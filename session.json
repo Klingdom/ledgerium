@@ -1,0 +1,58 @@
+{
+  "captured_at": "2026-01-15T22:41:09.233Z",
+  "context": {
+    "organization_id": "org_demo",
+    "user": {
+      "role": "operator",
+      "user_id": "usr_demo"
+    },
+    "workspace_id": "ws_demo"
+  },
+  "index": {
+    "actors": [
+      "human",
+      "system"
+    ],
+    "apps": [
+      {
+        "app_id": "app_netsuite",
+        "hostname": "system.netsuite.com"
+      }
+    ],
+    "event_types": {
+      "artifact_created": 1,
+      "click": 2,
+      "input_blur": 1,
+      "input_focus": 1,
+      "nav": 1,
+      "session_start": 1,
+      "session_stop": 1,
+      "submit": 1
+    },
+    "time_range": {
+      "end_ms": 14500,
+      "start_ms": 0
+    }
+  },
+  "integrity": {
+    "event_count": 9,
+    "events_format": "ndjson",
+    "events_sha256": "e8661c573b06241c8cd529fec05d2c2438f1bd27521ce048ea28770b714a9d23",
+    "session_sha256": "b75cfcf06456442dc0ab16d476a5f106ba49a930b8185d30c5448048a60f6aa2"
+  },
+  "privacy": {
+    "dom_snapshots": "off",
+    "screenshots": "off",
+    "text_capture": "none",
+    "url_query_param_policy": "strip_tracking"
+  },
+  "schema_version": "1.0.0",
+  "session_id": "sess_demo_0001",
+  "source": {
+    "browser": "chrome",
+    "extension_version": "1.0.0",
+    "os": "macos",
+    "type": "browser_extension"
+  },
+  "timezone": "America/Boise"
+}
