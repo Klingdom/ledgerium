@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAM-X - AI-Native Operating System for Work</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0e17;
+            color: #e4e4e7;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Animated background */
+        .bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        
+        .container {
+            position: relative;
+            height: 100vh;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 380px 1fr 380px;
+            grid-template-rows: 80px 1fr 120px;
+            gap: 16px;
+        }
+        
+        /* Header */
+        .header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(17, 24, 39, 0.8) 0%, rgba(31, 41, 55, 0.6) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 0 32px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        }
+        
+        .system-name {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .system-title {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #10b981 0%, #6366f1 50%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .system-subtitle {
+            font-size: 11px;
+            color: #71717a;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .rhythm-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 12px 24px;
+            background: rgba(17, 24, 39, 0.6);
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.15);
+        }
+        
+        .rhythm-label {
+            font-size: 11px;
+            color: #71717a;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .rhythm-phases {
+            display: flex;
+            gap: 12px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .phase-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 6px;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+        
+        .phase-item.active {
+            opacity: 1;
+            background: rgba(99, 102, 241, 0.2);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+        
+        .phase-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+        
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            overflow: hidden;
+        }
+        
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .user-status {
+            font-size: 11px;
+            color: #10b981;
+        }
+        
+        /* Left Panel - Deep Work Session */
+        .left-panel {
+            grid-row: 2 / 3;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .panel {
+            background: linear-gradient(135deg, rgba(17, 24, 39, 0.8) 0%, rgba(31, 41, 55, 0.6) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.15);
+        }
+        
+        .panel-title {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #a1a1aa;
+        }
+        
+        .deep-work-card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .session-title {
+            font-size: 12px;
+            color: #71717a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        
+        .session-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #e4e4e7;
+            margin-bottom: 24px;
+        }
+        
+        .time-remaining {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 20px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .time-icon {
+            font-size: 24px;
+            color: #ef4444;
+        }
+        
+        .time-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #ef4444;
+        }
+        
+        .time-label {
+            font-size: 12px;
+            color: #71717a;
+            text-transform: uppercase;
+        }
+        
+        .progress-ring {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 24px;
+            position: relative;
+        }
+        
+        .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-bg {
+            fill: none;
+            stroke: rgba(99, 102, 241, 0.1);
+            stroke-width: 8;
+        }
+        
+        .progress-ring-fill {
+            fill: none;
+            stroke: url(#gradient);
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.3s ease;
+        }
+        
+        .progress-ring-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            font-weight: 700;
+            color: #6366f1;
+        }
+        
+        .ai-assistants {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .ai-assistant {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(17, 24, 39, 0.6);
+            border-radius: 8px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .ai-assistant:hover {
+            background: rgba(17, 24, 39, 0.9);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateX(4px);
+        }
+        
+        .ai-icon {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .ai-icon.active { background: #10b981; }
+        .ai-icon.monitoring { background: #6366f1; }
+        .ai-icon.idle { background: #71717a; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
+            50% { opacity: 0.7; box-shadow: 0 0 0 4px transparent; }
+        }
+        
+        .ai-name {
+            font-size: 13px;
+            font-weight: 500;
+            flex: 1;
+        }
+        
+        .ai-status {
+            font-size: 11px;
+            color: #71717a;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .metric-card {
+            padding: 12px;
+            background: rgba(17, 24, 39, 0.6);
+            border-radius: 8px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+        
+        .metric-label {
+            font-size: 11px;
+            color: #71717a;
+            margin-bottom: 6px;
+        }
+        
+        .metric-value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .metric-value.good { color: #10b981; }
+        .metric-value.warning { color: #f59e0b; }
+        .metric-value.critical { color: #ef4444; }
+        
+        /* Center Panel - Main Work Area */
+        .center-panel {
+            grid-row: 2 / 3;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow: hidden;
+        }
+        
+        .work-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+        
+        .work-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .work-area::-webkit-scrollbar-track {
+            background: rgba(17, 24, 39, 0.6);
+            border-radius: 3px;
+        }
+        
+        .work-area::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 3px;
+        }
+        
+        .alert-card {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .alert-icon {
+            font-size: 24px;
+        }
+        
+        .alert-content {
+            flex: 1;
+        }
+        
+        .alert-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #fbbf24;
+        }
+        
+        .alert-message {
+            font-size: 13px;
+            color: #a1a1aa;
+        }
+        
+        .alert-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: rgba(71, 85, 105, 0.3);
+            color: #e4e4e7;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(71, 85, 105, 0.5);
+        }
+        
+        .work-card {
+            background: linear-gradient(135deg, rgba(17, 24, 39, 0.8) 0%, rgba(31, 41, 55, 0.6) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        
+        .work-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .work-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        
+        .work-icon.analysis { background: rgba(59, 130, 246, 0.2); }
+        
+        .work-title {
+            font-size: 16px;
+            font-weight: 600;
+            flex: 1;
+        }
+        
+        .work-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(17, 24, 39, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        
+        .icon-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+        
+        .issue-section {
+            margin-bottom: 20px;
+        }
+        
+        .issue-label {
+            font-size: 12px;
+            color: #71717a;
+            margin-bottom: 8px;
+        }
+        
+        .issue-item {
+            padding: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid #ef4444;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .solutions-section {
+            margin-bottom: 20px;
+        }
+        
+        .solution-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(17, 24, 39, 0.6);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .solution-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateX(4px);
+        }
+        
+        .solution-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: rgba(99, 102, 241, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .solution-text {
+            flex: 1;
+            font-size: 13px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .btn-action {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-implement {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+        
+        .btn-implement:hover {
+            background: rgba(16, 185, 129, 0.25);
+        }
+        
+        .btn-convert {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        
+        .btn-convert:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+        
+        .agency-check {
+            padding: 12px;
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 3px solid #f59e0b;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #fbbf24;
+        }
+        
+        /* Right Panel */
+        .right-panel {
+            grid-row: 2 / 3;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+        
+        .right-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .right-panel::-webkit-scrollbar-track {
+            background: rgba(17, 24, 39, 0.6);
+            border-radius: 3px;
+        }
+        
+        .right-panel::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 3px;
+        }
+        
+        .upcoming-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .upcoming-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .upcoming-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .time-badge {
+            padding: 6px 12px;
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #10b981;
+        }
+        
+        .upcoming-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .upcoming-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: rgba(17, 24, 39, 0.4);
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        
+        .item-icon {
+            font-size: 14px;
+        }
+        
+        .mood-badge {
+            margin-top: 12px;
+            padding: 8px;
+            background: rgba(245, 158, 11, 0.1);
+            border-radius: 6px;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .improvement-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .improvement-item {
+            padding: 12px;
+            background: rgba(17, 24, 39, 0.6);
+            border-radius: 8px;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+        
+        .improvement-item:hover {
+            background: rgba(17, 24, 39, 0.9);
+            transform: translateX(4px);
+        }
+        
+        .improvement-item.learning { border-left-color: #10b981; }
+        .improvement-item.bottleneck { border-left-color: #ef4444; }
+        .improvement-item.suggestion { border-left-color: #f59e0b; }
+        .improvement-item.training { border-left-color: #6366f1; }
+        .improvement-item.next-steps { border-left-color: #8b5cf6; }
+        
+        .improvement-title {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .improvement-desc {
+            font-size: 12px;
+            color: #71717a;
+        }
+        
+        /* Timeline Footer */
+        .timeline-footer {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, rgba(17, 24, 39, 0.8) 0%, rgba(31, 41, 55, 0.6) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 24px 32px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .timeline-time {
+            font-size: 12px;
+            color: #71717a;
+        }
+        
+        .timeline-track {
+            position: relative;
+            height: 40px;
+            background: rgba(17, 24, 39, 0.8);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .timeline-phases {
+            display: flex;
+            height: 100%;
+        }
+        
+        .timeline-phase {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 500;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-phase.deep {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(37, 99, 235, 0.3) 100%);
+            flex: 4;
+        }
+        
+        .timeline-phase.sync {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(5, 150, 105, 0.3) 100%);
+            flex: 2;
+        }
+        
+        .timeline-phase.improve {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(124, 58, 237, 0.3) 100%);
+            flex: 2;
+        }
+        
+        .timeline-phase.planning {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.3) 0%, rgba(147, 51, 234, 0.3) 100%);
+            flex: 1;
+        }
+        
+        .timeline-phase.active {
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+        
+        .timeline-cursor {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #10b981;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+            left: 30%;
+            animation: pulse-cursor 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-cursor {
+            0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.8); }
+            50% { box-shadow: 0 0 40px rgba(16, 185, 129, 1); }
+        }
+        
+        .ai-insight {
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(17, 24, 39, 0.6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .ai-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .ai-message {
+            flex: 1;
+            font-size: 13px;
+            color: #a1a1aa;
+        }
+        
+        .insight-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .insight-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            background: rgba(17, 24, 39, 0.6);
+            color: #e4e4e7;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .insight-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-layer"></div>
+    <div class="grid-overlay"></div>
+    
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-section">
+                <div class="logo">⚡</div>
+                <div class="system-name">
+                    <div class="system-title">BAM-X</div>
+                    <div class="system-subtitle">AI-Native Operating System for Work</div>
+                </div>
+            </div>
+            
+            <div class="rhythm-header">
+                <div class="rhythm-label">Daily Rhythm:</div>
+                <div class="rhythm-phases">
+                    <div class="phase-item active">
+                        <div class="phase-dot" style="color: #3b82f6;"></div>
+                        <span>4h Deep Work</span>
+                    </div>
+                    <div class="phase-item">
+                        <div class="phase-dot" style="color: #10b981;"></div>
+                        <span>2h Collaboration</span>
+                    </div>
+                    <div class="phase-item">
+                        <div class="phase-dot" style="color: #8b5cf6;"></div>
+                        <span>2h Improvement</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="user-section">
+                <div class="user-info">
+                    <div class="user-name">N. Chen</div>
+                    <div class="user-status">● In Deep Work</div>
+                </div>
+                <div class="user-avatar">
+                    <svg viewBox="0 0 40 40" style="width: 100%; height: 100%;">
+                        <rect fill="#6366f1" width="40" height="40"/>
+                        <text x="20" y="25" text-anchor="middle" fill="white" font-size="16" font-weight="600">NC</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Left Panel - Deep Work Session -->
+        <div class="left-panel">
+            <div class="panel deep-work-card">
+                <div class="panel-header">
+                    <div class="panel-title">🎯 Deep Work Session</div>
+                </div>
+                
+                <div class="session-title">Current Focus</div>
+                <div class="session-name">Project: Strategy Simulation</div>
+                
+                <div class="time-remaining">
+                    <div class="time-icon">⏱️</div>
+                    <div>
+                        <div class="time-value">2:14</div>
+                        <div class="time-label">Remaining</div>
+                    </div>
+                </div>
+                
+                <div class="progress-ring">
+                    <svg width="120" height="120">
+                        <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle class="progress-ring-bg" cx="60" cy="60" r="52"/>
+                        <circle class="progress-ring-fill" cx="60" cy="60" r="52"
+                                stroke-dasharray="326.7256359733385"
+                                stroke-dashoffset="130"/>
+                    </svg>
+                    <div class="progress-ring-text">57%</div>
+                </div>
+                
+                <div class="session-title">AI Assistants</div>
+                <div class="ai-assistants">
+                    <div class="ai-assistant">
+                        <div class="ai-icon active"></div>
+                        <div class="ai-name">Context Agent</div>
+                        <div class="ai-status">Staging docs</div>
+                    </div>
+                    <div class="ai-assistant">
+                        <div class="ai-icon monitoring"></div>
+                        <div class="ai-name">Momentum Agent</div>
+                        <div class="ai-status">Observing flow</div>
+                    </div>
+                    <div class="ai-assistant">
+                        <div class="ai-icon idle"></div>
+                        <div class="ai-name">Planning Agent</div>
+                        <div class="ai-status">Standby</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">📊 Personal Metrics</div>
+                </div>
+                
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Focus Level</div>
+                        <div class="metric-value good">86%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Decision Confidence</div>
+                        <div class="metric-value good">72%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Energy</div>
+                        <div class="metric-value good">STABLE</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Interrupts</div>
+                        <div class="metric-value warning">7</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Center Panel - Main Work Area -->
+        <div class="center-panel">
+            <div class="work-area">
+                <!-- Alert -->
+                <div class="alert-card">
+                    <div class="alert-icon">⚠️</div>
+                    <div class="alert-content">
+                        <div class="alert-title">Unplanned Work Detected</div>
+                        <div class="alert-message">Root Cause Analysis Ready. Review Now?</div>
+                    </div>
+                    <div class="alert-actions">
+                        <button class="btn btn-primary">Analyze</button>
+                        <button class="btn btn-secondary">Defer</button>
+                    </div>
+                </div>
+                
+                <!-- Root Cause Analysis -->
+                <div class="work-card">
+                    <div class="work-header">
+                        <div class="work-icon analysis">🔍</div>
+                        <div class="work-title">Root Cause Analysis</div>
+                        <div class="work-actions">
+                            <div class="icon-btn">👁️</div>
+                            <div class="icon-btn">💬</div>
+                            <div class="icon-btn">🔄</div>
+                        </div>
+                    </div>
+                    
+                    <div class="issue-section">
+                        <div class="issue-label">● Issue: Client Escalation</div>
+                        <div class="issue-item">
+                            Communication Gap Identified →
+                        </div>
+                    </div>
+                    
+                    <div class="solutions-section">
+                        <div class="issue-label">🎯 Suggested Solutions:</div>
+                        <div class="solution-item">
+                            <div class="solution-number">1</div>
+                            <div class="solution-text">Improve Client FAQ</div>
+                            <div>→</div>
+                        </div>
+                        <div class="solution-item">
+                            <div class="solution-number">2</div>
+                            <div class="solution-text">Adjust Response Protocol</div>
+                            <div>→</div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn-action btn-implement">
+                            <span>✓</span>
+                            <span>Implement Fix</span>
+                        </button>
+                        <button class="btn-action btn-convert">
+                            <span>●</span>
+                            <span>Convert to Kaizen</span>
+                            <span>→</span>
+                        </button>
+                    </div>
+                    
+                    <div class="agency-check">
+                        ⚡ Agency Check: Override logged. Adapt Schedule?
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Panel - Upcoming & Improvements -->
+        <div class="right-panel">
+            <div class="panel upcoming-card">
+                <div class="upcoming-header">
+                    <div class="upcoming-title">Team Sync Meeting</div>
+                    <div class="time-badge">STARTING IN 5 MIN</div>
+                </div>
+                
+                <div class="upcoming-list">
+                    <div class="upcoming-item">
+                        <div class="item-icon">✓</div>
+                        <div>Alignment Check</div>
+                    </div>
+                    <div class="upcoming-item">
+                        <div class="item-icon">●</div>
+                        <div>Pending Decisions</div>
+                        <div>→</div>
+                    </div>
+                </div>
+                
+                <div class="mood-badge">
+                    😐 Mood: CAUTIOUS / Focus: MODERATE
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">⚡ Continuous Improvement</div>
+                </div>
+                
+                <div class="improvement-list">
+                    <div class="improvement-item learning">
+                        <div class="improvement-title">🧠 AI Learning Review</div>
+                        <div class="improvement-desc">Pattern analysis complete →</div>
+                    </div>
+                    
+                    <div class="improvement-item bottleneck">
+                        <div class="improvement-title">🚧 Bottleneck Identified</div>
+                        <div class="improvement-desc">Approval delays detected</div>
+                    </div>
+                    
+                    <div class="improvement-item suggestion">
+                        <div class="improvement-title">💡 Suggest: Streamline Process</div>
+                        <div class="improvement-desc">Reduce decision latency →</div>
+                    </div>
+                    
+                    <div class="improvement-item training">
+                        <div class="improvement-title">🎓 Micro-Training</div>
+                        <div class="improvement-desc">Decision Making module →</div>
+                    </div>
+                    
+                    <div class="improvement-item next-steps">
+                        <div class="improvement-title">🎯 Next Steps</div>
+                        <div class="improvement-desc">Apply Kaizen-X framework</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Timeline Footer -->
+        <div class="timeline-footer">
+            <div class="timeline-header">
+                <div class="timeline-time">98:00</div>
+                <div class="timeline-time">● 13:00</div>
+                <div class="timeline-time">13:00</div>
+            </div>
+            
+            <div class="timeline-track">
+                <div class="timeline-phases">
+                    <div class="timeline-phase deep active">
+                        <span>🎯 Deep Work</span>
+                    </div>
+                    <div class="timeline-phase sync">
+                        <span>🤝 Team Sync</span>
+                    </div>
+                    <div class="timeline-phase improve">
+                        <span>⚡ Improvement</span>
+                    </div>
+                    <div class="timeline-phase planning">
+                        <span>📋 Kaizen Planning</span>
+                    </div>
+                </div>
+                <div class="timeline-cursor"></div>
+            </div>
+            
+            <div class="ai-insight">
+                <div class="ai-avatar">🤖</div>
+                <div class="ai-message">
+                    "I detected a pattern in recent escalations. Shall we explore it?"
+                </div>
+                <div class="insight-actions">
+                    <button class="insight-btn">Investigate</button>
+                    <button class="insight-btn">Snooze</button>
+                    <button class="insight-btn">Dismiss</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
