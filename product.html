@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b0f0e" />
+  <title>Product — Ledgerium AI</title>
+  <meta name="description" content="Recorder + immutable session JSON + deterministic maps & SOPs." />
+  <meta name="robots" content="index,follow" />
+
+  <meta property="og:title" content="Product — Ledgerium AI" />
+  <meta property="og:description" content="Recorder + immutable session JSON + deterministic maps & SOPs." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/img/og.svg" />
+
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a class="brand" href="index.html" aria-label="Ledgerium AI home">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Ledgerium<span class="brand-ai">AI</span></span>
+    </a>
+    
+    <nav class="nav" aria-label="Primary">
+      <a href="index.html" data-page="index.html">Home</a>
+      <a href="product.html" data-page="product.html">Product</a>
+      <a href="pricing.html" data-page="pricing.html">Pricing</a>
+      <a href="trust.html" data-page="trust.html">Trust</a>
+      <a href="docs.html" data-page="docs.html">Docs</a>
+      <a href="blog.html" data-page="blog.html">Blog</a>
+      <a class="btn btn-ghost" href="contact.html" data-page="contact.html">Contact</a>
+    </nav>
+    
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileNav">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  
+    <div class="mobile-nav" id="mobileNav" hidden>
+      <div class="container mobile-nav-inner">
+        <a href="index.html">Home</a>
+        <a href="product.html">Product</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="trust.html">Trust</a>
+        <a href="docs.html">Docs</a>
+        <a href="blog.html">Blog</a>
+        <a class="btn btn-primary" href="contact.html">Contact</a>
+      </div>
+    </div>
+    
+</header>
+
+<main id="main">
+  <section class="page-hero">
+    <div class="container">
+      <div class="pill"><span class="dot"></span>Recorder • Session JSON • Deterministic derivation</div>
+      <h1>Product</h1>
+      <p class="lead">The calm recorder that captures real work, plus a schema and rules that produce reproducible maps and SOPs.</p>
+    </div>
+  </section>
+
+  
+<section class="section">
+  <div class="container">
+    <h2>Product overview</h2>
+    <p class="subhead">Ledgerium AI turns user behavior into traceable process intelligence—without losing the raw truth of what happened.</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Recorder</h3>
+        <p>Captures browser workflow events (nav/click/input/submit) with timestamps and target context.</p>
+        <ul class="list">
+          <li>Start/stop with an explicit REC state</li>
+          <li>Session markers for “job changes”</li>
+          <li>Selective capture + redaction rules</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Evidence Drawer</h3>
+        <p>A dual-view timeline that shows human-readable steps and the underlying JSON evidence.</p>
+        <ul class="list">
+          <li>Event IDs, targets, and timing</li>
+          <li>Link every SOP line to evidence</li>
+          <li>Export raw + derived objects</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="grid-3">
+      <div class="card">
+        <h3>Deterministic derivation</h3>
+        <p>Rules translate raw events into normalized steps and a process graph.</p>
+        <ul class="list">
+          <li>Same input → same output</li>
+          <li>Published derivation rules</li>
+          <li>Versioned rulesets</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Process maps</h3>
+        <p>Generate legible maps from sessions and compare across runs to find variation.</p>
+        <ul class="list">
+          <li>Segment into activities</li>
+          <li>Detect decisions/branches</li>
+          <li>Measure time + variation</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>SOP rendering</h3>
+        <p>Render standard work that stays connected to evidence and updates deterministically.</p>
+        <ul class="list">
+          <li>Purpose / scope / prerequisites</li>
+          <li>Steps w/ evidence links</li>
+          <li>Controls + exceptions</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <h2>Example: step object</h2>
+    <pre class="code"><code>{
+  "step_id": "stp_0004",
+  "label": "Submit for approval",
+  "kind": "action",
+  "evidence": {
+    "event_ids": ["evt_031", "evt_032"],
+    "targets": ["button#submit"]
+  },
+  "timing_ms": { "min": 210, "median": 480, "max": 1200 }
+}</code></pre>
+
+    <p class="muted small">Want a deeper technical view? See <a href="docs.html">Docs</a>.</p>
+  </div>
+</section>
+
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="foot-left">
+        <div class="brand small">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span class="brand-text">Ledgerium<span class="brand-ai">AI</span></span>
+        </div>
+        <p class="muted small">Evidence-based process intelligence for AI-fluid workflows.</p>
+      </div>
+      <div class="foot-right">
+        <a href="security.html">Security</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+    <div class="container foot-bottom">
+      <span class="muted small">© <span id="year"></span> Ledgerium AI.</span>
+      <span class="muted small">Built for GitHub Pages.</span>
+    </div>
+  </footer>
+</main>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>
