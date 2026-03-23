@@ -12,25 +12,39 @@ this later", no demo-quality shortcuts unless explicitly asked for a spike
 or prototype.
 
 ## Product Context
-Ledgerium AI is a [describe your product — e.g. "process intelligence
-platform that converts recorded user sessions into structured SOPs, workflow
-maps, and operational documentation"].
+Ledgerium AI is a **trust-first, deterministic, evidence-linked process
+intelligence platform** that converts observed browser workflow activity into
+auditable process maps, SOPs, and reusable process knowledge.
 
-Core user: [who uses this — e.g. "operations managers, process analysts,
-and compliance teams at mid-market companies"]
+Core principle: Reality before opinion. Evidence before interpretation.
+Determinism before abstraction.
 
-Primary value: [what problem it solves — e.g. "eliminates manual process
-documentation by deriving it automatically from observed work"]
+Core users: operators and individual contributors recording their workflows;
+team leads and process improvement leaders; compliance and risk teams;
+engineers and AI builders who need grounded, machine-readable process
+definitions.
+
+Primary value: eliminates process theater and stale documentation by
+capturing structured signals of real work, preserving them as immutable
+evidence, and deterministically deriving process intelligence that stays
+traceable to source truth.
+
+What it is NOT: a screen recorder, surveillance tool, AI summarizer detached
+from evidence, or autonomous BPM suite.
 
 ## Tech Stack
-- **Backend:** [e.g. Node.js + Fastify / Python + FastAPI]
-- **Frontend:** [e.g. React + TypeScript + TanStack Query]
-- **Database:** [e.g. PostgreSQL with JSONB + Redis]
-- **Queue:** [e.g. BullMQ]
-- **Storage:** [e.g. S3-compatible / MinIO]
-- **Auth:** [e.g. JWT + OAuth2]
-- **Infra:** [e.g. Docker + AWS / Railway / Render]
-- **LLM:** [e.g. Anthropic Claude API — claude-sonnet-4-20250514]
+- **Extension:** Chrome MV3 + TypeScript + React (Vite build)
+- **Backend:** Node.js + Fastify + TypeScript (Phase 3+)
+- **Frontend:** React + TypeScript + TanStack Query (Phase 3+)
+- **Database:** PostgreSQL + JSONB (Phase 3+)
+- **Queue:** BullMQ + Redis (Phase 3+)
+- **Storage:** S3-compatible / MinIO for immutable artifacts (Phase 3+)
+- **Auth:** JWT + OAuth2 (Google) (Phase 3+)
+- **Infra:** Docker Compose (dev), Railway/Render (prod) (Phase 3+)
+- **LLM:** Anthropic Claude API — claude-sonnet-4-6 (Phase 5)
+- **Validation:** Zod (shared across extension + backend)
+- **Testing:** Vitest (unit), Playwright (extension E2E)
+- **Monorepo:** pnpm workspaces
 
 ## Coding Standards
 
@@ -122,27 +136,32 @@ Follow Conventional Commits format:
 Example: `feat(normalization): add sensitive field masking for input events`
 
 ## Current Phase
-[e.g. "Phase 1 — Foundation & Ingestion. Focus is on getting the session
-upload pipeline, normalization service, and step builder working end-to-end
-before adding any UI."]
+**Phase 0 — Technical Foundation.** Monorepo not yet initialized. No
+production code exists. Focus is on scaffolding the monorepo, defining
+canonical schemas, and proving the extension recording lifecycle before
+building any derivation logic.
+
+See `docs/project-plan.md` for the full 6-phase roadmap.
 
 ## Active Priorities
-1. [Your top priority right now]
-2. [Second priority]
-3. [Third priority]
+1. Initialize pnpm monorepo with `apps/` and `packages/` structure
+2. Build `packages/schema-events` (canonical event schema + Zod validators)
+3. Build extension shell with recorder state machine (Chrome MV3)
 
 ## Known Issues / Technical Debt
-- [Any existing issues Claude should know about and work around]
-- [Any shortcuts taken that need to be revisited]
+- No production code exists yet — all root-level files are specs, fixtures,
+  and a static marketing website
+- `CLAUDE.md` commands section below needs updating once monorepo is live
 
 ## Out of Scope (Do Not Touch)
-- [Any files, systems, or patterns that should not be changed without
-  explicit discussion]
+- The static marketing website (`index.html`, `product.html`, etc.) — that
+  is a separate concern from the product codebase
+- The existing `session.json` and `events.ndjson` in the root are demo
+  fixtures, not production data — treat as read-only test references
 
 ## Commands
-- **Run tests:** `[e.g. npm test]`
-- **Run dev server:** `[e.g. npm run dev]`
-- **Run migrations:** `[e.g. npm run migrate]`
-- **Lint:** `[e.g. npm run lint]`
-- **Type check:** `[e.g. npm run typecheck]`
-- **Build:** `[e.g. npm run build]`
+- **Run tests:** `pnpm test` (once monorepo is initialized)
+- **Run dev (extension):** `pnpm --filter extension-app dev`
+- **Lint:** `pnpm lint`
+- **Type check:** `pnpm typecheck`
+- **Build:** `pnpm build`
