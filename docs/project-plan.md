@@ -1,7 +1,9 @@
 # Ledgerium AI — Engineering Project Plan
 
 **Sources:** `ledgerium_product_philosophy_and_system_design.md`,
-`ledgerium_technical_architecture_and_roadmap.md`, and all root-level specs.
+`ledgerium_technical_architecture_and_roadmap.md`,
+`ledgerium_sidebar_recorder_browser_extension_specification.md`,
+and all root-level specs.
 **Last updated:** 2026-03-23
 
 ---
@@ -63,7 +65,7 @@ ledgerium/
 │   ├── process-engine/         # Process runs, definitions, variants, metrics
 │   ├── renderers/              # Process map, SOP, evidence drawer renderers
 │   ├── ui-components/          # Shared React components
-│   ├── policy-core/            # Privacy, redaction, sensitivity rules
+│   ├── policy-engine/          # Privacy, redaction, sensitivity rules
 │   └── api-client/             # Backend API client (Phase 3+)
 ├── docs/
 │   ├── project-plan.md         # This file
@@ -133,15 +135,28 @@ Fields: `artifact_id`, `artifact_type`, `source_entity_type`,
 
 ## Canonical Event Taxonomy
 
+Dot-notation namespacing groups related events and keeps the taxonomy
+extensible. Raw browser events are normalized into these canonical types
+by the normalization engine — they are never emitted directly.
+
 ```
-Navigation:      page_loaded, route_changed, tab_activated, app_context_changed
-Interaction:     element_clicked, text_entered_summary, selection_changed,
-                 checkbox_toggled, form_submitted, shortcut_invoked
-State/context:   view_ready, async_wait_started, async_wait_ended,
-                 validation_error_shown, confirmation_received
-Recorder:        recording_started, recording_paused, recording_resumed,
-                 recording_stopped, user_annotation_added
-Derived:         step_boundary_detected, activity_group_created, variant_detected
+navigation.*     navigation.open_page, navigation.route_change,
+                 navigation.tab_activated, navigation.app_context_changed
+
+interaction.*    interaction.click, interaction.select,
+                 interaction.input_change, interaction.submit,
+                 interaction.upload_file, interaction.download_file
+
+workflow.*       workflow.wait
+
+session.*        session.started, session.paused, session.resumed,
+                 session.stopped, session.annotation_added
+
+system.*         system.redaction_applied, system.capture_blocked
+                 (transparency events — always included when redaction fires)
+
+derived.*        derived.step_boundary_detected, derived.activity_group_created,
+                 derived.variant_detected
                  (always labeled as derived, never captured)
 ```
 
@@ -166,25 +181,36 @@ Events are logged locally. Debug replay is possible.
 #### 0.2 Extension Shell (Chrome MV3)
 - Side panel application (React + TypeScript)
 - Content scripts + background service worker
-- Internal message bus (typed contracts between scripts ↔ worker ↔ panel)
+- Internal message bus — typed message contracts in `packages/shared-types`:
+  `START_SESSION`, `PAUSE_SESSION`, `RESUME_SESSION`, `STOP_SESSION`,
+  `SESSION_STATE_UPDATED`, `NORMALIZED_EVENT_ADDED`, `LIVE_STEP_UPDATED`,
+  `FINALIZATION_COMPLETE`, `FINALIZATION_FAILED`
 - Local storage adapter (abstracted — swap chrome.storage vs IndexedDB later)
+- Minimal permissions: `activeTab`, `scripting`, `storage`, `sidePanel`
 
 #### 0.3 Recorder State Machine
 Implement the full lifecycle as an explicit state machine:
 ```
-idle → armed → recording → paused → stopping → processing
-  → review_ready → exported → error
+idle → arming → recording → paused → stopping → review_ready → error
+       │                                         │
+       └─ (if init fails) ─────────────────────→ error
 ```
-State transitions are first-class events (logged, inspectable).
+- `arming`: permissions loading, policy init, session ID assignment
+- `stopping`: final derivation and packaging — no new workflow events accepted
+- `review_ready → idle` after discard, clear, or new session start
+- State invariants enforced: no capture events emitted during `paused` or `stopping`
+- Every state transition emits a `session.*` event and is logged locally
 
 #### 0.4 Initial Event Taxonomy + Raw Capture Logging
-- Capture: `page_loaded`, `route_changed`, `element_clicked`,
-  `text_entered_summary`, `form_submitted`, `recording_started`,
-  `recording_stopped`, `user_annotation_added`
-- Privacy defaults enforced at capture: skip password fields, no raw
-  keystroke values, no clipboard
-- Append raw events to local buffer
+- Emit raw events for: navigation, click, input change, form submit,
+  focus/blur, tab activation, session control
+- Privacy defaults enforced at capture: skip `type=password` fields,
+  no raw keystroke values, no clipboard content
+- Append raw events to local buffer (pre-normalization)
 - Export raw JSON for debug inspection
+- Page identity model derived on each navigation:
+  `{ application_label, domain, route_template, page_label, module_label }`
+  — `route_template` strips dynamic URL segments (e.g. `/tasks/123` → `/tasks/:id`)
 
 **Exit criteria:**
 - [ ] Reliable recording lifecycle across target browser flows
@@ -218,17 +244,23 @@ Transforms raw captured events into canonical form.
 - Map browser events to stable canonical types
 - Deduplicate noisy events (rapid duplicate clicks, background DOM mutations)
 - Normalize timestamps, identifiers, URL tracking params
-- Apply sensitivity/redaction policy (`policy-core`)
+- Apply sensitivity/redaction policy (`policy-engine`)
+- Emit `system.redaction_applied` or `system.capture_blocked` when
+  redaction fires — never silently drop without a transparency event
 - Preserve normalization provenance metadata on every event
 - Output: `CanonicalEvent[]` + normalization warnings
 - Unit tests: each event type, redaction rules, idempotency
 
-#### 1.3 `packages/policy-core` — Privacy & Redaction Rules
+#### 1.3 `packages/policy-engine` — Privacy & Redaction Rules
 - Configurable exclusion rules: password fields, hidden fields, restricted
   domains, user-defined ignore zones
-- Sensitivity classification per event
-- Redaction metadata preserved (not silently dropped)
-- Versioned rule sets (rule changes tracked separately from schema changes)
+- Sensitivity classes: password/secret, payment, PII, HR, government ID,
+  legal, custom enterprise categories
+- Per-class behavior: block capture | structural metadata only | redacted
+  placeholder | log redaction occurred
+- Redaction metadata preserved — always emit transparency event, never
+  silently drop
+- Versioned rule sets (rule version tracked separately from schema version)
 
 #### 1.4 `packages/schema-process` — ProcessRun Schema v1
 - Versioned `ProcessRun`, `ProcessStep`, `ActivityGroup`, `EvidenceRef` types
@@ -237,7 +269,10 @@ Transforms raw captured events into canonical form.
 
 #### 1.5 `packages/segmentation-engine` — Deterministic Segmentation v1
 
-This is a core product moat. Build it as a pure, testable function.
+This is a core product moat. Build it as a pure, testable function with
+**two operating modes**: streaming (live feed during recording) and batch
+(final derivation after stop). Both must produce identical output for the
+same event sequence.
 
 **Segmentation pipeline:**
 ```
@@ -250,37 +285,47 @@ Canonical events
 ```
 
 **Step boundary triggers:**
-- Page/screen transition
+- Page/screen transition (`navigation.*` event)
 - Major semantic target change
-- Form submission completion
-- Explicit user annotation
-- Idle gap > 45 seconds
+- Form submission completion (`interaction.submit`)
+- Explicit user annotation (`session.annotation_added`)
+- Idle gap > 45 seconds (`workflow.wait`)
 - Application context change
 
 **Reduction rules (from recorder_spec.md):**
-- `click + nav` within 2500ms → "Navigate"
-- Multiple `input_focus/blur` + `submit` → "Fill + Submit"
+- `interaction.click + navigation.route_change` within 2500ms → "Navigate"
+- Multiple `input_focus/blur` + `interaction.submit` → "Fill + Submit"
 - Repeated clicks within 1000ms → deduplicate
-- Error events → explicit "Handle error" step
+- Validation error events → explicit "Handle error" step
 
 **Canonical step signature:** `Verb|Object|app_id|page_kind`
 
-**Every derived step must include explainability metadata:**
+**Step states — required for live feed:**
+- `provisional`: boundary conditions not yet met, still accumulating events
+- `finalized`: boundary trigger fired, step is complete and immutable
+
+**Every finalized step must include explainability metadata:**
 - `boundary_reason` (e.g. `form_submitted`, `context_changed`)
 - `grouping_reason` (e.g. `repeated_same_target`)
 - `confidence` score (0–1)
 - `evidence_refs` to source event range
 
 **Test requirements:**
-- All boundary rule types covered
-- Fixture replay: `fixtures/capture-runs/` → expected output golden files
-- Idempotency: same input always produces identical output
+- All boundary rule types covered in unit tests
+- Fixture replay: `fixtures/capture-runs/` → golden files in
+  `fixtures/segmentation-golden/`
+- Idempotency: same input always produces identical output (batch mode)
+- Streaming consistency: streaming output matches batch output for same input
 - Over/under-segmentation regression cases
 
-#### 1.6 Extension — Normalization + Segmentation Integration
-- Wire normalization and segmentation into the extension post-capture pipeline
-- Side panel shows live activity feed as events are captured
-- Emerging steps panel shows steps as they are derived in real time
+#### 1.6 Extension — Live Derivation Integration
+- Wire normalization → segmentation streaming mode into the capture pipeline
+- Side panel **live process feed** shows:
+  - Recently finalized steps (immutable, labeled as finalized)
+  - Currently forming provisional step (visually distinct — "in progress")
+- Provisional step updates in real time as events accumulate
+- When boundary fires: provisional → finalized, new provisional begins
+- `LIVE_STEP_UPDATED` message emitted to side panel on every state change
 
 #### 1.7 `packages/renderers` — Core Renderers v1
 
@@ -314,20 +359,35 @@ Canonical events
 #### 1.8 Extension — Review & Export UI
 - Review screen after recording stops: step list, process map, SOP, evidence
   drawer
-- Export: JSON, SVG process map, Markdown SOP
-- Export artifact includes: `renderer_version`, `segmentation_rule_version`,
-  `schema_version`
+- Evidence drawer shows for each step: contributing normalized events,
+  timestamps, page/app context, redaction markers, `boundary_reason`
+- Export produces a **5-file session bundle**:
+  ```
+  session.json           — metadata, recorder config, schema + rule versions
+  normalized_events.json — canonical event log
+  derived_steps.json     — finalized steps with evidence refs
+  policy_log.json        — every redaction_applied / capture_blocked event
+  manifest.json          — file hashes, export timestamp, renderer versions
+  ```
+- Export filename: `ledgerium-session-YYYYMMDD-HHMMSS.json` (consolidated)
+  or as a zip for the multi-file bundle
+- Export fails visibly if session is malformed — no silent partial output
 - Visible scope/privacy controls: include/exclude domains, redaction zones
 - "Mark important moment" annotation button during recording
+- Discard flow requires explicit confirmation before clearing session
 
 **Exit criteria:**
 - [ ] `fixtures/capture-runs/demo.ndjson` produces identical output to
       `fixtures/segmentation-golden/demo-expected.*`
+- [ ] Streaming segmentation output matches batch output for same input
 - [ ] All schema validators have 100% test coverage
 - [ ] Segmentation engine passes all golden file regression tests
 - [ ] User can record → review → export in under 60 seconds after stop
 - [ ] Every derived step has `boundary_reason` and `evidence_refs`
 - [ ] Privacy: password fields never appear in any exported artifact
+- [ ] Every redaction event produces a corresponding entry in `policy_log.json`
+- [ ] Export fails with a visible error if session bundle is malformed
+- [ ] Side panel shows `arming` state immediately on start click (< 1 second)
 
 ---
 
@@ -533,10 +593,29 @@ If resources are constrained, build in this order — do not skip ahead:
 
 ---
 
+## Open Design Decisions (require ADRs before Phase 1 build)
+
+These are unresolved per the recorder spec (Section 33). Document each
+decision in `docs/adr/` before the relevant code is written.
+
+| # | Decision | Recommended default |
+|---|----------|---------------------|
+| 1 | Screenshots in MVP? | Defer entirely — privacy risk > benefit |
+| 2 | Domain permissions: broad vs `activeTab` + allowlist | Start with `activeTab` only; easier store approval + stronger trust |
+| 3 | Raw event detail in exports? | Canonical only by default; raw as debug opt-in |
+| 4 | Long text input: tokenize / truncate / exclude? | Exclude value; capture field class + label only |
+| 5 | Step list editable in MVP? | Read-only in MVP; editing is Phase 2 |
+| 6 | Route-template inference: content script or normalization layer? | Normalization layer — keeps content scripts simple |
+
+---
+
 ## Companion Docs Needed
 
 These specs should be created as the relevant phase begins:
 
+0. `docs/ledgerium_core_data_model.md` — **expected incoming doc** (referenced
+   by the recorder spec but not yet in repo); will define all canonical entity
+   schemas with required fields and examples
 1. `docs/schemas/canonical-event-schema-v1.md` — full field specs + examples
 2. `docs/schemas/process-run-schema-v1.md` — ProcessRun + ProcessStep spec
 3. `docs/schemas/process-definition-schema-v1.md` — definition + variant spec
