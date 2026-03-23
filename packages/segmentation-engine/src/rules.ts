@@ -1,0 +1,227 @@
+/**
+ * Segmentation rules: version constants, title derivation, confidence scoring,
+ * and ID generation for the Ledgerium segmentation engine.
+ */
+
+import type {
+  SegmentableEvent,
+  DerivedStep,
+  GroupingReason,
+} from './types.js';
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+export const SEGMENTATION_RULE_VERSION = '1.0.0' as const;
+
+/** Gap between consecutive events (ms) that triggers a new step boundary. */
+export const IDLE_GAP_MS = 45_000 as const;
+
+/**
+ * Window (ms) after a click event within which a navigation event is
+ * considered causally linked (click → navigate grouping).
+ */
+export const CLICK_NAV_WINDOW_MS = 2_500 as const;
+
+/**
+ * Window (ms) within which repeated clicks on the same selector are
+ * collapsed into a single step.
+ */
+export const RAPID_CLICK_DEDUP_MS = 1_000 as const;
+
+// ---------------------------------------------------------------------------
+// generateStepId
+// ---------------------------------------------------------------------------
+
+/**
+ * Generates a UUID v4 step identifier.
+ * Uses crypto.randomUUID() when available; falls back to a Math.random-based
+ * UUID-shaped string.
+ */
+export function generateStepId(): string {
+  if (
+    typeof crypto !== 'undefined' &&
+    typeof crypto.randomUUID === 'function'
+  ) {
+    return crypto.randomUUID();
+  }
+
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
+
+/** Best-effort label from an event's target_summary. */
+function targetLabel(event: SegmentableEvent): string | undefined {
+  return (
+    event.target_summary?.label ??
+    event.target_summary?.role ??
+    event.target_summary?.elementType
+  );
+}
+
+/** Page title from an event's page_context. */
+function pageTitle(event: SegmentableEvent): string | undefined {
+  const t = event.page_context?.pageTitle;
+  return t !== undefined && t !== '' ? t : undefined;
+}
+
+/** Route template from an event's page_context. */
+function routeTemplate(event: SegmentableEvent): string | undefined {
+  const r = event.page_context?.routeTemplate;
+  return r !== undefined && r !== '' ? r : undefined;
+}
+
+// ---------------------------------------------------------------------------
+// deriveStepTitle
+// ---------------------------------------------------------------------------
+
+/**
+ * Produces a human-readable title for a derived step.
+ *
+ * Title is derived from the grouping reason and supplemented with contextual
+ * data from the events and page context.
+ */
+export function deriveStepTitle(
+  events: SegmentableEvent[],
+  groupingReason: GroupingReason,
+  pageContext?: DerivedStep['page_context'],
+): string {
+  const firstEvent = events[0];
+
+  switch (groupingReason) {
+    case 'click_then_navigate': {
+      // Find the navigation event for destination context.
+      const navEvent = events.find((e) =>
+        e.event_type.startsWith('navigation.'),
+      );
+      const destination =
+        (navEvent !== undefined ? pageTitle(navEvent) : undefined) ??
+        pageContext?.routeTemplate ??
+        (navEvent !== undefined ? routeTemplate(navEvent) : undefined) ??
+        'page';
+      return `Navigate to ${destination}`;
+    }
+
+    case 'fill_and_submit': {
+      // Find the submit event for form label context.
+      const submitEvent = events.find(
+        (e) => e.event_type === 'interaction.submit',
+      );
+      const formLabel =
+        (submitEvent !== undefined ? targetLabel(submitEvent) : undefined) ??
+        (firstEvent !== undefined ? pageTitle(firstEvent) : undefined) ??
+        pageContext?.routeTemplate ??
+        'form';
+      return `Fill and submit ${formLabel}`;
+    }
+
+    case 'repeated_click_dedup': {
+      const label =
+        (firstEvent !== undefined ? targetLabel(firstEvent) : undefined) ??
+        'element';
+      return `Click ${label}`;
+    }
+
+    case 'error_handling': {
+      return 'Handle error';
+    }
+
+    case 'annotation': {
+      // The annotation event carries its text directly in the event_type
+      // or normalization_meta; look for it in the first event.
+      // The caller should pass the annotation text via the events array;
+      // we surface the sourceEventType as a best-effort fallback.
+      if (firstEvent !== undefined) {
+        // Annotation events may carry a label in target_summary.
+        const annotationLabel = firstEvent.target_summary?.label;
+        if (annotationLabel !== undefined && annotationLabel !== '') {
+          return annotationLabel;
+        }
+      }
+      return 'User annotation';
+    }
+
+    case 'single_action': {
+      if (firstEvent === undefined) return 'Perform action';
+
+      const type = firstEvent.event_type;
+
+      if (type === 'interaction.click') {
+        const label = targetLabel(firstEvent) ?? 'element';
+        return `Click ${label}`;
+      }
+
+      if (type === 'interaction.input_change') {
+        const label = targetLabel(firstEvent) ?? 'field';
+        return `Update ${label}`;
+      }
+
+      if (type === 'interaction.submit') {
+        const label =
+          pageTitle(firstEvent) ??
+          pageContext?.routeTemplate ??
+          'form';
+        return `Submit ${label}`;
+      }
+
+      if (type.startsWith('navigation.')) {
+        const title =
+          pageTitle(firstEvent) ??
+          pageContext?.routeTemplate ??
+          'page';
+        return `Navigate to ${title}`;
+      }
+
+      return 'Perform action';
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// calculateConfidence
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns a confidence score in [0, 1] for the given step grouping.
+ *
+ * Higher confidence indicates that the grouping heuristic has strong evidence
+ * of a meaningful user task boundary.
+ */
+export function calculateConfidence(
+  events: SegmentableEvent[],
+  groupingReason: GroupingReason,
+): number {
+  switch (groupingReason) {
+    case 'click_then_navigate':
+      return 0.85;
+
+    case 'fill_and_submit':
+      return 0.9;
+
+    case 'annotation':
+      return 1.0;
+
+    case 'error_handling':
+      return 0.8;
+
+    case 'repeated_click_dedup':
+      return 0.7;
+
+    case 'single_action': {
+      // Higher confidence when we have a concrete label to reason about.
+      const firstEvent = events[0];
+      if (firstEvent !== undefined && targetLabel(firstEvent) !== undefined) {
+        return 0.75;
+      }
+      return 0.55;
+    }
+  }
+}

@@ -1,0 +1,9 @@
+export const SCHEMA_VERSION = '1.0.0' as const
+export const RECORDER_VERSION = '0.1.0' as const
+export const SEGMENTATION_RULE_VERSION = '1.0.0' as const
+export const RENDERER_VERSION = '0.1.0' as const
+export const STORAGE_KEY_SESSION = 'ledgerium_active_session' as const
+export const STORAGE_KEY_SETTINGS = 'ledgerium_settings' as const
+export const IDLE_GAP_MS = 45_000 as const
+export const CLICK_NAV_WINDOW_MS = 2_500 as const
+export const RAPID_CLICK_DEDUP_MS = 1_000 as const
