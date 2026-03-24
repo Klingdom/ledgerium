@@ -1,0 +1,506 @@
+# Ledgerium AI — Process Intelligence Layer
+
+## Purpose
+
+This document defines the Process Intelligence Layer (PIL), the system responsible for transforming individual workflow executions into aggregated insights, performance metrics, and actionable process intelligence.
+
+It enables Ledgerium AI to move from:
+- capturing workflows
+→ to understanding, comparing, and optimizing them
+
+---
+
+## Scope
+
+This document covers:
+- aggregation of ProcessRuns
+- process comparison and normalization
+- metrics generation
+- variant detection
+- process performance analysis
+- drift detection
+
+This document does NOT cover:
+- event capture (recorder)
+- deterministic workflow reconstruction (DPE)
+- UI visualization details
+
+---
+
+## Source of Truth Level
+
+**Intelligence Layer Authority**
+
+Subordinate to:
+- foundation_overview.md
+- deterministic-process-engine.md
+- event-schema.md
+
+Authoritative over:
+- metrics generation
+- process analytics
+- insight derivation
+
+---
+
+## Definition
+
+The Process Intelligence Layer is:
+
+> A deterministic aggregation and analysis system that converts multiple workflow executions into structured process insights, comparisons, and optimization opportunities.
+
+---
+
+## Core Principle
+
+> Intelligence must be derived from observed behavior, not assumptions.
+
+No:
+- speculative insights
+- inferred intent without evidence
+- generative analytics without grounding
+
+---
+
+## Inputs
+
+### Primary Inputs
+
+- ProcessRuns (from DPE)
+
+Each includes:
+- ordered steps
+- timing
+- outcomes
+- metadata
+
+---
+
+### Secondary Inputs
+
+- ProcessDefinitions
+- session metadata
+- user role (if available)
+
+---
+
+## Outputs
+
+### 1. Process Metrics
+
+Quantitative measures:
+- average duration per step
+- total workflow duration
+- step frequency
+- error rates
+- repetition counts
+
+---
+
+### 2. Process Variants
+
+Different ways a workflow is executed.
+
+Includes:
+- step sequence variations
+- branching patterns
+- optional steps
+
+---
+
+### 3. Bottleneck Identification
+
+Detect:
+- slow steps
+- high-delay transitions
+- repeated actions
+
+---
+
+### 4. Process Drift Detection
+
+Identify:
+- deviations from standard process
+- changes over time
+- inconsistency across users
+
+---
+
+### 5. Best Practice Identification
+
+Determine:
+- most efficient path
+- lowest error path
+- most common successful sequence
+
+---
+
+### 6. Process Portfolio
+
+Organized collection of:
+- processes
+- variants
+- metrics
+
+---
+
+## Aggregation Model
+
+The system aggregates multiple ProcessRuns into:
+
+> Process Intelligence Objects
+
+---
+
+### Aggregation Dimensions
+
+Processes can be grouped by:
+
+- process type
+- user role
+- application
+- workflow label
+- time period
+
+---
+
+## Normalization
+
+Before aggregation, ProcessRuns must be normalized:
+
+- align step labels
+- standardize structure
+- remove noise
+- resolve naming inconsistencies
+
+---
+
+## Variant Detection
+
+### Definition
+
+A variant is:
+> A unique sequence of steps representing a distinct execution path.
+
+---
+
+### Variant Identification Rules
+
+- compare step sequences
+- identify differences in:
+  - order
+  - inclusion/exclusion
+  - repetition
+
+---
+
+### Variant Thresholds
+
+Configurable:
+- minimum frequency
+- similarity threshold
+
+---
+
+## Metrics Model
+
+### Step-Level Metrics
+
+- average duration
+- median duration
+- frequency
+- failure rate
+
+---
+
+### Process-Level Metrics
+
+- total duration
+- completion rate
+- number of steps
+- variance across runs
+
+---
+
+### Transition Metrics
+
+- time between steps
+- transition frequency
+- drop-off points
+
+---
+
+## Bottleneck Detection
+
+A bottleneck is defined as:
+
+> A step or transition with disproportionately high time or frequency relative to the process.
+
+---
+
+### Detection Criteria
+
+- high average duration
+- high variance
+- repeated execution
+- high failure rate
+
+---
+
+## Drift Detection
+
+### Definition
+
+Drift occurs when:
+> Process execution diverges from the established ProcessDefinition over time.
+
+---
+
+### Detection Signals
+
+- new steps introduced
+- steps skipped
+- sequence changes
+- increased variance
+
+---
+
+## Best Practice Identification
+
+### Criteria
+
+Best practice path is:
+
+- most efficient (time)
+- most successful (low errors)
+- most consistent
+
+---
+
+### Output
+
+- recommended sequence
+- comparison vs other variants
+
+---
+
+## Process Comparison
+
+The system must support:
+
+- comparing users
+- comparing teams
+- comparing time periods
+
+---
+
+### Comparison Dimensions
+
+- step count
+- duration
+- path differences
+- tool usage
+
+---
+
+## Process Portfolio
+
+### Definition
+
+A portfolio is:
+
+> A collection of all processes within an organization, organized and analyzable.
+
+---
+
+### Capabilities
+
+- categorize processes
+- search processes
+- compare across processes
+- track evolution over time
+
+---
+
+## Deterministic Requirements
+
+### R-PIL-001: Evidence-Based Metrics
+
+All metrics must be derived directly from ProcessRuns.
+
+---
+
+### R-PIL-002: No Synthetic Data
+
+No fabricated or inferred data allowed.
+
+---
+
+### R-PIL-003: Consistent Aggregation
+
+Same inputs must yield same metrics.
+
+---
+
+### R-PIL-004: Traceability
+
+Every metric must trace back to:
+- specific runs
+- specific steps
+
+---
+
+### R-PIL-005: Variant Determinism
+
+Variant detection must be:
+- rule-based
+- reproducible
+
+---
+
+## Data Structures (Conceptual)
+
+### ProcessAggregate
+
+Includes:
+- process definition
+- list of runs
+- metrics
+- variants
+
+---
+
+### Variant
+
+Includes:
+- step sequence
+- frequency
+- performance metrics
+
+---
+
+### Insight
+
+Includes:
+- type (bottleneck, drift, optimization)
+- description
+- supporting evidence
+
+---
+
+## Insight Generation
+
+Insights must be:
+
+- evidence-backed
+- explainable
+- actionable
+
+---
+
+### Example Insights
+
+- "Step X takes 3x longer than average"
+- "Users repeat Step Y frequently"
+- "Variant B is 40% faster than Variant A"
+
+---
+
+## Constraints
+
+- no LLM-only insight generation
+- no hidden assumptions
+- no opaque scoring systems
+- must be explainable
+
+---
+
+## Explainability Requirement
+
+System must answer:
+
+- why is this a bottleneck?
+- which runs contributed to this metric?
+- how was this variant identified?
+
+---
+
+## Performance Considerations
+
+- must scale with large datasets
+- must support incremental updates
+- must avoid recomputing entire dataset unnecessarily
+
+---
+
+## Key Risks
+
+### Over-Aggregation
+
+Risk:
+- losing detail
+
+Mitigation:
+- preserve raw runs
+
+---
+
+### Misleading Metrics
+
+Risk:
+- incorrect conclusions
+
+Mitigation:
+- strict traceability
+
+---
+
+### Variant Explosion
+
+Risk:
+- too many variants
+
+Mitigation:
+- threshold filtering
+
+---
+
+## Success Criteria
+
+The layer is successful if:
+
+- insights match real behavior
+- bottlenecks are accurate
+- best practices are clear
+- users trust the outputs
+
+---
+
+## Dependencies
+
+Depends on:
+- deterministic-process-engine.md
+- process-definition-schema.md
+
+Informs:
+- analytics UI
+- enterprise features
+- optimization tools
+
+---
+
+## Future Enhancements
+
+- predictive insights
+- automated recommendations
+- AI-assisted optimization
+- integration with automation tools
+
+---
+
+## Change Log
+
+### v1.0 — Initial Definition
+- defined aggregation model
+- defined metrics and variants
+- established deterministic constraints
