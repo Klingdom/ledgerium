@@ -5,7 +5,9 @@
   "description": "Ledgerium AI — Universal Work Ledger monorepo",
   "scripts": {
     "build": "pnpm -r build",
-    "test": "pnpm -r test",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest run --coverage",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "dev": "pnpm --filter extension-app dev"
@@ -15,6 +17,8 @@
     "pnpm": ">=9.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.4.0"
+    "@vitest/coverage-v8": "^1.6.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
   }
 }

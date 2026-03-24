@@ -126,6 +126,36 @@ export type SettingsUpdatedMessage = {
   payload: { uploadUrl?: string };
 };
 
+// Query messages: request/response pairs handled via sendResponse
+export type GetStateMessage = {
+  type: 'GET_STATE';
+  payload: Record<string, never>;
+};
+
+export type ExportBundleMessage = {
+  type: 'EXPORT_BUNDLE';
+  payload: Record<string, never>;
+};
+
+export type GetSettingsMessage = {
+  type: 'GET_SETTINGS';
+  payload: Record<string, never>;
+};
+
+// ---------------------------------------------------------------------------
+// Response payload types (returned via sendResponse, not broadcast messages)
+// ---------------------------------------------------------------------------
+
+export type GetStateResponse = {
+  state: RecorderState;
+  meta: SessionMeta | null;
+  steps: LiveStep[];
+};
+
+export type GetSettingsResponse = {
+  settings: import('./entities.js').ExtensionSettings;
+};
+
 // ---------------------------------------------------------------------------
 // Union type
 // ---------------------------------------------------------------------------
@@ -143,7 +173,10 @@ export type ExtensionMessage =
   | FinalizationCompleteMessage
   | FinalizationFailedMessage
   | UploadProgressMessage
-  | SettingsUpdatedMessage;
+  | SettingsUpdatedMessage
+  | GetStateMessage
+  | ExportBundleMessage
+  | GetSettingsMessage;
 
 // ---------------------------------------------------------------------------
 // Message type string constants
@@ -163,6 +196,9 @@ export const MSG = {
   FINALIZATION_FAILED: 'FINALIZATION_FAILED',
   UPLOAD_PROGRESS: 'UPLOAD_PROGRESS',
   SETTINGS_UPDATED: 'SETTINGS_UPDATED',
+  GET_STATE: 'GET_STATE',
+  EXPORT_BUNDLE: 'EXPORT_BUNDLE',
+  GET_SETTINGS: 'GET_SETTINGS',
 } as const;
 
 export type MsgType = (typeof MSG)[keyof typeof MSG];

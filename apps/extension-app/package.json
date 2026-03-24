@@ -6,11 +6,18 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@ledgerium/shared-types": "workspace:*",
+    "@ledgerium/schema-events": "workspace:*",
+    "@ledgerium/normalization-engine": "workspace:*",
+    "@ledgerium/segmentation-engine": "workspace:*",
+    "@ledgerium/policy-engine": "workspace:*",
     "react": "^18.3.0",
-    "react-dom": "^18.3.0"
+    "react-dom": "^18.3.0",
+    "zod": "^3.23.0"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.26",
@@ -21,6 +28,7 @@
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.4",
-    "vite": "^5.3.1"
+    "vite": "^5.3.1",
+    "vitest": "^1.6.0"
   }
 }

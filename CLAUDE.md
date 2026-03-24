@@ -136,22 +136,35 @@ Follow Conventional Commits format:
 Example: `feat(normalization): add sensitive field masking for input events`
 
 ## Current Phase
-**Phase 0 — Technical Foundation.** Monorepo not yet initialized. No
-production code exists. Focus is on scaffolding the monorepo, defining
-canonical schemas, and proving the extension recording lifecycle before
-building any derivation logic.
+**Phase 0 complete — Phase 1 starting.** Monorepo initialized. Chrome MV3
+extension shell (background, content script, side panel UI) is fully
+implemented and building. Shared packages (schema-events, segmentation-engine,
+normalization-engine, policy-engine, shared-types) are implemented. Vitest
+test infrastructure is in place with tests for all packages and extension
+background layer.
 
 See `docs/project-plan.md` for the full 6-phase roadmap.
+See `docs/invariants.md` for the canonical list of codebase invariants.
 
-## Active Priorities
-1. Initialize pnpm monorepo with `apps/` and `packages/` structure
-2. Build `packages/schema-events` (canonical event schema + Zod validators)
-3. Build extension shell with recorder state machine (Chrome MV3)
+## Active Priorities (Phase 1)
+1. Resolve type duplication: migrate extension-app background to import from
+   workspace packages instead of inline types (see Known Issues)
+2. Integrate `@ledgerium/policy-engine` into `content/capture.ts`
+3. Add Playwright E2E tests for extension recording lifecycle
+4. Implement session recovery after service worker restart
+5. Add structured error logging with session context
 
 ## Known Issues / Technical Debt
-- No production code exists yet — all root-level files are specs, fixtures,
-  and a static marketing website
-- `CLAUDE.md` commands section below needs updating once monorepo is live
+- Extension-app background layer duplicates normalization, segmentation, and
+  policy logic (same logic exists in workspace packages). This is tracked
+  technical debt — the extension was built before workspace linking was
+  confirmed. Resolution: migrate background/normalizer.ts, bundle-builder.ts,
+  and live-steps.ts to import from @ledgerium/* packages.
+- `content/capture.ts` uses a local sensitivity pattern instead of importing
+  from `@ledgerium/policy-engine`. Tracked for Phase 1.
+- No Playwright E2E tests yet (deferred from Phase 0).
+- Session data is not fully persisted to chrome.storage.local (only meta,
+  not events). Full persistence needed for service worker restart recovery.
 
 ## Out of Scope (Do Not Touch)
 - The static marketing website (`index.html`, `product.html`, etc.) — that
@@ -160,8 +173,59 @@ See `docs/project-plan.md` for the full 6-phase roadmap.
   fixtures, not production data — treat as read-only test references
 
 ## Commands
-- **Run tests:** `pnpm test` (once monorepo is initialized)
-- **Run dev (extension):** `pnpm --filter extension-app dev`
-- **Lint:** `pnpm lint`
-- **Type check:** `pnpm typecheck`
-- **Build:** `pnpm build`
+- **Run tests:** `pnpm test`
+- **Run tests with coverage:** `pnpm test:coverage`
+- **Run per-package tests:** `pnpm --filter @ledgerium/segmentation-engine test`
+- **Run dev (extension):** `pnpm --filter @ledgerium/extension-app dev`
+- **Build extension:** `pnpm --filter @ledgerium/extension-app build`
+- **Type check all:** `pnpm typecheck`
+- **Build all:** `pnpm build`
+
+## Compaction Recovery Protocol
+
+When a Claude Code session is compacted (context window compressed), earlier
+decisions and invariants may be lost. Follow this protocol immediately:
+
+### Step 1 — Re-establish invariants
+Read these files in order:
+1. `CLAUDE.md` (this file — always in context)
+2. `docs/invariants.md` — the authoritative invariant specification
+3. `packages/shared-types/src/session.ts` — state machine source of truth
+4. `packages/segmentation-engine/src/rules.ts` — segmentation constants
+
+### Step 2 — Verify the build
+```
+pnpm typecheck
+pnpm test
+```
+If either fails, stop and fix before proceeding.
+
+### Step 3 — Confirm primitives
+These values are invariants. NEVER change them without explicit discussion:
+
+| Constant | Value | File |
+|----------|-------|------|
+| `IDLE_GAP_MS` | `45_000` | packages/segmentation-engine/src/rules.ts |
+| `CLICK_NAV_WINDOW_MS` | `2_500` | packages/segmentation-engine/src/rules.ts |
+| `RAPID_CLICK_DEDUP_MS` | `1_000` | packages/segmentation-engine/src/rules.ts |
+| `SCHEMA_VERSION` | `'1.0.0'` | apps/extension-app/src/shared/constants.ts |
+| `NORMALIZATION_RULE_VERSION` | `'1.0.0'` | packages/normalization-engine/src/normalizer.ts |
+| `SEGMENTATION_RULE_VERSION` | `'1.0.0'` | packages/segmentation-engine/src/rules.ts |
+| Step ID format | `${sessionId}-step-${ordinal}` | batch-segmenter.ts |
+| Step ordinal start | `1` (not 0) | batch-segmenter.ts |
+
+Confidence scores per grouping reason (NEVER re-derive these):
+- `annotation` → 1.0
+- `fill_and_submit` → 0.9
+- `click_then_navigate` → 0.85
+- `error_handling` → 0.8
+- `repeated_click_dedup` → 0.7
+- `single_action` with label → 0.75
+- `single_action` without label → 0.55
+
+### Step 4 — Check current work context
+- Which block/task is in progress?
+- Are there uncommitted changes? (`git status`)
+- Are there open issues flagged in the previous session?
+
+See `docs/compaction-recovery.md` for the full recovery guide.
