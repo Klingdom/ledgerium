@@ -1,0 +1,554 @@
+You are a senior software engineer and technical reviewer working on the Ledgerium AI codebase.
+
+Your task is to review, update, validate, and harden the CURRENT process-intelligence-layer implementation so it fully aligns with the CURRENT documentation in the GitHub /docs folder.
+
+You are not starting from scratch.
+You must treat the existing codebase as the implementation baseline and the documentation as the source of truth.
+
+You must also understand the full upstream dependency chain:
+- the Recorder captures privacy-safe event data
+- the Recorder structures those events according to the Event Schema
+- the Recorder exports session JSON files
+- those JSON files are used as primary inputs to the Deterministic Process Engine
+- the Deterministic Process Engine transforms session JSON into ProcessRuns, ProcessDefinitions, steps, transitions, and other deterministic outputs
+- the Process Intelligence Layer consumes those deterministic outputs and/or compatible validated session/process data to generate metrics, aggregation, variant analysis, timestudy outputs, variance analysis, drift detection, bottleneck detection, and process insights
+
+The Process Intelligence Layer must be aware of the full data lineage:
+Recorder → Event Schema → Session JSON → Deterministic Process Engine → ProcessRun / ProcessDefinition / intelligence inputs
+
+PRIMARY OBJECTIVE
+
+Audit the existing process-intelligence-layer code and all related usage across the Ledgerium AI codebase, identify all gaps, inconsistencies, missing functionality, schema mismatches, weak aggregation logic, non-deterministic analysis behavior, missing validation, missing timestudy and variance analysis features, privacy violations, pipeline drift, and architectural mismatches, then update the codebase so the Process Intelligence Layer is fully aligned with the documented requirements.
+
+After making changes, you must test the final code for:
+- feature completeness
+- compatibility with Recorder-produced JSON files where relevant
+- compatibility with the documented Event Schema where relevant
+- compatibility with Deterministic Process Engine outputs
+- ProcessRun and ProcessDefinition aggregation correctness
+- metrics correctness
+- timestudy correctness
+- variance analysis correctness
+- variant detection correctness
+- bottleneck detection correctness
+- drift detection correctness
+- explainability / traceability
+- privacy compliance
+- deterministic behavior
+- output integrity
+- type safety
+- validation correctness
+
+SOURCE OF TRUTH
+
+You must use the markdown files in the GitHub /docs folder as the governing specification.
+Treat them as authoritative in the following general order unless a more explicit authority model exists in the repo:
+
+1. /docs/00-foundation/foundation_overview.md
+2. trust and privacy related docs in /docs/00-foundation or /docs/60-rules
+3. schema docs in /docs/50-schemas
+4. recorder docs in /docs/20-recorder
+5. engine docs in /docs/30-engine
+6. intelligence docs in /docs/40-intelligence
+7. engineering rules in /docs/60-rules
+8. architecture decisions in /docs/70-decisions
+9. task or work docs in /docs/80-work
+
+If a doc-authority-model.md exists, use that instead and follow it strictly.
+
+PRIMARY DOCUMENTS TO REVIEW CAREFULLY
+
+At minimum, review all docs relevant to process intelligence design and upstream/downstream compatibility, especially:
+- /docs/40-intelligence/process-intelligence-layer.md
+- /docs/30-engine/deterministic-process-engine.md
+- /docs/50-schemas/event-schema-overview.md
+- /docs/20-recorder/recorder-overview.md
+- any event-capture-spec.md if present
+- any ProcessRun / ProcessDefinition / SOP / session schema docs if present
+- /docs/00-foundation/foundation_overview.md
+- /docs/10-product/product-overview.md
+- /docs/60-rules/engineering-rules.md
+- /docs/70-decisions/architecture-decisions.md
+
+If separate docs exist for:
+- process portfolio
+- metrics and insights
+- variant detection
+- time study
+- drift detection
+- output schemas
+review those too and treat them as binding.
+
+NON-NEGOTIABLE RULES
+
+You must not invent intelligence behavior that conflicts with the docs.
+You must not use opaque generative AI as a substitute for deterministic analysis in the core intelligence layer.
+You must not fabricate metrics, variants, bottlenecks, drift, or best practices.
+You must not invent process paths not supported by deterministic evidence.
+You must preserve privacy-first architecture.
+You must preserve explainability.
+You must preserve deterministic aggregation and analysis behavior.
+You must not quietly ignore gaps between docs and code.
+You must explicitly surface mismatches and then resolve them through code updates or clearly documented findings.
+
+OPERATING MODE
+
+Work in this sequence:
+
+PHASE 1 — DOCUMENT REVIEW
+1. Read the relevant docs in /docs.
+2. Build an intelligence-layer requirements map from the docs.
+3. Extract:
+   - intelligence layer purpose and role
+   - upstream dependencies on recorder/session JSON/event schema/deterministic engine outputs
+   - aggregation requirements
+   - normalization requirements before aggregation
+   - metrics requirements
+   - timestudy requirements
+   - variance analysis requirements
+   - variant detection requirements
+   - bottleneck detection requirements
+   - drift detection requirements
+   - best-practice or recommended-path requirements if documented
+   - process comparison requirements
+   - portfolio requirements
+   - explainability requirements
+   - deterministic/reproducible behavior requirements
+   - performance/scalability requirements
+   - testing requirements
+4. Identify requirement IDs if present.
+5. If no requirement IDs exist, create a temporary internal requirement map using doc path + heading references.
+
+PHASE 2 — INPUT CHAIN REVIEW
+Review how the Recorder, Event Schema, session JSON, and Deterministic Process Engine currently work so you fully understand the intelligence-layer input contract:
+- how the recorder captures events
+- how events are normalized into session JSON
+- what session JSON structure is actually exported
+- how the deterministic engine consumes that JSON
+- what ProcessRun / ProcessDefinition / step / transition outputs are actually produced
+- whether those structures fully match documented contracts
+- what assumptions the current intelligence layer makes about upstream data
+- whether those assumptions are documented or accidental
+- where schema drift exists between recorder output, engine output, and intelligence input
+
+You must treat this full chain as a first-class dependency of the Process Intelligence Layer and validate that the layer consumes upstream data safely and deterministically.
+
+PHASE 3 — CODEBASE AUDIT
+Review the current process-intelligence-layer codebase and determine:
+- where intelligence logic lives
+- whether there are multiple conflicting implementations
+- how data ingestion works
+- whether runtime validation exists for incoming data
+- how ProcessRuns are aggregated
+- how ProcessDefinitions are used
+- how metrics are computed
+- whether timestudy analysis exists and is correct
+- whether variance analysis exists and is correct
+- how variant detection is implemented
+- how bottlenecks are detected
+- how drift is detected
+- whether comparisons across users/runs/time periods are supported where documented
+- whether insights are evidence-backed and traceable
+- whether outputs are deterministic in practice
+- where stale or legacy logic exists
+- whether tests actually cover the documented feature set
+- whether downstream consumers depend on undocumented fields or behavior
+
+PHASE 4 — GAP ANALYSIS
+Produce a structured gap analysis:
+- what is implemented correctly
+- what is partially implemented
+- what is missing
+- what violates docs
+- what violates determinism
+- what violates privacy principles
+- what violates explainability
+- what mismatches recorder/session/engine outputs
+- what is missing for timestudy
+- what is missing for variance analysis
+- what should be refactored vs rewritten
+- what downstream code would break if intelligence outputs are corrected
+
+PHASE 5 — IMPLEMENTATION PLAN
+Before changing code, create a concrete engineering plan that maps:
+- documented intelligence requirement
+- upstream recorder/schema/engine dependency
+- affected files/modules
+- implementation approach
+- migration/compatibility considerations
+- validation/test approach
+
+PHASE 6 — CODE UPDATES
+Update the codebase to bring the process-intelligence-layer into alignment with the docs.
+You may refactor, replace, add, or remove code where necessary.
+Favor correctness, privacy, determinism, explainability, modularity, and maintainability over preserving flawed code.
+
+If the layer currently assumes malformed or undocumented upstream input, correct that behavior and either:
+- update integration points to align, or
+- add a minimal safe normalization/validation layer at the intelligence boundary
+
+PHASE 7 — TESTING AND VALIDATION
+Run and/or create tests to validate:
+- intelligence input validation against engine outputs and any accepted session/process input shapes
+- deterministic aggregation behavior
+- metrics correctness
+- timestudy correctness
+- variance analysis correctness
+- variant detection correctness
+- bottleneck detection correctness
+- drift detection correctness
+- process comparison correctness
+- traceability to source runs/steps/events
+- idempotence on repeated runs
+- privacy-safe output behavior
+- compatibility with Recorder-produced JSON files where relevant
+- compatibility with Deterministic Process Engine outputs
+- compatibility with downstream consumers if present
+- build/type-check/test health
+
+PHASE 8 — FINAL REPORT
+Provide a final implementation report with:
+- summary of changes
+- files changed
+- requirements satisfied
+- tests executed
+- remaining risks
+- doc ambiguities
+- recommended next steps
+
+KEY IMPLEMENTATION EXPECTATIONS
+
+The Process Intelligence Layer should align with the docs and support, at minimum, these capabilities if required by the docs:
+
+1. INPUT CONTRACT AWARENESS
+The layer must understand that its upstream truth chain begins with Recorder-produced session JSON built from privacy-safe events defined by the Event Schema, then flows through the Deterministic Process Engine.
+The Process Intelligence Layer should primarily operate on deterministic outputs such as ProcessRuns, ProcessDefinitions, steps, timings, transitions, and comparable validated structures.
+It must not rely on undocumented or ad hoc fields.
+
+2. AGGREGATION MODEL
+The layer should aggregate multiple ProcessRuns into deterministic process intelligence objects such as:
+- process aggregates
+- metrics bundles
+- variant sets
+- insight collections
+- portfolio collections
+or documented equivalents.
+
+Aggregation should support grouping by documented dimensions such as:
+- process type
+- user role
+- application
+- workflow label
+- time period
+or documented equivalents.
+
+3. NORMALIZATION BEFORE AGGREGATION
+Before comparing or aggregating runs, the layer should normalize:
+- step labels
+- step identity
+- structure
+- naming inconsistencies
+- timestamps/timing units if needed
+according to documented rules and deterministic engine outputs.
+
+4. METRICS MODEL
+The layer should compute deterministic evidence-based metrics such as:
+- total process duration
+- average step duration
+- median step duration where useful
+- frequency
+- completion rate if supported
+- repetition counts
+- transition durations
+- error rates if supported
+- step count variance
+or documented equivalents.
+
+5. TIMESTUDY FEATURES
+The layer must include timestudy analysis features.
+At minimum, if supported by the docs, timestudy should analyze:
+- total duration per run
+- duration per step
+- average duration by process
+- median duration by process
+- min/max duration by process and by step
+- cycle time distributions
+- waiting time / idle gaps where derivable
+- time spent in repeated loops or rework
+- transition time between key steps
+- comparative time performance across variants or users where documented
+
+Timestudy outputs must be deterministic, evidence-backed, privacy-safe, and traceable.
+
+6. VARIANCE ANALYSIS FEATURES
+The layer must include variance analysis features.
+At minimum, if supported by the docs, variance analysis should analyze:
+- variance in total process duration across runs
+- variance in step durations across runs
+- variance in step counts
+- variance in sequence/order
+- variance in tool switching patterns
+- variance in repeated actions or loops
+- variance between users, teams, or time windows if documented
+- optional identification of high-variance steps or transitions
+
+Variance analysis must be evidence-based, explainable, and reproducible.
+Do not produce vague or opaque scores without traceability.
+
+7. VARIANT DETECTION
+The layer should identify process variants deterministically based on step sequence differences such as:
+- order changes
+- missing/extra steps
+- repeated steps
+- branching patterns
+or documented equivalents.
+
+Variant detection must use reproducible rules and configurable thresholds if documented.
+
+8. BOTTLENECK DETECTION
+The layer should detect bottlenecks based on documented signals such as:
+- high average duration
+- high variance
+- repeated execution
+- high failure rate if available
+- slow transitions
+or documented equivalents.
+
+9. DRIFT DETECTION
+The layer should detect process drift over time or against a ProcessDefinition where documented, including:
+- new steps appearing
+- steps disappearing
+- sequence changes
+- variance increases
+- consistent deviations from standard path
+
+10. PROCESS COMPARISON
+The layer should support deterministic comparisons such as:
+- user vs user
+- team vs team
+- period vs period
+- variant vs variant
+- actual vs canonical ProcessDefinition
+if documented.
+
+11. BEST PRACTICE / RECOMMENDED PATH
+If documented, the layer should identify best-practice or recommended paths using deterministic evidence such as:
+- highest success
+- lowest duration
+- lowest error
+- highest consistency
+without fabricating unsupported recommendations.
+
+12. PROCESS PORTFOLIO SUPPORT
+If documented, the layer should support organizing intelligence across multiple processes, including:
+- process cataloging
+- process search/index metadata
+- aggregate summaries
+- portfolio-level metrics
+- process evolution tracking
+
+13. EXPLAINABILITY
+For every major intelligence output, it should be possible to answer:
+- which runs contributed to this metric?
+- which steps contributed to this bottleneck?
+- why was this run placed in this variant?
+- why is this variance high?
+- why is this labeled drift?
+- what evidence supports this insight?
+
+14. DETERMINISM / IDEMPOTENCE
+Given identical validated upstream inputs:
+- the same metrics should be produced
+- the same variants should be produced
+- the same bottlenecks should be produced
+- the same drift outputs should be produced
+- the same timestudy and variance outputs should be produced
+
+15. PRIVACY PRESERVATION
+The intelligence layer must not reintroduce sensitive content through:
+- labels
+- insights
+- logs
+- diagnostics
+- exported analytics objects
+It must operate on privacy-safe upstream data only.
+
+WHAT TO LOOK FOR SPECIFICALLY IN THE CURRENT CODEBASE
+
+Please specifically inspect for these common problems:
+- intelligence layer assumes recorder or engine emits fields that no longer exist
+- recorder JSON, engine outputs, and intelligence input contract are out of sync
+- no validation at intelligence boundary
+- metrics computed from undocumented fields
+- timestudy missing or incomplete
+- variance analysis missing or incomplete
+- duration calculations are inconsistent or unstable
+- step comparison logic is ad hoc instead of deterministic
+- variant detection is too loose or too brittle
+- bottleneck detection uses arbitrary thresholds without documentation
+- drift detection is vague or unsupported by evidence
+- “best practice” logic is speculative instead of evidence-based
+- repeated runs on same input yield different outputs
+- outputs lack traceability to source runs/steps/events
+- stale legacy fields from earlier versions remain in intelligence logic
+- tests validate old behavior instead of documented behavior
+- downstream code depends on undocumented intelligence output fields
+
+REQUIRED OUTPUT FORMAT
+
+Use this format exactly:
+
+A. DOCUMENTS REVIEWED
+List the docs reviewed and the sections most relevant to intelligence implementation.
+
+B. INTELLIGENCE REQUIREMENTS MAP
+List the extracted requirements grouped by:
+- input contract
+- aggregation
+- normalization
+- metrics
+- timestudy
+- variance analysis
+- variant detection
+- bottleneck detection
+- drift detection
+- process comparison
+- portfolio support
+- explainability
+- privacy
+- testing
+
+C. INPUT CHAIN REVIEW
+Describe how recorder events become session JSON, how that feeds the deterministic engine, and how engine outputs should feed the process intelligence layer.
+Call out any mismatches between recorder output, event schema, engine outputs, and intelligence expectations.
+
+D. CODEBASE AUDIT
+Describe the current state of the process-intelligence-layer implementation and major findings.
+
+E. GAP ANALYSIS
+For each major gap:
+- requirement or doc reference
+- current behavior
+- needed change
+- priority
+
+F. IMPLEMENTATION PLAN
+Map requirements to code changes and files.
+
+G. CODE CHANGES
+Show the actual code/file updates.
+Prefer complete file outputs or clearly scoped diffs with file paths.
+
+H. TEST PLAN
+List all tests added or run, including unit, integration, determinism, timestudy, variance, and compatibility checks.
+
+I. TEST RESULTS
+Report actual results. If something could not be tested, say so explicitly.
+
+J. FINAL COMPLIANCE CHECK
+For each key intelligence requirement area, state:
+- compliant
+- partially compliant
+- non-compliant
+with explanation
+
+K. REMAINING RISKS / FOLLOW-UPS
+List any unresolved issues, doc ambiguities, migration concerns, recorder/schema/engine integration concerns, or recommended next steps.
+
+TESTING REQUIREMENTS
+
+You must do real validation, not just claim correctness.
+At minimum, perform as many of the following as possible in the current environment:
+
+1. Static validation
+- TypeScript compile or type checking
+- linting if configured
+- import/path sanity checks
+
+2. Runtime validation / unit tests
+- valid upstream inputs accepted
+- malformed intelligence inputs rejected or normalized safely
+- metrics calculations correct for representative datasets
+- timestudy outputs correct for representative datasets
+- variance calculations correct for representative datasets
+- variant detection behaves deterministically
+- bottleneck detection behaves deterministically
+- drift detection behaves deterministically
+- comparison outputs are correct
+- traceability metadata is preserved
+
+3. Compatibility tests
+- Recorder-produced JSON files can be traced through the engine into intelligence inputs where relevant
+- event schema, engine outputs, and intelligence input assumptions match
+- downstream modules can consume intelligence outputs if present
+
+4. Privacy validation
+Prove that:
+- intelligence outputs do not expose forbidden content
+- labels and insights do not reintroduce unsafe text
+- logs/diagnostics do not leak unsafe payloads
+
+5. Determinism validation
+Given repeated equivalent validated input data:
+- output is identical across runs
+- metrics are identical across runs
+- variants are identical across runs
+- timestudy outputs are identical across runs
+- variance outputs are identical across runs
+- drift/bottleneck outputs are identical across runs
+
+WHEN DOCS ARE UNCLEAR
+
+If documentation is ambiguous:
+- do not guess silently
+- choose the most privacy-preserving and deterministic interpretation
+- document the ambiguity in the final report
+- implement the safest compliant behavior unless the ambiguity blocks essential intelligence-layer design
+
+WHEN CODE CONFLICTS WITH DOCS
+
+If code conflicts with docs:
+- docs win
+- update code accordingly
+- explicitly note the conflict and resolution
+
+WHEN DOCS CONFLICT WITH EACH OTHER
+
+If docs conflict:
+1. follow the explicit doc authority model if present
+2. otherwise prioritize foundation, privacy, schema, recorder, engine, intelligence, engineering rules, then lower-level docs
+3. document the conflict clearly in the final report
+
+DEFINITION OF DONE
+
+This task is only done when:
+- the process-intelligence-layer has been reviewed against the docs
+- key intelligence gaps are fixed
+- the layer correctly understands and integrates the Recorder → Event Schema → Session JSON → Deterministic Process Engine → Intelligence pipeline
+- timestudy and variance analysis features are implemented or corrected where required
+- deterministic aggregation and analysis rules are enforced
+- outputs align with documentation
+- final code is tested for completeness and feature requirements
+- you provide a full implementation and validation report
+
+ADDITIONAL INSTRUCTIONS
+
+- Be concrete and implementation-focused.
+- Do not give generic advice.
+- Do not only summarize the codebase.
+- Actually update the code.
+- Remove or refactor broken/stale intelligence logic when necessary.
+- Favor modular, production-minded TypeScript where possible.
+- Add comments where deterministic or privacy-sensitive logic is enforced.
+- Add or improve tests where there are meaningful risks.
+- If build tooling is broken, fix it if reasonably possible and report what changed.
+- If recorder/schema/engine integration must be updated to make the intelligence layer correct, do so.
+- If a compatibility layer is needed at the intelligence boundary, add the minimum safe version and document it clearly.
+- Do not replace deterministic analysis with vague heuristics or LLM behavior.
+- Timestudy and variance analysis are required features for this review/update pass and must be treated as first-class deliverables.
+
+FINAL NOTE
+
+Ledgerium AI is not building a black-box analytics system.
+The Process Intelligence Layer must transform validated deterministic process data into reproducible, explainable, privacy-safe intelligence outputs including metrics, timestudy, variance analysis, variants, bottlenecks, drift, and comparative insights.
+Your job is to ensure the current codebase actually reflects that and that the intelligence layer is complete, correct, deterministic, and tested.
