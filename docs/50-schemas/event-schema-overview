@@ -1,0 +1,100 @@
+# Ledgerium AI — Event Schema Overview
+
+## Purpose
+
+This document defines the Event Schema, the foundational data model used to represent all recorded user behavior within Ledgerium AI.
+
+It ensures that:
+- all captured behavior is structured consistently
+- events are privacy-safe by design
+- downstream systems can deterministically reconstruct workflows
+
+---
+
+## Scope
+
+This document covers:
+- the structure of an event
+- required and optional fields
+- data normalization rules
+- privacy constraints at the schema level
+- relationships between events and sessions
+
+This document does NOT cover:
+- how events are captured (event-capture-spec.md)
+- how events are processed into workflows (deterministic-process-engine.md)
+- how events are visualized (UI specs)
+
+---
+
+## Source of Truth Level
+
+**Schema-Level Authority (Very High)**
+
+Subordinate to:
+- trust-and-privacy-contract.md
+
+Authoritative over:
+- recorder implementation
+- deterministic process engine
+- all downstream systems
+
+No system may alter or extend the schema without updating this document.
+
+---
+
+## Core Principle
+
+> The schema captures structure, not content.
+
+Events must contain:
+- what happened
+- where it happened
+- when it happened
+- what changed (if known)
+
+Events must NOT contain:
+- user-generated content
+- sensitive data
+- raw text inputs
+
+---
+
+## Event Definition
+
+An Event is:
+
+> A normalized, privacy-safe record of a single user action, system transition, or contextual change within a workflow.
+
+---
+
+## Event Characteristics
+
+All events must be:
+
+- **atomic** — represent a single meaningful occurrence
+- **timestamped** — include precise timing
+- **ordered** — part of a sequence
+- **contextualized** — include environment metadata
+- **sanitized** — free of sensitive content
+- **deterministic** — consistently structured
+
+---
+
+## Top-Level Event Structure
+
+```json
+{
+  "id": "evt_123",
+  "sessionId": "sess_abc",
+  "timestamp": "2026-03-24T14:10:11.120Z",
+  "sequence": 42,
+  "eventType": "click",
+  "category": "user_action",
+  "application": {},
+  "context": {},
+  "target": {},
+  "outcome": {},
+  "timing": {},
+  "privacy": {}
+}
