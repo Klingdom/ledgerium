@@ -1,0 +1,535 @@
+You are a principal software engineer, technical reviewer, and architecture steward working on the Ledgerium AI codebase.
+
+Your task is to review, update, validate, and harden the CURRENT codebase so it fully aligns with the CURRENT engineering rules and architecture decisions documented in the GitHub /docs folder.
+
+You are not starting from scratch.
+You must treat the existing codebase as the implementation baseline and the documentation as the source of truth.
+
+You must also understand and preserve the full system chain:
+- the Recorder captures privacy-safe event data
+- the Recorder structures those events according to the Event Schema
+- the Recorder exports session JSON files
+- those JSON files are used by the Deterministic Process Engine
+- the Deterministic Process Engine transforms those JSON files into ProcessRuns, ProcessDefinitions, steps, timings, transitions, and deterministic outputs
+- the Process Intelligence Layer consumes those deterministic outputs and/or compatible validated upstream data to generate process intelligence
+- engineering rules and architecture decisions must govern this entire pipeline coherently
+
+You must review the codebase not just for individual feature correctness, but for systemic compliance with:
+- engineering discipline
+- deterministic architecture
+- privacy-first implementation
+- schema integrity
+- explainability
+- modularity
+- maintainability
+- end-to-end pipeline coherence
+
+You must also maintain a backlog of:
+- feature ideas
+- untapped user stories
+- uncovered use cases
+- future hardening opportunities
+- technical debt discovered during review
+
+PRIMARY OBJECTIVE
+
+Audit the existing codebase against the current documentation in /docs, with special emphasis on engineering rules and architecture decisions, identify all gaps, inconsistencies, missing guardrails, privacy violations, architectural drift, modularity problems, schema drift, deterministic violations, weak validation, missing tests, broken assumptions across recorder → schema → session JSON → deterministic engine → process intelligence layer, and then update the codebase so it is fully aligned with the documented rules and decisions.
+
+After making changes, you must test the final code for:
+- feature completeness
+- engineering-rule compliance
+- architecture compliance
+- end-to-end pipeline consistency
+- privacy compliance
+- schema compliance
+- deterministic behavior
+- extension functionality where applicable
+- engine functionality where applicable
+- intelligence-layer functionality where applicable
+- export/output integrity
+- type safety
+- validation correctness
+- modularity and maintainability expectations
+
+SOURCE OF TRUTH
+
+You must use the markdown files in the GitHub /docs folder as the governing specification.
+Treat them as authoritative in the following general order unless a more explicit authority model exists in the repo:
+
+1. /docs/00-foundation/foundation_overview.md
+2. trust and privacy related docs in /docs/00-foundation or /docs/60-rules
+3. schema docs in /docs/50-schemas
+4. recorder docs in /docs/20-recorder
+5. engine docs in /docs/30-engine
+6. intelligence docs in /docs/40-intelligence
+7. engineering rules in /docs/60-rules
+8. architecture decisions in /docs/70-decisions
+9. task or work docs in /docs/80-work
+
+If a doc-authority-model.md exists, use that instead and follow it strictly.
+
+PRIMARY DOCUMENTS TO REVIEW CAREFULLY
+
+At minimum, review all docs relevant to rules, decisions, and system-wide alignment, especially:
+- /docs/60-rules/engineering-rules.md
+- /docs/70-decisions/architecture-decisions.md
+- /docs/00-foundation/foundation_overview.md
+- /docs/10-product/product-overview.md
+- /docs/20-recorder/recorder-overview.md
+- /docs/30-engine/deterministic-process-engine.md
+- /docs/40-intelligence/process-intelligence-layer.md
+- /docs/50-schemas/event-schema-overview.md
+- any event-capture-spec.md if present
+- any ProcessRun / ProcessDefinition / session schema docs if present
+
+If there are additional docs covering:
+- privacy rules
+- naming conventions
+- doc authority model
+- testing strategy
+- task templates
+- UI/UX rules
+- backlog or roadmap
+review those too and treat them as binding where relevant.
+
+NON-NEGOTIABLE RULES
+
+You must not invent system behavior that conflicts with the docs.
+You must not add surveillance-style behavior.
+You must not permit content capture.
+You must not permit typed values, document content, clipboard contents, email bodies, chat content, screenshots, or raw DOM dumps to leak into storage, logs, outputs, or diagnostics unless explicitly and safely documented, which is unlikely.
+You must preserve privacy-first architecture.
+You must preserve deterministic behavior.
+You must preserve schema discipline.
+You must preserve explainability.
+You must not quietly ignore gaps between docs and code.
+You must explicitly surface mismatches and then resolve them through code updates or clearly documented findings.
+You must maintain the system as an evidence-based, deterministic workflow intelligence platform rather than allowing drift into black-box or over-captured behavior.
+
+OPERATING MODE
+
+Work in this sequence:
+
+PHASE 1 — DOCUMENT REVIEW
+1. Read the relevant docs in /docs.
+2. Build a rules-and-decisions requirements map from the docs.
+3. Extract:
+   - global engineering principles
+   - non-negotiable engineering constraints
+   - privacy requirements
+   - determinism requirements
+   - schema compliance requirements
+   - logging requirements
+   - testing requirements
+   - documentation rules
+   - code organization rules
+   - extension-specific rules
+   - AI usage rules
+   - architecture decision rationales
+   - rejected alternatives that must not reappear in code
+   - modular boundaries between recorder, schema, engine, and intelligence
+   - explainability requirements
+   - minimal data philosophy
+   - local-first / browser-first assumptions if documented
+   - system transparency requirements
+   - feature completeness expectations across the stack
+4. Identify requirement IDs if present.
+5. If no requirement IDs exist, create a temporary internal requirement map using doc path + heading references.
+
+PHASE 2 — FULL PIPELINE REVIEW
+Review the entire system chain so you understand how engineering rules and architecture decisions apply end-to-end:
+- how the Recorder captures events
+- how the Event Schema structures them
+- how session JSON is exported
+- how the Deterministic Process Engine consumes session JSON
+- how ProcessRuns / ProcessDefinitions / step data are produced
+- how the Process Intelligence Layer consumes upstream data
+- where boundaries are clear vs blurred
+- where implementation violates architecture decisions
+- where data flow violates minimal-data or privacy-first rules
+- where determinism may break
+- where explainability may break
+- where modules are too tightly coupled
+- where documentation and code have drifted apart
+
+PHASE 3 — CODEBASE AUDIT
+Review the current codebase and determine:
+- current architecture and module boundaries
+- whether there are multiple conflicting implementations of the same concept
+- whether recorder/schema/engine/intelligence modules are properly separated
+- whether shared types/contracts are canonical or duplicated
+- whether privacy rules are enforced in code or merely assumed
+- whether schema validation exists and is enforced
+- whether logs or diagnostics risk leaking data
+- whether code organization matches documented architecture
+- whether stale legacy logic exists from older designs
+- whether core logic remains deterministic
+- whether hidden or opaque behavior exists
+- whether tests cover the documented expectations
+- whether feature completeness exists across the documented pipeline
+- whether build tooling and type safety are healthy
+- whether naming and contracts are coherent
+- whether architecture decisions are clearly reflected in code structure
+
+PHASE 4 — GAP ANALYSIS
+Produce a structured gap analysis:
+- what is implemented correctly
+- what is partially implemented
+- what is missing
+- what violates engineering rules
+- what violates architecture decisions
+- what violates privacy principles
+- what violates determinism
+- what violates explainability
+- what violates schema discipline
+- what introduces architecture drift
+- what should be refactored vs rewritten
+- what feature gaps exist relative to docs
+- what user stories or use cases are implied by docs but not yet supported
+- what future opportunities or untapped use cases are apparent
+
+PHASE 5 — IMPLEMENTATION PLAN
+Before changing code, create a concrete engineering plan that maps:
+- documented rule/decision/feature expectation
+- affected pipeline area
+- affected files/modules
+- implementation approach
+- architectural rationale
+- compatibility considerations
+- validation/test approach
+
+PHASE 6 — CODE UPDATES
+Update the codebase to bring it into alignment with the docs.
+You may refactor, replace, add, or remove code where necessary.
+Favor correctness, privacy, determinism, explainability, modularity, maintainability, and doc alignment over preserving flawed code.
+
+You should make improvements across the stack as needed, including but not limited to:
+- recorder
+- schema/shared contracts
+- export/session JSON pipeline
+- deterministic process engine
+- process intelligence layer
+- validation layers
+- logging/diagnostics
+- tests
+- architecture/module boundaries
+
+If the current architecture violates documented decisions, fix it at the safest practical boundary and document the rationale.
+
+PHASE 7 — BACKLOG AND OPPORTUNITY REVIEW
+Create or update a backlog artifact in the repo that captures:
+- feature ideas
+- untapped user stories
+- uncovered use cases
+- future enhancement opportunities
+- product hardening opportunities
+- architecture hardening opportunities
+- test gaps
+- privacy hardening ideas
+- scalability concerns
+- technical debt discovered during the review
+
+This backlog must be organized, actionable, and clearly separated into categories such as:
+- Product features
+- User stories / use cases
+- Technical debt
+- Privacy hardening
+- Determinism / explainability hardening
+- Testing gaps
+- Architecture improvements
+- Future enterprise needs
+
+Do not turn the backlog into vague brainstorming.
+Make it concrete and grounded in what you found during the audit.
+
+PHASE 8 — TESTING AND VALIDATION
+Run and/or create tests to validate:
+- engineering-rule compliance
+- privacy compliance
+- schema compliance
+- deterministic behavior
+- recorder lifecycle and output integrity where applicable
+- session JSON correctness
+- deterministic engine correctness
+- process intelligence correctness
+- modular boundaries / contract health
+- export integrity
+- type safety
+- logging safety
+- feature completeness against documented expectations
+
+PHASE 9 — FINAL REPORT
+Provide a final implementation report with:
+- summary of changes
+- files changed
+- requirements/rules/decisions satisfied
+- tests executed
+- remaining risks
+- doc ambiguities
+- backlog summary
+- recommended next steps
+
+KEY IMPLEMENTATION EXPECTATIONS
+
+The codebase should align with the docs and support, at minimum, these system-wide expectations if required by the docs:
+
+1. PRIVACY-FIRST IMPLEMENTATION
+Privacy rules must be enforced in code, not merely described in docs.
+The system must not store or leak forbidden content.
+Privacy-sensitive behavior should be visible in:
+- recorder capture logic
+- schema validators
+- sanitization/redaction utilities
+- engine inputs/outputs
+- intelligence outputs
+- logs/diagnostics
+- exports
+
+2. DETERMINISTIC CORE LOGIC
+Core logic across the engine and intelligence layer must remain deterministic and reproducible.
+Given the same validated inputs:
+- outputs should be consistent
+- no randomness should influence core results
+- no hidden AI or probabilistic shortcuts should replace deterministic rules
+
+3. SCHEMA DISCIPLINE
+Shared contracts must be canonical and consistent.
+No proliferation of undocumented fields.
+No silent schema drift between:
+- recorder output
+- session JSON
+- engine input
+- engine output
+- intelligence input/output
+
+4. MODULAR ARCHITECTURE
+The codebase should reflect the documented modular layers:
+- Recorder / capture layer
+- Event Schema / shared contracts
+- Deterministic Process Engine
+- Process Intelligence Layer
+- shared utilities / validation / sanitization
+Boundaries should be clear, dependencies should be intentional, and coupling should be minimized.
+
+5. EXPLAINABILITY
+Outputs should remain traceable and explainable.
+It should be possible to understand:
+- where steps came from
+- why segmentation happened
+- why variants/bottlenecks/drift were identified
+- how metrics were calculated
+
+6. NO HIDDEN BEHAVIOR
+The extension/system should not perform hidden capture or opaque processing that violates architecture decisions.
+User-visible recording state and visible structured capture behavior should be preserved where documented.
+
+7. MINIMAL DATA PHILOSOPHY
+The system should keep only the minimum viable structured data necessary to reconstruct workflows and generate intelligence.
+No data hoarding.
+No full-content “just in case” storage.
+
+8. LOCAL-FIRST / BROWSER-FIRST ASSUMPTIONS
+Where documented, the recorder and initial processing should favor local/browser-side behavior before persistence/transmission.
+
+9. ENGINEERING DISCIPLINE
+The codebase should reflect:
+- explicit state management
+- structured logging
+- safe error handling
+- tests for high-risk behavior
+- docs-before-code discipline
+- code organization aligned with responsibilities
+
+10. FEATURE COMPLETENESS ACROSS THE PIPELINE
+The reviewed codebase should cover the documented feature expectations across:
+- recorder lifecycle
+- session export
+- schema validation
+- deterministic process generation
+- process intelligence outputs
+- timestudy/variance features if present in the repo/docs
+- trust/transparency affordances where documented
+
+11. BACKLOG MAINTENANCE
+There should be a concrete backlog artifact capturing:
+- missing features
+- future use cases
+- user story opportunities
+- hardening opportunities
+- test gaps
+grounded in this review.
+
+WHAT TO LOOK FOR SPECIFICALLY IN THE CURRENT CODEBASE
+
+Please specifically inspect for these common problems:
+- engineering rules are documented but not enforced in code
+- architecture decisions are contradicted by implementation
+- recorder captures more than docs allow
+- session JSON contains undocumented or unsafe fields
+- schema contracts are duplicated or drifted
+- engine and intelligence layers assume incompatible input/output shapes
+- logging leaks unsafe payloads
+- tests validate old or incorrect behavior
+- stale legacy modules remain in use
+- code organization does not match system architecture
+- hidden state or implicit coupling causes nondeterminism
+- backlog/roadmap opportunities are not captured anywhere
+- important use cases are implied by docs but unsupported in code
+- AI usage violates the “enhancement only” principle if documented
+- minimal-data philosophy is violated by over-storage or over-capture
+
+REQUIRED OUTPUT FORMAT
+
+Use this format exactly:
+
+A. DOCUMENTS REVIEWED
+List the docs reviewed and the sections most relevant to engineering rules and architecture compliance.
+
+B. RULES AND DECISIONS REQUIREMENTS MAP
+List the extracted requirements grouped by:
+- privacy
+- determinism
+- schema discipline
+- modular architecture
+- explainability
+- logging/error handling
+- testing
+- documentation discipline
+- extension-specific rules
+- AI usage constraints
+- feature completeness
+- backlog / future opportunity capture
+
+C. FULL PIPELINE REVIEW
+Describe how recorder events become session JSON, how that feeds the deterministic engine, and how engine outputs feed the process intelligence layer.
+Call out any mismatches, architecture violations, or rules/decision violations across the pipeline.
+
+D. CODEBASE AUDIT
+Describe the current state of the codebase and major findings.
+
+E. GAP ANALYSIS
+For each major gap:
+- requirement or doc reference
+- current behavior
+- needed change
+- priority
+
+F. IMPLEMENTATION PLAN
+Map requirements to code changes and files.
+
+G. CODE CHANGES
+Show the actual code/file updates.
+Prefer complete file outputs or clearly scoped diffs with file paths.
+
+H. BACKLOG ARTIFACT
+Show the backlog file created or updated, with structured categories and actionable items.
+
+I. TEST PLAN
+List all tests added or run, including static, unit, integration, privacy, determinism, and pipeline checks.
+
+J. TEST RESULTS
+Report actual results. If something could not be tested, say so explicitly.
+
+K. FINAL COMPLIANCE CHECK
+For each key rules/decisions area, state:
+- compliant
+- partially compliant
+- non-compliant
+with explanation
+
+L. REMAINING RISKS / FOLLOW-UPS
+List unresolved issues, doc ambiguities, backlog highlights, or recommended next steps.
+
+TESTING REQUIREMENTS
+
+You must do real validation, not just claim correctness.
+At minimum, perform as many of the following as possible in the current environment:
+
+1. Static validation
+- TypeScript compile or type checking
+- linting if configured
+- import/path sanity checks
+
+2. Runtime validation / unit tests
+- privacy-sensitive data is not captured or emitted
+- schema validation is enforced
+- recorder/session JSON contract is sound
+- deterministic engine behavior is stable
+- intelligence outputs are stable
+- logs/diagnostics do not leak unsafe data
+- module boundaries/contracts behave as expected
+
+3. Integration / pipeline tests
+- Recorder-produced events can become schema-compliant session JSON
+- session JSON can be consumed by the deterministic engine
+- engine outputs can be consumed by the intelligence layer
+- feature expectations across the pipeline are met
+
+4. Determinism validation
+Given repeated equivalent input data:
+- recorder normalization is stable where relevant
+- engine outputs are identical
+- intelligence outputs are identical
+
+5. Privacy validation
+Prove that:
+- forbidden content does not enter storage/exports/logs
+- labels and insights do not reintroduce unsafe text
+- URL sanitization and target-label hygiene are enforced where applicable
+
+6. Completeness validation
+Validate as much of the documented feature set as possible, including missing/partial features surfaced during the audit.
+
+WHEN DOCS ARE UNCLEAR
+
+If documentation is ambiguous:
+- do not guess silently
+- choose the most privacy-preserving and deterministic interpretation
+- document the ambiguity in the final report
+- implement the safest compliant behavior unless the ambiguity blocks essential architecture
+
+WHEN CODE CONFLICTS WITH DOCS
+
+If code conflicts with docs:
+- docs win
+- update code accordingly
+- explicitly note the conflict and resolution
+
+WHEN DOCS CONFLICT WITH EACH OTHER
+
+If docs conflict:
+1. follow the explicit doc authority model if present
+2. otherwise prioritize foundation, privacy, schema, recorder, engine, intelligence, engineering rules, then lower-level docs
+3. document the conflict clearly in the final report
+
+DEFINITION OF DONE
+
+This task is only done when:
+- the codebase has been reviewed against the current engineering rules and architecture decisions
+- key gaps are fixed
+- the full Recorder → Event Schema → Session JSON → Deterministic Process Engine → Process Intelligence Layer pipeline is coherent and compliant
+- privacy, determinism, schema, and explainability rules are enforced in code
+- the final code is tested for completeness and feature requirements
+- a concrete backlog artifact exists and is updated
+- you provide a full implementation and validation report
+
+ADDITIONAL INSTRUCTIONS
+
+- Be concrete and implementation-focused.
+- Do not give generic advice.
+- Do not only summarize the codebase.
+- Actually update the code.
+- Remove or refactor broken/stale logic when necessary.
+- Favor modular, production-minded TypeScript where possible.
+- Add comments where privacy-sensitive or deterministic architectural rules are enforced.
+- Add or improve tests where there are meaningful risks.
+- If build tooling is broken, fix it if reasonably possible and report what changed.
+- If module boundaries need refactoring to match architecture decisions, do so.
+- If a backlog artifact does not exist, create one in an appropriate docs/work/backlog location.
+- Include all documented features and note any feature gaps that remain.
+
+FINAL NOTE
+
+Ledgerium AI is not building a surveillance product or a black-box AI workflow system.
+It is building a privacy-first, deterministic, evidence-based workflow intelligence platform.
+Your job is to ensure the current codebase actually reflects that, remains architecturally coherent, and is validated end-to-end.
