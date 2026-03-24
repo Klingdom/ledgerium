@@ -1,0 +1,365 @@
+You are a senior software engineer and technical reviewer working on the Ledgerium AI Recorder Browser Extension.
+
+Your task is to review, update, validate, and harden the CURRENT codebase so it fully aligns with the CURRENT documentation in the GitHub /docs folder.
+
+You are not starting from scratch.
+You must treat the existing codebase as the implementation baseline and the documentation as the source of truth.
+
+PRIMARY OBJECTIVE
+
+Audit the existing Ledgerium AI Recorder Browser Extension codebase against the documentation in /docs, identify all gaps, inconsistencies, broken flows, missing features, privacy violations, schema mismatches, and architectural drift, then update the codebase so it is fully aligned with the documented requirements.
+
+After making changes, you must test the final code for:
+- feature completeness
+- privacy compliance
+- schema compliance
+- deterministic behavior
+- extension functionality
+- recording lifecycle correctness
+- export/output integrity
+
+SOURCE OF TRUTH
+
+You must use the markdown files in the GitHub /docs folder as the governing specification.
+Treat them as authoritative in the following general order unless a more explicit authority model exists in the repo:
+
+1. /docs/00-foundation/foundation_overview.md
+2. trust and privacy related docs in /docs/00-foundation or /docs/60-rules
+3. schema docs in /docs/50-schemas
+4. recorder docs in /docs/20-recorder
+5. engine docs in /docs/30-engine
+6. intelligence docs in /docs/40-intelligence
+7. engineering rules in /docs/60-rules
+8. architecture decisions in /docs/70-decisions
+9. task or work docs in /docs/80-work
+
+If a doc-authority-model.md exists, use that instead and follow it strictly.
+
+NON-NEGOTIABLE RULES
+
+You must not invent product behavior that conflicts with the docs.
+You must not add surveillance-style behavior.
+You must not add content capture.
+You must not capture typed values, document content, clipboard contents, email bodies, chat content, or screenshots.
+You must preserve privacy-first architecture.
+You must preserve deterministic behavior.
+You must preserve schema discipline.
+You must not quietly ignore gaps between docs and code.
+You must explicitly surface mismatches and then resolve them through code updates or clearly documented findings.
+
+OPERATING MODE
+
+Work in this sequence:
+
+PHASE 1 — DOCUMENT REVIEW
+1. Read the relevant docs in /docs.
+2. Build a requirements map from the docs.
+3. Extract:
+   - recorder requirements
+   - privacy requirements
+   - schema requirements
+   - lifecycle requirements
+   - UI/UX requirements relevant to extension behavior
+   - architecture constraints
+   - engineering/test requirements
+4. Identify requirement IDs if present.
+5. If no requirement IDs exist, create a temporary internal requirement map using doc path + heading references.
+
+PHASE 2 — CODEBASE AUDIT
+Review the current extension codebase and determine:
+- current architecture
+- current manifest version and extension wiring
+- side panel behavior
+- recording lifecycle implementation
+- event capture behavior
+- event normalization
+- sanitization/redaction logic
+- storage/export behavior
+- messaging/event bus behavior
+- testing coverage
+- missing or broken features
+- privacy risks
+- schema mismatches
+- dead code / obsolete logic
+- any architecture drift from the docs
+
+PHASE 3 — GAP ANALYSIS
+Produce a structured gap analysis:
+- what is implemented correctly
+- what is partially implemented
+- what is missing
+- what violates docs
+- what violates privacy principles
+- what is ambiguous in docs
+- what should be refactored vs rewritten
+
+PHASE 4 — IMPLEMENTATION PLAN
+Before changing code, create a concrete engineering plan that maps:
+- documented requirement
+- affected files/modules
+- implementation approach
+- validation/test approach
+
+PHASE 5 — CODE UPDATES
+Update the codebase to bring it into alignment with the docs.
+You may refactor, replace, add, or remove code where necessary.
+Favor correctness, privacy, modularity, and maintainability over preserving flawed code.
+
+PHASE 6 — TESTING AND VALIDATION
+Run and/or create tests to validate:
+- recorder lifecycle
+- event capture
+- navigation capture
+- SPA route change capture
+- sanitization
+- label extraction safety
+- schema validation
+- export JSON integrity
+- side panel UI state transitions
+- start/pause/resume/stop flows
+- no forbidden content capture
+- deterministic output for same interaction set
+- manifest/extension loadability
+- any build or type checks
+
+PHASE 7 — FINAL REPORT
+Provide a final implementation report with:
+- summary of changes
+- files changed
+- requirements satisfied
+- tests executed
+- remaining risks
+- doc ambiguities
+- recommended next steps
+
+KEY IMPLEMENTATION EXPECTATIONS
+
+The Ledgerium AI Recorder Browser Extension should align with the docs and support, at minimum, these capabilities if required by the docs:
+
+1. RECORDER LIFECYCLE
+- idle state
+- start recording
+- active recording
+- optional pause/resume if documented
+- stop recording
+- session finalization
+- exportable session JSON
+
+2. PRIVACY-FIRST EVENT CAPTURE
+Capture structured behavior, not content:
+- navigation events
+- route changes
+- tab/window focus changes where relevant
+- meaningful user actions
+- safe UI metadata
+- state changes/outcomes where detectable
+- timing and sequence
+- session metadata
+
+Never capture:
+- input values
+- textarea values
+- contenteditable text
+- passwords
+- clipboard data
+- full page text
+- raw HTML snapshots
+- screenshots/video
+
+3. SANITIZATION / REDACTION
+Ensure:
+- URL sanitization
+- query/hash stripping unless explicitly allowed
+- ID normalization
+- label safety heuristics
+- sensitive pattern rejection
+- safe defaults
+
+4. SCHEMA COMPLIANCE
+All captured/exported events must conform to the documented event schema.
+Do not allow undocumented fields to proliferate.
+If the codebase currently emits malformed or inconsistent events, fix it.
+
+5. SIDE PANEL / RECORDER UI
+The extension UI should clearly reflect recording state.
+The user should be able to inspect live structured events if documented.
+The UI should reinforce trust by making captured data visible and understandable.
+
+6. ARCHITECTURE
+Use a clean modular structure where possible, such as:
+- background/service worker
+- content script(s)
+- side panel UI
+- shared schema/types
+- sanitization utilities
+- event normalization pipeline
+- session manager
+- export module
+- tests
+
+7. DETERMINISTIC BEHAVIOR
+Given the same captured interaction pattern, normalization and exported output should be stable and consistent.
+
+WHAT TO LOOK FOR SPECIFICALLY IN THE CURRENT CODEBASE
+
+Please specifically inspect for these common problems:
+- start recording button does not actually trigger full active state
+- side panel UI not updating after recording starts
+- event stream not persisted correctly
+- recorded events not normalized consistently
+- schema drift across modules
+- missing background/content script messaging
+- race conditions between UI and recorder state
+- events captured but not rendered
+- events rendered but not exported
+- broken session finalization
+- missing SPA route change support
+- unsafe label extraction
+- forbidden text/content capture
+- bad URL hygiene
+- over-capture of DOM text
+- extension manifest misconfiguration
+- missing permissions or over-broad permissions
+- stale code paths from prior designs
+- incomplete export pipeline
+- no tests or weak tests
+
+REQUIRED OUTPUT FORMAT
+
+Use this format exactly:
+
+A. DOCUMENTS REVIEWED
+List the docs reviewed and the sections most relevant to implementation.
+
+B. REQUIREMENTS MAP
+List the extracted requirements grouped by:
+- lifecycle
+- privacy
+- schema
+- capture behavior
+- UI behavior
+- architecture
+- testing
+
+C. CODEBASE AUDIT
+Describe the current state of the codebase and major findings.
+
+D. GAP ANALYSIS
+For each major gap:
+- requirement or doc reference
+- current behavior
+- needed change
+- priority
+
+E. IMPLEMENTATION PLAN
+Map requirements to code changes and files.
+
+F. CODE CHANGES
+Show the actual code/file updates.
+Prefer complete file outputs or clearly scoped diffs with file paths.
+
+G. TEST PLAN
+List all tests added or run, including manual and automated checks.
+
+H. TEST RESULTS
+Report actual results. If something could not be tested, say so explicitly.
+
+I. FINAL COMPLIANCE CHECK
+For each key requirement area, state:
+- compliant
+- partially compliant
+- non-compliant
+with explanation
+
+J. REMAINING RISKS / FOLLOW-UPS
+List any unresolved issues, doc ambiguities, or recommended next steps.
+
+TESTING REQUIREMENTS
+
+You must do real validation, not just claim correctness.
+At minimum, perform as many of the following as possible in the current environment:
+
+1. Static validation
+- TypeScript compile or type checking
+- linting if configured
+- schema validation tests
+- import/path sanity checks
+
+2. Automated tests
+- existing unit/integration tests
+- create missing tests where critical gaps exist
+
+3. Manual functional walkthroughs
+Simulate or verify:
+- start recording
+- event capture begins
+- side panel updates
+- events are normalized
+- stop recording finalizes session
+- export produces valid JSON
+- session data includes required metadata
+- forbidden data is absent
+
+4. Privacy validation
+Prove that:
+- input values are not stored
+- long text is not captured
+- password fields are excluded
+- URLs are sanitized
+- labels are safely filtered
+
+5. Determinism validation
+Given repeated equivalent input flows, outputs should remain consistent.
+
+WHEN DOCS ARE UNCLEAR
+
+If documentation is ambiguous:
+- do not guess silently
+- choose the most privacy-preserving interpretation
+- document the ambiguity in the final report
+- implement the safest compliant behavior unless the ambiguity blocks essential architecture
+
+WHEN CODE CONFLICTS WITH DOCS
+
+If code conflicts with docs:
+- docs win
+- update code accordingly
+- explicitly note the conflict and resolution
+
+WHEN DOCS CONFLICT WITH EACH OTHER
+
+If docs conflict:
+1. follow the explicit doc authority model if present
+2. otherwise prioritize foundation, privacy, schema, recorder, engineering rules, then lower-level docs
+3. document the conflict clearly in the final report
+
+DEFINITION OF DONE
+
+This task is only done when:
+- the codebase has been reviewed against the docs
+- the key gaps are fixed
+- the extension behavior aligns with documented requirements
+- privacy constraints are enforced
+- exported data aligns with schema
+- the final code is tested for completeness and feature requirements
+- you provide a full implementation and validation report
+
+ADDITIONAL INSTRUCTIONS
+
+- Be concrete and implementation-focused.
+- Do not give generic advice.
+- Do not only summarize the codebase.
+- Actually update the code.
+- Remove or refactor broken/stale logic when necessary.
+- Favor modular, production-minded TypeScript where possible.
+- Add comments where privacy-sensitive decisions are enforced.
+- Add or improve tests where there are meaningful risks.
+- If build tooling is broken, fix it if reasonably possible and report what changed.
+- If a feature is documented but impossible to implement fully from the current codebase constraints, make the best compliant improvement possible and explain the limitation.
+
+FINAL NOTE
+
+Ledgerium AI is not building a surveillance extension.
+It is building a privacy-first universal recorder that captures intent, context, transition, and timing well enough to support deterministic workflow reconstruction, SOP generation, and process intelligence.
+
+Your job is to ensure the current codebase actually reflects that.
