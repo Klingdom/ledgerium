@@ -1,5 +1,6 @@
 import { RecorderStateMachine } from './state-machine.js'
 import { SessionStore } from './session-store.js'
+import { HistoryStore } from './history-store.js'
 import { normalizeRawEvent } from './normalizer.js'
 import { uploadBundle } from './uploader.js'
 import { buildBundle } from './bundle-builder.js'
@@ -13,6 +14,7 @@ import type { ExtensionSettings, RawEvent, SessionBundle } from '../shared/types
 
 const sm = new RecorderStateMachine()
 const store = new SessionStore()
+const historyStore = new HistoryStore()
 let liveBuilder: LiveStepBuilder | null = null
 let settings: ExtensionSettings = { uploadUrl: '', allowedDomains: [], blockedDomains: [] }
 let lastBundle: SessionBundle | null = null
@@ -197,6 +199,11 @@ async function handleStop(): Promise<void> {
 
     const bundle = await buildBundle(store)
     lastBundle = bundle
+
+    // Persist to activity history before transitioning — this way history is
+    // always available even if the user discards the review screen immediately.
+    void historyStore.addEntry(bundle)
+
     sm.transition('review_ready')
     store.updateState('review_ready')
 
@@ -257,6 +264,18 @@ chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<s
 
     case MSG.EXPORT_BUNDLE:
       sendResponse(lastBundle)
+      return true
+
+    case MSG.GET_HISTORY:
+      void historyStore.getIndex().then(sendResponse)
+      return true
+
+    case MSG.GET_BUNDLE:
+      void historyStore.getBundle(message.payload['sessionId'] as string).then(sendResponse)
+      return true
+
+    case MSG.DELETE_HISTORY_ENTRY:
+      void historyStore.deleteEntry(message.payload['sessionId'] as string).then(() => sendResponse({ ok: true }))
       return true
 
     case MSG.START_SESSION:

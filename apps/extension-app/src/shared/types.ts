@@ -251,6 +251,18 @@ export interface SessionBundle {
   manifest: BundleManifest
 }
 
+// ─── Activity history ─────────────────────────────────────────────────────────
+
+export interface HistoryEntry {
+  sessionId: string
+  activityName: string
+  startedAt: string
+  endedAt?: string
+  stepCount: number
+  eventCount: number
+  exportedAt: string
+}
+
 // ─── Settings ─────────────────────────────────────────────────────────────────
 
 export interface ExtensionSettings {
@@ -277,6 +289,9 @@ export const MSG = {
   SETTINGS_UPDATED: 'SETTINGS_UPDATED',
   GET_STATE: 'GET_STATE',
   EXPORT_BUNDLE: 'EXPORT_BUNDLE',
+  GET_HISTORY: 'GET_HISTORY',
+  GET_BUNDLE: 'GET_BUNDLE',
+  DELETE_HISTORY_ENTRY: 'DELETE_HISTORY_ENTRY',
 } as const
 
 export type MsgType = typeof MSG[keyof typeof MSG]
