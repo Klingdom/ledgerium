@@ -1,0 +1,372 @@
+You are Claude Code acting as a principal test automation engineer, QA architect, and browser extension reliability lead.
+
+Your task is to design and implement a real automated test harness for the Ledgerium AI recorder browser extension.
+
+This is not a placeholder test task.
+Do not create shallow tests.
+Do not generate only toy unit tests.
+Do not stop at a minimal happy-path check.
+
+You must build a practical, maintainable automated test system that validates the recorder end-to-end and protects against regressions as the codebase evolves.
+
+==================================================
+PRIMARY OBJECTIVE
+==================================================
+
+Create an automated test harness that verifies the recorder browser extension reliably captures, stores, displays, and exports user behavior events across realistic workflows.
+
+The harness should help the team answer:
+- Does recording still work?
+- Are events being captured correctly?
+- Is the event stream complete and ordered?
+- Is the UI updating correctly?
+- Did a recent code change break core recorder behavior?
+- Can we trust the output JSON?
+
+==================================================
+PRODUCT CONTEXT
+==================================================
+
+This recorder is the evidence layer for Ledgerium AI.
+
+Its captured event stream will power:
+- session JSON
+- process maps
+- SOP generation
+- deterministic workflow analysis
+- future process intelligence layers
+
+If the recorder is unreliable, the whole product becomes untrustworthy.
+
+The automated test harness must therefore emphasize:
+- accuracy
+- completeness
+- determinism
+- resilience
+- regression detection
+
+==================================================
+HIGH-LEVEL REQUIREMENT
+==================================================
+
+Build a layered automated testing system, not just one type of test.
+
+You should create the strongest practical test strategy the current codebase can support, including as many of these as are appropriate:
+
+1. Unit tests
+2. Integration tests
+3. End-to-end tests
+4. Regression tests
+5. Schema validation tests
+6. State management tests
+7. Messaging contract tests
+8. Export/output validation tests
+
+If parts of the existing code are too coupled or hard to test, identify that and refactor as needed to improve testability without breaking product behavior.
+
+==================================================
+FIRST TASK — AUDIT FOR TESTABILITY
+==================================================
+
+Before writing tests, inspect the current codebase and determine:
+
+- what testing stack is already present, if any
+- what framework the extension uses
+- whether the extension uses React/Vue/etc.
+- how the recorder architecture is split across:
+  - content scripts
+  - background/service worker
+  - side panel UI
+  - shared utilities
+  - schema/event normalization logic
+  - storage/session management
+  - export pipeline
+
+Then identify:
+
+- which parts are currently testable
+- which parts are not testable enough
+- where test seams should be added
+- what needs to be refactored for reliable automated testing
+
+Do not over-refactor unnecessarily, but do improve testability where needed.
+
+==================================================
+TARGET TEST HARNESS ARCHITECTURE
+==================================================
+
+Build a robust test architecture with these layers where feasible:
+
+--------------------------------------
+LAYER 1 — UNIT TESTS
+--------------------------------------
+
+Create focused tests for pure or mostly pure logic such as:
+- event normalization
+- event schema validation
+- dedupe logic
+- append-vs-replace reducers
+- session state transitions
+- export formatting
+- helper utilities
+- timestamp / sequence ID generation if abstracted
+- validation of required event fields
+
+Examples:
+- a click event is normalized correctly
+- appending events preserves prior events
+- stopping a session finalizes expected metadata
+- malformed input does not crash the pipeline
+
+--------------------------------------
+LAYER 2 — INTEGRATION TESTS
+--------------------------------------
+
+Create integration tests for important boundaries such as:
+- content script event → message payload creation
+- background listener → session store update
+- session store update → UI update
+- recording start/stop → listener registration behavior
+- export action → final JSON generation
+
+Examples:
+- a mock captured DOM event becomes a valid normalized recorder event
+- a runtime message updates the canonical session state
+- repeated messages append rather than overwrite
+- UI subscriber receives updated event list after store mutation
+
+--------------------------------------
+LAYER 3 — END-TO-END TESTS
+--------------------------------------
+
+Create real browser-driven tests that exercise the extension as a user would.
+
+Use the best practical browser automation stack for the extension environment.
+Favor a solution that can actually validate extension behavior realistically.
+
+E2E flows should include:
+- loading the extension
+- opening the side panel / UI
+- starting recording
+- interacting with a page
+- verifying multiple events captured
+- verifying live UI update
+- stopping recording
+- validating final exported JSON
+
+At minimum, build E2E coverage for:
+1. multiple clicks in one session
+2. typing into inputs
+3. navigation to another page
+4. tab switching if practical
+5. start/stop repeated sessions
+6. event ordering and output validation
+
+--------------------------------------
+LAYER 4 — REGRESSION TESTS
+--------------------------------------
+
+Create tests specifically for previously observed failure modes, especially:
+
+- only one event captured
+- tab switch captured but subsequent interactions lost
+- UI showing only first event
+- event array overwritten instead of appended
+- session state not resetting between recordings
+- event capture broken after navigation
+- malformed events breaking the session
+
+These regression tests should remain in the suite permanently.
+
+==================================================
+TOOLING EXPECTATIONS
+==================================================
+
+Choose and implement the most appropriate stack for the codebase.
+
+Examples may include:
+- Vitest or Jest for unit/integration
+- Playwright for browser/extension E2E
+- Testing Library if the UI framework supports it
+- JSON schema validation tooling if appropriate
+
+But do not choose tools arbitrarily.
+Choose based on actual compatibility with the extension architecture.
+
+Then:
+- configure test scripts
+- create test folders and naming conventions
+- add reusable helpers/fixtures
+- add mocks/stubs where needed
+- document how to run the tests
+
+==================================================
+REQUIRED TEST SCENARIOS
+==================================================
+
+The automated harness must validate these core scenarios wherever practical:
+
+Scenario 1 — Basic Multi-Event Recording
+- start recording
+- click several elements
+- ensure more than one event is captured
+- ensure UI updates live
+- stop recording
+- verify final JSON contains all events in order
+
+Scenario 2 — Typing / Form Interaction
+- start recording
+- type into an input
+- interact with a button or form
+- ensure input-related events are captured as intended
+- stop recording
+- verify output integrity
+
+Scenario 3 — Navigation Resilience
+- start recording
+- navigate to another page
+- continue interacting
+- verify recording remains active or reattaches correctly
+- verify later events are not lost
+
+Scenario 4 — Session Lifecycle
+- start recording
+- record several events
+- stop recording
+- start a new session
+- verify the previous session does not pollute the next
+
+Scenario 5 — Append-Only Event Storage
+- send multiple events through the pipeline
+- verify the session store appends instead of replaces
+
+Scenario 6 — UI Sync
+- verify the event list shown in the UI matches the canonical stored event stream
+
+Scenario 7 — Export Validation
+- verify exported/final JSON is valid, complete, ordered, and schema-compliant
+
+==================================================
+TEST QUALITY STANDARDS
+==================================================
+
+Your tests must be meaningful.
+
+Avoid:
+- trivial assertions that only check existence
+- snapshot-only tests with no semantic validation
+- tests that merely mirror implementation details
+- brittle hacks that fail for irrelevant reasons
+- fake success criteria
+
+Prefer:
+- behavioral assertions
+- explicit validation of recorder outcomes
+- stable fixtures
+- readable test names
+- maintainable helpers
+- reusable test utilities
+- clear failure messages
+
+==================================================
+TESTABILITY-DRIVEN REFACTORING
+==================================================
+
+If the current code is too tangled to test properly, improve the architecture carefully.
+
+Examples of helpful refactors:
+- extract event normalization into pure functions
+- isolate message contract handlers
+- isolate session store logic
+- create a canonical recorder state module
+- separate UI rendering from state mutation
+- centralize event schema definitions
+- add explicit interfaces around extension APIs
+
+Refactor only as much as needed to create a strong test harness.
+
+==================================================
+DELIVERABLES
+==================================================
+
+You must produce all of the following:
+
+1. Real test code added to the codebase
+2. Test configuration files
+3. Reusable test helpers / fixtures
+4. Regression tests for known recorder failures
+5. A concise test architecture explanation
+6. Instructions for running the full suite
+7. A coverage summary by subsystem
+8. A list of any areas still hard to test and why
+
+==================================================
+REPORT FORMAT
+==================================================
+
+At the end, provide a structured implementation report with:
+
+1. Test Strategy Chosen
+- what tools were selected and why
+
+2. Architecture Audit
+- what was testable
+- what needed refactoring
+
+3. Files Added / Changed
+- every test-related file created or modified
+
+4. Test Coverage by Layer
+- unit
+- integration
+- e2e
+- regression
+
+5. Key Recorder Behaviors Covered
+- explicit mapping from test suite to product behavior
+
+6. Remaining Gaps
+- what is not yet covered and why
+
+7. How to Run
+- exact commands
+
+8. Recommended Next Test Additions
+- prioritized future work
+
+==================================================
+NON-NEGOTIABLE REQUIREMENTS
+==================================================
+
+- Build actual tests, not pseudo-tests
+- Prefer durable regression protection over flashy complexity
+- Keep the test suite maintainable
+- Make sure the suite is aligned to recorder trustworthiness
+- Ensure at least one automated path validates multi-event recording end-to-end
+- Add permanent regression tests for the “only one behavior captured” class of bug
+- Be honest about any limitations in the current environment
+
+==================================================
+SUCCESS CRITERIA
+==================================================
+
+Do not finish until all of the following are true:
+
+[ ] Real automated tests exist in the codebase
+[ ] Core recorder logic has unit/integration coverage where practical
+[ ] At least one realistic E2E recorder path is implemented
+[ ] Known regression cases are covered
+[ ] Test tooling is configured and runnable
+[ ] Test execution instructions are documented
+[ ] Append-vs-replace behavior is explicitly tested
+[ ] Multi-event capture is explicitly tested
+[ ] Session lifecycle reset is explicitly tested
+[ ] Output/export JSON integrity is explicitly tested
+
+==================================================
+FINAL INSTRUCTION
+==================================================
+
+Treat this as building the long-term QA safety net for the Ledgerium AI recorder.
+
+Audit the codebase for testability, improve it where necessary, implement a strong automated test harness, add durable regression coverage, and summarize exactly what you built.
