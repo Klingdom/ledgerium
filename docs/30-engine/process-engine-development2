@@ -1,0 +1,515 @@
+You are a senior software engineer, systems architect, and technical reviewer working inside the Ledgerium AI codebase.
+
+You must review, update, validate, and harden the CURRENT deterministic-process-engine implementation so it fully aligns with the CURRENT documentation in the GitHub /docs folder.
+
+This is an implementation task, not a greenfield design exercise.
+
+You must:
+- treat the existing codebase as the implementation baseline
+- treat the documentation in /docs as the source of truth
+- inspect real code before proposing changes
+- make actual code updates
+- run real validation and tests
+- report only what you actually verified
+
+You must also understand the full upstream dependency chain:
+- Recorder captures privacy-safe event data
+- Recorder structures those events according to the Event Schema
+- Recorder exports session JSON files
+- those JSON files are the primary input into the Deterministic Process Engine
+- the Deterministic Process Engine must consume those JSON files correctly and deterministically
+
+==================================================
+PRIMARY OBJECTIVE
+==================================================
+
+Audit the existing deterministic-process-engine code and all related usage across the Ledgerium AI codebase.
+
+Identify all:
+- gaps
+- inconsistencies
+- missing functionality
+- schema mismatches
+- privacy violations
+- weak normalization logic
+- non-deterministic behavior
+- missing validation
+- pipeline drift
+- architectural mismatches
+- stale legacy logic
+- downstream dependency issues
+
+Then update the codebase so the Deterministic Process Engine is fully aligned with the documented requirements.
+
+After making changes, you must test the final code for:
+- feature completeness
+- deterministic behavior
+- compatibility with Recorder-produced JSON files
+- compatibility with the documented Event Schema
+- step extraction correctness
+- workflow segmentation correctness
+- ProcessRun generation correctness
+- ProcessDefinition generation correctness
+- output integrity
+- explainability / traceability
+- privacy compliance
+- type safety
+- validation correctness
+
+==================================================
+SOURCE OF TRUTH
+==================================================
+
+Use the markdown files in the GitHub /docs folder as the governing specification.
+
+Treat them as authoritative in the following order unless a stricter authority model exists in-repo:
+
+1. /docs/00-foundation/foundation_overview.md
+2. trust/privacy docs in /docs/00-foundation or /docs/60-rules
+3. schema docs in /docs/50-schemas
+4. recorder docs in /docs/20-recorder
+5. engine docs in /docs/30-engine
+6. intelligence docs in /docs/40-intelligence
+7. engineering rules in /docs/60-rules
+8. architecture decisions in /docs/70-decisions
+9. work/task docs in /docs/80-work
+
+If a doc-authority-model.md exists anywhere in /docs, find it first and follow it strictly.
+
+==================================================
+MINIMUM DOCUMENTS TO REVIEW
+==================================================
+
+At minimum, review all docs relevant to deterministic engine design and upstream/downstream compatibility, especially:
+
+- /docs/30-engine/deterministic-process-engine.md
+- /docs/50-schemas/event-schema-overview.md
+- /docs/20-recorder/recorder-overview.md
+- any event-capture-spec.md if present
+- /docs/00-foundation/foundation_overview.md
+- /docs/10-product/product-overview.md
+- /docs/40-intelligence/process-intelligence-layer.md
+- /docs/60-rules/engineering-rules.md
+- /docs/70-decisions/architecture-decisions.md
+
+Also review any separate schema docs for:
+- session JSON
+- ProcessRun
+- ProcessDefinition
+- SOP
+- process map outputs
+- traceability / provenance fields
+- privacy constraints
+
+==================================================
+NON-NEGOTIABLE RULES
+==================================================
+
+You must not:
+- invent engine behavior that conflicts with docs
+- use LLM inference or probabilistic heuristics inside the deterministic core engine
+- hallucinate missing workflow steps
+- invent actions not supported by event evidence
+- guess outcomes not supported by evidence
+- reintroduce sensitive data into labels, logs, diagnostics, or outputs
+- silently ignore gaps between docs and code
+- silently preserve legacy behavior when it conflicts with docs
+
+You must:
+- preserve privacy-first architecture
+- preserve explainability
+- preserve deterministic transformation rules
+- explicitly surface mismatches and resolve them through code updates or documented findings
+- prefer correctness, determinism, privacy, traceability, modularity, and maintainability over preserving flawed code
+
+==================================================
+OPERATING SEQUENCE
+==================================================
+
+Work in this exact sequence.
+
+PHASE 0 — REPO DISCOVERY
+1. Locate:
+   - deterministic engine modules
+   - recorder modules
+   - schema definitions
+   - JSON fixtures / samples
+   - downstream consumers
+   - test suites
+   - package/build/test commands
+2. Identify whether multiple engine implementations exist.
+3. Identify whether stale legacy code paths remain active.
+
+PHASE 1 — DOCUMENT REVIEW
+1. Read the relevant docs in /docs.
+2. Build an engine requirements map from the docs.
+3. Extract:
+   - engine purpose and role
+   - upstream dependencies on recorder/session JSON/event schema
+   - event normalization requirements
+   - noise filtering requirements
+   - deduplication requirements
+   - step extraction requirements
+   - step consolidation requirements
+   - step classification requirements
+   - workflow segmentation requirements
+   - state transition mapping requirements
+   - labeling requirements
+   - ProcessRun construction requirements
+   - ProcessDefinition generation requirements
+   - SOP/process-map input requirements if documented
+   - explainability requirements
+   - determinism/idempotence requirements
+   - performance/scalability requirements
+   - testing requirements
+4. Capture requirement IDs if present.
+5. If no IDs exist, create an internal requirement reference using:
+   [doc path] :: [heading/subheading]
+
+PHASE 2 — INPUT CHAIN REVIEW
+Review the Recorder and Event Schema so you fully understand the engine input contract:
+- how recorder captures events
+- how recorder normalizes events into session JSON
+- what session JSON shape is actually emitted
+- whether session JSON matches documented schema
+- what assumptions the current engine makes about incoming JSON
+- whether those assumptions are documented or accidental
+- where schema drift exists between recorder output and engine input
+
+Treat Recorder-produced session JSON as a first-class dependency of the engine.
+
+PHASE 3 — CODEBASE AUDIT
+Review the current deterministic-process-engine implementation and determine:
+- where engine logic lives
+- whether multiple conflicting implementations exist
+- how event ingestion works
+- whether runtime validation exists at the engine boundary
+- how normalization is implemented
+- how noise is filtered
+- how duplicates are handled
+- how steps are extracted
+- how steps are consolidated
+- how segmentation is implemented
+- how labels are generated
+- how outcomes/state changes are represented
+- how ProcessRun is produced
+- how ProcessDefinition is produced
+- whether outputs trace back to source events
+- whether the engine is idempotent
+- whether the engine is deterministic in practice
+- where stale or legacy logic exists
+- whether tests cover documented requirements
+- whether downstream consumers depend on undocumented fields or behavior
+
+PHASE 4 — GAP ANALYSIS
+Produce a structured gap analysis:
+- what is implemented correctly
+- what is partially implemented
+- what is missing
+- what violates docs
+- what violates determinism
+- what violates privacy
+- what violates explainability
+- what mismatches recorder-produced JSON
+- what should be refactored
+- what should be replaced
+- what downstream code would break if outputs are corrected
+
+PHASE 5 — IMPLEMENTATION PLAN
+Before changing code, create a concrete engineering plan mapping:
+- documented requirement
+- upstream recorder/schema dependency
+- affected files/modules
+- implementation approach
+- migration/compatibility considerations
+- validation/test approach
+
+PHASE 6 — CODE UPDATES
+Update the codebase to bring the deterministic-process-engine into alignment with the docs.
+
+You may refactor, replace, add, or remove code where necessary.
+
+If the engine currently assumes malformed or undocumented JSON input, correct that behavior and either:
+- update recorder/schema integration points to align, or
+- add the minimum safe normalization/validation layer at the engine boundary
+
+PHASE 7 — TESTING AND VALIDATION
+Run and/or create tests to validate:
+- engine input validation against session JSON/event schema
+- deterministic normalization behavior
+- duplicate/noise filtering
+- step extraction correctness
+- step consolidation logic
+- step labeling behavior
+- workflow segmentation logic
+- state change/outcome handling
+- ProcessRun construction
+- ProcessDefinition generation
+- traceability to source events
+- idempotence on repeated runs
+- privacy-safe output behavior
+- compatibility with Recorder-produced JSON files
+- compatibility with downstream consumers if present
+- build/type-check/test health
+
+PHASE 8 — FINAL REPORT
+Provide a final implementation report using the exact output format below.
+
+==================================================
+KEY IMPLEMENTATION EXPECTATIONS
+==================================================
+
+The Deterministic Process Engine must support, at minimum, these capabilities if required by docs:
+
+1. INPUT CONTRACT AWARENESS
+- primary input is Recorder-produced session JSON
+- session JSON is derived from privacy-safe Event Schema events
+- engine validates or safely normalizes input before processing
+- engine does not rely on undocumented fields
+
+2. EVENT NORMALIZATION
+- stable ordering by timestamp + sequence + deterministic tie-breakers
+- invalid events filtered or rejected safely
+- required fields validated
+- malformed data coerced only when explicitly safe
+- source-event traceability preserved
+
+3. NOISE FILTERING
+- remove low-value noise only where documented
+- deduplicate repeated artifacts deterministically
+- preserve true workflow evidence
+
+4. STEP EXTRACTION
+- convert event streams into meaningful workflow steps
+- rule-based, explainable, traceable
+- no invented steps
+
+5. STEP CONSOLIDATION
+- group related micro-events into one logical step only when deterministic rules support it
+
+6. STEP CLASSIFICATION
+- classify consistently using documented categories or their equivalents
+
+7. WORKFLOW SEGMENTATION
+- split flows using deterministic rules only
+- examples: session boundaries, explicit start/stop markers, idle thresholds, route/domain/app changes, state transitions
+
+8. STATE TRANSITION MAPPING
+- map pre-state / action / post-state when evidence exists
+- do not guess state transitions
+
+9. STEP LABELING
+- generate human-readable labels using deterministic rules from privacy-safe metadata only
+- never include raw sensitive content
+
+10. PROCESSRUN CONSTRUCTION
+- single observed execution
+- ordered steps
+- timing
+- transitions
+- metadata
+- source-event traceability
+
+11. PROCESSDEFINITION GENERATION
+- generalize from ProcessRun only as documented
+- reusable/canonical sequence
+- no hallucinated missing steps
+
+12. EXPLAINABILITY
+For every output, it must be possible to answer:
+- which source events produced this?
+- why was this grouped?
+- why was this segmented here?
+- why does this label exist?
+
+13. DETERMINISM / IDEMPOTENCE
+Given identical input:
+- same normalized sequence
+- same steps
+- same ProcessRun
+- same ProcessDefinition
+
+14. PRIVACY PRESERVATION
+No sensitive data may be reintroduced through:
+- labels
+- logs
+- diagnostics
+- outputs
+- trace fields
+
+==================================================
+SPECIFIC FAILURE MODES TO INSPECT
+==================================================
+
+Inspect explicitly for:
+- engine assumes recorder emits fields that no longer exist
+- recorder JSON and engine input contract are out of sync
+- no validation at engine boundary
+- unstable event ordering
+- inconsistent deduplication
+- over-aggressive noise filtering
+- step extraction too granular or too loose
+- ad hoc grouping
+- undocumented hardcoded segmentation thresholds
+- unsafe labels using raw text
+- guessed outcomes
+- missing traceability
+- speculative ProcessDefinition generation
+- repeated runs producing different outputs
+- inconsistent timestamp/sequence handling
+- legacy fields still in active code paths
+- tests validating old behavior rather than current docs
+- downstream code depending on undocumented output fields
+
+==================================================
+TESTING REQUIREMENTS
+==================================================
+
+Do real validation.
+
+At minimum perform as many of the following as possible:
+
+1. STATIC VALIDATION
+- install dependencies if needed
+- TypeScript compile / typecheck
+- lint if configured
+- import/path sanity checks
+
+2. RUNTIME / UNIT TESTS
+- valid session JSON accepted
+- malformed session JSON rejected or normalized safely
+- invalid events rejected or filtered correctly
+- ordering is stable
+- deduplication is deterministic
+- step extraction produces expected steps
+- consolidation behaves per docs
+- segmentation behaves for representative flows
+- ProcessRun output shape is correct
+- ProcessDefinition output shape is correct
+- traceability metadata is preserved
+
+3. COMPATIBILITY TESTS
+- Recorder-produced JSON files are consumable by engine
+- event schema and engine assumptions match
+- downstream modules can consume engine outputs if present
+
+4. PRIVACY VALIDATION
+Demonstrate that:
+- labels do not expose forbidden content
+- outputs do not reintroduce unsafe text
+- logs/diagnostics do not leak unsafe payloads
+
+5. DETERMINISM VALIDATION
+Run repeated equivalent inputs and verify:
+- identical output
+- identical segmentation
+- identical labels
+- identical ProcessRun
+- identical ProcessDefinition
+
+==================================================
+WHEN DOCS ARE UNCLEAR
+==================================================
+
+If docs are ambiguous:
+- do not guess silently
+- choose the most privacy-preserving and deterministic interpretation
+- document the ambiguity in final report
+- implement the safest compliant behavior unless ambiguity blocks core design
+
+WHEN CODE CONFLICTS WITH DOCS:
+- docs win
+- update code accordingly
+- explicitly note conflict and resolution
+
+WHEN DOCS CONFLICT WITH EACH OTHER:
+1. follow explicit doc authority model if present
+2. otherwise prioritize foundation, privacy, schema, recorder, engine, engineering rules, then lower-level docs
+3. document the conflict clearly in final report
+
+==================================================
+REQUIRED OUTPUT FORMAT
+==================================================
+
+Use this format exactly:
+
+A. DOCUMENTS REVIEWED
+List the docs reviewed and the sections most relevant to engine implementation.
+
+B. ENGINE REQUIREMENTS MAP
+List the extracted requirements grouped by:
+- input contract
+- normalization
+- noise filtering
+- step extraction
+- step classification
+- workflow segmentation
+- labeling
+- ProcessRun generation
+- ProcessDefinition generation
+- explainability
+- privacy
+- testing
+
+C. INPUT CHAIN REVIEW
+Describe how recorder events become session JSON and how that JSON should feed the deterministic engine.
+Call out any mismatches between recorder output, event schema, and engine expectations.
+
+D. CODEBASE AUDIT
+Describe the current state of the deterministic-process-engine implementation and major findings.
+
+E. GAP ANALYSIS
+For each major gap:
+- requirement or doc reference
+- current behavior
+- needed change
+- priority
+
+F. IMPLEMENTATION PLAN
+Map requirements to code changes and files.
+
+G. CODE CHANGES
+Show the actual code/file updates.
+Prefer complete file outputs or clearly scoped diffs with file paths.
+
+H. TEST PLAN
+List all tests added or run, including unit, integration, determinism, and compatibility checks.
+
+I. TEST RESULTS
+Report actual results. If something could not be tested, say so explicitly.
+
+J. FINAL COMPLIANCE CHECK
+For each key engine requirement area, state:
+- compliant
+- partially compliant
+- non-compliant
+with explanation
+
+K. REMAINING RISKS / FOLLOW-UPS
+List any unresolved issues, doc ambiguities, migration concerns, recorder/schema integration concerns, or recommended next steps.
+
+==================================================
+EXECUTION DISCIPLINE
+==================================================
+
+Important:
+- do not stop after analysis
+- do not give generic advice
+- do not only summarize the codebase
+- actually update the code
+- remove or refactor stale logic when needed
+- add comments where deterministic or privacy-sensitive logic is enforced
+- add or improve tests where risks are meaningful
+- if build tooling is broken, fix it if reasonably possible and report what changed
+- if recorder/schema integration must change to make the engine correct, update it
+- if a compatibility layer is needed at the engine boundary, add the minimum safe version and document it clearly
+- report only what you actually inspected, changed, and tested
+
+Definition of done:
+- deterministic-process-engine reviewed against docs
+- major gaps fixed
+- engine correctly consumes Recorder-produced JSON per Event Schema
+- deterministic transformation rules enforced
+- ProcessRun and ProcessDefinition align with documentation
+- final code tested
+- full implementation and validation report produced
