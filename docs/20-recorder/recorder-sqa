@@ -1,0 +1,204 @@
+You are Claude Code acting as a senior browser extension engineer, debugging lead, and QA engineer.
+
+Your task is to debug, repair, and thoroughly test the recorder browser extension codebase you previously developed.
+
+## Core problem to solve
+The extension UI looks good, but recording behavior is broken or incomplete.
+
+Observed issue:
+- At one point, the recorder captured only one user behavior:
+  - navigation to another tab
+- It did NOT capture or display other user behaviors during the same recording session.
+
+This means the extension may be partially wired up visually, but event capture, event transport, state management, persistence, rendering, or recording lifecycle logic is failing.
+
+Your mission is to find the root cause(s), fix them, test the entire flow, and harden the recorder so it reliably captures and displays multiple user behaviors during an active session.
+
+---
+
+## Product context
+This recorder is the foundation of Ledgerium AI.
+It must accurately capture real workflow behavior in a browser session and build a complete event stream that can later be turned into:
+- session JSON
+- process maps
+- SOPs
+- deterministic process intelligence outputs
+
+The recorder must be trustworthy, observable, and deterministic.
+
+---
+
+## What the recorder MUST do
+When recording is active, the extension should capture and display a sequence of user behaviors, not just one isolated event.
+
+At minimum, verify and debug support for:
+- tab navigation / tab switching
+- page loads
+- URL changes
+- clicks
+- form interactions
+- typing / input changes where appropriate
+- scroll activity if intended in the design
+- focus changes if intended
+- start recording
+- stop recording
+- session state reset between runs
+- live UI updating while events are captured
+- correct event ordering
+- no silent failure after first event
+- no dropped events due to listener teardown, stale state, or messaging issues
+
+If some events were intentionally not implemented yet, clearly identify what exists vs what is missing. Do not pretend functionality exists if it does not.
+
+---
+
+## Your required approach
+
+### 1. Audit the entire recorder architecture
+Review all relevant files and explain how the current implementation is supposed to work:
+- background/service worker
+- content scripts
+- side panel / sidebar UI
+- popup or control surface if present
+- messaging between components
+- storage / in-memory buffering
+- recording state management
+- event schema generation
+- UI rendering pipeline for recorded events
+
+Trace the exact lifecycle:
+1. user clicks Start Recording
+2. recorder enters active state
+3. listeners attach
+4. events are captured
+5. events are sent to the correct layer
+6. events are accumulated in session state
+7. UI updates live with each event
+8. Stop Recording finalizes and exports complete JSON
+
+---
+
+### 2. Find the actual root cause(s)
+Do not make shallow guesses.
+
+Investigate likely failure points such as:
+- listeners only attached for one event type
+- listeners attached to wrong execution context
+- service worker sleeping or losing state
+- message passing failures between content script and background
+- side panel not subscribing to updates after first render
+- React/Vue/state bug causing UI not to re-render after first event
+- stale closure / overwritten state array
+- event deduplication logic dropping valid events
+- storage writes replacing the full array instead of appending
+- race conditions between activeTab changes and content script listeners
+- manifest permission issues
+- host permission gaps
+- content script not injected on newly navigated pages
+- tab change events captured but DOM interaction events never attached
+- recording flag not consistently shared across components
+- stop/start logic breaking subsequent event listeners
+- debounce/throttle logic suppressing too much
+- CSP or extension isolation issues
+- event handlers bound but not cleaned/rebound correctly on navigation
+
+Identify the root cause with evidence from the code.
+
+---
+
+### 3. Fix the implementation
+Make concrete code changes so the recorder works reliably.
+
+Your fix should prioritize:
+- deterministic event capture
+- robust multi-event recording
+- append-only session event accumulation during active recording
+- live UI updates
+- resilience across page changes and tab switches
+- safe fallback logging and error handling
+- clean separation between capture, transport, storage, and presentation layers
+
+Where helpful, refactor the code rather than applying a fragile patch.
+
+---
+
+### 4. Add observability for debugging
+Instrument the recorder so failures are visible.
+
+Add temporary or permanent developer-friendly diagnostics such as:
+- logs for recording start/stop
+- logs when listeners attach/detach
+- logs when each event is captured
+- logs when messages are sent/received
+- logs when event state is appended
+- logs when UI receives updated event list
+- warnings for dropped or malformed events
+
+If useful, add a debug mode toggle.
+
+---
+
+### 5. Test like a real QA engineer
+Do not stop after code edits. Test the system thoroughly.
+
+Run through realistic browser workflows and verify that multiple events are captured in sequence.
+
+Test scenarios should include:
+1. Start recording, click around one page, stop recording
+2. Start recording, type into fields, click buttons, stop recording
+3. Start recording, navigate to another tab, interact there, return, stop recording
+4. Start recording, navigate to a new URL, continue interacting, stop recording
+5. Start/stop multiple times to ensure session reset works correctly
+6. Confirm UI updates live after every captured event
+7. Confirm exported/final session JSON contains all expected events in order
+8. Confirm no event stream truncation after first event
+9. Confirm no duplicate spam or runaway listener behavior
+10. Confirm behavior on both simple static pages and modern dynamic pages if possible
+
+---
+
+### 6. Produce a clear debugging report
+At the end, provide a concise but thorough report with these sections:
+
+#### A. Symptoms observed
+What was broken.
+
+#### B. Root cause
+What specifically caused the “only one behavior captured” issue.
+
+#### C. Code changes made
+List exact files changed and what was updated.
+
+#### D. Test results
+Show what scenarios you tested and whether they passed.
+
+#### E. Remaining risks or gaps
+Call out any known limitations honestly.
+
+#### F. Recommended next hardening steps
+Suggest the next improvements for recorder reliability and trustworthiness.
+
+---
+
+## Important engineering standards
+- Do not just patch the visible symptom
+- Do not leave hidden state bugs unresolved
+- Do not claim success without testing
+- Prefer robust architecture over hacks
+- Keep event schema clean and extensible
+- Preserve product UX quality
+- Make the recorder trustworthy enough to serve as the evidence layer for downstream JSON/process generation
+
+---
+
+## Specific expectation
+I want you to act like the extension must be productionized, not just “made to kind of work.”
+
+Please:
+1. inspect the current codebase,
+2. debug the recording pipeline end to end,
+3. repair the issue causing incomplete event capture,
+4. test thoroughly,
+5. and summarize exactly what you changed and why.
+
+Start now.
