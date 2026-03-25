@@ -43,13 +43,20 @@ export function useRecorderState() {
       chrome.runtime.sendMessage({ type: MSG.GET_STATE }, response => {
         if (chrome.runtime.lastError) return
         if (!response) return
-        setData(prev => ({
-          ...prev,
-          state: response.state as RecorderState,
-          meta: response.meta as SessionMeta | null,
-          steps: mergeSteps(prev.steps, (response.steps as LiveStep[]) ?? []),
-          rawEventCount: (response.rawEventCount as number) ?? prev.rawEventCount,
-        }))
+        setData(prev => {
+          // If a SESSION_STATE_UPDATED has already moved us out of recording
+          // (e.g. user pressed Discard while this poll was in flight), discard
+          // the stale response entirely. Applying it would re-inject cleared
+          // steps and flip state back to 'recording'.
+          if (prev.state !== 'recording') return prev
+          // Only refresh step/event data — state transitions are driven
+          // exclusively by SESSION_STATE_UPDATED messages.
+          return {
+            ...prev,
+            steps: mergeSteps(prev.steps, (response.steps as LiveStep[]) ?? []),
+            rawEventCount: (response.rawEventCount as number) ?? prev.rawEventCount,
+          }
+        })
       })
     }, 750)
     return () => clearInterval(id)
