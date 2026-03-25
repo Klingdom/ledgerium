@@ -110,11 +110,13 @@ export function buildDerivedSteps(events: CanonicalEvent[], sessionId: string): 
       start_t_ms: first.t_ms,
       end_t_ms: last.t_ms,
       duration_ms: last.t_ms - first.t_ms,
-      page_context: first.page_context ? {
-        domain,
-        applicationLabel: first.page_context.applicationLabel,
-        routeTemplate: first.page_context.routeTemplate,
-      } : undefined,
+      ...(first.page_context ? {
+        page_context: {
+          domain,
+          applicationLabel: first.page_context.applicationLabel,
+          routeTemplate: first.page_context.routeTemplate,
+        },
+      } : {}),
     })
     accumulator = []
   }

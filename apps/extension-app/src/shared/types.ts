@@ -23,12 +23,106 @@ export interface SessionMeta {
 
 // ─── Events ───────────────────────────────────────────────────────────────────
 
+export type RawEventType =
+  | 'page_loaded'
+  | 'spa_route_changed'
+  | 'tab_activated'
+  | 'url_changed'
+  | 'click'
+  | 'dblclick'
+  | 'input_changed'
+  | 'form_submitted'
+  | 'element_focused'
+  | 'element_blurred'
+  | 'keyboard_intent'
+  | 'window_blurred'
+  | 'window_focused'
+  | 'visibility_changed'
+  | 'modal_opened'
+  | 'modal_closed'
+  | 'toast_shown'
+  | 'loading_started'
+  | 'loading_finished'
+  | 'error_displayed'
+  | 'status_changed'
+  | 'drag_started'
+  | 'drag_completed'
+  | 'session_start'
+  | 'session_pause'
+  | 'session_resume'
+  | 'session_stop'
+  | 'user_annotation'
+
+export type InteractionType =
+  | 'button_click'
+  | 'link_click'
+  | 'dropdown_select'
+  | 'checkbox_toggle'
+  | 'radio_select'
+  | 'text_input'
+  | 'form_submit'
+  | 'keyboard_shortcut'
+  | 'drag_action'
+  | 'context_menu'
+  | 'generic_click'
+
+export type StateChangeKind =
+  | 'modal_opened'
+  | 'modal_closed'
+  | 'toast_shown'
+  | 'loading_started'
+  | 'loading_finished'
+  | 'error_displayed'
+  | 'status_changed'
+
+export interface RawEventApplication {
+  label: string
+  domain: string
+  routeTemplate: string
+}
+
+export interface RawEventContext {
+  url: string
+  urlNormalized: string
+  pageTitle: string
+  application: RawEventApplication
+}
+
+export interface RawEventTarget {
+  selector: string
+  selectorFingerprint: number
+  label: string
+  role: string
+  elementType: string
+  interactionType: InteractionType
+  ancestorPath: string[]
+  isSensitive: boolean
+}
+
+export interface RawEventOutcome {
+  triggeredNavigation: boolean
+  targetUrl?: string
+}
+
+export interface RawEventTiming {
+  absoluteMs: number
+  sessionOffsetMs: number
+  wallTime: string
+}
+
+export interface RawEventPrivacy {
+  valueRedacted: boolean
+  redactionReason?: string
+}
+
 export interface RawEvent {
   raw_event_id: string
   session_id: string
   t_ms: number
   t_wall: string
   event_type: string
+  schema_version: string
+  // Flat fields — preserved for normalizer backward compatibility
   url?: string
   url_normalized?: string
   page_title?: string
@@ -39,7 +133,23 @@ export interface RawEvent {
   is_sensitive_target?: boolean
   value_present?: boolean
   annotation_text?: string
-  schema_version: string
+  // Enriched sub-objects (Phase 1+ addition)
+  context?: RawEventContext
+  target?: RawEventTarget
+  outcome?: RawEventOutcome
+  timing?: RawEventTiming
+  privacy?: RawEventPrivacy
+  // Keyboard intent fields
+  keyboard_key?: string
+  keyboard_intent?: 'submit' | 'close' | 'navigate'
+  // Drag fields
+  drag_source_selector?: string
+  drag_target_selector?: string
+  // Visibility / window fields
+  visibility_state?: 'hidden' | 'visible'
+  // State change fields (state-observer events)
+  state_change_kind?: StateChangeKind
+  state_change_details?: string
 }
 
 export interface CanonicalEvent {
@@ -93,6 +203,8 @@ export interface LiveStep {
   title: string
   status: 'provisional' | 'finalized'
   boundaryReason?: string
+  grouping?: string
+  pageLabel?: string
   confidence: number
   eventCount: number
   startedAt: number

@@ -23,6 +23,7 @@ export function App() {
           <RecordingScreen
             meta={recorder.meta}
             steps={recorder.steps}
+            rawEventCount={recorder.rawEventCount}
             onPause={recorder.pauseSession}
             onStop={recorder.stopSession}
             onDiscard={recorder.discardSession}

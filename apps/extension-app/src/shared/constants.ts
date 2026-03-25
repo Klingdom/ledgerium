@@ -7,3 +7,6 @@ export const STORAGE_KEY_SETTINGS = 'ledgerium_settings' as const
 export const IDLE_GAP_MS = 45_000 as const
 export const CLICK_NAV_WINDOW_MS = 2_500 as const
 export const RAPID_CLICK_DEDUP_MS = 1_000 as const
+export const DBLCLICK_WINDOW_MS = 500 as const
+export const STATE_CHANGE_DEBOUNCE_MS = 150 as const
+export const DRAG_STALE_MS = 5_000 as const

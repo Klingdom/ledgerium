@@ -105,7 +105,11 @@ export class LiveStepBuilder {
       stepId,
       title: this.deriveTitle(events, grouping),
       status: finalized ? 'finalized' : 'provisional',
-      boundaryReason,
+      ...(boundaryReason !== undefined ? { boundaryReason } : {}),
+      grouping,
+      ...(first.page_context?.applicationLabel
+        ? { pageLabel: first.page_context.applicationLabel }
+        : {}),
       confidence: this.calcConfidence(events, grouping),
       eventCount: events.length,
       startedAt: first.t_ms,

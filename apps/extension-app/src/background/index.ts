@@ -17,12 +17,89 @@ let liveBuilder: LiveStepBuilder | null = null
 let settings: ExtensionSettings = { uploadUrl: '', allowedDomains: [], blockedDomains: [] }
 let lastBundle: SessionBundle | null = null
 
+// Key used to persist recording state across service worker restarts
+const SESSION_STATE_KEY = 'ledgerium_sw_state'
+
 // ─── Settings ─────────────────────────────────────────────────────────────────
 
 function loadSettings(): void {
   chrome.storage.sync.get([STORAGE_KEY_SETTINGS], result => {
     const saved = result[STORAGE_KEY_SETTINGS] as ExtensionSettings | undefined
     if (saved) settings = saved
+  })
+}
+
+// ─── Keepalive alarm ──────────────────────────────────────────────────────────
+// MV3 service workers sleep after ~30 seconds of inactivity and lose all
+// in-memory state. The alarm fires every 25 seconds to keep the SW alive
+// during an active recording session.
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name !== 'ledgerium-keepalive') return
+  // Cancel keepalive when not recording — no need to stay alive
+  if (sm.state !== 'recording' && sm.state !== 'paused') {
+    chrome.alarms.clear('ledgerium-keepalive')
+  }
+})
+
+function startKeepalive(): void {
+  chrome.alarms.create('ledgerium-keepalive', { periodInMinutes: 0.4 })
+}
+
+function stopKeepalive(): void {
+  chrome.alarms.clear('ledgerium-keepalive')
+}
+
+// ─── State persistence (survive SW restart) ───────────────────────────────────
+
+interface PersistedState {
+  recording: boolean
+  sessionId: string
+  activityName: string
+}
+
+function persistRecordingState(sessionId: string, activityName: string): void {
+  const payload: PersistedState = { recording: true, sessionId, activityName }
+  chrome.storage.session.set({ [SESSION_STATE_KEY]: payload })
+}
+
+function clearPersistedState(): void {
+  chrome.storage.session.remove(SESSION_STATE_KEY)
+}
+
+// On SW startup, check if a recording was in progress when SW was last killed.
+// If so, restore enough state so that incoming RAW_EVENT_CAPTURED messages are
+// processed rather than silently dropped.
+async function restoreStateIfNeeded(): Promise<void> {
+  const result = await chrome.storage.session.get(SESSION_STATE_KEY)
+  const persisted = result[SESSION_STATE_KEY] as PersistedState | undefined
+  if (!persisted?.recording) return
+
+  // Restore session meta from chrome.storage.local (SessionStore persists meta there)
+  const restored = await store.loadFromStorage()
+  if (!restored) return
+
+  // Rebuild the state machine and live builder
+  try {
+    sm.transition('arming')
+    sm.transition('recording')
+  } catch {
+    // SM might already be in a state that doesn't accept these transitions
+    return
+  }
+
+  liveBuilder = new LiveStepBuilder(persisted.sessionId, step => {
+    store.updateLiveStep(step)
+    broadcastToExtension({ type: MSG.LIVE_STEP_UPDATED, payload: { step } })
+  })
+
+  // Re-broadcast recording state so the sidepanel reflects reality
+  broadcastStateUpdate()
+
+  // Re-send START_SESSION to all tabs so content scripts resume capturing
+  broadcastAllTabs({
+    type: MSG.START_SESSION,
+    payload: { sessionId: persisted.sessionId },
   })
 }
 
@@ -40,34 +117,44 @@ function broadcastStateUpdate(): void {
   })
 }
 
+function broadcastAllTabs(message: unknown): void {
+  chrome.tabs.query({}, tabs => {
+    for (const tab of tabs) {
+      if (tab.id) {
+        chrome.tabs.sendMessage(tab.id, message).catch(() => { /* tab may not have content script */ })
+      }
+    }
+  })
+}
+
 // ─── Lifecycle actions ────────────────────────────────────────────────────────
 
 function handleStart(activityName: string, uploadUrl?: string): void {
+  console.log('[LDG-BG] handleStart', activityName)
   try {
     sm.transition('arming')
     broadcastStateUpdate()
 
     const meta = store.initSession(activityName, uploadUrl ?? settings.uploadUrl)
     liveBuilder = new LiveStepBuilder(meta.sessionId, step => {
+      console.log('[LDG-BG] liveBuilder onUpdate step:', step.stepId, step.status, step.title)
       store.updateLiveStep(step)
       broadcastToExtension({ type: MSG.LIVE_STEP_UPDATED, payload: { step } })
     })
 
-    // Notify content scripts to start capture
-    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-      for (const tab of tabs) {
-        if (tab.id) {
-          chrome.tabs.sendMessage(tab.id, {
-            type: MSG.START_SESSION,
-            payload: { sessionId: meta.sessionId },
-          }).catch(() => { /* tab may not have content script */ })
-        }
-      }
+    // Notify ALL tabs — every open tab with a content script must start capturing
+    broadcastAllTabs({
+      type: MSG.START_SESSION,
+      payload: { sessionId: meta.sessionId },
     })
 
     sm.transition('recording')
     store.updateState('recording')
     broadcastStateUpdate()
+
+    // Persist state and start keepalive so the SW survives the session
+    persistRecordingState(meta.sessionId, activityName)
+    startKeepalive()
   } catch (err) {
     transitionToError(err)
   }
@@ -102,6 +189,9 @@ async function handleStop(): Promise<void> {
     broadcastAllTabs({ type: MSG.STOP_SESSION, payload: {} })
     broadcastStateUpdate()
 
+    stopKeepalive()
+    clearPersistedState()
+
     // Finalize live steps
     liveBuilder?.finalize()
 
@@ -125,7 +215,7 @@ async function handleStop(): Promise<void> {
         payload: {
           percent: 100,
           status: result.success ? 'complete' : 'failed',
-          error: result.error,
+          ...(result.error ? { error: result.error } : {}),
         },
       })
     }
@@ -141,25 +231,19 @@ function handleDiscard(): void {
   lastBundle = null
   store.clear()
   sm.reset()
+  stopKeepalive()
+  clearPersistedState()
   broadcastStateUpdate()
 }
 
 function transitionToError(err: unknown): void {
   const message = err instanceof Error ? err.message : 'Unknown error'
   if (sm.canTransition('error')) sm.transition('error')
+  stopKeepalive()
+  clearPersistedState()
   broadcastToExtension({
     type: MSG.SESSION_STATE_UPDATED,
     payload: { state: sm.state, meta: store.getMeta(), error: message },
-  })
-}
-
-function broadcastAllTabs(message: unknown): void {
-  chrome.tabs.query({}, tabs => {
-    for (const tab of tabs) {
-      if (tab.id) {
-        chrome.tabs.sendMessage(tab.id, message).catch(() => { /* ignore */ })
-      }
-    }
   })
 }
 
@@ -168,7 +252,7 @@ function broadcastAllTabs(message: unknown): void {
 chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<string, unknown> }, _sender, sendResponse) => {
   switch (message.type) {
     case MSG.GET_STATE:
-      sendResponse({ state: sm.state, meta: store.getMeta(), steps: store.getLiveSteps() })
+      sendResponse({ state: sm.state, meta: store.getMeta(), steps: store.getLiveSteps(), rawEventCount: store.getRawEventCount() })
       return true
 
     case MSG.EXPORT_BUNDLE:
@@ -199,10 +283,19 @@ chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<s
       break
 
     case MSG.RAW_EVENT_CAPTURED: {
+      console.log('[LDG-BG] RAW_EVENT_CAPTURED state=', sm.state, 'type=', (message.payload['event'] as RawEvent)?.event_type)
       if (sm.state !== 'recording') break
       const raw = message.payload['event'] as RawEvent
       store.addRawEvent(raw)
-      const { canonical, policyEntry } = normalizeRawEvent(raw, settings.blockedDomains)
+      let normalized: ReturnType<typeof normalizeRawEvent>
+      try {
+        normalized = normalizeRawEvent(raw, settings.blockedDomains)
+      } catch (err) {
+        console.error('[LDG-BG] normalizeRawEvent threw:', err, 'raw.url=', raw.url)
+        break
+      }
+      const { canonical, policyEntry } = normalized
+      console.log('[LDG-BG] canonical:', canonical?.event_type ?? 'null')
       if (policyEntry) store.addPolicyEntry(policyEntry)
       if (canonical) {
         store.addCanonicalEvent(canonical)
@@ -222,11 +315,37 @@ chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<s
   return false
 })
 
+// ─── Tab lifecycle listeners ───────────────────────────────────────────────────
+
+// When a tab finishes loading during an active recording session, send it
+// START_SESSION so its content script begins capturing immediately.
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+  if (changeInfo.status !== 'complete') return
+  if (sm.state !== 'recording') return
+  const sessionId = store.getMeta()?.sessionId
+  if (!sessionId) return
+  chrome.tabs.sendMessage(tabId, {
+    type: MSG.START_SESSION,
+    payload: { sessionId },
+  }).catch(() => { /* content script may not be present */ })
+})
+
+// When the user switches to a tab during recording, ensure its content script
+// is capturing — covers tabs that may have been loaded before recording started.
+chrome.tabs.onActivated.addListener(({ tabId }) => {
+  if (sm.state !== 'recording') return
+  const sessionId = store.getMeta()?.sessionId
+  if (!sessionId) return
+  chrome.tabs.sendMessage(tabId, {
+    type: MSG.START_SESSION,
+    payload: { sessionId },
+  }).catch(() => { /* content script may not be present */ })
+})
+
 // ─── Initialisation ───────────────────────────────────────────────────────────
 
 chrome.runtime.onInstalled.addListener(() => {
   loadSettings()
-  // Open the side panel on install
   chrome.sidePanel.setOptions({ enabled: true }).catch(() => { /* ignore */ })
 })
 
@@ -237,3 +356,6 @@ chrome.action.onClicked.addListener(tab => {
 })
 
 loadSettings()
+
+// Restore any recording session that was in progress when the SW was last killed
+void restoreStateIfNeeded()

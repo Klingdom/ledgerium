@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import type { SessionMeta, LiveStep } from '../../shared/types.js'
+import { MSG } from '../../shared/types.js'
 import { ControlBar } from '../components/ControlBar.js'
 
 interface ReviewScreenProps {
@@ -63,6 +64,20 @@ function StepSummaryRow({ step, index }: { step: LiveStep; index: number }) {
 export function ReviewScreen({ meta, steps, uploadProgress, uploadStatus, onDiscard }: ReviewScreenProps) {
   const finalizedSteps = steps.filter(s => s.status === 'finalized')
 
+  const exportJson = useCallback(() => {
+    chrome.runtime.sendMessage({ type: MSG.EXPORT_BUNDLE }, bundle => {
+      if (chrome.runtime.lastError || !bundle) return
+      const filename = `ledgerium-${meta?.sessionId ?? 'session'}.json`
+      const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      a.click()
+      URL.revokeObjectURL(url)
+    })
+  }, [meta?.sessionId])
+
   return (
     <div className="flex flex-col h-full">
       {/* Session summary header */}
@@ -95,12 +110,20 @@ export function ReviewScreen({ meta, steps, uploadProgress, uploadStatus, onDisc
         )}
       </div>
 
-      {/* Bottom controls */}
+      {/* Export + bottom controls */}
+      <div className="px-4 pb-2 pt-1">
+        <button
+          onClick={exportJson}
+          className="w-full text-xs text-teal-400 border border-teal-800 rounded-md py-1.5 hover:bg-teal-950 transition-colors"
+        >
+          Export session JSON
+        </button>
+      </div>
       <ControlBar
         onPrimary={onDiscard}
         primaryLabel="Done"
         primaryVariant="primary"
-        onDiscard={uploadStatus !== 'uploading' ? onDiscard : undefined}
+        {...(uploadStatus !== 'uploading' ? { onDiscard } : {})}
       />
     </div>
   )
