@@ -61,3 +61,33 @@ Clear documentation of how it actually runs
 A reusable foundation for improvement, training, or handoff
 
 No friction. No guesswork. Just a clean, accurate view of reality.
+
+The right mental model
+
+Think of Ledgerium as 3 separate layers:
+
+1. Recorder (browser extension)
+Lives in Chrome sidebar
+Captures events
+Produces session JSON
+
+👉 This should stay lightweight and UI-focused
+
+2. Deterministic Process Engine (core logic)
+Takes session JSON as input
+Produces:
+ProcessRun
+ProcessDefinition
+process map model
+SOP data
+
+👉 This is the core product brain
+
+3. Renderer / Viewer (UI layer)
+Displays:
+process map
+SOP
+operational definitions
+Could live in:
+extension (MVP)
+web app (next step)
