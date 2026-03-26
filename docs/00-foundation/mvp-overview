@@ -1,0 +1,63 @@
+Ledgerium AI — MVP Overview
+
+Ledgerium AI helps you capture how work actually gets done and turn it into clear, usable process documentation—automatically.
+
+1. Sidebar Workflow Recorder (Chrome Extension)
+
+Ledgerium starts with a lightweight sidebar that lives inside your browser.
+You click “Start Recording,” perform your normal workflow, and click “Stop.”
+
+That’s it.
+
+No workshops. No interviews. No guessing.
+
+The recorder quietly captures privacy-safe signals about your actions—like clicks, navigation, and interactions—without storing sensitive content. It shows you exactly what’s being recorded so you stay in control.
+
+2. Workflow JSON + Event Data
+
+Behind the scenes, your session is turned into a structured workflow JSON file.
+
+This file contains:
+
+A timeline of your actions
+The systems and pages you used
+The sequence of steps you took
+Clean, normalized event data (not raw keystrokes or sensitive inputs)
+
+Think of it as a precise, portable record of how the process actually happened—not how someone thinks it happens.
+
+3. Deterministic Process Engine
+
+The JSON file is then processed by Ledgerium’s Deterministic Process Engine.
+
+This engine:
+
+Converts raw event data into meaningful workflow steps
+Groups actions into logical activities
+Builds a structured process flow
+Generates clear outputs you can actually use
+
+From a single recording, Ledgerium produces:
+
+Process Map
+A visual flow of the workflow showing each step in order.
+
+Operational Definitions
+Clear explanations of what each step is, what it does, and how it fits into the process.
+
+Standard Operating Procedure (SOP)
+A structured, step-by-step guide based on what actually happened—not assumptions.
+
+Why this matters
+
+Most process documentation is based on memory, opinion, or outdated SOPs.
+
+Ledgerium AI is based on evidence.
+
+You record the work once, and immediately get:
+
+A baseline of the real process
+Clear documentation of how it actually runs
+A reusable foundation for improvement, training, or handoff
+
+No friction. No guesswork. Just a clean, accurate view of reality.
