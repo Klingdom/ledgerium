@@ -6,7 +6,7 @@ import { ArmingScreen } from './screens/ArmingScreen.js'
 import { RecordingScreen } from './screens/RecordingScreen.js'
 import { PausedScreen } from './screens/PausedScreen.js'
 import { StoppingScreen } from './screens/StoppingScreen.js'
-import { ReviewScreen } from './screens/ReviewScreen.js'
+import { ProcessScreen } from './screens/ProcessScreen.js'
 import { ErrorScreen } from './screens/ErrorScreen.js'
 import { HistoryDetailScreen } from './screens/HistoryDetailScreen.js'
 import type { HistoryEntry } from '../shared/types.js'
@@ -75,7 +75,7 @@ export function App() {
 
       case 'review_ready':
         return (
-          <ReviewScreen
+          <ProcessScreen
             meta={recorder.meta}
             steps={recorder.steps}
             uploadProgress={recorder.uploadProgress}

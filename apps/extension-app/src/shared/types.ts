@@ -74,6 +74,8 @@ export type StateChangeKind =
   | 'loading_finished'
   | 'error_displayed'
   | 'status_changed'
+  | 'dropdown_opened'
+  | 'dropdown_closed'
 
 export interface RawEventApplication {
   label: string
@@ -211,14 +213,31 @@ export interface LiveStep {
   finalizedAt?: number
 }
 
+export type GroupingReason =
+  | 'click_then_navigate'
+  | 'fill_and_submit'
+  | 'repeated_click_dedup'
+  | 'single_action'
+  | 'error_handling'
+  | 'annotation'
+
+export type BoundaryReason =
+  | 'form_submitted'
+  | 'navigation_changed'
+  | 'app_context_changed'
+  | 'idle_gap'
+  | 'user_annotation'
+  | 'session_stop'
+  | 'explicit_boundary'
+
 export interface DerivedStep {
   step_id: string
   session_id: string
   ordinal: number
   title: string
   status: 'provisional' | 'finalized'
-  boundary_reason?: string
-  grouping_reason: string
+  boundary_reason?: BoundaryReason
+  grouping_reason: GroupingReason
   confidence: number
   source_event_ids: string[]
   start_t_ms: number
@@ -289,6 +308,7 @@ export const MSG = {
   SETTINGS_UPDATED: 'SETTINGS_UPDATED',
   GET_STATE: 'GET_STATE',
   EXPORT_BUNDLE: 'EXPORT_BUNDLE',
+  GET_WORKFLOW_REPORT: 'GET_WORKFLOW_REPORT',
   GET_HISTORY: 'GET_HISTORY',
   GET_BUNDLE: 'GET_BUNDLE',
   DELETE_HISTORY_ENTRY: 'DELETE_HISTORY_ENTRY',

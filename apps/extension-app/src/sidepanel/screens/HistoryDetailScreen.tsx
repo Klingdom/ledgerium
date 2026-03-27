@@ -70,6 +70,12 @@ export function HistoryDetailScreen({ sessionId, activityName, onBack, onDeleted
     URL.revokeObjectURL(url)
   }, [bundle, sessionId])
 
+  const handleViewProcessMap = useCallback(() => {
+    chrome.tabs.create({
+      url: chrome.runtime.getURL(`src/viewer/index.html?sessionId=${sessionId}`),
+    })
+  }, [sessionId])
+
   const handleDelete = useCallback(() => {
     if (!window.confirm(`Delete "${activityName}"? This cannot be undone.`)) return
     chrome.runtime.sendMessage(
@@ -141,10 +147,16 @@ export function HistoryDetailScreen({ sessionId, activityName, onBack, onDeleted
           {/* Action buttons */}
           <div className="flex gap-2 px-4 py-2.5 border-b border-gray-800 flex-none">
             <button
-              onClick={handleDownload}
-              className="flex-1 text-xs text-teal-400 border border-teal-800 rounded-md py-1.5 hover:bg-teal-950 transition-colors"
+              onClick={handleViewProcessMap}
+              className="flex-1 text-xs text-teal-300 bg-teal-950/60 border border-teal-800 rounded-md py-1.5 hover:bg-teal-900/60 transition-colors font-medium"
             >
-              Download JSON
+              View Process Map
+            </button>
+            <button
+              onClick={handleDownload}
+              className="text-xs text-gray-400 border border-gray-800 rounded-md px-3 py-1.5 hover:bg-gray-900 transition-colors"
+            >
+              Download
             </button>
             <button
               onClick={handleDelete}

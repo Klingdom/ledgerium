@@ -5,6 +5,8 @@ import { normalizeRawEvent } from './normalizer.js'
 import { uploadBundle } from './uploader.js'
 import { buildBundle } from './bundle-builder.js'
 import { LiveStepBuilder } from './live-steps.js'
+import { buildWorkflowReport } from './workflow-report-builder.js'
+import type { WorkflowReport } from './workflow-report-builder.js'
 import { nowIso } from '../shared/utils.js'
 import { STORAGE_KEY_SETTINGS } from '../shared/constants.js'
 import { MSG } from '../shared/types.js'
@@ -18,6 +20,7 @@ const historyStore = new HistoryStore()
 let liveBuilder: LiveStepBuilder | null = null
 let settings: ExtensionSettings = { uploadUrl: '', allowedDomains: [], blockedDomains: [] }
 let lastBundle: SessionBundle | null = null
+let lastWorkflowReport: WorkflowReport | null = null
 
 // Key used to persist recording state across service worker restarts
 const SESSION_STATE_KEY = 'ledgerium_sw_state'
@@ -107,7 +110,29 @@ async function restoreStateIfNeeded(): Promise<void> {
 
 // ─── Broadcast helpers ────────────────────────────────────────────────────────
 
-function broadcastToExtension(message: unknown): void {
+// Send a message to extension pages (sidepanel, popup, options) but NOT to
+// content scripts.  chrome.runtime.sendMessage broadcasts to every listener
+// in the extension — including content scripts — which wastes resources and
+// can interfere with message channels when large payloads (e.g. the full
+// session bundle) are serialized to every open tab.
+//
+// Strategy: use chrome.runtime.sendMessage for lightweight state updates
+// (these are small and harmless).  For the FINALIZATION_COMPLETE message
+// that carries the full bundle, we skip the broadcast entirely — the
+// sidepanel's ProcessScreen fetches it on-demand via EXPORT_BUNDLE instead.
+function broadcastToExtension(message: Record<string, unknown>): void {
+  // Skip broadcasting the full bundle to avoid serialization overhead and
+  // message-channel interference with content scripts in multiple tabs.
+  if (message.type === MSG.FINALIZATION_COMPLETE) {
+    // ProcessScreen will fetch the bundle via EXPORT_BUNDLE on mount.
+    // We only need to broadcast a lightweight notification that finalization
+    // is complete so the sidepanel can transition its state.
+    chrome.runtime.sendMessage({
+      type: MSG.FINALIZATION_COMPLETE,
+      payload: { ready: true },
+    }).catch(() => { /* side panel may not be open */ })
+    return
+  }
   chrome.runtime.sendMessage(message).catch(() => { /* side panel may not be open */ })
 }
 
@@ -197,8 +222,14 @@ async function handleStop(): Promise<void> {
     // Finalize live steps
     liveBuilder?.finalize()
 
+    console.log('[LDG-BG] buildBundle starting, events:', store.getCanonicalEvents().length)
     const bundle = await buildBundle(store)
+    console.log('[LDG-BG] buildBundle complete, steps:', bundle.derivedSteps.length)
     lastBundle = bundle
+
+    // Generate canonical workflow report from deterministic outputs
+    lastWorkflowReport = buildWorkflowReport(bundle)
+    console.log('[LDG-BG] workflowReport generated, steps:', lastWorkflowReport.metrics.stepCount)
 
     // Persist to activity history before transitioning — this way history is
     // always available even if the user discards the review screen immediately.
@@ -236,6 +267,7 @@ function handleDiscard(): void {
   liveBuilder?.reset()
   liveBuilder = null
   lastBundle = null
+  lastWorkflowReport = null
   store.clear()
   sm.reset()
   stopKeepalive()
@@ -244,6 +276,7 @@ function handleDiscard(): void {
 }
 
 function transitionToError(err: unknown): void {
+  console.error('[LDG-BG] transitionToError:', err)
   const message = err instanceof Error ? err.message : 'Unknown error'
   if (sm.canTransition('error')) sm.transition('error')
   stopKeepalive()
@@ -264,6 +297,10 @@ chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<s
 
     case MSG.EXPORT_BUNDLE:
       sendResponse(lastBundle)
+      return true
+
+    case MSG.GET_WORKFLOW_REPORT:
+      sendResponse(lastWorkflowReport)
       return true
 
     case MSG.GET_HISTORY:
@@ -308,7 +345,7 @@ chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<s
       store.addRawEvent(raw)
       let normalized: ReturnType<typeof normalizeRawEvent>
       try {
-        normalized = normalizeRawEvent(raw, settings.blockedDomains)
+        normalized = normalizeRawEvent(raw, settings.blockedDomains, settings.allowedDomains)
       } catch (err) {
         console.error('[LDG-BG] normalizeRawEvent threw:', err, 'raw.url=', raw.url)
         break

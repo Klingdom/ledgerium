@@ -16,7 +16,9 @@ export class LiveStepBuilder {
   }
 
   processEvent(event: CanonicalEvent): void {
-    if (event.event_type.startsWith('system.') || event.event_type.startsWith('derived.')) return
+    // Filter system noise but keep error_displayed for error_handling grouping
+    if (event.event_type.startsWith('derived.')) return
+    if (event.event_type.startsWith('system.') && event.event_type !== 'system.error_displayed') return
 
     // Annotation — finalize current, emit annotation step
     if (event.event_type === 'session.annotation_added') {
@@ -35,8 +37,10 @@ export class LiveStepBuilder {
       return
     }
 
-    // Navigation domain change → finalize
-    if (event.event_type.startsWith('navigation.') && this.accumulator.length > 1) {
+    // Domain change → finalize.  Fires when any event arrives from a
+    // different domain than the previous accumulated event, covering both
+    // explicit navigation and implicit tab switches in multi-tab workflows.
+    if (this.accumulator.length > 1) {
       const prev = this.accumulator[this.accumulator.length - 2]
       if (prev?.page_context?.domain && event.page_context?.domain &&
           prev.page_context.domain !== event.page_context.domain) {
@@ -150,9 +154,15 @@ export class LiveStepBuilder {
 
   private classifyGrouping(events: CanonicalEvent[]): string {
     if (events.length === 1 && events[0]?.event_type === 'session.annotation_added') return 'annotation'
+
+    // Error handling: error displayed + human action = error recovery sequence
+    const hasError = events.some(e => e.event_type === 'system.error_displayed')
+    const hasHumanAction = events.some(e => e.actor_type === 'human')
+    if (hasError && hasHumanAction) return 'error_handling'
+
     const hasSubmit = events.some(e => e.event_type === 'interaction.submit')
     const hasInput = events.some(e => e.event_type === 'interaction.input_change')
-    if (hasSubmit) return hasInput ? 'fill_and_submit' : 'fill_and_submit'
+    if (hasSubmit && hasInput) return 'fill_and_submit'
 
     const clickIdx = events.findIndex(e => e.event_type === 'interaction.click')
     if (clickIdx >= 0) {

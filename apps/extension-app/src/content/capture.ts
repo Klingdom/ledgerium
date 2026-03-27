@@ -9,6 +9,7 @@ import {
 import {
   SCHEMA_VERSION,
   DRAG_STALE_MS,
+  INPUT_DEBOUNCE_MS,
 } from '../shared/constants.js'
 import type {
   RawEvent,
@@ -50,6 +51,9 @@ export class CaptureEngine {
   // Contenteditable dedup — emit one input_changed when the user leaves a CE field
   private lastCeSelector = ''
   private lastCeT = 0
+
+  // Input debounce — collapse rapid keystrokes into a single input_changed event
+  private inputDebounceTimers = new Map<string, ReturnType<typeof setTimeout>>()
 
   private stateObserver: StateObserver | null = null
 
@@ -110,6 +114,9 @@ export class CaptureEngine {
     this.lastClickSelector = ''
     this.lastCeSelector = ''
     this.lastCeT = 0
+    // Clear any pending debounce timers
+    for (const timer of this.inputDebounceTimers.values()) clearTimeout(timer)
+    this.inputDebounceTimers.clear()
   }
 
   pauseCapture(): void {
@@ -156,6 +163,17 @@ export class CaptureEngine {
     const onFocusOut = (e: FocusEvent) => this.captureContentEditableBlur(e)
     document.addEventListener('focusout', onFocusOut, true)
     this.cleanupFns.push(() => document.removeEventListener('focusout', onFocusOut, true))
+
+    // Right-click (context menu) — captures user inspecting or accessing context actions
+    const onContextMenu = (e: MouseEvent) => this.captureContextMenu(e)
+    document.addEventListener('contextmenu', onContextMenu, true)
+    this.cleanupFns.push(() => document.removeEventListener('contextmenu', onContextMenu, true))
+
+    // Input event (for debounced text input tracking — fires during typing, unlike
+    // 'change' which fires on blur).  Debounced to INPUT_DEBOUNCE_MS to avoid spam.
+    const onInput = (e: Event) => this.captureDebouncedInput(e)
+    document.addEventListener('input', onInput, true)
+    this.cleanupFns.push(() => document.removeEventListener('input', onInput, true))
   }
 
   private attachWindowListeners(): void {
@@ -235,10 +253,11 @@ export class CaptureEngine {
     this.lastClickSelector = inspector.selector
     this.lastClickT = t
 
+    const clickUrl = this.sanitizeUrl(location.href)
     this.emit({
       event_type: 'click',
-      url: location.href,
-      url_normalized: normalizeUrl(location.href),
+      url: clickUrl,
+      url_normalized: normalizeUrl(clickUrl),
       page_title: document.title,
       target_selector: inspector.selector,
       target_label: inspector.label,
@@ -256,10 +275,11 @@ export class CaptureEngine {
     if (isSensitiveTarget(el)) return
 
     const inspector = inspectTarget(el)
+    const dblClickUrl = this.sanitizeUrl(location.href)
     this.emit({
       event_type: 'dblclick',
-      url: location.href,
-      url_normalized: normalizeUrl(location.href),
+      url: dblClickUrl,
+      url_normalized: normalizeUrl(dblClickUrl),
       page_title: document.title,
       target_selector: inspector.selector,
       target_label: inspector.label,
@@ -275,12 +295,13 @@ export class CaptureEngine {
     const el = e.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     if (!el) return
 
+    const inputUrl = this.sanitizeUrl(location.href)
     if (isSensitiveTarget(el)) {
       // Emit presence-only event — no label, selector, or value
       this.emit({
         event_type: 'input_changed',
-        url: location.href,
-        url_normalized: normalizeUrl(location.href),
+        url: inputUrl,
+        url_normalized: normalizeUrl(inputUrl),
         page_title: document.title,
         target_element_type: (el as HTMLInputElement).type ?? el.tagName.toLowerCase(),
         is_sensitive_target: true,
@@ -294,8 +315,8 @@ export class CaptureEngine {
 
     this.emit({
       event_type: 'input_changed',
-      url: location.href,
-      url_normalized: normalizeUrl(location.href),
+      url: inputUrl,
+      url_normalized: normalizeUrl(inputUrl),
       page_title: document.title,
       target_selector: inspector.selector,
       target_label: inspector.label,
@@ -323,10 +344,11 @@ export class CaptureEngine {
     this.lastCeSelector = inspector.selector
     this.lastCeT = t
 
+    const ceUrl = this.sanitizeUrl(location.href)
     this.emit({
       event_type: 'input_changed',
-      url: location.href,
-      url_normalized: normalizeUrl(location.href),
+      url: ceUrl,
+      url_normalized: normalizeUrl(ceUrl),
       page_title: document.title,
       target_selector: inspector.selector,
       target_label: inspector.label,
@@ -368,10 +390,11 @@ export class CaptureEngine {
     const el = e.target instanceof Element ? e.target : null
     const inspector = el && !isSensitiveTarget(el) ? inspectTarget(el) : null
 
+    const kbUrl = this.sanitizeUrl(location.href)
     this.emit({
       event_type: 'keyboard_intent',
-      url: location.href,
-      url_normalized: normalizeUrl(location.href),
+      url: kbUrl,
+      url_normalized: normalizeUrl(kbUrl),
       page_title: document.title,
       keyboard_key: e.key,
       // KEYBOARD_INTENT_MAP is keyed on INTENT_KEYS values — the guard above ensures this is always defined
@@ -396,10 +419,11 @@ export class CaptureEngine {
     this.dragSourceSelector = inspector.selector
     this.dragStartT = Date.now()
 
+    const dragUrl = this.sanitizeUrl(location.href)
     this.emit({
       event_type: 'drag_started',
-      url: location.href,
-      url_normalized: normalizeUrl(location.href),
+      url: dragUrl,
+      url_normalized: normalizeUrl(dragUrl),
       page_title: document.title,
       drag_source_selector: inspector.selector,
       target_selector: inspector.selector,
@@ -421,16 +445,103 @@ export class CaptureEngine {
     const dropInspector =
       dropEl && !isSensitiveTarget(dropEl) ? inspectTarget(dropEl) : null
 
+    const dragEndUrl = this.sanitizeUrl(location.href)
     this.emit({
       event_type: 'drag_completed',
-      url: location.href,
-      url_normalized: normalizeUrl(location.href),
+      url: dragEndUrl,
+      url_normalized: normalizeUrl(dragEndUrl),
       page_title: document.title,
       drag_source_selector: this.dragSourceSelector,
       ...(dropInspector ? { drag_target_selector: dropInspector.selector } : {}),
     })
 
     this.dragSourceSelector = null
+  }
+
+  // ─── Phase 2 capture handlers ──────────────────────────────────────────────
+
+  private captureContextMenu(e: MouseEvent): void {
+    if (!this.isCapturing()) return
+    const el = e.target as Element
+    if (!el || isSensitiveTarget(el)) return
+
+    const inspector = inspectTarget(el)
+    const menuUrl = this.sanitizeUrl(location.href)
+    this.emit({
+      event_type: 'context_menu',
+      url: menuUrl,
+      url_normalized: normalizeUrl(menuUrl),
+      page_title: document.title,
+      target_selector: inspector.selector,
+      target_label: inspector.label,
+      target_role: inspector.role,
+      target_element_type: inspector.elementType,
+      is_sensitive_target: false,
+      target: inspector,
+    })
+  }
+
+  /**
+   * Debounced input capture — collapses rapid keystrokes into a single event.
+   * Uses per-selector timers so typing in different fields doesn't interfere.
+   * This complements the 'change' listener: 'input' fires during typing (good
+   * for real-time step feed), while 'change' fires on blur (good for final value).
+   */
+  private captureDebouncedInput(e: Event): void {
+    if (!this.isCapturing()) return
+    const el = e.target as HTMLInputElement | HTMLTextAreaElement
+    if (!el) return
+    // Only text-like inputs benefit from debounce — checkboxes, selects, etc.
+    // fire 'change' events that are already captured without debounce.
+    if (!(el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)) return
+    const inputType = (el as HTMLInputElement).type ?? ''
+    if (['checkbox', 'radio', 'file', 'range', 'color'].includes(inputType)) return
+    if (el.isContentEditable) return  // handled by captureContentEditableBlur
+    if (isSensitiveTarget(el)) return
+
+    const inspector = inspectTarget(el)
+    const key = inspector.selector
+
+    // Clear previous timer for this selector
+    const prev = this.inputDebounceTimers.get(key)
+    if (prev !== undefined) clearTimeout(prev)
+
+    // Set new timer — emits after INPUT_DEBOUNCE_MS of silence
+    this.inputDebounceTimers.set(key, setTimeout(() => {
+      this.inputDebounceTimers.delete(key)
+      if (!this.isCapturing()) return
+      const inputUrl = this.sanitizeUrl(location.href)
+      this.emit({
+        event_type: 'input_changed',
+        url: inputUrl,
+        url_normalized: normalizeUrl(inputUrl),
+        page_title: document.title,
+        target_selector: inspector.selector,
+        target_label: inspector.label,
+        target_role: inspector.role,
+        target_element_type: inspector.elementType,
+        is_sensitive_target: false,
+        value_present: Boolean(el.value),
+        target: inspector,
+      })
+    }, INPUT_DEBOUNCE_MS))
+  }
+
+  // ─── URL helpers ───────────────────────────────────────────────────────────
+
+  /**
+   * Strips query string and fragment from a URL.
+   * Used for interaction events to avoid capturing PII or session tokens
+   * that may appear in query parameters. Navigation events use the same
+   * stripping via captureNavigation().
+   */
+  private sanitizeUrl(url: string): string {
+    try {
+      const u = new URL(url)
+      u.search = ''
+      u.hash = ''
+      return u.toString()
+    } catch { return url }
   }
 
   // ─── Core emit ─────────────────────────────────────────────────────────────

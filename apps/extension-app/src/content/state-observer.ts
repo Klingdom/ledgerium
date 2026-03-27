@@ -7,6 +7,7 @@
  *   loading_started / finished   — aria-busy attribute changes
  *   error_displayed              — requires ≥ 2 independent signals to fire
  *   status_changed               — generic aria-live polite updates
+ *   dropdown_opened / dropdown_closed — aria-expanded changes on combobox/listbox/menu
  *
  * All detections are debounced at STATE_CHANGE_DEBOUNCE_MS to batch rapid DOM
  * churn into a single event per kind.
@@ -34,7 +35,7 @@ export class StateObserver {
       subtree: true,
       attributes: true,
       attributeOldValue: true,
-      attributeFilter: ['aria-modal', 'aria-hidden', 'aria-busy', 'aria-live', 'role'],
+      attributeFilter: ['aria-modal', 'aria-hidden', 'aria-busy', 'aria-live', 'aria-expanded', 'role'],
     })
   }
 
@@ -109,6 +110,25 @@ export class StateObserver {
       if (role === 'dialog' || role === 'alertdialog' || ariaModal === 'true') {
         const isHidden = current === 'true'
         this.schedule(isHidden ? 'modal_closed' : 'modal_opened', this.nodeLabel(el))
+      }
+    }
+
+    // Dropdown / combobox / menu expand/collapse detection.
+    // aria-expanded is used by comboboxes, listboxes, menus, and custom dropdowns.
+    if (attr === 'aria-expanded') {
+      const role = el.getAttribute('role')
+      const isDropdownRole = role === 'combobox' || role === 'listbox' || role === 'menu' ||
+                             role === 'menubar' || role === 'button' || role === 'select'
+      // Also detect by tag: <select>, <details>, or any button with aria-expanded
+      const isDropdownTag = el.tagName === 'SELECT' || el.tagName === 'DETAILS' || el.tagName === 'BUTTON'
+      if (isDropdownRole || isDropdownTag || oldValue !== null) {
+        const expanded = current === 'true'
+        const wasExpanded = oldValue === 'true'
+        if (expanded && !wasExpanded) {
+          this.schedule('dropdown_opened' as StateChangeKind, this.nodeLabel(el))
+        } else if (!expanded && wasExpanded) {
+          this.schedule('dropdown_closed' as StateChangeKind, this.nodeLabel(el))
+        }
       }
     }
   }

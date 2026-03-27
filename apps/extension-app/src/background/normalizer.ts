@@ -13,6 +13,7 @@ const RAW_TO_CANONICAL: Record<string, string> = {
   // Interaction
   click:               'interaction.click',
   dblclick:            'interaction.click',
+  context_menu:        'interaction.right_click',
   input_changed:       'interaction.input_change',
   form_submitted:      'interaction.submit',
   element_focused:     'interaction.input_change',
@@ -32,6 +33,8 @@ const RAW_TO_CANONICAL: Record<string, string> = {
   loading_finished:    'system.loading_finished',
   error_displayed:     'system.error_displayed',
   status_changed:      'system.status_changed',
+  dropdown_opened:     'system.dropdown_opened',
+  dropdown_closed:     'system.dropdown_closed',
   // Session lifecycle
   session_start:       'session.started',
   session_pause:       'session.paused',
@@ -62,13 +65,14 @@ export interface NormalizeResult {
   policyEntry: PolicyLogEntry | null
 }
 
-export function normalizeRawEvent(raw: RawEvent, blockedDomains: string[]): NormalizeResult {
+export function normalizeRawEvent(raw: RawEvent, blockedDomains: string[], allowedDomains: string[] = []): NormalizeResult {
   const domain = extractDomain(raw.url ?? '')
   const sessionId = raw.session_id
   const eventId = generateId()
 
   // Blocked domain → emit capture_blocked transparency event
-  if (domain && blockedDomains.includes(domain)) {
+  // Matches exact domain and subdomains (e.g. 'example.com' blocks 'api.example.com').
+  if (domain && blockedDomains.some(blocked => domain === blocked || domain.endsWith(`.${blocked}`))) {
     const canonical: CanonicalEvent = {
       event_id: eventId,
       schema_version: SCHEMA_VERSION,
@@ -91,6 +95,35 @@ export function normalizeRawEvent(raw: RawEvent, blockedDomains: string[]): Norm
       t_ms: raw.t_ms,
       outcome: 'block',
       reason: `Domain blocked: ${domain}`,
+    }
+    return { canonical, policyEntry }
+  }
+
+  // Allowed domain list — non-empty list means only listed domains are captured.
+  // Events without a URL (e.g. system events) are not subject to this check.
+  if (domain && allowedDomains.length > 0 && !allowedDomains.some(allowed => domain === allowed || domain.endsWith(`.${allowed}`))) {
+    const canonical: CanonicalEvent = {
+      event_id: eventId,
+      schema_version: SCHEMA_VERSION,
+      session_id: sessionId,
+      t_ms: raw.t_ms,
+      t_wall: raw.t_wall,
+      event_type: 'system.capture_blocked',
+      actor_type: 'system',
+      normalization_meta: {
+        sourceEventId: raw.raw_event_id,
+        sourceEventType: raw.event_type,
+        normalizationRuleVersion: NORMALIZATION_RULE_VERSION,
+        redactionApplied: false,
+        redactionReason: `Domain ${domain} not in allowed list`,
+      },
+    }
+    const policyEntry: PolicyLogEntry = {
+      sessionId,
+      eventId,
+      t_ms: raw.t_ms,
+      outcome: 'block',
+      reason: `Domain not in allowed list: ${domain}`,
     }
     return { canonical, policyEntry }
   }
