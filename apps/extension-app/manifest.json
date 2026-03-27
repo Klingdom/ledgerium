@@ -3,8 +3,8 @@
   "name": "Ledgerium AI Recorder",
   "version": "0.1.0",
   "description": "Record browser workflows as evidence-linked process intelligence.",
-  "permissions": ["activeTab", "scripting", "storage", "sidePanel"],
-  "host_permissions": [],
+  "permissions": ["activeTab", "scripting", "storage", "sidePanel", "tabs", "alarms"],
+  "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "src/background/index.ts",
     "type": "module"
@@ -13,7 +13,8 @@
     {
       "matches": ["<all_urls>"],
       "js": ["src/content/index.ts"],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "all_frames": true
     }
   ],
   "side_panel": {
@@ -21,5 +22,11 @@
   },
   "action": {
     "default_title": "Open Ledgerium Recorder"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["src/viewer/index.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

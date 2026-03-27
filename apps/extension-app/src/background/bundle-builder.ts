@@ -8,8 +8,46 @@ import {
 
 // ─── Inline segmentation (deterministic, mirrors packages/segmentation-engine) ─
 
-type GroupingReason = 'click_then_navigate' | 'fill_and_submit' | 'repeated_click_dedup' | 'single_action' | 'error_handling' | 'annotation'
-type BoundaryReason = 'form_submitted' | 'navigation_changed' | 'idle_gap' | 'user_annotation' | 'session_stop'
+const TARGET_CHANGE_GAP_MS = 2_000
+const ACTION_BUTTON_PATTERNS = [
+  /\bsend\b/i, /\bsubmit\b/i, /\bsave\b/i, /\bdelete\b/i,
+  /\bconfirm\b/i, /\bapprove\b/i, /\breject\b/i, /\bcancel\b/i,
+  /\bclose\b/i, /\bdone\b/i, /\bfinish\b/i, /\bpublish\b/i,
+  /\barchive\b/i, /\bremove\b/i, /\bcreate\b/i, /\bupdate\b/i,
+]
+
+type GroupingReason = 'click_then_navigate' | 'fill_and_submit' | 'repeated_click_dedup' | 'single_action' | 'data_entry' | 'send_action' | 'file_action' | 'error_handling' | 'annotation'
+type BoundaryReason = 'form_submitted' | 'navigation_changed' | 'route_changed' | 'target_changed' | 'action_completed' | 'idle_gap' | 'user_annotation' | 'session_stop'
+
+function isActionButtonClick(event: CanonicalEvent): boolean {
+  if (event.event_type !== 'interaction.click') return false
+  const label = event.target_summary?.label
+  if (!label) return false
+  return ACTION_BUTTON_PATTERNS.some(p => p.test(label))
+}
+
+/**
+ * Returns a composite key for the interaction target.  Uses selector as the
+ * primary key but appends the label when present — this is critical for
+ * spreadsheet-like UIs where every cell shares the same selector (e.g.
+ * #waffle-rich-text-editor) but the label changes per cell (A16, B16, C16).
+ *
+ * When an event has an empty label, we look at the `lastKnownLabel` parameter
+ * (the label from the most recent event on the same selector that DID have a
+ * label).  This handles the common pattern where a keyboard_shortcut carries
+ * the cell reference but the subsequent input_change has an empty label.
+ */
+function interactionTargetKey(event: CanonicalEvent, lastKnownLabel?: string): string | undefined {
+  if (!event.event_type.startsWith('interaction.')) return undefined
+  const selector = event.target_summary?.selector
+  const label = event.target_summary?.label?.trim() || lastKnownLabel || ''
+  if (selector && label) return `${selector}::${label}`
+  return selector ?? undefined
+}
+
+function isFileInteraction(event: CanonicalEvent): boolean {
+  return event.target_summary?.elementType === 'file'
+}
 
 function deriveTitle(events: CanonicalEvent[], reason: GroupingReason): string {
   const first = events[0]
@@ -28,13 +66,43 @@ function deriveTitle(events: CanonicalEvent[], reason: GroupingReason): string {
       return first?.annotation_text ?? 'Annotation'
     case 'error_handling':
       return 'Handle error'
-    case 'repeated_click_dedup':
-      return `Click ${target?.label ?? target?.role ?? 'element'}`
+    case 'data_entry': {
+      // Use target label if meaningful, otherwise derive from page context
+      const fieldLabel = target?.label && target.label.trim() !== ''
+        ? target.label
+        : page?.pageTitle ?? 'field'
+      return `Enter ${fieldLabel}`
+    }
+    case 'send_action': {
+      // Find the actual action button click (Send, Save, etc.) — it may not
+      // be the first event in the step if an input change immediately preceded it.
+      const actionEvent = events.find(e => isActionButtonClick(e))
+      const actionLabel = actionEvent?.target_summary?.label?.trim()
+      if (actionLabel) return actionLabel
+      // Fallback to first event's label or page context
+      return target?.label && target.label.trim() !== '' ? target.label : 'Complete action'
+    }
+    case 'file_action':
+      return 'Attach file'
+    case 'repeated_click_dedup': {
+      const dedupLabel = (target?.label && target.label.trim() !== '') ? target.label
+        : target?.role && target.role !== 'div' ? target.role
+        : page?.pageTitle ?? 'element'
+      return `Click ${dedupLabel}`
+    }
     case 'single_action':
     default: {
       const type = first?.event_type ?? ''
-      if (type === 'interaction.click') return `Click ${target?.label ?? target?.role ?? 'element'}`
-      if (type === 'interaction.input_change') return `Update ${target?.label ?? 'field'}`
+      if (type === 'interaction.click') {
+        const clickLabel = (target?.label && target.label.trim() !== '') ? target.label
+          : target?.role && target.role !== 'div' ? target.role
+          : page?.pageTitle ?? 'element'
+        return `Click ${clickLabel}`
+      }
+      if (type === 'interaction.input_change') {
+        const inputLabel = (target?.label && target.label.trim() !== '') ? target.label : page?.pageTitle ?? 'field'
+        return `Update ${inputLabel}`
+      }
       if (type === 'interaction.submit') return `Submit ${page?.pageTitle ?? 'form'}`
       if (type.startsWith('navigation.')) return `Navigate to ${page?.pageTitle ?? page?.routeTemplate ?? 'page'}`
       return 'Perform action'
@@ -45,8 +113,11 @@ function deriveTitle(events: CanonicalEvent[], reason: GroupingReason): string {
 function calcConfidence(events: CanonicalEvent[], reason: GroupingReason): number {
   if (reason === 'annotation') return 1.0
   if (reason === 'fill_and_submit') return 0.90
+  if (reason === 'send_action') return 0.90
   if (reason === 'click_then_navigate') return 0.85
+  if (reason === 'file_action') return 0.85
   if (reason === 'error_handling') return 0.80
+  if (reason === 'data_entry') return 0.80
   if (reason === 'repeated_click_dedup') return 0.70
   const hasLabel = events.some(e => e.target_summary?.label)
   return hasLabel ? 0.75 : 0.55
@@ -55,10 +126,14 @@ function calcConfidence(events: CanonicalEvent[], reason: GroupingReason): numbe
 function classifyGrouping(events: CanonicalEvent[]): GroupingReason {
   if (events.length === 1 && events[0]?.event_type === 'session.annotation_added') return 'annotation'
 
+  const hasError = events.some(e => e.event_type === 'system.error_displayed')
+  const hasHumanAction = events.some(e =>
+    e.event_type.startsWith('interaction.') || e.event_type.startsWith('navigation.'))
+  if (hasError && hasHumanAction) return 'error_handling'
+
   const hasSubmit = events.some(e => e.event_type === 'interaction.submit')
   const hasInput = events.some(e => e.event_type === 'interaction.input_change')
   if (hasSubmit && hasInput) return 'fill_and_submit'
-  if (hasSubmit) return 'fill_and_submit'
 
   const clickIdx = events.findIndex(e => e.event_type === 'interaction.click')
   if (clickIdx >= 0) {
@@ -70,6 +145,7 @@ function classifyGrouping(events: CanonicalEvent[]): GroupingReason {
     }
   }
 
+  // repeated_click_dedup before send_action (rapid double-click on Save = dedup, not two sends)
   const clicks = events.filter(e => e.event_type === 'interaction.click')
   if (clicks.length > 1) {
     const firstT = clicks[0]!.t_ms
@@ -77,12 +153,22 @@ function classifyGrouping(events: CanonicalEvent[]): GroupingReason {
     if (lastT - firstT <= RAPID_CLICK_DEDUP_MS) return 'repeated_click_dedup'
   }
 
+  if (events.some(isActionButtonClick)) return 'send_action'
+  if (events.some(isFileInteraction)) return 'file_action'
+
+  const inputEvents = events.filter(e =>
+    e.event_type === 'interaction.input_change' || e.event_type === 'interaction.keyboard_shortcut')
+  if (inputEvents.length > 0 && inputEvents.length >= events.length * 0.5) return 'data_entry'
+
   return 'single_action'
 }
 
 export function buildDerivedSteps(events: CanonicalEvent[], sessionId: string): DerivedStep[] {
+  // Filter out system noise but keep error_displayed so error_handling grouping
+  // can detect error→recovery sequences.
   const workEvents = events.filter(
-    e => !e.event_type.startsWith('system.') && !e.event_type.startsWith('derived.')
+    e => (!e.event_type.startsWith('system.') || e.event_type === 'system.error_displayed') &&
+         !e.event_type.startsWith('derived.')
   )
 
   const steps: DerivedStep[] = []
@@ -110,38 +196,52 @@ export function buildDerivedSteps(events: CanonicalEvent[], sessionId: string): 
       start_t_ms: first.t_ms,
       end_t_ms: last.t_ms,
       duration_ms: last.t_ms - first.t_ms,
-      page_context: first.page_context ? {
-        domain,
-        applicationLabel: first.page_context.applicationLabel,
-        routeTemplate: first.page_context.routeTemplate,
-      } : undefined,
+      ...(first.page_context ? {
+        page_context: {
+          domain,
+          applicationLabel: first.page_context.applicationLabel,
+          routeTemplate: first.page_context.routeTemplate,
+        },
+      } : {}),
     })
     accumulator = []
   }
+
+  // Track the last known label per selector for spreadsheet-like UIs where
+  // some events (input_change) have empty labels but preceding events
+  // (keyboard_shortcut) carry the cell reference.
+  let lastLabelBySelector = new Map<string, string>()
+  let lastRoute = ''
 
   for (let i = 0; i < workEvents.length; i++) {
     const event = workEvents[i]!
     const prev = workEvents[i - 1]
 
+    // Track labels per selector for target key resolution
+    const sel = event.target_summary?.selector
+    const lbl = event.target_summary?.label?.trim()
+    if (sel && lbl) lastLabelBySelector.set(sel, lbl)
+
     // Idle gap boundary
     if (prev && event.t_ms - prev.t_ms > IDLE_GAP_MS) {
       finalizeStep('idle_gap')
+      lastLabelBySelector = new Map()
     }
 
-    // Navigation domain change boundary
+    // Domain change boundary
     const newDomain = event.page_context?.domain ?? ''
     if (
-      event.event_type.startsWith('navigation.') &&
       newDomain &&
       lastDomain &&
       newDomain !== lastDomain &&
       accumulator.length > 0
     ) {
       finalizeStep('navigation_changed')
+      lastLabelBySelector = new Map()
     }
     if (newDomain) lastDomain = newDomain
 
-    // Annotation boundary — finalize previous, then create annotation step
+    // Annotation boundary
     if (event.event_type === 'session.annotation_added') {
       finalizeStep('user_annotation')
       accumulator = [event]
@@ -149,13 +249,53 @@ export function buildDerivedSteps(events: CanonicalEvent[], sessionId: string): 
       continue
     }
 
-    // Session stop — finalize remaining
+    // Session stop
     if (event.event_type === 'session.stopped') {
       finalizeStep('session_stop')
       continue
     }
 
+    // Same-domain route change boundary — only trigger when the route
+    // template actually changes (not just any SPA routing event, which
+    // can fire during autocomplete selection in Gmail).
+    if (event.event_type === 'navigation.route_change') {
+      const newRoute = event.page_context?.routeTemplate ?? ''
+      if (accumulator.length > 0 && newRoute !== lastRoute && lastRoute !== '') {
+        finalizeStep('route_changed')
+      }
+      if (newRoute) lastRoute = newRoute
+      continue
+    }
+
+    // Target context change boundary — uses label tracking for cells
+    if (prev && accumulator.length > 0) {
+      const gap = event.t_ms - prev.t_ms
+      const prevSel = prev.target_summary?.selector
+      const prevLabel = prevSel ? lastLabelBySelector.get(prevSel) : undefined
+      const curSel = event.target_summary?.selector
+      const curLabel = curSel ? lastLabelBySelector.get(curSel) : undefined
+      const prevTarget = interactionTargetKey(prev, prevLabel)
+      const currentTarget = interactionTargetKey(event, lbl || curLabel)
+      if (gap >= TARGET_CHANGE_GAP_MS && prevTarget && currentTarget && prevTarget !== currentTarget) {
+        finalizeStep('target_changed')
+      }
+    }
+
     accumulator.push(event)
+
+    // Action button boundary — but defer if the next event is a rapid click
+    // on the same target (rapid-click dedup takes priority over action completion)
+    if (isActionButtonClick(event)) {
+      const next = workEvents[i + 1]
+      const isRapidRepeat = next &&
+        next.event_type === 'interaction.click' &&
+        next.target_summary?.selector === event.target_summary?.selector &&
+        next.t_ms - event.t_ms < RAPID_CLICK_DEDUP_MS
+      if (!isRapidRepeat) {
+        finalizeStep('action_completed')
+        lastDomain = ''
+      }
+    }
 
     // Submit boundary — finalize after adding the submit event
     if (event.event_type === 'interaction.submit') {
@@ -175,7 +315,9 @@ export async function buildBundle(store: SessionStore): Promise<SessionBundle> {
   const meta = store.getMeta()
   if (!meta) throw new Error('No active session to build bundle from')
 
-  const canonicalEvents = store.getCanonicalEvents()
+  // Sort events by t_ms — multi-tab recording can produce slightly out-of-order
+  // timestamps when content scripts in different tabs emit events concurrently.
+  const canonicalEvents = store.getCanonicalEvents().sort((a, b) => a.t_ms - b.t_ms)
   const policyLog = store.getPolicyLog()
   const derivedSteps = buildDerivedSteps(canonicalEvents, meta.sessionId)
 

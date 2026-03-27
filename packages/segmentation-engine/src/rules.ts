@@ -13,7 +13,7 @@ import type {
 // Constants
 // ---------------------------------------------------------------------------
 
-export const SEGMENTATION_RULE_VERSION = '1.0.0' as const;
+export const SEGMENTATION_RULE_VERSION = '1.1.0' as const;
 
 /** Gap between consecutive events (ms) that triggers a new step boundary. */
 export const IDLE_GAP_MS = 45_000 as const;
@@ -29,6 +29,27 @@ export const CLICK_NAV_WINDOW_MS = 2_500 as const;
  * collapsed into a single step.
  */
 export const RAPID_CLICK_DEDUP_MS = 1_000 as const;
+
+/**
+ * Minimum time gap (ms) between events on different targets that triggers a
+ * step boundary within the same domain.  This splits "Enter Subject" from
+ * "Write Email Body" when the user pauses briefly between fields.
+ *
+ * Set conservatively — too low creates noise, too high collapses distinct actions.
+ */
+export const TARGET_CHANGE_GAP_MS = 2_000 as const;
+
+/**
+ * Patterns that indicate a completion/action button (Send, Submit, Save, etc.).
+ * A click on a target whose label matches one of these triggers a step boundary
+ * AFTER the click event, similar to form_submitted.
+ */
+export const ACTION_BUTTON_PATTERNS = [
+  /\bsend\b/i, /\bsubmit\b/i, /\bsave\b/i, /\bdelete\b/i,
+  /\bconfirm\b/i, /\bapprove\b/i, /\breject\b/i, /\bcancel\b/i,
+  /\bclose\b/i, /\bdone\b/i, /\bfinish\b/i, /\bpublish\b/i,
+  /\barchive\b/i, /\bremove\b/i, /\bcreate\b/i, /\bupdate\b/i,
+] as const;
 
 // ---------------------------------------------------------------------------
 // generateStepId
@@ -134,6 +155,25 @@ export function deriveStepTitle(
       return 'Handle error';
     }
 
+    case 'data_entry': {
+      const label =
+        (firstEvent !== undefined ? targetLabel(firstEvent) : undefined) ??
+        'field';
+      return `Enter ${label}`;
+    }
+
+    case 'send_action': {
+      const label =
+        (firstEvent !== undefined ? targetLabel(firstEvent) : undefined) ??
+        'action';
+      // Use the target label for specific phrasing: "Send Email", "Save Document"
+      return label !== 'action' ? `${label}` : 'Complete action';
+    }
+
+    case 'file_action': {
+      return 'Attach file';
+    }
+
     case 'annotation': {
       // The annotation event carries its text directly in the event_type
       // or normalization_meta; look for it in the first event.
@@ -211,6 +251,15 @@ export function calculateConfidence(
 
     case 'error_handling':
       return 0.8;
+
+    case 'data_entry':
+      return 0.8;
+
+    case 'send_action':
+      return 0.9;
+
+    case 'file_action':
+      return 0.85;
 
     case 'repeated_click_dedup':
       return 0.7;

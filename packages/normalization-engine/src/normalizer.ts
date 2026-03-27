@@ -99,28 +99,46 @@ export interface NormalizationResult {
 export const NORMALIZATION_RULE_VERSION = '1.0.0' as const;
 
 export const RAW_TO_CANONICAL_TYPE: Record<string, string> = {
-  tab_activated: 'navigation.tab_activated',
-  url_changed: 'navigation.open_page',
-  page_loaded: 'navigation.open_page',
-  spa_route_changed: 'navigation.route_change',
-  click: 'interaction.click',
-  dblclick: 'interaction.click',
-  input_changed: 'interaction.input_change',
-  form_submitted: 'interaction.submit',
-  element_focused: 'interaction.input_change',
-  element_blurred: 'interaction.input_change',
-  session_start: 'session.started',
-  session_pause: 'session.paused',
-  session_resume: 'session.resumed',
-  session_stop: 'session.stopped',
-  user_annotation: 'session.annotation_added',
+  // Navigation
+  tab_activated:      'navigation.tab_activated',
+  url_changed:        'navigation.open_page',
+  page_loaded:        'navigation.open_page',
+  spa_route_changed:  'navigation.route_change',
+  // Interaction
+  click:              'interaction.click',
+  dblclick:           'interaction.click',
+  input_changed:      'interaction.input_change',
+  form_submitted:     'interaction.submit',
+  element_focused:    'interaction.input_change',
+  element_blurred:    'interaction.input_change',
+  keyboard_intent:    'interaction.keyboard_shortcut',
+  drag_started:       'interaction.drag_started',
+  drag_completed:     'interaction.drag_completed',
+  // System — window / visibility
+  window_blurred:     'system.window_blurred',
+  window_focused:     'system.window_focused',
+  visibility_changed: 'system.visibility_changed',
+  // System — UI state changes
+  modal_opened:       'system.modal_opened',
+  modal_closed:       'system.modal_closed',
+  toast_shown:        'system.toast_shown',
+  loading_started:    'system.loading_started',
+  loading_finished:   'system.loading_finished',
+  error_displayed:    'system.error_displayed',
+  status_changed:     'system.status_changed',
+  // Session lifecycle
+  session_start:      'session.started',
+  session_pause:      'session.paused',
+  session_resume:     'session.resumed',
+  session_stop:       'session.stopped',
+  user_annotation:    'session.annotation_added',
 };
 
 // ---------------------------------------------------------------------------
 // Inline policy helpers (minimal — full policy-engine not linked yet)
 // ---------------------------------------------------------------------------
 
-const SENSITIVE_SELECTOR_RE = /password|passwd|secret/i;
+const SENSITIVE_SELECTOR_RE = /password|passwd|secret|token|api[_-]?key|credit|cvv|ssn/i;
 
 /**
  * Returns true when the raw event's target should be treated as sensitive
@@ -239,6 +257,7 @@ function buildPageContext(
 export function normalizeEvent(
   raw: RawEvent,
   blockedDomains: string[] = [],
+  allowedDomains: string[] = [],
 ): {
   canonical: CanonicalEvent | null;
   policyEntry: PolicyLogEntry | null;
@@ -281,6 +300,41 @@ export function normalizeEvent(
       reason: `Domain blocked: ${domain}`,
     };
     return { canonical: blockedEvent, policyEntry };
+  }
+
+  // 2b. Allowed domain list — non-empty list means only listed domains are captured.
+  // Events without a URL (e.g. session lifecycle events) bypass this check.
+  if (allowedDomains.length > 0 && raw.url !== undefined && raw.url !== '') {
+    const domain = extractDomain(raw.url);
+    if (
+      domain !== '' &&
+      !allowedDomains.some((a) => domain === a || domain.endsWith(`.${a}`))
+    ) {
+      const blockedEvent: CanonicalEvent = {
+        event_id: generateEventId(),
+        schema_version: '1.0.0',
+        session_id: raw.session_id,
+        t_ms: raw.t_ms,
+        t_wall: raw.t_wall,
+        event_type: 'system.capture_blocked',
+        actor_type: 'system',
+        normalization_meta: {
+          sourceEventId: raw.raw_event_id,
+          sourceEventType: raw.event_type,
+          normalizationRuleVersion: NORMALIZATION_RULE_VERSION,
+          redactionApplied: false,
+          redactionReason: `Domain not in allowed list: ${domain}`,
+        },
+      };
+      const policyEntry: PolicyLogEntry = {
+        sessionId: raw.session_id,
+        eventId: raw.raw_event_id,
+        t_ms: raw.t_ms,
+        outcome: 'block',
+        reason: `Domain not in allowed list: ${domain}`,
+      };
+      return { canonical: blockedEvent, policyEntry };
+    }
   }
 
   // 3. Sensitivity check.
@@ -372,6 +426,7 @@ export function normalizeEvent(
 export function normalizeSession(
   rawEvents: RawEvent[],
   blockedDomains: string[] = [],
+  allowedDomains: string[] = [],
 ): NormalizationResult {
   const events: CanonicalEvent[] = [];
   const policyLog: PolicyLogEntry[] = [];
@@ -430,6 +485,7 @@ export function normalizeSession(
     const { canonical, policyEntry, warning } = normalizeEvent(
       raw,
       blockedDomains,
+      allowedDomains,
     );
 
     if (warning !== undefined) {

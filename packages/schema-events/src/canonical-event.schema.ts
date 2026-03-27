@@ -1,24 +1,45 @@
 import { z } from 'zod';
 
 export const CanonicalEventTypeSchema = z.enum([
+  // Navigation
   'navigation.open_page',
   'navigation.route_change',
   'navigation.tab_activated',
   'navigation.app_context_changed',
+  // Interaction
   'interaction.click',
   'interaction.select',
   'interaction.input_change',
   'interaction.submit',
   'interaction.upload_file',
   'interaction.download_file',
+  'interaction.keyboard_shortcut',
+  'interaction.drag_started',
+  'interaction.drag_completed',
+  // Workflow
   'workflow.wait',
+  // Session lifecycle
   'session.started',
   'session.paused',
   'session.resumed',
   'session.stopped',
   'session.annotation_added',
+  // System — policy / transparency
   'system.redaction_applied',
   'system.capture_blocked',
+  // System — window / visibility
+  'system.window_blurred',
+  'system.window_focused',
+  'system.visibility_changed',
+  // System — UI state changes (observed via MutationObserver)
+  'system.modal_opened',
+  'system.modal_closed',
+  'system.toast_shown',
+  'system.loading_started',
+  'system.loading_finished',
+  'system.error_displayed',
+  'system.status_changed',
+  // Derived
   'derived.step_boundary_detected',
   'derived.activity_group_created',
   'derived.variant_detected',

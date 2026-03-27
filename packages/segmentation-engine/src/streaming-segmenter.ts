@@ -247,8 +247,11 @@ export class StreamingSegmenter {
       return;
     }
 
-    // ----- Navigation domain change boundary ---------------------------------
-    if (event.event_type.startsWith('navigation.')) {
+    // ----- Domain change boundary --------------------------------------------
+    // Fires on ANY event from a different domain (not just navigation events)
+    // so that multi-tab workflows are correctly segmented when the user
+    // switches between tabs on different domains.
+    {
       const domain = event.page_context?.domain;
       if (
         domain !== undefined &&

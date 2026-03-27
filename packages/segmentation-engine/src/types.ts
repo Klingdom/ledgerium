@@ -40,6 +40,9 @@ export type StepStatus = 'provisional' | 'finalized';
 export type BoundaryReason =
   | 'form_submitted'
   | 'navigation_changed'
+  | 'route_changed'
+  | 'target_changed'
+  | 'action_completed'
   | 'app_context_changed'
   | 'idle_gap'
   | 'user_annotation'
@@ -51,6 +54,9 @@ export type GroupingReason =
   | 'fill_and_submit'
   | 'repeated_click_dedup'
   | 'single_action'
+  | 'data_entry'
+  | 'send_action'
+  | 'file_action'
   | 'error_handling'
   | 'annotation';
 

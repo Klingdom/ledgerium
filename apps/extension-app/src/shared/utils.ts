@@ -67,6 +67,12 @@ export function deriveAppLabel(hostname: string): string {
   return first.charAt(0).toUpperCase() + first.slice(1)
 }
 
+export function djb2Hash(str: string): number {
+  let h = 5381
+  for (let i = 0; i < str.length; i++) h = ((h << 5) + h) ^ str.charCodeAt(i)
+  return h >>> 0
+}
+
 export async function sha256Hex(text: string): Promise<string> {
   if (typeof crypto !== 'undefined' && crypto.subtle) {
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))

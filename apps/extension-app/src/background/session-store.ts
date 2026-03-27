@@ -78,6 +78,10 @@ export class SessionStore {
     return [...this.liveSteps]
   }
 
+  getRawEventCount(): number {
+    return this.rawEvents.length
+  }
+
   getRawEvents(): RawEvent[] {
     return [...this.rawEvents]
   }

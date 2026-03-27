@@ -19,6 +19,8 @@ import {
   IDLE_GAP_MS,
   CLICK_NAV_WINDOW_MS,
   RAPID_CLICK_DEDUP_MS,
+  TARGET_CHANGE_GAP_MS,
+  ACTION_BUTTON_PATTERNS,
   deriveStepTitle,
   calculateConfidence,
 } from './rules.js';
@@ -29,6 +31,9 @@ import {
 
 /** Returns true when the event should be excluded from step construction. */
 function isSystemOrDerived(event: SegmentableEvent): boolean {
+  // Allow error_displayed through so error_handling grouping can detect
+  // error→recovery sequences.
+  if (event.event_type === 'system.error_displayed') return false;
   return (
     event.event_type.startsWith('system.') ||
     event.event_type.startsWith('derived.')
@@ -72,6 +77,17 @@ function classifyGroupingReason(
     return 'annotation';
   }
 
+  // Error handling: error displayed + human action = error recovery sequence
+  const hasError = events.some(
+    (e) => e.event_type === 'system.error_displayed',
+  );
+  const hasHumanAction = events.some(
+    (e) =>
+      e.event_type.startsWith('interaction.') ||
+      e.event_type.startsWith('navigation.'),
+  );
+  if (hasError && hasHumanAction) return 'error_handling';
+
   // fill_and_submit: ends with submit AND has at least one input_change
   const hasSubmit = events.some(
     (e) => e.event_type === 'interaction.submit',
@@ -98,6 +114,8 @@ function classifyGroupingReason(
   }
 
   // repeated_click_dedup: multiple clicks on same selector within RAPID_CLICK_DEDUP_MS
+  // Checked BEFORE send_action so rapid accidental double-clicks on "Save" are
+  // correctly classified as dedup, not two separate send actions.
   const clickEvents = events.filter(
     (e) => e.event_type === 'interaction.click',
   );
@@ -115,7 +133,64 @@ function classifyGroupingReason(
     }
   }
 
+  // send_action: click on a completion/action button (Send, Save, etc.)
+  if (events.some(isActionButtonClick)) return 'send_action';
+
+  // file_action: interaction with a file input element
+  if (events.some(isFileInteraction)) return 'file_action';
+
+  // data_entry: input changes or keyboard intents targeting form fields
+  const inputEvents = events.filter(
+    (e) =>
+      e.event_type === 'interaction.input_change' ||
+      e.event_type === 'interaction.keyboard_shortcut',
+  );
+  if (inputEvents.length > 0 && inputEvents.length >= events.length * 0.5) {
+    return 'data_entry';
+  }
+
   return 'single_action';
+}
+
+/**
+ * Returns true when a click event targets a completion/action button
+ * (Send, Submit, Save, etc.).  Matching is case-insensitive against the
+ * target label.
+ */
+function isActionButtonClick(event: SegmentableEvent): boolean {
+  if (event.event_type !== 'interaction.click') return false;
+  const label = event.target_summary?.label;
+  if (label === undefined || label === '') return false;
+  return ACTION_BUTTON_PATTERNS.some((pattern) => pattern.test(label));
+}
+
+/**
+ * Returns the "interaction target key" — a stable identifier for the UI
+ * element the user is interacting with.  Used to detect when the user moves
+ * from one field/button to another, which signals a step boundary.
+ *
+ * Returns undefined for events without a meaningful target (navigation, system).
+ */
+/**
+ * Returns a composite key for the interaction target.  Uses selector as the
+ * primary key but appends the label when present — critical for UIs like
+ * spreadsheets where every cell shares the same selector but has a different
+ * label (e.g. A16, B16, C16 all on #waffle-rich-text-editor).
+ */
+function interactionTargetKey(event: SegmentableEvent): string | undefined {
+  if (!event.event_type.startsWith('interaction.')) return undefined;
+  const selector = event.target_summary?.selector;
+  const label = event.target_summary?.label;
+  if (selector && label) return `${selector}::${label}`;
+  return selector ?? label;
+}
+
+/**
+ * Returns true when a file input is being interacted with (click or change
+ * on type="file" elements).
+ */
+function isFileInteraction(event: SegmentableEvent): boolean {
+  return event.target_summary?.elementType === 'file';
 }
 
 // ---------------------------------------------------------------------------
@@ -232,8 +307,14 @@ export function segmentEvents(
       continue;
     }
 
-    // --- Navigation domain change ----------------------------------------
-    if (current.event_type.startsWith('navigation.')) {
+    // --- Domain change boundary ------------------------------------------
+    // Fires when ANY event arrives from a different domain, not just
+    // navigation events.  This correctly segments multi-tab workflows
+    // where the user switches between tabs on different domains — the
+    // tab switch produces interaction events (clicks, inputs) rather
+    // than navigation events, and those must still trigger a step
+    // boundary.
+    {
       const domain = current.page_context?.domain;
       if (
         domain !== undefined &&
@@ -248,8 +329,58 @@ export function segmentEvents(
       }
     }
 
+    // --- Same-domain route change boundary --------------------------------
+    // SPA navigation within the same domain indicates the user moved to a
+    // different section or view.  Finalize previous step, then skip the
+    // route_change itself — it's a transition signal, not a user action.
+    if (current.event_type === 'navigation.route_change') {
+      if (accumulator.length > 0) {
+        finalizeAccumulator('route_changed');
+      }
+      continue;
+    }
+
+    // --- Target context change boundary -----------------------------------
+    // When the user moves from one interaction target to a significantly
+    // different one (different selector) after a brief pause, finalize the
+    // previous step.  This splits "Enter Subject" from "Write Email Body".
+    //
+    // Only triggers on interaction events (clicks, inputs) — navigation
+    // and system events don't have meaningful targets.
+    if (prev !== undefined && accumulator.length > 0) {
+      const gap = current.t_ms - prev.t_ms;
+      const prevTarget = interactionTargetKey(prev);
+      const currentTarget = interactionTargetKey(current);
+      if (
+        gap >= TARGET_CHANGE_GAP_MS &&
+        prevTarget !== undefined &&
+        currentTarget !== undefined &&
+        prevTarget !== currentTarget
+      ) {
+        finalizeAccumulator('target_changed');
+      }
+    }
+
     // Accumulate the event.
     accumulator.push(current);
+
+    // --- Action button boundary (finalize AFTER adding the click) --------
+    // Clicks on Send/Save/Submit/Delete/etc. are completion signals.
+    // But defer if the next event is a rapid click on the same target
+    // (rapid-click dedup takes priority over action completion).
+    if (isActionButtonClick(current)) {
+      const next = workable[i + 1];
+      const isRapidRepeat =
+        next !== undefined &&
+        next.event_type === 'interaction.click' &&
+        next.target_summary?.selector !== undefined &&
+        next.target_summary.selector === current.target_summary?.selector &&
+        next.t_ms - current.t_ms < RAPID_CLICK_DEDUP_MS;
+      if (!isRapidRepeat) {
+        finalizeAccumulator('action_completed');
+        lastNavigationDomain = undefined;
+      }
+    }
 
     // --- Submit boundary (finalize AFTER adding the submit event) --------
     if (current.event_type === 'interaction.submit') {
