@@ -87,6 +87,7 @@ RUN mkdir -p /app/data/uploads
 # Environment defaults
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV AUTH_TRUST_HOST=true
 ENV PORT=3000
 ENV DATA_DIR=/app/data
 ENV DATABASE_URL=file:/app/data/ledgerium.db
