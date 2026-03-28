@@ -48,15 +48,17 @@ WORKDIR /app/apps/web-app
 RUN npx prisma generate
 
 # Build Next.js for production
+# NEXTAUTH_SECRET is required at build time for NextAuth config validation.
+# This is a dummy value — the real secret is set at runtime via env var.
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+ENV NEXTAUTH_SECRET=build-time-placeholder
+ENV NEXTAUTH_URL=http://localhost:3000
 RUN npx next build
 
 # ─── Stage 3: Production runtime ────────────────────────────────────────────
 
 FROM node:20-alpine AS runner
-
-RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
 
@@ -73,32 +75,19 @@ COPY --from=builder /app/apps/web-app/next.config.js ./apps/web-app/next.config.
 COPY --from=builder /app/apps/web-app/prisma ./apps/web-app/prisma
 COPY --from=builder /app/apps/web-app/node_modules ./apps/web-app/node_modules
 
-# Copy workspace package sources needed at runtime (process-engine, intelligence-engine)
+# Copy workspace package sources needed at runtime
 COPY --from=builder /app/packages/process-engine ./packages/process-engine
 COPY --from=builder /app/packages/intelligence-engine ./packages/intelligence-engine
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 
+# Copy startup script
+COPY scripts/docker-start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
 # Create persistent data directory (will be mounted as a volume)
 RUN mkdir -p /app/data/uploads && \
     chown -R ledgerium:ledgerium /app/data
-
-# Startup script: initialize DB + start server
-COPY <<'EOF' /app/start.sh
-#!/bin/sh
-set -e
-
-# Ensure data directories exist with correct permissions
-mkdir -p /app/data/uploads
-
-# Push database schema (non-destructive — only adds new tables/columns)
-cd /app/apps/web-app
-npx prisma db push --skip-generate 2>&1 || echo "Warning: prisma db push failed, DB may need manual attention"
-
-# Start Next.js production server
-exec node_modules/.bin/next start --hostname 0.0.0.0 --port ${PORT:-3000}
-EOF
-RUN chmod +x /app/start.sh
 
 # Switch to non-root user
 USER ledgerium
