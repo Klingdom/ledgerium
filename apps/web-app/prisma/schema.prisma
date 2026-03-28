@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String   @id @default(uuid())
+  email                String   @unique
+  name                 String?
+  passwordHash         String   @map("password_hash")
+  plan                 String   @default("free") // free, pro, team
+  subscriptionStatus   String   @default("trialing") @map("subscription_status") // trialing, active, past_due, canceled, none
+  stripeCustomerId     String?  @map("stripe_customer_id")
+  stripeSubscriptionId String?  @map("stripe_subscription_id")
+  uploadCount          Int      @default(0) @map("upload_count")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  uploads   Upload[]
+  workflows Workflow[]
+  apiKeys   ApiKey[]
+
+  @@map("users")
+}
+
+model ApiKey {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  keyHash   String   @unique @map("key_hash") // SHA-256 hash of the key — raw key is never stored
+  prefix    String                             // first 8 chars of key for display (e.g. "ldg_a1b2...")
+  label     String   @default("Extension")     // user-chosen label
+  lastUsedAt DateTime? @map("last_used_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("api_keys")
+}
+
+model Upload {
+  id               String   @id @default(uuid())
+  userId           String   @map("user_id")
+  fileName         String   @map("file_name")
+  fileSizeBytes    Int?     @map("file_size_bytes")
+  uploadedAt       DateTime @default(now()) @map("uploaded_at")
+  schemaVersion    String?  @map("schema_version")
+  validationStatus String   @default("pending") @map("validation_status") // pending, valid, invalid
+  validationErrors String?  @map("validation_errors") // JSON array
+  rawJsonPath      String   @map("raw_json_path")
+
+  user      User       @relation(fields: [userId], references: [id])
+  workflows Workflow[]
+
+  @@index([userId])
+  @@map("uploads")
+}
+
+model Workflow {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  sourceUploadId String?  @map("source_upload_id")
+  title          String
+  description    String?
+  toolsUsed      String?  @map("tools_used") // JSON array
+  durationMs     Int?     @map("duration_ms")
+  stepCount      Int?     @map("step_count")
+  phaseCount     Int?     @map("phase_count")
+  confidence     Float?
+  status         String   @default("active") // active, archived, deleted
+  sessionId      String?  @map("session_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  user      User               @relation(fields: [userId], references: [id])
+  upload    Upload?            @relation(fields: [sourceUploadId], references: [id])
+  artifacts WorkflowArtifact[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("workflows")
+}
+
+model WorkflowArtifact {
+  id           String   @id @default(uuid())
+  workflowId   String   @map("workflow_id")
+  artifactType String   @map("artifact_type") // process_output, workflow_report, source_bundle, sop, process_map
+  schemaVersion String? @map("schema_version")
+  contentJson  String?  @map("content_json") // JSON stored as text
+  contentPath  String?  @map("content_path") // filesystem path
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId])
+  @@map("workflow_artifacts")
+}

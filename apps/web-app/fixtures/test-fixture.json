@@ -1,0 +1,372 @@
+{
+  "sessionJson": {
+    "sessionId": "test-session-001",
+    "activityName": "Submit expense report in Workday",
+    "startedAt": "2026-03-27T10:00:00.000Z",
+    "endedAt": "2026-03-27T10:03:45.000Z",
+    "state": "review_ready",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "evt-001",
+      "session_id": "test-session-001",
+      "t_ms": 0,
+      "t_wall": "2026-03-27T10:00:00.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.example.com/expenses",
+        "urlNormalized": "https://workday.example.com/expenses",
+        "domain": "workday.example.com",
+        "routeTemplate": "/expenses",
+        "pageTitle": "Workday - Expenses",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#create-expense-btn",
+        "label": "Create Expense Report",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-001",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "evt-002",
+      "session_id": "test-session-001",
+      "t_ms": 1200,
+      "t_wall": "2026-03-27T10:00:01.200Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.example.com/expenses/new",
+        "urlNormalized": "https://workday.example.com/expenses/new",
+        "domain": "workday.example.com",
+        "routeTemplate": "/expenses/new",
+        "pageTitle": "Workday - New Expense Report",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "evt-003",
+      "session_id": "test-session-001",
+      "t_ms": 5000,
+      "t_wall": "2026-03-27T10:00:05.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.example.com/expenses/new",
+        "urlNormalized": "https://workday.example.com/expenses/new",
+        "domain": "workday.example.com",
+        "routeTemplate": "/expenses/new",
+        "pageTitle": "Workday - New Expense Report",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#expense-title",
+        "label": "Report Title",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-003",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "evt-004",
+      "session_id": "test-session-001",
+      "t_ms": 12000,
+      "t_wall": "2026-03-27T10:00:12.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.example.com/expenses/new",
+        "urlNormalized": "https://workday.example.com/expenses/new",
+        "domain": "workday.example.com",
+        "routeTemplate": "/expenses/new",
+        "pageTitle": "Workday - New Expense Report",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#expense-amount",
+        "label": "Amount",
+        "role": "spinbutton",
+        "elementType": "input",
+        "isSensitive": true,
+        "sensitivityClass": "financial"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-004",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true,
+        "redactionReason": "financial_value"
+      }
+    },
+    {
+      "event_id": "evt-005",
+      "session_id": "test-session-001",
+      "t_ms": 20000,
+      "t_wall": "2026-03-27T10:00:20.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.example.com/expenses/new",
+        "urlNormalized": "https://workday.example.com/expenses/new",
+        "domain": "workday.example.com",
+        "routeTemplate": "/expenses/new",
+        "pageTitle": "Workday - New Expense Report",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#expense-category",
+        "label": "Category",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-005",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "evt-006",
+      "session_id": "test-session-001",
+      "t_ms": 30000,
+      "t_wall": "2026-03-27T10:00:30.000Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.example.com/expenses/new",
+        "urlNormalized": "https://workday.example.com/expenses/new",
+        "domain": "workday.example.com",
+        "routeTemplate": "/expenses/new",
+        "pageTitle": "Workday - New Expense Report",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#submit-expense-form",
+        "label": "Submit",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-006",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "evt-007",
+      "session_id": "test-session-001",
+      "t_ms": 32000,
+      "t_wall": "2026-03-27T10:00:32.000Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.example.com/expenses",
+        "urlNormalized": "https://workday.example.com/expenses",
+        "domain": "workday.example.com",
+        "routeTemplate": "/expenses",
+        "pageTitle": "Workday - Expenses",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-007",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "evt-008",
+      "session_id": "test-session-001",
+      "t_ms": 35000,
+      "t_wall": "2026-03-27T10:00:35.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.example.com/expenses",
+        "urlNormalized": "https://workday.example.com/expenses",
+        "domain": "workday.example.com",
+        "routeTemplate": "/expenses",
+        "pageTitle": "Workday - Expenses",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#expense-row-1",
+        "label": "Q1 Travel Expense",
+        "role": "link",
+        "elementType": "a",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-008",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "evt-009",
+      "session_id": "test-session-001",
+      "t_ms": 36500,
+      "t_wall": "2026-03-27T10:00:36.500Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://workday.example.com/expenses/12345",
+        "urlNormalized": "https://workday.example.com/expenses/12345",
+        "domain": "workday.example.com",
+        "routeTemplate": "/expenses/:id",
+        "pageTitle": "Workday - Expense Detail",
+        "applicationLabel": "Workday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-009",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "evt-010",
+      "session_id": "test-session-001",
+      "t_ms": 45000,
+      "t_wall": "2026-03-27T10:00:45.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://workday.example.com/expenses/12345",
+        "urlNormalized": "https://workday.example.com/expenses/12345",
+        "domain": "workday.example.com",
+        "routeTemplate": "/expenses/:id",
+        "pageTitle": "Workday - Expense Detail",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "#approve-btn",
+        "label": "Send for Approval",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-010",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "test-session-001-step-1",
+      "session_id": "test-session-001",
+      "ordinal": 1,
+      "title": "Navigate to New Expense Report",
+      "status": "finalized",
+      "boundary_reason": "navigation_changed",
+      "grouping_reason": "click_then_navigate",
+      "confidence": 0.85,
+      "source_event_ids": ["evt-001", "evt-002"],
+      "start_t_ms": 0,
+      "end_t_ms": 1200,
+      "duration_ms": 1200,
+      "page_context": {
+        "domain": "workday.example.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/expenses"
+      }
+    },
+    {
+      "step_id": "test-session-001-step-2",
+      "session_id": "test-session-001",
+      "ordinal": 2,
+      "title": "Fill and submit expense form",
+      "status": "finalized",
+      "boundary_reason": "form_submitted",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.90,
+      "source_event_ids": ["evt-003", "evt-004", "evt-005", "evt-006"],
+      "start_t_ms": 5000,
+      "end_t_ms": 30000,
+      "duration_ms": 25000,
+      "page_context": {
+        "domain": "workday.example.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/expenses/new"
+      }
+    },
+    {
+      "step_id": "test-session-001-step-3",
+      "session_id": "test-session-001",
+      "ordinal": 3,
+      "title": "Navigate to expense detail",
+      "status": "finalized",
+      "boundary_reason": "navigation_changed",
+      "grouping_reason": "click_then_navigate",
+      "confidence": 0.85,
+      "source_event_ids": ["evt-008", "evt-009"],
+      "start_t_ms": 35000,
+      "end_t_ms": 36500,
+      "duration_ms": 1500,
+      "page_context": {
+        "domain": "workday.example.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/expenses"
+      }
+    },
+    {
+      "step_id": "test-session-001-step-4",
+      "session_id": "test-session-001",
+      "ordinal": 4,
+      "title": "Send for Approval",
+      "status": "finalized",
+      "boundary_reason": "action_completed",
+      "grouping_reason": "send_action",
+      "confidence": 0.90,
+      "source_event_ids": ["evt-010"],
+      "start_t_ms": 45000,
+      "end_t_ms": 45000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "workday.example.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/expenses/:id"
+      }
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "test-session-001",
+    "exportedAt": "2026-03-27T10:04:00.000Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0",
+    "segmentationRuleVersion": "1.1.0",
+    "rendererVersion": "0.1.0",
+    "fileHashes": {}
+  }
+}
