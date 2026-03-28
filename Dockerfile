@@ -34,11 +34,8 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
 
-# Copy installed node_modules from deps stage
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/web-app/node_modules ./apps/web-app/node_modules
-COPY --from=deps /app/packages/process-engine/node_modules ./packages/process-engine/node_modules 2>/dev/null || true
-COPY --from=deps /app/packages/intelligence-engine/node_modules ./packages/intelligence-engine/node_modules 2>/dev/null || true
+# Copy all node_modules from deps stage
+COPY --from=deps /app/ ./
 
 # Copy workspace source
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
