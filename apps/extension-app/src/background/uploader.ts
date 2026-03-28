@@ -9,6 +9,7 @@ export async function uploadBundle(
   bundle: SessionBundle,
   uploadUrl: string,
   onProgress: (percent: number) => void,
+  apiKey?: string,
 ): Promise<UploadResult> {
   if (!uploadUrl || !uploadUrl.startsWith('http')) {
     return { success: false, error: 'No valid upload URL configured' }
@@ -22,9 +23,18 @@ export async function uploadBundle(
     const body = JSON.stringify(bundle)
     onProgress(40)
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    }
+
+    // Include API key for Ledgerium web app sync authentication
+    if (apiKey) {
+      headers['Authorization'] = `Bearer ${apiKey}`
+    }
+
     const response = await fetch(uploadUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body,
       signal: controller.signal,
     })
@@ -32,7 +42,12 @@ export async function uploadBundle(
     onProgress(90)
 
     if (!response.ok) {
-      return { success: false, error: `HTTP ${response.status}: ${response.statusText}` }
+      let detail = response.statusText
+      try {
+        const errBody = await response.json()
+        if (errBody.error) detail = errBody.error
+      } catch { /* ignore parse failure */ }
+      return { success: false, error: `HTTP ${response.status}: ${detail}` }
     }
 
     onProgress(100)

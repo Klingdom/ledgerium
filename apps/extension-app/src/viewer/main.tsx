@@ -78,18 +78,11 @@ function FileIngestScreen({ onBundle }: { onBundle: (b: SessionBundle) => void }
     }}>
       {/* Logo */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-        <div style={{
-          width: 32,
-          height: 32,
-          borderRadius: 8,
-          background: 'rgba(45,212,191,0.12)',
-          border: '1px solid rgba(45,212,191,0.25)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <span style={{ fontSize: 16, fontWeight: 800, color: '#2dd4bf' }}>L</span>
-        </div>
+        <img
+          src={chrome.runtime.getURL('icons/icon-128.png')}
+          alt="Ledgerium AI"
+          style={{ width: 32, height: 32, borderRadius: 8 }}
+        />
         <div>
           <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#f3f4f6' }}>
             Ledgerium Process Map
@@ -228,24 +221,45 @@ function App() {
     if (!sessionId) return  // will show file ingest screen
 
     setLoading(true)
-    chrome.runtime.sendMessage(
-      { type: MSG.GET_BUNDLE, payload: { sessionId } },
-      (response: SessionBundle | null) => {
-        if (chrome.runtime.lastError) {
-          setError(`Failed to load session: ${chrome.runtime.lastError.message ?? 'Unknown error'}`)
-          setLoading(false)
-          return
-        }
-        if (!response || !isValidBundle(response)) {
-          setError('Session not found or data is invalid. It may have been deleted.')
-          setLoading(false)
-          return
-        }
-        setBundle(response)
-        document.title = `${response.sessionJson.activityName} — Ledgerium Process Map`
-        setLoading(false)
-      }
-    )
+
+    // MV3 service worker may be asleep when the viewer tab opens.
+    // Wake it with a lightweight GET_STATE ping, then fetch the bundle.
+    function fetchBundle(retriesLeft: number): void {
+      // Wake the service worker first
+      chrome.runtime.sendMessage({ type: MSG.GET_STATE }, () => {
+        // Ignore errors from the wake-up ping — the SW is now alive
+        if (chrome.runtime.lastError) { /* ignore */ }
+
+        chrome.runtime.sendMessage(
+          { type: MSG.GET_BUNDLE, payload: { sessionId } },
+          (response: SessionBundle | null) => {
+            if (chrome.runtime.lastError) {
+              if (retriesLeft > 0) {
+                setTimeout(() => fetchBundle(retriesLeft - 1), 500)
+                return
+              }
+              setError(`Failed to load session: ${chrome.runtime.lastError.message ?? 'Unknown error'}`)
+              setLoading(false)
+              return
+            }
+            if (!response || !isValidBundle(response)) {
+              if (retriesLeft > 0) {
+                setTimeout(() => fetchBundle(retriesLeft - 1), 500)
+                return
+              }
+              setError('Session not found or data is invalid. It may have been deleted.')
+              setLoading(false)
+              return
+            }
+            setBundle(response)
+            document.title = `${response.sessionJson.activityName} — Ledgerium Process Map`
+            setLoading(false)
+          }
+        )
+      })
+    }
+
+    fetchBundle(3)
   }, [])
 
   if (loading) return <LoadingScreen />

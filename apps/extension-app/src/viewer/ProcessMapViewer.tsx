@@ -30,12 +30,42 @@ function formatDuration(startedAt: string, endedAt?: string): string {
 
 export function ProcessMapViewer({ bundle }: ProcessMapViewerProps) {
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null)
+  const [engineError, setEngineError] = useState<string | null>(null)
+
+  // Sort events by t_ms before processing — multi-tab recording can
+  // produce out-of-order timestamps. The input validator requires strict ordering.
+  const sortedBundle = useMemo(() => ({
+    ...bundle,
+    normalizedEvents: [...bundle.normalizedEvents].sort(
+      (a, b) => (a as { t_ms: number }).t_ms - (b as { t_ms: number }).t_ms,
+    ),
+  }), [bundle])
 
   // Run the deterministic process engine — pure, synchronous
-  const output = useMemo(
-    () => processSession(bundle as unknown as Parameters<typeof processSession>[0]),
-    [bundle],
-  )
+  const output = useMemo(() => {
+    try {
+      return processSession(sortedBundle as unknown as Parameters<typeof processSession>[0])
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error('[LDG-Viewer] processSession() failed:', msg)
+      setEngineError(msg)
+      return null
+    }
+  }, [sortedBundle])
+
+  if (engineError || !output) {
+    return (
+      <div style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        height: '100vh', background: '#0a0e14', gap: 12, padding: 40,
+      }}>
+        <p style={{ fontSize: 14, color: '#f87171', margin: 0 }}>Failed to process session</p>
+        <p style={{ fontSize: 12, color: '#4b5563', margin: 0, maxWidth: 500, textAlign: 'center' }}>
+          {engineError ?? 'Unknown error'}
+        </p>
+      </div>
+    )
+  }
 
   const { processRun, processDefinition, processMap, sop } = output
 
@@ -82,13 +112,11 @@ export function ProcessMapViewer({ bundle }: ProcessMapViewerProps) {
         height: 52, borderBottom: '1px solid #111827', background: '#0d1117', flexShrink: 0, zIndex: 10,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 24, height: 24, borderRadius: 6,
-            background: 'rgba(45,212,191,0.15)', border: '1px solid rgba(45,212,191,0.3)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <span style={{ fontSize: 11, fontWeight: 800, color: '#2dd4bf' }}>L</span>
-          </div>
+          <img
+            src={chrome.runtime.getURL('icons/icon-128.png')}
+            alt="Ledgerium AI"
+            style={{ width: 24, height: 24, borderRadius: 6 }}
+          />
           <span style={{ fontSize: 13, fontWeight: 700, color: '#f3f4f6' }}>{meta.activityName}</span>
         </div>
 

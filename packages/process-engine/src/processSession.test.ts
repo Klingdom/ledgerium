@@ -585,28 +585,28 @@ describe('processSession', () => {
       }
     });
 
-    it('start→first edge has boundaryLabel "Process begins"', () => {
+    it('start→first edge has boundaryLabel "Workflow begins"', () => {
       const { processMap } = processSession(makeInput());
-      expect(processMap.edges[0]!.boundaryLabel).toBe('Process begins');
+      expect(processMap.edges[0]!.boundaryLabel).toBe('Workflow begins');
     });
 
-    it('last→end edge has boundaryLabel "Process completes"', () => {
+    it('last→end edge has boundaryLabel "Workflow completes"', () => {
       const { processMap } = processSession(makeInput());
       const lastEdge = processMap.edges[processMap.edges.length - 1]!;
-      expect(lastEdge.boundaryLabel).toBe('Process completes');
+      expect(lastEdge.boundaryLabel).toBe('Workflow completes');
     });
 
     it('navigation_changed boundary produces human-readable label', () => {
       const { processMap } = processSession(makeInput());
       // step-2 starts with boundary_reason=navigation_changed (in default fixture)
-      // edge[1] is start→step1 (Process begins), edge[2] is step1→step2
+      // edge[1] is start→step1 (Workflow begins), edge[2] is step1→step2
       // step-1 has boundary_reason='navigation_changed'... wait, let me check the fixture
       // step-1.boundary_reason = 'navigation_changed', step-2.boundary_reason = 'form_submitted'
       // edges[1] = start→step1 (step1 doesn't have a boundary that triggers edge label from step)
       // Actually: edge boundaryLabel is derived from the TO node's boundary_reason
-      // edges[0] = start→step1: fromNodeType=start → "Process begins"
+      // edges[0] = start→step1: fromNodeType=start → "Workflow begins"
       // edges[1] = step1→step2: boundaryReason = step2.boundary_reason = 'form_submitted' → "Form submitted"
-      // edges[2] = step2→end: toNodeType=end → "Process completes"
+      // edges[2] = step2→end: toNodeType=end → "Workflow completes"
       const step1ToStep2Edge = processMap.edges[1]!;
       expect(step1ToStep2Edge.boundaryLabel).toBe('Form submitted');
     });
@@ -1323,6 +1323,166 @@ describe('processSession', () => {
       if (!result.valid) {
         expect(result.errors.length).toBeGreaterThanOrEqual(2);
       }
+    });
+  });
+
+  // ─── New grouping reason regression tests ──────────────────────────────────
+
+  describe('new grouping reasons (data_entry, send_action, file_action)', () => {
+    function makeNewGroupingInput(): ProcessEngineInput {
+      const events = [
+        makeEvent({ event_id: 'evt-de-1', event_type: 'interaction.input_change', t_ms: NOW_MS, label: 'Cell A11' }),
+        makeEvent({ event_id: 'evt-de-2', event_type: 'interaction.input_change', t_ms: NOW_MS + 500, label: 'Cell B11' }),
+        makeEvent({ event_id: 'evt-sa-1', event_type: 'interaction.click', t_ms: NOW_MS + 3000, label: 'Send', applicationLabel: 'Gmail', domain: 'mail.google.com' }),
+        makeEvent({ event_id: 'evt-fa-1', event_type: 'interaction.click', t_ms: NOW_MS + 6000, label: 'Attach', applicationLabel: 'Gmail', domain: 'mail.google.com' }),
+      ];
+
+      const steps = [
+        {
+          step_id: `${SESSION_ID}-step-1`,
+          session_id: SESSION_ID,
+          ordinal: 1,
+          title: 'Enter Cell A11',
+          status: 'finalized' as const,
+          boundary_reason: 'target_changed',
+          grouping_reason: 'data_entry',
+          confidence: 0.80,
+          source_event_ids: ['evt-de-1', 'evt-de-2'],
+          start_t_ms: NOW_MS,
+          end_t_ms: NOW_MS + 500,
+          duration_ms: 500,
+          page_context: { domain: 'app.netsuite.com', applicationLabel: 'NetSuite', routeTemplate: '/sheet' },
+        },
+        {
+          step_id: `${SESSION_ID}-step-2`,
+          session_id: SESSION_ID,
+          ordinal: 2,
+          title: 'Send',
+          status: 'finalized' as const,
+          boundary_reason: 'action_completed',
+          grouping_reason: 'send_action',
+          confidence: 0.90,
+          source_event_ids: ['evt-sa-1'],
+          start_t_ms: NOW_MS + 3000,
+          end_t_ms: NOW_MS + 3000,
+          duration_ms: 0,
+          page_context: { domain: 'mail.google.com', applicationLabel: 'Gmail', routeTemplate: '/compose' },
+        },
+        {
+          step_id: `${SESSION_ID}-step-3`,
+          session_id: SESSION_ID,
+          ordinal: 3,
+          title: 'Attach file',
+          status: 'finalized' as const,
+          boundary_reason: 'session_stop',
+          grouping_reason: 'file_action',
+          confidence: 0.85,
+          source_event_ids: ['evt-fa-1'],
+          start_t_ms: NOW_MS + 6000,
+          end_t_ms: NOW_MS + 6000,
+          duration_ms: 0,
+          page_context: { domain: 'mail.google.com', applicationLabel: 'Gmail', routeTemplate: '/compose' },
+        },
+      ];
+
+      return {
+        sessionJson: {
+          sessionId: SESSION_ID,
+          activityName: 'Email with Spreadsheet',
+          startedAt: new Date(NOW_MS).toISOString(),
+          endedAt: new Date(NOW_MS + 7000).toISOString(),
+        },
+        normalizedEvents: events,
+        derivedSteps: steps,
+      };
+    }
+
+    it('data_entry gets correct category label and color', () => {
+      const { processDefinition } = processSession(makeNewGroupingInput());
+      const step = processDefinition.stepDefinitions[0]!;
+      expect(step.category).toBe('data_entry');
+      expect(step.categoryLabel).toBe('Data Entry');
+      expect(step.categoryColor).toBe('#a78bfa');
+    });
+
+    it('send_action gets correct category label and color', () => {
+      const { processDefinition } = processSession(makeNewGroupingInput());
+      const step = processDefinition.stepDefinitions[1]!;
+      expect(step.category).toBe('send_action');
+      expect(step.categoryLabel).toBe('Send / Submit');
+      expect(step.categoryColor).toBe('#34d399');
+    });
+
+    it('file_action gets correct category label and color', () => {
+      const { processDefinition } = processSession(makeNewGroupingInput());
+      const step = processDefinition.stepDefinitions[2]!;
+      expect(step.category).toBe('file_action');
+      expect(step.categoryLabel).toBe('File Action');
+      expect(step.categoryColor).toBe('#fbbf24');
+    });
+
+    it('data_entry operational definition mentions data entry', () => {
+      const { processDefinition } = processSession(makeNewGroupingInput());
+      const step = processDefinition.stepDefinitions[0]!;
+      expect(step.operationalDefinition).toContain('entered data');
+      expect(step.operationalDefinition).toContain('Cell A11');
+    });
+
+    it('send_action operational definition mentions send action', () => {
+      const { processDefinition } = processSession(makeNewGroupingInput());
+      const step = processDefinition.stepDefinitions[1]!;
+      expect(step.operationalDefinition).toContain('Send');
+      expect(step.operationalDefinition).toContain('Gmail');
+    });
+
+    it('file_action operational definition mentions file', () => {
+      const { processDefinition } = processSession(makeNewGroupingInput());
+      const step = processDefinition.stepDefinitions[2]!;
+      expect(step.operationalDefinition).toContain('file');
+    });
+
+    it('new grouping reasons are NOT downgraded to single_action', () => {
+      const { processDefinition } = processSession(makeNewGroupingInput());
+      const categories = processDefinition.stepDefinitions.map(s => s.category);
+      expect(categories).toEqual(['data_entry', 'send_action', 'file_action']);
+      expect(categories).not.toContain('single_action');
+    });
+
+    it('process map uses correct boundary labels for new reasons', () => {
+      const { processMap } = processSession(makeNewGroupingInput());
+      const labels = processMap.edges.map(e => e.boundaryLabel);
+      // step1→step2 edge uses step2's boundary_reason = action_completed
+      expect(labels).toContain('Action completed');
+      // step2→step3 edge uses step3's boundary_reason = session_stop
+      expect(labels).toContain('Session stopped');
+      // start→step1 is always "Workflow begins" regardless of step1's boundary_reason
+      expect(labels).toContain('Workflow begins');
+    });
+
+    it('SOP handles send_action with specific action text', () => {
+      const { sop } = processSession(makeNewGroupingInput());
+      const sendStep = sop.steps.find(s => s.category === 'send_action');
+      expect(sendStep).toBeDefined();
+      expect(sendStep!.action).toContain('Send');
+    });
+
+    it('SOP handles file_action with specific action text', () => {
+      const { sop } = processSession(makeNewGroupingInput());
+      const fileStep = sop.steps.find(s => s.category === 'file_action');
+      expect(fileStep).toBeDefined();
+      expect(fileStep!.action).toContain('file');
+    });
+
+    it('SOP completion criteria includes send/submit acknowledgement', () => {
+      const { sop } = processSession(makeNewGroupingInput());
+      const hasSendCriteria = sop.completionCriteria.some(c => c.includes('send/submit'));
+      expect(hasSendCriteria).toBe(true);
+    });
+
+    it('SOP outputs include file attachment', () => {
+      const { sop } = processSession(makeNewGroupingInput());
+      const hasFileOutput = sop.outputs.some(o => o.toLowerCase().includes('file'));
+      expect(hasFileOutput).toBe(true);
     });
   });
 });

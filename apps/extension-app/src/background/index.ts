@@ -18,7 +18,7 @@ const sm = new RecorderStateMachine()
 const store = new SessionStore()
 const historyStore = new HistoryStore()
 let liveBuilder: LiveStepBuilder | null = null
-let settings: ExtensionSettings = { uploadUrl: '', allowedDomains: [], blockedDomains: [] }
+let settings: ExtensionSettings = { uploadUrl: '', apiKey: '', allowedDomains: [], blockedDomains: [] }
 let lastBundle: SessionBundle | null = null
 let lastWorkflowReport: WorkflowReport | null = null
 
@@ -241,13 +241,13 @@ async function handleStop(): Promise<void> {
     broadcastToExtension({ type: MSG.FINALIZATION_COMPLETE, payload: { bundle } })
     broadcastStateUpdate()
 
-    // Upload if URL is configured
+    // Upload if URL is configured — sends API key for Ledgerium web app auth
     const uploadUrl = store.getMeta()?.uploadUrl
     if (uploadUrl) {
       broadcastToExtension({ type: MSG.UPLOAD_PROGRESS, payload: { percent: 0, status: 'uploading' } })
       const result = await uploadBundle(bundle, uploadUrl, percent => {
         broadcastToExtension({ type: MSG.UPLOAD_PROGRESS, payload: { percent, status: 'uploading' } })
-      })
+      }, settings.apiKey || undefined)
       broadcastToExtension({
         type: MSG.UPLOAD_PROGRESS,
         payload: {

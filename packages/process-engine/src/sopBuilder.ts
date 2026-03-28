@@ -453,6 +453,24 @@ function buildAction(
         'form';
       return `Complete and submit the "${formName}"`;
     }
+    case 'data_entry': {
+      const deFields = events
+        .filter(e => e.event_type === 'interaction.input_change' && safeTargetLabel(e))
+        .map(e => safeTargetLabel(e) as string)
+        .filter((l, i, arr) => arr.indexOf(l) === i)
+        .slice(0, 3);
+      return deFields.length > 0
+        ? `Enter data in ${deFields.join(', ')}`
+        : title;
+    }
+    case 'send_action': {
+      const actionEvt = events.find(e =>
+        e.event_type === 'interaction.click' && safeTargetLabel(e));
+      const actionLbl = actionEvt !== undefined ? safeTargetLabel(actionEvt) : undefined;
+      return actionLbl ? `Click "${actionLbl}" to complete the action` : title;
+    }
+    case 'file_action':
+      return 'Attach or upload the required file';
     case 'error_handling':
       return 'Resolve the error or exception state';
     case 'annotation': {
@@ -481,9 +499,9 @@ function buildSOPInputs(steps: SOPStep[], systems: string[]): string[] {
     inputs.push(systemAccess);
   }
 
-  // Collect field-level inputs from fill_and_submit steps
+  // Collect field-level inputs from data entry steps (fill_and_submit + data_entry)
   for (const step of steps) {
-    if (step.category !== 'fill_and_submit') continue;
+    if (step.category !== 'fill_and_submit' && step.category !== 'data_entry') continue;
     for (const input of step.inputs) {
       if (
         input.includes('interface') ||
@@ -516,16 +534,21 @@ function buildSOPInputs(steps: SOPStep[], systems: string[]): string[] {
  */
 function buildSOPOutputs(steps: SOPStep[], activityName: string): string[] {
   const outputs: string[] = [
-    `"${activityName}" process completed`,
+    `"${activityName}" workflow completed`,
   ];
 
-  const submits = steps.filter(s => s.category === 'fill_and_submit');
+  const submits = steps.filter(s => s.category === 'fill_and_submit' || s.category === 'send_action');
   if (submits.length > 0) {
-    outputs.push('Form data submitted and recorded in system');
+    outputs.push('Data submitted and recorded in system');
     const last = submits[submits.length - 1]!;
     if (last.expectedOutcome) {
       outputs.push(last.expectedOutcome);
     }
+  }
+
+  const fileSteps = steps.filter(s => s.category === 'file_action');
+  if (fileSteps.length > 0) {
+    outputs.push('File(s) attached or uploaded successfully');
   }
 
   const navigations = steps.filter(s => s.category === 'click_then_navigate');
@@ -546,10 +569,10 @@ function buildCompletionCriteria(steps: SOPStep[], activityName: string): string
     `All ${steps.length} procedure step${steps.length === 1 ? '' : 's'} executed in sequence`,
   ];
 
-  const submits = steps.filter(s => s.category === 'fill_and_submit');
+  const submits = steps.filter(s => s.category === 'fill_and_submit' || s.category === 'send_action');
   if (submits.length > 0) {
     criteria.push(
-      'Final form submission acknowledged by the system ' +
+      'Final send/submit action acknowledged by the system ' +
       '(confirmation message, redirect, or updated record status)',
     );
   }

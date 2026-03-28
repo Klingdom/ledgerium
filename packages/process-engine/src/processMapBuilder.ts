@@ -334,13 +334,16 @@ function deriveBoundaryLabel(
   boundaryReason: string | undefined,
 ): string {
   // Synthetic node transitions
-  if (fromNodeType === 'start') return 'Process begins';
-  if (toNodeType === 'end') return 'Process completes';
+  if (fromNodeType === 'start') return 'Workflow begins';
+  if (toNodeType === 'end') return 'Workflow completes';
 
   if (boundaryReason === undefined) return 'Continues';
 
   const LABELS: Record<string, string> = {
     navigation_changed:  'Page navigation',
+    route_changed:       'Route changed',
+    target_changed:      'Target changed',
+    action_completed:    'Action completed',
     form_submitted:      'Form submitted',
     app_context_changed: 'Application switch',
     idle_gap:            'Idle pause',

@@ -1,0 +1,65 @@
+# Dependencies (will be installed fresh in Docker)
+node_modules/
+**/node_modules/
+
+# Build outputs
+apps/web-app/.next/
+apps/web-app/data/
+apps/extension-app/dist/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment files (use Docker env vars instead)
+.env
+.env.local
+.env.production
+apps/web-app/.env
+apps/web-app/.env.local
+
+# Claude Code config
+.claude/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test / dev fixtures
+fixtures/capture-runs/
+fixtures/segmentation-golden/
+tests/
+
+# Static site files not needed in container
+*.html
+!apps/web-app/src/**/*.html
+404.html
+about.html
+blog*.html
+contact.html
+docs.html
+events.ndjson
+index.html
+pricing.html
+privacy.html
+product.html
+security.html
+session.json
+sitemap.xml
+robots.txt
+terms.html
+trust.html
+*.svg
+!apps/web-app/public/**
+
+# Python / non-Node files
+*.py
+requirements.txt
+*.md
+!apps/web-app/prisma/
