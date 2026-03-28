@@ -106,6 +106,9 @@ const VALID_GROUPING_REASONS: ReadonlySet<string> = new Set<GroupingReason>([
   'fill_and_submit',
   'repeated_click_dedup',
   'single_action',
+  'data_entry',
+  'send_action',
+  'file_action',
   'error_handling',
   'annotation',
 ]);
@@ -146,6 +149,31 @@ function deriveInputs(
       ];
     }
 
+    case 'data_entry': {
+      const fields = events
+        .filter(e => e.event_type === 'interaction.input_change' && targetLabel(e))
+        .map(e => targetLabel(e) as string)
+        .filter((l, i, arr) => arr.indexOf(l) === i)
+        .slice(0, 5);
+      return [
+        ...fields.map(f => `${f} value`),
+        `Access to ${systemCtx}`,
+      ];
+    }
+
+    case 'send_action': {
+      const actionLabel = events.find(e => e.event_type === 'interaction.click' && targetLabel(e))
+        ?.target_summary?.label;
+      return [
+        actionLabel ? `"${actionLabel}" button available` : 'Completion action available',
+        'All prerequisite data entered',
+        `Access to ${systemCtx}`,
+      ];
+    }
+
+    case 'file_action':
+      return ['File to upload/attach', `Access to ${systemCtx}`, 'File browser or drag target'];
+
     case 'error_handling':
       return ['Error state from prior action', 'User response/correction'];
 
@@ -180,6 +208,19 @@ function deriveOutputs(
         'Server-side state updated',
         `Confirmation or redirect from ${systemCtx}`,
       ];
+
+    case 'data_entry':
+      return ['Field value(s) entered', `${systemCtx} state updated`];
+
+    case 'send_action':
+      return [
+        'Action completed successfully',
+        `${systemCtx} state updated`,
+        'Confirmation or response from system',
+      ];
+
+    case 'file_action':
+      return ['File attached or uploaded', `${systemCtx} reflects the file`];
 
     case 'error_handling':
       return ['Error state resolved or acknowledged', 'Workflow resumed'];
@@ -217,6 +258,17 @@ function deriveCompletionCondition(
       return 'Target page has fully loaded';
     case 'fill_and_submit':
       return 'Form submitted and confirmation received (redirect or toast message)';
+    case 'data_entry':
+      return 'All required values entered and accepted by the system';
+    case 'send_action': {
+      const actionLabel2 = events.find(e => e.event_type === 'interaction.click')
+        ?.target_summary?.label;
+      return actionLabel2
+        ? `"${actionLabel2}" action confirmed by system`
+        : 'Action confirmed by system (redirect, toast, or status update)';
+    }
+    case 'file_action':
+      return 'File upload completes and file appears in the interface';
     case 'error_handling':
       return 'Error acknowledged and workflow can continue';
     case 'annotation':
@@ -270,6 +322,25 @@ export function deriveOperationalDefinition(
       return `The user clicked "${label ?? 'an element'}" on ${appLabel}. Multiple rapid clicks on the same target were deduplicated into a single logical action to eliminate noise.`;
     }
 
+    case 'data_entry': {
+      const deFields = events
+        .filter(e => e.event_type === 'interaction.input_change' && targetLabel(e))
+        .map(e => targetLabel(e) as string)
+        .filter((l, i, arr) => arr.indexOf(l) === i)
+        .slice(0, 3);
+      const deFieldList = deFields.length > 0 ? ` (${deFields.join(', ')})` : '';
+      return `The user entered data${deFieldList} on ${appLabel}. This step groups related data entry actions into a single logical unit.`;
+    }
+
+    case 'send_action': {
+      const actionEvt = events.find(e => e.event_type === 'interaction.click');
+      const actionLbl = actionEvt !== undefined ? targetLabel(actionEvt) : undefined;
+      return `The user completed an action by clicking "${actionLbl ?? 'a completion button'}" on ${appLabel}. This step represents a deliberate send, save, or submit action that advances the workflow.`;
+    }
+
+    case 'file_action':
+      return `The user attached or uploaded a file on ${appLabel}. This step captures the file interaction and any associated confirmation.`;
+
     case 'error_handling':
       return `The user encountered and responded to an error or unexpected state on ${appLabel}. This step captures the error recovery interaction pattern within the workflow.`;
 
@@ -303,11 +374,14 @@ export function deriveOperationalDefinition(
 function derivePurpose(groupingReason: GroupingReason, step: DerivedStepInput): string {
   const base = `Step ${step.ordinal} of the workflow.`;
   switch (groupingReason) {
-    case 'click_then_navigate': return `${base} Opens a new page or view, enabling the user to proceed to the next stage of the process.`;
+    case 'click_then_navigate': return `${base} Opens a new page or view, enabling the user to proceed to the next stage of the workflow.`;
     case 'fill_and_submit':     return `${base} Captures and submits structured data to the system, completing a data entry transaction.`;
     case 'repeated_click_dedup': return `${base} Triggers a specific UI control, representing a deliberate user intent.`;
+    case 'data_entry':           return `${base} Enters or updates data in the system, building toward a complete record.`;
+    case 'send_action':          return `${base} Executes a completion action (send, save, submit) that advances the workflow to the next stage.`;
+    case 'file_action':          return `${base} Attaches or uploads a file as part of the workflow.`;
     case 'error_handling':       return `${base} Resolves an exception or error state to allow the workflow to continue.`;
-    case 'annotation':           return `${base} Records contextual information about the process at this point.`;
+    case 'annotation':           return `${base} Records contextual information about the workflow at this point.`;
     default:                     return `${base} Performs a discrete user interaction within the workflow.`;
   }
 }

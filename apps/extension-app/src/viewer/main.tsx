@@ -228,24 +228,45 @@ function App() {
     if (!sessionId) return  // will show file ingest screen
 
     setLoading(true)
-    chrome.runtime.sendMessage(
-      { type: MSG.GET_BUNDLE, payload: { sessionId } },
-      (response: SessionBundle | null) => {
-        if (chrome.runtime.lastError) {
-          setError(`Failed to load session: ${chrome.runtime.lastError.message ?? 'Unknown error'}`)
-          setLoading(false)
-          return
-        }
-        if (!response || !isValidBundle(response)) {
-          setError('Session not found or data is invalid. It may have been deleted.')
-          setLoading(false)
-          return
-        }
-        setBundle(response)
-        document.title = `${response.sessionJson.activityName} — Ledgerium Process Map`
-        setLoading(false)
-      }
-    )
+
+    // MV3 service worker may be asleep when the viewer tab opens.
+    // Wake it with a lightweight GET_STATE ping, then fetch the bundle.
+    function fetchBundle(retriesLeft: number): void {
+      // Wake the service worker first
+      chrome.runtime.sendMessage({ type: MSG.GET_STATE }, () => {
+        // Ignore errors from the wake-up ping — the SW is now alive
+        if (chrome.runtime.lastError) { /* ignore */ }
+
+        chrome.runtime.sendMessage(
+          { type: MSG.GET_BUNDLE, payload: { sessionId } },
+          (response: SessionBundle | null) => {
+            if (chrome.runtime.lastError) {
+              if (retriesLeft > 0) {
+                setTimeout(() => fetchBundle(retriesLeft - 1), 500)
+                return
+              }
+              setError(`Failed to load session: ${chrome.runtime.lastError.message ?? 'Unknown error'}`)
+              setLoading(false)
+              return
+            }
+            if (!response || !isValidBundle(response)) {
+              if (retriesLeft > 0) {
+                setTimeout(() => fetchBundle(retriesLeft - 1), 500)
+                return
+              }
+              setError('Session not found or data is invalid. It may have been deleted.')
+              setLoading(false)
+              return
+            }
+            setBundle(response)
+            document.title = `${response.sessionJson.activityName} — Ledgerium Process Map`
+            setLoading(false)
+          }
+        )
+      })
+    }
+
+    fetchBundle(3)
   }, [])
 
   if (loading) return <LoadingScreen />

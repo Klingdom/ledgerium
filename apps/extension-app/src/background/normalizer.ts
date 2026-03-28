@@ -43,7 +43,8 @@ const RAW_TO_CANONICAL: Record<string, string> = {
   user_annotation:     'session.annotation_added',
 }
 
-const SENSITIVE_RE = /password|passwd|secret|token|api[_-]?key|credit|cvv|ssn/i
+// Mirrors @ledgerium/policy-engine SENSITIVE_SELECTOR_PATTERNS (11 patterns)
+const SENSITIVE_RE = /password|passwd|secret|token|api[_-]?key|credit[_-]?card|card[_-]?number|cvv|ssn|social[_-]?security|tax[_-]?id/i
 
 function isSensitive(raw: RawEvent): boolean {
   return (

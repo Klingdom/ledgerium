@@ -109,7 +109,12 @@ const NODE_GAP = 16
 const NODE_HEIGHT = 70
 
 function buildFlowNodes(processMap: ProcessMap): SidebarFlowNode[] {
-  return processMap.nodes.map((engineNode, index) => ({
+  // Filter out synthetic start/end nodes — they add visual noise in the sidebar.
+  // Layout task nodes sequentially from top to bottom.
+  const taskNodes = processMap.nodes.filter(
+    n => n.nodeType !== 'start' && n.nodeType !== 'end',
+  )
+  return taskNodes.map((engineNode, index) => ({
     id: engineNode.id,
     type: 'sidebarStep',
     position: { x: 0, y: index * (NODE_HEIGHT + NODE_GAP) },
@@ -128,15 +133,22 @@ interface SidebarProcessMapProps {
 export function SidebarProcessMap({ processMap, selectedStepId, onSelectStep }: SidebarProcessMapProps) {
   const initialNodes = useMemo(() => buildFlowNodes(processMap), [processMap])
 
+  const taskNodeIds = useMemo(() => {
+    const ids = new Set(initialNodes.map(n => n.id))
+    return ids
+  }, [initialNodes])
+
   const flowEdges = useMemo(() =>
-    processMap.edges.map(e => ({
-      id: e.id,
-      source: e.source,
-      target: e.target,
-      type: 'smoothstep',
-      style: { stroke: '#1e2d3d', strokeWidth: 1.5 },
-    })),
-    [processMap]
+    processMap.edges
+      .filter(e => taskNodeIds.has(e.source) && taskNodeIds.has(e.target))
+      .map(e => ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        type: 'smoothstep',
+        style: { stroke: '#1e2d3d', strokeWidth: 1.5 },
+      })),
+    [processMap, taskNodeIds]
   )
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
@@ -173,7 +185,7 @@ export function SidebarProcessMap({ processMap, selectedStepId, onSelectStep }: 
       onPaneClick={handlePaneClick}
       nodeTypes={nodeTypes}
       fitView
-      fitViewOptions={{ padding: 0.2, maxZoom: 1.1 }}
+      fitViewOptions={{ padding: 0.15, maxZoom: 1.1, minZoom: 0.4 }}
       minZoom={0.2}
       maxZoom={2}
       panOnScroll

@@ -27,12 +27,18 @@ export type GroupingReason =
   | 'fill_and_submit'
   | 'repeated_click_dedup'
   | 'single_action'
+  | 'data_entry'
+  | 'send_action'
+  | 'file_action'
   | 'error_handling'
   | 'annotation';
 
 export type BoundaryReason =
   | 'form_submitted'
   | 'navigation_changed'
+  | 'route_changed'
+  | 'target_changed'
+  | 'action_completed'
   | 'app_context_changed'
   | 'idle_gap'
   | 'user_annotation'
@@ -52,6 +58,9 @@ export const CATEGORY_CONFIG: Record<GroupingReason, CategoryConfig> = {
   fill_and_submit:      { label: 'Form Submit',     color: '#60a5fa', bg: 'rgba(96,165,250,0.07)' },
   repeated_click_dedup: { label: 'Repeated Action', color: '#fb923c', bg: 'rgba(251,146,60,0.07)' },
   single_action:        { label: 'Action',          color: '#94a3b8', bg: 'rgba(148,163,184,0.07)' },
+  data_entry:           { label: 'Data Entry',      color: '#a78bfa', bg: 'rgba(167,139,250,0.07)' },
+  send_action:          { label: 'Send / Submit',   color: '#34d399', bg: 'rgba(52,211,153,0.07)' },
+  file_action:          { label: 'File Action',     color: '#fbbf24', bg: 'rgba(251,191,36,0.07)' },
   error_handling:       { label: 'Error Handling',  color: '#f87171', bg: 'rgba(248,113,113,0.07)' },
   annotation:           { label: 'Annotation',      color: '#c084fc', bg: 'rgba(192,132,252,0.07)' },
 };

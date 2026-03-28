@@ -1,6 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useHistory } from '../hooks/useHistory.js'
-import type { HistoryEntry } from '../../shared/types.js'
+import { STORAGE_KEY_SETTINGS } from '../../shared/constants.js'
+import { MSG } from '../../shared/types.js'
+import type { HistoryEntry, ExtensionSettings } from '../../shared/types.js'
 
 interface IdleScreenProps {
   onStart: (activityName: string) => void
@@ -73,6 +75,113 @@ function HistoryRow({
   )
 }
 
+function SyncSettings() {
+  const [isOpen, setIsOpen] = useState(false)
+  const [syncUrl, setSyncUrl] = useState('')
+  const [apiKey, setApiKey] = useState('')
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    chrome.storage.sync.get([STORAGE_KEY_SETTINGS], result => {
+      const s = result[STORAGE_KEY_SETTINGS] as ExtensionSettings | undefined
+      if (s) {
+        setSyncUrl(s.uploadUrl ?? '')
+        setApiKey(s.apiKey ?? '')
+      }
+    })
+  }, [])
+
+  const handleSave = useCallback(() => {
+    chrome.runtime.sendMessage({
+      type: MSG.SETTINGS_UPDATED,
+      payload: { uploadUrl: syncUrl.trim(), apiKey: apiKey.trim() },
+    })
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }, [syncUrl, apiKey])
+
+  if (!isOpen) {
+    return (
+      <button
+        onClick={() => setIsOpen(true)}
+        className="w-full text-center py-2 text-xs text-gray-600 hover:text-gray-400 transition-colors"
+      >
+        ⚙ Sync Settings
+      </button>
+    )
+  }
+
+  return (
+    <div className="px-4 py-3 border-t border-gray-800 space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">
+          Sync Settings
+        </p>
+        <button
+          onClick={() => setIsOpen(false)}
+          className="text-xs text-gray-600 hover:text-gray-400"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div className="space-y-2">
+        <div>
+          <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">
+            Sync URL
+          </label>
+          <input
+            type="url"
+            value={syncUrl}
+            onChange={e => setSyncUrl(e.target.value)}
+            placeholder="https://your-app.com/api/sync"
+            className="
+              w-full rounded-md bg-gray-900 border border-gray-700
+              text-xs text-gray-200 placeholder-gray-700
+              px-2.5 py-2
+              focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600/40
+            "
+          />
+        </div>
+
+        <div>
+          <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">
+            API Key
+          </label>
+          <input
+            type="password"
+            value={apiKey}
+            onChange={e => setApiKey(e.target.value)}
+            placeholder="ldg_..."
+            className="
+              w-full rounded-md bg-gray-900 border border-gray-700
+              text-xs text-gray-200 placeholder-gray-700 font-mono
+              px-2.5 py-2
+              focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600/40
+            "
+          />
+        </div>
+
+        <button
+          onClick={handleSave}
+          className="
+            w-full py-2 rounded-md text-xs font-medium
+            bg-gray-800 hover:bg-gray-700 text-gray-300
+            transition-colors
+          "
+        >
+          {saved ? '✓ Saved' : 'Save'}
+        </button>
+      </div>
+
+      <p className="text-[10px] text-gray-700 leading-relaxed">
+        Get your Sync URL and API Key from your Ledgerium web app account page.
+        When configured, recordings sync automatically when you stop recording.
+      </p>
+    </div>
+  )
+}
+
 export function IdleScreen({ onStart, onOpenHistory }: IdleScreenProps) {
   const [activityName, setActivityName] = useState('')
   const { entries, loading, deleteEntry } = useHistory()
@@ -138,6 +247,9 @@ export function IdleScreen({ onStart, onOpenHistory }: IdleScreenProps) {
           </button>
         </form>
       </div>
+
+      {/* ─── Sync Settings ──────────────────────────────────────────────── */}
+      <SyncSettings />
 
       {/* ─── Activity History ───────────────────────────────────────────── */}
       <div className="flex-1 min-h-0 flex flex-col border-t border-gray-800">

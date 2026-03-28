@@ -291,6 +291,59 @@ describe('deriveStepTitle', () => {
       expect(deriveStepTitle([], 'single_action')).toBe('Perform action');
     });
   });
+
+  // --- data_entry ------------------------------------------------------------
+
+  describe('data_entry', () => {
+    it('uses target label when present', () => {
+      const evt = makeEvent({
+        event_id: 'evt-1',
+        event_type: 'interaction.input_change',
+        target_summary: { label: 'Cell A11' },
+      });
+      expect(deriveStepTitle([evt], 'data_entry')).toBe('Enter Cell A11');
+    });
+
+    it('falls back to "field" when no label', () => {
+      const evt = makeEvent({ event_id: 'evt-1', event_type: 'interaction.input_change' });
+      expect(deriveStepTitle([evt], 'data_entry')).toBe('Enter field');
+    });
+  });
+
+  // --- send_action -----------------------------------------------------------
+
+  describe('send_action', () => {
+    it('uses target label directly when present', () => {
+      const evt = makeEvent({
+        event_id: 'evt-1',
+        event_type: 'interaction.click',
+        target_summary: { label: 'Send Email' },
+      });
+      expect(deriveStepTitle([evt], 'send_action')).toBe('Send Email');
+    });
+
+    it('falls back to "Complete action" when no label', () => {
+      const evt = makeEvent({ event_id: 'evt-1', event_type: 'interaction.click' });
+      expect(deriveStepTitle([evt], 'send_action')).toBe('Complete action');
+    });
+  });
+
+  // --- file_action -----------------------------------------------------------
+
+  describe('file_action', () => {
+    it('always returns "Attach file"', () => {
+      const evt = makeEvent({
+        event_id: 'evt-1',
+        event_type: 'interaction.click',
+        target_summary: { label: 'Upload', elementType: 'file' },
+      });
+      expect(deriveStepTitle([evt], 'file_action')).toBe('Attach file');
+    });
+
+    it('returns "Attach file" even with no events', () => {
+      expect(deriveStepTitle([], 'file_action')).toBe('Attach file');
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -308,12 +361,24 @@ describe('calculateConfidence', () => {
     expect(calculateConfidence(emptyEvents, 'fill_and_submit')).toBe(0.9);
   });
 
+  it('send_action → 0.9', () => {
+    expect(calculateConfidence(emptyEvents, 'send_action')).toBe(0.9);
+  });
+
   it('click_then_navigate → 0.85', () => {
     expect(calculateConfidence(emptyEvents, 'click_then_navigate')).toBe(0.85);
   });
 
+  it('file_action → 0.85', () => {
+    expect(calculateConfidence(emptyEvents, 'file_action')).toBe(0.85);
+  });
+
   it('error_handling → 0.8', () => {
     expect(calculateConfidence(emptyEvents, 'error_handling')).toBe(0.8);
+  });
+
+  it('data_entry → 0.8', () => {
+    expect(calculateConfidence(emptyEvents, 'data_entry')).toBe(0.8);
   });
 
   it('repeated_click_dedup → 0.7', () => {
