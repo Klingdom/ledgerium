@@ -1,0 +1,21 @@
+services:
+  web:
+    image: ghcr.io/klingdom/ledgerium:latest
+    container_name: ledgerium-ai
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ledgerium-data:/app/data
+    environment:
+      NODE_ENV: "production"
+      AUTH_TRUST_HOST: "true"
+      PORT: "3000"
+      DATABASE_URL: "file:/app/data/ledgerium.db"
+      DATA_DIR: "/app/data"
+      UPLOAD_DIR: "/app/data/uploads"
+      NEXTAUTH_SECRET: "sladfjasdlkfjsadlkfjasdlfkjsadlkfjsadlkfjsaldkfjasldkfjsaldkfjlsadkjflsakdfjlsakdfjlaskdjf"
+      NEXTAUTH_URL: "https://ledgerium.ai"
+volumes:
+  ledgerium-data:
+    driver: local

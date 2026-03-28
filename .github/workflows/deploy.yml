@@ -57,7 +57,7 @@ jobs:
             NODE_ENV=production
             PORT=3000
             NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-            NEXTAUTH_URL=${{ vars.NEXTAUTH_URL || 'http://localhost:3000' }}
+            NEXTAUTH_URL=${{ vars.NEXTAUTH_URL || 'https://ledgerium.ai' }}
             DATABASE_URL=file:/app/data/ledgerium.db
             DATA_DIR=/app/data
             UPLOAD_DIR=/app/data/uploads

@@ -23,7 +23,7 @@ services:
       - UPLOAD_DIR=/app/data/uploads
       - AUTH_TRUST_HOST=true
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-me}
-      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-https://ledgerium.ai}
 
 volumes:
   ledgerium-data:

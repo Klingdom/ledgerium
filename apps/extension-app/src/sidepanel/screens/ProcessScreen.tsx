@@ -400,7 +400,7 @@ function ExportView({
 
       if (!syncUrl || !apiKey) {
         // No sync configured — open the web app with instructions
-        const baseUrl = syncUrl?.replace('/api/sync', '') ?? 'http://localhost:3000'
+        const baseUrl = syncUrl?.replace('/api/sync', '') ?? 'https://ledgerium.ai'
         chrome.tabs.create({ url: `${baseUrl}/upload` })
         return
       }

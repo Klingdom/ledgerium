@@ -26,7 +26,7 @@ docker compose up -d
 # View logs
 docker compose logs -f
 
-# Open http://localhost:3000
+# Open https://ledgerium.ai
 ```
 
 ### Updating
@@ -72,7 +72,7 @@ For production, consider scheduled backups via cron:
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `NEXTAUTH_SECRET` | Yes | — | Auth session encryption key |
-| `NEXTAUTH_URL` | No | `http://localhost:3000` | Public URL for auth callbacks |
+| `NEXTAUTH_URL` | No | `https://ledgerium.ai` | Public URL for auth callbacks |
 | `PORT` | No | `3000` | Port to expose |
 | `DATABASE_URL` | No | `file:/app/data/ledgerium.db` | SQLite database path |
 | `DATA_DIR` | No | `/app/data` | Base directory for persistent data |

@@ -15,7 +15,7 @@ services:
       DATA_DIR: /app/data
       UPLOAD_DIR: /app/data/uploads
       NEXTAUTH_SECRET: sladfjasdlkfjsadlkfjasdlfkjsadlkfjsadlkfjsaldkfjasldkfjsaldkfjlsadkjflsakdfjlsakdfjlaskdjf
-      NEXTAUTH_URL: http://187.77.25.50:3000
+      NEXTAUTH_URL: https://ledgerium.ai
 volumes:
   ledgerium-data:
     driver: local
