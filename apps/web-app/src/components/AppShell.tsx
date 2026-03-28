@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import {
@@ -8,10 +9,12 @@ import {
   Upload,
   User,
   LogOut,
+  BarChart3,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Workflows', icon: LayoutDashboard },
+  { href: '/analytics', label: 'Intelligence', icon: BarChart3 },
   { href: '/upload', label: 'Upload', icon: Upload },
   { href: '/account', label: 'Account', icon: User },
 ];
@@ -25,11 +28,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Top nav */}
       <header className="sticky top-0 z-30 border-b border-gray-200 bg-white">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <span className="text-lg font-bold text-gray-900">Ledgerium</span>
-            <span className="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-semibold text-brand-700 uppercase tracking-wide">
-              AI
-            </span>
+          <Link href="/dashboard" className="flex items-center">
+            <Image
+              src="/img/ledgerium_primary_logo.png"
+              alt="Ledgerium AI"
+              width={160}
+              height={40}
+              className="h-7 w-auto"
+              priority
+            />
           </Link>
 
           <nav className="flex items-center gap-1">

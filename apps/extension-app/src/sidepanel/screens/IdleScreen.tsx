@@ -204,9 +204,11 @@ export function IdleScreen({ onStart, onOpenHistory }: IdleScreenProps) {
       <div className="flex-none px-4 pt-5 pb-4">
         {/* Logo / Hero */}
         <div className="flex flex-col items-center mb-5 mt-1">
-          <div className="w-10 h-10 rounded-xl bg-teal-900/60 border border-teal-800 flex items-center justify-center mb-2.5">
-            <span className="text-teal-400 text-lg">⬡</span>
-          </div>
+          <img
+            src={chrome.runtime.getURL('icons/icon-128.png')}
+            alt="Ledgerium AI"
+            className="w-10 h-10 rounded-xl mb-2.5"
+          />
           <h1 className="text-sm font-semibold text-gray-100">Ledgerium AI</h1>
           <p className="text-xs text-gray-500 mt-0.5">Process recorder</p>
         </div>

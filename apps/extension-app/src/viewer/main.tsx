@@ -78,18 +78,11 @@ function FileIngestScreen({ onBundle }: { onBundle: (b: SessionBundle) => void }
     }}>
       {/* Logo */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-        <div style={{
-          width: 32,
-          height: 32,
-          borderRadius: 8,
-          background: 'rgba(45,212,191,0.12)',
-          border: '1px solid rgba(45,212,191,0.25)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <span style={{ fontSize: 16, fontWeight: 800, color: '#2dd4bf' }}>L</span>
-        </div>
+        <img
+          src={chrome.runtime.getURL('icons/icon-128.png')}
+          alt="Ledgerium AI"
+          style={{ width: 32, height: 32, borderRadius: 8 }}
+        />
         <div>
           <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#f3f4f6' }}>
             Ledgerium Process Map

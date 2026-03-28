@@ -112,13 +112,11 @@ export function ProcessMapViewer({ bundle }: ProcessMapViewerProps) {
         height: 52, borderBottom: '1px solid #111827', background: '#0d1117', flexShrink: 0, zIndex: 10,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 24, height: 24, borderRadius: 6,
-            background: 'rgba(45,212,191,0.15)', border: '1px solid rgba(45,212,191,0.3)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <span style={{ fontSize: 11, fontWeight: 800, color: '#2dd4bf' }}>L</span>
-          </div>
+          <img
+            src={chrome.runtime.getURL('icons/icon-128.png')}
+            alt="Ledgerium AI"
+            style={{ width: 24, height: 24, borderRadius: 6 }}
+          />
           <span style={{ fontSize: 13, fontWeight: 700, color: '#f3f4f6' }}>{meta.activityName}</span>
         </div>
 

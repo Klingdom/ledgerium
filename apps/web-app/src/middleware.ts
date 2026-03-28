@@ -33,5 +33,6 @@ export const config = {
     '/workflows/:path*',
     '/upload/:path*',
     '/account/:path*',
+    '/analytics/:path*',
   ],
 };
