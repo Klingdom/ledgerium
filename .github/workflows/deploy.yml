@@ -1,0 +1,27 @@
+name: Deploy to Hostinger VPS
+
+on:
+  push:
+    branches:
+      - main
+      - feature/recorder-v2
+  workflow_dispatch: # Allow manual trigger from GitHub UI
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Hostinger
+        uses: hostinger/deploy-action@v1
+        with:
+          api-key: ${{ secrets.HOSTINGER_API_KEY }}
+          virtual-machine: ${{ vars.HOSTINGER_VM_ID }}
+          docker-compose-path: compose.yaml
+          environment-variables: |
+            NODE_ENV=production
+            PORT=3000
+            NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+            NEXTAUTH_URL=https://${{ vars.SITE_DOMAIN || 'localhost' }}
+            DATABASE_URL=file:/app/data/ledgerium.db
+            DATA_DIR=/app/data
+            UPLOAD_DIR=/app/data/uploads
