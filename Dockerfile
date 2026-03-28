@@ -37,8 +37,8 @@ WORKDIR /app
 # Copy all node_modules from deps stage
 COPY --from=deps /app/ ./
 
-# Copy workspace source
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+# Copy workspace source + root tsconfig (extended by web-app)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY apps/web-app/ apps/web-app/
 COPY packages/process-engine/ packages/process-engine/
 COPY packages/intelligence-engine/ packages/intelligence-engine/
