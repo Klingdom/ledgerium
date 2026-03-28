@@ -62,10 +62,6 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Create non-root user
-RUN addgroup --system --gid 1001 ledgerium && \
-    adduser --system --uid 1001 --ingroup ledgerium ledgerium
-
 # Copy built app + production dependencies
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/web-app/.next ./apps/web-app/.next
@@ -86,11 +82,7 @@ COPY scripts/docker-start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
 # Create persistent data directory (will be mounted as a volume)
-RUN mkdir -p /app/data/uploads && \
-    chown -R ledgerium:ledgerium /app/data
-
-# Switch to non-root user
-USER ledgerium
+RUN mkdir -p /app/data/uploads
 
 # Environment defaults
 ENV NODE_ENV=production
