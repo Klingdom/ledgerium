@@ -1,0 +1,29 @@
+# ─── Ledgerium AI — Hostinger Docker Manager Compose ─────────────────────────
+#
+# This compose file uses a pre-built image from GitHub Container Registry.
+# Used by the GitHub Actions deploy workflow and Hostinger's "Compose from URL".
+#
+# For local Docker builds, use compose.yaml instead.
+# ──────────────────────────────────────────────────────────────────────────────
+
+services:
+  web:
+    image: ghcr.io/klingdom/ledgerium:latest
+    container_name: ledgerium-ai
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    volumes:
+      - ledgerium-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=file:/app/data/ledgerium.db
+      - DATA_DIR=/app/data
+      - UPLOAD_DIR=/app/data/uploads
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-me}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+
+volumes:
+  ledgerium-data:
+    driver: local
