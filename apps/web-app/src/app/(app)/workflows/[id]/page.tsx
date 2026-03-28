@@ -20,13 +20,16 @@ import { WorkflowTab } from '@/components/detail/WorkflowTab';
 import { SOPTab } from '@/components/detail/SOPTab';
 import { ReportTab } from '@/components/detail/ReportTab';
 import { EvidenceTab } from '@/components/detail/EvidenceTab';
+import { IntelligenceTab } from '@/components/detail/IntelligenceTab';
+import { Zap } from 'lucide-react';
 
-type TabId = 'workflow' | 'sop' | 'report' | 'evidence';
+type TabId = 'workflow' | 'sop' | 'report' | 'intelligence' | 'evidence';
 
 const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: 'workflow', label: 'Workflow', icon: Layers },
   { id: 'sop', label: 'SOP', icon: ListChecks },
   { id: 'report', label: 'Report', icon: FileText },
+  { id: 'intelligence', label: 'Intelligence', icon: Zap },
   { id: 'evidence', label: 'Evidence', icon: Eye },
 ];
 
@@ -181,6 +184,7 @@ export default function WorkflowDetailPage() {
       {activeTab === 'workflow' && <WorkflowTab processOutput={processOutput} processMap={processMap} />}
       {activeTab === 'sop' && <SOPTab sop={sopArtifact} />}
       {activeTab === 'report' && <ReportTab report={workflowReport} />}
+      {activeTab === 'intelligence' && <IntelligenceTab workflowId={id} />}
       {activeTab === 'evidence' && <EvidenceTab processOutput={processOutput} />}
     </div>
   );

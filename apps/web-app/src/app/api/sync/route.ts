@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { hashKey } from '@/lib/api-keys';
 import { validateBundle, runProcessEngine, buildWorkflowReportFromOutput } from '@/lib/ingestion';
+import { clusterWorkflows } from '@/lib/intelligence';
+import { UPLOAD_DIR } from '@/lib/storage';
 import fs from 'fs';
 import path from 'path';
-
-const UPLOAD_DIR = process.env.UPLOAD_DIR ?? './data/uploads';
 
 /**
  * POST /api/sync
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
 
   // Save raw JSON to disk
   const uploadId = crypto.randomUUID();
-  const uploadDir = path.resolve(process.cwd(), UPLOAD_DIR, userId);
+  const uploadDir = path.join(UPLOAD_DIR, userId);
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
@@ -177,6 +177,11 @@ export async function POST(req: NextRequest) {
   await db.user.update({
     where: { id: userId },
     data: { uploadCount: { increment: 1 } },
+  });
+
+  // Auto-cluster into process definitions (fire-and-forget)
+  void clusterWorkflows(userId).catch((err) => {
+    console.error('Auto-clustering failed (non-blocking):', err);
   });
 
   return NextResponse.json({

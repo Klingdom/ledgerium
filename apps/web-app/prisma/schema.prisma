@@ -20,9 +20,11 @@ model User {
   createdAt            DateTime @default(now()) @map("created_at")
   updatedAt            DateTime @updatedAt @map("updated_at")
 
-  uploads   Upload[]
-  workflows Workflow[]
-  apiKeys   ApiKey[]
+  uploads            Upload[]
+  workflows          Workflow[]
+  apiKeys            ApiKey[]
+  processDefinitions ProcessDefinition[]
+  insights           ProcessInsight[]
 
   @@map("users")
 }
@@ -76,13 +78,18 @@ model Workflow {
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
-  user      User               @relation(fields: [userId], references: [id])
-  upload    Upload?            @relation(fields: [sourceUploadId], references: [id])
-  artifacts WorkflowArtifact[]
+  processDefinitionId String? @map("process_definition_id")
+
+  user              User               @relation(fields: [userId], references: [id])
+  upload            Upload?            @relation(fields: [sourceUploadId], references: [id])
+  artifacts         WorkflowArtifact[]
+  processDefinition ProcessDefinition? @relation(fields: [processDefinitionId], references: [id])
+  insights          ProcessInsight[]
 
   @@index([userId])
   @@index([status])
   @@index([createdAt])
+  @@index([processDefinitionId])
   @@map("workflows")
 }
 
@@ -100,3 +107,61 @@ model WorkflowArtifact {
   @@index([workflowId])
   @@map("workflow_artifacts")
 }
+
+// ─── Phase 3: Process Intelligence ──────────────────────────────────────────
+
+model ProcessDefinition {
+  id               String   @id @default(uuid())
+  userId           String   @map("user_id")
+  canonicalName    String   @map("canonical_name")
+  description      String?
+  pathSignature    String   @map("path_signature")    // colon-separated step category sequence
+  runCount         Int      @default(0) @map("run_count")
+  variantCount     Int      @default(0) @map("variant_count")
+  avgDurationMs    Int?     @map("avg_duration_ms")
+  medianDurationMs Int?     @map("median_duration_ms")
+  stabilityScore   Float?   @map("stability_score")   // 0-1, sequence stability
+  confidenceScore  Float?   @map("confidence_score")  // cluster quality
+  intelligenceJson String?  @map("intelligence_json")  // cached PortfolioIntelligence JSON
+  analyzedAt       DateTime? @map("analyzed_at")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  user      User               @relation(fields: [userId], references: [id])
+  workflows Workflow[]
+  insights  ProcessInsight[]
+
+  @@index([userId])
+  @@index([pathSignature])
+  @@map("process_definitions")
+}
+
+model ProcessInsight {
+  id                    String   @id @default(uuid())
+  userId                String   @map("user_id")
+  processDefinitionId   String?  @map("process_definition_id")
+  workflowId            String?  @map("workflow_id")
+  insightType           String   @map("insight_type")    // bottleneck, loop, redundant_step, delay, variance, drift, anomaly
+  severity              String   @default("info")         // info, warning, critical
+  title                 String
+  explanation           String
+  recommendation        String?
+  evidenceJson          String?  @map("evidence_json")    // JSON: affected runs, values, baselines
+  observedValue         String?  @map("observed_value")
+  expectedValue         String?  @map("expected_value")
+  affectedRunIds        String?  @map("affected_run_ids") // JSON array of workflow IDs
+  dismissed             Boolean  @default(false)
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  user              User               @relation(fields: [userId], references: [id])
+  processDefinition ProcessDefinition? @relation(fields: [processDefinitionId], references: [id], onDelete: Cascade)
+  workflow          Workflow?           @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([processDefinitionId])
+  @@index([workflowId])
+  @@index([insightType])
+  @@index([severity])
+  @@map("process_insights")
+}
+
