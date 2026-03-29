@@ -81,20 +81,41 @@ export default function AccountPage() {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  const [billingLoading, setBillingLoading] = useState(false);
+  const [billingError, setBillingError] = useState('');
+
   async function handleUpgrade() {
-    const res = await fetch('/api/billing/checkout', { method: 'POST' });
-    if (res.ok) {
+    setBillingLoading(true);
+    setBillingError('');
+    try {
+      const res = await fetch('/api/billing/checkout', { method: 'POST' });
       const data = await res.json();
-      if (data.url) window.location.href = data.url;
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      setBillingError(data.error ?? 'Could not start checkout');
+    } catch {
+      setBillingError('Failed to connect to billing service');
     }
+    setBillingLoading(false);
   }
 
   async function handleManageBilling() {
-    const res = await fetch('/api/billing/portal', { method: 'POST' });
-    if (res.ok) {
+    setBillingLoading(true);
+    setBillingError('');
+    try {
+      const res = await fetch('/api/billing/portal', { method: 'POST' });
       const data = await res.json();
-      if (data.url) window.location.href = data.url;
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      setBillingError(data.error ?? 'Could not open billing portal');
+    } catch {
+      setBillingError('Failed to connect to billing service');
     }
+    setBillingLoading(false);
   }
 
   const planLabels: Record<string, string> = {
@@ -185,9 +206,12 @@ export default function AccountPage() {
                   Unlimited uploads, full workflow library, advanced search,
                   premium reports, and better exports.
                 </p>
-                <button onClick={handleUpgrade} className="btn-primary mt-3 text-xs">
-                  Upgrade Now
+                <button onClick={handleUpgrade} disabled={billingLoading} className="btn-primary mt-3 text-xs">
+                  {billingLoading ? 'Redirecting to Stripe...' : 'Upgrade Now'}
                 </button>
+                {billingError && (
+                  <p className="mt-2 text-xs text-red-600">{billingError}</p>
+                )}
               </div>
             </div>
           </div>
