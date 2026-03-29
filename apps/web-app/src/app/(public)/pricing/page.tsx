@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PRICING_CONFIG } from '@/lib/config';
 import { Check, ArrowRight, HelpCircle } from 'lucide-react';
+import { UpgradeButton } from '@/components/UpgradeButton';
 
 export const metadata: Metadata = {
   title: 'Pricing — Ledgerium AI',
@@ -89,14 +90,23 @@ export default function PricingPage() {
                   )}
                 </div>
 
-                <Link
-                  href={plan.ctaHref}
-                  className={`w-full text-center mb-7 ${
-                    plan.highlighted ? 'btn-primary shadow-sm shadow-brand-600/20' : 'btn-secondary'
-                  }`}
-                >
-                  {plan.cta}
-                </Link>
+                {plan.id === 'pro' ? (
+                  <UpgradeButton
+                    fallbackHref={plan.ctaHref}
+                    className={`w-full text-center mb-7 btn-primary shadow-sm shadow-brand-600/20`}
+                  >
+                    {plan.cta}
+                  </UpgradeButton>
+                ) : (
+                  <Link
+                    href={plan.ctaHref}
+                    className={`w-full text-center mb-7 ${
+                      plan.highlighted ? 'btn-primary shadow-sm shadow-brand-600/20' : 'btn-secondary'
+                    }`}
+                  >
+                    {plan.cta}
+                  </Link>
+                )}
 
                 <ul className="space-y-3 flex-1">
                   {plan.features.map((feature) => (

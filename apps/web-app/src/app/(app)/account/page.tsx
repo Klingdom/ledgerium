@@ -81,6 +81,22 @@ export default function AccountPage() {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  async function handleUpgrade() {
+    const res = await fetch('/api/billing/checkout', { method: 'POST' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    }
+  }
+
+  async function handleManageBilling() {
+    const res = await fetch('/api/billing/portal', { method: 'POST' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    }
+  }
+
   const planLabels: Record<string, string> = {
     free: 'Free Trial',
     pro: 'Pro',
@@ -169,11 +185,19 @@ export default function AccountPage() {
                   Unlimited uploads, full workflow library, advanced search,
                   premium reports, and better exports.
                 </p>
-                <button className="btn-primary mt-3 text-xs">
+                <button onClick={handleUpgrade} className="btn-primary mt-3 text-xs">
                   Upgrade Now
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {account?.plan === 'pro' && (
+          <div className="mt-4 flex gap-2">
+            <button onClick={handleManageBilling} className="btn-secondary text-xs">
+              Manage Subscription
+            </button>
           </div>
         )}
       </div>
