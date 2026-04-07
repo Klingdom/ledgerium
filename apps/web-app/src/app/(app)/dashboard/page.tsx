@@ -21,6 +21,8 @@ import {
   XIcon,
   Star,
   Eye,
+  Zap,
+  Lock,
 } from 'lucide-react';
 import { formatDuration, formatDateRelative, formatConfidence } from '@/lib/format';
 import { track } from '@/lib/analytics';
@@ -248,6 +250,15 @@ export default function DashboardPage() {
           </div>
           <ChevronRight className="h-4 w-4 text-amber-400 flex-shrink-0" />
         </Link>
+      )}
+
+      {/* ── Upgrade prompt (near or at free limit) ─────────────────── */}
+      {workflows.length >= 4 && workflows.length <= 5 && !onboarding?.isDismissed && (
+        <UpgradeBanner
+          usage={workflows.length}
+          limit={5}
+          atLimit={workflows.length >= 5}
+        />
       )}
 
       {/* ── Header ────────────────────────────────────────────────────── */}
@@ -482,6 +493,44 @@ export default function DashboardPage() {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function UpgradeBanner({ usage, limit, atLimit }: { usage: number; limit: number; atLimit: boolean }) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleUpgrade() {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/billing/checkout', { method: 'POST' });
+      const data = await res.json();
+      if (data.url) { window.location.href = data.url; return; }
+    } catch { /* handled */ }
+    setLoading(false);
+  }
+
+  return (
+    <div className={`card px-ds-5 py-ds-4 mb-ds-4 flex items-center gap-ds-4 ${atLimit ? 'border-amber-200 bg-amber-50/50' : 'bg-brand-50/30 border-brand-100'}`}>
+      <div className={`flex h-9 w-9 items-center justify-center rounded-ds-md ${atLimit ? 'bg-amber-100' : 'bg-brand-100'}`}>
+        {atLimit ? <Lock className="h-5 w-5 text-amber-600" /> : <Zap className="h-5 w-5 text-brand-600" />}
+      </div>
+      <div className="flex-1">
+        <p className="text-ds-sm font-medium text-gray-900">
+          {atLimit
+            ? 'Free plan limit reached'
+            : `${usage} of ${limit} free uploads used`}
+        </p>
+        <p className="text-ds-xs text-gray-500">
+          {atLimit
+            ? 'Upgrade to Pro for unlimited workflows, advanced templates, and process intelligence.'
+            : 'Upgrade to Pro for unlimited uploads and advanced features.'}
+        </p>
+      </div>
+      <button onClick={handleUpgrade} disabled={loading} className="btn-primary text-xs gap-1 flex-shrink-0">
+        <Zap className="h-3.5 w-3.5" />
+        {loading ? 'Redirecting...' : 'Upgrade to Pro'}
+      </button>
     </div>
   );
 }

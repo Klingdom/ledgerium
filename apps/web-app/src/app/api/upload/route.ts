@@ -16,6 +16,23 @@ export async function POST(req: NextRequest) {
 
   const userId = session.user.id;
 
+  // ── Plan limit enforcement ──────────────────────────────────────────────
+  const user = await db.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+
+  const FREE_UPLOAD_LIMIT = 5;
+  if (user.plan === 'free' && user.uploadCount >= FREE_UPLOAD_LIMIT) {
+    return NextResponse.json({
+      error: 'Free plan limit reached',
+      code: 'UPGRADE_REQUIRED',
+      detail: `Your free plan includes ${FREE_UPLOAD_LIMIT} workflow uploads. Upgrade to Pro for unlimited uploads.`,
+      currentUsage: user.uploadCount,
+      limit: FREE_UPLOAD_LIMIT,
+    }, { status: 403 });
+  }
+
   try {
     const formData = await req.formData();
     const file = formData.get('file') as File | null;

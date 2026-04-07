@@ -55,6 +55,15 @@ export async function POST(req: NextRequest) {
     data: { lastUsedAt: new Date() },
   });
 
+  // ── Plan limit enforcement ──────────────────────────────────────────────
+  const user = await db.user.findUnique({ where: { id: userId } });
+  if (user && user.plan === 'free' && user.uploadCount >= 5) {
+    return NextResponse.json({
+      error: 'Free plan limit reached — upgrade to Pro for unlimited uploads',
+      code: 'UPGRADE_REQUIRED',
+    }, { status: 403 });
+  }
+
   // ── Parse and validate bundle ─────────────────────────────────────────────
   let parsed: unknown;
   try {
