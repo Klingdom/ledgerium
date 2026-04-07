@@ -81,8 +81,11 @@ COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY scripts/docker-start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
-# Create persistent data directory (will be mounted as a volume)
-RUN mkdir -p /app/data/uploads
+# Create persistent data directory and set ownership
+RUN mkdir -p /app/data/uploads && \
+    addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs && \
+    chown -R nextjs:nodejs /app/data
 
 # Environment defaults
 ENV NODE_ENV=production
@@ -95,6 +98,13 @@ ENV UPLOAD_DIR=/app/data/uploads
 
 EXPOSE 3000
 
+# Run as non-root user for security
+USER nextjs
+
 WORKDIR /app/apps/web-app
+
+# Health check for container orchestration
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
 
 CMD ["/app/start.sh"]

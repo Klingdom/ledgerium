@@ -14,7 +14,7 @@ services:
       DATABASE_URL: "file:/app/data/ledgerium.db"
       DATA_DIR: "/app/data"
       UPLOAD_DIR: "/app/data/uploads"
-      NEXTAUTH_SECRET: "sladfjasdlkfjsadlkfjasdlfkjsadlkfjsadlkfjsaldkfjasldkfjsaldkfjlsadkjflsakdfjlsakdfjlaskdjf"
+      NEXTAUTH_SECRET: "${NEXTAUTH_SECRET:?Set NEXTAUTH_SECRET before deploying}"
       NEXTAUTH_URL: "https://ledgerium.ai"
 volumes:
   ledgerium-data:
