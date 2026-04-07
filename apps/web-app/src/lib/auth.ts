@@ -28,6 +28,7 @@ const nextAuth = NextAuth({
           id: user.id,
           email: user.email,
           name: user.name ?? user.email,
+          isAdmin: user.isAdmin,
         };
       },
     }),
@@ -41,12 +42,14 @@ const nextAuth = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.isAdmin = user.isAdmin ?? false;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user && token.id) {
         session.user.id = token.id as string;
+        session.user.isAdmin = token.isAdmin ?? false;
       }
       return session;
     },

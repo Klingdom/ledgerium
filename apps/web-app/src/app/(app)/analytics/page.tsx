@@ -123,16 +123,6 @@ export default function AnalyticsPage() {
 
   return (
     <div>
-      {/* Product analytics link */}
-      <Link
-        href="/analytics/product"
-        className="card flex items-center gap-ds-3 px-ds-5 py-ds-3 mb-ds-4 hover:border-brand-200 transition-colors"
-      >
-        <BarChart3 className="h-4 w-4 text-brand-600" />
-        <span className="text-ds-sm text-gray-700">View Product Analytics Dashboard</span>
-        <ChevronRight className="h-4 w-4 text-gray-300 ml-auto" />
-      </Link>
-
       {/* Header */}
       <div className="flex items-center justify-between mb-ds-6">
         <div>

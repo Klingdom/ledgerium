@@ -17,6 +17,7 @@ model User {
   stripeCustomerId     String?  @map("stripe_customer_id")
   stripeSubscriptionId String?  @map("stripe_subscription_id")
   uploadCount          Int      @default(0) @map("upload_count")
+  isAdmin              Boolean  @default(false) @map("is_admin")
   createdAt            DateTime @default(now()) @map("created_at")
   updatedAt            DateTime @updatedAt @map("updated_at")
 

@@ -2,7 +2,8 @@
 
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import { User, CreditCard, Shield, Zap, Key, Copy, Check, Trash2, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { User, CreditCard, Shield, Zap, Key, Copy, Check, Trash2, Plus, BarChart3, Settings } from 'lucide-react';
 
 interface AccountData {
   plan: string;
@@ -284,6 +285,28 @@ export default function AccountPage() {
           </div>
         )}
       </div>
+
+      {/* Admin — only visible to admins */}
+      {session?.user?.isAdmin && (
+        <div className="card px-ds-5 py-ds-5 border-brand-200 bg-brand-50/30">
+          <div className="flex items-center gap-ds-3 mb-ds-4">
+            <Settings className="h-5 w-5 text-brand-600" />
+            <h2 className="text-ds-base font-semibold text-gray-900">Admin</h2>
+          </div>
+          <div className="space-y-ds-2">
+            <Link
+              href="/analytics/product"
+              className="flex items-center gap-ds-3 rounded-ds-md border border-gray-200 bg-white px-ds-4 py-ds-3 hover:border-brand-200 transition-colors"
+            >
+              <BarChart3 className="h-4 w-4 text-brand-600" />
+              <div>
+                <p className="text-ds-sm font-medium text-gray-900">Product Analytics</p>
+                <p className="text-ds-xs text-gray-500">User behavior, funnels, activation metrics</p>
+              </div>
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Trust */}
       <div className="card px-ds-5 py-ds-5">

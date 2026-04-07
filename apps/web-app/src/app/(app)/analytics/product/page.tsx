@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   BarChart3,
@@ -81,25 +83,42 @@ const FUNNEL_LABELS: Record<string, string> = {
 };
 
 export default function ProductAnalyticsPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [days, setDays] = useState(30);
+  const [forbidden, setForbidden] = useState(false);
 
   useEffect(() => {
+    if (status === 'loading') return;
+    if (!session?.user?.isAdmin) {
+      router.replace('/dashboard');
+      return;
+    }
     loadData();
-  }, [days]);
+  }, [days, status, session, router]);
 
   async function loadData() {
     setIsLoading(true);
     const res = await fetch(`/api/analytics/events?days=${days}`);
+    if (res.status === 403) {
+      setForbidden(true);
+      setIsLoading(false);
+      return;
+    }
     if (res.ok) {
       setData(await res.json());
     }
     setIsLoading(false);
   }
 
-  if (isLoading && !data) {
+  if (status === 'loading' || (isLoading && !data && !forbidden)) {
     return <div className="text-center text-ds-sm text-gray-400 py-20">Loading analytics...</div>;
+  }
+
+  if (forbidden || !session?.user?.isAdmin) {
+    return <div className="text-center text-ds-sm text-gray-400 py-20">Access denied.</div>;
   }
 
   if (!data) {
@@ -117,8 +136,8 @@ export default function ProductAnalyticsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-ds-6">
         <div>
-          <Link href="/analytics" className="inline-flex items-center gap-1 text-ds-sm text-gray-500 hover:text-gray-700 mb-ds-2">
-            <ArrowLeft className="h-4 w-4" /> Back to Intelligence
+          <Link href="/account" className="inline-flex items-center gap-1 text-ds-sm text-gray-500 hover:text-gray-700 mb-ds-2">
+            <ArrowLeft className="h-4 w-4" /> Back to Account
           </Link>
           <h1 className="text-ds-2xl font-bold tracking-tight text-gray-900">Product Analytics</h1>
           <p className="text-ds-sm text-gray-500">

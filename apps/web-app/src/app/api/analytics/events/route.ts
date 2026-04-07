@@ -58,6 +58,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // Product analytics is admin-only — regular users must not see global metrics
+  if (!session.user.isAdmin) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   try {
     const params = req.nextUrl.searchParams;
     const days = parseInt(params.get('days') ?? '30', 10);
