@@ -36,9 +36,16 @@ export async function GET(req: NextRequest) {
     sortBy === 'views' ? 'viewCount' :
     'createdAt';
 
+  const tagFilter = params.get('tag') ?? '';
+
+  if (tagFilter) {
+    where.tags = { some: { tagId: tagFilter } };
+  }
+
   const results = await db.workflow.findMany({
     where,
     orderBy: { [orderByField]: sortDir },
+    include: { tags: { include: { tag: true } } },
   });
 
   // Compute stats for dashboard
@@ -60,6 +67,11 @@ export async function GET(req: NextRequest) {
     workflows: results.map((w) => ({
       ...w,
       toolsUsed: w.toolsUsed ? JSON.parse(w.toolsUsed) : [],
+      tags: w.tags.map((wt) => ({
+        id: wt.tag.id,
+        name: wt.tag.name,
+        color: wt.tag.color,
+      })),
     })),
     stats: {
       totalWorkflows,

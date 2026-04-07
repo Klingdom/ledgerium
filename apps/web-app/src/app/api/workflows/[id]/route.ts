@@ -86,6 +86,46 @@ export async function PATCH(
     data,
   });
 
+  // Handle tag assignment: { tagIds: ['id1', 'id2'] } replaces all tags
+  if (Array.isArray(body.tagIds)) {
+    // Verify all tags belong to this user
+    const validTags = await db.tag.findMany({
+      where: { id: { in: body.tagIds }, userId: session.user.id },
+      select: { id: true },
+    });
+    const validIds = new Set(validTags.map((t) => t.id));
+
+    // Remove existing tags and re-create
+    await db.workflowTag.deleteMany({ where: { workflowId: params.id } });
+    if (validIds.size > 0) {
+      await db.workflowTag.createMany({
+        data: [...validIds].map((tagId) => ({
+          workflowId: params.id,
+          tagId,
+        })),
+      });
+    }
+  }
+
+  // Handle single tag add/remove for quick toggling
+  if (body.addTagId) {
+    const tag = await db.tag.findFirst({
+      where: { id: body.addTagId, userId: session.user.id },
+    });
+    if (tag) {
+      await db.workflowTag.upsert({
+        where: { workflowId_tagId: { workflowId: params.id, tagId: tag.id } },
+        create: { workflowId: params.id, tagId: tag.id },
+        update: {},
+      });
+    }
+  }
+  if (body.removeTagId) {
+    await db.workflowTag.deleteMany({
+      where: { workflowId: params.id, tagId: body.removeTagId },
+    });
+  }
+
   return NextResponse.json({
     ok: true,
     shareToken: (updated as any).shareToken ?? null,

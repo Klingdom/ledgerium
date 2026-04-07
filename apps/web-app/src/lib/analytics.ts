@@ -64,6 +64,13 @@ export type AnalyticsEvent =
   | { event: 'team_invite_accepted'; teamId: string }
   | { event: 'team_member_removed'; teamId: string }
 
+  // ── Tags & organization ───────────────────────────────────────────────────
+  | { event: 'tag_created'; tagName: string }
+  | { event: 'tag_deleted'; tagId: string }
+  | { event: 'tag_assigned'; workflowId: string; tagId: string }
+  | { event: 'tag_removed'; workflowId: string; tagId: string }
+  | { event: 'tag_filter_applied'; tagId: string }
+
   // ── Conversion & billing ──────────────────────────────────────────────────
   | { event: 'upgrade_prompt_viewed'; location: string; plan: string }
   | { event: 'upgrade_clicked'; location: string }

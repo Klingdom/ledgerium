@@ -25,6 +25,7 @@ model User {
   apiKeys            ApiKey[]
   processDefinitions ProcessDefinition[]
   insights           ProcessInsight[]
+  tags               Tag[]
   createdTeams       Team[]          @relation("TeamCreator")
   teamMemberships    TeamMember[]
   sentInvites        TeamInvite[]    @relation("InviteSender")
@@ -94,12 +95,45 @@ model Workflow {
   processDefinition ProcessDefinition? @relation(fields: [processDefinitionId], references: [id])
   insights          ProcessInsight[]
   shares            WorkflowShare[]
+  tags              WorkflowTag[]
 
   @@index([userId])
   @@index([status])
   @@index([createdAt])
   @@index([processDefinitionId])
   @@map("workflows")
+}
+
+// ─── Tags & Organization ────────────────────────────────────────────────────
+
+model Tag {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String
+  color     String   @default("#6366f1") // hex color for UI chip
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workflows WorkflowTag[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("tags")
+}
+
+model WorkflowTag {
+  id         String   @id @default(uuid())
+  workflowId String   @map("workflow_id")
+  tagId      String   @map("tag_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  tag      Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([workflowId, tagId])
+  @@index([workflowId])
+  @@index([tagId])
+  @@map("workflow_tags")
 }
 
 model WorkflowArtifact {

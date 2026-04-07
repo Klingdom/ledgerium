@@ -23,6 +23,10 @@ import {
   Eye,
   Zap,
   Lock,
+  Tag,
+  Plus,
+  Flame,
+  Trophy,
 } from 'lucide-react';
 import { formatDuration, formatDateRelative, formatConfidence } from '@/lib/format';
 import { track } from '@/lib/analytics';
@@ -36,6 +40,12 @@ import {
   type OnboardingState,
   type OnboardingContext,
 } from '@/lib/onboarding';
+
+interface TagSummary {
+  id: string;
+  name: string;
+  color: string;
+}
 
 interface WorkflowSummary {
   id: string;
@@ -51,6 +61,20 @@ interface WorkflowSummary {
   lastViewedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  tags: TagSummary[];
+}
+
+interface TagWithCount extends TagSummary {
+  workflowCount: number;
+}
+
+interface StreakData {
+  currentStreak: number;
+  longestStreak: number;
+  monthlyCount: number;
+  totalCount: number;
+  lastRecordedDate: string | null;
+  milestones: { label: string; threshold: number; isReached: boolean }[];
 }
 
 interface DashboardStats {
@@ -72,12 +96,19 @@ export default function DashboardPage() {
   const [onboarding, setOnboarding] = useState<OnboardingState | null>(null);
   const [loadingSample, setLoadingSample] = useState(false);
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [tags, setTags] = useState<TagWithCount[]>([]);
+  const [activeTagId, setActiveTagId] = useState<string | null>(null);
+  const [showNewTag, setShowNewTag] = useState(false);
+  const [newTagName, setNewTagName] = useState('');
+  const [streak, setStreak] = useState<StreakData | null>(null);
+  const [tagMenuWorkflowId, setTagMenuWorkflowId] = useState<string | null>(null);
 
   const fetchWorkflows = useCallback(async () => {
     const params = new URLSearchParams();
     if (search) params.set('search', search);
     params.set('sort', sortBy);
     params.set('dir', sortDir);
+    if (activeTagId) params.set('tag', activeTagId);
 
     const res = await fetch(`/api/workflows?${params}`);
     if (res.ok) {
@@ -86,13 +117,64 @@ export default function DashboardPage() {
       if (data.stats) setStats(data.stats);
     }
     setIsLoading(false);
-  }, [search, sortBy, sortDir]);
+  }, [search, sortBy, sortDir, activeTagId]);
+
+  const fetchTags = useCallback(async () => {
+    const res = await fetch('/api/tags');
+    if (res.ok) {
+      const data = await res.json();
+      setTags(data.tags);
+    }
+  }, []);
+
+  const fetchStreak = useCallback(async () => {
+    const res = await fetch('/api/streaks');
+    if (res.ok) {
+      const data = await res.json();
+      setStreak(data.data);
+    }
+  }, []);
 
   useEffect(() => {
     fetchWorkflows();
+    fetchTags();
+    fetchStreak();
     setOnboarding(getOnboardingState());
     track({ event: 'page_viewed', path: '/dashboard' });
-  }, [fetchWorkflows]);
+  }, [fetchWorkflows, fetchTags, fetchStreak]);
+
+  async function handleCreateTag() {
+    const name = newTagName.trim();
+    if (!name) return;
+    const res = await fetch('/api/tags', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    if (res.ok) {
+      setNewTagName('');
+      setShowNewTag(false);
+      fetchTags();
+    }
+  }
+
+  async function handleToggleTag(workflowId: string, tagId: string, hasTag: boolean) {
+    const body = hasTag ? { removeTagId: tagId } : { addTagId: tagId };
+    await fetch(`/api/workflows/${workflowId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    fetchWorkflows();
+    fetchTags();
+  }
+
+  async function handleDeleteTag(tagId: string) {
+    await fetch(`/api/tags/${tagId}`, { method: 'DELETE' });
+    if (activeTagId === tagId) setActiveTagId(null);
+    fetchTags();
+    fetchWorkflows();
+  }
 
   const onboardingContext: OnboardingContext = {
     workflowCount: workflows.length,
@@ -252,6 +334,11 @@ export default function DashboardPage() {
         </Link>
       )}
 
+      {/* ── Streak Banner ──────────────────────────────────────────── */}
+      {streak && streak.totalCount > 0 && (
+        <StreakBanner streak={streak} />
+      )}
+
       {/* ── Upgrade prompt (near or at free limit) ─────────────────── */}
       {workflows.length >= 4 && workflows.length <= 5 && !onboarding?.isDismissed && (
         <UpgradeBanner
@@ -309,6 +396,80 @@ export default function DashboardPage() {
             <ArrowUpDown className="h-3.5 w-3.5" />
             Steps
           </button>
+        </div>
+      )}
+
+      {/* ── Tag Filter Bar ──────────────────────────────────────────── */}
+      {(tags.length > 0 || workflows.length > 0) && (
+        <div className="flex items-center gap-2 mb-ds-4 flex-wrap">
+          <Tag className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+          <button
+            onClick={() => setActiveTagId(null)}
+            className={`ds-tag transition-colors ${
+              activeTagId === null ? 'ds-tag-brand' : 'ds-tag-neutral hover:bg-gray-200'
+            }`}
+          >
+            All
+          </button>
+          {tags.map((t) => (
+            <div key={t.id} className="group/tag relative flex items-center">
+              <button
+                onClick={() => setActiveTagId(activeTagId === t.id ? null : t.id)}
+                className="ds-tag transition-colors border"
+                style={{
+                  backgroundColor: activeTagId === t.id ? t.color + '20' : undefined,
+                  borderColor: activeTagId === t.id ? t.color : 'transparent',
+                  color: activeTagId === t.id ? t.color : undefined,
+                }}
+              >
+                <span
+                  className="inline-block h-2 w-2 rounded-full mr-1.5 flex-shrink-0"
+                  style={{ backgroundColor: t.color }}
+                />
+                {t.name}
+                {t.workflowCount > 0 && (
+                  <span className="ml-1 text-[10px] opacity-60">{t.workflowCount}</span>
+                )}
+              </button>
+              <button
+                onClick={() => handleDeleteTag(t.id)}
+                className="absolute -top-1 -right-1 hidden group-hover/tag:flex h-3.5 w-3.5 items-center justify-center rounded-full bg-gray-300 text-white hover:bg-red-400 transition-colors"
+                title="Delete tag"
+              >
+                <X className="h-2 w-2" />
+              </button>
+            </div>
+          ))}
+          {showNewTag ? (
+            <div className="flex items-center gap-1">
+              <input
+                type="text"
+                value={newTagName}
+                onChange={(e) => setNewTagName(e.target.value)}
+                placeholder="Tag name"
+                className="input-field text-xs py-0.5 px-2 w-28"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleCreateTag();
+                  if (e.key === 'Escape') { setShowNewTag(false); setNewTagName(''); }
+                }}
+              />
+              <button onClick={handleCreateTag} className="p-0.5 text-green-600 hover:bg-green-50 rounded">
+                <Check className="h-3.5 w-3.5" />
+              </button>
+              <button onClick={() => { setShowNewTag(false); setNewTagName(''); }} className="p-0.5 text-gray-400 hover:bg-gray-100 rounded">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowNewTag(true)}
+              className="ds-tag ds-tag-neutral hover:bg-gray-200 transition-colors gap-0.5"
+            >
+              <Plus className="h-3 w-3" />
+              New tag
+            </button>
+          )}
         </div>
       )}
 
@@ -425,17 +586,28 @@ export default function DashboardPage() {
                   </Link>
                 )}
 
-                {/* Tool badges */}
-                {w.toolsUsed.length > 0 && (
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {w.toolsUsed.slice(0, 4).map((tool) => (
-                      <span key={tool} className="ds-tag ds-tag-neutral text-[11px]">{tool}</span>
-                    ))}
-                    {w.toolsUsed.length > 4 && (
-                      <span className="text-ds-xs text-gray-400">+{w.toolsUsed.length - 4}</span>
-                    )}
-                  </div>
-                )}
+                {/* Tool badges + Tag chips */}
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {w.toolsUsed.slice(0, 4).map((tool) => (
+                    <span key={tool} className="ds-tag ds-tag-neutral text-[11px]">{tool}</span>
+                  ))}
+                  {w.toolsUsed.length > 4 && (
+                    <span className="text-ds-xs text-gray-400">+{w.toolsUsed.length - 4}</span>
+                  )}
+                  {w.tags.map((t) => (
+                    <span
+                      key={t.id}
+                      className="ds-tag text-[11px] border"
+                      style={{
+                        backgroundColor: t.color + '15',
+                        borderColor: t.color + '40',
+                        color: t.color,
+                      }}
+                    >
+                      {t.name}
+                    </span>
+                  ))}
+                </div>
               </div>
 
               {/* Metadata */}
@@ -467,6 +639,27 @@ export default function DashboardPage() {
 
               {/* Actions */}
               <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setTagMenuWorkflowId(tagMenuWorkflowId === w.id ? null : w.id);
+                    }}
+                    className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                    title="Manage tags"
+                  >
+                    <Tag className="h-3.5 w-3.5" />
+                  </button>
+                  {tagMenuWorkflowId === w.id && (
+                    <TagMenu
+                      workflowId={w.id}
+                      workflowTags={w.tags}
+                      allTags={tags}
+                      onToggle={handleToggleTag}
+                      onClose={() => setTagMenuWorkflowId(null)}
+                    />
+                  )}
+                </div>
                 <button
                   onClick={(e) => {
                     e.preventDefault();
@@ -531,6 +724,112 @@ function UpgradeBanner({ usage, limit, atLimit }: { usage: number; limit: number
         <Zap className="h-3.5 w-3.5" />
         {loading ? 'Redirecting...' : 'Upgrade to Pro'}
       </button>
+    </div>
+  );
+}
+
+// ─── Tag assignment dropdown ────────────────────────────────────────────────
+
+function TagMenu({
+  workflowId,
+  workflowTags,
+  allTags,
+  onToggle,
+  onClose,
+}: {
+  workflowId: string;
+  workflowTags: TagSummary[];
+  allTags: TagWithCount[];
+  onToggle: (workflowId: string, tagId: string, hasTag: boolean) => void;
+  onClose: () => void;
+}) {
+  const assignedIds = new Set(workflowTags.map((t) => t.id));
+
+  return (
+    <>
+      {/* Backdrop to close */}
+      <div className="fixed inset-0 z-40" onClick={onClose} />
+      <div className="absolute right-0 top-8 z-50 w-48 rounded-ds-md border border-gray-200 bg-white shadow-lg py-1">
+        <p className="px-3 py-1.5 text-[11px] font-medium text-gray-400 uppercase tracking-wide">
+          Assign tags
+        </p>
+        {allTags.length === 0 && (
+          <p className="px-3 py-2 text-ds-xs text-gray-400">No tags yet. Create one above.</p>
+        )}
+        {allTags.map((tag) => {
+          const isAssigned = assignedIds.has(tag.id);
+          return (
+            <button
+              key={tag.id}
+              onClick={(e) => {
+                e.preventDefault();
+                onToggle(workflowId, tag.id, isAssigned);
+              }}
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-ds-xs hover:bg-gray-50 transition-colors"
+            >
+              <span
+                className="h-2.5 w-2.5 rounded-full border-2 flex-shrink-0"
+                style={{
+                  backgroundColor: isAssigned ? tag.color : 'transparent',
+                  borderColor: tag.color,
+                }}
+              />
+              <span className="flex-1 text-left text-gray-700">{tag.name}</span>
+              {isAssigned && <Check className="h-3 w-3 text-gray-400" />}
+            </button>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+// ─── Streak tracking banner ─────────────────────────────────────────────────
+
+function StreakBanner({ streak }: { streak: StreakData }) {
+  const nextMilestone = streak.milestones.find((m) => !m.isReached);
+  const lastReached = [...streak.milestones].reverse().find((m) => m.isReached);
+
+  return (
+    <div className="card flex items-center gap-ds-4 px-ds-5 py-ds-4 mb-ds-4 bg-gradient-to-r from-orange-50/50 to-white border-orange-100">
+      <div className="flex h-9 w-9 items-center justify-center rounded-ds-md bg-orange-100">
+        <Flame className="h-5 w-5 text-orange-500" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-3">
+          {streak.currentStreak > 0 && (
+            <div className="flex items-baseline gap-1">
+              <span className="text-ds-lg font-bold text-orange-600">{streak.currentStreak}</span>
+              <span className="text-ds-xs text-gray-500">day streak</span>
+            </div>
+          )}
+          <div className="flex items-baseline gap-1">
+            <span className="text-ds-sm font-semibold text-gray-700">{streak.monthlyCount}</span>
+            <span className="text-ds-xs text-gray-500">this month</span>
+          </div>
+          <div className="flex items-baseline gap-1">
+            <span className="text-ds-sm font-semibold text-gray-700">{streak.totalCount}</span>
+            <span className="text-ds-xs text-gray-500">total</span>
+          </div>
+        </div>
+        {lastReached && (
+          <div className="flex items-center gap-1.5 mt-1">
+            <Trophy className="h-3 w-3 text-amber-500" />
+            <span className="text-[11px] text-gray-500">
+              {lastReached.label}
+              {nextMilestone && (
+                <> &middot; {nextMilestone.threshold - streak.totalCount} more to {nextMilestone.label}</>
+              )}
+            </span>
+          </div>
+        )}
+      </div>
+      {streak.longestStreak > 1 && (
+        <div className="text-right flex-shrink-0">
+          <p className="text-ds-xs text-gray-400">Best streak</p>
+          <p className="text-ds-sm font-semibold text-gray-600">{streak.longestStreak} days</p>
+        </div>
+      )}
     </div>
   );
 }
