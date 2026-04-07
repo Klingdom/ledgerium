@@ -25,6 +25,10 @@ model User {
   apiKeys            ApiKey[]
   processDefinitions ProcessDefinition[]
   insights           ProcessInsight[]
+  createdTeams       Team[]          @relation("TeamCreator")
+  teamMemberships    TeamMember[]
+  sentInvites        TeamInvite[]    @relation("InviteSender")
+  createdShares      WorkflowShare[] @relation("ShareCreator")
 
   @@map("users")
 }
@@ -89,6 +93,7 @@ model Workflow {
   artifacts         WorkflowArtifact[]
   processDefinition ProcessDefinition? @relation(fields: [processDefinitionId], references: [id])
   insights          ProcessInsight[]
+  shares            WorkflowShare[]
 
   @@index([userId])
   @@index([status])
@@ -167,5 +172,77 @@ model ProcessInsight {
   @@index([insightType])
   @@index([severity])
   @@map("process_insights")
+}
+
+// ─── Phase 4: Teams & Collaboration ─────────────────────────────────────────
+
+model Team {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique  // URL-friendly team identifier
+  createdBy   String   @map("created_by")
+  plan        String   @default("free") // free, pro, enterprise
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  creator     User         @relation("TeamCreator", fields: [createdBy], references: [id])
+  members     TeamMember[]
+  invites     TeamInvite[]
+
+  @@index([createdBy])
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  teamId    String   @map("team_id")
+  userId    String   @map("user_id")
+  role      String   @default("member") // owner, admin, member, viewer
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([userId])
+  @@map("team_members")
+}
+
+model TeamInvite {
+  id          String    @id @default(uuid())
+  teamId      String    @map("team_id")
+  email       String
+  role        String    @default("member") // member, viewer
+  token       String    @unique  // invite acceptance token
+  invitedBy   String    @map("invited_by")
+  acceptedAt  DateTime? @map("accepted_at")
+  expiresAt   DateTime  @map("expires_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  team    Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  inviter User @relation("InviteSender", fields: [invitedBy], references: [id])
+
+  @@index([teamId])
+  @@index([email])
+  @@index([token])
+  @@map("team_invites")
+}
+
+model WorkflowShare {
+  id          String    @id @default(uuid())
+  workflowId  String    @map("workflow_id")
+  sharedWith  String    @map("shared_with") // userId or teamId
+  shareType   String    @map("share_type")  // user, team
+  permission  String    @default("viewer")  // viewer, editor
+  sharedBy    String    @map("shared_by")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  sharer   User     @relation("ShareCreator", fields: [sharedBy], references: [id])
+
+  @@unique([workflowId, sharedWith, shareType])
+  @@index([sharedWith])
+  @@index([workflowId])
+  @@map("workflow_shares")
 }
 
