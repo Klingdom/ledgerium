@@ -172,14 +172,12 @@ export default function AnalyticsPage() {
             <MetricCard
               icon={Shield}
               label="Avg Stability"
-              value={
-                data!.definitions.length > 0
-                  ? `${Math.round(
-                      (data!.definitions.reduce((s, d) => s + (d.stabilityScore ?? 0), 0) /
-                        data!.definitions.filter((d) => d.stabilityScore !== null).length) * 100,
-                    )}%`
-                  : '—'
-              }
+              value={(() => {
+                const scored = data!.definitions.filter((d) => d.stabilityScore !== null);
+                if (scored.length === 0) return '—';
+                const avg = scored.reduce((s, d) => s + (d.stabilityScore ?? 0), 0) / scored.length;
+                return `${Math.round(avg * 100)}%`;
+              })()}
             />
           </div>
 

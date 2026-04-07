@@ -87,6 +87,18 @@ export async function GET() {
   const definitions = await db.processDefinition.findMany({
     where: { userId },
     orderBy: { runCount: 'desc' },
+    include: {
+      workflows: {
+        where: { status: 'active' },
+        select: { id: true, title: true, durationMs: true, stepCount: true, createdAt: true },
+        take: 5,
+      },
+      insights: {
+        where: { dismissed: false },
+        select: { id: true, insightType: true, severity: true, title: true },
+        take: 5,
+      },
+    },
   });
 
   const insights = await db.processInsight.findMany({
