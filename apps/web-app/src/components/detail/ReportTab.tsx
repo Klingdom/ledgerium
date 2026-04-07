@@ -2,97 +2,148 @@
 
 import { formatDuration } from '@/lib/format';
 
+/**
+ * ReportTab — workflow report rendering using the Ledgerium design system.
+ *
+ * Layout: Header → Key Metrics → Observations → Steps → SOP Summary → Attribution
+ */
+
 interface Props {
   report: any;
 }
 
 export function ReportTab({ report }: Props) {
   if (!report) {
-    return <div className="text-sm text-gray-400">No report data available.</div>;
+    return <div className="text-ds-sm text-gray-400 py-ds-10">No report data available.</div>;
   }
 
   const { header, executiveSummary, workflowOverview, metrics, sop } = report;
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      {/* Report header */}
-      <div className="card p-6 border-l-4 border-l-brand-500">
-        <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Workflow Report</p>
-        <h2 className="text-xl font-bold text-gray-900">
-          {executiveSummary?.title ?? header?.activityName}
-        </h2>
-        <div className="mt-2 flex flex-wrap gap-4 text-xs text-gray-500">
-          <span>Duration: <strong>{header?.durationLabel}</strong></span>
-          <span>Generated: <strong>{header?.generatedAt ? new Date(header.generatedAt).toLocaleDateString() : '—'}</strong></span>
-          <span>Engine: <strong>{header?.engineVersion ?? header?.schemaVersion}</strong></span>
-        </div>
-      </div>
-
-      {/* Executive summary */}
-      <section>
-        <h3 className="text-sm font-semibold text-gray-900 mb-2">Executive Summary</h3>
-        <div className="card p-5 space-y-3">
-          {executiveSummary?.objective && (
-            <p className="text-sm text-gray-700">{executiveSummary.objective}</p>
+    <div className="ds-document">
+      {/* ── Document Header ────────────────────────────────────────────── */}
+      <header className="ds-header">
+        <div className="flex items-center gap-ds-2 mb-ds-2">
+          <span className="ds-tag ds-tag-brand">Report</span>
+          {(header?.engineVersion ?? header?.schemaVersion) && (
+            <span className="text-ds-xs text-gray-400">Engine {header.engineVersion ?? header.schemaVersion}</span>
           )}
+        </div>
+        <h1 className="ds-header-title">{executiveSummary?.title ?? header?.activityName}</h1>
+        {executiveSummary?.objective && (
+          <p className="ds-header-subtitle">{executiveSummary.objective}</p>
+        )}
+        <div className="mt-ds-4 flex flex-wrap gap-ds-6">
+          <QuickStat label="Duration" value={header?.durationLabel ?? '—'} />
+          <QuickStat label="Generated" value={header?.generatedAt ? new Date(header.generatedAt).toLocaleDateString() : '—'} />
+        </div>
+      </header>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <MiniMetric label="Steps" value={executiveSummary?.totalSteps ?? metrics?.stepCount} />
-            <MiniMetric label="Phases" value={executiveSummary?.totalPhases ?? metrics?.phaseCount} />
-            <MiniMetric
-              label="Confidence"
-              value={executiveSummary?.workflowConfidence
-                ? `${Math.round(executiveSummary.workflowConfidence * 100)}%`
-                : '—'}
-            />
-            <MiniMetric
-              label="Apps"
-              value={executiveSummary?.applicationsUsed?.length ?? metrics?.systemsUsed?.length ?? 0}
-            />
+      {/* ── Key Metrics ────────────────────────────────────────────────── */}
+      <section className="ds-section">
+        <h2 className="ds-section-label">Key Metrics</h2>
+        <div className="card px-ds-5 py-ds-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-ds-6">
+            <div className="ds-metric">
+              <p className="ds-metric-label">Steps</p>
+              <p className="ds-metric-value">{executiveSummary?.totalSteps ?? metrics?.stepCount ?? '—'}</p>
+            </div>
+            <div className="ds-metric">
+              <p className="ds-metric-label">Phases</p>
+              <p className="ds-metric-value">{executiveSummary?.totalPhases ?? metrics?.phaseCount ?? '—'}</p>
+            </div>
+            <div className="ds-metric">
+              <p className="ds-metric-label">Confidence</p>
+              <p className="ds-metric-value">
+                {executiveSummary?.workflowConfidence
+                  ? `${Math.round(executiveSummary.workflowConfidence * 100)}%`
+                  : '—'}
+              </p>
+            </div>
+            <div className="ds-metric">
+              <p className="ds-metric-label">Duration</p>
+              <p className="ds-metric-value">{metrics?.totalDurationLabel ?? formatDuration(metrics?.totalDurationMs) ?? '—'}</p>
+            </div>
           </div>
 
+          {/* Systems tags */}
           {executiveSummary?.applicationsUsed?.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {executiveSummary.applicationsUsed.map((app: string) => (
-                <span key={app} className="rounded-md bg-brand-50 px-2 py-0.5 text-xs text-brand-700">
-                  {app}
-                </span>
-              ))}
+            <div className="mt-ds-4 pt-ds-3 border-t border-gray-100">
+              <p className="ds-metric-label mb-ds-2">Systems</p>
+              <div className="flex flex-wrap gap-ds-2">
+                {executiveSummary.applicationsUsed.map((app: string) => (
+                  <span key={app} className="ds-tag ds-tag-brand">{app}</span>
+                ))}
+              </div>
             </div>
           )}
         </div>
       </section>
 
-      {/* Metrics */}
+      {/* ── Key Observations ───────────────────────────────────────────── */}
+      {executiveSummary?.keyObservations?.length > 0 && (
+        <section className="ds-section">
+          <h2 className="ds-section-label">Key Observations</h2>
+          <div className="space-y-ds-2">
+            {executiveSummary.keyObservations.map((obs: string, i: number) => (
+              <div key={i} className="flex items-baseline gap-ds-2 text-ds-sm text-gray-700">
+                <span className="mt-[5px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-400" />
+                {obs}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── Detailed Metrics ───────────────────────────────────────────── */}
       {metrics && (
-        <section>
-          <h3 className="text-sm font-semibold text-gray-900 mb-2">Metrics</h3>
-          <div className="card p-5">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              <MiniMetric label="Total Duration" value={metrics.totalDurationLabel ?? formatDuration(metrics.totalDurationMs)} />
-              <MiniMetric label="Steps" value={metrics.stepCount} />
-              <MiniMetric label="Events" value={metrics.eventCount ?? metrics.humanEventCount} />
-              <MiniMetric label="Phases" value={metrics.phaseCount} />
-              <MiniMetric label="Error Steps" value={metrics.errorStepCount ?? 0} />
-              <MiniMetric label="Status" value={metrics.completionStatus ?? 'complete'} />
+        <section className="ds-section">
+          <h2 className="ds-section-label">Activity Breakdown</h2>
+          <div className="card px-ds-5 py-ds-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-ds-6">
+              <div className="ds-metric">
+                <p className="ds-metric-label">Active Time</p>
+                <p className="ds-metric-value">{formatDuration(metrics.activeDurationMs)}</p>
+              </div>
+              <div className="ds-metric">
+                <p className="ds-metric-label">Idle Time</p>
+                <p className="ds-metric-value">{formatDuration(metrics.idleDurationMs)}</p>
+              </div>
+              <div className="ds-metric">
+                <p className="ds-metric-label">Events</p>
+                <p className="ds-metric-value">{metrics.eventCount ?? metrics.humanEventCount ?? '—'}</p>
+              </div>
+              <div className="ds-metric">
+                <p className="ds-metric-label">Clicks</p>
+                <p className="ds-metric-value">{metrics.clickCount ?? 0}</p>
+              </div>
+              <div className="ds-metric">
+                <p className="ds-metric-label">Data Entries</p>
+                <p className="ds-metric-value">{metrics.inputCount ?? 0}</p>
+              </div>
+              <div className="ds-metric">
+                <p className="ds-metric-label">Error Steps</p>
+                <p className="ds-metric-value">{metrics.errorStepCount ?? 0}</p>
+              </div>
             </div>
           </div>
         </section>
       )}
 
-      {/* Workflow overview */}
+      {/* ── Workflow Steps ─────────────────────────────────────────────── */}
       {workflowOverview?.steps?.length > 0 && (
-        <section>
-          <h3 className="text-sm font-semibold text-gray-900 mb-2">Workflow Overview</h3>
-          <div className="card divide-y divide-gray-100">
+        <section className="ds-section">
+          <h2 className="ds-section-label">Workflow Steps</h2>
+          <div className="card overflow-hidden divide-y divide-gray-100">
             {workflowOverview.steps.map((step: any) => (
-              <div key={step.stepId ?? step.ordinal} className="flex items-center gap-3 px-4 py-3">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-100 text-[10px] font-medium text-gray-600">
-                  {step.ordinal}
+              <div key={step.stepId ?? step.ordinal} className="flex items-center gap-ds-3 px-ds-5 py-ds-3 hover:bg-gray-50/50 transition-colors">
+                <span className="ds-step-ordinal text-[11px]">{step.ordinal}</span>
+                <span className="text-ds-sm text-gray-800 flex-1 min-w-0 truncate">{step.title}</span>
+                <span className="ds-tag ds-tag-neutral text-[11px] flex-shrink-0">
+                  {step.categoryLabel ?? step.category?.replace(/_/g, ' ')}
                 </span>
-                <span className="text-sm text-gray-800 flex-1">{step.title}</span>
-                <span className="text-xs text-gray-400">
-                  {step.categoryLabel ?? step.category}
+                <span className="text-ds-xs text-gray-400 flex-shrink-0 w-12 text-right tabular-nums">
+                  {step.durationLabel}
                 </span>
               </div>
             ))}
@@ -100,16 +151,18 @@ export function ReportTab({ report }: Props) {
         </section>
       )}
 
-      {/* SOP summary */}
+      {/* ── SOP Summary ────────────────────────────────────────────────── */}
       {sop?.steps?.length > 0 && (
-        <section>
-          <h3 className="text-sm font-semibold text-gray-900 mb-2">Standard Operating Procedure</h3>
-          <div className="card p-5 space-y-3">
-            <p className="text-sm text-gray-600">{sop.purpose ?? sop.overview}</p>
-            <div className="space-y-2">
+        <section className="ds-section">
+          <h2 className="ds-section-label">Procedure Summary</h2>
+          <div className="card px-ds-5 py-ds-4 space-y-ds-3">
+            {sop.overview && <p className="text-ds-sm text-gray-600">{sop.overview}</p>}
+            <div className="space-y-ds-2">
               {sop.steps.map((step: any) => (
-                <div key={step.ordinal} className="flex gap-2 text-sm">
-                  <span className="text-brand-600 font-medium flex-shrink-0">{step.ordinal}.</span>
+                <div key={step.ordinal} className="flex gap-ds-2 text-ds-sm">
+                  <span className="text-brand-600 font-semibold flex-shrink-0 tabular-nums w-5 text-right">
+                    {step.ordinal}.
+                  </span>
                   <span className="text-gray-700">{step.action ?? step.text ?? step.title}</span>
                 </div>
               ))}
@@ -118,20 +171,19 @@ export function ReportTab({ report }: Props) {
         </section>
       )}
 
-      {/* Footer */}
-      <div className="rounded-lg bg-gray-50 p-4 text-xs text-gray-400">
-        This report was generated deterministically from a recorded browser session.
-        All content is evidence-backed — no AI inference was applied.
-      </div>
+      {/* ── Attribution ────────────────────────────────────────────────── */}
+      <footer className="ds-attribution">
+        Generated from observed workflow behavior · Evidence-backed · No AI inference applied
+      </footer>
     </div>
   );
 }
 
-function MiniMetric({ label, value }: { label: string; value: string | number }) {
+function QuickStat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div>
-      <p className="text-[10px] text-gray-400 uppercase tracking-wide">{label}</p>
-      <p className="text-sm font-semibold text-gray-900">{value}</p>
+    <div className="ds-metric">
+      <p className="ds-metric-label">{label}</p>
+      <p className="ds-metric-value">{value}</p>
     </div>
   );
 }

@@ -2,31 +2,191 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Design System: Base Layer ───────────────────────────────────────────── */
+
 @layer base {
   body {
     @apply bg-gray-50 text-gray-900 antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 
-  /* Smooth scrolling for anchor links */
   html {
     scroll-behavior: smooth;
   }
 }
 
+/* ─── Design System: Component Layer ──────────────────────────────────────── */
+
 @layer components {
+
+  /* ── Buttons ──────────────────────────────────────────────────────────── */
+
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center rounded-ds-md bg-brand-600 px-4 py-2.5 text-ds-sm font-medium text-white transition-all hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center rounded-ds-md border border-gray-300 bg-white px-4 py-2.5 text-ds-sm font-medium text-gray-700 transition-all hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-danger {
-    @apply inline-flex items-center justify-center rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center rounded-ds-md bg-red-600 px-4 py-2.5 text-ds-sm font-medium text-white transition-all hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
+
+  /* ── Form inputs ──────────────────────────────────────────────────────── */
+
   .input-field {
-    @apply block w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500;
+    @apply block w-full rounded-ds-md border border-gray-300 bg-white px-3.5 py-2.5 text-ds-base text-gray-900 placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500;
   }
+
+  /* ── Card ─────────────────────────────────────────────────────────────── */
+
   .card {
-    @apply rounded-xl border border-gray-200 bg-white shadow-sm;
+    @apply rounded-ds-lg border border-gray-200 bg-white shadow-sm;
+  }
+
+  /* ── Artifact Components ─────────────────────────────────────────────── */
+  /* These are the design system components for process map and SOP output */
+
+  /** Document container — max-width readable column with clean spacing */
+  .ds-document {
+    @apply max-w-ds-content space-y-ds-8;
+  }
+
+  /** Document header — title, metadata, and objective block */
+  .ds-header {
+    @apply border-b border-gray-200 pb-ds-6;
+  }
+
+  .ds-header-title {
+    @apply text-ds-2xl font-bold tracking-tight text-gray-900;
+  }
+
+  .ds-header-subtitle {
+    @apply mt-ds-2 text-ds-base text-gray-600 leading-relaxed;
+  }
+
+  /** Section — labeled content group with consistent spacing */
+  .ds-section {
+    @apply space-y-ds-3;
+  }
+
+  .ds-section-label {
+    @apply text-ds-xs font-semibold uppercase tracking-widest text-gray-400;
+  }
+
+  /** Step card — numbered procedure step block */
+  .ds-step {
+    @apply rounded-ds-lg border border-gray-200 bg-white overflow-hidden transition-shadow hover:shadow-md;
+  }
+
+  .ds-step-header {
+    @apply flex items-start gap-ds-3 px-ds-5 py-ds-4;
+  }
+
+  .ds-step-ordinal {
+    @apply flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-ds-md bg-brand-50 text-ds-xs font-bold text-brand-700;
+  }
+
+  .ds-step-title {
+    @apply text-ds-base font-semibold text-gray-900;
+  }
+
+  .ds-step-body {
+    @apply px-ds-5 pb-ds-4 text-ds-sm text-gray-600 leading-relaxed;
+  }
+
+  .ds-step-footer {
+    @apply flex items-center gap-ds-3 border-t border-gray-100 bg-gray-50/60 px-ds-5 py-ds-2 text-ds-xs text-gray-400;
+  }
+
+  /** Tag / pill — for systems, roles, categories */
+  .ds-tag {
+    @apply inline-flex items-center rounded-ds-sm px-2 py-0.5 text-ds-xs font-medium;
+  }
+
+  .ds-tag-brand {
+    @apply bg-brand-50 text-brand-700 border border-brand-100;
+  }
+
+  .ds-tag-neutral {
+    @apply bg-gray-100 text-gray-600;
+  }
+
+  /** Callout — for notes, warnings, tips, risks */
+  .ds-callout {
+    @apply rounded-ds-md border-l-[3px] px-ds-4 py-ds-3;
+  }
+
+  .ds-callout-info {
+    @apply border-l-brand-400 bg-brand-50/40;
+  }
+
+  .ds-callout-warning {
+    @apply border-l-amber-400 bg-amber-50/40;
+  }
+
+  .ds-callout-success {
+    @apply border-l-green-400 bg-green-50/40;
+  }
+
+  .ds-callout-danger {
+    @apply border-l-red-400 bg-red-50/40;
+  }
+
+  /** Metric — small stat block for dashboards/summaries */
+  .ds-metric {
+    @apply space-y-ds-1;
+  }
+
+  .ds-metric-label {
+    @apply text-ds-xs text-gray-400 uppercase tracking-wide;
+  }
+
+  .ds-metric-value {
+    @apply text-ds-lg font-semibold text-gray-900 tabular-nums;
+  }
+
+  /** Divider — subtle section break */
+  .ds-divider {
+    @apply border-t border-gray-200;
+  }
+
+  /** Confidence dot — color-coded quality indicator */
+  .ds-confidence-high {
+    @apply h-2 w-2 rounded-full bg-emerald-400;
+  }
+  .ds-confidence-mid {
+    @apply h-2 w-2 rounded-full bg-blue-400;
+  }
+  .ds-confidence-low {
+    @apply h-2 w-2 rounded-full bg-amber-400;
+  }
+
+  /** Source attribution — footer note for generated artifacts */
+  .ds-attribution {
+    @apply rounded-ds-md bg-gray-50 px-ds-4 py-ds-3 text-center text-ds-xs text-gray-400;
+  }
+
+  /* ── Print / Export Styles ────────────────────────────────────────────── */
+
+  @media print {
+    body {
+      @apply bg-white text-black;
+    }
+    .ds-step {
+      break-inside: avoid;
+    }
+    .ds-section {
+      break-inside: avoid;
+    }
+    .ds-header {
+      break-after: avoid;
+    }
+    .ds-attribution {
+      @apply mt-8 pt-4 border-t border-gray-300;
+    }
+    /* Hide interactive elements in print */
+    nav, button, .no-print {
+      display: none !important;
+    }
   }
 }
