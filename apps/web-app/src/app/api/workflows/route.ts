@@ -32,6 +32,8 @@ export async function GET(req: NextRequest) {
   const orderByField =
     sortBy === 'title' ? 'title' :
     sortBy === 'step_count' ? 'stepCount' :
+    sortBy === 'last_viewed' ? 'lastViewedAt' :
+    sortBy === 'views' ? 'viewCount' :
     'createdAt';
 
   const results = await db.workflow.findMany({
@@ -39,10 +41,31 @@ export async function GET(req: NextRequest) {
     orderBy: { [orderByField]: sortDir },
   });
 
+  // Compute stats for dashboard
+  // Note: lastViewedAt, isFavorite, viewCount added in schema but
+  // Prisma client may not reflect them until next generate. Cast safely.
+  const totalWorkflows = results.length;
+  const recentlyViewed = results
+    .filter(w => (w as any).lastViewedAt != null)
+    .sort((a, b) => new Date((b as any).lastViewedAt).getTime() - new Date((a as any).lastViewedAt).getTime())
+    .slice(0, 3);
+  const favorites = results.filter(w => (w as any).isFavorite === true);
+
+  // Count active insights for the user
+  const insightCount = await db.processInsight.count({
+    where: { userId: session.user.id, dismissed: false },
+  });
+
   return NextResponse.json({
     workflows: results.map((w) => ({
       ...w,
       toolsUsed: w.toolsUsed ? JSON.parse(w.toolsUsed) : [],
     })),
+    stats: {
+      totalWorkflows,
+      favoriteCount: favorites.length,
+      recentlyViewedIds: recentlyViewed.map(w => w.id),
+      insightCount,
+    },
   });
 }

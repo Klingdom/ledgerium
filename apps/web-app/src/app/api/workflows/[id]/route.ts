@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
+import crypto from 'crypto';
 
 export async function GET(
   _req: NextRequest,
@@ -19,6 +20,17 @@ export async function GET(
   if (!workflow) {
     return NextResponse.json({ error: 'Workflow not found' }, { status: 404 });
   }
+
+  // Track view — fire-and-forget for performance
+  // viewCount and lastViewedAt are new schema fields; cast to avoid
+  // Prisma client type mismatch until next prisma generate
+  db.workflow.update({
+    where: { id: params.id },
+    data: {
+      viewCount: { increment: 1 },
+      lastViewedAt: new Date(),
+    } as any,
+  }).catch(() => { /* non-critical */ });
 
   return NextResponse.json({
     workflow: {
@@ -58,13 +70,26 @@ export async function PATCH(
   if (body.title !== undefined) data.title = body.title;
   if (body.description !== undefined) data.description = body.description;
   if (body.status !== undefined) data.status = body.status;
+  if (body.isFavorite !== undefined) data.isFavorite = body.isFavorite;
 
-  await db.workflow.update({
+  // Generate share token on demand
+  // shareToken is a new schema field; cast safely
+  if (body.enableSharing === true && !(workflow as any).shareToken) {
+    data.shareToken = crypto.randomBytes(16).toString('hex');
+  }
+  if (body.enableSharing === false) {
+    data.shareToken = null;
+  }
+
+  const updated = await db.workflow.update({
     where: { id: params.id },
     data,
   });
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+    shareToken: (updated as any).shareToken ?? null,
+  });
 }
 
 export async function DELETE(

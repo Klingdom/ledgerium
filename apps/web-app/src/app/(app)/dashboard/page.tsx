@@ -19,6 +19,8 @@ import {
   CheckCircle2,
   Circle,
   XIcon,
+  Star,
+  Eye,
 } from 'lucide-react';
 import { formatDuration, formatDateRelative, formatConfidence } from '@/lib/format';
 import { track } from '@/lib/analytics';
@@ -42,8 +44,18 @@ interface WorkflowSummary {
   phaseCount: number | null;
   confidence: number | null;
   status: string;
+  isFavorite: boolean;
+  viewCount: number;
+  lastViewedAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+interface DashboardStats {
+  totalWorkflows: number;
+  favoriteCount: number;
+  recentlyViewedIds: string[];
+  insightCount: number;
 }
 
 export default function DashboardPage() {
@@ -57,6 +69,7 @@ export default function DashboardPage() {
   const [editTitle, setEditTitle] = useState('');
   const [onboarding, setOnboarding] = useState<OnboardingState | null>(null);
   const [loadingSample, setLoadingSample] = useState(false);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
 
   const fetchWorkflows = useCallback(async () => {
     const params = new URLSearchParams();
@@ -68,6 +81,7 @@ export default function DashboardPage() {
     if (res.ok) {
       const data = await res.json();
       setWorkflows(data.workflows);
+      if (data.stats) setStats(data.stats);
     }
     setIsLoading(false);
   }, [search, sortBy, sortDir]);
@@ -215,6 +229,27 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* ── Insights Banner (retention driver) ─────────────────────── */}
+      {stats && stats.insightCount > 0 && workflows.length > 0 && (
+        <Link
+          href="/analytics"
+          className="card flex items-center gap-ds-4 px-ds-5 py-ds-4 mb-ds-4 bg-amber-50/50 border-amber-200 hover:border-amber-300 transition-colors"
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-ds-md bg-amber-100">
+            <BarChart3 className="h-5 w-5 text-amber-600" />
+          </div>
+          <div className="flex-1">
+            <p className="text-ds-sm font-medium text-gray-900">
+              {stats.insightCount} insight{stats.insightCount !== 1 ? 's' : ''} available
+            </p>
+            <p className="text-ds-xs text-gray-500">
+              Process intelligence detected bottlenecks or patterns in your workflows.
+            </p>
+          </div>
+          <ChevronRight className="h-4 w-4 text-amber-400 flex-shrink-0" />
+        </Link>
+      )}
+
       {/* ── Header ────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-ds-6">
         <div>
@@ -330,6 +365,24 @@ export default function DashboardPage() {
               key={w.id}
               className="card flex items-center gap-4 p-4 hover:border-gray-300 transition-colors group"
             >
+              {/* Favorite */}
+              <button
+                onClick={async (e) => {
+                  e.preventDefault();
+                  const newVal = !w.isFavorite;
+                  setWorkflows(prev => prev.map(wf => wf.id === w.id ? { ...wf, isFavorite: newVal } : wf));
+                  await fetch(`/api/workflows/${w.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ isFavorite: newVal }),
+                  });
+                }}
+                className="rounded-ds-sm p-1 hover:bg-gray-100 transition-colors flex-shrink-0"
+                title={w.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+              >
+                <Star className={`h-4 w-4 ${w.isFavorite ? 'fill-amber-400 text-amber-400' : 'text-gray-200 group-hover:text-gray-300'}`} />
+              </button>
+
               {/* Title */}
               <div className="flex-1 min-w-0">
                 {editingId === w.id ? (
@@ -388,6 +441,12 @@ export default function DashboardPage() {
                   <span className="flex items-center gap-1" title="Confidence">
                     <BarChart3 className="h-3.5 w-3.5" />
                     {formatConfidence(w.confidence)}
+                  </span>
+                )}
+                {w.viewCount > 0 && (
+                  <span className="flex items-center gap-1" title="Views">
+                    <Eye className="h-3.5 w-3.5" />
+                    {w.viewCount}
                   </span>
                 )}
                 <span className="w-16 text-right" title={w.createdAt}>

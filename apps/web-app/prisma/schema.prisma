@@ -75,6 +75,10 @@ model Workflow {
   confidence     Float?
   status         String   @default("active") // active, archived, deleted
   sessionId      String?  @map("session_id")
+  shareToken     String?  @unique @map("share_token") // public share link token
+  viewCount      Int      @default(0) @map("view_count")
+  lastViewedAt   DateTime? @map("last_viewed_at")
+  isFavorite     Boolean  @default(false) @map("is_favorite")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
