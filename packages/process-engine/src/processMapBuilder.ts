@@ -1,20 +1,24 @@
 /**
  * Builds a pure graph model from engine inputs.
  *
+ * Canonical process map model v2.0: enriched, friction-aware, decision-enabled.
+ *
  * Engine spec §14: Process map generation model.
  * Granularity: STEP level — each node represents one segmented step.
  *
- * Outputs:
- * - Synthetic start and end nodes (spec §14.3)
- * - Task/exception nodes per finalized step with rich step-level metadata
- * - Phases grouping consecutive steps by application/system context (spec §8.5)
- * - Edges with transition type and human-readable boundary labels
+ * v2.0 improvements:
+ * - Decision nodes inferred from submit → error_handling patterns
+ * - Friction indicators attached to nodes where detected
+ * - Enriched phase labels with business context
+ * - Meaningful start/end nodes with trigger/outcome labels
+ * - Process-level objective, trigger, and outcome
+ * - Duration label at map level
  *
- * Node metadata includes:
- * - eventTypeSummary: breakdown of event types in this step (for badges/tooltips)
- * - dominantAction: the primary thing that happened in this step
- * - humanEventCount: distinct from total eventCount
- * - pageTitle / routeTemplate: primary page context for this step
+ * Outputs:
+ * - Synthetic start and end nodes with trigger/outcome context
+ * - Task/exception/decision nodes per finalized step with rich metadata
+ * - Phases grouping consecutive steps by application/system context
+ * - Edges with transition type and human-readable boundary labels
  *
  * No React, no browser APIs, no UI framework dependencies.
  * Positions are deterministic: vertical layout, ordinal-based spacing.
@@ -33,6 +37,14 @@ import type {
 } from './types.js';
 import { CATEGORY_CONFIG, PROCESS_ENGINE_VERSION } from './types.js';
 import { formatDuration, uniqueSystems, uniqueDomains, toGroupingReason } from './stepAnalyzer.js';
+import {
+  inferBusinessObjective,
+  inferTrigger,
+  detectFriction,
+  detectDecisionPoints,
+  cleanStepTitle,
+  enrichPhaseLabel,
+} from './contentEnricher.js';
 
 // ─── Layout constants ─────────────────────────────────────────────────────────
 // Deterministic, fixed for all renders. Adjust only for global layout changes.
@@ -56,8 +68,22 @@ export function buildProcessMap(input: ProcessEngineInput): ProcessMap {
   // ── Aggregate systems for the whole map ──────────────────────────────────
   const allSystems = uniqueSystems(normalizedEvents);
 
-  // ── Build task / exception nodes ─────────────────────────────────────────
-  // Offset by the synthetic start node height so task nodes start below it.
+  // ── Enrichment layer ─────────────────────────────────────────────────────
+  const friction = detectFriction(finalizedSteps, normalizedEvents);
+  const decisionPoints = detectDecisionPoints(finalizedSteps, normalizedEvents);
+  const objective = inferBusinessObjective(
+    sessionJson.activityName, finalizedSteps, normalizedEvents,
+  );
+  const trigger = inferTrigger(
+    sessionJson.activityName, finalizedSteps, normalizedEvents,
+  );
+
+  // ── Total duration ─────────────────────────────────────────────────────
+  const totalDurationMs = finalizedSteps.reduce(
+    (sum, s) => sum + (s.duration_ms ?? 0), 0,
+  );
+
+  // ── Build task / exception / decision nodes ─────────────────────────────
   const startNodeHeight = SYNTHETIC_NODE_HEIGHT + NODE_GAP;
 
   const taskNodes: ProcessMapNode[] = finalizedSteps.map((step, index) => {
@@ -70,22 +96,37 @@ export function buildProcessMap(input: ProcessEngineInput): ProcessMap {
     const systems = uniqueSystems(events);
     const domains = uniqueDomains(events);
 
-    // Node type: exception for error_handling, task for everything else (spec §14.3)
-    const nodeType: ProcessMapNodeType =
-      groupingReason === 'error_handling' ? 'exception' : 'task';
+    // Node type: decision if inferred, exception for error_handling, task otherwise
+    const isDecision = decisionPoints.has(step.step_id);
+    const nodeType: ProcessMapNodeType = isDecision
+      ? 'decision'
+      : groupingReason === 'error_handling'
+        ? 'exception'
+        : 'task';
 
-    const metadata = buildNodeMetadata(events, systems, domains, step.duration_ms);
+    // Clean the title
+    const cleanedTitle = cleanStepTitle(step.title, groupingReason);
+
+    // Friction for this specific step
+    const stepFriction = friction.filter(f => f.stepOrdinals.includes(step.ordinal));
+
+    const metadata = buildNodeMetadata(
+      events, systems, domains, step.duration_ms,
+      stepFriction.length > 0 ? stepFriction : undefined,
+      isDecision,
+      decisionPoints.get(step.step_id),
+    );
 
     return {
       id: step.step_id,
       stepId: step.step_id,
       ordinal: step.ordinal,
-      title: step.title,
+      title: cleanedTitle,
       nodeType,
       category: groupingReason,
       categoryLabel: category.label,
-      categoryColor: category.color,
-      categoryBg: category.bg,
+      categoryColor: isDecision ? '#f59e0b' : category.color,  // Amber for decisions
+      categoryBg: isDecision ? 'rgba(245,158,11,0.07)' : category.bg,
       position: {
         x: NODE_X,
         y: startNodeHeight + index * (NODE_HEIGHT + NODE_GAP),
@@ -94,7 +135,7 @@ export function buildProcessMap(input: ProcessEngineInput): ProcessMap {
     };
   });
 
-  // ── Build phases from consecutive application context groups ─────────────
+  // ── Build phases with enriched labels ───────────────────────────────────
   const phases = buildPhases(sessionJson.sessionId, finalizedSteps);
 
   // Attach phaseId to each task node
@@ -107,7 +148,21 @@ export function buildProcessMap(input: ProcessEngineInput): ProcessMap {
     }
   }
 
-  // ── Build synthetic start node (spec §14.3) ───────────────────────────────
+  // ── Infer outcome from last step ────────────────────────────────────────
+  const lastStep = finalizedSteps[finalizedSteps.length - 1];
+  const lastStepEvents = lastStep
+    ? lastStep.source_event_ids
+        .map(id => eventById.get(id))
+        .filter((e): e is CanonicalEventInput => e !== undefined)
+    : [];
+  const lastPage = lastStepEvents.find(e => e.page_context?.pageTitle)?.page_context?.pageTitle;
+  const outcome = lastStep
+    ? lastPage
+      ? `${sessionJson.activityName} completed — "${lastPage}" reached`
+      : `${sessionJson.activityName} completed`
+    : 'Workflow completed';
+
+  // ── Build synthetic start node ──────────────────────────────────────────
   const startNode: ProcessMapNode = {
     id: `${sessionJson.sessionId}-start`,
     stepId: `${sessionJson.sessionId}-start`,
@@ -115,7 +170,7 @@ export function buildProcessMap(input: ProcessEngineInput): ProcessMap {
     title: 'Start',
     nodeType: 'start',
     category: 'single_action',
-    categoryLabel: 'Start',
+    categoryLabel: 'Trigger',
     categoryColor: '#64748b',
     categoryBg: 'rgba(100,116,139,0.07)',
     position: { x: NODE_X, y: 0 },
@@ -128,7 +183,7 @@ export function buildProcessMap(input: ProcessEngineInput): ProcessMap {
     },
   };
 
-  // ── Build synthetic end node (spec §14.3) ─────────────────────────────────
+  // ── Build synthetic end node ────────────────────────────────────────────
   const endNodeY =
     taskNodes.length > 0
       ? taskNodes[taskNodes.length - 1]!.position.y + NODE_HEIGHT + NODE_GAP
@@ -141,7 +196,7 @@ export function buildProcessMap(input: ProcessEngineInput): ProcessMap {
     title: 'End',
     nodeType: 'end',
     category: 'single_action',
-    categoryLabel: 'End',
+    categoryLabel: 'Complete',
     categoryColor: '#64748b',
     categoryBg: 'rgba(100,116,139,0.07)',
     position: { x: NODE_X, y: endNodeY },
@@ -154,7 +209,7 @@ export function buildProcessMap(input: ProcessEngineInput): ProcessMap {
     },
   };
 
-  // ── Build edges ───────────────────────────────────────────────────────────
+  // ── Build edges ─────────────────────────────────────────────────────────
   const allNodes = [startNode, ...taskNodes, endNode];
   const edges: ProcessMapEdge[] = [];
 
@@ -162,13 +217,11 @@ export function buildProcessMap(input: ProcessEngineInput): ProcessMap {
     const from = allNodes[i]!;
     const to = allNodes[i + 1]!;
 
-    // Exception transition when either endpoint is an exception node
     const edgeType: ProcessMapEdge['type'] =
       to.nodeType === 'exception' || from.nodeType === 'exception'
         ? 'exception'
         : 'sequence';
 
-    // The boundary reason comes from the target step (the step that triggered the boundary)
     const targetDerivedStep =
       to.nodeType !== 'start' && to.nodeType !== 'end'
         ? finalizedSteps.find(s => s.step_id === to.stepId)
@@ -195,36 +248,35 @@ export function buildProcessMap(input: ProcessEngineInput): ProcessMap {
     phases,
     nodes: allNodes,
     edges,
+    // New canonical fields
+    objective,
+    trigger,
+    outcome,
+    ...(totalDurationMs > 0 && { durationLabel: formatDuration(totalDurationMs) }),
+    ...(friction.length > 0 && { frictionSummary: friction }),
   };
 }
 
 // ─── Node metadata builder ────────────────────────────────────────────────────
 
-/**
- * Builds rich step-level metadata for a process map node.
- *
- * The metadata is used by renderers to display event breakdowns, dominant actions,
- * page context, and human vs system event ratios on map node cards.
- */
 function buildNodeMetadata(
   events: CanonicalEventInput[],
   systems: string[],
   domains: string[],
   durationMs: number | undefined,
+  frictionIndicators?: ProcessMapNodeMetadata['frictionIndicators'],
+  isDecisionPoint?: boolean,
+  decisionLabel?: string,
 ): ProcessMapNodeMetadata {
   const humanEvents = events.filter(e => e.actor_type === 'human');
 
-  // Count all event types present in this step
   const eventTypeSummary: Record<string, number> = {};
   for (const evt of events) {
     eventTypeSummary[evt.event_type] = (eventTypeSummary[evt.event_type] ?? 0) + 1;
   }
 
-  // Primary page context: use the most common pageTitle across events
   const pageTitle = mostFrequentPageTitle(events);
   const routeTemplate = mostFrequentRouteTemplate(events);
-
-  // Dominant action: most frequent human event type mapped to readable label
   const dominantAction = deriveDominantAction(humanEvents);
 
   return {
@@ -238,25 +290,22 @@ function buildNodeMetadata(
     ...(routeTemplate !== undefined && { routeTemplate }),
     ...(dominantAction !== undefined && { dominantAction }),
     eventTypeSummary,
+    ...(frictionIndicators !== undefined && { frictionIndicators }),
+    ...(isDecisionPoint === true && { isDecisionPoint: true }),
+    ...(decisionLabel !== undefined && { decisionLabel }),
   };
 }
 
 // ─── Dominant action derivation ───────────────────────────────────────────────
 
-/**
- * Maps the most frequent human event type in a step to a readable action label.
- * Used to describe "what mainly happened in this step" on the map node.
- */
 function deriveDominantAction(humanEvents: CanonicalEventInput[]): string | undefined {
   if (humanEvents.length === 0) return undefined;
 
-  // Count human event types
   const counts = new Map<string, number>();
   for (const evt of humanEvents) {
     counts.set(evt.event_type, (counts.get(evt.event_type) ?? 0) + 1);
   }
 
-  // Find the most frequent
   let dominant = '';
   let maxCount = 0;
   for (const [type, count] of counts) {
@@ -311,7 +360,6 @@ function mostFrequent(counts: Map<string, number>): string | undefined {
   let result: string | undefined;
   let max = 0;
   for (const [key, count] of counts) {
-    // Tie-break: lexicographic order for determinism
     if (count > max || (count === max && result !== undefined && key < result)) {
       result = key;
       max = count;
@@ -322,20 +370,17 @@ function mostFrequent(counts: Map<string, number>): string | undefined {
 
 // ─── Boundary label derivation ────────────────────────────────────────────────
 
-/**
- * Converts a raw boundary reason into a human-readable transition label for edges.
- *
- * Always returns a non-empty string so renderers can label every edge without
- * conditional handling.
- */
 function deriveBoundaryLabel(
   fromNodeType: ProcessMapNodeType,
   toNodeType: ProcessMapNodeType,
   boundaryReason: string | undefined,
 ): string {
-  // Synthetic node transitions
   if (fromNodeType === 'start') return 'Workflow begins';
   if (toNodeType === 'end') return 'Workflow completes';
+
+  // Decision-related transitions
+  if (fromNodeType === 'decision' && toNodeType === 'exception') return 'Validation failed';
+  if (fromNodeType === 'decision') return 'Accepted';
 
   if (boundaryReason === undefined) return 'Continues';
 
@@ -358,15 +403,16 @@ function deriveBoundaryLabel(
 // ─── Phase computation ────────────────────────────────────────────────────────
 
 /**
- * Groups consecutive finalized steps by their applicationLabel into phases.
- *
- * Rule (deterministic):
- *   A new phase starts when the applicationLabel changes from the previous step.
- *   Steps with no page_context inherit the current open phase's system label.
+ * Groups consecutive finalized steps by applicationLabel into phases.
+ * v2.0: Enriched phase labels with business context.
  */
 function buildPhases(
   sessionId: string,
-  finalizedSteps: Array<{ step_id: string; page_context?: { applicationLabel: string } }>,
+  finalizedSteps: Array<{
+    step_id: string;
+    grouping_reason: string;
+    page_context?: { applicationLabel: string; domain: string; routeTemplate: string };
+  }>,
 ): ProcessMapPhase[] {
   if (finalizedSteps.length === 0) return [];
 
@@ -390,6 +436,12 @@ function buildPhases(
     } else {
       phases[phases.length - 1]!.stepNodeIds.push(step.step_id);
     }
+  }
+
+  // Enrich phase labels with business context
+  for (const phase of phases) {
+    const phaseSteps = finalizedSteps.filter(s => phase.stepNodeIds.includes(s.step_id));
+    phase.name = enrichPhaseLabel(phase.system, phaseSteps);
   }
 
   return phases;

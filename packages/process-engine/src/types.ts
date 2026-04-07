@@ -253,6 +253,14 @@ export interface ProcessMapNodeMetadata {
    * Example: { "interaction.click": 1, "navigation.open_page": 1 }
    */
   eventTypeSummary: Record<string, number>;
+  /** Friction indicators observed at this step. */
+  frictionIndicators?: FrictionIndicator[];
+  /** Whether this node is an inferred decision point. */
+  isDecisionPoint?: boolean;
+  /** Human-readable label for a decision point. */
+  decisionLabel?: string;
+  /** Actor or role performing this step. */
+  actor?: string;
 }
 
 export interface ProcessMapNode {
@@ -298,6 +306,16 @@ export interface ProcessMap {
   phases: ProcessMapPhase[];
   nodes: ProcessMapNode[];
   edges: ProcessMapEdge[];
+  /** Inferred business objective of this workflow. */
+  objective?: string;
+  /** Trigger condition that starts this process. */
+  trigger?: string;
+  /** Expected outcome when the process completes. */
+  outcome?: string;
+  /** Total duration label for the entire process. */
+  durationLabel?: string;
+  /** Aggregate friction indicators across the entire map. */
+  frictionSummary?: FrictionIndicator[];
 }
 
 // ─── Output: SOP ─────────────────────────────────────────────────────────────
@@ -326,6 +344,11 @@ export interface SOPInstruction {
   redacted: boolean;
   /** UI element label associated with the event, if available and non-sensitive. */
   targetLabel?: string;
+  /**
+   * Instruction classification: 'action' for user-initiated steps,
+   * 'wait' for system processing, 'verify' for confirmation checks.
+   */
+  instructionType?: 'action' | 'wait' | 'verify' | 'note';
 }
 
 export interface SOPStep {
@@ -354,6 +377,14 @@ export interface SOPStep {
   confidence: number;
   /** Source step ID for traceability back to ProcessDefinition step (§15.3). */
   sourceStepId: string;
+  /** Actor or role performing this step (inferred from behavior patterns). */
+  actor?: string;
+  /** Friction indicators observed during this step. */
+  frictionIndicators?: FrictionIndicator[];
+  /** Whether this step is a decision point that affects subsequent flow. */
+  isDecisionPoint?: boolean;
+  /** Human-readable label for a decision point (question form). */
+  decisionLabel?: string;
 }
 
 export interface SOP {
@@ -374,6 +405,75 @@ export interface SOP {
   steps: SOPStep[];
   notes: string[];
   generatedAt: string;
+  /** When this SOP should be invoked — the triggering condition. */
+  trigger?: string;
+  /** Roles or actors involved in this procedure (inferred from behavior). */
+  roles?: string[];
+  /** Common issues and exception patterns observed during the workflow. */
+  commonIssues?: CommonIssue[];
+  /** Friction points detected in the observed workflow. */
+  frictionSummary?: FrictionIndicator[];
+  /** Inferred business objective of this workflow. */
+  businessObjective?: string;
+  /** Overall process quality indicators. */
+  qualityIndicators?: QualityIndicators;
+}
+
+// ─── Enrichment types ───────────────────────────────────────────────────────
+
+/**
+ * A friction indicator detected from observed behavior patterns.
+ * Friction includes: excessive navigation, retries, backtracking,
+ * long waits, repeated errors, or manual workarounds.
+ */
+export interface FrictionIndicator {
+  type: FrictionType;
+  /** Human-readable description of the friction. */
+  label: string;
+  /** Severity: 'low' = minor inconvenience, 'medium' = notable, 'high' = significant. */
+  severity: 'low' | 'medium' | 'high';
+  /** Step ordinal(s) where this friction was observed. */
+  stepOrdinals: number[];
+}
+
+export type FrictionType =
+  | 'excessive_navigation'
+  | 'retry_detected'
+  | 'backtracking'
+  | 'long_wait'
+  | 'repeated_error'
+  | 'manual_workaround'
+  | 'redundant_action'
+  | 'context_switching';
+
+/**
+ * A common issue or exception pattern detected in the workflow.
+ */
+export interface CommonIssue {
+  /** Short title for the issue. */
+  title: string;
+  /** Description of the issue and how it was handled. */
+  description: string;
+  /** Step ordinal(s) where this issue was observed. */
+  stepOrdinals: number[];
+}
+
+/**
+ * Aggregate quality indicators for the overall process.
+ */
+export interface QualityIndicators {
+  /** Average confidence across all steps (0–1). */
+  averageConfidence: number;
+  /** Number of steps with confidence below 0.7. */
+  lowConfidenceStepCount: number;
+  /** Number of error-handling steps in the process. */
+  errorStepCount: number;
+  /** Number of distinct systems/applications used. */
+  systemCount: number;
+  /** Number of detected friction points. */
+  frictionCount: number;
+  /** Whether the workflow completed fully. */
+  isComplete: boolean;
 }
 
 // ─── Output: ProcessOutput (full engine result) ───────────────────────────────

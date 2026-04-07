@@ -689,9 +689,12 @@ describe('processSession', () => {
       expect(sop.completionCriteria.length).toBeGreaterThan(0);
     });
 
-    it('completionCriteria mentions step count', () => {
+    it('completionCriteria includes outcome-based criteria', () => {
       const { sop } = processSession(makeInput());
-      expect(sop.completionCriteria.some(c => c.includes('2'))).toBe(true);
+      // v2.0: completion criteria are outcome-based, not mechanical step counts
+      expect(sop.completionCriteria.some(c =>
+        c.includes('confirms') || c.includes('completed') || c.includes('verified'),
+      )).toBe(true);
     });
 
     it('each SOPStep has sourceStepId for traceability (§15.3)', () => {
@@ -1473,10 +1476,14 @@ describe('processSession', () => {
       expect(fileStep!.action).toContain('file');
     });
 
-    it('SOP completion criteria includes send/submit acknowledgement', () => {
+    it('SOP completion criteria includes outcome-based criteria', () => {
       const { sop } = processSession(makeNewGroupingInput());
-      const hasSendCriteria = sop.completionCriteria.some(c => c.includes('send/submit'));
-      expect(hasSendCriteria).toBe(true);
+      // v2.0: outcome-based criteria reference completion state
+      expect(sop.completionCriteria.length).toBeGreaterThan(0);
+      const hasOutcomeCriteria = sop.completionCriteria.some(c =>
+        c.includes('completed') || c.includes('verified') || c.includes('executed'),
+      );
+      expect(hasOutcomeCriteria).toBe(true);
     });
 
     it('SOP outputs include file attachment', () => {
