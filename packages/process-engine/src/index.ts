@@ -47,6 +47,11 @@ export {
   computeQualityIndicators,
 } from './contentEnricher.js';
 
+// ─── Workflow insights ───────────────────────────────────────────────────────
+
+export { analyzeWorkflowInsights } from './workflowInsights.js';
+export type { WorkflowInsight, WorkflowInsightReport, InsightCategory } from './workflowInsights.js';
+
 // ─── Template system ─────────────────────────────────────────────────────────
 
 export {

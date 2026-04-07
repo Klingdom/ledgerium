@@ -30,14 +30,16 @@ import { SOPTab } from '@/components/detail/SOPTab';
 import { ReportTab } from '@/components/detail/ReportTab';
 import { EvidenceTab } from '@/components/detail/EvidenceTab';
 import { IntelligenceTab } from '@/components/detail/IntelligenceTab';
+import { InsightsPanel } from '@/components/detail/InsightsPanel';
 
-type TabId = 'workflow' | 'sop' | 'report' | 'intelligence' | 'evidence';
+type TabId = 'workflow' | 'sop' | 'report' | 'insights' | 'intelligence' | 'evidence';
 
 const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: 'workflow', label: 'Workflow', icon: Layers },
   { id: 'sop', label: 'SOP', icon: ListChecks },
   { id: 'report', label: 'Report', icon: FileText },
-  { id: 'intelligence', label: 'Intelligence', icon: Zap },
+  { id: 'insights', label: 'Insights', icon: Zap },
+  { id: 'intelligence', label: 'Intelligence', icon: BarChart3 },
   { id: 'evidence', label: 'Evidence', icon: Eye },
 ];
 
@@ -122,6 +124,7 @@ export default function WorkflowDetailPage() {
   const workflowReport = artifacts.find((a: any) => a.artifactType === 'workflow_report')?.contentJson;
   const sopArtifact = artifacts.find((a: any) => a.artifactType === 'sop')?.contentJson;
   const processMap = artifacts.find((a: any) => a.artifactType === 'process_map')?.contentJson;
+  const workflowInsights = artifacts.find((a: any) => a.artifactType === 'workflow_insights')?.contentJson;
 
   function handleExport(type: string) {
     let content: string;
@@ -265,6 +268,7 @@ export default function WorkflowDetailPage() {
       {activeTab === 'workflow' && <WorkflowTab processOutput={processOutput} processMap={processMap} />}
       {activeTab === 'sop' && <SOPTab sop={sopArtifact} />}
       {activeTab === 'report' && <ReportTab report={workflowReport} />}
+      {activeTab === 'insights' && <InsightsPanel insights={workflowInsights} />}
       {activeTab === 'intelligence' && <IntelligenceTab workflowId={id} />}
       {activeTab === 'evidence' && <EvidenceTab processOutput={processOutput} />}
 

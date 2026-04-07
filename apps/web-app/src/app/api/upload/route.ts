@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { validateBundle, runProcessEngine, buildWorkflowReportFromOutput } from '@/lib/ingestion';
+import { analyzeWorkflowInsights } from '@ledgerium/process-engine';
 import { clusterWorkflows } from '@/lib/intelligence';
 import { UPLOAD_DIR } from '@/lib/storage';
 import fs from 'fs';
@@ -91,8 +92,9 @@ export async function POST(req: NextRequest) {
       }, { status: 422 });
     }
 
-    // Build workflow report
+    // Build workflow report + insights
     const workflowReport = buildWorkflowReportFromOutput(processOutput, bundle);
+    const workflowInsights = analyzeWorkflowInsights(processOutput);
 
     // Extract metadata
     const { processRun, processMap, processDefinition } = processOutput;
@@ -142,6 +144,11 @@ export async function POST(req: NextRequest) {
                 artifactType: 'process_map',
                 schemaVersion: processMap.version,
                 contentJson: JSON.stringify(processMap),
+              },
+              {
+                artifactType: 'workflow_insights',
+                schemaVersion: '1.0.0',
+                contentJson: JSON.stringify(workflowInsights),
               },
             ],
           },
