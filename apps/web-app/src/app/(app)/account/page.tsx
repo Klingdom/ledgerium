@@ -54,7 +54,6 @@ export default function AccountPage() {
     if (res.ok) {
       const data = await res.json();
       setNewKey(data.key);
-      // Refresh key list
       const keysRes = await fetch('/api/keys');
       if (keysRes.ok) {
         const keysData = await keysRes.json();
@@ -118,31 +117,26 @@ export default function AccountPage() {
     setBillingLoading(false);
   }
 
-  const planLabels: Record<string, string> = {
-    free: 'Free Trial',
-    pro: 'Pro',
-    team: 'Team',
-  };
-
-  const statusLabels: Record<string, { label: string; color: string }> = {
-    trialing: { label: 'Trial', color: 'bg-blue-100 text-blue-700' },
-    active: { label: 'Active', color: 'bg-green-100 text-green-700' },
-    past_due: { label: 'Past Due', color: 'bg-red-100 text-red-700' },
-    canceled: { label: 'Canceled', color: 'bg-gray-100 text-gray-700' },
-    none: { label: 'No Plan', color: 'bg-gray-100 text-gray-500' },
+  const planLabels: Record<string, string> = { free: 'Free', pro: 'Pro', team: 'Team' };
+  const statusLabels: Record<string, { label: string; cls: string }> = {
+    trialing: { label: 'Trial', cls: 'bg-blue-50 text-blue-700 border border-blue-200' },
+    active: { label: 'Active', cls: 'bg-green-50 text-green-700 border border-green-200' },
+    past_due: { label: 'Past Due', cls: 'bg-red-50 text-red-700 border border-red-200' },
+    canceled: { label: 'Canceled', cls: 'bg-gray-100 text-gray-600' },
+    none: { label: 'Free', cls: 'bg-gray-100 text-gray-500' },
   };
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-xl font-semibold text-gray-900">Account</h1>
+    <div className="mx-auto max-w-ds-content space-y-ds-6">
+      <h1 className="text-ds-2xl font-bold tracking-tight text-gray-900">Account</h1>
 
       {/* Profile */}
-      <div className="card p-5">
-        <div className="flex items-center gap-3 mb-4">
+      <div className="card px-ds-5 py-ds-5">
+        <div className="flex items-center gap-ds-3 mb-ds-4">
           <User className="h-5 w-5 text-gray-400" />
-          <h2 className="text-sm font-semibold text-gray-900">Profile</h2>
+          <h2 className="text-ds-base font-semibold text-gray-900">Profile</h2>
         </div>
-        <dl className="space-y-3 text-sm">
+        <dl className="space-y-ds-3 text-ds-sm">
           <div className="flex justify-between">
             <dt className="text-gray-500">Email</dt>
             <dd className="font-medium text-gray-900">{session?.user?.email ?? '—'}</dd>
@@ -153,43 +147,35 @@ export default function AccountPage() {
           </div>
           <div className="flex justify-between">
             <dt className="text-gray-500">Member since</dt>
-            <dd className="text-gray-900">
-              {account?.createdAt
-                ? new Date(account.createdAt).toLocaleDateString()
-                : '—'}
-            </dd>
+            <dd className="text-gray-900">{account?.createdAt ? new Date(account.createdAt).toLocaleDateString() : '—'}</dd>
           </div>
         </dl>
       </div>
 
       {/* Plan */}
-      <div className="card p-5">
-        <div className="flex items-center gap-3 mb-4">
+      <div className="card px-ds-5 py-ds-5">
+        <div className="flex items-center gap-ds-3 mb-ds-4">
           <CreditCard className="h-5 w-5 text-gray-400" />
-          <h2 className="text-sm font-semibold text-gray-900">Plan & Billing</h2>
+          <h2 className="text-ds-base font-semibold text-gray-900">Plan & Billing</h2>
         </div>
-        <dl className="space-y-3 text-sm">
+        <dl className="space-y-ds-3 text-ds-sm">
           <div className="flex justify-between items-center">
             <dt className="text-gray-500">Current Plan</dt>
-            <dd className="font-semibold text-gray-900">
-              {planLabels[account?.plan ?? 'free'] ?? 'Free Trial'}
-            </dd>
+            <dd className="font-semibold text-gray-900">{planLabels[account?.plan ?? 'free'] ?? 'Free'}</dd>
           </div>
           <div className="flex justify-between items-center">
             <dt className="text-gray-500">Status</dt>
             <dd>
               {account && (
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                  statusLabels[account.subscriptionStatus]?.color ?? 'bg-gray-100 text-gray-500'
-                }`}>
+                <span className={`rounded-ds-sm px-2.5 py-0.5 text-ds-xs font-medium ${statusLabels[account.subscriptionStatus]?.cls ?? 'bg-gray-100 text-gray-500'}`}>
                   {statusLabels[account.subscriptionStatus]?.label ?? account.subscriptionStatus}
                 </span>
               )}
             </dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-gray-500">Uploads Used</dt>
-            <dd className="text-gray-900">
+            <dt className="text-gray-500">Uploads</dt>
+            <dd className="text-gray-900 tabular-nums">
               {account?.uploadCount ?? 0}
               {account?.plan === 'free' && <span className="text-gray-400"> / 5</span>}
             </dd>
@@ -197,28 +183,25 @@ export default function AccountPage() {
         </dl>
 
         {account?.plan === 'free' && (
-          <div className="mt-4 rounded-lg bg-brand-50 p-4">
-            <div className="flex items-start gap-2">
+          <div className="mt-ds-4 ds-callout ds-callout-info">
+            <div className="flex items-start gap-ds-2">
               <Zap className="h-4 w-4 text-brand-600 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-brand-900">Upgrade to Pro</p>
-                <p className="mt-0.5 text-xs text-brand-700">
-                  Unlimited uploads, full workflow library, advanced search,
-                  premium reports, and better exports.
+                <p className="text-ds-sm font-medium text-brand-900">Upgrade to Pro</p>
+                <p className="mt-0.5 text-ds-xs text-brand-700">
+                  Unlimited uploads, full workflow library, advanced search, premium reports.
                 </p>
-                <button onClick={handleUpgrade} disabled={billingLoading} className="btn-primary mt-3 text-xs">
-                  {billingLoading ? 'Redirecting to Stripe...' : 'Upgrade Now'}
+                <button onClick={handleUpgrade} disabled={billingLoading} className="btn-primary mt-ds-3 text-xs">
+                  {billingLoading ? 'Redirecting...' : 'Upgrade Now'}
                 </button>
-                {billingError && (
-                  <p className="mt-2 text-xs text-red-600">{billingError}</p>
-                )}
+                {billingError && <p className="mt-ds-2 text-ds-xs text-red-600">{billingError}</p>}
               </div>
             </div>
           </div>
         )}
 
         {account?.plan === 'pro' && (
-          <div className="mt-4 flex gap-2">
+          <div className="mt-ds-4">
             <button onClick={handleManageBilling} className="btn-secondary text-xs">
               Manage Subscription
             </button>
@@ -227,37 +210,32 @@ export default function AccountPage() {
       </div>
 
       {/* Extension Sync */}
-      <div className="card p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
+      <div className="card px-ds-5 py-ds-5">
+        <div className="flex items-center justify-between mb-ds-4">
+          <div className="flex items-center gap-ds-3">
             <Key className="h-5 w-5 text-gray-400" />
-            <h2 className="text-sm font-semibold text-gray-900">Extension Sync</h2>
+            <h2 className="text-ds-base font-semibold text-gray-900">Extension Sync</h2>
           </div>
           {apiKeys.length < 3 && (
-            <button
-              onClick={handleCreateKey}
-              disabled={isCreating}
-              className="btn-secondary gap-1 text-xs"
-            >
+            <button onClick={handleCreateKey} disabled={isCreating} className="btn-secondary gap-1 text-xs">
               <Plus className="h-3.5 w-3.5" />
               {isCreating ? 'Creating...' : 'New API Key'}
             </button>
           )}
         </div>
 
-        <p className="text-xs text-gray-500 mb-4">
+        <p className="text-ds-xs text-gray-500 mb-ds-4">
           Connect your Ledgerium browser extension to automatically sync recordings
-          to your workflow library. Create an API key, then paste it into the extension settings.
+          to your workflow library.
         </p>
 
-        {/* New key banner */}
         {newKey && (
-          <div className="rounded-lg bg-green-50 border border-green-200 p-4 mb-4">
-            <p className="text-xs font-semibold text-green-800 mb-1">
+          <div className="ds-callout ds-callout-success mb-ds-4">
+            <p className="text-ds-xs font-semibold text-green-800 mb-ds-1">
               API key created — copy it now. It will not be shown again.
             </p>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 rounded bg-white px-3 py-2 text-xs font-mono text-gray-900 border border-green-200 select-all">
+            <div className="flex items-center gap-ds-2">
+              <code className="flex-1 rounded-ds-md bg-white px-ds-3 py-ds-2 text-ds-xs font-mono text-gray-900 border border-green-200 select-all">
                 {newKey}
               </code>
               <button onClick={handleCopyKey} className="btn-secondary text-xs gap-1 flex-shrink-0">
@@ -265,52 +243,40 @@ export default function AccountPage() {
                 {copied ? 'Copied' : 'Copy'}
               </button>
             </div>
-            <div className="mt-3 rounded bg-white border border-green-200 p-3">
-              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                Extension Settings
-              </p>
-              <p className="text-xs text-gray-700">
+            <div className="mt-ds-3 rounded-ds-md bg-white border border-green-200 px-ds-3 py-ds-3">
+              <p className="ds-section-label mb-ds-1">Extension Settings</p>
+              <p className="text-ds-xs text-gray-700">
                 <strong>Sync URL:</strong>{' '}
                 <code className="text-brand-600">{typeof window !== 'undefined' ? `${window.location.origin}/api/sync` : '/api/sync'}</code>
               </p>
-              <p className="text-xs text-gray-700 mt-0.5">
+              <p className="text-ds-xs text-gray-700 mt-0.5">
                 <strong>API Key:</strong> <code className="text-brand-600">{newKey}</code>
               </p>
             </div>
-            <button
-              onClick={() => setNewKey(null)}
-              className="mt-2 text-xs text-green-700 hover:text-green-800"
-            >
+            <button onClick={() => setNewKey(null)} className="mt-ds-2 text-ds-xs text-green-700 hover:text-green-800">
               Dismiss
             </button>
           </div>
         )}
 
-        {/* Key list */}
         {apiKeys.length === 0 && !newKey ? (
-          <div className="text-center py-4">
+          <div className="text-center py-ds-6">
             <Key className="mx-auto h-8 w-8 text-gray-200" />
-            <p className="mt-2 text-xs text-gray-400">
-              No API keys yet. Create one to start syncing from the extension.
-            </p>
+            <p className="mt-ds-2 text-ds-xs text-gray-400">No API keys yet. Create one to start syncing.</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-ds-2">
             {apiKeys.map((k) => (
-              <div key={k.id} className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2">
+              <div key={k.id} className="flex items-center justify-between rounded-ds-md border border-gray-100 px-ds-3 py-ds-2">
                 <div>
-                  <p className="text-xs font-mono text-gray-700">{k.prefix}...</p>
-                  <p className="text-[10px] text-gray-400">
+                  <p className="text-ds-xs font-mono text-gray-700">{k.prefix}...</p>
+                  <p className="text-ds-xs text-gray-400">
                     {k.label}
-                    {k.lastUsedAt && <> &middot; Last used {new Date(k.lastUsedAt).toLocaleDateString()}</>}
-                    {!k.lastUsedAt && <> &middot; Never used</>}
+                    {k.lastUsedAt && <> · Last used {new Date(k.lastUsedAt).toLocaleDateString()}</>}
+                    {!k.lastUsedAt && <> · Never used</>}
                   </p>
                 </div>
-                <button
-                  onClick={() => handleDeleteKey(k.id)}
-                  className="rounded p-1.5 text-gray-300 hover:bg-red-50 hover:text-red-500"
-                  title="Revoke key"
-                >
+                <button onClick={() => handleDeleteKey(k.id)} className="rounded-ds-sm p-1.5 text-gray-300 hover:bg-red-50 hover:text-red-500" title="Revoke">
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -320,26 +286,26 @@ export default function AccountPage() {
       </div>
 
       {/* Trust */}
-      <div className="card p-5">
-        <div className="flex items-center gap-3 mb-4">
+      <div className="card px-ds-5 py-ds-5">
+        <div className="flex items-center gap-ds-3 mb-ds-4">
           <Shield className="h-5 w-5 text-gray-400" />
-          <h2 className="text-sm font-semibold text-gray-900">Trust & Privacy</h2>
+          <h2 className="text-ds-base font-semibold text-gray-900">Trust & Privacy</h2>
         </div>
-        <ul className="space-y-2 text-sm text-gray-600">
-          <li className="flex items-start gap-2">
-            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-green-400 flex-shrink-0" />
+        <ul className="space-y-ds-2 text-ds-sm text-gray-600">
+          <li className="flex items-start gap-ds-2">
+            <span className="mt-[5px] h-1.5 w-1.5 rounded-full bg-green-400 flex-shrink-0" />
             All workflow processing is deterministic — same input, same output
           </li>
-          <li className="flex items-start gap-2">
-            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-green-400 flex-shrink-0" />
+          <li className="flex items-start gap-ds-2">
+            <span className="mt-[5px] h-1.5 w-1.5 rounded-full bg-green-400 flex-shrink-0" />
             Sensitive values are never stored — only field labels are preserved
           </li>
-          <li className="flex items-start gap-2">
-            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-green-400 flex-shrink-0" />
+          <li className="flex items-start gap-ds-2">
+            <span className="mt-[5px] h-1.5 w-1.5 rounded-full bg-green-400 flex-shrink-0" />
             Your workflow data is private to your account
           </li>
-          <li className="flex items-start gap-2">
-            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-green-400 flex-shrink-0" />
+          <li className="flex items-start gap-ds-2">
+            <span className="mt-[5px] h-1.5 w-1.5 rounded-full bg-green-400 flex-shrink-0" />
             No AI inference is applied to generate workflow content
           </li>
         </ul>

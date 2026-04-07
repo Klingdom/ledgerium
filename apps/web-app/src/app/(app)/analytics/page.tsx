@@ -17,6 +17,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { formatDuration, formatDateRelative, formatConfidence } from '@/lib/format';
+import { track } from '@/lib/analytics';
 
 interface ProcessDef {
   id: string;
@@ -52,10 +53,16 @@ interface AnalyticsData {
   insights: Insight[];
 }
 
-const SEVERITY_STYLES: Record<string, { bg: string; text: string; dot: string }> = {
-  critical: { bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500' },
-  warning: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
-  info: { bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-500' },
+const SEVERITY_STYLES: Record<string, string> = {
+  critical: 'ds-callout ds-callout-danger',
+  warning: 'ds-callout ds-callout-warning',
+  info: 'ds-callout ds-callout-info',
+};
+
+const SEVERITY_TEXT: Record<string, string> = {
+  critical: 'text-red-700',
+  warning: 'text-amber-700',
+  info: 'text-blue-700',
 };
 
 const INSIGHT_TYPE_ICONS: Record<string, React.ElementType> = {
@@ -76,10 +83,14 @@ export default function AnalyticsPage() {
     setIsLoading(false);
   }, []);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => {
+    loadData();
+    track({ event: 'page_viewed', path: '/analytics' });
+  }, [loadData]);
 
   async function runAnalysis() {
     setIsAnalyzing(true);
+    track({ event: 'analysis_run' });
     const res = await fetch('/api/analytics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
     if (res.ok) {
       await loadData();
@@ -101,7 +112,7 @@ export default function AnalyticsPage() {
   }
 
   if (isLoading) {
-    return <div className="text-center text-sm text-gray-400 py-20">Loading intelligence...</div>;
+    return <div className="text-center text-ds-sm text-gray-400 py-20">Loading intelligence...</div>;
   }
 
   const hasData = data && data.totalWorkflows > 0;
@@ -109,17 +120,17 @@ export default function AnalyticsPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-ds-6">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Process Intelligence</h1>
-          <p className="text-sm text-gray-500">
-            {data ? `${data.totalWorkflows} workflows · ${data.totalDefinitions} process definitions · ${data.totalInsights} insights` : 'No data yet'}
+          <h1 className="text-ds-2xl font-bold tracking-tight text-gray-900">Process Intelligence</h1>
+          <p className="text-ds-sm text-gray-500">
+            {data ? `${data.totalWorkflows} workflows · ${data.totalDefinitions} definitions · ${data.totalInsights} insights` : 'No data yet'}
           </p>
         </div>
         <button
           onClick={runAnalysis}
           disabled={isAnalyzing || !hasData}
-          className="btn-primary gap-1.5 text-sm"
+          className="btn-primary gap-1.5"
         >
           <RefreshCw className={`h-4 w-4 ${isAnalyzing ? 'animate-spin' : ''}`} />
           {isAnalyzing ? 'Analyzing...' : 'Run Analysis'}
@@ -127,23 +138,27 @@ export default function AnalyticsPage() {
       </div>
 
       {!hasData ? (
-        <div className="card p-12 text-center">
-          <BarChart3 className="mx-auto h-10 w-10 text-gray-300" />
-          <h3 className="mt-3 text-sm font-medium text-gray-900">No workflows to analyze</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            Upload workflow recordings to start seeing process intelligence.
-          </p>
-          <Link href="/upload" className="btn-primary mt-4 inline-flex">
-            Upload a Workflow
-          </Link>
+        <div className="card overflow-hidden">
+          <div className="bg-gradient-to-br from-gray-50 to-white px-ds-8 py-ds-10 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100">
+              <BarChart3 className="h-7 w-7 text-gray-400" />
+            </div>
+            <h3 className="mt-ds-4 text-ds-base font-medium text-gray-900">No workflows to analyze</h3>
+            <p className="mt-ds-1 text-ds-sm text-gray-500">
+              Upload workflow recordings to start seeing process intelligence.
+            </p>
+            <Link href="/upload" className="btn-primary mt-ds-4 inline-flex">
+              Upload a Workflow
+            </Link>
+          </div>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-ds-8">
           {/* Summary metrics */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-ds-4">
             <MetricCard icon={Layers} label="Workflows" value={data!.totalWorkflows} />
-            <MetricCard icon={GitBranch} label="Process Definitions" value={data!.totalDefinitions} />
-            <MetricCard icon={AlertTriangle} label="Active Insights" value={data!.totalInsights} />
+            <MetricCard icon={GitBranch} label="Definitions" value={data!.totalDefinitions} />
+            <MetricCard icon={AlertTriangle} label="Insights" value={data!.totalInsights} />
             <MetricCard
               icon={Shield}
               label="Avg Stability"
@@ -160,30 +175,31 @@ export default function AnalyticsPage() {
 
           {/* Insights */}
           {data!.insights.length > 0 && (
-            <div>
-              <h2 className="text-sm font-semibold text-gray-900 mb-3">Insights</h2>
-              <div className="space-y-2">
+            <section className="ds-section">
+              <h2 className="ds-section-label">Active Insights</h2>
+              <div className="space-y-ds-2">
                 {data!.insights.map((insight) => {
-                  const style = SEVERITY_STYLES[insight.severity] ?? SEVERITY_STYLES.info!;
+                  const cls = SEVERITY_STYLES[insight.severity] ?? SEVERITY_STYLES.info;
+                  const textCls = SEVERITY_TEXT[insight.severity] ?? SEVERITY_TEXT.info;
                   const Icon = INSIGHT_TYPE_ICONS[insight.insightType] ?? Eye;
                   return (
-                    <div key={insight.id} className={`card p-4 ${style.bg} border-0`}>
-                      <div className="flex items-start gap-3">
-                        <Icon className={`h-4 w-4 mt-0.5 ${style.text} flex-shrink-0`} />
+                    <div key={insight.id} className={cls}>
+                      <div className="flex items-start gap-ds-3">
+                        <Icon className={`h-4 w-4 mt-0.5 ${textCls} flex-shrink-0`} />
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-xs font-semibold ${style.text}`}>
-                              {insight.severity.toUpperCase()}
+                          <div className="flex items-center gap-ds-2">
+                            <span className={`text-ds-xs font-semibold uppercase ${textCls}`}>
+                              {insight.severity}
                             </span>
-                            <span className="text-xs text-gray-400">{insight.insightType}</span>
+                            <span className="text-ds-xs text-gray-400">{insight.insightType}</span>
                           </div>
-                          <p className="text-sm font-medium text-gray-900 mt-0.5">{insight.title}</p>
-                          <p className="text-xs text-gray-600 mt-1 leading-relaxed">{insight.explanation}</p>
+                          <p className="text-ds-sm font-medium text-gray-900 mt-0.5">{insight.title}</p>
+                          <p className="text-ds-xs text-gray-600 mt-ds-1 leading-relaxed">{insight.explanation}</p>
                           {insight.recommendation && (
-                            <p className="text-xs text-gray-500 mt-1 italic">{insight.recommendation}</p>
+                            <p className="text-ds-xs text-gray-500 mt-ds-1 italic">{insight.recommendation}</p>
                           )}
                           {(insight.observedValue || insight.expectedValue) && (
-                            <div className="flex gap-4 mt-2 text-[10px] text-gray-500">
+                            <div className="flex gap-ds-4 mt-ds-2 text-ds-xs text-gray-500">
                               {insight.observedValue && <span>Observed: <strong>{insight.observedValue}</strong></span>}
                               {insight.expectedValue && <span>Expected: <strong>{insight.expectedValue}</strong></span>}
                             </div>
@@ -201,26 +217,26 @@ export default function AnalyticsPage() {
                   );
                 })}
               </div>
-            </div>
+            </section>
           )}
 
           {/* Process Definitions */}
-          <div>
-            <h2 className="text-sm font-semibold text-gray-900 mb-3">Process Definitions</h2>
+          <section className="ds-section">
+            <h2 className="ds-section-label">Process Definitions</h2>
             {data!.definitions.length === 0 ? (
-              <div className="card p-8 text-center">
-                <p className="text-sm text-gray-500">
+              <div className="card px-ds-8 py-ds-8 text-center">
+                <p className="text-ds-sm text-gray-500">
                   Click &quot;Run Analysis&quot; to auto-detect process definitions from your workflows.
                 </p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-ds-2">
                 {data!.definitions.map((def) => (
-                  <div key={def.id} className="card p-4 hover:border-gray-300 transition-colors">
+                  <div key={def.id} className="card px-ds-5 py-ds-4 hover:border-gray-300 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-medium text-gray-900 truncate">{def.canonicalName}</h3>
-                        <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-gray-500">
+                        <h3 className="text-ds-sm font-medium text-gray-900 truncate">{def.canonicalName}</h3>
+                        <div className="flex flex-wrap items-center gap-ds-3 mt-ds-1 text-ds-xs text-gray-500">
                           <span className="flex items-center gap-1">
                             <Layers className="h-3.5 w-3.5" />
                             {def.runCount} run{def.runCount !== 1 ? 's' : ''}
@@ -248,39 +264,36 @@ export default function AnalyticsPage() {
                           )}
                         </div>
 
-                        {/* Insight badges */}
                         {def.insights.length > 0 && (
-                          <div className="flex gap-1 mt-2">
+                          <div className="flex gap-ds-1 mt-ds-2">
                             {def.insights.slice(0, 3).map((i) => {
-                              const s = SEVERITY_STYLES[i.severity] ?? SEVERITY_STYLES.info!;
+                              const textCls = SEVERITY_TEXT[i.severity] ?? 'text-blue-700';
                               return (
-                                <span key={i.id} className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${s.bg} ${s.text}`}>
-                                  <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
+                                <span key={i.id} className={`ds-tag text-[10px] ${textCls} bg-gray-50`}>
                                   {i.title}
                                 </span>
                               );
                             })}
                             {def.insights.length > 3 && (
-                              <span className="text-[10px] text-gray-400">+{def.insights.length - 3}</span>
+                              <span className="text-ds-xs text-gray-400">+{def.insights.length - 3}</span>
                             )}
                           </div>
                         )}
                       </div>
 
-                      {/* Run list preview */}
-                      <div className="hidden sm:flex items-center gap-2 ml-4">
+                      <div className="hidden sm:flex items-center gap-ds-2 ml-ds-4">
                         <div className="text-right">
                           {def.workflows.slice(0, 2).map((w) => (
                             <Link
                               key={w.id}
                               href={`/workflows/${w.id}`}
-                              className="block text-[10px] text-gray-400 hover:text-brand-600 truncate max-w-[120px]"
+                              className="block text-ds-xs text-gray-400 hover:text-brand-600 truncate max-w-[120px]"
                             >
                               {w.title}
                             </Link>
                           ))}
                           {def.workflows.length > 2 && (
-                            <span className="text-[10px] text-gray-300">+{def.workflows.length - 2} more</span>
+                            <span className="text-ds-xs text-gray-300">+{def.workflows.length - 2} more</span>
                           )}
                         </div>
                         <ChevronRight className="h-4 w-4 text-gray-300" />
@@ -290,7 +303,7 @@ export default function AnalyticsPage() {
                 ))}
               </div>
             )}
-          </div>
+          </section>
         </div>
       )}
     </div>
@@ -299,12 +312,12 @@ export default function AnalyticsPage() {
 
 function MetricCard({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string | number }) {
   return (
-    <div className="card p-4">
-      <div className="flex items-center gap-2 mb-1">
+    <div className="card px-ds-5 py-ds-4">
+      <div className="flex items-center gap-ds-2 mb-ds-1">
         <Icon className="h-4 w-4 text-brand-600" />
-        <p className="text-xs text-gray-500">{label}</p>
+        <p className="ds-metric-label">{label}</p>
       </div>
-      <p className="text-xl font-semibold text-gray-900">{value}</p>
+      <p className="ds-metric-value">{value}</p>
     </div>
   );
 }

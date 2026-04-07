@@ -14,14 +14,16 @@ import {
   ListChecks,
   FileText,
   Eye,
+  Zap,
 } from 'lucide-react';
 import { formatDuration, formatDate, formatConfidence } from '@/lib/format';
+import { track } from '@/lib/analytics';
+import { completeStep } from '@/lib/onboarding';
 import { WorkflowTab } from '@/components/detail/WorkflowTab';
 import { SOPTab } from '@/components/detail/SOPTab';
 import { ReportTab } from '@/components/detail/ReportTab';
 import { EvidenceTab } from '@/components/detail/EvidenceTab';
 import { IntelligenceTab } from '@/components/detail/IntelligenceTab';
-import { Zap } from 'lucide-react';
 
 type TabId = 'workflow' | 'sop' | 'report' | 'intelligence' | 'evidence';
 
@@ -51,10 +53,18 @@ export default function WorkflowDetailPage() {
       setIsLoading(false);
     }
     load();
+    track({ event: 'workflow_viewed', workflowId: id, tab: 'workflow' });
   }, [id, router]);
 
+  function handleTabChange(tab: TabId) {
+    setActiveTab(tab);
+    track({ event: 'tab_switched', tab });
+    if (tab === 'sop') completeStep('view_sop');
+    if (tab === 'workflow') completeStep('view_process_map');
+  }
+
   if (isLoading || !data) {
-    return <div className="text-center text-sm text-gray-400 py-20">Loading workflow...</div>;
+    return <div className="text-center text-ds-sm text-gray-400 py-20">Loading workflow...</div>;
   }
 
   const { workflow, artifacts } = data;
@@ -85,15 +95,16 @@ export default function WorkflowDetailPage() {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
+    track({ event: 'workflow_exported', workflowId: id, format: type });
   }
 
   return (
     <div>
       {/* Back + Header */}
-      <div className="mb-6">
+      <div className="mb-ds-6">
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-3"
+          className="inline-flex items-center gap-1 text-ds-sm text-gray-500 hover:text-gray-700 mb-ds-3"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Library
@@ -101,8 +112,8 @@ export default function WorkflowDetailPage() {
 
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">{workflow.title}</h1>
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+            <h1 className="text-ds-2xl font-bold tracking-tight text-gray-900">{workflow.title}</h1>
+            <div className="mt-ds-2 flex flex-wrap items-center gap-ds-3 text-ds-xs text-gray-500">
               <span className="flex items-center gap-1">
                 <Layers className="h-3.5 w-3.5" />
                 {workflow.stepCount} steps
@@ -120,30 +131,24 @@ export default function WorkflowDetailPage() {
               {workflow.confidence !== null && (
                 <span className="flex items-center gap-1">
                   <BarChart3 className="h-3.5 w-3.5" />
-                  {formatConfidence(workflow.confidence)} confidence
+                  {formatConfidence(workflow.confidence)}
                 </span>
               )}
-              <span className="text-gray-300">|</span>
+              <span className="text-gray-300">·</span>
               <span>{formatDate(workflow.createdAt)}</span>
             </div>
 
-            {/* Tool badges */}
             {workflow.toolsUsed.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1.5">
+              <div className="mt-ds-2 flex flex-wrap gap-ds-1">
                 {workflow.toolsUsed.map((tool: string) => (
-                  <span
-                    key={tool}
-                    className="inline-flex rounded-md bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700"
-                  >
-                    {tool}
-                  </span>
+                  <span key={tool} className="ds-tag ds-tag-brand">{tool}</span>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Export buttons */}
-          <div className="flex gap-2">
+          {/* Export */}
+          <div className="flex gap-ds-2 no-print">
             <button onClick={() => handleExport('report')} className="btn-secondary gap-1 text-xs">
               <Download className="h-3.5 w-3.5" />
               Report
@@ -161,13 +166,13 @@ export default function WorkflowDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="flex gap-6">
+      <div className="border-b border-gray-200 mb-ds-6 no-print">
+        <nav className="flex gap-ds-6">
           {TABS.map(({ id: tabId, label, icon: Icon }) => (
             <button
               key={tabId}
-              onClick={() => setActiveTab(tabId)}
-              className={`flex items-center gap-1.5 border-b-2 pb-3 pt-1 text-sm font-medium transition-colors ${
+              onClick={() => handleTabChange(tabId)}
+              className={`flex items-center gap-1.5 border-b-2 pb-ds-3 pt-ds-1 text-ds-sm font-medium transition-colors ${
                 activeTab === tabId
                   ? 'border-brand-600 text-brand-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
