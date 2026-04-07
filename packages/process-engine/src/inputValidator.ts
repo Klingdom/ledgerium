@@ -131,6 +131,32 @@ export function validateProcessEngineInput(
     }
   }
 
+  // ── Cross-reference checks ─────────────────────────────────────────────────
+  // Verify that derived steps reference events that actually exist.
+
+  if (Array.isArray(input.normalizedEvents) && Array.isArray(input.derivedSteps)) {
+    const eventIdSet = new Set(input.normalizedEvents.map(e => e.event_id));
+    for (let i = 0; i < input.derivedSteps.length; i++) {
+      const step = input.derivedSteps[i]!;
+      if (Array.isArray(step.source_event_ids)) {
+        for (const eventId of step.source_event_ids) {
+          if (!eventIdSet.has(eventId)) {
+            errors.push(
+              `derivedSteps[${i}].source_event_ids references unknown event "${eventId}"`,
+            );
+            break; // one error per step is enough
+          }
+        }
+      }
+    }
+
+    // Warn if no finalized steps exist (produces empty but valid output)
+    const finalizedCount = input.derivedSteps.filter(s => s.status === 'finalized').length;
+    if (input.derivedSteps.length > 0 && finalizedCount === 0) {
+      errors.push('derivedSteps contains no finalized steps — output will be empty');
+    }
+  }
+
   if (errors.length === 0) {
     return { valid: true };
   }

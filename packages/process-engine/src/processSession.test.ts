@@ -164,9 +164,16 @@ describe('processSession', () => {
     it('counts human vs system events', () => {
       const input = makeInput({
         events: [
-          makeEvent({ event_id: 'h1', actor_type: 'human' }),
-          makeEvent({ event_id: 'h2', actor_type: 'human' }),
-          makeEvent({ event_id: 's1', actor_type: 'system', event_type: 'system.toast_shown' }),
+          makeEvent({ event_id: 'h1', actor_type: 'human', t_ms: NOW_MS }),
+          makeEvent({ event_id: 'h2', actor_type: 'human', t_ms: NOW_MS + 100 }),
+          makeEvent({ event_id: 's1', actor_type: 'system', event_type: 'system.toast_shown', t_ms: NOW_MS + 200 }),
+        ],
+        steps: [
+          {
+            step_id: `${SESSION_ID}-step-1`, session_id: SESSION_ID, ordinal: 1,
+            title: 'Step 1', status: 'finalized' as const, grouping_reason: 'single_action',
+            confidence: 0.85, source_event_ids: ['h1', 'h2', 's1'], start_t_ms: NOW_MS,
+          },
         ],
       });
       const { processRun } = processSession(input);
@@ -195,13 +202,20 @@ describe('processSession', () => {
             t_ms: NOW_MS,
             t_wall: new Date(NOW_MS).toISOString(),
             event_type: 'interaction.click',
-            actor_type: 'human',
+            actor_type: 'human' as const,
             normalization_meta: {
               sourceEventId: 'e1',
               sourceEventType: 'interaction.click',
               normalizationRuleVersion: '1.0.0',
               redactionApplied: false,
             },
+          },
+        ],
+        steps: [
+          {
+            step_id: `${SESSION_ID}-step-1`, session_id: SESSION_ID, ordinal: 1,
+            title: 'Step 1', status: 'finalized' as const, grouping_reason: 'single_action',
+            confidence: 0.85, source_event_ids: ['e1'], start_t_ms: NOW_MS,
           },
         ],
       });
