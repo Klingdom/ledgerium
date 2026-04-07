@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Upload, CheckCircle, XCircle, FileJson, Loader2, Zap, Lock } from 'lucide-react';
-import { track } from '@/lib/analytics';
+import { track, trackActivation } from '@/lib/analytics';
 
 type UploadState = 'idle' | 'uploading' | 'success' | 'error' | 'upgrade_required';
 
@@ -70,6 +70,7 @@ export default function UploadPage() {
         // Update local count
         if (account) setAccount({ ...account, uploadCount: account.uploadCount + 1 });
         track({ event: 'workflow_uploaded', stepCount: data.stepCount ?? 0, systemCount: data.toolsUsed?.length ?? 0 });
+        trackActivation('first_workflow', { stepCount: data.stepCount ?? 0, systemCount: data.toolsUsed?.length ?? 0 });
       } else if (data.code === 'UPGRADE_REQUIRED') {
         setState('upgrade_required');
         setResult(data);

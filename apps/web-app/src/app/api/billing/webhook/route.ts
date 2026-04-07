@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStripe, WEBHOOK_SECRET } from '@/lib/stripe';
 import { db } from '@/db';
+import { trackServer } from '@/lib/analytics';
 import type Stripe from 'stripe';
 
 /**
@@ -46,6 +47,7 @@ export async function POST(req: NextRequest) {
           },
         });
         console.log(`[stripe] User ${userId} upgraded to Pro`);
+        trackServer('subscription_created', { userId, plan: 'pro' });
         break;
       }
 

@@ -4,6 +4,7 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
+import { track } from '@/lib/analytics';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -46,6 +47,7 @@ export default function SignupPage() {
       return;
     }
 
+    track({ event: 'signup_completed' });
     router.push('/dashboard');
     router.refresh();
   }

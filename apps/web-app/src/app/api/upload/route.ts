@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { validateBundle, runProcessEngine, buildWorkflowReportFromOutput } from '@/lib/ingestion';
 import { analyzeWorkflowInsights } from '@ledgerium/process-engine';
+import { trackServer } from '@/lib/analytics';
 import { clusterWorkflows } from '@/lib/intelligence';
 import { UPLOAD_DIR } from '@/lib/storage';
 import fs from 'fs';
@@ -177,6 +178,16 @@ export async function POST(req: NextRequest) {
     await db.user.update({
       where: { id: userId },
       data: { uploadCount: { increment: 1 } },
+    });
+
+    // Track server-side
+    trackServer('workflow_created', {
+      userId,
+      workflowId: workflow.id,
+      stepCount: processRun.stepCount,
+      systemCount: toolsUsed.length,
+      durationMs: processRun.durationMs,
+      uploadNumber: (user?.uploadCount ?? 0) + 1,
     });
 
     // Auto-cluster into process definitions (fire-and-forget)

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { getStripe, PRO_PRICE_ID, APP_URL } from '@/lib/stripe';
+import { trackServer } from '@/lib/analytics';
 
 /**
  * POST /api/billing/checkout
@@ -65,6 +66,7 @@ export async function POST() {
       },
     });
 
+    trackServer('checkout_started', { userId: user.id });
     return NextResponse.json({ url: checkoutSession.url });
   } catch (err) {
     console.error('Stripe checkout error:', err);

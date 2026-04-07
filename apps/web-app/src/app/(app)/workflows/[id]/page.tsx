@@ -23,7 +23,7 @@ import {
   Plus,
 } from 'lucide-react';
 import { formatDuration, formatDate, formatConfidence } from '@/lib/format';
-import { track } from '@/lib/analytics';
+import { track, trackActivation } from '@/lib/analytics';
 import { completeStep } from '@/lib/onboarding';
 import { WorkflowTab } from '@/components/detail/WorkflowTab';
 import { SOPTab } from '@/components/detail/SOPTab';
@@ -75,8 +75,8 @@ export default function WorkflowDetailPage() {
   function handleTabChange(tab: TabId) {
     setActiveTab(tab);
     track({ event: 'tab_switched', tab });
-    if (tab === 'sop') completeStep('view_sop');
-    if (tab === 'workflow') completeStep('view_process_map');
+    if (tab === 'sop') { completeStep('view_sop'); trackActivation('first_sop', { workflowId: id }); }
+    if (tab === 'workflow') { completeStep('view_process_map'); trackActivation('first_map', { workflowId: id }); }
   }
 
   async function handleToggleFavorite() {

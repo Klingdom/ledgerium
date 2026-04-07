@@ -4,6 +4,7 @@ import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
+import { track } from '@/lib/analytics';
 
 function LoginForm() {
   const router = useRouter();
@@ -30,9 +31,11 @@ function LoginForm() {
 
     if (result?.error) {
       setError('Invalid email or password');
+      track({ event: 'login_failed', reason: 'invalid_credentials' });
       return;
     }
 
+    track({ event: 'login_completed' });
     router.push(callbackUrl);
     router.refresh();
   }

@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Layers, Clock, Monitor, BarChart3, ExternalLink } from 'lucide-react';
 import { formatDuration, formatConfidence } from '@/lib/format';
+import { track } from '@/lib/analytics';
 import { SOPTab } from '@/components/detail/SOPTab';
 import { ReportTab } from '@/components/detail/ReportTab';
 
@@ -32,6 +33,7 @@ export default function SharedWorkflowPage() {
       }
       setData(await res.json());
       setIsLoading(false);
+      track({ event: 'shared_workflow_viewed', token });
     }
     load();
   }, [token]);
