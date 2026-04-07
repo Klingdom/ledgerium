@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Users, CheckCircle, XCircle } from 'lucide-react';
 
@@ -10,6 +10,21 @@ import { Users, CheckCircle, XCircle } from 'lucide-react';
  */
 
 export default function JoinTeamPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-md py-ds-12 text-center">
+          <Users className="mx-auto h-10 w-10 text-brand-500 animate-pulse" />
+          <p className="mt-ds-4 text-ds-sm text-gray-500">Joining team...</p>
+        </div>
+      }
+    >
+      <JoinTeamContent />
+    </Suspense>
+  );
+}
+
+function JoinTeamContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
