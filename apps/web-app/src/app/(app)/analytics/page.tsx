@@ -78,8 +78,12 @@ export default function AnalyticsPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const loadData = useCallback(async () => {
-    const res = await fetch('/api/analytics');
-    if (res.ok) setData(await res.json());
+    try {
+      const res = await fetch('/api/analytics');
+      if (res.ok) setData(await res.json());
+    } catch {
+      // API unreachable — show empty state
+    }
     setIsLoading(false);
   }, []);
 
@@ -272,9 +276,9 @@ export default function AnalyticsPage() {
                           )}
                         </div>
 
-                        {def.insights.length > 0 && (
+                        {(def.insights ?? []).length > 0 && (
                           <div className="flex gap-ds-1 mt-ds-2">
-                            {def.insights.slice(0, 3).map((i) => {
+                            {(def.insights ?? []).slice(0, 3).map((i) => {
                               const textCls = SEVERITY_TEXT[i.severity] ?? 'text-blue-700';
                               return (
                                 <span key={i.id} className={`ds-tag text-[10px] ${textCls} bg-gray-50`}>
@@ -282,7 +286,7 @@ export default function AnalyticsPage() {
                                 </span>
                               );
                             })}
-                            {def.insights.length > 3 && (
+                            {(def.insights ?? []).length > 3 && (
                               <span className="text-ds-xs text-gray-400">+{def.insights.length - 3}</span>
                             )}
                           </div>
@@ -291,7 +295,7 @@ export default function AnalyticsPage() {
 
                       <div className="hidden sm:flex items-center gap-ds-2 ml-ds-4">
                         <div className="text-right">
-                          {def.workflows.slice(0, 2).map((w) => (
+                          {(def.workflows ?? []).slice(0, 2).map((w) => (
                             <Link
                               key={w.id}
                               href={`/workflows/${w.id}`}
@@ -300,7 +304,7 @@ export default function AnalyticsPage() {
                               {w.title}
                             </Link>
                           ))}
-                          {def.workflows.length > 2 && (
+                          {(def.workflows ?? []).length > 2 && (
                             <span className="text-ds-xs text-gray-300">+{def.workflows.length - 2} more</span>
                           )}
                         </div>
