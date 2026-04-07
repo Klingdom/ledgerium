@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { SITE_CONFIG } from '@/lib/config';
 
 const FOOTER_LINKS = {
@@ -25,13 +24,9 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <Image
-              src="/img/ledgerium_primary_logo.png"
-              alt="Ledgerium AI"
-              width={140}
-              height={35}
-              className="h-6 w-auto mb-3"
-            />
+            <span className="text-xl font-bold tracking-tight text-gray-900">
+              Ledgerium <span className="text-brand-600">AI</span>
+            </span>
             <p className="text-sm text-gray-500 leading-relaxed">
               Evidence-based workflow intelligence. Record real work, generate real documentation.
             </p>

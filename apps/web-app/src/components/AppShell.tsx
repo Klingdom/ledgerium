@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import {
@@ -31,14 +30,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 backdrop-blur-sm no-print">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-ds-4 sm:px-ds-6">
           <Link href="/dashboard" className="flex items-center">
-            <Image
-              src="/img/ledgerium_primary_logo.png"
-              alt="Ledgerium AI"
-              width={160}
-              height={40}
-              className="h-7 w-auto"
-              priority
-            />
+            <span className="text-2xl font-bold tracking-tight text-gray-900">
+              Ledgerium <span className="text-brand-600">AI</span>
+            </span>
           </Link>
 
           <nav className="flex items-center gap-ds-1">

@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
@@ -26,14 +25,9 @@ export function PublicNav() {
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
         {/* Logo */}
         <Link href="/" className="flex items-center">
-          <Image
-            src="/img/ledgerium_primary_logo.png"
-            alt="Ledgerium AI"
-            width={160}
-            height={40}
-            className="h-7 w-auto"
-            priority
-          />
+          <span className="text-2xl font-bold tracking-tight text-gray-900">
+            Ledgerium <span className="text-brand-600">AI</span>
+          </span>
         </Link>
 
         {/* Desktop nav */}
