@@ -1,4 +1,4 @@
-import { injectIntoAllTabs, injectOnTabLoad, injectOnTabActivated, clearInjectionState } from './injection-manager.js'
+import { ensureAllTabsInjected, onTabLoadDuringRecording, onTabActivatedDuringRecording, clearInjectionState } from './injection-manager.js'
 import { RecorderStateMachine } from './state-machine.js'
 import { SessionStore } from './session-store.js'
 import { HistoryStore } from './history-store.js'
@@ -170,10 +170,10 @@ async function handleStart(activityName: string, uploadUrl?: string): Promise<vo
       broadcastToExtension({ type: MSG.LIVE_STEP_UPDATED, payload: { step } })
     })
 
-    // v2: Programmatic injection — inject content scripts into ALL open tabs
-    // This eliminates the need for manual tab refresh. Scripts are injected on
-    // demand when recording starts, not on every page load.
-    await injectIntoAllTabs()
+    // v2: Ensure content scripts are present on all tabs.
+    // Manifest injection handles new page loads; programmatic injection
+    // handles tabs that were already open before the extension loaded.
+    await ensureAllTabsInjected()
 
     // Notify ALL tabs — content scripts are now present and ready
     broadcastAllTabs({
@@ -392,7 +392,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (!sessionId) return
 
   // Inject content script (idempotent — safe if already injected)
-  await injectOnTabLoad(tabId, tab.url)
+  await onTabLoadDuringRecording(tabId, tab.url)
 
   // Then tell it to start capturing
   chrome.tabs.sendMessage(tabId, {
@@ -409,7 +409,7 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   if (!sessionId) return
 
   // Inject content script (no-op if already injected)
-  await injectOnTabActivated(tabId)
+  await onTabActivatedDuringRecording(tabId)
 
   chrome.tabs.sendMessage(tabId, {
     type: MSG.START_SESSION,

@@ -23,9 +23,16 @@ if ((window as any)[GUARD_KEY]) {
   const engine = new CaptureEngine()
 
   // ─── Message listener (receives START/PAUSE/STOP from background) ──────────
-  chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<string, unknown> }) => {
+  chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<string, unknown> }, _sender, sendResponse) => {
+    // PING handler — allows injection manager to detect this script is present
+    if (message.type === 'PING') {
+      sendResponse({ ok: true })
+      return true
+    }
+
     switch (message.type) {
       case MSG.START_SESSION:
+        console.log('[LDG-CS] START_SESSION received, sessionId:', message.payload['sessionId'])
         engine.startCapture(message.payload['sessionId'] as string)
         break
       case MSG.PAUSE_SESSION:

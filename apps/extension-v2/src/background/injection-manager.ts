@@ -1,95 +1,149 @@
 /**
- * Injection Manager — Programmatic content script injection for zero-refresh recording.
+ * Injection Manager v2 — Hybrid content script management.
  *
- * v1 relied on manifest-declared content_scripts, which meant the content script
- * was only injected when a tab loaded AFTER the extension installed. Tabs that were
- * already open required a manual refresh.
+ * Architecture:
+ * - Content scripts are declared in manifest.json, so CRXJS bundles them
+ *   and Chrome auto-injects them on new page loads.
+ * - For ALREADY-OPEN tabs (the zero-refresh problem), we use
+ *   chrome.scripting.executeScript() with the CRXJS-built file path.
+ * - The content script has an idempotency guard, so double-injection is safe.
  *
- * v2 uses chrome.scripting.executeScript() to programmatically inject the capture
- * engine into any tab on demand — no refresh needed. This also enables:
- * - Injection only when recording starts (not on every page load)
- * - Re-injection on tab navigation during recording
- * - Idempotent injection (safe to inject multiple times)
- * - Frame-aware injection (all_frames support)
+ * The key fix from v2.0.0: We resolve the content script's BUILT path
+ * from the manifest instead of hard-coding a source path that doesn't
+ * exist after Vite builds.
  */
 
-// Track which tabs have been injected in the current recording session
-const injectedTabs = new Set<number>();
+// Track which tabs have been confirmed as having the content script
+const confirmedTabs = new Set<number>();
 
 /**
- * Inject the content script into a specific tab.
- * Safe to call multiple times — the content script has an idempotency guard.
+ * Get the built content script path from the extension's own manifest.
+ * CRXJS transforms "src/content/index.ts" into the actual bundle path.
+ */
+function getContentScriptPath(): string | null {
+  try {
+    const manifest = chrome.runtime.getManifest();
+    const cs = manifest.content_scripts?.[0];
+    if (cs?.js?.[0]) return cs.js[0];
+  } catch {
+    // Manifest read failed
+  }
+  return null;
+}
+
+/**
+ * Try to programmatically inject the content script into a tab.
+ * Uses the CRXJS-resolved path from the manifest, not a hardcoded source path.
  */
 export async function injectIntoTab(tabId: number): Promise<boolean> {
+  const scriptPath = getContentScriptPath();
+  if (!scriptPath) {
+    console.warn('[injection] Could not resolve content script path from manifest');
+    return false;
+  }
+
   try {
     await chrome.scripting.executeScript({
       target: { tabId, allFrames: true },
-      files: ['src/content/index.ts'],
+      files: [scriptPath],
     });
-    injectedTabs.add(tabId);
-    console.log(`[injection] Injected into tab ${tabId}`);
+    confirmedTabs.add(tabId);
+    console.log(`[injection] Programmatically injected into tab ${tabId} (${scriptPath})`);
     return true;
   } catch (err) {
-    // Common: chrome:// pages, devtools, web store — can't inject there
     const msg = String(err);
     if (msg.includes('Cannot access') || msg.includes('chrome://') || msg.includes('chrome-extension://')) {
-      console.debug(`[injection] Skipped restricted tab ${tabId}: ${msg}`);
+      console.debug(`[injection] Skipped restricted tab ${tabId}`);
     } else {
-      console.warn(`[injection] Failed to inject into tab ${tabId}:`, err);
+      console.warn(`[injection] Failed to inject into tab ${tabId}:`, msg);
     }
     return false;
   }
 }
 
 /**
- * Inject the content script into ALL open tabs.
- * Called when recording starts to ensure every existing tab captures events.
+ * Ensure content scripts are present on all open tabs.
+ * For tabs loaded AFTER extension install, manifest injection handles it.
+ * For tabs loaded BEFORE, we inject programmatically.
+ *
+ * We also send a ping to detect which tabs already have the script,
+ * and only inject into those that don't respond.
  */
-export async function injectIntoAllTabs(): Promise<void> {
+export async function ensureAllTabsInjected(): Promise<void> {
   const tabs = await chrome.tabs.query({});
-  const results = await Promise.allSettled(
-    tabs
-      .filter((tab) => tab.id != null && tab.url && !tab.url.startsWith('chrome://') && !tab.url.startsWith('chrome-extension://'))
-      .map((tab) => injectIntoTab(tab.id!)),
+  const eligible = tabs.filter(
+    (tab) => tab.id != null && tab.url &&
+      !tab.url.startsWith('chrome://') &&
+      !tab.url.startsWith('chrome-extension://') &&
+      !tab.url.startsWith('about:'),
   );
 
-  const injected = results.filter((r) => r.status === 'fulfilled' && r.value).length;
-  const skipped = results.length - injected;
-  console.log(`[injection] Injected into ${injected} tabs, skipped ${skipped}`);
+  let injected = 0;
+  let alreadyPresent = 0;
+  let skipped = 0;
+
+  for (const tab of eligible) {
+    const tabId = tab.id!;
+
+    // First, try sending a message to see if content script is already there
+    try {
+      await chrome.tabs.sendMessage(tabId, { type: 'PING', payload: {} });
+      // If no error, content script is present
+      confirmedTabs.add(tabId);
+      alreadyPresent++;
+      continue;
+    } catch {
+      // Content script not present — need to inject
+    }
+
+    // Programmatic injection for tabs that don't have the script
+    const success = await injectIntoTab(tabId);
+    if (success) injected++;
+    else skipped++;
+  }
+
+  console.log(`[injection] Tabs: ${alreadyPresent} already present, ${injected} newly injected, ${skipped} skipped`);
 }
 
 /**
- * Inject into a tab that just finished loading (onUpdated listener).
- * Only injects during an active recording session.
+ * Handle tab load during recording — content script may already be
+ * there from manifest injection, but send START_SESSION to be sure.
  */
-export async function injectOnTabLoad(tabId: number, url: string | undefined): Promise<void> {
+export async function onTabLoadDuringRecording(tabId: number, url: string | undefined): Promise<void> {
   if (!url || url.startsWith('chrome://') || url.startsWith('chrome-extension://')) return;
-  await injectIntoTab(tabId);
+  // Manifest injection should handle new loads, but mark as confirmed
+  confirmedTabs.add(tabId);
 }
 
 /**
- * Inject into a tab the user just switched to (onActivated listener).
- * Ensures tabs that existed before recording started get injected when first visited.
+ * Handle tab activation during recording — inject if needed.
  */
-export async function injectOnTabActivated(tabId: number): Promise<void> {
-  if (injectedTabs.has(tabId)) return; // Already injected
+export async function onTabActivatedDuringRecording(tabId: number): Promise<void> {
+  if (confirmedTabs.has(tabId)) return;
+
   const tab = await chrome.tabs.get(tabId).catch(() => null);
   if (!tab?.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) return;
+
+  // Try messaging first (maybe manifest already injected)
+  try {
+    await chrome.tabs.sendMessage(tabId, { type: 'PING', payload: {} });
+    confirmedTabs.add(tabId);
+    return;
+  } catch {
+    // Not present, inject
+  }
+
   await injectIntoTab(tabId);
 }
 
 /**
- * Clear the injection tracking state.
- * Called when recording stops or is discarded.
+ * Clear tracking state between sessions.
  */
 export function clearInjectionState(): void {
-  injectedTabs.clear();
+  confirmedTabs.clear();
   console.log('[injection] Cleared injection state');
 }
 
-/**
- * Check if a tab has been injected in the current session.
- */
-export function isTabInjected(tabId: number): boolean {
-  return injectedTabs.has(tabId);
+export function isTabConfirmed(tabId: number): boolean {
+  return confirmedTabs.has(tabId);
 }
