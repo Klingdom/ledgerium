@@ -1,0 +1,36 @@
+{
+  "name": "@ledgerium/extension-v2",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@ledgerium/normalization-engine": "workspace:*",
+    "@ledgerium/policy-engine": "workspace:*",
+    "@ledgerium/process-engine": "workspace:*",
+    "@ledgerium/schema-events": "workspace:*",
+    "@ledgerium/segmentation-engine": "workspace:*",
+    "@ledgerium/shared-types": "workspace:*",
+    "@xyflow/react": "^12.10.1",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.0.0-beta.26",
+    "@types/chrome": "^0.0.268",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4",
+    "vite": "^5.3.1",
+    "vitest": "^1.6.0"
+  }
+}
