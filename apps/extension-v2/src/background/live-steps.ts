@@ -198,41 +198,80 @@ export class LiveStepBuilder {
     }
   }
 
+  /** Detect spreadsheet cell references */
+  private static CELL_REF_RE = /^[A-Z]{1,3}\d{1,5}$/
+
+  /** Get readable app context suffix */
+  private appContext(page: CanonicalEvent['page_context']): string {
+    if (!page) return ''
+    const app = page.applicationLabel?.toLowerCase() ?? ''
+    const title = page.pageTitle?.toLowerCase() ?? ''
+    const route = page.routeTemplate?.toLowerCase() ?? ''
+    if (app === 'mail' || title.includes('inbox') || title.includes('gmail') || route.includes('mail')) return ' in email'
+    if (title.includes('sheets') || title.includes('spreadsheet') || route.includes('spreadsheet')) return ' in spreadsheet'
+    if (title.includes('docs') || title.includes('document')) return ' in document'
+    if (page.applicationLabel && page.applicationLabel !== 'Mail' && page.applicationLabel !== 'Docs') return ` in ${page.applicationLabel}`
+    return ''
+  }
+
+  /** Extract meaningful field labels, excluding cell references */
+  private fieldLabels(events: CanonicalEvent[]): string[] {
+    return events
+      .filter(e => e.event_type === 'interaction.input_change' && e.target_summary?.label?.trim())
+      .map(e => e.target_summary!.label!.trim())
+      .filter((l, i, arr) => arr.indexOf(l) === i)
+      .filter(l => !LiveStepBuilder.CELL_REF_RE.test(l))
+      .slice(0, 3)
+  }
+
   private deriveTitle(events: CanonicalEvent[], grouping: string): string {
     const first = events[0]
     const page = first?.page_context
-    const target = first?.target_summary
+    const ctx = this.appContext(page)
 
     if (grouping === 'annotation') return first?.annotation_text ?? 'Annotation'
-    if (grouping === 'fill_and_submit') return `Fill and submit ${page?.pageTitle ?? 'form'}`
+    if (grouping === 'fill_and_submit') {
+      const fields = this.fieldLabels(events)
+      return fields.length > 0 ? `Complete ${fields.join(', ')} and submit${ctx}` : `Complete and submit form${ctx}`
+    }
     if (grouping === 'click_then_navigate') {
       const nav = events.find(e => e.event_type.startsWith('navigation.'))
       return `Navigate to ${nav?.page_context?.pageTitle ?? nav?.page_context?.routeTemplate ?? 'page'}`
     }
-    if (grouping === 'repeated_click_dedup') return `Click ${target?.label ?? target?.role ?? 'element'}`
-    if (grouping === 'error_handling') return 'Handle error'
+    if (grouping === 'error_handling') return `Handle error${ctx}`
     if (grouping === 'send_action') {
-      const clickEvt = events.find(e => e.event_type === 'interaction.click' && e.target_summary?.label)
-      return clickEvt?.target_summary?.label ?? 'Submit action'
+      const clickEvt = events.find(e => e.event_type === 'interaction.click' && e.target_summary?.label?.trim())
+      return clickEvt?.target_summary?.label ? `${clickEvt.target_summary.label}${ctx}` : `Send${ctx}`
     }
-    if (grouping === 'file_action') return 'Attach file'
+    if (grouping === 'file_action') return `Attach file${ctx}`
     if (grouping === 'data_entry') {
-      // Use field labels for a better title
-      const fields = events
-        .filter(e => e.event_type === 'interaction.input_change' && e.target_summary?.label)
-        .map(e => e.target_summary!.label!)
+      const fields = this.fieldLabels(events)
+      if (fields.length > 0) return `Enter ${fields.join(', ')}${ctx}`
+      const cells = events
+        .filter(e => e.target_summary?.label && LiveStepBuilder.CELL_REF_RE.test(e.target_summary.label.trim()))
+        .map(e => e.target_summary!.label!.trim())
         .filter((l, i, arr) => arr.indexOf(l) === i)
-        .slice(0, 2)
-      if (fields.length > 0) return `Enter ${fields.join(', ')}`
-      return `Enter ${page?.pageTitle ?? 'data'}`
+        .slice(0, 3)
+      if (cells.length > 0) return `Enter data in cells ${cells.join(', ')}${ctx || ' in spreadsheet'}`
+      return `Enter data${ctx}`
+    }
+    if (grouping === 'repeated_click_dedup') {
+      const label = events.find(e => e.event_type === 'interaction.click' && e.target_summary?.label?.trim())?.target_summary?.label
+      return label ? `Click ${label}` : `Click action${ctx}`
     }
 
     const type = first?.event_type ?? ''
-    if (type === 'interaction.click') return `Click ${target?.label ?? target?.role ?? 'element'}`
-    if (type === 'interaction.input_change') return `Enter ${target?.label ?? 'data'}`
-    if (type === 'interaction.submit') return `Submit ${page?.pageTitle ?? 'form'}`
+    if (type === 'interaction.click') {
+      const label = first?.target_summary?.label?.trim()
+      return label ? `Click ${label}` : `Click action${ctx}`
+    }
+    if (type === 'interaction.input_change') {
+      const fields = this.fieldLabels(events)
+      return fields.length > 0 ? `Enter ${fields.join(', ')}${ctx}` : `Enter data${ctx}`
+    }
+    if (type === 'interaction.submit') return `Submit form${ctx}`
     if (type.startsWith('navigation.')) return `Navigate to ${page?.pageTitle ?? page?.routeTemplate ?? 'page'}`
-    return 'Perform action'
+    return `Perform action${ctx}`
   }
 
   private calcConfidence(events: CanonicalEvent[], grouping: string): number {
