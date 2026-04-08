@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -16,9 +16,6 @@ import {
   ArrowUpDown,
   ChevronRight,
   Sparkles,
-  CheckCircle2,
-  Circle,
-  XIcon,
   Star,
   Eye,
   Zap,
@@ -27,19 +24,21 @@ import {
   Plus,
   Flame,
   Trophy,
+  ShieldCheck,
+  AlertTriangle,
+  TrendingUp,
+  Activity,
+  Target,
+  FileCheck,
+  Monitor,
+  ChevronDown,
+  Filter,
+  ArrowRight,
 } from 'lucide-react';
 import { formatDuration, formatDateRelative, formatConfidence } from '@/lib/format';
 import { track } from '@/lib/analytics';
-import {
-  getOnboardingState,
-  completeStep,
-  dismissOnboarding,
-  isOnboardingComplete,
-  getCompletionCount,
-  ONBOARDING_STEPS,
-  type OnboardingState,
-  type OnboardingContext,
-} from '@/lib/onboarding';
+
+// ─── Type definitions ──────────────────────────────────────────────────────────
 
 interface TagSummary {
   id: string;
@@ -47,9 +46,24 @@ interface TagSummary {
   color: string;
 }
 
+interface ProcessDefinitionSummary {
+  id: string;
+  canonicalName: string;
+  variantCount: number;
+  runCount: number;
+  stabilityScore: number | null;
+  confidenceScore: number | null;
+}
+
+type HealthStatus = 'healthy' | 'needs_review' | 'high_variation' | 'stale' | 'new';
+type SopReadiness = 'ready' | 'partial' | 'not_ready';
+type OptimizationPotential = 'high' | 'medium' | 'low';
+type BottleneckRisk = 'high' | 'medium' | 'low' | 'none';
+
 interface WorkflowSummary {
   id: string;
   title: string;
+  description: string | null;
   toolsUsed: string[];
   durationMs: number | null;
   stepCount: number | null;
@@ -62,6 +76,14 @@ interface WorkflowSummary {
   createdAt: string;
   updatedAt: string;
   tags: TagSummary[];
+  variationScore: number;
+  sopReadiness: SopReadiness;
+  optimizationPotential: OptimizationPotential;
+  documentationCompleteness: number;
+  isStale: boolean;
+  bottleneckRisk: BottleneckRisk;
+  healthStatus: HealthStatus;
+  processDefinition: ProcessDefinitionSummary | null;
 }
 
 interface TagWithCount extends TagSummary {
@@ -79,36 +101,165 @@ interface StreakData {
 
 interface DashboardStats {
   totalWorkflows: number;
-  favoriteCount: number;
-  recentlyViewedIds: string[];
+  recordedThisWeek: number;
+  needsReview: number;
+  sopReady: number;
+  avgConfidence: number;
+  avgDuration: number;
+  avgStepCount: number;
+  optimizationOpportunities: number;
   insightCount: number;
+  favoriteCount: number;
+  staleCount: number;
+  systemCoverage: { system: string; workflowCount: number }[];
+  recentlyViewedIds: string[];
 }
+
+type SortOption =
+  | 'created_at'
+  | 'title'
+  | 'confidence'
+  | 'confidence_asc'
+  | 'duration'
+  | 'step_count'
+  | 'views'
+  | 'optimization';
+
+// ─── Constants ──────────────────────────────────────────────────────────────────
+
+const HEALTH_STATUS_CONFIG: Record<
+  HealthStatus,
+  { label: string; bgClass: string; textClass: string; dotClass: string }
+> = {
+  healthy: {
+    label: 'Healthy',
+    bgClass: 'bg-emerald-50',
+    textClass: 'text-emerald-700',
+    dotClass: 'bg-emerald-500',
+  },
+  needs_review: {
+    label: 'Needs Review',
+    bgClass: 'bg-amber-50',
+    textClass: 'text-amber-700',
+    dotClass: 'bg-amber-500',
+  },
+  high_variation: {
+    label: 'High Variation',
+    bgClass: 'bg-red-50',
+    textClass: 'text-red-700',
+    dotClass: 'bg-red-500',
+  },
+  stale: {
+    label: 'Stale',
+    bgClass: 'bg-gray-50',
+    textClass: 'text-gray-500',
+    dotClass: 'bg-gray-400',
+  },
+  new: {
+    label: 'New',
+    bgClass: 'bg-blue-50',
+    textClass: 'text-blue-700',
+    dotClass: 'bg-blue-500',
+  },
+};
+
+const SOP_READINESS_CONFIG: Record<
+  SopReadiness,
+  { label: string; bgClass: string; textClass: string }
+> = {
+  ready: { label: 'Ready', bgClass: 'bg-emerald-50', textClass: 'text-emerald-700' },
+  partial: { label: 'Partial', bgClass: 'bg-amber-50', textClass: 'text-amber-700' },
+  not_ready: { label: 'Not Ready', bgClass: 'bg-gray-100', textClass: 'text-gray-500' },
+};
+
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: 'created_at', label: 'Newest' },
+  { value: 'title', label: 'Name' },
+  { value: 'confidence', label: 'Highest Confidence' },
+  { value: 'confidence_asc', label: 'Lowest Confidence' },
+  { value: 'duration', label: 'Longest Duration' },
+  { value: 'step_count', label: 'Most Steps' },
+  { value: 'views', label: 'Most Viewed' },
+  { value: 'optimization', label: 'Optimization Potential' },
+];
+
+// ─── Helper functions ───────────────────────────────────────────────────────────
+
+function confidenceColorClass(value: number | null): string {
+  if (value === null) return 'text-gray-400';
+  const pct = value * 100;
+  if (pct >= 80) return 'text-emerald-600';
+  if (pct >= 60) return 'text-amber-600';
+  return 'text-red-600';
+}
+
+function confidenceBarColorClass(value: number | null): string {
+  if (value === null) return 'bg-gray-200';
+  const pct = value * 100;
+  if (pct >= 80) return 'bg-emerald-500';
+  if (pct >= 60) return 'bg-amber-500';
+  return 'bg-red-500';
+}
+
+function getPrimarySystem(toolsUsed: string[]): string | null {
+  return toolsUsed.length > 0 ? toolsUsed[0]! : null;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ─── Main Dashboard Page ────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
 
 export default function DashboardPage() {
   const router = useRouter();
+
+  // ── State ──────────────────────────────────────────────────────────────────
+
   const [workflows, setWorkflows] = useState<WorkflowSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState('created_at');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editTitle, setEditTitle] = useState('');
-  const [onboarding, setOnboarding] = useState<OnboardingState | null>(null);
-  const [loadingSample, setLoadingSample] = useState(false);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [tags, setTags] = useState<TagWithCount[]>([]);
+  const [streak, setStreak] = useState<StreakData | null>(null);
+
+  // Filter & sort state
+  const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState<SortOption>('created_at');
+  const [healthFilter, setHealthFilter] = useState<HealthStatus | ''>('');
+  const [sopFilter, setSopFilter] = useState<SopReadiness | ''>('');
   const [activeTagId, setActiveTagId] = useState<string | null>(null);
+
+  // Inline edit state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+
+  // Tag management state
   const [showNewTag, setShowNewTag] = useState(false);
   const [newTagName, setNewTagName] = useState('');
-  const [streak, setStreak] = useState<StreakData | null>(null);
   const [tagMenuWorkflowId, setTagMenuWorkflowId] = useState<string | null>(null);
+
+  // Sample workflow loading
+  const [loadingSample, setLoadingSample] = useState(false);
+
+  // ── Data fetching ──────────────────────────────────────────────────────────
 
   const fetchWorkflows = useCallback(async () => {
     const params = new URLSearchParams();
     if (search) params.set('search', search);
-    params.set('sort', sortBy);
-    params.set('dir', sortDir);
+
+    // Map sort options to API params
+    if (sortBy === 'confidence_asc') {
+      params.set('sort', 'confidence');
+      params.set('dir', 'asc');
+    } else if (sortBy === 'created_at') {
+      params.set('sort', 'created_at');
+      params.set('dir', 'desc');
+    } else {
+      params.set('sort', sortBy);
+      params.set('dir', 'desc');
+    }
+
     if (activeTagId) params.set('tag', activeTagId);
+    if (healthFilter) params.set('health', healthFilter);
+    if (sopFilter) params.set('sopReadiness', sopFilter);
 
     const res = await fetch(`/api/workflows?${params}`);
     if (res.ok) {
@@ -117,7 +268,7 @@ export default function DashboardPage() {
       if (data.stats) setStats(data.stats);
     }
     setIsLoading(false);
-  }, [search, sortBy, sortDir, activeTagId]);
+  }, [search, sortBy, activeTagId, healthFilter, sopFilter]);
 
   const fetchTags = useCallback(async () => {
     const res = await fetch('/api/tags');
@@ -139,9 +290,10 @@ export default function DashboardPage() {
     fetchWorkflows();
     fetchTags();
     fetchStreak();
-    setOnboarding(getOnboardingState());
     track({ event: 'page_viewed', path: '/dashboard' });
   }, [fetchWorkflows, fetchTags, fetchStreak]);
+
+  // ── Tag management handlers ────────────────────────────────────────────────
 
   async function handleCreateTag() {
     const name = newTagName.trim();
@@ -155,6 +307,7 @@ export default function DashboardPage() {
       setNewTagName('');
       setShowNewTag(false);
       fetchTags();
+      track({ event: 'tag_created', tagName: name });
     }
   }
 
@@ -167,6 +320,10 @@ export default function DashboardPage() {
     });
     fetchWorkflows();
     fetchTags();
+    track(hasTag
+      ? { event: 'tag_removed', workflowId, tagId }
+      : { event: 'tag_assigned', workflowId, tagId },
+    );
   }
 
   async function handleDeleteTag(tagId: string) {
@@ -174,16 +331,10 @@ export default function DashboardPage() {
     if (activeTagId === tagId) setActiveTagId(null);
     fetchTags();
     fetchWorkflows();
+    track({ event: 'tag_deleted', tagId });
   }
 
-  const onboardingContext: OnboardingContext = {
-    workflowCount: workflows.length,
-    hasExtensionKey: false, // Would check from account API
-  };
-
-  const showOnboarding = onboarding !== null
-    && !onboarding.isDismissed
-    && !isOnboardingComplete(onboarding, onboardingContext);
+  // ── Workflow action handlers ───────────────────────────────────────────────
 
   async function handleDelete(id: string) {
     if (!confirm('Delete this workflow?')) return;
@@ -205,6 +356,22 @@ export default function DashboardPage() {
     setEditingId(null);
   }
 
+  async function handleToggleFavorite(id: string, currentValue: boolean) {
+    const newVal = !currentValue;
+    setWorkflows((prev) =>
+      prev.map((wf) => (wf.id === id ? { ...wf, isFavorite: newVal } : wf)),
+    );
+    await fetch(`/api/workflows/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isFavorite: newVal }),
+    });
+    track(newVal
+      ? { event: 'workflow_favorited', workflowId: id }
+      : { event: 'workflow_unfavorited', workflowId: id },
+    );
+  }
+
   async function handleLoadSample() {
     setLoadingSample(true);
     track({ event: 'sample_workflow_loaded' });
@@ -219,141 +386,69 @@ export default function DashboardPage() {
     setLoadingSample(false);
   }
 
-  function handleDismissOnboarding() {
-    dismissOnboarding();
-    setOnboarding(getOnboardingState());
-    track({ event: 'onboarding_dismissed' });
+  // ── Derived data for intelligence panel ────────────────────────────────────
+
+  const needsAttentionWorkflows = useMemo(() => {
+    return workflows
+      .filter((w) => w.healthStatus === 'needs_review' || w.healthStatus === 'high_variation')
+      .sort((a, b) => {
+        // Worst first: high_variation before needs_review, then by lowest confidence
+        if (a.healthStatus === 'high_variation' && b.healthStatus !== 'high_variation') return -1;
+        if (b.healthStatus === 'high_variation' && a.healthStatus !== 'high_variation') return 1;
+        return (a.confidence ?? 0) - (b.confidence ?? 0);
+      })
+      .slice(0, 5);
+  }, [workflows]);
+
+  const optimizationWorkflows = useMemo(() => {
+    return workflows
+      .filter((w) => w.optimizationPotential === 'high')
+      .sort((a, b) => (b.durationMs ?? 0) - (a.durationMs ?? 0))
+      .slice(0, 5);
+  }, [workflows]);
+
+  const staleWorkflows = useMemo(() => {
+    return workflows
+      .filter((w) => w.isStale)
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      .slice(0, 5);
+  }, [workflows]);
+
+  const hasActiveFilters = healthFilter !== '' || sopFilter !== '' || activeTagId !== null || search !== '';
+
+  function clearAllFilters() {
+    setSearch('');
+    setHealthFilter('');
+    setSopFilter('');
+    setActiveTagId(null);
+    setSortBy('created_at');
   }
 
-  function toggleSort(field: string) {
-    if (sortBy === field) {
-      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-    } else {
-      setSortBy(field);
-      setSortDir('desc');
-    }
+  // ── Render ─────────────────────────────────────────────────────────────────
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-ds-sm text-gray-400">Loading dashboard...</div>
+      </div>
+    );
+  }
+
+  // If no workflows at all, show the empty state
+  if (workflows.length === 0 && !hasActiveFilters && stats?.totalWorkflows === 0) {
+    return <EmptyDashboard onLoadSample={handleLoadSample} isLoading={loadingSample} />;
   }
 
   return (
     <div>
-      {/* ── Onboarding Checklist ──────────────────────────────────────── */}
-      {showOnboarding && onboarding && (
-        <div className="card mb-ds-6 overflow-hidden">
-          <div className="bg-gradient-to-r from-brand-50 to-white px-ds-6 py-ds-5">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-ds-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-ds-lg bg-brand-100">
-                  <Sparkles className="h-5 w-5 text-brand-600" />
-                </div>
-                <div>
-                  <h2 className="text-ds-lg font-semibold text-gray-900">Get started with Ledgerium</h2>
-                  <p className="text-ds-sm text-gray-500">
-                    {getCompletionCount(onboarding, onboardingContext)} of {ONBOARDING_STEPS.length} steps complete
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={handleDismissOnboarding}
-                className="rounded-ds-sm p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
-                title="Dismiss"
-              >
-                <XIcon className="h-4 w-4" />
-              </button>
-            </div>
-
-            {/* Progress bar */}
-            <div className="mt-ds-4 h-1.5 w-full rounded-full bg-brand-100 overflow-hidden">
-              <div
-                className="h-full rounded-full bg-brand-500 transition-all duration-500"
-                style={{
-                  width: `${(getCompletionCount(onboarding, onboardingContext) / ONBOARDING_STEPS.length) * 100}%`,
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Steps */}
-          <div className="divide-y divide-gray-100">
-            {ONBOARDING_STEPS.map((step) => {
-              const done = step.isCompleted(onboarding, onboardingContext);
-              return (
-                <Link
-                  key={step.id}
-                  href={step.actionHref}
-                  className={`flex items-center gap-ds-4 px-ds-6 py-ds-4 transition-colors ${
-                    done ? 'bg-gray-50/50' : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() => {
-                    if (!done) {
-                      track({ event: 'onboarding_step_completed', step: step.id });
-                    }
-                  }}
-                >
-                  {done ? (
-                    <CheckCircle2 className="h-5 w-5 text-emerald-500 flex-shrink-0" />
-                  ) : (
-                    <Circle className="h-5 w-5 text-gray-300 flex-shrink-0" />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-ds-sm font-medium ${done ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
-                      {step.title}
-                    </p>
-                    <p className="text-ds-xs text-gray-500 mt-0.5">{step.description}</p>
-                  </div>
-                  {!done && (
-                    <span className="text-ds-xs text-brand-600 font-medium flex-shrink-0 flex items-center gap-1">
-                      {step.actionLabel}
-                      <ChevronRight className="h-3.5 w-3.5" />
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ── Insights Banner (retention driver) ─────────────────────── */}
-      {stats && stats.insightCount > 0 && workflows.length > 0 && (
-        <Link
-          href="/analytics"
-          className="card flex items-center gap-ds-4 px-ds-5 py-ds-4 mb-ds-4 bg-amber-50/50 border-amber-200 hover:border-amber-300 transition-colors"
-        >
-          <div className="flex h-9 w-9 items-center justify-center rounded-ds-md bg-amber-100">
-            <BarChart3 className="h-5 w-5 text-amber-600" />
-          </div>
-          <div className="flex-1">
-            <p className="text-ds-sm font-medium text-gray-900">
-              {stats.insightCount} insight{stats.insightCount !== 1 ? 's' : ''} available
-            </p>
-            <p className="text-ds-xs text-gray-500">
-              Process intelligence detected bottlenecks or patterns in your workflows.
-            </p>
-          </div>
-          <ChevronRight className="h-4 w-4 text-amber-400 flex-shrink-0" />
-        </Link>
-      )}
-
-      {/* ── Streak Banner ──────────────────────────────────────────── */}
-      {streak && streak.totalCount > 0 && (
-        <StreakBanner streak={streak} />
-      )}
-
-      {/* ── Upgrade prompt (near or at free limit) ─────────────────── */}
-      {workflows.length >= 4 && workflows.length <= 5 && !onboarding?.isDismissed && (
-        <UpgradeBanner
-          usage={workflows.length}
-          limit={5}
-          atLimit={workflows.length >= 5}
-        />
-      )}
-
-      {/* ── Header ────────────────────────────────────────────────────── */}
+      {/* ── Page Header ──────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-ds-6">
         <div>
-          <h1 className="text-ds-xl font-semibold text-gray-900">Workflow Library</h1>
-          <p className="text-ds-sm text-gray-500">
-            {workflows.length} workflow{workflows.length !== 1 ? 's' : ''}
+          <h1 className="text-ds-2xl font-semibold text-gray-900">
+            Process Intelligence
+          </h1>
+          <p className="text-ds-sm text-gray-500 mt-0.5">
+            Monitor, optimize, and standardize your workflows
           </p>
         </div>
         <Link href="/upload" className="btn-primary gap-1.5">
@@ -362,44 +457,263 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      {/* ── Search & Sort ─────────────────────────────────────────────── */}
-      {workflows.length > 0 && (
-        <div className="flex items-center gap-3 mb-ds-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search workflows..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="input-field pl-9"
-            />
-          </div>
-          <button
-            onClick={() => toggleSort('created_at')}
-            className={`btn-secondary gap-1 text-xs ${sortBy === 'created_at' ? 'bg-gray-100' : ''}`}
-          >
-            <ArrowUpDown className="h-3.5 w-3.5" />
-            Date
-          </button>
-          <button
-            onClick={() => toggleSort('title')}
-            className={`btn-secondary gap-1 text-xs ${sortBy === 'title' ? 'bg-gray-100' : ''}`}
-          >
-            <ArrowUpDown className="h-3.5 w-3.5" />
-            Name
-          </button>
-          <button
-            onClick={() => toggleSort('step_count')}
-            className={`btn-secondary gap-1 text-xs ${sortBy === 'step_count' ? 'bg-gray-100' : ''}`}
-          >
-            <ArrowUpDown className="h-3.5 w-3.5" />
-            Steps
-          </button>
+      {/* ═══════════════════════════════════════════════════════════════════
+          LAYER 1 — Executive Overview
+          ═══════════════════════════════════════════════════════════════════ */}
+      {stats && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-ds-3 mb-ds-6">
+          {/* Total Workflows */}
+          <MetricCard
+            icon={<Layers className="h-4 w-4 text-brand-600" />}
+            label="Total Workflows"
+            value={String(stats.totalWorkflows)}
+            subtitle={`${stats.recordedThisWeek} this week`}
+          />
+
+          {/* Avg Confidence */}
+          <MetricCard
+            icon={<Target className="h-4 w-4 text-brand-600" />}
+            label="Avg Confidence"
+            value={stats.avgConfidence > 0 ? formatConfidence(stats.avgConfidence) : '--'}
+            subtitle={stats.avgConfidence > 0 ? (
+              stats.avgConfidence >= 0.8 ? 'Strong' : stats.avgConfidence >= 0.6 ? 'Moderate' : 'Low'
+            ) : 'No data'}
+            valueClassName={confidenceColorClass(stats.avgConfidence > 0 ? stats.avgConfidence : null)}
+          />
+
+          {/* SOP Ready */}
+          <MetricCard
+            icon={<FileCheck className="h-4 w-4 text-emerald-600" />}
+            label="SOP Ready"
+            value={String(stats.sopReady)}
+            subtitle={`of ${stats.totalWorkflows} total`}
+          />
+
+          {/* Needs Review */}
+          <MetricCard
+            icon={<AlertTriangle className="h-4 w-4 text-amber-600" />}
+            label="Needs Review"
+            value={String(stats.needsReview)}
+            subtitle={stats.needsReview > 0 ? 'Action needed' : 'All clear'}
+            valueClassName={stats.needsReview > 0 ? 'text-amber-600' : undefined}
+          />
+
+          {/* Optimization Opportunities */}
+          <MetricCard
+            icon={<TrendingUp className="h-4 w-4 text-violet-600" />}
+            label="Optimization"
+            value={String(stats.optimizationOpportunities)}
+            subtitle="High potential"
+          />
+
+          {/* Avg Duration */}
+          <MetricCard
+            icon={<Clock className="h-4 w-4 text-gray-500" />}
+            label="Avg Duration"
+            value={stats.avgDuration > 0 ? formatDuration(stats.avgDuration) : '--'}
+            subtitle={stats.avgStepCount > 0 ? `~${Math.round(stats.avgStepCount)} steps` : 'No data'}
+          />
+
+          {/* Insights Available */}
+          <MetricCard
+            icon={<Sparkles className="h-4 w-4 text-amber-500" />}
+            label="Insights"
+            value={String(stats.insightCount)}
+            subtitle={stats.insightCount > 0 ? 'View analytics' : 'None yet'}
+            href={stats.insightCount > 0 ? '/analytics' : undefined}
+          />
+
+          {/* System Coverage */}
+          <MetricCard
+            icon={<Monitor className="h-4 w-4 text-blue-600" />}
+            label="Systems"
+            value={String(stats.systemCoverage.length)}
+            subtitle={stats.systemCoverage.length > 0
+              ? stats.systemCoverage.slice(0, 2).map((s) => s.system).join(', ')
+              : 'None tracked'}
+          />
         </div>
       )}
 
-      {/* ── Tag Filter Bar ──────────────────────────────────────────── */}
+      {/* ═══════════════════════════════════════════════════════════════════
+          LAYER 2 — Process Intelligence Panel
+          ═══════════════════════════════════════════════════════════════════ */}
+      {(needsAttentionWorkflows.length > 0 ||
+        optimizationWorkflows.length > 0 ||
+        staleWorkflows.length > 0) && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-ds-4 mb-ds-6">
+          {/* Needs Attention */}
+          {needsAttentionWorkflows.length > 0 && (
+            <IntelligenceList
+              title="Needs Attention"
+              icon={<AlertTriangle className="h-4 w-4 text-amber-500" />}
+              borderClass="border-amber-200"
+              items={needsAttentionWorkflows}
+              renderMetric={(w) => (
+                <span className={`text-ds-xs font-medium ${confidenceColorClass(w.confidence)}`}>
+                  {w.confidence !== null ? formatConfidence(w.confidence) : '--'}
+                </span>
+              )}
+              onViewAll={() => {
+                setHealthFilter('needs_review');
+                setSopFilter('');
+              }}
+            />
+          )}
+
+          {/* Optimization Opportunities */}
+          {optimizationWorkflows.length > 0 && (
+            <IntelligenceList
+              title="Optimization Potential"
+              icon={<TrendingUp className="h-4 w-4 text-violet-500" />}
+              borderClass="border-violet-200"
+              items={optimizationWorkflows}
+              renderMetric={(w) => (
+                <span className="text-ds-xs text-gray-500">
+                  {formatDuration(w.durationMs)}
+                </span>
+              )}
+              onViewAll={() => {
+                setSortBy('optimization');
+                setHealthFilter('');
+                setSopFilter('');
+              }}
+            />
+          )}
+
+          {/* Stale Workflows */}
+          {staleWorkflows.length > 0 && (
+            <IntelligenceList
+              title="Stale Workflows"
+              icon={<Clock className="h-4 w-4 text-gray-400" />}
+              borderClass="border-gray-200"
+              items={staleWorkflows}
+              renderMetric={(w) => (
+                <span className="text-ds-xs text-gray-400">
+                  {formatDateRelative(w.createdAt)}
+                </span>
+              )}
+              onViewAll={() => {
+                setHealthFilter('stale');
+                setSopFilter('');
+              }}
+            />
+          )}
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          LAYER 3 — Momentum Section (compact)
+          ═══════════════════════════════════════════════════════════════════ */}
+      {streak && streak.totalCount > 0 && (
+        <div className="card flex items-center gap-ds-4 px-ds-5 py-ds-3 mb-ds-6 bg-gradient-to-r from-orange-50/40 to-white border-orange-100">
+          <Flame className="h-5 w-5 text-orange-500 flex-shrink-0" />
+          <div className="flex items-center gap-ds-4 flex-wrap text-ds-sm">
+            {streak.currentStreak > 0 && (
+              <div className="flex items-baseline gap-1">
+                <span className="font-bold text-orange-600">{streak.currentStreak}</span>
+                <span className="text-ds-xs text-gray-500">day streak</span>
+              </div>
+            )}
+            <div className="flex items-baseline gap-1">
+              <span className="font-semibold text-gray-700">{streak.monthlyCount}</span>
+              <span className="text-ds-xs text-gray-500">this month</span>
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="font-semibold text-gray-700">{streak.totalCount}</span>
+              <span className="text-ds-xs text-gray-500">total</span>
+            </div>
+            {streak.longestStreak > 1 && (
+              <div className="flex items-baseline gap-1">
+                <Trophy className="h-3.5 w-3.5 text-amber-500" />
+                <span className="font-semibold text-gray-700">{streak.longestStreak}</span>
+                <span className="text-ds-xs text-gray-500">best streak</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          LAYER 4 — Rich Workflow Library
+          ═══════════════════════════════════════════════════════════════════ */}
+
+      {/* ── Section Header ────────────────────────────────────────────── */}
+      <div className="ds-section mb-ds-4">
+        <h2 className="ds-section-label text-ds-lg font-semibold text-gray-900">
+          Workflow Library
+        </h2>
+        <p className="text-ds-xs text-gray-500">
+          {stats ? `${stats.totalWorkflows} workflow${stats.totalWorkflows !== 1 ? 's' : ''}` : ''}
+        </p>
+      </div>
+
+      {/* ── Filter Bar ────────────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center gap-ds-3 mb-ds-4">
+        {/* Search */}
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search workflows..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="input-field pl-9"
+          />
+        </div>
+
+        {/* Health Filter */}
+        <select
+          value={healthFilter}
+          onChange={(e) => setHealthFilter(e.target.value as HealthStatus | '')}
+          className="input-field text-ds-sm py-2 pr-8 w-auto min-w-[140px]"
+        >
+          <option value="">All Health</option>
+          <option value="healthy">Healthy</option>
+          <option value="needs_review">Needs Review</option>
+          <option value="high_variation">High Variation</option>
+          <option value="stale">Stale</option>
+          <option value="new">New</option>
+        </select>
+
+        {/* SOP Readiness Filter */}
+        <select
+          value={sopFilter}
+          onChange={(e) => setSopFilter(e.target.value as SopReadiness | '')}
+          className="input-field text-ds-sm py-2 pr-8 w-auto min-w-[140px]"
+        >
+          <option value="">All SOP Status</option>
+          <option value="ready">Ready</option>
+          <option value="partial">Partial</option>
+          <option value="not_ready">Not Ready</option>
+        </select>
+
+        {/* Sort */}
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as SortOption)}
+          className="input-field text-ds-sm py-2 pr-8 w-auto min-w-[160px]"
+        >
+          {SORT_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+
+        {/* Clear filters */}
+        {hasActiveFilters && (
+          <button
+            onClick={clearAllFilters}
+            className="btn-secondary gap-1 text-xs"
+          >
+            <X className="h-3.5 w-3.5" />
+            Clear
+          </button>
+        )}
+      </div>
+
+      {/* ── Tag Filter Bar ────────────────────────────────────────────── */}
       {(tags.length > 0 || workflows.length > 0) && (
         <div className="flex items-center gap-2 mb-ds-4 flex-wrap">
           <Tag className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
@@ -414,7 +728,12 @@ export default function DashboardPage() {
           {tags.map((t) => (
             <div key={t.id} className="group/tag relative flex items-center">
               <button
-                onClick={() => setActiveTagId(activeTagId === t.id ? null : t.id)}
+                onClick={() => {
+                  setActiveTagId(activeTagId === t.id ? null : t.id);
+                  if (activeTagId !== t.id) {
+                    track({ event: 'tag_filter_applied', tagId: t.id });
+                  }
+                }}
                 className="ds-tag transition-colors border"
                 style={{
                   backgroundColor: activeTagId === t.id ? t.color + '20' : undefined,
@@ -451,13 +770,25 @@ export default function DashboardPage() {
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleCreateTag();
-                  if (e.key === 'Escape') { setShowNewTag(false); setNewTagName(''); }
+                  if (e.key === 'Escape') {
+                    setShowNewTag(false);
+                    setNewTagName('');
+                  }
                 }}
               />
-              <button onClick={handleCreateTag} className="p-0.5 text-green-600 hover:bg-green-50 rounded">
+              <button
+                onClick={handleCreateTag}
+                className="p-0.5 text-green-600 hover:bg-green-50 rounded"
+              >
                 <Check className="h-3.5 w-3.5" />
               </button>
-              <button onClick={() => { setShowNewTag(false); setNewTagName(''); }} className="p-0.5 text-gray-400 hover:bg-gray-100 rounded">
+              <button
+                onClick={() => {
+                  setShowNewTag(false);
+                  setNewTagName('');
+                }}
+                className="p-0.5 text-gray-400 hover:bg-gray-100 rounded"
+              >
                 <X className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -473,262 +804,528 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── Workflow List / Empty State ────────────────────────────────── */}
-      {isLoading ? (
-        <div className="text-center text-ds-sm text-gray-400 py-20">Loading...</div>
-      ) : workflows.length === 0 && !search ? (
-        /* Enhanced empty state */
-        <div className="card overflow-hidden">
-          <div className="bg-gradient-to-br from-brand-50 via-white to-white px-ds-8 py-ds-10 text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-100">
-              <Layers className="h-8 w-8 text-brand-500" />
-            </div>
-            <h2 className="mt-ds-4 text-ds-lg font-semibold text-gray-900">
-              Your workflow library is empty
-            </h2>
-            <p className="mt-ds-2 text-ds-sm text-gray-500 max-w-md mx-auto">
-              Record a workflow with the browser extension, or upload a JSON file to generate
-              your first SOP and process map.
-            </p>
-            <div className="mt-ds-6 flex items-center justify-center gap-ds-3">
-              <Link href="/upload" className="btn-primary gap-1.5">
-                <Upload className="h-4 w-4" />
-                Upload a workflow
-              </Link>
-              <button
-                onClick={handleLoadSample}
-                disabled={loadingSample}
-                className="btn-secondary gap-1.5"
-              >
-                <Sparkles className="h-4 w-4" />
-                {loadingSample ? 'Loading...' : 'Try a sample workflow'}
-              </button>
-            </div>
-          </div>
-          {/* Quick value props */}
-          <div className="grid grid-cols-3 divide-x divide-gray-100 border-t border-gray-100">
-            <div className="px-ds-5 py-ds-4 text-center">
-              <p className="text-ds-xs text-gray-400 uppercase tracking-wide">Step 1</p>
-              <p className="mt-ds-1 text-ds-sm font-medium text-gray-700">Record</p>
-              <p className="text-ds-xs text-gray-500">Capture your real workflow</p>
-            </div>
-            <div className="px-ds-5 py-ds-4 text-center">
-              <p className="text-ds-xs text-gray-400 uppercase tracking-wide">Step 2</p>
-              <p className="mt-ds-1 text-ds-sm font-medium text-gray-700">Process</p>
-              <p className="text-ds-xs text-gray-500">Deterministic analysis</p>
-            </div>
-            <div className="px-ds-5 py-ds-4 text-center">
-              <p className="text-ds-xs text-gray-400 uppercase tracking-wide">Step 3</p>
-              <p className="mt-ds-1 text-ds-sm font-medium text-gray-700">Use</p>
-              <p className="text-ds-xs text-gray-500">SOP, process map, report</p>
-            </div>
-          </div>
-        </div>
-      ) : workflows.length === 0 && search ? (
-        <div className="card p-12 text-center">
-          <Layers className="mx-auto h-10 w-10 text-gray-300" />
-          <h3 className="mt-3 text-ds-sm font-medium text-gray-900">No workflows match your search</h3>
-          <p className="mt-1 text-ds-sm text-gray-500">Try a different search term.</p>
-        </div>
+      {/* ── Workflow Table ─────────────────────────────────────────────── */}
+      {workflows.length === 0 && hasActiveFilters ? (
+        <FilteredEmptyState onClear={clearAllFilters} hasSearch={search.length > 0} />
+      ) : workflows.length === 0 ? (
+        <EmptyDashboard onLoadSample={handleLoadSample} isLoading={loadingSample} />
       ) : (
-        <div className="space-y-2">
-          {workflows.map((w) => (
-            <div
-              key={w.id}
-              className="card flex items-center gap-4 p-4 hover:border-gray-300 transition-colors group"
-            >
-              {/* Favorite */}
-              <button
-                onClick={async (e) => {
-                  e.preventDefault();
-                  const newVal = !w.isFavorite;
-                  setWorkflows(prev => prev.map(wf => wf.id === w.id ? { ...wf, isFavorite: newVal } : wf));
-                  await fetch(`/api/workflows/${w.id}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ isFavorite: newVal }),
-                  });
+        <>
+          {/* Table header (desktop) */}
+          <div className="hidden lg:grid grid-cols-[32px_1fr_100px_60px_80px_120px_80px_140px_80px_72px] gap-3 items-center px-4 py-2 text-ds-xs font-medium text-gray-400 uppercase tracking-wide border-b border-gray-100 mb-1">
+            <div>{/* favorite */}</div>
+            <div>Workflow</div>
+            <div>Health</div>
+            <div>Steps</div>
+            <div>Duration</div>
+            <div>Confidence</div>
+            <div>SOP</div>
+            <div>Tags</div>
+            <div>Active</div>
+            <div>{/* actions */}</div>
+          </div>
+
+          {/* Workflow rows */}
+          <div className="space-y-1">
+            {workflows.map((w) => (
+              <WorkflowRow
+                key={w.id}
+                workflow={w}
+                allTags={tags}
+                editingId={editingId}
+                editTitle={editTitle}
+                tagMenuWorkflowId={tagMenuWorkflowId}
+                onFavoriteToggle={() => handleToggleFavorite(w.id, w.isFavorite)}
+                onStartEdit={() => {
+                  setEditingId(w.id);
+                  setEditTitle(w.title);
                 }}
-                className="rounded-ds-sm p-1 hover:bg-gray-100 transition-colors flex-shrink-0"
-                title={w.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-              >
-                <Star className={`h-4 w-4 ${w.isFavorite ? 'fill-amber-400 text-amber-400' : 'text-gray-200 group-hover:text-gray-300'}`} />
-              </button>
-
-              {/* Title */}
-              <div className="flex-1 min-w-0">
-                {editingId === w.id ? (
-                  <div className="flex items-center gap-1.5">
-                    <input
-                      type="text"
-                      value={editTitle}
-                      onChange={(e) => setEditTitle(e.target.value)}
-                      className="input-field text-sm py-1"
-                      autoFocus
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleRename(w.id);
-                        if (e.key === 'Escape') setEditingId(null);
-                      }}
-                    />
-                    <button onClick={() => handleRename(w.id)} className="p-1 text-green-600 hover:bg-green-50 rounded">
-                      <Check className="h-4 w-4" />
-                    </button>
-                    <button onClick={() => setEditingId(null)} className="p-1 text-gray-400 hover:bg-gray-100 rounded">
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <Link
-                    href={`/workflows/${w.id}`}
-                    className="text-ds-sm font-medium text-gray-900 hover:text-brand-600 truncate block"
-                  >
-                    {w.title}
-                  </Link>
-                )}
-
-                {/* Tool badges + Tag chips */}
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {w.toolsUsed.slice(0, 4).map((tool) => (
-                    <span key={tool} className="ds-tag ds-tag-neutral text-[11px]">{tool}</span>
-                  ))}
-                  {w.toolsUsed.length > 4 && (
-                    <span className="text-ds-xs text-gray-400">+{w.toolsUsed.length - 4}</span>
-                  )}
-                  {w.tags.map((t) => (
-                    <span
-                      key={t.id}
-                      className="ds-tag text-[11px] border"
-                      style={{
-                        backgroundColor: t.color + '15',
-                        borderColor: t.color + '40',
-                        color: t.color,
-                      }}
-                    >
-                      {t.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Metadata */}
-              <div className="hidden sm:flex items-center gap-4 text-ds-xs text-gray-500 flex-shrink-0">
-                <span className="flex items-center gap-1" title="Steps">
-                  <Layers className="h-3.5 w-3.5" />
-                  {w.stepCount ?? 0}
-                </span>
-                <span className="flex items-center gap-1" title="Duration">
-                  <Clock className="h-3.5 w-3.5" />
-                  {formatDuration(w.durationMs)}
-                </span>
-                {w.confidence !== null && (
-                  <span className="flex items-center gap-1" title="Confidence">
-                    <BarChart3 className="h-3.5 w-3.5" />
-                    {formatConfidence(w.confidence)}
-                  </span>
-                )}
-                {w.viewCount > 0 && (
-                  <span className="flex items-center gap-1" title="Views">
-                    <Eye className="h-3.5 w-3.5" />
-                    {w.viewCount}
-                  </span>
-                )}
-                <span className="w-16 text-right" title={w.createdAt}>
-                  {formatDateRelative(w.createdAt)}
-                </span>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="relative">
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setTagMenuWorkflowId(tagMenuWorkflowId === w.id ? null : w.id);
-                    }}
-                    className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-                    title="Manage tags"
-                  >
-                    <Tag className="h-3.5 w-3.5" />
-                  </button>
-                  {tagMenuWorkflowId === w.id && (
-                    <TagMenu
-                      workflowId={w.id}
-                      workflowTags={w.tags}
-                      allTags={tags}
-                      onToggle={handleToggleTag}
-                      onClose={() => setTagMenuWorkflowId(null)}
-                    />
-                  )}
-                </div>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setEditingId(w.id);
-                    setEditTitle(w.title);
-                  }}
-                  className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-                  title="Rename"
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleDelete(w.id);
-                  }}
-                  className="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
-                  title="Delete"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+                onCancelEdit={() => setEditingId(null)}
+                onConfirmEdit={() => handleRename(w.id)}
+                onEditTitleChange={setEditTitle}
+                onDelete={() => handleDelete(w.id)}
+                onTagMenuToggle={() =>
+                  setTagMenuWorkflowId(tagMenuWorkflowId === w.id ? null : w.id)
+                }
+                onTagMenuClose={() => setTagMenuWorkflowId(null)}
+                onToggleTag={handleToggleTag}
+              />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
 }
 
-function UpgradeBanner({ usage, limit, atLimit }: { usage: number; limit: number; atLimit: boolean }) {
-  const [loading, setLoading] = useState(false);
+// ═══════════════════════════════════════════════════════════════════════════════
+// ─── Sub-components ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
 
-  async function handleUpgrade() {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/billing/checkout', { method: 'POST' });
-      const data = await res.json();
-      if (data.url) { window.location.href = data.url; return; }
-    } catch { /* handled */ }
-    setLoading(false);
+// ─── Metric Card (Layer 1) ──────────────────────────────────────────────────────
+
+function MetricCard({
+  icon,
+  label,
+  value,
+  subtitle,
+  valueClassName,
+  href,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  subtitle: string;
+  valueClassName?: string | undefined;
+  href?: string | undefined;
+}) {
+  const content = (
+    <div className={`card px-ds-4 py-ds-3 ${href ? 'hover:border-brand-300 cursor-pointer' : ''} transition-colors`}>
+      <div className="flex items-center gap-ds-2 mb-ds-2">
+        {icon}
+        <span className="ds-metric-label text-ds-xs text-gray-500 truncate">{label}</span>
+      </div>
+      <p className={`ds-metric-value text-ds-lg font-semibold ${valueClassName ?? 'text-gray-900'}`}>
+        {value}
+      </p>
+      <p className="text-[11px] text-gray-400 mt-0.5 truncate">{subtitle}</p>
+    </div>
+  );
+
+  if (href) {
+    return <Link href={href}>{content}</Link>;
   }
+  return content;
+}
 
+// ─── Intelligence List (Layer 2) ────────────────────────────────────────────────
+
+function IntelligenceList({
+  title,
+  icon,
+  borderClass,
+  items,
+  renderMetric,
+  onViewAll,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  borderClass: string;
+  items: WorkflowSummary[];
+  renderMetric: (w: WorkflowSummary) => React.ReactNode;
+  onViewAll: () => void;
+}) {
   return (
-    <div className={`card px-ds-5 py-ds-4 mb-ds-4 flex items-center gap-ds-4 ${atLimit ? 'border-amber-200 bg-amber-50/50' : 'bg-brand-50/30 border-brand-100'}`}>
-      <div className={`flex h-9 w-9 items-center justify-center rounded-ds-md ${atLimit ? 'bg-amber-100' : 'bg-brand-100'}`}>
-        {atLimit ? <Lock className="h-5 w-5 text-amber-600" /> : <Zap className="h-5 w-5 text-brand-600" />}
+    <div className={`card overflow-hidden ${borderClass}`}>
+      <div className="flex items-center justify-between px-ds-4 py-ds-3 border-b border-gray-100">
+        <div className="flex items-center gap-ds-2">
+          {icon}
+          <h3 className="text-ds-sm font-semibold text-gray-900">{title}</h3>
+          <span className="ds-tag ds-tag-neutral text-[10px]">{items.length}</span>
+        </div>
+        <button
+          onClick={onViewAll}
+          className="text-ds-xs text-brand-600 hover:text-brand-700 font-medium flex items-center gap-0.5"
+        >
+          View all
+          <ChevronRight className="h-3 w-3" />
+        </button>
       </div>
-      <div className="flex-1">
-        <p className="text-ds-sm font-medium text-gray-900">
-          {atLimit
-            ? 'Free plan limit reached'
-            : `${usage} of ${limit} free uploads used`}
-        </p>
-        <p className="text-ds-xs text-gray-500">
-          {atLimit
-            ? 'Upgrade to Pro for unlimited workflows, advanced templates, and process intelligence.'
-            : 'Upgrade to Pro for unlimited uploads and advanced features.'}
-        </p>
+      <div className="divide-y divide-gray-50">
+        {items.map((w) => {
+          const primarySystem = getPrimarySystem(w.toolsUsed);
+          return (
+            <Link
+              key={w.id}
+              href={`/workflows/${w.id}`}
+              className="flex items-center gap-ds-3 px-ds-4 py-ds-3 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-ds-sm font-medium text-gray-900 truncate">{w.title}</p>
+                {primarySystem && (
+                  <span className="text-[11px] text-gray-400">{primarySystem}</span>
+                )}
+              </div>
+              {renderMetric(w)}
+              <ChevronRight className="h-3.5 w-3.5 text-gray-300 flex-shrink-0" />
+            </Link>
+          );
+        })}
       </div>
-      <button onClick={handleUpgrade} disabled={loading} className="btn-primary text-xs gap-1 flex-shrink-0">
-        <Zap className="h-3.5 w-3.5" />
-        {loading ? 'Redirecting...' : 'Upgrade to Pro'}
-      </button>
     </div>
   );
 }
 
-// ─── Tag assignment dropdown ────────────────────────────────────────────────
+// ─── Workflow Row (Layer 4) ─────────────────────────────────────────────────────
+
+function WorkflowRow({
+  workflow: w,
+  allTags,
+  editingId,
+  editTitle,
+  tagMenuWorkflowId,
+  onFavoriteToggle,
+  onStartEdit,
+  onCancelEdit,
+  onConfirmEdit,
+  onEditTitleChange,
+  onDelete,
+  onTagMenuToggle,
+  onTagMenuClose,
+  onToggleTag,
+}: {
+  workflow: WorkflowSummary;
+  allTags: TagWithCount[];
+  editingId: string | null;
+  editTitle: string;
+  tagMenuWorkflowId: string | null;
+  onFavoriteToggle: () => void;
+  onStartEdit: () => void;
+  onCancelEdit: () => void;
+  onConfirmEdit: () => void;
+  onEditTitleChange: (value: string) => void;
+  onDelete: () => void;
+  onTagMenuToggle: () => void;
+  onTagMenuClose: () => void;
+  onToggleTag: (workflowId: string, tagId: string, hasTag: boolean) => void;
+}) {
+  const isEditing = editingId === w.id;
+  const healthConfig = HEALTH_STATUS_CONFIG[w.healthStatus];
+  const sopConfig = SOP_READINESS_CONFIG[w.sopReadiness];
+  const primarySystem = getPrimarySystem(w.toolsUsed);
+  const confidencePct = w.confidence !== null ? Math.round(w.confidence * 100) : null;
+
+  return (
+    <div className="card hover:border-gray-300 transition-colors group">
+      {/* Desktop layout */}
+      <div className="hidden lg:grid grid-cols-[32px_1fr_100px_60px_80px_120px_80px_140px_80px_72px] gap-3 items-center px-4 py-3">
+        {/* Favorite */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            onFavoriteToggle();
+          }}
+          className="rounded-ds-sm p-1 hover:bg-gray-100 transition-colors flex-shrink-0"
+          title={w.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+        >
+          <Star
+            className={`h-4 w-4 ${
+              w.isFavorite
+                ? 'fill-amber-400 text-amber-400'
+                : 'text-gray-200 group-hover:text-gray-300'
+            }`}
+          />
+        </button>
+
+        {/* Workflow Name + System */}
+        <div className="min-w-0">
+          {isEditing ? (
+            <div className="flex items-center gap-1.5">
+              <input
+                type="text"
+                value={editTitle}
+                onChange={(e) => onEditTitleChange(e.target.value)}
+                className="input-field text-sm py-1"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') onConfirmEdit();
+                  if (e.key === 'Escape') onCancelEdit();
+                }}
+              />
+              <button
+                onClick={onConfirmEdit}
+                className="p-1 text-green-600 hover:bg-green-50 rounded"
+              >
+                <Check className="h-4 w-4" />
+              </button>
+              <button
+                onClick={onCancelEdit}
+                className="p-1 text-gray-400 hover:bg-gray-100 rounded"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <Link
+              href={`/workflows/${w.id}`}
+              className="text-ds-sm font-medium text-gray-900 hover:text-brand-600 truncate block"
+            >
+              {w.title}
+            </Link>
+          )}
+          {primarySystem && (
+            <span className="ds-tag ds-tag-neutral text-[10px] mt-0.5 inline-block">
+              {primarySystem}
+            </span>
+          )}
+        </div>
+
+        {/* Health Badge */}
+        <div>
+          <span
+            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium ${healthConfig.bgClass} ${healthConfig.textClass}`}
+          >
+            <span className={`h-1.5 w-1.5 rounded-full ${healthConfig.dotClass}`} />
+            {healthConfig.label}
+          </span>
+        </div>
+
+        {/* Steps */}
+        <div className="text-ds-xs text-gray-600">{w.stepCount ?? '--'}</div>
+
+        {/* Duration */}
+        <div className="text-ds-xs text-gray-600">{formatDuration(w.durationMs)}</div>
+
+        {/* Confidence with bar */}
+        <div className="flex items-center gap-2">
+          <div className="flex-1 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all ${confidenceBarColorClass(w.confidence)}`}
+              style={{ width: `${confidencePct ?? 0}%` }}
+            />
+          </div>
+          <span className={`text-ds-xs font-medium w-8 text-right ${confidenceColorClass(w.confidence)}`}>
+            {confidencePct !== null ? `${confidencePct}%` : '--'}
+          </span>
+        </div>
+
+        {/* SOP Readiness */}
+        <div>
+          <span
+            className={`inline-block px-2 py-0.5 rounded text-[11px] font-medium ${sopConfig.bgClass} ${sopConfig.textClass}`}
+          >
+            {sopConfig.label}
+          </span>
+        </div>
+
+        {/* Tags */}
+        <div className="flex items-center gap-1 overflow-hidden">
+          {w.tags.slice(0, 2).map((t) => (
+            <span
+              key={t.id}
+              className="ds-tag text-[10px] border truncate max-w-[60px]"
+              style={{
+                backgroundColor: t.color + '15',
+                borderColor: t.color + '40',
+                color: t.color,
+              }}
+              title={t.name}
+            >
+              {t.name}
+            </span>
+          ))}
+          {w.tags.length > 2 && (
+            <span className="text-[10px] text-gray-400">+{w.tags.length - 2}</span>
+          )}
+        </div>
+
+        {/* Last Active */}
+        <div className="text-ds-xs text-gray-500" title={w.updatedAt}>
+          {formatDateRelative(w.updatedAt)}
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="relative">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                onTagMenuToggle();
+              }}
+              className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              title="Manage tags"
+            >
+              <Tag className="h-3.5 w-3.5" />
+            </button>
+            {tagMenuWorkflowId === w.id && (
+              <TagMenu
+                workflowId={w.id}
+                workflowTags={w.tags}
+                allTags={allTags}
+                onToggle={onToggleTag}
+                onClose={onTagMenuClose}
+              />
+            )}
+          </div>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              onStartEdit();
+            }}
+            className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            title="Rename"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              onDelete();
+            }}
+            className="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
+            title="Delete"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile / Tablet layout */}
+      <div className="lg:hidden p-4">
+        <div className="flex items-start gap-3">
+          {/* Favorite */}
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              onFavoriteToggle();
+            }}
+            className="rounded-ds-sm p-1 hover:bg-gray-100 transition-colors flex-shrink-0 mt-0.5"
+          >
+            <Star
+              className={`h-4 w-4 ${
+                w.isFavorite
+                  ? 'fill-amber-400 text-amber-400'
+                  : 'text-gray-200'
+              }`}
+            />
+          </button>
+
+          <div className="flex-1 min-w-0">
+            {/* Title */}
+            {isEditing ? (
+              <div className="flex items-center gap-1.5 mb-2">
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => onEditTitleChange(e.target.value)}
+                  className="input-field text-sm py-1"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') onConfirmEdit();
+                    if (e.key === 'Escape') onCancelEdit();
+                  }}
+                />
+                <button onClick={onConfirmEdit} className="p-1 text-green-600 hover:bg-green-50 rounded">
+                  <Check className="h-4 w-4" />
+                </button>
+                <button onClick={onCancelEdit} className="p-1 text-gray-400 hover:bg-gray-100 rounded">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <Link
+                href={`/workflows/${w.id}`}
+                className="text-ds-sm font-medium text-gray-900 hover:text-brand-600 block mb-1"
+              >
+                {w.title}
+              </Link>
+            )}
+
+            {/* Badges row */}
+            <div className="flex flex-wrap items-center gap-1.5 mb-2">
+              <span
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium ${healthConfig.bgClass} ${healthConfig.textClass}`}
+              >
+                <span className={`h-1.5 w-1.5 rounded-full ${healthConfig.dotClass}`} />
+                {healthConfig.label}
+              </span>
+              <span
+                className={`inline-block px-2 py-0.5 rounded text-[11px] font-medium ${sopConfig.bgClass} ${sopConfig.textClass}`}
+              >
+                SOP: {sopConfig.label}
+              </span>
+              {primarySystem && (
+                <span className="ds-tag ds-tag-neutral text-[10px]">{primarySystem}</span>
+              )}
+              {w.tags.slice(0, 2).map((t) => (
+                <span
+                  key={t.id}
+                  className="ds-tag text-[10px] border"
+                  style={{
+                    backgroundColor: t.color + '15',
+                    borderColor: t.color + '40',
+                    color: t.color,
+                  }}
+                >
+                  {t.name}
+                </span>
+              ))}
+              {w.tags.length > 2 && (
+                <span className="text-[10px] text-gray-400">+{w.tags.length - 2}</span>
+              )}
+            </div>
+
+            {/* Metrics row */}
+            <div className="flex items-center gap-4 text-ds-xs text-gray-500">
+              <span className="flex items-center gap-1">
+                <Layers className="h-3.5 w-3.5" />
+                {w.stepCount ?? 0}
+              </span>
+              <span className="flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" />
+                {formatDuration(w.durationMs)}
+              </span>
+              {confidencePct !== null && (
+                <span className={`flex items-center gap-1 ${confidenceColorClass(w.confidence)}`}>
+                  <BarChart3 className="h-3.5 w-3.5" />
+                  {confidencePct}%
+                </span>
+              )}
+              <span className="ml-auto">{formatDateRelative(w.updatedAt)}</span>
+            </div>
+          </div>
+
+          {/* Mobile actions */}
+          <div className="flex flex-col gap-0.5">
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  onTagMenuToggle();
+                }}
+                className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                title="Manage tags"
+              >
+                <Tag className="h-3.5 w-3.5" />
+              </button>
+              {tagMenuWorkflowId === w.id && (
+                <TagMenu
+                  workflowId={w.id}
+                  workflowTags={w.tags}
+                  allTags={allTags}
+                  onToggle={onToggleTag}
+                  onClose={onTagMenuClose}
+                />
+              )}
+            </div>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                onStartEdit();
+              }}
+              className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              title="Rename"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                onDelete();
+              }}
+              className="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
+              title="Delete"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Tag assignment dropdown ────────────────────────────────────────────────────
 
 function TagMenu({
   workflowId,
@@ -784,52 +1381,107 @@ function TagMenu({
   );
 }
 
-// ─── Streak tracking banner ─────────────────────────────────────────────────
+// ─── Empty Dashboard ────────────────────────────────────────────────────────────
 
-function StreakBanner({ streak }: { streak: StreakData }) {
-  const nextMilestone = streak.milestones.find((m) => !m.isReached);
-  const lastReached = [...streak.milestones].reverse().find((m) => m.isReached);
-
+function EmptyDashboard({
+  onLoadSample,
+  isLoading,
+}: {
+  onLoadSample: () => void;
+  isLoading: boolean;
+}) {
   return (
-    <div className="card flex items-center gap-ds-4 px-ds-5 py-ds-4 mb-ds-4 bg-gradient-to-r from-orange-50/50 to-white border-orange-100">
-      <div className="flex h-9 w-9 items-center justify-center rounded-ds-md bg-orange-100">
-        <Flame className="h-5 w-5 text-orange-500" />
+    <div>
+      <div className="flex items-center justify-between mb-ds-6">
+        <div>
+          <h1 className="text-ds-2xl font-semibold text-gray-900">Process Intelligence</h1>
+          <p className="text-ds-sm text-gray-500 mt-0.5">
+            Monitor, optimize, and standardize your workflows
+          </p>
+        </div>
+        <Link href="/upload" className="btn-primary gap-1.5">
+          <Upload className="h-4 w-4" />
+          Upload
+        </Link>
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-3">
-          {streak.currentStreak > 0 && (
-            <div className="flex items-baseline gap-1">
-              <span className="text-ds-lg font-bold text-orange-600">{streak.currentStreak}</span>
-              <span className="text-ds-xs text-gray-500">day streak</span>
-            </div>
-          )}
-          <div className="flex items-baseline gap-1">
-            <span className="text-ds-sm font-semibold text-gray-700">{streak.monthlyCount}</span>
-            <span className="text-ds-xs text-gray-500">this month</span>
+
+      <div className="card overflow-hidden">
+        <div className="bg-gradient-to-br from-brand-50 via-white to-white px-ds-8 py-ds-10 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-100">
+            <Layers className="h-8 w-8 text-brand-500" />
           </div>
-          <div className="flex items-baseline gap-1">
-            <span className="text-ds-sm font-semibold text-gray-700">{streak.totalCount}</span>
-            <span className="text-ds-xs text-gray-500">total</span>
+          <h2 className="mt-ds-4 text-ds-lg font-semibold text-gray-900">
+            Your process intelligence center is empty
+          </h2>
+          <p className="mt-ds-2 text-ds-sm text-gray-500 max-w-md mx-auto">
+            Record a workflow with the browser extension, or upload a JSON file to generate
+            your first SOP and process map.
+          </p>
+          <div className="mt-ds-6 flex items-center justify-center gap-ds-3">
+            <Link href="/upload" className="btn-primary gap-1.5">
+              <Upload className="h-4 w-4" />
+              Upload a workflow
+            </Link>
+            <button
+              onClick={onLoadSample}
+              disabled={isLoading}
+              className="btn-secondary gap-1.5"
+            >
+              <Sparkles className="h-4 w-4" />
+              {isLoading ? 'Loading...' : 'Try a sample workflow'}
+            </button>
           </div>
         </div>
-        {lastReached && (
-          <div className="flex items-center gap-1.5 mt-1">
-            <Trophy className="h-3 w-3 text-amber-500" />
-            <span className="text-[11px] text-gray-500">
-              {lastReached.label}
-              {nextMilestone && (
-                <> &middot; {nextMilestone.threshold - streak.totalCount} more to {nextMilestone.label}</>
-              )}
-            </span>
+        {/* Quick value props */}
+        <div className="grid grid-cols-3 divide-x divide-gray-100 border-t border-gray-100">
+          <div className="px-ds-5 py-ds-4 text-center">
+            <p className="text-ds-xs text-gray-400 uppercase tracking-wide">Step 1</p>
+            <p className="mt-ds-1 text-ds-sm font-medium text-gray-700">Record</p>
+            <p className="text-ds-xs text-gray-500">Capture your real workflow</p>
           </div>
-        )}
-      </div>
-      {streak.longestStreak > 1 && (
-        <div className="text-right flex-shrink-0">
-          <p className="text-ds-xs text-gray-400">Best streak</p>
-          <p className="text-ds-sm font-semibold text-gray-600">{streak.longestStreak} days</p>
+          <div className="px-ds-5 py-ds-4 text-center">
+            <p className="text-ds-xs text-gray-400 uppercase tracking-wide">Step 2</p>
+            <p className="mt-ds-1 text-ds-sm font-medium text-gray-700">Process</p>
+            <p className="text-ds-xs text-gray-500">Deterministic analysis</p>
+          </div>
+          <div className="px-ds-5 py-ds-4 text-center">
+            <p className="text-ds-xs text-gray-400 uppercase tracking-wide">Step 3</p>
+            <p className="mt-ds-1 text-ds-sm font-medium text-gray-700">Use</p>
+            <p className="text-ds-xs text-gray-500">SOP, process map, report</p>
+          </div>
         </div>
-      )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Filtered Empty State ───────────────────────────────────────────────────────
+
+function FilteredEmptyState({
+  onClear,
+  hasSearch,
+}: {
+  onClear: () => void;
+  hasSearch: boolean;
+}) {
+  return (
+    <div className="card p-12 text-center">
+      <Filter className="mx-auto h-10 w-10 text-gray-300" />
+      <h3 className="mt-3 text-ds-sm font-medium text-gray-900">
+        {hasSearch ? 'No workflows match your search' : 'No workflows in this category'}
+      </h3>
+      <p className="mt-1 text-ds-sm text-gray-500">
+        {hasSearch
+          ? 'Try different search terms or adjust your filters.'
+          : 'Try adjusting your filters to see more workflows.'}
+      </p>
+      <button
+        onClick={onClear}
+        className="btn-secondary mt-4 gap-1.5"
+      >
+        <X className="h-4 w-4" />
+        Clear all filters
+      </button>
     </div>
   );
 }
