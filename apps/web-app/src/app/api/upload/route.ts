@@ -111,9 +111,30 @@ export async function POST(req: NextRequest) {
     }
 
     // Build workflow report + insights + templates
-    const workflowReport = buildWorkflowReportFromOutput(processOutput, bundle);
-    const workflowInsights = analyzeWorkflowInsights(processOutput);
-    const templateArtifacts = renderAllTemplates(processOutput);
+    // Each wrapped in try/catch so a failure in one doesn't block the upload
+    let workflowReport;
+    try {
+      workflowReport = buildWorkflowReportFromOutput(processOutput, bundle);
+    } catch (err) {
+      console.error('Workflow report generation failed (non-blocking):', err);
+      workflowReport = null;
+    }
+
+    let workflowInsights;
+    try {
+      workflowInsights = analyzeWorkflowInsights(processOutput);
+    } catch (err) {
+      console.error('Workflow insights generation failed (non-blocking):', err);
+      workflowInsights = null;
+    }
+
+    let templateArtifacts: { artifactType: string; contentJson: string }[];
+    try {
+      templateArtifacts = renderAllTemplates(processOutput);
+    } catch (err) {
+      console.error('Template rendering failed (non-blocking):', err);
+      templateArtifacts = [];
+    }
 
     // Extract metadata
     const { processRun, processMap, processDefinition } = processOutput;
@@ -144,11 +165,11 @@ export async function POST(req: NextRequest) {
                 schemaVersion: processRun.engineVersion,
                 contentJson: JSON.stringify(processOutput),
               },
-              {
+              ...(workflowReport ? [{
                 artifactType: 'workflow_report',
                 schemaVersion: '1.0.0',
                 contentJson: JSON.stringify(workflowReport),
-              },
+              }] : []),
               {
                 artifactType: 'source_bundle',
                 schemaVersion: bundle.manifest?.schemaVersion ?? '1.0.0',
@@ -164,11 +185,11 @@ export async function POST(req: NextRequest) {
                 schemaVersion: processMap.version,
                 contentJson: JSON.stringify(processMap),
               },
-              {
+              ...(workflowInsights ? [{
                 artifactType: 'workflow_insights',
                 schemaVersion: '1.0.0',
                 contentJson: JSON.stringify(workflowInsights),
-              },
+              }] : []),
               // Template artifacts (6 templates + selection)
               ...templateArtifacts.map((ta) => ({
                 artifactType: ta.artifactType,
@@ -213,6 +234,7 @@ export async function POST(req: NextRequest) {
 
   } catch (err) {
     console.error('Upload failed:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    return NextResponse.json({ error: 'Internal server error', detail: message }, { status: 500 });
   }
 }
