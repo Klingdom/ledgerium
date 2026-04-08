@@ -419,11 +419,19 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   const tab = await chrome.tabs.get(tabId).catch(() => null)
   if (!tab?.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) return
 
-  await onTabActivatedDuringRecording(tabId)
+  // Always try injection first (handles tabs opened before extension loaded)
+  await injectIntoTab(tabId)
+
+  // Small delay to let the content script initialize after injection
+  await new Promise(resolve => setTimeout(resolve, 100))
+
+  // Send START_SESSION — always, even if we think the script is already there
   chrome.tabs.sendMessage(tabId, {
     type: MSG.START_SESSION,
     payload: { sessionId },
-  }).catch(() => { /* content script may not be present */ })
+  }).catch(() => {
+    console.warn(`[LDG-BG] Could not reach content script on tab ${tabId} after injection`)
+  })
   console.log(`[LDG-BG] Activated capture on tab switch: ${tabId} (${tab.url})`)
 })
 
