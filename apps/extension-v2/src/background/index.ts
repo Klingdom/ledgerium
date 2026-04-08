@@ -107,7 +107,7 @@ async function restoreStateIfNeeded(): Promise<void> {
     if (activeTab?.id) {
       chrome.tabs.sendMessage(activeTab.id, {
         type: MSG.START_SESSION,
-        payload: { sessionId: persisted.sessionId },
+        payload: { sessionId: persisted.sessionId, startedAt: store.getMeta()?.startedAt },
       }).catch(() => { /* content script may not be present */ })
     }
   })
@@ -183,7 +183,7 @@ async function handleStart(activityName: string, uploadUrl?: string): Promise<vo
       await injectIntoTab(activeTab.id)
       chrome.tabs.sendMessage(activeTab.id, {
         type: MSG.START_SESSION,
-        payload: { sessionId: meta.sessionId },
+        payload: { sessionId: meta.sessionId, startedAt: meta.startedAt },
       }).catch(() => { /* content script may not be ready yet */ })
       console.log(`[LDG-BG] Recording started on active tab ${activeTab.id}: ${activeTab.url}`)
     }
@@ -401,10 +401,11 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (!sessionId) return
   if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) return
 
+  const startedAt = store.getMeta()?.startedAt
   await injectIntoTab(tabId)
   chrome.tabs.sendMessage(tabId, {
     type: MSG.START_SESSION,
-    payload: { sessionId },
+    payload: { sessionId, startedAt },
   }).catch(() => { /* content script may not have loaded yet */ })
   console.log(`[LDG-BG] Activated capture on tab load: ${tabId} (${tab.url})`)
 })
@@ -426,9 +427,10 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   await new Promise(resolve => setTimeout(resolve, 100))
 
   // Send START_SESSION — always, even if we think the script is already there
+  const startedAt2 = store.getMeta()?.startedAt
   chrome.tabs.sendMessage(tabId, {
     type: MSG.START_SESSION,
-    payload: { sessionId },
+    payload: { sessionId, startedAt: startedAt2 },
   }).catch(() => {
     console.warn(`[LDG-BG] Could not reach content script on tab ${tabId} after injection`)
   })

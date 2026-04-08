@@ -59,7 +59,7 @@ export class CaptureEngine {
 
   // ─── Lifecycle ─────────────────────────────────────────────────────────────
 
-  startCapture(sessionId: string): void {
+  startCapture(sessionId: string, sessionStartedAt?: string): void {
     console.log('[LDG-CS] startCapture called, sessionId=', sessionId, 'already recording=', this.isRecording)
     // Idempotent: already capturing this exact session — do nothing.
     // This can happen because broadcastAllTabs fires on start AND onActivated
@@ -70,7 +70,10 @@ export class CaptureEngine {
     if (this.isRecording) this.stopCapture()
 
     this.sessionId = sessionId
-    this.sessionStartT = Date.now()
+    // Use the actual session start time (from background) so t_ms values are
+    // consistent across all tabs. Without this, each tab computes t_ms relative
+    // to when IT started capturing, causing events to appear out of order.
+    this.sessionStartT = sessionStartedAt ? new Date(sessionStartedAt).getTime() : Date.now()
     this.isRecording = true
     this.isPaused = false
 

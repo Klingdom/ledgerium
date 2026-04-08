@@ -33,7 +33,10 @@ if ((window as any)[GUARD_KEY]) {
     switch (message.type) {
       case MSG.START_SESSION:
         console.log('[LDG-CS] START_SESSION received, sessionId:', message.payload['sessionId'])
-        engine.startCapture(message.payload['sessionId'] as string)
+        engine.startCapture(
+          message.payload['sessionId'] as string,
+          message.payload['startedAt'] as string | undefined,
+        )
         break
       case MSG.PAUSE_SESSION:
         engine.pauseCapture()
