@@ -6,11 +6,13 @@
     "endedAt": "2026-04-07T10:18:45.000Z",
     "state": "review_ready",
     "schemaVersion": "1.0.0",
-    "recorderVersion": "0.1.0"
+    "recorderVersion": "0.1.0",
+    "pauseIntervals": []
   },
   "normalizedEvents": [
     {
       "event_id": "evt-ob-001",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 0,
       "t_wall": "2026-04-07T10:00:00.000Z",
@@ -33,6 +35,7 @@
     },
     {
       "event_id": "evt-ob-002",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 4200,
       "t_wall": "2026-04-07T10:00:04.200Z",
@@ -62,6 +65,7 @@
     },
     {
       "event_id": "evt-ob-003",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 6800,
       "t_wall": "2026-04-07T10:00:06.800Z",
@@ -84,6 +88,7 @@
     },
     {
       "event_id": "evt-ob-004",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 12500,
       "t_wall": "2026-04-07T10:00:12.500Z",
@@ -113,6 +118,7 @@
     },
     {
       "event_id": "evt-ob-005",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 16100,
       "t_wall": "2026-04-07T10:00:16.100Z",
@@ -142,6 +148,7 @@
     },
     {
       "event_id": "evt-ob-006",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 22300,
       "t_wall": "2026-04-07T10:00:22.300Z",
@@ -171,6 +178,7 @@
     },
     {
       "event_id": "evt-ob-007",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 30800,
       "t_wall": "2026-04-07T10:00:30.800Z",
@@ -200,6 +208,7 @@
     },
     {
       "event_id": "evt-ob-008",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 38200,
       "t_wall": "2026-04-07T10:00:38.200Z",
@@ -229,6 +238,7 @@
     },
     {
       "event_id": "evt-ob-009",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 40500,
       "t_wall": "2026-04-07T10:00:40.500Z",
@@ -251,6 +261,7 @@
     },
     {
       "event_id": "evt-ob-010",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 120000,
       "t_wall": "2026-04-07T10:02:00.000Z",
@@ -273,6 +284,7 @@
     },
     {
       "event_id": "evt-ob-011",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 128500,
       "t_wall": "2026-04-07T10:02:08.500Z",
@@ -302,6 +314,7 @@
     },
     {
       "event_id": "evt-ob-012",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 130200,
       "t_wall": "2026-04-07T10:02:10.200Z",
@@ -324,6 +337,7 @@
     },
     {
       "event_id": "evt-ob-013",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 138000,
       "t_wall": "2026-04-07T10:02:18.000Z",
@@ -353,6 +367,7 @@
     },
     {
       "event_id": "evt-ob-014",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 142400,
       "t_wall": "2026-04-07T10:02:22.400Z",
@@ -382,6 +397,7 @@
     },
     {
       "event_id": "evt-ob-015",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 144100,
       "t_wall": "2026-04-07T10:02:24.100Z",
@@ -404,6 +420,7 @@
     },
     {
       "event_id": "evt-ob-016",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 240000,
       "t_wall": "2026-04-07T10:04:00.000Z",
@@ -426,6 +443,7 @@
     },
     {
       "event_id": "evt-ob-017",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 248600,
       "t_wall": "2026-04-07T10:04:08.600Z",
@@ -455,6 +473,7 @@
     },
     {
       "event_id": "evt-ob-018",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 250300,
       "t_wall": "2026-04-07T10:04:10.300Z",
@@ -477,6 +496,7 @@
     },
     {
       "event_id": "evt-ob-019",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 258700,
       "t_wall": "2026-04-07T10:04:18.700Z",
@@ -506,6 +526,7 @@
     },
     {
       "event_id": "evt-ob-020",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 265200,
       "t_wall": "2026-04-07T10:04:25.200Z",
@@ -535,6 +556,7 @@
     },
     {
       "event_id": "evt-ob-021",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 270400,
       "t_wall": "2026-04-07T10:04:30.400Z",
@@ -564,6 +586,7 @@
     },
     {
       "event_id": "evt-ob-022",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 272100,
       "t_wall": "2026-04-07T10:04:32.100Z",
@@ -586,6 +609,7 @@
     },
     {
       "event_id": "evt-ob-023",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 600000,
       "t_wall": "2026-04-07T10:10:00.000Z",
@@ -608,6 +632,7 @@
     },
     {
       "event_id": "evt-ob-024",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 612000,
       "t_wall": "2026-04-07T10:10:12.000Z",
@@ -637,6 +662,7 @@
     },
     {
       "event_id": "evt-ob-025",
+      "schema_version": "1.0.0",
       "session_id": "ses-onboard-20260407-001",
       "t_ms": 1125000,
       "t_wall": "2026-04-07T10:18:45.000Z",
@@ -674,7 +700,11 @@
       "status": "finalized",
       "grouping_reason": "click_then_navigate",
       "confidence": 0.85,
-      "source_event_ids": ["evt-ob-001", "evt-ob-002", "evt-ob-003"],
+      "source_event_ids": [
+        "evt-ob-001",
+        "evt-ob-002",
+        "evt-ob-003"
+      ],
       "start_t_ms": 0,
       "end_t_ms": 6800,
       "duration_ms": 6800,
@@ -693,7 +723,14 @@
       "status": "finalized",
       "grouping_reason": "fill_and_submit",
       "confidence": 0.9,
-      "source_event_ids": ["evt-ob-004", "evt-ob-005", "evt-ob-006", "evt-ob-007", "evt-ob-008", "evt-ob-009"],
+      "source_event_ids": [
+        "evt-ob-004",
+        "evt-ob-005",
+        "evt-ob-006",
+        "evt-ob-007",
+        "evt-ob-008",
+        "evt-ob-009"
+      ],
       "start_t_ms": 12500,
       "end_t_ms": 40500,
       "duration_ms": 28000,
@@ -712,7 +749,9 @@
       "status": "finalized",
       "grouping_reason": "single_action",
       "confidence": 0.75,
-      "source_event_ids": ["evt-ob-010"],
+      "source_event_ids": [
+        "evt-ob-010"
+      ],
       "start_t_ms": 120000,
       "end_t_ms": 120000,
       "duration_ms": 0,
@@ -731,7 +770,13 @@
       "status": "finalized",
       "grouping_reason": "fill_and_submit",
       "confidence": 0.9,
-      "source_event_ids": ["evt-ob-011", "evt-ob-012", "evt-ob-013", "evt-ob-014", "evt-ob-015"],
+      "source_event_ids": [
+        "evt-ob-011",
+        "evt-ob-012",
+        "evt-ob-013",
+        "evt-ob-014",
+        "evt-ob-015"
+      ],
       "start_t_ms": 128500,
       "end_t_ms": 144100,
       "duration_ms": 15600,
@@ -750,7 +795,9 @@
       "status": "finalized",
       "grouping_reason": "single_action",
       "confidence": 0.75,
-      "source_event_ids": ["evt-ob-016"],
+      "source_event_ids": [
+        "evt-ob-016"
+      ],
       "start_t_ms": 240000,
       "end_t_ms": 240000,
       "duration_ms": 0,
@@ -769,7 +816,14 @@
       "status": "finalized",
       "grouping_reason": "fill_and_submit",
       "confidence": 0.9,
-      "source_event_ids": ["evt-ob-017", "evt-ob-018", "evt-ob-019", "evt-ob-020", "evt-ob-021", "evt-ob-022"],
+      "source_event_ids": [
+        "evt-ob-017",
+        "evt-ob-018",
+        "evt-ob-019",
+        "evt-ob-020",
+        "evt-ob-021",
+        "evt-ob-022"
+      ],
       "start_t_ms": 248600,
       "end_t_ms": 272100,
       "duration_ms": 23500,
@@ -788,7 +842,10 @@
       "status": "finalized",
       "grouping_reason": "data_entry",
       "confidence": 0.9,
-      "source_event_ids": ["evt-ob-023", "evt-ob-024"],
+      "source_event_ids": [
+        "evt-ob-023",
+        "evt-ob-024"
+      ],
       "start_t_ms": 600000,
       "end_t_ms": 612000,
       "duration_ms": 12000,
@@ -807,7 +864,9 @@
       "status": "finalized",
       "grouping_reason": "send_action",
       "confidence": 0.75,
-      "source_event_ids": ["evt-ob-025"],
+      "source_event_ids": [
+        "evt-ob-025"
+      ],
       "start_t_ms": 1125000,
       "end_t_ms": 1125000,
       "duration_ms": 0,
@@ -827,6 +886,11 @@
     "recorderVersion": "0.1.0",
     "segmentationRuleVersion": "1.1.0",
     "rendererVersion": "0.1.0",
-    "fileHashes": {}
+    "fileHashes": {
+      "session.json": "61707cefef088c4214bba24895950c01ec556de749b170d1442f66c02bfc76f6",
+      "normalized_events.json": "080088f28b64e6cadb4831bbe955ccb6320557d462f4b51aa67be2e848ba5f41",
+      "derived_steps.json": "cc4aeee44ae5b88dbb7854ffd329def631932ce080809041f739724736b3a41f",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
   }
 }

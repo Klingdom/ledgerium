@@ -6,11 +6,13 @@
     "endedAt": "2026-04-07T11:08:32.000Z",
     "state": "review_ready",
     "schemaVersion": "1.0.0",
-    "recorderVersion": "0.1.0"
+    "recorderVersion": "0.1.0",
+    "pauseIntervals": []
   },
   "normalizedEvents": [
     {
       "event_id": "evt-crm-001",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 0,
       "t_wall": "2026-04-07T11:00:00.000Z",
@@ -33,6 +35,7 @@
     },
     {
       "event_id": "evt-crm-002",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 5600,
       "t_wall": "2026-04-07T11:00:05.600Z",
@@ -62,6 +65,7 @@
     },
     {
       "event_id": "evt-crm-003",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 7200,
       "t_wall": "2026-04-07T11:00:07.200Z",
@@ -84,6 +88,7 @@
     },
     {
       "event_id": "evt-crm-004",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 12800,
       "t_wall": "2026-04-07T11:00:12.800Z",
@@ -113,6 +118,7 @@
     },
     {
       "event_id": "evt-crm-005",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 16400,
       "t_wall": "2026-04-07T11:00:16.400Z",
@@ -142,6 +148,7 @@
     },
     {
       "event_id": "evt-crm-006",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 18100,
       "t_wall": "2026-04-07T11:00:18.100Z",
@@ -164,6 +171,7 @@
     },
     {
       "event_id": "evt-crm-007",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 18200,
       "t_wall": "2026-04-07T11:00:18.200Z",
@@ -186,6 +194,7 @@
     },
     {
       "event_id": "evt-crm-008",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 60000,
       "t_wall": "2026-04-07T11:01:00.000Z",
@@ -215,6 +224,7 @@
     },
     {
       "event_id": "evt-crm-009",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 68000,
       "t_wall": "2026-04-07T11:01:08.000Z",
@@ -244,6 +254,7 @@
     },
     {
       "event_id": "evt-crm-010",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 72000,
       "t_wall": "2026-04-07T11:01:12.000Z",
@@ -273,6 +284,7 @@
     },
     {
       "event_id": "evt-crm-011",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 120000,
       "t_wall": "2026-04-07T11:02:00.000Z",
@@ -302,6 +314,7 @@
     },
     {
       "event_id": "evt-crm-012",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 180000,
       "t_wall": "2026-04-07T11:03:00.000Z",
@@ -331,6 +344,7 @@
     },
     {
       "event_id": "evt-crm-013",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 181500,
       "t_wall": "2026-04-07T11:03:01.500Z",
@@ -353,6 +367,7 @@
     },
     {
       "event_id": "evt-crm-014",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 190000,
       "t_wall": "2026-04-07T11:03:10.000Z",
@@ -382,6 +397,7 @@
     },
     {
       "event_id": "evt-crm-015",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 198000,
       "t_wall": "2026-04-07T11:03:18.000Z",
@@ -411,6 +427,7 @@
     },
     {
       "event_id": "evt-crm-016",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 205000,
       "t_wall": "2026-04-07T11:03:25.000Z",
@@ -440,6 +457,7 @@
     },
     {
       "event_id": "evt-crm-017",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 210000,
       "t_wall": "2026-04-07T11:03:30.000Z",
@@ -469,6 +487,7 @@
     },
     {
       "event_id": "evt-crm-018",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 212000,
       "t_wall": "2026-04-07T11:03:32.000Z",
@@ -491,6 +510,7 @@
     },
     {
       "event_id": "evt-crm-019",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 480000,
       "t_wall": "2026-04-07T11:08:00.000Z",
@@ -520,6 +540,7 @@
     },
     {
       "event_id": "evt-crm-020",
+      "schema_version": "1.0.0",
       "session_id": "ses-crm-20260407-001",
       "t_ms": 512000,
       "t_wall": "2026-04-07T11:08:32.000Z",
@@ -550,7 +571,9 @@
       "status": "finalized",
       "grouping_reason": "single_action",
       "confidence": 0.75,
-      "source_event_ids": ["evt-crm-001"],
+      "source_event_ids": [
+        "evt-crm-001"
+      ],
       "start_t_ms": 0,
       "end_t_ms": 0,
       "duration_ms": 0,
@@ -569,7 +592,14 @@
       "status": "finalized",
       "grouping_reason": "fill_and_submit",
       "confidence": 0.9,
-      "source_event_ids": ["evt-crm-002", "evt-crm-003", "evt-crm-004", "evt-crm-005", "evt-crm-006", "evt-crm-007"],
+      "source_event_ids": [
+        "evt-crm-002",
+        "evt-crm-003",
+        "evt-crm-004",
+        "evt-crm-005",
+        "evt-crm-006",
+        "evt-crm-007"
+      ],
       "start_t_ms": 5600,
       "end_t_ms": 18200,
       "duration_ms": 12600,
@@ -588,7 +618,12 @@
       "status": "finalized",
       "grouping_reason": "fill_and_submit",
       "confidence": 0.9,
-      "source_event_ids": ["evt-crm-008", "evt-crm-009", "evt-crm-010", "evt-crm-011"],
+      "source_event_ids": [
+        "evt-crm-008",
+        "evt-crm-009",
+        "evt-crm-010",
+        "evt-crm-011"
+      ],
       "start_t_ms": 60000,
       "end_t_ms": 120000,
       "duration_ms": 60000,
@@ -607,7 +642,15 @@
       "status": "finalized",
       "grouping_reason": "fill_and_submit",
       "confidence": 0.9,
-      "source_event_ids": ["evt-crm-012", "evt-crm-013", "evt-crm-014", "evt-crm-015", "evt-crm-016", "evt-crm-017", "evt-crm-018"],
+      "source_event_ids": [
+        "evt-crm-012",
+        "evt-crm-013",
+        "evt-crm-014",
+        "evt-crm-015",
+        "evt-crm-016",
+        "evt-crm-017",
+        "evt-crm-018"
+      ],
       "start_t_ms": 180000,
       "end_t_ms": 212000,
       "duration_ms": 32000,
@@ -626,7 +669,10 @@
       "status": "finalized",
       "grouping_reason": "send_action",
       "confidence": 0.75,
-      "source_event_ids": ["evt-crm-019", "evt-crm-020"],
+      "source_event_ids": [
+        "evt-crm-019",
+        "evt-crm-020"
+      ],
       "start_t_ms": 480000,
       "end_t_ms": 512000,
       "duration_ms": 32000,
@@ -646,6 +692,11 @@
     "recorderVersion": "0.1.0",
     "segmentationRuleVersion": "1.1.0",
     "rendererVersion": "0.1.0",
-    "fileHashes": {}
+    "fileHashes": {
+      "session.json": "679ec8844d33dd455749de394dad9b4f1b803538d6f254dd1191196a05ff730e",
+      "normalized_events.json": "04914a49c5cc5c6b4b56583f7a6443f04453706fe3b0fc91f8efcfe7f9b5d3eb",
+      "derived_steps.json": "40f147b75c9473734facfaf05ec665accfd399a5479a48175ff76476fd524009",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
   }
 }

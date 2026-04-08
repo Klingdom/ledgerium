@@ -6,11 +6,13 @@
     "endedAt": "2026-04-07T15:56:48.000Z",
     "state": "review_ready",
     "schemaVersion": "1.0.0",
-    "recorderVersion": "0.1.0"
+    "recorderVersion": "0.1.0",
+    "pauseIntervals": []
   },
   "normalizedEvents": [
     {
       "event_id": "evt-rf-001",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 0,
       "t_wall": "2026-04-07T15:45:00.000Z",
@@ -33,6 +35,7 @@
     },
     {
       "event_id": "evt-rf-002",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 2100,
       "t_wall": "2026-04-07T15:45:02.100Z",
@@ -55,6 +58,7 @@
     },
     {
       "event_id": "evt-rf-003",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 4500,
       "t_wall": "2026-04-07T15:45:04.500Z",
@@ -77,6 +81,7 @@
     },
     {
       "event_id": "evt-rf-004",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 18000,
       "t_wall": "2026-04-07T15:45:18.000Z",
@@ -106,6 +111,7 @@
     },
     {
       "event_id": "evt-rf-005",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 20300,
       "t_wall": "2026-04-07T15:45:20.300Z",
@@ -128,6 +134,7 @@
     },
     {
       "event_id": "evt-rf-006",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 55000,
       "t_wall": "2026-04-07T15:45:55.000Z",
@@ -157,6 +164,7 @@
     },
     {
       "event_id": "evt-rf-007",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 57200,
       "t_wall": "2026-04-07T15:45:57.200Z",
@@ -179,6 +187,7 @@
     },
     {
       "event_id": "evt-rf-008",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 68000,
       "t_wall": "2026-04-07T15:46:08.000Z",
@@ -208,6 +217,7 @@
     },
     {
       "event_id": "evt-rf-009",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 75000,
       "t_wall": "2026-04-07T15:46:15.000Z",
@@ -237,6 +247,7 @@
     },
     {
       "event_id": "evt-rf-010",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 82000,
       "t_wall": "2026-04-07T15:46:22.000Z",
@@ -266,6 +277,7 @@
     },
     {
       "event_id": "evt-rf-011",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 84500,
       "t_wall": "2026-04-07T15:46:24.500Z",
@@ -288,6 +300,7 @@
     },
     {
       "event_id": "evt-rf-012",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 90000,
       "t_wall": "2026-04-07T15:46:30.000Z",
@@ -310,6 +323,7 @@
     },
     {
       "event_id": "evt-rf-013",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 90200,
       "t_wall": "2026-04-07T15:46:30.200Z",
@@ -332,6 +346,7 @@
     },
     {
       "event_id": "evt-rf-014",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 120000,
       "t_wall": "2026-04-07T15:47:00.000Z",
@@ -361,6 +376,7 @@
     },
     {
       "event_id": "evt-rf-015",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 130000,
       "t_wall": "2026-04-07T15:47:10.000Z",
@@ -390,6 +406,7 @@
     },
     {
       "event_id": "evt-rf-016",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 132500,
       "t_wall": "2026-04-07T15:47:12.500Z",
@@ -412,6 +429,7 @@
     },
     {
       "event_id": "evt-rf-017",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 138000,
       "t_wall": "2026-04-07T15:47:18.000Z",
@@ -434,6 +452,7 @@
     },
     {
       "event_id": "evt-rf-018",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 138200,
       "t_wall": "2026-04-07T15:47:18.200Z",
@@ -456,6 +475,7 @@
     },
     {
       "event_id": "evt-rf-019",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 180000,
       "t_wall": "2026-04-07T15:48:00.000Z",
@@ -485,6 +505,7 @@
     },
     {
       "event_id": "evt-rf-020",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 182500,
       "t_wall": "2026-04-07T15:48:02.500Z",
@@ -507,6 +528,7 @@
     },
     {
       "event_id": "evt-rf-021",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 240000,
       "t_wall": "2026-04-07T15:49:00.000Z",
@@ -536,6 +558,7 @@
     },
     {
       "event_id": "evt-rf-022",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 242800,
       "t_wall": "2026-04-07T15:49:02.800Z",
@@ -558,6 +581,7 @@
     },
     {
       "event_id": "evt-rf-023",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 300000,
       "t_wall": "2026-04-07T15:50:00.000Z",
@@ -587,6 +611,7 @@
     },
     {
       "event_id": "evt-rf-024",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 340000,
       "t_wall": "2026-04-07T15:50:40.000Z",
@@ -616,6 +641,7 @@
     },
     {
       "event_id": "evt-rf-025",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 342000,
       "t_wall": "2026-04-07T15:50:42.000Z",
@@ -638,6 +664,7 @@
     },
     {
       "event_id": "evt-rf-026",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 420000,
       "t_wall": "2026-04-07T15:52:00.000Z",
@@ -660,6 +687,7 @@
     },
     {
       "event_id": "evt-rf-027",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 432000,
       "t_wall": "2026-04-07T15:52:12.000Z",
@@ -689,6 +717,7 @@
     },
     {
       "event_id": "evt-rf-028",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 440000,
       "t_wall": "2026-04-07T15:52:20.000Z",
@@ -718,6 +747,7 @@
     },
     {
       "event_id": "evt-rf-029",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 690000,
       "t_wall": "2026-04-07T15:56:30.000Z",
@@ -747,6 +777,7 @@
     },
     {
       "event_id": "evt-rf-030",
+      "schema_version": "1.0.0",
       "session_id": "ses-refund-20260407-001",
       "t_ms": 708000,
       "t_wall": "2026-04-07T15:56:48.000Z",
@@ -784,7 +815,11 @@
       "status": "finalized",
       "grouping_reason": "single_action",
       "confidence": 0.75,
-      "source_event_ids": ["evt-rf-001", "evt-rf-002", "evt-rf-003"],
+      "source_event_ids": [
+        "evt-rf-001",
+        "evt-rf-002",
+        "evt-rf-003"
+      ],
       "start_t_ms": 0,
       "end_t_ms": 4500,
       "duration_ms": 4500,
@@ -803,7 +838,10 @@
       "status": "finalized",
       "grouping_reason": "click_then_navigate",
       "confidence": 0.85,
-      "source_event_ids": ["evt-rf-004", "evt-rf-005"],
+      "source_event_ids": [
+        "evt-rf-004",
+        "evt-rf-005"
+      ],
       "start_t_ms": 18000,
       "end_t_ms": 20300,
       "duration_ms": 2300,
@@ -822,7 +860,10 @@
       "status": "finalized",
       "grouping_reason": "click_then_navigate",
       "confidence": 0.85,
-      "source_event_ids": ["evt-rf-006", "evt-rf-007"],
+      "source_event_ids": [
+        "evt-rf-006",
+        "evt-rf-007"
+      ],
       "start_t_ms": 55000,
       "end_t_ms": 57200,
       "duration_ms": 2200,
@@ -841,7 +882,14 @@
       "status": "finalized",
       "grouping_reason": "error_handling",
       "confidence": 0.8,
-      "source_event_ids": ["evt-rf-008", "evt-rf-009", "evt-rf-010", "evt-rf-011", "evt-rf-012", "evt-rf-013"],
+      "source_event_ids": [
+        "evt-rf-008",
+        "evt-rf-009",
+        "evt-rf-010",
+        "evt-rf-011",
+        "evt-rf-012",
+        "evt-rf-013"
+      ],
       "start_t_ms": 68000,
       "end_t_ms": 90200,
       "duration_ms": 22200,
@@ -860,7 +908,13 @@
       "status": "finalized",
       "grouping_reason": "fill_and_submit",
       "confidence": 0.9,
-      "source_event_ids": ["evt-rf-014", "evt-rf-015", "evt-rf-016", "evt-rf-017", "evt-rf-018"],
+      "source_event_ids": [
+        "evt-rf-014",
+        "evt-rf-015",
+        "evt-rf-016",
+        "evt-rf-017",
+        "evt-rf-018"
+      ],
       "start_t_ms": 120000,
       "end_t_ms": 138200,
       "duration_ms": 18200,
@@ -879,7 +933,10 @@
       "status": "finalized",
       "grouping_reason": "click_then_navigate",
       "confidence": 0.85,
-      "source_event_ids": ["evt-rf-019", "evt-rf-020"],
+      "source_event_ids": [
+        "evt-rf-019",
+        "evt-rf-020"
+      ],
       "start_t_ms": 180000,
       "end_t_ms": 182500,
       "duration_ms": 2500,
@@ -898,7 +955,13 @@
       "status": "finalized",
       "grouping_reason": "fill_and_submit",
       "confidence": 0.9,
-      "source_event_ids": ["evt-rf-021", "evt-rf-022", "evt-rf-023", "evt-rf-024", "evt-rf-025"],
+      "source_event_ids": [
+        "evt-rf-021",
+        "evt-rf-022",
+        "evt-rf-023",
+        "evt-rf-024",
+        "evt-rf-025"
+      ],
       "start_t_ms": 240000,
       "end_t_ms": 342000,
       "duration_ms": 102000,
@@ -917,7 +980,12 @@
       "status": "finalized",
       "grouping_reason": "data_entry",
       "confidence": 0.9,
-      "source_event_ids": ["evt-rf-026", "evt-rf-027", "evt-rf-028", "evt-rf-029"],
+      "source_event_ids": [
+        "evt-rf-026",
+        "evt-rf-027",
+        "evt-rf-028",
+        "evt-rf-029"
+      ],
       "start_t_ms": 420000,
       "end_t_ms": 690000,
       "duration_ms": 270000,
@@ -936,7 +1004,9 @@
       "status": "finalized",
       "grouping_reason": "send_action",
       "confidence": 0.75,
-      "source_event_ids": ["evt-rf-030"],
+      "source_event_ids": [
+        "evt-rf-030"
+      ],
       "start_t_ms": 708000,
       "end_t_ms": 708000,
       "duration_ms": 0,
@@ -956,6 +1026,11 @@
     "recorderVersion": "0.1.0",
     "segmentationRuleVersion": "1.1.0",
     "rendererVersion": "0.1.0",
-    "fileHashes": {}
+    "fileHashes": {
+      "session.json": "e2996a6e88a7a3e06becbd986aeaa284f8944b8aaf08ebfe1bc9d0de8a3c04d8",
+      "normalized_events.json": "7b90f19867c1658b7cd1fc80f8c280b0898561c3720c430875a338c7594d4737",
+      "derived_steps.json": "21634c30d64feadf24e764ac49b60de40e7bbc4f4ecba4d191cffc83bf314aa4",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
   }
 }

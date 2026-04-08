@@ -857,6 +857,11 @@
     "recorderVersion": "0.1.0",
     "segmentationRuleVersion": "1.1.0",
     "rendererVersion": "0.1.0",
-    "fileHashes": {}
+    "fileHashes": {
+      "session.json": "aa34c7d03e0f16c784c2b053b3926f49e629bbde50de85e264d7beaeaeb25004",
+      "normalized_events.json": "b65b89d56292a97080ff4868d4ec9d7a966a1f1910782ee87e9e4325cd13cd79",
+      "derived_steps.json": "3fa49ace22b75a32549b21c25285cfed37132fed978707f593d214c5b97f144d",
+      "policy_log.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
   }
 }
