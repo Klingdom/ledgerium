@@ -48,19 +48,13 @@ if ((window as any)[GUARD_KEY]) {
     }
   })
 
-  // ─── Self-recovery: query background for current state ──────────────────────
-  // If injected into a tab that's already in a recording session, start capture.
-  chrome.runtime.sendMessage(
-    { type: MSG.GET_STATE, payload: {} },
-    (response: { state: string; meta?: { sessionId: string } } | undefined) => {
-      if (chrome.runtime.lastError) {
-        console.debug('[LDG-CS] GET_STATE error:', chrome.runtime.lastError.message)
-        return
-      }
-      if (response?.state === 'recording' && response?.meta?.sessionId) {
-        console.log('[LDG-CS] Joining active session:', response.meta.sessionId)
-        engine.startCapture(response.meta.sessionId)
-      }
-    },
-  )
+  // ─── Self-recovery: only join if this is the active tab ─────────────────────
+  // v2 trust model: Content scripts load on every page (via manifest), but
+  // capture should ONLY activate on the tab the user is currently viewing.
+  // The background will send START_SESSION explicitly when the user visits
+  // this tab. We do NOT auto-join from every tab on load.
+  //
+  // Exception: if this script was programmatically injected by the background
+  // (which only happens for the active tab), it will receive START_SESSION
+  // immediately after injection via the background's message send.
 }

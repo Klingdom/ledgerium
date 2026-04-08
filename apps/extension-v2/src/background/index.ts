@@ -1,4 +1,4 @@
-import { ensureAllTabsInjected, onTabLoadDuringRecording, onTabActivatedDuringRecording, clearInjectionState } from './injection-manager.js'
+import { injectIntoTab, onTabActivatedDuringRecording, clearInjectionState } from './injection-manager.js'
 import { RecorderStateMachine } from './state-machine.js'
 import { SessionStore } from './session-store.js'
 import { HistoryStore } from './history-store.js'
@@ -102,10 +102,14 @@ async function restoreStateIfNeeded(): Promise<void> {
   // Re-broadcast recording state so the sidepanel reflects reality
   broadcastStateUpdate()
 
-  // Re-send START_SESSION to all tabs so content scripts resume capturing
-  broadcastAllTabs({
-    type: MSG.START_SESSION,
-    payload: { sessionId: persisted.sessionId },
+  // v2 trust model: Only re-activate capture on the currently active tab
+  chrome.tabs.query({ active: true, lastFocusedWindow: true }, ([activeTab]) => {
+    if (activeTab?.id) {
+      chrome.tabs.sendMessage(activeTab.id, {
+        type: MSG.START_SESSION,
+        payload: { sessionId: persisted.sessionId },
+      }).catch(() => { /* content script may not be present */ })
+    }
   })
 }
 
@@ -170,16 +174,19 @@ async function handleStart(activityName: string, uploadUrl?: string): Promise<vo
       broadcastToExtension({ type: MSG.LIVE_STEP_UPDATED, payload: { step } })
     })
 
-    // v2: Ensure content scripts are present on all tabs.
-    // Manifest injection handles new page loads; programmatic injection
-    // handles tabs that were already open before the extension loaded.
-    await ensureAllTabsInjected()
-
-    // Notify ALL tabs — content scripts are now present and ready
-    broadcastAllTabs({
-      type: MSG.START_SESSION,
-      payload: { sessionId: meta.sessionId },
-    })
+    // v2 trust model: Only capture on the tab the user is currently viewing.
+    // We do NOT inject or activate capture on all tabs — that would break trust.
+    // Capture activates when the user clicks into a tab (onActivated) or
+    // navigates within the active tab (onUpdated).
+    const [activeTab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true })
+    if (activeTab?.id) {
+      await injectIntoTab(activeTab.id)
+      chrome.tabs.sendMessage(activeTab.id, {
+        type: MSG.START_SESSION,
+        payload: { sessionId: meta.sessionId },
+      }).catch(() => { /* content script may not be ready yet */ })
+      console.log(`[LDG-BG] Recording started on active tab ${activeTab.id}: ${activeTab.url}`)
+    }
 
     sm.transition('recording')
     store.updateState('recording')
@@ -383,38 +390,41 @@ chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<s
 
 // ─── Tab lifecycle listeners ───────────────────────────────────────────────────
 
-// v2: When a tab finishes loading during recording, inject the content script
-// and then send START_SESSION. This handles new tabs and navigations.
+// v2 trust model: Only capture on tabs the user actively visits.
+// When a tab finishes loading during recording, only activate if it's
+// the active tab in its window (user navigated within the active tab).
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status !== 'complete') return
   if (sm.state !== 'recording') return
+  if (!tab.active) return  // Only the active tab — never background tabs
   const sessionId = store.getMeta()?.sessionId
   if (!sessionId) return
+  if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) return
 
-  // Inject content script (idempotent — safe if already injected)
-  await onTabLoadDuringRecording(tabId, tab.url)
-
-  // Then tell it to start capturing
+  await injectIntoTab(tabId)
   chrome.tabs.sendMessage(tabId, {
     type: MSG.START_SESSION,
     payload: { sessionId },
   }).catch(() => { /* content script may not have loaded yet */ })
+  console.log(`[LDG-BG] Activated capture on tab load: ${tabId} (${tab.url})`)
 })
 
-// v2: When the user switches to a tab during recording, inject if needed
-// and start capture. Ensures pre-existing tabs get scripts on first visit.
+// When user switches to a different tab during recording, activate capture
+// on that tab. This is the core "follow the user" behavior.
 chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   if (sm.state !== 'recording') return
   const sessionId = store.getMeta()?.sessionId
   if (!sessionId) return
 
-  // Inject content script (no-op if already injected)
-  await onTabActivatedDuringRecording(tabId)
+  const tab = await chrome.tabs.get(tabId).catch(() => null)
+  if (!tab?.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) return
 
+  await onTabActivatedDuringRecording(tabId)
   chrome.tabs.sendMessage(tabId, {
     type: MSG.START_SESSION,
     payload: { sessionId },
   }).catch(() => { /* content script may not be present */ })
+  console.log(`[LDG-BG] Activated capture on tab switch: ${tabId} (${tab.url})`)
 })
 
 // ─── Initialisation ───────────────────────────────────────────────────────────
