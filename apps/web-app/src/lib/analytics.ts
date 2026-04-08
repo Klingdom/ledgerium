@@ -71,6 +71,10 @@ export type AnalyticsEvent =
   | { event: 'tag_removed'; workflowId: string; tagId: string }
   | { event: 'tag_filter_applied'; tagId: string }
 
+  // ── Process groups & analysis ─────────────────────────────────────────────
+  | { event: 'view_mode_changed'; mode: string }
+  | { event: 'process_analysis_triggered' }
+
   // ── Conversion & billing ──────────────────────────────────────────────────
   | { event: 'upgrade_prompt_viewed'; location: string; plan: string }
   | { event: 'upgrade_clicked'; location: string }

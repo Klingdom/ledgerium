@@ -34,6 +34,9 @@ import {
   ChevronDown,
   Filter,
   ArrowRight,
+  GitBranch,
+  Boxes,
+  RefreshCw,
 } from 'lucide-react';
 import { formatDuration, formatDateRelative, formatConfidence } from '@/lib/format';
 import { track } from '@/lib/analytics';
@@ -53,6 +56,40 @@ interface ProcessDefinitionSummary {
   runCount: number;
   stabilityScore: number | null;
   confidenceScore: number | null;
+}
+
+type ViewMode = 'workflows' | 'process_groups';
+
+interface ProcessDefinitionWorkflow {
+  id: string;
+  title: string;
+  durationMs: number;
+  stepCount: number;
+  createdAt: string;
+}
+
+interface ProcessDefinitionInsight {
+  id: string;
+  insightType: string;
+  severity: 'info' | 'warning' | 'critical';
+  title: string;
+}
+
+interface ProcessDefinition {
+  id: string;
+  canonicalName: string;
+  description: string | null;
+  pathSignature: string;
+  runCount: number;
+  variantCount: number;
+  avgDurationMs: number;
+  medianDurationMs: number;
+  stabilityScore: number | null;
+  confidenceScore: number | null;
+  analyzedAt: string;
+  workflows: ProcessDefinitionWorkflow[];
+  insights: ProcessDefinitionInsight[];
+  intelligence: Record<string, unknown> | null;
 }
 
 type HealthStatus = 'healthy' | 'needs_review' | 'high_variation' | 'stale' | 'new';
@@ -239,6 +276,12 @@ export default function DashboardPage() {
   // Sample workflow loading
   const [loadingSample, setLoadingSample] = useState(false);
 
+  // View mode toggle
+  const [viewMode, setViewMode] = useState<ViewMode>('workflows');
+  const [processDefinitions, setProcessDefinitions] = useState<ProcessDefinition[]>([]);
+  const [isLoadingProcessGroups, setIsLoadingProcessGroups] = useState(false);
+  const [isRunningAnalysis, setIsRunningAnalysis] = useState(false);
+
   // ── Data fetching ──────────────────────────────────────────────────────────
 
   const fetchWorkflows = useCallback(async () => {
@@ -286,12 +329,46 @@ export default function DashboardPage() {
     }
   }, []);
 
+  const fetchProcessDefinitions = useCallback(async () => {
+    setIsLoadingProcessGroups(true);
+    try {
+      const res = await fetch('/api/process-definitions');
+      if (res.ok) {
+        const data = await res.json();
+        setProcessDefinitions(data.definitions ?? []);
+      }
+    } catch {
+      // Endpoint may not exist yet — fail silently
+    }
+    setIsLoadingProcessGroups(false);
+  }, []);
+
+  async function handleRunAnalysis() {
+    setIsRunningAnalysis(true);
+    track({ event: 'process_analysis_triggered' });
+    try {
+      const res = await fetch('/api/analytics', { method: 'POST' });
+      if (res.ok) {
+        await fetchProcessDefinitions();
+      }
+    } catch {
+      // Silently fail
+    }
+    setIsRunningAnalysis(false);
+  }
+
   useEffect(() => {
     fetchWorkflows();
     fetchTags();
     fetchStreak();
     track({ event: 'page_viewed', path: '/dashboard' });
   }, [fetchWorkflows, fetchTags, fetchStreak]);
+
+  useEffect(() => {
+    if (viewMode === 'process_groups') {
+      fetchProcessDefinitions();
+    }
+  }, [viewMode, fetchProcessDefinitions]);
 
   // ── Tag management handlers ────────────────────────────────────────────────
 
@@ -635,9 +712,45 @@ export default function DashboardPage() {
       )}
 
       {/* ═══════════════════════════════════════════════════════════════════
+          VIEW MODE TOGGLE
+          ═══════════════════════════════════════════════════════════════════ */}
+      <div className="flex items-center gap-1 mb-ds-4 p-1 bg-gray-100 rounded-ds-md w-fit">
+        <button
+          onClick={() => {
+            setViewMode('workflows');
+            track({ event: 'view_mode_changed', mode: 'workflows' });
+          }}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-ds-sm text-ds-sm font-medium transition-colors ${
+            viewMode === 'workflows'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <Layers className="h-4 w-4" />
+          Workflows
+        </button>
+        <button
+          onClick={() => {
+            setViewMode('process_groups');
+            track({ event: 'view_mode_changed', mode: 'process_groups' });
+          }}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-ds-sm text-ds-sm font-medium transition-colors ${
+            viewMode === 'process_groups'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <Boxes className="h-4 w-4" />
+          Process Groups
+        </button>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════════════
           LAYER 4 — Rich Workflow Library
           ═══════════════════════════════════════════════════════════════════ */}
 
+      {viewMode === 'workflows' && (
+      <>
       {/* ── Section Header ────────────────────────────────────────────── */}
       <div className="ds-section mb-ds-4">
         <h2 className="ds-section-label text-ds-lg font-semibold text-gray-900">
@@ -853,6 +966,20 @@ export default function DashboardPage() {
             ))}
           </div>
         </>
+      )}
+      </>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          LAYER 4B — Process Groups View
+          ═══════════════════════════════════════════════════════════════════ */}
+      {viewMode === 'process_groups' && (
+        <ProcessGroupsView
+          definitions={processDefinitions}
+          isLoading={isLoadingProcessGroups}
+          isRunningAnalysis={isRunningAnalysis}
+          onRunAnalysis={handleRunAnalysis}
+        />
       )}
     </div>
   );
@@ -1452,6 +1579,218 @@ function EmptyDashboard({
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Process Groups View ───────────────────────────────────────────────────────
+
+function ProcessGroupsView({
+  definitions,
+  isLoading,
+  isRunningAnalysis,
+  onRunAnalysis,
+}: {
+  definitions: ProcessDefinition[];
+  isLoading: boolean;
+  isRunningAnalysis: boolean;
+  onRunAnalysis: () => void;
+}) {
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="text-ds-sm text-gray-400">Loading process groups...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* Section Header */}
+      <div className="flex items-center justify-between mb-ds-4">
+        <div className="ds-section">
+          <h2 className="ds-section-label text-ds-lg font-semibold text-gray-900">
+            Process Groups
+          </h2>
+          <p className="text-ds-xs text-gray-500">
+            {definitions.length} process group{definitions.length !== 1 ? 's' : ''} detected
+          </p>
+        </div>
+        <button
+          onClick={onRunAnalysis}
+          disabled={isRunningAnalysis}
+          className="btn-secondary gap-1.5"
+        >
+          <RefreshCw className={`h-4 w-4 ${isRunningAnalysis ? 'animate-spin' : ''}`} />
+          {isRunningAnalysis ? 'Analyzing...' : 'Run Analysis'}
+        </button>
+      </div>
+
+      {/* Empty state */}
+      {definitions.length === 0 && (
+        <div className="card p-12 text-center">
+          <Boxes className="mx-auto h-10 w-10 text-gray-300" />
+          <h3 className="mt-3 text-ds-sm font-medium text-gray-900">
+            No process groups detected yet
+          </h3>
+          <p className="mt-1 text-ds-sm text-gray-500 max-w-md mx-auto">
+            Upload more workflows or click &quot;Run Analysis&quot; to detect recurring processes.
+          </p>
+          <button
+            onClick={onRunAnalysis}
+            disabled={isRunningAnalysis}
+            className="btn-primary mt-4 gap-1.5"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRunningAnalysis ? 'animate-spin' : ''}`} />
+            {isRunningAnalysis ? 'Analyzing...' : 'Run Analysis'}
+          </button>
+        </div>
+      )}
+
+      {/* Process Group Cards */}
+      {definitions.length > 0 && (
+        <div className="space-y-2">
+          {definitions.map((def) => (
+            <ProcessGroupCard key={def.id} definition={def} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Process Group Card ───────────────────────────────────────────────────────
+
+function ProcessGroupCard({ definition: def }: { definition: ProcessDefinition }) {
+  const stabilityColor =
+    def.stabilityScore === null
+      ? 'bg-gray-300'
+      : def.stabilityScore >= 0.8
+        ? 'bg-emerald-500'
+        : def.stabilityScore >= 0.6
+          ? 'bg-amber-500'
+          : 'bg-red-500';
+
+  const stabilityLabel =
+    def.stabilityScore === null
+      ? 'N/A'
+      : def.stabilityScore >= 0.8
+        ? 'Stable'
+        : def.stabilityScore >= 0.6
+          ? 'Moderate'
+          : 'Unstable';
+
+  const warningCount = def.insights.filter((i) => i.severity === 'warning').length;
+  const criticalCount = def.insights.filter((i) => i.severity === 'critical').length;
+
+  const lastRunDate =
+    def.workflows.length > 0
+      ? def.workflows.reduce((latest, w) =>
+          new Date(w.createdAt) > new Date(latest.createdAt) ? w : latest,
+        ).createdAt
+      : null;
+
+  const systemsUsed = Array.from(
+    new Set(
+      def.pathSignature
+        .split(':')
+        .filter((s) => s.length > 0),
+    ),
+  );
+
+  return (
+    <Link
+      href={`/analytics/process/${def.id}`}
+      className="card hover:border-gray-300 transition-colors group block"
+    >
+      <div className="px-ds-5 py-ds-4">
+        {/* Top row: name + badges */}
+        <div className="flex items-start justify-between gap-ds-4 mb-ds-3">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-ds-sm font-semibold text-gray-900 group-hover:text-brand-600 transition-colors truncate">
+              {def.canonicalName}
+            </h3>
+            {def.description && (
+              <p className="text-ds-xs text-gray-500 mt-0.5 line-clamp-1">{def.description}</p>
+            )}
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Stability indicator */}
+            <div className="flex items-center gap-1.5">
+              <span className={`h-2 w-2 rounded-full ${stabilityColor}`} />
+              <span className="text-ds-xs text-gray-500">{stabilityLabel}</span>
+            </div>
+            <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-gray-400" />
+          </div>
+        </div>
+
+        {/* Metrics row */}
+        <div className="flex flex-wrap items-center gap-ds-4 text-ds-xs">
+          {/* Run count */}
+          <span className="ds-tag ds-tag-brand">
+            {def.runCount} run{def.runCount !== 1 ? 's' : ''}
+          </span>
+
+          {/* Variant count */}
+          <span className="flex items-center gap-1 text-gray-600">
+            <GitBranch className="h-3.5 w-3.5" />
+            {def.variantCount} variant{def.variantCount !== 1 ? 's' : ''}
+          </span>
+
+          {/* Avg duration */}
+          <span className="flex items-center gap-1 text-gray-600">
+            <Clock className="h-3.5 w-3.5" />
+            {formatDuration(def.avgDurationMs)}
+          </span>
+
+          {/* Confidence */}
+          {def.confidenceScore !== null && (
+            <span className={`flex items-center gap-1 ${confidenceColorClass(def.confidenceScore)}`}>
+              <Target className="h-3.5 w-3.5" />
+              {formatConfidence(def.confidenceScore)}
+            </span>
+          )}
+
+          {/* Insights */}
+          {(criticalCount > 0 || warningCount > 0) && (
+            <span className="flex items-center gap-1.5">
+              {criticalCount > 0 && (
+                <span className="flex items-center gap-0.5 text-red-600">
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                  {criticalCount}
+                </span>
+              )}
+              {warningCount > 0 && (
+                <span className="flex items-center gap-0.5 text-amber-600">
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                  {warningCount}
+                </span>
+              )}
+            </span>
+          )}
+
+          {/* Path signature chips */}
+          {systemsUsed.length > 0 && (
+            <div className="flex items-center gap-1">
+              {systemsUsed.slice(0, 3).map((sys) => (
+                <span key={sys} className="ds-tag ds-tag-neutral text-[10px]">
+                  {sys}
+                </span>
+              ))}
+              {systemsUsed.length > 3 && (
+                <span className="text-[10px] text-gray-400">+{systemsUsed.length - 3}</span>
+              )}
+            </div>
+          )}
+
+          {/* Last run */}
+          {lastRunDate && (
+            <span className="text-gray-400 ml-auto">
+              Last run {formatDateRelative(lastRunDate)}
+            </span>
+          )}
+        </div>
+      </div>
+    </Link>
   );
 }
 
