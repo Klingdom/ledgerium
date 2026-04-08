@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
-import { validateBundle, runProcessEngine, buildWorkflowReportFromOutput } from '@/lib/ingestion';
+import { validateBundle, runProcessEngine, buildWorkflowReportFromOutput, renderAllTemplates } from '@/lib/ingestion';
 import { analyzeWorkflowInsights } from '@ledgerium/process-engine';
 import { trackServer } from '@/lib/analytics';
 import { clusterWorkflows } from '@/lib/intelligence';
@@ -110,9 +110,10 @@ export async function POST(req: NextRequest) {
       }, { status: 422 });
     }
 
-    // Build workflow report + insights
+    // Build workflow report + insights + templates
     const workflowReport = buildWorkflowReportFromOutput(processOutput, bundle);
     const workflowInsights = analyzeWorkflowInsights(processOutput);
+    const templateArtifacts = renderAllTemplates(processOutput);
 
     // Extract metadata
     const { processRun, processMap, processDefinition } = processOutput;
@@ -168,6 +169,12 @@ export async function POST(req: NextRequest) {
                 schemaVersion: '1.0.0',
                 contentJson: JSON.stringify(workflowInsights),
               },
+              // Template artifacts (6 templates + selection)
+              ...templateArtifacts.map((ta) => ({
+                artifactType: ta.artifactType,
+                schemaVersion: '1.0.0',
+                contentJson: ta.contentJson,
+              })),
             ],
           },
         },

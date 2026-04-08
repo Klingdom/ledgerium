@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { hashKey } from '@/lib/api-keys';
-import { validateBundle, runProcessEngine, buildWorkflowReportFromOutput } from '@/lib/ingestion';
+import { validateBundle, runProcessEngine, buildWorkflowReportFromOutput, renderAllTemplates } from '@/lib/ingestion';
 import { clusterWorkflows } from '@/lib/intelligence';
 import { UPLOAD_DIR } from '@/lib/storage';
 import fs from 'fs';
@@ -128,8 +128,9 @@ export async function POST(req: NextRequest) {
     }, { status: 422 });
   }
 
-  // ── Build report and store workflow ────────────────────────────────────────
+  // ── Build report, templates, and store workflow ────────────────────────────
   const workflowReport = buildWorkflowReportFromOutput(processOutput, bundle);
+  const templateArtifacts = renderAllTemplates(processOutput);
   const { processRun, processMap, processDefinition } = processOutput;
   const toolsUsed = processRun.systemsUsed;
   const confidence = processDefinition.stepDefinitions.length > 0
@@ -177,6 +178,12 @@ export async function POST(req: NextRequest) {
               schemaVersion: processMap.version,
               contentJson: JSON.stringify(processMap),
             },
+            // Template artifacts (6 templates + selection)
+            ...templateArtifacts.map((ta) => ({
+              artifactType: ta.artifactType,
+              schemaVersion: '1.0.0',
+              contentJson: ta.contentJson,
+            })),
           ],
         },
       },

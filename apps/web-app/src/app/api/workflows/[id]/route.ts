@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import crypto from 'crypto';
+import { renderAllTemplates } from '@/lib/ingestion';
 
 export async function GET(
   _req: NextRequest,
@@ -22,22 +23,51 @@ export async function GET(
   }
 
   // Track view — fire-and-forget for performance
-  // viewCount and lastViewedAt are new schema fields; cast to avoid
-  // Prisma client type mismatch until next prisma generate
   db.workflow.update({
     where: { id: params.id },
     data: {
       viewCount: { increment: 1 },
       lastViewedAt: new Date(),
-    } as any,
+    },
   }).catch(() => { /* non-critical */ });
+
+  // Lazy template backfill — generate templates for older workflows that lack them
+  let artifacts = workflow.artifacts;
+  const hasTemplates = artifacts.some((a) => a.artifactType === 'template_selection');
+  if (!hasTemplates) {
+    const processOutputArtifact = artifacts.find((a) => a.artifactType === 'process_output');
+    if (processOutputArtifact?.contentJson) {
+      try {
+        const processOutput = JSON.parse(processOutputArtifact.contentJson);
+        const templateArtifacts = renderAllTemplates(processOutput);
+        if (templateArtifacts.length > 0) {
+          await db.workflowArtifact.createMany({
+            data: templateArtifacts.map((ta) => ({
+              workflowId: params.id,
+              artifactType: ta.artifactType,
+              schemaVersion: '1.0.0',
+              contentJson: ta.contentJson,
+            })),
+          });
+          // Re-fetch artifacts to include the newly generated templates
+          const updated = await db.workflow.findFirst({
+            where: { id: params.id },
+            include: { artifacts: true },
+          });
+          if (updated) artifacts = updated.artifacts;
+        }
+      } catch (err) {
+        console.error('Template backfill failed (non-blocking):', err);
+      }
+    }
+  }
 
   return NextResponse.json({
     workflow: {
       ...workflow,
       toolsUsed: workflow.toolsUsed ? JSON.parse(workflow.toolsUsed) : [],
     },
-    artifacts: workflow.artifacts.map((a) => ({
+    artifacts: artifacts.map((a) => ({
       id: a.id,
       artifactType: a.artifactType,
       schemaVersion: a.schemaVersion,

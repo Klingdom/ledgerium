@@ -126,6 +126,19 @@ export default function WorkflowDetailPage() {
   const processMap = artifacts.find((a: any) => a.artifactType === 'process_map')?.contentJson;
   const workflowInsights = artifacts.find((a: any) => a.artifactType === 'workflow_insights')?.contentJson;
 
+  // Template artifacts
+  const templateSelection = artifacts.find((a: any) => a.artifactType === 'template_selection')?.contentJson;
+  const processMapTemplates = {
+    swimlane: artifacts.find((a: any) => a.artifactType === 'template_process_map_swimlane')?.contentJson,
+    bpmn_informed: artifacts.find((a: any) => a.artifactType === 'template_process_map_bpmn_informed')?.contentJson,
+    sipoc_high_level: artifacts.find((a: any) => a.artifactType === 'template_process_map_sipoc_high_level')?.contentJson,
+  };
+  const sopTemplates = {
+    operator_centric: artifacts.find((a: any) => a.artifactType === 'template_sop_operator_centric')?.contentJson,
+    enterprise: artifacts.find((a: any) => a.artifactType === 'template_sop_enterprise')?.contentJson,
+    decision_based: artifacts.find((a: any) => a.artifactType === 'template_sop_decision_based')?.contentJson,
+  };
+
   function handleExport(type: string) {
     let content: string;
     let filename: string;
@@ -265,8 +278,23 @@ export default function WorkflowDetailPage() {
       </div>
 
       {/* Tab content */}
-      {activeTab === 'workflow' && <WorkflowTab processOutput={processOutput} processMap={processMap} />}
-      {activeTab === 'sop' && <SOPTab sop={sopArtifact} />}
+      {activeTab === 'workflow' && (
+        <WorkflowTab
+          processOutput={processOutput}
+          processMap={processMap}
+          templateArtifacts={processMapTemplates}
+          defaultTemplate={templateSelection?.processMap?.template}
+          workflowId={id}
+        />
+      )}
+      {activeTab === 'sop' && (
+        <SOPTab
+          sop={sopArtifact}
+          templateArtifacts={sopTemplates}
+          defaultTemplate={templateSelection?.sop?.template}
+          workflowId={id}
+        />
+      )}
       {activeTab === 'report' && <ReportTab report={workflowReport} />}
       {activeTab === 'insights' && <InsightsPanel insights={workflowInsights} />}
       {activeTab === 'intelligence' && <IntelligenceTab workflowId={id} />}

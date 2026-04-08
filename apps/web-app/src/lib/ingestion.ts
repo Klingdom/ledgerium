@@ -6,8 +6,8 @@
  * All transformation is server-side, pure, and environment-agnostic.
  */
 
-import { processSession, validateProcessEngineInput } from '@ledgerium/process-engine';
-import type { ProcessEngineInput, ProcessOutput } from '@ledgerium/process-engine';
+import { processSession, validateProcessEngineInput, renderProcessMap, renderSOP, selectTemplates } from '@ledgerium/process-engine';
+import type { ProcessEngineInput, ProcessOutput, ProcessMapTemplateType, SOPTemplateType } from '@ledgerium/process-engine';
 import { z } from 'zod';
 
 // ─── Bundle validation schema ───────────────────────────────────────────────
@@ -98,6 +98,63 @@ export function runProcessEngine(bundle: z.infer<typeof bundleSchema>): ProcessO
   }
 
   return processSession(input);
+}
+
+// ─── Template artifact types ────────────────────────────────────────────────
+
+const PROCESS_MAP_TEMPLATES: ProcessMapTemplateType[] = ['swimlane', 'bpmn_informed', 'sipoc_high_level'];
+const SOP_TEMPLATES: SOPTemplateType[] = ['operator_centric', 'enterprise', 'decision_based'];
+
+export interface TemplateArtifact {
+  artifactType: string;
+  contentJson: string;
+}
+
+/**
+ * Renders all 6 template variants + selection metadata from a ProcessOutput.
+ * Each template is wrapped in try/catch so one failure doesn't block others.
+ */
+export function renderAllTemplates(output: ProcessOutput): TemplateArtifact[] {
+  const artifacts: TemplateArtifact[] = [];
+
+  // Auto-selection (for storing the recommended default)
+  try {
+    const selection = selectTemplates(output);
+    artifacts.push({
+      artifactType: 'template_selection',
+      contentJson: JSON.stringify(selection),
+    });
+  } catch (err) {
+    console.error('Template selection failed:', err);
+  }
+
+  // Process map templates
+  for (const template of PROCESS_MAP_TEMPLATES) {
+    try {
+      const rendered = renderProcessMap(output, template);
+      artifacts.push({
+        artifactType: `template_process_map_${template}`,
+        contentJson: JSON.stringify(rendered),
+      });
+    } catch (err) {
+      console.error(`Process map template "${template}" failed:`, err);
+    }
+  }
+
+  // SOP templates
+  for (const template of SOP_TEMPLATES) {
+    try {
+      const rendered = renderSOP(output, template);
+      artifacts.push({
+        artifactType: `template_sop_${template}`,
+        contentJson: JSON.stringify(rendered),
+      });
+    } catch (err) {
+      console.error(`SOP template "${template}" failed:`, err);
+    }
+  }
+
+  return artifacts;
 }
 
 /**
