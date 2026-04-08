@@ -147,6 +147,17 @@ function broadcastStateUpdate(): void {
     type: MSG.SESSION_STATE_UPDATED,
     payload: { state: sm.state, meta },
   })
+
+  // Update extension badge to show recording state
+  if (sm.state === 'recording') {
+    chrome.action.setBadgeText({ text: 'REC' }).catch(() => {})
+    chrome.action.setBadgeBackgroundColor({ color: '#2563EB' }).catch(() => {})
+  } else if (sm.state === 'paused') {
+    chrome.action.setBadgeText({ text: '❚❚' }).catch(() => {})
+    chrome.action.setBadgeBackgroundColor({ color: '#F59E0B' }).catch(() => {})
+  } else {
+    chrome.action.setBadgeText({ text: '' }).catch(() => {})
+  }
 }
 
 function broadcastAllTabs(message: unknown): void {

@@ -27,12 +27,20 @@ const LONG_DIGITS_RE = /\d{5,}/
 const MAX_LABEL_CHARS = 80
 const MAX_LABEL_WORDS = 12
 
+// Additional PII patterns to reject
+const PHONE_RE = /(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/
+const SSN_RE = /\d{3}-\d{2}-\d{4}/
+const CC_RE = /\b(?:\d{4}[-\s]?){3}\d{4}\b/
+
 function applySafetyHeuristics(raw: string): string | null {
   const text = raw.trim()
   if (!text) return null
   if (EMAIL_RE.test(text)) return null
   if (URL_RE.test(text)) return null
   if (LONG_DIGITS_RE.test(text.replace(/[\s\-]/g, ''))) return null
+  if (PHONE_RE.test(text)) return null
+  if (SSN_RE.test(text)) return null
+  if (CC_RE.test(text)) return null
   if (text.split(/\s+/).length >= MAX_LABEL_WORDS) return null
   return text.slice(0, MAX_LABEL_CHARS)
 }
@@ -91,9 +99,9 @@ export function extractLabel(el: Element): string {
     if (safe) return safe
   }
 
-  // 7. innerText for interactive leaf elements only
+  // 7. innerText for interactive leaf elements only (never contenteditable — could contain user text)
   const tag = el.tagName.toLowerCase()
-  if (tag === 'button' || tag === 'a') {
+  if ((tag === 'button' || tag === 'a') && !(el as HTMLElement).isContentEditable) {
     const text = (el as HTMLElement).innerText?.trim()
     if (text) {
       const safe = applySafetyHeuristics(text)

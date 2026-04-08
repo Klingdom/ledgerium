@@ -11,8 +11,9 @@ export async function uploadBundle(
   onProgress: (percent: number) => void,
   apiKey?: string,
 ): Promise<UploadResult> {
-  if (!uploadUrl || !uploadUrl.startsWith('http')) {
-    return { success: false, error: 'No valid upload URL configured' }
+  // Security: enforce HTTPS to prevent API key and workflow data from being sent in clear text
+  if (!uploadUrl || !uploadUrl.startsWith('https://')) {
+    return { success: false, error: 'Upload URL must use HTTPS' }
   }
 
   const controller = new AbortController()
@@ -45,7 +46,7 @@ export async function uploadBundle(
       let detail = response.statusText
       try {
         const errBody = await response.json()
-        if (errBody.error) detail = errBody.error
+        if (typeof errBody.error === 'string') detail = errBody.error.slice(0, 200)
       } catch { /* ignore parse failure */ }
       return { success: false, error: `HTTP ${response.status}: ${detail}` }
     }

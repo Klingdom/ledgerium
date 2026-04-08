@@ -14,12 +14,19 @@ const STRIP_PARAMS = new Set([
   'fbclid', 'gclid', '_ga', 'ref', 'source',
 ])
 
+// Security: strip query params that could contain credentials or PII
+const SENSITIVE_PARAM_RE = /^(token|api[_-]?key|secret|password|passwd|auth|session[_-]?id|x[_-]?api|bearer|access[_-]?token|refresh[_-]?token|code|nonce|state|ticket|credential)/i
+
 export function normalizeUrl(rawUrl: string): string {
   try {
     const u = new URL(rawUrl)
     for (const key of [...u.searchParams.keys()]) {
-      if (STRIP_PARAMS.has(key)) u.searchParams.delete(key)
+      if (STRIP_PARAMS.has(key) || SENSITIVE_PARAM_RE.test(key)) {
+        u.searchParams.delete(key)
+      }
     }
+    // Strip fragment (could contain tokens in OAuth flows)
+    u.hash = ''
     return u.toString()
   } catch {
     return rawUrl

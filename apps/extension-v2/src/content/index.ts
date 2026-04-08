@@ -14,16 +14,26 @@ import { MSG } from '../shared/types.js'
 
 const GUARD_KEY = '__ledgerium_capture_engine_v2__';
 
-if ((window as any)[GUARD_KEY]) {
-  console.debug('[LDG-CS] Already injected, skipping duplicate initialization')
+if ((window as Record<string, unknown>)[GUARD_KEY] === true) {
+  // Already initialized — skip
 } else {
-  (window as any)[GUARD_KEY] = true;
+  // Non-enumerable, non-configurable guard to prevent page-side spoofing
+  try {
+    Object.defineProperty(window, GUARD_KEY, {
+      value: true, writable: false, configurable: false, enumerable: false,
+    });
+  } catch {
+    // Property already defined (shouldn't happen, but safety)
+  }
 
   console.log('[LDG-CS] Content script loaded on', location.href)
   const engine = new CaptureEngine()
 
   // ─── Message listener (receives START/PAUSE/STOP from background) ──────────
-  chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<string, unknown> }, _sender, sendResponse) => {
+  chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<string, unknown> }, sender, sendResponse) => {
+    // Security: only accept messages from our own extension
+    if (sender.id !== chrome.runtime.id) return false
+
     // PING handler — allows injection manager to detect this script is present
     if (message.type === 'PING') {
       sendResponse({ ok: true })
