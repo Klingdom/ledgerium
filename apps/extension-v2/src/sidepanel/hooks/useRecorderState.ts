@@ -71,7 +71,7 @@ export function useRecorderState() {
           }
         })
       })
-    }, 750)
+    }, 400)
     return () => clearInterval(id)
   }, [data.state, data.meta?.sessionId])
 
