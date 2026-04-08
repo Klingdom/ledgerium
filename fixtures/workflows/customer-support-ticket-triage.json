@@ -1,0 +1,712 @@
+{
+  "sessionJson": {
+    "sessionId": "ses-triage-20260407-001",
+    "activityName": "Triage Support Ticket #ZD-19472",
+    "startedAt": "2026-04-07T14:30:00.000Z",
+    "endedAt": "2026-04-07T14:37:18.000Z",
+    "state": "review_ready",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "evt-tr-001",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 0,
+      "t_wall": "2026-04-07T14:30:00.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-001",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/tickets/19472",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/tickets/:id",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/tickets/:id",
+        "pageTitle": "Ticket #19472 — Zendesk",
+        "applicationLabel": "Zendesk"
+      }
+    },
+    {
+      "event_id": "evt-tr-002",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 2400,
+      "t_wall": "2026-04-07T14:30:02.400Z",
+      "event_type": "system.loading_started",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-002",
+        "sourceEventType": "loading_started",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/tickets/19472",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/tickets/:id",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/tickets/:id",
+        "pageTitle": "Ticket #19472 — Zendesk",
+        "applicationLabel": "Zendesk"
+      }
+    },
+    {
+      "event_id": "evt-tr-003",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 4100,
+      "t_wall": "2026-04-07T14:30:04.100Z",
+      "event_type": "system.loading_finished",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-003",
+        "sourceEventType": "loading_finished",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/tickets/19472",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/tickets/:id",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/tickets/:id",
+        "pageTitle": "Ticket #19472 — Zendesk",
+        "applicationLabel": "Zendesk"
+      }
+    },
+    {
+      "event_id": "evt-tr-004",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 25000,
+      "t_wall": "2026-04-07T14:30:25.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-004",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/tickets/19472",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/tickets/:id",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/tickets/:id",
+        "pageTitle": "Ticket #19472 — Zendesk",
+        "applicationLabel": "Zendesk"
+      },
+      "target_summary": {
+        "selector": "a[data-test-id='requester-link']",
+        "label": "View requester: Sarah Chen",
+        "role": "link",
+        "elementType": "a",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-tr-005",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 27200,
+      "t_wall": "2026-04-07T14:30:27.200Z",
+      "event_type": "navigation.spa_route_changed",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-005",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/users/88341/requested_tickets",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/users/:id/requested_tickets",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/users/:id/requested_tickets",
+        "pageTitle": "Sarah Chen — Requested Tickets — Zendesk",
+        "applicationLabel": "Zendesk"
+      }
+    },
+    {
+      "event_id": "evt-tr-006",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 55000,
+      "t_wall": "2026-04-07T14:30:55.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-006",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/users/88341/requested_tickets",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/users/:id/requested_tickets",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/users/:id/requested_tickets",
+        "pageTitle": "Sarah Chen — Requested Tickets — Zendesk",
+        "applicationLabel": "Zendesk"
+      },
+      "target_summary": {
+        "selector": "a[data-test-id='crm-link']",
+        "label": "View in CRM",
+        "role": "link",
+        "elementType": "a",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-tr-007",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 58400,
+      "t_wall": "2026-04-07T14:30:58.400Z",
+      "event_type": "system.loading_started",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-007",
+        "sourceEventType": "loading_started",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/users/88341/requested_tickets",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/users/:id/requested_tickets",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/users/:id/requested_tickets",
+        "pageTitle": "Sarah Chen — Requested Tickets — Zendesk",
+        "applicationLabel": "Zendesk"
+      }
+    },
+    {
+      "event_id": "evt-tr-008",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 66200,
+      "t_wall": "2026-04-07T14:31:06.200Z",
+      "event_type": "system.error_displayed",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-008",
+        "sourceEventType": "error_displayed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/users/88341/requested_tickets",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/users/:id/requested_tickets",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/users/:id/requested_tickets",
+        "pageTitle": "Sarah Chen — Requested Tickets — Zendesk",
+        "applicationLabel": "Zendesk"
+      }
+    },
+    {
+      "event_id": "evt-tr-009",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 72000,
+      "t_wall": "2026-04-07T14:31:12.000Z",
+      "event_type": "system.loading_finished",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-009",
+        "sourceEventType": "loading_finished",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/users/88341/requested_tickets",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/users/:id/requested_tickets",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/users/:id/requested_tickets",
+        "pageTitle": "Sarah Chen — Requested Tickets — Zendesk",
+        "applicationLabel": "Zendesk"
+      }
+    },
+    {
+      "event_id": "evt-tr-010",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 78500,
+      "t_wall": "2026-04-07T14:31:18.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-010",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/users/88341/requested_tickets",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/users/:id/requested_tickets",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/users/:id/requested_tickets",
+        "pageTitle": "Sarah Chen — Requested Tickets — Zendesk",
+        "applicationLabel": "Zendesk"
+      },
+      "target_summary": {
+        "selector": "button[data-test-id='retry-crm-link']",
+        "label": "Retry",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-tr-011",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 80200,
+      "t_wall": "2026-04-07T14:31:20.200Z",
+      "event_type": "system.loading_started",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-011",
+        "sourceEventType": "loading_started",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/users/88341/requested_tickets",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/users/:id/requested_tickets",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/users/:id/requested_tickets",
+        "pageTitle": "Sarah Chen — Requested Tickets — Zendesk",
+        "applicationLabel": "Zendesk"
+      }
+    },
+    {
+      "event_id": "evt-tr-012",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 84600,
+      "t_wall": "2026-04-07T14:31:24.600Z",
+      "event_type": "system.loading_finished",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-012",
+        "sourceEventType": "loading_finished",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/users/88341/requested_tickets",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/users/:id/requested_tickets",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/users/:id/requested_tickets",
+        "pageTitle": "Sarah Chen — Requested Tickets — Zendesk",
+        "applicationLabel": "Zendesk"
+      }
+    },
+    {
+      "event_id": "evt-tr-013",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 84700,
+      "t_wall": "2026-04-07T14:31:24.700Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-013",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/users/88341/requested_tickets",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/users/:id/requested_tickets",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/users/:id/requested_tickets",
+        "pageTitle": "Sarah Chen — Requested Tickets — Zendesk",
+        "applicationLabel": "Zendesk"
+      }
+    },
+    {
+      "event_id": "evt-tr-014",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 150000,
+      "t_wall": "2026-04-07T14:32:30.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-014",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/users/88341/requested_tickets",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/users/:id/requested_tickets",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/users/:id/requested_tickets",
+        "pageTitle": "Sarah Chen — Requested Tickets — Zendesk",
+        "applicationLabel": "Zendesk"
+      },
+      "target_summary": {
+        "selector": "a[data-test-id='back-to-ticket']",
+        "label": "Back to Ticket #19472",
+        "role": "link",
+        "elementType": "a",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-tr-015",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 152300,
+      "t_wall": "2026-04-07T14:32:32.300Z",
+      "event_type": "navigation.spa_route_changed",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-015",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/tickets/19472",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/tickets/:id",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/tickets/:id",
+        "pageTitle": "Ticket #19472 — Zendesk",
+        "applicationLabel": "Zendesk"
+      }
+    },
+    {
+      "event_id": "evt-tr-016",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 180000,
+      "t_wall": "2026-04-07T14:33:00.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-016",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/tickets/19472",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/tickets/:id",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/tickets/:id",
+        "pageTitle": "Ticket #19472 — Zendesk",
+        "applicationLabel": "Zendesk"
+      },
+      "target_summary": {
+        "selector": "select[data-test-id='ticket-priority']",
+        "label": "Priority",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-tr-017",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 183400,
+      "t_wall": "2026-04-07T14:33:03.400Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-017",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/tickets/19472",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/tickets/:id",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/tickets/:id",
+        "pageTitle": "Ticket #19472 — Zendesk",
+        "applicationLabel": "Zendesk"
+      },
+      "target_summary": {
+        "selector": "select[data-test-id='ticket-priority']",
+        "label": "Priority",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-tr-018",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 195000,
+      "t_wall": "2026-04-07T14:33:15.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-018",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/tickets/19472",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/tickets/:id",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/tickets/:id",
+        "pageTitle": "Ticket #19472 — Zendesk",
+        "applicationLabel": "Zendesk"
+      },
+      "target_summary": {
+        "selector": "select[data-test-id='ticket-type']",
+        "label": "Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-tr-019",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 210000,
+      "t_wall": "2026-04-07T14:33:30.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-019",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/tickets/19472",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/tickets/:id",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/tickets/:id",
+        "pageTitle": "Ticket #19472 — Zendesk",
+        "applicationLabel": "Zendesk"
+      },
+      "target_summary": {
+        "selector": "select[data-test-id='ticket-group']",
+        "label": "Group",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-tr-020",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 225000,
+      "t_wall": "2026-04-07T14:33:45.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-020",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/tickets/19472",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/tickets/:id",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/tickets/:id",
+        "pageTitle": "Ticket #19472 — Zendesk",
+        "applicationLabel": "Zendesk"
+      },
+      "target_summary": {
+        "selector": "input[data-test-id='ticket-assignee']",
+        "label": "Assignee",
+        "role": "combobox",
+        "elementType": "input",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-tr-021",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 420000,
+      "t_wall": "2026-04-07T14:37:00.000Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-021",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/tickets/19472",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/tickets/:id",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/tickets/:id",
+        "pageTitle": "Ticket #19472 — Zendesk",
+        "applicationLabel": "Zendesk"
+      },
+      "target_summary": {
+        "selector": "button[data-test-id='submit-ticket']",
+        "label": "Submit as Open",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-tr-022",
+      "session_id": "ses-triage-20260407-001",
+      "t_ms": 438000,
+      "t_wall": "2026-04-07T14:37:18.000Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-tr-022",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.zendesk.com/agent/tickets/19472",
+        "urlNormalized": "https://acmecorp.zendesk.com/agent/tickets/:id",
+        "domain": "acmecorp.zendesk.com",
+        "routeTemplate": "/agent/tickets/:id",
+        "pageTitle": "Ticket #19472 — Zendesk",
+        "applicationLabel": "Zendesk"
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "ses-triage-20260407-001-step-1",
+      "session_id": "ses-triage-20260407-001",
+      "ordinal": 1,
+      "title": "Open and review support ticket #19472",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": ["evt-tr-001", "evt-tr-002", "evt-tr-003"],
+      "start_t_ms": 0,
+      "end_t_ms": 4100,
+      "duration_ms": 4100,
+      "boundary_reason": "action_completed",
+      "page_context": {
+        "domain": "acmecorp.zendesk.com",
+        "applicationLabel": "Zendesk",
+        "routeTemplate": "/agent/tickets/:id"
+      }
+    },
+    {
+      "step_id": "ses-triage-20260407-001-step-2",
+      "session_id": "ses-triage-20260407-001",
+      "ordinal": 2,
+      "title": "Navigate to requester's ticket history",
+      "status": "finalized",
+      "grouping_reason": "click_then_navigate",
+      "confidence": 0.85,
+      "source_event_ids": ["evt-tr-004", "evt-tr-005"],
+      "start_t_ms": 25000,
+      "end_t_ms": 27200,
+      "duration_ms": 2200,
+      "boundary_reason": "route_changed",
+      "page_context": {
+        "domain": "acmecorp.zendesk.com",
+        "applicationLabel": "Zendesk",
+        "routeTemplate": "/agent/tickets/:id"
+      }
+    },
+    {
+      "step_id": "ses-triage-20260407-001-step-3",
+      "session_id": "ses-triage-20260407-001",
+      "ordinal": 3,
+      "title": "Attempt to load CRM record — failed with error",
+      "status": "finalized",
+      "grouping_reason": "error_handling",
+      "confidence": 0.8,
+      "source_event_ids": ["evt-tr-006", "evt-tr-007", "evt-tr-008", "evt-tr-009"],
+      "start_t_ms": 55000,
+      "end_t_ms": 72000,
+      "duration_ms": 17000,
+      "boundary_reason": "action_completed",
+      "page_context": {
+        "domain": "acmecorp.zendesk.com",
+        "applicationLabel": "Zendesk",
+        "routeTemplate": "/agent/users/:id/requested_tickets"
+      }
+    },
+    {
+      "step_id": "ses-triage-20260407-001-step-4",
+      "session_id": "ses-triage-20260407-001",
+      "ordinal": 4,
+      "title": "Retry CRM lookup — succeeded",
+      "status": "finalized",
+      "grouping_reason": "error_handling",
+      "confidence": 0.8,
+      "source_event_ids": ["evt-tr-010", "evt-tr-011", "evt-tr-012", "evt-tr-013"],
+      "start_t_ms": 78500,
+      "end_t_ms": 84700,
+      "duration_ms": 6200,
+      "boundary_reason": "action_completed",
+      "page_context": {
+        "domain": "acmecorp.zendesk.com",
+        "applicationLabel": "Zendesk",
+        "routeTemplate": "/agent/users/:id/requested_tickets"
+      }
+    },
+    {
+      "step_id": "ses-triage-20260407-001-step-5",
+      "session_id": "ses-triage-20260407-001",
+      "ordinal": 5,
+      "title": "Return to ticket #19472",
+      "status": "finalized",
+      "grouping_reason": "click_then_navigate",
+      "confidence": 0.85,
+      "source_event_ids": ["evt-tr-014", "evt-tr-015"],
+      "start_t_ms": 150000,
+      "end_t_ms": 152300,
+      "duration_ms": 2300,
+      "boundary_reason": "route_changed",
+      "page_context": {
+        "domain": "acmecorp.zendesk.com",
+        "applicationLabel": "Zendesk",
+        "routeTemplate": "/agent/users/:id/requested_tickets"
+      }
+    },
+    {
+      "step_id": "ses-triage-20260407-001-step-6",
+      "session_id": "ses-triage-20260407-001",
+      "ordinal": 6,
+      "title": "Classify ticket priority, type, group, and assign",
+      "status": "finalized",
+      "grouping_reason": "data_entry",
+      "confidence": 0.9,
+      "source_event_ids": ["evt-tr-016", "evt-tr-017", "evt-tr-018", "evt-tr-019", "evt-tr-020"],
+      "start_t_ms": 180000,
+      "end_t_ms": 225000,
+      "duration_ms": 45000,
+      "boundary_reason": "target_changed",
+      "page_context": {
+        "domain": "acmecorp.zendesk.com",
+        "applicationLabel": "Zendesk",
+        "routeTemplate": "/agent/tickets/:id"
+      }
+    },
+    {
+      "step_id": "ses-triage-20260407-001-step-7",
+      "session_id": "ses-triage-20260407-001",
+      "ordinal": 7,
+      "title": "Submit triaged ticket",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": ["evt-tr-021", "evt-tr-022"],
+      "start_t_ms": 420000,
+      "end_t_ms": 438000,
+      "duration_ms": 18000,
+      "boundary_reason": "form_submitted",
+      "page_context": {
+        "domain": "acmecorp.zendesk.com",
+        "applicationLabel": "Zendesk",
+        "routeTemplate": "/agent/tickets/:id"
+      }
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "ses-triage-20260407-001",
+    "exportedAt": "2026-04-07T14:38:00.000Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0",
+    "segmentationRuleVersion": "1.1.0",
+    "rendererVersion": "0.1.0",
+    "fileHashes": {}
+  }
+}

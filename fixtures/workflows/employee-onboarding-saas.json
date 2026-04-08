@@ -1,0 +1,832 @@
+{
+  "sessionJson": {
+    "sessionId": "ses-onboard-20260407-001",
+    "activityName": "Onboard New Hire — Jordan Rivera (Engineering)",
+    "startedAt": "2026-04-07T10:00:00.000Z",
+    "endedAt": "2026-04-07T10:18:45.000Z",
+    "state": "review_ready",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "evt-ob-001",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 0,
+      "t_wall": "2026-04-07T10:00:00.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-001",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://wd5.myworkday.com/acmecorp/d/home.htmld",
+        "urlNormalized": "https://wd5.myworkday.com/acmecorp/d/home.htmld",
+        "domain": "wd5.myworkday.com",
+        "routeTemplate": "/acmecorp/d/home.htmld",
+        "pageTitle": "Home — Workday",
+        "applicationLabel": "Workday"
+      }
+    },
+    {
+      "event_id": "evt-ob-002",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 4200,
+      "t_wall": "2026-04-07T10:00:04.200Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-002",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://wd5.myworkday.com/acmecorp/d/home.htmld",
+        "urlNormalized": "https://wd5.myworkday.com/acmecorp/d/home.htmld",
+        "domain": "wd5.myworkday.com",
+        "routeTemplate": "/acmecorp/d/home.htmld",
+        "pageTitle": "Home — Workday",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "a[data-automation-id='hire']",
+        "label": "Hire Employee",
+        "role": "link",
+        "elementType": "a",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-ob-003",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 6800,
+      "t_wall": "2026-04-07T10:00:06.800Z",
+      "event_type": "navigation.spa_route_changed",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-003",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://wd5.myworkday.com/acmecorp/d/inst/hire.htmld",
+        "urlNormalized": "https://wd5.myworkday.com/acmecorp/d/inst/hire.htmld",
+        "domain": "wd5.myworkday.com",
+        "routeTemplate": "/acmecorp/d/inst/hire.htmld",
+        "pageTitle": "Hire Employee — Workday",
+        "applicationLabel": "Workday"
+      }
+    },
+    {
+      "event_id": "evt-ob-004",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 12500,
+      "t_wall": "2026-04-07T10:00:12.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-004",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true
+      },
+      "page_context": {
+        "url": "https://wd5.myworkday.com/acmecorp/d/inst/hire.htmld",
+        "urlNormalized": "https://wd5.myworkday.com/acmecorp/d/inst/hire.htmld",
+        "domain": "wd5.myworkday.com",
+        "routeTemplate": "/acmecorp/d/inst/hire.htmld",
+        "pageTitle": "Hire Employee — Workday",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "input[data-automation-id='legalNameWidget-firstName']",
+        "label": "Legal First Name",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      }
+    },
+    {
+      "event_id": "evt-ob-005",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 16100,
+      "t_wall": "2026-04-07T10:00:16.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-005",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true
+      },
+      "page_context": {
+        "url": "https://wd5.myworkday.com/acmecorp/d/inst/hire.htmld",
+        "urlNormalized": "https://wd5.myworkday.com/acmecorp/d/inst/hire.htmld",
+        "domain": "wd5.myworkday.com",
+        "routeTemplate": "/acmecorp/d/inst/hire.htmld",
+        "pageTitle": "Hire Employee — Workday",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "input[data-automation-id='legalNameWidget-lastName']",
+        "label": "Legal Last Name",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      }
+    },
+    {
+      "event_id": "evt-ob-006",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 22300,
+      "t_wall": "2026-04-07T10:00:22.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-006",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true
+      },
+      "page_context": {
+        "url": "https://wd5.myworkday.com/acmecorp/d/inst/hire.htmld",
+        "urlNormalized": "https://wd5.myworkday.com/acmecorp/d/inst/hire.htmld",
+        "domain": "wd5.myworkday.com",
+        "routeTemplate": "/acmecorp/d/inst/hire.htmld",
+        "pageTitle": "Hire Employee — Workday",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "input[data-automation-id='emailAddress']",
+        "label": "Work Email",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      }
+    },
+    {
+      "event_id": "evt-ob-007",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 30800,
+      "t_wall": "2026-04-07T10:00:30.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-007",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://wd5.myworkday.com/acmecorp/d/inst/hire.htmld",
+        "urlNormalized": "https://wd5.myworkday.com/acmecorp/d/inst/hire.htmld",
+        "domain": "wd5.myworkday.com",
+        "routeTemplate": "/acmecorp/d/inst/hire.htmld",
+        "pageTitle": "Hire Employee — Workday",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "select[data-automation-id='department']",
+        "label": "Department",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-ob-008",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 38200,
+      "t_wall": "2026-04-07T10:00:38.200Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-008",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://wd5.myworkday.com/acmecorp/d/inst/hire.htmld",
+        "urlNormalized": "https://wd5.myworkday.com/acmecorp/d/inst/hire.htmld",
+        "domain": "wd5.myworkday.com",
+        "routeTemplate": "/acmecorp/d/inst/hire.htmld",
+        "pageTitle": "Hire Employee — Workday",
+        "applicationLabel": "Workday"
+      },
+      "target_summary": {
+        "selector": "button[data-automation-id='submit']",
+        "label": "Submit",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-ob-009",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 40500,
+      "t_wall": "2026-04-07T10:00:40.500Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-009",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://wd5.myworkday.com/acmecorp/d/inst/hire.htmld",
+        "urlNormalized": "https://wd5.myworkday.com/acmecorp/d/inst/hire.htmld",
+        "domain": "wd5.myworkday.com",
+        "routeTemplate": "/acmecorp/d/inst/hire.htmld",
+        "pageTitle": "Hire Employee — Workday",
+        "applicationLabel": "Workday"
+      }
+    },
+    {
+      "event_id": "evt-ob-010",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 120000,
+      "t_wall": "2026-04-07T10:02:00.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-010",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://app.slack.com/client/T01ABC/C01DEF",
+        "urlNormalized": "https://app.slack.com/client/:teamId/:channelId",
+        "domain": "app.slack.com",
+        "routeTemplate": "/client/:teamId/:channelId",
+        "pageTitle": "#engineering — Slack",
+        "applicationLabel": "Slack"
+      }
+    },
+    {
+      "event_id": "evt-ob-011",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 128500,
+      "t_wall": "2026-04-07T10:02:08.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-011",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://app.slack.com/client/T01ABC/C01DEF",
+        "urlNormalized": "https://app.slack.com/client/:teamId/:channelId",
+        "domain": "app.slack.com",
+        "routeTemplate": "/client/:teamId/:channelId",
+        "pageTitle": "#engineering — Slack",
+        "applicationLabel": "Slack"
+      },
+      "target_summary": {
+        "selector": "button[data-qa='invite-to-channel']",
+        "label": "Add people to #engineering",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-ob-012",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 130200,
+      "t_wall": "2026-04-07T10:02:10.200Z",
+      "event_type": "system.modal_opened",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-012",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://app.slack.com/client/T01ABC/C01DEF",
+        "urlNormalized": "https://app.slack.com/client/:teamId/:channelId",
+        "domain": "app.slack.com",
+        "routeTemplate": "/client/:teamId/:channelId",
+        "pageTitle": "Add people — Slack",
+        "applicationLabel": "Slack"
+      }
+    },
+    {
+      "event_id": "evt-ob-013",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 138000,
+      "t_wall": "2026-04-07T10:02:18.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-013",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true
+      },
+      "page_context": {
+        "url": "https://app.slack.com/client/T01ABC/C01DEF",
+        "urlNormalized": "https://app.slack.com/client/:teamId/:channelId",
+        "domain": "app.slack.com",
+        "routeTemplate": "/client/:teamId/:channelId",
+        "pageTitle": "Add people — Slack",
+        "applicationLabel": "Slack"
+      },
+      "target_summary": {
+        "selector": "input[data-qa='invite-user-search']",
+        "label": "Search for people",
+        "role": "combobox",
+        "elementType": "input",
+        "isSensitive": true
+      }
+    },
+    {
+      "event_id": "evt-ob-014",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 142400,
+      "t_wall": "2026-04-07T10:02:22.400Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-014",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://app.slack.com/client/T01ABC/C01DEF",
+        "urlNormalized": "https://app.slack.com/client/:teamId/:channelId",
+        "domain": "app.slack.com",
+        "routeTemplate": "/client/:teamId/:channelId",
+        "pageTitle": "Add people — Slack",
+        "applicationLabel": "Slack"
+      },
+      "target_summary": {
+        "selector": "button[data-qa='invite-confirm']",
+        "label": "Add",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-ob-015",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 144100,
+      "t_wall": "2026-04-07T10:02:24.100Z",
+      "event_type": "system.modal_closed",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-015",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://app.slack.com/client/T01ABC/C01DEF",
+        "urlNormalized": "https://app.slack.com/client/:teamId/:channelId",
+        "domain": "app.slack.com",
+        "routeTemplate": "/client/:teamId/:channelId",
+        "pageTitle": "#engineering — Slack",
+        "applicationLabel": "Slack"
+      }
+    },
+    {
+      "event_id": "evt-ob-016",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 240000,
+      "t_wall": "2026-04-07T10:04:00.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-016",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.atlassian.net/jira/people/team",
+        "urlNormalized": "https://acmecorp.atlassian.net/jira/people/team",
+        "domain": "acmecorp.atlassian.net",
+        "routeTemplate": "/jira/people/team",
+        "pageTitle": "People — Jira",
+        "applicationLabel": "Jira"
+      }
+    },
+    {
+      "event_id": "evt-ob-017",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 248600,
+      "t_wall": "2026-04-07T10:04:08.600Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-017",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.atlassian.net/jira/people/team",
+        "urlNormalized": "https://acmecorp.atlassian.net/jira/people/team",
+        "domain": "acmecorp.atlassian.net",
+        "routeTemplate": "/jira/people/team",
+        "pageTitle": "People — Jira",
+        "applicationLabel": "Jira"
+      },
+      "target_summary": {
+        "selector": "button[data-testid='add-member-button']",
+        "label": "Add team member",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-ob-018",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 250300,
+      "t_wall": "2026-04-07T10:04:10.300Z",
+      "event_type": "system.modal_opened",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-018",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.atlassian.net/jira/people/team",
+        "urlNormalized": "https://acmecorp.atlassian.net/jira/people/team",
+        "domain": "acmecorp.atlassian.net",
+        "routeTemplate": "/jira/people/team",
+        "pageTitle": "Add team member — Jira",
+        "applicationLabel": "Jira"
+      }
+    },
+    {
+      "event_id": "evt-ob-019",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 258700,
+      "t_wall": "2026-04-07T10:04:18.700Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-019",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true
+      },
+      "page_context": {
+        "url": "https://acmecorp.atlassian.net/jira/people/team",
+        "urlNormalized": "https://acmecorp.atlassian.net/jira/people/team",
+        "domain": "acmecorp.atlassian.net",
+        "routeTemplate": "/jira/people/team",
+        "pageTitle": "Add team member — Jira",
+        "applicationLabel": "Jira"
+      },
+      "target_summary": {
+        "selector": "input[data-testid='user-search']",
+        "label": "Email or name",
+        "role": "combobox",
+        "elementType": "input",
+        "isSensitive": true
+      }
+    },
+    {
+      "event_id": "evt-ob-020",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 265200,
+      "t_wall": "2026-04-07T10:04:25.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-020",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.atlassian.net/jira/people/team",
+        "urlNormalized": "https://acmecorp.atlassian.net/jira/people/team",
+        "domain": "acmecorp.atlassian.net",
+        "routeTemplate": "/jira/people/team",
+        "pageTitle": "Add team member — Jira",
+        "applicationLabel": "Jira"
+      },
+      "target_summary": {
+        "selector": "select[data-testid='role-select']",
+        "label": "Role",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-ob-021",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 270400,
+      "t_wall": "2026-04-07T10:04:30.400Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-021",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.atlassian.net/jira/people/team",
+        "urlNormalized": "https://acmecorp.atlassian.net/jira/people/team",
+        "domain": "acmecorp.atlassian.net",
+        "routeTemplate": "/jira/people/team",
+        "pageTitle": "Add team member — Jira",
+        "applicationLabel": "Jira"
+      },
+      "target_summary": {
+        "selector": "button[data-testid='add-member-submit']",
+        "label": "Add member",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-ob-022",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 272100,
+      "t_wall": "2026-04-07T10:04:32.100Z",
+      "event_type": "system.modal_closed",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-022",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://acmecorp.atlassian.net/jira/people/team",
+        "urlNormalized": "https://acmecorp.atlassian.net/jira/people/team",
+        "domain": "acmecorp.atlassian.net",
+        "routeTemplate": "/jira/people/team",
+        "pageTitle": "People — Jira",
+        "applicationLabel": "Jira"
+      }
+    },
+    {
+      "event_id": "evt-ob-023",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 600000,
+      "t_wall": "2026-04-07T10:10:00.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-023",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://mail.google.com/mail/u/0/#inbox?compose=new",
+        "urlNormalized": "https://mail.google.com/mail/u/0/#inbox?compose=new",
+        "domain": "mail.google.com",
+        "routeTemplate": "/mail/u/0/#inbox?compose=new",
+        "pageTitle": "Compose — Gmail",
+        "applicationLabel": "Gmail"
+      }
+    },
+    {
+      "event_id": "evt-ob-024",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 612000,
+      "t_wall": "2026-04-07T10:10:12.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-024",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true
+      },
+      "page_context": {
+        "url": "https://mail.google.com/mail/u/0/#inbox?compose=new",
+        "urlNormalized": "https://mail.google.com/mail/u/0/#inbox?compose=new",
+        "domain": "mail.google.com",
+        "routeTemplate": "/mail/u/0/#inbox?compose=new",
+        "pageTitle": "Compose — Gmail",
+        "applicationLabel": "Gmail"
+      },
+      "target_summary": {
+        "selector": "input[name='to']",
+        "label": "To",
+        "role": "combobox",
+        "elementType": "input",
+        "isSensitive": true
+      }
+    },
+    {
+      "event_id": "evt-ob-025",
+      "session_id": "ses-onboard-20260407-001",
+      "t_ms": 1125000,
+      "t_wall": "2026-04-07T10:18:45.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ob-025",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://mail.google.com/mail/u/0/#inbox?compose=new",
+        "urlNormalized": "https://mail.google.com/mail/u/0/#inbox?compose=new",
+        "domain": "mail.google.com",
+        "routeTemplate": "/mail/u/0/#inbox?compose=new",
+        "pageTitle": "Compose — Gmail",
+        "applicationLabel": "Gmail"
+      },
+      "target_summary": {
+        "selector": "div[data-tooltip='Send'] div[role='button']",
+        "label": "Send",
+        "role": "button",
+        "elementType": "div",
+        "isSensitive": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "ses-onboard-20260407-001-step-1",
+      "session_id": "ses-onboard-20260407-001",
+      "ordinal": 1,
+      "title": "Navigate to Hire Employee form in Workday",
+      "status": "finalized",
+      "grouping_reason": "click_then_navigate",
+      "confidence": 0.85,
+      "source_event_ids": ["evt-ob-001", "evt-ob-002", "evt-ob-003"],
+      "start_t_ms": 0,
+      "end_t_ms": 6800,
+      "duration_ms": 6800,
+      "boundary_reason": "route_changed",
+      "page_context": {
+        "domain": "wd5.myworkday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/acmecorp/d/home.htmld"
+      }
+    },
+    {
+      "step_id": "ses-onboard-20260407-001-step-2",
+      "session_id": "ses-onboard-20260407-001",
+      "ordinal": 2,
+      "title": "Fill and submit new employee record",
+      "status": "finalized",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": ["evt-ob-004", "evt-ob-005", "evt-ob-006", "evt-ob-007", "evt-ob-008", "evt-ob-009"],
+      "start_t_ms": 12500,
+      "end_t_ms": 40500,
+      "duration_ms": 28000,
+      "boundary_reason": "form_submitted",
+      "page_context": {
+        "domain": "wd5.myworkday.com",
+        "applicationLabel": "Workday",
+        "routeTemplate": "/acmecorp/d/inst/hire.htmld"
+      }
+    },
+    {
+      "step_id": "ses-onboard-20260407-001-step-3",
+      "session_id": "ses-onboard-20260407-001",
+      "ordinal": 3,
+      "title": "Open Slack engineering channel",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": ["evt-ob-010"],
+      "start_t_ms": 120000,
+      "end_t_ms": 120000,
+      "duration_ms": 0,
+      "boundary_reason": "navigation_changed",
+      "page_context": {
+        "domain": "app.slack.com",
+        "applicationLabel": "Slack",
+        "routeTemplate": "/client/:teamId/:channelId"
+      }
+    },
+    {
+      "step_id": "ses-onboard-20260407-001-step-4",
+      "session_id": "ses-onboard-20260407-001",
+      "ordinal": 4,
+      "title": "Invite new hire to #engineering channel in Slack",
+      "status": "finalized",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": ["evt-ob-011", "evt-ob-012", "evt-ob-013", "evt-ob-014", "evt-ob-015"],
+      "start_t_ms": 128500,
+      "end_t_ms": 144100,
+      "duration_ms": 15600,
+      "boundary_reason": "action_completed",
+      "page_context": {
+        "domain": "app.slack.com",
+        "applicationLabel": "Slack",
+        "routeTemplate": "/client/:teamId/:channelId"
+      }
+    },
+    {
+      "step_id": "ses-onboard-20260407-001-step-5",
+      "session_id": "ses-onboard-20260407-001",
+      "ordinal": 5,
+      "title": "Navigate to Jira team management",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": ["evt-ob-016"],
+      "start_t_ms": 240000,
+      "end_t_ms": 240000,
+      "duration_ms": 0,
+      "boundary_reason": "navigation_changed",
+      "page_context": {
+        "domain": "acmecorp.atlassian.net",
+        "applicationLabel": "Jira",
+        "routeTemplate": "/jira/people/team"
+      }
+    },
+    {
+      "step_id": "ses-onboard-20260407-001-step-6",
+      "session_id": "ses-onboard-20260407-001",
+      "ordinal": 6,
+      "title": "Add new hire as team member in Jira",
+      "status": "finalized",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": ["evt-ob-017", "evt-ob-018", "evt-ob-019", "evt-ob-020", "evt-ob-021", "evt-ob-022"],
+      "start_t_ms": 248600,
+      "end_t_ms": 272100,
+      "duration_ms": 23500,
+      "boundary_reason": "form_submitted",
+      "page_context": {
+        "domain": "acmecorp.atlassian.net",
+        "applicationLabel": "Jira",
+        "routeTemplate": "/jira/people/team"
+      }
+    },
+    {
+      "step_id": "ses-onboard-20260407-001-step-7",
+      "session_id": "ses-onboard-20260407-001",
+      "ordinal": 7,
+      "title": "Compose welcome email in Gmail",
+      "status": "finalized",
+      "grouping_reason": "data_entry",
+      "confidence": 0.9,
+      "source_event_ids": ["evt-ob-023", "evt-ob-024"],
+      "start_t_ms": 600000,
+      "end_t_ms": 612000,
+      "duration_ms": 12000,
+      "boundary_reason": "target_changed",
+      "page_context": {
+        "domain": "mail.google.com",
+        "applicationLabel": "Gmail",
+        "routeTemplate": "/mail/u/0/#inbox?compose=new"
+      }
+    },
+    {
+      "step_id": "ses-onboard-20260407-001-step-8",
+      "session_id": "ses-onboard-20260407-001",
+      "ordinal": 8,
+      "title": "Send welcome email to new hire",
+      "status": "finalized",
+      "grouping_reason": "send_action",
+      "confidence": 0.75,
+      "source_event_ids": ["evt-ob-025"],
+      "start_t_ms": 1125000,
+      "end_t_ms": 1125000,
+      "duration_ms": 0,
+      "boundary_reason": "action_completed",
+      "page_context": {
+        "domain": "mail.google.com",
+        "applicationLabel": "Gmail",
+        "routeTemplate": "/mail/u/0/#inbox?compose=new"
+      }
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "ses-onboard-20260407-001",
+    "exportedAt": "2026-04-07T10:19:00.000Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0",
+    "segmentationRuleVersion": "1.1.0",
+    "rendererVersion": "0.1.0",
+    "fileHashes": {}
+  }
+}

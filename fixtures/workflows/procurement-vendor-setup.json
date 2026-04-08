@@ -1,0 +1,1201 @@
+{
+  "sessionJson": {
+    "sessionId": "sess_procure_001",
+    "activityName": "New Vendor Setup and Approval",
+    "startedAt": "2026-04-07T11:00:00.000Z",
+    "endedAt": "2026-04-07T11:13:20.000Z",
+    "state": "review_ready",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000001",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 0,
+      "t_wall": "2026-04-07T11:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000002",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 2000,
+      "t_wall": "2026-04-07T11:00:02.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Initial Screen - SAP",
+        "applicationLabel": "SAP"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000003",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 6000,
+      "t_wall": "2026-04-07T11:00:06.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Initial Screen - SAP",
+        "applicationLabel": "SAP"
+      },
+      "target_summary": {
+        "selector": "#vendor-search-name",
+        "label": "Vendor Name Search",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-003",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000004",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 9000,
+      "t_wall": "2026-04-07T11:00:09.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Initial Screen - SAP",
+        "applicationLabel": "SAP"
+      },
+      "target_summary": {
+        "selector": "#btn-search-vendor",
+        "label": "Search",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-004",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000005",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 11000,
+      "t_wall": "2026-04-07T11:00:11.000Z",
+      "event_type": "system.loading_started",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Initial Screen - SAP",
+        "applicationLabel": "SAP"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-005",
+        "sourceEventType": "loading_started",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000006",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 14000,
+      "t_wall": "2026-04-07T11:00:14.000Z",
+      "event_type": "system.loading_finished",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Search Results - SAP",
+        "applicationLabel": "SAP"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-006",
+        "sourceEventType": "loading_finished",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000007",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 22000,
+      "t_wall": "2026-04-07T11:00:22.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Search Results - SAP",
+        "applicationLabel": "SAP"
+      },
+      "target_summary": {
+        "selector": "#btn-create-new-vendor",
+        "label": "Create New Vendor",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-007",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000008",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 24000,
+      "t_wall": "2026-04-07T11:00:24.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=general",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: General Data - SAP",
+        "applicationLabel": "SAP"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-008",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000009",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 30000,
+      "t_wall": "2026-04-07T11:00:30.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=general",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: General Data - SAP",
+        "applicationLabel": "SAP"
+      },
+      "target_summary": {
+        "selector": "#vendor-name",
+        "label": "Vendor Name",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-009",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000010",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 34000,
+      "t_wall": "2026-04-07T11:00:34.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=general",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: General Data - SAP",
+        "applicationLabel": "SAP"
+      },
+      "target_summary": {
+        "selector": "#vendor-address",
+        "label": "Street Address",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-010",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000011",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 38000,
+      "t_wall": "2026-04-07T11:00:38.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=general",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: General Data - SAP",
+        "applicationLabel": "SAP"
+      },
+      "target_summary": {
+        "selector": "#vendor-tax-id",
+        "label": "Tax ID / EIN",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-011",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true,
+        "redactionReason": "sensitive_financial_field"
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000012",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 42000,
+      "t_wall": "2026-04-07T11:00:42.000Z",
+      "event_type": "interaction.select",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=general",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: General Data - SAP",
+        "applicationLabel": "SAP"
+      },
+      "target_summary": {
+        "selector": "#vendor-category",
+        "label": "Vendor Category",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000013",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 46000,
+      "t_wall": "2026-04-07T11:00:46.000Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=general",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: General Data - SAP",
+        "applicationLabel": "SAP"
+      },
+      "target_summary": {
+        "selector": "#general-data-form",
+        "label": "Save General Data",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-013",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000014",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 48500,
+      "t_wall": "2026-04-07T11:00:48.500Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=bank",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Bank Details - SAP",
+        "applicationLabel": "SAP"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-014",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000015",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 55000,
+      "t_wall": "2026-04-07T11:00:55.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=bank",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Bank Details - SAP",
+        "applicationLabel": "SAP"
+      },
+      "target_summary": {
+        "selector": "#bank-name",
+        "label": "Bank Name",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-015",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000016",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 60000,
+      "t_wall": "2026-04-07T11:01:00.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=bank",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Bank Details - SAP",
+        "applicationLabel": "SAP"
+      },
+      "target_summary": {
+        "selector": "#routing-number",
+        "label": "Routing Number",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-016",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true,
+        "redactionReason": "sensitive_financial_field"
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000017",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 65000,
+      "t_wall": "2026-04-07T11:01:05.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=bank",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Bank Details - SAP",
+        "applicationLabel": "SAP"
+      },
+      "target_summary": {
+        "selector": "#account-number",
+        "label": "Account Number",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-017",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true,
+        "redactionReason": "sensitive_financial_field"
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000018",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 70000,
+      "t_wall": "2026-04-07T11:01:10.000Z",
+      "event_type": "interaction.select",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=bank",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Bank Details - SAP",
+        "applicationLabel": "SAP"
+      },
+      "target_summary": {
+        "selector": "#payment-method",
+        "label": "Payment Method",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-018",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000019",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 74000,
+      "t_wall": "2026-04-07T11:01:14.000Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=bank",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Bank Details - SAP",
+        "applicationLabel": "SAP"
+      },
+      "target_summary": {
+        "selector": "#bank-details-form",
+        "label": "Save Bank Details",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-019",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000020",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 80000,
+      "t_wall": "2026-04-07T11:01:20.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=compliance",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Compliance Documents - SAP",
+        "applicationLabel": "SAP"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-020",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000021",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 85000,
+      "t_wall": "2026-04-07T11:01:25.000Z",
+      "event_type": "interaction.upload_file",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=compliance",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Compliance Documents - SAP",
+        "applicationLabel": "SAP"
+      },
+      "target_summary": {
+        "selector": "#w9-upload",
+        "label": "W-9 Form Upload",
+        "role": "button",
+        "elementType": "file",
+        "isSensitive": true
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-021",
+        "sourceEventType": "file_uploaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true,
+        "redactionReason": "sensitive_compliance_document"
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000022",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 92000,
+      "t_wall": "2026-04-07T11:01:32.000Z",
+      "event_type": "interaction.upload_file",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=compliance",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Compliance Documents - SAP",
+        "applicationLabel": "SAP"
+      },
+      "target_summary": {
+        "selector": "#insurance-cert-upload",
+        "label": "Insurance Certificate Upload",
+        "role": "button",
+        "elementType": "file",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-022",
+        "sourceEventType": "file_uploaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000023",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 100000,
+      "t_wall": "2026-04-07T11:01:40.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=compliance",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Compliance Documents - SAP",
+        "applicationLabel": "SAP"
+      },
+      "target_summary": {
+        "selector": "#btn-submit-for-approval",
+        "label": "Submit for Approval",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-023",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000024",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 101500,
+      "t_wall": "2026-04-07T11:01:41.500Z",
+      "event_type": "system.modal_opened",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=compliance",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Compliance Documents - SAP",
+        "applicationLabel": "SAP"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-024",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000025",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 106000,
+      "t_wall": "2026-04-07T11:01:46.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=compliance",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Compliance Documents - SAP",
+        "applicationLabel": "SAP"
+      },
+      "target_summary": {
+        "selector": "#modal-confirm-submit",
+        "label": "Confirm",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-025",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000026",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 108000,
+      "t_wall": "2026-04-07T11:01:48.000Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://sap.acme.com/sap/bc/gui/sap/its/webgui?~transaction=XK01&step=compliance",
+        "urlNormalized": "https://sap.acme.com/sap/bc/gui/sap/its/webgui",
+        "domain": "sap.acme.com",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui",
+        "pageTitle": "Create Vendor: Compliance Documents - SAP",
+        "applicationLabel": "SAP"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-026",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000027",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 120000,
+      "t_wall": "2026-04-07T11:02:00.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docs.google.com/spreadsheets/d/1aBcDeFgHiJkLmNoPqRsTuVwXyZ/edit#gid=0",
+        "urlNormalized": "https://docs.google.com/spreadsheets/d/:sheetId/edit",
+        "domain": "docs.google.com",
+        "routeTemplate": "/spreadsheets/d/:sheetId/edit",
+        "pageTitle": "Vendor Procurement Tracker - Google Sheets",
+        "applicationLabel": "Google Sheets"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-027",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000028",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 128000,
+      "t_wall": "2026-04-07T11:02:08.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docs.google.com/spreadsheets/d/1aBcDeFgHiJkLmNoPqRsTuVwXyZ/edit#gid=0",
+        "urlNormalized": "https://docs.google.com/spreadsheets/d/:sheetId/edit",
+        "domain": "docs.google.com",
+        "routeTemplate": "/spreadsheets/d/:sheetId/edit",
+        "pageTitle": "Vendor Procurement Tracker - Google Sheets",
+        "applicationLabel": "Google Sheets"
+      },
+      "target_summary": {
+        "selector": "#waffle-rich-text-editor",
+        "label": "Cell A42",
+        "role": "textbox",
+        "elementType": "div",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-028",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000029",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 132000,
+      "t_wall": "2026-04-07T11:02:12.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docs.google.com/spreadsheets/d/1aBcDeFgHiJkLmNoPqRsTuVwXyZ/edit#gid=0",
+        "urlNormalized": "https://docs.google.com/spreadsheets/d/:sheetId/edit",
+        "domain": "docs.google.com",
+        "routeTemplate": "/spreadsheets/d/:sheetId/edit",
+        "pageTitle": "Vendor Procurement Tracker - Google Sheets",
+        "applicationLabel": "Google Sheets"
+      },
+      "target_summary": {
+        "selector": "#waffle-rich-text-editor",
+        "label": "Cell A42",
+        "role": "textbox",
+        "elementType": "div",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-029",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000030",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 138000,
+      "t_wall": "2026-04-07T11:02:18.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docs.google.com/spreadsheets/d/1aBcDeFgHiJkLmNoPqRsTuVwXyZ/edit#gid=0",
+        "urlNormalized": "https://docs.google.com/spreadsheets/d/:sheetId/edit",
+        "domain": "docs.google.com",
+        "routeTemplate": "/spreadsheets/d/:sheetId/edit",
+        "pageTitle": "Vendor Procurement Tracker - Google Sheets",
+        "applicationLabel": "Google Sheets"
+      },
+      "target_summary": {
+        "selector": "#waffle-rich-text-editor",
+        "label": "Cell B42",
+        "role": "textbox",
+        "elementType": "div",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-030",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000031",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 142000,
+      "t_wall": "2026-04-07T11:02:22.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docs.google.com/spreadsheets/d/1aBcDeFgHiJkLmNoPqRsTuVwXyZ/edit#gid=0",
+        "urlNormalized": "https://docs.google.com/spreadsheets/d/:sheetId/edit",
+        "domain": "docs.google.com",
+        "routeTemplate": "/spreadsheets/d/:sheetId/edit",
+        "pageTitle": "Vendor Procurement Tracker - Google Sheets",
+        "applicationLabel": "Google Sheets"
+      },
+      "target_summary": {
+        "selector": "#waffle-rich-text-editor",
+        "label": "Cell B42",
+        "role": "textbox",
+        "elementType": "div",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-031",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000032",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 148000,
+      "t_wall": "2026-04-07T11:02:28.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docs.google.com/spreadsheets/d/1aBcDeFgHiJkLmNoPqRsTuVwXyZ/edit#gid=0",
+        "urlNormalized": "https://docs.google.com/spreadsheets/d/:sheetId/edit",
+        "domain": "docs.google.com",
+        "routeTemplate": "/spreadsheets/d/:sheetId/edit",
+        "pageTitle": "Vendor Procurement Tracker - Google Sheets",
+        "applicationLabel": "Google Sheets"
+      },
+      "target_summary": {
+        "selector": "#waffle-rich-text-editor",
+        "label": "Cell C42",
+        "role": "textbox",
+        "elementType": "div",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-032",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000033",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 152000,
+      "t_wall": "2026-04-07T11:02:32.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://docs.google.com/spreadsheets/d/1aBcDeFgHiJkLmNoPqRsTuVwXyZ/edit#gid=0",
+        "urlNormalized": "https://docs.google.com/spreadsheets/d/:sheetId/edit",
+        "domain": "docs.google.com",
+        "routeTemplate": "/spreadsheets/d/:sheetId/edit",
+        "pageTitle": "Vendor Procurement Tracker - Google Sheets",
+        "applicationLabel": "Google Sheets"
+      },
+      "target_summary": {
+        "selector": "#waffle-rich-text-editor",
+        "label": "Cell C42",
+        "role": "textbox",
+        "elementType": "div",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-033",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000034",
+      "schema_version": "1.0.0",
+      "session_id": "sess_procure_001",
+      "t_ms": 800000,
+      "t_wall": "2026-04-07T11:13:20.000Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "raw-pr-034",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sess_procure_001-step-1",
+      "session_id": "sess_procure_001",
+      "ordinal": 1,
+      "title": "Navigate to Create Vendor: General Data - SAP",
+      "status": "finalized",
+      "grouping_reason": "click_then_navigate",
+      "confidence": 0.85,
+      "boundary_reason": "route_changed",
+      "source_event_ids": [
+        "e5f6a7b8-0001-4000-8000-000000000002",
+        "e5f6a7b8-0001-4000-8000-000000000003",
+        "e5f6a7b8-0001-4000-8000-000000000004",
+        "e5f6a7b8-0001-4000-8000-000000000007",
+        "e5f6a7b8-0001-4000-8000-000000000008"
+      ],
+      "start_t_ms": 2000,
+      "end_t_ms": 24000,
+      "duration_ms": 22000,
+      "page_context": {
+        "domain": "sap.acme.com",
+        "applicationLabel": "SAP",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui"
+      }
+    },
+    {
+      "step_id": "sess_procure_001-step-2",
+      "session_id": "sess_procure_001",
+      "ordinal": 2,
+      "title": "Fill and submit Save General Data",
+      "status": "finalized",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "boundary_reason": "form_submitted",
+      "source_event_ids": [
+        "e5f6a7b8-0001-4000-8000-000000000009",
+        "e5f6a7b8-0001-4000-8000-000000000010",
+        "e5f6a7b8-0001-4000-8000-000000000011",
+        "e5f6a7b8-0001-4000-8000-000000000012",
+        "e5f6a7b8-0001-4000-8000-000000000013"
+      ],
+      "start_t_ms": 30000,
+      "end_t_ms": 46000,
+      "duration_ms": 16000,
+      "page_context": {
+        "domain": "sap.acme.com",
+        "applicationLabel": "SAP",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui"
+      }
+    },
+    {
+      "step_id": "sess_procure_001-step-3",
+      "session_id": "sess_procure_001",
+      "ordinal": 3,
+      "title": "Fill and submit Save Bank Details",
+      "status": "finalized",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "boundary_reason": "form_submitted",
+      "source_event_ids": [
+        "e5f6a7b8-0001-4000-8000-000000000015",
+        "e5f6a7b8-0001-4000-8000-000000000016",
+        "e5f6a7b8-0001-4000-8000-000000000017",
+        "e5f6a7b8-0001-4000-8000-000000000018",
+        "e5f6a7b8-0001-4000-8000-000000000019"
+      ],
+      "start_t_ms": 55000,
+      "end_t_ms": 74000,
+      "duration_ms": 19000,
+      "page_context": {
+        "domain": "sap.acme.com",
+        "applicationLabel": "SAP",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui"
+      }
+    },
+    {
+      "step_id": "sess_procure_001-step-4",
+      "session_id": "sess_procure_001",
+      "ordinal": 4,
+      "title": "Attach file",
+      "status": "finalized",
+      "grouping_reason": "file_action",
+      "confidence": 0.85,
+      "boundary_reason": "target_changed",
+      "source_event_ids": [
+        "e5f6a7b8-0001-4000-8000-000000000021"
+      ],
+      "start_t_ms": 85000,
+      "end_t_ms": 85000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "sap.acme.com",
+        "applicationLabel": "SAP",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui"
+      }
+    },
+    {
+      "step_id": "sess_procure_001-step-5",
+      "session_id": "sess_procure_001",
+      "ordinal": 5,
+      "title": "Attach file",
+      "status": "finalized",
+      "grouping_reason": "file_action",
+      "confidence": 0.85,
+      "boundary_reason": "target_changed",
+      "source_event_ids": [
+        "e5f6a7b8-0001-4000-8000-000000000022"
+      ],
+      "start_t_ms": 92000,
+      "end_t_ms": 92000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "sap.acme.com",
+        "applicationLabel": "SAP",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui"
+      }
+    },
+    {
+      "step_id": "sess_procure_001-step-6",
+      "session_id": "sess_procure_001",
+      "ordinal": 6,
+      "title": "Confirm",
+      "status": "finalized",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "boundary_reason": "action_completed",
+      "source_event_ids": [
+        "e5f6a7b8-0001-4000-8000-000000000023",
+        "e5f6a7b8-0001-4000-8000-000000000025"
+      ],
+      "start_t_ms": 100000,
+      "end_t_ms": 106000,
+      "duration_ms": 6000,
+      "page_context": {
+        "domain": "sap.acme.com",
+        "applicationLabel": "SAP",
+        "routeTemplate": "/sap/bc/gui/sap/its/webgui"
+      }
+    },
+    {
+      "step_id": "sess_procure_001-step-7",
+      "session_id": "sess_procure_001",
+      "ordinal": 7,
+      "title": "Enter Cell A42",
+      "status": "finalized",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "boundary_reason": "target_changed",
+      "source_event_ids": [
+        "e5f6a7b8-0001-4000-8000-000000000027",
+        "e5f6a7b8-0001-4000-8000-000000000028",
+        "e5f6a7b8-0001-4000-8000-000000000029"
+      ],
+      "start_t_ms": 120000,
+      "end_t_ms": 132000,
+      "duration_ms": 12000,
+      "page_context": {
+        "domain": "docs.google.com",
+        "applicationLabel": "Google Sheets",
+        "routeTemplate": "/spreadsheets/d/:sheetId/edit"
+      }
+    },
+    {
+      "step_id": "sess_procure_001-step-8",
+      "session_id": "sess_procure_001",
+      "ordinal": 8,
+      "title": "Enter Cell B42",
+      "status": "finalized",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "boundary_reason": "target_changed",
+      "source_event_ids": [
+        "e5f6a7b8-0001-4000-8000-000000000030",
+        "e5f6a7b8-0001-4000-8000-000000000031"
+      ],
+      "start_t_ms": 138000,
+      "end_t_ms": 142000,
+      "duration_ms": 4000,
+      "page_context": {
+        "domain": "docs.google.com",
+        "applicationLabel": "Google Sheets",
+        "routeTemplate": "/spreadsheets/d/:sheetId/edit"
+      }
+    },
+    {
+      "step_id": "sess_procure_001-step-9",
+      "session_id": "sess_procure_001",
+      "ordinal": 9,
+      "title": "Enter Cell C42",
+      "status": "finalized",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "boundary_reason": "session_stop",
+      "source_event_ids": [
+        "e5f6a7b8-0001-4000-8000-000000000032",
+        "e5f6a7b8-0001-4000-8000-000000000033",
+        "e5f6a7b8-0001-4000-8000-000000000034"
+      ],
+      "start_t_ms": 148000,
+      "end_t_ms": 800000,
+      "duration_ms": 652000,
+      "page_context": {
+        "domain": "docs.google.com",
+        "applicationLabel": "Google Sheets",
+        "routeTemplate": "/spreadsheets/d/:sheetId/edit"
+      }
+    }
+  ],
+  "policyLog": [
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000011",
+      "field": "target_summary.value",
+      "action": "redacted",
+      "reason": "sensitive_financial_field",
+      "selector": "#vendor-tax-id",
+      "label": "Tax ID / EIN",
+      "timestamp": "2026-04-07T11:00:38.000Z"
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000016",
+      "field": "target_summary.value",
+      "action": "redacted",
+      "reason": "sensitive_financial_field",
+      "selector": "#routing-number",
+      "label": "Routing Number",
+      "timestamp": "2026-04-07T11:01:00.000Z"
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000017",
+      "field": "target_summary.value",
+      "action": "redacted",
+      "reason": "sensitive_financial_field",
+      "selector": "#account-number",
+      "label": "Account Number",
+      "timestamp": "2026-04-07T11:01:05.000Z"
+    },
+    {
+      "event_id": "e5f6a7b8-0001-4000-8000-000000000021",
+      "field": "file_metadata",
+      "action": "redacted",
+      "reason": "sensitive_compliance_document",
+      "selector": "#w9-upload",
+      "label": "W-9 Form Upload",
+      "timestamp": "2026-04-07T11:01:25.000Z"
+    }
+  ],
+  "manifest": {
+    "sessionId": "sess_procure_001",
+    "exportedAt": "2026-04-07T11:14:00.000Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0",
+    "segmentationRuleVersion": "1.1.0",
+    "rendererVersion": "0.1.0",
+    "fileHashes": {}
+  }
+}

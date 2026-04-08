@@ -1,0 +1,605 @@
+{
+  "sessionJson": {
+    "sessionId": "ses-ap-inv-20260407-001",
+    "activityName": "Process Vendor Invoice #INV-8842",
+    "startedAt": "2026-04-07T09:15:00.000Z",
+    "endedAt": "2026-04-07T09:21:42.000Z",
+    "state": "review_ready",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "evt-ap-001",
+      "session_id": "ses-ap-inv-20260407-001",
+      "t_ms": 0,
+      "t_wall": "2026-04-07T09:15:00.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ap-001",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://system.netsuite.com/app/accounting/transactions/vendbilllist.nl",
+        "urlNormalized": "https://system.netsuite.com/app/accounting/transactions/vendbilllist.nl",
+        "domain": "system.netsuite.com",
+        "routeTemplate": "/app/accounting/transactions/vendbilllist.nl",
+        "pageTitle": "Vendor Bills | NetSuite",
+        "applicationLabel": "NetSuite"
+      }
+    },
+    {
+      "event_id": "evt-ap-002",
+      "session_id": "ses-ap-inv-20260407-001",
+      "t_ms": 3200,
+      "t_wall": "2026-04-07T09:15:03.200Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ap-002",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://system.netsuite.com/app/accounting/transactions/vendbilllist.nl",
+        "urlNormalized": "https://system.netsuite.com/app/accounting/transactions/vendbilllist.nl",
+        "domain": "system.netsuite.com",
+        "routeTemplate": "/app/accounting/transactions/vendbilllist.nl",
+        "pageTitle": "Vendor Bills | NetSuite",
+        "applicationLabel": "NetSuite"
+      },
+      "target_summary": {
+        "selector": "table.listtable tr[data-id='inv-8842'] td.listtext a",
+        "label": "INV-8842 — Acme Office Supplies",
+        "role": "link",
+        "elementType": "a",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-ap-003",
+      "session_id": "ses-ap-inv-20260407-001",
+      "t_ms": 4800,
+      "t_wall": "2026-04-07T09:15:04.800Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-ap-003",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=8842",
+        "urlNormalized": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=:id",
+        "domain": "system.netsuite.com",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id",
+        "pageTitle": "Vendor Bill #INV-8842 | NetSuite",
+        "applicationLabel": "NetSuite"
+      }
+    },
+    {
+      "event_id": "evt-ap-004",
+      "session_id": "ses-ap-inv-20260407-001",
+      "t_ms": 18500,
+      "t_wall": "2026-04-07T09:15:18.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ap-004",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=8842",
+        "urlNormalized": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=:id",
+        "domain": "system.netsuite.com",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id",
+        "pageTitle": "Vendor Bill #INV-8842 | NetSuite",
+        "applicationLabel": "NetSuite"
+      },
+      "target_summary": {
+        "selector": "#matchpo_btn",
+        "label": "Match to PO",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-ap-005",
+      "session_id": "ses-ap-inv-20260407-001",
+      "t_ms": 20100,
+      "t_wall": "2026-04-07T09:15:20.100Z",
+      "event_type": "system.modal_opened",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-ap-005",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=8842",
+        "urlNormalized": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=:id",
+        "domain": "system.netsuite.com",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id",
+        "pageTitle": "Match Purchase Order | NetSuite",
+        "applicationLabel": "NetSuite"
+      }
+    },
+    {
+      "event_id": "evt-ap-006",
+      "session_id": "ses-ap-inv-20260407-001",
+      "t_ms": 28400,
+      "t_wall": "2026-04-07T09:15:28.400Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ap-006",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=8842",
+        "urlNormalized": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=:id",
+        "domain": "system.netsuite.com",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id",
+        "pageTitle": "Match Purchase Order | NetSuite",
+        "applicationLabel": "NetSuite"
+      },
+      "target_summary": {
+        "selector": "table.po-match tr[data-po='PO-4419'] input[type='checkbox']",
+        "label": "PO-4419 — Acme Office Supplies",
+        "role": "checkbox",
+        "elementType": "input",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-ap-007",
+      "session_id": "ses-ap-inv-20260407-001",
+      "t_ms": 31200,
+      "t_wall": "2026-04-07T09:15:31.200Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ap-007",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=8842",
+        "urlNormalized": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=:id",
+        "domain": "system.netsuite.com",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id",
+        "pageTitle": "Match Purchase Order | NetSuite",
+        "applicationLabel": "NetSuite"
+      },
+      "target_summary": {
+        "selector": "#modal-confirm-match",
+        "label": "Confirm Match",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-ap-008",
+      "session_id": "ses-ap-inv-20260407-001",
+      "t_ms": 32800,
+      "t_wall": "2026-04-07T09:15:32.800Z",
+      "event_type": "system.modal_closed",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-ap-008",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=8842",
+        "urlNormalized": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=:id",
+        "domain": "system.netsuite.com",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id",
+        "pageTitle": "Vendor Bill #INV-8842 | NetSuite",
+        "applicationLabel": "NetSuite"
+      }
+    },
+    {
+      "event_id": "evt-ap-009",
+      "session_id": "ses-ap-inv-20260407-001",
+      "t_ms": 45600,
+      "t_wall": "2026-04-07T09:15:45.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ap-009",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true
+      },
+      "page_context": {
+        "url": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=8842",
+        "urlNormalized": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=:id",
+        "domain": "system.netsuite.com",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id",
+        "pageTitle": "Vendor Bill #INV-8842 | NetSuite",
+        "applicationLabel": "NetSuite"
+      },
+      "target_summary": {
+        "selector": "#line1_amount",
+        "label": "Line 1 Amount",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      }
+    },
+    {
+      "event_id": "evt-ap-010",
+      "session_id": "ses-ap-inv-20260407-001",
+      "t_ms": 52300,
+      "t_wall": "2026-04-07T09:15:52.300Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ap-010",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true
+      },
+      "page_context": {
+        "url": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=8842",
+        "urlNormalized": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=:id",
+        "domain": "system.netsuite.com",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id",
+        "pageTitle": "Vendor Bill #INV-8842 | NetSuite",
+        "applicationLabel": "NetSuite"
+      },
+      "target_summary": {
+        "selector": "#line1_account",
+        "label": "Line 1 GL Account",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-ap-011",
+      "session_id": "ses-ap-inv-20260407-001",
+      "t_ms": 61800,
+      "t_wall": "2026-04-07T09:16:01.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ap-011",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true
+      },
+      "page_context": {
+        "url": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=8842",
+        "urlNormalized": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=:id",
+        "domain": "system.netsuite.com",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id",
+        "pageTitle": "Vendor Bill #INV-8842 | NetSuite",
+        "applicationLabel": "NetSuite"
+      },
+      "target_summary": {
+        "selector": "#line2_amount",
+        "label": "Line 2 Amount",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      }
+    },
+    {
+      "event_id": "evt-ap-012",
+      "session_id": "ses-ap-inv-20260407-001",
+      "t_ms": 68200,
+      "t_wall": "2026-04-07T09:16:08.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ap-012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true
+      },
+      "page_context": {
+        "url": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=8842",
+        "urlNormalized": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=:id",
+        "domain": "system.netsuite.com",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id",
+        "pageTitle": "Vendor Bill #INV-8842 | NetSuite",
+        "applicationLabel": "NetSuite"
+      },
+      "target_summary": {
+        "selector": "#line2_account",
+        "label": "Line 2 GL Account",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-ap-013",
+      "session_id": "ses-ap-inv-20260407-001",
+      "t_ms": 180500,
+      "t_wall": "2026-04-07T09:18:00.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ap-013",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=8842",
+        "urlNormalized": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=:id",
+        "domain": "system.netsuite.com",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id",
+        "pageTitle": "Vendor Bill #INV-8842 | NetSuite",
+        "applicationLabel": "NetSuite"
+      },
+      "target_summary": {
+        "selector": "#btn_approve",
+        "label": "Approve",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-ap-014",
+      "session_id": "ses-ap-inv-20260407-001",
+      "t_ms": 182100,
+      "t_wall": "2026-04-07T09:18:02.100Z",
+      "event_type": "system.loading_started",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-ap-014",
+        "sourceEventType": "loading_started",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=8842",
+        "urlNormalized": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=:id",
+        "domain": "system.netsuite.com",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id",
+        "pageTitle": "Vendor Bill #INV-8842 | NetSuite",
+        "applicationLabel": "NetSuite"
+      }
+    },
+    {
+      "event_id": "evt-ap-015",
+      "session_id": "ses-ap-inv-20260407-001",
+      "t_ms": 185400,
+      "t_wall": "2026-04-07T09:18:05.400Z",
+      "event_type": "system.loading_finished",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-ap-015",
+        "sourceEventType": "loading_finished",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=8842",
+        "urlNormalized": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=:id",
+        "domain": "system.netsuite.com",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id",
+        "pageTitle": "Vendor Bill #INV-8842 | NetSuite",
+        "applicationLabel": "NetSuite"
+      }
+    },
+    {
+      "event_id": "evt-ap-016",
+      "session_id": "ses-ap-inv-20260407-001",
+      "t_ms": 186200,
+      "t_wall": "2026-04-07T09:18:06.200Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-ap-016",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=8842",
+        "urlNormalized": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=:id",
+        "domain": "system.netsuite.com",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id",
+        "pageTitle": "Vendor Bill #INV-8842 | NetSuite",
+        "applicationLabel": "NetSuite"
+      }
+    },
+    {
+      "event_id": "evt-ap-017",
+      "session_id": "ses-ap-inv-20260407-001",
+      "t_ms": 390000,
+      "t_wall": "2026-04-07T09:21:30.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-ap-017",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=8842",
+        "urlNormalized": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=:id",
+        "domain": "system.netsuite.com",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id",
+        "pageTitle": "Vendor Bill #INV-8842 | NetSuite",
+        "applicationLabel": "NetSuite"
+      },
+      "target_summary": {
+        "selector": "#btn_post",
+        "label": "Post to GL",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-ap-018",
+      "session_id": "ses-ap-inv-20260407-001",
+      "t_ms": 402000,
+      "t_wall": "2026-04-07T09:21:42.000Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-ap-018",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=8842",
+        "urlNormalized": "https://system.netsuite.com/app/accounting/transactions/vendbill.nl?id=:id",
+        "domain": "system.netsuite.com",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id",
+        "pageTitle": "Vendor Bill #INV-8842 | NetSuite",
+        "applicationLabel": "NetSuite"
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "ses-ap-inv-20260407-001-step-1",
+      "session_id": "ses-ap-inv-20260407-001",
+      "ordinal": 1,
+      "title": "Open invoice queue and select INV-8842",
+      "status": "finalized",
+      "grouping_reason": "click_then_navigate",
+      "confidence": 0.85,
+      "source_event_ids": ["evt-ap-001", "evt-ap-002", "evt-ap-003"],
+      "start_t_ms": 0,
+      "end_t_ms": 4800,
+      "duration_ms": 4800,
+      "boundary_reason": "navigation_changed",
+      "page_context": {
+        "domain": "system.netsuite.com",
+        "applicationLabel": "NetSuite",
+        "routeTemplate": "/app/accounting/transactions/vendbilllist.nl"
+      }
+    },
+    {
+      "step_id": "ses-ap-inv-20260407-001-step-2",
+      "session_id": "ses-ap-inv-20260407-001",
+      "ordinal": 2,
+      "title": "Match invoice to Purchase Order PO-4419",
+      "status": "finalized",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": ["evt-ap-004", "evt-ap-005", "evt-ap-006", "evt-ap-007", "evt-ap-008"],
+      "start_t_ms": 18500,
+      "end_t_ms": 32800,
+      "duration_ms": 14300,
+      "boundary_reason": "form_submitted",
+      "page_context": {
+        "domain": "system.netsuite.com",
+        "applicationLabel": "NetSuite",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id"
+      }
+    },
+    {
+      "step_id": "ses-ap-inv-20260407-001-step-3",
+      "session_id": "ses-ap-inv-20260407-001",
+      "ordinal": 3,
+      "title": "Enter line item 1 amount and GL account",
+      "status": "finalized",
+      "grouping_reason": "data_entry",
+      "confidence": 0.9,
+      "source_event_ids": ["evt-ap-009", "evt-ap-010"],
+      "start_t_ms": 45600,
+      "end_t_ms": 52300,
+      "duration_ms": 6700,
+      "boundary_reason": "target_changed",
+      "page_context": {
+        "domain": "system.netsuite.com",
+        "applicationLabel": "NetSuite",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id"
+      }
+    },
+    {
+      "step_id": "ses-ap-inv-20260407-001-step-4",
+      "session_id": "ses-ap-inv-20260407-001",
+      "ordinal": 4,
+      "title": "Enter line item 2 amount and GL account",
+      "status": "finalized",
+      "grouping_reason": "data_entry",
+      "confidence": 0.9,
+      "source_event_ids": ["evt-ap-011", "evt-ap-012"],
+      "start_t_ms": 61800,
+      "end_t_ms": 68200,
+      "duration_ms": 6400,
+      "boundary_reason": "target_changed",
+      "page_context": {
+        "domain": "system.netsuite.com",
+        "applicationLabel": "NetSuite",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id"
+      }
+    },
+    {
+      "step_id": "ses-ap-inv-20260407-001-step-5",
+      "session_id": "ses-ap-inv-20260407-001",
+      "ordinal": 5,
+      "title": "Approve vendor bill",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": ["evt-ap-013", "evt-ap-014", "evt-ap-015", "evt-ap-016"],
+      "start_t_ms": 180500,
+      "end_t_ms": 186200,
+      "duration_ms": 5700,
+      "boundary_reason": "action_completed",
+      "page_context": {
+        "domain": "system.netsuite.com",
+        "applicationLabel": "NetSuite",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id"
+      }
+    },
+    {
+      "step_id": "ses-ap-inv-20260407-001-step-6",
+      "session_id": "ses-ap-inv-20260407-001",
+      "ordinal": 6,
+      "title": "Post invoice to General Ledger",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": ["evt-ap-017", "evt-ap-018"],
+      "start_t_ms": 390000,
+      "end_t_ms": 402000,
+      "duration_ms": 12000,
+      "boundary_reason": "action_completed",
+      "page_context": {
+        "domain": "system.netsuite.com",
+        "applicationLabel": "NetSuite",
+        "routeTemplate": "/app/accounting/transactions/vendbill.nl?id=:id"
+      }
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "ses-ap-inv-20260407-001",
+    "exportedAt": "2026-04-07T09:22:00.000Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0",
+    "segmentationRuleVersion": "1.1.0",
+    "rendererVersion": "0.1.0",
+    "fileHashes": {}
+  }
+}

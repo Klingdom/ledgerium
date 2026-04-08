@@ -1,0 +1,1352 @@
+{
+  "sessionJson": {
+    "sessionId": "sess_insurance_001",
+    "activityName": "Insurance Claim Review and Adjudication",
+    "startedAt": "2026-04-07T10:00:00.000Z",
+    "endedAt": "2026-04-07T10:14:32.000Z",
+    "state": "review_ready",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000001",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 0,
+      "t_wall": "2026-04-07T10:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "raw-i-001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000002",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 1500,
+      "t_wall": "2026-04-07T10:00:01.500Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/queue",
+        "urlNormalized": "https://claims.guidewire.com/claims/queue",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/queue",
+        "pageTitle": "Claims Queue - Guidewire ClaimCenter",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000003",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 5000,
+      "t_wall": "2026-04-07T10:00:05.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/queue",
+        "urlNormalized": "https://claims.guidewire.com/claims/queue",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/queue",
+        "pageTitle": "Claims Queue - Guidewire ClaimCenter",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "target_summary": {
+        "selector": ".claim-row[data-claim-id='CLM-2026-44891']",
+        "label": "Claim CLM-2026-44891 - Auto Collision",
+        "role": "row",
+        "elementType": "tr",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000004",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 6800,
+      "t_wall": "2026-04-07T10:00:06.800Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/summary",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/summary",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/summary",
+        "pageTitle": "Claim Summary - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-004",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000005",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 12000,
+      "t_wall": "2026-04-07T10:00:12.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/summary",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/summary",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/summary",
+        "pageTitle": "Claim Summary - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "target_summary": {
+        "selector": "#tab-documents",
+        "label": "Documents",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-005",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000006",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 13500,
+      "t_wall": "2026-04-07T10:00:13.500Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/documents",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/documents",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/documents",
+        "pageTitle": "Documents - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-006",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000007",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 18000,
+      "t_wall": "2026-04-07T10:00:18.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/documents",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/documents",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/documents",
+        "pageTitle": "Documents - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "target_summary": {
+        "selector": ".document-row[data-doc='police-report.pdf']",
+        "label": "Police Report",
+        "role": "link",
+        "elementType": "a",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-007",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000008",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 19200,
+      "t_wall": "2026-04-07T10:00:19.200Z",
+      "event_type": "system.modal_opened",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/documents",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/documents",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/documents",
+        "pageTitle": "Documents - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-008",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000009",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 35000,
+      "t_wall": "2026-04-07T10:00:35.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/documents",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/documents",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/documents",
+        "pageTitle": "Documents - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "target_summary": {
+        "selector": ".document-row[data-doc='repair-estimate.pdf']",
+        "label": "Repair Estimate",
+        "role": "link",
+        "elementType": "a",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-009",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000010",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 36500,
+      "t_wall": "2026-04-07T10:00:36.500Z",
+      "event_type": "system.modal_opened",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/documents",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/documents",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/documents",
+        "pageTitle": "Documents - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-010",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000011",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 50000,
+      "t_wall": "2026-04-07T10:00:50.000Z",
+      "event_type": "system.modal_closed",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/documents",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/documents",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/documents",
+        "pageTitle": "Documents - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-011",
+        "sourceEventType": "modal_closed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000012",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 58000,
+      "t_wall": "2026-04-07T10:00:58.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://policyAdmin.guidewire.com/policies/POL-AUTO-88234/details",
+        "urlNormalized": "https://policyadmin.guidewire.com/policies/:policyId/details",
+        "domain": "policyadmin.guidewire.com",
+        "routeTemplate": "/policies/:policyId/details",
+        "pageTitle": "Policy Details - POL-AUTO-88234",
+        "applicationLabel": "Guidewire PolicyCenter"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-012",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000013",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 65000,
+      "t_wall": "2026-04-07T10:01:05.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://policyAdmin.guidewire.com/policies/POL-AUTO-88234/details",
+        "urlNormalized": "https://policyadmin.guidewire.com/policies/:policyId/details",
+        "domain": "policyadmin.guidewire.com",
+        "routeTemplate": "/policies/:policyId/details",
+        "pageTitle": "Policy Details - POL-AUTO-88234",
+        "applicationLabel": "Guidewire PolicyCenter"
+      },
+      "target_summary": {
+        "selector": "#tab-coverage",
+        "label": "Coverage Details",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-013",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000014",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 66800,
+      "t_wall": "2026-04-07T10:01:06.800Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://policyAdmin.guidewire.com/policies/POL-AUTO-88234/coverage",
+        "urlNormalized": "https://policyadmin.guidewire.com/policies/:policyId/coverage",
+        "domain": "policyadmin.guidewire.com",
+        "routeTemplate": "/policies/:policyId/coverage",
+        "pageTitle": "Coverage - POL-AUTO-88234",
+        "applicationLabel": "Guidewire PolicyCenter"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-014",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000015",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 80000,
+      "t_wall": "2026-04-07T10:01:20.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://policyAdmin.guidewire.com/policies/POL-AUTO-88234/coverage",
+        "urlNormalized": "https://policyadmin.guidewire.com/policies/:policyId/coverage",
+        "domain": "policyadmin.guidewire.com",
+        "routeTemplate": "/policies/:policyId/coverage",
+        "pageTitle": "Coverage - POL-AUTO-88234",
+        "applicationLabel": "Guidewire PolicyCenter"
+      },
+      "target_summary": {
+        "selector": "#deductible-details-expand",
+        "label": "Expand Deductible Details",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-015",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000016",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 100000,
+      "t_wall": "2026-04-07T10:01:40.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://fraud.nicb.org/check?vin=1HGCM82633A004352",
+        "urlNormalized": "https://fraud.nicb.org/check",
+        "domain": "fraud.nicb.org",
+        "routeTemplate": "/check",
+        "pageTitle": "VIN Check - NICB Fraud Database",
+        "applicationLabel": "NICB Fraud Check"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-016",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000017",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 105000,
+      "t_wall": "2026-04-07T10:01:45.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://fraud.nicb.org/check",
+        "urlNormalized": "https://fraud.nicb.org/check",
+        "domain": "fraud.nicb.org",
+        "routeTemplate": "/check",
+        "pageTitle": "VIN Check - NICB Fraud Database",
+        "applicationLabel": "NICB Fraud Check"
+      },
+      "target_summary": {
+        "selector": "#vin-input",
+        "label": "VIN Number",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-017",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000018",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 108000,
+      "t_wall": "2026-04-07T10:01:48.000Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://fraud.nicb.org/check",
+        "urlNormalized": "https://fraud.nicb.org/check",
+        "domain": "fraud.nicb.org",
+        "routeTemplate": "/check",
+        "pageTitle": "VIN Check - NICB Fraud Database",
+        "applicationLabel": "NICB Fraud Check"
+      },
+      "target_summary": {
+        "selector": "#fraud-check-form",
+        "label": "Check VIN",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-018",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000019",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 110000,
+      "t_wall": "2026-04-07T10:01:50.000Z",
+      "event_type": "system.loading_started",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://fraud.nicb.org/check",
+        "urlNormalized": "https://fraud.nicb.org/check",
+        "domain": "fraud.nicb.org",
+        "routeTemplate": "/check",
+        "pageTitle": "VIN Check - NICB Fraud Database",
+        "applicationLabel": "NICB Fraud Check"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-019",
+        "sourceEventType": "loading_started",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000020",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 113000,
+      "t_wall": "2026-04-07T10:01:53.000Z",
+      "event_type": "system.loading_finished",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://fraud.nicb.org/check",
+        "urlNormalized": "https://fraud.nicb.org/check",
+        "domain": "fraud.nicb.org",
+        "routeTemplate": "/check",
+        "pageTitle": "VIN Check Results - NICB Fraud Database",
+        "applicationLabel": "NICB Fraud Check"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-020",
+        "sourceEventType": "loading_finished",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000021",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 130000,
+      "t_wall": "2026-04-07T10:02:10.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/summary",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/summary",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/summary",
+        "pageTitle": "Claim Summary - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-021",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000022",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 135000,
+      "t_wall": "2026-04-07T10:02:15.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/summary",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/summary",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/summary",
+        "pageTitle": "Claim Summary - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "target_summary": {
+        "selector": "#tab-evaluation",
+        "label": "Evaluation",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-022",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000023",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 136500,
+      "t_wall": "2026-04-07T10:02:16.500Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/evaluation",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/evaluation",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/evaluation",
+        "pageTitle": "Claim Evaluation - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-023",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000024",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 142000,
+      "t_wall": "2026-04-07T10:02:22.000Z",
+      "event_type": "interaction.select",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/evaluation",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/evaluation",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/evaluation",
+        "pageTitle": "Claim Evaluation - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "target_summary": {
+        "selector": "#decision-select",
+        "label": "Decision",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-024",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000025",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 148000,
+      "t_wall": "2026-04-07T10:02:28.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/evaluation",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/evaluation",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/evaluation",
+        "pageTitle": "Claim Evaluation - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "target_summary": {
+        "selector": "#approved-amount",
+        "label": "Approved Amount",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-025",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000026",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 160000,
+      "t_wall": "2026-04-07T10:02:40.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/evaluation",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/evaluation",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/evaluation",
+        "pageTitle": "Claim Evaluation - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "target_summary": {
+        "selector": "#adjuster-notes",
+        "label": "Adjuster Notes",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-026",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000027",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 180000,
+      "t_wall": "2026-04-07T10:03:00.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/evaluation",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/evaluation",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/evaluation",
+        "pageTitle": "Claim Evaluation - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "target_summary": {
+        "selector": "#adjuster-notes",
+        "label": "Adjuster Notes",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-027",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000028",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 195000,
+      "t_wall": "2026-04-07T10:03:15.000Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/evaluation",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/evaluation",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/evaluation",
+        "pageTitle": "Claim Evaluation - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "target_summary": {
+        "selector": "#evaluation-form",
+        "label": "Submit Evaluation",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-028",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000029",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 197000,
+      "t_wall": "2026-04-07T10:03:17.000Z",
+      "event_type": "system.error_displayed",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/evaluation",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/evaluation",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/evaluation",
+        "pageTitle": "Claim Evaluation - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-029",
+        "sourceEventType": "error_displayed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000030",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 205000,
+      "t_wall": "2026-04-07T10:03:25.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/evaluation",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/evaluation",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/evaluation",
+        "pageTitle": "Claim Evaluation - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "target_summary": {
+        "selector": "#approved-amount",
+        "label": "Approved Amount",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-030",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000031",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 212000,
+      "t_wall": "2026-04-07T10:03:32.000Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/evaluation",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/evaluation",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/evaluation",
+        "pageTitle": "Claim Evaluation - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "target_summary": {
+        "selector": "#evaluation-form",
+        "label": "Submit Evaluation",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-031",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000032",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 215000,
+      "t_wall": "2026-04-07T10:03:35.000Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/evaluation",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/evaluation",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/evaluation",
+        "pageTitle": "Claim Evaluation - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-032",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000033",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 225000,
+      "t_wall": "2026-04-07T10:03:45.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/evaluation",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/evaluation",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/evaluation",
+        "pageTitle": "Claim Evaluation - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "target_summary": {
+        "selector": "#btn-approve-claim",
+        "label": "Approve Claim",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-033",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000034",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 226500,
+      "t_wall": "2026-04-07T10:03:46.500Z",
+      "event_type": "system.modal_opened",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/evaluation",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/evaluation",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/evaluation",
+        "pageTitle": "Claim Evaluation - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-034",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000035",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 230000,
+      "t_wall": "2026-04-07T10:03:50.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/evaluation",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/evaluation",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/evaluation",
+        "pageTitle": "Claim Evaluation - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "target_summary": {
+        "selector": "#modal-confirm-approve",
+        "label": "Confirm Approval",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-035",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000036",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 235000,
+      "t_wall": "2026-04-07T10:03:55.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/evaluation",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/evaluation",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/evaluation",
+        "pageTitle": "Claim Evaluation - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "target_summary": {
+        "selector": "#btn-generate-letter",
+        "label": "Generate Approval Letter",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-036",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000037",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 237000,
+      "t_wall": "2026-04-07T10:03:57.000Z",
+      "event_type": "system.loading_started",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/evaluation",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/evaluation",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/evaluation",
+        "pageTitle": "Claim Evaluation - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-037",
+        "sourceEventType": "loading_started",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000038",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 242000,
+      "t_wall": "2026-04-07T10:04:02.000Z",
+      "event_type": "system.loading_finished",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/evaluation",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/evaluation",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/evaluation",
+        "pageTitle": "Claim Evaluation - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-038",
+        "sourceEventType": "loading_finished",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000039",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 245000,
+      "t_wall": "2026-04-07T10:04:05.000Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://claims.guidewire.com/claims/CLM-2026-44891/evaluation",
+        "urlNormalized": "https://claims.guidewire.com/claims/:claimId/evaluation",
+        "domain": "claims.guidewire.com",
+        "routeTemplate": "/claims/:claimId/evaluation",
+        "pageTitle": "Claim Evaluation - CLM-2026-44891",
+        "applicationLabel": "Guidewire ClaimCenter"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-i-039",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "b2c3d4e5-0001-4000-8000-000000000040",
+      "schema_version": "1.0.0",
+      "session_id": "sess_insurance_001",
+      "t_ms": 872000,
+      "t_wall": "2026-04-07T10:14:32.000Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "raw-i-040",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sess_insurance_001-step-1",
+      "session_id": "sess_insurance_001",
+      "ordinal": 1,
+      "title": "Navigate to Claim Summary - CLM-2026-44891",
+      "status": "finalized",
+      "grouping_reason": "click_then_navigate",
+      "confidence": 0.85,
+      "boundary_reason": "route_changed",
+      "source_event_ids": [
+        "b2c3d4e5-0001-4000-8000-000000000002",
+        "b2c3d4e5-0001-4000-8000-000000000003",
+        "b2c3d4e5-0001-4000-8000-000000000004"
+      ],
+      "start_t_ms": 1500,
+      "end_t_ms": 6800,
+      "duration_ms": 5300,
+      "page_context": {
+        "domain": "claims.guidewire.com",
+        "applicationLabel": "Guidewire ClaimCenter",
+        "routeTemplate": "/claims/queue"
+      }
+    },
+    {
+      "step_id": "sess_insurance_001-step-2",
+      "session_id": "sess_insurance_001",
+      "ordinal": 2,
+      "title": "Navigate to Documents - CLM-2026-44891",
+      "status": "finalized",
+      "grouping_reason": "click_then_navigate",
+      "confidence": 0.85,
+      "boundary_reason": "route_changed",
+      "source_event_ids": [
+        "b2c3d4e5-0001-4000-8000-000000000005",
+        "b2c3d4e5-0001-4000-8000-000000000006"
+      ],
+      "start_t_ms": 12000,
+      "end_t_ms": 13500,
+      "duration_ms": 1500,
+      "page_context": {
+        "domain": "claims.guidewire.com",
+        "applicationLabel": "Guidewire ClaimCenter",
+        "routeTemplate": "/claims/:claimId/summary"
+      }
+    },
+    {
+      "step_id": "sess_insurance_001-step-3",
+      "session_id": "sess_insurance_001",
+      "ordinal": 3,
+      "title": "Click Police Report",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "boundary_reason": "target_changed",
+      "source_event_ids": [
+        "b2c3d4e5-0001-4000-8000-000000000007"
+      ],
+      "start_t_ms": 18000,
+      "end_t_ms": 18000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "claims.guidewire.com",
+        "applicationLabel": "Guidewire ClaimCenter",
+        "routeTemplate": "/claims/:claimId/documents"
+      }
+    },
+    {
+      "step_id": "sess_insurance_001-step-4",
+      "session_id": "sess_insurance_001",
+      "ordinal": 4,
+      "title": "Click Repair Estimate",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "boundary_reason": "navigation_changed",
+      "source_event_ids": [
+        "b2c3d4e5-0001-4000-8000-000000000009"
+      ],
+      "start_t_ms": 35000,
+      "end_t_ms": 35000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "claims.guidewire.com",
+        "applicationLabel": "Guidewire ClaimCenter",
+        "routeTemplate": "/claims/:claimId/documents"
+      }
+    },
+    {
+      "step_id": "sess_insurance_001-step-5",
+      "session_id": "sess_insurance_001",
+      "ordinal": 5,
+      "title": "Navigate to Coverage - POL-AUTO-88234",
+      "status": "finalized",
+      "grouping_reason": "click_then_navigate",
+      "confidence": 0.85,
+      "boundary_reason": "route_changed",
+      "source_event_ids": [
+        "b2c3d4e5-0001-4000-8000-000000000012",
+        "b2c3d4e5-0001-4000-8000-000000000013",
+        "b2c3d4e5-0001-4000-8000-000000000014"
+      ],
+      "start_t_ms": 58000,
+      "end_t_ms": 66800,
+      "duration_ms": 8800,
+      "page_context": {
+        "domain": "policyadmin.guidewire.com",
+        "applicationLabel": "Guidewire PolicyCenter",
+        "routeTemplate": "/policies/:policyId/details"
+      }
+    },
+    {
+      "step_id": "sess_insurance_001-step-6",
+      "session_id": "sess_insurance_001",
+      "ordinal": 6,
+      "title": "Click Expand Deductible Details",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "boundary_reason": "navigation_changed",
+      "source_event_ids": [
+        "b2c3d4e5-0001-4000-8000-000000000015"
+      ],
+      "start_t_ms": 80000,
+      "end_t_ms": 80000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "policyadmin.guidewire.com",
+        "applicationLabel": "Guidewire PolicyCenter",
+        "routeTemplate": "/policies/:policyId/coverage"
+      }
+    },
+    {
+      "step_id": "sess_insurance_001-step-7",
+      "session_id": "sess_insurance_001",
+      "ordinal": 7,
+      "title": "Fill and submit Check VIN",
+      "status": "finalized",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "boundary_reason": "form_submitted",
+      "source_event_ids": [
+        "b2c3d4e5-0001-4000-8000-000000000016",
+        "b2c3d4e5-0001-4000-8000-000000000017",
+        "b2c3d4e5-0001-4000-8000-000000000018"
+      ],
+      "start_t_ms": 100000,
+      "end_t_ms": 108000,
+      "duration_ms": 8000,
+      "page_context": {
+        "domain": "fraud.nicb.org",
+        "applicationLabel": "NICB Fraud Check",
+        "routeTemplate": "/check"
+      }
+    },
+    {
+      "step_id": "sess_insurance_001-step-8",
+      "session_id": "sess_insurance_001",
+      "ordinal": 8,
+      "title": "Navigate to Claim Evaluation - CLM-2026-44891",
+      "status": "finalized",
+      "grouping_reason": "click_then_navigate",
+      "confidence": 0.85,
+      "boundary_reason": "route_changed",
+      "source_event_ids": [
+        "b2c3d4e5-0001-4000-8000-000000000021",
+        "b2c3d4e5-0001-4000-8000-000000000022",
+        "b2c3d4e5-0001-4000-8000-000000000023"
+      ],
+      "start_t_ms": 130000,
+      "end_t_ms": 136500,
+      "duration_ms": 6500,
+      "page_context": {
+        "domain": "claims.guidewire.com",
+        "applicationLabel": "Guidewire ClaimCenter",
+        "routeTemplate": "/claims/:claimId/summary"
+      }
+    },
+    {
+      "step_id": "sess_insurance_001-step-9",
+      "session_id": "sess_insurance_001",
+      "ordinal": 9,
+      "title": "Fill and submit Submit Evaluation",
+      "status": "finalized",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "boundary_reason": "form_submitted",
+      "source_event_ids": [
+        "b2c3d4e5-0001-4000-8000-000000000024",
+        "b2c3d4e5-0001-4000-8000-000000000025",
+        "b2c3d4e5-0001-4000-8000-000000000026",
+        "b2c3d4e5-0001-4000-8000-000000000027",
+        "b2c3d4e5-0001-4000-8000-000000000028"
+      ],
+      "start_t_ms": 142000,
+      "end_t_ms": 195000,
+      "duration_ms": 53000,
+      "page_context": {
+        "domain": "claims.guidewire.com",
+        "applicationLabel": "Guidewire ClaimCenter",
+        "routeTemplate": "/claims/:claimId/evaluation"
+      }
+    },
+    {
+      "step_id": "sess_insurance_001-step-10",
+      "session_id": "sess_insurance_001",
+      "ordinal": 10,
+      "title": "Handle error",
+      "status": "finalized",
+      "grouping_reason": "error_handling",
+      "confidence": 0.8,
+      "boundary_reason": "form_submitted",
+      "source_event_ids": [
+        "b2c3d4e5-0001-4000-8000-000000000029",
+        "b2c3d4e5-0001-4000-8000-000000000030",
+        "b2c3d4e5-0001-4000-8000-000000000031"
+      ],
+      "start_t_ms": 197000,
+      "end_t_ms": 212000,
+      "duration_ms": 15000,
+      "page_context": {
+        "domain": "claims.guidewire.com",
+        "applicationLabel": "Guidewire ClaimCenter",
+        "routeTemplate": "/claims/:claimId/evaluation"
+      }
+    },
+    {
+      "step_id": "sess_insurance_001-step-11",
+      "session_id": "sess_insurance_001",
+      "ordinal": 11,
+      "title": "Approve Claim",
+      "status": "finalized",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "boundary_reason": "action_completed",
+      "source_event_ids": [
+        "b2c3d4e5-0001-4000-8000-000000000033"
+      ],
+      "start_t_ms": 225000,
+      "end_t_ms": 225000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "claims.guidewire.com",
+        "applicationLabel": "Guidewire ClaimCenter",
+        "routeTemplate": "/claims/:claimId/evaluation"
+      }
+    },
+    {
+      "step_id": "sess_insurance_001-step-12",
+      "session_id": "sess_insurance_001",
+      "ordinal": 12,
+      "title": "Confirm Approval",
+      "status": "finalized",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "boundary_reason": "action_completed",
+      "source_event_ids": [
+        "b2c3d4e5-0001-4000-8000-000000000035"
+      ],
+      "start_t_ms": 230000,
+      "end_t_ms": 230000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "claims.guidewire.com",
+        "applicationLabel": "Guidewire ClaimCenter",
+        "routeTemplate": "/claims/:claimId/evaluation"
+      }
+    },
+    {
+      "step_id": "sess_insurance_001-step-13",
+      "session_id": "sess_insurance_001",
+      "ordinal": 13,
+      "title": "Generate Approval Letter",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "boundary_reason": "session_stop",
+      "source_event_ids": [
+        "b2c3d4e5-0001-4000-8000-000000000036",
+        "b2c3d4e5-0001-4000-8000-000000000040"
+      ],
+      "start_t_ms": 235000,
+      "end_t_ms": 872000,
+      "duration_ms": 637000,
+      "page_context": {
+        "domain": "claims.guidewire.com",
+        "applicationLabel": "Guidewire ClaimCenter",
+        "routeTemplate": "/claims/:claimId/evaluation"
+      }
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sess_insurance_001",
+    "exportedAt": "2026-04-07T10:15:00.000Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0",
+    "segmentationRuleVersion": "1.1.0",
+    "rendererVersion": "0.1.0",
+    "fileHashes": {}
+  }
+}

@@ -1,0 +1,1129 @@
+{
+  "sessionJson": {
+    "sessionId": "sess_healthcare_001",
+    "activityName": "Patient Intake Registration",
+    "startedAt": "2026-04-07T09:15:00.000Z",
+    "endedAt": "2026-04-07T09:22:47.000Z",
+    "state": "review_ready",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 0,
+      "t_wall": "2026-04-07T09:15:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "raw-h-001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000002",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 1200,
+      "t_wall": "2026-04-07T09:15:01.200Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/search",
+        "urlNormalized": "https://ehr.epichealth.com/patients/search",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/search",
+        "pageTitle": "Patient Search - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000003",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 4500,
+      "t_wall": "2026-04-07T09:15:04.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/search",
+        "urlNormalized": "https://ehr.epichealth.com/patients/search",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/search",
+        "pageTitle": "Patient Search - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": "#patient-search-input",
+        "label": "Last Name",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-003",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000004",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 6800,
+      "t_wall": "2026-04-07T09:15:06.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/search",
+        "urlNormalized": "https://ehr.epichealth.com/patients/search",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/search",
+        "pageTitle": "Patient Search - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": "#patient-dob-input",
+        "label": "Date of Birth",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-004",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true,
+        "redactionReason": "sensitive_pii_field"
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000005",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 8200,
+      "t_wall": "2026-04-07T09:15:08.200Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/search",
+        "urlNormalized": "https://ehr.epichealth.com/patients/search",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/search",
+        "pageTitle": "Patient Search - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": "#patient-search-form",
+        "label": "Search Patients",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-005",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000006",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 9500,
+      "t_wall": "2026-04-07T09:15:09.500Z",
+      "event_type": "system.loading_started",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/search",
+        "urlNormalized": "https://ehr.epichealth.com/patients/search",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/search",
+        "pageTitle": "Patient Search - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-006",
+        "sourceEventType": "loading_started",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000007",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 11200,
+      "t_wall": "2026-04-07T09:15:11.200Z",
+      "event_type": "system.loading_finished",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/search",
+        "urlNormalized": "https://ehr.epichealth.com/patients/search",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/search",
+        "pageTitle": "Patient Search - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-007",
+        "sourceEventType": "loading_finished",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000008",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 15000,
+      "t_wall": "2026-04-07T09:15:15.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/search",
+        "urlNormalized": "https://ehr.epichealth.com/patients/search",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/search",
+        "pageTitle": "Patient Search Results - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": ".search-result-row:nth-child(2)",
+        "label": "Patient Record - Johnson, Maria",
+        "role": "row",
+        "elementType": "tr",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-008",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000009",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 22000,
+      "t_wall": "2026-04-07T09:15:22.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/search",
+        "urlNormalized": "https://ehr.epichealth.com/patients/search",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/search",
+        "pageTitle": "Patient Search Results - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": "#btn-new-patient",
+        "label": "Create New Patient",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-009",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000010",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 23500,
+      "t_wall": "2026-04-07T09:15:23.500Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/new",
+        "urlNormalized": "https://ehr.epichealth.com/patients/new",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/new",
+        "pageTitle": "New Patient Registration - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-010",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000011",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 28000,
+      "t_wall": "2026-04-07T09:15:28.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/new",
+        "urlNormalized": "https://ehr.epichealth.com/patients/new",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/new",
+        "pageTitle": "New Patient Registration - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": "#first-name",
+        "label": "First Name",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-011",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true,
+        "redactionReason": "sensitive_pii_field"
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000012",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 30500,
+      "t_wall": "2026-04-07T09:15:30.500Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/new",
+        "urlNormalized": "https://ehr.epichealth.com/patients/new",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/new",
+        "pageTitle": "New Patient Registration - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": "#last-name",
+        "label": "Last Name",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-012",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true,
+        "redactionReason": "sensitive_pii_field"
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000013",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 33200,
+      "t_wall": "2026-04-07T09:15:33.200Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/new",
+        "urlNormalized": "https://ehr.epichealth.com/patients/new",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/new",
+        "pageTitle": "New Patient Registration - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": "#date-of-birth",
+        "label": "Date of Birth",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-013",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true,
+        "redactionReason": "sensitive_pii_field"
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000014",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 36000,
+      "t_wall": "2026-04-07T09:15:36.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/new",
+        "urlNormalized": "https://ehr.epichealth.com/patients/new",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/new",
+        "pageTitle": "New Patient Registration - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": "#address-line-1",
+        "label": "Address",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-014",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true,
+        "redactionReason": "sensitive_pii_field"
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000015",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 39500,
+      "t_wall": "2026-04-07T09:15:39.500Z",
+      "event_type": "interaction.select",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/new",
+        "urlNormalized": "https://ehr.epichealth.com/patients/new",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/new",
+        "pageTitle": "New Patient Registration - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": "#gender-select",
+        "label": "Gender",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-015",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000016",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 42000,
+      "t_wall": "2026-04-07T09:15:42.000Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/new",
+        "urlNormalized": "https://ehr.epichealth.com/patients/new",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/new",
+        "pageTitle": "New Patient Registration - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": "#demographics-form",
+        "label": "Demographics Form",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-016",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000017",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 43500,
+      "t_wall": "2026-04-07T09:15:43.500Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/new",
+        "urlNormalized": "https://ehr.epichealth.com/patients/new",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/new",
+        "pageTitle": "New Patient Registration - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-017",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000018",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 48000,
+      "t_wall": "2026-04-07T09:15:48.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/new",
+        "urlNormalized": "https://ehr.epichealth.com/patients/new",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/new",
+        "pageTitle": "New Patient Registration - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": "#tab-insurance",
+        "label": "Insurance Tab",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-018",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000019",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 55000,
+      "t_wall": "2026-04-07T09:15:55.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://portal.bcbs.com/eligibility/verify",
+        "urlNormalized": "https://portal.bcbs.com/eligibility/verify",
+        "domain": "portal.bcbs.com",
+        "routeTemplate": "/eligibility/verify",
+        "pageTitle": "Eligibility Verification - BCBS Portal",
+        "applicationLabel": "BCBS Portal"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-019",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000020",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 60000,
+      "t_wall": "2026-04-07T09:16:00.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://portal.bcbs.com/eligibility/verify",
+        "urlNormalized": "https://portal.bcbs.com/eligibility/verify",
+        "domain": "portal.bcbs.com",
+        "routeTemplate": "/eligibility/verify",
+        "pageTitle": "Eligibility Verification - BCBS Portal",
+        "applicationLabel": "BCBS Portal"
+      },
+      "target_summary": {
+        "selector": "#member-id",
+        "label": "Member ID",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-020",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true,
+        "redactionReason": "sensitive_insurance_id"
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000021",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 63000,
+      "t_wall": "2026-04-07T09:16:03.000Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://portal.bcbs.com/eligibility/verify",
+        "urlNormalized": "https://portal.bcbs.com/eligibility/verify",
+        "domain": "portal.bcbs.com",
+        "routeTemplate": "/eligibility/verify",
+        "pageTitle": "Eligibility Verification - BCBS Portal",
+        "applicationLabel": "BCBS Portal"
+      },
+      "target_summary": {
+        "selector": "#eligibility-form",
+        "label": "Verify Eligibility",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-021",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000022",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 65500,
+      "t_wall": "2026-04-07T09:16:05.500Z",
+      "event_type": "system.loading_finished",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://portal.bcbs.com/eligibility/verify",
+        "urlNormalized": "https://portal.bcbs.com/eligibility/verify",
+        "domain": "portal.bcbs.com",
+        "routeTemplate": "/eligibility/verify",
+        "pageTitle": "Eligibility Verification - BCBS Portal",
+        "applicationLabel": "BCBS Portal"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-022",
+        "sourceEventType": "loading_finished",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000023",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 75000,
+      "t_wall": "2026-04-07T09:16:15.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/PT-20260407-001/insurance",
+        "urlNormalized": "https://ehr.epichealth.com/patients/:patientId/insurance",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/:patientId/insurance",
+        "pageTitle": "Insurance Details - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-023",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000024",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 80000,
+      "t_wall": "2026-04-07T09:16:20.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/PT-20260407-001/insurance",
+        "urlNormalized": "https://ehr.epichealth.com/patients/:patientId/insurance",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/:patientId/insurance",
+        "pageTitle": "Insurance Details - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": "#insurance-provider",
+        "label": "Insurance Provider",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-024",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000025",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 84000,
+      "t_wall": "2026-04-07T09:16:24.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/PT-20260407-001/insurance",
+        "urlNormalized": "https://ehr.epichealth.com/patients/:patientId/insurance",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/:patientId/insurance",
+        "pageTitle": "Insurance Details - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": "#policy-number",
+        "label": "Policy Number",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-025",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true,
+        "redactionReason": "sensitive_insurance_id"
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000026",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 88000,
+      "t_wall": "2026-04-07T09:16:28.000Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/PT-20260407-001/insurance",
+        "urlNormalized": "https://ehr.epichealth.com/patients/:patientId/insurance",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/:patientId/insurance",
+        "pageTitle": "Insurance Details - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": "#insurance-form",
+        "label": "Save Insurance",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-026",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000027",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 95000,
+      "t_wall": "2026-04-07T09:16:35.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/patients/PT-20260407-001/insurance",
+        "urlNormalized": "https://ehr.epichealth.com/patients/:patientId/insurance",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/patients/:patientId/insurance",
+        "pageTitle": "Insurance Details - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": "#btn-schedule-appointment",
+        "label": "Schedule Appointment",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-027",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000028",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 96500,
+      "t_wall": "2026-04-07T09:16:36.500Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/scheduling/new?patient=PT-20260407-001",
+        "urlNormalized": "https://ehr.epichealth.com/scheduling/new",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/scheduling/new",
+        "pageTitle": "Schedule Appointment - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-028",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000029",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 105000,
+      "t_wall": "2026-04-07T09:16:45.000Z",
+      "event_type": "interaction.select",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/scheduling/new?patient=PT-20260407-001",
+        "urlNormalized": "https://ehr.epichealth.com/scheduling/new",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/scheduling/new",
+        "pageTitle": "Schedule Appointment - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": "#appointment-type",
+        "label": "Appointment Type",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-029",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000030",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 115000,
+      "t_wall": "2026-04-07T09:16:55.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/scheduling/new?patient=PT-20260407-001",
+        "urlNormalized": "https://ehr.epichealth.com/scheduling/new",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/scheduling/new",
+        "pageTitle": "Schedule Appointment - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": ".time-slot[data-time='10:30']",
+        "label": "10:30 AM - Dr. Patel",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-030",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000031",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 120000,
+      "t_wall": "2026-04-07T09:17:00.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/scheduling/new?patient=PT-20260407-001",
+        "urlNormalized": "https://ehr.epichealth.com/scheduling/new",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/scheduling/new",
+        "pageTitle": "Schedule Appointment - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "target_summary": {
+        "selector": "#btn-confirm-appointment",
+        "label": "Confirm Appointment",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-031",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000032",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 122000,
+      "t_wall": "2026-04-07T09:17:02.000Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://ehr.epichealth.com/scheduling/new?patient=PT-20260407-001",
+        "urlNormalized": "https://ehr.epichealth.com/scheduling/new",
+        "domain": "ehr.epichealth.com",
+        "routeTemplate": "/scheduling/new",
+        "pageTitle": "Schedule Appointment - EpicCare",
+        "applicationLabel": "EpicCare"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-h-032",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "a1b2c3d4-0001-4000-8000-000000000033",
+      "schema_version": "1.0.0",
+      "session_id": "sess_healthcare_001",
+      "t_ms": 467000,
+      "t_wall": "2026-04-07T09:22:47.000Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "raw-h-033",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sess_healthcare_001-step-1",
+      "session_id": "sess_healthcare_001",
+      "ordinal": 1,
+      "title": "Fill and submit Search Patients",
+      "status": "finalized",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "boundary_reason": "form_submitted",
+      "source_event_ids": [
+        "a1b2c3d4-0001-4000-8000-000000000002",
+        "a1b2c3d4-0001-4000-8000-000000000003",
+        "a1b2c3d4-0001-4000-8000-000000000004",
+        "a1b2c3d4-0001-4000-8000-000000000005"
+      ],
+      "start_t_ms": 1200,
+      "end_t_ms": 8200,
+      "duration_ms": 7000,
+      "page_context": {
+        "domain": "ehr.epichealth.com",
+        "applicationLabel": "EpicCare",
+        "routeTemplate": "/patients/search"
+      }
+    },
+    {
+      "step_id": "sess_healthcare_001-step-2",
+      "session_id": "sess_healthcare_001",
+      "ordinal": 2,
+      "title": "Click Patient Record - Johnson, Maria",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "boundary_reason": "target_changed",
+      "source_event_ids": [
+        "a1b2c3d4-0001-4000-8000-000000000008"
+      ],
+      "start_t_ms": 15000,
+      "end_t_ms": 15000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "ehr.epichealth.com",
+        "applicationLabel": "EpicCare",
+        "routeTemplate": "/patients/search"
+      }
+    },
+    {
+      "step_id": "sess_healthcare_001-step-3",
+      "session_id": "sess_healthcare_001",
+      "ordinal": 3,
+      "title": "Navigate to New Patient Registration - EpicCare",
+      "status": "finalized",
+      "grouping_reason": "click_then_navigate",
+      "confidence": 0.85,
+      "boundary_reason": "route_changed",
+      "source_event_ids": [
+        "a1b2c3d4-0001-4000-8000-000000000009",
+        "a1b2c3d4-0001-4000-8000-000000000010"
+      ],
+      "start_t_ms": 22000,
+      "end_t_ms": 23500,
+      "duration_ms": 1500,
+      "page_context": {
+        "domain": "ehr.epichealth.com",
+        "applicationLabel": "EpicCare",
+        "routeTemplate": "/patients/search"
+      }
+    },
+    {
+      "step_id": "sess_healthcare_001-step-4",
+      "session_id": "sess_healthcare_001",
+      "ordinal": 4,
+      "title": "Fill and submit Demographics Form",
+      "status": "finalized",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "boundary_reason": "form_submitted",
+      "source_event_ids": [
+        "a1b2c3d4-0001-4000-8000-000000000011",
+        "a1b2c3d4-0001-4000-8000-000000000012",
+        "a1b2c3d4-0001-4000-8000-000000000013",
+        "a1b2c3d4-0001-4000-8000-000000000014",
+        "a1b2c3d4-0001-4000-8000-000000000015",
+        "a1b2c3d4-0001-4000-8000-000000000016"
+      ],
+      "start_t_ms": 28000,
+      "end_t_ms": 42000,
+      "duration_ms": 14000,
+      "page_context": {
+        "domain": "ehr.epichealth.com",
+        "applicationLabel": "EpicCare",
+        "routeTemplate": "/patients/new"
+      }
+    },
+    {
+      "step_id": "sess_healthcare_001-step-5",
+      "session_id": "sess_healthcare_001",
+      "ordinal": 5,
+      "title": "Click Insurance Tab",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "boundary_reason": "navigation_changed",
+      "source_event_ids": [
+        "a1b2c3d4-0001-4000-8000-000000000018"
+      ],
+      "start_t_ms": 48000,
+      "end_t_ms": 48000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "ehr.epichealth.com",
+        "applicationLabel": "EpicCare",
+        "routeTemplate": "/patients/new"
+      }
+    },
+    {
+      "step_id": "sess_healthcare_001-step-6",
+      "session_id": "sess_healthcare_001",
+      "ordinal": 6,
+      "title": "Fill and submit Verify Eligibility",
+      "status": "finalized",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "boundary_reason": "form_submitted",
+      "source_event_ids": [
+        "a1b2c3d4-0001-4000-8000-000000000019",
+        "a1b2c3d4-0001-4000-8000-000000000020",
+        "a1b2c3d4-0001-4000-8000-000000000021"
+      ],
+      "start_t_ms": 55000,
+      "end_t_ms": 63000,
+      "duration_ms": 8000,
+      "page_context": {
+        "domain": "portal.bcbs.com",
+        "applicationLabel": "BCBS Portal",
+        "routeTemplate": "/eligibility/verify"
+      }
+    },
+    {
+      "step_id": "sess_healthcare_001-step-7",
+      "session_id": "sess_healthcare_001",
+      "ordinal": 7,
+      "title": "Fill and submit Save Insurance",
+      "status": "finalized",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "boundary_reason": "form_submitted",
+      "source_event_ids": [
+        "a1b2c3d4-0001-4000-8000-000000000023",
+        "a1b2c3d4-0001-4000-8000-000000000024",
+        "a1b2c3d4-0001-4000-8000-000000000025",
+        "a1b2c3d4-0001-4000-8000-000000000026"
+      ],
+      "start_t_ms": 75000,
+      "end_t_ms": 88000,
+      "duration_ms": 13000,
+      "page_context": {
+        "domain": "ehr.epichealth.com",
+        "applicationLabel": "EpicCare",
+        "routeTemplate": "/patients/:patientId/insurance"
+      }
+    },
+    {
+      "step_id": "sess_healthcare_001-step-8",
+      "session_id": "sess_healthcare_001",
+      "ordinal": 8,
+      "title": "Navigate to Schedule Appointment - EpicCare",
+      "status": "finalized",
+      "grouping_reason": "click_then_navigate",
+      "confidence": 0.85,
+      "boundary_reason": "route_changed",
+      "source_event_ids": [
+        "a1b2c3d4-0001-4000-8000-000000000027",
+        "a1b2c3d4-0001-4000-8000-000000000028"
+      ],
+      "start_t_ms": 95000,
+      "end_t_ms": 96500,
+      "duration_ms": 1500,
+      "page_context": {
+        "domain": "ehr.epichealth.com",
+        "applicationLabel": "EpicCare",
+        "routeTemplate": "/patients/:patientId/insurance"
+      }
+    },
+    {
+      "step_id": "sess_healthcare_001-step-9",
+      "session_id": "sess_healthcare_001",
+      "ordinal": 9,
+      "title": "Confirm Appointment",
+      "status": "finalized",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "boundary_reason": "action_completed",
+      "source_event_ids": [
+        "a1b2c3d4-0001-4000-8000-000000000029",
+        "a1b2c3d4-0001-4000-8000-000000000030",
+        "a1b2c3d4-0001-4000-8000-000000000031"
+      ],
+      "start_t_ms": 105000,
+      "end_t_ms": 120000,
+      "duration_ms": 15000,
+      "page_context": {
+        "domain": "ehr.epichealth.com",
+        "applicationLabel": "EpicCare",
+        "routeTemplate": "/scheduling/new"
+      }
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sess_healthcare_001",
+    "exportedAt": "2026-04-07T09:23:00.000Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0",
+    "segmentationRuleVersion": "1.1.0",
+    "rendererVersion": "0.1.0",
+    "fileHashes": {}
+  }
+}

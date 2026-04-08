@@ -1,0 +1,882 @@
+{
+  "sessionJson": {
+    "sessionId": "sess_itprov_001",
+    "activityName": "IT Access Provisioning - New Hire",
+    "startedAt": "2026-04-07T13:30:00.000Z",
+    "endedAt": "2026-04-07T13:41:15.000Z",
+    "state": "review_ready",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000001",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 0,
+      "t_wall": "2026-04-07T13:30:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "raw-it-001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000002",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 1800,
+      "t_wall": "2026-04-07T13:30:01.800Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://acme.service-now.com/nav_to.do?uri=sc_req_item.do?sys_id=REQ0045231",
+        "urlNormalized": "https://acme.service-now.com/sc_req_item.do",
+        "domain": "acme.service-now.com",
+        "routeTemplate": "/sc_req_item.do",
+        "pageTitle": "Request Item: New Hire Access - REQ0045231",
+        "applicationLabel": "ServiceNow"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000003",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 8000,
+      "t_wall": "2026-04-07T13:30:08.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://acme.service-now.com/nav_to.do?uri=sc_req_item.do?sys_id=REQ0045231",
+        "urlNormalized": "https://acme.service-now.com/sc_req_item.do",
+        "domain": "acme.service-now.com",
+        "routeTemplate": "/sc_req_item.do",
+        "pageTitle": "Request Item: New Hire Access - REQ0045231",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#approval_history_link",
+        "label": "View Approval History",
+        "role": "link",
+        "elementType": "a",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000004",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 15000,
+      "t_wall": "2026-04-07T13:30:15.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://acme.service-now.com/nav_to.do?uri=sc_req_item.do?sys_id=REQ0045231",
+        "urlNormalized": "https://acme.service-now.com/sc_req_item.do",
+        "domain": "acme.service-now.com",
+        "routeTemplate": "/sc_req_item.do",
+        "pageTitle": "Request Item: New Hire Access - REQ0045231",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#work_notes_add",
+        "label": "Add Work Note",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-004",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000005",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 20000,
+      "t_wall": "2026-04-07T13:30:20.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://acme.service-now.com/nav_to.do?uri=sc_req_item.do?sys_id=REQ0045231",
+        "urlNormalized": "https://acme.service-now.com/sc_req_item.do",
+        "domain": "acme.service-now.com",
+        "routeTemplate": "/sc_req_item.do",
+        "pageTitle": "Request Item: New Hire Access - REQ0045231",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#work_notes_textarea",
+        "label": "Work Notes",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-005",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000006",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 35000,
+      "t_wall": "2026-04-07T13:30:35.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://admin.azure.com/users/new",
+        "urlNormalized": "https://admin.azure.com/users/new",
+        "domain": "admin.azure.com",
+        "routeTemplate": "/users/new",
+        "pageTitle": "New User - Azure Active Directory",
+        "applicationLabel": "Azure AD"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-006",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000007",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 40000,
+      "t_wall": "2026-04-07T13:30:40.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://admin.azure.com/users/new",
+        "urlNormalized": "https://admin.azure.com/users/new",
+        "domain": "admin.azure.com",
+        "routeTemplate": "/users/new",
+        "pageTitle": "New User - Azure Active Directory",
+        "applicationLabel": "Azure AD"
+      },
+      "target_summary": {
+        "selector": "#displayName",
+        "label": "Display Name",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-007",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true,
+        "redactionReason": "sensitive_pii_field"
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000008",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 44000,
+      "t_wall": "2026-04-07T13:30:44.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://admin.azure.com/users/new",
+        "urlNormalized": "https://admin.azure.com/users/new",
+        "domain": "admin.azure.com",
+        "routeTemplate": "/users/new",
+        "pageTitle": "New User - Azure Active Directory",
+        "applicationLabel": "Azure AD"
+      },
+      "target_summary": {
+        "selector": "#userPrincipalName",
+        "label": "User Principal Name",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-008",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true,
+        "redactionReason": "sensitive_pii_field"
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000009",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 48000,
+      "t_wall": "2026-04-07T13:30:48.000Z",
+      "event_type": "interaction.select",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://admin.azure.com/users/new",
+        "urlNormalized": "https://admin.azure.com/users/new",
+        "domain": "admin.azure.com",
+        "routeTemplate": "/users/new",
+        "pageTitle": "New User - Azure Active Directory",
+        "applicationLabel": "Azure AD"
+      },
+      "target_summary": {
+        "selector": "#department",
+        "label": "Department",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-009",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000010",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 52000,
+      "t_wall": "2026-04-07T13:30:52.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://admin.azure.com/users/new",
+        "urlNormalized": "https://admin.azure.com/users/new",
+        "domain": "admin.azure.com",
+        "routeTemplate": "/users/new",
+        "pageTitle": "New User - Azure Active Directory",
+        "applicationLabel": "Azure AD"
+      },
+      "target_summary": {
+        "selector": "#btn-create-user",
+        "label": "Create User",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-010",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000011",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 54500,
+      "t_wall": "2026-04-07T13:30:54.500Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://admin.azure.com/users/new",
+        "urlNormalized": "https://admin.azure.com/users/new",
+        "domain": "admin.azure.com",
+        "routeTemplate": "/users/new",
+        "pageTitle": "New User - Azure Active Directory",
+        "applicationLabel": "Azure AD"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-011",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000012",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 62000,
+      "t_wall": "2026-04-07T13:31:02.000Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://admin.azure.com/users/jdoe@acme.com/licenses",
+        "urlNormalized": "https://admin.azure.com/users/:userId/licenses",
+        "domain": "admin.azure.com",
+        "routeTemplate": "/users/:userId/licenses",
+        "pageTitle": "Assign Licenses - Azure AD",
+        "applicationLabel": "Azure AD"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-012",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000013",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 68000,
+      "t_wall": "2026-04-07T13:31:08.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://admin.azure.com/users/jdoe@acme.com/licenses",
+        "urlNormalized": "https://admin.azure.com/users/:userId/licenses",
+        "domain": "admin.azure.com",
+        "routeTemplate": "/users/:userId/licenses",
+        "pageTitle": "Assign Licenses - Azure AD",
+        "applicationLabel": "Azure AD"
+      },
+      "target_summary": {
+        "selector": "#license-m365-e3",
+        "label": "Microsoft 365 E3",
+        "role": "checkbox",
+        "elementType": "input",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-013",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000014",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 72000,
+      "t_wall": "2026-04-07T13:31:12.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://admin.azure.com/users/jdoe@acme.com/licenses",
+        "urlNormalized": "https://admin.azure.com/users/:userId/licenses",
+        "domain": "admin.azure.com",
+        "routeTemplate": "/users/:userId/licenses",
+        "pageTitle": "Assign Licenses - Azure AD",
+        "applicationLabel": "Azure AD"
+      },
+      "target_summary": {
+        "selector": "#license-teams",
+        "label": "Microsoft Teams",
+        "role": "checkbox",
+        "elementType": "input",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-014",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000015",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 76000,
+      "t_wall": "2026-04-07T13:31:16.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://admin.azure.com/users/jdoe@acme.com/licenses",
+        "urlNormalized": "https://admin.azure.com/users/:userId/licenses",
+        "domain": "admin.azure.com",
+        "routeTemplate": "/users/:userId/licenses",
+        "pageTitle": "Assign Licenses - Azure AD",
+        "applicationLabel": "Azure AD"
+      },
+      "target_summary": {
+        "selector": "#btn-save-licenses",
+        "label": "Save",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-015",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000016",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 85000,
+      "t_wall": "2026-04-07T13:31:25.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://vpn.acme.com/admin/users/add",
+        "urlNormalized": "https://vpn.acme.com/admin/users/add",
+        "domain": "vpn.acme.com",
+        "routeTemplate": "/admin/users/add",
+        "pageTitle": "Add VPN User - GlobalProtect Admin",
+        "applicationLabel": "GlobalProtect"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-016",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000017",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 90000,
+      "t_wall": "2026-04-07T13:31:30.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://vpn.acme.com/admin/users/add",
+        "urlNormalized": "https://vpn.acme.com/admin/users/add",
+        "domain": "vpn.acme.com",
+        "routeTemplate": "/admin/users/add",
+        "pageTitle": "Add VPN User - GlobalProtect Admin",
+        "applicationLabel": "GlobalProtect"
+      },
+      "target_summary": {
+        "selector": "#vpn-username",
+        "label": "Username",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-017",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true,
+        "redactionReason": "sensitive_credential_field"
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000018",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 94000,
+      "t_wall": "2026-04-07T13:31:34.000Z",
+      "event_type": "interaction.select",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://vpn.acme.com/admin/users/add",
+        "urlNormalized": "https://vpn.acme.com/admin/users/add",
+        "domain": "vpn.acme.com",
+        "routeTemplate": "/admin/users/add",
+        "pageTitle": "Add VPN User - GlobalProtect Admin",
+        "applicationLabel": "GlobalProtect"
+      },
+      "target_summary": {
+        "selector": "#vpn-group",
+        "label": "VPN Group",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-018",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000019",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 98000,
+      "t_wall": "2026-04-07T13:31:38.000Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://vpn.acme.com/admin/users/add",
+        "urlNormalized": "https://vpn.acme.com/admin/users/add",
+        "domain": "vpn.acme.com",
+        "routeTemplate": "/admin/users/add",
+        "pageTitle": "Add VPN User - GlobalProtect Admin",
+        "applicationLabel": "GlobalProtect"
+      },
+      "target_summary": {
+        "selector": "#vpn-user-form",
+        "label": "Add VPN User",
+        "role": "form",
+        "elementType": "form",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-019",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000020",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 100500,
+      "t_wall": "2026-04-07T13:31:40.500Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://vpn.acme.com/admin/users/add",
+        "urlNormalized": "https://vpn.acme.com/admin/users/add",
+        "domain": "vpn.acme.com",
+        "routeTemplate": "/admin/users/add",
+        "pageTitle": "Add VPN User - GlobalProtect Admin",
+        "applicationLabel": "GlobalProtect"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-020",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000021",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 115000,
+      "t_wall": "2026-04-07T13:31:55.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://acme.service-now.com/nav_to.do?uri=sc_req_item.do?sys_id=REQ0045231",
+        "urlNormalized": "https://acme.service-now.com/sc_req_item.do",
+        "domain": "acme.service-now.com",
+        "routeTemplate": "/sc_req_item.do",
+        "pageTitle": "Request Item: New Hire Access - REQ0045231",
+        "applicationLabel": "ServiceNow"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-021",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000022",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 120000,
+      "t_wall": "2026-04-07T13:32:00.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://acme.service-now.com/nav_to.do?uri=sc_req_item.do?sys_id=REQ0045231",
+        "urlNormalized": "https://acme.service-now.com/sc_req_item.do",
+        "domain": "acme.service-now.com",
+        "routeTemplate": "/sc_req_item.do",
+        "pageTitle": "Request Item: New Hire Access - REQ0045231",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#close_notes",
+        "label": "Close Notes",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-022",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000023",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 130000,
+      "t_wall": "2026-04-07T13:32:10.000Z",
+      "event_type": "interaction.select",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://acme.service-now.com/nav_to.do?uri=sc_req_item.do?sys_id=REQ0045231",
+        "urlNormalized": "https://acme.service-now.com/sc_req_item.do",
+        "domain": "acme.service-now.com",
+        "routeTemplate": "/sc_req_item.do",
+        "pageTitle": "Request Item: New Hire Access - REQ0045231",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#state",
+        "label": "State",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-023",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000024",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 135000,
+      "t_wall": "2026-04-07T13:32:15.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://acme.service-now.com/nav_to.do?uri=sc_req_item.do?sys_id=REQ0045231",
+        "urlNormalized": "https://acme.service-now.com/sc_req_item.do",
+        "domain": "acme.service-now.com",
+        "routeTemplate": "/sc_req_item.do",
+        "pageTitle": "Request Item: New Hire Access - REQ0045231",
+        "applicationLabel": "ServiceNow"
+      },
+      "target_summary": {
+        "selector": "#sysverb_update",
+        "label": "Update",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-it-024",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "c3d4e5f6-0001-4000-8000-000000000025",
+      "schema_version": "1.0.0",
+      "session_id": "sess_itprov_001",
+      "t_ms": 675000,
+      "t_wall": "2026-04-07T13:41:15.000Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "raw-it-025",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sess_itprov_001-step-1",
+      "session_id": "sess_itprov_001",
+      "ordinal": 1,
+      "title": "Click View Approval History",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "boundary_reason": "target_changed",
+      "source_event_ids": [
+        "c3d4e5f6-0001-4000-8000-000000000002",
+        "c3d4e5f6-0001-4000-8000-000000000003"
+      ],
+      "start_t_ms": 1800,
+      "end_t_ms": 8000,
+      "duration_ms": 6200,
+      "page_context": {
+        "domain": "acme.service-now.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/sc_req_item.do"
+      }
+    },
+    {
+      "step_id": "sess_itprov_001-step-2",
+      "session_id": "sess_itprov_001",
+      "ordinal": 2,
+      "title": "Enter Work Notes",
+      "status": "finalized",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "boundary_reason": "navigation_changed",
+      "source_event_ids": [
+        "c3d4e5f6-0001-4000-8000-000000000004",
+        "c3d4e5f6-0001-4000-8000-000000000005"
+      ],
+      "start_t_ms": 15000,
+      "end_t_ms": 20000,
+      "duration_ms": 5000,
+      "page_context": {
+        "domain": "acme.service-now.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/sc_req_item.do"
+      }
+    },
+    {
+      "step_id": "sess_itprov_001-step-3",
+      "session_id": "sess_itprov_001",
+      "ordinal": 3,
+      "title": "Create User",
+      "status": "finalized",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "boundary_reason": "action_completed",
+      "source_event_ids": [
+        "c3d4e5f6-0001-4000-8000-000000000006",
+        "c3d4e5f6-0001-4000-8000-000000000007",
+        "c3d4e5f6-0001-4000-8000-000000000008",
+        "c3d4e5f6-0001-4000-8000-000000000009",
+        "c3d4e5f6-0001-4000-8000-000000000010"
+      ],
+      "start_t_ms": 35000,
+      "end_t_ms": 52000,
+      "duration_ms": 17000,
+      "page_context": {
+        "domain": "admin.azure.com",
+        "applicationLabel": "Azure AD",
+        "routeTemplate": "/users/new"
+      }
+    },
+    {
+      "step_id": "sess_itprov_001-step-4",
+      "session_id": "sess_itprov_001",
+      "ordinal": 4,
+      "title": "Navigate to Assign Licenses - Azure AD",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "boundary_reason": "route_changed",
+      "source_event_ids": [
+        "c3d4e5f6-0001-4000-8000-000000000012"
+      ],
+      "start_t_ms": 62000,
+      "end_t_ms": 62000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "admin.azure.com",
+        "applicationLabel": "Azure AD",
+        "routeTemplate": "/users/:userId/licenses"
+      }
+    },
+    {
+      "step_id": "sess_itprov_001-step-5",
+      "session_id": "sess_itprov_001",
+      "ordinal": 5,
+      "title": "Save",
+      "status": "finalized",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "boundary_reason": "action_completed",
+      "source_event_ids": [
+        "c3d4e5f6-0001-4000-8000-000000000013",
+        "c3d4e5f6-0001-4000-8000-000000000014",
+        "c3d4e5f6-0001-4000-8000-000000000015"
+      ],
+      "start_t_ms": 68000,
+      "end_t_ms": 76000,
+      "duration_ms": 8000,
+      "page_context": {
+        "domain": "admin.azure.com",
+        "applicationLabel": "Azure AD",
+        "routeTemplate": "/users/:userId/licenses"
+      }
+    },
+    {
+      "step_id": "sess_itprov_001-step-6",
+      "session_id": "sess_itprov_001",
+      "ordinal": 6,
+      "title": "Fill and submit Add VPN User",
+      "status": "finalized",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "boundary_reason": "form_submitted",
+      "source_event_ids": [
+        "c3d4e5f6-0001-4000-8000-000000000016",
+        "c3d4e5f6-0001-4000-8000-000000000017",
+        "c3d4e5f6-0001-4000-8000-000000000018",
+        "c3d4e5f6-0001-4000-8000-000000000019"
+      ],
+      "start_t_ms": 85000,
+      "end_t_ms": 98000,
+      "duration_ms": 13000,
+      "page_context": {
+        "domain": "vpn.acme.com",
+        "applicationLabel": "GlobalProtect",
+        "routeTemplate": "/admin/users/add"
+      }
+    },
+    {
+      "step_id": "sess_itprov_001-step-7",
+      "session_id": "sess_itprov_001",
+      "ordinal": 7,
+      "title": "Enter Close Notes",
+      "status": "finalized",
+      "grouping_reason": "data_entry",
+      "confidence": 0.8,
+      "boundary_reason": "target_changed",
+      "source_event_ids": [
+        "c3d4e5f6-0001-4000-8000-000000000021",
+        "c3d4e5f6-0001-4000-8000-000000000022"
+      ],
+      "start_t_ms": 115000,
+      "end_t_ms": 120000,
+      "duration_ms": 5000,
+      "page_context": {
+        "domain": "acme.service-now.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/sc_req_item.do"
+      }
+    },
+    {
+      "step_id": "sess_itprov_001-step-8",
+      "session_id": "sess_itprov_001",
+      "ordinal": 8,
+      "title": "Update",
+      "status": "finalized",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "boundary_reason": "action_completed",
+      "source_event_ids": [
+        "c3d4e5f6-0001-4000-8000-000000000023",
+        "c3d4e5f6-0001-4000-8000-000000000024",
+        "c3d4e5f6-0001-4000-8000-000000000025"
+      ],
+      "start_t_ms": 130000,
+      "end_t_ms": 675000,
+      "duration_ms": 545000,
+      "page_context": {
+        "domain": "acme.service-now.com",
+        "applicationLabel": "ServiceNow",
+        "routeTemplate": "/sc_req_item.do"
+      }
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sess_itprov_001",
+    "exportedAt": "2026-04-07T13:42:00.000Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0",
+    "segmentationRuleVersion": "1.1.0",
+    "rendererVersion": "0.1.0",
+    "fileHashes": {}
+  }
+}

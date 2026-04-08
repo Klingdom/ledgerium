@@ -1,0 +1,961 @@
+{
+  "sessionJson": {
+    "sessionId": "ses-refund-20260407-001",
+    "activityName": "Process Refund for Order #ORD-77291",
+    "startedAt": "2026-04-07T15:45:00.000Z",
+    "endedAt": "2026-04-07T15:56:48.000Z",
+    "state": "review_ready",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "evt-rf-001",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 0,
+      "t_wall": "2026-04-07T15:45:00.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-001",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id",
+        "pageTitle": "Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      }
+    },
+    {
+      "event_id": "evt-rf-002",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 2100,
+      "t_wall": "2026-04-07T15:45:02.100Z",
+      "event_type": "system.loading_started",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-002",
+        "sourceEventType": "loading_started",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id",
+        "pageTitle": "Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      }
+    },
+    {
+      "event_id": "evt-rf-003",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 4500,
+      "t_wall": "2026-04-07T15:45:04.500Z",
+      "event_type": "system.loading_finished",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-003",
+        "sourceEventType": "loading_finished",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id",
+        "pageTitle": "Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      }
+    },
+    {
+      "event_id": "evt-rf-004",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 18000,
+      "t_wall": "2026-04-07T15:45:18.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-004",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id",
+        "pageTitle": "Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      },
+      "target_summary": {
+        "selector": "a[data-section='payment']",
+        "label": "Payment details",
+        "role": "link",
+        "elementType": "a",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-rf-005",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 20300,
+      "t_wall": "2026-04-07T15:45:20.300Z",
+      "event_type": "navigation.spa_route_changed",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-005",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291/payments",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id/payments",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id/payments",
+        "pageTitle": "Payment — Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      }
+    },
+    {
+      "event_id": "evt-rf-006",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 55000,
+      "t_wall": "2026-04-07T15:45:55.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-006",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291/payments",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id/payments",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id/payments",
+        "pageTitle": "Payment — Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      },
+      "target_summary": {
+        "selector": "button[data-action='refund']",
+        "label": "Refund",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-rf-007",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 57200,
+      "t_wall": "2026-04-07T15:45:57.200Z",
+      "event_type": "navigation.spa_route_changed",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-007",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291/refund",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id/refund",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id/refund",
+        "pageTitle": "Refund — Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      }
+    },
+    {
+      "event_id": "evt-rf-008",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 68000,
+      "t_wall": "2026-04-07T15:46:08.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-008",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291/refund",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id/refund",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id/refund",
+        "pageTitle": "Refund — Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      },
+      "target_summary": {
+        "selector": "input[name='refundAmount']",
+        "label": "Refund amount",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      }
+    },
+    {
+      "event_id": "evt-rf-009",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 75000,
+      "t_wall": "2026-04-07T15:46:15.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-009",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291/refund",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id/refund",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id/refund",
+        "pageTitle": "Refund — Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      },
+      "target_summary": {
+        "selector": "select[name='refundReason']",
+        "label": "Reason for refund",
+        "role": "combobox",
+        "elementType": "select",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-rf-010",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 82000,
+      "t_wall": "2026-04-07T15:46:22.000Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-010",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291/refund",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id/refund",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id/refund",
+        "pageTitle": "Refund — Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      },
+      "target_summary": {
+        "selector": "button[data-action='submitRefund']",
+        "label": "Refund",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-rf-011",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 84500,
+      "t_wall": "2026-04-07T15:46:24.500Z",
+      "event_type": "system.loading_started",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-011",
+        "sourceEventType": "loading_started",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291/refund",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id/refund",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id/refund",
+        "pageTitle": "Refund — Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      }
+    },
+    {
+      "event_id": "evt-rf-012",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 90000,
+      "t_wall": "2026-04-07T15:46:30.000Z",
+      "event_type": "system.loading_finished",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-012",
+        "sourceEventType": "loading_finished",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291/refund",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id/refund",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id/refund",
+        "pageTitle": "Refund — Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      }
+    },
+    {
+      "event_id": "evt-rf-013",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 90200,
+      "t_wall": "2026-04-07T15:46:30.200Z",
+      "event_type": "system.error_displayed",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-013",
+        "sourceEventType": "error_displayed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291/refund",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id/refund",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id/refund",
+        "pageTitle": "Refund — Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      }
+    },
+    {
+      "event_id": "evt-rf-014",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 120000,
+      "t_wall": "2026-04-07T15:47:00.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-014",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291/refund",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id/refund",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id/refund",
+        "pageTitle": "Refund — Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      },
+      "target_summary": {
+        "selector": "input[name='refundAmount']",
+        "label": "Refund amount",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true
+      }
+    },
+    {
+      "event_id": "evt-rf-015",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 130000,
+      "t_wall": "2026-04-07T15:47:10.000Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-015",
+        "sourceEventType": "form_submitted",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291/refund",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id/refund",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id/refund",
+        "pageTitle": "Refund — Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      },
+      "target_summary": {
+        "selector": "button[data-action='submitRefund']",
+        "label": "Refund",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-rf-016",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 132500,
+      "t_wall": "2026-04-07T15:47:12.500Z",
+      "event_type": "system.loading_started",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-016",
+        "sourceEventType": "loading_started",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291/refund",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id/refund",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id/refund",
+        "pageTitle": "Refund — Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      }
+    },
+    {
+      "event_id": "evt-rf-017",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 138000,
+      "t_wall": "2026-04-07T15:47:18.000Z",
+      "event_type": "system.loading_finished",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-017",
+        "sourceEventType": "loading_finished",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291/refund",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id/refund",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id/refund",
+        "pageTitle": "Refund — Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      }
+    },
+    {
+      "event_id": "evt-rf-018",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 138200,
+      "t_wall": "2026-04-07T15:47:18.200Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-018",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291/refund",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id/refund",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id/refund",
+        "pageTitle": "Refund — Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      }
+    },
+    {
+      "event_id": "evt-rf-019",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 180000,
+      "t_wall": "2026-04-07T15:48:00.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-019",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291/refund",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id/refund",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id/refund",
+        "pageTitle": "Refund — Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      },
+      "target_summary": {
+        "selector": "a[data-action='backToOrder']",
+        "label": "Back to order",
+        "role": "link",
+        "elementType": "a",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-rf-020",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 182500,
+      "t_wall": "2026-04-07T15:48:02.500Z",
+      "event_type": "navigation.spa_route_changed",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-020",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id",
+        "pageTitle": "Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      }
+    },
+    {
+      "event_id": "evt-rf-021",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 240000,
+      "t_wall": "2026-04-07T15:49:00.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-021",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/orders/77291",
+        "urlNormalized": "https://admin.shopify.com/store/:store/orders/:id",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/orders/:id",
+        "pageTitle": "Order #ORD-77291 — Shopify Admin",
+        "applicationLabel": "Shopify"
+      },
+      "target_summary": {
+        "selector": "a[data-section='customer']",
+        "label": "View customer profile",
+        "role": "link",
+        "elementType": "a",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-rf-022",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 242800,
+      "t_wall": "2026-04-07T15:49:02.800Z",
+      "event_type": "navigation.spa_route_changed",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-022",
+        "sourceEventType": "spa_route_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/customers/44102",
+        "urlNormalized": "https://admin.shopify.com/store/:store/customers/:id",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/customers/:id",
+        "pageTitle": "Customer — Shopify Admin",
+        "applicationLabel": "Shopify"
+      }
+    },
+    {
+      "event_id": "evt-rf-023",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 300000,
+      "t_wall": "2026-04-07T15:50:00.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-023",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/customers/44102",
+        "urlNormalized": "https://admin.shopify.com/store/:store/customers/:id",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/customers/:id",
+        "pageTitle": "Customer — Shopify Admin",
+        "applicationLabel": "Shopify"
+      },
+      "target_summary": {
+        "selector": "textarea[name='customerNote']",
+        "label": "Customer note",
+        "role": "textbox",
+        "elementType": "textarea",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-rf-024",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 340000,
+      "t_wall": "2026-04-07T15:50:40.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-024",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/customers/44102",
+        "urlNormalized": "https://admin.shopify.com/store/:store/customers/:id",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/customers/:id",
+        "pageTitle": "Customer — Shopify Admin",
+        "applicationLabel": "Shopify"
+      },
+      "target_summary": {
+        "selector": "button[data-action='saveNote']",
+        "label": "Save",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-rf-025",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 342000,
+      "t_wall": "2026-04-07T15:50:42.000Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-025",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://admin.shopify.com/store/acme-shop/customers/44102",
+        "urlNormalized": "https://admin.shopify.com/store/:store/customers/:id",
+        "domain": "admin.shopify.com",
+        "routeTemplate": "/store/:store/customers/:id",
+        "pageTitle": "Customer — Shopify Admin",
+        "applicationLabel": "Shopify"
+      }
+    },
+    {
+      "event_id": "evt-rf-026",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 420000,
+      "t_wall": "2026-04-07T15:52:00.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-026",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://mail.google.com/mail/u/0/#inbox?compose=new",
+        "urlNormalized": "https://mail.google.com/mail/u/0/#inbox?compose=new",
+        "domain": "mail.google.com",
+        "routeTemplate": "/mail/u/0/#inbox?compose=new",
+        "pageTitle": "Compose — Gmail",
+        "applicationLabel": "Gmail"
+      }
+    },
+    {
+      "event_id": "evt-rf-027",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 432000,
+      "t_wall": "2026-04-07T15:52:12.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-027",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true
+      },
+      "page_context": {
+        "url": "https://mail.google.com/mail/u/0/#inbox?compose=new",
+        "urlNormalized": "https://mail.google.com/mail/u/0/#inbox?compose=new",
+        "domain": "mail.google.com",
+        "routeTemplate": "/mail/u/0/#inbox?compose=new",
+        "pageTitle": "Compose — Gmail",
+        "applicationLabel": "Gmail"
+      },
+      "target_summary": {
+        "selector": "input[name='to']",
+        "label": "To",
+        "role": "combobox",
+        "elementType": "input",
+        "isSensitive": true
+      }
+    },
+    {
+      "event_id": "evt-rf-028",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 440000,
+      "t_wall": "2026-04-07T15:52:20.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-028",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://mail.google.com/mail/u/0/#inbox?compose=new",
+        "urlNormalized": "https://mail.google.com/mail/u/0/#inbox?compose=new",
+        "domain": "mail.google.com",
+        "routeTemplate": "/mail/u/0/#inbox?compose=new",
+        "pageTitle": "Compose — Gmail",
+        "applicationLabel": "Gmail"
+      },
+      "target_summary": {
+        "selector": "input[name='subjectbox']",
+        "label": "Subject",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-rf-029",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 690000,
+      "t_wall": "2026-04-07T15:56:30.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-029",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://mail.google.com/mail/u/0/#inbox?compose=new",
+        "urlNormalized": "https://mail.google.com/mail/u/0/#inbox?compose=new",
+        "domain": "mail.google.com",
+        "routeTemplate": "/mail/u/0/#inbox?compose=new",
+        "pageTitle": "Compose — Gmail",
+        "applicationLabel": "Gmail"
+      },
+      "target_summary": {
+        "selector": "div[aria-label='Message Body']",
+        "label": "Message Body",
+        "role": "textbox",
+        "elementType": "div",
+        "isSensitive": false
+      }
+    },
+    {
+      "event_id": "evt-rf-030",
+      "session_id": "ses-refund-20260407-001",
+      "t_ms": 708000,
+      "t_wall": "2026-04-07T15:56:48.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "normalization_meta": {
+        "sourceEventId": "raw-rf-030",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      },
+      "page_context": {
+        "url": "https://mail.google.com/mail/u/0/#inbox?compose=new",
+        "urlNormalized": "https://mail.google.com/mail/u/0/#inbox?compose=new",
+        "domain": "mail.google.com",
+        "routeTemplate": "/mail/u/0/#inbox?compose=new",
+        "pageTitle": "Compose — Gmail",
+        "applicationLabel": "Gmail"
+      },
+      "target_summary": {
+        "selector": "div[data-tooltip='Send'] div[role='button']",
+        "label": "Send",
+        "role": "button",
+        "elementType": "div",
+        "isSensitive": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "ses-refund-20260407-001-step-1",
+      "session_id": "ses-refund-20260407-001",
+      "ordinal": 1,
+      "title": "Open order #ORD-77291 in Shopify Admin",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": ["evt-rf-001", "evt-rf-002", "evt-rf-003"],
+      "start_t_ms": 0,
+      "end_t_ms": 4500,
+      "duration_ms": 4500,
+      "boundary_reason": "action_completed",
+      "page_context": {
+        "domain": "admin.shopify.com",
+        "applicationLabel": "Shopify",
+        "routeTemplate": "/store/:store/orders/:id"
+      }
+    },
+    {
+      "step_id": "ses-refund-20260407-001-step-2",
+      "session_id": "ses-refund-20260407-001",
+      "ordinal": 2,
+      "title": "Navigate to payment details",
+      "status": "finalized",
+      "grouping_reason": "click_then_navigate",
+      "confidence": 0.85,
+      "source_event_ids": ["evt-rf-004", "evt-rf-005"],
+      "start_t_ms": 18000,
+      "end_t_ms": 20300,
+      "duration_ms": 2300,
+      "boundary_reason": "route_changed",
+      "page_context": {
+        "domain": "admin.shopify.com",
+        "applicationLabel": "Shopify",
+        "routeTemplate": "/store/:store/orders/:id"
+      }
+    },
+    {
+      "step_id": "ses-refund-20260407-001-step-3",
+      "session_id": "ses-refund-20260407-001",
+      "ordinal": 3,
+      "title": "Navigate to refund form",
+      "status": "finalized",
+      "grouping_reason": "click_then_navigate",
+      "confidence": 0.85,
+      "source_event_ids": ["evt-rf-006", "evt-rf-007"],
+      "start_t_ms": 55000,
+      "end_t_ms": 57200,
+      "duration_ms": 2200,
+      "boundary_reason": "route_changed",
+      "page_context": {
+        "domain": "admin.shopify.com",
+        "applicationLabel": "Shopify",
+        "routeTemplate": "/store/:store/orders/:id/payments"
+      }
+    },
+    {
+      "step_id": "ses-refund-20260407-001-step-4",
+      "session_id": "ses-refund-20260407-001",
+      "ordinal": 4,
+      "title": "Submit refund — failed validation (amount exceeds payment)",
+      "status": "finalized",
+      "grouping_reason": "error_handling",
+      "confidence": 0.8,
+      "source_event_ids": ["evt-rf-008", "evt-rf-009", "evt-rf-010", "evt-rf-011", "evt-rf-012", "evt-rf-013"],
+      "start_t_ms": 68000,
+      "end_t_ms": 90200,
+      "duration_ms": 22200,
+      "boundary_reason": "action_completed",
+      "page_context": {
+        "domain": "admin.shopify.com",
+        "applicationLabel": "Shopify",
+        "routeTemplate": "/store/:store/orders/:id/refund"
+      }
+    },
+    {
+      "step_id": "ses-refund-20260407-001-step-5",
+      "session_id": "ses-refund-20260407-001",
+      "ordinal": 5,
+      "title": "Correct refund amount and resubmit — succeeded",
+      "status": "finalized",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": ["evt-rf-014", "evt-rf-015", "evt-rf-016", "evt-rf-017", "evt-rf-018"],
+      "start_t_ms": 120000,
+      "end_t_ms": 138200,
+      "duration_ms": 18200,
+      "boundary_reason": "form_submitted",
+      "page_context": {
+        "domain": "admin.shopify.com",
+        "applicationLabel": "Shopify",
+        "routeTemplate": "/store/:store/orders/:id/refund"
+      }
+    },
+    {
+      "step_id": "ses-refund-20260407-001-step-6",
+      "session_id": "ses-refund-20260407-001",
+      "ordinal": 6,
+      "title": "Return to order details",
+      "status": "finalized",
+      "grouping_reason": "click_then_navigate",
+      "confidence": 0.85,
+      "source_event_ids": ["evt-rf-019", "evt-rf-020"],
+      "start_t_ms": 180000,
+      "end_t_ms": 182500,
+      "duration_ms": 2500,
+      "boundary_reason": "route_changed",
+      "page_context": {
+        "domain": "admin.shopify.com",
+        "applicationLabel": "Shopify",
+        "routeTemplate": "/store/:store/orders/:id/refund"
+      }
+    },
+    {
+      "step_id": "ses-refund-20260407-001-step-7",
+      "session_id": "ses-refund-20260407-001",
+      "ordinal": 7,
+      "title": "Navigate to customer profile and add refund note",
+      "status": "finalized",
+      "grouping_reason": "fill_and_submit",
+      "confidence": 0.9,
+      "source_event_ids": ["evt-rf-021", "evt-rf-022", "evt-rf-023", "evt-rf-024", "evt-rf-025"],
+      "start_t_ms": 240000,
+      "end_t_ms": 342000,
+      "duration_ms": 102000,
+      "boundary_reason": "action_completed",
+      "page_context": {
+        "domain": "admin.shopify.com",
+        "applicationLabel": "Shopify",
+        "routeTemplate": "/store/:store/customers/:id"
+      }
+    },
+    {
+      "step_id": "ses-refund-20260407-001-step-8",
+      "session_id": "ses-refund-20260407-001",
+      "ordinal": 8,
+      "title": "Compose refund confirmation email",
+      "status": "finalized",
+      "grouping_reason": "data_entry",
+      "confidence": 0.9,
+      "source_event_ids": ["evt-rf-026", "evt-rf-027", "evt-rf-028", "evt-rf-029"],
+      "start_t_ms": 420000,
+      "end_t_ms": 690000,
+      "duration_ms": 270000,
+      "boundary_reason": "target_changed",
+      "page_context": {
+        "domain": "mail.google.com",
+        "applicationLabel": "Gmail",
+        "routeTemplate": "/mail/u/0/#inbox?compose=new"
+      }
+    },
+    {
+      "step_id": "ses-refund-20260407-001-step-9",
+      "session_id": "ses-refund-20260407-001",
+      "ordinal": 9,
+      "title": "Send refund confirmation to customer",
+      "status": "finalized",
+      "grouping_reason": "send_action",
+      "confidence": 0.75,
+      "source_event_ids": ["evt-rf-030"],
+      "start_t_ms": 708000,
+      "end_t_ms": 708000,
+      "duration_ms": 0,
+      "boundary_reason": "action_completed",
+      "page_context": {
+        "domain": "mail.google.com",
+        "applicationLabel": "Gmail",
+        "routeTemplate": "/mail/u/0/#inbox?compose=new"
+      }
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "ses-refund-20260407-001",
+    "exportedAt": "2026-04-07T15:57:00.000Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0",
+    "segmentationRuleVersion": "1.1.0",
+    "rendererVersion": "0.1.0",
+    "fileHashes": {}
+  }
+}

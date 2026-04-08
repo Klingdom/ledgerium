@@ -1,0 +1,862 @@
+{
+  "sessionJson": {
+    "sessionId": "sess_mktg_001",
+    "activityName": "Marketing Campaign Launch - Q2 Product Update",
+    "startedAt": "2026-04-07T14:00:00.000Z",
+    "endedAt": "2026-04-07T14:08:45.000Z",
+    "state": "review_ready",
+    "pauseIntervals": [],
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0"
+  },
+  "normalizedEvents": [
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000001",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 0,
+      "t_wall": "2026-04-07T14:00:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-001",
+        "sourceEventType": "session_start",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000002",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 1500,
+      "t_wall": "2026-04-07T14:00:01.500Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://acme.monday.com/boards/4589321/views/main",
+        "urlNormalized": "https://acme.monday.com/boards/:boardId/views/main",
+        "domain": "acme.monday.com",
+        "routeTemplate": "/boards/:boardId/views/main",
+        "pageTitle": "Q2 Campaign Tracker - Monday.com",
+        "applicationLabel": "Monday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-002",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000003",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 6000,
+      "t_wall": "2026-04-07T14:00:06.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://acme.monday.com/boards/4589321/views/main",
+        "urlNormalized": "https://acme.monday.com/boards/:boardId/views/main",
+        "domain": "acme.monday.com",
+        "routeTemplate": "/boards/:boardId/views/main",
+        "pageTitle": "Q2 Campaign Tracker - Monday.com",
+        "applicationLabel": "Monday"
+      },
+      "target_summary": {
+        "selector": ".pulse-row[data-pulse-id='email-assets']",
+        "label": "Email Assets - Product Update",
+        "role": "row",
+        "elementType": "div",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-003",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000004",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 12000,
+      "t_wall": "2026-04-07T14:00:12.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://acme.monday.com/boards/4589321/views/main",
+        "urlNormalized": "https://acme.monday.com/boards/:boardId/views/main",
+        "domain": "acme.monday.com",
+        "routeTemplate": "/boards/:boardId/views/main",
+        "pageTitle": "Q2 Campaign Tracker - Monday.com",
+        "applicationLabel": "Monday"
+      },
+      "target_summary": {
+        "selector": ".pulse-row[data-pulse-id='landing-page']",
+        "label": "Landing Page - Q2 Product",
+        "role": "row",
+        "elementType": "div",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-004",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000005",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 20000,
+      "t_wall": "2026-04-07T14:00:20.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://acme.monday.com/boards/4589321/views/main",
+        "urlNormalized": "https://acme.monday.com/boards/:boardId/views/main",
+        "domain": "acme.monday.com",
+        "routeTemplate": "/boards/:boardId/views/main",
+        "pageTitle": "Q2 Campaign Tracker - Monday.com",
+        "applicationLabel": "Monday"
+      },
+      "target_summary": {
+        "selector": ".status-column[data-pulse-id='email-assets']",
+        "label": "Status: Email Assets",
+        "role": "button",
+        "elementType": "div",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-005",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000006",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 35000,
+      "t_wall": "2026-04-07T14:00:35.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.hubspot.com/email/12345678/edit/987654321/settings",
+        "urlNormalized": "https://app.hubspot.com/email/:portalId/edit/:emailId/settings",
+        "domain": "app.hubspot.com",
+        "routeTemplate": "/email/:portalId/edit/:emailId/settings",
+        "pageTitle": "Q2 Product Update Email - HubSpot",
+        "applicationLabel": "HubSpot"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-006",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000007",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 42000,
+      "t_wall": "2026-04-07T14:00:42.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.hubspot.com/email/12345678/edit/987654321/settings",
+        "urlNormalized": "https://app.hubspot.com/email/:portalId/edit/:emailId/settings",
+        "domain": "app.hubspot.com",
+        "routeTemplate": "/email/:portalId/edit/:emailId/settings",
+        "pageTitle": "Q2 Product Update Email - HubSpot",
+        "applicationLabel": "HubSpot"
+      },
+      "target_summary": {
+        "selector": "#btn-preview",
+        "label": "Preview Email",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-007",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000008",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 43500,
+      "t_wall": "2026-04-07T14:00:43.500Z",
+      "event_type": "system.modal_opened",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://app.hubspot.com/email/12345678/edit/987654321/settings",
+        "urlNormalized": "https://app.hubspot.com/email/:portalId/edit/:emailId/settings",
+        "domain": "app.hubspot.com",
+        "routeTemplate": "/email/:portalId/edit/:emailId/settings",
+        "pageTitle": "Q2 Product Update Email - HubSpot",
+        "applicationLabel": "HubSpot"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-008",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000009",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 60000,
+      "t_wall": "2026-04-07T14:01:00.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.hubspot.com/email/12345678/edit/987654321/settings",
+        "urlNormalized": "https://app.hubspot.com/email/:portalId/edit/:emailId/settings",
+        "domain": "app.hubspot.com",
+        "routeTemplate": "/email/:portalId/edit/:emailId/settings",
+        "pageTitle": "Q2 Product Update Email - HubSpot",
+        "applicationLabel": "HubSpot"
+      },
+      "target_summary": {
+        "selector": "#btn-send-test",
+        "label": "Send Test Email",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-009",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000010",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 62000,
+      "t_wall": "2026-04-07T14:01:02.000Z",
+      "event_type": "system.modal_opened",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://app.hubspot.com/email/12345678/edit/987654321/settings",
+        "urlNormalized": "https://app.hubspot.com/email/:portalId/edit/:emailId/settings",
+        "domain": "app.hubspot.com",
+        "routeTemplate": "/email/:portalId/edit/:emailId/settings",
+        "pageTitle": "Q2 Product Update Email - HubSpot",
+        "applicationLabel": "HubSpot"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-010",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000011",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 66000,
+      "t_wall": "2026-04-07T14:01:06.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.hubspot.com/email/12345678/edit/987654321/settings",
+        "urlNormalized": "https://app.hubspot.com/email/:portalId/edit/:emailId/settings",
+        "domain": "app.hubspot.com",
+        "routeTemplate": "/email/:portalId/edit/:emailId/settings",
+        "pageTitle": "Q2 Product Update Email - HubSpot",
+        "applicationLabel": "HubSpot"
+      },
+      "target_summary": {
+        "selector": "#test-email-address",
+        "label": "Test Email Address",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-011",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000012",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 70000,
+      "t_wall": "2026-04-07T14:01:10.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.hubspot.com/email/12345678/edit/987654321/settings",
+        "urlNormalized": "https://app.hubspot.com/email/:portalId/edit/:emailId/settings",
+        "domain": "app.hubspot.com",
+        "routeTemplate": "/email/:portalId/edit/:emailId/settings",
+        "pageTitle": "Q2 Product Update Email - HubSpot",
+        "applicationLabel": "HubSpot"
+      },
+      "target_summary": {
+        "selector": "#btn-confirm-send-test",
+        "label": "Send",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-012",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000013",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 72000,
+      "t_wall": "2026-04-07T14:01:12.000Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://app.hubspot.com/email/12345678/edit/987654321/settings",
+        "urlNormalized": "https://app.hubspot.com/email/:portalId/edit/:emailId/settings",
+        "domain": "app.hubspot.com",
+        "routeTemplate": "/email/:portalId/edit/:emailId/settings",
+        "pageTitle": "Q2 Product Update Email - HubSpot",
+        "applicationLabel": "HubSpot"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-013",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000014",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 85000,
+      "t_wall": "2026-04-07T14:01:25.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.hubspot.com/email/12345678/edit/987654321/settings",
+        "urlNormalized": "https://app.hubspot.com/email/:portalId/edit/:emailId/settings",
+        "domain": "app.hubspot.com",
+        "routeTemplate": "/email/:portalId/edit/:emailId/settings",
+        "pageTitle": "Q2 Product Update Email - HubSpot",
+        "applicationLabel": "HubSpot"
+      },
+      "target_summary": {
+        "selector": "#btn-schedule-send",
+        "label": "Schedule",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-014",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000015",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 86500,
+      "t_wall": "2026-04-07T14:01:26.500Z",
+      "event_type": "system.modal_opened",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://app.hubspot.com/email/12345678/edit/987654321/settings",
+        "urlNormalized": "https://app.hubspot.com/email/:portalId/edit/:emailId/settings",
+        "domain": "app.hubspot.com",
+        "routeTemplate": "/email/:portalId/edit/:emailId/settings",
+        "pageTitle": "Q2 Product Update Email - HubSpot",
+        "applicationLabel": "HubSpot"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-015",
+        "sourceEventType": "modal_opened",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000016",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 92000,
+      "t_wall": "2026-04-07T14:01:32.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.hubspot.com/email/12345678/edit/987654321/settings",
+        "urlNormalized": "https://app.hubspot.com/email/:portalId/edit/:emailId/settings",
+        "domain": "app.hubspot.com",
+        "routeTemplate": "/email/:portalId/edit/:emailId/settings",
+        "pageTitle": "Q2 Product Update Email - HubSpot",
+        "applicationLabel": "HubSpot"
+      },
+      "target_summary": {
+        "selector": "#schedule-date-picker",
+        "label": "Send Date",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-016",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000017",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 96000,
+      "t_wall": "2026-04-07T14:01:36.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.hubspot.com/email/12345678/edit/987654321/settings",
+        "urlNormalized": "https://app.hubspot.com/email/:portalId/edit/:emailId/settings",
+        "domain": "app.hubspot.com",
+        "routeTemplate": "/email/:portalId/edit/:emailId/settings",
+        "pageTitle": "Q2 Product Update Email - HubSpot",
+        "applicationLabel": "HubSpot"
+      },
+      "target_summary": {
+        "selector": "#btn-confirm-schedule",
+        "label": "Confirm Schedule",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-017",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000018",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 98000,
+      "t_wall": "2026-04-07T14:01:38.000Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://app.hubspot.com/email/12345678/edit/987654321/settings",
+        "urlNormalized": "https://app.hubspot.com/email/:portalId/edit/:emailId/settings",
+        "domain": "app.hubspot.com",
+        "routeTemplate": "/email/:portalId/edit/:emailId/settings",
+        "pageTitle": "Q2 Product Update Email - HubSpot",
+        "applicationLabel": "HubSpot"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-018",
+        "sourceEventType": "toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000019",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 110000,
+      "t_wall": "2026-04-07T14:01:50.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://acme.monday.com/boards/4589321/views/main",
+        "urlNormalized": "https://acme.monday.com/boards/:boardId/views/main",
+        "domain": "acme.monday.com",
+        "routeTemplate": "/boards/:boardId/views/main",
+        "pageTitle": "Q2 Campaign Tracker - Monday.com",
+        "applicationLabel": "Monday"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-019",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000020",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 116000,
+      "t_wall": "2026-04-07T14:01:56.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://acme.monday.com/boards/4589321/views/main",
+        "urlNormalized": "https://acme.monday.com/boards/:boardId/views/main",
+        "domain": "acme.monday.com",
+        "routeTemplate": "/boards/:boardId/views/main",
+        "pageTitle": "Q2 Campaign Tracker - Monday.com",
+        "applicationLabel": "Monday"
+      },
+      "target_summary": {
+        "selector": ".status-column[data-pulse-id='email-campaign']",
+        "label": "Status: Email Campaign",
+        "role": "button",
+        "elementType": "div",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-020",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000021",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 120000,
+      "t_wall": "2026-04-07T14:02:00.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://acme.monday.com/boards/4589321/views/main",
+        "urlNormalized": "https://acme.monday.com/boards/:boardId/views/main",
+        "domain": "acme.monday.com",
+        "routeTemplate": "/boards/:boardId/views/main",
+        "pageTitle": "Q2 Campaign Tracker - Monday.com",
+        "applicationLabel": "Monday"
+      },
+      "target_summary": {
+        "selector": ".status-option[data-value='scheduled']",
+        "label": "Scheduled",
+        "role": "option",
+        "elementType": "div",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-021",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000022",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 135000,
+      "t_wall": "2026-04-07T14:02:15.000Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.slack.com/client/T01234567/C09876543",
+        "urlNormalized": "https://app.slack.com/client/:teamId/:channelId",
+        "domain": "app.slack.com",
+        "routeTemplate": "/client/:teamId/:channelId",
+        "pageTitle": "#marketing-team - Slack",
+        "applicationLabel": "Slack"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-022",
+        "sourceEventType": "page_loaded",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000023",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 140000,
+      "t_wall": "2026-04-07T14:02:20.000Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.slack.com/client/T01234567/C09876543",
+        "urlNormalized": "https://app.slack.com/client/:teamId/:channelId",
+        "domain": "app.slack.com",
+        "routeTemplate": "/client/:teamId/:channelId",
+        "pageTitle": "#marketing-team - Slack",
+        "applicationLabel": "Slack"
+      },
+      "target_summary": {
+        "selector": ".ql-editor[data-placeholder='Message #marketing-team']",
+        "label": "Message Input",
+        "role": "textbox",
+        "elementType": "div",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-023",
+        "sourceEventType": "input_changed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000024",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 155000,
+      "t_wall": "2026-04-07T14:02:35.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.slack.com/client/T01234567/C09876543",
+        "urlNormalized": "https://app.slack.com/client/:teamId/:channelId",
+        "domain": "app.slack.com",
+        "routeTemplate": "/client/:teamId/:channelId",
+        "pageTitle": "#marketing-team - Slack",
+        "applicationLabel": "Slack"
+      },
+      "target_summary": {
+        "selector": "button[data-qa='texty_send_button']",
+        "label": "Send",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-024",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "d4e5f6a7-0001-4000-8000-000000000025",
+      "schema_version": "1.0.0",
+      "session_id": "sess_mktg_001",
+      "t_ms": 525000,
+      "t_wall": "2026-04-07T14:08:45.000Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "raw-mk-025",
+        "sourceEventType": "session_stop",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "sess_mktg_001-step-1",
+      "session_id": "sess_mktg_001",
+      "ordinal": 1,
+      "title": "Click Email Assets - Product Update",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "boundary_reason": "target_changed",
+      "source_event_ids": [
+        "d4e5f6a7-0001-4000-8000-000000000002",
+        "d4e5f6a7-0001-4000-8000-000000000003"
+      ],
+      "start_t_ms": 1500,
+      "end_t_ms": 6000,
+      "duration_ms": 4500,
+      "page_context": {
+        "domain": "acme.monday.com",
+        "applicationLabel": "Monday",
+        "routeTemplate": "/boards/:boardId/views/main"
+      }
+    },
+    {
+      "step_id": "sess_mktg_001-step-2",
+      "session_id": "sess_mktg_001",
+      "ordinal": 2,
+      "title": "Click Landing Page - Q2 Product",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "boundary_reason": "target_changed",
+      "source_event_ids": [
+        "d4e5f6a7-0001-4000-8000-000000000004"
+      ],
+      "start_t_ms": 12000,
+      "end_t_ms": 12000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "acme.monday.com",
+        "applicationLabel": "Monday",
+        "routeTemplate": "/boards/:boardId/views/main"
+      }
+    },
+    {
+      "step_id": "sess_mktg_001-step-3",
+      "session_id": "sess_mktg_001",
+      "ordinal": 3,
+      "title": "Click Status: Email Assets",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "boundary_reason": "navigation_changed",
+      "source_event_ids": [
+        "d4e5f6a7-0001-4000-8000-000000000005"
+      ],
+      "start_t_ms": 20000,
+      "end_t_ms": 20000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "acme.monday.com",
+        "applicationLabel": "Monday",
+        "routeTemplate": "/boards/:boardId/views/main"
+      }
+    },
+    {
+      "step_id": "sess_mktg_001-step-4",
+      "session_id": "sess_mktg_001",
+      "ordinal": 4,
+      "title": "Click Preview Email",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "boundary_reason": "target_changed",
+      "source_event_ids": [
+        "d4e5f6a7-0001-4000-8000-000000000006",
+        "d4e5f6a7-0001-4000-8000-000000000007"
+      ],
+      "start_t_ms": 35000,
+      "end_t_ms": 42000,
+      "duration_ms": 7000,
+      "page_context": {
+        "domain": "app.hubspot.com",
+        "applicationLabel": "HubSpot",
+        "routeTemplate": "/email/:portalId/edit/:emailId/settings"
+      }
+    },
+    {
+      "step_id": "sess_mktg_001-step-5",
+      "session_id": "sess_mktg_001",
+      "ordinal": 5,
+      "title": "Send",
+      "status": "finalized",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "boundary_reason": "action_completed",
+      "source_event_ids": [
+        "d4e5f6a7-0001-4000-8000-000000000009",
+        "d4e5f6a7-0001-4000-8000-000000000011",
+        "d4e5f6a7-0001-4000-8000-000000000012"
+      ],
+      "start_t_ms": 60000,
+      "end_t_ms": 70000,
+      "duration_ms": 10000,
+      "page_context": {
+        "domain": "app.hubspot.com",
+        "applicationLabel": "HubSpot",
+        "routeTemplate": "/email/:portalId/edit/:emailId/settings"
+      }
+    },
+    {
+      "step_id": "sess_mktg_001-step-6",
+      "session_id": "sess_mktg_001",
+      "ordinal": 6,
+      "title": "Confirm Schedule",
+      "status": "finalized",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "boundary_reason": "action_completed",
+      "source_event_ids": [
+        "d4e5f6a7-0001-4000-8000-000000000014",
+        "d4e5f6a7-0001-4000-8000-000000000016",
+        "d4e5f6a7-0001-4000-8000-000000000017"
+      ],
+      "start_t_ms": 85000,
+      "end_t_ms": 96000,
+      "duration_ms": 11000,
+      "page_context": {
+        "domain": "app.hubspot.com",
+        "applicationLabel": "HubSpot",
+        "routeTemplate": "/email/:portalId/edit/:emailId/settings"
+      }
+    },
+    {
+      "step_id": "sess_mktg_001-step-7",
+      "session_id": "sess_mktg_001",
+      "ordinal": 7,
+      "title": "Click Status: Email Campaign",
+      "status": "finalized",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "boundary_reason": "navigation_changed",
+      "source_event_ids": [
+        "d4e5f6a7-0001-4000-8000-000000000019",
+        "d4e5f6a7-0001-4000-8000-000000000020",
+        "d4e5f6a7-0001-4000-8000-000000000021"
+      ],
+      "start_t_ms": 110000,
+      "end_t_ms": 120000,
+      "duration_ms": 10000,
+      "page_context": {
+        "domain": "acme.monday.com",
+        "applicationLabel": "Monday",
+        "routeTemplate": "/boards/:boardId/views/main"
+      }
+    },
+    {
+      "step_id": "sess_mktg_001-step-8",
+      "session_id": "sess_mktg_001",
+      "ordinal": 8,
+      "title": "Send",
+      "status": "finalized",
+      "grouping_reason": "send_action",
+      "confidence": 0.9,
+      "boundary_reason": "action_completed",
+      "source_event_ids": [
+        "d4e5f6a7-0001-4000-8000-000000000022",
+        "d4e5f6a7-0001-4000-8000-000000000023",
+        "d4e5f6a7-0001-4000-8000-000000000024",
+        "d4e5f6a7-0001-4000-8000-000000000025"
+      ],
+      "start_t_ms": 135000,
+      "end_t_ms": 525000,
+      "duration_ms": 390000,
+      "page_context": {
+        "domain": "app.slack.com",
+        "applicationLabel": "Slack",
+        "routeTemplate": "/client/:teamId/:channelId"
+      }
+    }
+  ],
+  "policyLog": [],
+  "manifest": {
+    "sessionId": "sess_mktg_001",
+    "exportedAt": "2026-04-07T14:09:00.000Z",
+    "schemaVersion": "1.0.0",
+    "recorderVersion": "0.1.0",
+    "segmentationRuleVersion": "1.1.0",
+    "rendererVersion": "0.1.0",
+    "fileHashes": {}
+  }
+}
