@@ -98,8 +98,8 @@ export function buildSOP(input: ProcessEngineInput): SOP {
     const groupingReason = toGroupingReason(step.grouping_reason);
     const primarySystem = definition.systems[0];
 
-    // Clean step title to imperative voice
-    const cleanedTitle = cleanStepTitle(step.title, groupingReason);
+    // Clean step title to imperative voice (pass events for field-level context)
+    const cleanedTitle = cleanStepTitle(step.title, groupingReason, events);
 
     // Step-level action summary — concise, specific
     const action = buildAction(cleanedTitle, groupingReason, events);
@@ -135,7 +135,7 @@ export function buildSOP(input: ProcessEngineInput): SOP {
       detail,
       ...(primarySystem !== undefined && { system: primarySystem }),
       inputs: definition.inputs,
-      expectedOutcome: definition.completionCondition,
+      expectedOutcome: buildExpectedOutcome(definition.completionCondition, groupingReason, events),
       warnings,
       durationLabel: definition.durationLabel,
       confidence: definition.confidence,
@@ -257,7 +257,7 @@ function deriveInstruction(
 
     case 'interaction.input_change': {
       if (label && (isSensitive || redacted)) {
-        return `Enter value in "${label}" (sensitive — handle per data policy)`;
+        return `Enter value in "${label}" (sensitive — do not share or display in plain text)`;
       }
       if (label) return `Enter value in "${label}"`;
       if (role) return `Enter value in the ${role} field`;
@@ -465,9 +465,21 @@ function buildAction(
       return dest ? `Navigate to "${dest}"` : title;
     }
     case 'fill_and_submit': {
-      const submitTarget = events.find(e => e.event_type === 'interaction.submit');
+      const fsFields = events
+        .filter(e => e.event_type === 'interaction.input_change' && safeTargetLabel(e))
+        .map(e => safeTargetLabel(e) as string)
+        .filter((l, i, arr) => arr.indexOf(l) === i)
+        .slice(0, 5);
+      const system = first?.page_context?.applicationLabel;
+      if (fsFields.length > 0) {
+        return system
+          ? `Complete ${fsFields.join(', ')} and submit in ${system}`
+          : `Complete ${fsFields.join(', ')} and submit`;
+      }
       const formName =
-        (submitTarget !== undefined ? safeTargetLabel(submitTarget) : undefined) ??
+        (events.find(e => e.event_type === 'interaction.submit') !== undefined
+          ? safeTargetLabel(events.find(e => e.event_type === 'interaction.submit')!)
+          : undefined) ??
         first?.page_context?.pageTitle ??
         'form';
       return `Complete and submit "${formName}"`;
@@ -477,16 +489,16 @@ function buildAction(
         .filter(e => e.event_type === 'interaction.input_change' && safeTargetLabel(e))
         .map(e => safeTargetLabel(e) as string)
         .filter((l, i, arr) => arr.indexOf(l) === i)
-        .slice(0, 3);
+        .slice(0, 5);
       return deFields.length > 0
-        ? `Enter data: ${deFields.join(', ')}`
+        ? `Enter ${deFields.join(', ')}`
         : title;
     }
     case 'send_action': {
       const actionEvt = events.find(e =>
         e.event_type === 'interaction.click' && safeTargetLabel(e));
       const actionLbl = actionEvt !== undefined ? safeTargetLabel(actionEvt) : undefined;
-      return actionLbl ? `Click "${actionLbl}" to complete` : title;
+      return actionLbl ? `Click "${actionLbl}"` : title;
     }
     case 'file_action':
       return 'Upload or attach the required file';
@@ -498,6 +510,43 @@ function buildAction(
     }
     default:
       return title;
+  }
+}
+
+// ─── Expected outcome builder ────────────────────────────────────────────────
+
+function buildExpectedOutcome(
+  completionCondition: string,
+  groupingReason: GroupingReason,
+  events: CanonicalEventInput[],
+): string {
+  const system = events[0]?.page_context?.applicationLabel;
+  const systemLabel = system ?? 'the system';
+
+  switch (groupingReason) {
+    case 'fill_and_submit': {
+      const pageTitle = events.find(e => e.event_type === 'interaction.submit')
+        ?.page_context?.pageTitle;
+      return pageTitle
+        ? `Confirmation message appears and record is saved in ${systemLabel} ("${pageTitle}")`
+        : `Confirmation message appears and record is saved in ${systemLabel}`;
+    }
+    case 'click_then_navigate': {
+      const dest = events.find(e => e.event_type.startsWith('navigation.'))
+        ?.page_context?.pageTitle;
+      return dest
+        ? `"${dest}" loads with expected content`
+        : 'Target page loads with expected content';
+    }
+    case 'send_action': {
+      const actionLabel = events.find(e => e.event_type === 'interaction.click')
+        ?.target_summary?.label;
+      return actionLabel
+        ? `${systemLabel} confirms the "${actionLabel}" action was successful`
+        : `${systemLabel} confirms the action was successful`;
+    }
+    default:
+      return completionCondition;
   }
 }
 

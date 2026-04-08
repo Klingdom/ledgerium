@@ -210,7 +210,7 @@ describe('Output Quality: Simple Linear Workflow', () => {
 
     it('purpose is specific, not boilerplate', () => {
       expect(output.sop.purpose).toContain('Salesforce');
-      expect(output.sop.purpose).toContain('2-step');
+      expect(output.sop.purpose.toLowerCase()).toContain('opportunity');
       expect(output.sop.purpose).not.toContain('Standard operating procedure for performing');
     });
 

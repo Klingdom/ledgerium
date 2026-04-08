@@ -237,7 +237,7 @@ describe('processSession', () => {
       const { processDefinition } = processSession(makeInput());
       const step1 = processDefinition.stepDefinitions[0]!;
       expect(step1.category).toBe('click_then_navigate');
-      expect(step1.operationalDefinition).toContain('navigated');
+      expect(step1.operationalDefinition).toContain('Navigate to');
       expect(step1.inputs).toBeInstanceOf(Array);
       expect(step1.outputs).toBeInstanceOf(Array);
       expect(step1.completionCondition).toBeTruthy();
@@ -1441,7 +1441,7 @@ describe('processSession', () => {
     it('data_entry operational definition mentions data entry', () => {
       const { processDefinition } = processSession(makeNewGroupingInput());
       const step = processDefinition.stepDefinitions[0]!;
-      expect(step.operationalDefinition).toContain('entered data');
+      expect(step.operationalDefinition).toContain('Enter');
       expect(step.operationalDefinition).toContain('Cell A11');
     });
 

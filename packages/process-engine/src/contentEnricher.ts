@@ -26,11 +26,219 @@ import type {
 } from './types.js';
 import { toGroupingReason, uniqueSystems } from './stepAnalyzer.js';
 
+// ─── Shared helper: extract field names from events ─────────────────────────
+
+/**
+ * Extracts human-readable field names from input_change events within the
+ * given event set. Returns deduplicated labels in observed order, capped at
+ * `limit` entries.
+ */
+function extractFieldNames(
+  events: CanonicalEventInput[],
+  limit = 6,
+): string[] {
+  const fields: string[] = [];
+  const seen = new Set<string>();
+  for (const evt of events) {
+    if (evt.event_type === 'interaction.input_change' && evt.target_summary?.label) {
+      const label = evt.target_summary.label.trim();
+      if (label && !seen.has(label.toLowerCase())) {
+        seen.add(label.toLowerCase());
+        fields.push(label);
+      }
+    }
+  }
+  return fields.slice(0, limit);
+}
+
+/**
+ * Resolves events for a step from the event map.
+ */
+function resolveStepEvents(
+  step: DerivedStepInput,
+  eventById: Map<string, CanonicalEventInput>,
+): CanonicalEventInput[] {
+  return step.source_event_ids
+    .map(id => eventById.get(id))
+    .filter((e): e is CanonicalEventInput => e !== undefined);
+}
+
+/**
+ * Extracts the primary business entity from field names, page titles, and
+ * route templates. Returns a lowercase entity noun (e.g. "invoice",
+ * "customer", "employee") or null if nothing can be inferred.
+ */
+function inferEntityFromContext(
+  events: CanonicalEventInput[],
+  steps: DerivedStepInput[],
+): string | null {
+  // Common business entity keywords ranked by specificity
+  const ENTITY_KEYWORDS: readonly string[] = [
+    'invoice', 'purchase order', 'bill', 'payment', 'credit memo',
+    'journal entry', 'expense report', 'vendor', 'supplier',
+    'customer', 'contact', 'lead', 'opportunity', 'account', 'deal',
+    'employee', 'candidate', 'applicant', 'requisition', 'timesheet',
+    'ticket', 'case', 'incident', 'request', 'order', 'quote',
+    'shipment', 'receipt', 'transfer', 'return', 'adjustment',
+    'project', 'task', 'report', 'document', 'email', 'message',
+  ];
+
+  // Gather all text signals: page titles, route templates, field names
+  const signals: string[] = [];
+  for (const evt of events) {
+    if (evt.page_context?.pageTitle) signals.push(evt.page_context.pageTitle);
+    if (evt.page_context?.routeTemplate) signals.push(evt.page_context.routeTemplate);
+    if (evt.target_summary?.label) signals.push(evt.target_summary.label);
+  }
+  const corpus = signals.join(' ').toLowerCase();
+
+  for (const keyword of ENTITY_KEYWORDS) {
+    if (corpus.includes(keyword)) return keyword;
+  }
+  return null;
+}
+
+/**
+ * Determines the primary action verb for a workflow based on step patterns.
+ * Returns an active-voice phrase like "create and submit", "review and approve".
+ */
+function inferWorkflowAction(
+  steps: DerivedStepInput[],
+  activityName: string,
+): string {
+  const nameLower = activityName.toLowerCase();
+  const groupings = new Set(steps.map(s => s.grouping_reason));
+
+  // Check activity name for semantic verbs first
+  if (nameLower.includes('approv')) return 'review and approve';
+  if (nameLower.includes('review')) return 'review';
+  if (nameLower.includes('creat') || nameLower.includes('new')) return 'create';
+  if (nameLower.includes('edit') || nameLower.includes('updat') || nameLower.includes('modif')) return 'update';
+  if (nameLower.includes('delet') || nameLower.includes('remov')) return 'delete';
+  if (nameLower.includes('send') || nameLower.includes('email') || nameLower.includes('compos')) return 'compose and send';
+  if (nameLower.includes('upload') || nameLower.includes('import')) return 'upload';
+  if (nameLower.includes('download') || nameLower.includes('export')) return 'export';
+  if (nameLower.includes('search') || nameLower.includes('lookup') || nameLower.includes('find')) return 'search for';
+
+  // Infer from step patterns
+  if (groupings.has('fill_and_submit') && groupings.has('send_action')) return 'complete and submit';
+  if (groupings.has('fill_and_submit')) return 'enter and submit';
+  if (groupings.has('send_action')) return 'process and submit';
+  if (groupings.has('file_action') && groupings.has('data_entry')) return 'prepare and upload';
+  if (groupings.has('data_entry')) return 'enter';
+
+  return 'complete';
+}
+
+/**
+ * Maps known application names to likely business roles.
+ * Returns null if the system is not recognized.
+ */
+const SYSTEM_ROLE_MAP: Record<string, string> = {
+  'netsuite':       'Accounts Payable Clerk',
+  'quickbooks':     'Bookkeeper',
+  'xero':           'Bookkeeper',
+  'salesforce':     'Sales Representative',
+  'hubspot':        'Sales Representative',
+  'zendesk':        'Support Agent',
+  'freshdesk':      'Support Agent',
+  'intercom':       'Support Agent',
+  'workday':        'HR Specialist',
+  'bamboohr':       'HR Specialist',
+  'adp':            'HR Specialist',
+  'servicenow':     'IT Administrator',
+  'jira':           'Project Manager',
+  'asana':          'Project Manager',
+  'monday':         'Project Manager',
+  'trello':         'Project Manager',
+  'github':         'Developer',
+  'gitlab':         'Developer',
+  'bitbucket':      'Developer',
+  'shopify':        'E-Commerce Operator',
+  'stripe':         'Payments Administrator',
+  'sap':            'ERP Operator',
+  'oracle':         'ERP Operator',
+  'gmail':          'Business User',
+  'outlook':        'Business User',
+  'google sheets':  'Data Analyst',
+  'excel':          'Data Analyst',
+  'tableau':        'Data Analyst',
+  'looker':         'Data Analyst',
+  'slack':          'Business User',
+  'teams':          'Business User',
+  'zoom':           'Business User',
+};
+
+/**
+ * Looks up a role for a given system label using fuzzy matching against
+ * the known system-role map.
+ */
+function roleForSystem(systemLabel: string): string | null {
+  const lower = systemLabel.toLowerCase();
+  for (const [key, role] of Object.entries(SYSTEM_ROLE_MAP)) {
+    if (lower.includes(key)) return role;
+  }
+  return null;
+}
+
+/**
+ * Converts an active-voice action verb to passive voice for trigger phrasing.
+ * e.g. "create" → "created", "review and approve" → "reviewed and approved"
+ */
+function inferPassiveAction(action: string): string {
+  const PASSIVE_MAP: Record<string, string> = {
+    'create': 'created',
+    'review and approve': 'reviewed and approved',
+    'review': 'reviewed',
+    'update': 'updated',
+    'delete': 'deleted',
+    'compose and send': 'composed and sent',
+    'upload': 'uploaded',
+    'export': 'exported',
+    'search for': 'located',
+    'complete and submit': 'completed and submitted',
+    'enter and submit': 'entered and submitted',
+    'process and submit': 'processed and submitted',
+    'prepare and upload': 'prepared and uploaded',
+    'enter': 'entered',
+    'complete': 'completed',
+  };
+  return PASSIVE_MAP[action] ?? `${action}ed`;
+}
+
+/**
+ * Capitalizes the first letter of a string.
+ */
+function capitalize(s: string): string {
+  return s.length > 0 ? s[0]!.toUpperCase() + s.slice(1) : s;
+}
+
+/**
+ * Summarizes field names into a concise phrase.
+ * e.g. ["To", "Subject", "Body"] → "To, Subject, and Body"
+ */
+function summarizeFields(fields: string[], max = 3): string {
+  if (fields.length === 0) return '';
+  const shown = fields.slice(0, max);
+  if (fields.length > max) {
+    return `${shown.join(', ')}, and ${fields.length - max} more field${fields.length - max > 1 ? 's' : ''}`;
+  }
+  if (shown.length === 1) return shown[0]!;
+  if (shown.length === 2) return `${shown[0]} and ${shown[1]}`;
+  return `${shown.slice(0, -1).join(', ')}, and ${shown[shown.length - 1]}`;
+}
+
 // ─── Business objective inference ────────────────────────────────────────────
 
 /**
- * Infers a business objective from the activity name and observed step patterns.
- * Uses the action sequence to determine what the workflow accomplishes.
+ * Infers a business objective by analyzing the actual entities, fields, and
+ * actions observed in the workflow — not just grouping patterns.
+ *
+ * Strategy:
+ * 1. Extract the business entity from field names, page titles, and routes
+ * 2. Determine the primary action verb from activity name and step patterns
+ * 3. Summarize key sub-activities (field entry, file upload, submission)
+ * 4. Mention specific systems and what role they play
  */
 export function inferBusinessObjective(
   activityName: string,
@@ -40,42 +248,51 @@ export function inferBusinessObjective(
   const systems = uniqueSystems(events);
   const systemLabel = systems.length > 0 ? systems.join(' and ') : 'the system';
 
-  const hasFormSubmit = steps.some(s => s.grouping_reason === 'fill_and_submit');
-  const hasSendAction = steps.some(s => s.grouping_reason === 'send_action');
-  const hasFileAction = steps.some(s => s.grouping_reason === 'file_action');
-  const hasDataEntry = steps.some(s => s.grouping_reason === 'data_entry');
-  const navCount = steps.filter(s => s.grouping_reason === 'click_then_navigate').length;
+  const entity = inferEntityFromContext(events, steps);
+  const action = inferWorkflowAction(steps, activityName);
+  const fields = extractFieldNames(events, 8);
 
-  // Infer from observed patterns
-  if (hasFormSubmit && hasSendAction) {
-    return `Complete and submit a ${cleanActivityName(activityName)} transaction in ${systemLabel}`;
+  // Build sub-activity description from observed step patterns
+  const subActivities: string[] = [];
+  const groupings = new Set(steps.map(s => s.grouping_reason));
+
+  if (groupings.has('data_entry') && fields.length > 0) {
+    subActivities.push(`${summarizeFields(fields, 3)} entry`);
   }
-  if (hasFormSubmit) {
-    return `Enter and submit ${cleanActivityName(activityName)} data in ${systemLabel}`;
+  if (groupings.has('fill_and_submit')) {
+    subActivities.push('form completion');
   }
-  if (hasSendAction) {
-    return `Execute the ${cleanActivityName(activityName)} action in ${systemLabel}`;
+  if (groupings.has('file_action')) {
+    subActivities.push('document attachment');
   }
-  if (hasFileAction && hasDataEntry) {
-    return `Prepare and upload ${cleanActivityName(activityName)} documentation in ${systemLabel}`;
+  if (groupings.has('send_action')) {
+    subActivities.push('submission for processing');
   }
-  if (hasFileAction) {
-    return `Attach files for ${cleanActivityName(activityName)} in ${systemLabel}`;
+  if (groupings.has('error_handling')) {
+    subActivities.push('error resolution');
   }
-  if (hasDataEntry) {
-    return `Enter ${cleanActivityName(activityName)} information in ${systemLabel}`;
-  }
-  if (navCount >= 3) {
-    return `Navigate and review ${cleanActivityName(activityName)} in ${systemLabel}`;
-  }
-  return `Complete the ${cleanActivityName(activityName)} workflow in ${systemLabel}`;
+
+  const subActivitySuffix = subActivities.length > 0
+    ? `, including ${subActivities.join(', ')}`
+    : '';
+
+  // Use entity if discovered, otherwise fall back to cleaned activity name
+  const subject = entity ?? cleanActivityName(activityName);
+
+  return `${capitalize(action)} a ${subject} in ${systemLabel}${subActivitySuffix}`;
 }
 
 // ─── Trigger inference ───────────────────────────────────────────────────────
 
 /**
- * Infers the trigger condition that starts this workflow.
- * Based on the first step's context and the overall workflow pattern.
+ * Infers the trigger condition by analyzing the first step's context,
+ * the starting page/system, and the overall workflow action pattern.
+ *
+ * Strategy:
+ * 1. Examine the first page title/route for clue about the trigger context
+ *    (queue, inbox, list view, form, dashboard)
+ * 2. Use the workflow action verb for specificity
+ * 3. Mention the starting system
  */
 export function inferTrigger(
   activityName: string,
@@ -86,26 +303,51 @@ export function inferTrigger(
 
   const firstStep = steps[0]!;
   const eventById = new Map(events.map(e => [e.event_id, e]));
-  const firstEvents = firstStep.source_event_ids
-    .map(id => eventById.get(id))
-    .filter((e): e is CanonicalEventInput => e !== undefined);
-  const firstPage = firstEvents[0]?.page_context?.pageTitle;
-  const firstSystem = firstStep.page_context?.applicationLabel;
+  const firstEvents = resolveStepEvents(firstStep, eventById);
+  const firstPage = firstEvents[0]?.page_context?.pageTitle ?? '';
+  const firstSystem = firstStep.page_context?.applicationLabel ?? '';
+  const entity = inferEntityFromContext(events, steps);
+  const action = inferWorkflowAction(steps, activityName);
+  const subject = entity ?? cleanActivityName(activityName);
 
-  const hasFormSubmit = steps.some(s => s.grouping_reason === 'fill_and_submit');
-  const hasSendAction = steps.some(s => s.grouping_reason === 'send_action');
+  const pageLower = firstPage.toLowerCase();
+  const inSystem = firstSystem ? ` in ${firstSystem}` : '';
 
-  if (hasFormSubmit || hasSendAction) {
-    return firstSystem
-      ? `When a new ${cleanActivityName(activityName)} needs to be created or submitted in ${firstSystem}`
-      : `When a new ${cleanActivityName(activityName)} needs to be processed`;
+  // Detect trigger context from the first page
+  const isQueue = /queue|inbox|pending|awaiting|to.?do|worklist/i.test(pageLower);
+  const isListView = /list|results|search|browse|all\s/i.test(pageLower);
+  const isDashboard = /dashboard|home|overview|summary/i.test(pageLower);
+  const isNewForm = /new|create|add\s/i.test(pageLower);
+
+  if (isQueue) {
+    return `When a ${subject} appears in the queue${inSystem} and needs to be ${inferPassiveAction(action)}`;
+  }
+  if (isNewForm) {
+    return `When a new ${subject} needs to be created${inSystem}`;
+  }
+  if (isListView) {
+    return `When a ${subject} is selected from the list${inSystem} for ${action.replace(/^(review and |create |enter |complete )/, '')}processing`;
+  }
+  if (isDashboard && firstSystem) {
+    return `When the operator navigates from ${firstSystem} dashboard to ${action} a ${subject}`;
   }
 
+  // Fall back to action-specific trigger
+  if (action.includes('review') || action.includes('approve')) {
+    return `When a ${subject} requires review and approval${inSystem}`;
+  }
+  if (action.includes('send') || action.includes('compose')) {
+    return `When a ${subject} needs to be composed and sent${inSystem}`;
+  }
+  if (action.includes('update') || action.includes('edit')) {
+    return `When a ${subject} needs to be updated${inSystem}`;
+  }
+
+  // General fallback with system context
   if (firstPage && firstSystem) {
-    return `When the operator opens "${firstPage}" in ${firstSystem} to begin ${cleanActivityName(activityName)}`;
+    return `When the operator opens "${firstPage}" in ${firstSystem} to ${action} a ${subject}`;
   }
-
-  return `When ${cleanActivityName(activityName)} is required`;
+  return `When a ${subject} needs to be ${inferPassiveAction(action)}${inSystem}`;
 }
 
 // ─── Friction detection ──────────────────────────────────────────────────────
@@ -263,32 +505,74 @@ function detectBacktracking(
 // ─── Decision point detection ────────────────────────────────────────────────
 
 /**
- * Infers decision points from observed behavior patterns.
+ * Infers decision points from observed behavior patterns with context-specific
+ * labels derived from the preceding step's title, field names, and system.
+ *
  * A decision is inferred when:
  * - An error_handling step follows a submit/send step (validation decision)
  * - The flow branches to different pages based on form submission
+ * - An approval or review pattern is detected in step titles
  */
 export function detectDecisionPoints(
   steps: DerivedStepInput[],
   events: CanonicalEventInput[],
 ): Map<string, string> {
   const decisions = new Map<string, string>();
+  const eventById = new Map(events.map(e => [e.event_id, e]));
 
   for (let i = 0; i < steps.length - 1; i++) {
     const current = steps[i]!;
     const next = steps[i + 1]!;
+    const system = current.page_context?.applicationLabel ?? '';
+    const systemSuffix = system ? ` in ${system}` : '';
 
     // Pattern: submit → error_handling = validation decision
     if (
       (current.grouping_reason === 'fill_and_submit' || current.grouping_reason === 'send_action') &&
       next.grouping_reason === 'error_handling'
     ) {
-      decisions.set(current.step_id, 'Was the submission accepted?');
+      // Extract field names from the submission step for specific label
+      const stepEvents = resolveStepEvents(current, eventById);
+      const fields = extractFieldNames(stepEvents, 4);
+      if (fields.length > 0) {
+        decisions.set(
+          current.step_id,
+          `Do the ${summarizeFields(fields, 2)} values pass validation?${systemSuffix ? ` (Validated${systemSuffix})` : ''}`,
+        );
+      } else {
+        decisions.set(
+          current.step_id,
+          `Was "${current.title}" accepted?${systemSuffix ? ` (Validated${systemSuffix})` : ''}`,
+        );
+      }
     }
 
     // Pattern: data_entry → error_handling = validation decision
     if (current.grouping_reason === 'data_entry' && next.grouping_reason === 'error_handling') {
-      decisions.set(current.step_id, 'Is the entered data valid?');
+      const stepEvents = resolveStepEvents(current, eventById);
+      const fields = extractFieldNames(stepEvents, 4);
+      if (fields.length > 0) {
+        decisions.set(
+          current.step_id,
+          `Is the entered ${summarizeFields(fields, 2)} data valid?${systemSuffix ? ` (Validated${systemSuffix})` : ''}`,
+        );
+      } else {
+        decisions.set(
+          current.step_id,
+          `Is the data entered in "${current.title}" valid?${systemSuffix ? ` (Validated${systemSuffix})` : ''}`,
+        );
+      }
+    }
+  }
+
+  // Pattern: approval/review steps detected by title semantics
+  for (const step of steps) {
+    if (decisions.has(step.step_id)) continue;
+    const titleLower = step.title.toLowerCase();
+    if (/\b(approv|reject|deny|decline)\b/.test(titleLower)) {
+      const entity = inferEntityFromContext(events, steps);
+      const subject = entity ?? 'the record';
+      decisions.set(step.step_id, `Should ${subject} be approved or rejected?`);
     }
   }
 
@@ -333,26 +617,70 @@ export function extractCommonIssues(
 // ─── Role inference ──────────────────────────────────────────────────────────
 
 /**
- * Infers the primary role/actor from the workflow pattern.
- * Uses the systems accessed and action patterns to determine who is performing this.
+ * Infers business roles from the systems used, action patterns, and
+ * workflow semantics.
+ *
+ * Strategy:
+ * 1. Map known systems to specific business roles using SYSTEM_ROLE_MAP
+ * 2. Weight by step count — the system with the most steps determines the
+ *    primary role
+ * 3. Add "Manager" or "Approver" if approval patterns are detected
+ * 4. Fall back to "Operator" only when no system-specific role is found
  */
 export function inferRoles(
   steps: DerivedStepInput[],
   events: CanonicalEventInput[],
 ): string[] {
   const systems = uniqueSystems(events);
-
-  // All steps are human-initiated in a recorded session
   const roles = new Set<string>();
-  roles.add('Operator');
 
-  // If the workflow spans multiple systems, the actor is likely cross-functional
-  if (systems.length > 2) {
-    roles.delete('Operator');
-    roles.add('Cross-functional operator');
+  // Count steps per system to find the primary one
+  const systemStepCounts = new Map<string, number>();
+  for (const step of steps) {
+    const sys = step.page_context?.applicationLabel;
+    if (sys) {
+      systemStepCounts.set(sys, (systemStepCounts.get(sys) ?? 0) + 1);
+    }
   }
 
-  // If there are file uploads, they may be a document preparer
+  // Map systems to roles, preferring the system with the most steps
+  const sortedSystems = [...systemStepCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([sys]) => sys);
+
+  let hasMappedRole = false;
+  for (const sys of sortedSystems) {
+    const role = roleForSystem(sys);
+    if (role) {
+      roles.add(role);
+      hasMappedRole = true;
+    }
+  }
+
+  // Also check systems that might not have steps counted (from events only)
+  for (const sys of systems) {
+    const role = roleForSystem(sys);
+    if (role) {
+      roles.add(role);
+      hasMappedRole = true;
+    }
+  }
+
+  // Fall back to "Operator" only when no system-specific role is found
+  if (!hasMappedRole) {
+    roles.add('Operator');
+  }
+
+  // Detect approval / management patterns
+  const hasApprovalPattern = steps.some(s => {
+    const titleLower = s.title.toLowerCase();
+    return /\b(approv|reject|deny|escalat|sign.?off)\b/.test(titleLower);
+  });
+  if (hasApprovalPattern) {
+    roles.add('Approver / Manager');
+  }
+
+  // If there are file uploads, add document handler role
   if (steps.some(s => s.grouping_reason === 'file_action')) {
     roles.add('Document preparer');
   }
@@ -381,29 +709,81 @@ export function cleanActivityName(name: string): string {
 }
 
 /**
- * Converts a raw step title into clean SOP instruction language.
- * Ensures imperative voice, removes noise words, makes titles business-focused.
+ * Converts a raw step title into clean SOP instruction language with
+ * business-meaningful context.
+ *
+ * Improvements over the basic verb-prepending approach:
+ * 1. Strips noise words ("Untitled", generic page names)
+ * 2. Extracts business actions from page titles (e.g. "Customer Lookup Results" → "Review customer lookup results")
+ * 3. Uses field context from step events when available for data_entry steps
+ * 4. Ensures imperative voice appropriate to the action category
  */
-export function cleanStepTitle(title: string, groupingReason: GroupingReason): string {
+export function cleanStepTitle(
+  title: string,
+  groupingReason: GroupingReason,
+  stepEvents?: CanonicalEventInput[],
+): string {
   let cleaned = title.trim();
 
-  // Already clean imperative form
+  // Strip noise phrases from titles
+  cleaned = cleaned
+    .replace(/\bUntitled\s*(spreadsheet|document|page)?\b/gi, '')
+    .replace(/\bLoading\.{0,3}\b/gi, '')
+    .replace(/^\s*[-–—]\s*/, '')
+    .trim();
+
+  // If title became empty after cleaning, try to derive from events or use generic
+  if (!cleaned) {
+    cleaned = groupingReason === 'data_entry' ? 'data fields'
+      : groupingReason === 'click_then_navigate' ? 'next page'
+      : 'action';
+  }
+
+  // Already clean imperative form — but still apply field enrichment for data_entry
   if (/^(Navigate|Enter|Click|Submit|Select|Upload|Download|Attach|Verify|Review|Open|Save|Send|Complete|Fill)/.test(cleaned)) {
+    // For data_entry with "Enter" prefix, try to add field specifics
+    if (groupingReason === 'data_entry' && stepEvents && /^Enter\s/.test(cleaned)) {
+      const fields = extractFieldNames(stepEvents, 3);
+      if (fields.length > 0) {
+        return `Enter ${summarizeFields(fields)}`;
+      }
+    }
     return cleaned;
+  }
+
+  // For data_entry, derive title from actual field names when possible
+  if (groupingReason === 'data_entry' && stepEvents) {
+    const fields = extractFieldNames(stepEvents, 3);
+    if (fields.length > 0) {
+      return `Enter ${summarizeFields(fields)}`;
+    }
   }
 
   // Add imperative verb based on category
   switch (groupingReason) {
-    case 'click_then_navigate':
+    case 'click_then_navigate': {
+      // Try to extract meaningful destination from the title
+      const pageMatch = cleaned.match(/(?:to|→|->)\s+(.+)/i);
+      const destination = pageMatch ? pageMatch[1]!.trim() : cleaned;
       if (!cleaned.toLowerCase().startsWith('navigate')) {
-        cleaned = `Navigate to ${cleaned}`;
+        cleaned = `Navigate to ${destination}`;
       }
       break;
-    case 'fill_and_submit':
+    }
+    case 'fill_and_submit': {
       if (!cleaned.toLowerCase().startsWith('fill') && !cleaned.toLowerCase().startsWith('complete')) {
-        cleaned = `Complete ${cleaned}`;
+        // Try to include field context
+        if (stepEvents) {
+          const fields = extractFieldNames(stepEvents, 3);
+          if (fields.length > 0) {
+            cleaned = `Complete form with ${summarizeFields(fields)} and submit`;
+            break;
+          }
+        }
+        cleaned = `Complete and submit ${cleaned}`;
       }
       break;
+    }
     case 'data_entry':
       if (!cleaned.toLowerCase().startsWith('enter')) {
         cleaned = `Enter ${cleaned}`;
@@ -495,7 +875,14 @@ export function computeQualityIndicators(
 // ─── Purpose generation ──────────────────────────────────────────────────────
 
 /**
- * Generates a specific, non-boilerplate purpose statement for the SOP.
+ * Generates a purpose statement grounded in what the workflow actually achieves,
+ * mentioning the specific deliverable (submitted record, sent communication, etc.)
+ * rather than boilerplate about step counts and evidence.
+ *
+ * Strategy:
+ * 1. Determine the workflow's deliverable from the last meaningful step
+ * 2. Mention specific entity and action
+ * 3. List the key phases of work
  */
 export function generatePurpose(
   activityName: string,
@@ -504,25 +891,53 @@ export function generatePurpose(
 ): string {
   const systems = uniqueSystems(events);
   const systemLabel = systems.length > 0 ? systems.join(' and ') : 'the target system';
-  const stepCount = steps.length;
+  const entity = inferEntityFromContext(events, steps);
+  const action = inferWorkflowAction(steps, activityName);
+  const subject = entity ?? cleanActivityName(activityName);
 
-  const hasFormSubmit = steps.some(s => s.grouping_reason === 'fill_and_submit');
-  const hasSendAction = steps.some(s => s.grouping_reason === 'send_action');
-  const hasFileAction = steps.some(s => s.grouping_reason === 'file_action');
+  // Determine the workflow deliverable from the last meaningful step
+  const meaningfulSteps = steps.filter(s => s.grouping_reason !== 'error_handling');
+  const lastStep = meaningfulSteps[meaningfulSteps.length - 1];
+  let deliverable = `a completed ${subject}`;
+  if (lastStep) {
+    const lastGrouping = toGroupingReason(lastStep.grouping_reason);
+    if (lastGrouping === 'fill_and_submit' || lastGrouping === 'send_action') {
+      deliverable = `a submitted ${subject} record`;
+    } else if (lastGrouping === 'file_action') {
+      deliverable = `uploaded documentation for the ${subject}`;
+    } else if (lastGrouping === 'click_then_navigate') {
+      deliverable = `a fully processed ${subject}`;
+    }
+  }
 
-  const actionParts: string[] = [];
-  if (hasFormSubmit) actionParts.push('completing required forms');
-  if (hasFileAction) actionParts.push('attaching documentation');
-  if (hasSendAction) actionParts.push('submitting for processing');
+  // Build phase summary from observed action types
+  const phases: string[] = [];
+  const groupings = new Set(steps.map(s => s.grouping_reason));
+  if (groupings.has('click_then_navigate') && steps.filter(s => s.grouping_reason === 'click_then_navigate').length >= 2) {
+    phases.push('navigation');
+  }
+  if (groupings.has('data_entry') || groupings.has('fill_and_submit')) {
+    phases.push('data entry');
+  }
+  if (groupings.has('file_action')) {
+    phases.push('document attachment');
+  }
+  if (groupings.has('send_action') || groupings.has('fill_and_submit')) {
+    phases.push('submission');
+  }
+  if (groupings.has('error_handling')) {
+    phases.push('error resolution');
+  }
 
-  const actionSuffix = actionParts.length > 0
-    ? `, including ${actionParts.join(', ')}`
+  // Deduplicate and build
+  const uniquePhases = [...new Set(phases)];
+  const phaseSuffix = uniquePhases.length > 0
+    ? ` The workflow covers ${uniquePhases.join(', ')}.`
     : '';
 
   return (
-    `This procedure guides the operator through the ${stepCount}-step process ` +
-    `for ${cleanActivityName(activityName)} in ${systemLabel}${actionSuffix}. ` +
-    `All steps are derived from observed workflow behavior and linked to source evidence.`
+    `This procedure documents how to ${action} a ${subject} in ${systemLabel}, ` +
+    `resulting in ${deliverable}.${phaseSuffix}`
   );
 }
 
@@ -685,12 +1100,20 @@ export function generateNotes(
 // ─── Enriched phase labels ───────────────────────────────────────────────────
 
 /**
- * Generates meaningful phase labels instead of just "{System} Workflow".
- * Analyzes the steps within a phase to determine its business purpose.
+ * Generates meaningful phase labels that include entity/field context from
+ * the actual steps in the phase.
+ *
+ * Strategy:
+ * 1. Extract field names and page titles from phase events to identify
+ *    the entity or action being performed
+ * 2. Combine with system label for context like
+ *    "Gmail — Compose Email" or "NetSuite — Invoice Line Items"
+ * 3. Fall back to grouping-pattern labels when no entity context is available
  */
 export function enrichPhaseLabel(
   systemLabel: string,
-  phaseSteps: Array<{ grouping_reason: string }>,
+  phaseSteps: Array<{ grouping_reason: string; title?: string; source_event_ids?: string[] }>,
+  phaseEvents?: CanonicalEventInput[],
 ): string {
   if (phaseSteps.length === 0) return systemLabel;
 
@@ -700,14 +1123,72 @@ export function enrichPhaseLabel(
   const hasSendAction = groupings.includes('send_action');
   const hasNavigation = groupings.includes('click_then_navigate');
   const hasFileAction = groupings.includes('file_action');
+  const hasErrorHandling = groupings.includes('error_handling');
 
-  // Determine phase purpose
+  // Try to extract entity context from events
+  let entityContext: string | null = null;
+  if (phaseEvents && phaseEvents.length > 0) {
+    // Check field names first — most specific signal
+    const fields = extractFieldNames(phaseEvents, 3);
+    if (fields.length > 0) {
+      entityContext = summarizeFields(fields, 2);
+    }
+
+    // If no fields, try entity from page titles / routes
+    if (!entityContext) {
+      const entity = inferEntityFromContext(phaseEvents, []);
+      if (entity) {
+        entityContext = capitalize(entity);
+      }
+    }
+
+    // If still nothing, try to use the first meaningful page title
+    if (!entityContext) {
+      for (const evt of phaseEvents) {
+        const pageTitle = evt.page_context?.pageTitle;
+        if (pageTitle && !/untitled|loading|home|dashboard/i.test(pageTitle)) {
+          // Trim long page titles
+          entityContext = pageTitle.length > 30 ? pageTitle.slice(0, 27) + '...' : pageTitle;
+          break;
+        }
+      }
+    }
+  }
+
+  // If no events provided, try to derive from step titles
+  if (!entityContext) {
+    for (const step of phaseSteps) {
+      if (step.title && !/untitled|loading/i.test(step.title)) {
+        // Extract the meaningful part of the title (skip verb prefixes)
+        const meaningful = step.title.replace(/^(Navigate to|Enter|Complete|Submit|Attach|Resolve)\s+/i, '').trim();
+        if (meaningful && meaningful.length > 2 && meaningful.length <= 40) {
+          entityContext = meaningful;
+          break;
+        }
+      }
+    }
+  }
+
+  // Build the label with entity context when available
+  if (entityContext) {
+    if (hasFormSubmit && hasSendAction) return `${systemLabel} — Submit ${entityContext}`;
+    if (hasFormSubmit) return `${systemLabel} — Complete ${entityContext}`;
+    if (hasDataEntry && hasSendAction) return `${systemLabel} — Enter & Submit ${entityContext}`;
+    if (hasDataEntry) return `${systemLabel} — Enter ${entityContext}`;
+    if (hasSendAction) return `${systemLabel} — Send ${entityContext}`;
+    if (hasFileAction) return `${systemLabel} — Upload ${entityContext}`;
+    if (hasNavigation) return `${systemLabel} — ${entityContext}`;
+    return `${systemLabel} — ${entityContext}`;
+  }
+
+  // Fallback: grouping-pattern labels (same as before but slightly improved)
   if (hasFormSubmit && hasSendAction) return `${systemLabel} — Data Entry & Submission`;
   if (hasFormSubmit) return `${systemLabel} — Form Completion`;
   if (hasDataEntry && hasSendAction) return `${systemLabel} — Data Entry & Confirmation`;
   if (hasDataEntry) return `${systemLabel} — Data Entry`;
   if (hasSendAction) return `${systemLabel} — Action Execution`;
   if (hasFileAction) return `${systemLabel} — Document Management`;
+  if (hasErrorHandling) return `${systemLabel} — Error Resolution`;
   if (hasNavigation && phaseSteps.length > 2) return `${systemLabel} — Navigation & Review`;
   if (hasNavigation) return `${systemLabel} — Navigation`;
   return systemLabel;

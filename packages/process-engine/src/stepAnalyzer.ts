@@ -117,6 +117,37 @@ function toGroupingReason(raw: string): GroupingReason {
   return VALID_GROUPING_REASONS.has(raw) ? (raw as GroupingReason) : 'single_action';
 }
 
+// ─── Field name humanization ─────────────────────────────────────────────────
+
+/** Maps common field name patterns to descriptive input labels. */
+const FIELD_TYPE_SUFFIXES: ReadonlyArray<[RegExp, string]> = [
+  [/^email$/i, 'Email address'],
+  [/^phone$/i, 'Phone number'],
+  [/^amount$/i, 'Amount'],
+  [/^price$/i, 'Price'],
+  [/^date$/i, 'Date'],
+  [/^name$/i, 'Name'],
+  [/^address$/i, 'Address'],
+  [/^url$/i, 'URL'],
+  [/^description$/i, 'Description'],
+  [/^password$/i, 'Password'],
+  [/^username$/i, 'Username'],
+  [/^vendor$/i, 'Vendor name'],
+  [/email/i, 'Email address'],
+  [/phone/i, 'Phone number'],
+  [/amount/i, 'Amount'],
+  [/date/i, 'Date'],
+  [/close.?date/i, 'Close date'],
+];
+
+function humanizeFieldInput(fieldName: string): string {
+  for (const [pattern, label] of FIELD_TYPE_SUFFIXES) {
+    if (pattern.test(fieldName)) return label;
+  }
+  // If the field name already reads naturally (e.g. "Opportunity Name"), return as-is
+  return fieldName;
+}
+
 // ─── Inputs / Outputs derivation ─────────────────────────────────────────────
 
 function deriveInputs(
@@ -144,7 +175,7 @@ function deriveInputs(
         .filter((l, i, arr) => arr.indexOf(l) === i)
         .slice(0, 5);
       return [
-        ...fields.map(f => `${f} value`),
+        ...fields.map(f => humanizeFieldInput(f)),
         `${systemCtx} form`,
       ];
     }
@@ -156,7 +187,7 @@ function deriveInputs(
         .filter((l, i, arr) => arr.indexOf(l) === i)
         .slice(0, 5);
       return [
-        ...fields.map(f => `${f} value`),
+        ...fields.map(f => humanizeFieldInput(f)),
         `Access to ${systemCtx}`,
       ];
     }
@@ -199,25 +230,30 @@ function deriveOutputs(
   const systemCtx = systems.length > 0 ? systems[0] : 'the application';
 
   switch (groupingReason) {
-    case 'click_then_navigate':
-      return ['New page loaded in browser', 'Updated navigation state'];
+    case 'click_then_navigate': {
+      const navPage = events.find(e => e.event_type.startsWith('navigation.'))
+        ?.page_context?.pageTitle;
+      return navPage
+        ? [`"${navPage}" page loaded in ${systemCtx}`, 'Navigation state updated']
+        : ['Target page loaded in browser', 'Navigation state updated'];
+    }
 
     case 'fill_and_submit':
       return [
-        'Form data submitted to system',
-        'Server-side state updated',
-        `Confirmation or redirect from ${systemCtx}`,
+        `Record created or updated in ${systemCtx}`,
+        'Confirmation of successful submission',
       ];
 
     case 'data_entry':
-      return ['Field value(s) entered', `${systemCtx} state updated`];
+      return [`Data saved in ${systemCtx}`, 'Fields accepted by the system'];
 
-    case 'send_action':
-      return [
-        'Action completed successfully',
-        `${systemCtx} state updated`,
-        'Confirmation or response from system',
-      ];
+    case 'send_action': {
+      const actionLabel = events.find(e => e.event_type === 'interaction.click')
+        ?.target_summary?.label;
+      return actionLabel
+        ? [`"${actionLabel}" action confirmed by ${systemCtx}`, `${systemCtx} state updated`]
+        : [`Action confirmed by ${systemCtx}`, `${systemCtx} state updated`];
+    }
 
     case 'file_action':
       return ['File attached or uploaded', `${systemCtx} reflects the file`];
@@ -253,19 +289,35 @@ function deriveCompletionCondition(
   groupingReason: GroupingReason,
   events: CanonicalEventInput[],
 ): string {
+  const ccSystems = uniqueSystems(events);
+  const ccSystemCtx = ccSystems[0] ?? 'the system';
+
   switch (groupingReason) {
-    case 'click_then_navigate':
-      return 'Target page has fully loaded';
-    case 'fill_and_submit':
-      return 'Form submitted and confirmation received (redirect or toast message)';
+    case 'click_then_navigate': {
+      const navPage = events.find(e => e.event_type.startsWith('navigation.'))
+        ?.page_context?.pageTitle;
+      return navPage
+        ? `"${navPage}" loads successfully`
+        : 'Target page loads successfully';
+    }
+    case 'fill_and_submit': {
+      const ccFields = events
+        .filter(e => e.event_type === 'interaction.input_change' && targetLabel(e))
+        .map(e => targetLabel(e) as string)
+        .filter((l, i, arr) => arr.indexOf(l) === i)
+        .slice(0, 5);
+      return ccFields.length > 0
+        ? `Form fields (${ccFields.join(', ')}) accepted and submission confirmed`
+        : 'Form submitted and confirmation received';
+    }
     case 'data_entry':
       return 'All required values entered and accepted by the system';
     case 'send_action': {
       const actionLabel2 = events.find(e => e.event_type === 'interaction.click')
         ?.target_summary?.label;
       return actionLabel2
-        ? `"${actionLabel2}" action confirmed by system`
-        : 'Action confirmed by system (redirect, toast, or status update)';
+        ? `"${actionLabel2}" action confirmed by ${ccSystemCtx}`
+        : `Action confirmed by ${ccSystemCtx}`;
     }
     case 'file_action':
       return 'File upload completes and file appears in the interface';
@@ -302,8 +354,8 @@ export function deriveOperationalDefinition(
   switch (groupingReason) {
     case 'click_then_navigate': {
       const dest = events.find(e => e.event_type.startsWith('navigation.'))
-        ?.page_context?.pageTitle ?? 'another page';
-      return `The user navigated to "${dest}" on ${appLabel}. This step captures the click that triggered navigation and the resulting page load as a single logical action.`;
+        ?.page_context?.pageTitle ?? 'the next page';
+      return `Navigate to "${dest}" in ${appLabel} to proceed with the next phase.`;
     }
 
     case 'fill_and_submit': {
@@ -311,15 +363,15 @@ export function deriveOperationalDefinition(
         .filter(e => e.event_type === 'interaction.input_change' && targetLabel(e))
         .map(e => targetLabel(e) as string)
         .filter((l, i, arr) => arr.indexOf(l) === i)
-        .slice(0, 3);
-      const fieldList = fields.length > 0 ? ` (${fields.join(', ')})` : '';
-      return `The user completed a form${fieldList} and submitted it on ${appLabel}. This step groups the data entry actions and final submission into a single transactional unit.`;
+        .slice(0, 5);
+      const fieldList = fields.length > 0 ? ` with ${fields.join(', ')} fields` : '';
+      return `Complete the form${fieldList} and submit in ${appLabel}.`;
     }
 
     case 'repeated_click_dedup': {
       const firstEvt = events[0];
       const label = firstEvt !== undefined ? targetLabel(firstEvt) : undefined;
-      return `The user clicked "${label ?? 'an element'}" on ${appLabel}. Multiple rapid clicks on the same target were deduplicated into a single logical action to eliminate noise.`;
+      return `Click "${label ?? 'the target element'}" in ${appLabel}.`;
     }
 
     case 'data_entry': {
@@ -327,62 +379,71 @@ export function deriveOperationalDefinition(
         .filter(e => e.event_type === 'interaction.input_change' && targetLabel(e))
         .map(e => targetLabel(e) as string)
         .filter((l, i, arr) => arr.indexOf(l) === i)
-        .slice(0, 3);
-      const deFieldList = deFields.length > 0 ? ` (${deFields.join(', ')})` : '';
-      return `The user entered data${deFieldList} on ${appLabel}. This step groups related data entry actions into a single logical unit.`;
+        .slice(0, 5);
+      const deFieldList = deFields.length > 0 ? ` ${deFields.join(', ')}` : '';
+      return `Enter${deFieldList} in ${appLabel}.`;
     }
 
     case 'send_action': {
       const actionEvt = events.find(e => e.event_type === 'interaction.click');
       const actionLbl = actionEvt !== undefined ? targetLabel(actionEvt) : undefined;
-      return `The user completed an action by clicking "${actionLbl ?? 'a completion button'}" on ${appLabel}. This step represents a deliberate send, save, or submit action that advances the workflow.`;
+      return `Click "${actionLbl ?? 'the action button'}" in ${appLabel} to execute the action.`;
     }
 
     case 'file_action':
-      return `The user attached or uploaded a file on ${appLabel}. This step captures the file interaction and any associated confirmation.`;
+      return `Attach or upload the required file in ${appLabel}.`;
 
-    case 'error_handling':
-      return `The user encountered and responded to an error or unexpected state on ${appLabel}. This step captures the error recovery interaction pattern within the workflow.`;
+    case 'error_handling': {
+      // Find the preceding action context if available
+      const precedingAction = events.find(e => e.event_type === 'system.error_displayed');
+      const prevLabel = precedingAction !== undefined ? targetLabel(precedingAction) : undefined;
+      return prevLabel
+        ? `Resolve the error that occurred after "${prevLabel}" in ${appLabel}.`
+        : `Resolve the error that occurred in ${appLabel}.`;
+    }
 
     case 'annotation': {
       const text = events.find(e => e.event_type === 'session.annotation_added')?.annotation_text;
       return text
-        ? `A manual workflow annotation was recorded: "${text}". This marks a contextual boundary or note within the process.`
-        : 'A manual workflow annotation was added at this point. This marks a contextual boundary or note within the process.';
+        ? `Annotation: "${text}"`
+        : 'Annotation recorded at this point in the workflow.';
     }
 
     case 'single_action':
     default: {
       const first = events[0];
-      if (first === undefined) return `An action was performed on ${appLabel}.`;
+      if (first === undefined) return `Perform the required action in ${appLabel}.`;
       const label = targetLabel(first);
       if (first.event_type === 'interaction.click') {
-        return `The user clicked${label !== undefined ? ` "${label}"` : ' an element'} on ${appLabel}. This is a discrete UI interaction that does not directly trigger navigation.`;
+        return `Click ${label !== undefined ? `"${label}"` : 'the target element'} in ${appLabel}.`;
       }
       if (first.event_type === 'interaction.input_change') {
-        return `The user entered or updated data${label !== undefined ? ` in the "${label}" field` : ''} on ${appLabel}.`;
+        return label !== undefined
+          ? `Enter data in the "${label}" field in ${appLabel}.`
+          : `Enter the required data in ${appLabel}.`;
       }
       if (first.event_type.startsWith('navigation.')) {
         const dest = first.page_context?.pageTitle ?? first.page_context?.routeTemplate;
-        return `The user navigated${dest !== undefined ? ` to "${dest}"` : ''} on ${appLabel}.`;
+        return dest !== undefined
+          ? `Navigate to "${dest}" in ${appLabel}.`
+          : `Navigate to the target page in ${appLabel}.`;
       }
-      return `A single interaction was performed on ${appLabel}.`;
+      return `Perform the required action in ${appLabel}.`;
     }
   }
 }
 
-function derivePurpose(groupingReason: GroupingReason, step: DerivedStepInput): string {
-  const base = `Step ${step.ordinal} of the workflow.`;
+function derivePurpose(groupingReason: GroupingReason, _step: DerivedStepInput): string {
   switch (groupingReason) {
-    case 'click_then_navigate': return `${base} Opens a new page or view, enabling the user to proceed to the next stage of the workflow.`;
-    case 'fill_and_submit':     return `${base} Captures and submits structured data to the system, completing a data entry transaction.`;
-    case 'repeated_click_dedup': return `${base} Triggers a specific UI control, representing a deliberate user intent.`;
-    case 'data_entry':           return `${base} Enters or updates data in the system, building toward a complete record.`;
-    case 'send_action':          return `${base} Executes a completion action (send, save, submit) that advances the workflow to the next stage.`;
-    case 'file_action':          return `${base} Attaches or uploads a file as part of the workflow.`;
-    case 'error_handling':       return `${base} Resolves an exception or error state to allow the workflow to continue.`;
-    case 'annotation':           return `${base} Records contextual information about the workflow at this point.`;
-    default:                     return `${base} Performs a discrete user interaction within the workflow.`;
+    case 'click_then_navigate': return 'Opens a new page or view to proceed to the next stage of the workflow.';
+    case 'fill_and_submit':     return 'Captures and submits structured data to the system, completing a data entry transaction.';
+    case 'repeated_click_dedup': return 'Triggers a specific UI control, representing a deliberate user intent.';
+    case 'data_entry':           return 'Enters or updates data in the system, building toward a complete record.';
+    case 'send_action':          return 'Executes a completion action (send, save, submit) that advances the workflow.';
+    case 'file_action':          return 'Attaches or uploads a file as part of the workflow.';
+    case 'error_handling':       return 'Resolves an exception or error state to allow the workflow to continue.';
+    case 'annotation':           return 'Records contextual information about the workflow at this point.';
+    default:                     return 'Performs a discrete user interaction within the workflow.';
   }
 }
 

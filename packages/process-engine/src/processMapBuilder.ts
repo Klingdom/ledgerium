@@ -104,8 +104,8 @@ export function buildProcessMap(input: ProcessEngineInput): ProcessMap {
         ? 'exception'
         : 'task';
 
-    // Clean the title
-    const cleanedTitle = cleanStepTitle(step.title, groupingReason);
+    // Clean the title (pass events for field-level context)
+    const cleanedTitle = cleanStepTitle(step.title, groupingReason, events);
 
     // Friction for this specific step
     const stepFriction = friction.filter(f => f.stepOrdinals.includes(step.ordinal));
@@ -136,7 +136,7 @@ export function buildProcessMap(input: ProcessEngineInput): ProcessMap {
   });
 
   // ── Build phases with enriched labels ───────────────────────────────────
-  const phases = buildPhases(sessionJson.sessionId, finalizedSteps);
+  const phases = buildPhases(sessionJson.sessionId, finalizedSteps, eventById);
 
   // Attach phaseId to each task node
   for (const phase of phases) {
@@ -411,8 +411,11 @@ function buildPhases(
   finalizedSteps: Array<{
     step_id: string;
     grouping_reason: string;
+    source_event_ids: string[];
+    title: string;
     page_context?: { applicationLabel: string; domain: string; routeTemplate: string };
   }>,
+  eventById: Map<string, CanonicalEventInput>,
 ): ProcessMapPhase[] {
   if (finalizedSteps.length === 0) return [];
 
@@ -438,10 +441,18 @@ function buildPhases(
     }
   }
 
-  // Enrich phase labels with business context
+  // Enrich phase labels with business context (including event data)
   for (const phase of phases) {
     const phaseSteps = finalizedSteps.filter(s => phase.stepNodeIds.includes(s.step_id));
-    phase.name = enrichPhaseLabel(phase.system, phaseSteps);
+    // Collect all events for steps in this phase
+    const phaseEvents: CanonicalEventInput[] = [];
+    for (const step of phaseSteps) {
+      for (const eid of step.source_event_ids) {
+        const evt = eventById.get(eid);
+        if (evt) phaseEvents.push(evt);
+      }
+    }
+    phase.name = enrichPhaseLabel(phase.system, phaseSteps, phaseEvents);
   }
 
   return phases;

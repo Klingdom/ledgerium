@@ -103,7 +103,7 @@ describe('inferBusinessObjective', () => {
     ];
     const events = [makeEvent({})];
     const result = inferBusinessObjective('Create Invoice', steps, events);
-    expect(result).toContain('submit');
+    expect(result.toLowerCase()).toContain('create');
     expect(result.toLowerCase()).toContain('invoice');
     expect(result).toContain('NetSuite');
   });
@@ -116,16 +116,17 @@ describe('inferBusinessObjective', () => {
     expect(result.toLowerCase()).toContain('customer record');
   });
 
-  it('infers navigation for nav-heavy workflows', () => {
+  it('infers entity and action for nav-heavy workflows', () => {
     const steps = [
       makeStep({ grouping_reason: 'click_then_navigate', ordinal: 1 }),
       makeStep({ grouping_reason: 'click_then_navigate', ordinal: 2 }),
       makeStep({ grouping_reason: 'click_then_navigate', ordinal: 3 }),
       makeStep({ grouping_reason: 'click_then_navigate', ordinal: 4 }),
     ];
-    const events = [makeEvent({})];
+    const events = [makeEvent({ pageTitle: 'Monthly Report' })];
     const result = inferBusinessObjective('Monthly Report', steps, events);
-    expect(result).toContain('review');
+    expect(result.toLowerCase()).toContain('report');
+    expect(result).toContain('NetSuite');
   });
 });
 
@@ -243,7 +244,8 @@ describe('detectDecisionPoints', () => {
     ];
     const decisions = detectDecisionPoints(steps, []);
     expect(decisions.has('s1')).toBe(true);
-    expect(decisions.get('s1')).toContain('submission');
+    // New enriched label references the step title when no field names available
+    expect(decisions.get('s1')).toContain('accepted');
   });
 
   it('detects data_entry → error_handling as decision', () => {
@@ -289,19 +291,26 @@ describe('extractCommonIssues', () => {
 // ─── Role inference ──────────────────────────────────────────────────────────
 
 describe('inferRoles', () => {
-  it('returns Operator for simple workflows', () => {
-    const roles = inferRoles([makeStep({})], [makeEvent({})]);
+  it('returns system-specific role for known systems', () => {
+    const roles = inferRoles([makeStep({})], [makeEvent({ applicationLabel: 'NetSuite' })]);
+    expect(roles).toContain('Accounts Payable Clerk');
+  });
+
+  it('returns Operator for unknown systems', () => {
+    const roles = inferRoles([makeStep({})], [makeEvent({ applicationLabel: 'Custom App' })]);
     expect(roles).toContain('Operator');
   });
 
-  it('returns Cross-functional for 3+ system workflows', () => {
+  it('returns multiple roles for multi-system workflows', () => {
     const events = [
-      makeEvent({ applicationLabel: 'App A' }),
-      makeEvent({ applicationLabel: 'App B' }),
-      makeEvent({ applicationLabel: 'App C' }),
+      makeEvent({ applicationLabel: 'Salesforce' }),
+      makeEvent({ applicationLabel: 'NetSuite' }),
+      makeEvent({ applicationLabel: 'Gmail' }),
     ];
     const roles = inferRoles([makeStep({})], events);
-    expect(roles).toContain('Cross-functional operator');
+    expect(roles.length).toBeGreaterThanOrEqual(2);
+    expect(roles).toContain('Sales Representative');
+    expect(roles).toContain('Accounts Payable Clerk');
   });
 
   it('adds Document preparer for file workflows', () => {
@@ -346,7 +355,7 @@ describe('cleanStepTitle', () => {
 
   it('adds verb prefix for form submit steps', () => {
     const result = cleanStepTitle('Invoice Form', 'fill_and_submit');
-    expect(result).toBe('Complete Invoice Form');
+    expect(result).toBe('Complete and submit Invoice Form');
   });
 });
 
@@ -404,22 +413,23 @@ describe('computeQualityIndicators', () => {
 // ─── Purpose generation ──────────────────────────────────────────────────────
 
 describe('generatePurpose', () => {
-  it('generates specific purpose mentioning step count and systems', () => {
+  it('generates specific purpose mentioning entity, action, and systems', () => {
     const steps = [
       makeStep({ grouping_reason: 'fill_and_submit', ordinal: 1 }),
       makeStep({ grouping_reason: 'send_action', ordinal: 2 }),
     ];
     const events = [makeEvent({})];
     const purpose = generatePurpose('Create Invoice', steps, events);
-    expect(purpose).toContain('2-step');
     expect(purpose).toContain('NetSuite');
-    expect(purpose).toContain('forms');
+    expect(purpose.toLowerCase()).toContain('create');
+    expect(purpose.toLowerCase()).toContain('submission');
   });
 
   it('does not contain boilerplate phrases', () => {
     const purpose = generatePurpose('Test', [makeStep({})], [makeEvent({})]);
     expect(purpose).not.toContain('Standard operating procedure for performing');
-    expect(purpose).toContain('evidence');
+    // Purpose should mention what procedure documents and its deliverable
+    expect(purpose).toContain('procedure documents');
   });
 });
 
