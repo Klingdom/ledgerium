@@ -24,7 +24,13 @@ services:
       - AUTH_TRUST_HOST=true
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-me}
       - NEXTAUTH_URL=${NEXTAUTH_URL:-https://ledgerium.ai}
+    networks:
+      - proxy-net
 
 volumes:
   ledgerium-data:
     driver: local
+
+networks:
+  proxy-net:
+    external: true
