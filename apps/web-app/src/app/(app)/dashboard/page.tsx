@@ -239,6 +239,26 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'optimization', label: 'Optimization Potential' },
 ];
 
+interface PresetView {
+  label: string;
+  filters: {
+    sort?: SortOption;
+    health?: HealthStatus;
+    sopReadiness?: SopReadiness;
+    minScore?: number;
+  };
+}
+
+const PRESET_VIEWS: PresetView[] = [
+  { label: 'All Workflows', filters: {} },
+  { label: 'AI-Ready', filters: { sort: 'optimization', minScore: 60 } },
+  { label: 'Needs Attention', filters: { health: 'needs_review' } },
+  { label: 'High Friction', filters: { sort: 'optimization', health: 'high_variation' } },
+  { label: 'Quick Wins', filters: { sopReadiness: 'ready', sort: 'confidence' } },
+  { label: 'Low Confidence', filters: { sort: 'confidence_asc' } },
+  { label: 'Recently Added', filters: { sort: 'created_at', health: 'new' } },
+];
+
 // ─── Helper functions ───────────────────────────────────────────────────────────
 
 function confidenceColorClass(value: number | null): string {
@@ -282,6 +302,9 @@ export default function DashboardPage() {
   const [healthFilter, setHealthFilter] = useState<HealthStatus | ''>('');
   const [sopFilter, setSopFilter] = useState<SopReadiness | ''>('');
   const [activeTagId, setActiveTagId] = useState<string | null>(null);
+
+  // Preset view state
+  const [activePreset, setActivePreset] = useState<string | null>('All Workflows');
 
   // Inline edit state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -532,6 +555,17 @@ export default function DashboardPage() {
     setSopFilter('');
     setActiveTagId(null);
     setSortBy('created_at');
+    setActivePreset('All Workflows');
+  }
+
+  function applyPreset(view: PresetView) {
+    setSearch('');
+    setActiveTagId(null);
+    setHealthFilter((view.filters.health as HealthStatus) ?? '');
+    setSopFilter((view.filters.sopReadiness as SopReadiness) ?? '');
+    setSortBy(view.filters.sort ?? 'created_at');
+    setActivePreset(view.label);
+    track({ event: 'preset_view_applied', preset: view.label });
   }
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -895,6 +929,19 @@ export default function DashboardPage() {
         </p>
       </div>
 
+      {/* ── Preset Views ─────────────────────────────────────────────── */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-ds-3">
+        {PRESET_VIEWS.map((view) => (
+          <button
+            key={view.label}
+            onClick={() => applyPreset(view)}
+            className={`whitespace-nowrap ds-tag ${activePreset === view.label ? 'ds-tag-brand' : 'ds-tag-neutral hover:bg-gray-200'} transition-colors cursor-pointer`}
+          >
+            {view.label}
+          </button>
+        ))}
+      </div>
+
       {/* ── Filter Bar ────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-ds-3 mb-ds-4">
         {/* Search */}
@@ -904,7 +951,7 @@ export default function DashboardPage() {
             type="text"
             placeholder="Search workflows..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setActivePreset(null); }}
             className="input-field pl-9"
           />
         </div>
@@ -912,7 +959,7 @@ export default function DashboardPage() {
         {/* Health Filter */}
         <select
           value={healthFilter}
-          onChange={(e) => setHealthFilter(e.target.value as HealthStatus | '')}
+          onChange={(e) => { setHealthFilter(e.target.value as HealthStatus | ''); setActivePreset(null); }}
           className="input-field text-ds-sm py-2 pr-8 w-auto min-w-[140px]"
         >
           <option value="">All Health</option>
@@ -926,7 +973,7 @@ export default function DashboardPage() {
         {/* SOP Readiness Filter */}
         <select
           value={sopFilter}
-          onChange={(e) => setSopFilter(e.target.value as SopReadiness | '')}
+          onChange={(e) => { setSopFilter(e.target.value as SopReadiness | ''); setActivePreset(null); }}
           className="input-field text-ds-sm py-2 pr-8 w-auto min-w-[140px]"
         >
           <option value="">All SOP Status</option>
@@ -938,7 +985,7 @@ export default function DashboardPage() {
         {/* Sort */}
         <select
           value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as SortOption)}
+          onChange={(e) => { setSortBy(e.target.value as SortOption); setActivePreset(null); }}
           className="input-field text-ds-sm py-2 pr-8 w-auto min-w-[160px]"
         >
           {SORT_OPTIONS.map((opt) => (
@@ -1454,6 +1501,24 @@ function WorkflowRow({
           </button>
         </div>
       </div>
+
+      {/* Score signals strip — only shown when noteworthy */}
+      {(w.cognitiveBurdenScore >= 60 || w.processMaturityScore <= 30 || w.aiOpportunityScore >= 70 || w.complexityScore >= 70) && (
+        <div className="hidden lg:flex col-span-full items-center gap-3 px-4 pb-2 text-[11px]">
+          {w.complexityScore >= 70 && (
+            <span className="text-red-600">Complexity: {w.complexityScore}</span>
+          )}
+          {w.cognitiveBurdenScore >= 60 && (
+            <span className="text-amber-600">Cognitive Load: {w.cognitiveBurdenScore}</span>
+          )}
+          {w.processMaturityScore <= 30 && (
+            <span className="text-red-600">Low Maturity: {w.processMaturityScore}</span>
+          )}
+          {w.aiOpportunityScore >= 70 && (
+            <span className="text-violet-600">AI Potential: {w.aiOpportunityScore}</span>
+          )}
+        </div>
+      )}
 
       {/* Mobile / Tablet layout */}
       <div className="lg:hidden p-4">

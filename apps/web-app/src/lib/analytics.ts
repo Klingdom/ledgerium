@@ -74,6 +74,7 @@ export type AnalyticsEvent =
   // ── Process groups & analysis ─────────────────────────────────────────────
   | { event: 'view_mode_changed'; mode: string }
   | { event: 'process_analysis_triggered' }
+  | { event: 'preset_view_applied'; preset: string }
 
   // ── Conversion & billing ──────────────────────────────────────────────────
   | { event: 'upgrade_prompt_viewed'; location: string; plan: string }
