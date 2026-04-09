@@ -70,3 +70,18 @@ export type {
   OutlierRun,
   RecommendedCanonicalPath,
 } from './standardizationScorer.js';
+
+// Phase 4: Recommendation Engine
+export {
+  generateRecommendations,
+  computeAutomationROI,
+  simulateWhatIf,
+} from './recommendationEngine.js';
+export type {
+  Recommendation,
+  RecommendationType,
+  RecommendationImpact,
+  RecommendationConfidence,
+  AutomationROI,
+  WhatIfScenario,
+} from './recommendationEngine.js';

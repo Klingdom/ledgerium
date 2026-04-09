@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -22,6 +22,11 @@ import {
   FileText,
   Compass,
   XCircle,
+  Lightbulb,
+  DollarSign,
+  Sliders,
+  Trash2,
+  Bot,
 } from 'lucide-react';
 import { formatDuration, formatDateRelative, formatConfidence } from '@/lib/format';
 import { track } from '@/lib/analytics';
@@ -177,6 +182,35 @@ interface RecommendedCanonicalPathData {
   rationale: string;
 }
 
+interface AutomationROIData {
+  stepPosition: number;
+  stepCategory: string;
+  avgDurationMs: number;
+  runCount: number;
+  totalSavingsMs: number;
+  perRunSavingsMs: number;
+  suitabilityScore: number;
+  rationale: string;
+}
+
+interface RecommendationData {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  impact: 'high' | 'medium' | 'low';
+  confidence: 'high' | 'medium' | 'low';
+  effort: 'low' | 'medium' | 'high';
+  estimatedTimeSavingsMs: number | null;
+  estimatedImprovementPct: number | null;
+  evidence: string;
+  dataPoints: number;
+  processName: string;
+  affectedSteps: number[];
+  evidenceRunIds: string[];
+  computedAt: string;
+}
+
 interface Intelligence {
   metrics?: IntelligenceMetrics;
   variants?: IntelligenceVariants;
@@ -188,6 +222,8 @@ interface Intelligence {
   documentationDrift?: DocumentationDriftData;
   outlierRuns?: OutlierRunData[];
   recommendedPath?: RecommendedCanonicalPathData;
+  automationROI?: AutomationROIData[];
+  recommendations?: RecommendationData[];
 }
 
 interface ProcessDefinition {
@@ -367,6 +403,94 @@ export default function ProcessGroupDetailPage() {
   const documentationDrift = intel?.documentationDrift ?? null;
   const outlierRuns = intel?.outlierRuns ?? null;
   const recommendedPath = intel?.recommendedPath ?? null;
+  const automationROI = intel?.automationROI ?? null;
+  const recommendations = intel?.recommendations ?? null;
+
+  // What-If Simulator state
+  const [removedSteps, setRemovedSteps] = useState<Set<number>>(new Set());
+  const [automatedSteps, setAutomatedSteps] = useState<Set<number>>(new Set());
+
+  const toggleRemoved = useCallback((idx: number) => {
+    setRemovedSteps((prev) => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+    // Cannot both remove and automate
+    setAutomatedSteps((prev) => {
+      const next = new Set(prev);
+      next.delete(idx);
+      return next;
+    });
+  }, []);
+
+  const toggleAutomated = useCallback((idx: number) => {
+    setAutomatedSteps((prev) => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+    // Cannot both remove and automate
+    setRemovedSteps((prev) => {
+      const next = new Set(prev);
+      next.delete(idx);
+      return next;
+    });
+  }, []);
+
+  // What-If scenario computation (local, no API call)
+  const whatIfResult = useMemo(() => {
+    if (!timestudy?.steps || !metrics) return null;
+    if (removedSteps.size === 0 && automatedSteps.size === 0) return null;
+
+    const currentDuration = metrics.avgDuration;
+    let durationReduction = 0;
+    let stepsRemoved = 0;
+    const assumptions: string[] = [];
+
+    for (const idx of removedSteps) {
+      const step = timestudy.steps[idx];
+      if (step) {
+        durationReduction += step.avgDurationMs;
+        stepsRemoved++;
+        assumptions.push(`Removing "${step.stepTitle}" eliminates ~${formatDuration(step.avgDurationMs)}`);
+      }
+    }
+
+    for (const idx of automatedSteps) {
+      const step = timestudy.steps[idx];
+      if (step) {
+        const isFullyAutomatable = step.category === 'data_entry' || step.category === 'fill_and_submit';
+        const factor = isFullyAutomatable ? 0.9 : 0.5;
+        durationReduction += step.avgDurationMs * factor;
+        assumptions.push(`Automating "${step.stepTitle}" reduces ~${Math.round(factor * 100)}% of ${formatDuration(step.avgDurationMs)}`);
+      }
+    }
+
+    const estimatedDuration = Math.max(0, currentDuration - durationReduction);
+    const changePct = currentDuration > 0
+      ? Math.round(((estimatedDuration - currentDuration) / currentDuration) * 100)
+      : 0;
+
+    const totalChanges = removedSteps.size + automatedSteps.size;
+    const confidence: 'high' | 'medium' | 'low' =
+      (metrics.runCount ?? 0) >= 20 && totalChanges <= 2 ? 'high' :
+      (metrics.runCount ?? 0) >= 5 ? 'medium' : 'low';
+
+    assumptions.push(`Based on ${metrics.runCount} historical runs`);
+
+    return {
+      currentDurationMs: currentDuration,
+      estimatedDurationMs: Math.round(estimatedDuration),
+      changePct,
+      currentStepCount: Math.round(metrics.avgStepCount),
+      estimatedStepCount: Math.round(metrics.avgStepCount) - stepsRemoved,
+      confidence,
+      assumptions,
+    };
+  }, [timestudy, metrics, removedSteps, automatedSteps]);
 
   // Sort timestudy steps by avg duration descending
   const sortedTimeStudySteps = useMemo(() => {
@@ -913,7 +1037,250 @@ export default function ProcessGroupDetailPage() {
           </section>
         )}
 
-        {/* ---- Section 10: Active Insights ---- */}
+        {/* ---- Section 10: What-If Simulator ---- */}
+        {timestudy && timestudy.steps.length > 0 && metrics && (
+          <section className="ds-section">
+            <SectionHeader>What-If Simulator</SectionHeader>
+            <div className="card px-ds-5 py-ds-4">
+              <div className="flex items-center gap-ds-2 mb-ds-4">
+                <Sliders className="h-4 w-4 text-brand-600" />
+                <p className="text-ds-sm text-gray-600">
+                  Select steps to remove or automate to see the estimated impact on process duration.
+                </p>
+              </div>
+
+              {/* Step table with checkboxes */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-ds-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100 text-ds-xs text-gray-500">
+                      <th className="text-left font-medium px-ds-3 py-ds-2">#</th>
+                      <th className="text-left font-medium px-ds-3 py-ds-2">Step</th>
+                      <th className="text-left font-medium px-ds-3 py-ds-2">Category</th>
+                      <th className="text-right font-medium px-ds-3 py-ds-2">Avg Duration</th>
+                      <th className="text-center font-medium px-ds-3 py-ds-2">
+                        <span className="flex items-center justify-center gap-1">
+                          <Trash2 className="h-3.5 w-3.5" /> Remove
+                        </span>
+                      </th>
+                      <th className="text-center font-medium px-ds-3 py-ds-2">
+                        <span className="flex items-center justify-center gap-1">
+                          <Bot className="h-3.5 w-3.5" /> Automate
+                        </span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {timestudy.steps.map((step, idx) => (
+                      <tr
+                        key={idx}
+                        className={`border-b border-gray-50 ${
+                          removedSteps.has(idx) ? 'bg-red-50/40' :
+                          automatedSteps.has(idx) ? 'bg-blue-50/40' : ''
+                        }`}
+                      >
+                        <td className="px-ds-3 py-ds-2 text-gray-400 text-ds-xs">{idx + 1}</td>
+                        <td className="px-ds-3 py-ds-2 text-gray-900 font-medium truncate max-w-[200px]">
+                          {step.stepTitle}
+                        </td>
+                        <td className="px-ds-3 py-ds-2">
+                          <span className={`ds-tag text-[10px] ${categoryChip(step.category)}`}>
+                            {categoryLabel(step.category)}
+                          </span>
+                        </td>
+                        <td className="px-ds-3 py-ds-2 text-right text-gray-600">
+                          {formatDuration(step.avgDurationMs)}
+                        </td>
+                        <td className="px-ds-3 py-ds-2 text-center">
+                          <input
+                            type="checkbox"
+                            checked={removedSteps.has(idx)}
+                            onChange={() => toggleRemoved(idx)}
+                            className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                          />
+                        </td>
+                        <td className="px-ds-3 py-ds-2 text-center">
+                          <input
+                            type="checkbox"
+                            checked={automatedSteps.has(idx)}
+                            onChange={() => toggleAutomated(idx)}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Results panel */}
+              {whatIfResult && (
+                <div className="mt-ds-4 p-ds-4 rounded-lg bg-brand-50/50 border border-brand-100">
+                  <div className="flex items-center gap-ds-2 mb-ds-3">
+                    <Zap className="h-4 w-4 text-brand-600" />
+                    <p className="text-ds-sm font-semibold text-gray-900">Estimated Impact</p>
+                    <span className={`ds-tag text-[10px] ${
+                      whatIfResult.confidence === 'high' ? 'bg-green-100 text-green-700' :
+                      whatIfResult.confidence === 'medium' ? 'bg-amber-100 text-amber-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {whatIfResult.confidence} confidence
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-ds-3">
+                    <div>
+                      <p className="text-ds-xs text-gray-400">Current Duration</p>
+                      <p className="text-ds-sm font-semibold text-gray-900">
+                        {formatDuration(whatIfResult.currentDurationMs)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-ds-xs text-gray-400">Estimated Duration</p>
+                      <p className="text-ds-sm font-semibold text-brand-700">
+                        {formatDuration(whatIfResult.estimatedDurationMs)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-ds-xs text-gray-400">Change</p>
+                      <p className={`text-ds-sm font-semibold ${
+                        whatIfResult.changePct < 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {whatIfResult.changePct > 0 ? '+' : ''}{whatIfResult.changePct}%
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-ds-xs text-gray-400">Step Count</p>
+                      <p className="text-ds-sm font-semibold text-gray-900">
+                        {whatIfResult.currentStepCount} &rarr; {whatIfResult.estimatedStepCount}
+                      </p>
+                    </div>
+                  </div>
+                  {whatIfResult.assumptions.length > 0 && (
+                    <div className="mt-ds-3 pt-ds-3 border-t border-brand-100">
+                      <p className="text-ds-xs text-gray-500 font-medium mb-ds-1">Assumptions</p>
+                      <ul className="space-y-0.5">
+                        {whatIfResult.assumptions.map((a, i) => (
+                          <li key={i} className="text-ds-xs text-gray-500 flex items-start gap-1">
+                            <span className="text-gray-400 mt-0.5">-</span> {a}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* ---- Section 11: Automation ROI ---- */}
+        {automationROI && automationROI.length > 0 && (
+          <section className="ds-section">
+            <SectionHeader>Automation ROI</SectionHeader>
+            <div className="space-y-ds-2">
+              {automationROI.map((roi) => (
+                <div key={roi.stepPosition} className="card px-ds-5 py-ds-4">
+                  <div className="flex items-start justify-between gap-ds-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-ds-2 mb-ds-1">
+                        <DollarSign className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        <span className="text-ds-sm font-medium text-gray-900">
+                          Step {roi.stepPosition}
+                        </span>
+                        <span className={`ds-tag text-[10px] ${categoryChip(roi.stepCategory)}`}>
+                          {categoryLabel(roi.stepCategory)}
+                        </span>
+                        <span className={`ds-tag text-[10px] ${
+                          roi.suitabilityScore >= 70 ? 'bg-green-100 text-green-700' :
+                          roi.suitabilityScore >= 50 ? 'bg-amber-100 text-amber-700' :
+                          'bg-gray-100 text-gray-600'
+                        }`}>
+                          {roi.suitabilityScore}% suitable
+                        </span>
+                      </div>
+                      <p className="text-ds-xs text-gray-600 mt-ds-1">{roi.rationale}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-ds-sm font-semibold text-green-600">
+                        {formatDuration(roi.perRunSavingsMs)}/run
+                      </p>
+                      <p className="text-ds-xs text-gray-400">
+                        {formatDuration(roi.totalSavingsMs)} total
+                      </p>
+                      <p className="text-ds-xs text-gray-400">
+                        {roi.runCount} runs
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ---- Section 12: Recommendations ---- */}
+        {recommendations && recommendations.length > 0 && (
+          <section className="ds-section">
+            <SectionHeader>Recommendations</SectionHeader>
+            <div className="space-y-ds-2">
+              {recommendations.map((rec) => (
+                <div key={rec.id} className="card px-ds-5 py-ds-4">
+                  <div className="flex items-start gap-ds-3">
+                    <Lightbulb className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
+                      rec.impact === 'high' ? 'text-red-500' :
+                      rec.impact === 'medium' ? 'text-amber-500' : 'text-blue-500'
+                    }`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-ds-2 mb-ds-1">
+                        <span className="text-ds-sm font-semibold text-gray-900">{rec.title}</span>
+                        <span className={`ds-tag text-[10px] ${
+                          rec.type === 'automate_step' ? 'bg-blue-100 text-blue-700' :
+                          rec.type === 'update_sop' ? 'bg-purple-100 text-purple-700' :
+                          rec.type === 'standardize_variant' ? 'bg-teal-100 text-teal-700' :
+                          rec.type === 'reduce_rework' ? 'bg-orange-100 text-orange-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {rec.type.replace(/_/g, ' ')}
+                        </span>
+                        <span className={`ds-tag text-[10px] ${
+                          rec.impact === 'high' ? 'bg-red-100 text-red-700' :
+                          rec.impact === 'medium' ? 'bg-amber-100 text-amber-700' :
+                          'bg-green-100 text-green-700'
+                        }`}>
+                          {rec.impact} impact
+                        </span>
+                        <span className={`ds-tag text-[10px] ${
+                          rec.confidence === 'high' ? 'bg-green-100 text-green-700' :
+                          rec.confidence === 'medium' ? 'bg-amber-100 text-amber-700' :
+                          'bg-gray-100 text-gray-600'
+                        }`}>
+                          {rec.confidence} confidence
+                        </span>
+                        <span className={`ds-tag text-[10px] ${
+                          rec.effort === 'low' ? 'bg-green-100 text-green-700' :
+                          rec.effort === 'medium' ? 'bg-amber-100 text-amber-700' :
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          {rec.effort} effort
+                        </span>
+                      </div>
+                      <p className="text-ds-xs text-gray-600">{rec.description}</p>
+                      {rec.estimatedTimeSavingsMs != null && (
+                        <p className="text-ds-xs text-green-600 font-medium mt-ds-1">
+                          Estimated savings: {formatDuration(rec.estimatedTimeSavingsMs)} per run
+                          {rec.estimatedImprovementPct != null && ` (${rec.estimatedImprovementPct}% improvement)`}
+                        </p>
+                      )}
+                      <p className="text-ds-xs text-gray-400 mt-ds-1">{rec.evidence}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ---- Section 13: Active Insights ---- */}
         {definition.insights.length > 0 && (
           <section className="ds-section">
             <SectionHeader>Active Insights</SectionHeader>

@@ -10,11 +10,13 @@ import {
   LogOut,
   BarChart3,
   Users,
+  Zap,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Workflows', icon: LayoutDashboard },
   { href: '/analytics', label: 'Intelligence', icon: BarChart3 },
+  { href: '/recommendations', label: 'Actions', icon: Zap },
   { href: '/teams', label: 'Teams', icon: Users },
   { href: '/upload', label: 'Upload', icon: Upload },
   { href: '/account', label: 'Account', icon: User },

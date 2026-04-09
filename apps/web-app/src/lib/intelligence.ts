@@ -18,6 +18,8 @@ import {
   computeDocumentationDriftScore,
   detectOutlierRuns,
   deriveRecommendedCanonicalPath,
+  generateRecommendations,
+  computeAutomationROI,
 } from '@ledgerium/intelligence-engine';
 import type {
   ProcessRunBundle,
@@ -190,7 +192,29 @@ export async function clusterWorkflows(userId: string): Promise<void> {
           documentationDrift = computeDocumentationDriftScore(sopAlignment);
         }
 
-        // Merge Phase 3 scores into the intelligence JSON alongside portfolio data
+        // Phase 4: Recommendations
+        let recommendations: unknown[] = [];
+        try {
+          const sopAlignmentResult = sopAlignment ?? null;
+          const standardizationResult = standardization ?? null;
+          recommendations = generateRecommendations(
+            canonicalName, bundles, intelligence.metrics,
+            intelligence.variants, intelligence.variance,
+            intelligence.timestudy, intelligence.bottlenecks,
+            sopAlignmentResult, standardizationResult,
+          );
+        } catch (err) {
+          console.error('Recommendation generation failed:', err);
+        }
+
+        let automationROI: unknown[] = [];
+        try {
+          automationROI = computeAutomationROI(intelligence.timestudy, bundles.length);
+        } catch (err) {
+          console.error('Automation ROI computation failed:', err);
+        }
+
+        // Merge Phase 3 + Phase 4 scores into the intelligence JSON alongside portfolio data
         const extendedIntelligence = {
           ...intelligence,
           standardization,
@@ -198,6 +222,8 @@ export async function clusterWorkflows(userId: string): Promise<void> {
           recommendedPath,
           sopAlignment,
           documentationDrift,
+          recommendations,
+          automationROI,
         };
 
         intelligenceJson = JSON.stringify(extendedIntelligence);
