@@ -151,7 +151,7 @@ describe('buildDerivedSteps', () => {
     expect(steps).toHaveLength(1);
     expect(steps[0]!.grouping_reason).toBe('send_action');
     expect(steps[0]!.confidence).toBe(0.90);
-    expect(steps[0]!.title).toBe('Send');
+    expect(steps[0]!.title).toBe('Send in App');
   });
 
   it('click on Save button → send_action', () => {
