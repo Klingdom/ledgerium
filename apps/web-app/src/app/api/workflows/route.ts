@@ -139,6 +139,41 @@ function computeHealthStatus(
   return 'healthy';
 }
 
+function computeAiOpportunityScore(
+  stepCount: number | null,
+  durationMs: number | null,
+  toolsUsed: string | null,
+  optimizationPotential: RiskLevel,
+): number {
+  let score = 0;
+
+  // Repetitive step ratio proxy via step count (30% weight, up to 30 pts for 15+ steps)
+  if (stepCount != null) {
+    score += Math.min(Math.round((stepCount / 15) * 30), 30);
+  }
+
+  // Longer workflows benefit more from automation (up to 25 pts for 5min+)
+  if (durationMs != null) {
+    score += Math.min(Math.round((durationMs / 300_000) * 25), 25);
+  }
+
+  // Multi-system = orchestration opportunity (up to 25 pts for 3+ systems)
+  const toolCount = toolsUsed ? (() => {
+    try {
+      const parsed = JSON.parse(toolsUsed);
+      return Array.isArray(parsed) ? parsed.length : 0;
+    } catch { return 0; }
+  })() : 0;
+  score += Math.min(Math.round((toolCount / 3) * 25), 25);
+
+  // High optimization potential bonus (20 pts)
+  if (optimizationPotential === 'high') {
+    score += 20;
+  }
+
+  return Math.min(score, 100);
+}
+
 // ── Lightweight interpretation-derived fields ────────────────────────────────
 
 function computeProcessType(
@@ -298,7 +333,7 @@ export async function GET(req: NextRequest) {
 
   // ── Query ──────────────────────────────────────────────────────────────
 
-  const [results, insightCount] = await Promise.all([
+  const [results, insightCount, topInsights] = await Promise.all([
     db.workflow.findMany({
       where,
       orderBy: { [orderByField]: sortDir },
@@ -309,6 +344,12 @@ export async function GET(req: NextRequest) {
     }),
     db.processInsight.count({
       where: { userId: session.user.id, dismissed: false },
+    }),
+    db.processInsight.findMany({
+      where: { userId: session.user.id, dismissed: false },
+      orderBy: [{ severity: 'desc' }, { createdAt: 'desc' }],
+      take: 3,
+      select: { id: true, title: true, severity: true, insightType: true },
     }),
   ]);
 
@@ -346,6 +387,9 @@ export async function GET(req: NextRequest) {
     );
     const processType = computeProcessType(w.toolsUsed, w.stepCount, w.description);
     const complexityScore = computeComplexityScore(w.stepCount, w.toolsUsed, w.durationMs);
+    const aiOpportunityScore = computeAiOpportunityScore(
+      w.stepCount, w.durationMs, w.toolsUsed, optimizationPotential,
+    );
 
     // Exclude processDefinition relation from spread to keep response clean
     const { processDefinition: _pd, tags: _tags, ...workflowBase } = w;
@@ -364,6 +408,7 @@ export async function GET(req: NextRequest) {
       healthStatus,
       processType,
       complexityScore,
+      aiOpportunityScore,
       // Include processDefinition summary if present
       processDefinition: w.processDefinition ? {
         id: w.processDefinition.id,
@@ -456,6 +501,10 @@ export async function GET(req: NextRequest) {
 
   const staleCount = allEnriched.filter((w) => w.isStale).length;
 
+  const aiOpportunityCount = allEnriched.filter(
+    (w) => w.aiOpportunityScore >= 60,
+  ).length;
+
   const recentlyViewed = allEnriched
     .filter((w) => w.lastViewedAt != null)
     .sort((a, b) => new Date(b.lastViewedAt!).getTime() - new Date(a.lastViewedAt!).getTime())
@@ -477,7 +526,9 @@ export async function GET(req: NextRequest) {
       insightCount,
       favoriteCount,
       staleCount,
+      aiOpportunityCount,
       systemCoverage,
+      topInsights,
       // Backward-compatible fields
       recentlyViewedIds: recentlyViewed.map((w) => w.id),
     },

@@ -123,6 +123,7 @@ interface WorkflowSummary {
   processDefinition: ProcessDefinitionSummary | null;
   processType: string;
   complexityScore: number;
+  aiOpportunityScore: number;
 }
 
 interface TagWithCount extends TagSummary {
@@ -138,6 +139,13 @@ interface StreakData {
   milestones: { label: string; threshold: number; isReached: boolean }[];
 }
 
+interface TopInsight {
+  id: string;
+  title: string;
+  severity: 'info' | 'warning' | 'critical';
+  insightType: string;
+}
+
 interface DashboardStats {
   totalWorkflows: number;
   recordedThisWeek: number;
@@ -150,7 +158,9 @@ interface DashboardStats {
   insightCount: number;
   favoriteCount: number;
   staleCount: number;
+  aiOpportunityCount: number;
   systemCoverage: { system: string; workflowCount: number }[];
+  topInsights: TopInsight[];
   recentlyViewedIds: string[];
 }
 
@@ -618,6 +628,36 @@ export default function DashboardPage() {
               ? stats.systemCoverage.slice(0, 2).map((s) => s.system).join(', ')
               : 'None tracked'}
           />
+        </div>
+      )}
+
+      {/* ── Insights Alert Bar ─────────────────────────────────────────── */}
+      {stats?.topInsights && stats.topInsights.length > 0 && (
+        <div className="space-y-2 mb-ds-4">
+          {stats.topInsights.map((insight) => (
+            <Link
+              key={insight.id}
+              href="/analytics"
+              className="card flex items-center gap-3 px-4 py-3 hover:border-gray-300 transition-colors"
+            >
+              <span
+                className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                  insight.severity === 'critical'
+                    ? 'bg-red-500'
+                    : insight.severity === 'warning'
+                      ? 'bg-amber-500'
+                      : 'bg-blue-500'
+                }`}
+              />
+              <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wide">
+                {insight.insightType.replace(/_/g, ' ')}
+              </span>
+              <span className="text-ds-sm text-gray-700 flex-1 truncate">
+                {insight.title}
+              </span>
+              <ChevronRight className="h-4 w-4 text-gray-300 flex-shrink-0" />
+            </Link>
+          ))}
         </div>
       )}
 
@@ -1227,14 +1267,31 @@ function WorkflowRow({
           )}
         </div>
 
-        {/* Health Badge */}
-        <div>
+        {/* Health Badge + AI Opportunity + Doc Warning */}
+        <div className="flex items-center gap-1.5 flex-wrap">
           <span
             className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium ${healthConfig.bgClass} ${healthConfig.textClass}`}
           >
             <span className={`h-1.5 w-1.5 rounded-full ${healthConfig.dotClass}`} />
             {healthConfig.label}
           </span>
+          {w.aiOpportunityScore >= 60 && (
+            <span
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-50 text-violet-700"
+              title={`AI Automation Opportunity: ${w.aiOpportunityScore}/100`}
+            >
+              <Zap className="h-2.5 w-2.5" />
+              AI: {w.aiOpportunityScore}
+            </span>
+          )}
+          {w.documentationCompleteness < 50 && (
+            <span
+              className="inline-flex items-center text-amber-500"
+              title={`Documentation ${w.documentationCompleteness}% complete`}
+            >
+              <AlertTriangle className="h-3 w-3" />
+            </span>
+          )}
         </div>
 
         {/* Steps */}
@@ -1401,6 +1458,23 @@ function WorkflowRow({
               >
                 SOP: {sopConfig.label}
               </span>
+              {w.aiOpportunityScore >= 60 && (
+                <span
+                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-50 text-violet-700"
+                  title={`AI Automation Opportunity: ${w.aiOpportunityScore}/100`}
+                >
+                  <Zap className="h-2.5 w-2.5" />
+                  AI: {w.aiOpportunityScore}
+                </span>
+              )}
+              {w.documentationCompleteness < 50 && (
+                <span
+                  className="inline-flex items-center text-amber-500"
+                  title={`Documentation ${w.documentationCompleteness}% complete`}
+                >
+                  <AlertTriangle className="h-3 w-3" />
+                </span>
+              )}
               {primarySystem && (
                 <span className="ds-tag ds-tag-neutral text-[10px]">{primarySystem}</span>
               )}
