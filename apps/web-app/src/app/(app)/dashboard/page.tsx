@@ -533,19 +533,8 @@ export default function DashboardPage() {
       .slice(0, 5);
   }, [workflows]);
 
-  const mostComplexWorkflows = useMemo(() => {
-    return workflows
-      .filter((w) => w.complexityScore > 0)
-      .sort((a, b) => b.complexityScore - a.complexityScore)
-      .slice(0, 3);
-  }, [workflows]);
-
-  const highCognitiveBurdenWorkflows = useMemo(() => {
-    return workflows
-      .filter((w) => w.cognitiveBurdenScore >= 60)
-      .sort((a, b) => b.cognitiveBurdenScore - a.cognitiveBurdenScore)
-      .slice(0, 5);
-  }, [workflows]);
+  // mostComplexWorkflows and highCognitiveBurdenWorkflows removed —
+  // replaced by unified Action Items and AI Opportunities panels
 
   const hasActiveFilters = healthFilter !== '' || sopFilter !== '' || activeTagId !== null || search !== '';
 
@@ -734,122 +723,136 @@ export default function DashboardPage() {
       )}
 
       {/* ═══════════════════════════════════════════════════════════════════
-          LAYER 2 — Process Intelligence Panel
+          LAYER 2 — Intelligence Engine
+          Three-column layout: Action Items | AI Opportunities | Recent Activity
           ═══════════════════════════════════════════════════════════════════ */}
-      {(needsAttentionWorkflows.length > 0 ||
-        optimizationWorkflows.length > 0 ||
-        staleWorkflows.length > 0 ||
-        mostComplexWorkflows.length > 0 ||
-        highCognitiveBurdenWorkflows.length > 0) && (
+      {workflows.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-ds-4 mb-ds-6">
-          {/* Needs Attention */}
-          {needsAttentionWorkflows.length > 0 && (
-            <IntelligenceList
-              title="Needs Attention"
-              icon={<AlertTriangle className="h-4 w-4 text-amber-500" />}
-              borderClass="border-amber-200"
-              items={needsAttentionWorkflows}
-              renderMetric={(w) => (
-                <span className={`text-ds-xs font-medium ${confidenceColorClass(w.confidence)}`}>
-                  {w.confidence !== null ? formatConfidence(w.confidence) : '--'}
-                </span>
-              )}
-              onViewAll={() => {
-                setHealthFilter('needs_review');
-                setSopFilter('');
-              }}
-            />
-          )}
 
-          {/* Optimization Opportunities */}
-          {optimizationWorkflows.length > 0 && (
-            <IntelligenceList
-              title="Optimization Potential"
-              icon={<TrendingUp className="h-4 w-4 text-violet-500" />}
-              borderClass="border-violet-200"
-              items={optimizationWorkflows}
-              renderMetric={(w) => (
-                <span className="text-ds-xs text-gray-500">
-                  {formatDuration(w.durationMs)}
-                </span>
-              )}
-              onViewAll={() => {
-                setSortBy('optimization');
-                setHealthFilter('');
-                setSopFilter('');
-              }}
-            />
-          )}
-
-          {/* Stale Workflows */}
-          {staleWorkflows.length > 0 && (
-            <IntelligenceList
-              title="Stale Workflows"
-              icon={<Clock className="h-4 w-4 text-gray-400" />}
-              borderClass="border-gray-200"
-              items={staleWorkflows}
-              renderMetric={(w) => (
-                <span className="text-ds-xs text-gray-400">
-                  {formatDateRelative(w.createdAt)}
-                </span>
-              )}
-              onViewAll={() => {
-                setHealthFilter('stale');
-                setSopFilter('');
-              }}
-            />
-          )}
-
-          {/* Most Complex Workflows */}
-          {mostComplexWorkflows.length > 0 && (
-            <IntelligenceList
-              title="Most Complex"
-              icon={<Boxes className="h-4 w-4 text-red-500" />}
-              borderClass="border-red-200"
-              items={mostComplexWorkflows}
-              renderMetric={(w) => (
-                <span className={`text-ds-xs font-medium tabular-nums ${
-                  w.complexityScore > 70 ? 'text-red-600' :
-                  w.complexityScore > 40 ? 'text-amber-600' : 'text-emerald-600'
-                }`}>
-                  {w.complexityScore}
-                </span>
-              )}
-              onViewAll={() => {
-                setSortBy('step_count');
-                setHealthFilter('');
-                setSopFilter('');
-              }}
-            />
-          )}
-
-          {/* Recent Activity */}
-          {workflows.length > 0 && (
-            <div className="card border-blue-100 overflow-hidden">
-              <div className="flex items-center gap-ds-2 px-ds-4 py-ds-3 border-b border-gray-100">
-                <Activity className="h-4 w-4 text-blue-500" />
-                <h3 className="text-ds-sm font-semibold text-gray-900">Recent Activity</h3>
+          {/* ── Action Items: workflows needing attention ──────────────── */}
+          <div className="card overflow-hidden">
+            <div className="flex items-center justify-between px-ds-4 py-ds-3 border-b border-gray-100">
+              <div className="flex items-center gap-ds-2">
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                <h3 className="text-ds-sm font-semibold text-gray-900">Action Items</h3>
               </div>
-              <div className="divide-y divide-gray-50">
-                {workflows.slice(0, 5).map((w) => (
-                  <Link
-                    key={w.id}
-                    href={`/workflows/${w.id}`}
-                    className="flex items-center gap-ds-3 px-ds-4 py-ds-2 hover:bg-gray-50 transition-colors"
-                  >
-                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                      HEALTH_STATUS_CONFIG[w.healthStatus]?.dotClass ?? 'bg-gray-300'
-                    }`} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-ds-xs text-gray-900 font-medium truncate">{w.title}</p>
-                      <p className="text-[10px] text-gray-400">{formatDateRelative(w.createdAt)}</p>
-                    </div>
-                    <span className="text-[10px] text-gray-400">{w.stepCount ?? 0} steps</span>
-                  </Link>
-                ))}
-              </div>
+              {needsAttentionWorkflows.length > 0 && (
+                <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">
+                  {needsAttentionWorkflows.length + staleWorkflows.length + optimizationWorkflows.length}
+                </span>
+              )}
             </div>
-          )}
+            <div className="divide-y divide-gray-50">
+              {needsAttentionWorkflows.length === 0 && staleWorkflows.length === 0 && optimizationWorkflows.length === 0 ? (
+                <div className="px-ds-4 py-ds-6 text-center">
+                  <ShieldCheck className="h-6 w-6 text-emerald-400 mx-auto mb-2" />
+                  <p className="text-ds-xs text-gray-500">All workflows are healthy</p>
+                </div>
+              ) : (
+                <>
+                  {needsAttentionWorkflows.slice(0, 3).map((w) => (
+                    <Link key={w.id} href={`/workflows/${w.id}`} className="flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-gray-50 transition-colors">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-ds-xs text-gray-900 font-medium truncate">{w.title}</p>
+                        <p className="text-[10px] text-gray-400">Needs review &middot; {w.confidence !== null ? formatConfidence(w.confidence) : 'Low'} confidence</p>
+                      </div>
+                    </Link>
+                  ))}
+                  {staleWorkflows.slice(0, 2).map((w) => (
+                    <Link key={w.id} href={`/workflows/${w.id}`} className="flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-gray-50 transition-colors">
+                      <span className="w-1.5 h-1.5 rounded-full bg-gray-400 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-ds-xs text-gray-900 font-medium truncate">{w.title}</p>
+                        <p className="text-[10px] text-gray-400">Stale &middot; Recorded {formatDateRelative(w.createdAt)}</p>
+                      </div>
+                    </Link>
+                  ))}
+                  {(needsAttentionWorkflows.length + staleWorkflows.length + optimizationWorkflows.length) > 5 && (
+                    <button
+                      onClick={() => { setHealthFilter('needs_review'); setSopFilter(''); setActivePreset(null); }}
+                      className="w-full px-ds-4 py-ds-2 text-ds-xs text-brand-600 hover:bg-brand-50 transition-colors text-center"
+                    >
+                      View all action items &rarr;
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* ── AI Opportunities: automation + optimization candidates ─── */}
+          <div className="card overflow-hidden">
+            <div className="flex items-center justify-between px-ds-4 py-ds-3 border-b border-gray-100">
+              <div className="flex items-center gap-ds-2">
+                <Zap className="h-4 w-4 text-violet-500" />
+                <h3 className="text-ds-sm font-semibold text-gray-900">AI Opportunities</h3>
+              </div>
+              {stats && stats.aiOpportunityCount > 0 && (
+                <span className="text-[10px] font-medium text-violet-600 bg-violet-50 px-1.5 py-0.5 rounded-full">
+                  {stats.aiOpportunityCount}
+                </span>
+              )}
+            </div>
+            <div className="divide-y divide-gray-50">
+              {optimizationWorkflows.length === 0 ? (
+                <div className="px-ds-4 py-ds-6 text-center">
+                  <Sparkles className="h-6 w-6 text-gray-300 mx-auto mb-2" />
+                  <p className="text-ds-xs text-gray-500">Upload more workflows to discover AI opportunities</p>
+                </div>
+              ) : (
+                <>
+                  {optimizationWorkflows.slice(0, 5).map((w) => (
+                    <Link key={w.id} href={`/workflows/${w.id}`} className="flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-gray-50 transition-colors">
+                      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                        w.aiOpportunityScore >= 70 ? 'bg-violet-500' : 'bg-violet-300'
+                      }`} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-ds-xs text-gray-900 font-medium truncate">{w.title}</p>
+                        <p className="text-[10px] text-gray-400">
+                          AI score: {w.aiOpportunityScore} &middot; {formatDuration(w.durationMs)} &middot; {w.stepCount ?? 0} steps
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                  <button
+                    onClick={() => { applyPreset(PRESET_VIEWS.find(v => v.label === 'AI-Ready')!); }}
+                    className="w-full px-ds-4 py-ds-2 text-ds-xs text-violet-600 hover:bg-violet-50 transition-colors text-center"
+                  >
+                    View all AI opportunities &rarr;
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* ── Recent Activity ────────────────────────────────────────── */}
+          <div className="card overflow-hidden">
+            <div className="flex items-center gap-ds-2 px-ds-4 py-ds-3 border-b border-gray-100">
+              <Activity className="h-4 w-4 text-blue-500" />
+              <h3 className="text-ds-sm font-semibold text-gray-900">Recent Activity</h3>
+            </div>
+            <div className="divide-y divide-gray-50">
+              {workflows.slice(0, 5).map((w) => (
+                <Link
+                  key={w.id}
+                  href={`/workflows/${w.id}`}
+                  className="flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-gray-50 transition-colors"
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                    HEALTH_STATUS_CONFIG[w.healthStatus]?.dotClass ?? 'bg-gray-300'
+                  }`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-ds-xs text-gray-900 font-medium truncate">{w.title}</p>
+                    <p className="text-[10px] text-gray-400">
+                      {formatDateRelative(w.createdAt)} &middot; {w.stepCount ?? 0} steps &middot; {formatDuration(w.durationMs)}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+
         </div>
       )}
 
