@@ -53,3 +53,20 @@ export { analyzeVariance } from './varianceAnalyzer.js';
 export { detectVariants } from './variantDetector.js';
 export { detectBottlenecks } from './bottleneckDetector.js';
 export { detectDrift } from './driftDetector.js';
+
+// Phase 3: Process Intelligence Layer
+export { analyzeSopAlignment } from './sopAlignmentEngine.js';
+export type { SOPStep, SOPAlignmentResult, UndocumentedStep, UnusedStep, SOPDriftIndicator } from './sopAlignmentEngine.js';
+
+export {
+  computeStandardizationScore,
+  computeDocumentationDriftScore,
+  detectOutlierRuns,
+  deriveRecommendedCanonicalPath,
+} from './standardizationScorer.js';
+export type {
+  StandardizationScore,
+  DocumentationDriftScore,
+  OutlierRun,
+  RecommendedCanonicalPath,
+} from './standardizationScorer.js';
