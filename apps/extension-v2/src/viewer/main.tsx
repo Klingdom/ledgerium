@@ -74,7 +74,7 @@ function FileIngestScreen({ onBundle }: { onBundle: (b: SessionBundle) => void }
       height: '100vh',
       gap: 24,
       padding: 40,
-      background: '#0a0e14',
+      background: '#f9fafb',
     }}>
       {/* Logo */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
@@ -84,10 +84,10 @@ function FileIngestScreen({ onBundle }: { onBundle: (b: SessionBundle) => void }
           style={{ width: 32, height: 32, borderRadius: 8 }}
         />
         <div>
-          <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#f3f4f6' }}>
+          <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#111827' }}>
             Ledgerium Process Map
           </p>
-          <p style={{ margin: 0, fontSize: 11, color: '#4b5563' }}>
+          <p style={{ margin: 0, fontSize: 11, color: '#6b7280' }}>
             Import a workflow session to visualize
           </p>
         </div>
@@ -107,9 +107,9 @@ function FileIngestScreen({ onBundle }: { onBundle: (b: SessionBundle) => void }
           width: '100%',
           maxWidth: 400,
           padding: '36px 24px',
-          border: `2px dashed ${dragging ? '#2dd4bf' : '#1f2937'}`,
+          border: `2px dashed ${dragging ? '#2563eb' : '#d1d5db'}`,
           borderRadius: 14,
-          background: dragging ? 'rgba(45,212,191,0.04)' : '#0d1117',
+          background: dragging ? 'rgba(37,99,235,0.04)' : '#ffffff',
           cursor: 'pointer',
           transition: 'all 0.15s ease',
         }}
@@ -124,8 +124,8 @@ function FileIngestScreen({ onBundle }: { onBundle: (b: SessionBundle) => void }
           width: 44,
           height: 44,
           borderRadius: 10,
-          background: '#111827',
-          border: '1px solid #1f2937',
+          background: '#f3f4f6',
+          border: '1px solid #e5e7eb',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -134,10 +134,10 @@ function FileIngestScreen({ onBundle }: { onBundle: (b: SessionBundle) => void }
           📂
         </div>
         <div style={{ textAlign: 'center' }}>
-          <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 600, color: '#d1d5db' }}>
+          <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 600, color: '#374151' }}>
             Drop a workflow JSON file
           </p>
-          <p style={{ margin: 0, fontSize: 11, color: '#4b5563' }}>
+          <p style={{ margin: 0, fontSize: 11, color: '#6b7280' }}>
             or click to browse · ledgerium-{'{'}session-id{'}'}.json
           </p>
         </div>
@@ -171,7 +171,7 @@ function LoadingScreen() {
       alignItems: 'center',
       justifyContent: 'center',
       height: '100vh',
-      background: '#0a0e14',
+      background: '#f9fafb',
     }}>
       <p style={{ fontSize: 13, color: '#374151' }}>Loading session…</p>
     </div>
@@ -187,16 +187,16 @@ function ErrorScreen({ message }: { message: string }) {
       justifyContent: 'center',
       gap: 8,
       height: '100vh',
-      background: '#0a0e14',
+      background: '#f9fafb',
     }}>
       <p style={{ fontSize: 13, color: '#f87171', margin: 0 }}>{message}</p>
       <button
         onClick={() => window.close()}
         style={{
           background: 'none',
-          border: '1px solid #1f2937',
+          border: '1px solid #e5e7eb',
           borderRadius: 6,
-          color: '#4b5563',
+          color: '#6b7280',
           fontSize: 12,
           padding: '5px 12px',
           cursor: 'pointer',

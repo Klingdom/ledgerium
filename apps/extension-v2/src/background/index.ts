@@ -335,9 +335,16 @@ chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<s
       void historyStore.getIndex().then(sendResponse)
       return true
 
-    case MSG.GET_BUNDLE:
-      void historyStore.getBundle(message.payload['sessionId'] as string).then(sendResponse)
+    case MSG.GET_BUNDLE: {
+      const requestedSessionId = message.payload['sessionId'] as string
+      // Check in-memory lastBundle first (current session may not be in history yet)
+      if (lastBundle && lastBundle.sessionJson.sessionId === requestedSessionId) {
+        sendResponse(lastBundle)
+      } else {
+        void historyStore.getBundle(requestedSessionId).then(sendResponse)
+      }
       return true
+    }
 
     case MSG.DELETE_HISTORY_ENTRY:
       void historyStore.deleteEntry(message.payload['sessionId'] as string).then(() => sendResponse({ ok: true }))
