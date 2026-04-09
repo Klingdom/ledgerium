@@ -36,7 +36,7 @@ export function buildProcessDefinition(input: ProcessEngineInput): ProcessDefini
 
   const description = buildDescription(sessionJson.activityName, allSystems, finalizedSteps.length);
   const purpose = buildPurpose(sessionJson.activityName, allSystems);
-  const scope = buildScope(allDomains, allSystems);
+  const scope = buildScope(allDomains, allSystems, finalizedSteps.length);
 
   return {
     definitionId: `${sessionJson.sessionId}-def`,
@@ -55,20 +55,27 @@ export function buildProcessDefinition(input: ProcessEngineInput): ProcessDefini
 }
 
 function buildDescription(activityName: string, systems: string[], stepCount: number): string {
-  const systemList = systems.length > 0 ? ` using ${systems.join(', ')}` : '';
-  return `"${activityName}" is a ${stepCount}-step workflow captured from a live browser session${systemList}. Each step represents a discrete user action or navigation event, grouped by the Ledgerium segmentation engine into logical process units.`;
+  const systemScope = systems.length > 1
+    ? ` spanning ${systems.join(' and ')}`
+    : systems.length === 1
+      ? ` in ${systems[0]}`
+      : '';
+  return `"${activityName}" is a ${stepCount}-step workflow${systemScope}, covering the end-to-end process from initiation through completion.`;
 }
 
 function buildPurpose(activityName: string, systems: string[]): string {
-  const systemCtx = systems.length > 0 ? ` within ${systems.join(' and ')}` : '';
-  return `To document and standardize the process for performing "${activityName}"${systemCtx}, enabling repeatable execution, training, compliance review, and process improvement.`;
+  const systemCtx = systems.length > 0
+    ? ` in ${systems.join(' and ')}`
+    : '';
+  return `Standardize how "${activityName}" is performed${systemCtx} to ensure consistent execution, accurate data handling, and reliable outcomes.`;
 }
 
-function buildScope(domains: string[], systems: string[]): string {
-  const parts: string[] = [];
-  if (systems.length > 0) parts.push(`Systems: ${systems.join(', ')}`);
-  if (domains.length > 0) parts.push(`Domains: ${domains.join(', ')}`);
-  return parts.length > 0
-    ? parts.join(' | ')
-    : 'Scope determined by the systems accessed during the recorded session.';
+function buildScope(domains: string[], systems: string[], stepCount: number): string {
+  if (systems.length === 0 && domains.length === 0) {
+    return `This process covers a ${stepCount}-step workflow from initiation to completion.`;
+  }
+  const systemClause = systems.length > 0
+    ? `across ${systems.join(' and ')}`
+    : '';
+  return `This process covers the end-to-end workflow from initiation to completion ${systemClause}, encompassing ${stepCount} step${stepCount !== 1 ? 's' : ''}.`.replace(/  +/g, ' ');
 }

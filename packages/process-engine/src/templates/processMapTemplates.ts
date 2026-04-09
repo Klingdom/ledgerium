@@ -11,7 +11,7 @@
  * All renderers are pure and deterministic.
  */
 
-import type { ProcessOutput } from '../types.js';
+import type { ProcessOutput, ProcessMapNode, ProcessMapPhase } from '../types.js';
 import type {
   SwimlaneProcessMap,
   SwimlaneMapStep,
@@ -81,28 +81,49 @@ function renderSwimlane(output: ProcessOutput): SwimlaneProcessMap {
     const node = taskNodes[i]!;
     if (node.metadata.isDecisionPoint && node.metadata.decisionLabel) {
       const nextNode = taskNodes[i + 1];
+      const decisionLabel = node.metadata.decisionLabel;
+
+      let yesPath: string;
+      let noPath: string;
+
+      if (nextNode?.nodeType === 'exception') {
+        const resumeNode = taskNodes[i + 2];
+        const resumeLabel = resumeNode
+          ? conciseStepLabel(resumeNode.title)
+          : 'next step';
+        yesPath = `${decisionLabel} accepted — proceed to ${resumeLabel}`;
+        noPath = `Validation error at ${conciseStepLabel(node.title)} — resolve before continuing`;
+      } else if (nextNode) {
+        yesPath = `${decisionLabel} confirmed — proceed to ${conciseStepLabel(nextNode.title)}`;
+        noPath = 'Process completes';
+      } else {
+        yesPath = `${decisionLabel} confirmed — process completes`;
+        noPath = 'Process completes';
+      }
+
       decisions.push({
         afterStepOrdinal: node.ordinal,
-        label: node.metadata.decisionLabel,
+        label: decisionLabel,
         laneId: nodeLaneId(node, processMap.phases),
-        yesPath: nextNode?.nodeType === 'exception'
-          ? `Continue to step ${taskNodes[i + 2]?.ordinal ?? 'next'}`
-          : `Continue to step ${nextNode?.ordinal ?? 'next'}`,
-        noPath: nextNode?.nodeType === 'exception'
-          ? 'Error handling path'
-          : 'Process completes',
+        yesPath,
+        noPath,
       });
     }
   }
 
   const qi = sop.qualityIndicators;
 
+  // Derive contextual fallbacks for objective, trigger, and outcome
+  const fallbackObjective = deriveSwimlaneObjective(processMap.name, taskNodes, processMap.systems);
+  const fallbackTrigger = deriveSwimlaneContext(taskNodes, 'trigger');
+  const fallbackOutcome = deriveSwimlaneContext(taskNodes, 'outcome');
+
   return {
     templateType: 'swimlane',
     title: processMap.name,
-    objective: processMap.objective ?? `Complete the ${processMap.name} workflow`,
-    trigger: processMap.trigger ?? 'Workflow initiated',
-    outcome: processMap.outcome ?? 'Workflow completed',
+    objective: processMap.objective ?? fallbackObjective,
+    trigger: processMap.trigger ?? fallbackTrigger,
+    outcome: processMap.outcome ?? fallbackOutcome,
     durationLabel: processMap.durationLabel ?? sop.estimatedTime,
     lanes,
     steps,
@@ -192,11 +213,14 @@ function renderBPMN(output: ProcessOutput): BPMNProcessMap {
   const systemInteractions: BPMNSystemInteraction[] = [];
   for (const node of taskNodes) {
     if (node.category === 'fill_and_submit' || node.category === 'send_action') {
+      const stepDef = processDefinition.stepDefinitions.find(s => s.stepId === node.stepId);
+      const system = node.metadata.systems[0] ?? 'System';
+      const description = deriveSystemInteractionDescription(node, stepDef?.inputs ?? []);
       systemInteractions.push({
         taskId: node.stepId,
         type: 'send',
-        system: node.metadata.systems[0] ?? 'System',
-        description: `Submit data to ${node.metadata.systems[0] ?? 'system'}`,
+        system,
+        description,
       });
     }
   }
@@ -207,14 +231,21 @@ function renderBPMN(output: ProcessOutput): BPMNProcessMap {
     const node = taskNodes[i]!;
     if (node.nodeType === 'exception') {
       const precedingNode = taskNodes[i - 1];
+      const nextNode = taskNodes[i + 1];
       const sopStep = sop.steps.find(s => s.stepId === node.stepId);
+      const system = node.metadata.systems[0] ?? precedingNode?.metadata.systems[0] ?? 'system';
+      const precedingTitle = precedingNode ? conciseStepLabel(precedingNode.title) : 'previous action';
+      const errorLabel = `${precedingTitle} failed in ${system}`;
+      const resolution = nextNode
+        ? `Resolve error and proceed to ${conciseStepLabel(nextNode.title)}`
+        : `Resolve error in ${system} and complete the process`;
       exceptionFlows.push({
         sourceTaskId: precedingNode?.stepId ?? 'unknown',
-        errorLabel: `Error at step ${precedingNode?.ordinal ?? '?'}`,
+        errorLabel,
         handlingSteps: sopStep
           ? sopStep.instructions.map(inst => inst.instruction)
-          : ['Resolve the error'],
-        resolution: 'Continue to next step after resolution',
+          : [`Resolve the error in ${system}`],
+        resolution,
       });
     }
   }
@@ -270,16 +301,18 @@ function renderSIPOC(output: ProcessOutput): SIPOCProcessMap {
   // Derive outputs from SOP outputs
   const outputs = sop.outputs;
 
-  // Risk highlights from friction
+  // Risk highlights from friction — prefixed with phase/system context
   const riskHighlights: string[] = [];
   for (const f of (processMap.frictionSummary ?? [])) {
     if (f.severity === 'high' || f.severity === 'medium') {
-      riskHighlights.push(f.label);
+      const contextSystem = deriveRiskContext(f.stepOrdinals, processMap.nodes, processMap.phases);
+      riskHighlights.push(contextSystem ? `[${contextSystem}] ${f.label}` : f.label);
     }
   }
   if (riskHighlights.length === 0 && (sop.commonIssues?.length ?? 0) > 0) {
     for (const issue of sop.commonIssues!) {
-      riskHighlights.push(issue.title);
+      const contextSystem = deriveRiskContext(issue.stepOrdinals, processMap.nodes, processMap.phases);
+      riskHighlights.push(contextSystem ? `[${contextSystem}] ${issue.title}` : issue.title);
     }
   }
 
@@ -308,4 +341,120 @@ function renderSIPOC(output: ProcessOutput): SIPOCProcessMap {
       confidence: qi?.averageConfidence ?? 0,
     },
   };
+}
+
+// ─── Private helpers ────────────────────────────────────────────────────────
+
+/**
+ * Derives a meaningful objective from the actual workflow steps.
+ * Prioritizes form submissions, then multi-system coordination, then generic.
+ */
+function deriveSwimlaneObjective(
+  name: string,
+  taskNodes: ProcessMapNode[],
+  systems: string[],
+): string {
+  const submitNodes = taskNodes.filter(
+    n => n.category === 'fill_and_submit' || n.category === 'send_action',
+  );
+
+  if (submitNodes.length > 0 && systems.length > 1) {
+    const submitTitles = submitNodes.map(n => conciseStepLabel(n.title, 30));
+    return `${submitTitles[0]} across ${systems.join(' and ')}`;
+  }
+
+  if (submitNodes.length > 0) {
+    return conciseStepLabel(submitNodes[0]!.title, 50) + ` in ${systems[0] ?? 'the system'}`;
+  }
+
+  if (systems.length > 1) {
+    return `Coordinate ${name} across ${systems.join(', ')}`;
+  }
+
+  return `Complete ${name} in ${systems[0] ?? 'the system'}`;
+}
+
+/**
+ * Derives a contextual trigger or outcome from the first/last task node.
+ */
+function deriveSwimlaneContext(
+  taskNodes: ProcessMapNode[],
+  field: 'trigger' | 'outcome',
+): string {
+  if (taskNodes.length === 0) {
+    return field === 'trigger' ? 'Workflow initiated' : 'Workflow completed';
+  }
+
+  if (field === 'trigger') {
+    const first = taskNodes[0]!;
+    const system = first.metadata.systems[0];
+    const page = first.metadata.pageTitle ?? first.metadata.routeTemplate;
+    if (system && page) return `User navigates to ${page} in ${system}`;
+    if (system) return `User begins work in ${system}`;
+    if (page) return `User opens ${page}`;
+    return `User initiates ${conciseStepLabel(first.title, 40)}`;
+  }
+
+  // outcome
+  const last = taskNodes[taskNodes.length - 1]!;
+  const system = last.metadata.systems[0];
+  if (last.category === 'fill_and_submit' || last.category === 'send_action') {
+    return `${conciseStepLabel(last.title, 40)} completed${system ? ` in ${system}` : ''}`;
+  }
+  if (system) return `${conciseStepLabel(last.title, 40)} completed in ${system}`;
+  return `${conciseStepLabel(last.title, 40)} completed`;
+}
+
+/**
+ * Derives a descriptive system interaction from step inputs and context.
+ */
+function deriveSystemInteractionDescription(
+  node: ProcessMapNode,
+  inputs: string[],
+): string {
+  const system = node.metadata.systems[0] ?? 'system';
+
+  if (inputs.length > 0) {
+    const fieldList = inputs.slice(0, 3).join(', ');
+    const suffix = inputs.length > 3 ? ` and ${inputs.length - 3} more fields` : '';
+    return `Submit ${fieldList}${suffix} to ${system}`;
+  }
+
+  // Use the step title for a better fallback than "Submit data"
+  if (node.category === 'send_action') {
+    return `${conciseStepLabel(node.title, 40)} in ${system}`;
+  }
+
+  return `Complete form submission in ${system}`;
+}
+
+/**
+ * Derives the system/phase context string for a set of step ordinals.
+ * Used to prefix risk highlights with where they occur.
+ */
+function deriveRiskContext(
+  stepOrdinals: number[],
+  nodes: ProcessMapNode[],
+  phases: ProcessMapPhase[],
+): string {
+  if (stepOrdinals.length === 0) return '';
+
+  const relevantNodes = nodes.filter(
+    n => stepOrdinals.includes(n.ordinal) && n.nodeType !== 'start' && n.nodeType !== 'end',
+  );
+
+  if (relevantNodes.length === 0) return '';
+
+  // Collect unique systems from the affected nodes
+  const systems = [...new Set(relevantNodes.flatMap(n => n.metadata.systems))];
+  if (systems.length === 0) {
+    // Fall back to phase name
+    const phaseIds = [...new Set(relevantNodes.map(n => n.phaseId).filter(Boolean))];
+    const phaseNames = phaseIds
+      .map(id => phases.find(p => p.id === id)?.name)
+      .filter((n): n is string => n !== undefined);
+    return phaseNames[0] ?? '';
+  }
+
+  return systems.join(', ');
 }

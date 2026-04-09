@@ -62,15 +62,30 @@ function renderOperatorCentric(output: ProcessOutput): OperatorSOP {
     templateType: 'operator_centric',
     taskTitle: sop.title,
     whatThisIsFor: sop.businessObjective ?? sop.purpose,
-    whenToUseIt: sop.trigger ?? `When ${sop.title.toLowerCase()} is required`,
+    whenToUseIt: sop.trigger ?? deriveWhenToUseIt(sop.title),
     beforeYouBegin: sop.prerequisites,
     systemsNeeded: sop.systems,
     steps,
     commonMistakes: deriveCommonMistakes(output),
     tips: deriveTips(output),
     completionCheck: sop.completionCriteria,
-    sourceNote: 'This procedure was derived from observed browser workflow activity. All instructions link to source evidence.',
+    sourceNote: `This procedure was derived from observed workflow activity in ${sop.systems.join(' and ') || 'the target system'}. All ${sop.steps.length} steps are evidence-linked.`,
   };
+}
+
+/**
+ * Derives a contextual "when to use" clause from the activity name pattern.
+ * Recognizes common verb patterns (process, review, create, update, submit, approve).
+ */
+function deriveWhenToUseIt(title: string): string {
+  const lower = title.toLowerCase();
+  if (lower.startsWith('process '))  return `When a new ${lower.replace('process ', '')} needs to be processed`;
+  if (lower.startsWith('review '))   return `When a ${lower.replace('review ', '')} is ready for review`;
+  if (lower.startsWith('create '))   return `When a new ${lower.replace('create ', '')} needs to be created`;
+  if (lower.startsWith('update '))   return `When an existing ${lower.replace('update ', '')} requires updates`;
+  if (lower.startsWith('submit '))   return `When a ${lower.replace('submit ', '')} is ready for submission`;
+  if (lower.startsWith('approve '))  return `When a ${lower.replace('approve ', '')} requires approval`;
+  return `When you need to ${lower}`;
 }
 
 // ─── 2. Enterprise SOP ───────────────────────────────────────────────────────
@@ -102,14 +117,31 @@ function renderEnterprise(output: ProcessOutput): EnterpriseSOP {
   // Decision points
   const decisionPoints: EnterpriseSOPDecision[] = sop.steps
     .filter(s => s.isDecisionPoint && s.decisionLabel)
-    .map(step => ({
-      atStepOrdinal: step.ordinal,
-      question: step.decisionLabel!,
-      options: [
-        { condition: 'Success', action: 'Continue to next step' },
-        { condition: 'Failure / Error', action: 'Resolve the error (see exception handling) then retry' },
-      ],
-    }));
+    .map(step => {
+      const nextStep = sop.steps.find(s => s.ordinal === step.ordinal + 1);
+      const isNextError = nextStep?.category === 'error_handling';
+      const successAction = sop.steps.find(s => s.ordinal > step.ordinal && s.category !== 'error_handling');
+      const successLabel = step.system
+        ? `${step.system} accepts the submission`
+        : 'Validation passes';
+      const failureLabel = step.system
+        ? `${step.system} returns an error`
+        : 'Validation fails';
+      const failureAction = isNextError && nextStep
+        ? `${nextStep.title} (step ${nextStep.ordinal}), then retry`
+        : successAction
+          ? `Resolve the issue, then resume at step ${successAction.ordinal}`
+          : 'Resolve the error (see exception handling) then retry';
+
+      return {
+        atStepOrdinal: step.ordinal,
+        question: step.decisionLabel!,
+        options: [
+          { condition: successLabel, action: successAction ? `Continue to step ${successAction.ordinal}: ${successAction.title}` : 'Continue to next step' },
+          { condition: failureLabel, action: failureAction },
+        ],
+      };
+    });
 
   // Controls / checkpoints
   const controls: string[] = [];
@@ -152,7 +184,7 @@ function renderEnterprise(output: ProcessOutput): EnterpriseSOP {
     risks,
     outputs: sop.outputs,
     completionCriteria: sop.completionCriteria,
-    sourceNote: 'This SOP was derived from observed workflow behavior. All procedure steps are evidence-based and traceable to source events.',
+    sourceNote: `This SOP was derived from observed workflow behavior in ${sop.systems.join(' and ') || 'the target system'}. All ${sop.steps.length} procedure steps are evidence-based and traceable to source events.`,
     revisionMetadata: {
       generatedAt: sop.generatedAt,
       engineVersion: PROCESS_ENGINE_VERSION,
@@ -163,13 +195,16 @@ function renderEnterprise(output: ProcessOutput): EnterpriseSOP {
 
 function deriveRoleResponsibility(role: string, output: ProcessOutput): string {
   const stepCount = output.sop.steps.length;
+  const systemList = output.processMap.systems.join(' and ') || 'the target system';
+  const activityName = output.sop.title;
+
   if (role === 'Cross-functional operator') {
-    return `Execute all ${stepCount} procedure steps across ${output.processMap.systems.length} systems`;
+    return `Execute all ${stepCount} steps of "${activityName}" across ${systemList}, ensuring data consistency at each handoff`;
   }
   if (role === 'Document preparer') {
-    return 'Prepare and attach required documentation';
+    return `Prepare and attach required documentation for "${activityName}" in ${systemList}`;
   }
-  return `Execute the ${stepCount}-step procedure as documented`;
+  return `Execute the ${stepCount}-step "${activityName}" procedure in ${systemList}`;
 }
 
 // ─── 3. Decision-Based SOP ───────────────────────────────────────────────────
@@ -203,17 +238,18 @@ function renderDecisionBased(output: ProcessOutput): DecisionSOP {
         s => s.category === 'error_handling' && s.ordinal === decision.ordinal + 1,
       );
       if (errorStep) {
+        const errorContext = errorStep.system ? ` in ${errorStep.system}` : '';
         branches.push({
           condition: `${decision.decisionLabel ?? 'Validation fails'} — error at step ${decision.ordinal}`,
           actions: [
             {
               ordinal: 1,
-              instruction: `Review the error: ${primaryInstruction(errorStep)}`,
+              instruction: `Review the error${errorContext}: ${primaryInstruction(errorStep)}`,
               system: errorStep.system ?? '',
             },
             {
               ordinal: 2,
-              instruction: `Correct the issue and retry step ${decision.ordinal}`,
+              instruction: `Correct the data per the error message and resubmit at step ${decision.ordinal} (${decision.title})`,
               system: decision.system ?? '',
             },
           ],
@@ -280,7 +316,7 @@ function renderDecisionBased(output: ProcessOutput): DecisionSOP {
     resolutionOutcomes,
     completionCriteria: sop.completionCriteria,
     documentationRequirements: docRequirements,
-    sourceNote: 'This procedure was derived from observed workflow behavior. Branch logic reflects actual decision patterns observed during execution.',
+    sourceNote: `This procedure was derived from observed workflow behavior in ${sop.systems.join(' and ') || 'the target system'}. Branch logic reflects ${branches.length} path${branches.length !== 1 ? 's' : ''} observed during execution.`,
   };
 }
 
