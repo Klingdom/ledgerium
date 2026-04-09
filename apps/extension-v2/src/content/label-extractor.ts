@@ -109,5 +109,57 @@ export function extractLabel(el: Element): string {
     }
   }
 
+  // 8. Visible text content for small interactive-looking elements (divs/spans acting as buttons)
+  const role = el.getAttribute('role')
+  if ((role === 'button' || role === 'tab' || role === 'menuitem' || role === 'option' || role === 'link') &&
+      !(el as HTMLElement).isContentEditable) {
+    const text = (el as HTMLElement).innerText?.trim()
+    if (text) {
+      const safe = applySafetyHeuristics(text)
+      if (safe) return safe
+    }
+  }
+
+  // 9. Short visible text on the element itself (for divs/spans with short text acting as controls)
+  if ((tag === 'div' || tag === 'span') && !(el as HTMLElement).isContentEditable) {
+    const text = (el as HTMLElement).innerText?.trim()
+    if (text && text.length <= 40 && text.split(/\s+/).length <= 5) {
+      const safe = applySafetyHeuristics(text)
+      if (safe) return safe
+    }
+  }
+
+  // 10. Nearest ancestor with aria-label or heading context
+  let ancestor: Element | null = el.parentElement
+  for (let depth = 0; ancestor && depth < 4; depth++, ancestor = ancestor.parentElement) {
+    const ancestorLabel = ancestor.getAttribute('aria-label')?.trim()
+    if (ancestorLabel) {
+      const safe = applySafetyHeuristics(ancestorLabel)
+      if (safe) return safe
+    }
+    // Check for nearby heading in ancestor
+    const heading = ancestor.querySelector('h1, h2, h3, h4, [role="heading"]')
+    if (heading && heading !== el) {
+      const headingText = heading.textContent?.trim()
+      if (headingText) {
+        const safe = applySafetyHeuristics(headingText)
+        if (safe) return safe
+      }
+    }
+  }
+
+  // 11. Form legend or fieldset label
+  const form = el.closest('form, fieldset')
+  if (form) {
+    const legend = form.querySelector('legend')
+    if (legend) {
+      const legendText = legend.textContent?.trim()
+      if (legendText) {
+        const safe = applySafetyHeuristics(legendText)
+        if (safe) return safe
+      }
+    }
+  }
+
   return ''
 }

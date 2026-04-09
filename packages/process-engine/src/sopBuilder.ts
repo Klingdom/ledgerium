@@ -251,7 +251,13 @@ function deriveInstruction(
 
     case 'interaction.click': {
       if (label) return `Click "${label}"`;
-      if (role) return `Click the ${role}`;
+      // Never output raw HTML element types (div, span, svg, use, p, etc.)
+      // Use semantic role only for meaningful ARIA roles
+      const SEMANTIC_ROLES = new Set(['button', 'link', 'tab', 'menuitem', 'option', 'checkbox', 'radio', 'switch', 'combobox', 'listbox', 'textbox']);
+      if (role && SEMANTIC_ROLES.has(role)) return `Click the ${role}`;
+      // Fallback: use page/section context instead of meaningless element type
+      const pageLabel = page?.pageTitle ?? page?.applicationLabel;
+      if (pageLabel) return `Click the target element on "${pageLabel}"`;
       return 'Click the target element';
     }
 
@@ -260,7 +266,11 @@ function deriveInstruction(
         return `Enter value in "${label}" (sensitive — do not share or display in plain text)`;
       }
       if (label) return `Enter value in "${label}"`;
-      if (role) return `Enter value in the ${role} field`;
+      // Don't use raw element types as field names
+      const INPUT_ROLES = new Set(['textbox', 'combobox', 'spinbutton', 'searchbox', 'input']);
+      if (role && INPUT_ROLES.has(role)) return `Enter value in the ${role} field`;
+      const fieldPage = page?.pageTitle ?? page?.applicationLabel;
+      if (fieldPage) return `Enter the required value on "${fieldPage}"`;
       return 'Enter the required value';
     }
 

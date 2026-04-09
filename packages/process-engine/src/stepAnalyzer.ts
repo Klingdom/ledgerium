@@ -89,8 +89,16 @@ function humanEvents(events: CanonicalEventInput[]): CanonicalEventInput[] {
   );
 }
 
+/** Raw HTML element types that should never appear in user-facing output. */
+const RAW_ELEMENT_TYPES = new Set(['div', 'span', 'svg', 'use', 'p', 'li', 'ul', 'section', 'article', 'main', 'header', 'footer', 'nav', 'form', 'fieldset', 'figure', 'img']);
+
 function targetLabel(event: CanonicalEventInput): string | undefined {
-  return event.target_summary?.label ?? event.target_summary?.role;
+  const label = event.target_summary?.label;
+  if (label && label.trim()) return label;
+  // Only use role if it's a meaningful ARIA role, not a raw HTML element type
+  const role = event.target_summary?.role;
+  if (role && !RAW_ELEMENT_TYPES.has(role)) return role;
+  return undefined;
 }
 
 function hasSensitiveEvents(events: CanonicalEventInput[]): boolean {
@@ -280,7 +288,7 @@ function deriveOutputs(
       if (first?.event_type === 'interaction.submit') {
         return ['Form data submitted', `${systemCtx} state updated`];
       }
-      return ['UI state updated'];
+      return ['Page updated accordingly'];
     }
   }
 }
@@ -335,7 +343,11 @@ function deriveCompletionCondition(
       if (first?.event_type === 'interaction.input_change') {
         return 'Field value accepted and cursor moves to next field or action';
       }
-      return 'UI reflects the completed action';
+      // Use page context for a more specific completion condition
+      const defaultPage = first?.page_context?.pageTitle ?? first?.page_context?.applicationLabel;
+      return defaultPage
+        ? `Action completed on "${defaultPage}"`
+        : 'Action completed and page updates accordingly';
     }
   }
 }
