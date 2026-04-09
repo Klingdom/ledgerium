@@ -823,26 +823,32 @@ export default function DashboardPage() {
             />
           )}
 
-          {/* High Cognitive Burden */}
-          {highCognitiveBurdenWorkflows.length > 0 && (
-            <IntelligenceList
-              title="High Cognitive Burden"
-              icon={<Brain className="h-4 w-4 text-rose-500" />}
-              borderClass="border-rose-200"
-              items={highCognitiveBurdenWorkflows}
-              renderMetric={(w) => (
-                <span className={`text-ds-xs font-medium tabular-nums ${
-                  w.cognitiveBurdenScore >= 80 ? 'text-red-600' :
-                  w.cognitiveBurdenScore >= 60 ? 'text-amber-600' : 'text-emerald-600'
-                }`}>
-                  {w.cognitiveBurdenScore}
-                </span>
-              )}
-              onViewAll={() => {
-                setHealthFilter('');
-                setSopFilter('');
-              }}
-            />
+          {/* Recent Activity */}
+          {workflows.length > 0 && (
+            <div className="card border-blue-100 overflow-hidden">
+              <div className="flex items-center gap-ds-2 px-ds-4 py-ds-3 border-b border-gray-100">
+                <Activity className="h-4 w-4 text-blue-500" />
+                <h3 className="text-ds-sm font-semibold text-gray-900">Recent Activity</h3>
+              </div>
+              <div className="divide-y divide-gray-50">
+                {workflows.slice(0, 5).map((w) => (
+                  <Link
+                    key={w.id}
+                    href={`/workflows/${w.id}`}
+                    className="flex items-center gap-ds-3 px-ds-4 py-ds-2 hover:bg-gray-50 transition-colors"
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                      HEALTH_STATUS_CONFIG[w.healthStatus]?.dotClass ?? 'bg-gray-300'
+                    }`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-ds-xs text-gray-900 font-medium truncate">{w.title}</p>
+                      <p className="text-[10px] text-gray-400">{formatDateRelative(w.createdAt)}</p>
+                    </div>
+                    <span className="text-[10px] text-gray-400">{w.stepCount ?? 0} steps</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       )}
