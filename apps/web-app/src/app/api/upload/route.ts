@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { validateBundle, runProcessEngine, buildWorkflowReportFromOutput, renderAllTemplates } from '@/lib/ingestion';
-import { analyzeWorkflowInsights } from '@ledgerium/process-engine';
+import { analyzeWorkflowInsights, interpretWorkflow } from '@ledgerium/process-engine';
 import { trackServer } from '@/lib/analytics';
 import { clusterWorkflows } from '@/lib/intelligence';
 import { UPLOAD_DIR } from '@/lib/storage';
@@ -136,6 +136,14 @@ export async function POST(req: NextRequest) {
       templateArtifacts = [];
     }
 
+    let interpretation;
+    try {
+      interpretation = interpretWorkflow(processOutput);
+    } catch (err) {
+      console.error('Workflow interpretation failed (non-blocking):', err);
+      interpretation = null;
+    }
+
     // Extract metadata
     const { processRun, processMap, processDefinition } = processOutput;
     const toolsUsed = processRun.systemsUsed;
@@ -189,6 +197,12 @@ export async function POST(req: NextRequest) {
                 artifactType: 'workflow_insights',
                 schemaVersion: '1.0.0',
                 contentJson: JSON.stringify(workflowInsights),
+              }] : []),
+              // Workflow interpretation (Phase 2)
+              ...(interpretation ? [{
+                artifactType: 'workflow_interpretation',
+                schemaVersion: '1.0.0',
+                contentJson: JSON.stringify(interpretation),
               }] : []),
               // Template artifacts (6 templates + selection)
               ...templateArtifacts.map((ta) => ({

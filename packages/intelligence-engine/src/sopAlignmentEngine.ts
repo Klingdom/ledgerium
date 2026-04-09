@@ -161,7 +161,7 @@ export function analyzeSopAlignment(
 
   // Find unused documented steps (in SOP but rarely in runs)
   const runCategorySets = runs.map(r =>
-    new Set(r.processDefinition.stepDefinitions.map(s => s.category)),
+    new Set(r.processDefinition.stepDefinitions.map(s => s.category as string)),
   );
   const unusedDocumentedSteps: UnusedStep[] = [];
   for (const sopStep of sopSteps) {

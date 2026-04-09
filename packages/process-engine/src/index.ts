@@ -52,6 +52,19 @@ export {
 export { analyzeWorkflowInsights } from './workflowInsights.js';
 export type { WorkflowInsight, WorkflowInsightReport, InsightCategory } from './workflowInsights.js';
 
+// ─── Workflow Interpreter (Phase 2) ──────────────────────────────────────
+
+export { interpretWorkflow } from './workflowInterpreter.js';
+export type {
+  WorkflowInterpretation,
+  ProcessType,
+  DecisionPoint,
+  ReworkPattern,
+  FrictionPoint,
+  ProcessPhase,
+  InsightItem,
+} from './workflowInterpreter.js';
+
 // ─── Template system ─────────────────────────────────────────────────────────
 
 export {
