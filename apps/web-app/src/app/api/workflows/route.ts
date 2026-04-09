@@ -234,6 +234,74 @@ function computeComplexityScore(
   return Math.min(score, 100);
 }
 
+function computeCognitiveBurdenScore(
+  stepCount: number | null,
+  toolsUsed: string[],
+  durationMs: number | null,
+  processType: string,
+): number {
+  let score = 0;
+
+  // Decision density proxy: approval/review types are decision-heavy
+  if (processType === 'approval' || processType === 'review') score += 25;
+  else if (processType === 'coordination' || processType === 'exception_handling') score += 20;
+  else if (processType === 'data_collection') score += 15;
+
+  // System switches: more systems = more context switching
+  const systems = toolsUsed.length;
+  if (systems >= 4) score += 30;
+  else if (systems >= 3) score += 22;
+  else if (systems >= 2) score += 15;
+  else score += 5;
+
+  // Field entry burden: more steps = more data entry likely
+  const steps = stepCount ?? 0;
+  if (steps >= 15) score += 25;
+  else if (steps >= 10) score += 18;
+  else if (steps >= 6) score += 10;
+
+  // Duration pressure: longer workflows = more sustained attention
+  const mins = (durationMs ?? 0) / 60000;
+  if (mins >= 10) score += 20;
+  else if (mins >= 5) score += 12;
+  else if (mins >= 2) score += 5;
+
+  return Math.min(score, 100);
+}
+
+function computeProcessMaturityScore(
+  confidence: number | null,
+  sopReadiness: string,
+  documentationCompleteness: number,
+  isStale: boolean,
+  processDefinition: { stabilityScore: number | null; runCount: number } | null,
+): number {
+  let score = 0;
+
+  // Confidence (20%)
+  score += (confidence ?? 0) * 20;
+
+  // Documentation (25%)
+  score += (documentationCompleteness / 100) * 25;
+
+  // SOP readiness (20%)
+  if (sopReadiness === 'ready') score += 20;
+  else if (sopReadiness === 'partial') score += 10;
+
+  // Stability (15%) — from process definition if available
+  const stability = processDefinition?.stabilityScore;
+  if (typeof stability === 'number') score += stability * 15;
+
+  // Frequency/evidence (10%) — more runs = more mature
+  const runCount = processDefinition?.runCount ?? 1;
+  score += Math.min(Math.log2(runCount + 1) / 4, 1) * 10; // log scale, cap at 1
+
+  // Freshness (10%) — not stale
+  if (!isStale) score += 10;
+
+  return Math.round(Math.min(score, 100));
+}
+
 // ── Helpers for system extraction ────────────────────────────────────────────
 
 function extractSystems(workflows: Array<{ toolsUsed: string | null }>): Array<{ system: string; workflowCount: number }> {
@@ -390,6 +458,12 @@ export async function GET(req: NextRequest) {
     const aiOpportunityScore = computeAiOpportunityScore(
       w.stepCount, w.durationMs, w.toolsUsed, optimizationPotential,
     );
+    const cognitiveBurdenScore = computeCognitiveBurdenScore(
+      w.stepCount, parsedTools, w.durationMs, processType,
+    );
+    const processMaturityScore = computeProcessMaturityScore(
+      w.confidence, sopReadiness, documentationCompleteness, isStale, w.processDefinition,
+    );
 
     // Exclude processDefinition relation from spread to keep response clean
     const { processDefinition: _pd, tags: _tags, ...workflowBase } = w;
@@ -409,6 +483,8 @@ export async function GET(req: NextRequest) {
       processType,
       complexityScore,
       aiOpportunityScore,
+      cognitiveBurdenScore,
+      processMaturityScore,
       // Include processDefinition summary if present
       processDefinition: w.processDefinition ? {
         id: w.processDefinition.id,
@@ -505,6 +581,20 @@ export async function GET(req: NextRequest) {
     (w) => w.aiOpportunityScore >= 60,
   ).length;
 
+  const cognitiveBurdenValues = allEnriched.map((w) => w.cognitiveBurdenScore);
+  const avgCognitiveBurden = cognitiveBurdenValues.length > 0
+    ? Math.round(cognitiveBurdenValues.reduce((sum, v) => sum + v, 0) / cognitiveBurdenValues.length)
+    : 0;
+
+  const maturityValues = allEnriched.map((w) => w.processMaturityScore);
+  const avgMaturity = maturityValues.length > 0
+    ? Math.round(maturityValues.reduce((sum, v) => sum + v, 0) / maturityValues.length)
+    : 0;
+
+  const highCognitiveBurdenCount = allEnriched.filter(
+    (w) => w.cognitiveBurdenScore >= 60,
+  ).length;
+
   const recentlyViewed = allEnriched
     .filter((w) => w.lastViewedAt != null)
     .sort((a, b) => new Date(b.lastViewedAt!).getTime() - new Date(a.lastViewedAt!).getTime())
@@ -527,6 +617,9 @@ export async function GET(req: NextRequest) {
       favoriteCount,
       staleCount,
       aiOpportunityCount,
+      avgCognitiveBurden,
+      avgMaturity,
+      highCognitiveBurdenCount,
       systemCoverage,
       topInsights,
       // Backward-compatible fields

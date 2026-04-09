@@ -37,6 +37,8 @@ import {
   GitBranch,
   Boxes,
   RefreshCw,
+  Brain,
+  Shield,
 } from 'lucide-react';
 import { formatDuration, formatDateRelative, formatConfidence } from '@/lib/format';
 import { track } from '@/lib/analytics';
@@ -124,6 +126,8 @@ interface WorkflowSummary {
   processType: string;
   complexityScore: number;
   aiOpportunityScore: number;
+  cognitiveBurdenScore: number;
+  processMaturityScore: number;
 }
 
 interface TagWithCount extends TagSummary {
@@ -159,6 +163,9 @@ interface DashboardStats {
   favoriteCount: number;
   staleCount: number;
   aiOpportunityCount: number;
+  avgCognitiveBurden: number;
+  avgMaturity: number;
+  highCognitiveBurdenCount: number;
   systemCoverage: { system: string; workflowCount: number }[];
   topInsights: TopInsight[];
   recentlyViewedIds: string[];
@@ -510,6 +517,13 @@ export default function DashboardPage() {
       .slice(0, 3);
   }, [workflows]);
 
+  const highCognitiveBurdenWorkflows = useMemo(() => {
+    return workflows
+      .filter((w) => w.cognitiveBurdenScore >= 60)
+      .sort((a, b) => b.cognitiveBurdenScore - a.cognitiveBurdenScore)
+      .slice(0, 5);
+  }, [workflows]);
+
   const hasActiveFilters = healthFilter !== '' || sopFilter !== '' || activeTagId !== null || search !== '';
 
   function clearAllFilters() {
@@ -557,7 +571,7 @@ export default function DashboardPage() {
           LAYER 1 — Executive Overview
           ═══════════════════════════════════════════════════════════════════ */}
       {stats && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-ds-3 mb-ds-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-10 gap-ds-3 mb-ds-6">
           {/* Total Workflows */}
           <MetricCard
             icon={<Layers className="h-4 w-4 text-brand-600" />}
@@ -628,6 +642,30 @@ export default function DashboardPage() {
               ? stats.systemCoverage.slice(0, 2).map((s) => s.system).join(', ')
               : 'None tracked'}
           />
+
+          {/* Cognitive Burden */}
+          <MetricCard
+            icon={<Brain className="h-4 w-4 text-rose-600" />}
+            label="Cognitive Burden"
+            value={stats.avgCognitiveBurden > 0 ? String(stats.avgCognitiveBurden) : '--'}
+            subtitle={stats.avgCognitiveBurden >= 60 ? 'High burden' : stats.avgCognitiveBurden >= 30 ? 'Moderate' : 'Low burden'}
+            valueClassName={
+              stats.avgCognitiveBurden >= 60 ? 'text-red-600' :
+              stats.avgCognitiveBurden >= 30 ? 'text-amber-600' : 'text-emerald-600'
+            }
+          />
+
+          {/* Process Maturity */}
+          <MetricCard
+            icon={<Shield className="h-4 w-4 text-indigo-600" />}
+            label="Process Maturity"
+            value={stats.avgMaturity > 0 ? String(stats.avgMaturity) : '--'}
+            subtitle={stats.avgMaturity > 70 ? 'Mature' : stats.avgMaturity > 40 ? 'Developing' : 'Immature'}
+            valueClassName={
+              stats.avgMaturity > 70 ? 'text-emerald-600' :
+              stats.avgMaturity > 40 ? 'text-amber-600' : 'text-red-600'
+            }
+          />
         </div>
       )}
 
@@ -667,7 +705,8 @@ export default function DashboardPage() {
       {(needsAttentionWorkflows.length > 0 ||
         optimizationWorkflows.length > 0 ||
         staleWorkflows.length > 0 ||
-        mostComplexWorkflows.length > 0) && (
+        mostComplexWorkflows.length > 0 ||
+        highCognitiveBurdenWorkflows.length > 0) && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-ds-4 mb-ds-6">
           {/* Needs Attention */}
           {needsAttentionWorkflows.length > 0 && (
@@ -744,6 +783,28 @@ export default function DashboardPage() {
               )}
               onViewAll={() => {
                 setSortBy('step_count');
+                setHealthFilter('');
+                setSopFilter('');
+              }}
+            />
+          )}
+
+          {/* High Cognitive Burden */}
+          {highCognitiveBurdenWorkflows.length > 0 && (
+            <IntelligenceList
+              title="High Cognitive Burden"
+              icon={<Brain className="h-4 w-4 text-rose-500" />}
+              borderClass="border-rose-200"
+              items={highCognitiveBurdenWorkflows}
+              renderMetric={(w) => (
+                <span className={`text-ds-xs font-medium tabular-nums ${
+                  w.cognitiveBurdenScore >= 80 ? 'text-red-600' :
+                  w.cognitiveBurdenScore >= 60 ? 'text-amber-600' : 'text-emerald-600'
+                }`}>
+                  {w.cognitiveBurdenScore}
+                </span>
+              )}
+              onViewAll={() => {
                 setHealthFilter('');
                 setSopFilter('');
               }}
