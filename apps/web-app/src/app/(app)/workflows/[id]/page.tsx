@@ -21,6 +21,7 @@ import {
   Check,
   Link2,
   Plus,
+  Brain,
 } from 'lucide-react';
 import { formatDuration, formatDate, formatConfidence } from '@/lib/format';
 import { track, trackActivation } from '@/lib/analytics';
@@ -30,15 +31,17 @@ import { SOPTab } from '@/components/detail/SOPTab';
 import { ReportTab } from '@/components/detail/ReportTab';
 import { EvidenceTab } from '@/components/detail/EvidenceTab';
 import { IntelligenceTab } from '@/components/detail/IntelligenceTab';
+import { InterpretationTab } from '@/components/detail/InterpretationTab';
 import { InsightsPanel } from '@/components/detail/InsightsPanel';
 
-type TabId = 'workflow' | 'sop' | 'report' | 'insights' | 'intelligence' | 'evidence';
+type TabId = 'workflow' | 'sop' | 'report' | 'insights' | 'interpretation' | 'intelligence' | 'evidence';
 
 const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: 'workflow', label: 'Workflow', icon: Layers },
   { id: 'sop', label: 'SOP', icon: ListChecks },
   { id: 'report', label: 'Report', icon: FileText },
   { id: 'insights', label: 'Insights', icon: Zap },
+  { id: 'interpretation', label: 'Interpretation', icon: Brain },
   { id: 'intelligence', label: 'Intelligence', icon: BarChart3 },
   { id: 'evidence', label: 'Evidence', icon: Eye },
 ];
@@ -125,6 +128,7 @@ export default function WorkflowDetailPage() {
   const sopArtifact = artifacts.find((a: any) => a.artifactType === 'sop')?.contentJson;
   const processMap = artifacts.find((a: any) => a.artifactType === 'process_map')?.contentJson;
   const workflowInsights = artifacts.find((a: any) => a.artifactType === 'workflow_insights')?.contentJson;
+  const interpretation = artifacts.find((a: any) => a.artifactType === 'workflow_interpretation')?.contentJson;
 
   // Template artifacts
   const templateSelection = artifacts.find((a: any) => a.artifactType === 'template_selection')?.contentJson;
@@ -297,6 +301,7 @@ export default function WorkflowDetailPage() {
       )}
       {activeTab === 'report' && <ReportTab report={workflowReport} />}
       {activeTab === 'insights' && <InsightsPanel insights={workflowInsights} />}
+      {activeTab === 'interpretation' && <InterpretationTab interpretation={interpretation} />}
       {activeTab === 'intelligence' && <IntelligenceTab workflowId={id} />}
       {activeTab === 'evidence' && <EvidenceTab processOutput={processOutput} />}
 

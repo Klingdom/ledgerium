@@ -139,6 +139,66 @@ function computeHealthStatus(
   return 'healthy';
 }
 
+// ── Lightweight interpretation-derived fields ────────────────────────────────
+
+function computeProcessType(
+  toolsUsed: string | null,
+  stepCount: number | null,
+  description: string | null,
+): string {
+  // Lightweight heuristic classifier based on observable signals
+  const desc = (description ?? '').toLowerCase();
+  const toolCount = toolsUsed ? (() => {
+    try {
+      const parsed = JSON.parse(toolsUsed);
+      return Array.isArray(parsed) ? parsed.length : 0;
+    } catch { return 0; }
+  })() : 0;
+
+  // Keyword-based classification from description
+  if (desc.includes('approv') || desc.includes('sign off') || desc.includes('authorize')) return 'approval';
+  if (desc.includes('review') || desc.includes('audit') || desc.includes('check')) return 'review';
+  if (desc.includes('exception') || desc.includes('error') || desc.includes('escalat')) return 'exception_handling';
+  if (desc.includes('collect') || desc.includes('gather') || desc.includes('survey') || desc.includes('form')) return 'data_collection';
+  if (desc.includes('research') || desc.includes('investigat') || desc.includes('analyz')) return 'research';
+
+  // Signal-based fallbacks
+  if (toolCount >= 3) return 'coordination';
+  if (stepCount != null && stepCount <= 5) return 'transaction';
+
+  return 'general';
+}
+
+function computeComplexityScore(
+  stepCount: number | null,
+  toolsUsed: string | null,
+  durationMs: number | null,
+): number {
+  let score = 0;
+
+  // Step count contribution (0-40 points)
+  if (stepCount != null) {
+    score += Math.min(Math.round((stepCount / 30) * 40), 40);
+  }
+
+  // System count contribution (0-30 points)
+  const toolCount = toolsUsed ? (() => {
+    try {
+      const parsed = JSON.parse(toolsUsed);
+      return Array.isArray(parsed) ? parsed.length : 0;
+    } catch { return 0; }
+  })() : 0;
+  score += Math.min(Math.round((toolCount / 5) * 30), 30);
+
+  // Duration contribution (0-30 points)
+  if (durationMs != null) {
+    // 10 minutes = full 30 points
+    score += Math.min(Math.round((durationMs / 600_000) * 30), 30);
+  }
+
+  return Math.min(score, 100);
+}
+
 // ── Helpers for system extraction ────────────────────────────────────────────
 
 function extractSystems(workflows: Array<{ toolsUsed: string | null }>): Array<{ system: string; workflowCount: number }> {
@@ -284,6 +344,8 @@ export async function GET(req: NextRequest) {
     const healthStatus = computeHealthStatus(
       w.createdAt, isStale, variationScore, w.confidence, sopReadiness,
     );
+    const processType = computeProcessType(w.toolsUsed, w.stepCount, w.description);
+    const complexityScore = computeComplexityScore(w.stepCount, w.toolsUsed, w.durationMs);
 
     // Exclude processDefinition relation from spread to keep response clean
     const { processDefinition: _pd, tags: _tags, ...workflowBase } = w;
@@ -300,6 +362,8 @@ export async function GET(req: NextRequest) {
       isStale,
       bottleneckRisk,
       healthStatus,
+      processType,
+      complexityScore,
       // Include processDefinition summary if present
       processDefinition: w.processDefinition ? {
         id: w.processDefinition.id,

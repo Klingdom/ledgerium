@@ -121,6 +121,8 @@ interface WorkflowSummary {
   bottleneckRisk: BottleneckRisk;
   healthStatus: HealthStatus;
   processDefinition: ProcessDefinitionSummary | null;
+  processType: string;
+  complexityScore: number;
 }
 
 interface TagWithCount extends TagSummary {
@@ -491,6 +493,13 @@ export default function DashboardPage() {
       .slice(0, 5);
   }, [workflows]);
 
+  const mostComplexWorkflows = useMemo(() => {
+    return workflows
+      .filter((w) => w.complexityScore > 0)
+      .sort((a, b) => b.complexityScore - a.complexityScore)
+      .slice(0, 3);
+  }, [workflows]);
+
   const hasActiveFilters = healthFilter !== '' || sopFilter !== '' || activeTagId !== null || search !== '';
 
   function clearAllFilters() {
@@ -617,7 +626,8 @@ export default function DashboardPage() {
           ═══════════════════════════════════════════════════════════════════ */}
       {(needsAttentionWorkflows.length > 0 ||
         optimizationWorkflows.length > 0 ||
-        staleWorkflows.length > 0) && (
+        staleWorkflows.length > 0 ||
+        mostComplexWorkflows.length > 0) && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-ds-4 mb-ds-6">
           {/* Needs Attention */}
           {needsAttentionWorkflows.length > 0 && (
@@ -672,6 +682,29 @@ export default function DashboardPage() {
               )}
               onViewAll={() => {
                 setHealthFilter('stale');
+                setSopFilter('');
+              }}
+            />
+          )}
+
+          {/* Most Complex Workflows */}
+          {mostComplexWorkflows.length > 0 && (
+            <IntelligenceList
+              title="Most Complex"
+              icon={<Boxes className="h-4 w-4 text-red-500" />}
+              borderClass="border-red-200"
+              items={mostComplexWorkflows}
+              renderMetric={(w) => (
+                <span className={`text-ds-xs font-medium tabular-nums ${
+                  w.complexityScore > 70 ? 'text-red-600' :
+                  w.complexityScore > 40 ? 'text-amber-600' : 'text-emerald-600'
+                }`}>
+                  {w.complexityScore}
+                </span>
+              )}
+              onViewAll={() => {
+                setSortBy('step_count');
+                setHealthFilter('');
                 setSopFilter('');
               }}
             />
@@ -1173,12 +1206,19 @@ function WorkflowRow({
               </button>
             </div>
           ) : (
-            <Link
-              href={`/workflows/${w.id}`}
-              className="text-ds-sm font-medium text-gray-900 hover:text-brand-600 truncate block"
-            >
-              {w.title}
-            </Link>
+            <div className="flex items-center gap-ds-1 min-w-0">
+              <Link
+                href={`/workflows/${w.id}`}
+                className="text-ds-sm font-medium text-gray-900 hover:text-brand-600 truncate"
+              >
+                {w.title}
+              </Link>
+              {w.processType && w.processType !== 'general' && (
+                <span className="ds-tag ds-tag-brand text-[10px] flex-shrink-0">
+                  {w.processType.replace(/_/g, ' ')}
+                </span>
+              )}
+            </div>
           )}
           {primarySystem && (
             <span className="ds-tag ds-tag-neutral text-[10px] mt-0.5 inline-block">
