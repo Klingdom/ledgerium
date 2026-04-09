@@ -1682,6 +1682,16 @@ function ProcessGroupCard({ definition: def }: { definition: ProcessDefinition }
   const warningCount = def.insights.filter((i) => i.severity === 'warning').length;
   const criticalCount = def.insights.filter((i) => i.severity === 'critical').length;
 
+  // Phase 3: standardization score from intelligence data
+  const standardizationScore = (def.intelligence as Record<string, unknown> | null)?.standardization as
+    | { score: number; level: string }
+    | undefined;
+  const stdScoreBg =
+    standardizationScore?.level === 'excellent' ? 'bg-green-100 text-green-700' :
+    standardizationScore?.level === 'good' ? 'bg-blue-100 text-blue-700' :
+    standardizationScore?.level === 'moderate' ? 'bg-amber-100 text-amber-700' :
+    standardizationScore?.level === 'poor' ? 'bg-red-100 text-red-700' : '';
+
   const lastRunDate =
     def.workflows.length > 0
       ? def.workflows.reduce((latest, w) =>
@@ -1747,6 +1757,13 @@ function ProcessGroupCard({ definition: def }: { definition: ProcessDefinition }
             <span className={`flex items-center gap-1 ${confidenceColorClass(def.confidenceScore)}`}>
               <Target className="h-3.5 w-3.5" />
               {formatConfidence(def.confidenceScore)}
+            </span>
+          )}
+
+          {/* Standardization score */}
+          {standardizationScore && (
+            <span className={`ds-tag text-[10px] ${stdScoreBg}`}>
+              Std: {standardizationScore.score}/100
             </span>
           )}
 

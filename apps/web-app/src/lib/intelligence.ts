@@ -10,15 +10,28 @@
  * 5. Auto-cluster workflows into ProcessDefinitions by path signature
  */
 
-import { analyzePortfolio, computePathSignature } from '@ledgerium/intelligence-engine';
+import {
+  analyzePortfolio,
+  computePathSignature,
+  analyzeSopAlignment,
+  computeStandardizationScore,
+  computeDocumentationDriftScore,
+  detectOutlierRuns,
+  deriveRecommendedCanonicalPath,
+} from '@ledgerium/intelligence-engine';
 import type {
   ProcessRunBundle,
   PortfolioIntelligence,
   BottleneckStep,
   HighVarianceStep,
   DriftSignal,
+  SOPAlignmentResult,
+  StandardizationScore,
+  DocumentationDriftScore,
+  OutlierRun,
+  RecommendedCanonicalPath,
 } from '@ledgerium/intelligence-engine';
-import type { ProcessRun, ProcessDefinition as EngineProcessDefinition } from '@ledgerium/process-engine';
+import type { ProcessRun, ProcessDefinition as EngineProcessDefinition, SOP } from '@ledgerium/process-engine';
 import { db } from '@/db';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -29,7 +42,7 @@ interface WorkflowWithArtifacts {
   title: string;
   durationMs: number | null;
   stepCount: number | null;
-  processOutput: { processRun: ProcessRun; processDefinition: EngineProcessDefinition } | null;
+  processOutput: { processRun: ProcessRun; processDefinition: EngineProcessDefinition; sop?: SOP } | null;
 }
 
 // ─── Load bundles from DB ───────────────────────────────────────────────────
@@ -148,9 +161,46 @@ export async function clusterWorkflows(userId: string): Promise<void> {
     if (bundles.length >= 1) {
       try {
         const intelligence = analyzePortfolio({ runs: bundles });
-        intelligenceJson = JSON.stringify(intelligence);
         stabilityScore = intelligence.variance.sequenceStability;
         variantCount = intelligence.variants.variantCount;
+
+        // Phase 3: compute additional process intelligence scores
+        const standardization = computeStandardizationScore(
+          intelligence.variants,
+          intelligence.variance,
+          intelligence.metrics,
+        );
+        const outlierRuns = detectOutlierRuns(bundles, intelligence.variants);
+        const recommendedPath = deriveRecommendedCanonicalPath(bundles, intelligence.variants);
+
+        // SOP alignment: derive SOP steps from the first workflow's process output
+        const sopWorkflow = group.find((w) => w.processOutput?.sop?.steps?.length);
+        const sopSteps = sopWorkflow?.processOutput?.sop?.steps?.map((s) => ({
+          ordinal: s.ordinal,
+          title: s.title,
+          category: s.category,
+        })) ?? [];
+
+        let sopAlignment: SOPAlignmentResult | null = null;
+        let documentationDrift: DocumentationDriftScore | null = null;
+
+        if (sopSteps.length > 0) {
+          const dominantVariant = intelligence.variants.standardPath ?? null;
+          sopAlignment = analyzeSopAlignment(sopSteps, bundles, dominantVariant);
+          documentationDrift = computeDocumentationDriftScore(sopAlignment);
+        }
+
+        // Merge Phase 3 scores into the intelligence JSON alongside portfolio data
+        const extendedIntelligence = {
+          ...intelligence,
+          standardization,
+          outlierRuns,
+          recommendedPath,
+          sopAlignment,
+          documentationDrift,
+        };
+
+        intelligenceJson = JSON.stringify(extendedIntelligence);
       } catch {
         // Intelligence computation failed — store without it
       }

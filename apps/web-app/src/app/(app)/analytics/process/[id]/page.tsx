@@ -18,6 +18,10 @@ import {
   Target,
   Shield,
   Users,
+  CheckCircle,
+  FileText,
+  Compass,
+  XCircle,
 } from 'lucide-react';
 import { formatDuration, formatDateRelative, formatConfidence } from '@/lib/format';
 import { track } from '@/lib/analytics';
@@ -104,12 +108,86 @@ interface VarianceAnalysis {
   sequenceStability: number;
 }
 
+interface StandardizationScoreData {
+  score: number;
+  level: 'excellent' | 'good' | 'moderate' | 'poor';
+  factors: {
+    dominantPathAdherence: number;
+    sequenceStability: number;
+    variantConsolidation: number;
+    timingConsistency: number;
+  };
+  computedAt: string;
+}
+
+interface UndocumentedStep {
+  category: string;
+  frequency: number;
+  runCount: number;
+  typicalPosition: number;
+}
+
+interface UnusedStep {
+  sopOrdinal: number;
+  sopTitle: string;
+  sopCategory: string;
+}
+
+interface SOPDriftIndicator {
+  type: string;
+  severity: 'low' | 'medium' | 'high';
+  description: string;
+  sopStepOrdinal?: number;
+  frequency?: number;
+}
+
+interface SOPAlignmentData {
+  alignmentScore: number;
+  alignmentLevel: 'high' | 'moderate' | 'low' | 'critical';
+  undocumentedSteps: UndocumentedStep[];
+  unusedDocumentedSteps: UnusedStep[];
+  structuralSimilarity: number;
+  alignedRunCount: number;
+  totalRunCount: number;
+  driftIndicators: SOPDriftIndicator[];
+  computedAt: string;
+}
+
+interface DocumentationDriftData {
+  score: number;
+  level: 'aligned' | 'minor_drift' | 'significant_drift' | 'outdated';
+  findings: string[];
+  computedAt: string;
+}
+
+interface OutlierRunData {
+  runId: string;
+  bestVariantSimilarity: number;
+  reason: string;
+  stepCount: number;
+  medianStepCount: number;
+}
+
+interface RecommendedCanonicalPathData {
+  stepCategories: string[];
+  sourceVariantId: string;
+  supportingRunCount: number;
+  frequency: number;
+  avgDurationMs: number | null;
+  rationale: string;
+}
+
 interface Intelligence {
   metrics?: IntelligenceMetrics;
   variants?: IntelligenceVariants;
   timestudy?: { steps: TimeStudyStep[] };
   bottlenecks?: Bottleneck[];
   variance?: VarianceAnalysis;
+  standardization?: StandardizationScoreData;
+  sopAlignment?: SOPAlignmentData;
+  documentationDrift?: DocumentationDriftData;
+  outlierRuns?: OutlierRunData[];
+  recommendedPath?: RecommendedCanonicalPathData;
 }
 
 interface ProcessDefinition {
@@ -284,6 +362,11 @@ export default function ProcessGroupDetailPage() {
   const timestudy = intel?.timestudy ?? null;
   const bottlenecks = intel?.bottlenecks ?? null;
   const variance = intel?.variance ?? null;
+  const standardization = intel?.standardization ?? null;
+  const sopAlignment = intel?.sopAlignment ?? null;
+  const documentationDrift = intel?.documentationDrift ?? null;
+  const outlierRuns = intel?.outlierRuns ?? null;
+  const recommendedPath = intel?.recommendedPath ?? null;
 
   // Sort timestudy steps by avg duration descending
   const sortedTimeStudySteps = useMemo(() => {
@@ -609,7 +692,228 @@ export default function ProcessGroupDetailPage() {
           </section>
         )}
 
-        {/* ---- Section 6: Active Insights ---- */}
+        {/* ---- Section 6: Standardization Score ---- */}
+        {standardization && (
+          <section className="ds-section">
+            <SectionHeader>Standardization Score</SectionHeader>
+            <div className="card px-ds-5 py-ds-4">
+              <div className="flex items-center justify-between mb-ds-4">
+                <div className="flex items-center gap-ds-3">
+                  <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-brand-50">
+                    <Shield className="h-6 w-6 text-brand-600" />
+                  </div>
+                  <div>
+                    <p className="ds-metric-value">{standardization.score}<span className="text-ds-sm text-gray-400">/100</span></p>
+                    <span className={`ds-tag text-[10px] ${
+                      standardization.level === 'excellent' ? 'bg-green-100 text-green-700' :
+                      standardization.level === 'good' ? 'bg-blue-100 text-blue-700' :
+                      standardization.level === 'moderate' ? 'bg-amber-100 text-amber-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {standardization.level.charAt(0).toUpperCase() + standardization.level.slice(1)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <p className="text-ds-xs text-gray-500 font-medium mb-ds-2">Factor Breakdown</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-ds-3">
+                <div>
+                  <p className="text-ds-xs text-gray-400">Path Adherence</p>
+                  <p className="text-ds-sm font-semibold text-gray-900">{pct(standardization.factors.dominantPathAdherence)}</p>
+                </div>
+                <div>
+                  <p className="text-ds-xs text-gray-400">Sequence Stability</p>
+                  <p className="text-ds-sm font-semibold text-gray-900">{pct(standardization.factors.sequenceStability)}</p>
+                </div>
+                <div>
+                  <p className="text-ds-xs text-gray-400">Variant Consolidation</p>
+                  <p className="text-ds-sm font-semibold text-gray-900">{pct(standardization.factors.variantConsolidation)}</p>
+                </div>
+                <div>
+                  <p className="text-ds-xs text-gray-400">Timing Consistency</p>
+                  <p className="text-ds-sm font-semibold text-gray-900">{pct(standardization.factors.timingConsistency)}</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ---- Section 7: SOP Alignment ---- */}
+        {sopAlignment && (
+          <section className="ds-section">
+            <SectionHeader>SOP Alignment</SectionHeader>
+            <div className="card px-ds-5 py-ds-4">
+              <div className="flex items-center gap-ds-3 mb-ds-4">
+                <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-brand-50">
+                  <FileText className="h-6 w-6 text-brand-600" />
+                </div>
+                <div>
+                  <p className="ds-metric-value">{pct(sopAlignment.alignmentScore)}</p>
+                  <span className={`ds-tag text-[10px] ${
+                    sopAlignment.alignmentLevel === 'high' ? 'bg-green-100 text-green-700' :
+                    sopAlignment.alignmentLevel === 'moderate' ? 'bg-amber-100 text-amber-700' :
+                    sopAlignment.alignmentLevel === 'low' ? 'bg-orange-100 text-orange-700' :
+                    'bg-red-100 text-red-700'
+                  }`}>
+                    {sopAlignment.alignmentLevel.charAt(0).toUpperCase() + sopAlignment.alignmentLevel.slice(1)} alignment
+                  </span>
+                </div>
+                <div className="ml-auto text-right">
+                  <p className="text-ds-xs text-gray-400">Aligned runs</p>
+                  <p className="text-ds-sm font-semibold text-gray-900">
+                    {sopAlignment.alignedRunCount} / {sopAlignment.totalRunCount}
+                  </p>
+                </div>
+              </div>
+
+              {sopAlignment.undocumentedSteps.length > 0 && (
+                <div className="mb-ds-3">
+                  <p className="text-ds-xs text-gray-500 font-medium mb-ds-1">Undocumented Steps</p>
+                  <div className="space-y-ds-1">
+                    {sopAlignment.undocumentedSteps.map((step) => (
+                      <div key={step.category} className="ds-callout ds-callout-warning py-ds-2 px-ds-3">
+                        <div className="flex items-center gap-ds-2">
+                          <AlertTriangle className="h-3.5 w-3.5 text-amber-600 flex-shrink-0" />
+                          <span className={`ds-tag text-[10px] ${categoryChip(step.category)}`}>
+                            {categoryLabel(step.category)}
+                          </span>
+                          <span className="text-ds-xs text-gray-600">
+                            observed in {pct(step.frequency)} of runs, not in SOP
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {sopAlignment.unusedDocumentedSteps.length > 0 && (
+                <div className="mb-ds-3">
+                  <p className="text-ds-xs text-gray-500 font-medium mb-ds-1">Unused SOP Steps</p>
+                  <div className="space-y-ds-1">
+                    {sopAlignment.unusedDocumentedSteps.map((step) => (
+                      <div key={step.sopOrdinal} className="ds-callout ds-callout-info py-ds-2 px-ds-3">
+                        <div className="flex items-center gap-ds-2">
+                          <XCircle className="h-3.5 w-3.5 text-blue-600 flex-shrink-0" />
+                          <span className="text-ds-xs text-gray-600">
+                            Step {step.sopOrdinal}: <strong>{step.sopTitle}</strong> ({categoryLabel(step.sopCategory)}) — rarely observed
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {documentationDrift && (
+                <div className="mt-ds-3 pt-ds-3 border-t border-gray-100">
+                  <div className="flex items-center gap-ds-2">
+                    <p className="text-ds-xs text-gray-500 font-medium">Documentation Drift:</p>
+                    <span className={`ds-tag text-[10px] ${
+                      documentationDrift.level === 'aligned' ? 'bg-green-100 text-green-700' :
+                      documentationDrift.level === 'minor_drift' ? 'bg-amber-100 text-amber-700' :
+                      documentationDrift.level === 'significant_drift' ? 'bg-orange-100 text-orange-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {documentationDrift.score}/100 — {documentationDrift.level.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+                  {documentationDrift.findings.length > 0 && (
+                    <ul className="mt-ds-2 space-y-ds-1">
+                      {documentationDrift.findings.map((finding, idx) => (
+                        <li key={idx} className="text-ds-xs text-gray-600 flex items-start gap-ds-1">
+                          <span className="text-gray-400 mt-0.5">-</span>
+                          {finding}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* ---- Section 8: Outlier Runs ---- */}
+        {outlierRuns && outlierRuns.length > 0 && (
+          <section className="ds-section">
+            <SectionHeader>Outlier Runs</SectionHeader>
+            <div className="space-y-ds-2">
+              {outlierRuns.map((outlier) => (
+                <div key={outlier.runId} className="ds-callout ds-callout-warning">
+                  <div className="flex items-start gap-ds-3">
+                    <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-ds-2 mb-ds-1">
+                        <Link
+                          href={`/workflows/${outlier.runId}`}
+                          className="text-ds-sm font-medium text-brand-600 hover:text-brand-700"
+                        >
+                          {outlier.runId}
+                        </Link>
+                        <span className="ds-tag text-[10px] bg-amber-100 text-amber-700">
+                          {pct(outlier.bestVariantSimilarity)} similar
+                        </span>
+                      </div>
+                      <p className="text-ds-xs text-gray-600">{outlier.reason}</p>
+                      <p className="text-ds-xs text-gray-400 mt-0.5">
+                        {outlier.stepCount} steps (median: {outlier.medianStepCount})
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ---- Section 9: Recommended SOP Path ---- */}
+        {recommendedPath && (
+          <section className="ds-section">
+            <SectionHeader>Recommended SOP Path</SectionHeader>
+            <div className="card px-ds-5 py-ds-4">
+              <div className="flex items-start gap-ds-3 mb-ds-4">
+                <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-green-50">
+                  <Compass className="h-5 w-5 text-green-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-ds-sm text-gray-700">{recommendedPath.rationale}</p>
+                  <div className="flex flex-wrap items-center gap-ds-3 mt-ds-2 text-ds-xs text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <Layers className="h-3.5 w-3.5" />
+                      {recommendedPath.supportingRunCount} supporting run{recommendedPath.supportingRunCount !== 1 ? 's' : ''}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Target className="h-3.5 w-3.5" />
+                      {pct(recommendedPath.frequency)} of all runs
+                    </span>
+                    {recommendedPath.avgDurationMs !== null && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3.5 w-3.5" />
+                        {formatDuration(recommendedPath.avgDurationMs)} avg
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <p className="text-ds-xs text-gray-500 font-medium mb-ds-2">Canonical Step Sequence</p>
+              <div className="flex flex-wrap items-center gap-ds-1">
+                {recommendedPath.stepCategories.map((cat, idx) => (
+                  <div key={`${cat}-${idx}`} className="flex items-center">
+                    <span className={`ds-tag text-ds-xs ${categoryChip(cat)}`}>
+                      {categoryLabel(cat)}
+                    </span>
+                    {idx < recommendedPath.stepCategories.length - 1 && (
+                      <ChevronRight className="h-3.5 w-3.5 text-gray-300 mx-0.5 flex-shrink-0" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ---- Section 10: Active Insights ---- */}
         {definition.insights.length > 0 && (
           <section className="ds-section">
             <SectionHeader>Active Insights</SectionHeader>
