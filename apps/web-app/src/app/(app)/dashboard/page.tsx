@@ -692,36 +692,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── Insights Alert Bar ─────────────────────────────────────────── */}
-      {stats?.topInsights && stats.topInsights.length > 0 && (
-        <div className="space-y-2 mb-ds-4">
-          {stats.topInsights.map((insight) => (
-            <Link
-              key={insight.id}
-              href="/analytics"
-              className="card flex items-center gap-3 px-4 py-3 hover:border-gray-300 transition-colors"
-            >
-              <span
-                className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                  insight.severity === 'critical'
-                    ? 'bg-red-500'
-                    : insight.severity === 'warning'
-                      ? 'bg-amber-500'
-                      : 'bg-blue-500'
-                }`}
-              />
-              <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wide">
-                {insight.insightType.replace(/_/g, ' ')}
-              </span>
-              <span className="text-ds-sm text-gray-700 flex-1 truncate">
-                {insight.title}
-              </span>
-              <ChevronRight className="h-4 w-4 text-gray-300 flex-shrink-0" />
-            </Link>
-          ))}
-        </div>
-      )}
-
       {/* ═══════════════════════════════════════════════════════════════════
           LAYER 2 — Intelligence Engine
           Three-column layout: Action Items | AI Opportunities | Recent Activity
