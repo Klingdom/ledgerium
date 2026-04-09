@@ -574,121 +574,120 @@ export default function DashboardPage() {
 
   return (
     <div>
-      {/* ── Page Header ──────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between mb-ds-6">
+      {/* ── Command Header ─────────────────────────────────────────────── */}
+      <div className="flex items-start justify-between mb-ds-6">
         <div>
-          <h1 className="text-ds-2xl font-semibold text-gray-900">
+          <h1 className="text-ds-2xl font-bold tracking-tight text-gray-900">
             Process Intelligence
           </h1>
           <p className="text-ds-sm text-gray-500 mt-0.5">
-            Monitor, optimize, and standardize your workflows
+            {stats ? (
+              <>
+                <span className="font-medium text-gray-700">{stats.totalWorkflows}</span> workflows
+                {stats.recordedThisWeek > 0 && <> &middot; <span className="text-emerald-600">{stats.recordedThisWeek} new this week</span></>}
+                {stats.needsReview > 0 && <> &middot; <span className="text-amber-600">{stats.needsReview} need review</span></>}
+                {stats.optimizationOpportunities > 0 && <> &middot; <span className="text-violet-600">{stats.optimizationOpportunities} optimization opportunities</span></>}
+              </>
+            ) : 'Monitor, optimize, and standardize your workflows'}
           </p>
         </div>
-        <Link href="/upload" className="btn-primary gap-1.5">
-          <Upload className="h-4 w-4" />
-          Upload
-        </Link>
+        <div className="flex items-center gap-ds-2">
+          <Link href="/analytics" className="btn-secondary gap-1.5 text-xs">
+            <BarChart3 className="h-3.5 w-3.5" />
+            Analytics
+          </Link>
+          <Link href="/upload" className="btn-primary gap-1.5">
+            <Upload className="h-4 w-4" />
+            Upload
+          </Link>
+        </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          LAYER 1 — Executive Overview
+          LAYER 1 — Executive Overview (3 grouped panels)
           ═══════════════════════════════════════════════════════════════════ */}
       {stats && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-10 gap-ds-3 mb-ds-6">
-          {/* Total Workflows */}
-          <MetricCard
-            icon={<Layers className="h-4 w-4 text-brand-600" />}
-            label="Total Workflows"
-            value={String(stats.totalWorkflows)}
-            subtitle={`${stats.recordedThisWeek} this week`}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-ds-4 mb-ds-6">
 
-          {/* Avg Confidence */}
-          <MetricCard
-            icon={<Target className="h-4 w-4 text-brand-600" />}
-            label="Avg Confidence"
-            value={stats.avgConfidence > 0 ? formatConfidence(stats.avgConfidence) : '--'}
-            subtitle={stats.avgConfidence > 0 ? (
-              stats.avgConfidence >= 0.8 ? 'Strong' : stats.avgConfidence >= 0.6 ? 'Moderate' : 'Low'
-            ) : 'No data'}
-            valueClassName={confidenceColorClass(stats.avgConfidence > 0 ? stats.avgConfidence : null)}
-          />
+          {/* ── Volume & Coverage ─────────────────────────────────────── */}
+          <div className="card px-ds-5 py-ds-4">
+            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-ds-3">Volume &amp; Coverage</p>
+            <div className="grid grid-cols-2 gap-ds-4">
+              <div>
+                <p className="text-ds-2xl font-bold text-gray-900 tabular-nums">{stats.totalWorkflows}</p>
+                <p className="text-ds-xs text-gray-500">Workflows</p>
+              </div>
+              <div>
+                <p className="text-ds-2xl font-bold text-emerald-600 tabular-nums">{stats.recordedThisWeek}</p>
+                <p className="text-ds-xs text-gray-500">This week</p>
+              </div>
+              <div>
+                <p className="text-ds-lg font-semibold text-gray-700 tabular-nums">{stats.systemCoverage.length}</p>
+                <p className="text-ds-xs text-gray-500">Systems</p>
+              </div>
+              <div>
+                <p className="text-ds-lg font-semibold text-gray-700 tabular-nums">{stats.avgDuration > 0 ? formatDuration(stats.avgDuration) : '--'}</p>
+                <p className="text-ds-xs text-gray-500">Avg duration</p>
+              </div>
+            </div>
+          </div>
 
-          {/* SOP Ready */}
-          <MetricCard
-            icon={<FileCheck className="h-4 w-4 text-emerald-600" />}
-            label="SOP Ready"
-            value={String(stats.sopReady)}
-            subtitle={`of ${stats.totalWorkflows} total`}
-          />
+          {/* ── Quality & Readiness ───────────────────────────────────── */}
+          <div className="card px-ds-5 py-ds-4">
+            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-ds-3">Quality &amp; Readiness</p>
+            <div className="grid grid-cols-2 gap-ds-4">
+              <div>
+                <p className={`text-ds-2xl font-bold tabular-nums ${confidenceColorClass(stats.avgConfidence > 0 ? stats.avgConfidence : null)}`}>
+                  {stats.avgConfidence > 0 ? formatConfidence(stats.avgConfidence) : '--'}
+                </p>
+                <p className="text-ds-xs text-gray-500">Confidence</p>
+              </div>
+              <div>
+                <p className="text-ds-2xl font-bold text-emerald-600 tabular-nums">{stats.sopReady}</p>
+                <p className="text-ds-xs text-gray-500">SOP ready</p>
+              </div>
+              <div>
+                <p className={`text-ds-lg font-semibold tabular-nums ${stats.avgMaturity > 70 ? 'text-emerald-600' : stats.avgMaturity > 40 ? 'text-amber-600' : 'text-red-600'}`}>
+                  {stats.avgMaturity > 0 ? stats.avgMaturity : '--'}
+                </p>
+                <p className="text-ds-xs text-gray-500">Maturity</p>
+              </div>
+              <div>
+                <p className={`text-ds-lg font-semibold tabular-nums ${stats.avgCognitiveBurden >= 60 ? 'text-red-600' : stats.avgCognitiveBurden >= 30 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                  {stats.avgCognitiveBurden > 0 ? stats.avgCognitiveBurden : '--'}
+                </p>
+                <p className="text-ds-xs text-gray-500">Cognitive load</p>
+              </div>
+            </div>
+          </div>
 
-          {/* Needs Review */}
-          <MetricCard
-            icon={<AlertTriangle className="h-4 w-4 text-amber-600" />}
-            label="Needs Review"
-            value={String(stats.needsReview)}
-            subtitle={stats.needsReview > 0 ? 'Action needed' : 'All clear'}
-            valueClassName={stats.needsReview > 0 ? 'text-amber-600' : undefined}
-          />
+          {/* ── Signals & Opportunities ───────────────────────────────── */}
+          <div className="card px-ds-5 py-ds-4">
+            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-ds-3">Signals &amp; Opportunities</p>
+            <div className="grid grid-cols-2 gap-ds-4">
+              <div>
+                <p className={`text-ds-2xl font-bold tabular-nums ${stats.needsReview > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                  {stats.needsReview}
+                </p>
+                <p className="text-ds-xs text-gray-500">Need review</p>
+              </div>
+              <div>
+                <p className="text-ds-2xl font-bold text-violet-600 tabular-nums">{stats.optimizationOpportunities}</p>
+                <p className="text-ds-xs text-gray-500">Optimization</p>
+              </div>
+              <div>
+                <Link href="/analytics" className="group">
+                  <p className="text-ds-lg font-semibold text-brand-600 tabular-nums group-hover:text-brand-700">{stats.insightCount}</p>
+                  <p className="text-ds-xs text-gray-500 group-hover:text-brand-600">Insights &rarr;</p>
+                </Link>
+              </div>
+              <div>
+                <p className="text-ds-lg font-semibold text-violet-600 tabular-nums">{stats.aiOpportunityCount}</p>
+                <p className="text-ds-xs text-gray-500">AI candidates</p>
+              </div>
+            </div>
+          </div>
 
-          {/* Optimization Opportunities */}
-          <MetricCard
-            icon={<TrendingUp className="h-4 w-4 text-violet-600" />}
-            label="Optimization"
-            value={String(stats.optimizationOpportunities)}
-            subtitle="High potential"
-          />
-
-          {/* Avg Duration */}
-          <MetricCard
-            icon={<Clock className="h-4 w-4 text-gray-500" />}
-            label="Avg Duration"
-            value={stats.avgDuration > 0 ? formatDuration(stats.avgDuration) : '--'}
-            subtitle={stats.avgStepCount > 0 ? `~${Math.round(stats.avgStepCount)} steps` : 'No data'}
-          />
-
-          {/* Insights Available */}
-          <MetricCard
-            icon={<Sparkles className="h-4 w-4 text-amber-500" />}
-            label="Insights"
-            value={String(stats.insightCount)}
-            subtitle={stats.insightCount > 0 ? 'View analytics' : 'None yet'}
-            href={stats.insightCount > 0 ? '/analytics' : undefined}
-          />
-
-          {/* System Coverage */}
-          <MetricCard
-            icon={<Monitor className="h-4 w-4 text-blue-600" />}
-            label="Systems"
-            value={String(stats.systemCoverage.length)}
-            subtitle={stats.systemCoverage.length > 0
-              ? stats.systemCoverage.slice(0, 2).map((s) => s.system).join(', ')
-              : 'None tracked'}
-          />
-
-          {/* Cognitive Burden */}
-          <MetricCard
-            icon={<Brain className="h-4 w-4 text-rose-600" />}
-            label="Cognitive Burden"
-            value={stats.avgCognitiveBurden > 0 ? String(stats.avgCognitiveBurden) : '--'}
-            subtitle={stats.avgCognitiveBurden >= 60 ? 'High burden' : stats.avgCognitiveBurden >= 30 ? 'Moderate' : 'Low burden'}
-            valueClassName={
-              stats.avgCognitiveBurden >= 60 ? 'text-red-600' :
-              stats.avgCognitiveBurden >= 30 ? 'text-amber-600' : 'text-emerald-600'
-            }
-          />
-
-          {/* Process Maturity */}
-          <MetricCard
-            icon={<Shield className="h-4 w-4 text-indigo-600" />}
-            label="Process Maturity"
-            value={stats.avgMaturity > 0 ? String(stats.avgMaturity) : '--'}
-            subtitle={stats.avgMaturity > 70 ? 'Mature' : stats.avgMaturity > 40 ? 'Developing' : 'Immature'}
-            valueClassName={
-              stats.avgMaturity > 70 ? 'text-emerald-600' :
-              stats.avgMaturity > 40 ? 'text-amber-600' : 'text-red-600'
-            }
-          />
         </div>
       )}
 
