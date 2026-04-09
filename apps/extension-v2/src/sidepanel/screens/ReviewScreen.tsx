@@ -17,9 +17,9 @@ function UploadBar({ progress, status }: { progress: number | null; status: Revi
   const pct = progress ?? 0
 
   const barColor =
-    status === 'complete' ? 'bg-green-500' :
+    status === 'complete' ? 'bg-emerald-500' :
     status === 'failed' ? 'bg-red-500' :
-    'bg-teal-500'
+    'bg-blue-500'
 
   const label =
     status === 'complete' ? 'Upload complete' :
@@ -27,12 +27,12 @@ function UploadBar({ progress, status }: { progress: number | null; status: Revi
     `Uploading… ${pct}%`
 
   return (
-    <div className="px-4 py-3 border-b border-gray-800">
-      <div className="flex justify-between text-xs text-gray-400 mb-1.5">
+    <div className="px-4 py-3 border-b border-gray-200">
+      <div className="flex justify-between text-xs text-gray-500 mb-1.5">
         <span>{label}</span>
         {status === 'uploading' && <span>{pct}%</span>}
       </div>
-      <div className="w-full bg-gray-800 rounded-full h-1.5">
+      <div className="w-full bg-gray-200 rounded-full h-1.5">
         <div
           className={`h-1.5 rounded-full transition-all duration-300 ${barColor}`}
           style={{ width: `${status === 'complete' ? 100 : pct}%` }}
@@ -44,17 +44,17 @@ function UploadBar({ progress, status }: { progress: number | null; status: Revi
 
 function StepSummaryRow({ step, index }: { step: LiveStep; index: number }) {
   return (
-    <div className="flex items-start gap-3 py-2.5 border-b border-gray-800/60 last:border-0">
-      <span className="text-xs text-gray-600 tabular-nums w-5 shrink-0 mt-0.5">{index + 1}</span>
+    <div className="flex items-start gap-3 py-2.5 border-b border-gray-100 last:border-0">
+      <span className="text-xs text-gray-400 tabular-nums w-5 shrink-0 mt-0.5">{index + 1}</span>
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-gray-200 leading-snug">{step.title}</p>
+        <p className="text-sm text-gray-900 leading-snug">{step.title}</p>
         {step.pageLabel && (
           <p className="text-xs text-gray-500 mt-0.5">{step.pageLabel}</p>
         )}
       </div>
       <div className="flex items-center gap-1 shrink-0">
         {step.eventCount > 0 && (
-          <span className="text-xs text-gray-600">{step.eventCount} events</span>
+          <span className="text-xs text-gray-400">{step.eventCount} events</span>
         )}
       </div>
     </div>
@@ -81,13 +81,13 @@ export function ReviewScreen({ meta, steps, uploadProgress, uploadStatus, onDisc
   return (
     <div className="flex flex-col h-full">
       {/* Session summary header */}
-      <div className="px-4 pt-4 pb-3 border-b border-gray-800">
+      <div className="px-4 pt-4 pb-3 border-b border-gray-200 bg-white">
         <div className="flex items-center gap-2 mb-1">
-          <span className="w-2 h-2 rounded-full bg-teal-500" />
-          <p className="text-xs text-teal-400 uppercase tracking-wider font-medium">Session complete</p>
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          <p className="text-xs text-emerald-600 uppercase tracking-wider font-medium">Session complete</p>
         </div>
         {meta && (
-          <p className="text-sm text-gray-100 font-medium">{meta.activityName}</p>
+          <p className="text-sm text-gray-900 font-medium">{meta.activityName}</p>
         )}
         <p className="text-xs text-gray-500 mt-1">
           {finalizedSteps.length} step{finalizedSteps.length !== 1 ? 's' : ''} captured
@@ -100,7 +100,7 @@ export function ReviewScreen({ meta, steps, uploadProgress, uploadStatus, onDisc
       {/* Steps list */}
       <div className="flex-1 overflow-y-auto px-4">
         {finalizedSteps.length === 0 ? (
-          <div className="flex items-center justify-center h-24 text-sm text-gray-600">
+          <div className="flex items-center justify-center h-24 text-sm text-gray-500">
             No steps captured
           </div>
         ) : (
@@ -114,7 +114,7 @@ export function ReviewScreen({ meta, steps, uploadProgress, uploadStatus, onDisc
       <div className="px-4 pb-2 pt-1">
         <button
           onClick={exportJson}
-          className="w-full text-xs text-teal-400 border border-teal-800 rounded-md py-1.5 hover:bg-teal-950 transition-colors"
+          className="btn-secondary w-full text-xs"
         >
           Export session JSON
         </button>

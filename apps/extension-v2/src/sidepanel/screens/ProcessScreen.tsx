@@ -22,15 +22,15 @@ interface ProcessScreenProps {
 function UploadBar({ progress, status }: { progress: number | null; status: ProcessScreenProps['uploadStatus'] }) {
   if (!status) return null
   const pct = progress ?? 0
-  const barColor = status === 'complete' ? 'bg-green-500' : status === 'failed' ? 'bg-red-500' : 'bg-teal-500'
+  const barColor = status === 'complete' ? 'bg-emerald-500' : status === 'failed' ? 'bg-red-500' : 'bg-blue-500'
   const label = status === 'complete' ? 'Upload complete' : status === 'failed' ? 'Upload failed' : `Uploading… ${pct}%`
   return (
-    <div className="px-3 py-2 border-b border-gray-800 flex-none">
-      <div className="flex justify-between text-[10px] text-gray-500 mb-1">
+    <div className="px-3 py-2 border-b border-gray-200 flex-none">
+      <div className="flex justify-between text-xs text-gray-500 mb-1">
         <span>{label}</span>
         {status === 'uploading' && <span>{pct}%</span>}
       </div>
-      <div className="w-full bg-gray-800 rounded-full h-1">
+      <div className="w-full bg-gray-200 rounded-full h-1">
         <div
           className={`h-1 rounded-full transition-all duration-300 ${barColor}`}
           style={{ width: `${status === 'complete' ? 100 : pct}%` }}
@@ -50,10 +50,10 @@ function SOPStepEvents({ events }: { events: CanonicalEvent[] }) {
   const [open, setOpen] = useState(false)
   if (events.length === 0) return null
   return (
-    <div className="border-t border-gray-800/60 px-2.5 pb-2 pt-1.5">
+    <div className="border-t border-gray-200 px-2.5 pb-2 pt-1.5">
       <button
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-1 text-[9px] font-semibold text-gray-600 hover:text-gray-400 transition-colors uppercase tracking-wider"
+        className="flex items-center gap-1 text-xs font-semibold text-gray-400 hover:text-gray-600 transition-colors uppercase tracking-wider"
       >
         <span style={{ transform: open ? 'rotate(90deg)' : undefined, display: 'inline-block', transition: 'transform 0.15s' }}>▶</span>
         {events.length} evidence event{events.length !== 1 ? 's' : ''}
@@ -73,10 +73,10 @@ function SOPStepEvents({ events }: { events: CanonicalEvent[] }) {
                     marginTop: 3,
                   }}
                 />
-                <span className="text-[9px] text-gray-500 leading-snug flex-1 min-w-0">
+                <span className="text-xs text-gray-500 leading-snug flex-1 min-w-0">
                   {eventTypeLabel(e.event_type)}
-                  {isSensitive && <span className="ml-1 text-red-400/70">[redacted]</span>}
-                  {desc && <span className="ml-1 text-gray-700 truncate">— {desc}</span>}
+                  {isSensitive && <span className="ml-1 text-red-500">[redacted]</span>}
+                  {desc && <span className="ml-1 text-gray-400 truncate">— {desc}</span>}
                 </span>
               </div>
             )
@@ -92,18 +92,18 @@ function SOPView({ output, eventsByStepId }: { output: ProcessOutput; eventsBySt
   return (
     <div className="flex-1 overflow-y-auto px-3 py-3">
       {/* SOP header */}
-      <div className="mb-4 pb-3 border-b border-gray-800">
-        <p className="text-xs font-semibold text-gray-100 mb-1">{sop.title}</p>
-        <p className="text-[10px] text-gray-500 leading-relaxed">{sop.purpose}</p>
+      <div className="mb-4 pb-3 border-b border-gray-200">
+        <p className="text-xs font-semibold text-gray-900 mb-1">{sop.title}</p>
+        <p className="text-xs text-gray-500 leading-relaxed">{sop.purpose}</p>
       </div>
 
       {/* Systems */}
       {sop.systems.length > 0 && (
         <div className="mb-3">
-          <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest mb-1">Systems</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Systems</p>
           <div className="flex flex-wrap gap-1.5">
             {sop.systems.map(s => (
-              <span key={s} className="text-[10px] text-gray-400 bg-gray-800 border border-gray-700 rounded px-2 py-0.5">{s}</span>
+              <span key={s} className="text-xs text-gray-600 bg-gray-100 border border-gray-200 rounded px-2 py-0.5">{s}</span>
             ))}
           </div>
         </div>
@@ -111,12 +111,12 @@ function SOPView({ output, eventsByStepId }: { output: ProcessOutput; eventsBySt
 
       {/* Estimated time */}
       <div className="flex justify-between mb-4">
-        <span className="text-[10px] text-gray-600">Estimated time</span>
-        <span className="text-[10px] text-gray-400 font-medium">{sop.estimatedTime}</span>
+        <span className="text-xs text-gray-400">Estimated time</span>
+        <span className="text-xs text-gray-600 font-medium">{sop.estimatedTime}</span>
       </div>
 
       {/* Steps */}
-      <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest mb-2">Steps</p>
+      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Steps</p>
       <div className="space-y-2">
         {sop.steps.map(step => {
           const stepDef = processDefinition.stepDefinitions.find(d => d.stepId === step.stepId)
@@ -127,21 +127,21 @@ function SOPView({ output, eventsByStepId }: { output: ProcessOutput; eventsBySt
             <div
               key={step.stepId}
               className="rounded-lg border overflow-hidden"
-              style={{ borderColor: 'rgba(255,255,255,0.07)', background: bg }}
+              style={{ borderColor: '#e5e7eb', background: bg }}
             >
               {/* Step header */}
               <div className="flex items-center gap-2 px-2.5 py-2">
-                <span className="text-[9px] font-bold tabular-nums" style={{ color, minWidth: 14 }}>
+                <span className="text-xs font-bold tabular-nums" style={{ color, minWidth: 14 }}>
                   {step.ordinal}
                 </span>
-                <span className="text-[11px] font-medium text-gray-200 flex-1 leading-snug">{step.title}</span>
-                <span className="text-[9px] text-gray-600">{step.durationLabel}</span>
+                <span className="text-xs font-medium text-gray-900 flex-1 leading-snug">{step.title}</span>
+                <span className="text-xs text-gray-400">{step.durationLabel}</span>
               </div>
               {/* Action */}
               <div className="px-2.5 pb-2">
-                <p className="text-[10px] text-gray-400 leading-snug">{step.action}</p>
+                <p className="text-xs text-gray-600 leading-snug">{step.action}</p>
                 {step.warnings.length > 0 && (
-                  <p className="text-[9px] text-amber-400/70 mt-1">⚠ {step.warnings[0]}</p>
+                  <p className="text-xs text-amber-600 mt-1">⚠ {step.warnings[0]}</p>
                 )}
               </div>
               {/* Evidence events */}
@@ -153,10 +153,10 @@ function SOPView({ output, eventsByStepId }: { output: ProcessOutput; eventsBySt
 
       {/* Notes */}
       {sop.notes.length > 0 && (
-        <div className="mt-4 pt-3 border-t border-gray-800">
-          <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest mb-2">Notes</p>
+        <div className="mt-4 pt-3 border-t border-gray-200">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Notes</p>
           {sop.notes.map((note, i) => (
-            <p key={i} className="text-[10px] text-gray-600 leading-relaxed mb-1">{note}</p>
+            <p key={i} className="text-xs text-gray-500 leading-relaxed mb-1">{note}</p>
           ))}
         </div>
       )}
@@ -451,8 +451,8 @@ function ExportView({
   return (
     <div className="flex flex-col flex-1 overflow-y-auto px-3 py-3 gap-3">
       {/* Session stats */}
-      <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-3">
-        <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest mb-2">Session</p>
+      <div className="bg-white border border-gray-200 rounded-lg p-3">
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Session</p>
         {[
           ['Activity', processRun.activityName],
           ['Steps', `${processRun.stepCount}`],
@@ -461,8 +461,8 @@ function ExportView({
           ['Status', processRun.completionStatus],
         ].map(([label, value]) => (
           <div key={label} className="flex justify-between py-0.5">
-            <span className="text-[10px] text-gray-600">{label}</span>
-            <span className="text-[10px] text-gray-400 font-medium capitalize">{value}</span>
+            <span className="text-xs text-gray-400">{label}</span>
+            <span className="text-xs text-gray-600 font-medium capitalize">{value}</span>
           </div>
         ))}
       </div>
@@ -470,10 +470,10 @@ function ExportView({
       {/* Systems */}
       {processDefinition.systems.length > 0 && (
         <div>
-          <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest mb-1.5">Systems Accessed</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">Systems Accessed</p>
           <div className="flex flex-wrap gap-1.5">
             {processDefinition.systems.map(s => (
-              <span key={s} className="text-[10px] text-gray-400 bg-gray-800 border border-gray-700 rounded px-2 py-0.5">{s}</span>
+              <span key={s} className="text-xs text-gray-600 bg-gray-100 border border-gray-200 rounded px-2 py-0.5">{s}</span>
             ))}
           </div>
         </div>
@@ -487,17 +487,17 @@ function ExportView({
           disabled={openWebStatus === 'loading'}
           className={`w-full text-xs font-medium rounded-md py-2.5 transition-colors ${
             openWebStatus === 'loading'
-              ? 'text-gray-500 bg-gray-900 border border-gray-800 cursor-wait'
+              ? 'text-gray-400 bg-gray-100 border border-gray-200 cursor-wait'
               : openWebStatus === 'error'
-                ? 'text-red-300 bg-red-950/60 border border-red-800'
-                : 'text-teal-300 bg-teal-950/60 border border-teal-800 hover:bg-teal-900/60'
+                ? 'text-red-600 bg-red-50 border border-red-200'
+                : 'btn-primary'
           }`}
         >
           {openWebStatus === 'loading'
             ? 'Syncing…'
             : openWebStatus === 'error'
               ? 'Sync Failed — Try Again'
-              : '🌐 Open in Ledgerium AI Website'}
+              : 'Open in Ledgerium AI Website'}
         </button>
 
         {/* Download Workflow Report */}
@@ -506,34 +506,34 @@ function ExportView({
           disabled={reportStatus === 'loading'}
           className={`w-full text-xs font-medium rounded-md py-2 transition-colors ${
             reportStatus === 'loading'
-              ? 'text-gray-500 bg-gray-900 border border-gray-800 cursor-wait'
+              ? 'text-gray-400 bg-gray-100 border border-gray-200 cursor-wait'
               : reportStatus === 'error'
-                ? 'text-red-300 bg-red-950/60 border border-red-800'
-                : 'text-gray-300 border border-gray-700 hover:bg-gray-800'
+                ? 'text-red-600 bg-red-50 border border-red-200'
+                : 'btn-secondary'
           }`}
         >
           {reportStatus === 'loading'
             ? 'Generating Report…'
             : reportStatus === 'error'
               ? 'Report Generation Failed'
-              : '📄 Download Workflow Report'}
+              : 'Download Workflow Report'}
         </button>
 
         <button
           onClick={openFullView}
-          className="w-full text-xs text-gray-300 border border-gray-700 rounded-md py-2 hover:bg-gray-800 transition-colors"
+          className="btn-secondary w-full text-xs"
         >
-          Open Full Workflow Map ↗
+          Open Full Workflow Map
         </button>
         <button
           onClick={exportEnrichedJson}
-          className="w-full text-xs text-gray-500 border border-gray-800 rounded-md py-2 hover:bg-gray-900 transition-colors"
+          className="btn-ghost w-full text-xs"
         >
           Export Enriched JSON (with events)
         </button>
         <button
           onClick={exportJson}
-          className="w-full text-xs text-gray-500 border border-gray-800 rounded-md py-2 hover:bg-gray-900 transition-colors"
+          className="btn-ghost w-full text-xs"
         >
           Export Raw Session JSON
         </button>
@@ -672,15 +672,15 @@ export function ProcessScreen({ meta, steps, uploadProgress, uploadStatus, onDis
   return (
     <div className="flex flex-col h-full">
       {/* Session header */}
-      <div className="px-3 pt-3 pb-2.5 border-b border-gray-800 flex-none">
+      <div className="px-3 pt-3 pb-2.5 border-b border-gray-200 bg-white flex-none">
         <div className="flex items-center gap-2 mb-0.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0" />
-          <p className="text-[10px] text-teal-400 uppercase tracking-wider font-semibold">Session complete</p>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+          <p className="text-xs text-emerald-600 uppercase tracking-wider font-semibold">Session complete</p>
         </div>
         {meta && (
-          <p className="text-xs text-gray-100 font-semibold truncate">{meta.activityName}</p>
+          <p className="text-xs text-gray-900 font-semibold truncate">{meta.activityName}</p>
         )}
-        <p className="text-[10px] text-gray-600 mt-0.5">
+        <p className="text-xs text-gray-500 mt-0.5">
           {finalizedCount} step{finalizedCount !== 1 ? 's' : ''} · {bundle ? `${(bundle as SessionBundle).normalizedEvents.length} events` : 'Loading…'}
         </p>
       </div>
@@ -689,15 +689,15 @@ export function ProcessScreen({ meta, steps, uploadProgress, uploadStatus, onDis
       <UploadBar progress={uploadProgress} status={uploadStatus} />
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-800 flex-none">
+      <div className="flex border-b border-gray-200 bg-white flex-none">
         {(['map', 'sop', 'export'] as Tab[]).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`flex-1 py-2 text-[10px] font-semibold uppercase tracking-wider transition-colors ${
+            className={`flex-1 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
               tab === t
-                ? 'text-teal-400 border-b-2 border-teal-500 -mb-px'
-                : 'text-gray-600 hover:text-gray-400'
+                ? 'text-blue-600 border-b-2 border-blue-600 -mb-px'
+                : 'text-gray-400 hover:text-gray-600'
             }`}
           >
             {t === 'map' ? 'Map' : t === 'sop' ? 'SOP' : 'Export'}
@@ -708,11 +708,11 @@ export function ProcessScreen({ meta, steps, uploadProgress, uploadStatus, onDis
       {/* Content */}
       {loadError || processError ? (
         <div className="flex items-center justify-center flex-1 px-4">
-          <p className="text-xs text-red-400 text-center">{loadError ?? processError}</p>
+          <p className="text-xs text-red-600 text-center">{loadError ?? processError}</p>
         </div>
       ) : !output ? (
         <div className="flex items-center justify-center flex-1">
-          <p className="text-xs text-gray-600">{bundle ? 'Processing…' : 'Loading session data…'}</p>
+          <p className="text-xs text-gray-500">{bundle ? 'Processing…' : 'Loading session data…'}</p>
         </div>
       ) : (
         <>
@@ -721,23 +721,23 @@ export function ProcessScreen({ meta, steps, uploadProgress, uploadStatus, onDis
             <div className="flex-1 flex flex-col overflow-hidden relative">
               {/* Compact metrics bar */}
               {!selectedStepDef && (
-                <div className="flex-shrink-0 border-b border-gray-800 px-3 py-2">
+                <div className="flex-shrink-0 border-b border-gray-200 bg-white px-3 py-2">
                   <div className="grid grid-cols-4 gap-2 text-center">
                     <div>
-                      <div className="text-sm font-semibold text-white">{output.processRun.stepCount}</div>
-                      <div className="text-[10px] text-gray-500 uppercase tracking-wide">Steps</div>
+                      <div className="text-sm font-semibold text-gray-900">{output.processRun.stepCount}</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wide">Steps</div>
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-white">{output.processRun.durationLabel}</div>
-                      <div className="text-[10px] text-gray-500 uppercase tracking-wide">Duration</div>
+                      <div className="text-sm font-semibold text-gray-900">{output.processRun.durationLabel}</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wide">Duration</div>
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-white">{output.processRun.systemsUsed.length}</div>
-                      <div className="text-[10px] text-gray-500 uppercase tracking-wide">Tools</div>
+                      <div className="text-sm font-semibold text-gray-900">{output.processRun.systemsUsed.length}</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wide">Tools</div>
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-white">{output.processRun.humanEventCount}</div>
-                      <div className="text-[10px] text-gray-500 uppercase tracking-wide">Actions</div>
+                      <div className="text-sm font-semibold text-gray-900">{output.processRun.humanEventCount}</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wide">Actions</div>
                     </div>
                   </div>
                 </div>
@@ -785,12 +785,12 @@ export function ProcessScreen({ meta, steps, uploadProgress, uploadStatus, onDis
 
       {/* Bottom controls — shown on map/sop tabs for quick access */}
       {tab !== 'export' && output && !selectedStepDef && (
-        <div className="flex gap-2 px-3 py-2 border-t border-gray-800 flex-none">
+        <div className="flex gap-2 px-3 py-2 border-t border-gray-200 bg-white flex-none">
           <button
             onClick={() => setTab('export')}
-            className="flex-1 text-[10px] text-gray-500 hover:text-gray-300 transition-colors"
+            className="flex-1 text-xs text-gray-500 hover:text-blue-600 transition-colors"
           >
-            Export / Done →
+            Export / Done
           </button>
         </div>
       )}

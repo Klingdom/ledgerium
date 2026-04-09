@@ -62,7 +62,7 @@ function HistoryRow({
       </div>
       <button
         onClick={e => { e.stopPropagation(); onDelete() }}
-        className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all p-0.5 rounded shrink-0"
+        className="opacity-40 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all p-0.5 rounded shrink-0"
         title="Delete recording"
       >
         &times;

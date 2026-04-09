@@ -103,7 +103,7 @@ export function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#0a0e14] text-gray-100 overflow-hidden">
+    <div className="flex flex-col h-screen bg-gray-50 text-gray-900 overflow-hidden">
       <Header state={recorder.state} meta={recorder.meta} />
       <main className="flex-1 overflow-hidden">
         {renderScreen()}
