@@ -574,33 +574,80 @@ export default function DashboardPage() {
 
   return (
     <div>
-      {/* ── Command Header ─────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between mb-ds-6">
-        <div>
-          <h1 className="text-ds-2xl font-bold tracking-tight text-gray-900">
-            Process Intelligence
-          </h1>
-          <p className="text-ds-sm text-gray-500 mt-0.5">
-            {stats ? (
-              <>
-                <span className="font-medium text-gray-700">{stats.totalWorkflows}</span> workflows
-                {stats.recordedThisWeek > 0 && <> &middot; <span className="text-emerald-600">{stats.recordedThisWeek} new this week</span></>}
-                {stats.needsReview > 0 && <> &middot; <span className="text-amber-600">{stats.needsReview} need review</span></>}
-                {stats.optimizationOpportunities > 0 && <> &middot; <span className="text-violet-600">{stats.optimizationOpportunities} optimization opportunities</span></>}
-              </>
-            ) : 'Monitor, optimize, and standardize your workflows'}
-          </p>
+      {/* ═══════════════════════════════════════════════════════════════════
+          COMMAND CENTER HEADER
+          ═══════════════════════════════════════════════════════════════════ */}
+      <div className="mb-ds-6">
+        <div className="flex items-start justify-between mb-ds-4">
+          <div>
+            <h1 className="text-ds-2xl font-bold tracking-tight text-gray-900">
+              Process Intelligence
+            </h1>
+            <p className="text-ds-sm text-gray-500 mt-0.5">
+              Operational command center &middot; {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+            </p>
+          </div>
+          <div className="flex items-center gap-ds-2">
+            <Link href="/recommendations" className="btn-secondary gap-1.5 text-xs">
+              <Zap className="h-3.5 w-3.5" />
+              Actions
+            </Link>
+            <Link href="/analytics" className="btn-secondary gap-1.5 text-xs">
+              <BarChart3 className="h-3.5 w-3.5" />
+              Analytics
+            </Link>
+            <Link href="/upload" className="btn-primary gap-1.5">
+              <Upload className="h-4 w-4" />
+              Upload
+            </Link>
+          </div>
         </div>
-        <div className="flex items-center gap-ds-2">
-          <Link href="/analytics" className="btn-secondary gap-1.5 text-xs">
-            <BarChart3 className="h-3.5 w-3.5" />
-            Analytics
-          </Link>
-          <Link href="/upload" className="btn-primary gap-1.5">
-            <Upload className="h-4 w-4" />
-            Upload
-          </Link>
-        </div>
+
+        {/* ── Top Signals Strip ──────────────────────────────────────────── */}
+        {stats && stats.totalWorkflows > 0 && (
+          <div className="flex flex-wrap gap-ds-2">
+            {stats.needsReview > 0 && (
+              <button onClick={() => { setHealthFilter('needs_review'); setSopFilter(''); setActivePreset(null); }}
+                className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-ds-xs font-medium text-amber-700 hover:bg-amber-100 transition-colors">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                {stats.needsReview} need review
+              </button>
+            )}
+            {stats.optimizationOpportunities > 0 && (
+              <Link href="/recommendations"
+                className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 border border-violet-200 px-3 py-1 text-ds-xs font-medium text-violet-700 hover:bg-violet-100 transition-colors">
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
+                {stats.optimizationOpportunities} optimization opportunities
+              </Link>
+            )}
+            {stats.aiOpportunityCount > 0 && (
+              <button onClick={() => applyPreset(PRESET_VIEWS.find(v => v.label === 'AI-Ready')!)}
+                className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-ds-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                {stats.aiOpportunityCount} AI candidates
+              </button>
+            )}
+            {stats.staleCount > 0 && (
+              <button onClick={() => { setHealthFilter('stale'); setSopFilter(''); setActivePreset(null); }}
+                className="inline-flex items-center gap-1.5 rounded-full bg-gray-50 border border-gray-200 px-3 py-1 text-ds-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors">
+                <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                {stats.staleCount} stale
+              </button>
+            )}
+            {stats.recordedThisWeek > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-ds-xs font-medium text-emerald-700">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                {stats.recordedThisWeek} new this week
+              </span>
+            )}
+            {stats.needsReview === 0 && stats.optimizationOpportunities === 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-ds-xs font-medium text-emerald-700">
+                <ShieldCheck className="h-3 w-3" />
+                No critical risks detected
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════════
