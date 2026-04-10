@@ -1496,23 +1496,29 @@ function WorkflowRow({
         </div>
       </div>
 
-      {/* Score signals strip — only shown when noteworthy */}
-      {(w.cognitiveBurdenScore >= 60 || w.processMaturityScore <= 30 || w.aiOpportunityScore >= 70 || w.complexityScore >= 70) && (
-        <div className="hidden lg:flex col-span-full items-center gap-3 px-4 pb-2 text-[11px]">
-          {w.complexityScore >= 70 && (
-            <span className="text-red-600">Complexity: {w.complexityScore}</span>
-          )}
-          {w.cognitiveBurdenScore >= 60 && (
-            <span className="text-amber-600">Cognitive Load: {w.cognitiveBurdenScore}</span>
-          )}
-          {w.processMaturityScore <= 30 && (
-            <span className="text-red-600">Low Maturity: {w.processMaturityScore}</span>
-          )}
-          {w.aiOpportunityScore >= 70 && (
-            <span className="text-violet-600">AI Potential: {w.aiOpportunityScore}</span>
-          )}
-        </div>
-      )}
+      {/* Top signal — single most important sentence about this workflow */}
+      {(() => {
+        // Priority order: most urgent signal wins
+        const signal =
+          w.healthStatus === 'high_variation' ? { text: 'High variation detected — consider standardizing', color: 'text-red-600', bg: 'bg-red-50' } :
+          w.healthStatus === 'needs_review' && (w.confidence === null || w.confidence < 0.5) ? { text: 'Low confidence — needs more evidence or review', color: 'text-amber-600', bg: 'bg-amber-50' } :
+          w.healthStatus === 'needs_review' ? { text: 'Needs review — SOP or documentation incomplete', color: 'text-amber-600', bg: 'bg-amber-50' } :
+          w.isStale ? { text: `Stale — not reviewed in ${formatDateRelative(w.createdAt)}`, color: 'text-gray-500', bg: 'bg-gray-50' } :
+          w.aiOpportunityScore >= 70 ? { text: `Strong AI candidate — automation potential score ${w.aiOpportunityScore}/100`, color: 'text-violet-600', bg: 'bg-violet-50' } :
+          w.complexityScore >= 70 ? { text: `High complexity (${w.complexityScore}/100) — consider simplifying`, color: 'text-amber-600', bg: 'bg-amber-50' } :
+          w.cognitiveBurdenScore >= 60 ? { text: `High cognitive load (${w.cognitiveBurdenScore}/100) — operators may struggle`, color: 'text-amber-600', bg: 'bg-amber-50' } :
+          w.processMaturityScore <= 30 ? { text: `Low maturity (${w.processMaturityScore}/100) — needs documentation and standardization`, color: 'text-red-600', bg: 'bg-red-50' } :
+          w.optimizationPotential === 'high' ? { text: `Optimization opportunity — ${w.stepCount ?? 0} steps, ${formatDuration(w.durationMs)}`, color: 'text-violet-600', bg: 'bg-violet-50' } :
+          null;
+        if (!signal) return null;
+        return (
+          <div className={`hidden lg:flex col-span-full items-center gap-2 px-4 pb-2`}>
+            <span className={`text-[11px] ${signal.color} ${signal.bg} px-2 py-0.5 rounded-full`}>
+              {signal.text}
+            </span>
+          </div>
+        );
+      })()}
 
       {/* Mobile / Tablet layout */}
       <div className="lg:hidden p-4">
