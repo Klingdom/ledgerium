@@ -99,6 +99,9 @@ export interface RawEventTarget {
   interactionType: InteractionType
   ancestorPath: string[]
   isSensitive: boolean
+  /** Nearest section/fieldset/heading context, for fallback label enrichment.
+   *  Example: "Payment Details" from a <fieldset><legend>Payment Details</legend> */
+  sectionContext?: string
 }
 
 export interface RawEventOutcome {

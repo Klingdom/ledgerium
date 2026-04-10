@@ -21,16 +21,19 @@ model User {
   createdAt            DateTime @default(now()) @map("created_at")
   updatedAt            DateTime @updatedAt @map("updated_at")
 
-  uploads            Upload[]
-  workflows          Workflow[]
-  apiKeys            ApiKey[]
-  processDefinitions ProcessDefinition[]
-  insights           ProcessInsight[]
-  tags               Tag[]
-  createdTeams       Team[]          @relation("TeamCreator")
-  teamMemberships    TeamMember[]
-  sentInvites        TeamInvite[]    @relation("InviteSender")
-  createdShares      WorkflowShare[] @relation("ShareCreator")
+  uploads             Upload[]
+  workflows           Workflow[]
+  apiKeys             ApiKey[]
+  processDefinitions  ProcessDefinition[]
+  processFamilies     ProcessFamily[]
+  canonicalComponents CanonicalComponentRecord[]
+  groupRelationships  GroupRelationship[]
+  insights            ProcessInsight[]
+  tags                Tag[]
+  createdTeams        Team[]          @relation("TeamCreator")
+  teamMemberships     TeamMember[]
+  sentInvites         TeamInvite[]    @relation("InviteSender")
+  createdShares       WorkflowShare[] @relation("ShareCreator")
 
   @@map("users")
 }
@@ -61,7 +64,7 @@ model Upload {
   validationErrors String?  @map("validation_errors") // JSON array
   rawJsonPath      String   @map("raw_json_path")
 
-  user      User       @relation(fields: [userId], references: [id])
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   workflows Workflow[]
 
   @@index([userId])
@@ -90,10 +93,10 @@ model Workflow {
 
   processDefinitionId String? @map("process_definition_id")
 
-  user              User               @relation(fields: [userId], references: [id])
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   upload            Upload?            @relation(fields: [sourceUploadId], references: [id])
   artifacts         WorkflowArtifact[]
-  processDefinition ProcessDefinition? @relation(fields: [processDefinitionId], references: [id])
+  processDefinition ProcessDefinition? @relation(fields: [processDefinitionId], references: [id], onDelete: SetNull)
   insights          ProcessInsight[]
   shares            WorkflowShare[]
   tags              WorkflowTag[]
@@ -154,6 +157,40 @@ model WorkflowArtifact {
 
 // ─── Phase 3: Process Intelligence ──────────────────────────────────────────
 
+// ProcessFamily: broad category connecting related exact groups.
+// Example: "Email Customer Cities Report" family contains exact groups
+// for "World", "US", "EMEA" qualifier variants.
+model ProcessFamily {
+  id                    String   @id @default(uuid())
+  userId                String   @map("user_id")
+  familyName            String   @map("family_name")
+  familySlug            String   @map("family_slug")
+  description           String   @default("")
+  confidenceScore       Float    @default(0) @map("confidence_score")
+  confidenceBand        String   @default("low") @map("confidence_band") // very_high, high, medium, low, very_low
+  totalExactGroups      Int      @default(0) @map("total_exact_groups")
+  totalRuns             Int      @default(0) @map("total_runs")
+  canonicalIntent       String   @default("") @map("canonical_intent")
+  createdFromModelVersion String @default("1.0.0") @map("created_from_model_version")
+  explanationJson       String?  @map("explanation_json") // GroupingExplanation JSON
+  relatedFamilyIds      String?  @map("related_family_ids") // JSON array of family IDs
+  topSystems            String?  @map("top_systems") // JSON array of system names
+  commonComponentIds    String?  @map("common_component_ids") // JSON array of component IDs
+  metricsJson           String?  @map("metrics_json") // ProcessFamilyMetrics JSON
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  processGroups ProcessDefinition[]
+
+  @@unique([userId, familySlug])
+  @@index([userId])
+  @@map("process_families")
+}
+
+// ProcessDefinition: exact process group — strict cluster of workflow runs
+// representing the same real process. Retains existing column names for
+// backward compatibility; new fields extend the model.
 model ProcessDefinition {
   id               String   @id @default(uuid())
   userId           String   @map("user_id")
@@ -171,13 +208,118 @@ model ProcessDefinition {
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
-  user      User               @relation(fields: [userId], references: [id])
+  // ── New fields for process grouping hierarchy ──
+  familyId            String?  @map("family_id")
+  normalizedName      String?  @map("normalized_name")
+  groupType           String   @default("exact_group") @map("group_type") // exact_group, standalone
+  startAnchor         String?  @map("start_anchor") // semantic signature of first step
+  endAnchor           String?  @map("end_anchor")   // semantic signature of last step
+  confidenceBand      String?  @map("confidence_band") // very_high, high, medium, low, very_low
+  explanationJson     String?  @map("explanation_json") // GroupingExplanation JSON
+  systems             String?  // JSON array of system names
+  intentSignature     String?  @map("intent_signature")
+  nameSignature       String?  @map("name_signature") // NormalizedTitle.exactSignature
+  stepSignatureHash   String?  @map("step_signature_hash")
+  eventSignatureHash  String?  @map("event_signature_hash")
+  metricsJson         String?  @map("extended_metrics_json") // ProcessGroupMetrics JSON
+
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family    ProcessFamily?     @relation(fields: [familyId], references: [id], onDelete: SetNull)
   workflows Workflow[]
   insights  ProcessInsight[]
+  variants  ProcessVariantRecord[]
 
   @@index([userId])
   @@index([pathSignature])
+  @@index([familyId])
+  @@index([nameSignature])
   @@map("process_definitions")
+}
+
+// ProcessVariantRecord: a distinct execution path within an exact group.
+model ProcessVariantRecord {
+  id               String  @id @default(uuid())
+  processGroupId   String  @map("process_group_id")
+  variantName      String  @map("variant_name")
+  variantRank      Int     @default(1) @map("variant_rank")
+  runCount         Int     @default(0) @map("run_count")
+  percentOfRuns    Float   @default(0) @map("percent_of_runs")
+  pathStepCategories String? @map("path_step_categories") // JSON array
+  deviationPoints  String? @map("deviation_points") // JSON array of DeviationPoint
+  addedSteps       String? @map("added_steps")      // JSON array
+  removedSteps     String? @map("removed_steps")    // JSON array
+  reorderedSteps   String? @map("reordered_steps")  // JSON array
+  avgDurationMs    Int?    @map("avg_duration_ms")
+  confidenceScore  Float   @default(0) @map("confidence_score")
+  explanationJson  String? @map("explanation_json")  // GroupingExplanation JSON
+  isStandard       Boolean @default(false) @map("is_standard")
+  isFastest        Boolean @default(false) @map("is_fastest")
+  isSlowest        Boolean @default(false) @map("is_slowest")
+  isOutlier        Boolean @default(false) @map("is_outlier")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  processGroup ProcessDefinition @relation(fields: [processGroupId], references: [id], onDelete: Cascade)
+
+  @@index([processGroupId])
+  @@map("process_variant_records")
+}
+
+// CanonicalComponentRecord: a reusable step pattern detected across workflows.
+model CanonicalComponentRecord {
+  id                    String  @id @default(uuid())
+  userId                String  @map("user_id")
+  componentName         String  @map("component_name")
+  componentType         String  @map("component_type") // action, navigation, data_entry, file_action, verification, decision, integration
+  canonicalVerb         String  @map("canonical_verb")
+  canonicalObject       String  @map("canonical_object")
+  canonicalSystem       String? @map("canonical_system")
+  description           String  @default("")
+  usageCount            Int     @default(0) @map("usage_count")
+  familyCount           Int     @default(0) @map("family_count")
+  groupCount            Int     @default(0) @map("group_count")
+  avgDurationMs         Int?    @map("avg_duration_ms")
+  volatilityScore       Float?  @map("volatility_score")
+  automationOpportunityScore Float? @map("automation_opportunity_score")
+  commonPredecessors    String? @map("common_predecessors") // JSON array of component keys
+  commonSuccessors      String? @map("common_successors")   // JSON array of component keys
+  relatedComponentIds   String? @map("related_component_ids") // JSON array of component IDs
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, canonicalVerb, canonicalObject])
+  @@index([userId])
+  @@index([componentType])
+  @@map("canonical_components")
+}
+
+// GroupRelationship: edge between any two entities in the hierarchy.
+model GroupRelationship {
+  id                    String   @id @default(uuid())
+  userId                String   @map("user_id")
+  sourceType            String   @map("source_type") // family, group, variant, workflow, component
+  sourceId              String   @map("source_id")
+  targetType            String   @map("target_type")
+  targetId              String   @map("target_id")
+  relationshipType      String   @map("relationship_type") // same_family, possible_match, shares_component, template_like, parent_child, variant_like
+  confidenceScore       Float    @default(0) @map("confidence_score")
+  explanationCodes      String?  @map("explanation_codes") // JSON array of ExplanationCode strings
+  explanationText       String?  @map("explanation_text")
+  createdFromModelVersion String @default("1.0.0") @map("created_from_model_version")
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // sourceId and targetId are polymorphic: they reference families, groups,
+  // workflows, or components depending on sourceType/targetType.
+  // No FK constraint — resolved at the application layer.
+
+  @@index([userId])
+  @@index([sourceId])
+  @@index([targetId])
+  @@index([relationshipType])
+  @@map("group_relationships")
 }
 
 model ProcessInsight {
@@ -197,7 +339,7 @@ model ProcessInsight {
   dismissed             Boolean  @default(false)
   createdAt             DateTime @default(now()) @map("created_at")
 
-  user              User               @relation(fields: [userId], references: [id])
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   processDefinition ProcessDefinition? @relation(fields: [processDefinitionId], references: [id], onDelete: Cascade)
   workflow          Workflow?           @relation(fields: [workflowId], references: [id], onDelete: Cascade)
 
@@ -272,7 +414,7 @@ model TeamInvite {
   createdAt   DateTime  @default(now()) @map("created_at")
 
   team    Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  inviter User @relation("InviteSender", fields: [invitedBy], references: [id])
+  inviter User @relation("InviteSender", fields: [invitedBy], references: [id], onDelete: Cascade)
 
   @@index([teamId])
   @@index([email])
@@ -290,7 +432,7 @@ model WorkflowShare {
   createdAt   DateTime  @default(now()) @map("created_at")
 
   workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-  sharer   User     @relation("ShareCreator", fields: [sharedBy], references: [id])
+  sharer   User     @relation("ShareCreator", fields: [sharedBy], references: [id], onDelete: Cascade)
 
   @@unique([workflowId, sharedWith, shareType])
   @@index([sharedWith])

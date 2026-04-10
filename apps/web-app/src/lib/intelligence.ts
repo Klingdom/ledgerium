@@ -8,6 +8,9 @@
  * 3. Run analyzePortfolio() and store the PortfolioIntelligence result
  * 4. Generate ProcessInsight records from the analysis
  * 5. Auto-cluster workflows into ProcessDefinitions by path signature
+ * 6. Phase 5: Run title normalization, step fingerprinting, exact-group
+ *    scoring, family detection, component detection, variant analysis,
+ *    and relationship generation. Populate new schema fields.
  */
 
 import {
@@ -20,6 +23,24 @@ import {
   deriveRecommendedCanonicalPath,
   generateRecommendations,
   computeAutomationROI,
+  // Phase 5 imports
+  normalizeTitle,
+  fingerprintWorkflowSteps,
+  hashStepSequence,
+  hashEventSequence,
+  fingerprintEvent,
+  detectComponents,
+  scoreFamilyMembership,
+  evaluatePossibleMatch,
+  generateGroupRelationships,
+  computeVariantDistance,
+  scoreAutomationOpportunity,
+  deriveAutomationFactors,
+  buildExplanation,
+  resolveConfidenceBand,
+  SCORING_MODEL_VERSION,
+  GROUPING_MODEL_VERSION,
+  DEFAULT_SCORING_CONFIG,
 } from '@ledgerium/intelligence-engine';
 import type {
   ProcessRunBundle,
@@ -32,6 +53,8 @@ import type {
   DocumentationDriftScore,
   OutlierRun,
   RecommendedCanonicalPath,
+  StepFingerprint,
+  NormalizedTitle,
 } from '@ledgerium/intelligence-engine';
 import type { ProcessRun, ProcessDefinition as EngineProcessDefinition, SOP } from '@ledgerium/process-engine';
 import { db } from '@/db';
@@ -125,6 +148,16 @@ export async function clusterWorkflows(userId: string): Promise<void> {
       groups.set(sig, [w]);
     }
   }
+
+  // Phase 5 tracking maps — populated per group, used for family detection after
+  const groupFingerprintMap = new Map<string, StepFingerprint[]>();
+  const groupNormalizedTitles = new Map<string, NormalizedTitle>();
+  const groupSystems = new Map<string, string[]>();
+  const groupArtifacts = new Map<string, string[]>();
+  const groupStartAnchors = new Map<string, string>();
+  const groupEndAnchors = new Map<string, string>();
+  const groupRunCounts = new Map<string, number>();
+  const groupEventFps = new Map<string, string[]>();
 
   // For each group, create or update a ProcessDefinition
   for (const [signature, group] of groups) {
@@ -232,7 +265,79 @@ export async function clusterWorkflows(userId: string): Promise<void> {
       }
     }
 
-    // Upsert ProcessDefinition
+    // ── Phase 5: Enrich with title normalization, fingerprints, anchors ───
+
+    const normalized = normalizeTitle(canonicalName);
+
+    // Fingerprint steps for the representative (first) bundle
+    const representativeDef = bundles[0]?.processDefinition;
+    let startAnchor = '';
+    let endAnchor = '';
+    let stepSigHash = '';
+    let eventSigHash = '';
+    let groupFingerprints: StepFingerprint[] = [];
+
+    if (representativeDef) {
+      groupFingerprints = fingerprintWorkflowSteps(
+        representativeDef.stepDefinitions,
+        group[0]!.id,
+      );
+      if (groupFingerprints.length > 0) {
+        startAnchor = groupFingerprints[0]!.semanticSignature;
+        endAnchor = groupFingerprints[groupFingerprints.length - 1]!.semanticSignature;
+      }
+      stepSigHash = hashStepSequence(groupFingerprints);
+    }
+
+    // Build event fingerprints from the representative bundle
+    const eventFps: string[] = [];
+    if (representativeDef) {
+      for (const step of representativeDef.stepDefinitions) {
+        eventFps.push(fingerprintEvent(step.category, null, step.systems[0] ?? null));
+      }
+      eventSigHash = hashEventSequence(eventFps);
+    }
+
+    // Compute confidence band
+    const rawConfidence = group.length >= 3 ? 0.8 : group.length >= 2 ? 0.5 : 0.3;
+    const confidenceBand = resolveConfidenceBand(rawConfidence, DEFAULT_SCORING_CONFIG);
+
+    // Build explanation
+    const supportingEntries = [];
+    const weaknessEntries = [];
+    if (group.length >= 3) {
+      supportingEntries.push({ code: 'HIGH_STEP_OVERLAP' as const, weight: 0.3, detail: `${group.length} runs with identical step sequence` });
+    }
+    if (group.length < 3) {
+      weaknessEntries.push({ code: 'LOW_SAMPLE_SIZE' as const, weight: 0.1, detail: `Only ${group.length} run(s) observed` });
+    }
+    if (startAnchor) {
+      supportingEntries.push({ code: 'SAME_START_ANCHOR' as const, weight: 0.15 });
+    }
+    if (endAnchor) {
+      supportingEntries.push({ code: 'SAME_END_ANCHOR' as const, weight: 0.15 });
+    }
+    const explanation = buildExplanation(supportingEntries, weaknessEntries, GROUPING_MODEL_VERSION);
+
+    // Collect systems from all bundles
+    const allSystems = new Set<string>();
+    for (const b of bundles) {
+      for (const sys of b.processRun.systemsUsed) allSystems.add(sys);
+    }
+
+    // Extended metrics
+    const extendedMetrics = {
+      avgDurationMs: avgDuration,
+      medianDurationMs: medianDuration,
+      commonPathPct: stabilityScore ?? 0,
+      stepConsistencyScore: stabilityScore ?? 0,
+      eventConsistencyScore: stabilityScore ?? 0,
+      anomalyRate: 0,
+      reworkRate: 0,
+      delayHotspots: [] as number[],
+    };
+
+    // Upsert ProcessDefinition with Phase 5 fields
     const existing = await db.processDefinition.findFirst({
       where: { userId, pathSignature: signature },
     });
@@ -245,9 +350,22 @@ export async function clusterWorkflows(userId: string): Promise<void> {
       avgDurationMs: avgDuration,
       medianDurationMs: medianDuration,
       stabilityScore,
-      confidenceScore: group.length >= 3 ? 0.8 : group.length >= 2 ? 0.5 : 0.3,
+      confidenceScore: rawConfidence,
       intelligenceJson,
       analyzedAt: new Date(),
+      // Phase 5 fields
+      normalizedName: normalized.normalized,
+      groupType: 'exact_group',
+      startAnchor,
+      endAnchor,
+      confidenceBand,
+      explanationJson: JSON.stringify(explanation),
+      systems: JSON.stringify([...allSystems]),
+      intentSignature: normalized.familySignature,
+      nameSignature: normalized.exactSignature,
+      stepSignatureHash: stepSigHash,
+      eventSignatureHash: eventSigHash,
+      metricsJson: JSON.stringify(extendedMetrics),
     };
 
     let defId: string;
@@ -275,7 +393,27 @@ export async function clusterWorkflows(userId: string): Promise<void> {
     if (intelligenceJson && bundles.length >= 2) {
       await generateInsights(userId, defId, JSON.parse(intelligenceJson), workflowIds);
     }
+
+    // Track for Phase 5 family detection
+    groupFingerprintMap.set(defId, groupFingerprints);
+    groupNormalizedTitles.set(defId, normalized);
+    groupSystems.set(defId, [...allSystems]);
+    groupArtifacts.set(defId, []);
+    groupStartAnchors.set(defId, startAnchor);
+    groupEndAnchors.set(defId, endAnchor);
+    groupRunCounts.set(defId, group.length);
+    groupEventFps.set(defId, eventFps);
   }
+
+  // ── Phase 5.2: Family detection across process definitions ───────────
+
+  await runFamilyDetection(userId, groupNormalizedTitles, groupFingerprintMap,
+    groupSystems, groupArtifacts, groupStartAnchors, groupEndAnchors,
+    groupRunCounts, groupEventFps);
+
+  // ── Phase 5.3: Component detection ───────────────────────────────────
+
+  await runComponentDetection(userId, groupFingerprintMap);
 }
 
 // ─── Analyze a single workflow ──────────────────────────────────────────────
@@ -421,4 +559,289 @@ async function generateInsights(
       },
     });
   }
+}
+
+// ─── Phase 5.2: Family detection ────────────────────────────────────────────
+
+/**
+ * Detect process families by scoring pairs of process definitions for
+ * family-level similarity. Creates ProcessFamily records and links
+ * definitions via familyId. Also creates GroupRelationship records.
+ */
+async function runFamilyDetection(
+  userId: string,
+  titles: Map<string, NormalizedTitle>,
+  fingerprints: Map<string, StepFingerprint[]>,
+  systems: Map<string, string[]>,
+  artifacts: Map<string, string[]>,
+  startAnchors: Map<string, string>,
+  endAnchors: Map<string, string>,
+  runCounts: Map<string, number>,
+  eventFps: Map<string, string[]>,
+): Promise<void> {
+  const defIds = [...titles.keys()];
+  if (defIds.length < 2) return;
+
+  // Build lightweight WorkflowRunRecord-like objects for the scorer
+  function makeRunRecord(defId: string) {
+    return {
+      id: defId,
+      originalWorkflowId: defId,
+      processGroupId: null,
+      variantId: null,
+      familyId: null,
+      title: titles.get(defId)?.raw ?? '',
+      normalizedTitle: titles.get(defId)!,
+      startAnchor: startAnchors.get(defId) ?? '',
+      endAnchor: endAnchors.get(defId) ?? '',
+      stepCount: fingerprints.get(defId)?.length ?? 0,
+      eventCount: (eventFps.get(defId)?.length ?? 0) * 2,
+      systems: systems.get(defId) ?? [],
+      artifacts: artifacts.get(defId) ?? [],
+      actor: null,
+      durationMs: null,
+      pathHash: '',
+      stepFingerprints: fingerprints.get(defId) ?? [],
+      eventFingerprints: eventFps.get(defId) ?? [],
+      clusteringScores: { exactGroupScore: 0, familyScore: 0, componentReuseScore: 0, anomalyScore: 0 },
+    };
+  }
+
+  // Score all pairs for family membership
+  // Use union-find to merge into families
+  const parent = new Map<string, string>();
+  for (const id of defIds) parent.set(id, id);
+
+  function find(x: string): string {
+    while (parent.get(x) !== x) {
+      parent.set(x, parent.get(parent.get(x)!)!);
+      x = parent.get(x)!;
+    }
+    return x;
+  }
+
+  function union(a: string, b: string): void {
+    const ra = find(a);
+    const rb = find(b);
+    if (ra !== rb) parent.set(rb, ra);
+  }
+
+  const relationships: Array<{
+    sourceId: string; targetId: string;
+    type: string; score: number;
+    codes: string[]; text: string;
+  }> = [];
+
+  for (let i = 0; i < defIds.length; i++) {
+    for (let j = i + 1; j < defIds.length; j++) {
+      const a = makeRunRecord(defIds[i]!);
+      const b = makeRunRecord(defIds[j]!);
+      const result = scoreFamilyMembership(a, b);
+
+      if (result.decision === 'same_family' || result.decision === 'likely_family') {
+        union(defIds[i]!, defIds[j]!);
+        relationships.push({
+          sourceId: defIds[i]!, targetId: defIds[j]!,
+          type: 'same_family', score: result.score,
+          codes: result.explanation.supporting.map(e => e.code),
+          text: result.explanation.summary,
+        });
+      } else if (result.decision === 'possible_related') {
+        relationships.push({
+          sourceId: defIds[i]!, targetId: defIds[j]!,
+          type: 'possible_match', score: result.score,
+          codes: result.explanation.supporting.map(e => e.code),
+          text: result.explanation.summary,
+        });
+      }
+    }
+  }
+
+  // Build families from union-find clusters
+  const familyClusters = new Map<string, string[]>();
+  for (const id of defIds) {
+    const root = find(id);
+    if (!familyClusters.has(root)) familyClusters.set(root, []);
+    familyClusters.get(root)!.push(id);
+  }
+
+  // Clear old families and relationships for this user
+  await db.groupRelationship.deleteMany({ where: { userId } });
+  // Only delete families that have no groups left (orphan cleanup)
+  const existingFamilies = await db.processFamily.findMany({ where: { userId }, select: { id: true } });
+  for (const fam of existingFamilies) {
+    const groupCount = await db.processDefinition.count({ where: { familyId: fam.id } });
+    if (groupCount === 0) {
+      await db.processFamily.delete({ where: { id: fam.id } });
+    }
+  }
+
+  // Create family records for clusters with 2+ members
+  for (const [_root, memberIds] of familyClusters) {
+    if (memberIds.length < 2) {
+      // Single member = standalone, clear any stale familyId
+      await db.processDefinition.updateMany({
+        where: { id: { in: memberIds } },
+        data: { familyId: null },
+      });
+      continue;
+    }
+
+    // Derive family name from member titles
+    const memberTitles = memberIds.map(id => titles.get(id)?.raw ?? '');
+    const familyName = deriveFamilyNameFromTitles(memberTitles);
+    const familySlug = slugify(familyName);
+
+    // Collect family-level metrics
+    const totalRuns = memberIds.reduce((s, id) => s + (runCounts.get(id) ?? 0), 0);
+    const allFamilySystems = new Set<string>();
+    for (const id of memberIds) {
+      for (const sys of systems.get(id) ?? []) allFamilySystems.add(sys);
+    }
+
+    // Compute family confidence (average of member confidences)
+    const memberConfidences: number[] = [];
+    for (const id of memberIds) {
+      const def = await db.processDefinition.findUnique({ where: { id }, select: { confidenceScore: true } });
+      if (def?.confidenceScore) memberConfidences.push(def.confidenceScore);
+    }
+    const familyConfidence = memberConfidences.length > 0
+      ? memberConfidences.reduce((s, c) => s + c, 0) / memberConfidences.length
+      : 0.5;
+
+    const familyBand = resolveConfidenceBand(familyConfidence, DEFAULT_SCORING_CONFIG);
+    const familyExplanation = buildExplanation(
+      [{ code: 'TITLE_PATTERN_MATCH' as const, weight: 0.3, detail: `${memberIds.length} groups share naming pattern` }],
+      memberIds.length < 3 ? [{ code: 'LOW_SAMPLE_SIZE' as const, weight: 0.1 }] : [],
+      GROUPING_MODEL_VERSION,
+    );
+
+    // Upsert family
+    const existingFamily = await db.processFamily.findFirst({
+      where: { userId, familySlug },
+    });
+
+    let familyId: string;
+    const familyData = {
+      familyName,
+      familySlug,
+      confidenceScore: familyConfidence,
+      confidenceBand: familyBand,
+      totalExactGroups: memberIds.length,
+      totalRuns,
+      canonicalIntent: titles.get(memberIds[0]!)?.familySignature ?? '',
+      createdFromModelVersion: SCORING_MODEL_VERSION,
+      explanationJson: JSON.stringify(familyExplanation),
+      topSystems: JSON.stringify([...allFamilySystems]),
+      metricsJson: JSON.stringify({ avgDurationMs: null, totalVariants: 0 }),
+    };
+
+    if (existingFamily) {
+      await db.processFamily.update({ where: { id: existingFamily.id }, data: familyData });
+      familyId = existingFamily.id;
+    } else {
+      const created = await db.processFamily.create({
+        data: { id: crypto.randomUUID(), userId, ...familyData },
+      });
+      familyId = created.id;
+    }
+
+    // Link definitions to family
+    await db.processDefinition.updateMany({
+      where: { id: { in: memberIds } },
+      data: { familyId },
+    });
+  }
+
+  // Persist group relationships
+  for (const rel of relationships) {
+    await db.groupRelationship.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId,
+        sourceType: 'group',
+        sourceId: rel.sourceId,
+        targetType: 'group',
+        targetId: rel.targetId,
+        relationshipType: rel.type,
+        confidenceScore: rel.score,
+        explanationCodes: JSON.stringify(rel.codes),
+        explanationText: rel.text,
+        createdFromModelVersion: SCORING_MODEL_VERSION,
+      },
+    });
+  }
+}
+
+// ─── Phase 5.3: Component detection ─────────────────────────────────────────
+
+/**
+ * Detect canonical shared components from step fingerprints across all
+ * process definitions and persist to CanonicalComponentRecord table.
+ */
+async function runComponentDetection(
+  userId: string,
+  fingerprintsByGroup: Map<string, StepFingerprint[]>,
+): Promise<void> {
+  if (fingerprintsByGroup.size === 0) return;
+
+  const result = detectComponents({ fingerprintsByWorkflow: fingerprintsByGroup }, 2);
+
+  // Clear old components for this user
+  await db.canonicalComponentRecord.deleteMany({ where: { userId } });
+
+  // Persist detected components
+  for (const comp of result.components) {
+    await db.canonicalComponentRecord.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId,
+        componentName: comp.componentName,
+        componentType: comp.componentType,
+        canonicalVerb: comp.canonicalVerb,
+        canonicalObject: comp.canonicalObject,
+        canonicalSystem: comp.canonicalSystem,
+        description: comp.description,
+        usageCount: comp.usageCount,
+        familyCount: comp.familyCount,
+        groupCount: comp.groupCount,
+        avgDurationMs: comp.avgDurationMs,
+        commonPredecessors: JSON.stringify(comp.commonPredecessors),
+        commonSuccessors: JSON.stringify(comp.commonSuccessors),
+        relatedComponentIds: JSON.stringify(comp.relatedComponentIds),
+      },
+    });
+  }
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function deriveFamilyNameFromTitles(names: string[]): string {
+  if (names.length === 0) return 'Unknown Family';
+  if (names.length === 1) return names[0]!;
+
+  // Find longest common prefix (word-level)
+  const tokenized = names.map(n => n.split(/\s+/));
+  const minLen = Math.min(...tokenized.map(t => t.length));
+  const commonWords: string[] = [];
+  for (let i = 0; i < minLen; i++) {
+    const word = tokenized[0]![i]!.toLowerCase();
+    if (tokenized.every(t => t[i]!.toLowerCase() === word)) {
+      commonWords.push(tokenized[0]![i]!);
+    } else {
+      break;
+    }
+  }
+
+  if (commonWords.length >= 2) return commonWords.join(' ');
+  // Fallback: shortest name
+  return names.reduce((shortest, n) => n.length < shortest.length ? n : shortest);
+}
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 100);
 }

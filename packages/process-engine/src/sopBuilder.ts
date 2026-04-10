@@ -258,6 +258,8 @@ function deriveInstruction(
       // Fallback: use page/section context instead of meaningless element type
       const pageLabel = page?.pageTitle ?? page?.applicationLabel;
       if (pageLabel) return `Click the target element on "${pageLabel}"`;
+      // Last resort — at least include the application name if available
+      if (page?.applicationLabel) return `Click the target element in ${page.applicationLabel}`;
       return 'Click the target element';
     }
 
@@ -271,12 +273,15 @@ function deriveInstruction(
       if (role && INPUT_ROLES.has(role)) return `Enter value in the ${role} field`;
       const fieldPage = page?.pageTitle ?? page?.applicationLabel;
       if (fieldPage) return `Enter the required value on "${fieldPage}"`;
+      if (page?.applicationLabel) return `Enter the required value in ${page.applicationLabel}`;
       return 'Enter the required value';
     }
 
     case 'interaction.submit': {
       if (label) return `Submit via "${label}"`;
       if (role) return `Submit using the ${role}`;
+      const formPage = page?.pageTitle ?? page?.applicationLabel;
+      if (formPage) return `Submit the form on "${formPage}"`;
       return 'Submit the form';
     }
 
@@ -312,17 +317,20 @@ function deriveInstruction(
     // ── Navigation events ───────────────────────────────────────────────────
 
     case 'navigation.open_page': {
-      if (page?.pageTitle) return `Wait for "${page.pageTitle}" to load`;
+      const dest = enrichedPageLabel(page);
+      if (dest) return `Wait for "${dest}" to load`;
       return 'Wait for page to load';
     }
 
     case 'navigation.route_change': {
-      if (page?.pageTitle) return `Page navigates to "${page.pageTitle}"`;
+      const dest = enrichedPageLabel(page);
+      if (dest) return `Page navigates to "${dest}"`;
       return 'Page route updates';
     }
 
     case 'navigation.tab_activated': {
-      if (page?.pageTitle) return `Switch to "${page.pageTitle}" tab`;
+      const dest = enrichedPageLabel(page);
+      if (dest) return `Switch to "${dest}" tab`;
       return 'Switch browser tab';
     }
 
@@ -455,8 +463,48 @@ function deduplicateInputChanges(events: CanonicalEventInput[]): CanonicalEventI
 
 // ─── Privacy-safe label extraction ───────────────────────────────────────────
 
+/**
+ * Page titles too generic to be useful as destinations in SOP instructions.
+ * When we encounter these, we enrich with route template or application label.
+ */
+const GENERIC_PAGE_TITLES = new Set([
+  'home', 'dashboard', 'main', 'index', 'welcome', 'loading',
+  'untitled', 'new tab', 'about:blank',
+]);
+
+/**
+ * Returns a meaningful page label, enriching generic titles with route/app context.
+ * "Dashboard" → "/invoices/new (NetSuite)" or "NetSuite" instead.
+ */
+function enrichedPageLabel(page: CanonicalEventInput['page_context']): string | undefined {
+  if (!page) return undefined;
+  const title = page.pageTitle;
+  const isGeneric = !title || GENERIC_PAGE_TITLES.has(title.toLowerCase().trim());
+
+  if (!isGeneric && title) return title;
+
+  // Title is generic or empty — build from route + app
+  const route = page.routeTemplate;
+  const app = page.applicationLabel;
+  if (route && app) return `${route} (${app})`;
+  if (app) return app;
+  if (route) return route;
+  // Last resort: return the generic title rather than nothing
+  return title || undefined;
+}
+
+/** Raw HTML element types that should not appear as labels in SOP output. */
+const SOP_RAW_ELEMENTS = new Set([
+  'div', 'span', 'svg', 'use', 'p', 'li', 'ul', 'section', 'article',
+  'main', 'header', 'footer', 'nav', 'form', 'fieldset', 'figure', 'img',
+]);
+
 function safeTargetLabel(evt: CanonicalEventInput): string | undefined {
-  return evt.target_summary?.label ?? evt.target_summary?.role;
+  const label = evt.target_summary?.label;
+  if (label && label.trim()) return label;
+  const role = evt.target_summary?.role;
+  if (role && !SOP_RAW_ELEMENTS.has(role)) return role;
+  return undefined;
 }
 
 // ─── Step-level action builder ────────────────────────────────────────────────
@@ -469,9 +517,8 @@ function buildAction(
   const first = events[0];
   switch (groupingReason) {
     case 'click_then_navigate': {
-      const dest = events
-        .find(e => e.event_type.startsWith('navigation.'))
-        ?.page_context?.pageTitle;
+      const navEvent = events.find(e => e.event_type.startsWith('navigation.'));
+      const dest = navEvent ? enrichedPageLabel(navEvent.page_context) : undefined;
       return dest ? `Navigate to "${dest}"` : title;
     }
     case 'fill_and_submit': {
@@ -542,8 +589,8 @@ function buildExpectedOutcome(
         : `Confirmation message appears and record is saved in ${systemLabel}`;
     }
     case 'click_then_navigate': {
-      const dest = events.find(e => e.event_type.startsWith('navigation.'))
-        ?.page_context?.pageTitle;
+      const navEvt = events.find(e => e.event_type.startsWith('navigation.'));
+      const dest = navEvt ? enrichedPageLabel(navEvt.page_context) : undefined;
       return dest
         ? `"${dest}" loads with expected content`
         : 'Target page loads with expected content';

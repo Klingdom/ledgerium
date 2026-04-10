@@ -2,6 +2,13 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 
+/** Safely parse a JSON string, returning null on failure instead of throwing. */
+function safeJsonParse(json: string | null | undefined): unknown {
+  if (!json) return null;
+  try { return JSON.parse(json); }
+  catch { return null; }
+}
+
 /**
  * GET /api/process-definitions
  * List all process definitions for the current user.
@@ -44,7 +51,19 @@ export async function GET() {
       analyzedAt: d.analyzedAt,
       workflows: d.workflows,
       insights: d.insights,
-      intelligence: d.intelligenceJson ? JSON.parse(d.intelligenceJson) : null,
+      intelligence: safeJsonParse(d.intelligenceJson),
+      // Phase 5 hierarchy fields
+      familyId: d.familyId,
+      normalizedName: d.normalizedName,
+      groupType: d.groupType,
+      startAnchor: d.startAnchor,
+      endAnchor: d.endAnchor,
+      confidenceBand: d.confidenceBand,
+      explanationJson: d.explanationJson,
+      systems: d.systems,
+      nameSignature: d.nameSignature,
+      stepSignatureHash: d.stepSignatureHash,
+      metricsJson: d.metricsJson,
     })),
   });
 }

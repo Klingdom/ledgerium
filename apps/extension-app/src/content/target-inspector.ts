@@ -12,7 +12,7 @@
  */
 
 import { djb2Hash } from '../shared/utils.js'
-import { extractLabel } from './label-extractor.js'
+import { extractLabel, extractSectionContext } from './label-extractor.js'
 import type { InteractionType, RawEventTarget } from '../shared/types.js'
 
 // ─── Sensitivity ──────────────────────────────────────────────────────────────
@@ -133,6 +133,7 @@ function getAncestorPath(el: Element): string[] {
  */
 export function inspectTarget(el: Element): RawEventTarget {
   const selector = getStableSelector(el)
+  const sectionContext = extractSectionContext(el)
   return {
     selector,
     selectorFingerprint: djb2Hash(selector),
@@ -142,5 +143,6 @@ export function inspectTarget(el: Element): RawEventTarget {
     interactionType: classifyInteractionType(el),
     ancestorPath: getAncestorPath(el),
     isSensitive: false,
+    ...(sectionContext ? { sectionContext } : {}),
   }
 }

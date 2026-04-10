@@ -503,7 +503,7 @@ function RawSOPView({ sop }: { sop: any }) {
       )}
 
       {/* ── Quality Bar ────────────────────────────────────────────────── */}
-      {sop.qualityIndicators && <QualityBar qi={sop.qualityIndicators} />}
+      {sop.qualityIndicators && <QualityBar qi={sop.qualityIndicators} qualityAdvisory={sop.qualityAdvisory} />}
 
       {/* ── Procedure Steps ────────────────────────────────────────────── */}
       <section className="ds-section">
@@ -590,9 +590,10 @@ function QuickStat({ label, value }: { label: string; value: string | number }) 
   );
 }
 
-function QualityBar({ qi }: { qi: any }) {
-  const pct = Math.round((qi.averageConfidence ?? 0) * 100);
+function QualityBar({ qi, qualityAdvisory }: { qi: Record<string, unknown>; qualityAdvisory?: string }) {
+  const pct = Math.round(((qi.averageConfidence as number) ?? 0) * 100);
   const barClass = pct >= 85 ? 'bg-emerald-500' : pct >= 70 ? 'bg-blue-500' : 'bg-amber-500';
+  const lowCount = (qi.lowConfidenceStepCount as number) ?? 0;
 
   return (
     <div className="card px-ds-5 py-ds-4">
@@ -603,11 +604,22 @@ function QualityBar({ qi }: { qi: any }) {
       <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
         <div className={`h-full rounded-full transition-all ${barClass}`} style={{ width: `${pct}%` }} />
       </div>
+
+      {/* Advisory — actionable message when some steps need manual review */}
+      {(qualityAdvisory || lowCount > 0) && (
+        <div className="mt-ds-3 flex items-start gap-ds-2 rounded-ds-sm bg-amber-50 border border-amber-200 px-ds-3 py-ds-2">
+          <svg className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+          <p className="text-ds-xs text-amber-800">
+            {qualityAdvisory ?? `${lowCount} step${lowCount !== 1 ? 's have' : ' has'} low label confidence — consider reviewing ${lowCount === 1 ? 'this step' : 'these steps'} manually before sharing.`}
+          </p>
+        </div>
+      )}
+
       <div className="mt-ds-3 grid grid-cols-4 gap-ds-4">
-        <MiniStat label="Systems" value={qi.systemCount ?? 0} />
-        <MiniStat label="Low Confidence" value={qi.lowConfidenceStepCount ?? 0} />
-        <MiniStat label="Errors" value={qi.errorStepCount ?? 0} />
-        <MiniStat label="Friction" value={qi.frictionCount ?? 0} />
+        <MiniStat label="Systems" value={(qi.systemCount as number) ?? 0} />
+        <MiniStat label="Low Confidence" value={lowCount} />
+        <MiniStat label="Errors" value={(qi.errorStepCount as number) ?? 0} />
+        <MiniStat label="Friction" value={(qi.frictionCount as number) ?? 0} />
       </div>
     </div>
   );

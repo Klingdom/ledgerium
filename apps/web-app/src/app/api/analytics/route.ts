@@ -3,6 +3,13 @@ import { auth } from '@/lib/auth';
 import { analyzeUserPortfolio, clusterWorkflows } from '@/lib/intelligence';
 import { db } from '@/db';
 
+/** Safely parse a JSON string, returning fallback on failure instead of throwing. */
+function safeJsonParse(json: string | null | undefined, fallback: unknown = null): unknown {
+  if (!json) return fallback;
+  try { return JSON.parse(json); }
+  catch { return fallback; }
+}
+
 /**
  * POST /api/analytics
  * Run portfolio-level intelligence analysis for the current user.
@@ -62,8 +69,8 @@ export async function POST(req: NextRequest) {
       definitions,
       insights: insights.map((i) => ({
         ...i,
-        evidenceJson: i.evidenceJson ? JSON.parse(i.evidenceJson) : null,
-        affectedRunIds: i.affectedRunIds ? JSON.parse(i.affectedRunIds) : [],
+        evidenceJson: safeJsonParse(i.evidenceJson),
+        affectedRunIds: safeJsonParse(i.affectedRunIds, []),
       })),
     });
   } catch (err) {

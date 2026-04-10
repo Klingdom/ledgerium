@@ -46,6 +46,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Only JSON files are supported' }, { status: 400 });
     }
 
+    // Enforce maximum file size to prevent memory issues during parsing
+    // and process engine execution. 10 MB is generous for workflow JSON.
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json({
+        error: 'File too large',
+        detail: `Maximum file size is 10 MB. Your file is ${(file.size / 1024 / 1024).toFixed(1)} MB.`,
+      }, { status: 413 });
+    }
+
     const text = await file.text();
     let parsed: unknown;
     try {

@@ -224,6 +224,8 @@ export interface OperatorSOP {
   tips: string[];
   completionCheck: string[];
   sourceNote: string;
+  /** Advisory shown when some steps have low label confidence. */
+  qualityAdvisory?: string | undefined;
 }
 
 export interface OperatorSOPStep {
@@ -257,6 +259,8 @@ export interface EnterpriseSOP {
   outputs: string[];
   completionCriteria: string[];
   sourceNote: string;
+  /** Advisory shown when some steps have low label confidence. */
+  qualityAdvisory?: string | undefined;
   revisionMetadata: {
     generatedAt: string;
     engineVersion: string;
@@ -298,6 +302,8 @@ export interface DecisionSOP {
   completionCriteria: string[];
   documentationRequirements: string[];
   sourceNote: string;
+  /** Advisory shown when some steps have low label confidence. */
+  qualityAdvisory?: string | undefined;
 }
 
 export interface DecisionSOPBranch {

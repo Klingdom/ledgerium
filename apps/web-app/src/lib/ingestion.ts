@@ -247,5 +247,20 @@ export function buildWorkflowReportFromOutput(
       completionCriteria: sop.completionCriteria,
       notes: sop.notes,
     },
+    // Quality advisory — surfaces low-confidence step counts as a
+    // human-readable warning for anyone reviewing or sharing the report
+    qualityAdvisory: buildQualityAdvisoryText(sop),
   };
+}
+
+function buildQualityAdvisoryText(sop: { steps: Array<{ confidence: number; ordinal: number }>; qualityIndicators?: { lowConfidenceStepCount: number } }): string | undefined {
+  const qi = sop.qualityIndicators;
+  if (!qi || qi.lowConfidenceStepCount === 0) return undefined;
+
+  const lowCount = qi.lowConfidenceStepCount;
+  const total = sop.steps.length;
+  const lowSteps = sop.steps.filter(s => s.confidence < 0.7).map(s => s.ordinal);
+  const stepRef = lowSteps.length <= 3 ? ` (step${lowSteps.length > 1 ? 's' : ''} ${lowSteps.join(', ')})` : '';
+  const verb = lowCount === 1 ? 'has' : 'have';
+  return `${lowCount} of ${total} step${total !== 1 ? 's' : ''} ${verb} low label confidence${stepRef} — consider reviewing ${lowCount === 1 ? 'this step' : 'these steps'} manually.`;
 }

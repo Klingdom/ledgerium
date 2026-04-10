@@ -65,11 +65,33 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Parse and validate bundle ─────────────────────────────────────────────
+
+  // Check Content-Length BEFORE parsing to prevent memory exhaustion.
+  // Without this, a 100MB streaming JSON body would be fully loaded into
+  // memory before the size check below could reject it.
+  const MAX_PAYLOAD_SIZE = 10 * 1024 * 1024; // 10 MB
+  const contentLength = parseInt(req.headers.get('content-length') ?? '0', 10);
+  if (contentLength > MAX_PAYLOAD_SIZE) {
+    return NextResponse.json({
+      error: 'Payload too large',
+      detail: `Maximum payload size is 10 MB. Your request declares ${(contentLength / 1024 / 1024).toFixed(1)} MB.`,
+    }, { status: 413 });
+  }
+
   let parsed: unknown;
   try {
     parsed = await req.json();
   } catch {
     return NextResponse.json({ error: 'Request body is not valid JSON' }, { status: 400 });
+  }
+
+  // Post-parse size check as a safety net (Content-Length can be spoofed or absent).
+  const payloadSize = Buffer.byteLength(JSON.stringify(parsed));
+  if (payloadSize > MAX_PAYLOAD_SIZE) {
+    return NextResponse.json({
+      error: 'Payload too large',
+      detail: `Maximum payload size is 10 MB. Your payload is ${(payloadSize / 1024 / 1024).toFixed(1)} MB.`,
+    }, { status: 413 });
   }
 
   const validation = validateBundle(parsed);
@@ -129,8 +151,22 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Build report, templates, and store workflow ────────────────────────────
-  const workflowReport = buildWorkflowReportFromOutput(processOutput, bundle);
-  const templateArtifacts = renderAllTemplates(processOutput);
+  // Each secondary artifact is wrapped in try-catch so a failure in report
+  // generation or template rendering doesn't block workflow creation.
+  let workflowReport: Record<string, unknown> | null = null;
+  try {
+    workflowReport = buildWorkflowReportFromOutput(processOutput, bundle);
+  } catch (err) {
+    console.warn('Workflow report generation failed (non-blocking):', err);
+  }
+
+  let templateArtifacts: Array<{ artifactType: string; contentJson: string }> = [];
+  try {
+    templateArtifacts = renderAllTemplates(processOutput);
+  } catch (err) {
+    console.warn('Template rendering failed (non-blocking):', err);
+  }
+
   const { processRun, processMap, processDefinition } = processOutput;
   const toolsUsed = processRun.systemsUsed;
   const confidence = processDefinition.stepDefinitions.length > 0
@@ -158,11 +194,12 @@ export async function POST(req: NextRequest) {
               schemaVersion: processRun.engineVersion,
               contentJson: JSON.stringify(processOutput),
             },
-            {
+            // Workflow report is optional — may fail to generate
+            ...(workflowReport ? [{
               artifactType: 'workflow_report',
               schemaVersion: '1.0.0',
               contentJson: JSON.stringify(workflowReport),
-            },
+            }] : []),
             {
               artifactType: 'source_bundle',
               schemaVersion: bundle.manifest?.schemaVersion ?? '1.0.0',
@@ -178,7 +215,7 @@ export async function POST(req: NextRequest) {
               schemaVersion: processMap.version,
               contentJson: JSON.stringify(processMap),
             },
-            // Template artifacts (6 templates + selection)
+            // Template artifacts (6 templates + selection) — may be empty if rendering failed
             ...templateArtifacts.map((ta) => ({
               artifactType: ta.artifactType,
               schemaVersion: '1.0.0',

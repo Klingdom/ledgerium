@@ -2,7 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import crypto from 'crypto';
+import { z } from 'zod';
 import { renderAllTemplates } from '@/lib/ingestion';
+
+/** Validation schema for workflow PATCH body fields. */
+const patchSchema = z.object({
+  title: z.string().min(1).max(256).optional(),
+  description: z.string().max(2000).optional(),
+  status: z.enum(['active', 'archived', 'deleted']).optional(),
+  isFavorite: z.boolean().optional(),
+  enableSharing: z.boolean().optional(),
+  tagIds: z.array(z.string().uuid()).optional(),
+  addTagId: z.string().uuid().optional(),
+  removeTagId: z.string().uuid().optional(),
+}).passthrough();
 
 export async function GET(
   _req: NextRequest,
@@ -86,7 +99,18 @@ export async function PATCH(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const body = await req.json();
+  const rawBody = await req.json();
+
+  // Validate input — prevents arbitrary status values, XSS via long strings,
+  // and ensures type safety on all updateable fields.
+  const parsed = patchSchema.safeParse(rawBody);
+  if (!parsed.success) {
+    return NextResponse.json({
+      error: 'Invalid request body',
+      details: parsed.error.errors.map(e => `${e.path.join('.')}: ${e.message}`),
+    }, { status: 400 });
+  }
+  const body = parsed.data;
 
   const workflow = await db.workflow.findFirst({
     where: { id: params.id, userId: session.user.id },

@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { formatDuration, formatDateRelative, formatConfidence } from '@/lib/format';
 import { track } from '@/lib/analytics';
+import ProcessGroupsExplorer from '@/components/ProcessGroupsExplorer';
 
 // ─── Type definitions ──────────────────────────────────────────────────────────
 
@@ -299,6 +300,7 @@ export default function DashboardPage() {
   const [healthFilter, setHealthFilter] = useState<HealthStatus | ''>('');
   const [sopFilter, setSopFilter] = useState<SopReadiness | ''>('');
   const [activeTagId, setActiveTagId] = useState<string | null>(null);
+  const [minAiScore, setMinAiScore] = useState<number>(0);
 
   // Preset view state
   const [activePreset, setActivePreset] = useState<string | null>('All Workflows');
@@ -502,6 +504,13 @@ export default function DashboardPage() {
     setLoadingSample(false);
   }
 
+  // ── Client-side AI score filter (for AI-Ready preset) ─────────────────────
+
+  const displayedWorkflows = useMemo(() => {
+    if (minAiScore <= 0) return workflows;
+    return workflows.filter((w) => (w.aiOpportunityScore ?? 0) >= minAiScore);
+  }, [workflows, minAiScore]);
+
   // ── Derived data for intelligence panel ────────────────────────────────────
 
   const needsAttentionWorkflows = useMemo(() => {
@@ -518,8 +527,13 @@ export default function DashboardPage() {
 
   const optimizationWorkflows = useMemo(() => {
     return workflows
-      .filter((w) => w.optimizationPotential === 'high')
-      .sort((a, b) => (b.durationMs ?? 0) - (a.durationMs ?? 0))
+      .filter((w) => w.optimizationPotential === 'high' || w.optimizationPotential === 'medium')
+      .sort((a, b) => {
+        // high before medium, then by duration descending
+        if (a.optimizationPotential === 'high' && b.optimizationPotential !== 'high') return -1;
+        if (b.optimizationPotential === 'high' && a.optimizationPotential !== 'high') return 1;
+        return (b.durationMs ?? 0) - (a.durationMs ?? 0);
+      })
       .slice(0, 5);
   }, [workflows]);
 
@@ -553,13 +567,14 @@ export default function DashboardPage() {
   const topRiskWorkflow = needsAttentionWorkflows.length > 0 ? needsAttentionWorkflows[0] : null;
   const topOpportunityWorkflow = optimizationWorkflows.length > 0 ? optimizationWorkflows[0] : null;
 
-  const hasActiveFilters = healthFilter !== '' || sopFilter !== '' || activeTagId !== null || search !== '';
+  const hasActiveFilters = healthFilter !== '' || sopFilter !== '' || activeTagId !== null || search !== '' || minAiScore > 0;
 
   function clearAllFilters() {
     setSearch('');
     setHealthFilter('');
     setSopFilter('');
     setActiveTagId(null);
+    setMinAiScore(0);
     setSortBy('created_at');
     setActivePreset('All Workflows');
   }
@@ -570,6 +585,7 @@ export default function DashboardPage() {
     setHealthFilter((view.filters.health as HealthStatus) ?? '');
     setSopFilter((view.filters.sopReadiness as SopReadiness) ?? '');
     setSortBy(view.filters.sort ?? 'created_at');
+    setMinAiScore(view.filters.minScore ?? 0);
     setActivePreset(view.label);
     track({ event: 'preset_view_applied', preset: view.label });
   }
@@ -1240,7 +1256,7 @@ export default function DashboardPage() {
       )}
 
       {/* ── Workflow Table ─────────────────────────────────────────────── */}
-      {workflows.length === 0 && hasActiveFilters ? (
+      {displayedWorkflows.length === 0 && hasActiveFilters ? (
         <FilteredEmptyState onClear={clearAllFilters} hasSearch={search.length > 0} />
       ) : workflows.length === 0 ? (
         <EmptyDashboard onLoadSample={handleLoadSample} isLoading={loadingSample} />
@@ -1262,7 +1278,7 @@ export default function DashboardPage() {
 
           {/* Workflow rows */}
           <div className="space-y-1">
-            {workflows.map((w) => (
+            {displayedWorkflows.map((w) => (
               <WorkflowRow
                 key={w.id}
                 workflow={w}
@@ -1296,7 +1312,7 @@ export default function DashboardPage() {
           LAYER 4B — Process Groups View
           ═══════════════════════════════════════════════════════════════════ */}
       {viewMode === 'process_groups' && (
-        <ProcessGroupsView
+        <ProcessGroupsExplorer
           definitions={processDefinitions}
           isLoading={isLoadingProcessGroups}
           isRunningAnalysis={isRunningAnalysis}

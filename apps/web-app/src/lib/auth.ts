@@ -33,7 +33,10 @@ const nextAuth = NextAuth({
       },
     }),
   ],
-  session: { strategy: 'jwt' },
+  session: {
+    strategy: 'jwt',
+    maxAge: 7 * 24 * 60 * 60, // 7 days — forces re-authentication weekly
+  },
   pages: {
     signIn: '/login',
     newUser: '/signup',

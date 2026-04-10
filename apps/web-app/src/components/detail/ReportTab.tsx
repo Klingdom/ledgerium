@@ -80,6 +80,14 @@ export function ReportTab({ report }: Props) {
         </div>
       </section>
 
+      {/* ── Quality Advisory ──────────────────────────────────────────── */}
+      {report.qualityAdvisory && (
+        <div className="flex items-start gap-ds-2 rounded-ds-sm bg-amber-50 border border-amber-200 px-ds-4 py-ds-3">
+          <svg className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+          <p className="text-ds-xs text-amber-800">{report.qualityAdvisory}</p>
+        </div>
+      )}
+
       {/* ── Key Observations ───────────────────────────────────────────── */}
       {executiveSummary?.keyObservations?.length > 0 && (
         <section className="ds-section">

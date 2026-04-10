@@ -55,7 +55,7 @@ describe('deriveStepTitle', () => {
   // --- click_then_navigate --------------------------------------------------
 
   describe('click_then_navigate', () => {
-    it('uses pageTitle from nav event when present', () => {
+    it('uses enriched destination for generic pageTitle like "Dashboard"', () => {
       const click = makeEvent({ event_id: 'evt-1', event_type: 'interaction.click' });
       const nav = makeEvent({
         event_id: 'evt-2',
@@ -67,12 +67,30 @@ describe('deriveStepTitle', () => {
           pageTitle: 'Dashboard',
         },
       });
+      // "Dashboard" is generic — enriched to route + app label
       expect(deriveStepTitle([click, nav], 'click_then_navigate')).toBe(
-        'Navigate to Dashboard',
+        'Navigate to /dashboard (App)',
       );
     });
 
-    it('falls back to nav event routeTemplate when pageTitle is absent', () => {
+    it('uses specific pageTitle when non-generic', () => {
+      const click = makeEvent({ event_id: 'evt-1', event_type: 'interaction.click' });
+      const nav = makeEvent({
+        event_id: 'evt-2',
+        event_type: 'navigation.open_page',
+        page_context: {
+          domain: 'app.com',
+          routeTemplate: '/invoices/new',
+          applicationLabel: 'NetSuite',
+          pageTitle: 'Create Invoice',
+        },
+      });
+      expect(deriveStepTitle([click, nav], 'click_then_navigate')).toBe(
+        'Navigate to Create Invoice',
+      );
+    });
+
+    it('falls back to route + app label when pageTitle is empty', () => {
       const click = makeEvent({ event_id: 'evt-1', event_type: 'interaction.click' });
       const nav = makeEvent({
         event_id: 'evt-2',
@@ -86,7 +104,7 @@ describe('deriveStepTitle', () => {
       });
       // pageTitle is empty string → treated as undefined; no pageContext arg passed
       expect(deriveStepTitle([click, nav], 'click_then_navigate')).toBe(
-        'Navigate to /tasks/:id',
+        'Navigate to /tasks/:id (App)',
       );
     });
 
@@ -174,13 +192,17 @@ describe('deriveStepTitle', () => {
       );
     });
 
-    it('falls back to elementType when no label or role', () => {
+    it('falls back to "element" when no label and elementType is a raw HTML tag', () => {
       const click = makeEvent({
         event_id: 'evt-1',
         target_summary: { elementType: 'input', selector: '#inp' },
       });
+      // "input" is not in RAW_ELEMENT_TYPES so it shouldn't appear as a label.
+      // The targetLabel function only uses role (not elementType) as fallback,
+      // and filters out raw HTML element types. With no label or meaningful role,
+      // the fallback is "element" with optional page context.
       expect(deriveStepTitle([click, click], 'repeated_click_dedup')).toBe(
-        'Click input',
+        'Click element',
       );
     });
 
@@ -263,7 +285,7 @@ describe('deriveStepTitle', () => {
       );
     });
 
-    it('navigation.open_page with pageTitle → "Navigate to <pageTitle>"', () => {
+    it('navigation.open_page with generic pageTitle uses enriched destination', () => {
       const evt = makeEvent({
         event_id: 'evt-1',
         event_type: 'navigation.open_page',
@@ -274,17 +296,35 @@ describe('deriveStepTitle', () => {
           pageTitle: 'Dashboard',
         },
       });
+      // "Dashboard" is generic — enriched to route + app label
       expect(deriveStepTitle([evt], 'single_action')).toBe(
-        'Navigate to Dashboard',
+        'Navigate to /dashboard (App)',
       );
     });
 
-    it('unrecognised event type → "Perform action"', () => {
+    it('navigation.open_page with specific pageTitle uses it directly', () => {
+      const evt = makeEvent({
+        event_id: 'evt-1',
+        event_type: 'navigation.open_page',
+        page_context: {
+          domain: 'app.com',
+          routeTemplate: '/invoices/new',
+          applicationLabel: 'NetSuite',
+          pageTitle: 'Create Invoice',
+        },
+      });
+      expect(deriveStepTitle([evt], 'single_action')).toBe(
+        'Navigate to Create Invoice',
+      );
+    });
+
+    it('unrecognised event type → contextual fallback', () => {
       const evt = makeEvent({
         event_id: 'evt-1',
         event_type: 'workflow.wait',
       });
-      expect(deriveStepTitle([evt], 'single_action')).toBe('Perform action');
+      // With no page context, falls back to "Interact with page"
+      expect(deriveStepTitle([evt], 'single_action')).toBe('Interact with page');
     });
 
     it('empty events array → "Perform action"', () => {

@@ -31,6 +31,39 @@ import {
   deriveTips,
 } from './renderHelpers.js';
 
+// ─── Quality advisory ────────────────────────────────────────────────────────
+
+/**
+ * Build a human-readable quality advisory message when some steps have
+ * low label confidence. Returns undefined when quality is adequate.
+ *
+ * Examples:
+ *   "3 of 12 steps have low label confidence — consider reviewing these
+ *    steps manually before sharing this SOP."
+ *   "1 of 5 steps has low label confidence — review step 3 manually."
+ */
+function buildQualityAdvisory(output: ProcessOutput): string | undefined {
+  const qi = output.sop.qualityIndicators;
+  if (!qi) return undefined;
+
+  const lowCount = qi.lowConfidenceStepCount;
+  const total = output.sop.steps.length;
+
+  if (lowCount === 0) return undefined;
+
+  // Identify which step numbers have low confidence
+  const lowSteps = output.sop.steps
+    .filter(s => s.confidence < 0.7)
+    .map(s => s.ordinal);
+
+  const stepRef = lowSteps.length <= 3
+    ? ` (step${lowSteps.length > 1 ? 's' : ''} ${lowSteps.join(', ')})`
+    : '';
+
+  const verb = lowCount === 1 ? 'has' : 'have';
+  return `${lowCount} of ${total} step${total !== 1 ? 's' : ''} ${verb} low label confidence${stepRef} — consider reviewing ${lowCount === 1 ? 'this step' : 'these steps'} manually before sharing this document.`;
+}
+
 // ─── Dispatcher ──────────────────────────────────────────────────────────────
 
 export function renderSOP(
@@ -70,6 +103,7 @@ function renderOperatorCentric(output: ProcessOutput): OperatorSOP {
     tips: deriveTips(output),
     completionCheck: sop.completionCriteria,
     sourceNote: `This procedure was derived from observed workflow activity in ${sop.systems.join(' and ') || 'the target system'}. All ${sop.steps.length} steps are evidence-linked.`,
+    qualityAdvisory: buildQualityAdvisory(output),
   };
 }
 
@@ -185,6 +219,7 @@ function renderEnterprise(output: ProcessOutput): EnterpriseSOP {
     outputs: sop.outputs,
     completionCriteria: sop.completionCriteria,
     sourceNote: `This SOP was derived from observed workflow behavior in ${sop.systems.join(' and ') || 'the target system'}. All ${sop.steps.length} procedure steps are evidence-based and traceable to source events.`,
+    qualityAdvisory: buildQualityAdvisory(output),
     revisionMetadata: {
       generatedAt: sop.generatedAt,
       engineVersion: PROCESS_ENGINE_VERSION,
@@ -317,6 +352,7 @@ function renderDecisionBased(output: ProcessOutput): DecisionSOP {
     completionCriteria: sop.completionCriteria,
     documentationRequirements: docRequirements,
     sourceNote: `This procedure was derived from observed workflow behavior in ${sop.systems.join(' and ') || 'the target system'}. Branch logic reflects ${branches.length} path${branches.length !== 1 ? 's' : ''} observed during execution.`,
+    qualityAdvisory: buildQualityAdvisory(output),
   };
 }
 

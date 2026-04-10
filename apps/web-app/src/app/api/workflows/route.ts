@@ -131,11 +131,14 @@ function computeHealthStatus(
   const now = Date.now();
   const daysSinceCreated = (now - createdAt.getTime()) / (1000 * 60 * 60 * 24);
 
-  if (daysSinceCreated <= NEW_WORKFLOW_DAYS) return 'new';
+  // Actionable statuses surface regardless of age
   if (isStale) return 'stale';
   if (variationScore > 0.7) return 'high_variation';
   if (confidence != null && confidence < 0.5) return 'needs_review';
   if (sopReadiness === 'not_ready') return 'needs_review';
+
+  // Only mark as 'new' if the workflow is otherwise healthy
+  if (daysSinceCreated <= NEW_WORKFLOW_DAYS) return 'new';
   return 'healthy';
 }
 

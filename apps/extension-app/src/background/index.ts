@@ -84,6 +84,14 @@ async function restoreStateIfNeeded(): Promise<void> {
   const restored = await store.loadFromStorage()
   if (!restored) return
 
+  // Restore any canonical events that were persisted before the SW died.
+  // This closes the data-gap bug where events captured before a SW restart
+  // were permanently lost, creating an invisible hole in the recording.
+  const recoveredCount = await store.loadEventsFromStorage()
+  if (recoveredCount > 0) {
+    console.log(`[LDG-BG] Restored ${recoveredCount} canonical events from storage after SW restart`)
+  }
+
   // Rebuild the state machine and live builder
   try {
     sm.transition('arming')
@@ -97,6 +105,13 @@ async function restoreStateIfNeeded(): Promise<void> {
     store.updateLiveStep(step)
     broadcastToExtension({ type: MSG.LIVE_STEP_UPDATED, payload: { step } })
   })
+
+  // Replay recovered events through the live builder so the sidebar
+  // reflects all steps, not just those captured after the restart.
+  const recoveredEvents = store.getCanonicalEvents()
+  for (const event of recoveredEvents) {
+    try { liveBuilder.processEvent(event) } catch { /* best-effort replay */ }
+  }
 
   // Re-broadcast recording state so the sidepanel reflects reality
   broadcastStateUpdate()
@@ -159,6 +174,12 @@ function broadcastAllTabs(message: unknown): void {
 function handleStart(activityName: string, uploadUrl?: string): void {
   console.log('[LDG-BG] handleStart', activityName)
   try {
+    // Clear stale output from any previous session that wasn't discarded.
+    // Without this, EXPORT_BUNDLE could return the old session's data while
+    // a new session is recording.
+    lastBundle = null
+    lastWorkflowReport = null
+
     sm.transition('arming')
     broadcastStateUpdate()
 
@@ -222,7 +243,32 @@ async function handleStop(): Promise<void> {
     // Finalize live steps
     liveBuilder?.finalize()
 
-    console.log('[LDG-BG] buildBundle starting, events:', store.getCanonicalEvents().length)
+    // Final persist of events before building the bundle. This ensures
+    // chrome.storage.local has the complete event set in case SW dies
+    // during the async buildBundle() call below.
+    store.persistEvents()
+
+    const eventCount = store.getCanonicalEvents().length
+    const droppedCount = store.getDroppedEventCount()
+    console.log('[LDG-BG] buildBundle starting, events:', eventCount, 'dropped:', droppedCount)
+
+    // Guard against empty recordings — if all events were dropped by
+    // normalization or policy filtering, warn the user instead of producing
+    // an empty bundle that looks like a successful recording.
+    if (eventCount === 0) {
+      console.warn('[LDG-BG] No canonical events captured — recording produced empty output')
+      const errorMessage = droppedCount > 0
+        ? `Recording captured ${droppedCount} event(s) but all were filtered or failed to normalize. Try recording on a different page.`
+        : 'No events were captured during this recording. Make sure you interact with the page while recording.'
+      sm.transition('review_ready')
+      store.updateState('review_ready')
+      broadcastToExtension({
+        type: MSG.SESSION_STATE_UPDATED,
+        payload: { state: 'review_ready', meta: store.getMeta(), warning: errorMessage },
+      })
+      return
+    }
+
     const bundle = await buildBundle(store)
     console.log('[LDG-BG] buildBundle complete, steps:', bundle.derivedSteps.length)
     lastBundle = bundle
@@ -238,7 +284,12 @@ async function handleStop(): Promise<void> {
     sm.transition('review_ready')
     store.updateState('review_ready')
 
-    broadcastToExtension({ type: MSG.FINALIZATION_COMPLETE, payload: { bundle } })
+    // Include dropped event count in finalization payload so the UI can
+    // warn the user about incomplete data.
+    broadcastToExtension({
+      type: MSG.FINALIZATION_COMPLETE,
+      payload: { ready: true, droppedEventCount: droppedCount },
+    })
     broadcastStateUpdate()
 
     // Upload if URL is configured — sends API key for Ledgerium web app auth
@@ -342,12 +393,33 @@ chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<s
       console.log('[LDG-BG] RAW_EVENT_CAPTURED state=', sm.state, 'type=', (message.payload['event'] as RawEvent)?.event_type)
       if (sm.state !== 'recording') break
       const raw = message.payload['event'] as RawEvent
+
+      // Validate that this event belongs to the current session. Events from
+      // a previous session's content script (slow to receive the new START
+      // broadcast) could otherwise contaminate the new session's data.
+      const currentSessionId = store.getMeta()?.sessionId
+      if (currentSessionId && raw.session_id && raw.session_id !== currentSessionId) {
+        console.warn('[LDG-BG] Dropping stale event from previous session:', raw.session_id, '!==', currentSessionId)
+        break
+      }
+
       store.addRawEvent(raw)
       let normalized: ReturnType<typeof normalizeRawEvent>
       try {
         normalized = normalizeRawEvent(raw, settings.blockedDomains, settings.allowedDomains)
       } catch (err) {
+        // Normalization failed — record the failure in the policy log so it's
+        // visible in the bundle, and increment the dropped event counter so
+        // the UI can warn the user about lost data.
         console.error('[LDG-BG] normalizeRawEvent threw:', err, 'raw.url=', raw.url)
+        store.addPolicyEntry({
+          sessionId: raw.session_id,
+          eventId: raw.raw_event_id,
+          t_ms: raw.t_ms,
+          outcome: 'block',
+          reason: `normalization_error: ${err instanceof Error ? err.message : 'unknown'}`,
+        })
+        store.incrementDroppedEvents()
         break
       }
       const { canonical, policyEntry } = normalized
@@ -355,7 +427,11 @@ chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<s
       if (policyEntry) store.addPolicyEntry(policyEntry)
       if (canonical) {
         store.addCanonicalEvent(canonical)
-        liveBuilder?.processEvent(canonical)
+        try {
+          liveBuilder?.processEvent(canonical)
+        } catch (builderErr) {
+          console.error('[LDG-BG] liveBuilder.processEvent threw:', builderErr)
+        }
         broadcastToExtension({ type: MSG.NORMALIZED_EVENT_ADDED, payload: { event: canonical } })
       }
       break
