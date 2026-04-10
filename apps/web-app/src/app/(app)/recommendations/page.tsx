@@ -117,13 +117,15 @@ export default function RecommendationCenterPage() {
       try {
         const res = await fetch('/api/process-definitions');
         if (!res.ok) {
+          console.error('[recommendations] API returned', res.status);
           setIsLoading(false);
           return;
         }
         const data = await res.json();
-        setDefinitions(data.definitions ?? []);
-      } catch {
-        // Silently fail
+        const defs = Array.isArray(data?.definitions) ? data.definitions : [];
+        setDefinitions(defs);
+      } catch (err) {
+        console.error('[recommendations] Failed to load:', err);
       }
       setIsLoading(false);
     }
@@ -135,8 +137,10 @@ export default function RecommendationCenterPage() {
   const allRecommendations = useMemo(() => {
     const recs: EnrichedRecommendation[] = [];
     for (const def of definitions) {
-      if (!def.intelligence?.recommendations) continue;
+      if (!def?.intelligence?.recommendations) continue;
+      if (!Array.isArray(def.intelligence.recommendations)) continue;
       for (const rec of def.intelligence.recommendations) {
+        if (!rec?.id || !rec?.type || !rec?.title) continue; // Skip malformed
         recs.push({ ...rec, processId: def.id });
       }
     }
@@ -275,10 +279,10 @@ export default function RecommendationCenterPage() {
                       }`}>
                         {rec.effort} effort
                       </span>
-                      {rec.estimatedTimeSavingsMs != null && (
+                      {rec.estimatedTimeSavingsMs != null && rec.estimatedTimeSavingsMs > 0 && (
                         <span className="ds-tag text-[10px] bg-green-100 text-green-700 flex items-center gap-1">
                           <Clock className="h-3 w-3" />
-                          {formatDuration(rec.estimatedTimeSavingsMs)}/run
+                          saves {formatDuration(rec.estimatedTimeSavingsMs)}/run
                         </span>
                       )}
                     </div>
