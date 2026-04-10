@@ -251,11 +251,8 @@ interface PresetView {
 
 const PRESET_VIEWS: PresetView[] = [
   { label: 'All Workflows', filters: {} },
-  { label: 'AI-Ready', filters: { sort: 'optimization', minScore: 60 } },
   { label: 'Needs Attention', filters: { health: 'needs_review' } },
-  { label: 'High Friction', filters: { sort: 'optimization', health: 'high_variation' } },
-  { label: 'Quick Wins', filters: { sopReadiness: 'ready', sort: 'confidence' } },
-  { label: 'Low Confidence', filters: { sort: 'confidence_asc' } },
+  { label: 'AI-Ready', filters: { sort: 'optimization', minScore: 60 } },
   { label: 'Recently Added', filters: { sort: 'created_at', health: 'new' } },
 ];
 
@@ -670,7 +667,11 @@ export default function DashboardPage() {
               </div>
               <div>
                 <p className="text-ds-lg font-semibold text-gray-700 tabular-nums">{stats.systemCoverage.length}</p>
-                <p className="text-ds-xs text-gray-500">Systems</p>
+                <p className="text-ds-xs text-gray-500 truncate" title={stats.systemCoverage.map(s => s.system).join(', ')}>
+                  {stats.systemCoverage.length > 0
+                    ? stats.systemCoverage.slice(0, 2).map(s => s.system).join(', ')
+                    : 'Systems'}
+                </p>
               </div>
               <div>
                 <p className="text-ds-lg font-semibold text-gray-700 tabular-nums">{stats.avgDuration > 0 ? formatDuration(stats.avgDuration) : '--'}</p>
@@ -697,13 +698,13 @@ export default function DashboardPage() {
                 <p className={`text-ds-lg font-semibold tabular-nums ${stats.avgMaturity > 70 ? 'text-emerald-600' : stats.avgMaturity > 40 ? 'text-amber-600' : 'text-red-600'}`}>
                   {stats.avgMaturity > 0 ? stats.avgMaturity : '--'}
                 </p>
-                <p className="text-ds-xs text-gray-500">Maturity</p>
+                <p className="text-ds-xs text-gray-500 cursor-help" title="Composite score from confidence, documentation completeness, SOP readiness, process stability, run frequency, and freshness.">Maturity</p>
               </div>
               <div>
                 <p className={`text-ds-lg font-semibold tabular-nums ${stats.avgCognitiveBurden >= 60 ? 'text-red-600' : stats.avgCognitiveBurden >= 30 ? 'text-amber-600' : 'text-emerald-600'}`}>
                   {stats.avgCognitiveBurden > 0 ? stats.avgCognitiveBurden : '--'}
                 </p>
-                <p className="text-ds-xs text-gray-500">Cognitive load</p>
+                <p className="text-ds-xs text-gray-500 cursor-help" title="Measures mental demand from decision density, system switches, data entry, and duration. Higher = more burden on the operator.">Cognitive load</p>
               </div>
             </div>
           </div>
@@ -869,38 +870,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-        </div>
-      )}
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          LAYER 3 — Momentum Section (compact)
-          ═══════════════════════════════════════════════════════════════════ */}
-      {streak && streak.totalCount > 0 && (
-        <div className="card flex items-center gap-ds-4 px-ds-5 py-ds-3 mb-ds-6 bg-gradient-to-r from-orange-50/40 to-white border-orange-100">
-          <Flame className="h-5 w-5 text-orange-500 flex-shrink-0" />
-          <div className="flex items-center gap-ds-4 flex-wrap text-ds-sm">
-            {streak.currentStreak > 0 && (
-              <div className="flex items-baseline gap-1">
-                <span className="font-bold text-orange-600">{streak.currentStreak}</span>
-                <span className="text-ds-xs text-gray-500">day streak</span>
-              </div>
-            )}
-            <div className="flex items-baseline gap-1">
-              <span className="font-semibold text-gray-700">{streak.monthlyCount}</span>
-              <span className="text-ds-xs text-gray-500">this month</span>
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span className="font-semibold text-gray-700">{streak.totalCount}</span>
-              <span className="text-ds-xs text-gray-500">total</span>
-            </div>
-            {streak.longestStreak > 1 && (
-              <div className="flex items-baseline gap-1">
-                <Trophy className="h-3.5 w-3.5 text-amber-500" />
-                <span className="font-semibold text-gray-700">{streak.longestStreak}</span>
-                <span className="text-ds-xs text-gray-500">best streak</span>
-              </div>
-            )}
-          </div>
         </div>
       )}
 
