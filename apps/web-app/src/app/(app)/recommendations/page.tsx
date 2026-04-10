@@ -120,8 +120,8 @@ export default function RecommendationCenterPage() {
           setIsLoading(false);
           return;
         }
-        const defs: ProcessDefinitionBrief[] = await res.json();
-        setDefinitions(defs);
+        const data = await res.json();
+        setDefinitions(data.definitions ?? []);
       } catch {
         // Silently fail
       }

@@ -34,5 +34,6 @@ export const config = {
     '/upload/:path*',
     '/account/:path*',
     '/analytics/:path*',
+    '/recommendations/:path*',
   ],
 };
