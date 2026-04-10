@@ -533,6 +533,26 @@ export default function DashboardPage() {
   // mostComplexWorkflows and highCognitiveBurdenWorkflows removed —
   // replaced by unified Action Items and AI Opportunities panels
 
+  const orgHealthScore = useMemo(() => {
+    if (!stats) return 0;
+    return Math.round(
+      (stats.avgConfidence > 0 ? stats.avgConfidence * 25 : 0) +
+      (stats.sopReady > 0 ? Math.min(stats.sopReady / Math.max(stats.totalWorkflows, 1), 1) * 25 : 0) +
+      (stats.avgMaturity > 0 ? stats.avgMaturity / 100 * 25 : 0) +
+      (stats.needsReview === 0 ? 25 : Math.max(0, 25 - stats.needsReview * 5))
+    );
+  }, [stats]);
+
+  const bottleneckWorkflows = useMemo(() => {
+    return workflows
+      .filter(w => w.bottleneckRisk === 'high' || w.bottleneckRisk === 'medium')
+      .sort((a, b) => (b.durationMs ?? 0) - (a.durationMs ?? 0))
+      .slice(0, 4);
+  }, [workflows]);
+
+  const topRiskWorkflow = needsAttentionWorkflows.length > 0 ? needsAttentionWorkflows[0] : null;
+  const topOpportunityWorkflow = optimizationWorkflows.length > 0 ? optimizationWorkflows[0] : null;
+
   const hasActiveFilters = healthFilter !== '' || sopFilter !== '' || activeTagId !== null || search !== '';
 
   function clearAllFilters() {
@@ -600,6 +620,50 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* ── Org Health Score + Top Signals ────────────────────────────── */}
+        {stats && stats.totalWorkflows > 0 && (
+          <div className="flex items-center gap-ds-4 mb-ds-4 flex-wrap">
+            <div className="flex items-center gap-ds-2">
+              <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+                orgHealthScore >= 70 ? 'border-emerald-500 bg-emerald-50' :
+                orgHealthScore >= 40 ? 'border-amber-500 bg-amber-50' :
+                'border-red-500 bg-red-50'
+              }`}>
+                <span className={`text-ds-sm font-bold tabular-nums ${
+                  orgHealthScore >= 70 ? 'text-emerald-700' :
+                  orgHealthScore >= 40 ? 'text-amber-700' :
+                  'text-red-700'
+                }`}>{orgHealthScore}</span>
+              </div>
+              <span className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">Org Health</span>
+            </div>
+
+            {topRiskWorkflow && (
+              <>
+                <span className="text-gray-200">|</span>
+                <Link href={`/workflows/${topRiskWorkflow.id}`} className="flex items-center gap-1.5 text-ds-xs text-gray-600 hover:text-amber-700 transition-colors">
+                  <AlertTriangle className="h-3 w-3 text-amber-500 flex-shrink-0" />
+                  <span className="font-medium text-gray-400">Top Risk:</span>
+                  <span className="truncate max-w-[160px]">&ldquo;{topRiskWorkflow.title}&rdquo;</span>
+                  <span className="text-gray-400">&mdash; needs review</span>
+                </Link>
+              </>
+            )}
+
+            {topOpportunityWorkflow && (
+              <>
+                <span className="text-gray-200">|</span>
+                <Link href={`/workflows/${topOpportunityWorkflow.id}`} className="flex items-center gap-1.5 text-ds-xs text-gray-600 hover:text-violet-700 transition-colors">
+                  <TrendingUp className="h-3 w-3 text-violet-500 flex-shrink-0" />
+                  <span className="font-medium text-gray-400">Top Opportunity:</span>
+                  <span className="truncate max-w-[160px]">&ldquo;{topOpportunityWorkflow.title}&rdquo;</span>
+                  <span className="text-gray-400">&mdash; AI score {topOpportunityWorkflow.aiOpportunityScore}</span>
+                </Link>
+              </>
+            )}
+          </div>
+        )}
+
         {/* ── Top Signals Strip ──────────────────────────────────────────── */}
         {stats && stats.totalWorkflows > 0 && (
           <div className="flex flex-wrap gap-ds-2">
@@ -643,6 +707,23 @@ export default function DashboardPage() {
                 No critical risks detected
               </span>
             )}
+          </div>
+        )}
+
+        {/* ── Top Insights Chips ───────────────────────────────────────── */}
+        {stats && stats.topInsights && stats.topInsights.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-ds-2">
+            {stats.topInsights.map((insight) => (
+              <Link key={insight.id} href="/analytics"
+                className="inline-flex items-center gap-1 rounded bg-gray-50 border border-gray-200 px-2 py-0.5 text-[10px] text-gray-600 hover:bg-gray-100 transition-colors">
+                <span className={`w-1 h-1 rounded-full ${
+                  insight.severity === 'critical' ? 'bg-red-500' :
+                  insight.severity === 'warning' ? 'bg-amber-500' :
+                  'bg-blue-500'
+                }`} />
+                {insight.title}
+              </Link>
+            ))}
           </div>
         )}
       </div>
@@ -771,8 +852,11 @@ export default function DashboardPage() {
                     <Link key={w.id} href={`/workflows/${w.id}`} className="flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-gray-50 transition-colors">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-ds-xs text-gray-900 font-medium truncate">{w.title}</p>
-                        <p className="text-[10px] text-gray-400">Needs review &middot; {w.confidence !== null ? formatConfidence(w.confidence) : 'Low'} confidence</p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-ds-xs text-gray-900 font-medium truncate">{w.title}</p>
+                          <span className="flex-shrink-0 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">Review</span>
+                        </div>
+                        <p className="text-[10px] text-gray-400">Review &middot; {w.confidence !== null ? formatConfidence(w.confidence) : 'Low'} confidence &middot; {w.stepCount ?? 0} steps</p>
                       </div>
                     </Link>
                   ))}
@@ -780,8 +864,11 @@ export default function DashboardPage() {
                     <Link key={w.id} href={`/workflows/${w.id}`} className="flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-gray-50 transition-colors">
                       <span className="w-1.5 h-1.5 rounded-full bg-gray-400 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-ds-xs text-gray-900 font-medium truncate">{w.title}</p>
-                        <p className="text-[10px] text-gray-400">Stale &middot; Recorded {formatDateRelative(w.createdAt)}</p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-ds-xs text-gray-900 font-medium truncate">{w.title}</p>
+                          <span className="flex-shrink-0 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">Update</span>
+                        </div>
+                        <p className="text-[10px] text-gray-400">Update &middot; Last seen {formatDateRelative(w.createdAt)} &middot; {w.stepCount ?? 0} steps</p>
                       </div>
                     </Link>
                   ))}
@@ -870,6 +957,66 @@ export default function DashboardPage() {
             </div>
           </div>
 
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          BOTTLENECK RADAR
+          ═══════════════════════════════════════════════════════════════════ */}
+      {bottleneckWorkflows.length > 0 && (
+        <div className="card px-ds-5 py-ds-4 mb-ds-6">
+          <div className="flex items-center gap-ds-2 mb-ds-3">
+            <Clock className="h-4 w-4 text-red-500" />
+            <h3 className="text-ds-sm font-semibold text-gray-900">Bottleneck Radar</h3>
+            <span className="text-[10px] text-gray-400">{bottleneckWorkflows.length} workflow{bottleneckWorkflows.length !== 1 ? 's' : ''} with bottleneck risk</span>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-ds-3">
+            {bottleneckWorkflows.map((w) => (
+              <Link key={w.id} href={`/workflows/${w.id}`} className="rounded-lg border border-red-100 bg-red-50/30 px-3 py-2 hover:bg-red-50 transition-colors">
+                <p className="text-ds-xs font-medium text-gray-900 truncate">{w.title}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[10px] text-red-600 font-medium">{formatDuration(w.durationMs)}</span>
+                  <span className="text-[10px] text-gray-400">{w.stepCount ?? 0} steps</span>
+                  <span className={`text-[10px] font-medium ${w.bottleneckRisk === 'high' ? 'text-red-600' : 'text-amber-600'}`}>
+                    {w.bottleneckRisk} risk
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          PROCESS FAMILIES PREVIEW
+          ═══════════════════════════════════════════════════════════════════ */}
+      {processDefinitions.length > 0 && viewMode === 'workflows' && (
+        <div className="card px-ds-5 py-ds-4 mb-ds-6">
+          <div className="flex items-center justify-between mb-ds-3">
+            <div className="flex items-center gap-ds-2">
+              <GitBranch className="h-4 w-4 text-brand-600" />
+              <h3 className="text-ds-sm font-semibold text-gray-900">Process Families</h3>
+            </div>
+            <button onClick={() => { setViewMode('process_groups'); }} className="text-ds-xs text-brand-600 hover:text-brand-700 font-medium">
+              View all &rarr;
+            </button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-ds-3">
+            {processDefinitions.slice(0, 3).map((def) => (
+              <Link key={def.id} href={`/analytics/process/${def.id}`} className="rounded-lg border border-gray-200 px-3 py-2.5 hover:border-brand-200 transition-colors">
+                <p className="text-ds-xs font-medium text-gray-900 truncate">{def.canonicalName}</p>
+                <div className="flex items-center gap-2 mt-1 text-[10px] text-gray-500">
+                  <span>{def.runCount} runs</span>
+                  <span>{def.variantCount} variants</span>
+                  {def.stabilityScore != null && (
+                    <span className={def.stabilityScore >= 0.8 ? 'text-emerald-600' : def.stabilityScore >= 0.6 ? 'text-amber-600' : 'text-red-600'}>
+                      {Math.round(def.stabilityScore * 100)}% stable
+                    </span>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       )}
 
