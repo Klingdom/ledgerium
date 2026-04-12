@@ -49,63 +49,109 @@ function isFileInteraction(event: CanonicalEvent): boolean {
   return event.target_summary?.elementType === 'file'
 }
 
+// ── Title derivation helpers ─────────────────────────────────────────────────
+
+/** Extract unique, meaningful field labels from a set of events */
+function extractFieldLabels(events: CanonicalEvent[]): string[] {
+  const labels = events
+    .filter(e => e.event_type === 'interaction.input_change' && e.target_summary?.label?.trim())
+    .map(e => e.target_summary!.label!.trim())
+    .filter((l, i, arr) => arr.indexOf(l) === i)  // dedupe
+    .filter(l => !CELL_REF_RE.test(l))             // exclude spreadsheet cell refs
+    .slice(0, 3)
+  return labels
+}
+
+/** Detect spreadsheet cell references (A1, B5, AA12, etc.) */
+const CELL_REF_RE = /^[A-Z]{1,3}\d{1,5}$/
+
+/** Get a readable app context suffix like " in email" or " in spreadsheet" */
+function appContextSuffix(page: { applicationLabel?: string; pageTitle?: string; routeTemplate?: string } | undefined): string {
+  if (!page) return ''
+  const app = page.applicationLabel?.toLowerCase() ?? ''
+  const title = page.pageTitle?.toLowerCase() ?? ''
+  const route = page.routeTemplate?.toLowerCase() ?? ''
+  if (app === 'mail' || title.includes('inbox') || title.includes('gmail') || route.includes('mail')) return ' in email'
+  if (title.includes('sheets') || title.includes('spreadsheet') || route.includes('spreadsheet')) return ' in spreadsheet'
+  if (title.includes('docs') || title.includes('document')) return ' in document'
+  if (page.applicationLabel && page.applicationLabel !== 'Mail' && page.applicationLabel !== 'Docs') return ` in ${page.applicationLabel}`
+  return ''
+}
+
+/** Get a meaningful click label, avoiding raw HTML element types */
+function meaningfulClickLabel(events: CanonicalEvent[]): string {
+  for (const e of events) {
+    if (e.event_type === 'interaction.click' && e.target_summary) {
+      const label = e.target_summary.label?.trim()
+      if (label) return label
+    }
+  }
+  // No label found — derive from context
+  const first = events[0]
+  const page = first?.page_context
+  const ctx = appContextSuffix(page)
+  return ctx ? `action${ctx}` : 'action'
+}
+
 function deriveTitle(events: CanonicalEvent[], reason: GroupingReason): string {
   const first = events[0]
   const page = first?.page_context
-  const target = first?.target_summary
+  const ctx = appContextSuffix(page)
 
   switch (reason) {
     case 'click_then_navigate': {
       const navEvent = events.find(e => e.event_type.startsWith('navigation.'))
-      const label = navEvent?.page_context?.pageTitle ?? navEvent?.page_context?.routeTemplate ?? 'page'
-      return `Navigate to ${label}`
+      const dest = navEvent?.page_context?.pageTitle ?? navEvent?.page_context?.routeTemplate ?? 'page'
+      return `Navigate to ${dest}`
     }
-    case 'fill_and_submit':
-      return `Fill and submit ${page?.pageTitle ?? 'form'}`
+    case 'fill_and_submit': {
+      const fields = extractFieldLabels(events)
+      if (fields.length > 0) return `Complete ${fields.join(', ')} and submit${ctx}`
+      return `Complete and submit form${ctx}`
+    }
     case 'annotation':
       return first?.annotation_text ?? 'Annotation'
     case 'error_handling':
-      return 'Handle error'
+      return `Handle error${ctx}`
     case 'data_entry': {
-      // Use target label if meaningful, otherwise derive from page context
-      const fieldLabel = target?.label && target.label.trim() !== ''
-        ? target.label
-        : page?.pageTitle ?? 'field'
-      return `Enter ${fieldLabel}`
+      const fields = extractFieldLabels(events)
+      if (fields.length > 0) return `Enter ${fields.join(', ')}${ctx}`
+      // Spreadsheet cell detection
+      const cellLabels = events
+        .filter(e => e.target_summary?.label && CELL_REF_RE.test(e.target_summary.label.trim()))
+        .map(e => e.target_summary!.label!.trim())
+        .filter((l, i, arr) => arr.indexOf(l) === i)
+        .slice(0, 3)
+      if (cellLabels.length > 0) return `Enter data in cells ${cellLabels.join(', ')}${ctx || ' in spreadsheet'}`
+      return `Enter data${ctx}`
     }
     case 'send_action': {
-      // Find the actual action button click (Send, Save, etc.) — it may not
-      // be the first event in the step if an input change immediately preceded it.
       const actionEvent = events.find(e => isActionButtonClick(e))
       const actionLabel = actionEvent?.target_summary?.label?.trim()
-      if (actionLabel) return actionLabel
-      // Fallback to first event's label or page context
-      return target?.label && target.label.trim() !== '' ? target.label : 'Complete action'
+      if (actionLabel) return `${actionLabel}${ctx}`
+      return `Send${ctx}`
     }
     case 'file_action':
-      return 'Attach file'
+      return `Attach file${ctx}`
     case 'repeated_click_dedup': {
-      const dedupLabel = (target?.label && target.label.trim() !== '') ? target.label
-        : target?.role && target.role !== 'div' ? target.role
-        : page?.pageTitle ?? 'element'
-      return `Click ${dedupLabel}`
+      const label = meaningfulClickLabel(events)
+      return `Click ${label}`
     }
     case 'single_action':
     default: {
       const type = first?.event_type ?? ''
       if (type === 'interaction.click') {
-        const clickLabel = (target?.label && target.label.trim() !== '') ? target.label
-          : target?.role && target.role !== 'div' ? target.role
-          : page?.pageTitle ?? 'element'
-        return `Click ${clickLabel}`
+        const label = meaningfulClickLabel(events)
+        return `Click ${label}`
       }
       if (type === 'interaction.input_change') {
-        const inputLabel = (target?.label && target.label.trim() !== '') ? target.label : page?.pageTitle ?? 'field'
-        return `Update ${inputLabel}`
+        const fields = extractFieldLabels(events)
+        if (fields.length > 0) return `Enter ${fields.join(', ')}${ctx}`
+        return `Enter data${ctx}`
       }
-      if (type === 'interaction.submit') return `Submit ${page?.pageTitle ?? 'form'}`
+      if (type === 'interaction.submit') return `Submit form${ctx}`
       if (type.startsWith('navigation.')) return `Navigate to ${page?.pageTitle ?? page?.routeTemplate ?? 'page'}`
-      return 'Perform action'
+      return `Perform action${ctx}`
     }
   }
 }

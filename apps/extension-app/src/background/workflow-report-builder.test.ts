@@ -12,8 +12,9 @@ const SESSION_ID = 'test-session';
 const NOW = '2026-01-01T00:00:00Z';
 
 function makeCanonicalEvent(overrides: Partial<CanonicalEvent> & { event_id: string }): CanonicalEvent {
+  const { event_id, ...rest } = overrides;
   return {
-    event_id: overrides.event_id,
+    event_id,
     schema_version: '1.0.0',
     session_id: SESSION_ID,
     t_ms: 1000,
@@ -26,7 +27,7 @@ function makeCanonicalEvent(overrides: Partial<CanonicalEvent> & { event_id: str
       normalizationRuleVersion: '1.0.0',
       redactionApplied: false,
     },
-    ...overrides,
+    ...rest,
   } as CanonicalEvent;
 }
 

@@ -31,20 +31,20 @@ function SidebarStepNodeInner({ data, selected }: { data: SidebarNodeData; selec
         background: selected
           ? engineNode.categoryBg.replace('0.07', '0.14')
           : engineNode.categoryBg,
-        border: `1px solid ${selected ? engineNode.categoryColor : 'rgba(255,255,255,0.07)'}`,
+        border: `1px solid ${selected ? engineNode.categoryColor : '#e5e7eb'}`,
         borderRadius: 8,
         padding: '7px 10px',
         cursor: 'pointer',
-        boxShadow: selected ? `0 0 0 2px ${engineNode.categoryColor}22` : '0 1px 4px rgba(0,0,0,0.3)',
+        boxShadow: selected ? `0 0 0 2px ${engineNode.categoryColor}22` : '0 1px 3px rgba(0,0,0,0.08)',
       }}
     >
       <Handle
         type="target"
         position={Position.Top}
-        style={{ background: '#0a0e14', border: `1px solid ${selected ? engineNode.categoryColor : '#283041'}`, width: 6, height: 6 }}
+        style={{ background: '#ffffff', border: `1px solid ${selected ? engineNode.categoryColor : '#d1d5db'}`, width: 6, height: 6 }}
       />
       <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 3 }}>
-        <span style={{ fontSize: 9, fontWeight: 700, color: '#3d4f6a', minWidth: 12 }}>
+        <span style={{ fontSize: 9, fontWeight: 700, color: '#9ca3af', minWidth: 12 }}>
           {engineNode.ordinal}
         </span>
         <span style={{
@@ -60,13 +60,13 @@ function SidebarStepNodeInner({ data, selected }: { data: SidebarNodeData; selec
           {engineNode.categoryLabel}
         </span>
         <span style={{ flex: 1 }} />
-        <span style={{ fontSize: 9, color: '#374151' }}>{engineNode.metadata.durationLabel}</span>
+        <span style={{ fontSize: 9, color: '#9ca3af' }}>{engineNode.metadata.durationLabel}</span>
       </div>
       <p style={{
         margin: 0,
         fontSize: 11,
         fontWeight: 500,
-        color: selected ? '#f3f4f6' : '#d1d5db',
+        color: selected ? '#111827' : '#374151',
         lineHeight: 1.35,
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -78,7 +78,7 @@ function SidebarStepNodeInner({ data, selected }: { data: SidebarNodeData; selec
         <p style={{
           margin: '2px 0 0',
           fontSize: 9,
-          color: '#4b5563',
+          color: '#9ca3af',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
@@ -89,7 +89,7 @@ function SidebarStepNodeInner({ data, selected }: { data: SidebarNodeData; selec
       <Handle
         type="source"
         position={Position.Bottom}
-        style={{ background: '#0a0e14', border: `1px solid ${selected ? engineNode.categoryColor : '#283041'}`, width: 6, height: 6 }}
+        style={{ background: '#ffffff', border: `1px solid ${selected ? engineNode.categoryColor : '#d1d5db'}`, width: 6, height: 6 }}
       />
     </div>
   )
@@ -146,7 +146,7 @@ export function SidebarProcessMap({ processMap, selectedStepId, onSelectStep }: 
         source: e.source,
         target: e.target,
         type: 'smoothstep',
-        style: { stroke: '#1e2d3d', strokeWidth: 1.5 },
+        style: { stroke: '#d1d5db', strokeWidth: 1.5 },
       })),
     [processMap, taskNodeIds]
   )
@@ -170,7 +170,7 @@ export function SidebarProcessMap({ processMap, selectedStepId, onSelectStep }: 
   if (processMap.nodes.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-xs text-gray-700">No steps</p>
+        <p className="text-xs text-gray-400">No steps</p>
       </div>
     )
   }
@@ -190,10 +190,10 @@ export function SidebarProcessMap({ processMap, selectedStepId, onSelectStep }: 
       maxZoom={2}
       panOnScroll
       selectionOnDrag={false}
-      style={{ background: '#0a0e14' }}
+      style={{ background: '#ffffff' }}
       proOptions={{ hideAttribution: true }}
     >
-      <Background variant={BackgroundVariant.Dots} color="#111827" gap={24} size={1} />
+      <Background variant={BackgroundVariant.Dots} color="#e5e7eb" gap={24} size={1} />
     </ReactFlow>
   )
 }

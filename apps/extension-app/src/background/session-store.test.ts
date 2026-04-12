@@ -290,12 +290,10 @@ describe('SessionStore', () => {
       expect(store.getLiveSteps()).toHaveLength(0)
     })
 
-    it('calls chrome.storage.local.remove for session and events', () => {
+    it('calls chrome.storage.local.remove', () => {
       store.initSession('Test')
-      vi.mocked(chrome.storage.local.remove).mockClear()
       store.clear()
-      // clear() removes both the session meta key and the events key
-      expect(chrome.storage.local.remove).toHaveBeenCalledTimes(2)
+      expect(chrome.storage.local.remove).toHaveBeenCalledOnce()
     })
   })
 

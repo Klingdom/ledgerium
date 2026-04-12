@@ -361,13 +361,12 @@ export function normalizeEvent(
     raw.target_element_type !== undefined
   ) {
     targetSummary = {
-      selector: raw.target_selector,
-      selectorConfidence: raw.target_selector !== undefined ? 1.0 : undefined,
-      label: redactionApplied ? undefined : raw.target_label,
-      role: raw.target_role,
-      elementType: raw.target_element_type,
+      ...(raw.target_selector !== undefined && { selector: raw.target_selector, selectorConfidence: 1.0 }),
+      ...(!redactionApplied && raw.target_label !== undefined && { label: raw.target_label }),
+      ...(raw.target_role !== undefined && { role: raw.target_role }),
+      ...(raw.target_element_type !== undefined && { elementType: raw.target_element_type }),
       isSensitive: sensitive,
-      sensitivityClass: sensitive ? 'credential' : undefined,
+      ...(sensitive && { sensitivityClass: 'credential' }),
     };
   }
 

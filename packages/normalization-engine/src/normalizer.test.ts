@@ -131,7 +131,7 @@ describe('normalizeEvent', () => {
 
     it('omits page_context when no URL is provided', () => {
       const { canonical } = normalizeEvent(
-        makeRaw({ event_type: 'click', url: undefined }),
+        makeRaw({ event_type: 'click' }),
       )
       expect(canonical?.page_context).toBeUndefined()
     })

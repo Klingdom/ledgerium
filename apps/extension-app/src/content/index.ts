@@ -1,43 +1,74 @@
+/**
+ * Content script entry point — v2 with idempotency guard.
+ *
+ * In v2, this script is injected programmatically (not via manifest).
+ * It may be injected multiple times into the same frame — the guard
+ * ensures only one CaptureEngine instance exists per frame.
+ */
+
 import { CaptureEngine } from './capture.js'
 import { MSG } from '../shared/types.js'
 
-console.log('[LDG-CS] content script loaded on', location.href)
-const engine = new CaptureEngine()
+// ─── Idempotency guard ────────────────────────────────────────────────────────
+// Prevents duplicate engines if the script is injected more than once.
 
-// ─── Message listener (receives START/PAUSE/STOP from background) ──────────────
+const GUARD_KEY = '__ledgerium_capture_engine_v2__';
 
-chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<string, unknown> }) => {
-  switch (message.type) {
-    case MSG.START_SESSION:
-      engine.startCapture(message.payload['sessionId'] as string)
-      break
-    case MSG.PAUSE_SESSION:
-      engine.pauseCapture()
-      break
-    case MSG.RESUME_SESSION:
-      engine.resumeCapture()
-      break
-    case MSG.STOP_SESSION:
-    case MSG.DISCARD_SESSION:
-      engine.stopCapture()
-      break
+if ((window as unknown as Record<string, unknown>)[GUARD_KEY] === true) {
+  // Already initialized — skip
+} else {
+  // Non-enumerable, non-configurable guard to prevent page-side spoofing
+  try {
+    Object.defineProperty(window, GUARD_KEY, {
+      value: true, writable: false, configurable: false, enumerable: false,
+    });
+  } catch {
+    // Property already defined (shouldn't happen, but safety)
   }
-})
 
-// ─── Self-recovery on load ─────────────────────────────────────────────────────
-// If this content script loads AFTER recording has already started (e.g. the tab
-// was navigated to after Start Recording was clicked, or the extension was just
-// installed into an already-open tab), query the background and start capture.
-chrome.runtime.sendMessage(
-  { type: MSG.GET_STATE, payload: {} },
-  (response: { state: string; meta?: { sessionId: string } } | undefined) => {
-    if (chrome.runtime.lastError) {
-      console.log('[LDG-CS] GET_STATE error:', chrome.runtime.lastError.message)
-      return
+  console.log('[LDG-CS] Content script loaded on', location.href)
+  const engine = new CaptureEngine()
+
+  // ─── Message listener (receives START/PAUSE/STOP from background) ──────────
+  chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<string, unknown> }, sender, sendResponse) => {
+    // Security: only accept messages from our own extension
+    if (sender.id !== chrome.runtime.id) return false
+
+    // PING handler — allows injection manager to detect this script is present
+    if (message.type === 'PING') {
+      sendResponse({ ok: true })
+      return true
     }
-    console.log('[LDG-CS] GET_STATE response:', response?.state)
-    if (response?.state === 'recording' && response?.meta?.sessionId) {
-      engine.startCapture(response.meta.sessionId)
+
+    switch (message.type) {
+      case MSG.START_SESSION:
+        console.log('[LDG-CS] START_SESSION received, sessionId:', message.payload['sessionId'])
+        engine.startCapture(
+          message.payload['sessionId'] as string,
+          message.payload['startedAt'] as string | undefined,
+        )
+        break
+      case MSG.PAUSE_SESSION:
+        engine.pauseCapture()
+        break
+      case MSG.RESUME_SESSION:
+        engine.resumeCapture()
+        break
+      case MSG.STOP_SESSION:
+      case MSG.DISCARD_SESSION:
+        engine.stopCapture()
+        break
     }
-  },
-)
+    return false
+  })
+
+  // ─── Self-recovery: only join if this is the active tab ─────────────────────
+  // v2 trust model: Content scripts load on every page (via manifest), but
+  // capture should ONLY activate on the tab the user is currently viewing.
+  // The background will send START_SESSION explicitly when the user visits
+  // this tab. We do NOT auto-join from every tab on load.
+  //
+  // Exception: if this script was programmatically injected by the background
+  // (which only happens for the active tab), it will receive START_SESSION
+  // immediately after injection via the background's message send.
+}

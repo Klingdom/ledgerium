@@ -1,3 +1,4 @@
+import { injectIntoTab, onTabActivatedDuringRecording, clearInjectionState } from './injection-manager.js'
 import { RecorderStateMachine } from './state-machine.js'
 import { SessionStore } from './session-store.js'
 import { HistoryStore } from './history-store.js'
@@ -84,14 +85,6 @@ async function restoreStateIfNeeded(): Promise<void> {
   const restored = await store.loadFromStorage()
   if (!restored) return
 
-  // Restore any canonical events that were persisted before the SW died.
-  // This closes the data-gap bug where events captured before a SW restart
-  // were permanently lost, creating an invisible hole in the recording.
-  const recoveredCount = await store.loadEventsFromStorage()
-  if (recoveredCount > 0) {
-    console.log(`[LDG-BG] Restored ${recoveredCount} canonical events from storage after SW restart`)
-  }
-
   // Rebuild the state machine and live builder
   try {
     sm.transition('arming')
@@ -106,20 +99,17 @@ async function restoreStateIfNeeded(): Promise<void> {
     broadcastToExtension({ type: MSG.LIVE_STEP_UPDATED, payload: { step } })
   })
 
-  // Replay recovered events through the live builder so the sidebar
-  // reflects all steps, not just those captured after the restart.
-  const recoveredEvents = store.getCanonicalEvents()
-  for (const event of recoveredEvents) {
-    try { liveBuilder.processEvent(event) } catch { /* best-effort replay */ }
-  }
-
   // Re-broadcast recording state so the sidepanel reflects reality
   broadcastStateUpdate()
 
-  // Re-send START_SESSION to all tabs so content scripts resume capturing
-  broadcastAllTabs({
-    type: MSG.START_SESSION,
-    payload: { sessionId: persisted.sessionId },
+  // v2 trust model: Only re-activate capture on the currently active tab
+  chrome.tabs.query({ active: true, lastFocusedWindow: true }, ([activeTab]) => {
+    if (activeTab?.id) {
+      chrome.tabs.sendMessage(activeTab.id, {
+        type: MSG.START_SESSION,
+        payload: { sessionId: persisted.sessionId, startedAt: store.getMeta()?.startedAt },
+      }).catch(() => { /* content script may not be present */ })
+    }
   })
 }
 
@@ -157,6 +147,17 @@ function broadcastStateUpdate(): void {
     type: MSG.SESSION_STATE_UPDATED,
     payload: { state: sm.state, meta },
   })
+
+  // Update extension badge to show recording state
+  if (sm.state === 'recording') {
+    chrome.action.setBadgeText({ text: 'REC' }).catch(() => {})
+    chrome.action.setBadgeBackgroundColor({ color: '#2563EB' }).catch(() => {})
+  } else if (sm.state === 'paused') {
+    chrome.action.setBadgeText({ text: '❚❚' }).catch(() => {})
+    chrome.action.setBadgeBackgroundColor({ color: '#F59E0B' }).catch(() => {})
+  } else {
+    chrome.action.setBadgeText({ text: '' }).catch(() => {})
+  }
 }
 
 function broadcastAllTabs(message: unknown): void {
@@ -171,15 +172,9 @@ function broadcastAllTabs(message: unknown): void {
 
 // ─── Lifecycle actions ────────────────────────────────────────────────────────
 
-function handleStart(activityName: string, uploadUrl?: string): void {
+async function handleStart(activityName: string, uploadUrl?: string): Promise<void> {
   console.log('[LDG-BG] handleStart', activityName)
   try {
-    // Clear stale output from any previous session that wasn't discarded.
-    // Without this, EXPORT_BUNDLE could return the old session's data while
-    // a new session is recording.
-    lastBundle = null
-    lastWorkflowReport = null
-
     sm.transition('arming')
     broadcastStateUpdate()
 
@@ -190,11 +185,19 @@ function handleStart(activityName: string, uploadUrl?: string): void {
       broadcastToExtension({ type: MSG.LIVE_STEP_UPDATED, payload: { step } })
     })
 
-    // Notify ALL tabs — every open tab with a content script must start capturing
-    broadcastAllTabs({
-      type: MSG.START_SESSION,
-      payload: { sessionId: meta.sessionId },
-    })
+    // v2 trust model: Only capture on the tab the user is currently viewing.
+    // We do NOT inject or activate capture on all tabs — that would break trust.
+    // Capture activates when the user clicks into a tab (onActivated) or
+    // navigates within the active tab (onUpdated).
+    const [activeTab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true })
+    if (activeTab?.id) {
+      await injectIntoTab(activeTab.id)
+      chrome.tabs.sendMessage(activeTab.id, {
+        type: MSG.START_SESSION,
+        payload: { sessionId: meta.sessionId, startedAt: meta.startedAt },
+      }).catch(() => { /* content script may not be ready yet */ })
+      console.log(`[LDG-BG] Recording started on active tab ${activeTab.id}: ${activeTab.url}`)
+    }
 
     sm.transition('recording')
     store.updateState('recording')
@@ -243,32 +246,7 @@ async function handleStop(): Promise<void> {
     // Finalize live steps
     liveBuilder?.finalize()
 
-    // Final persist of events before building the bundle. This ensures
-    // chrome.storage.local has the complete event set in case SW dies
-    // during the async buildBundle() call below.
-    store.persistEvents()
-
-    const eventCount = store.getCanonicalEvents().length
-    const droppedCount = store.getDroppedEventCount()
-    console.log('[LDG-BG] buildBundle starting, events:', eventCount, 'dropped:', droppedCount)
-
-    // Guard against empty recordings — if all events were dropped by
-    // normalization or policy filtering, warn the user instead of producing
-    // an empty bundle that looks like a successful recording.
-    if (eventCount === 0) {
-      console.warn('[LDG-BG] No canonical events captured — recording produced empty output')
-      const errorMessage = droppedCount > 0
-        ? `Recording captured ${droppedCount} event(s) but all were filtered or failed to normalize. Try recording on a different page.`
-        : 'No events were captured during this recording. Make sure you interact with the page while recording.'
-      sm.transition('review_ready')
-      store.updateState('review_ready')
-      broadcastToExtension({
-        type: MSG.SESSION_STATE_UPDATED,
-        payload: { state: 'review_ready', meta: store.getMeta(), warning: errorMessage },
-      })
-      return
-    }
-
+    console.log('[LDG-BG] buildBundle starting, events:', store.getCanonicalEvents().length)
     const bundle = await buildBundle(store)
     console.log('[LDG-BG] buildBundle complete, steps:', bundle.derivedSteps.length)
     lastBundle = bundle
@@ -281,15 +259,13 @@ async function handleStop(): Promise<void> {
     // always available even if the user discards the review screen immediately.
     void historyStore.addEntry(bundle)
 
+    // v2: Clear injection tracking — content scripts will be re-injected next session
+    clearInjectionState()
+
     sm.transition('review_ready')
     store.updateState('review_ready')
 
-    // Include dropped event count in finalization payload so the UI can
-    // warn the user about incomplete data.
-    broadcastToExtension({
-      type: MSG.FINALIZATION_COMPLETE,
-      payload: { ready: true, droppedEventCount: droppedCount },
-    })
+    broadcastToExtension({ type: MSG.FINALIZATION_COMPLETE, payload: { bundle } })
     broadcastStateUpdate()
 
     // Upload if URL is configured — sends API key for Ledgerium web app auth
@@ -315,6 +291,7 @@ async function handleStop(): Promise<void> {
 
 function handleDiscard(): void {
   broadcastAllTabs({ type: MSG.DISCARD_SESSION, payload: {} })
+  clearInjectionState()
   liveBuilder?.reset()
   liveBuilder = null
   lastBundle = null
@@ -358,9 +335,16 @@ chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<s
       void historyStore.getIndex().then(sendResponse)
       return true
 
-    case MSG.GET_BUNDLE:
-      void historyStore.getBundle(message.payload['sessionId'] as string).then(sendResponse)
+    case MSG.GET_BUNDLE: {
+      const requestedSessionId = message.payload['sessionId'] as string
+      // Check in-memory lastBundle first (current session may not be in history yet)
+      if (lastBundle && lastBundle.sessionJson.sessionId === requestedSessionId) {
+        sendResponse(lastBundle)
+      } else {
+        void historyStore.getBundle(requestedSessionId).then(sendResponse)
+      }
       return true
+    }
 
     case MSG.DELETE_HISTORY_ENTRY:
       void historyStore.deleteEntry(message.payload['sessionId'] as string).then(() => sendResponse({ ok: true }))
@@ -393,33 +377,12 @@ chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<s
       console.log('[LDG-BG] RAW_EVENT_CAPTURED state=', sm.state, 'type=', (message.payload['event'] as RawEvent)?.event_type)
       if (sm.state !== 'recording') break
       const raw = message.payload['event'] as RawEvent
-
-      // Validate that this event belongs to the current session. Events from
-      // a previous session's content script (slow to receive the new START
-      // broadcast) could otherwise contaminate the new session's data.
-      const currentSessionId = store.getMeta()?.sessionId
-      if (currentSessionId && raw.session_id && raw.session_id !== currentSessionId) {
-        console.warn('[LDG-BG] Dropping stale event from previous session:', raw.session_id, '!==', currentSessionId)
-        break
-      }
-
       store.addRawEvent(raw)
       let normalized: ReturnType<typeof normalizeRawEvent>
       try {
         normalized = normalizeRawEvent(raw, settings.blockedDomains, settings.allowedDomains)
       } catch (err) {
-        // Normalization failed — record the failure in the policy log so it's
-        // visible in the bundle, and increment the dropped event counter so
-        // the UI can warn the user about lost data.
         console.error('[LDG-BG] normalizeRawEvent threw:', err, 'raw.url=', raw.url)
-        store.addPolicyEntry({
-          sessionId: raw.session_id,
-          eventId: raw.raw_event_id,
-          t_ms: raw.t_ms,
-          outcome: 'block',
-          reason: `normalization_error: ${err instanceof Error ? err.message : 'unknown'}`,
-        })
-        store.incrementDroppedEvents()
         break
       }
       const { canonical, policyEntry } = normalized
@@ -427,11 +390,7 @@ chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<s
       if (policyEntry) store.addPolicyEntry(policyEntry)
       if (canonical) {
         store.addCanonicalEvent(canonical)
-        try {
-          liveBuilder?.processEvent(canonical)
-        } catch (builderErr) {
-          console.error('[LDG-BG] liveBuilder.processEvent threw:', builderErr)
-        }
+        liveBuilder?.processEvent(canonical)
         broadcastToExtension({ type: MSG.NORMALIZED_EVENT_ADDED, payload: { event: canonical } })
       }
       break
@@ -449,29 +408,51 @@ chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<s
 
 // ─── Tab lifecycle listeners ───────────────────────────────────────────────────
 
-// When a tab finishes loading during an active recording session, send it
-// START_SESSION so its content script begins capturing immediately.
-chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+// v2 trust model: Only capture on tabs the user actively visits.
+// When a tab finishes loading during recording, only activate if it's
+// the active tab in its window (user navigated within the active tab).
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status !== 'complete') return
   if (sm.state !== 'recording') return
+  if (!tab.active) return  // Only the active tab — never background tabs
   const sessionId = store.getMeta()?.sessionId
   if (!sessionId) return
+  if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) return
+
+  const startedAt = store.getMeta()?.startedAt
+  await injectIntoTab(tabId)
   chrome.tabs.sendMessage(tabId, {
     type: MSG.START_SESSION,
-    payload: { sessionId },
-  }).catch(() => { /* content script may not be present */ })
+    payload: { sessionId, startedAt },
+  }).catch(() => { /* content script may not have loaded yet */ })
+  console.log(`[LDG-BG] Activated capture on tab load: ${tabId} (${tab.url})`)
 })
 
-// When the user switches to a tab during recording, ensure its content script
-// is capturing — covers tabs that may have been loaded before recording started.
-chrome.tabs.onActivated.addListener(({ tabId }) => {
+// When user switches to a different tab during recording, activate capture
+// on that tab. This is the core "follow the user" behavior.
+chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   if (sm.state !== 'recording') return
   const sessionId = store.getMeta()?.sessionId
   if (!sessionId) return
+
+  const tab = await chrome.tabs.get(tabId).catch(() => null)
+  if (!tab?.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) return
+
+  // Always try injection first (handles tabs opened before extension loaded)
+  await injectIntoTab(tabId)
+
+  // Small delay to let the content script initialize after injection
+  await new Promise(resolve => setTimeout(resolve, 100))
+
+  // Send START_SESSION — always, even if we think the script is already there
+  const startedAt2 = store.getMeta()?.startedAt
   chrome.tabs.sendMessage(tabId, {
     type: MSG.START_SESSION,
-    payload: { sessionId },
-  }).catch(() => { /* content script may not be present */ })
+    payload: { sessionId, startedAt: startedAt2 },
+  }).catch(() => {
+    console.warn(`[LDG-BG] Could not reach content script on tab ${tabId} after injection`)
+  })
+  console.log(`[LDG-BG] Activated capture on tab switch: ${tabId} (${tab.url})`)
 })
 
 // ─── Initialisation ───────────────────────────────────────────────────────────

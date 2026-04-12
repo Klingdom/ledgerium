@@ -91,15 +91,15 @@ export function HistoryDetailScreen({ sessionId, activityName, onBack, onDeleted
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-800 bg-[#0d1117] flex-none">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-200 bg-white flex-none">
         <button
           onClick={onBack}
-          className="text-gray-500 hover:text-gray-300 transition-colors p-1 -ml-1 rounded"
+          className="text-gray-400 hover:text-gray-600 transition-colors p-1 -ml-1 rounded"
           title="Back to history"
         >
           ←
         </button>
-        <p className="text-sm font-medium text-gray-100 truncate flex-1">{activityName}</p>
+        <p className="text-sm font-medium text-gray-900 truncate flex-1">{activityName}</p>
       </div>
 
       {loading && (
@@ -110,8 +110,8 @@ export function HistoryDetailScreen({ sessionId, activityName, onBack, onDeleted
 
       {error && (
         <div className="flex flex-col items-center justify-center flex-1 gap-2 px-4">
-          <p className="text-sm text-red-400">{error}</p>
-          <button onClick={onBack} className="text-xs text-gray-500 hover:text-gray-300">
+          <p className="text-sm text-red-600">{error}</p>
+          <button onClick={onBack} className="text-xs text-gray-500 hover:text-gray-700">
             ← Back
           </button>
         </div>
@@ -120,7 +120,7 @@ export function HistoryDetailScreen({ sessionId, activityName, onBack, onDeleted
       {!loading && !error && bundle && meta && (
         <>
           {/* Metadata */}
-          <div className="px-4 py-3 border-b border-gray-800 flex-none">
+          <div className="px-4 py-3 border-b border-gray-200 flex-none">
             <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500">
               <span>{formatDate(meta.startedAt)} · {formatTime(meta.startedAt)}</span>
               {meta.endedAt && <span>{formatDuration(meta.startedAt, meta.endedAt)}</span>}
@@ -131,13 +131,13 @@ export function HistoryDetailScreen({ sessionId, activityName, onBack, onDeleted
 
           {/* Steps summary */}
           {bundle.derivedSteps.length > 0 && (
-            <div className="px-4 py-2 border-b border-gray-800 flex-none">
-              <p className="text-xs text-gray-600 uppercase tracking-wider font-medium mb-1.5">Steps</p>
+            <div className="px-4 py-2 border-b border-gray-200 flex-none">
+              <p className="text-xs text-gray-400 uppercase tracking-wider font-medium mb-1.5">Steps</p>
               <div className="flex flex-col gap-1">
                 {bundle.derivedSteps.map((step, i) => (
                   <div key={step.step_id} className="flex items-baseline gap-2">
-                    <span className="text-xs text-gray-700 tabular-nums w-4 shrink-0">{i + 1}</span>
-                    <span className="text-xs text-gray-300 leading-snug">{step.title}</span>
+                    <span className="text-xs text-gray-400 tabular-nums w-4 shrink-0">{i + 1}</span>
+                    <span className="text-xs text-gray-700 leading-snug">{step.title}</span>
                   </div>
                 ))}
               </div>
@@ -145,22 +145,22 @@ export function HistoryDetailScreen({ sessionId, activityName, onBack, onDeleted
           )}
 
           {/* Action buttons */}
-          <div className="flex gap-2 px-4 py-2.5 border-b border-gray-800 flex-none">
+          <div className="flex gap-2 px-4 py-2.5 border-b border-gray-200 flex-none">
             <button
               onClick={handleViewProcessMap}
-              className="flex-1 text-xs text-teal-300 bg-teal-950/60 border border-teal-800 rounded-md py-1.5 hover:bg-teal-900/60 transition-colors font-medium"
+              className="flex-1 btn-primary text-xs py-1.5"
             >
               View Process Map
             </button>
             <button
               onClick={handleDownload}
-              className="text-xs text-gray-400 border border-gray-800 rounded-md px-3 py-1.5 hover:bg-gray-900 transition-colors"
+              className="btn-secondary text-xs px-3 py-1.5"
             >
               Download
             </button>
             <button
               onClick={handleDelete}
-              className="text-xs text-red-500 border border-red-900 rounded-md px-3 py-1.5 hover:bg-red-950 transition-colors"
+              className="text-xs text-red-600 border border-red-200 rounded-md px-3 py-1.5 hover:bg-red-50 transition-colors"
             >
               Delete
             </button>
@@ -168,10 +168,10 @@ export function HistoryDetailScreen({ sessionId, activityName, onBack, onDeleted
 
           {/* JSON viewer */}
           <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3">
-            <p className="text-xs text-gray-600 uppercase tracking-wider font-medium mb-2">
+            <p className="text-xs text-gray-400 uppercase tracking-wider font-medium mb-2">
               Session JSON
             </p>
-            <pre className="text-xs text-gray-400 font-mono leading-relaxed whitespace-pre-wrap break-all bg-gray-900/60 border border-gray-800 rounded-lg p-3">
+            <pre className="text-xs text-gray-600 font-mono leading-relaxed whitespace-pre-wrap break-all bg-gray-50 border border-gray-200 rounded-lg p-3">
               {JSON.stringify(bundle, null, 2)}
             </pre>
           </div>

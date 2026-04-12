@@ -8,27 +8,24 @@ interface HeaderProps {
 }
 
 const STATE_BADGE: Record<RecorderState, { label: string; className: string }> = {
-  idle: { label: 'Idle', className: 'bg-gray-700 text-gray-400' },
-  arming: { label: 'Starting…', className: 'bg-yellow-900 text-yellow-400' },
-  recording: { label: 'Recording', className: 'bg-red-900 text-red-400' },
-  paused: { label: 'Paused', className: 'bg-yellow-900 text-yellow-400' },
-  stopping: { label: 'Processing…', className: 'bg-blue-900 text-blue-400' },
-  review_ready: { label: 'Ready', className: 'bg-teal-900 text-teal-400' },
-  error: { label: 'Error', className: 'bg-red-900 text-red-400' },
+  idle: { label: 'Ready', className: 'badge-gray' },
+  arming: { label: 'Starting...', className: 'badge-amber' },
+  recording: { label: 'Recording', className: 'badge-blue' },
+  paused: { label: 'Paused', className: 'badge-amber' },
+  stopping: { label: 'Processing...', className: 'badge-blue' },
+  review_ready: { label: 'Complete', className: 'badge-green' },
+  error: { label: 'Error', className: 'badge-red' },
 }
 
 export function Header({ state, meta }: HeaderProps) {
   const badge = STATE_BADGE[state]
 
   return (
-    <header className="flex items-center justify-between px-4 py-3 border-b border-gray-800 bg-[#0d1117]">
-      <div className="flex items-center gap-2">
-        {/* Recording indicator dot */}
-        {state === 'recording' && (
-          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-        )}
-        <span className="text-sm font-semibold text-gray-100 tracking-wide">
-          Ledgerium AI
+    <header className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white">
+      <div className="flex items-center gap-2.5">
+        {state === 'recording' && <span className="recording-dot" />}
+        <span className="text-base font-bold tracking-tight text-gray-900">
+          Ledgerium <span className="text-blue-600">AI</span>
         </span>
       </div>
 
@@ -36,7 +33,7 @@ export function Header({ state, meta }: HeaderProps) {
         {(state === 'recording' || state === 'paused') && meta && (
           <SessionTimer startedAt={meta.startedAt} isPaused={state === 'paused'} />
         )}
-        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badge.className}`}>
+        <span className={`badge ${badge.className}`}>
           {badge.label}
         </span>
       </div>

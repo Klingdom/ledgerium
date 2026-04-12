@@ -39,9 +39,8 @@ export default function InstallExtensionPage() {
           </p>
           <div className="mt-8">
             <a
-              href={EXTENSION_CONFIG.chromeStoreUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={EXTENSION_CONFIG.directDownloadUrl}
+              download="ledgerium-recorder-chrome-extension.zip"
               className="btn-primary text-base px-8 py-3.5 gap-2.5 inline-flex shadow-sm shadow-brand-600/20"
             >
               <Download className="h-5 w-5" />
@@ -228,9 +227,8 @@ export default function InstallExtensionPage() {
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
-              href={EXTENSION_CONFIG.chromeStoreUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={EXTENSION_CONFIG.directDownloadUrl}
+              download="ledgerium-recorder-chrome-extension.zip"
               className="btn-primary gap-2 shadow-sm shadow-brand-600/20"
             >
               <Chrome className="h-4 w-4" />

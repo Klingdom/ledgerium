@@ -10,12 +10,6 @@ interface ControlBarProps {
   disabled?: boolean
 }
 
-const VARIANT_CLASSES = {
-  danger: 'bg-red-700 hover:bg-red-600 text-white',
-  primary: 'bg-teal-700 hover:bg-teal-600 text-white',
-  success: 'bg-green-700 hover:bg-green-600 text-white',
-}
-
 export function ControlBar({
   onPrimary,
   primaryLabel,
@@ -25,12 +19,19 @@ export function ControlBar({
   onDiscard,
   disabled = false,
 }: ControlBarProps) {
+  const primaryClass =
+    primaryVariant === 'danger'
+      ? 'btn-primary bg-red-600 hover:bg-red-700 active:bg-red-800'
+      : primaryVariant === 'success'
+        ? 'btn-primary bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800'
+        : 'btn-primary'
+
   return (
-    <div className="flex items-center gap-2 px-4 py-3 border-t border-gray-800 bg-[#0d1117]">
+    <div className="flex items-center gap-2 px-4 py-3 border-t border-gray-200 bg-white">
       {onDiscard && (
         <button
           onClick={onDiscard}
-          className="text-xs text-gray-500 hover:text-red-400 transition-colors px-2 py-1.5 rounded"
+          className="btn-danger text-xs"
           title="Discard session"
         >
           Discard
@@ -41,7 +42,7 @@ export function ControlBar({
           <button
             onClick={onSecondary}
             disabled={disabled}
-            className="text-sm px-4 py-2 rounded-lg border border-gray-700 text-gray-300 hover:border-gray-500 hover:text-gray-100 transition-colors disabled:opacity-40"
+            className="btn-secondary"
           >
             {secondaryLabel}
           </button>
@@ -49,7 +50,7 @@ export function ControlBar({
         <button
           onClick={onPrimary}
           disabled={disabled}
-          className={`text-sm px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-40 ${VARIANT_CLASSES[primaryVariant]}`}
+          className={primaryClass}
         >
           {primaryLabel}
         </button>

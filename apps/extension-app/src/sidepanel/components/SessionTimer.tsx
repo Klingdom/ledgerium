@@ -52,7 +52,7 @@ export function SessionTimer({ startedAt, isPaused }: SessionTimerProps) {
   }, [startedAt, isPaused])
 
   return (
-    <span className="text-xs font-mono text-gray-400 tabular-nums">
+    <span className="text-xs font-mono text-gray-600 tabular-nums">
       {formatDuration(elapsed)}
     </span>
   )

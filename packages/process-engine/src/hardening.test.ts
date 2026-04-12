@@ -185,7 +185,7 @@ describe('Engine Resilience', () => {
 
   it('handles workflow with missing page context', () => {
     const input = validInput({
-      derivedSteps: [step({ page_context: undefined })],
+      derivedSteps: [step({})],
     });
     const output = processSession(input);
     expect(output.processMap.phases.length).toBeGreaterThanOrEqual(0);

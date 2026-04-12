@@ -14,6 +14,8 @@ export const SITE_CONFIG = {
 export const EXTENSION_CONFIG = {
   /** Chrome Web Store URL — update when published */
   chromeStoreUrl: 'https://chrome.google.com/webstore/detail/ledgerium-ai/placeholder',
+  /** Direct download URL for the extension zip (sideload) */
+  directDownloadUrl: '/ledgerium-recorder-chrome-extension.zip',
   /** Minimum supported Chrome version */
   minChromeVersion: '120',
   /** Whether Firefox is supported (future) */
