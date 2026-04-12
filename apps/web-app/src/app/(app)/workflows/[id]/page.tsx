@@ -27,6 +27,7 @@ import { formatDuration, formatDate, formatConfidence } from '@/lib/format';
 import { track, trackActivation } from '@/lib/analytics';
 import { completeStep } from '@/lib/onboarding';
 import { WorkflowTab } from '@/components/detail/WorkflowTab';
+import { WorkflowPageShell } from '@/components/workflow-view/WorkflowPageShell';
 import { SOPTab } from '@/components/detail/SOPTab';
 import { ReportTab } from '@/components/detail/ReportTab';
 import { EvidenceTab } from '@/components/detail/EvidenceTab';
@@ -283,12 +284,17 @@ export default function WorkflowDetailPage() {
 
       {/* Tab content */}
       {activeTab === 'workflow' && (
-        <WorkflowTab
+        <WorkflowPageShell
           processOutput={processOutput}
           processMap={processMap}
-          templateArtifacts={processMapTemplates}
-          defaultTemplate={templateSelection?.processMap?.template}
-          workflowId={id}
+          sopArtifact={sopArtifact}
+          workflowRecord={{
+            id: workflow.id,
+            title: workflow.title,
+            confidence: workflow.confidence,
+            createdAt: workflow.createdAt,
+            status: workflow.status ?? 'active',
+          }}
         />
       )}
       {activeTab === 'sop' && (
