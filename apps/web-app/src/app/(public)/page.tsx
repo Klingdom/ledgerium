@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -56,6 +57,23 @@ export default function HomePage() {
             </div>
             <p className="mt-4 text-xs text-gray-400">
               Free to start. No credit card required.
+            </p>
+          </div>
+
+          {/* Hero product screenshot */}
+          <div className="mt-16 mx-auto max-w-5xl px-4 sm:px-6">
+            <div className="rounded-xl border border-gray-200 overflow-hidden shadow-lg shadow-gray-200/50 bg-white">
+              <Image
+                src="/img/screenshot-dashboard.png"
+                alt="Ledgerium AI dashboard showing recorded workflows with process intelligence metrics"
+                width={1200}
+                height={700}
+                className="w-full h-auto"
+                priority
+              />
+            </div>
+            <p className="text-center text-xs text-gray-400 mt-3">
+              Your workflow library — every recording becomes structured documentation
             </p>
           </div>
         </div>

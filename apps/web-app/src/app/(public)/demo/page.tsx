@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import {
   Play,
@@ -24,6 +25,8 @@ const STEPS = [
     title: 'Start recording',
     what: 'Open the Ledgerium sidebar in Chrome. Name the workflow — "Create purchase order," "Process expense report," "Onboard new vendor." Click Record.',
     result: 'The extension starts capturing silently. A live step feed shows your progress as you work.',
+    screenshot: '/img/screenshot-upload.png',
+    screenshotAlt: 'Ledgerium upload workflow interface',
   },
   {
     step: 2,
@@ -31,6 +34,8 @@ const STEPS = [
     title: 'Do the workflow normally',
     what: 'Navigate your ERP, CRM, or internal tools. Fill forms, click buttons, switch between systems. Work exactly as you normally would.',
     result: 'Every click, form entry, and navigation is captured as structured data. Multi-system, multi-tab workflows are fully supported.',
+    screenshot: '/img/screenshot-dashboard.png',
+    screenshotAlt: 'Ledgerium dashboard showing recorded workflows with metrics',
   },
   {
     step: 3,
@@ -38,6 +43,8 @@ const STEPS = [
     title: 'Stop and review',
     what: 'Click Stop. The engine segments your session into logical workflow steps with timing, system context, and confidence scores.',
     result: 'You see your workflow as structured steps — not a video to watch. Each step traces to specific observed actions.',
+    screenshot: '/img/screenshot-workflow.png',
+    screenshotAlt: 'Ledgerium workflow detail showing structured steps and process map',
   },
   {
     step: 4,
@@ -45,6 +52,8 @@ const STEPS = [
     title: 'Get your SOP instantly',
     what: 'Ledgerium generates a complete SOP with step-by-step instructions, system context, expected outcomes, and a visual process map showing phases and transitions.',
     result: 'A ready-to-share SOP with prerequisites, warnings, and completion criteria — generated from evidence, not memory.',
+    screenshot: '/img/screenshot-sop.png',
+    screenshotAlt: 'Ledgerium generated SOP with step-by-step instructions and roles',
   },
   {
     step: 5,
@@ -52,6 +61,8 @@ const STEPS = [
     title: 'Build your workflow library',
     what: 'Every recording syncs to your searchable library. Find any workflow by title, system, or date. Keep your team\'s process documentation always up to date.',
     result: 'When the process changes, record it again. The new SOP replaces the old one. Documentation stays current automatically.',
+    screenshot: '/img/screenshot-process-groups.png',
+    screenshotAlt: 'Ledgerium process groups showing workflow families and variants',
   },
 ];
 
@@ -75,7 +86,7 @@ export default function DemoPage() {
       <section className="py-16 bg-white border-t border-gray-100">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <div className="space-y-20">
-            {STEPS.map(({ step, icon: Icon, title, what, result }) => (
+            {STEPS.map(({ step, icon: Icon, title, what, result, screenshot, screenshotAlt }) => (
               <div key={step} className="grid grid-cols-1 md:grid-cols-5 gap-8 items-start">
                 {/* Text — 3 cols */}
                 <div className={`md:col-span-3 ${step % 2 === 0 ? 'md:order-2' : ''}`}>
@@ -96,13 +107,17 @@ export default function DemoPage() {
                   </div>
                 </div>
 
-                {/* Visual — 2 cols */}
+                {/* Screenshot — 2 cols */}
                 <div className={`md:col-span-2 ${step % 2 === 0 ? 'md:order-1' : ''}`}>
-                  <div className="rounded-xl bg-gray-50 border border-gray-200 aspect-[4/3] flex flex-col items-center justify-center p-6">
-                    <Icon className="h-8 w-8 text-gray-300 mb-2" />
-                    <p className="text-[11px] text-gray-400 text-center font-medium">
-                      Step {step}: {title}
-                    </p>
+                  <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow bg-white">
+                    <Image
+                      src={screenshot}
+                      alt={screenshotAlt}
+                      width={600}
+                      height={450}
+                      className="w-full h-auto"
+                      priority={step <= 2}
+                    />
                   </div>
                 </div>
               </div>
