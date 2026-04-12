@@ -1,10 +1,174 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+
+  "agent": "coordinator",
+
   "permissions": {
+    "allow": [
+      "Read(./**)",
+      "Read(~/.gitconfig)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(ls *)",
+      "Bash(find *)",
+      "Bash(cat *)",
+      "Bash(jq *)",
+      "Bash(node --version)",
+      "Bash(npm --version)",
+      "Bash(python --version)",
+      "Bash(python3 --version)",
+      "Bash(pnpm --version)",
+      "Bash(npm run lint)",
+      "Bash(npm run test)",
+      "Bash(npm run test *)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm test)",
+      "Bash(pnpm test *)",
+      "Bash(pytest)",
+      "Bash(pytest *)"
+    ],
     "deny": [
       "Read(./.env)",
       "Read(./.env.*)",
-      "Read(./secrets/**)"
+      "Read(./secrets/**)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)",
+      "Read(./**/*id_rsa*)",
+      "Edit(./package-lock.json)",
+      "Edit(./pnpm-lock.yaml)",
+      "Edit(./yarn.lock)",
+      "Write(./package-lock.json)",
+      "Write(./pnpm-lock.yaml)",
+      "Write(./yarn.lock)",
+      "Edit(./.env)",
+      "Edit(./.env.*)",
+      "Write(./.env)",
+      "Write(./.env.*)",
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(rm -rf *)",
+      "Bash(sudo *)",
+      "Bash(chmod 777 *)",
+      "Bash(git push *)",
+      "Bash(git reset --hard *)"
+    ]
+  },
+
+  "env": {
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
+    "LEDGERIUM_MODE": "1",
+    "LEDGERIUM_REQUIRE_ARTIFACTS": "1",
+    "LEDGERIUM_REQUIRE_METRICS": "1",
+    "LEDGERIUM_CHANGELOG_PATH": ".claude/audit/change-log.md",
+    "LEDGERIUM_AUDIT_LOG_PATH": ".claude/audit/tool-events.jsonl"
+  },
+
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p \"$CLAUDE_PROJECT_DIR/.claude/audit\" && echo 'Reminder: run as an agentic product team. Coordinator owns sequencing. Specialists own execution. No build without upstream artifacts. No launch without metrics. Prefer deterministic, traceable, measurable changes.'"
+          }
+        ]
+      }
+    ],
+
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf '{\"ts\":\"%s\",\"event\":\"user_prompt_submit\"}\\n' \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\" >> \"$CLAUDE_PROJECT_DIR/.claude/audit/tool-events.jsonl\""
+          }
+        ]
+      }
+    ],
+
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(jq -r '.tool_input.file_path // empty'); case \"$FILE\" in *'.env'*|*'/secrets/'*|*'.pem'|*'.key'|*'id_rsa'*) echo \"Blocked: protected file path $FILE\" >&2; exit 2;; esac; exit 0"
+          },
+          {
+            "type": "command",
+            "command": "FILE=$(jq -r '.tool_input.file_path // empty'); if echo \"$FILE\" | grep -Eq '/(api|routes|services|controllers|app|src)/|\\.(ts|tsx|js|jsx|py)$'; then for f in PRD.md ARCHITECTURE.md API_SPEC.md; do [ -f \"$CLAUDE_PROJECT_DIR/$f\" ] || { echo \"Blocked: missing required artifact $f before code changes\" >&2; exit 2; }; done; fi; exit 0"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CMD=$(jq -r '.tool_input.command // empty'); case \"$CMD\" in *'curl '*|*'wget '*|*'rm -rf '*|*'sudo '*|*'git push '*|*'git reset --hard '*) echo \"Blocked command by project policy: $CMD\" >&2; exit 2;; esac; exit 0"
+          },
+          {
+            "type": "command",
+            "command": "CMD=$(jq -r '.tool_input.command // empty'); printf '{\"ts\":\"%s\",\"event\":\"pre_bash\",\"command\":%s}\\n' \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\" \"$(printf '%s' \"$CMD\" | jq -Rs .)\" >> \"$CLAUDE_PROJECT_DIR/.claude/audit/tool-events.jsonl\""
+          }
+        ]
+      }
+    ],
+
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(jq -r '.tool_input.file_path // empty'); printf '{\"ts\":\"%s\",\"event\":\"file_change\",\"file\":%s}\\n' \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\" \"$(printf '%s' \"$FILE\" | jq -Rs .)\" >> \"$CLAUDE_PROJECT_DIR/.claude/audit/tool-events.jsonl\""
+          },
+          {
+            "type": "command",
+            "command": "FILE=$(jq -r '.tool_input.file_path // empty'); if [ -f \"$CLAUDE_PROJECT_DIR/package.json\" ]; then case \"$FILE\" in *.ts|*.tsx|*.js|*.jsx|*.json|*.md) npm run lint >/dev/null 2>&1 || true;; esac; fi"
+          },
+          {
+            "type": "command",
+            "command": "mkdir -p \"$CLAUDE_PROJECT_DIR/.claude/audit\"; touch \"$CLAUDE_PROJECT_DIR/.claude/audit/change-log.md\"; FILE=$(jq -r '.tool_input.file_path // empty'); printf '- %s UTC | changed `%s`\\n' \"$(date -u +%Y-%m-%d %H:%M:%S)\" \"$FILE\" >> \"$CLAUDE_PROJECT_DIR/.claude/audit/change-log.md\""
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CMD=$(jq -r '.tool_input.command // empty'); printf '{\"ts\":\"%s\",\"event\":\"post_bash\",\"command\":%s}\\n' \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\" \"$(printf '%s' \"$CMD\" | jq -Rs .)\" >> \"$CLAUDE_PROJECT_DIR/.claude/audit/tool-events.jsonl\""
+          }
+        ]
+      }
+    ],
+
+    "PostToolUseFailure": [
+      {
+        "matcher": "Bash|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf '{\"ts\":\"%s\",\"event\":\"tool_failure\"}\\n' \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\" >> \"$CLAUDE_PROJECT_DIR/.claude/audit/tool-events.jsonl\""
+          }
+        ]
+      }
+    ],
+
+    "SessionEnd": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Session ended. Before next session, confirm artifacts, unresolved blockers, and measurement plan remain current.'"
+          }
+        ]
+      }
     ]
   }
 }
