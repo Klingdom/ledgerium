@@ -286,6 +286,7 @@ export function WorkflowPageShell({
           {mode === 'variants' && (
             <WorkflowVariantsMap
               graph={viewModel.graph}
+              intelligence={processOutput?.intelligence ?? processOutput?.processDefinition?.intelligence}
               onSelectNode={handleSelectNode}
             />
           )}
