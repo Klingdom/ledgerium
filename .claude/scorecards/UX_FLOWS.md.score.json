@@ -1,0 +1,15 @@
+{
+  "artifact": "UX_FLOWS.md",
+  "completeness": 5,
+  "clarity": 2,
+  "alignment": 4,
+  "actionability": 2,
+  "confidence": 3,
+  "known_gaps": [
+    "Artifact lacks explicit next steps, owners, status, or checklist language."
+  ],
+  "notes": [
+    "Artifact is very short; may be a stub."
+  ],
+  "average": 3.25
+}
