@@ -1,290 +1,280 @@
-# 🧠 AI Product Operating System (Ledgerium-Aligned)
+# CLAUDE.md
 
-## 0. Core Philosophy (NON-NEGOTIABLE)
+## Purpose
 
-We are not building features.
-We are building a **measurable system that produces outcomes.**
+This repository is operated as an **agentic product team** building a SaaS product using deterministic, artifact-driven workflows.
 
-All work must be:
-- Deterministic (repeatable)
-- Traceable (input → transformation → output)
-- Measurable (before vs after)
-- Reviewable (artifacts, not opinions)
+The goal is not just to ship code.
+The goal is to produce **working, measurable, traceable outcomes**.
 
-If it is not documented, it does not exist.
-If it is not measurable, it does not ship.
+Use this file for durable operating rules only.
 
 ---
 
-## 1. System Model (How This Team Works)
+## Core Principles
 
-This is an **Agentic Product Team**, not a chat session.
+1. **Deterministic over vague**
+   - Prefer explicit contracts, defined artifacts, and repeatable steps.
 
-### Roles:
-- Coordinator = orchestration + sequencing
-- Specialist Agents = execution units
+2. **Traceable over black-box**
+   - All meaningful work should map from input → transformation → output.
 
-### Rules:
-- No agent does “everything”
-- Each agent operates within a defined scope
-- All work flows through **artifacts**
-- No hidden decisions
+3. **Measurable over “done”**
+   - Features should define expected outcomes and success metrics.
 
----
+4. **Small, reversible changes**
+   - Prefer narrow increments over broad rewrites.
 
-## 2. Standard Work Lifecycle (MANDATORY FLOW)
+5. **Artifacts are the interface**
+   - Agents coordinate through written artifacts, not implicit assumptions.
 
-Every feature, change, or system must follow:
-
-### Phase 1: Define
-- PRD created
-- Problem clearly stated
-- Success metrics defined
-
-### Phase 2: Design
-- Architecture defined
-- Data model defined
-- UX flows defined (if applicable)
-
-### Phase 3: Build
-- Backend + Frontend implemented
-- APIs follow spec exactly
-
-### Phase 4: Validate
-- QA verifies functionality
-- Edge cases tested
-- Security reviewed
-
-### Phase 5: Deploy
-- DevOps validates environment
-- Deployment is repeatable
-
-### Phase 6: Measure
-- Metrics defined and tracked
-- Baseline vs post-change comparison
+6. **Simplicity wins**
+   - Choose the simplest architecture and implementation that satisfies the current need.
 
 ---
 
-## 3. Artifact-Driven Development (CRITICAL)
+## Team Operating Model
 
-All work must produce artifacts.
+The default operating pattern is:
 
-### Required Artifacts:
+1. Coordinator sequences work
+2. Specialist agents execute within role boundaries
+3. Each phase produces artifacts
+4. Downstream work must use upstream artifacts
+5. QA and validation happen before claiming completion
+6. Metrics are defined before launch
 
-- PRD.md → problem, scope, success metrics
-- ARCHITECTURE.md → system design
-- API_SPEC.md → contract (source of truth)
-- DATA_MODEL.md → schema definition
-- UX_FLOWS.md → user journeys
-- TEST_PLAN.md → validation strategy
-- SECURITY_REVIEW.md → risk assessment
-- LAUNCH_PLAN.md → go-to-market
-- METRICS.md → KPIs + instrumentation
-- CHANGELOG.md → what changed and why
-
-### Rules:
-- Artifacts are the interface between agents
-- No implementation without upstream artifacts
-- No deployment without validation artifacts
+Do not let one agent “do everything” if a specialist exists.
 
 ---
 
-## 4. Deterministic Execution (Ledgerium Principle)
+## Standard Delivery Flow
 
-All workflows must be:
+Use this sequence unless there is a strong reason not to:
 
-INPUT → TRANSFORMATION → OUTPUT
+1. Define
+2. Design
+3. Build
+4. Validate
+5. Deploy
+6. Measure
 
-### Example:
-PRD → Architecture → Code → Tests → Deployment → Metrics
+### Define
+Create or update:
+- `PRD.md`
+- `MVP_SCOPE.md`
+- `ACCEPTANCE_CRITERIA.md`
+- `SUCCESS_METRICS.md`
 
-Each step must:
-- Reference its input artifact
-- Produce a new output artifact
-- Be independently reviewable
+### Design
+Create or update:
+- `ARCHITECTURE.md`
+- `DATA_MODEL.md`
+- `API_SPEC.md`
+- `UX_FLOWS.md` when user-facing behavior matters
 
----
+### Build
+Implement:
+- backend
+- frontend
+- tests
+- migrations if needed
 
-## 5. Agent Responsibilities (Strict Boundaries)
+### Validate
+Create or update:
+- `TEST_PLAN.md`
+- `BUG_REPORTS.md`
+- `RELEASE_READINESS.md`
 
-### Product Manager
-- Defines problem + scope
-- Owns PRD + success metrics
+### Deploy
+Create or update:
+- `DEPLOYMENT_PLAN.md`
+- `RUNBOOK.md`
+- `ENVIRONMENT_CHECKLIST.md`
 
-### Architect
-- Owns system design
-- Defines APIs + data models
-
-### UX
-- Owns flows + usability
-
-### Backend
-- Owns APIs + business logic
-
-### Frontend
-- Owns UI + integration
-
-### QA
-- Owns validation + defects
-
-### Security
-- Owns risk identification
-
-### DevOps
-- Owns deployment + reliability
-
-### Growth
-- Owns messaging + acquisition
-
-### Analytics
-- Owns measurement + insights
-
----
-
-## 6. Handoff Rules (NO CHAOS)
-
-Every handoff must include:
-
-- Input artifacts
-- Expected output
-- Acceptance criteria
-
-### Example:
-Backend receives:
-- ARCHITECTURE.md
-- API_SPEC.md
-
-Backend must produce:
-- Working endpoints
-- Tests
-- Updated docs
+### Measure
+Create or update:
+- `METRICS.md`
+- `EVENT_TRACKING_PLAN.md`
+- `DASHBOARD_SPEC.md`
 
 ---
 
-## 7. Definition of Done (STRICT)
+## Required Build Gates
 
-Work is NOT done until:
+Do not proceed casually across phases.
 
-- Code is implemented
-- Tests pass
-- QA validates behavior
-- Security risks reviewed
-- Deployment is successful
-- Metrics are defined
+### Before major code changes
+Expect these to exist:
+- `PRD.md`
+- `ARCHITECTURE.md`
+- `API_SPEC.md`
 
----
+### Before frontend implementation
+Expect:
+- relevant product requirements
+- `UX_FLOWS.md` for important user-facing changes
 
-## 8. Measurement System (MANDATORY)
+### Before release
+Expect:
+- tests
+- QA validation
+- deployment steps
+- metrics definition
 
-Every feature must define:
-
-### Before State:
-- Current behavior
-- Baseline metrics
-
-### After State:
-- Expected improvement
-- Measurable outcome
-
-### Examples:
-- Time saved
-- Error reduction
-- Conversion increase
-- Latency improvement
-
-No metrics → No deployment
+If critical artifacts are missing, stop and create or request them.
 
 ---
 
-## 9. Change Control (TRACEABILITY)
+## Coding Conventions
 
-Every change must include:
+### General
+- Prefer readable code over clever code
+- Keep functions focused and small
+- Use explicit naming
+- Minimize hidden side effects
+- Avoid unnecessary dependencies
+- Do not introduce large frameworks without justification
 
-- What changed
-- Why it changed
-- Expected impact
-- Linked artifacts
+### Types and Contracts
+- Prefer typed interfaces where supported
+- Keep API contracts explicit
+- Do not silently change schema or payload shapes
+- Document contract changes in the relevant artifact
 
-All changes logged in:
-- CHANGELOG.md
-
----
-
-## 10. Simplicity Bias (CRITICAL)
-
-Always prefer:
-- Simpler architecture
-- Fewer dependencies
-- Faster iteration
-- Clearer logic
-
-Avoid:
-- Premature scaling
-- Overengineering
-- Abstract frameworks without need
+### Changes
+- Make the smallest change that solves the problem
+- Preserve existing repo patterns unless there is a good reason to improve them
+- Leave surrounding code cleaner when practical
+- Update related docs when behavior or architecture changes
 
 ---
 
-## 11. Tooling + Stack Defaults
+## Architecture Principles
 
-### Frontend
-- Next.js (TypeScript)
-
-### Backend
-- FastAPI or Node
-
-### Database
-- Postgres
-
-### Auth
-- Clerk or Auth.js
-
-### Infra
-- Vercel + Render/Fly/AWS
-
-### Payments
-- Stripe
+- Prefer modular monolith over premature microservices
+- Prefer explicit service boundaries over magic coupling
+- Keep data models simple and durable
+- Design for operability, not just feature completion
+- Protect data integrity and permission boundaries
+- Handle empty, loading, success, and error paths intentionally
+- Use background jobs only when synchronous flow is clearly inappropriate
 
 ---
 
-## 12. Execution Principles (HOW AGENTS THINK)
+## Quality Principles
 
-Agents must:
-- Break problems into steps
-- Prefer explicit over implicit
-- Validate before proceeding
-- Ask for clarification when needed
-- Avoid assumptions
+Do not claim work is complete unless:
 
----
+- behavior matches requirements
+- important paths are tested
+- edge cases are considered
+- visible UI states are handled
+- known risks are called out explicitly
 
-## 13. Failure Modes (AVOID THESE)
-
-- Skipping PRD
-- Coding without architecture
-- No test coverage
-- No metrics defined
-- Overlapping agent responsibilities
-- Silent decisions (not documented)
+QA should validate against artifacts, not assumptions.
 
 ---
 
-## 14. Operating Mode
+## Measurement Principles
 
-We are:
-- A Continuous Improvement system
-- A measurable execution engine
-- A deterministic product factory
+Every meaningful feature should answer:
 
-NOT:
-- A brainstorming tool
-- A chat-based coding toy
-- A black-box AI system
+- What problem is being improved?
+- What is the baseline?
+- What should improve after release?
+- How will we know?
+
+Useful measures include:
+- time saved
+- error reduction
+- activation or conversion
+- retention or repeat usage
+- latency or reliability improvements
+
+If no one will act on a metric, do not track it.
 
 ---
 
-## 15. North Star
+## Documentation Rules
 
-Ship fast.
-Measure everything.
-Improve continuously.
+Documentation should be:
+- short
+- explicit
+- decision-useful
+- easy for downstream agents to use
+
+Do not write long narrative docs when a precise checklist, contract, or matrix is better.
+
+When updating behavior, also update the most relevant artifact.
+
+---
+
+## Security and Safety Defaults
+
+- Treat secrets, tokens, keys, and `.env` files as protected
+- Do not expose sensitive values in code or docs
+- Use least privilege where possible
+- Flag auth, permissions, PII, and logging risks explicitly
+- Do not assume production secrets or infrastructure exist
+
+---
+
+## What Belongs in CLAUDE.md
+
+Keep only durable repo-level memory here:
+- coding conventions
+- architecture principles
+- operating workflow
+- required artifacts
+- stable quality standards
+
+Do not put transient project facts here.
+
+---
+
+## What Belongs in Agent Memory Instead
+
+Use agent memory for durable but narrower learnings such as:
+- payment flow specifics
+- auth file locations
+- test commands
+- folder-specific patterns
+- deployment quirks
+- integration caveats
+
+Examples:
+- “Payments use Stripe Checkout sessions”
+- “Auth middleware lives in `/lib/auth`”
+- “Run web tests from `/apps/web`”
+- “API handlers live under `/src/server/routes`”
+
+Only store learnings that are likely to matter again.
+
+---
+
+## How to Work in This Repo
+
+When given a new task:
+
+1. Identify the phase
+2. Read the relevant artifacts
+3. Check for missing dependencies
+4. Make the smallest correct change
+5. Validate the result
+6. Update the relevant artifact if behavior changed
+7. State blockers, risks, and next step clearly
+
+---
+
+## North Star
+
+Build software that is:
+- useful
+- correct
+- measurable
+- easy to evolve
+
+Fast is good.
+Traceable is better.
+Reliable learning is best.
