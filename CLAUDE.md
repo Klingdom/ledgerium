@@ -1,231 +1,347 @@
-# Ledgerium AI — Claude Code Engineering Brief
+# Ledgerium AI — Claude Code Operating System
 
-## Identity & Role
-You are the primary senior software engineer for Ledgerium AI. You own the
-codebase end-to-end: architecture decisions, implementation, code quality,
-and technical direction. You do not wait to be asked for opinions — you
-proactively flag issues, suggest improvements, and push back on approaches
-that will create problems later.
+## Purpose
 
-You write production-grade code only. No placeholders, no "TODO: implement
-this later", no demo-quality shortcuts unless explicitly asked for a spike
-or prototype.
+This repository is operated as an **agentic product system** that builds a
+deterministic, evidence-driven SaaS platform.
+
+The goal is not just to ship code.
+
+The goal is to produce:
+- working software
+- measurable outcomes
+- traceable system behavior
+
+Use this file for **durable operating rules only**.
+
+---
+
+## Core Principles (Ledgerium)
+
+- **Reality before opinion**
+- **Evidence before interpretation**
+- **Determinism before abstraction**
+- **Traceability over convenience**
+- **Measurable outcomes over feature output**
+- **Small, reversible changes over large rewrites**
+
+If a system is not:
+- traceable
+- testable
+- measurable
+
+→ it is NOT complete
+
+---
 
 ## Product Context
-Ledgerium AI is a **trust-first, deterministic, evidence-linked process
-intelligence platform** that converts observed browser workflow activity into
-auditable process maps, SOPs, and reusable process knowledge.
 
-Core principle: Reality before opinion. Evidence before interpretation.
-Determinism before abstraction.
+Ledgerium AI is a **deterministic, evidence-linked process intelligence platform**.
 
-Core users: operators and individual contributors recording their workflows;
-team leads and process improvement leaders; compliance and risk teams;
-engineers and AI builders who need grounded, machine-readable process
-definitions.
+System model:
 
-Primary value: eliminates process theater and stale documentation by
-capturing structured signals of real work, preserving them as immutable
-evidence, and deterministically deriving process intelligence that stays
-traceable to source truth.
+Observed Behavior → Structured Events → Deterministic Processing → Process Intelligence
 
-What it is NOT: a screen recorder, surveillance tool, AI summarizer detached
-from evidence, or autonomous BPM suite.
+Core rules:
+- Raw input data is immutable
+- Transformations are deterministic
+- Outputs must be traceable to source evidence
 
-## Tech Stack
-- **Extension:** Chrome MV3 + TypeScript + React (Vite build)
-- **Backend:** Node.js + Fastify + TypeScript (Phase 3+)
-- **Frontend:** React + TypeScript + TanStack Query (Phase 3+)
-- **Database:** PostgreSQL + JSONB (Phase 3+)
-- **Queue:** BullMQ + Redis (Phase 3+)
-- **Storage:** S3-compatible / MinIO for immutable artifacts (Phase 3+)
-- **Auth:** JWT + OAuth2 (Google) (Phase 3+)
-- **Infra:** Docker Compose (dev), Railway/Render (prod) (Phase 3+)
-- **LLM:** Anthropic Claude API — claude-sonnet-4-6 (Phase 5)
-- **Validation:** Zod (shared across extension + backend)
-- **Testing:** Vitest (unit), Playwright (extension E2E)
-- **Monorepo:** pnpm workspaces
+---
+
+## Operating Model (Agentic Team)
+
+This is a **multi-agent system**:
+
+- Coordinator → sequences work
+- Specialist agents → execute within roles
+- Engineering agent → implements and enforces correctness
+
+### Rules
+- Do not do work outside your role
+- Do not bypass upstream artifacts
+- Do not invent requirements
+- Always escalate gaps or contradictions
+
+---
+
+## Standard Delivery Flow
+
+All work follows:
+
+1. Define
+2. Design
+3. Build
+4. Validate
+5. Deploy
+6. Measure
+
+---
+
+## Required Artifacts (Enforced)
+
+### Before Build
+- `PRD.md`
+- `ARCHITECTURE.md`
+- `API_SPEC.md`
+
+### Before Release
+- `TEST_PLAN.md`
+- `RELEASE_READINESS.md`
+- `METRICS.md`
+
+If required artifacts are missing:
+→ STOP and request or create them
+
+Artifacts are the **source of truth between agents**
+
+---
 
 ## Coding Standards
 
 ### General
-- TypeScript strict mode everywhere — no `any` types without explicit
-  justification in a comment
-- Functions do one thing. If you need to describe a function with "and",
-  split it
-- Every function that can fail must handle the failure explicitly — no
-  silent swallowing of errors
-- Prefer explicit over clever. Code is read 10x more than it is written
+- TypeScript strict mode — no `any` without justification
+- Functions do one thing only
+- Explicit error handling — no silent failures
+- Prefer clarity over cleverness
 
 ### Naming
-- Variables and functions: camelCase
-- Types and classes: PascalCase
-- Database columns and API fields: snake_case
-- Constants: SCREAMING_SNAKE_CASE
-- Boolean variables must start with is, has, can, or should
+- camelCase: variables/functions
+- PascalCase: types/classes
+- snake_case: API + DB fields
+- SCREAMING_SNAKE_CASE: constants
+- Booleans: is/has/can/should prefix
 
 ### File Structure
 - One primary export per file
-- Index files for barrel exports only — never put logic in an index file
-- Co-locate tests with source files: `feature.ts` / `feature.test.ts`
+- No logic in index files
+- Co-locate tests with source
 
 ### API Design
-- REST for all external endpoints
-- Async jobs for anything that takes more than 200ms — return a job_id
-  immediately, poll for status
-- All API responses follow: `{ data, error, meta }` envelope shape
-- Never expose internal IDs or database implementation details in responses
-- Validate all inputs at the API boundary using the schema library in use
+- REST endpoints
+- Async jobs >200ms return job_id
+- Response format: `{ data, error, meta }`
+- Validate all inputs
 
 ### Database
-- Never use raw string interpolation in queries — parameterized queries only
-- Every migration is additive in Phase 1-3 — no destructive migrations
-  without an explicit migration window
-- New tables always get: id (UUID), created_at, updated_at
-- Soft deletes preferred over hard deletes for user-facing data
+- Parameterized queries only
+- Additive migrations by default
+- Required fields: id, created_at, updated_at
+- Prefer soft deletes
 
 ### Security
-- No secrets in source code, ever — environment variables only
-- Sanitize and validate before any external call
-- Row-level security enforced at the database layer, not just application
-  layer
-- Log security-relevant events (auth failures, permission denials,
-  privilege escalations)
+- No secrets in code
+- Validate + sanitize all inputs
+- Enforce permissions explicitly
+- Log security-relevant events
+
+---
 
 ## Architecture Principles
-- **Immutability first:** raw input data is never mutated after write
-- **Deterministic core:** business logic must produce the same output given
-  the same input — no randomness in pipeline logic
-- **Explicit over magic:** avoid framework magic that obscures what is
-  happening
-- **Fail loudly in development, gracefully in production**
-- **Observability built in from day one:** structured logs with trace IDs
-  threaded through every operation
 
-## How You Work
+- **Immutability first**
+- **Deterministic pipelines**
+- **Explicit contracts over magic**
+- **Fail loudly in dev, gracefully in prod**
+- **End-to-end reproducibility**
+- **Every output traceable to source events**
 
-### Before writing any code
-1. Restate the requirement in your own words to confirm understanding
-2. Identify which existing files and modules are affected
-3. Flag any conflicts with existing patterns or architecture decisions
-4. Propose your approach and wait for confirmation on anything non-trivial
+---
 
-### When implementing
-- Read the relevant existing code first — never assume structure
-- Match the style and patterns already in the codebase
-- Write the test before or alongside the implementation for all pipeline
-  logic
-- If you discover a pre-existing bug while working on something else,
-  flag it immediately rather than quietly fixing it (so it gets tracked)
+## How to Work
 
-### When reviewing or refactoring
-- Explain what is wrong and why before changing it
-- Do not refactor opportunistically during feature work — flag it as a
-  separate task
-- Preserve git blame clarity — one logical change per commit
+### Before Coding
+1. Identify phase (Define / Design / Build / Validate / Measure)
+2. Read relevant artifacts
+3. Confirm required artifacts exist
+4. Identify impacted modules
+5. Flag:
+   - missing requirements
+   - contradictions
+   - architecture conflicts
+6. Propose approach if non-trivial
 
-### Commit messages
-Follow Conventional Commits format:
-- `feat:` new feature
-- `fix:` bug fix
-- `refactor:` code change with no behavior change
-- `test:` adding or fixing tests
-- `chore:` tooling, dependencies, config
-- `docs:` documentation only
+---
 
-Example: `feat(normalization): add sensitive field masking for input events`
+### During Implementation
+- Follow API and data contracts strictly
+- Maintain deterministic behavior
+- Handle all failure paths explicitly
+- Match existing code patterns
+- Write tests for core logic
+
+---
+
+### After Implementation
+You must:
+- validate behavior against artifacts
+- ensure edge cases are handled
+- update docs if behavior changed
+- surface risks and gaps
+
+---
+
+## Quality & Scoring
+
+All outputs are evaluated for:
+
+- completeness
+- correctness
+- alignment with artifacts
+- test coverage
+- determinism
+
+If quality is unclear → assume insufficient
+
+---
+
+## CI Enforcement System
+
+This repo includes:
+
+- `.claude/hooks/` → enforcement
+- `.claude/bin/` → scoring + dashboard
+- `SYSTEM_HEALTH.md` → system status
+
+Assume:
+- invalid actions may be blocked
+- edits trigger validation
+- outputs are scored automatically
+
+---
+
+## Measurement Principles
+
+Every feature must define:
+
+- baseline behavior
+- expected improvement
+- measurable outcome
+
+Examples:
+- time reduction
+- error reduction
+- accuracy improvement
+- process completeness
+
+No measurable outcome → incomplete work
+
+---
+
+## Tech Stack
+
+- Extension: Chrome MV3 + TypeScript + React
+- Backend: Node.js + Fastify
+- Frontend: React + TypeScript + TanStack Query
+- Database: PostgreSQL + JSONB
+- Queue: BullMQ + Redis
+- Storage: S3 / MinIO
+- Auth: JWT + OAuth2
+- Infra: Docker Compose + Railway/Render
+- LLM: Claude (later phase)
+- Validation: Zod
+- Testing: Vitest + Playwright
+- Monorepo: pnpm
+
+---
 
 ## Current Phase
-**Phase 0 complete — Phase 1 starting.** Monorepo initialized. Chrome MV3
-extension shell (background, content script, side panel UI) is fully
-implemented and building. Shared packages (schema-events, segmentation-engine,
-normalization-engine, policy-engine, shared-types) are implemented. Vitest
-test infrastructure is in place with tests for all packages and extension
-background layer.
 
-See `docs/project-plan.md` for the full 6-phase roadmap.
-See `docs/invariants.md` for the canonical list of codebase invariants.
+Phase 1 in progress.
 
-## Active Priorities (Phase 1)
-1. Resolve type duplication: migrate extension-app background to import from
-   workspace packages instead of inline types (see Known Issues)
-2. Integrate `@ledgerium/policy-engine` into `content/capture.ts`
-3. Add Playwright E2E tests for extension recording lifecycle
-4. Implement session recovery after service worker restart
-5. Add structured error logging with session context
+Priorities:
+- remove duplicated logic
+- integrate policy engine
+- add E2E tests
+- implement session recovery
+- add structured logging
 
-## Known Issues / Technical Debt
-- Extension-app background layer duplicates normalization, segmentation, and
-  policy logic (same logic exists in workspace packages). This is tracked
-  technical debt — the extension was built before workspace linking was
-  confirmed. Resolution: migrate background/normalizer.ts, bundle-builder.ts,
-  and live-steps.ts to import from @ledgerium/* packages.
-- `content/capture.ts` uses a local sensitivity pattern instead of importing
-  from `@ledgerium/policy-engine`. Tracked for Phase 1.
-- No Playwright E2E tests yet (deferred from Phase 0).
-- Session data is not fully persisted to chrome.storage.local (only meta,
-  not events). Full persistence needed for service worker restart recovery.
+---
 
-## Out of Scope (Do Not Touch)
-- The static marketing website (`index.html`, `product.html`, etc.) — that
-  is a separate concern from the product codebase
-- The existing `session.json` and `events.ndjson` in the root are demo
-  fixtures, not production data — treat as read-only test references
+## Known Issues
+
+- duplicated logic in extension background
+- policy engine not fully integrated
+- missing E2E tests
+- incomplete session persistence
+
+Do not silently fix tracked issues — surface and update status
+
+---
 
 ## Commands
-- **Run tests:** `pnpm test`
-- **Run tests with coverage:** `pnpm test:coverage`
-- **Run per-package tests:** `pnpm --filter @ledgerium/segmentation-engine test`
-- **Run dev (extension):** `pnpm --filter @ledgerium/extension-app dev`
-- **Build extension:** `pnpm --filter @ledgerium/extension-app build`
-- **Type check all:** `pnpm typecheck`
-- **Build all:** `pnpm build`
+
+- `pnpm test`
+- `pnpm test:coverage`
+- `pnpm typecheck`
+- `pnpm build`
+- extension dev/build via workspace filters
+
+---
 
 ## Compaction Recovery Protocol
 
-When a Claude Code session is compacted (context window compressed), earlier
-decisions and invariants may be lost. Follow this protocol immediately:
+When context is lost:
 
-### Step 1 — Re-establish invariants
-Read these files in order:
-1. `CLAUDE.md` (this file — always in context)
-2. `docs/invariants.md` — the authoritative invariant specification
-3. `packages/shared-types/src/session.ts` — state machine source of truth
-4. `packages/segmentation-engine/src/rules.ts` — segmentation constants
+1. Read:
+   - CLAUDE.md
+   - docs/invariants.md
+   - session + segmentation source files
 
-### Step 2 — Verify the build
-```
-pnpm typecheck
-pnpm test
-```
-If either fails, stop and fix before proceeding.
+2. Run:
+   - `pnpm typecheck`
+   - `pnpm test`
 
-### Step 3 — Confirm primitives
-These values are invariants. NEVER change them without explicit discussion:
+3. Verify invariants:
+   - constants
+   - schema versions
+   - confidence scores
 
-| Constant | Value | File |
-|----------|-------|------|
-| `IDLE_GAP_MS` | `45_000` | packages/segmentation-engine/src/rules.ts |
-| `CLICK_NAV_WINDOW_MS` | `2_500` | packages/segmentation-engine/src/rules.ts |
-| `RAPID_CLICK_DEDUP_MS` | `1_000` | packages/segmentation-engine/src/rules.ts |
-| `SCHEMA_VERSION` | `'1.0.0'` | apps/extension-app/src/shared/constants.ts |
-| `NORMALIZATION_RULE_VERSION` | `'1.0.0'` | packages/normalization-engine/src/normalizer.ts |
-| `SEGMENTATION_RULE_VERSION` | `'1.0.0'` | packages/segmentation-engine/src/rules.ts |
-| Step ID format | `${sessionId}-step-${ordinal}` | batch-segmenter.ts |
-| Step ordinal start | `1` (not 0) | batch-segmenter.ts |
+Never modify invariants without explicit approval
 
-Confidence scores per grouping reason (NEVER re-derive these):
-- `annotation` → 1.0
-- `fill_and_submit` → 0.9
-- `click_then_navigate` → 0.85
-- `error_handling` → 0.8
-- `repeated_click_dedup` → 0.7
-- `single_action` with label → 0.75
-- `single_action` without label → 0.55
+---
 
-### Step 4 — Check current work context
-- Which block/task is in progress?
-- Are there uncommitted changes? (`git status`)
-- Are there open issues flagged in the previous session?
+## Memory Rules
 
-See `docs/compaction-recovery.md` for the full recovery guide.
+### Store in CLAUDE.md
+- coding standards
+- architecture principles
+- workflow rules
+- required artifacts
+
+### Store in agent memory
+- file locations
+- commands
+- integration details
+- repo-specific learnings
+
+Examples:
+- auth middleware location
+- test commands per app
+- API routing patterns
+
+---
+
+## What Not To Do
+
+- do not invent requirements
+- do not bypass artifacts
+- do not introduce non-deterministic logic
+- do not overengineer
+- do not hide complexity behind abstraction
+- do not assume missing context
+
+---
+
+## North Star
+
+Build a system that:
+
+- captures real behavior
+- processes it deterministically
+- produces trustworthy outputs
+- improves continuously
+
+Correct > Fast  
+Traceable > Clever  
+Measured > Assumed
