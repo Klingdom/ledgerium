@@ -48,6 +48,11 @@ export default function SignupPage() {
     }
 
     track({ event: 'signup_completed' });
+    // Identify new user in PostHog
+    try {
+      const { identifyAnalyticsUser } = await import('@/lib/analytics');
+      identifyAnalyticsUser(email, { email, signupDate: new Date().toISOString() });
+    } catch { /* non-blocking */ }
     router.push('/dashboard');
     router.refresh();
   }

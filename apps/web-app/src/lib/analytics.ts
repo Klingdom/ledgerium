@@ -13,7 +13,12 @@
  *
  * Event naming: snake_case, action-oriented, grouped by category
  * Metadata: consistent structure, no PII, useful for analysis
+ *
+ * PostHog integration: all track() calls also forward to PostHog
+ * when NEXT_PUBLIC_POSTHOG_KEY is configured in the environment.
  */
+
+import { captureEvent as posthogCapture, identifyUser as posthogIdentify, isPostHogEnabled } from './posthog';
 
 // ─── Event taxonomy ──────────────────────────────────────────────────────────
 
@@ -127,7 +132,19 @@ export function track(payload: AnalyticsEvent): void {
     console.debug('[analytics]', enriched.event, enriched);
   }
 
-  // Buffer for batch sending
+  // Forward to PostHog (if configured)
+  if (IS_BROWSER && isPostHogEnabled()) {
+    const { event: eventName, timestamp: _ts, url: _url, ...properties } = enriched;
+    posthogCapture(eventName, properties);
+
+    // Auto-identify on signup/login
+    if (eventName === 'signup_completed' || eventName === 'login_completed') {
+      // PostHog identify will be called separately via identifyUser()
+      // when the session is available
+    }
+  }
+
+  // Buffer for batch sending to our own analytics API
   if (IS_BROWSER) {
     const buffer: EnrichedEvent[] = (window as any).__ledgerium_events ?? [];
     buffer.push(enriched);
@@ -138,6 +155,16 @@ export function track(payload: AnalyticsEvent): void {
     if (buffer.length >= 10) {
       flushEvents();
     }
+  }
+}
+
+/**
+ * Identify the current user in PostHog after login/signup.
+ * Call this when the session becomes available.
+ */
+export function identifyAnalyticsUser(userId: string, properties?: Record<string, unknown>): void {
+  if (IS_BROWSER && isPostHogEnabled()) {
+    posthogIdentify(userId, properties);
   }
 }
 
