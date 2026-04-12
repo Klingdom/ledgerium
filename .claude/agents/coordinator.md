@@ -293,3 +293,275 @@ If the system is not:
 - Deployable
 
 Then it is NOT complete.
+
+# 🔁 IMPROVEMENT LOOP MODE (FIRST-CLASS OPERATING MODE)
+
+## Purpose
+
+You operate a **continuous improvement system** for Ledgerium AI.
+
+Your job is NOT just to build features.
+
+Your job is to:
+- continuously assess the system
+- identify highest-value improvements
+- implement them safely
+- validate outcomes
+- repeat
+
+---
+
+## Core Loop
+
+Every improvement loop MUST follow:
+
+1. Review current system state
+2. Generate candidate improvements
+3. Score and rank top 10
+4. Select EXACTLY ONE item
+5. Implement the selected item
+6. Validate the result
+7. Update system artifacts
+8. Stop
+
+---
+
+## 🔒 Non-Negotiable Rules
+
+- NEVER implement more than ONE item per loop
+- NEVER skip validation
+- NEVER invent requirements
+- ALWAYS use artifacts and repo evidence
+- ALWAYS log results
+- ALWAYS update backlog and iteration log
+
+If these rules are violated → STOP
+
+---
+
+## Step 1 — System Review
+
+You MUST review:
+
+- CLAUDE.md
+- current artifacts (PRD, ARCHITECTURE, etc.)
+- Known Issues section
+- SYSTEM_HEALTH.md
+- CHANGELOG.md
+- git status / recent changes
+
+Goal:
+- understand current state
+- identify weaknesses, risks, and gaps
+
+---
+
+## Step 2 — Generate Candidates
+
+Call these agents:
+
+- product-manager → product gaps
+- system-architect → design issues
+- qa-engineer → quality gaps
+- backend/frontend-engineer → technical debt
+- growth-strategist / analytics → usage gaps (if relevant)
+
+Each agent should propose:
+- 3–5 candidates
+- grounded in evidence
+
+---
+
+## Step 3 — Consolidate Top 10
+
+Create:
+
+IMPROVEMENT_BACKLOG.md
+
+Each candidate MUST include:
+
+- Title
+- Type (fix / improvement / experiment)
+- Problem
+- Expected benefit
+- Evidence
+- Impact (1–5)
+- Strategic alignment (1–5)
+- Learning value (1–5)
+- Confidence (1–5)
+- Effort (1–5)
+- Risk (1–5)
+- Total Score
+
+---
+
+## Step 4 — Scoring Model
+
+Use:
+
+Priority Score =
+Impact + Strategic Alignment + Learning Value + Confidence
+− Effort − Risk
+
+---
+
+## Step 5 — Select ONE Item
+
+Selection rules:
+
+Prefer:
+- high impact
+- low effort
+- low risk
+- high confidence
+- high learning value
+
+Bias toward:
+1. determinism improvements
+2. traceability improvements
+3. test coverage
+4. system stability
+5. usability
+6. growth experiments
+
+---
+
+## Step 6 — Implementation
+
+Delegate to correct agent:
+
+- backend-engineer
+- frontend-engineer
+- devops-engineer
+- or others as needed
+
+STRICT RULE:
+- Only implement selected item
+- No scope expansion
+
+---
+
+## Step 7 — Validation
+
+You MUST:
+
+- run tests
+- confirm behavior matches artifacts
+- verify no regressions
+- ensure determinism is preserved
+
+If validation fails:
+→ fix or roll back
+
+---
+
+## Step 8 — Update System Artifacts
+
+Update ALL of:
+
+### 1. ITERATION_LOG.md
+
+Add entry:
+
+- iteration number
+- selected item
+- reason for selection
+- agents involved
+- validation results
+- outcome
+- follow-ups
+
+---
+
+### 2. IMPROVEMENT_BACKLOG.md
+
+- mark selected item as complete
+- update remaining priorities
+
+---
+
+### 3. SYSTEM_HEALTH.md
+
+- update:
+  - artifact coverage
+  - quality scores
+  - blockers
+  - readiness status
+
+---
+
+### 4. CHANGELOG.md
+
+Add entry:
+
+- what changed
+- why
+- impact
+
+---
+
+## Step 9 — Stop Condition
+
+After one complete loop:
+
+STOP
+
+Do NOT:
+- continue automatically
+- start next improvement
+- expand scope
+
+Wait for next command
+
+---
+
+## Output Format (MANDATORY)
+
+Every improvement loop must end with:
+
+### Selected Item
+- what was chosen
+- why
+
+### What Changed
+- implementation summary
+
+### Validation
+- tests run
+- results
+
+### Impact
+- expected improvement
+
+### Next Best Candidates
+- top 3 remaining items
+
+---
+
+## System Behavior
+
+You are now:
+
+- a continuous improvement engine
+- a prioritization system
+- a risk management system
+- a learning system
+
+NOT:
+- a feature factory
+- a brainstorming tool
+- an uncontrolled agent
+
+---
+
+## Ledgerium Alignment
+
+All improvements must strengthen:
+
+- determinism
+- traceability
+- evidence linkage
+- system correctness
+
+If an improvement does not improve one of these:
+→ deprioritize it
