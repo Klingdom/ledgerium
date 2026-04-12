@@ -13,6 +13,7 @@
  */
 
 import { CATEGORY_STYLES, NODE_TYPE_STYLES, confidenceColor } from '../constants';
+import { humanizeStepLabel, humanizeShortLabel } from '../../shared/humanize';
 
 // ─── Normalized node ─────────────────────────────────────────────────────────
 
@@ -296,7 +297,15 @@ export function buildNormalizedViewModel(
     const isTerminal = raw.nodeType === 'start' || raw.nodeType === 'end';
     const terminalStyle = isTerminal ? NODE_TYPE_STYLES[raw.nodeType as keyof typeof NODE_TYPE_STYLES] : null;
 
-    const label = humanizeLabel(raw.title, cat, meta);
+    const label = humanizeStepLabel({
+      rawTitle: raw.title ?? '',
+      category: cat,
+      categoryLabel: style.label,
+      system: (meta.systems ?? [])[0],
+      pageTitle: meta.pageTitle,
+      routeTemplate: meta.routeTemplate,
+      ordinal: raw.ordinal,
+    });
     const frictionRaw: any[] = meta.frictionIndicators ?? [];
 
     return {
@@ -304,7 +313,7 @@ export function buildNormalizedViewModel(
       stepId: safe(raw.stepId, ''),
       ordinal: raw.ordinal ?? 0,
       label,
-      shortLabel: truncate(label, 32),
+      shortLabel: humanizeShortLabel(label, 32),
       nodeType: normalizeNodeType(raw.nodeType),
       category: cat,
       categoryLabel: style.label,
@@ -492,60 +501,8 @@ export function buildNormalizedViewModel(
  *    page title, system, or dominant action
  * 3. Truncate to reasonable display length
  */
-function humanizeLabel(
-  rawTitle: string,
-  category: string,
-  metadata: any,
-): string {
-  const title = (rawTitle ?? '').trim();
-  if (!title) return fallbackLabel(category, metadata);
-
-  // "Start" and "End" are fine as-is
-  if (title === 'Start' || title === 'End') return title;
-
-  // Already has good structure (3+ words) — return as-is
-  const words = title.split(/\s+/);
-  if (words.length >= 3) return title;
-
-  // Bare fallbacks that need enrichment
-  const weak = [
-    'Perform action', 'Click element', 'Update field', 'Enter field',
-    'Interact with', 'Complete action', 'Handle error', 'Attach file',
-  ];
-  if (weak.some(w => title.startsWith(w))) {
-    const enriched = fallbackLabel(category, metadata);
-    // Only use the enriched label if it's actually better than what we have
-    if (enriched.split(/\s+/).length > title.split(/\s+/).length) return enriched;
-    return title;
-  }
-
-  // Short titles (1-2 words) that are just category names — enrich them
-  const catLabel = (CATEGORY_STYLES[category as keyof typeof CATEGORY_STYLES] ?? CATEGORY_STYLES.single_action).label;
-  if (title === catLabel || title.toLowerCase() === catLabel.toLowerCase()) {
-    const enriched = fallbackLabel(category, metadata);
-    if (enriched !== catLabel) return enriched;
-  }
-
-  return title;
-}
-
-function fallbackLabel(category: string, metadata: any): string {
-  const page = metadata?.pageTitle;
-  const system = (metadata?.systems ?? [])[0];
-  const action = metadata?.dominantAction;
-  const route = metadata?.routeTemplate;
-  const catLabel = (CATEGORY_STYLES[category as keyof typeof CATEGORY_STYLES] ?? CATEGORY_STYLES.single_action).label;
-
-  // Build the richest available label — never return a bare category name
-  if (page && system && page !== system) return `${catLabel} on ${page} (${system})`;
-  if (page) return `${catLabel} on ${page}`;
-  if (system && route) return `${catLabel} at ${route} (${system})`;
-  if (system) return `${catLabel} in ${system}`;
-  if (route) return `${catLabel} at ${route}`;
-  if (action) return action;
-  // Last resort: append a step ordinal hint if we have it from the metadata
-  return `${catLabel} step`;
-}
+// Step label humanization moved to shared/humanize.ts
+// Workflow adapter uses humanizeStepLabel() from the shared module
 
 // ═════════════════════════════════════════════════════════════════════════════
 // HELPERS

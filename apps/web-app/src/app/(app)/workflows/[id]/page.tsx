@@ -29,6 +29,7 @@ import { completeStep } from '@/lib/onboarding';
 import { WorkflowTab } from '@/components/detail/WorkflowTab';
 import { WorkflowPageShell } from '@/components/workflow-view/WorkflowPageShell';
 import { SOPTab } from '@/components/detail/SOPTab';
+import { SOPPageShell } from '@/components/sop-view/SOPPageShell';
 import { ReportTab } from '@/components/detail/ReportTab';
 import { EvidenceTab } from '@/components/detail/EvidenceTab';
 import { IntelligenceTab } from '@/components/detail/IntelligenceTab';
@@ -298,10 +299,16 @@ export default function WorkflowDetailPage() {
         />
       )}
       {activeTab === 'sop' && (
-        <SOPTab
+        <SOPPageShell
           sop={sopArtifact}
           templateArtifacts={sopTemplates}
-          defaultTemplate={templateSelection?.sop?.template}
+          workflowRecord={{
+            id: workflow.id,
+            title: workflow.title,
+            confidence: workflow.confidence,
+            createdAt: workflow.createdAt,
+            status: workflow.status ?? 'active',
+          }}
           workflowId={id}
         />
       )}
