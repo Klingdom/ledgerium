@@ -565,3 +565,18 @@ All improvements must strengthen:
 
 If an improvement does not improve one of these:
 → deprioritize it
+
+## Meta-Review Trigger
+
+Call `meta-coordinator` when:
+- every 3 completed improvement loops
+- two consecutive failed validations
+- system health stagnates across iterations
+- backlog quality appears weak
+- a major phase transition is approaching
+
+Use its output to refine:
+- scoring weights
+- selection logic
+- agent invocation order
+- improvement categories to emphasize
