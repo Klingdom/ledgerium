@@ -14,7 +14,7 @@ import {
 export const metadata: Metadata = {
   title: 'How It Works — Ledgerium AI',
   description:
-    'See the full flow: record a browser workflow, get structured steps, SOPs, process maps, and a searchable library. Under 5 minutes.',
+    'Record a real browser workflow, get a structured SOP and process map in under 5 minutes. See how ops teams use Ledgerium to document internal tool workflows.',
 };
 
 const STEPS = [
@@ -22,36 +22,36 @@ const STEPS = [
     step: 1,
     icon: Play,
     title: 'Start recording',
-    what: 'Open the Ledgerium sidebar in Chrome. Name your workflow — "Expense report," "Client onboarding," "QA test run." Click Record.',
-    result: 'The extension begins capturing interaction events silently. A live step feed shows your progress.',
+    what: 'Open the Ledgerium sidebar in Chrome. Name the workflow — "Create purchase order," "Process expense report," "Onboard new vendor." Click Record.',
+    result: 'The extension starts capturing silently. A live step feed shows your progress as you work.',
   },
   {
     step: 2,
     icon: MousePointer2,
-    title: 'Do your work normally',
-    what: 'Navigate between pages, fill forms, click buttons, switch tabs. Work exactly as you normally would.',
-    result: 'Every click, form entry, and navigation is captured as structured evidence. Multi-tab workflows are fully supported.',
+    title: 'Do the workflow normally',
+    what: 'Navigate your ERP, CRM, or internal tools. Fill forms, click buttons, switch between systems. Work exactly as you normally would.',
+    result: 'Every click, form entry, and navigation is captured as structured data. Multi-system, multi-tab workflows are fully supported.',
   },
   {
     step: 3,
     icon: Layers,
     title: 'Stop and review',
-    what: 'Click Stop. The deterministic engine segments your session into logical workflow steps with timing, confidence, and phase groupings.',
-    result: 'You see your workflow as structured steps — not a video timeline. Each step traces to specific observed events.',
+    what: 'Click Stop. The engine segments your session into logical workflow steps with timing, system context, and confidence scores.',
+    result: 'You see your workflow as structured steps — not a video to watch. Each step traces to specific observed actions.',
   },
   {
     step: 4,
     icon: FileText,
-    title: 'Get your SOP and process map',
-    what: 'The engine generates a standard operating procedure with event-level instructions and a visual process map with phases and transitions.',
-    result: 'A complete SOP with prerequisites, inputs, outputs, and completion criteria — derived entirely from evidence, not guesswork.',
+    title: 'Get your SOP instantly',
+    what: 'Ledgerium generates a complete SOP with step-by-step instructions, system context, expected outcomes, and a visual process map showing phases and transitions.',
+    result: 'A ready-to-share SOP with prerequisites, warnings, and completion criteria — generated from evidence, not memory.',
   },
   {
     step: 5,
     icon: Library,
-    title: 'Save to your library',
-    what: 'Your workflow syncs to the web app. It appears in your searchable library with title, tools used, step count, and duration.',
-    result: 'Search by title or tool. Open any workflow to review its full detail. Export the report, SOP, or raw data anytime.',
+    title: 'Build your workflow library',
+    what: 'Every recording syncs to your searchable library. Find any workflow by title, system, or date. Keep your team\'s process documentation always up to date.',
+    result: 'When the process changes, record it again. The new SOP replaces the old one. Documentation stays current automatically.',
   },
 ];
 
@@ -62,11 +62,11 @@ export default function DemoPage() {
       <section className="pt-20 pb-12 bg-gradient-to-b from-brand-50/40 to-white">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
-            Recording to documentation in 5 minutes
+            Record a workflow. Get an SOP instantly.
           </h1>
           <p className="mt-4 text-lg text-gray-500 leading-relaxed">
-            Here&apos;s the full flow — from clicking Record to having a structured
-            SOP in your library.
+            See how ops teams use Ledgerium to turn real browser workflows
+            into structured SOPs and process maps — in under 5 minutes.
           </p>
         </div>
       </section>
@@ -138,11 +138,11 @@ export default function DemoPage() {
       <section className="py-20 bg-white border-t border-gray-100">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
           <h2 className="text-2xl font-bold text-gray-900">
-            Try it yourself
+            Get your first SOP in 60 seconds
           </h2>
           <p className="mt-3 text-gray-500">
-            Create an account, install the extension, and record your first
-            workflow. Free — no credit card required.
+            Sign up free, and explore a sample workflow SOP immediately —
+            no extension install required. When you&apos;re ready, record your own.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/signup" className="btn-primary gap-2 text-base px-7 py-3.5 shadow-sm shadow-brand-600/20">

@@ -18,12 +18,12 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Ledgerium AI — Record Real Workflows. Generate Real Documentation.',
+  title: 'Ledgerium AI — Record Real Workflows. Get SOPs Instantly.',
   description:
-    'Record how work actually happens. Turn browser workflows into SOPs, process maps, and structured documentation — automatically. No workshops. No guessing.',
+    'Record how work actually happens in the browser. Generate SOPs, process maps, and workflow documentation in minutes — not weeks. Built for ops teams who maintain SOPs for internal tools.',
   openGraph: {
-    title: 'Ledgerium AI — Workflow Intelligence',
-    description: 'Your SOP says 5 steps. Your team takes 17. We record what actually happens.',
+    title: 'Ledgerium AI — Record Real Workflows. Get SOPs Instantly.',
+    description: 'Your SOP says 5 steps. Your team takes 17. Record what actually happens and get documentation automatically.',
   },
 };
 
@@ -40,8 +40,9 @@ export default function HomePage() {
               <span className="text-brand-600">Your team takes 17.</span>
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-gray-500 leading-relaxed max-w-2xl mx-auto">
-              Record how work actually happens in the browser. Get structured
-              workflows, SOPs, and process maps — automatically.
+              Record real workflows in the browser. Get structured SOPs,
+              process maps, and documentation — instantly. No interviews.
+              No workshops. No guessing.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link href="/signup" className="btn-primary text-base px-7 py-3.5 gap-2 shadow-sm shadow-brand-600/20">
@@ -112,12 +113,12 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-14">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              You can&apos;t automate a process you&apos;ve never observed
+              Your SOPs are already out of date
             </h2>
             <p className="mt-4 text-gray-500 leading-relaxed">
-              Most process documentation is aspirational — written from memory,
-              not evidence. Teams deploy AI on workflows they don&apos;t understand,
-              scaling problems they&apos;ve never measured.
+              Most process documentation is written from memory, not observation.
+              Workarounds, extra steps, and tribal knowledge never make it into the doc.
+              The gap between what&apos;s documented and what&apos;s real grows every week.
             </p>
           </div>
 
@@ -125,18 +126,18 @@ export default function HomePage() {
             {[
               {
                 icon: TrendingUp,
-                title: 'The real process is invisible',
-                desc: 'Undocumented workarounds, extra approvals, and tribal knowledge never make it into the SOP. The gap between documentation and reality grows every quarter.',
-              },
-              {
-                icon: Zap,
-                title: 'Automating broken workflows scales problems',
-                desc: 'Deploying AI or RPA into a process you haven\'t observed doesn\'t fix inefficiency — it encodes it. You need evidence of the real workflow first.',
+                title: 'Writing SOPs takes hours. They go stale in weeks.',
+                desc: 'Interviews, workshops, and manual documentation are slow and expensive. By the time the SOP is published, the process has already changed.',
               },
               {
                 icon: Eye,
-                title: 'Observation beats opinion',
-                desc: 'Ledgerium captures what people actually do — not what they say they do. Every step traces back to an observed event. No interpretation. No fabrication.',
+                title: 'New hires follow the SOP and get stuck.',
+                desc: 'The documented process skips steps, misses workarounds, and doesn\'t match what experts actually do. Onboarding takes longer than it should.',
+              },
+              {
+                icon: Zap,
+                title: 'Ledgerium records what actually happens.',
+                desc: 'Record a real workflow in the browser. Get a structured SOP with every step, timing, and system context — automatically. No interviews. No guessing.',
               },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="card p-7">
@@ -187,18 +188,21 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Use cases ─────────────────────────────────────────────────────── */}
+      {/* ── Who it's for ────────────────────────────────────────────────── */}
       <section className="py-20 bg-gray-50 border-t border-gray-200">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <h2 className="text-center text-2xl sm:text-3xl font-bold text-gray-900 mb-12">
-            Who uses Ledgerium
+          <h2 className="text-center text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+            Built for teams that maintain SOPs
           </h2>
+          <p className="text-center text-gray-500 mb-12 max-w-2xl mx-auto">
+            If your team documents workflows in browser-based tools — ERP, CRM, ticketing, HR systems — Ledgerium records what actually happens and generates the documentation for you.
+          </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
-              { icon: TrendingUp, title: 'Operations', desc: 'See the real workflow before redesigning it. Measure what actually takes time.' },
-              { icon: Users, title: 'Sales Enablement', desc: 'Capture top-performer workflows. Turn winning patterns into teachable SOPs.' },
-              { icon: BookOpen, title: 'Training', desc: 'Build onboarding docs from expert behavior, not from memory or guesswork.' },
-              { icon: Shield, title: 'Compliance', desc: 'Evidence that a process was followed. Audit-ready workflows with full traceability.' },
+              { icon: TrendingUp, title: 'Operations Teams', desc: 'Record your ERP, CRM, and internal tool workflows. Get SOPs that match how work actually happens — not how someone remembers it.' },
+              { icon: BookOpen, title: 'Training & Onboarding', desc: 'Capture expert workflows and turn them into onboarding docs instantly. New hires follow real steps, not outdated guides.' },
+              { icon: Shield, title: 'Compliance & Audit', desc: 'Every step traces to observed evidence. Generate audit-ready process documentation with full traceability.' },
+              { icon: Users, title: 'Process Improvement', desc: 'See where the real process diverges from the documented one. Find the steps that take the longest and the workarounds nobody wrote down.' },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="card p-6 hover:shadow-md transition-shadow">
                 <Icon className="h-5 w-5 text-brand-600 mb-3" />
