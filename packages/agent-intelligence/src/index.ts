@@ -26,6 +26,7 @@ export { buildActivities } from './activity-builder.js';
 export { detectDecisions } from './decision-detector.js';
 export { buildWorkflow } from './workflow-builder.js';
 export { extractSkills } from './skill-extractor.js';
+export { detectOpportunities } from './opportunity-detector.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -43,6 +44,11 @@ export type {
   SkillIO,
   SkillCluster,
   SkillLibrary,
+  OpportunityCategory,
+  OpportunityClassification,
+  OpportunityEvidence,
+  Opportunity,
+  OpportunityAnalysis,
 } from './types.js';
 
 export { AGENT_INTELLIGENCE_VERSION } from './types.js';

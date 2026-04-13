@@ -5,10 +5,12 @@
  * TransformationResult — the full agent-ready workflow intelligence output.
  *
  * Pipeline stages:
- * 1. parseSteps()      → StepIntelligence[]  (semantic enrichment of steps)
- * 2. buildActivities() → Activity[]          (logical step groupings)
- * 3. detectDecisions() → DecisionPoint[]     (branch + retry points)
- * 4. buildWorkflow()   → WorkflowStructure   (full workflow with dependencies)
+ * 1. parseSteps()          → StepIntelligence[]  (semantic enrichment of steps)
+ * 2. buildActivities()     → Activity[]          (logical step groupings)
+ * 3. detectDecisions()     → DecisionPoint[]     (branch + retry points)
+ * 4. buildWorkflow()       → WorkflowStructure   (full workflow with dependencies)
+ * 5. extractSkills()       → SkillLibrary        (reusable skill extraction)
+ * 6. detectOpportunities() → OpportunityAnalysis (AI + automation opportunity scoring)
  *
  * All stages are deterministic and pure — same input → same output.
  * Pipeline timing is included in metadata for observability.
@@ -22,6 +24,7 @@ import { buildActivities } from './activity-builder.js';
 import { detectDecisions } from './decision-detector.js';
 import { buildWorkflow } from './workflow-builder.js';
 import { extractSkills } from './skill-extractor.js';
+import { detectOpportunities } from './opportunity-detector.js';
 
 /**
  * Transform a ProcessOutput into a full TransformationResult.
@@ -50,6 +53,9 @@ export function transformWorkflow(output: ProcessOutput): TransformationResult {
   // Stage 5: Extract reusable skills from steps and activities
   const skillLibrary = extractSkills(steps, activities);
 
+  // Stage 6: Detect AI and automation opportunities
+  const opportunities = detectOpportunities(steps, activities, workflow, skillLibrary);
+
   const pipelineDurationMs = Date.now() - startMs;
 
   return {
@@ -58,6 +64,7 @@ export function transformWorkflow(output: ProcessOutput): TransformationResult {
     workflow,
     decisionPoints,
     skillLibrary,
+    opportunities,
     metadata: {
       engineVersion: AGENT_INTELLIGENCE_VERSION,
       processedAt: new Date().toISOString(),

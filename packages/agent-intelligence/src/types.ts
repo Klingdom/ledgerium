@@ -320,6 +320,104 @@ export interface SkillLibrary {
   skillTypeDistribution: Record<SkillType, number>;
 }
 
+// ─── OpportunityCategory ─────────────────────────────────────────────────────
+
+/**
+ * The category of automation/AI opportunity detected.
+ */
+export type OpportunityCategory =
+  | 'repetition'                 // Repeated steps/patterns that can be automated
+  | 'deterministic_logic'        // Rule-based steps with no human judgment needed
+  | 'data_movement'              // Manual data transfer between systems (copy/paste, re-entry)
+  | 'content_generation'         // Email writing, report creation, drafting
+  | 'multi_system_orchestration' // Workflows spanning 3+ systems
+  | 'friction_reduction'         // Steps with high duration, excessive typing, app-switching
+  | 'decision_support';          // Human decision points that could benefit from AI suggestions
+
+/**
+ * How the opportunity should be addressed.
+ */
+export type OpportunityClassification =
+  | 'automation_candidate'           // Can be fully automated with scripts/RPA
+  | 'ai_assist_candidate'            // AI can draft/suggest, human reviews
+  | 'integration_opportunity'        // API integration eliminates manual bridging
+  | 'agent_orchestration_candidate'; // Multi-step, multi-system — needs an agent
+
+/**
+ * Evidence supporting why an opportunity was detected.
+ */
+export interface OpportunityEvidence {
+  /** What signal triggered this opportunity */
+  signal: string;
+  /** Step IDs that exhibit this signal */
+  sourceStepIds: string[];
+  /** Quantitative metric supporting the signal (e.g., duration, count) */
+  metric: string;
+  /** Human-readable reasoning */
+  reasoning: string;
+}
+
+/**
+ * A scored automation/AI opportunity detected within a workflow.
+ */
+export interface Opportunity {
+  /** Stable ID: "opp-{index}" */
+  opportunityId: string;
+  /** Which category of opportunity this is */
+  category: OpportunityCategory;
+  /** How this should be addressed */
+  classification: OpportunityClassification;
+  /** Human-readable title */
+  title: string;
+  /** Detailed description of the opportunity */
+  description: string;
+  /** Step IDs involved in this opportunity */
+  affectedStepIds: string[];
+  /** Activity IDs involved */
+  affectedActivityIds: string[];
+  /** Skill IDs relevant to this opportunity */
+  relatedSkillIds: string[];
+  /** Systems involved */
+  systems: string[];
+  /** Evidence supporting this detection */
+  evidence: OpportunityEvidence[];
+  /** Composite opportunity score (0-100) */
+  score: number;
+  /** Individual scoring factors */
+  scoringFactors: {
+    /** Time that could be saved (0-100) */
+    timeSaved: number;
+    /** How often this occurs (0-100). In single-workflow context, based on step count involved */
+    frequency: number;
+    /** How complex to implement (0-100, higher = easier to implement) */
+    feasibility: number;
+    /** Risk of automation failure (0-100, higher = lower risk) */
+    reliability: number;
+  };
+  /** Estimated time savings in ms per execution (null if no timing data) */
+  estimatedTimeSavingsMs: number | null;
+  /** Confidence in this detection (0-1) */
+  confidence: number;
+}
+
+/**
+ * Complete opportunity analysis output for a workflow.
+ */
+export interface OpportunityAnalysis {
+  /** All detected opportunities, sorted by score descending */
+  opportunities: Opportunity[];
+  /** Total number of opportunities detected */
+  totalOpportunities: number;
+  /** Opportunities by category */
+  categoryBreakdown: Record<OpportunityCategory, number>;
+  /** Opportunities by classification */
+  classificationBreakdown: Record<OpportunityClassification, number>;
+  /** Top opportunity score */
+  topScore: number;
+  /** Total estimated time savings in ms (null if any opportunity lacks timing) */
+  totalEstimatedTimeSavingsMs: number | null;
+}
+
 // ─── TransformationResult ─────────────────────────────────────────────────────
 
 /**
@@ -338,6 +436,8 @@ export interface TransformationResult {
   decisionPoints: DecisionPoint[];
   /** Extracted skill library */
   skillLibrary: SkillLibrary;
+  /** AI opportunity analysis */
+  opportunities: OpportunityAnalysis;
   /** Pipeline metadata for traceability and debugging. */
   metadata: {
     /** Version of the agent-intelligence engine. */

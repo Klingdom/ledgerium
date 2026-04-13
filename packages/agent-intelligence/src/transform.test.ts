@@ -441,6 +441,38 @@ describe('Example 1: Invoice Processing (6 steps, gmail + netsuite)', () => {
     const ordinals = result.steps.map(s => s.rawReference.stepOrdinal);
     expect(ordinals).toEqual([1, 2, 3, 4, 5, 6]);
   });
+
+  it('result.opportunities is present and has correct shape', () => {
+    const result = transformWorkflow(output);
+    expect(result.opportunities).toBeDefined();
+    expect(Array.isArray(result.opportunities.opportunities)).toBe(true);
+    expect(typeof result.opportunities.totalOpportunities).toBe('number');
+    expect(result.opportunities.totalOpportunities).toBe(result.opportunities.opportunities.length);
+    expect(typeof result.opportunities.topScore).toBe('number');
+    expect(result.opportunities.topScore).toBeGreaterThanOrEqual(0);
+    expect(result.opportunities.categoryBreakdown).toBeDefined();
+    expect(result.opportunities.classificationBreakdown).toBeDefined();
+  });
+
+  it('result.opportunities.categoryBreakdown has all 7 categories', () => {
+    const result = transformWorkflow(output);
+    const cb = result.opportunities.categoryBreakdown;
+    expect(typeof cb.repetition).toBe('number');
+    expect(typeof cb.deterministic_logic).toBe('number');
+    expect(typeof cb.data_movement).toBe('number');
+    expect(typeof cb.content_generation).toBe('number');
+    expect(typeof cb.multi_system_orchestration).toBe('number');
+    expect(typeof cb.friction_reduction).toBe('number');
+    expect(typeof cb.decision_support).toBe('number');
+  });
+
+  it('invoice processing detects opportunities given 2 systems and a 45s form step', () => {
+    const result = transformWorkflow(output);
+    // The 45s form step should trigger friction_reduction
+    // The 2-system workflow (gmail + netsuite) does NOT trigger multi_system_orchestration (needs 3+)
+    // Opportunities still expected from friction or data movement
+    expect(result.opportunities.totalOpportunities).toBeGreaterThan(0);
+  });
 });
 
 // ─── Example 2: Customer Support Ticket ──────────────────────────────────────
