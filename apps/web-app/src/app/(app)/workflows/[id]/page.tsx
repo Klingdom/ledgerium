@@ -32,6 +32,7 @@ import { WorkflowPageShell } from '@/components/workflow-view/WorkflowPageShell'
 import { SOPTab } from '@/components/detail/SOPTab';
 import { SOPPageShell } from '@/components/sop-view/SOPPageShell';
 import { ReportTab } from '@/components/detail/ReportTab';
+import { WorkflowReportPage } from '@/components/detail/WorkflowReportPage';
 import { EvidenceTab } from '@/components/detail/EvidenceTab';
 import { IntelligenceTab } from '@/components/detail/IntelligenceTab';
 import { InterpretationTab } from '@/components/detail/InterpretationTab';
@@ -60,6 +61,8 @@ export default function WorkflowDetailPage() {
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [intelligenceData, setIntelligenceData] = useState<any>(null);
+  const [agentIntelligenceData, setAgentIntelligenceData] = useState<any>(null);
 
   useEffect(() => {
     async function load() {
@@ -121,6 +124,28 @@ export default function WorkflowDetailPage() {
     navigator.clipboard.writeText(shareUrl);
     setShareCopied(true);
     setTimeout(() => setShareCopied(false), 2000);
+  }
+
+  async function handleRunIntelligence() {
+    try {
+      const res = await fetch(`/api/workflows/${id}/analyze`, { method: 'POST' });
+      if (!res.ok) return;
+      const result = await res.json();
+      setIntelligenceData(result.intelligence ?? null);
+    } catch {
+      // Non-fatal — user can retry from within the report page
+    }
+  }
+
+  async function handleRunAgentIntelligence() {
+    try {
+      const res = await fetch(`/api/workflows/${id}/agent-intelligence`, { method: 'POST' });
+      if (!res.ok) return;
+      const result = await res.json();
+      setAgentIntelligenceData(result.data ?? null);
+    } catch {
+      // Non-fatal — user can retry from within the report page
+    }
   }
 
   if (isLoading || !data) {
@@ -315,7 +340,33 @@ export default function WorkflowDetailPage() {
           workflowId={id}
         />
       )}
-      {activeTab === 'report' && <ReportTab report={workflowReport} />}
+      {activeTab === 'report' && (
+        <WorkflowReportPage
+          workflow={{
+            id: workflow.id,
+            title: workflow.title,
+            durationMs: workflow.durationMs ?? 0,
+            stepCount: workflow.stepCount ?? 0,
+            phaseCount: workflow.phaseCount ?? 0,
+            confidence: workflow.confidence ?? 0,
+            toolsUsed: workflow.toolsUsed ?? [],
+            status: workflow.status ?? 'active',
+            createdAt: workflow.createdAt,
+            updatedAt: workflow.updatedAt,
+            isFavorite: isFavorite,
+            shareToken: workflow.shareToken,
+          }}
+          report={workflowReport}
+          insights={workflowInsights}
+          interpretation={interpretation}
+          intelligence={intelligenceData}
+          agentIntelligence={agentIntelligenceData}
+          processOutput={processOutput}
+          sop={sopArtifact}
+          onRunIntelligence={handleRunIntelligence}
+          onRunAgentIntelligence={handleRunAgentIntelligence}
+        />
+      )}
       {activeTab === 'insights' && <InsightsPanel insights={workflowInsights} />}
       {activeTab === 'interpretation' && <InterpretationTab interpretation={interpretation} />}
       {activeTab === 'intelligence' && <IntelligenceTab workflowId={id} />}
