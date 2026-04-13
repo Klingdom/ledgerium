@@ -11,6 +11,7 @@
  * 4. buildWorkflow()       → WorkflowStructure   (full workflow with dependencies)
  * 5. extractSkills()       → SkillLibrary        (reusable skill extraction)
  * 6. detectOpportunities() → OpportunityAnalysis (AI + automation opportunity scoring)
+ * 7. composeAgents()       → AgentComposition    (agent profile composition)
  *
  * All stages are deterministic and pure — same input → same output.
  * Pipeline timing is included in metadata for observability.
@@ -25,6 +26,7 @@ import { detectDecisions } from './decision-detector.js';
 import { buildWorkflow } from './workflow-builder.js';
 import { extractSkills } from './skill-extractor.js';
 import { detectOpportunities } from './opportunity-detector.js';
+import { composeAgents } from './agent-composer.js';
 
 /**
  * Transform a ProcessOutput into a full TransformationResult.
@@ -56,6 +58,9 @@ export function transformWorkflow(output: ProcessOutput): TransformationResult {
   // Stage 6: Detect AI and automation opportunities
   const opportunities = detectOpportunities(steps, activities, workflow, skillLibrary);
 
+  // Stage 7: Compose agent profiles from activities, skills, and opportunities
+  const agentComposition = composeAgents(activities, skillLibrary, opportunities, workflow, steps);
+
   const pipelineDurationMs = Date.now() - startMs;
 
   return {
@@ -65,6 +70,7 @@ export function transformWorkflow(output: ProcessOutput): TransformationResult {
     decisionPoints,
     skillLibrary,
     opportunities,
+    agentComposition,
     metadata: {
       engineVersion: AGENT_INTELLIGENCE_VERSION,
       processedAt: new Date().toISOString(),

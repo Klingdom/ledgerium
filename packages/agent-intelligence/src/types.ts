@@ -418,6 +418,137 @@ export interface OpportunityAnalysis {
   totalEstimatedTimeSavingsMs: number | null;
 }
 
+// ─── AgentRole ───────────────────────────────────────────────────────────────
+
+/**
+ * The primary role/archetype of a composed agent.
+ */
+export type AgentRole =
+  | 'executor'       // Runs deterministic, fully automated tasks
+  | 'assistant'      // AI-assisted: drafts, suggests, human reviews
+  | 'orchestrator'   // Coordinates multi-system, multi-step workflows
+  | 'monitor'        // Watches for conditions, triggers actions
+  | 'specialist';    // Focused on a specific system or domain
+
+/**
+ * How an agent interacts with humans during execution.
+ */
+export type AgentInteractionMode =
+  | 'autonomous'          // Runs without human intervention
+  | 'supervised'          // Human monitors, can intervene
+  | 'collaborative'       // Human and agent alternate / co-work
+  | 'approval_required';  // Agent prepares, human approves each action
+
+/**
+ * A tool that an agent needs access to in order to execute its tasks.
+ */
+export interface AgentTool {
+  /** Tool identifier: "{system}_{capability}" e.g., "gmail_send_email" */
+  toolId: string;
+  /** Human-readable name */
+  toolName: string;
+  /** The system this tool interacts with */
+  system: string;
+  /** The specific capability from SYSTEM_CAPABILITIES */
+  capability: string;
+  /** Whether this tool is required or optional */
+  required: boolean;
+}
+
+/**
+ * A task that an agent is responsible for within the workflow.
+ */
+export interface AgentTask {
+  /** Stable ID: "task-{index}" */
+  taskId: string;
+  /** Human-readable description of what this task accomplishes */
+  description: string;
+  /** Activity IDs this task maps to */
+  activityIds: string[];
+  /** Step IDs involved */
+  stepIds: string[];
+  /** Skills needed for this task */
+  requiredSkillIds: string[];
+  /** Execution order within the agent's task list */
+  executionOrder: number;
+  /** Whether a human needs to approve before execution */
+  requiresApproval: boolean;
+  /** Estimated duration in ms (null if unknown) */
+  estimatedDurationMs: number | null;
+}
+
+/**
+ * A composed AI agent profile derived from workflow analysis.
+ */
+export interface AgentProfile {
+  /** Stable ID: "agent-{index}" */
+  agentId: string;
+  /** Human-readable agent name (e.g., "Gmail Email Agent", "Invoice Processing Orchestrator") */
+  agentName: string;
+  /** What this agent does */
+  description: string;
+  /** The primary role of this agent */
+  role: AgentRole;
+  /** How this agent interacts with humans */
+  interactionMode: AgentInteractionMode;
+  /** Skills this agent possesses */
+  skillIds: string[];
+  /** Tools this agent needs */
+  tools: AgentTool[];
+  /** Tasks this agent is responsible for */
+  tasks: AgentTask[];
+  /** Systems this agent interacts with */
+  systems: string[];
+  /** Opportunity IDs this agent addresses */
+  opportunityIds: string[];
+  /** Activity IDs this agent covers */
+  coveredActivityIds: string[];
+  /** Step IDs this agent covers */
+  coveredStepIds: string[];
+  /** Automation classification for this agent's scope */
+  automationClassification: AutomationType;
+  /** 0-100: how capable this agent is (based on automation score of covered steps) */
+  capabilityScore: number;
+  /** 0-1: confidence in this agent design */
+  confidence: number;
+}
+
+/**
+ * A collaboration link between two agents in the workflow.
+ */
+export interface AgentCollaboration {
+  /** Source agent ID */
+  fromAgentId: string;
+  /** Target agent ID */
+  toAgentId: string;
+  /** What triggers the handoff */
+  trigger: string;
+  /** Data passed between agents */
+  dataFlow: string[];
+  /** Type of collaboration */
+  type: 'handoff' | 'delegation' | 'notification';
+}
+
+/**
+ * Complete agent composition output for a workflow.
+ */
+export interface AgentComposition {
+  /** All composed agent profiles */
+  agents: AgentProfile[];
+  /** Collaboration links between agents */
+  collaborations: AgentCollaboration[];
+  /** Total number of agents */
+  agentCount: number;
+  /** How many steps are covered by at least one agent */
+  coveredStepCount: number;
+  /** Coverage ratio: coveredStepCount / total steps */
+  coverageRatio: number;
+  /** Distribution of agent roles */
+  roleDistribution: Record<AgentRole, number>;
+  /** Total capability score across all agents (average) */
+  averageCapabilityScore: number;
+}
+
 // ─── TransformationResult ─────────────────────────────────────────────────────
 
 /**
@@ -438,6 +569,8 @@ export interface TransformationResult {
   skillLibrary: SkillLibrary;
   /** AI opportunity analysis */
   opportunities: OpportunityAnalysis;
+  /** Composed agent profiles */
+  agentComposition: AgentComposition;
   /** Pipeline metadata for traceability and debugging. */
   metadata: {
     /** Version of the agent-intelligence engine. */

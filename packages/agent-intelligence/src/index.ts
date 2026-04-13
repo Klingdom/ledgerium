@@ -27,6 +27,7 @@ export { detectDecisions } from './decision-detector.js';
 export { buildWorkflow } from './workflow-builder.js';
 export { extractSkills } from './skill-extractor.js';
 export { detectOpportunities } from './opportunity-detector.js';
+export { composeAgents } from './agent-composer.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -49,6 +50,13 @@ export type {
   OpportunityEvidence,
   Opportunity,
   OpportunityAnalysis,
+  AgentRole,
+  AgentInteractionMode,
+  AgentTool,
+  AgentTask,
+  AgentProfile,
+  AgentCollaboration,
+  AgentComposition,
 } from './types.js';
 
 export { AGENT_INTELLIGENCE_VERSION } from './types.js';

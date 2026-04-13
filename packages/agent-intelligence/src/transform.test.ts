@@ -473,6 +473,32 @@ describe('Example 1: Invoice Processing (6 steps, gmail + netsuite)', () => {
     // Opportunities still expected from friction or data movement
     expect(result.opportunities.totalOpportunities).toBeGreaterThan(0);
   });
+
+  it('result.agentComposition is present and populated', () => {
+    const result = transformWorkflow(output);
+    expect(result.agentComposition).toBeDefined();
+    expect(result.agentComposition.agentCount).toBeGreaterThan(0);
+    expect(result.agentComposition.agents.length).toBe(result.agentComposition.agentCount);
+  });
+
+  it('invoice processing (2 systems) produces 2 agents and no orchestrator', () => {
+    const result = transformWorkflow(output);
+    const { agents } = result.agentComposition;
+    // gmail + netsuite = 2 system agents, no orchestrator (needs 3+)
+    expect(agents.some(a => a.role === 'orchestrator')).toBe(false);
+    expect(agents.some(a => a.agentName.toLowerCase().includes('gmail'))).toBe(true);
+    expect(agents.some(a => a.agentName.toLowerCase().includes('netsuite'))).toBe(true);
+  });
+
+  it('agentComposition roleDistribution has all roles initialized', () => {
+    const result = transformWorkflow(output);
+    const { roleDistribution } = result.agentComposition;
+    expect(typeof roleDistribution.executor).toBe('number');
+    expect(typeof roleDistribution.assistant).toBe('number');
+    expect(typeof roleDistribution.orchestrator).toBe('number');
+    expect(typeof roleDistribution.monitor).toBe('number');
+    expect(typeof roleDistribution.specialist).toBe('number');
+  });
 });
 
 // ─── Example 2: Customer Support Ticket ──────────────────────────────────────
