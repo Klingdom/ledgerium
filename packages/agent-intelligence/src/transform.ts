@@ -13,6 +13,7 @@
  * 6. detectOpportunities()      → OpportunityAnalysis    (AI + automation opportunity scoring)
  * 7. composeAgents()            → AgentComposition       (agent profile composition)
  * 8. analyzeIntegrationRisk()   → IntegrationRiskAnalysis (integration mapping + risk assessment)
+ * 9. generateArtifacts()        → ArtifactOutput         (deployment-ready configuration artifacts)
  *
  * All stages are deterministic and pure — same input → same output.
  * Pipeline timing is included in metadata for observability.
@@ -29,6 +30,7 @@ import { extractSkills } from './skill-extractor.js';
 import { detectOpportunities } from './opportunity-detector.js';
 import { composeAgents } from './agent-composer.js';
 import { analyzeIntegrationRisk } from './integration-risk-analyzer.js';
+import { generateArtifacts } from './artifact-generator.js';
 
 /**
  * Transform a ProcessOutput into a full TransformationResult.
@@ -66,6 +68,9 @@ export function transformWorkflow(output: ProcessOutput): TransformationResult {
   // Stage 8: Map integrations and assess automation risks
   const integrationRisk = analyzeIntegrationRisk(steps, agentComposition, skillLibrary, opportunities, workflow);
 
+  // Stage 9: Generate deployment-ready configuration artifacts
+  const artifacts = generateArtifacts(agentComposition, skillLibrary, integrationRisk, opportunities, workflow);
+
   const pipelineDurationMs = Date.now() - startMs;
 
   return {
@@ -77,6 +82,7 @@ export function transformWorkflow(output: ProcessOutput): TransformationResult {
     opportunities,
     agentComposition,
     integrationRisk,
+    artifacts,
     metadata: {
       engineVersion: AGENT_INTELLIGENCE_VERSION,
       processedAt: new Date().toISOString(),

@@ -519,6 +519,54 @@ describe('Example 1: Invoice Processing (6 steps, gmail + netsuite)', () => {
     expect(typeof readinessBreakdown.no_api).toBe('number');
     expect(typeof readinessBreakdown.unknown).toBe('number');
   });
+
+  it('result.artifacts is present and has expected shape', () => {
+    const result = transformWorkflow(output);
+    expect(result.artifacts).toBeDefined();
+    expect(Array.isArray(result.artifacts.agentConfigs)).toBe(true);
+    expect(Array.isArray(result.artifacts.skillManifests)).toBe(true);
+    expect(Array.isArray(result.artifacts.integrationConfigs)).toBe(true);
+    expect(Array.isArray(result.artifacts.roadmap)).toBe(true);
+    expect(result.artifacts.summary).toBeDefined();
+  });
+
+  it('artifacts.agentConfigs length matches agentComposition.agentCount', () => {
+    const result = transformWorkflow(output);
+    expect(result.artifacts.agentConfigs.length).toBe(result.agentComposition.agentCount);
+  });
+
+  it('artifacts.summary.automationScore matches workflow.automationScore', () => {
+    const result = transformWorkflow(output);
+    expect(result.artifacts.summary.automationScore).toBe(result.workflow.automationScore);
+  });
+
+  it('artifacts.summary has all required keys with correct types', () => {
+    const result = transformWorkflow(output);
+    const { summary } = result.artifacts;
+    expect(typeof summary.totalAgents).toBe('number');
+    expect(typeof summary.totalSkills).toBe('number');
+    expect(typeof summary.totalIntegrations).toBe('number');
+    expect(typeof summary.totalPhases).toBe('number');
+    expect(typeof summary.automationScore).toBe('number');
+    expect(typeof summary.implementationReadinessScore).toBe('number');
+    // estimatedTimeSavingsMs is number | null
+    expect(summary.estimatedTimeSavingsMs === null || typeof summary.estimatedTimeSavingsMs === 'number').toBe(true);
+  });
+
+  it('artifacts.roadmap has at least 2 phases (foundation + optimization)', () => {
+    const result = transformWorkflow(output);
+    expect(result.artifacts.roadmap.length).toBeGreaterThanOrEqual(2);
+    const phases = result.artifacts.roadmap;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    expect(phases[0]!.phase).toBe(1);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    expect(phases.at(-1)!.title).toContain('Optimization');
+  });
+
+  it('artifacts.integrationConfigs length matches integrationRisk.integrationCount', () => {
+    const result = transformWorkflow(output);
+    expect(result.artifacts.integrationConfigs.length).toBe(result.integrationRisk.integrationCount);
+  });
 });
 
 // ─── Example 2: Customer Support Ticket ──────────────────────────────────────

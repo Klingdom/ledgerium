@@ -670,6 +670,146 @@ export interface IntegrationRiskAnalysis {
   implementationReadinessScore: number;
 }
 
+// ─── Artifacts ───────────────────────────────────────────────────────────────
+
+/**
+ * A deployment-ready agent configuration artifact.
+ * Contains everything needed to instantiate and configure an agent.
+ */
+export interface AgentConfigArtifact {
+  /** Matches the source AgentProfile.agentId */
+  agentId: string;
+  /** Agent display name */
+  name: string;
+  /** What this agent does */
+  description: string;
+  /** Agent role */
+  role: AgentRole;
+  /** How the agent interacts with humans */
+  interactionMode: AgentInteractionMode;
+  /** Configuration for agent behavior */
+  config: {
+    /** Systems this agent connects to */
+    systems: string[];
+    /** Tools available to this agent */
+    tools: AgentTool[];
+    /** Skills this agent can execute */
+    skills: string[];
+    /** Maximum concurrent tasks */
+    maxConcurrentTasks: number;
+    /** Whether to require human approval before executing */
+    requiresHumanApproval: boolean;
+    /** Retry policy */
+    retryPolicy: {
+      maxRetries: number;
+      backoffMs: number;
+    };
+  };
+  /** Ordered task execution plan */
+  taskPlan: AgentTask[];
+}
+
+/**
+ * A skill manifest artifact — a portable skill definition.
+ */
+export interface SkillManifestArtifact {
+  /** Matches the source Skill.skillId */
+  skillId: string;
+  /** Skill name */
+  name: string;
+  /** Description */
+  description: string;
+  /** Skill category */
+  skillType: SkillType;
+  /** Input parameters */
+  inputs: SkillIO[];
+  /** Output parameters */
+  outputs: SkillIO[];
+  /** Required system integrations */
+  requiredIntegrations: string[];
+  /** Whether this skill can run autonomously */
+  autonomous: boolean;
+  /** Reusability indicator */
+  reusabilityScore: number;
+}
+
+/**
+ * An integration setup artifact — configuration for connecting to a system.
+ */
+export interface IntegrationConfigArtifact {
+  /** Matches IntegrationRequirement.integrationId */
+  integrationId: string;
+  /** System name */
+  system: string;
+  /** Display name */
+  name: string;
+  /** Integration approach */
+  integrationType: IntegrationType;
+  /** API readiness */
+  readiness: IntegrationReadiness;
+  /** Required API capabilities */
+  capabilities: string[];
+  /** Setup steps (human-readable) */
+  setupSteps: string[];
+  /** Implementation complexity 1-5 */
+  complexity: number;
+  /** Estimated setup time label */
+  estimatedSetupTime: string;
+}
+
+/**
+ * A single step in the implementation roadmap.
+ */
+export interface RoadmapPhase {
+  /** Phase number (1-based) */
+  phase: number;
+  /** Phase title */
+  title: string;
+  /** What to implement in this phase */
+  description: string;
+  /** Agent IDs to deploy in this phase */
+  agentIds: string[];
+  /** Integration IDs needed for this phase */
+  integrationIds: string[];
+  /** Risk IDs to mitigate before/during this phase */
+  riskIds: string[];
+  /** Estimated effort label (e.g., "1-2 days", "1 week") */
+  estimatedEffort: string;
+  /** Prerequisites: phase numbers that must complete first */
+  prerequisites: number[];
+}
+
+/**
+ * Complete artifact generation output.
+ */
+export interface ArtifactOutput {
+  /** Agent configuration artifacts */
+  agentConfigs: AgentConfigArtifact[];
+  /** Skill manifest artifacts */
+  skillManifests: SkillManifestArtifact[];
+  /** Integration configuration artifacts */
+  integrationConfigs: IntegrationConfigArtifact[];
+  /** Phased implementation roadmap */
+  roadmap: RoadmapPhase[];
+  /** Summary statistics */
+  summary: {
+    /** Total agents to deploy */
+    totalAgents: number;
+    /** Total skills available */
+    totalSkills: number;
+    /** Total integrations required */
+    totalIntegrations: number;
+    /** Total roadmap phases */
+    totalPhases: number;
+    /** Overall automation potential (from workflow) */
+    automationScore: number;
+    /** Overall implementation readiness (from integration risk) */
+    implementationReadinessScore: number;
+    /** Estimated total time savings per execution in ms (null if unknown) */
+    estimatedTimeSavingsMs: number | null;
+  };
+}
+
 // ─── TransformationResult ─────────────────────────────────────────────────────
 
 /**
@@ -694,6 +834,8 @@ export interface TransformationResult {
   agentComposition: AgentComposition;
   /** Integration mapping and risk assessment */
   integrationRisk: IntegrationRiskAnalysis;
+  /** Deployment-ready configuration artifacts */
+  artifacts: ArtifactOutput;
   /** Pipeline metadata for traceability and debugging. */
   metadata: {
     /** Version of the agent-intelligence engine. */

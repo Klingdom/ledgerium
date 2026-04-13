@@ -29,6 +29,7 @@ export { extractSkills } from './skill-extractor.js';
 export { detectOpportunities } from './opportunity-detector.js';
 export { composeAgents } from './agent-composer.js';
 export { analyzeIntegrationRisk } from './integration-risk-analyzer.js';
+export { generateArtifacts } from './artifact-generator.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -65,6 +66,11 @@ export type {
   RiskCategory,
   RiskItem,
   IntegrationRiskAnalysis,
+  AgentConfigArtifact,
+  SkillManifestArtifact,
+  IntegrationConfigArtifact,
+  RoadmapPhase,
+  ArtifactOutput,
 } from './types.js';
 
 export { AGENT_INTELLIGENCE_VERSION } from './types.js';
