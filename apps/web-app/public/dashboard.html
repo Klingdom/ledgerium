@@ -90,11 +90,11 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 
 /* ── Workflow Table Layout ── */
 .wf-table-wrap{display:flex;flex-direction:column;gap:4px}
-.wf-table-header{display:grid;grid-template-columns:32px 1fr 100px 60px 80px 120px 80px 140px 80px 72px;gap:12px;padding:6px 16px;margin-bottom:2px}
+.wf-table-header{display:grid;grid-template-columns:28px minmax(200px,1fr) 90px 50px 70px 100px 70px 80px 64px;gap:10px;padding:6px 16px;margin-bottom:2px}
 .wf-table-header span{font-size:11px;font-weight:500;color:var(--gray-400);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wf-row{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);cursor:pointer;transition:border-color .15s;position:relative}
 .wf-row:hover{border-color:var(--gray-400)}
-.wf-row-grid{display:grid;grid-template-columns:32px 1fr 100px 60px 80px 120px 80px 140px 80px 72px;gap:12px;padding:12px 16px;align-items:center}
+.wf-row-grid{display:grid;grid-template-columns:28px minmax(200px,1fr) 90px 50px 70px 100px 70px 80px 64px;gap:10px;padding:12px 16px;align-items:center}
 .wf-signal{padding:6px 16px 10px 60px;font-size:11px;line-height:16px;border-top:1px solid var(--gray-100)}
 
 /* Star button */
@@ -513,7 +513,6 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
         <span>SOP</span>
         <span>Tags</span>
         <span>Active</span>
-        <span></span>
       </div>
     </div>
     <div id="empty-state" class="empty-state" style="display:none" aria-live="polite">
@@ -1089,7 +1088,7 @@ function renderRow(wf) {
   const signal = renderSignal(wf);
   const primarySys = wf.systems[0] || '';
 
-  // Desktop grid row
+  // Desktop grid row — 9 columns, title gets most space
   const desktopRow = `
     <div class="wf-row-grid">
       <div>
@@ -1097,26 +1096,23 @@ function renderRow(wf) {
           ${STAR_SVG(wf.starred)}
         </button>
       </div>
-      <div>
-        <button class="wf-title-link" data-id="${wf.id}">${escapeHtml(wf.title)}</button>
-        <div style="margin-top:3px"><span class="sys-tag-neutral">${escapeHtml(primarySys)}</span></div>
+      <div style="min-width:0">
+        <div style="display:flex;align-items:center;gap:6px;min-width:0">
+          <button class="wf-title-link" data-id="${wf.id}" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1">${escapeHtml(wf.title)}</button>
+          ${renderAiOppBadge(wf) ? renderAiOppBadge(wf) : ''}
+        </div>
+        <div style="margin-top:3px;display:flex;align-items:center;gap:4px;flex-wrap:nowrap;overflow:hidden">
+          <span class="sys-tag-neutral">${escapeHtml(primarySys)}</span>
+          ${wf.systems.length > 1 ? wf.systems.slice(1).map(s=>`<span class="sys-tag-neutral">${escapeHtml(s)}</span>`).join('') : ''}
+        </div>
       </div>
-      <div>
-        <div>${renderHealthPill(wf)}</div>
-        ${renderAiOppBadge(wf) ? `<div style="margin-top:4px">${renderAiOppBadge(wf)}</div>` : ''}
-        ${wf.documentationCompleteness < 50 ? `<div style="margin-top:2px;color:#d97706">${WARN_SMALL}</div>` : ''}
-      </div>
+      <div>${renderHealthPill(wf)}</div>
       <div style="font-size:12px;color:#4b5563">${wf.steps}</div>
       <div style="font-size:12px;color:#4b5563">${escapeHtml(wf.duration)}</div>
       <div>${renderConfBar(wf.confidence)}</div>
       <div>${renderSopBadge(wf)}</div>
       <div>${renderTags(wf)}</div>
       <div style="font-size:11px;color:#9ca3af">${formatDateRelative(wf.updatedAt)}</div>
-      <div class="wf-actions">
-        <button class="view-btn" data-id="${wf.id}">View
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      </div>
     </div>`;
 
   // Mobile stacked card
