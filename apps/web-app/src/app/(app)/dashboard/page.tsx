@@ -1391,7 +1391,7 @@ export default function DashboardPage() {
       ) : (
         <>
           {/* Table header (desktop) */}
-          <div className="hidden lg:grid grid-cols-[32px_1fr_100px_60px_80px_120px_80px_140px_80px_72px] gap-3 items-center px-4 py-2 text-ds-xs font-medium text-gray-400 uppercase tracking-wide border-b border-gray-100 mb-1">
+          <div className="hidden lg:grid grid-cols-[28px_minmax(180px,1fr)_90px_48px_64px_100px_64px_110px_64px_56px] gap-2 items-center px-4 py-2 text-ds-xs font-medium text-gray-400 uppercase tracking-wide border-b border-gray-100 mb-1">
             <div>{/* favorite */}</div>
             <div>Workflow</div>
             <div>Health</div>
@@ -1621,7 +1621,7 @@ function WorkflowRow({
   return (
     <div className="card hover:border-gray-300 transition-colors group">
       {/* Desktop layout */}
-      <div className="hidden lg:grid grid-cols-[32px_1fr_100px_60px_80px_120px_80px_140px_80px_72px] gap-3 items-center px-4 py-3">
+      <div className="hidden lg:grid grid-cols-[28px_minmax(180px,1fr)_90px_48px_64px_100px_64px_110px_64px_56px] gap-2 items-center px-4 py-3">
         {/* Favorite */}
         <button
           onClick={(e) => {
