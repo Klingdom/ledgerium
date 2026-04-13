@@ -1,0 +1,23 @@
+{
+  "name": "@ledgerium/agent-intelligence",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ledgerium/process-engine": "workspace:*",
+    "@ledgerium/intelligence-engine": "workspace:*",
+    "@ledgerium/schema-events": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  }
+}

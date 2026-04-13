@@ -152,6 +152,25 @@ importers:
         specifier: ^5.4.0
         version: 5.9.3
 
+  packages/agent-intelligence:
+    dependencies:
+      '@ledgerium/intelligence-engine':
+        specifier: workspace:*
+        version: link:../intelligence-engine
+      '@ledgerium/process-engine':
+        specifier: workspace:*
+        version: link:../process-engine
+      '@ledgerium/schema-events':
+        specifier: workspace:*
+        version: link:../schema-events
+    devDependencies:
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+      vitest:
+        specifier: ^1.6.0
+        version: 1.6.1(@types/node@20.19.37)
+
   packages/intelligence-engine:
     dependencies:
       '@ledgerium/process-engine':
