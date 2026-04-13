@@ -12,6 +12,7 @@
     "db:generate": "prisma generate"
   },
   "dependencies": {
+    "@ledgerium/agent-intelligence": "workspace:*",
     "@ledgerium/intelligence-engine": "workspace:*",
     "@ledgerium/process-engine": "workspace:*",
     "@prisma/client": "^6.2.0",

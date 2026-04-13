@@ -84,6 +84,9 @@ importers:
 
   apps/web-app:
     dependencies:
+      '@ledgerium/agent-intelligence':
+        specifier: workspace:*
+        version: link:../../packages/agent-intelligence
       '@ledgerium/intelligence-engine':
         specifier: workspace:*
         version: link:../../packages/intelligence-engine
