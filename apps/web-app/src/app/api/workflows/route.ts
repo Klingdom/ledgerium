@@ -346,6 +346,7 @@ export async function GET(req: NextRequest) {
   const toolFilter = params.get('tool') ?? '';
   const status = params.get('status') ?? 'active';
   const tagFilter = params.get('tag') ?? '';
+  const portfolioFilter = params.get('portfolio') ?? '';
 
   // New filter params
   const healthFilter = params.get('health') ?? '';
@@ -373,6 +374,12 @@ export async function GET(req: NextRequest) {
 
   if (tagFilter) {
     where.tags = { some: { tagId: tagFilter } };
+  }
+
+  if (portfolioFilter === 'uncategorized') {
+    where.portfolios = { none: {} };
+  } else if (portfolioFilter) {
+    where.portfolios = { some: { portfolioId: portfolioFilter } };
   }
 
   // Confidence range filters (applied at DB level)

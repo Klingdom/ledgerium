@@ -39,10 +39,13 @@ import {
   RefreshCw,
   Brain,
   Shield,
+  FolderOpen,
 } from 'lucide-react';
 import { formatDuration, formatDateRelative, formatConfidence } from '@/lib/format';
 import { track } from '@/lib/analytics';
 import ProcessGroupsExplorer from '@/components/ProcessGroupsExplorer';
+import PortfolioSidebar, { type PortfolioNode } from '@/components/PortfolioSidebar';
+import CreatePortfolioDialog from '@/components/CreatePortfolioDialog';
 
 // ─── Type definitions ──────────────────────────────────────────────────────────
 
@@ -323,6 +326,13 @@ export default function DashboardPage() {
   const [isLoadingProcessGroups, setIsLoadingProcessGroups] = useState(false);
   const [isRunningAnalysis, setIsRunningAnalysis] = useState(false);
 
+  // Portfolio state
+  const [portfolios, setPortfolios] = useState<PortfolioNode[]>([]);
+  const [activePortfolioId, setActivePortfolioId] = useState<string | null>(null);
+  const [showPortfolioSidebar, setShowPortfolioSidebar] = useState(true);
+  const [showCreatePortfolioDialog, setShowCreatePortfolioDialog] = useState(false);
+  const [portfolioMenuWorkflowId, setPortfolioMenuWorkflowId] = useState<string | null>(null);
+
   // ── Data fetching ──────────────────────────────────────────────────────────
 
   const fetchWorkflows = useCallback(async () => {
@@ -345,6 +355,11 @@ export default function DashboardPage() {
     if (healthFilter) params.set('health', healthFilter);
     if (sopFilter) params.set('sopReadiness', sopFilter);
 
+    // Portfolio filter: pass to API (including 'uncategorized' for workflows not in any portfolio)
+    if (activePortfolioId) {
+      params.set('portfolio', activePortfolioId);
+    }
+
     const res = await fetch(`/api/workflows?${params}`);
     if (res.ok) {
       const data = await res.json();
@@ -352,7 +367,7 @@ export default function DashboardPage() {
       if (data.stats) setStats(data.stats);
     }
     setIsLoading(false);
-  }, [search, sortBy, activeTagId, healthFilter, sopFilter]);
+  }, [search, sortBy, activeTagId, healthFilter, sopFilter, activePortfolioId]);
 
   const fetchTags = useCallback(async () => {
     const res = await fetch('/api/tags');
@@ -367,6 +382,14 @@ export default function DashboardPage() {
     if (res.ok) {
       const data = await res.json();
       setStreak(data.data);
+    }
+  }, []);
+
+  const fetchPortfolios = useCallback(async () => {
+    const res = await fetch('/api/portfolios');
+    if (res.ok) {
+      const data = await res.json();
+      setPortfolios(data.portfolios ?? []);
     }
   }, []);
 
@@ -402,8 +425,9 @@ export default function DashboardPage() {
     fetchWorkflows();
     fetchTags();
     fetchStreak();
+    fetchPortfolios();
     track({ event: 'page_viewed', path: '/dashboard' });
-  }, [fetchWorkflows, fetchTags, fetchStreak]);
+  }, [fetchWorkflows, fetchTags, fetchStreak, fetchPortfolios]);
 
   useEffect(() => {
     if (viewMode === 'process_groups') {
@@ -442,6 +466,28 @@ export default function DashboardPage() {
       ? { event: 'tag_removed', workflowId, tagId }
       : { event: 'tag_assigned', workflowId, tagId },
     );
+  }
+
+  // ── Portfolio assignment handlers ──────────────────────────────────────────
+
+  async function handleTogglePortfolio(workflowId: string, portfolioId: string, isAssigned: boolean) {
+    if (isAssigned) {
+      await fetch(`/api/portfolios/${portfolioId}/workflows`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workflowIds: [workflowId] }),
+      });
+      track({ event: 'workflow_removed_from_portfolio', workflowId, portfolioId });
+    } else {
+      await fetch(`/api/portfolios/${portfolioId}/workflows`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workflowIds: [workflowId] }),
+      });
+      track({ event: 'workflow_added_to_portfolio', workflowId, portfolioId });
+    }
+    fetchPortfolios();
+    fetchWorkflows();
   }
 
   async function handleDeleteTag(tagId: string) {
@@ -504,12 +550,31 @@ export default function DashboardPage() {
     setLoadingSample(false);
   }
 
-  // ── Client-side AI score filter (for AI-Ready preset) ─────────────────────
+  // ── Client-side filters ────────────────────────────────────────────────────
 
   const displayedWorkflows = useMemo(() => {
-    if (minAiScore <= 0) return workflows;
-    return workflows.filter((w) => (w.aiOpportunityScore ?? 0) >= minAiScore);
+    let result = workflows;
+    // AI-Ready preset score filter
+    if (minAiScore > 0) {
+      result = result.filter((w) => (w.aiOpportunityScore ?? 0) >= minAiScore);
+    }
+    return result;
   }, [workflows, minAiScore]);
+
+  // Derived: name of the active portfolio for the section header
+  const activePortfolioName = useMemo(() => {
+    if (!activePortfolioId) return null;
+    if (activePortfolioId === 'uncategorized') return 'Uncategorized';
+    function findNode(nodes: PortfolioNode[]): string | null {
+      for (const n of nodes) {
+        if (n.id === activePortfolioId) return n.name;
+        const found = findNode(n.children);
+        if (found) return found;
+      }
+      return null;
+    }
+    return findNode(portfolios);
+  }, [activePortfolioId, portfolios]);
 
   // ── Derived data for intelligence panel ────────────────────────────────────
 
@@ -567,7 +632,7 @@ export default function DashboardPage() {
   const topRiskWorkflow = needsAttentionWorkflows.length > 0 ? needsAttentionWorkflows[0] : null;
   const topOpportunityWorkflow = optimizationWorkflows.length > 0 ? optimizationWorkflows[0] : null;
 
-  const hasActiveFilters = healthFilter !== '' || sopFilter !== '' || activeTagId !== null || search !== '' || minAiScore > 0;
+  const hasActiveFilters = healthFilter !== '' || sopFilter !== '' || activeTagId !== null || search !== '' || minAiScore > 0 || activePortfolioId !== null;
 
   function clearAllFilters() {
     setSearch('');
@@ -577,6 +642,7 @@ export default function DashboardPage() {
     setMinAiScore(0);
     setSortBy('created_at');
     setActivePreset('All Workflows');
+    setActivePortfolioId(null);
   }
 
   function applyPreset(view: PresetView) {
@@ -841,6 +907,12 @@ export default function DashboardPage() {
           Three-column layout: Action Items | AI Opportunities | Recent Activity
           ═══════════════════════════════════════════════════════════════════ */}
       {workflows.length > 0 && (
+        <>
+        <div className="flex items-center gap-ds-2 mb-ds-3">
+          <Brain className="h-4 w-4 text-brand-600" />
+          <h2 className="text-ds-sm font-semibold text-gray-900">Intelligence Summary</h2>
+          <span className="text-ds-xs text-gray-400">Key signals from your workflow portfolio</span>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-ds-4 mb-ds-6">
 
           {/* ── Action Items: workflows needing attention ──────────────── */}
@@ -974,6 +1046,7 @@ export default function DashboardPage() {
           </div>
 
         </div>
+        </>
       )}
 
       {/* ═══════════════════════════════════════════════════════════════════
@@ -1037,9 +1110,10 @@ export default function DashboardPage() {
       )}
 
       {/* ═══════════════════════════════════════════════════════════════════
-          VIEW MODE TOGGLE
+          VIEW MODE TOGGLE + PORTFOLIO SIDEBAR TOGGLE
           ═══════════════════════════════════════════════════════════════════ */}
-      <div className="flex items-center gap-1 mb-ds-4 p-1 bg-gray-100 rounded-ds-md w-fit">
+      <div className="flex items-center justify-between mb-ds-4">
+      <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-ds-md w-fit">
         <button
           onClick={() => {
             setViewMode('workflows');
@@ -1069,6 +1143,21 @@ export default function DashboardPage() {
           Process Groups
         </button>
       </div>
+      {viewMode === 'workflows' && (
+        <button
+          onClick={() => setShowPortfolioSidebar((v) => !v)}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-ds-sm text-ds-xs font-medium border transition-colors ${
+            showPortfolioSidebar
+              ? 'bg-brand-50 border-brand-200 text-brand-700'
+              : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+          }`}
+          title={showPortfolioSidebar ? 'Hide portfolios' : 'Show portfolios'}
+        >
+          <FolderOpen className="h-3.5 w-3.5" />
+          Portfolios
+        </button>
+      )}
+      </div>
 
       {/* ═══════════════════════════════════════════════════════════════════
           LAYER 4 — Rich Workflow Library
@@ -1076,13 +1165,45 @@ export default function DashboardPage() {
 
       {viewMode === 'workflows' && (
       <>
+      {/* ── Portfolio sidebar + content flex wrapper ───────────────────── */}
+      <div className="flex gap-ds-4 items-start">
+
+      {/* Portfolio Sidebar */}
+      {showPortfolioSidebar && (
+        <PortfolioSidebar
+          portfolios={portfolios}
+          activePortfolioId={activePortfolioId}
+          onSelectPortfolio={(id) => {
+            setActivePortfolioId(id);
+            setActivePreset(null);
+          }}
+          onCreatePortfolio={() => setShowCreatePortfolioDialog(true)}
+          onRefresh={fetchPortfolios}
+          isCollapsed={false}
+          onToggleCollapsed={() => setShowPortfolioSidebar(false)}
+        />
+      )}
+
+      {/* Main workflow library content */}
+      <div className="flex-1 min-w-0">
+
       {/* ── Section Header ────────────────────────────────────────────── */}
       <div className="ds-section mb-ds-4">
         <h2 className="ds-section-label text-ds-lg font-semibold text-gray-900">
           Workflow Library
+          {activePortfolioName && (
+            <span className="text-gray-400 font-normal"> &middot; {activePortfolioName}</span>
+          )}
         </h2>
         <p className="text-ds-xs text-gray-500">
-          {stats ? `${stats.totalWorkflows} workflow${stats.totalWorkflows !== 1 ? 's' : ''}` : ''}
+          {displayedWorkflows.length} workflow{displayedWorkflows.length !== 1 ? 's' : ''}
+          {activePortfolioId && activePortfolioId !== 'uncategorized'
+            ? ' in portfolio'
+            : activePortfolioId === 'uncategorized'
+            ? ' (no portfolio)'
+            : stats
+            ? ` of ${stats.totalWorkflows} total`
+            : ''}
         </p>
       </div>
 
@@ -1300,11 +1421,22 @@ export default function DashboardPage() {
                 }
                 onTagMenuClose={() => setTagMenuWorkflowId(null)}
                 onToggleTag={handleToggleTag}
+                allPortfolios={portfolios}
+                portfolioMenuWorkflowId={portfolioMenuWorkflowId}
+                onPortfolioMenuToggle={() =>
+                  setPortfolioMenuWorkflowId(portfolioMenuWorkflowId === w.id ? null : w.id)
+                }
+                onPortfolioMenuClose={() => setPortfolioMenuWorkflowId(null)}
+                onTogglePortfolio={handleTogglePortfolio}
               />
             ))}
           </div>
         </>
       )}
+
+      {/* Close main content div and sidebar flex wrapper */}
+      </div>
+      </div>
       </>
       )}
 
@@ -1317,6 +1449,15 @@ export default function DashboardPage() {
           isLoading={isLoadingProcessGroups}
           isRunningAnalysis={isRunningAnalysis}
           onRunAnalysis={handleRunAnalysis}
+        />
+      )}
+
+      {/* ── Create Portfolio Dialog ────────────────────────────────────────── */}
+      {showCreatePortfolioDialog && (
+        <CreatePortfolioDialog
+          portfolios={portfolios}
+          onCreated={fetchPortfolios}
+          onClose={() => setShowCreatePortfolioDialog(false)}
         />
       )}
     </div>
@@ -1438,6 +1579,11 @@ function WorkflowRow({
   onTagMenuToggle,
   onTagMenuClose,
   onToggleTag,
+  allPortfolios,
+  portfolioMenuWorkflowId,
+  onPortfolioMenuToggle,
+  onPortfolioMenuClose,
+  onTogglePortfolio,
 }: {
   workflow: WorkflowSummary;
   allTags: TagWithCount[];
@@ -1453,6 +1599,11 @@ function WorkflowRow({
   onTagMenuToggle: () => void;
   onTagMenuClose: () => void;
   onToggleTag: (workflowId: string, tagId: string, hasTag: boolean) => void;
+  allPortfolios: PortfolioNode[];
+  portfolioMenuWorkflowId: string | null;
+  onPortfolioMenuToggle: () => void;
+  onPortfolioMenuClose: () => void;
+  onTogglePortfolio: (workflowId: string, portfolioId: string, isAssigned: boolean) => void;
 }) {
   const isEditing = editingId === w.id;
   const healthConfig = HEALTH_STATUS_CONFIG[w.healthStatus];
@@ -1615,6 +1766,29 @@ function WorkflowRow({
 
         {/* Actions */}
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          {/* Portfolio assignment menu */}
+          {allPortfolios.length > 0 && (
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  onPortfolioMenuToggle();
+                }}
+                className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                title="Assign to portfolio"
+              >
+                <FolderOpen className="h-3.5 w-3.5" />
+              </button>
+              {portfolioMenuWorkflowId === w.id && (
+                <PortfolioMenu
+                  workflowId={w.id}
+                  allPortfolios={allPortfolios}
+                  onToggle={onTogglePortfolio}
+                  onClose={onPortfolioMenuClose}
+                />
+              )}
+            </div>
+          )}
           <div className="relative">
             <button
               onClick={(e) => {
@@ -1807,6 +1981,28 @@ function WorkflowRow({
 
           {/* Mobile actions */}
           <div className="flex flex-col gap-0.5">
+            {allPortfolios.length > 0 && (
+              <div className="relative">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onPortfolioMenuToggle();
+                  }}
+                  className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                  title="Assign to portfolio"
+                >
+                  <FolderOpen className="h-3.5 w-3.5" />
+                </button>
+                {portfolioMenuWorkflowId === w.id && (
+                  <PortfolioMenu
+                    workflowId={w.id}
+                    allPortfolios={allPortfolios}
+                    onToggle={onTogglePortfolio}
+                    onClose={onPortfolioMenuClose}
+                  />
+                )}
+              </div>
+            )}
             <div className="relative">
               <button
                 onClick={(e) => {
@@ -1906,6 +2102,73 @@ function TagMenu({
             </button>
           );
         })}
+      </div>
+    </>
+  );
+}
+
+// ─── Portfolio assignment dropdown ─────────────────────────────────────────────
+
+function PortfolioMenu({
+  workflowId,
+  allPortfolios,
+  onToggle,
+  onClose,
+}: {
+  workflowId: string;
+  allPortfolios: PortfolioNode[];
+  onToggle: (workflowId: string, portfolioId: string, isAssigned: boolean) => void;
+  onClose: () => void;
+}) {
+  // Flatten the tree for display — we don't know which portfolios this workflow
+  // is in without a separate API call, so we use a simple UI that issues PATCH
+  // calls and refreshes; the assigned state is communicated via fetchWorkflows.
+  function flattenNodes(
+    nodes: PortfolioNode[],
+    depth = 0,
+  ): { node: PortfolioNode; depth: number }[] {
+    const result: { node: PortfolioNode; depth: number }[] = [];
+    for (const n of nodes) {
+      result.push({ node: n, depth });
+      result.push(...flattenNodes(n.children, depth + 1));
+    }
+    return result;
+  }
+
+  const flat = flattenNodes(allPortfolios);
+
+  return (
+    <>
+      {/* Backdrop to close */}
+      <div className="fixed inset-0 z-40" onClick={onClose} />
+      <div className="absolute right-0 top-8 z-50 w-52 rounded-ds-md border border-gray-200 bg-white shadow-lg py-1 max-h-64 overflow-y-auto">
+        <p className="px-3 py-1.5 text-[11px] font-medium text-gray-400 uppercase tracking-wide">
+          Assign to portfolio
+        </p>
+        {flat.length === 0 && (
+          <p className="px-3 py-2 text-ds-xs text-gray-400">No portfolios yet.</p>
+        )}
+        {flat.map(({ node, depth }) => (
+          <button
+            key={node.id}
+            onClick={(e) => {
+              e.preventDefault();
+              // isAssigned unknown without extra API call — always send assign
+              // The backend handles idempotent add (skips if already assigned)
+              onToggle(workflowId, node.id, false);
+              onClose();
+            }}
+            className="flex w-full items-center gap-2 px-3 py-1.5 text-ds-xs hover:bg-gray-50 transition-colors"
+            style={{ paddingLeft: `${12 + depth * 10}px` }}
+          >
+            <span
+              className="h-2 w-2 rounded-full flex-shrink-0"
+              style={{ backgroundColor: node.color }}
+            />
+            <span className="flex-1 text-left text-gray-700 truncate">{node.name}</span>
+            <span className="text-[10px] text-gray-400">{node.workflowCount}</span>
+          </button>
+        ))}
       </div>
     </>
   );

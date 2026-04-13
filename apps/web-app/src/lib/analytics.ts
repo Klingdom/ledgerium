@@ -76,6 +76,14 @@ export type AnalyticsEvent =
   | { event: 'tag_removed'; workflowId: string; tagId: string }
   | { event: 'tag_filter_applied'; tagId: string }
 
+  // ── Portfolios ─────────────────────────────────────────────────────────────
+  | { event: 'portfolio_created'; type: string; hasParent: boolean }
+  | { event: 'portfolio_renamed'; portfolioId: string }
+  | { event: 'portfolio_deleted'; portfolioId: string }
+  | { event: 'portfolio_filter_applied'; portfolioId: string }
+  | { event: 'workflow_added_to_portfolio'; workflowId: string; portfolioId: string }
+  | { event: 'workflow_removed_from_portfolio'; workflowId: string; portfolioId: string }
+
   // ── Process groups & analysis ─────────────────────────────────────────────
   | { event: 'view_mode_changed'; mode: string }
   | { event: 'process_analysis_triggered' }

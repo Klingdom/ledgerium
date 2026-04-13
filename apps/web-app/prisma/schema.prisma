@@ -30,6 +30,7 @@ model User {
   groupRelationships  GroupRelationship[]
   insights            ProcessInsight[]
   tags                Tag[]
+  portfolios          Portfolio[]
   createdTeams        Team[]          @relation("TeamCreator")
   teamMemberships     TeamMember[]
   sentInvites         TeamInvite[]    @relation("InviteSender")
@@ -100,6 +101,7 @@ model Workflow {
   insights          ProcessInsight[]
   shares            WorkflowShare[]
   tags              WorkflowTag[]
+  portfolios        WorkflowPortfolio[]
 
   @@index([userId])
   @@index([status])
@@ -138,6 +140,47 @@ model WorkflowTag {
   @@index([workflowId])
   @@index([tagId])
   @@map("workflow_tags")
+}
+
+// ─── Portfolio Organization ─────────────────────────────────────────────────
+
+model Portfolio {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  name        String
+  description String?
+  type        String   @default("folder") // folder, project, business_unit, department, custom
+  color       String   @default("#6366f1") // hex color for UI
+  icon        String?  // optional icon identifier (e.g., "folder", "briefcase", "building")
+  parentId    String?  @map("parent_id") // self-referencing for nested portfolios
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent    Portfolio?         @relation("PortfolioTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Portfolio[]        @relation("PortfolioTree")
+  workflows WorkflowPortfolio[]
+
+  @@unique([userId, name, parentId])
+  @@index([userId])
+  @@index([parentId])
+  @@map("portfolios")
+}
+
+model WorkflowPortfolio {
+  id          String   @id @default(uuid())
+  workflowId  String   @map("workflow_id")
+  portfolioId String   @map("portfolio_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  workflow  Workflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@unique([workflowId, portfolioId])
+  @@index([workflowId])
+  @@index([portfolioId])
+  @@map("workflow_portfolios")
 }
 
 model WorkflowArtifact {
