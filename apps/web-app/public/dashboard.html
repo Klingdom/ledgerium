@@ -88,31 +88,67 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .filter-pill:hover{border-color:var(--brand-400);color:var(--brand-600)}
 .filter-pill.active{background:var(--brand-600);color:#fff;border-color:var(--brand-600)}
 
-/* ── Workflow Grid ── */
-.workflow-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
-.workflow-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:20px;cursor:pointer;transition:box-shadow .15s,border-color .15s;position:relative}
-.workflow-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08);border-color:var(--brand-400)}
-.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}
-.card-title{font-size:14px;font-weight:600;color:var(--gray-900);line-height:20px;flex:1}
-.star-btn{background:none;border:none;cursor:pointer;padding:2px;color:var(--gray-400);flex-shrink:0;transition:color .15s}
+/* ── Workflow Table Layout ── */
+.wf-table-wrap{display:flex;flex-direction:column;gap:4px}
+.wf-table-header{display:grid;grid-template-columns:32px 1fr 100px 60px 80px 120px 80px 140px 80px 72px;gap:12px;padding:6px 16px;margin-bottom:2px}
+.wf-table-header span{font-size:11px;font-weight:500;color:var(--gray-400);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wf-row{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);cursor:pointer;transition:border-color .15s;position:relative}
+.wf-row:hover{border-color:var(--gray-400)}
+.wf-row-grid{display:grid;grid-template-columns:32px 1fr 100px 60px 80px 120px 80px 140px 80px 72px;gap:12px;padding:12px 16px;align-items:center}
+.wf-signal{padding:6px 16px 10px 60px;font-size:11px;line-height:16px;border-top:1px solid var(--gray-100)}
+
+/* Star button */
+.star-btn{background:none;border:none;cursor:pointer;padding:2px;color:var(--gray-200);flex-shrink:0;transition:color .15s;display:flex;align-items:center;justify-content:center}
 .star-btn.active{color:var(--amber-400)}
-.star-btn:hover{color:var(--amber-400)}
-.tag-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}
-.sys-tag{display:inline-flex;align-items:center;padding:2px 8px;background:var(--brand-50);color:var(--brand-700);border-radius:var(--radius-sm);font-size:11px;font-weight:500}
-.card-meta{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--gray-400);margin-bottom:12px;flex-wrap:wrap}
-.meta-item{display:inline-flex;align-items:center;gap:4px}
-.conf-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.conf-dot.high{background:var(--emerald-400)}
-.conf-dot.med{background:var(--blue-400)}
-.conf-dot.low{background:var(--amber-400)}
-.card-footer{display:flex;align-items:center;justify-content:space-between}
-.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:var(--radius-sm);font-size:11px;font-weight:600}
-.badge-healthy{background:#d1fae5;color:#065f46}
-.badge-review{background:#fef3c7;color:#92400e}
-.badge-new{background:var(--brand-50);color:var(--brand-700)}
-.sop-ready{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:#d1fae5;color:#065f46;border-radius:var(--radius-sm);font-size:11px;font-weight:500}
-.view-sop-btn{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--brand-600);background:none;border:none;cursor:pointer;padding:3px 0;transition:color .15s}
-.view-sop-btn:hover{color:var(--brand-700)}
+.star-btn:hover{color:var(--gray-400)}
+.star-btn.active:hover{color:var(--amber-500)}
+
+/* Health pill */
+.health-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.health-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.health-healthy{background:#ecfdf5;color:#065f46}
+.health-healthy .health-dot{background:#10b981}
+.health-needs_review{background:#fffbeb;color:#92400e}
+.health-needs_review .health-dot{background:#f59e0b}
+.health-high_variation{background:#fef2f2;color:#991b1b}
+.health-high_variation .health-dot{background:#ef4444}
+.health-new{background:var(--brand-50);color:var(--brand-700)}
+.health-new .health-dot{background:var(--brand-500)}
+
+/* Confidence bar */
+.conf-bar{height:6px;border-radius:9999px;background:var(--gray-100);overflow:hidden;flex:1;min-width:40px}
+.conf-bar-fill{height:100%;border-radius:9999px}
+
+/* SOP badge */
+.sop-badge{display:inline-flex;align-items:center;padding:3px 7px;border-radius:var(--radius-sm);font-size:10px;font-weight:600;white-space:nowrap}
+.sop-ready-badge{background:#ecfdf5;color:#065f46}
+.sop-partial-badge{background:#fffbeb;color:#92400e}
+.sop-not-ready-badge{background:var(--gray-100);color:var(--gray-600)}
+
+/* Tag chip */
+.tag-chip{display:inline-flex;align-items:center;padding:2px 7px;border-radius:var(--radius-sm);font-size:10px;font-weight:500;border:1px solid transparent;white-space:nowrap}
+.sys-tag-neutral{display:inline-flex;align-items:center;padding:2px 7px;background:var(--gray-100);color:var(--gray-600);border-radius:var(--radius-sm);font-size:10px;font-weight:500}
+
+/* AI opportunity badge */
+.ai-opp-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:20px;font-size:10px;font-weight:600;background:#f5f3ff;color:#6d28d9;white-space:nowrap}
+
+/* Actions column (hover reveal) */
+.wf-actions{display:flex;align-items:center;justify-content:flex-end;opacity:0;transition:opacity .15s}
+.wf-row:hover .wf-actions{opacity:1}
+.view-btn{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--brand-600);background:none;border:1px solid var(--brand-200);border-radius:var(--radius-md);cursor:pointer;padding:4px 10px;white-space:nowrap;transition:background .15s,border-color .15s}
+.view-btn:hover{background:var(--brand-50);border-color:var(--brand-400)}
+
+/* Workflow title link */
+.wf-title-link{font-size:13px;font-weight:500;color:var(--gray-900);background:none;border:none;cursor:pointer;padding:0;text-align:left;line-height:18px}
+.wf-title-link:hover{color:var(--brand-600)}
+
+/* Mobile card layout */
+.wf-mobile-card{display:none;padding:12px 16px}
+.wf-mobile-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px}
+.wf-mobile-badges{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.wf-mobile-meta{display:flex;align-items:center;gap:12px;font-size:11px;color:var(--gray-500)}
+.wf-mobile-meta-item{display:inline-flex;align-items:center;gap:4px}
+
 .empty-state{text-align:center;padding:48px 24px;color:var(--gray-400)}
 .empty-state p{margin-top:8px;font-size:13px}
 
@@ -326,6 +362,13 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .floating-cta a:hover{background:var(--brand-700);box-shadow:0 6px 20px rgba(0,111,199,.5)}
 
 /* ── Responsive ── */
+@media(max-width:1024px){
+  .wf-table-header{display:none}
+  .wf-row-grid{display:none}
+  .wf-mobile-card{display:block}
+  .wf-signal{padding-left:16px}
+  .wf-actions{opacity:1}
+}
 @media(max-width:900px){
   .slide-panel{width:90%}
   .stats-grid{grid-template-columns:repeat(3,1fr)}
@@ -338,7 +381,6 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 @media(max-width:640px){
   .slide-panel{width:100%}
   .stats-grid{grid-template-columns:repeat(2,1fr)}
-  .workflow-grid{grid-template-columns:1fr}
   .sop-meta-grid{grid-template-columns:repeat(2,1fr)}
   .nav-tabs .nav-tab{display:none}
   .nav-tabs .nav-tab:first-child{display:flex}
@@ -347,9 +389,9 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 
 /* ── Print ── */
 @media print{
-  .demo-banner,.topnav,.stats-bar,.search-row,.filter-pills,.panel-overlay,.slide-panel,.floating-cta,.view-sop-btn,.close-btn,.panel-tabs,.no-print{display:none!important}
-  .workflow-grid{grid-template-columns:repeat(2,1fr)}
-  .workflow-card{break-inside:avoid}
+  .demo-banner,.topnav,.stats-bar,.search-row,.filter-pills,.panel-overlay,.slide-panel,.floating-cta,.wf-actions,.close-btn,.panel-tabs,.no-print{display:none!important}
+  .wf-row{break-inside:avoid;border:1px solid #e5e7eb}
+  .wf-table-header{display:none}
 }
 
 /* ── Download Banner ── */
@@ -429,7 +471,20 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
       <button class="filter-pill" data-filter="sop-ready">SOP Ready</button>
     </div>
 
-    <div class="workflow-grid" id="workflow-grid" role="list" aria-label="Workflows"></div>
+    <div class="wf-table-wrap" id="workflow-grid" role="list" aria-label="Workflows">
+      <div class="wf-table-header" aria-hidden="true">
+        <span></span>
+        <span>Workflow</span>
+        <span>Health</span>
+        <span>Steps</span>
+        <span>Duration</span>
+        <span>Confidence</span>
+        <span>SOP</span>
+        <span>Tags</span>
+        <span>Active</span>
+        <span></span>
+      </div>
+    </div>
     <div id="empty-state" class="empty-state" style="display:none" aria-live="polite">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gray-200);margin:0 auto"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <p>No workflows match your search.</p>
@@ -483,6 +538,29 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 </div>
 
 <script>
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function formatDuration(ms) {
+  if (!ms) return '—';
+  const m = Math.floor(ms / 60000);
+  const s = Math.round((ms % 60000) / 1000);
+  if (m === 0) return s + 's';
+  return s === 0 ? m + 'm' : m + 'm ' + s + 's';
+}
+function formatDateRelative(iso) {
+  if (!iso) return '—';
+  const diff = Date.now() - new Date(iso).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days === 0) return 'today';
+  if (days === 1) return '1d ago';
+  if (days < 7) return days + 'd ago';
+  const weeks = Math.floor(days / 7);
+  if (weeks < 5) return weeks + 'w ago';
+  const months = Math.floor(days / 30);
+  return months + 'mo ago';
+}
+function confBarColor(pct) { return pct >= 80 ? '#10b981' : pct >= 60 ? '#f59e0b' : '#ef4444'; }
+function confTextColor(pct) { return pct >= 80 ? '#059669' : pct >= 60 ? '#d97706' : '#dc2626'; }
+
 // ── Data ──────────────────────────────────────────────────────────────────────
 const WORKFLOWS = [
   {
@@ -496,6 +574,16 @@ const WORKFLOWS = [
     status: 'healthy',
     sopReady: true,
     starred: true,
+    healthStatus: 'healthy',
+    sopReadiness: 'ready',
+    aiOpportunityScore: 72,
+    processType: 'general',
+    complexityScore: 32,
+    cognitiveBurdenScore: 28,
+    processMaturityScore: 74,
+    documentationCompleteness: 82,
+    tags: [{id:'t1',name:'Finance',color:'#2563eb'},{id:'t2',name:'HR',color:'#7c3aed'}],
+    updatedAt: '2026-04-10T09:15:00Z',
     objective: 'Capture and submit employee expenses for manager approval in Workday.',
     trigger: 'Employee has out-of-pocket business expenses to reimburse',
     roles: ['Employee', 'Manager'],
@@ -525,6 +613,16 @@ const WORKFLOWS = [
     status: 'healthy',
     sopReady: true,
     starred: false,
+    healthStatus: 'healthy',
+    sopReadiness: 'ready',
+    aiOpportunityScore: 68,
+    processType: 'general',
+    complexityScore: 55,
+    cognitiveBurdenScore: 48,
+    processMaturityScore: 68,
+    documentationCompleteness: 75,
+    tags: [{id:'t1',name:'Finance',color:'#2563eb'},{id:'t3',name:'Operations',color:'#059669'}],
+    updatedAt: '2026-04-08T14:30:00Z',
     objective: 'Match, validate, and post a vendor invoice to the general ledger in NetSuite.',
     trigger: 'Vendor invoice received and requires processing',
     roles: ['AP Clerk', 'AP Manager'],
@@ -558,6 +656,16 @@ const WORKFLOWS = [
     status: 'healthy',
     sopReady: true,
     starred: true,
+    healthStatus: 'healthy',
+    sopReadiness: 'ready',
+    aiOpportunityScore: 65,
+    processType: 'general',
+    complexityScore: 60,
+    cognitiveBurdenScore: 54,
+    processMaturityScore: 62,
+    documentationCompleteness: 70,
+    tags: [{id:'t4',name:'IT',color:'#0891b2'},{id:'t5',name:'Compliance',color:'#dc2626'}],
+    updatedAt: '2026-04-11T11:00:00Z',
     objective: 'Classify, investigate, and respond to an inbound customer support ticket.',
     trigger: 'New ticket submitted via customer support portal',
     roles: ['Support Agent', 'Engineering Lead'],
@@ -593,6 +701,16 @@ const WORKFLOWS = [
     status: 'needs-review',
     sopReady: false,
     starred: false,
+    healthStatus: 'needs_review',
+    sopReadiness: 'partial',
+    aiOpportunityScore: 58,
+    processType: 'general',
+    complexityScore: 72,
+    cognitiveBurdenScore: 66,
+    processMaturityScore: 44,
+    documentationCompleteness: 38,
+    tags: [{id:'t1',name:'Finance',color:'#2563eb'},{id:'t3',name:'Operations',color:'#059669'}],
+    updatedAt: '2026-03-28T16:45:00Z',
     objective: 'Process a customer refund across Shopify and Stripe for a returned order.',
     trigger: 'Customer refund request approved by support team',
     roles: ['Support Agent', 'Finance'],
@@ -623,6 +741,16 @@ const WORKFLOWS = [
     status: 'healthy',
     sopReady: true,
     starred: false,
+    healthStatus: 'healthy',
+    sopReadiness: 'ready',
+    aiOpportunityScore: 81,
+    processType: 'general',
+    complexityScore: 78,
+    cognitiveBurdenScore: 70,
+    processMaturityScore: 58,
+    documentationCompleteness: 65,
+    tags: [{id:'t2',name:'HR',color:'#7c3aed'},{id:'t4',name:'IT',color:'#0891b2'}],
+    updatedAt: '2026-04-09T08:00:00Z',
     objective: 'Set up accounts, tools, and access for a new employee across HR and IT systems.',
     trigger: 'New hire start date confirmed in BambooHR',
     roles: ['HR Coordinator', 'IT Admin'],
@@ -652,6 +780,16 @@ const WORKFLOWS = [
     status: 'healthy',
     sopReady: true,
     starred: true,
+    healthStatus: 'healthy',
+    sopReadiness: 'ready',
+    aiOpportunityScore: 55,
+    processType: 'general',
+    complexityScore: 65,
+    cognitiveBurdenScore: 60,
+    processMaturityScore: 80,
+    documentationCompleteness: 88,
+    tags: [{id:'t5',name:'Compliance',color:'#dc2626'},{id:'t3',name:'Operations',color:'#059669'}],
+    updatedAt: '2026-04-12T07:30:00Z',
     objective: 'Register a new patient and complete intake documentation in EpicCare.',
     trigger: 'Patient arrives at front desk for scheduled appointment',
     roles: ['Front Desk Coordinator', 'Intake Nurse'],
@@ -682,6 +820,16 @@ const WORKFLOWS = [
     status: 'needs-review',
     sopReady: false,
     starred: false,
+    healthStatus: 'high_variation',
+    sopReadiness: 'partial',
+    aiOpportunityScore: 61,
+    processType: 'general',
+    complexityScore: 88,
+    cognitiveBurdenScore: 82,
+    processMaturityScore: 40,
+    documentationCompleteness: 42,
+    tags: [{id:'t5',name:'Compliance',color:'#dc2626'},{id:'t1',name:'Finance',color:'#2563eb'}],
+    updatedAt: '2026-03-20T12:00:00Z',
     objective: 'Review, validate, and adjudicate an insurance claim against active policy terms.',
     trigger: 'New claim submitted through insured portal',
     roles: ['Claims Adjuster', 'Claims Supervisor'],
@@ -716,6 +864,16 @@ const WORKFLOWS = [
     status: 'healthy',
     sopReady: true,
     starred: false,
+    healthStatus: 'healthy',
+    sopReadiness: 'ready',
+    aiOpportunityScore: 78,
+    processType: 'general',
+    complexityScore: 58,
+    cognitiveBurdenScore: 50,
+    processMaturityScore: 72,
+    documentationCompleteness: 78,
+    tags: [{id:'t4',name:'IT',color:'#0891b2'},{id:'t5',name:'Compliance',color:'#dc2626'}],
+    updatedAt: '2026-04-07T10:20:00Z',
     objective: 'Provision all required system access and tools for a new employee on day one.',
     trigger: 'IT provisioning ticket created via Jira Service Management',
     roles: ['IT Administrator', 'Security Team'],
@@ -745,6 +903,16 @@ const WORKFLOWS = [
     status: 'needs-review',
     sopReady: false,
     starred: false,
+    healthStatus: 'needs_review',
+    sopReadiness: 'not_ready',
+    aiOpportunityScore: 63,
+    processType: 'general',
+    complexityScore: 62,
+    cognitiveBurdenScore: 56,
+    processMaturityScore: 36,
+    documentationCompleteness: 30,
+    tags: [{id:'t3',name:'Operations',color:'#059669'}],
+    updatedAt: '2026-03-15T14:00:00Z',
     objective: 'Coordinate and launch a marketing campaign across email and project management tools.',
     trigger: 'Campaign brief approved by marketing director',
     roles: ['Marketing Manager', 'Content Designer'],
@@ -774,6 +942,16 @@ const WORKFLOWS = [
     status: 'healthy',
     sopReady: true,
     starred: true,
+    healthStatus: 'healthy',
+    sopReadiness: 'ready',
+    aiOpportunityScore: 74,
+    processType: 'general',
+    complexityScore: 68,
+    cognitiveBurdenScore: 60,
+    processMaturityScore: 76,
+    documentationCompleteness: 84,
+    tags: [{id:'t1',name:'Finance',color:'#2563eb'},{id:'t5',name:'Compliance',color:'#dc2626'}],
+    updatedAt: '2026-04-05T09:00:00Z',
     objective: 'Onboard a new vendor into NetSuite with full contract execution via DocuSign.',
     trigger: 'Vendor onboarding request submitted by procurement team',
     roles: ['Procurement Manager', 'AP Admin', 'Legal'],
@@ -795,68 +973,181 @@ const WORKFLOWS = [
   }
 ];
 
-// ── Render Workflow Grid ───────────────────────────────────────────────────────
-function confClass(c) {
-  if (c >= 85) return 'high';
-  if (c >= 80) return 'med';
-  return 'low';
+// ── Render Workflow Table ──────────────────────────────────────────────────────
+const HEALTH_LABEL = { healthy:'Healthy', needs_review:'Needs Review', high_variation:'High Variation', new:'New' };
+const STAR_SVG = (filled) => `<svg width="15" height="15" viewBox="0 0 24 24" fill="${filled?'#fbbf24':'none'}" stroke="${filled?'#fbbf24':'#d1d5db'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+const ZAP_SMALL = `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
+const WARN_SMALL = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+
+function renderHealthPill(wf) {
+  const hs = wf.healthStatus || 'healthy';
+  const label = HEALTH_LABEL[hs] || hs;
+  return `<span class="health-pill health-${hs}"><span class="health-dot"></span>${label}</span>`;
 }
 
-function renderCard(wf) {
-  const tags = wf.systems.map(s => `<span class="sys-tag">${escapeHtml(s)}</span>`).join('');
-  const statusBadge = wf.status === 'healthy'
-    ? `<span class="badge badge-healthy"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Healthy</span>`
-    : `<span class="badge badge-review"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Needs Review</span>`;
-  const sopBadge = wf.sopReady
-    ? `<span class="sop-ready"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>SOP Ready</span>`
-    : '';
-  const starClass = wf.starred ? 'active' : '';
-  return `
-    <div class="workflow-card" data-id="${wf.id}" data-status="${wf.status}" data-sop="${wf.sopReady}" role="listitem" tabindex="0" aria-label="Open ${wf.title}">
-      <div class="card-top">
-        <div class="card-title">${wf.title}</div>
-        <button class="star-btn ${starClass}" data-id="${wf.id}" aria-label="${wf.starred ? 'Remove from favorites' : 'Add to favorites'}" aria-pressed="${wf.starred}">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="${wf.starred ? '#fbbf24' : 'none'}" stroke="${wf.starred ? '#fbbf24' : 'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+function renderSopBadge(wf) {
+  const r = wf.sopReadiness || 'not_ready';
+  const map = { ready:['sop-ready-badge','Ready'], partial:['sop-partial-badge','Partial'], not_ready:['sop-not-ready-badge','Not Ready'] };
+  const [cls, label] = map[r] || map.not_ready;
+  return `<span class="sop-badge ${cls}">${label}</span>`;
+}
+
+function renderConfBar(pct) {
+  const fill = confBarColor(pct);
+  const text = confTextColor(pct);
+  return `<div style="display:flex;align-items:center;gap:6px">
+    <div class="conf-bar"><div class="conf-bar-fill" style="width:${pct}%;background:${fill}"></div></div>
+    <span style="font-size:11px;font-weight:500;color:${text};white-space:nowrap">${pct}%</span>
+  </div>`;
+}
+
+function renderTags(wf) {
+  const tags = wf.tags || [];
+  const visible = tags.slice(0, 2);
+  const overflow = tags.length > 2 ? tags.length - 2 : 0;
+  const chips = visible.map(t =>
+    `<span class="tag-chip" style="background:${t.color}18;color:${t.color};border-color:${t.color}30">${escapeHtml(t.name)}</span>`
+  ).join('');
+  const more = overflow ? `<span class="tag-chip" style="background:#f3f4f6;color:#6b7280;border-color:#e5e7eb">+${overflow}</span>` : '';
+  return `<div style="display:flex;flex-wrap:wrap;gap:3px">${chips}${more}</div>`;
+}
+
+function renderAiOppBadge(wf) {
+  const score = wf.aiOpportunityScore || wf.aiScore || 0;
+  if (score < 60) return '';
+  return `<span class="ai-opp-badge">${ZAP_SMALL}AI: ${score}</span>`;
+}
+
+function renderSignal(wf) {
+  const hs = wf.healthStatus;
+  const score = wf.aiOpportunityScore || wf.aiScore || 0;
+  const mat = wf.processMaturityScore || 50;
+  const doc = wf.documentationCompleteness || 50;
+  const conf = wf.confidence;
+  const lastActive = wf.updatedAt ? formatDateRelative(wf.updatedAt) : null;
+  const daysSince = wf.updatedAt ? Math.floor((Date.now() - new Date(wf.updatedAt).getTime()) / 86400000) : 0;
+
+  let text = '';
+  let style = '';
+
+  if (hs === 'high_variation') {
+    text = 'High variation detected across runs — review steps for inconsistency before generating SOP.';
+    style = 'color:#b91c1c';
+  } else if (hs === 'needs_review' && conf < 83) {
+    text = 'Low confidence combined with review flag — additional recordings recommended to stabilize this workflow.';
+    style = 'color:#b45309';
+  } else if (daysSince > 20) {
+    text = `Last active ${lastActive} — workflow may be stale. Re-record to refresh evidence.`;
+    style = 'color:#6b7280';
+  } else if (score >= 70) {
+    text = 'Strong AI candidate — most steps show consistent patterns suitable for full automation.';
+    style = 'color:#6d28d9';
+  } else if (wf.complexityScore >= 80) {
+    text = 'High complexity workflow — break into sub-processes to improve SOP clarity and automation potential.';
+    style = 'color:#b45309';
+  } else if (mat < 40) {
+    text = 'Low process maturity — workflow lacks consistency. More recordings needed before SOP generation.';
+    style = 'color:#b91c1c';
+  }
+
+  if (!text) return '';
+  return `<div class="wf-signal" style="${style}">${text}</div>`;
+}
+
+function renderRow(wf) {
+  const signal = renderSignal(wf);
+  const primarySys = wf.systems[0] || '';
+
+  // Desktop grid row
+  const desktopRow = `
+    <div class="wf-row-grid">
+      <div>
+        <button class="star-btn${wf.starred?' active':''}" data-id="${wf.id}" aria-label="${wf.starred?'Remove from favorites':'Add to favorites'}" aria-pressed="${wf.starred}" onclick="event.stopPropagation()">
+          ${STAR_SVG(wf.starred)}
         </button>
       </div>
-      <div class="tag-row">${tags}</div>
-      <div class="card-meta">
-        <span class="meta-item">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-          ${wf.steps} steps
-        </span>
-        <span class="meta-item">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          ${wf.duration}
-        </span>
-        <span class="meta-item">
-          <span class="conf-dot ${confClass(wf.confidence)}"></span>
-          ${wf.confidence}% conf
-        </span>
+      <div>
+        <button class="wf-title-link" data-id="${wf.id}">${escapeHtml(wf.title)}</button>
+        <div style="margin-top:3px"><span class="sys-tag-neutral">${escapeHtml(primarySys)}</span></div>
       </div>
-      <div class="card-footer">
-        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${statusBadge}${sopBadge}<span class="ai-score-badge"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>AI ${wf.aiScore}</span></div>
-        <button class="view-sop-btn" data-id="${wf.id}">
-          View SOP
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      <div>
+        <div>${renderHealthPill(wf)}</div>
+        ${renderAiOppBadge(wf) ? `<div style="margin-top:4px">${renderAiOppBadge(wf)}</div>` : ''}
+        ${wf.documentationCompleteness < 50 ? `<div style="margin-top:2px;color:#d97706">${WARN_SMALL}</div>` : ''}
+      </div>
+      <div style="font-size:12px;color:#4b5563">${wf.steps}</div>
+      <div style="font-size:12px;color:#4b5563">${escapeHtml(wf.duration)}</div>
+      <div>${renderConfBar(wf.confidence)}</div>
+      <div>${renderSopBadge(wf)}</div>
+      <div>${renderTags(wf)}</div>
+      <div style="font-size:11px;color:#9ca3af">${formatDateRelative(wf.updatedAt)}</div>
+      <div class="wf-actions">
+        <button class="view-btn" data-id="${wf.id}">View
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
     </div>`;
+
+  // Mobile stacked card
+  const mobileCard = `
+    <div class="wf-mobile-card">
+      <div class="wf-mobile-top">
+        <button class="star-btn${wf.starred?' active':''}" data-id="${wf.id}" aria-label="${wf.starred?'Remove from favorites':'Add to favorites'}" aria-pressed="${wf.starred}" onclick="event.stopPropagation()" style="flex-shrink:0;margin-top:1px">
+          ${STAR_SVG(wf.starred)}
+        </button>
+        <div style="flex:1;min-width:0">
+          <button class="wf-title-link" data-id="${wf.id}" style="font-size:13px;font-weight:600">${escapeHtml(wf.title)}</button>
+        </div>
+        <button class="view-btn" data-id="${wf.id}" style="flex-shrink:0">View</button>
+      </div>
+      <div class="wf-mobile-badges">
+        ${renderHealthPill(wf)}
+        ${renderSopBadge(wf)}
+        ${renderAiOppBadge(wf)}
+        <span class="sys-tag-neutral">${escapeHtml(primarySys)}</span>
+        ${(wf.tags||[]).slice(0,2).map(t=>`<span class="tag-chip" style="background:${t.color}18;color:${t.color};border-color:${t.color}30">${escapeHtml(t.name)}</span>`).join('')}
+      </div>
+      <div class="wf-mobile-meta">
+        <span class="wf-mobile-meta-item">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          ${wf.steps}
+        </span>
+        <span class="wf-mobile-meta-item">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ${escapeHtml(wf.duration)}
+        </span>
+        <span style="font-size:11px;font-weight:500;color:${confTextColor(wf.confidence)}">${wf.confidence}%</span>
+        <span>${formatDateRelative(wf.updatedAt)}</span>
+      </div>
+    </div>`;
+
+  return `
+    <div class="wf-row" data-id="${wf.id}" data-status="${wf.healthStatus||wf.status}" data-sop="${wf.sopReady}" role="listitem" tabindex="0" aria-label="Open ${escapeHtml(wf.title)}">
+      ${desktopRow}
+      ${mobileCard}
+      ${signal}
+    </div>`;
 }
 
-function renderGrid(list) {
+function renderTable(list) {
   const grid = document.getElementById('workflow-grid');
   const empty = document.getElementById('empty-state');
+  // Preserve the sticky table header
+  const header = grid.querySelector('.wf-table-header');
   if (!list.length) {
     grid.innerHTML = '';
+    if (header) grid.appendChild(header);
     empty.style.display = '';
   } else {
-    grid.innerHTML = list.map(renderCard).join('');
+    const rowsHtml = list.map(renderRow).join('');
+    grid.innerHTML = '';
+    if (header) grid.appendChild(header);
+    grid.insertAdjacentHTML('beforeend', rowsHtml);
     empty.style.display = 'none';
   }
 }
 
-renderGrid(WORKFLOWS);
+renderTable(WORKFLOWS);
 
 // ── Search & Filter ────────────────────────────────────────────────────────────
 let activeFilter = 'all';
@@ -866,12 +1157,16 @@ function applyFilters() {
   let list = WORKFLOWS;
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
-    list = list.filter(w => w.title.toLowerCase().includes(q) || w.systems.some(s => s.toLowerCase().includes(q)));
+    list = list.filter(w =>
+      w.title.toLowerCase().includes(q) ||
+      w.systems.some(s => s.toLowerCase().includes(q)) ||
+      (w.tags || []).some(t => t.name.toLowerCase().includes(q))
+    );
   }
-  if (activeFilter === 'healthy') list = list.filter(w => w.status === 'healthy');
-  else if (activeFilter === 'needs-review') list = list.filter(w => w.status === 'needs-review');
-  else if (activeFilter === 'sop-ready') list = list.filter(w => w.sopReady);
-  renderGrid(list);
+  if (activeFilter === 'healthy') list = list.filter(w => w.healthStatus === 'healthy');
+  else if (activeFilter === 'needs-review') list = list.filter(w => w.healthStatus === 'needs_review' || w.healthStatus === 'high_variation');
+  else if (activeFilter === 'sop-ready') list = list.filter(w => w.sopReadiness === 'ready');
+  renderTable(list);
 }
 
 document.getElementById('search-input').addEventListener('input', e => {
@@ -888,7 +1183,7 @@ document.querySelectorAll('.filter-pill').forEach(btn => {
   });
 });
 
-// ── Star Toggle ────────────────────────────────────────────────────────────────
+// ── Star Toggle & Row Clicks ───────────────────────────────────────────────────
 document.getElementById('workflow-grid').addEventListener('click', e => {
   const starBtn = e.target.closest('.star-btn');
   if (starBtn) {
@@ -901,18 +1196,23 @@ document.getElementById('workflow-grid').addEventListener('click', e => {
     }
     return;
   }
-  const card = e.target.closest('.workflow-card');
-  const sopBtn = e.target.closest('.view-sop-btn');
-  if (card || sopBtn) {
-    const id = (card || sopBtn).dataset.id;
+  const viewBtn = e.target.closest('.view-btn');
+  const titleBtn = e.target.closest('.wf-title-link');
+  const row = e.target.closest('.wf-row');
+  if (viewBtn || titleBtn) {
+    const id = (viewBtn || titleBtn).dataset.id;
     openPanel(id);
+    return;
+  }
+  if (row && !e.target.closest('button')) {
+    openPanel(row.dataset.id);
   }
 });
 
 document.getElementById('workflow-grid').addEventListener('keydown', e => {
   if (e.key === 'Enter' || e.key === ' ') {
-    const card = e.target.closest('.workflow-card');
-    if (card) { e.preventDefault(); openPanel(card.dataset.id); }
+    const row = e.target.closest('.wf-row');
+    if (row) { e.preventDefault(); openPanel(row.dataset.id); }
   }
 });
 
