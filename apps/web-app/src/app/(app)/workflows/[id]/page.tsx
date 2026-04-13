@@ -267,13 +267,13 @@ export default function WorkflowDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 mb-ds-6 no-print">
-        <nav className="flex gap-ds-6">
+      <div className="border-b border-gray-200 mb-ds-6 no-print overflow-x-auto">
+        <nav className="flex gap-ds-6 min-w-max">
           {TABS.map(({ id: tabId, label, icon: Icon }) => (
             <button
               key={tabId}
               onClick={() => handleTabChange(tabId)}
-              className={`flex items-center gap-1.5 border-b-2 pb-ds-3 pt-ds-1 text-ds-sm font-medium transition-colors ${
+              className={`flex items-center gap-1.5 border-b-2 pb-ds-3 pt-ds-1 text-ds-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeTab === tabId
                   ? 'border-brand-600 text-brand-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700'

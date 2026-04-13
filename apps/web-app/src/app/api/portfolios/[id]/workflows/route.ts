@@ -96,10 +96,22 @@ export async function DELETE(
 
   const { workflowIds } = parsed.data;
 
+  // Verify all workflows belong to this user — mirror the POST ownership check
+  const ownedWorkflows = await db.workflow.findMany({
+    where: { id: { in: workflowIds }, userId: session.user.id },
+    select: { id: true },
+  });
+  const ownedIds = new Set(ownedWorkflows.map((w) => w.id));
+  const validIds = workflowIds.filter((id: string) => ownedIds.has(id));
+
+  if (validIds.length === 0) {
+    return NextResponse.json({ removed: 0 });
+  }
+
   const result = await db.workflowPortfolio.deleteMany({
     where: {
       portfolioId: params.id,
-      workflowId: { in: workflowIds },
+      workflowId: { in: validIds },
     },
   });
 

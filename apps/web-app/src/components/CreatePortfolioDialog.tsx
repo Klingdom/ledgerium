@@ -100,22 +100,26 @@ export default function CreatePortfolioDialog({
     if (description.trim()) body.description = description.trim();
     if (parentId) body.parentId = parentId;
 
-    const res = await fetch('/api/portfolios', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
+    try {
+      const res = await fetch('/api/portfolios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
 
-    if (res.ok) {
-      track({ event: 'portfolio_created', type, hasParent: !!parentId });
-      onCreated();
-      onClose();
-    } else {
-      const data = await res.json().catch(() => ({}));
-      setError((data as { error?: string }).error ?? 'Failed to create portfolio. Please try again.');
+      if (res.ok) {
+        track({ event: 'portfolio_created', type, hasParent: !!parentId });
+        onCreated();
+        onClose();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError((data as { error?: string }).error ?? 'Failed to create portfolio. Please try again.');
+      }
+    } catch {
+      setError('Network error. Could not create portfolio. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSubmitting(false);
   }
 
   return (

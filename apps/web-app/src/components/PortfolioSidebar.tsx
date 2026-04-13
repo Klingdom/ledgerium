@@ -108,21 +108,45 @@ function PortfolioTreeNode({
       setRenameValue(node.name);
       return;
     }
-    await fetch(`/api/portfolios/${node.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name }),
-    });
-    setIsRenaming(false);
-    onRefresh();
-    track({ event: 'portfolio_renamed', portfolioId: node.id });
+    try {
+      const res = await fetch(`/api/portfolios/${node.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const message = (data as { error?: string }).error ?? 'Failed to rename portfolio.';
+        window.alert(message);
+        setRenameValue(node.name);
+        setIsRenaming(false);
+        return;
+      }
+      setIsRenaming(false);
+      onRefresh();
+      track({ event: 'portfolio_renamed', portfolioId: node.id });
+    } catch {
+      window.alert('Network error. Could not rename portfolio.');
+      setRenameValue(node.name);
+      setIsRenaming(false);
+    }
   }, [renameValue, node.id, node.name, onRefresh]);
 
   const handleDelete = useCallback(async () => {
     if (!confirm(`Delete "${node.name}"? Workflows inside will not be deleted.`)) return;
-    await fetch(`/api/portfolios/${node.id}`, { method: 'DELETE' });
-    onRefresh();
-    track({ event: 'portfolio_deleted', portfolioId: node.id });
+    try {
+      const res = await fetch(`/api/portfolios/${node.id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const message = (data as { error?: string }).error ?? 'Failed to delete portfolio.';
+        window.alert(message);
+        return;
+      }
+      onRefresh();
+      track({ event: 'portfolio_deleted', portfolioId: node.id });
+    } catch {
+      window.alert('Network error. Could not delete portfolio.');
+    }
   }, [node.id, node.name, onRefresh]);
 
   const indentPx = depth * 12;

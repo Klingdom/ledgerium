@@ -418,6 +418,7 @@ export async function GET(req: NextRequest) {
       include: {
         tags: { include: { tag: true } },
         processDefinition: true,
+        portfolios: { select: { portfolioId: true } },
       },
     }),
     db.processInsight.count({
@@ -475,13 +476,14 @@ export async function GET(req: NextRequest) {
       w.confidence, sopReadiness, documentationCompleteness, isStale, w.processDefinition,
     );
 
-    // Exclude processDefinition relation from spread to keep response clean
-    const { processDefinition: _pd, tags: _tags, ...workflowBase } = w;
+    // Exclude processDefinition, portfolios, and tags relations from spread to keep response clean
+    const { processDefinition: _pd, tags: _tags, portfolios: _portfolios, ...workflowBase } = w;
 
     return {
       ...workflowBase,
       toolsUsed: parsedTools,
       tags: tagsMapped,
+      portfolioIds: w.portfolios.map((p) => p.portfolioId),
       // Enriched intelligence fields
       variationScore,
       sopReadiness,

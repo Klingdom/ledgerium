@@ -119,6 +119,7 @@ interface WorkflowSummary {
   createdAt: string;
   updatedAt: string;
   tags: TagSummary[];
+  portfolioIds: string[];
   variationScore: number;
   sopReadiness: SopReadiness;
   optimizationPotential: OptimizationPotential;
@@ -329,7 +330,7 @@ export default function DashboardPage() {
   // Portfolio state
   const [portfolios, setPortfolios] = useState<PortfolioNode[]>([]);
   const [activePortfolioId, setActivePortfolioId] = useState<string | null>(null);
-  const [showPortfolioSidebar, setShowPortfolioSidebar] = useState(true);
+  const [isPortfolioCollapsed, setIsPortfolioCollapsed] = useState(false);
   const [showCreatePortfolioDialog, setShowCreatePortfolioDialog] = useState(false);
   const [portfolioMenuWorkflowId, setPortfolioMenuWorkflowId] = useState<string | null>(null);
 
@@ -386,10 +387,14 @@ export default function DashboardPage() {
   }, []);
 
   const fetchPortfolios = useCallback(async () => {
-    const res = await fetch('/api/portfolios');
-    if (res.ok) {
-      const data = await res.json();
-      setPortfolios(data.portfolios ?? []);
+    try {
+      const res = await fetch('/api/portfolios');
+      if (res.ok) {
+        const data = await res.json();
+        setPortfolios(data.portfolios ?? []);
+      }
+    } catch {
+      // Network error — portfolio list stays as-is
     }
   }, []);
 
@@ -471,23 +476,27 @@ export default function DashboardPage() {
   // ── Portfolio assignment handlers ──────────────────────────────────────────
 
   async function handleTogglePortfolio(workflowId: string, portfolioId: string, isAssigned: boolean) {
-    if (isAssigned) {
-      await fetch(`/api/portfolios/${portfolioId}/workflows`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ workflowIds: [workflowId] }),
-      });
-      track({ event: 'workflow_removed_from_portfolio', workflowId, portfolioId });
-    } else {
-      await fetch(`/api/portfolios/${portfolioId}/workflows`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ workflowIds: [workflowId] }),
-      });
-      track({ event: 'workflow_added_to_portfolio', workflowId, portfolioId });
+    try {
+      if (isAssigned) {
+        await fetch(`/api/portfolios/${portfolioId}/workflows`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ workflowIds: [workflowId] }),
+        });
+        track({ event: 'workflow_removed_from_portfolio', workflowId, portfolioId });
+      } else {
+        await fetch(`/api/portfolios/${portfolioId}/workflows`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ workflowIds: [workflowId] }),
+        });
+        track({ event: 'workflow_added_to_portfolio', workflowId, portfolioId });
+      }
+      fetchPortfolios();
+      fetchWorkflows();
+    } catch {
+      // Network error — no state change; user can retry
     }
-    fetchPortfolios();
-    fetchWorkflows();
   }
 
   async function handleDeleteTag(tagId: string) {
@@ -1145,13 +1154,13 @@ export default function DashboardPage() {
       </div>
       {viewMode === 'workflows' && (
         <button
-          onClick={() => setShowPortfolioSidebar((v) => !v)}
+          onClick={() => setIsPortfolioCollapsed((v) => !v)}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-ds-sm text-ds-xs font-medium border transition-colors ${
-            showPortfolioSidebar
+            !isPortfolioCollapsed
               ? 'bg-brand-50 border-brand-200 text-brand-700'
               : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
           }`}
-          title={showPortfolioSidebar ? 'Hide portfolios' : 'Show portfolios'}
+          title={isPortfolioCollapsed ? 'Expand portfolios' : 'Collapse portfolios'}
         >
           <FolderOpen className="h-3.5 w-3.5" />
           Portfolios
@@ -1169,20 +1178,18 @@ export default function DashboardPage() {
       <div className="flex gap-ds-4 items-start">
 
       {/* Portfolio Sidebar */}
-      {showPortfolioSidebar && (
-        <PortfolioSidebar
-          portfolios={portfolios}
-          activePortfolioId={activePortfolioId}
-          onSelectPortfolio={(id) => {
-            setActivePortfolioId(id);
-            setActivePreset(null);
-          }}
-          onCreatePortfolio={() => setShowCreatePortfolioDialog(true)}
-          onRefresh={fetchPortfolios}
-          isCollapsed={false}
-          onToggleCollapsed={() => setShowPortfolioSidebar(false)}
-        />
-      )}
+      <PortfolioSidebar
+        portfolios={portfolios}
+        activePortfolioId={activePortfolioId}
+        onSelectPortfolio={(id) => {
+          setActivePortfolioId(id);
+          setActivePreset(null);
+        }}
+        onCreatePortfolio={() => setShowCreatePortfolioDialog(true)}
+        onRefresh={fetchPortfolios}
+        isCollapsed={isPortfolioCollapsed}
+        onToggleCollapsed={() => setIsPortfolioCollapsed((v) => !v)}
+      />
 
       {/* Main workflow library content */}
       <div className="flex-1 min-w-0">
@@ -1782,6 +1789,7 @@ function WorkflowRow({
               {portfolioMenuWorkflowId === w.id && (
                 <PortfolioMenu
                   workflowId={w.id}
+                  portfolioIds={w.portfolioIds}
                   allPortfolios={allPortfolios}
                   onToggle={onTogglePortfolio}
                   onClose={onPortfolioMenuClose}
@@ -1996,6 +2004,7 @@ function WorkflowRow({
                 {portfolioMenuWorkflowId === w.id && (
                   <PortfolioMenu
                     workflowId={w.id}
+                    portfolioIds={w.portfolioIds}
                     allPortfolios={allPortfolios}
                     onToggle={onTogglePortfolio}
                     onClose={onPortfolioMenuClose}
@@ -2111,18 +2120,19 @@ function TagMenu({
 
 function PortfolioMenu({
   workflowId,
+  portfolioIds,
   allPortfolios,
   onToggle,
   onClose,
 }: {
   workflowId: string;
+  portfolioIds: string[];
   allPortfolios: PortfolioNode[];
   onToggle: (workflowId: string, portfolioId: string, isAssigned: boolean) => void;
   onClose: () => void;
 }) {
-  // Flatten the tree for display — we don't know which portfolios this workflow
-  // is in without a separate API call, so we use a simple UI that issues PATCH
-  // calls and refreshes; the assigned state is communicated via fetchWorkflows.
+  const assignedIds = new Set(portfolioIds);
+
   function flattenNodes(
     nodes: PortfolioNode[],
     depth = 0,
@@ -2148,27 +2158,31 @@ function PortfolioMenu({
         {flat.length === 0 && (
           <p className="px-3 py-2 text-ds-xs text-gray-400">No portfolios yet.</p>
         )}
-        {flat.map(({ node, depth }) => (
-          <button
-            key={node.id}
-            onClick={(e) => {
-              e.preventDefault();
-              // isAssigned unknown without extra API call — always send assign
-              // The backend handles idempotent add (skips if already assigned)
-              onToggle(workflowId, node.id, false);
-              onClose();
-            }}
-            className="flex w-full items-center gap-2 px-3 py-1.5 text-ds-xs hover:bg-gray-50 transition-colors"
-            style={{ paddingLeft: `${12 + depth * 10}px` }}
-          >
-            <span
-              className="h-2 w-2 rounded-full flex-shrink-0"
-              style={{ backgroundColor: node.color }}
-            />
-            <span className="flex-1 text-left text-gray-700 truncate">{node.name}</span>
-            <span className="text-[10px] text-gray-400">{node.workflowCount}</span>
-          </button>
-        ))}
+        {flat.map(({ node, depth }) => {
+          const isAssigned = assignedIds.has(node.id);
+          return (
+            <button
+              key={node.id}
+              onClick={(e) => {
+                e.preventDefault();
+                onToggle(workflowId, node.id, isAssigned);
+                onClose();
+              }}
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-ds-xs hover:bg-gray-50 transition-colors"
+              style={{ paddingLeft: `${12 + depth * 10}px` }}
+            >
+              <span
+                className="h-2 w-2 rounded-full flex-shrink-0 border-2"
+                style={{
+                  backgroundColor: isAssigned ? node.color : 'transparent',
+                  borderColor: node.color,
+                }}
+              />
+              <span className="flex-1 text-left text-gray-700 truncate">{node.name}</span>
+              {isAssigned && <Check className="h-3 w-3 text-gray-400 flex-shrink-0" />}
+            </button>
+          );
+        })}
       </div>
     </>
   );
