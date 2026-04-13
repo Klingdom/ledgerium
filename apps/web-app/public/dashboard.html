@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledgerium AI — Interactive Dashboard Demo</title>
+<meta name="description" content="See what your workflow library looks like in Ledgerium. Browse sample SOPs, process maps, and AI agent intelligence — no signup required.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%230c8de9'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── Reset ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:22px;background:#f9fafb;color:#111827;-webkit-font-smoothing:antialiased}
+
+/* ── Design Tokens ── */
+:root{
+  --brand-50:#f0f7ff;--brand-100:#e0effe;--brand-400:#36a7f8;--brand-500:#0c8de9;--brand-600:#006fc7;--brand-700:#0059a1;
+  --gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-400:#9ca3af;--gray-600:#4b5563;--gray-900:#111827;
+  --emerald-400:#34d399;--blue-400:#60a5fa;--amber-400:#fbbf24;--red-400:#f87171;
+  --teal-500:#14b8a6;--violet-500:#8b5cf6;--emerald-500:#10b981;--amber-500:#f59e0b;--red-500:#ef4444;--purple-500:#a855f7;
+  --radius-sm:6px;--radius-md:8px;--radius-lg:12px;
+}
+
+/* ── Typography ── */
+.text-xs{font-size:11px;line-height:16px}
+.text-sm{font-size:13px;line-height:20px}
+.text-base{font-size:14px;line-height:22px}
+.text-lg{font-size:16px;line-height:24px}
+.text-2xl{font-size:22px;line-height:28px}
+.font-medium{font-weight:500}
+.font-semibold{font-weight:600}
+.font-bold{font-weight:700}
+.uppercase{text-transform:uppercase}
+.tracking-wide{letter-spacing:.05em}
+.tracking-widest{letter-spacing:.1em}
+
+/* ── Layout ── */
+.max-w-7xl{max-width:1280px;margin-left:auto;margin-right:auto}
+.px-4{padding-left:16px;padding-right:16px}
+.px-6{padding-left:24px;padding-right:24px}
+
+/* ── Banner ── */
+.demo-banner{background:var(--brand-50);border-bottom:1px solid var(--brand-100);padding:8px 16px;text-align:center;font-size:13px;color:var(--brand-700)}
+.demo-banner a{color:var(--brand-600);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+.demo-banner a:hover{color:var(--brand-700)}
+
+/* ── Top Nav ── */
+.topnav{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.97);border-bottom:1px solid var(--gray-200);backdrop-filter:blur(4px)}
+.topnav-inner{display:flex;align-items:center;justify-content:space-between;height:56px;gap:16px}
+.logo{font-size:20px;font-weight:700;letter-spacing:-.02em;color:var(--gray-900);text-decoration:none;white-space:nowrap}
+.logo span{color:var(--brand-600)}
+.nav-tabs{display:flex;align-items:center;gap:2px}
+.nav-tab{padding:6px 12px;border-radius:var(--radius-md);font-size:13px;font-weight:500;color:var(--gray-600);text-decoration:none;border:none;background:none;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s}
+.nav-tab:hover{background:var(--gray-100);color:var(--gray-900)}
+.nav-tab.active{background:var(--brand-50);color:var(--brand-700)}
+.btn-primary{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--brand-600);color:#fff;border:none;border-radius:var(--radius-md);font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background .15s}
+.btn-primary:hover{background:var(--brand-700)}
+.btn-secondary{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#fff;color:var(--gray-600);border:1px solid var(--gray-200);border-radius:var(--radius-md);font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background .15s,border-color .15s}
+.btn-secondary:hover{background:var(--gray-50);border-color:var(--gray-400)}
+
+/* ── Stats Bar ── */
+.stats-bar{background:#fff;border-bottom:1px solid var(--gray-200);padding:16px 0}
+.stats-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--gray-200);border:1px solid var(--gray-200);border-radius:var(--radius-lg);overflow:hidden}
+.stat-card{background:#fff;padding:16px 20px;text-align:center}
+.stat-value{font-size:22px;line-height:28px;font-weight:700;color:var(--gray-900)}
+.stat-label{font-size:11px;line-height:16px;color:var(--gray-400);margin-top:2px;font-weight:500;text-transform:uppercase;letter-spacing:.06em}
+
+/* ── Main Content ── */
+.main-content{padding:24px 0 48px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+.section-title{font-size:16px;font-weight:600;color:var(--gray-900)}
+.search-row{display:flex;align-items:center;gap:8px;flex:1;max-width:600px}
+.search-wrap{position:relative;flex:1}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--gray-400);pointer-events:none}
+.search-input{width:100%;padding:8px 12px 8px 34px;border:1px solid var(--gray-200);border-radius:var(--radius-md);font-size:13px;color:var(--gray-900);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s}
+.search-input:focus{border-color:var(--brand-500);box-shadow:0 0 0 3px rgba(12,141,233,.1)}
+.search-input::placeholder{color:var(--gray-400)}
+.filter-pills{display:flex;gap:6px;flex-wrap:wrap}
+.filter-pill{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--gray-200);background:#fff;color:var(--gray-600);cursor:pointer;transition:all .15s}
+.filter-pill:hover{border-color:var(--brand-400);color:var(--brand-600)}
+.filter-pill.active{background:var(--brand-600);color:#fff;border-color:var(--brand-600)}
+
+/* ── Workflow Grid ── */
+.workflow-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+.workflow-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:20px;cursor:pointer;transition:box-shadow .15s,border-color .15s;position:relative}
+.workflow-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08);border-color:var(--brand-400)}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}
+.card-title{font-size:14px;font-weight:600;color:var(--gray-900);line-height:20px;flex:1}
+.star-btn{background:none;border:none;cursor:pointer;padding:2px;color:var(--gray-400);flex-shrink:0;transition:color .15s}
+.star-btn.active{color:var(--amber-400)}
+.star-btn:hover{color:var(--amber-400)}
+.tag-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}
+.sys-tag{display:inline-flex;align-items:center;padding:2px 8px;background:var(--brand-50);color:var(--brand-700);border-radius:var(--radius-sm);font-size:11px;font-weight:500}
+.card-meta{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--gray-400);margin-bottom:12px;flex-wrap:wrap}
+.meta-item{display:inline-flex;align-items:center;gap:4px}
+.conf-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.conf-dot.high{background:var(--emerald-400)}
+.conf-dot.med{background:var(--blue-400)}
+.conf-dot.low{background:var(--amber-400)}
+.card-footer{display:flex;align-items:center;justify-content:space-between}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:var(--radius-sm);font-size:11px;font-weight:600}
+.badge-healthy{background:#d1fae5;color:#065f46}
+.badge-review{background:#fef3c7;color:#92400e}
+.badge-new{background:var(--brand-50);color:var(--brand-700)}
+.sop-ready{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:#d1fae5;color:#065f46;border-radius:var(--radius-sm);font-size:11px;font-weight:500}
+.view-sop-btn{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--brand-600);background:none;border:none;cursor:pointer;padding:3px 0;transition:color .15s}
+.view-sop-btn:hover{color:var(--brand-700)}
+.empty-state{text-align:center;padding:48px 24px;color:var(--gray-400)}
+.empty-state p{margin-top:8px;font-size:13px}
+
+/* ── Slide Panel ── */
+.panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
+.panel-overlay.open{opacity:1;pointer-events:all}
+.slide-panel{position:fixed;top:0;right:0;bottom:0;width:62%;max-width:860px;background:#fff;z-index:51;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-4px 0 24px rgba(0,0,0,.12)}
+.slide-panel.open{transform:translateX(0)}
+.panel-header{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 24px 0;border-bottom:1px solid var(--gray-200);flex-shrink:0}
+.panel-title{font-size:16px;font-weight:700;color:var(--gray-900);line-height:22px;padding-bottom:16px;flex:1}
+.close-btn{background:none;border:none;cursor:pointer;padding:4px;color:var(--gray-400);border-radius:var(--radius-md);transition:background .15s,color .15s;flex-shrink:0;margin-left:8px}
+.close-btn:hover{background:var(--gray-100);color:var(--gray-900)}
+.panel-tabs{display:flex;gap:0;border-bottom:1px solid var(--gray-200);padding:0 24px;flex-shrink:0}
+.panel-tab{padding:10px 16px;font-size:13px;font-weight:500;color:var(--gray-600);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:color .15s}
+.panel-tab:hover{color:var(--gray-900)}
+.panel-tab.active{color:var(--brand-600);border-bottom-color:var(--brand-600)}
+.panel-body{flex:1;overflow-y:auto;padding:24px}
+.panel-tab-content{display:none}
+.panel-tab-content.active{display:block}
+
+/* ── SOP Styles ── */
+.sop-meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.sop-meta-card{background:var(--gray-50);border-radius:var(--radius-md);padding:12px 16px;text-align:center}
+.sop-meta-val{font-size:18px;font-weight:700;color:var(--gray-900)}
+.sop-meta-lbl{font-size:11px;color:var(--gray-400);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.sop-section{margin-bottom:24px}
+.sop-section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-400);margin-bottom:10px}
+.sop-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.sop-info-item{font-size:13px;color:var(--gray-600)}
+.sop-info-item strong{color:var(--gray-900);font-weight:600}
+.step-card{border:1px solid var(--gray-200);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:12px;transition:box-shadow .15s}
+.step-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.step-header{display:flex;align-items:flex-start;gap:12px;padding:16px 20px 12px}
+.step-ordinal{display:flex;align-items:center;justify-content:center;width:28px;height:28px;min-width:28px;background:var(--brand-50);color:var(--brand-700);border-radius:var(--radius-md);font-size:12px;font-weight:700}
+.step-info{flex:1}
+.step-title{font-size:14px;font-weight:600;color:var(--gray-900);margin-bottom:4px}
+.step-cat{display:inline-flex;align-items:center;padding:2px 8px;border-radius:var(--radius-sm);font-size:11px;font-weight:600}
+.cat-navigation{background:#ccfbf1;color:#065f46}
+.cat-data_entry{background:#ede9fe;color:#4c1d95}
+.cat-form_submit{background:#dbeafe;color:#1e40af}
+.cat-send_action{background:#d1fae5;color:#065f46}
+.cat-error_handling{background:#fee2e2;color:#991b1b}
+.cat-annotation{background:#f3e8ff;color:#6b21a8}
+.step-actions{background:var(--gray-50);border-radius:var(--radius-md);padding:10px 14px;margin:0 20px 12px;font-size:13px;color:var(--gray-600);line-height:20px}
+.step-actions li{list-style:none;padding:2px 0;display:flex;align-items:baseline;gap:6px}
+.step-actions li::before{content:"→";color:var(--gray-400);font-size:11px;flex-shrink:0}
+.step-footer{display:flex;align-items:center;gap:12px;background:rgba(249,250,251,.6);border-top:1px solid var(--gray-100);padding:8px 20px;font-size:12px;color:var(--gray-400)}
+.sop-attribution{background:var(--brand-50);border:1px solid var(--brand-100);border-radius:var(--radius-md);padding:12px 16px;font-size:12px;color:var(--brand-700);margin-top:8px;line-height:18px}
+.sop-cta{background:linear-gradient(135deg,var(--brand-600),var(--brand-700));border-radius:var(--radius-lg);padding:20px 24px;margin-top:24px;text-align:center;color:#fff}
+.sop-cta h3{font-size:15px;font-weight:700;margin-bottom:6px}
+.sop-cta p{font-size:13px;opacity:.85;margin-bottom:14px}
+.sop-cta a{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:#fff;color:var(--brand-700);border-radius:var(--radius-md);font-size:13px;font-weight:700;text-decoration:none;transition:opacity .15s}
+.sop-cta a:hover{opacity:.9}
+.preview-step-list{list-style:none;space-y:4px}
+.preview-step{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--gray-50);border-radius:var(--radius-md);margin-bottom:6px;font-size:13px;color:var(--gray-700)}
+.preview-step-num{width:22px;height:22px;min-width:22px;background:var(--brand-50);color:var(--brand-700);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+
+/* ── Process Map ── */
+.process-map-wrap{overflow-x:auto;padding-bottom:16px}
+.process-map{display:flex;align-items:center;gap:0;padding:24px 0;min-width:max-content}
+.pm-node{display:flex;flex-direction:column;align-items:center;gap:6px}
+.pm-box{padding:8px 14px;border-radius:var(--radius-md);font-size:12px;font-weight:600;text-align:center;max-width:110px;word-break:break-word;line-height:16px}
+.pm-start{width:36px;height:36px;border-radius:50%;background:#d1fae5;color:#065f46;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.pm-end{width:36px;height:36px;border-radius:50%;background:#fee2e2;color:#991b1b;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.pm-diamond{width:48px;height:48px;background:#fef3c7;transform:rotate(45deg);display:flex;align-items:center;justify-content:center}
+.pm-diamond-inner{transform:rotate(-45deg);font-size:10px;font-weight:700;color:#92400e}
+.pm-arrow{width:28px;height:2px;background:var(--gray-200);position:relative;flex-shrink:0}
+.pm-arrow::after{content:"";position:absolute;right:-4px;top:-4px;border:5px solid transparent;border-left-color:var(--gray-300)}
+.pm-sys{font-size:10px;color:var(--gray-400);font-weight:500;text-align:center;max-width:110px}
+.pm-cat-navigation{background:#ccfbf1;color:#065f46}
+.pm-cat-data_entry{background:#ede9fe;color:#4c1d95}
+.pm-cat-form_submit{background:#dbeafe;color:#1e40af}
+.pm-cat-send_action{background:#d1fae5;color:#065f46}
+.pm-cat-error_handling{background:#fee2e2;color:#991b1b}
+.pm-cta{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:14px 18px;margin-top:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;color:var(--gray-600)}
+.pm-cta a{color:var(--brand-600);font-weight:600;text-decoration:none;white-space:nowrap}
+.pm-cta a:hover{text-decoration:underline}
+
+/* ── Agent Intelligence ── */
+.ai-score-row{display:flex;align-items:center;gap:24px;margin-bottom:24px;background:var(--gray-50);border-radius:var(--radius-lg);padding:20px}
+.ai-score-num{font-size:40px;font-weight:800;color:var(--gray-900);line-height:1}
+.ai-score-label{font-size:13px;color:var(--gray-600);margin-top:4px}
+.ai-score-bar-wrap{flex:1}
+.ai-score-bar-bg{height:10px;background:var(--gray-200);border-radius:10px;overflow:hidden;margin-bottom:6px}
+.ai-score-bar-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--brand-500),var(--emerald-500))}
+.ai-score-sub{font-size:12px;color:var(--gray-400)}
+.ai-steps-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px}
+.ai-steps-table th{text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);padding:6px 10px;border-bottom:1px solid var(--gray-200)}
+.ai-steps-table td{padding:8px 10px;border-bottom:1px solid var(--gray-100);color:var(--gray-700)}
+.auto-badge{display:inline-flex;padding:2px 8px;border-radius:var(--radius-sm);font-size:11px;font-weight:600}
+.auto-full{background:#d1fae5;color:#065f46}
+.auto-semi{background:#fef3c7;color:#92400e}
+.auto-human{background:#fee2e2;color:#991b1b}
+.opp-list{list-style:none;margin-bottom:20px}
+.opp-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--gray-50);border-radius:var(--radius-md);margin-bottom:8px;font-size:13px;color:var(--gray-700)}
+.opp-icon{width:20px;height:20px;min-width:20px;background:var(--brand-50);color:var(--brand-600);border-radius:6px;display:flex;align-items:center;justify-content:center}
+.agent-profile-card{border:1px solid var(--brand-100);background:var(--brand-50);border-radius:var(--radius-lg);padding:20px;margin-bottom:20px}
+.agent-profile-title{font-size:14px;font-weight:700;color:var(--brand-700);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.agent-detail-row{display:flex;align-items:baseline;gap:8px;margin-bottom:8px;font-size:13px}
+.agent-detail-lbl{font-weight:600;color:var(--gray-700);width:56px;flex-shrink:0}
+.agent-detail-val{color:var(--gray-600)}
+.ai-cta{background:linear-gradient(135deg,#6d28d9,#7c3aed);border-radius:var(--radius-lg);padding:18px 20px;text-align:center;color:#fff;margin-top:8px}
+.ai-cta h3{font-size:14px;font-weight:700;margin-bottom:4px}
+.ai-cta p{font-size:12px;opacity:.8;margin-bottom:12px}
+.ai-cta a{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:#fff;color:#6d28d9;border-radius:var(--radius-md);font-size:12px;font-weight:700;text-decoration:none}
+.ai-cta a:hover{opacity:.9}
+
+/* ── Evidence ── */
+.evidence-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.evt-count-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--brand-50);color:var(--brand-700);border-radius:var(--radius-md);font-size:13px;font-weight:600}
+.evt-timeline{list-style:none;position:relative;padding-left:20px;margin-bottom:20px}
+.evt-timeline::before{content:"";position:absolute;left:6px;top:0;bottom:0;width:2px;background:var(--gray-200)}
+.evt-item{position:relative;margin-bottom:12px;padding-left:16px}
+.evt-item::before{content:"";position:absolute;left:-14px;top:6px;width:8px;height:8px;border-radius:50%;background:var(--brand-400);border:2px solid #fff;z-index:1}
+.evt-time{font-size:11px;color:var(--gray-400);font-weight:600;margin-bottom:2px}
+.evt-label{font-size:13px;color:var(--gray-700)}
+.evt-type{font-size:11px;color:var(--gray-400);margin-top:1px}
+.json-preview{background:var(--gray-900);border-radius:var(--radius-md);overflow:hidden}
+.json-preview-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #374151;cursor:pointer}
+.json-preview-header span{font-size:12px;font-weight:600;color:#9ca3af}
+.json-body{padding:14px;overflow-x:auto;font-family:'SFMono-Regular',Consolas,monospace;font-size:11px;color:#e5e7eb;line-height:18px;display:none;max-height:220px;overflow-y:auto}
+.json-body.visible{display:block}
+.evidence-attribution{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:12px 16px;font-size:12px;color:var(--gray-600);margin-top:16px;line-height:18px}
+
+/* ── Floating CTA ── */
+.floating-cta{position:fixed;bottom:24px;right:24px;z-index:60;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;transform:translateY(8px)}
+.floating-cta.visible{opacity:1;pointer-events:all;transform:translateY(0)}
+.floating-cta a{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:var(--brand-600);color:#fff;border-radius:24px;font-size:14px;font-weight:700;text-decoration:none;box-shadow:0 4px 16px rgba(0,111,199,.4);transition:background .15s,box-shadow .15s}
+.floating-cta a:hover{background:var(--brand-700);box-shadow:0 6px 20px rgba(0,111,199,.5)}
+
+/* ── Responsive ── */
+@media(max-width:900px){
+  .slide-panel{width:90%}
+  .stats-grid{grid-template-columns:repeat(3,1fr)}
+  .nav-tabs .nav-tab:nth-child(n+3){display:none}
+}
+@media(max-width:640px){
+  .slide-panel{width:100%}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .workflow-grid{grid-template-columns:1fr}
+  .sop-meta-grid{grid-template-columns:repeat(2,1fr)}
+  .nav-tabs .nav-tab{display:none}
+  .nav-tabs .nav-tab:first-child{display:flex}
+  .btn-primary span{display:none}
+}
+
+/* ── Print ── */
+@media print{
+  .demo-banner,.topnav,.stats-bar,.search-row,.filter-pills,.panel-overlay,.slide-panel,.floating-cta,.view-sop-btn,.close-btn,.panel-tabs,.no-print{display:none!important}
+  .workflow-grid{grid-template-columns:repeat(2,1fr)}
+  .workflow-card{break-inside:avoid}
+}
+
+/* ── Utility ── */
+.divider{height:1px;background:var(--gray-200);margin:20px 0}
+.text-gray-400{color:var(--gray-400)}
+.text-gray-600{color:var(--gray-600)}
+.text-gray-900{color:var(--gray-900)}
+.text-brand-600{color:var(--brand-600)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+</style>
+</head>
+<body>
+
+<!-- Demo Banner -->
+<div class="demo-banner" role="banner">
+  <svg style="display:inline;vertical-align:middle;margin-right:6px" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+  You're viewing a sample dashboard — this is what your workflow library looks like after recording.
+  <a href="https://ledgerium.ai" style="margin-left:8px">Create your free account →</a>
+</div>
+
+<!-- Top Navigation -->
+<header class="topnav" role="navigation" aria-label="Main navigation">
+  <div class="max-w-7xl px-6">
+    <div class="topnav-inner">
+      <a href="#" class="logo" aria-label="Ledgerium AI home">Ledgerium <span>AI</span></a>
+      <nav class="nav-tabs" aria-label="Dashboard sections">
+        <button class="nav-tab active" data-section="dashboard" aria-current="page">Dashboard</button>
+        <button class="nav-tab" data-section="workflows">Workflows</button>
+        <button class="nav-tab" data-section="process-groups">Process Groups</button>
+        <button class="nav-tab" data-section="ai-agents">AI Agents</button>
+        <button class="nav-tab" data-section="analytics">Analytics</button>
+      </nav>
+      <a href="https://ledgerium.ai" class="btn-primary" aria-label="Try Ledgerium Free">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+        <span>Try Ledgerium Free</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- Stats Bar -->
+<div class="stats-bar" aria-label="Summary statistics">
+  <div class="max-w-7xl px-6">
+    <div class="stats-grid" role="list">
+      <div class="stat-card" role="listitem"><div class="stat-value">10</div><div class="stat-label">Total Workflows</div></div>
+      <div class="stat-card" role="listitem"><div class="stat-value">8.2</div><div class="stat-label">Avg Steps</div></div>
+      <div class="stat-card" role="listitem"><div class="stat-value">86%</div><div class="stat-label">Avg Confidence</div></div>
+      <div class="stat-card" role="listitem"><div class="stat-value">7</div><div class="stat-label">SOP Ready</div></div>
+      <div class="stat-card" role="listitem"><div class="stat-value">8</div><div class="stat-label">Systems Covered</div></div>
+      <div class="stat-card" role="listitem"><div class="stat-value">14</div><div class="stat-label">AI Opportunities</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<main class="main-content" role="main">
+  <div class="max-w-7xl px-6">
+    <div class="section-header">
+      <h1 class="section-title">Workflow Library</h1>
+      <div class="search-row">
+        <div class="search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="search" class="search-input" id="search-input" placeholder="Search workflows…" aria-label="Search workflows">
+        </div>
+      </div>
+    </div>
+    <div class="filter-pills" role="group" aria-label="Filter workflows" style="margin-bottom:20px">
+      <button class="filter-pill active" data-filter="all">All</button>
+      <button class="filter-pill" data-filter="healthy">Healthy</button>
+      <button class="filter-pill" data-filter="needs-review">Needs Review</button>
+      <button class="filter-pill" data-filter="sop-ready">SOP Ready</button>
+    </div>
+
+    <div class="workflow-grid" id="workflow-grid" role="list" aria-label="Workflows"></div>
+    <div id="empty-state" class="empty-state" style="display:none" aria-live="polite">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gray-200);margin:0 auto"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <p>No workflows match your search.</p>
+    </div>
+  </div>
+</main>
+
+<!-- Panel Overlay -->
+<div class="panel-overlay" id="panel-overlay" aria-hidden="true"></div>
+
+<!-- Slide Panel -->
+<aside class="slide-panel" id="slide-panel" role="dialog" aria-modal="true" aria-label="Workflow detail" tabindex="-1">
+  <div class="panel-header">
+    <div class="panel-title" id="panel-title"></div>
+    <button class="close-btn" id="close-panel" aria-label="Close panel">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+  </div>
+  <div class="panel-tabs" role="tablist" aria-label="Workflow detail sections">
+    <button class="panel-tab active" data-tab="sop" role="tab" aria-selected="true" aria-controls="tab-sop">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      SOP
+    </button>
+    <button class="panel-tab" data-tab="process-map" role="tab" aria-selected="false" aria-controls="tab-process-map">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+      Process Map
+    </button>
+    <button class="panel-tab" data-tab="agent-intel" role="tab" aria-selected="false" aria-controls="tab-agent-intel">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+      Agent Intelligence
+    </button>
+    <button class="panel-tab" data-tab="evidence" role="tab" aria-selected="false" aria-controls="tab-evidence">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Evidence
+    </button>
+  </div>
+  <div class="panel-body" id="panel-body">
+    <div class="panel-tab-content active" id="tab-sop" role="tabpanel"></div>
+    <div class="panel-tab-content" id="tab-process-map" role="tabpanel"></div>
+    <div class="panel-tab-content" id="tab-agent-intel" role="tabpanel"></div>
+    <div class="panel-tab-content" id="tab-evidence" role="tabpanel"></div>
+  </div>
+</aside>
+
+<!-- Floating CTA -->
+<div class="floating-cta" id="floating-cta" aria-label="Sign up call to action">
+  <a href="https://ledgerium.ai">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    Try Ledgerium Free
+  </a>
+</div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+const WORKFLOWS = [
+  {
+    id: 'wf-01',
+    title: 'Submit Expense Report in Workday',
+    systems: ['Workday'],
+    steps: 4,
+    duration: '3m 45s',
+    durationMs: 225000,
+    confidence: 88,
+    status: 'healthy',
+    sopReady: true,
+    starred: true,
+    objective: 'Capture and submit employee expenses for manager approval in Workday.',
+    trigger: 'Employee has out-of-pocket business expenses to reimburse',
+    roles: ['Employee', 'Manager'],
+    aiScore: 72,
+    eventCount: 18,
+    sopSteps: [
+      { title: 'Navigate to New Expense Report', category: 'navigation', system: 'Workday', duration: '1.2s', confidence: 85,
+        actions: ['Click "Create Expense Report" on expenses dashboard', 'Wait for navigation to new expense form', 'Verify form header reads "New Expense Report"'] },
+      { title: 'Complete Expense Form', category: 'data_entry', system: 'Workday', duration: '25.0s', confidence: 90,
+        actions: ['Enter descriptive title in "Report Title" field', 'Enter expense amount in "Amount" field', 'Select appropriate category from "Category" dropdown'] },
+      { title: 'Submit Expense Report', category: 'form_submit', system: 'Workday', duration: '2.0s', confidence: 90,
+        actions: ['Review all form fields for accuracy', 'Click "Submit" button to submit the expense form', 'Verify green confirmation toast appears on screen'] },
+      { title: 'Send for Approval', category: 'send_action', system: 'Workday', duration: '10.0s', confidence: 90,
+        actions: ['Navigate to expense detail page', 'Click "Send for Approval" to route to manager review', 'Confirm status changes to "Pending Approval"'] }
+    ],
+    opportunities: ['Auto-populate expense amounts from receipts via OCR', 'Pre-fill category based on vendor name', 'Auto-route to correct approver based on amount threshold'],
+    agent: { name: 'Workday Expense Bot', role: 'Executor', tools: 'Workday API, Receipt OCR', skills: 'Form filling, Approval routing, Expense categorization' }
+  },
+  {
+    id: 'wf-02',
+    title: 'Process Vendor Invoice #INV-8842',
+    systems: ['NetSuite'],
+    steps: 6,
+    duration: '6m 42s',
+    durationMs: 402000,
+    confidence: 85,
+    status: 'healthy',
+    sopReady: true,
+    starred: false,
+    objective: 'Match, validate, and post a vendor invoice to the general ledger in NetSuite.',
+    trigger: 'Vendor invoice received and requires processing',
+    roles: ['AP Clerk', 'AP Manager'],
+    aiScore: 68,
+    eventCount: 24,
+    sopSteps: [
+      { title: 'Open Invoice Queue', category: 'navigation', system: 'NetSuite', duration: '4.8s', confidence: 85,
+        actions: ['Navigate to Vendor Bills list in NetSuite', 'Locate invoice INV-8842 in the queue', 'Click invoice row to open detail view'] },
+      { title: 'Match to Purchase Order', category: 'form_submit', system: 'NetSuite', duration: '14.3s', confidence: 90,
+        actions: ['Search for corresponding PO number PO-4419', 'Link invoice to matching purchase order', 'Verify 3-way match confirmation message'] },
+      { title: 'Enter Line Item 1', category: 'data_entry', system: 'NetSuite', duration: '6.7s', confidence: 90,
+        actions: ['Enter amount for first line item: $1,240.00', 'Assign GL account code from dropdown', 'Confirm department and class fields'] },
+      { title: 'Enter Line Item 2', category: 'data_entry', system: 'NetSuite', duration: '6.4s', confidence: 90,
+        actions: ['Enter amount for second line item: $860.00', 'Assign GL account code from dropdown', 'Verify total matches invoice amount'] },
+      { title: 'Approve Vendor Bill', category: 'send_action', system: 'NetSuite', duration: '5.7s', confidence: 75,
+        actions: ['Review all line items and totals', 'Click "Approve" to authorize the vendor bill', 'Confirm approval confirmation appears'] },
+      { title: 'Post to General Ledger', category: 'send_action', system: 'NetSuite', duration: '12.0s', confidence: 75,
+        actions: ['Click "Post to GL" to finalize the transaction', 'Verify journal entry number is assigned', 'Confirm posting date and period are correct'] }
+    ],
+    opportunities: ['Auto-match invoices to POs via pattern recognition', 'Auto-extract line items from PDF invoices', 'Flag duplicate invoices before entry', 'Auto-route approval based on amount thresholds'],
+    agent: { name: 'AP Invoice Bot', role: 'Orchestrator', tools: 'NetSuite API, PDF Parser, GL Engine', skills: 'Invoice matching, GL coding, Approval workflow' }
+  },
+  {
+    id: 'wf-03',
+    title: 'Triage Support Ticket #ZD-19472',
+    systems: ['Zendesk', 'Jira'],
+    steps: 7,
+    duration: '7m 18s',
+    durationMs: 438000,
+    confidence: 83,
+    status: 'healthy',
+    sopReady: true,
+    starred: true,
+    objective: 'Classify, investigate, and respond to an inbound customer support ticket.',
+    trigger: 'New ticket submitted via customer support portal',
+    roles: ['Support Agent', 'Engineering Lead'],
+    aiScore: 65,
+    eventCount: 31,
+    sopSteps: [
+      { title: 'Open Ticket', category: 'navigation', system: 'Zendesk', duration: '4.1s', confidence: 85,
+        actions: ['Navigate to ticket #ZD-19472 in Zendesk inbox', 'Wait for full ticket data to load', 'Review subject line and initial description'] },
+      { title: 'Review Customer Details', category: 'navigation', system: 'Zendesk', duration: '3.5s', confidence: 85,
+        actions: ['Click customer profile link in sidebar', 'Review account tier, history, and open tickets', 'Note any SLA requirements or escalation flags'] },
+      { title: 'Check Knowledge Base', category: 'navigation', system: 'Zendesk', duration: '8.2s', confidence: 80,
+        actions: ['Open internal KB search panel', 'Search for keywords matching the issue', 'Review top result article for relevance'] },
+      { title: 'Classify Ticket', category: 'data_entry', system: 'Zendesk', duration: '5.0s', confidence: 90,
+        actions: ['Set priority to "High" based on customer tier', 'Set category to "Billing"', 'Assign product area tag for routing'] },
+      { title: 'Create Jira Issue', category: 'form_submit', system: 'Jira', duration: '12.5s', confidence: 85,
+        actions: ['Open Jira integration panel in Zendesk', 'Create linked engineering issue with summary', 'Fill description with reproduction steps'] },
+      { title: 'Write Internal Note', category: 'data_entry', system: 'Zendesk', duration: '8.0s', confidence: 88,
+        actions: ['Click "Internal Note" tab in reply editor', 'Summarize investigation findings', 'Document next steps and assignee'] },
+      { title: 'Send Customer Response', category: 'send_action', system: 'Zendesk', duration: '6.2s', confidence: 90,
+        actions: ['Select appropriate response template', 'Customize message with ticket-specific details', 'Click "Submit as Pending" to send and await reply'] }
+    ],
+    opportunities: ['Auto-classify ticket priority based on keywords and customer tier', 'Suggest KB articles automatically', 'Auto-draft initial response from ticket content', 'Auto-create Jira issue for common bug patterns'],
+    agent: { name: 'Support Triage Agent', role: 'Assistant', tools: 'Zendesk API, Jira API, KB Search', skills: 'Ticket classification, Response drafting, Issue linking' }
+  },
+  {
+    id: 'wf-04',
+    title: 'Process Refund for Order #ORD-77291',
+    systems: ['Shopify', 'Stripe'],
+    steps: 9,
+    duration: '11m 48s',
+    durationMs: 708000,
+    confidence: 82,
+    status: 'needs-review',
+    sopReady: false,
+    starred: false,
+    objective: 'Process a customer refund across Shopify and Stripe for a returned order.',
+    trigger: 'Customer refund request approved by support team',
+    roles: ['Support Agent', 'Finance'],
+    aiScore: 58,
+    eventCount: 38,
+    sopSteps: [
+      { title: 'Locate Order in Shopify', category: 'navigation', system: 'Shopify', duration: '3.2s', confidence: 82 },
+      { title: 'Verify Return Eligibility', category: 'data_entry', system: 'Shopify', duration: '6.5s', confidence: 78 },
+      { title: 'Initiate Refund in Shopify', category: 'form_submit', system: 'Shopify', duration: '8.0s', confidence: 84 },
+      { title: 'Select Refund Items', category: 'data_entry', system: 'Shopify', duration: '7.2s', confidence: 80 },
+      { title: 'Calculate Refund Amount', category: 'data_entry', system: 'Shopify', duration: '4.5s', confidence: 76 },
+      { title: 'Open Stripe Dashboard', category: 'navigation', system: 'Stripe', duration: '2.8s', confidence: 85 },
+      { title: 'Locate Payment Intent', category: 'navigation', system: 'Stripe', duration: '5.1s', confidence: 82 },
+      { title: 'Confirm Refund Amount', category: 'form_submit', system: 'Stripe', duration: '4.0s', confidence: 88 },
+      { title: 'Submit Refund', category: 'send_action', system: 'Stripe', duration: '3.5s', confidence: 86 }
+    ],
+    opportunities: ['Auto-sync refund between Shopify and Stripe', 'Flag high-value refunds for supervisor review', 'Auto-generate refund confirmation email'],
+    agent: { name: 'Refund Processing Bot', role: 'Executor', tools: 'Shopify API, Stripe API', skills: 'Refund processing, Payment reconciliation' }
+  },
+  {
+    id: 'wf-05',
+    title: 'Onboard New Hire — Jordan Rivera',
+    systems: ['BambooHR', 'Google Workspace', 'Okta'],
+    steps: 8,
+    duration: '18m 45s',
+    durationMs: 1125000,
+    confidence: 80,
+    status: 'healthy',
+    sopReady: true,
+    starred: false,
+    objective: 'Set up accounts, tools, and access for a new employee across HR and IT systems.',
+    trigger: 'New hire start date confirmed in BambooHR',
+    roles: ['HR Coordinator', 'IT Admin'],
+    aiScore: 81,
+    eventCount: 42,
+    sopSteps: [
+      { title: 'Create Employee Record in BambooHR', category: 'data_entry', system: 'BambooHR', duration: '8.2s', confidence: 80 },
+      { title: 'Send Onboarding Packet', category: 'send_action', system: 'BambooHR', duration: '3.5s', confidence: 85 },
+      { title: 'Create Google Workspace Account', category: 'form_submit', system: 'Google Workspace', duration: '5.0s', confidence: 88 },
+      { title: 'Assign Google Groups', category: 'data_entry', system: 'Google Workspace', duration: '4.2s', confidence: 82 },
+      { title: 'Create Okta Account', category: 'form_submit', system: 'Okta', duration: '6.5s', confidence: 79 },
+      { title: 'Assign Okta App Assignments', category: 'data_entry', system: 'Okta', duration: '9.8s', confidence: 77 },
+      { title: 'Send Welcome Email', category: 'send_action', system: 'Google Workspace', duration: '4.0s', confidence: 84 },
+      { title: 'Schedule 1:1 Onboarding Call', category: 'form_submit', system: 'Google Workspace', duration: '3.8s', confidence: 80 }
+    ],
+    opportunities: ['Fully automate account provisioning via SCIM', 'Auto-assign apps based on department', 'Auto-send onboarding communications on schedule'],
+    agent: { name: 'HR Onboarding Orchestrator', role: 'Orchestrator', tools: 'BambooHR API, Google Admin SDK, Okta API', skills: 'Account provisioning, Access management, Communication automation' }
+  },
+  {
+    id: 'wf-06',
+    title: 'Patient Intake Registration',
+    systems: ['EpicCare'],
+    steps: 9,
+    duration: '7m 47s',
+    durationMs: 467000,
+    confidence: 84,
+    status: 'healthy',
+    sopReady: true,
+    starred: true,
+    objective: 'Register a new patient and complete intake documentation in EpicCare.',
+    trigger: 'Patient arrives at front desk for scheduled appointment',
+    roles: ['Front Desk Coordinator', 'Intake Nurse'],
+    aiScore: 55,
+    eventCount: 36,
+    sopSteps: [
+      { title: 'Search Patient Record', category: 'navigation', system: 'EpicCare', duration: '3.5s', confidence: 88 },
+      { title: 'Verify Demographics', category: 'data_entry', system: 'EpicCare', duration: '6.2s', confidence: 85 },
+      { title: 'Confirm Insurance', category: 'data_entry', system: 'EpicCare', duration: '8.5s', confidence: 82 },
+      { title: 'Collect Consent Forms', category: 'form_submit', system: 'EpicCare', duration: '12.0s', confidence: 80 },
+      { title: 'Capture Chief Complaint', category: 'data_entry', system: 'EpicCare', duration: '5.8s', confidence: 84 },
+      { title: 'Record Vital Signs', category: 'data_entry', system: 'EpicCare', duration: '9.2s', confidence: 86 },
+      { title: 'Assign Care Team', category: 'data_entry', system: 'EpicCare', duration: '4.0s', confidence: 82 },
+      { title: 'Flag Allergies and Alerts', category: 'data_entry', system: 'EpicCare', duration: '5.5s', confidence: 88 },
+      { title: 'Mark Patient Arrived', category: 'send_action', system: 'EpicCare', duration: '2.0s', confidence: 90 }
+    ],
+    opportunities: ['Pre-fill demographics from prior visit data', 'Auto-verify insurance eligibility in real-time', 'Flag missing consent forms before appointment'],
+    agent: { name: 'Patient Intake Assistant', role: 'Assistant', tools: 'Epic FHIR API, Insurance Verification API', skills: 'Patient data entry, Insurance verification, Consent management' }
+  },
+  {
+    id: 'wf-07',
+    title: 'Insurance Claim Review and Adjudication',
+    systems: ['ClaimsCore', 'PolicyAdmin'],
+    steps: 13,
+    duration: '14m 32s',
+    durationMs: 872000,
+    confidence: 81,
+    status: 'needs-review',
+    sopReady: false,
+    starred: false,
+    objective: 'Review, validate, and adjudicate an insurance claim against active policy terms.',
+    trigger: 'New claim submitted through insured portal',
+    roles: ['Claims Adjuster', 'Claims Supervisor'],
+    aiScore: 61,
+    eventCount: 55,
+    sopSteps: [
+      { title: 'Open Claim in ClaimsCore', category: 'navigation', system: 'ClaimsCore', duration: '4.0s', confidence: 85 },
+      { title: 'Verify Policyholder Identity', category: 'data_entry', system: 'ClaimsCore', duration: '6.5s', confidence: 82 },
+      { title: 'Pull Policy from PolicyAdmin', category: 'navigation', system: 'PolicyAdmin', duration: '5.2s', confidence: 80 },
+      { title: 'Verify Coverage Dates', category: 'data_entry', system: 'PolicyAdmin', duration: '4.8s', confidence: 78 },
+      { title: 'Check Deductible Status', category: 'data_entry', system: 'PolicyAdmin', duration: '3.5s', confidence: 80 },
+      { title: 'Review Claim Documentation', category: 'annotation', system: 'ClaimsCore', duration: '18.5s', confidence: 76 },
+      { title: 'Flag Missing Documents', category: 'error_handling', system: 'ClaimsCore', duration: '8.0s', confidence: 72 },
+      { title: 'Calculate Covered Amount', category: 'data_entry', system: 'ClaimsCore', duration: '7.2s', confidence: 81 },
+      { title: 'Apply Deductible', category: 'data_entry', system: 'ClaimsCore', duration: '4.5s', confidence: 82 },
+      { title: 'Apply Co-pay', category: 'data_entry', system: 'ClaimsCore', duration: '3.8s', confidence: 82 },
+      { title: 'Supervisor Review', category: 'form_submit', system: 'ClaimsCore', duration: '12.0s', confidence: 75 },
+      { title: 'Approve or Deny Claim', category: 'send_action', system: 'ClaimsCore', duration: '5.5s', confidence: 80 },
+      { title: 'Send Claim Decision Letter', category: 'send_action', system: 'ClaimsCore', duration: '4.2s', confidence: 84 }
+    ],
+    opportunities: ['Auto-verify policy coverage via API', 'Flag high-value claims for automatic supervisor routing', 'Auto-calculate covered amount from fee schedule', 'Generate decision letter automatically'],
+    agent: { name: 'Claims Adjudication Engine', role: 'Specialist', tools: 'ClaimsCore API, PolicyAdmin API, Fee Schedule DB', skills: 'Policy verification, Coverage calculation, Document review' }
+  },
+  {
+    id: 'wf-08',
+    title: 'IT Access Provisioning - New Hire',
+    systems: ['Okta', 'Jira Service Mgmt'],
+    steps: 8,
+    duration: '11m 15s',
+    durationMs: 675000,
+    confidence: 86,
+    status: 'healthy',
+    sopReady: true,
+    starred: false,
+    objective: 'Provision all required system access and tools for a new employee on day one.',
+    trigger: 'IT provisioning ticket created via Jira Service Management',
+    roles: ['IT Administrator', 'Security Team'],
+    aiScore: 78,
+    eventCount: 33,
+    sopSteps: [
+      { title: 'Open Provisioning Ticket', category: 'navigation', system: 'Jira Service Mgmt', duration: '3.0s', confidence: 88 },
+      { title: 'Verify Role Requirements', category: 'data_entry', system: 'Jira Service Mgmt', duration: '5.5s', confidence: 86 },
+      { title: 'Create Okta Account', category: 'form_submit', system: 'Okta', duration: '6.2s', confidence: 84 },
+      { title: 'Assign Security Groups', category: 'data_entry', system: 'Okta', duration: '4.8s', confidence: 88 },
+      { title: 'Enable MFA', category: 'form_submit', system: 'Okta', duration: '3.5s', confidence: 90 },
+      { title: 'Assign Application Access', category: 'data_entry', system: 'Okta', duration: '8.5s', confidence: 85 },
+      { title: 'Test Login Flow', category: 'navigation', system: 'Okta', duration: '5.0s', confidence: 82 },
+      { title: 'Resolve Provisioning Ticket', category: 'send_action', system: 'Jira Service Mgmt', duration: '4.2s', confidence: 87 }
+    ],
+    opportunities: ['Fully automate provisioning via SCIM/IDP integration', 'Auto-assign apps based on role template', 'Auto-close ticket when all access is confirmed'],
+    agent: { name: 'IT Provisioning Bot', role: 'Executor', tools: 'Okta SCIM API, Jira API', skills: 'Identity management, Access provisioning, MFA setup' }
+  },
+  {
+    id: 'wf-09',
+    title: 'Marketing Campaign Launch - Q2 Product Update',
+    systems: ['HubSpot', 'Asana', 'Mailchimp'],
+    steps: 8,
+    duration: '8m 45s',
+    durationMs: 525000,
+    confidence: 79,
+    status: 'needs-review',
+    sopReady: false,
+    starred: false,
+    objective: 'Coordinate and launch a marketing campaign across email and project management tools.',
+    trigger: 'Campaign brief approved by marketing director',
+    roles: ['Marketing Manager', 'Content Designer'],
+    aiScore: 63,
+    eventCount: 35,
+    sopSteps: [
+      { title: 'Create Campaign in HubSpot', category: 'form_submit', system: 'HubSpot', duration: '8.5s', confidence: 82 },
+      { title: 'Set Campaign Goals', category: 'data_entry', system: 'HubSpot', duration: '5.0s', confidence: 79 },
+      { title: 'Create Project in Asana', category: 'form_submit', system: 'Asana', duration: '7.2s', confidence: 80 },
+      { title: 'Assign Tasks to Team', category: 'data_entry', system: 'Asana', duration: '6.5s', confidence: 78 },
+      { title: 'Build Email in Mailchimp', category: 'data_entry', system: 'Mailchimp', duration: '18.5s', confidence: 76 },
+      { title: 'Set Audience Segment', category: 'data_entry', system: 'Mailchimp', duration: '4.8s', confidence: 80 },
+      { title: 'Schedule Campaign Send', category: 'form_submit', system: 'Mailchimp', duration: '3.5s', confidence: 82 },
+      { title: 'Notify Stakeholders', category: 'send_action', system: 'HubSpot', duration: '4.0s', confidence: 78 }
+    ],
+    opportunities: ['Auto-sync campaign from HubSpot to Mailchimp', 'Auto-generate Asana tasks from campaign template', 'Auto-send stakeholder notification on launch'],
+    agent: { name: 'Campaign Launch Coordinator', role: 'Orchestrator', tools: 'HubSpot API, Asana API, Mailchimp API', skills: 'Campaign management, Task automation, Audience segmentation' }
+  },
+  {
+    id: 'wf-10',
+    title: 'New Vendor Setup and Approval',
+    systems: ['NetSuite', 'DocuSign'],
+    steps: 9,
+    duration: '13m 20s',
+    durationMs: 800000,
+    confidence: 87,
+    status: 'healthy',
+    sopReady: true,
+    starred: true,
+    objective: 'Onboard a new vendor into NetSuite with full contract execution via DocuSign.',
+    trigger: 'Vendor onboarding request submitted by procurement team',
+    roles: ['Procurement Manager', 'AP Admin', 'Legal'],
+    aiScore: 74,
+    eventCount: 40,
+    sopSteps: [
+      { title: 'Create Vendor Record in NetSuite', category: 'form_submit', system: 'NetSuite', duration: '8.5s', confidence: 88 },
+      { title: 'Enter Tax Information', category: 'data_entry', system: 'NetSuite', duration: '6.2s', confidence: 86 },
+      { title: 'Set Payment Terms', category: 'data_entry', system: 'NetSuite', duration: '4.0s', confidence: 90 },
+      { title: 'Assign Expense Categories', category: 'data_entry', system: 'NetSuite', duration: '5.5s', confidence: 87 },
+      { title: 'Generate Contract in DocuSign', category: 'form_submit', system: 'DocuSign', duration: '10.2s', confidence: 85 },
+      { title: 'Add Signatories', category: 'data_entry', system: 'DocuSign', duration: '5.8s', confidence: 88 },
+      { title: 'Send for Signature', category: 'send_action', system: 'DocuSign', duration: '3.5s', confidence: 90 },
+      { title: 'Wait for Signed Document', category: 'navigation', system: 'DocuSign', duration: '4.0s', confidence: 85 },
+      { title: 'Mark Vendor Active', category: 'send_action', system: 'NetSuite', duration: '3.2s', confidence: 88 }
+    ],
+    opportunities: ['Auto-populate vendor data from W-9 via OCR', 'Auto-generate contract from template with vendor details', 'Auto-activate vendor in NetSuite upon DocuSign completion'],
+    agent: { name: 'Vendor Onboarding Bot', role: 'Orchestrator', tools: 'NetSuite API, DocuSign API, W-9 OCR', skills: 'Vendor management, Contract generation, E-signature orchestration' }
+  }
+];
+
+// ── Render Workflow Grid ───────────────────────────────────────────────────────
+function confClass(c) {
+  if (c >= 85) return 'high';
+  if (c >= 80) return 'med';
+  return 'low';
+}
+
+function renderCard(wf) {
+  const tags = wf.systems.map(s => `<span class="sys-tag">${s}</span>`).join('');
+  const statusBadge = wf.status === 'healthy'
+    ? `<span class="badge badge-healthy"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Healthy</span>`
+    : `<span class="badge badge-review"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Needs Review</span>`;
+  const sopBadge = wf.sopReady
+    ? `<span class="sop-ready"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>SOP Ready</span>`
+    : '';
+  const starClass = wf.starred ? 'active' : '';
+  return `
+    <div class="workflow-card" data-id="${wf.id}" data-status="${wf.status}" data-sop="${wf.sopReady}" role="listitem" tabindex="0" aria-label="Open ${wf.title}">
+      <div class="card-top">
+        <div class="card-title">${wf.title}</div>
+        <button class="star-btn ${starClass}" data-id="${wf.id}" aria-label="${wf.starred ? 'Remove from favorites' : 'Add to favorites'}" aria-pressed="${wf.starred}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="${wf.starred ? '#fbbf24' : 'none'}" stroke="${wf.starred ? '#fbbf24' : 'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </button>
+      </div>
+      <div class="tag-row">${tags}</div>
+      <div class="card-meta">
+        <span class="meta-item">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          ${wf.steps} steps
+        </span>
+        <span class="meta-item">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ${wf.duration}
+        </span>
+        <span class="meta-item">
+          <span class="conf-dot ${confClass(wf.confidence)}"></span>
+          ${wf.confidence}% conf
+        </span>
+      </div>
+      <div class="card-footer">
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${statusBadge}${sopBadge}</div>
+        <button class="view-sop-btn" data-id="${wf.id}">
+          View SOP
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>`;
+}
+
+function renderGrid(list) {
+  const grid = document.getElementById('workflow-grid');
+  const empty = document.getElementById('empty-state');
+  if (!list.length) {
+    grid.innerHTML = '';
+    empty.style.display = '';
+  } else {
+    grid.innerHTML = list.map(renderCard).join('');
+    empty.style.display = 'none';
+  }
+}
+
+renderGrid(WORKFLOWS);
+
+// ── Search & Filter ────────────────────────────────────────────────────────────
+let activeFilter = 'all';
+let searchQuery = '';
+
+function applyFilters() {
+  let list = WORKFLOWS;
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    list = list.filter(w => w.title.toLowerCase().includes(q) || w.systems.some(s => s.toLowerCase().includes(q)));
+  }
+  if (activeFilter === 'healthy') list = list.filter(w => w.status === 'healthy');
+  else if (activeFilter === 'needs-review') list = list.filter(w => w.status === 'needs-review');
+  else if (activeFilter === 'sop-ready') list = list.filter(w => w.sopReady);
+  renderGrid(list);
+}
+
+document.getElementById('search-input').addEventListener('input', e => {
+  searchQuery = e.target.value;
+  applyFilters();
+});
+
+document.querySelectorAll('.filter-pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    applyFilters();
+  });
+});
+
+// ── Star Toggle ────────────────────────────────────────────────────────────────
+document.getElementById('workflow-grid').addEventListener('click', e => {
+  const starBtn = e.target.closest('.star-btn');
+  if (starBtn) {
+    e.stopPropagation();
+    const id = starBtn.dataset.id;
+    const wf = WORKFLOWS.find(w => w.id === id);
+    if (wf) {
+      wf.starred = !wf.starred;
+      applyFilters();
+    }
+    return;
+  }
+  const card = e.target.closest('.workflow-card');
+  const sopBtn = e.target.closest('.view-sop-btn');
+  if (card || sopBtn) {
+    const id = (card || sopBtn).dataset.id;
+    openPanel(id);
+  }
+});
+
+document.getElementById('workflow-grid').addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    const card = e.target.closest('.workflow-card');
+    if (card) { e.preventDefault(); openPanel(card.dataset.id); }
+  }
+});
+
+// ── Panel ─────────────────────────────────────────────────────────────────────
+function openPanel(id) {
+  const wf = WORKFLOWS.find(w => w.id === id);
+  if (!wf) return;
+  document.getElementById('panel-title').textContent = wf.title;
+  renderSOPTab(wf);
+  renderProcessMapTab(wf);
+  renderAgentIntelTab(wf);
+  renderEvidenceTab(wf);
+  // Reset to SOP tab
+  switchTab('sop');
+  document.getElementById('panel-overlay').classList.add('open');
+  document.getElementById('slide-panel').classList.add('open');
+  document.getElementById('panel-overlay').setAttribute('aria-hidden', 'false');
+  document.getElementById('slide-panel').focus();
+  document.body.style.overflow = 'hidden';
+}
+
+function closePanel() {
+  document.getElementById('panel-overlay').classList.remove('open');
+  document.getElementById('slide-panel').classList.remove('open');
+  document.getElementById('panel-overlay').setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('close-panel').addEventListener('click', closePanel);
+document.getElementById('panel-overlay').addEventListener('click', closePanel);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+// ── Tab Switching ──────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.panel-tab').forEach(t => {
+    const active = t.dataset.tab === name;
+    t.classList.toggle('active', active);
+    t.setAttribute('aria-selected', String(active));
+  });
+  document.querySelectorAll('.panel-tab-content').forEach(c => {
+    c.classList.toggle('active', c.id === 'tab-' + name);
+  });
+}
+
+document.querySelectorAll('.panel-tab').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  btn.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); switchTab(btn.dataset.tab); }
+  });
+});
+
+// ── SOP Tab Renderer ──────────────────────────────────────────────────────────
+const FULL_SOP_IDS = ['wf-01', 'wf-02', 'wf-03'];
+
+function catLabel(cat) {
+  const map = { navigation: 'Navigation', data_entry: 'Data Entry', form_submit: 'Form Submit', send_action: 'Submit/Send', error_handling: 'Error Handling', annotation: 'Annotation' };
+  return map[cat] || cat;
+}
+
+function renderSOPStep(step, idx) {
+  const catClass = 'cat-' + step.category;
+  const actionsHtml = step.actions
+    ? `<ul class="step-actions">${step.actions.map(a => `<li>${a}</li>`).join('')}</ul>`
+    : '';
+  return `
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-ordinal">${idx + 1}</div>
+        <div class="step-info">
+          <div class="step-title">${step.title}</div>
+          <span class="step-cat ${catClass}">${catLabel(step.category)}</span>
+        </div>
+      </div>
+      ${actionsHtml}
+      <div class="step-footer">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        ${step.system}
+        <span style="margin-left:8px">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ${step.duration}
+        </span>
+        <span style="margin-left:8px">
+          <span class="conf-dot ${confClass(step.confidence)}" style="display:inline-block;vertical-align:middle;margin-right:3px"></span>
+          ${step.confidence}%
+        </span>
+      </div>
+    </div>`;
+}
+
+function renderPreviewStep(step, idx) {
+  return `
+    <div class="preview-step">
+      <div class="preview-step-num">${idx + 1}</div>
+      <span style="flex:1">${step.title}</span>
+      <span class="step-cat cat-${step.category}" style="font-size:11px;padding:2px 6px">${catLabel(step.category)}</span>
+      <span style="font-size:11px;color:var(--gray-400);margin-left:6px">${step.system}</span>
+    </div>`;
+}
+
+function renderSOPTab(wf) {
+  const isFull = FULL_SOP_IDS.includes(wf.id);
+  const stepsHtml = isFull
+    ? wf.sopSteps.map((s, i) => renderSOPStep(s, i)).join('')
+    : wf.sopSteps.map((s, i) => renderPreviewStep(s, i)).join('');
+  const sopLabel = isFull ? 'Procedure Steps' : 'Step Overview';
+  document.getElementById('tab-sop').innerHTML = `
+    <div class="sop-meta-grid">
+      <div class="sop-meta-card"><div class="sop-meta-val">${wf.steps}</div><div class="sop-meta-lbl">Steps</div></div>
+      <div class="sop-meta-card"><div class="sop-meta-val">${wf.duration}</div><div class="sop-meta-lbl">Duration</div></div>
+      <div class="sop-meta-card"><div class="sop-meta-val" style="color:${wf.confidence >= 85 ? '#065f46' : wf.confidence >= 80 ? 'var(--brand-600)' : '#92400e'}">${wf.confidence}%</div><div class="sop-meta-lbl">Confidence</div></div>
+    </div>
+    <div class="sop-section">
+      <div class="sop-section-label">Business Objective</div>
+      <p style="font-size:14px;color:var(--gray-700);line-height:22px">${wf.objective}</p>
+    </div>
+    <div class="sop-info-grid" style="margin-bottom:20px">
+      <div class="sop-info-item"><strong>Trigger:</strong> ${wf.trigger}</div>
+      <div class="sop-info-item"><strong>Systems:</strong> ${wf.systems.join(', ')}</div>
+      <div class="sop-info-item"><strong>Roles:</strong> ${wf.roles.join(', ')}</div>
+      <div class="sop-info-item"><strong>Events Captured:</strong> ${wf.eventCount} browser events</div>
+    </div>
+    <div class="sop-section">
+      <div class="sop-section-label">${sopLabel}</div>
+      ${stepsHtml}
+    </div>
+    ${isFull ? `<div class="sop-section" style="margin-top:20px">
+      <div class="sop-section-label">Completion Criteria</div>
+      <p style="font-size:13px;color:var(--gray-600);line-height:20px">All steps completed in sequence with confirmation states verified at each stage. Process output traceable to source browser events.</p>
+    </div>` : ''}
+    <div class="sop-attribution">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Generated deterministically from observed browser events. Every step traces to source evidence. No AI interpretation applied.
+    </div>
+    <div class="sop-cta">
+      <h3>Record your own workflows and get SOPs like this automatically.</h3>
+      <p>Install the Ledgerium recorder extension, complete any workflow, and receive a structured SOP in minutes.</p>
+      <a href="https://ledgerium.ai">Start free
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>`;
+}
+
+// ── Process Map Tab ────────────────────────────────────────────────────────────
+function renderProcessMapTab(wf) {
+  const nodes = [
+    `<div class="pm-node"><div class="pm-start">Start</div><div class="pm-sys">&nbsp;</div></div>`,
+    `<div class="pm-arrow"></div>`
+  ];
+  wf.sopSteps.forEach((step, i) => {
+    const catClass = 'pm-cat-' + step.category;
+    nodes.push(`<div class="pm-node"><div class="pm-box ${catClass}">${step.title}</div><div class="pm-sys">${step.system}</div></div>`);
+    if (i < wf.sopSteps.length - 1) nodes.push(`<div class="pm-arrow"></div>`);
+  });
+  nodes.push(`<div class="pm-arrow"></div>`);
+  nodes.push(`<div class="pm-node"><div class="pm-end">End</div><div class="pm-sys">&nbsp;</div></div>`);
+
+  document.getElementById('tab-process-map').innerHTML = `
+    <p style="font-size:13px;color:var(--gray-600);margin-bottom:16px">Sequential process flow generated from ${wf.eventCount} observed browser events.</p>
+    <div class="process-map-wrap">
+      <div class="process-map" role="img" aria-label="Process flow for ${wf.title}">
+        ${nodes.join('')}
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;margin-bottom:8px">
+      ${Object.entries({navigation:'Navigation','data_entry':'Data Entry','form_submit':'Form Submit','send_action':'Submit/Send','error_handling':'Error Handling'}).map(([k,v]) =>
+        `<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--gray-600)"><span style="width:10px;height:10px;border-radius:3px" class="pm-box pm-cat-${k}"></span>${v}</span>`
+      ).join('')}
+    </div>
+    <div class="pm-cta">
+      <span>Your real workflows produce interactive, evidence-linked process maps.</span>
+      <a href="https://ledgerium.ai">Try it free →</a>
+    </div>`;
+}
+
+// ── Agent Intelligence Tab ─────────────────────────────────────────────────────
+function renderAgentIntelTab(wf) {
+  const score = wf.aiScore;
+  const barW = score + '%';
+  const stepRows = wf.sopSteps.map((step, i) => {
+    const autoType = step.confidence >= 88 ? 'Full Auto' : step.confidence >= 82 ? 'Semi-Auto' : 'Human Required';
+    const autoCls = step.confidence >= 88 ? 'auto-full' : step.confidence >= 82 ? 'auto-semi' : 'auto-human';
+    return `<tr>
+      <td>${i + 1}. ${step.title}</td>
+      <td>${step.system}</td>
+      <td><span class="auto-badge ${autoCls}">${autoType}</span></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('tab-agent-intel').innerHTML = `
+    <div class="ai-score-row">
+      <div>
+        <div class="ai-score-num">${score}</div>
+        <div class="ai-score-label">Automation Score</div>
+      </div>
+      <div class="ai-score-bar-wrap">
+        <div class="ai-score-bar-bg"><div class="ai-score-bar-fill" style="width:${barW}"></div></div>
+        <div class="ai-score-sub">${score >= 70 ? 'High automation potential' : score >= 50 ? 'Moderate automation potential' : 'Requires human oversight'} · ${score}/100</div>
+      </div>
+    </div>
+    <div class="sop-section-label" style="margin-bottom:10px">Per-Step Automation Analysis</div>
+    <table class="ai-steps-table" aria-label="Step automation breakdown">
+      <thead><tr><th>Step</th><th>System</th><th>Automation</th></tr></thead>
+      <tbody>${stepRows}</tbody>
+    </table>
+    <div class="sop-section-label" style="margin-bottom:10px">Top AI Opportunities</div>
+    <ul class="opp-list" aria-label="AI opportunities">
+      ${wf.opportunities.map(o => `
+        <li class="opp-item">
+          <div class="opp-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+          ${o}
+        </li>`).join('')}
+    </ul>
+    <div class="sop-section-label" style="margin-bottom:10px">Proposed Agent Profile</div>
+    <div class="agent-profile-card">
+      <div class="agent-profile-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+        ${wf.agent.name}
+      </div>
+      <div class="agent-detail-row"><span class="agent-detail-lbl">Role</span><span class="agent-detail-val">${wf.agent.role}</span></div>
+      <div class="agent-detail-row"><span class="agent-detail-lbl">Tools</span><span class="agent-detail-val">${wf.agent.tools}</span></div>
+      <div class="agent-detail-row"><span class="agent-detail-lbl">Skills</span><span class="agent-detail-val">${wf.agent.skills}</span></div>
+    </div>
+    <div class="ai-cta">
+      <h3>Discover what's automatable in your workflows.</h3>
+      <p>Record a real workflow and get a full agent intelligence report in minutes.</p>
+      <a href="https://ledgerium.ai">Start recording →
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>`;
+}
+
+// ── Evidence Tab ───────────────────────────────────────────────────────────────
+function renderEvidenceTab(wf) {
+  const evtTypes = ['navigation.open_page', 'interaction.click', 'interaction.type', 'interaction.select', 'interaction.click', 'navigation.open_page'];
+  const evtLabels = [
+    `Opened ${wf.systems[0]} — page loaded`,
+    `Clicked primary action button`,
+    `Typed into form field`,
+    `Selected dropdown value`,
+    `Clicked submit button`,
+    `Confirmation page loaded`
+  ];
+  const baseMs = [0, 3200, 8500, 14200, 22800, 26400];
+  const timelineItems = evtLabels.map((label, i) => {
+    const ms = baseMs[i];
+    const s = (ms / 1000).toFixed(1);
+    return `<li class="evt-item">
+      <div class="evt-time">+${s}s</div>
+      <div class="evt-label">${label}</div>
+      <div class="evt-type">${evtTypes[i]}</div>
+    </li>`;
+  }).join('');
+
+  const sampleJson = JSON.stringify({
+    event_id: `evt-${wf.id}-001`,
+    session_id: `ses-${wf.id}`,
+    t_ms: 0,
+    event_type: 'navigation.open_page',
+    actor_type: 'human',
+    page_context: { applicationLabel: wf.systems[0], url: `https://${wf.systems[0].toLowerCase().replace(/\s/g,'')}.example.com` },
+    normalization_meta: { normalizationRuleVersion: '1.0.0', redactionApplied: false }
+  }, null, 2);
+
+  document.getElementById('tab-evidence').innerHTML = `
+    <div class="evidence-header">
+      <span class="evt-count-badge">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        ${wf.eventCount} browser events captured
+      </span>
+    </div>
+    <div class="sop-section-label" style="margin-bottom:10px">Event Timeline (sample)</div>
+    <ul class="evt-timeline" aria-label="Event timeline">${timelineItems}</ul>
+    <div class="sop-section-label" style="margin-bottom:10px">Raw Event Preview</div>
+    <div class="json-preview">
+      <div class="json-preview-header" id="json-toggle" role="button" aria-expanded="false" tabindex="0" aria-controls="json-body">
+        <span>Event Schema (click to expand)</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="json-chevron"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <pre class="json-body" id="json-body" aria-label="Sample event JSON">${escapeHtml(sampleJson)}</pre>
+    </div>
+    <div class="evidence-attribution" style="margin-top:16px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Every SOP step traces to source browser events. Raw events are immutable. All processing is deterministic and reproducible.
+    </div>`;
+
+  // JSON toggle
+  const toggle = document.getElementById('json-toggle');
+  const body = document.getElementById('json-body');
+  const chevron = document.getElementById('json-chevron');
+  function toggleJson() {
+    const expanded = body.classList.toggle('visible');
+    toggle.setAttribute('aria-expanded', String(expanded));
+    chevron.style.transform = expanded ? 'rotate(180deg)' : '';
+  }
+  toggle.addEventListener('click', toggleJson);
+  toggle.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleJson(); } });
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Floating CTA ───────────────────────────────────────────────────────────────
+setTimeout(() => {
+  document.getElementById('floating-cta').classList.add('visible');
+}, 10000);
+
+// ── Nav Tab (cosmetic) ─────────────────────────────────────────────────────────
+document.querySelectorAll('.nav-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(b => {
+      b.classList.remove('active');
+      b.removeAttribute('aria-current');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-current', 'page');
+  });
+});
+</script>
+</body>
+</html>
