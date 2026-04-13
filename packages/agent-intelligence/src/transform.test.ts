@@ -427,6 +427,15 @@ describe('Example 1: Invoice Processing (6 steps, gmail + netsuite)', () => {
     expect(result.metadata.pipelineDurationMs).toBeGreaterThanOrEqual(0);
   });
 
+  it('skillLibrary is present and has skills extracted', () => {
+    const result = transformWorkflow(output);
+    expect(result.skillLibrary).toBeDefined();
+    expect(result.skillLibrary.skills.length).toBeGreaterThan(0);
+    expect(result.skillLibrary.uniqueSkillCount).toBe(result.skillLibrary.skills.length);
+    // 6 steps with distinct verb+object+system tuples should produce multiple skills
+    expect(result.skillLibrary.uniqueSkillCount).toBeGreaterThanOrEqual(2);
+  });
+
   it('all steps preserve rawReference with correct stepOrdinal', () => {
     const result = transformWorkflow(output);
     const ordinals = result.steps.map(s => s.rawReference.stepOrdinal);

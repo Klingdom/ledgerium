@@ -25,6 +25,7 @@ export { parseSteps } from './step-parser.js';
 export { buildActivities } from './activity-builder.js';
 export { detectDecisions } from './decision-detector.js';
 export { buildWorkflow } from './workflow-builder.js';
+export { extractSkills } from './skill-extractor.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -38,6 +39,10 @@ export type {
   WorkflowStructure,
   WorkflowDependency,
   TransformationResult,
+  Skill,
+  SkillIO,
+  SkillCluster,
+  SkillLibrary,
 } from './types.js';
 
 export { AGENT_INTELLIGENCE_VERSION } from './types.js';

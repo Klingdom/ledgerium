@@ -21,6 +21,7 @@ import { parseSteps } from './step-parser.js';
 import { buildActivities } from './activity-builder.js';
 import { detectDecisions } from './decision-detector.js';
 import { buildWorkflow } from './workflow-builder.js';
+import { extractSkills } from './skill-extractor.js';
 
 /**
  * Transform a ProcessOutput into a full TransformationResult.
@@ -46,6 +47,9 @@ export function transformWorkflow(output: ProcessOutput): TransformationResult {
   // Stage 4: Build the complete workflow structure
   const workflow = buildWorkflow(steps, activities, decisionPoints, output);
 
+  // Stage 5: Extract reusable skills from steps and activities
+  const skillLibrary = extractSkills(steps, activities);
+
   const pipelineDurationMs = Date.now() - startMs;
 
   return {
@@ -53,6 +57,7 @@ export function transformWorkflow(output: ProcessOutput): TransformationResult {
     activities,
     workflow,
     decisionPoints,
+    skillLibrary,
     metadata: {
       engineVersion: AGENT_INTELLIGENCE_VERSION,
       processedAt: new Date().toISOString(),

@@ -234,6 +234,92 @@ export interface WorkflowStructure {
   confidence: number;
 }
 
+// ─── Skill ───────────────────────────────────────────────────────────────────
+
+/**
+ * A reusable, composable unit of work extracted from workflow activities.
+ * Skills are the atomic building blocks of agents.
+ */
+export interface Skill {
+  /** Stable ID: "skill-{normalized_name}" */
+  skillId: string;
+  /** Snake_case normalized name. Examples: 'generate_email', 'send_email', 'fetch_report' */
+  skillName: string;
+  /** Human-readable description of what this skill does */
+  description: string;
+  /** The type/category of this skill */
+  skillType: SkillType;
+  /** Input schema: what data this skill needs */
+  inputSchema: SkillIO[];
+  /** Output schema: what data this skill produces */
+  outputSchema: SkillIO[];
+  /** Systems this skill requires access to */
+  requiredSystems: string[];
+  /** Step IDs this skill was extracted from (traceability) */
+  sourceStepIds: string[];
+  /** Activity IDs this skill was extracted from */
+  sourceActivityIds: string[];
+  /** How automatable this skill is */
+  automationClassification: AutomationType;
+  /** 0-1: how reusable across different workflows (higher = more general) */
+  reusabilityScore: number;
+  /** 0-1: confidence in the extraction */
+  confidence: number;
+  /** The canonical verb this skill is based on */
+  verb: string;
+  /** The canonical object this skill operates on */
+  object: string;
+}
+
+/**
+ * Describes a single input or output field for a skill.
+ */
+export interface SkillIO {
+  /** Field name in snake_case */
+  name: string;
+  /** Human-readable description */
+  description: string;
+  /** Whether this field is required */
+  required: boolean;
+}
+
+/**
+ * A cluster of similar/identical skills detected across steps or workflows.
+ * Enables deduplication and reuse tracking.
+ */
+export interface SkillCluster {
+  /** Stable ID: "cluster-{normalized_name}" */
+  clusterId: string;
+  /** The canonical skill this cluster represents */
+  canonicalSkillName: string;
+  /** All skill IDs in this cluster */
+  skillIds: string[];
+  /** Number of occurrences (frequency across steps) */
+  occurrenceCount: number;
+  /** Number of distinct workflows this skill appears in */
+  workflowCount: number;
+  /** Average reusability score across cluster members */
+  averageReusabilityScore: number;
+  /** Average confidence across cluster members */
+  averageConfidence: number;
+}
+
+/**
+ * Complete skill library output for a single workflow.
+ */
+export interface SkillLibrary {
+  /** All extracted skills for this workflow */
+  skills: Skill[];
+  /** Clusters of similar/identical skills */
+  clusters: SkillCluster[];
+  /** Total number of unique skills */
+  uniqueSkillCount: number;
+  /** Total number of reusable skills (reusabilityScore >= 0.6) */
+  reusableSkillCount: number;
+  /** Most common skill types */
+  skillTypeDistribution: Record<SkillType, number>;
+}
+
 // ─── TransformationResult ─────────────────────────────────────────────────────
 
 /**
@@ -250,6 +336,8 @@ export interface TransformationResult {
   workflow: WorkflowStructure;
   /** All detected decision points in the workflow. */
   decisionPoints: DecisionPoint[];
+  /** Extracted skill library */
+  skillLibrary: SkillLibrary;
   /** Pipeline metadata for traceability and debugging. */
   metadata: {
     /** Version of the agent-intelligence engine. */
