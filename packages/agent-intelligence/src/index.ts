@@ -19,6 +19,10 @@
 
 export { transformWorkflow } from './transform.js';
 
+// ─── Portfolio-level analysis ─────────────────────────────────────────────────
+
+export { analyzePortfolio } from './cross-workflow-analyzer.js';
+
 // ─── Individual pipeline stages (composable) ─────────────────────────────────
 
 export { parseSteps } from './step-parser.js';
@@ -71,6 +75,11 @@ export type {
   IntegrationConfigArtifact,
   RoadmapPhase,
   ArtifactOutput,
+  SharedSkill,
+  SharedSystem,
+  WorkflowPattern,
+  PortfolioSummary,
+  CrossWorkflowIntelligence,
 } from './types.js';
 
 export { AGENT_INTELLIGENCE_VERSION } from './types.js';

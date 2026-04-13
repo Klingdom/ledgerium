@@ -810,6 +810,116 @@ export interface ArtifactOutput {
   };
 }
 
+// ─── Cross-Workflow Intelligence ─────────────────────────────────────────────
+
+/**
+ * A skill that appears across multiple workflows in the portfolio.
+ */
+export interface SharedSkill {
+  /** The canonical skill name (verb_object) */
+  skillName: string;
+  /** Skill type */
+  skillType: SkillType;
+  /** Description of the shared skill */
+  description: string;
+  /** Workflow IDs where this skill appears */
+  workflowIds: string[];
+  /** Number of workflows containing this skill */
+  workflowCount: number;
+  /** Total occurrences across all workflows */
+  totalOccurrences: number;
+  /** Systems this skill is used with across workflows */
+  systems: string[];
+  /** Average reusability score across all instances */
+  averageReusabilityScore: number;
+  /** Average confidence across all instances */
+  averageConfidence: number;
+  /** Whether this skill is a strong candidate for a shared library */
+  isLibraryCandidate: boolean;
+}
+
+/**
+ * A system that appears across multiple workflows.
+ */
+export interface SharedSystem {
+  /** Canonical system name */
+  system: string;
+  /** Workflow IDs that use this system */
+  workflowIds: string[];
+  /** Number of workflows using this system */
+  workflowCount: number;
+  /** Total step count involving this system across all workflows */
+  totalStepCount: number;
+  /** Skills associated with this system across workflows */
+  associatedSkills: string[];
+  /** Whether a shared integration would benefit multiple workflows */
+  sharedIntegrationValue: 'high' | 'medium' | 'low';
+}
+
+/**
+ * A pattern detected across multiple workflows.
+ */
+export interface WorkflowPattern {
+  /** Stable ID: "pattern-{index}" */
+  patternId: string;
+  /** Human-readable pattern name */
+  patternName: string;
+  /** Description of the pattern */
+  description: string;
+  /** Workflow IDs exhibiting this pattern */
+  workflowIds: string[];
+  /** The type of pattern */
+  patternType: 'shared_skill_sequence' | 'common_system_pair' | 'similar_structure' | 'shared_bottleneck';
+  /** Evidence supporting the pattern */
+  evidence: string[];
+  /** How many workflows exhibit this pattern */
+  frequency: number;
+  /** Confidence in this pattern (0-1) */
+  confidence: number;
+}
+
+/**
+ * Portfolio-level summary statistics.
+ */
+export interface PortfolioSummary {
+  /** Total workflows analyzed */
+  workflowCount: number;
+  /** Total steps across all workflows */
+  totalStepCount: number;
+  /** Total unique skills across all workflows */
+  totalUniqueSkills: number;
+  /** Total shared skills (appearing in 2+ workflows) */
+  sharedSkillCount: number;
+  /** Total unique systems across all workflows */
+  totalUniqueSystems: number;
+  /** Total shared systems (appearing in 2+ workflows) */
+  sharedSystemCount: number;
+  /** Average automation score across workflows */
+  averageAutomationScore: number;
+  /** Average implementation readiness across workflows */
+  averageReadinessScore: number;
+  /** Total estimated time savings across all workflows (null if any is null) */
+  totalEstimatedTimeSavingsMs: number | null;
+  /** Total detected patterns */
+  patternCount: number;
+  /** Skill type distribution across portfolio */
+  portfolioSkillDistribution: Record<SkillType, number>;
+}
+
+/**
+ * Complete cross-workflow intelligence output.
+ */
+export interface CrossWorkflowIntelligence {
+  /** Skills shared across multiple workflows */
+  sharedSkills: SharedSkill[];
+  /** Systems shared across multiple workflows */
+  sharedSystems: SharedSystem[];
+  /** Patterns detected across workflows */
+  patterns: WorkflowPattern[];
+  /** Portfolio-level summary */
+  summary: PortfolioSummary;
+}
+
 // ─── TransformationResult ─────────────────────────────────────────────────────
 
 /**
