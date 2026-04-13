@@ -11,7 +11,9 @@ import {
   BarChart3,
   Users,
   Zap,
+  Download,
 } from 'lucide-react';
+import { EXTENSION_CONFIG } from '@/lib/config';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Workflows', icon: LayoutDashboard },
@@ -57,6 +59,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             })}
 
             <div className="ml-ds-2 flex items-center gap-ds-2 border-l border-gray-200 pl-ds-3">
+              <a
+                href={EXTENSION_CONFIG.directDownloadUrl}
+                download
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-ds-md px-ds-3 py-ds-2 text-ds-sm font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 transition-colors"
+                title="Download Chrome Extension"
+              >
+                <Download className="h-3.5 w-3.5" />
+                <span className="hidden lg:inline">Get Extension</span>
+              </a>
               <span className="hidden text-ds-xs text-gray-400 sm:inline">
                 {session?.user?.email}
               </span>

@@ -40,9 +40,11 @@ import {
   Brain,
   Shield,
   FolderOpen,
+  Download,
 } from 'lucide-react';
 import { formatDuration, formatDateRelative, formatConfidence } from '@/lib/format';
 import { track } from '@/lib/analytics';
+import { EXTENSION_CONFIG } from '@/lib/config';
 import ProcessGroupsExplorer from '@/components/ProcessGroupsExplorer';
 import PortfolioSidebar, { type PortfolioNode } from '@/components/PortfolioSidebar';
 import CreatePortfolioDialog from '@/components/CreatePortfolioDialog';
@@ -2224,8 +2226,16 @@ function EmptyDashboard({
             Record a workflow with the browser extension, or upload a JSON file to generate
             your first SOP and process map.
           </p>
-          <div className="mt-ds-6 flex items-center justify-center gap-ds-3">
-            <Link href="/upload" className="btn-primary gap-1.5">
+          <div className="mt-ds-6 flex flex-wrap items-center justify-center gap-ds-3">
+            <a
+              href={EXTENSION_CONFIG.directDownloadUrl}
+              download
+              className="btn-primary gap-1.5"
+            >
+              <Download className="h-4 w-4" />
+              Download Chrome Extension
+            </a>
+            <Link href="/upload" className="btn-secondary gap-1.5">
               <Upload className="h-4 w-4" />
               Upload a workflow
             </Link>
