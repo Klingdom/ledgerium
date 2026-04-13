@@ -309,6 +309,37 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .pm-cta a{color:var(--brand-600);font-weight:600;text-decoration:none;white-space:nowrap}
 .pm-cta a:hover{text-decoration:underline}
 
+/* ── Flow Diagram ── */
+.fd-canvas-wrap{overflow-y:auto;overflow-x:hidden;margin-bottom:16px}
+.fd-canvas{position:relative;width:100%;background-color:#fff;background-image:radial-gradient(circle,#e2e8f0 1px,transparent 1px);background-size:20px 20px;border:1px solid var(--gray-200);border-radius:12px}
+.fd-node-start,.fd-node-end{position:absolute;left:50%;transform:translateX(-50%);width:140px;height:40px;border-radius:20px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;font-weight:600}
+.fd-node-start{background:#ecfdf5;border:1.5px solid #6ee7b7;color:#065f46}
+.fd-node-end{background:#f1f5f9;border:1.5px solid #94a3b8;color:#475569}
+.fd-node-task{position:absolute;left:50%;transform:translateX(-50%);width:280px;border-radius:12px;border:1.5px solid;padding:10px 14px;box-shadow:0 1px 3px rgba(0,0,0,.04),0 1px 2px rgba(0,0,0,.02);box-sizing:border-box}
+.fd-node-decision{position:absolute;left:50%;transform:translateX(-50%);width:220px;border-radius:12px;border:1.5px solid #fcd34d;background:#fffbeb;padding:10px 14px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.fd-row1{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.fd-ordinal{font-size:10px;font-weight:700;min-width:18px;text-align:center;border-radius:4px;padding:1px 4px}
+.fd-cat-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-radius:4px;padding:2px 6px}
+.fd-duration{font-size:10px;color:#9ca3af;display:flex;align-items:center;gap:3px;margin-left:auto;flex-shrink:0}
+.fd-row2{font-size:12px;font-weight:500;line-height:1.4;color:#374151;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.fd-row3{display:flex;align-items:center;gap:6px;margin-top:6px}
+.fd-sys-badge{font-size:9px;font-weight:500;color:#6b7280;background:#f3f4f6;border-radius:4px;padding:2px 6px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fd-indicators{display:flex;align-items:center;gap:4px;margin-left:auto}
+.fd-dot-red{width:7px;height:7px;border-radius:50%;background:#ef4444;flex-shrink:0}
+.fd-dot-amber{width:7px;height:7px;border-radius:50%;background:#f59e0b;flex-shrink:0}
+.fd-edge{position:absolute;left:50%;transform:translateX(-50%)}
+.fd-edge-line{width:2px;background:#cbd5e1;margin:0 auto}
+.fd-edge-line-amber{width:2px;background:#fbbf24;margin:0 auto}
+.fd-edge-line-red{width:2px;background:#fca5a5;margin:0 auto;background:repeating-linear-gradient(to bottom,#fca5a5 0,#fca5a5 6px,transparent 6px,transparent 9px)}
+.fd-arrow{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid #cbd5e1;margin:0 auto}
+.fd-arrow-amber{border-top-color:#fbbf24}
+.fd-phase-group{position:absolute;border-radius:16px;pointer-events:none}
+.fd-phase-header{position:absolute;top:8px;left:12px;display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+.fd-phase-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.fd-legend{display:flex;flex-wrap:wrap;gap:12px 16px;padding:12px 0 4px;border-top:1px solid var(--gray-100);margin-top:4px}
+.fd-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#6b7280}
+.fd-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
 /* ── Agent Intelligence ── */
 .ai-score-row{display:flex;align-items:center;gap:24px;margin-bottom:24px;background:var(--gray-50);border-radius:var(--radius-lg);padding:20px}
 .ai-score-num{font-size:40px;font-weight:800;color:var(--gray-900);line-height:1}
@@ -1523,67 +1554,218 @@ function toggleCheck(idx) {
 }
 
 // ── Process Map Tab ────────────────────────────────────────────────────────────
-function renderProcessMapTab(wf) {
-  // Build lane data: unique systems with step counts
-  const systemStepCounts = {};
-  wf.sopSteps.forEach(s => {
-    if (s.system) systemStepCounts[s.system] = (systemStepCounts[s.system] || 0) + 1;
-  });
-  const lanes = Object.entries(systemStepCounts).map(([sys, count]) => ({ sys, count }));
 
-  // Detect handoffs: consecutive steps with different systems
-  const handoffs = [];
-  for (let i = 0; i < wf.sopSteps.length - 1; i++) {
-    const a = wf.sopSteps[i], b = wf.sopSteps[i+1];
-    if (a.system && b.system && a.system !== b.system) {
-      handoffs.push({ fromOrdinal: i+1, toOrdinal: i+2, fromSys: a.system, toSys: b.system });
-    }
+// Category config: accent color, bg, text color
+const CAT_FLOW_CONFIG = {
+  navigation:        { accent:'#0d9488', bg:'#f0fdfa', text:'#134e4a' },
+  click_then_navigate:{ accent:'#0d9488', bg:'#f0fdfa', text:'#134e4a' },
+  form_submit:       { accent:'#2563eb', bg:'#eff6ff', text:'#1e3a8a' },
+  fill_and_submit:   { accent:'#2563eb', bg:'#eff6ff', text:'#1e3a8a' },
+  repeated_click_dedup:{ accent:'#ea580c', bg:'#fff7ed', text:'#9a3412' },
+  single_action:     { accent:'#64748b', bg:'#f8fafc', text:'#334155' },
+  data_entry:        { accent:'#7c3aed', bg:'#f5f3ff', text:'#4c1d95' },
+  send_action:       { accent:'#059669', bg:'#ecfdf5', text:'#064e3b' },
+  file_action:       { accent:'#d97706', bg:'#fffbeb', text:'#92400e' },
+  error_handling:    { accent:'#dc2626', bg:'#fef2f2', text:'#991b1b' },
+  annotation:        { accent:'#9333ea', bg:'#faf5ff', text:'#581c87' }
+};
+
+const LEGEND_CATS = [
+  { key:'navigation',   label:'Navigation' },
+  { key:'data_entry',   label:'Data Entry' },
+  { key:'form_submit',  label:'Form Submit' },
+  { key:'send_action',  label:'Send / Submit' },
+  { key:'error_handling',label:'Error Handling' },
+  { key:'annotation',   label:'Annotation' }
+];
+
+function flowCatConfig(cat) {
+  return CAT_FLOW_CONFIG[cat] || { accent:'#64748b', bg:'#f8fafc', text:'#334155' };
+}
+
+// SVG icons used in flow nodes
+const FD_PLAY = `<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg>`;
+const FD_STOP = `<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>`;
+const FD_CLOCK_SM = `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+const FD_DIAMOND = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" transform="rotate(45 12 12)"/></svg>`;
+
+function renderProcessMapTab(wf) {
+  const steps = wf.sopSteps;
+
+  // ── Layout constants ──────────────────────────────────────────────────────
+  const CANVAS_W = 460;    // logical canvas width; rendered at 100% via CSS
+  const NODE_W   = 280;    // task node width
+  const NODE_H   = 78;     // task node approximate height
+  const START_H  = 40;
+  const END_H    = 40;
+  const DEC_H    = 64;     // decision node height
+  const GAP      = 56;     // vertical space between node bottom and next node top (includes connector)
+  const PAD_TOP  = 32;
+  const PAD_BOT  = 32;
+  const EDGE_H   = GAP;    // connector zone height (matches GAP)
+
+  // Identify which steps are "decision" style (annotation/error_handling with low confidence, or wf-07 steps 7,11)
+  const DECISION_INDICES = new Set();
+  if (wf.id === 'wf-07') { DECISION_INDICES.add(6); DECISION_INDICES.add(10); }
+
+  // ── Phase group detection (4+ steps per system) ───────────────────────────
+  const sysRuns = []; // [{sys, start, end, accent, bg}]
+  {
+    const sysStepMap = {};
+    steps.forEach((s, i) => {
+      const sys = s.system || '';
+      if (!sysStepMap[sys]) sysStepMap[sys] = [];
+      sysStepMap[sys].push(i);
+    });
+    Object.entries(sysStepMap).forEach(([sys, indices]) => {
+      if (indices.length < 4) return;
+      // Find contiguous runs within this system
+      let runStart = indices[0], prev = indices[0];
+      for (let k = 1; k <= indices.length; k++) {
+        const cur = indices[k];
+        if (cur !== prev + 1 || k === indices.length) {
+          const runLen = prev - runStart + 1;
+          if (runLen >= 4) {
+            // pick accent from first step in run
+            const cfg = flowCatConfig(steps[runStart].category);
+            sysRuns.push({ sys, start: runStart, end: prev, accent: cfg.accent });
+          }
+          runStart = cur;
+        }
+        prev = cur;
+      }
+    });
   }
 
-  // Estimated duration from steps (sum parsed)
-  const lanesHtml = lanes.map(l => `
-    <div class="pm-lane-card">
-      <div class="pm-lane-name">${escapeHtml(l.sys)}</div>
-      <div class="pm-lane-sub">${l.count} step${l.count!==1?'s':''}</div>
-    </div>`).join('');
+  // ── Vertical position calculation ─────────────────────────────────────────
+  // Order: PAD_TOP → Start node → edge → Step 0 → edge → … → Step N-1 → edge → End node → PAD_BOT
+  const nodeYs = []; // y position of top of each task node
+  let cursor = PAD_TOP + START_H + EDGE_H; // after start node + first connector
+  steps.forEach((s, i) => {
+    nodeYs.push(cursor);
+    const h = DECISION_INDICES.has(i) ? DEC_H : NODE_H;
+    cursor += h + EDGE_H;
+  });
+  const endNodeY = cursor;
+  const totalH = endNodeY + END_H + PAD_BOT;
 
-  // Step rows with category-colored left border
-  const stepsHtml = wf.sopSteps.map((step, i) => {
-    const color = catColor(step.category);
-    const label = catLabel(step.category);
-    return `
-      <div class="pm-step" style="border-left-color:${color}">
-        <div class="pm-step-header">
-          <span class="pm-step-ordinal">${i+1}</span>
-          <div style="flex:1;min-width:0">
-            <div class="pm-step-title">${escapeHtml(step.title)}</div>
-            <div class="pm-step-meta">
-              <span class="pm-step-cat cat-${step.category}">${label}</span>
-              <span class="pm-step-action">${escapeHtml(step.system||'')}</span>
-              ${step.duration ? `<span class="pm-step-action">${SVG_CLOCK}${escapeHtml(step.duration)}</span>` : ''}
-            </div>
-          </div>
+  // ── Build phase group HTML ─────────────────────────────────────────────────
+  let phaseGroupsHtml = '';
+  sysRuns.forEach(run => {
+    const topY = nodeYs[run.start] - 16;
+    const botY = nodeYs[run.end] + NODE_H + 16;
+    const groupH = botY - topY;
+    const groupX = (CANVAS_W / 2) - (NODE_W / 2) - 20;
+    const groupW = NODE_W + 40;
+    phaseGroupsHtml += `
+      <div class="fd-phase-group" style="left:${groupX}px;top:${topY}px;width:${groupW}px;height:${groupH}px;background:${run.accent}0f;border:1px solid ${run.accent}26">
+        <div class="fd-phase-header" style="color:${run.accent}">
+          <div class="fd-phase-dot" style="background:${run.accent}"></div>
+          ${escapeHtml(run.sys).toUpperCase()}
         </div>
       </div>`;
-  }).join('');
+  });
 
-  const handoffsHtml = handoffs.length > 0 ? `
-    <div class="sop-section-label" style="margin-bottom:8px">System Handoffs</div>
-    ${handoffs.map(h => `
-      <div class="pm-handoff-card">
-        <span style="font-family:monospace;color:var(--gray-500)">Step ${h.fromOrdinal}</span>
-        <span class="pm-handoff-arrow">→</span>
-        <span style="font-family:monospace;color:var(--gray-500)">Step ${h.toOrdinal}</span>
-        <span style="color:var(--gray-400)">${escapeHtml(h.fromSys)} → ${escapeHtml(h.toSys)}</span>
-      </div>`).join('')}
-    <div style="height:12px"></div>` : '';
+  // ── Build connector HTML ───────────────────────────────────────────────────
+  // Connector from Start → first step
+  const startConnY = PAD_TOP + START_H;
+  let connectorsHtml = `
+    <div class="fd-edge" style="top:${startConnY}px;width:2px">
+      <div class="fd-edge-line" style="height:${EDGE_H - 7}px"></div>
+      <div class="fd-arrow"></div>
+    </div>`;
+
+  // Connectors between steps and after last step → End
+  steps.forEach((step, i) => {
+    const h = DECISION_INDICES.has(i) ? DEC_H : NODE_H;
+    const connY = nodeYs[i] + h;
+    const nextStep = steps[i + 1];
+    // Determine edge style
+    let lineClass = 'fd-edge-line';
+    let arrowClass = 'fd-arrow';
+    if (step.category === 'error_handling') {
+      lineClass = 'fd-edge-line-red';
+    } else if (DECISION_INDICES.has(i) || (nextStep && nextStep.category === 'error_handling')) {
+      lineClass = 'fd-edge-line-amber';
+      arrowClass = 'fd-arrow fd-arrow-amber';
+    }
+    connectorsHtml += `
+      <div class="fd-edge" style="top:${connY}px;width:2px">
+        <div class="${lineClass}" style="height:${EDGE_H - 7}px"></div>
+        <div class="${arrowClass}"></div>
+      </div>`;
+  });
+
+  // ── Build node HTML ────────────────────────────────────────────────────────
+  const startY = PAD_TOP;
+  let nodesHtml = `
+    <div class="fd-node-start" style="top:${startY}px" aria-label="Start">
+      <span style="color:#059669">${FD_PLAY}</span>Start
+    </div>`;
+
+  steps.forEach((step, i) => {
+    const cfg = flowCatConfig(step.category);
+    const num = i + 1;
+    const isDecision = DECISION_INDICES.has(i);
+
+    if (isDecision) {
+      nodesHtml += `
+        <div class="fd-node-decision" style="top:${nodeYs[i]}px" aria-label="Decision step ${num}: ${escapeHtml(step.title)}">
+          <div class="fd-row1">
+            ${FD_DIAMOND}
+            <span style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#b45309">Decision</span>
+            <span style="font-size:9px;font-weight:700;color:#92400e;margin-left:auto">${num}</span>
+          </div>
+          <div style="font-size:11px;font-weight:500;color:#78350f;line-height:1.4;margin-top:2px">${escapeHtml(step.title)}</div>
+        </div>`;
+      return;
+    }
+
+    // Bottleneck indicator: confidence < 80 → red dot; annotation/decision → amber dot
+    const showRed  = (step.confidence || 85) < 80;
+    const showAmber = step.category === 'annotation' || step.category === 'error_handling';
+    const indicators = (showRed ? `<div class="fd-dot-red" title="High friction / low confidence"></div>` : '') +
+                       (showAmber ? `<div class="fd-dot-amber" title="Decision or annotation step"></div>` : '');
+
+    nodesHtml += `
+      <div class="fd-node-task" style="top:${nodeYs[i]}px;background:${cfg.bg};border-color:${cfg.accent}25" aria-label="Step ${num}: ${escapeHtml(step.title)}">
+        <div class="fd-row1">
+          <span class="fd-ordinal" style="color:${cfg.accent};background:${cfg.accent}1f">${num}</span>
+          <span class="fd-cat-label" style="color:${cfg.accent};background:${cfg.accent}1a">${escapeHtml(catLabel(step.category))}</span>
+          ${step.duration ? `<span class="fd-duration">${FD_CLOCK_SM}${escapeHtml(step.duration)}</span>` : ''}
+        </div>
+        <div class="fd-row2">${escapeHtml(step.title)}</div>
+        <div class="fd-row3">
+          ${step.system ? `<span class="fd-sys-badge">${escapeHtml(step.system)}</span>` : ''}
+          ${indicators ? `<div class="fd-indicators">${indicators}</div>` : ''}
+        </div>
+      </div>`;
+  });
+
+  nodesHtml += `
+    <div class="fd-node-end" style="top:${endNodeY}px" aria-label="End">
+      <span style="color:#64748b">${FD_STOP}</span>End
+    </div>`;
+
+  // ── Legend HTML ────────────────────────────────────────────────────────────
+  // Only show categories actually used by this workflow
+  const usedCats = new Set(steps.map(s => s.category));
+  const legendHtml = LEGEND_CATS.filter(l => usedCats.has(l.key)).map(l => {
+    const cfg = flowCatConfig(l.key);
+    return `<div class="fd-legend-item"><div class="fd-legend-dot" style="background:${cfg.accent}"></div>${l.label}</div>`;
+  }).join('') + `
+    <div class="fd-legend-item"><div class="fd-dot-red" style="width:8px;height:8px"></div>High friction</div>
+    <div class="fd-legend-item"><div class="fd-dot-amber" style="width:8px;height:8px"></div>Decision / annotation</div>`;
+
+  // ── System count for header ────────────────────────────────────────────────
+  const uniqueSystems = [...new Set(steps.map(s => s.system).filter(Boolean))];
 
   document.getElementById('tab-process-map').innerHTML = `
     <!-- Format selector -->
     <div class="pm-format-bar">
       <span class="pm-format-label">Format</span>
       <div class="pm-format-group" role="group" aria-label="Process map format">
-        <button class="pm-fmt-btn active" disabled>Swimlane</button>
+        <button class="pm-fmt-btn active" disabled>Flow Diagram</button>
         <button class="pm-fmt-btn" disabled title="Available with recorded workflows" aria-disabled="true">BPMN</button>
         <button class="pm-fmt-btn" disabled title="Available with recorded workflows" aria-disabled="true">SIPOC</button>
       </div>
@@ -1591,12 +1773,12 @@ function renderProcessMapTab(wf) {
 
     <!-- Header -->
     <div class="pm-header">
-      <div class="pm-tag">Swimlane Process Map</div>
+      <div class="pm-tag">Flow Intelligence Diagram</div>
       <div class="pm-title">${escapeHtml(wf.title)}</div>
       <div class="pm-subtitle">${escapeHtml(wf.objective)}</div>
       <div class="pm-metrics">
         <div class="pm-metric-item"><strong>${wf.steps}</strong>Steps</div>
-        <div class="pm-metric-item"><strong>${lanes.length}</strong>Systems</div>
+        <div class="pm-metric-item"><strong>${uniqueSystems.length}</strong>Systems</div>
         <div class="pm-metric-item"><strong>${escapeHtml(wf.duration)}</strong>Duration</div>
       </div>
     </div>
@@ -1607,19 +1789,18 @@ function renderProcessMapTab(wf) {
       <div class="pm-trigger-text">${escapeHtml(wf.trigger)}</div>
     </div>
 
-    <!-- Lanes -->
-    <div class="sop-section-label" style="margin-bottom:8px">Lanes (Systems / Roles)</div>
-    <div class="pm-lanes-grid" style="margin-bottom:20px">${lanesHtml}</div>
-
-    <!-- Process Flow -->
-    <div class="sop-section-label" style="margin-bottom:8px">Process Flow</div>
-    ${stepsHtml}
-
-    <!-- Handoffs -->
-    ${handoffsHtml}
+    <!-- Visual Flow Diagram -->
+    <div class="fd-canvas-wrap">
+      <div class="fd-canvas" style="height:${totalH}px" role="img" aria-label="Visual flow diagram for ${escapeHtml(wf.title)}">
+        ${phaseGroupsHtml}
+        ${connectorsHtml}
+        ${nodesHtml}
+      </div>
+      <div class="fd-legend" aria-label="Legend">${legendHtml}</div>
+    </div>
 
     <!-- Attribution -->
-    <div class="pm-footer">Swimlane process map &middot; Generated from ${wf.eventCount} observed browser events &middot; Ledgerium AI</div>
+    <div class="pm-footer">Flow Intelligence diagram &middot; Generated from ${wf.eventCount} observed browser events &middot; Ledgerium AI</div>
 
     <div class="pm-cta">
       <span>Your real workflows produce interactive, evidence-linked process maps.</span>
