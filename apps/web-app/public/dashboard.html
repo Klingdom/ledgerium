@@ -395,8 +395,6 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .get-started-banner .gsb-actions{display:flex;gap:10px;flex-shrink:0;flex-wrap:wrap}
 .get-started-banner .gsb-btn-primary{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:var(--brand-600);color:#fff;border:none;border-radius:var(--radius-md);font-size:13px;font-weight:700;text-decoration:none;cursor:pointer;transition:background .15s,box-shadow .15s;white-space:nowrap}
 .get-started-banner .gsb-btn-primary:hover{background:var(--brand-700);box-shadow:0 2px 8px rgba(0,111,199,.25)}
-.get-started-banner .gsb-btn-secondary{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:#fff;color:var(--gray-600);border:1px solid var(--gray-200);border-radius:var(--radius-md);font-size:13px;font-weight:500;text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s;white-space:nowrap}
-.get-started-banner .gsb-btn-secondary:hover{background:var(--gray-50);border-color:var(--gray-400)}
 
 /* ── Floating CTA ── */
 .floating-cta{position:fixed;bottom:24px;right:24px;z-index:60;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;transform:translateY(8px)}
@@ -521,16 +519,12 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
       </div>
       <div class="gsb-text">
         <h3>Get started with your own workflows</h3>
-        <p>Record a workflow with the browser extension, or upload a JSON file to generate your first SOP and process map.</p>
+        <p>Record a workflow with the browser extension to generate your first SOP and process map.</p>
       </div>
       <div class="gsb-actions">
-        <a href="https://chromewebstore.google.com" target="_blank" rel="noopener noreferrer" class="gsb-btn-primary">
+        <a href="/ledgerium-recorder-chrome-extension.zip" download class="gsb-btn-primary">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Install Chrome Extension
-        </a>
-        <a href="/upload" class="gsb-btn-secondary">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          Upload JSON
+          Download Chrome Extension
         </a>
       </div>
     </div>
