@@ -21,6 +21,11 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
   --gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-400:#9ca3af;--gray-600:#4b5563;--gray-900:#111827;
   --emerald-400:#34d399;--blue-400:#60a5fa;--amber-400:#fbbf24;--red-400:#f87171;
   --teal-500:#14b8a6;--violet-500:#8b5cf6;--emerald-500:#10b981;--amber-500:#f59e0b;--red-500:#ef4444;--purple-500:#a855f7;
+  --emerald-50:#ecfdf5;--emerald-100:#d1fae5;--emerald-200:#a7f3d0;--emerald-600:#059669;--emerald-700:#047857;--emerald-800:#065f46;
+  --blue-50:#eff6ff;--blue-100:#dbeafe;--blue-200:#bfdbfe;--blue-600:#2563eb;--blue-700:#1d4ed8;
+  --amber-50:#fffbeb;--amber-200:#fde68a;--amber-600:#d97706;--amber-700:#b45309;--amber-800:#92400e;
+  --violet-50:#f5f3ff;--violet-200:#ddd6fe;--violet-600:#7c3aed;--violet-700:#6d28d9;
+  --teal-600:#0d9488;--red-600:#dc2626;--purple-600:#9333ea;
   --radius-sm:6px;--radius-md:8px;--radius-lg:12px;
 }
 
@@ -129,41 +134,123 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .panel-tab-content.active{display:block}
 
 /* ── SOP Styles ── */
-.sop-meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
-.sop-meta-card{background:var(--gray-50);border-radius:var(--radius-md);padding:12px 16px;text-align:center}
-.sop-meta-val{font-size:18px;font-weight:700;color:var(--gray-900)}
-.sop-meta-lbl{font-size:11px;color:var(--gray-400);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
-.sop-section{margin-bottom:24px}
+.sop-section{margin-bottom:20px}
 .sop-section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-400);margin-bottom:10px}
-.sop-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-.sop-info-item{font-size:13px;color:var(--gray-600)}
-.sop-info-item strong{color:var(--gray-900);font-weight:600}
-.step-card{border:1px solid var(--gray-200);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:12px;transition:box-shadow .15s}
-.step-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.step-header{display:flex;align-items:flex-start;gap:12px;padding:16px 20px 12px}
-.step-ordinal{display:flex;align-items:center;justify-content:center;width:28px;height:28px;min-width:28px;background:var(--brand-50);color:var(--brand-700);border-radius:var(--radius-md);font-size:12px;font-weight:700}
-.step-info{flex:1}
-.step-title{font-size:14px;font-weight:600;color:var(--gray-900);margin-bottom:4px}
-.step-cat{display:inline-flex;align-items:center;padding:2px 8px;border-radius:var(--radius-sm);font-size:11px;font-weight:600}
-.cat-navigation{background:#ccfbf1;color:#065f46}
-.cat-data_entry{background:#ede9fe;color:#4c1d95}
-.cat-form_submit{background:#dbeafe;color:#1e40af}
-.cat-send_action{background:#d1fae5;color:#065f46}
-.cat-error_handling{background:#fee2e2;color:#991b1b}
-.cat-annotation{background:#f3e8ff;color:#6b21a8}
-.step-actions{background:var(--gray-50);border-radius:var(--radius-md);padding:10px 14px;margin:0 20px 12px;font-size:13px;color:var(--gray-600);line-height:20px}
-.step-actions li{list-style:none;padding:2px 0;display:flex;align-items:baseline;gap:6px}
-.step-actions li::before{content:"→";color:var(--gray-400);font-size:11px;flex-shrink:0}
-.step-footer{display:flex;align-items:center;gap:12px;background:rgba(249,250,251,.6);border-top:1px solid var(--gray-100);padding:8px 20px;font-size:12px;color:var(--gray-400)}
 .sop-attribution{background:var(--brand-50);border:1px solid var(--brand-100);border-radius:var(--radius-md);padding:12px 16px;font-size:12px;color:var(--brand-700);margin-top:8px;line-height:18px}
 .sop-cta{background:linear-gradient(135deg,var(--brand-600),var(--brand-700));border-radius:var(--radius-lg);padding:20px 24px;margin-top:24px;text-align:center;color:#fff}
 .sop-cta h3{font-size:15px;font-weight:700;margin-bottom:6px}
 .sop-cta p{font-size:13px;opacity:.85;margin-bottom:14px}
 .sop-cta a{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:#fff;color:var(--brand-700);border-radius:var(--radius-md);font-size:13px;font-weight:700;text-decoration:none;transition:opacity .15s}
 .sop-cta a:hover{opacity:.9}
-.preview-step-list{list-style:none;space-y:4px}
+
+/* Quick Start */
+.qs-card{background:linear-gradient(135deg,#ecfdf580 0%,#fff 100%);border:1px solid var(--emerald-200);border-radius:16px;overflow:hidden;margin-bottom:20px}
+.qs-header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--emerald-100)}
+.qs-header-left{display:flex;align-items:center;gap:8px}
+.qs-icon-badge{width:24px;height:24px;background:var(--emerald-500);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.qs-title{font-size:12px;font-weight:600;color:#064e3b}
+.qs-time{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--emerald-600)}
+.qs-body{padding:16px 20px;display:flex;flex-direction:column;gap:12px}
+.qs-sublabel{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--emerald-600);margin-bottom:2px}
+.qs-text{font-size:12px;color:#1f2937;line-height:18px}
+.qs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.qs-box{background:rgba(255,255,255,.7);border:1px solid var(--emerald-100);border-radius:8px;padding:10px 12px}
+.qs-sys-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:500;color:var(--emerald-700);background:rgba(209,250,229,.7);border-radius:4px;padding:2px 8px;margin:2px 2px 0 0}
+.qs-outcome{display:flex;align-items:flex-start;gap:8px;background:rgba(209,250,229,.3);border-radius:8px;padding:8px 12px}
+.qs-outcome-text{font-size:10px;color:#065f46}
+.qs-outcome-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--emerald-600);margin-bottom:2px}
+
+/* Step cards (expandable) */
+.step-card{border:1px solid var(--gray-200);border-radius:12px;overflow:hidden;margin-bottom:8px;transition:box-shadow .15s;background:#fff}
+.step-card.expanded{box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.step-btn{display:flex;align-items:center;gap:12px;padding:12px 16px;width:100%;background:none;border:none;cursor:pointer;text-align:left;transition:background .15s;border-radius:12px}
+.step-btn:hover{background:rgba(249,250,251,.6)}
+.step-ordinal{display:flex;align-items:center;justify-content:center;width:28px;height:28px;min-width:28px;border-radius:8px;font-size:11px;font-weight:700;flex-shrink:0}
+.step-title{font-size:13px;font-weight:600;color:var(--gray-900);line-height:18px}
+.step-cat{display:inline-flex;align-items:center;padding:2px 6px;border-radius:4px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.cat-navigation{background:#ccfbf1;color:#065f46}
+.cat-data_entry{background:#ede9fe;color:#4c1d95}
+.cat-form_submit{background:#dbeafe;color:#1e40af}
+.cat-send_action{background:#d1fae5;color:#065f46}
+.cat-error_handling{background:#fee2e2;color:#991b1b}
+.cat-annotation{background:#f3e8ff;color:#6b21a8}
+.step-sys-badge{display:inline-flex;font-size:9px;font-weight:500;color:var(--gray-400);background:var(--gray-50);border:1px solid var(--gray-200);border-radius:4px;padding:2px 6px;white-space:nowrap}
+.step-dur{font-size:10px;color:var(--gray-400);display:flex;align-items:center;gap:3px;white-space:nowrap}
+.step-chevron{color:var(--gray-300);transition:transform .2s;flex-shrink:0}
+.step-chevron.open{transform:rotate(90deg)}
+.step-body{padding:0 16px 14px 56px;border-top:1px solid var(--gray-100);margin-top:0;display:none}
+.step-body.open{display:block}
+.step-instructions{background:var(--gray-50);border:1px solid var(--gray-100);border-radius:8px;overflow:hidden;margin-top:12px}
+.step-instr-row{display:flex;gap:10px;padding:8px 12px;font-size:11px;color:var(--gray-700)}
+.step-instr-row+.step-instr-row{border-top:1px solid var(--gray-100)}
+.step-instr-num{min-width:14px;font-weight:700;color:var(--gray-400);flex-shrink:0}
+.step-outcome{display:flex;align-items:flex-start;gap:8px;font-size:10px;margin-top:10px}
+.step-auto-hint{display:flex;align-items:flex-start;gap:8px;font-size:10px;background:var(--violet-50);border:1px solid var(--violet-200);border-radius:8px;padding:8px 12px;margin-top:8px;color:var(--violet-600)}
+
+/* Completion checklist */
+.checklist-section{margin-bottom:20px}
+.checklist-label{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-400);margin-bottom:8px}
+.checklist-wrap{border:1px solid var(--gray-200);border-radius:12px;padding:16px 20px;background:#fff;transition:all .2s}
+.checklist-wrap.all-checked{background:var(--emerald-50);border-color:#a7f3d0}
+.checklist-all-done{display:none;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--emerald-200);font-size:12px;font-weight:600;color:var(--emerald-700)}
+.checklist-all-done.visible{display:flex}
+.checklist-item{display:flex;align-items:flex-start;gap:10px;padding:6px 0;cursor:pointer;background:none;border:none;width:100%;text-align:left}
+.checklist-item+.checklist-item{border-top:1px solid var(--gray-100)}
+.checklist-box{width:16px;height:16px;border:1px solid var(--gray-300);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .15s}
+.checklist-box.checked{background:var(--emerald-500);border-color:var(--emerald-500)}
+.checklist-text{font-size:12px;color:var(--gray-800);line-height:18px;transition:all .15s}
+.checklist-text.checked{color:var(--gray-400);text-decoration:line-through}
+
+/* Process overview (4-col stat grid) */
+.proc-overview-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.proc-stat{background:#fff;border:1px solid var(--gray-200);border-radius:10px;padding:10px 12px}
+.proc-stat-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400)}
+.proc-stat-val{font-size:18px;font-weight:700;color:var(--gray-900);margin-top:2px}
+.proc-stat-sub{font-size:9px;color:var(--gray-400);margin-top:1px}
+
+/* Swimlane / process map */
+.pm-format-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.pm-format-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400)}
+.pm-format-group{display:flex;border:1px solid var(--gray-200);border-radius:8px;overflow:hidden}
+.pm-fmt-btn{padding:5px 12px;font-size:12px;font-weight:500;color:var(--gray-500);background:#fff;border:none;cursor:pointer;border-right:1px solid var(--gray-200);transition:background .15s,color .15s}
+.pm-fmt-btn:last-child{border-right:none}
+.pm-fmt-btn.active{background:var(--brand-50);color:var(--brand-700)}
+.pm-fmt-btn:disabled{opacity:.35;cursor:not-allowed}
+.pm-header{margin-bottom:16px}
+.pm-tag{display:inline-flex;align-items:center;padding:3px 10px;background:var(--brand-50);color:var(--brand-700);border-radius:6px;font-size:11px;font-weight:600;margin-bottom:8px}
+.pm-title{font-size:16px;font-weight:700;color:var(--gray-900);line-height:22px;margin-bottom:4px}
+.pm-subtitle{font-size:13px;color:var(--gray-600);line-height:20px;margin-bottom:12px}
+.pm-metrics{display:flex;gap:24px;flex-wrap:wrap}
+.pm-metric-item{font-size:12px;color:var(--gray-400)}
+.pm-metric-item strong{color:var(--gray-900);font-weight:700;font-size:16px;display:block;line-height:20px}
+.pm-trigger-callout{background:var(--blue-50);border:1px solid var(--blue-200);border-radius:10px;padding:12px 16px;margin-bottom:16px}
+.pm-trigger-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--blue-600);margin-bottom:4px}
+.pm-trigger-text{font-size:13px;color:#1e40af}
+.pm-lanes-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px;margin-bottom:16px}
+.pm-lane-card{background:#fff;border:1px solid var(--gray-200);border-radius:10px;padding:10px 14px}
+.pm-lane-name{font-size:13px;font-weight:600;color:var(--gray-900)}
+.pm-lane-sub{font-size:11px;color:var(--gray-400);margin-top:2px}
+.pm-step{background:#fff;border:1px solid var(--gray-200);border-left:3px solid var(--gray-300);border-radius:8px;padding:10px 14px;margin-bottom:6px}
+.pm-step-header{display:flex;align-items:flex-start;gap:10px}
+.pm-step-ordinal{width:22px;height:22px;min-width:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;background:var(--brand-50);color:var(--brand-700);flex-shrink:0}
+.pm-step-title{font-size:13px;font-weight:600;color:var(--gray-900);line-height:18px}
+.pm-step-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;align-items:center}
+.pm-step-cat{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 6px;border-radius:4px}
+.pm-step-action{font-size:11px;color:var(--gray-400)}
+.pm-step-page{font-size:11px;color:var(--gray-400);margin-top:3px}
+.pm-handoff-card{background:#fff;border:1px solid var(--gray-200);border-radius:8px;padding:8px 14px;margin-bottom:6px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--gray-600)}
+.pm-handoff-arrow{color:var(--gray-300)}
+.pm-footer{font-size:10px;color:var(--gray-400);margin-top:16px;padding-top:12px;border-top:1px solid var(--gray-100)}
+.pm-cta{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:14px 18px;margin-top:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;color:var(--gray-600)}
+.pm-cta a{color:var(--brand-600);font-weight:600;text-decoration:none;white-space:nowrap}
+.pm-cta a:hover{text-decoration:underline}
+
+/* Preview step (compact, for non-full workflows) */
 .preview-step{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--gray-50);border-radius:var(--radius-md);margin-bottom:6px;font-size:13px;color:var(--gray-700)}
 .preview-step-num{width:22px;height:22px;min-width:22px;background:var(--brand-50);color:var(--brand-700);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+
+/* AI score badge on workflow card */
+.ai-score-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600;background:var(--violet-50);color:var(--violet-600);border:1px solid var(--violet-200)}
 
 /* ── Process Map ── */
 .process-map-wrap{overflow-x:auto;padding-bottom:16px}
@@ -243,6 +330,10 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
   .slide-panel{width:90%}
   .stats-grid{grid-template-columns:repeat(3,1fr)}
   .nav-tabs .nav-tab:nth-child(n+3){display:none}
+  .step-sys-badge{display:none!important}
+  .qs-grid{grid-template-columns:1fr}
+  .proc-overview-grid{grid-template-columns:repeat(2,1fr)}
+  .pm-lanes-grid{grid-template-columns:1fr}
 }
 @media(max-width:640px){
   .slide-panel{width:100%}
@@ -712,7 +803,7 @@ function confClass(c) {
 }
 
 function renderCard(wf) {
-  const tags = wf.systems.map(s => `<span class="sys-tag">${s}</span>`).join('');
+  const tags = wf.systems.map(s => `<span class="sys-tag">${escapeHtml(s)}</span>`).join('');
   const statusBadge = wf.status === 'healthy'
     ? `<span class="badge badge-healthy"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Healthy</span>`
     : `<span class="badge badge-review"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Needs Review</span>`;
@@ -744,7 +835,7 @@ function renderCard(wf) {
         </span>
       </div>
       <div class="card-footer">
-        <div style="display:flex;gap:6px;flex-wrap:wrap">${statusBadge}${sopBadge}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${statusBadge}${sopBadge}<span class="ai-score-badge"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>AI ${wf.aiScore}</span></div>
         <button class="view-sop-btn" data-id="${wf.id}">
           View SOP
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -876,38 +967,76 @@ document.querySelectorAll('.panel-tab').forEach(btn => {
 // ── SOP Tab Renderer ──────────────────────────────────────────────────────────
 const FULL_SOP_IDS = ['wf-01', 'wf-02', 'wf-03'];
 
-function catLabel(cat) {
-  const map = { navigation: 'Navigation', data_entry: 'Data Entry', form_submit: 'Form Submit', send_action: 'Submit/Send', error_handling: 'Error Handling', annotation: 'Annotation' };
-  return map[cat] || cat;
-}
+const CAT_LABEL = { navigation:'Navigation', data_entry:'Data Entry', form_submit:'Form Submit', send_action:'Submit/Send', error_handling:'Error Handling', annotation:'Annotation' };
+const CAT_COLOR = { navigation:'#0d9488', data_entry:'#7c3aed', form_submit:'#2563eb', send_action:'#059669', error_handling:'#dc2626', annotation:'#9333ea' };
 
-function renderSOPStep(step, idx) {
-  const catClass = 'cat-' + step.category;
-  const actionsHtml = step.actions
-    ? `<ul class="step-actions">${step.actions.map(a => `<li>${a}</li>`).join('')}</ul>`
+function catLabel(cat) { return CAT_LABEL[cat] || cat; }
+function catColor(cat) { return CAT_COLOR[cat] || '#6b7280'; }
+
+// SVG icons (inline)
+const SVG_CHECK = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+const SVG_CLOCK = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+const SVG_CHEVRON = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+const SVG_ZAP = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
+const SVG_MONITOR = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`;
+const SVG_TARGET = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`;
+const SVG_LAYERS = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>`;
+const SVG_BAR = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`;
+const SVG_SHIELD = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
+
+function renderExpandableStep(step, idx) {
+  const num = idx + 1;
+  const color = catColor(step.category);
+  const label = catLabel(step.category);
+  const confVal = step.confidence || 80;
+  const confColor = confVal >= 85 ? '#059669' : confVal >= 80 ? '#2563eb' : '#d97706';
+  const stepId = `step-body-${idx}`;
+  const chevronId = `step-chev-${idx}`;
+
+  // Build instruction rows from actions array
+  const instrHtml = step.actions
+    ? step.actions.map((a, i) => `
+      <div class="step-instr-row">
+        <span class="step-instr-num">${i+1}.</span>
+        <span>${escapeHtml(a)}</span>
+      </div>`).join('')
     : '';
+
+  // Automation hint based on confidence
+  const autoHint = confVal >= 88
+    ? 'This step is a strong candidate for full automation — consistent pattern detected.'
+    : confVal >= 82
+      ? 'Partial automation possible. Human review recommended for edge cases.'
+      : 'Human oversight recommended for this step due to variation detected.';
+
+  const bodyHtml = instrHtml ? `
+    <div class="step-instructions">${instrHtml}</div>
+    <div class="step-outcome">
+      <span style="color:var(--emerald-500);flex-shrink:0;margin-top:1px">${SVG_CHECK}</span>
+      <div><span style="font-weight:600;color:var(--emerald-700)">Expected:</span>
+      <span style="color:var(--gray-600);margin-left:4px">Step completed with visible confirmation in ${escapeHtml(step.system || 'system')}.</span></div>
+    </div>
+    <div class="step-auto-hint">${SVG_ZAP}<span>${escapeHtml(autoHint)}</span></div>` : '';
+
   return `
-    <div class="step-card">
-      <div class="step-header">
-        <div class="step-ordinal">${idx + 1}</div>
-        <div class="step-info">
-          <div class="step-title">${step.title}</div>
-          <span class="step-cat ${catClass}">${catLabel(step.category)}</span>
+    <div class="step-card" id="step-card-${idx}">
+      <button class="step-btn" onclick="toggleStep(${idx})" aria-expanded="false" aria-controls="${stepId}">
+        <span class="step-ordinal" style="color:${color};background:${color}15;border:1px solid ${color}25">${num}</span>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span class="step-title">${escapeHtml(step.title)}</span>
+            <span class="step-cat cat-${step.category}">${label}</span>
+          </div>
+          ${step.actions ? '' : `<div style="font-size:10px;color:var(--gray-400);margin-top:2px">${escapeHtml(step.system||'')}</div>`}
         </div>
-      </div>
-      ${actionsHtml}
-      <div class="step-footer">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        ${step.system}
-        <span style="margin-left:8px">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          ${step.duration}
-        </span>
-        <span style="margin-left:8px">
-          <span class="conf-dot ${confClass(step.confidence)}" style="display:inline-block;vertical-align:middle;margin-right:3px"></span>
-          ${step.confidence}%
-        </span>
-      </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          ${step.system ? `<span class="step-sys-badge" id="sys-${idx}">${escapeHtml(step.system)}</span>` : ''}
+          <span class="step-dur">${SVG_CLOCK}${escapeHtml(step.duration||'')}</span>
+          <span style="width:6px;height:6px;border-radius:50%;background:${confColor};flex-shrink:0" title="${confVal}% confidence" aria-label="Confidence ${confVal}%"></span>
+          <span class="step-chevron" id="${chevronId}">${SVG_CHEVRON}</span>
+        </div>
+      </button>
+      <div class="step-body" id="${stepId}">${bodyHtml}</div>
     </div>`;
 }
 
@@ -915,18 +1044,86 @@ function renderPreviewStep(step, idx) {
   return `
     <div class="preview-step">
       <div class="preview-step-num">${idx + 1}</div>
-      <span style="flex:1">${step.title}</span>
+      <span style="flex:1">${escapeHtml(step.title)}</span>
       <span class="step-cat cat-${step.category}" style="font-size:11px;padding:2px 6px">${catLabel(step.category)}</span>
-      <span style="font-size:11px;color:var(--gray-400);margin-left:6px">${step.system}</span>
+      <span style="font-size:11px;color:var(--gray-400);margin-left:6px">${escapeHtml(step.system||'')}</span>
     </div>`;
+}
+
+// Keep track of open steps per panel open
+let _stepCount = 0;
+
+function toggleStep(idx) {
+  const body = document.getElementById('step-body-' + idx);
+  const chev = document.getElementById('step-chev-' + idx);
+  const card = document.getElementById('step-card-' + idx);
+  const btn = card ? card.querySelector('.step-btn') : null;
+  if (!body) return;
+  const isOpen = body.classList.toggle('open');
+  if (chev) chev.classList.toggle('open', isOpen);
+  if (card) card.classList.toggle('expanded', isOpen);
+  if (btn) btn.setAttribute('aria-expanded', String(isOpen));
+  // Hide system badge when expanded (it's implied by the instruction rows)
+  const sysBadge = document.getElementById('sys-' + idx);
+  if (sysBadge) sysBadge.style.display = isOpen ? 'none' : 'inline-flex';
 }
 
 function renderSOPTab(wf) {
   const isFull = FULL_SOP_IDS.includes(wf.id);
+  _stepCount = wf.sopSteps.length;
+  _checklistState.clear(); // reset on each open
+
+  // Quick Start prerequisites: derive from roles
+  const prereqs = wf.roles.map(r => `${r} access confirmed`);
+
   const stepsHtml = isFull
-    ? wf.sopSteps.map((s, i) => renderSOPStep(s, i)).join('')
+    ? wf.sopSteps.map((s, i) => renderExpandableStep(s, i)).join('')
     : wf.sopSteps.map((s, i) => renderPreviewStep(s, i)).join('');
-  const sopLabel = isFull ? 'Procedure Steps' : 'Step Overview';
+
+  const sopLabel = isFull ? 'Procedure' : 'Step Overview';
+
+  // Checklist items for full SOP
+  const checklistItems = isFull ? [
+    'All steps completed in sequence',
+    'Confirmation states verified at each stage',
+    'Process output is traceable to source events',
+    'No errors or warnings present in final state'
+  ] : [];
+
+  const checklistHtml = isFull ? `
+    <div class="checklist-section" id="checklist-section">
+      <div class="checklist-label">
+        ${SVG_CHECK}
+        Completion Checklist
+      </div>
+      <div class="checklist-wrap" id="checklist-wrap">
+        <div class="checklist-all-done" id="checklist-done">
+          ${SVG_CHECK}
+          All criteria met
+        </div>
+        ${checklistItems.map((item, i) => `
+          <button class="checklist-item" id="cl-${i}" onclick="toggleCheck(${i})" role="checkbox" aria-checked="false" aria-label="${escapeHtml(item)}" type="button">
+            <span class="checklist-box" id="clbox-${i}"></span>
+            <span class="checklist-text" id="cltext-${i}">${escapeHtml(item)}</span>
+          </button>`).join('')}
+      </div>
+    </div>` : '';
+
+  // Friction count estimate
+  const frictionCount = wf.sopSteps.filter(s => s.confidence < 80).length;
+  const uniqueSystems = [...new Set(wf.sopSteps.map(s => s.system))].filter(Boolean);
+
+  const processOverviewHtml = isFull ? `
+    <div class="sop-section">
+      <div class="sop-section-label" style="display:flex;align-items:center;gap:6px">${SVG_BAR} Process Overview</div>
+      <div class="proc-overview-grid">
+        <div class="proc-stat"><div class="proc-stat-label">Steps</div><div class="proc-stat-val">${wf.steps}</div><div class="proc-stat-sub">in procedure</div></div>
+        <div class="proc-stat"><div class="proc-stat-label">Systems</div><div class="proc-stat-val">${uniqueSystems.length}</div><div class="proc-stat-sub">${uniqueSystems.slice(0,2).join(', ') || '—'}</div></div>
+        <div class="proc-stat"><div class="proc-stat-label">Confidence</div><div class="proc-stat-val" style="color:${wf.confidence>=85?'#059669':wf.confidence>=80?'var(--brand-600)':'#d97706'}">${wf.confidence}%</div><div class="proc-stat-sub">avg across steps</div></div>
+        <div class="proc-stat"><div class="proc-stat-label">Friction</div><div class="proc-stat-val">${frictionCount}</div><div class="proc-stat-sub">${frictionCount===0?'None detected':'points flagged'}</div></div>
+      </div>
+    </div>` : '';
+
   document.getElementById('tab-sop').innerHTML = `
     <div class="dl-banner" role="region" aria-label="Download SOP sample">
       <span class="dl-banner-text">
@@ -938,31 +1135,56 @@ function renderSOPTab(wf) {
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </a>
     </div>
-    <div class="sop-meta-grid">
-      <div class="sop-meta-card"><div class="sop-meta-val">${wf.steps}</div><div class="sop-meta-lbl">Steps</div></div>
-      <div class="sop-meta-card"><div class="sop-meta-val">${wf.duration}</div><div class="sop-meta-lbl">Duration</div></div>
-      <div class="sop-meta-card"><div class="sop-meta-val" style="color:${wf.confidence >= 85 ? '#065f46' : wf.confidence >= 80 ? 'var(--brand-600)' : '#92400e'}">${wf.confidence}%</div><div class="sop-meta-lbl">Confidence</div></div>
+
+    <!-- Quick Start -->
+    <div class="qs-card">
+      <div class="qs-header">
+        <div class="qs-header-left">
+          <div class="qs-icon-badge">${SVG_CHECK}</div>
+          <span class="qs-title">Quick Start</span>
+        </div>
+        <span class="qs-time">${SVG_CLOCK}~${escapeHtml(wf.duration)}</span>
+      </div>
+      <div class="qs-body">
+        <div>
+          <div class="qs-sublabel">What This Does</div>
+          <div class="qs-text">${escapeHtml(wf.objective)}</div>
+        </div>
+        <div>
+          <div class="qs-sublabel">When To Use</div>
+          <div class="qs-text">${escapeHtml(wf.trigger)}</div>
+        </div>
+        <div class="qs-grid">
+          <div class="qs-box">
+            <div class="qs-sublabel" style="font-size:9px">Before You Begin</div>
+            ${prereqs.map(p => `<div style="font-size:10px;color:var(--gray-700);display:flex;align-items:flex-start;gap:6px;margin-top:3px"><span style="width:5px;height:5px;border-radius:50%;background:var(--emerald-400);flex-shrink:0;margin-top:4px"></span>${escapeHtml(p)}</div>`).join('')}
+          </div>
+          <div class="qs-box">
+            <div class="qs-sublabel" style="font-size:9px">Systems Needed</div>
+            <div style="margin-top:4px">${wf.systems.map(s => `<span class="qs-sys-tag">${SVG_MONITOR}${escapeHtml(s)}</span>`).join('')}</div>
+          </div>
+        </div>
+        <div class="qs-outcome">
+          <span style="color:var(--emerald-600);flex-shrink:0;margin-top:1px">${SVG_TARGET}</span>
+          <div>
+            <div class="qs-outcome-label">Expected Outcome</div>
+            <div class="qs-outcome-text">Process completed and confirmed in ${escapeHtml(wf.systems[wf.systems.length-1])}. All steps traceable to source browser events.</div>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Procedure Steps -->
     <div class="sop-section">
-      <div class="sop-section-label">Business Objective</div>
-      <p style="font-size:14px;color:var(--gray-700);line-height:22px">${wf.objective}</p>
-    </div>
-    <div class="sop-info-grid" style="margin-bottom:20px">
-      <div class="sop-info-item"><strong>Trigger:</strong> ${wf.trigger}</div>
-      <div class="sop-info-item"><strong>Systems:</strong> ${wf.systems.join(', ')}</div>
-      <div class="sop-info-item"><strong>Roles:</strong> ${wf.roles.join(', ')}</div>
-      <div class="sop-info-item"><strong>Events Captured:</strong> ${wf.eventCount} browser events</div>
-    </div>
-    <div class="sop-section">
-      <div class="sop-section-label">${sopLabel}</div>
+      <div class="sop-section-label" style="display:flex;align-items:center;gap:6px">${SVG_LAYERS} ${sopLabel} <span style="font-weight:400;color:var(--gray-400)">${wf.sopSteps.length}</span></div>
       ${stepsHtml}
     </div>
-    ${isFull ? `<div class="sop-section" style="margin-top:20px">
-      <div class="sop-section-label">Completion Criteria</div>
-      <p style="font-size:13px;color:var(--gray-600);line-height:20px">All steps completed in sequence with confirmation states verified at each stage. Process output traceable to source browser events.</p>
-    </div>` : ''}
+
+    ${checklistHtml}
+    ${processOverviewHtml}
+
     <div class="sop-attribution">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      ${SVG_SHIELD}
       Generated deterministically from observed browser events. Every step traces to source evidence. No AI interpretation applied.
     </div>
     <div class="sop-cta">
@@ -974,32 +1196,131 @@ function renderSOPTab(wf) {
     </div>`;
 }
 
+// ── Checklist interaction ──────────────────────────────────────────────────────
+const _checklistState = new Set();
+let _checklistTotal = 0;
+
+function toggleCheck(idx) {
+  const box = document.getElementById('clbox-' + idx);
+  const text = document.getElementById('cltext-' + idx);
+  const btn = document.getElementById('cl-' + idx);
+  if (!box) return;
+  const isChecked = box.classList.toggle('checked');
+  if (text) text.classList.toggle('checked', isChecked);
+  if (btn) btn.setAttribute('aria-checked', String(isChecked));
+  if (isChecked) _checklistState.add(idx);
+  else _checklistState.delete(idx);
+  // Count checklist items dynamically
+  const allItems = document.querySelectorAll('[id^="cl-"]');
+  const total = allItems.length;
+  const wrap = document.getElementById('checklist-wrap');
+  const done = document.getElementById('checklist-done');
+  if (wrap && done) {
+    const allChecked = _checklistState.size >= total && total > 0;
+    wrap.classList.toggle('all-checked', allChecked);
+    done.classList.toggle('visible', allChecked);
+  }
+}
+
 // ── Process Map Tab ────────────────────────────────────────────────────────────
 function renderProcessMapTab(wf) {
-  const nodes = [
-    `<div class="pm-node"><div class="pm-start">Start</div><div class="pm-sys">&nbsp;</div></div>`,
-    `<div class="pm-arrow"></div>`
-  ];
-  wf.sopSteps.forEach((step, i) => {
-    const catClass = 'pm-cat-' + step.category;
-    nodes.push(`<div class="pm-node"><div class="pm-box ${catClass}">${step.title}</div><div class="pm-sys">${step.system}</div></div>`);
-    if (i < wf.sopSteps.length - 1) nodes.push(`<div class="pm-arrow"></div>`);
+  // Build lane data: unique systems with step counts
+  const systemStepCounts = {};
+  wf.sopSteps.forEach(s => {
+    if (s.system) systemStepCounts[s.system] = (systemStepCounts[s.system] || 0) + 1;
   });
-  nodes.push(`<div class="pm-arrow"></div>`);
-  nodes.push(`<div class="pm-node"><div class="pm-end">End</div><div class="pm-sys">&nbsp;</div></div>`);
+  const lanes = Object.entries(systemStepCounts).map(([sys, count]) => ({ sys, count }));
+
+  // Detect handoffs: consecutive steps with different systems
+  const handoffs = [];
+  for (let i = 0; i < wf.sopSteps.length - 1; i++) {
+    const a = wf.sopSteps[i], b = wf.sopSteps[i+1];
+    if (a.system && b.system && a.system !== b.system) {
+      handoffs.push({ fromOrdinal: i+1, toOrdinal: i+2, fromSys: a.system, toSys: b.system });
+    }
+  }
+
+  // Estimated duration from steps (sum parsed)
+  const lanesHtml = lanes.map(l => `
+    <div class="pm-lane-card">
+      <div class="pm-lane-name">${escapeHtml(l.sys)}</div>
+      <div class="pm-lane-sub">${l.count} step${l.count!==1?'s':''}</div>
+    </div>`).join('');
+
+  // Step rows with category-colored left border
+  const stepsHtml = wf.sopSteps.map((step, i) => {
+    const color = catColor(step.category);
+    const label = catLabel(step.category);
+    return `
+      <div class="pm-step" style="border-left-color:${color}">
+        <div class="pm-step-header">
+          <span class="pm-step-ordinal">${i+1}</span>
+          <div style="flex:1;min-width:0">
+            <div class="pm-step-title">${escapeHtml(step.title)}</div>
+            <div class="pm-step-meta">
+              <span class="pm-step-cat cat-${step.category}">${label}</span>
+              <span class="pm-step-action">${escapeHtml(step.system||'')}</span>
+              ${step.duration ? `<span class="pm-step-action">${SVG_CLOCK}${escapeHtml(step.duration)}</span>` : ''}
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  const handoffsHtml = handoffs.length > 0 ? `
+    <div class="sop-section-label" style="margin-bottom:8px">System Handoffs</div>
+    ${handoffs.map(h => `
+      <div class="pm-handoff-card">
+        <span style="font-family:monospace;color:var(--gray-500)">Step ${h.fromOrdinal}</span>
+        <span class="pm-handoff-arrow">→</span>
+        <span style="font-family:monospace;color:var(--gray-500)">Step ${h.toOrdinal}</span>
+        <span style="color:var(--gray-400)">${escapeHtml(h.fromSys)} → ${escapeHtml(h.toSys)}</span>
+      </div>`).join('')}
+    <div style="height:12px"></div>` : '';
 
   document.getElementById('tab-process-map').innerHTML = `
-    <p style="font-size:13px;color:var(--gray-600);margin-bottom:16px">Sequential process flow generated from ${wf.eventCount} observed browser events.</p>
-    <div class="process-map-wrap">
-      <div class="process-map" role="img" aria-label="Process flow for ${wf.title}">
-        ${nodes.join('')}
+    <!-- Format selector -->
+    <div class="pm-format-bar">
+      <span class="pm-format-label">Format</span>
+      <div class="pm-format-group" role="group" aria-label="Process map format">
+        <button class="pm-fmt-btn active" disabled>Swimlane</button>
+        <button class="pm-fmt-btn" disabled title="Available with recorded workflows" aria-disabled="true">BPMN</button>
+        <button class="pm-fmt-btn" disabled title="Available with recorded workflows" aria-disabled="true">SIPOC</button>
       </div>
     </div>
-    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;margin-bottom:8px">
-      ${Object.entries({navigation:'Navigation','data_entry':'Data Entry','form_submit':'Form Submit','send_action':'Submit/Send','error_handling':'Error Handling'}).map(([k,v]) =>
-        `<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--gray-600)"><span style="width:10px;height:10px;border-radius:3px" class="pm-box pm-cat-${k}"></span>${v}</span>`
-      ).join('')}
+
+    <!-- Header -->
+    <div class="pm-header">
+      <div class="pm-tag">Swimlane Process Map</div>
+      <div class="pm-title">${escapeHtml(wf.title)}</div>
+      <div class="pm-subtitle">${escapeHtml(wf.objective)}</div>
+      <div class="pm-metrics">
+        <div class="pm-metric-item"><strong>${wf.steps}</strong>Steps</div>
+        <div class="pm-metric-item"><strong>${lanes.length}</strong>Systems</div>
+        <div class="pm-metric-item"><strong>${escapeHtml(wf.duration)}</strong>Duration</div>
+      </div>
     </div>
+
+    <!-- Trigger -->
+    <div class="pm-trigger-callout">
+      <div class="pm-trigger-label">Trigger</div>
+      <div class="pm-trigger-text">${escapeHtml(wf.trigger)}</div>
+    </div>
+
+    <!-- Lanes -->
+    <div class="sop-section-label" style="margin-bottom:8px">Lanes (Systems / Roles)</div>
+    <div class="pm-lanes-grid" style="margin-bottom:20px">${lanesHtml}</div>
+
+    <!-- Process Flow -->
+    <div class="sop-section-label" style="margin-bottom:8px">Process Flow</div>
+    ${stepsHtml}
+
+    <!-- Handoffs -->
+    ${handoffsHtml}
+
+    <!-- Attribution -->
+    <div class="pm-footer">Swimlane process map &middot; Generated from ${wf.eventCount} observed browser events &middot; Ledgerium AI</div>
+
     <div class="pm-cta">
       <span>Your real workflows produce interactive, evidence-linked process maps.</span>
       <a href="https://ledgerium.ai">Try it free →</a>

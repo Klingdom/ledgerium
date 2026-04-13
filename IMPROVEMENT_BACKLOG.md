@@ -1,6 +1,6 @@
 # Ledgerium AI — Improvement Backlog
 
-Last updated: 2026-04-12  
+Last updated: 2026-04-13  
 Current phase: Phase 1  
 Backlog purpose: maintain a ranked, evidence-based portfolio of the highest-value fixes, improvements, and experiments for bounded improvement loops.
 
@@ -21,11 +21,11 @@ Higher total score = higher priority.
 
 ## Portfolio Summary
 
-- Total candidates reviewed: 10
-- Top priority area: extension determinism and recovery
-- Highest-risk unresolved item: service worker restart recovery with incomplete event persistence
-- Current selected item: none
-- Next recommended item: replace duplicated background logic with workspace package imports
+- Total candidates reviewed: 20 (10 original + 10 from iteration 001)
+- Top priority area: web-app test coverage and API safety
+- Highest-risk unresolved item: 11 API routes with no try/catch error handling
+- Last completed item: Add vitest config + test script to web-app (iteration 001)
+- Next recommended item: Add try/catch to 11 unguarded API routes
 
 ---
 
@@ -33,16 +33,22 @@ Higher total score = higher priority.
 
 | Rank | Title | Type | Area | Impact | Alignment | Learning | Confidence | Effort | Risk | Score | Status |
 |------|-------|------|------|--------|-----------|----------|------------|--------|------|-------|--------|
+| ~~—~~ | ~~Add vitest config + test script to web-app~~ | ~~improvement~~ | ~~test infrastructure~~ | ~~5~~ | ~~5~~ | ~~3~~ | ~~5~~ | ~~1~~ | ~~1~~ | ~~16~~ | **done (iter 001)** |
 | 1 | Replace duplicated background logic with workspace package imports | improvement | extension architecture | 5 | 5 | 4 | 5 | 3 | 2 | 14 | proposed |
-| 2 | Persist full session event stream for service worker restart recovery | fix | session durability | 5 | 5 | 4 | 4 | 4 | 3 | 11 | proposed |
-| 3 | Integrate `@ledgerium/policy-engine` into `content/capture.ts` | fix | capture pipeline | 4 | 5 | 3 | 5 | 2 | 2 | 13 | proposed |
+| 2 | Integrate `@ledgerium/policy-engine` into `content/capture.ts` | fix | capture pipeline | 4 | 5 | 3 | 5 | 2 | 2 | 13 | proposed |
+| 3 | Add dashboard-level process for artifact and system-health refresh after each loop | improvement | agentic CI | 3 | 4 | 5 | 4 | 2 | 1 | 13 | proposed |
 | 4 | Add Playwright E2E tests for recording lifecycle | improvement | quality assurance | 4 | 5 | 4 | 4 | 3 | 2 | 12 | proposed |
-| 5 | Add structured error logging with session context | improvement | observability | 4 | 4 | 4 | 4 | 3 | 2 | 11 | proposed |
-| 6 | Create invariant-focused regression suite for segmentation and normalization versions | improvement | invariants / testing | 4 | 5 | 4 | 4 | 3 | 2 | 12 | proposed |
-| 7 | Add dashboard-level process for artifact and system-health refresh after each loop | improvement | agentic CI | 3 | 4 | 5 | 4 | 2 | 1 | 13 | proposed |
-| 8 | Define recorder failure-state UX for service worker interruption and recovery | experiment | UX resilience | 3 | 4 | 4 | 3 | 2 | 2 | 10 | proposed |
-| 9 | Evaluate event bundle integrity checks before downstream derivation | experiment | evidence linkage | 4 | 5 | 5 | 3 | 3 | 3 | 11 | proposed |
-| 10 | Draft clearer product wedge and ICP narrative for deterministic process intelligence | experiment | product / GTM | 3 | 4 | 5 | 3 | 2 | 1 | 12 | proposed |
+| 5 | Create invariant-focused regression suite for segmentation and normalization versions | improvement | invariants / testing | 4 | 5 | 4 | 4 | 3 | 2 | 12 | proposed |
+| 6 | Draft clearer product wedge and ICP narrative for deterministic process intelligence | experiment | product / GTM | 3 | 4 | 5 | 3 | 2 | 1 | 12 | proposed |
+| 7 | Add try/catch to 11 unguarded API routes | fix | API safety | 4 | 4 | 2 | 5 | 3 | 1 | 11 | **new (iter 001)** |
+| 8 | Persist full session event stream for service worker restart recovery | fix | session durability | 5 | 5 | 4 | 4 | 4 | 3 | 11 | proposed |
+| 9 | Add structured error logging with session context | improvement | observability | 4 | 4 | 4 | 4 | 3 | 2 | 11 | proposed |
+| 10 | Evaluate event bundle integrity checks before downstream derivation | experiment | evidence linkage | 4 | 5 | 5 | 3 | 3 | 3 | 11 | proposed |
+| 11 | Fix (db as any) casts / regenerate Prisma client | fix | type safety | 3 | 4 | 3 | 4 | 2 | 2 | 10 | **new (iter 001)** |
+| 12 | Initialize Prisma migrations baseline | fix | data integrity | 4 | 4 | 3 | 4 | 2 | 3 | 10 | **new (iter 001)** |
+| 13 | Define recorder failure-state UX for service worker interruption and recovery | experiment | UX resilience | 3 | 4 | 4 | 3 | 2 | 2 | 10 | proposed |
+| 14 | Extract shared ingestion service (upload/sync) | improvement | API architecture | 4 | 5 | 4 | 3 | 4 | 3 | 9 | **new (iter 001)** |
+| 15 | Fix DELETE /api/keys error handling | fix | API safety | 2 | 3 | 1 | 5 | 1 | 1 | 9 | **new (iter 001)** |
 
 > Note: rank is influenced by both score and dependency value. Candidate 1 is ranked first because it directly addresses tracked technical debt, removes duplicated logic, and strengthens determinism across the extension and workspace packages.
 

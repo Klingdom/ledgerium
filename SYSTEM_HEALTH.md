@@ -1,6 +1,6 @@
 # Ledgerium AI — System Health
 
-Last updated: 2026-04-12
+Last updated: 2026-04-13
 
 ## Executive Summary
 
@@ -26,7 +26,7 @@ Overall confidence: **Medium-High**
 | Deterministic core protection | moderate | 4 | good principles, but more regression protection is still needed |
 | Package / code consistency | moderate | 3 | duplicate background logic weakens source-of-truth discipline |
 | Session durability / recovery | moderate-risk | 2 | full event persistence is still missing |
-| Test coverage | moderate | 3 | unit test posture is good; E2E coverage is missing |
+| Test coverage | moderate | 3.5 | web-app vitest now active (50 tests); E2E coverage still missing; 1,364 total tests |
 | Observability | moderate | 3 | structured session-aware logging still needs work |
 | Agentic CI readiness | improving | 4 | command, backlog, iteration log, and templates now exist |
 | GTM readiness | emerging | 2 | product wedge is promising but not yet fully operationalized |
@@ -95,21 +95,21 @@ These should be assumed to block a high-confidence release until resolved:
 ## Recommended Next Iteration
 
 Recommended next item:
-- **Replace duplicated background logic with workspace package imports**
+- **Add try/catch to 11 unguarded API routes** (score: 11)
 
 Why:
-- highest overall leverage
-- directly addresses tracked technical debt
-- strengthens determinism and source-of-truth discipline
-- likely reduces future maintenance and testing complexity
+- 11 API routes have zero error handling — any Prisma/DB failure returns raw 500
+- violates `{ data, error, meta }` contract from CLAUDE.md
+- high confidence, moderate effort, very low risk
+- directly improves beta readiness
 
 Fallback next item:
-- **Integrate `@ledgerium/policy-engine` into `content/capture.ts`**
+- **Fix (db as any) casts / regenerate Prisma client** (score: 10)
 
 Why:
-- smaller, lower-risk improvement
-- high strategic alignment
-- fast confidence gain
+- restores type safety in teams and analytics routes
+- root cause is likely stale Prisma generation
+- fast, low-risk fix
 
 ---
 

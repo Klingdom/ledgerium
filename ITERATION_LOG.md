@@ -68,3 +68,76 @@ This file records each bounded improvement loop.
 ### Risks / Open Questions
 - actual repository implementation details may change the ordering of candidates after direct code review
 - testing and build-system specifics should be re-validated inside the live repo before selecting the first implementation item
+
+---
+
+## Iteration 001
+
+- Date: 2026-04-13
+- Trigger: user requested improvement loop
+- Coordinator: coordinator
+- Phase: Phase 1
+- Objective: identify and implement the single highest-value improvement for beta readiness
+
+### System Review
+- Read: CLAUDE.md, SYSTEM_HEALTH.md, IMPROVEMENT_BACKLOG.md, CHANGELOG.md, git log
+- Key finding: web-app has zero test runner configuration despite 2 existing test files with 50 tests. This blocks ALL future web-app testing.
+
+### Candidate Generation
+Three specialist agents ran in parallel:
+- **qa-engineer**: Found zero test config in web-app (blocker), 11 unguarded API routes, 0 of 34 API routes tested, 0 of 39 components tested. TypeScript clean.
+- **system-architect**: Found upload/sync code duplication, extension normalizeUrl duplication, `(db as any)` casts in teams routes, missing `updated_at` on 10+ models, admin bootstrap attack surface.
+- **backend-engineer**: Found no Prisma migrations (db push only), `(db as any)` from stale Prisma client, DELETE /api/keys missing error handling, inconsistent response envelope, no rate limiting on signup.
+
+### Top 10 Candidates (Scored)
+
+| Rank | Title | Score |
+|------|-------|-------|
+| 1 | Add vitest config + test script to web-app | **16** |
+| 2 | Wire existing tests into CI | 12 |
+| 3 | Add try/catch to 11 unguarded API routes | 11 |
+| 4 | Fix (db as any) casts / regenerate Prisma client | 10 |
+| 5 | Initialize Prisma migrations baseline | 10 |
+| 6 | Extract shared ingestion service (upload/sync) | 9 |
+| 7 | Fix DELETE /api/keys error handling | 9 |
+| 8 | Deduplicate normalizeUrl in extension | 8 |
+| 9 | Inconsistent response envelope across routes | 7 |
+| 10 | Add updated_at to missing Prisma models | 7 |
+
+### Selected Item
+- Title: **Add vitest config + test script to web-app**
+- Type: improvement
+- Area: quality assurance / test infrastructure
+- Score: 16 (Impact:5 + Alignment:5 + Learning:3 + Confidence:5 − Effort:1 − Risk:1)
+- Why selected: Highest score by wide margin. Prerequisite for ALL web-app testing. Unblocks items #2–#5. Two existing test files (50 tests) were invisible to CI. Zero risk, minimal effort.
+
+### Agents Used
+- coordinator (orchestration + scoring)
+- qa-engineer (candidate generation)
+- system-architect (candidate generation)
+- backend-engineer (candidate generation)
+
+### Files Changed
+- `apps/web-app/vitest.config.ts` — NEW: vitest configuration with path aliases, proper includes/excludes
+- `apps/web-app/package.json` — MODIFIED: added `test` and `test:watch` scripts
+
+### Validation Run
+- `pnpm --filter @ledgerium/web-app test` → **2 files, 50 tests, all pass** ✅
+- `pnpm test` (root) → **38 files, 1,364 tests, all pass** ✅ (web-app tests now included)
+- `pnpm --filter @ledgerium/web-app typecheck` → **clean, 0 errors** ✅
+- No regressions detected
+
+### Outcome
+- Status: **complete**
+- Summary: web-app now has a working vitest configuration. The 2 existing test files (humanize.test.ts with 25 tests, format.test.ts with 25 tests) are now discoverable and run as part of both workspace and monorepo test suites. This unblocks all future web-app test authoring.
+
+### Impact
+- Before: 0 web-app tests executed (test runner missing)
+- After: 50 web-app tests execute in CI
+- Monorepo total: 1,314 → 1,364 tests (+50)
+- Unblocks: API route tests, component tests, integration tests for all web-app code
+
+### Follow-Ups
+- Add try/catch to 11 unguarded API routes (score: 11)
+- Fix (db as any) casts by regenerating Prisma client (score: 10)
+- Initialize Prisma migrations baseline (score: 10)

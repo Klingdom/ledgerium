@@ -6,6 +6,25 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-13] - Iteration 001: Web-app test infrastructure
+
+### Added
+- `apps/web-app/vitest.config.ts` — vitest configuration with `@/` path alias, proper include/exclude patterns
+- `test` and `test:watch` scripts in `apps/web-app/package.json`
+
+### Changed
+- Web-app test files (`humanize.test.ts`, `format.test.ts`) are now discovered and executed by vitest
+- Monorepo test count: 1,314 → 1,364 (+50 web-app tests now running)
+- `IMPROVEMENT_BACKLOG.md` updated with 5 new candidates from iteration 001 assessment
+- `SYSTEM_HEALTH.md` test coverage score: 3 → 3.5
+
+### Notes
+- This was the first true bounded improvement loop (iteration 001)
+- Selected item scored 16 (highest by 4 points over next candidate)
+- Unblocks all future web-app test authoring: API route tests, component tests, integration tests
+
+---
+
 ## [2026-04-12] - Agentic CI initialization
 
 ### Added
