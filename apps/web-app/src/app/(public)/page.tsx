@@ -16,6 +16,7 @@ import {
   Zap,
   CheckCircle,
   MousePointer2,
+  LayoutDashboard,
 } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -55,7 +56,14 @@ export default function HomePage() {
                 See how it works
               </Link>
             </div>
-            <p className="mt-4 text-xs text-gray-400">
+            <div className="mt-5 flex items-center justify-center">
+              <a href="/dashboard.html" className="inline-flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-700 font-medium transition-colors">
+                <LayoutDashboard className="h-3.5 w-3.5" />
+                See the dashboard
+                <ArrowRight className="h-3 w-3" />
+              </a>
+            </div>
+            <p className="mt-3 text-xs text-gray-400">
               Free to start. No credit card required.
             </p>
           </div>
@@ -73,7 +81,10 @@ export default function HomePage() {
               />
             </div>
             <p className="text-center text-xs text-gray-400 mt-3">
-              Your workflow library — every recording becomes structured documentation
+              Your workflow library — every recording becomes structured documentation.{' '}
+              <a href="/dashboard.html" className="text-brand-600 hover:text-brand-700 font-medium">
+                Explore the live demo &rarr;
+              </a>
             </p>
           </div>
         </div>

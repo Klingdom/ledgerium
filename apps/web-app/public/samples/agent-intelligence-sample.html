@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Intelligence — Process Vendor Invoice #INV-8842 | Ledgerium AI</title>
+<meta name="description" content="Agent Intelligence Analysis: Process Vendor Invoice #INV-8842. Automation opportunities, composed agents, and implementation roadmap from Ledgerium AI.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;line-height:22px;background:#f9fafb;color:#111827;-webkit-font-smoothing:antialiased}
+
+:root{
+  --brand-50:#f0f7ff;--brand-100:#e0effe;--brand-300:#7dc7fd;--brand-400:#36a7f8;--brand-500:#0c8de9;--brand-600:#006fc7;--brand-700:#0059a1;
+  --gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-400:#9ca3af;--gray-600:#4b5563;--gray-700:#374151;--gray-900:#111827;
+  --emerald-500:#10b981;--emerald-600:#059669;
+  --yellow-100:#fef9c3;--yellow-800:#713f12;
+  --amber-50:#fffbeb;--amber-200:#fde68a;--amber-800:#92400e;
+  --red-100:#fee2e2;--red-800:#991b1b;
+  --purple-100:#f3e8ff;--purple-500:#a855f7;--purple-800:#6b21a8;
+  --indigo-100:#e0e7ff;--indigo-500:#6366f1;--indigo-800:#3730a3;
+  --green-100:#dcfce7;--green-600:#16a34a;--green-800:#166534;
+  --blue-50:#eff6ff;--blue-100:#dbeafe;--blue-200:#bfdbfe;--blue-600:#2563eb;--blue-800:#1e40af;
+  --orange-100:#ffedd5;--orange-500:#f97316;--orange-800:#9a3412;
+  --radius-sm:6px;--radius-md:8px;--radius-lg:12px;
+}
+
+/* Page wrapper */
+.page-wrap{max-width:768px;margin:0 auto;padding:20px;display:flex;flex-direction:column;gap:20px}
+
+/* Page header */
+.page-header{padding-bottom:20px;border-bottom:1px solid var(--gray-200)}
+.logo-text{font-size:20px;font-weight:700;letter-spacing:-.02em;color:var(--brand-600)}
+.page-subtitle{font-size:13px;color:var(--gray-400);margin-top:2px}
+.page-workflow-name{font-size:16px;font-weight:700;color:var(--gray-900);margin-top:6px}
+
+/* Summary Banner */
+.summary-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.summary-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:12px 10px;text-align:center}
+.summary-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:6px}
+.summary-value{font-size:20px;font-weight:700;color:var(--gray-900);line-height:1.2}
+.auto-badge-score{display:inline-flex;align-items:center;justify-content:center;padding:4px 12px;border-radius:20px;border:1px solid;font-size:14px;font-weight:700}
+.score-yellow{background:var(--yellow-100);color:var(--yellow-800);border-color:#fde047}
+
+/* Collapsible sections */
+.collapsible{border:1px solid var(--gray-200);border-radius:var(--radius-lg);overflow:hidden}
+.collapsible-header{width:100%;background:rgba(249,250,251,.6);border:none;cursor:pointer;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;transition:background .15s}
+.collapsible-header:hover{background:rgba(243,244,246,.6)}
+.collapsible-header-left{display:flex;align-items:center;gap:8px}
+.collapsible-title{font-size:13px;font-weight:600;color:var(--gray-900)}
+.collapsible-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;background:var(--gray-200);color:var(--gray-700);border-radius:10px;font-size:11px;font-weight:700}
+.collapsible-chevron{color:var(--gray-400);transition:transform .2s;flex-shrink:0}
+.collapsible-chevron.open{transform:rotate(180deg)}
+.collapsible-body{display:none;padding:16px 20px;border-top:1px solid var(--gray-200)}
+.collapsible-body.open{display:block}
+
+/* Table base */
+.data-table-wrap{border:1px solid var(--gray-200);border-radius:var(--radius-md);overflow:hidden}
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);padding:8px 12px;background:rgba(249,250,251,.5);border-bottom:1px solid var(--gray-200)}
+.data-table td{padding:10px 12px;border-bottom:1px solid var(--gray-100);color:var(--gray-700);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+
+/* Score pills */
+.score-pill{display:inline-flex;align-items:center;justify-content:center;min-width:36px;padding:2px 8px;border-radius:20px;font-size:12px;font-weight:700}
+.score-green{background:var(--green-100);color:var(--green-800)}
+.score-yellow{background:var(--yellow-100);color:var(--yellow-800)}
+
+/* Category pills */
+.cat-pill{display:inline-flex;padding:2px 8px;border-radius:var(--radius-sm);font-size:11px;font-weight:600}
+.cat-deterministic{background:var(--green-100);color:var(--green-800)}
+.cat-data_movement{background:var(--purple-100);color:var(--purple-800)}
+.cat-friction_reduction{background:var(--red-100);color:var(--red-800)}
+.cat-indigo{background:var(--indigo-100);color:var(--indigo-800)}
+.cls-pill{display:inline-flex;padding:2px 8px;border-radius:var(--radius-sm);font-size:11px;font-weight:500;color:var(--gray-600);background:var(--gray-100)}
+
+/* Agent cards */
+.agents-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.agent-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:16px;display:flex;flex-direction:column;gap:10px}
+.agent-name{font-size:13px;font-weight:700;color:var(--gray-900)}
+.agent-mode{font-size:11px;color:var(--gray-400)}
+.role-badge{display:inline-flex;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.role-executor{background:var(--green-100);color:var(--green-800)}
+.role-assistant{background:var(--blue-100);color:var(--blue-800)}
+.cap-label{font-size:11px;color:var(--gray-400);margin-bottom:4px}
+.cap-bar-bg{height:6px;background:var(--gray-200);border-radius:6px;overflow:hidden;margin-bottom:4px}
+.cap-bar-fill{height:100%;border-radius:6px;background:var(--brand-500)}
+.cap-value{font-size:11px;color:var(--gray-600);font-weight:600}
+.sys-pill{display:inline-flex;padding:2px 8px;background:var(--gray-100);color:var(--gray-600);border-radius:var(--radius-sm);font-size:11px;font-weight:500}
+.agent-footer{font-size:11px;color:var(--gray-400);border-top:1px solid var(--gray-100);padding-top:10px;margin-top:2px}
+
+/* Skill table */
+.reuse-bar-wrap{display:flex;align-items:center;gap:6px}
+.reuse-bar-bg{width:60px;height:6px;background:var(--gray-200);border-radius:6px;overflow:hidden;flex-shrink:0}
+.reuse-bar-fill{height:100%;border-radius:6px;background:var(--indigo-500)}
+.check-yes{color:var(--emerald-600);font-weight:700}
+.check-no{color:var(--gray-400)}
+
+/* Integration & risks */
+.risk-banner{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--yellow-100);border-radius:var(--radius-md);margin-bottom:14px;font-size:13px;font-weight:600;color:var(--yellow-800)}
+.readiness-pill{display:inline-flex;padding:2px 8px;border-radius:var(--radius-sm);font-size:11px;font-weight:600}
+.readiness-api{background:var(--green-100);color:var(--green-800)}
+.readiness-webhook{background:var(--yellow-100);color:var(--yellow-800)}
+.complexity-dots{display:flex;gap:3px}
+.dot{width:8px;height:8px;border-radius:50%}
+.dot.filled{background:var(--gray-600)}
+.dot.empty{background:var(--gray-200)}
+.risks-list{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.risk-card{border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:12px 14px;background:#fff}
+.risk-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.risk-title{font-size:13px;font-weight:600;color:var(--gray-900);flex:1}
+.sev-pill{display:inline-flex;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.sev-medium{background:var(--yellow-100);color:var(--yellow-800)}
+.cat-tech-pill{display:inline-flex;padding:2px 8px;border-radius:var(--radius-sm);font-size:11px;font-weight:500;background:var(--gray-100);color:var(--gray-600)}
+.risk-mitigation{font-size:12px;color:var(--gray-600);line-height:18px}
+
+/* Roadmap */
+.roadmap-wrap{position:relative;padding-left:44px}
+.roadmap-line{position:absolute;left:20px;top:20px;bottom:20px;width:2px;background:var(--gray-200)}
+.roadmap-phase{position:relative;margin-bottom:20px}
+.roadmap-phase:last-child{margin-bottom:0}
+.phase-node{position:absolute;left:-44px;top:0;width:40px;height:40px;border:2px solid var(--brand-300);border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--brand-700)}
+.phase-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:14px}
+.phase-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px}
+.phase-title{font-size:13px;font-weight:700;color:var(--gray-900)}
+.phase-effort{font-size:11px;color:var(--gray-400);background:var(--gray-100);padding:2px 8px;border-radius:20px}
+.phase-desc{font-size:12px;color:var(--gray-600);line-height:18px;margin-bottom:8px}
+.phase-prereqs{display:flex;gap:6px;flex-wrap:wrap}
+.prereq-pill{font-size:11px;color:var(--brand-700);background:var(--brand-50);border:1px solid var(--brand-100);border-radius:20px;padding:2px 8px}
+
+/* Metadata footer */
+.meta-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 0;font-size:11px;color:var(--gray-400);border-top:1px solid var(--gray-200);flex-wrap:wrap;gap:8px}
+.btn-secondary{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#fff;color:var(--gray-400);border:1px solid var(--gray-200);border-radius:var(--radius-md);font-size:12px;font-weight:500;cursor:not-allowed;opacity:.6}
+
+/* Page footer */
+.page-footer{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--gray-600)}
+.page-footer a{color:var(--brand-600);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.page-footer a:hover{color:var(--brand-700);text-decoration:underline}
+
+/* Responsive */
+@media(max-width:640px){
+  .summary-grid{grid-template-columns:repeat(2,1fr)}
+  .agents-grid{grid-template-columns:1fr}
+  .page-footer{flex-direction:column;text-align:center;gap:8px}
+}
+@media(max-width:900px) and (min-width:641px){
+  .summary-grid{grid-template-columns:repeat(3,1fr)}
+}
+
+/* Print */
+@media print{
+  body{background:#fff}
+  .page-footer,.btn-secondary{display:none}
+  .collapsible-body{display:block!important}
+  .collapsible-chevron{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="logo-text">Ledgerium AI</div>
+    <div class="page-subtitle">Agent Intelligence Analysis</div>
+    <div class="page-workflow-name">Process Vendor Invoice #INV-8842</div>
+  </div>
+
+  <!-- Summary Banner -->
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-label">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Score
+      </div>
+      <div><span class="auto-badge-score score-yellow">68</span></div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Steps
+      </div>
+      <div class="summary-value">6</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Activities
+      </div>
+      <div class="summary-value">4</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+        Agents
+      </div>
+      <div class="summary-value">2</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        Opps
+      </div>
+      <div class="summary-value">3</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Readiness
+      </div>
+      <div class="summary-value">72</div>
+    </div>
+  </div>
+
+  <!-- Section A: Opportunities -->
+  <div class="collapsible">
+    <button class="collapsible-header" onclick="toggleSection(this)" aria-expanded="true">
+      <div class="collapsible-header-left">
+        <!-- Target icon -->
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0c8de9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <span class="collapsible-title">Opportunities</span>
+        <span class="collapsible-badge">3</span>
+      </div>
+      <svg class="collapsible-chevron open" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="collapsible-body open">
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Score</th>
+              <th>Opportunity</th>
+              <th>Category</th>
+              <th>Classification</th>
+              <th>Time Saved</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="score-pill score-green">82</span></td>
+              <td style="font-weight:500;color:var(--gray-900)">Automate GL Account Assignment</td>
+              <td><span class="cat-pill cat-deterministic">deterministic_logic</span></td>
+              <td><span class="cls-pill">rule_based</span></td>
+              <td>45s</td>
+            </tr>
+            <tr>
+              <td><span class="score-pill score-yellow">75</span></td>
+              <td style="font-weight:500;color:var(--gray-900)">Automate PO Matching</td>
+              <td><span class="cat-pill cat-data_movement">data_movement</span></td>
+              <td><span class="cls-pill">template_based</span></td>
+              <td>60s</td>
+            </tr>
+            <tr>
+              <td><span class="score-pill score-yellow">61</span></td>
+              <td style="font-weight:500;color:var(--gray-900)">Streamline Approval Workflow</td>
+              <td><span class="cat-pill cat-friction_reduction">friction_reduction</span></td>
+              <td><span class="cls-pill">workflow_optimization</span></td>
+              <td>30s</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section B: Composed Agents -->
+  <div class="collapsible">
+    <button class="collapsible-header" onclick="toggleSection(this)" aria-expanded="false">
+      <div class="collapsible-header-left">
+        <!-- Bot icon -->
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>
+        <span class="collapsible-title">Composed Agents</span>
+        <span class="collapsible-badge">2</span>
+      </div>
+      <svg class="collapsible-chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="collapsible-body">
+      <div class="agents-grid">
+        <!-- Agent 1 -->
+        <div class="agent-card">
+          <div>
+            <div class="agent-name">Invoice Processing Agent</div>
+            <div class="agent-mode">autonomous</div>
+          </div>
+          <div><span class="role-badge role-executor">executor</span></div>
+          <div>
+            <div class="cap-label">Capability score</div>
+            <div class="cap-bar-bg"><div class="cap-bar-fill" style="width:74%"></div></div>
+            <div class="cap-value">74 / 100</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <span class="sys-pill">NetSuite</span>
+          </div>
+          <div class="agent-footer">4 tasks &middot; 3 skills</div>
+        </div>
+        <!-- Agent 2 -->
+        <div class="agent-card">
+          <div>
+            <div class="agent-name">Approval Routing Agent</div>
+            <div class="agent-mode">semi-autonomous</div>
+          </div>
+          <div><span class="role-badge role-assistant">assistant</span></div>
+          <div>
+            <div class="cap-label">Capability score</div>
+            <div class="cap-bar-bg"><div class="cap-bar-fill" style="width:58%"></div></div>
+            <div class="cap-value">58 / 100</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <span class="sys-pill">NetSuite</span>
+          </div>
+          <div class="agent-footer">2 tasks &middot; 2 skills</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section C: Skill Library -->
+  <div class="collapsible">
+    <button class="collapsible-header" onclick="toggleSection(this)" aria-expanded="false">
+      <div class="collapsible-header-left">
+        <!-- BookOpen icon -->
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span class="collapsible-title">Skill Library</span>
+        <span class="collapsible-badge">5</span>
+      </div>
+      <svg class="collapsible-chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="collapsible-body">
+      <p style="font-size:12px;color:var(--gray-400);margin-bottom:12px">5 unique skills &middot; 3 reusable</p>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Skill</th>
+              <th>Type</th>
+              <th>Reusability</th>
+              <th>Autonomous</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:500;color:var(--gray-900)">Invoice Data Extraction</td>
+              <td><span class="cat-pill cat-indigo">data_processing</span></td>
+              <td>
+                <div class="reuse-bar-wrap">
+                  <div class="reuse-bar-bg"><div class="reuse-bar-fill" style="width:85%"></div></div>
+                  <span style="font-size:11px;color:var(--gray-600);font-weight:600">85</span>
+                </div>
+              </td>
+              <td><span class="check-yes">&#10003;</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;color:var(--gray-900)">PO Matching</td>
+              <td><span class="cat-pill cat-indigo">lookup</span></td>
+              <td>
+                <div class="reuse-bar-wrap">
+                  <div class="reuse-bar-bg"><div class="reuse-bar-fill" style="width:90%"></div></div>
+                  <span style="font-size:11px;color:var(--gray-600);font-weight:600">90</span>
+                </div>
+              </td>
+              <td><span class="check-yes">&#10003;</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;color:var(--gray-900)">GL Code Assignment</td>
+              <td><span class="cat-pill cat-indigo">classification</span></td>
+              <td>
+                <div class="reuse-bar-wrap">
+                  <div class="reuse-bar-bg"><div class="reuse-bar-fill" style="width:75%"></div></div>
+                  <span style="font-size:11px;color:var(--gray-600);font-weight:600">75</span>
+                </div>
+              </td>
+              <td><span class="check-yes">&#10003;</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;color:var(--gray-900)">Approval Routing</td>
+              <td><span class="cat-pill cat-indigo">workflow</span></td>
+              <td>
+                <div class="reuse-bar-wrap">
+                  <div class="reuse-bar-bg"><div class="reuse-bar-fill" style="width:40%"></div></div>
+                  <span style="font-size:11px;color:var(--gray-600);font-weight:600">40</span>
+                </div>
+              </td>
+              <td><span class="check-no">&#215;</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;color:var(--gray-900)">Ledger Posting</td>
+              <td><span class="cat-pill cat-indigo">transaction</span></td>
+              <td>
+                <div class="reuse-bar-wrap">
+                  <div class="reuse-bar-bg"><div class="reuse-bar-fill" style="width:30%"></div></div>
+                  <span style="font-size:11px;color:var(--gray-600);font-weight:600">30</span>
+                </div>
+              </td>
+              <td><span class="check-no">&#215;</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section D: Integrations & Risks -->
+  <div class="collapsible">
+    <button class="collapsible-header" onclick="toggleSection(this)" aria-expanded="false">
+      <div class="collapsible-header-left">
+        <!-- Plug icon -->
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8H6a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2z"/></svg>
+        <span class="collapsible-title">Integrations &amp; Risks</span>
+        <span class="collapsible-badge" style="background:#fef3c7;color:#92400e">2 risks</span>
+      </div>
+      <svg class="collapsible-chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="collapsible-body">
+      <div class="risk-banner">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Overall risk: Medium
+      </div>
+
+      <div class="data-table-wrap" style="margin-bottom:16px">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>System</th>
+              <th>Readiness</th>
+              <th>Complexity</th>
+              <th>Setup Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:600;color:var(--gray-900)">NetSuite</td>
+              <td><span class="readiness-pill readiness-api">api_available</span></td>
+              <td>
+                <div class="complexity-dots">
+                  <div class="dot filled"></div>
+                  <div class="dot filled"></div>
+                  <div class="dot filled"></div>
+                  <div class="dot empty"></div>
+                  <div class="dot empty"></div>
+                </div>
+              </td>
+              <td>2h</td>
+            </tr>
+            <tr>
+              <td style="font-weight:600;color:var(--gray-900)">Email (Notifications)</td>
+              <td><span class="readiness-pill readiness-webhook">webhook_only</span></td>
+              <td>
+                <div class="complexity-dots">
+                  <div class="dot filled"></div>
+                  <div class="dot empty"></div>
+                  <div class="dot empty"></div>
+                  <div class="dot empty"></div>
+                  <div class="dot empty"></div>
+                </div>
+              </td>
+              <td>30m</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="risks-list">
+        <div class="risk-card">
+          <div class="risk-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span class="risk-title">API Rate Limiting</span>
+            <span class="sev-pill sev-medium">medium</span>
+            <span class="cat-tech-pill">technical</span>
+          </div>
+          <p class="risk-mitigation">Implement request batching and exponential backoff for NetSuite API calls.</p>
+        </div>
+        <div class="risk-card">
+          <div class="risk-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span class="risk-title">Approval Logic Complexity</span>
+            <span class="sev-pill sev-medium">medium</span>
+            <span class="cat-tech-pill">process</span>
+          </div>
+          <p class="risk-mitigation">Map all approval thresholds and routing rules before automation. Requires business rule documentation.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section E: Implementation Roadmap -->
+  <div class="collapsible">
+    <button class="collapsible-header" onclick="toggleSection(this)" aria-expanded="false">
+      <div class="collapsible-header-left">
+        <!-- Map icon -->
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+        <span class="collapsible-title">Implementation Roadmap</span>
+        <span class="collapsible-badge">3 phases</span>
+      </div>
+      <svg class="collapsible-chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="collapsible-body">
+      <div class="roadmap-wrap">
+        <div class="roadmap-line"></div>
+
+        <!-- Phase 1 -->
+        <div class="roadmap-phase">
+          <div class="phase-node">1</div>
+          <div class="phase-card">
+            <div class="phase-header">
+              <span class="phase-title">Data Integration Setup</span>
+              <span class="phase-effort">1 week</span>
+            </div>
+            <p class="phase-desc">Configure NetSuite API access, implement invoice data extraction, and set up PO matching rules.</p>
+            <div class="phase-prereqs">
+              <span class="prereq-pill">NetSuite admin access</span>
+              <span class="prereq-pill">API credentials</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 2 -->
+        <div class="roadmap-phase">
+          <div class="phase-node">2</div>
+          <div class="phase-card">
+            <div class="phase-header">
+              <span class="phase-title">Automation Core</span>
+              <span class="phase-effort">2 weeks</span>
+            </div>
+            <p class="phase-desc">Build invoice processing agent with GL assignment logic and approval routing workflow.</p>
+            <div class="phase-prereqs">
+              <span class="prereq-pill">Phase 1 complete</span>
+              <span class="prereq-pill">Business rule documentation</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 3 -->
+        <div class="roadmap-phase">
+          <div class="phase-node">3</div>
+          <div class="phase-card">
+            <div class="phase-header">
+              <span class="phase-title">Monitoring &amp; Optimization</span>
+              <span class="phase-effort">1 week</span>
+            </div>
+            <p class="phase-desc">Deploy monitoring, exception handling, and performance optimization for the automated pipeline.</p>
+            <div class="phase-prereqs">
+              <span class="prereq-pill">Phase 2 complete</span>
+              <span class="prereq-pill">Test environment access</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Metadata Footer -->
+  <div class="meta-footer">
+    <span>Analyzed Apr 7, 2026, 9:25 AM &middot; engine 1.0.0 &middot; 342ms</span>
+    <button class="btn-secondary" disabled aria-disabled="true">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Re-analyze
+    </button>
+  </div>
+
+  <!-- Page Footer -->
+  <div class="page-footer">
+    <span>Download this sample to explore Ledgerium agent intelligence output offline.</span>
+    <a href="https://ledgerium.ai">
+      Discover what's automatable in your workflows
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      ledgerium.ai
+    </a>
+  </div>
+
+</div>
+
+<script>
+function toggleSection(headerBtn) {
+  const body = headerBtn.nextElementSibling;
+  const chevron = headerBtn.querySelector('.collapsible-chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chevron.classList.toggle('open', !isOpen);
+  headerBtn.setAttribute('aria-expanded', String(!isOpen));
+}
+</script>
+
+</body>
+</html>

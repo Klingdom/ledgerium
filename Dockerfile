@@ -22,6 +22,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web-app/package.json apps/web-app/
 COPY packages/process-engine/package.json packages/process-engine/
 COPY packages/intelligence-engine/package.json packages/intelligence-engine/
+COPY packages/agent-intelligence/package.json packages/agent-intelligence/
 
 # Install all dependencies (including dev for build step)
 RUN pnpm install --frozen-lockfile
@@ -42,6 +43,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY apps/web-app/ apps/web-app/
 COPY packages/process-engine/ packages/process-engine/
 COPY packages/intelligence-engine/ packages/intelligence-engine/
+COPY packages/agent-intelligence/ packages/agent-intelligence/
 
 # Generate Prisma client
 WORKDIR /app/apps/web-app
@@ -74,6 +76,7 @@ COPY --from=builder /app/apps/web-app/node_modules ./apps/web-app/node_modules
 # Copy workspace package sources needed at runtime
 COPY --from=builder /app/packages/process-engine ./packages/process-engine
 COPY --from=builder /app/packages/intelligence-engine ./packages/intelligence-engine
+COPY --from=builder /app/packages/agent-intelligence ./packages/agent-intelligence
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 

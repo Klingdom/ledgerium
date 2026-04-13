@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOP — Submit Expense Report in Workday | Ledgerium AI</title>
+<meta name="description" content="Standard Operating Procedure: Submit Expense Report in Workday. Generated deterministically by Ledgerium Process Engine.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;line-height:22px;background:#f9fafb;color:#111827;-webkit-font-smoothing:antialiased}
+
+:root{
+  --brand-50:#f0f7ff;--brand-100:#e0effe;--brand-400:#36a7f8;--brand-500:#0c8de9;--brand-600:#006fc7;--brand-700:#0059a1;
+  --gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-400:#9ca3af;--gray-600:#4b5563;--gray-900:#111827;
+  --emerald-50:#ecfdf5;--emerald-100:#d1fae5;--emerald-200:#a7f3d0;--emerald-500:#10b981;--emerald-600:#059669;
+  --teal-500:#14b8a6;--violet-50:#f5f3ff;--violet-200:#ddd6fe;--violet-500:#8b5cf6;
+  --blue-50:#eff6ff;--blue-200:#bfdbfe;--blue-500:#3b82f6;
+  --amber-50:#fffbeb;--amber-200:#fde68a;--amber-500:#f59e0b;--amber-600:#d97706;
+  --red-500:#ef4444;
+  --radius-sm:6px;--radius-md:8px;--radius-lg:12px;
+}
+
+/* Typography */
+.text-xs{font-size:11px;line-height:16px}
+.text-sm{font-size:13px;line-height:20px}
+.font-medium{font-weight:500}
+.font-semibold{font-weight:600}
+.font-bold{font-weight:700}
+.uppercase{text-transform:uppercase;letter-spacing:.08em}
+
+/* Page wrapper */
+.page-wrap{max-width:768px;margin:0 auto;padding:20px;display:flex;flex-direction:column;gap:20px}
+
+/* Page header */
+.page-header{padding-bottom:20px;border-bottom:1px solid var(--gray-200)}
+.logo-text{font-size:20px;font-weight:700;letter-spacing:-.02em;color:var(--brand-600)}
+.page-subtitle{font-size:13px;color:var(--gray-400);margin-top:2px}
+
+/* Section label */
+.section-label{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-400);margin-bottom:12px}
+.section-count{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;background:var(--gray-200);color:var(--gray-600);border-radius:10px;font-size:10px;font-weight:700}
+
+/* Quick Start Card */
+.qs-card{background:linear-gradient(135deg,rgba(236,253,245,.8),#fff);border:1px solid var(--emerald-200);border-radius:16px;overflow:hidden}
+.qs-header{display:flex;align-items:center;gap:10px;padding:16px 20px;background:rgba(16,185,129,.06);border-bottom:1px solid var(--emerald-200)}
+.qs-icon{width:32px;height:32px;background:var(--emerald-500);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.qs-header-title{font-size:14px;font-weight:700;color:#065f46;flex:1}
+.qs-time{font-size:12px;font-weight:600;color:var(--emerald-600);background:var(--emerald-100);padding:3px 10px;border-radius:20px}
+.qs-body{padding:20px}
+.qs-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-400);margin-bottom:6px}
+.qs-desc{font-size:13px;color:var(--gray-600);line-height:20px;margin-bottom:16px}
+.qs-two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.qs-box{background:rgba(255,255,255,.6);border:1px solid var(--emerald-100);border-radius:var(--radius-md);padding:12px 14px}
+.qs-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-400);margin-bottom:8px}
+.qs-bullet-list{list-style:none;display:flex;flex-direction:column;gap:4px}
+.qs-bullet-list li{font-size:12px;color:var(--gray-600);display:flex;align-items:baseline;gap:6px}
+.qs-bullet-list li::before{content:"•";color:var(--emerald-500);font-weight:700;flex-shrink:0}
+.qs-sys-pill{display:inline-flex;align-items:center;gap:5px;background:var(--emerald-100);color:#065f46;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:500}
+.qs-outcome{background:rgba(209,250,229,.4);border:1px solid var(--emerald-200);border-radius:var(--radius-md);padding:12px 14px;display:flex;align-items:center;gap:8px;margin-top:4px}
+.qs-outcome-text{font-size:13px;color:#065f46;font-weight:500}
+
+/* Procedure Steps */
+.steps-wrap{display:flex;flex-direction:column;gap:10px}
+.step-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);overflow:hidden;transition:box-shadow .15s}
+.step-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.step-header-row{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none}
+.step-ordinal{width:28px;height:28px;min-width:28px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.step-meta{flex:1;min-width:0}
+.step-title{font-size:12px;font-weight:700;color:var(--gray-900);line-height:16px;margin-bottom:3px}
+.step-cat-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:2px 7px;border-radius:var(--radius-sm)}
+.step-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.step-sys{font-size:11px;font-weight:500;color:var(--gray-600);background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:2px 7px}
+.step-dur{font-size:11px;color:var(--gray-400)}
+.conf-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.conf-dot.green{background:#059669}
+.conf-dot.blue{background:#2563eb}
+.conf-dot.amber{background:#d97706}
+.step-chevron{color:var(--gray-400);transition:transform .2s;flex-shrink:0}
+.step-chevron.open{transform:rotate(90deg)}
+
+/* Step body */
+.step-body{border-top:1px solid var(--gray-100);padding:14px 16px 14px 56px;display:none}
+.step-body.open{display:block}
+.instructions{background:var(--gray-50);border-radius:var(--radius-md);border:1px solid var(--gray-200);overflow:hidden;margin-bottom:12px}
+.instr-line{display:flex;align-items:baseline;gap:8px;padding:8px 12px;border-bottom:1px solid var(--gray-100);font-size:13px}
+.instr-line:last-child{border-bottom:none}
+.instr-num{font-size:11px;font-weight:700;color:var(--gray-400);width:18px;flex-shrink:0}
+.instr-text{color:#374151;line-height:20px}
+.instr-verify{background:rgba(236,253,245,.5)}
+.instr-verify .instr-num{color:var(--emerald-600)}
+.instr-verify .instr-text{color:var(--emerald-600)}
+.instr-note .instr-num{color:var(--gray-400)}
+.instr-note .instr-text{color:var(--gray-400);font-style:italic}
+.step-outcome{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--emerald-600);font-weight:500;margin-bottom:10px}
+.step-warning{display:flex;align-items:flex-start;gap:8px;background:var(--amber-50);border:1px solid var(--amber-200);border-radius:var(--radius-md);padding:10px 12px;margin-bottom:10px;font-size:12px;color:#92400e;line-height:18px}
+.step-auto-hint{display:flex;align-items:flex-start;gap:8px;background:var(--violet-50);border:1px solid var(--violet-200);border-radius:var(--radius-md);padding:10px 12px;font-size:12px;color:#5b21b6;line-height:18px}
+
+/* Completion Checklist */
+.checklist-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:20px;transition:background .2s,border-color .2s}
+.checklist-card.all-done{background:var(--emerald-50);border-color:var(--emerald-200)}
+.checklist-title{font-size:13px;font-weight:700;color:#065f46;margin-bottom:10px;display:none}
+.checklist-title.visible{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.checklist-items{display:flex;flex-direction:column;gap:8px}
+.check-item{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--gray-700);cursor:pointer;padding:4px 0}
+.check-item input[type="checkbox"]{width:16px;height:16px;accent-color:var(--emerald-500);cursor:pointer;flex-shrink:0}
+.check-item.checked{color:var(--gray-400);text-decoration:line-through}
+
+/* Process Overview */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:16px;text-align:center}
+.stat-value{font-size:22px;font-weight:700;color:var(--gray-900);line-height:28px}
+.stat-label{font-size:11px;color:var(--gray-400);margin-top:2px}
+
+/* Intelligence */
+.intel-wrap{display:flex;flex-direction:column;gap:10px}
+.intel-rec-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:16px;display:flex;align-items:flex-start;gap:12px}
+.intel-rec-icon{width:36px;height:36px;background:var(--violet-50);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.intel-rec-body{flex:1}
+.intel-rec-header{display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap}
+.intel-rec-title{font-size:13px;font-weight:600;color:var(--gray-900)}
+.impact-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:20px;background:#fef3c7;color:#92400e}
+.intel-rec-detail{font-size:12px;color:var(--gray-600);line-height:18px}
+.intel-insight{background:rgba(239,246,255,.5);border:1px solid var(--blue-200);border-radius:var(--radius-lg);padding:14px 16px;display:flex;align-items:flex-start;gap:10px;font-size:12px;color:#1e40af;line-height:18px}
+
+/* Provenance footer */
+.provenance{text-align:center;font-size:10px;color:var(--gray-400);padding:8px 0}
+
+/* Page footer */
+.page-footer{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--gray-600)}
+.page-footer a{color:var(--brand-600);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.page-footer a:hover{color:var(--brand-700);text-decoration:underline}
+
+/* Category colors */
+.cat-navigation{background:#ccfbf1;color:#065f46}
+.cat-data_entry{background:#ede9fe;color:#4c1d95}
+.cat-form_submit{background:#dbeafe;color:#1e40af}
+.cat-send_action{background:#d1fae5;color:#065f46}
+.cat-error_handling{background:#fee2e2;color:#991b1b}
+.ord-navigation{background:rgba(20,184,166,.15);color:var(--teal-500)}
+.ord-data_entry{background:rgba(139,92,246,.15);color:var(--violet-500)}
+.ord-form_submit{background:rgba(59,130,246,.15);color:var(--blue-500)}
+.ord-send_action{background:rgba(16,185,129,.15);color:var(--emerald-500)}
+
+/* Responsive */
+@media(max-width:640px){
+  .qs-two-col{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .step-right{gap:6px}
+  .step-sys{display:none}
+  .page-footer{flex-direction:column;text-align:center;gap:8px}
+}
+
+/* Print */
+@media print{
+  body{background:#fff}
+  .page-footer{display:none}
+  .step-body{display:block!important}
+  .step-chevron{display:none}
+  .step-header-row{cursor:default}
+}
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="logo-text">Ledgerium AI</div>
+    <div class="page-subtitle">Standard Operating Procedure — Execution Mode</div>
+  </div>
+
+  <!-- Quick Start Card -->
+  <div class="qs-card">
+    <div class="qs-header">
+      <div class="qs-icon">
+        <!-- CheckCircle icon -->
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <div class="qs-header-title">Submit Expense Report in Workday</div>
+      <div class="qs-time">~3m 45s</div>
+    </div>
+    <div class="qs-body">
+      <div class="qs-section-title">What This Does</div>
+      <p class="qs-desc">Submit and route an expense report through Workday for manager approval.</p>
+      <div class="qs-section-title">When To Use</div>
+      <p class="qs-desc">Use when you need to submit a new expense report and route it for approval.</p>
+      <div class="qs-two-col">
+        <div class="qs-box">
+          <div class="qs-box-title">Before You Begin</div>
+          <ul class="qs-bullet-list">
+            <li>Access to Workday Expenses module</li>
+            <li>Valid expense receipts or documentation</li>
+            <li>Knowledge of GL account codes</li>
+          </ul>
+        </div>
+        <div class="qs-box">
+          <div class="qs-box-title">Systems Needed</div>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+            <span class="qs-sys-pill">
+              <!-- Monitor icon -->
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              Workday
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="qs-outcome">
+        <!-- Target icon -->
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <span class="qs-outcome-text">Expense report submitted and routed for manager approval.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Procedure Section -->
+  <div>
+    <div class="section-label">
+      <!-- Layers icon -->
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      PROCEDURE
+      <span class="section-count">4</span>
+    </div>
+    <div class="steps-wrap" id="steps-wrap">
+
+      <!-- Step 1 -->
+      <div class="step-card">
+        <div class="step-header-row" onclick="toggleStep(this)" aria-expanded="true">
+          <div class="step-ordinal ord-navigation">1</div>
+          <div class="step-meta">
+            <div class="step-title">Navigate to New Expense Report</div>
+            <span class="step-cat-tag cat-navigation">Navigation</span>
+          </div>
+          <div class="step-right">
+            <span class="step-sys">Workday</span>
+            <span class="step-dur">1.2s</span>
+            <span class="conf-dot green" title="85% confidence"></span>
+            <svg class="step-chevron open" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </div>
+        <div class="step-body open">
+          <div class="instructions">
+            <div class="instr-line">
+              <span class="instr-num">1.</span>
+              <span class="instr-text">Click "Create Expense Report" on the Expenses dashboard</span>
+            </div>
+            <div class="instr-line instr-note">
+              <span class="instr-num">→</span>
+              <span class="instr-text">Page navigates to the new expense report form</span>
+            </div>
+          </div>
+          <div class="step-outcome">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M9 12l2 2 4-4"/><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/></svg>
+            New expense report form is displayed
+          </div>
+          <div class="step-auto-hint">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            This navigation step could be automated with a direct URL bookmark or macro.
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card">
+        <div class="step-header-row" onclick="toggleStep(this)" aria-expanded="true">
+          <div class="step-ordinal ord-data_entry">2</div>
+          <div class="step-meta">
+            <div class="step-title">Complete Expense Form</div>
+            <span class="step-cat-tag cat-data_entry">Data Entry</span>
+          </div>
+          <div class="step-right">
+            <span class="step-sys">Workday</span>
+            <span class="step-dur">25.0s</span>
+            <span class="conf-dot green" title="90% confidence"></span>
+            <svg class="step-chevron open" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </div>
+        <div class="step-body open">
+          <div class="instructions">
+            <div class="instr-line">
+              <span class="instr-num">1.</span>
+              <span class="instr-text">Enter report title in the "Report Title" field</span>
+            </div>
+            <div class="instr-line">
+              <span class="instr-num">2.</span>
+              <span class="instr-text">Enter expense amount in the "Amount" field</span>
+            </div>
+            <div class="instr-line">
+              <span class="instr-num">3.</span>
+              <span class="instr-text">Select expense category from the "Category" dropdown</span>
+            </div>
+            <div class="instr-line instr-verify">
+              <span class="instr-num">✓</span>
+              <span class="instr-text">Verify all required fields are populated before submitting</span>
+            </div>
+          </div>
+          <div class="step-outcome">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M9 12l2 2 4-4"/><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/></svg>
+            Expense form is complete with title, amount, and category
+          </div>
+          <div class="step-warning">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            This step handles sensitive financial data — verify amounts before submission.
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-card">
+        <div class="step-header-row" onclick="toggleStep(this)" aria-expanded="true">
+          <div class="step-ordinal ord-form_submit">3</div>
+          <div class="step-meta">
+            <div class="step-title">Submit Expense Report</div>
+            <span class="step-cat-tag cat-form_submit">Form Submit</span>
+          </div>
+          <div class="step-right">
+            <span class="step-sys">Workday</span>
+            <span class="step-dur">2.0s</span>
+            <span class="conf-dot green" title="90% confidence"></span>
+            <svg class="step-chevron open" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </div>
+        <div class="step-body open">
+          <div class="instructions">
+            <div class="instr-line">
+              <span class="instr-num">1.</span>
+              <span class="instr-text">Click "Submit" to submit the expense form</span>
+            </div>
+            <div class="instr-line instr-verify">
+              <span class="instr-num">✓</span>
+              <span class="instr-text">Verify confirmation toast message appears</span>
+            </div>
+            <div class="instr-line instr-note">
+              <span class="instr-num">→</span>
+              <span class="instr-text">System returns to the Expenses list</span>
+            </div>
+          </div>
+          <div class="step-outcome">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M9 12l2 2 4-4"/><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/></svg>
+            Expense report is submitted and confirmation is received
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step-card">
+        <div class="step-header-row" onclick="toggleStep(this)" aria-expanded="true">
+          <div class="step-ordinal ord-send_action">4</div>
+          <div class="step-meta">
+            <div class="step-title">Send for Approval</div>
+            <span class="step-cat-tag cat-send_action">Submit/Send</span>
+          </div>
+          <div class="step-right">
+            <span class="step-sys">Workday</span>
+            <span class="step-dur">10.0s</span>
+            <span class="conf-dot green" title="90% confidence"></span>
+            <svg class="step-chevron open" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </div>
+        <div class="step-body open">
+          <div class="instructions">
+            <div class="instr-line">
+              <span class="instr-num">1.</span>
+              <span class="instr-text">Click on the submitted expense report in the list</span>
+            </div>
+            <div class="instr-line instr-note">
+              <span class="instr-num">→</span>
+              <span class="instr-text">Page navigates to expense detail view</span>
+            </div>
+            <div class="instr-line">
+              <span class="instr-num">2.</span>
+              <span class="instr-text">Click "Send for Approval" to route for manager review</span>
+            </div>
+            <div class="instr-line instr-verify">
+              <span class="instr-num">✓</span>
+              <span class="instr-text">Verify approval routing confirmation</span>
+            </div>
+          </div>
+          <div class="step-outcome">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M9 12l2 2 4-4"/><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/></svg>
+            Expense report is routed to manager for approval
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Completion Checklist -->
+  <div>
+    <div class="section-label">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/></svg>
+      COMPLETION CHECKLIST
+    </div>
+    <div class="checklist-card" id="checklist-card">
+      <div class="checklist-title" id="checklist-done-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        All criteria met
+      </div>
+      <div class="checklist-items" id="checklist-items">
+        <label class="check-item">
+          <input type="checkbox" onchange="updateChecklist()">
+          Expense report has been submitted with correct title and amount
+        </label>
+        <label class="check-item">
+          <input type="checkbox" onchange="updateChecklist()">
+          Confirmation toast appeared after form submission
+        </label>
+        <label class="check-item">
+          <input type="checkbox" onchange="updateChecklist()">
+          Report has been sent for manager approval
+        </label>
+        <label class="check-item">
+          <input type="checkbox" onchange="updateChecklist()">
+          Approval routing confirmation received
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Process Overview -->
+  <div>
+    <div class="section-label">
+      <!-- BarChart3 icon -->
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      PROCESS OVERVIEW
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">4</div>
+        <div class="stat-label">in this procedure</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">1</div>
+        <div class="stat-label">Workday</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:#059669">88%</div>
+        <div class="stat-label">High</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">0</div>
+        <div class="stat-label">None detected</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Intelligence -->
+  <div>
+    <div class="section-label">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      INTELLIGENCE
+    </div>
+    <div class="intel-wrap">
+      <div class="intel-rec-card">
+        <div class="intel-rec-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div class="intel-rec-body">
+          <div class="intel-rec-header">
+            <span class="intel-rec-title">Automate Navigation Step</span>
+            <span class="impact-badge">medium impact</span>
+          </div>
+          <p class="intel-rec-detail">Step 1 navigates to a fixed URL pattern. This can be replaced with a direct link or browser automation, saving ~1.2s per execution.</p>
+        </div>
+      </div>
+      <div class="intel-insight">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        All steps have high confidence (&ge;85%), indicating a stable, well-defined process suitable for documentation and training.
+      </div>
+    </div>
+  </div>
+
+  <!-- Provenance Footer -->
+  <div class="provenance">
+    Generated deterministically by Ledgerium Process Engine v1.0.0. All steps trace to observed browser events. Schema v1.0.0.
+  </div>
+
+  <!-- Page Footer -->
+  <div class="page-footer">
+    <span>Download this sample to explore Ledgerium output offline.</span>
+    <a href="https://ledgerium.ai">
+      Record your own workflows
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      ledgerium.ai
+    </a>
+  </div>
+
+</div>
+
+<script>
+function toggleStep(headerRow) {
+  const body = headerRow.nextElementSibling;
+  const chevron = headerRow.querySelector('.step-chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chevron.classList.toggle('open', !isOpen);
+  headerRow.setAttribute('aria-expanded', String(!isOpen));
+}
+
+function updateChecklist() {
+  const card = document.getElementById('checklist-card');
+  const items = document.querySelectorAll('#checklist-items input[type="checkbox"]');
+  const labels = document.querySelectorAll('#checklist-items .check-item');
+  const doneTitle = document.getElementById('checklist-done-title');
+  let allChecked = true;
+  items.forEach((cb, i) => {
+    labels[i].classList.toggle('checked', cb.checked);
+    if (!cb.checked) allChecked = false;
+  });
+  card.classList.toggle('all-done', allChecked);
+  doneTitle.classList.toggle('visible', allChecked);
+}
+</script>
+
+</body>
+</html>

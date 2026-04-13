@@ -4,9 +4,17 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
-import { Menu, X, ArrowRight } from 'lucide-react';
+import { Menu, X, ArrowRight, LayoutDashboard } from 'lucide-react';
 
-const NAV_LINKS = [
+type NavLink = {
+  href: string;
+  label: string;
+  icon?: typeof LayoutDashboard;
+  isExternal?: boolean;
+};
+
+const NAV_LINKS: NavLink[] = [
+  { href: '/dashboard.html', label: 'Live Demo', icon: LayoutDashboard, isExternal: true },
   { href: '/demo', label: 'How It Works' },
   { href: '/pricing', label: 'Pricing' },
   { href: '/install-extension', label: 'Install' },
@@ -32,19 +40,31 @@ export function PublicNav() {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-0.5">
-          {NAV_LINKS.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                pathname === href
-                  ? 'text-brand-700 bg-brand-50'
+          {NAV_LINKS.map(({ href, label, icon: Icon, isExternal }) => {
+            const classes = `rounded-lg px-3 py-2 text-sm font-medium transition-colors inline-flex items-center gap-1.5 ${
+              pathname === href
+                ? 'text-brand-700 bg-brand-50'
+                : href === '/dashboard.html'
+                  ? 'text-brand-600 hover:text-brand-700 hover:bg-brand-50/60'
                   : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              {label}
-            </Link>
-          ))}
+            }`;
+
+            if (isExternal) {
+              return (
+                <a key={href} href={href} className={classes}>
+                  {Icon && <Icon className="h-3.5 w-3.5" />}
+                  {label}
+                </a>
+              );
+            }
+
+            return (
+              <Link key={href} href={href} className={classes}>
+                {Icon && <Icon className="h-3.5 w-3.5" />}
+                {label}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Auth CTAs */}
@@ -82,20 +102,31 @@ export function PublicNav() {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden border-t border-gray-100 bg-white px-4 py-3 space-y-1 shadow-lg">
-          {NAV_LINKS.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              onClick={() => setMobileOpen(false)}
-              className={`block rounded-lg px-3 py-2.5 text-sm font-medium ${
-                pathname === href
-                  ? 'text-brand-700 bg-brand-50'
+          {NAV_LINKS.map(({ href, label, icon: Icon, isExternal }) => {
+            const classes = `rounded-lg px-3 py-2.5 text-sm font-medium flex items-center gap-2 ${
+              pathname === href
+                ? 'text-brand-700 bg-brand-50'
+                : href === '/dashboard.html'
+                  ? 'text-brand-600 bg-brand-50/40'
                   : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              {label}
-            </Link>
-          ))}
+            }`;
+
+            if (isExternal) {
+              return (
+                <a key={href} href={href} onClick={() => setMobileOpen(false)} className={classes}>
+                  {Icon && <Icon className="h-4 w-4" />}
+                  {label}
+                </a>
+              );
+            }
+
+            return (
+              <Link key={href} href={href} onClick={() => setMobileOpen(false)} className={classes}>
+                {Icon && <Icon className="h-4 w-4" />}
+                {label}
+              </Link>
+            );
+          })}
           <div className="pt-2 border-t border-gray-100 space-y-1">
             {isAuthenticated ? (
               <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="block btn-primary text-sm text-center">
