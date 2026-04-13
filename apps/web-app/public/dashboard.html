@@ -261,6 +261,12 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
   .workflow-card{break-inside:avoid}
 }
 
+/* ── Download Banner ── */
+.dl-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--brand-50);border:1px solid var(--brand-100);border-radius:var(--radius-lg);padding:12px 16px;margin-bottom:20px}
+.dl-banner-text{font-size:11px;color:var(--brand-700);display:flex;align-items:center;gap:6px}
+.dl-banner-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--brand-600);text-decoration:none;white-space:nowrap;flex-shrink:0}
+.dl-banner-link:hover{color:var(--brand-700);text-decoration:underline}
+
 /* ── Utility ── */
 .divider{height:1px;background:var(--gray-200);margin:20px 0}
 .text-gray-400{color:var(--gray-400)}
@@ -922,6 +928,16 @@ function renderSOPTab(wf) {
     : wf.sopSteps.map((s, i) => renderPreviewStep(s, i)).join('');
   const sopLabel = isFull ? 'Procedure Steps' : 'Step Overview';
   document.getElementById('tab-sop').innerHTML = `
+    <div class="dl-banner" role="region" aria-label="Download SOP sample">
+      <span class="dl-banner-text">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download this SOP as a standalone file
+      </span>
+      <a class="dl-banner-link" href="/samples/sop-execution-sample.html" download aria-label="Download SOP Sample">
+        Download SOP Sample
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
     <div class="sop-meta-grid">
       <div class="sop-meta-card"><div class="sop-meta-val">${wf.steps}</div><div class="sop-meta-lbl">Steps</div></div>
       <div class="sop-meta-card"><div class="sop-meta-val">${wf.duration}</div><div class="sop-meta-lbl">Duration</div></div>
@@ -1005,6 +1021,16 @@ function renderAgentIntelTab(wf) {
   }).join('');
 
   document.getElementById('tab-agent-intel').innerHTML = `
+    <div class="dl-banner" role="region" aria-label="Download agent intelligence report">
+      <span class="dl-banner-text">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download this analysis as a standalone file
+      </span>
+      <a class="dl-banner-link" href="/samples/agent-intelligence-sample.html" download aria-label="Download Intelligence Report">
+        Download Intelligence Report
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
     <div class="ai-score-row">
       <div>
         <div class="ai-score-num">${score}</div>
