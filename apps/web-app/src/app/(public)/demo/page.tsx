@@ -10,6 +10,7 @@ import {
   ArrowRight,
   CheckCircle,
   Map,
+  LayoutDashboard,
 } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -145,6 +146,27 @@ export default function DemoPage() {
                 <p className="text-[11px] text-gray-400 mt-0.5">{sub}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Interactive demo dashboard callout */}
+      <section className="py-12 bg-white border-t border-gray-200">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+          <div className="rounded-xl border border-brand-100 bg-brand-50/40 p-8 text-center">
+            <LayoutDashboard className="h-8 w-8 text-brand-600 mx-auto mb-3" />
+            <h3 className="text-lg font-bold text-gray-900 mb-2">
+              See the dashboard with real sample workflows
+            </h3>
+            <p className="text-sm text-gray-500 mb-5 max-w-lg mx-auto">
+              Browse 10 real workflow recordings — view SOPs, process maps,
+              agent intelligence, and evidence traces. No signup required.
+            </p>
+            <a href="/dashboard.html" className="btn-primary gap-2 px-6 py-3">
+              <LayoutDashboard className="h-4 w-4" />
+              Explore the live dashboard
+              <ArrowRight className="h-4 w-4" />
+            </a>
           </div>
         </div>
       </section>
