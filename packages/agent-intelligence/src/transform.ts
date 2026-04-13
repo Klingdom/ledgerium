@@ -5,13 +5,14 @@
  * TransformationResult — the full agent-ready workflow intelligence output.
  *
  * Pipeline stages:
- * 1. parseSteps()          → StepIntelligence[]  (semantic enrichment of steps)
- * 2. buildActivities()     → Activity[]          (logical step groupings)
- * 3. detectDecisions()     → DecisionPoint[]     (branch + retry points)
- * 4. buildWorkflow()       → WorkflowStructure   (full workflow with dependencies)
- * 5. extractSkills()       → SkillLibrary        (reusable skill extraction)
- * 6. detectOpportunities() → OpportunityAnalysis (AI + automation opportunity scoring)
- * 7. composeAgents()       → AgentComposition    (agent profile composition)
+ * 1. parseSteps()               → StepIntelligence[]     (semantic enrichment of steps)
+ * 2. buildActivities()          → Activity[]             (logical step groupings)
+ * 3. detectDecisions()          → DecisionPoint[]        (branch + retry points)
+ * 4. buildWorkflow()            → WorkflowStructure      (full workflow with dependencies)
+ * 5. extractSkills()            → SkillLibrary           (reusable skill extraction)
+ * 6. detectOpportunities()      → OpportunityAnalysis    (AI + automation opportunity scoring)
+ * 7. composeAgents()            → AgentComposition       (agent profile composition)
+ * 8. analyzeIntegrationRisk()   → IntegrationRiskAnalysis (integration mapping + risk assessment)
  *
  * All stages are deterministic and pure — same input → same output.
  * Pipeline timing is included in metadata for observability.
@@ -27,6 +28,7 @@ import { buildWorkflow } from './workflow-builder.js';
 import { extractSkills } from './skill-extractor.js';
 import { detectOpportunities } from './opportunity-detector.js';
 import { composeAgents } from './agent-composer.js';
+import { analyzeIntegrationRisk } from './integration-risk-analyzer.js';
 
 /**
  * Transform a ProcessOutput into a full TransformationResult.
@@ -61,6 +63,9 @@ export function transformWorkflow(output: ProcessOutput): TransformationResult {
   // Stage 7: Compose agent profiles from activities, skills, and opportunities
   const agentComposition = composeAgents(activities, skillLibrary, opportunities, workflow, steps);
 
+  // Stage 8: Map integrations and assess automation risks
+  const integrationRisk = analyzeIntegrationRisk(steps, agentComposition, skillLibrary, opportunities, workflow);
+
   const pipelineDurationMs = Date.now() - startMs;
 
   return {
@@ -71,6 +76,7 @@ export function transformWorkflow(output: ProcessOutput): TransformationResult {
     skillLibrary,
     opportunities,
     agentComposition,
+    integrationRisk,
     metadata: {
       engineVersion: AGENT_INTELLIGENCE_VERSION,
       processedAt: new Date().toISOString(),

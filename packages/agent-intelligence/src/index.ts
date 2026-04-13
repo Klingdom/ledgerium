@@ -28,6 +28,7 @@ export { buildWorkflow } from './workflow-builder.js';
 export { extractSkills } from './skill-extractor.js';
 export { detectOpportunities } from './opportunity-detector.js';
 export { composeAgents } from './agent-composer.js';
+export { analyzeIntegrationRisk } from './integration-risk-analyzer.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -57,6 +58,13 @@ export type {
   AgentProfile,
   AgentCollaboration,
   AgentComposition,
+  IntegrationType,
+  IntegrationReadiness,
+  IntegrationRequirement,
+  RiskSeverity,
+  RiskCategory,
+  RiskItem,
+  IntegrationRiskAnalysis,
 } from './types.js';
 
 export { AGENT_INTELLIGENCE_VERSION } from './types.js';

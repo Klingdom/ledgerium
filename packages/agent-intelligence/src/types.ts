@@ -549,6 +549,127 @@ export interface AgentComposition {
   averageCapabilityScore: number;
 }
 
+// ─── IntegrationRequirement ──────────────────────────────────────────────────
+
+/**
+ * The type of API integration needed.
+ */
+export type IntegrationType =
+  | 'rest_api'       // Standard REST API
+  | 'webhook'        // Webhook-based event subscription
+  | 'oauth'          // OAuth2 authentication flow
+  | 'browser_rpa'    // Browser automation (no API available)
+  | 'email_imap'     // Email protocol integration
+  | 'file_sync';     // File system / cloud storage sync
+
+/**
+ * The current readiness status of an integration.
+ */
+export type IntegrationReadiness =
+  | 'api_available'   // System has a well-documented public API
+  | 'api_limited'     // API exists but with limitations (rate limits, missing endpoints)
+  | 'no_api'          // No API; requires browser automation or manual process
+  | 'unknown';        // Cannot determine API availability
+
+/**
+ * A required API integration for agent operation.
+ */
+export interface IntegrationRequirement {
+  /** Stable ID: "int-{system}" */
+  integrationId: string;
+  /** The system requiring integration */
+  system: string;
+  /** Human-readable name */
+  integrationName: string;
+  /** What type of integration is needed */
+  integrationType: IntegrationType;
+  /** Current readiness status */
+  readiness: IntegrationReadiness;
+  /** API capabilities needed (from SYSTEM_CAPABILITIES) */
+  requiredCapabilities: string[];
+  /** Agent IDs that depend on this integration */
+  dependentAgentIds: string[];
+  /** Skill IDs that require this integration */
+  dependentSkillIds: string[];
+  /** Step IDs that use this system */
+  affectedStepIds: string[];
+  /** Estimated implementation complexity: 1 (trivial) to 5 (complex) */
+  complexity: number;
+  /** Human-readable notes about this integration */
+  notes: string;
+}
+
+// ─── RiskAssessment ──────────────────────────────────────────────────────────
+
+/**
+ * The severity level of a risk.
+ */
+export type RiskSeverity = 'low' | 'medium' | 'high' | 'critical';
+
+/**
+ * The category of automation risk.
+ */
+export type RiskCategory =
+  | 'data_integrity'     // Risk of data corruption or loss
+  | 'security'           // Authentication, authorization, data exposure
+  | 'reliability'        // System availability, API rate limits, timeouts
+  | 'compliance'         // Regulatory, audit trail, data handling
+  | 'human_displacement' // Steps that require human judgment being automated
+  | 'integration'        // API compatibility, version changes, breaking changes
+  | 'complexity';        // Implementation complexity, maintenance burden
+
+/**
+ * A specific automation risk identified in the workflow.
+ */
+export interface RiskItem {
+  /** Stable ID: "risk-{index}" */
+  riskId: string;
+  /** Which category this risk belongs to */
+  category: RiskCategory;
+  /** How severe this risk is */
+  severity: RiskSeverity;
+  /** Human-readable title */
+  title: string;
+  /** Detailed description of the risk */
+  description: string;
+  /** What could go wrong */
+  impact: string;
+  /** Recommended mitigation strategy */
+  mitigation: string;
+  /** Step IDs affected by this risk */
+  affectedStepIds: string[];
+  /** Agent IDs affected */
+  affectedAgentIds: string[];
+  /** Systems involved */
+  systems: string[];
+  /** Confidence in this risk assessment (0-1) */
+  confidence: number;
+}
+
+/**
+ * Complete integration and risk assessment output.
+ */
+export interface IntegrationRiskAnalysis {
+  /** All required integrations */
+  integrations: IntegrationRequirement[];
+  /** All identified risks */
+  risks: RiskItem[];
+  /** Total integration count */
+  integrationCount: number;
+  /** Integrations by readiness */
+  readinessBreakdown: Record<IntegrationReadiness, number>;
+  /** Total risk count */
+  riskCount: number;
+  /** Risks by severity */
+  severityBreakdown: Record<RiskSeverity, number>;
+  /** Risks by category */
+  categoryBreakdown: Record<RiskCategory, number>;
+  /** Overall risk level for the workflow */
+  overallRiskLevel: RiskSeverity;
+  /** 0-100: implementation readiness score (higher = more ready to implement) */
+  implementationReadinessScore: number;
+}
+
 // ─── TransformationResult ─────────────────────────────────────────────────────
 
 /**
@@ -571,6 +692,8 @@ export interface TransformationResult {
   opportunities: OpportunityAnalysis;
   /** Composed agent profiles */
   agentComposition: AgentComposition;
+  /** Integration mapping and risk assessment */
+  integrationRisk: IntegrationRiskAnalysis;
   /** Pipeline metadata for traceability and debugging. */
   metadata: {
     /** Version of the agent-intelligence engine. */

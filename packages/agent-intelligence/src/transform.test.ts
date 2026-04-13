@@ -499,6 +499,26 @@ describe('Example 1: Invoice Processing (6 steps, gmail + netsuite)', () => {
     expect(typeof roleDistribution.monitor).toBe('number');
     expect(typeof roleDistribution.specialist).toBe('number');
   });
+
+  it('result.integrationRisk is present', () => {
+    const result = transformWorkflow(output);
+    expect(result.integrationRisk).toBeDefined();
+  });
+
+  it('integrationRisk has integrationCount > 0 for gmail + netsuite workflow', () => {
+    const result = transformWorkflow(output);
+    expect(result.integrationRisk.integrationCount).toBeGreaterThan(0);
+    expect(result.integrationRisk.integrations.length).toBe(result.integrationRisk.integrationCount);
+  });
+
+  it('integrationRisk.readinessBreakdown has all 4 keys initialized', () => {
+    const result = transformWorkflow(output);
+    const { readinessBreakdown } = result.integrationRisk;
+    expect(typeof readinessBreakdown.api_available).toBe('number');
+    expect(typeof readinessBreakdown.api_limited).toBe('number');
+    expect(typeof readinessBreakdown.no_api).toBe('number');
+    expect(typeof readinessBreakdown.unknown).toBe('number');
+  });
 });
 
 // ─── Example 2: Customer Support Ticket ──────────────────────────────────────
