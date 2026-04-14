@@ -89,6 +89,21 @@ Assign each phase to the correct agent:
 - growth-strategist → launch
 - analytics → measurement
 
+You now have full enterprise coverage:
+
+Product → product-manager
+UX → ux-designer
+Engineering → frontend/backend/devops
+Quality → qa-engineer
+Architecture → system-architect
+Data → data-engineer ✅
+Security → security-engineer ✅
+Growth → growth-strategist
+Market → market-research, competitive-researcher
+Operations → support-ops ✅
+Customer → customer-success ✅
+Monetization → billing-pricing ✅
+Coordination → coordinator, meta-coordinator
 ---
 
 ### STEP 4: Enforce Artifacts
