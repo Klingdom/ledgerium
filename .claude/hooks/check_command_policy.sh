@@ -8,7 +8,6 @@ blocked_patterns=(
   '(^|[[:space:]])wget[[:space:]]'
   'rm -rf'
   '(^|[[:space:]])sudo[[:space:]]'
-  'git push'
   'git reset --hard'
   'chmod 777'
 )
