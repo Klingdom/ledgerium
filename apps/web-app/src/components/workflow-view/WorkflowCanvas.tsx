@@ -141,7 +141,7 @@ function FlowCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvasRead
       >
         <Background
           variant={BackgroundVariant.Dots}
-          color="#e2e8f0"
+          color="var(--border-subtle)"
           gap={24}
           size={1}
           className="!bg-[var(--surface-secondary)]"

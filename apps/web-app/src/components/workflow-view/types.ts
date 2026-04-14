@@ -24,12 +24,16 @@ import type {
 
 // ─── View modes ──────────────────────────────────────────────────────────────
 
-export type WorkflowViewMode = 'flow' | 'variants' | 'systems';
+export type WorkflowViewMode = 'flow' | 'swimlane' | 'variants' | 'systems';
 
 export const VIEW_MODE_LABELS: Record<WorkflowViewMode, { label: string; description: string }> = {
   flow: {
     label: 'Flow Intelligence',
     description: 'Step-by-step execution path with phases, decisions, and friction',
+  },
+  swimlane: {
+    label: 'Swimlane',
+    description: 'Cross-functional view with system lanes and handoff tracking',
   },
   variants: {
     label: 'Process Variants',

@@ -20,6 +20,7 @@ import { WorkflowLegend } from './WorkflowLegend';
 import { WorkflowEmptyState, WorkflowErrorState, WorkflowSkeleton } from './WorkflowEmptyState';
 import { WorkflowFlowCanvas } from './WorkflowCanvas';
 import type { CanvasControls } from './WorkflowCanvas';
+import { WorkflowSwimlaneCanvas } from './WorkflowSwimlaneCanvas';
 import { WorkflowVariantsMap } from './WorkflowVariantsMap';
 import { WorkflowSystemsMap } from './WorkflowSystemsMap';
 import { useWorkflowViewModel } from './hooks/useWorkflowViewModel';
@@ -274,6 +275,17 @@ export function WorkflowPageShell({
           {/* Flow Intelligence Map */}
           {mode === 'flow' && (
             <WorkflowFlowCanvas
+              graph={viewModel.graph}
+              toolbar={toolbar}
+              selectedNodeId={selection.type === 'node' ? selection.id : null}
+              onSelectNode={handleSelectNode}
+              onCanvasReady={handleCanvasReady}
+            />
+          )}
+
+          {/* Swimlane Map */}
+          {mode === 'swimlane' && (
+            <WorkflowSwimlaneCanvas
               graph={viewModel.graph}
               toolbar={toolbar}
               selectedNodeId={selection.type === 'node' ? selection.id : null}

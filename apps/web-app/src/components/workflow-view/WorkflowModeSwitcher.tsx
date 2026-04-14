@@ -1,16 +1,17 @@
 'use client';
 
-import { Workflow, GitBranch, Monitor } from 'lucide-react';
+import { Workflow, Columns, GitBranch, Monitor } from 'lucide-react';
 import type { WorkflowViewMode } from './types';
 import { VIEW_MODE_LABELS } from './types';
 
 const MODE_ICONS: Record<WorkflowViewMode, React.ElementType> = {
   flow: Workflow,
+  swimlane: Columns,
   variants: GitBranch,
   systems: Monitor,
 };
 
-const MODES: WorkflowViewMode[] = ['flow', 'variants', 'systems'];
+const MODES: WorkflowViewMode[] = ['flow', 'swimlane', 'variants', 'systems'];
 
 interface Props {
   activeMode: WorkflowViewMode;
