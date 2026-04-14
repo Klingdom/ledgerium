@@ -46,7 +46,7 @@ export default function PricingPage() {
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)]">
             Simple pricing that scales with your team
           </h1>
-          <p className="mt-4 text-lg text-[#cbd5e1]">
+          <p className="mt-4 text-lg text-[#e2e8f0]">
             Start free. Upgrade when you need intelligence, team collaboration, or compliance-grade exports.
           </p>
         </div>
@@ -73,7 +73,7 @@ export default function PricingPage() {
 
                 <div className="mb-5">
                   <h3 className="text-lg font-bold text-[var(--content-primary)]">{plan.name}</h3>
-                  <p className="text-xs text-[#b0bec9] mt-1 leading-relaxed">{plan.description}</p>
+                  <p className="text-xs text-[#e2e8f0] mt-1 leading-relaxed">{plan.description}</p>
                 </div>
 
                 <div className="mb-1">
@@ -131,7 +131,7 @@ export default function PricingPage() {
                   {plan.limits.map((limit) => (
                     <li key={limit} className="flex items-start gap-2 opacity-40">
                       <span className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-center text-[var(--content-tertiary)] text-[10px]">&mdash;</span>
-                      <span className="text-xs text-[#b0bec9] leading-relaxed">{limit}</span>
+                      <span className="text-xs text-[#e2e8f0] leading-relaxed">{limit}</span>
                     </li>
                   ))}
                 </ul>
@@ -157,7 +157,7 @@ export default function PricingPage() {
             {FAQ.map(({ q, a }) => (
               <div key={q}>
                 <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-1.5">{q}</h3>
-                <p className="text-sm text-[#b0bec9] leading-relaxed">{a}</p>
+                <p className="text-sm text-[#e2e8f0] leading-relaxed">{a}</p>
               </div>
             ))}
           </div>
@@ -176,7 +176,7 @@ export default function PricingPage() {
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <p className="mt-3 text-ds-xs text-[#b0bec9]">
+          <p className="mt-3 text-ds-xs text-[#e2e8f0]">
             No credit card required · Data never used for training · <a href="/security" className="underline hover:text-brand-600">Security details</a>
           </p>
         </div>

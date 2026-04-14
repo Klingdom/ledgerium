@@ -76,7 +76,7 @@ export default function DemoPage() {
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)]">
             Record a workflow. Get an SOP instantly.
           </h1>
-          <p className="mt-4 text-lg text-[#cbd5e1] leading-relaxed">
+          <p className="mt-4 text-lg text-[#e2e8f0] leading-relaxed">
             See how ops teams use Ledgerium to turn real browser workflows
             into structured SOPs and process maps — in under 5 minutes.
           </p>
@@ -97,7 +97,7 @@ export default function DemoPage() {
                     </span>
                     <h3 className="text-lg font-bold text-[var(--content-primary)]">{title}</h3>
                   </div>
-                  <p className="text-sm text-[#b0bec9] leading-relaxed mb-3">
+                  <p className="text-sm text-[#e2e8f0] leading-relaxed mb-3">
                     {what}
                   </p>
                   <div className="flex items-start gap-2">
@@ -158,7 +158,7 @@ export default function DemoPage() {
             <h3 className="text-lg font-bold text-[var(--content-primary)] mb-2">
               See the dashboard with real sample workflows
             </h3>
-            <p className="text-sm text-[#b0bec9] mb-5 max-w-lg mx-auto">
+            <p className="text-sm text-[#e2e8f0] mb-5 max-w-lg mx-auto">
               Browse 10 real workflow recordings — view SOPs, process maps,
               agent intelligence, and evidence traces. No signup required.
             </p>
@@ -177,7 +177,7 @@ export default function DemoPage() {
           <h2 className="text-2xl font-bold text-[var(--content-primary)]">
             Get your first SOP in 60 seconds
           </h2>
-          <p className="mt-3 text-[#b0bec9]">
+          <p className="mt-3 text-[#e2e8f0]">
             Sign up free, and explore a sample workflow SOP immediately —
             no extension install required. When you&apos;re ready, record your own.
           </p>

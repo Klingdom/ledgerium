@@ -41,7 +41,7 @@ export default function HomePage() {
               <br className="hidden sm:block" />
               <span className="text-brand-600">Your team takes 17.</span>
             </h1>
-            <p className="mt-6 text-lg sm:text-xl text-[#cbd5e1] leading-relaxed max-w-2xl mx-auto">
+            <p className="mt-6 text-lg sm:text-xl text-[#e2e8f0] leading-relaxed max-w-2xl mx-auto">
               Record real workflows in the browser. Get structured SOPs,
               process maps, and documentation — instantly. No interviews.
               No workshops. No guessing.
@@ -130,7 +130,7 @@ export default function HomePage() {
                   Step {step}
                 </p>
                 <h3 className="text-lg font-semibold text-[var(--content-primary)] mb-3">{title}</h3>
-                <p className="text-sm text-[#b0bec9] leading-relaxed">{desc}</p>
+                <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -144,7 +144,7 @@ export default function HomePage() {
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
               Your SOPs are already out of date
             </h2>
-            <p className="mt-4 text-[#cbd5e1] leading-relaxed">
+            <p className="mt-4 text-[#e2e8f0] leading-relaxed">
               Most process documentation is written from memory, not observation.
               Workarounds, extra steps, and tribal knowledge never make it into the doc.
               The gap between what&apos;s documented and what&apos;s real grows every week.
@@ -174,7 +174,7 @@ export default function HomePage() {
                   <Icon className="h-5 w-5 text-brand-600" />
                 </div>
                 <h3 className="text-base font-semibold text-[var(--content-primary)] mb-2">{title}</h3>
-                <p className="text-sm text-[#b0bec9] leading-relaxed">{desc}</p>
+                <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -188,7 +188,7 @@ export default function HomePage() {
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
               Every recording produces real output
             </h2>
-            <p className="mt-4 text-[#cbd5e1]">
+            <p className="mt-4 text-[#e2e8f0]">
               Not another video file to watch. Structured, searchable, reusable
               workflow intelligence.
             </p>
@@ -209,7 +209,7 @@ export default function HomePage() {
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-1">{title}</h3>
-                  <p className="text-sm text-[#b0bec9] leading-relaxed">{desc}</p>
+                  <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
                 </div>
               </div>
             ))}
@@ -223,7 +223,7 @@ export default function HomePage() {
           <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-4">
             Built for teams that maintain SOPs
           </h2>
-          <p className="text-center text-[#cbd5e1] mb-12 max-w-2xl mx-auto">
+          <p className="text-center text-[#e2e8f0] mb-12 max-w-2xl mx-auto">
             If your team documents workflows in browser-based tools — ERP, CRM, ticketing, HR systems — Ledgerium records what actually happens and generates the documentation for you.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -236,7 +236,7 @@ export default function HomePage() {
               <div key={title} className="card p-6 hover:shadow-md transition-shadow">
                 <Icon className="h-5 w-5 text-brand-600 mb-3" />
                 <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-1.5">{title}</h3>
-                <p className="text-xs text-[#b0bec9] leading-relaxed">{desc}</p>
+                <p className="text-xs text-[#e2e8f0] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -270,7 +270,7 @@ export default function HomePage() {
             <br />
             Start recording what actually happens.
           </h2>
-          <p className="mt-5 text-[#cbd5e1] leading-relaxed">
+          <p className="mt-5 text-[#e2e8f0] leading-relaxed">
             Install the extension, record a workflow, and get structured output
             in under 5 minutes. Free to start.
           </p>
