@@ -24,7 +24,7 @@ export default function PrivacyPage() {
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)]">
             Ledgerium AI Recorder — Privacy Policy
           </h1>
-          <p className="mt-4 text-sm text-[var(--content-secondary)]">
+          <p className="mt-4 text-sm text-[#b0bec9]">
             Effective Date: March 28, 2026
           </p>
         </div>
@@ -252,7 +252,7 @@ function PolicySection({
       <h3 className="text-lg font-bold text-[var(--content-primary)] mb-3 flex items-baseline gap-2">
         <span className="text-brand-600">{number}.</span> {title}
       </h3>
-      <div className="text-sm text-[var(--content-secondary)] leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_h4]:text-sm [&_h4]:font-semibold [&_h4]:text-[var(--content-primary)] [&_h4]:mt-4 [&_h4]:mb-2 [&_a]:text-brand-600 [&_a:hover]:text-brand-700 [&_strong]:text-[var(--content-primary)]">
+      <div className="text-sm text-[#b0bec9] leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_h4]:text-sm [&_h4]:font-semibold [&_h4]:text-[var(--content-primary)] [&_h4]:mt-4 [&_h4]:mb-2 [&_a]:text-brand-600 [&_a:hover]:text-brand-700 [&_strong]:text-[var(--content-primary)]">
         {children}
       </div>
     </div>

@@ -33,7 +33,7 @@ export default function InstallExtensionPage() {
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)]">
             Add Ledgerium to Chrome
           </h1>
-          <p className="mt-4 text-lg text-[var(--content-secondary)] leading-relaxed max-w-xl mx-auto">
+          <p className="mt-4 text-lg text-[#cbd5e1] leading-relaxed max-w-xl mx-auto">
             The browser extension captures your workflow. The web app turns it into
             SOPs, process maps, and a searchable library.
           </p>
@@ -92,7 +92,7 @@ export default function InstallExtensionPage() {
                 </div>
                 <Icon className="h-5 w-5 text-brand-600 mx-auto mb-2" />
                 <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-1.5">{title}</h3>
-                <p className="text-xs text-[var(--content-secondary)] leading-relaxed">{desc}</p>
+                <p className="text-xs text-[#b0bec9] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -121,7 +121,7 @@ export default function InstallExtensionPage() {
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
                     <CheckCircle className="h-4 w-4 text-brand-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-[var(--content-secondary)] leading-relaxed">{item}</span>
+                    <span className="text-sm text-[#b0bec9] leading-relaxed">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -142,7 +142,7 @@ export default function InstallExtensionPage() {
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
                     <Shield className="h-4 w-4 text-[var(--content-tertiary)] mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-[var(--content-secondary)] leading-relaxed">{item}</span>
+                    <span className="text-sm text-[#b0bec9] leading-relaxed">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -170,7 +170,7 @@ export default function InstallExtensionPage() {
             <div className="card p-4">
               <Chrome className="h-6 w-6 text-[var(--content-tertiary)] mx-auto mb-2" />
               <p className="text-sm font-medium text-[var(--content-primary)]">Edge / Brave</p>
-              <p className="text-[11px] text-[var(--content-secondary)]">Compatible</p>
+              <p className="text-[11px] text-[#b0bec9]">Compatible</p>
             </div>
             <div className="card p-4">
               <Chrome className="h-6 w-6 text-[var(--content-tertiary)] mx-auto mb-2" />
@@ -209,7 +209,7 @@ export default function InstallExtensionPage() {
             ].map(({ q, a }) => (
               <div key={q}>
                 <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-1.5">{q}</h3>
-                <p className="text-sm text-[var(--content-secondary)] leading-relaxed">{a}</p>
+                <p className="text-sm text-[#b0bec9] leading-relaxed">{a}</p>
               </div>
             ))}
           </div>
@@ -222,7 +222,7 @@ export default function InstallExtensionPage() {
           <h2 className="text-2xl font-bold text-[var(--content-primary)]">
             Ready to see your real workflows?
           </h2>
-          <p className="mt-3 text-[var(--content-secondary)]">
+          <p className="mt-3 text-[#b0bec9]">
             Install the extension and record your first workflow in under 2 minutes.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">

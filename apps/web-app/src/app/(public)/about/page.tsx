@@ -22,7 +22,7 @@ export default function AboutPage() {
             <br className="hidden sm:block" />
             We think it should be evidence-based.
           </h1>
-          <p className="mt-6 text-lg text-[var(--content-secondary)] leading-relaxed">
+          <p className="mt-6 text-lg text-[#cbd5e1] leading-relaxed">
             SOPs written from memory. Process maps drawn in workshops. Training
             docs that describe the ideal, not the reality. Every organization has
             this problem. Most don&apos;t know how big the gap is.
@@ -36,7 +36,7 @@ export default function AboutPage() {
           <h2 className="text-xl font-bold text-[var(--content-primary)] mb-8">
             The documentation gap
           </h2>
-          <div className="space-y-5 text-[15px] text-[var(--content-secondary)] leading-relaxed">
+          <div className="space-y-5 text-[15px] text-[#b0bec9] leading-relaxed">
             <p>
               Every organization runs on workflows — onboarding customers,
               processing claims, configuring systems, closing sales. These
@@ -105,7 +105,7 @@ export default function AboutPage() {
               <div key={title} className="card p-6">
                 <Icon className="h-5 w-5 text-brand-600 mb-3" />
                 <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-2">{title}</h3>
-                <p className="text-sm text-[var(--content-secondary)] leading-relaxed">{desc}</p>
+                <p className="text-sm text-[#b0bec9] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -118,7 +118,7 @@ export default function AboutPage() {
           <h2 className="text-xl font-bold text-[var(--content-primary)] mb-8">
             How it works
           </h2>
-          <div className="space-y-5 text-[15px] text-[var(--content-secondary)] leading-relaxed">
+          <div className="space-y-5 text-[15px] text-[#b0bec9] leading-relaxed">
             <p>
               You install a Chrome extension and record a workflow by doing your
               normal work. The extension captures interaction events — clicks,
@@ -146,7 +146,7 @@ export default function AboutPage() {
           <h2 className="text-2xl font-bold text-[var(--content-primary)]">
             See what your real workflows look like
           </h2>
-          <p className="mt-3 text-[var(--content-secondary)]">
+          <p className="mt-3 text-[#b0bec9]">
             Record a workflow. Review the structured output. Decide if
             evidence-based process capture is what your team needs.
           </p>
