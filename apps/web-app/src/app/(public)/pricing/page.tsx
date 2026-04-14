@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { PRICING_CONFIG } from '@/lib/config';
-import { Check, ArrowRight, HelpCircle } from 'lucide-react';
-import { UpgradeButton } from '@/components/UpgradeButton';
+import { ArrowRight, HelpCircle } from 'lucide-react';
+import { PricingCards } from '@/components/PricingCards';
 
 export const metadata: Metadata = {
   title: 'Pricing — Ledgerium AI',
@@ -55,89 +54,7 @@ export default function PricingPage() {
       {/* Pricing cards */}
       <section className="py-12 bg-[var(--surface-primary)]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 items-start">
-            {PRICING_CONFIG.plans.map((plan) => (
-              <div
-                key={plan.id}
-                className={`rounded-2xl border p-6 flex flex-col ${
-                  plan.highlighted
-                    ? 'border-brand-300 bg-[var(--surface-elevated)] ring-1 ring-brand-200 shadow-lg shadow-brand-100/50 relative lg:scale-[1.03]'
-                    : 'border-[var(--border-default)] bg-[var(--surface-elevated)]'
-                }`}
-              >
-                {plan.highlighted && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-600 px-4 py-1 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm">
-                    Most Popular
-                  </span>
-                )}
-
-                <div className="mb-5">
-                  <h3 className="text-lg font-bold text-[var(--content-primary)]">{plan.name}</h3>
-                  <p className="text-xs text-[#e2e8f0] mt-1 leading-relaxed">{plan.description}</p>
-                </div>
-
-                <div className="mb-1">
-                  {plan.price !== null ? (
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold text-[var(--content-primary)]">
-                        ${plan.price}
-                      </span>
-                      {plan.price > 0 && plan.interval && (
-                        <span className="text-sm text-[var(--content-tertiary)]">/{plan.interval}</span>
-                      )}
-                      {plan.price === 0 && (
-                        <span className="text-sm text-[var(--content-tertiary)]">forever</span>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-2xl font-bold text-[var(--content-primary)]">Custom</p>
-                  )}
-                </div>
-
-                {plan.annualPrice != null && plan.annualPrice > 0 && (
-                  <p className="text-xs text-[var(--content-tertiary)] mb-1">${plan.annualPrice}/mo billed annually</p>
-                )}
-
-                {plan.seats && (
-                  <p className="text-xs font-semibold text-brand-600 mb-5">{plan.seats}</p>
-                )}
-
-                {!plan.seats && <div className="mb-5" />}
-
-                {plan.highlighted ? (
-                  <UpgradeButton
-                    fallbackHref={plan.ctaHref}
-                    className="w-full text-center btn-primary shadow-sm shadow-brand-600/20"
-                  >
-                    {plan.cta}
-                  </UpgradeButton>
-                ) : (
-                  <Link
-                    href={plan.ctaHref}
-                    className="w-full text-center btn-secondary"
-                  >
-                    {plan.cta}
-                  </Link>
-                )}
-                {plan.price !== null ? (<p className="mt-2 mb-4 text-center text-ds-xs text-[var(--content-tertiary)]">No credit card required</p>) : (<div className="mt-2 mb-4" />)}
-
-                <ul className="space-y-2.5 flex-1">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2">
-                      <Check className={`h-3.5 w-3.5 mt-0.5 flex-shrink-0 ${plan.highlighted ? 'text-brand-600' : 'text-[var(--content-tertiary)]'}`} />
-                      <span className="text-xs text-[var(--content-primary)] leading-relaxed">{feature}</span>
-                    </li>
-                  ))}
-                  {plan.limits.map((limit) => (
-                    <li key={limit} className="flex items-start gap-2">
-                      <span className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-center text-[var(--content-tertiary)] text-[10px]">&mdash;</span>
-                      <span className="text-xs text-[var(--content-tertiary)] leading-relaxed">{limit}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+          <PricingCards />
 
           <p className="text-center text-sm text-[var(--content-tertiary)] mt-10 leading-relaxed max-w-xl mx-auto">
             All plans include the browser extension, deterministic processing,

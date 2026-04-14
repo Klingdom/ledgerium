@@ -48,6 +48,7 @@ import { EXTENSION_CONFIG } from '@/lib/config';
 import ProcessGroupsExplorer from '@/components/ProcessGroupsExplorer';
 import PortfolioSidebar, { type PortfolioNode } from '@/components/PortfolioSidebar';
 import CreatePortfolioDialog from '@/components/CreatePortfolioDialog';
+import OnboardingChecklist from '@/components/OnboardingChecklist';
 
 // ─── Type definitions ──────────────────────────────────────────────────────────
 
@@ -2214,9 +2215,11 @@ function EmptyDashboard({
         </Link>
       </div>
 
+      <OnboardingChecklist workflowCount={0} hasExtensionKey={false} />
+
       <div className="card overflow-hidden">
-        <div className="bg-gradient-to-br from-brand-50 via-white to-white px-ds-8 py-ds-10 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-100">
+        <div className="bg-gradient-to-br from-brand-900/15 via-[var(--surface-elevated)] to-[var(--surface-elevated)] px-ds-8 py-ds-10 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-900/20">
             <Layers className="h-8 w-8 text-brand-500" />
           </div>
           <h2 className="mt-ds-4 text-ds-lg font-semibold text-[var(--content-primary)]">

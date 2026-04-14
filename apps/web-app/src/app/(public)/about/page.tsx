@@ -75,67 +75,86 @@ export default function AboutPage() {
                 icon: Eye,
                 title: 'Observation over opinion',
                 desc: 'Workflows should be captured from what people do, not what they say they do. If it wasn\'t observed, it doesn\'t belong in the SOP.',
+                takeaway: 'Your SOPs reflect what people do today — not what a workshop decided.',
               },
               {
                 icon: Shield,
                 title: 'Evidence over interpretation',
                 desc: 'Every step, every instruction, every metric traces back to an observed event. No AI rewrites. No made-up content. No hallucination.',
+                takeaway: 'Every instruction in the SOP has a source event you can verify.',
               },
               {
                 icon: Target,
                 title: 'Determinism over magic',
                 desc: 'The same recording always produces the same output. Reproducibility is the foundation of trust. If you can\'t explain it, you can\'t trust it.',
+                takeaway: 'Re-record next quarter and get a meaningful diff, not a surprise.',
               },
               {
                 icon: Zap,
                 title: 'Capture before automation',
                 desc: 'Before you automate a process, observe it. Before you optimize, get a baseline. Before you train someone, capture what the expert actually does.',
+                takeaway: 'See the real steps before you hand a process to an AI agent.',
               },
               {
                 icon: BookOpen,
                 title: 'Structure over raw data',
                 desc: 'A recording is useful only if it produces something actionable — SOPs, process maps, reports, searchable libraries. Data without structure is noise.',
+                takeaway: 'You get an SOP and process map in minutes — not a video to watch.',
               },
               {
                 icon: CheckCircle,
                 title: 'Privacy is non-negotiable',
                 desc: 'Sensitive values are redacted automatically. No screenshots, no video, no keystroke logging. Users see and control everything that gets captured.',
+                takeaway: 'IT and compliance can approve deployment without escalation.',
               },
-            ].map(({ icon: Icon, title, desc }) => (
+            ].map(({ icon: Icon, title, desc, takeaway }) => (
               <div key={title} className="card p-6">
                 <Icon className="h-5 w-5 text-brand-600 mb-3" />
                 <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-2">{title}</h3>
                 <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
+                {takeaway && (
+                  <p className="mt-1.5 text-xs text-brand-400 leading-relaxed">{takeaway}</p>
+                )}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How it works (brief) */}
+      {/* What makes us different */}
       <section className="py-20 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <h2 className="text-xl font-bold text-[var(--content-primary)] mb-8">
-            How it works
+            What makes Ledgerium different
           </h2>
           <div className="space-y-5 text-[15px] text-[#e2e8f0] leading-relaxed">
             <p>
-              You install a Chrome extension and record a workflow by doing your
-              normal work. The extension captures interaction events — clicks,
-              form entries, navigation, system feedback — as structured data.
+              Most process documentation tools ask you to describe your
+              workflows manually — flowchart builders, form-based SOP editors,
+              screen recording tools that produce videos nobody watches.
             </p>
             <p>
-              A deterministic engine segments the events into meaningful
-              workflow steps, each with timing, confidence scores, and evidence
-              linkage. From these steps, it generates SOPs with event-level
-              instructions, visual process maps with phases and transitions,
-              and structured reports.
+              Ledgerium doesn&apos;t ask you to describe anything. It observes.
+              You do your work in the browser. The extension captures structural
+              interaction data — not screenshots, not keystrokes, not screen
+              recordings — and a deterministic engine turns it into documentation.
             </p>
             <p>
-              Everything is saved to a persistent workflow library you can
-              search, filter, export, and return to. The same recording always
-              produces the same output. Evidence in, structured intelligence out.
+              The same recording always produces the same output. There is no
+              AI rewriting your steps. No hallucinated instructions. No creative
+              interpretation. Every step in the generated SOP traces back to an
+              observed event with timing and evidence.
             </p>
+            <p className="text-[var(--content-primary)] font-medium">
+              The result: process documentation you can actually trust, created in
+              minutes instead of weeks.
+            </p>
+          </div>
+          <div className="mt-6">
+            <Link href="/demo" className="text-sm text-brand-600 hover:text-brand-500 font-medium inline-flex items-center gap-1.5">
+              See the full walkthrough
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
         </div>
       </section>
@@ -147,8 +166,7 @@ export default function AboutPage() {
             See what your real workflows look like
           </h2>
           <p className="mt-3 text-[#e2e8f0]">
-            Record a workflow. Review the structured output. Decide if
-            evidence-based process capture is what your team needs.
+            Record your first workflow. See the structured output in under 5 minutes.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/signup" className="btn-primary gap-2 shadow-sm shadow-brand-600/20">
