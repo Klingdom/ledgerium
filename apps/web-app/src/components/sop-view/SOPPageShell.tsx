@@ -126,19 +126,19 @@ export function SOPPageShell({
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col h-[calc(100vh-200px)] min-h-[500px] bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-200px)] min-h-[500px] bg-[var(--surface-elevated)] rounded-xl border border-[var(--border-default)] shadow-sm overflow-hidden">
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <SOPHeader metadata={viewModel.metadata} />
 
       {/* ── Mode switcher + controls row ───────────────────────────────── */}
-      <div className="flex items-center justify-between px-ds-5 py-ds-1.5 border-b border-gray-100">
+      <div className="flex items-center justify-between px-ds-5 py-ds-1.5 border-b border-[var(--border-subtle)]">
         <SOPModeSwitcher activeMode={mode} onModeChange={handleModeChange} />
 
         <div className="flex items-center gap-1.5">
           {/* Expand/collapse toggle */}
           <button
             onClick={allExpanded ? collapseAll : expandAll}
-            className="text-[10px] font-medium text-gray-500 hover:text-gray-700 px-2 py-1 rounded-md hover:bg-gray-50 transition-colors"
+            className="text-[10px] font-medium text-[var(--content-secondary)] hover:text-[var(--content-primary)] px-2 py-1 rounded-md hover:bg-[var(--surface-secondary)] transition-colors"
           >
             {allExpanded ? 'Collapse all' : 'Expand all'}
           </button>
@@ -147,7 +147,7 @@ export function SOPPageShell({
           {workflowId && (
             <button
               onClick={handleExport}
-              className="flex items-center gap-1 text-[10px] font-medium text-gray-500 hover:text-gray-700 px-2 py-1 rounded-md hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-1 text-[10px] font-medium text-[var(--content-secondary)] hover:text-[var(--content-primary)] px-2 py-1 rounded-md hover:bg-[var(--surface-secondary)] transition-colors"
               title="Export SOP as Markdown"
             >
               <Download className="h-3 w-3" />
@@ -215,7 +215,7 @@ function SOPStepRail({
 
   return (
     <nav
-      className="w-12 flex-shrink-0 border-r border-gray-100 bg-gray-50/30 overflow-y-auto py-3 hidden sm:block"
+      className="w-12 flex-shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-secondary)] overflow-y-auto py-3 hidden sm:block"
       aria-label="Step navigation"
       role="navigation"
     >
@@ -235,7 +235,7 @@ function SOPStepRail({
               className={`w-7 h-7 rounded-lg text-[10px] font-bold flex items-center justify-center transition-all duration-150 ${
                 isExpanded
                   ? 'text-white shadow-sm'
-                  : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                  : 'text-[var(--content-tertiary)] hover:text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
               }`}
               style={isExpanded ? {
                 background: step.accentColor,
@@ -275,14 +275,14 @@ function SOPStepCardCompact({
   return (
     <div
       id={`sop-step-${step.id}`}
-      className={`transition-all ${compact ? '' : 'rounded-xl border border-gray-200 overflow-hidden'}`}
+      className={`transition-all ${compact ? '' : 'rounded-xl border border-[var(--border-default)] overflow-hidden'}`}
     >
       {/* Collapsed header — always visible, clickable */}
       <button
         onClick={onToggle}
         className={`w-full text-left flex items-center gap-3 transition-colors ${
-          compact ? 'px-4 py-2.5 hover:bg-gray-50/50' : 'px-4 py-3 hover:bg-gray-50/30'
-        } ${isExpanded && !compact ? 'border-b border-gray-100' : ''}`}
+          compact ? 'px-4 py-2.5 hover:bg-[var(--surface-secondary)]' : 'px-4 py-3 hover:bg-[var(--surface-secondary)]'
+        } ${isExpanded && !compact ? 'border-b border-[var(--border-subtle)]' : ''}`}
         aria-expanded={isExpanded}
         aria-controls={`sop-step-body-${step.id}`}
       >
@@ -297,7 +297,7 @@ function SOPStepCardCompact({
         {/* Title + category */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            <span className="text-ds-xs font-medium text-gray-800 truncate">{step.title}</span>
+            <span className="text-ds-xs font-medium text-[var(--content-primary)] truncate">{step.title}</span>
             <span
               className="text-[8px] font-bold uppercase tracking-wider px-1 py-0.5 rounded flex-shrink-0"
               style={{ color: step.accentColor, background: `${step.accentColor}10` }}
@@ -315,12 +315,12 @@ function SOPStepCardCompact({
         {/* Right side: system + duration + confidence + chevron */}
         <div className="flex items-center gap-2 flex-shrink-0">
           {step.system && (
-            <span className="text-[9px] font-medium text-gray-500 bg-gray-50 border border-gray-200 rounded px-1.5 py-0.5 hidden md:block">
+            <span className="text-[9px] font-medium text-[var(--content-secondary)] bg-[var(--surface-secondary)] border border-[var(--border-default)] rounded px-1.5 py-0.5 hidden md:block">
               {step.system}
             </span>
           )}
           {step.durationLabel && (
-            <span className="text-[10px] text-gray-400">{step.durationLabel}</span>
+            <span className="text-[10px] text-[var(--content-tertiary)]">{step.durationLabel}</span>
           )}
           {/* Confidence dot */}
           <span
@@ -331,7 +331,7 @@ function SOPStepCardCompact({
           />
           {/* Expand chevron */}
           <svg
-            className={`h-3.5 w-3.5 text-gray-300 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+            className={`h-3.5 w-3.5 text-[var(--content-tertiary)] transition-transform ${isExpanded ? 'rotate-90' : ''}`}
             fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor"
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
@@ -347,28 +347,28 @@ function SOPStepCardCompact({
         >
           {/* Action summary */}
           {step.action && step.action !== step.title && (
-            <p className="text-ds-xs text-gray-600">{step.action}</p>
+            <p className="text-ds-xs text-[var(--content-secondary)]">{step.action}</p>
           )}
 
           {/* Procedure instructions */}
           {step.detailText && (
-            <div className="bg-gray-50 rounded-lg border border-gray-100 overflow-hidden">
+            <div className="bg-[var(--surface-secondary)] rounded-lg border border-[var(--border-subtle)] overflow-hidden">
               {step.detailText.split('\n').filter(Boolean).map((line, i, arr) => (
                 <div
                   key={i}
-                  className={`flex gap-2 px-3 py-1.5 text-[11px] ${i < arr.length - 1 ? 'border-b border-gray-100' : ''}`}
+                  className={`flex gap-2 px-3 py-1.5 text-[11px] ${i < arr.length - 1 ? 'border-b border-[var(--border-subtle)]' : ''}`}
                 >
                   <span className={`flex-shrink-0 min-w-[14px] ${
                     line.startsWith('✓') ? 'text-emerald-600 font-bold' :
-                    line.startsWith('→') ? 'text-gray-400 italic' :
-                    'text-gray-400 tabular-nums font-bold'
+                    line.startsWith('→') ? 'text-[var(--content-tertiary)] italic' :
+                    'text-[var(--content-tertiary)] tabular-nums font-bold'
                   }`}>
                     {line.match(/^\d+\./)?.[0] ?? (line.startsWith('✓') ? '✓' : line.startsWith('→') ? '→' : '')}
                   </span>
                   <span className={
                     line.startsWith('✓') ? 'text-emerald-700' :
-                    line.startsWith('→') ? 'text-gray-500 italic' :
-                    'text-gray-700'
+                    line.startsWith('→') ? 'text-[var(--content-secondary)] italic' :
+                    'text-[var(--content-primary)]'
                   }>
                     {line.replace(/^\d+\.\s*/, '').replace(/^[✓→]\s*/, '')}
                   </span>
@@ -406,7 +406,7 @@ function SOPStepCardCompact({
 
           {/* Expected outcome */}
           {step.expectedOutcome && (
-            <p className="text-[10px] text-gray-500">
+            <p className="text-[10px] text-[var(--content-secondary)]">
               <span className="text-emerald-600 font-medium">→</span> {step.expectedOutcome}
             </p>
           )}

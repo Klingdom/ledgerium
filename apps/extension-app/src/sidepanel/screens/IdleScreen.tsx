@@ -37,7 +37,7 @@ function HistoryRow({
       className="group flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
       onClick={onOpen}
     >
-      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
       <div className="flex-1 min-w-0">
         <p className="text-sm text-gray-900 font-medium truncate leading-snug">
           {entry.activityName}
@@ -121,7 +121,7 @@ function SyncSettings() {
             value={syncUrl}
             onChange={e => setSyncUrl(e.target.value)}
             placeholder="https://ledgerium.ai/api/sync"
-            className="w-full rounded-lg bg-white border border-gray-200 text-xs text-gray-900 placeholder-gray-400 px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-colors"
+            className="w-full rounded-lg bg-white border border-gray-200 text-xs text-gray-900 placeholder-gray-400 px-3 py-2 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-colors"
           />
         </div>
         <div>
@@ -131,7 +131,7 @@ function SyncSettings() {
             value={apiKey}
             onChange={e => setApiKey(e.target.value)}
             placeholder="ldg_..."
-            className="w-full rounded-lg bg-white border border-gray-200 text-xs text-gray-900 placeholder-gray-400 font-mono px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-colors"
+            className="w-full rounded-lg bg-white border border-gray-200 text-xs text-gray-900 placeholder-gray-400 font-mono px-3 py-2 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-colors"
           />
         </div>
         <button onClick={handleSave} className="w-full py-2 rounded-lg text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors">
@@ -166,9 +166,36 @@ export function IdleScreen({ onStart, onOpenHistory }: IdleScreenProps) {
       {/* Form */}
       <div className="flex-none px-4 pt-6 pb-4">
         <div className="flex flex-col items-center mb-6">
-          <h1 className="text-lg font-bold text-gray-900">
-            Ledgerium <span className="text-blue-600">AI</span>
-          </h1>
+          <div className="flex items-center gap-2">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 220 220"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-label="Ledgerium"
+            >
+              <defs>
+                <linearGradient id="idle-logo-grad" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0" stopColor="#20f2a6" />
+                  <stop offset="1" stopColor="#0adf92" />
+                </linearGradient>
+              </defs>
+              <g
+                stroke="url(#idle-logo-grad)"
+                strokeWidth="12"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M70 70 L110 45 L150 70 L110 95 Z" />
+                <path d="M70 110 L110 85 L150 110 L110 135 Z" opacity="0.95" />
+                <path d="M70 150 L110 125 L150 150 L110 175 Z" opacity="0.9" />
+              </g>
+            </svg>
+            <span className="text-lg font-bold text-gray-900">
+              Ledgerium <span className="text-emerald-600">AI</span>
+            </span>
+          </div>
           <p className="text-xs text-gray-500 mt-0.5">Workflow Recorder</p>
         </div>
 
@@ -184,7 +211,7 @@ export function IdleScreen({ onStart, onOpenHistory }: IdleScreenProps) {
               onChange={e => setActivityName(e.target.value)}
               placeholder="e.g. Submit expense report"
               autoFocus
-              className="w-full rounded-lg bg-white border border-gray-200 text-sm text-gray-900 placeholder-gray-400 px-3 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+              className="w-full rounded-lg bg-white border border-gray-200 text-sm text-gray-900 placeholder-gray-400 px-3 py-2.5 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-colors"
             />
           </div>
 

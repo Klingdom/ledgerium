@@ -12,10 +12,10 @@ export function WorkflowLegend({ visible, onClose }: Props) {
   if (!visible) return null;
 
   return (
-    <div className="absolute bottom-4 left-4 z-10 w-64 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl shadow-lg overflow-hidden">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
-        <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Legend</span>
-        <button onClick={onClose} className="p-0.5 rounded hover:bg-gray-100 text-gray-400">
+    <div className="absolute bottom-4 left-4 z-10 w-64 bg-[var(--surface-elevated)]/95 backdrop-blur-sm border border-[var(--border-default)] rounded-xl shadow-lg overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--border-subtle)]">
+        <span className="text-[10px] font-semibold text-[var(--content-secondary)] uppercase tracking-wider">Legend</span>
+        <button onClick={onClose} className="p-0.5 rounded hover:bg-[var(--surface-secondary)] text-[var(--content-tertiary)]">
           <X className="h-3 w-3" />
         </button>
       </div>
@@ -49,7 +49,7 @@ export function WorkflowLegend({ visible, onClose }: Props) {
 function LegendSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider mb-1">{title}</p>
+      <p className="text-[9px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider mb-1">{title}</p>
       <div className="space-y-0.5">{children}</div>
     </div>
   );
@@ -77,7 +77,7 @@ function LegendRow({
           opacity: 0.8,
         }}
       />
-      <span className="text-[10px] text-gray-600">{label}</span>
+      <span className="text-[10px] text-[var(--content-secondary)]">{label}</span>
     </div>
   );
 }
@@ -101,7 +101,7 @@ function LegendEdgeRow({
           strokeDasharray={dashed ? '4 2' : 'none'}
         />
       </svg>
-      <span className="text-[10px] text-gray-600">{label}</span>
+      <span className="text-[10px] text-[var(--content-secondary)]">{label}</span>
     </div>
   );
 }

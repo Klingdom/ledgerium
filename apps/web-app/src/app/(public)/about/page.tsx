@@ -17,12 +17,12 @@ export default function AboutPage() {
           <p className="text-sm font-semibold text-brand-600 uppercase tracking-wide mb-4">
             Why Ledgerium exists
           </p>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)] leading-tight">
             Most process documentation is aspirational.
             <br className="hidden sm:block" />
             We think it should be evidence-based.
           </h1>
-          <p className="mt-6 text-lg text-gray-500 leading-relaxed">
+          <p className="mt-6 text-lg text-[var(--content-secondary)] leading-relaxed">
             SOPs written from memory. Process maps drawn in workshops. Training
             docs that describe the ideal, not the reality. Every organization has
             this problem. Most don&apos;t know how big the gap is.
@@ -31,12 +31,12 @@ export default function AboutPage() {
       </section>
 
       {/* The problem */}
-      <section className="py-20 bg-white border-t border-gray-100">
+      <section className="py-20 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-8">
+          <h2 className="text-xl font-bold text-[var(--content-primary)] mb-8">
             The documentation gap
           </h2>
-          <div className="space-y-5 text-[15px] text-gray-600 leading-relaxed">
+          <div className="space-y-5 text-[15px] text-[var(--content-secondary)] leading-relaxed">
             <p>
               Every organization runs on workflows — onboarding customers,
               processing claims, configuring systems, closing sales. These
@@ -55,7 +55,7 @@ export default function AboutPage() {
               are automating processes they have never measured, scaling
               inefficiencies they have never seen.
             </p>
-            <p className="text-gray-900 font-medium">
+            <p className="text-[var(--content-primary)] font-medium">
               You can&apos;t improve what you can&apos;t see. You can&apos;t
               automate what you don&apos;t understand.
             </p>
@@ -64,9 +64,9 @@ export default function AboutPage() {
       </section>
 
       {/* What we believe */}
-      <section className="py-20 bg-gray-50 border-t border-gray-200">
+      <section className="py-20 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <h2 className="text-center text-xl font-bold text-gray-900 mb-12">
+          <h2 className="text-center text-xl font-bold text-[var(--content-primary)] mb-12">
             Principles
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -104,8 +104,8 @@ export default function AboutPage() {
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="card p-6">
                 <Icon className="h-5 w-5 text-brand-600 mb-3" />
-                <h3 className="text-sm font-semibold text-gray-900 mb-2">{title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
+                <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-2">{title}</h3>
+                <p className="text-sm text-[var(--content-secondary)] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -113,12 +113,12 @@ export default function AboutPage() {
       </section>
 
       {/* How it works (brief) */}
-      <section className="py-20 bg-white border-t border-gray-100">
+      <section className="py-20 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-8">
+          <h2 className="text-xl font-bold text-[var(--content-primary)] mb-8">
             How it works
           </h2>
-          <div className="space-y-5 text-[15px] text-gray-600 leading-relaxed">
+          <div className="space-y-5 text-[15px] text-[var(--content-secondary)] leading-relaxed">
             <p>
               You install a Chrome extension and record a workflow by doing your
               normal work. The extension captures interaction events — clicks,
@@ -141,12 +141,12 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-gray-50 border-t border-gray-200">
+      <section className="py-20 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-[var(--content-primary)]">
             See what your real workflows look like
           </h2>
-          <p className="mt-3 text-gray-500">
+          <p className="mt-3 text-[var(--content-secondary)]">
             Record a workflow. Review the structured output. Decide if
             evidence-based process capture is what your team needs.
           </p>

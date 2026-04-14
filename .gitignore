@@ -10,3 +10,11 @@ coverage/
 .DS_Store
 Thumbs.db
 *.log
+
+# Playwright
+e2e/.auth/
+playwright-report/
+test-results/
+blob-report/
+prisma/test.db
+prisma/test.db-*

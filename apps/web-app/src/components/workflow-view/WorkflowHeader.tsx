@@ -22,7 +22,7 @@ export function WorkflowHeader({ metadata }: Props) {
     : null;
 
   return (
-    <div className="flex items-center gap-ds-3 px-ds-5 py-ds-2 border-b border-gray-100 bg-white">
+    <div className="flex items-center gap-ds-3 px-ds-5 py-ds-2 border-b border-[var(--border-subtle)] bg-[var(--surface-elevated)]">
       {/* Compact metrics */}
       <MetricChip icon={Layers} value={`${metadata.stepCount}`} label="steps" />
       <MetricChip icon={Clock} value={metadata.durationLabel} />
@@ -34,12 +34,12 @@ export function WorkflowHeader({ metadata }: Props) {
           <Divider />
           <div className="flex items-center gap-1">
             {metadata.systems.slice(0, 4).map(sys => (
-              <span key={sys} className="text-[10px] font-medium text-gray-500 bg-gray-50 border border-gray-200 rounded px-1.5 py-0.5">
+              <span key={sys} className="text-[10px] font-medium text-[var(--content-secondary)] bg-[var(--surface-secondary)] border border-[var(--border-default)] rounded px-1.5 py-0.5">
                 {sys}
               </span>
             ))}
             {metadata.systems.length > 4 && (
-              <span className="text-[10px] text-gray-400">+{metadata.systems.length - 4}</span>
+              <span className="text-[10px] text-[var(--content-tertiary)]">+{metadata.systems.length - 4}</span>
             )}
           </div>
         </>
@@ -100,14 +100,14 @@ function MetricChip({
   label?: string;
 }) {
   return (
-    <span className="flex items-center gap-1 text-[11px] text-gray-600">
-      <Icon className="h-3 w-3 text-gray-400" />
-      <span className="font-semibold text-gray-800">{value}</span>
-      {label && <span className="text-gray-400">{label}</span>}
+    <span className="flex items-center gap-1 text-[11px] text-[var(--content-secondary)]">
+      <Icon className="h-3 w-3 text-[var(--content-tertiary)]" />
+      <span className="font-semibold text-[var(--content-primary)]">{value}</span>
+      {label && <span className="text-[var(--content-tertiary)]">{label}</span>}
     </span>
   );
 }
 
 function Divider() {
-  return <span className="w-px h-4 bg-gray-200" />;
+  return <span className="w-px h-4 bg-[var(--surface-secondary)]" />;
 }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import type { Prisma } from '@prisma/client';
+import { computeHealthScore } from '@/lib/health-scores';
+import { toPlanType, hasFeature } from '@/lib/plans';
 
 // ── Per-workflow intelligence computation ────────────────────────────────────
 
@@ -339,6 +341,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // Resolve plan for feature gating (health scores are Starter+)
+  const userRecord = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { plan: true },
+  });
+  const userPlan = toPlanType(userRecord?.plan ?? 'free');
+  const canSeeHealthScores = hasFeature(userPlan, 'healthScores');
+
   const params = req.nextUrl.searchParams;
   const search = params.get('search') ?? '';
   const sortBy = params.get('sort') ?? 'created_at';
@@ -506,6 +516,15 @@ export async function GET(req: NextRequest) {
         stabilityScore: w.processDefinition.stabilityScore,
         confidenceScore: w.processDefinition.confidenceScore,
       } : null,
+      // Health score: only included for Starter+ users
+      ...(canSeeHealthScores ? {
+        healthScore: computeHealthScore({
+          stepCount: w.stepCount,
+          confidence: w.confidence,
+          durationMs: w.durationMs,
+          phaseCount: w.phaseCount,
+        }),
+      } : {}),
     };
   });
 

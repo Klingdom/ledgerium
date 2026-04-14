@@ -60,7 +60,7 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
         </span>
         <span className="flex-1" />
         {n.durationMs > 0 && (
-          <span className="flex items-center gap-0.5 text-[10px] text-gray-400 group-hover:text-gray-600 transition-colors">
+          <span className="flex items-center gap-0.5 text-[10px] text-[var(--content-tertiary)] group-hover:text-[var(--content-secondary)] transition-colors">
             <Clock className="w-2.5 h-2.5" />
             {n.durationLabel}
           </span>
@@ -69,7 +69,7 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
 
       {/* Row 2: Title */}
       <p
-        className="text-[12px] font-medium leading-[1.4] mb-1 group-hover:text-gray-900 transition-colors"
+        className="text-[12px] font-medium leading-[1.4] mb-1 group-hover:text-[var(--content-primary)] transition-colors"
         style={{
           color: selected ? n.textColor : '#374151',
           overflow: 'hidden',
@@ -85,7 +85,7 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
       {/* Row 3: System + indicators */}
       <div className="flex items-center gap-1.5">
         {n.system && (
-          <span className="text-[9px] font-medium text-gray-500 bg-gray-100 group-hover:bg-gray-200/60 rounded px-1.5 py-0.5 truncate max-w-[120px] transition-colors">
+          <span className="text-[9px] font-medium text-[var(--content-secondary)] bg-[var(--surface-secondary)] group-hover:bg-[var(--surface-secondary)]/60 rounded px-1.5 py-0.5 truncate max-w-[120px] transition-colors">
             {n.system}
           </span>
         )}

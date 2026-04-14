@@ -12,7 +12,7 @@ export function EvidenceTab({ processOutput }: Props) {
   const [copied, setCopied] = useState(false);
 
   if (!processOutput) {
-    return <div className="text-ds-sm text-gray-400 py-ds-10">No evidence data available.</div>;
+    return <div className="text-ds-sm text-[var(--content-tertiary)] py-ds-10">No evidence data available.</div>;
   }
 
   const sections = [
@@ -31,7 +31,7 @@ export function EvidenceTab({ processOutput }: Props) {
   return (
     <div className="ds-document">
       <div className="flex items-center justify-between">
-        <p className="text-ds-sm text-gray-500">
+        <p className="text-ds-sm text-[var(--content-secondary)]">
           Structured evidence from the deterministic process engine.
         </p>
         <button onClick={handleCopyAll} className="btn-secondary gap-1 text-xs">
@@ -54,19 +54,19 @@ export function EvidenceTab({ processOutput }: Props) {
           <div key={key} className="card overflow-hidden">
             <button
               onClick={() => setExpanded(expanded === key ? null : key)}
-              className="flex w-full items-center justify-between px-ds-5 py-ds-4 text-left hover:bg-gray-50/50 transition-colors"
+              className="flex w-full items-center justify-between px-ds-5 py-ds-4 text-left hover:bg-[var(--surface-secondary)] transition-colors"
             >
-              <span className="text-ds-sm font-medium text-gray-900">{label}</span>
+              <span className="text-ds-sm font-medium text-[var(--content-primary)]">{label}</span>
               {expanded === key ? (
-                <ChevronDown className="h-4 w-4 text-gray-400" />
+                <ChevronDown className="h-4 w-4 text-[var(--content-tertiary)]" />
               ) : (
-                <ChevronRight className="h-4 w-4 text-gray-400" />
+                <ChevronRight className="h-4 w-4 text-[var(--content-tertiary)]" />
               )}
             </button>
 
             {expanded === key && (
-              <div className="border-t border-gray-100 px-ds-5 py-ds-3">
-                <pre className="max-h-96 overflow-auto rounded-ds-md bg-gray-50 p-ds-4 text-ds-xs text-gray-700 font-mono leading-relaxed">
+              <div className="border-t border-[var(--border-subtle)] px-ds-5 py-ds-3">
+                <pre className="max-h-96 overflow-auto rounded-ds-md bg-[var(--surface-secondary)] p-ds-4 text-ds-xs text-[var(--content-primary)] font-mono leading-relaxed">
                   {JSON.stringify(data, null, 2)}
                 </pre>
               </div>

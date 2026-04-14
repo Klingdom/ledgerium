@@ -14,6 +14,8 @@ import {
   Download,
 } from 'lucide-react';
 import { EXTENSION_CONFIG } from '@/lib/config';
+import { LogoFull } from '@/components/shared/LogoMark';
+import { ThemeToggle } from '@/components/shared/ThemeToggle';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Workflows', icon: LayoutDashboard },
@@ -29,14 +31,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--surface-primary)]">
       {/* Top nav */}
-      <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 backdrop-blur-sm no-print">
+      <header className="sticky top-0 z-30 border-b border-[var(--border-default)] bg-[var(--surface-elevated)]/95 backdrop-blur-sm no-print">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-ds-4 sm:px-ds-6">
           <Link href="/dashboard" className="flex items-center">
-            <span className="text-2xl font-bold tracking-tight text-gray-900">
-              Ledgerium <span className="text-brand-600">AI</span>
-            </span>
+            <LogoFull size={24} />
           </Link>
 
           <nav className="flex items-center gap-ds-1">
@@ -49,7 +49,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   className={`flex items-center gap-1.5 rounded-ds-md px-ds-3 py-ds-2 text-ds-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-brand-50 text-brand-700'
-                      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                      : 'text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-primary)]'
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -58,7 +58,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               );
             })}
 
-            <div className="ml-ds-2 flex items-center gap-ds-2 border-l border-gray-200 pl-ds-3">
+            <div className="ml-ds-2 flex items-center gap-ds-2 border-l border-[var(--border-default)] pl-ds-3">
               <a
                 href={EXTENSION_CONFIG.directDownloadUrl}
                 download
@@ -68,12 +68,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Download className="h-3.5 w-3.5" />
                 <span className="hidden lg:inline">Get Extension</span>
               </a>
-              <span className="hidden text-ds-xs text-gray-400 sm:inline">
+              <span className="hidden text-ds-xs text-[var(--content-tertiary)] sm:inline">
                 {session?.user?.email}
               </span>
+              <ThemeToggle />
               <button
                 onClick={() => signOut({ callbackUrl: '/login' })}
-                className="rounded-ds-md p-ds-2 text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors"
+                className="rounded-ds-md p-ds-2 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-secondary)] transition-colors"
                 title="Sign out"
               >
                 <LogOut className="h-4 w-4" />

@@ -3,6 +3,7 @@ import { db } from '@/db';
 import { hashKey } from '@/lib/api-keys';
 import { validateBundle, runProcessEngine, buildWorkflowReportFromOutput, renderAllTemplates } from '@/lib/ingestion';
 import { clusterWorkflows } from '@/lib/intelligence';
+import { checkRecordingLimit } from '@/lib/feature-gating';
 import { UPLOAD_DIR } from '@/lib/storage';
 import fs from 'fs';
 import path from 'path';
@@ -55,12 +56,19 @@ export async function POST(req: NextRequest) {
     data: { lastUsedAt: new Date() },
   });
 
-  // ── Plan limit enforcement ──────────────────────────────────────────────
+  // ── Plan-aware recording limit (monthly reset, supports all tiers) ──────
   const user = await db.user.findUnique({ where: { id: userId } });
-  if (user && user.plan === 'free' && user.uploadCount >= 5) {
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+
+  const limitCheck = await checkRecordingLimit(user);
+  if (!limitCheck.allowed) {
     return NextResponse.json({
-      error: 'Free plan limit reached — upgrade to Pro for unlimited uploads',
+      error: 'Recording limit reached',
       code: 'UPGRADE_REQUIRED',
+      used: limitCheck.used,
+      limit: limitCheck.limit,
     }, { status: 403 });
   }
 

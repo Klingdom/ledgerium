@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { z } from 'zod';
+import { checkFeatureAccess } from '@/lib/feature-gating';
 
 const PORTFOLIO_TYPES = ['folder', 'project', 'business_unit', 'department', 'custom'] as const;
 
@@ -48,6 +49,25 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const user = await db.user.findUnique({ where: { id: session.user.id } });
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+
+  // Gate: portfolio access is a Team+ (sharedLibrary) feature
+  const access = checkFeatureAccess(user, 'sharedLibrary');
+  if (!access.allowed) {
+    return NextResponse.json(
+      {
+        error: 'Feature not available on your plan',
+        feature: 'sharedLibrary',
+        requiredPlan: access.requiredPlan,
+        upgradeUrl: '/pricing',
+      },
+      { status: 403 },
+    );
+  }
+
   const portfolio = await db.portfolio.findFirst({
     where: { id: params.id, userId: session.user.id },
     include: {
@@ -91,6 +111,25 @@ export async function PATCH(
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const user = await db.user.findUnique({ where: { id: session.user.id } });
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+
+  // Gate: portfolio management is a Team+ (sharedLibrary) feature
+  const patchAccess = checkFeatureAccess(user, 'sharedLibrary');
+  if (!patchAccess.allowed) {
+    return NextResponse.json(
+      {
+        error: 'Feature not available on your plan',
+        feature: 'sharedLibrary',
+        requiredPlan: patchAccess.requiredPlan,
+        upgradeUrl: '/pricing',
+      },
+      { status: 403 },
+    );
   }
 
   const portfolio = await db.portfolio.findFirst({
@@ -181,6 +220,25 @@ export async function DELETE(
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const user = await db.user.findUnique({ where: { id: session.user.id } });
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+
+  // Gate: portfolio management is a Team+ (sharedLibrary) feature
+  const deleteAccess = checkFeatureAccess(user, 'sharedLibrary');
+  if (!deleteAccess.allowed) {
+    return NextResponse.json(
+      {
+        error: 'Feature not available on your plan',
+        feature: 'sharedLibrary',
+        requiredPlan: deleteAccess.requiredPlan,
+        upgradeUrl: '/pricing',
+      },
+      { status: 403 },
+    );
   }
 
   const portfolio = await db.portfolio.findFirst({

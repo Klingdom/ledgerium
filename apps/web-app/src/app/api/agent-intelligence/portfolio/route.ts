@@ -1,16 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { analyzePortfolioAgentIntelligence } from '@/lib/agent-intelligence';
+import { checkFeatureAccess } from '@/lib/feature-gating';
+import { db } from '@/db';
 
 /**
  * POST /api/agent-intelligence/portfolio
  * Run cross-workflow intelligence analysis on the user's workflow portfolio.
  * Optionally accepts { workflowIds: string[] } in the body to scope analysis.
+ * Requires agentComposition feature (Growth+).
  */
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const user = await db.user.findUnique({ where: { id: session.user.id } });
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+
+  // Gate: agentComposition is a Growth+ feature
+  const access = checkFeatureAccess(user, 'agentComposition');
+  if (!access.allowed) {
+    return NextResponse.json(
+      {
+        error: 'Feature not available on your plan',
+        feature: 'agentComposition',
+        requiredPlan: access.requiredPlan,
+        upgradeUrl: '/pricing',
+      },
+      { status: 403 },
+    );
   }
 
   let workflowIds: string[] | undefined;

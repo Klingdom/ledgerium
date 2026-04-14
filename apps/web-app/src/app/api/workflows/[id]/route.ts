@@ -4,6 +4,8 @@ import { db } from '@/db';
 import crypto from 'crypto';
 import { z } from 'zod';
 import { renderAllTemplates } from '@/lib/ingestion';
+import { computeHealthScore } from '@/lib/health-scores';
+import { toPlanType, hasFeature } from '@/lib/plans';
 
 /** Validation schema for workflow PATCH body fields. */
 const patchSchema = z.object({
@@ -25,6 +27,14 @@ export async function GET(
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  // Resolve plan for feature gating (health scores are Starter+)
+  const userRecord = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { plan: true },
+  });
+  const userPlan = toPlanType(userRecord?.plan ?? 'free');
+  const canSeeHealthScores = hasFeature(userPlan, 'healthScores');
 
   const workflow = await db.workflow.findFirst({
     where: { id: params.id, userId: session.user.id },
@@ -75,10 +85,22 @@ export async function GET(
     }
   }
 
+  // Compute health score only for plans that include the feature
+  const healthScore = canSeeHealthScores
+    ? computeHealthScore({
+        stepCount: workflow.stepCount,
+        confidence: workflow.confidence,
+        durationMs: workflow.durationMs,
+        phaseCount: workflow.phaseCount,
+      })
+    : undefined;
+
   return NextResponse.json({
     workflow: {
       ...workflow,
       toolsUsed: workflow.toolsUsed ? JSON.parse(workflow.toolsUsed) : [],
+      // Only present for Starter+ users
+      ...(healthScore !== undefined ? { healthScore } : {}),
     },
     artifacts: artifacts.map((a) => ({
       id: a.id,

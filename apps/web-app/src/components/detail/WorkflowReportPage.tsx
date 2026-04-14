@@ -247,7 +247,7 @@ const PHASE_BG_COLORS = [
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-4">
+    <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[var(--content-tertiary)] mb-4">
       {children}
     </h2>
   );
@@ -264,7 +264,7 @@ interface SkeletonCardProps {
 function SkeletonCard({ message, onAction, actionLabel }: SkeletonCardProps) {
   return (
     <div className="card px-5 py-8 text-center">
-      <p className="text-ds-sm text-gray-400 mb-3">{message}</p>
+      <p className="text-ds-sm text-[var(--content-tertiary)] mb-3">{message}</p>
       {onAction != null && actionLabel != null && (
         <button
           type="button"
@@ -319,7 +319,7 @@ function HeroSection({ workflow }: { workflow: WorkflowSummary }) {
       ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
       : workflow.status === 'active'
       ? 'bg-brand-50 text-brand-700 border border-brand-200'
-      : 'bg-gray-100 text-gray-600';
+      : 'bg-[var(--surface-secondary)] text-[var(--content-secondary)]';
 
   return (
     <div
@@ -328,11 +328,11 @@ function HeroSection({ workflow }: { workflow: WorkflowSummary }) {
     >
       {/* Title row */}
       <div className="flex items-center gap-3 mb-1 flex-wrap">
-        <h1 className="text-ds-2xl font-bold tracking-tight text-gray-900">{workflow.title}</h1>
+        <h1 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">{workflow.title}</h1>
       </div>
 
       {/* Metrics band */}
-      <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 divide-x divide-gray-100 rounded-ds-md border border-gray-100 bg-white overflow-hidden">
+      <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 divide-x divide-[var(--border-subtle)] rounded-ds-md border border-[var(--border-subtle)] bg-[var(--surface-elevated)] overflow-hidden">
         {/* Duration */}
         <MetricCell label="Duration" value={displayDuration} />
 
@@ -344,11 +344,11 @@ function HeroSection({ workflow }: { workflow: WorkflowSummary }) {
 
         {/* Confidence */}
         <div className="px-4 py-3">
-          <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-1">Confidence</p>
+          <p className="text-[10px] uppercase tracking-wide text-[var(--content-tertiary)] mb-1">Confidence</p>
           <p className={`text-[28px] font-bold tabular-nums leading-none ${confColor}`}>
             {confValue}%
           </p>
-          <div className="mt-2 h-1 w-full rounded-full bg-gray-100 overflow-hidden">
+          <div className="mt-2 h-1 w-full rounded-full bg-[var(--surface-secondary)] overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-700 ${confBarColor}`}
               style={{ width: `${confidencePct}%` }}
@@ -358,8 +358,8 @@ function HeroSection({ workflow }: { workflow: WorkflowSummary }) {
 
         {/* Systems */}
         <div className="px-4 py-3 col-span-2 sm:col-span-1">
-          <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-1">Systems</p>
-          <p className="text-[28px] font-bold tabular-nums leading-none text-gray-900">
+          <p className="text-[10px] uppercase tracking-wide text-[var(--content-tertiary)] mb-1">Systems</p>
+          <p className="text-[28px] font-bold tabular-nums leading-none text-[var(--content-primary)]">
             {workflow.toolsUsed.length}
           </p>
           {workflow.toolsUsed.length > 0 && (
@@ -376,7 +376,7 @@ function HeroSection({ workflow }: { workflow: WorkflowSummary }) {
 
         {/* Status */}
         <div className="px-4 py-3">
-          <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-2">Status</p>
+          <p className="text-[10px] uppercase tracking-wide text-[var(--content-tertiary)] mb-2">Status</p>
           <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusClass}`}>
             {statusLabel}
           </span>
@@ -389,8 +389,8 @@ function HeroSection({ workflow }: { workflow: WorkflowSummary }) {
 function MetricCell({ label, value }: { label: string; value: string }) {
   return (
     <div className="px-4 py-3">
-      <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-1">{label}</p>
-      <p className="text-[28px] font-bold tabular-nums leading-none text-gray-900">{value}</p>
+      <p className="text-[10px] uppercase tracking-wide text-[var(--content-tertiary)] mb-1">{label}</p>
+      <p className="text-[28px] font-bold tabular-nums leading-none text-[var(--content-primary)]">{value}</p>
     </div>
   );
 }
@@ -417,11 +417,11 @@ function ProcessScoresSection({ interpretation }: { interpretation: Interpretati
         <SectionHeading>Process Intelligence</SectionHeading>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {['Complexity', 'Friction', 'Linearity', 'Manual Intensity'].map((label) => (
-            <div key={label} className="bg-white border border-gray-100 rounded-ds-lg px-5 py-4 animate-pulse">
-              <div className="h-2.5 w-20 bg-gray-100 rounded mb-3" />
-              <div className="h-8 w-12 bg-gray-100 rounded mb-3" />
-              <div className="h-1.5 w-full bg-gray-100 rounded" />
-              <div className="h-3 w-28 bg-gray-100 rounded mt-2" />
+            <div key={label} className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-ds-lg px-5 py-4 animate-pulse">
+              <div className="h-2.5 w-20 bg-[var(--surface-secondary)] rounded mb-3" />
+              <div className="h-8 w-12 bg-[var(--surface-secondary)] rounded mb-3" />
+              <div className="h-1.5 w-full bg-[var(--surface-secondary)] rounded" />
+              <div className="h-3 w-28 bg-[var(--surface-secondary)] rounded mt-2" />
             </div>
           ))}
         </div>
@@ -480,7 +480,7 @@ function PhaseTimelineSection({ interpretation }: { interpretation: Interpretati
         <SkeletonCard message="No phase data available for this workflow." />
       ) : (
         <div className="overflow-x-auto pb-2">
-          <div className="flex items-stretch gap-0 min-w-max rounded-ds-md border border-gray-100 overflow-hidden">
+          <div className="flex items-stretch gap-0 min-w-max rounded-ds-md border border-[var(--border-subtle)] overflow-hidden">
             {phases.map((phase, idx) => {
               const colorBar = PHASE_COLORS[idx % PHASE_COLORS.length] ?? 'bg-blue-500';
               const colorText = PHASE_TEXT_COLORS[idx % PHASE_TEXT_COLORS.length] ?? 'text-blue-700';
@@ -497,17 +497,17 @@ function PhaseTimelineSection({ interpretation }: { interpretation: Interpretati
                   <p className={`text-[10px] font-semibold uppercase tracking-wide mt-1 ${colorText}`}>
                     Phase {phase.ordinal}
                   </p>
-                  <p className="text-ds-sm font-medium text-gray-900 mt-0.5 leading-snug">
+                  <p className="text-ds-sm font-medium text-[var(--content-primary)] mt-0.5 leading-snug">
                     {phase.name}
                   </p>
-                  <div className="mt-2 flex items-center gap-2 text-[10px] text-gray-500">
+                  <div className="mt-2 flex items-center gap-2 text-[10px] text-[var(--content-secondary)]">
                     <span>{phase.stepCount} step{phase.stepCount !== 1 ? 's' : ''}</span>
                     {phase.durationMs && (
                       <span>{formatDuration(phase.durationMs)}</span>
                     )}
                   </div>
                   {phase.system && (
-                    <p className="mt-1 text-[10px] text-gray-400 truncate">{phase.system}</p>
+                    <p className="mt-1 text-[10px] text-[var(--content-tertiary)] truncate">{phase.system}</p>
                   )}
                 </div>
               );
@@ -539,8 +539,8 @@ function InsightsFeedSection({ insights }: { insights: InsightsData | null | und
         <SectionHeading>Insights</SectionHeading>
         <div className="bg-emerald-50 border border-emerald-200 rounded-ds-lg px-6 py-8 text-center">
           <CheckCircle className="mx-auto h-8 w-8 text-emerald-500 mb-3" />
-          <h3 className="text-ds-base font-medium text-gray-900">No inefficiencies detected</h3>
-          <p className="mt-1 text-ds-sm text-gray-500">
+          <h3 className="text-ds-base font-medium text-[var(--content-primary)]">No inefficiencies detected</h3>
+          <p className="mt-1 text-ds-sm text-[var(--content-secondary)]">
             {insights?.noInsightsMessage ?? 'This workflow appears well-structured.'}
           </p>
         </div>
@@ -593,7 +593,7 @@ function InsightsFeedSection({ insights }: { insights: InsightsData | null | und
             </span>
           )}
           {mediumCount > 0 && (
-            <span className="inline-flex items-center rounded-full bg-gray-100 text-gray-600 text-[10px] font-semibold px-2 py-0.5">
+            <span className="inline-flex items-center rounded-full bg-[var(--surface-secondary)] text-[var(--content-secondary)] text-[10px] font-semibold px-2 py-0.5">
               {mediumCount} medium
             </span>
           )}
@@ -610,7 +610,7 @@ function InsightsFeedSection({ insights }: { insights: InsightsData | null | und
             className={`rounded-full px-3 py-1 text-[11px] font-medium transition-colors ${
               activeCategory === cat.key
                 ? 'bg-brand-600 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                : 'bg-[var(--surface-secondary)] text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
             }`}
           >
             {cat.label}
@@ -620,7 +620,7 @@ function InsightsFeedSection({ insights }: { insights: InsightsData | null | und
 
       {/* Insight cards */}
       {normalizedInsights.length === 0 ? (
-        <p className="text-ds-sm text-gray-400 py-4">No insights in this category.</p>
+        <p className="text-ds-sm text-[var(--content-tertiary)] py-4">No insights in this category.</p>
       ) : (
         <div className="space-y-2">
           {normalizedInsights.map((ins) => (
@@ -676,7 +676,7 @@ function AutomationOpportunityCard({ opportunity }: { opportunity: AgentOpportun
   const savings = opportunity.estimatedTimeSavingsMs;
 
   return (
-    <div className="bg-white border border-gray-100 rounded-ds-lg px-4 py-4 flex items-start gap-4">
+    <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-ds-lg px-4 py-4 flex items-start gap-4">
       <AutomationScoreChip score={score} size="md" />
       <div className="flex-1 min-w-0">
         {opportunity.category && (
@@ -684,11 +684,11 @@ function AutomationOpportunityCard({ opportunity }: { opportunity: AgentOpportun
             {opportunity.category.replace(/_/g, ' ')}
           </span>
         )}
-        <p className="text-ds-sm font-medium text-gray-900 leading-snug">
+        <p className="text-ds-sm font-medium text-[var(--content-primary)] leading-snug">
           {opportunity.title ?? 'Automation opportunity'}
         </p>
         {opportunity.description && (
-          <p className="text-ds-xs text-gray-500 mt-0.5 line-clamp-2">{opportunity.description}</p>
+          <p className="text-ds-xs text-[var(--content-secondary)] mt-0.5 line-clamp-2">{opportunity.description}</p>
         )}
         {savings != null && savings > 0 && (
           <p className="mt-1.5 text-ds-xs font-semibold text-emerald-600">
@@ -728,7 +728,7 @@ function BottlenecksSection({
           {...(onRunIntelligence != null ? { onAction: onRunIntelligence, actionLabel: 'Run Analysis' } : {})}
         />
       ) : (
-        <div className="bg-white border border-gray-100 rounded-ds-lg overflow-hidden divide-y divide-gray-50">
+        <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-ds-lg overflow-hidden divide-y divide-[var(--border-subtle)]">
           {bottlenecks.map((b) => {
             const step = stepMap.get(b.position);
             return (
@@ -781,11 +781,11 @@ function StepBreakdownSection({
     <div id="rpt-steps" className="scroll-mt-20">
       <div className="flex items-center gap-3 mb-4">
         <SectionHeading>Step Breakdown</SectionHeading>
-        <span className="mb-4 inline-flex items-center rounded-full bg-gray-100 text-gray-600 text-[10px] font-semibold px-2 py-0.5">
+        <span className="mb-4 inline-flex items-center rounded-full bg-[var(--surface-secondary)] text-[var(--content-secondary)] text-[10px] font-semibold px-2 py-0.5">
           {steps.length} steps
         </span>
       </div>
-      <div className="bg-white border border-gray-100 rounded-ds-lg overflow-hidden divide-y divide-gray-50">
+      <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-ds-lg overflow-hidden divide-y divide-[var(--border-subtle)]">
         {steps.map((step) => {
           const isBottleneck = bottleneckPositions.has(step.ordinal);
           const showPhaseDivider =
@@ -801,7 +801,7 @@ function StepBreakdownSection({
               {/* Phase divider */}
               {showPhaseDivider && step.phaseName && (
                 <div
-                  className={`flex items-center gap-2 px-4 py-1.5 bg-gray-50 border-b border-gray-100`}
+                  className={`flex items-center gap-2 px-4 py-1.5 bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)]`}
                 >
                   <div className={`h-1.5 w-1.5 rounded-full ${phaseAccent}`} />
                   <span className={`text-[10px] font-semibold uppercase tracking-wide ${phaseText}`}>
@@ -814,21 +814,21 @@ function StepBreakdownSection({
               <button
                 type="button"
                 onClick={() => setExpandedStep(isExpanded ? null : step.ordinal)}
-                className="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-gray-50/60 transition-colors"
+                className="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-[var(--surface-secondary)] transition-colors"
               >
                 {/* Ordinal badge */}
                 <div
                   className={`flex-shrink-0 flex items-center justify-center h-7 w-7 rounded-full text-[11px] font-bold tabular-nums ${
                     isBottleneck
                       ? 'bg-red-50 border border-red-200 text-red-700'
-                      : 'bg-gray-100 text-gray-600'
+                      : 'bg-[var(--surface-secondary)] text-[var(--content-secondary)]'
                   }`}
                 >
                   {step.ordinal}
                 </div>
 
                 {/* Title */}
-                <span className="flex-1 min-w-0 text-ds-sm text-gray-800 truncate">
+                <span className="flex-1 min-w-0 text-ds-sm text-[var(--content-primary)] truncate">
                   {step.title}
                 </span>
 
@@ -862,37 +862,37 @@ function StepBreakdownSection({
 
                 {/* Duration */}
                 {step.durationMs != null && (
-                  <span className="flex-shrink-0 text-ds-xs text-gray-400 tabular-nums w-14 text-right">
+                  <span className="flex-shrink-0 text-ds-xs text-[var(--content-tertiary)] tabular-nums w-14 text-right">
                     {formatDuration(step.durationMs)}
                   </span>
                 )}
 
                 <ChevronDown
-                  className={`flex-shrink-0 h-4 w-4 text-gray-300 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                  className={`flex-shrink-0 h-4 w-4 text-[var(--content-tertiary)] transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                 />
               </button>
 
               {/* Expanded detail */}
               {isExpanded && (
-                <div className="px-4 pb-4 pt-1 bg-gray-50/60 border-t border-gray-100">
+                <div className="px-4 pb-4 pt-1 bg-[var(--surface-secondary)] border-t border-[var(--border-subtle)]">
                   {step.evidence && (
                     <div className="mb-2">
-                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Evidence</p>
-                      <p className="text-ds-xs text-gray-600">{step.evidence}</p>
+                      <p className="text-[10px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wide mb-1">Evidence</p>
+                      <p className="text-ds-xs text-[var(--content-secondary)]">{step.evidence}</p>
                     </div>
                   )}
                   {step.instructions && step.instructions.length > 0 && (
                     <div>
-                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Instructions</p>
+                      <p className="text-[10px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wide mb-1">Instructions</p>
                       <div className="space-y-1">
                         {step.instructions.slice(0, 3).map((ins, i) => (
-                          <p key={i} className="text-ds-xs text-gray-600">{ins.text}</p>
+                          <p key={i} className="text-ds-xs text-[var(--content-secondary)]">{ins.text}</p>
                         ))}
                       </div>
                     </div>
                   )}
                   {!step.evidence && !(step.instructions?.length) && (
-                    <p className="text-ds-xs text-gray-400">No additional detail available.</p>
+                    <p className="text-ds-xs text-[var(--content-tertiary)]">No additional detail available.</p>
                   )}
                 </div>
               )}
@@ -940,24 +940,24 @@ function ProcessStructureSection({ interpretation }: { interpretation: Interpret
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Friction Points */}
         <div>
-          <h3 className="text-ds-sm font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
+          <h3 className="text-ds-sm font-semibold text-[var(--content-primary)] mb-3 flex items-center gap-1.5">
             <AlertTriangle className="h-4 w-4 text-red-500" />
             Friction Points
             {friction.length > 0 && (
-              <span className="ml-1 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600">
+              <span className="ml-1 rounded-full bg-[var(--surface-secondary)] px-2 py-0.5 text-[10px] font-medium text-[var(--content-secondary)]">
                 {friction.length}
               </span>
             )}
           </h3>
           {friction.length === 0 ? (
-            <p className="text-ds-sm text-gray-400">No friction points detected.</p>
+            <p className="text-ds-sm text-[var(--content-tertiary)]">No friction points detected.</p>
           ) : (
             <div className="space-y-3">
               {friction.map((f, idx) => {
-                const typeColor = FRICTION_TYPE_COLORS[f.type] ?? 'bg-gray-100 text-gray-600';
-                const sevClass = SEVERITY_BADGE_CLASSES[f.severity] ?? 'bg-gray-100 text-gray-600';
+                const typeColor = FRICTION_TYPE_COLORS[f.type] ?? 'bg-[var(--surface-secondary)] text-[var(--content-secondary)]';
+                const sevClass = SEVERITY_BADGE_CLASSES[f.severity] ?? 'bg-[var(--surface-secondary)] text-[var(--content-secondary)]';
                 return (
-                  <div key={idx} className="bg-white border border-gray-100 rounded-ds-md px-4 py-3">
+                  <div key={idx} className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-ds-md px-4 py-3">
                     <div className="flex items-center gap-2 flex-wrap mb-1.5">
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${typeColor}`}>
                         {f.type.replace(/_/g, ' ')}
@@ -966,12 +966,12 @@ function ProcessStructureSection({ interpretation }: { interpretation: Interpret
                         {f.severity}
                       </span>
                     </div>
-                    <p className="text-ds-sm text-gray-700">{f.description}</p>
+                    <p className="text-ds-sm text-[var(--content-primary)]">{f.description}</p>
                     {f.evidence && (
-                      <p className="text-ds-xs text-gray-400 mt-1">{f.evidence}</p>
+                      <p className="text-ds-xs text-[var(--content-tertiary)] mt-1">{f.evidence}</p>
                     )}
                     {f.stepOrdinals.length > 0 && (
-                      <p className="text-[10px] text-gray-400 mt-1">
+                      <p className="text-[10px] text-[var(--content-tertiary)] mt-1">
                         Steps: {f.stepOrdinals.join(', ')}
                       </p>
                     )}
@@ -984,30 +984,30 @@ function ProcessStructureSection({ interpretation }: { interpretation: Interpret
 
         {/* Decision Points */}
         <div>
-          <h3 className="text-ds-sm font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
+          <h3 className="text-ds-sm font-semibold text-[var(--content-primary)] mb-3 flex items-center gap-1.5">
             <ChevronRight className="h-4 w-4 text-brand-500" />
             Decision Points
             {decisions.length > 0 && (
-              <span className="ml-1 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600">
+              <span className="ml-1 rounded-full bg-[var(--surface-secondary)] px-2 py-0.5 text-[10px] font-medium text-[var(--content-secondary)]">
                 {decisions.length}
               </span>
             )}
           </h3>
           {decisions.length === 0 ? (
-            <p className="text-ds-sm text-gray-400">No decision points detected.</p>
+            <p className="text-ds-sm text-[var(--content-tertiary)]">No decision points detected.</p>
           ) : (
             <div className="space-y-3">
               {decisions.map((d, idx) => (
-                <div key={idx} className="bg-white border border-gray-100 rounded-ds-md px-4 py-3">
+                <div key={idx} className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-ds-md px-4 py-3">
                   <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                    <div className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-gray-100 text-[11px] font-bold text-gray-600">
+                    <div className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-[var(--surface-secondary)] text-[11px] font-bold text-[var(--content-secondary)]">
                       {d.stepOrdinal}
                     </div>
                     <span className="ds-tag ds-tag-brand text-[10px]">{d.decisionType}</span>
                   </div>
-                  <p className="text-ds-sm font-medium text-gray-900">{d.stepTitle}</p>
+                  <p className="text-ds-sm font-medium text-[var(--content-primary)]">{d.stepTitle}</p>
                   {d.evidence && (
-                    <p className="text-ds-xs text-gray-400 mt-1">{d.evidence}</p>
+                    <p className="text-ds-xs text-[var(--content-tertiary)] mt-1">{d.evidence}</p>
                   )}
                 </div>
               ))}
@@ -1037,30 +1037,30 @@ function ReworkPatternsSection({ interpretation }: { interpretation: Interpretat
       </div>
       <div className="space-y-3">
         {rework.map((r, idx) => (
-          <div key={idx} className="bg-white border border-amber-200 rounded-ds-md px-4 py-4">
+          <div key={idx} className="bg-[var(--surface-elevated)] border border-amber-200 rounded-ds-md px-4 py-4">
             <div className="flex items-start gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-1.5">
                   <span className="ds-tag ds-tag-neutral text-[10px]">
                     {r.type.replace(/_/g, ' ')}
                   </span>
-                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${SEVERITY_BADGE_CLASSES[r.severity] ?? 'bg-gray-100 text-gray-600'}`}>
+                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${SEVERITY_BADGE_CLASSES[r.severity] ?? 'bg-[var(--surface-secondary)] text-[var(--content-secondary)]'}`}>
                     {r.severity}
                   </span>
                 </div>
-                <p className="text-ds-sm text-gray-700">{r.description}</p>
+                <p className="text-ds-sm text-[var(--content-primary)]">{r.description}</p>
                 {r.evidence && (
-                  <p className="text-ds-xs text-gray-400 mt-1">{r.evidence}</p>
+                  <p className="text-ds-xs text-[var(--content-tertiary)] mt-1">{r.evidence}</p>
                 )}
                 {r.stepOrdinals.length > 0 && (
-                  <p className="text-[10px] text-gray-400 mt-1">
+                  <p className="text-[10px] text-[var(--content-tertiary)] mt-1">
                     Steps: {r.stepOrdinals.join(', ')}
                   </p>
                 )}
               </div>
               <div className="flex-shrink-0 text-right">
                 <p className="text-2xl font-bold text-amber-600 tabular-nums">{r.occurrences}</p>
-                <p className="text-[10px] text-gray-400">occurrences</p>
+                <p className="text-[10px] text-[var(--content-tertiary)]">occurrences</p>
               </div>
             </div>
           </div>
@@ -1077,7 +1077,7 @@ function RightRailNavigator({ sectionIds }: { sectionIds: readonly string[] }) {
 
   return (
     <nav className="hidden xl:block sticky top-20 w-48 flex-shrink-0">
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--content-tertiary)] mb-3">
         On this page
       </p>
       <ul className="space-y-0.5">
@@ -1094,7 +1094,7 @@ function RightRailNavigator({ sectionIds }: { sectionIds: readonly string[] }) {
                 className={`block border-l-2 pl-3 py-1 text-ds-xs transition-colors ${
                   isActive
                     ? 'border-brand-500 text-brand-600 font-semibold'
-                    : 'border-transparent text-gray-400 hover:text-gray-600'
+                    : 'border-transparent text-[var(--content-tertiary)] hover:text-[var(--content-secondary)]'
                 }`}
               >
                 {SECTION_LABELS[id] ?? id}
@@ -1157,7 +1157,7 @@ export function WorkflowReportPage({
         <ReworkPatternsSection interpretation={interpretation} />
 
         {/* Footer */}
-        <footer className="text-[10px] text-gray-300 pb-4 border-t border-gray-100 pt-4">
+        <footer className="text-[10px] text-[var(--content-tertiary)] pb-4 border-t border-[var(--border-subtle)] pt-4">
           Generated from observed workflow behavior · Evidence-backed · Ledgerium AI
         </footer>
       </div>

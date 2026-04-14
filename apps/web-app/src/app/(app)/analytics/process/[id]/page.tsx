@@ -251,7 +251,7 @@ const CATEGORY_BG: Record<string, string> = {
   click_then_navigate:  'bg-teal-100 text-teal-800',
   fill_and_submit:      'bg-blue-100 text-blue-800',
   repeated_click_dedup: 'bg-orange-100 text-orange-800',
-  single_action:        'bg-gray-100 text-gray-700',
+  single_action:        'bg-[var(--surface-secondary)] text-[var(--content-primary)]',
   data_entry:           'bg-violet-100 text-violet-800',
   send_action:          'bg-emerald-100 text-emerald-800',
   file_action:          'bg-amber-100 text-amber-800',
@@ -295,7 +295,7 @@ const INSIGHT_TYPE_ICONS: Record<string, React.ElementType> = {
 /* ------------------------------------------------------------------ */
 
 function categoryChip(category: string): string {
-  return CATEGORY_BG[category] ?? 'bg-gray-100 text-gray-600';
+  return CATEGORY_BG[category] ?? 'bg-[var(--surface-secondary)] text-[var(--content-secondary)]';
 }
 
 function categoryLabel(category: string): string {
@@ -340,7 +340,7 @@ function MetricCard({
         <p className="ds-metric-label">{label}</p>
       </div>
       <p className="ds-metric-value">{value}</p>
-      {sub && <p className="text-ds-xs text-gray-400 mt-0.5">{sub}</p>}
+      {sub && <p className="text-ds-xs text-[var(--content-tertiary)] mt-0.5">{sub}</p>}
     </div>
   );
 }
@@ -525,7 +525,7 @@ export default function ProcessGroupDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="text-center text-ds-sm text-gray-400 py-20">
+      <div className="text-center text-ds-sm text-[var(--content-tertiary)] py-20">
         Loading process group...
       </div>
     );
@@ -541,18 +541,18 @@ export default function ProcessGroupDetailPage() {
       <div className="mb-ds-6">
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-1 text-ds-sm text-gray-500 hover:text-gray-700 mb-ds-3"
+          className="inline-flex items-center gap-1 text-ds-sm text-[var(--content-secondary)] hover:text-[var(--content-primary)] mb-ds-3"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Dashboard
         </Link>
 
-        <h1 className="text-ds-2xl font-bold tracking-tight text-gray-900">
+        <h1 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">
           {definition.canonicalName}
         </h1>
 
         {definition.description && (
-          <p className="text-ds-sm text-gray-600 mt-ds-1">{definition.description}</p>
+          <p className="text-ds-sm text-[var(--content-secondary)] mt-ds-1">{definition.description}</p>
         )}
 
         <div className="mt-ds-3 flex flex-wrap items-center gap-ds-3 text-ds-xs">
@@ -583,7 +583,7 @@ export default function ProcessGroupDetailPage() {
             </span>
           )}
           {definition.analyzedAt && (
-            <span className="text-gray-400">
+            <span className="text-[var(--content-tertiary)]">
               Analyzed {formatDateRelative(definition.analyzedAt)}
             </span>
           )}
@@ -638,7 +638,7 @@ export default function ProcessGroupDetailPage() {
             {/* Systems Used */}
             {Object.keys(metrics.systemFrequency).length > 0 && (
               <div className="mt-ds-4">
-                <p className="text-ds-xs text-gray-500 font-medium mb-ds-2">Systems Used</p>
+                <p className="text-ds-xs text-[var(--content-secondary)] font-medium mb-ds-2">Systems Used</p>
                 <div className="flex flex-wrap gap-ds-1">
                   {Object.entries(metrics.systemFrequency)
                     .sort(([, a], [, b]) => b - a)
@@ -663,7 +663,7 @@ export default function ProcessGroupDetailPage() {
               <div className="ds-callout ds-callout-info mb-ds-4">
                 <div className="flex items-center gap-ds-2">
                   <GitBranch className="h-4 w-4 text-blue-600 flex-shrink-0" />
-                  <p className="text-ds-sm text-gray-700">
+                  <p className="text-ds-sm text-[var(--content-primary)]">
                     <strong>{variants.variantCount} variant{variants.variantCount !== 1 ? 's' : ''}</strong> detected.
                     {variants.standardPath && (
                       <> Standard path covers <strong>{pct(variants.standardPath.frequency)}</strong> of runs.</>
@@ -685,8 +685,8 @@ export default function ProcessGroupDetailPage() {
             </>
           ) : (
             <div className="card px-ds-6 py-ds-6 text-center">
-              <GitBranch className="h-6 w-6 text-gray-300 mx-auto mb-ds-2" />
-              <p className="text-ds-sm text-gray-500">
+              <GitBranch className="h-6 w-6 text-[var(--content-tertiary)] mx-auto mb-ds-2" />
+              <p className="text-ds-sm text-[var(--content-secondary)]">
                 Not enough runs to detect variants. Record more executions of this process.
               </p>
             </div>
@@ -713,7 +713,7 @@ export default function ProcessGroupDetailPage() {
                     <div className="flex items-start justify-between gap-ds-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-ds-2 mb-ds-1">
-                          <span className="text-ds-sm font-medium text-gray-900 truncate">
+                          <span className="text-ds-sm font-medium text-[var(--content-primary)] truncate">
                             {step.stepTitle}
                           </span>
                           <span className={`ds-tag text-[10px] ${categoryChip(step.category)}`}>
@@ -727,7 +727,7 @@ export default function ProcessGroupDetailPage() {
                         </div>
 
                         {/* Duration bar */}
-                        <div className="mt-ds-2 h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="mt-ds-2 h-2 bg-[var(--surface-secondary)] rounded-full overflow-hidden">
                           <div
                             className={`h-full rounded-full ${isBottleneck ? 'bg-red-400' : 'bg-brand-500'}`}
                             style={{ width: `${barWidth}%` }}
@@ -736,17 +736,17 @@ export default function ProcessGroupDetailPage() {
                       </div>
 
                       <div className="text-right flex-shrink-0">
-                        <p className="text-ds-sm font-semibold text-gray-900">
+                        <p className="text-ds-sm font-semibold text-[var(--content-primary)]">
                           {formatDuration(step.avgDurationMs)}
                         </p>
-                        <p className="text-ds-xs text-gray-400">
+                        <p className="text-ds-xs text-[var(--content-tertiary)]">
                           {formatDuration(step.minDurationMs)} – {formatDuration(step.maxDurationMs)}
                         </p>
-                        <p className={`text-ds-xs mt-0.5 ${highCV ? 'text-amber-600 font-medium' : 'text-gray-400'}`}>
+                        <p className={`text-ds-xs mt-0.5 ${highCV ? 'text-amber-600 font-medium' : 'text-[var(--content-tertiary)]'}`}>
                           CV: {step.coefficientOfVariation.toFixed(2)}
                           {highCV && ' (inconsistent)'}
                         </p>
-                        <p className="text-ds-xs text-gray-300">
+                        <p className="text-ds-xs text-[var(--content-tertiary)]">
                           {step.sampleCount} sample{step.sampleCount !== 1 ? 's' : ''}
                         </p>
                       </div>
@@ -769,15 +769,15 @@ export default function ProcessGroupDetailPage() {
                     <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-ds-2">
-                        <span className="text-ds-sm font-medium text-gray-900">{bn.stepTitle}</span>
+                        <span className="text-ds-sm font-medium text-[var(--content-primary)]">{bn.stepTitle}</span>
                         <span className="ds-tag text-[10px] bg-amber-100 text-amber-700">
                           {pct(bn.percentOfTotal)} of total time
                         </span>
                       </div>
-                      <p className="text-ds-xs text-gray-600 mt-ds-1">
+                      <p className="text-ds-xs text-[var(--content-secondary)] mt-ds-1">
                         Avg duration: <strong>{formatDuration(bn.avgDurationMs)}</strong>
                       </p>
-                      <p className="text-ds-xs text-gray-500 mt-0.5">{bn.reason}</p>
+                      <p className="text-ds-xs text-[var(--content-secondary)] mt-0.5">{bn.reason}</p>
                     </div>
                   </div>
                 </div>
@@ -827,7 +827,7 @@ export default function ProcessGroupDetailPage() {
                     <Shield className="h-6 w-6 text-brand-600" />
                   </div>
                   <div>
-                    <p className="ds-metric-value">{standardization.score}<span className="text-ds-sm text-gray-400">/100</span></p>
+                    <p className="ds-metric-value">{standardization.score}<span className="text-ds-sm text-[var(--content-tertiary)]">/100</span></p>
                     <span className={`ds-tag text-[10px] ${
                       standardization.level === 'excellent' ? 'bg-green-100 text-green-700' :
                       standardization.level === 'good' ? 'bg-blue-100 text-blue-700' :
@@ -839,23 +839,23 @@ export default function ProcessGroupDetailPage() {
                   </div>
                 </div>
               </div>
-              <p className="text-ds-xs text-gray-500 font-medium mb-ds-2">Factor Breakdown</p>
+              <p className="text-ds-xs text-[var(--content-secondary)] font-medium mb-ds-2">Factor Breakdown</p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-ds-3">
                 <div>
-                  <p className="text-ds-xs text-gray-400">Path Adherence</p>
-                  <p className="text-ds-sm font-semibold text-gray-900">{pct(standardization.factors.dominantPathAdherence)}</p>
+                  <p className="text-ds-xs text-[var(--content-tertiary)]">Path Adherence</p>
+                  <p className="text-ds-sm font-semibold text-[var(--content-primary)]">{pct(standardization.factors.dominantPathAdherence)}</p>
                 </div>
                 <div>
-                  <p className="text-ds-xs text-gray-400">Sequence Stability</p>
-                  <p className="text-ds-sm font-semibold text-gray-900">{pct(standardization.factors.sequenceStability)}</p>
+                  <p className="text-ds-xs text-[var(--content-tertiary)]">Sequence Stability</p>
+                  <p className="text-ds-sm font-semibold text-[var(--content-primary)]">{pct(standardization.factors.sequenceStability)}</p>
                 </div>
                 <div>
-                  <p className="text-ds-xs text-gray-400">Variant Consolidation</p>
-                  <p className="text-ds-sm font-semibold text-gray-900">{pct(standardization.factors.variantConsolidation)}</p>
+                  <p className="text-ds-xs text-[var(--content-tertiary)]">Variant Consolidation</p>
+                  <p className="text-ds-sm font-semibold text-[var(--content-primary)]">{pct(standardization.factors.variantConsolidation)}</p>
                 </div>
                 <div>
-                  <p className="text-ds-xs text-gray-400">Timing Consistency</p>
-                  <p className="text-ds-sm font-semibold text-gray-900">{pct(standardization.factors.timingConsistency)}</p>
+                  <p className="text-ds-xs text-[var(--content-tertiary)]">Timing Consistency</p>
+                  <p className="text-ds-sm font-semibold text-[var(--content-primary)]">{pct(standardization.factors.timingConsistency)}</p>
                 </div>
               </div>
             </div>
@@ -883,8 +883,8 @@ export default function ProcessGroupDetailPage() {
                   </span>
                 </div>
                 <div className="ml-auto text-right">
-                  <p className="text-ds-xs text-gray-400">Aligned runs</p>
-                  <p className="text-ds-sm font-semibold text-gray-900">
+                  <p className="text-ds-xs text-[var(--content-tertiary)]">Aligned runs</p>
+                  <p className="text-ds-sm font-semibold text-[var(--content-primary)]">
                     {sopAlignment.alignedRunCount} / {sopAlignment.totalRunCount}
                   </p>
                 </div>
@@ -892,7 +892,7 @@ export default function ProcessGroupDetailPage() {
 
               {sopAlignment.undocumentedSteps.length > 0 && (
                 <div className="mb-ds-3">
-                  <p className="text-ds-xs text-gray-500 font-medium mb-ds-1">Undocumented Steps</p>
+                  <p className="text-ds-xs text-[var(--content-secondary)] font-medium mb-ds-1">Undocumented Steps</p>
                   <div className="space-y-ds-1">
                     {sopAlignment.undocumentedSteps.map((step) => (
                       <div key={step.category} className="ds-callout ds-callout-warning py-ds-2 px-ds-3">
@@ -901,7 +901,7 @@ export default function ProcessGroupDetailPage() {
                           <span className={`ds-tag text-[10px] ${categoryChip(step.category)}`}>
                             {categoryLabel(step.category)}
                           </span>
-                          <span className="text-ds-xs text-gray-600">
+                          <span className="text-ds-xs text-[var(--content-secondary)]">
                             observed in {pct(step.frequency)} of runs, not in SOP
                           </span>
                         </div>
@@ -913,13 +913,13 @@ export default function ProcessGroupDetailPage() {
 
               {sopAlignment.unusedDocumentedSteps.length > 0 && (
                 <div className="mb-ds-3">
-                  <p className="text-ds-xs text-gray-500 font-medium mb-ds-1">Unused SOP Steps</p>
+                  <p className="text-ds-xs text-[var(--content-secondary)] font-medium mb-ds-1">Unused SOP Steps</p>
                   <div className="space-y-ds-1">
                     {sopAlignment.unusedDocumentedSteps.map((step) => (
                       <div key={step.sopOrdinal} className="ds-callout ds-callout-info py-ds-2 px-ds-3">
                         <div className="flex items-center gap-ds-2">
                           <XCircle className="h-3.5 w-3.5 text-blue-600 flex-shrink-0" />
-                          <span className="text-ds-xs text-gray-600">
+                          <span className="text-ds-xs text-[var(--content-secondary)]">
                             Step {step.sopOrdinal}: <strong>{step.sopTitle}</strong> ({categoryLabel(step.sopCategory)}) — rarely observed
                           </span>
                         </div>
@@ -930,9 +930,9 @@ export default function ProcessGroupDetailPage() {
               )}
 
               {documentationDrift && (
-                <div className="mt-ds-3 pt-ds-3 border-t border-gray-100">
+                <div className="mt-ds-3 pt-ds-3 border-t border-[var(--border-subtle)]">
                   <div className="flex items-center gap-ds-2">
-                    <p className="text-ds-xs text-gray-500 font-medium">Documentation Drift:</p>
+                    <p className="text-ds-xs text-[var(--content-secondary)] font-medium">Documentation Drift:</p>
                     <span className={`ds-tag text-[10px] ${
                       documentationDrift.level === 'aligned' ? 'bg-green-100 text-green-700' :
                       documentationDrift.level === 'minor_drift' ? 'bg-amber-100 text-amber-700' :
@@ -945,8 +945,8 @@ export default function ProcessGroupDetailPage() {
                   {documentationDrift.findings.length > 0 && (
                     <ul className="mt-ds-2 space-y-ds-1">
                       {documentationDrift.findings.map((finding, idx) => (
-                        <li key={idx} className="text-ds-xs text-gray-600 flex items-start gap-ds-1">
-                          <span className="text-gray-400 mt-0.5">-</span>
+                        <li key={idx} className="text-ds-xs text-[var(--content-secondary)] flex items-start gap-ds-1">
+                          <span className="text-[var(--content-tertiary)] mt-0.5">-</span>
                           {finding}
                         </li>
                       ))}
@@ -979,8 +979,8 @@ export default function ProcessGroupDetailPage() {
                           {pct(outlier.bestVariantSimilarity)} similar
                         </span>
                       </div>
-                      <p className="text-ds-xs text-gray-600">{outlier.reason}</p>
-                      <p className="text-ds-xs text-gray-400 mt-0.5">
+                      <p className="text-ds-xs text-[var(--content-secondary)]">{outlier.reason}</p>
+                      <p className="text-ds-xs text-[var(--content-tertiary)] mt-0.5">
                         {outlier.stepCount} steps (median: {outlier.medianStepCount})
                       </p>
                     </div>
@@ -1001,8 +1001,8 @@ export default function ProcessGroupDetailPage() {
                   <Compass className="h-5 w-5 text-green-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-ds-sm text-gray-700">{recommendedPath.rationale}</p>
-                  <div className="flex flex-wrap items-center gap-ds-3 mt-ds-2 text-ds-xs text-gray-500">
+                  <p className="text-ds-sm text-[var(--content-primary)]">{recommendedPath.rationale}</p>
+                  <div className="flex flex-wrap items-center gap-ds-3 mt-ds-2 text-ds-xs text-[var(--content-secondary)]">
                     <span className="flex items-center gap-1">
                       <Layers className="h-3.5 w-3.5" />
                       {recommendedPath.supportingRunCount} supporting run{recommendedPath.supportingRunCount !== 1 ? 's' : ''}
@@ -1020,7 +1020,7 @@ export default function ProcessGroupDetailPage() {
                   </div>
                 </div>
               </div>
-              <p className="text-ds-xs text-gray-500 font-medium mb-ds-2">Canonical Step Sequence</p>
+              <p className="text-ds-xs text-[var(--content-secondary)] font-medium mb-ds-2">Canonical Step Sequence</p>
               <div className="flex flex-wrap items-center gap-ds-1">
                 {recommendedPath.stepCategories.map((cat, idx) => (
                   <div key={`${cat}-${idx}`} className="flex items-center">
@@ -1028,7 +1028,7 @@ export default function ProcessGroupDetailPage() {
                       {categoryLabel(cat)}
                     </span>
                     {idx < recommendedPath.stepCategories.length - 1 && (
-                      <ChevronRight className="h-3.5 w-3.5 text-gray-300 mx-0.5 flex-shrink-0" />
+                      <ChevronRight className="h-3.5 w-3.5 text-[var(--content-tertiary)] mx-0.5 flex-shrink-0" />
                     )}
                   </div>
                 ))}
@@ -1044,7 +1044,7 @@ export default function ProcessGroupDetailPage() {
             <div className="card px-ds-5 py-ds-4">
               <div className="flex items-center gap-ds-2 mb-ds-4">
                 <Sliders className="h-4 w-4 text-brand-600" />
-                <p className="text-ds-sm text-gray-600">
+                <p className="text-ds-sm text-[var(--content-secondary)]">
                   Select steps to remove or automate to see the estimated impact on process duration.
                 </p>
               </div>
@@ -1053,7 +1053,7 @@ export default function ProcessGroupDetailPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-ds-sm">
                   <thead>
-                    <tr className="border-b border-gray-100 text-ds-xs text-gray-500">
+                    <tr className="border-b border-[var(--border-subtle)] text-ds-xs text-[var(--content-secondary)]">
                       <th className="text-left font-medium px-ds-3 py-ds-2">#</th>
                       <th className="text-left font-medium px-ds-3 py-ds-2">Step</th>
                       <th className="text-left font-medium px-ds-3 py-ds-2">Category</th>
@@ -1074,13 +1074,13 @@ export default function ProcessGroupDetailPage() {
                     {timestudy.steps.map((step, idx) => (
                       <tr
                         key={idx}
-                        className={`border-b border-gray-50 ${
+                        className={`border-b border-[var(--border-subtle)] ${
                           removedSteps.has(idx) ? 'bg-red-50/40' :
                           automatedSteps.has(idx) ? 'bg-blue-50/40' : ''
                         }`}
                       >
-                        <td className="px-ds-3 py-ds-2 text-gray-400 text-ds-xs">{idx + 1}</td>
-                        <td className="px-ds-3 py-ds-2 text-gray-900 font-medium truncate max-w-[200px]">
+                        <td className="px-ds-3 py-ds-2 text-[var(--content-tertiary)] text-ds-xs">{idx + 1}</td>
+                        <td className="px-ds-3 py-ds-2 text-[var(--content-primary)] font-medium truncate max-w-[200px]">
                           {step.stepTitle}
                         </td>
                         <td className="px-ds-3 py-ds-2">
@@ -1088,7 +1088,7 @@ export default function ProcessGroupDetailPage() {
                             {categoryLabel(step.category)}
                           </span>
                         </td>
-                        <td className="px-ds-3 py-ds-2 text-right text-gray-600">
+                        <td className="px-ds-3 py-ds-2 text-right text-[var(--content-secondary)]">
                           {formatDuration(step.avgDurationMs)}
                         </td>
                         <td className="px-ds-3 py-ds-2 text-center">
@@ -1096,7 +1096,7 @@ export default function ProcessGroupDetailPage() {
                             type="checkbox"
                             checked={removedSteps.has(idx)}
                             onChange={() => toggleRemoved(idx)}
-                            className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                            className="h-4 w-4 rounded border-[var(--border-default)] text-red-600 focus:ring-red-500"
                           />
                         </td>
                         <td className="px-ds-3 py-ds-2 text-center">
@@ -1104,7 +1104,7 @@ export default function ProcessGroupDetailPage() {
                             type="checkbox"
                             checked={automatedSteps.has(idx)}
                             onChange={() => toggleAutomated(idx)}
-                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            className="h-4 w-4 rounded border-[var(--border-default)] text-blue-600 focus:ring-blue-500"
                           />
                         </td>
                       </tr>
@@ -1118,7 +1118,7 @@ export default function ProcessGroupDetailPage() {
                 <div className="mt-ds-4 p-ds-4 rounded-lg bg-brand-50/50 border border-brand-100">
                   <div className="flex items-center gap-ds-2 mb-ds-3">
                     <Zap className="h-4 w-4 text-brand-600" />
-                    <p className="text-ds-sm font-semibold text-gray-900">Estimated Impact</p>
+                    <p className="text-ds-sm font-semibold text-[var(--content-primary)]">Estimated Impact</p>
                     <span className={`ds-tag text-[10px] ${
                       whatIfResult.confidence === 'high' ? 'bg-green-100 text-green-700' :
                       whatIfResult.confidence === 'medium' ? 'bg-amber-100 text-amber-700' :
@@ -1129,19 +1129,19 @@ export default function ProcessGroupDetailPage() {
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-ds-3">
                     <div>
-                      <p className="text-ds-xs text-gray-400">Current Duration</p>
-                      <p className="text-ds-sm font-semibold text-gray-900">
+                      <p className="text-ds-xs text-[var(--content-tertiary)]">Current Duration</p>
+                      <p className="text-ds-sm font-semibold text-[var(--content-primary)]">
                         {formatDuration(whatIfResult.currentDurationMs)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-ds-xs text-gray-400">Estimated Duration</p>
+                      <p className="text-ds-xs text-[var(--content-tertiary)]">Estimated Duration</p>
                       <p className="text-ds-sm font-semibold text-brand-700">
                         {formatDuration(whatIfResult.estimatedDurationMs)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-ds-xs text-gray-400">Change</p>
+                      <p className="text-ds-xs text-[var(--content-tertiary)]">Change</p>
                       <p className={`text-ds-sm font-semibold ${
                         whatIfResult.changePct < 0 ? 'text-green-600' : 'text-red-600'
                       }`}>
@@ -1149,19 +1149,19 @@ export default function ProcessGroupDetailPage() {
                       </p>
                     </div>
                     <div>
-                      <p className="text-ds-xs text-gray-400">Step Count</p>
-                      <p className="text-ds-sm font-semibold text-gray-900">
+                      <p className="text-ds-xs text-[var(--content-tertiary)]">Step Count</p>
+                      <p className="text-ds-sm font-semibold text-[var(--content-primary)]">
                         {whatIfResult.currentStepCount} &rarr; {whatIfResult.estimatedStepCount}
                       </p>
                     </div>
                   </div>
                   {whatIfResult.assumptions.length > 0 && (
                     <div className="mt-ds-3 pt-ds-3 border-t border-brand-100">
-                      <p className="text-ds-xs text-gray-500 font-medium mb-ds-1">Assumptions</p>
+                      <p className="text-ds-xs text-[var(--content-secondary)] font-medium mb-ds-1">Assumptions</p>
                       <ul className="space-y-0.5">
                         {whatIfResult.assumptions.map((a, i) => (
-                          <li key={i} className="text-ds-xs text-gray-500 flex items-start gap-1">
-                            <span className="text-gray-400 mt-0.5">-</span> {a}
+                          <li key={i} className="text-ds-xs text-[var(--content-secondary)] flex items-start gap-1">
+                            <span className="text-[var(--content-tertiary)] mt-0.5">-</span> {a}
                           </li>
                         ))}
                       </ul>
@@ -1184,7 +1184,7 @@ export default function ProcessGroupDetailPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-ds-2 mb-ds-1">
                         <DollarSign className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        <span className="text-ds-sm font-medium text-gray-900">
+                        <span className="text-ds-sm font-medium text-[var(--content-primary)]">
                           Step {roi.stepPosition}
                         </span>
                         <span className={`ds-tag text-[10px] ${categoryChip(roi.stepCategory)}`}>
@@ -1193,21 +1193,21 @@ export default function ProcessGroupDetailPage() {
                         <span className={`ds-tag text-[10px] ${
                           roi.suitabilityScore >= 70 ? 'bg-green-100 text-green-700' :
                           roi.suitabilityScore >= 50 ? 'bg-amber-100 text-amber-700' :
-                          'bg-gray-100 text-gray-600'
+                          'bg-[var(--surface-secondary)] text-[var(--content-secondary)]'
                         }`}>
                           {roi.suitabilityScore}% suitable
                         </span>
                       </div>
-                      <p className="text-ds-xs text-gray-600 mt-ds-1">{roi.rationale}</p>
+                      <p className="text-ds-xs text-[var(--content-secondary)] mt-ds-1">{roi.rationale}</p>
                     </div>
                     <div className="text-right flex-shrink-0">
                       <p className="text-ds-sm font-semibold text-green-600">
                         {formatDuration(roi.perRunSavingsMs)}/run
                       </p>
-                      <p className="text-ds-xs text-gray-400">
+                      <p className="text-ds-xs text-[var(--content-tertiary)]">
                         {formatDuration(roi.totalSavingsMs)} total
                       </p>
-                      <p className="text-ds-xs text-gray-400">
+                      <p className="text-ds-xs text-[var(--content-tertiary)]">
                         {roi.runCount} runs
                       </p>
                     </div>
@@ -1232,13 +1232,13 @@ export default function ProcessGroupDetailPage() {
                     }`} />
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-ds-2 mb-ds-1">
-                        <span className="text-ds-sm font-semibold text-gray-900">{rec.title}</span>
+                        <span className="text-ds-sm font-semibold text-[var(--content-primary)]">{rec.title}</span>
                         <span className={`ds-tag text-[10px] ${
                           rec.type === 'automate_step' ? 'bg-blue-100 text-blue-700' :
                           rec.type === 'update_sop' ? 'bg-purple-100 text-purple-700' :
                           rec.type === 'standardize_variant' ? 'bg-teal-100 text-teal-700' :
                           rec.type === 'reduce_rework' ? 'bg-orange-100 text-orange-700' :
-                          'bg-gray-100 text-gray-700'
+                          'bg-[var(--surface-secondary)] text-[var(--content-primary)]'
                         }`}>
                           {rec.type.replace(/_/g, ' ')}
                         </span>
@@ -1252,7 +1252,7 @@ export default function ProcessGroupDetailPage() {
                         <span className={`ds-tag text-[10px] ${
                           rec.confidence === 'high' ? 'bg-green-100 text-green-700' :
                           rec.confidence === 'medium' ? 'bg-amber-100 text-amber-700' :
-                          'bg-gray-100 text-gray-600'
+                          'bg-[var(--surface-secondary)] text-[var(--content-secondary)]'
                         }`}>
                           {rec.confidence} confidence
                         </span>
@@ -1264,14 +1264,14 @@ export default function ProcessGroupDetailPage() {
                           {rec.effort} effort
                         </span>
                       </div>
-                      <p className="text-ds-xs text-gray-600">{rec.description}</p>
+                      <p className="text-ds-xs text-[var(--content-secondary)]">{rec.description}</p>
                       {rec.estimatedTimeSavingsMs != null && (
                         <p className="text-ds-xs text-green-600 font-medium mt-ds-1">
                           Estimated savings: {formatDuration(rec.estimatedTimeSavingsMs)} per run
                           {rec.estimatedImprovementPct != null && ` (${rec.estimatedImprovementPct}% improvement)`}
                         </p>
                       )}
-                      <p className="text-ds-xs text-gray-400 mt-ds-1">{rec.evidence}</p>
+                      <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-1">{rec.evidence}</p>
                     </div>
                   </div>
                 </div>
@@ -1300,7 +1300,7 @@ export default function ProcessGroupDetailPage() {
                         <span className="ds-tag ds-tag-neutral text-[10px]">
                           {insight.insightType}
                         </span>
-                        <span className="text-ds-sm text-gray-900">{insight.title}</span>
+                        <span className="text-ds-sm text-[var(--content-primary)]">{insight.title}</span>
                       </div>
                       <Link
                         href="/analytics"
@@ -1324,7 +1324,7 @@ export default function ProcessGroupDetailPage() {
             <div className="card overflow-hidden">
               <table className="w-full text-ds-sm">
                 <thead>
-                  <tr className="border-b border-gray-100 text-ds-xs text-gray-500">
+                  <tr className="border-b border-[var(--border-subtle)] text-ds-xs text-[var(--content-secondary)]">
                     <th className="text-left font-medium px-ds-5 py-ds-3">Title</th>
                     <th className="text-right font-medium px-ds-5 py-ds-3">Duration</th>
                     <th className="text-right font-medium px-ds-5 py-ds-3">Steps</th>
@@ -1335,7 +1335,7 @@ export default function ProcessGroupDetailPage() {
                   {sortedWorkflows.map((wf) => (
                     <tr
                       key={wf.id}
-                      className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
+                      className="border-b border-[var(--border-subtle)] hover:bg-[var(--surface-secondary)] transition-colors"
                     >
                       <td className="px-ds-5 py-ds-3">
                         <Link
@@ -1345,13 +1345,13 @@ export default function ProcessGroupDetailPage() {
                           {wf.title}
                         </Link>
                       </td>
-                      <td className="text-right px-ds-5 py-ds-3 text-gray-600">
+                      <td className="text-right px-ds-5 py-ds-3 text-[var(--content-secondary)]">
                         {formatDuration(wf.durationMs)}
                       </td>
-                      <td className="text-right px-ds-5 py-ds-3 text-gray-600">
+                      <td className="text-right px-ds-5 py-ds-3 text-[var(--content-secondary)]">
                         {wf.stepCount ?? '—'}
                       </td>
-                      <td className="text-right px-ds-5 py-ds-3 text-gray-400">
+                      <td className="text-right px-ds-5 py-ds-3 text-[var(--content-tertiary)]">
                         {formatDateRelative(wf.createdAt)}
                       </td>
                     </tr>
@@ -1361,7 +1361,7 @@ export default function ProcessGroupDetailPage() {
             </div>
           ) : (
             <div className="card px-ds-6 py-ds-6 text-center">
-              <p className="text-ds-sm text-gray-500">No workflows in this process group yet.</p>
+              <p className="text-ds-sm text-[var(--content-secondary)]">No workflows in this process group yet.</p>
             </div>
           )}
         </section>
@@ -1378,12 +1378,12 @@ export default function ProcessGroupDetailPage() {
                       {categoryLabel(cat)}
                     </span>
                     {idx < signatureCategories.length - 1 && (
-                      <ChevronRight className="h-3.5 w-3.5 text-gray-300 mx-0.5 flex-shrink-0" />
+                      <ChevronRight className="h-3.5 w-3.5 text-[var(--content-tertiary)] mx-0.5 flex-shrink-0" />
                     )}
                   </div>
                 ))}
               </div>
-              <p className="text-ds-xs text-gray-400 mt-ds-2 font-mono">
+              <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-2 font-mono">
                 {definition.pathSignature}
               </p>
             </div>
@@ -1422,11 +1422,11 @@ function VariantCard({
             ) : (
               <span className="ds-tag ds-tag-neutral text-[10px]">Variant {index + 1}</span>
             )}
-            <span className="text-ds-xs text-gray-500">
+            <span className="text-ds-xs text-[var(--content-secondary)]">
               {variant.runCount} run{variant.runCount !== 1 ? 's' : ''} &middot; {pct(variant.frequency)}
             </span>
             {!variant.isStandardPath && (
-              <span className="text-ds-xs text-gray-400">
+              <span className="text-ds-xs text-[var(--content-tertiary)]">
                 {pct(variant.similarityToStandard)} similar
               </span>
             )}
@@ -1439,7 +1439,7 @@ function VariantCard({
                 {categoryLabel(cat)}
               </span>
             ))}
-            <span className="text-ds-xs text-gray-400 self-center ml-ds-1">
+            <span className="text-ds-xs text-[var(--content-tertiary)] self-center ml-ds-1">
               {variant.pathSignature.stepCount} step{variant.pathSignature.stepCount !== 1 ? 's' : ''}
             </span>
           </div>
@@ -1447,7 +1447,7 @@ function VariantCard({
           {/* Evidence workflows */}
           {evidenceWorkflows.length > 0 && (
             <div className="mt-ds-2">
-              <p className="text-ds-xs text-gray-400 mb-0.5">Matching workflows:</p>
+              <p className="text-ds-xs text-[var(--content-tertiary)] mb-0.5">Matching workflows:</p>
               <div className="flex flex-wrap gap-ds-1">
                 {evidenceWorkflows.slice(0, 5).map((wf) => (
                   <Link
@@ -1459,7 +1459,7 @@ function VariantCard({
                   </Link>
                 ))}
                 {evidenceWorkflows.length > 5 && (
-                  <span className="text-ds-xs text-gray-400">
+                  <span className="text-ds-xs text-[var(--content-tertiary)]">
                     +{evidenceWorkflows.length - 5} more
                   </span>
                 )}
@@ -1496,10 +1496,10 @@ function VarianceIndicator({
 
   return (
     <div className="card px-ds-5 py-ds-4">
-      <p className="text-ds-xs text-gray-500 font-medium">{label}</p>
-      <p className="text-ds-sm text-gray-400 mb-ds-2">{description}</p>
+      <p className="text-ds-xs text-[var(--content-secondary)] font-medium">{label}</p>
+      <p className="text-ds-sm text-[var(--content-tertiary)] mb-ds-2">{description}</p>
       <div className="flex items-center gap-ds-3">
-        <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className="flex-1 h-2 bg-[var(--surface-secondary)] rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full ${
               clamped >= 0.8 ? 'bg-green-500' : clamped >= 0.6 ? 'bg-amber-500' : 'bg-red-500'
@@ -1511,7 +1511,7 @@ function VarianceIndicator({
           {pct(clamped)}
         </span>
       </div>
-      <p className="text-ds-xs text-gray-300 mt-ds-1">
+      <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-1">
         {rawLabel}: {raw.toFixed(2)}
       </p>
     </div>

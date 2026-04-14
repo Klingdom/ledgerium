@@ -149,7 +149,7 @@ export default function WorkflowDetailPage() {
   }
 
   if (isLoading || !data) {
-    return <div className="text-center text-ds-sm text-gray-400 py-20">Loading workflow...</div>;
+    return <div className="text-center text-ds-sm text-[var(--content-tertiary)] py-20">Loading workflow...</div>;
   }
 
   const { workflow, artifacts } = data;
@@ -202,7 +202,7 @@ export default function WorkflowDetailPage() {
       <div className="mb-ds-6">
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-1 text-ds-sm text-gray-500 hover:text-gray-700 mb-ds-3"
+          className="inline-flex items-center gap-1 text-ds-sm text-[var(--content-secondary)] hover:text-[var(--content-primary)] mb-ds-3"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Library
@@ -211,16 +211,16 @@ export default function WorkflowDetailPage() {
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-ds-2">
-              <h1 className="text-ds-2xl font-bold tracking-tight text-gray-900">{workflow.title}</h1>
+              <h1 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">{workflow.title}</h1>
               <button
                 onClick={handleToggleFavorite}
-                className="rounded-ds-sm p-1 hover:bg-gray-100 transition-colors"
+                className="rounded-ds-sm p-1 hover:bg-[var(--surface-secondary)] transition-colors"
                 title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
               >
-                <Star className={`h-5 w-5 ${isFavorite ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`} />
+                <Star className={`h-5 w-5 ${isFavorite ? 'fill-amber-400 text-amber-400' : 'text-[var(--content-tertiary)]'}`} />
               </button>
             </div>
-            <div className="mt-ds-2 flex flex-wrap items-center gap-ds-3 text-ds-xs text-gray-500">
+            <div className="mt-ds-2 flex flex-wrap items-center gap-ds-3 text-ds-xs text-[var(--content-secondary)]">
               <span className="flex items-center gap-1">
                 <Layers className="h-3.5 w-3.5" />
                 {workflow.stepCount} steps
@@ -247,7 +247,7 @@ export default function WorkflowDetailPage() {
                   {workflow.viewCount} view{workflow.viewCount !== 1 ? 's' : ''}
                 </span>
               )}
-              <span className="text-gray-300">·</span>
+              <span className="text-[var(--content-tertiary)]">·</span>
               <span>{formatDate(workflow.createdAt)}</span>
             </div>
             {workflow.toolsUsed.length > 0 && (
@@ -292,7 +292,7 @@ export default function WorkflowDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 mb-ds-6 no-print overflow-x-auto">
+      <div className="border-b border-[var(--border-default)] mb-ds-6 no-print overflow-x-auto">
         <nav className="flex gap-ds-6 min-w-max">
           {TABS.map(({ id: tabId, label, icon: Icon }) => (
             <button
@@ -301,7 +301,7 @@ export default function WorkflowDetailPage() {
               className={`flex items-center gap-1.5 border-b-2 pb-ds-3 pt-ds-1 text-ds-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeTab === tabId
                   ? 'border-brand-600 text-brand-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  : 'border-transparent text-[var(--content-secondary)] hover:text-[var(--content-primary)]'
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -374,11 +374,11 @@ export default function WorkflowDetailPage() {
       {activeTab === 'evidence' && <EvidenceTab processOutput={processOutput} />}
 
       {/* Post-view guidance */}
-      <div className="mt-ds-8 card px-ds-6 py-ds-5 bg-gray-50/50 no-print">
+      <div className="mt-ds-8 card px-ds-6 py-ds-5 bg-[var(--surface-secondary)] no-print">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-ds-sm font-medium text-gray-700">Build your workflow library</p>
-            <p className="text-ds-xs text-gray-500">Record more workflows to compare patterns and find improvement opportunities.</p>
+            <p className="text-ds-sm font-medium text-[var(--content-primary)]">Build your workflow library</p>
+            <p className="text-ds-xs text-[var(--content-secondary)]">Record more workflows to compare patterns and find improvement opportunities.</p>
           </div>
           <Link href="/upload" className="btn-primary gap-1.5 text-xs flex-shrink-0">
             <Plus className="h-3.5 w-3.5" />

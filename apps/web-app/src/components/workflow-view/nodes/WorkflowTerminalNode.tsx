@@ -38,7 +38,7 @@ export const WorkflowTerminalNode = memo(function WorkflowTerminalNode({
         {isStart ? (
           <Play className="w-3.5 h-3.5 text-emerald-600" fill="currentColor" />
         ) : (
-          <Square className="w-3 h-3 text-gray-500" fill="currentColor" />
+          <Square className="w-3 h-3 text-[var(--content-secondary)]" fill="currentColor" />
         )}
         <span
           className="text-[11px] font-semibold"
@@ -51,7 +51,7 @@ export const WorkflowTerminalNode = memo(function WorkflowTerminalNode({
       {isStart ? (
         <Handle type="source" position={Position.Bottom} className="!bg-emerald-500 !border-emerald-600 !w-2 !h-2" />
       ) : (
-        <Handle type="target" position={Position.Top} className="!bg-gray-400 !border-gray-500 !w-2 !h-2" />
+        <Handle type="target" position={Position.Top} className="!bg-[var(--content-tertiary)] !border-[var(--content-secondary)] !w-2 !h-2" />
       )}
     </div>
   );

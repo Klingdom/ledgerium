@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import crypto from 'crypto';
+import { checkFeatureAccess } from '@/lib/feature-gating';
 
 /**
  * POST /api/teams/:id/invite — create an invite link for a team
@@ -15,6 +16,25 @@ export async function POST(
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const user = await db.user.findUnique({ where: { id: session.user.id } });
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+
+  // Gate: inviting team members is a Team+ (teamWorkspace) feature
+  const access = checkFeatureAccess(user, 'teamWorkspace');
+  if (!access.allowed) {
+    return NextResponse.json(
+      {
+        error: 'Feature not available on your plan',
+        feature: 'teamWorkspace',
+        requiredPlan: access.requiredPlan,
+        upgradeUrl: '/pricing',
+      },
+      { status: 403 },
+    );
   }
 
   try {

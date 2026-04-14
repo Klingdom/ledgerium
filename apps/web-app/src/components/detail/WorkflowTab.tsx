@@ -9,7 +9,7 @@ const STEP_BORDER: Record<string, string> = {
   click_then_navigate:  'border-l-teal-500',
   fill_and_submit:      'border-l-blue-500',
   repeated_click_dedup: 'border-l-orange-500',
-  single_action:        'border-l-gray-400',
+  single_action:        'border-l-[var(--border-default)]',
   data_entry:           'border-l-violet-500',
   send_action:          'border-l-emerald-500',
   file_action:          'border-l-amber-500',
@@ -53,7 +53,7 @@ export function WorkflowTab({ processOutput, processMap, templateArtifacts, defa
   const [showRaw, setShowRaw] = useState(!hasTemplates);
 
   if (!processOutput) {
-    return <div className="text-ds-sm text-gray-400 py-ds-10">No workflow data available.</div>;
+    return <div className="text-ds-sm text-[var(--content-tertiary)] py-ds-10">No workflow data available.</div>;
   }
 
   const { processDefinition, processRun } = processOutput;
@@ -71,8 +71,8 @@ export function WorkflowTab({ processOutput, processMap, templateArtifacts, defa
       {hasTemplates && (
         <div className="flex items-center justify-between mb-ds-4 no-print">
           <div className="flex items-center gap-ds-2">
-            <span className="text-ds-xs text-gray-400 font-medium uppercase tracking-wide">Format</span>
-            <div className="flex rounded-ds-md border border-gray-200 overflow-hidden">
+            <span className="text-ds-xs text-[var(--content-tertiary)] font-medium uppercase tracking-wide">Format</span>
+            <div className="flex rounded-ds-md border border-[var(--border-default)] overflow-hidden">
               {Object.entries(TEMPLATE_LABELS).map(([key, label]) => {
                 const isAvailable = templateArtifacts?.[key as keyof typeof templateArtifacts];
                 const isSelected = !showRaw && selectedFormat === key;
@@ -84,8 +84,8 @@ export function WorkflowTab({ processOutput, processMap, templateArtifacts, defa
                     disabled={!isAvailable}
                     className={`px-ds-3 py-ds-1 text-ds-xs font-medium transition-colors ${
                       isSelected
-                        ? 'bg-brand-50 text-brand-700 border-r border-gray-200'
-                        : 'text-gray-500 hover:bg-gray-50 border-r border-gray-200'
+                        ? 'bg-brand-50 text-brand-700 border-r border-[var(--border-default)]'
+                        : 'text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)] border-r border-[var(--border-default)]'
                     } ${!isAvailable ? 'opacity-30 cursor-not-allowed' : ''} last:border-r-0`}
                   >
                     {label}
@@ -96,7 +96,7 @@ export function WorkflowTab({ processOutput, processMap, templateArtifacts, defa
               <button
                 onClick={() => setShowRaw(true)}
                 className={`px-ds-3 py-ds-1 text-ds-xs font-medium transition-colors ${
-                  showRaw ? 'bg-brand-50 text-brand-700' : 'text-gray-500 hover:bg-gray-50'
+                  showRaw ? 'bg-brand-50 text-brand-700' : 'text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
                 }`}
               >
                 Raw
@@ -159,7 +159,7 @@ export function WorkflowTab({ processOutput, processMap, templateArtifacts, defa
             <h3 className="ds-section-label">Workflow Steps</h3>
             <div className="space-y-ds-2">
               {steps.map((step: any) => {
-                const border = STEP_BORDER[step.category] ?? 'border-l-gray-300';
+                const border = STEP_BORDER[step.category] ?? 'border-l-[var(--border-default)]';
                 const label = CATEGORY_LABEL[step.category] ?? 'Action';
                 return (
                   <div key={step.stepId} className={`ds-step border-l-[3px] ${border}`}>
@@ -170,9 +170,9 @@ export function WorkflowTab({ processOutput, processMap, templateArtifacts, defa
                         <div className="mt-ds-1 flex flex-wrap items-center gap-ds-2">
                           <span className="ds-tag ds-tag-neutral text-[11px]">{label}</span>
                           {step.durationLabel && step.durationLabel !== '< 1s' && (
-                            <span className="text-ds-xs text-gray-400">{step.durationLabel}</span>
+                            <span className="text-ds-xs text-[var(--content-tertiary)]">{step.durationLabel}</span>
                           )}
-                          <span className="text-ds-xs text-gray-400">
+                          <span className="text-ds-xs text-[var(--content-tertiary)]">
                             {step.eventCount} event{step.eventCount !== 1 ? 's' : ''}
                           </span>
                           {step.confidence < 0.7 && (
@@ -184,7 +184,7 @@ export function WorkflowTab({ processOutput, processMap, templateArtifacts, defa
                         {step.systems?.length > 0 && (
                           <div className="mt-ds-1 flex gap-ds-1">
                             {step.systems.map((s: string) => (
-                              <span key={s} className="text-ds-xs text-gray-400">{s}</span>
+                              <span key={s} className="text-ds-xs text-[var(--content-tertiary)]">{s}</span>
                             ))}
                           </div>
                         )}
@@ -208,7 +208,7 @@ function TemplateProcessMapView({ data, templateType }: { data: any; templateTyp
     case 'swimlane': return <SwimlaneView data={data} />;
     case 'bpmn_informed': return <BPMNView data={data} />;
     case 'sipoc_high_level': return <SIPOCView data={data} />;
-    default: return <div className="text-ds-sm text-gray-400">Unknown template type.</div>;
+    default: return <div className="text-ds-sm text-[var(--content-tertiary)]">Unknown template type.</div>;
   }
 }
 
@@ -229,7 +229,7 @@ function SwimlaneView({ data }: { data: any }) {
       {data.trigger && (
         <div className="ds-callout ds-callout-info">
           <p className="text-ds-xs font-semibold text-brand-700 uppercase tracking-wide mb-ds-1">Trigger</p>
-          <p className="text-ds-sm text-gray-700">{data.trigger}</p>
+          <p className="text-ds-sm text-[var(--content-primary)]">{data.trigger}</p>
         </div>
       )}
 
@@ -240,8 +240,8 @@ function SwimlaneView({ data }: { data: any }) {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-ds-2">
             {data.lanes.map((lane: any) => (
               <div key={lane.id} className="card px-ds-4 py-ds-3">
-                <p className="text-ds-sm font-medium text-gray-900">{lane.label}</p>
-                <p className="text-ds-xs text-gray-400">{lane.system} &middot; {lane.stepCount} steps</p>
+                <p className="text-ds-sm font-medium text-[var(--content-primary)]">{lane.label}</p>
+                <p className="text-ds-xs text-[var(--content-tertiary)]">{lane.system} &middot; {lane.stepCount} steps</p>
               </div>
             ))}
           </div>
@@ -260,10 +260,10 @@ function SwimlaneView({ data }: { data: any }) {
                   <p className="ds-step-title">{step.title}</p>
                   <div className="mt-ds-1 flex flex-wrap items-center gap-ds-2">
                     <span className="ds-tag ds-tag-neutral text-[11px]">{step.categoryLabel}</span>
-                    <span className="text-ds-xs text-gray-400">{step.dominantAction}</span>
-                    {step.durationLabel && <span className="text-ds-xs text-gray-400">{step.durationLabel}</span>}
+                    <span className="text-ds-xs text-[var(--content-tertiary)]">{step.dominantAction}</span>
+                    {step.durationLabel && <span className="text-ds-xs text-[var(--content-tertiary)]">{step.durationLabel}</span>}
                   </div>
-                  <p className="text-ds-xs text-gray-400 mt-ds-1">{step.pageContext}</p>
+                  <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-1">{step.pageContext}</p>
                 </div>
               </div>
             </div>
@@ -278,11 +278,11 @@ function SwimlaneView({ data }: { data: any }) {
           <div className="space-y-ds-2">
             {data.handoffs.map((h: any, i: number) => (
               <div key={i} className="card px-ds-4 py-ds-3 flex items-center gap-ds-3">
-                <span className="text-ds-xs font-mono text-gray-500">Step {h.fromStepOrdinal}</span>
-                <span className="text-ds-xs text-gray-300">&rarr;</span>
-                <span className="text-ds-xs font-mono text-gray-500">Step {h.toStepOrdinal}</span>
-                <span className="text-ds-xs text-gray-400">{h.fromLane} &rarr; {h.toLane}</span>
-                <span className="text-ds-xs text-gray-600 ml-auto">{h.label}</span>
+                <span className="text-ds-xs font-mono text-[var(--content-secondary)]">Step {h.fromStepOrdinal}</span>
+                <span className="text-ds-xs text-[var(--content-tertiary)]">&rarr;</span>
+                <span className="text-ds-xs font-mono text-[var(--content-secondary)]">Step {h.toStepOrdinal}</span>
+                <span className="text-ds-xs text-[var(--content-tertiary)]">{h.fromLane} &rarr; {h.toLane}</span>
+                <span className="text-ds-xs text-[var(--content-secondary)] ml-auto">{h.label}</span>
               </div>
             ))}
           </div>
@@ -296,8 +296,8 @@ function SwimlaneView({ data }: { data: any }) {
           <div className="space-y-ds-2">
             {data.decisions.map((d: any, i: number) => (
               <div key={i} className="ds-callout ds-callout-warning">
-                <p className="text-ds-sm font-medium text-gray-900">{d.label}</p>
-                <p className="text-ds-xs text-gray-500 mt-ds-1">After step {d.afterStepOrdinal} &middot; Yes: {d.yesPath} &middot; No: {d.noPath}</p>
+                <p className="text-ds-sm font-medium text-[var(--content-primary)]">{d.label}</p>
+                <p className="text-ds-xs text-[var(--content-secondary)] mt-ds-1">After step {d.afterStepOrdinal} &middot; Yes: {d.yesPath} &middot; No: {d.noPath}</p>
               </div>
             ))}
           </div>
@@ -329,8 +329,8 @@ function BPMNView({ data }: { data: any }) {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-ds-2">
             {data.pools.map((pool: any) => (
               <div key={pool.id} className="card px-ds-4 py-ds-3">
-                <p className="text-ds-sm font-medium text-gray-900">{pool.label}</p>
-                <p className="text-ds-xs text-gray-400">{pool.system} &middot; {pool.taskIds?.length ?? 0} tasks</p>
+                <p className="text-ds-sm font-medium text-[var(--content-primary)]">{pool.label}</p>
+                <p className="text-ds-xs text-[var(--content-tertiary)]">{pool.system} &middot; {pool.taskIds?.length ?? 0} tasks</p>
               </div>
             ))}
           </div>
@@ -349,13 +349,13 @@ function BPMNView({ data }: { data: any }) {
                   <p className="ds-step-title">{task.label}</p>
                   <div className="mt-ds-1 flex flex-wrap items-center gap-ds-2">
                     <span className="ds-tag ds-tag-neutral text-[11px]">{task.type}</span>
-                    {task.durationLabel && <span className="text-ds-xs text-gray-400">{task.durationLabel}</span>}
+                    {task.durationLabel && <span className="text-ds-xs text-[var(--content-tertiary)]">{task.durationLabel}</span>}
                   </div>
                   {task.inputs?.length > 0 && (
-                    <p className="text-ds-xs text-gray-400 mt-ds-1">In: {task.inputs.join(', ')}</p>
+                    <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-1">In: {task.inputs.join(', ')}</p>
                   )}
                   {task.outputs?.length > 0 && (
-                    <p className="text-ds-xs text-gray-400">Out: {task.outputs.join(', ')}</p>
+                    <p className="text-ds-xs text-[var(--content-tertiary)]">Out: {task.outputs.join(', ')}</p>
                   )}
                 </div>
               </div>
@@ -371,10 +371,10 @@ function BPMNView({ data }: { data: any }) {
           <div className="space-y-ds-2">
             {data.gateways.map((gw: any) => (
               <div key={gw.id} className="ds-callout ds-callout-warning">
-                <p className="text-ds-sm font-medium text-gray-900">{gw.label}</p>
-                <p className="text-ds-xs text-gray-500">Type: {gw.type}</p>
+                <p className="text-ds-sm font-medium text-[var(--content-primary)]">{gw.label}</p>
+                <p className="text-ds-xs text-[var(--content-secondary)]">Type: {gw.type}</p>
                 {gw.conditions?.map((c: any, i: number) => (
-                  <p key={i} className="text-ds-xs text-gray-600 mt-ds-1">&rarr; {c.label}</p>
+                  <p key={i} className="text-ds-xs text-[var(--content-secondary)] mt-ds-1">&rarr; {c.label}</p>
                 ))}
               </div>
             ))}
@@ -390,7 +390,7 @@ function BPMNView({ data }: { data: any }) {
             {data.exceptionFlows.map((ef: any, i: number) => (
               <div key={i} className="ds-callout ds-callout-danger">
                 <p className="text-ds-sm font-medium text-red-800">{ef.errorLabel}</p>
-                <p className="text-ds-xs text-gray-600 mt-ds-1">Resolution: {ef.resolution}</p>
+                <p className="text-ds-xs text-[var(--content-secondary)] mt-ds-1">Resolution: {ef.resolution}</p>
               </div>
             ))}
           </div>
@@ -429,7 +429,7 @@ function SIPOCView({ data }: { data: any }) {
             <p className="text-ds-xs font-semibold text-brand-700 uppercase tracking-wide mb-ds-2">{label}</p>
             <ul className="space-y-ds-1">
               {(items ?? []).map((item: string, i: number) => (
-                <li key={i} className="text-ds-xs text-gray-600">{item}</li>
+                <li key={i} className="text-ds-xs text-[var(--content-secondary)]">{item}</li>
               ))}
             </ul>
           </div>
@@ -447,8 +447,8 @@ function SIPOCView({ data }: { data: any }) {
                   <span className="ds-step-ordinal">{stage.ordinal}</span>
                   <div className="flex-1 min-w-0">
                     <p className="ds-step-title">{stage.title}</p>
-                    <p className="text-ds-xs text-gray-500 mt-ds-1">{stage.description}</p>
-                    <p className="text-ds-xs text-gray-400 mt-ds-1">{stage.system} &middot; {stage.stepCount} steps</p>
+                    <p className="text-ds-xs text-[var(--content-secondary)] mt-ds-1">{stage.description}</p>
+                    <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-1">{stage.system} &middot; {stage.stepCount} steps</p>
                   </div>
                 </div>
               </div>
@@ -464,7 +464,7 @@ function SIPOCView({ data }: { data: any }) {
           <div className="space-y-ds-1">
             {data.riskHighlights.map((r: string, i: number) => (
               <div key={i} className="ds-callout ds-callout-warning">
-                <p className="text-ds-sm text-gray-700">{r}</p>
+                <p className="text-ds-sm text-[var(--content-primary)]">{r}</p>
               </div>
             ))}
           </div>

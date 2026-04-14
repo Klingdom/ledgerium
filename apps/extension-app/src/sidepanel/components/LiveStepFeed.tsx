@@ -92,7 +92,7 @@ export function LiveStepFeed({ steps }: LiveStepFeedProps) {
   if (steps.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-10 gap-2">
-        <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center">
           <span className="recording-dot" />
         </div>
         <p className="text-sm text-gray-500">Waiting for activity...</p>

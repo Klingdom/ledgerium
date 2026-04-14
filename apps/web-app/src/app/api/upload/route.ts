@@ -5,6 +5,7 @@ import { validateBundle, runProcessEngine, buildWorkflowReportFromOutput, render
 import { analyzeWorkflowInsights, interpretWorkflow } from '@ledgerium/process-engine';
 import { trackServer } from '@/lib/analytics';
 import { clusterWorkflows } from '@/lib/intelligence';
+import { checkRecordingLimit } from '@/lib/feature-gating';
 import { UPLOAD_DIR } from '@/lib/storage';
 import fs from 'fs';
 import path from 'path';
@@ -23,14 +24,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
 
-  const FREE_UPLOAD_LIMIT = 5;
-  if (user.plan === 'free' && user.uploadCount >= FREE_UPLOAD_LIMIT) {
+  // Plan-aware recording limit (monthly reset, supports all tiers)
+  const limitCheck = await checkRecordingLimit(user);
+  if (!limitCheck.allowed) {
     return NextResponse.json({
-      error: 'Free plan limit reached',
+      error: 'Recording limit reached',
       code: 'UPGRADE_REQUIRED',
-      detail: `Your free plan includes ${FREE_UPLOAD_LIMIT} workflow uploads. Upgrade to Pro for unlimited uploads.`,
-      currentUsage: user.uploadCount,
-      limit: FREE_UPLOAD_LIMIT,
+      detail: `You have used ${limitCheck.used} of ${limitCheck.limit} recordings this month. Upgrade your plan for more.`,
+      used: limitCheck.used,
+      limit: limitCheck.limit,
     }, { status: 403 });
   }
 

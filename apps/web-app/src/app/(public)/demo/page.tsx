@@ -73,10 +73,10 @@ export default function DemoPage() {
       {/* Hero */}
       <section className="pt-20 pb-12 bg-gradient-to-b from-brand-50/40 to-white">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+          <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)]">
             Record a workflow. Get an SOP instantly.
           </h1>
-          <p className="mt-4 text-lg text-gray-500 leading-relaxed">
+          <p className="mt-4 text-lg text-[var(--content-secondary)] leading-relaxed">
             See how ops teams use Ledgerium to turn real browser workflows
             into structured SOPs and process maps — in under 5 minutes.
           </p>
@@ -84,7 +84,7 @@ export default function DemoPage() {
       </section>
 
       {/* Steps */}
-      <section className="py-16 bg-white border-t border-gray-100">
+      <section className="py-16 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <div className="space-y-20">
             {STEPS.map(({ step, icon: Icon, title, what, result, screenshot, screenshotAlt }) => (
@@ -95,9 +95,9 @@ export default function DemoPage() {
                     <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-600 text-white text-sm font-bold shadow-sm shadow-brand-600/20">
                       {step}
                     </span>
-                    <h3 className="text-lg font-bold text-gray-900">{title}</h3>
+                    <h3 className="text-lg font-bold text-[var(--content-primary)]">{title}</h3>
                   </div>
-                  <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                  <p className="text-sm text-[var(--content-secondary)] leading-relaxed mb-3">
                     {what}
                   </p>
                   <div className="flex items-start gap-2">
@@ -110,7 +110,7 @@ export default function DemoPage() {
 
                 {/* Screenshot — 2 cols */}
                 <div className={`md:col-span-2 ${step % 2 === 0 ? 'md:order-1' : ''}`}>
-                  <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow bg-white">
+                  <div className="rounded-xl border border-[var(--border-default)] overflow-hidden shadow-sm hover:shadow-md transition-shadow bg-[var(--surface-elevated)]">
                     <Image
                       src={screenshot}
                       alt={screenshotAlt}
@@ -128,9 +128,9 @@ export default function DemoPage() {
       </section>
 
       {/* Output summary */}
-      <section className="py-16 bg-gray-50 border-t border-gray-200">
+      <section className="py-16 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <h2 className="text-center text-xl font-bold text-gray-900 mb-10">
+          <h2 className="text-center text-xl font-bold text-[var(--content-primary)] mb-10">
             Every recording produces
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -142,8 +142,8 @@ export default function DemoPage() {
             ].map(({ icon: Icon, label, sub }) => (
               <div key={label} className="card p-5 text-center">
                 <Icon className="h-5 w-5 text-brand-600 mx-auto mb-2" />
-                <p className="text-sm font-semibold text-gray-900">{label}</p>
-                <p className="text-[11px] text-gray-400 mt-0.5">{sub}</p>
+                <p className="text-sm font-semibold text-[var(--content-primary)]">{label}</p>
+                <p className="text-[11px] text-[var(--content-tertiary)] mt-0.5">{sub}</p>
               </div>
             ))}
           </div>
@@ -151,14 +151,14 @@ export default function DemoPage() {
       </section>
 
       {/* Interactive demo dashboard callout */}
-      <section className="py-12 bg-white border-t border-gray-200">
+      <section className="py-12 bg-[var(--surface-elevated)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <div className="rounded-xl border border-brand-100 bg-brand-50/40 p-8 text-center">
             <LayoutDashboard className="h-8 w-8 text-brand-600 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-gray-900 mb-2">
+            <h3 className="text-lg font-bold text-[var(--content-primary)] mb-2">
               See the dashboard with real sample workflows
             </h3>
-            <p className="text-sm text-gray-500 mb-5 max-w-lg mx-auto">
+            <p className="text-sm text-[var(--content-secondary)] mb-5 max-w-lg mx-auto">
               Browse 10 real workflow recordings — view SOPs, process maps,
               agent intelligence, and evidence traces. No signup required.
             </p>
@@ -172,12 +172,12 @@ export default function DemoPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-white border-t border-gray-100">
+      <section className="py-20 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-[var(--content-primary)]">
             Get your first SOP in 60 seconds
           </h2>
-          <p className="mt-3 text-gray-500">
+          <p className="mt-3 text-[var(--content-secondary)]">
             Sign up free, and explore a sample workflow SOP immediately —
             no extension install required. When you&apos;re ready, record your own.
           </p>

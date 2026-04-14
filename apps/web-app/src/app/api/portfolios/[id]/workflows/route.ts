@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { z } from 'zod';
+import { checkFeatureAccess } from '@/lib/feature-gating';
 
 const workflowIdsSchema = z.object({
   workflowIds: z.array(z.string().uuid()).min(1).max(100),
@@ -14,6 +15,25 @@ export async function POST(
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const user = await db.user.findUnique({ where: { id: session.user.id } });
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+
+  // Gate: portfolio workflow management is a Team+ (sharedLibrary) feature
+  const access = checkFeatureAccess(user, 'sharedLibrary');
+  if (!access.allowed) {
+    return NextResponse.json(
+      {
+        error: 'Feature not available on your plan',
+        feature: 'sharedLibrary',
+        requiredPlan: access.requiredPlan,
+        upgradeUrl: '/pricing',
+      },
+      { status: 403 },
+    );
   }
 
   // Verify the portfolio belongs to this user
@@ -75,6 +95,25 @@ export async function DELETE(
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const user = await db.user.findUnique({ where: { id: session.user.id } });
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+
+  // Gate: portfolio workflow management is a Team+ (sharedLibrary) feature
+  const deleteAccess = checkFeatureAccess(user, 'sharedLibrary');
+  if (!deleteAccess.allowed) {
+    return NextResponse.json(
+      {
+        error: 'Feature not available on your plan',
+        feature: 'sharedLibrary',
+        requiredPlan: deleteAccess.requiredPlan,
+        upgradeUrl: '/pricing',
+      },
+      { status: 403 },
+    );
   }
 
   // Verify the portfolio belongs to this user

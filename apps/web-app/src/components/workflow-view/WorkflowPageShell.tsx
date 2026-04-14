@@ -250,12 +250,12 @@ export function WorkflowPageShell({
   const inspectorOpen = selection.type !== 'none' && selection.id !== null;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-200px)] min-h-[500px] bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-200px)] min-h-[500px] bg-[var(--surface-elevated)] rounded-xl border border-[var(--border-default)] shadow-sm overflow-hidden">
       {/* ── Metadata header ────────────────��───────────────────────────── */}
       <WorkflowHeader metadata={viewModel.metadata} />
 
       {/* ── Mode switcher + Toolbar row ────────────────────────���───────── */}
-      <div className="flex items-center justify-between px-ds-5 py-ds-1.5 border-b border-gray-100">
+      <div className="flex items-center justify-between px-ds-5 py-ds-1.5 border-b border-[var(--border-subtle)]">
         <WorkflowModeSwitcher activeMode={mode} onModeChange={setMode} />
         <WorkflowToolbar
           toolbar={toolbar}
@@ -270,7 +270,7 @@ export function WorkflowPageShell({
       {/* ── Canvas + Inspector area ────────────────────────────────────── */}
       <div className="flex-1 flex overflow-hidden relative">
         {/* Canvas area — flex-1 shrinks when inspector opens */}
-        <div className="flex-1 relative bg-gray-50/30 min-w-0">
+        <div className="flex-1 relative bg-[var(--surface-secondary)] min-w-0">
           {/* Flow Intelligence Map */}
           {mode === 'flow' && (
             <WorkflowFlowCanvas

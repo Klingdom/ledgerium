@@ -36,12 +36,12 @@ export default function HomePage() {
       <section className="relative overflow-hidden">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 pt-20 pb-24 sm:pt-28 sm:pb-32">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-gray-900 leading-[1.1] tracking-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-[var(--content-primary)] leading-[1.1] tracking-tight">
               Your SOP says 5 steps.{' '}
               <br className="hidden sm:block" />
               <span className="text-brand-600">Your team takes 17.</span>
             </h1>
-            <p className="mt-6 text-lg sm:text-xl text-gray-500 leading-relaxed max-w-2xl mx-auto">
+            <p className="mt-6 text-lg sm:text-xl text-[var(--content-secondary)] leading-relaxed max-w-2xl mx-auto">
               Record real workflows in the browser. Get structured SOPs,
               process maps, and documentation — instantly. No interviews.
               No workshops. No guessing.
@@ -63,14 +63,14 @@ export default function HomePage() {
                 <ArrowRight className="h-3 w-3" />
               </a>
             </div>
-            <p className="mt-3 text-xs text-gray-400">
+            <p className="mt-3 text-xs text-[var(--content-tertiary)]">
               Free to start. No credit card required.
             </p>
           </div>
 
           {/* Hero product screenshot */}
           <div className="mt-16 mx-auto max-w-5xl px-4 sm:px-6">
-            <div className="rounded-xl border border-gray-200 overflow-hidden shadow-lg shadow-gray-200/50 bg-white">
+            <div className="rounded-xl border border-[var(--border-default)] overflow-hidden shadow-lg shadow-[var(--border-default)]/50 bg-[var(--surface-elevated)]">
               <Image
                 src="/img/screenshot-dashboard.png"
                 alt="Ledgerium AI dashboard showing recorded workflows with process intelligence metrics"
@@ -80,7 +80,7 @@ export default function HomePage() {
                 priority
               />
             </div>
-            <p className="text-center text-xs text-gray-400 mt-3">
+            <p className="text-center text-xs text-[var(--content-tertiary)] mt-3">
               Your workflow library — every recording becomes structured documentation.{' '}
               <a href="/dashboard.html" className="text-brand-600 hover:text-brand-700 font-medium">
                 Explore the live demo &rarr;
@@ -89,16 +89,16 @@ export default function HomePage() {
           </div>
         </div>
         {/* Subtle gradient backdrop */}
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-50/40 via-white to-gray-50" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-50/40 via-white to-[var(--surface-secondary)]" />
       </section>
 
       {/* ── How it works ──────────────────────────────────────────────────── */}
-      <section className="border-y border-gray-200 bg-white py-20">
+      <section className="border-y border-[var(--border-default)] bg-[var(--surface-elevated)] py-20">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <p className="text-center text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
             How it works
           </p>
-          <h2 className="text-center text-2xl sm:text-3xl font-bold text-gray-900 mb-14">
+          <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-14">
             From recording to documentation in minutes
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-12">
@@ -129,8 +129,8 @@ export default function HomePage() {
                 <p className="text-[11px] font-bold text-brand-600 uppercase tracking-widest mb-2">
                   Step {step}
                 </p>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">{title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
+                <h3 className="text-lg font-semibold text-[var(--content-primary)] mb-3">{title}</h3>
+                <p className="text-sm text-[var(--content-secondary)] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -138,13 +138,13 @@ export default function HomePage() {
       </section>
 
       {/* ── Why it matters ────────────────────────────────────────────────── */}
-      <section className="py-24 bg-gray-50">
+      <section className="py-24 bg-[var(--surface-secondary)]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-14">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
               Your SOPs are already out of date
             </h2>
-            <p className="mt-4 text-gray-500 leading-relaxed">
+            <p className="mt-4 text-[var(--content-secondary)] leading-relaxed">
               Most process documentation is written from memory, not observation.
               Workarounds, extra steps, and tribal knowledge never make it into the doc.
               The gap between what&apos;s documented and what&apos;s real grows every week.
@@ -173,8 +173,8 @@ export default function HomePage() {
                 <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center mb-4">
                   <Icon className="h-5 w-5 text-brand-600" />
                 </div>
-                <h3 className="text-base font-semibold text-gray-900 mb-2">{title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
+                <h3 className="text-base font-semibold text-[var(--content-primary)] mb-2">{title}</h3>
+                <p className="text-sm text-[var(--content-secondary)] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -182,13 +182,13 @@ export default function HomePage() {
       </section>
 
       {/* ── What you get ──────────────────────────────────────────────────── */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-[var(--surface-elevated)]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-14">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
               Every recording produces real output
             </h2>
-            <p className="mt-4 text-gray-500">
+            <p className="mt-4 text-[var(--content-secondary)]">
               Not another video file to watch. Structured, searchable, reusable
               workflow intelligence.
             </p>
@@ -203,13 +203,13 @@ export default function HomePage() {
               { icon: Clock, title: 'History & Metrics', desc: 'Duration, step count, phase count, and confidence for every recording. Track how workflows vary over time.' },
               { icon: CheckCircle, title: 'Reports & Export', desc: 'Download workflow reports, SOP documents, and raw data. Share structured output with stakeholders.' },
             ].map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="flex gap-4 p-5 rounded-xl border border-transparent hover:border-gray-200 hover:bg-gray-50/50 transition-all">
+              <div key={title} className="flex gap-4 p-5 rounded-xl border border-transparent hover:border-[var(--border-default)] hover:bg-[var(--surface-secondary)] transition-all">
                 <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center">
                   <Icon className="h-4 w-4 text-brand-600" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900 mb-1">{title}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
+                  <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-1">{title}</h3>
+                  <p className="text-sm text-[var(--content-secondary)] leading-relaxed">{desc}</p>
                 </div>
               </div>
             ))}
@@ -218,12 +218,12 @@ export default function HomePage() {
       </section>
 
       {/* ── Who it's for ────────────────────────────────────────────────── */}
-      <section className="py-20 bg-gray-50 border-t border-gray-200">
+      <section className="py-20 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <h2 className="text-center text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+          <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-4">
             Built for teams that maintain SOPs
           </h2>
-          <p className="text-center text-gray-500 mb-12 max-w-2xl mx-auto">
+          <p className="text-center text-[var(--content-secondary)] mb-12 max-w-2xl mx-auto">
             If your team documents workflows in browser-based tools — ERP, CRM, ticketing, HR systems — Ledgerium records what actually happens and generates the documentation for you.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -235,8 +235,8 @@ export default function HomePage() {
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="card p-6 hover:shadow-md transition-shadow">
                 <Icon className="h-5 w-5 text-brand-600 mb-3" />
-                <h3 className="text-sm font-semibold text-gray-900 mb-1.5">{title}</h3>
-                <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
+                <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-1.5">{title}</h3>
+                <p className="text-xs text-[var(--content-secondary)] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -244,7 +244,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Trust strip ───────────────────────────────────────────────────── */}
-      <section className="py-12 bg-white border-t border-gray-200">
+      <section className="py-12 bg-[var(--surface-elevated)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
@@ -254,8 +254,8 @@ export default function HomePage() {
               { value: 'Free to start', label: 'No credit card needed' },
             ].map(({ value, label }) => (
               <div key={value}>
-                <p className="text-sm font-bold text-gray-900">{value}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{label}</p>
+                <p className="text-sm font-bold text-[var(--content-primary)]">{value}</p>
+                <p className="text-xs text-[var(--content-tertiary)] mt-0.5">{label}</p>
               </div>
             ))}
           </div>
@@ -263,14 +263,14 @@ export default function HomePage() {
       </section>
 
       {/* ── Final CTA ─────────────────────────────────────────────────────── */}
-      <section className="py-24 bg-gray-50 border-t border-gray-200">
+      <section className="py-24 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
             Stop documenting from memory.
             <br />
             Start recording what actually happens.
           </h2>
-          <p className="mt-5 text-gray-500 leading-relaxed">
+          <p className="mt-5 text-[var(--content-secondary)] leading-relaxed">
             Install the extension, record a workflow, and get structured output
             in under 5 minutes. Free to start.
           </p>

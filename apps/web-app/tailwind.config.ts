@@ -2,20 +2,36 @@ import type { Config } from 'tailwindcss';
 
 const config: Config = {
   content: ['./src/**/*.{ts,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
         brand: {
-          50: '#f0f7ff',
-          100: '#e0effe',
-          200: '#b9dffd',
-          300: '#7cc5fc',
-          400: '#36a7f8',
-          500: '#0c8de9',
-          600: '#006fc7',
-          700: '#0059a1',
-          800: '#054b85',
-          900: '#0a3f6e',
+          50: '#ecfdf5',
+          100: '#d1fae5',
+          200: '#a7f3d0',
+          300: '#6ee7b7',
+          400: '#34d399',
+          500: '#10b981',
+          600: '#059669',
+          700: '#047857',
+          800: '#065f46',
+          900: '#064e3b',
+        },
+        // Semantic surface colors — switch via CSS vars
+        surface: {
+          primary: 'var(--surface-primary)',
+          secondary: 'var(--surface-secondary)',
+          elevated: 'var(--surface-elevated)',
+        },
+        content: {
+          primary: 'var(--content-primary)',
+          secondary: 'var(--content-secondary)',
+          tertiary: 'var(--content-tertiary)',
+        },
+        border: {
+          DEFAULT: 'var(--border-default)',
+          subtle: 'var(--border-subtle)',
         },
       },
       fontSize: {

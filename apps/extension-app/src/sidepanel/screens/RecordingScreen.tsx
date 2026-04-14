@@ -17,14 +17,14 @@ export function RecordingScreen({ meta, steps, rawEventCount, onPause, onStop, o
     <div className="flex flex-col h-full">
       {/* Activity label + event counter */}
       {meta && (
-        <div className="px-4 pt-3 pb-2 bg-blue-50 border-b border-blue-100">
+        <div className="px-4 pt-3 pb-2 bg-emerald-50 border-b border-emerald-100">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="recording-dot" />
-              <p className="text-xs text-blue-700 uppercase tracking-wider font-medium">Recording Active</p>
+              <p className="text-xs text-emerald-700 uppercase tracking-wider font-medium">Recording Active</p>
             </div>
             {rawEventCount > 0 && (
-              <p className="text-xs text-blue-600 tabular-nums font-medium">{rawEventCount} events</p>
+              <p className="text-xs text-emerald-600 tabular-nums font-medium">{rawEventCount} events</p>
             )}
           </div>
           <p className="text-sm text-gray-900 font-medium mt-1 truncate">{meta.activityName}</p>

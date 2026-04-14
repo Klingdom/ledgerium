@@ -30,10 +30,10 @@ export default function InstallExtensionPage() {
           <div className="mx-auto w-16 h-16 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center mb-6">
             <Chrome className="h-7 w-7 text-brand-600" />
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+          <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)]">
             Add Ledgerium to Chrome
           </h1>
-          <p className="mt-4 text-lg text-gray-500 leading-relaxed max-w-xl mx-auto">
+          <p className="mt-4 text-lg text-[var(--content-secondary)] leading-relaxed max-w-xl mx-auto">
             The browser extension captures your workflow. The web app turns it into
             SOPs, process maps, and a searchable library.
           </p>
@@ -47,16 +47,16 @@ export default function InstallExtensionPage() {
               Install Chrome Extension
             </a>
           </div>
-          <p className="mt-3 text-xs text-gray-400">
+          <p className="mt-3 text-xs text-[var(--content-tertiary)]">
             Also works with Edge, Brave, and other Chromium-based browsers
           </p>
         </div>
       </section>
 
       {/* Setup steps */}
-      <section className="py-20 bg-white border-t border-gray-100">
+      <section className="py-20 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <h2 className="text-center text-xl font-bold text-gray-900 mb-12">
+          <h2 className="text-center text-xl font-bold text-[var(--content-primary)] mb-12">
             Up and running in under 2 minutes
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -91,8 +91,8 @@ export default function InstallExtensionPage() {
                   {step}
                 </div>
                 <Icon className="h-5 w-5 text-brand-600 mx-auto mb-2" />
-                <h3 className="text-sm font-semibold text-gray-900 mb-1.5">{title}</h3>
-                <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
+                <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-1.5">{title}</h3>
+                <p className="text-xs text-[var(--content-secondary)] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -100,9 +100,9 @@ export default function InstallExtensionPage() {
       </section>
 
       {/* What it captures / what it doesn't */}
-      <section className="py-20 bg-gray-50 border-t border-gray-200">
+      <section className="py-20 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <h2 className="text-center text-xl font-bold text-gray-900 mb-12">
+          <h2 className="text-center text-xl font-bold text-[var(--content-primary)] mb-12">
             What the extension records — and what it doesn&apos;t
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -110,7 +110,7 @@ export default function InstallExtensionPage() {
             <div className="card p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Eye className="h-5 w-5 text-brand-600" />
-                <h3 className="text-sm font-bold text-gray-900">Captured</h3>
+                <h3 className="text-sm font-bold text-[var(--content-primary)]">Captured</h3>
               </div>
               <ul className="space-y-3">
                 {[
@@ -121,7 +121,7 @@ export default function InstallExtensionPage() {
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
                     <CheckCircle className="h-4 w-4 text-brand-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-gray-600 leading-relaxed">{item}</span>
+                    <span className="text-sm text-[var(--content-secondary)] leading-relaxed">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -130,8 +130,8 @@ export default function InstallExtensionPage() {
             {/* What it does NOT capture */}
             <div className="card p-6">
               <div className="flex items-center gap-2 mb-4">
-                <EyeOff className="h-5 w-5 text-gray-400" />
-                <h3 className="text-sm font-bold text-gray-900">Not captured</h3>
+                <EyeOff className="h-5 w-5 text-[var(--content-tertiary)]" />
+                <h3 className="text-sm font-bold text-[var(--content-primary)]">Not captured</h3>
               </div>
               <ul className="space-y-3">
                 {[
@@ -141,14 +141,14 @@ export default function InstallExtensionPage() {
                   'No background activity — recording only when you choose',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <Shield className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-gray-600 leading-relaxed">{item}</span>
+                    <Shield className="h-4 w-4 text-[var(--content-tertiary)] mt-0.5 flex-shrink-0" />
+                    <span className="text-sm text-[var(--content-secondary)] leading-relaxed">{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
           </div>
-          <p className="text-center text-xs text-gray-400 mt-6">
+          <p className="text-center text-xs text-[var(--content-tertiary)] mt-6">
             Sensitive field values (passwords, financial data) are automatically
             redacted. You can review everything captured before exporting.
           </p>
@@ -156,37 +156,37 @@ export default function InstallExtensionPage() {
       </section>
 
       {/* Browser support */}
-      <section className="py-14 bg-white border-t border-gray-100">
+      <section className="py-14 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <h2 className="text-center text-sm font-semibold text-gray-400 uppercase tracking-wider mb-6">
+          <h2 className="text-center text-sm font-semibold text-[var(--content-tertiary)] uppercase tracking-wider mb-6">
             Browser compatibility
           </h2>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div className="card p-4">
               <Chrome className="h-6 w-6 text-brand-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-gray-900">Chrome</p>
+              <p className="text-sm font-medium text-[var(--content-primary)]">Chrome</p>
               <p className="text-[11px] text-green-600 font-medium">Fully supported</p>
             </div>
             <div className="card p-4">
-              <Chrome className="h-6 w-6 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm font-medium text-gray-700">Edge / Brave</p>
-              <p className="text-[11px] text-gray-500">Compatible</p>
+              <Chrome className="h-6 w-6 text-[var(--content-tertiary)] mx-auto mb-2" />
+              <p className="text-sm font-medium text-[var(--content-primary)]">Edge / Brave</p>
+              <p className="text-[11px] text-[var(--content-secondary)]">Compatible</p>
             </div>
             <div className="card p-4">
-              <Chrome className="h-6 w-6 text-gray-200 mx-auto mb-2" />
-              <p className="text-sm font-medium text-gray-400">Firefox / Safari</p>
-              <p className="text-[11px] text-gray-400">Planned</p>
+              <Chrome className="h-6 w-6 text-[var(--content-tertiary)] mx-auto mb-2" />
+              <p className="text-sm font-medium text-[var(--content-tertiary)]">Firefox / Safari</p>
+              <p className="text-[11px] text-[var(--content-tertiary)]">Planned</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="py-20 bg-gray-50 border-t border-gray-200">
+      <section className="py-20 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <div className="flex items-center gap-3 mb-10">
-            <HelpCircle className="h-5 w-5 text-gray-400" />
-            <h2 className="text-lg font-bold text-gray-900">Troubleshooting</h2>
+            <HelpCircle className="h-5 w-5 text-[var(--content-tertiary)]" />
+            <h2 className="text-lg font-bold text-[var(--content-primary)]">Troubleshooting</h2>
           </div>
           <div className="space-y-8">
             {[
@@ -208,8 +208,8 @@ export default function InstallExtensionPage() {
               },
             ].map(({ q, a }) => (
               <div key={q}>
-                <h3 className="text-sm font-semibold text-gray-900 mb-1.5">{q}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{a}</p>
+                <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-1.5">{q}</h3>
+                <p className="text-sm text-[var(--content-secondary)] leading-relaxed">{a}</p>
               </div>
             ))}
           </div>
@@ -217,12 +217,12 @@ export default function InstallExtensionPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-white border-t border-gray-100">
+      <section className="py-20 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-[var(--content-primary)]">
             Ready to see your real workflows?
           </h2>
-          <p className="mt-3 text-gray-500">
+          <p className="mt-3 text-[var(--content-secondary)]">
             Install the extension and record your first workflow in under 2 minutes.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">

@@ -85,7 +85,7 @@ const TYPE_STYLES: Record<string, string> = {
   standardize_variant: 'bg-teal-100 text-teal-700',
   update_sop: 'bg-purple-100 text-purple-700',
   automate_step: 'bg-blue-100 text-blue-700',
-  remove_step: 'bg-gray-100 text-gray-700',
+  remove_step: 'bg-[var(--surface-secondary)] text-[var(--content-primary)]',
   reduce_rework: 'bg-orange-100 text-orange-700',
   add_validation: 'bg-emerald-100 text-emerald-700',
   simplify_handoffs: 'bg-red-100 text-red-700',
@@ -162,7 +162,7 @@ export default function RecommendationCenterPage() {
 
   if (isLoading) {
     return (
-      <div className="text-center text-ds-sm text-gray-400 py-20">
+      <div className="text-center text-ds-sm text-[var(--content-tertiary)] py-20">
         Loading recommendations...
       </div>
     );
@@ -172,21 +172,21 @@ export default function RecommendationCenterPage() {
     <div>
       {/* Header */}
       <div className="mb-ds-6">
-        <h1 className="text-ds-2xl font-bold tracking-tight text-gray-900">
+        <h1 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">
           Recommendation Center
         </h1>
-        <p className="text-ds-sm text-gray-500 mt-ds-1">
+        <p className="text-ds-sm text-[var(--content-secondary)] mt-ds-1">
           {allRecommendations.length} actionable recommendation{allRecommendations.length !== 1 ? 's' : ''} across {definitions.filter((d) => d.intelligence?.recommendations?.length).length} process{definitions.filter((d) => d.intelligence?.recommendations?.length).length !== 1 ? 'es' : ''}
         </p>
       </div>
 
       {/* Filter bar */}
       <div className="flex flex-wrap items-center gap-ds-3 mb-ds-6">
-        <Filter className="h-4 w-4 text-gray-400" />
+        <Filter className="h-4 w-4 text-[var(--content-tertiary)]" />
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
-          className="rounded-ds-md border border-gray-200 bg-white px-ds-3 py-ds-2 text-ds-sm text-gray-700 focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+          className="rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-elevated)] px-ds-3 py-ds-2 text-ds-sm text-[var(--content-primary)] focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
         >
           {TYPE_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -195,7 +195,7 @@ export default function RecommendationCenterPage() {
         <select
           value={filterImpact}
           onChange={(e) => setFilterImpact(e.target.value)}
-          className="rounded-ds-md border border-gray-200 bg-white px-ds-3 py-ds-2 text-ds-sm text-gray-700 focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+          className="rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-elevated)] px-ds-3 py-ds-2 text-ds-sm text-[var(--content-primary)] focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
         >
           {IMPACT_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -204,7 +204,7 @@ export default function RecommendationCenterPage() {
         <select
           value={filterConfidence}
           onChange={(e) => setFilterConfidence(e.target.value)}
-          className="rounded-ds-md border border-gray-200 bg-white px-ds-3 py-ds-2 text-ds-sm text-gray-700 focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+          className="rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-elevated)] px-ds-3 py-ds-2 text-ds-sm text-[var(--content-primary)] focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
         >
           {CONFIDENCE_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -218,7 +218,7 @@ export default function RecommendationCenterPage() {
             Clear filters
           </button>
         )}
-        <span className="text-ds-xs text-gray-400 ml-auto">
+        <span className="text-ds-xs text-[var(--content-tertiary)] ml-auto">
           Showing {filteredRecommendations.length} of {allRecommendations.length}
         </span>
       </div>
@@ -238,8 +238,8 @@ export default function RecommendationCenterPage() {
                   <div className="flex-1 min-w-0">
                     {/* Title + badges */}
                     <div className="flex flex-wrap items-center gap-ds-2 mb-ds-1">
-                      <span className="text-ds-sm font-semibold text-gray-900">{rec.title}</span>
-                      <span className={`ds-tag text-[10px] ${TYPE_STYLES[rec.type] ?? 'bg-gray-100 text-gray-700'}`}>
+                      <span className="text-ds-sm font-semibold text-[var(--content-primary)]">{rec.title}</span>
+                      <span className={`ds-tag text-[10px] ${TYPE_STYLES[rec.type] ?? 'bg-[var(--surface-secondary)] text-[var(--content-primary)]'}`}>
                         {rec.type.replace(/_/g, ' ')}
                       </span>
                     </div>
@@ -254,7 +254,7 @@ export default function RecommendationCenterPage() {
                     </Link>
 
                     {/* Description */}
-                    <p className="text-ds-xs text-gray-600">{rec.description}</p>
+                    <p className="text-ds-xs text-[var(--content-secondary)]">{rec.description}</p>
 
                     {/* Metric badges */}
                     <div className="flex flex-wrap items-center gap-ds-2 mt-ds-2">
@@ -268,7 +268,7 @@ export default function RecommendationCenterPage() {
                       <span className={`ds-tag text-[10px] ${
                         rec.confidence === 'high' ? 'bg-green-100 text-green-700' :
                         rec.confidence === 'medium' ? 'bg-amber-100 text-amber-700' :
-                        'bg-gray-100 text-gray-600'
+                        'bg-[var(--surface-secondary)] text-[var(--content-secondary)]'
                       }`}>
                         {rec.confidence} confidence
                       </span>
@@ -288,7 +288,7 @@ export default function RecommendationCenterPage() {
                     </div>
 
                     {/* Evidence */}
-                    <p className="text-ds-xs text-gray-400 mt-ds-2">{rec.evidence}</p>
+                    <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-2">{rec.evidence}</p>
 
                     {/* View Process link */}
                     <div className="mt-ds-3">
@@ -308,13 +308,13 @@ export default function RecommendationCenterPage() {
         </div>
       ) : (
         <div className="card px-ds-6 py-ds-10 text-center">
-          <Lightbulb className="h-8 w-8 text-gray-300 mx-auto mb-ds-3" />
-          <p className="text-ds-sm text-gray-500 font-medium">
+          <Lightbulb className="h-8 w-8 text-[var(--content-tertiary)] mx-auto mb-ds-3" />
+          <p className="text-ds-sm text-[var(--content-secondary)] font-medium">
             {allRecommendations.length === 0
               ? 'No recommendations yet'
               : 'No recommendations match the current filters'}
           </p>
-          <p className="text-ds-xs text-gray-400 mt-ds-1">
+          <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-1">
             {allRecommendations.length === 0
               ? 'Record more workflow executions to generate actionable recommendations.'
               : 'Try adjusting or clearing filters to see more results.'}

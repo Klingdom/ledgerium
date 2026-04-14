@@ -123,7 +123,7 @@ export function SOPExecutionMode({ viewModel, expandedSteps, onToggleStep }: Pro
 
       {/* 8. Provenance */}
       <footer className="text-center pt-3 pb-2">
-        <p className="text-[10px] text-gray-400">{viewModel.metadata.sourceNote}</p>
+        <p className="text-[10px] text-[var(--content-tertiary)]">{viewModel.metadata.sourceNote}</p>
       </footer>
     </div>
   );
@@ -158,23 +158,23 @@ function QuickStartSection({ viewModel }: { viewModel: SOPViewModel }) {
         {/* What this does */}
         <div>
           <p className="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider mb-0.5">What This Does</p>
-          <p className="text-ds-xs text-gray-800 leading-relaxed">{viewModel.metadata.objective || viewModel.metadata.purpose}</p>
+          <p className="text-ds-xs text-[var(--content-primary)] leading-relaxed">{viewModel.metadata.objective || viewModel.metadata.purpose}</p>
         </div>
 
         {/* When to use */}
         <div>
           <p className="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider mb-0.5">When To Use</p>
-          <p className="text-ds-xs text-gray-700">{qs.whenToUseIt}</p>
+          <p className="text-ds-xs text-[var(--content-primary)]">{qs.whenToUseIt}</p>
         </div>
 
         {/* Prerequisites + Systems (side by side on desktop) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {qs.prerequisites.length > 0 && (
-            <div className="bg-white/60 rounded-lg px-3 py-2 border border-emerald-100">
+            <div className="bg-[var(--surface-elevated)]/60 rounded-lg px-3 py-2 border border-emerald-100">
               <p className="text-[9px] font-semibold text-emerald-600 uppercase tracking-wider mb-1">Before You Begin</p>
               <ul className="space-y-0.5">
                 {qs.prerequisites.map((p, i) => (
-                  <li key={i} className="flex items-baseline gap-1.5 text-[10px] text-gray-700">
+                  <li key={i} className="flex items-baseline gap-1.5 text-[10px] text-[var(--content-primary)]">
                     <span className="w-1 h-1 rounded-full bg-emerald-400 mt-1.5 flex-shrink-0" />
                     {p}
                   </li>
@@ -184,7 +184,7 @@ function QuickStartSection({ viewModel }: { viewModel: SOPViewModel }) {
           )}
 
           {qs.systemsNeeded.length > 0 && (
-            <div className="bg-white/60 rounded-lg px-3 py-2 border border-emerald-100">
+            <div className="bg-[var(--surface-elevated)]/60 rounded-lg px-3 py-2 border border-emerald-100">
               <p className="text-[9px] font-semibold text-emerald-600 uppercase tracking-wider mb-1">Systems Needed</p>
               <div className="flex flex-wrap gap-1">
                 {qs.systemsNeeded.map(sys => (
@@ -240,14 +240,14 @@ function ExecutionStepCard({
             ? 'border-amber-200 bg-amber-50/10'
             : step.isErrorHandling
               ? 'border-red-200/50 bg-red-50/10'
-              : 'border-gray-200 bg-white'
+              : 'border-[var(--border-default)] bg-[var(--surface-elevated)]'
       } ${isExpanded ? 'shadow-sm' : ''}`}
     >
       {/* ── Collapsed header ──────────────────────────────────────── */}
       <button
         onClick={onToggle}
         aria-expanded={isExpanded}
-        className="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-gray-50/30 transition-colors rounded-xl"
+        className="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-[var(--surface-secondary)] transition-colors rounded-xl"
       >
         {/* Ordinal badge */}
         <span
@@ -260,7 +260,7 @@ function ExecutionStepCard({
         {/* Title + tags */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-ds-xs font-semibold text-gray-900 truncate">{step.title}</span>
+            <span className="text-ds-xs font-semibold text-[var(--content-primary)] truncate">{step.title}</span>
             <span
               className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded flex-shrink-0"
               style={{ color: step.accentColor, background: `${step.accentColor}10` }}
@@ -280,19 +280,19 @@ function ExecutionStepCard({
           </div>
           {/* Subtitle: action if different from title */}
           {step.action && step.action !== step.title && (
-            <p className="text-[10px] text-gray-500 mt-0.5 truncate">{step.action}</p>
+            <p className="text-[10px] text-[var(--content-secondary)] mt-0.5 truncate">{step.action}</p>
           )}
         </div>
 
         {/* Right side */}
         <div className="flex items-center gap-2 flex-shrink-0">
           {step.system && (
-            <span className="text-[9px] font-medium text-gray-500 bg-gray-50 border border-gray-200 rounded px-1.5 py-0.5 hidden md:block">
+            <span className="text-[9px] font-medium text-[var(--content-secondary)] bg-[var(--surface-secondary)] border border-[var(--border-default)] rounded px-1.5 py-0.5 hidden md:block">
               {step.system}
             </span>
           )}
           {step.durationLabel && (
-            <span className="text-[10px] text-gray-400 flex items-center gap-0.5">
+            <span className="text-[10px] text-[var(--content-tertiary)] flex items-center gap-0.5">
               <Clock className="h-2.5 w-2.5" />
               {step.durationLabel}
             </span>
@@ -302,32 +302,32 @@ function ExecutionStepCard({
           {/* Friction indicator */}
           {step.hasHighFriction && <AlertTriangle className="h-3 w-3 text-red-400" />}
           {/* Expand chevron */}
-          <ChevronRight className={`h-3.5 w-3.5 text-gray-300 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+          <ChevronRight className={`h-3.5 w-3.5 text-[var(--content-tertiary)] transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
         </div>
       </button>
 
       {/* ── Expanded body ─────────────────────────────────────────── */}
       {isExpanded && (
-        <div className="px-4 pb-4 pl-[52px] space-y-3 border-t border-gray-100 pt-3">
+        <div className="px-4 pb-4 pl-[52px] space-y-3 border-t border-[var(--border-subtle)] pt-3">
           {/* Instructions */}
           {step.detailText && (
-            <div className="bg-gray-50 rounded-lg border border-gray-100 overflow-hidden">
+            <div className="bg-[var(--surface-secondary)] rounded-lg border border-[var(--border-subtle)] overflow-hidden">
               {step.detailText.split('\n').filter(Boolean).map((line, i, arr) => {
                 const isVerify = line.startsWith('✓');
                 const isNote = line.startsWith('→');
                 return (
                   <div
                     key={i}
-                    className={`flex gap-2.5 px-3 py-2 text-[11px] ${i < arr.length - 1 ? 'border-b border-gray-100' : ''} ${
-                      isVerify ? 'bg-emerald-50/50' : isNote ? 'bg-gray-50/50' : ''
+                    className={`flex gap-2.5 px-3 py-2 text-[11px] ${i < arr.length - 1 ? 'border-b border-[var(--border-subtle)]' : ''} ${
+                      isVerify ? 'bg-emerald-50/50' : isNote ? 'bg-[var(--surface-secondary)]' : ''
                     }`}
                   >
                     <span className={`flex-shrink-0 min-w-[14px] font-bold tabular-nums ${
-                      isVerify ? 'text-emerald-600' : isNote ? 'text-gray-400' : 'text-gray-400'
+                      isVerify ? 'text-emerald-600' : isNote ? 'text-[var(--content-tertiary)]' : 'text-[var(--content-tertiary)]'
                     }`}>
                       {line.match(/^\d+\./)?.[0] ?? (isVerify ? '✓' : isNote ? '→' : '')}
                     </span>
-                    <span className={isVerify ? 'text-emerald-700 font-medium' : isNote ? 'text-gray-500 italic' : 'text-gray-700'}>
+                    <span className={isVerify ? 'text-emerald-700 font-medium' : isNote ? 'text-[var(--content-secondary)] italic' : 'text-[var(--content-primary)]'}>
                       {line.replace(/^\d+\.\s*/, '').replace(/^[✓→]\s*/, '')}
                     </span>
                   </div>
@@ -365,7 +365,7 @@ function ExecutionStepCard({
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 mt-0.5 flex-shrink-0" />
               <div>
                 <span className="font-semibold text-emerald-700">Expected:</span>
-                <span className="text-gray-600 ml-1">{step.expectedOutcome}</span>
+                <span className="text-[var(--content-secondary)] ml-1">{step.expectedOutcome}</span>
               </div>
             </div>
           )}
@@ -440,16 +440,16 @@ function DecisionSummaryCard({ decision }: { decision: SOPViewDecision }) {
 
 function IssueCard({ issue }: { issue: { title: string; description: string; affectedStepOrdinals: number[] } }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
+    <div className="bg-[var(--surface-elevated)] border border-[var(--border-default)] rounded-xl px-4 py-3">
       <div className="flex items-start gap-3">
         <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center flex-shrink-0">
           <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-ds-xs font-semibold text-gray-800">{issue.title}</p>
-          <p className="text-[10px] text-gray-600 mt-0.5 leading-relaxed">{issue.description}</p>
+          <p className="text-ds-xs font-semibold text-[var(--content-primary)]">{issue.title}</p>
+          <p className="text-[10px] text-[var(--content-secondary)] mt-0.5 leading-relaxed">{issue.description}</p>
           {issue.affectedStepOrdinals.length > 0 && (
-            <p className="text-[9px] text-gray-400 mt-1">
+            <p className="text-[9px] text-[var(--content-tertiary)] mt-1">
               Affects step{issue.affectedStepOrdinals.length !== 1 ? 's' : ''} {issue.affectedStepOrdinals.join(', ')}
             </p>
           )}
@@ -481,7 +481,7 @@ function CompletionSection({ criteria }: { criteria: string[] }) {
     <section>
       <SectionLabel icon={CheckCircle2} label="Completion Checklist" />
       <div className={`mt-2 rounded-xl border px-5 py-4 transition-colors ${
-        allChecked ? 'bg-emerald-50 border-emerald-300' : 'bg-white border-gray-200'
+        allChecked ? 'bg-emerald-50 border-emerald-300' : 'bg-[var(--surface-elevated)] border-[var(--border-default)]'
       }`}>
         {allChecked && (
           <div className="flex items-center gap-2 mb-3 pb-3 border-b border-emerald-200">
@@ -503,12 +503,12 @@ function CompletionSection({ criteria }: { criteria: string[] }) {
                 <span className={`w-4 h-4 rounded border flex items-center justify-center mt-0.5 flex-shrink-0 transition-colors ${
                   checked.has(i)
                     ? 'bg-emerald-500 border-emerald-500 text-white'
-                    : 'border-gray-300 group-hover:border-gray-400'
+                    : 'border-[var(--border-default)] group-hover:border-[var(--border-default)]'
                 }`}>
                   {checked.has(i) && <CheckCircle2 className="h-3 w-3" />}
                 </span>
                 <span className={`text-ds-xs transition-colors ${
-                  checked.has(i) ? 'text-gray-500 line-through' : 'text-gray-800'
+                  checked.has(i) ? 'text-[var(--content-secondary)] line-through' : 'text-[var(--content-primary)]'
                 }`}>
                   {c}
                 </span>
@@ -546,10 +546,10 @@ function VariantsSummarySection({ viewModel }: { viewModel: SOPViewModel }) {
 
 function OverviewStat({ label, value, detail }: { label: string; value: string; detail: string }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl px-3 py-2.5">
-      <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">{label}</p>
-      <p className="text-ds-lg font-bold text-gray-900 mt-0.5">{value}</p>
-      <p className="text-[9px] text-gray-400 mt-0.5">{detail}</p>
+    <div className="bg-[var(--surface-elevated)] border border-[var(--border-default)] rounded-xl px-3 py-2.5">
+      <p className="text-[9px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider">{label}</p>
+      <p className="text-ds-lg font-bold text-[var(--content-primary)] mt-0.5">{value}</p>
+      <p className="text-[9px] text-[var(--content-tertiary)] mt-0.5">{detail}</p>
     </div>
   );
 }
@@ -573,7 +573,7 @@ function InsightsSection({
       <div className="mt-2 space-y-2">
         {/* Recommendations first (more actionable) */}
         {recommendations.map(rec => (
-          <div key={rec.id} className="bg-white border border-gray-200 rounded-xl px-4 py-3">
+          <div key={rec.id} className="bg-[var(--surface-elevated)] border border-[var(--border-default)] rounded-xl px-4 py-3">
             <div className="flex items-start gap-3">
               <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${
                 rec.type === 'automation' ? 'bg-violet-50 border border-violet-200' :
@@ -592,14 +592,14 @@ function InsightsSection({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className="text-ds-xs font-semibold text-gray-800">{rec.title}</span>
+                  <span className="text-ds-xs font-semibold text-[var(--content-primary)]">{rec.title}</span>
                   <span className={`text-[8px] font-bold uppercase tracking-wider px-1 py-0.5 rounded ${
                     rec.impact === 'high' ? 'text-red-600 bg-red-50' :
                     rec.impact === 'medium' ? 'text-amber-600 bg-amber-50' :
-                    'text-gray-500 bg-gray-50'
+                    'text-[var(--content-secondary)] bg-[var(--surface-secondary)]'
                   }`}>{rec.impact}</span>
                 </div>
-                <p className="text-[10px] text-gray-600 leading-relaxed">{rec.detail}</p>
+                <p className="text-[10px] text-[var(--content-secondary)] leading-relaxed">{rec.detail}</p>
               </div>
             </div>
           </div>
@@ -627,7 +627,7 @@ function InsightsSection({
                 'text-blue-800'
               }`}>{insight.label}</p>
               {insight.detail && insight.detail !== insight.label && (
-                <p className="text-[10px] text-gray-500 mt-0.5">{insight.detail}</p>
+                <p className="text-[10px] text-[var(--content-secondary)] mt-0.5">{insight.detail}</p>
               )}
             </div>
           </div>
@@ -636,8 +636,8 @@ function InsightsSection({
         {/* Placeholder when no AI insights */}
         {insights.length === 0 && recommendations.length === 0 && (
           <div className="text-center py-4">
-            <Zap className="h-5 w-5 text-gray-300 mx-auto mb-1.5" />
-            <p className="text-[10px] text-gray-400">No intelligence signals detected for this procedure.</p>
+            <Zap className="h-5 w-5 text-[var(--content-tertiary)] mx-auto mb-1.5" />
+            <p className="text-[10px] text-[var(--content-tertiary)]">No intelligence signals detected for this procedure.</p>
           </div>
         )}
       </div>
@@ -660,10 +660,10 @@ function SectionLabel({
 }) {
   return (
     <div className="flex items-center gap-2">
-      <Icon className="h-4 w-4 text-gray-400" />
-      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{label}</span>
+      <Icon className="h-4 w-4 text-[var(--content-tertiary)]" />
+      <span className="text-[10px] font-bold text-[var(--content-secondary)] uppercase tracking-wider">{label}</span>
       {count !== undefined && (
-        <span className="text-[10px] text-gray-400">{count}</span>
+        <span className="text-[10px] text-[var(--content-tertiary)]">{count}</span>
       )}
     </div>
   );

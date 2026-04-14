@@ -1,3 +1,42 @@
+/* ─── Theme: CSS Custom Properties ──────────────────────────────────────── */
+/* Dark theme is the default. Add class="light" to <html> for light mode.   */
+
+:root {
+  /* Surfaces */
+  --surface-primary: #0D1117;
+  --surface-secondary: #161B22;
+  --surface-elevated: #1C2128;
+
+  /* Content */
+  --content-primary: #E2E8F0;
+  --content-secondary: #94A3B8;
+  --content-tertiary: #64748B;
+
+  /* Borders */
+  --border-default: rgba(255, 255, 255, 0.10);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+
+  /* Accent — the brand green, usable in both themes */
+  --accent: #20f2a6;
+  --accent-muted: #059669;
+}
+
+.light {
+  /* Surfaces */
+  --surface-primary: #F8FAFC;
+  --surface-secondary: #FFFFFF;
+  --surface-elevated: #FFFFFF;
+
+  /* Content */
+  --content-primary: #0F172A;
+  --content-secondary: #64748B;
+  --content-tertiary: #94A3B8;
+
+  /* Borders */
+  --border-default: #E2E8F0;
+  --border-subtle: #F1F5F9;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,7 +45,9 @@
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    background-color: var(--surface-primary);
+    color: var(--content-primary);
+    @apply antialiased;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 
@@ -25,7 +66,14 @@
     @apply inline-flex items-center justify-center rounded-ds-md bg-brand-600 px-4 py-2.5 text-ds-sm font-medium text-white transition-all hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-ds-md border border-gray-300 bg-white px-4 py-2.5 text-ds-sm font-medium text-gray-700 transition-all hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center rounded-ds-md border px-4 py-2.5 text-ds-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    border-color: var(--border-default);
+    background-color: var(--surface-elevated);
+    color: var(--content-primary);
+  }
+  .btn-secondary:hover {
+    background-color: var(--surface-secondary);
+    border-color: var(--border-default);
   }
   .btn-danger {
     @apply inline-flex items-center justify-center rounded-ds-md bg-red-600 px-4 py-2.5 text-ds-sm font-medium text-white transition-all hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
@@ -34,13 +82,21 @@
   /* ── Form inputs ──────────────────────────────────────────────────────── */
 
   .input-field {
-    @apply block w-full rounded-ds-md border border-gray-300 bg-white px-3.5 py-2.5 text-ds-base text-gray-900 placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500;
+    @apply block w-full rounded-ds-md border px-3.5 py-2.5 text-ds-base focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500;
+    border-color: var(--border-default);
+    background-color: var(--surface-elevated);
+    color: var(--content-primary);
+  }
+  .input-field::placeholder {
+    color: var(--content-tertiary);
   }
 
   /* ── Card ─────────────────────────────────────────────────────────────── */
 
   .card {
-    @apply rounded-ds-lg border border-gray-200 bg-white shadow-sm;
+    @apply rounded-ds-lg border shadow-sm;
+    border-color: var(--border-default);
+    background-color: var(--surface-elevated);
   }
 
   /* ── Artifact Components ─────────────────────────────────────────────── */
@@ -53,15 +109,18 @@
 
   /** Document header — title, metadata, and objective block */
   .ds-header {
-    @apply border-b border-gray-200 pb-ds-6;
+    @apply border-b pb-ds-6;
+    border-color: var(--border-default);
   }
 
   .ds-header-title {
-    @apply text-ds-2xl font-bold tracking-tight text-gray-900;
+    @apply text-ds-2xl font-bold tracking-tight;
+    color: var(--content-primary);
   }
 
   .ds-header-subtitle {
-    @apply mt-ds-2 text-ds-base text-gray-600 leading-relaxed;
+    @apply mt-ds-2 text-ds-base leading-relaxed;
+    color: var(--content-secondary);
   }
 
   /** Section — labeled content group with consistent spacing */
@@ -70,12 +129,15 @@
   }
 
   .ds-section-label {
-    @apply text-ds-xs font-semibold uppercase tracking-widest text-gray-400;
+    @apply text-ds-xs font-semibold uppercase tracking-widest;
+    color: var(--content-tertiary);
   }
 
   /** Step card — numbered procedure step block */
   .ds-step {
-    @apply rounded-ds-lg border border-gray-200 bg-white overflow-hidden transition-shadow hover:shadow-md;
+    @apply rounded-ds-lg border overflow-hidden transition-shadow hover:shadow-md;
+    border-color: var(--border-default);
+    background-color: var(--surface-elevated);
   }
 
   .ds-step-header {
@@ -87,15 +149,20 @@
   }
 
   .ds-step-title {
-    @apply text-ds-base font-semibold text-gray-900;
+    @apply text-ds-base font-semibold;
+    color: var(--content-primary);
   }
 
   .ds-step-body {
-    @apply px-ds-5 pb-ds-4 text-ds-sm text-gray-600 leading-relaxed;
+    @apply px-ds-5 pb-ds-4 text-ds-sm leading-relaxed;
+    color: var(--content-secondary);
   }
 
   .ds-step-footer {
-    @apply flex items-center gap-ds-3 border-t border-gray-100 bg-gray-50/60 px-ds-5 py-ds-2 text-ds-xs text-gray-400;
+    @apply flex items-center gap-ds-3 border-t px-ds-5 py-ds-2 text-ds-xs;
+    border-color: var(--border-subtle);
+    background-color: var(--surface-secondary);
+    color: var(--content-tertiary);
   }
 
   /** Tag / pill — for systems, roles, categories */
@@ -108,7 +175,9 @@
   }
 
   .ds-tag-neutral {
-    @apply bg-gray-100 text-gray-600;
+    @apply text-ds-xs font-medium;
+    background-color: var(--surface-secondary);
+    color: var(--content-secondary);
   }
 
   /** Callout — for notes, warnings, tips, risks */
@@ -138,16 +207,19 @@
   }
 
   .ds-metric-label {
-    @apply text-ds-xs text-gray-400 uppercase tracking-wide;
+    @apply text-ds-xs uppercase tracking-wide;
+    color: var(--content-tertiary);
   }
 
   .ds-metric-value {
-    @apply text-ds-lg font-semibold text-gray-900 tabular-nums;
+    @apply text-ds-lg font-semibold tabular-nums;
+    color: var(--content-primary);
   }
 
   /** Divider — subtle section break */
   .ds-divider {
-    @apply border-t border-gray-200;
+    @apply border-t;
+    border-color: var(--border-default);
   }
 
   /** Confidence dot — color-coded quality indicator */
@@ -163,7 +235,9 @@
 
   /** Source attribution — footer note for generated artifacts */
   .ds-attribution {
-    @apply rounded-ds-md bg-gray-50 px-ds-4 py-ds-3 text-center text-ds-xs text-gray-400;
+    @apply rounded-ds-md px-ds-4 py-ds-3 text-center text-ds-xs;
+    background-color: var(--surface-secondary);
+    color: var(--content-tertiary);
   }
 
   /* ── Print / Export Styles ────────────────────────────────────────────── */

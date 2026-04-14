@@ -114,15 +114,15 @@ export default function ProductAnalyticsPage() {
   }
 
   if (status === 'loading' || (isLoading && !data && !forbidden)) {
-    return <div className="text-center text-ds-sm text-gray-400 py-20">Loading analytics...</div>;
+    return <div className="text-center text-ds-sm text-[var(--content-tertiary)] py-20">Loading analytics...</div>;
   }
 
   if (forbidden || !session?.user?.isAdmin) {
-    return <div className="text-center text-ds-sm text-gray-400 py-20">Access denied.</div>;
+    return <div className="text-center text-ds-sm text-[var(--content-tertiary)] py-20">Access denied.</div>;
   }
 
   if (!data) {
-    return <div className="text-center text-ds-sm text-gray-400 py-20">Failed to load analytics.</div>;
+    return <div className="text-center text-ds-sm text-[var(--content-tertiary)] py-20">Failed to load analytics.</div>;
   }
 
   // Categorize events for display
@@ -136,11 +136,11 @@ export default function ProductAnalyticsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-ds-6">
         <div>
-          <Link href="/account" className="inline-flex items-center gap-1 text-ds-sm text-gray-500 hover:text-gray-700 mb-ds-2">
+          <Link href="/account" className="inline-flex items-center gap-1 text-ds-sm text-[var(--content-secondary)] hover:text-[var(--content-primary)] mb-ds-2">
             <ArrowLeft className="h-4 w-4" /> Back to Account
           </Link>
-          <h1 className="text-ds-2xl font-bold tracking-tight text-gray-900">Product Analytics</h1>
-          <p className="text-ds-sm text-gray-500">
+          <h1 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">Product Analytics</h1>
+          <p className="text-ds-sm text-[var(--content-secondary)]">
             {data.summary.totalEvents.toLocaleString()} events · {data.summary.uniqueUsers} users · last {days} days
           </p>
         </div>
@@ -190,12 +190,12 @@ export default function ProductAnalyticsPage() {
           <h2 className="ds-section-label">Top Pages</h2>
           <div className="card overflow-hidden">
             {data.topPages.map((page, i) => (
-              <div key={page.path} className="flex items-center justify-between px-ds-5 py-ds-3 border-b border-gray-100 last:border-0">
+              <div key={page.path} className="flex items-center justify-between px-ds-5 py-ds-3 border-b border-[var(--border-subtle)] last:border-0">
                 <div className="flex items-center gap-ds-3">
-                  <span className="text-ds-xs text-gray-400 w-5 text-right tabular-nums">{i + 1}</span>
-                  <span className="text-ds-sm text-gray-800 font-mono">{page.path}</span>
+                  <span className="text-ds-xs text-[var(--content-tertiary)] w-5 text-right tabular-nums">{i + 1}</span>
+                  <span className="text-ds-sm text-[var(--content-primary)] font-mono">{page.path}</span>
                 </div>
-                <span className="text-ds-sm font-semibold text-gray-900 tabular-nums">{page.count}</span>
+                <span className="text-ds-sm font-semibold text-[var(--content-primary)] tabular-nums">{page.count}</span>
               </div>
             ))}
           </div>
@@ -214,21 +214,21 @@ export default function ProductAnalyticsPage() {
         <div className="card overflow-hidden">
           <table className="w-full text-ds-sm">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50/50">
-                <th className="text-left py-ds-2 px-ds-4 text-gray-500 font-medium">Event</th>
-                <th className="text-right py-ds-2 px-ds-4 text-gray-500 font-medium">Count</th>
+              <tr className="border-b border-[var(--border-default)] bg-[var(--surface-secondary)]">
+                <th className="text-left py-ds-2 px-ds-4 text-[var(--content-secondary)] font-medium">Event</th>
+                <th className="text-right py-ds-2 px-ds-4 text-[var(--content-secondary)] font-medium">Count</th>
               </tr>
             </thead>
             <tbody>
               {Object.entries(data.eventCounts)
                 .sort(([, a], [, b]) => b - a)
                 .map(([event, count]) => (
-                  <tr key={event} className="border-b border-gray-100 last:border-0">
-                    <td className="py-ds-2 px-ds-4 text-gray-800">
+                  <tr key={event} className="border-b border-[var(--border-subtle)] last:border-0">
+                    <td className="py-ds-2 px-ds-4 text-[var(--content-primary)]">
                       {EVENT_LABELS[event] ?? event.replace(/_/g, ' ')}
-                      <span className="text-ds-xs text-gray-400 ml-ds-2 font-mono">{event}</span>
+                      <span className="text-ds-xs text-[var(--content-tertiary)] ml-ds-2 font-mono">{event}</span>
                     </td>
-                    <td className="py-ds-2 px-ds-4 text-right font-semibold text-gray-900 tabular-nums">{count}</td>
+                    <td className="py-ds-2 px-ds-4 text-right font-semibold text-[var(--content-primary)] tabular-nums">{count}</td>
                   </tr>
                 ))}
             </tbody>
@@ -257,7 +257,7 @@ function FunnelChart({ steps }: { steps: FunnelStep[] }) {
   if (steps.length === 0 || steps.every(s => s.count === 0)) {
     return (
       <div className="card px-ds-6 py-ds-8 text-center">
-        <p className="text-ds-sm text-gray-400">No funnel data yet. Events will appear as users interact with the product.</p>
+        <p className="text-ds-sm text-[var(--content-tertiary)]">No funnel data yet. Events will appear as users interact with the product.</p>
       </div>
     );
   }
@@ -274,12 +274,12 @@ function FunnelChart({ steps }: { steps: FunnelStep[] }) {
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-50 text-[10px] font-bold text-brand-700">
                   {i + 1}
                 </span>
-                <span className="text-ds-sm font-medium text-gray-800">
+                <span className="text-ds-sm font-medium text-[var(--content-primary)]">
                   {FUNNEL_LABELS[step.step] ?? step.step.replace(/_/g, ' ')}
                 </span>
               </div>
               <div className="flex items-center gap-ds-3 text-ds-xs">
-                <span className="font-semibold text-gray-900 tabular-nums">{step.count} users</span>
+                <span className="font-semibold text-[var(--content-primary)] tabular-nums">{step.count} users</span>
                 {i > 0 && step.rate < 100 && (
                   <span className={`${step.rate >= 50 ? 'text-emerald-600' : step.rate >= 20 ? 'text-amber-600' : 'text-red-600'}`}>
                     {step.rate}% →
@@ -287,14 +287,14 @@ function FunnelChart({ steps }: { steps: FunnelStep[] }) {
                 )}
               </div>
             </div>
-            <div className="h-2 w-full rounded-full bg-gray-100 overflow-hidden">
+            <div className="h-2 w-full rounded-full bg-[var(--surface-secondary)] overflow-hidden">
               <div
                 className="h-full rounded-full bg-brand-500 transition-all"
                 style={{ width: `${Math.max(2, (step.count / maxCount) * 100)}%` }}
               />
             </div>
             {i > 0 && step.dropoff > 0 && (
-              <p className="text-[10px] text-gray-400 mt-0.5">
+              <p className="text-[10px] text-[var(--content-tertiary)] mt-0.5">
                 ↓ {step.dropoff} dropped ({100 - step.rate}%)
               </p>
             )}
@@ -319,16 +319,16 @@ function EventCategory({
   return (
     <div className="card px-ds-5 py-ds-4">
       <div className="flex items-center justify-between mb-ds-3">
-        <h3 className="text-ds-sm font-semibold text-gray-900">{title}</h3>
-        <span className="text-ds-xs text-gray-400">{total} total</span>
+        <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">{title}</h3>
+        <span className="text-ds-xs text-[var(--content-tertiary)]">{total} total</span>
       </div>
       <div className="space-y-ds-2">
         {events.map(event => {
           const count = counts[event] ?? 0;
           return (
             <div key={event} className="flex items-center justify-between">
-              <span className="text-ds-xs text-gray-600">{EVENT_LABELS[event] ?? event.replace(/_/g, ' ')}</span>
-              <span className="text-ds-sm font-medium text-gray-900 tabular-nums">{count}</span>
+              <span className="text-ds-xs text-[var(--content-secondary)]">{EVENT_LABELS[event] ?? event.replace(/_/g, ' ')}</span>
+              <span className="text-ds-sm font-medium text-[var(--content-primary)] tabular-nums">{count}</span>
             </div>
           );
         })}
@@ -342,7 +342,7 @@ function DailyChart({ dailyCounts }: { dailyCounts: Record<string, Record<string
   if (days.length === 0) {
     return (
       <div className="card px-ds-6 py-ds-8 text-center">
-        <p className="text-ds-sm text-gray-400">No daily activity data yet.</p>
+        <p className="text-ds-sm text-[var(--content-tertiary)]">No daily activity data yet.</p>
       </div>
     );
   }
@@ -366,7 +366,7 @@ function DailyChart({ dailyCounts }: { dailyCounts: Record<string, Record<string
           />
         ))}
       </div>
-      <div className="flex justify-between mt-ds-2 text-[10px] text-gray-400">
+      <div className="flex justify-between mt-ds-2 text-[10px] text-[var(--content-tertiary)]">
         <span>{days[0]}</span>
         <span>{days[days.length - 1]}</span>
       </div>

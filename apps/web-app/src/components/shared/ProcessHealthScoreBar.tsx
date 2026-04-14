@@ -15,7 +15,7 @@ function resolveColors(
   colorScheme: 'standard' | 'inverted' | 'neutral',
 ): { text: string; bar: string } {
   if (colorScheme === 'neutral') {
-    return { text: 'text-gray-700', bar: 'bg-gray-400' };
+    return { text: 'text-[var(--content-primary)]', bar: 'bg-[var(--content-tertiary)]' };
   }
   if (colorScheme === 'inverted') {
     // High score = good (linearity)
@@ -54,21 +54,21 @@ export function ProcessHealthScoreBar({
   }, [animate, clamped]);
 
   return (
-    <div className="bg-white border border-gray-100 rounded-ds-lg px-5 py-4">
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-1">
+    <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-ds-lg px-5 py-4">
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--content-tertiary)] mb-1">
         {label}
       </p>
       <p className={`text-[32px] font-bold tabular-nums leading-none mb-3 ${text}`}>
         {clamped}
       </p>
       {/* 6px progress bar */}
-      <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+      <div className="h-1.5 w-full rounded-full bg-[var(--surface-secondary)] overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-700 ease-out ${bar}`}
           style={{ width: `${width}%` }}
         />
       </div>
-      <p className="mt-2 text-ds-xs text-gray-500">{interpretation}</p>
+      <p className="mt-2 text-ds-xs text-[var(--content-secondary)]">{interpretation}</p>
     </div>
   );
 }

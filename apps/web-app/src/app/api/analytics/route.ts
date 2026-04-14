@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { analyzeUserPortfolio, clusterWorkflows } from '@/lib/intelligence';
 import { db } from '@/db';
+import { checkFeatureAccess } from '@/lib/feature-gating';
 
 /** Safely parse a JSON string, returning fallback on failure instead of throwing. */
 function safeJsonParse(json: string | null | undefined, fallback: unknown = null): unknown {
@@ -23,6 +24,24 @@ export async function POST(req: NextRequest) {
   }
 
   const userId = session.user.id;
+
+  // Gate: intelligenceLayer is a Team+ feature
+  const user = await db.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+  const intelligenceAccess = checkFeatureAccess(user, 'intelligenceLayer');
+  if (!intelligenceAccess.allowed) {
+    return NextResponse.json(
+      {
+        error: 'Feature not available on your plan',
+        feature: 'intelligenceLayer',
+        requiredPlan: intelligenceAccess.requiredPlan,
+        upgradeUrl: '/pricing',
+      },
+      { status: 403 },
+    );
+  }
 
   try {
     const body = await req.json().catch(() => ({}));

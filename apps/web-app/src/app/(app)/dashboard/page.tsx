@@ -214,9 +214,9 @@ const HEALTH_STATUS_CONFIG: Record<
   },
   stale: {
     label: 'Stale',
-    bgClass: 'bg-gray-50',
-    textClass: 'text-gray-500',
-    dotClass: 'bg-gray-400',
+    bgClass: 'bg-[var(--surface-secondary)]',
+    textClass: 'text-[var(--content-secondary)]',
+    dotClass: 'bg-[var(--content-tertiary)]',
   },
   new: {
     label: 'New',
@@ -232,7 +232,7 @@ const SOP_READINESS_CONFIG: Record<
 > = {
   ready: { label: 'Ready', bgClass: 'bg-emerald-50', textClass: 'text-emerald-700' },
   partial: { label: 'Partial', bgClass: 'bg-amber-50', textClass: 'text-amber-700' },
-  not_ready: { label: 'Not Ready', bgClass: 'bg-gray-100', textClass: 'text-gray-500' },
+  not_ready: { label: 'Not Ready', bgClass: 'bg-[var(--surface-secondary)]', textClass: 'text-[var(--content-secondary)]' },
 };
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
@@ -266,7 +266,7 @@ const PRESET_VIEWS: PresetView[] = [
 // ─── Helper functions ───────────────────────────────────────────────────────────
 
 function confidenceColorClass(value: number | null): string {
-  if (value === null) return 'text-gray-400';
+  if (value === null) return 'text-[var(--content-tertiary)]';
   const pct = value * 100;
   if (pct >= 80) return 'text-emerald-600';
   if (pct >= 60) return 'text-amber-600';
@@ -274,7 +274,7 @@ function confidenceColorClass(value: number | null): string {
 }
 
 function confidenceBarColorClass(value: number | null): string {
-  if (value === null) return 'bg-gray-200';
+  if (value === null) return 'bg-[var(--surface-secondary)]';
   const pct = value * 100;
   if (pct >= 80) return 'bg-emerald-500';
   if (pct >= 60) return 'bg-amber-500';
@@ -672,7 +672,7 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="text-ds-sm text-gray-400">Loading dashboard...</div>
+        <div className="text-ds-sm text-[var(--content-tertiary)]">Loading dashboard...</div>
       </div>
     );
   }
@@ -690,10 +690,10 @@ export default function DashboardPage() {
       <div className="mb-ds-6">
         <div className="flex items-start justify-between mb-ds-4">
           <div>
-            <h1 className="text-ds-2xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">
               Process Intelligence
             </h1>
-            <p className="text-ds-sm text-gray-500 mt-0.5">
+            <p className="text-ds-sm text-[var(--content-secondary)] mt-0.5">
               Operational command center &middot; {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
             </p>
           </div>
@@ -728,29 +728,29 @@ export default function DashboardPage() {
                   'text-red-700'
                 }`}>{orgHealthScore}</span>
               </div>
-              <span className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">Org Health</span>
+              <span className="text-[10px] font-medium text-[var(--content-secondary)] uppercase tracking-wider">Org Health</span>
             </div>
 
             {topRiskWorkflow && (
               <>
-                <span className="text-gray-200">|</span>
-                <Link href={`/workflows/${topRiskWorkflow.id}`} className="flex items-center gap-1.5 text-ds-xs text-gray-600 hover:text-amber-700 transition-colors">
+                <span className="text-[var(--border-default)]">|</span>
+                <Link href={`/workflows/${topRiskWorkflow.id}`} className="flex items-center gap-1.5 text-ds-xs text-[var(--content-secondary)] hover:text-amber-700 transition-colors">
                   <AlertTriangle className="h-3 w-3 text-amber-500 flex-shrink-0" />
-                  <span className="font-medium text-gray-400">Top Risk:</span>
+                  <span className="font-medium text-[var(--content-tertiary)]">Top Risk:</span>
                   <span className="truncate max-w-[160px]">&ldquo;{topRiskWorkflow.title}&rdquo;</span>
-                  <span className="text-gray-400">&mdash; needs review</span>
+                  <span className="text-[var(--content-tertiary)]">&mdash; needs review</span>
                 </Link>
               </>
             )}
 
             {topOpportunityWorkflow && (
               <>
-                <span className="text-gray-200">|</span>
-                <Link href={`/workflows/${topOpportunityWorkflow.id}`} className="flex items-center gap-1.5 text-ds-xs text-gray-600 hover:text-violet-700 transition-colors">
+                <span className="text-[var(--border-default)]">|</span>
+                <Link href={`/workflows/${topOpportunityWorkflow.id}`} className="flex items-center gap-1.5 text-ds-xs text-[var(--content-secondary)] hover:text-violet-700 transition-colors">
                   <TrendingUp className="h-3 w-3 text-violet-500 flex-shrink-0" />
-                  <span className="font-medium text-gray-400">Top Opportunity:</span>
+                  <span className="font-medium text-[var(--content-tertiary)]">Top Opportunity:</span>
                   <span className="truncate max-w-[160px]">&ldquo;{topOpportunityWorkflow.title}&rdquo;</span>
-                  <span className="text-gray-400">&mdash; AI score {topOpportunityWorkflow.aiOpportunityScore}</span>
+                  <span className="text-[var(--content-tertiary)]">&mdash; AI score {topOpportunityWorkflow.aiOpportunityScore}</span>
                 </Link>
               </>
             )}
@@ -783,8 +783,8 @@ export default function DashboardPage() {
             )}
             {stats.staleCount > 0 && (
               <button onClick={() => { setHealthFilter('stale'); setSopFilter(''); setActivePreset(null); }}
-                className="inline-flex items-center gap-1.5 rounded-full bg-gray-50 border border-gray-200 px-3 py-1 text-ds-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors">
-                <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-secondary)] border border-[var(--border-default)] px-3 py-1 text-ds-xs font-medium text-[var(--content-secondary)] hover:bg-[var(--surface-elevated)] transition-colors">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--content-tertiary)]" />
                 {stats.staleCount} stale
               </button>
             )}
@@ -808,7 +808,7 @@ export default function DashboardPage() {
           <div className="flex flex-wrap gap-1.5 mt-ds-2">
             {stats.topInsights.map((insight) => (
               <Link key={insight.id} href="/analytics"
-                className="inline-flex items-center gap-1 rounded bg-gray-50 border border-gray-200 px-2 py-0.5 text-[10px] text-gray-600 hover:bg-gray-100 transition-colors">
+                className="inline-flex items-center gap-1 rounded bg-[var(--surface-secondary)] border border-[var(--border-default)] px-2 py-0.5 text-[10px] text-[var(--content-secondary)] hover:bg-[var(--surface-elevated)] transition-colors">
                 <span className={`w-1 h-1 rounded-full ${
                   insight.severity === 'critical' ? 'bg-red-500' :
                   insight.severity === 'warning' ? 'bg-amber-500' :
@@ -829,83 +829,83 @@ export default function DashboardPage() {
 
           {/* ── Volume & Coverage ─────────────────────────────────────── */}
           <div className="card px-ds-5 py-ds-4">
-            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-ds-3">Volume &amp; Coverage</p>
+            <p className="text-[10px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider mb-ds-3">Volume &amp; Coverage</p>
             <div className="grid grid-cols-2 gap-ds-4">
               <div>
-                <p className="text-ds-2xl font-bold text-gray-900 tabular-nums">{stats.totalWorkflows}</p>
-                <p className="text-ds-xs text-gray-500">Workflows</p>
+                <p className="text-ds-2xl font-bold text-[var(--content-primary)] tabular-nums">{stats.totalWorkflows}</p>
+                <p className="text-ds-xs text-[var(--content-secondary)]">Workflows</p>
               </div>
               <div>
                 <p className="text-ds-2xl font-bold text-emerald-600 tabular-nums">{stats.recordedThisWeek}</p>
-                <p className="text-ds-xs text-gray-500">This week</p>
+                <p className="text-ds-xs text-[var(--content-secondary)]">This week</p>
               </div>
               <div>
-                <p className="text-ds-lg font-semibold text-gray-700 tabular-nums">{stats.systemCoverage.length}</p>
-                <p className="text-ds-xs text-gray-500 truncate" title={stats.systemCoverage.map(s => s.system).join(', ')}>
+                <p className="text-ds-lg font-semibold text-[var(--content-primary)] tabular-nums">{stats.systemCoverage.length}</p>
+                <p className="text-ds-xs text-[var(--content-secondary)] truncate" title={stats.systemCoverage.map(s => s.system).join(', ')}>
                   {stats.systemCoverage.length > 0
                     ? stats.systemCoverage.slice(0, 2).map(s => s.system).join(', ')
                     : 'Systems'}
                 </p>
               </div>
               <div>
-                <p className="text-ds-lg font-semibold text-gray-700 tabular-nums">{stats.avgDuration > 0 ? formatDuration(stats.avgDuration) : '--'}</p>
-                <p className="text-ds-xs text-gray-500">Avg duration</p>
+                <p className="text-ds-lg font-semibold text-[var(--content-primary)] tabular-nums">{stats.avgDuration > 0 ? formatDuration(stats.avgDuration) : '--'}</p>
+                <p className="text-ds-xs text-[var(--content-secondary)]">Avg duration</p>
               </div>
             </div>
           </div>
 
           {/* ── Quality & Readiness ───────────────────────────────────── */}
           <div className="card px-ds-5 py-ds-4">
-            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-ds-3">Quality &amp; Readiness</p>
+            <p className="text-[10px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider mb-ds-3">Quality &amp; Readiness</p>
             <div className="grid grid-cols-2 gap-ds-4">
               <div>
                 <p className={`text-ds-2xl font-bold tabular-nums ${confidenceColorClass(stats.avgConfidence > 0 ? stats.avgConfidence : null)}`}>
                   {stats.avgConfidence > 0 ? formatConfidence(stats.avgConfidence) : '--'}
                 </p>
-                <p className="text-ds-xs text-gray-500">Confidence</p>
+                <p className="text-ds-xs text-[var(--content-secondary)]">Confidence</p>
               </div>
               <div>
                 <p className="text-ds-2xl font-bold text-emerald-600 tabular-nums">{stats.sopReady}</p>
-                <p className="text-ds-xs text-gray-500">SOP ready</p>
+                <p className="text-ds-xs text-[var(--content-secondary)]">SOP ready</p>
               </div>
               <div>
                 <p className={`text-ds-lg font-semibold tabular-nums ${stats.avgMaturity > 70 ? 'text-emerald-600' : stats.avgMaturity > 40 ? 'text-amber-600' : 'text-red-600'}`}>
                   {stats.avgMaturity > 0 ? stats.avgMaturity : '--'}
                 </p>
-                <p className="text-ds-xs text-gray-500 cursor-help" title="Composite score from confidence, documentation completeness, SOP readiness, process stability, run frequency, and freshness.">Maturity</p>
+                <p className="text-ds-xs text-[var(--content-secondary)] cursor-help" title="Composite score from confidence, documentation completeness, SOP readiness, process stability, run frequency, and freshness.">Maturity</p>
               </div>
               <div>
                 <p className={`text-ds-lg font-semibold tabular-nums ${stats.avgCognitiveBurden >= 60 ? 'text-red-600' : stats.avgCognitiveBurden >= 30 ? 'text-amber-600' : 'text-emerald-600'}`}>
                   {stats.avgCognitiveBurden > 0 ? stats.avgCognitiveBurden : '--'}
                 </p>
-                <p className="text-ds-xs text-gray-500 cursor-help" title="Measures mental demand from decision density, system switches, data entry, and duration. Higher = more burden on the operator.">Cognitive load</p>
+                <p className="text-ds-xs text-[var(--content-secondary)] cursor-help" title="Measures mental demand from decision density, system switches, data entry, and duration. Higher = more burden on the operator.">Cognitive load</p>
               </div>
             </div>
           </div>
 
           {/* ── Signals & Opportunities ───────────────────────────────── */}
           <div className="card px-ds-5 py-ds-4">
-            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-ds-3">Signals &amp; Opportunities</p>
+            <p className="text-[10px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider mb-ds-3">Signals &amp; Opportunities</p>
             <div className="grid grid-cols-2 gap-ds-4">
               <div>
                 <p className={`text-ds-2xl font-bold tabular-nums ${stats.needsReview > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
                   {stats.needsReview}
                 </p>
-                <p className="text-ds-xs text-gray-500">Need review</p>
+                <p className="text-ds-xs text-[var(--content-secondary)]">Need review</p>
               </div>
               <div>
                 <p className="text-ds-2xl font-bold text-violet-600 tabular-nums">{stats.optimizationOpportunities}</p>
-                <p className="text-ds-xs text-gray-500">Optimization</p>
+                <p className="text-ds-xs text-[var(--content-secondary)]">Optimization</p>
               </div>
               <div>
                 <Link href="/analytics" className="group">
                   <p className="text-ds-lg font-semibold text-brand-600 tabular-nums group-hover:text-brand-700">{stats.insightCount}</p>
-                  <p className="text-ds-xs text-gray-500 group-hover:text-brand-600">Insights &rarr;</p>
+                  <p className="text-ds-xs text-[var(--content-secondary)] group-hover:text-brand-600">Insights &rarr;</p>
                 </Link>
               </div>
               <div>
                 <p className="text-ds-lg font-semibold text-violet-600 tabular-nums">{stats.aiOpportunityCount}</p>
-                <p className="text-ds-xs text-gray-500">AI candidates</p>
+                <p className="text-ds-xs text-[var(--content-secondary)]">AI candidates</p>
               </div>
             </div>
           </div>
@@ -921,17 +921,17 @@ export default function DashboardPage() {
         <>
         <div className="flex items-center gap-ds-2 mb-ds-3">
           <Brain className="h-4 w-4 text-brand-600" />
-          <h2 className="text-ds-sm font-semibold text-gray-900">Intelligence Summary</h2>
-          <span className="text-ds-xs text-gray-400">Key signals from your workflow portfolio</span>
+          <h2 className="text-ds-sm font-semibold text-[var(--content-primary)]">Intelligence Summary</h2>
+          <span className="text-ds-xs text-[var(--content-tertiary)]">Key signals from your workflow portfolio</span>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-ds-4 mb-ds-6">
 
           {/* ── Action Items: workflows needing attention ──────────────── */}
           <div className="card overflow-hidden">
-            <div className="flex items-center justify-between px-ds-4 py-ds-3 border-b border-gray-100">
+            <div className="flex items-center justify-between px-ds-4 py-ds-3 border-b border-[var(--border-subtle)]">
               <div className="flex items-center gap-ds-2">
                 <AlertTriangle className="h-4 w-4 text-amber-500" />
-                <h3 className="text-ds-sm font-semibold text-gray-900">Action Items</h3>
+                <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">Action Items</h3>
               </div>
               {needsAttentionWorkflows.length > 0 && (
                 <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">
@@ -939,35 +939,35 @@ export default function DashboardPage() {
                 </span>
               )}
             </div>
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-[var(--border-subtle)]">
               {needsAttentionWorkflows.length === 0 && staleWorkflows.length === 0 && optimizationWorkflows.length === 0 ? (
                 <div className="px-ds-4 py-ds-6 text-center">
                   <ShieldCheck className="h-6 w-6 text-emerald-400 mx-auto mb-2" />
-                  <p className="text-ds-xs text-gray-500">All workflows are healthy</p>
+                  <p className="text-ds-xs text-[var(--content-secondary)]">All workflows are healthy</p>
                 </div>
               ) : (
                 <>
                   {needsAttentionWorkflows.slice(0, 3).map((w) => (
-                    <Link key={w.id} href={`/workflows/${w.id}`} className="flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-gray-50 transition-colors">
+                    <Link key={w.id} href={`/workflows/${w.id}`} className="flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-[var(--surface-secondary)] transition-colors">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <p className="text-ds-xs text-gray-900 font-medium truncate">{w.title}</p>
+                          <p className="text-ds-xs text-[var(--content-primary)] font-medium truncate">{w.title}</p>
                           <span className="flex-shrink-0 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">Review</span>
                         </div>
-                        <p className="text-[10px] text-gray-400">Review &middot; {w.confidence !== null ? formatConfidence(w.confidence) : 'Low'} confidence &middot; {w.stepCount ?? 0} steps</p>
+                        <p className="text-[10px] text-[var(--content-tertiary)]">Review &middot; {w.confidence !== null ? formatConfidence(w.confidence) : 'Low'} confidence &middot; {w.stepCount ?? 0} steps</p>
                       </div>
                     </Link>
                   ))}
                   {staleWorkflows.slice(0, 2).map((w) => (
-                    <Link key={w.id} href={`/workflows/${w.id}`} className="flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-gray-50 transition-colors">
-                      <span className="w-1.5 h-1.5 rounded-full bg-gray-400 flex-shrink-0" />
+                    <Link key={w.id} href={`/workflows/${w.id}`} className="flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-[var(--surface-secondary)] transition-colors">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--content-tertiary)] flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <p className="text-ds-xs text-gray-900 font-medium truncate">{w.title}</p>
-                          <span className="flex-shrink-0 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">Update</span>
+                          <p className="text-ds-xs text-[var(--content-primary)] font-medium truncate">{w.title}</p>
+                          <span className="flex-shrink-0 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[var(--surface-secondary)] text-[var(--content-secondary)]">Update</span>
                         </div>
-                        <p className="text-[10px] text-gray-400">Update &middot; Last seen {formatDateRelative(w.createdAt)} &middot; {w.stepCount ?? 0} steps</p>
+                        <p className="text-[10px] text-[var(--content-tertiary)]">Update &middot; Last seen {formatDateRelative(w.createdAt)} &middot; {w.stepCount ?? 0} steps</p>
                       </div>
                     </Link>
                   ))}
@@ -986,10 +986,10 @@ export default function DashboardPage() {
 
           {/* ── AI Opportunities: automation + optimization candidates ─── */}
           <div className="card overflow-hidden">
-            <div className="flex items-center justify-between px-ds-4 py-ds-3 border-b border-gray-100">
+            <div className="flex items-center justify-between px-ds-4 py-ds-3 border-b border-[var(--border-subtle)]">
               <div className="flex items-center gap-ds-2">
                 <Zap className="h-4 w-4 text-violet-500" />
-                <h3 className="text-ds-sm font-semibold text-gray-900">AI Opportunities</h3>
+                <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">AI Opportunities</h3>
               </div>
               {stats && stats.aiOpportunityCount > 0 && (
                 <span className="text-[10px] font-medium text-violet-600 bg-violet-50 px-1.5 py-0.5 rounded-full">
@@ -997,22 +997,22 @@ export default function DashboardPage() {
                 </span>
               )}
             </div>
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-[var(--border-subtle)]">
               {optimizationWorkflows.length === 0 ? (
                 <div className="px-ds-4 py-ds-6 text-center">
-                  <Sparkles className="h-6 w-6 text-gray-300 mx-auto mb-2" />
-                  <p className="text-ds-xs text-gray-500">Upload more workflows to discover AI opportunities</p>
+                  <Sparkles className="h-6 w-6 text-[var(--content-tertiary)] mx-auto mb-2" />
+                  <p className="text-ds-xs text-[var(--content-secondary)]">Upload more workflows to discover AI opportunities</p>
                 </div>
               ) : (
                 <>
                   {optimizationWorkflows.slice(0, 5).map((w) => (
-                    <Link key={w.id} href={`/workflows/${w.id}`} className="flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-gray-50 transition-colors">
+                    <Link key={w.id} href={`/workflows/${w.id}`} className="flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-[var(--surface-secondary)] transition-colors">
                       <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
                         w.aiOpportunityScore >= 70 ? 'bg-violet-500' : 'bg-violet-300'
                       }`} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-ds-xs text-gray-900 font-medium truncate">{w.title}</p>
-                        <p className="text-[10px] text-gray-400">
+                        <p className="text-ds-xs text-[var(--content-primary)] font-medium truncate">{w.title}</p>
+                        <p className="text-[10px] text-[var(--content-tertiary)]">
                           AI score: {w.aiOpportunityScore} &middot; {formatDuration(w.durationMs)} &middot; {w.stepCount ?? 0} steps
                         </p>
                       </div>
@@ -1031,23 +1031,23 @@ export default function DashboardPage() {
 
           {/* ── Recent Activity ────────────────────────────────────────── */}
           <div className="card overflow-hidden">
-            <div className="flex items-center gap-ds-2 px-ds-4 py-ds-3 border-b border-gray-100">
+            <div className="flex items-center gap-ds-2 px-ds-4 py-ds-3 border-b border-[var(--border-subtle)]">
               <Activity className="h-4 w-4 text-blue-500" />
-              <h3 className="text-ds-sm font-semibold text-gray-900">Recent Activity</h3>
+              <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">Recent Activity</h3>
             </div>
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-[var(--border-subtle)]">
               {workflows.slice(0, 5).map((w) => (
                 <Link
                   key={w.id}
                   href={`/workflows/${w.id}`}
-                  className="flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-[var(--surface-secondary)] transition-colors"
                 >
                   <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                    HEALTH_STATUS_CONFIG[w.healthStatus]?.dotClass ?? 'bg-gray-300'
+                    HEALTH_STATUS_CONFIG[w.healthStatus]?.dotClass ?? 'bg-[var(--content-tertiary)]'
                   }`} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-ds-xs text-gray-900 font-medium truncate">{w.title}</p>
-                    <p className="text-[10px] text-gray-400">
+                    <p className="text-ds-xs text-[var(--content-primary)] font-medium truncate">{w.title}</p>
+                    <p className="text-[10px] text-[var(--content-tertiary)]">
                       {formatDateRelative(w.createdAt)} &middot; {w.stepCount ?? 0} steps &middot; {formatDuration(w.durationMs)}
                     </p>
                   </div>
@@ -1067,16 +1067,16 @@ export default function DashboardPage() {
         <div className="card px-ds-5 py-ds-4 mb-ds-6">
           <div className="flex items-center gap-ds-2 mb-ds-3">
             <Clock className="h-4 w-4 text-red-500" />
-            <h3 className="text-ds-sm font-semibold text-gray-900">Bottleneck Radar</h3>
-            <span className="text-[10px] text-gray-400">{bottleneckWorkflows.length} workflow{bottleneckWorkflows.length !== 1 ? 's' : ''} with bottleneck risk</span>
+            <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">Bottleneck Radar</h3>
+            <span className="text-[10px] text-[var(--content-tertiary)]">{bottleneckWorkflows.length} workflow{bottleneckWorkflows.length !== 1 ? 's' : ''} with bottleneck risk</span>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-ds-3">
             {bottleneckWorkflows.map((w) => (
               <Link key={w.id} href={`/workflows/${w.id}`} className="rounded-lg border border-red-100 bg-red-50/30 px-3 py-2 hover:bg-red-50 transition-colors">
-                <p className="text-ds-xs font-medium text-gray-900 truncate">{w.title}</p>
+                <p className="text-ds-xs font-medium text-[var(--content-primary)] truncate">{w.title}</p>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-[10px] text-red-600 font-medium">{formatDuration(w.durationMs)}</span>
-                  <span className="text-[10px] text-gray-400">{w.stepCount ?? 0} steps</span>
+                  <span className="text-[10px] text-[var(--content-tertiary)]">{w.stepCount ?? 0} steps</span>
                   <span className={`text-[10px] font-medium ${w.bottleneckRisk === 'high' ? 'text-red-600' : 'text-amber-600'}`}>
                     {w.bottleneckRisk} risk
                   </span>
@@ -1095,7 +1095,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-ds-3">
             <div className="flex items-center gap-ds-2">
               <GitBranch className="h-4 w-4 text-brand-600" />
-              <h3 className="text-ds-sm font-semibold text-gray-900">Process Families</h3>
+              <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">Process Families</h3>
             </div>
             <button onClick={() => { setViewMode('process_groups'); }} className="text-ds-xs text-brand-600 hover:text-brand-700 font-medium">
               View all &rarr;
@@ -1103,9 +1103,9 @@ export default function DashboardPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-ds-3">
             {processDefinitions.slice(0, 3).map((def) => (
-              <Link key={def.id} href={`/analytics/process/${def.id}`} className="rounded-lg border border-gray-200 px-3 py-2.5 hover:border-brand-200 transition-colors">
-                <p className="text-ds-xs font-medium text-gray-900 truncate">{def.canonicalName}</p>
-                <div className="flex items-center gap-2 mt-1 text-[10px] text-gray-500">
+              <Link key={def.id} href={`/analytics/process/${def.id}`} className="rounded-lg border border-[var(--border-default)] px-3 py-2.5 hover:border-brand-200 transition-colors">
+                <p className="text-ds-xs font-medium text-[var(--content-primary)] truncate">{def.canonicalName}</p>
+                <div className="flex items-center gap-2 mt-1 text-[10px] text-[var(--content-secondary)]">
                   <span>{def.runCount} runs</span>
                   <span>{def.variantCount} variants</span>
                   {def.stabilityScore != null && (
@@ -1124,7 +1124,7 @@ export default function DashboardPage() {
           VIEW MODE TOGGLE + PORTFOLIO SIDEBAR TOGGLE
           ═══════════════════════════════════════════════════════════════════ */}
       <div className="flex items-center justify-between mb-ds-4">
-      <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-ds-md w-fit">
+      <div className="flex items-center gap-1 p-1 bg-[var(--surface-secondary)] rounded-ds-md w-fit">
         <button
           onClick={() => {
             setViewMode('workflows');
@@ -1132,8 +1132,8 @@ export default function DashboardPage() {
           }}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-ds-sm text-ds-sm font-medium transition-colors ${
             viewMode === 'workflows'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-500 hover:text-gray-700'
+              ? 'bg-[var(--surface-elevated)] text-[var(--content-primary)] shadow-sm'
+              : 'text-[var(--content-secondary)] hover:text-[var(--content-primary)]'
           }`}
         >
           <Layers className="h-4 w-4" />
@@ -1146,8 +1146,8 @@ export default function DashboardPage() {
           }}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-ds-sm text-ds-sm font-medium transition-colors ${
             viewMode === 'process_groups'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-500 hover:text-gray-700'
+              ? 'bg-[var(--surface-elevated)] text-[var(--content-primary)] shadow-sm'
+              : 'text-[var(--content-secondary)] hover:text-[var(--content-primary)]'
           }`}
         >
           <Boxes className="h-4 w-4" />
@@ -1160,7 +1160,7 @@ export default function DashboardPage() {
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-ds-sm text-ds-xs font-medium border transition-colors ${
             !isPortfolioCollapsed
               ? 'bg-brand-50 border-brand-200 text-brand-700'
-              : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+              : 'bg-[var(--surface-elevated)] border-[var(--border-default)] text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
           }`}
           title={isPortfolioCollapsed ? 'Expand portfolios' : 'Collapse portfolios'}
         >
@@ -1198,13 +1198,13 @@ export default function DashboardPage() {
 
       {/* ── Section Header ────────────────────────────────────────────── */}
       <div className="ds-section mb-ds-4">
-        <h2 className="ds-section-label text-ds-lg font-semibold text-gray-900">
+        <h2 className="ds-section-label text-ds-lg font-semibold text-[var(--content-primary)]">
           Workflow Library
           {activePortfolioName && (
-            <span className="text-gray-400 font-normal"> &middot; {activePortfolioName}</span>
+            <span className="text-[var(--content-tertiary)] font-normal"> &middot; {activePortfolioName}</span>
           )}
         </h2>
-        <p className="text-ds-xs text-gray-500">
+        <p className="text-ds-xs text-[var(--content-secondary)]">
           {displayedWorkflows.length} workflow{displayedWorkflows.length !== 1 ? 's' : ''}
           {activePortfolioId && activePortfolioId !== 'uncategorized'
             ? ' in portfolio'
@@ -1222,7 +1222,7 @@ export default function DashboardPage() {
           <button
             key={view.label}
             onClick={() => applyPreset(view)}
-            className={`whitespace-nowrap ds-tag ${activePreset === view.label ? 'ds-tag-brand' : 'ds-tag-neutral hover:bg-gray-200'} transition-colors cursor-pointer`}
+            className={`whitespace-nowrap ds-tag ${activePreset === view.label ? 'ds-tag-brand' : 'ds-tag-neutral hover:bg-[var(--surface-elevated)]'} transition-colors cursor-pointer`}
           >
             {view.label}
           </button>
@@ -1233,7 +1233,7 @@ export default function DashboardPage() {
       <div className="flex flex-wrap items-center gap-ds-3 mb-ds-4">
         {/* Search */}
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--content-tertiary)]" />
           <input
             type="text"
             placeholder="Search workflows..."
@@ -1297,11 +1297,11 @@ export default function DashboardPage() {
       {/* ── Tag Filter Bar ────────────────────────────────────────────── */}
       {(tags.length > 0 || workflows.length > 0) && (
         <div className="flex items-center gap-2 mb-ds-4 flex-wrap">
-          <Tag className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+          <Tag className="h-3.5 w-3.5 text-[var(--content-tertiary)] flex-shrink-0" />
           <button
             onClick={() => setActiveTagId(null)}
             className={`ds-tag transition-colors ${
-              activeTagId === null ? 'ds-tag-brand' : 'ds-tag-neutral hover:bg-gray-200'
+              activeTagId === null ? 'ds-tag-brand' : 'ds-tag-neutral hover:bg-[var(--surface-elevated)]'
             }`}
           >
             All
@@ -1333,7 +1333,7 @@ export default function DashboardPage() {
               </button>
               <button
                 onClick={() => handleDeleteTag(t.id)}
-                className="absolute -top-1 -right-1 hidden group-hover/tag:flex h-3.5 w-3.5 items-center justify-center rounded-full bg-gray-300 text-white hover:bg-red-400 transition-colors"
+                className="absolute -top-1 -right-1 hidden group-hover/tag:flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[var(--content-tertiary)] text-white hover:bg-red-400 transition-colors"
                 title="Delete tag"
               >
                 <X className="h-2 w-2" />
@@ -1368,7 +1368,7 @@ export default function DashboardPage() {
                   setShowNewTag(false);
                   setNewTagName('');
                 }}
-                className="p-0.5 text-gray-400 hover:bg-gray-100 rounded"
+                className="p-0.5 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] rounded"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -1376,7 +1376,7 @@ export default function DashboardPage() {
           ) : (
             <button
               onClick={() => setShowNewTag(true)}
-              className="ds-tag ds-tag-neutral hover:bg-gray-200 transition-colors gap-0.5"
+              className="ds-tag ds-tag-neutral hover:bg-[var(--surface-elevated)] transition-colors gap-0.5"
             >
               <Plus className="h-3 w-3" />
               New tag
@@ -1393,7 +1393,7 @@ export default function DashboardPage() {
       ) : (
         <>
           {/* Table header (desktop) */}
-          <div className="hidden lg:grid gap-2 items-center px-4 py-2 text-ds-xs font-medium text-gray-400 uppercase tracking-wide border-b border-gray-100 mb-1" style={{ gridTemplateColumns: '28px minmax(180px, 1fr) 80px 44px 56px 90px 56px 100px 56px 48px' }}>
+          <div className="hidden lg:grid gap-2 items-center px-4 py-2 text-ds-xs font-medium text-[var(--content-tertiary)] uppercase tracking-wide border-b border-[var(--border-subtle)] mb-1" style={{ gridTemplateColumns: '28px minmax(180px, 1fr) 80px 44px 56px 90px 56px 100px 56px 48px' }}>
             <div>{/* favorite */}</div>
             <div>Workflow</div>
             <div>Health</div>
@@ -1498,12 +1498,12 @@ function MetricCard({
     <div className={`card px-ds-4 py-ds-3 ${href ? 'hover:border-brand-300 cursor-pointer' : ''} transition-colors`}>
       <div className="flex items-center gap-ds-2 mb-ds-2">
         {icon}
-        <span className="ds-metric-label text-ds-xs text-gray-500 truncate">{label}</span>
+        <span className="ds-metric-label text-ds-xs text-[var(--content-secondary)] truncate">{label}</span>
       </div>
-      <p className={`ds-metric-value text-ds-lg font-semibold ${valueClassName ?? 'text-gray-900'}`}>
+      <p className={`ds-metric-value text-ds-lg font-semibold ${valueClassName ?? 'text-[var(--content-primary)]'}`}>
         {value}
       </p>
-      <p className="text-[11px] text-gray-400 mt-0.5 truncate">{subtitle}</p>
+      <p className="text-[11px] text-[var(--content-tertiary)] mt-0.5 truncate">{subtitle}</p>
     </div>
   );
 
@@ -1532,10 +1532,10 @@ function IntelligenceList({
 }) {
   return (
     <div className={`card overflow-hidden ${borderClass}`}>
-      <div className="flex items-center justify-between px-ds-4 py-ds-3 border-b border-gray-100">
+      <div className="flex items-center justify-between px-ds-4 py-ds-3 border-b border-[var(--border-subtle)]">
         <div className="flex items-center gap-ds-2">
           {icon}
-          <h3 className="text-ds-sm font-semibold text-gray-900">{title}</h3>
+          <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">{title}</h3>
           <span className="ds-tag ds-tag-neutral text-[10px]">{items.length}</span>
         </div>
         <button
@@ -1546,23 +1546,23 @@ function IntelligenceList({
           <ChevronRight className="h-3 w-3" />
         </button>
       </div>
-      <div className="divide-y divide-gray-50">
+      <div className="divide-y divide-[var(--border-subtle)]">
         {items.map((w) => {
           const primarySystem = getPrimarySystem(w.toolsUsed);
           return (
             <Link
               key={w.id}
               href={`/workflows/${w.id}`}
-              className="flex items-center gap-ds-3 px-ds-4 py-ds-3 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-ds-3 px-ds-4 py-ds-3 hover:bg-[var(--surface-secondary)] transition-colors"
             >
               <div className="flex-1 min-w-0">
-                <p className="text-ds-sm font-medium text-gray-900 truncate">{w.title}</p>
+                <p className="text-ds-sm font-medium text-[var(--content-primary)] truncate">{w.title}</p>
                 {primarySystem && (
-                  <span className="text-[11px] text-gray-400">{primarySystem}</span>
+                  <span className="text-[11px] text-[var(--content-tertiary)]">{primarySystem}</span>
                 )}
               </div>
               {renderMetric(w)}
-              <ChevronRight className="h-3.5 w-3.5 text-gray-300 flex-shrink-0" />
+              <ChevronRight className="h-3.5 w-3.5 text-[var(--content-tertiary)] flex-shrink-0" />
             </Link>
           );
         })}
@@ -1621,7 +1621,7 @@ function WorkflowRow({
   const confidencePct = w.confidence !== null ? Math.round(w.confidence * 100) : null;
 
   return (
-    <div className="card hover:border-gray-300 transition-colors group">
+    <div className="card hover:border-[var(--border-default)] transition-colors group">
       {/* Desktop layout */}
       <div className="hidden lg:grid gap-2 items-center px-4 py-3" style={{ gridTemplateColumns: '28px minmax(180px, 1fr) 80px 44px 56px 90px 56px 100px 56px 48px' }}>
         {/* Favorite */}
@@ -1630,14 +1630,14 @@ function WorkflowRow({
             e.preventDefault();
             onFavoriteToggle();
           }}
-          className="rounded-ds-sm p-1 hover:bg-gray-100 transition-colors flex-shrink-0"
+          className="rounded-ds-sm p-1 hover:bg-[var(--surface-secondary)] transition-colors flex-shrink-0"
           title={w.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
         >
           <Star
             className={`h-4 w-4 ${
               w.isFavorite
                 ? 'fill-amber-400 text-amber-400'
-                : 'text-gray-200 group-hover:text-gray-300'
+                : 'text-[var(--border-default)] group-hover:text-[var(--content-tertiary)]'
             }`}
           />
         </button>
@@ -1665,7 +1665,7 @@ function WorkflowRow({
               </button>
               <button
                 onClick={onCancelEdit}
-                className="p-1 text-gray-400 hover:bg-gray-100 rounded"
+                className="p-1 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] rounded"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1674,7 +1674,7 @@ function WorkflowRow({
             <div className="flex items-center gap-ds-1 min-w-0">
               <Link
                 href={`/workflows/${w.id}`}
-                className="text-ds-sm font-medium text-gray-900 hover:text-brand-600 truncate"
+                className="text-ds-sm font-medium text-[var(--content-primary)] hover:text-brand-600 truncate"
               >
                 {w.title}
               </Link>
@@ -1720,14 +1720,14 @@ function WorkflowRow({
         </div>
 
         {/* Steps */}
-        <div className="text-ds-xs text-gray-600">{w.stepCount ?? '--'}</div>
+        <div className="text-ds-xs text-[var(--content-secondary)]">{w.stepCount ?? '--'}</div>
 
         {/* Duration */}
-        <div className="text-ds-xs text-gray-600">{formatDuration(w.durationMs)}</div>
+        <div className="text-ds-xs text-[var(--content-secondary)]">{formatDuration(w.durationMs)}</div>
 
         {/* Confidence with bar */}
         <div className="flex items-center gap-2">
-          <div className="flex-1 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+          <div className="flex-1 h-1.5 rounded-full bg-[var(--surface-secondary)] overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${confidenceBarColorClass(w.confidence)}`}
               style={{ width: `${confidencePct ?? 0}%` }}
@@ -1764,12 +1764,12 @@ function WorkflowRow({
             </span>
           ))}
           {w.tags.length > 2 && (
-            <span className="text-[10px] text-gray-400">+{w.tags.length - 2}</span>
+            <span className="text-[10px] text-[var(--content-tertiary)]">+{w.tags.length - 2}</span>
           )}
         </div>
 
         {/* Last Active */}
-        <div className="text-ds-xs text-gray-500" title={w.updatedAt}>
+        <div className="text-ds-xs text-[var(--content-secondary)]" title={w.updatedAt}>
           {formatDateRelative(w.updatedAt)}
         </div>
 
@@ -1783,7 +1783,7 @@ function WorkflowRow({
                   e.preventDefault();
                   onPortfolioMenuToggle();
                 }}
-                className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                className="rounded p-1.5 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-secondary)]"
                 title="Assign to portfolio"
               >
                 <FolderOpen className="h-3.5 w-3.5" />
@@ -1805,7 +1805,7 @@ function WorkflowRow({
                 e.preventDefault();
                 onTagMenuToggle();
               }}
-              className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              className="rounded p-1.5 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-secondary)]"
               title="Manage tags"
             >
               <Tag className="h-3.5 w-3.5" />
@@ -1825,7 +1825,7 @@ function WorkflowRow({
               e.preventDefault();
               onStartEdit();
             }}
-            className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded p-1.5 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-secondary)]"
             title="Rename"
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -1835,7 +1835,7 @@ function WorkflowRow({
               e.preventDefault();
               onDelete();
             }}
-            className="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
+            className="rounded p-1.5 text-[var(--content-tertiary)] hover:bg-red-50 hover:text-red-600"
             title="Delete"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -1850,7 +1850,7 @@ function WorkflowRow({
           w.healthStatus === 'high_variation' ? { text: 'High variation detected — consider standardizing', color: 'text-red-600', bg: 'bg-red-50' } :
           w.healthStatus === 'needs_review' && (w.confidence === null || w.confidence < 0.5) ? { text: 'Low confidence — needs more evidence or review', color: 'text-amber-600', bg: 'bg-amber-50' } :
           w.healthStatus === 'needs_review' ? { text: 'Needs review — SOP or documentation incomplete', color: 'text-amber-600', bg: 'bg-amber-50' } :
-          w.isStale ? { text: `Stale — not reviewed in ${formatDateRelative(w.createdAt)}`, color: 'text-gray-500', bg: 'bg-gray-50' } :
+          w.isStale ? { text: `Stale — not reviewed in ${formatDateRelative(w.createdAt)}`, color: 'text-[var(--content-secondary)]', bg: 'bg-[var(--surface-secondary)]' } :
           w.aiOpportunityScore >= 70 ? { text: `Strong AI candidate — automation potential score ${w.aiOpportunityScore}/100`, color: 'text-violet-600', bg: 'bg-violet-50' } :
           w.complexityScore >= 70 ? { text: `High complexity (${w.complexityScore}/100) — consider simplifying`, color: 'text-amber-600', bg: 'bg-amber-50' } :
           w.cognitiveBurdenScore >= 60 ? { text: `High cognitive load (${w.cognitiveBurdenScore}/100) — operators may struggle`, color: 'text-amber-600', bg: 'bg-amber-50' } :
@@ -1876,13 +1876,13 @@ function WorkflowRow({
               e.preventDefault();
               onFavoriteToggle();
             }}
-            className="rounded-ds-sm p-1 hover:bg-gray-100 transition-colors flex-shrink-0 mt-0.5"
+            className="rounded-ds-sm p-1 hover:bg-[var(--surface-secondary)] transition-colors flex-shrink-0 mt-0.5"
           >
             <Star
               className={`h-4 w-4 ${
                 w.isFavorite
                   ? 'fill-amber-400 text-amber-400'
-                  : 'text-gray-200'
+                  : 'text-[var(--border-default)]'
               }`}
             />
           </button>
@@ -1905,14 +1905,14 @@ function WorkflowRow({
                 <button onClick={onConfirmEdit} className="p-1 text-green-600 hover:bg-green-50 rounded">
                   <Check className="h-4 w-4" />
                 </button>
-                <button onClick={onCancelEdit} className="p-1 text-gray-400 hover:bg-gray-100 rounded">
+                <button onClick={onCancelEdit} className="p-1 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] rounded">
                   <X className="h-4 w-4" />
                 </button>
               </div>
             ) : (
               <Link
                 href={`/workflows/${w.id}`}
-                className="text-ds-sm font-medium text-gray-900 hover:text-brand-600 block mb-1"
+                className="text-ds-sm font-medium text-[var(--content-primary)] hover:text-brand-600 block mb-1"
               >
                 {w.title}
               </Link>
@@ -1965,12 +1965,12 @@ function WorkflowRow({
                 </span>
               ))}
               {w.tags.length > 2 && (
-                <span className="text-[10px] text-gray-400">+{w.tags.length - 2}</span>
+                <span className="text-[10px] text-[var(--content-tertiary)]">+{w.tags.length - 2}</span>
               )}
             </div>
 
             {/* Metrics row */}
-            <div className="flex items-center gap-4 text-ds-xs text-gray-500">
+            <div className="flex items-center gap-4 text-ds-xs text-[var(--content-secondary)]">
               <span className="flex items-center gap-1">
                 <Layers className="h-3.5 w-3.5" />
                 {w.stepCount ?? 0}
@@ -1998,7 +1998,7 @@ function WorkflowRow({
                     e.preventDefault();
                     onPortfolioMenuToggle();
                   }}
-                  className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                  className="rounded p-1.5 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-secondary)]"
                   title="Assign to portfolio"
                 >
                   <FolderOpen className="h-3.5 w-3.5" />
@@ -2020,7 +2020,7 @@ function WorkflowRow({
                   e.preventDefault();
                   onTagMenuToggle();
                 }}
-                className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                className="rounded p-1.5 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-secondary)]"
                 title="Manage tags"
               >
                 <Tag className="h-3.5 w-3.5" />
@@ -2040,7 +2040,7 @@ function WorkflowRow({
                 e.preventDefault();
                 onStartEdit();
               }}
-              className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              className="rounded p-1.5 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-secondary)]"
               title="Rename"
             >
               <Pencil className="h-3.5 w-3.5" />
@@ -2050,7 +2050,7 @@ function WorkflowRow({
                 e.preventDefault();
                 onDelete();
               }}
-              className="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
+              className="rounded p-1.5 text-[var(--content-tertiary)] hover:bg-red-50 hover:text-red-600"
               title="Delete"
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -2083,12 +2083,12 @@ function TagMenu({
     <>
       {/* Backdrop to close */}
       <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className="absolute right-0 top-8 z-50 w-48 rounded-ds-md border border-gray-200 bg-white shadow-lg py-1">
-        <p className="px-3 py-1.5 text-[11px] font-medium text-gray-400 uppercase tracking-wide">
+      <div className="absolute right-0 top-8 z-50 w-48 rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-elevated)] shadow-lg py-1">
+        <p className="px-3 py-1.5 text-[11px] font-medium text-[var(--content-tertiary)] uppercase tracking-wide">
           Assign tags
         </p>
         {allTags.length === 0 && (
-          <p className="px-3 py-2 text-ds-xs text-gray-400">No tags yet. Create one above.</p>
+          <p className="px-3 py-2 text-ds-xs text-[var(--content-tertiary)]">No tags yet. Create one above.</p>
         )}
         {allTags.map((tag) => {
           const isAssigned = assignedIds.has(tag.id);
@@ -2099,7 +2099,7 @@ function TagMenu({
                 e.preventDefault();
                 onToggle(workflowId, tag.id, isAssigned);
               }}
-              className="flex w-full items-center gap-2 px-3 py-1.5 text-ds-xs hover:bg-gray-50 transition-colors"
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-ds-xs hover:bg-[var(--surface-secondary)] transition-colors"
             >
               <span
                 className="h-2.5 w-2.5 rounded-full border-2 flex-shrink-0"
@@ -2108,8 +2108,8 @@ function TagMenu({
                   borderColor: tag.color,
                 }}
               />
-              <span className="flex-1 text-left text-gray-700">{tag.name}</span>
-              {isAssigned && <Check className="h-3 w-3 text-gray-400" />}
+              <span className="flex-1 text-left text-[var(--content-primary)]">{tag.name}</span>
+              {isAssigned && <Check className="h-3 w-3 text-[var(--content-tertiary)]" />}
             </button>
           );
         })}
@@ -2153,12 +2153,12 @@ function PortfolioMenu({
     <>
       {/* Backdrop to close */}
       <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className="absolute right-0 top-8 z-50 w-52 rounded-ds-md border border-gray-200 bg-white shadow-lg py-1 max-h-64 overflow-y-auto">
-        <p className="px-3 py-1.5 text-[11px] font-medium text-gray-400 uppercase tracking-wide">
+      <div className="absolute right-0 top-8 z-50 w-52 rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-elevated)] shadow-lg py-1 max-h-64 overflow-y-auto">
+        <p className="px-3 py-1.5 text-[11px] font-medium text-[var(--content-tertiary)] uppercase tracking-wide">
           Assign to portfolio
         </p>
         {flat.length === 0 && (
-          <p className="px-3 py-2 text-ds-xs text-gray-400">No portfolios yet.</p>
+          <p className="px-3 py-2 text-ds-xs text-[var(--content-tertiary)]">No portfolios yet.</p>
         )}
         {flat.map(({ node, depth }) => {
           const isAssigned = assignedIds.has(node.id);
@@ -2170,7 +2170,7 @@ function PortfolioMenu({
                 onToggle(workflowId, node.id, isAssigned);
                 onClose();
               }}
-              className="flex w-full items-center gap-2 px-3 py-1.5 text-ds-xs hover:bg-gray-50 transition-colors"
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-ds-xs hover:bg-[var(--surface-secondary)] transition-colors"
               style={{ paddingLeft: `${12 + depth * 10}px` }}
             >
               <span
@@ -2180,8 +2180,8 @@ function PortfolioMenu({
                   borderColor: node.color,
                 }}
               />
-              <span className="flex-1 text-left text-gray-700 truncate">{node.name}</span>
-              {isAssigned && <Check className="h-3 w-3 text-gray-400 flex-shrink-0" />}
+              <span className="flex-1 text-left text-[var(--content-primary)] truncate">{node.name}</span>
+              {isAssigned && <Check className="h-3 w-3 text-[var(--content-tertiary)] flex-shrink-0" />}
             </button>
           );
         })}
@@ -2203,8 +2203,8 @@ function EmptyDashboard({
     <div>
       <div className="flex items-center justify-between mb-ds-6">
         <div>
-          <h1 className="text-ds-2xl font-semibold text-gray-900">Process Intelligence</h1>
-          <p className="text-ds-sm text-gray-500 mt-0.5">
+          <h1 className="text-ds-2xl font-semibold text-[var(--content-primary)]">Process Intelligence</h1>
+          <p className="text-ds-sm text-[var(--content-secondary)] mt-0.5">
             Monitor, optimize, and standardize your workflows
           </p>
         </div>
@@ -2219,10 +2219,10 @@ function EmptyDashboard({
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-100">
             <Layers className="h-8 w-8 text-brand-500" />
           </div>
-          <h2 className="mt-ds-4 text-ds-lg font-semibold text-gray-900">
+          <h2 className="mt-ds-4 text-ds-lg font-semibold text-[var(--content-primary)]">
             Your process intelligence center is empty
           </h2>
-          <p className="mt-ds-2 text-ds-sm text-gray-500 max-w-md mx-auto">
+          <p className="mt-ds-2 text-ds-sm text-[var(--content-secondary)] max-w-md mx-auto">
             Record a workflow with the browser extension, or upload a JSON file to generate
             your first SOP and process map.
           </p>
@@ -2250,21 +2250,21 @@ function EmptyDashboard({
           </div>
         </div>
         {/* Quick value props */}
-        <div className="grid grid-cols-3 divide-x divide-gray-100 border-t border-gray-100">
+        <div className="grid grid-cols-3 divide-x divide-[var(--border-subtle)] border-t border-[var(--border-subtle)]">
           <div className="px-ds-5 py-ds-4 text-center">
-            <p className="text-ds-xs text-gray-400 uppercase tracking-wide">Step 1</p>
-            <p className="mt-ds-1 text-ds-sm font-medium text-gray-700">Record</p>
-            <p className="text-ds-xs text-gray-500">Capture your real workflow</p>
+            <p className="text-ds-xs text-[var(--content-tertiary)] uppercase tracking-wide">Step 1</p>
+            <p className="mt-ds-1 text-ds-sm font-medium text-[var(--content-primary)]">Record</p>
+            <p className="text-ds-xs text-[var(--content-secondary)]">Capture your real workflow</p>
           </div>
           <div className="px-ds-5 py-ds-4 text-center">
-            <p className="text-ds-xs text-gray-400 uppercase tracking-wide">Step 2</p>
-            <p className="mt-ds-1 text-ds-sm font-medium text-gray-700">Process</p>
-            <p className="text-ds-xs text-gray-500">Deterministic analysis</p>
+            <p className="text-ds-xs text-[var(--content-tertiary)] uppercase tracking-wide">Step 2</p>
+            <p className="mt-ds-1 text-ds-sm font-medium text-[var(--content-primary)]">Process</p>
+            <p className="text-ds-xs text-[var(--content-secondary)]">Deterministic analysis</p>
           </div>
           <div className="px-ds-5 py-ds-4 text-center">
-            <p className="text-ds-xs text-gray-400 uppercase tracking-wide">Step 3</p>
-            <p className="mt-ds-1 text-ds-sm font-medium text-gray-700">Use</p>
-            <p className="text-ds-xs text-gray-500">SOP, process map, report</p>
+            <p className="text-ds-xs text-[var(--content-tertiary)] uppercase tracking-wide">Step 3</p>
+            <p className="mt-ds-1 text-ds-sm font-medium text-[var(--content-primary)]">Use</p>
+            <p className="text-ds-xs text-[var(--content-secondary)]">SOP, process map, report</p>
           </div>
         </div>
       </div>
@@ -2288,7 +2288,7 @@ function ProcessGroupsView({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <div className="text-ds-sm text-gray-400">Loading process groups...</div>
+        <div className="text-ds-sm text-[var(--content-tertiary)]">Loading process groups...</div>
       </div>
     );
   }
@@ -2298,10 +2298,10 @@ function ProcessGroupsView({
       {/* Section Header */}
       <div className="flex items-center justify-between mb-ds-4">
         <div className="ds-section">
-          <h2 className="ds-section-label text-ds-lg font-semibold text-gray-900">
+          <h2 className="ds-section-label text-ds-lg font-semibold text-[var(--content-primary)]">
             Process Groups
           </h2>
-          <p className="text-ds-xs text-gray-500">
+          <p className="text-ds-xs text-[var(--content-secondary)]">
             {definitions.length} process group{definitions.length !== 1 ? 's' : ''} detected
           </p>
         </div>
@@ -2318,11 +2318,11 @@ function ProcessGroupsView({
       {/* Empty state */}
       {definitions.length === 0 && (
         <div className="card p-12 text-center">
-          <Boxes className="mx-auto h-10 w-10 text-gray-300" />
-          <h3 className="mt-3 text-ds-sm font-medium text-gray-900">
+          <Boxes className="mx-auto h-10 w-10 text-[var(--content-tertiary)]" />
+          <h3 className="mt-3 text-ds-sm font-medium text-[var(--content-primary)]">
             No process groups detected yet
           </h3>
-          <p className="mt-1 text-ds-sm text-gray-500 max-w-md mx-auto">
+          <p className="mt-1 text-ds-sm text-[var(--content-secondary)] max-w-md mx-auto">
             Upload more workflows or click &quot;Run Analysis&quot; to detect recurring processes.
           </p>
           <button
@@ -2353,7 +2353,7 @@ function ProcessGroupsView({
 function ProcessGroupCard({ definition: def }: { definition: ProcessDefinition }) {
   const stabilityColor =
     def.stabilityScore === null
-      ? 'bg-gray-300'
+      ? 'bg-[var(--content-tertiary)]'
       : def.stabilityScore >= 0.8
         ? 'bg-emerald-500'
         : def.stabilityScore >= 0.6
@@ -2400,26 +2400,26 @@ function ProcessGroupCard({ definition: def }: { definition: ProcessDefinition }
   return (
     <Link
       href={`/analytics/process/${def.id}`}
-      className="card hover:border-gray-300 transition-colors group block"
+      className="card hover:border-[var(--border-default)] transition-colors group block"
     >
       <div className="px-ds-5 py-ds-4">
         {/* Top row: name + badges */}
         <div className="flex items-start justify-between gap-ds-4 mb-ds-3">
           <div className="min-w-0 flex-1">
-            <h3 className="text-ds-sm font-semibold text-gray-900 group-hover:text-brand-600 transition-colors truncate">
+            <h3 className="text-ds-sm font-semibold text-[var(--content-primary)] group-hover:text-brand-600 transition-colors truncate">
               {def.canonicalName}
             </h3>
             {def.description && (
-              <p className="text-ds-xs text-gray-500 mt-0.5 line-clamp-1">{def.description}</p>
+              <p className="text-ds-xs text-[var(--content-secondary)] mt-0.5 line-clamp-1">{def.description}</p>
             )}
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             {/* Stability indicator */}
             <div className="flex items-center gap-1.5">
               <span className={`h-2 w-2 rounded-full ${stabilityColor}`} />
-              <span className="text-ds-xs text-gray-500">{stabilityLabel}</span>
+              <span className="text-ds-xs text-[var(--content-secondary)]">{stabilityLabel}</span>
             </div>
-            <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-gray-400" />
+            <ChevronRight className="h-4 w-4 text-[var(--content-tertiary)] group-hover:text-[var(--content-secondary)]" />
           </div>
         </div>
 
@@ -2431,13 +2431,13 @@ function ProcessGroupCard({ definition: def }: { definition: ProcessDefinition }
           </span>
 
           {/* Variant count */}
-          <span className="flex items-center gap-1 text-gray-600">
+          <span className="flex items-center gap-1 text-[var(--content-secondary)]">
             <GitBranch className="h-3.5 w-3.5" />
             {def.variantCount} variant{def.variantCount !== 1 ? 's' : ''}
           </span>
 
           {/* Avg duration */}
-          <span className="flex items-center gap-1 text-gray-600">
+          <span className="flex items-center gap-1 text-[var(--content-secondary)]">
             <Clock className="h-3.5 w-3.5" />
             {formatDuration(def.avgDurationMs)}
           </span>
@@ -2484,14 +2484,14 @@ function ProcessGroupCard({ definition: def }: { definition: ProcessDefinition }
                 </span>
               ))}
               {systemsUsed.length > 3 && (
-                <span className="text-[10px] text-gray-400">+{systemsUsed.length - 3}</span>
+                <span className="text-[10px] text-[var(--content-tertiary)]">+{systemsUsed.length - 3}</span>
               )}
             </div>
           )}
 
           {/* Last run */}
           {lastRunDate && (
-            <span className="text-gray-400 ml-auto">
+            <span className="text-[var(--content-tertiary)] ml-auto">
               Last run {formatDateRelative(lastRunDate)}
             </span>
           )}
@@ -2512,11 +2512,11 @@ function FilteredEmptyState({
 }) {
   return (
     <div className="card p-12 text-center">
-      <Filter className="mx-auto h-10 w-10 text-gray-300" />
-      <h3 className="mt-3 text-ds-sm font-medium text-gray-900">
+      <Filter className="mx-auto h-10 w-10 text-[var(--content-tertiary)]" />
+      <h3 className="mt-3 text-ds-sm font-medium text-[var(--content-primary)]">
         {hasSearch ? 'No workflows match your search' : 'No workflows in this category'}
       </h3>
-      <p className="mt-1 text-ds-sm text-gray-500">
+      <p className="mt-1 text-ds-sm text-[var(--content-secondary)]">
         {hasSearch
           ? 'Try different search terms or adjust your filters.'
           : 'Try adjusting your filters to see more workflows.'}

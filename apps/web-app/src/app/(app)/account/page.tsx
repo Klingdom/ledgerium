@@ -123,32 +123,32 @@ export default function AccountPage() {
     trialing: { label: 'Trial', cls: 'bg-blue-50 text-blue-700 border border-blue-200' },
     active: { label: 'Active', cls: 'bg-green-50 text-green-700 border border-green-200' },
     past_due: { label: 'Past Due', cls: 'bg-red-50 text-red-700 border border-red-200' },
-    canceled: { label: 'Canceled', cls: 'bg-gray-100 text-gray-600' },
-    none: { label: 'Free', cls: 'bg-gray-100 text-gray-500' },
+    canceled: { label: 'Canceled', cls: 'bg-[var(--surface-secondary)] text-[var(--content-secondary)]' },
+    none: { label: 'Free', cls: 'bg-[var(--surface-secondary)] text-[var(--content-secondary)]' },
   };
 
   return (
     <div className="mx-auto max-w-ds-content space-y-ds-6">
-      <h1 className="text-ds-2xl font-bold tracking-tight text-gray-900">Account</h1>
+      <h1 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">Account</h1>
 
       {/* Profile */}
       <div className="card px-ds-5 py-ds-5">
         <div className="flex items-center gap-ds-3 mb-ds-4">
-          <User className="h-5 w-5 text-gray-400" />
-          <h2 className="text-ds-base font-semibold text-gray-900">Profile</h2>
+          <User className="h-5 w-5 text-[var(--content-tertiary)]" />
+          <h2 className="text-ds-base font-semibold text-[var(--content-primary)]">Profile</h2>
         </div>
         <dl className="space-y-ds-3 text-ds-sm">
           <div className="flex justify-between">
-            <dt className="text-gray-500">Email</dt>
-            <dd className="font-medium text-gray-900">{session?.user?.email ?? '—'}</dd>
+            <dt className="text-[var(--content-secondary)]">Email</dt>
+            <dd className="font-medium text-[var(--content-primary)]">{session?.user?.email ?? '—'}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-gray-500">Name</dt>
-            <dd className="font-medium text-gray-900">{account?.name ?? session?.user?.name ?? '—'}</dd>
+            <dt className="text-[var(--content-secondary)]">Name</dt>
+            <dd className="font-medium text-[var(--content-primary)]">{account?.name ?? session?.user?.name ?? '—'}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-gray-500">Member since</dt>
-            <dd className="text-gray-900">{account?.createdAt ? new Date(account.createdAt).toLocaleDateString() : '—'}</dd>
+            <dt className="text-[var(--content-secondary)]">Member since</dt>
+            <dd className="text-[var(--content-primary)]">{account?.createdAt ? new Date(account.createdAt).toLocaleDateString() : '—'}</dd>
           </div>
         </dl>
       </div>
@@ -156,29 +156,29 @@ export default function AccountPage() {
       {/* Plan */}
       <div className="card px-ds-5 py-ds-5">
         <div className="flex items-center gap-ds-3 mb-ds-4">
-          <CreditCard className="h-5 w-5 text-gray-400" />
-          <h2 className="text-ds-base font-semibold text-gray-900">Plan & Billing</h2>
+          <CreditCard className="h-5 w-5 text-[var(--content-tertiary)]" />
+          <h2 className="text-ds-base font-semibold text-[var(--content-primary)]">Plan & Billing</h2>
         </div>
         <dl className="space-y-ds-3 text-ds-sm">
           <div className="flex justify-between items-center">
-            <dt className="text-gray-500">Current Plan</dt>
-            <dd className="font-semibold text-gray-900">{planLabels[account?.plan ?? 'free'] ?? 'Free'}</dd>
+            <dt className="text-[var(--content-secondary)]">Current Plan</dt>
+            <dd className="font-semibold text-[var(--content-primary)]">{planLabels[account?.plan ?? 'free'] ?? 'Free'}</dd>
           </div>
           <div className="flex justify-between items-center">
-            <dt className="text-gray-500">Status</dt>
+            <dt className="text-[var(--content-secondary)]">Status</dt>
             <dd>
               {account && (
-                <span className={`rounded-ds-sm px-2.5 py-0.5 text-ds-xs font-medium ${statusLabels[account.subscriptionStatus]?.cls ?? 'bg-gray-100 text-gray-500'}`}>
+                <span className={`rounded-ds-sm px-2.5 py-0.5 text-ds-xs font-medium ${statusLabels[account.subscriptionStatus]?.cls ?? 'bg-[var(--surface-secondary)] text-[var(--content-secondary)]'}`}>
                   {statusLabels[account.subscriptionStatus]?.label ?? account.subscriptionStatus}
                 </span>
               )}
             </dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-gray-500">Uploads</dt>
-            <dd className="text-gray-900 tabular-nums">
+            <dt className="text-[var(--content-secondary)]">Uploads</dt>
+            <dd className="text-[var(--content-primary)] tabular-nums">
               {account?.uploadCount ?? 0}
-              {account?.plan === 'free' && <span className="text-gray-400"> / 5</span>}
+              {account?.plan === 'free' && <span className="text-[var(--content-tertiary)]"> / 5</span>}
             </dd>
           </div>
         </dl>
@@ -214,8 +214,8 @@ export default function AccountPage() {
       <div className="card px-ds-5 py-ds-5">
         <div className="flex items-center justify-between mb-ds-4">
           <div className="flex items-center gap-ds-3">
-            <Key className="h-5 w-5 text-gray-400" />
-            <h2 className="text-ds-base font-semibold text-gray-900">Extension Sync</h2>
+            <Key className="h-5 w-5 text-[var(--content-tertiary)]" />
+            <h2 className="text-ds-base font-semibold text-[var(--content-primary)]">Extension Sync</h2>
           </div>
           {apiKeys.length < 3 && (
             <button onClick={handleCreateKey} disabled={isCreating} className="btn-secondary gap-1 text-xs">
@@ -225,7 +225,7 @@ export default function AccountPage() {
           )}
         </div>
 
-        <p className="text-ds-xs text-gray-500 mb-ds-4">
+        <p className="text-ds-xs text-[var(--content-secondary)] mb-ds-4">
           Connect your Ledgerium browser extension to automatically sync recordings
           to your workflow library.
         </p>
@@ -236,7 +236,7 @@ export default function AccountPage() {
               API key created — copy it now. It will not be shown again.
             </p>
             <div className="flex items-center gap-ds-2">
-              <code className="flex-1 rounded-ds-md bg-white px-ds-3 py-ds-2 text-ds-xs font-mono text-gray-900 border border-green-200 select-all">
+              <code className="flex-1 rounded-ds-md bg-[var(--surface-elevated)] px-ds-3 py-ds-2 text-ds-xs font-mono text-[var(--content-primary)] border border-green-200 select-all">
                 {newKey}
               </code>
               <button onClick={handleCopyKey} className="btn-secondary text-xs gap-1 flex-shrink-0">
@@ -244,13 +244,13 @@ export default function AccountPage() {
                 {copied ? 'Copied' : 'Copy'}
               </button>
             </div>
-            <div className="mt-ds-3 rounded-ds-md bg-white border border-green-200 px-ds-3 py-ds-3">
+            <div className="mt-ds-3 rounded-ds-md bg-[var(--surface-elevated)] border border-green-200 px-ds-3 py-ds-3">
               <p className="ds-section-label mb-ds-1">Extension Settings</p>
-              <p className="text-ds-xs text-gray-700">
+              <p className="text-ds-xs text-[var(--content-primary)]">
                 <strong>Sync URL:</strong>{' '}
                 <code className="text-brand-600">{typeof window !== 'undefined' ? `${window.location.origin}/api/sync` : '/api/sync'}</code>
               </p>
-              <p className="text-ds-xs text-gray-700 mt-0.5">
+              <p className="text-ds-xs text-[var(--content-primary)] mt-0.5">
                 <strong>API Key:</strong> <code className="text-brand-600">{newKey}</code>
               </p>
             </div>
@@ -262,22 +262,22 @@ export default function AccountPage() {
 
         {apiKeys.length === 0 && !newKey ? (
           <div className="text-center py-ds-6">
-            <Key className="mx-auto h-8 w-8 text-gray-200" />
-            <p className="mt-ds-2 text-ds-xs text-gray-400">No API keys yet. Create one to start syncing.</p>
+            <Key className="mx-auto h-8 w-8 text-[var(--content-tertiary)]" />
+            <p className="mt-ds-2 text-ds-xs text-[var(--content-tertiary)]">No API keys yet. Create one to start syncing.</p>
           </div>
         ) : (
           <div className="space-y-ds-2">
             {apiKeys.map((k) => (
-              <div key={k.id} className="flex items-center justify-between rounded-ds-md border border-gray-100 px-ds-3 py-ds-2">
+              <div key={k.id} className="flex items-center justify-between rounded-ds-md border border-[var(--border-subtle)] px-ds-3 py-ds-2">
                 <div>
-                  <p className="text-ds-xs font-mono text-gray-700">{k.prefix}...</p>
-                  <p className="text-ds-xs text-gray-400">
+                  <p className="text-ds-xs font-mono text-[var(--content-primary)]">{k.prefix}...</p>
+                  <p className="text-ds-xs text-[var(--content-tertiary)]">
                     {k.label}
                     {k.lastUsedAt && <> · Last used {new Date(k.lastUsedAt).toLocaleDateString()}</>}
                     {!k.lastUsedAt && <> · Never used</>}
                   </p>
                 </div>
-                <button onClick={() => handleDeleteKey(k.id)} className="rounded-ds-sm p-1.5 text-gray-300 hover:bg-red-50 hover:text-red-500" title="Revoke">
+                <button onClick={() => handleDeleteKey(k.id)} className="rounded-ds-sm p-1.5 text-[var(--content-tertiary)] hover:bg-red-50 hover:text-red-500" title="Revoke">
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -291,17 +291,17 @@ export default function AccountPage() {
         <div className="card px-ds-5 py-ds-5 border-brand-200 bg-brand-50/30">
           <div className="flex items-center gap-ds-3 mb-ds-4">
             <Settings className="h-5 w-5 text-brand-600" />
-            <h2 className="text-ds-base font-semibold text-gray-900">Admin</h2>
+            <h2 className="text-ds-base font-semibold text-[var(--content-primary)]">Admin</h2>
           </div>
           <div className="space-y-ds-2">
             <Link
               href="/analytics/product"
-              className="flex items-center gap-ds-3 rounded-ds-md border border-gray-200 bg-white px-ds-4 py-ds-3 hover:border-brand-200 transition-colors"
+              className="flex items-center gap-ds-3 rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-elevated)] px-ds-4 py-ds-3 hover:border-brand-200 transition-colors"
             >
               <BarChart3 className="h-4 w-4 text-brand-600" />
               <div>
-                <p className="text-ds-sm font-medium text-gray-900">Product Analytics</p>
-                <p className="text-ds-xs text-gray-500">User behavior, funnels, activation metrics</p>
+                <p className="text-ds-sm font-medium text-[var(--content-primary)]">Product Analytics</p>
+                <p className="text-ds-xs text-[var(--content-secondary)]">User behavior, funnels, activation metrics</p>
               </div>
             </Link>
           </div>
@@ -311,10 +311,10 @@ export default function AccountPage() {
       {/* Trust */}
       <div className="card px-ds-5 py-ds-5">
         <div className="flex items-center gap-ds-3 mb-ds-4">
-          <Shield className="h-5 w-5 text-gray-400" />
-          <h2 className="text-ds-base font-semibold text-gray-900">Trust & Privacy</h2>
+          <Shield className="h-5 w-5 text-[var(--content-tertiary)]" />
+          <h2 className="text-ds-base font-semibold text-[var(--content-primary)]">Trust & Privacy</h2>
         </div>
-        <ul className="space-y-ds-2 text-ds-sm text-gray-600">
+        <ul className="space-y-ds-2 text-ds-sm text-[var(--content-secondary)]">
           <li className="flex items-start gap-ds-2">
             <span className="mt-[5px] h-1.5 w-1.5 rounded-full bg-green-400 flex-shrink-0" />
             All workflow processing is deterministic — same input, same output

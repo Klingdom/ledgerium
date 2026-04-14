@@ -10,9 +10,9 @@ interface HeaderProps {
 const STATE_BADGE: Record<RecorderState, { label: string; className: string }> = {
   idle: { label: 'Ready', className: 'badge-gray' },
   arming: { label: 'Starting...', className: 'badge-amber' },
-  recording: { label: 'Recording', className: 'badge-blue' },
+  recording: { label: 'Recording', className: 'badge-green' },
   paused: { label: 'Paused', className: 'badge-amber' },
-  stopping: { label: 'Processing...', className: 'badge-blue' },
+  stopping: { label: 'Processing...', className: 'badge-green' },
   review_ready: { label: 'Complete', className: 'badge-green' },
   error: { label: 'Error', className: 'badge-red' },
 }
@@ -25,7 +25,7 @@ export function Header({ state, meta }: HeaderProps) {
       <div className="flex items-center gap-2.5">
         {state === 'recording' && <span className="recording-dot" />}
         <span className="text-base font-bold tracking-tight text-gray-900">
-          Ledgerium <span className="text-blue-600">AI</span>
+          Ledgerium <span className="text-emerald-600">AI</span>
         </span>
       </div>
 

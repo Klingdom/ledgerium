@@ -157,7 +157,7 @@ function PortfolioTreeNode({
         className={`group/node flex items-center gap-1.5 rounded-ds-sm px-2 py-1.5 cursor-pointer transition-colors select-none ${
           isActive
             ? 'bg-brand-50 text-brand-700'
-            : 'text-gray-700 hover:bg-gray-100'
+            : 'text-[var(--content-primary)] hover:bg-[var(--surface-secondary)]'
         }`}
         style={{ paddingLeft: `${8 + indentPx}px` }}
         onMouseEnter={() => setIsHovered(true)}
@@ -178,8 +178,8 @@ function PortfolioTreeNode({
           className={`flex-shrink-0 h-3.5 w-3.5 ${!hasChildren ? 'invisible' : ''}`}
         >
           {isExpanded
-            ? <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
-            : <ChevronRight className="h-3.5 w-3.5 text-gray-400" />
+            ? <ChevronDown className="h-3.5 w-3.5 text-[var(--content-tertiary)]" />
+            : <ChevronRight className="h-3.5 w-3.5 text-[var(--content-tertiary)]" />
           }
         </button>
 
@@ -190,7 +190,7 @@ function PortfolioTreeNode({
         />
         <PortfolioTypeIcon
           type={node.type}
-          className={`flex-shrink-0 h-3.5 w-3.5 ${isActive ? 'text-brand-600' : 'text-gray-400'}`}
+          className={`flex-shrink-0 h-3.5 w-3.5 ${isActive ? 'text-brand-600' : 'text-[var(--content-tertiary)]'}`}
         />
 
         {/* Name or rename input */}
@@ -224,7 +224,7 @@ function PortfolioTreeNode({
                 setIsRenaming(false);
                 setRenameValue(node.name);
               }}
-              className="p-0.5 text-gray-400 hover:bg-gray-100 rounded flex-shrink-0"
+              className="p-0.5 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] rounded flex-shrink-0"
             >
               <X className="h-3 w-3" />
             </button>
@@ -232,14 +232,14 @@ function PortfolioTreeNode({
         ) : (
           <>
             <span className={`flex-1 min-w-0 text-ds-xs font-medium truncate ${
-              isActive ? 'text-brand-700' : 'text-gray-700'
+              isActive ? 'text-brand-700' : 'text-[var(--content-primary)]'
             }`}>
               {node.name}
             </span>
 
             {/* Workflow count badge */}
             {node.workflowCount > 0 && !isHovered && (
-              <span className="flex-shrink-0 text-[10px] text-gray-400 tabular-nums">
+              <span className="flex-shrink-0 text-[10px] text-[var(--content-tertiary)] tabular-nums">
                 {node.workflowCount}
               </span>
             )}
@@ -252,14 +252,14 @@ function PortfolioTreeNode({
               >
                 <button
                   onClick={() => setIsRenaming(true)}
-                  className="rounded p-0.5 text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-colors"
+                  className="rounded p-0.5 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-secondary)] transition-colors"
                   title="Rename"
                 >
                   <Pencil className="h-3 w-3" />
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="rounded p-0.5 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                  className="rounded p-0.5 text-[var(--content-tertiary)] hover:bg-red-50 hover:text-red-600 transition-colors"
                   title="Delete"
                 >
                   <Trash2 className="h-3 w-3" />
@@ -307,7 +307,7 @@ export default function PortfolioSidebar({
       <div className="flex flex-col items-center pt-2 gap-2 w-8">
         <button
           onClick={onToggleCollapsed}
-          className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+          className="rounded p-1.5 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-secondary)] transition-colors"
           title="Expand portfolio sidebar"
         >
           <PanelLeftOpen className="h-4 w-4" />
@@ -320,20 +320,20 @@ export default function PortfolioSidebar({
     <div className="w-52 flex-shrink-0">
       {/* Sidebar header */}
       <div className="flex items-center justify-between mb-2 px-1">
-        <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+        <span className="text-[10px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider">
           Portfolios
         </span>
         <div className="flex items-center gap-1">
           <button
             onClick={onCreatePortfolio}
-            className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+            className="rounded p-1 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-secondary)] transition-colors"
             title="New portfolio"
           >
             <Plus className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={onToggleCollapsed}
-            className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+            className="rounded p-1 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-secondary)] transition-colors"
             title="Collapse sidebar"
           >
             <PanelLeftClose className="h-3.5 w-3.5" />
@@ -349,10 +349,10 @@ export default function PortfolioSidebar({
           className={`w-full flex items-center gap-1.5 rounded-ds-sm px-2 py-1.5 text-ds-xs font-medium transition-colors ${
             activePortfolioId === null
               ? 'bg-brand-50 text-brand-700'
-              : 'text-gray-600 hover:bg-gray-100'
+              : 'text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
           }`}
         >
-          <Layers className={`h-3.5 w-3.5 flex-shrink-0 ${activePortfolioId === null ? 'text-brand-600' : 'text-gray-400'}`} />
+          <Layers className={`h-3.5 w-3.5 flex-shrink-0 ${activePortfolioId === null ? 'text-brand-600' : 'text-[var(--content-tertiary)]'}`} />
           <span className="flex-1 text-left">All Workflows</span>
         </button>
 
@@ -362,23 +362,23 @@ export default function PortfolioSidebar({
           className={`w-full flex items-center gap-1.5 rounded-ds-sm px-2 py-1.5 text-ds-xs font-medium transition-colors ${
             activePortfolioId === 'uncategorized'
               ? 'bg-brand-50 text-brand-700'
-              : 'text-gray-600 hover:bg-gray-100'
+              : 'text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
           }`}
         >
-          <FolderOpen className={`h-3.5 w-3.5 flex-shrink-0 ${activePortfolioId === 'uncategorized' ? 'text-brand-600' : 'text-gray-400'}`} />
+          <FolderOpen className={`h-3.5 w-3.5 flex-shrink-0 ${activePortfolioId === 'uncategorized' ? 'text-brand-600' : 'text-[var(--content-tertiary)]'}`} />
           <span className="flex-1 text-left">Uncategorized</span>
         </button>
       </div>
 
       {/* Divider */}
       {portfolios.length > 0 && (
-        <div className="border-t border-gray-100 mb-2" />
+        <div className="border-t border-[var(--border-subtle)] mb-2" />
       )}
 
       {/* Portfolio tree */}
       {portfolios.length === 0 ? (
         <div className="px-2 py-3 text-center">
-          <p className="text-[11px] text-gray-400">No portfolios yet.</p>
+          <p className="text-[11px] text-[var(--content-tertiary)]">No portfolios yet.</p>
           <button
             onClick={onCreatePortfolio}
             className="mt-1.5 text-[11px] text-brand-600 hover:text-brand-700 font-medium"
@@ -404,7 +404,7 @@ export default function PortfolioSidebar({
       {/* Footer: portfolio count */}
       {portfolios.length > 0 && (
         <div className="mt-3 px-2">
-          <p className="text-[10px] text-gray-400">
+          <p className="text-[10px] text-[var(--content-tertiary)]">
             {portfolios.length} portfolio{portfolios.length !== 1 ? 's' : ''} &middot; {totalWorkflowsInPortfolios} assigned
           </p>
         </div>

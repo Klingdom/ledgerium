@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { db } from '@/db';
 import type { User } from '@prisma/client';
+import { checkRecordingLimit } from './feature-gating';
 
 /**
  * Get the authenticated user or redirect to login.
@@ -22,15 +23,12 @@ export async function requireUser(): Promise<User> {
 }
 
 /**
- * Plan limits for upload gating.
+ * Return true if the user is allowed to upload another recording this month.
+ * Delegates to checkRecordingLimit for plan-aware, monthly-reset logic.
+ *
+ * @deprecated Prefer using checkRecordingLimit() directly for richer error info.
  */
-export const PLAN_LIMITS = {
-  free: { maxUploads: 5, maxLibrarySize: 10 },
-  pro: { maxUploads: Infinity, maxLibrarySize: Infinity },
-  team: { maxUploads: Infinity, maxLibrarySize: Infinity },
-} as const;
-
-export function canUpload(user: User): boolean {
-  const limits = PLAN_LIMITS[user.plan as keyof typeof PLAN_LIMITS] ?? PLAN_LIMITS.free;
-  return user.uploadCount < limits.maxUploads;
+export async function canUpload(user: User): Promise<boolean> {
+  const result = await checkRecordingLimit(user);
+  return result.allowed;
 }

@@ -44,11 +44,11 @@ export function WorkflowSystemsMap({ graph, onSelectNode }: Props) {
   return (
     <div className="absolute inset-0 flex flex-col overflow-hidden">
       {/* ── Overview header ─────────────────────────────────────────── */}
-      <div className="flex-shrink-0 px-5 py-3 border-b border-gray-100 bg-white">
+      <div className="flex-shrink-0 px-5 py-3 border-b border-[var(--border-subtle)] bg-[var(--surface-elevated)]">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Monitor className="h-4 w-4 text-cyan-600" />
-            <span className="text-ds-sm font-semibold text-gray-900">System Topology</span>
+            <span className="text-ds-sm font-semibold text-[var(--content-primary)]">System Topology</span>
           </div>
           <div className="flex items-center gap-3">
             <OverviewStat icon={Monitor} value={systemData.nodes.length} label="systems" color="#0891b2" />
@@ -87,7 +87,7 @@ export function WorkflowSystemsMap({ graph, onSelectNode }: Props) {
 
         {/* System detail panel */}
         {selectedSystem && (
-          <div className="w-80 flex-shrink-0 border-l border-gray-200 bg-white overflow-y-auto">
+          <div className="w-80 flex-shrink-0 border-l border-[var(--border-default)] bg-[var(--surface-elevated)] overflow-y-auto">
             <SystemDetailPanel
               system={selectedSystem}
               graph={graph}
@@ -122,9 +122,9 @@ function SystemNetworkDiagram({
   const maxSteps = Math.max(...systems.map(s => s.stepCount), 1);
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-      <div className="px-5 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-transparent">
-        <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">System Network</span>
+    <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border-default)] shadow-sm overflow-hidden">
+      <div className="px-5 py-3 border-b border-[var(--border-subtle)] bg-gradient-to-r from-[var(--surface-secondary)] to-transparent">
+        <span className="text-[10px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider">System Network</span>
       </div>
 
       <div className="p-6">
@@ -164,16 +164,16 @@ function SystemNetworkDiagram({
                   </div>
 
                   {/* System name */}
-                  <p className="text-[12px] font-semibold text-gray-900 mb-1 truncate">{sys.label}</p>
+                  <p className="text-[12px] font-semibold text-[var(--content-primary)] mb-1 truncate">{sys.label}</p>
 
                   {/* Metrics */}
                   <div className="space-y-0.5">
-                    <p className="text-[10px] text-gray-500">{sys.stepCount} step{sys.stepCount !== 1 ? 's' : ''}</p>
-                    <p className="text-[10px] text-gray-500">{formatDuration(sys.totalDurationMs) || '< 1s'}</p>
+                    <p className="text-[10px] text-[var(--content-secondary)]">{sys.stepCount} step{sys.stepCount !== 1 ? 's' : ''}</p>
+                    <p className="text-[10px] text-[var(--content-secondary)]">{formatDuration(sys.totalDurationMs) || '< 1s'}</p>
                   </div>
 
                   {/* Usage share bar */}
-                  <div className="mt-2 h-1 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="mt-2 h-1 bg-[var(--surface-secondary)] rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all"
                       style={{
@@ -182,7 +182,7 @@ function SystemNetworkDiagram({
                       }}
                     />
                   </div>
-                  <p className="text-[9px] text-gray-400 mt-0.5">{Math.round(share * 100)}% of time</p>
+                  <p className="text-[9px] text-[var(--content-tertiary)] mt-0.5">{Math.round(share * 100)}% of time</p>
                 </div>
               </button>
             );
@@ -195,9 +195,9 @@ function SystemNetworkDiagram({
             {edges.map(edge => (
               <div
                 key={edge.id}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-200"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--surface-secondary)] border border-[var(--border-default)]"
               >
-                <span className="text-[10px] font-medium text-gray-700">{edge.label}</span>
+                <span className="text-[10px] font-medium text-[var(--content-primary)]">{edge.label}</span>
                 {edge.count > 1 && (
                   <span className="text-[9px] font-bold text-violet-600 bg-violet-50 rounded-full px-1.5 py-0.5">
                     {edge.count}×
@@ -242,18 +242,18 @@ function HandoffTimeline({
   if (transitions.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-      <div className="px-5 py-3 border-b border-gray-100">
+    <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border-default)] shadow-sm overflow-hidden">
+      <div className="px-5 py-3 border-b border-[var(--border-subtle)]">
         <div className="flex items-center gap-2">
           <ArrowRightLeft className="h-3.5 w-3.5 text-violet-600" />
-          <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Handoff Timeline</span>
-          <span className="text-[10px] text-gray-400">{transitions.length} transition{transitions.length !== 1 ? 's' : ''}</span>
+          <span className="text-[10px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider">Handoff Timeline</span>
+          <span className="text-[10px] text-[var(--content-tertiary)]">{transitions.length} transition{transitions.length !== 1 ? 's' : ''}</span>
         </div>
       </div>
 
-      <div className="divide-y divide-gray-50">
+      <div className="divide-y divide-[var(--border-subtle)]">
         {transitions.map((t, i) => (
-          <div key={i} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50/50 transition-colors">
+          <div key={i} className="flex items-center gap-3 px-5 py-3 hover:bg-[var(--surface-secondary)] transition-colors">
             {/* Handoff number */}
             <span className="text-[10px] font-bold text-violet-600 bg-violet-50 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0">
               {t.handoffIndex}
@@ -262,10 +262,10 @@ function HandoffTimeline({
             {/* From system */}
             <button
               onClick={() => onSelectNode(t.from.id)}
-              className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-50 border border-gray-200 hover:border-gray-300 transition-colors"
+              className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-default)] hover:border-[var(--border-default)] transition-colors"
             >
-              <Monitor className="h-3 w-3 text-gray-400" />
-              <span className="text-[10px] font-medium text-gray-700">{t.from.system}</span>
+              <Monitor className="h-3 w-3 text-[var(--content-tertiary)]" />
+              <span className="text-[10px] font-medium text-[var(--content-primary)]">{t.from.system}</span>
             </button>
 
             {/* Arrow */}
@@ -277,14 +277,14 @@ function HandoffTimeline({
             {/* To system */}
             <button
               onClick={() => onSelectNode(t.to.id)}
-              className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-50 border border-gray-200 hover:border-gray-300 transition-colors"
+              className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-default)] hover:border-[var(--border-default)] transition-colors"
             >
-              <Monitor className="h-3 w-3 text-gray-400" />
-              <span className="text-[10px] font-medium text-gray-700">{t.to.system}</span>
+              <Monitor className="h-3 w-3 text-[var(--content-tertiary)]" />
+              <span className="text-[10px] font-medium text-[var(--content-primary)]">{t.to.system}</span>
             </button>
 
             {/* Context */}
-            <span className="flex-1 text-[10px] text-gray-400 truncate">
+            <span className="flex-1 text-[10px] text-[var(--content-tertiary)] truncate">
               {t.from.shortLabel} → {t.to.shortLabel}
             </span>
           </div>
@@ -377,11 +377,11 @@ function FrictionAnalysis({
 
   return (
     <div className="space-y-2">
-      <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider px-1">Friction & Opportunities</p>
+      <p className="text-[9px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider px-1">Friction & Opportunities</p>
       {signals.map((signal, i) => {
         const Icon = signal.icon;
         return (
-          <div key={i} className="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-start gap-3">
+          <div key={i} className="bg-[var(--surface-elevated)] rounded-xl border border-[var(--border-default)] px-4 py-3 flex items-start gap-3">
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
               style={{ background: signal.bg }}
@@ -389,8 +389,8 @@ function FrictionAnalysis({
               <Icon className="h-4 w-4" style={{ color: signal.color }} />
             </div>
             <div>
-              <p className="text-ds-xs font-medium text-gray-800">{signal.label}</p>
-              <p className="text-[10px] text-gray-500 mt-0.5 leading-relaxed">{signal.detail}</p>
+              <p className="text-ds-xs font-medium text-[var(--content-primary)]">{signal.label}</p>
+              <p className="text-[10px] text-[var(--content-secondary)] mt-0.5 leading-relaxed">{signal.detail}</p>
             </div>
             <span
               className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded flex-shrink-0 mt-0.5"
@@ -430,12 +430,12 @@ function SystemDetailPanel({
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50 flex items-start justify-between">
+      <div className="px-4 py-3 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex items-start justify-between">
         <div>
-          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">System Detail</p>
-          <h3 className="text-ds-sm font-semibold text-gray-900 mt-0.5">{system.label}</h3>
+          <p className="text-[10px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider">System Detail</p>
+          <h3 className="text-ds-sm font-semibold text-[var(--content-primary)] mt-0.5">{system.label}</h3>
         </div>
-        <button onClick={onClose} className="p-1 rounded-md hover:bg-gray-200 text-gray-400">
+        <button onClick={onClose} className="p-1 rounded-md hover:bg-[var(--surface-secondary)] text-[var(--content-tertiary)]">
           <ChevronRight className="h-3.5 w-3.5" />
         </button>
       </div>
@@ -452,14 +452,14 @@ function SystemDetailPanel({
 
         {/* Usage bar */}
         <div>
-          <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Time Distribution</p>
-          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <p className="text-[9px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider mb-1">Time Distribution</p>
+          <div className="h-2 bg-[var(--surface-secondary)] rounded-full overflow-hidden">
             <div
               className="h-full rounded-full bg-cyan-500 transition-all"
               style={{ width: `${Math.max(3, share * 100)}%` }}
             />
           </div>
-          <p className="text-[9px] text-gray-400 mt-0.5">
+          <p className="text-[9px] text-[var(--content-tertiary)] mt-0.5">
             {Math.round(share * 100)}% of total workflow duration
           </p>
         </div>
@@ -467,21 +467,21 @@ function SystemDetailPanel({
         {/* Transitions */}
         {(inbound.length > 0 || outbound.length > 0) && (
           <div>
-            <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Transitions</p>
+            <p className="text-[9px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider mb-1.5">Transitions</p>
             <div className="space-y-1">
               {inbound.map(e => (
-                <div key={`in-${e.id}`} className="flex items-center gap-2 text-[10px] px-2 py-1 rounded bg-gray-50">
+                <div key={`in-${e.id}`} className="flex items-center gap-2 text-[10px] px-2 py-1 rounded bg-[var(--surface-secondary)]">
                   <ArrowRight className="h-2.5 w-2.5 text-emerald-500 rotate-180" />
-                  <span className="text-gray-500">from</span>
-                  <span className="font-medium text-gray-700">{e.label.split(' → ')[0]}</span>
+                  <span className="text-[var(--content-secondary)]">from</span>
+                  <span className="font-medium text-[var(--content-primary)]">{e.label.split(' → ')[0]}</span>
                   {e.count > 1 && <span className="text-violet-600 font-bold">{e.count}×</span>}
                 </div>
               ))}
               {outbound.map(e => (
-                <div key={`out-${e.id}`} className="flex items-center gap-2 text-[10px] px-2 py-1 rounded bg-gray-50">
+                <div key={`out-${e.id}`} className="flex items-center gap-2 text-[10px] px-2 py-1 rounded bg-[var(--surface-secondary)]">
                   <ArrowRight className="h-2.5 w-2.5 text-blue-500" />
-                  <span className="text-gray-500">to</span>
-                  <span className="font-medium text-gray-700">{e.label.split(' → ')[1]}</span>
+                  <span className="text-[var(--content-secondary)]">to</span>
+                  <span className="font-medium text-[var(--content-primary)]">{e.label.split(' → ')[1]}</span>
                   {e.count > 1 && <span className="text-violet-600 font-bold">{e.count}×</span>}
                 </div>
               ))}
@@ -491,7 +491,7 @@ function SystemDetailPanel({
 
         {/* Steps in this system */}
         <div>
-          <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+          <p className="text-[9px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider mb-1.5">
             Steps ({systemNodes.length})
           </p>
           <div className="space-y-0.5">
@@ -501,7 +501,7 @@ function SystemDetailPanel({
                 <button
                   key={node.id}
                   onClick={() => onSelectNode(node.id)}
-                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--surface-secondary)] transition-colors text-left"
                 >
                   <span
                     className="text-[9px] font-bold w-4 h-4 rounded flex items-center justify-center flex-shrink-0"
@@ -510,10 +510,10 @@ function SystemDetailPanel({
                     {node.ordinal}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] text-gray-700 truncate">{node.shortLabel}</p>
-                    <p className="text-[9px] text-gray-400">{node.durationLabel}</p>
+                    <p className="text-[10px] text-[var(--content-primary)] truncate">{node.shortLabel}</p>
+                    <p className="text-[9px] text-[var(--content-tertiary)]">{node.durationLabel}</p>
                   </div>
-                  <ChevronRight className="h-2.5 w-2.5 text-gray-300 flex-shrink-0" />
+                  <ChevronRight className="h-2.5 w-2.5 text-[var(--content-tertiary)] flex-shrink-0" />
                 </button>
               );
             })}
@@ -549,12 +549,12 @@ function SingleSystemView({
         </div>
 
         {system && (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 text-center">
+          <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border-default)] shadow-sm p-5 text-center">
             <div className="w-14 h-14 rounded-2xl bg-cyan-50 border border-cyan-200 flex items-center justify-center mx-auto mb-3">
               <Monitor className="h-7 w-7 text-cyan-600" />
             </div>
-            <p className="text-ds-sm font-semibold text-gray-900">{system.label}</p>
-            <p className="text-[10px] text-gray-500 mt-1">
+            <p className="text-ds-sm font-semibold text-[var(--content-primary)]">{system.label}</p>
+            <p className="text-[10px] text-[var(--content-secondary)] mt-1">
               {system.stepCount} steps · {formatDuration(system.totalDurationMs) || '< 1s'} · {system.humanEventCount} events
             </p>
           </div>
@@ -580,17 +580,17 @@ function OverviewStat({
   return (
     <span className="flex items-center gap-1.5 text-[11px]">
       <Icon className="h-3 w-3" style={{ color }} />
-      <span className="font-semibold text-gray-800">{value}</span>
-      <span className="text-gray-400">{label}</span>
+      <span className="font-semibold text-[var(--content-primary)]">{value}</span>
+      <span className="text-[var(--content-tertiary)]">{label}</span>
     </span>
   );
 }
 
 function DetailMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
-      <p className="text-[9px] text-gray-400 uppercase tracking-wider">{label}</p>
-      <p className="text-ds-xs font-semibold text-gray-800 mt-0.5">{value}</p>
+    <div className="bg-[var(--surface-secondary)] rounded-lg px-3 py-2 border border-[var(--border-subtle)]">
+      <p className="text-[9px] text-[var(--content-tertiary)] uppercase tracking-wider">{label}</p>
+      <p className="text-ds-xs font-semibold text-[var(--content-primary)] mt-0.5">{value}</p>
     </div>
   );
 }

@@ -696,7 +696,7 @@ export function ProcessScreen({ meta, steps, uploadProgress, uploadStatus, onDis
             onClick={() => setTab(t)}
             className={`flex-1 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
               tab === t
-                ? 'text-blue-600 border-b-2 border-blue-600 -mb-px'
+                ? 'text-emerald-600 border-b-2 border-emerald-600 -mb-px'
                 : 'text-gray-400 hover:text-gray-600'
             }`}
           >
@@ -788,7 +788,7 @@ export function ProcessScreen({ meta, steps, uploadProgress, uploadStatus, onDis
         <div className="flex gap-2 px-3 py-2 border-t border-gray-200 bg-white flex-none">
           <button
             onClick={() => setTab('export')}
-            className="flex-1 text-xs text-gray-500 hover:text-blue-600 transition-colors"
+            className="flex-1 text-xs text-gray-500 hover:text-emerald-600 transition-colors"
           >
             Export / Done
           </button>

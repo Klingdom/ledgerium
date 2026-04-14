@@ -14,7 +14,7 @@ interface Props {
 
 export function ReportTab({ report }: Props) {
   if (!report) {
-    return <div className="text-ds-sm text-gray-400 py-ds-10">No report data available.</div>;
+    return <div className="text-ds-sm text-[var(--content-tertiary)] py-ds-10">No report data available.</div>;
   }
 
   const { header, executiveSummary, workflowOverview, metrics, sop } = report;
@@ -26,7 +26,7 @@ export function ReportTab({ report }: Props) {
         <div className="flex items-center gap-ds-2 mb-ds-2">
           <span className="ds-tag ds-tag-brand">Report</span>
           {(header?.engineVersion ?? header?.schemaVersion) && (
-            <span className="text-ds-xs text-gray-400">Engine {header.engineVersion ?? header.schemaVersion}</span>
+            <span className="text-ds-xs text-[var(--content-tertiary)]">Engine {header.engineVersion ?? header.schemaVersion}</span>
           )}
         </div>
         <h1 className="ds-header-title">{executiveSummary?.title ?? header?.activityName}</h1>
@@ -68,7 +68,7 @@ export function ReportTab({ report }: Props) {
 
           {/* Systems tags */}
           {executiveSummary?.applicationsUsed?.length > 0 && (
-            <div className="mt-ds-4 pt-ds-3 border-t border-gray-100">
+            <div className="mt-ds-4 pt-ds-3 border-t border-[var(--border-subtle)]">
               <p className="ds-metric-label mb-ds-2">Systems</p>
               <div className="flex flex-wrap gap-ds-2">
                 {executiveSummary.applicationsUsed.map((app: string) => (
@@ -94,7 +94,7 @@ export function ReportTab({ report }: Props) {
           <h2 className="ds-section-label">Key Observations</h2>
           <div className="space-y-ds-2">
             {executiveSummary.keyObservations.map((obs: string, i: number) => (
-              <div key={i} className="flex items-baseline gap-ds-2 text-ds-sm text-gray-700">
+              <div key={i} className="flex items-baseline gap-ds-2 text-ds-sm text-[var(--content-primary)]">
                 <span className="mt-[5px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-400" />
                 {obs}
               </div>
@@ -142,15 +142,15 @@ export function ReportTab({ report }: Props) {
       {workflowOverview?.steps?.length > 0 && (
         <section className="ds-section">
           <h2 className="ds-section-label">Workflow Steps</h2>
-          <div className="card overflow-hidden divide-y divide-gray-100">
+          <div className="card overflow-hidden divide-y divide-[var(--border-subtle)]">
             {workflowOverview.steps.map((step: any) => (
-              <div key={step.stepId ?? step.ordinal} className="flex items-center gap-ds-3 px-ds-5 py-ds-3 hover:bg-gray-50/50 transition-colors">
+              <div key={step.stepId ?? step.ordinal} className="flex items-center gap-ds-3 px-ds-5 py-ds-3 hover:bg-[var(--surface-secondary)] transition-colors">
                 <span className="ds-step-ordinal text-[11px]">{step.ordinal}</span>
-                <span className="text-ds-sm text-gray-800 flex-1 min-w-0 truncate">{step.title}</span>
+                <span className="text-ds-sm text-[var(--content-primary)] flex-1 min-w-0 truncate">{step.title}</span>
                 <span className="ds-tag ds-tag-neutral text-[11px] flex-shrink-0">
                   {step.categoryLabel ?? step.category?.replace(/_/g, ' ')}
                 </span>
-                <span className="text-ds-xs text-gray-400 flex-shrink-0 w-12 text-right tabular-nums">
+                <span className="text-ds-xs text-[var(--content-tertiary)] flex-shrink-0 w-12 text-right tabular-nums">
                   {step.durationLabel}
                 </span>
               </div>
@@ -164,14 +164,14 @@ export function ReportTab({ report }: Props) {
         <section className="ds-section">
           <h2 className="ds-section-label">Procedure Summary</h2>
           <div className="card px-ds-5 py-ds-4 space-y-ds-3">
-            {sop.overview && <p className="text-ds-sm text-gray-600">{sop.overview}</p>}
+            {sop.overview && <p className="text-ds-sm text-[var(--content-secondary)]">{sop.overview}</p>}
             <div className="space-y-ds-2">
               {sop.steps.map((step: any) => (
                 <div key={step.ordinal} className="flex gap-ds-2 text-ds-sm">
                   <span className="text-brand-600 font-semibold flex-shrink-0 tabular-nums w-5 text-right">
                     {step.ordinal}.
                   </span>
-                  <span className="text-gray-700">{step.action ?? step.text ?? step.title}</span>
+                  <span className="text-[var(--content-primary)]">{step.action ?? step.text ?? step.title}</span>
                 </div>
               ))}
             </div>

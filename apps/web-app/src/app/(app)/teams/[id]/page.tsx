@@ -127,19 +127,19 @@ export default function TeamDetailPage() {
   const isAdmin = myRole === 'owner' || myRole === 'admin';
 
   if (isLoading) {
-    return <div className="text-center text-ds-sm text-gray-400 py-20">Loading team...</div>;
+    return <div className="text-center text-ds-sm text-[var(--content-tertiary)] py-20">Loading team...</div>;
   }
 
   return (
     <div className="mx-auto max-w-ds-content">
-      <Link href="/teams" className="inline-flex items-center gap-1 text-ds-sm text-gray-500 hover:text-gray-700 mb-ds-3">
+      <Link href="/teams" className="inline-flex items-center gap-1 text-ds-sm text-[var(--content-secondary)] hover:text-[var(--content-primary)] mb-ds-3">
         <ArrowLeft className="h-4 w-4" /> Back to Teams
       </Link>
 
       <div className="flex items-center justify-between mb-ds-6">
         <div>
-          <h1 className="text-ds-2xl font-bold tracking-tight text-gray-900">{teamName}</h1>
-          <p className="text-ds-sm text-gray-500">{members.length} member{members.length !== 1 ? 's' : ''} · Your role: {myRole}</p>
+          <h1 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">{teamName}</h1>
+          <p className="text-ds-sm text-[var(--content-secondary)]">{members.length} member{members.length !== 1 ? 's' : ''} · Your role: {myRole}</p>
         </div>
         {isAdmin && (
           <button onClick={() => setShowInvite(true)} className="btn-primary gap-1.5">
@@ -151,7 +151,7 @@ export default function TeamDetailPage() {
       {/* Invite form */}
       {showInvite && (
         <div className="card px-ds-5 py-ds-4 mb-ds-6">
-          <h3 className="text-ds-sm font-medium text-gray-900 mb-ds-3">Invite a team member</h3>
+          <h3 className="text-ds-sm font-medium text-[var(--content-primary)] mb-ds-3">Invite a team member</h3>
           <div className="flex gap-ds-2 mb-ds-2">
             <input
               type="email"
@@ -180,7 +180,7 @@ export default function TeamDetailPage() {
                 Invite created! Share this link with {inviteEmail || 'the recipient'}:
               </p>
               <div className="flex items-center gap-ds-2">
-                <code className="flex-1 rounded-ds-md bg-white px-ds-3 py-ds-2 text-ds-xs font-mono text-gray-900 border border-green-200 truncate">
+                <code className="flex-1 rounded-ds-md bg-[var(--surface-elevated)] px-ds-3 py-ds-2 text-ds-xs font-mono text-[var(--content-primary)] border border-green-200 truncate">
                   {inviteUrl}
                 </code>
                 <button onClick={handleCopyInvite} className="btn-secondary text-xs gap-1 flex-shrink-0">
@@ -204,12 +204,12 @@ export default function TeamDetailPage() {
             const RoleIcon = ROLE_ICONS[member.role] ?? Users;
             return (
               <div key={member.id} className="card flex items-center gap-ds-3 px-ds-5 py-ds-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-ds-xs font-medium text-gray-600">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--surface-secondary)] text-ds-xs font-medium text-[var(--content-secondary)]">
                   {(member.name ?? member.email)[0]?.toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-ds-sm font-medium text-gray-900">{member.name ?? member.email}</p>
-                  {member.name && <p className="text-ds-xs text-gray-400">{member.email}</p>}
+                  <p className="text-ds-sm font-medium text-[var(--content-primary)]">{member.name ?? member.email}</p>
+                  {member.name && <p className="text-ds-xs text-[var(--content-tertiary)]">{member.email}</p>}
                 </div>
                 <span className="ds-tag ds-tag-neutral text-[11px] flex items-center gap-1">
                   <RoleIcon className="h-3 w-3" />
@@ -218,7 +218,7 @@ export default function TeamDetailPage() {
                 {isAdmin && member.role !== 'owner' && (
                   <button
                     onClick={() => handleRemoveMember(member.id)}
-                    className="rounded-ds-sm p-1.5 text-gray-300 hover:bg-red-50 hover:text-red-500"
+                    className="rounded-ds-sm p-1.5 text-[var(--content-tertiary)] hover:bg-red-50 hover:text-red-500"
                     title="Remove"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -237,10 +237,10 @@ export default function TeamDetailPage() {
           <div className="space-y-ds-2">
             {invites.map(invite => (
               <div key={invite.id} className="card flex items-center gap-ds-3 px-ds-5 py-ds-3">
-                <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                <Mail className="h-4 w-4 text-[var(--content-tertiary)] flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-ds-sm text-gray-700">{invite.email}</p>
-                  <p className="text-ds-xs text-gray-400 flex items-center gap-1">
+                  <p className="text-ds-sm text-[var(--content-primary)]">{invite.email}</p>
+                  <p className="text-ds-xs text-[var(--content-tertiary)] flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     Expires {new Date(invite.expiresAt).toLocaleDateString()}
                   </p>

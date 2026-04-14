@@ -84,7 +84,7 @@ export function AutomationScoreChip({
         </text>
       </svg>
       {showLabel && (
-        <span className={`${config.label} text-gray-400 font-medium`}>Score</span>
+        <span className={`${config.label} text-[var(--content-tertiary)] font-medium`}>Score</span>
       )}
     </div>
   );

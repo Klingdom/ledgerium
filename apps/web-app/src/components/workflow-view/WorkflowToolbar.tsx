@@ -88,7 +88,7 @@ function ToolbarGroup({ children }: { children: React.ReactNode }) {
 }
 
 function ToolbarDivider() {
-  return <span className="w-px h-5 bg-gray-200 mx-1" />;
+  return <span className="w-px h-5 bg-[var(--surface-secondary)] mx-1" />;
 }
 
 function ToolbarButton({
@@ -104,7 +104,7 @@ function ToolbarButton({
     <button
       onClick={onClick}
       title={label}
-      className="flex items-center justify-center w-7 h-7 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+      className="flex items-center justify-center w-7 h-7 rounded-md text-[var(--content-secondary)] hover:text-[var(--content-primary)] hover:bg-[var(--surface-secondary)] transition-colors"
     >
       <Icon className="h-3.5 w-3.5" />
     </button>
@@ -129,7 +129,7 @@ function ToolbarToggle({
       className={`flex items-center gap-1 h-7 px-2 rounded-md text-[10px] font-medium transition-colors ${
         active
           ? 'text-brand-700 bg-brand-50 hover:bg-brand-100'
-          : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+          : 'text-[var(--content-tertiary)] hover:text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
       }`}
     >
       <Icon className="h-3 w-3" />

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getStripe, WEBHOOK_SECRET } from '@/lib/stripe';
+import { getStripe, WEBHOOK_SECRET, planFromPriceId } from '@/lib/stripe';
+import type { PlanType } from '@/lib/plans';
 import { db } from '@/db';
 import { trackServer } from '@/lib/analytics';
 import type Stripe from 'stripe';
@@ -9,9 +10,9 @@ import type Stripe from 'stripe';
  * Handles Stripe webhook events to sync subscription state.
  *
  * Key events handled:
- * - checkout.session.completed → activate Pro
- * - customer.subscription.updated → sync status changes
- * - customer.subscription.deleted → revoke Pro
+ * - checkout.session.completed → activate paid plan (resolved from price ID)
+ * - customer.subscription.updated → sync status changes and plan tier
+ * - customer.subscription.deleted → revoke paid plan → free
  * - invoice.payment_failed → mark past_due
  */
 export async function POST(req: NextRequest) {
@@ -37,17 +38,34 @@ export async function POST(req: NextRequest) {
         const userId = session.metadata?.userId;
         if (!userId) break;
 
+        // Resolve plan from the subscription's price ID instead of hardcoding "pro".
+        let plan: PlanType = 'starter';
+        if (session.subscription) {
+          try {
+            const subscription = await getStripe().subscriptions.retrieve(
+              session.subscription as string,
+            );
+            const priceId = subscription.items.data[0]?.price.id;
+            if (priceId) {
+              plan = planFromPriceId(priceId);
+            }
+          } catch (err) {
+            console.error(`[stripe] Failed to retrieve subscription for plan resolution:`, err);
+            // Fallback to 'starter' — better than failing the webhook entirely.
+          }
+        }
+
         await db.user.update({
           where: { id: userId },
           data: {
-            plan: 'pro',
+            plan,
             subscriptionStatus: 'active',
             stripeSubscriptionId: session.subscription as string,
             stripeCustomerId: session.customer as string,
           },
         });
-        console.log(`[stripe] User ${userId} upgraded to Pro`);
-        trackServer('subscription_created', { userId, plan: 'pro' });
+        console.log(`[stripe] User ${userId} upgraded to ${plan}`);
+        trackServer('subscription_created', { userId, plan });
         break;
       }
 
@@ -64,9 +82,11 @@ export async function POST(req: NextRequest) {
           status === 'trialing' ? 'trialing' :
           'none';
 
-        // If subscription is canceled at period end, keep Pro until it expires
-        const plan = (status === 'active' || status === 'past_due' || status === 'trialing')
-          ? 'pro'
+        // Resolve plan from the current price ID.
+        const isActive = status === 'active' || status === 'past_due' || status === 'trialing';
+        const priceId = subscription.items.data[0]?.price.id;
+        const plan: PlanType = isActive && priceId
+          ? planFromPriceId(priceId)
           : 'free';
 
         await db.user.update({
@@ -76,7 +96,8 @@ export async function POST(req: NextRequest) {
             subscriptionStatus: planStatus,
           },
         });
-        console.log(`[stripe] User ${userId} subscription updated: ${status}`);
+        console.log(`[stripe] User ${userId} subscription updated: ${status} → plan ${plan}`);
+        trackServer('subscription_updated', { userId, plan, status });
         break;
       }
 
@@ -94,6 +115,7 @@ export async function POST(req: NextRequest) {
           },
         });
         console.log(`[stripe] User ${userId} subscription canceled — reverted to free`);
+        trackServer('subscription_canceled', { userId });
         break;
       }
 
@@ -113,6 +135,7 @@ export async function POST(req: NextRequest) {
           data: { subscriptionStatus: 'past_due' },
         });
         console.log(`[stripe] User ${user.id} payment failed — marked past_due`);
+        trackServer('payment_failed', { userId: user.id });
         break;
       }
 

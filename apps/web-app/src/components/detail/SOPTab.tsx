@@ -31,7 +31,7 @@ export function SOPTab({ sop, templateArtifacts, defaultTemplate, workflowId }: 
   const [showRaw, setShowRaw] = useState(!hasTemplates);
 
   if (!sop && !hasTemplates) {
-    return <div className="text-ds-sm text-gray-400 py-ds-10">No SOP data available.</div>;
+    return <div className="text-ds-sm text-[var(--content-tertiary)] py-ds-10">No SOP data available.</div>;
   }
 
   function handleExportMarkdown() {
@@ -45,8 +45,8 @@ export function SOPTab({ sop, templateArtifacts, defaultTemplate, workflowId }: 
       {hasTemplates && (
         <div className="flex items-center justify-between mb-ds-4 no-print">
           <div className="flex items-center gap-ds-2">
-            <span className="text-ds-xs text-gray-400 font-medium uppercase tracking-wide">Format</span>
-            <div className="flex rounded-ds-md border border-gray-200 overflow-hidden">
+            <span className="text-ds-xs text-[var(--content-tertiary)] font-medium uppercase tracking-wide">Format</span>
+            <div className="flex rounded-ds-md border border-[var(--border-default)] overflow-hidden">
               {Object.entries(SOP_TEMPLATE_LABELS).map(([key, label]) => {
                 const isAvailable = templateArtifacts?.[key as keyof typeof templateArtifacts];
                 const isSelected = !showRaw && selectedFormat === key;
@@ -58,8 +58,8 @@ export function SOPTab({ sop, templateArtifacts, defaultTemplate, workflowId }: 
                     disabled={!isAvailable}
                     className={`px-ds-3 py-ds-1 text-ds-xs font-medium transition-colors ${
                       isSelected
-                        ? 'bg-brand-50 text-brand-700 border-r border-gray-200'
-                        : 'text-gray-500 hover:bg-gray-50 border-r border-gray-200'
+                        ? 'bg-brand-50 text-brand-700 border-r border-[var(--border-default)]'
+                        : 'text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)] border-r border-[var(--border-default)]'
                     } ${!isAvailable ? 'opacity-30 cursor-not-allowed' : ''} last:border-r-0`}
                   >
                     {label}
@@ -70,7 +70,7 @@ export function SOPTab({ sop, templateArtifacts, defaultTemplate, workflowId }: 
               <button
                 onClick={() => setShowRaw(true)}
                 className={`px-ds-3 py-ds-1 text-ds-xs font-medium transition-colors ${
-                  showRaw ? 'bg-brand-50 text-brand-700' : 'text-gray-500 hover:bg-gray-50'
+                  showRaw ? 'bg-brand-50 text-brand-700' : 'text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
                 }`}
               >
                 Raw
@@ -106,7 +106,7 @@ function TemplateSOPView({ data, templateType }: { data: any; templateType: stri
     case 'operator_centric': return <OperatorSOPView data={data} />;
     case 'enterprise': return <EnterpriseSOPView data={data} />;
     case 'decision_based': return <DecisionSOPView data={data} />;
-    default: return <div className="text-ds-sm text-gray-400">Unknown template type.</div>;
+    default: return <div className="text-ds-sm text-[var(--content-tertiary)]">Unknown template type.</div>;
   }
 }
 
@@ -128,7 +128,7 @@ function OperatorSOPView({ data }: { data: any }) {
       {data.whenToUseIt && (
         <div className="ds-callout ds-callout-info">
           <p className="text-ds-xs font-semibold text-brand-700 uppercase tracking-wide mb-ds-1">When to Use</p>
-          <p className="text-ds-sm text-gray-700">{data.whenToUseIt}</p>
+          <p className="text-ds-sm text-[var(--content-primary)]">{data.whenToUseIt}</p>
         </div>
       )}
 
@@ -137,7 +137,7 @@ function OperatorSOPView({ data }: { data: any }) {
           <h2 className="ds-section-label">Before You Begin</h2>
           <ul className="space-y-ds-1">
             {data.beforeYouBegin.map((item: string, i: number) => (
-              <li key={i} className="flex items-baseline gap-ds-2 text-ds-sm text-gray-600">
+              <li key={i} className="flex items-baseline gap-ds-2 text-ds-sm text-[var(--content-secondary)]">
                 <span className="mt-[5px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-400" />
                 {item}
               </li>
@@ -155,12 +155,12 @@ function OperatorSOPView({ data }: { data: any }) {
                 <span className="ds-step-ordinal">{step.number}</span>
                 <div className="flex-1 min-w-0">
                   <p className="ds-step-title">{step.action}</p>
-                  <p className="mt-ds-1 text-ds-sm text-gray-600">{step.detail}</p>
+                  <p className="mt-ds-1 text-ds-sm text-[var(--content-secondary)]">{step.detail}</p>
                 </div>
               </div>
               <div className="ds-step-footer">
                 {step.system && <span>{step.system}</span>}
-                {step.expectedResult && <span className="ml-auto text-gray-500">&rarr; {step.expectedResult}</span>}
+                {step.expectedResult && <span className="ml-auto text-[var(--content-secondary)]">&rarr; {step.expectedResult}</span>}
               </div>
               {step.caution && (
                 <div className="border-t border-amber-100 bg-amber-50/40 px-ds-5 py-ds-2">
@@ -178,7 +178,7 @@ function OperatorSOPView({ data }: { data: any }) {
           <div className="space-y-ds-1">
             {data.commonMistakes.map((m: string, i: number) => (
               <div key={i} className="ds-callout ds-callout-warning">
-                <p className="text-ds-sm text-gray-700">{m}</p>
+                <p className="text-ds-sm text-[var(--content-primary)]">{m}</p>
               </div>
             ))}
           </div>
@@ -190,7 +190,7 @@ function OperatorSOPView({ data }: { data: any }) {
           <h2 className="ds-section-label">Tips</h2>
           <ul className="space-y-ds-1">
             {data.tips.map((t: string, i: number) => (
-              <li key={i} className="text-ds-sm text-gray-600">&bull; {t}</li>
+              <li key={i} className="text-ds-sm text-[var(--content-secondary)]">&bull; {t}</li>
             ))}
           </ul>
         </section>
@@ -202,7 +202,7 @@ function OperatorSOPView({ data }: { data: any }) {
           <div className="ds-callout ds-callout-success">
             <ul className="space-y-ds-1">
               {data.completionCheck.map((c: string, i: number) => (
-                <li key={i} className="flex items-baseline gap-ds-2 text-ds-sm text-gray-700">
+                <li key={i} className="flex items-baseline gap-ds-2 text-ds-sm text-[var(--content-primary)]">
                   <span className="text-green-600 font-medium flex-shrink-0">&#10003;</span>{c}
                 </li>
               ))}
@@ -224,8 +224,8 @@ function EnterpriseSOPView({ data }: { data: any }) {
       <header className="ds-header">
         <div className="flex items-center gap-ds-2 mb-ds-2">
           <span className="ds-tag ds-tag-brand">Enterprise SOP</span>
-          {data.sopId && <span className="text-ds-xs text-gray-400">{data.sopId}</span>}
-          {data.version && <span className="text-ds-xs text-gray-400">v{data.version}</span>}
+          {data.sopId && <span className="text-ds-xs text-[var(--content-tertiary)]">{data.sopId}</span>}
+          {data.version && <span className="text-ds-xs text-[var(--content-tertiary)]">v{data.version}</span>}
         </div>
         <h1 className="ds-header-title">{data.title}</h1>
         <p className="ds-header-subtitle">{data.purpose}</p>
@@ -233,10 +233,10 @@ function EnterpriseSOPView({ data }: { data: any }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-ds-4">
         {data.scope && (
-          <section className="ds-section"><h2 className="ds-section-label">Scope</h2><p className="text-ds-sm text-gray-600">{data.scope}</p></section>
+          <section className="ds-section"><h2 className="ds-section-label">Scope</h2><p className="text-ds-sm text-[var(--content-secondary)]">{data.scope}</p></section>
         )}
         {data.trigger && (
-          <section className="ds-section"><h2 className="ds-section-label">Trigger</h2><p className="text-ds-sm text-gray-600">{data.trigger}</p></section>
+          <section className="ds-section"><h2 className="ds-section-label">Trigger</h2><p className="text-ds-sm text-[var(--content-secondary)]">{data.trigger}</p></section>
         )}
       </div>
 
@@ -245,15 +245,15 @@ function EnterpriseSOPView({ data }: { data: any }) {
           <h2 className="ds-section-label">Roles & Responsibilities</h2>
           <div className="card overflow-hidden">
             <table className="w-full text-ds-sm">
-              <thead><tr className="border-b border-gray-200 bg-gray-50/50">
-                <th className="text-left py-ds-2 px-ds-4 text-gray-500 font-medium">Role</th>
-                <th className="text-left py-ds-2 px-ds-4 text-gray-500 font-medium">Responsibility</th>
+              <thead><tr className="border-b border-[var(--border-default)] bg-[var(--surface-secondary)]">
+                <th className="text-left py-ds-2 px-ds-4 text-[var(--content-secondary)] font-medium">Role</th>
+                <th className="text-left py-ds-2 px-ds-4 text-[var(--content-secondary)] font-medium">Responsibility</th>
               </tr></thead>
               <tbody>
                 {data.rolesAndResponsibilities.map((r: any, i: number) => (
-                  <tr key={i} className="border-b border-gray-100 last:border-0">
-                    <td className="py-ds-2 px-ds-4 font-medium text-gray-800">{r.role}</td>
-                    <td className="py-ds-2 px-ds-4 text-gray-600">{r.responsibility}</td>
+                  <tr key={i} className="border-b border-[var(--border-subtle)] last:border-0">
+                    <td className="py-ds-2 px-ds-4 font-medium text-[var(--content-primary)]">{r.role}</td>
+                    <td className="py-ds-2 px-ds-4 text-[var(--content-secondary)]">{r.responsibility}</td>
                   </tr>
                 ))}
               </tbody>
@@ -271,7 +271,7 @@ function EnterpriseSOPView({ data }: { data: any }) {
                 <span className="ds-step-ordinal">{step.ordinal}</span>
                 <div className="flex-1 min-w-0">
                   <p className="ds-step-title">{step.title}</p>
-                  <p className="mt-ds-1 text-ds-sm text-gray-600">{step.instruction}</p>
+                  <p className="mt-ds-1 text-ds-sm text-[var(--content-secondary)]">{step.instruction}</p>
                 </div>
               </div>
               <div className="ds-step-footer">
@@ -294,9 +294,9 @@ function EnterpriseSOPView({ data }: { data: any }) {
           <div className="space-y-ds-2">
             {data.decisionPoints.map((dp: any, i: number) => (
               <div key={i} className="ds-callout ds-callout-warning">
-                <p className="text-ds-sm font-medium text-gray-900">At step {dp.atStepOrdinal}: {dp.question}</p>
+                <p className="text-ds-sm font-medium text-[var(--content-primary)]">At step {dp.atStepOrdinal}: {dp.question}</p>
                 {dp.options?.map((opt: any, j: number) => (
-                  <p key={j} className="text-ds-xs text-gray-600 mt-ds-1">&rarr; If {opt.condition}: {opt.action}</p>
+                  <p key={j} className="text-ds-xs text-[var(--content-secondary)] mt-ds-1">&rarr; If {opt.condition}: {opt.action}</p>
                 ))}
               </div>
             ))}
@@ -309,7 +309,7 @@ function EnterpriseSOPView({ data }: { data: any }) {
           <h2 className="ds-section-label">Controls</h2>
           <ul className="space-y-ds-1">
             {data.controls.map((c: string, i: number) => (
-              <li key={i} className="text-ds-sm text-gray-600">&bull; {c}</li>
+              <li key={i} className="text-ds-sm text-[var(--content-secondary)]">&bull; {c}</li>
             ))}
           </ul>
         </section>
@@ -320,7 +320,7 @@ function EnterpriseSOPView({ data }: { data: any }) {
           <h2 className="ds-section-label">Risks</h2>
           <div className="space-y-ds-1">
             {data.risks.map((r: string, i: number) => (
-              <div key={i} className="ds-callout ds-callout-danger"><p className="text-ds-sm text-gray-700">{r}</p></div>
+              <div key={i} className="ds-callout ds-callout-danger"><p className="text-ds-sm text-[var(--content-primary)]">{r}</p></div>
             ))}
           </div>
         </section>
@@ -345,14 +345,14 @@ function DecisionSOPView({ data }: { data: any }) {
       {data.triggerCondition && (
         <div className="ds-callout ds-callout-info">
           <p className="text-ds-xs font-semibold text-brand-700 uppercase tracking-wide mb-ds-1">Trigger</p>
-          <p className="text-ds-sm text-gray-700">{data.triggerCondition}</p>
+          <p className="text-ds-sm text-[var(--content-primary)]">{data.triggerCondition}</p>
         </div>
       )}
 
       {data.initialAssessment && (
         <section className="ds-section">
           <h2 className="ds-section-label">Initial Assessment</h2>
-          <p className="text-ds-sm text-gray-600">{data.initialAssessment}</p>
+          <p className="text-ds-sm text-[var(--content-secondary)]">{data.initialAssessment}</p>
         </section>
       )}
 
@@ -362,14 +362,14 @@ function DecisionSOPView({ data }: { data: any }) {
           <div className="space-y-ds-4">
             {data.branches.map((branch: any, i: number) => (
               <div key={i} className="card px-ds-5 py-ds-4 border-l-[3px] border-l-amber-400">
-                <p className="text-ds-sm font-semibold text-gray-900 mb-ds-2">If: {branch.condition}</p>
+                <p className="text-ds-sm font-semibold text-[var(--content-primary)] mb-ds-2">If: {branch.condition}</p>
                 <div className="space-y-ds-2 ml-ds-4">
                   {(branch.actions ?? []).map((action: any) => (
                     <div key={action.ordinal} className="flex items-start gap-ds-2">
-                      <span className="text-ds-xs font-mono text-gray-400 mt-0.5">{action.ordinal}.</span>
+                      <span className="text-ds-xs font-mono text-[var(--content-tertiary)] mt-0.5">{action.ordinal}.</span>
                       <div>
-                        <p className="text-ds-sm text-gray-700">{action.instruction}</p>
-                        {action.system && <p className="text-ds-xs text-gray-400">{action.system}</p>}
+                        <p className="text-ds-sm text-[var(--content-primary)]">{action.instruction}</p>
+                        {action.system && <p className="text-ds-xs text-[var(--content-tertiary)]">{action.system}</p>}
                       </div>
                     </div>
                   ))}
@@ -388,7 +388,7 @@ function DecisionSOPView({ data }: { data: any }) {
           <h2 className="ds-section-label">Escalation Rules</h2>
           <div className="space-y-ds-1">
             {data.escalationRules.map((r: string, i: number) => (
-              <div key={i} className="ds-callout ds-callout-warning"><p className="text-ds-sm text-gray-700">{r}</p></div>
+              <div key={i} className="ds-callout ds-callout-warning"><p className="text-ds-sm text-[var(--content-primary)]">{r}</p></div>
             ))}
           </div>
         </section>
@@ -399,7 +399,7 @@ function DecisionSOPView({ data }: { data: any }) {
           <h2 className="ds-section-label">Exception Handling</h2>
           <div className="space-y-ds-1">
             {data.exceptionHandling.map((e: string, i: number) => (
-              <div key={i} className="ds-callout ds-callout-danger"><p className="text-ds-sm text-gray-700">{e}</p></div>
+              <div key={i} className="ds-callout ds-callout-danger"><p className="text-ds-sm text-[var(--content-primary)]">{e}</p></div>
             ))}
           </div>
         </section>
@@ -411,7 +411,7 @@ function DecisionSOPView({ data }: { data: any }) {
           <div className="ds-callout ds-callout-success">
             <ul className="space-y-ds-1">
               {data.completionCriteria.map((c: string, i: number) => (
-                <li key={i} className="flex items-baseline gap-ds-2 text-ds-sm text-gray-700">
+                <li key={i} className="flex items-baseline gap-ds-2 text-ds-sm text-[var(--content-primary)]">
                   <span className="text-green-600 font-medium flex-shrink-0">&#10003;</span>{c}
                 </li>
               ))}
@@ -428,7 +428,7 @@ function DecisionSOPView({ data }: { data: any }) {
 // ─── Raw SOP View (original, for backward compatibility) ────────────────────
 
 function RawSOPView({ sop }: { sop: any }) {
-  if (!sop) return <div className="text-ds-sm text-gray-400 py-ds-10">No SOP data available.</div>;
+  if (!sop) return <div className="text-ds-sm text-[var(--content-tertiary)] py-ds-10">No SOP data available.</div>;
 
   return (
     <>
@@ -436,7 +436,7 @@ function RawSOPView({ sop }: { sop: any }) {
       <header className="ds-header">
         <div className="flex items-center gap-ds-2 mb-ds-2">
           <span className="ds-tag ds-tag-brand">SOP</span>
-          {sop.version && <span className="text-ds-xs text-gray-400">v{sop.version}</span>}
+          {sop.version && <span className="text-ds-xs text-[var(--content-tertiary)]">v{sop.version}</span>}
         </div>
         <h1 className="ds-header-title">{sop.title}</h1>
         {sop.businessObjective && (
@@ -462,7 +462,7 @@ function RawSOPView({ sop }: { sop: any }) {
       {sop.trigger && (
         <div className="ds-callout ds-callout-info">
           <p className="text-ds-xs font-semibold text-brand-700 uppercase tracking-wide mb-ds-1">When to Use</p>
-          <p className="text-ds-sm text-gray-700">{sop.trigger}</p>
+          <p className="text-ds-sm text-[var(--content-primary)]">{sop.trigger}</p>
         </div>
       )}
 
@@ -471,7 +471,7 @@ function RawSOPView({ sop }: { sop: any }) {
         {sop.scope && (
           <section className="ds-section">
             <h2 className="ds-section-label">Scope</h2>
-            <p className="text-ds-sm text-gray-600 leading-relaxed">{sop.scope}</p>
+            <p className="text-ds-sm text-[var(--content-secondary)] leading-relaxed">{sop.scope}</p>
           </section>
         )}
         <section className="ds-section">
@@ -493,7 +493,7 @@ function RawSOPView({ sop }: { sop: any }) {
           <h2 className="ds-section-label">Prerequisites</h2>
           <ul className="space-y-ds-2">
             {sop.prerequisites.map((p: string, i: number) => (
-              <li key={i} className="flex items-baseline gap-ds-2 text-ds-sm text-gray-600">
+              <li key={i} className="flex items-baseline gap-ds-2 text-ds-sm text-[var(--content-secondary)]">
                 <span className="mt-[5px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-400" />
                 {p}
               </li>
@@ -522,7 +522,7 @@ function RawSOPView({ sop }: { sop: any }) {
           <div className="ds-callout ds-callout-success">
             <ul className="space-y-ds-2">
               {sop.completionCriteria.map((c: string, i: number) => (
-                <li key={i} className="flex items-baseline gap-ds-2 text-ds-sm text-gray-700">
+                <li key={i} className="flex items-baseline gap-ds-2 text-ds-sm text-[var(--content-primary)]">
                   <span className="text-green-600 font-medium flex-shrink-0">✓</span>
                   {c}
                 </li>
@@ -539,8 +539,8 @@ function RawSOPView({ sop }: { sop: any }) {
           <div className="space-y-ds-2">
             {sop.commonIssues.map((issue: any, i: number) => (
               <div key={i} className="ds-callout ds-callout-warning">
-                <p className="text-ds-sm font-medium text-gray-800">{issue.title}</p>
-                <p className="mt-ds-1 text-ds-sm text-gray-600">{issue.description}</p>
+                <p className="text-ds-sm font-medium text-[var(--content-primary)]">{issue.title}</p>
+                <p className="mt-ds-1 text-ds-sm text-[var(--content-secondary)]">{issue.description}</p>
               </div>
             ))}
           </div>
@@ -565,7 +565,7 @@ function RawSOPView({ sop }: { sop: any }) {
           <h2 className="ds-section-label">Notes</h2>
           <ul className="space-y-ds-2">
             {sop.notes.map((n: string, i: number) => (
-              <li key={i} className="text-ds-sm text-gray-500 leading-relaxed">{n}</li>
+              <li key={i} className="text-ds-sm text-[var(--content-secondary)] leading-relaxed">{n}</li>
             ))}
           </ul>
         </section>
@@ -599,9 +599,9 @@ function QualityBar({ qi, qualityAdvisory }: { qi: Record<string, unknown>; qual
     <div className="card px-ds-5 py-ds-4">
       <div className="flex items-center justify-between mb-ds-3">
         <span className="ds-section-label">Quality Indicators</span>
-        <span className="text-ds-sm font-semibold text-gray-700">{pct}% confidence</span>
+        <span className="text-ds-sm font-semibold text-[var(--content-primary)]">{pct}% confidence</span>
       </div>
-      <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+      <div className="h-1.5 w-full rounded-full bg-[var(--surface-secondary)] overflow-hidden">
         <div className={`h-full rounded-full transition-all ${barClass}`} style={{ width: `${pct}%` }} />
       </div>
 
@@ -628,8 +628,8 @@ function QualityBar({ qi, qualityAdvisory }: { qi: Record<string, unknown>; qual
 function MiniStat({ label, value }: { label: string; value: string | number }) {
   return (
     <div>
-      <p className="text-ds-xs text-gray-400">{label}</p>
-      <p className="text-ds-sm font-semibold text-gray-800">{value}</p>
+      <p className="text-ds-xs text-[var(--content-tertiary)]">{label}</p>
+      <p className="text-ds-sm font-semibold text-[var(--content-primary)]">{value}</p>
     </div>
   );
 }
@@ -640,7 +640,7 @@ const STEP_BORDER: Record<string, string> = {
   click_then_navigate:  'border-l-teal-500',
   fill_and_submit:      'border-l-blue-500',
   repeated_click_dedup: 'border-l-orange-500',
-  single_action:        'border-l-gray-400',
+  single_action:        'border-l-[var(--border-default)]',
   data_entry:           'border-l-violet-500',
   send_action:          'border-l-emerald-500',
   file_action:          'border-l-amber-500',
@@ -661,7 +661,7 @@ const CATEGORY_LABEL: Record<string, string> = {
 };
 
 function StepCard({ step }: { step: any }) {
-  const border = STEP_BORDER[step.category] ?? 'border-l-gray-300';
+  const border = STEP_BORDER[step.category] ?? 'border-l-[var(--border-default)]';
   const label = CATEGORY_LABEL[step.category] ?? 'Step';
 
   return (
@@ -677,22 +677,22 @@ function StepCard({ step }: { step: any }) {
               <span className="ds-tag bg-amber-50 text-amber-700 border border-amber-200 text-[11px]">Decision</span>
             )}
           </div>
-          <p className="mt-ds-1 text-ds-sm text-gray-600">{step.action}</p>
+          <p className="mt-ds-1 text-ds-sm text-[var(--content-secondary)]">{step.action}</p>
         </div>
       </div>
 
       {/* Instructions detail */}
       {step.detail && step.detail !== 'System-initiated step — no operator action required.' && (
         <div className="ds-step-body">
-          <div className="rounded-ds-md bg-gray-50 px-ds-4 py-ds-3 space-y-ds-1">
+          <div className="rounded-ds-md bg-[var(--surface-secondary)] px-ds-4 py-ds-3 space-y-ds-1">
             {step.detail.split('\n').filter(Boolean).map((line: string, i: number) => {
               const isVerify = line.startsWith('\u2713');
               const isNote = line.startsWith('\u2192');
               return (
                 <p key={i} className={`text-ds-sm leading-relaxed ${
                   isVerify ? 'text-emerald-700 font-medium' :
-                  isNote ? 'text-gray-500 italic' :
-                  'text-gray-700'
+                  isNote ? 'text-[var(--content-secondary)] italic' :
+                  'text-[var(--content-primary)]'
                 }`}>
                   {line}
                 </p>
@@ -728,7 +728,7 @@ function StepCard({ step }: { step: any }) {
         {step.durationLabel && <span>{step.durationLabel}</span>}
         {step.confidence !== undefined && <ConfidenceDot value={step.confidence} />}
         {step.expectedOutcome && (
-          <span className="ml-auto text-gray-500 truncate max-w-[240px]" title={step.expectedOutcome}>
+          <span className="ml-auto text-[var(--content-secondary)] truncate max-w-[240px]" title={step.expectedOutcome}>
             → {step.expectedOutcome}
           </span>
         )}
@@ -761,14 +761,14 @@ function FrictionItem({ friction, compact }: { friction: any; compact?: boolean 
   const styles: Record<string, string> = {
     high: 'ds-callout ds-callout-danger',
     medium: 'ds-callout ds-callout-warning',
-    low: 'rounded-ds-md bg-gray-50 px-ds-4 py-ds-2',
+    low: 'rounded-ds-md bg-[var(--surface-secondary)] px-ds-4 py-ds-2',
   };
   const cls = styles[friction.severity] ?? styles.low;
   return (
     <div className={cls}>
-      <p className={compact ? 'text-ds-xs text-gray-600' : 'text-ds-sm text-gray-700'}>
+      <p className={compact ? 'text-ds-xs text-[var(--content-secondary)]' : 'text-ds-sm text-[var(--content-primary)]'}>
         <span className="font-semibold uppercase text-ds-xs">{friction.severity}</span>
-        <span className="mx-1.5 text-gray-300">·</span>
+        <span className="mx-1.5 text-[var(--content-tertiary)]">·</span>
         {friction.label}
       </p>
     </div>

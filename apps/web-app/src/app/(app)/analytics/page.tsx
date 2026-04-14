@@ -137,7 +137,7 @@ export default function AnalyticsPage() {
   }
 
   if (isLoading) {
-    return <div className="text-center text-ds-sm text-gray-400 py-20">Loading intelligence...</div>;
+    return <div className="text-center text-ds-sm text-[var(--content-tertiary)] py-20">Loading intelligence...</div>;
   }
 
   const hasData = data && data.totalWorkflows > 0;
@@ -168,8 +168,8 @@ export default function AnalyticsPage() {
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-ds-2xl font-bold tracking-tight text-gray-900">Process Intelligence</h1>
-          <p className="text-ds-sm text-gray-500 mt-0.5">
+          <h1 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">Process Intelligence</h1>
+          <p className="text-ds-sm text-[var(--content-secondary)] mt-0.5">
             Analyze, compare, and optimize your workflows
           </p>
         </div>
@@ -185,12 +185,12 @@ export default function AnalyticsPage() {
 
       {!hasData ? (
         <div className="card overflow-hidden">
-          <div className="bg-gradient-to-br from-gray-50 to-white px-ds-8 py-ds-10 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100">
-              <BarChart3 className="h-7 w-7 text-gray-400" />
+          <div className="bg-gradient-to-br from-[var(--surface-secondary)] to-[var(--surface-elevated)] px-ds-8 py-ds-10 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface-secondary)]">
+              <BarChart3 className="h-7 w-7 text-[var(--content-tertiary)]" />
             </div>
-            <h3 className="mt-ds-4 text-ds-base font-medium text-gray-900">No workflows to analyze</h3>
-            <p className="mt-ds-1 text-ds-sm text-gray-500">
+            <h3 className="mt-ds-4 text-ds-base font-medium text-[var(--content-primary)]">No workflows to analyze</h3>
+            <p className="mt-ds-1 text-ds-sm text-[var(--content-secondary)]">
               Upload workflow recordings to start seeing process intelligence.
             </p>
             <Link href="/upload" className="btn-primary mt-ds-4 inline-flex">
@@ -218,7 +218,7 @@ export default function AnalyticsPage() {
               icon={AlertTriangle}
               label="Active Signals"
               value={data!.totalInsights}
-              valueColor={criticalInsights.length > 0 ? 'text-red-600' : warningInsights.length > 0 ? 'text-amber-600' : 'text-gray-900'}
+              valueColor={criticalInsights.length > 0 ? 'text-red-600' : warningInsights.length > 0 ? 'text-amber-600' : 'text-[var(--content-primary)]'}
             />
             <KPICard
               icon={Zap}
@@ -233,7 +233,7 @@ export default function AnalyticsPage() {
               ═══════════════════════════════════════════════════════════════ */}
           {definitions.length > 0 && (
             <div className="card px-ds-5 py-ds-4">
-              <h2 className="text-ds-sm font-semibold text-gray-900 mb-ds-3">Process Health Overview</h2>
+              <h2 className="text-ds-sm font-semibold text-[var(--content-primary)] mb-ds-3">Process Health Overview</h2>
               <div className="flex gap-1 h-3 rounded-full overflow-hidden mb-ds-2">
                 {(() => {
                   const stable = definitions.filter(d => (d.stabilityScore ?? 0) >= 0.8).length;
@@ -246,16 +246,16 @@ export default function AnalyticsPage() {
                       {stable > 0 && <div className="bg-emerald-500 rounded-l-full" style={{ width: `${(stable / total) * 100}%` }} title={`${stable} stable`} />}
                       {moderate > 0 && <div className="bg-amber-400" style={{ width: `${(moderate / total) * 100}%` }} title={`${moderate} moderate`} />}
                       {unstable > 0 && <div className="bg-red-500" style={{ width: `${(unstable / total) * 100}%` }} title={`${unstable} unstable`} />}
-                      {unscored > 0 && <div className="bg-gray-200 rounded-r-full" style={{ width: `${(unscored / total) * 100}%` }} title={`${unscored} unscored`} />}
+                      {unscored > 0 && <div className="bg-[var(--surface-secondary)] rounded-r-full" style={{ width: `${(unscored / total) * 100}%` }} title={`${unscored} unscored`} />}
                     </>
                   );
                 })()}
               </div>
-              <div className="flex gap-ds-4 text-ds-xs text-gray-500">
+              <div className="flex gap-ds-4 text-ds-xs text-[var(--content-secondary)]">
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500" />Stable (&ge;80%)</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400" />Moderate</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" />Unstable</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-200" />Unscored</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[var(--surface-secondary)]" />Unscored</span>
               </div>
             </div>
           )}
@@ -267,21 +267,21 @@ export default function AnalyticsPage() {
                 ═══════════════════════════════════════════════════════════════ */}
             <section>
               <div className="flex items-center justify-between mb-ds-3">
-                <h2 className="text-ds-sm font-semibold text-gray-900">Process Families</h2>
-                <span className="text-ds-xs text-gray-400">{definitions.length} detected</span>
+                <h2 className="text-ds-sm font-semibold text-[var(--content-primary)]">Process Families</h2>
+                <span className="text-ds-xs text-[var(--content-tertiary)]">{definitions.length} detected</span>
               </div>
               {definitions.length === 0 ? (
                 <div className="card px-ds-6 py-ds-8 text-center">
-                  <p className="text-ds-sm text-gray-500">Click &ldquo;Run Analysis&rdquo; to detect process families.</p>
+                  <p className="text-ds-sm text-[var(--content-secondary)]">Click &ldquo;Run Analysis&rdquo; to detect process families.</p>
                 </div>
               ) : (
                 <div className="space-y-ds-2">
                   {definitions.map((def) => (
-                    <Link key={def.id} href={`/analytics/process/${def.id}`} className="card px-ds-4 py-ds-3 hover:border-gray-300 transition-colors block">
+                    <Link key={def.id} href={`/analytics/process/${def.id}`} className="card px-ds-4 py-ds-3 hover:border-[var(--border-default)] transition-colors block">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-ds-sm font-medium text-gray-900 truncate">{def.canonicalName}</h3>
-                          <div className="flex flex-wrap items-center gap-ds-3 mt-1 text-ds-xs text-gray-500">
+                          <h3 className="text-ds-sm font-medium text-[var(--content-primary)] truncate">{def.canonicalName}</h3>
+                          <div className="flex flex-wrap items-center gap-ds-3 mt-1 text-ds-xs text-[var(--content-secondary)]">
                             <span>{def.runCount} run{def.runCount !== 1 ? 's' : ''}</span>
                             <span>{def.variantCount} variant{def.variantCount !== 1 ? 's' : ''}</span>
                             {def.avgDurationMs != null && <span>{formatDuration(def.avgDurationMs)} avg</span>}
@@ -304,7 +304,7 @@ export default function AnalyticsPage() {
                             </div>
                           )}
                         </div>
-                        <ChevronRight className="h-4 w-4 text-gray-300 flex-shrink-0 ml-2" />
+                        <ChevronRight className="h-4 w-4 text-[var(--content-tertiary)] flex-shrink-0 ml-2" />
                       </div>
                     </Link>
                   ))}
@@ -316,7 +316,7 @@ export default function AnalyticsPage() {
                 SECTION 4 — Performance Leaderboard
                 ═══════════════════════════════════════════════════════════════ */}
             <section>
-              <h2 className="text-ds-sm font-semibold text-gray-900 mb-ds-3">Performance Leaderboard</h2>
+              <h2 className="text-ds-sm font-semibold text-[var(--content-primary)] mb-ds-3">Performance Leaderboard</h2>
               <div className="space-y-ds-3">
                 {/* Slowest processes */}
                 {slowest.length > 0 && (
@@ -324,8 +324,8 @@ export default function AnalyticsPage() {
                     <p className="text-ds-xs font-medium text-red-600 uppercase tracking-wide mb-ds-2">Slowest Processes</p>
                     <div className="space-y-ds-1.5">
                       {slowest.map((d) => (
-                        <Link key={d.id} href={`/analytics/process/${d.id}`} className="flex items-center justify-between hover:bg-gray-50 rounded px-1 -mx-1 py-0.5 transition-colors">
-                          <span className="text-ds-xs text-gray-700 truncate">{d.canonicalName}</span>
+                        <Link key={d.id} href={`/analytics/process/${d.id}`} className="flex items-center justify-between hover:bg-[var(--surface-secondary)] rounded px-1 -mx-1 py-0.5 transition-colors">
+                          <span className="text-ds-xs text-[var(--content-primary)] truncate">{d.canonicalName}</span>
                           <span className="text-ds-xs font-medium text-red-600 tabular-nums ml-2">{formatDuration(d.avgDurationMs)}</span>
                         </Link>
                       ))}
@@ -339,8 +339,8 @@ export default function AnalyticsPage() {
                     <p className="text-ds-xs font-medium text-emerald-600 uppercase tracking-wide mb-ds-2">Fastest Processes</p>
                     <div className="space-y-ds-1.5">
                       {fastest.map((d) => (
-                        <Link key={d.id} href={`/analytics/process/${d.id}`} className="flex items-center justify-between hover:bg-gray-50 rounded px-1 -mx-1 py-0.5 transition-colors">
-                          <span className="text-ds-xs text-gray-700 truncate">{d.canonicalName}</span>
+                        <Link key={d.id} href={`/analytics/process/${d.id}`} className="flex items-center justify-between hover:bg-[var(--surface-secondary)] rounded px-1 -mx-1 py-0.5 transition-colors">
+                          <span className="text-ds-xs text-[var(--content-primary)] truncate">{d.canonicalName}</span>
                           <span className="text-ds-xs font-medium text-emerald-600 tabular-nums ml-2">{formatDuration(d.avgDurationMs)}</span>
                         </Link>
                       ))}
@@ -354,8 +354,8 @@ export default function AnalyticsPage() {
                     <p className="text-ds-xs font-medium text-amber-600 uppercase tracking-wide mb-ds-2">Highest Variation</p>
                     <div className="space-y-ds-1.5">
                       {highVariation.slice(0, 3).map((d) => (
-                        <Link key={d.id} href={`/analytics/process/${d.id}`} className="flex items-center justify-between hover:bg-gray-50 rounded px-1 -mx-1 py-0.5 transition-colors">
-                          <span className="text-ds-xs text-gray-700 truncate">{d.canonicalName}</span>
+                        <Link key={d.id} href={`/analytics/process/${d.id}`} className="flex items-center justify-between hover:bg-[var(--surface-secondary)] rounded px-1 -mx-1 py-0.5 transition-colors">
+                          <span className="text-ds-xs text-[var(--content-primary)] truncate">{d.canonicalName}</span>
                           <span className="text-ds-xs font-medium text-amber-600 tabular-nums ml-2">{d.variantCount} variants</span>
                         </Link>
                       ))}
@@ -371,15 +371,15 @@ export default function AnalyticsPage() {
               ═══════════════════════════════════════════════════════════════ */}
           {highVariation.length > 0 && (
             <section>
-              <h2 className="text-ds-sm font-semibold text-gray-900 mb-ds-3">Standardization Opportunities</h2>
+              <h2 className="text-ds-sm font-semibold text-[var(--content-primary)] mb-ds-3">Standardization Opportunities</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-ds-3">
                 {highVariation.map((def) => (
                   <Link key={def.id} href={`/analytics/process/${def.id}`} className="card px-ds-4 py-ds-3 hover:border-brand-200 transition-colors">
                     <div className="flex items-center justify-between mb-ds-2">
-                      <h3 className="text-ds-sm font-medium text-gray-900 truncate">{def.canonicalName}</h3>
+                      <h3 className="text-ds-sm font-medium text-[var(--content-primary)] truncate">{def.canonicalName}</h3>
                       <span className="text-ds-xs font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">{def.variantCount} variants</span>
                     </div>
-                    <p className="text-ds-xs text-gray-500">
+                    <p className="text-ds-xs text-[var(--content-secondary)]">
                       {def.runCount} run{def.runCount !== 1 ? 's' : ''} across {def.variantCount} execution patterns.
                       {def.stabilityScore != null && ` Stability: ${Math.round(def.stabilityScore * 100)}%.`}
                       {' '}Consider standardizing to reduce variation.
@@ -395,20 +395,20 @@ export default function AnalyticsPage() {
               ═══════════════════════════════════════════════════════════════ */}
           {definitions.length > 0 && (
             <section>
-              <h2 className="text-ds-sm font-semibold text-gray-900 mb-ds-3">Documentation Quality</h2>
+              <h2 className="text-ds-sm font-semibold text-[var(--content-primary)] mb-ds-3">Documentation Quality</h2>
               <div className="card px-ds-5 py-ds-4">
                 <div className="grid grid-cols-3 gap-ds-4 text-center">
                   <div>
                     <p className="text-ds-2xl font-bold text-emerald-600">{definitions.filter(d => (d.insights ?? []).length === 0).length}</p>
-                    <p className="text-ds-xs text-gray-500 mt-0.5">Clean (no issues)</p>
+                    <p className="text-ds-xs text-[var(--content-secondary)] mt-0.5">Clean (no issues)</p>
                   </div>
                   <div>
                     <p className="text-ds-2xl font-bold text-amber-600">{defsWithInsights.length}</p>
-                    <p className="text-ds-xs text-gray-500 mt-0.5">Has findings</p>
+                    <p className="text-ds-xs text-[var(--content-secondary)] mt-0.5">Has findings</p>
                   </div>
                   <div>
-                    <p className="text-ds-2xl font-bold text-gray-400">{definitions.filter(d => d.analyzedAt === null).length}</p>
-                    <p className="text-ds-xs text-gray-500 mt-0.5">Not yet analyzed</p>
+                    <p className="text-ds-2xl font-bold text-[var(--content-tertiary)]">{definitions.filter(d => d.analyzedAt === null).length}</p>
+                    <p className="text-ds-xs text-[var(--content-secondary)] mt-0.5">Not yet analyzed</p>
                   </div>
                 </div>
               </div>
@@ -420,30 +420,30 @@ export default function AnalyticsPage() {
               ═══════════════════════════════════════════════════════════════ */}
           {definitions.length > 0 && (
             <section>
-              <h2 className="text-ds-sm font-semibold text-gray-900 mb-ds-3">Process Family Details</h2>
+              <h2 className="text-ds-sm font-semibold text-[var(--content-primary)] mb-ds-3">Process Family Details</h2>
               <div className="card overflow-hidden">
                 <table className="w-full text-ds-xs">
                   <thead>
-                    <tr className="border-b border-gray-200 bg-gray-50/50 text-left">
-                      <th className="py-ds-2 px-ds-4 font-medium text-gray-500">Process</th>
-                      <th className="py-ds-2 px-ds-4 font-medium text-gray-500 text-right">Runs</th>
-                      <th className="py-ds-2 px-ds-4 font-medium text-gray-500 text-right">Variants</th>
-                      <th className="py-ds-2 px-ds-4 font-medium text-gray-500 text-right">Avg Duration</th>
-                      <th className="py-ds-2 px-ds-4 font-medium text-gray-500 text-right">Stability</th>
-                      <th className="py-ds-2 px-ds-4 font-medium text-gray-500 text-right">Signals</th>
+                    <tr className="border-b border-[var(--border-default)] bg-[var(--surface-secondary)] text-left">
+                      <th className="py-ds-2 px-ds-4 font-medium text-[var(--content-secondary)]">Process</th>
+                      <th className="py-ds-2 px-ds-4 font-medium text-[var(--content-secondary)] text-right">Runs</th>
+                      <th className="py-ds-2 px-ds-4 font-medium text-[var(--content-secondary)] text-right">Variants</th>
+                      <th className="py-ds-2 px-ds-4 font-medium text-[var(--content-secondary)] text-right">Avg Duration</th>
+                      <th className="py-ds-2 px-ds-4 font-medium text-[var(--content-secondary)] text-right">Stability</th>
+                      <th className="py-ds-2 px-ds-4 font-medium text-[var(--content-secondary)] text-right">Signals</th>
                     </tr>
                   </thead>
                   <tbody>
                     {definitions.map((def) => (
-                      <tr key={def.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                      <tr key={def.id} className="border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--surface-secondary)] transition-colors">
                         <td className="py-ds-2 px-ds-4">
-                          <Link href={`/analytics/process/${def.id}`} className="text-gray-900 font-medium hover:text-brand-600">{def.canonicalName}</Link>
+                          <Link href={`/analytics/process/${def.id}`} className="text-[var(--content-primary)] font-medium hover:text-brand-600">{def.canonicalName}</Link>
                         </td>
-                        <td className="py-ds-2 px-ds-4 text-right text-gray-600 tabular-nums">{def.runCount}</td>
+                        <td className="py-ds-2 px-ds-4 text-right text-[var(--content-secondary)] tabular-nums">{def.runCount}</td>
                         <td className="py-ds-2 px-ds-4 text-right tabular-nums">
-                          <span className={def.variantCount >= 3 ? 'text-amber-600 font-medium' : 'text-gray-600'}>{def.variantCount}</span>
+                          <span className={def.variantCount >= 3 ? 'text-amber-600 font-medium' : 'text-[var(--content-secondary)]'}>{def.variantCount}</span>
                         </td>
-                        <td className="py-ds-2 px-ds-4 text-right text-gray-600 tabular-nums">{def.avgDurationMs != null ? formatDuration(def.avgDurationMs) : '—'}</td>
+                        <td className="py-ds-2 px-ds-4 text-right text-[var(--content-secondary)] tabular-nums">{def.avgDurationMs != null ? formatDuration(def.avgDurationMs) : '—'}</td>
                         <td className="py-ds-2 px-ds-4 text-right tabular-nums">
                           {def.stabilityScore != null ? (
                             <span className={def.stabilityScore >= 0.8 ? 'text-emerald-600' : def.stabilityScore >= 0.6 ? 'text-amber-600' : 'text-red-600'}>
@@ -472,8 +472,8 @@ export default function AnalyticsPage() {
           {insights.length > 0 && (
             <section>
               <div className="flex items-center justify-between mb-ds-3">
-                <h2 className="text-ds-sm font-semibold text-gray-900">Active Signals</h2>
-                <span className="text-ds-xs text-gray-400">{insights.length} finding{insights.length !== 1 ? 's' : ''}</span>
+                <h2 className="text-ds-sm font-semibold text-[var(--content-primary)]">Active Signals</h2>
+                <span className="text-ds-xs text-[var(--content-tertiary)]">{insights.length} finding{insights.length !== 1 ? 's' : ''}</span>
               </div>
               <div className="space-y-ds-2">
                 {insights.map((insight) => {
@@ -486,15 +486,15 @@ export default function AnalyticsPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-ds-2 mb-0.5">
                             <span className={`text-[10px] font-semibold uppercase ${colors.text}`}>{insight.severity}</span>
-                            <span className="text-[10px] text-gray-400">{insight.insightType}</span>
+                            <span className="text-[10px] text-[var(--content-tertiary)]">{insight.insightType}</span>
                           </div>
-                          <p className="text-ds-sm font-medium text-gray-900">{insight.title}</p>
-                          <p className="text-ds-xs text-gray-600 mt-0.5 leading-relaxed">{insight.explanation}</p>
+                          <p className="text-ds-sm font-medium text-[var(--content-primary)]">{insight.title}</p>
+                          <p className="text-ds-xs text-[var(--content-secondary)] mt-0.5 leading-relaxed">{insight.explanation}</p>
                           {insight.recommendation && (
-                            <p className="text-ds-xs text-gray-500 mt-1 italic">→ {insight.recommendation}</p>
+                            <p className="text-ds-xs text-[var(--content-secondary)] mt-1 italic">→ {insight.recommendation}</p>
                           )}
                           {(insight.observedValue || insight.expectedValue) && (
-                            <div className="flex gap-ds-4 mt-1.5 text-ds-xs text-gray-500">
+                            <div className="flex gap-ds-4 mt-1.5 text-ds-xs text-[var(--content-secondary)]">
                               {insight.observedValue && <span>Observed: <strong>{insight.observedValue}</strong></span>}
                               {insight.expectedValue && <span>Expected: <strong>{insight.expectedValue}</strong></span>}
                             </div>
@@ -502,7 +502,7 @@ export default function AnalyticsPage() {
                         </div>
                         <button
                           onClick={() => dismissInsight(insight.id)}
-                          className="p-1 text-gray-300 hover:text-gray-500 flex-shrink-0"
+                          className="p-1 text-[var(--content-tertiary)] hover:text-[var(--content-secondary)] flex-shrink-0"
                           title="Dismiss"
                         >
                           <X className="h-3.5 w-3.5" />
@@ -537,9 +537,9 @@ function KPICard({
     <div className="card px-ds-4 py-ds-3">
       <div className="flex items-center gap-1.5 mb-1">
         <Icon className="h-3.5 w-3.5 text-brand-600" />
-        <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wide">{label}</p>
+        <p className="text-[10px] font-medium text-[var(--content-tertiary)] uppercase tracking-wide">{label}</p>
       </div>
-      <p className={`text-ds-lg font-bold tabular-nums ${valueColor ?? 'text-gray-900'}`}>{value}</p>
+      <p className={`text-ds-lg font-bold tabular-nums ${valueColor ?? 'text-[var(--content-primary)]'}`}>{value}</p>
     </div>
   );
 }

@@ -34,7 +34,7 @@ export function BottleneckRow({
   );
 
   return (
-    <div className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50/60 transition-colors">
+    <div className="flex items-center gap-4 px-4 py-3 hover:bg-[var(--surface-secondary)] transition-colors">
       {/* Ordinal badge */}
       <div className="flex-shrink-0 flex items-center justify-center h-7 w-7 rounded-full bg-red-50 border border-red-200 text-[11px] font-bold text-red-700 tabular-nums">
         {position}
@@ -42,10 +42,10 @@ export function BottleneckRow({
 
       {/* Title + system */}
       <div className="flex-1 min-w-0">
-        <p className="text-ds-sm font-medium text-gray-900 truncate">{title}</p>
+        <p className="text-ds-sm font-medium text-[var(--content-primary)] truncate">{title}</p>
         <div className="flex items-center gap-2 mt-0.5">
           {system && (
-            <span className="text-[10px] text-gray-400">{system}</span>
+            <span className="text-[10px] text-[var(--content-tertiary)]">{system}</span>
           )}
           {category && (
             <span className="ds-tag ds-tag-neutral text-[10px]">
@@ -58,16 +58,16 @@ export function BottleneckRow({
       {/* Mini bar chart — 100px fixed */}
       <div className="flex-shrink-0 w-24 space-y-1" aria-hidden>
         {/* This step */}
-        <div className="h-2 w-full rounded-full bg-gray-100 overflow-hidden">
+        <div className="h-2 w-full rounded-full bg-[var(--surface-secondary)] overflow-hidden">
           <div
             className="h-full rounded-full bg-red-400"
             style={{ width: `${barFill}%` }}
           />
         </div>
         {/* Average reference */}
-        <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+        <div className="h-1.5 w-full rounded-full bg-[var(--surface-secondary)] overflow-hidden">
           <div
-            className="h-full rounded-full bg-gray-300"
+            className="h-full rounded-full bg-[var(--content-tertiary)]"
             style={{ width: `${avgBarFill}%` }}
           />
         </div>
@@ -78,7 +78,7 @@ export function BottleneckRow({
         <p className="text-ds-sm font-semibold text-red-700 tabular-nums">
           {formatDuration(durationMs)}
         </p>
-        <p className="text-[10px] text-gray-400 tabular-nums">
+        <p className="text-[10px] text-[var(--content-tertiary)] tabular-nums">
           {ratio.toFixed(1)}x avg
         </p>
       </div>

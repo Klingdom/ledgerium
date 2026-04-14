@@ -21,17 +21,17 @@ export default function PrivacyPage() {
               Privacy Policy
             </p>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+          <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)]">
             Ledgerium AI Recorder — Privacy Policy
           </h1>
-          <p className="mt-4 text-sm text-gray-500">
+          <p className="mt-4 text-sm text-[var(--content-secondary)]">
             Effective Date: March 28, 2026
           </p>
         </div>
       </section>
 
       {/* Transparency commitment */}
-      <section className="border-t border-gray-100 bg-white py-10">
+      <section className="border-t border-[var(--border-subtle)] bg-[var(--surface-elevated)] py-10">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <div className="rounded-xl bg-brand-50 border border-brand-100 p-6">
             <div className="flex items-center gap-2 mb-3">
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
       </section>
 
       {/* Policy content */}
-      <section className="py-12 bg-white">
+      <section className="py-12 bg-[var(--surface-elevated)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <div className="prose-policy space-y-12">
 
@@ -114,7 +114,7 @@ export default function PrivacyPage() {
             {/* 3. What We Do NOT Collect */}
             <PolicySection number="3" title="What We Do NOT Collect">
               <p>Ledgerium AI Recorder is designed with a trust-first approach. We do <strong>NOT</strong>:</p>
-              <div className="rounded-lg bg-gray-50 border border-gray-200 p-4">
+              <div className="rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-default)] p-4">
                 <ul className="space-y-2">
                   {[
                     'Record anything unless you explicitly start recording',
@@ -124,7 +124,7 @@ export default function PrivacyPage() {
                     'Store sensitive data intentionally (e.g., passwords, financial info)',
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2">
-                      <EyeOff className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                      <EyeOff className="h-4 w-4 text-[var(--content-tertiary)] mt-0.5 flex-shrink-0" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -165,7 +165,7 @@ export default function PrivacyPage() {
                   { icon: Eye, text: 'You can review all captured data' },
                   { icon: Lock, text: 'You can manage or delete workflows within the platform' },
                 ].map(({ icon: Icon, text }) => (
-                  <div key={text} className="flex items-start gap-2 rounded-lg bg-gray-50 p-3">
+                  <div key={text} className="flex items-start gap-2 rounded-lg bg-[var(--surface-secondary)] p-3">
                     <Icon className="h-4 w-4 text-brand-600 mt-0.5 flex-shrink-0" />
                     <span className="text-sm">{text}</span>
                   </div>
@@ -218,9 +218,9 @@ export default function PrivacyPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 bg-gray-50 border-t border-gray-200">
+      <section className="py-16 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
-          <h2 className="text-xl font-bold text-gray-900">
+          <h2 className="text-xl font-bold text-[var(--content-primary)]">
             Ready to capture your workflows?
           </h2>
           <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -249,10 +249,10 @@ function PolicySection({
 }) {
   return (
     <div>
-      <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-baseline gap-2">
+      <h3 className="text-lg font-bold text-[var(--content-primary)] mb-3 flex items-baseline gap-2">
         <span className="text-brand-600">{number}.</span> {title}
       </h3>
-      <div className="text-sm text-gray-600 leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_h4]:text-sm [&_h4]:font-semibold [&_h4]:text-gray-900 [&_h4]:mt-4 [&_h4]:mb-2 [&_a]:text-brand-600 [&_a:hover]:text-brand-700 [&_strong]:text-gray-900">
+      <div className="text-sm text-[var(--content-secondary)] leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_h4]:text-sm [&_h4]:font-semibold [&_h4]:text-[var(--content-primary)] [&_h4]:mt-4 [&_h4]:mb-2 [&_a]:text-brand-600 [&_a:hover]:text-brand-700 [&_strong]:text-[var(--content-primary)]">
         {children}
       </div>
     </div>

@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 /*
- * Ledgerium Recorder v2 — White + Blue Design System
+ * Ledgerium Recorder v2 — White + Green Design System
  *
  * Color palette:
- * - Primary Blue: #2563EB
- * - Light Blue: #3B82F6
- * - Accent Blue: #60A5FA
+ * - Primary Green: #059669
+ * - Light Green: #10b981
+ * - Accent Green: #34d399
  * - White: #FFFFFF
  * - Background: #F9FAFB
  * - Border: #E5E7EB
@@ -48,10 +48,10 @@
   .btn-primary {
     @apply inline-flex items-center justify-center gap-1.5
            rounded-lg px-4 py-2.5
-           bg-blue-600 text-white text-sm font-medium
+           bg-emerald-600 text-white text-sm font-medium
            shadow-sm
-           hover:bg-blue-700 active:bg-blue-800
-           focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:ring-offset-1
+           hover:bg-emerald-700 active:bg-emerald-800
+           focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:ring-offset-1
            disabled:opacity-50 disabled:cursor-not-allowed
            transition-colors;
   }
@@ -63,7 +63,7 @@
            border border-gray-200
            shadow-sm
            hover:bg-gray-50 active:bg-gray-100
-           focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:ring-offset-1
+           focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:ring-offset-1
            disabled:opacity-50 disabled:cursor-not-allowed
            transition-colors;
   }
@@ -82,7 +82,7 @@
            rounded-lg px-3 py-2
            text-gray-500 text-sm font-medium
            hover:bg-gray-100 hover:text-gray-700 active:bg-gray-200
-           focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:ring-offset-1
+           focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:ring-offset-1
            disabled:opacity-50 disabled:cursor-not-allowed
            transition-colors;
   }
@@ -122,7 +122,7 @@
   }
 
   .recording-dot {
-    @apply w-2 h-2 rounded-full bg-blue-600;
+    @apply w-2 h-2 rounded-full bg-emerald-600;
     animation: recording-pulse 1.5s ease-in-out infinite;
   }
 }

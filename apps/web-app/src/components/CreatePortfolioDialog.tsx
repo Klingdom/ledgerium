@@ -137,11 +137,11 @@ export default function CreatePortfolioDialog({
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-ds-5 py-ds-4 border-b border-gray-100">
-            <h2 className="text-ds-sm font-semibold text-gray-900">New Portfolio</h2>
+          <div className="flex items-center justify-between px-ds-5 py-ds-4 border-b border-[var(--border-subtle)]">
+            <h2 className="text-ds-sm font-semibold text-[var(--content-primary)]">New Portfolio</h2>
             <button
               onClick={onClose}
-              className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+              className="rounded p-1.5 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-secondary)] transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
@@ -151,7 +151,7 @@ export default function CreatePortfolioDialog({
           <form onSubmit={handleSubmit} className="px-ds-5 py-ds-4 space-y-ds-4">
             {/* Name */}
             <div>
-              <label className="block text-ds-xs font-medium text-gray-700 mb-1">
+              <label className="block text-ds-xs font-medium text-[var(--content-primary)] mb-1">
                 Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -168,7 +168,7 @@ export default function CreatePortfolioDialog({
 
             {/* Type */}
             <div>
-              <label className="block text-ds-xs font-medium text-gray-700 mb-1">
+              <label className="block text-ds-xs font-medium text-[var(--content-primary)] mb-1">
                 Type
               </label>
               <div className="grid grid-cols-5 gap-1.5">
@@ -180,7 +180,7 @@ export default function CreatePortfolioDialog({
                     className={`flex flex-col items-center gap-1 rounded-ds-md border py-2 px-1 transition-colors text-center ${
                       type === value
                         ? 'border-brand-400 bg-brand-50 text-brand-700'
-                        : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                        : 'border-[var(--border-default)] text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
                     }`}
                     title={label}
                   >
@@ -193,7 +193,7 @@ export default function CreatePortfolioDialog({
 
             {/* Color */}
             <div>
-              <label className="block text-ds-xs font-medium text-gray-700 mb-1">
+              <label className="block text-ds-xs font-medium text-[var(--content-primary)] mb-1">
                 Color
               </label>
               <div className="flex items-center gap-2 flex-wrap">
@@ -203,7 +203,7 @@ export default function CreatePortfolioDialog({
                     type="button"
                     onClick={() => setColor(c)}
                     className={`h-6 w-6 rounded-full border-2 transition-all ${
-                      color === c ? 'border-gray-800 scale-110' : 'border-transparent hover:border-gray-300'
+                      color === c ? 'border-[var(--content-primary)] scale-110' : 'border-transparent hover:border-[var(--border-default)]'
                     }`}
                     style={{ backgroundColor: c }}
                     title={c}
@@ -214,8 +214,8 @@ export default function CreatePortfolioDialog({
 
             {/* Description */}
             <div>
-              <label className="block text-ds-xs font-medium text-gray-700 mb-1">
-                Description <span className="text-[10px] text-gray-400 font-normal">(optional)</span>
+              <label className="block text-ds-xs font-medium text-[var(--content-primary)] mb-1">
+                Description <span className="text-[10px] text-[var(--content-tertiary)] font-normal">(optional)</span>
               </label>
               <textarea
                 value={description}
@@ -230,8 +230,8 @@ export default function CreatePortfolioDialog({
             {/* Parent portfolio */}
             {flatPortfolios.length > 0 && (
               <div>
-                <label className="block text-ds-xs font-medium text-gray-700 mb-1">
-                  Parent Portfolio <span className="text-[10px] text-gray-400 font-normal">(optional)</span>
+                <label className="block text-ds-xs font-medium text-[var(--content-primary)] mb-1">
+                  Parent Portfolio <span className="text-[10px] text-[var(--content-tertiary)] font-normal">(optional)</span>
                 </label>
                 <select
                   value={parentId}

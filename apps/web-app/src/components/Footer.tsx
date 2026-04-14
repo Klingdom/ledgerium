@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { SITE_CONFIG } from '@/lib/config';
+import { LogoFull } from '@/components/shared/LogoMark';
 
 const FOOTER_LINKS = {
   Product: [
@@ -19,15 +20,13 @@ const FOOTER_LINKS = {
 
 export function Footer() {
   return (
-    <footer className="border-t border-gray-200 bg-white">
+    <footer className="border-t border-[var(--border-default)] bg-[var(--surface-elevated)]">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <span className="text-xl font-bold tracking-tight text-gray-900">
-              Ledgerium <span className="text-brand-600">AI</span>
-            </span>
-            <p className="text-sm text-gray-500 leading-relaxed">
+            <LogoFull size={20} />
+            <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
               Evidence-based workflow intelligence. Record real work, generate real documentation.
             </p>
           </div>
@@ -35,7 +34,7 @@ export function Footer() {
           {/* Link columns */}
           {Object.entries(FOOTER_LINKS).map(([heading, links]) => (
             <div key={heading}>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+              <p className="text-xs font-semibold text-[var(--content-tertiary)] uppercase tracking-wider mb-3">
                 {heading}
               </p>
               <ul className="space-y-2">
@@ -43,7 +42,7 @@ export function Footer() {
                   <li key={href}>
                     <Link
                       href={href}
-                      className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                      className="text-sm text-[var(--content-secondary)] hover:text-[var(--content-primary)] transition-colors"
                     >
                       {label}
                     </Link>
@@ -54,11 +53,11 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-10 pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="text-xs text-gray-400">
+        <div className="mt-10 pt-6 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p className="text-xs text-[var(--content-tertiary)]">
             &copy; {new Date().getFullYear()} Ledgerium AI. All rights reserved.
           </p>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-[var(--content-tertiary)]">
             Built for people who care about how work actually gets done.
           </p>
         </div>

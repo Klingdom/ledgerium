@@ -25,8 +25,8 @@ export function WorkflowInsightsStrip({ insights, visible }: Props) {
   const top = sorted.slice(0, 3);
 
   return (
-    <div className="flex items-center gap-2 px-ds-5 py-1.5 border-t border-gray-100 bg-gray-50/50 overflow-x-auto">
-      <Zap className="h-3 w-3 text-gray-400 flex-shrink-0" />
+    <div className="flex items-center gap-2 px-ds-5 py-1.5 border-t border-[var(--border-subtle)] bg-[var(--surface-secondary)] overflow-x-auto">
+      <Zap className="h-3 w-3 text-[var(--content-tertiary)] flex-shrink-0" />
       {top.map(insight => {
         const style = SEVERITY_STYLES[insight.severity] ?? SEVERITY_STYLES.info;
         return (
@@ -41,7 +41,7 @@ export function WorkflowInsightsStrip({ insights, visible }: Props) {
         );
       })}
       {insights.length > 3 && (
-        <span className="text-[10px] text-gray-400 flex-shrink-0">
+        <span className="text-[10px] text-[var(--content-tertiary)] flex-shrink-0">
           +{insights.length - 3} more
         </span>
       )}

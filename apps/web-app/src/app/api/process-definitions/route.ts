@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
+import { checkFeatureAccess } from '@/lib/feature-gating';
 
 /** Safely parse a JSON string, returning null on failure instead of throwing. */
 function safeJsonParse(json: string | null | undefined): unknown {
@@ -12,11 +13,31 @@ function safeJsonParse(json: string | null | undefined): unknown {
 /**
  * GET /api/process-definitions
  * List all process definitions for the current user.
+ * Requires intelligenceLayer feature (Team+).
  */
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const user = await db.user.findUnique({ where: { id: session.user.id } });
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+
+  // Gate: intelligenceLayer is a Team+ feature
+  const access = checkFeatureAccess(user, 'intelligenceLayer');
+  if (!access.allowed) {
+    return NextResponse.json(
+      {
+        error: 'Feature not available on your plan',
+        feature: 'intelligenceLayer',
+        requiredPlan: access.requiredPlan,
+        upgradeUrl: '/pricing',
+      },
+      { status: 403 },
+    );
   }
 
   const definitions = await db.processDefinition.findMany({

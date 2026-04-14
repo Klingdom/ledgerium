@@ -59,15 +59,15 @@ export default function TeamsPage() {
   }
 
   if (isLoading) {
-    return <div className="text-center text-ds-sm text-gray-400 py-20">Loading teams...</div>;
+    return <div className="text-center text-ds-sm text-[var(--content-tertiary)] py-20">Loading teams...</div>;
   }
 
   return (
     <div className="mx-auto max-w-ds-content">
       <div className="flex items-center justify-between mb-ds-6">
         <div>
-          <h1 className="text-ds-2xl font-bold tracking-tight text-gray-900">Teams</h1>
-          <p className="text-ds-sm text-gray-500">
+          <h1 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">Teams</h1>
+          <p className="text-ds-sm text-[var(--content-secondary)]">
             {teams.length} team{teams.length !== 1 ? 's' : ''}
           </p>
         </div>
@@ -80,7 +80,7 @@ export default function TeamsPage() {
       {/* Create form */}
       {showCreate && (
         <div className="card px-ds-5 py-ds-4 mb-ds-4">
-          <h3 className="text-ds-sm font-medium text-gray-900 mb-ds-2">Create a new team</h3>
+          <h3 className="text-ds-sm font-medium text-[var(--content-primary)] mb-ds-2">Create a new team</h3>
           <div className="flex gap-ds-2">
             <input
               type="text"
@@ -104,12 +104,12 @@ export default function TeamsPage() {
       {/* Team list */}
       {teams.length === 0 ? (
         <div className="card overflow-hidden">
-          <div className="bg-gradient-to-br from-gray-50 to-white px-ds-8 py-ds-10 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100">
-              <Users className="h-7 w-7 text-gray-400" />
+          <div className="bg-gradient-to-br from-[var(--surface-secondary)] to-[var(--surface-elevated)] px-ds-8 py-ds-10 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface-secondary)]">
+              <Users className="h-7 w-7 text-[var(--content-tertiary)]" />
             </div>
-            <h3 className="mt-ds-4 text-ds-base font-medium text-gray-900">No teams yet</h3>
-            <p className="mt-ds-1 text-ds-sm text-gray-500">
+            <h3 className="mt-ds-4 text-ds-base font-medium text-[var(--content-primary)]">No teams yet</h3>
+            <p className="mt-ds-1 text-ds-sm text-[var(--content-secondary)]">
               Create a team to share workflows with colleagues and collaborate on process documentation.
             </p>
             <button onClick={() => setShowCreate(true)} className="btn-primary mt-ds-4 gap-1.5">
@@ -126,14 +126,14 @@ export default function TeamsPage() {
               <Link
                 key={team.id}
                 href={`/teams/${team.id}`}
-                className="card flex items-center gap-ds-4 px-ds-5 py-ds-4 hover:border-gray-300 transition-colors"
+                className="card flex items-center gap-ds-4 px-ds-5 py-ds-4 hover:border-[var(--border-default)] transition-colors"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-ds-lg bg-brand-50">
                   <Users className="h-5 w-5 text-brand-600" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-ds-sm font-medium text-gray-900">{team.name}</p>
-                  <div className="flex items-center gap-ds-2 mt-0.5 text-ds-xs text-gray-500">
+                  <p className="text-ds-sm font-medium text-[var(--content-primary)]">{team.name}</p>
+                  <div className="flex items-center gap-ds-2 mt-0.5 text-ds-xs text-[var(--content-secondary)]">
                     <span className="flex items-center gap-1">
                       <RoleIcon className="h-3 w-3" />
                       {team.role}
@@ -142,7 +142,7 @@ export default function TeamsPage() {
                     <span>{team.memberCount} member{team.memberCount !== 1 ? 's' : ''}</span>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-gray-300 flex-shrink-0" />
+                <ChevronRight className="h-4 w-4 text-[var(--content-tertiary)] flex-shrink-0" />
               </Link>
             );
           })}

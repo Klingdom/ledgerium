@@ -199,8 +199,8 @@ export default function ProcessGroupsExplorer({
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
-          <RefreshCw className="h-6 w-6 text-gray-300 animate-spin mx-auto mb-3" />
-          <p className="text-ds-sm text-gray-400">Loading process intelligence...</p>
+          <RefreshCw className="h-6 w-6 text-[var(--content-tertiary)] animate-spin mx-auto mb-3" />
+          <p className="text-ds-sm text-[var(--content-tertiary)]">Loading process intelligence...</p>
         </div>
       </div>
     );
@@ -212,8 +212,8 @@ export default function ProcessGroupsExplorer({
     return (
       <div className="card p-12 text-center">
         <AlertTriangle className="mx-auto h-10 w-10 text-red-400" />
-        <h3 className="mt-3 text-ds-sm font-medium text-gray-900">Analysis Error</h3>
-        <p className="mt-1 text-ds-sm text-gray-500 max-w-md mx-auto">{error}</p>
+        <h3 className="mt-3 text-ds-sm font-medium text-[var(--content-primary)]">Analysis Error</h3>
+        <p className="mt-1 text-ds-sm text-[var(--content-secondary)] max-w-md mx-auto">{error}</p>
         <button onClick={onRunAnalysis} disabled={isRunningAnalysis} className="btn-secondary mt-4 gap-1.5">
           <RefreshCw className={`h-4 w-4 ${isRunningAnalysis ? 'animate-spin' : ''}`} />
           Retry Analysis
@@ -297,8 +297,8 @@ export default function ProcessGroupsExplorer({
           {/* No results */}
           {filteredFamilies.length === 0 && filteredStandalone.length === 0 && (
             <div className="card p-10 text-center">
-              <Filter className="mx-auto h-8 w-8 text-gray-300 mb-2" />
-              <p className="text-ds-sm text-gray-500">No process groups match your filters.</p>
+              <Filter className="mx-auto h-8 w-8 text-[var(--content-tertiary)] mb-2" />
+              <p className="text-ds-sm text-[var(--content-secondary)]">No process groups match your filters.</p>
               <button
                 onClick={() => { setSearchQuery(''); setConfidenceFilter(''); }}
                 className="btn-secondary mt-3 gap-1.5 text-ds-xs"
@@ -361,36 +361,36 @@ function LowConfidenceReviewQueue({
 
   return (
     <div className="card overflow-hidden">
-      <div className="px-ds-4 py-ds-3 border-b border-gray-100 bg-amber-50/30">
+      <div className="px-ds-4 py-ds-3 border-b border-[var(--border-subtle)] bg-amber-50/30">
         <div className="flex items-center gap-ds-2">
           <Eye className="h-4 w-4 text-amber-600" />
-          <h3 className="text-ds-sm font-semibold text-gray-900">Needs Review</h3>
+          <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">Needs Review</h3>
           <span className="text-[10px] font-medium text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded-full">
             {lowConfidence.length + emerging.length}
           </span>
         </div>
-        <p className="text-[10px] text-gray-500 mt-0.5">
+        <p className="text-[10px] text-[var(--content-secondary)] mt-0.5">
           These workflows need more runs or manual review to classify confidently.
         </p>
       </div>
 
-      <div className="divide-y divide-gray-50">
+      <div className="divide-y divide-[var(--border-subtle)]">
         {/* Low-confidence groups */}
         {lowConfidence.slice(0, 5).map(group => (
           <button
             key={group.id}
             onClick={() => onSelectGroup(group.id)}
-            className={`w-full text-left flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-gray-50 transition-colors ${
+            className={`w-full text-left flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-[var(--surface-secondary)] transition-colors ${
               selectedGroupId === group.id ? 'bg-brand-50' : ''
             }`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
-                <p className="text-ds-xs text-gray-900 font-medium truncate">{group.canonicalName}</p>
+                <p className="text-ds-xs text-[var(--content-primary)] font-medium truncate">{group.canonicalName}</p>
                 <span className="ds-tag text-[9px] bg-amber-100 text-amber-700">Low Confidence</span>
               </div>
-              <p className="text-[10px] text-gray-400">
+              <p className="text-[10px] text-[var(--content-tertiary)]">
                 {group.runCount} run{group.runCount !== 1 ? 's' : ''} &middot; {formatConfidence(group.confidenceScore ?? 0)} confidence
               </p>
             </div>
@@ -402,17 +402,17 @@ function LowConfidenceReviewQueue({
           <button
             key={group.id}
             onClick={() => onSelectGroup(group.id)}
-            className={`w-full text-left flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-gray-50 transition-colors ${
+            className={`w-full text-left flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-[var(--surface-secondary)] transition-colors ${
               selectedGroupId === group.id ? 'bg-brand-50' : ''
             }`}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-gray-300 flex-shrink-0" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--content-tertiary)] flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
-                <p className="text-ds-xs text-gray-900 font-medium truncate">{group.canonicalName}</p>
-                <span className="ds-tag text-[9px] bg-gray-100 text-gray-600">Emerging</span>
+                <p className="text-ds-xs text-[var(--content-primary)] font-medium truncate">{group.canonicalName}</p>
+                <span className="ds-tag text-[9px] bg-[var(--surface-secondary)] text-[var(--content-secondary)]">Emerging</span>
               </div>
-              <p className="text-[10px] text-gray-400">
+              <p className="text-[10px] text-[var(--content-tertiary)]">
                 Single run &middot; Needs more recordings to classify
               </p>
             </div>
@@ -441,14 +441,14 @@ function ContextHeader({
       <div>
         <div className="flex items-center gap-ds-2">
           <Boxes className="h-5 w-5 text-brand-600" />
-          <h2 className="text-ds-lg font-semibold text-gray-900">Process Groups</h2>
+          <h2 className="text-ds-lg font-semibold text-[var(--content-primary)]">Process Groups</h2>
         </div>
-        <p className="text-ds-xs text-gray-500 mt-1">
+        <p className="text-ds-xs text-[var(--content-secondary)] mt-1">
           {kpis.totalWorkflows} workflow{kpis.totalWorkflows !== 1 ? 's' : ''} analyzed into{' '}
           {kpis.verifiedGroups} verified group{kpis.verifiedGroups !== 1 ? 's' : ''} across{' '}
           {kpis.totalFamilies} famil{kpis.totalFamilies !== 1 ? 'ies' : 'y'}
           {lastAnalyzed && (
-            <span className="text-gray-400"> &middot; Last analyzed {formatDateRelative(lastAnalyzed)}</span>
+            <span className="text-[var(--content-tertiary)]"> &middot; Last analyzed {formatDateRelative(lastAnalyzed)}</span>
           )}
         </p>
       </div>
@@ -496,7 +496,7 @@ function KpiStrip({ kpis }: { kpis: KpiData }) {
         icon={HelpCircle}
         label="Needs Review"
         value={kpis.lowConfidenceCount}
-        color={kpis.lowConfidenceCount > 0 ? 'text-amber-600' : 'text-gray-400'}
+        color={kpis.lowConfidenceCount > 0 ? 'text-amber-600' : 'text-[var(--content-tertiary)]'}
       />
     </div>
   );
@@ -517,9 +517,9 @@ function KpiCard({
     <div className="card px-ds-3 py-ds-2.5">
       <div className="flex items-center gap-ds-2">
         <Icon className={`h-3.5 w-3.5 ${color}`} />
-        <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">{label}</span>
+        <span className="text-[10px] font-medium text-[var(--content-tertiary)] uppercase tracking-wider">{label}</span>
       </div>
-      <p className="text-ds-lg font-semibold text-gray-900 mt-1">{value}</p>
+      <p className="text-ds-lg font-semibold text-[var(--content-primary)] mt-1">{value}</p>
     </div>
   );
 }
@@ -549,13 +549,13 @@ function FilterBar({
     <div className="flex flex-wrap items-center gap-ds-2">
       {/* Search */}
       <div className="relative flex-1 min-w-[200px] max-w-[320px]">
-        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--content-tertiary)]" />
         <input
           type="text"
           placeholder="Search families or groups..."
           value={searchQuery}
           onChange={e => onSearchChange(e.target.value)}
-          className="w-full pl-9 pr-3 py-2 text-ds-xs border border-gray-200 rounded-ds-md bg-white focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600"
+          className="w-full pl-9 pr-3 py-2 text-ds-xs border border-[var(--border-default)] rounded-ds-md bg-[var(--surface-elevated)] focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600"
         />
       </div>
 
@@ -563,7 +563,7 @@ function FilterBar({
       <select
         value={confidenceFilter}
         onChange={e => onConfidenceChange(e.target.value as FilterBand)}
-        className="px-3 py-2 text-ds-xs border border-gray-200 rounded-ds-md bg-white focus:outline-none focus:ring-2 focus:ring-brand-600/20"
+        className="px-3 py-2 text-ds-xs border border-[var(--border-default)] rounded-ds-md bg-[var(--surface-elevated)] focus:outline-none focus:ring-2 focus:ring-brand-600/20"
       >
         {CONFIDENCE_FILTERS.map(f => (
           <option key={f.value} value={f.value}>{f.label}</option>
@@ -572,11 +572,11 @@ function FilterBar({
 
       {/* Sort */}
       <div className="flex items-center gap-1.5">
-        <ArrowUpDown className="h-3.5 w-3.5 text-gray-400" />
+        <ArrowUpDown className="h-3.5 w-3.5 text-[var(--content-tertiary)]" />
         <select
           value={sortBy}
           onChange={e => onSortChange(e.target.value as SortOption)}
-          className="px-3 py-2 text-ds-xs border border-gray-200 rounded-ds-md bg-white focus:outline-none focus:ring-2 focus:ring-brand-600/20"
+          className="px-3 py-2 text-ds-xs border border-[var(--border-default)] rounded-ds-md bg-[var(--surface-elevated)] focus:outline-none focus:ring-2 focus:ring-brand-600/20"
         >
           {SORT_OPTIONS.map(s => (
             <option key={s.value} value={s.value}>{s.label}</option>
@@ -586,7 +586,7 @@ function FilterBar({
 
       {/* Clear */}
       {hasActiveFilters && (
-        <button onClick={onClearFilters} className="text-ds-xs text-gray-500 hover:text-gray-700 flex items-center gap-1">
+        <button onClick={onClearFilters} className="text-ds-xs text-[var(--content-secondary)] hover:text-[var(--content-primary)] flex items-center gap-1">
           <X className="h-3 w-3" /> Clear
         </button>
       )}
@@ -628,13 +628,13 @@ function FamilyCard({
       {/* Family header — clickable to expand */}
       <button
         onClick={onToggle}
-        className="w-full px-ds-4 py-ds-3 flex items-center gap-ds-3 hover:bg-gray-50/50 transition-colors text-left"
+        className="w-full px-ds-4 py-ds-3 flex items-center gap-ds-3 hover:bg-[var(--surface-secondary)] transition-colors text-left"
       >
         {/* Expand/collapse chevron */}
         <div className="flex-shrink-0">
           {isExpanded
-            ? <ChevronDown className="h-4 w-4 text-gray-400" />
-            : <ChevronRight className="h-4 w-4 text-gray-400" />
+            ? <ChevronDown className="h-4 w-4 text-[var(--content-tertiary)]" />
+            : <ChevronRight className="h-4 w-4 text-[var(--content-tertiary)]" />
           }
         </div>
 
@@ -642,12 +642,12 @@ function FamilyCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-ds-2">
             <Layers className="h-4 w-4 text-brand-600 flex-shrink-0" />
-            <h3 className="text-ds-sm font-semibold text-gray-900 truncate">{family.name}</h3>
+            <h3 className="text-ds-sm font-semibold text-[var(--content-primary)] truncate">{family.name}</h3>
             <span className={`ds-tag text-[10px] ${bandInfo.className}`}>
               {bandInfo.label}
             </span>
           </div>
-          <div className="flex items-center gap-ds-3 mt-1 text-[10px] text-gray-400">
+          <div className="flex items-center gap-ds-3 mt-1 text-[10px] text-[var(--content-tertiary)]">
             <span>{family.groups.length} exact group{family.groups.length !== 1 ? 's' : ''}</span>
             <span>&middot;</span>
             <span>{family.totalRuns} run{family.totalRuns !== 1 ? 's' : ''}</span>
@@ -674,7 +674,7 @@ function FamilyCard({
 
       {/* Expanded: child exact groups */}
       {isExpanded && (
-        <div className="border-t border-gray-100 bg-gray-50/30">
+        <div className="border-t border-[var(--border-subtle)] bg-[var(--surface-secondary)]">
           {family.groups.map(group => (
             <GroupRow
               key={group.id}
@@ -720,7 +720,7 @@ function GroupRow({
       } ${
         isSelected
           ? 'bg-brand-50 border-l-2 border-brand-600'
-          : 'hover:bg-gray-50 border-l-2 border-transparent'
+          : 'hover:bg-[var(--surface-secondary)] border-l-2 border-transparent'
       }`}
     >
       {/* Confidence dot */}
@@ -729,7 +729,7 @@ function GroupRow({
       {/* Name + metrics */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-ds-2">
-          <p className={`text-ds-sm font-medium truncate ${isSelected ? 'text-brand-700' : 'text-gray-900'}`}>
+          <p className={`text-ds-sm font-medium truncate ${isSelected ? 'text-brand-700' : 'text-[var(--content-primary)]'}`}>
             {group.canonicalName}
           </p>
           <span className={`ds-tag text-[9px] ${bandInfo.className}`}>{bandInfo.shortLabel}</span>
@@ -737,7 +737,7 @@ function GroupRow({
             <span className={`ds-tag text-[9px] ${stabilityInfo.className}`}>{stabilityInfo.label}</span>
           )}
         </div>
-        <div className="flex items-center gap-ds-3 mt-0.5 text-[10px] text-gray-400">
+        <div className="flex items-center gap-ds-3 mt-0.5 text-[10px] text-[var(--content-tertiary)]">
           <span>{group.runCount} run{group.runCount !== 1 ? 's' : ''}</span>
           {group.variantCount > 1 && (
             <span className="flex items-center gap-0.5">
@@ -758,7 +758,7 @@ function GroupRow({
       </div>
 
       {/* Arrow */}
-      <ChevronRight className={`h-3.5 w-3.5 flex-shrink-0 ${isSelected ? 'text-brand-600' : 'text-gray-300'}`} />
+      <ChevronRight className={`h-3.5 w-3.5 flex-shrink-0 ${isSelected ? 'text-brand-600' : 'text-[var(--content-tertiary)]'}`} />
     </button>
   );
 }
@@ -786,7 +786,7 @@ function GroupDetailPanel({
   return (
     <div className="card overflow-hidden sticky top-4">
       {/* Detail header */}
-      <div className="px-ds-4 py-ds-3 border-b border-gray-100 bg-gray-50/50">
+      <div className="px-ds-4 py-ds-3 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)]">
         <div className="flex items-start justify-between gap-ds-2">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-ds-2 mb-1">
@@ -795,19 +795,19 @@ function GroupDetailPanel({
                 <span className={`ds-tag text-[9px] ${stabilityInfo.className}`}>{stabilityInfo.label}</span>
               )}
             </div>
-            <h3 className="text-ds-sm font-semibold text-gray-900 truncate">{group.canonicalName}</h3>
+            <h3 className="text-ds-sm font-semibold text-[var(--content-primary)] truncate">{group.canonicalName}</h3>
             {group.description && (
-              <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-2">{group.description}</p>
+              <p className="text-[10px] text-[var(--content-secondary)] mt-0.5 line-clamp-2">{group.description}</p>
             )}
           </div>
-          <button onClick={onClose} className="p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0">
-            <X className="h-4 w-4 text-gray-400" />
+          <button onClick={onClose} className="p-1 hover:bg-[var(--surface-secondary)] rounded transition-colors flex-shrink-0">
+            <X className="h-4 w-4 text-[var(--content-tertiary)]" />
           </button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-100">
+      <div className="flex border-b border-[var(--border-subtle)]">
         {(['overview', 'variants', 'components', 'explanation'] as const).map(tab => (
           <button
             key={tab}
@@ -815,7 +815,7 @@ function GroupDetailPanel({
             className={`flex-1 px-ds-3 py-ds-2 text-[10px] font-medium transition-colors border-b-2 ${
               activeTab === tab
                 ? 'text-brand-600 border-brand-600'
-                : 'text-gray-400 border-transparent hover:text-gray-600'
+                : 'text-[var(--content-tertiary)] border-transparent hover:text-[var(--content-secondary)]'
             }`}
           >
             {tab === 'overview' ? 'Overview' : tab === 'variants' ? 'Variants' : tab === 'components' ? 'Components' : 'Why Grouped'}
@@ -845,7 +845,7 @@ function GroupDetailPanel({
       </div>
 
       {/* Footer: link to full analytics */}
-      <div className="px-ds-4 py-ds-2.5 border-t border-gray-100 bg-gray-50/50">
+      <div className="px-ds-4 py-ds-2.5 border-t border-[var(--border-subtle)] bg-[var(--surface-secondary)]">
         <Link
           href={`/analytics/process/${group.id}`}
           className="text-ds-xs text-brand-600 hover:text-brand-700 flex items-center gap-1"
@@ -898,9 +898,9 @@ function OverviewTab({
       {/* Metrics grid */}
       <div className="grid grid-cols-2 gap-ds-2">
         {metrics.map(m => (
-          <div key={m.label} className="bg-gray-50 rounded-ds-sm px-ds-3 py-ds-2">
-            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{m.label}</p>
-            <p className="text-ds-sm font-semibold text-gray-900 mt-0.5">{m.value}</p>
+          <div key={m.label} className="bg-[var(--surface-secondary)] rounded-ds-sm px-ds-3 py-ds-2">
+            <p className="text-[10px] text-[var(--content-tertiary)] font-medium uppercase tracking-wider">{m.label}</p>
+            <p className="text-ds-sm font-semibold text-[var(--content-primary)] mt-0.5">{m.value}</p>
           </div>
         ))}
       </div>
@@ -908,7 +908,7 @@ function OverviewTab({
       {/* Systems */}
       {systemsList.length > 0 && (
         <div>
-          <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-1">Systems</p>
+          <p className="text-[10px] text-[var(--content-tertiary)] font-medium uppercase tracking-wider mb-1">Systems</p>
           <div className="flex flex-wrap gap-1">
             {systemsList.map(sys => (
               <span key={sys} className="ds-tag ds-tag-neutral text-[10px]">{sys}</span>
@@ -920,20 +920,20 @@ function OverviewTab({
       {/* Start / End anchors */}
       {(group.startAnchor || group.endAnchor) && (
         <div>
-          <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-1">Process Boundary</p>
+          <p className="text-[10px] text-[var(--content-tertiary)] font-medium uppercase tracking-wider mb-1">Process Boundary</p>
           <div className="space-y-1">
             {group.startAnchor && (
               <div className="flex items-center gap-ds-2 text-[10px]">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span className="text-gray-500">Start:</span>
-                <span className="text-gray-700 font-mono">{formatAnchor(group.startAnchor)}</span>
+                <span className="text-[var(--content-secondary)]">Start:</span>
+                <span className="text-[var(--content-primary)] font-mono">{formatAnchor(group.startAnchor)}</span>
               </div>
             )}
             {group.endAnchor && (
               <div className="flex items-center gap-ds-2 text-[10px]">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                <span className="text-gray-500">End:</span>
-                <span className="text-gray-700 font-mono">{formatAnchor(group.endAnchor)}</span>
+                <span className="text-[var(--content-secondary)]">End:</span>
+                <span className="text-[var(--content-primary)] font-mono">{formatAnchor(group.endAnchor)}</span>
               </div>
             )}
           </div>
@@ -943,7 +943,7 @@ function OverviewTab({
       {/* Path signature preview */}
       {group.pathSignature && (
         <div>
-          <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-1">Step Sequence</p>
+          <p className="text-[10px] text-[var(--content-tertiary)] font-medium uppercase tracking-wider mb-1">Step Sequence</p>
           <div className="flex flex-wrap gap-1">
             {group.pathSignature.split(':').filter(Boolean).slice(0, 8).map((step, i) => (
               <span key={i} className="ds-tag ds-tag-neutral text-[9px]">
@@ -951,7 +951,7 @@ function OverviewTab({
               </span>
             ))}
             {group.pathSignature.split(':').filter(Boolean).length > 8 && (
-              <span className="text-[9px] text-gray-400">+{group.pathSignature.split(':').filter(Boolean).length - 8} more</span>
+              <span className="text-[9px] text-[var(--content-tertiary)]">+{group.pathSignature.split(':').filter(Boolean).length - 8} more</span>
             )}
           </div>
         </div>
@@ -960,7 +960,7 @@ function OverviewTab({
       {/* Workflow runs in this group */}
       {group.workflows.length > 0 && (
         <div>
-          <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-1">
+          <p className="text-[10px] text-[var(--content-tertiary)] font-medium uppercase tracking-wider mb-1">
             Recent Runs ({group.workflows.length})
           </p>
           <div className="space-y-1">
@@ -968,11 +968,11 @@ function OverviewTab({
               <Link
                 key={w.id}
                 href={`/workflows/${w.id}`}
-                className="flex items-center gap-ds-2 px-ds-2 py-1 rounded hover:bg-gray-50 transition-colors group"
+                className="flex items-center gap-ds-2 px-ds-2 py-1 rounded hover:bg-[var(--surface-secondary)] transition-colors group"
               >
-                <span className="w-1 h-1 rounded-full bg-gray-300" />
-                <span className="text-[10px] text-gray-700 truncate flex-1 group-hover:text-brand-600">{w.title}</span>
-                <span className="text-[9px] text-gray-400">{formatDuration(w.durationMs)}</span>
+                <span className="w-1 h-1 rounded-full bg-[var(--content-tertiary)]" />
+                <span className="text-[10px] text-[var(--content-primary)] truncate flex-1 group-hover:text-brand-600">{w.title}</span>
+                <span className="text-[9px] text-[var(--content-tertiary)]">{formatDuration(w.durationMs)}</span>
               </Link>
             ))}
           </div>
@@ -995,15 +995,15 @@ function VariantsTab({
     return (
       <div className="text-center py-6">
         <CheckCircle2 className="h-6 w-6 text-emerald-400 mx-auto mb-2" />
-        <p className="text-ds-xs text-gray-500">All runs follow the same path.</p>
-        <p className="text-[10px] text-gray-400 mt-1">No variants detected in this process group.</p>
+        <p className="text-ds-xs text-[var(--content-secondary)]">All runs follow the same path.</p>
+        <p className="text-[10px] text-[var(--content-tertiary)] mt-1">No variants detected in this process group.</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-ds-2">
-      <p className="text-[10px] text-gray-400">
+      <p className="text-[10px] text-[var(--content-tertiary)]">
         {group.variantCount} variant{group.variantCount !== 1 ? 's' : ''} detected across {group.runCount} runs.
       </p>
       {variantList.map((v, i) => {
@@ -1015,17 +1015,17 @@ function VariantsTab({
         const steps = sig?.stepCategories ?? [];
 
         return (
-          <div key={i} className={`rounded-ds-sm border p-ds-3 ${isStandard ? 'border-emerald-200 bg-emerald-50/30' : 'border-gray-200'}`}>
+          <div key={i} className={`rounded-ds-sm border p-ds-3 ${isStandard ? 'border-emerald-200 bg-emerald-50/30' : 'border-[var(--border-default)]'}`}>
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-ds-2">
-                <span className={`text-ds-xs font-medium ${isStandard ? 'text-emerald-700' : 'text-gray-700'}`}>
+                <span className={`text-ds-xs font-medium ${isStandard ? 'text-emerald-700' : 'text-[var(--content-primary)]'}`}>
                   {isStandard ? 'Standard Path' : `Variant ${i + 1}`}
                 </span>
                 {isStandard && (
                   <span className="ds-tag text-[9px] bg-emerald-100 text-emerald-700">Canonical</span>
                 )}
               </div>
-              <span className="text-[10px] text-gray-400">
+              <span className="text-[10px] text-[var(--content-tertiary)]">
                 {runCount} run{runCount !== 1 ? 's' : ''} &middot; {Math.round(frequency * 100)}%
               </span>
             </div>
@@ -1034,12 +1034,12 @@ function VariantsTab({
             {steps.length > 0 && (
               <div className="flex flex-wrap gap-0.5 mt-1">
                 {steps.slice(0, 6).map((step: string, j: number) => (
-                  <span key={j} className="text-[9px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+                  <span key={j} className="text-[9px] bg-[var(--surface-secondary)] text-[var(--content-secondary)] px-1.5 py-0.5 rounded">
                     {formatStepCategory(step)}
                   </span>
                 ))}
                 {steps.length > 6 && (
-                  <span className="text-[9px] text-gray-400">+{steps.length - 6}</span>
+                  <span className="text-[9px] text-[var(--content-tertiary)]">+{steps.length - 6}</span>
                 )}
               </div>
             )}
@@ -1059,27 +1059,27 @@ function ComponentsTab({ group }: { group: ProcessDefinition }) {
   if (uniqueSteps.length === 0) {
     return (
       <div className="text-center py-6">
-        <Puzzle className="h-6 w-6 text-gray-300 mx-auto mb-2" />
-        <p className="text-ds-xs text-gray-500">No shared component data available yet.</p>
-        <p className="text-[10px] text-gray-400 mt-1">Run analysis to detect reusable step patterns.</p>
+        <Puzzle className="h-6 w-6 text-[var(--content-tertiary)] mx-auto mb-2" />
+        <p className="text-ds-xs text-[var(--content-secondary)]">No shared component data available yet.</p>
+        <p className="text-[10px] text-[var(--content-tertiary)] mt-1">Run analysis to detect reusable step patterns.</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-ds-2">
-      <p className="text-[10px] text-gray-400">
+      <p className="text-[10px] text-[var(--content-tertiary)]">
         Step patterns in this process group. Components appearing across multiple groups are reusable.
       </p>
       {uniqueSteps.map((step, i) => {
         const count = steps.filter(s => s === step).length;
         return (
-          <div key={i} className="flex items-center gap-ds-3 px-ds-2 py-1.5 rounded-ds-sm bg-gray-50">
+          <div key={i} className="flex items-center gap-ds-3 px-ds-2 py-1.5 rounded-ds-sm bg-[var(--surface-secondary)]">
             <span className={`w-2 h-2 rounded-full flex-shrink-0 ${getStepColor(step)}`} />
             <div className="flex-1 min-w-0">
-              <p className="text-ds-xs text-gray-700 font-medium">{formatStepCategory(step)}</p>
+              <p className="text-ds-xs text-[var(--content-primary)] font-medium">{formatStepCategory(step)}</p>
               {count > 1 && (
-                <p className="text-[9px] text-gray-400">{count}x in this process</p>
+                <p className="text-[9px] text-[var(--content-tertiary)]">{count}x in this process</p>
               )}
             </div>
           </div>
@@ -1113,9 +1113,9 @@ function ExplanationTab({
 
       {!summary && supporting.length === 0 && weaknesses.length === 0 && (
         <div className="text-center py-6">
-          <Info className="h-6 w-6 text-gray-300 mx-auto mb-2" />
-          <p className="text-ds-xs text-gray-500">Explanation data will be available after re-analysis.</p>
-          <p className="text-[10px] text-gray-400 mt-1">
+          <Info className="h-6 w-6 text-[var(--content-tertiary)] mx-auto mb-2" />
+          <p className="text-ds-xs text-[var(--content-secondary)]">Explanation data will be available after re-analysis.</p>
+          <p className="text-[10px] text-[var(--content-tertiary)] mt-1">
             The new scoring engine generates detailed grouping explanations.
           </p>
         </div>
@@ -1124,14 +1124,14 @@ function ExplanationTab({
       {/* Supporting evidence */}
       {supporting.length > 0 && (
         <div>
-          <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-1.5">Supporting Evidence</p>
+          <p className="text-[10px] text-[var(--content-tertiary)] font-medium uppercase tracking-wider mb-1.5">Supporting Evidence</p>
           <div className="space-y-1">
             {supporting.sort((a, b) => b.weight - a.weight).map((entry, i) => (
               <div key={i} className="flex items-start gap-ds-2 px-ds-2 py-1">
                 <CheckCircle2 className="h-3 w-3 text-emerald-500 mt-0.5 flex-shrink-0" />
                 <div>
                   <span className="ds-tag text-[9px] bg-emerald-50 text-emerald-700">{formatExplanationCode(entry.code)}</span>
-                  {entry.detail && <p className="text-[10px] text-gray-500 mt-0.5">{entry.detail}</p>}
+                  {entry.detail && <p className="text-[10px] text-[var(--content-secondary)] mt-0.5">{entry.detail}</p>}
                 </div>
               </div>
             ))}
@@ -1142,14 +1142,14 @@ function ExplanationTab({
       {/* Weaknesses / caveats */}
       {weaknesses.length > 0 && (
         <div>
-          <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-1.5">Caveats</p>
+          <p className="text-[10px] text-[var(--content-tertiary)] font-medium uppercase tracking-wider mb-1.5">Caveats</p>
           <div className="space-y-1">
             {weaknesses.sort((a, b) => b.weight - a.weight).map((entry, i) => (
               <div key={i} className="flex items-start gap-ds-2 px-ds-2 py-1">
                 <AlertTriangle className="h-3 w-3 text-amber-500 mt-0.5 flex-shrink-0" />
                 <div>
                   <span className="ds-tag text-[9px] bg-amber-50 text-amber-700">{formatExplanationCode(entry.code)}</span>
-                  {entry.detail && <p className="text-[10px] text-gray-500 mt-0.5">{entry.detail}</p>}
+                  {entry.detail && <p className="text-[10px] text-[var(--content-secondary)] mt-0.5">{entry.detail}</p>}
                 </div>
               </div>
             ))}
@@ -1159,8 +1159,8 @@ function ExplanationTab({
 
       {/* Confidence details */}
       <div>
-        <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-1">Confidence</p>
-        <div className="bg-gray-50 rounded-ds-sm px-ds-3 py-ds-2 text-[10px] text-gray-600">
+        <p className="text-[10px] text-[var(--content-tertiary)] font-medium uppercase tracking-wider mb-1">Confidence</p>
+        <div className="bg-[var(--surface-secondary)] rounded-ds-sm px-ds-3 py-ds-2 text-[10px] text-[var(--content-secondary)]">
           <p>Score: {group.confidenceScore !== null ? formatConfidence(group.confidenceScore) : 'Not scored'}</p>
           <p>Stability: {group.stabilityScore !== null ? `${Math.round(group.stabilityScore * 100)}%` : 'Not scored'}</p>
           {group.confidenceBand && <p>Band: {formatExplanationCode(group.confidenceBand)}</p>}
@@ -1181,11 +1181,11 @@ function EmptyState({
 }) {
   return (
     <div className="card p-12 text-center">
-      <Boxes className="mx-auto h-10 w-10 text-gray-300" />
-      <h3 className="mt-3 text-ds-sm font-medium text-gray-900">
+      <Boxes className="mx-auto h-10 w-10 text-[var(--content-tertiary)]" />
+      <h3 className="mt-3 text-ds-sm font-medium text-[var(--content-primary)]">
         No process groups detected yet
       </h3>
-      <p className="mt-1 text-ds-sm text-gray-500 max-w-md mx-auto">
+      <p className="mt-1 text-ds-sm text-[var(--content-secondary)] max-w-md mx-auto">
         Process groups are automatically detected when you have multiple workflow recordings.
         Upload more workflows or run analysis to discover recurring patterns.
       </p>
@@ -1318,7 +1318,7 @@ function getConfidenceBandInfo(score: number | null): { label: string; shortLabe
     case 'low_confidence':
       return { label: 'Low Confidence', shortLabel: 'Low', className: 'bg-orange-100 text-orange-700', dotColor: 'bg-orange-400' };
     default:
-      return { label: 'Possible Match', shortLabel: 'Possible', className: 'bg-gray-100 text-gray-600', dotColor: 'bg-gray-400' };
+      return { label: 'Possible Match', shortLabel: 'Possible', className: 'bg-[var(--surface-secondary)] text-[var(--content-secondary)]', dotColor: 'bg-[var(--content-tertiary)]' };
   }
 }
 
@@ -1363,14 +1363,14 @@ function getStepColor(step: string): string {
     click_then_navigate: 'bg-teal-400',
     fill_and_submit: 'bg-blue-400',
     repeated_click_dedup: 'bg-orange-400',
-    single_action: 'bg-gray-400',
+    single_action: 'bg-[var(--content-tertiary)]',
     data_entry: 'bg-violet-400',
     send_action: 'bg-emerald-400',
     file_action: 'bg-yellow-400',
     error_handling: 'bg-red-400',
     annotation: 'bg-purple-400',
   };
-  return colors[step] ?? 'bg-gray-300';
+  return colors[step] ?? 'bg-[var(--content-tertiary)]';
 }
 
 function deriveFamilyName(names: string[]): string {

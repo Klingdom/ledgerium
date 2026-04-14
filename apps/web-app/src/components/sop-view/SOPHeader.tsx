@@ -12,7 +12,7 @@ export function SOPHeader({ metadata }: Props) {
   const confStyle = metadata.confidence !== null ? confidenceColor(metadata.confidence) : null;
 
   return (
-    <div className="px-ds-5 py-ds-3 border-b border-gray-100 bg-white">
+    <div className="px-ds-5 py-ds-3 border-b border-[var(--border-subtle)] bg-[var(--surface-elevated)]">
       {/* Row 1: Title + provenance */}
       <div className="flex items-start justify-between gap-4 mb-2">
         <div className="min-w-0 flex-1">
@@ -21,11 +21,11 @@ export function SOPHeader({ metadata }: Props) {
               SOP
             </span>
             {metadata.version && (
-              <span className="text-[9px] text-gray-400">v{metadata.version}</span>
+              <span className="text-[9px] text-[var(--content-tertiary)]">v{metadata.version}</span>
             )}
           </div>
           {metadata.objective && (
-            <p className="text-[11px] text-gray-500 mt-1 leading-relaxed line-clamp-2">
+            <p className="text-[11px] text-[var(--content-secondary)] mt-1 leading-relaxed line-clamp-2">
               {metadata.objective}
             </p>
           )}
@@ -85,12 +85,12 @@ export function SOPHeader({ metadata }: Props) {
             <Divider />
             <div className="flex items-center gap-1">
               {metadata.systems.slice(0, 3).map(sys => (
-                <span key={sys} className="text-[9px] font-medium text-gray-500 bg-gray-50 border border-gray-200 rounded px-1.5 py-0.5">
+                <span key={sys} className="text-[9px] font-medium text-[var(--content-secondary)] bg-[var(--surface-secondary)] border border-[var(--border-default)] rounded px-1.5 py-0.5">
                   {sys}
                 </span>
               ))}
               {metadata.systems.length > 3 && (
-                <span className="text-[9px] text-gray-400">+{metadata.systems.length - 3}</span>
+                <span className="text-[9px] text-[var(--content-tertiary)]">+{metadata.systems.length - 3}</span>
               )}
             </div>
           </>
@@ -102,14 +102,14 @@ export function SOPHeader({ metadata }: Props) {
 
 function MetricChip({ icon: Icon, value, label }: { icon: React.ElementType; value: string; label?: string }) {
   return (
-    <span className="flex items-center gap-1 text-[11px] text-gray-600">
-      <Icon className="h-3 w-3 text-gray-400" />
-      <span className="font-semibold text-gray-800">{value}</span>
-      {label && <span className="text-gray-400">{label}</span>}
+    <span className="flex items-center gap-1 text-[11px] text-[var(--content-secondary)]">
+      <Icon className="h-3 w-3 text-[var(--content-tertiary)]" />
+      <span className="font-semibold text-[var(--content-primary)]">{value}</span>
+      {label && <span className="text-[var(--content-tertiary)]">{label}</span>}
     </span>
   );
 }
 
 function Divider() {
-  return <span className="w-px h-4 bg-gray-200" />;
+  return <span className="w-px h-4 bg-[var(--surface-secondary)]" />;
 }

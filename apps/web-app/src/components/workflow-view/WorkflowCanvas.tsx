@@ -144,7 +144,7 @@ function FlowCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvasRead
           color="#e2e8f0"
           gap={24}
           size={1}
-          className="!bg-gray-50/50"
+          className="!bg-[var(--surface-secondary)]"
         />
 
         {toolbar.showMinimap && (

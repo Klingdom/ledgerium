@@ -114,8 +114,8 @@ export default function UploadPage() {
   return (
     <div className="mx-auto max-w-ds-content">
       <div className="mb-ds-6">
-        <h1 className="text-ds-2xl font-bold tracking-tight text-gray-900">Upload Workflow</h1>
-        <p className="mt-ds-1 text-ds-sm text-gray-500">
+        <h1 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">Upload Workflow</h1>
+        <p className="mt-ds-1 text-ds-sm text-[var(--content-secondary)]">
           Upload a Ledgerium recorder JSON file to add it to your workflow library.
         </p>
       </div>
@@ -125,13 +125,13 @@ export default function UploadPage() {
         <div className={`card px-ds-5 py-ds-3 mb-ds-4 flex items-center justify-between ${isAtLimit ? 'border-amber-200 bg-amber-50/50' : ''}`}>
           <div className="flex items-center gap-ds-3">
             <div className="flex items-center gap-ds-2">
-              <span className="text-ds-sm text-gray-600">
-                Uploads: <strong className="text-gray-900 tabular-nums">{account.uploadCount}</strong>
-                <span className="text-gray-400"> / {FREE_LIMIT}</span>
+              <span className="text-ds-sm text-[var(--content-secondary)]">
+                Uploads: <strong className="text-[var(--content-primary)] tabular-nums">{account.uploadCount}</strong>
+                <span className="text-[var(--content-tertiary)]"> / {FREE_LIMIT}</span>
               </span>
             </div>
             {/* Progress bar */}
-            <div className="h-1.5 w-24 rounded-full bg-gray-100 overflow-hidden">
+            <div className="h-1.5 w-24 rounded-full bg-[var(--surface-secondary)] overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${isAtLimit ? 'bg-amber-500' : 'bg-brand-500'}`}
                 style={{ width: `${Math.min(100, (account.uploadCount / FREE_LIMIT) * 100)}%` }}
@@ -150,9 +150,9 @@ export default function UploadPage() {
       )}
 
       {account?.plan === 'pro' && (
-        <div className="card px-ds-5 py-ds-3 mb-ds-4 flex items-center gap-ds-2 text-ds-sm text-gray-600">
+        <div className="card px-ds-5 py-ds-3 mb-ds-4 flex items-center gap-ds-2 text-ds-sm text-[var(--content-secondary)]">
           <Zap className="h-4 w-4 text-brand-600" />
-          <span>Pro plan — <strong className="text-gray-900">unlimited uploads</strong></span>
+          <span>Pro plan — <strong className="text-[var(--content-primary)]">unlimited uploads</strong></span>
         </div>
       )}
 
@@ -162,15 +162,15 @@ export default function UploadPage() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100">
             <Lock className="h-7 w-7 text-amber-500" />
           </div>
-          <h3 className="mt-ds-4 text-ds-lg font-semibold text-gray-900">Free plan limit reached</h3>
-          <p className="mt-ds-2 text-ds-sm text-gray-500 max-w-sm">
+          <h3 className="mt-ds-4 text-ds-lg font-semibold text-[var(--content-primary)]">Free plan limit reached</h3>
+          <p className="mt-ds-2 text-ds-sm text-[var(--content-secondary)] max-w-sm">
             You've used all {FREE_LIMIT} uploads on the free plan. Upgrade to Pro for unlimited workflow uploads, advanced templates, and more.
           </p>
           <button onClick={handleUpgrade} disabled={billingLoading} className="btn-primary mt-ds-4 gap-1.5">
             <Zap className="h-4 w-4" />
             {billingLoading ? 'Redirecting to checkout...' : 'Upgrade to Pro — $29/mo'}
           </button>
-          <Link href="/pricing" className="mt-ds-2 text-ds-xs text-gray-400 hover:text-gray-600">
+          <Link href="/pricing" className="mt-ds-2 text-ds-xs text-[var(--content-tertiary)] hover:text-[var(--content-secondary)]">
             See plan details
           </Link>
         </div>
@@ -182,7 +182,7 @@ export default function UploadPage() {
           className={`card flex flex-col items-center justify-center px-ds-8 py-ds-12 text-center transition-all ${
             isDragOver
               ? 'border-brand-400 bg-brand-50 border-2 border-dashed shadow-md'
-              : 'border-2 border-dashed border-gray-300 hover:border-gray-400'
+              : 'border-2 border-dashed border-[var(--border-default)] hover:border-[var(--border-default)]'
           } ${state === 'uploading' ? 'pointer-events-none opacity-60' : 'cursor-pointer'}`}
           onClick={() => {
             if (state !== 'uploading') document.getElementById('file-input')?.click();
@@ -191,16 +191,20 @@ export default function UploadPage() {
           {state === 'uploading' ? (
             <>
               <Loader2 className="h-10 w-10 text-brand-500 animate-spin" />
-              <p className="mt-ds-3 text-ds-base font-medium text-gray-700">Processing workflow...</p>
-              <p className="mt-ds-1 text-ds-xs text-gray-400">Validating and running deterministic pipeline</p>
+              <p className="mt-ds-3 text-ds-base font-medium text-[var(--content-primary)]">Processing workflow...</p>
+              <p className="mt-ds-1 text-ds-xs text-[var(--content-tertiary)]">Validating and running deterministic pipeline</p>
             </>
           ) : (
             <>
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100">
-                <Upload className="h-7 w-7 text-gray-400" />
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface-secondary)]">
+                <Upload className="h-7 w-7 text-[var(--content-tertiary)]" />
               </div>
-              <p className="mt-ds-4 text-ds-base font-medium text-gray-700">Drag and drop your JSON file here</p>
-              <p className="mt-ds-1 text-ds-xs text-gray-400">or click to browse — accepts Ledgerium recorder .json files</p>
+              <p className="mt-ds-4 text-ds-base font-medium text-[var(--content-primary)]">Drag and drop your JSON file here</p>
+              <p className="mt-ds-1 text-ds-xs text-[var(--content-tertiary)]">or click to browse — accepts Ledgerium recorder .json files</p>
+              <p className="text-ds-xs text-[var(--content-tertiary)] mt-2">
+                Your workflow data is processed locally and never shared.{' '}
+                <a href="/security" className="underline hover:text-brand-600">Learn more</a>
+              </p>
             </>
           )}
 
@@ -215,8 +219,8 @@ export default function UploadPage() {
             <div className="flex items-start gap-ds-3">
               <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
               <div className="flex-1">
-                <h3 className="text-ds-sm font-semibold text-gray-900">Workflow created</h3>
-                <p className="mt-ds-1 text-ds-sm text-gray-600">
+                <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">Workflow created</h3>
+                <p className="mt-ds-1 text-ds-sm text-[var(--content-secondary)]">
                   <strong>{result.title}</strong> — {result.stepCount} steps
                   {result.toolsUsed && result.toolsUsed.length > 0 && <> across {result.toolsUsed.join(', ')}</>}
                 </p>
@@ -241,8 +245,8 @@ export default function UploadPage() {
             <div className="flex items-start gap-ds-3">
               <Lock className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
               <div className="flex-1">
-                <h3 className="text-ds-sm font-semibold text-gray-900">Upgrade to continue</h3>
-                <p className="mt-ds-1 text-ds-sm text-gray-600">{result.detail ?? result.error}</p>
+                <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">Upgrade to continue</h3>
+                <p className="mt-ds-1 text-ds-sm text-[var(--content-secondary)]">{result.detail ?? result.error}</p>
                 <div className="mt-ds-3 flex gap-ds-2">
                   <button onClick={handleUpgrade} disabled={billingLoading} className="btn-primary text-xs gap-1">
                     <Zap className="h-3.5 w-3.5" />
@@ -263,12 +267,12 @@ export default function UploadPage() {
             <div className="flex items-start gap-ds-3">
               <XCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
               <div className="flex-1">
-                <h3 className="text-ds-sm font-semibold text-gray-900">Upload failed</h3>
+                <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">Upload failed</h3>
                 <p className="mt-ds-1 text-ds-sm text-red-600">{result.error}</p>
                 {result.details && result.details.length > 0 && (
                   <ul className="mt-ds-2 space-y-1">
                     {result.details.slice(0, 5).map((d, i) => (
-                      <li key={i} className="text-ds-xs text-gray-500 font-mono">{d}</li>
+                      <li key={i} className="text-ds-xs text-[var(--content-secondary)] font-mono">{d}</li>
                     ))}
                   </ul>
                 )}
@@ -282,11 +286,11 @@ export default function UploadPage() {
       {/* Info */}
       <div className="mt-ds-8 card px-ds-5 py-ds-4">
         <h3 className="ds-section-label">Supported Format</h3>
-        <div className="mt-ds-2 flex items-center gap-ds-2 text-ds-sm text-gray-600">
-          <FileJson className="h-4 w-4 text-gray-400" />
+        <div className="mt-ds-2 flex items-center gap-ds-2 text-ds-sm text-[var(--content-secondary)]">
+          <FileJson className="h-4 w-4 text-[var(--content-tertiary)]" />
           Ledgerium recorder session bundle (.json)
         </div>
-        <p className="mt-ds-2 text-ds-xs text-gray-400">
+        <p className="mt-ds-2 text-ds-xs text-[var(--content-tertiary)]">
           Export a recording from the Ledgerium browser extension, then upload the JSON file here.
         </p>
       </div>

@@ -170,12 +170,12 @@ export function WorkflowVariantsMap({ graph, intelligence, onSelectNode }: Props
   return (
     <div className="absolute inset-0 flex overflow-hidden">
       {/* ── Left: Path cards rail ──────────────────────────────────────── */}
-      <div className="w-80 flex-shrink-0 border-r border-gray-100 bg-white overflow-y-auto">
+      <div className="w-80 flex-shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-elevated)] overflow-y-auto">
         {/* Overview header */}
-        <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+        <div className="px-4 py-3 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)]">
           <div className="flex items-center gap-2 mb-2">
             <GitBranch className="h-4 w-4 text-violet-600" />
-            <h3 className="text-ds-sm font-semibold text-gray-900">Process Variants</h3>
+            <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">Process Variants</h3>
           </div>
           <div className="grid grid-cols-3 gap-2">
             <MiniStat label="Paths" value={paths.length} />
@@ -200,17 +200,17 @@ export function WorkflowVariantsMap({ graph, intelligence, onSelectNode }: Props
 
         {/* Comparison shortcuts */}
         {paths.length > 1 && (
-          <div className="px-4 py-3 border-t border-gray-100">
-            <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Quick Compare</p>
+          <div className="px-4 py-3 border-t border-[var(--border-subtle)]">
+            <p className="text-[9px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider mb-2">Quick Compare</p>
             <div className="space-y-1">
               {paths.filter(p => !p.isStandard).slice(0, 3).map(p => (
                 <button
                   key={p.id}
                   onClick={() => { setSelectedPathId(standardPath?.id ?? null); setComparePathId(p.id); }}
-                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-[10px] text-gray-600 hover:bg-gray-50 transition-colors text-left"
+                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-[10px] text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)] transition-colors text-left"
                 >
                   <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#059669' }} />
-                  <span className="text-gray-400">vs</span>
+                  <span className="text-[var(--content-tertiary)]">vs</span>
                   <span className="w-1.5 h-1.5 rounded-full" style={{ background: p.roleColor }} />
                   <span className="truncate">Standard vs {p.roleLabel}</span>
                 </button>
@@ -221,7 +221,7 @@ export function WorkflowVariantsMap({ graph, intelligence, onSelectNode }: Props
       </div>
 
       {/* ── Right: Path detail + step comparison ──────────────────────── */}
-      <div className="flex-1 overflow-y-auto bg-gray-50/30 p-5">
+      <div className="flex-1 overflow-y-auto bg-[var(--surface-secondary)] p-5">
         {selectedPath && (
           <div className="space-y-4 max-w-3xl mx-auto">
             {/* Path summary header */}
@@ -268,10 +268,10 @@ function PathCard({
     <div
       className={`rounded-xl border transition-all cursor-pointer ${
         isSelected
-          ? 'border-gray-300 bg-white shadow-sm ring-1 ring-gray-200'
+          ? 'border-[var(--border-default)] bg-[var(--surface-elevated)] shadow-sm ring-1 ring-[var(--border-default)]'
           : isComparing
             ? 'border-indigo-200 bg-indigo-50/30'
-            : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm'
+            : 'border-[var(--border-subtle)] bg-[var(--surface-elevated)] hover:border-[var(--border-default)] hover:shadow-sm'
       }`}
     >
       <button onClick={onSelect} className="w-full text-left px-3 py-2.5">
@@ -284,16 +284,16 @@ function PathCard({
             {path.roleLabel}
           </span>
           <span className="flex-1" />
-          <span className="text-[10px] font-semibold text-gray-700">
+          <span className="text-[10px] font-semibold text-[var(--content-primary)]">
             {Math.round(path.frequency * 100)}%
           </span>
         </div>
 
         {/* Title */}
-        <p className="text-[11px] font-medium text-gray-800 mb-1.5">{path.label}</p>
+        <p className="text-[11px] font-medium text-[var(--content-primary)] mb-1.5">{path.label}</p>
 
         {/* Metrics row */}
-        <div className="flex items-center gap-3 text-[10px] text-gray-500">
+        <div className="flex items-center gap-3 text-[10px] text-[var(--content-secondary)]">
           <span className="flex items-center gap-0.5">
             <Layers className="w-2.5 h-2.5" />
             {path.stepCategories.length} steps
@@ -309,7 +309,7 @@ function PathCard({
         </div>
 
         {/* Frequency bar */}
-        <div className="mt-2 h-1 bg-gray-100 rounded-full overflow-hidden">
+        <div className="mt-2 h-1 bg-[var(--surface-secondary)] rounded-full overflow-hidden">
           <div
             className="h-full rounded-full transition-all"
             style={{ width: `${Math.max(3, path.frequency * 100)}%`, background: path.roleColor }}
@@ -325,7 +325,7 @@ function PathCard({
             className={`text-[9px] font-medium px-2 py-0.5 rounded transition-colors ${
               isComparing
                 ? 'text-indigo-700 bg-indigo-100'
-                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+                : 'text-[var(--content-tertiary)] hover:text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
             }`}
           >
             {isComparing ? 'Comparing' : 'Compare vs Standard'}
@@ -340,7 +340,7 @@ function PathCard({
 
 function PathSummaryCard({ path, totalRuns }: { path: ClassifiedPath; totalRuns: number }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div className="bg-[var(--surface-elevated)] rounded-xl border border-[var(--border-default)] shadow-sm overflow-hidden">
       <div className="px-5 py-4">
         <div className="flex items-center gap-3 mb-3">
           <span
@@ -349,7 +349,7 @@ function PathSummaryCard({ path, totalRuns }: { path: ClassifiedPath; totalRuns:
           >
             {path.roleLabel}
           </span>
-          <h3 className="text-ds-sm font-semibold text-gray-900">{path.label}</h3>
+          <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">{path.label}</h3>
         </div>
 
         <div className="grid grid-cols-5 gap-3">
@@ -366,10 +366,10 @@ function PathSummaryCard({ path, totalRuns }: { path: ClassifiedPath; totalRuns:
 
 function SummaryMetric({ label, value, sublabel }: { label: string; value: string; sublabel?: string | undefined }) {
   return (
-    <div className="bg-gray-50 rounded-lg px-3 py-2">
-      <p className="text-[9px] text-gray-400 uppercase tracking-wider">{label}</p>
-      <p className="text-ds-sm font-semibold text-gray-800 mt-0.5">{value}</p>
-      {sublabel && <p className="text-[9px] text-gray-400 mt-0.5">{sublabel}</p>}
+    <div className="bg-[var(--surface-secondary)] rounded-lg px-3 py-2">
+      <p className="text-[9px] text-[var(--content-tertiary)] uppercase tracking-wider">{label}</p>
+      <p className="text-ds-sm font-semibold text-[var(--content-primary)] mt-0.5">{value}</p>
+      {sublabel && <p className="text-[9px] text-[var(--content-tertiary)] mt-0.5">{sublabel}</p>}
     </div>
   );
 }
@@ -381,7 +381,7 @@ function ComparisonCard({ primary, secondary }: { primary: ClassifiedPath; secon
   const freqDiff = Math.round((secondary.frequency - primary.frequency) * 100);
 
   return (
-    <div className="bg-white rounded-xl border border-indigo-200 shadow-sm overflow-hidden">
+    <div className="bg-[var(--surface-elevated)] rounded-xl border border-indigo-200 shadow-sm overflow-hidden">
       <div className="px-4 py-3 bg-indigo-50/50 border-b border-indigo-100">
         <div className="flex items-center gap-2">
           <Target className="h-3.5 w-3.5 text-indigo-600" />
@@ -396,15 +396,15 @@ function ComparisonCard({ primary, secondary }: { primary: ClassifiedPath; secon
               style={{ color: primary.roleColor, background: primary.roleBg }}>
               {primary.roleLabel}
             </span>
-            <p className="text-ds-xs font-medium text-gray-700 mt-1">{primary.stepCategories.length} steps</p>
-            <p className="text-[10px] text-gray-500">{primary.durationLabel}</p>
-            <p className="text-[10px] text-gray-500">{Math.round(primary.frequency * 100)}% of runs</p>
+            <p className="text-ds-xs font-medium text-[var(--content-primary)] mt-1">{primary.stepCategories.length} steps</p>
+            <p className="text-[10px] text-[var(--content-secondary)]">{primary.durationLabel}</p>
+            <p className="text-[10px] text-[var(--content-secondary)]">{Math.round(primary.frequency * 100)}% of runs</p>
           </div>
 
           {/* vs divider */}
           <div className="flex flex-col items-center gap-1 px-3">
-            <span className="text-[10px] font-bold text-gray-300">VS</span>
-            <div className="w-px h-8 bg-gray-200" />
+            <span className="text-[10px] font-bold text-[var(--content-tertiary)]">VS</span>
+            <div className="w-px h-8 bg-[var(--surface-secondary)]" />
             <div className="space-y-0.5 text-center">
               {stepDiff !== 0 && (
                 <p className={`text-[9px] font-medium ${stepDiff > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
@@ -412,7 +412,7 @@ function ComparisonCard({ primary, secondary }: { primary: ClassifiedPath; secon
                 </p>
               )}
               {freqDiff !== 0 && (
-                <p className={`text-[9px] font-medium ${freqDiff < 0 ? 'text-amber-600' : 'text-gray-500'}`}>
+                <p className={`text-[9px] font-medium ${freqDiff < 0 ? 'text-amber-600' : 'text-[var(--content-secondary)]'}`}>
                   {freqDiff > 0 ? '+' : ''}{freqDiff}% freq
                 </p>
               )}
@@ -425,9 +425,9 @@ function ComparisonCard({ primary, secondary }: { primary: ClassifiedPath; secon
               style={{ color: secondary.roleColor, background: secondary.roleBg }}>
               {secondary.roleLabel}
             </span>
-            <p className="text-ds-xs font-medium text-gray-700 mt-1">{secondary.stepCategories.length} steps</p>
-            <p className="text-[10px] text-gray-500">{secondary.durationLabel}</p>
-            <p className="text-[10px] text-gray-500">{Math.round(secondary.frequency * 100)}% of runs</p>
+            <p className="text-ds-xs font-medium text-[var(--content-primary)] mt-1">{secondary.stepCategories.length} steps</p>
+            <p className="text-[10px] text-[var(--content-secondary)]">{secondary.durationLabel}</p>
+            <p className="text-[10px] text-[var(--content-secondary)]">{Math.round(secondary.frequency * 100)}% of runs</p>
           </div>
         </div>
       </div>
@@ -451,17 +451,17 @@ function StepSequenceView({
   const standardCategories = standardPath?.stepCategories ?? [];
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-      <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+    <div className="bg-[var(--surface-elevated)] rounded-xl border border-[var(--border-default)] shadow-sm overflow-hidden">
+      <div className="px-4 py-3 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)]">
         <div className="flex items-center gap-2">
-          <Layers className="h-3.5 w-3.5 text-gray-500" />
-          <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Step Sequence</span>
+          <Layers className="h-3.5 w-3.5 text-[var(--content-secondary)]" />
+          <span className="text-[10px] font-semibold text-[var(--content-secondary)] uppercase tracking-wider">Step Sequence</span>
           <span className="flex-1" />
-          <span className="text-[10px] text-gray-400">{path.stepCategories.length} steps</span>
+          <span className="text-[10px] text-[var(--content-tertiary)]">{path.stepCategories.length} steps</span>
         </div>
       </div>
 
-      <div className="divide-y divide-gray-50">
+      <div className="divide-y divide-[var(--border-subtle)]">
         {path.stepCategories.map((cat, i) => {
           const style = CATEGORY_STYLES[cat as keyof typeof CATEGORY_STYLES] ?? CATEGORY_STYLES.single_action;
           const matchesStandard = i < standardCategories.length && standardCategories[i] === cat;
@@ -476,7 +476,7 @@ function StepSequenceView({
               key={`${path.id}-step-${i}`}
               onClick={() => matchNode && onSelectNode(matchNode.id)}
               className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                isDivergence ? 'bg-amber-50/30' : 'hover:bg-gray-50'
+                isDivergence ? 'bg-amber-50/30' : 'hover:bg-[var(--surface-secondary)]'
               }`}
             >
               {/* Ordinal + connector */}
@@ -502,11 +502,11 @@ function StepSequenceView({
                     {style.label}
                   </span>
                   {matchNode && (
-                    <span className="text-[10px] text-gray-700 truncate">{matchNode.shortLabel}</span>
+                    <span className="text-[10px] text-[var(--content-primary)] truncate">{matchNode.shortLabel}</span>
                   )}
                 </div>
                 {matchNode && matchNode.system && (
-                  <span className="text-[9px] text-gray-400">{matchNode.system}</span>
+                  <span className="text-[9px] text-[var(--content-tertiary)]">{matchNode.system}</span>
                 )}
               </div>
 
@@ -519,10 +519,10 @@ function StepSequenceView({
 
               {/* Duration */}
               {matchNode && matchNode.durationMs > 0 && (
-                <span className="text-[10px] text-gray-400 flex-shrink-0">{matchNode.durationLabel}</span>
+                <span className="text-[10px] text-[var(--content-tertiary)] flex-shrink-0">{matchNode.durationLabel}</span>
               )}
 
-              <ChevronRight className="h-3 w-3 text-gray-300 flex-shrink-0" />
+              <ChevronRight className="h-3 w-3 text-[var(--content-tertiary)] flex-shrink-0" />
             </button>
           );
         })}
@@ -593,18 +593,18 @@ function VariantInsightsCards({
 
   return (
     <div className="space-y-2">
-      <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider px-1">Path Insights</p>
+      <p className="text-[9px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider px-1">Path Insights</p>
       {insights.map((insight, i) => {
         const Icon = insight.icon;
         return (
-          <div key={i} className="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-start gap-3">
+          <div key={i} className="bg-[var(--surface-elevated)] rounded-xl border border-[var(--border-default)] px-4 py-3 flex items-start gap-3">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
               style={{ background: `${insight.color}10` }}>
               <Icon className="h-3.5 w-3.5" style={{ color: insight.color }} />
             </div>
             <div>
-              <p className="text-ds-xs font-medium text-gray-800">{insight.label}</p>
-              <p className="text-[10px] text-gray-500 mt-0.5 leading-relaxed">{insight.detail}</p>
+              <p className="text-ds-xs font-medium text-[var(--content-primary)]">{insight.label}</p>
+              <p className="text-[10px] text-[var(--content-secondary)] mt-0.5 leading-relaxed">{insight.detail}</p>
             </div>
           </div>
         );
@@ -644,18 +644,18 @@ function SinglePathView({
         {path && <PathSummaryCard path={path} totalRuns={1} />}
 
         {/* Step sequence */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
-            <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Observed Step Sequence</span>
+        <div className="bg-[var(--surface-elevated)] rounded-xl border border-[var(--border-default)] shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)]">
+            <span className="text-[10px] font-semibold text-[var(--content-secondary)] uppercase tracking-wider">Observed Step Sequence</span>
           </div>
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-[var(--border-subtle)]">
             {taskNodes.map((node, i) => {
               const style = CATEGORY_STYLES[node.category as keyof typeof CATEGORY_STYLES] ?? CATEGORY_STYLES.single_action;
               return (
                 <button
                   key={node.id}
                   onClick={() => onSelectNode(node.id)}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-50 transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-[var(--surface-secondary)] transition-colors"
                 >
                   <span
                     className="text-[10px] font-bold w-5 h-5 rounded flex items-center justify-center flex-shrink-0"
@@ -669,13 +669,13 @@ function SinglePathView({
                         style={{ color: style.color, background: `${style.color}10` }}>
                         {style.label}
                       </span>
-                      <span className="text-[10px] text-gray-700 truncate">{node.shortLabel}</span>
+                      <span className="text-[10px] text-[var(--content-primary)] truncate">{node.shortLabel}</span>
                     </div>
                   </div>
                   {node.durationMs > 0 && (
-                    <span className="text-[10px] text-gray-400 flex-shrink-0">{node.durationLabel}</span>
+                    <span className="text-[10px] text-[var(--content-tertiary)] flex-shrink-0">{node.durationLabel}</span>
                   )}
-                  <ChevronRight className="h-3 w-3 text-gray-300 flex-shrink-0" />
+                  <ChevronRight className="h-3 w-3 text-[var(--content-tertiary)] flex-shrink-0" />
                 </button>
               );
             })}
@@ -690,9 +690,9 @@ function SinglePathView({
 
 function MiniStat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="bg-white rounded-lg px-2 py-1.5 border border-gray-100">
-      <p className="text-[9px] text-gray-400 uppercase tracking-wider">{label}</p>
-      <p className="text-ds-sm font-semibold text-gray-800">{value}</p>
+    <div className="bg-[var(--surface-elevated)] rounded-lg px-2 py-1.5 border border-[var(--border-subtle)]">
+      <p className="text-[9px] text-[var(--content-tertiary)] uppercase tracking-wider">{label}</p>
+      <p className="text-ds-sm font-semibold text-[var(--content-primary)]">{value}</p>
     </div>
   );
 }

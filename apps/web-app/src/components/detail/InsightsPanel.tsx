@@ -30,13 +30,13 @@ const CATEGORY_CONFIG: Record<string, { icon: React.ElementType; label: string; 
   rework:             { icon: RefreshCw,      label: 'Rework',             color: 'text-amber-600' },
   system_efficiency:  { icon: Monitor,        label: 'System Efficiency',  color: 'text-violet-600' },
   automation:         { icon: Zap,            label: 'Automation',         color: 'text-emerald-600' },
-  process_health:     { icon: Shield,         label: 'Process Health',     color: 'text-gray-600' },
+  process_health:     { icon: Shield,         label: 'Process Health',     color: 'text-[var(--content-secondary)]' },
 };
 
 const SEVERITY_STYLES: Record<string, string> = {
   high:   'border-l-red-500',
   medium: 'border-l-amber-500',
-  low:    'border-l-gray-300',
+  low:    'border-l-[var(--border-default)]',
 };
 
 export function InsightsPanel({ insights }: Props) {
@@ -47,8 +47,8 @@ export function InsightsPanel({ insights }: Props) {
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-green-50">
             <Target className="h-6 w-6 text-green-500" />
           </div>
-          <h3 className="mt-ds-3 text-ds-base font-medium text-gray-900">No inefficiencies detected</h3>
-          <p className="mt-ds-1 text-ds-sm text-gray-500">
+          <h3 className="mt-ds-3 text-ds-base font-medium text-[var(--content-primary)]">No inefficiencies detected</h3>
+          <p className="mt-ds-1 text-ds-sm text-[var(--content-secondary)]">
             {insights?.noInsightsMessage || 'This workflow appears well-structured.'}
           </p>
         </div>
@@ -81,7 +81,7 @@ export function InsightsPanel({ insights }: Props) {
             <div className="card px-ds-4 py-ds-3">
               <p className="ds-metric-label">Longest Step</p>
               <p className="ds-metric-value">{timeBreakdown.longestStepDurationLabel}</p>
-              <p className="text-ds-xs text-gray-400">
+              <p className="text-ds-xs text-[var(--content-tertiary)]">
                 Step {timeBreakdown.longestStepOrdinal} ({timeBreakdown.longestStepPercentage}%)
               </p>
             </div>
@@ -91,7 +91,7 @@ export function InsightsPanel({ insights }: Props) {
 
       {/* Insights by category */}
       {summary.categories.map((category: string) => {
-        const config = CATEGORY_CONFIG[category] ?? { icon: BarChart3, label: category, color: 'text-gray-600' };
+        const config = CATEGORY_CONFIG[category] ?? { icon: BarChart3, label: category, color: 'text-[var(--content-secondary)]' };
         const Icon = config.icon;
         const categoryInsights = insights.insights.filter((i: any) => i.category === category);
         if (categoryInsights.length === 0) return null;
@@ -116,7 +116,7 @@ export function InsightsPanel({ insights }: Props) {
 
 function InsightCard({ insight }: { insight: any }) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const border = SEVERITY_STYLES[insight.severity] ?? 'border-l-gray-300';
+  const border = SEVERITY_STYLES[insight.severity] ?? 'border-l-[var(--border-default)]';
 
   return (
     <div className={`ds-step border-l-[3px] ${border}`}>
@@ -138,33 +138,33 @@ function InsightCard({ insight }: { insight: any }) {
               {insight.confidence} confidence
             </span>
           </div>
-          <p className="mt-ds-1 text-ds-sm text-gray-600">{insight.description}</p>
+          <p className="mt-ds-1 text-ds-sm text-[var(--content-secondary)]">{insight.description}</p>
         </div>
         {isExpanded ? (
-          <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0" />
+          <ChevronDown className="h-4 w-4 text-[var(--content-tertiary)] flex-shrink-0" />
         ) : (
-          <ChevronRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
+          <ChevronRight className="h-4 w-4 text-[var(--content-tertiary)] flex-shrink-0" />
         )}
       </button>
 
       {isExpanded && (
         <div className="ds-step-body space-y-ds-3">
-          <div className="rounded-ds-md bg-gray-50 px-ds-4 py-ds-3 space-y-ds-3">
+          <div className="rounded-ds-md bg-[var(--surface-secondary)] px-ds-4 py-ds-3 space-y-ds-3">
             <div>
-              <p className="text-ds-xs font-semibold text-gray-500 uppercase tracking-wide mb-ds-1">Evidence</p>
-              <p className="text-ds-sm text-gray-700">{insight.evidence}</p>
+              <p className="text-ds-xs font-semibold text-[var(--content-secondary)] uppercase tracking-wide mb-ds-1">Evidence</p>
+              <p className="text-ds-sm text-[var(--content-primary)]">{insight.evidence}</p>
             </div>
             <div>
-              <p className="text-ds-xs font-semibold text-gray-500 uppercase tracking-wide mb-ds-1">Impact</p>
-              <p className="text-ds-sm text-gray-700">{insight.impact}</p>
+              <p className="text-ds-xs font-semibold text-[var(--content-secondary)] uppercase tracking-wide mb-ds-1">Impact</p>
+              <p className="text-ds-sm text-[var(--content-primary)]">{insight.impact}</p>
             </div>
             <div className="ds-callout ds-callout-info">
               <p className="text-ds-xs font-semibold text-brand-700 uppercase tracking-wide mb-ds-1">Suggestion</p>
-              <p className="text-ds-sm text-gray-700">{insight.suggestion}</p>
+              <p className="text-ds-sm text-[var(--content-primary)]">{insight.suggestion}</p>
             </div>
           </div>
           {insight.stepOrdinals?.length > 0 && (
-            <p className="text-ds-xs text-gray-400">
+            <p className="text-ds-xs text-[var(--content-tertiary)]">
               Affected steps: {insight.stepOrdinals.join(', ')}
             </p>
           )}

@@ -96,7 +96,7 @@ export function SidebarStepDrawer({ stepDef, sopStep, onClose }: SidebarStepDraw
             <ul className="space-y-1">
               {stepDef.inputs.map((inp, i) => (
                 <li key={i} className="flex items-start gap-1.5">
-                  <span className="text-blue-600 mt-0.5 shrink-0 text-xs">▸</span>
+                  <span className="text-emerald-600 mt-0.5 shrink-0 text-xs">▸</span>
                   <span className="text-xs text-gray-600">{inp}</span>
                 </li>
               ))}

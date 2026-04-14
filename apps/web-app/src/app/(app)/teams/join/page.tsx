@@ -15,7 +15,7 @@ export default function JoinTeamPage() {
       fallback={
         <div className="mx-auto max-w-md py-ds-12 text-center">
           <Users className="mx-auto h-10 w-10 text-brand-500 animate-pulse" />
-          <p className="mt-ds-4 text-ds-sm text-gray-500">Joining team...</p>
+          <p className="mt-ds-4 text-ds-sm text-[var(--content-secondary)]">Joining team...</p>
         </div>
       }
     >
@@ -67,7 +67,7 @@ function JoinTeamContent() {
       {status === 'loading' && (
         <>
           <Users className="mx-auto h-10 w-10 text-brand-500 animate-pulse" />
-          <p className="mt-ds-4 text-ds-sm text-gray-500">Joining team...</p>
+          <p className="mt-ds-4 text-ds-sm text-[var(--content-secondary)]">Joining team...</p>
         </>
       )}
 
@@ -76,10 +76,10 @@ function JoinTeamContent() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-green-50">
             <CheckCircle className="h-7 w-7 text-green-500" />
           </div>
-          <h2 className="mt-ds-4 text-ds-lg font-semibold text-gray-900">
+          <h2 className="mt-ds-4 text-ds-lg font-semibold text-[var(--content-primary)]">
             Welcome to {teamName}!
           </h2>
-          <p className="mt-ds-2 text-ds-sm text-gray-500">
+          <p className="mt-ds-2 text-ds-sm text-[var(--content-secondary)]">
             You've joined as a {role}. You can now access shared workflows from this team.
           </p>
           <button
@@ -96,10 +96,10 @@ function JoinTeamContent() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50">
             <XCircle className="h-7 w-7 text-red-500" />
           </div>
-          <h2 className="mt-ds-4 text-ds-lg font-semibold text-gray-900">
+          <h2 className="mt-ds-4 text-ds-lg font-semibold text-[var(--content-primary)]">
             Could not join team
           </h2>
-          <p className="mt-ds-2 text-ds-sm text-gray-500">{errorMsg}</p>
+          <p className="mt-ds-2 text-ds-sm text-[var(--content-secondary)]">{errorMsg}</p>
           <button
             onClick={() => router.push('/teams')}
             className="btn-secondary mt-ds-6"

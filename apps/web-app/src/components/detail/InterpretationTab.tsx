@@ -120,7 +120,7 @@ function severityBadgeClass(severity: string): string {
     case 'low':
       return 'bg-blue-50 text-blue-700';
     default:
-      return 'bg-gray-100 text-gray-600';
+      return 'bg-[var(--surface-secondary)] text-[var(--content-secondary)]';
   }
 }
 
@@ -133,7 +133,7 @@ function confidenceBadgeClass(confidence: string): string {
     case 'low':
       return 'bg-red-50 text-red-700';
     default:
-      return 'bg-gray-100 text-gray-600';
+      return 'bg-[var(--surface-secondary)] text-[var(--content-secondary)]';
   }
 }
 
@@ -143,13 +143,13 @@ export function InterpretationTab({ interpretation }: Props) {
   if (!interpretation) {
     return (
       <div className="text-center py-ds-12">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100">
-          <Brain className="h-7 w-7 text-gray-400" />
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface-secondary)]">
+          <Brain className="h-7 w-7 text-[var(--content-tertiary)]" />
         </div>
-        <h3 className="mt-ds-4 text-ds-base font-medium text-gray-900">
+        <h3 className="mt-ds-4 text-ds-base font-medium text-[var(--content-primary)]">
           No interpretation available
         </h3>
-        <p className="mt-ds-1 text-ds-sm text-gray-500">
+        <p className="mt-ds-1 text-ds-sm text-[var(--content-secondary)]">
           Upload a new workflow to generate process intelligence.
         </p>
       </div>
@@ -173,7 +173,7 @@ export function InterpretationTab({ interpretation }: Props) {
                 {processTypeConfidence} confidence
               </span>
             </div>
-            <p className="text-ds-sm text-gray-700 leading-relaxed">{summary}</p>
+            <p className="text-ds-sm text-[var(--content-primary)] leading-relaxed">{summary}</p>
           </div>
         </div>
       </div>
@@ -197,17 +197,17 @@ export function InterpretationTab({ interpretation }: Props) {
             {phases.map((phase, idx) => (
               <div key={phase.ordinal} className="flex items-stretch flex-shrink-0">
                 <div className="card px-ds-4 py-ds-3 min-w-[160px]">
-                  <p className="text-ds-xs text-gray-400 mb-0.5">Phase {phase.ordinal}</p>
-                  <p className="text-ds-sm font-medium text-gray-900">{phase.name}</p>
-                  <p className="text-ds-xs text-gray-500 mt-ds-1">{phase.system}</p>
-                  <div className="flex items-center gap-ds-2 mt-ds-2 text-ds-xs text-gray-400">
+                  <p className="text-ds-xs text-[var(--content-tertiary)] mb-0.5">Phase {phase.ordinal}</p>
+                  <p className="text-ds-sm font-medium text-[var(--content-primary)]">{phase.name}</p>
+                  <p className="text-ds-xs text-[var(--content-secondary)] mt-ds-1">{phase.system}</p>
+                  <div className="flex items-center gap-ds-2 mt-ds-2 text-ds-xs text-[var(--content-tertiary)]">
                     <span>{phase.stepCount} step{phase.stepCount !== 1 ? 's' : ''}</span>
                     <span className="ds-tag ds-tag-neutral text-[10px]">{phase.dominantAction}</span>
                   </div>
                 </div>
                 {idx < phases.length - 1 && (
                   <div className="flex items-center px-1">
-                    <ChevronRight className="h-4 w-4 text-gray-300" />
+                    <ChevronRight className="h-4 w-4 text-[var(--content-tertiary)]" />
                   </div>
                 )}
               </div>
@@ -232,9 +232,9 @@ export function InterpretationTab({ interpretation }: Props) {
                       <span className="ds-tag ds-tag-neutral font-mono text-[10px]">
                         Step {d.stepOrdinal}
                       </span>
-                      <span className="text-ds-sm font-medium text-gray-900">{d.stepTitle}</span>
+                      <span className="text-ds-sm font-medium text-[var(--content-primary)]">{d.stepTitle}</span>
                     </div>
-                    <p className="text-ds-xs text-gray-500 mt-ds-1">{d.evidence}</p>
+                    <p className="text-ds-xs text-[var(--content-secondary)] mt-ds-1">{d.evidence}</p>
                   </div>
                   <div className="flex items-center gap-ds-1 flex-shrink-0">
                     <span className="ds-tag ds-tag-brand text-[10px]">{d.decisionType}</span>
@@ -267,12 +267,12 @@ export function InterpretationTab({ interpretation }: Props) {
                         {r.severity}
                       </span>
                     </div>
-                    <p className="text-ds-sm text-gray-700">{r.description}</p>
-                    <p className="text-ds-xs text-gray-500 mt-ds-1">{r.evidence}</p>
+                    <p className="text-ds-sm text-[var(--content-primary)]">{r.description}</p>
+                    <p className="text-ds-xs text-[var(--content-secondary)] mt-ds-1">{r.evidence}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className="text-ds-sm font-semibold text-amber-700">{r.occurrences}x</p>
-                    <p className="text-ds-xs text-gray-400">
+                    <p className="text-ds-xs text-[var(--content-tertiary)]">
                       Steps {r.stepOrdinals.join(', ')}
                     </p>
                   </div>
@@ -301,11 +301,11 @@ export function InterpretationTab({ interpretation }: Props) {
                         {f.severity}
                       </span>
                     </div>
-                    <p className="text-ds-sm text-gray-700">{f.description}</p>
-                    <p className="text-ds-xs text-gray-500 mt-ds-1">{f.evidence}</p>
+                    <p className="text-ds-sm text-[var(--content-primary)]">{f.description}</p>
+                    <p className="text-ds-xs text-[var(--content-secondary)] mt-ds-1">{f.evidence}</p>
                   </div>
                   <div className="flex-shrink-0">
-                    <p className="text-ds-xs text-gray-400">
+                    <p className="text-ds-xs text-[var(--content-tertiary)]">
                       Steps {f.stepOrdinals.join(', ')}
                     </p>
                   </div>
@@ -339,11 +339,11 @@ export function InterpretationTab({ interpretation }: Props) {
                         </span>
                         <span className="ds-tag ds-tag-neutral text-[10px]">{ins.category}</span>
                       </div>
-                      <p className="text-ds-sm font-medium text-gray-900">{ins.title}</p>
-                      <p className="text-ds-sm text-gray-600 mt-0.5">{ins.description}</p>
-                      <p className="text-ds-xs text-gray-400 mt-ds-1">{ins.evidence}</p>
+                      <p className="text-ds-sm font-medium text-[var(--content-primary)]">{ins.title}</p>
+                      <p className="text-ds-sm text-[var(--content-secondary)] mt-0.5">{ins.description}</p>
+                      <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-1">{ins.evidence}</p>
                       {ins.stepOrdinals && ins.stepOrdinals.length > 0 && (
-                        <p className="text-ds-xs text-gray-400 mt-0.5">
+                        <p className="text-ds-xs text-[var(--content-tertiary)] mt-0.5">
                           Steps: {ins.stepOrdinals.join(', ')}
                         </p>
                       )}
@@ -371,14 +371,14 @@ function ScoreCard({
   invert?: boolean;
   neutral?: boolean;
 }) {
-  const colorClass = neutral ? 'text-gray-700' : scoreColor(score, invert);
-  const barClass = neutral ? 'bg-gray-400' : scoreBarColor(score, invert);
+  const colorClass = neutral ? 'text-[var(--content-primary)]' : scoreColor(score, invert);
+  const barClass = neutral ? 'bg-[var(--content-tertiary)]' : scoreBarColor(score, invert);
 
   return (
     <div className="card px-ds-4 py-ds-3">
       <p className="ds-metric-label">{label}</p>
       <p className={`ds-metric-value ${colorClass}`}>{score}</p>
-      <div className="mt-ds-2 h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+      <div className="mt-ds-2 h-1.5 w-full rounded-full bg-[var(--surface-secondary)] overflow-hidden">
         <div
           className={`h-full rounded-full transition-all ${barClass}`}
           style={{ width: `${Math.min(score, 100)}%` }}

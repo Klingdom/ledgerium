@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { z } from 'zod';
+import { checkFeatureAccess } from '@/lib/feature-gating';
 
 const PORTFOLIO_TYPES = ['folder', 'project', 'business_unit', 'department', 'custom'] as const;
 const MAX_PORTFOLIOS_PER_USER = 100;
@@ -92,6 +93,25 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const user = await db.user.findUnique({ where: { id: session.user.id } });
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+
+  // Gate: creating portfolios (shared library) is a Team+ feature
+  const access = checkFeatureAccess(user, 'sharedLibrary');
+  if (!access.allowed) {
+    return NextResponse.json(
+      {
+        error: 'Feature not available on your plan',
+        feature: 'sharedLibrary',
+        requiredPlan: access.requiredPlan,
+        upgradeUrl: '/pricing',
+      },
+      { status: 403 },
+    );
   }
 
   const body = await req.json();

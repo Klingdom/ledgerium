@@ -39,15 +39,15 @@ export default function SharedWorkflowPage() {
   }, [token]);
 
   if (isLoading) {
-    return <div className="text-center text-ds-sm text-gray-400 py-20">Loading shared workflow...</div>;
+    return <div className="text-center text-ds-sm text-[var(--content-tertiary)] py-20">Loading shared workflow...</div>;
   }
 
   if (error || !data) {
     return (
       <div className="mx-auto max-w-ds-content py-ds-12 text-center">
-        <Layers className="mx-auto h-10 w-10 text-gray-300" />
-        <h2 className="mt-ds-4 text-ds-lg font-semibold text-gray-900">Workflow not found</h2>
-        <p className="mt-ds-2 text-ds-sm text-gray-500">{error ?? 'This link may have expired or been revoked.'}</p>
+        <Layers className="mx-auto h-10 w-10 text-[var(--content-tertiary)]" />
+        <h2 className="mt-ds-4 text-ds-lg font-semibold text-[var(--content-primary)]">Workflow not found</h2>
+        <p className="mt-ds-2 text-ds-sm text-[var(--content-secondary)]">{error ?? 'This link may have expired or been revoked.'}</p>
         <Link href="/" className="btn-primary mt-ds-6 inline-flex">
           Learn about Ledgerium AI
         </Link>
@@ -65,7 +65,7 @@ export default function SharedWorkflowPage() {
           <span className="ds-tag ds-tag-brand">Shared Workflow</span>
         </div>
         <h1 className="ds-header-title">{workflow.title}</h1>
-        <div className="mt-ds-2 flex flex-wrap items-center gap-ds-3 text-ds-xs text-gray-500">
+        <div className="mt-ds-2 flex flex-wrap items-center gap-ds-3 text-ds-xs text-[var(--content-secondary)]">
           {workflow.stepCount && (
             <span className="flex items-center gap-1">
               <Layers className="h-3.5 w-3.5" />
@@ -95,12 +95,12 @@ export default function SharedWorkflowPage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 mb-ds-6">
+      <div className="border-b border-[var(--border-default)] mb-ds-6">
         <nav className="flex gap-ds-6">
           <button
             onClick={() => setActiveTab('sop')}
             className={`border-b-2 pb-ds-3 pt-ds-1 text-ds-sm font-medium transition-colors ${
-              activeTab === 'sop' ? 'border-brand-600 text-brand-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+              activeTab === 'sop' ? 'border-brand-600 text-brand-600' : 'border-transparent text-[var(--content-secondary)] hover:text-[var(--content-primary)]'
             }`}
           >
             SOP
@@ -108,7 +108,7 @@ export default function SharedWorkflowPage() {
           <button
             onClick={() => setActiveTab('report')}
             className={`border-b-2 pb-ds-3 pt-ds-1 text-ds-sm font-medium transition-colors ${
-              activeTab === 'report' ? 'border-brand-600 text-brand-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+              activeTab === 'report' ? 'border-brand-600 text-brand-600' : 'border-transparent text-[var(--content-secondary)] hover:text-[var(--content-primary)]'
             }`}
           >
             Report
@@ -121,8 +121,8 @@ export default function SharedWorkflowPage() {
 
       {/* CTA footer */}
       <div className="mt-ds-8 card px-ds-6 py-ds-5 text-center bg-gradient-to-r from-brand-50 to-white">
-        <p className="text-ds-base font-medium text-gray-900">Want to create your own workflow documentation?</p>
-        <p className="mt-ds-1 text-ds-sm text-gray-500">
+        <p className="text-ds-base font-medium text-[var(--content-primary)]">Want to create your own workflow documentation?</p>
+        <p className="mt-ds-1 text-ds-sm text-[var(--content-secondary)]">
           Record browser workflows and get SOPs, process maps, and reports automatically.
         </p>
         <Link href="/signup" className="btn-primary mt-ds-4 inline-flex gap-1.5">
