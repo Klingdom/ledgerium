@@ -12,7 +12,7 @@ export default function AboutPage() {
   return (
     <>
       {/* Hero */}
-      <section className="pt-20 pb-16 bg-gradient-to-b from-brand-50/40 to-white">
+      <section className="pt-20 pb-16 bg-gradient-to-b from-brand-900/20 to-[var(--surface-primary)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <p className="text-sm font-semibold text-brand-600 uppercase tracking-wide mb-4">
             Why Ledgerium exists

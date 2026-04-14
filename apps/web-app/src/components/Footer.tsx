@@ -14,7 +14,6 @@ const FOOTER_LINKS = {
   ],
   Legal: [
     { href: '/privacy', label: 'Privacy' },
-    { href: '/terms', label: 'Terms' },
   ],
 };
 
@@ -26,7 +25,7 @@ export function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <LogoFull size={20} />
-            <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+            <p className="text-sm text-[#e2e8f0] leading-relaxed">
               Evidence-based workflow intelligence. Record real work, generate real documentation.
             </p>
           </div>
@@ -42,7 +41,7 @@ export function Footer() {
                   <li key={href}>
                     <Link
                       href={href}
-                      className="text-sm text-[var(--content-secondary)] hover:text-[var(--content-primary)] transition-colors"
+                      className="text-sm text-[#e2e8f0] hover:text-[var(--content-primary)] transition-colors"
                     >
                       {label}
                     </Link>

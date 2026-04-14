@@ -68,7 +68,7 @@ function LoginForm() {
 
         <form onSubmit={handleSubmit} className="card p-6 space-y-4">
           {error && (
-            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</div>
+            <div className="rounded-lg bg-red-900/20 border border-red-700/40 p-3 text-sm text-red-400">{error}</div>
           )}
 
           <div>
@@ -102,6 +102,12 @@ function LoginForm() {
             />
           </div>
 
+          <div className="text-right">
+            <a href="mailto:hello@ledgerium.ai" className="text-xs text-brand-600 hover:text-brand-500">
+              Forgot password?
+            </a>
+          </div>
+
           <button type="submit" disabled={isLoading} className="btn-primary w-full">
             {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
@@ -120,7 +126,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><p className="text-sm text-[var(--content-tertiary)]">Loading...</p></div>}>
       <LoginForm />
     </Suspense>
   );

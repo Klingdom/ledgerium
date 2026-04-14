@@ -25,7 +25,7 @@ export default function InstallExtensionPage() {
   return (
     <>
       {/* Hero */}
-      <section className="pt-20 pb-16 bg-gradient-to-b from-brand-50/40 to-white">
+      <section className="pt-20 pb-16 bg-gradient-to-b from-brand-900/20 to-[var(--surface-primary)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
           <div className="mx-auto w-16 h-16 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center mb-6">
             <Chrome className="h-7 w-7 text-brand-600" />
@@ -50,6 +50,9 @@ export default function InstallExtensionPage() {
           <p className="mt-3 text-xs text-[var(--content-tertiary)]">
             Also works with Edge, Brave, and other Chromium-based browsers
           </p>
+          <p className="mt-2 text-xs text-[var(--content-tertiary)]">
+            After downloading: Chrome → Extensions → Enable Developer Mode → Load Unpacked → Select the extracted folder
+          </p>
         </div>
       </section>
 
@@ -71,7 +74,7 @@ export default function InstallExtensionPage() {
                 step: 2,
                 icon: Download,
                 title: 'Install the extension',
-                desc: 'One click from the Chrome Web Store. Opens as a sidebar panel.',
+                desc: 'Download the extension and load it in Chrome. It opens as a sidebar panel.',
               },
               {
                 step: 3,

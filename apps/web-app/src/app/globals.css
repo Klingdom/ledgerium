@@ -120,7 +120,7 @@
 
   .ds-header-subtitle {
     @apply mt-ds-2 text-ds-base leading-relaxed;
-    color: var(--content-secondary);
+    color: var(--content-primary);
   }
 
   /** Section — labeled content group with consistent spacing */
@@ -155,7 +155,7 @@
 
   .ds-step-body {
     @apply px-ds-5 pb-ds-4 text-ds-sm leading-relaxed;
-    color: var(--content-secondary);
+    color: #e2e8f0;
   }
 
   .ds-step-footer {

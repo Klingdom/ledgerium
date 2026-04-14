@@ -34,7 +34,7 @@ const STEPS = [
     icon: MousePointer2,
     title: 'Do the workflow normally',
     what: 'Navigate your ERP, CRM, or internal tools. Fill forms, click buttons, switch between systems. Work exactly as you normally would.',
-    result: 'Every click, form entry, and navigation is captured as structured data. Multi-system, multi-tab workflows are fully supported.',
+    result: 'Every click, form entry, and navigation is captured as structured data — no screenshots, no typed content, no screen recording. Multi-system, multi-tab workflows are fully supported.',
     screenshot: '/img/screenshot-dashboard.png',
     screenshotAlt: 'Ledgerium dashboard showing recorded workflows with metrics',
   },
@@ -71,7 +71,7 @@ export default function DemoPage() {
   return (
     <>
       {/* Hero */}
-      <section className="pt-20 pb-12 bg-gradient-to-b from-brand-50/40 to-white">
+      <section className="pt-20 pb-12 bg-gradient-to-b from-brand-900/20 to-[var(--surface-primary)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)]">
             Record a workflow. Get an SOP instantly.
@@ -102,7 +102,7 @@ export default function DemoPage() {
                   </p>
                   <div className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-brand-500 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-brand-700 leading-relaxed">
+                    <p className="text-sm text-brand-400 leading-relaxed">
                       {result}
                     </p>
                   </div>
@@ -153,7 +153,7 @@ export default function DemoPage() {
       {/* Interactive demo dashboard callout */}
       <section className="py-12 bg-[var(--surface-elevated)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="rounded-xl border border-brand-100 bg-brand-50/40 p-8 text-center">
+          <div className="rounded-xl border border-brand-700/30 bg-brand-900/15 p-8 text-center">
             <LayoutDashboard className="h-8 w-8 text-brand-600 mx-auto mb-3" />
             <h3 className="text-lg font-bold text-[var(--content-primary)] mb-2">
               See the dashboard with real sample workflows

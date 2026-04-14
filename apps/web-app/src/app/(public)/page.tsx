@@ -16,7 +16,6 @@ import {
   Zap,
   CheckCircle,
   MousePointer2,
-  LayoutDashboard,
 } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -56,14 +55,7 @@ export default function HomePage() {
                 See how it works
               </Link>
             </div>
-            <div className="mt-5 flex items-center justify-center">
-              <a href="/dashboard.html" className="inline-flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-700 font-medium transition-colors">
-                <LayoutDashboard className="h-3.5 w-3.5" />
-                See the dashboard
-                <ArrowRight className="h-3 w-3" />
-              </a>
-            </div>
-            <p className="mt-3 text-xs text-[var(--content-tertiary)]">
+            <p className="mt-5 text-xs text-[var(--content-tertiary)]">
               Free to start. No credit card required.
             </p>
           </div>
@@ -89,7 +81,7 @@ export default function HomePage() {
           </div>
         </div>
         {/* Subtle gradient backdrop */}
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-50/40 via-white to-[var(--surface-secondary)]" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-900/20 via-transparent to-[var(--surface-secondary)]" />
       </section>
 
       {/* ── How it works ──────────────────────────────────────────────────── */}
@@ -123,7 +115,7 @@ export default function HomePage() {
               },
             ].map(({ step, icon: Icon, title, desc }) => (
               <div key={step} className="text-center">
-                <div className="mx-auto w-14 h-14 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center mb-5">
+                <div className="mx-auto w-14 h-14 rounded-2xl bg-brand-900/15 border border-brand-700/30 flex items-center justify-center mb-5">
                   <Icon className="h-6 w-6 text-brand-600" />
                 </div>
                 <p className="text-[11px] font-bold text-brand-600 uppercase tracking-widest mb-2">
@@ -170,7 +162,7 @@ export default function HomePage() {
               },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="card p-7">
-                <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center mb-4">
+                <div className="w-10 h-10 rounded-xl bg-brand-900/15 flex items-center justify-center mb-4">
                   <Icon className="h-5 w-5 text-brand-600" />
                 </div>
                 <h3 className="text-base font-semibold text-[var(--content-primary)] mb-2">{title}</h3>
@@ -204,7 +196,7 @@ export default function HomePage() {
               { icon: CheckCircle, title: 'Reports & Export', desc: 'Download workflow reports, SOP documents, and raw data. Share structured output with stakeholders.' },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="flex gap-4 p-5 rounded-xl border border-transparent hover:border-[var(--border-default)] hover:bg-[var(--surface-secondary)] transition-all">
-                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center">
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-brand-900/15 flex items-center justify-center">
                   <Icon className="h-4 w-4 text-brand-600" />
                 </div>
                 <div>

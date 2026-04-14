@@ -84,7 +84,7 @@ export const PRICING_CONFIG = {
       price: 249,
       annualPrice: 207,
       interval: 'month',
-      seats: 'Up to 5 seats · 3 recorders',
+      seats: '3 recorders + 5 viewer seats',
       description: 'For process improvement teams',
       cta: 'Start Team Trial',
       ctaHref: '/signup?plan=team',

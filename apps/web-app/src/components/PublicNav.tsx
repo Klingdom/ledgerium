@@ -43,7 +43,7 @@ export function PublicNav() {
           {NAV_LINKS.map(({ href, label, icon: Icon, isExternal }) => {
             const classes = `rounded-lg px-3 py-2 text-sm font-medium transition-colors inline-flex items-center gap-1.5 ${
               pathname === href
-                ? 'text-brand-700 bg-brand-50'
+                ? 'text-brand-400 bg-brand-900/30'
                 : href === '/dashboard.html'
                   ? 'text-brand-600 hover:text-brand-700 hover:bg-brand-50/60'
                   : 'text-[var(--content-secondary)] hover:text-[var(--content-primary)] hover:bg-[var(--surface-secondary)]'
@@ -106,7 +106,7 @@ export function PublicNav() {
           {NAV_LINKS.map(({ href, label, icon: Icon, isExternal }) => {
             const classes = `rounded-lg px-3 py-2.5 text-sm font-medium flex items-center gap-2 ${
               pathname === href
-                ? 'text-brand-700 bg-brand-50'
+                ? 'text-brand-400 bg-brand-900/30'
                 : href === '/dashboard.html'
                   ? 'text-brand-600 bg-brand-50/40'
                   : 'text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'

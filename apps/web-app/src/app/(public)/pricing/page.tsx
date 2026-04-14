@@ -21,7 +21,7 @@ const FAQ = [
   },
   {
     q: 'Can I try before I buy?',
-    a: 'Yes. The Free plan gives you 5 recordings per month with full SOP and process map output. No credit card required. Upgrade when you need more recordings, clean exports, or the intelligence layer.',
+    a: 'Yes. The Free plan gives you 5 recordings per month with SOP and process map output (exports include a Ledgerium watermark). No credit card required. Upgrade to Starter for clean exports, or to Team for the full intelligence layer.',
   },
   {
     q: 'How does annual billing work?',
@@ -119,7 +119,7 @@ export default function PricingPage() {
                     {plan.cta}
                   </Link>
                 )}
-                <p className="mt-2 mb-4 text-center text-ds-xs text-[var(--content-tertiary)]">No credit card required</p>
+                {plan.price !== null ? (<p className="mt-2 mb-4 text-center text-ds-xs text-[var(--content-tertiary)]">No credit card required</p>) : (<div className="mt-2 mb-4" />)}
 
                 <ul className="space-y-2.5 flex-1">
                   {plan.features.map((feature) => (
@@ -129,9 +129,9 @@ export default function PricingPage() {
                     </li>
                   ))}
                   {plan.limits.map((limit) => (
-                    <li key={limit} className="flex items-start gap-2 opacity-40">
+                    <li key={limit} className="flex items-start gap-2">
                       <span className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-center text-[var(--content-tertiary)] text-[10px]">&mdash;</span>
-                      <span className="text-xs text-[#e2e8f0] leading-relaxed">{limit}</span>
+                      <span className="text-xs text-[var(--content-tertiary)] leading-relaxed">{limit}</span>
                     </li>
                   ))}
                 </ul>
@@ -177,7 +177,7 @@ export default function PricingPage() {
             </Link>
           </div>
           <p className="mt-3 text-ds-xs text-[#e2e8f0]">
-            No credit card required · Data never used for training · <a href="/security" className="underline hover:text-brand-600">Security details</a>
+            No credit card required · Data never used for training · <a href="/privacy" className="underline hover:text-brand-600">Privacy & security details</a>
           </p>
         </div>
       </section>

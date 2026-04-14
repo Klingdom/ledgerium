@@ -13,7 +13,7 @@ export default function PrivacyPage() {
   return (
     <>
       {/* Hero */}
-      <section className="pt-20 pb-12 bg-gradient-to-b from-brand-50/40 to-white">
+      <section className="pt-20 pb-12 bg-gradient-to-b from-brand-900/20 to-[var(--surface-primary)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <div className="flex items-center gap-3 mb-4">
             <Shield className="h-6 w-6 text-brand-600" />
@@ -33,10 +33,10 @@ export default function PrivacyPage() {
       {/* Transparency commitment */}
       <section className="border-t border-[var(--border-subtle)] bg-[var(--surface-elevated)] py-10">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="rounded-xl bg-brand-50 border border-brand-100 p-6">
+          <div className="rounded-xl bg-brand-900/15 border border-brand-700/30 p-6">
             <div className="flex items-center gap-2 mb-3">
               <Eye className="h-5 w-5 text-brand-600" />
-              <h2 className="text-sm font-bold text-brand-900">Our Commitment to Transparency</h2>
+              <h2 className="text-sm font-bold text-[var(--content-primary)]">Our Commitment to Transparency</h2>
             </div>
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {[
@@ -45,8 +45,8 @@ export default function PrivacyPage() {
                 'Nothing runs silently in the background',
                 'Your workflows remain under your control',
               ].map((item) => (
-                <li key={item} className="flex items-center gap-2 text-sm text-brand-800">
-                  <Shield className="h-3.5 w-3.5 text-brand-600 flex-shrink-0" />
+                <li key={item} className="flex items-center gap-2 text-sm text-[var(--content-primary)]">
+                  <Shield className="h-3.5 w-3.5 text-brand-400 flex-shrink-0" />
                   {item}
                 </li>
               ))}
@@ -89,7 +89,7 @@ export default function PrivacyPage() {
                 <li>Generate workflow outputs (SOPs, process maps)</li>
                 <li>Provide process intelligence and analytics</li>
               </ul>
-              <p className="text-brand-700 font-medium">
+              <p className="text-brand-400 font-medium">
                 Recording only occurs while a session is actively running.
               </p>
 
