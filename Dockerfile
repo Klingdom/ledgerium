@@ -20,6 +20,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 # Copy package.json files for all workspace packages needed at build time
 COPY apps/web-app/package.json apps/web-app/
+COPY apps/web-app/prisma/schema.prisma apps/web-app/prisma/
 COPY packages/process-engine/package.json packages/process-engine/
 COPY packages/intelligence-engine/package.json packages/intelligence-engine/
 COPY packages/agent-intelligence/package.json packages/agent-intelligence/
