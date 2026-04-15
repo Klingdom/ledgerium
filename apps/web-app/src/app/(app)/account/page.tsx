@@ -118,7 +118,7 @@ export default function AccountPage() {
     setBillingLoading(false);
   }
 
-  const planLabels: Record<string, string> = { free: 'Free', pro: 'Pro', team: 'Team' };
+  const planLabels: Record<string, string> = { free: 'Free', starter: 'Starter', team: 'Team', growth: 'Growth', enterprise: 'Enterprise' };
   const statusLabels: Record<string, { label: string; cls: string }> = {
     trialing: { label: 'Trial', cls: 'bg-blue-50 text-blue-700 border border-blue-200' },
     active: { label: 'Active', cls: 'bg-green-50 text-green-700 border border-green-200' },
@@ -197,9 +197,9 @@ export default function AccountPage() {
             <div className="flex items-start gap-ds-2">
               <Zap className="h-4 w-4 text-brand-600 mt-0.5" />
               <div>
-                <p className="text-ds-sm font-medium text-brand-900">Upgrade to Pro</p>
+                <p className="text-ds-sm font-medium text-brand-900">Upgrade to Starter</p>
                 <p className="mt-0.5 text-ds-xs text-brand-700">
-                  Unlimited uploads, full workflow library, advanced search, premium reports.
+                  15 recordings per month, clean exports, basic process health scores.
                 </p>
                 <button onClick={handleUpgrade} disabled={billingLoading} className="btn-primary mt-ds-3 text-xs">
                   {billingLoading ? 'Redirecting...' : 'Upgrade Now'}
@@ -210,7 +210,7 @@ export default function AccountPage() {
           </div>
         )}
 
-        {account?.plan === 'pro' && (
+        {account?.plan && account.plan !== 'free' && (
           <div className="mt-ds-4">
             <button onClick={handleManageBilling} className="btn-secondary text-xs">
               Manage Subscription

@@ -85,7 +85,7 @@ function Code({ children }: { children: React.ReactNode }) {
 function StepList({ steps }: { steps: React.ReactNode[] }) {
   return (
     <ol className="my-4 ml-0 list-none space-y-3">
-      {steps.map((step, i) => (
+      {steps.map((step: React.ReactNode, i: number) => (
         <li key={i} className="relative pl-11 text-[var(--content-primary)] leading-relaxed">
           <span className="absolute left-0 top-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-brand-900/20 text-xs font-bold text-brand-400">
             {i + 1}
@@ -179,7 +179,7 @@ function MobileTOC() {
       </summary>
       <nav className="px-4 pb-4 pt-1">
         <ol className="space-y-1">
-          {SIDEBAR_LINKS.map(({ id, label }, i) => (
+          {SIDEBAR_LINKS.map(({ id, label }: typeof SIDEBAR_LINKS[number], i: number) => (
             <li key={id}>
               <a
                 href={`#${id}`}
@@ -210,7 +210,7 @@ function Sidebar() {
         </div>
         <nav className="px-2 py-3">
           <ol className="space-y-0.5">
-            {SIDEBAR_LINKS.map(({ id, label }, i) => (
+            {SIDEBAR_LINKS.map(({ id, label }: typeof SIDEBAR_LINKS[number], i: number) => (
               <li key={id}>
                 <a
                   href={`#${id}`}
@@ -480,14 +480,16 @@ export default function DocsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {[
-                    ['Sources & Workflows', 'Total workflows and data sources in your library'],
-                    ['Steps & Duration', 'Combined step count and average duration across workflows'],
-                    ['SOP & Confidence', 'SOP readiness score and average confidence percentage'],
-                    ['Intelligence Summary', 'Count of active items, action items, and recent findings'],
-                    ['AI Opportunities', 'Number of workflows with automation potential'],
-                    ['Recent Activity', 'Latest workflow additions and changes'],
-                  ].map(([card, desc]) => (
+                  {(
+                    [
+                      ['Sources & Workflows', 'Total workflows and data sources in your library'],
+                      ['Steps & Duration', 'Combined step count and average duration across workflows'],
+                      ['SOP & Confidence', 'SOP readiness score and average confidence percentage'],
+                      ['Intelligence Summary', 'Count of active items, action items, and recent findings'],
+                      ['AI Opportunities', 'Number of workflows with automation potential'],
+                      ['Recent Activity', 'Latest workflow additions and changes'],
+                    ] as Array<[string, string]>
+                  ).map(([card, desc]) => (
                     <tr key={card}>
                       <TD><strong className="text-[var(--content-primary)]">{card}</strong></TD>
                       <TD>{desc}</TD>
