@@ -120,8 +120,8 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .chip-amber:hover{background:rgba(245,158,11,.14)}
 .chip-violet{background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.2);color:var(--violet-400)}
 .chip-violet:hover{background:rgba(139,92,246,.14)}
-.chip-blue{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);color:var(--blue-400)}
-.chip-blue:hover{background:rgba(59,130,246,.14)}
+.chip-brand{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.2);color:var(--brand-400)}
+.chip-brand:hover{background:rgba(16,185,129,.14)}
 .chip-emerald{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.2);color:var(--emerald-500)}
 
 /* ── Exec Overview (3 col) ── */
@@ -225,7 +225,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .badge-healthy{background:var(--emerald-50);color:var(--emerald-700)}
 .badge-review{background:var(--amber-50);color:var(--amber-700)}
 .badge-variation{background:var(--red-50);color:var(--red-700)}
-.badge-new{background:var(--blue-50);color:var(--blue-600)}
+.badge-new{background:var(--emerald-50);color:var(--emerald-600)}
 .badge-stale{background:var(--surface-elevated);color:var(--content-tertiary)}
 
 /* ── SOP badges ── */
@@ -500,8 +500,8 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
         <span class="chip-dot" style="background:var(--violet-500)"></span>
         4 optimization opportunities
       </button>
-      <button class="chip chip-blue" onclick="applyPreset('AI-Ready')">
-        <span class="chip-dot" style="background:var(--blue-500)"></span>
+      <button class="chip chip-brand" onclick="applyPreset('AI-Ready')">
+        <span class="chip-dot" style="background:var(--brand-500)"></span>
         6 AI candidates
       </button>
       <span class="chip chip-emerald">
@@ -688,13 +688,13 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
     <div class="card" style="overflow:hidden">
       <div class="intel-panel-header">
         <div class="intel-panel-title">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--brand-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           Recent Activity
         </div>
       </div>
       <div>
         <div class="intel-item" onclick="openPanel('wf-09')">
-          <span class="intel-item-dot" style="background:var(--blue-400)"></span>
+          <span class="intel-item-dot" style="background:var(--brand-400)"></span>
           <div class="intel-item-body">
             <div class="intel-item-title">Update CRM Contact Records</div>
             <div class="intel-item-meta">1 day ago &middot; 3 steps &middot; 2m 0s</div>
@@ -1158,7 +1158,7 @@ function healthBadgeHtml(status) {
     healthy: { label:'Healthy', cls:'badge-healthy', dot:'var(--emerald-500)' },
     needs_review: { label:'Needs Review', cls:'badge-review', dot:'var(--amber-500)' },
     high_variation: { label:'High Variation', cls:'badge-variation', dot:'var(--red-400)' },
-    new: { label:'New', cls:'badge-new', dot:'var(--blue-400)' },
+    new: { label:'New', cls:'badge-new', dot:'var(--brand-400)' },
     stale: { label:'Stale', cls:'badge-stale', dot:'var(--content-tertiary)' },
   };
   const c = cfg[status] || cfg.healthy;
@@ -1484,7 +1484,7 @@ function renderPanelBody(id, tab) {
           <div style="display:flex;flex-direction:column;gap:6px">
             <div style="display:flex;gap:8px"><span style="color:${w.bottleneckRisk==='high'?'var(--red-400)':'var(--emerald-500)'}">&#9679;</span><span>${w.bottleneckRisk==='high'?'Bottleneck detected: process duration significantly above average for step count':w.bottleneckRisk==='medium'?'Mild bottleneck: some steps take longer than expected':'No bottleneck detected in this workflow'}</span></div>
             <div style="display:flex;gap:8px"><span style="color:${w.healthStatus==='healthy'?'var(--emerald-500)':'var(--amber-500)'}">&#9679;</span><span>Health: ${w.healthStatus.replace(/_/g,' ')} — ${w.healthStatus==='healthy'?'workflow is performing consistently':'review recommended before SOP publication'}</span></div>
-            <div style="display:flex;gap:8px"><span style="color:var(--blue-400)">&#9679;</span><span>${w.systems.length} system${w.systems.length>1?'s':''} involved: ${w.systems.join(', ')}</span></div>
+            <div style="display:flex;gap:8px"><span style="color:var(--brand-400)">&#9679;</span><span>${w.systems.length} system${w.systems.length>1?'s':''} involved: ${w.systems.join(', ')}</span></div>
             <div style="display:flex;gap:8px"><span style="color:${w.sopReadiness==='ready'?'var(--emerald-500)':'var(--amber-500)'}">&#9679;</span><span>SOP readiness: ${w.sopReadiness.replace(/_/g,' ')}</span></div>
           </div>
         </div>
@@ -1495,7 +1495,7 @@ function renderPanelBody(id, tab) {
         <div style="display:flex;flex-direction:column;gap:8px">
           ${w.healthStatus !== 'healthy' ? `<div style="display:flex;gap:8px;font-size:12px;color:var(--content-secondary)"><span style="color:var(--amber-500);flex-shrink:0">1.</span>Review workflow for consistency issues — high variation detected across runs</div>` : ''}
           ${w.aiOpportunityScore >= 70 ? `<div style="display:flex;gap:8px;font-size:12px;color:var(--content-secondary)"><span style="color:var(--violet-400);flex-shrink:0">${w.healthStatus!=='healthy'?2:1}.</span>Evaluate AI agent automation for repetitive step sequences</div>` : ''}
-          ${w.sopReadiness !== 'ready' ? `<div style="display:flex;gap:8px;font-size:12px;color:var(--content-secondary)"><span style="color:var(--blue-400);flex-shrink:0">&#8250;</span>Complete SOP documentation before sharing with team</div>` : `<div style="display:flex;gap:8px;font-size:12px;color:var(--content-secondary)"><span style="color:var(--emerald-500);flex-shrink:0">&#10003;</span>SOP is ready to export and share</div>`}
+          ${w.sopReadiness !== 'ready' ? `<div style="display:flex;gap:8px;font-size:12px;color:var(--content-secondary)"><span style="color:var(--brand-400);flex-shrink:0">&#8250;</span>Complete SOP documentation before sharing with team</div>` : `<div style="display:flex;gap:8px;font-size:12px;color:var(--content-secondary)"><span style="color:var(--emerald-500);flex-shrink:0">&#10003;</span>SOP is ready to export and share</div>`}
         </div>
       </div>
     `;
