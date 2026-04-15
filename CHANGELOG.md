@@ -6,6 +6,20 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-15] - Iteration 002: CI quality gate
+
+### Added
+- `quality-gate` job in `.github/workflows/deploy.yml` — runs `pnpm typecheck` and `pnpm test` before Docker build
+- Job dependency chain: `quality-gate → build-and-push → deploy`
+- Uses Node.js 20, pnpm 9, `--frozen-lockfile` install
+
+### Impact
+- Before: every push to `main` deployed to production with zero automated quality checks
+- After: all 1,393 tests and full monorepo typecheck must pass before any deployment
+- All existing and future test/type investments are now enforced on the deployment path
+
+---
+
 ## [2026-04-14] - Phase F2+F3: Free/Starter + Team/Growth feature implementation
 
 ### Added (Phase F2 — Free + Starter)
