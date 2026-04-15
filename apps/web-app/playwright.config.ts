@@ -22,7 +22,7 @@ export default defineConfig({
 
   /* Shared settings for all tests */
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3099',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3098',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     /* Wait for network to settle before asserting */
@@ -70,17 +70,17 @@ export default defineConfig({
     },
   ],
 
-  /* Start the Next.js dev server on port 3099 (avoids conflict with dev on 3000) */
+  /* Start the Next.js dev server on port 3098 (avoids conflict with dev on 3000) */
   webServer: {
-    command: 'npx next dev -p 3099',
-    port: 3099,
+    command: 'npx next dev -p 3098',
+    port: 3098,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     env: {
       NODE_ENV: 'test',
       DATABASE_URL: 'file:./test.db',
       NEXTAUTH_SECRET: 'e2e-test-secret-not-for-production',
-      NEXTAUTH_URL: 'http://localhost:3099',
+      NEXTAUTH_URL: 'http://localhost:3098',
       // Disable PostHog in tests
       NEXT_PUBLIC_POSTHOG_KEY: '',
       NEXT_PUBLIC_POSTHOG_HOST: '',
