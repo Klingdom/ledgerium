@@ -16,7 +16,7 @@ type NavLink = {
 };
 
 const NAV_LINKS: NavLink[] = [
-  { href: '/demo', label: 'Live Demo', icon: LayoutDashboard },
+  { href: '/dashboard.html', label: 'Live Demo', icon: LayoutDashboard, isExternal: true },
   { href: '/demo', label: 'How It Works' },
   { href: '/pricing', label: 'Pricing' },
   { href: '/install-extension', label: 'Install' },
@@ -45,7 +45,9 @@ export function PublicNav() {
             const classes = `rounded-lg px-3 py-2 text-sm font-medium transition-colors inline-flex items-center gap-1.5 ${
               pathname === href
                 ? 'text-brand-400 bg-brand-900/30'
-                : 'text-[var(--content-secondary)] hover:text-[var(--content-primary)] hover:bg-[var(--surface-secondary)]'
+                : href === '/dashboard.html'
+                  ? 'text-brand-600 hover:text-brand-700 hover:bg-brand-50/60'
+                  : 'text-[var(--content-secondary)] hover:text-[var(--content-primary)] hover:bg-[var(--surface-secondary)]'
             }`;
 
             if (isExternal) {
