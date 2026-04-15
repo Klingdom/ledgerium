@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ledgerium AI — Interactive Dashboard Demo</title>
 <meta name="description" content="See what your workflow library looks like in Ledgerium. Browse sample SOPs, process maps, and AI agent intelligence — no signup required.">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%230c8de9'/></svg>">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%2310b981'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,22 +15,25 @@
 html{scroll-behavior:smooth}
 body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:22px;background:var(--surface-primary);color:var(--content-primary);-webkit-font-smoothing:antialiased}
 
-/* ── Dark Theme Tokens ── */
+/* ── Dark Theme Tokens (matches production globals.css + tailwind.config.ts) ── */
 :root{
-  --surface-primary:#0a0e17;
-  --surface-secondary:#111827;
-  --surface-elevated:#1a2233;
-  --content-primary:#f1f5f9;
-  --content-secondary:#94a3b8;
-  --content-tertiary:#64748b;
-  --border-default:#1e293b;
-  --border-subtle:#1e293b80;
-  --brand-50:#eff6ff;
-  --brand-100:#dbeafe;
-  --brand-200:#bfdbfe;
-  --brand-500:#0c8de9;
-  --brand-600:#006fc7;
-  --brand-700:#0059a1;
+  --surface-primary:#0D1117;
+  --surface-secondary:#161B22;
+  --surface-elevated:#1C2128;
+  --content-primary:#E2E8F0;
+  --content-secondary:#94A3B8;
+  --content-tertiary:#64748B;
+  --border-default:rgba(255,255,255,0.10);
+  --border-subtle:rgba(255,255,255,0.06);
+  --brand-50:#ecfdf5;
+  --brand-100:#d1fae5;
+  --brand-200:#a7f3d0;
+  --brand-300:#6ee7b7;
+  --brand-400:#34d399;
+  --brand-500:#10b981;
+  --brand-600:#059669;
+  --brand-700:#047857;
+  --accent:#20f2a6;--accent-muted:#059669;
   --emerald-50:#ecfdf5;--emerald-100:#d1fae5;--emerald-400:#34d399;--emerald-500:#10b981;--emerald-600:#059669;--emerald-700:#047857;
   --amber-50:#fffbeb;--amber-100:#fef3c7;--amber-200:#fde68a;--amber-400:#fbbf24;--amber-500:#f59e0b;--amber-600:#d97706;--amber-700:#b45309;
   --red-50:#fef2f2;--red-100:#fee2e2;--red-400:#f87171;--red-500:#ef4444;--red-600:#dc2626;--red-700:#b91c1c;
@@ -59,13 +62,13 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .container-sm{max-width:1280px;margin-left:auto;margin-right:auto;padding-left:16px;padding-right:16px}
 
 /* ── Demo Banner ── */
-.demo-banner{background:linear-gradient(90deg,rgba(12,141,233,.12),rgba(12,141,233,.08));border-bottom:1px solid rgba(12,141,233,.2);padding:9px 16px;text-align:center;font-size:12px;color:var(--content-secondary)}
+.demo-banner{background:linear-gradient(90deg,rgba(16,185,129,.12),rgba(16,185,129,.08));border-bottom:1px solid rgba(16,185,129,.2);padding:9px 16px;text-align:center;font-size:12px;color:var(--content-secondary)}
 .demo-banner strong{color:var(--content-primary)}
 .demo-banner a{color:var(--brand-500);font-weight:600;text-decoration:underline;text-underline-offset:2px}
 .demo-banner a:hover{color:var(--brand-200)}
 
 /* ── Top Nav ── */
-.topnav{position:sticky;top:0;z-index:40;background:rgba(10,14,23,.97);border-bottom:1px solid var(--border-default);backdrop-filter:blur(8px)}
+.topnav{position:sticky;top:0;z-index:40;background:rgba(13,17,23,.97);border-bottom:1px solid var(--border-default);backdrop-filter:blur(8px)}
 .topnav-inner{display:flex;align-items:center;justify-content:space-between;height:56px;gap:16px}
 .logo{font-size:19px;font-weight:700;letter-spacing:-.03em;color:var(--content-primary);text-decoration:none;white-space:nowrap;display:flex;align-items:center;gap:6px}
 .logo-icon{width:26px;height:26px;background:var(--brand-500);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -74,11 +77,11 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .nav-tabs{display:flex;align-items:center;gap:2px}
 .nav-tab{padding:6px 11px;border-radius:var(--radius-md);font-size:13px;font-weight:500;color:var(--content-secondary);text-decoration:none;border:none;background:none;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s}
 .nav-tab:hover{background:var(--surface-elevated);color:var(--content-primary)}
-.nav-tab.active{background:rgba(12,141,233,.12);color:var(--brand-500)}
+.nav-tab.active{background:rgba(16,185,129,.12);color:var(--brand-500)}
 .nav-actions{display:flex;align-items:center;gap:8px}
-.btn-primary{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--brand-500);color:#fff;border:none;border-radius:var(--radius-md);font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background .15s}
-.btn-primary:hover{background:var(--brand-600)}
-.btn-secondary{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;background:var(--surface-elevated);color:var(--content-secondary);border:1px solid var(--border-default);border-radius:var(--radius-md);font-size:12px;font-weight:500;cursor:pointer;text-decoration:none;white-space:nowrap;transition:all .15s}
+.btn-primary{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--brand-600);color:#fff;border:none;border-radius:var(--radius-md);font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background .15s}
+.btn-primary:hover{background:var(--brand-700)}
+.btn-secondary{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--surface-elevated);color:var(--content-primary);border:1px solid var(--border-default);border-radius:var(--radius-md);font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;white-space:nowrap;transition:all .15s}
 .btn-secondary:hover{background:rgba(255,255,255,.05);color:var(--content-primary);border-color:rgba(255,255,255,.1)}
 .btn-ghost{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;background:none;color:var(--content-secondary);border:none;border-radius:var(--radius-md);font-size:12px;font-weight:500;cursor:pointer;text-decoration:none;white-space:nowrap;transition:all .15s}
 .btn-ghost:hover{background:var(--surface-elevated);color:var(--content-primary)}
@@ -87,7 +90,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .page-body{padding:24px 0 64px}
 
 /* ── Card ── */
-.card{background:var(--surface-secondary);border:1px solid var(--border-default);border-radius:var(--radius-lg)}
+.card{background:var(--surface-elevated);border:1px solid var(--border-default);border-radius:var(--radius-lg)}
 .card-hover{transition:border-color .15s}
 .card-hover:hover{border-color:rgba(255,255,255,.1)}
 
@@ -157,7 +160,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .mini-badge-amber{background:rgba(245,158,11,.15);color:var(--amber-500)}
 .mini-badge-gray{background:var(--surface-elevated);color:var(--content-secondary)}
 .intel-view-all{width:100%;padding:8px;font-size:11px;color:var(--brand-500);background:none;border:none;border-top:1px solid var(--border-subtle);cursor:pointer;transition:background .12s}
-.intel-view-all:hover{background:rgba(12,141,233,.06)}
+.intel-view-all:hover{background:rgba(16,185,129,.06)}
 
 /* ── Bottleneck Radar ── */
 .bottleneck-card{padding:12px;border-radius:var(--radius-md);border:1px solid rgba(239,68,68,.15);background:rgba(239,68,68,.04);cursor:pointer;transition:background .12s;text-decoration:none;display:block}
@@ -178,14 +181,14 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .preset-bar{display:flex;align-items:center;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px}
 .preset-btn{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--border-default);background:var(--surface-elevated);color:var(--content-secondary);cursor:pointer;white-space:nowrap;transition:all .15s}
 .preset-btn:hover{color:var(--content-primary);border-color:rgba(255,255,255,.12)}
-.preset-btn.active{background:rgba(12,141,233,.12);border-color:rgba(12,141,233,.25);color:var(--brand-500)}
+.preset-btn.active{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.25);color:var(--brand-500)}
 
 /* ── Filter bar ── */
 .filter-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
 .search-wrap{position:relative;flex:1;min-width:200px}
 .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--content-tertiary);pointer-events:none;width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .search-input{width:100%;padding:8px 12px 8px 34px;border:1px solid var(--border-default);border-radius:var(--radius-md);font-size:13px;color:var(--content-primary);background:var(--surface-elevated);outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit}
-.search-input:focus{border-color:var(--brand-500);box-shadow:0 0 0 3px rgba(12,141,233,.12)}
+.search-input:focus{border-color:var(--brand-500);box-shadow:0 0 0 3px rgba(16,185,129,.12)}
 .search-input::placeholder{color:var(--content-tertiary)}
 .filter-select{padding:8px 12px;border:1px solid var(--border-default);border-radius:var(--radius-md);font-size:12px;color:var(--content-secondary);background:var(--surface-elevated);outline:none;cursor:pointer;font-family:inherit;transition:border-color .15s}
 .filter-select:focus{border-color:var(--brand-500)}
@@ -219,21 +222,21 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 /* ── Health badges ── */
 .badge{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
 .badge-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
-.badge-healthy{background:rgba(16,185,129,.1);color:var(--emerald-500)}
-.badge-review{background:rgba(245,158,11,.1);color:var(--amber-500)}
-.badge-variation{background:rgba(239,68,68,.1);color:var(--red-400)}
-.badge-new{background:rgba(59,130,246,.1);color:var(--blue-400)}
+.badge-healthy{background:var(--emerald-50);color:var(--emerald-700)}
+.badge-review{background:var(--amber-50);color:var(--amber-700)}
+.badge-variation{background:var(--red-50);color:var(--red-700)}
+.badge-new{background:var(--blue-50);color:var(--blue-600)}
 .badge-stale{background:var(--surface-elevated);color:var(--content-tertiary)}
 
 /* ── SOP badges ── */
 .sop-badge{padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
-.sop-ready{background:rgba(16,185,129,.1);color:var(--emerald-500)}
-.sop-partial{background:rgba(245,158,11,.1);color:var(--amber-500)}
+.sop-ready{background:var(--emerald-50);color:var(--emerald-700)}
+.sop-partial{background:var(--amber-50);color:var(--amber-700)}
 .sop-not{background:var(--surface-elevated);color:var(--content-tertiary)}
 
 /* ── Confidence bar ── */
 .conf-wrap{display:flex;align-items:center;gap:6px}
-.conf-bar-track{flex:1;height:4px;background:var(--surface-elevated);border-radius:2px;overflow:hidden;min-width:40px}
+.conf-bar-track{flex:1;height:6px;background:var(--surface-elevated);border-radius:3px;overflow:hidden;min-width:40px}
 .conf-bar-fill{height:100%;border-radius:2px}
 .conf-pct{font-size:11px;font-variant-numeric:tabular-nums;min-width:30px;text-align:right}
 
@@ -275,7 +278,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .sop-step{border:1px solid var(--border-default);border-radius:var(--radius-md);margin-bottom:8px;overflow:hidden}
 .sop-step-header{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;transition:background .12s}
 .sop-step-header:hover{background:var(--surface-elevated)}
-.sop-step-num{width:22px;height:22px;border-radius:50%;background:rgba(12,141,233,.12);color:var(--brand-500);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sop-step-num{width:22px;height:22px;border-radius:50%;background:rgba(16,185,129,.12);color:var(--brand-500);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .sop-step-title{font-size:13px;font-weight:500;color:var(--content-primary);flex:1}
 .sop-step-toggle{color:var(--content-tertiary);transition:transform .15s}
 .sop-step.open .sop-step-toggle{transform:rotate(90deg)}
@@ -332,16 +335,72 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 @media (min-width:768px){
   .mobile-only{display:none!important}
 }
+
+/* ── Demo Banner CTAs ── */
+.demo-banner-cta{display:inline-flex;padding:3px 12px;background:var(--brand-600);color:#fff;border-radius:20px;font-weight:600;text-decoration:none;margin-left:8px;transition:background .15s}
+.demo-banner-cta:hover{background:var(--brand-700);color:#fff}
+.demo-banner-link{color:var(--content-tertiary);text-decoration:underline;margin-left:8px;font-weight:400}
+.demo-banner-proof{color:var(--content-tertiary);font-size:11px;margin-left:12px;opacity:.7}
+
+/* ── CTA strip ── */
+.cta-strip{text-align:center;padding:12px;font-size:12px;color:var(--content-tertiary);margin-bottom:24px}
+.cta-strip a{color:var(--brand-500);text-decoration:none;font-weight:500}
+.cta-strip a:hover{color:var(--brand-400)}
+
+/* ── Panel CTA footer ── */
+.panel-cta{padding:12px 24px;border-top:1px solid var(--border-default);background:var(--surface-primary);font-size:12px;color:var(--content-secondary);text-align:center;flex-shrink:0}
+.panel-cta a{color:var(--brand-500);text-decoration:none;font-weight:500}
+.panel-cta a:hover{color:var(--brand-400)}
+
+/* ── View mode toggle ── */
+.view-mode-toggle{display:flex;align-items:center;gap:4px;padding:4px;background:var(--surface-secondary);border-radius:var(--radius-md);width:fit-content;margin-bottom:16px}
+.view-mode-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:var(--content-secondary);transition:all .15s;white-space:nowrap}
+.view-mode-btn:hover{color:var(--content-primary)}
+.view-mode-btn.active{background:var(--surface-elevated);color:var(--content-primary);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.view-mode-portfolios{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--border-default);border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:var(--content-secondary);transition:all .15s}
+.view-mode-portfolios:hover{color:var(--content-primary);border-color:rgba(255,255,255,.15)}
+.view-mode-portfolios.active{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.2);color:var(--brand-500)}
+.view-mode-header{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+
+/* ── Portfolio sidebar ── */
+.wf-library-layout{display:flex;gap:16px;align-items:flex-start}
+.portfolio-sidebar{width:0;overflow:hidden;transition:width .2s ease,opacity .2s ease;opacity:0;flex-shrink:0}
+.portfolio-sidebar.open{width:200px;opacity:1}
+.portfolio-sidebar-inner{width:200px;background:var(--surface-secondary);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:8px;font-size:13px}
+.portfolio-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--radius-sm);cursor:pointer;color:var(--content-secondary);transition:all .12s;border:none;background:none;width:100%;text-align:left}
+.portfolio-item:hover{background:var(--surface-elevated);color:var(--content-primary)}
+.portfolio-item.active{background:rgba(16,185,129,.08);color:var(--brand-500)}
+.portfolio-count{margin-left:auto;font-size:10px;opacity:.5}
+.portfolio-main{flex:1;min-width:0}
+
+/* ── Process Families section ── */
+.process-families-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.process-family-card{border:1px solid var(--border-default);border-radius:var(--radius-md);padding:12px 14px;background:var(--surface-primary)}
+.process-family-title{font-size:12px;font-weight:600;color:var(--content-primary);margin-bottom:8px}
+.process-family-stats{display:flex;gap:12px;flex-wrap:wrap}
+.process-family-stat{font-size:11px;color:var(--content-tertiary)}
+.process-family-stat strong{color:var(--content-secondary)}
+.process-groups-placeholder{text-align:center;padding:48px 24px;color:var(--content-tertiary);font-size:13px}
+
+/* ── Toast notification ── */
+.demo-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface-elevated);border:1px solid var(--border-default);padding:10px 20px;border-radius:var(--radius-lg);font-size:13px;color:var(--content-primary);box-shadow:0 4px 12px rgba(0,0,0,.3);z-index:100;opacity:0;transition:opacity .2s;pointer-events:none}
+.demo-toast.show{opacity:1;pointer-events:auto}
+
+@media (max-width:767px){
+  .process-families-grid{grid-template-columns:1fr}
+  .portfolio-sidebar.open{width:100%;margin-bottom:12px}
+  .wf-library-layout{flex-direction:column}
+}
 </style>
 </head>
 <body>
 
 <!-- Demo Banner -->
 <div class="demo-banner">
-  <strong>Interactive demo</strong> &mdash; sample data only. See your real workflows here &rarr;
-  <a href="/signup">Create free account</a>
-  &nbsp;&middot;&nbsp;
-  <a href="/pricing">View pricing</a>
+  <strong>Live demo</strong> &mdash; this is what your workflow library looks like after one week.
+  <a href="/signup" class="demo-banner-cta">Start free &mdash; no card required</a>
+  <a href="/pricing" class="demo-banner-link">See pricing</a>
+  <span class="demo-banner-proof">Trusted by operations teams worldwide</span>
 </div>
 
 <!-- Top Nav -->
@@ -385,11 +444,11 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
         <p class="cmd-subtitle" id="cmd-date">Operational command center</p>
       </div>
       <div class="cmd-actions">
-        <button class="btn-secondary">
+        <button class="btn-secondary" onclick="window.location.href='/signup?intent=actions'">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           Actions
         </button>
-        <button class="btn-secondary">
+        <button class="btn-secondary" onclick="window.location.href='/signup?intent=analytics'">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           Analytics
         </button>
@@ -406,7 +465,10 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
         <div class="health-circle">
           <span class="health-circle-num">72</span>
         </div>
-        <span class="health-label">Org Health</span>
+        <div>
+          <span class="health-label">Org Health</span>
+          <span style="font-size:10px;color:var(--content-tertiary);display:block;margin-top:1px">2 workflows need attention</span>
+        </div>
       </div>
 
       <span class="health-sep">|</span>
@@ -716,9 +778,73 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
     </div>
   </div>
 
+  <!-- CTA strip after Bottleneck Radar -->
+  <div class="cta-strip">
+    See bottlenecks in your own workflows &mdash; takes 5 minutes.
+    <a href="/signup">Record your first workflow free &rarr;</a>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PROCESS FAMILIES
+       ═══════════════════════════════════════════ -->
+  <div class="card section-mb" style="padding:16px 20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--brand-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+        <span style="font-size:13px;font-weight:600;color:var(--content-primary)">Process Families</span>
+      </div>
+      <a href="#" onclick="switchToProcessGroups();return false" style="font-size:12px;color:var(--brand-500);text-decoration:none">View all &rarr;</a>
+    </div>
+    <p style="font-size:12px;color:var(--content-tertiary);margin-bottom:12px">Workflow patterns discovered across your team</p>
+    <div class="process-families-grid">
+      <div class="process-family-card">
+        <div class="process-family-title">Expense Report Processing</div>
+        <div class="process-family-stats">
+          <div class="process-family-stat"><strong>3</strong> runs</div>
+          <div class="process-family-stat"><strong>2</strong> variants</div>
+          <div class="process-family-stat" style="color:var(--emerald-600)"><strong>87%</strong> stable</div>
+        </div>
+      </div>
+      <div class="process-family-card">
+        <div class="process-family-title">Employee Onboarding</div>
+        <div class="process-family-stats">
+          <div class="process-family-stat"><strong>2</strong> runs</div>
+          <div class="process-family-stat"><strong>2</strong> variants</div>
+          <div class="process-family-stat" style="color:var(--amber-600)"><strong>62%</strong> stable</div>
+        </div>
+      </div>
+      <div class="process-family-card">
+        <div class="process-family-title">Purchase Order Management</div>
+        <div class="process-family-stats">
+          <div class="process-family-stat"><strong>2</strong> runs</div>
+          <div class="process-family-stat"><strong>1</strong> variant</div>
+          <div class="process-family-stat" style="color:var(--emerald-600)"><strong>91%</strong> stable</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══════════════════════════════════════════
        WORKFLOW LIBRARY
        ═══════════════════════════════════════════ -->
+  <!-- View mode toggle -->
+  <div class="view-mode-header">
+    <div class="view-mode-toggle">
+      <button class="view-mode-btn active" id="vm-workflows" onclick="setViewMode('workflows')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="4"/><rect x="2" y="10" width="20" height="4"/><rect x="2" y="17" width="20" height="4"/></svg>
+        Workflows
+      </button>
+      <button class="view-mode-btn" id="vm-groups" onclick="setViewMode('groups')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        Process Groups
+      </button>
+    </div>
+    <button class="view-mode-portfolios" id="vm-portfolios" onclick="togglePortfolioSidebar()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      Portfolios
+    </button>
+  </div>
+
   <div class="section-header-row">
     <div>
       <div class="section-title">Workflow Library</div>
@@ -745,6 +871,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
       <option value="healthy">Healthy</option>
       <option value="needs_review">Needs Review</option>
       <option value="high_variation">High Variation</option>
+      <option value="stale">Stale</option>
       <option value="new">New</option>
     </select>
     <select class="filter-select" id="sop-filter" onchange="applyFilters()">
@@ -759,62 +886,115 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
       <option value="confidence_desc">Highest Confidence</option>
       <option value="confidence_asc">Lowest Confidence</option>
       <option value="duration">Longest Duration</option>
+      <option value="views">Most Viewed</option>
+      <option value="optimization">Optimization</option>
       <option value="ai_score">AI Score</option>
     </select>
   </div>
 
-  <!-- Tag filter bar -->
-  <div class="tag-bar">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--content-tertiary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-    <button class="tag-chip active" data-tag="" onclick="filterByTag(this,'')">All</button>
-    <button class="tag-chip" data-tag="Finance" onclick="filterByTag(this,'Finance')" style="color:#10b981">
-      <span class="tag-chip-dot" style="background:#10b981"></span>Finance
-      <span style="opacity:.5;font-size:10px">4</span>
-    </button>
-    <button class="tag-chip" data-tag="Onboarding" onclick="filterByTag(this,'Onboarding')" style="color:#8b5cf6">
-      <span class="tag-chip-dot" style="background:#8b5cf6"></span>Onboarding
-      <span style="opacity:.5;font-size:10px">1</span>
-    </button>
-    <button class="tag-chip" data-tag="Compliance" onclick="filterByTag(this,'Compliance')" style="color:#f59e0b">
-      <span class="tag-chip-dot" style="background:#f59e0b"></span>Compliance
-      <span style="opacity:.5;font-size:10px">2</span>
-    </button>
-    <button class="tag-chip" data-tag="Sales" onclick="filterByTag(this,'Sales')" style="color:#ef4444">
-      <span class="tag-chip-dot" style="background:#ef4444"></span>Sales
-      <span style="opacity:.5;font-size:10px">3</span>
-    </button>
-    <button class="tag-chip" data-tag="IT" onclick="filterByTag(this,'IT')" style="color:#6366f1">
-      <span class="tag-chip-dot" style="background:#6366f1"></span>IT
-      <span style="opacity:.5;font-size:10px">3</span>
-    </button>
-  </div>
+  <!-- Workflow library layout with optional portfolio sidebar -->
+  <div class="wf-library-layout">
 
-  <!-- Desktop table header -->
-  <div class="wf-table-header wf-cols desktop-only" style="display:grid">
-    <span></span>
-    <span>Workflow</span>
-    <span>Health</span>
-    <span>Steps</span>
-    <span>Duration</span>
-    <span>Confidence</span>
-    <span>SOP</span>
-    <span>Tags</span>
-    <span>Updated</span>
-    <span></span>
-  </div>
+    <!-- Portfolio Sidebar (item 14) -->
+    <div class="portfolio-sidebar" id="portfolio-sidebar">
+      <div class="portfolio-sidebar-inner">
+        <div style="font-size:10px;font-weight:600;color:var(--content-tertiary);text-transform:uppercase;letter-spacing:.08em;padding:4px 10px 8px">Portfolios</div>
+        <button class="portfolio-item active" data-portfolio="" onclick="filterByPortfolio(this,'')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+          All Workflows
+          <span class="portfolio-count">10</span>
+        </button>
+        <button class="portfolio-item" data-portfolio="Finance" onclick="filterByPortfolio(this,'Finance')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          Finance Operations
+          <span class="portfolio-count">4</span>
+        </button>
+        <button class="portfolio-item" data-portfolio="IT" onclick="filterByPortfolio(this,'IT')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          IT &amp; Infrastructure
+          <span class="portfolio-count">3</span>
+        </button>
+        <button class="portfolio-item" data-portfolio="Sales" onclick="filterByPortfolio(this,'Sales')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          Sales &amp; Revenue
+          <span class="portfolio-count">3</span>
+        </button>
+        <button class="portfolio-item" data-portfolio="__none__" onclick="filterByPortfolio(this,'__none__')" style="opacity:.5">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          Uncategorized
+          <span class="portfolio-count">0</span>
+        </button>
+      </div>
+    </div>
 
-  <!-- Workflow rows -->
-  <div class="wf-table-wrap" id="workflow-list">
-    <!-- Rows injected by JS -->
-  </div>
+    <!-- Main content area -->
+    <div class="portfolio-main">
 
-  <!-- Empty state -->
-  <div id="empty-state" style="display:none;text-align:center;padding:48px 24px">
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--content-tertiary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 12px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <p style="font-size:14px;font-weight:500;color:var(--content-secondary)">No workflows match your filters</p>
-    <p style="font-size:12px;color:var(--content-tertiary);margin-top:4px">Try adjusting your search or filter criteria</p>
-    <button onclick="clearFilters()" style="margin-top:12px;padding:7px 16px;background:var(--surface-elevated);border:1px solid var(--border-default);border-radius:var(--radius-md);font-size:12px;color:var(--content-secondary);cursor:pointer;font-family:inherit">Clear filters</button>
-  </div>
+      <!-- Tag filter bar -->
+      <div class="tag-bar">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--content-tertiary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        <button class="tag-chip active" data-tag="" onclick="filterByTag(this,'')">All</button>
+        <button class="tag-chip" data-tag="Finance" onclick="filterByTag(this,'Finance')" style="color:#10b981">
+          <span class="tag-chip-dot" style="background:#10b981"></span>Finance
+          <span style="opacity:.5;font-size:10px">4</span>
+        </button>
+        <button class="tag-chip" data-tag="Onboarding" onclick="filterByTag(this,'Onboarding')" style="color:#8b5cf6">
+          <span class="tag-chip-dot" style="background:#8b5cf6"></span>Onboarding
+          <span style="opacity:.5;font-size:10px">1</span>
+        </button>
+        <button class="tag-chip" data-tag="Compliance" onclick="filterByTag(this,'Compliance')" style="color:#f59e0b">
+          <span class="tag-chip-dot" style="background:#f59e0b"></span>Compliance
+          <span style="opacity:.5;font-size:10px">2</span>
+        </button>
+        <button class="tag-chip" data-tag="Sales" onclick="filterByTag(this,'Sales')" style="color:#ef4444">
+          <span class="tag-chip-dot" style="background:#ef4444"></span>Sales
+          <span style="opacity:.5;font-size:10px">3</span>
+        </button>
+        <button class="tag-chip" data-tag="IT" onclick="filterByTag(this,'IT')" style="color:#6366f1">
+          <span class="tag-chip-dot" style="background:#6366f1"></span>IT
+          <span style="opacity:.5;font-size:10px">3</span>
+        </button>
+      </div>
+
+      <!-- Process Groups placeholder (hidden by default) -->
+      <div id="process-groups-view" style="display:none">
+        <div class="process-groups-placeholder">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--content-tertiary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 12px;display:block"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          <p style="font-size:14px;font-weight:500;color:var(--content-secondary);margin-bottom:8px">Run analysis to discover process families across your workflows</p>
+          <button disabled style="padding:8px 16px;background:var(--surface-elevated);border:1px solid var(--border-default);border-radius:var(--radius-md);font-size:12px;color:var(--content-tertiary);cursor:not-allowed;font-family:inherit;opacity:.6">Run Analysis</button>
+          <p style="font-size:11px;color:var(--content-tertiary);margin-top:12px"><a href="/signup" style="color:var(--brand-500);text-decoration:none">Sign up</a> to unlock process grouping</p>
+        </div>
+      </div>
+
+      <!-- Desktop table header -->
+      <div class="wf-table-header wf-cols desktop-only" id="wf-table-header" style="display:grid">
+        <span></span>
+        <span>Workflow</span>
+        <span>Health</span>
+        <span>Steps</span>
+        <span>Duration</span>
+        <span>Confidence</span>
+        <span>SOP</span>
+        <span>Tags</span>
+        <span>Active</span>
+        <span></span>
+      </div>
+
+      <!-- Workflow rows -->
+      <div class="wf-table-wrap" id="workflow-list">
+        <!-- Rows injected by JS -->
+      </div>
+
+      <!-- Empty state -->
+      <div id="empty-state" style="display:none;text-align:center;padding:48px 24px">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--content-tertiary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 12px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <p style="font-size:14px;font-weight:500;color:var(--content-secondary)">No workflows match your filters</p>
+        <p style="font-size:12px;color:var(--content-tertiary);margin-top:4px">Try adjusting your search or filter criteria</p>
+        <button onclick="clearFilters()" style="margin-top:12px;padding:7px 16px;background:var(--surface-elevated);border:1px solid var(--border-default);border-radius:var(--radius-md);font-size:12px;color:var(--content-secondary);cursor:pointer;font-family:inherit">Clear filters</button>
+      </div>
+
+    </div><!-- /portfolio-main -->
+  </div><!-- /wf-library-layout -->
 
 </div><!-- /container -->
 </main>
@@ -840,7 +1020,13 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
   <div class="panel-body" id="panel-body">
     <!-- Content injected by JS -->
   </div>
+  <div class="panel-cta">
+    Record this workflow for your team &mdash; <a href="/signup">Start free</a>
+  </div>
 </div>
+
+<!-- Toast notification -->
+<div class="demo-toast" id="demo-toast"></div>
 
 <script>
 // ── Data ──────────────────────────────────────────────────────────────────────
@@ -902,6 +1088,10 @@ let activePresetName = 'All Workflows';
 let currentPanelId = null;
 let currentTab = 'sop';
 let favorites = new Set(['wf-01','wf-04']);
+let activeViewMode = 'workflows';
+let portfolioSidebarOpen = false;
+let activePortfolio = '';
+let toastTimer = null;
 
 // ── Format helpers ─────────────────────────────────────────────────────────────
 function formatDuration(ms) {
@@ -925,9 +1115,9 @@ function confColor(v) {
 }
 
 function confBarColor(v) {
-  if (v >= 0.8) return '#10b981';
-  if (v >= 0.6) return '#f59e0b';
-  return '#ef4444';
+  if (v >= 0.8) return 'var(--emerald-500)';
+  if (v >= 0.6) return 'var(--amber-500)';
+  return 'var(--red-400)';
 }
 
 // ── Render workflow rows ──────────────────────────────────────────────────────
@@ -942,6 +1132,8 @@ function getFilteredWorkflows() {
     if (health && w.healthStatus !== health) return false;
     if (sop && w.sopReadiness !== sop) return false;
     if (activeTag && !w.tags.some(t=>t.name===activeTag)) return false;
+    if (activePortfolio && activePortfolio !== '__none__' && !w.tags.some(t=>t.name===activePortfolio)) return false;
+    if (activePortfolio === '__none__') return false; // Uncategorized = 0 items
     return true;
   });
 
@@ -951,6 +1143,8 @@ function getFilteredWorkflows() {
       case 'confidence_desc': return b.confidence - a.confidence;
       case 'confidence_asc': return a.confidence - b.confidence;
       case 'duration': return b.durationMs - a.durationMs;
+      case 'views': return 0;
+      case 'optimization': return b.aiOpportunityScore - a.aiOpportunityScore;
       case 'ai_score': return b.aiOpportunityScore - a.aiOpportunityScore;
       default: return new Date(b.updatedAt) - new Date(a.updatedAt);
     }
@@ -1021,15 +1215,18 @@ function renderWorkflows() {
 
         <!-- Title + system -->
         <div style="min-width:0">
-          <div style="font-size:13px;font-weight:500;color:var(--content-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${w.title}</div>
+          <div style="font-size:13px;font-weight:500;color:var(--content-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;transition:color .12s" onmouseenter="this.style.color='var(--brand-500)'" onmouseleave="this.style.color='var(--content-primary)'">${w.title}</div>
           <div style="margin-top:3px;display:flex;gap:4px;flex-wrap:wrap">
             ${w.systems.slice(0,2).map(s=>`<span style="font-size:10px;font-weight:500;padding:1px 6px;border-radius:4px;background:var(--surface-elevated);color:var(--content-tertiary)">${s}</span>`).join('')}
             ${w.systems.length>2?`<span style="font-size:10px;color:var(--content-tertiary)">+${w.systems.length-2}</span>`:''}
           </div>
         </div>
 
-        <!-- Health -->
-        <div>${healthBadgeHtml(w.healthStatus)}</div>
+        <!-- Health + AI chip -->
+        <div>
+          ${healthBadgeHtml(w.healthStatus)}
+          ${w.aiOpportunityScore >= 60 ? `<span class="ai-score" style="margin-top:4px;display:inline-flex">&#9889; AI ${w.aiOpportunityScore}</span>` : ''}
+        </div>
 
         <!-- Steps -->
         <div style="font-size:13px;color:var(--content-secondary);font-variant-numeric:tabular-nums">${w.steps}</div>
@@ -1056,6 +1253,12 @@ function renderWorkflows() {
 
         <!-- Actions -->
         <div class="row-actions">
+          <button class="row-action-btn" title="Manage tags" onclick="event.stopPropagation();showDemoToast('Sign up to manage workflows')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          </button>
+          <button class="row-action-btn" title="Rename" onclick="event.stopPropagation();showDemoToast('Sign up to manage workflows')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
           <button class="row-action-btn" title="View" onclick="openPanel('${w.id}');event.stopPropagation()">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
@@ -1147,6 +1350,7 @@ function clearFilters() {
 
 function toggleFav(e, id) {
   e.stopPropagation();
+  showDemoToast('Sign up to save favorites — <a href="/signup" style="color:var(--brand-400)">Create free account</a>');
   if (favorites.has(id)) { favorites.delete(id); } else { favorites.add(id); }
   renderWorkflows();
 }
@@ -1211,6 +1415,9 @@ function renderPanelBody(id, tab) {
           </div>
         </div>
       `).join('')}
+      <div style="margin-top:12px;padding:10px 14px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.12);border-radius:var(--radius-md);font-size:11px;color:var(--content-secondary)">
+        Every step above is generated from <a href="#" onclick="switchTab('evidence');return false" style="color:var(--brand-500);text-decoration:underline">structured evidence</a> &mdash; raw events captured during workflow execution.
+      </div>
       <div style="margin-top:16px;padding:12px 14px;background:var(--surface-elevated);border-radius:var(--radius-md);border:1px solid var(--border-default)">
         <div style="font-size:11px;font-weight:600;color:var(--content-tertiary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Tags</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">${tagsHtml(w.tags)}</div>
@@ -1250,7 +1457,7 @@ function renderPanelBody(id, tab) {
       <div style="margin-top:16px;padding:12px 14px;background:var(--surface-elevated);border-radius:var(--radius-md)">
         <div style="font-size:11px;font-weight:600;color:var(--content-tertiary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Systems Involved</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
-          ${w.systems.map(s=>`<span style="font-size:11px;font-weight:500;padding:3px 8px;border-radius:4px;background:rgba(12,141,233,.1);color:var(--brand-500)">${s}</span>`).join('')}
+          ${w.systems.map(s=>`<span style="font-size:11px;font-weight:500;padding:3px 8px;border-radius:4px;background:rgba(16,185,129,.1);color:var(--brand-500)">${s}</span>`).join('')}
         </div>
       </div>
     `;
@@ -1317,7 +1524,7 @@ function renderPanelBody(id, tab) {
           <span style="color:var(--content-tertiary)"> &mdash; ${ev.detail}</span>
         </div>
       `).join('')}
-      <div style="margin-top:16px;padding:10px 12px;background:rgba(12,141,233,.06);border:1px solid rgba(12,141,233,.15);border-radius:var(--radius-md);font-size:11px;color:var(--content-secondary)">
+      <div style="margin-top:16px;padding:10px 12px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:var(--radius-md);font-size:11px;color:var(--content-secondary)">
         Evidence is immutable. Raw events are stored as structured JSON and used to derive intelligence scores.
       </div>
     `;
@@ -1327,6 +1534,65 @@ function renderPanelBody(id, tab) {
 function toggleStep(i) {
   const el = document.getElementById('sop-step-' + i);
   if (el) el.classList.toggle('open');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showDemoToast(msg) {
+  const el = document.getElementById('demo-toast');
+  el.innerHTML = msg;
+  el.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ── View mode toggle (item 12) ────────────────────────────────────────────────
+function setViewMode(mode) {
+  activeViewMode = mode;
+  document.getElementById('vm-workflows').classList.toggle('active', mode === 'workflows');
+  document.getElementById('vm-groups').classList.toggle('active', mode === 'groups');
+
+  const workflowsView = document.getElementById('workflow-list');
+  const groupsView = document.getElementById('process-groups-view');
+  const tableHeader = document.getElementById('wf-table-header');
+  const presetBar = document.querySelector('.preset-bar');
+  const filterBar = document.querySelector('.filter-bar');
+  const tagBar = document.querySelector('.tag-bar');
+  const emptyState = document.getElementById('empty-state');
+
+  if (mode === 'groups') {
+    workflowsView.style.display = 'none';
+    tableHeader.style.display = 'none';
+    if (presetBar) presetBar.style.display = 'none';
+    if (filterBar) filterBar.style.display = 'none';
+    if (tagBar) tagBar.style.display = 'none';
+    if (emptyState) emptyState.style.display = 'none';
+    groupsView.style.display = 'block';
+  } else {
+    groupsView.style.display = 'none';
+    tableHeader.style.display = 'grid';
+    if (presetBar) presetBar.style.display = 'flex';
+    if (filterBar) filterBar.style.display = 'flex';
+    if (tagBar) tagBar.style.display = 'flex';
+    renderWorkflows();
+  }
+}
+
+// ── Portfolio sidebar (item 14) ───────────────────────────────────────────────
+function togglePortfolioSidebar() {
+  portfolioSidebarOpen = !portfolioSidebarOpen;
+  document.getElementById('portfolio-sidebar').classList.toggle('open', portfolioSidebarOpen);
+  document.getElementById('vm-portfolios').classList.toggle('active', portfolioSidebarOpen);
+}
+
+function filterByPortfolio(el, portfolio) {
+  activePortfolio = portfolio;
+  document.querySelectorAll('.portfolio-item').forEach(b => b.classList.toggle('active', b.dataset.portfolio === portfolio));
+  renderWorkflows();
+}
+
+// ── Switch to process groups view (called from Process Families section) ──────
+function switchToProcessGroups() {
+  setViewMode('groups');
 }
 
 // ── Date in header ─────────────────────────────────────────────────────────────
