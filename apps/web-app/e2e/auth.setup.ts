@@ -15,7 +15,7 @@ setup('authenticate as test user', async ({ page }) => {
 
   // Wait for the form to be interactive (React hydration)
   const emailInput = page.getByLabel('Email');
-  await emailInput.waitFor({ state: 'visible' });
+  await emailInput.waitFor({ state: 'visible', timeout: 60_000 });
 
   // Fill credentials
   await emailInput.fill('e2e@ledgerium.test');

@@ -22,7 +22,7 @@ export default defineConfig({
 
   /* Shared settings for all tests */
   use: {
-    baseURL: 'http://localhost:3099',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3099',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     /* Wait for network to settle before asserting */
