@@ -23,6 +23,7 @@ import {
   Plus,
   Brain,
   Bot,
+  HelpCircle,
 } from 'lucide-react';
 import { formatDuration, formatDate, formatConfidence } from '@/lib/format';
 import { track, trackActivation } from '@/lib/analytics';
@@ -41,15 +42,15 @@ import { AgentIntelligenceTab } from '@/components/detail/AgentIntelligenceTab';
 
 type TabId = 'workflow' | 'sop' | 'report' | 'insights' | 'interpretation' | 'intelligence' | 'agent-intelligence' | 'evidence';
 
-const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
-  { id: 'workflow', label: 'Workflow', icon: Layers },
-  { id: 'sop', label: 'SOP', icon: ListChecks },
-  { id: 'report', label: 'Report', icon: FileText },
-  { id: 'insights', label: 'Insights', icon: Zap },
-  { id: 'interpretation', label: 'Interpretation', icon: Brain },
-  { id: 'intelligence', label: 'Intelligence', icon: BarChart3 },
-  { id: 'agent-intelligence', label: 'AI Agents', icon: Bot },
-  { id: 'evidence', label: 'Evidence', icon: Eye },
+const TABS: { id: TabId; label: string; icon: React.ElementType; docsAnchor: string }[] = [
+  { id: 'workflow', label: 'Workflow', icon: Layers, docsAnchor: 'process-map' },
+  { id: 'sop', label: 'SOP', icon: ListChecks, docsAnchor: 'sop-tab' },
+  { id: 'report', label: 'Report', icon: FileText, docsAnchor: 'report-tab' },
+  { id: 'insights', label: 'Insights', icon: Zap, docsAnchor: 'insights-tab' },
+  { id: 'interpretation', label: 'Interpretation', icon: Brain, docsAnchor: 'interpretation-tab' },
+  { id: 'intelligence', label: 'Intelligence', icon: BarChart3, docsAnchor: 'intelligence-tab' },
+  { id: 'agent-intelligence', label: 'AI Agents', icon: Bot, docsAnchor: 'agents-tab' },
+  { id: 'evidence', label: 'Evidence', icon: Eye, docsAnchor: 'evidence-tab' },
 ];
 
 export default function WorkflowDetailPage() {
@@ -294,19 +295,31 @@ export default function WorkflowDetailPage() {
       {/* Tabs */}
       <div className="border-b border-[var(--border-default)] mb-ds-6 no-print overflow-x-auto">
         <nav className="flex gap-ds-6 min-w-max">
-          {TABS.map(({ id: tabId, label, icon: Icon }) => (
-            <button
-              key={tabId}
-              onClick={() => handleTabChange(tabId)}
-              className={`flex items-center gap-1.5 border-b-2 pb-ds-3 pt-ds-1 text-ds-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
-                activeTab === tabId
-                  ? 'border-brand-600 text-brand-600'
-                  : 'border-transparent text-[var(--content-secondary)] hover:text-[var(--content-primary)]'
-              }`}
-            >
-              <Icon className="h-4 w-4" />
-              {label}
-            </button>
+          {TABS.map(({ id: tabId, label, icon: Icon, docsAnchor }) => (
+            <span key={tabId} className="flex items-center gap-0.5 flex-shrink-0">
+              <button
+                onClick={() => handleTabChange(tabId)}
+                className={`flex items-center gap-1.5 border-b-2 pb-ds-3 pt-ds-1 text-ds-sm font-medium transition-colors whitespace-nowrap ${
+                  activeTab === tabId
+                    ? 'border-brand-600 text-brand-600'
+                    : 'border-transparent text-[var(--content-secondary)] hover:text-[var(--content-primary)]'
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </button>
+              {activeTab === tabId && (
+                <a
+                  href={`/docs#${docsAnchor}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={`Learn about the ${label} tab`}
+                  className="mb-1 ml-0.5 text-[var(--content-tertiary)] hover:text-brand-400 transition-colors"
+                >
+                  <HelpCircle className="h-3.5 w-3.5" />
+                </a>
+              )}
+            </span>
           ))}
         </nav>
       </div>

@@ -12,6 +12,7 @@ import {
   Users,
   Zap,
   Download,
+  HelpCircle,
 } from 'lucide-react';
 import { EXTENSION_CONFIG } from '@/lib/config';
 import { LogoFull } from '@/components/shared/LogoMark';
@@ -72,6 +73,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 {session?.user?.email}
               </span>
               <ThemeToggle />
+              <Link
+                href="/docs"
+                className="rounded-ds-md p-ds-2 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-secondary)] transition-colors"
+                title="Documentation"
+              >
+                <HelpCircle className="h-4 w-4" />
+              </Link>
               <button
                 onClick={() => signOut({ callbackUrl: '/login' })}
                 className="rounded-ds-md p-ds-2 text-[var(--content-tertiary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-secondary)] transition-colors"

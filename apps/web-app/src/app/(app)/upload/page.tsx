@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Upload, CheckCircle, XCircle, FileJson, Loader2, Zap, Lock } from 'lucide-react';
+import { Upload, CheckCircle, XCircle, FileJson, Loader2, Zap, Lock, HelpCircle } from 'lucide-react';
 import { track, trackActivation } from '@/lib/analytics';
 
 type UploadState = 'idle' | 'uploading' | 'success' | 'error' | 'upgrade_required';
@@ -117,6 +117,16 @@ export default function UploadPage() {
         <h1 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">Upload Workflow</h1>
         <p className="mt-ds-1 text-ds-sm text-[var(--content-secondary)]">
           Upload a Ledgerium recorder JSON file to add it to your workflow library.
+          <a
+            href="/docs#upload-manual"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 ml-2 text-[var(--content-tertiary)] hover:text-brand-400 transition-colors"
+            title="Learn more about uploading"
+          >
+            <HelpCircle className="h-3.5 w-3.5" />
+            <span className="text-xs">How it works</span>
+          </a>
         </p>
       </div>
 

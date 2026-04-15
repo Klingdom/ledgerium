@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Users, Plus, ChevronRight, Crown, Shield, Eye } from 'lucide-react';
+import { Users, Plus, ChevronRight, Crown, Shield, Eye, HelpCircle } from 'lucide-react';
 import { track } from '@/lib/analytics';
 
 interface TeamSummary {
@@ -69,6 +69,16 @@ export default function TeamsPage() {
           <h1 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">Teams</h1>
           <p className="text-ds-sm text-[var(--content-secondary)]">
             {teams.length} team{teams.length !== 1 ? 's' : ''}
+            <a
+              href="/docs#teams"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 ml-2 text-[var(--content-tertiary)] hover:text-brand-400 transition-colors"
+              title="Learn more about teams"
+            >
+              <HelpCircle className="h-3.5 w-3.5" />
+              <span className="text-xs">Learn more</span>
+            </a>
           </p>
         </div>
         <button onClick={() => setShowCreate(true)} className="btn-primary gap-1.5">

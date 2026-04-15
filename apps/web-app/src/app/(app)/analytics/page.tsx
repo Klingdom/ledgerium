@@ -35,6 +35,7 @@ import {
   CheckCircle,
   XCircle,
   ArrowRight,
+  HelpCircle,
 } from 'lucide-react';
 import { formatDuration, formatDateRelative, formatConfidence } from '@/lib/format';
 import { track } from '@/lib/analytics';
@@ -171,6 +172,16 @@ export default function AnalyticsPage() {
           <h1 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">Process Intelligence</h1>
           <p className="text-ds-sm text-[var(--content-secondary)] mt-0.5">
             Analyze, compare, and optimize your workflows
+            <a
+              href="/docs#process-intelligence"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 ml-2 text-[var(--content-tertiary)] hover:text-brand-400 transition-colors"
+              title="Learn more about Process Intelligence"
+            >
+              <HelpCircle className="h-3.5 w-3.5" />
+              <span className="text-xs">Learn more</span>
+            </a>
           </p>
         </div>
         <button

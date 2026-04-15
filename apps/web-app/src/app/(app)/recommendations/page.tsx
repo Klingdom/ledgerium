@@ -14,6 +14,7 @@ import {
   GitBranch,
   AlertTriangle,
   Wrench,
+  HelpCircle,
 } from 'lucide-react';
 import { formatDuration } from '@/lib/format';
 import { track } from '@/lib/analytics';
@@ -177,6 +178,16 @@ export default function RecommendationCenterPage() {
         </h1>
         <p className="text-ds-sm text-[var(--content-secondary)] mt-ds-1">
           {allRecommendations.length} actionable recommendation{allRecommendations.length !== 1 ? 's' : ''} across {definitions.filter((d) => d.intelligence?.recommendations?.length).length} process{definitions.filter((d) => d.intelligence?.recommendations?.length).length !== 1 ? 'es' : ''}
+          <a
+            href="/docs#recommendations"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 ml-2 text-[var(--content-tertiary)] hover:text-brand-400 transition-colors"
+            title="Learn more about recommendations"
+          >
+            <HelpCircle className="h-3.5 w-3.5" />
+            <span className="text-xs">Learn more</span>
+          </a>
         </p>
       </div>
 

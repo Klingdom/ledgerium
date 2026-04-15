@@ -21,6 +21,7 @@ const NAV_LINKS: NavLink[] = [
   { href: '/pricing', label: 'Pricing' },
   { href: '/install-extension', label: 'Install' },
   { href: '/about', label: 'About' },
+  { href: '/docs', label: 'Docs' },
 ];
 
 export function PublicNav() {

@@ -30,8 +30,8 @@ async function seed() {
         email: 'e2e@ledgerium.test',
         name: 'E2E Test User',
         passwordHash,
-        plan: 'free',
-        subscriptionStatus: 'trialing',
+        plan: 'growth',
+        subscriptionStatus: 'active',
         isAdmin: false,
       },
     });

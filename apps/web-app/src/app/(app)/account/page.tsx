@@ -3,7 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { User, CreditCard, Shield, Zap, Key, Copy, Check, Trash2, Plus, BarChart3, Settings } from 'lucide-react';
+import { User, CreditCard, Shield, Zap, Key, Copy, Check, Trash2, Plus, BarChart3, Settings, HelpCircle } from 'lucide-react';
 
 interface AccountData {
   plan: string;
@@ -158,6 +158,15 @@ export default function AccountPage() {
         <div className="flex items-center gap-ds-3 mb-ds-4">
           <CreditCard className="h-5 w-5 text-[var(--content-tertiary)]" />
           <h2 className="text-ds-base font-semibold text-[var(--content-primary)]">Plan & Billing</h2>
+          <a
+            href="/docs#pricing"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-auto text-[var(--content-tertiary)] hover:text-brand-400 transition-colors"
+            title="Compare plans"
+          >
+            <HelpCircle className="h-4 w-4" />
+          </a>
         </div>
         <dl className="space-y-ds-3 text-ds-sm">
           <div className="flex justify-between items-center">

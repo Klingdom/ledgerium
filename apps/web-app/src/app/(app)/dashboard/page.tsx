@@ -2229,6 +2229,16 @@ function EmptyDashboard({
             Record a workflow with the browser extension, or upload a JSON file to generate
             your first SOP and process map.
           </p>
+          <p className="mt-ds-2">
+            <a
+              href="/docs#getting-started"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-ds-xs text-[var(--content-tertiary)] hover:text-brand-400 transition-colors"
+            >
+              Not sure where to start? Read the Getting Started guide &rarr;
+            </a>
+          </p>
           <div className="mt-ds-6 flex flex-wrap items-center justify-center gap-ds-3">
             <a
               href={EXTENSION_CONFIG.directDownloadUrl}
