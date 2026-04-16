@@ -2,24 +2,27 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   ArrowRight,
-  Shield,
-  CheckCircle,
+  Bot,
+  AlertTriangle,
+  BarChart3,
   Eye,
-  FileText,
-  Lock,
+  Zap,
   GitCompare,
-  Download,
-  Users,
+  Clock,
+  Target,
+  Layers,
+  Activity,
+  Star,
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Compliance & Audit — Ledgerium AI',
+  title: 'AI Implementation Teams — Ledgerium AI',
   description:
-    'Ledgerium captures real process execution and generates evidence-linked documentation — every step traceable to source events. Built for compliance, audit, and risk teams.',
+    "You're deploying AI agents into workflows you've never observed. Ledgerium captures the real process first — so your agents execute accurately, not aspirationally.",
   openGraph: {
-    title: 'Compliance & Audit — Ledgerium AI',
+    title: 'AI Implementation Teams — Ledgerium AI',
     description:
-      'Your audit documentation says the process works. Ledgerium verifies it — with deterministic, evidence-linked process documentation traceable to real browser events.',
+      "AI agents built on assumed workflows break in production. Ledgerium captures the real process before you automate it — so your agents have ground truth, not workshop notes.",
   },
 };
 
@@ -27,16 +30,19 @@ export const metadata: Metadata = {
 
 const PROBLEMS = [
   {
-    title: 'Documentation vs. reality',
-    desc: 'Audit-ready SOPs describe what should happen. Nobody has verified that\u2019s what actually happens.',
+    icon: AlertTriangle,
+    title: 'Automating the unknown',
+    desc: 'Teams deploy RPA and AI agents into processes described in workshops, not observed in reality. The documentation is a best-guess reconstruction — not a record of what actually happens.',
   },
   {
-    title: 'Manual evidence collection',
-    desc: 'Collecting process evidence means interviews, screenshots, and months of observation. It\u2019s expensive and subjective.',
+    icon: Bot,
+    title: 'Hallucinated workflows',
+    desc: 'AI agents built on assumed step sequences break when the real process has 3x more steps and undocumented workarounds. Your agent is executing confidently against fiction.',
   },
   {
-    title: 'Stale compliance artifacts',
-    desc: 'Controls documented during the last audit are already outdated. Processes drift between audit cycles.',
+    icon: BarChart3,
+    title: 'No baseline, no measurement',
+    desc: "Without observing the current process, you can't measure if automation actually improved anything. You shipped the agent — but you have no idea if it's faster, more accurate, or just differently broken.",
   },
 ];
 
@@ -45,57 +51,59 @@ const PROBLEMS = [
 const FEATURES = [
   {
     icon: Eye,
-    title: 'Observe, don\u2019t interview',
-    desc: 'Record real process execution in the browser. Every step is captured with timing, system context, and confidence scores \u2014 no relying on what people say they do.',
+    title: 'Observe before you automate',
+    desc: 'Record the actual human workflow. See every step, timing, system context, and decision point before handing it to an AI agent. Ground your automation in evidence, not assumptions.',
   },
   {
-    icon: CheckCircle,
-    title: 'Deterministic outputs',
-    desc: 'The same recording always produces the same SOP, process map, and report. No AI interpretation, no hallucination, no creative rewriting. Outputs are reproducible and audit-safe.',
-  },
-  {
-    icon: FileText,
-    title: 'Full evidence trail',
-    desc: 'Every instruction in the generated SOP traces back to a specific observed browser event. Auditors can verify each step against source evidence.',
-  },
-];
-
-/* ── Compliance features grid ──────────────────────────────────────────────── */
-
-const COMPLIANCE_FEATURES = [
-  {
-    icon: CheckCircle,
-    title: 'Deterministic Processing',
-    desc: 'Same input, same output \u2014 always',
-  },
-  {
-    icon: FileText,
-    title: 'Evidence Linking',
-    desc: 'Every step traces to source events',
-  },
-  {
-    icon: Lock,
-    title: 'Data Minimization',
-    desc: 'No screenshots, no keystrokes, no screen recording',
+    icon: Zap,
+    title: 'Generate automation blueprints',
+    desc: 'Structured process data with step sequences, system interactions, and timing — ready to feed into n8n, Zapier, or custom agent frameworks. Give your agents a map of reality, not a sketch from memory.',
   },
   {
     icon: GitCompare,
-    title: 'Reproducible Audits',
-    desc: 'Re-record and compare \u2014 detect process drift',
-  },
-  {
-    icon: Download,
-    title: 'Export & Archive',
-    desc: 'Download complete evidence bundles as JSON',
-  },
-  {
-    icon: Users,
-    title: 'Access Controls',
-    desc: 'Role-based team permissions (Team plan+)',
+    title: 'Measure the delta',
+    desc: 'Re-record after automation. Compare human vs. automated execution step by step. Quantify what improved and what regressed — so you ship with evidence, not hope.',
   },
 ];
 
-export default function CompliancePage() {
+/* ── What You Get grid ─────────────────────────────────────────────────────── */
+
+const DELIVERABLES = [
+  {
+    icon: Layers,
+    title: 'Process capture with full context',
+    desc: 'Every step recorded with system state, navigation path, and decision context',
+  },
+  {
+    icon: ArrowRight,
+    title: 'Step-by-step execution sequences',
+    desc: 'Ordered, structured event chains ready for agent consumption',
+  },
+  {
+    icon: Activity,
+    title: 'System interaction mapping',
+    desc: 'Which tools, fields, and UI surfaces the process touches — and in what order',
+  },
+  {
+    icon: Clock,
+    title: 'Timing and duration baselines',
+    desc: 'Per-step and end-to-end timing so you can measure automation against reality',
+  },
+  {
+    icon: Star,
+    title: 'Confidence scores per step',
+    desc: 'Signal quality indicators that surface ambiguous steps before they become agent failures',
+  },
+  {
+    icon: Target,
+    title: 'Automation opportunity scoring',
+    desc: 'Identify which steps are high-value automation targets and which require human judgment',
+  },
+];
+
+/* ── Page component ─────────────────────────────────────────────────────────── */
+
+export default function AiImplementationPage() {
   return (
     <>
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
@@ -104,22 +112,19 @@ export default function CompliancePage() {
           <div className="max-w-3xl mx-auto text-center">
             {/* Badge */}
             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-700/40 bg-brand-900/20 px-3 py-1 text-xs font-semibold text-brand-400 mb-6">
-              <Shield className="h-3.5 w-3.5" />
-              For Compliance &amp; Audit Teams
+              <Bot className="h-3.5 w-3.5" />
+              For AI &amp; Automation Teams
             </span>
 
             <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-[var(--content-primary)] leading-[1.1] tracking-tight">
-              Your audit documentation says{' '}
+              You&rsquo;re automating processes{' '}
               <br className="hidden sm:block" />
-              <span className="text-brand-600">the process works.</span>
-              <br className="hidden sm:block" />
-              But has anyone actually verified it?
+              <span className="text-brand-600">you&rsquo;ve never measured.</span>
             </h1>
 
             <p className="mt-6 text-lg sm:text-xl text-[#e2e8f0] leading-relaxed max-w-2xl mx-auto">
-              Ledgerium captures real process execution and generates
-              evidence-linked documentation &mdash; every step traceable to
-              source events. Built for SOC 2, ISO 27001, and audit-driven compliance programs.
+              Ledgerium captures the real process first &mdash; so your agents
+              execute accurately, not aspirationally.
             </p>
 
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -148,27 +153,29 @@ export default function CompliancePage() {
               The problem
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
-              The compliance documentation gap
+              The automation blind spot
             </h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {PROBLEMS.map(({ title, desc }) => (
-              <div
-                key={title}
-                className="card p-7 flex flex-col gap-3"
-              >
-                <h3 className="text-base font-semibold text-[var(--content-primary)]">
-                  {title}
-                </h3>
-                <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
+            {PROBLEMS.map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="card p-7 flex flex-col gap-4">
+                <div className="w-10 h-10 rounded-lg bg-brand-900/20 border border-brand-700/25 flex items-center justify-center flex-shrink-0">
+                  <Icon className="h-5 w-5 text-brand-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-2">
+                    {title}
+                  </h3>
+                  <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── How Ledgerium Helps ───────────────────────────────────────────── */}
+      {/* ── How Ledgerium Solves It ───────────────────────────────────────── */}
       <section className="py-24 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-14">
@@ -176,7 +183,7 @@ export default function CompliancePage() {
               How it works
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
-              Evidence-based process documentation
+              Observe. Blueprint. Measure.
             </h2>
           </div>
 
@@ -196,24 +203,20 @@ export default function CompliancePage() {
         </div>
       </section>
 
-      {/* ── Compliance Features Grid ──────────────────────────────────────── */}
+      {/* ── What You Get ─────────────────────────────────────────────────── */}
       <section className="py-24 bg-[var(--surface-elevated)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-14">
             <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
-              Compliance-ready
+              What you get
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
-              Built for regulated environments
+              Everything your agents need to execute correctly
             </h2>
-            <p className="mt-4 text-[#e2e8f0] leading-relaxed">
-              Designed to support SOC 2 control evidence, ISO 27001 process documentation,
-              and FDA 21 CFR Part 11 traceability requirements.
-            </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {COMPLIANCE_FEATURES.map(({ icon: Icon, title, desc }) => (
+            {DELIVERABLES.map(({ icon: Icon, title, desc }) => (
               <div
                 key={title}
                 className="flex gap-4 p-5 rounded-xl border border-transparent hover:border-[var(--border-default)] hover:bg-[var(--surface-secondary)] transition-all"
@@ -237,13 +240,14 @@ export default function CompliancePage() {
       <section className="py-24 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
-            Start building evidence-based
+            Capture the real process
             <br />
-            process documentation
+            before you automate it
           </h2>
-          <p className="mt-5 text-[#e2e8f0] leading-relaxed">
-            Record real workflow execution. Get audit-ready SOPs with full
-            evidence traceability &mdash; in minutes, not months. Free to start.
+          <p className="mt-5 text-[#e2e8f0] leading-relaxed max-w-xl mx-auto">
+            Give your AI agents ground truth, not workshop notes. Record actual human
+            execution, generate structured blueprints, and measure the delta after
+            automation ships.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
@@ -253,8 +257,8 @@ export default function CompliancePage() {
               Create free account
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link href="/security" className="btn-secondary text-base px-7 py-3.5">
-              See our security practices
+            <Link href="/product" className="btn-secondary text-base px-7 py-3.5">
+              See how it works
             </Link>
           </div>
         </div>

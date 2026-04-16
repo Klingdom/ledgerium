@@ -163,8 +163,8 @@ const COMPARISON_ROWS = [
     manual: 'Text document (Notion, Confluence)',
   },
   {
-    dimension: 'Deterministic',
-    ledgerium: 'Yes — same input, same output',
+    dimension: 'Reproducible',
+    ledgerium: 'Yes — same recording, same output every time',
     screenshot: 'No — depends on annotation',
     mining: 'Partially — depends on log quality',
     manual: 'No — depends on author',
@@ -547,7 +547,7 @@ export default function ProductPage() {
             {[
               { icon: Shield, label: 'No screenshots', sub: 'No screen recording ever' },
               { icon: Eye, label: 'No keystrokes', sub: 'Typed content is never captured' },
-              { icon: CheckCircle, label: 'Deterministic', sub: 'Same input, same output' },
+              { icon: CheckCircle, label: 'Reproducible', sub: 'Same recording, same output' },
               { icon: Layers, label: 'Evidence-linked', sub: 'Every step traces to source' },
             ].map(({ icon: Icon, label, sub }) => (
               <div key={label} className="flex flex-col items-center gap-1.5">

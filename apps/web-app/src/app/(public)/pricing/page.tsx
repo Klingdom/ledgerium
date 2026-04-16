@@ -41,7 +41,7 @@ const FAQ = [
   },
   {
     q: 'How does this compare to process mining tools like Celonis?',
-    a: 'Process mining tools analyze system event logs from enterprise software (SAP, Salesforce) and require IT integration, API access, and months of implementation. Ledgerium captures from the browser with a Chrome extension — no IT involvement, no system integration, no 6-month project. You get your first process map in under 5 minutes.',
+    a: 'Process mining tools analyze system event logs and require IT integration, API access to enterprise backends (SAP, Salesforce), and dedicated implementation teams. That architecture means they capture what systems recorded — not what people actually did. Ledgerium captures real human activity directly from the browser. No IT involvement, no API access required, no backend integration. You install a Chrome extension and get your first process map in under 5 minutes.',
   },
 ];
 

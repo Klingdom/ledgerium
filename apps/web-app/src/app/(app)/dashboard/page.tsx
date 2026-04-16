@@ -51,6 +51,7 @@ import PortfolioSidebar, { type PortfolioNode } from '@/components/PortfolioSide
 import CreatePortfolioDialog from '@/components/CreatePortfolioDialog';
 import OnboardingChecklist from '@/components/OnboardingChecklist';
 import UsageQuotaMeter from '@/components/UsageQuotaMeter';
+import { ExtensionStatusToast } from '@/components/ExtensionStatusToast';
 
 // ─── Type definitions ──────────────────────────────────────────────────────────
 
@@ -710,6 +711,7 @@ export default function DashboardPage() {
 
   return (
     <div>
+      <ExtensionStatusToast />
       {/* ═══════════════════════════════════════════════════════════════════
           COMMAND CENTER HEADER
           ═══════════════════════════════════════════════════════════════════ */}

@@ -12,11 +12,14 @@ const FOOTER_LINKS = {
   'Use Cases': [
     { href: '/use-cases/operations', label: 'Operations Teams' },
     { href: '/use-cases/compliance', label: 'Compliance & Audit' },
-    { href: '/blog', label: 'Blog' },
+    { href: '/use-cases/ai-implementation', label: 'AI & Automation' },
+    { href: '/compare/scribe', label: 'Ledgerium vs. Scribe' },
   ],
   Resources: [
     { href: '/docs', label: 'User Guide' },
+    { href: '/blog', label: 'Blog' },
     { href: '/security', label: 'Security' },
+    { href: '/support', label: 'Support' },
     { href: '/about', label: 'About' },
     { href: `mailto:${SITE_CONFIG.supportEmail}`, label: 'Contact' },
   ],

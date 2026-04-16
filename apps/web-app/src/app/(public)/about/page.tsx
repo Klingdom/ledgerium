@@ -85,8 +85,8 @@ export default function AboutPage() {
               },
               {
                 icon: Target,
-                title: 'Determinism over magic',
-                desc: 'The same recording always produces the same output. Reproducibility is the foundation of trust. If you can\'t explain it, you can\'t trust it.',
+                title: 'Reproducibility over magic',
+                desc: 'The same recording always produces the same output. You can re-record next quarter, compare the results, and see exactly what changed. If you can\'t explain it, you can\'t trust it.',
                 takeaway: 'Re-record next quarter and get a meaningful diff, not a surprise.',
               },
               {
@@ -262,7 +262,7 @@ export default function AboutPage() {
           <div className="border-t border-[var(--border-subtle)] pt-8 grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
               { value: 'Evidence-driven' },
-              { value: 'Deterministic pipeline' },
+              { value: 'Reproducible pipeline' },
               { value: 'Privacy-first architecture' },
               { value: '1,393 tests passing' },
             ].map(({ value }) => (

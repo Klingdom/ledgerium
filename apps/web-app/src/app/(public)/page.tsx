@@ -56,7 +56,7 @@ export default function HomePage() {
               </Link>
             </div>
             <p className="mt-5 text-xs text-[var(--content-tertiary)]">
-              Free to start. No credit card required.
+              Free to start. No credit card required. Share any SOP with a public link.
             </p>
           </div>
 
@@ -89,7 +89,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
             {[
-              { icon: Zap, label: 'Deterministic pipeline' },
+              { icon: Zap, label: 'Same input, same output — always' },
               { icon: Eye, label: 'Evidence-linked output' },
               { icon: Shield, label: 'Privacy-by-architecture' },
               { icon: CheckCircle, label: '1,393 tests passing' },
@@ -226,7 +226,7 @@ export default function HomePage() {
               { icon: Map, title: 'Process Maps', desc: 'Visual workflow diagrams with phases, system boundaries, and transition labels. Ready to review or export.' },
               { icon: Library, title: 'Workflow Library', desc: 'Every workflow saved to a persistent, searchable collection. Find any workflow by title, tool, or date.' },
               { icon: Clock, title: 'History & Metrics', desc: 'Duration, step count, phase count, and confidence for every recording. Track how workflows vary over time.' },
-              { icon: CheckCircle, title: 'Reports & Export', desc: 'Download workflow reports, SOP documents, and raw data. Share structured output with stakeholders.' },
+              { icon: CheckCircle, title: 'Reports & Export', desc: 'Download workflow reports, SOP documents, and raw data. Share any SOP via a public link — recipients see the output and can sign up free.' },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="flex gap-4 p-5 rounded-xl border border-transparent hover:border-[var(--border-default)] hover:bg-[var(--surface-secondary)] transition-all">
                 <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-brand-900/15 flex items-center justify-center">
@@ -346,7 +346,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
-              { value: 'Deterministic', label: 'Same input, same output' },
+              { value: 'Reproducible', label: 'Same recording, same output — every time' },
               { value: 'Private', label: 'Your data stays yours' },
               { value: 'No AI guessing', label: 'Evidence, not interpretation' },
               { value: 'Free to start', label: 'No credit card needed' },

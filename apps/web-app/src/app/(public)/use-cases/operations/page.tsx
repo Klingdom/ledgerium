@@ -85,7 +85,7 @@ const EXAMPLE_WORKFLOWS = [
 
 const METRICS = [
   { icon: Zap, label: 'Under 5 min to first SOP' },
-  { icon: CheckCircle, label: 'Deterministic output' },
+  { icon: CheckCircle, label: 'Reproducible output' },
   { icon: Server, label: 'No IT integration' },
   { icon: ArrowRight, label: 'Free to start' },
 ];
