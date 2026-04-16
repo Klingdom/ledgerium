@@ -20,6 +20,11 @@ const nextConfig = {
         destination: '/install',
         permanent: true,
       },
+      {
+        source: '/docs.html',
+        destination: '/docs',
+        permanent: true,
+      },
     ];
   },
 };

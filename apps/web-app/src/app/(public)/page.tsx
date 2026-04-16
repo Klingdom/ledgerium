@@ -84,8 +84,27 @@ export default function HomePage() {
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-900/20 via-transparent to-[var(--surface-secondary)]" />
       </section>
 
+      {/* ── Social Proof Strip ────────────────────────────────────────────── */}
+      <section className="border-y border-[var(--border-subtle)] bg-[var(--surface-elevated)] py-5">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+            {[
+              { icon: Zap, label: 'Deterministic pipeline' },
+              { icon: Eye, label: 'Evidence-linked output' },
+              { icon: Shield, label: 'Privacy-by-architecture' },
+              { icon: CheckCircle, label: '1,393 tests passing' },
+            ].map(({ icon: Icon, label }) => (
+              <div key={label} className="flex items-center justify-center gap-2.5 text-[var(--content-secondary)]">
+                <Icon className="h-4 w-4 flex-shrink-0 text-brand-600" />
+                <span className="text-sm font-medium whitespace-nowrap">{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── How it works ──────────────────────────────────────────────────── */}
-      <section className="border-y border-[var(--border-default)] bg-[var(--surface-elevated)] py-20">
+      <section className="border-b border-[var(--border-default)] bg-[var(--surface-elevated)] py-20">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <p className="text-center text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
             How it works
@@ -129,46 +148,60 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Why it matters ────────────────────────────────────────────────── */}
-      <section className="py-24 bg-[var(--surface-secondary)]">
+      {/* ── Example Output ────────────────────────────────────────────────── */}
+      <section className="py-24 bg-[var(--surface-secondary)] border-b border-[var(--border-default)]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="max-w-2xl mx-auto text-center mb-14">
-            <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
-              Your SOPs are already out of date
-            </h2>
-            <p className="mt-4 text-[#e2e8f0] leading-relaxed">
-              Most process documentation is written from memory, not observation.
-              Workarounds, extra steps, and tribal knowledge never make it into the doc.
-              The gap between what&apos;s documented and what&apos;s real grows every week.
-            </p>
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Left: text */}
+            <div>
+              <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+                Real output
+              </p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-5">
+                See what a generated SOP looks like
+              </h2>
+              <p className="text-[#e2e8f0] leading-relaxed mb-6">
+                This SOP was generated automatically from a 3-minute browser recording of an expense report workflow in Workday. Every instruction traces back to an observed event.
+              </p>
+              <a
+                href="/dashboard.html"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:text-brand-500 transition-colors"
+              >
+                Explore the full interactive demo
+                <ArrowRight className="h-3.5 w-3.5" />
+              </a>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                icon: TrendingUp,
-                title: 'Writing SOPs takes hours. They go stale in weeks.',
-                desc: 'Interviews, workshops, and manual documentation are slow and expensive. By the time the SOP is published, the process has already changed.',
-              },
-              {
-                icon: Eye,
-                title: 'New hires follow the SOP and get stuck.',
-                desc: 'The documented process skips steps, misses workarounds, and doesn\'t match what experts actually do. Onboarding takes longer than it should.',
-              },
-              {
-                icon: Zap,
-                title: 'Ledgerium records what actually happens.',
-                desc: 'Record a real workflow in the browser. Get a structured SOP with every step, timing, and system context — automatically. No interviews. No guessing.',
-              },
-            ].map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="card p-7">
-                <div className="w-10 h-10 rounded-xl bg-brand-900/15 flex items-center justify-center mb-4">
-                  <Icon className="h-5 w-5 text-brand-600" />
+            {/* Right: framed iframe */}
+            <div>
+              {/* Browser chrome */}
+              <div className="rounded-xl border border-[var(--border-default)] overflow-hidden shadow-lg shadow-black/30 bg-[var(--surface-elevated)]">
+                {/* Title bar */}
+                <div className="flex items-center gap-2 px-4 py-3 bg-[var(--surface-secondary)] border-b border-[var(--border-default)]">
+                  {/* Traffic light dots */}
+                  <span className="w-3 h-3 rounded-full bg-red-500/80 flex-shrink-0" />
+                  <span className="w-3 h-3 rounded-full bg-yellow-500/80 flex-shrink-0" />
+                  <span className="w-3 h-3 rounded-full bg-green-500/80 flex-shrink-0" />
+                  {/* URL bar */}
+                  <div className="ml-2 flex-1 rounded-md bg-[var(--surface-primary)] border border-[var(--border-subtle)] px-3 py-1">
+                    <span className="text-[11px] text-[var(--content-tertiary)] font-mono">
+                      ledgerium.ai/samples/sop-execution-sample.html
+                    </span>
+                  </div>
                 </div>
-                <h3 className="text-base font-semibold text-[var(--content-primary)] mb-2">{title}</h3>
-                <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
+                {/* iframe */}
+                <iframe
+                  src="/samples/sop-execution-sample.html"
+                  title="Example generated SOP — Expense Report Workflow"
+                  className="w-full"
+                  style={{ height: '400px', border: 'none', display: 'block' }}
+                  loading="lazy"
+                />
               </div>
-            ))}
+              <p className="mt-3 text-xs text-[var(--content-tertiary)] text-center">
+                Real output from a real workflow recording. No editing, no AI rewriting.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -205,6 +238,79 @@ export default function HomePage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Built Different ───────────────────────────────────────────────── */}
+      <section className="py-24 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="max-w-2xl mx-auto text-center mb-14">
+            <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+              Competitive positioning
+            </p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
+              Built different
+            </h2>
+            <p className="mt-4 text-[#e2e8f0] leading-relaxed">
+              Ledgerium isn&apos;t another documentation tool. Here&apos;s how we compare.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* vs. Screen Recorders */}
+            <div className="card p-7 flex flex-col gap-4">
+              <span className="inline-block text-[11px] font-bold text-[var(--content-tertiary)] uppercase tracking-widest border border-[var(--border-subtle)] rounded-full px-3 py-1 w-fit">
+                vs. Screen Recorders
+              </span>
+              <div className="space-y-3">
+                <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                  <span className="font-semibold text-[var(--content-tertiary)]">They</span> capture annotated screenshots.
+                </p>
+                <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                  <span className="font-semibold text-brand-500">We</span> capture structured process data with timing, confidence scores, and evidence traces.
+                </p>
+              </div>
+              <p className="text-sm font-semibold text-brand-500 leading-snug border-t border-[var(--border-subtle)] pt-4 mt-auto">
+                &ldquo;You can&apos;t diff two screenshot SOPs. You can diff two Ledgerium recordings.&rdquo;
+              </p>
+            </div>
+
+            {/* vs. Process Mining */}
+            <div className="card p-7 flex flex-col gap-4">
+              <span className="inline-block text-[11px] font-bold text-[var(--content-tertiary)] uppercase tracking-widest border border-[var(--border-subtle)] rounded-full px-3 py-1 w-fit">
+                vs. Process Mining
+              </span>
+              <div className="space-y-3">
+                <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                  <span className="font-semibold text-[var(--content-tertiary)]">They</span> analyze system event logs from enterprise software.
+                </p>
+                <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                  <span className="font-semibold text-brand-500">We</span> capture from the browser — no IT integration, no API access, no 6-month implementation.
+                </p>
+              </div>
+              <p className="text-sm font-semibold text-brand-500 leading-snug border-t border-[var(--border-subtle)] pt-4 mt-auto">
+                &ldquo;Process mining costs $200K and takes 6 months. Ledgerium gives you a process map in 5 minutes.&rdquo;
+              </p>
+            </div>
+
+            {/* vs. Manual Documentation */}
+            <div className="card p-7 flex flex-col gap-4">
+              <span className="inline-block text-[11px] font-bold text-[var(--content-tertiary)] uppercase tracking-widest border border-[var(--border-subtle)] rounded-full px-3 py-1 w-fit">
+                vs. Manual Documentation
+              </span>
+              <div className="space-y-3">
+                <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                  <span className="font-semibold text-[var(--content-tertiary)]">They</span> require humans to write and maintain SOPs.
+                </p>
+                <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                  <span className="font-semibold text-brand-500">We</span> generate documentation from observation — recorded from what people actually do.
+                </p>
+              </div>
+              <p className="text-sm font-semibold text-brand-500 leading-snug border-t border-[var(--border-subtle)] pt-4 mt-auto">
+                &ldquo;Notion is where SOPs go to become outdated. Ledgerium is where they stay current.&rdquo;
+              </p>
+            </div>
           </div>
         </div>
       </section>

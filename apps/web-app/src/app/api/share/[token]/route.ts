@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
+import { trackServer } from '@/lib/analytics-server';
 
 /**
  * GET /api/share/{token}
@@ -34,6 +35,12 @@ export async function GET(
   // Only return SOP and report artifacts — not raw evidence or source bundle
   const sopArtifact = workflow.artifacts.find(a => a.artifactType === 'sop');
   const reportArtifact = workflow.artifacts.find(a => a.artifactType === 'workflow_report');
+
+  trackServer('shared_workflow_viewed', {
+    token: params.token,
+    workflowId: workflow.id,
+    ownerId: workflow.userId,
+  });
 
   return NextResponse.json({
     workflow: {

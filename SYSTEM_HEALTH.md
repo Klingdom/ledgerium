@@ -1,10 +1,10 @@
 # Ledgerium AI — System Health
 
-Last updated: 2026-04-15
+Last updated: 2026-04-16 (post-analytics completion)
 
 ## Executive Summary
 
-Ledgerium AI is in **Phase 1** with a strong deterministic product foundation, clear architectural principles, and an explicit set of active priorities. The current system is strongest in **vision clarity, invariants, and core trust-first philosophy**. The highest near-term risks are **duplicate logic, incomplete session recovery, and missing end-to-end lifecycle validation**.
+Ledgerium AI is in **Phase 1** with a strong deterministic product foundation, comprehensive analytics infrastructure, and clear architectural principles. The current system is strongest in **vision clarity, invariants, analytics coverage, and core trust-first philosophy**. The highest near-term risks are **remaining code duplication, incomplete session recovery, and missing end-to-end lifecycle validation**.
 
 Overall confidence: **Medium-High**
 
@@ -24,13 +24,13 @@ Overall confidence: **Medium-High**
 | Product clarity | strong | 5 | trust-first, deterministic positioning is unusually clear |
 | Architectural discipline | strong | 4 | invariants and principles are well defined |
 | Deterministic core protection | moderate | 4 | good principles, but more regression protection is still needed |
-| Package / code consistency | moderate | 3 | duplicate background logic weakens source-of-truth discipline |
+| Package / code consistency | improving | 3.5 | extension now imports from 3 workspace packages; LiveStepBuilder duplication remains |
 | Session durability / recovery | moderate-risk | 2 | full event persistence is still missing |
-| Test coverage | moderate | 3.5 | web-app vitest now active (50 tests); E2E coverage still missing; 1,364 total tests |
-| Observability | moderate | 3 | structured session-aware logging still needs work |
+| Test coverage | moderate | 3.5 | web-app vitest active; E2E coverage still missing; 1,393 total tests |
+| Observability | strong | 4 | analytics fully instrumented, 8 alert conditions, admin dashboard with engagement/retention/alerts |
 | Agentic CI readiness | improving | 4 | command, backlog, iteration log, and templates now exist |
-| GTM readiness | emerging | 2 | product wedge is promising but not yet fully operationalized |
-| Release readiness | low | 2 | Phase 1 is not yet release-focused |
+| GTM readiness | emerging | 2.5 | product wedge promising; analytics infrastructure ready for data-driven decisions |
+| Release readiness | moderate | 3 | analytics, alerting, and event cleanup operational; still needs E2E tests and session recovery |
 
 ---
 
@@ -47,7 +47,11 @@ Overall confidence: **Medium-High**
 | `ARCHITECTURE.md` | unknown / repo-dependent | verify in live repo |
 | `API_SPEC.md` | unknown / repo-dependent | verify in live repo |
 | `TEST_PLAN.md` | unknown / repo-dependent | verify in live repo |
-| `METRICS.md` | unknown / repo-dependent | verify in live repo |
+| `METRICS.md` | present | docs/METRICS.md — KPI definitions with formulas |
+| `METRICS_FRAMEWORK.md` | present | docs/METRICS_FRAMEWORK.md — North star, AARRR, tier funnels |
+| `EVENT_TRACKING_PLAN.md` | present | docs/EVENT_TRACKING_PLAN.md — 28+ events with full specs |
+| `DASHBOARD_SPEC.md` | present | docs/DASHBOARD_SPEC.md — 3 admin dashboards, alerting rules |
+| `ANALYTICS_ARCHITECTURE.md` | present | docs/ANALYTICS_ARCHITECTURE.md — Collection architecture, privacy |
 
 ---
 
@@ -55,25 +59,26 @@ Overall confidence: **Medium-High**
 
 1. Very clear trust-first product identity
 2. Strong deterministic and invariant-based architectural philosophy
-3. Good monorepo and package direction for long-term reuse
-4. Explicit active priorities and known technical debt
-5. Clear code-quality expectations
+3. Comprehensive analytics infrastructure (50+ events, engagement scoring, retention cohorts, 8 system alerts)
+4. Good monorepo and package direction for long-term reuse
+5. Explicit active priorities and known technical debt
+6. Full conversion funnel instrumented end-to-end
 
 ---
 
 ## Top Risks
 
-1. Duplicate logic between extension background code and workspace packages
+1. Remaining duplication: LiveStepBuilder vs StreamingSegmenter, extension types vs package types
 2. Incomplete persistence for service worker restart recovery
 3. Missing E2E coverage for the extension recording lifecycle
-4. Incomplete shared policy-engine integration
-5. Limited structured logging for failure diagnosis
+4. Incomplete shared policy-engine integration in content/capture.ts
+5. PostHog not yet connected (env vars not set) — analytics only writes to internal DB
 
 ---
 
 ## Current Top Opportunities
 
-1. Remove duplicated background logic and converge on workspace packages
+1. Converge LiveStepBuilder with StreamingSegmenter and unify types
 2. Strengthen session durability and restart recovery
 3. Increase validation confidence with Playwright lifecycle tests
 4. Improve failure diagnosis with structured session-aware logging
@@ -95,21 +100,17 @@ These should be assumed to block a high-confidence release until resolved:
 ## Recommended Next Iteration
 
 Recommended next item:
-- **Add try/catch to 11 unguarded API routes** (score: 11)
+- **Integrate `@ledgerium/policy-engine` into `content/capture.ts`** (score: 13)
 
 Why:
-- 11 API routes have zero error handling — any Prisma/DB failure returns raw 500
-- violates `{ data, error, meta }` contract from CLAUDE.md
-- high confidence, moderate effort, very low risk
-- directly improves beta readiness
+- content script still uses local sensitivity pattern instead of shared policy engine
+- directly continues the deduplication trajectory from iteration 003
+- low effort, low risk, high strategic alignment
 
-Fallback next item:
-- **Fix (db as any) casts / regenerate Prisma client** (score: 10)
-
-Why:
-- restores type safety in teams and analytics routes
-- root cause is likely stale Prisma generation
-- fast, low-risk fix
+Fallback next items:
+- **Add try/catch to 11 unguarded API routes** (score: 11) — violates `{ data, error, meta }` contract
+- **Add Playwright E2E tests for recording lifecycle** (score: 12) — release blocker
+- **Connect PostHog** — configure env vars to enable cloud analytics alongside internal DB
 
 ---
 

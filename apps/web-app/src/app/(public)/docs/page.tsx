@@ -10,6 +10,8 @@ export const metadata: Metadata = {
 
 /* ── Sidebar navigation items ─────────────────────────────────── */
 const SIDEBAR_LINKS = [
+  { id: 'quick-start', label: 'Quick Start' },
+  { id: 'visual-overview', label: 'Visual Overview' },
   { id: 'getting-started', label: 'Getting Started' },
   { id: 'dashboard', label: 'Dashboard & Workflow Library' },
   { id: 'workflow-detail', label: 'Workflow Detail View' },
@@ -241,7 +243,7 @@ export default function DocsPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10">
           <p className="text-sm text-brand-400 font-medium mb-2">User Guide</p>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--content-primary)] mb-3">
-            Documentation
+            Ledgerium AI Documentation
           </h1>
           <p className="text-[var(--content-secondary)] max-w-2xl leading-relaxed">
             Everything you need to record workflows, read the intelligence outputs, collaborate
@@ -250,8 +252,400 @@ export default function DocsPage() {
           <p className="mt-3 text-xs text-[var(--content-tertiary)]">
             Last updated April 2026 &middot; Version 1.0
           </p>
+          {/* Section navigation pills */}
+          <div className="mt-5 flex flex-wrap gap-2">
+            <a
+              href="#quick-start"
+              className="inline-flex items-center rounded-full border border-brand-500/40 bg-brand-900/20 px-3 py-1 text-xs font-medium text-brand-400 hover:bg-brand-900/40 transition-colors"
+            >
+              Quick Start
+            </a>
+            <a
+              href="#visual-overview"
+              className="inline-flex items-center rounded-full border border-[var(--border-default)] bg-[var(--surface-secondary)] px-3 py-1 text-xs font-medium text-[var(--content-secondary)] hover:text-brand-400 hover:border-brand-500/40 transition-colors"
+            >
+              Extension
+            </a>
+            <a
+              href="#web-app-overview"
+              className="inline-flex items-center rounded-full border border-[var(--border-default)] bg-[var(--surface-secondary)] px-3 py-1 text-xs font-medium text-[var(--content-secondary)] hover:text-brand-400 hover:border-brand-500/40 transition-colors"
+            >
+              Web App
+            </a>
+            <a
+              href="#getting-started"
+              className="inline-flex items-center rounded-full border border-[var(--border-default)] bg-[var(--surface-secondary)] px-3 py-1 text-xs font-medium text-[var(--content-secondary)] hover:text-brand-400 hover:border-brand-500/40 transition-colors"
+            >
+              Full Reference
+            </a>
+          </div>
         </div>
       </div>
+
+      {/* ── Quick Start Section ─────────────────────────────────── */}
+      <section id="quick-start" className="scroll-mt-20 bg-[var(--surface-elevated)] border-b border-[var(--border-default)]">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-14">
+          <div className="mb-10 text-center">
+            <p className="text-xs font-semibold uppercase tracking-wider text-brand-400 mb-2">
+              Get up and running
+            </p>
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--content-primary)] mb-3">
+              Quick Start
+            </h2>
+            <p className="text-[var(--content-secondary)] max-w-xl mx-auto leading-relaxed">
+              From zero to your first recorded workflow in under five minutes.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Step 1 */}
+            <div className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-900/30 text-sm font-bold text-brand-400 border border-brand-500/30">
+                  1
+                </span>
+                <h3 className="text-base font-bold text-[var(--content-primary)]">Create Account</h3>
+              </div>
+              <p className="text-sm text-[var(--content-secondary)] leading-relaxed mb-4">
+                Sign up free — no credit card required. Takes less than a minute.
+              </p>
+              <a
+                href="https://ledgerium.ai/signup"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-400 hover:text-brand-300 transition-colors"
+              >
+                ledgerium.ai/signup
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M7 17L17 7M17 7H7M17 7v10" />
+                </svg>
+              </a>
+            </div>
+
+            {/* Step 2 */}
+            <div className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-900/30 text-sm font-bold text-brand-400 border border-brand-500/30">
+                  2
+                </span>
+                <h3 className="text-base font-bold text-[var(--content-primary)]">Install Extension</h3>
+              </div>
+              <p className="text-sm text-[var(--content-secondary)] leading-relaxed mb-4">
+                Download the Chrome extension, enable Developer Mode, and load unpacked. Pinning it to your toolbar makes it easy to access.
+              </p>
+              <a
+                href="/install"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-400 hover:text-brand-300 transition-colors"
+              >
+                Installation guide
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M7 17L17 7M17 7H7M17 7v10" />
+                </svg>
+              </a>
+            </div>
+
+            {/* Step 3 */}
+            <div className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-900/30 text-sm font-bold text-brand-400 border border-brand-500/30">
+                  3
+                </span>
+                <h3 className="text-base font-bold text-[var(--content-primary)]">Record a Workflow</h3>
+              </div>
+              <p className="text-sm text-[var(--content-secondary)] leading-relaxed mb-4">
+                Click the extension icon, name your workflow, hit Record, do your work, then click Stop. Your workflow syncs automatically.
+              </p>
+              <a
+                href="#getting-started"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-400 hover:text-brand-300 transition-colors"
+              >
+                Detailed guide
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M7 17L17 7M17 7H7M17 7v10" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Visual Overview Section ──────────────────────────────── */}
+      <section id="visual-overview" className="scroll-mt-20 bg-[var(--surface-primary)] border-b border-[var(--border-default)]">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-14">
+          <div className="mb-10 text-center">
+            <p className="text-xs font-semibold uppercase tracking-wider text-brand-400 mb-2">
+              Platform overview
+            </p>
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--content-primary)] mb-3">
+              Visual Overview
+            </h2>
+            <p className="text-[var(--content-secondary)] max-w-xl mx-auto leading-relaxed">
+              A tour of the Chrome extension and web application — what you will see and how each screen fits into your workflow.
+            </p>
+          </div>
+
+          {/* Browser Extension subsection */}
+          <div className="mb-14">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-900/30 border border-brand-500/30">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-brand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                  <line x1="8" y1="21" x2="16" y2="21"/>
+                  <line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+              </span>
+              <h3 className="text-xl font-bold text-[var(--content-primary)]">Browser Extension</h3>
+              <span className="ml-1 rounded-full bg-brand-900/20 border border-brand-500/30 px-2.5 py-0.5 text-xs font-semibold text-brand-400">
+                Chrome
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {/* Extension card 1 */}
+              <div className="group rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] overflow-hidden hover:border-brand-500/40 transition-colors">
+                <div className="aspect-[16/10] overflow-hidden bg-[var(--surface-primary)]">
+                  <Image
+                    src="/docs/screenshots/extension/01-idle-screen.png"
+                    alt="Extension idle screen showing workflow name field and settings"
+                    width={640}
+                    height={400}
+                    className="block w-full h-full object-cover object-top"
+                    unoptimized
+                  />
+                </div>
+                <div className="p-4">
+                  <h4 className="font-semibold text-[var(--content-primary)] mb-1">Idle Screen</h4>
+                  <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                    Start here. Name your workflow and configure settings before recording begins.
+                  </p>
+                </div>
+              </div>
+
+              {/* Extension card 2 */}
+              <div className="group rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] overflow-hidden hover:border-brand-500/40 transition-colors">
+                <div className="aspect-[16/10] overflow-hidden bg-[var(--surface-primary)]">
+                  <Image
+                    src="/docs/screenshots/extension/04-recording-active.png"
+                    alt="Extension recording active screen showing steps captured in real-time"
+                    width={640}
+                    height={400}
+                    className="block w-full h-full object-cover object-top"
+                    unoptimized
+                  />
+                </div>
+                <div className="p-4">
+                  <h4 className="font-semibold text-[var(--content-primary)] mb-1">Recording Active</h4>
+                  <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                    See steps captured in real-time as you work through your process.
+                  </p>
+                </div>
+              </div>
+
+              {/* Extension card 3 */}
+              <div className="group rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] overflow-hidden hover:border-brand-500/40 transition-colors">
+                <div className="aspect-[16/10] overflow-hidden bg-[var(--surface-primary)]">
+                  <Image
+                    src="/docs/screenshots/extension/05-paused-screen.png"
+                    alt="Extension paused screen with resume option"
+                    width={640}
+                    height={400}
+                    className="block w-full h-full object-cover object-top"
+                    unoptimized
+                  />
+                </div>
+                <div className="p-4">
+                  <h4 className="font-semibold text-[var(--content-primary)] mb-1">Pause &amp; Resume</h4>
+                  <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                    Pause anytime mid-process, then resume when you are ready to continue.
+                  </p>
+                </div>
+              </div>
+
+              {/* Extension card 4 */}
+              <div className="group rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] overflow-hidden hover:border-brand-500/40 transition-colors">
+                <div className="aspect-[16/10] overflow-hidden bg-[var(--surface-primary)]">
+                  <Image
+                    src="/docs/screenshots/extension/06-stopping-screen.png"
+                    alt="Extension stopping screen showing auto-sync to account"
+                    width={640}
+                    height={400}
+                    className="block w-full h-full object-cover object-top"
+                    unoptimized
+                  />
+                </div>
+                <div className="p-4">
+                  <h4 className="font-semibold text-[var(--content-primary)] mb-1">Stop &amp; Upload</h4>
+                  <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                    Finish recording and your workflow automatically syncs to your account.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Web Application subsection */}
+          <div id="web-app-overview" className="scroll-mt-20">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-900/30 border border-violet-500/30">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="3" y1="9" x2="21" y2="9"/>
+                  <line x1="9" y1="21" x2="9" y2="9"/>
+                </svg>
+              </span>
+              <h3 className="text-xl font-bold text-[var(--content-primary)]">Web Application</h3>
+              <span className="ml-1 rounded-full bg-violet-900/20 border border-violet-500/30 px-2.5 py-0.5 text-xs font-semibold text-violet-400">
+                ledgerium.ai
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {/* Web app card 1 */}
+              <div className="group rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] overflow-hidden hover:border-violet-500/40 transition-colors">
+                <div className="aspect-[16/10] overflow-hidden bg-[var(--surface-primary)]">
+                  <Image
+                    src="/docs/screenshots/dashboard-with-workflows.png"
+                    alt="Workflow dashboard showing library of recorded workflows"
+                    width={640}
+                    height={400}
+                    className="block w-full h-full object-cover object-top"
+                    unoptimized
+                  />
+                </div>
+                <div className="p-4">
+                  <h4 className="font-semibold text-[var(--content-primary)] mb-1">Workflow Dashboard</h4>
+                  <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                    Your library of recorded workflows — browse, search, and open any recording.
+                  </p>
+                </div>
+              </div>
+
+              {/* Web app card 2 */}
+              <div className="group rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] overflow-hidden hover:border-violet-500/40 transition-colors">
+                <div className="aspect-[16/10] overflow-hidden bg-[var(--surface-primary)]">
+                  <Image
+                    src="/docs/screenshots/workflow-sop-tab.png"
+                    alt="SOP generation view showing structured operating procedures"
+                    width={640}
+                    height={400}
+                    className="block w-full h-full object-cover object-top"
+                    unoptimized
+                  />
+                </div>
+                <div className="p-4">
+                  <h4 className="font-semibold text-[var(--content-primary)] mb-1">SOP Generation</h4>
+                  <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                    Structured operating procedures generated automatically from your recordings.
+                  </p>
+                </div>
+              </div>
+
+              {/* Web app card 3 */}
+              <div className="group rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] overflow-hidden hover:border-violet-500/40 transition-colors">
+                <div className="aspect-[16/10] overflow-hidden bg-[var(--surface-primary)]">
+                  <Image
+                    src="/docs/screenshots/workflow-flow-view.png"
+                    alt="Process map showing visual flow diagram with phases"
+                    width={640}
+                    height={400}
+                    className="block w-full h-full object-cover object-top"
+                    unoptimized
+                  />
+                </div>
+                <div className="p-4">
+                  <h4 className="font-semibold text-[var(--content-primary)] mb-1">Process Maps</h4>
+                  <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                    Visual flow diagrams showing each phase and decision point in your process.
+                  </p>
+                </div>
+              </div>
+
+              {/* Web app card 4 */}
+              <div className="group rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] overflow-hidden hover:border-violet-500/40 transition-colors">
+                <div className="aspect-[16/10] overflow-hidden bg-[var(--surface-primary)]">
+                  <Image
+                    src="/docs/screenshots/analytics-dashboard.png"
+                    alt="Intelligence dashboard showing process health scores and analytics"
+                    width={640}
+                    height={400}
+                    className="block w-full h-full object-cover object-top"
+                    unoptimized
+                  />
+                </div>
+                <div className="p-4">
+                  <h4 className="font-semibold text-[var(--content-primary)] mb-1">Intelligence Dashboard</h4>
+                  <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                    Process health scores, timing analytics, and variation insights across runs.
+                  </p>
+                </div>
+              </div>
+
+              {/* Web app card 5 */}
+              <div className="group rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] overflow-hidden hover:border-violet-500/40 transition-colors">
+                <div className="aspect-[16/10] overflow-hidden bg-[var(--surface-primary)]">
+                  <Image
+                    src="/docs/screenshots/workflow-agents-tab.png"
+                    alt="AI Agent analysis tab showing automation opportunities"
+                    width={640}
+                    height={400}
+                    className="block w-full h-full object-cover object-top"
+                    unoptimized
+                  />
+                </div>
+                <div className="p-4">
+                  <h4 className="font-semibold text-[var(--content-primary)] mb-1">AI Agent Analysis</h4>
+                  <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                    Automation opportunities identified from your workflow patterns.
+                  </p>
+                </div>
+              </div>
+
+              {/* Web app card 6 */}
+              <div className="group rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] overflow-hidden hover:border-violet-500/40 transition-colors">
+                <div className="aspect-[16/10] overflow-hidden bg-[var(--surface-primary)]">
+                  <Image
+                    src="/docs/screenshots/teams-page.png"
+                    alt="Teams page showing shared libraries and member roles"
+                    width={640}
+                    height={400}
+                    className="block w-full h-full object-cover object-top"
+                    unoptimized
+                  />
+                </div>
+                <div className="p-4">
+                  <h4 className="font-semibold text-[var(--content-primary)] mb-1">Team Collaboration</h4>
+                  <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                    Shared workflow libraries, member management, and role-based access.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation pills to detailed reference */}
+          <div className="mt-12 flex flex-wrap justify-center gap-3 pt-8 border-t border-[var(--border-default)]">
+            <a
+              href="#getting-started"
+              className="inline-flex items-center gap-2 rounded-lg border border-brand-500/40 bg-brand-900/20 px-4 py-2 text-sm font-semibold text-brand-400 hover:bg-brand-900/40 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+              </svg>
+              Extension Guide
+            </a>
+            <a
+              href="#dashboard"
+              className="inline-flex items-center gap-2 rounded-lg border border-violet-500/40 bg-violet-900/20 px-4 py-2 text-sm font-semibold text-violet-400 hover:bg-violet-900/40 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <line x1="3" y1="9" x2="21" y2="9"/>
+                <line x1="9" y1="21" x2="9" y2="9"/>
+              </svg>
+              Web App Reference
+            </a>
+          </div>
+        </div>
+      </section>
 
       {/* Body: sidebar + content */}
       <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10">

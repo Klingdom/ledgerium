@@ -6,6 +6,66 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-16] - Analytics Next Steps: Alerting, missing tracking, upgrade instrumentation
+
+### Added
+- `GET /api/admin/alerts` — Evaluates 8 alert conditions (3×P1, 4×P2, 1×P3) against AnalyticsEvent table. Returns per-alert status (ok/firing/insufficient_data), thresholds, and summary counts.
+- System Alerts section in admin analytics dashboard — shows firing alerts with severity badges, pulsing status dots, and "Show all" toggle for ok alerts. Green "All systems operational" banner when healthy.
+- `trackServer('signup_completed')` in `/api/auth/signup` — server-side signup tracking for reliable funnel measurement
+- `trackServer('extension_api_key_created')` in `/api/keys` POST — tracks extension setup milestone
+- `trackServer('plan_limit_hit')` in `/api/upload` — was missing (only in `/api/sync`)
+- `track('upgrade_prompt_viewed')` in `UpgradeCTA` component — fires once on mount with feature/plan context
+- `track('upgrade_clicked')` and `track('checkout_started')` in `UpgradeButton` component — completes conversion funnel instrumentation
+
+### Changed
+- `/api/admin/cleanup-events` — replaced single `deleteMany` with batched deletion (1000 per batch) to avoid long table locks on large datasets
+
+### Impact
+- All 8 DASHBOARD_SPEC alerting conditions now evaluated via API
+- Conversion funnel fully instrumented: upgrade_prompt_viewed → upgrade_clicked → checkout_started → subscription_created
+- Server-side signup tracking ensures funnel accuracy even if client-side tracking fails
+- Extension API key creation tracked for activation funnel measurement
+- All 1,393 tests pass, typecheck clean
+
+---
+
+## [2026-04-16] - Analytics Phase 3: Admin dashboard enhancements, event cleanup, SOP survey
+
+### Added
+- `GET /api/analytics/engagement` — Computes 0-100 engagement scores for all users based on 8 weighted behavioral signals (workflows, SOP views, exports, shares, map views, analyses, login recency, org usage). Returns per-user breakdown and tier distribution (high/medium/low/inactive).
+- `GET /api/analytics/retention` — Computes weekly cohort retention over last 8 signup weeks. Tracks % of users who uploaded workflows in weeks 0-4+ after signup, with average retention row.
+- `GET /api/admin/cleanup-events` — Admin event retention management. Supports dry-run (count only) and purge modes with configurable retention window (7-3650 days, default 90).
+- Enhanced admin analytics dashboard with 3 new sections: Engagement Score Distribution (tier tiles + user table), Retention Cohorts (heat-map table), Event Cleanup (check/purge UI)
+- `SOPUsefulnessSurvey` component — Non-blocking in-app feedback prompt that appears after 30s on SOP tab. 4 response options: yes_as_is, minor_edits, major_rework, not_useful
+- `sop_usefulness_response` added to AnalyticsEvent union type
+
+### Impact
+- Admin can now see per-user engagement scoring, identify churn risk, and track weekly retention cohorts
+- Direct output quality signal collection via SOP usefulness survey (KPI-005 target: 50% yes+minor_edits)
+- Event table can now be managed to prevent unbounded growth
+- All 1,393 tests pass, typecheck clean
+
+---
+
+## [2026-04-16] - Iteration 003: Replace duplicated extension logic with workspace package imports
+
+### Changed
+- `apps/extension-app/src/shared/constants.ts` — Replaced local definitions of `SEGMENTATION_RULE_VERSION`, `IDLE_GAP_MS`, `CLICK_NAV_WINDOW_MS`, `RAPID_CLICK_DEDUP_MS` with re-exports from `@ledgerium/segmentation-engine`
+- `apps/extension-app/src/shared/utils.ts` — Replaced local `extractDomain` and `deriveRouteTemplate` implementations with re-exports from `@ledgerium/normalization-engine`
+- `apps/extension-app/src/background/normalizer.ts` — Replaced local `RAW_TO_CANONICAL` map with spread of `RAW_TO_CANONICAL_TYPE` from `@ledgerium/normalization-engine` + 3 extension-specific additions; replaced local `SENSITIVE_RE` and `isSensitive()` with `classifySensitivity()` from `@ledgerium/policy-engine`; imported `NORMALIZATION_RULE_VERSION` from package
+
+### Impact
+- Before: Extension declared 6 workspace packages as dependencies but imported from 0 of them in background/capture code. Normalization, segmentation constants, and sensitivity detection were duplicated locally.
+- After: Extension imports from 3 workspace packages (`normalization-engine`, `segmentation-engine`, `policy-engine`). 6 constants, 2 utility functions, 1 type map, and 1 sensitivity function now use the single source of truth.
+- Removed ~80 lines of duplicated logic
+- Zero behavior change — all 1,393 tests pass, typecheck clean, extension builds successfully
+
+### Notes
+- Extension-specific items preserved: `normalizeUrl` (more secure — strips sensitive params + hash), `deriveAppLabel` (more app labels), 3 extra event type mappings (`context_menu`, `dropdown_opened`, `dropdown_closed`)
+- Future iterations can address: LiveStepBuilder ↔ StreamingSegmenter convergence, full type unification, upstreaming extension-only improvements to packages
+
+---
+
 ## [2026-04-15] - Iteration 002: CI quality gate
 
 ### Added

@@ -4,6 +4,7 @@ import { SessionStore } from './session-store.js'
 import { HistoryStore } from './history-store.js'
 import { normalizeRawEvent } from './normalizer.js'
 import { uploadBundle } from './uploader.js'
+import { trackExtension, flushTelemetry } from './telemetry.js'
 import { buildBundle } from './bundle-builder.js'
 import { LiveStepBuilder } from './live-steps.js'
 import { buildWorkflowReport } from './workflow-report-builder.js'
@@ -19,7 +20,7 @@ const sm = new RecorderStateMachine()
 const store = new SessionStore()
 const historyStore = new HistoryStore()
 let liveBuilder: LiveStepBuilder | null = null
-let settings: ExtensionSettings = { uploadUrl: '', apiKey: '', allowedDomains: [], blockedDomains: [] }
+let settings: ExtensionSettings = { uploadUrl: '', apiKey: '', allowedDomains: [], blockedDomains: [], telemetryEnabled: false }
 let lastBundle: SessionBundle | null = null
 let lastWorkflowReport: WorkflowReport | null = null
 
@@ -203,6 +204,11 @@ async function handleStart(activityName: string, uploadUrl?: string): Promise<vo
     store.updateState('recording')
     broadcastStateUpdate()
 
+    trackExtension('recording.started', {
+      sessionId: meta.sessionId,
+      activityName,
+    })
+
     // Persist state and start keepalive so the SW survives the session
     persistRecordingState(meta.sessionId, activityName)
     startKeepalive()
@@ -255,6 +261,15 @@ async function handleStop(): Promise<void> {
     lastWorkflowReport = buildWorkflowReport(bundle)
     console.log('[LDG-BG] workflowReport generated, steps:', lastWorkflowReport.metrics.stepCount)
 
+    trackExtension('recording.stopped', {
+      sessionId: store.getMeta()?.sessionId,
+      eventCount: store.getCanonicalEvents().length,
+      stepCount: bundle.derivedSteps.length,
+      durationMs: bundle.sessionJson.endedAt
+        ? new Date(bundle.sessionJson.endedAt).getTime() - new Date(bundle.sessionJson.startedAt).getTime()
+        : null,
+    })
+
     // Persist to activity history before transitioning — this way history is
     // always available even if the user discards the review screen immediately.
     void historyStore.addEntry(bundle)
@@ -283,13 +298,33 @@ async function handleStop(): Promise<void> {
           ...(result.error ? { error: result.error } : {}),
         },
       })
+      if (result.success) {
+        trackExtension('recording.synced', {
+          sessionId: store.getMeta()?.sessionId,
+        })
+      } else {
+        trackExtension('recording.sync_failed', {
+          sessionId: store.getMeta()?.sessionId,
+          error: result.error ?? 'unknown',
+        })
+      }
     }
+
+    // Flush telemetry (piggyback after upload, best-effort)
+    void flushTelemetry(
+      store.getMeta()?.uploadUrl ?? settings.uploadUrl,
+      settings.apiKey,
+      settings.telemetryEnabled ?? false,
+    )
   } catch (err) {
     transitionToError(err)
   }
 }
 
 function handleDiscard(): void {
+  trackExtension('recording.discarded', {
+    sessionId: store.getMeta()?.sessionId,
+  })
   broadcastAllTabs({ type: MSG.DISCARD_SESSION, payload: {} })
   clearInjectionState()
   liveBuilder?.reset()

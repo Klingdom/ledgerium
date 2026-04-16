@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, HelpCircle } from 'lucide-react';
 import { PricingCards } from '@/components/PricingCards';
+import { ROICalculator } from './ROICalculator';
 
 export const metadata: Metadata = {
   title: 'Pricing — Ledgerium AI',
@@ -28,13 +29,61 @@ const FAQ = [
   },
   {
     q: 'What happens to my workflows if I downgrade?',
-    a: 'Everything stays. You can still access, search, and export all your existing workflows. You just can\'t create new recordings beyond your plan limit.',
+    a: "Everything stays. You can still access, search, and export all your existing workflows. You just can't create new recordings beyond your plan limit.",
   },
   {
     q: 'Is my data private?',
     a: 'Yes. Your workflow data is stored in your workspace and never shared with third parties. All processing is deterministic and auditable. Enterprise plans support custom retention policies and on-premise deployment.',
   },
+  {
+    q: 'How is Ledgerium different from Scribe or Tango?',
+    a: 'Scribe and Tango capture annotated screenshots — visual walkthroughs of what happened on screen. Ledgerium captures structured interaction data: timing, system context, confidence scores, and evidence traces. The result is structured process data you can diff, compare across runs, and feed into automation — not a static screenshot guide.',
+  },
+  {
+    q: 'How does this compare to process mining tools like Celonis?',
+    a: 'Process mining tools analyze system event logs from enterprise software (SAP, Salesforce) and require IT integration, API access, and months of implementation. Ledgerium captures from the browser with a Chrome extension — no IT involvement, no system integration, no 6-month project. You get your first process map in under 5 minutes.',
+  },
 ];
+
+// Feature comparison table data
+const COMPARISON_FEATURES = [
+  { label: 'Price (monthly)',      free: '$0',        starter: '$49',      team: '$249',      growth: '$799',    enterprise: 'Custom' },
+  { label: 'Seats',               free: '1 user',    starter: '1 recorder', team: '3 rec + 5 viewers', growth: '10 rec, 15 seats', enterprise: 'Custom' },
+  { label: 'Recordings / month',  free: '5',         starter: '15',       team: 'Unlimited', growth: 'Unlimited', enterprise: 'Custom' },
+  { label: 'SOP + process map',   free: true,        starter: true,       team: true,        growth: true,      enterprise: true },
+  { label: 'Public sharing',      free: true,        starter: true,       team: true,        growth: true,      enterprise: true },
+  { label: 'Clean exports',       free: false,       starter: true,       team: true,        growth: true,      enterprise: true },
+  { label: 'Health scores',       free: false,       starter: true,       team: true,        growth: true,      enterprise: true },
+  { label: 'Full intelligence',   free: false,       starter: false,      team: true,        growth: true,      enterprise: true },
+  { label: 'Bottleneck analysis', free: false,       starter: false,      team: true,        growth: true,      enterprise: true },
+  { label: 'Automation scoring',  free: false,       starter: false,      team: true,        growth: true,      enterprise: true },
+  { label: 'Shared team library', free: false,       starter: false,      team: true,        growth: true,      enterprise: true },
+  { label: 'Advanced analytics',  free: false,       starter: false,      team: false,       growth: true,      enterprise: true },
+  { label: 'AI agent composition',free: false,       starter: false,      team: false,       growth: true,      enterprise: true },
+  { label: 'SSO & RBAC',          free: false,       starter: false,      team: false,       growth: false,     enterprise: 'coming-soon' },
+  { label: 'Audit trail',         free: false,       starter: false,      team: false,       growth: false,     enterprise: 'coming-soon' },
+  { label: 'On-premise option',   free: false,       starter: false,      team: false,       growth: false,     enterprise: 'coming-soon' },
+] as const;
+
+type CellValue = boolean | string;
+
+function ComparisonCell({ value }: { value: CellValue }) {
+  if (value === 'coming-soon') {
+    return (
+      <span className="inline-block text-amber-400 bg-amber-900/20 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap">
+        Coming soon
+      </span>
+    );
+  }
+  if (value === true) {
+    return <span className="text-brand-400 font-semibold text-base leading-none">✓</span>;
+  }
+  if (value === false) {
+    return <span className="text-[var(--content-tertiary)]">—</span>;
+  }
+  // String value (price, seat count, etc.)
+  return <span className="text-[var(--content-primary)] text-sm">{value}</span>;
+}
 
 export default function PricingPage() {
   return (
@@ -63,6 +112,102 @@ export default function PricingPage() {
         </div>
       </section>
 
+      {/* Plan guidance strip */}
+      <section className="bg-[var(--surface-secondary)] border-y border-[var(--border-default)]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="flex flex-wrap justify-center gap-x-0 divide-x divide-[var(--border-default)]">
+            {[
+              { plan: 'Free', tagline: 'Capture & document' },
+              { plan: 'Starter', tagline: 'Clean exports' },
+              { plan: 'Team', tagline: 'Understand & improve' },
+              { plan: 'Growth', tagline: 'Automate' },
+            ].map(({ plan, tagline }) => (
+              <div key={plan} className="px-6 py-4 text-sm text-center min-w-[140px]">
+                <span className="font-bold text-[var(--content-primary)]">{plan}</span>
+                <span className="text-[var(--content-tertiary)]"> · {tagline}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Feature comparison table */}
+      <section className="py-16 bg-[var(--surface-primary)]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <h2 className="text-xl font-bold text-[var(--content-primary)] mb-8 text-center">
+            Compare plans
+          </h2>
+
+          <div className="overflow-x-auto rounded-xl border border-[var(--border-default)]">
+            <table className="w-full min-w-[700px] border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-[var(--border-default)] bg-[var(--surface-elevated)]">
+                  <th className="text-left px-5 py-4 font-semibold text-[var(--content-secondary)] w-[220px] sticky left-0 bg-[var(--surface-elevated)] z-10">
+                    Feature
+                  </th>
+                  {['Free', 'Starter'].map((col) => (
+                    <th key={col} className="px-4 py-4 font-semibold text-[var(--content-secondary)] text-center">
+                      {col}
+                    </th>
+                  ))}
+                  {/* Team column — highlighted */}
+                  <th className="px-4 py-4 text-center bg-brand-900/10 border-x border-brand-800/30">
+                    <span className="inline-flex flex-col items-center gap-1">
+                      <span className="text-xs font-bold text-white uppercase tracking-wider bg-brand-600 rounded-full px-3 py-0.5">
+                        Most Popular
+                      </span>
+                      <span className="font-semibold text-brand-400">Team</span>
+                    </span>
+                  </th>
+                  {['Growth', 'Enterprise'].map((col) => (
+                    <th key={col} className="px-4 py-4 font-semibold text-[var(--content-secondary)] text-center">
+                      {col}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {COMPARISON_FEATURES.map((row, i) => (
+                  <tr
+                    key={row.label}
+                    className={`border-b border-[var(--border-default)] last:border-0 ${
+                      i % 2 === 0
+                        ? 'bg-[var(--surface-primary)]'
+                        : 'bg-[var(--surface-secondary)]'
+                    }`}
+                  >
+                    <td className={`px-5 py-3.5 font-medium text-[var(--content-primary)] sticky left-0 z-10 ${
+                      i % 2 === 0 ? 'bg-[var(--surface-primary)]' : 'bg-[var(--surface-secondary)]'
+                    }`}>
+                      {row.label}
+                    </td>
+                    <td className="px-4 py-3.5 text-center">
+                      <ComparisonCell value={row.free} />
+                    </td>
+                    <td className="px-4 py-3.5 text-center">
+                      <ComparisonCell value={row.starter} />
+                    </td>
+                    {/* Team column — highlighted with subtle brand tint */}
+                    <td className="px-4 py-3.5 text-center bg-brand-900/10 border-x border-brand-800/30">
+                      <ComparisonCell value={row.team} />
+                    </td>
+                    <td className="px-4 py-3.5 text-center">
+                      <ComparisonCell value={row.growth} />
+                    </td>
+                    <td className="px-4 py-3.5 text-center">
+                      <ComparisonCell value={row.enterprise} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* ROI Calculator */}
+      <ROICalculator />
+
       {/* FAQ */}
       <section className="py-20 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
@@ -81,6 +226,22 @@ export default function PricingPage() {
         </div>
       </section>
 
+      {/* Secondary CTA — demo nudge */}
+      <section className="py-10 bg-[var(--surface-primary)] border-t border-[var(--border-default)]">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
+          <p className="text-base text-[var(--content-secondary)]">
+            Still not sure? See it in action first.
+          </p>
+          <Link
+            href="/product"
+            className="inline-flex items-center gap-1.5 mt-3 text-sm font-semibold text-brand-400 hover:text-brand-300 transition-colors"
+          >
+            Explore the interactive demo
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-20 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
@@ -94,7 +255,10 @@ export default function PricingPage() {
             </Link>
           </div>
           <p className="mt-3 text-ds-xs text-[#e2e8f0]">
-            No credit card required · Data never used for training · <a href="/privacy" className="underline hover:text-brand-600">Privacy & security details</a>
+            No credit card required · Data never used for training ·{' '}
+            <a href="/privacy" className="underline hover:text-brand-600">
+              Privacy &amp; security details
+            </a>
           </p>
         </div>
       </section>

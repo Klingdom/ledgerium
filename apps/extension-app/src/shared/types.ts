@@ -295,6 +295,7 @@ export interface ExtensionSettings {
   apiKey: string
   allowedDomains: string[]
   blockedDomains: string[]
+  telemetryEnabled: boolean  // opt-in analytics for recording lifecycle
 }
 
 // ─── Message bus ──────────────────────────────────────────────────────────────

@@ -117,6 +117,9 @@ importers:
       posthog-js:
         specifier: ^1.367.0
         version: 1.367.0
+      posthog-node:
+        specifier: ^5.29.2
+        version: 5.29.2(rxjs@7.5.7)
       react:
         specifier: ^18.3.0
         version: 18.3.1
@@ -1753,6 +1756,15 @@ packages:
 
   posthog-js@1.367.0:
     resolution: {integrity: sha512-jWNwB8XjlVUC9PbGaIlmsyohUDMBrwf7cvLuOY3lIOmWVO3L6VxTE3GZShjxpFKQtmWcPxFbf1hcbct1YCb6xg==}
+
+  posthog-node@5.29.2:
+    resolution: {integrity: sha512-rI7kkF0XqDc0G1qjx+Hb4iuY9NAlL+XQNoGOpnEpRNTUcXvjY6WlsRGZ9m2whgc39emrrYdszi/YT8wZkr2xsg==}
+    engines: {node: ^20.20.0 || >=22.22.0}
+    peerDependencies:
+      rxjs: ^7.0.0
+    peerDependenciesMeta:
+      rxjs:
+        optional: true
 
   preact-render-to-string@6.5.11:
     resolution: {integrity: sha512-ubnauqoGczeGISiOh6RjX0/cdaF8v/oDXIjO85XALCQjwQP+SB4RDXXtvZ6yTYSjG+PC1QRP2AhPgCEsM2EvUw==}
@@ -3580,6 +3592,12 @@ snapshots:
       preact: 10.29.1
       query-selector-shadow-dom: 1.0.1
       web-vitals: 5.2.0
+
+  posthog-node@5.29.2(rxjs@7.5.7):
+    dependencies:
+      '@posthog/core': 1.25.2
+    optionalDependencies:
+      rxjs: 7.5.7
 
   preact-render-to-string@6.5.11(preact@10.24.3):
     dependencies:

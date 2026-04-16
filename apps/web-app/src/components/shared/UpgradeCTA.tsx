@@ -1,7 +1,9 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Lock } from 'lucide-react';
+import { track } from '@/lib/analytics';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -41,6 +43,13 @@ export function UpgradeCTA({
   description,
   compact = false,
 }: UpgradeCTAProps): JSX.Element {
+  const hasFiredRef = useRef(false);
+  useEffect(() => {
+    if (hasFiredRef.current) return;
+    hasFiredRef.current = true;
+    track({ event: 'upgrade_prompt_viewed', location: feature, plan: requiredPlan ?? 'unknown' });
+  }, [feature, requiredPlan]);
+
   const planLabel = requiredPlan ? capitalize(requiredPlan) : 'a higher plan';
   const buttonLabel = requiredPlan ? `Upgrade to ${planLabel}` : 'Upgrade plan';
   const defaultTitle = title ?? 'This feature requires an upgrade';

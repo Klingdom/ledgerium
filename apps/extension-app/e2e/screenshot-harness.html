@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Extension Screenshot Harness</title>
+  <link rel="stylesheet" href="../dist/assets/index-CeVP2obg.css" />
+  <style>
+    /* Ensure the harness fills the viewport exactly like a side panel */
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+    #screen-root { width: 100%; height: 100%; }
+    .screen-frame { width: 100%; height: 100%; display: flex; flex-direction: column; background: #f9fafb; color: #111827; overflow: hidden; }
+
+    /* Replicate extension button/badge/card styles */
+    body { font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div id="screen-root"></div>
+  <script>
+    // Mock chrome API so components don't crash
+    window.chrome = {
+      runtime: {
+        sendMessage: (msg, cb) => { if (cb) cb(null); },
+        onMessage: { addListener: () => {}, removeListener: () => {} },
+        lastError: null,
+      },
+      storage: {
+        sync: { get: (keys, cb) => cb({}), set: (obj, cb) => { if (cb) cb(); } },
+        local: { get: (keys, cb) => cb({}), set: (obj, cb) => { if (cb) cb(); } },
+      },
+    };
+  </script>
+  <script type="module">
+    import React from 'https://esm.sh/react@18.3.1';
+    import ReactDOM from 'https://esm.sh/react-dom@18.3.1/client';
+
+    // ─── Mock data ───────────────────────────────────────────────────────────────
+
+    const MOCK_META = {
+      sessionId: 'demo-session-001',
+      activityName: 'Submit expense report',
+      startedAt: new Date(Date.now() - 3 * 60 * 1000).toISOString(), // 3 min ago
+    };
+
+    const MOCK_STEPS = [
+      {
+        stepId: 'demo-session-001-step-1',
+        title: 'Open Expense Portal',
+        status: 'finalized',
+        grouping: 'click_then_navigate',
+        pageLabel: 'portal.company.com',
+        confidence: 0.95,
+        eventCount: 3,
+      },
+      {
+        stepId: 'demo-session-001-step-2',
+        title: 'Click "New Expense Report"',
+        status: 'finalized',
+        grouping: 'single_action',
+        pageLabel: 'portal.company.com/expenses',
+        confidence: 0.92,
+        eventCount: 2,
+      },
+      {
+        stepId: 'demo-session-001-step-3',
+        title: 'Fill report details form',
+        status: 'finalized',
+        grouping: 'fill_and_submit',
+        pageLabel: 'portal.company.com/expenses/new',
+        confidence: 0.88,
+        eventCount: 7,
+      },
+      {
+        stepId: 'demo-session-001-step-4',
+        title: 'Upload receipt image',
+        status: 'finalized',
+        grouping: 'data_entry',
+        pageLabel: 'portal.company.com/expenses/new',
+        confidence: 0.85,
+        eventCount: 4,
+      },
+      {
+        stepId: 'demo-session-001-step-5',
+        title: 'Submit for approval',
+        status: 'provisional',
+        grouping: 'send_action',
+        pageLabel: 'portal.company.com/expenses/new',
+        confidence: 0.78,
+        eventCount: 1,
+      },
+    ];
+
+    const MOCK_HISTORY = [
+      { sessionId: 's1', activityName: 'Submit expense report', startedAt: new Date(Date.now() - 2 * 3600000).toISOString(), stepCount: 8, eventCount: 42 },
+      { sessionId: 's2', activityName: 'Onboard new employee', startedAt: new Date(Date.now() - 26 * 3600000).toISOString(), stepCount: 12, eventCount: 67 },
+      { sessionId: 's3', activityName: 'Process invoice in SAP', startedAt: new Date(Date.now() - 3 * 86400000).toISOString(), stepCount: 6, eventCount: 31 },
+    ];
+
+    // ─── Reusable sub-components (inline, matching extension source) ─────────────
+
+    const e = React.createElement;
+
+    function Header({ state, meta }) {
+      const badges = {
+        idle: { label: 'Ready', cls: 'badge badge-gray' },
+        arming: { label: 'Starting...', cls: 'badge badge-amber' },
+        recording: { label: 'Recording', cls: 'badge badge-green' },
+        paused: { label: 'Paused', cls: 'badge badge-amber' },
+        stopping: { label: 'Processing...', cls: 'badge badge-green' },
+        review_ready: { label: 'Complete', cls: 'badge badge-green' },
+        error: { label: 'Error', cls: 'badge badge-red' },
+      };
+      const b = badges[state] || badges.idle;
+      return e('header', { className: 'flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white' },
+        e('div', { className: 'flex items-center gap-2.5' },
+          state === 'recording' && e('span', { className: 'recording-dot' }),
+          e('span', { className: 'text-base font-bold tracking-tight text-gray-900' },
+            'Ledgerium ', e('span', { className: 'text-emerald-600' }, 'AI')
+          )
+        ),
+        e('div', { className: 'flex items-center gap-3' },
+          (state === 'recording' || state === 'paused') && e('span', { className: 'text-xs text-gray-500 tabular-nums font-medium' }, '03:24'),
+          e('span', { className: b.cls }, b.label)
+        )
+      );
+    }
+
+    function ControlBar({ primaryLabel, secondaryLabel, hasDiscard }) {
+      return e('div', { className: 'flex items-center gap-2 px-4 py-3 border-t border-gray-200 bg-white' },
+        hasDiscard && e('button', { className: 'btn-danger text-xs' }, 'Discard'),
+        e('div', { className: 'flex-1 flex gap-2 justify-end' },
+          secondaryLabel && e('button', { className: 'btn-secondary' }, secondaryLabel),
+          e('button', { className: 'btn-primary' }, primaryLabel)
+        )
+      );
+    }
+
+    function ConfidenceBar({ confidence }) {
+      const pct = Math.round(confidence * 100);
+      const color = pct >= 80 ? 'bg-emerald-500' : pct >= 60 ? 'bg-amber-500' : 'bg-red-500';
+      return e('div', { className: 'flex items-center gap-1.5', title: `Confidence: ${pct}%` },
+        e('div', { className: 'w-8 h-1 rounded-full bg-gray-200 overflow-hidden' },
+          e('div', { className: `h-full rounded-full ${color}`, style: { width: `${pct}%` } })
+        )
+      );
+    }
+
+    const GROUPING_COLORS = {
+      click_then_navigate: 'border-l-teal-500',
+      fill_and_submit: 'border-l-blue-500',
+      repeated_click_dedup: 'border-l-amber-500',
+      single_action: 'border-l-gray-300',
+      data_entry: 'border-l-violet-500',
+      send_action: 'border-l-emerald-500',
+      error_handling: 'border-l-red-500',
+    };
+    const GROUPING_LABELS = {
+      click_then_navigate: 'Navigation',
+      fill_and_submit: 'Form',
+      single_action: 'Action',
+      data_entry: 'Input',
+      send_action: 'Submit',
+    };
+
+    function StepCard({ step, index }) {
+      const isProvisional = step.status === 'provisional';
+      const borderColor = GROUPING_COLORS[step.grouping] || 'border-l-gray-300';
+      const label = GROUPING_LABELS[step.grouping] || 'Action';
+      return e('div', { className: `card border-l-[3px] ${borderColor} px-3 py-2.5 text-sm transition-all ${isProvisional ? 'opacity-60' : ''}` },
+        e('div', { className: 'flex items-start gap-2' },
+          e('span', { className: 'text-xs text-gray-400 font-mono mt-0.5 w-4 text-right shrink-0' }, index + 1),
+          e('div', { className: 'flex-1 min-w-0' },
+            e('p', { className: `font-medium leading-snug truncate ${isProvisional ? 'text-gray-500' : 'text-gray-900'}` },
+              step.title, isProvisional && e('span', { className: 'ml-1 text-xs text-gray-400 font-normal' }, '...')
+            ),
+            e('div', { className: 'flex items-center gap-2 mt-1' },
+              e('span', { className: 'text-[10px] font-medium text-gray-400 uppercase' }, label),
+              step.pageLabel && e(React.Fragment, null,
+                e('span', { className: 'text-gray-300' }, '\u00B7'),
+                e('p', { className: 'text-[11px] text-gray-400 truncate' }, step.pageLabel)
+              )
+            )
+          ),
+          e('div', { className: 'flex items-center gap-2 shrink-0' },
+            e(ConfidenceBar, { confidence: step.confidence }),
+            step.eventCount > 0 && e('span', { className: 'text-[10px] text-gray-400 tabular-nums' }, step.eventCount)
+          )
+        )
+      );
+    }
+
+    function LiveStepFeed({ steps }) {
+      if (steps.length === 0) {
+        return e('div', { className: 'flex flex-col items-center justify-center py-10 gap-2' },
+          e('div', { className: 'w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center' },
+            e('span', { className: 'recording-dot' })
+          ),
+          e('p', { className: 'text-sm text-gray-500' }, 'Waiting for activity...'),
+          e('p', { className: 'text-xs text-gray-400' }, 'Interact with any tab to begin capturing')
+        );
+      }
+      return e('div', { className: 'flex flex-col gap-1.5 px-3 py-3' },
+        ...steps.map((step, i) => e(StepCard, { key: step.stepId, step, index: i }))
+      );
+    }
+
+    // ─── Screen renderers ────────────────────────────────────────────────────────
+
+    function IdleScreen() {
+      return e('div', { className: 'screen-frame' },
+        e(Header, { state: 'idle', meta: null }),
+        e('main', { className: 'flex-1 overflow-hidden' },
+          e('div', { className: 'flex flex-col h-full overflow-hidden' },
+            // Form section
+            e('div', { className: 'flex-none px-4 pt-6 pb-4' },
+              e('div', { className: 'flex flex-col items-center mb-6' },
+                e('div', { className: 'flex items-center gap-2' },
+                  e('svg', { width: 24, height: 24, viewBox: '0 0 220 220', fill: 'none', xmlns: 'http://www.w3.org/2000/svg' },
+                    e('defs', null, e('linearGradient', { id: 'g', x1: 0, x2: 1, y1: 0, y2: 1 },
+                      e('stop', { offset: 0, stopColor: '#20f2a6' }), e('stop', { offset: 1, stopColor: '#0adf92' })
+                    )),
+                    e('g', { stroke: 'url(#g)', strokeWidth: 12, strokeLinecap: 'round', strokeLinejoin: 'round' },
+                      e('path', { d: 'M70 70 L110 45 L150 70 L110 95 Z' }),
+                      e('path', { d: 'M70 110 L110 85 L150 110 L110 135 Z', opacity: 0.95 }),
+                      e('path', { d: 'M70 150 L110 125 L150 150 L110 175 Z', opacity: 0.9 })
+                    )
+                  ),
+                  e('span', { className: 'text-lg font-bold text-gray-900' }, 'Ledgerium ', e('span', { className: 'text-emerald-600' }, 'AI'))
+                ),
+                e('p', { className: 'text-xs text-gray-500 mt-0.5' }, 'Workflow Recorder')
+              ),
+              e('div', { className: 'flex flex-col gap-3' },
+                e('div', { className: 'flex flex-col gap-1.5' },
+                  e('label', { className: 'text-xs font-medium text-gray-500' }, 'What are you recording?'),
+                  e('input', { type: 'text', placeholder: 'e.g. Submit expense report', className: 'w-full rounded-lg bg-white border border-gray-200 text-sm text-gray-900 placeholder-gray-400 px-3 py-2.5 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-colors' })
+                ),
+                e('button', { className: 'btn-primary w-full', disabled: true }, 'Start Recording')
+              )
+            ),
+            // Sync settings link
+            e('button', { className: 'w-full text-center py-2 text-xs text-gray-400 hover:text-gray-600 transition-colors' }, 'Sync Settings'),
+            // History
+            e('div', { className: 'flex-1 min-h-0 flex flex-col border-t border-gray-200' },
+              e('div', { className: 'flex items-center justify-between px-4 py-2.5 flex-none' },
+                e('p', { className: 'text-xs font-medium text-gray-400 uppercase tracking-wider' }, 'Recent Recordings'),
+                e('span', { className: 'text-xs text-gray-400 tabular-nums' }, '3')
+              ),
+              e('div', { className: 'flex-1 min-h-0 overflow-y-auto px-2 pb-3' },
+                e('div', { className: 'flex flex-col gap-0.5' },
+                  ...MOCK_HISTORY.map(entry => e('div', { key: entry.sessionId, className: 'group flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors' },
+                    e('span', { className: 'w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0' }),
+                    e('div', { className: 'flex-1 min-w-0' },
+                      e('p', { className: 'text-sm text-gray-900 font-medium truncate leading-snug' }, entry.activityName),
+                      e('div', { className: 'flex items-center gap-2 mt-0.5' },
+                        e('span', { className: 'text-xs text-gray-400' }, entry.stepCount + ' steps'),
+                        e('span', { className: 'text-gray-300' }, '\u00B7'),
+                        e('span', { className: 'text-xs text-gray-400' }, entry.eventCount + ' events')
+                      )
+                    ),
+                    e('button', { className: 'opacity-40 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all p-0.5 rounded shrink-0' }, '\u00D7')
+                  ))
+                )
+              )
+            )
+          )
+        )
+      );
+    }
+
+    function ArmingScreen() {
+      return e('div', { className: 'screen-frame' },
+        e(Header, { state: 'arming', meta: null }),
+        e('main', { className: 'flex-1 flex flex-col items-center justify-center gap-4 px-4 bg-white' },
+          e('div', { className: 'w-10 h-10 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin' }),
+          e('div', { className: 'text-center' },
+            e('p', { className: 'text-sm text-gray-900 font-medium' }, 'Starting session...'),
+            e('p', { className: 'text-xs text-gray-500 mt-1' }, 'Preparing to capture your workflow')
+          )
+        )
+      );
+    }
+
+    function RecordingScreen() {
+      return e('div', { className: 'screen-frame' },
+        e(Header, { state: 'recording', meta: MOCK_META }),
+        e('main', { className: 'flex-1 overflow-hidden flex flex-col' },
+          // Activity banner
+          e('div', { className: 'px-4 pt-3 pb-2 bg-emerald-50 border-b border-emerald-100 flex-none' },
+            e('div', { className: 'flex items-center justify-between' },
+              e('div', { className: 'flex items-center gap-2' },
+                e('span', { className: 'recording-dot' }),
+                e('p', { className: 'text-xs text-emerald-700 uppercase tracking-wider font-medium' }, 'Recording Active')
+              ),
+              e('p', { className: 'text-xs text-emerald-600 tabular-nums font-medium' }, '17 events')
+            ),
+            e('p', { className: 'text-sm text-gray-900 font-medium mt-1 truncate' }, 'Submit expense report')
+          ),
+          // Steps
+          e('div', { className: 'flex-1 overflow-y-auto bg-gray-50' }, e(LiveStepFeed, { steps: MOCK_STEPS })),
+          // Controls
+          e(ControlBar, { primaryLabel: 'Stop & Review', secondaryLabel: 'Pause', hasDiscard: true })
+        )
+      );
+    }
+
+    function PausedScreen() {
+      return e('div', { className: 'screen-frame' },
+        e(Header, { state: 'paused', meta: MOCK_META }),
+        e('main', { className: 'flex-1 overflow-hidden flex flex-col' },
+          e('div', { className: 'px-4 pt-3 pb-2 bg-amber-50 border-b border-amber-100 flex-none' },
+            e('div', { className: 'flex items-center gap-2' },
+              e('span', { className: 'w-2 h-2 rounded-full bg-amber-500' }),
+              e('p', { className: 'text-xs text-amber-700 uppercase tracking-wider font-medium' }, 'Paused')
+            ),
+            e('p', { className: 'text-sm text-gray-900 font-medium mt-1 truncate' }, 'Submit expense report'),
+            e('p', { className: 'text-xs text-gray-500 mt-1' }, 'Capture is suspended. Resume to continue recording.')
+          ),
+          e('div', { className: 'flex-1 overflow-y-auto bg-gray-50 opacity-60' }, e(LiveStepFeed, { steps: MOCK_STEPS.slice(0, 4) })),
+          e(ControlBar, { primaryLabel: 'Resume', secondaryLabel: 'Stop & Review', hasDiscard: true })
+        )
+      );
+    }
+
+    function ErrorScreen() {
+      return e('div', { className: 'screen-frame' },
+        e(Header, { state: 'error', meta: null }),
+        e('main', { className: 'flex-1 flex flex-col items-center justify-center px-4 gap-5 bg-white' },
+          e('div', { className: 'w-12 h-12 rounded-full bg-red-50 border border-red-200 flex items-center justify-center' },
+            e('span', { className: 'text-red-500 text-xl font-bold' }, '!')
+          ),
+          e('div', { className: 'text-center' },
+            e('p', { className: 'text-sm font-medium text-gray-900' }, 'Something went wrong'),
+            e('p', { className: 'text-xs text-gray-500 mt-2 leading-relaxed max-w-xs' }, 'Content script disconnected unexpectedly. This can happen when the browser tab is closed during recording.')
+          ),
+          e('button', { className: 'btn-secondary' }, 'Dismiss')
+        )
+      );
+    }
+
+    function RecordingEmptyScreen() {
+      return e('div', { className: 'screen-frame' },
+        e(Header, { state: 'recording', meta: MOCK_META }),
+        e('main', { className: 'flex-1 overflow-hidden flex flex-col' },
+          e('div', { className: 'px-4 pt-3 pb-2 bg-emerald-50 border-b border-emerald-100 flex-none' },
+            e('div', { className: 'flex items-center justify-between' },
+              e('div', { className: 'flex items-center gap-2' },
+                e('span', { className: 'recording-dot' }),
+                e('p', { className: 'text-xs text-emerald-700 uppercase tracking-wider font-medium' }, 'Recording Active')
+              ),
+              e('p', { className: 'text-xs text-emerald-600 tabular-nums font-medium' }, '0 events')
+            ),
+            e('p', { className: 'text-sm text-gray-900 font-medium mt-1 truncate' }, 'Submit expense report')
+          ),
+          e('div', { className: 'flex-1 overflow-y-auto bg-gray-50' }, e(LiveStepFeed, { steps: [] })),
+          e(ControlBar, { primaryLabel: 'Stop & Review', secondaryLabel: 'Pause', hasDiscard: true })
+        )
+      );
+    }
+
+    function StoppingScreen() {
+      return e('div', { className: 'screen-frame' },
+        e(Header, { state: 'stopping', meta: MOCK_META }),
+        e('main', { className: 'flex-1 flex flex-col items-center justify-center gap-4 px-4 bg-white' },
+          e('div', { className: 'w-10 h-10 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin' }),
+          e('div', { className: 'text-center' },
+            e('p', { className: 'text-sm text-gray-900 font-medium' }, 'Processing recording...'),
+            e('p', { className: 'text-xs text-gray-500 mt-1' }, 'Finalizing 5 steps and 17 events')
+          )
+        )
+      );
+    }
+
+    // ─── Screen registry ─────────────────────────────────────────────────────────
+
+    const SCREENS = {
+      idle: IdleScreen,
+      arming: ArmingScreen,
+      recording_empty: RecordingEmptyScreen,
+      recording: RecordingScreen,
+      paused: PausedScreen,
+      stopping: StoppingScreen,
+      error: ErrorScreen,
+    };
+
+    // ─── Render current screen from URL hash ─────────────────────────────────────
+
+    function render() {
+      const screen = location.hash.replace('#', '') || 'idle';
+      const Screen = SCREENS[screen];
+      if (!Screen) { document.getElementById('screen-root').innerText = `Unknown screen: ${screen}`; return; }
+      const root = ReactDOM.createRoot(document.getElementById('screen-root'));
+      root.render(e(Screen));
+    }
+
+    render();
+    window.addEventListener('hashchange', render);
+
+    // Signal ready for Playwright
+    window.__HARNESS_READY = true;
+  </script>
+</body>
+</html>

@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { validateBundle, runProcessEngine, buildWorkflowReportFromOutput, renderAllTemplates } from '@/lib/ingestion';
 import { analyzeWorkflowInsights, interpretWorkflow } from '@ledgerium/process-engine';
-import { trackServer } from '@/lib/analytics';
+import { trackServer } from '@/lib/analytics-server';
 import { clusterWorkflows } from '@/lib/intelligence';
 import { checkRecordingLimit } from '@/lib/feature-gating';
 import { UPLOAD_DIR } from '@/lib/storage';
@@ -27,6 +27,12 @@ export async function POST(req: NextRequest) {
   // Plan-aware recording limit (monthly reset, supports all tiers)
   const limitCheck = await checkRecordingLimit(user);
   if (!limitCheck.allowed) {
+    trackServer('plan_limit_hit', {
+      userId,
+      limit: 'recordings',
+      currentUsage: limitCheck.used,
+      maxAllowed: limitCheck.limit,
+    });
     return NextResponse.json({
       error: 'Recording limit reached',
       code: 'UPGRADE_REQUIRED',

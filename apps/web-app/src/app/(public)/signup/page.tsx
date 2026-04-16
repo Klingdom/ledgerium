@@ -49,6 +49,19 @@ export default function SignupPage() {
     }
 
     track({ event: 'signup_completed' });
+
+    // Attribution: fire a separate event if the user arrived via a shared SOP link
+    try {
+      const rawRef = localStorage.getItem('ledgerium_signup_ref');
+      if (rawRef) {
+        const parsed = JSON.parse(rawRef) as { source: string; token: string };
+        if (parsed.source === 'shared_sop' && parsed.token) {
+          track({ event: 'signup_from_shared_sop', token: parsed.token });
+        }
+        localStorage.removeItem('ledgerium_signup_ref');
+      }
+    } catch { /* non-blocking — attribution must never break signup */ }
+
     // Identify new user in PostHog
     try {
       const { identifyAnalyticsUser } = await import('@/lib/analytics');
@@ -76,6 +89,11 @@ export default function SignupPage() {
             </svg>
             No screenshots. No keystrokes. Your data stays private.
           </span>
+        </p>
+
+        {/* Expectation-setting copy — reduces anxiety about the extension sideload */}
+        <p className="text-center text-xs text-[var(--content-secondary)] mb-5 px-2">
+          Sign up free, and explore a sample workflow SOP immediately — no extension install required.
         </p>
 
         <form onSubmit={handleSubmit} className="card p-6 space-y-4">
@@ -140,6 +158,54 @@ export default function SignupPage() {
             Sign in
           </Link>
         </p>
+
+        {/* "What happens next" preview — purely presentational, no state */}
+        <div className="mt-8 px-1">
+          <p className="text-xs font-medium text-[var(--content-tertiary)] uppercase tracking-wide mb-4">
+            After you sign up:
+          </p>
+          <ol className="space-y-4">
+            <li className="flex items-start gap-3">
+              <span className="flex-shrink-0 inline-flex items-center justify-center bg-brand-900/20 text-brand-400 rounded-full w-6 h-6 text-xs font-semibold mt-0.5">
+                1
+              </span>
+              <div>
+                <p className="text-xs font-semibold text-[var(--content-secondary)]">
+                  Explore a sample workflow instantly
+                </p>
+                <p className="text-xs text-[var(--content-tertiary)] mt-0.5">
+                  See a real SOP and process map — no extension needed.
+                </p>
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="flex-shrink-0 inline-flex items-center justify-center bg-brand-900/20 text-brand-400 rounded-full w-6 h-6 text-xs font-semibold mt-0.5">
+                2
+              </span>
+              <div>
+                <p className="text-xs font-semibold text-[var(--content-secondary)]">
+                  Install the Chrome extension
+                </p>
+                <p className="text-xs text-[var(--content-tertiary)] mt-0.5">
+                  Download and set up in under 2 minutes.
+                </p>
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="flex-shrink-0 inline-flex items-center justify-center bg-brand-900/20 text-brand-400 rounded-full w-6 h-6 text-xs font-semibold mt-0.5">
+                3
+              </span>
+              <div>
+                <p className="text-xs font-semibold text-[var(--content-secondary)]">
+                  Record your first workflow
+                </p>
+                <p className="text-xs text-[var(--content-tertiary)] mt-0.5">
+                  Get your own SOP in under 5 minutes.
+                </p>
+              </div>
+            </li>
+          </ol>
+        </div>
       </div>
     </div>
   );

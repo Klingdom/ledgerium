@@ -1,6 +1,6 @@
 # Ledgerium AI — Improvement Backlog
 
-Last updated: 2026-04-13  
+Last updated: 2026-04-16  
 Current phase: Phase 1  
 Backlog purpose: maintain a ranked, evidence-based portfolio of the highest-value fixes, improvements, and experiments for bounded improvement loops.
 
@@ -22,10 +22,10 @@ Higher total score = higher priority.
 ## Portfolio Summary
 
 - Total candidates reviewed: 20 (10 original + 10 from iteration 001)
-- Top priority area: web-app test coverage and API safety
+- Top priority area: extension architecture convergence and API safety
 - Highest-risk unresolved item: 11 API routes with no try/catch error handling
-- Last completed item: Add vitest config + test script to web-app (iteration 001)
-- Next recommended item: Add try/catch to 11 unguarded API routes
+- Last completed item: Replace duplicated background logic with workspace package imports (iteration 003)
+- Next recommended item: Integrate `@ledgerium/policy-engine` into `content/capture.ts`
 
 ---
 
@@ -34,7 +34,7 @@ Higher total score = higher priority.
 | Rank | Title | Type | Area | Impact | Alignment | Learning | Confidence | Effort | Risk | Score | Status |
 |------|-------|------|------|--------|-----------|----------|------------|--------|------|-------|--------|
 | ~~—~~ | ~~Add vitest config + test script to web-app~~ | ~~improvement~~ | ~~test infrastructure~~ | ~~5~~ | ~~5~~ | ~~3~~ | ~~5~~ | ~~1~~ | ~~1~~ | ~~16~~ | **done (iter 001)** |
-| 1 | Replace duplicated background logic with workspace package imports | improvement | extension architecture | 5 | 5 | 4 | 5 | 3 | 2 | 14 | proposed |
+| ~~1~~ | ~~Replace duplicated background logic with workspace package imports~~ | ~~improvement~~ | ~~extension architecture~~ | ~~5~~ | ~~5~~ | ~~4~~ | ~~5~~ | ~~3~~ | ~~2~~ | ~~14~~ | **done (iter 003)** |
 | 2 | Integrate `@ledgerium/policy-engine` into `content/capture.ts` | fix | capture pipeline | 4 | 5 | 3 | 5 | 2 | 2 | 13 | proposed |
 | 3 | Add dashboard-level process for artifact and system-health refresh after each loop | improvement | agentic CI | 3 | 4 | 5 | 4 | 2 | 1 | 13 | proposed |
 | 4 | Add Playwright E2E tests for recording lifecycle | improvement | quality assurance | 4 | 5 | 4 | 4 | 3 | 2 | 12 | proposed |

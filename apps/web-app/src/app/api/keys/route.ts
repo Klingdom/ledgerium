@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { generateApiKey } from '@/lib/api-keys';
+import { trackServer } from '@/lib/analytics-server';
 
 /** List user's API keys (without hashes). */
 export async function GET() {
@@ -39,6 +40,8 @@ export async function POST(req: NextRequest) {
       label: label ?? 'Extension',
     },
   });
+
+  trackServer('extension_api_key_created', { userId: session.user.id, keyPrefix: prefix });
 
   return NextResponse.json({
     key: rawKey,

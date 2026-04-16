@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
+import { trackServer } from '@/lib/analytics-server';
 
 /**
  * GET /api/workflows/:id/share — list who this workflow is shared with
@@ -121,6 +122,7 @@ export async function POST(
         },
       });
 
+      trackServer('workflow_shared_with_user', { userId: session.user.id, workflowId: params.id });
       return NextResponse.json({ ok: true, sharedWith: targetUser.email });
     }
 
@@ -153,6 +155,7 @@ export async function POST(
         },
       });
 
+      trackServer('workflow_shared_with_team', { userId: session.user.id, workflowId: params.id, teamId });
       return NextResponse.json({ ok: true, sharedWith: teamId });
     }
 

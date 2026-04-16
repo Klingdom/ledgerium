@@ -71,6 +71,59 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 003
+
+- Date: 2026-04-16
+- Trigger: user requested next recommended action
+- Coordinator: coordinator
+- Phase: Phase 1
+- Objective: replace duplicated logic in extension background code with workspace package imports
+
+### System Review
+- Read: CLAUDE.md, SYSTEM_HEALTH.md, IMPROVEMENT_BACKLOG.md, CHANGELOG.md, git log
+- Key finding: Extension declares 6 workspace packages as dependencies but imports from 0 of them in background/capture code. All normalization, segmentation constants, and sensitivity detection logic is duplicated locally despite identical implementations existing in packages. Build system (Vite + CRXJS) already supports workspace imports — 7 viewer files already import from `@ledgerium/process-engine`.
+
+### Candidate Selection
+- Title: **Replace duplicated background logic with workspace package imports**
+- Type: improvement
+- Area: extension architecture
+- Score: 14 (Impact:5 + Alignment:5 + Learning:4 + Confidence:5 − Effort:3 − Risk:2)
+- Why selected: Highest-scored item in backlog. Directly addresses #1 tracked technical debt. Strengthens determinism by establishing single source of truth for normalization, segmentation, and policy logic.
+
+### Agents Used
+- coordinator (orchestration, verification, artifact updates)
+- Explore agents ×2 (duplication mapping, build system analysis)
+- backend-engineer (implementation)
+
+### Files Changed
+- `apps/extension-app/src/shared/constants.ts` — replaced 4 local constant definitions with re-exports from `@ledgerium/segmentation-engine`
+- `apps/extension-app/src/shared/utils.ts` — replaced 2 local function implementations with re-exports from `@ledgerium/normalization-engine`
+- `apps/extension-app/src/background/normalizer.ts` — imported `RAW_TO_CANONICAL_TYPE` + `NORMALIZATION_RULE_VERSION` from normalization-engine; imported `classifySensitivity` from policy-engine; removed ~80 lines of duplicated logic
+
+### Validation Run
+- `pnpm typecheck` → 0 errors across all 10 workspace projects ✅
+- `pnpm test` → 1,393/1,393 tests pass (39 test files) ✅
+- `pnpm --filter @ledgerium/extension-app build` → clean build ✅
+- No regressions detected
+
+### Outcome
+- Status: **complete**
+- Summary: Extension background code now imports from 3 workspace packages (normalization-engine, segmentation-engine, policy-engine) instead of duplicating their logic. ~80 lines of duplicated code removed. Extension-specific additions preserved (more secure normalizeUrl, more app labels, 3 extra event type mappings).
+
+### Impact
+- Before: 0 workspace package imports in extension background/capture code
+- After: 3 packages imported (normalization-engine, segmentation-engine, policy-engine)
+- Duplicated items eliminated: 6 constants, 2 utility functions, 1 type map, 1 sensitivity regex + function
+- Divergence risk reduced for normalization rules, segmentation constants, and sensitivity patterns
+
+### Follow-Ups
+- Integrate `@ledgerium/policy-engine` into `content/capture.ts` (score: 13)
+- Converge LiveStepBuilder with StreamingSegmenter (future iteration)
+- Upstream extension-only improvements to packages (normalizeUrl security, extra app labels, extra event types)
+- Full type unification between extension and package type definitions
+
+---
+
 ## Iteration 001
 
 - Date: 2026-04-13

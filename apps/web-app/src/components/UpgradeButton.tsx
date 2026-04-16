@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { track } from '@/lib/analytics';
 
 interface Props {
   className?: string;
@@ -29,10 +30,12 @@ export function UpgradeButton({ className, children, fallbackHref }: Props) {
 
   async function handleClick() {
     setIsLoading(true);
+    track({ event: 'upgrade_clicked', location: 'upgrade_button' });
     try {
       const res = await fetch('/api/billing/checkout', { method: 'POST' });
       const data = await res.json();
       if (data.url) {
+        track({ event: 'checkout_started' });
         window.location.href = data.url;
       } else if (data.redirect) {
         window.location.href = data.redirect;

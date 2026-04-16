@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getStripe, WEBHOOK_SECRET, planFromPriceId } from '@/lib/stripe';
 import type { PlanType } from '@/lib/plans';
 import { db } from '@/db';
-import { trackServer } from '@/lib/analytics';
+import { trackServer } from '@/lib/analytics-server';
 import type Stripe from 'stripe';
 
 /**

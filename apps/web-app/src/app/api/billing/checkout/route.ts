@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { getStripe, getPriceId, PRO_PRICE_ID, APP_URL } from '@/lib/stripe';
 import { toPlanType } from '@/lib/plans';
-import { trackServer } from '@/lib/analytics';
+import { trackServer } from '@/lib/analytics-server';
 import type { PaidPlanType, BillingInterval } from '@/lib/stripe';
 import type Stripe from 'stripe';
 

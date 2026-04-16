@@ -5,6 +5,7 @@ import { validateBundle, runProcessEngine, buildWorkflowReportFromOutput, render
 import { clusterWorkflows } from '@/lib/intelligence';
 import { checkRecordingLimit } from '@/lib/feature-gating';
 import { UPLOAD_DIR } from '@/lib/storage';
+import { trackServer } from '@/lib/analytics-server';
 import fs from 'fs';
 import path from 'path';
 
@@ -64,6 +65,12 @@ export async function POST(req: NextRequest) {
 
   const limitCheck = await checkRecordingLimit(user);
   if (!limitCheck.allowed) {
+    trackServer('plan_limit_hit', {
+      userId,
+      limit: 'recordings',
+      currentUsage: limitCheck.used,
+      maxAllowed: limitCheck.limit,
+    });
     return NextResponse.json({
       error: 'Recording limit reached',
       code: 'UPGRADE_REQUIRED',
@@ -129,6 +136,11 @@ export async function POST(req: NextRequest) {
   });
 
   if (!validation.valid) {
+    trackServer('upload_failed', {
+      userId,
+      error: 'bundle_validation_failed',
+      errorCount: validation.errors.length,
+    });
     return NextResponse.json({
       error: 'Bundle validation failed',
       details: validation.errors,
@@ -151,6 +163,11 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    trackServer('upload_failed', {
+      userId,
+      error: 'processing_failed',
+      uploadId,
+    });
     return NextResponse.json({
       error: 'Processing failed',
       details: [String(err)],
@@ -238,6 +255,18 @@ export async function POST(req: NextRequest) {
   await db.user.update({
     where: { id: userId },
     data: { uploadCount: { increment: 1 } },
+  });
+
+  trackServer('workflow_uploaded', {
+    userId,
+    workflowId: workflow.id,
+    stepCount: processRun.stepCount,
+    phaseCount: processMap.phases.length,
+    systemCount: toolsUsed.length,
+    durationMs: processRun.durationMs ?? null,
+    confidence: confidence ?? null,
+    uploadNumber: (user.uploadCount ?? 0) + 1,
+    source: 'extension_sync',
   });
 
   // Auto-cluster into process definitions (fire-and-forget)

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -39,6 +39,7 @@ import { IntelligenceTab } from '@/components/detail/IntelligenceTab';
 import { InterpretationTab } from '@/components/detail/InterpretationTab';
 import { InsightsPanel } from '@/components/detail/InsightsPanel';
 import { AgentIntelligenceTab } from '@/components/detail/AgentIntelligenceTab';
+import { SOPUsefulnessSurvey } from '@/components/shared/SOPUsefulnessSurvey';
 
 type TabId = 'workflow' | 'sop' | 'report' | 'insights' | 'interpretation' | 'intelligence' | 'agent-intelligence' | 'evidence';
 
@@ -64,6 +65,25 @@ export default function WorkflowDetailPage() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [intelligenceData, setIntelligenceData] = useState<any>(null);
   const [agentIntelligenceData, setAgentIntelligenceData] = useState<any>(null);
+  const [showSurvey, setShowSurvey] = useState(false);
+
+  // Tracks whether we've already fired the 30-second SOP dwell event this session.
+  const sopViewedFiredRef = useRef(false);
+
+  // Fire `sop_section_viewed` once the user has spent 30 continuous seconds on the SOP tab.
+  useEffect(() => {
+    if (activeTab !== 'sop') return;
+
+    const SOP_DWELL_MS = 30_000;
+    const timer = setTimeout(() => {
+      if (sopViewedFiredRef.current) return;
+      sopViewedFiredRef.current = true;
+      setShowSurvey(true);
+      track({ event: 'sop_section_viewed', workflowId: id, durationMs: SOP_DWELL_MS });
+    }, SOP_DWELL_MS);
+
+    return () => clearTimeout(timer);
+  }, [activeTab, id]);
 
   useEffect(() => {
     async function load() {
@@ -115,8 +135,10 @@ export default function WorkflowDetailPage() {
       navigator.clipboard.writeText(url);
       setShareCopied(true);
       setTimeout(() => setShareCopied(false), 2000);
+      track({ event: 'share_link_created', workflowId: id });
     } else {
       setShareUrl(null);
+      track({ event: 'share_link_disabled', workflowId: id });
     }
   }
 
@@ -125,6 +147,7 @@ export default function WorkflowDetailPage() {
     navigator.clipboard.writeText(shareUrl);
     setShareCopied(true);
     setTimeout(() => setShareCopied(false), 2000);
+    track({ event: 'share_link_copied', workflowId: id });
   }
 
   async function handleRunIntelligence() {
@@ -340,18 +363,23 @@ export default function WorkflowDetailPage() {
         />
       )}
       {activeTab === 'sop' && (
-        <SOPPageShell
-          sop={sopArtifact}
-          templateArtifacts={sopTemplates}
-          workflowRecord={{
-            id: workflow.id,
-            title: workflow.title,
-            confidence: workflow.confidence,
-            createdAt: workflow.createdAt,
-            status: workflow.status ?? 'active',
-          }}
-          workflowId={id}
-        />
+        <>
+          <SOPPageShell
+            sop={sopArtifact}
+            templateArtifacts={sopTemplates}
+            workflowRecord={{
+              id: workflow.id,
+              title: workflow.title,
+              confidence: workflow.confidence,
+              createdAt: workflow.createdAt,
+              status: workflow.status ?? 'active',
+            }}
+            workflowId={id}
+          />
+          {showSurvey && (
+            <SOPUsefulnessSurvey workflowId={id} />
+          )}
+        </>
       )}
       {activeTab === 'report' && (
         <WorkflowReportPage

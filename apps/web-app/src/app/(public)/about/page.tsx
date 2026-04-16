@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, Eye, Shield, Zap, Target, BookOpen, CheckCircle } from 'lucide-react';
+import { ArrowRight, Eye, Shield, Zap, Target, BookOpen, CheckCircle, Camera, Server, FileText } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'About — Ledgerium AI',
@@ -159,6 +159,121 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* How we compare */}
+      <section className="py-20 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="max-w-2xl mx-auto text-center mb-12">
+            <h2 className="text-xl font-bold text-[var(--content-primary)]">
+              How we compare
+            </h2>
+            <p className="mt-3 text-[#e2e8f0]">
+              We&apos;re not another documentation tool. Here&apos;s specifically how we differ.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* vs. Screen Recorders */}
+            <div className="card p-7 flex flex-col gap-4">
+              <div className="flex items-center gap-2.5">
+                <Camera className="h-4 w-4 text-brand-600 flex-shrink-0" />
+                <span className="inline-block text-[11px] font-bold text-[var(--content-tertiary)] uppercase tracking-widest border border-[var(--border-subtle)] rounded-full px-3 py-1">
+                  vs. Screen Recorders
+                </span>
+              </div>
+              <div className="space-y-3">
+                <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                  <span className="font-semibold text-[var(--content-tertiary)]">They capture:</span>{' '}
+                  Annotated screenshots and visual walkthroughs
+                </p>
+                <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                  <span className="font-semibold text-brand-500">We capture:</span>{' '}
+                  Structured interaction data with timing, confidence scores, and evidence traces
+                </p>
+              </div>
+              <p className="text-sm font-semibold text-brand-400 leading-snug border-t border-[var(--border-subtle)] pt-4 mt-auto">
+                &ldquo;Scribe shows what the screen looks like. Ledgerium captures what the workflow actually is.&rdquo;
+              </p>
+            </div>
+
+            {/* vs. Process Mining */}
+            <div className="card p-7 flex flex-col gap-4">
+              <div className="flex items-center gap-2.5">
+                <Server className="h-4 w-4 text-brand-600 flex-shrink-0" />
+                <span className="inline-block text-[11px] font-bold text-[var(--content-tertiary)] uppercase tracking-widest border border-[var(--border-subtle)] rounded-full px-3 py-1">
+                  vs. Process Mining
+                </span>
+              </div>
+              <div className="space-y-3">
+                <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                  <span className="font-semibold text-[var(--content-tertiary)]">They capture:</span>{' '}
+                  Event logs from enterprise systems (SAP, Salesforce)
+                </p>
+                <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                  <span className="font-semibold text-brand-500">We capture:</span>{' '}
+                  Real human activity from the browser &mdash; no IT integration required
+                </p>
+              </div>
+              <p className="text-sm font-semibold text-brand-400 leading-snug border-t border-[var(--border-subtle)] pt-4 mt-auto">
+                &ldquo;Process mining tells you what your system recorded. Ledgerium tells you what your people actually did.&rdquo;
+              </p>
+            </div>
+
+            {/* vs. Documentation Tools */}
+            <div className="card p-7 flex flex-col gap-4">
+              <div className="flex items-center gap-2.5">
+                <FileText className="h-4 w-4 text-brand-600 flex-shrink-0" />
+                <span className="inline-block text-[11px] font-bold text-[var(--content-tertiary)] uppercase tracking-widest border border-[var(--border-subtle)] rounded-full px-3 py-1">
+                  vs. Documentation Tools
+                </span>
+              </div>
+              <div className="space-y-3">
+                <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                  <span className="font-semibold text-[var(--content-tertiary)]">They require:</span>{' '}
+                  Humans to write and maintain process documentation
+                </p>
+                <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+                  <span className="font-semibold text-brand-500">We generate:</span>{' '}
+                  Documentation from direct observation of real workflows
+                </p>
+              </div>
+              <p className="text-sm font-semibold text-brand-400 leading-snug border-t border-[var(--border-subtle)] pt-4 mt-auto">
+                &ldquo;Notion is where your SOPs go to become outdated. Ledgerium is where they stay current.&rdquo;
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Founder / Company */}
+      <section className="py-20 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+          <h2 className="text-xl font-bold text-[var(--content-primary)] mb-5">
+            Built by process people
+          </h2>
+          <p className="text-[15px] text-[#e2e8f0] leading-relaxed">
+            Ledgerium AI was founded in 2025 with a simple observation: organizations are deploying
+            AI and automation into processes they&apos;ve never actually measured. We build the
+            observation layer &mdash; the foundation that makes everything else trustworthy.
+          </p>
+        </div>
+
+        {/* Stats row */}
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 mt-10">
+          <div className="border-t border-[var(--border-subtle)] pt-8 grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+            {[
+              { value: 'Founded 2025' },
+              { value: 'Evidence-driven' },
+              { value: 'Privacy-first architecture' },
+              { value: '1,393 tests passing' },
+            ].map(({ value }) => (
+              <div key={value}>
+                <p className="text-sm font-semibold text-[var(--content-primary)]">{value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-20 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
@@ -169,12 +284,12 @@ export default function AboutPage() {
             Record your first workflow. See the structured output in under 5 minutes.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href="/signup" className="btn-primary gap-2 shadow-sm shadow-brand-600/20">
-              Create free account
+            <Link href="/product" className="btn-primary gap-2 shadow-sm shadow-brand-600/20">
+              See the product
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link href="/product" className="btn-secondary">
-              See how it works
+            <Link href="/signup" className="btn-secondary">
+              Create free account
             </Link>
           </div>
         </div>

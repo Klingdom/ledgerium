@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import {
   Play,
@@ -38,6 +39,13 @@ const TOUR_STEPS = [
     title: 'Record',
     what: 'Open the Ledgerium side panel in Chrome. Name your workflow and click Record. The extension captures every click, navigation, and form interaction as structured data.',
     result: 'A live step feed shows your progress. No screenshots, no keystrokes, no screen recording — just interaction structure.',
+    image: {
+      src: '/docs/screenshots/extension/04-recording-active.png',
+      alt: 'Ledgerium Chrome extension side panel capturing workflow steps in real time',
+      width: 360,
+      height: 640,
+      type: 'extension' as const,
+    },
   },
   {
     step: 2,
@@ -45,6 +53,13 @@ const TOUR_STEPS = [
     title: 'Process',
     what: 'Click Stop. The deterministic engine segments your session into logical steps with timing, system context, and confidence scores.',
     result: 'Same input always produces the same output. Every step traces to specific observed browser events.',
+    image: {
+      src: '/docs/screenshots/workflow-evidence-tab.png',
+      alt: 'Workflow evidence tab showing structured events and confidence scores',
+      width: 1200,
+      height: 750,
+      type: 'webapp' as const,
+    },
   },
   {
     step: 3,
@@ -52,6 +67,13 @@ const TOUR_STEPS = [
     title: 'Analyze',
     what: 'Ledgerium generates a complete SOP, visual process map, workflow report, and actionable insights — all from a single recording.',
     result: 'Ready-to-share documentation with prerequisites, system context, and expected outcomes — generated from evidence, not memory.',
+    image: {
+      src: '/docs/screenshots/workflow-sop-tab.png',
+      alt: 'SOP tab showing generated standard operating procedure from recorded workflow',
+      width: 1200,
+      height: 750,
+      type: 'webapp' as const,
+    },
   },
   {
     step: 4,
@@ -59,16 +81,43 @@ const TOUR_STEPS = [
     title: 'Act',
     what: 'Build a searchable library. Get process health scores, bottleneck detection, and AI agent compositions as your library grows.',
     result: 'The more you record, the more intelligence you unlock — variant analysis, automation scoring, and cross-workflow comparison.',
+    image: {
+      src: '/docs/screenshots/analytics-dashboard.png',
+      alt: 'Analytics dashboard showing process health scores and intelligence metrics across workflow library',
+      width: 1200,
+      height: 750,
+      type: 'webapp' as const,
+    },
   },
 ];
 
 /* ── What every recording produces ──────────────────────────────────────── */
 
 const OUTPUTS = [
-  { icon: Layers, label: 'Workflow Steps', sub: 'With timing and evidence' },
-  { icon: FileText, label: 'SOP Document', sub: 'Step-by-step instructions' },
-  { icon: Map, label: 'Process Map', sub: 'Phases and transitions' },
-  { icon: CheckCircle, label: 'Workflow Report', sub: 'Health scores and export' },
+  {
+    icon: Layers,
+    label: 'Workflow Steps',
+    sub: 'With timing and evidence',
+    image: { src: '/img/screenshot-workflow.png', alt: 'Workflow steps view' },
+  },
+  {
+    icon: FileText,
+    label: 'SOP Document',
+    sub: 'Step-by-step instructions',
+    image: { src: '/img/screenshot-sop.png', alt: 'Generated SOP document' },
+  },
+  {
+    icon: Map,
+    label: 'Process Map',
+    sub: 'Phases and transitions',
+    image: { src: '/docs/screenshots/workflow-flow-view.png', alt: 'Visual process flow map' },
+  },
+  {
+    icon: CheckCircle,
+    label: 'Workflow Report',
+    sub: 'Health scores and export',
+    image: { src: '/img/screenshot-report.png', alt: 'Workflow health report' },
+  },
 ];
 
 /* ── Intelligence layer features ────────────────────────────────────────── */
@@ -150,6 +199,55 @@ const COMPARISON_ROWS = [
   },
 ];
 
+/* ── Frame components ───────────────────────────────────────────────────── */
+
+function WebAppFrame({ src, alt, width, height }: { src: string; alt: string; width: number; height: number }) {
+  return (
+    <div className="rounded-xl border border-[var(--border-default)] overflow-hidden shadow-xl shadow-black/40 bg-[var(--surface-elevated)]">
+      <div className="bg-[var(--surface-secondary)] border-b border-[var(--border-default)] px-4 py-2 flex items-center gap-2 flex-shrink-0">
+        <div className="flex gap-1.5">
+          <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+          <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
+          <span className="w-3 h-3 rounded-full bg-[#28c840]" />
+        </div>
+        <span className="text-[10px] text-[var(--content-tertiary)] ml-2 font-mono">ledgerium.ai/dashboard</span>
+      </div>
+      <Image
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        className="w-full h-auto block"
+        loading="lazy"
+      />
+    </div>
+  );
+}
+
+function ExtensionFrame({ src, alt, width, height }: { src: string; alt: string; width: number; height: number }) {
+  return (
+    <div className="mx-auto" style={{ maxWidth: '220px' }}>
+      <div className="rounded-2xl border border-[var(--border-default)] overflow-hidden shadow-xl shadow-black/40 bg-[var(--surface-elevated)]">
+        {/* Extension panel header */}
+        <div className="bg-[var(--surface-secondary)] border-b border-[var(--border-default)] px-3 py-2 flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-brand-600/20 flex items-center justify-center">
+            <span className="w-2 h-2 rounded-full bg-brand-500" />
+          </div>
+          <span className="text-[9px] text-[var(--content-tertiary)] font-medium tracking-wide">Ledgerium Recorder</span>
+        </div>
+        <Image
+          src={src}
+          alt={alt}
+          width={width}
+          height={height}
+          className="w-full h-auto block"
+          loading="lazy"
+        />
+      </div>
+    </div>
+  );
+}
+
 /* ── Page component ─────────────────────────────────────────────────────── */
 
 export default function ProductPage() {
@@ -212,55 +310,101 @@ export default function ProductPage() {
         </div>
       </section>
 
-      {/* ── Product Tour (4 steps) ───────────────────────────────────── */}
+      {/* ── Product Tour (4 steps — alternating layout) ──────────────── */}
       <section className="py-20 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-4">
             How it works
           </h2>
-          <p className="text-center text-[#e2e8f0] mb-16 max-w-xl mx-auto">
+          <p className="text-center text-[#e2e8f0] mb-20 max-w-xl mx-auto">
             Four steps from browser recording to actionable process intelligence.
           </p>
 
-          <div className="space-y-16">
-            {TOUR_STEPS.map(({ step, icon: Icon, title, what, result }) => (
-              <div key={step} className="flex gap-6 items-start">
-                <div className="flex-shrink-0">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600 text-white font-bold shadow-sm shadow-brand-600/20">
-                    <Icon className="h-5 w-5" />
-                  </span>
-                </div>
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
+          <div className="space-y-24">
+            {TOUR_STEPS.map(({ step, icon: Icon, title, what, result, image }) => {
+              /* Odd steps (1, 3): text left, image right. Even steps (2, 4): image left, text right. */
+              const imageRight = step % 2 !== 0;
+
+              const textBlock = (
+                <div className="flex flex-col justify-center">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600 text-white font-bold shadow-sm shadow-brand-600/20 flex-shrink-0">
+                      <Icon className="h-5 w-5" />
+                    </span>
                     <span className="text-xs font-semibold text-brand-500 uppercase tracking-wider">Step {step}</span>
-                    <h3 className="text-lg font-bold text-[var(--content-primary)]">{title}</h3>
                   </div>
-                  <p className="text-sm text-[#e2e8f0] leading-relaxed mb-2">
-                    {what}
-                  </p>
+                  <h3 className="text-2xl font-bold text-[var(--content-primary)] mb-4">{title}</h3>
+                  <p className="text-[#e2e8f0] leading-relaxed mb-4">{what}</p>
                   <div className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-brand-500 mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="h-4 w-4 text-brand-500 mt-1 flex-shrink-0" />
                     <p className="text-sm text-brand-400 leading-relaxed">{result}</p>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+
+              const imageBlock = (
+                <div className="relative">
+                  {/* Subtle gradient glow behind the screenshot */}
+                  <div className="absolute inset-0 -m-6 rounded-3xl bg-brand-600/5 blur-2xl pointer-events-none" />
+                  <div className="relative">
+                    {image.type === 'extension' ? (
+                      <ExtensionFrame src={image.src} alt={image.alt} width={image.width} height={image.height} />
+                    ) : (
+                      <WebAppFrame src={image.src} alt={image.alt} width={image.width} height={image.height} />
+                    )}
+                  </div>
+                </div>
+              );
+
+              return (
+                <div key={step} className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                  {imageRight ? (
+                    <>
+                      <div>{textBlock}</div>
+                      <div>{imageBlock}</div>
+                    </>
+                  ) : (
+                    <>
+                      {/* On mobile, text comes first regardless of desktop order */}
+                      <div className="order-2 lg:order-1">{imageBlock}</div>
+                      <div className="order-1 lg:order-2">{textBlock}</div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* ── What every recording produces ────────────────────────────── */}
       <section className="py-16 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <h2 className="text-center text-xl font-bold text-[var(--content-primary)] mb-10">
             Every recording produces
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {OUTPUTS.map(({ icon: Icon, label, sub }) => (
-              <div key={label} className="card p-5 text-center">
-                <Icon className="h-5 w-5 text-brand-600 mx-auto mb-2" />
-                <p className="text-sm font-semibold text-[var(--content-primary)]">{label}</p>
-                <p className="text-[11px] text-[var(--content-tertiary)] mt-0.5">{sub}</p>
+            {OUTPUTS.map(({ icon: Icon, label, sub, image }) => (
+              <div key={label} className="card overflow-hidden group hover:border-[rgba(255,255,255,0.12)] transition-colors">
+                {/* Thumbnail preview */}
+                <div className="relative overflow-hidden bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)]" style={{ aspectRatio: '16/9' }}>
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    fill
+                    className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                    sizes="(max-width: 640px) 50vw, 25vw"
+                  />
+                  {/* Subtle gradient overlay at bottom of thumbnail */}
+                  <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-[var(--surface-elevated)] to-transparent" />
+                </div>
+                {/* Card text */}
+                <div className="p-4 text-center">
+                  <Icon className="h-5 w-5 text-brand-600 mx-auto mb-2" />
+                  <p className="text-sm font-semibold text-[var(--content-primary)]">{label}</p>
+                  <p className="text-[11px] text-[var(--content-tertiary)] mt-0.5">{sub}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -270,7 +414,7 @@ export default function ProductPage() {
       {/* ── Intelligence Layer ────────────────────────────────────────── */}
       <section className="py-20 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <p className="text-xs font-semibold text-brand-500 uppercase tracking-wider mb-2">Intelligence Layer</p>
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-4">
               Your library gets smarter with every recording
@@ -279,6 +423,35 @@ export default function ProductPage() {
               Individual recordings produce documentation. A growing library unlocks
               process intelligence — health scores, bottleneck detection, variant analysis,
               and AI automation opportunities.
+            </p>
+          </div>
+
+          {/* Hero analytics screenshot */}
+          <div className="mb-10 relative">
+            <div className="absolute inset-0 -m-4 rounded-3xl bg-brand-600/5 blur-2xl pointer-events-none" />
+            <div className="relative">
+              <WebAppFrame
+                src="/docs/screenshots/analytics-dashboard.png"
+                alt="Analytics dashboard showing process health scores, bottleneck detection, and intelligence metrics"
+                width={1200}
+                height={750}
+              />
+            </div>
+          </div>
+
+          {/* Detail screenshot — process detail view */}
+          <div className="mb-14 mx-auto max-w-3xl relative">
+            <div className="absolute inset-0 -m-4 rounded-3xl bg-brand-600/5 blur-2xl pointer-events-none" />
+            <div className="relative">
+              <WebAppFrame
+                src="/docs/screenshots/analytics-process-detail.png"
+                alt="Process detail view showing deep-dive analytics and step-level breakdown"
+                width={1200}
+                height={750}
+              />
+            </div>
+            <p className="text-center text-xs text-[var(--content-tertiary)] mt-3">
+              Drill into any process to see step-level health, timing breakdowns, and rework patterns.
             </p>
           </div>
 

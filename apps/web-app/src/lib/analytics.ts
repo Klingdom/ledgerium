@@ -52,6 +52,7 @@ export type AnalyticsEvent =
 
   // ── Feature usage ─────────────────────────────────────────────────────────
   | { event: 'tab_switched'; tab: string; workflowId?: string }
+  | { event: 'sop_section_viewed'; workflowId: string; durationMs: number }
   | { event: 'analysis_run'; workflowId?: string }
   | { event: 'insights_viewed'; workflowId: string; insightCount: number }
 
@@ -60,6 +61,7 @@ export type AnalyticsEvent =
   | { event: 'share_link_disabled'; workflowId: string }
   | { event: 'share_link_copied'; workflowId: string }
   | { event: 'shared_workflow_viewed'; token: string }
+  | { event: 'signup_from_shared_sop'; token: string }
   | { event: 'workflow_shared_with_user'; workflowId: string }
   | { event: 'workflow_shared_with_team'; workflowId: string; teamId: string }
 
@@ -100,6 +102,9 @@ export type AnalyticsEvent =
 
   // ── Navigation ────────────────────────────────────────────────────────────
   | { event: 'page_viewed'; path: string }
+
+  // ── Feedback ───────────────────────────────────────────────────────────────
+  | { event: 'sop_usefulness_response'; workflowId: string; response: 'yes_as_is' | 'minor_edits' | 'major_rework' | 'not_useful' }
 
   // ── Errors ────────────────────────────────────────────────────────────────
   | { event: 'upload_failed'; error: string }
@@ -215,28 +220,9 @@ if (IS_BROWSER) {
 }
 
 // ─── Server-side tracking ────────────────────────────────────────────────────
-
-/**
- * Tracks a server-side analytics event.
- * Used in API routes for events that don't originate from the UI
- * (billing webhooks, sync uploads, background processing).
- */
-export function trackServer(
-  event: string,
-  properties: Record<string, unknown> = {},
-): void {
-  const enriched: EnrichedEvent = {
-    event,
-    ...properties,
-    timestamp: new Date().toISOString(),
-    source: 'server',
-  };
-
-  // Log for now — replace with PostHog/Segment server SDK when ready
-  if (process.env.NODE_ENV !== 'test') {
-    console.log('[analytics:server]', JSON.stringify(enriched));
-  }
-}
+// trackServer() lives in './analytics-server' to keep Node.js-only dependencies
+// (posthog-node, Prisma) out of the client bundle.
+// API routes should import { trackServer } from '@/lib/analytics-server'.
 
 // ─── Funnel helpers ──────────────────────────────────────────────────────────
 

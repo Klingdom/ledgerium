@@ -1,58 +1,25 @@
 import type { RawEvent, CanonicalEvent, PolicyLogEntry } from '../shared/types.js'
 import { generateId, normalizeUrl, extractDomain, deriveRouteTemplate, deriveAppLabel } from '../shared/utils.js'
 import { SCHEMA_VERSION } from '../shared/constants.js'
-
-const NORMALIZATION_RULE_VERSION = '1.0.0'
+import { RAW_TO_CANONICAL_TYPE as BASE_TYPE_MAP, NORMALIZATION_RULE_VERSION } from '@ledgerium/normalization-engine'
+import { classifySensitivity } from '@ledgerium/policy-engine'
 
 const RAW_TO_CANONICAL: Record<string, string> = {
-  // Navigation
-  tab_activated:       'navigation.tab_activated',
-  url_changed:         'navigation.open_page',
-  page_loaded:         'navigation.open_page',
-  spa_route_changed:   'navigation.route_change',
-  // Interaction
-  click:               'interaction.click',
-  dblclick:            'interaction.click',
-  context_menu:        'interaction.right_click',
-  input_changed:       'interaction.input_change',
-  form_submitted:      'interaction.submit',
-  element_focused:     'interaction.input_change',
-  element_blurred:     'interaction.input_change',
-  keyboard_intent:     'interaction.keyboard_shortcut',
-  drag_started:        'interaction.drag_started',
-  drag_completed:      'interaction.drag_completed',
-  // System / window
-  window_blurred:      'system.window_blurred',
-  window_focused:      'system.window_focused',
-  visibility_changed:  'system.visibility_changed',
-  // System / UI state changes (observed via MutationObserver)
-  modal_opened:        'system.modal_opened',
-  modal_closed:        'system.modal_closed',
-  toast_shown:         'system.toast_shown',
-  loading_started:     'system.loading_started',
-  loading_finished:    'system.loading_finished',
-  error_displayed:     'system.error_displayed',
-  status_changed:      'system.status_changed',
-  dropdown_opened:     'system.dropdown_opened',
-  dropdown_closed:     'system.dropdown_closed',
-  // Session lifecycle
-  session_start:       'session.started',
-  session_pause:       'session.paused',
-  session_resume:      'session.resumed',
-  session_stop:        'session.stopped',
-  user_annotation:     'session.annotation_added',
+  ...BASE_TYPE_MAP,
+  // Extension-specific mappings not yet in the shared package
+  context_menu:    'interaction.right_click',
+  dropdown_opened: 'system.dropdown_opened',
+  dropdown_closed: 'system.dropdown_closed',
 }
 
-// Mirrors @ledgerium/policy-engine SENSITIVE_SELECTOR_PATTERNS (11 patterns)
-const SENSITIVE_RE = /password|passwd|secret|token|api[_-]?key|credit[_-]?card|card[_-]?number|cvv|ssn|social[_-]?security|tax[_-]?id/i
-
 function isSensitive(raw: RawEvent): boolean {
-  return (
-    raw.is_sensitive_target === true ||
-    raw.target_element_type === 'password' ||
-    SENSITIVE_RE.test(raw.target_selector ?? '') ||
-    SENSITIVE_RE.test(raw.target_label ?? '')
+  if (raw.is_sensitive_target === true) return true
+  const result = classifySensitivity(
+    raw.target_element_type,
+    raw.target_selector,
+    raw.target_label,
   )
+  return result.isSensitive
 }
 
 function actorType(canonicalType: string): 'human' | 'system' | 'recorder' {

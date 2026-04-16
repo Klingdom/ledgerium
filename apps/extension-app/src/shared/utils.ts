@@ -33,27 +33,8 @@ export function normalizeUrl(rawUrl: string): string {
   }
 }
 
-export function extractDomain(url: string): string {
-  try {
-    return new URL(url).hostname
-  } catch {
-    return ''
-  }
-}
-
-export function deriveRouteTemplate(pathname: string): string {
-  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-  const INT_RE = /^\d+$/
-  const HEX_LONG_RE = /^[0-9a-f]{10,}$/
-  return pathname
-    .split('/')
-    .map(seg => {
-      if (!seg) return seg
-      if (INT_RE.test(seg) || UUID_RE.test(seg) || HEX_LONG_RE.test(seg)) return ':id'
-      return seg
-    })
-    .join('/')
-}
+// Import from workspace package — single source of truth for URL utilities
+export { extractDomain, deriveRouteTemplate } from '@ledgerium/normalization-engine'
 
 const KNOWN_APP_LABELS: Record<string, string> = {
   netsuite: 'NetSuite', salesforce: 'Salesforce', workday: 'Workday',

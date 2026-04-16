@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { hash } from 'bcryptjs';
 import { db } from '@/db';
 import { z } from 'zod';
+import { trackServer } from '@/lib/analytics-server';
 
 const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -42,6 +43,8 @@ export async function POST(req: NextRequest) {
         subscriptionStatus: 'trialing',
       },
     });
+
+    trackServer('signup_completed', { userId: user.id, email: user.email });
 
     return NextResponse.json({ id: user.id, email: user.email }, { status: 201 });
   } catch {
