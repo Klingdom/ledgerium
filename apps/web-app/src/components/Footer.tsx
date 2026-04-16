@@ -4,10 +4,14 @@ import { LogoFull } from '@/components/shared/LogoMark';
 
 const FOOTER_LINKS = {
   Product: [
-    { href: '/demo', label: 'Demo' },
+    { href: '/product', label: 'Features' },
+    { href: '/dashboard.html', label: 'Interactive Demo' },
     { href: '/pricing', label: 'Pricing' },
-    { href: '/install-extension', label: 'Install Extension' },
-    { href: '/docs', label: 'Docs' },
+    { href: '/install', label: 'Get Extension' },
+  ],
+  Resources: [
+    { href: '/docs', label: 'User Guide' },
+    { href: '/docs.html', label: 'Visual Guide' },
   ],
   Company: [
     { href: '/about', label: 'About' },

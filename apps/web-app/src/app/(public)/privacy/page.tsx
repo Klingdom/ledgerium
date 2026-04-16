@@ -228,7 +228,7 @@ export default function PrivacyPage() {
               Create free account
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link href="/install-extension" className="btn-secondary">
+            <Link href="/install" className="btn-secondary">
               Install extension
             </Link>
           </div>

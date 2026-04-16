@@ -47,12 +47,12 @@ export default function HomePage() {
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link href="/signup" className="btn-primary text-base px-7 py-3.5 gap-2 shadow-sm shadow-brand-600/20">
-                Record your first workflow
+                Get Started Free
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/demo" className="btn-secondary text-base px-7 py-3.5 gap-2">
+              <Link href="/product" className="btn-secondary text-base px-7 py-3.5 gap-2">
                 <PlayCircle className="h-4 w-4" />
-                See how it works
+                See the Product
               </Link>
             </div>
             <p className="mt-5 text-xs text-[var(--content-tertiary)]">
@@ -271,7 +271,7 @@ export default function HomePage() {
               Create free account
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link href="/install-extension" className="btn-secondary text-base px-7 py-3.5">
+            <Link href="/install" className="btn-secondary text-base px-7 py-3.5">
               Install extension
             </Link>
           </div>

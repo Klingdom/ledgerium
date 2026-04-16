@@ -302,7 +302,7 @@ export default function DocsPage() {
               <H4>Step 1 — Download the extension</H4>
               <StepList
                 steps={[
-                  <>From the public navigation bar, click <strong className="text-[var(--content-primary)]">Install</strong>, or go to <a href="https://ledgerium.ai/install-extension" className="text-brand-400 hover:underline">ledgerium.ai/install-extension</a>.</>,
+                  <>From the footer or product page, click <strong className="text-[var(--content-primary)]">Get Extension</strong>, or go to <a href="https://ledgerium.ai/install" className="text-brand-400 hover:underline">ledgerium.ai/install</a>.</>,
                   <>Click <strong className="text-[var(--content-primary)]">Install Chrome Extension</strong>.</>,
                   <>A <Code>.zip</Code> file downloads to your computer.</>,
                 ]}

@@ -48,7 +48,7 @@ export default function SharedWorkflowPage() {
         <Layers className="mx-auto h-10 w-10 text-[var(--content-tertiary)]" />
         <h2 className="mt-ds-4 text-ds-lg font-semibold text-[var(--content-primary)]">Workflow not found</h2>
         <p className="mt-ds-2 text-ds-sm text-[#e2e8f0]">{error ?? 'This link may have expired or been revoked.'}</p>
-        <Link href="/demo" className="btn-primary mt-ds-6 inline-flex">
+        <Link href="/product" className="btn-primary mt-ds-6 inline-flex">
           See how Ledgerium AI works
         </Link>
       </div>
@@ -125,7 +125,18 @@ export default function SharedWorkflowPage() {
         <p className="mt-ds-1 text-ds-sm text-[#e2e8f0]">
           Record your own workflows and get structured documentation in minutes — free to start.
         </p>
-        <Link href="/signup" className="btn-primary mt-ds-4 inline-flex gap-1.5">
+        <Link
+          href="/signup"
+          className="btn-primary mt-ds-4 inline-flex gap-1.5"
+          onClick={() => {
+            try {
+              localStorage.setItem(
+                'ledgerium_signup_ref',
+                JSON.stringify({ source: 'shared_sop', token }),
+              );
+            } catch { /* localStorage unavailable — non-blocking */ }
+          }}
+        >
           <ArrowRight className="h-4 w-4" />
           Record your first workflow
         </Link>

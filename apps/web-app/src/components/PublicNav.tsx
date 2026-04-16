@@ -4,24 +4,20 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
-import { Menu, X, ArrowRight, LayoutDashboard } from 'lucide-react';
+import { Menu, X, ArrowRight } from 'lucide-react';
 import { LogoFull } from '@/components/shared/LogoMark';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 
 type NavLink = {
   href: string;
   label: string;
-  icon?: typeof LayoutDashboard;
-  isExternal?: boolean;
 };
 
 const NAV_LINKS: NavLink[] = [
-  { href: '/dashboard.html', label: 'Live Demo', icon: LayoutDashboard, isExternal: true },
-  { href: '/demo', label: 'How It Works' },
+  { href: '/product', label: 'Product' },
   { href: '/pricing', label: 'Pricing' },
-  { href: '/install-extension', label: 'Install' },
-  { href: '/about', label: 'About' },
   { href: '/docs', label: 'Docs' },
+  { href: '/about', label: 'About' },
 ];
 
 export function PublicNav() {
@@ -41,31 +37,19 @@ export function PublicNav() {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-0.5">
-          {NAV_LINKS.map(({ href, label, icon: Icon, isExternal }) => {
-            const classes = `rounded-lg px-3 py-2 text-sm font-medium transition-colors inline-flex items-center gap-1.5 ${
-              pathname === href
-                ? 'text-brand-400 bg-brand-900/30'
-                : href === '/dashboard.html'
-                  ? 'text-brand-600 hover:text-brand-700 hover:bg-brand-50/60'
+          {NAV_LINKS.map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors inline-flex items-center gap-1.5 ${
+                pathname === href
+                  ? 'text-brand-400 bg-brand-900/30'
                   : 'text-[var(--content-secondary)] hover:text-[var(--content-primary)] hover:bg-[var(--surface-secondary)]'
-            }`;
-
-            if (isExternal) {
-              return (
-                <a key={href} href={href} className={classes}>
-                  {Icon && <Icon className="h-3.5 w-3.5" />}
-                  {label}
-                </a>
-              );
-            }
-
-            return (
-              <Link key={href} href={href} className={classes}>
-                {Icon && <Icon className="h-3.5 w-3.5" />}
-                {label}
-              </Link>
-            );
-          })}
+              }`}
+            >
+              {label}
+            </Link>
+          ))}
         </nav>
 
         {/* Auth CTAs + Theme toggle */}
@@ -104,31 +88,20 @@ export function PublicNav() {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden border-t border-[var(--border-subtle)] bg-[var(--surface-elevated)] px-4 py-3 space-y-1 shadow-lg">
-          {NAV_LINKS.map(({ href, label, icon: Icon, isExternal }) => {
-            const classes = `rounded-lg px-3 py-2.5 text-sm font-medium flex items-center gap-2 ${
-              pathname === href
-                ? 'text-brand-400 bg-brand-900/30'
-                : href === '/dashboard.html'
-                  ? 'text-brand-600 bg-brand-50/40'
+          {NAV_LINKS.map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              onClick={() => setMobileOpen(false)}
+              className={`rounded-lg px-3 py-2.5 text-sm font-medium flex items-center gap-2 ${
+                pathname === href
+                  ? 'text-brand-400 bg-brand-900/30'
                   : 'text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
-            }`;
-
-            if (isExternal) {
-              return (
-                <a key={href} href={href} onClick={() => setMobileOpen(false)} className={classes}>
-                  {Icon && <Icon className="h-4 w-4" />}
-                  {label}
-                </a>
-              );
-            }
-
-            return (
-              <Link key={href} href={href} onClick={() => setMobileOpen(false)} className={classes}>
-                {Icon && <Icon className="h-4 w-4" />}
-                {label}
-              </Link>
-            );
-          })}
+              }`}
+            >
+              {label}
+            </Link>
+          ))}
           <div className="pt-2 border-t border-[var(--border-subtle)] space-y-1">
             {isAuthenticated ? (
               <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="block btn-primary text-sm text-center">

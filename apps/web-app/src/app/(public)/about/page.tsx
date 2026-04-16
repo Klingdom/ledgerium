@@ -151,7 +151,7 @@ export default function AboutPage() {
             </p>
           </div>
           <div className="mt-6">
-            <Link href="/demo" className="text-sm text-brand-600 hover:text-brand-500 font-medium inline-flex items-center gap-1.5">
+            <Link href="/product" className="text-sm text-brand-600 hover:text-brand-500 font-medium inline-flex items-center gap-1.5">
               See the full walkthrough
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
@@ -173,7 +173,7 @@ export default function AboutPage() {
               Create free account
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link href="/demo" className="btn-secondary">
+            <Link href="/product" className="btn-secondary">
               See how it works
             </Link>
           </div>
