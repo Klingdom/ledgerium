@@ -9,11 +9,14 @@ const FOOTER_LINKS = {
     { href: '/pricing', label: 'Pricing' },
     { href: '/install', label: 'Get Extension' },
   ],
+  'Use Cases': [
+    { href: '/use-cases/operations', label: 'Operations Teams' },
+    { href: '/use-cases/compliance', label: 'Compliance & Audit' },
+    { href: '/blog', label: 'Blog' },
+  ],
   Resources: [
     { href: '/docs', label: 'User Guide' },
-    { href: '/docs.html', label: 'Visual Guide' },
-  ],
-  Company: [
+    { href: '/security', label: 'Security' },
     { href: '/about', label: 'About' },
     { href: `mailto:${SITE_CONFIG.supportEmail}`, label: 'Contact' },
   ],

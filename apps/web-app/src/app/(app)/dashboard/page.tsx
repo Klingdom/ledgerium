@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -45,10 +45,12 @@ import {
 import { formatDuration, formatDateRelative, formatConfidence } from '@/lib/format';
 import { track } from '@/lib/analytics';
 import { EXTENSION_CONFIG } from '@/lib/config';
+import { PLAN_FEATURES, toPlanType } from '@/lib/plans';
 import ProcessGroupsExplorer from '@/components/ProcessGroupsExplorer';
 import PortfolioSidebar, { type PortfolioNode } from '@/components/PortfolioSidebar';
 import CreatePortfolioDialog from '@/components/CreatePortfolioDialog';
 import OnboardingChecklist from '@/components/OnboardingChecklist';
+import UsageQuotaMeter from '@/components/UsageQuotaMeter';
 
 // ─── Type definitions ──────────────────────────────────────────────────────────
 
@@ -161,6 +163,7 @@ interface TopInsight {
 interface DashboardStats {
   totalWorkflows: number;
   recordedThisWeek: number;
+  recordedThisMonth: number;
   needsReview: number;
   sopReady: number;
   avgConfidence: number;
@@ -324,6 +327,12 @@ export default function DashboardPage() {
   // Sample workflow loading
   const [loadingSample, setLoadingSample] = useState(false);
 
+  // User plan (for usage quota meter)
+  const [userPlan, setUserPlan] = useState<string>('free');
+
+  // Ref to ensure auto-seed fires only once per session
+  const hasSeedAttempted = useRef<boolean>(false);
+
   // View mode toggle
   const [viewMode, setViewMode] = useState<ViewMode>('workflows');
   const [processDefinitions, setProcessDefinitions] = useState<ProcessDefinition[]>([]);
@@ -435,6 +444,11 @@ export default function DashboardPage() {
     fetchStreak();
     fetchPortfolios();
     track({ event: 'page_viewed', path: '/dashboard' });
+    // Fetch user plan for usage quota meter
+    fetch('/api/me')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (data?.plan) setUserPlan(data.plan); })
+      .catch(() => { /* plan defaults to 'free' */ });
   }, [fetchWorkflows, fetchTags, fetchStreak, fetchPortfolios]);
 
   useEffect(() => {
@@ -442,6 +456,17 @@ export default function DashboardPage() {
       fetchProcessDefinitions();
     }
   }, [viewMode, fetchProcessDefinitions]);
+
+  // Auto-seed sample workflow on first load when user has no workflows
+  useEffect(() => {
+    if (isLoading) return;
+    if (!stats || stats.totalWorkflows !== 0) return;
+    if (loadingSample) return;
+    if (hasSeedAttempted.current) return;
+    hasSeedAttempted.current = true;
+    track({ event: 'sample_workflow_auto_seeded' });
+    handleLoadSample();
+  }, [isLoading, stats, loadingSample]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Tag management handlers ────────────────────────────────────────────────
 
@@ -698,7 +723,14 @@ export default function DashboardPage() {
               Operational command center &middot; {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
             </p>
           </div>
-          <div className="flex items-center gap-ds-2">
+          {stats && (
+            <div className="flex items-center gap-ds-4">
+              <UsageQuotaMeter
+                used={stats.recordedThisMonth}
+                limit={PLAN_FEATURES[toPlanType(userPlan)].maxRecordingsPerMonth}
+                plan={userPlan}
+              />
+              <div className="flex items-center gap-ds-2">
             <Link href="/recommendations" className="btn-secondary gap-1.5 text-xs">
               <Zap className="h-3.5 w-3.5" />
               Actions
@@ -711,7 +743,9 @@ export default function DashboardPage() {
               <Upload className="h-4 w-4" />
               Upload
             </Link>
-          </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── Org Health Score + Top Signals ────────────────────────────── */}

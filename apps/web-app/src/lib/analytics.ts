@@ -49,6 +49,7 @@ export type AnalyticsEvent =
   | { event: 'workflow_favorited'; workflowId: string }
   | { event: 'workflow_unfavorited'; workflowId: string }
   | { event: 'sample_workflow_loaded' }
+  | { event: 'sample_workflow_auto_seeded' }
 
   // ── Feature usage ─────────────────────────────────────────────────────────
   | { event: 'tab_switched'; tab: string; workflowId?: string }

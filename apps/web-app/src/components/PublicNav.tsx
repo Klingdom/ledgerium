@@ -16,8 +16,9 @@ type NavLink = {
 const NAV_LINKS: NavLink[] = [
   { href: '/product', label: 'Product' },
   { href: '/pricing', label: 'Pricing' },
+  { href: '/use-cases/operations', label: 'Use Cases' },
+  { href: '/blog', label: 'Blog' },
   { href: '/docs', label: 'Docs' },
-  { href: '/about', label: 'About' },
 ];
 
 export function PublicNav() {

@@ -115,10 +115,16 @@ export function PricingCards() {
 
               {!plan.seats && <div className="mb-5" />}
 
-              {plan.highlighted ? (
+              {plan.id !== 'free' && plan.id !== 'enterprise' ? (
                 <UpgradeButton
                   fallbackHref={plan.ctaHref}
-                  className="w-full text-center btn-primary shadow-sm shadow-brand-600/20"
+                  plan={plan.id as 'starter' | 'team' | 'growth'}
+                  interval={isAnnual ? 'annual' : 'monthly'}
+                  className={`w-full text-center ${
+                    plan.highlighted
+                      ? 'btn-primary shadow-sm shadow-brand-600/20'
+                      : 'btn-secondary'
+                  }`}
                 >
                   {plan.cta}
                 </UpgradeButton>

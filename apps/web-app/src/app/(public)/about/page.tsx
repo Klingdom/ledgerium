@@ -261,8 +261,8 @@ export default function AboutPage() {
         <div className="mx-auto max-w-3xl px-4 sm:px-6 mt-10">
           <div className="border-t border-[var(--border-subtle)] pt-8 grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
-              { value: 'Founded 2025' },
               { value: 'Evidence-driven' },
+              { value: 'Deterministic pipeline' },
               { value: 'Privacy-first architecture' },
               { value: '1,393 tests passing' },
             ].map(({ value }) => (

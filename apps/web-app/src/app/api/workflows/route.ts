@@ -571,6 +571,14 @@ export async function GET(req: NextRequest) {
     (w) => w.createdAt.getTime() >= oneWeekAgo,
   ).length;
 
+  const oneMonthAgo = new Date();
+  oneMonthAgo.setDate(1); // First of current month
+  oneMonthAgo.setHours(0, 0, 0, 0);
+
+  const recordedThisMonth = allEnriched.filter(
+    (w) => w.createdAt.getTime() >= oneMonthAgo.getTime(),
+  ).length;
+
   const needsReview = allEnriched.filter(
     (w) => w.healthStatus === 'needs_review' || w.healthStatus === 'high_variation',
   ).length;
@@ -653,6 +661,7 @@ export async function GET(req: NextRequest) {
       highCognitiveBurdenCount,
       systemCoverage,
       topInsights,
+      recordedThisMonth,
       // Backward-compatible fields
       recentlyViewedIds: recentlyViewed.map((w) => w.id),
     },

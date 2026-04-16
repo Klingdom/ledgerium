@@ -9,6 +9,8 @@ interface Props {
   className?: string;
   children: React.ReactNode;
   fallbackHref: string;
+  plan?: 'starter' | 'team' | 'growth';
+  interval?: 'monthly' | 'annual';
 }
 
 /**
@@ -16,7 +18,7 @@ interface Props {
  * - Authenticated → POST /api/billing/checkout → redirect to Stripe
  * - Unauthenticated → link to signup
  */
-export function UpgradeButton({ className, children, fallbackHref }: Props) {
+export function UpgradeButton({ className, children, fallbackHref, plan, interval }: Props) {
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,7 +34,14 @@ export function UpgradeButton({ className, children, fallbackHref }: Props) {
     setIsLoading(true);
     track({ event: 'upgrade_clicked', location: 'upgrade_button' });
     try {
-      const res = await fetch('/api/billing/checkout', { method: 'POST' });
+      const res = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan: plan ?? 'starter',
+          interval: interval ?? 'monthly',
+        }),
+      });
       const data = await res.json();
       if (data.url) {
         track({ event: 'checkout_started' });

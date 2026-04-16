@@ -103,9 +103,9 @@ function LoginForm() {
           </div>
 
           <div className="text-right">
-            <a href="mailto:hello@ledgerium.ai" className="text-xs text-brand-600 hover:text-brand-500">
+            <Link href="/forgot-password" className="text-xs text-brand-600 hover:text-brand-500">
               Forgot password?
-            </a>
+            </Link>
           </div>
 
           <button type="submit" disabled={isLoading} className="btn-primary w-full">
