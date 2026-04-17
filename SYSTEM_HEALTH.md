@@ -89,34 +89,58 @@ Overall confidence: **Medium-High**
 
 ## Release Blockers
 
-These should be assumed to block a high-confidence release until resolved:
+These block a high-confidence Phase 1 release. Scoring bonus `+3` applies to items in this list (see CLAUDE.md § Selection Policy).
 
-- full session restart recovery not complete
-- E2E lifecycle testing missing
-- some duplicate logic still present (LiveStepBuilder vs StreamingSegmenter)
+| # | Blocker | Opened | Loops unaddressed | Next action |
+|---|---------|--------|-------------------|-------------|
+| 1 | E2E Playwright lifecycle tests missing | iter 000 | 8 | **iter 009** |
+| 2 | Session event persistence for SW restart recovery | iter 000 | 8 | iter 010 (after E2E harness) |
+| 3 | LiveStepBuilder ↔ StreamingSegmenter duplication | iter 003 | 5 | iter 011 |
 
-**Resolved in iter 008**: shared capture-policy enforcement was outstanding — now integrated via `classifySensitivity` in `target-inspector.ts`.
+**Resolved in iter 008**: shared capture-policy enforcement — now integrated via `classifySensitivity` in `target-inspector.ts`.
+**Resolved in iter 003**: extension background logic deduplicated (normalization-engine, segmentation-engine, policy-engine imports).
 
 ---
 
 ## Recommended Next Iteration
 
-**Mandatory meta-review before iter 009.** Per CLAUDE.md Meta-Review Trigger, the meta-coordinator must be invoked every 3 loops — we are at 8 completed loops with 5 loops since the last meta-review. The user-directed 006/007/008 batch is now closed.
+**Iter 009: Add Playwright E2E tests for recording lifecycle** (new score **15** under refined formula: old score 12 + 3 release-blocker bonus; no saturation penalty).
 
-After meta-review refines scoring weights, candidate items for iter 009+:
-- **Wire `validateRenderedSOP` into `processSession.ts`** (score: 11, iter 007 follow-up) — dev-throws/prod-logs policy
-- **Widen policy-engine `credit_card` regex to accept whitespace separators** (score: 11, iter 008 follow-up) — quick coverage fix
-- **Add Playwright E2E tests for recording lifecycle** (score: 12) — remaining release blocker
-- **Connect PostHog** — configure env vars to enable cloud analytics alongside internal DB
-- **Extract confidence thresholds to shared constants module** (score: 10, iter 006 follow-up) — remove benign circular import
+Rationale:
+- Release blocker since iter 000 (8 loops unaddressed).
+- Highest new score after applying the SOP-saturation penalty (−2) to competing SOP-area items.
+- Unblocks session-recovery validation in iter 010+.
+- Breaks the 5-loop `backend-engineer`-only orchestration pattern.
+
+Primary agent: `qa-engineer`. Secondary agent: `devops-engineer` (CI wiring).
+
+Scope: install Playwright + 1–3 lifecycle tests (record → stop → upload; record → restart → recover). Do NOT aim for full coverage in one loop.
+
+### Post-009 candidate queue (preliminary ordering under new formula)
+
+- **Iter 010: Session event persistence** (blocker, new score 14 = 11 base + 3 blocker bonus) — natural pairing with E2E harness from iter 009.
+- **Iter 011: LiveStepBuilder / StreamingSegmenter convergence** (last remaining duplication blocker).
+- **Iter 012: Follow-up burn-down loop** (per 1-in-5 rule; candidate: wire `validateRenderedSOP` into `processSession.ts`, or extract confidence thresholds).
 
 ## Meta-Review Status
 
 - Completed loops since initialization: **8 (iter 001–008)**
-- Completed loops since last meta-review: **5 (iter 004–008)**
-- Status: **OVERDUE — meta-coordinator invocation is the next required action**
+- Last meta-review: **Meta-Review 001 (2026-04-17, covering iter 004–008)** — see `META_REVIEW_001.md`
+- Next meta-review trigger: after iter 011 OR on any early-trigger condition (see CLAUDE.md § Meta-Review Cadence).
+- Status: **current**
 
-The 006/007/008 batch demonstrated a new execution mode: user-directed multi-iteration sequencing with the coordinator enforcing one-commit-per-iteration discipline. This is itself a pattern worth reviewing in the next meta-level pass.
+### Meta-Review 001 headline findings
+
+1. Scoring formula deprioritized release blockers → added `release_blocker_bonus` (+3) and `saturation_penalty` (−2) terms.
+2. Agent orchestration collapsed to `backend-engineer` for 5 consecutive loops → Delegation Decision Rubric added to `coordinator.md`.
+3. Zero release blockers closed in 5 loops → 1-in-5 forced-rotation rule added.
+4. Follow-up debt accumulating at ~1.2 per loop with 0 burn-down → 1-in-5 burn-down rule added.
+5. Mode 5 (Directed Sequence) formalized in CLAUDE.md.
+
+### Key behavior changes enacted
+
+- Iter 009 selection: **Playwright E2E tests** (release-blocker bonus + SOP saturation penalty forced the pivot)
+- Iter 009 implementer: **qa-engineer + devops-engineer** (first non-backend-engineer loop since iter 003)
 
 ---
 

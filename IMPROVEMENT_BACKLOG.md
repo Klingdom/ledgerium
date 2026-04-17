@@ -1,13 +1,17 @@
 # Ledgerium AI — Improvement Backlog
 
-Last updated: 2026-04-17 (post-iteration 008 — policy-engine integrated into content capture)  
+Last updated: 2026-04-17 (post Meta-Review 001 — rescored under refined formula)  
 Current phase: Phase 1  
 Backlog purpose: maintain a ranked, evidence-based portfolio of the highest-value fixes, improvements, and experiments for bounded improvement loops.
 
 ## Scoring Formula
 
 ```text
-priority_score = impact + strategic_alignment + learning_value + confidence - effort - risk
+priority_score =
+    impact + alignment + learning + confidence
+  − effort − risk
+  + release_blocker_bonus      # +3 if item is in SYSTEM_HEALTH.md Release Blockers
+  − saturation_penalty          # −2 if 3 of last 5 iterations landed in the same Area
 ```
 
 Scoring scale:
@@ -15,49 +19,78 @@ Scoring scale:
 - 3 = medium
 - 5 = very high
 
-Higher total score = higher priority.
+Higher total score = higher priority. Post Meta-Review 001: range widened to ~6–18 (was 10–16).
+
+### Saturation status (computed over iter 004–008)
+
+- SOP area (presentation / trust / quality gate) = 4 of last 5 → **SATURATED**
+- Affected open items: "Wire validateRenderedSOP into processSession.ts", "Extract confidence thresholds" → each receives −2 saturation penalty until saturation clears (requires 3 non-SOP loops in the last 5).
+
+### Portfolio override rules
+
+See `CLAUDE.md § Selection Policy` — any of these overrides top-score:
+1. Release-blocker minimum cadence (1-in-5)
+2. Area saturation rule
+3. Follow-up burn-down (1-in-5)
 
 ---
 
 ## Portfolio Summary
 
-- Total candidates reviewed: 26 (10 original + 10 from iteration 001 + 3 from sop-expert design review + 1 smell from iter 006 + 1 follow-up from iter 007 + 1 pattern gap from iter 008)
-- Top priority area: SOP output quality + E2E test coverage + API safety (capture-pipeline duplicate logic now resolved)
-- Highest-risk unresolved item: 11 API routes with no try/catch error handling
+- Total candidates reviewed: 27 (prior 26 + LiveStepBuilder convergence blocker surfaced in Meta-Review 001)
+- Top priority area: **release blockers** (E2E tests, session persistence, LiveStepBuilder convergence)
+- Highest-risk unresolved item: Playwright E2E coverage missing (release blocker, 8 loops unaddressed)
 - Last completed item: Integrate `@ledgerium/policy-engine` into content capture pipeline (iteration 008)
-- Next recommended item: **meta-coordinator invocation** (mandatory before iter 009 per CLAUDE.md; 7 loops completed since last review)
+- Last meta-review: **Meta-Review 001 (2026-04-17)** — see `META_REVIEW_001.md`
+- Next recommended item: **Add Playwright E2E tests for recording lifecycle** (iter 009, new score 15, blocker-cadence rule)
 
 ---
 
 ## Ranked Backlog
 
-| Rank | Title | Type | Area | Impact | Alignment | Learning | Confidence | Effort | Risk | Score | Status |
-|------|-------|------|------|--------|-----------|----------|------------|--------|------|-------|--------|
-| ~~—~~ | ~~Add vitest config + test script to web-app~~ | ~~improvement~~ | ~~test infrastructure~~ | ~~5~~ | ~~5~~ | ~~3~~ | ~~5~~ | ~~1~~ | ~~1~~ | ~~16~~ | **done (iter 001)** |
-| ~~1~~ | ~~Replace duplicated background logic with workspace package imports~~ | ~~improvement~~ | ~~extension architecture~~ | ~~5~~ | ~~5~~ | ~~4~~ | ~~5~~ | ~~3~~ | ~~2~~ | ~~14~~ | **done (iter 003)** |
-| ~~—~~ | ~~Metadata strip + confidence badge above the fold in SOP markdown renderer~~ | ~~improvement~~ | ~~SOP presentation~~ | ~~5~~ | ~~5~~ | ~~3~~ | ~~5~~ | ~~2~~ | ~~1~~ | ~~15~~ | **done (iter 004)** |
-| ~~—~~ | ~~Hoist per-step `evidenceEvents: string[]` onto SOP step interfaces and render per-step evidence lines~~ | ~~fix~~ | ~~SOP presentation / trust~~ | ~~5~~ | ~~5~~ | ~~3~~ | ~~5~~ | ~~2~~ | ~~1~~ | ~~15~~ | **done (iter 005)** |
-| ~~—~~ | ~~Per-step `confidence?: number` + three-tier confidence glyph in rendered SOPs~~ | ~~improvement~~ | ~~SOP presentation / trust~~ | ~~4~~ | ~~5~~ | ~~3~~ | ~~5~~ | ~~2~~ | ~~1~~ | ~~14~~ | **done (iter 006)** |
-| ~~—~~ | ~~Add `templates/sopValidator.ts` (validator-only, no pipeline wiring)~~ | ~~fix~~ | ~~SOP quality gate~~ | ~~4~~ | ~~5~~ | ~~4~~ | ~~4~~ | ~~2~~ | ~~2~~ | ~~13~~ | **done (iter 007)** |
-| ~~—~~ | ~~Integrate `@ledgerium/policy-engine` into `content/capture.ts`~~ | ~~fix~~ | ~~capture pipeline~~ | ~~4~~ | ~~5~~ | ~~3~~ | ~~5~~ | ~~2~~ | ~~2~~ | ~~13~~ | **done (iter 008)** |
-| 2 | Wire `validateRenderedSOP` into `processSession.ts` with dev-throws/prod-logs policy | fix | SOP quality gate | 3 | 5 | 3 | 4 | 2 | 2 | 11 | **new (iter 007 follow-up)** |
-| 3 | Extract confidence thresholds to shared constants module (remove `renderHelpers.ts ↔ sopTemplates.ts` circular) | improvement | code hygiene | 2 | 3 | 2 | 5 | 1 | 1 | 10 | **new (iter 006 follow-up)** |
-| 4 | Widen policy-engine `credit[_-]?card` regex to accept whitespace separators (`/credit\s*card/i`) | fix | policy coverage | 2 | 4 | 2 | 5 | 1 | 1 | 11 | **new (iter 008 follow-up)** |
-| 3 | Add dashboard-level process for artifact and system-health refresh after each loop | improvement | agentic CI | 3 | 4 | 5 | 4 | 2 | 1 | 13 | proposed |
-| 4 | Add Playwright E2E tests for recording lifecycle | improvement | quality assurance | 4 | 5 | 4 | 4 | 3 | 2 | 12 | proposed |
-| 5 | Create invariant-focused regression suite for segmentation and normalization versions | improvement | invariants / testing | 4 | 5 | 4 | 4 | 3 | 2 | 12 | proposed |
-| 6 | Draft clearer product wedge and ICP narrative for deterministic process intelligence | experiment | product / GTM | 3 | 4 | 5 | 3 | 2 | 1 | 12 | proposed |
-| 7 | Add try/catch to 11 unguarded API routes | fix | API safety | 4 | 4 | 2 | 5 | 3 | 1 | 11 | **new (iter 001)** |
-| 8 | Persist full session event stream for service worker restart recovery | fix | session durability | 5 | 5 | 4 | 4 | 4 | 3 | 11 | proposed |
-| 9 | Add structured error logging with session context | improvement | observability | 4 | 4 | 4 | 4 | 3 | 2 | 11 | proposed |
-| 10 | Evaluate event bundle integrity checks before downstream derivation | experiment | evidence linkage | 4 | 5 | 5 | 3 | 3 | 3 | 11 | proposed |
-| 11 | Fix (db as any) casts / regenerate Prisma client | fix | type safety | 3 | 4 | 3 | 4 | 2 | 2 | 10 | **new (iter 001)** |
-| 12 | Initialize Prisma migrations baseline | fix | data integrity | 4 | 4 | 3 | 4 | 2 | 3 | 10 | **new (iter 001)** |
-| 13 | Define recorder failure-state UX for service worker interruption and recovery | experiment | UX resilience | 3 | 4 | 4 | 3 | 2 | 2 | 10 | proposed |
-| 14 | Extract shared ingestion service (upload/sync) | improvement | API architecture | 4 | 5 | 4 | 3 | 4 | 3 | 9 | **new (iter 001)** |
-| 15 | Fix DELETE /api/keys error handling | fix | API safety | 2 | 3 | 1 | 5 | 1 | 1 | 9 | **new (iter 001)** |
+Score column format: `base ± adjustments = final` where adjustments are `+B` (release-blocker bonus) and `−S` (saturation penalty). Ranked by `final`.
 
-> Note: rank is influenced by both score and dependency value. Candidate 1 is ranked first because it directly addresses tracked technical debt, removes duplicated logic, and strengthens determinism across the extension and workspace packages.
+### Release Blockers (auto-top per 1-in-5 cadence rule)
+
+| Rank | Title | Type | Area | I | A | L | C | E | R | Score | Status |
+|------|-------|------|------|---|---|---|---|---|---|-------|--------|
+| 1 | **Add Playwright E2E tests for recording lifecycle** | improvement | quality assurance | 4 | 5 | 4 | 4 | 3 | 2 | 12 `+B3` = **15** | proposed — **iter 009** |
+| 2 | Persist full session event stream for service worker restart recovery | fix | session durability | 5 | 5 | 4 | 4 | 4 | 3 | 11 `+B3` = **14** | proposed — iter 010 |
+| 3 | Converge LiveStepBuilder with StreamingSegmenter | improvement | extension architecture | 4 | 5 | 3 | 3 | 4 | 3 | 8 `+B3` = **11** | proposed — iter 011 |
+
+### Standard Backlog
+
+| Rank | Title | Type | Area | I | A | L | C | E | R | Score | Status |
+|------|-------|------|------|---|---|---|---|---|---|-------|--------|
+| 4 | Add dashboard-level process for artifact and system-health refresh after each loop | improvement | agentic CI | 3 | 4 | 5 | 4 | 2 | 1 | **13** | proposed |
+| 5 | Create invariant-focused regression suite for segmentation and normalization versions | improvement | invariants / testing | 4 | 5 | 4 | 4 | 3 | 2 | **12** | proposed |
+| 6 | Draft clearer product wedge and ICP narrative for deterministic process intelligence | experiment | product / GTM | 3 | 4 | 5 | 3 | 2 | 1 | **12** | proposed |
+| 7 | Widen policy-engine `credit[_-]?card` regex to `/credit[\s_-]*card/i` | fix | policy coverage | 2 | 4 | 2 | 5 | 1 | 1 | **11** | new (iter 008 follow-up) |
+| 8 | Add try/catch to 11 unguarded API routes | fix | API safety | 4 | 4 | 2 | 5 | 3 | 1 | **11** | new (iter 001) |
+| 9 | Add structured error logging with session context | improvement | observability | 4 | 4 | 4 | 4 | 3 | 2 | **11** | proposed |
+| 10 | Evaluate event bundle integrity checks before downstream derivation | experiment | evidence linkage | 4 | 5 | 5 | 3 | 3 | 3 | **11** | proposed |
+| 11 | Fix (db as any) casts / regenerate Prisma client | fix | type safety | 3 | 4 | 3 | 4 | 2 | 2 | **10** | new (iter 001) |
+| 12 | Initialize Prisma migrations baseline | fix | data integrity | 4 | 4 | 3 | 4 | 2 | 3 | **10** | new (iter 001) |
+| 13 | Define recorder failure-state UX for service worker interruption and recovery | experiment | UX resilience | 3 | 4 | 4 | 3 | 2 | 2 | **10** | proposed |
+| 14 | Wire `validateRenderedSOP` into `processSession.ts` (dev-throws/prod-logs) | fix | SOP quality gate | 3 | 5 | 3 | 4 | 2 | 2 | 11 `−S2` = **9** | new (iter 007 follow-up) — SOP-saturated |
+| 15 | Fix DELETE /api/keys error handling | fix | API safety | 2 | 3 | 1 | 5 | 1 | 1 | **9** | new (iter 001) |
+| 16 | Extract shared ingestion service (upload/sync) | improvement | API architecture | 4 | 5 | 4 | 3 | 4 | 3 | **9** | new (iter 001) |
+| 17 | Extract confidence thresholds to shared constants module (remove `renderHelpers.ts ↔ sopTemplates.ts` circular) | improvement | code hygiene | 2 | 3 | 2 | 5 | 1 | 1 | 10 `−S2` = **8** | new (iter 006 follow-up) — SOP-saturated |
+
+### Completed (historical)
+
+| Iter | Title | Final score |
+|------|-------|-------|
+| 001 | Add vitest config + test script to web-app | 16 |
+| 003 | Replace duplicated background logic with workspace package imports | 14 |
+| 004 | Metadata strip + confidence badge above the fold in SOP markdown renderer | 15 |
+| 005 | Hoist per-step `evidenceEvents: string[]` onto SOP step interfaces | 15 |
+| 006 | Per-step `confidence?: number` + three-tier confidence glyph | 14 |
+| 007 | Add `templates/sopValidator.ts` (validator-only, no pipeline wiring) | 13 |
+| 008 | Integrate `@ledgerium/policy-engine` into `content/capture.ts` | 13 |
+
+> Ranks 1–3 are release blockers and take priority over higher raw-score items per the 1-in-5 release-blocker cadence rule (see `CLAUDE.md § Selection Policy`).
+> SOP-saturated items (rank 14, 17) will return to natural score once 3 of the last 5 iterations are in non-SOP areas.
 
 ---
 
@@ -237,9 +270,18 @@ Higher total score = higher priority.
 
 ## Selection Rules
 
-When choosing one item:
-1. prefer the highest score
-2. prefer lower-risk items among close scores
-3. prefer items that improve determinism, traceability, recovery, and validation
-4. prefer reversible changes
-5. choose exactly one item per iteration
+See `CLAUDE.md § Selection Policy` for the authoritative policy.
+
+**Portfolio overrides** (any overrides top-score):
+1. Release-blocker minimum cadence (1-in-5)
+2. Area saturation rule (no 3-in-a-row same Area)
+3. Follow-up burn-down (1-in-5 targets a prior follow-up)
+
+**Within those constraints, prefer:**
+1. the highest final score
+2. lower-risk items among close scores
+3. items that improve determinism, traceability, recovery, and validation
+4. reversible changes
+5. **exactly one item per iteration**
+
+The iteration log's "Candidate Selection" block MUST state which rule drove the selection: `top-score`, `blocker-cadence`, `saturation-rule`, `burn-down`, or `directed`.
