@@ -109,10 +109,24 @@ export function SOPPageShell({
     setExpandedSteps(new Set());
   }, []);
 
+  // Pick the best available template in documented preference order:
+  // operator_centric → enterprise → decision_based
+  // (operator_centric is the sop-expert's primary recommendation)
+  // TODO: A parent-driven format switcher could replace this fallback in a
+  // future iteration — see SOPTab.tsx for the pattern.
+  const selectedTemplate =
+    templateArtifacts?.operator_centric ? 'operator_centric' :
+    templateArtifacts?.enterprise ? 'enterprise' :
+    templateArtifacts?.decision_based ? 'decision_based' :
+    null;
+
   const handleExport = useCallback(() => {
-    if (!workflowId) return;
-    window.open(`/api/workflows/${workflowId}/export-markdown?artifactType=sop`, '_blank');
-  }, [workflowId]);
+    if (!workflowId || !selectedTemplate) return;
+    window.open(
+      `/api/workflows/${workflowId}/export-markdown?artifactType=template_sop_${selectedTemplate}`,
+      '_blank',
+    );
+  }, [workflowId, selectedTemplate]);
 
   // ── Loading / Error / Empty ──────────────────────────────────────────────
 
@@ -143,8 +157,8 @@ export function SOPPageShell({
             {allExpanded ? 'Collapse all' : 'Expand all'}
           </button>
 
-          {/* Export */}
-          {workflowId && (
+          {/* Export — requires both a workflowId and at least one template artifact */}
+          {workflowId && selectedTemplate && (
             <button
               onClick={handleExport}
               className="flex items-center gap-1 text-[10px] font-medium text-[var(--content-secondary)] hover:text-[var(--content-primary)] px-2 py-1 rounded-md hover:bg-[var(--surface-secondary)] transition-colors"
