@@ -1,6 +1,6 @@
 # Ledgerium AI — Improvement Backlog
 
-Last updated: 2026-04-17 (post-iteration 007 — sopValidator release-readiness quality gate)  
+Last updated: 2026-04-17 (post-iteration 008 — policy-engine integrated into content capture)  
 Current phase: Phase 1  
 Backlog purpose: maintain a ranked, evidence-based portfolio of the highest-value fixes, improvements, and experiments for bounded improvement loops.
 
@@ -21,11 +21,11 @@ Higher total score = higher priority.
 
 ## Portfolio Summary
 
-- Total candidates reviewed: 25 (10 original + 10 from iteration 001 + 3 from sop-expert design review + 1 smell from iter 006 + 1 integration follow-up from iter 007)
-- Top priority area: SOP output quality + extension architecture convergence + API safety
+- Total candidates reviewed: 26 (10 original + 10 from iteration 001 + 3 from sop-expert design review + 1 smell from iter 006 + 1 follow-up from iter 007 + 1 pattern gap from iter 008)
+- Top priority area: SOP output quality + E2E test coverage + API safety (capture-pipeline duplicate logic now resolved)
 - Highest-risk unresolved item: 11 API routes with no try/catch error handling
-- Last completed item: `sopValidator.ts` release-readiness quality gate (iteration 007)
-- Next recommended item: Integrate `@ledgerium/policy-engine` into `content/capture.ts` (iter 008, queued)
+- Last completed item: Integrate `@ledgerium/policy-engine` into content capture pipeline (iteration 008)
+- Next recommended item: **meta-coordinator invocation** (mandatory before iter 009 per CLAUDE.md; 7 loops completed since last review)
 
 ---
 
@@ -39,9 +39,10 @@ Higher total score = higher priority.
 | ~~—~~ | ~~Hoist per-step `evidenceEvents: string[]` onto SOP step interfaces and render per-step evidence lines~~ | ~~fix~~ | ~~SOP presentation / trust~~ | ~~5~~ | ~~5~~ | ~~3~~ | ~~5~~ | ~~2~~ | ~~1~~ | ~~15~~ | **done (iter 005)** |
 | ~~—~~ | ~~Per-step `confidence?: number` + three-tier confidence glyph in rendered SOPs~~ | ~~improvement~~ | ~~SOP presentation / trust~~ | ~~4~~ | ~~5~~ | ~~3~~ | ~~5~~ | ~~2~~ | ~~1~~ | ~~14~~ | **done (iter 006)** |
 | ~~—~~ | ~~Add `templates/sopValidator.ts` (validator-only, no pipeline wiring)~~ | ~~fix~~ | ~~SOP quality gate~~ | ~~4~~ | ~~5~~ | ~~4~~ | ~~4~~ | ~~2~~ | ~~2~~ | ~~13~~ | **done (iter 007)** |
-| 2 | Integrate `@ledgerium/policy-engine` into `content/capture.ts` | fix | capture pipeline | 4 | 5 | 3 | 5 | 2 | 2 | 13 | **in-flight (iter 008)** |
-| 3 | Wire `validateRenderedSOP` into `processSession.ts` with dev-throws/prod-logs policy | fix | SOP quality gate | 3 | 5 | 3 | 4 | 2 | 2 | 11 | **new (iter 007 follow-up)** |
-| 4 | Extract confidence thresholds to shared constants module (remove `renderHelpers.ts ↔ sopTemplates.ts` circular) | improvement | code hygiene | 2 | 3 | 2 | 5 | 1 | 1 | 10 | **new (iter 006 follow-up)** |
+| ~~—~~ | ~~Integrate `@ledgerium/policy-engine` into `content/capture.ts`~~ | ~~fix~~ | ~~capture pipeline~~ | ~~4~~ | ~~5~~ | ~~3~~ | ~~5~~ | ~~2~~ | ~~2~~ | ~~13~~ | **done (iter 008)** |
+| 2 | Wire `validateRenderedSOP` into `processSession.ts` with dev-throws/prod-logs policy | fix | SOP quality gate | 3 | 5 | 3 | 4 | 2 | 2 | 11 | **new (iter 007 follow-up)** |
+| 3 | Extract confidence thresholds to shared constants module (remove `renderHelpers.ts ↔ sopTemplates.ts` circular) | improvement | code hygiene | 2 | 3 | 2 | 5 | 1 | 1 | 10 | **new (iter 006 follow-up)** |
+| 4 | Widen policy-engine `credit[_-]?card` regex to accept whitespace separators (`/credit\s*card/i`) | fix | policy coverage | 2 | 4 | 2 | 5 | 1 | 1 | 11 | **new (iter 008 follow-up)** |
 | 3 | Add dashboard-level process for artifact and system-health refresh after each loop | improvement | agentic CI | 3 | 4 | 5 | 4 | 2 | 1 | 13 | proposed |
 | 4 | Add Playwright E2E tests for recording lifecycle | improvement | quality assurance | 4 | 5 | 4 | 4 | 3 | 2 | 12 | proposed |
 | 5 | Create invariant-focused regression suite for segmentation and normalization versions | improvement | invariants / testing | 4 | 5 | 4 | 4 | 3 | 2 | 12 | proposed |

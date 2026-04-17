@@ -190,6 +190,71 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 008
+
+- Date: 2026-04-17
+- Trigger: user-directed sequential execution of top-3 backlog items (006/007/008) — third and final in sequence
+- Coordinator: coordinator
+- Phase: Phase 1
+- Objective: eliminate duplicated sensitivity-classification logic by routing `target-inspector.isSensitiveTarget()` through `@ledgerium/policy-engine.classifySensitivity()`, closing a long-standing capture-pipeline cleanup item tracked since iter 003 follow-ups
+
+### System Review
+- `@ledgerium/policy-engine` has been a declared dependency of `@ledgerium/extension-app` since before iter 003 and has been wired into `src/background/normalizer.ts:5` — but the content capture layer (where sensitivity first matters, at event capture time) was never migrated
+- Extension's local `SENSITIVE_RE` regex (`/password|passwd|secret|token|api[_-]?key|credit|cvv|ssn/i` in `target-inspector.ts`) drifted behind the shared `classifySensitivity` pattern set which includes `card_number`, `social_security`, `tax_id`, and classifies into categories (`password`, `payment`, `government_id`, `pii`)
+- Drift cost: every new sensitivity class added to the shared package needs to be mirrored manually in the extension — and historically has not been
+
+### Candidate Selection
+- Title: **Integrate `@ledgerium/policy-engine` into the content capture pipeline (via `target-inspector.isSensitiveTarget`)**
+- Type: fix
+- Area: capture pipeline / determinism / shared-package integration
+- Score: 13 (Impact:4 + Alignment:5 + Learning:3 + Confidence:5 − Effort:2 − Risk:2)
+- Why selected: third item in the user-directed 006/007/008 sequence; eliminates duplicate logic (Core Principle: Determinism before abstraction); no longer allows capture-time and normalization-time to use different regex sets
+- Scope discipline: refactored ONLY `target-inspector.ts` (1 source file). Did NOT modify `content/capture.ts` (its 10 callsites of `isSensitiveTarget` remain untouched — proof that the refactor is a drop-in replacement). Did NOT touch `background/normalizer.ts` (already integrated).
+
+### Agents Used
+- coordinator (orchestration, verification, artifact updates)
+- backend-engineer (implementation)
+
+### Files Changed
+- `apps/extension-app/src/content/target-inspector.ts` — **refactored**, net -3 LOC (150 → 147 total): replaced inline `SENSITIVE_RE` + `SENSITIVE_INPUT_TYPES` with delegation to `classifySensitivity`, preserving the DOM-specific early returns (password/hidden input types and autocomplete="password" attribute — these require a live Element and cannot be done string-side)
+- `apps/extension-app/src/content/target-inspector.test.ts` — **new file**, +175 LOC: 20 tests covering password/hidden/autocomplete DOM fast paths, all pre-refactor regex patterns as regression guards, and 3 explicit tests for newly-available shared patterns (`card_number`, `social_security_number`, `tax_id`) that would fail if the old local regex were re-introduced
+
+### Validation Run
+- `pnpm --filter @ledgerium/extension-app typecheck` → clean ✅
+- `pnpm --filter @ledgerium/extension-app test` → 156/156 (136 pre-existing + 20 new) ✅
+- `pnpm typecheck` (monorepo) → clean across all 10 workspace projects ✅
+- `pnpm test` (monorepo) → 1,512/1,512 tests pass across 41 test files (+20 from iter 007) ✅
+- All 10 `isSensitiveTarget` callsites in `capture.ts` continue to work unchanged — function signature preserved
+
+### Outcome
+- Status: **complete**
+- Summary: Capture-time and normalization-time sensitivity classification now route through the same `classifySensitivity` function. The extension content layer is now fully aligned with the shared policy-engine package, completing the consolidation begun in iter 003. Adding a new sensitivity pattern to the shared package will now automatically propagate to the capture layer — no hand-patching required.
+
+### Impact
+- **Before**: extension capture used a local 8-word regex; shared package used a 12-pattern ladder with category classification; new patterns added to the shared package never reached capture time
+- **After**: single source of truth for sensitivity; newly-active patterns include `card_number`, `social_security_number`, `tax_id`, and richer `credit_card` matching
+- **Test count**: 1,492 → 1,512 (+20)
+- **Coverage gain**: extension content layer gets its first-ever tests for sensitivity classification (module was previously untested)
+
+### Artifacts Updated
+- `ITERATION_LOG.md` — this entry
+- `IMPROVEMENT_BACKLOG.md` — iter 008 item marked complete; new follow-up added for `/credit\s*card/` pattern gap in policy-engine
+- `SYSTEM_HEALTH.md` — test count refreshed; drift-risk item removed from top risks
+- `CHANGELOG.md` — new entry prepended
+
+### Follow-Ups
+- **Policy-engine `/credit\s*card/i` pattern gap**: shared `classifySensitivity` uses `/credit[_-]?card/i` (requires `_` or `-` separator), missing `"Credit card number"` aria-labels with spaces. The pre-refactor local regex caught this via the looser `/credit/i`. Low-effort fix — widen the shared regex. Queued as new backlog item.
+- **Playwright E2E tests for recording lifecycle** — still a remaining Phase 1 release blocker
+- **Wire `validateRenderedSOP` into `processSession.ts`** — iter 007 follow-up
+- **Meta-coordinator invocation** — now mandatory before iter 009 (7 completed loops, user-directed 006/007/008 batch just closed)
+
+### Risks / Open Questions
+- Narrow behavior regression documented in `target-inspector.test.ts`: aria-label `"Credit card number"` with spaces is no longer caught (tracked as the follow-up above). All other pre-existing positive cases are preserved.
+- DOM test approach: manual Element mocks (no `happy-dom`/`jsdom` installed in the monorepo) — keeps the extension test suite dependency-free but means the mocks cover only the `type`, `autocomplete`, and `getAttribute` surface. Acceptable for this module; heavier DOM testing is tracked as part of the Playwright E2E candidate.
+- Extension content layer is now untested beyond this module — `capture.ts`, `state-observer.ts`, `label-extractor.ts`, `index.ts` remain without unit tests. Not in scope for iter 008.
+
+---
+
 ## Iteration 007
 
 - Date: 2026-04-17

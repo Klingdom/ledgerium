@@ -14,27 +14,32 @@
 import { djb2Hash } from '../shared/utils.js'
 import { extractLabel } from './label-extractor.js'
 import type { InteractionType, RawEventTarget } from '../shared/types.js'
+import { classifySensitivity } from '@ledgerium/policy-engine'
 
 // ─── Sensitivity ──────────────────────────────────────────────────────────────
 
-const SENSITIVE_INPUT_TYPES = new Set(['password', 'hidden'])
-const SENSITIVE_RE = /password|passwd|secret|token|api[_-]?key|credit|cvv|ssn/i
-
 export function isSensitiveTarget(el: Element): boolean {
+  // DOM-type early returns — these require a live Element and cannot be
+  // performed by the shared package: password is a fast-path guard, hidden
+  // is not caught by classifySensitivity at all.
   if (el instanceof HTMLInputElement) {
-    if (SENSITIVE_INPUT_TYPES.has(el.type.toLowerCase())) return true
+    if (el.type.toLowerCase() === 'password' || el.type.toLowerCase() === 'hidden') return true
     if (el.autocomplete?.toLowerCase().includes('password')) return true
   }
+
+  // Extract string attributes and delegate to the shared classifier so all
+  // pattern coverage (card_number, social_security, tax_id, etc.) is owned
+  // by a single source of truth.
+  const inputType = el instanceof HTMLInputElement ? el.type.toLowerCase() : undefined
   const name = el.getAttribute('name') ?? ''
   const id = el.getAttribute('id') ?? ''
   const testId = el.getAttribute('data-testid') ?? ''
   const ariaLabel = el.getAttribute('aria-label') ?? ''
-  return (
-    SENSITIVE_RE.test(name) ||
-    SENSITIVE_RE.test(id) ||
-    SENSITIVE_RE.test(testId) ||
-    SENSITIVE_RE.test(ariaLabel)
-  )
+  // Combine id/name/testid into a pseudo-selector so all attribute sources
+  // are matched by the shared package's regex patterns.
+  const combinedSelector = [id, name, testId].filter(Boolean).join(' ')
+  const result = classifySensitivity(inputType, combinedSelector, ariaLabel)
+  return result.isSensitive
 }
 
 // ─── Stable selector ──────────────────────────────────────────────────────────

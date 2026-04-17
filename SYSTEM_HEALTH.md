@@ -1,6 +1,6 @@
 # Ledgerium AI — System Health
 
-Last updated: 2026-04-17 (post-iteration 007 — sopValidator release-readiness quality gate delivered)
+Last updated: 2026-04-17 (post-iteration 008 — policy-engine integrated into content capture; 006/007/008 batch complete)
 
 ## Executive Summary
 
@@ -24,9 +24,9 @@ Overall confidence: **Medium-High**
 | Product clarity | strong | 5 | trust-first, deterministic positioning is unusually clear |
 | Architectural discipline | strong | 4 | invariants and principles are well defined |
 | Deterministic core protection | moderate | 4 | good principles, but more regression protection is still needed |
-| Package / code consistency | improving | 3.5 | extension now imports from 3 workspace packages; LiveStepBuilder duplication remains |
+| Package / code consistency | improving | 4 | extension now imports from 4 workspace packages (policy-engine now wired into content layer as of iter 008); LiveStepBuilder duplication remains |
 | Session durability / recovery | moderate-risk | 2 | full event persistence is still missing |
-| Test coverage | moderate | 3.5 | web-app vitest active; E2E coverage still missing; 1,492 total tests (+31 in iter 007, +25 in iter 006, +17 in iter 005, +26 in iter 004) |
+| Test coverage | moderate | 3.5 | web-app vitest active; E2E coverage still missing; 1,512 total tests (+20 in iter 008, +31 in iter 007, +25 in iter 006, +17 in iter 005, +26 in iter 004) |
 | Observability | strong | 4 | analytics fully instrumented, 8 alert conditions, admin dashboard with engagement/retention/alerts |
 | Agentic CI readiness | improving | 4 | command, backlog, iteration log, and templates now exist |
 | GTM readiness | emerging | 2.5 | product wedge promising; analytics infrastructure ready for data-driven decisions |
@@ -72,8 +72,8 @@ Overall confidence: **Medium-High**
 1. Remaining duplication: LiveStepBuilder vs StreamingSegmenter, extension types vs package types
 2. Incomplete persistence for service worker restart recovery
 3. Missing E2E coverage for the extension recording lifecycle
-4. Incomplete shared policy-engine integration in content/capture.ts
-5. PostHog not yet connected (env vars not set) — analytics only writes to internal DB
+4. PostHog not yet connected (env vars not set) — analytics only writes to internal DB
+5. Extension content layer still has minimal unit test coverage outside target-inspector (capture.ts, state-observer.ts, label-extractor.ts untested)
 
 ---
 
@@ -93,30 +93,30 @@ These should be assumed to block a high-confidence release until resolved:
 
 - full session restart recovery not complete
 - E2E lifecycle testing missing
-- duplicate logic still present in critical extension flows
-- shared capture-policy enforcement not fully integrated
+- some duplicate logic still present (LiveStepBuilder vs StreamingSegmenter)
+
+**Resolved in iter 008**: shared capture-policy enforcement was outstanding — now integrated via `classifySensitivity` in `target-inspector.ts`.
 
 ---
 
 ## Recommended Next Iteration
 
-Recommended next item (iter 008, in-flight):
-- **Integrate `@ledgerium/policy-engine` into `content/capture.ts`** (score: 13) — long-standing capture-pipeline cleanup carried from iter 003 follow-ups
+**Mandatory meta-review before iter 009.** Per CLAUDE.md Meta-Review Trigger, the meta-coordinator must be invoked every 3 loops — we are at 8 completed loops with 5 loops since the last meta-review. The user-directed 006/007/008 batch is now closed.
 
-Why:
-- Third and final item in the user-directed 006/007/008 sequence
-- Outstanding since iter 003 — the content/capture.ts layer still enforces policy inline rather than via the shared `@ledgerium/policy-engine` package; this allows capture-policy drift between extension and backend
-- Closes one of the remaining Phase 1 release blockers from the SYSTEM_HEALTH top-risks list
-
-Alternative high-value next items:
+After meta-review refines scoring weights, candidate items for iter 009+:
 - **Wire `validateRenderedSOP` into `processSession.ts`** (score: 11, iter 007 follow-up) — dev-throws/prod-logs policy
+- **Widen policy-engine `credit_card` regex to accept whitespace separators** (score: 11, iter 008 follow-up) — quick coverage fix
 - **Add Playwright E2E tests for recording lifecycle** (score: 12) — remaining release blocker
 - **Connect PostHog** — configure env vars to enable cloud analytics alongside internal DB
 - **Extract confidence thresholds to shared constants module** (score: 10, iter 006 follow-up) — remove benign circular import
 
-## Meta-Review
+## Meta-Review Status
 
-At 7 completed improvement loops. Per CLAUDE.md, meta-coordinator should be invoked every 3 loops — **mandatory before iter 009** (after the user-directed 006/007/008 batch) to refine scoring weights and selection logic based on the SOP-heavy iter 004/005/006/007 run.
+- Completed loops since initialization: **8 (iter 001–008)**
+- Completed loops since last meta-review: **5 (iter 004–008)**
+- Status: **OVERDUE — meta-coordinator invocation is the next required action**
+
+The 006/007/008 batch demonstrated a new execution mode: user-directed multi-iteration sequencing with the coordinator enforcing one-commit-per-iteration discipline. This is itself a pattern worth reviewing in the next meta-level pass.
 
 ---
 

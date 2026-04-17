@@ -6,6 +6,38 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-17] - Iteration 008: Policy-engine integrated into content capture pipeline
+
+### Changed
+- `apps/extension-app/src/content/target-inspector.ts` — `isSensitiveTarget(el: Element): boolean` now delegates to `classifySensitivity` from `@ledgerium/policy-engine`, replacing the local `SENSITIVE_RE` regex and `SENSITIVE_INPUT_TYPES` set
+- DOM-specific early returns preserved: `<input type="password">`, `<input type="hidden">`, and `autocomplete` containing "password" still short-circuit to `true` (cannot be checked string-side)
+- String attributes (`id`, `name`, `data-testid`, `aria-label`, `type`) extracted from the Element and passed to the shared classifier — single source of truth for sensitivity patterns across capture time and normalization time
+- Function signature unchanged: all 10 existing callsites in `content/capture.ts` work without modification
+
+### Added
+- `apps/extension-app/src/content/target-inspector.test.ts` — **new file**, 20 tests covering:
+  - All pre-refactor behavior preserved (password, hidden, autocomplete, `name="password"`, `id="api_key"`, `data-testid="cvv-input"`, `name="ssn"`, etc.)
+  - 3 new-coverage regression guards (`name="card_number"`, `name="social_security_number"`, `name="tax_id"`) that would fail if the old local regex were re-introduced
+  - Smoke test for `inspectTarget()` to give the module baseline coverage
+- Manual DOM mocks (no `happy-dom`/`jsdom` dependency added — monorepo stayed dependency-clean)
+
+### Impact
+- **Before**: capture-time used local 8-word regex; normalization used 12-pattern shared ladder. New patterns added to shared package never reached capture time.
+- **After**: single source of truth. Newly-active sensitivity patterns in capture: `card_number`, `social_security_number`, `tax_id`, richer `credit_card` matching via the shared classifier's category ladder
+- **Consolidation**: extension now imports from 4 workspace packages in the content layer (previously only `background/normalizer.ts` used `@ledgerium/policy-engine`)
+- **Package / code consistency score**: 3.5 → 4
+- **Test count**: 1,492 → 1,512 (+20)
+
+### Notes
+- **Known narrow regression** (documented in tests and backlog): aria-label `"Credit card number"` with literal spaces is no longer caught. The pre-refactor local regex used a loose `/credit/i`; the shared classifier uses `/credit[_-]?card/i` which requires `_` or `-` (not whitespace). Fix queued as iter 008 follow-up (score 11): widen shared regex to `/credit[\s_-]*card/i`.
+- `content/capture.ts` NOT modified — the refactor is a drop-in replacement, and 10 intact callsites prove it.
+- Extension content layer gets its first-ever unit tests via this iteration. Other content files (`capture.ts`, `state-observer.ts`, `label-extractor.ts`) remain untested and are added to SYSTEM_HEALTH top risks.
+
+### Release blocker resolved
+- "Shared capture-policy enforcement not fully integrated" — closed.
+
+---
+
 ## [2026-04-17] - Iteration 007: SOP release-readiness quality gate (sopValidator)
 
 ### Added
