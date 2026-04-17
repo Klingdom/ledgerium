@@ -1,0 +1,819 @@
+{
+  "_comment": "Source CanonicalEvent[] recording for the three example SOPs in this directory. Conforms to packages/schema-events/src/canonical-event.schema.ts. Session represents 'Upload and Review Workflow in Ledgerium AI' — 28 events across 12 steps, one error recovery, one decision point.",
+  "_session": {
+    "sessionId": "s_2026_04_17_abc123",
+    "activityName": "Upload and Review Workflow in Ledgerium AI",
+    "startedAt": "2026-04-17T14:30:00.000Z",
+    "endedAt": "2026-04-17T14:32:47.000Z"
+  },
+  "events": [
+    {
+      "event_id": "ev_01",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 0,
+      "t_wall": "2026-04-17T14:30:00.000Z",
+      "event_type": "session.started",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "raw_001",
+        "sourceEventType": "session.started",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_02",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 1250,
+      "t_wall": "2026-04-17T14:30:01.250Z",
+      "event_type": "navigation.open_page",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/sign-in",
+        "urlNormalized": "https://app.ledgerium.ai/sign-in",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/sign-in",
+        "pageTitle": "Sign in — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_002",
+        "sourceEventType": "navigation.open_page",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_03",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 4800,
+      "t_wall": "2026-04-17T14:30:04.800Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/sign-in",
+        "urlNormalized": "https://app.ledgerium.ai/sign-in",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/sign-in",
+        "pageTitle": "Sign in — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "selector": "input#email",
+        "selectorConfidence": 0.98,
+        "label": "Email",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_003",
+        "sourceEventType": "input",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_04",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 7100,
+      "t_wall": "2026-04-17T14:30:07.100Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/sign-in",
+        "urlNormalized": "https://app.ledgerium.ai/sign-in",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/sign-in",
+        "pageTitle": "Sign in — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "selector": "input#password",
+        "selectorConfidence": 0.98,
+        "label": "Password",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": true,
+        "sensitivityClass": "credential"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_004",
+        "sourceEventType": "input",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": true,
+        "redactionReason": "credential field"
+      }
+    },
+    {
+      "event_id": "ev_05",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 8400,
+      "t_wall": "2026-04-17T14:30:08.400Z",
+      "event_type": "interaction.submit",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/sign-in",
+        "urlNormalized": "https://app.ledgerium.ai/sign-in",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/sign-in",
+        "pageTitle": "Sign in — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "selector": "button[type=submit]",
+        "selectorConfidence": 0.95,
+        "label": "Sign in",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_005",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_06",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 10200,
+      "t_wall": "2026-04-17T14:30:10.200Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows",
+        "urlNormalized": "https://app.ledgerium.ai/workflows",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows",
+        "pageTitle": "Workflows — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI",
+        "moduleLabel": "Workflows"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_006",
+        "sourceEventType": "navigation.route_change",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_07",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 13500,
+      "t_wall": "2026-04-17T14:30:13.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows",
+        "urlNormalized": "https://app.ledgerium.ai/workflows",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows",
+        "pageTitle": "Workflows — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI",
+        "moduleLabel": "Workflows"
+      },
+      "target_summary": {
+        "selector": "button[data-testid=upload-workflow]",
+        "selectorConfidence": 0.98,
+        "label": "Upload workflow",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_007",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_08",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 13800,
+      "t_wall": "2026-04-17T14:30:13.800Z",
+      "event_type": "system.modal_opened",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows",
+        "urlNormalized": "https://app.ledgerium.ai/workflows",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows",
+        "pageTitle": "Workflows — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "label": "Upload workflow file",
+        "role": "dialog",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_008",
+        "sourceEventType": "system.modal_opened",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_09",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 18200,
+      "t_wall": "2026-04-17T14:30:18.200Z",
+      "event_type": "interaction.upload_file",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows",
+        "urlNormalized": "https://app.ledgerium.ai/workflows",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows",
+        "pageTitle": "Workflows — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "selector": "input[type=file]",
+        "selectorConfidence": 0.97,
+        "label": "Choose file",
+        "role": "button",
+        "elementType": "input",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_009",
+        "sourceEventType": "input[type=file].change",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_10",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 19100,
+      "t_wall": "2026-04-17T14:30:19.100Z",
+      "event_type": "system.error_displayed",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows",
+        "urlNormalized": "https://app.ledgerium.ai/workflows",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows",
+        "pageTitle": "Workflows — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "label": "File exceeds 10 MB — please select a smaller workflow",
+        "role": "alert",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_010",
+        "sourceEventType": "system.error_displayed",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_11",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 32400,
+      "t_wall": "2026-04-17T14:30:32.400Z",
+      "event_type": "interaction.upload_file",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows",
+        "urlNormalized": "https://app.ledgerium.ai/workflows",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows",
+        "pageTitle": "Workflows — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "selector": "input[type=file]",
+        "selectorConfidence": 0.97,
+        "label": "Choose file",
+        "role": "button",
+        "elementType": "input",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_011",
+        "sourceEventType": "input[type=file].change",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_12",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 33700,
+      "t_wall": "2026-04-17T14:30:33.700Z",
+      "event_type": "system.loading_started",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows",
+        "urlNormalized": "https://app.ledgerium.ai/workflows",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows",
+        "pageTitle": "Workflows — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "label": "Uploading workflow",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_012",
+        "sourceEventType": "system.loading_started",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_13",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 35600,
+      "t_wall": "2026-04-17T14:30:35.600Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows",
+        "urlNormalized": "https://app.ledgerium.ai/workflows",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows",
+        "pageTitle": "Workflows — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "label": "Workflow uploaded — processing",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_013",
+        "sourceEventType": "system.toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_14",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 36100,
+      "t_wall": "2026-04-17T14:30:36.100Z",
+      "event_type": "navigation.route_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows/w_4821",
+        "urlNormalized": "https://app.ledgerium.ai/workflows/:id",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows/:id",
+        "pageTitle": "Processing workflow — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI",
+        "moduleLabel": "Workflow detail"
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_014",
+        "sourceEventType": "navigation.route_change",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_15",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 94200,
+      "t_wall": "2026-04-17T14:31:34.200Z",
+      "event_type": "system.loading_finished",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows/w_4821",
+        "urlNormalized": "https://app.ledgerium.ai/workflows/:id",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows/:id",
+        "pageTitle": "Processing workflow — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "label": "Processing complete",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_015",
+        "sourceEventType": "system.loading_finished",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_16",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 96500,
+      "t_wall": "2026-04-17T14:31:36.500Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows/w_4821",
+        "urlNormalized": "https://app.ledgerium.ai/workflows/:id",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows/:id",
+        "pageTitle": "Q2 invoice intake — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI",
+        "moduleLabel": "Workflow detail"
+      },
+      "target_summary": {
+        "selector": "button[data-tab=sop]",
+        "selectorConfidence": 0.96,
+        "label": "SOP",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_016",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_17",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 112000,
+      "t_wall": "2026-04-17T14:31:52.000Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows/w_4821",
+        "urlNormalized": "https://app.ledgerium.ai/workflows/:id",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows/:id",
+        "pageTitle": "Q2 invoice intake — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "selector": "button[data-tab=process-map]",
+        "selectorConfidence": 0.96,
+        "label": "Process map",
+        "role": "tab",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_017",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_18",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 128400,
+      "t_wall": "2026-04-17T14:32:08.400Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows/w_4821",
+        "urlNormalized": "https://app.ledgerium.ai/workflows/:id",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows/:id",
+        "pageTitle": "Q2 invoice intake — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "selector": "button[data-action=edit-name]",
+        "selectorConfidence": 0.93,
+        "label": "Edit name",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_018",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_19",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 133600,
+      "t_wall": "2026-04-17T14:32:13.600Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows/w_4821",
+        "urlNormalized": "https://app.ledgerium.ai/workflows/:id",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows/:id",
+        "pageTitle": "Q2 invoice intake — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "selector": "input[name=workflow-name]",
+        "selectorConfidence": 0.95,
+        "label": "Workflow name",
+        "role": "textbox",
+        "elementType": "input",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_019",
+        "sourceEventType": "input",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_20",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 139800,
+      "t_wall": "2026-04-17T14:32:19.800Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows/w_4821",
+        "urlNormalized": "https://app.ledgerium.ai/workflows/:id",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows/:id",
+        "pageTitle": "Q2 invoice intake — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "selector": "button[data-action=add-tag]",
+        "selectorConfidence": 0.94,
+        "label": "Add tag",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_020",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_21",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 142100,
+      "t_wall": "2026-04-17T14:32:22.100Z",
+      "event_type": "interaction.select",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows/w_4821",
+        "urlNormalized": "https://app.ledgerium.ai/workflows/:id",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows/:id",
+        "pageTitle": "Q2 invoice intake — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "selector": "select[name=tags]",
+        "selectorConfidence": 0.94,
+        "label": "Tags",
+        "role": "listbox",
+        "elementType": "select",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_021",
+        "sourceEventType": "change",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_22",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 148900,
+      "t_wall": "2026-04-17T14:32:28.900Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows/w_4821",
+        "urlNormalized": "https://app.ledgerium.ai/workflows/:id",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows/:id",
+        "pageTitle": "Q2 invoice intake — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "selector": "button[data-action=save]",
+        "selectorConfidence": 0.98,
+        "label": "Save",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_022",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_23",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 149700,
+      "t_wall": "2026-04-17T14:32:29.700Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows/w_4821",
+        "urlNormalized": "https://app.ledgerium.ai/workflows/:id",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows/:id",
+        "pageTitle": "Q2 invoice intake — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "label": "Workflow saved",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_023",
+        "sourceEventType": "system.toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_24",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 154200,
+      "t_wall": "2026-04-17T14:32:34.200Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows/w_4821",
+        "urlNormalized": "https://app.ledgerium.ai/workflows/:id",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows/:id",
+        "pageTitle": "Q2 invoice intake — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "selector": "button[data-action=share]",
+        "selectorConfidence": 0.97,
+        "label": "Share",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_024",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_25",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 154600,
+      "t_wall": "2026-04-17T14:32:34.600Z",
+      "event_type": "system.modal_opened",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows/w_4821",
+        "urlNormalized": "https://app.ledgerium.ai/workflows/:id",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows/:id",
+        "pageTitle": "Q2 invoice intake — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "label": "Share this workflow",
+        "role": "dialog",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_025",
+        "sourceEventType": "system.modal_opened",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_26",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 159100,
+      "t_wall": "2026-04-17T14:32:39.100Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows/w_4821",
+        "urlNormalized": "https://app.ledgerium.ai/workflows/:id",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows/:id",
+        "pageTitle": "Q2 invoice intake — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "selector": "button[data-action=copy-link]",
+        "selectorConfidence": 0.97,
+        "label": "Copy link",
+        "role": "button",
+        "elementType": "button",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_026",
+        "sourceEventType": "click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_27",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 159400,
+      "t_wall": "2026-04-17T14:32:39.400Z",
+      "event_type": "system.toast_shown",
+      "actor_type": "system",
+      "page_context": {
+        "url": "https://app.ledgerium.ai/workflows/w_4821",
+        "urlNormalized": "https://app.ledgerium.ai/workflows/:id",
+        "domain": "app.ledgerium.ai",
+        "routeTemplate": "/workflows/:id",
+        "pageTitle": "Q2 invoice intake — Ledgerium AI",
+        "applicationLabel": "Ledgerium AI"
+      },
+      "target_summary": {
+        "label": "Share link copied to clipboard",
+        "role": "status",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "raw_027",
+        "sourceEventType": "system.toast_shown",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ev_28",
+      "schema_version": "1.0.0",
+      "session_id": "s_2026_04_17_abc123",
+      "t_ms": 167000,
+      "t_wall": "2026-04-17T14:32:47.000Z",
+      "event_type": "session.stopped",
+      "actor_type": "recorder",
+      "normalization_meta": {
+        "sourceEventId": "raw_028",
+        "sourceEventType": "session.stopped",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "_derivedSteps": [
+    { "ordinal": 1, "title": "Sign in to Ledgerium AI", "events": ["ev_02","ev_03","ev_04","ev_05"], "category": "fill_and_submit", "confidence": 0.91 },
+    { "ordinal": 2, "title": "Navigate to the Workflows dashboard", "events": ["ev_06"], "category": "click_then_navigate", "confidence": 0.95 },
+    { "ordinal": 3, "title": "Open the upload dialog", "events": ["ev_07","ev_08"], "category": "send_action", "confidence": 0.93 },
+    { "ordinal": 4, "title": "Upload the workflow file (first attempt)", "events": ["ev_09","ev_10"], "category": "error_handling", "confidence": 0.88, "isDecisionPoint": true, "decisionLabel": "Did the file pass validation?" },
+    { "ordinal": 5, "title": "Re-upload the workflow file within size limit", "events": ["ev_11","ev_12","ev_13","ev_14"], "category": "file_action", "confidence": 0.90 },
+    { "ordinal": 6, "title": "Wait for processing to complete", "events": ["ev_15"], "category": "single_action", "confidence": 0.86 },
+    { "ordinal": 7, "title": "Open the SOP tab", "events": ["ev_16"], "category": "click_then_navigate", "confidence": 0.92 },
+    { "ordinal": 8, "title": "Open the process map tab", "events": ["ev_17"], "category": "click_then_navigate", "confidence": 0.92 },
+    { "ordinal": 9, "title": "Edit the workflow name", "events": ["ev_18","ev_19"], "category": "data_entry", "confidence": 0.89 },
+    { "ordinal": 10, "title": "Add tags to the workflow", "events": ["ev_20","ev_21"], "category": "data_entry", "confidence": 0.87 },
+    { "ordinal": 11, "title": "Save the workflow", "events": ["ev_22","ev_23"], "category": "send_action", "confidence": 0.94 },
+    { "ordinal": 12, "title": "Share the workflow via link", "events": ["ev_24","ev_25","ev_26","ev_27"], "category": "send_action", "confidence": 0.93 }
+  ]
+}
