@@ -4,9 +4,14 @@ import { FileText, ArrowRight } from 'lucide-react';
 import { SITE_CONFIG } from '@/lib/config';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service — Ledgerium AI',
+  title: 'Terms of Service — Ledgerium AI Workflow Recorder & SOP Platform',
   description:
-    'Terms of Service for the Ledgerium AI platform and browser extension. Clear, fair terms for workflow intelligence.',
+    'Terms of Service for the Ledgerium AI platform, workflow recorder Chrome extension, and automated SOP generator. Clear, fair terms for process documentation.',
+  openGraph: {
+    title: 'Terms of Service — Ledgerium AI Workflow Recorder & SOP Platform',
+    description:
+      'Terms of Service for the Ledgerium AI platform and browser extension workflow recorder. Clear terms for workflow intelligence and process documentation.',
+  },
 };
 
 export default function TermsPage() {

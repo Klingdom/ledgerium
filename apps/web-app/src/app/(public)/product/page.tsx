@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { TrackedLink } from '@/components/TrackedLink';
 import {
   Play,
   MousePointer2,
@@ -20,13 +21,13 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Product — Ledgerium AI',
+  title: 'Browser Workflow Recorder & SOP Generator — Ledgerium AI',
   description:
-    'From recording to process intelligence in minutes. See how Ledgerium captures real browser workflows and produces SOPs, process maps, health scores, and AI agent compositions.',
+    'Automatic process documentation from real browser activity. Record workflows once, get structured SOPs, process maps, and AI-ready data instantly. No screenshots, no writing.',
   openGraph: {
-    title: 'Product — Ledgerium AI',
+    title: 'Browser Workflow Recorder & SOP Generator — Ledgerium AI',
     description:
-      'Capture real browser workflows. Get structured SOPs, process maps, and AI-powered process intelligence — deterministically.',
+      'Capture real browser workflows with structured interaction data. Get SOPs, process maps, and process intelligence — deterministically, in minutes.',
   },
 };
 
@@ -267,10 +268,15 @@ export default function ProductPage() {
               health scores, and AI-powered analysis — deterministically.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link href="/signup" className="btn-primary text-base px-7 py-3.5 gap-2 shadow-sm shadow-brand-600/20">
+              <TrackedLink
+                href="/signup"
+                event="cta_clicked"
+                properties={{ location: 'product_hero', destination: '/signup' }}
+                className="btn-primary text-base px-7 py-3.5 gap-2 shadow-sm shadow-brand-600/20"
+              >
                 Get Started Free
                 <ArrowRight className="h-4 w-4" />
-              </Link>
+              </TrackedLink>
               <a href="/dashboard.html" className="btn-secondary text-base px-7 py-3.5 gap-2">
                 <LayoutDashboard className="h-4 w-4" />
                 Interactive Demo
@@ -571,10 +577,15 @@ export default function ProductPage() {
             no extension install required. When you&apos;re ready, record your own.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href="/signup" className="btn-primary gap-2 text-base px-7 py-3.5 shadow-sm shadow-brand-600/20">
+            <TrackedLink
+              href="/signup"
+              event="cta_clicked"
+              properties={{ location: 'product_bottom_cta', destination: '/signup' }}
+              className="btn-primary gap-2 text-base px-7 py-3.5 shadow-sm shadow-brand-600/20"
+            >
               Get Started Free
               <ArrowRight className="h-4 w-4" />
-            </Link>
+            </TrackedLink>
             <Link href="/install" className="btn-secondary text-base px-7 py-3.5">
               Install Extension
             </Link>

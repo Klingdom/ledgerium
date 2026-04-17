@@ -3,9 +3,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Documentation — Ledgerium AI',
+  title: 'Workflow Recorder Documentation — SOP Generator User Guide | Ledgerium',
   description:
-    'Complete user guide for Ledgerium AI — record workflows, generate SOPs, process maps, analytics, and more.',
+    'Complete guide to the Ledgerium AI workflow recorder and automated SOP generator. Learn how to record browser workflows, generate SOPs, process maps, and use analytics.',
+  openGraph: {
+    title: 'Workflow Recorder Documentation — SOP Generator User Guide | Ledgerium',
+    description:
+      'Everything you need to get started with Ledgerium AI: recording workflows, generating SOPs and process maps, sharing, exporting, and team collaboration.',
+  },
 };
 
 /* ── Sidebar navigation items ─────────────────────────────────── */

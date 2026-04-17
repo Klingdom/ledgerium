@@ -3,11 +3,17 @@ import Link from 'next/link';
 import { ArrowRight, HelpCircle } from 'lucide-react';
 import { PricingCards } from '@/components/PricingCards';
 import { ROICalculator } from './ROICalculator';
+import { TrackedLink } from '@/components/TrackedLink';
 
 export const metadata: Metadata = {
-  title: 'Pricing — Ledgerium AI',
+  title: 'SOP Software Pricing — Process Documentation Tool Plans | Ledgerium',
   description:
-    'Start free. Plans from $49/mo for individuals to custom enterprise pricing for compliance teams.',
+    'Free plan available. SOP software pricing from $49/mo for individuals to enterprise. Automated process documentation with workflow recording, SOPs, and process intelligence.',
+  openGraph: {
+    title: 'SOP Software Pricing — Process Documentation Tool Plans | Ledgerium',
+    description:
+      'Start free. Upgrade for unlimited recordings, process intelligence, and compliance-grade exports. Automated SOP generation from $49/mo.',
+  },
 };
 
 const FAQ = [
@@ -85,9 +91,26 @@ function ComparisonCell({ value }: { value: CellValue }) {
   return <span className="text-[var(--content-primary)] text-sm">{value}</span>;
 }
 
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQ.map(({ q, a }) => ({
+    '@type': 'Question',
+    name: q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: a,
+    },
+  })),
+};
+
 export default function PricingPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       {/* Hero */}
       <section className="pt-20 pb-10 bg-gradient-to-b from-brand-900/20 to-[var(--surface-primary)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
@@ -249,10 +272,15 @@ export default function PricingPage() {
             Record 5 workflows free. See what you&apos;ve been missing.
           </h2>
           <div className="mt-8">
-            <Link href="/signup" className="btn-primary gap-2 text-base px-7 py-3.5 shadow-sm shadow-brand-600/20">
+            <TrackedLink
+              href="/signup"
+              event="cta_clicked"
+              properties={{ location: 'pricing_cta', destination: '/signup' }}
+              className="btn-primary gap-2 text-base px-7 py-3.5 shadow-sm shadow-brand-600/20"
+            >
               Create free account
               <ArrowRight className="h-4 w-4" />
-            </Link>
+            </TrackedLink>
           </div>
           <p className="mt-3 text-ds-xs text-[#e2e8f0]">
             No credit card required · Data never used for training ·{' '}

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Check } from 'lucide-react';
 import { PRICING_CONFIG } from '@/lib/config';
 import { UpgradeButton } from '@/components/UpgradeButton';
+import { track } from '@/lib/analytics';
 
 export function PricingCards() {
   const [isAnnual, setIsAnnual] = useState(false);
@@ -129,7 +130,15 @@ export function PricingCards() {
                   {plan.cta}
                 </UpgradeButton>
               ) : (
-                <Link href={plan.ctaHref} className="w-full text-center btn-secondary">
+                <Link
+                  href={plan.ctaHref}
+                  className="w-full text-center btn-secondary"
+                  onClick={() => {
+                    if (plan.ctaHref === '/signup') {
+                      track({ event: 'cta_clicked', location: 'pricing_cta', destination: '/signup' });
+                    }
+                  }}
+                >
                   {plan.cta}
                 </Link>
               )}

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { TrackedLink } from '@/components/TrackedLink';
 import {
   ArrowRight,
   Bot,
@@ -16,13 +17,13 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'AI Implementation Teams — Ledgerium AI',
+  title: 'Process Documentation for AI Automation & Workflow Data for AI Agents | Ledgerium',
   description:
-    "You're deploying AI agents into workflows you've never observed. Ledgerium captures the real process first — so your agents execute accurately, not aspirationally.",
+    'Capture real workflow data for AI agents before you automate. Process documentation for AI automation that gives your agents ground truth — not assumed or written-from-memory SOPs.',
   openGraph: {
-    title: 'AI Implementation Teams — Ledgerium AI',
+    title: 'Process Documentation for AI Automation — Workflow Data for AI Agents | Ledgerium',
     description:
-      "AI agents built on assumed workflows break in production. Ledgerium captures the real process before you automate it — so your agents have ground truth, not workshop notes.",
+      'AI agents built on assumed workflows break in production. Capture structured workflow data for AI agents with Ledgerium — evidence-based, not aspirational.',
   },
 };
 
@@ -128,13 +129,15 @@ export default function AiImplementationPage() {
             </p>
 
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
+              <TrackedLink
                 href="/signup"
+                event="cta_clicked"
+                properties={{ location: 'use_case_ai_implementation_hero', destination: '/signup' }}
                 className="btn-primary text-base px-7 py-3.5 gap-2 shadow-sm shadow-brand-600/20"
               >
                 Get Started Free
                 <ArrowRight className="h-4 w-4" />
-              </Link>
+              </TrackedLink>
               <Link href="/product" className="btn-secondary text-base px-7 py-3.5">
                 See how it works
               </Link>
@@ -250,13 +253,15 @@ export default function AiImplementationPage() {
             automation ships.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link
+            <TrackedLink
               href="/signup"
+              event="cta_clicked"
+              properties={{ location: 'use_case_ai_implementation_bottom_cta', destination: '/signup' }}
               className="btn-primary text-base px-7 py-3.5 gap-2 shadow-sm shadow-brand-600/20"
             >
               Create free account
               <ArrowRight className="h-4 w-4" />
-            </Link>
+            </TrackedLink>
             <Link href="/product" className="btn-secondary text-base px-7 py-3.5">
               See how it works
             </Link>

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { TrackedLink } from '@/components/TrackedLink';
 import {
   ArrowRight,
   Shield,
@@ -13,13 +14,13 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Compliance & Audit — Ledgerium AI',
+  title: 'Compliance Process Documentation — SOC 2 & ISO 27001 Evidence | Ledgerium',
   description:
-    'Ledgerium captures real process execution and generates evidence-linked documentation — every step traceable to source events. Built for compliance, audit, and risk teams.',
+    'Compliance process documentation with traceable evidence. Generate SOC 2 audit evidence and ISO 27001 documentation automatically from real browser workflow recordings.',
   openGraph: {
-    title: 'Compliance & Audit — Ledgerium AI',
+    title: 'Compliance Process Documentation — SOC 2 & ISO 27001 Evidence | Ledgerium',
     description:
-      'Your audit documentation says the process works. Ledgerium verifies it — with deterministic, evidence-linked process documentation traceable to real browser events.',
+      'Deterministic, evidence-linked compliance process documentation. Every step traceable to source browser events — built for audit, risk, and compliance teams.',
   },
 };
 
@@ -123,13 +124,15 @@ export default function CompliancePage() {
             </p>
 
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
+              <TrackedLink
                 href="/signup"
+                event="cta_clicked"
+                properties={{ location: 'use_case_compliance_hero', destination: '/signup' }}
                 className="btn-primary text-base px-7 py-3.5 gap-2 shadow-sm shadow-brand-600/20"
               >
                 Get Started Free
                 <ArrowRight className="h-4 w-4" />
-              </Link>
+              </TrackedLink>
               <Link href="/product" className="btn-secondary text-base px-7 py-3.5">
                 See how it works
               </Link>
@@ -246,13 +249,15 @@ export default function CompliancePage() {
             evidence traceability &mdash; in minutes, not months. Free to start.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link
+            <TrackedLink
               href="/signup"
+              event="cta_clicked"
+              properties={{ location: 'use_case_compliance_bottom_cta', destination: '/signup' }}
               className="btn-primary text-base px-7 py-3.5 gap-2 shadow-sm shadow-brand-600/20"
             >
               Create free account
               <ArrowRight className="h-4 w-4" />
-            </Link>
+            </TrackedLink>
             <Link href="/security" className="btn-secondary text-base px-7 py-3.5">
               See our security practices
             </Link>

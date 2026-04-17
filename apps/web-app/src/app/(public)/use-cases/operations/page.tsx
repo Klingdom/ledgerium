@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { TrackedLink } from '@/components/TrackedLink';
 import {
   ArrowRight,
   AlertTriangle,
@@ -20,13 +21,13 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Operations Teams — Ledgerium AI',
+  title: 'Operations Process Documentation — SOP Tool for Ops Teams | Ledgerium',
   description:
-    'Ledgerium records what your team actually does in ERP, CRM, and internal tools — and generates SOPs automatically. No interviews, no workshops, no outdated documentation.',
+    'Operations process documentation that captures real ERP and CRM workflows automatically. Generate SOPs for ops teams from browser recordings — no interviews or workshops.',
   openGraph: {
-    title: 'Operations Teams — Ledgerium AI',
+    title: 'Operations Process Documentation — SOP Tool for Ops Teams | Ledgerium',
     description:
-      'Your ERP workflows are undocumented. Your SOPs are outdated. Your new hires are stuck. Ledgerium fixes that.',
+      'Your ERP workflows are undocumented. Your SOPs are outdated. Ledgerium records real operations workflows and generates accurate process documentation automatically.',
   },
 };
 
@@ -116,13 +117,15 @@ export default function OperationsUseCasePage() {
             </p>
 
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
+              <TrackedLink
                 href="/signup"
+                event="cta_clicked"
+                properties={{ location: 'use_case_operations_hero', destination: '/signup' }}
                 className="btn-primary text-base px-7 py-3.5 gap-2 shadow-sm shadow-brand-600/20"
               >
                 Get Started Free
                 <ArrowRight className="h-4 w-4" />
-              </Link>
+              </TrackedLink>
               <Link href="/product" className="btn-secondary text-base px-7 py-3.5">
                 See how it works
               </Link>
@@ -274,13 +277,15 @@ export default function OperationsUseCasePage() {
             Free to start — no IT involvement required.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link
+            <TrackedLink
               href="/signup"
+              event="cta_clicked"
+              properties={{ location: 'use_case_operations_bottom_cta', destination: '/signup' }}
               className="btn-primary text-base px-7 py-3.5 gap-2 shadow-sm shadow-brand-600/20"
             >
               Create free account
               <ArrowRight className="h-4 w-4" />
-            </Link>
+            </TrackedLink>
             <Link href="/install" className="btn-secondary text-base px-7 py-3.5">
               Install extension
             </Link>

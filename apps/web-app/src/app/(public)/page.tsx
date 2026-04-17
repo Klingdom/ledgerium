@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { TrackedLink } from '@/components/TrackedLink';
 import {
   ArrowRight,
   PlayCircle,
@@ -46,14 +47,24 @@ export default function HomePage() {
               No workshops. No guessing.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link href="/signup" className="btn-primary text-base px-7 py-3.5 gap-2 shadow-sm shadow-brand-600/20">
+              <TrackedLink
+                href="/signup"
+                event="cta_clicked"
+                properties={{ location: 'homepage_hero', destination: '/signup' }}
+                className="btn-primary text-base px-7 py-3.5 gap-2 shadow-sm shadow-brand-600/20"
+              >
                 Get Started Free
                 <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link href="/product" className="btn-secondary text-base px-7 py-3.5 gap-2">
+              </TrackedLink>
+              <TrackedLink
+                href="/product"
+                event="cta_clicked"
+                properties={{ location: 'homepage_hero', destination: '/product' }}
+                className="btn-secondary text-base px-7 py-3.5 gap-2"
+              >
                 <PlayCircle className="h-4 w-4" />
                 See the Product
-              </Link>
+              </TrackedLink>
             </div>
             <p className="mt-5 text-xs text-[var(--content-tertiary)]">
               Free to start. No credit card required. Share any SOP with a public link.
@@ -373,10 +384,15 @@ export default function HomePage() {
             in under 5 minutes. Free to start.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href="/signup" className="btn-primary text-base px-7 py-3.5 gap-2 shadow-sm shadow-brand-600/20">
+            <TrackedLink
+              href="/signup"
+              event="cta_clicked"
+              properties={{ location: 'homepage_bottom_cta', destination: '/signup' }}
+              className="btn-primary text-base px-7 py-3.5 gap-2 shadow-sm shadow-brand-600/20"
+            >
               Create free account
               <ArrowRight className="h-4 w-4" />
-            </Link>
+            </TrackedLink>
             <Link href="/install" className="btn-secondary text-base px-7 py-3.5">
               Install extension
             </Link>

@@ -20,9 +20,14 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Install — Ledgerium AI',
+  title: 'Install Chrome Extension Workflow Recorder — Ledgerium AI',
   description:
-    'Add the Ledgerium AI browser extension to Chrome. Record workflows, generate SOPs and process maps automatically.',
+    'Install the Ledgerium AI Chrome extension workflow recorder in 2 minutes. Record browser workflows automatically and generate SOPs, process maps, and process documentation instantly.',
+  openGraph: {
+    title: 'Install Chrome Extension Workflow Recorder — Ledgerium AI',
+    description:
+      'Add the Ledgerium AI Chrome extension to start recording browser workflows. Get structured SOPs and process maps from real activity — no screenshots, no writing.',
+  },
 };
 
 export default function InstallPage() {

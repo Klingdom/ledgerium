@@ -3,9 +3,14 @@ import Link from 'next/link';
 import { ArrowRight, Eye, Shield, Zap, Target, BookOpen, CheckCircle, Camera, Server, FileText } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'About — Ledgerium AI',
+  title: 'About Ledgerium AI — Automated SOP Generator & Workflow Recorder',
   description:
-    'Evidence-based workflow intelligence. We capture how work actually happens so organizations can document, improve, and automate with confidence.',
+    'Ledgerium AI builds evidence-based process intelligence. We capture how work actually happens in the browser to generate accurate SOPs, process maps, and workflow documentation.',
+  openGraph: {
+    title: 'About Ledgerium AI — Automated SOP Generator & Workflow Recorder',
+    description:
+      'Most process documentation is aspirational. Ledgerium captures what actually happens in the browser and generates accurate SOPs — evidence-based, not memory-based.',
+  },
 };
 
 export default function AboutPage() {

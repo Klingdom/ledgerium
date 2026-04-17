@@ -3,9 +3,14 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Blog — Ledgerium AI',
+  title: 'Process Documentation & SOP Automation Blog — Ledgerium AI',
   description:
-    'Process documentation, automation readiness, and evidence-based operations. Insights from the Ledgerium team.',
+    'Insights on automated SOP generation, process documentation, workflow recording, and evidence-based operations from the Ledgerium AI team.',
+  openGraph: {
+    title: 'Process Documentation & SOP Automation Blog — Ledgerium AI',
+    description:
+      'Practical guides and research on process documentation, SOP automation, workflow recording, and automation readiness from the Ledgerium team.',
+  },
 };
 
 const POSTS = [

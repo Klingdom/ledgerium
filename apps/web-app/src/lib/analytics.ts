@@ -24,7 +24,7 @@ import { captureEvent as posthogCapture, identifyUser as posthogIdentify, isPost
 
 export type AnalyticsEvent =
   // ── Authentication ────────────────────────────────────────────────────────
-  | { event: 'signup_completed' }
+  | { event: 'signup_completed'; [utm: string]: unknown }
   | { event: 'login_completed' }
   | { event: 'login_failed'; reason: string }
   | { event: 'logout' }
@@ -106,6 +106,9 @@ export type AnalyticsEvent =
 
   // ── Feedback ───────────────────────────────────────────────────────────────
   | { event: 'sop_usefulness_response'; workflowId: string; response: 'yes_as_is' | 'minor_edits' | 'major_rework' | 'not_useful' }
+
+  // ── Marketing ─────────────────────────────────────────────────────────────
+  | { event: 'cta_clicked'; location: string; destination: string }
 
   // ── Errors ────────────────────────────────────────────────────────────────
   | { event: 'upload_failed'; error: string }
@@ -224,6 +227,33 @@ if (IS_BROWSER) {
 // trackServer() lives in './analytics-server' to keep Node.js-only dependencies
 // (posthog-node, Prisma) out of the client bundle.
 // API routes should import { trackServer } from '@/lib/analytics-server'.
+
+// ─── Funnel helpers ──────────────────────────────────────────────────────────
+
+// ─── UTM helpers ─────────────────────────────────────────────────────────────
+
+const FIRST_TOUCH_UTM_KEY = 'ledgerium_first_touch_utm';
+
+/**
+ * Returns the first-touch UTM data stored by UTMCapture, or null if none.
+ * Safe to call on the server — returns null in that context.
+ */
+export function getFirstTouchUTM(): Record<string, string> | null {
+  if (!IS_BROWSER) return null;
+  try {
+    const raw = localStorage.getItem(FIRST_TOUCH_UTM_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    // Return only string values to keep the shape clean for event properties
+    const result: Record<string, string> = {};
+    for (const [k, v] of Object.entries(parsed)) {
+      if (typeof v === 'string') result[k] = v;
+    }
+    return Object.keys(result).length > 0 ? result : null;
+  } catch {
+    return null;
+  }
+}
 
 // ─── Funnel helpers ──────────────────────────────────────────────────────────
 

@@ -4,9 +4,14 @@ import { Shield, Eye, EyeOff, Lock, UserCheck, ArrowRight } from 'lucide-react';
 import { SITE_CONFIG } from '@/lib/config';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — Ledgerium AI',
+  title: 'Privacy Policy — Ledgerium AI Chrome Extension Workflow Recorder',
   description:
-    'How the Ledgerium AI Recorder browser extension collects, uses, and safeguards your information. Trust-first, user-controlled, evidence-based.',
+    'Privacy policy for the Ledgerium AI workflow recorder Chrome extension. No screenshots, no keystroke logging. Learn exactly what data is collected and how it is protected.',
+  openGraph: {
+    title: 'Privacy Policy — Ledgerium AI Chrome Extension Workflow Recorder',
+    description:
+      'Trust-first privacy: no screenshots, no keystroke logging, no background recording. See exactly what the Ledgerium AI workflow recorder collects and why.',
+  },
 };
 
 export default function PrivacyPage() {

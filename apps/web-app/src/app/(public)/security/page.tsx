@@ -16,9 +16,14 @@ import {
 import { SITE_CONFIG } from '@/lib/config';
 
 export const metadata: Metadata = {
-  title: 'Security & Privacy — Ledgerium AI',
+  title: 'Privacy-Safe Workflow Recorder — Secure Process Documentation | Ledgerium',
   description:
-    'Ledgerium AI is built with a trust-first architecture. No screenshots, no keystrokes, no background recording. Learn how we protect your data.',
+    'Privacy-safe workflow recorder with no screenshots, no keystrokes, and no background recording. Secure process documentation built on a trust-first, data-minimization architecture.',
+  openGraph: {
+    title: 'Privacy-Safe Workflow Recorder — Secure Process Documentation | Ledgerium',
+    description:
+      'Ledgerium captures browser interaction structure — not screen content. No screenshots, no keystroke logging. Secure process documentation by design.',
+  },
 };
 
 const PRINCIPLES = [

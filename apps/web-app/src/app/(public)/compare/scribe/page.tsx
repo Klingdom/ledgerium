@@ -15,13 +15,13 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Ledgerium vs Scribe — Comparison | Ledgerium AI',
+  title: 'Scribe Alternative: Ledgerium vs Scribe Comparison | Ledgerium AI',
   description:
-    'Scribe captures annotated screenshots. Ledgerium captures structured interaction data. Understand the structural difference before you choose a tool.',
+    'Scribe alternative for teams who need more than screenshots. Compare Ledgerium vs Scribe: structured data capture vs annotated images, process intelligence vs visual guides.',
   openGraph: {
-    title: 'Ledgerium vs Scribe — Comparison | Ledgerium AI',
+    title: 'Scribe Alternative: Ledgerium vs Scribe Comparison | Ledgerium AI',
     description:
-      'Scribe captures annotated screenshots. Ledgerium captures structured interaction data. Understand the structural difference before you choose a tool.',
+      'Scribe captures annotated screenshots. Ledgerium captures structured interaction data. See the structural difference and decide which tool fits your workflow needs.',
   },
 };
 
@@ -93,6 +93,31 @@ const COMPARISON_ROWS: ComparisonRow[] = [
   },
 ];
 
+/* ── FAQ data ───────────────────────────────────────────────────────────── */
+
+const COMPARE_FAQ = [
+  {
+    q: 'Is Ledgerium a Scribe alternative?',
+    a: 'Yes. Ledgerium is a Scribe alternative for teams that need structured process data, not just annotated screenshots. Where Scribe produces a visual walkthrough, Ledgerium captures structured interaction events with timing data, system context, and confidence scores — output you can diff, version, and feed into automation.',
+  },
+  {
+    q: 'What is the main difference between Ledgerium and Scribe?',
+    a: 'Scribe captures annotated screenshots — a visual record of what the screen looked like at each step. Ledgerium captures structural interaction data: clicks, inputs, navigation events, timing, and system context. The result is structured process data rather than a screenshot guide.',
+  },
+  {
+    q: 'Does Ledgerium take screenshots like Scribe?',
+    a: 'No. Ledgerium never captures screenshots or screen content. It records structural browser interaction events — what was clicked, where, and when — without storing any visual representation of the screen. This is a deliberate privacy design: no screenshots means no risk of capturing sensitive data visible on screen.',
+  },
+  {
+    q: 'Can Ledgerium replace Scribe for SOP generation?',
+    a: "Ledgerium generates SOPs automatically from recorded browser workflows, similar to Scribe. The difference is output quality: Ledgerium's SOPs are backed by structured data with timing, step-by-step evidence, and process health scores, whereas Scribe SOPs are screenshot-based walkthroughs. If you need compliance-grade or automation-ready documentation, Ledgerium is the stronger fit.",
+  },
+  {
+    q: 'Which tool is better for compliance documentation?',
+    a: 'Ledgerium. Compliance teams need evidence-linked, traceable process documentation — not screenshot guides. Ledgerium captures structured interaction data traceable to source browser events, supports process diffing to detect drift, and produces deterministic output you can use as audit evidence.',
+  },
+] as const;
+
 /* ── Cell renderer ──────────────────────────────────────────────────────── */
 
 function ComparisonCell({
@@ -131,11 +156,30 @@ function ComparisonCell({
   );
 }
 
+/* ── FAQ JSON-LD ────────────────────────────────────────────────────────── */
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: COMPARE_FAQ.map(({ q, a }) => ({
+    '@type': 'Question',
+    name: q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: a,
+    },
+  })),
+};
+
 /* ── Page ───────────────────────────────────────────────────────────────── */
 
 export default function CompareScribePage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 pt-20 pb-16 sm:pt-28 sm:pb-20 text-center">
@@ -422,6 +466,23 @@ export default function CompareScribePage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ───────────────────────────────────────────────────────────── */}
+      <section className="py-20 bg-[var(--surface-primary)] border-t border-[var(--border-default)]">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-[var(--content-primary)] mb-10 text-center">
+            Frequently asked questions
+          </h2>
+          <dl className="space-y-6">
+            {COMPARE_FAQ.map(({ q, a }) => (
+              <div key={q} className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-elevated)] p-6">
+                <dt className="text-base font-semibold text-[var(--content-primary)] mb-3">{q}</dt>
+                <dd className="text-sm text-[#e2e8f0] leading-relaxed">{a}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </section>
 

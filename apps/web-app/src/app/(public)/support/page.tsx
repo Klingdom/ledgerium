@@ -14,9 +14,14 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Support — Ledgerium AI',
+  title: 'Support — Ledgerium AI Workflow Recorder & SOP Generator',
   description:
-    'Find answers, documentation, and contact options for Ledgerium AI support.',
+    'Get help with the Ledgerium AI workflow recorder and automated SOP generator. Find user guides, troubleshooting steps, billing help, and contact options.',
+  openGraph: {
+    title: 'Support — Ledgerium AI Workflow Recorder & SOP Generator',
+    description:
+      'Find answers, user guides, and contact options for the Ledgerium AI workflow recorder, SOP generator, and process documentation tool.',
+  },
 };
 
 const QUICK_LINKS = [
