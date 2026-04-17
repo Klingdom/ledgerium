@@ -16,7 +16,18 @@ import type {
   EnterpriseSOP,
   DecisionSOP,
 } from '../templateTypes.js';
-import { mdHeading, mdBullet, mdNumbered, mdBold, mdTable, mdCallout } from './renderHelpers.js';
+import {
+  mdHeading,
+  mdBullet,
+  mdNumbered,
+  mdBold,
+  mdTable,
+  mdCallout,
+  renderMetadataStrip,
+  renderEnterpriseMetadataTable,
+  renderConfidenceBadge,
+} from './renderHelpers.js';
+import { PROCESS_ENGINE_VERSION } from '../types.js';
 
 // ─── Document frame ──────────────────────────────────────────────────────────
 
@@ -279,8 +290,32 @@ function sipocRow(map: SIPOCProcessMap): string[] {
 function renderOperatorMarkdown(sop: OperatorSOP): string {
   const lines: string[] = [];
 
+  // ── Above the fold (lines 1–~8) ──────────────────────────────────────────
   lines.push(mdHeading(1, sop.taskTitle));
   lines.push('');
+
+  // 2. Italic one-line purpose
+  lines.push(`_${sop.whatThisIsFor}_`);
+  lines.push('');
+
+  // 3. Inline metadata strip
+  const metaStrip = renderMetadataStrip({
+    version: '1.0',
+    stepCount: sop.steps.length,
+    systemCount: sop.systemsNeeded.length || 1,
+    averageConfidence: sop.averageConfidence ?? 1,
+    generatedAt: sop.generatedAt ?? new Date().toISOString(),
+  });
+  lines.push(metaStrip);
+  lines.push('');
+
+  // 4. Confidence badge callout
+  const badge = sop.qualityBadge ?? 'high';
+  lines.push(renderConfidenceBadge(badge, sop.steps.length, sop.qualityAdvisory));
+  lines.push('');
+  lines.push('---');
+  lines.push('');
+  // ─────────────────────────────────────────────────────────────────────────
 
   // What & When
   lines.push(mdHeading(2, 'What This Is For'));
@@ -362,10 +397,29 @@ function renderOperatorMarkdown(sop: OperatorSOP): string {
 function renderEnterpriseMarkdown(sop: EnterpriseSOP): string {
   const lines: string[] = [];
 
+  // ── Above the fold ────────────────────────────────────────────────────────
   lines.push(mdHeading(1, sop.title));
   lines.push('');
-  lines.push(`${mdBold('SOP ID:')} ${sop.sopId} · ${mdBold('Version:')} ${sop.version}`);
+
+  // 3. Full metadata table (Enterprise uses table, not inline strip — §9.1)
+  lines.push(renderEnterpriseMetadataTable({
+    sopId: sop.sopId,
+    version: sop.version,
+    generatedAt: sop.revisionMetadata.generatedAt,
+    engineVersion: sop.revisionMetadata.engineVersion ?? PROCESS_ENGINE_VERSION,
+    basedOn: sop.revisionMetadata.basedOn,
+    stepCount: sop.procedure.length,
+    systemCount: sop.systemsAndTools.length || 1,
+  }));
   lines.push('');
+
+  // 4. Confidence badge callout
+  const badge = sop.qualityBadge ?? 'high';
+  lines.push(renderConfidenceBadge(badge, sop.procedure.length, sop.qualityAdvisory));
+  lines.push('');
+  lines.push('---');
+  lines.push('');
+  // ─────────────────────────────────────────────────────────────────────────
 
   // Purpose & Scope
   lines.push(mdHeading(2, 'Purpose'));
@@ -488,8 +542,38 @@ function renderEnterpriseMarkdown(sop: EnterpriseSOP): string {
 function renderDecisionMarkdown(sop: DecisionSOP): string {
   const lines: string[] = [];
 
+  // ── Above the fold ────────────────────────────────────────────────────────
   lines.push(mdHeading(1, sop.title));
   lines.push('');
+
+  // 2. Italic one-line purpose (first sentence of purpose, or full purpose)
+  const purposeOneLiner = sop.purpose.split(/\.\s/)[0] + '.';
+  lines.push(`_${purposeOneLiner}_`);
+  lines.push('');
+
+  // 3. Inline metadata strip (Decision uses same compact form as Operator — §9.1)
+  const totalActions = sop.branches.reduce((acc, b) => acc + b.actions.length, 0);
+  const metaStrip = renderMetadataStrip({
+    version: '1.0',
+    stepCount: sop.branches.length,
+    systemCount: 1,
+    averageConfidence: sop.averageConfidence ?? 1,
+    generatedAt: sop.generatedAt ?? new Date().toISOString(),
+  });
+  // Annotate strip with "paths" context for decision SOPs
+  lines.push(metaStrip.replace(
+    /· (\d+ step[s]?) ·/,
+    `· ${sop.branches.length} path${sop.branches.length !== 1 ? 's' : ''} ·`,
+  ));
+  lines.push('');
+
+  // 4. Confidence badge callout
+  const badge = sop.qualityBadge ?? 'high';
+  lines.push(renderConfidenceBadge(badge, totalActions, sop.qualityAdvisory));
+  lines.push('');
+  lines.push('---');
+  lines.push('');
+  // ─────────────────────────────────────────────────────────────────────────
 
   lines.push(mdHeading(2, 'Purpose'));
   lines.push(sop.purpose);

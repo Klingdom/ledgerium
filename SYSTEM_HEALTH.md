@@ -1,6 +1,6 @@
 # Ledgerium AI — System Health
 
-Last updated: 2026-04-16 (post-analytics completion)
+Last updated: 2026-04-17 (post-iteration 004 — SOP metadata above the fold)
 
 ## Executive Summary
 
@@ -26,7 +26,7 @@ Overall confidence: **Medium-High**
 | Deterministic core protection | moderate | 4 | good principles, but more regression protection is still needed |
 | Package / code consistency | improving | 3.5 | extension now imports from 3 workspace packages; LiveStepBuilder duplication remains |
 | Session durability / recovery | moderate-risk | 2 | full event persistence is still missing |
-| Test coverage | moderate | 3.5 | web-app vitest active; E2E coverage still missing; 1,393 total tests |
+| Test coverage | moderate | 3.5 | web-app vitest active; E2E coverage still missing; 1,419 total tests (+26 in iter 004) |
 | Observability | strong | 4 | analytics fully instrumented, 8 alert conditions, admin dashboard with engagement/retention/alerts |
 | Agentic CI readiness | improving | 4 | command, backlog, iteration log, and templates now exist |
 | GTM readiness | emerging | 2.5 | product wedge promising; analytics infrastructure ready for data-driven decisions |
@@ -52,6 +52,7 @@ Overall confidence: **Medium-High**
 | `EVENT_TRACKING_PLAN.md` | present | docs/EVENT_TRACKING_PLAN.md — 28+ events with full specs |
 | `DASHBOARD_SPEC.md` | present | docs/DASHBOARD_SPEC.md — 3 admin dashboards, alerting rules |
 | `ANALYTICS_ARCHITECTURE.md` | present | docs/ANALYTICS_ARCHITECTURE.md — Collection architecture, privacy |
+| `docs/sop/` pack | present | 14 artifacts: design system, schema, transformation rules, quality rubric, 3 template specs, 3 rendered examples, implementation notes, collaboration requests |
 
 ---
 
@@ -100,15 +101,17 @@ These should be assumed to block a high-confidence release until resolved:
 ## Recommended Next Iteration
 
 Recommended next item:
-- **Integrate `@ledgerium/policy-engine` into `content/capture.ts`** (score: 13)
+- **Hoist per-step `evidenceEvents: string[]` onto SOP step interfaces and render per-step evidence lines** (score: 15, sop-expert gap #2)
 
 Why:
-- content script still uses local sensitivity pattern instead of shared policy engine
-- directly continues the deduplication trajectory from iteration 003
-- low effort, low risk, high strategic alignment
+- Continues the SOP-quality trajectory established in iteration 004
+- Makes Ledgerium's core trust promise (evidence-linked outputs) visible per step, not just at the document level
+- Additive, non-breaking interface change (parallel to iteration 004 pattern)
+- Aligns rendered SOPs with the approved `docs/sop/examples/` aesthetic
 
 Fallback next items:
-- **Add try/catch to 11 unguarded API routes** (score: 11) — violates `{ data, error, meta }` contract
+- **Add `templates/sopValidator.ts`** (score: 13, sop-expert gap #3) — rejects banned recorder artifacts before render
+- **Integrate `@ledgerium/policy-engine` into `content/capture.ts`** (score: 13) — long-standing capture-pipeline cleanup
 - **Add Playwright E2E tests for recording lifecycle** (score: 12) — release blocker
 - **Connect PostHog** — configure env vars to enable cloud analytics alongside internal DB
 

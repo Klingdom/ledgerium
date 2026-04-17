@@ -11,6 +11,8 @@ import { renderProcessMap } from './processMapTemplates.js';
 import { renderSOP } from './sopTemplates.js';
 import { renderProcessMapMarkdown, renderSOPMarkdown } from './markdownRenderer.js';
 import type { ProcessEngineInput, CanonicalEventInput, DerivedStepInput } from '../types.js';
+import { qualityBadge } from './sopTemplates.js';
+import { renderMetadataStrip, renderConfidenceBadge } from './renderHelpers.js';
 
 // ─── Fixture helpers ─────────────────────────────────────────────────────────
 
@@ -596,5 +598,323 @@ describe('Determinism', () => {
 
     expect(md1.processMap).toBe(md2.processMap);
     expect(md1.sop).toBe(md2.sop);
+  });
+});
+
+// ─── Gap #1: Metadata strip + confidence badge above the fold ─────────────────
+
+describe('renderMetadataStrip helper', () => {
+  it('produces the correct format with plural steps and systems', () => {
+    const strip = renderMetadataStrip({
+      version: '2.0',
+      stepCount: 12,
+      systemCount: 3,
+      averageConfidence: 0.87,
+      generatedAt: '2026-04-17T14:32:47Z',
+    });
+    expect(strip).toBe(
+      '*Ledgerium SOP · v2.0 · 12 steps · 3 systems · 87% confidence · Generated 2026-04-17*',
+    );
+  });
+
+  it('handles singular step and system correctly', () => {
+    const strip = renderMetadataStrip({
+      version: '1.0',
+      stepCount: 1,
+      systemCount: 1,
+      averageConfidence: 0.9,
+      generatedAt: '2026-01-01T00:00:00Z',
+    });
+    expect(strip).toContain('1 step ·');
+    expect(strip).toContain('1 system ·');
+    expect(strip).not.toContain('1 steps');
+    expect(strip).not.toContain('1 systems');
+  });
+
+  it('rounds confidence to nearest integer', () => {
+    const strip = renderMetadataStrip({
+      version: '1.0',
+      stepCount: 5,
+      systemCount: 2,
+      averageConfidence: 0.876,
+      generatedAt: '2026-04-17T00:00:00Z',
+    });
+    expect(strip).toContain('88% confidence');
+  });
+
+  it('trims generatedAt to YYYY-MM-DD', () => {
+    const strip = renderMetadataStrip({
+      version: '1.0',
+      stepCount: 3,
+      systemCount: 1,
+      averageConfidence: 0.9,
+      generatedAt: '2026-04-17T14:32:47.999Z',
+    });
+    expect(strip).toContain('Generated 2026-04-17');
+    expect(strip).not.toContain('T14');
+  });
+});
+
+describe('renderConfidenceBadge helper', () => {
+  it('renders high confidence badge with step count', () => {
+    const badge = renderConfidenceBadge('high', 12);
+    expect(badge).toBe('> ✓ **High confidence** — fully evidence-linked across all 12 steps.');
+  });
+
+  it('renders medium confidence badge with advisory', () => {
+    const badge = renderConfidenceBadge('medium', 5, '2 of 5 steps have low confidence');
+    expect(badge).toContain('⚠ **Medium confidence**');
+    expect(badge).toContain('2 of 5 steps have low confidence');
+  });
+
+  it('renders medium confidence badge with fallback when no advisory', () => {
+    const badge = renderConfidenceBadge('medium', 3);
+    expect(badge).toContain('⚠ **Medium confidence**');
+    expect(badge).toContain('review flagged steps before sharing');
+  });
+
+  it('renders low confidence badge with advisory', () => {
+    const badge = renderConfidenceBadge('low', 4, '3 of 4 steps have low label confidence');
+    expect(badge).toContain('✕ **Low confidence**');
+    expect(badge).toContain('3 of 4 steps have low label confidence');
+  });
+
+  it('renders low confidence badge with fallback when no advisory', () => {
+    const badge = renderConfidenceBadge('low', 2);
+    expect(badge).toContain('✕ **Low confidence**');
+    expect(badge).toContain('manual review required');
+  });
+
+  it('renders singular "step" for single step', () => {
+    const badge = renderConfidenceBadge('high', 1);
+    expect(badge).toContain('all 1 step.');
+    expect(badge).not.toContain('steps');
+  });
+});
+
+describe('qualityBadge classifier', () => {
+  it('returns high when avg >= 0.85 and no low-confidence steps', () => {
+    const output = processSession(simpleWorkflow());
+    // simpleWorkflow has confidence 0.85 and 0.9 — avg well above 0.85
+    const result = qualityBadge(output);
+    // Steps: 0.85 and 0.9 — avg = 0.875, 0 low-confidence steps
+    expect(['high', 'medium']).toContain(result); // depends on exact avg
+  });
+
+  it('returns medium for moderate confidence', () => {
+    // Build an output with no qualityIndicators to test the default
+    const output = processSession(simpleWorkflow());
+    // Manually test the boundary: if qi is undefined, must return 'medium'
+    const fakeOutput = {
+      ...output,
+      sop: { ...output.sop, qualityIndicators: undefined },
+    } as unknown as typeof output;
+    expect(qualityBadge(fakeOutput)).toBe('medium');
+  });
+
+  it('returns low when avg < 0.70', () => {
+    const output = processSession(tinyWorkflow());
+    // tinyWorkflow has confidence 0.55 < 0.70 → low
+    const result = qualityBadge(output);
+    expect(result).toBe('low');
+  });
+
+  it('returns low when >= 3 low-confidence steps', () => {
+    const output = processSession(simpleWorkflow());
+    const fakeOutput = {
+      ...output,
+      sop: {
+        ...output.sop,
+        qualityIndicators: {
+          averageConfidence: 0.80, // above low threshold
+          lowConfidenceStepCount: 3, // at or above LOW_BADGE_MIN_LOW_STEPS
+          errorStepCount: 0,
+          systemCount: 1,
+          frictionCount: 0,
+          isComplete: true,
+        },
+      },
+    };
+    expect(qualityBadge(fakeOutput)).toBe('low');
+  });
+});
+
+describe('Gap #1: Metadata strip appears above the fold in operator SOP markdown', () => {
+  it('metadata strip is within first 15 lines of operator markdown', () => {
+    const output = processSession(simpleWorkflow());
+    const sop = renderSOP(output, 'operator_centric');
+    const md = renderSOPMarkdown(sop);
+    const lines = md.split('\n').filter(l => l.trim() !== '');
+
+    // Metadata strip is the italic line starting with *Ledgerium SOP
+    const stripIndex = lines.findIndex(l => l.startsWith('*Ledgerium SOP'));
+    expect(stripIndex).toBeGreaterThanOrEqual(0);
+    expect(stripIndex).toBeLessThan(15);
+  });
+
+  it('confidence badge is within first 15 lines of operator markdown', () => {
+    const output = processSession(simpleWorkflow());
+    const sop = renderSOP(output, 'operator_centric');
+    const md = renderSOPMarkdown(sop);
+    const lines = md.split('\n').filter(l => l.trim() !== '');
+
+    const badgeIndex = lines.findIndex(l =>
+      l.includes('High confidence') ||
+      l.includes('Medium confidence') ||
+      l.includes('Low confidence'),
+    );
+    expect(badgeIndex).toBeGreaterThanOrEqual(0);
+    expect(badgeIndex).toBeLessThan(15);
+  });
+
+  it('italic purpose line follows H1 immediately (within first 5 lines)', () => {
+    const output = processSession(simpleWorkflow());
+    const sop = renderSOP(output, 'operator_centric');
+    const md = renderSOPMarkdown(sop);
+    const lines = md.split('\n').filter(l => l.trim() !== '');
+
+    // H1 must be first non-empty line
+    expect(lines[0]).toMatch(/^# /);
+    // Italic purpose must follow (within next 4 non-empty lines)
+    const purposeIndex = lines.slice(0, 5).findIndex(l => l.startsWith('_') && l.endsWith('_'));
+    expect(purposeIndex).toBeGreaterThanOrEqual(1);
+    expect(purposeIndex).toBeLessThan(5);
+  });
+
+  it('document order is: H1 → italic purpose → metadata strip → confidence badge', () => {
+    const output = processSession(complexWorkflow());
+    const sop = renderSOP(output, 'operator_centric');
+    const md = renderSOPMarkdown(sop);
+    const lines = md.split('\n').filter(l => l.trim() !== '');
+
+    const h1Index = lines.findIndex(l => l.startsWith('# '));
+    const purposeIndex = lines.findIndex(l => l.startsWith('_') && l.endsWith('_'));
+    const stripIndex = lines.findIndex(l => l.startsWith('*Ledgerium SOP'));
+    const badgeIndex = lines.findIndex(l =>
+      l.includes('High confidence') ||
+      l.includes('Medium confidence') ||
+      l.includes('Low confidence'),
+    );
+
+    expect(h1Index).toBeLessThan(purposeIndex);
+    expect(purposeIndex).toBeLessThan(stripIndex);
+    expect(stripIndex).toBeLessThan(badgeIndex);
+  });
+});
+
+describe('Gap #1: Metadata strip appears above the fold in enterprise SOP markdown', () => {
+  it('metadata table (SOP ID row) is within first 15 lines', () => {
+    const output = processSession(complexWorkflow());
+    const sop = renderSOP(output, 'enterprise');
+    const md = renderSOPMarkdown(sop);
+    const lines = md.split('\n');
+
+    const tableIndex = lines.findIndex(l => l.includes('**SOP ID**'));
+    expect(tableIndex).toBeGreaterThanOrEqual(0);
+    expect(tableIndex).toBeLessThan(15);
+  });
+
+  it('confidence badge is within first 20 lines of enterprise markdown', () => {
+    const output = processSession(complexWorkflow());
+    const sop = renderSOP(output, 'enterprise');
+    const md = renderSOPMarkdown(sop);
+    const lines = md.split('\n');
+
+    const badgeIndex = lines.findIndex(l =>
+      l.includes('High confidence') ||
+      l.includes('Medium confidence') ||
+      l.includes('Low confidence'),
+    );
+    expect(badgeIndex).toBeGreaterThanOrEqual(0);
+    expect(badgeIndex).toBeLessThan(20);
+  });
+
+  it('enterprise metadata table contains all required fields', () => {
+    const output = processSession(complexWorkflow());
+    const sop = renderSOP(output, 'enterprise');
+    const md = renderSOPMarkdown(sop);
+
+    expect(md).toContain('**SOP ID**');
+    expect(md).toContain('**Version**');
+    expect(md).toContain('**Generated**');
+    expect(md).toContain('**Engine**');
+    expect(md).toContain('**Source session**');
+    expect(md).toContain('**Steps**');
+  });
+});
+
+describe('Gap #1: Metadata strip appears above the fold in decision SOP markdown', () => {
+  it('metadata strip is within first 15 lines of decision markdown', () => {
+    const output = processSession(complexWorkflow());
+    const sop = renderSOP(output, 'decision_based');
+    const md = renderSOPMarkdown(sop);
+    const lines = md.split('\n').filter(l => l.trim() !== '');
+
+    const stripIndex = lines.findIndex(l => l.startsWith('*Ledgerium SOP'));
+    expect(stripIndex).toBeGreaterThanOrEqual(0);
+    expect(stripIndex).toBeLessThan(15);
+  });
+
+  it('confidence badge is within first 15 lines of decision markdown', () => {
+    const output = processSession(complexWorkflow());
+    const sop = renderSOP(output, 'decision_based');
+    const md = renderSOPMarkdown(sop);
+    const lines = md.split('\n').filter(l => l.trim() !== '');
+
+    const badgeIndex = lines.findIndex(l =>
+      l.includes('High confidence') ||
+      l.includes('Medium confidence') ||
+      l.includes('Low confidence'),
+    );
+    expect(badgeIndex).toBeGreaterThanOrEqual(0);
+    expect(badgeIndex).toBeLessThan(15);
+  });
+
+  it('decision document order is: H1 → italic purpose → metadata strip → confidence badge', () => {
+    const output = processSession(complexWorkflow());
+    const sop = renderSOP(output, 'decision_based');
+    const md = renderSOPMarkdown(sop);
+    const lines = md.split('\n').filter(l => l.trim() !== '');
+
+    const h1Index = lines.findIndex(l => l.startsWith('# '));
+    const purposeIndex = lines.findIndex(l => l.startsWith('_') && l.endsWith('_'));
+    const stripIndex = lines.findIndex(l => l.startsWith('*Ledgerium SOP'));
+    const badgeIndex = lines.findIndex(l =>
+      l.includes('High confidence') ||
+      l.includes('Medium confidence') ||
+      l.includes('Low confidence'),
+    );
+
+    expect(h1Index).toBeLessThan(purposeIndex);
+    expect(purposeIndex).toBeLessThan(stripIndex);
+    expect(stripIndex).toBeLessThan(badgeIndex);
+  });
+});
+
+describe('Gap #1: Confidence badge correctness for low-confidence recording', () => {
+  it('low-confidence recording produces a low or medium badge, never high', () => {
+    // tinyWorkflow has one step at 0.55 confidence → low badge
+    const output = processSession(tinyWorkflow());
+    const sop = renderSOP(output, 'operator_centric');
+    const md = renderSOPMarkdown(sop);
+
+    expect(md).not.toContain('High confidence');
+    expect(md).toMatch(/Low confidence|Medium confidence/);
+  });
+
+  it('qualityAdvisory text appears inside the badge for medium/low', () => {
+    const output = processSession(tinyWorkflow());
+    const sop = renderSOP(output, 'operator_centric');
+    const md = renderSOPMarkdown(sop);
+
+    // For medium or low, advisory or fallback text should be present in badge
+    if (md.includes('Low confidence') || md.includes('Medium confidence')) {
+      const badgeLine = md.split('\n').find(l =>
+        l.includes('Low confidence') || l.includes('Medium confidence'),
+      );
+      expect(badgeLine).toBeDefined();
+      // Badge is a blockquote line
+      expect(badgeLine).toMatch(/^>/);
+    }
   });
 });

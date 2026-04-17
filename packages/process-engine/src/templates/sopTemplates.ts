@@ -31,6 +31,43 @@ import {
   deriveTips,
 } from './renderHelpers.js';
 
+// ─── Confidence thresholds ───────────────────────────────────────────────────
+
+/** Minimum average confidence for a "high" badge. */
+const HIGH_CONFIDENCE_THRESHOLD = 0.85 as const;
+/** Minimum average confidence to avoid a "low" badge. */
+const LOW_CONFIDENCE_THRESHOLD = 0.70 as const;
+/** Maximum low-confidence step count for a "high" badge (must be zero). */
+const HIGH_BADGE_MAX_LOW_STEPS = 0 as const;
+/** Minimum low-confidence step count that forces a "low" badge. */
+const LOW_BADGE_MIN_LOW_STEPS = 3 as const;
+
+// ─── Quality badge classifier ────────────────────────────────────────────────
+
+/**
+ * Classifies overall SOP quality as high / medium / low, based on average
+ * confidence and low-confidence step count (Design System §7.3).
+ *
+ * Thresholds are named constants above for tunability.
+ */
+export function qualityBadge(output: ProcessOutput): 'high' | 'medium' | 'low' {
+  const qi = output.sop.qualityIndicators;
+  if (!qi) return 'medium';
+  if (
+    qi.averageConfidence >= HIGH_CONFIDENCE_THRESHOLD &&
+    qi.lowConfidenceStepCount <= HIGH_BADGE_MAX_LOW_STEPS
+  ) {
+    return 'high';
+  }
+  if (
+    qi.averageConfidence < LOW_CONFIDENCE_THRESHOLD ||
+    qi.lowConfidenceStepCount >= LOW_BADGE_MIN_LOW_STEPS
+  ) {
+    return 'low';
+  }
+  return 'medium';
+}
+
 // ─── Quality advisory ────────────────────────────────────────────────────────
 
 /**
@@ -104,6 +141,9 @@ function renderOperatorCentric(output: ProcessOutput): OperatorSOP {
     completionCheck: sop.completionCriteria,
     sourceNote: `This procedure was derived from observed workflow activity in ${sop.systems.join(' and ') || 'the target system'}. All ${sop.steps.length} steps are evidence-linked.`,
     qualityAdvisory: buildQualityAdvisory(output),
+    qualityBadge: qualityBadge(output),
+    averageConfidence: output.sop.qualityIndicators?.averageConfidence ?? 1,
+    generatedAt: sop.generatedAt,
   };
 }
 
@@ -220,6 +260,8 @@ function renderEnterprise(output: ProcessOutput): EnterpriseSOP {
     completionCriteria: sop.completionCriteria,
     sourceNote: `This SOP was derived from observed workflow behavior in ${sop.systems.join(' and ') || 'the target system'}. All ${sop.steps.length} procedure steps are evidence-based and traceable to source events.`,
     qualityAdvisory: buildQualityAdvisory(output),
+    qualityBadge: qualityBadge(output),
+    averageConfidence: output.sop.qualityIndicators?.averageConfidence ?? 1,
     revisionMetadata: {
       generatedAt: sop.generatedAt,
       engineVersion: PROCESS_ENGINE_VERSION,
@@ -353,6 +395,9 @@ function renderDecisionBased(output: ProcessOutput): DecisionSOP {
     documentationRequirements: docRequirements,
     sourceNote: `This procedure was derived from observed workflow behavior in ${sop.systems.join(' and ') || 'the target system'}. Branch logic reflects ${branches.length} path${branches.length !== 1 ? 's' : ''} observed during execution.`,
     qualityAdvisory: buildQualityAdvisory(output),
+    qualityBadge: qualityBadge(output),
+    averageConfidence: output.sop.qualityIndicators?.averageConfidence ?? 1,
+    generatedAt: sop.generatedAt,
   };
 }
 

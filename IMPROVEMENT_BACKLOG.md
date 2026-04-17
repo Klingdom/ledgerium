@@ -1,6 +1,6 @@
 # Ledgerium AI — Improvement Backlog
 
-Last updated: 2026-04-16  
+Last updated: 2026-04-17  
 Current phase: Phase 1  
 Backlog purpose: maintain a ranked, evidence-based portfolio of the highest-value fixes, improvements, and experiments for bounded improvement loops.
 
@@ -21,11 +21,11 @@ Higher total score = higher priority.
 
 ## Portfolio Summary
 
-- Total candidates reviewed: 20 (10 original + 10 from iteration 001)
-- Top priority area: extension architecture convergence and API safety
+- Total candidates reviewed: 23 (10 original + 10 from iteration 001 + 3 from sop-expert design review)
+- Top priority area: SOP output quality + extension architecture convergence + API safety
 - Highest-risk unresolved item: 11 API routes with no try/catch error handling
-- Last completed item: Replace duplicated background logic with workspace package imports (iteration 003)
-- Next recommended item: Integrate `@ledgerium/policy-engine` into `content/capture.ts`
+- Last completed item: Metadata strip + confidence badge above the fold in SOP markdown renderer (iteration 004)
+- Next recommended item: Hoist per-step evidence references onto SOP step interfaces and render in all three templates (sop-expert gap #2)
 
 ---
 
@@ -35,7 +35,10 @@ Higher total score = higher priority.
 |------|-------|------|------|--------|-----------|----------|------------|--------|------|-------|--------|
 | ~~—~~ | ~~Add vitest config + test script to web-app~~ | ~~improvement~~ | ~~test infrastructure~~ | ~~5~~ | ~~5~~ | ~~3~~ | ~~5~~ | ~~1~~ | ~~1~~ | ~~16~~ | **done (iter 001)** |
 | ~~1~~ | ~~Replace duplicated background logic with workspace package imports~~ | ~~improvement~~ | ~~extension architecture~~ | ~~5~~ | ~~5~~ | ~~4~~ | ~~5~~ | ~~3~~ | ~~2~~ | ~~14~~ | **done (iter 003)** |
-| 2 | Integrate `@ledgerium/policy-engine` into `content/capture.ts` | fix | capture pipeline | 4 | 5 | 3 | 5 | 2 | 2 | 13 | proposed |
+| ~~—~~ | ~~Metadata strip + confidence badge above the fold in SOP markdown renderer~~ | ~~improvement~~ | ~~SOP presentation~~ | ~~5~~ | ~~5~~ | ~~3~~ | ~~5~~ | ~~2~~ | ~~1~~ | ~~15~~ | **done (iter 004)** |
+| 2 | Hoist per-step `evidenceEvents: string[]` onto SOP step interfaces and render per-step evidence lines | fix | SOP presentation / trust | 5 | 5 | 3 | 5 | 2 | 1 | 15 | **new (sop-expert gap #2)** |
+| 3 | Add `templates/sopValidator.ts` to reject banned recorder artifacts + wire into `processSession.ts` | fix | SOP quality gate | 4 | 5 | 4 | 4 | 2 | 2 | 13 | **new (sop-expert gap #3)** |
+| 4 | Integrate `@ledgerium/policy-engine` into `content/capture.ts` | fix | capture pipeline | 4 | 5 | 3 | 5 | 2 | 2 | 13 | proposed |
 | 3 | Add dashboard-level process for artifact and system-health refresh after each loop | improvement | agentic CI | 3 | 4 | 5 | 4 | 2 | 1 | 13 | proposed |
 | 4 | Add Playwright E2E tests for recording lifecycle | improvement | quality assurance | 4 | 5 | 4 | 4 | 3 | 2 | 12 | proposed |
 | 5 | Create invariant-focused regression suite for segmentation and normalization versions | improvement | invariants / testing | 4 | 5 | 4 | 4 | 3 | 2 | 12 | proposed |

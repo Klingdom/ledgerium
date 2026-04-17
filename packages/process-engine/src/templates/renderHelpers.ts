@@ -313,6 +313,91 @@ export function deriveTips(output: ProcessOutput): string[] {
   return tips.slice(0, 4);
 }
 
+// ─── Above-the-fold metadata and confidence helpers ──────────────────────────
+
+/**
+ * Renders the single-line italic metadata strip required above the fold in all
+ * three SOP templates (Design System §7.2).
+ *
+ * Operator and Decision SOPs use this one-liner. Enterprise SOPs render the
+ * full metadata table via `renderEnterpriseMetadataTable` instead.
+ *
+ * Example output:
+ *   *Ledgerium SOP · v2.0 · 12 steps · 3 systems · 87% confidence · Generated 2026-04-17*
+ */
+export function renderMetadataStrip(input: {
+  version: string;
+  stepCount: number;
+  systemCount: number;
+  averageConfidence: number;
+  generatedAt: string;
+}): string {
+  const confPct = Math.round(input.averageConfidence * 100);
+  const date = input.generatedAt.slice(0, 10); // YYYY-MM-DD
+  return (
+    `*Ledgerium SOP · v${input.version} · ${input.stepCount} step${input.stepCount !== 1 ? 's' : ''} · ` +
+    `${input.systemCount} system${input.systemCount !== 1 ? 's' : ''} · ` +
+    `${confPct}% confidence · Generated ${date}*`
+  );
+}
+
+/**
+ * Renders the full metadata table used by Enterprise SOPs (Design System §9.1).
+ *
+ * Returns a Markdown table string with SOP-level metadata fields.
+ */
+export function renderEnterpriseMetadataTable(input: {
+  sopId: string;
+  version: string;
+  generatedAt: string;
+  engineVersion: string;
+  basedOn: string;
+  stepCount: number;
+  systemCount: number;
+}): string {
+  const rows: Array<[string, string]> = [
+    ['**SOP ID**', `\`${input.sopId}\``],
+    ['**Version**', input.version],
+    ['**Generated**', input.generatedAt],
+    ['**Engine**', `Ledgerium process-engine \`${input.engineVersion}\``],
+    ['**Source session**', input.basedOn],
+    ['**Steps**', `${input.stepCount} · Systems: ${input.systemCount}`],
+  ];
+  const header = '| | |';
+  const separator = '|---|---|';
+  const dataRows = rows.map(([k, v]) => `| ${k} | ${v} |`);
+  return [header, separator, ...dataRows].join('\n');
+}
+
+/**
+ * Renders the above-the-fold confidence badge callout (Design System §7.3).
+ *
+ * Three states: high (✓), medium (⚠), low (✕).
+ * The `stepCount` is used in the high-confidence description.
+ */
+export function renderConfidenceBadge(
+  badge: 'high' | 'medium' | 'low',
+  stepCount: number,
+  qualityAdvisory?: string,
+): string {
+  switch (badge) {
+    case 'high':
+      return `> ✓ **High confidence** — fully evidence-linked across all ${stepCount} step${stepCount !== 1 ? 's' : ''}.`;
+    case 'medium': {
+      const detail = qualityAdvisory
+        ? qualityAdvisory
+        : 'review flagged steps before sharing';
+      return `> ⚠ **Medium confidence** — ${detail}`;
+    }
+    case 'low': {
+      const detail = qualityAdvisory
+        ? qualityAdvisory
+        : 'manual review required before sharing';
+      return `> ✕ **Low confidence** — ${detail}`;
+    }
+  }
+}
+
 // ─── Markdown rendering primitives ──────────────────────────────────────────
 
 export function mdHeading(level: number, text: string): string {

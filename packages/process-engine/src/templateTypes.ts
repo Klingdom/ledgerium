@@ -226,6 +226,12 @@ export interface OperatorSOP {
   sourceNote: string;
   /** Advisory shown when some steps have low label confidence. */
   qualityAdvisory?: string | undefined;
+  /** Computed confidence tier for the above-the-fold badge. */
+  qualityBadge?: 'high' | 'medium' | 'low' | undefined;
+  /** Average confidence across all steps (0–1), used in the metadata strip. */
+  averageConfidence?: number | undefined;
+  /** ISO-8601 timestamp of SOP generation, used in the metadata strip. */
+  generatedAt?: string | undefined;
 }
 
 export interface OperatorSOPStep {
@@ -261,6 +267,10 @@ export interface EnterpriseSOP {
   sourceNote: string;
   /** Advisory shown when some steps have low label confidence. */
   qualityAdvisory?: string | undefined;
+  /** Computed confidence tier for the above-the-fold badge. */
+  qualityBadge?: 'high' | 'medium' | 'low' | undefined;
+  /** Average confidence across all steps (0–1), used in the metadata strip. */
+  averageConfidence?: number | undefined;
   revisionMetadata: {
     generatedAt: string;
     engineVersion: string;
@@ -304,6 +314,12 @@ export interface DecisionSOP {
   sourceNote: string;
   /** Advisory shown when some steps have low label confidence. */
   qualityAdvisory?: string | undefined;
+  /** Computed confidence tier for the above-the-fold badge. */
+  qualityBadge?: 'high' | 'medium' | 'low' | undefined;
+  /** Average confidence across all steps (0–1), used in the metadata strip. */
+  averageConfidence?: number | undefined;
+  /** ISO-8601 timestamp of SOP generation, used in the metadata strip. */
+  generatedAt?: string | undefined;
 }
 
 export interface DecisionSOPBranch {

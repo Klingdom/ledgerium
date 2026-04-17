@@ -6,6 +6,33 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-17] - Iteration 004: SOP metadata strip + confidence badge above the fold
+
+### Added
+- `docs/sop/` — 14-artifact world-class SOP framework delivered by sop-expert agent (design system, canonical schema, transformation rules, quality rubric, 3 template specs, 3 rendered reference examples, implementation notes, collaboration requests). All examples trace to a shared 28-event `source_recording.json` for deterministic traceability proof.
+- `packages/process-engine/src/templates/renderHelpers.ts` — `renderMetadataStrip()`, `renderEnterpriseMetadataTable()`, `renderConfidenceBadge()` helpers
+- `qualityBadge()` classifier exported from `sopTemplates.ts` with `HIGH_CONFIDENCE_THRESHOLD`, `LOW_CONFIDENCE_THRESHOLD`, `HIGH_BADGE_MAX_LOW_STEPS`, `LOW_BADGE_MIN_LOW_STEPS` constants
+- 26 new test cases in `templates.test.ts` across 6 describe blocks covering helpers, classifier, and above-the-fold position assertions for all three SOP templates
+
+### Changed
+- `packages/process-engine/src/templateTypes.ts` — added optional `qualityBadge?: 'high' | 'medium' | 'low'`, `averageConfidence?: number`, `generatedAt?: string` fields to `OperatorSOP`, `EnterpriseSOP`, `DecisionSOP` (all additive, non-breaking)
+- `packages/process-engine/src/templates/sopTemplates.ts` — all three template builders populate the new metadata fields from `qualityIndicators`
+- `packages/process-engine/src/templates/markdownRenderer.ts` — `renderOperatorMarkdown`, `renderEnterpriseMarkdown`, `renderDecisionMarkdown` restructured to emit H1 → italic purpose tagline → metadata strip → confidence badge as the first block
+
+### Impact
+- Before: rendered SOPs jumped from H1 directly into `## What This Is For`; generator credit only in footer; no confidence surfacing anywhere in the document
+- After: first 15 lines of every rendered SOP contain H1, italic purpose, metadata strip (`Ledgerium SOP · v1.0 · N steps · M systems · X% confidence · Generated YYYY-MM-DD`), and confidence callout (`> ✓ High confidence` / `> ⚠ Medium confidence` / `> ⚠ Low confidence`)
+- Customer-visible SOP output quality lifted to match approved `docs/sop/examples/` aesthetic
+- Ledgerium's trust-first promise is now visible above the fold, not buried in metadata
+- Test count: 1,393 → 1,419 (+26)
+
+### Notes
+- Interface changes are additive with safe defaults (`averageConfidence ?? 1`, `qualityBadge ?? 'high'`) — any caller still passing partial objects continues working
+- Gap #2 (per-step evidence hoisting) and Gap #3 (sopValidator) from sop-expert's `IMPLEMENTATION_NOTES.md` are explicitly OUT OF SCOPE for this iteration and are now top backlog items
+- Decision SOP metadata strip uses `N paths` wording (vs `N steps`) to match decision template's target aesthetic
+
+---
+
 ## [2026-04-16] - Analytics Next Steps: Alerting, missing tracking, upgrade instrumentation
 
 ### Added

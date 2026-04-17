@@ -124,6 +124,72 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 004
+
+- Date: 2026-04-17
+- Trigger: user approved sop-expert design artifacts; requested execution of gap #1
+- Coordinator: coordinator
+- Phase: Phase 1
+- Objective: render SOP metadata strip + confidence badge above the fold in all three template types (operator_centric, enterprise, decision_based) per `docs/sop/DESIGN_SYSTEM.md`
+
+### System Review
+- sop-expert delivered 14 artifacts under `docs/sop/` defining a world-class SOP design system, three template specs, and reference examples with full traceability
+- Gap #1 identified as highest-value visible-quality lift: existing `markdownRenderer.ts` emitted generator credit in the footer; design system requires metadata strip + confidence badge in first ~15 lines
+- User explicitly approved reference examples and green-lit this iteration
+
+### Candidate Selection
+- Title: **Metadata strip + confidence badge above the fold in SOP markdown renderer**
+- Type: improvement
+- Area: SOP presentation / customer-facing output quality
+- Score: 15 (Impact:5 + Alignment:5 + Learning:3 + Confidence:5 − Effort:2 − Risk:1)
+- Why selected: highest-impact gap from sop-expert report; directly executes an approved design-system artifact; fully reversible; low LOC; strong test coverage possible
+
+### Agents Used
+- coordinator (orchestration, scoring, verification, artifact updates)
+- sop-expert (upstream design artifacts consumed as inputs)
+- backend-engineer (implementation)
+
+### Files Changed
+- `packages/process-engine/src/templateTypes.ts` — +16 LOC: added optional `qualityBadge?`, `averageConfidence?`, `generatedAt?` fields to `OperatorSOP`, `EnterpriseSOP`, `DecisionSOP` (all additive, non-breaking)
+- `packages/process-engine/src/templates/renderHelpers.ts` — +85 LOC: added `renderMetadataStrip()`, `renderEnterpriseMetadataTable()`, `renderConfidenceBadge()`
+- `packages/process-engine/src/templates/sopTemplates.ts` — +45 LOC: added confidence thresholds, exported `qualityBadge()` classifier, populated new metadata fields in all three template builders
+- `packages/process-engine/src/templates/markdownRenderer.ts` — +88 LOC: restructured all three render functions to emit H1 → italic purpose → metadata strip → confidence badge as the first block
+- `packages/process-engine/src/templates/templates.test.ts` — +320 LOC: 26 new test cases across 6 describe blocks (helper unit tests, classifier tests, above-the-fold position assertions per template)
+
+### Validation Run
+- `pnpm --filter @ledgerium/process-engine typecheck` → clean ✅
+- `pnpm --filter @ledgerium/process-engine test` → 350/350 (324 pre-existing + 26 new) ✅
+- `pnpm typecheck` (monorepo) → clean across all 10 workspace projects ✅
+- `pnpm test` (monorepo) → 1,419/1,419 tests pass (39 test files, +26 from iter 003) ✅
+- No regressions detected
+
+### Outcome
+- Status: **complete**
+- Summary: All three SOP templates now emit a visually unified metadata strip and confidence badge above the fold. The renderer consumes additive optional fields on existing SOP interfaces; defaults (`averageConfidence ?? 1`, `qualityBadge ?? 'high'`) preserve backward compatibility for any caller passing partial objects.
+
+### Impact
+- Before: rendered SOPs jumped from H1 directly into `## What This Is For`; generator credit only in footer; no confidence surfacing
+- After: first 15 lines contain H1 → italic purpose tagline → metadata strip (`Ledgerium SOP · v1.0 · N steps · M systems · X% confidence · Generated YYYY-MM-DD`) → confidence badge callout (`> ✓ High confidence` / `> ⚠ Medium confidence` / `> ⚠ Low confidence`)
+- Customer-visible SOP quality lifted to match approved `docs/sop/examples/` aesthetic
+- Test coverage added to lock the "above the fold" contract in place
+
+### Artifacts Updated
+- `ITERATION_LOG.md` — this entry
+- `IMPROVEMENT_BACKLOG.md` — gap #1 marked done; gaps #2 and #3 added
+- `SYSTEM_HEALTH.md` — test count + visual quality dimension refreshed
+- `CHANGELOG.md` — new entry
+
+### Follow-Ups
+- Gap #2: hoist `evidenceEvents: string[]` onto `OperatorSOPStep`, `EnterpriseSOPStep`, `DecisionSOPAction` and render `◦ Evidence: N events · [ev_XX]` per step (next iteration candidate)
+- Gap #3: new `templates/sopValidator.ts` rejecting banned recorder artifacts (`Click the div`, one-step SOPs, missing expected outcomes) wired into `processSession.ts` post-render
+- Gap #7: extend `documentFooter()` to accept `sessionId` and emit session timeline URL
+- Integrate `@ledgerium/policy-engine` into `content/capture.ts` (still score 13, outstanding since iter 003)
+
+### Risks / Open Questions
+- None surfaced. Changes are additive, behind optional fields, and fully reversible by reverting 5 files.
+
+---
+
 ## Iteration 001
 
 - Date: 2026-04-13
