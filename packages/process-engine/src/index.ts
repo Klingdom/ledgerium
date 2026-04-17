@@ -75,7 +75,9 @@ export {
   renderSOP,
   renderProcessMapMarkdown,
   renderSOPMarkdown,
+  validateRenderedSOP,
 } from './templates/index.js';
+export type { SOPValidation } from './templates/sopValidator.js';
 export type { TemplateOverrides } from './templateSelector.js';
 export type {
   ProcessMapTemplateType,

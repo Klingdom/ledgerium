@@ -6,6 +6,35 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-17] - Iteration 007: SOP release-readiness quality gate (sopValidator)
+
+### Added
+- `packages/process-engine/src/templates/sopValidator.ts` — new file exposing `validateRenderedSOP(rendered: RenderedSOP, output: ProcessOutput): SOPValidation` with 6 quality-rubric rules evaluated in declaration order
+- Exported `validateRenderedSOP` and `SOPValidation` type from `@ledgerium/process-engine` public API (`templates/index.ts` + `src/index.ts`)
+- `packages/process-engine/src/templates/sopValidator.test.ts` — 31 tests covering every rule in isolation, parameterized banned-string coverage, first-match ordering, positive fixtures, and structured-error shape invariants
+
+### Rules (first failure wins)
+1. **banned_recorder_artifact** — scans rendered markdown for 8 strings from `TRANSFORMATION_RULES.md` §5.1 (`"Click the div"`, `"Click the span"`, `"Click the svg"`, `"Click the p"`, `"Click the li"`, `"Click the section"`, `"Interact with element"`, `"Perform action"`)
+2. **too_few_steps** — requires `output.sop.steps.length >= 2`
+3. **step_has_no_evidence** — every step must have `instructions.length > 0`
+4. **empty_expected_outcomes** — no step may have a falsy `expectedOutcome`
+5. **generic_title** — rejects `"Workflow N"`, `"Untitled Process"`, `"Untitled Workflow N"`
+6. **prose_only_purpose** — rejects purposes starting with `"This SOP describes "`
+
+Failures return structured `{ ok: false, reason, diagnostic, suggestion }` — the validator never throws. Throwing is the caller's policy decision.
+
+### Impact
+- Before: no programmatic quality gate existed; a bad recording could produce a rendered SOP containing raw recorder artifacts like `"Click the div"` that would reach users
+- After: consumers of `@ledgerium/process-engine` have a single zero-dependency function to call before publishing a rendered SOP; 6 anti-patterns from `QUALITY_RUBRIC.md` §10 are now detectable in one pass
+- Test count: 1,461 → 1,492 (+31)
+
+### Notes
+- **Integration into `processSession.ts` deferred** per the one-item-per-loop rule. The dev-throws/prod-logs guard policy is a separate concern tracked as a follow-up backlog item (score 11).
+- **Spec reconciliation**: `IMPLEMENTATION_NOTES.md` Gap #8 (lines 182–186) listed 7 banned strings and omitted `"Click the section"`. `TRANSFORMATION_RULES.md` §5.1 is the authoritative source and lists 8. Implementation follows §5.1 — the IMPLEMENTATION_NOTES.md snippet is a doc gap, flagged for future doc sync.
+- `processSession.ts` NOT modified — existing pipeline behavior preserved.
+
+---
+
 ## [2026-04-17] - Iteration 006: Per-step confidence glyph in rendered SOPs
 
 ### Added

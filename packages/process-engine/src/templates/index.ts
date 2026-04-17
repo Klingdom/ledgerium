@@ -64,3 +64,5 @@ export type { TemplateOverrides } from '../templateSelector.js';
 export { renderProcessMap } from './processMapTemplates.js';
 export { renderSOP } from './sopTemplates.js';
 export { renderProcessMapMarkdown, renderSOPMarkdown } from './markdownRenderer.js';
+export { validateRenderedSOP } from './sopValidator.js';
+export type { SOPValidation } from './sopValidator.js';
