@@ -398,6 +398,42 @@ export function renderConfidenceBadge(
   }
 }
 
+// ─── Per-step evidence row ───────────────────────────────────────────────────
+
+/**
+ * Renders the per-step evidence row for the Markdown SOP output (Gap #5).
+ *
+ * Format: `◦ Evidence: N events · ev_01, ev_02, ev_03`
+ *
+ * Rules:
+ * - Returns undefined (omit the line entirely) when the list is empty.
+ * - Uses "1 event" (singular) when exactly one ID is present.
+ * - Truncates lists longer than MAX_EVIDENCE_IDS: renders the first
+ *   EVIDENCE_TRUNCATION_HEAD IDs followed by `…+N more`.
+ *
+ * These constants are named for tunability.
+ */
+const MAX_EVIDENCE_IDS = 8 as const;
+const EVIDENCE_TRUNCATION_HEAD = 5 as const;
+
+export function formatEvidenceRow(eventIds: string[]): string | undefined {
+  if (eventIds.length === 0) return undefined;
+
+  const n = eventIds.length;
+  const label = n === 1 ? '1 event' : `${n} events`;
+
+  let idList: string;
+  if (n > MAX_EVIDENCE_IDS) {
+    const head = eventIds.slice(0, EVIDENCE_TRUNCATION_HEAD).join(', ');
+    const remaining = n - EVIDENCE_TRUNCATION_HEAD;
+    idList = `${head}, …+${remaining} more`;
+  } else {
+    idList = eventIds.join(', ');
+  }
+
+  return `◦ Evidence: ${label} · ${idList}`;
+}
+
 // ─── Markdown rendering primitives ──────────────────────────────────────────
 
 export function mdHeading(level: number, text: string): string {

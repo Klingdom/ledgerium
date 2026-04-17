@@ -1,6 +1,6 @@
 # Ledgerium AI — System Health
 
-Last updated: 2026-04-17 (post-iteration 004 — SOP metadata above the fold)
+Last updated: 2026-04-17 (post-iteration 005 — per-step evidence references in rendered SOPs)
 
 ## Executive Summary
 
@@ -26,7 +26,7 @@ Overall confidence: **Medium-High**
 | Deterministic core protection | moderate | 4 | good principles, but more regression protection is still needed |
 | Package / code consistency | improving | 3.5 | extension now imports from 3 workspace packages; LiveStepBuilder duplication remains |
 | Session durability / recovery | moderate-risk | 2 | full event persistence is still missing |
-| Test coverage | moderate | 3.5 | web-app vitest active; E2E coverage still missing; 1,419 total tests (+26 in iter 004) |
+| Test coverage | moderate | 3.5 | web-app vitest active; E2E coverage still missing; 1,436 total tests (+17 in iter 005, +26 in iter 004) |
 | Observability | strong | 4 | analytics fully instrumented, 8 alert conditions, admin dashboard with engagement/retention/alerts |
 | Agentic CI readiness | improving | 4 | command, backlog, iteration log, and templates now exist |
 | GTM readiness | emerging | 2.5 | product wedge promising; analytics infrastructure ready for data-driven decisions |
@@ -101,17 +101,16 @@ These should be assumed to block a high-confidence release until resolved:
 ## Recommended Next Iteration
 
 Recommended next item:
-- **Hoist per-step `evidenceEvents: string[]` onto SOP step interfaces and render per-step evidence lines** (score: 15, sop-expert gap #2)
+- **Add per-step `confidence?: number` + confidence glyph in rendered SOPs** (score: 14, IMPLEMENTATION_NOTES Gap #6)
 
 Why:
-- Continues the SOP-quality trajectory established in iteration 004
-- Makes Ledgerium's core trust promise (evidence-linked outputs) visible per step, not just at the document level
-- Additive, non-breaking interface change (parallel to iteration 004 pattern)
-- Aligns rendered SOPs with the approved `docs/sop/examples/` aesthetic
+- Completes the SOP trust-signal trifecta started in iter 004 (doc-level confidence) and iter 005 (per-step evidence): per-step confidence is the last core visible signal
+- Perfect pattern parallel to iters 004 and 005 — additive optional field on existing step interfaces, helper-based render, low risk
+- Low-confidence steps currently render identically to high-confidence steps — reviewers cannot spot which steps need manual review without opening quality indicators
 
-Fallback next items:
-- **Add `templates/sopValidator.ts`** (score: 13, sop-expert gap #3) — rejects banned recorder artifacts before render
-- **Integrate `@ledgerium/policy-engine` into `content/capture.ts`** (score: 13) — long-standing capture-pipeline cleanup
+Alternative high-value next items:
+- **Add `templates/sopValidator.ts`** (score: 13, sop-expert gap #3) — rejects banned recorder artifacts before render (release-readiness item)
+- **Integrate `@ledgerium/policy-engine` into `content/capture.ts`** (score: 13) — long-standing capture-pipeline cleanup from iter 003 follow-ups
 - **Add Playwright E2E tests for recording lifecycle** (score: 12) — release blocker
 - **Connect PostHog** — configure env vars to enable cloud analytics alongside internal DB
 

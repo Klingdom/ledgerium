@@ -26,6 +26,7 @@ import {
   renderMetadataStrip,
   renderEnterpriseMetadataTable,
   renderConfidenceBadge,
+  formatEvidenceRow,
 } from './renderHelpers.js';
 import { PROCESS_ENGINE_VERSION } from '../types.js';
 
@@ -359,6 +360,10 @@ function renderOperatorMarkdown(sop: OperatorSOP): string {
     if (step.caution) {
       lines.push(`   ⚠ ${step.caution}`);
     }
+    const evidenceLine = formatEvidenceRow(step.evidenceEvents ?? []);
+    if (evidenceLine) {
+      lines.push(`   ${evidenceLine}`);
+    }
     lines.push('');
   }
 
@@ -484,6 +489,11 @@ function renderEnterpriseMarkdown(sop: EnterpriseSOP): string {
       lines.push(`${mdBold('Outputs:')} ${step.outputs.join(', ')}`);
     }
     lines.push(`${mdBold('Verification:')} ${step.verificationPoint}`);
+    const evidenceLine = formatEvidenceRow(step.evidenceEvents ?? []);
+    if (evidenceLine) {
+      lines.push('');
+      lines.push(evidenceLine);
+    }
     lines.push('');
   }
 
@@ -606,6 +616,10 @@ function renderDecisionMarkdown(sop: DecisionSOP): string {
       lines.push(mdNumbered(action.ordinal, action.instruction));
       if (action.system) {
         lines.push(`   Performed in ${action.system}`);
+      }
+      const evidenceLine = formatEvidenceRow(action.evidenceEvents ?? []);
+      if (evidenceLine) {
+        lines.push(`   ${evidenceLine}`);
       }
     }
     lines.push('');

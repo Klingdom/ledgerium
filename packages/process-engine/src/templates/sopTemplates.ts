@@ -126,6 +126,7 @@ function renderOperatorCentric(output: ProcessOutput): OperatorSOP {
     system: step.system ?? '',
     expectedResult: step.expectedOutcome,
     caution: stepCaution(step),
+    evidenceEvents: step.instructions.map(i => i.sourceEventId),
   }));
 
   return {
@@ -185,6 +186,7 @@ function renderEnterprise(output: ProcessOutput): EnterpriseSOP {
       inputs: stepDef?.inputs ?? step.inputs,
       outputs: stepDef?.outputs ?? [],
       verificationPoint: step.expectedOutcome,
+      evidenceEvents: step.instructions.map(i => i.sourceEventId),
     };
   });
 
@@ -305,6 +307,7 @@ function renderDecisionBased(output: ProcessOutput): DecisionSOP {
         ordinal: step.ordinal,
         instruction: `${step.title}: ${primaryInstruction(step)}`,
         system: step.system ?? '',
+        evidenceEvents: step.instructions.map(i => i.sourceEventId),
       })),
       outcome: sop.completionCriteria[0] ?? 'Workflow completes successfully',
     });
@@ -323,11 +326,13 @@ function renderDecisionBased(output: ProcessOutput): DecisionSOP {
               ordinal: 1,
               instruction: `Review the error${errorContext}: ${primaryInstruction(errorStep)}`,
               system: errorStep.system ?? '',
+              evidenceEvents: errorStep.instructions.map(i => i.sourceEventId),
             },
             {
               ordinal: 2,
               instruction: `Correct the data per the error message and resubmit at step ${decision.ordinal} (${decision.title})`,
               system: decision.system ?? '',
+              evidenceEvents: decision.instructions.map(i => i.sourceEventId),
             },
           ],
           outcome: `Error resolved — resume standard flow at step ${decision.ordinal}`,
@@ -342,6 +347,7 @@ function renderDecisionBased(output: ProcessOutput): DecisionSOP {
         ordinal: step.ordinal,
         instruction: `${step.title}: ${primaryInstruction(step)}`,
         system: step.system ?? '',
+        evidenceEvents: step.instructions.map(i => i.sourceEventId),
       })),
       outcome: sop.completionCriteria[0] ?? 'Workflow completes',
     });

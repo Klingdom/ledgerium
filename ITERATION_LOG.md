@@ -190,6 +190,76 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 005
+
+- Date: 2026-04-17
+- Trigger: user-directed continuation after iter 004 completion and SOP export bug fix
+- Coordinator: coordinator
+- Phase: Phase 1
+- Objective: render per-step evidence references in all three SOP templates by hoisting `evidenceEvents?: string[]` onto the step interfaces (IMPLEMENTATION_NOTES.md Gap #5 / sop-expert gap #2 subset)
+
+### System Review
+- Iteration 004 established the metadata/confidence-above-the-fold pattern with additive optional fields
+- `IMPLEMENTATION_NOTES.md` Gap #5 defined the exact prescription: add `evidenceEvents?: string[]` to `OperatorSOPStep`, `EnterpriseSOPStep`, `DecisionSOPAction`; populate from `step.instructions.map(i => i.sourceEventId)`; render `◦ Evidence: N events · ev_XX, ev_YY` per step
+- Target aesthetic already approved in `docs/sop/examples/01_operator_centric_example.md`
+- SOP Export bug (unrelated, Mode 3 Debugging) fixed and committed as `6fe0795` prior to this iteration
+
+### Candidate Selection
+- Title: **Per-step `evidenceEvents` on SOP step interfaces + render evidence lines**
+- Type: improvement
+- Area: SOP presentation / trust / traceability
+- Score: 15 (Impact:5 + Alignment:5 + Learning:3 + Confidence:5 − Effort:2 − Risk:1)
+- Why selected: highest-scored backlog item (tied with iter 004); directly continues SOP quality trajectory; parallel pattern to iter 004 (additive optional fields, non-breaking); makes Ledgerium's trust-first promise visible per step
+- Scope discipline: deliberately narrowed to evidenceEvents ONLY. Adjacent fields from sop-expert's broader gap lists (`confidence`, `isSensitive`, `durationLabel`, `risks`, `branchType`, `probability`, `metadata`, `evidenceManifest`) deferred to future iterations per the one-item rule.
+
+### Agents Used
+- coordinator (orchestration, verification, artifact updates)
+- backend-engineer (implementation)
+
+### Files Changed
+- `packages/process-engine/src/templateTypes.ts` — +6 LOC: added `evidenceEvents?: string[] | undefined` to `OperatorSOPStep`, `EnterpriseSOPStep`, `DecisionSOPAction` (all optional, non-breaking)
+- `packages/process-engine/src/templates/sopTemplates.ts` — +6 LOC: populated `evidenceEvents` in all three template builders from `step.instructions.map(i => i.sourceEventId)`
+- `packages/process-engine/src/templates/renderHelpers.ts` — +36 LOC: added `formatEvidenceRow(eventIds: string[]): string | undefined` helper with named truncation constants (`MAX_EVIDENCE_IDS = 8`, `EVIDENCE_TRUNCATION_HEAD = 5`)
+- `packages/process-engine/src/templates/markdownRenderer.ts` — +14 LOC: evidence line emission after each step in all three render functions
+- `packages/process-engine/src/templates/templates.test.ts` — +204 LOC: +17 new tests across 6 describe blocks covering helper unit tests, per-template evidence rendering, empty/undefined suppression, and truncation
+
+### Validation Run
+- `pnpm --filter @ledgerium/process-engine typecheck` → clean ✅
+- `pnpm --filter @ledgerium/process-engine test` → 367/367 (350 pre-existing + 17 new) ✅
+- `pnpm typecheck` (monorepo) → clean across all 10 workspace projects ✅
+- `pnpm test` (monorepo) → 1,436/1,436 tests pass (39 test files, +17 from iter 004) ✅
+- No regressions detected
+
+### Outcome
+- Status: **complete**
+- Summary: All three SOP templates now render `◦ Evidence: N events · ev_XX, ev_YY` per step, with correct singular/plural pluralization, empty-list suppression, and truncation to first 5 + `…+N more` for lists over 8 IDs. Ledgerium's trust-first promise is now visible at the step level, not just in document metadata.
+
+### Impact
+- Before: source event IDs existed in `SOPStep.instructions[].sourceEventId` but never surfaced in the rendered SOP; readers had no per-step traceability without traversing the underlying data
+- After: every step in every rendered SOP shows its evidence line immediately below the expected-outcome row, matching the approved `docs/sop/examples/01_operator_centric_example.md` aesthetic
+- Test count: 1,419 → 1,436 (+17)
+- Combined with iter 004 output: rendered SOPs now surface confidence at the document level AND evidence at the step level — the two core visible trust signals from the design system
+
+### Artifacts Updated
+- `ITERATION_LOG.md` — this entry
+- `IMPROVEMENT_BACKLOG.md` — evidenceEvents portion of gap #2 marked done; adjacent fields remain as follow-up candidates
+- `SYSTEM_HEALTH.md` — test count refreshed
+- `CHANGELOG.md` — new entry
+
+### Follow-Ups
+- Per-step confidence glyph in rendered output (`IMPLEMENTATION_NOTES.md` Gap #6) — additive `confidence?: number` field
+- `sopValidator.ts` rejecting banned recorder artifacts (sop-expert gap #3) — still a release-readiness candidate
+- Enterprise step metadata (`durationLabel?`, `risks?`) for audit-grade SOPs
+- Decision branch classification (`branchType?`, `probability?`) for triage UX
+- `metadata?:` + `evidenceManifest?:` objects at top-level SOP types per `SCHEMA.md` §3
+- Integrate `@ledgerium/policy-engine` into `content/capture.ts` (still outstanding from iter 003 follow-ups)
+
+### Risks / Open Questions
+- None surfaced. Changes are additive, behind optional fields, and fully reversible.
+- Minor: agent reported "28 new tests" in 6 describe blocks but the net delta was +17 tests. Coverage is real and all validation is green; the miscount is cosmetic and does not affect correctness.
+
+---
+
 ## Iteration 001
 
 - Date: 2026-04-13

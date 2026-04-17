@@ -918,3 +918,207 @@ describe('Gap #1: Confidence badge correctness for low-confidence recording', ()
     }
   });
 });
+
+// ─── Gap #5: Per-step evidence row ───────────────────────────────────────────
+
+import { formatEvidenceRow } from './renderHelpers.js';
+import type { OperatorSOP, EnterpriseSOP, DecisionSOP } from '../templateTypes.js';
+
+describe('formatEvidenceRow helper', () => {
+  it('returns undefined for an empty array', () => {
+    expect(formatEvidenceRow([])).toBeUndefined();
+  });
+
+  it('uses singular "event" for exactly 1 ID', () => {
+    const result = formatEvidenceRow(['ev_01']);
+    expect(result).toBe('◦ Evidence: 1 event · ev_01');
+  });
+
+  it('uses plural "events" for N > 1 IDs', () => {
+    const result = formatEvidenceRow(['ev_01', 'ev_02', 'ev_03']);
+    expect(result).toBe('◦ Evidence: 3 events · ev_01, ev_02, ev_03');
+  });
+
+  it('renders all IDs when count is exactly at the truncation threshold (8)', () => {
+    const ids = ['ev_01', 'ev_02', 'ev_03', 'ev_04', 'ev_05', 'ev_06', 'ev_07', 'ev_08'];
+    const result = formatEvidenceRow(ids);
+    expect(result).toContain('8 events');
+    expect(result).not.toContain('more');
+    expect(result).toContain('ev_08');
+  });
+
+  it('truncates lists longer than 8 IDs: first 5 + …+N more', () => {
+    const ids = ['ev_01', 'ev_02', 'ev_03', 'ev_04', 'ev_05', 'ev_06', 'ev_07', 'ev_08', 'ev_09'];
+    const result = formatEvidenceRow(ids);
+    expect(result).toBeDefined();
+    expect(result).toContain('9 events');
+    expect(result).toContain('ev_01, ev_02, ev_03, ev_04, ev_05');
+    expect(result).toContain('…+4 more');
+    expect(result).not.toContain('ev_06');
+  });
+});
+
+describe('Gap #5: Per-step evidence in operator SOP markdown', () => {
+  it('each step with evidence events emits a ◦ Evidence: line', () => {
+    const output = processSession(simpleWorkflow());
+    const sop = renderSOP(output, 'operator_centric') as OperatorSOP;
+    const md = renderSOPMarkdown(sop);
+
+    // simpleWorkflow has 2 steps each with ≥1 source event
+    expect(md).toContain('◦ Evidence:');
+    // Count occurrences — should match step count
+    const matches = md.match(/◦ Evidence:/g) ?? [];
+    expect(matches.length).toBe(sop.steps.length);
+  });
+
+  it('evidence line contains correct event count and IDs', () => {
+    const output = processSession(simpleWorkflow());
+    const sop = renderSOP(output, 'operator_centric') as OperatorSOP;
+
+    // Step 1 maps from source events e1, e2 (via instructions)
+    const step1 = sop.steps[0]!;
+    expect(step1.evidenceEvents).toBeDefined();
+    expect((step1.evidenceEvents ?? []).length).toBeGreaterThan(0);
+
+    const md = renderSOPMarkdown(sop);
+    // Each event ID from step 1 should appear in the output
+    for (const id of (step1.evidenceEvents ?? [])) {
+      expect(md).toContain(id);
+    }
+  });
+
+  it('evidence line uses plural "events" for multi-event steps', () => {
+    // complexWorkflow step 2 has 3 source events (e3, e4, e5)
+    const output = processSession(complexWorkflow());
+    const sop = renderSOP(output, 'operator_centric') as OperatorSOP;
+    const md = renderSOPMarkdown(sop);
+
+    expect(md).toMatch(/◦ Evidence: \d+ events · /);
+  });
+
+  it('does NOT render an evidence line when evidenceEvents is empty', () => {
+    const output = processSession(simpleWorkflow());
+    const sop = renderSOP(output, 'operator_centric') as OperatorSOP;
+    // Manually strip evidenceEvents to simulate absent data
+    const sopWithNoEvidence: OperatorSOP = {
+      ...sop,
+      steps: sop.steps.map(s => ({ ...s, evidenceEvents: [] })),
+    };
+    const md = renderSOPMarkdown(sopWithNoEvidence);
+
+    expect(md).not.toContain('◦ Evidence:');
+  });
+
+  it('does NOT render an evidence line when evidenceEvents is undefined', () => {
+    const output = processSession(simpleWorkflow());
+    const sop = renderSOP(output, 'operator_centric') as OperatorSOP;
+    const sopWithUndefined: OperatorSOP = {
+      ...sop,
+      steps: sop.steps.map(s => {
+        const { evidenceEvents: _ev, ...rest } = s;
+        return rest;
+      }),
+    };
+    const md = renderSOPMarkdown(sopWithUndefined);
+
+    expect(md).not.toContain('◦ Evidence:');
+  });
+});
+
+describe('Gap #5: Per-step evidence in enterprise SOP markdown', () => {
+  it('each procedure step with evidence events emits a ◦ Evidence: line', () => {
+    const output = processSession(complexWorkflow());
+    const sop = renderSOP(output, 'enterprise') as EnterpriseSOP;
+    const md = renderSOPMarkdown(sop);
+
+    expect(md).toContain('◦ Evidence:');
+    const matches = md.match(/◦ Evidence:/g) ?? [];
+    expect(matches.length).toBe(sop.procedure.length);
+  });
+
+  it('enterprise procedure steps carry populated evidenceEvents', () => {
+    const output = processSession(complexWorkflow());
+    const sop = renderSOP(output, 'enterprise') as EnterpriseSOP;
+
+    for (const step of sop.procedure) {
+      expect(step.evidenceEvents).toBeDefined();
+      expect((step.evidenceEvents ?? []).length).toBeGreaterThan(0);
+    }
+  });
+
+  it('does NOT render evidence line when evidenceEvents is empty', () => {
+    const output = processSession(complexWorkflow());
+    const sop = renderSOP(output, 'enterprise') as EnterpriseSOP;
+    const sopEmpty: EnterpriseSOP = {
+      ...sop,
+      procedure: sop.procedure.map(s => ({ ...s, evidenceEvents: [] })),
+    };
+    const md = renderSOPMarkdown(sopEmpty);
+
+    expect(md).not.toContain('◦ Evidence:');
+  });
+});
+
+describe('Gap #5: Per-step evidence in decision SOP markdown', () => {
+  it('renders ◦ Evidence: lines in the happy-path branch', () => {
+    const output = processSession(complexWorkflow());
+    const sop = renderSOP(output, 'decision_based') as DecisionSOP;
+    const md = renderSOPMarkdown(sop);
+
+    expect(md).toContain('◦ Evidence:');
+  });
+
+  it('happy-path branch actions carry evidenceEvents', () => {
+    const output = processSession(complexWorkflow());
+    const sop = renderSOP(output, 'decision_based') as DecisionSOP;
+
+    // The first branch (happy path) should have evidence on its actions
+    const happyBranch = sop.branches.find(b => b.condition.includes('Standard'));
+    expect(happyBranch).toBeDefined();
+    if (happyBranch) {
+      const actionsWithEvidence = happyBranch.actions.filter(
+        a => (a.evidenceEvents ?? []).length > 0,
+      );
+      expect(actionsWithEvidence.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('does NOT render evidence line when evidenceEvents is empty', () => {
+    const output = processSession(simpleWorkflow());
+    const sop = renderSOP(output, 'decision_based') as DecisionSOP;
+    const sopEmpty: DecisionSOP = {
+      ...sop,
+      branches: sop.branches.map(b => ({
+        ...b,
+        actions: b.actions.map(a => ({ ...a, evidenceEvents: [] })),
+      })),
+    };
+    const md = renderSOPMarkdown(sopEmpty);
+
+    expect(md).not.toContain('◦ Evidence:');
+  });
+});
+
+describe('Gap #5: Evidence row truncation in rendered markdown', () => {
+  it('truncates very long evidence lists to first 5 + …+N more', () => {
+    const output = processSession(simpleWorkflow());
+    const sop = renderSOP(output, 'operator_centric') as OperatorSOP;
+    // Inject 9 fake event IDs onto step 1 to trigger truncation
+    const sopLong: OperatorSOP = {
+      ...sop,
+      steps: sop.steps.map((s, idx) =>
+        idx === 0
+          ? { ...s, evidenceEvents: ['ev_01', 'ev_02', 'ev_03', 'ev_04', 'ev_05', 'ev_06', 'ev_07', 'ev_08', 'ev_09'] }
+          : s,
+      ),
+    };
+    const md = renderSOPMarkdown(sopLong);
+
+    expect(md).toContain('9 events');
+    expect(md).toContain('ev_01, ev_02, ev_03, ev_04, ev_05');
+    expect(md).toContain('…+4 more');
+    // ev_06 and beyond should not appear verbatim in the evidence line
+    const evidenceLines = md.split('\n').filter(l => l.includes('◦ Evidence:'));
+    expect(evidenceLines[0]).not.toContain('ev_06');
+  });
+});

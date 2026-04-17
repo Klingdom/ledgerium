@@ -6,6 +6,29 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-17] - Iteration 005: Per-step evidence references in rendered SOPs
+
+### Added
+- `evidenceEvents?: string[]` optional field on `OperatorSOPStep`, `EnterpriseSOPStep`, `DecisionSOPAction` interfaces (additive, non-breaking)
+- `formatEvidenceRow(eventIds: string[]): string | undefined` helper in `renderHelpers.ts` with named truncation constants (`MAX_EVIDENCE_IDS = 8`, `EVIDENCE_TRUNCATION_HEAD = 5`)
+- 17 new tests across 6 describe blocks in `templates.test.ts` covering helper unit tests, per-template evidence rendering, empty/undefined suppression, and truncation
+
+### Changed
+- `packages/process-engine/src/templates/sopTemplates.ts` — all three template builders now populate `evidenceEvents` per step from `step.instructions.map(i => i.sourceEventId)`
+- `packages/process-engine/src/templates/markdownRenderer.ts` — all three render functions emit `◦ Evidence: N events · ev_XX, ev_YY` per step (with correct singular/plural; omitted when empty; truncated to first 5 + `…+N more` over 8 IDs)
+
+### Impact
+- Before: source event IDs existed in the underlying `SOPStep.instructions[].sourceEventId` data but never surfaced in rendered output; readers had no per-step traceability without traversing internal data structures
+- After: every step in every rendered SOP shows its evidence line immediately below the expected-outcome row, matching the approved `docs/sop/examples/01_operator_centric_example.md` aesthetic
+- Combined with iter 004: rendered SOPs now surface confidence at the document level AND evidence at the step level — both core visible trust signals from `docs/sop/DESIGN_SYSTEM.md`
+- Test count: 1,419 → 1,436 (+17)
+
+### Notes
+- Scope was deliberately narrowed to `evidenceEvents` only. Adjacent fields from broader IMPLEMENTATION_NOTES lists (`confidence`, `isSensitive`, `durationLabel`, `risks`, `branchType`, `probability`, `metadata`, `evidenceManifest`) are explicitly out of scope per the one-item rule and are now tracked as follow-up backlog items.
+- Truncation cap chosen: 8 full IDs, then first 5 + `…+N more`. Constants are named in `renderHelpers.ts` for future tunability.
+
+---
+
 ## [2026-04-17] - Iteration 004: SOP metadata strip + confidence badge above the fold
 
 ### Added

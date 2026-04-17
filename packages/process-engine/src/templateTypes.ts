@@ -241,6 +241,8 @@ export interface OperatorSOPStep {
   system: string;
   expectedResult: string;
   caution: string;
+  /** Source event IDs that provide evidence for this step. Used to render the per-step evidence row. */
+  evidenceEvents?: string[] | undefined;
 }
 
 /**
@@ -287,6 +289,8 @@ export interface EnterpriseSOPStep {
   inputs: string[];
   outputs: string[];
   verificationPoint: string;
+  /** Source event IDs that provide evidence for this step. Used to render the per-step evidence row. */
+  evidenceEvents?: string[] | undefined;
 }
 
 export interface EnterpriseSOPDecision {
@@ -332,6 +336,8 @@ export interface DecisionSOPAction {
   ordinal: number;
   instruction: string;
   system: string;
+  /** Source event IDs that provide evidence for this action. Used to render the per-step evidence row. */
+  evidenceEvents?: string[] | undefined;
 }
 
 // ─── Union types for renderer dispatch ───────────────────────────────────────
