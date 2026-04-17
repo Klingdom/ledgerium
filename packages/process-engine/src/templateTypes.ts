@@ -243,6 +243,8 @@ export interface OperatorSOPStep {
   caution: string;
   /** Source event IDs that provide evidence for this step. Used to render the per-step evidence row. */
   evidenceEvents?: string[] | undefined;
+  /** Source confidence score (0–1) for this step. Used to render the per-step confidence glyph. */
+  confidence?: number | undefined;
 }
 
 /**
@@ -291,6 +293,8 @@ export interface EnterpriseSOPStep {
   verificationPoint: string;
   /** Source event IDs that provide evidence for this step. Used to render the per-step evidence row. */
   evidenceEvents?: string[] | undefined;
+  /** Source confidence score (0–1) for this step. Used to render the per-step confidence glyph. */
+  confidence?: number | undefined;
 }
 
 export interface EnterpriseSOPDecision {
@@ -338,6 +342,8 @@ export interface DecisionSOPAction {
   system: string;
   /** Source event IDs that provide evidence for this action. Used to render the per-step evidence row. */
   evidenceEvents?: string[] | undefined;
+  /** Source confidence score (0–1) for this action. Used to render the per-step confidence glyph. */
+  confidence?: number | undefined;
 }
 
 // ─── Union types for renderer dispatch ───────────────────────────────────────

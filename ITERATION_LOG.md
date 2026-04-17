@@ -190,6 +190,74 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 006
+
+- Date: 2026-04-17
+- Trigger: user-directed sequential execution of top-3 backlog items (006/007/008)
+- Coordinator: coordinator
+- Phase: Phase 1
+- Objective: complete the SOP trust-signal trifecta by surfacing per-step confidence in rendered SOPs via additive optional `confidence?: number` on step interfaces + a three-tier confidence glyph in the Markdown renderer (IMPLEMENTATION_NOTES.md Gap #6)
+
+### System Review
+- Iter 004 established the document-level confidence badge above the fold
+- Iter 005 added per-step evidence references (`◦ Evidence: N events · ev_XX`)
+- Per-step confidence was the last visible trust signal from the design system; low-confidence steps rendered identically to high-confidence steps, giving reviewers no per-step signal
+- `SOPStep.confidence: number` already exists in `packages/process-engine/src/types.ts:377` — values flow from the quality pipeline
+- Approved aesthetic lives in `docs/sop/examples/` and Design System §7.3 thresholds already classify the document-level badge using `HIGH_CONFIDENCE_THRESHOLD = 0.85` and `LOW_CONFIDENCE_THRESHOLD = 0.70`
+
+### Candidate Selection
+- Title: **Per-step `confidence?: number` + three-tier confidence glyph in rendered SOPs**
+- Type: improvement
+- Area: SOP presentation / trust / traceability
+- Score: 14 (Impact:5 + Alignment:5 + Learning:2 + Confidence:5 − Effort:2 − Risk:1)
+- Why selected: completes the SOP trust-signal trifecta (document-level confidence + per-step evidence + per-step confidence); parallels the iter 004/005 additive-optional-field pattern exactly; zero breaking surface; direct prescription in IMPLEMENTATION_NOTES.md Gap #6
+- Scope discipline: shared thresholds exported from `sopTemplates.ts` rather than duplicated, per spec. No other trust signals (e.g., `isSensitive`, per-step risks) added in this loop.
+
+### Agents Used
+- coordinator (orchestration, verification, artifact updates)
+- backend-engineer (implementation)
+
+### Files Changed
+- `packages/process-engine/src/templateTypes.ts` — +6 LOC: added `confidence?: number | undefined` to `OperatorSOPStep`, `EnterpriseSOPStep`, `DecisionSOPAction` (all optional, non-breaking)
+- `packages/process-engine/src/templates/sopTemplates.ts` — +10 LOC: exported the two confidence-threshold constants; populated `confidence: step.confidence` in all three template builders (including all four DecisionSOP branch patterns: happy-path, per-decision error paths, and the no-decision linear branch)
+- `packages/process-engine/src/templates/renderHelpers.ts` — +40 LOC: added `formatConfidenceGlyph(confidence: number | undefined): string | undefined` helper with named glyph constants (`STEP_CONFIDENCE_HIGH_GLYPH = '●'`, `STEP_CONFIDENCE_MEDIUM_GLYPH = '◐'`, `STEP_CONFIDENCE_LOW_GLYPH = '○'`); thresholds imported from `sopTemplates.ts` to prevent drift
+- `packages/process-engine/src/templates/markdownRenderer.ts` — +13 LOC: glyph line emission directly after the evidence row in all three SOP renderers
+- `packages/process-engine/src/templates/templates.test.ts` — +217 LOC: +25 new tests across 5 describe blocks covering glyph selection boundaries, percentage rounding, undefined handling, and per-template population for Operator/Enterprise/Decision-happy-path/Decision-error-path
+
+### Validation Run
+- `pnpm --filter @ledgerium/process-engine typecheck` → clean ✅
+- `pnpm --filter @ledgerium/process-engine test` → 392/392 pass (367 pre-existing + 25 new) ✅
+- `pnpm test` (monorepo) → 1,461/1,461 tests pass across 39 test files (+25 from iter 005) ✅
+- No regressions detected
+
+### Outcome
+- Status: **complete**
+- Summary: Rendered SOPs now surface per-step confidence via `● High confidence (92%)` / `◐ Medium confidence (78%)` / `○ Low confidence (54%) — review manually`. Thresholds are single-sourced via exports from `sopTemplates.ts`, eliminating the risk of the per-step tier drifting from the document-level badge tier. The SOP trust-signal trifecta is now complete.
+
+### Impact
+- Before: reviewers had no way to spot low-confidence steps without opening quality indicators
+- After: every low-confidence step is visually flagged inline with the explicit `— review manually` advisory
+- Combined trust surface: document-level badge (iter 004) + per-step evidence (iter 005) + per-step confidence (iter 006) — the three core visible signals from Design System §7.3
+- Test count: 1,436 → 1,461 (+25)
+
+### Artifacts Updated
+- `ITERATION_LOG.md` — this entry
+- `IMPROVEMENT_BACKLOG.md` — iter 006 item marked complete; replaced with next candidates
+- `SYSTEM_HEALTH.md` — test count refreshed; recommended-next updated
+- `CHANGELOG.md` — new entry prepended
+
+### Follow-Ups
+- **Circular-import smell**: `renderHelpers.ts → sopTemplates.ts → renderHelpers.ts` now exists because thresholds are sourced from `sopTemplates.ts`. Benign at runtime (primitive constants resolve via ESM hoisting, all tests pass cleanly) but a design smell. Low-effort refactor: extract confidence thresholds to a shared `templates/constants.ts` or add them to `types.ts`. Queued as a backlog candidate.
+- `sopValidator.ts` (sop-expert gap #3) — next in the 006/007/008 sequence
+- `@ledgerium/policy-engine` integration into `content/capture.ts` — third in the 006/007/008 sequence
+
+### Risks / Open Questions
+- Circular import flagged above is benign at runtime but should be fixed opportunistically
+- Agent reported 25 tests added within a "17–22" target range — coverage is good, minor over-addition
+- Meta-review should be triggered before iter 009 (we're at 6 completed loops, above the 3-loop threshold; this batch of 3 was user-directed execution ahead of the cadence check)
+
+---
+
 ## Iteration 005
 
 - Date: 2026-04-17

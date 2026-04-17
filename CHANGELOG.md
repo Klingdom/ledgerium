@@ -6,6 +6,33 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-17] - Iteration 006: Per-step confidence glyph in rendered SOPs
+
+### Added
+- `confidence?: number` optional field on `OperatorSOPStep`, `EnterpriseSOPStep`, `DecisionSOPAction` interfaces (additive, non-breaking)
+- `formatConfidenceGlyph(confidence: number | undefined): string | undefined` helper in `renderHelpers.ts` with named glyph constants (`STEP_CONFIDENCE_HIGH_GLYPH = '●'`, `STEP_CONFIDENCE_MEDIUM_GLYPH = '◐'`, `STEP_CONFIDENCE_LOW_GLYPH = '○'`)
+- Three-tier classification reusing the document-level confidence thresholds (`HIGH_CONFIDENCE_THRESHOLD = 0.85`, `LOW_CONFIDENCE_THRESHOLD = 0.70`) now exported from `sopTemplates.ts` to ensure document- and step-level tiers cannot drift apart
+- 25 new tests across 5 describe blocks in `templates.test.ts` covering glyph selection boundaries, percentage rounding, undefined handling, and per-template population across all four Decision branch patterns
+
+### Changed
+- `packages/process-engine/src/templates/sopTemplates.ts` — all three template builders now populate `confidence: step.confidence` per step (including all four DecisionSOP action patterns)
+- `packages/process-engine/src/templates/markdownRenderer.ts` — all three render functions emit the confidence glyph line directly after the evidence row:
+  - `● High confidence (92%)` for confidence ≥ 0.85
+  - `◐ Medium confidence (78%)` for 0.70 ≤ confidence < 0.85
+  - `○ Low confidence (54%) — review manually` for confidence < 0.70
+
+### Impact
+- Before: low-confidence and high-confidence steps rendered identically; reviewers had no inline signal for which steps to audit
+- After: every step that has a confidence score shows its tier glyph with the explicit `— review manually` advisory on low-confidence steps
+- **SOP trust-signal trifecta complete**: document-level badge (iter 004) + per-step evidence (iter 005) + per-step confidence (iter 006) — the three core visible signals from Design System §7.3
+- Test count: 1,436 → 1,461 (+25)
+
+### Notes
+- Thresholds are single-sourced from `sopTemplates.ts` to prevent tier drift. This creates a benign circular import (`renderHelpers.ts → sopTemplates.ts → renderHelpers.ts`) that resolves cleanly via ESM hoisting because the shared values are primitive constants. Queued as a low-effort follow-up (extract to shared constants module) — backlog item score 10.
+- Scope discipline: no other trust signals added in this loop (e.g., no per-step risk markers, no sensitivity flags).
+
+---
+
 ## [2026-04-17] - Iteration 005: Per-step evidence references in rendered SOPs
 
 ### Added

@@ -1122,3 +1122,220 @@ describe('Gap #5: Evidence row truncation in rendered markdown', () => {
     expect(evidenceLines[0]).not.toContain('ev_06');
   });
 });
+
+// ─── Gap #6: Per-step confidence glyph ───────────────────────────────────────
+
+import { formatConfidenceGlyph } from './renderHelpers.js';
+
+describe('formatConfidenceGlyph helper', () => {
+  it('returns undefined when confidence is undefined', () => {
+    expect(formatConfidenceGlyph(undefined)).toBeUndefined();
+  });
+
+  it('returns high glyph for confidence exactly at 0.85 threshold', () => {
+    const result = formatConfidenceGlyph(0.85);
+    expect(result).toBe('● High confidence (85%)');
+  });
+
+  it('returns high glyph for confidence above 0.85', () => {
+    const result = formatConfidenceGlyph(0.923);
+    expect(result).toBe('● High confidence (92%)');
+  });
+
+  it('rounds percentage correctly for high tier (0.855 → 86%)', () => {
+    const result = formatConfidenceGlyph(0.855);
+    expect(result).toBe('● High confidence (86%)');
+  });
+
+  it('returns medium glyph for confidence exactly at 0.70 threshold', () => {
+    const result = formatConfidenceGlyph(0.70);
+    expect(result).toBe('◐ Medium confidence (70%)');
+  });
+
+  it('returns medium glyph for confidence in the 0.70–0.84 range', () => {
+    const result = formatConfidenceGlyph(0.78);
+    expect(result).toBe('◐ Medium confidence (78%)');
+  });
+
+  it('returns low glyph for confidence just below 0.70 threshold', () => {
+    const result = formatConfidenceGlyph(0.699);
+    expect(result).toBe('○ Low confidence (70%) — review manually');
+  });
+
+  it('returns low glyph for confidence well below threshold', () => {
+    const result = formatConfidenceGlyph(0.54);
+    expect(result).toBe('○ Low confidence (54%) — review manually');
+  });
+
+  it('low confidence result includes the advisory suffix "— review manually"', () => {
+    const result = formatConfidenceGlyph(0.5);
+    expect(result).toContain('— review manually');
+  });
+
+  it('high confidence result does NOT include advisory suffix', () => {
+    const result = formatConfidenceGlyph(0.9);
+    expect(result).not.toContain('review manually');
+  });
+
+  it('medium confidence result does NOT include advisory suffix', () => {
+    const result = formatConfidenceGlyph(0.75);
+    expect(result).not.toContain('review manually');
+  });
+});
+
+describe('Gap #6: Per-step confidence population in operator SOP', () => {
+  it('each operator SOP step carries confidence from source step', () => {
+    const output = processSession(simpleWorkflow());
+    const sop = renderSOP(output, 'operator_centric') as OperatorSOP;
+
+    // simpleWorkflow steps have confidence 0.85 and 0.9
+    expect(sop.steps[0]!.confidence).toBe(0.85);
+    expect(sop.steps[1]!.confidence).toBe(0.9);
+  });
+
+  it('operator SOP markdown renders a confidence glyph line for each step', () => {
+    const output = processSession(simpleWorkflow());
+    const sop = renderSOP(output, 'operator_centric') as OperatorSOP;
+    const md = renderSOPMarkdown(sop);
+
+    // simpleWorkflow has 2 steps both ≥ 0.85 → high glyph
+    const glyphLines = md.split('\n').filter(l => l.includes('● High confidence') || l.includes('◐ Medium confidence') || l.includes('○ Low confidence'));
+    expect(glyphLines.length).toBe(sop.steps.length);
+  });
+
+  it('does NOT render a confidence glyph line when step.confidence is undefined', () => {
+    const output = processSession(simpleWorkflow());
+    const sop = renderSOP(output, 'operator_centric') as OperatorSOP;
+    const sopNoConf: OperatorSOP = {
+      ...sop,
+      steps: sop.steps.map(s => {
+        const { confidence: _c, ...rest } = s;
+        return rest;
+      }),
+    };
+    const md = renderSOPMarkdown(sopNoConf);
+
+    expect(md).not.toContain('● High confidence');
+    expect(md).not.toContain('◐ Medium confidence');
+    expect(md).not.toContain('○ Low confidence');
+  });
+});
+
+describe('Gap #6: Per-step confidence population in enterprise SOP', () => {
+  it('each enterprise procedure step carries confidence from source step', () => {
+    const output = processSession(complexWorkflow());
+    const sop = renderSOP(output, 'enterprise') as EnterpriseSOP;
+
+    // All complexWorkflow steps have defined confidence
+    for (const step of sop.procedure) {
+      expect(step.confidence).toBeDefined();
+      expect(step.confidence).toBeGreaterThan(0);
+    }
+  });
+
+  it('enterprise SOP markdown renders a confidence glyph line for each procedure step', () => {
+    const output = processSession(complexWorkflow());
+    const sop = renderSOP(output, 'enterprise') as EnterpriseSOP;
+    const md = renderSOPMarkdown(sop);
+
+    const glyphLines = md.split('\n').filter(l =>
+      l.includes('● High confidence') ||
+      l.includes('◐ Medium confidence') ||
+      l.includes('○ Low confidence'),
+    );
+    expect(glyphLines.length).toBe(sop.procedure.length);
+  });
+});
+
+describe('Gap #6: Per-step confidence population in decision SOP', () => {
+  it('happy-path branch actions carry confidence from source step', () => {
+    const output = processSession(complexWorkflow());
+    const sop = renderSOP(output, 'decision_based') as DecisionSOP;
+
+    const happyBranch = sop.branches.find(b => b.condition.includes('Standard'));
+    expect(happyBranch).toBeDefined();
+    if (happyBranch) {
+      for (const action of happyBranch.actions) {
+        expect(action.confidence).toBeDefined();
+        expect(action.confidence).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('error-path branch actions carry confidence from errorStep and decision step', () => {
+    const output = processSession(complexWorkflow());
+    const sop = renderSOP(output, 'decision_based') as DecisionSOP;
+
+    // Error branches are those not containing "Standard"
+    const errorBranches = sop.branches.filter(b => !b.condition.includes('Standard'));
+    expect(errorBranches.length).toBeGreaterThan(0);
+    for (const branch of errorBranches) {
+      for (const action of branch.actions) {
+        expect(action.confidence).toBeDefined();
+        expect(action.confidence).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('decision SOP markdown renders confidence glyph lines', () => {
+    const output = processSession(complexWorkflow());
+    const sop = renderSOP(output, 'decision_based') as DecisionSOP;
+    const md = renderSOPMarkdown(sop);
+
+    const glyphLines = md.split('\n').filter(l =>
+      l.includes('● High confidence') ||
+      l.includes('◐ Medium confidence') ||
+      l.includes('○ Low confidence'),
+    );
+    expect(glyphLines.length).toBeGreaterThan(0);
+  });
+
+  it('does NOT render confidence glyph lines when action.confidence is undefined', () => {
+    const output = processSession(simpleWorkflow());
+    const sop = renderSOP(output, 'decision_based') as DecisionSOP;
+    const sopNoConf: DecisionSOP = {
+      ...sop,
+      branches: sop.branches.map(b => ({
+        ...b,
+        actions: b.actions.map(a => {
+          const { confidence: _c, ...rest } = a;
+          return rest;
+        }),
+      })),
+    };
+    const md = renderSOPMarkdown(sopNoConf);
+
+    expect(md).not.toContain('● High confidence');
+    expect(md).not.toContain('◐ Medium confidence');
+    expect(md).not.toContain('○ Low confidence');
+  });
+});
+
+describe('Gap #6: Confidence glyph uses shared thresholds (no duplicated constants)', () => {
+  it('confidence exactly 0.85 renders as high (● glyph)', () => {
+    expect(formatConfidenceGlyph(0.85)).toMatch(/^● High/);
+  });
+
+  it('confidence exactly 0.70 renders as medium (◐ glyph)', () => {
+    expect(formatConfidenceGlyph(0.70)).toMatch(/^◐ Medium/);
+  });
+
+  it('confidence just below 0.70 (0.6999) renders as low (○ glyph)', () => {
+    expect(formatConfidenceGlyph(0.6999)).toMatch(/^○ Low/);
+  });
+
+  it('low confidence glyph from tinyWorkflow (0.55) shows 55%', () => {
+    const result = formatConfidenceGlyph(0.55);
+    expect(result).toBe('○ Low confidence (55%) — review manually');
+  });
+
+  it('low confidence step in operator markdown contains advisory text', () => {
+    const output = processSession(tinyWorkflow());
+    const sop = renderSOP(output, 'operator_centric') as OperatorSOP;
+    const md = renderSOPMarkdown(sop);
+
+    // tinyWorkflow step has confidence 0.55 → low glyph
+    expect(md).toContain('○ Low confidence');
+    expect(md).toContain('review manually');
+  });
+});

@@ -34,9 +34,9 @@ import {
 // ─── Confidence thresholds ───────────────────────────────────────────────────
 
 /** Minimum average confidence for a "high" badge. */
-const HIGH_CONFIDENCE_THRESHOLD = 0.85 as const;
+export const HIGH_CONFIDENCE_THRESHOLD = 0.85 as const;
 /** Minimum average confidence to avoid a "low" badge. */
-const LOW_CONFIDENCE_THRESHOLD = 0.70 as const;
+export const LOW_CONFIDENCE_THRESHOLD = 0.70 as const;
 /** Maximum low-confidence step count for a "high" badge (must be zero). */
 const HIGH_BADGE_MAX_LOW_STEPS = 0 as const;
 /** Minimum low-confidence step count that forces a "low" badge. */
@@ -127,6 +127,7 @@ function renderOperatorCentric(output: ProcessOutput): OperatorSOP {
     expectedResult: step.expectedOutcome,
     caution: stepCaution(step),
     evidenceEvents: step.instructions.map(i => i.sourceEventId),
+    confidence: step.confidence,
   }));
 
   return {
@@ -187,6 +188,7 @@ function renderEnterprise(output: ProcessOutput): EnterpriseSOP {
       outputs: stepDef?.outputs ?? [],
       verificationPoint: step.expectedOutcome,
       evidenceEvents: step.instructions.map(i => i.sourceEventId),
+      confidence: step.confidence,
     };
   });
 
@@ -308,6 +310,7 @@ function renderDecisionBased(output: ProcessOutput): DecisionSOP {
         instruction: `${step.title}: ${primaryInstruction(step)}`,
         system: step.system ?? '',
         evidenceEvents: step.instructions.map(i => i.sourceEventId),
+        confidence: step.confidence,
       })),
       outcome: sop.completionCriteria[0] ?? 'Workflow completes successfully',
     });
@@ -327,12 +330,14 @@ function renderDecisionBased(output: ProcessOutput): DecisionSOP {
               instruction: `Review the error${errorContext}: ${primaryInstruction(errorStep)}`,
               system: errorStep.system ?? '',
               evidenceEvents: errorStep.instructions.map(i => i.sourceEventId),
+              confidence: errorStep.confidence,
             },
             {
               ordinal: 2,
               instruction: `Correct the data per the error message and resubmit at step ${decision.ordinal} (${decision.title})`,
               system: decision.system ?? '',
               evidenceEvents: decision.instructions.map(i => i.sourceEventId),
+              confidence: decision.confidence,
             },
           ],
           outcome: `Error resolved — resume standard flow at step ${decision.ordinal}`,
@@ -348,6 +353,7 @@ function renderDecisionBased(output: ProcessOutput): DecisionSOP {
         instruction: `${step.title}: ${primaryInstruction(step)}`,
         system: step.system ?? '',
         evidenceEvents: step.instructions.map(i => i.sourceEventId),
+        confidence: step.confidence,
       })),
       outcome: sop.completionCriteria[0] ?? 'Workflow completes',
     });

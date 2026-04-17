@@ -13,6 +13,10 @@ import type {
   ProcessMapPhase,
   SOPStep,
 } from '../types.js';
+import {
+  HIGH_CONFIDENCE_THRESHOLD,
+  LOW_CONFIDENCE_THRESHOLD,
+} from './sopTemplates.js';
 
 // ─── Step naming ─────────────────────────────────────────────────────────────
 
@@ -432,6 +436,42 @@ export function formatEvidenceRow(eventIds: string[]): string | undefined {
   }
 
   return `◦ Evidence: ${label} · ${idList}`;
+}
+
+// ─── Per-step confidence glyph ───────────────────────────────────────────────
+
+const STEP_CONFIDENCE_HIGH_GLYPH = '●' as const;
+const STEP_CONFIDENCE_MEDIUM_GLYPH = '◐' as const;
+const STEP_CONFIDENCE_LOW_GLYPH = '○' as const;
+
+/**
+ * Renders the per-step confidence glyph line for the Markdown SOP output (Gap #6).
+ *
+ * Format examples:
+ *   `● High confidence (92%)`
+ *   `◐ Medium confidence (78%)`
+ *   `○ Low confidence (54%) — review manually`
+ *
+ * Rules:
+ * - Returns undefined (omit the line entirely) when confidence is undefined.
+ * - Three tiers mirror the doc-level badge thresholds (shared constants):
+ *   - High  (≥ 0.85): filled circle glyph
+ *   - Medium (0.70 ≤ c < 0.85): half-filled glyph
+ *   - Low   (< 0.70): empty circle glyph with advisory suffix
+ * - Percentage is Math.round(confidence * 100).
+ */
+export function formatConfidenceGlyph(confidence: number | undefined): string | undefined {
+  if (confidence === undefined) return undefined;
+
+  const pct = Math.round(confidence * 100);
+
+  if (confidence >= HIGH_CONFIDENCE_THRESHOLD) {
+    return `${STEP_CONFIDENCE_HIGH_GLYPH} High confidence (${pct}%)`;
+  }
+  if (confidence >= LOW_CONFIDENCE_THRESHOLD) {
+    return `${STEP_CONFIDENCE_MEDIUM_GLYPH} Medium confidence (${pct}%)`;
+  }
+  return `${STEP_CONFIDENCE_LOW_GLYPH} Low confidence (${pct}%) — review manually`;
 }
 
 // ─── Markdown rendering primitives ──────────────────────────────────────────

@@ -1,6 +1,6 @@
 # Ledgerium AI — System Health
 
-Last updated: 2026-04-17 (post-iteration 005 — per-step evidence references in rendered SOPs)
+Last updated: 2026-04-17 (post-iteration 006 — per-step confidence glyph in rendered SOPs; SOP trust-signal trifecta complete)
 
 ## Executive Summary
 
@@ -26,7 +26,7 @@ Overall confidence: **Medium-High**
 | Deterministic core protection | moderate | 4 | good principles, but more regression protection is still needed |
 | Package / code consistency | improving | 3.5 | extension now imports from 3 workspace packages; LiveStepBuilder duplication remains |
 | Session durability / recovery | moderate-risk | 2 | full event persistence is still missing |
-| Test coverage | moderate | 3.5 | web-app vitest active; E2E coverage still missing; 1,436 total tests (+17 in iter 005, +26 in iter 004) |
+| Test coverage | moderate | 3.5 | web-app vitest active; E2E coverage still missing; 1,461 total tests (+25 in iter 006, +17 in iter 005, +26 in iter 004) |
 | Observability | strong | 4 | analytics fully instrumented, 8 alert conditions, admin dashboard with engagement/retention/alerts |
 | Agentic CI readiness | improving | 4 | command, backlog, iteration log, and templates now exist |
 | GTM readiness | emerging | 2.5 | product wedge promising; analytics infrastructure ready for data-driven decisions |
@@ -100,19 +100,23 @@ These should be assumed to block a high-confidence release until resolved:
 
 ## Recommended Next Iteration
 
-Recommended next item:
-- **Add per-step `confidence?: number` + confidence glyph in rendered SOPs** (score: 14, IMPLEMENTATION_NOTES Gap #6)
+Recommended next item (iter 007, in-flight):
+- **Add `templates/sopValidator.ts`** (score: 13, sop-expert gap #3) — rejects banned recorder artifacts before render (release-readiness quality gate)
 
 Why:
-- Completes the SOP trust-signal trifecta started in iter 004 (doc-level confidence) and iter 005 (per-step evidence): per-step confidence is the last core visible signal
-- Perfect pattern parallel to iters 004 and 005 — additive optional field on existing step interfaces, helper-based render, low risk
-- Low-confidence steps currently render identically to high-confidence steps — reviewers cannot spot which steps need manual review without opening quality indicators
+- With the SOP trust-signal trifecta now visible (iter 004/005/006), the next highest-leverage work is preventing low-quality content from reaching the renderer in the first place
+- Release-readiness item: protects the rendered SOP contract from upstream drift in the recorder output
+- Completes sop-expert's original 3-gap release-readiness set
 
 Alternative high-value next items:
-- **Add `templates/sopValidator.ts`** (score: 13, sop-expert gap #3) — rejects banned recorder artifacts before render (release-readiness item)
-- **Integrate `@ledgerium/policy-engine` into `content/capture.ts`** (score: 13) — long-standing capture-pipeline cleanup from iter 003 follow-ups
+- **Integrate `@ledgerium/policy-engine` into `content/capture.ts`** (score: 13, iter 008 queued) — long-standing capture-pipeline cleanup from iter 003 follow-ups
 - **Add Playwright E2E tests for recording lifecycle** (score: 12) — release blocker
 - **Connect PostHog** — configure env vars to enable cloud analytics alongside internal DB
+- **Extract confidence thresholds to shared constants module** (score: 10, iter 006 follow-up) — remove benign circular import between `renderHelpers.ts` and `sopTemplates.ts`
+
+## Meta-Review
+
+At 6 completed improvement loops and counting. Per CLAUDE.md, meta-coordinator should be invoked every 3 loops — recommend running before iter 009 to refine scoring weights and selection logic based on the SOP-heavy iter 004/005/006 run plus the upcoming 007/008 cycle.
 
 ---
 

@@ -27,6 +27,7 @@ import {
   renderEnterpriseMetadataTable,
   renderConfidenceBadge,
   formatEvidenceRow,
+  formatConfidenceGlyph,
 } from './renderHelpers.js';
 import { PROCESS_ENGINE_VERSION } from '../types.js';
 
@@ -364,6 +365,10 @@ function renderOperatorMarkdown(sop: OperatorSOP): string {
     if (evidenceLine) {
       lines.push(`   ${evidenceLine}`);
     }
+    const confidenceLine = formatConfidenceGlyph(step.confidence);
+    if (confidenceLine) {
+      lines.push(`   ${confidenceLine}`);
+    }
     lines.push('');
   }
 
@@ -494,6 +499,10 @@ function renderEnterpriseMarkdown(sop: EnterpriseSOP): string {
       lines.push('');
       lines.push(evidenceLine);
     }
+    const confidenceLine = formatConfidenceGlyph(step.confidence);
+    if (confidenceLine) {
+      lines.push(confidenceLine);
+    }
     lines.push('');
   }
 
@@ -620,6 +629,10 @@ function renderDecisionMarkdown(sop: DecisionSOP): string {
       const evidenceLine = formatEvidenceRow(action.evidenceEvents ?? []);
       if (evidenceLine) {
         lines.push(`   ${evidenceLine}`);
+      }
+      const confidenceLine = formatConfidenceGlyph(action.confidence);
+      if (confidenceLine) {
+        lines.push(`   ${confidenceLine}`);
       }
     }
     lines.push('');
