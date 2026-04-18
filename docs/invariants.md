@@ -253,9 +253,23 @@ Valid `BoundaryReason` values (from `packages/segmentation-engine/src/types.ts`)
 
 The streaming segmenter (`StreamingSegmenter`) and the batch segmenter
 (`segmentEvents`) must produce **identical finalized steps** for the same
-ordered event sequence. This is a tested invariant. The same boundary
-trigger logic and `classifyGroupingReason` implementation is maintained
-in both files (they are separate implementations that must stay in sync).
+ordered event sequence. This is a structurally guaranteed invariant —
+both implementations share all boundary rules and grouping classifications
+via `packages/segmentation-engine/src/grouping.ts` and `rules.ts`.
+`StreamingSegmenter` wraps the same canonical primitives as `segmentEvents`;
+equivalent output is no longer maintained by manual sync but enforced by
+the shared implementation.
+
+The convergence regression suite (`convergence-batch.regression.test.ts`
+and `convergence-live.regression.test.ts`) validates this invariant against
+12 golden fixtures covering all boundary and grouping scenarios.
+
+`LiveStepBuilder` (extension-app) is a thin adapter over `StreamingSegmenter`;
+it delegates all segmentation logic to the package and maps `DerivedStep →
+LiveStep` at the adapter boundary. `buildDerivedSteps` (extension-app) is
+a thin wrapper over `segmentEvents`; it projects `CanonicalEvent →
+SegmentableEvent` before calling the package. All four segmentation paths
+in the system now converge on the same canonical package primitives.
 
 ### 3.8 Determinism Rule
 

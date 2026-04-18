@@ -318,7 +318,6 @@ Phase 1 in progress.
 Priorities (ordered by release-blocker status):
 - **[BLOCKER]** add Playwright E2E tests for recording lifecycle
 - **[BLOCKER]** implement full session event persistence for service worker restart recovery
-- **[BLOCKER]** converge LiveStepBuilder with StreamingSegmenter (last remaining duplication)
 - add structured error logging with session context
 - extract confidence thresholds (remove circular import)
 - widen policy-engine credit_card regex to accept whitespace separators
@@ -328,12 +327,12 @@ Resolved (do not re-list):
 - ✅ integrate policy engine into normalizer (iter 003) and content capture (iter 008)
 - ✅ SOP metadata strip + trust-signal trifecta (iters 004/005/006)
 - ✅ SOP release-readiness validator (iter 007)
+- ✅ converge LiveStepBuilder / StreamingSegmenter / buildDerivedSteps / segmentEvents (iter 011)
 
 ---
 
 ## Known Issues
 
-- LiveStepBuilder / StreamingSegmenter duplication not yet converged
 - full session event persistence missing
 - no Playwright E2E coverage
 

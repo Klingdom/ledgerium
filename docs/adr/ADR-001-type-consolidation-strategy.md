@@ -1,7 +1,7 @@
 # ADR-001: Type and Logic Consolidation Strategy
 
-**Status:** Accepted
-**Date:** 2026-03-24
+**Status:** Partially Implemented — segmentation convergence complete (iter-011)
+**Date:** 2026-03-24 (updated 2026-04-18)
 **Phase:** 0 → 1 transition
 
 ---
@@ -41,20 +41,24 @@ When workspace package linking is verified stable (pnpm install + build + tests 
    - Import `normalizeEvent`, `normalizeSession`, `RawEvent`, `CanonicalEvent` from `@ledgerium/normalization-engine`
    - Adapter boundary: the package `RawEvent` type uses snake_case fields identical to the background type
 
-2. **Background bundle builder** (`background/bundle-builder.ts`):
-   - Remove inline `buildDerivedSteps`, `classifyGrouping`, `deriveTitle`, `calcConfidence` functions
-   - Import `segmentEvents` from `@ledgerium/segmentation-engine`
-   - `buildDerivedSteps(events, sessionId)` → `segmentEvents(events, sessionId).steps`
-   - Keep `buildBundle` — it orchestrates, not derives
+2. **Background bundle builder** (`background/bundle-builder.ts`): ✅ DONE (iter-011)
+   - Removed inline `buildDerivedSteps`, `classifyGrouping`, `deriveTitle`, `calcConfidence` functions
+   - Imports `segmentEvents` from `@ledgerium/segmentation-engine`
+   - `buildDerivedSteps(events, sessionId)` → thin wrapper: `toSegmentableEvents()` + `segmentEvents().steps`
+   - `buildBundle` retained — it orchestrates, not derives
 
-3. **Background live steps** (`background/live-steps.ts`):
-   - Replace `LiveStepBuilder` with adapter wrapping `StreamingSegmenter` from `@ledgerium/segmentation-engine`
-   - Map `DerivedStep` → `LiveStep` at the adapter boundary:
+3. **Background live steps** (`background/live-steps.ts`): ✅ DONE (iter-011)
+   - `LiveStepBuilder` replaced with thin adapter wrapping `StreamingSegmenter` from `@ledgerium/segmentation-engine`
+   - `DerivedStep → LiveStep` mapping at adapter boundary:
+     - `DerivedStep.step_id` → `LiveStep.stepId`
      - `DerivedStep.start_t_ms` → `LiveStep.startedAt`
      - `DerivedStep.end_t_ms` → `LiveStep.finalizedAt`
      - `DerivedStep.title` → `LiveStep.title`
      - `DerivedStep.confidence` → `LiveStep.confidence`
      - `DerivedStep.source_event_ids.length` → `LiveStep.eventCount`
+     - `DerivedStep.grouping_reason` → `LiveStep.grouping`
+     - `DerivedStep.boundary_reason` → `LiveStep.boundaryReason`
+     - `DerivedStep.page_context.applicationLabel` → `LiveStep.pageLabel`
 
 4. **Content script sensitivity** (`content/capture.ts`):
    - Import `classifySensitivity` from `@ledgerium/policy-engine`
@@ -85,18 +89,22 @@ When workspace package linking is verified stable (pnpm install + build + tests 
 - Build time may increase marginally (more code for Vite to tree-shake)
 
 **Risk mitigated by:**
-- The 339-test suite will catch regressions immediately
-- The duplicate code is tested via package tests, so behavior is verified independently before consolidation
+- 307-test suite (post-convergence) catches regressions immediately
+- 12-fixture convergence regression suite (batch + live) enforces structural equivalence
+- All segmentation paths now share canonical primitives; divergence is structurally impossible
 
 ---
 
 ## Invariants This ADR Protects
 
-The following behaviors must produce identical results from both the workspace package and the inline implementation during the transition period:
+Post-convergence: the "duplicate" segmentation implementations have been eliminated.
+The following invariants now apply:
 
-| Behavior | Package | Inline | Test |
-|----------|---------|--------|------|
-| `segmentEvents` step IDs | `batch-segmenter.ts` | `bundle-builder.ts` | `batch-segmenter.test.ts` |
-| Confidence scores | `segmentation-engine/rules.ts` | `bundle-builder.ts` | `rules.test.ts` |
+| Behavior | Canonical Source | Consumers | Test |
+|----------|-----------------|-----------|------|
+| Batch segmentation | `packages/segmentation-engine/batch-segmenter.ts` | `bundle-builder.ts` (wrapper) | `convergence-batch.regression.test.ts` |
+| Streaming segmentation | `packages/segmentation-engine/streaming-segmenter.ts` | `live-steps.ts` (adapter) | `convergence-live.regression.test.ts` |
+| Grouping classification | `packages/segmentation-engine/grouping.ts` | both segmenters | `batch-segmenter.test.ts`, `streaming-segmenter.test.ts` |
+| Title derivation | `packages/segmentation-engine/rules.ts` | both segmenters | `rules.test.ts` |
 | `normalizeEvent` redaction | `normalization-engine/normalizer.ts` | `background/normalizer.ts` | `normalizer.test.ts` |
 | Sensitivity classification | `policy-engine/sensitivity.ts` | `content/capture.ts` | `sensitivity.test.ts` |
