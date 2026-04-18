@@ -120,13 +120,64 @@ export function SOPPageShell({
     templateArtifacts?.decision_based ? 'decision_based' :
     null;
 
-  const handleExport = useCallback(() => {
-    if (!workflowId || !selectedTemplate) return;
-    window.open(
-      `/api/workflows/${workflowId}/export-markdown?artifactType=template_sop_${selectedTemplate}`,
-      '_blank',
-    );
-  }, [workflowId, selectedTemplate]);
+  const [isExporting, setIsExporting] = useState(false);
+
+  // Download via fetch → blob → programmatic anchor click.
+  //
+  // Why not `window.open(url, '_blank')`?
+  //   - Popup blockers can kill `_blank` opens even inside click handlers.
+  //   - A download with `Content-Disposition: attachment` into a new tab
+  //     leaves a blank tab (or is blocked silently).
+  //   - HTTP errors (401/404/500) surface as JSON in a blank tab with no
+  //     user-visible feedback, so the click looks like a no-op.
+  //
+  // The fetch path keeps auth cookies, reports errors, avoids blank tabs,
+  // and works consistently across browsers.
+  const handleExport = useCallback(async () => {
+    if (!workflowId || !selectedTemplate || isExporting) return;
+
+    const exportUrl = `/api/workflows/${workflowId}/export-markdown?artifactType=template_sop_${selectedTemplate}`;
+
+    setIsExporting(true);
+    try {
+      const res = await fetch(exportUrl, { credentials: 'same-origin' });
+      if (!res.ok) {
+        const bodyText = await res.text().catch(() => '');
+        // eslint-disable-next-line no-console
+        console.error(`[SOPPageShell] Export failed (${res.status}):`, bodyText);
+        const message =
+          res.status === 401 ? 'Please sign in again to export.' :
+          res.status === 404 ? 'No SOP template is available for this workflow yet.' :
+          `Export failed (HTTP ${res.status}). Please try again.`;
+        // eslint-disable-next-line no-alert
+        alert(message);
+        return;
+      }
+
+      const blob = await res.blob();
+      const disposition = res.headers.get('Content-Disposition') ?? '';
+      const filenameMatch = /filename="([^"]+)"/.exec(disposition);
+      const filename = filenameMatch?.[1] ?? `sop-${selectedTemplate}.md`;
+
+      const objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = objectUrl;
+      anchor.download = filename;
+      anchor.rel = 'noopener';
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      // Revoke on next tick so the browser has time to start the download.
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('[SOPPageShell] Export error:', err);
+      // eslint-disable-next-line no-alert
+      alert('Export failed — check your connection and try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  }, [workflowId, selectedTemplate, isExporting]);
 
   // ── Loading / Error / Empty ──────────────────────────────────────────────
 
@@ -161,11 +212,13 @@ export function SOPPageShell({
           {workflowId && selectedTemplate && (
             <button
               onClick={handleExport}
-              className="flex items-center gap-1 text-[10px] font-medium text-[var(--content-secondary)] hover:text-[var(--content-primary)] px-2 py-1 rounded-md hover:bg-[var(--surface-secondary)] transition-colors"
+              disabled={isExporting}
+              className="flex items-center gap-1 text-[10px] font-medium text-[var(--content-secondary)] hover:text-[var(--content-primary)] disabled:opacity-50 disabled:cursor-not-allowed px-2 py-1 rounded-md hover:bg-[var(--surface-secondary)] transition-colors"
               title="Export SOP as Markdown"
+              aria-busy={isExporting}
             >
               <Download className="h-3 w-3" />
-              Export
+              {isExporting ? 'Exporting…' : 'Export'}
             </button>
           )}
         </div>
