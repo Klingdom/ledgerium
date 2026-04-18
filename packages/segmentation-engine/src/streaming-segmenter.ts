@@ -4,95 +4,37 @@
  * Designed for the live recording feed in the browser extension.
  * Events are fed one at a time; the segmenter emits provisional and
  * finalized DerivedSteps via a callback as boundaries are detected.
+ *
+ * All boundary rules and grouping classifications are aligned with the
+ * batch segmenter (segmentEvents) via shared primitives from grouping.ts.
+ * After iter-011 convergence, feeding the same event sequence through
+ * StreamingSegmenter and segmentEvents produces identical finalized steps.
  */
 
 import type {
   SegmentableEvent,
   DerivedStep,
   BoundaryReason,
-  GroupingReason,
 } from './types.js';
 
 import {
-  CLICK_NAV_WINDOW_MS,
+  IDLE_GAP_MS,
   RAPID_CLICK_DEDUP_MS,
+  TARGET_CHANGE_GAP_MS,
   deriveStepTitle,
   calculateConfidence,
 } from './rules.js';
 
+import {
+  extractPageContext,
+  classifyGroupingReason,
+  isActionButtonClick,
+  interactionTargetKey,
+} from './grouping.js';
+
 // ---------------------------------------------------------------------------
-// Internal helpers (mirrored from batch-segmenter, kept private)
+// Step builders (internal)
 // ---------------------------------------------------------------------------
-
-function extractPageContext(
-  events: SegmentableEvent[],
-): DerivedStep['page_context'] | undefined {
-  for (const e of events) {
-    if (e.page_context !== undefined) {
-      return {
-        domain: e.page_context.domain,
-        applicationLabel: e.page_context.applicationLabel,
-        routeTemplate: e.page_context.routeTemplate,
-      };
-    }
-  }
-  return undefined;
-}
-
-function classifyGroupingReason(
-  events: SegmentableEvent[],
-): GroupingReason {
-  if (events.length === 0) return 'single_action';
-
-  if (
-    events.length === 1 &&
-    events[0]!.event_type === 'session.annotation_added'
-  ) {
-    return 'annotation';
-  }
-
-  const hasSubmit = events.some(
-    (e) => e.event_type === 'interaction.submit',
-  );
-  const hasInput = events.some(
-    (e) => e.event_type === 'interaction.input_change',
-  );
-  if (hasSubmit && hasInput) return 'fill_and_submit';
-
-  for (let i = 0; i < events.length - 1; i++) {
-    const ev = events[i]!;
-    if (ev.event_type !== 'interaction.click') continue;
-    for (let j = i + 1; j < events.length; j++) {
-      const next = events[j]!;
-      if (next.t_ms - ev.t_ms > CLICK_NAV_WINDOW_MS) break;
-      if (
-        next.event_type === 'navigation.route_change' ||
-        next.event_type === 'navigation.open_page'
-      ) {
-        return 'click_then_navigate';
-      }
-    }
-  }
-
-  const clickEvents = events.filter(
-    (e) => e.event_type === 'interaction.click',
-  );
-  if (clickEvents.length >= 2) {
-    for (let i = 0; i < clickEvents.length - 1; i++) {
-      const a = clickEvents[i]!;
-      const b = clickEvents[i + 1]!;
-      if (
-        a.target_summary?.selector !== undefined &&
-        a.target_summary.selector === b.target_summary?.selector &&
-        b.t_ms - a.t_ms < RAPID_CLICK_DEDUP_MS
-      ) {
-        return 'repeated_click_dedup';
-      }
-    }
-  }
-
-  return 'single_action';
-}
 
 function buildFinalizedStep(
   events: SegmentableEvent[],
@@ -178,6 +120,16 @@ function buildProvisionalStep(
  *    step boundary is detected.
  *
  * Call `finalize()` when the recording session ends to flush remaining events.
+ *
+ * Boundary rules (aligned with batch segmenter after iter-011 convergence):
+ *  - idle_gap: gap > IDLE_GAP_MS between consecutive events (D1)
+ *  - route_changed: SPA navigation to a different route template (D2, guarded)
+ *  - target_changed: different interaction target after TARGET_CHANGE_GAP_MS (D3)
+ *  - action_completed: click on completion button (D4, one-event lookahead)
+ *  - form_submitted: interaction.submit event
+ *  - navigation_changed: event from different domain
+ *  - user_annotation: session.annotation_added event
+ *  - session_stop: session.stopped event or explicit finalize()
  */
 export class StreamingSegmenter {
   private readonly sessionId: string;
@@ -186,8 +138,39 @@ export class StreamingSegmenter {
   private stepCounter: number;
   private lastEventT_ms: number;
   private readonly onStepUpdate: (step: DerivedStep) => void;
+
   /** Domain seen in the most recent navigation event, for change detection. */
   private lastNavigationDomain: string | undefined;
+
+  /**
+   * Last seen route template, for SPA route-change boundary detection.
+   * Only fires a boundary when lastRouteTemplate !== '' AND the route changes.
+   * (Mirrors the buildDerivedSteps guard — prevents the first route_change from
+   * splitting an empty accumulator.)
+   */
+  private lastRouteTemplate: string;
+
+  /**
+   * Tracks the last known label for each selector.
+   * Used for spreadsheet cell-aware target-change detection (D3).
+   */
+  private lastLabelBySelector: Map<string, string>;
+
+  /**
+   * The previous event processed (for target-change gap measurement).
+   */
+  private prevEvent: SegmentableEvent | undefined;
+
+  /**
+   * When true, the previous event was an action-button click that wants to
+   * finalize on the NEXT event. If the next event is a rapid repeat click on
+   * the same selector, defer (let dedup handle it). Otherwise, finalize BEFORE
+   * processing the new event. (D4 — one-event lookahead approach for streaming.)
+   */
+  private pendingActionBoundary: boolean;
+
+  /** Selector of the action button that set pendingActionBoundary. */
+  private pendingActionSelector: string | undefined;
 
   constructor(
     sessionId: string,
@@ -200,6 +183,11 @@ export class StreamingSegmenter {
     this.stepCounter = 0;
     this.lastEventT_ms = 0;
     this.lastNavigationDomain = undefined;
+    this.lastRouteTemplate = '';
+    this.lastLabelBySelector = new Map();
+    this.prevEvent = undefined;
+    this.pendingActionBoundary = false;
+    this.pendingActionSelector = undefined;
   }
 
   // -------------------------------------------------------------------------
@@ -214,15 +202,59 @@ export class StreamingSegmenter {
    * itself was emitted as a finalized annotation step.
    */
   processEvent(event: SegmentableEvent): void {
-    // Skip system / derived events.
+    // ----- System/derived event filter (D5: keep system.error_displayed) ----
     if (
-      event.event_type.startsWith('system.') ||
-      event.event_type.startsWith('derived.')
+      event.event_type.startsWith('system.') &&
+      event.event_type !== 'system.error_displayed'
     ) {
       return;
     }
+    if (event.event_type.startsWith('derived.')) {
+      return;
+    }
 
-    this.lastEventT_ms = event.t_ms;
+    // ----- Pending action boundary (D4) -------------------------------------
+    // If the previous event was an action-button click, resolve the deferred
+    // boundary now. If this event is a rapid repeat on the same selector, let
+    // dedup handle it naturally (clear pending). Otherwise, flush BEFORE
+    // accumulating this event.
+    if (this.pendingActionBoundary) {
+      const isRapidRepeat =
+        event.event_type === 'interaction.click' &&
+        this.pendingActionSelector !== undefined &&
+        event.target_summary?.selector === this.pendingActionSelector &&
+        event.t_ms - this.lastEventT_ms < RAPID_CLICK_DEDUP_MS;
+
+      if (isRapidRepeat) {
+        // Dedup takes priority — clear pending without flushing.
+        this.pendingActionBoundary = false;
+        this.pendingActionSelector = undefined;
+      } else {
+        // Flush the previous accumulator (which includes the action button click).
+        this.pendingActionBoundary = false;
+        this.pendingActionSelector = undefined;
+        this.flushProvisionalAsFinalized('action_completed');
+        this.lastNavigationDomain = undefined;
+      }
+    }
+
+    // ----- Track label-per-selector for target-change cell detection --------
+    const evtSelector = event.target_summary?.selector;
+    const evtLabel = event.target_summary?.label?.trim();
+    if (evtSelector !== undefined && evtLabel !== undefined && evtLabel !== '') {
+      this.lastLabelBySelector.set(evtSelector, evtLabel);
+    }
+
+    // ----- Idle gap boundary (D1, BEFORE accumulating) ----------------------
+    if (
+      this.provisionalEvents.length > 0 &&
+      this.lastEventT_ms > 0 &&
+      event.t_ms - this.lastEventT_ms > IDLE_GAP_MS
+    ) {
+      this.flushProvisionalAsFinalized('idle_gap');
+      this.lastNavigationDomain = undefined;
+      this.lastLabelBySelector = new Map();
+    }
 
     // ----- Annotation: finalize previous accumulator, emit annotation step --
     if (event.event_type === 'session.annotation_added') {
@@ -244,10 +276,12 @@ export class StreamingSegmenter {
         this.onStepUpdate(annotationStep);
       }
       this.lastNavigationDomain = undefined;
+      this.lastEventT_ms = event.t_ms;
+      this.prevEvent = undefined;
       return;
     }
 
-    // ----- Domain change boundary --------------------------------------------
+    // ----- Domain change boundary -------------------------------------------
     // Fires on ANY event from a different domain (not just navigation events)
     // so that multi-tab workflows are correctly segmented when the user
     // switches between tabs on different domains.
@@ -260,14 +294,65 @@ export class StreamingSegmenter {
         this.provisionalEvents.length > 0
       ) {
         this.flushProvisionalAsFinalized('navigation_changed');
+        this.lastLabelBySelector = new Map();
       }
       if (domain !== undefined) {
         this.lastNavigationDomain = domain;
       }
     }
 
+    // ----- Same-domain route change boundary (D2, guarded) ------------------
+    // Only fires when the route template actually changes AND a lastRoute
+    // is already known (guard prevents first route_change from splitting an
+    // empty accumulator when no prior route exists).
+    if (event.event_type === 'navigation.route_change') {
+      const newRoute = event.page_context?.routeTemplate ?? '';
+      if (
+        this.provisionalEvents.length > 0 &&
+        newRoute !== this.lastRouteTemplate &&
+        this.lastRouteTemplate !== ''
+      ) {
+        this.flushProvisionalAsFinalized('route_changed');
+      }
+      if (newRoute !== '') {
+        this.lastRouteTemplate = newRoute;
+      }
+      // route_change is a boundary marker — do NOT add to accumulator.
+      this.lastEventT_ms = event.t_ms;
+      this.prevEvent = event;
+      this.emitProvisional();
+      return;
+    }
+
+    // ----- Target context change boundary (D3, with label tracking) ---------
+    // When the user moves from one interaction target to a significantly
+    // different one after a brief pause, finalize the previous step.
+    if (this.prevEvent !== undefined && this.provisionalEvents.length > 0) {
+      const gap = event.t_ms - this.prevEvent.t_ms;
+      const prevSel = this.prevEvent.target_summary?.selector;
+      const prevLabelKnown = prevSel !== undefined
+        ? this.lastLabelBySelector.get(prevSel)
+        : undefined;
+      const curSel = event.target_summary?.selector;
+      const curLabelKnown = curSel !== undefined
+        ? this.lastLabelBySelector.get(curSel)
+        : undefined;
+      const prevTarget = interactionTargetKey(this.prevEvent, prevLabelKnown);
+      const currentTarget = interactionTargetKey(event, evtLabel ?? curLabelKnown);
+      if (
+        gap >= TARGET_CHANGE_GAP_MS &&
+        prevTarget !== undefined &&
+        currentTarget !== undefined &&
+        prevTarget !== currentTarget
+      ) {
+        this.flushProvisionalAsFinalized('target_changed');
+      }
+    }
+
     // Add event to provisional accumulator.
     this.provisionalEvents.push(event);
+    this.lastEventT_ms = event.t_ms;
+    this.prevEvent = event;
 
     // ----- Submit boundary (finalize AFTER adding the submit event) ----------
     if (event.event_type === 'interaction.submit') {
@@ -280,6 +365,18 @@ export class StreamingSegmenter {
     if (event.event_type === 'session.stopped') {
       this.flushProvisionalAsFinalized('session_stop');
       this.lastNavigationDomain = undefined;
+      return;
+    }
+
+    // ----- Action button boundary (D4) ----------------------------------------
+    // Clicks on Send/Save/Submit/etc. are completion signals. Defer by one event
+    // so we can check if the next event is a rapid repeat on the same selector
+    // (in which case dedup takes priority over action_completed).
+    if (isActionButtonClick(event)) {
+      this.pendingActionBoundary = true;
+      this.pendingActionSelector = event.target_summary?.selector;
+      // Emit provisional (not finalized yet — deferred).
+      this.emitProvisional();
       return;
     }
 
@@ -298,6 +395,15 @@ export class StreamingSegmenter {
    * @returns All finalized steps accumulated over the session lifetime.
    */
   finalize(): DerivedStep[] {
+    // Resolve any pending action boundary first (the recording ended, so
+    // no next event is coming).
+    if (this.pendingActionBoundary && this.provisionalEvents.length > 0) {
+      this.pendingActionBoundary = false;
+      this.pendingActionSelector = undefined;
+      this.flushProvisionalAsFinalized('action_completed');
+      this.lastNavigationDomain = undefined;
+      return this.getFinalizedSteps();
+    }
     if (this.provisionalEvents.length > 0) {
       this.flushProvisionalAsFinalized('session_stop');
     }
@@ -345,6 +451,11 @@ export class StreamingSegmenter {
     this.stepCounter = 0;
     this.lastEventT_ms = 0;
     this.lastNavigationDomain = undefined;
+    this.lastRouteTemplate = '';
+    this.lastLabelBySelector = new Map();
+    this.prevEvent = undefined;
+    this.pendingActionBoundary = false;
+    this.pendingActionSelector = undefined;
   }
 
   // -------------------------------------------------------------------------
