@@ -1,5 +1,8 @@
 /**
  * Tests for segmentation rules: constants, deriveStepTitle, calculateConfidence.
+ *
+ * deriveStepTitle expectations align with the extension-side deriveTitle style
+ * (post-convergence per D12).
  */
 
 import { describe, it, expect } from 'vitest';
@@ -55,42 +58,24 @@ describe('deriveStepTitle', () => {
   // --- click_then_navigate --------------------------------------------------
 
   describe('click_then_navigate', () => {
-    it('uses enriched destination for generic pageTitle like "Dashboard"', () => {
+    it('uses pageTitle from navigation event', () => {
       const click = makeEvent({ event_id: 'evt-1', event_type: 'interaction.click' });
       const nav = makeEvent({
         event_id: 'evt-2',
         event_type: 'navigation.open_page',
         page_context: {
           domain: 'app.com',
-          routeTemplate: '/dashboard',
+          routeTemplate: '/inbox',
           applicationLabel: 'App',
-          pageTitle: 'Dashboard',
-        },
-      });
-      // "Dashboard" is generic — enriched to route + app label
-      expect(deriveStepTitle([click, nav], 'click_then_navigate')).toBe(
-        'Navigate to /dashboard (App)',
-      );
-    });
-
-    it('uses specific pageTitle when non-generic', () => {
-      const click = makeEvent({ event_id: 'evt-1', event_type: 'interaction.click' });
-      const nav = makeEvent({
-        event_id: 'evt-2',
-        event_type: 'navigation.open_page',
-        page_context: {
-          domain: 'app.com',
-          routeTemplate: '/invoices/new',
-          applicationLabel: 'NetSuite',
-          pageTitle: 'Create Invoice',
+          pageTitle: 'Inbox',
         },
       });
       expect(deriveStepTitle([click, nav], 'click_then_navigate')).toBe(
-        'Navigate to Create Invoice',
+        'Navigate to Inbox',
       );
     });
 
-    it('falls back to route + app label when pageTitle is empty', () => {
+    it('uses routeTemplate when pageTitle is absent', () => {
       const click = makeEvent({ event_id: 'evt-1', event_type: 'interaction.click' });
       const nav = makeEvent({
         event_id: 'evt-2',
@@ -102,9 +87,8 @@ describe('deriveStepTitle', () => {
           pageTitle: '',
         },
       });
-      // pageTitle is empty string → treated as undefined; no pageContext arg passed
       expect(deriveStepTitle([click, nav], 'click_then_navigate')).toBe(
-        'Navigate to /tasks/:id (App)',
+        'Navigate to /tasks/:id',
       );
     });
 
@@ -119,7 +103,33 @@ describe('deriveStepTitle', () => {
   // --- fill_and_submit ------------------------------------------------------
 
   describe('fill_and_submit', () => {
-    it('uses target label from submit event', () => {
+    it('lists field labels from input_change events', () => {
+      const input1 = makeEvent({
+        event_id: 'evt-1',
+        event_type: 'interaction.input_change',
+        page_context: {
+          domain: 'app.com',
+          routeTemplate: '/page',
+          applicationLabel: 'App',
+          pageTitle: 'Page',
+        },
+        target_summary: { label: 'Name' },
+      });
+      const input2 = makeEvent({
+        event_id: 'evt-2',
+        event_type: 'interaction.input_change',
+        target_summary: { label: 'Email' },
+      });
+      const submit = makeEvent({
+        event_id: 'evt-3',
+        event_type: 'interaction.submit',
+      });
+      expect(deriveStepTitle([input1, input2, submit], 'fill_and_submit')).toBe(
+        'Complete Name, Email and submit in App',
+      );
+    });
+
+    it('falls back to "Complete and submit form" when no input labels', () => {
       const input = makeEvent({
         event_id: 'evt-1',
         event_type: 'interaction.input_change',
@@ -127,44 +137,27 @@ describe('deriveStepTitle', () => {
       const submit = makeEvent({
         event_id: 'evt-2',
         event_type: 'interaction.submit',
-        target_summary: { label: 'Expense Form' },
       });
       expect(deriveStepTitle([input, submit], 'fill_and_submit')).toBe(
-        'Fill and submit Expense Form',
+        'Complete and submit form',
       );
     });
 
-    it('falls back to pageTitle of first event when no submit target label', () => {
+    it('appends app context when available', () => {
       const input = makeEvent({
         event_id: 'evt-1',
         event_type: 'interaction.input_change',
         page_context: {
           domain: 'app.com',
-          routeTemplate: '/reports/new',
-          applicationLabel: 'App',
-          pageTitle: 'Create Report',
+          routeTemplate: '/form',
+          applicationLabel: 'MyApp',
+          pageTitle: 'Page',
         },
+        target_summary: { label: 'Subject' },
       });
-      const submit = makeEvent({
-        event_id: 'evt-2',
-        event_type: 'interaction.submit',
-      });
+      const submit = makeEvent({ event_id: 'evt-2', event_type: 'interaction.submit' });
       expect(deriveStepTitle([input, submit], 'fill_and_submit')).toBe(
-        'Fill and submit Create Report',
-      );
-    });
-
-    it('falls back to "form" when no context is available', () => {
-      const input = makeEvent({
-        event_id: 'evt-1',
-        event_type: 'interaction.input_change',
-      });
-      const submit = makeEvent({
-        event_id: 'evt-2',
-        event_type: 'interaction.submit',
-      });
-      expect(deriveStepTitle([input, submit], 'fill_and_submit')).toBe(
-        'Fill and submit form',
+        'Complete Subject and submit in MyApp',
       );
     });
   });
@@ -172,7 +165,7 @@ describe('deriveStepTitle', () => {
   // --- repeated_click_dedup -------------------------------------------------
 
   describe('repeated_click_dedup', () => {
-    it('uses label from first event target_summary', () => {
+    it('uses label from first click event', () => {
       const click = makeEvent({
         event_id: 'evt-1',
         target_summary: { label: 'Save', selector: '#save-btn' },
@@ -182,34 +175,29 @@ describe('deriveStepTitle', () => {
       );
     });
 
-    it('falls back to role when no label is present', () => {
+    it('falls back to "Click action" when no label and no app context', () => {
       const click = makeEvent({
         event_id: 'evt-1',
-        target_summary: { role: 'button', selector: '#btn' },
+        target_summary: { selector: '#btn' },
       });
       expect(deriveStepTitle([click, click], 'repeated_click_dedup')).toBe(
-        'Click button',
+        'Click action',
       );
     });
 
-    it('falls back to "element" when no label and elementType is a raw HTML tag', () => {
+    it('uses app context in fallback when available', () => {
       const click = makeEvent({
         event_id: 'evt-1',
-        target_summary: { elementType: 'input', selector: '#inp' },
+        page_context: {
+          domain: 'app.com',
+          routeTemplate: '/page',
+          applicationLabel: 'CRM',
+          pageTitle: 'Page',
+        },
+        target_summary: { selector: '#btn' },
       });
-      // "input" is not in RAW_ELEMENT_TYPES so it shouldn't appear as a label.
-      // The targetLabel function only uses role (not elementType) as fallback,
-      // and filters out raw HTML element types. With no label or meaningful role,
-      // the fallback is "element" with optional page context.
       expect(deriveStepTitle([click, click], 'repeated_click_dedup')).toBe(
-        'Click element',
-      );
-    });
-
-    it('falls back to "element" when target_summary is entirely absent', () => {
-      const click = makeEvent({ event_id: 'evt-1' });
-      expect(deriveStepTitle([click, click], 'repeated_click_dedup')).toBe(
-        'Click element',
+        'Click action in CRM',
       );
     });
   });
@@ -217,24 +205,24 @@ describe('deriveStepTitle', () => {
   // --- annotation -----------------------------------------------------------
 
   describe('annotation', () => {
-    it('uses target_summary label when present', () => {
+    it('uses annotation_text when present', () => {
       const annotation = makeEvent({
         event_id: 'evt-1',
         event_type: 'session.annotation_added',
-        target_summary: { label: 'Check approval' },
+        annotation_text: 'Note the process here',
       });
       expect(deriveStepTitle([annotation], 'annotation')).toBe(
-        'Check approval',
+        'Note the process here',
       );
     });
 
-    it('falls back to "User annotation" when no label', () => {
+    it('falls back to "Annotation" when no annotation_text', () => {
       const annotation = makeEvent({
         event_id: 'evt-1',
         event_type: 'session.annotation_added',
       });
       expect(deriveStepTitle([annotation], 'annotation')).toBe(
-        'User annotation',
+        'Annotation',
       );
     });
   });
@@ -242,9 +230,22 @@ describe('deriveStepTitle', () => {
   // --- error_handling -------------------------------------------------------
 
   describe('error_handling', () => {
-    it('always returns "Handle error"', () => {
+    it('returns "Handle error" without app context', () => {
       const evt = makeEvent({ event_id: 'evt-1' });
       expect(deriveStepTitle([evt], 'error_handling')).toBe('Handle error');
+    });
+
+    it('appends app context when available', () => {
+      const evt = makeEvent({
+        event_id: 'evt-1',
+        page_context: {
+          domain: 'app.com',
+          routeTemplate: '/page',
+          applicationLabel: 'MyApp',
+          pageTitle: 'Page',
+        },
+      });
+      expect(deriveStepTitle([evt], 'error_handling')).toBe('Handle error in MyApp');
     });
   });
 
@@ -260,16 +261,50 @@ describe('deriveStepTitle', () => {
       expect(deriveStepTitle([evt], 'single_action')).toBe('Click Submit');
     });
 
-    it('interaction.input_change with label → "Update <label>"', () => {
+    it('interaction.click without label → "Click action<ctx>"', () => {
+      const evt = makeEvent({
+        event_id: 'evt-1',
+        event_type: 'interaction.click',
+        page_context: {
+          domain: 'app.com',
+          routeTemplate: '/page',
+          applicationLabel: 'App',
+          pageTitle: 'Page',
+        },
+      });
+      expect(deriveStepTitle([evt], 'single_action')).toBe('Click action in App');
+    });
+
+    it('interaction.input_change with label → "Enter <label><ctx>"', () => {
       const evt = makeEvent({
         event_id: 'evt-1',
         event_type: 'interaction.input_change',
+        page_context: {
+          domain: 'app.com',
+          routeTemplate: '/page',
+          applicationLabel: 'App',
+          pageTitle: 'Page',
+        },
         target_summary: { label: 'Amount' },
       });
-      expect(deriveStepTitle([evt], 'single_action')).toBe('Update Amount');
+      expect(deriveStepTitle([evt], 'single_action')).toBe('Enter Amount in App');
     });
 
-    it('interaction.submit with pageTitle → "Submit <pageTitle>"', () => {
+    it('interaction.input_change without label → "Enter data<ctx>"', () => {
+      const evt = makeEvent({
+        event_id: 'evt-1',
+        event_type: 'interaction.input_change',
+        page_context: {
+          domain: 'app.com',
+          routeTemplate: '/page',
+          applicationLabel: 'App',
+          pageTitle: 'Page',
+        },
+      });
+      expect(deriveStepTitle([evt], 'single_action')).toBe('Enter data in App');
+    });
+
+    it('interaction.submit → "Submit form<ctx>"', () => {
       const evt = makeEvent({
         event_id: 'evt-1',
         event_type: 'interaction.submit',
@@ -280,12 +315,10 @@ describe('deriveStepTitle', () => {
           pageTitle: 'Expense Report',
         },
       });
-      expect(deriveStepTitle([evt], 'single_action')).toBe(
-        'Submit Expense Report',
-      );
+      expect(deriveStepTitle([evt], 'single_action')).toBe('Submit form in App');
     });
 
-    it('navigation.open_page with generic pageTitle uses enriched destination', () => {
+    it('navigation.open_page uses pageTitle', () => {
       const evt = makeEvent({
         event_id: 'evt-1',
         event_type: 'navigation.open_page',
@@ -296,13 +329,10 @@ describe('deriveStepTitle', () => {
           pageTitle: 'Dashboard',
         },
       });
-      // "Dashboard" is generic — enriched to route + app label
-      expect(deriveStepTitle([evt], 'single_action')).toBe(
-        'Navigate to /dashboard (App)',
-      );
+      expect(deriveStepTitle([evt], 'single_action')).toBe('Navigate to Dashboard');
     });
 
-    it('navigation.open_page with specific pageTitle uses it directly', () => {
+    it('navigation.open_page falls back to routeTemplate when no pageTitle', () => {
       const evt = makeEvent({
         event_id: 'evt-1',
         event_type: 'navigation.open_page',
@@ -310,21 +340,20 @@ describe('deriveStepTitle', () => {
           domain: 'app.com',
           routeTemplate: '/invoices/new',
           applicationLabel: 'NetSuite',
-          pageTitle: 'Create Invoice',
+          pageTitle: '',
         },
       });
       expect(deriveStepTitle([evt], 'single_action')).toBe(
-        'Navigate to Create Invoice',
+        'Navigate to /invoices/new',
       );
     });
 
-    it('unrecognised event type → contextual fallback', () => {
+    it('unrecognised event type → "Perform action<ctx>"', () => {
       const evt = makeEvent({
         event_id: 'evt-1',
         event_type: 'workflow.wait',
       });
-      // With no page context, falls back to "Interact with page"
-      expect(deriveStepTitle([evt], 'single_action')).toBe('Interact with page');
+      expect(deriveStepTitle([evt], 'single_action')).toBe('Perform action');
     });
 
     it('empty events array → "Perform action"', () => {
@@ -335,25 +364,64 @@ describe('deriveStepTitle', () => {
   // --- data_entry ------------------------------------------------------------
 
   describe('data_entry', () => {
-    it('uses target label when present', () => {
+    it('uses field labels from input_change events', () => {
       const evt = makeEvent({
         event_id: 'evt-1',
         event_type: 'interaction.input_change',
-        target_summary: { label: 'Cell A11' },
+        target_summary: { label: 'Amount' },
       });
-      expect(deriveStepTitle([evt], 'data_entry')).toBe('Enter Cell A11');
+      expect(deriveStepTitle([evt], 'data_entry')).toBe('Enter Amount');
     });
 
-    it('falls back to "field" when no label', () => {
+    it('detects spreadsheet cell references → "Enter data in cells <cells><ctx>"', () => {
+      const evt = makeEvent({
+        event_id: 'evt-1',
+        event_type: 'interaction.input_change',
+        page_context: {
+          domain: 'app.com',
+          routeTemplate: '/page',
+          applicationLabel: 'App',
+          pageTitle: 'Page',
+        },
+        target_summary: { label: 'A16' },
+      });
+      expect(deriveStepTitle([evt], 'data_entry')).toBe('Enter data in cells A16 in App');
+    });
+
+    it('falls back to "Enter data" when no label', () => {
       const evt = makeEvent({ event_id: 'evt-1', event_type: 'interaction.input_change' });
-      expect(deriveStepTitle([evt], 'data_entry')).toBe('Enter field');
+      expect(deriveStepTitle([evt], 'data_entry')).toBe('Enter data');
+    });
+
+    it('appends " in spreadsheet" when no app context and cell refs present', () => {
+      const evt = makeEvent({
+        event_id: 'evt-1',
+        event_type: 'interaction.input_change',
+        target_summary: { label: 'B5' },
+      });
+      expect(deriveStepTitle([evt], 'data_entry')).toBe('Enter data in cells B5 in spreadsheet');
     });
   });
 
   // --- send_action -----------------------------------------------------------
 
   describe('send_action', () => {
-    it('uses target label directly when present', () => {
+    it('uses click target label with app context', () => {
+      const evt = makeEvent({
+        event_id: 'evt-1',
+        event_type: 'interaction.click',
+        page_context: {
+          domain: 'app.com',
+          routeTemplate: '/page',
+          applicationLabel: 'App',
+          pageTitle: 'Page',
+        },
+        target_summary: { label: 'Save' },
+      });
+      expect(deriveStepTitle([evt], 'send_action')).toBe('Save in App');
+    });
+
+    it('uses label without context when no app context', () => {
       const evt = makeEvent({
         event_id: 'evt-1',
         event_type: 'interaction.click',
@@ -362,22 +430,46 @@ describe('deriveStepTitle', () => {
       expect(deriveStepTitle([evt], 'send_action')).toBe('Send Email');
     });
 
-    it('falls back to "Complete action" when no label', () => {
-      const evt = makeEvent({ event_id: 'evt-1', event_type: 'interaction.click' });
-      expect(deriveStepTitle([evt], 'send_action')).toBe('Complete action');
+    it('falls back to "Send<ctx>" when no label', () => {
+      const evt = makeEvent({
+        event_id: 'evt-1',
+        event_type: 'interaction.click',
+        page_context: {
+          domain: 'app.com',
+          routeTemplate: '/page',
+          applicationLabel: 'App',
+          pageTitle: 'Page',
+        },
+      });
+      expect(deriveStepTitle([evt], 'send_action')).toBe('Send in App');
     });
   });
 
   // --- file_action -----------------------------------------------------------
 
   describe('file_action', () => {
-    it('always returns "Attach file"', () => {
+    it('returns "Attach file" without app context', () => {
       const evt = makeEvent({
         event_id: 'evt-1',
         event_type: 'interaction.click',
         target_summary: { label: 'Upload', elementType: 'file' },
       });
       expect(deriveStepTitle([evt], 'file_action')).toBe('Attach file');
+    });
+
+    it('appends app context when available', () => {
+      const evt = makeEvent({
+        event_id: 'evt-1',
+        event_type: 'interaction.click',
+        page_context: {
+          domain: 'app.com',
+          routeTemplate: '/page',
+          applicationLabel: 'MyApp',
+          pageTitle: 'Page',
+        },
+        target_summary: { label: 'Upload', elementType: 'file' },
+      });
+      expect(deriveStepTitle([evt], 'file_action')).toBe('Attach file in MyApp');
     });
 
     it('returns "Attach file" even with no events', () => {

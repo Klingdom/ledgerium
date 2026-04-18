@@ -49,6 +49,9 @@ function loadGoldenInputs(name: string): SegmentableEvent[] {
     if (e['target_summary'] !== undefined) {
       event.target_summary = e['target_summary'] as NonNullable<SegmentableEvent['target_summary']>;
     }
+    if (e['annotation_text'] !== undefined) {
+      event.annotation_text = e['annotation_text'] as string;
+    }
     return event;
   });
 }

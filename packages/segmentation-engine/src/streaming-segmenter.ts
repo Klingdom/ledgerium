@@ -59,6 +59,7 @@ function buildFinalizedStep(
     ordinal,
     title,
     status: 'finalized',
+    ...(boundaryReason !== undefined && { boundary_reason: boundaryReason }),
     grouping_reason: groupingReason,
     confidence,
     source_event_ids: events.map((e) => e.event_id),
@@ -66,7 +67,6 @@ function buildFinalizedStep(
     end_t_ms: endT,
     duration_ms: endT - startT,
     ...(pageCtx !== undefined && { page_context: pageCtx }),
-    ...(boundaryReason !== undefined && { boundary_reason: boundaryReason }),
   };
 
   return step;

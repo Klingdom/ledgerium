@@ -76,101 +76,84 @@ export function generateStepId(): string {
 }
 
 // ---------------------------------------------------------------------------
-// Internal helpers
+// Internal helpers (extension-side style, ported from bundle-builder.ts)
 // ---------------------------------------------------------------------------
 
 /**
- * Raw HTML element types that should not appear in user-facing labels.
- * When the only identifier is a generic tag name, we return undefined
- * so callers fall back to page context instead.
+ * Detect spreadsheet cell references (A1, B5, AA12, etc.).
+ * Labels matching this pattern are treated as cell coordinates rather than
+ * field names, and are excluded from field-label extraction.
  */
-const RAW_ELEMENT_TYPES = new Set([
-  'div', 'span', 'svg', 'use', 'p', 'li', 'ul', 'section', 'article',
-  'main', 'header', 'footer', 'nav', 'form', 'fieldset', 'figure', 'img',
-]);
-
-/** Best-effort label from an event's target_summary. */
-function targetLabel(event: SegmentableEvent): string | undefined {
-  const label = event.target_summary?.label;
-  if (label && label.trim()) return label;
-  // Only use role if it's a meaningful ARIA role, not a raw HTML element type.
-  // "button" and "link" are useful; "div" and "span" are not.
-  const role = event.target_summary?.role;
-  if (role && !RAW_ELEMENT_TYPES.has(role)) return role;
-  return undefined;
-}
+const CELL_REF_RE = /^[A-Z]{1,3}\d{1,5}$/;
 
 /**
- * Build a contextual fallback label using page context when the target
- * element has no meaningful label. Produces strings like:
- *   "element on Invoice Page" or "field in Salesforce"
- * instead of bare "element" or "field".
+ * Get a readable app context suffix like " in email" or " in App".
+ * Returns '' when no meaningful application label is present.
  */
-function contextualFallback(
-  event: SegmentableEvent | undefined,
-  bareLabel: string,
-  pageContext?: DerivedStep['page_context'],
+function appContextSuffix(
+  page: SegmentableEvent['page_context'] | DerivedStep['page_context'] | undefined,
 ): string {
-  if (!event) return bareLabel;
-  const pageLabel =
-    event.page_context?.pageTitle ??
-    pageContext?.routeTemplate ??
-    event.page_context?.applicationLabel;
-  if (pageLabel) {
-    const system = event.page_context?.applicationLabel;
-    if (system && system !== pageLabel) {
-      return `${bareLabel} on ${pageLabel} (${system})`;
-    }
-    return `${bareLabel} on ${pageLabel}`;
+  if (page === undefined) return '';
+  const app = page.applicationLabel?.toLowerCase() ?? '';
+  const title = 'pageTitle' in page ? (page.pageTitle?.toLowerCase() ?? '') : '';
+  const route = page.routeTemplate?.toLowerCase() ?? '';
+  if (
+    app === 'mail' ||
+    title.includes('inbox') ||
+    title.includes('gmail') ||
+    route.includes('mail')
+  ) {
+    return ' in email';
   }
-  return bareLabel;
+  if (
+    title.includes('sheets') ||
+    title.includes('spreadsheet') ||
+    route.includes('spreadsheet')
+  ) {
+    return ' in spreadsheet';
+  }
+  if (title.includes('docs') || title.includes('document')) return ' in document';
+  if (page.applicationLabel && page.applicationLabel !== 'Mail' && page.applicationLabel !== 'Docs') {
+    return ` in ${page.applicationLabel}`;
+  }
+  return '';
 }
 
 /**
- * Page titles that are too generic to be useful as navigation destinations.
- * When we encounter these, we fall back to route template + app label
- * for a richer title like "Navigate to /orders/new (NetSuite)" instead
- * of "Navigate to Home".
+ * Extract unique, meaningful field labels from input_change events.
+ * Excludes spreadsheet cell references (A16, B16, etc.) and deduplicates.
+ * Returns at most 3 labels.
  */
-const GENERIC_PAGE_TITLES = new Set([
-  'home', 'dashboard', 'main', 'index', 'welcome', 'loading',
-  'untitled', 'new tab', 'about:blank',
-]);
-
-/** Page title from an event's page_context, with generic title detection. */
-function pageTitle(event: SegmentableEvent): string | undefined {
-  const t = event.page_context?.pageTitle;
-  if (t === undefined || t === '') return undefined;
-  // If the page title is generic, it's not useful as a navigation target.
-  // Return undefined to let callers fall through to route template.
-  if (GENERIC_PAGE_TITLES.has(t.toLowerCase().trim())) return undefined;
-  return t;
+function extractFieldLabels(events: SegmentableEvent[]): string[] {
+  return events
+    .filter(
+      (e) =>
+        e.event_type === 'interaction.input_change' &&
+        e.target_summary?.label?.trim() !== undefined &&
+        e.target_summary.label.trim() !== '',
+    )
+    .map((e) => e.target_summary!.label!.trim())
+    .filter((l, i, arr) => arr.indexOf(l) === i) // dedupe
+    .filter((l) => !CELL_REF_RE.test(l))         // exclude cell refs
+    .slice(0, 3);
 }
 
 /**
- * Enriched page title that, for generic page titles, combines route template
- * and application label for better navigation context.
- * Example: "Home" → "/invoices/new (NetSuite)" or "NetSuite" or undefined
+ * Get a meaningful click label from a set of events.
+ * Returns the label of the first click event that has one,
+ * or falls back to 'action{ctx}'.
  */
-function enrichedPageDestination(event: SegmentableEvent): string | undefined {
-  // Try the page title first — if it's specific, use it
-  const title = pageTitle(event);
-  if (title) return title;
-
-  // Page title is generic or empty — build from route + app label
-  const route = event.page_context?.routeTemplate;
-  const app = event.page_context?.applicationLabel;
-
-  if (route && app) return `${route} (${app})`;
-  if (route) return route;
-  if (app) return app;
-  return undefined;
-}
-
-/** Route template from an event's page_context. */
-function routeTemplate(event: SegmentableEvent): string | undefined {
-  const r = event.page_context?.routeTemplate;
-  return r !== undefined && r !== '' ? r : undefined;
+function meaningfulClickLabel(
+  events: SegmentableEvent[],
+  ctx: string,
+): string {
+  for (const e of events) {
+    if (e.event_type === 'interaction.click' && e.target_summary) {
+      const label = e.target_summary.label?.trim();
+      if (label !== undefined && label !== '') return label;
+    }
+  }
+  return ctx ? `action${ctx}` : 'action';
 }
 
 // ---------------------------------------------------------------------------
@@ -180,8 +163,8 @@ function routeTemplate(event: SegmentableEvent): string | undefined {
 /**
  * Produces a human-readable title for a derived step.
  *
- * Title is derived from the grouping reason and supplemented with contextual
- * data from the events and page context.
+ * Title derivation style matches the extension-side `deriveTitle` in
+ * bundle-builder.ts (canonical post-convergence style per D12).
  */
 export function deriveStepTitle(
   events: SegmentableEvent[],
@@ -189,74 +172,73 @@ export function deriveStepTitle(
   pageContext?: DerivedStep['page_context'],
 ): string {
   const firstEvent = events[0];
+  const page = firstEvent?.page_context ?? pageContext;
+  const ctx = appContextSuffix(page);
 
   switch (groupingReason) {
     case 'click_then_navigate': {
-      // Find the navigation event for destination context.
-      const navEvent = events.find((e) =>
-        e.event_type.startsWith('navigation.'),
-      );
-      // Use enriched destination to avoid generic titles like "Dashboard"
-      const destination =
-        (navEvent !== undefined ? enrichedPageDestination(navEvent) : undefined) ??
-        pageContext?.routeTemplate ??
-        (navEvent !== undefined ? routeTemplate(navEvent) : undefined) ??
+      const navEvent = events.find((e) => e.event_type.startsWith('navigation.'));
+      const dest =
+        navEvent?.page_context?.pageTitle ||
+        navEvent?.page_context?.routeTemplate ||
         'page';
-      return `Navigate to ${destination}`;
+      return `Navigate to ${dest}`;
     }
 
     case 'fill_and_submit': {
-      // Find the submit event for form label context.
-      const submitEvent = events.find(
-        (e) => e.event_type === 'interaction.submit',
-      );
-      const formLabel =
-        (submitEvent !== undefined ? targetLabel(submitEvent) : undefined) ??
-        (firstEvent !== undefined ? pageTitle(firstEvent) : undefined) ??
-        pageContext?.routeTemplate ??
-        'form';
-      return `Fill and submit ${formLabel}`;
-    }
-
-    case 'repeated_click_dedup': {
-      const label = firstEvent !== undefined ? targetLabel(firstEvent) : undefined;
-      if (label) return `Click ${label}`;
-      return `Click ${contextualFallback(firstEvent, 'element', pageContext)}`;
-    }
-
-    case 'error_handling': {
-      return 'Handle error';
-    }
-
-    case 'data_entry': {
-      const label = firstEvent !== undefined ? targetLabel(firstEvent) : undefined;
-      if (label) return `Enter ${label}`;
-      return `Enter ${contextualFallback(firstEvent, 'field', pageContext)}`;
-    }
-
-    case 'send_action': {
-      const label = firstEvent !== undefined ? targetLabel(firstEvent) : undefined;
-      if (label) return label;
-      return `Complete ${contextualFallback(firstEvent, 'action', pageContext)}`;
-    }
-
-    case 'file_action': {
-      return 'Attach file';
+      const fields = extractFieldLabels(events);
+      if (fields.length > 0) return `Complete ${fields.join(', ')} and submit${ctx}`;
+      return `Complete and submit form${ctx}`;
     }
 
     case 'annotation': {
-      // The annotation event carries its text directly in the event_type
-      // or normalization_meta; look for it in the first event.
-      // The caller should pass the annotation text via the events array;
-      // we surface the sourceEventType as a best-effort fallback.
       if (firstEvent !== undefined) {
-        // Annotation events may carry a label in target_summary.
-        const annotationLabel = firstEvent.target_summary?.label;
-        if (annotationLabel !== undefined && annotationLabel !== '') {
-          return annotationLabel;
+        if (firstEvent.annotation_text !== undefined && firstEvent.annotation_text !== '') {
+          return firstEvent.annotation_text;
         }
       }
-      return 'User annotation';
+      return 'Annotation';
+    }
+
+    case 'error_handling': {
+      return `Handle error${ctx}`;
+    }
+
+    case 'data_entry': {
+      const fields = extractFieldLabels(events);
+      if (fields.length > 0) return `Enter ${fields.join(', ')}${ctx}`;
+      // Spreadsheet cell detection
+      const cellLabels = events
+        .filter(
+          (e) =>
+            e.target_summary?.label !== undefined &&
+            CELL_REF_RE.test(e.target_summary.label.trim()),
+        )
+        .map((e) => e.target_summary!.label!.trim())
+        .filter((l, i, arr) => arr.indexOf(l) === i)
+        .slice(0, 3);
+      if (cellLabels.length > 0) {
+        return `Enter data in cells ${cellLabels.join(', ')}${ctx || ' in spreadsheet'}`;
+      }
+      return `Enter data${ctx}`;
+    }
+
+    case 'send_action': {
+      const actionEvent = events.find((e) => e.event_type === 'interaction.click' &&
+        e.target_summary?.label?.trim() !== undefined &&
+        e.target_summary.label.trim() !== '');
+      const actionLabel = actionEvent?.target_summary?.label?.trim();
+      if (actionLabel !== undefined && actionLabel !== '') return `${actionLabel}${ctx}`;
+      return `Send${ctx}`;
+    }
+
+    case 'file_action': {
+      return `Attach file${ctx}`;
+    }
+
+    case 'repeated_click_dedup': {
+      const label = meaningfulClickLabel(events, ctx);
+      return `Click ${label}`;
     }
 
     case 'single_action': {
@@ -265,34 +247,29 @@ export function deriveStepTitle(
       const type = firstEvent.event_type;
 
       if (type === 'interaction.click') {
-        const label = targetLabel(firstEvent);
-        if (label) return `Click ${label}`;
-        return `Click ${contextualFallback(firstEvent, 'element', pageContext)}`;
+        const label = meaningfulClickLabel(events, ctx);
+        return `Click ${label}`;
       }
 
       if (type === 'interaction.input_change') {
-        const label = targetLabel(firstEvent);
-        if (label) return `Update ${label}`;
-        return `Update ${contextualFallback(firstEvent, 'field', pageContext)}`;
+        const fields = extractFieldLabels(events);
+        if (fields.length > 0) return `Enter ${fields.join(', ')}${ctx}`;
+        return `Enter data${ctx}`;
       }
 
       if (type === 'interaction.submit') {
-        const label =
-          pageTitle(firstEvent) ??
-          pageContext?.routeTemplate ??
-          'form';
-        return `Submit ${label}`;
+        return `Submit form${ctx}`;
       }
 
       if (type.startsWith('navigation.')) {
-        const title =
-          enrichedPageDestination(firstEvent) ??
-          pageContext?.routeTemplate ??
+        const dest =
+          firstEvent.page_context?.pageTitle ||
+          firstEvent.page_context?.routeTemplate ||
           'page';
-        return `Navigate to ${title}`;
+        return `Navigate to ${dest}`;
       }
 
-      return `Interact with ${contextualFallback(firstEvent, 'page', pageContext)}`;
+      return `Perform action${ctx}`;
     }
   }
 }
@@ -338,11 +315,8 @@ export function calculateConfidence(
 
     case 'single_action': {
       // Higher confidence when we have a concrete label to reason about.
-      const firstEvent = events[0];
-      if (firstEvent !== undefined && targetLabel(firstEvent) !== undefined) {
-        return 0.75;
-      }
-      return 0.55;
+      const hasLabel = events.some((e) => e.target_summary?.label?.trim());
+      return hasLabel ? 0.75 : 0.55;
     }
   }
 }

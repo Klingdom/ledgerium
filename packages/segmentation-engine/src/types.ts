@@ -26,6 +26,8 @@ export interface SegmentableEvent {
     elementType?: string;
     selector?: string;
   };
+  /** Text of a user annotation (present when event_type is 'session.annotation_added'). */
+  annotation_text?: string;
   normalization_meta: {
     sourceEventType: string;
   };

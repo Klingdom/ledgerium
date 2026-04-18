@@ -65,12 +65,17 @@ function buildStep(
   const startT = events[0]!.t_ms;
   const endT = events[events.length - 1]!.t_ms;
 
+  // Construct with key order matching the golden fixture authority
+  // (extension buildDerivedSteps): step_id, session_id, ordinal, title, status,
+  // boundary_reason (when present), grouping_reason, confidence, source_event_ids,
+  // start_t_ms, end_t_ms, duration_ms, page_context (when present).
   const step: DerivedStep = {
     step_id: `${sessionId}-step-${ordinal}`,
     session_id: sessionId,
     ordinal,
     title,
     status: 'finalized',
+    ...(boundaryReason !== undefined && { boundary_reason: boundaryReason }),
     grouping_reason: groupingReason,
     confidence,
     source_event_ids: events.map((e) => e.event_id),
@@ -78,7 +83,6 @@ function buildStep(
     end_t_ms: endT,
     duration_ms: endT - startT,
     ...(pageCtx !== undefined && { page_context: pageCtx }),
-    ...(boundaryReason !== undefined && { boundary_reason: boundaryReason }),
   };
 
   return step;
@@ -111,6 +115,13 @@ export function segmentEvents(
   let accumulator: SegmentableEvent[] = [];
   let stepCounter = 0;
   let lastNavigationDomain: string | undefined;
+  /**
+   * Last seen route template for same-domain SPA route-change detection.
+   * Guard: only triggers a boundary when the route actually changes AND a
+   * prior route is already known (prevents the first route_change from
+   * splitting an empty accumulator). Mirrors buildDerivedSteps guard.
+   */
+  let lastRouteTemplate = '';
 
   const finalizeAccumulator = (boundaryReason: BoundaryReason): void => {
     if (accumulator.length === 0) return;
@@ -185,9 +196,22 @@ export function segmentEvents(
     // SPA navigation within the same domain indicates the user moved to a
     // different section or view.  Finalize previous step, then skip the
     // route_change itself — it's a transition signal, not a user action.
+    //
+    // Guard: only fires when the route template actually changes AND a prior
+    // route is known (lastRouteTemplate !== '').  This prevents the first
+    // route_change in a session from splitting an empty or single-event
+    // accumulator when no prior route has been established.
     if (current.event_type === 'navigation.route_change') {
-      if (accumulator.length > 0) {
+      const newRoute = current.page_context?.routeTemplate ?? '';
+      if (
+        accumulator.length > 0 &&
+        newRoute !== lastRouteTemplate &&
+        lastRouteTemplate !== ''
+      ) {
         finalizeAccumulator('route_changed');
+      }
+      if (newRoute !== '') {
+        lastRouteTemplate = newRoute;
       }
       continue;
     }
