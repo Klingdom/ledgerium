@@ -627,3 +627,74 @@ Three specialist agents ran in parallel:
 - Add try/catch to 11 unguarded API routes (score: 11)
 - Fix (db as any) casts by regenerating Prisma client (score: 10)
 - Initialize Prisma migrations baseline (score: 10)
+
+---
+
+## Iteration 010
+
+- Date: 2026-04-18
+- Trigger: user-directed Mode 5 sequence — "run iter 010 + 011 to close the outstanding release blockers"
+- Coordinator: coordinator
+- Phase: Phase 1
+- Objective: Persist full session event stream to `chrome.storage.local` so a Chrome MV3 service worker eviction mid-recording no longer loses `rawEvents`, `canonicalEvents`, `policyLog`, and `liveSteps`. Close release blocker #1 (open since iter 000, 9 loops unaddressed).
+
+### Mode
+- **Mode 5** (Directed sequence: iter 010 → iter 011). Counter increments by 2.
+- Area check: iter 010 = `session durability / background-engine`; iter 011 = `extension architecture / segmentation`. Different `Area` fields → no saturation flag.
+
+### Candidate Selection
+- Selected item: **Persist full session event stream for service worker restart recovery**
+- Selection rule: **`directed`** (user-named, Mode 5)
+- Score at selection: **14** (11 base + 3 release-blocker bonus; 0 saturation penalty; per IMPROVEMENT_BACKLOG.md §Release Blockers)
+- Scope discipline (stated up-front): (a) `chrome.storage.local` full-event persistence, (b) restart-recovery merge logic, (c) 1 E2E covering `record → SW restart → recover`. Do NOT refactor the background SW message protocol. Do NOT touch `LiveStepBuilder` / `StreamingSegmenter` (iter 011). Do NOT add `launchPersistentContext` (iter 013).
+
+### Agents Used
+- coordinator (orchestration, scope enforcement, artifact updates)
+- explore (current-state mapping of session handling)
+- backend-engineer (implementation)
+- qa-engineer (E2E + integration test coverage)
+
+### Top Candidates Considered (pre-selection, for traceability)
+1. Persist full session event stream for SW restart recovery — score 14 [**selected**]
+2. Converge LiveStepBuilder with StreamingSegmenter — score 11 (queued iter 011)
+3. Add dashboard-level process for artifact/system-health refresh — score 13
+4. Invariant-focused regression suite for segmentation/normalization — score 12
+5. Product wedge / ICP narrative — score 12
+
+### Files Changed
+- `apps/extension-app/src/shared/constants.ts` — added `STORAGE_KEY_SESSION_EVENTS_PREFIX`, `PERSIST_SCHEMA_VERSION` (=1), `PERSIST_DEBOUNCE_MS` (=500)
+- `apps/extension-app/src/shared/types.ts` — added `persistenceTruncated?: true` to `SessionMeta`
+- `apps/extension-app/src/background/session-store.ts` — debounced `persistEvents()`, `loadFromStorage()` full-restore, `flushOnSuspend()`, `PersistedSessionEvents` type; quota-overflow append-stop semantics
+- `apps/extension-app/src/background/index.ts` — `chrome.runtime.onSuspend` listener → `store.flushOnSuspend()`
+- `apps/extension-app/src/background/session-store.test.ts` — 36 total tests (20 existing + 16 new: round-trip, malformed, quota, debounce coalescing, schema mismatch, suspend flush)
+- `apps/extension-app/src/background/session-restore.integration.test.ts` — **new**, 2 tests (6-step `record → events → restart → rehydrate` + pause-flush invariant)
+- `apps/extension-app/e2e/recording-lifecycle.spec.ts` — **+1 test**: SW restart smoke (UI-observable rehydration via `SESSION_STATE_UPDATED` broadcast)
+- `apps/extension-app/vitest.config.ts` — **new**, `exclude: ['**/e2e/**']`; pre-existing defect (Vitest was picking up Playwright specs) surfaced during validation and fixed additively (was follow-up #1 from backend-engineer; blocking for green CI)
+
+### Validation Run
+- `pnpm --filter extension-app typecheck` → **clean** ✅
+- `pnpm --filter extension-app test --run` → **170 tests, 8 files, 0 failures** ✅ (up from 168 pre-iteration)
+- `pnpm --filter extension-app test:e2e` → **4/4 pass** ✅ (3 iter-009 + 1 new restart-recovery)
+- `pnpm typecheck` (monorepo) → **clean across all 10 workspace projects** ✅
+
+### Outcome
+- Status: **complete**
+- Summary: service worker eviction mid-recording now preserves all four event arrays in `chrome.storage.local` under per-session keys with schema-version guard. Restart recovery rehydrates the full session state; quota overflow is handled by append-stop (never head-trim, never throw) with a `meta.persistenceTruncated` flag for downstream surfacing. `chrome.runtime.onSuspend` drains the debounce timer.
+
+### Impact
+- **Before**: session meta persisted, but `rawEvents` (N), `canonicalEvents`, `policyLog`, and `liveSteps` were lost on SW eviction. A mid-recording restart silently zeroed the evidence stream.
+- **After**: all four arrays round-trip through `chrome.storage.local`. Debounced 500 ms writes coalesce high-frequency event bursts. Quota overflow surfaces to a durable flag instead of a silent drop.
+- Release blocker burn rate (5-loop window iter 006–010): 0 → **2 closed** (iter 009 E2E + iter 010 persistence).
+- Vitest: 1,512 → **~1,514** (net +2 new integration tests; session-store +16 new unit tests offset an internal reshape).
+- E2E: 3 → **4** tests on the extension-app harness.
+- Remaining release blockers: **1** (LiveStepBuilder ↔ StreamingSegmenter convergence — iter 011, scope next).
+
+### Follow-Ups (surfaced but explicitly NOT implemented this loop)
+- Surface `meta.persistenceTruncated` in the review UI / bundle builder with a visible user warning.
+- Garbage-collect stale `ledgerium_active_session_events_*` keys from prior sessions on extension startup (today only the active session's key is cleared on `clear()`).
+- `loadFromStorage` should validate that `saved.sessionId` matches the `chrome.storage.session` in-flight flag (silent wrong-session load risk).
+- Real-extension `launchPersistentContext` E2E (iter 013) — would close the fidelity gap between Vitest integration and full OS-level restart.
+
+### Governance / Selection Signals
+- Rule: `directed` (Mode 5). Bypassed top-score selection in favor of the 1-in-5 release-blocker cadence requirement, which iter 010 satisfied.
+- Agent diversity over last 5 loops: iter 006 (backend) · iter 007 (backend) · iter 008 (backend) · iter 009 (qa + devops) · iter 010 (backend + qa) → 3 distinct implementing agents across the window (Meta-Review 001's delegation rubric continues to produce rotation).

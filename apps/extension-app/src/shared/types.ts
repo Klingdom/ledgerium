@@ -19,6 +19,17 @@ export interface SessionMeta {
   schemaVersion: string
   recorderVersion: string
   uploadUrl?: string
+  /**
+   * Set to true when a chrome.storage.local QUOTA_BYTES_PER_ITEM error is
+   * caught during event persistence.  When true, no further event-array writes
+   * are attempted for this session.  Downstream consumers (e.g. the bundle
+   * builder, the review UI) can surface this flag to warn the user that the
+   * persisted snapshot is incomplete.
+   *
+   * Truncation policy: append-stop (we stop writing new events).  We do NOT
+   * delete earlier events to make room — that would corrupt the audit trail.
+   */
+  persistenceTruncated?: true
 }
 
 // ─── Events ───────────────────────────────────────────────────────────────────

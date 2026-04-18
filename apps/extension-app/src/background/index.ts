@@ -490,6 +490,16 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   console.log(`[LDG-BG] Activated capture on tab switch: ${tabId} (${tab.url})`)
 })
 
+// ─── Service worker suspend flush ─────────────────────────────────────────────
+// chrome.runtime.onSuspend fires when Chrome is about to evict the service
+// worker.  We cancel the pending debounce and perform a synchronous event-array
+// write here so that the persisted snapshot is up-to-date before the SW dies.
+// Chrome gives the SW approximately 5 seconds in the onSuspend callback.
+
+chrome.runtime.onSuspend.addListener(() => {
+  store.flushOnSuspend()
+})
+
 // ─── Initialisation ───────────────────────────────────────────────────────────
 
 chrome.runtime.onInstalled.addListener(() => {

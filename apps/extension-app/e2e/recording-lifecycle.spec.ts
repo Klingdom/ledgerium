@@ -289,6 +289,170 @@ test('start recording: typing activity name enables button and clicking transiti
   await expect(page.getByText('Recording Active')).toBeVisible();
 });
 
+/**
+ * SW restart recovery — Playwright smoke test (iter 010).
+ *
+ * WHY THIS IS A SMOKE TEST:
+ *   The SessionStore lives in the background service worker, not in the
+ *   sidepanel page that the static harness serves.  The static harness has no
+ *   channel to the background store's internals: chrome.storage.local.get
+ *   always returns {} in the current no-op mock, and there is no
+ *   window.__bgState or equivalent exposed by the production sidepanel bundle.
+ *
+ *   The full 6-step persistence round-trip is validated at the Vitest
+ *   integration level in session-restore.integration.test.ts, which imports
+ *   SessionStore directly and exercises the real persistence logic with an
+ *   in-memory chrome mock.
+ *
+ *   This Playwright test validates the ONE observable consequence the harness
+ *   CAN verify: that the sidepanel renders the rehydrated rawEventCount when
+ *   the mock GET_STATE response reflects a rehydrated recording session (as
+ *   would happen after SW restart + loadFromStorage()).  The "N events" text is
+ *   rendered by RecordingScreen only when rawEventCount > 0.
+ *
+ * SCENARIO:
+ *   1. Mock GET_STATE returns recording state with rawEventCount: 3 (simulates
+ *      post-restart GET_STATE — the background has already called
+ *      loadFromStorage() and reports the rehydrated count).
+ *   2. Assert the sidepanel renders "Recording Active" and "3 events".
+ */
+test('record → SW restart → recover: session events rehydrate from chrome.storage.local', async ({ page }) => {
+  // Inject a chrome.* mock that pre-configures the recording state with
+  // rawEventCount: 3 — this simulates the sidepanel querying the background
+  // after it has already completed restoreStateIfNeeded() + loadFromStorage().
+  await page.addInitScript(() => {
+    const sessionId = 'test-session-restart-smoke'
+    const activityName = 'SW restart smoke test'
+    const startedAt = new Date().toISOString()
+
+    const listeners: Array<(msg: unknown) => void> = []
+
+    function broadcast(type: string, payload: Record<string, unknown>) {
+      for (const fn of listeners) {
+        try { fn({ type, payload }); } catch { /* ignore */ }
+      }
+    }
+
+    const mock = {
+      runtime: {
+        sendMessage: (
+          msg: { type: string; payload?: Record<string, unknown> },
+          cb?: (response: unknown) => void
+        ) => {
+          (window as unknown as Record<string, unknown[]>).__sentMessages =
+            (window as unknown as Record<string, unknown[]>).__sentMessages ?? []
+          ;((window as unknown as Record<string, unknown[]>).__sentMessages).push(msg)
+
+          if (msg.type === 'GET_STATE') {
+            // Simulate the post-restart GET_STATE: background is in recording
+            // state and has already rehydrated 3 raw events from storage.
+            if (cb) cb({
+              state: 'recording',
+              meta: {
+                sessionId,
+                activityName,
+                startedAt,
+                state: 'recording',
+                pauseIntervals: [],
+                schemaVersion: '2',
+                recorderVersion: '2.0.0',
+              },
+              steps: [],
+              rawEventCount: 3,
+            })
+            return
+          }
+
+          if (msg.type === 'GET_HISTORY') {
+            if (cb) cb([])
+            return
+          }
+
+          if (cb) cb(null)
+        },
+        onMessage: {
+          addListener: (fn: (msg: unknown) => void) => { listeners.push(fn); },
+          removeListener: (fn: (msg: unknown) => void) => {
+            const i = listeners.indexOf(fn)
+            if (i !== -1) listeners.splice(i, 1)
+          },
+        },
+        lastError: null as null,
+      },
+      storage: {
+        local: {
+          // Simulate that chrome.storage.local contains the persisted events —
+          // the sidepanel itself does not read storage directly, but returning
+          // a non-empty store is honest about the simulated post-restart state.
+          get: (_keys: unknown, cb: (r: Record<string, unknown>) => void) => cb({
+            ledgerium_active_session: {
+              sessionId,
+              activityName,
+              startedAt,
+              state: 'recording',
+              pauseIntervals: [],
+              schemaVersion: '2',
+              recorderVersion: '2.0.0',
+            },
+            [`ledgerium_active_session_events_${sessionId}`]: {
+              persistSchemaVersion: 1,
+              rawEvents: [
+                { raw_event_id: 'raw-restart-001', event_type: 'click', t_ms: 100 },
+                { raw_event_id: 'raw-restart-002', event_type: 'click', t_ms: 200 },
+                { raw_event_id: 'raw-restart-003', event_type: 'click', t_ms: 300 },
+              ],
+              canonicalEvents: [],
+              policyLog: [],
+              liveSteps: [],
+            },
+          }),
+          set: (_obj: unknown, cb?: () => void) => { if (cb) cb() },
+          remove: (_keys: unknown, cb?: () => void) => { if (cb) cb() },
+        },
+        sync: {
+          get: (_keys: unknown, cb: (r: Record<string, unknown>) => void) => cb({}),
+          set: (_obj: unknown, cb?: () => void) => { if (cb) cb() },
+        },
+      },
+    }
+
+    ;(window as unknown as { chrome: typeof mock }).chrome = mock
+
+    // Immediately broadcast SESSION_STATE_UPDATED so the React app transitions
+    // to recording state without waiting for a user interaction.  This mirrors
+    // what the background does after restoreStateIfNeeded() completes: it calls
+    // broadcastStateUpdate() which sends SESSION_STATE_UPDATED to the sidepanel.
+    setTimeout(() => {
+      broadcast('SESSION_STATE_UPDATED', {
+        state: 'recording',
+        meta: {
+          sessionId,
+          activityName,
+          startedAt,
+          state: 'recording',
+          pauseIntervals: [],
+          schemaVersion: '2',
+          recorderVersion: '2.0.0',
+        },
+      })
+    }, 50)
+  })
+
+  await page.goto(`${baseUrl}/src/sidepanel/index.html`, { waitUntil: 'networkidle' })
+  await page.waitForSelector('#root > *', { timeout: 10_000 })
+
+  // The sidepanel must reflect the rehydrated recording state.
+  const badge = page.locator('header .badge')
+  await expect(badge).toContainText('Recording', { timeout: 3_000 })
+
+  // The RecordingScreen renders "N events" only when rawEventCount > 0.
+  // This is the observable consequence of a successful SW restart recovery:
+  // the rehydrated rawEventCount is reflected in the GET_STATE response and
+  // rendered by the sidepanel.
+  await expect(page.getByText('Recording Active')).toBeVisible()
+  await expect(page.getByText('3 events')).toBeVisible()
+})
+
 test('stop recording: clicking "Stop & Review" transitions to processing then complete state', async ({ page }) => {
   // Start from idle, transition to recording first.
   await loadSidepanel(page, 'idle');

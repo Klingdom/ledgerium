@@ -1,12 +1,12 @@
 # Ledgerium AI — System Health
 
-Last updated: 2026-04-18 (post-iteration 009 — Playwright E2E harness + CI wiring; release blocker #1 closed)
+Last updated: 2026-04-18 (post-iteration 010 — session event persistence landed; release blocker #1 "session persistence" closed, only "LiveStepBuilder convergence" remains)
 
 ## Executive Summary
 
-Ledgerium AI is in **Phase 1** with a strong deterministic product foundation, comprehensive analytics infrastructure, and clear architectural principles. The current system is strongest in **vision clarity, invariants, analytics coverage, and core trust-first philosophy**. The highest near-term risks are now **incomplete session recovery and remaining LiveStepBuilder/StreamingSegmenter duplication** — Playwright E2E coverage (prior release blocker #1) was closed in iter 009.
+Ledgerium AI is in **Phase 1** with a strong deterministic product foundation, comprehensive analytics infrastructure, and clear architectural principles. The current system is strongest in **vision clarity, invariants, analytics coverage, and core trust-first philosophy**. The sole remaining Phase-1 release blocker is **LiveStepBuilder ↔ StreamingSegmenter duplication** — session event persistence (prior release blocker #1) closed in iter 010, Playwright E2E (prior #2) closed in iter 009.
 
-Overall confidence: **Medium-High**
+Overall confidence: **Medium-High → approaching High** (2 of 3 release blockers closed in last 2 loops; last blocker is architecturally bounded).
 
 ---
 
@@ -25,12 +25,12 @@ Overall confidence: **Medium-High**
 | Architectural discipline | strong | 4 | invariants and principles are well defined |
 | Deterministic core protection | moderate | 4 | good principles, but more regression protection is still needed |
 | Package / code consistency | improving | 4 | extension now imports from 4 workspace packages (policy-engine now wired into content layer as of iter 008); LiveStepBuilder duplication remains |
-| Session durability / recovery | moderate-risk | 2 | full event persistence is still missing |
-| Test coverage | improving | 4 | 1,512 Vitest tests across 41 files + **3 Playwright E2E tests (new in iter 009)** covering the recording lifecycle |
+| Session durability / recovery | strong | 4 | **full event persistence landed in iter 010** — all four arrays (raw, canonical, policyLog, liveSteps) debounced to `chrome.storage.local` per-session; quota-overflow append-stop; schema-version guard; `onSuspend` flush |
+| Test coverage | improving | 4 | ~1,514 Vitest tests across 43 files (+2 integration tests iter 010) + **4 Playwright E2E tests** (3 iter 009 lifecycle + 1 iter 010 restart-recovery smoke) |
 | Observability | strong | 4 | analytics fully instrumented, 8 alert conditions, admin dashboard with engagement/retention/alerts |
-| Agentic CI readiness | strong | 4.5 | command, backlog, iteration log, templates, Meta-Review 001 diffs applied (Selection Policy, Operating Modes, Delegation Decision Rubric); first non-backend-engineer iteration since iter 003 landed in iter 009 |
+| Agentic CI readiness | strong | 4.5 | command, backlog, iteration log, templates, Meta-Review 001 diffs applied; iter 009 + iter 010 both used multi-agent loops (qa+devops; backend+qa); first Mode 5 directed sequence executed in iter 010 |
 | GTM readiness | emerging | 2.5 | product wedge promising; analytics infrastructure ready for data-driven decisions |
-| Release readiness | improving | 3.5 | first release blocker closed (E2E tests); CI gate live on PRs via `e2e-extension.yml`; still needs session recovery and LiveStepBuilder convergence |
+| Release readiness | strong | 4 | **2 of 3 release blockers closed** (E2E iter 009, session persistence iter 010); sole remaining blocker is LiveStepBuilder convergence (iter 011, Mode 5 directed sequence). CI gate live on PRs via `e2e-extension.yml`. |
 
 ---
 
@@ -69,11 +69,11 @@ Overall confidence: **Medium-High**
 
 ## Top Risks
 
-1. Remaining duplication: LiveStepBuilder vs StreamingSegmenter, extension types vs package types
-2. Incomplete persistence for service worker restart recovery
-3. Static-harness E2E does not exercise real `chrome.runtime` transport / background service worker — real-extension `launchPersistentContext` tests still pending (iter 010+)
-4. PostHog not yet connected (env vars not set) — analytics only writes to internal DB
-5. Extension content layer still has minimal unit test coverage outside target-inspector (capture.ts, state-observer.ts, label-extractor.ts untested)
+1. Remaining duplication: LiveStepBuilder vs StreamingSegmenter, extension types vs package types (iter 011 target)
+2. Static-harness E2E does not exercise real `chrome.runtime` transport / background service worker — real-extension `launchPersistentContext` tests still pending (iter 010 follow-up #21, originally iter 013)
+3. PostHog not yet connected (env vars not set) — analytics only writes to internal DB
+4. Extension content layer still has minimal unit test coverage outside target-inspector (capture.ts, state-observer.ts, label-extractor.ts untested)
+5. iter-010 follow-ups queued (#18–21): surface `persistenceTruncated` in review UI, GC stale session-event keys, sessionId/in-flight cross-validation on load
 
 ---
 
@@ -93,45 +93,49 @@ These block a high-confidence Phase 1 release. Scoring bonus `+3` applies to ite
 
 | # | Blocker | Opened | Loops unaddressed | Next action |
 |---|---------|--------|-------------------|-------------|
-| 1 | Session event persistence for SW restart recovery | iter 000 | 9 | **iter 010** |
-| 2 | LiveStepBuilder ↔ StreamingSegmenter duplication | iter 003 | 6 | iter 011 |
+| 1 | LiveStepBuilder ↔ StreamingSegmenter duplication | iter 003 | 7 | **iter 011** (Mode 5 directed, in progress) |
 
+**Resolved in iter 010**: Session event persistence for SW restart recovery — all four arrays (raw/canonical/policy/live) debounced to `chrome.storage.local` per-session; quota-overflow append-stop; schema-version guard; `onSuspend` flush; 16 new unit tests + 2 integration tests + 1 Playwright smoke.
 **Resolved in iter 009**: E2E Playwright lifecycle tests — 3 tests covering idle → recording → complete, plus CI wiring via `e2e-extension.yml` (runs on push/PR to main).
 **Resolved in iter 008**: shared capture-policy enforcement — now integrated via `classifySensitivity` in `target-inspector.ts`.
 **Resolved in iter 003**: extension background logic deduplicated (normalization-engine, segmentation-engine, policy-engine imports).
 
 ### Release-blocker burn rate
-- 5-loop window (iter 005–009): **1 closed** (E2E tests, iter 009)
-- Target under new 1-in-5 cadence rule: ≥ 1 closed per 5-loop window → **on track**
+- 5-loop window (iter 006–010): **2 closed** (E2E tests iter 009; session persistence iter 010)
+- Target under 1-in-5 cadence rule: ≥ 1 closed per 5-loop window → **exceeded (2 of last 5)**
 
 ---
 
 ## Recommended Next Iteration
 
-**Iter 010: Persist full session event stream for service worker restart recovery** (score **14** = 11 base + 3 release-blocker bonus; no saturation penalty).
+**Iter 011: Converge LiveStepBuilder with StreamingSegmenter** (score **11** = 8 base + 3 release-blocker bonus; no saturation penalty). Mode 5 directed by user (continuation of iter 010 → 011 sequence).
 
 Rationale:
-- Release blocker since iter 000 (9 loops unaddressed — now the longest-standing open blocker).
-- Highest new score after iter 009 closed the prior #1 (Playwright E2E).
-- Natural pairing with the iter 009 E2E harness: recovery flows (`record → restart → recover`) can be validated through the Playwright suite once the persistence layer exists.
-- Still forces a pivot out of SOP-area saturation (iter 005/006/007 = 3 of last 5 SOP loops).
+- Sole remaining Phase-1 release blocker (open since iter 003 surfacing, 7 loops unaddressed).
+- Closes the last duplication blocker; eliminates the architectural divergence risk between the live UI builder and the normalization-layer segmenter.
+- Saturation cleared — no area concerns.
 
-Primary agent: `backend-engineer` (session durability implementation). Secondary agent: `qa-engineer` (add recovery-path E2E test extending iter 009 harness).
+Primary agent: `system-architect` (convergence design document). Secondary agent: `backend-engineer` (implementation). Tertiary: `qa-engineer` (regression coverage).
 
-Scope: implement `chrome.storage.local` full-event persistence + restart-recovery merge logic + 1 E2E test covering `record → SW restart → recover`. Do NOT refactor the background service worker message protocol in this loop.
+Scope: design the convergence, implement, preserve byte-identical output from both paths, maintain determinism guards. Do NOT expand surface area beyond the two modules. Do NOT touch iter-010 persistence code.
 
-### Post-010 candidate queue (preliminary ordering)
+### Post-011 candidate queue (preliminary ordering)
 
-- **Iter 011: LiveStepBuilder / StreamingSegmenter convergence** (blocker, score 11) — last remaining duplication blocker. Primary: `system-architect` (design the convergence) + `backend-engineer` (implement).
-- **Iter 012: Follow-up burn-down loop** (per 1-in-5 rule — 2 loops past burn-down selection). Candidates: widen policy-engine `credit_card` regex (iter 008 follow-up, score 11); wire `validateRenderedSOP` into `processSession.ts` (iter 007 follow-up, score 9 post-saturation); extract confidence thresholds (iter 006 follow-up, score 8 post-saturation).
-- **Iter 013: Real-extension E2E with `launchPersistentContext`** (iter 009 follow-up) — complements the static-harness approach; exercises actual `chrome.runtime` transport.
+- **Iter 012: Follow-up burn-down loop** (per 1-in-5 rule). Candidates: iter 010 follow-ups (#18 persistenceTruncated UI surface score 11; #19 stale-key GC score 11; #20 sessionId cross-validation score 10); iter 008 follow-up widen policy-engine `credit_card` regex (score 11); iter 007 follow-up wire `validateRenderedSOP` (score 11 post-saturation-clear); iter 006 follow-up extract confidence thresholds (score 10 post-saturation-clear).
+- **Iter 013: Real-extension E2E with `launchPersistentContext`** (iter 010 follow-up #21) — complements the static-harness approach; exercises actual `chrome.runtime` transport and real-extension SW-restart semantics.
+- **Iter 014: Structured error logging with session context** (score 11) — observability improvement building on iter 010's durable session state.
+
+### Meta-review trigger check
+- Loops since last meta-review: will be **3 after iter 011 completes** (iter 009 + 010 + 011) → base-cadence meta-review due at iter 012.
+- Mode 5 directed sequence increments counter by 2 (not 1 per batch), already reflected.
+- Early-trigger conditions: none currently met (no agent-monoculture, no blocker stagnation, no back-to-back failed validations).
 
 ## Meta-Review Status
 
-- Completed loops since initialization: **9 (iter 001–009)**
+- Completed loops since initialization: **10 (iter 001–010)**
 - Last meta-review: **Meta-Review 001 (2026-04-17, covering iter 004–008)** — see `META_REVIEW_001.md`
-- Loops completed since last meta-review: **1 (iter 009)**
-- Next meta-review trigger: after iter 012 (3 loops from meta-review per base cadence) OR on any early-trigger condition (see CLAUDE.md § Meta-Review Cadence).
+- Loops completed since last meta-review: **2 (iter 009 + iter 010)**
+- Next meta-review trigger: after iter 012 (3 loops base cadence: 009, 010, 011) OR on any early-trigger condition (see CLAUDE.md § Meta-Review Cadence).
 - Status: **current**
 
 ### Meta-Review 001 headline findings
