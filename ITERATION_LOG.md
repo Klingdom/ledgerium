@@ -698,3 +698,91 @@ Three specialist agents ran in parallel:
 ### Governance / Selection Signals
 - Rule: `directed` (Mode 5). Bypassed top-score selection in favor of the 1-in-5 release-blocker cadence requirement, which iter 010 satisfied.
 - Agent diversity over last 5 loops: iter 006 (backend) · iter 007 (backend) · iter 008 (backend) · iter 009 (qa + devops) · iter 010 (backend + qa) → 3 distinct implementing agents across the window (Meta-Review 001's delegation rubric continues to produce rotation).
+
+---
+
+## Iteration 011
+
+- Date: 2026-04-18
+- Trigger: user-directed Mode 5 sequence — "run iter 010 + 011 to close the outstanding release blockers" (item 2 of 2)
+- Coordinator: coordinator
+- Phase: Phase 1
+- Objective: Converge the four independent segmentation implementations (`LiveStepBuilder`, `StreamingSegmenter`, `buildDerivedSteps`, `segmentEvents`) onto a single `@ledgerium/segmentation-engine` primitive. Close the **last remaining Phase-1 release blocker** (open since iter 003 surfacing, 8 loops unaddressed).
+
+### Mode
+- **Mode 5** (Directed sequence: iter 010 → iter 011). Meta-review counter increments by 2 total (this is item 2 of 2).
+- Area check: iter 010 = `session durability / background-engine`; iter 011 = `extension architecture / segmentation`. Different `Area` fields → no saturation flag.
+
+### Candidate Selection
+- Selected item: **Converge LiveStepBuilder with StreamingSegmenter**
+- Selection rule: **`directed`** (user-named, Mode 5)
+- Score at selection: **11** (8 base + 3 release-blocker bonus; 0 saturation penalty)
+- Scope-expansion decision (coordinator): the architect's current-state audit revealed the canonical package segmenters (`StreamingSegmenter`, `segmentEvents`) have **zero production call sites**; the real ship risk is the extension-internal divergence between `LiveStepBuilder` (live UI) and `buildDerivedSteps` (shipped bundle). Closing only the named pair would eliminate dead code while leaving the actual risk open. Coordinator accepted the scope expansion to include `bundle-builder.ts` because (a) it is evidence-based not speculative, (b) it is still one logical outcome ("unify segmentation onto the package primitive"), (c) it stays within the segmentation subsystem, and (d) it closes ADR-001 Phase 1 entirely. This decision is documented in the architect's design doc §0 and §3.4.
+- Scope discipline (stated up-front): Do NOT touch `session-store.ts`, `constants.ts` storage keys, `restoreStateIfNeeded`, `onSuspend` flush (iter-010 surface). Do NOT change `LiveStep` shape or `MSG.LIVE_STEP_UPDATED` wire format. Do NOT bump `SEGMENTATION_RULE_VERSION` (no rule semantics change). Do NOT silently update golden fixtures to make tests pass.
+
+### Agents Used
+- coordinator (orchestration, scope-expansion approval, artifact updates)
+- system-architect (convergence design document — 714 lines, §0–§10 — establishing migration plan with checkpoints A–F and byte-equivalence regression strategy)
+- backend-engineer (implementation across 7 sequential commits)
+- qa-engineer (independent audit — fixture coverage verdict, byte-identity verdict, wire-protocol preservation verdict, iter-010-surface verdict, Invariant I1 verdict)
+
+### Top Candidates Considered (pre-selection, for traceability)
+1. Converge LiveStepBuilder with StreamingSegmenter — score 11 [**selected**, Mode 5 item 2]
+2. Iter-010 follow-up #18 (surface `persistenceTruncated` in review UI) — score 11 (queued iter 012)
+3. Iter-010 follow-up #19 (GC stale `session_events` keys) — score 11 (queued iter 012)
+4. Iter-008 follow-up (widen `credit_card` regex to whitespace separators) — score 11 (queued iter 012)
+5. Iter-007 follow-up (wire `validateRenderedSOP` into pipeline) — score 11 (queued iter 012)
+
+### Files Changed (7 commits: `88a770d` → `dfe9658`)
+- `docs/architecture/CONVERGENCE_LIVESTEPBUILDER_STREAMING_SEGMENTER.md` — **new**, 714-line design doc (system-architect authoritative spec)
+- `packages/segmentation-engine/fixtures/` — **new**, 12 golden fixtures (input + live-expected + derived-expected) covering demo / spreadsheet-cells / action-button-then-other / action-button-rapid-repeat / annotation-mid-stream / idle-gap / multi-domain-tabs / spa-route-change / error-recovery / fill-and-submit / single-action-no-label / empty-session
+- `packages/segmentation-engine/src/convergence-live.regression.test.ts` — **new**, 24 tests asserting `JSON.stringify` byte-identity on LiveStep outputs
+- `packages/segmentation-engine/src/convergence-batch.regression.test.ts` — **new**, 24 tests asserting `JSON.stringify` byte-identity on DerivedStep outputs
+- `packages/segmentation-engine/src/grouping.ts` — **new**, extracted shared `classifyGroupingReason` primitive (9 grouping reasons, single source of truth)
+- `packages/segmentation-engine/src/streaming-segmenter.ts` — major: absorbs D1–D11 (ports `idle_gap`, `route_changed`, `target_changed`, `action_completed` boundaries + `error_handling`/`send_action`/`file_action`/`data_entry` grouping + spreadsheet cell-label tracking); aligns regex to `ACTION_BUTTON_PATTERNS` (word-boundary); uses `lastNavigationDomain` tracker; pairwise same-selector dedup check
+- `packages/segmentation-engine/src/batch-segmenter.ts` — imports shared `classifyGroupingReason`; adds D2 `route_changed` guard; fixes `DerivedStep` key ordering to match golden authority
+- `packages/segmentation-engine/src/rules.ts` — `deriveStepTitle` rewritten to extension-side style (D12); adds `appContextSuffix`, `CELL_REF_RE`, `extractFieldLabels`, `meaningfulClickLabel` helpers
+- `packages/segmentation-engine/src/types.ts` — adds `annotation_text?: string` to `SegmentableEvent` (annotation title carry)
+- `packages/segmentation-engine/src/index.ts` — exports new shared primitives
+- `packages/segmentation-engine/src/streaming-segmenter.test.ts` — updated expectations for D1–D11-ported behavior
+- `packages/segmentation-engine/src/rules.test.ts` — updated title expectations
+- `apps/extension-app/src/background/bundle-builder.ts` — 350-line inline segmentation replaced with 53-line thin wrapper (`buildDerivedSteps` → `segmentEvents`)
+- `apps/extension-app/src/background/live-steps.ts` — 335-line `LiveStepBuilder` rewritten as 115-line adapter over `StreamingSegmenter` (public surface preserved: same constructor, same methods, same emitted `LiveStep` shape)
+- `apps/extension-app/src/background/live-steps.test.ts` — **new**, 14 adapter field-mapping tests
+- `docs/invariants.md` — §3.7 updated to reflect single-impl reality (post-convergence guarantee is structural, not parallel)
+- `docs/adr/ADR-001-type-consolidation-strategy.md` — status advanced to "Phase 1 completed for segmentation"
+
+### Validation Run (independently re-verified by coordinator and qa-engineer)
+- `pnpm typecheck` (monorepo) → **clean across all 10 workspace projects** ✅
+- `pnpm test` (monorepo) → **1593 tests passing across 45 files** ✅ (was 1512 pre-iteration; +81 net)
+- `pnpm --filter segmentation-engine test` → convergence-live **24/24**, convergence-batch **24/24**, streaming-segmenter **13/13**, batch-segmenter **17/17**, rules **45/45** ✅
+- `pnpm --filter extension-app test` → **170/170** including session-store **36/36** + session-restore integration **2/2** + live-steps adapter **14/14** + bundle-builder **21/21** ✅
+- `pnpm --filter extension-app build` → **clean** ✅
+- `pnpm --filter extension-app test:e2e` → **4/4** including iter-010 SW-restart recovery smoke ✅ (proves iter-010 persistence surface is untouched)
+
+### Outcome
+- Status: **complete**. Last Phase-1 release blocker closed.
+- Summary: all four segmentation implementations now flow through the package. `LiveStepBuilder` and `buildDerivedSteps` are thin adapters calling `StreamingSegmenter` and `segmentEvents` respectively; both downstream engines share `classifyGroupingReason` / `deriveStepTitle` / `calculateConfidence` primitives. The byte-equivalent output invariant is proved on 12 golden fixtures × 2 contracts × 2 assertions (24 live + 24 batch) + 2 determinism assertions per fixture.
+
+### Impact
+- **Before**: four separate segmentation implementations; bug fixes had to be applied in N places; divergence between the live UI preview and the shipped bundle was a present risk; `StreamingSegmenter` was dead code (zero production call sites).
+- **After**: single source of truth. What the user sees during capture is structurally guaranteed to match what ships in the bundle because both go through the same code path. Eliminates the D1–D11 accidental divergences (e.g., `LiveStepBuilder`'s anchored-regex action detection, its first-vs-last window dedup, its missing same-selector dedup check — all regressions silently corrected by the convergence).
+- **Release blockers remaining**: 1 → **0** (all Phase-1 release blockers closed).
+- **Release blocker burn rate (5-loop window iter 007–011)**: 0 → **3 closed** (iter 009 E2E + iter 010 persistence + iter 011 convergence).
+- Vitest: ~1514 → **1593** (+79 net; 24 convergence-live + 24 convergence-batch + 14 adapter + 17 net across existing segmentation/bundle test updates).
+- Playwright E2E: 4/4 (unchanged — no new E2E in this loop; iter-010's restart test proves iter-010 surface is untouched).
+- Lines-of-code net: `bundle-builder.ts` 350 → 53 (−297); `live-steps.ts` 335 → 115 (−220); offset by +714 design doc + ~600 fixtures + regression harness — net reduction of ~500 lines of production segmentation code in the extension app.
+- Architecture: ADR-001 Phase 1 complete for segmentation. Extension now imports segmentation from `@ledgerium/segmentation-engine` exclusively.
+
+### Follow-Ups (surfaced but explicitly NOT implemented this loop)
+- **#22** Explicit Invariant I1 cross-path assertion (design doc §5.3 requires `liveFinalizedDerivedSteps === batchDerivedSteps` as one test; currently structurally guaranteed but not tested).
+- **#23** `SEGMENTATION_RULE_VERSION` doc drift (`docs/invariants.md` L172 says `'1.0.0'`; code says `'1.1.0'`).
+- **#24** `LiveStep` type tightening (`grouping?: string` and `boundaryReason?: string` should be typed unions matching the enum values the adapter already writes).
+- **#25** Full-pipeline golden fixture (raw `.ndjson` → normalizer → segmentation) to catch normalizer regressions that segmentation-only fixtures miss.
+
+### Governance / Selection Signals
+- Rule: `directed` (Mode 5 item 2 of 2). Scope expansion approved on architect's evidence; scope-expansion reasoning documented in this log, in the design doc §0/§3.4, and in CHANGELOG.
+- Agent diversity (rolling 5-loop window iter 007–011): backend (007) · backend (008) · qa+devops (009) · backend+qa (010) · architect+backend+qa (011) → **4 distinct implementing agents** in the window. First iteration to use `system-architect` as primary agent since Meta-Review 001.
+- Mode 5 counter: increments by **2** (one per item). Loops since Meta-Review 001 = **3** (009 + 010 + 011) → **base-cadence meta-review due at iter 012**.
+- Scope discipline preserved: iter-010 persistence surface verifiably untouched (git log `--follow` confirms last-touched commit on `session-store.ts` and `constants.ts` is `d24699d`); `LiveStep` wire shape unchanged; `MSG.LIVE_STEP_UPDATED` contract unchanged; `SEGMENTATION_RULE_VERSION` not bumped.
+- Release signal (qa-engineer): **GO WITH FOLLOW-UPS**. Release blocker can close; four non-blocker follow-ups queued for iter 012+.

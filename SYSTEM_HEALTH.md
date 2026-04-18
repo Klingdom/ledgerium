@@ -1,12 +1,12 @@
 # Ledgerium AI — System Health
 
-Last updated: 2026-04-18 (post-iteration 010 — session event persistence landed; release blocker #1 "session persistence" closed, only "LiveStepBuilder convergence" remains)
+Last updated: 2026-04-18 (post-iteration 011 — segmentation convergence landed; **all Phase-1 release blockers closed**)
 
 ## Executive Summary
 
-Ledgerium AI is in **Phase 1** with a strong deterministic product foundation, comprehensive analytics infrastructure, and clear architectural principles. The current system is strongest in **vision clarity, invariants, analytics coverage, and core trust-first philosophy**. The sole remaining Phase-1 release blocker is **LiveStepBuilder ↔ StreamingSegmenter duplication** — session event persistence (prior release blocker #1) closed in iter 010, Playwright E2E (prior #2) closed in iter 009.
+Ledgerium AI is in **Phase 1** with a strong deterministic product foundation, comprehensive analytics infrastructure, and clear architectural principles. The current system is strongest in **vision clarity, invariants, analytics coverage, and core trust-first philosophy**. **All three Phase-1 release blockers are now closed** — Playwright E2E (iter 009), session event persistence (iter 010), and LiveStepBuilder ↔ StreamingSegmenter convergence (iter 011). The system is architecturally ready for Phase 2 with no carried blockers.
 
-Overall confidence: **Medium-High → approaching High** (2 of 3 release blockers closed in last 2 loops; last blocker is architecturally bounded).
+Overall confidence: **High** (3 of 3 release blockers closed in last 3 consecutive loops; Mode 5 directed sequence executed cleanly across iter 010 + iter 011 with zero scope violations).
 
 ---
 
@@ -24,13 +24,13 @@ Overall confidence: **Medium-High → approaching High** (2 of 3 release blocker
 | Product clarity | strong | 5 | trust-first, deterministic positioning is unusually clear |
 | Architectural discipline | strong | 4 | invariants and principles are well defined |
 | Deterministic core protection | moderate | 4 | good principles, but more regression protection is still needed |
-| Package / code consistency | improving | 4 | extension now imports from 4 workspace packages (policy-engine now wired into content layer as of iter 008); LiveStepBuilder duplication remains |
-| Session durability / recovery | strong | 4 | **full event persistence landed in iter 010** — all four arrays (raw, canonical, policyLog, liveSteps) debounced to `chrome.storage.local` per-session; quota-overflow append-stop; schema-version guard; `onSuspend` flush |
-| Test coverage | improving | 4 | ~1,514 Vitest tests across 43 files (+2 integration tests iter 010) + **4 Playwright E2E tests** (3 iter 009 lifecycle + 1 iter 010 restart-recovery smoke) |
+| Package / code consistency | strong | 5 | **all 4 segmentation implementations converged onto `@ledgerium/segmentation-engine` in iter 011**; extension imports segmentation exclusively from package; ADR-001 Phase 1 complete for segmentation; extension now imports from 4+ workspace packages across background and content layers |
+| Session durability / recovery | strong | 4 | full event persistence landed in iter 010 — all four arrays (raw, canonical, policyLog, liveSteps) debounced to `chrome.storage.local` per-session; quota-overflow append-stop; schema-version guard; `onSuspend` flush |
+| Test coverage | strong | 4.5 | **1,593 Vitest tests across 45 files** (+79 net in iter 011: 24 convergence-live + 24 convergence-batch + 14 adapter + 17 across segmentation/bundle test updates) + **4 Playwright E2E tests** (3 iter 009 lifecycle + 1 iter 010 restart-recovery smoke). 12 golden fixtures × 2 contracts × byte-identity assertions form the segmentation regression gate. |
 | Observability | strong | 4 | analytics fully instrumented, 8 alert conditions, admin dashboard with engagement/retention/alerts |
-| Agentic CI readiness | strong | 4.5 | command, backlog, iteration log, templates, Meta-Review 001 diffs applied; iter 009 + iter 010 both used multi-agent loops (qa+devops; backend+qa); first Mode 5 directed sequence executed in iter 010 |
+| Agentic CI readiness | strong | 4.5 | command, backlog, iteration log, templates, Meta-Review 001 diffs applied; iter 009 + 010 + 011 all used multi-agent loops; Mode 5 directed sequence executed cleanly across iter 010 + 011 (two independent iterations, own commits, own validations, zero scope violations); iter 011 first iteration since init to use `system-architect` as primary agent |
 | GTM readiness | emerging | 2.5 | product wedge promising; analytics infrastructure ready for data-driven decisions |
-| Release readiness | strong | 4 | **2 of 3 release blockers closed** (E2E iter 009, session persistence iter 010); sole remaining blocker is LiveStepBuilder convergence (iter 011, Mode 5 directed sequence). CI gate live on PRs via `e2e-extension.yml`. |
+| Release readiness | strong | 5 | **3 of 3 release blockers closed** (E2E iter 009, session persistence iter 010, segmentation convergence iter 011). Zero Phase-1 blockers remain. CI gate live on PRs via `e2e-extension.yml`. Byte-equivalence regression harness guards the segmentation convergence. |
 
 ---
 
@@ -69,74 +69,84 @@ Overall confidence: **Medium-High → approaching High** (2 of 3 release blocker
 
 ## Top Risks
 
-1. Remaining duplication: LiveStepBuilder vs StreamingSegmenter, extension types vs package types (iter 011 target)
-2. Static-harness E2E does not exercise real `chrome.runtime` transport / background service worker — real-extension `launchPersistentContext` tests still pending (iter 010 follow-up #21, originally iter 013)
-3. PostHog not yet connected (env vars not set) — analytics only writes to internal DB
-4. Extension content layer still has minimal unit test coverage outside target-inspector (capture.ts, state-observer.ts, label-extractor.ts untested)
-5. iter-010 follow-ups queued (#18–21): surface `persistenceTruncated` in review UI, GC stale session-event keys, sessionId/in-flight cross-validation on load
+1. Static-harness E2E does not exercise real `chrome.runtime` transport / background service worker — real-extension `launchPersistentContext` tests still pending (iter 010 follow-up #21, originally iter 013)
+2. PostHog not yet connected (env vars not set) — analytics only writes to internal DB
+3. Extension content layer still has minimal unit test coverage outside target-inspector (capture.ts, state-observer.ts, label-extractor.ts untested)
+4. iter-010 and iter-011 follow-ups accumulated to 8 open items (#18–25); follow-up burn-down rotation (1-in-5) is due at iter 012
+5. Invariant I1 (LiveStep-to-DerivedStep correspondence, design doc §5.3) is structurally guaranteed post-convergence but not explicitly tested — flagged as iter-011 follow-up #22
+6. `SEGMENTATION_RULE_VERSION` doc/code drift (`docs/invariants.md` L172 vs `rules.ts` L16) — iter-011 follow-up #23
 
 ---
 
 ## Current Top Opportunities
 
-1. Converge LiveStepBuilder with StreamingSegmenter and unify types
-2. Strengthen session durability and restart recovery
-3. Increase validation confidence with Playwright lifecycle tests
-4. Improve failure diagnosis with structured session-aware logging
-5. Use bounded improvement loops to continuously harden the deterministic core
+1. **Meta-Review 002** — base cadence due (3 loops since MR-001: 009 + 010 + 011). Assess whether the formula changes, delegation rubric, and Mode 5 guardrails are producing the intended outcomes.
+2. Follow-up burn-down loop (iter 012) — 8 open follow-ups (#18–25) across session-durability, segmentation, and invariants territory
+3. Real-extension `launchPersistentContext` E2E — closes the fidelity gap between Vitest integration and full OS-level SW restart
+4. Structured session-aware error logging — the last item from the original Phase-1 priority list not yet addressed
+5. Extension content layer unit-test coverage (capture.ts, state-observer.ts, label-extractor.ts)
+6. Move to Phase 2 planning — no release blockers remain; PRD refresh or GTM readiness work unblocked
 
 ---
 
 ## Release Blockers
 
-These block a high-confidence Phase 1 release. Scoring bonus `+3` applies to items in this list (see CLAUDE.md § Selection Policy).
+**All Phase-1 release blockers closed as of iter 011.** Table preserved for historical traceability.
 
-| # | Blocker | Opened | Loops unaddressed | Next action |
-|---|---------|--------|-------------------|-------------|
-| 1 | LiveStepBuilder ↔ StreamingSegmenter duplication | iter 003 | 7 | **iter 011** (Mode 5 directed, in progress) |
+| # | Blocker | Opened | Resolved | Iterations unaddressed | Iteration |
+|---|---------|--------|----------|-------------------|-----------|
+| 1 | LiveStepBuilder ↔ StreamingSegmenter duplication | iter 003 | iter 011 | 8 | **iter 011** (Mode 5 directed item 2/2) |
+| 2 | Session event persistence for SW restart recovery | iter 000 | iter 010 | 9 | iter 010 (Mode 5 directed item 1/2) |
+| 3 | Playwright E2E tests for recording lifecycle | iter 000 | iter 009 | 8 | iter 009 (1-in-5 blocker-cadence forced selection) |
 
+**Resolved in iter 011**: Segmentation convergence — `LiveStepBuilder`, `StreamingSegmenter`, `buildDerivedSteps`, `segmentEvents` all flow through the single `@ledgerium/segmentation-engine` primitive. ADR-001 Phase 1 complete for segmentation. 12 golden fixtures × 2 contracts × byte-identity assertions form the regression gate. 79 net new tests.
 **Resolved in iter 010**: Session event persistence for SW restart recovery — all four arrays (raw/canonical/policy/live) debounced to `chrome.storage.local` per-session; quota-overflow append-stop; schema-version guard; `onSuspend` flush; 16 new unit tests + 2 integration tests + 1 Playwright smoke.
 **Resolved in iter 009**: E2E Playwright lifecycle tests — 3 tests covering idle → recording → complete, plus CI wiring via `e2e-extension.yml` (runs on push/PR to main).
 **Resolved in iter 008**: shared capture-policy enforcement — now integrated via `classifySensitivity` in `target-inspector.ts`.
 **Resolved in iter 003**: extension background logic deduplicated (normalization-engine, segmentation-engine, policy-engine imports).
 
 ### Release-blocker burn rate
-- 5-loop window (iter 006–010): **2 closed** (E2E tests iter 009; session persistence iter 010)
-- Target under 1-in-5 cadence rule: ≥ 1 closed per 5-loop window → **exceeded (2 of last 5)**
+- 5-loop window (iter 007–011): **3 closed** (E2E tests iter 009; session persistence iter 010; segmentation convergence iter 011)
+- Target under 1-in-5 cadence rule: ≥ 1 closed per 5-loop window → **exceeded 3× (3 of last 5)**
+- **All Phase-1 blockers now closed.** Future blockers will be surfaced during Phase 2 planning.
 
 ---
 
 ## Recommended Next Iteration
 
-**Iter 011: Converge LiveStepBuilder with StreamingSegmenter** (score **11** = 8 base + 3 release-blocker bonus; no saturation penalty). Mode 5 directed by user (continuation of iter 010 → 011 sequence).
+**Iter 012: Meta-Review 002 (Mode 4) — then follow-up burn-down loop.**
 
-Rationale:
-- Sole remaining Phase-1 release blocker (open since iter 003 surfacing, 7 loops unaddressed).
-- Closes the last duplication blocker; eliminates the architectural divergence risk between the live UI builder and the normalization-layer segmenter.
-- Saturation cleared — no area concerns.
+### Mandatory sequencing
 
-Primary agent: `system-architect` (convergence design document). Secondary agent: `backend-engineer` (implementation). Tertiary: `qa-engineer` (regression coverage).
+1. **Meta-Review 002 first** (Mode 4, no product code changes). Base-cadence trigger is hit: 3 loops since Meta-Review 001 (iter 009 + iter 010 + iter 011; Mode 5 counter increments by N=2 for the directed sequence).
+2. **Iter 012 (after MR-002)**: follow-up burn-down loop per 1-in-5 rule.
 
-Scope: design the convergence, implement, preserve byte-identical output from both paths, maintain determinism guards. Do NOT expand surface area beyond the two modules. Do NOT touch iter-010 persistence code.
+### Candidates for iter 012 (ordered by score)
 
-### Post-011 candidate queue (preliminary ordering)
+- **#22** Explicit Invariant I1 cross-path assertion — score 13 (iter 011 follow-up, pure test add, zero risk, design-doc debt)
+- **#18** Surface `persistenceTruncated` in review UI — score 11 (iter 010 follow-up, UX resilience)
+- **#19** GC stale `ledgerium_active_session_events_*` keys — score 11 (iter 010 follow-up, session durability)
+- **#25** Full-pipeline golden fixture (raw → normalizer → segmentation) — score 11 (iter 011 follow-up, invariant coverage)
+- **#7** Widen policy-engine `credit_card` regex — score 11 (iter 008 follow-up)
+- **#14** Wire `validateRenderedSOP` into pipeline — score 11 (iter 007 follow-up)
 
-- **Iter 012: Follow-up burn-down loop** (per 1-in-5 rule). Candidates: iter 010 follow-ups (#18 persistenceTruncated UI surface score 11; #19 stale-key GC score 11; #20 sessionId cross-validation score 10); iter 008 follow-up widen policy-engine `credit_card` regex (score 11); iter 007 follow-up wire `validateRenderedSOP` (score 11 post-saturation-clear); iter 006 follow-up extract confidence thresholds (score 10 post-saturation-clear).
-- **Iter 013: Real-extension E2E with `launchPersistentContext`** (iter 010 follow-up #21) — complements the static-harness approach; exercises actual `chrome.runtime` transport and real-extension SW-restart semantics.
-- **Iter 014: Structured error logging with session context** (score 11) — observability improvement building on iter 010's durable session state.
+### Post-012 preliminary queue
 
-### Meta-review trigger check
-- Loops since last meta-review: will be **3 after iter 011 completes** (iter 009 + 010 + 011) → base-cadence meta-review due at iter 012.
-- Mode 5 directed sequence increments counter by 2 (not 1 per batch), already reflected.
-- Early-trigger conditions: none currently met (no agent-monoculture, no blocker stagnation, no back-to-back failed validations).
+- **Iter 013: Real-extension `launchPersistentContext` E2E** (iter 010 follow-up #21) — closes fidelity gap between Vitest integration and OS-level SW restart.
+- **Iter 014: Structured error logging with session context** — last original Phase-1 priority not yet addressed; builds on iter 010's durable session state.
+- **Iter 015+**: Phase 2 planning — no blockers remain, so PRD refresh / GTM work is unblocked.
+
+### Meta-review trigger check (post iter 011)
+- Loops since Meta-Review 001: **3** (iter 009 + iter 010 + iter 011 with Mode 5 increment of N=2) → **base-cadence meta-review DUE**.
+- Early-trigger conditions: none currently met (no agent-monoculture — iter 011 added `system-architect` as primary; no blocker stagnation — 3 closed in 3 loops; no back-to-back failed validations).
 
 ## Meta-Review Status
 
-- Completed loops since initialization: **10 (iter 001–010)**
+- Completed loops since initialization: **11 (iter 001–011)**
 - Last meta-review: **Meta-Review 001 (2026-04-17, covering iter 004–008)** — see `META_REVIEW_001.md`
-- Loops completed since last meta-review: **2 (iter 009 + iter 010)**
-- Next meta-review trigger: after iter 012 (3 loops base cadence: 009, 010, 011) OR on any early-trigger condition (see CLAUDE.md § Meta-Review Cadence).
-- Status: **current**
+- Loops completed since last meta-review: **3 (iter 009 + iter 010 + iter 011)** — Mode 5 directed sequence contributes N=2 per CLAUDE.md increment rule.
+- Next meta-review trigger: **DUE NOW** (base cadence threshold reached). Meta-Review 002 should run as iter 012 or before.
+- Status: **trigger active**
 
 ### Meta-Review 001 headline findings
 

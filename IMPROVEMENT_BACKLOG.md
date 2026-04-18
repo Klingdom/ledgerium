@@ -1,6 +1,6 @@
 # Ledgerium AI — Improvement Backlog
 
-Last updated: 2026-04-18 (post-iteration 010 — session event persistence landed; release blocker #1 closed)  
+Last updated: 2026-04-18 (post-iteration 011 — segmentation convergence landed; **all Phase-1 release blockers closed**)  
 Current phase: Phase 1  
 Backlog purpose: maintain a ranked, evidence-based portfolio of the highest-value fixes, improvements, and experiments for bounded improvement loops.
 
@@ -21,13 +21,14 @@ Scoring scale:
 
 Higher total score = higher priority. Post Meta-Review 001: range widened to ~6–18 (was 10–16).
 
-### Saturation status (computed over iter 006–010)
+### Saturation status (computed over iter 007–011)
 
-- SOP area (presentation / trust / quality gate) = 2 of last 5 (iters 006, 007) → **SATURATION CLEARED** (iter 005 dropped out of the window; iter 010 was session durability)
+- SOP area (presentation / trust / quality gate) = 1 of last 5 (iter 007) → **SATURATION CLEARED**
 - Session-durability area = 1 of last 5 (iter 010)
 - Quality-assurance area = 1 of last 5 (iter 009)
 - Capture-pipeline area = 1 of last 5 (iter 008)
-- Affected open items: "Wire validateRenderedSOP into processSession.ts", "Extract confidence thresholds" → **saturation penalty removed**. Natural scores restored to 11 and 10 respectively.
+- Extension-architecture / segmentation area = 1 of last 5 (iter 011)
+- All areas clear; no `−S` penalties currently apply.
 
 ### Portfolio override rules
 
@@ -40,13 +41,13 @@ See `CLAUDE.md § Selection Policy` — any of these overrides top-score:
 
 ## Portfolio Summary
 
-- Total candidates reviewed: 27 (26 original + LiveStepBuilder convergence blocker surfaced in Meta-Review 001)
-- Top priority area: **LiveStepBuilder ↔ StreamingSegmenter convergence** (sole remaining release blocker)
-- Highest-risk unresolved item: LiveStepBuilder ↔ StreamingSegmenter duplication (release blocker, 7 loops unaddressed since iter 003 surfacing)
-- Last completed item: Persist full session event stream for SW restart recovery (iteration 010)
+- Total candidates reviewed: 31 (27 prior + 4 iter-011 follow-ups)
+- Top priority area: **meta-review due** (base-cadence trigger: 3 loops since Meta-Review 001) + follow-up burn-down rotation (iter 012 must select from follow-up pool per 1-in-5 rule)
+- Highest-risk unresolved item: no release blockers remain; highest-risk open items are iter-010 follow-ups #18–21 and iter-011 follow-ups #22–25
+- Last completed item: Converge LiveStepBuilder with StreamingSegmenter (iteration 011)
 - Last meta-review: **Meta-Review 001 (2026-04-17)** — see `META_REVIEW_001.md`
-- Next recommended item: **Converge LiveStepBuilder with StreamingSegmenter** (iter 011, score 11, Mode 5 directed by user)
-- Release-blocker burn rate (last 5 loops iter 006–010): **2/3 closed** (Playwright E2E ✓ iter 009; session persistence ✓ iter 010; LiveStepBuilder convergence pending — iter 011)
+- Next recommended action: **Meta-Review 002** (base-cadence) then iter 012 follow-up burn-down
+- Release-blocker burn rate (last 5 loops iter 007–011): **3/3 closed** (Playwright E2E ✓ iter 009; session persistence ✓ iter 010; segmentation convergence ✓ iter 011) — **100% of release blockers cleared**
 
 ---
 
@@ -56,9 +57,11 @@ Score column format: `base ± adjustments = final` where adjustments are `+B` (r
 
 ### Release Blockers (auto-top per 1-in-5 cadence rule)
 
+**All Phase-1 release blockers closed as of iter 011.** Table preserved for historical traceability.
+
 | Rank | Title | Type | Area | I | A | L | C | E | R | Score | Status |
 |------|-------|------|------|---|---|---|---|---|---|-------|--------|
-| 1 | **Converge LiveStepBuilder with StreamingSegmenter** | improvement | extension architecture | 4 | 5 | 3 | 3 | 4 | 3 | 8 `+B3` = **11** | proposed — **iter 011** (directed) |
+| ~~—~~ | ~~Converge LiveStepBuilder with StreamingSegmenter~~ | ~~improvement~~ | ~~extension architecture~~ | ~~4~~ | ~~5~~ | ~~3~~ | ~~3~~ | ~~4~~ | ~~3~~ | ~~8 +B3 = 11~~ | **done (iter 011)** |
 | ~~—~~ | ~~Persist full session event stream for service worker restart recovery~~ | ~~fix~~ | ~~session durability~~ | ~~5~~ | ~~5~~ | ~~4~~ | ~~4~~ | ~~4~~ | ~~3~~ | ~~11 +B3 = 14~~ | **done (iter 010)** |
 | ~~—~~ | ~~Add Playwright E2E tests for recording lifecycle~~ | ~~improvement~~ | ~~quality assurance~~ | ~~4~~ | ~~5~~ | ~~4~~ | ~~4~~ | ~~3~~ | ~~2~~ | ~~12 +B3 = 15~~ | **done (iter 009)** |
 
@@ -84,6 +87,10 @@ Score column format: `base ± adjustments = final` where adjustments are `+B` (r
 | 19 | Garbage-collect stale `ledgerium_active_session_events_*` keys on SW startup | fix | session durability | 2 | 4 | 2 | 5 | 1 | 1 | **11** | new (iter 010 follow-up) |
 | 20 | `loadFromStorage` sessionId/in-flight flag cross-validation | fix | session durability | 3 | 4 | 2 | 4 | 1 | 2 | **10** | new (iter 010 follow-up) |
 | 21 | Real-extension `launchPersistentContext` E2E harness | improvement | quality assurance | 4 | 5 | 4 | 3 | 4 | 3 | **9** | new (iter 010 follow-up; originally iter 013) |
+| 22 | Explicit Invariant I1 cross-path assertion (`liveFinalizedDerivedSteps === batchDerivedSteps`) | improvement | invariants / testing | 3 | 4 | 3 | 5 | 1 | 1 | **13** | new (iter 011 follow-up) |
+| 23 | `SEGMENTATION_RULE_VERSION` doc drift (`docs/invariants.md` L172 says `'1.0.0'`; code says `'1.1.0'`) | fix | docs / invariants | 2 | 3 | 1 | 5 | 1 | 1 | **9** | new (iter 011 follow-up) |
+| 24 | `LiveStep` type tightening (`grouping?`, `boundaryReason?` → typed enum unions) | improvement | type safety | 2 | 3 | 2 | 5 | 1 | 1 | **10** | new (iter 011 follow-up) |
+| 25 | Full-pipeline golden fixture (raw `.ndjson` → normalizer → segmentation) | improvement | invariants / testing | 4 | 5 | 4 | 3 | 3 | 2 | **11** | new (iter 011 follow-up) |
 
 ### Completed (historical)
 
@@ -98,10 +105,12 @@ Score column format: `base ± adjustments = final` where adjustments are `+B` (r
 | 008 | Integrate `@ledgerium/policy-engine` into `content/capture.ts` | 13 |
 | 009 | Add Playwright E2E tests for recording lifecycle + CI workflow | 15 |
 | 010 | Persist full session event stream for SW restart recovery | 14 |
+| 011 | Converge LiveStepBuilder ↔ StreamingSegmenter (+ `buildDerivedSteps` + `segmentEvents` onto package primitive) | 11 |
 
-> Rank 1 is the sole remaining release blocker and takes priority per the 1-in-5 release-blocker cadence rule (see `CLAUDE.md § Selection Policy`).
-> SOP saturation cleared after iter 010 (session durability) — items 14 and 15 are back to natural scores.
-> Items 18–21 are iter 010 follow-ups and are eligible for the follow-up burn-down rotation (1 of next 5 iterations must pick from the follow-up pool).
+> **All Phase-1 release blockers closed as of iter 011.** The release-blocker bonus `+B3` no longer applies to any item in the table.
+> All areas clear; no `−S` penalties apply.
+> Items 18–25 are iter-010 and iter-011 follow-ups and are eligible for the follow-up burn-down rotation (1 of next 5 iterations must pick from the follow-up pool per `CLAUDE.md § Follow-Up Debt Policy`). Iter 012 is due for follow-up burn-down.
+> **Meta-Review 002 is due:** 3 loops since Meta-Review 001 (iter 009 + iter 010 + iter 011 = 3, per CLAUDE.md § Meta-Review Cadence, Mode 5 increment rule: N=2 from the directed sequence + 1 from iter 009). Next non-directed loop triggers it.
 
 ---
 
