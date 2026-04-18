@@ -18,10 +18,20 @@ export {
   IDLE_GAP_MS,
   CLICK_NAV_WINDOW_MS,
   RAPID_CLICK_DEDUP_MS,
+  TARGET_CHANGE_GAP_MS,
+  ACTION_BUTTON_PATTERNS,
   generateStepId,
   deriveStepTitle,
   calculateConfidence,
 } from './rules.js';
+
+export {
+  extractPageContext,
+  classifyGroupingReason,
+  isActionButtonClick,
+  isFileInteraction,
+  interactionTargetKey,
+} from './grouping.js';
 
 export { segmentEvents } from './batch-segmenter.js';
 
