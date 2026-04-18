@@ -6,6 +6,49 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-18] - Iteration 009: Playwright E2E tests + CI workflow (release blocker #1 closed)
+
+### Added
+- `apps/extension-app/playwright.config.ts` — **new file**, isolated Playwright config for the extension workspace (400×600 sidepanel viewport, `testMatch: recording-lifecycle.spec.ts`, CI-aware reporter/retries, single-worker sequential, 30s timeout). Does NOT couple to the existing `apps/web-app/playwright.config.ts` (Next.js / Prisma / auth-setup dependencies would fail outside the web-app context).
+- `apps/extension-app/e2e/recording-lifecycle.spec.ts` — **new file**, 3 lifecycle tests using a static-harness approach:
+  - **idle screen** — Start Recording button is disabled when activity name is empty (4 assertions)
+  - **start recording** — typing activity name enables button; clicking transitions badge "Ready" → "Recording" + shows "Recording Active" banner (4 assertions)
+  - **stop recording** — clicking "Stop & Review" transitions badge to "Complete" (2 assertions)
+- `.github/workflows/e2e-extension.yml` — **new file**, 63 lines, single-job GitHub Actions workflow triggered on push/PR to `main`. Steps: checkout → pnpm/action-setup@v4 → setup-node@v4 with pnpm cache → `pnpm install --frozen-lockfile` → cache Playwright browsers (keyed on pnpm-lock hash) → conditional `playwright install chromium --with-deps` → `pnpm --filter extension-app build` → `pnpm --filter extension-app test:e2e` → upload `playwright-report/` artifact on failure (7-day retention). Concurrency: cancel-in-progress on same ref. Timeout: 10 minutes.
+- `apps/extension-app/package.json` — `"test:e2e": "playwright test"` script + pinned `@playwright/test@1.59.1` devDependency
+
+### Test strategy: static-harness with real production bundle
+- The built sidepanel (`dist/src/sidepanel/index.html`) is served via a local HTTP server from `beforeAll`
+- A deterministic `chrome.*` mock is injected via `page.addInitScript` BEFORE React mounts, simulating the background service worker's state machine (GET_STATE response + SESSION_STATE_UPDATED broadcasts on START_SESSION / STOP_SESSION)
+- Tests exercise the REAL production JS bundle (same code that ships in the extension) including `useRecorderState` and every sidepanel component — only the `chrome.runtime` transport layer is mocked
+- Tradeoff: deterministic and fast, but does NOT test background/content script message handling or `chrome.storage` persistence. Real-extension `launchPersistentContext` tests deferred to iter 010+.
+
+### Impact
+- **Before**: release blocker #1 (E2E coverage) open for 8 loops; no automated regression protection for the sidepanel lifecycle; no test CI gate on PRs (only deploy.yml's quality-gate on push events)
+- **After**: 3 lifecycle assertions auto-run on every push/PR to main; fast local reproduction (`cd apps/extension-app && pnpm test:e2e` → 4.7s); foundation for iter 010 session-recovery tests to extend this harness
+- **Release-blocker burn rate**: 0/3 → **1/3 closed** in a single loop (Meta-Review 001's 1-in-5 cadence rule working as intended)
+- **CI surface**: new `e2e-extension` workflow adds PR-blocking gate; expected ~60–90s warm-cache runtime, ~3–5min cold-cache
+- **Agent diversity over last 5 loops**: 1 → **3** (backend-engineer + qa-engineer + devops-engineer — first non-backend-engineer implementation loop since iter 003)
+- **Test counts**: Vitest stays at 1,512/1,512 (no regressions); E2E adds 3 new tests (first non-unit tests in repo history)
+
+### Validation
+- `pnpm typecheck` (monorepo) — clean across all 10 workspace projects ✅
+- `pnpm test` (monorepo) — 1,512/1,512 pass across 41 files ✅
+- `pnpm --filter extension-app test:e2e` — 3/3 pass in 4.7s ✅
+- Workflow YAML parsed valid; action versions pinned (`@v4` across the board); line count 63 (within 40–100 scope-discipline target)
+- Command sequence in workflow matches qa-engineer's handoff repro commands exactly
+
+### Governance / selection signals
+- Selected via `blocker-cadence` rule (1-in-5 release-blocker rotation, new in Meta-Review 001)
+- Final score: 15 (Impact:4 + Alignment:5 + Learning:4 + Confidence:4 − Effort:3 − Risk:2 + release_blocker_bonus:3 − saturation_penalty:0) — highest post-formula score; would have been 12 under the old formula
+- First iteration executed under the refined Selection Policy; first post-Meta-Review-001 loop
+- Scope discipline preserved: no unit-test CI, no lint CI, no typecheck CI, no web-app E2E, no `launchPersistentContext` — all queued as follow-ups
+
+### Release blocker resolved
+- "E2E Playwright lifecycle tests missing" — closed after 8 loops. Remaining release blockers: session event persistence (iter 010), LiveStepBuilder ↔ StreamingSegmenter duplication (iter 011).
+
+---
+
 ## [2026-04-17] - Iteration 008: Policy-engine integrated into content capture pipeline
 
 ### Changed

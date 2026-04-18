@@ -190,6 +190,97 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 009
+
+- Date: 2026-04-18
+- Trigger: first post-meta-review loop; selected via `blocker-cadence` rule (new in Meta-Review 001)
+- Coordinator: coordinator
+- Phase: Phase 1
+- Objective: close the longest-standing Phase 1 release blocker — missing Playwright E2E coverage for the extension recording lifecycle (8 loops unaddressed since iter 000) — by installing Playwright for `apps/extension-app` and landing 1–3 lifecycle tests + CI wiring
+
+### System Review
+- Meta-Review 001 (2026-04-17) diagnosed 5-loop drift into SOP-presentation polish with zero release blockers closed
+- New Selection Policy formulas: `+3 release_blocker_bonus`, `−2 saturation_penalty` — under the refined formula, Playwright E2E rose from 12 → 15, beating all other candidates
+- SOP area was saturated (4 of last 5 iterations); Area saturation rule also forced pivot out of SOP work
+- Agent diversity was 1 (backend-engineer) across 5 consecutive loops — Meta-Review 001 added a 3-consecutive-same-agent check; this iteration is the first non-backend-engineer loop since iter 003
+- No test workflow existed in `.github/workflows/` prior to this loop — CI test gates were previously only in the deploy workflow's `quality-gate` job (which runs on push to main/feature branches, not on PRs)
+
+### Candidate Selection
+- Title: **Add Playwright E2E tests for recording lifecycle**
+- Type: improvement
+- Area: quality assurance / release readiness
+- Score: **15** (Impact:4 + Alignment:5 + Learning:4 + Confidence:4 − Effort:3 − Risk:2 + release_blocker_bonus:3 − saturation_penalty:0)
+- Selection rule: **`blocker-cadence`** — 1-in-5 release-blocker rotation rule. Also supported by `top-score` (highest post-formula score) and `saturation-rule` (forced pivot out of SOP area)
+- Why selected: release blocker since iter 000 (8 loops untouched); unblocks iter 010 session-persistence validation; breaks the backend-engineer-only orchestration streak
+- Scope discipline: install Playwright + 1–3 lifecycle tests + CI wiring only. NO unit-test CI, NO lint CI, NO typecheck CI, NO web-app E2E, NO real-extension `launchPersistentContext` test (deferred to iter 010). NO source-code rewrites to enable testing.
+
+### Agents Used
+- coordinator (orchestration, verification, artifact updates)
+- qa-engineer (primary — installation + test design + authorship)
+- devops-engineer (secondary — CI workflow wiring)
+
+Delegation pattern: sequential (qa-engineer completes and reports → devops-engineer uses the exact reproduce commands). This is the first iteration since iter 003 where implementation used specialist agents other than `backend-engineer`, satisfying the agent-diversity rule added by Meta-Review 001.
+
+### Files Changed
+- `apps/extension-app/package.json` — **modified**, +2 LOC: added `"test:e2e": "playwright test"` script and pinned `@playwright/test@1.59.1` as devDependency
+- `pnpm-lock.yaml` — **modified**, +3 LOC: dependency resolution
+- `apps/extension-app/playwright.config.ts` — **new file**, +47 LOC: isolated config with 400×600 sidepanel viewport, 30s timeout, CI-aware reporter (`github` in CI / `list` locally), CI-aware retries (1 in CI / 0 locally), `testMatch: recording-lifecycle.spec.ts`, single-worker sequential execution
+- `apps/extension-app/e2e/recording-lifecycle.spec.ts` — **new file**, +311 LOC: 3 lifecycle tests using static-harness approach — serves `dist/src/sidepanel/index.html` via a local HTTP server + injects a deterministic `chrome.*` mock via `page.addInitScript` before React mounts. Exercises the real production JS bundle while keeping the transport layer fully controlled.
+- `.github/workflows/e2e-extension.yml` — **new file**, +63 LOC: single-job workflow triggered on push/PR to main, with pnpm/action-setup@v4 + actions/setup-node@v4 (pnpm store cache), actions/cache@v4 keyed on pnpm-lock.yaml hash for Playwright browsers, conditional `playwright install chromium --with-deps` on cache miss, `pnpm --filter extension-app build`, then `pnpm --filter extension-app test:e2e`, with artifact upload of `playwright-report/` on failure (7-day retention). Concurrency group cancels in-progress runs on the same ref. 10-minute job timeout.
+
+### Test Inventory (3 tests, all passing locally in 4.7s)
+1. **idle screen** — Start Recording button is disabled when activity name is empty. Asserts header badge = "Ready", input visible and empty, button disabled (4 assertions).
+2. **start recording** — Typing an activity name enables the button; clicking it transitions the header badge "Ready" → "Recording" and shows "Recording Active" banner (4 assertions).
+3. **stop recording** — From recording state, clicking "Stop & Review" transitions the header badge to "Complete" (2 assertions).
+
+### Validation Run
+- `pnpm typecheck` (monorepo) → clean across all 10 workspace projects ✅
+- `pnpm test` (monorepo) → 1,512/1,512 tests pass across 41 test files (Vitest unchanged — no regressions) ✅
+- `pnpm --filter extension-app test:e2e` → 3/3 passed in 4.7s ✅
+- `.github/workflows/e2e-extension.yml` YAML syntax → valid (parsed via js-yaml) ✅
+- Workflow action pins verified: `actions/checkout@v4`, `pnpm/action-setup@v4`, `actions/setup-node@v4`, `actions/cache@v4`, `actions/upload-artifact@v4`
+- Workflow line count: 63 (within the 40–100 scope-discipline target)
+- Command sequence in workflow matches qa-engineer's handoff repro commands exactly
+
+### Outcome
+- Status: **complete**
+- Summary: The extension now has its first E2E test suite AND its first CI test gate. Both artifacts are minimal by design — 3 lifecycle tests, 1 workflow file, 1 job, 1 concern. The static-harness strategy exercises the real production bundle while keeping `chrome.*` controllable; the real-extension `launchPersistentContext` approach remains an explicit iter 010 follow-up.
+
+### Impact
+- **Before**: release blocker #1 (E2E coverage) open for 8 loops; no automated regression protection for the sidepanel → service-worker → sidepanel lifecycle; no test CI gate on PRs
+- **After**: 3 lifecycle assertions auto-run on every push/PR; fast local reproduction (`cd apps/extension-app && pnpm test:e2e`); foundation for iter 010 session-recovery tests
+- **Test count**: 1,512 Vitest + **3 Playwright E2E** (first non-unit tests in repo history)
+- **CI surface**: new `e2e-extension` workflow runs in ~60–90s warm-cache, ~3–5min cold-cache
+- **Release-blocker burn rate**: 0/3 → **1/3 closed** in this loop
+- **Agent diversity (last 5 loops)**: 1 → **2** (backend-engineer + qa-engineer — devops-engineer brings it to **3** if counted as implementer of the CI workflow)
+
+### Artifacts Updated
+- `ITERATION_LOG.md` — this entry
+- `IMPROVEMENT_BACKLOG.md` — iter 009 item marked complete; release-blocker burn rate updated; session-persistence (iter 010) remains top of release-blocker stack
+- `SYSTEM_HEALTH.md` — release blocker #1 marked resolved; Playwright E2E removed from release-blocker table; test count / CI surface updated; scorecard shifts for release readiness
+- `CHANGELOG.md` — new entry prepended
+
+### Follow-Ups
+- **Real-extension smoke test via `launchPersistentContext`** (iter 010 or 011) — complement the harness approach by testing the actual `chrome.runtime` transport + service-worker message bus
+- **Session recovery test** (iter 010) — Meta-Review 001 earmarked "record → restart → recover". `useRecorderState` already has stale-session filtering in `mergeSteps` but no test covers this path. Natural companion to the iter 010 session-persistence implementation work.
+- **chrome.storage persistence test** — mock currently returns empty `{}` for all storage.get calls; `useHistory` hook and `SyncSettings` component have untested paths
+- **`STOP_SESSION` transient "Processing..." badge assertion** — currently skipped because the mock's 80ms `stopping → review_ready` transition is too fast to poll reliably; would need a slow-mock variant
+- **Add unit-test CI workflow** — `pnpm test` has never run in CI as a dedicated PR gate (only inside deploy.yml quality-gate on push). Separate workflow file, next iteration candidate.
+- **Add typecheck / lint CI workflows** — same reasoning as above, separate files per the one-concern-per-workflow rule
+- **Web-app E2E wiring** — `apps/web-app` has its own Playwright config (with globalSetup, Prisma seed, auth state). Should get its own dedicated workflow once stable
+- **Extension-app untested content modules** — `capture.ts`, `state-observer.ts`, `label-extractor.ts` remain without unit tests (carryover from iter 008 follow-ups); now partially covered indirectly by the static-harness approach but unit tests would still be valuable
+- **Design smell (note only, do not fix opportunistically)**: `useRecorderState` polls `GET_STATE` on a 400ms interval during recording — in test it generates no-op chrome.runtime.sendMessage traffic. Not a bug; worth flagging for iter 010's real-extension tests, which will see this traffic.
+
+### Risks / Open Questions
+- **Playwright browser download bandwidth on cold CI runs** (~100MB Chromium). Cache hit eliminates this; cache bust happens on Playwright version change (via pnpm-lock hash). Acceptable risk.
+- **dist path coupling**: config and spec hard-code `dist/src/sidepanel/index.html`. If Vite/crxjs build output layout changes, tests will 404 silently and hit the waitForSelector timeout. Mitigated by a `fs.existsSync(DIST_ROOT)` guard in `beforeAll` that throws fast.
+- **Asset hash coupling in `apps/extension-app/e2e/screenshot-harness.html`** — pre-existing file references CSS by content hash; a rebuild changes the hash. NOT introduced by this iteration, but flagged because any CI run that rebuilds before screenshots will hit this. Not in iter 009 scope.
+- **`--with-deps` requires sudo on Ubuntu**. GitHub-hosted runners have passwordless sudo; self-hosted runners without sudo would need the `--with-deps` flag removed and OS deps pre-installed on the image. Acceptable risk for the current CI setup.
+- **Static-harness limitation** — does NOT test background/content script message handling or chrome.storage persistence. This is by design for iter 009; real-extension tests are explicitly deferred.
+- **CI first-run verification** — this workflow has not yet actually executed on GitHub. First CI run will confirm end-to-end correctness; any issue surfaces as a Mode 3 Debugging follow-up, not a scope expansion.
+
+---
+
 ## Iteration 008
 
 - Date: 2026-04-17

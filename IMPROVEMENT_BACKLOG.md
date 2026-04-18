@@ -1,6 +1,6 @@
 # Ledgerium AI — Improvement Backlog
 
-Last updated: 2026-04-17 (post Meta-Review 001 — rescored under refined formula)  
+Last updated: 2026-04-18 (post-iteration 009 — Playwright E2E harness + CI wiring landed; first release blocker closed)  
 Current phase: Phase 1  
 Backlog purpose: maintain a ranked, evidence-based portfolio of the highest-value fixes, improvements, and experiments for bounded improvement loops.
 
@@ -21,10 +21,12 @@ Scoring scale:
 
 Higher total score = higher priority. Post Meta-Review 001: range widened to ~6–18 (was 10–16).
 
-### Saturation status (computed over iter 004–008)
+### Saturation status (computed over iter 005–009)
 
-- SOP area (presentation / trust / quality gate) = 4 of last 5 → **SATURATED**
-- Affected open items: "Wire validateRenderedSOP into processSession.ts", "Extract confidence thresholds" → each receives −2 saturation penalty until saturation clears (requires 3 non-SOP loops in the last 5).
+- SOP area (presentation / trust / quality gate) = 3 of last 5 (iters 005, 006, 007) → **STILL SATURATED**
+- Quality-assurance area = 1 of last 5 (iter 009)
+- Capture-pipeline area = 1 of last 5 (iter 008)
+- Affected open items: "Wire validateRenderedSOP into processSession.ts", "Extract confidence thresholds" → still receive −2 saturation penalty. Saturation clears after iter 010 if iter 010 is non-SOP (iter 005 drops out of the window).
 
 ### Portfolio override rules
 
@@ -37,12 +39,13 @@ See `CLAUDE.md § Selection Policy` — any of these overrides top-score:
 
 ## Portfolio Summary
 
-- Total candidates reviewed: 27 (prior 26 + LiveStepBuilder convergence blocker surfaced in Meta-Review 001)
-- Top priority area: **release blockers** (E2E tests, session persistence, LiveStepBuilder convergence)
-- Highest-risk unresolved item: Playwright E2E coverage missing (release blocker, 8 loops unaddressed)
-- Last completed item: Integrate `@ledgerium/policy-engine` into content capture pipeline (iteration 008)
+- Total candidates reviewed: 27 (26 original + LiveStepBuilder convergence blocker surfaced in Meta-Review 001)
+- Top priority area: **remaining release blockers** (session persistence, LiveStepBuilder convergence)
+- Highest-risk unresolved item: Session event persistence for service worker restart recovery (release blocker, 9 loops unaddressed)
+- Last completed item: Add Playwright E2E tests for recording lifecycle + CI workflow (iteration 009)
 - Last meta-review: **Meta-Review 001 (2026-04-17)** — see `META_REVIEW_001.md`
-- Next recommended item: **Add Playwright E2E tests for recording lifecycle** (iter 009, new score 15, blocker-cadence rule)
+- Next recommended item: **Persist full session event stream for SW restart recovery** (iter 010, score 14, blocker-cadence + natural pairing with iter 009 E2E harness)
+- Release-blocker burn rate (last 5 loops): **1/3 closed** (Playwright E2E ✓; session persistence + LiveStepBuilder convergence pending)
 
 ---
 
@@ -54,9 +57,9 @@ Score column format: `base ± adjustments = final` where adjustments are `+B` (r
 
 | Rank | Title | Type | Area | I | A | L | C | E | R | Score | Status |
 |------|-------|------|------|---|---|---|---|---|---|-------|--------|
-| 1 | **Add Playwright E2E tests for recording lifecycle** | improvement | quality assurance | 4 | 5 | 4 | 4 | 3 | 2 | 12 `+B3` = **15** | proposed — **iter 009** |
-| 2 | Persist full session event stream for service worker restart recovery | fix | session durability | 5 | 5 | 4 | 4 | 4 | 3 | 11 `+B3` = **14** | proposed — iter 010 |
-| 3 | Converge LiveStepBuilder with StreamingSegmenter | improvement | extension architecture | 4 | 5 | 3 | 3 | 4 | 3 | 8 `+B3` = **11** | proposed — iter 011 |
+| 1 | **Persist full session event stream for service worker restart recovery** | fix | session durability | 5 | 5 | 4 | 4 | 4 | 3 | 11 `+B3` = **14** | proposed — **iter 010** |
+| 2 | Converge LiveStepBuilder with StreamingSegmenter | improvement | extension architecture | 4 | 5 | 3 | 3 | 4 | 3 | 8 `+B3` = **11** | proposed — iter 011 |
+| ~~—~~ | ~~Add Playwright E2E tests for recording lifecycle~~ | ~~improvement~~ | ~~quality assurance~~ | ~~4~~ | ~~5~~ | ~~4~~ | ~~4~~ | ~~3~~ | ~~2~~ | ~~12 +B3 = 15~~ | **done (iter 009)** |
 
 ### Standard Backlog
 
@@ -88,6 +91,7 @@ Score column format: `base ± adjustments = final` where adjustments are `+B` (r
 | 006 | Per-step `confidence?: number` + three-tier confidence glyph | 14 |
 | 007 | Add `templates/sopValidator.ts` (validator-only, no pipeline wiring) | 13 |
 | 008 | Integrate `@ledgerium/policy-engine` into `content/capture.ts` | 13 |
+| 009 | Add Playwright E2E tests for recording lifecycle + CI workflow | 15 |
 
 > Ranks 1–3 are release blockers and take priority over higher raw-score items per the 1-in-5 release-blocker cadence rule (see `CLAUDE.md § Selection Policy`).
 > SOP-saturated items (rank 14, 17) will return to natural score once 3 of the last 5 iterations are in non-SOP areas.
