@@ -1,0 +1,1 @@
+[{"stepId":"test-session-golden-step-1","title":"Handle error in App","status":"finalized","boundaryReason":"session_stop","grouping":"error_handling","pageLabel":"App","confidence":0.8,"eventCount":2,"startedAt":1000,"finalizedAt":1500}]

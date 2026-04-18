@@ -1,0 +1,1 @@
+[{"stepId":"test-session-golden-step-1","title":"Click Orders","status":"finalized","boundaryReason":"session_stop","grouping":"single_action","pageLabel":"App","confidence":0.75,"eventCount":2,"startedAt":1000,"finalizedAt":3000}]

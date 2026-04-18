@@ -1,0 +1,1 @@
+[{"stepId":"test-session-golden-step-1","title":"Click Save","status":"finalized","boundaryReason":"action_completed","grouping":"repeated_click_dedup","pageLabel":"App","confidence":0.7,"eventCount":3,"startedAt":1000,"finalizedAt":2500}]
