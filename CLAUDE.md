@@ -82,6 +82,12 @@ Each improvement-loop invocation runs in one of these modes:
 4. If the sequence contains 3+ items, a meta-review is MANDATORY before the next non-directed loop.
 5. Meta-review cadence counter increments by N (one per item), not by 1 (one per batch).
 6. If selected items are all in the same `Area` field, the coordinator must flag saturation risk to the user before beginning.
+7. **Scope-expansion protocol (MR-002 Change D):** a Mode 5 item's implementation may legitimately expand beyond the backlog row's literal wording ONLY if ALL of the following conditions hold:
+   a. The expansion is **evidence-based** — a specialist agent (architect, root-cause-analyst, qa-engineer) has produced an artifact demonstrating the original scope would miss the actual risk surface. Speculative "while we're here" expansions are forbidden.
+   b. The expanded work still resolves to **one logical outcome** — no multi-outcome bundles. If the expansion would ship two independently reversible changes, split into two iterations.
+   c. The expansion stays within the **same `Area`** as the original backlog row. Cross-area expansion is a new iteration, not an expansion.
+   d. The expansion is logged as `scope-expansion: approved` in the iteration log's "Candidate Selection" block with a ≤3-sentence rationale and a reference to the evidence artifact from (a).
+   e. The expansion does **not** touch surfaces modified by the immediately prior iteration — this preserves the independent-iteration guarantee in guardrail 1 and prevents unreviewable cross-iteration coupling.
 
 ---
 
@@ -124,6 +130,12 @@ Every iteration may generate follow-up backlog items. To prevent unbounded accum
 1. **Burn-down cadence:** at least 1 of every 5 iterations must select its target from the follow-up pool (items tagged "follow-up (iter N)" in `IMPROVEMENT_BACKLOG.md`).
 2. **Staleness cap:** any follow-up not addressed within 10 iterations of its creation is escalated to the next meta-review for explicit "keep / downgrade / delete" triage. No item sits ignored forever.
 3. **Follow-up density trigger:** if a single iteration generates 3+ follow-ups, the coordinator must either (a) re-scope the iteration into multiple loops, or (b) invoke `root-cause-analyst` on why one loop is spawning that much residual work.
+4. **Density-trigger enforcement (MR-002 Change A):** when clause 3 fires, the iteration log's "Candidate Selection" or "Validation" block MUST include exactly one of the following `density-response:` log lines, and the coordinator MUST emit this line in the iteration's completion summary:
+   - `density-response: re-scoped to N loops` — work was split; reference the new iteration numbers.
+   - `density-response: root-cause-analyst invoked` — reference the analyst's findings artifact.
+   - `density-response: acknowledged, carried forward` — explicit conscious decision to defer; must include a one-sentence rationale. Silent violations are treated as a failed iteration for meta-review scoring purposes.
+5. **Birth-iter field (MR-002 Change B):** every follow-up row in `IMPROVEMENT_BACKLOG.md` MUST carry a `Birth iter` column with the iteration number that created it. Rows missing this field cannot be selected until backfilled; this enables deterministic staleness-cap enforcement (clause 2) and the meta-review `age > 10` triage query.
+6. **Pool-size density ceiling (MR-002 Change C):** if the open follow-up pool size exceeds 8 items at the start of an iteration, that iteration MUST be a burn-down selection, regardless of the 1-in-5 floor in clause 1. This is a ceiling rule: floor is "at least 1-in-5," ceiling is "when debt is growing, force immediate burn-down."
 
 **Testable metric:** over any 10-iteration window, the ratio of (follow-ups closed) / (follow-ups created) must be ≥ 0.4.
 
@@ -399,7 +411,7 @@ Examples:
 - **Increment rule:** Mode 5 directed sequences increment the counter by N (one per item), not by 1 (per batch).
 - **Early triggers** (any of these forces an immediate meta-review, bypassing the 3-loop cadence):
   - 3+ consecutive iterations in the same `Area` field
-  - 0 release-blocker items selected in 5 loops
+  - 0 release-blocker items selected in 5 loops AND at least 1 open blocker exists in `SYSTEM_HEALTH.md`
   - Same implementing agent used for 4+ consecutive loops
   - Follow-up accumulation > 10 open items
   - 2+ iterations fail validation in a row

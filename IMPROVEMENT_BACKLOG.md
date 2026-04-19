@@ -1,6 +1,6 @@
 # Ledgerium AI — Improvement Backlog
 
-Last updated: 2026-04-18 (post-iteration 011 — segmentation convergence landed; **all Phase-1 release blockers closed**)  
+Last updated: 2026-04-19 (post-**Meta-Review 002** — governance diffs applied; follow-up schema now includes `Birth iter`)  
 Current phase: Phase 1  
 Backlog purpose: maintain a ranked, evidence-based portfolio of the highest-value fixes, improvements, and experiments for bounded improvement loops.
 
@@ -42,12 +42,14 @@ See `CLAUDE.md § Selection Policy` — any of these overrides top-score:
 ## Portfolio Summary
 
 - Total candidates reviewed: 31 (27 prior + 4 iter-011 follow-ups)
-- Top priority area: **meta-review due** (base-cadence trigger: 3 loops since Meta-Review 001) + follow-up burn-down rotation (iter 012 must select from follow-up pool per 1-in-5 rule)
+- Top priority area: **iter 012 burn-down** — open follow-up pool = 11 items, which exceeds the MR-002 Change C ceiling of 8; iter 012 MUST select from the follow-up pool regardless of top-score.
+- Open follow-up pool (Birth iter shown): #7 (008) · #14 (007) · #15 (006) · #18/19/20/21 (010) · #22/23/24/25 (011) — **11 items open**
 - Highest-risk unresolved item: no release blockers remain; highest-risk open items are iter-010 follow-ups #18–21 and iter-011 follow-ups #22–25
 - Last completed item: Converge LiveStepBuilder with StreamingSegmenter (iteration 011)
-- Last meta-review: **Meta-Review 001 (2026-04-17)** — see `META_REVIEW_001.md`
-- Next recommended action: **Meta-Review 002** (base-cadence) then iter 012 follow-up burn-down
+- Last meta-review: **Meta-Review 002 (2026-04-19)** — see `META_REVIEW_002.md`; prior: Meta-Review 001 (2026-04-17)
+- Next recommended action: iter 012 — recommended pairing #22 (I1 cross-path assertion) + #25 (full-pipeline golden fixture), both in Area `invariants / testing`, both test-only zero-risk; scores 13 and 11 respectively.
 - Release-blocker burn rate (last 5 loops iter 007–011): **3/3 closed** (Playwright E2E ✓ iter 009; session persistence ✓ iter 010; segmentation convergence ✓ iter 011) — **100% of release blockers cleared**
+- Follow-up closure ratio (10-iter window): **0 / 12 = 0.0** — below the ≥0.4 testable metric. MR-002 ceiling rule (Change C) is the mitigation; iter 012 burn-down starts the recovery curve.
 
 ---
 
@@ -67,30 +69,32 @@ Score column format: `base ± adjustments = final` where adjustments are `+B` (r
 
 ### Standard Backlog
 
-| Rank | Title | Type | Area | I | A | L | C | E | R | Score | Status |
-|------|-------|------|------|---|---|---|---|---|---|-------|--------|
-| 4 | Add dashboard-level process for artifact and system-health refresh after each loop | improvement | agentic CI | 3 | 4 | 5 | 4 | 2 | 1 | **13** | proposed |
-| 5 | Create invariant-focused regression suite for segmentation and normalization versions | improvement | invariants / testing | 4 | 5 | 4 | 4 | 3 | 2 | **12** | proposed |
-| 6 | Draft clearer product wedge and ICP narrative for deterministic process intelligence | experiment | product / GTM | 3 | 4 | 5 | 3 | 2 | 1 | **12** | proposed |
-| 7 | Widen policy-engine `credit[_-]?card` regex to `/credit[\s_-]*card/i` | fix | policy coverage | 2 | 4 | 2 | 5 | 1 | 1 | **11** | new (iter 008 follow-up) |
-| 8 | Add try/catch to 11 unguarded API routes | fix | API safety | 4 | 4 | 2 | 5 | 3 | 1 | **11** | new (iter 001) |
-| 9 | Add structured error logging with session context | improvement | observability | 4 | 4 | 4 | 4 | 3 | 2 | **11** | proposed |
-| 10 | Evaluate event bundle integrity checks before downstream derivation | experiment | evidence linkage | 4 | 5 | 5 | 3 | 3 | 3 | **11** | proposed |
-| 11 | Fix (db as any) casts / regenerate Prisma client | fix | type safety | 3 | 4 | 3 | 4 | 2 | 2 | **10** | new (iter 001) |
-| 12 | Initialize Prisma migrations baseline | fix | data integrity | 4 | 4 | 3 | 4 | 2 | 3 | **10** | new (iter 001) |
-| 13 | Define recorder failure-state UX for service worker interruption and recovery | experiment | UX resilience | 3 | 4 | 4 | 3 | 2 | 2 | **10** | proposed |
-| 14 | Wire `validateRenderedSOP` into `processSession.ts` (dev-throws/prod-logs) | fix | SOP quality gate | 3 | 5 | 3 | 4 | 2 | 2 | **11** | new (iter 007 follow-up) — saturation cleared post-iter-010 |
-| 15 | Extract confidence thresholds to shared constants module (remove `renderHelpers.ts ↔ sopTemplates.ts` circular) | improvement | code hygiene | 2 | 3 | 2 | 5 | 1 | 1 | **10** | new (iter 006 follow-up) — saturation cleared post-iter-010 |
-| 16 | Fix DELETE /api/keys error handling | fix | API safety | 2 | 3 | 1 | 5 | 1 | 1 | **9** | new (iter 001) |
-| 17 | Extract shared ingestion service (upload/sync) | improvement | API architecture | 4 | 5 | 4 | 3 | 4 | 3 | **9** | new (iter 001) |
-| 18 | Surface `meta.persistenceTruncated` flag in review UI / bundle builder | improvement | UX resilience | 3 | 4 | 2 | 4 | 1 | 1 | **11** | new (iter 010 follow-up) |
-| 19 | Garbage-collect stale `ledgerium_active_session_events_*` keys on SW startup | fix | session durability | 2 | 4 | 2 | 5 | 1 | 1 | **11** | new (iter 010 follow-up) |
-| 20 | `loadFromStorage` sessionId/in-flight flag cross-validation | fix | session durability | 3 | 4 | 2 | 4 | 1 | 2 | **10** | new (iter 010 follow-up) |
-| 21 | Real-extension `launchPersistentContext` E2E harness | improvement | quality assurance | 4 | 5 | 4 | 3 | 4 | 3 | **9** | new (iter 010 follow-up; originally iter 013) |
-| 22 | Explicit Invariant I1 cross-path assertion (`liveFinalizedDerivedSteps === batchDerivedSteps`) | improvement | invariants / testing | 3 | 4 | 3 | 5 | 1 | 1 | **13** | new (iter 011 follow-up) |
-| 23 | `SEGMENTATION_RULE_VERSION` doc drift (`docs/invariants.md` L172 says `'1.0.0'`; code says `'1.1.0'`) | fix | docs / invariants | 2 | 3 | 1 | 5 | 1 | 1 | **9** | new (iter 011 follow-up) |
-| 24 | `LiveStep` type tightening (`grouping?`, `boundaryReason?` → typed enum unions) | improvement | type safety | 2 | 3 | 2 | 5 | 1 | 1 | **10** | new (iter 011 follow-up) |
-| 25 | Full-pipeline golden fixture (raw `.ndjson` → normalizer → segmentation) | improvement | invariants / testing | 4 | 5 | 4 | 3 | 3 | 2 | **11** | new (iter 011 follow-up) |
+Schema note (MR-002 Change B): `Birth iter` column is MANDATORY for any row tagged "follow-up (iter N)". Rows with `—` are non-follow-up proposals and predate the column; they are exempt.
+
+| Rank | Title | Type | Area | I | A | L | C | E | R | Score | Birth iter | Status |
+|------|-------|------|------|---|---|---|---|---|---|-------|-----------|--------|
+| 4 | Add dashboard-level process for artifact and system-health refresh after each loop | improvement | agentic CI | 3 | 4 | 5 | 4 | 2 | 1 | **13** | — | proposed |
+| 5 | Create invariant-focused regression suite for segmentation and normalization versions | improvement | invariants / testing | 4 | 5 | 4 | 4 | 3 | 2 | **12** | — | proposed |
+| 6 | Draft clearer product wedge and ICP narrative for deterministic process intelligence | experiment | product / GTM | 3 | 4 | 5 | 3 | 2 | 1 | **12** | — | proposed |
+| 7 | Widen policy-engine `credit[_-]?card` regex to `/credit[\s_-]*card/i` | fix | policy coverage | 2 | 4 | 2 | 5 | 1 | 1 | **11** | 008 | new (iter 008 follow-up) |
+| 8 | Add try/catch to 11 unguarded API routes | fix | API safety | 4 | 4 | 2 | 5 | 3 | 1 | **11** | — | new (iter 001) |
+| 9 | Add structured error logging with session context | improvement | observability | 4 | 4 | 4 | 4 | 3 | 2 | **11** | — | proposed |
+| 10 | Evaluate event bundle integrity checks before downstream derivation | experiment | evidence linkage | 4 | 5 | 5 | 3 | 3 | 3 | **11** | — | proposed |
+| 11 | Fix (db as any) casts / regenerate Prisma client | fix | type safety | 3 | 4 | 3 | 4 | 2 | 2 | **10** | — | new (iter 001) |
+| 12 | Initialize Prisma migrations baseline | fix | data integrity | 4 | 4 | 3 | 4 | 2 | 3 | **10** | — | new (iter 001) |
+| 13 | Define recorder failure-state UX for service worker interruption and recovery | experiment | UX resilience | 3 | 4 | 4 | 3 | 2 | 2 | **10** | — | proposed |
+| 14 | Wire `validateRenderedSOP` into `processSession.ts` (dev-throws/prod-logs) | fix | SOP quality gate | 3 | 5 | 3 | 4 | 2 | 2 | **11** | 007 | new (iter 007 follow-up) — saturation cleared post-iter-010 |
+| 15 | Extract confidence thresholds to shared constants module (remove `renderHelpers.ts ↔ sopTemplates.ts` circular) | improvement | code hygiene | 2 | 3 | 2 | 5 | 1 | 1 | **10** | 006 | new (iter 006 follow-up) — saturation cleared post-iter-010 |
+| 16 | Fix DELETE /api/keys error handling | fix | API safety | 2 | 3 | 1 | 5 | 1 | 1 | **9** | — | new (iter 001) |
+| 17 | Extract shared ingestion service (upload/sync) | improvement | API architecture | 4 | 5 | 4 | 3 | 4 | 3 | **9** | — | new (iter 001) |
+| 18 | Surface `meta.persistenceTruncated` flag in review UI / bundle builder | improvement | UX resilience | 3 | 4 | 2 | 4 | 1 | 1 | **11** | 010 | new (iter 010 follow-up) |
+| 19 | Garbage-collect stale `ledgerium_active_session_events_*` keys on SW startup | fix | session durability | 2 | 4 | 2 | 5 | 1 | 1 | **11** | 010 | new (iter 010 follow-up) |
+| 20 | `loadFromStorage` sessionId/in-flight flag cross-validation | fix | session durability | 3 | 4 | 2 | 4 | 1 | 2 | **10** | 010 | new (iter 010 follow-up) |
+| 21 | Real-extension `launchPersistentContext` E2E harness | improvement | quality assurance | 4 | 5 | 4 | 3 | 4 | 3 | **9** | 010 | new (iter 010 follow-up; originally iter 013) |
+| 22 | Explicit Invariant I1 cross-path assertion (`liveFinalizedDerivedSteps === batchDerivedSteps`) | improvement | invariants / testing | 3 | 4 | 3 | 5 | 1 | 1 | **13** | 011 | new (iter 011 follow-up) |
+| 23 | `SEGMENTATION_RULE_VERSION` doc drift (`docs/invariants.md` L172 says `'1.0.0'`; code says `'1.1.0'`) | fix | docs / invariants | 2 | 3 | 1 | 5 | 1 | 1 | **9** | 011 | new (iter 011 follow-up) |
+| 24 | `LiveStep` type tightening (`grouping?`, `boundaryReason?` → typed enum unions) | improvement | type safety | 2 | 3 | 2 | 5 | 1 | 1 | **10** | 011 | new (iter 011 follow-up) |
+| 25 | Full-pipeline golden fixture (raw `.ndjson` → normalizer → segmentation) | improvement | invariants / testing | 4 | 5 | 4 | 3 | 3 | 2 | **11** | 011 | new (iter 011 follow-up) |
 
 ### Completed (historical)
 
@@ -109,8 +113,8 @@ Score column format: `base ± adjustments = final` where adjustments are `+B` (r
 
 > **All Phase-1 release blockers closed as of iter 011.** The release-blocker bonus `+B3` no longer applies to any item in the table.
 > All areas clear; no `−S` penalties apply.
-> Items 18–25 are iter-010 and iter-011 follow-ups and are eligible for the follow-up burn-down rotation (1 of next 5 iterations must pick from the follow-up pool per `CLAUDE.md § Follow-Up Debt Policy`). Iter 012 is due for follow-up burn-down.
-> **Meta-Review 002 is due:** 3 loops since Meta-Review 001 (iter 009 + iter 010 + iter 011 = 3, per CLAUDE.md § Meta-Review Cadence, Mode 5 increment rule: N=2 from the directed sequence + 1 from iter 009). Next non-directed loop triggers it.
+> Items 7, 14, 15, 18–25 are open follow-ups (pool size = 11). MR-002 Change C: pool > 8 triggers the ceiling rule → iter 012 MUST be burn-down.
+> **Meta-Review 002 complete (2026-04-19).** Governance diffs A/B/C/D/E/F applied. Next base-cadence trigger: 3 loops (iter 014).
 
 ---
 

@@ -6,6 +6,39 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-19] - Meta-Review 002 (governance): density-trigger enforcement, birth-iter schema, pool-size ceiling, scope-expansion protocol
+
+### Added
+- `META_REVIEW_002.md` — **new**, 547-line meta-coordinator analysis artifact covering iter 009–011. Confirms MR-001 first-order control changes (formula rewrite, delegation rubric, Mode 5 formalization) are working. Priority finding: **density trigger silently violated 3 consecutive iterations** (iter 009 generated 8 follow-ups, iter 010 generated 4, iter 011 generated 4; policy requires `re-scope` or `root-cause-analyst` response; zero responses delivered). 10-iter follow-up closure ratio: 0/12 = 0.0, below 0.4 target. Recommends 6 governance diffs (A–F), 4 mandatory and 2 optional.
+- `IMPROVEMENT_BACKLOG.md` — **new** `Birth iter` column (MR-002 Change B) on Standard Backlog table; populated for all follow-up rows (#7 → 008, #14 → 007, #15 → 006, #18–21 → 010, #22–25 → 011); non-follow-up rows marked `—`.
+- `SYSTEM_HEALTH.md` — **new** scorecard row "Autonomous-vs-directed selection ratio" (MR-002 Change E). Last 10 iterations: 2 directed / 8 autonomous = 0.25 ratio (within 0.1–0.3 healthy band, trending up).
+
+### Changed
+- `CLAUDE.md § Follow-Up Debt Policy` — added **clause 4 density-trigger enforcement** (MR-002 Change A): when clause 3 fires, iteration log MUST include exactly one of `density-response: re-scoped to N loops` / `density-response: root-cause-analyst invoked` / `density-response: acknowledged, carried forward`; silent violations treated as failed iteration for meta-review scoring.
+- `CLAUDE.md § Follow-Up Debt Policy` — added **clause 5 birth-iter field** (MR-002 Change B): every follow-up row in `IMPROVEMENT_BACKLOG.md` MUST carry `Birth iter`; rows missing this field cannot be selected until backfilled.
+- `CLAUDE.md § Follow-Up Debt Policy` — added **clause 6 pool-size ceiling rule** (MR-002 Change C): if open follow-up pool > 8, next iteration MUST be burn-down regardless of the 1-in-5 floor. Ceiling rule currently active — pool is 11.
+- `CLAUDE.md § Operating Modes § Mode 5 guardrails` — added **guardrail 7 scope-expansion protocol** (MR-002 Change D): Mode 5 items may expand beyond literal wording ONLY if all of (a) evidence-based with specialist artifact; (b) one logical outcome; (c) same `Area`; (d) logged as `scope-expansion: approved` with rationale + evidence reference; (e) does not touch surfaces modified by immediately prior iteration.
+- `CLAUDE.md § Meta-Review Cadence` — trigger #2 tightened (MR-002 Change F): "0 release-blocker items selected in 5 loops" → "...AND at least 1 open blocker exists in SYSTEM_HEALTH.md" (prevents false triggers when zero blockers exist, as is currently the case).
+- `SYSTEM_HEALTH.md` — Exec summary, scorecard, Top Opportunities, Recommended Next Iteration, and Meta-Review Status blocks all updated to reflect MR-002 completion + ceiling-rule-forced iter 012 burn-down.
+
+### Impact
+- **Governance is now machine-enforceable, not convention-based.** The density trigger cannot be silently violated; the birth-iter field makes staleness-cap queries deterministic; the pool-size ceiling prevents follow-up debt compounding past an actionable threshold; the scope-expansion protocol prevents the iter-011 expansion pattern from being repeated without evidence.
+- **Iter 012 is now forced to be a burn-down loop** (pool = 11 > 8 ceiling). Recommended pair: #22 + #25 (both Area `invariants / testing`, test-only zero-risk). This starts the follow-up closure-ratio recovery curve.
+- **Next base-cadence meta-review at iter 014** (3 loops after MR-002). Post-meta-review stability window protects iter 012/013/014 from overlapping control changes.
+
+### Validation
+- No product code changes (Mode 4). Governance and artifact-only edits.
+- Lint / typecheck / tests not re-run — MR-002 did not touch source.
+- Diffs scoped to different policy clauses and different failure modes (per meta-coordinator recommendation) → no control-variable cluster-change risk for effectiveness measurement.
+
+### Governance follow-through
+- Iter 012 is pre-committed to burn-down; coordinator will pair #22 + #25 unless QA objects.
+- `density-response:` log-line compliance must be monitored on iter 012+.
+- 10-iter follow-up closure ratio will be re-measured at iter 021 and at each meta-review; target ≥ 0.4.
+- MR-002 control-change effectiveness assessed at MR-003 (iter 014 base cadence).
+
+---
+
 ## [2026-04-18] - Iteration 011: Segmentation engine convergence (last Phase-1 release blocker closed)
 
 ### Added
