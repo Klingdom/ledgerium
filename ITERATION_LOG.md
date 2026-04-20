@@ -4,6 +4,93 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 020
+
+- Date: 2026-04-20
+- Trigger: Path B Mode 5 item 3/5 — Metrics engine build per `PRD_DASHBOARD_V2.md` §7
+- Coordinator: coordinator
+- Phase: Phase 1
+- Mode: Mode 1 (bounded loop) + Mode 5 item 3/5 (`directed`)
+- Commit: `afb1250`
+
+### Candidate Selection
+
+- **Selection rule:** `directed` (Mode 5 item 3/5, Path B dashboard redesign sequence)
+- **Selected work:** Pure metrics engine build per PRD §7 — all interfaces and functions in a new `apps/web-app/src/lib/workflow-metrics.ts` module. NO UI changes; NO component work; NO E2E tests. Entry gate from iter 019 (typecheck + tests clean) satisfied.
+- **Score:** n/a (directed)
+- **Scope discipline:** one logical outcome — "ship the metrics engine module + its unit tests + minimal API route update." No scope expansion. Agent explicitly surfaced scope-expansion temptations resisted (did not add opportunity/health_score sort params; deferred to iter 021 or a follow-up).
+- **Saturation status:** web-app Area (expected and user-ack'd at iter 018). Counter: Path B iter 020/021/022 = 3 remaining web-app touches. Iter 019's `code hygiene` iteration (touching `packages/process-engine/`) interposed one extension-adjacent iteration between the PRD (018) and the three web-app build iterations.
+
+### Agents Used
+
+- `backend-engineer` (primary) — implemented the metrics module, fixtures, unit tests, route update, and integration tests; self-verified typecheck + full test suite before reporting
+
+### Files Read
+
+- `apps/web-app/src/lib/health-scores.ts` + `health-scores.test.ts` (understand v1 + test conventions)
+- `apps/web-app/src/app/api/workflows/route.ts` (existing response shape + gating logic + toolsUsed parsing)
+- `docs/prd/PRD_DASHBOARD_V2.md` §7 + §11 (contract)
+
+### Files Changed
+
+- **New:** `apps/web-app/src/lib/workflow-metrics.ts` (+305 LOC) — pure module; 21 named threshold constants; 8 exported functions + orchestrator
+- **New:** `apps/web-app/src/lib/workflow-metrics.test.ts` (+307 LOC, 62 tests) — 8 describe blocks, boundary-value coverage for variation thresholds, top-to-bottom rule evaluation for opportunity tagging, range integrity for health score
+- **New:** `apps/web-app/src/lib/__tests__/workflow-metrics.fixtures.ts` (+105 LOC) — 5 fixture archetypes from PRD §11
+- **New:** `apps/web-app/src/app/api/workflows/route.test.ts` (+146 LOC, 4 integration tests) — metricsV2 presence, portfolioHealthScore integer, free-tier isGated=true, starter+ isGated=false
+- **Modified:** `apps/web-app/src/app/api/workflows/route.ts` (+100 LOC net) — imports from new module, `toMetricsInput()` adapter (route-layer, keeps metrics module pure), per-workflow insight indexing, metricsV2 attached, portfolioHealthScore + insightChips added to stats; existing v1 healthScore preserved unchanged
+
+### Validation Run
+
+- `pnpm typecheck` — clean across all 10 workspace projects
+- `pnpm test` — **1718/1718 passing across 53 test files** (+66 tests vs iter 019; +2 test files)
+- PRD §11 fixture archetypes all covered: 5 archetypes × direct assertion per fixture
+- Opportunity-tag rule-priority test: fixture satisfying both rule 2 and rule 3 returns `standardize` (top-to-bottom first-match semantics verified)
+- Portfolio empty-array edge case: returns 0 ✓
+- Variation boundary values (0.33 / 0.34 / 0.66 / 0.67): correct label buckets ✓
+- v1 `computeHealthScore()` untouched; all pre-existing tests pass unchanged
+
+### Outcome
+
+- Status: complete
+- Summary: metrics engine landed as a pure module, fully typed, deterministic, with 62 unit tests + 4 route integration tests + full PRD §7 interface coverage. Route handler enriches each workflow with `metricsV2` and stats with `portfolioHealthScore` + `insightChips`. v1 gating preserved. Entry gate for iter 021 UI build satisfied.
+
+### Artifacts Updated
+
+- `ITERATION_LOG.md` (this entry)
+- `IMPROVEMENT_BACKLOG.md` (3 new follow-ups appended; portfolio summary updated)
+- `SYSTEM_HEALTH.md` (test coverage scorecard update; top opportunities advance to iter 021)
+- `CHANGELOG.md` (iter 020 entry prepended)
+
+### Impact
+
+- **Before state:** PRD_DASHBOARD_V2 §7 defined the metrics engine contract but no implementation existed. v1 `computeHealthScore()` uses a different dimension mapping (completeness/confidence/duration/complexity) than the CEO-specified v2 formula (efficiency/consistency/reliability/standardization at 0.30/0.30/0.20/0.20 weights).
+- **After state:** CEO's Health Score formula is now computed alongside v1 per D2 parallel-run directive; Opportunity tag (Automate/Standardize/Optimize/Monitor/None) computed via the deterministic top-to-bottom decision tree from §7.6; Bottleneck label sourced from ProcessInsight `bottleneck`/`delay` rows per D3 (no fabrication); portfolio-level Health Score + insight chips ready for iter 021 UI consumption.
+- **Measurable outcome:** test count 1652 → 1718 (+66); 21 named threshold constants surface every scoring decision in the metrics engine; v2 Health Score output integrity enforced by test (overall === sum of 4 sub-scores); file count +4.
+
+### Follow-Ups (3 generated)
+
+Per agent report:
+
+1. **Retire `computeHealthScore` v1 post-iter-022** — PRD D2 commitment to retire v1 after output distribution comparison. Backlog row added; target post-Path-B.
+2. **Extend `computeInsightChips` to accept `staleCount` parameter** — stale chip cannot be computed from `WorkflowMetricsOutput` alone (needs age-based signal). Route handler currently owns `staleCount`. Minor API refinement. Backlog row added.
+3. **Add `opportunity` + `health_score` sort params to `/api/workflows` route** — PRD §6 references these as required sort params; deferred by agent as route-layer addition beyond pure metrics engine scope. Candidate for iter 021 or standalone follow-up. Backlog row added.
+
+Density-response: 3 follow-ups generated — at the Follow-Up Debt Policy clause 3 density threshold (≥3). Per CLAUDE.md clause 4, coordinator must emit one of three `density-response:` log lines. Analysis:
+
+- Re-scope to N loops? No. The 3 follow-ups are all bounded to tiny post-Path-B refinements (v1 retirement, stale-chip param, 2 sort params). None are iter-020-scope issues; they are PRD-commitment artifacts (D2 parallel-run retirement + route-layer scope not belonging in the metrics module).
+- `root-cause-analyst` invoked? Not warranted. The follow-up density here is a known-and-expected consequence of the "parallel-run both v1 and v2" decision locked in D2 at iter 018 — the coordinator and PM accepted this tradeoff at that time with eyes open.
+- **`density-response: acknowledged, carried forward` — explicit conscious decision to defer. Rationale: all 3 follow-ups are PRD-commitment items (D2 v1 retirement) or genuine scope-boundary items (sort params, stale-chip param) that belong in post-Path-B iterations, not re-scoped into iter 020. No clause 4 silent violation.**
+
+### Governance / Selection Signals
+
+- **Mode 5 item 3/5 complete.** 2 Path B iterations remain (iter 021 UI build + iter 022 accessibility/polish + E2E).
+- **Mode 5 guardrail 7 scope-expansion protocol:** backend-engineer explicitly surfaced scope-expansion temptations resisted (sort params). No `scope-expansion: approved` entry required — all resisted.
+- **Area-saturation counter:** web-app entry (as expected and user-ack'd). Rolling 5-iter window now: 016 web-app · 017 billing · 018 governance · 019 code hygiene · 020 web-app = 2 web-app in last 5, not yet 3-in-a-row. Iter 021 = 3rd web-app in the 5-window (saturation rule trigger if iter 020/021/022 all web-app). User-ack from iter 018 stands; MR-005 at iter 023 will evaluate retrospectively per MR-004 Agenda 9.
+- **Agent-diversity counter:** backend-engineer primary at iter 017 + iter 019 + iter 020. Consecutive-use counter = 2 (iter 019 + iter 020). Same-implementer-4+ trigger = 2 iterations away (would fire if backend-engineer is primary at iter 021 AND iter 022). Iter 021 should be frontend-engineer per PRD §8 (component build). Counter will reset.
+- **Test coverage velocity:** +66 tests in a single iteration is the largest single-iteration test increase since iter 017 (+21). The metrics engine's pure-function shape naturally admits high test density — this is a positive signal for determinism and traceability.
+
+---
+
 ## Iteration 019
 
 - Date: 2026-04-20

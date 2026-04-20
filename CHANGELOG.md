@@ -6,6 +6,68 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-20] - Iteration 020: Workflow-metrics engine (Mode 5 item 3/5, `directed`, PRD_DASHBOARD_V2 §7)
+
+### Selection
+
+- **Selection rule:** `directed` (Mode 5 item 3/5, Path B dashboard redesign sequence).
+- **Selected work:** Pure metrics engine build per PRD_DASHBOARD_V2.md §7. Implements CEO Health Score formula (0.30 efficiency + 0.30 consistency + 0.20 reliability + 0.20 standardization) as `computeHealthScoreV2()`; deterministic Opportunity tagging decision tree (Automate/Standardize/Optimize/Monitor/None); per-workflow + aggregate + orchestrator functions.
+- **Rationale:** Path B gate for iter 021 UI build. Entry gate from iter 019 (typecheck + tests clean) satisfied. Pure module decouples metrics computation from UI and API layers, enabling iter 021 frontend work without further backend changes.
+
+### What changed
+
+- **New file:** `apps/web-app/src/lib/workflow-metrics.ts` (+305 LOC) — 8 exported functions (`computeRuns`, `computeAvgTimeMs`, `computeVariation`, `computeBottleneckLabel`, `computeHealthScoreV2`, `computeOpportunityTag`, `computePortfolioHealthScore`, `computeInsightChips`) + `computeWorkflowMetrics` orchestrator. 21 named threshold constants (`EFFICIENCY_IDEAL_DURATION_MIN_MS`, `AUTOMATE_AI_OPPORTUNITY_THRESHOLD`, `VARIATION_HIGH_THRESHOLD`, `TREND_READY_MIN_RUNS`, etc.). Pure module — no I/O, no DB, no route imports. Deterministic — no `Date.now()`, no `Math.random()`. `aiOpportunityScore` computed internally from input fields to keep engine self-contained.
+- **New file:** `apps/web-app/src/lib/workflow-metrics.test.ts` (+307 LOC, 62 unit tests) — describe block per exported function; boundary-value coverage on variation thresholds (0.33 / 0.34 / 0.66 / 0.67); rule-priority invariants on `computeOpportunityTag` (first-match top-to-bottom semantics verified); range integrity on `computeHealthScoreV2` (`overall === efficiency + consistency + reliability + standardization`); empty-array edge on `computePortfolioHealthScore`.
+- **New file:** `apps/web-app/src/lib/__tests__/workflow-metrics.fixtures.ts` (+105 LOC) — 5 PRD §11 archetype fixtures (fully populated / null processDefinition / sparse / automate-trigger / monitor-trigger).
+- **New file:** `apps/web-app/src/app/api/workflows/route.test.ts` (+146 LOC, 4 integration tests) — metricsV2 presence on each workflow / portfolioHealthScore is integer / free-tier `isGated === true` / starter+ `isGated === false`.
+- **Modified:** `apps/web-app/src/app/api/workflows/route.ts` (+100 LOC net) — imports from new module; `toMetricsInput()` adapter (route-layer — keeps metrics module pure from Prisma shapes); `insightsByWorkflowId` index for O(1) per-workflow insight lookup; `metricsV2: WorkflowMetricsOutput` attached per workflow; `portfolioHealthScore: number` + `insightChips: InsightChip[]` added to top-level `stats`. v1 `healthScore` object and all existing fields preserved unchanged.
+
+### Validation
+
+- `pnpm typecheck` — clean across all 10 workspace projects.
+- `pnpm test` — **1718/1718 passing across 53 test files** (+66 tests vs iter 019's 1652/51). Duration 3.37s.
+- PRD §7 interface integrity: `HealthScoreV2.overall` is always in [0, 100] and equals `efficiency + consistency + reliability + standardization` across every fixture.
+- PRD §7.6 decision-tree priority verified by fixture that simultaneously satisfies rule 2 (Standardize) and rule 3 (Optimize) conditions — correctly returns `standardize` (first match wins).
+- v1 `computeHealthScore()` untouched; all pre-existing tests pass unchanged.
+- Plan gating: `metricsV2.healthScore.isGated` set at route layer (not in pure metrics module); free-tier integration test asserts the gate fires.
+
+### Impact
+
+- **Before:** PRD_DASHBOARD_V2 §7 defined the metrics engine contract but no implementation existed. v1 `computeHealthScore()` uses a different dimension mapping (completeness/confidence/duration/complexity) than the CEO-specified v2 formula.
+- **After:** CEO's Health Score formula computable alongside v1 per D2 parallel-run directive; Opportunity tag deterministically computed via explicit decision tree from §7.6; Bottleneck label sourced from ProcessInsight `bottleneck`/`delay` rows per D3 (no fabrication); portfolio-level Health Score + insight chips ready for iter 021 UI consumption.
+- **Measurable outcome:** test count 1652 → 1718 (+66); 21 named threshold constants surface every scoring decision; file count +4; `aiOpportunityScore` computation centralized (previously duplicated in route); API response gains `metricsV2` field per workflow + 2 new stats keys.
+- **Governance impact:** Path B now 3 of 5 iterations complete. Companion-burn-down obligation remains discharged at iter 019. Iter 021 entry gate satisfied.
+
+### Follow-Ups (3 generated)
+
+Density-response: **`acknowledged, carried forward`** per CLAUDE.md § Follow-Up Debt Policy clause 4. All 3 items are PRD-commitment or genuine scope-boundary artifacts — not re-scope candidates for iter 020.
+
+1. **#42** — Retire `computeHealthScore()` v1 after output distribution comparison (PRD D2 commitment; post-Path-B target).
+2. **#43** — Extend `computeInsightChips()` signature to accept `staleCount` parameter so the stale chip can be emitted (current behavior: stale chip omitted; route handler owns `staleCount`).
+3. **#44** — Add `sort=opportunity` and `sort=health_score` params to `/api/workflows` route (PRD §6; deferred by iter 020 as route-layer addition beyond pure metrics-engine scope; candidate for iter 021 or standalone follow-up).
+
+### Files changed
+
+- `apps/web-app/src/lib/workflow-metrics.ts` (new)
+- `apps/web-app/src/lib/workflow-metrics.test.ts` (new)
+- `apps/web-app/src/lib/__tests__/workflow-metrics.fixtures.ts` (new)
+- `apps/web-app/src/app/api/workflows/route.test.ts` (new)
+- `apps/web-app/src/app/api/workflows/route.ts` (modified)
+- `ITERATION_LOG.md` (iter 020 entry)
+- `IMPROVEMENT_BACKLOG.md` (3 follow-ups added; pool 22 → 25; portfolio summary update; completed historical table +iter 020 row)
+- `SYSTEM_HEALTH.md` (header + exec summary + top risks + top opportunities + test coverage scorecard)
+- `CHANGELOG.md` (this entry)
+
+### Commit
+
+- `afb1250` — `feat(web-app): iter 020 — workflow-metrics engine (Mode 5 item 3/5, PRD_DASHBOARD_V2 §7)`
+
+### Next step
+
+- **Iter 021 — UI build** per `PRD_DASHBOARD_V2.md` §5 + §8 + §9 (Mode 5 item 4/5). 18 components under `apps/web-app/src/components/dashboard-v2/`; `/dashboard?v2=1` flag-gated route per D1; all 5 UI states reachable; Starter+ gating on health-score breakdown tooltip per D8. Primary agent: frontend-engineer. Entry gate: iter 020 validation green ✅.
+
+---
+
 ## [2026-04-20] - Iteration 019: Confidence-thresholds extraction (Mode 1 `burn-down` #15 + Mode 5 item 2/5 companion-burn-down)
 
 ### Selection
