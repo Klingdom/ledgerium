@@ -6,6 +6,88 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-19] - Iteration 013: Full-pipeline golden fixture (raw `.ndjson` → normalizer → segmentation) — forced burn-down by MR-002 Change C ceiling rule, second consecutive
+
+### Added
+- `packages/normalization-engine/src/full-pipeline.regression.test.ts` — **new**, 12-test regression file (~175 LOC) asserting byte-identity (`JSON.stringify` equality) at three layers for each of 3 full-pipeline golden fixtures:
+  1. raw `.ndjson` event stream → `normalizeEvent()` → byte-identical normalized event stream
+  2. normalized stream → `StreamingSegmenter` → byte-identical `LiveStep[]`
+  3. normalized stream → `segmentEvents()` → byte-identical `DerivedStep[]`
+  Plus determinism rerun (same raw input → same output twice). Test-layer workaround for non-deterministic `event_id` values is documented in top-of-file JSDoc (replaces `event_id` with `normalization_meta.sourceEventId` prior to assertion; no production change).
+- `packages/normalization-engine/fixtures/golden/raw/{click-with-label,fill-and-submit,route-change}.ndjson` — 3 raw event stream fixtures covering distinct normalizer paths (click + target_label; focus + input_changed dedup + form_submit grouping; spa_route_changed + click coexistence).
+- `packages/normalization-engine/fixtures/golden/normalized/*.json` — 3 expected normalized-event fixtures.
+- `packages/normalization-engine/fixtures/golden/pipeline-segmentation/*.json` — 3 expected LiveStep + DerivedStep outputs.
+- `packages/normalization-engine/scripts/regenerate-pipeline-fixtures.ts` — regeneration script (~80 LOC) documenting how to re-derive the expected-output files if normalization rules legitimately change.
+
+### Changed
+- `IMPROVEMENT_BACKLOG.md` — row #25 closed (strike-through, marked done iter 013); rows #29 and #30 added for iter-013 follow-ups (Birth iter 013); portfolio summary updated: total candidates 34 → 36, pool 13 → 14, closure ratio 0.077 → 0.143.
+- `SYSTEM_HEALTH.md` — test-coverage scorecard row updated (1605 → 1617 tests, 46 → 47 files); autonomous-vs-directed ratio row updated (mixed → healthy); recommended-next-iteration block rewritten for iter 014 with saturation watch (2-in-a-row invariants/testing).
+
+**Zero production code touched.** No `src/` files modified in any workspace package or app. All changes are additive fixture + test + script files in a new directory (`packages/normalization-engine/fixtures/` and `packages/normalization-engine/scripts/`).
+
+### Impact
+- **End-to-end normalizer determinism now under regression gate.** Previously, the iter-011 segmentation harness and iter-012 I1a test asserted determinism from *already-normalized* `SegmentableEvent[]` onward — normalizer rule changes that subtly altered event shape, dedup, labelling, or URL normalization would go undetected by the determinism harness. Any such change now fails the 12 full-pipeline byte-identity assertions.
+- **Fixture regeneration is reproducible, not hand-maintained.** The regeneration script means future normalizer changes have an explicit authorized path for updating expected outputs; reviewers can diff raw inputs against regenerated expected outputs rather than inferring intent from hand-edited JSON.
+- **Follow-up closure ratio moves from 1/13 = 0.077 to 2/14 = 0.143** for the 10-iter window iter 004–013. Recovery trajectory continues (0.0 → 0.077 → 0.143 across iter 011 → 012 → 013). Still below the 0.4 testable-metric target; iter 014 burn-down (also forced by MR-002 Change C ceiling — pool grew to 14 after iter 013 closed #25 and opened #29, #30, plus Mode-3 #27, #28) will continue the curve.
+- Test-suite totals: **46 → 47 files**, **1605 → 1617 tests** (+12 exact delta; zero existing test perturbed).
+
+### Validation
+- `pnpm --filter @ledgerium/normalization-engine test` via root (workspace `--filter` issue surfaced as follow-up #29): 12/12 pass.
+- `pnpm test` (root): 1617/1617 pass, 47 files. Baseline 1605/46 — delta exactly +12/+1.
+- `pnpm typecheck`: clean across all 10 workspace packages + 2 apps.
+- Git diff scope: only expected new files under `packages/normalization-engine/{fixtures,scripts,src/full-pipeline.regression.test.ts}`. Zero production source modifications. Existing iter-011 convergence tests (24 live + 24 batch) and iter-012 I1a tests (12) all green and unchanged.
+
+### Governance
+- **Selection rule**: `burn-down` — forced by **MR-002 Change C pool-size ceiling rule** (pool = 13 > 8). Second consecutive iteration under the ceiling rule. Among the 5 items tied at score 11 (#25, #18, #19, #7, #14), chose #25 on CLAUDE.md § Selection Policy tie-breaker 3 ("prefer items that improve determinism, traceability, recovery, and validation") — #25 has the highest impact (4) and alignment (5) and directly advances the deterministic-core invariant gate.
+- **Density trigger**: 2 follow-ups generated (#29, #30). Below the ≥3 threshold → no `density-response:` log line required.
+- **Scope discipline**: no Mode 5 scope-expansion invocation; Mode 1 does not permit it. Zero production logic modified. Pattern B (separate `packages/normalization-engine/fixtures/golden/` directory) kept the new fixture set fully isolated from iter-011's segmentation-engine fixtures — no coupling risk. The non-determinism wrinkle in `event_id` was handled test-side (`normalization_meta.sourceEventId` substitution), not by modifying `generateEventId()`.
+- **Agent diversity** (5-loop window iter 009–013): qa+devops / backend+qa / architect+backend+qa / qa / backend → 4 distinct primaries, no monoculture risk. Backend primary in iter 013 rotated cleanly off iter 012's qa-primary.
+- **Autonomous-vs-directed ratio** (10-iter window iter 004–013): 2 directed (iter 010, 011 Mode 5) / 8 autonomous = 0.2. Within the 0.1–0.3 healthy band. Iter 012 + 013 returned to autonomous top-score as predicted post-MR-002.
+- **Saturation watch (active)**: iter 012 + 013 both in `invariants / testing`. A third consecutive iteration in the same area (iter 014) would trip the 3-in-a-row saturation rule. **Recommend iter 014 diversify proactively.**
+- **Meta-review cadence**: MR-002 completed before iter 012. Iter 012 + 013 = 2 of 3 loops toward base-cadence MR-003 trigger at iter 015. Stability window protects iter 012/013/014 from overlapping control changes.
+
+### Follow-ups
+- **#29** `pnpm --filter <pkg> test` doesn't resolve test files because the root vitest config glob is relative to repo root, not the package directory under `--filter`. Add per-package `vitest.config.ts` stubs or workspace-aware vitest config. Score 9. Area: DX / tooling. Birth iter 013.
+- **#30** Rapid-focus-blur normalizer dedup fixture (focus → immediate blur → no input). Currently `fill-and-submit` only exercises the `focus → input_changed` dedup path. Score 10. Area: invariants / testing. Birth iter 013. ⚠ Would trigger saturation rule if selected for iter 014.
+
+### Risks / open questions
+- `event_id` non-determinism substitution is a test-layer workaround, NOT a guarantee about production `event_id` uniqueness. If a downstream process ever depends on `event_id` byte-equality across runs (e.g., idempotent reingest), the test file's substitution pattern will mask that dependency. Current usage does not; revisit if that changes.
+- Full-pipeline fixture count is 3, not 12. This is intentional floor-not-ceiling coverage; #30 adds one more, and future normalizer touches can add fixtures opportunistically rather than requiring bulk port.
+
+---
+
+## [2026-04-19] - Mode 3 intervention: billing bug fix + admin-unlimited allowlist (DOES NOT count toward improvement-loop cadence)
+
+### Added
+- `apps/web-app/src/lib/admin-allowlist.ts` — new, 22 LOC. `isAdminUnlimited(email)` checks a code-level email allowlist (trimmed + lowercased). Defense-in-depth: Stripe webhooks that sync plan changes cannot downgrade allowlisted accounts because all feature-gating checks consult this list first. `philklingmbb@gmail.com` added.
+
+### Changed
+- `apps/web-app/src/lib/feature-gating.ts` — short-circuits added to `checkFeatureAccess`, `checkRecordingLimit`, and `buildFeatureFlags` for allowlisted emails: returns full enterprise-tier entitlements (all 19 features `true`, all limits `'unlimited'`).
+- `apps/web-app/src/app/api/billing/checkout/route.ts` — guard blocks Stripe subscription creation for allowlisted users (400 error with explanatory message) to prevent charging for a no-value subscription.
+- `apps/web-app/src/app/api/account/route.ts` — adds `createdAt` and `hasStripeCustomer` (boolean only; raw `stripeCustomerId` never exposed) to the user subobject.
+- `apps/web-app/src/app/(app)/account/page.tsx` — 347 → 506 LOC. Fixed data-shape unwrap (was treating nested `{data: {user, features, limits}}` as flat); fixed `handleUpgrade` to send `{ plan, interval }` JSON body (was empty body → Stripe defaulted to starter/monthly); added monthly/annual toggle; added `PlanCard` subcomponent rendering all 5 tiers with per-relationship actions (Current / Upgrade to X / Downgrade / Cancel Subscription / Contact Sales / Included in Enterprise pill). Reuses `PRICING_CONFIG` from `lib/config.ts` — zero copy drift with the public pricing page.
+
+### Impact
+- Four compounding bugs closed in the account/billing surface: (1) data-shape mismatch, (2) empty-body checkout, (3) missing plan selector UI, (4) no admin-unlimited mechanism. Signed-up users can now select between starter/team/growth/enterprise tiers and switch billing interval from the account page.
+- `philklingmbb@gmail.com` granted full enterprise-tier entitlements regardless of `user.plan` in DB. `GET /api/account` for that email returns `plan: 'enterprise'` with all limits `'unlimited'`.
+
+### Validation
+- `pnpm --filter @ledgerium/web-app typecheck`: clean.
+- `pnpm --filter @ledgerium/web-app test`: 79/79 pass.
+- `pnpm --filter @ledgerium/web-app build`: succeeded (67 static pages).
+- E2E: 6/8 pass; 2 failures are pre-existing test-seed mismatch (`account.spec.ts` asserts `plan='free'` but seeded user has `plan='growth'`) — flagged as follow-up #27, NOT caused by this change.
+
+### Governance
+- **Mode**: 3 (debugging / bug-fix) — does NOT count toward improvement-loop cadence per CLAUDE.md § Operating Modes.
+- **Parallel delegation**: backend-engineer (admin-allowlist + feature-gating + checkout guard + account route extension) and frontend-engineer (account page rewrite) executed in parallel with zero file-overlap.
+- **Defense-in-depth choice**: code-level allowlist chosen over DB write because Stripe webhooks that sync plan changes cannot downgrade allowlisted accounts — `user.plan` in DB can stay 'free' while entitlements resolve to enterprise.
+
+### Follow-ups (Birth iter: M3@012 — anchored to last completed iteration for staleness-cap purposes)
+- **#27** E2E seed/assertion mismatch in `apps/web-app/e2e/api/account.spec.ts`. Score 9. Area: quality assurance.
+- **#28** Downgrade UX edge case for non-free user without `stripeCustomerId` (should surface contact-support path instead of attempting Stripe portal redirect). Score 7. Area: UX resilience.
+
+---
+
 ## [2026-04-19] - Iteration 012: I1a LiveStep cross-path invariant regression test (forced burn-down by MR-002 Change C)
 
 ### Added

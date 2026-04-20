@@ -1,0 +1,5 @@
+{"raw_event_id":"rc-1","session_id":"test-pipeline-golden","t_ms":1000,"t_wall":"2026-01-01T00:00:01Z","event_type":"session_start","schema_version":"1.0.0"}
+{"raw_event_id":"rc-2","session_id":"test-pipeline-golden","t_ms":2000,"t_wall":"2026-01-01T00:00:02Z","event_type":"click","url":"https://app.example.com/home","page_title":"Home","target_selector":"#nav-reports","target_label":"Reports","schema_version":"1.0.0"}
+{"raw_event_id":"rc-3","session_id":"test-pipeline-golden","t_ms":2200,"t_wall":"2026-01-01T00:00:02Z","event_type":"spa_route_changed","url":"https://app.example.com/reports","page_title":"Reports","schema_version":"1.0.0"}
+{"raw_event_id":"rc-4","session_id":"test-pipeline-golden","t_ms":3000,"t_wall":"2026-01-01T00:00:03Z","event_type":"click","url":"https://app.example.com/reports","page_title":"Reports","target_selector":"#btn-export","target_label":"Export","schema_version":"1.0.0"}
+{"raw_event_id":"rc-5","session_id":"test-pipeline-golden","t_ms":6000,"t_wall":"2026-01-01T00:00:06Z","event_type":"session_stop","schema_version":"1.0.0"}

@@ -842,3 +842,103 @@ Three specialist agents ran in parallel:
 - Meta-review cadence: MR-002 was completed before iter 012. Stability window rule protects iter 012/013/014. Next base-cadence trigger: iter 015.
 - Pool size at iter 013 start: **11** — ceiling rule forces iter 013 burn-down as well.
 - Release signal (qa-engineer): **GO**. No follow-up blockers; I1b is a deliberate deferral, not a regression.
+
+---
+
+### Mode 3 intervention — billing bug fix (post-iter 012, pre-iter 013)
+
+**Date:** 2026-04-19
+**Mode:** 3 (debugging / bug-fix)
+**Status:** Complete (commit `09b2d80`, pushed to `origin/main`)
+**Does NOT count toward improvement-loop cadence.** Logged here for traceability only.
+
+**Summary:** user-reported symptom "plan types and billing broken in account section" traced to four compounding bugs:
+
+1. `/api/account` returns `{ data: { user, features, limits } }` but account page expected flat shape → `account.plan` was `undefined` → every signed-up user saw hardcoded "Upgrade to Starter" CTA.
+2. `handleUpgrade` sent empty-body POST to checkout → Stripe always defaulted to `starter/monthly`.
+3. No plan-selector UI existed in the account page (single hardcoded CTA).
+4. No admin-unlimited mechanism to survive Stripe webhook plan sync.
+
+**Fix strategy (parallel delegation, zero-file-overlap):**
+- backend-engineer: new `apps/web-app/src/lib/admin-allowlist.ts` + short-circuits in `feature-gating.ts` (checkFeatureAccess / checkRecordingLimit / buildFeatureFlags) + guard in `api/billing/checkout/route.ts` + `createdAt` + `hasStripeCustomer` added to `api/account/route.ts` response.
+- frontend-engineer: rewrote `(app)/account/page.tsx` (347 → 506 LOC) with data-shape unwrap, new `PlanCard` subcomponent consuming `PRICING_CONFIG`, monthly/annual toggle, per-relationship actions (Current / Upgrade / Downgrade / Contact Sales / Cancel / Included in Enterprise), fixed `handleUpgrade` to send `{ plan, interval }` JSON body.
+
+**Grant:** `philklingmbb@gmail.com` added to allowlist → full enterprise-tier entitlements (19 features true, all limits 'unlimited') regardless of `user.plan` in DB. Stripe checkout blocked for allowlisted emails to prevent no-value subscriptions.
+
+**Validation:** typecheck clean · 79/79 web-app unit tests pass · build succeeded (67 static pages) · 6/8 E2E pass (2 pre-existing seed mismatches, not caused by this change). Pushed and deployed to production.
+
+**Follow-ups queued (Mode 3 follow-ups, anchored to `M3@012` for staleness-cap purposes):**
+- **#27** E2E seed mismatch in `apps/web-app/e2e/api/account.spec.ts` (seed has `plan='growth'`, test asserts `plan='free'`) — score 9
+- **#28** Downgrade UX edge case for non-free user without `stripeCustomerId` — score 7
+
+---
+
+## Iteration 013 — Full-pipeline golden fixture (raw `.ndjson` → normalizer → segmentation)
+
+**Date:** 2026-04-19
+**Mode:** 1 (standard bounded loop, burn-down)
+**Status:** Complete
+
+### Candidate Selection
+- **Selected:** #25 — Full-pipeline golden fixture (raw `.ndjson` → normalizer → segmentation)
+- **Score:** 11 (I=4 A=5 L=4 C=3 E=3 R=2) — highest impact+alignment among the tied score-11 burn-down candidates
+- **Rule:** `burn-down` — forced by **MR-002 Change C pool-size ceiling rule** (open follow-up pool = 13 > 8, grew from 11 after the Mode-3 billing fix added #27, #28). Second consecutive iteration under the ceiling rule.
+- **Alternatives considered (from the follow-up pool, ordered by score):** #25 · #18 · #19 · #7 · #14 all tied at 11; #26 at 10. Chose #25 on CLAUDE.md § Selection Policy tie-breaker 3 ("prefer items that improve determinism, traceability, recovery, and validation") — #25 directly advances the deterministic core invariant gate; #18 is UX-facing only; #19 is recovery hygiene. Highest impact (4) and alignment (5) scores in the tied set. Test-only zero-risk.
+- **Area saturation check:** iter 012 was invariants/testing. Iter 013 in the same area = 2-in-a-row, not yet 3-in-a-row threshold. Permitted under saturation policy.
+- **Scope discipline (stated up-front):** NO production logic changes in normalization-engine / segmentation-engine / extension-app. NO rule-version bumps. NO touching iter-012 surfaces (`convergence-invariant-i1.test.ts`, `live-steps.ts` `toLiveStep` export). Mode 1 does NOT permit scope expansion; HALT-and-escalate if normalizer bug discovered.
+
+### Agents Involved
+- **Coordinator (in-session):** selection, independent validation, artifact updates.
+- **backend-engineer (primary):** fixture pattern selection (Pattern B: separate `packages/normalization-engine/fixtures/golden/` directory), 3 fixtures authored (click-with-label, fill-and-submit, route-change), 12 byte-identity regression tests, regeneration script for reproducibility. Chose backend-engineer over qa-engineer for agent-diversity rotation (qa-engineer was primary for iter 012; rotation maintains diversity).
+
+### Scope Expansion Decision
+**None.** No Mode 5 guardrail 7 invocation. Mode 1 does not permit scope expansion. Zero production logic modified. backend-engineer's Pattern B choice kept the new fixture set fully isolated in `packages/normalization-engine/` — zero coupling with iter-011's `packages/segmentation-engine/fixtures/golden/`.
+
+### Files Added
+- `packages/normalization-engine/src/full-pipeline.regression.test.ts` — new test file (12 tests, ~175 LOC). Loads `.ndjson` raw events, runs through `normalizeEvent()` → `StreamingSegmenter` → LiveStep[] + `segmentEvents()` → DerivedStep[], asserts byte-identity via `JSON.stringify` at each layer.
+- `packages/normalization-engine/fixtures/golden/raw/{click-with-label,fill-and-submit,route-change}.ndjson` — 3 raw event stream fixtures (each exercising distinct normalizer paths).
+- `packages/normalization-engine/fixtures/golden/normalized/{click-with-label,fill-and-submit,route-change}.json` — 3 expected-normalized-event fixtures.
+- `packages/normalization-engine/fixtures/golden/pipeline-segmentation/{click-with-label,fill-and-submit,route-change}.json` — 3 expected LiveStep+DerivedStep output fixtures.
+- `packages/normalization-engine/scripts/regenerate-pipeline-fixtures.ts` — regeneration script (~80 LOC) documenting how to re-derive the expected-output files from raw inputs if normalization rules legitimately change.
+
+### Files Changed
+**Zero.** No production code modified. No existing test file modified. No existing fixture modified.
+
+### Design Note
+A non-determinism wrinkle was surfaced and handled test-side only (no production change): `normalizeEvent()` produces non-deterministic `event_id` values via `generateEventId()`. The test resolves this by replacing each event's `event_id` with `normalization_meta.sourceEventId` prior to byte-identity assertion. Documented in a top-of-file JSDoc block in the new test file. This is a known-acceptable test-layer workaround and is NOT a normalizer bug — `event_id` uniqueness is a production requirement that would be broken by making it deterministic.
+
+### Validation Results (independently re-verified by coordinator)
+- `pnpm typecheck` (monorepo) → **clean across all 10 workspace projects + 2 apps** ✅
+- `pnpm test` (monorepo root) → **47 test files / 1617 tests passing** — baseline was 46/1605 pre-iter-013; delta exactly +1 file / +12 tests = new file, zero regressions ✅
+- `packages/normalization-engine/src/full-pipeline.regression.test.ts` → **12/12 pass** ✅
+- `packages/segmentation-engine/src/convergence-live.regression.test.ts` (iter 011) → **24/24** unchanged ✅
+- `packages/segmentation-engine/src/convergence-batch.regression.test.ts` (iter 011) → **24/24** unchanged ✅
+- `apps/extension-app/src/background/convergence-invariant-i1.test.ts` (iter 012) → **12/12** unchanged ✅
+- `git status` verification → only expected new files in `packages/normalization-engine/{fixtures,scripts,src/full-pipeline.regression.test.ts}`; zero modifications to tracked production source
+
+### Outcome
+- **Status:** **complete**. Normalizer-layer regression gap closed; the I1a (iter 012) + full-pipeline (iter 013) test surface now covers both segmentation-only and end-to-end determinism failure modes.
+- Summary: raw `.ndjson` event streams now flow through the full normalizer + segmentation pipeline with byte-identity assertions at each layer. Future normalizer rule changes that subtly alter normalized events will fail the regression harness loudly rather than silently mutating downstream segmentation output.
+
+### Impact
+- **Before iter 013:** segmentation determinism was guaranteed from already-normalized `SegmentableEvent[]` onward (iter 011, iter 012), but normalizer regressions that changed the normalized events themselves would go undetected by the regression harness.
+- **After iter 013:** end-to-end determinism coverage. Any normalizer rule change that affects event shape, dedup, labelling, or URL normalization will fail the 12 full-pipeline byte-identity assertions.
+- **Vitest totals:** 1605 → **1617** (+12) across 46 → **47** test files (+1).
+- **Production LOC touched:** **0**. Fixture+test LOC added: ~235.
+- **Follow-up closure ratio (10-iter window iter 004–013):** 2 / 14 = **0.143** — rising from iter 012's 0.077. Still below the 0.4 target; recovery trajectory continues.
+- **Pool size trajectory:** 11 (iter 012 start) → 13 (after Mode-3 #27 + #28) → 14 (after iter 013: closed #25, opened #29 + #30). Still above 8 ceiling — iter 014 is a third consecutive forced burn-down.
+
+### Follow-Ups Generated (Birth iter: 013)
+- **#29** `pnpm --filter <pkg> test` doesn't resolve test files because the root vitest config glob is relative to repo root, not to the package directory when `--filter` is used. Add per-package `vitest.config.ts` stubs (or workspace-aware vitest config) so package-scoped test commands work. Score 9. DX / tooling area.
+- **#30** Add rapid-focus-blur normalizer dedup fixture to the full-pipeline golden set (focus → immediate blur → no input). Currently `fill-and-submit` exercises only the `focus → input_changed` dedup path. Score 10. Invariants/testing area — complementary to #25.
+
+**Follow-up density check:** 2 generated. Below the ≥3 threshold. **`density-response:` log line not required** per CLAUDE.md § Follow-Up Debt Policy clause 4.
+
+### Governance / Selection Signals
+- Rule: `burn-down` (MR-002 Change C ceiling rule — pool 13 > 8 at iter 013 start). Second consecutive iteration under the ceiling rule; the ceiling is actively governing selection, which is the intended behavior.
+- Agent diversity (rolling 5-loop window iter 009–013): qa+devops (009) · backend+qa (010) · architect+backend+qa (011) · qa (012) · backend (013) → **4 distinct primaries** in the window (qa, backend, architect, devops). Backend primary in iter 013 rotated cleanly off iter 012's qa-primary. No monoculture risk.
+- Autonomous-vs-directed ratio (rolling 10 iter 004–013): 2 directed (010, 011) / 8 autonomous = 0.2. Within the healthy 0.1–0.3 band (MR-002 Change E). Iter 012 + 013 back to autonomous top-score selection as predicted.
+- Scope discipline preserved: zero production logic changes. iter-011 and iter-012 surfaces untouched except for the new fixtures that live entirely in a new directory. This preserves the independent-iteration guarantee in Mode 5 guardrail 1 and the spirit of Mode 5 guardrail 7(e).
+- Meta-review cadence: MR-002 ran before iter 012. Iter 012 + 013 = 2 of 3 loops toward base-cadence MR-003 trigger at iter 015. Stability window rule protects iter 012/013/014 from overlapping control changes.
+- **Saturation watch:** iter 012 + 013 both in `invariants / testing`. A third consecutive iteration in the same area (iter 014) would trip the 3-in-a-row rule. **Iter 014 should diversify OUT of invariants/testing** unless a hard blocker forces otherwise.
+- Release signal (backend-engineer self-report + coordinator independent re-verification): **GO**. Zero production changes → zero release risk. Pool size remains above ceiling → iter 014 stays forced burn-down.

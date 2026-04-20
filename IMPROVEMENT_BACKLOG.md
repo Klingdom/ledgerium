@@ -1,6 +1,6 @@
 # Ledgerium AI — Improvement Backlog
 
-Last updated: 2026-04-19 (post-iteration 012 — I1a LiveStep cross-path invariant regression test added; pool held at 11, ceiling rule still active for iter 013)  
+Last updated: 2026-04-19 (post-iteration 013 — full-pipeline golden fixture landed; #25 closed, #29 + #30 opened; pool 13 → 14, ceiling rule still active for iter 014)  
 Current phase: Phase 1  
 Backlog purpose: maintain a ranked, evidence-based portfolio of the highest-value fixes, improvements, and experiments for bounded improvement loops.
 
@@ -41,15 +41,15 @@ See `CLAUDE.md § Selection Policy` — any of these overrides top-score:
 
 ## Portfolio Summary
 
-- Total candidates reviewed: 32 (27 prior + 4 iter-011 follow-ups + 1 iter-012 follow-up)
-- Top priority area: **iter 013 burn-down** — open follow-up pool = 11 items (unchanged net: iter 012 closed #22 and spawned #26), still exceeds the MR-002 Change C ceiling of 8; iter 013 MUST select from the follow-up pool.
-- Open follow-up pool (Birth iter shown): #7 (008) · #14 (007) · #15 (006) · #18/19/20/21 (010) · #23/24/25 (011) · #26 (012) — **11 items open**
-- Highest-risk unresolved item: no release blockers remain; highest-risk open items are iter-010 follow-ups #18–21 and iter-011 follow-ups #23–25.
-- Last completed item: I1a LiveStep cross-path invariant regression test (iteration 012)
+- Total candidates reviewed: 36 (27 prior + 4 iter-011 follow-ups + 1 iter-012 follow-up + 2 Mode-3 follow-ups + 2 iter-013 follow-ups)
+- Top priority area: **iter 014 burn-down (ceiling still active)** — open follow-up pool = 14 items (iter 013 closed #25, spawned #29 + #30), exceeds the MR-002 Change C ceiling of 8; iter 014 MUST select from the follow-up pool.
+- Open follow-up pool (Birth iter shown): #7 (008) · #14 (007) · #15 (006) · #18/19/20/21 (010) · #23/24 (011) · #26 (012) · #27/28 (M3 post-012) · #29/30 (013) — **14 items open**
+- Highest-risk unresolved item: no release blockers remain; highest-risk open items are iter-010 follow-ups #18–21 and iter-011 follow-ups #23/24.
+- Last completed item: Full-pipeline golden fixture raw `.ndjson` → normalizer → segmentation (iteration 013)
 - Last meta-review: **Meta-Review 002 (2026-04-19)** — see `META_REVIEW_002.md`; prior: Meta-Review 001 (2026-04-17)
-- Next recommended action: iter 013 burn-down — top candidates (ranked): #25 (full-pipeline golden fixture, score 11) · #18 (persistenceTruncated UI, score 11) · #19 (GC stale session keys, score 11) · #26 (I1b DerivedStep byte-identity, score 10).
-- Release-blocker burn rate (last 5 loops iter 008–012): **3/3 closed** (Playwright E2E ✓ iter 009; session persistence ✓ iter 010; segmentation convergence ✓ iter 011) — **100% of release blockers cleared**; iter 012 (test-add) was not blocker-bearing.
-- Follow-up closure ratio (10-iter window iter 003–012): **1 / 13 = 0.077** — below the ≥0.4 testable metric but trending up. Pool-size ceiling rule remains active for iter 013.
+- Next recommended action: iter 014 burn-down — top candidates (ranked): #18 (persistenceTruncated UI, score 11) · #19 (GC stale session keys, score 11) · #7 (widen credit_card regex, score 11) · #14 (wire validateRenderedSOP, score 11) · #26 (I1b DerivedStep byte-identity, score 10). **Saturation watch:** iter 012 + 013 both landed in `invariants / testing` — iter 014 should diversify OUT of that area unless a hard blocker forces otherwise. Area saturation rule is 3-in-a-row, so 014 is not yet mandated out, but a third consecutive would trigger it for 015.
+- Release-blocker burn rate (last 5 loops iter 009–013): **3/3 closed** (Playwright E2E ✓ iter 009; session persistence ✓ iter 010; segmentation convergence ✓ iter 011) — **100% of release blockers cleared**; iter 012 + 013 (test-adds) were non-blocker burn-downs.
+- Follow-up closure ratio (10-iter window iter 004–013): **2 / 14 = 0.143** — below the ≥0.4 testable metric but recovery continues (0.0 → 0.077 → 0.143 across iter 011 → 012 → 013). Pool-size ceiling rule remains active for iter 014.
 
 ---
 
@@ -94,8 +94,12 @@ Schema note (MR-002 Change B): `Birth iter` column is MANDATORY for any row tagg
 | ~~22~~ | ~~I1 cross-path assertion (LiveStep-level, 12 golden fixtures)~~ | ~~improvement~~ | ~~invariants / testing~~ | ~~3~~ | ~~4~~ | ~~3~~ | ~~5~~ | ~~1~~ | ~~1~~ | ~~**13**~~ | ~~011~~ | **done (iter 012 — I1a; I1b deferred to #26)** |
 | 23 | `SEGMENTATION_RULE_VERSION` doc drift (`docs/invariants.md` L172 says `'1.0.0'`; code says `'1.1.0'`) | fix | docs / invariants | 2 | 3 | 1 | 5 | 1 | 1 | **9** | 011 | new (iter 011 follow-up) |
 | 24 | `LiveStep` type tightening (`grouping?`, `boundaryReason?` → typed enum unions) | improvement | type safety | 2 | 3 | 2 | 5 | 1 | 1 | **10** | 011 | new (iter 011 follow-up) |
-| 25 | Full-pipeline golden fixture (raw `.ndjson` → normalizer → segmentation) | improvement | invariants / testing | 4 | 5 | 4 | 3 | 3 | 2 | **11** | 011 | new (iter 011 follow-up) |
+| ~~25~~ | ~~Full-pipeline golden fixture (raw `.ndjson` → normalizer → segmentation)~~ | ~~improvement~~ | ~~invariants / testing~~ | ~~4~~ | ~~5~~ | ~~4~~ | ~~3~~ | ~~3~~ | ~~2~~ | ~~**11**~~ | ~~011~~ | **done (iter 013 — 3 fixtures covering click-with-label, fill-and-submit, route-change; zero production code changes)** |
 | 26 | I1b: DerivedStep-level byte-identity (add `LiveStepBuilder.getDerivedSteps()` accessor + strict test) | improvement | invariants / testing | 3 | 4 | 2 | 4 | 2 | 1 | **10** | 012 | new (iter 012 follow-up — deferral from I1a per §5.3 revision) |
+| 27 | Fix E2E seed/assertion mismatch in `apps/web-app/e2e/api/account.spec.ts` (test asserts `plan='free'` but seeded user has `plan='growth'`) | fix | quality assurance | 2 | 3 | 1 | 5 | 1 | 1 | **9** | M3@012 | new (Mode 3 follow-up — billing fix `09b2d80`) |
+| 28 | Downgrade UX edge case: non-free user without `stripeCustomerId` should surface contact-support path instead of attempting Stripe portal redirect | fix | UX resilience | 2 | 3 | 2 | 4 | 2 | 2 | **7** | M3@012 | new (Mode 3 follow-up — billing fix `09b2d80`) |
+| 29 | Fix `pnpm --filter <pkg> test` not resolving test files (root vitest config glob vs per-package resolution) — add per-package `vitest.config.ts` stubs or workspace-aware config | improvement | DX / tooling | 2 | 3 | 2 | 4 | 1 | 1 | **9** | 013 | new (iter 013 follow-up — found during fixture regeneration) |
+| 30 | Add rapid-focus-blur normalizer dedup fixture to full-pipeline golden set (focus → immediate blur → no input) — currently `fill-and-submit` only exercises the `focus → input_changed` dedup path | improvement | invariants / testing | 2 | 4 | 2 | 4 | 1 | 1 | **10** | 013 | new (iter 013 follow-up — complementary to #25 fixture set) |
 
 ### Completed (historical)
 
@@ -112,11 +116,13 @@ Schema note (MR-002 Change B): `Birth iter` column is MANDATORY for any row tagg
 | 010 | Persist full session event stream for SW restart recovery | 14 |
 | 011 | Converge LiveStepBuilder ↔ StreamingSegmenter (+ `buildDerivedSteps` + `segmentEvents` onto package primitive) | 11 |
 | 012 | I1a regression test — LiveStep-level cross-path equality across 12 golden fixtures | 13 |
+| 013 | Full-pipeline golden fixture (raw `.ndjson` → normalizer → segmentation) — 3 fixtures, 12 byte-identity tests, zero production code changes | 11 |
 
 > **All Phase-1 release blockers closed as of iter 011.** The release-blocker bonus `+B3` no longer applies to any item in the table.
 > All areas clear; no `−S` penalties apply.
-> Items 7, 14, 15, 18–21, 23–25, 26 are open follow-ups (pool size = 11 — unchanged from iter-012 start because #22 closed and #26 opened as the deliberate I1a→I1b tier deferral). MR-002 Change C: pool > 8 triggers the ceiling rule → **iter 013 MUST be burn-down** as well.
-> **Meta-Review 002 complete (2026-04-19).** Governance diffs A/B/C/D/E/F applied. Next base-cadence trigger: 3 loops (iter 015 — MR-002 ran before iter 012, then iter 012 counts as loop 1 of 3).
+> Items 7, 14, 15, 18–21, 23, 24, 26, 27, 28, 29, 30 are open follow-ups (pool size = 14 — #25 closed in iter 013, #29 + #30 opened). MR-002 Change C: pool > 8 triggers the ceiling rule → **iter 014 MUST be burn-down** as well. `Birth iter` for Mode-3 follow-ups uses the anchor `M3@012` — the last completed iteration at the time of creation — for deterministic staleness-cap enforcement.
+> **Saturation note:** iter 012 + 013 both in `invariants / testing`. Third consecutive in that area would trip the 3-in-a-row rule for iter 015. Iter 014 should diversify.
+> **Meta-Review 002 complete (2026-04-19).** Governance diffs A/B/C/D/E/F applied. Next base-cadence trigger: 3 loops (iter 015 — MR-002 ran before iter 012, then iter 012, 013 = 2 of 3 loops so far).
 
 ---
 
