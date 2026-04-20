@@ -1,6 +1,6 @@
 # Ledgerium AI — Improvement Backlog
 
-Last updated: 2026-04-19 (post-**Meta-Review 002** — governance diffs applied; follow-up schema now includes `Birth iter`)  
+Last updated: 2026-04-19 (post-iteration 012 — I1a LiveStep cross-path invariant regression test added; pool held at 11, ceiling rule still active for iter 013)  
 Current phase: Phase 1  
 Backlog purpose: maintain a ranked, evidence-based portfolio of the highest-value fixes, improvements, and experiments for bounded improvement loops.
 
@@ -41,15 +41,15 @@ See `CLAUDE.md § Selection Policy` — any of these overrides top-score:
 
 ## Portfolio Summary
 
-- Total candidates reviewed: 31 (27 prior + 4 iter-011 follow-ups)
-- Top priority area: **iter 012 burn-down** — open follow-up pool = 11 items, which exceeds the MR-002 Change C ceiling of 8; iter 012 MUST select from the follow-up pool regardless of top-score.
-- Open follow-up pool (Birth iter shown): #7 (008) · #14 (007) · #15 (006) · #18/19/20/21 (010) · #22/23/24/25 (011) — **11 items open**
-- Highest-risk unresolved item: no release blockers remain; highest-risk open items are iter-010 follow-ups #18–21 and iter-011 follow-ups #22–25
-- Last completed item: Converge LiveStepBuilder with StreamingSegmenter (iteration 011)
+- Total candidates reviewed: 32 (27 prior + 4 iter-011 follow-ups + 1 iter-012 follow-up)
+- Top priority area: **iter 013 burn-down** — open follow-up pool = 11 items (unchanged net: iter 012 closed #22 and spawned #26), still exceeds the MR-002 Change C ceiling of 8; iter 013 MUST select from the follow-up pool.
+- Open follow-up pool (Birth iter shown): #7 (008) · #14 (007) · #15 (006) · #18/19/20/21 (010) · #23/24/25 (011) · #26 (012) — **11 items open**
+- Highest-risk unresolved item: no release blockers remain; highest-risk open items are iter-010 follow-ups #18–21 and iter-011 follow-ups #23–25.
+- Last completed item: I1a LiveStep cross-path invariant regression test (iteration 012)
 - Last meta-review: **Meta-Review 002 (2026-04-19)** — see `META_REVIEW_002.md`; prior: Meta-Review 001 (2026-04-17)
-- Next recommended action: iter 012 — recommended pairing #22 (I1 cross-path assertion) + #25 (full-pipeline golden fixture), both in Area `invariants / testing`, both test-only zero-risk; scores 13 and 11 respectively.
-- Release-blocker burn rate (last 5 loops iter 007–011): **3/3 closed** (Playwright E2E ✓ iter 009; session persistence ✓ iter 010; segmentation convergence ✓ iter 011) — **100% of release blockers cleared**
-- Follow-up closure ratio (10-iter window): **0 / 12 = 0.0** — below the ≥0.4 testable metric. MR-002 ceiling rule (Change C) is the mitigation; iter 012 burn-down starts the recovery curve.
+- Next recommended action: iter 013 burn-down — top candidates (ranked): #25 (full-pipeline golden fixture, score 11) · #18 (persistenceTruncated UI, score 11) · #19 (GC stale session keys, score 11) · #26 (I1b DerivedStep byte-identity, score 10).
+- Release-blocker burn rate (last 5 loops iter 008–012): **3/3 closed** (Playwright E2E ✓ iter 009; session persistence ✓ iter 010; segmentation convergence ✓ iter 011) — **100% of release blockers cleared**; iter 012 (test-add) was not blocker-bearing.
+- Follow-up closure ratio (10-iter window iter 003–012): **1 / 13 = 0.077** — below the ≥0.4 testable metric but trending up. Pool-size ceiling rule remains active for iter 013.
 
 ---
 
@@ -91,10 +91,11 @@ Schema note (MR-002 Change B): `Birth iter` column is MANDATORY for any row tagg
 | 19 | Garbage-collect stale `ledgerium_active_session_events_*` keys on SW startup | fix | session durability | 2 | 4 | 2 | 5 | 1 | 1 | **11** | 010 | new (iter 010 follow-up) |
 | 20 | `loadFromStorage` sessionId/in-flight flag cross-validation | fix | session durability | 3 | 4 | 2 | 4 | 1 | 2 | **10** | 010 | new (iter 010 follow-up) |
 | 21 | Real-extension `launchPersistentContext` E2E harness | improvement | quality assurance | 4 | 5 | 4 | 3 | 4 | 3 | **9** | 010 | new (iter 010 follow-up; originally iter 013) |
-| 22 | Explicit Invariant I1 cross-path assertion (`liveFinalizedDerivedSteps === batchDerivedSteps`) | improvement | invariants / testing | 3 | 4 | 3 | 5 | 1 | 1 | **13** | 011 | new (iter 011 follow-up) |
+| ~~22~~ | ~~I1 cross-path assertion (LiveStep-level, 12 golden fixtures)~~ | ~~improvement~~ | ~~invariants / testing~~ | ~~3~~ | ~~4~~ | ~~3~~ | ~~5~~ | ~~1~~ | ~~1~~ | ~~**13**~~ | ~~011~~ | **done (iter 012 — I1a; I1b deferred to #26)** |
 | 23 | `SEGMENTATION_RULE_VERSION` doc drift (`docs/invariants.md` L172 says `'1.0.0'`; code says `'1.1.0'`) | fix | docs / invariants | 2 | 3 | 1 | 5 | 1 | 1 | **9** | 011 | new (iter 011 follow-up) |
 | 24 | `LiveStep` type tightening (`grouping?`, `boundaryReason?` → typed enum unions) | improvement | type safety | 2 | 3 | 2 | 5 | 1 | 1 | **10** | 011 | new (iter 011 follow-up) |
 | 25 | Full-pipeline golden fixture (raw `.ndjson` → normalizer → segmentation) | improvement | invariants / testing | 4 | 5 | 4 | 3 | 3 | 2 | **11** | 011 | new (iter 011 follow-up) |
+| 26 | I1b: DerivedStep-level byte-identity (add `LiveStepBuilder.getDerivedSteps()` accessor + strict test) | improvement | invariants / testing | 3 | 4 | 2 | 4 | 2 | 1 | **10** | 012 | new (iter 012 follow-up — deferral from I1a per §5.3 revision) |
 
 ### Completed (historical)
 
@@ -110,11 +111,12 @@ Schema note (MR-002 Change B): `Birth iter` column is MANDATORY for any row tagg
 | 009 | Add Playwright E2E tests for recording lifecycle + CI workflow | 15 |
 | 010 | Persist full session event stream for SW restart recovery | 14 |
 | 011 | Converge LiveStepBuilder ↔ StreamingSegmenter (+ `buildDerivedSteps` + `segmentEvents` onto package primitive) | 11 |
+| 012 | I1a regression test — LiveStep-level cross-path equality across 12 golden fixtures | 13 |
 
 > **All Phase-1 release blockers closed as of iter 011.** The release-blocker bonus `+B3` no longer applies to any item in the table.
 > All areas clear; no `−S` penalties apply.
-> Items 7, 14, 15, 18–25 are open follow-ups (pool size = 11). MR-002 Change C: pool > 8 triggers the ceiling rule → iter 012 MUST be burn-down.
-> **Meta-Review 002 complete (2026-04-19).** Governance diffs A/B/C/D/E/F applied. Next base-cadence trigger: 3 loops (iter 014).
+> Items 7, 14, 15, 18–21, 23–25, 26 are open follow-ups (pool size = 11 — unchanged from iter-012 start because #22 closed and #26 opened as the deliberate I1a→I1b tier deferral). MR-002 Change C: pool > 8 triggers the ceiling rule → **iter 013 MUST be burn-down** as well.
+> **Meta-Review 002 complete (2026-04-19).** Governance diffs A/B/C/D/E/F applied. Next base-cadence trigger: 3 loops (iter 015 — MR-002 ran before iter 012, then iter 012 counts as loop 1 of 3).
 
 ---
 

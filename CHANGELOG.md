@@ -6,6 +6,41 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-19] - Iteration 012: I1a LiveStep cross-path invariant regression test (forced burn-down by MR-002 Change C)
+
+### Added
+- `apps/extension-app/src/background/convergence-invariant-i1.test.ts` — **new**, 12-test regression file (~140 LOC) asserting `JSON.stringify(livePathLiveSteps) === JSON.stringify(batchPathLiveSteps)` for each of the 12 iter-011 golden fixtures. Top-of-file JSDoc cites the §5.3 authority revision and lists the survival-matrix of what I1a catches (boundary/grouping/title/confidence/status/timing/eventCount/page-label drift) and does not catch (the three lossy-projection fields: `source_event_ids` array content, `session_id`, `ordinal` — all trivially equal post-iter-011 and scheduled for I1b under follow-up #26).
+
+### Changed
+- `apps/extension-app/src/background/live-steps.ts` — `export` keyword added to the already-landed `toLiveStep` function. No logic change. JSDoc annotation added: "Exported for test use only (convergence-invariant-i1.test.ts). This is not a production API surface — do not import outside of tests." This is test-wiring, not a scope expansion.
+- `docs/architecture/CONVERGENCE_LIVESTEPBUILDER_STREAMING_SEGMENTER.md` — §5.3 revised by coordinator to split the original I1 formulation (`liveFinalizedDerivedSteps === batchDerivedSteps`) into **I1a** (LiveStep-level, testable today — this iteration's target) and **I1b** (DerivedStep-level byte-identity, deferred to its own iteration because it requires a production `getDerivedSteps()` accessor on `LiveStepBuilder`). Original wording retained for traceability; revision block marked with coordinator attribution and date.
+- `IMPROVEMENT_BACKLOG.md` — row #22 closed (strike-through, marked done iter 012); row #26 added for I1b follow-up (Birth iter 012, score 10); portfolio summary and footer note updated for new pool composition.
+
+### Impact
+- **I1a now has explicit regression coverage.** Any future segmentation-path refactor that drifts boundary detection, grouping classification, title derivation, confidence scoring, status, timing, `eventCount`, or page-label will immediately fail the 12 byte-identity assertions.
+- **I1b explicitly tracked, not silently dropped.** The deliberate tier split prevents the "we'll test it later" anti-pattern: the design-doc §5.3 revision states the invariant at two tiers, the test file documents what each tier covers, and #26 holds a ready-to-execute plan.
+- **Follow-up closure ratio moves from 0/12 = 0.0 to 1/13 = 0.077** for the 10-iter window iter 003–012. Still below the 0.4 testable-metric target; iter 013 burn-down (also forced by MR-002 Change C ceiling — pool stayed at 11) will continue the recovery curve.
+- Test-suite totals: **45 → 46 files**, **1593 → 1605 tests** (+12 exact delta; no existing test perturbed).
+
+### Validation
+- `pnpm --filter extension-app test -- convergence-invariant-i1`: 12/12 pass.
+- `pnpm --filter extension-app test`: 196/196 pass (10 files). Baseline 184/9 — delta exactly +12/+1.
+- `pnpm typecheck`: clean across all 10 workspace packages + 2 apps.
+- `pnpm test` (root): 1605/1605 pass, 46 files.
+- Git diff scope: only the three expected files modified. Iter-010 SW-restart smoke and iter-011 adapter tests both green.
+
+### Governance
+- **Selection rule**: `burn-down` — forced by **MR-002 Change C pool-size ceiling rule** (pool = 11 > 8). First iteration to use the ceiling rule since MR-002 enacted it.
+- **Density trigger**: 1 follow-up generated (#26). Below the ≥3 threshold → no `density-response:` log line required.
+- **Scope discipline**: no Mode 5 scope-expansion invocation. The qa-engineer correctly halted on the first attempt when the structural infeasibility of the original I1 was uncovered; the coordinator revised the design-doc §5.3 (artifact, not production) to split I1 into testable and deferred tiers; the `export` on `toLiveStep` is test-wiring, documented as such in the test file header.
+- **Agent diversity** (5-loop window iter 008–012): backend / qa+devops / backend+qa / architect+backend+qa / qa → 4 distinct primaries, no monoculture risk.
+- **Meta-review cadence**: MR-002 completed before iter 012 (see CHANGELOG entry below). Stability window protects iter 012/013/014. Next base-cadence MR-003 at iter 015.
+
+### Follow-ups
+- **#26** I1b: DerivedStep-level byte-identity across live and batch paths. Requires `LiveStepBuilder.getDerivedSteps(): DerivedStep[]` (one-line non-breaking accessor returning `this.segmenter.getFinalizedSteps()`) + ~60-LOC test file mirroring `convergence-batch.regression.test.ts`. Score 10 (I=3 A=4 L=2 C=4 E=2 R=1). Birth iter 012. **Deliberate tier deferral**, not an unhandled scope surface.
+
+---
+
 ## [2026-04-19] - Meta-Review 002 (governance): density-trigger enforcement, birth-iter schema, pool-size ceiling, scope-expansion protocol
 
 ### Added

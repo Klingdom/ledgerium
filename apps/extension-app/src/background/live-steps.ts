@@ -62,8 +62,11 @@ function toSegmentableEvent(e: CanonicalEvent): SegmentableEvent {
 /**
  * Maps a DerivedStep from the segmentation engine to the LiveStep shape
  * used by the extension sidebar. This is the adapter boundary.
+ *
+ * Exported for test use only (convergence-invariant-i1.test.ts). This is not
+ * a production API surface — do not import outside of tests.
  */
-function toLiveStep(step: DerivedStep): LiveStep {
+export function toLiveStep(step: DerivedStep): LiveStep {
   return {
     stepId: step.step_id,
     title: step.title,

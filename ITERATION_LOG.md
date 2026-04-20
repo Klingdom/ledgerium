@@ -786,3 +786,59 @@ Three specialist agents ran in parallel:
 - Mode 5 counter: increments by **2** (one per item). Loops since Meta-Review 001 = **3** (009 + 010 + 011) → **base-cadence meta-review due at iter 012**.
 - Scope discipline preserved: iter-010 persistence surface verifiably untouched (git log `--follow` confirms last-touched commit on `session-store.ts` and `constants.ts` is `d24699d`); `LiveStep` wire shape unchanged; `MSG.LIVE_STEP_UPDATED` contract unchanged; `SEGMENTATION_RULE_VERSION` not bumped.
 - Release signal (qa-engineer): **GO WITH FOLLOW-UPS**. Release blocker can close; four non-blocker follow-ups queued for iter 012+.
+
+---
+
+## Iteration 012 — I1a: LiveStep-level cross-path invariant regression test
+
+**Date:** 2026-04-19
+**Mode:** 1 (standard bounded loop, burn-down)
+**Status:** Complete
+
+### Candidate Selection
+- **Selected:** #22 — Explicit Invariant I1 cross-path assertion (as scoped to **I1a** per §5.3 coordinator revision of the convergence design doc)
+- **Score:** 13 (I=3 A=4 L=3 C=5 E=1 R=1)
+- **Rule:** `burn-down` — forced by **MR-002 Change C pool-size ceiling rule** (open follow-up pool = 11 > 8). This is a ceiling override of the 1-in-5 burn-down floor; the coordinator did not have top-score discretion.
+- **Alternatives considered (from the follow-up pool, ordered by score):** #22 (13) chosen over #18/#19/#25/#7/#14 (all 11) on top score within the burn-down set. #22 also has the lowest E/R (1/1) in the pool — fastest, safest way to start the closure-ratio recovery.
+- **Scope discipline:** single test file addition asserting JSON-stringify equality on `LiveStep[]` across 12 golden fixtures. One approved test-wiring production edit: `export` keyword added to the already-landed `toLiveStep` in `live-steps.ts` (no logic change; JSDoc annotates "test use only — not a production API surface"). This does NOT invoke Mode 5 scope-expansion protocol — Mode 1 doesn't have that protocol and the edit is test-wiring, not new logic. Documented in the test file header and in the git diff.
+
+### Agents Involved
+- **Coordinator (in-session):** routed, authored the §5.3 revision after qa's structural halt, and applied artifact updates.
+- **qa-engineer (primary, 2 runs):**
+  - Run 1 (HALT): correctly escalated that the originally stated I1 (`liveFinalizedDerivedSteps === batchDerivedSteps`) was untestable through the current `LiveStepBuilder` public API because the `DerivedStep → LiveStep` projection is provably lossy (`source_event_ids: string[]` collapses to `eventCount: number`; `session_id` and `ordinal` dropped). Produced a survival-matrix artifact classifying each field. Refused to silently weaken the assertion.
+  - Run 2 (COMPLETE): implemented I1a per revised brief; 12 tests green; all validation gates passed.
+
+### Scope Expansion Decision
+**None.** No Mode 5 guardrail 7 invocation. The coordinator's §5.3 revision in the design doc is an artifact edit, not a scope expansion. The `export` keyword on `toLiveStep` is test-wiring, explicitly permitted by the brief as "exposing an already-landed function to a neighbouring test file; no new production logic."
+
+### Files Added
+- `apps/extension-app/src/background/convergence-invariant-i1.test.ts` — new test file (~140 LOC). Loads each of 12 golden fixtures from `packages/segmentation-engine/fixtures/golden/`, runs events through both paths, asserts `JSON.stringify(livePathLiveSteps) === JSON.stringify(batchPathLiveSteps)`. Top-of-file JSDoc block cites §5.3 revision as authority and lists survival-matrix-driven caught / not-caught failure modes.
+
+### Files Changed
+- `apps/extension-app/src/background/live-steps.ts` — `export` added to `toLiveStep` (2-line diff: one export keyword, one JSDoc line noting "test use only"). No logic change.
+- `docs/architecture/CONVERGENCE_LIVESTEPBUILDER_STREAMING_SEGMENTER.md` — §5.3 revised by coordinator to split I1 into I1a (testable today) and I1b (deferred, requires `getDerivedSteps()` accessor). Keeps original wording cited for traceability; inserts an indented "§5.3 revision" block as the operative definition.
+
+### Validation Results
+- `pnpm --filter extension-app test -- convergence-invariant-i1`: **12/12 pass** (new file only).
+- `pnpm --filter extension-app test`: **196/196 pass, 10 test files** — baseline was 184/9; delta exactly +12/+1 = new file, nothing broken.
+- `pnpm typecheck`: clean across all 10 workspace packages + 2 apps.
+- `pnpm test` (root, full workspace): **1605/1605 pass, 46 test files** — baseline 1593/45; delta +12/+1 exactly.
+- Git diff scope verified: only the three expected files modified; `.claude/settings.local.json` drift is unrelated local settings.
+
+### Outcome
+- **I1a now has explicit regression coverage.** Future refactors of either segmentation path will immediately fail the 12 byte-identity assertions if they drift the LiveStep projection.
+- **I1b is explicitly deferred** with a planned path (#26, Birth iter 012) requiring a one-line non-breaking production accessor addition. No silent coverage gap — the test file documents exactly what I1a does and does not catch.
+- **Follow-up closure ratio (10-iter window iter 003–012):** 1 / 13 = 0.077. Still below the 0.4 target but trending up from 0.0 pre-iter-012. Pool-size ceiling rule remains active for iter 013 (pool = 11 unchanged net; #22 closed, #26 opened).
+
+### Follow-ups Generated
+- **#26** I1b: DerivedStep-level byte-identity across live and batch paths. Requires `LiveStepBuilder.getDerivedSteps(): DerivedStep[]` accessor (1-line non-breaking addition returning `this.segmenter.getFinalizedSteps()`) + ~60-LOC test file mirroring `convergence-batch.regression.test.ts`. Score 10 (I=3 A=4 L=2 C=4 E=2 R=1). Birth iter 012. This is a **deliberate tier deferral**, not an unhandled scope surface.
+
+**Follow-up density check:** 1 generated. Below the ≥3 threshold. **`density-response:` log line not required** per CLAUDE.md § Follow-Up Debt Policy clause 4.
+
+### Governance / Selection Signals
+- Rule: `burn-down` (MR-002 Change C ceiling rule forced it, not 1-in-5 floor). First iteration to use the ceiling rule since it was enacted.
+- Agent diversity (rolling 5-loop window iter 008–012): backend (008) · qa+devops (009) · backend+qa (010) · architect+backend+qa (011) · qa (012) → **4 distinct primaries** in the window. Monoculture risk: none.
+- Scope discipline preserved: iter-011 surfaces (`packages/segmentation-engine/*`, `bundle-builder.ts`, `live-steps.ts` logic) were NOT modified. Only the `export` keyword landed on `live-steps.ts`. This preserves the independent-iteration guarantee in Mode 5 guardrail 1 and the spirit of Mode 5 guardrail 7(e) even though Mode 1 doesn't formally require it.
+- Meta-review cadence: MR-002 was completed before iter 012. Stability window rule protects iter 012/013/014. Next base-cadence trigger: iter 015.
+- Pool size at iter 013 start: **11** — ceiling rule forces iter 013 burn-down as well.
+- Release signal (qa-engineer): **GO**. No follow-up blockers; I1b is a deliberate deferral, not a regression.

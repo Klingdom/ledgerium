@@ -1,6 +1,6 @@
 # Ledgerium AI — System Health
 
-Last updated: 2026-04-19 (post-**Meta-Review 002** — governance diffs applied; follow-up schema hardened; iter 012 forced to burn-down via MR-002 Change C)
+Last updated: 2026-04-19 (post-iteration 012 — I1a regression test landed; closure ratio 0.0 → 0.077; pool unchanged at 11; iter 013 also forced to burn-down)
 
 ## Executive Summary
 
@@ -28,7 +28,7 @@ Overall confidence: **High, with governance tightening in progress** (3 of 3 rel
 | Deterministic core protection | moderate | 4 | good principles, but more regression protection is still needed |
 | Package / code consistency | strong | 5 | **all 4 segmentation implementations converged onto `@ledgerium/segmentation-engine` in iter 011**; extension imports segmentation exclusively from package; ADR-001 Phase 1 complete for segmentation; extension now imports from 4+ workspace packages across background and content layers |
 | Session durability / recovery | strong | 4 | full event persistence landed in iter 010 — all four arrays (raw, canonical, policyLog, liveSteps) debounced to `chrome.storage.local` per-session; quota-overflow append-stop; schema-version guard; `onSuspend` flush |
-| Test coverage | strong | 4.5 | **1,593 Vitest tests across 45 files** (+79 net in iter 011: 24 convergence-live + 24 convergence-batch + 14 adapter + 17 across segmentation/bundle test updates) + **4 Playwright E2E tests** (3 iter 009 lifecycle + 1 iter 010 restart-recovery smoke). 12 golden fixtures × 2 contracts × byte-identity assertions form the segmentation regression gate. |
+| Test coverage | strong | 4.5 | **1,605 Vitest tests across 46 files** (+12 in iter 012: new `convergence-invariant-i1.test.ts` — I1a LiveStep-level cross-path byte-identity on 12 golden fixtures) + **4 Playwright E2E tests** (3 iter 009 lifecycle + 1 iter 010 restart-recovery smoke). 12 golden fixtures × 3 contracts (LiveStep byte-identity + DerivedStep byte-identity + I1a cross-path) form the segmentation regression gate. I1b (strict DerivedStep cross-path) deferred as follow-up #26. |
 | Observability | strong | 4 | analytics fully instrumented, 8 alert conditions, admin dashboard with engagement/retention/alerts |
 | Agentic CI readiness | strong | 4.5 | command, backlog, iteration log, templates, Meta-Review 001 + 002 diffs applied; iter 009 + 010 + 011 all used multi-agent loops; Mode 5 directed sequence executed cleanly across iter 010 + 011 (two independent iterations, own commits, own validations, zero scope violations); iter 011 first iteration since init to use `system-architect` as primary agent; MR-002 mechanized density-trigger + birth-iter schema + pool-size ceiling + scope-expansion protocol |
 | GTM readiness | emerging | 2.5 | product wedge promising; analytics infrastructure ready for data-driven decisions |
@@ -83,12 +83,12 @@ Overall confidence: **High, with governance tightening in progress** (3 of 3 rel
 
 ## Current Top Opportunities
 
-1. **Iter 012 burn-down (FORCED by MR-002 Change C)** — open follow-up pool is 11 items (> 8 ceiling). Recommended pairing: #22 (I1 cross-path assertion, score 13) + #25 (full-pipeline golden fixture, score 11), both in Area `invariants / testing`, both test-only zero-risk.
+1. **Iter 013 burn-down (STILL FORCED by MR-002 Change C)** — pool remained at 11 after iter 012 (closed #22, opened #26 as tier deferral). Top candidates: **#25** (full-pipeline golden fixture, score 11) · **#18** (persistenceTruncated UI, score 11) · **#19** (GC stale session keys, score 11) · **#26** (I1b DerivedStep byte-identity, score 10). Recommend #25 first — stays in the same invariants/testing Area as iter 012 but catches a complementary failure mode (normalizer regressions vs segmentation-only) and is test-only zero-risk.
 2. Real-extension `launchPersistentContext` E2E (#21) — closes the fidelity gap between Vitest integration and full OS-level SW restart
 3. Structured session-aware error logging — the last item from the original Phase-1 priority list not yet addressed
 4. Extension content layer unit-test coverage (capture.ts, state-observer.ts, label-extractor.ts)
 5. Move to Phase 2 planning — no release blockers remain; PRD refresh or GTM readiness work unblocked
-6. Monitor MR-002 control-change efficacy (autonomous-vs-directed ratio row in scorecard; 10-iter closure-ratio metric; density-response log-line compliance)
+6. Monitor MR-002 control-change efficacy (autonomous-vs-directed ratio row in scorecard; 10-iter closure-ratio metric now at 0.077, recovery curve starting; density-response log-line compliance)
 
 ---
 
@@ -117,42 +117,43 @@ Overall confidence: **High, with governance tightening in progress** (3 of 3 rel
 
 ## Recommended Next Iteration
 
-**Iter 012: forced follow-up burn-down (MR-002 Change C ceiling rule — pool size 11 > 8).**
+**Iter 013: forced follow-up burn-down (MR-002 Change C ceiling rule — pool size still 11 > 8 after iter 012).**
 
 ### Mandatory sequencing
 
-1. Meta-Review 002 is **complete** (2026-04-19, see `META_REVIEW_002.md`). Governance diffs A/B/C/D/E/F applied.
-2. **Iter 012**: burn-down is now mandatory via the ceiling rule (not optional via 1-in-5 floor). The open follow-up pool is 11 items and exceeds the ceiling of 8.
-3. **Recommended pairing for iter 012**: #22 (I1 cross-path assertion) + #25 (full-pipeline golden fixture). Both are test-only, both land in Area `invariants / testing`, both are zero-risk. Addressing both in one loop lowers the pool from 11 → 9 (still over ceiling but on the right trajectory). If one-item-per-loop must be strictly preserved, select #22 first (score 13).
+1. Iter 012 completed I1a coverage (#22). Pool net-unchanged at 11 because #22 closed and #26 (I1b tier deferral) opened.
+2. **Iter 013**: burn-down is still mandatory via the ceiling rule. Pick from the pool.
+3. **Recommended candidate for iter 013**: **#25** (full-pipeline golden fixture, raw `.ndjson` → normalizer → segmentation). Score 11, Area `invariants / testing`, test-only zero-risk, catches the failure mode iter 012's I1a does not cover (normalizer regressions that segmentation-only fixtures miss). Keeping iter 013 in the same Area as iter 012 is within saturation policy (only 1 of last 5 landed there — iter 012 — so adding iter 013 = 2 of 6, still healthy).
 
-### Candidates for iter 012 (ordered by score)
+### Candidates for iter 013 (ordered by score)
 
-- **#22** Explicit Invariant I1 cross-path assertion — score 13 (iter 011 follow-up, pure test add, zero risk, design-doc debt)
-- **#25** Full-pipeline golden fixture (raw → normalizer → segmentation) — score 11 (iter 011 follow-up, invariant coverage)
+- **#25** Full-pipeline golden fixture (raw → normalizer → segmentation) — score 11 (iter 011 follow-up)
 - **#18** Surface `persistenceTruncated` in review UI — score 11 (iter 010 follow-up, UX resilience)
 - **#19** GC stale `ledgerium_active_session_events_*` keys — score 11 (iter 010 follow-up, session durability)
 - **#7** Widen policy-engine `credit_card` regex — score 11 (iter 008 follow-up)
 - **#14** Wire `validateRenderedSOP` into pipeline — score 11 (iter 007 follow-up)
+- **#26** I1b DerivedStep-level byte-identity — score 10 (iter 012 follow-up; requires production accessor, so is NOT a pure burn-down test-add)
 
-### Post-012 preliminary queue
+### Post-013 preliminary queue
 
-- **Iter 013: continue burn-down** (pool will still be at 9–10 items unless iter 012 closes 2+). Pick from #18/#19/#25.
-- **Iter 014: base-cadence Meta-Review 003** (3 loops after MR-002 = 014) unless an early trigger fires sooner. At iter 014, burn-down also requires evaluation of the MR-002 closure-ratio metric.
-- **Iter 015: Real-extension `launchPersistentContext` E2E** (iter 010 follow-up #21) — closes fidelity gap between Vitest integration and OS-level SW restart.
-- **Iter 016+**: Phase 2 planning — no blockers remain, so PRD refresh / GTM work is unblocked.
+- **Iter 014: continue burn-down** if pool still > 8. Projected pool after iter 013 = 10 (close 1, add 0–1) — still above ceiling, still mandatory burn-down.
+- **Iter 015: base-cadence Meta-Review 003** (3 loops after MR-002 = iter 015: 012, 013, 014 = 3 loops completed). Earlier trigger only if agent-monoculture, validation-failure run, or other conditions fire.
+- **Iter 016: Real-extension `launchPersistentContext` E2E** (iter 010 follow-up #21) — closes fidelity gap between Vitest integration and OS-level SW restart.
+- **Iter 017+**: Phase 2 planning — no blockers remain, so PRD refresh / GTM work is unblocked.
 
-### Meta-review trigger check (post MR-002)
-- Loops since Meta-Review 002: **0** — next base-cadence trigger at iter 014 (MR-002 was run before iter 012).
-- Post-meta-review stability window: 3 loops minimum per CLAUDE.md § Meta-Review Cadence ("do not run another for at least 3 loops") → iter 012, 013, 014 all protected.
-- Early-trigger conditions: none currently met.
+### Meta-review trigger check (post iter 012)
+- Loops since Meta-Review 002: **1** (iter 012) — next base-cadence trigger at iter 015.
+- Post-meta-review stability window: 3 loops minimum per CLAUDE.md § Meta-Review Cadence → iter 012, 013, 014 protected from overlapping control changes.
+- Early-trigger conditions: none currently met (3 distinct implementer primaries in last 3 loops; no validation-failure run; pool at 11 not yet >10 but close — monitor).
+- Closure-ratio recovery: **0.0 → 0.077** after iter 012. Target ≥0.4. On current trajectory (1 closure per iteration), pool would reach 8 by iter 015 (exiting ceiling rule) and ratio would hit ~0.3 — still below target but materially closer.
 
 ## Meta-Review Status
 
-- Completed loops since initialization: **11 (iter 001–011)**
+- Completed loops since initialization: **12 (iter 001–012)**
 - Last meta-review: **Meta-Review 002 (2026-04-19, covering iter 009–011)** — see `META_REVIEW_002.md`
 - Prior meta-review: Meta-Review 001 (2026-04-17, covering iter 004–008) — see `META_REVIEW_001.md`
-- Loops completed since last meta-review: **0**
-- Next meta-review trigger: base-cadence at iter 014 (3 loops after MR-002).
+- Loops completed since last meta-review: **1 (iter 012)**
+- Next meta-review trigger: base-cadence at iter 015 (3 loops after MR-002).
 - Status: **current**
 
 ### Meta-Review 001 headline findings
