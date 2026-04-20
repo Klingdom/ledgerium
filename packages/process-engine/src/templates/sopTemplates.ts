@@ -30,13 +30,19 @@ import {
   deriveCommonMistakes,
   deriveTips,
 } from './renderHelpers.js';
+import {
+  HIGH_CONFIDENCE_THRESHOLD,
+  LOW_CONFIDENCE_THRESHOLD,
+} from './confidenceThresholds.js';
 
 // ─── Confidence thresholds ───────────────────────────────────────────────────
 
-/** Minimum average confidence for a "high" badge. */
-export const HIGH_CONFIDENCE_THRESHOLD = 0.85 as const;
-/** Minimum average confidence to avoid a "low" badge. */
-export const LOW_CONFIDENCE_THRESHOLD = 0.70 as const;
+// HIGH_CONFIDENCE_THRESHOLD and LOW_CONFIDENCE_THRESHOLD are imported from
+// confidenceThresholds.ts — the canonical source shared with renderHelpers.ts.
+// Re-export them so existing consumers that imported from sopTemplates.ts
+// continue to work without change.
+export { HIGH_CONFIDENCE_THRESHOLD, LOW_CONFIDENCE_THRESHOLD } from './confidenceThresholds.js';
+
 /** Maximum low-confidence step count for a "high" badge (must be zero). */
 const HIGH_BADGE_MAX_LOW_STEPS = 0 as const;
 /** Minimum low-confidence step count that forces a "low" badge. */

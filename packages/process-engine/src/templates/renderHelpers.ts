@@ -16,7 +16,7 @@ import type {
 import {
   HIGH_CONFIDENCE_THRESHOLD,
   LOW_CONFIDENCE_THRESHOLD,
-} from './sopTemplates.js';
+} from './confidenceThresholds.js';
 
 // ─── Step naming ─────────────────────────────────────────────────────────────
 
