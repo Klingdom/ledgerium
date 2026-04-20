@@ -6,6 +6,62 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-20] - Iteration 019: Confidence-thresholds extraction (Mode 1 `burn-down` #15 + Mode 5 item 2/5 companion-burn-down)
+
+### Selection
+
+- **Selection rule:** `burn-down` (Mode 5 companion-burn-down obligation per MR-004 Change A / new guardrail 8; also satisfies Follow-Up Debt Policy clause 1 1-in-5 cadence and clause 6 pool-size ceiling with pool > 8).
+- **Selected item:** `#15 Extract confidence thresholds to shared constants module` — score 10, Birth iter 006, age 13 (past staleness cap 10), Effort 1 / Risk 1, Area code hygiene.
+- **Rationale:** pre-locked at iter-018 close as the MR-004 staleness-triage KEEP verdict with explicit iter-019 targeting. First MR-004 staleness-cap KEEP verdict to close. Partial portfolio-drift relief by touching `packages/process-engine/` (extension-adjacent) between the PRD iteration (018) and the three remaining web-app Path B iterations (020/021/022).
+
+### What changed
+
+- **New file:** `packages/process-engine/src/templates/confidenceThresholds.ts` (+18 LOC) — single source of truth for `HIGH_CONFIDENCE_THRESHOLD = 0.85` and `LOW_CONFIDENCE_THRESHOLD = 0.70`.
+- **New file:** `packages/process-engine/src/templates/confidenceThresholds.test.ts` (+46 LOC) — 6 regression tests: value locks for both constants + 3 backward-compat contract tests verifying `sopTemplates.ts` re-exports still resolve + 1 import-shape test.
+- **Modified:** `packages/process-engine/src/templates/renderHelpers.ts` — import path changed from `./sopTemplates.js` to `./confidenceThresholds.js` (0 net LOC).
+- **Modified:** `packages/process-engine/src/templates/sopTemplates.ts` (+4 LOC net) — removed two `export const` declarations, added import from shared module and re-export to preserve backward compatibility for `templates.test.ts` consumers.
+- **Net effect:** circular import `renderHelpers.ts ↔ sopTemplates.ts` eliminated. Threshold values unchanged. Consumer API unchanged (re-exports preserve old import paths).
+
+### Validation
+
+- `pnpm typecheck` — clean across all 10 workspace projects.
+- `pnpm test` — **1652/1652 passing across 51 test files** (+6 tests, +1 test file vs iter 018's 1646/50). Duration 3.43s.
+- Backward-compat contract verified: `import { HIGH_CONFIDENCE_THRESHOLD, LOW_CONFIDENCE_THRESHOLD } from './sopTemplates.js'` still resolves to identical numeric values.
+- Full regression suite run; zero failures; zero behavior change in any dependent module.
+
+### Impact
+
+- **Before:** 2-file circular import carried as tech debt since iter 006; past staleness cap (age 13); blocked cleaner discriminated-union refactors in the confidence-rendering layer.
+- **After:** single authoritative source of truth; shared module can be consumed by any future template-rendering code without re-introducing the cycle; 6 new regression tests make silent threshold-value drift loudly detectable.
+- **Measurable outcome:** test count 1646 → 1652 (+6); follow-up pool 23 → 22; 10-iter closure ratio 0.167 → ~0.200; first MR-004 staleness-cap KEEP verdict closed.
+- **Governance impact:** MR-004 Change A Mode 5 companion-burn-down obligation for Path B **SATISFIED** on its first opportunity. Remaining Path B iterations (020, 021, 022) can proceed without further companion-burn-down gating.
+
+### Follow-Ups
+
+- **0 follow-ups generated.** Extraction was self-contained; no residual debt.
+- Density-response: not triggered (0 follow-ups ≪ 3-item threshold).
+
+### Files changed
+
+- `packages/process-engine/src/templates/confidenceThresholds.ts` (new)
+- `packages/process-engine/src/templates/confidenceThresholds.test.ts` (new)
+- `packages/process-engine/src/templates/renderHelpers.ts` (modified)
+- `packages/process-engine/src/templates/sopTemplates.ts` (modified)
+- `ITERATION_LOG.md` (iter 019 entry)
+- `IMPROVEMENT_BACKLOG.md` (#15 marked done; pool 23 → 22; portfolio summary update)
+- `SYSTEM_HEALTH.md` (header + exec summary + top risks + top opportunities + test coverage scorecard)
+- `CHANGELOG.md` (this entry)
+
+### Commit
+
+- `eca703c` — `refactor(process-engine): iter 019 — extract confidence thresholds to shared module (burn-down #15, Mode 5 item 2/5)`
+
+### Next step
+
+- **Iter 020 — Metrics engine build** per `PRD_DASHBOARD_V2.md` §7 (Mode 5 item 3/5). Primary agent: backend-engineer. Entry gate: iter 019 validation green ✅.
+
+---
+
 ## [2026-04-20] - Iteration 018: Meta-Review 004 + Path B PRD (Mode 4 + Mode 5 item 1/5, `directed`)
 
 ### Selection

@@ -4,6 +4,80 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 019
+
+- Date: 2026-04-20
+- Trigger: Path B Mode 5 item 2/5 — companion-burn-down per MR-004 Change A guardrail 8 (pool > 8, Mode 5 sequence of ≥3)
+- Coordinator: coordinator
+- Phase: Phase 1
+- Mode: Mode 1 (bounded loop) + Mode 5 item 2/5 (companion-burn-down)
+- Commit: `eca703c`
+
+### Candidate Selection
+
+- **Selection rule:** `burn-down` (Mode 5 companion-burn-down obligation per MR-004 Change A / new guardrail 8; also satisfies Follow-Up Debt Policy clause 1 1-in-5 cadence and clause 6 pool-size ceiling with pool > 8)
+- **Selected item:** `#15 Extract confidence thresholds to shared constants module (remove renderHelpers.ts ↔ sopTemplates.ts circular)` — Type: improvement · Area: code hygiene · Birth iter: 006 · Age: 13 iterations (past staleness cap 10) · Score: 10 · Effort: 1 · Risk: 1
+- **Why this item:** pre-locked at iter-018 close as the MR-004 staleness-triage KEEP verdict with explicit iter-019 targeting. Past staleness cap, low effort, low risk, and its `code hygiene` Area touches `packages/process-engine/` — an extension-adjacent shared package, NOT pure web-app — partially offsetting the Path B web-app saturation risk surfaced in MR-004 Agenda 4. Zero production-code behavior change; pure refactor with regression tests locking threshold values.
+- **Alternatives considered:** none. `#15` was pre-locked in iter 018 SYSTEM_HEALTH.md "Current Top Opportunities #1" and IMPROVEMENT_BACKLOG.md portfolio summary as the MR-004 Change A companion-burn-down target. No valid alternative under this selection rule.
+- **Scope discipline:** one logical outcome (eliminate one circular import by extracting two constants to a shared module). No scope expansion; all threshold values preserved numerically.
+- **Saturation status:** `code hygiene` Area; last 3 non-Mode-4 iterations were `billing / quality assurance` (017), `governance / PRD` (018, Mode 4 + Mode 5 directed), `code hygiene` (019) — distinct Areas, no saturation penalty.
+
+### Agents Used
+
+- `backend-engineer` (primary) — executed the extraction, added regression tests, verified typecheck + full test suite
+
+### Files Read
+
+- `packages/process-engine/src/templates/renderHelpers.ts`
+- `packages/process-engine/src/templates/sopTemplates.ts`
+- `packages/process-engine/src/templates/templates.test.ts`
+
+### Files Changed
+
+- **New:** `packages/process-engine/src/templates/confidenceThresholds.ts` (+18 LOC)
+- **New:** `packages/process-engine/src/templates/confidenceThresholds.test.ts` (+46 LOC, 6 regression tests)
+- **Modified:** `packages/process-engine/src/templates/renderHelpers.ts` (import path only; net 0 LOC)
+- **Modified:** `packages/process-engine/src/templates/sopTemplates.ts` (+4 LOC net; 2 `export const` → import + re-export for backward compatibility)
+
+### Validation Run
+
+- `pnpm typecheck` — clean across all 10 workspace projects
+- `pnpm test` — **1652/1652 passing** (up from 1646; +6 new tests in `confidenceThresholds.test.ts`)
+- Backward-compat contract verified: `import { HIGH_CONFIDENCE_THRESHOLD, LOW_CONFIDENCE_THRESHOLD } from './sopTemplates.js'` still resolves and returns identical values (0.85, 0.70)
+- Circular import eliminated: renderHelpers and sopTemplates now both import thresholds from the shared module; no longer reference each other for constants
+
+### Outcome
+
+- Status: complete
+- Summary: circular import removed via shared-constants module; no behavior change; regression tests lock threshold values + re-export contract; test count +6; past-staleness-cap item closed.
+
+### Artifacts Updated
+
+- `ITERATION_LOG.md` (this entry)
+- `IMPROVEMENT_BACKLOG.md` (mark #15 done; pool 23 → 22; update portfolio summary + closure ratio)
+- `SYSTEM_HEALTH.md` (closure ratio update; pool-size ceiling still active but one closure banked; Path B companion-burn-down obligation satisfied)
+- `CHANGELOG.md` (iter 019 entry)
+
+### Impact
+
+- **Before state:** 2-file circular import (`renderHelpers.ts` ↔ `sopTemplates.ts`) carried as tech debt since iter 006; past staleness cap; blocked discriminated-union refactors in the confidence-rendering layer.
+- **After state:** single authoritative source of truth for confidence thresholds; shared module can be consumed by any future template-rendering code without re-introducing the cycle; 6 new regression tests make silent value drift loudly detectable.
+- **Measurable outcome:** test count 1646 → 1652 (+6); imports-from-sopTemplates-for-constants reduced by 1 consumer; follow-up pool 23 → 22; closure ratio 10-iter window 0.167 → ~0.200 (ratios subject to staleness-cap window).
+
+### Follow-Ups
+
+- **0 follow-ups generated.** Extraction was self-contained; no residual debt.
+- Density-response: not triggered (0 follow-ups ≪ 3-item threshold).
+
+### Governance / Selection Signals
+
+- **Mode 5 companion-burn-down satisfied:** MR-004 Change A obligation for Path B (≥3-item Mode 5 sequence with pool > 8) fulfilled at iter 019, two iterations before the tail of the sequence (iter 022). Prevents the pool-growth failure MR-004 predicted (projected pool ~27 by iter 021 absent this iteration).
+- **Staleness-cap closure:** item #15 was the first MR-004 staleness-triage KEEP verdict to close. #14 and #7 remain KEEP but not yet scheduled; MR-005 at iter 023 boundary will re-triage if still open.
+- **Agent-diversity counter:** backend-engineer used as primary at iter 017 (billing tests) and iter 019 (extraction). Iter 018 was product-manager + meta-coordinator, so backend-engineer's consecutive-use counter is 1 (not 2). Same-implementer-4+ trigger remains comfortably distant.
+- **Area-saturation counter:** `code hygiene` is a new entry in the rolling 5-loop window. Path B iter 020–022 will re-enter web-app Area. MR-005 will evaluate whether the iter-019 `code hygiene` touch provides meaningful portfolio-drift relief.
+
+---
+
 ## Iteration 000
 
 - Date: 2026-04-12
