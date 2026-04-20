@@ -942,3 +942,74 @@ A non-determinism wrinkle was surfaced and handled test-side only (no production
 - Meta-review cadence: MR-002 ran before iter 012. Iter 012 + 013 = 2 of 3 loops toward base-cadence MR-003 trigger at iter 015. Stability window rule protects iter 012/013/014 from overlapping control changes.
 - **Saturation watch:** iter 012 + 013 both in `invariants / testing`. A third consecutive iteration in the same area (iter 014) would trip the 3-in-a-row rule. **Iter 014 should diversify OUT of invariants/testing** unless a hard blocker forces otherwise.
 - Release signal (backend-engineer self-report + coordinator independent re-verification): **GO**. Zero production changes → zero release risk. Pool size remains above ceiling → iter 014 stays forced burn-down.
+
+---
+
+## Iteration 014 — Surface `persistenceTruncated` flag in review UI
+
+**Date:** 2026-04-19
+**Mode:** 1 (standard bounded loop, burn-down)
+**Status:** Complete
+
+### Candidate Selection
+- **Selected:** #18 — Surface `meta.persistenceTruncated` flag in review UI / bundle builder
+- **Score:** 11 (I=3 A=4 L=2 C=4 E=1 R=1)
+- **Rule:** `burn-down` — forced by **MR-002 Change C pool-size ceiling rule** (open follow-up pool = 14 > 8). Third consecutive iteration under the ceiling rule.
+- **Alternatives considered (from the follow-up pool, ordered by score):** #18, #19, #7, #14 all tied at 11; #26, #30 at 10. Chose #18 on CLAUDE.md § Selection Policy tie-breaker 3 ("prefer items that improve determinism, traceability, recovery, and validation") + proactive saturation avoidance: iter 012 + 013 were both in `invariants / testing`; picking #26 or #30 (also invariants/testing) would trip the 3-in-a-row rule. #18's `UX resilience` area cleanly diversifies. Among tied candidates, #18 is the most user-facing — directly advances Ledgerium's trust-first positioning by making a previously-invisible data-loss signal visible.
+- **Area saturation check (proactive):** iter 012 + 013 consecutive in invariants/testing. #18 in UX resilience resets the streak. Post-iter-014, saturation cleared; any area permissible for iter 016.
+- **Scope discipline (stated up-front):** NO changes to `session-store.ts`, `constants.ts`, `types.ts` (iter-010 surface). NO changes to segmentation-engine (iter-011 surface). NO changes to `convergence-invariant-i1.test.ts` (iter-012 surface). NO changes to `full-pipeline.regression.test.ts` or normalization-engine fixtures (iter-013 surface). NO jsdom / `@testing-library/react` bootstrap — sidepanel component tests are a separate iteration concern. One logical outcome: make the signal visible.
+
+### Agents Involved
+- **Coordinator (in-session):** pre-dispatch repo verification (confirmed `SessionMeta.persistenceTruncated` setter path, bundle builder carry-through, target render surfaces, absence of sidepanel test harness), selection + brief authoring, independent validation, artifact updates.
+- **frontend-engineer (primary):** banner component authoring in two screens, regression assertion in `bundle-builder.test.ts`. First primary appearance in the rolling 5-loop window.
+
+### Scope Expansion Decision
+**None.** No Mode 5 guardrail 7 invocation (Mode 1 does not permit). The `HistoryDetailScreen.tsx` banner was NOT a scope expansion — the coordinator's brief explicitly permitted it as a secondary target contingent on `bundle.sessionJson` carrying `persistenceTruncated` through the history store, which frontend-engineer verified it does via `MSG.GET_BUNDLE` with existing `SessionMeta` shape. No history-store surface change required.
+
+### Files Added
+- **None.** All changes are additive JSX within existing files.
+
+### Files Changed
+- `apps/extension-app/src/sidepanel/screens/ReviewScreen.tsx` — +17 LOC. New `TruncationWarningBanner` JSX function component (10 LOC) + conditional render (3 LOC) placed between session-summary header and upload progress bar. Amber palette (`bg-amber-50 border-amber-200 text-amber-800`) matching warning-not-error semantics.
+- `apps/extension-app/src/sidepanel/screens/HistoryDetailScreen.tsx` — +19 LOC. Same `TruncationWarningBanner` (duplicated — surfaced as follow-up #32) + conditional render as first child of the loaded-bundle block, above the metadata row.
+- `apps/extension-app/src/background/bundle-builder.test.ts` — +28 LOC. New `describe('buildBundle')` block asserting that `buildBundle()` preserves `meta.persistenceTruncated === true` in `bundle.sessionJson.persistenceTruncated`. Uses mock `SessionStore` with empty event arrays — minimal, deterministic.
+
+### Copy Finalized
+> **⚠ Some events may be missing from this session.** The browser hit a storage limit during recording, so later events were not saved. The steps below are accurate but may be incomplete.
+
+Plain English; no `chrome.storage.local` jargon. Warning (amber), not error (red) — signals partial data, not failure. `aria-hidden="true"` on the decorative glyph for accessibility.
+
+### Validation Results (independently re-verified by coordinator)
+- `pnpm --filter @ledgerium/extension-app typecheck` → clean ✅
+- `pnpm --filter @ledgerium/extension-app test` → **197/197 pass** (baseline 196 + 1 new bundle-builder regression) ✅
+- `pnpm --filter @ledgerium/extension-app build` → clean, 2.47s, artifacts unchanged except sidepanel bundle ✅
+- `pnpm typecheck` (root monorepo) → clean across 10 packages + 2 apps ✅
+- `pnpm test` (root monorepo) → **1618/1618 pass, 47 files** — baseline 1617/47 → delta exactly +1 test / 0 new files ✅
+- Git diff scope verification: only the 3 expected files modified. Zero modifications to `session-store.ts`, `types.ts`, `bundle-builder.ts` production source, or any iter-011/012/013 surface. ✅
+
+### Outcome
+- **Status:** **complete**. Silent-truncation trust gap closed at the UX layer.
+- Summary: when a session's `chrome.storage.local` quota is exceeded during recording, the user now sees an explicit amber warning banner in both the live review screen and the historical-session detail view. The exported bundle already carried `persistenceTruncated: true` through `buildBundle()` (iter 010 + unchanged iter-011 wiring), but that signal was previously only visible to someone who opened the exported JSON. Users with a truncated capture now know before they make a downstream decision based on incomplete data. A regression test was added to `bundle-builder.test.ts` to guarantee the flag continues to flow through future bundle-builder changes.
+
+### Impact
+- **Before iter 014:** `meta.persistenceTruncated` was set correctly by iter-010 code, persisted through restart, and included in exports — but never rendered anywhere the user would see it. A user could end a long recording with truncated data, walk through the review screen seeing all their captured steps (which are accurate — append-stop truncation preserves the prefix), export the bundle, and not realize their capture was incomplete. This directly contradicts the trust-first product positioning.
+- **After iter 014:** explicit visual warning at both the immediate post-recording review (`ReviewScreen`) and any historical revisit (`HistoryDetailScreen`). Plain-English copy, amber treatment (warning not error), accessible glyph. Regression-guarded against future bundle-builder changes that might drop the flag.
+- **Vitest totals:** 1617 → **1618** (+1) across 47 → 47 test files. No new file — extended existing `bundle-builder.test.ts`.
+- **Production LOC touched:** 36 (ReviewScreen +17 / HistoryDetailScreen +19). Test LOC added: +28.
+- **Follow-up closure ratio (10-iter window iter 005–014):** 3 / 16 = **0.188** — up from iter 013's 0.143. Still below 0.4 target; recovery trajectory continues (0.0 → 0.077 → 0.143 → 0.188).
+- **Pool size trajectory:** 14 (iter 014 start) → 13 (close #18) → 15 (open #31, #32). Net +1. Still above 8 ceiling.
+
+### Follow-Ups Generated (Birth iter: 014)
+- **#31** Bootstrap sidepanel component test harness (jsdom + `@testing-library/react` + vitest env config) to enable component-level test coverage for `ReviewScreen` / `HistoryDetailScreen` / future screens. Score 11 (I=3 A=4 L=4 C=4 E=2 R=2). Quality assurance area. Would unlock explicit render-assertion coverage for the iter-014 banner logic (currently tested only by data-plumbing regression in `bundle-builder.test.ts`, not by "banner actually renders when flag is true").
+- **#32** Extract `TruncationWarningBanner` into shared sidepanel components directory. Currently 10-line JSX component duplicated across `ReviewScreen.tsx` and `HistoryDetailScreen.tsx`. Score 7 (I=1 A=2 L=1 C=5 E=1 R=1). Code hygiene area. Low-priority DRY cleanup — if the warning copy changes, both copies need to update.
+
+**Follow-up density check:** 2 generated. Below the ≥3 threshold. **`density-response:` log line not required** per CLAUDE.md § Follow-Up Debt Policy clause 4.
+
+### Governance / Selection Signals
+- Rule: `burn-down` (MR-002 Change C ceiling rule — pool 14 > 8 at iter 014 start). Third consecutive iteration under the ceiling rule; the ceiling is actively governing selection, which is the intended behavior post-MR-002.
+- Agent diversity (rolling 5-loop window iter 010–014): backend+qa (010) · architect+backend+qa (011) · qa (012) · backend (013) · frontend (014) → **5 distinct primaries** in the window (backend, qa, architect, frontend, devops via iter 009 just outside window). Strongest agent diversity in the bounded-loop era. No monoculture risk.
+- Autonomous-vs-directed ratio (10-iter window iter 005–014): 2 directed (010, 011) / 8 autonomous = 0.2. Within 0.1–0.3 healthy band (MR-002 Change E). Iter 010/011 age toward the edge of the 10-iter window; ratio will drop toward 0.1 next loop.
+- Scope discipline preserved: iter-010/011/012/013 surfaces verifiably untouched. `types.ts` `SessionMeta` shape unchanged. `session-store.ts` truncation-flag-setter path unchanged. `bundle-builder.ts` production code unchanged (only `.test.ts` extended). Segmentation engine + normalization engine + convergence test + full-pipeline test all unmodified. This preserves the independent-iteration guarantee per Mode 5 guardrail 1 spirit.
+- Meta-review cadence: MR-002 completed pre-iter-012. Iter 012 + 013 + 014 = **3 loops since MR-002** → **base-cadence Meta-Review 003 is DUE at iter 015**. Stability window expires: iter 015 may change control variables.
+- **Saturation status post iter 014:** cleared. Last 3 iterations (012, 013, 014) land in 2 distinct areas (invariants/testing + UX resilience). 3-in-a-row rule inactive for iter 016.
+- Release signal (frontend-engineer self-report + coordinator independent re-verification): **GO**. Small, reversible, user-visible improvement. Zero production-logic risk surface. Pool size above ceiling → iter 016 stays forced burn-down (iter 015 is Mode 4 meta-review, non-coding).

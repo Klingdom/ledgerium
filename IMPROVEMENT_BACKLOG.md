@@ -1,6 +1,6 @@
 # Ledgerium AI — Improvement Backlog
 
-Last updated: 2026-04-19 (post-iteration 013 — full-pipeline golden fixture landed; #25 closed, #29 + #30 opened; pool 13 → 14, ceiling rule still active for iter 014)  
+Last updated: 2026-04-19 (post-iteration 014 — persistenceTruncated UI banner landed; #18 closed, #31 + #32 opened; pool 14 → 15; iter 015 is base-cadence meta-review (Mode 4, non-coding), iter 016 still forced burn-down)  
 Current phase: Phase 1  
 Backlog purpose: maintain a ranked, evidence-based portfolio of the highest-value fixes, improvements, and experiments for bounded improvement loops.
 
@@ -41,15 +41,15 @@ See `CLAUDE.md § Selection Policy` — any of these overrides top-score:
 
 ## Portfolio Summary
 
-- Total candidates reviewed: 36 (27 prior + 4 iter-011 follow-ups + 1 iter-012 follow-up + 2 Mode-3 follow-ups + 2 iter-013 follow-ups)
-- Top priority area: **iter 014 burn-down (ceiling still active)** — open follow-up pool = 14 items (iter 013 closed #25, spawned #29 + #30), exceeds the MR-002 Change C ceiling of 8; iter 014 MUST select from the follow-up pool.
-- Open follow-up pool (Birth iter shown): #7 (008) · #14 (007) · #15 (006) · #18/19/20/21 (010) · #23/24 (011) · #26 (012) · #27/28 (M3 post-012) · #29/30 (013) — **14 items open**
-- Highest-risk unresolved item: no release blockers remain; highest-risk open items are iter-010 follow-ups #18–21 and iter-011 follow-ups #23/24.
-- Last completed item: Full-pipeline golden fixture raw `.ndjson` → normalizer → segmentation (iteration 013)
-- Last meta-review: **Meta-Review 002 (2026-04-19)** — see `META_REVIEW_002.md`; prior: Meta-Review 001 (2026-04-17)
-- Next recommended action: iter 014 burn-down — top candidates (ranked): #18 (persistenceTruncated UI, score 11) · #19 (GC stale session keys, score 11) · #7 (widen credit_card regex, score 11) · #14 (wire validateRenderedSOP, score 11) · #26 (I1b DerivedStep byte-identity, score 10). **Saturation watch:** iter 012 + 013 both landed in `invariants / testing` — iter 014 should diversify OUT of that area unless a hard blocker forces otherwise. Area saturation rule is 3-in-a-row, so 014 is not yet mandated out, but a third consecutive would trigger it for 015.
-- Release-blocker burn rate (last 5 loops iter 009–013): **3/3 closed** (Playwright E2E ✓ iter 009; session persistence ✓ iter 010; segmentation convergence ✓ iter 011) — **100% of release blockers cleared**; iter 012 + 013 (test-adds) were non-blocker burn-downs.
-- Follow-up closure ratio (10-iter window iter 004–013): **2 / 14 = 0.143** — below the ≥0.4 testable metric but recovery continues (0.0 → 0.077 → 0.143 across iter 011 → 012 → 013). Pool-size ceiling rule remains active for iter 014.
+- Total candidates reviewed: 38 (27 prior + 4 iter-011 follow-ups + 1 iter-012 follow-up + 2 Mode-3 follow-ups + 2 iter-013 follow-ups + 2 iter-014 follow-ups)
+- Top priority area: **iter 015 = Meta-Review 003 (Mode 4, non-coding)** — base-cadence trigger (3 loops since MR-002: 012+013+014). Iter 016 resumes bounded loops; pool = 15 > 8, so iter 016 is still forced burn-down.
+- Open follow-up pool (Birth iter shown): #7 (008) · #14 (007) · #15 (006) · #19/20/21 (010) · #23/24 (011) · #26 (012) · #27/28 (M3 post-012) · #29/30 (013) · #31/32 (014) — **15 items open**
+- Highest-risk unresolved item: no release blockers remain; highest-risk open items are iter-010 follow-ups #19–21 and iter-011 follow-ups #23/24.
+- Last completed item: persistenceTruncated UI banner (iteration 014) — review screen + history detail screen
+- Last meta-review: **Meta-Review 002 (2026-04-19)** — see `META_REVIEW_002.md`; prior: Meta-Review 001 (2026-04-17). **Next meta-review (MR-003) is due at iter 015** (base cadence: 3 loops since MR-002 = iter 012/013/014 completed).
+- Next recommended action: **iter 015 = Meta-Review 003 (Mode 4, no product code changes)**. After MR-003, iter 016 burn-down — top candidates (ranked): #19 (GC stale session keys, score 11, session durability) · #7 (widen credit_card regex, score 11, policy coverage) · #14 (wire validateRenderedSOP, score 11, SOP quality gate) · #20 (loadFromStorage validation, score 10, session durability) · #31 (sidepanel component test harness, score 11, quality assurance). **Saturation watch:** iter 014 broke the 012+013 invariants/testing streak → saturation cleared. Any area is permissible for iter 016.
+- Release-blocker burn rate (last 5 loops iter 010–014): **2/2 closed** (session persistence ✓ iter 010; segmentation convergence ✓ iter 011) — **100% of release blockers cleared**; iter 012 + 013 + 014 (test-add, fixture-add, UX-add) were non-blocker burn-downs.
+- Follow-up closure ratio (10-iter window iter 005–014): **3 / 16 = 0.188** — below the ≥0.4 testable metric but recovery curve continues (0.0 → 0.077 → 0.143 → 0.188 across iter 011 → 012 → 013 → 014). Pool-size ceiling rule remains active for iter 016.
 
 ---
 
@@ -87,7 +87,7 @@ Schema note (MR-002 Change B): `Birth iter` column is MANDATORY for any row tagg
 | 15 | Extract confidence thresholds to shared constants module (remove `renderHelpers.ts ↔ sopTemplates.ts` circular) | improvement | code hygiene | 2 | 3 | 2 | 5 | 1 | 1 | **10** | 006 | new (iter 006 follow-up) — saturation cleared post-iter-010 |
 | 16 | Fix DELETE /api/keys error handling | fix | API safety | 2 | 3 | 1 | 5 | 1 | 1 | **9** | — | new (iter 001) |
 | 17 | Extract shared ingestion service (upload/sync) | improvement | API architecture | 4 | 5 | 4 | 3 | 4 | 3 | **9** | — | new (iter 001) |
-| 18 | Surface `meta.persistenceTruncated` flag in review UI / bundle builder | improvement | UX resilience | 3 | 4 | 2 | 4 | 1 | 1 | **11** | 010 | new (iter 010 follow-up) |
+| ~~18~~ | ~~Surface `meta.persistenceTruncated` flag in review UI / bundle builder~~ | ~~improvement~~ | ~~UX resilience~~ | ~~3~~ | ~~4~~ | ~~2~~ | ~~4~~ | ~~1~~ | ~~1~~ | ~~**11**~~ | ~~010~~ | **done (iter 014 — amber warning banner in ReviewScreen + HistoryDetailScreen; `buildBundle` regression test)** |
 | 19 | Garbage-collect stale `ledgerium_active_session_events_*` keys on SW startup | fix | session durability | 2 | 4 | 2 | 5 | 1 | 1 | **11** | 010 | new (iter 010 follow-up) |
 | 20 | `loadFromStorage` sessionId/in-flight flag cross-validation | fix | session durability | 3 | 4 | 2 | 4 | 1 | 2 | **10** | 010 | new (iter 010 follow-up) |
 | 21 | Real-extension `launchPersistentContext` E2E harness | improvement | quality assurance | 4 | 5 | 4 | 3 | 4 | 3 | **9** | 010 | new (iter 010 follow-up; originally iter 013) |
@@ -100,6 +100,8 @@ Schema note (MR-002 Change B): `Birth iter` column is MANDATORY for any row tagg
 | 28 | Downgrade UX edge case: non-free user without `stripeCustomerId` should surface contact-support path instead of attempting Stripe portal redirect | fix | UX resilience | 2 | 3 | 2 | 4 | 2 | 2 | **7** | M3@012 | new (Mode 3 follow-up — billing fix `09b2d80`) |
 | 29 | Fix `pnpm --filter <pkg> test` not resolving test files (root vitest config glob vs per-package resolution) — add per-package `vitest.config.ts` stubs or workspace-aware config | improvement | DX / tooling | 2 | 3 | 2 | 4 | 1 | 1 | **9** | 013 | new (iter 013 follow-up — found during fixture regeneration) |
 | 30 | Add rapid-focus-blur normalizer dedup fixture to full-pipeline golden set (focus → immediate blur → no input) — currently `fill-and-submit` only exercises the `focus → input_changed` dedup path | improvement | invariants / testing | 2 | 4 | 2 | 4 | 1 | 1 | **10** | 013 | new (iter 013 follow-up — complementary to #25 fixture set) |
+| 31 | Bootstrap sidepanel component test harness (jsdom + `@testing-library/react` + vitest env config) to enable component-level test coverage for `ReviewScreen` / `HistoryDetailScreen` / future screens | improvement | quality assurance | 3 | 4 | 4 | 4 | 2 | 2 | **11** | 014 | new (iter 014 follow-up — banner render currently untested at component level) |
+| 32 | Extract `TruncationWarningBanner` into shared sidepanel components directory (currently duplicated across `ReviewScreen.tsx` and `HistoryDetailScreen.tsx`, ~10 lines each) | improvement | code hygiene | 1 | 2 | 1 | 5 | 1 | 1 | **7** | 014 | new (iter 014 follow-up — low-priority DRY cleanup) |
 
 ### Completed (historical)
 
@@ -117,12 +119,13 @@ Schema note (MR-002 Change B): `Birth iter` column is MANDATORY for any row tagg
 | 011 | Converge LiveStepBuilder ↔ StreamingSegmenter (+ `buildDerivedSteps` + `segmentEvents` onto package primitive) | 11 |
 | 012 | I1a regression test — LiveStep-level cross-path equality across 12 golden fixtures | 13 |
 | 013 | Full-pipeline golden fixture (raw `.ndjson` → normalizer → segmentation) — 3 fixtures, 12 byte-identity tests, zero production code changes | 11 |
+| 014 | Surface `persistenceTruncated` flag in review UI — amber warning banner in `ReviewScreen` + `HistoryDetailScreen`; `buildBundle` regression test | 11 |
 
 > **All Phase-1 release blockers closed as of iter 011.** The release-blocker bonus `+B3` no longer applies to any item in the table.
 > All areas clear; no `−S` penalties apply.
-> Items 7, 14, 15, 18–21, 23, 24, 26, 27, 28, 29, 30 are open follow-ups (pool size = 14 — #25 closed in iter 013, #29 + #30 opened). MR-002 Change C: pool > 8 triggers the ceiling rule → **iter 014 MUST be burn-down** as well. `Birth iter` for Mode-3 follow-ups uses the anchor `M3@012` — the last completed iteration at the time of creation — for deterministic staleness-cap enforcement.
-> **Saturation note:** iter 012 + 013 both in `invariants / testing`. Third consecutive in that area would trip the 3-in-a-row rule for iter 015. Iter 014 should diversify.
-> **Meta-Review 002 complete (2026-04-19).** Governance diffs A/B/C/D/E/F applied. Next base-cadence trigger: 3 loops (iter 015 — MR-002 ran before iter 012, then iter 012, 013 = 2 of 3 loops so far).
+> Items 7, 14, 15, 19, 20, 21, 23, 24, 26, 27, 28, 29, 30, 31, 32 are open follow-ups (pool size = 15 — #18 closed in iter 014, #31 + #32 opened). MR-002 Change C: pool > 8 triggers the ceiling rule → **iter 016 MUST be burn-down** (iter 015 is Mode 4 meta-review, not a coding loop). `Birth iter` for Mode-3 follow-ups uses the anchor `M3@012` — the last completed iteration at the time of creation — for deterministic staleness-cap enforcement.
+> **Saturation cleared:** iter 014 landed in `UX resilience`, breaking the 012+013 invariants/testing streak. 3-in-a-row rule inactive for iter 016.
+> **Meta-Review 002 complete (2026-04-19).** Governance diffs A/B/C/D/E/F applied. **Meta-Review 003 DUE at iter 015** (base cadence: 3 loops since MR-002 = iter 012, 013, 014 completed).
 
 ---
 

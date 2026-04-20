@@ -8,8 +8,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { buildDerivedSteps } from './bundle-builder.js';
-import type { CanonicalEvent } from '../shared/types.js';
+import { buildDerivedSteps, buildBundle } from './bundle-builder.js';
+import type { CanonicalEvent, SessionMeta, PolicyLogEntry } from '../shared/types.js';
 
 // ─── Factories ────────────────────────────────────────────────────────────────
 
@@ -346,5 +346,33 @@ describe('buildDerivedSteps', () => {
     const steps = buildDerivedSteps(events, SESSION_ID);
     expect(steps).toHaveLength(2);
     expect(steps[0]!.boundary_reason).toBe('target_changed');
+  });
+});
+
+// ─── buildBundle — persistenceTruncated regression ───────────────────────────
+
+describe('buildBundle', () => {
+  it('preserves persistenceTruncated=true from meta into sessionJson', async () => {
+    const truncatedMeta: SessionMeta = {
+      sessionId: 'test-trunc-session',
+      activityName: 'Truncation test',
+      startedAt: '2026-01-01T00:00:00Z',
+      endedAt: '2026-01-01T00:01:00Z',
+      state: 'review_ready',
+      pauseIntervals: [],
+      schemaVersion: '1.0.0',
+      recorderVersion: '1.0.0',
+      persistenceTruncated: true,
+    };
+
+    const mockStore = {
+      getMeta: () => truncatedMeta,
+      getCanonicalEvents: (): CanonicalEvent[] => [],
+      getPolicyLog: (): PolicyLogEntry[] => [],
+    };
+
+    const bundle = await buildBundle(mockStore as never);
+
+    expect(bundle.sessionJson.persistenceTruncated).toBe(true);
   });
 });

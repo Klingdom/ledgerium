@@ -2,6 +2,19 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { MSG } from '../../shared/types.js'
 import type { SessionBundle } from '../../shared/types.js'
 
+function TruncationWarningBanner() {
+  return (
+    <div className="mx-4 mt-3 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5">
+      <span className="mt-px shrink-0 text-amber-600" aria-hidden="true">⚠</span>
+      <p className="text-xs leading-snug text-amber-800">
+        <strong className="font-medium">Some events may be missing from this session.</strong>{' '}
+        The browser hit a storage limit during recording, so later events were not saved.
+        The steps below are accurate but may be incomplete.
+      </p>
+    </div>
+  )
+}
+
 interface HistoryDetailScreenProps {
   sessionId: string
   activityName: string
@@ -119,6 +132,9 @@ export function HistoryDetailScreen({ sessionId, activityName, onBack, onDeleted
 
       {!loading && !error && bundle && meta && (
         <>
+          {/* Truncation warning — renders only when storage quota was exceeded during recording */}
+          {meta.persistenceTruncated === true && <TruncationWarningBanner />}
+
           {/* Metadata */}
           <div className="px-4 py-3 border-b border-gray-200 flex-none">
             <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500">

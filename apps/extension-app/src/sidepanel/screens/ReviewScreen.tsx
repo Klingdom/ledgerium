@@ -3,6 +3,19 @@ import type { SessionMeta, LiveStep } from '../../shared/types.js'
 import { MSG } from '../../shared/types.js'
 import { ControlBar } from '../components/ControlBar.js'
 
+function TruncationWarningBanner() {
+  return (
+    <div className="mx-4 mt-3 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5">
+      <span className="mt-px shrink-0 text-amber-600" aria-hidden="true">⚠</span>
+      <p className="text-xs leading-snug text-amber-800">
+        <strong className="font-medium">Some events may be missing from this session.</strong>{' '}
+        The browser hit a storage limit during recording, so later events were not saved.
+        The steps below are accurate but may be incomplete.
+      </p>
+    </div>
+  )
+}
+
 interface ReviewScreenProps {
   meta: SessionMeta | null
   steps: LiveStep[]
@@ -93,6 +106,9 @@ export function ReviewScreen({ meta, steps, uploadProgress, uploadStatus, onDisc
           {finalizedSteps.length} step{finalizedSteps.length !== 1 ? 's' : ''} captured
         </p>
       </div>
+
+      {/* Truncation warning — renders only when storage quota was exceeded during recording */}
+      {meta?.persistenceTruncated === true && <TruncationWarningBanner />}
 
       {/* Upload progress */}
       <UploadBar progress={uploadProgress} status={uploadStatus} />
