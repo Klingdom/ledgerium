@@ -43,6 +43,8 @@ export async function GET() {
         name: user.name,
         plan: flags.plan,
         subscriptionStatus: user.subscriptionStatus,
+        createdAt: user.createdAt,
+        hasStripeCustomer: !!user.stripeCustomerId,
       },
       features: flags.features,
       limits: flags.limits,

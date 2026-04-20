@@ -20,6 +20,7 @@ import {
   type FeatureKey,
   type PlanType,
 } from './plans';
+import { isAdminUnlimited } from './admin-allowlist';
 import { db } from '@/db';
 
 // ─── Feature Access Checks ─────────────────────────────────────────────────
@@ -36,6 +37,9 @@ export interface FeatureAccessResult {
  * Returns { allowed: true } or { allowed: false, requiredPlan }.
  */
 export function checkFeatureAccess(user: User, feature: FeatureKey): FeatureAccessResult {
+  if (isAdminUnlimited(user.email)) {
+    return { allowed: true };
+  }
   const plan = toPlanType(user.plan);
   if (hasFeature(plan, feature)) {
     return { allowed: true };
@@ -91,6 +95,10 @@ export interface RecordingLimitResult {
  * This replaces the old hardcoded `plan === 'free' && uploadCount >= 5` check.
  */
 export async function checkRecordingLimit(user: User): Promise<RecordingLimitResult> {
+  if (isAdminUnlimited(user.email)) {
+    return { allowed: true, used: 0, limit: Number.MAX_SAFE_INTEGER };
+  }
+
   const plan = toPlanType(user.plan);
   const config = getPlanConfig(plan);
   const limit = config.maxRecordingsPerMonth;
@@ -145,6 +153,19 @@ function serializeLimit(value: number): number | 'unlimited' {
  * monthly count should await checkRecordingLimit() separately and merge it in.
  */
 export function buildFeatureFlags(user: User): FeatureFlagsResponse {
+  if (isAdminUnlimited(user.email)) {
+    const enterpriseConfig = getPlanConfig('enterprise');
+    return {
+      plan: 'enterprise',
+      features: { ...enterpriseConfig.features } as Record<string, boolean>,
+      limits: {
+        recordings: { used: 0, max: 'unlimited' },
+        seats: { max: 'unlimited' },
+        recorders: { max: 'unlimited' },
+      },
+    };
+  }
+
   const plan = toPlanType(user.plan);
   const config = getPlanConfig(plan);
 

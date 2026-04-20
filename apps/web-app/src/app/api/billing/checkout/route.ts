@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { getStripe, getPriceId, PRO_PRICE_ID, APP_URL } from '@/lib/stripe';
 import { toPlanType } from '@/lib/plans';
+import { isAdminUnlimited } from '@/lib/admin-allowlist';
 import { trackServer } from '@/lib/analytics-server';
 import type { PaidPlanType, BillingInterval } from '@/lib/stripe';
 import type Stripe from 'stripe';
@@ -29,6 +30,15 @@ export async function POST(req: NextRequest) {
   const user = await db.user.findUnique({ where: { id: session.user.id } });
   if (!user) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+
+  // Block allowlisted accounts — they have admin-granted unlimited access and
+  // do not need (or benefit from) a Stripe subscription.
+  if (isAdminUnlimited(user.email)) {
+    return NextResponse.json(
+      { error: 'This account has admin-granted unlimited access and does not require a Stripe subscription.' },
+      { status: 400 },
+    );
   }
 
   // Parse plan and interval from request body (with backward-compatible defaults).
