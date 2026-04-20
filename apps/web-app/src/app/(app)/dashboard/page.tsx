@@ -27,7 +27,6 @@ import {
   ShieldCheck,
   AlertTriangle,
   TrendingUp,
-  Activity,
   Target,
   FileCheck,
   Monitor,
@@ -37,7 +36,6 @@ import {
   GitBranch,
   Boxes,
   RefreshCw,
-  Brain,
   Shield,
   FolderOpen,
   Download,
@@ -640,13 +638,6 @@ export default function DashboardPage() {
       .slice(0, 5);
   }, [workflows]);
 
-  const staleWorkflows = useMemo(() => {
-    return workflows
-      .filter((w) => w.isStale)
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-      .slice(0, 5);
-  }, [workflows]);
-
   // mostComplexWorkflows and highCognitiveBurdenWorkflows removed —
   // replaced by unified Action Items and AI Opportunities panels
 
@@ -659,13 +650,6 @@ export default function DashboardPage() {
       (stats.needsReview === 0 ? 25 : Math.max(0, 25 - stats.needsReview * 5))
     );
   }, [stats]);
-
-  const bottleneckWorkflows = useMemo(() => {
-    return workflows
-      .filter(w => w.bottleneckRisk === 'high' || w.bottleneckRisk === 'medium')
-      .sort((a, b) => (b.durationMs ?? 0) - (a.durationMs ?? 0))
-      .slice(0, 4);
-  }, [workflows]);
 
   const topRiskWorkflow = needsAttentionWorkflows.length > 0 ? needsAttentionWorkflows[0] : null;
   const topOpportunityWorkflow = optimizationWorkflows.length > 0 ? optimizationWorkflows[0] : null;
@@ -857,272 +841,6 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          LAYER 1 — Executive Overview (3 grouped panels)
-          ═══════════════════════════════════════════════════════════════════ */}
-      {stats && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-ds-4 mb-ds-6">
-
-          {/* ── Volume & Coverage ─────────────────────────────────────── */}
-          <div className="card px-ds-5 py-ds-4">
-            <p className="text-[10px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider mb-ds-3">Volume &amp; Coverage</p>
-            <div className="grid grid-cols-2 gap-ds-4">
-              <div>
-                <p className="text-ds-2xl font-bold text-[var(--content-primary)] tabular-nums">{stats.totalWorkflows}</p>
-                <p className="text-ds-xs text-[var(--content-secondary)]">Workflows</p>
-              </div>
-              <div>
-                <p className="text-ds-2xl font-bold text-emerald-600 tabular-nums">{stats.recordedThisWeek}</p>
-                <p className="text-ds-xs text-[var(--content-secondary)]">This week</p>
-              </div>
-              <div>
-                <p className="text-ds-lg font-semibold text-[var(--content-primary)] tabular-nums">{stats.systemCoverage.length}</p>
-                <p className="text-ds-xs text-[var(--content-secondary)] truncate" title={stats.systemCoverage.map(s => s.system).join(', ')}>
-                  {stats.systemCoverage.length > 0
-                    ? stats.systemCoverage.slice(0, 2).map(s => s.system).join(', ')
-                    : 'Systems'}
-                </p>
-              </div>
-              <div>
-                <p className="text-ds-lg font-semibold text-[var(--content-primary)] tabular-nums">{stats.avgDuration > 0 ? formatDuration(stats.avgDuration) : '--'}</p>
-                <p className="text-ds-xs text-[var(--content-secondary)]">Avg duration</p>
-              </div>
-            </div>
-          </div>
-
-          {/* ── Quality & Readiness ───────────────────────────────────── */}
-          <div className="card px-ds-5 py-ds-4">
-            <p className="text-[10px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider mb-ds-3">Quality &amp; Readiness</p>
-            <div className="grid grid-cols-2 gap-ds-4">
-              <div>
-                <p className={`text-ds-2xl font-bold tabular-nums ${confidenceColorClass(stats.avgConfidence > 0 ? stats.avgConfidence : null)}`}>
-                  {stats.avgConfidence > 0 ? formatConfidence(stats.avgConfidence) : '--'}
-                </p>
-                <p className="text-ds-xs text-[var(--content-secondary)]">Confidence</p>
-              </div>
-              <div>
-                <p className="text-ds-2xl font-bold text-emerald-600 tabular-nums">{stats.sopReady}</p>
-                <p className="text-ds-xs text-[var(--content-secondary)]">SOP ready</p>
-              </div>
-              <div>
-                <p className={`text-ds-lg font-semibold tabular-nums ${stats.avgMaturity > 70 ? 'text-emerald-600' : stats.avgMaturity > 40 ? 'text-amber-600' : 'text-red-600'}`}>
-                  {stats.avgMaturity > 0 ? stats.avgMaturity : '--'}
-                </p>
-                <p className="text-ds-xs text-[var(--content-secondary)] cursor-help" title="Composite score from confidence, documentation completeness, SOP readiness, process stability, run frequency, and freshness.">Maturity</p>
-              </div>
-              <div>
-                <p className={`text-ds-lg font-semibold tabular-nums ${stats.avgCognitiveBurden >= 60 ? 'text-red-600' : stats.avgCognitiveBurden >= 30 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                  {stats.avgCognitiveBurden > 0 ? stats.avgCognitiveBurden : '--'}
-                </p>
-                <p className="text-ds-xs text-[var(--content-secondary)] cursor-help" title="Measures mental demand from decision density, system switches, data entry, and duration. Higher = more burden on the operator.">Cognitive load</p>
-              </div>
-            </div>
-          </div>
-
-          {/* ── Signals & Opportunities ───────────────────────────────── */}
-          <div className="card px-ds-5 py-ds-4">
-            <p className="text-[10px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider mb-ds-3">Signals &amp; Opportunities</p>
-            <div className="grid grid-cols-2 gap-ds-4">
-              <div>
-                <p className={`text-ds-2xl font-bold tabular-nums ${stats.needsReview > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                  {stats.needsReview}
-                </p>
-                <p className="text-ds-xs text-[var(--content-secondary)]">Need review</p>
-              </div>
-              <div>
-                <p className="text-ds-2xl font-bold text-violet-600 tabular-nums">{stats.optimizationOpportunities}</p>
-                <p className="text-ds-xs text-[var(--content-secondary)]">Optimization</p>
-              </div>
-              <div>
-                <Link href="/analytics" className="group">
-                  <p className="text-ds-lg font-semibold text-brand-600 tabular-nums group-hover:text-brand-700">{stats.insightCount}</p>
-                  <p className="text-ds-xs text-[var(--content-secondary)] group-hover:text-brand-600">Insights &rarr;</p>
-                </Link>
-              </div>
-              <div>
-                <p className="text-ds-lg font-semibold text-violet-600 tabular-nums">{stats.aiOpportunityCount}</p>
-                <p className="text-ds-xs text-[var(--content-secondary)]">AI candidates</p>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      )}
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          LAYER 2 — Intelligence Engine
-          Three-column layout: Action Items | AI Opportunities | Recent Activity
-          ═══════════════════════════════════════════════════════════════════ */}
-      {workflows.length > 0 && (
-        <>
-        <div className="flex items-center gap-ds-2 mb-ds-3">
-          <Brain className="h-4 w-4 text-brand-600" />
-          <h2 className="text-ds-sm font-semibold text-[var(--content-primary)]">Intelligence Summary</h2>
-          <span className="text-ds-xs text-[var(--content-tertiary)]">Key signals from your workflow portfolio</span>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-ds-4 mb-ds-6">
-
-          {/* ── Action Items: workflows needing attention ──────────────── */}
-          <div className="card overflow-hidden">
-            <div className="flex items-center justify-between px-ds-4 py-ds-3 border-b border-[var(--border-subtle)]">
-              <div className="flex items-center gap-ds-2">
-                <AlertTriangle className="h-4 w-4 text-amber-500" />
-                <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">Action Items</h3>
-              </div>
-              {needsAttentionWorkflows.length > 0 && (
-                <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">
-                  {needsAttentionWorkflows.length + staleWorkflows.length + optimizationWorkflows.length}
-                </span>
-              )}
-            </div>
-            <div className="divide-y divide-[var(--border-subtle)]">
-              {needsAttentionWorkflows.length === 0 && staleWorkflows.length === 0 && optimizationWorkflows.length === 0 ? (
-                <div className="px-ds-4 py-ds-6 text-center">
-                  <ShieldCheck className="h-6 w-6 text-emerald-400 mx-auto mb-2" />
-                  <p className="text-ds-xs text-[var(--content-secondary)]">All workflows are healthy</p>
-                </div>
-              ) : (
-                <>
-                  {needsAttentionWorkflows.slice(0, 3).map((w) => (
-                    <Link key={w.id} href={`/workflows/${w.id}`} className="flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-[var(--surface-secondary)] transition-colors">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-ds-xs text-[var(--content-primary)] font-medium truncate">{w.title}</p>
-                          <span className="flex-shrink-0 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">Review</span>
-                        </div>
-                        <p className="text-[10px] text-[var(--content-tertiary)]">Review &middot; {w.confidence !== null ? formatConfidence(w.confidence) : 'Low'} confidence &middot; {w.stepCount ?? 0} steps</p>
-                      </div>
-                    </Link>
-                  ))}
-                  {staleWorkflows.slice(0, 2).map((w) => (
-                    <Link key={w.id} href={`/workflows/${w.id}`} className="flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-[var(--surface-secondary)] transition-colors">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--content-tertiary)] flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-ds-xs text-[var(--content-primary)] font-medium truncate">{w.title}</p>
-                          <span className="flex-shrink-0 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[var(--surface-secondary)] text-[var(--content-secondary)]">Update</span>
-                        </div>
-                        <p className="text-[10px] text-[var(--content-tertiary)]">Update &middot; Last seen {formatDateRelative(w.createdAt)} &middot; {w.stepCount ?? 0} steps</p>
-                      </div>
-                    </Link>
-                  ))}
-                  {(needsAttentionWorkflows.length + staleWorkflows.length + optimizationWorkflows.length) > 5 && (
-                    <button
-                      onClick={() => { setHealthFilter('needs_review'); setSopFilter(''); setActivePreset(null); }}
-                      className="w-full px-ds-4 py-ds-2 text-ds-xs text-brand-600 hover:bg-brand-50 transition-colors text-center"
-                    >
-                      View all action items &rarr;
-                    </button>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* ── AI Opportunities: automation + optimization candidates ─── */}
-          <div className="card overflow-hidden">
-            <div className="flex items-center justify-between px-ds-4 py-ds-3 border-b border-[var(--border-subtle)]">
-              <div className="flex items-center gap-ds-2">
-                <Zap className="h-4 w-4 text-violet-500" />
-                <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">AI Opportunities</h3>
-              </div>
-              {stats && stats.aiOpportunityCount > 0 && (
-                <span className="text-[10px] font-medium text-violet-600 bg-violet-50 px-1.5 py-0.5 rounded-full">
-                  {stats.aiOpportunityCount}
-                </span>
-              )}
-            </div>
-            <div className="divide-y divide-[var(--border-subtle)]">
-              {optimizationWorkflows.length === 0 ? (
-                <div className="px-ds-4 py-ds-6 text-center">
-                  <Sparkles className="h-6 w-6 text-[var(--content-tertiary)] mx-auto mb-2" />
-                  <p className="text-ds-xs text-[var(--content-secondary)]">Upload more workflows to discover AI opportunities</p>
-                </div>
-              ) : (
-                <>
-                  {optimizationWorkflows.slice(0, 5).map((w) => (
-                    <Link key={w.id} href={`/workflows/${w.id}`} className="flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-[var(--surface-secondary)] transition-colors">
-                      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                        w.aiOpportunityScore >= 70 ? 'bg-violet-500' : 'bg-violet-300'
-                      }`} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-ds-xs text-[var(--content-primary)] font-medium truncate">{w.title}</p>
-                        <p className="text-[10px] text-[var(--content-tertiary)]">
-                          AI score: {w.aiOpportunityScore} &middot; {formatDuration(w.durationMs)} &middot; {w.stepCount ?? 0} steps
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
-                  <button
-                    onClick={() => { applyPreset(PRESET_VIEWS.find(v => v.label === 'AI-Ready')!); }}
-                    className="w-full px-ds-4 py-ds-2 text-ds-xs text-violet-600 hover:bg-violet-50 transition-colors text-center"
-                  >
-                    View all AI opportunities &rarr;
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* ── Recent Activity ────────────────────────────────────────── */}
-          <div className="card overflow-hidden">
-            <div className="flex items-center gap-ds-2 px-ds-4 py-ds-3 border-b border-[var(--border-subtle)]">
-              <Activity className="h-4 w-4 text-blue-500" />
-              <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">Recent Activity</h3>
-            </div>
-            <div className="divide-y divide-[var(--border-subtle)]">
-              {workflows.slice(0, 5).map((w) => (
-                <Link
-                  key={w.id}
-                  href={`/workflows/${w.id}`}
-                  className="flex items-center gap-ds-3 px-ds-4 py-ds-2.5 hover:bg-[var(--surface-secondary)] transition-colors"
-                >
-                  <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                    HEALTH_STATUS_CONFIG[w.healthStatus]?.dotClass ?? 'bg-[var(--content-tertiary)]'
-                  }`} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-ds-xs text-[var(--content-primary)] font-medium truncate">{w.title}</p>
-                    <p className="text-[10px] text-[var(--content-tertiary)]">
-                      {formatDateRelative(w.createdAt)} &middot; {w.stepCount ?? 0} steps &middot; {formatDuration(w.durationMs)}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-        </div>
-        </>
-      )}
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          BOTTLENECK RADAR
-          ═══════════════════════════════════════════════════════════════════ */}
-      {bottleneckWorkflows.length > 0 && (
-        <div className="card px-ds-5 py-ds-4 mb-ds-6">
-          <div className="flex items-center gap-ds-2 mb-ds-3">
-            <Clock className="h-4 w-4 text-red-500" />
-            <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">Bottleneck Radar</h3>
-            <span className="text-[10px] text-[var(--content-tertiary)]">{bottleneckWorkflows.length} workflow{bottleneckWorkflows.length !== 1 ? 's' : ''} with bottleneck risk</span>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-ds-3">
-            {bottleneckWorkflows.map((w) => (
-              <Link key={w.id} href={`/workflows/${w.id}`} className="rounded-lg border border-red-100 bg-red-50/30 px-3 py-2 hover:bg-red-50 transition-colors">
-                <p className="text-ds-xs font-medium text-[var(--content-primary)] truncate">{w.title}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] text-red-600 font-medium">{formatDuration(w.durationMs)}</span>
-                  <span className="text-[10px] text-[var(--content-tertiary)]">{w.stepCount ?? 0} steps</span>
-                  <span className={`text-[10px] font-medium ${w.bottleneckRisk === 'high' ? 'text-red-600' : 'text-amber-600'}`}>
-                    {w.bottleneckRisk} risk
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* ═══════════════════════════════════════════════════════════════════
           PROCESS FAMILIES PREVIEW

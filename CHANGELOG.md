@@ -6,6 +6,82 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-20] - Iteration 016: Dashboard simplification — 5 sections removed (Mode 2 directed + first ceiling-cool-off invocation)
+
+### User directive (CEO scope)
+
+"Dramatically simplify the dashboard page of the main web app. Remove: Volume & Coverage object, Quality & Readiness object, Signals & Opportunities object, the entire Intelligence Summary section, and the Bottleneck Radar section."
+
+### Governance framing
+
+- **Mode 2 (Targeted fix — user-directed):** single logical outcome (dashboard simplification) with five internal removal steps, one file, one Area (web-app UI), one reversible commit.
+- **Selection rule:** `directed` + `ceiling-cool-off: invoked; rationale: user-directed CEO scope; pool 15 > 8 would force burn-down, clause 7 (MR-003 Change B, landed at iter 015) authorizes single-use cool-off to honor the directed scope with one-logical-outcome discipline`.
+- **First invocation of MR-003 Change B (ceiling-cool-off clause 7)** — the policy is now stress-tested in a real directed scenario.
+- **First web-app bounded-loop iteration since iter 001** (14-iter drought broken) — partial relief on MR-003 Signal 5 portfolio drift; portfolio-drift counter reset to 0.
+
+### Removed
+
+Five sections from `apps/web-app/src/app/(app)/dashboard/page.tsx`:
+
+1. **Volume & Coverage** card (~L867–892) — total workflows / recorded-this-week / system count / avg duration.
+2. **Quality & Readiness** card (~L894–921) — avg confidence / SOP ready count / maturity score / cognitive load.
+3. **Signals & Opportunities** card (~L923–948) — needs review / optimization opportunities / insights count / AI candidates.
+4. **Intelligence Summary** (entire section, ~L957–1098) — section header + 3 sub-cards: Action Items, AI Opportunities, Recent Activity.
+5. **Bottleneck Radar** (~L1103–1125) — 4-column grid of high/medium bottleneck-risk workflows.
+
+Also removed:
+- The Executive Overview 3-column grid wrapper that held sections 1–3 (including its LAYER 1 section comment).
+- 2 useMemo hooks with zero surviving consumers: `staleWorkflows`, `bottleneckWorkflows`.
+- 2 unused lucide-react icon imports: `Brain`, `Activity`.
+
+### Preserved (verified surviving consumers)
+
+Frontend-engineer honestly narrowed the coordinator's initial dead-code brief when grep-verification showed 4 of 7 candidate items had legitimate surviving consumers:
+
+- `needsAttentionWorkflows` / `optimizationWorkflows` — feed `topRiskWorkflow` / `topOpportunityWorkflow` upstream of Command Center Top Signals strip.
+- `confidenceColorClass()` / `confidenceBarColorClass()` — used at 3 call sites in Workflow Library cards.
+- `BottleneckRisk` type + `WorkflowSummary.bottleneckRisk` field — API contract field returned from `/api/workflows`; data-model level, not section-scoped.
+- Icon imports `AlertTriangle`, `Zap`, `Clock` — used in Command Center header and Workflow Library.
+
+Command Center Header, Workflow Library, Process Groups View, Empty State, and all API data-fetching paths are untouched.
+
+### Impact
+
+- **Post-removal dashboard flow:** Command Center Header (Org Health + Top Signals strip + Top Insights + Usage Meter + action buttons) → Process Families preview (conditional) → View Mode Toggle → Workflow Library / Process Groups View. Lean single-column reading path; the signal-level insights in Command Center are no longer duplicated by the metric-summary cards below.
+- **LOC:** `−282 / +0` in `page.tsx` (1 file changed, 0 new files).
+- **Cognitive load reduction:** 5 of the most derived-metric-heavy sections removed; Top Signals strip continues to surface the same underlying alerts at a higher-impact frame.
+- **Zero production-logic risk surface:** pure removal, no behavior change to what remains.
+- **Signal-5 relief:** first bounded-loop web-app iteration since iter 001; portfolio-drift counter reset; web-app UI area now represented in the rolling 5-loop saturation window (4 distinct areas now).
+
+### Validation (independent coordinator verification)
+
+- `pnpm --filter @ledgerium/web-app typecheck` → clean (tsc --noEmit, no errors)
+- `pnpm --filter @ledgerium/web-app test` → **79/79 passed** (3 test files: humanize 25 tests, health-scores 29 tests, format 25 tests)
+- `pnpm --filter @ledgerium/web-app build` → clean (67 static pages generated; `/dashboard` route builds to 25.7 kB)
+- `git diff --stat` → 1 file changed, 282 deletions
+- Grep for `"Volume & Coverage|Quality & Readiness|Signals & Opportunities|Intelligence Summary|Bottleneck Radar"` in `page.tsx` → **0 matches**
+- Grep for `"staleWorkflows|bottleneckWorkflows"` in `apps/web-app/src/` → **0 matches**
+
+### Governance
+
+- **Rule:** `directed` + `ceiling-cool-off: invoked`. Cool-off consumed — single-use per clause 7; iter 017 returns to clause 6 burn-down.
+- **Cool-off rationale evaluation (for MR-004 to consider):** MR-003 Change B was motivated by the need to exercise the refined scoring formula via `top-score`; iter 016 invoked it for a `directed` pick instead. Clause 7's text explicitly lists `directed` as permitted, but this does NOT advance the top-score-evidence goal. MR-004 should decide whether cool-off should be narrowed to `top-score`-only or whether it correctly serves dual purposes (user-scope respect + formula exercise, whichever arrives first).
+- **Agent diversity:** frontend-engineer is now 2nd consecutive primary (iter 014 + iter 016); same-implementer-4+ trigger is 2 away. Monitor iter 018/020 for diversity pick.
+- **Saturation status post iter 016 (rolling iter 011–016 excluding Mode-4 iter 015):** extension architecture 1 · invariants/testing 2 (012+013) · UX resilience 1 · web-app UI 1. **No 3-in-a-row; 4 distinct areas — strong diversity.**
+- **Staleness-cap watch (CRITICAL):** #15 (Birth 006) now at age 10 — **staleness cap reached**. Per CLAUDE.md § Follow-Up Debt Policy clause 2, this item MUST be triaged at MR-004 (iter 018) unless iter 017 preemptively closes it. #14 (Birth 007, age 9) reaches cap at iter 017. **Coordinator recommendation: iter 017 = #15** (Extract confidence thresholds to shared constants, score 10, Effort 2 / Risk 1).
+- **Meta-review cadence:** iter 016 is the 1st bounded loop post-MR-003. MR-004 triggers at iter 018 (base cadence, 3 bounded loops post-MR-003). Stability window active through iter 017.
+
+### Follow-ups
+
+**Zero follow-ups generated.** Directed Mode 2 with clean scope + clean validation + no emergent adjacent work. Frontend-engineer's dead-code narrowing is a scope-discipline signal, not a follow-up.
+
+### Risks (flagged, not blocking)
+
+- If the CEO intends "dramatically simplify" as an ongoing program, additional Mode-2 iterations may follow. Coordinator will treat each as a separate directed iteration with its own scope statement; no pre-emptive multi-section backlog items created.
+- Cool-off invocation pattern deviates from MR-003's stated motivation. MR-004 will formally review.
+
+---
+
 ## [2026-04-20] - Iteration 015: Meta-Review 003 (Mode 4, governance-only) — 4 diffs applied
 
 ### Governance-only iteration — no product code changes

@@ -1,6 +1,6 @@
 # Ledgerium AI — Improvement Backlog
 
-Last updated: 2026-04-20 (post-iteration 015 / Meta-Review 003 — 4 governance diffs applied; ceiling-cool-off clause 7 now available at iter 016; pool unchanged at 15 (Mode 4 adds no follow-ups); iter 016 authorized to cool-off → top-score pick #4 or fallback burn-down pick #19)  
+Last updated: 2026-04-20 (post-iteration 016 — **directed dashboard simplification shipped**; 5 sections removed from web-app dashboard (Volume & Coverage, Quality & Readiness, Signals & Opportunities, Intelligence Summary, Bottleneck Radar); ceiling-cool-off clause 7 invoked for the first time (rationale: directed CEO scope); pool unchanged at 15 (0 follow-ups generated); web-app surface touched for first time in bounded-loop era since iter 001 — partial Signal 5 relief; iter 017 returns to forced burn-down per clause 6)  
 Current phase: Phase 1  
 Backlog purpose: maintain a ranked, evidence-based portfolio of the highest-value fixes, improvements, and experiments for bounded improvement loops.
 
@@ -21,15 +21,14 @@ Scoring scale:
 
 Higher total score = higher priority. Post Meta-Review 001: range widened to ~6–18 (was 10–16).
 
-### Saturation status (computed over iter 010–014 — rolling 5 bounded loops; iter 015 is Mode 4 and does not consume Area cadence)
+### Saturation status (computed over iter 011–016 — rolling 5 bounded loops; iter 015 is Mode 4 and does not consume Area cadence)
 
-- Session-durability area = 1 of last 5 (iter 010)
 - Extension-architecture / segmentation area = 1 of last 5 (iter 011)
-- Invariants / testing area = 2 of last 5 (iter 012, iter 013) — **2-in-a-row watch**; picking invariants again at iter 016 would trip 3-in-a-row (#26, #30 flagged)
+- Invariants / testing area = 2 of last 5 (iter 012, iter 013) — cluster cleared; 2 more non-invariants loops aged it out
 - UX resilience area = 1 of last 5 (iter 014)
-- Quality assurance area = 0 of last 5
-- SOP area = 0 of last 5
-- No 3-in-a-row; no `−S` penalties currently apply. Coordinator-aware 2-in-a-row signal on invariants/testing.
+- Web-app UI area = 1 of last 5 (iter 016) — **new entry**; first web-app bounded loop since iter 001, partial Signal-5 portfolio-drift relief
+- Session-durability area = 0 of last 5 (iter 010 aged out)
+- No 3-in-a-row; no `−S` penalties currently apply. Area diversity remains strong (4 distinct areas in rolling 5-loop window).
 
 ### Portfolio override rules
 
@@ -42,17 +41,18 @@ See `CLAUDE.md § Selection Policy` — any of these overrides top-score:
 
 ## Portfolio Summary
 
-- Total candidates reviewed: 38 (27 prior + 4 iter-011 follow-ups + 1 iter-012 follow-up + 2 Mode-3 follow-ups + 2 iter-013 follow-ups + 2 iter-014 follow-ups)
-- Top priority area: **iter 016 = ceiling-cool-off → top-score (MR-003 Change B clause 7, single-use)** OR fallback burn-down. Cool-off top pick: **#4** Artifact + system-health refresh process (score 13, Area agentic CI). Burn-down top pick: **#19** GC stale session keys (score 11, Area session durability).
-- Open follow-up pool (Birth iter shown): #7 (008) · #14 (007) · #15 (006) · #19/20/21 (010) · #23/24 (011) · #26 (012) · #27/28 (M3@012) · #29/30 (013) · #31/32 (014) — **15 items open** (unchanged; Mode 4 adds no follow-ups)
-- **Staleness watch (MR-003 Appendix A)**: #15 (Birth 006, age 9) crosses the 10-loop cap at iter 016. If iter 016 ≠ #15 (e.g. cool-off picks #4), MR-004 must execute mandatory keep/downgrade/delete triage per CLAUDE.md § Follow-Up Debt Policy clause 2. Recommend iter 017 = #15 preemptively.
-- Highest-risk unresolved item: no release blockers remain; highest-risk open items are iter-010 follow-ups #19–21 and iter-011 follow-ups #23/24.
-- Last completed item: **Meta-Review 003 (iteration 015, Mode 4)** — governance-only, 4 diffs applied to CLAUDE.md + SYSTEM_HEALTH.md; no product code changes. Prior: persistenceTruncated UI banner (iter 014).
-- Last meta-review: **Meta-Review 003 (2026-04-20)** — see `META_REVIEW_003.md`; prior: MR-002 (2026-04-19) `META_REVIEW_002.md`; MR-001 (2026-04-17) `META_REVIEW_001.md`. **Next meta-review (MR-004) due at iter 018** (base cadence: 3 loops post MR-003). Stability window active through iter 017.
-- Next recommended action: **iter 016 — ceiling-cool-off invoked, pick #4 Artifact + system-health refresh process (score 13)**. Rationale: (a) mechanizes MR-003 Change A's manual staleness-prevention work; (b) first `top-score` autonomous selection since iter 009 — exercises the refined scoring formula; (c) non-extension-app surface partially addresses MR-003 Signal 5 portfolio drift. Fallback (if cool-off declined): **#19** (GC stale session keys, score 11, burn-down, Effort 1 / Risk 1).
-- Release-blocker burn rate (last 5 loops iter 011–015, excluding Mode-4 iter 015): **0/0** — all blockers closed; future blockers will surface in Phase 2 planning.
-- Follow-up closure ratio (10-iter window iter 005–014, unchanged since iter 015 is Mode 4): **0.188**. MR-003 revised KPI target from ≥0.4 to ≥0.25 by iter 018 (see META_REVIEW_003.md §Effectiveness KPIs). Pool-size ceiling active for iter 016 unless cool-off invoked.
-- MR-003 governance diffs applied: **Change A** CLAUDE.md § Current Phase + § Known Issues hygiene refresh; **Change B** CLAUDE.md § Follow-Up Debt Policy clause 7 ceiling-cool-off; **Change C** SYSTEM_HEALTH.md autonomous-ratio sub-partition; **Change D** CLAUDE.md § Meta-Review Cadence portfolio-drift early-trigger.
+- Total candidates reviewed: 38 (27 prior + 4 iter-011 follow-ups + 1 iter-012 follow-up + 2 Mode-3 follow-ups + 2 iter-013 follow-ups + 2 iter-014 follow-ups; iter 016 generated 0 follow-ups)
+- Top priority area: **iter 017 = forced burn-down** — cool-off was single-use and has been consumed at iter 016; clause 6 returns. Pool still 15 > 8. Top candidate: **#15** (Extract confidence thresholds to shared constants, score 10, Area code hygiene, Birth iter 006, **age 10 — staleness cap reached**). Preemptively close to prevent MR-004 mandatory triage.
+- Open follow-up pool (Birth iter shown): #7 (008) · #14 (007) · **#15 (006, age 10 — at staleness cap)** · #19/20/21 (010) · #23/24 (011) · #26 (012) · #27/28 (M3@012) · #29/30 (013) · #31/32 (014) — **15 items open** (iter 016 generated 0 follow-ups — directed Mode 2 with clean scope)
+- **Staleness watch**: #15 (Birth 006) reached age 10 at iter 016. CLAUDE.md § Follow-Up Debt Policy clause 2 escalates to MR-004 for mandatory keep/downgrade/delete triage unless iter 017 preemptively closes it. **Recommend iter 017 = #15.**
+- Highest-risk unresolved item: no release blockers remain; highest-risk open items are #15 (age 10, stale) and iter-010 follow-ups #19–21.
+- Last completed item: **Dashboard simplification (iteration 016, Mode 2 directed + ceiling-cool-off invoked)** — removed 5 named sections from web-app dashboard; −282 LOC; frontend-engineer primary; typecheck + tests + build all clean. Prior: Meta-Review 003 (iter 015).
+- Last meta-review: **Meta-Review 003 (2026-04-20)** — see `META_REVIEW_003.md`; prior: MR-002 (2026-04-19) `META_REVIEW_002.md`; MR-001 (2026-04-17) `META_REVIEW_001.md`. **Next meta-review (MR-004) due at iter 018** (base cadence: 2 more bounded loops post iter 016 = iter 017 + iter 018-marker; MR-004 fires at iter 019 IF we count strictly, OR at iter 018 if we count the elapsed-loop boundary). Stability window still active through iter 017.
+- Next recommended action: **iter 017 — forced burn-down (cool-off consumed); pick #15** (Extract confidence thresholds, score 10, age 10 staleness cap reached). Alternates: #19 (score 11, session durability), #7 (score 11, policy coverage), #14 (score 11, SOP quality gate, age 9).
+- Release-blocker burn rate (last 5 bounded loops iter 011–016, excluding Mode-4 iter 015): **0/0** — all blockers closed; future blockers will surface in Phase 2 planning.
+- Follow-up closure ratio (10-iter window iter 005–014 rolling; iter 016 adds 0 closures + 0 generations; ratio unchanged): **0.188**. MR-003 revised KPI target from ≥0.4 to ≥0.25 by iter 018. Pool-size ceiling active for iter 017.
+- **Autonomous-vs-directed sub-partition (MR-003 Change C, rolling iter 006–015 + iter 016):** `top-score` 1/10 (iter 009 only) · `burn-down` 6/10 (iter 005–007 then iter 012–014) · `blocker-cadence` 1/10 (iter 009 overlap) · `directed` 3/10 (iter 010, 011, **016**). Cool-off at iter 016 was invoked for a `directed` item, not `top-score` — refined formula discrimination still needs evidence from a `top-score` selection. Target for iter 017/018 window: ≥1 `top-score` selection.
+- MR-003 governance diffs applied (recap): **Change A** CLAUDE.md hygiene refresh; **Change B** ceiling-cool-off clause 7 (first invocation at iter 016); **Change C** autonomous-ratio sub-partition; **Change D** portfolio-drift early-trigger.
 
 ---
 
@@ -124,6 +124,7 @@ Schema note (MR-002 Change B): `Birth iter` column is MANDATORY for any row tagg
 | 013 | Full-pipeline golden fixture (raw `.ndjson` → normalizer → segmentation) — 3 fixtures, 12 byte-identity tests, zero production code changes | 11 |
 | 014 | Surface `persistenceTruncated` flag in review UI — amber warning banner in `ReviewScreen` + `HistoryDetailScreen`; `buildBundle` regression test | 11 |
 | 015 | **Meta-Review 003** (Mode 4, governance-only) — applied 4 diffs: CLAUDE.md hygiene refresh (A), ceiling-cool-off clause 7 (B), SYSTEM_HEALTH.md autonomous-ratio sub-partition (C), portfolio-drift early-trigger (D). No product code changes. | — |
+| 016 | **Dashboard simplification** (Mode 2 directed + `ceiling-cool-off: invoked`) — removed 5 sections from web-app dashboard: Volume & Coverage, Quality & Readiness, Signals & Opportunities, Intelligence Summary (entire), Bottleneck Radar. −282 LOC in `page.tsx` (1 file, 0 new files). Dead-code audit: 2 useMemos removed (`staleWorkflows`, `bottleneckWorkflows`); 4 candidate items preserved after verifying surviving consumers. First web-app bounded-loop iteration since iter 001 (Signal-5 relief). Zero follow-ups. | — (directed, not ranked) |
 
 > **All Phase-1 release blockers closed as of iter 011.** The release-blocker bonus `+B3` no longer applies to any item in the table.
 > All areas clear; no `−S` penalties apply.
