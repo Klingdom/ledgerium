@@ -4,6 +4,12 @@ import { db } from '@/db';
 import type { Prisma } from '@prisma/client';
 import { computeHealthScore } from '@/lib/health-scores';
 import { toPlanType, hasFeature } from '@/lib/plans';
+import {
+  computeWorkflowMetrics,
+  computePortfolioHealthScore,
+  computeInsightChips,
+} from '@/lib/workflow-metrics';
+import type { WorkflowMetricsInput, WorkflowMetricsOutput } from '@/lib/workflow-metrics';
 
 // ── Per-workflow intelligence computation ────────────────────────────────────
 
@@ -307,6 +313,71 @@ function computeProcessMaturityScore(
   return Math.round(Math.min(score, 100));
 }
 
+// ── Metrics V2 input adapter ──────────────────────────────────────────────────
+
+/**
+ * Converts a Prisma-shaped workflow row + its relations into the pure
+ * WorkflowMetricsInput shape expected by the metrics engine.
+ *
+ * Kept in route.ts intentionally: the metrics module must stay I/O-free and
+ * unaware of Prisma types. Parsing/normalisation is a route-layer concern.
+ */
+function toMetricsInput(
+  w: {
+    id: string;
+    confidence: number | null;
+    stepCount: number | null;
+    durationMs: number | null;
+    phaseCount: number | null;
+    toolsUsed: string | null;
+    createdAt: Date;
+    lastViewedAt: Date | null;
+    processDefinition: {
+      runCount: number;
+      variantCount: number;
+      avgDurationMs: number | null;
+      medianDurationMs: number | null;
+      stabilityScore: number | null;
+      confidenceScore: number | null;
+    } | null;
+  },
+  processInsights: Array<{
+    insightType: string;
+    severity: string;
+    title: string;
+    observedValue: string | null;
+  }>,
+): WorkflowMetricsInput {
+  const parsedTools: string[] = w.toolsUsed ? (() => {
+    try {
+      const parsed = JSON.parse(w.toolsUsed!);
+      return Array.isArray(parsed) ? parsed.filter((t): t is string => typeof t === 'string') : [];
+    } catch {
+      return [];
+    }
+  })() : [];
+
+  return {
+    id: w.id,
+    confidence: w.confidence,
+    stepCount: w.stepCount,
+    durationMs: w.durationMs,
+    phaseCount: w.phaseCount,
+    toolsUsed: parsedTools,
+    createdAt: w.createdAt,
+    lastViewedAt: w.lastViewedAt,
+    processDefinition: w.processDefinition ? {
+      runCount: w.processDefinition.runCount,
+      variantCount: w.processDefinition.variantCount,
+      avgDurationMs: w.processDefinition.avgDurationMs,
+      medianDurationMs: w.processDefinition.medianDurationMs,
+      stabilityScore: w.processDefinition.stabilityScore,
+      confidenceScore: w.processDefinition.confidenceScore,
+    } : null,
+    processInsights,
+  };
+}
+
 // ── Helpers for system extraction ────────────────────────────────────────────
 
 function extractSystems(workflows: Array<{ toolsUsed: string | null }>): Array<{ system: string; workflowCount: number }> {
@@ -421,7 +492,7 @@ export async function GET(req: NextRequest) {
 
   // ── Query ──────────────────────────────────────────────────────────────
 
-  const [results, insightCount, topInsights] = await Promise.all([
+  const [results, insightCount, topInsights, allWorkflowInsights] = await Promise.all([
     db.workflow.findMany({
       where,
       orderBy: { [orderByField]: sortDir },
@@ -440,7 +511,37 @@ export async function GET(req: NextRequest) {
       take: 3,
       select: { id: true, title: true, severity: true, insightType: true },
     }),
+    // Per-workflow insights for metrics engine (bottleneck/delay signals)
+    db.processInsight.findMany({
+      where: { userId: session.user.id, dismissed: false },
+      select: {
+        workflowId: true,
+        insightType: true,
+        severity: true,
+        title: true,
+        observedValue: true,
+      },
+    }),
   ]);
+
+  // Index per-workflow insights by workflowId for O(1) lookup
+  const insightsByWorkflowId = new Map<string, Array<{
+    insightType: string;
+    severity: string;
+    title: string;
+    observedValue: string | null;
+  }>>();
+  for (const insight of allWorkflowInsights) {
+    if (!insight.workflowId) continue;
+    const existing = insightsByWorkflowId.get(insight.workflowId) ?? [];
+    existing.push({
+      insightType: insight.insightType,
+      severity: insight.severity,
+      title: insight.title,
+      observedValue: insight.observedValue ?? null,
+    });
+    insightsByWorkflowId.set(insight.workflowId, existing);
+  }
 
   // ── Enrich each workflow ───────────────────────────────────────────────
 
@@ -489,6 +590,19 @@ export async function GET(req: NextRequest) {
     // Exclude processDefinition, portfolios, and tags relations from spread to keep response clean
     const { processDefinition: _pd, tags: _tags, portfolios: _portfolios, ...workflowBase } = w;
 
+    // ── Metrics V2 computation ────────────────────────────────────────────
+    const workflowProcessInsights = insightsByWorkflowId.get(w.id) ?? [];
+    const metricsInput = toMetricsInput(w, workflowProcessInsights);
+    const rawMetricsV2 = computeWorkflowMetrics(metricsInput);
+    // Apply plan gate: set isGated=true for free-tier users so UI can hide breakdown
+    const metricsV2: WorkflowMetricsOutput = {
+      ...rawMetricsV2,
+      healthScore: {
+        ...rawMetricsV2.healthScore,
+        isGated: !canSeeHealthScores,
+      },
+    };
+
     return {
       ...workflowBase,
       toolsUsed: parsedTools,
@@ -516,7 +630,7 @@ export async function GET(req: NextRequest) {
         stabilityScore: w.processDefinition.stabilityScore,
         confidenceScore: w.processDefinition.confidenceScore,
       } : null,
-      // Health score: only included for Starter+ users
+      // Health score V1: only included for Starter+ users (unchanged)
       ...(canSeeHealthScores ? {
         healthScore: computeHealthScore({
           stepCount: w.stepCount,
@@ -525,6 +639,8 @@ export async function GET(req: NextRequest) {
           phaseCount: w.phaseCount,
         }),
       } : {}),
+      // Health score V2 + full metrics (always present; isGated controls breakdown visibility)
+      metricsV2,
     };
   });
 
@@ -641,6 +757,14 @@ export async function GET(req: NextRequest) {
 
   const systemCoverage = extractSystems(results);
 
+  // ── V2 aggregate metrics ───────────────────────────────────────────────
+  const allMetricsV2 = allEnriched.map((w) => w.metricsV2);
+  const portfolioHealthScore = computePortfolioHealthScore(allMetricsV2);
+  const insightChips = computeInsightChips(
+    allMetricsV2,
+    topInsights.map((i) => ({ insightType: i.insightType, severity: i.severity, title: i.title })),
+  );
+
   return NextResponse.json({
     workflows: filteredWorkflows,
     stats: {
@@ -662,6 +786,9 @@ export async function GET(req: NextRequest) {
       systemCoverage,
       topInsights,
       recordedThisMonth,
+      // V2 aggregate metrics
+      portfolioHealthScore,
+      insightChips,
       // Backward-compatible fields
       recentlyViewedIds: recentlyViewed.map((w) => w.id),
     },
