@@ -1,6 +1,6 @@
 # Ledgerium AI — System Health
 
-Last updated: 2026-04-19 (post-iteration 014 — persistenceTruncated UI banner landed; closure ratio 0.143 → 0.188; pool 14 → 15 net +1; saturation cleared by UX resilience area pick; **iter 015 = Meta-Review 003 due at base cadence**; iter 016 resumes forced burn-down)
+Last updated: 2026-04-20 (post-Meta-Review 003 — 4 governance diffs applied: CLAUDE.md § Current Phase + § Known Issues hygiene refresh (Change A), § Follow-Up Debt Policy clause 7 ceiling-cool-off (Change B), SYSTEM_HEALTH.md autonomous ratio sub-partition (Change C), § Meta-Review Cadence portfolio-drift trigger (Change D); iter 016 authorized to invoke ceiling-cool-off → top-score or fall back to burn-down)
 
 ## Executive Summary
 
@@ -8,7 +8,7 @@ Ledgerium AI is in **Phase 1** with a strong deterministic product foundation, c
 
 **Meta-Review 002** (2026-04-19) confirmed MR-001's control changes (formula rewrite, delegation rubric, Mode 5 formalization) are working first-order, but flagged a priority finding: the **density trigger** in `Follow-Up Debt Policy` clause 3 was silently violated 3 consecutive iterations (009, 010, 011 each generated ≥3 follow-ups with zero `density-response` log). MR-002 mechanized the policy into a machine-enforceable log line (Change A), added `Birth iter` as a mandatory schema field (Change B), and introduced a pool-size ceiling rule (Change C) that forces iter 012 to burn-down because the open follow-up pool is 11 items (> 8).
 
-Overall confidence: **High, stable post-MR-002** (3 of 3 release blockers closed; Mode 5 directed sequence executed cleanly across iter 010 + iter 011; MR-002 governance diffs applied and now enforcing selection for 3 consecutive iterations; follow-up closure ratio 0.0 → 0.077 → 0.143 → 0.188 across iter 011 → 012 → 013 → 014, below the 0.4 target but monotonically climbing; Mode 3 billing fix shipped cleanly with zero cadence impact; saturation discipline working — iter 014 proactively pivoted out of invariants/testing to avoid a 3-in-a-row; frontend-engineer surfaced for the first time in the bounded-loop era giving us 5 distinct primaries in the rolling window).
+Overall confidence: **High, stable post-MR-003** (3 of 3 release blockers closed; MR-003 applied 4 governance diffs evaluating MR-002 control-change efficacy: 4 of 6 MR-002 changes verdict "working, no change needed"; mandatory hygiene refresh on CLAUDE.md § Current Phase resolving 5-iter staleness; new ceiling-cool-off clause 7 authorizes iter 016 to exercise the refined scoring formula for the first time since iter 009; follow-up closure ratio 0.188 with revised KPI target ≥0.25 by iter 018; Mode 3 billing fix shipped cleanly with zero cadence impact; agent diversity at 5 distinct primaries; scope-expansion protocol (Change D) observably shaping coordinator behavior without ever firing — textbook mechanized-qualitative-policy outcome).
 
 ---
 
@@ -33,7 +33,7 @@ Overall confidence: **High, stable post-MR-002** (3 of 3 release blockers closed
 | Agentic CI readiness | strong | 4.5 | command, backlog, iteration log, templates, Meta-Review 001 + 002 diffs applied; iter 009 + 010 + 011 all used multi-agent loops; Mode 5 directed sequence executed cleanly across iter 010 + 011 (two independent iterations, own commits, own validations, zero scope violations); iter 011 first iteration since init to use `system-architect` as primary agent; MR-002 mechanized density-trigger + birth-iter schema + pool-size ceiling + scope-expansion protocol |
 | GTM readiness | emerging | 2.5 | product wedge promising; analytics infrastructure ready for data-driven decisions |
 | Release readiness | strong | 5 | **3 of 3 release blockers closed** (E2E iter 009, session persistence iter 010, segmentation convergence iter 011). Zero Phase-1 blockers remain. CI gate live on PRs via `e2e-extension.yml`. Byte-equivalence regression harness guards the segmentation convergence. |
-| Autonomous-vs-directed selection ratio (MR-002 Change E) | healthy | 4 | Last 10 iterations (iter 005–014): 2 directed (iter 010, iter 011) / 8 autonomous = 0.2 directed ratio. Healthy band: 0.1–0.3. Iter 012 + 013 + 014 all autonomous burn-down as expected; trend will drop toward 0.1 once iter 010/011 age out of the 10-iter window (iter 016/017). |
+| Autonomous-vs-directed selection ratio (MR-002 Change E; MR-003 Change C sub-partition) | below band | 3 | Last 10 iterations (iter 005–014) sub-partitioned per MR-003 Change C: `top-score` autonomous **1/10** (iter 009 only) · `burn-down` autonomous **6/10** (iter 005, 006, 007, 012, 013, 014) · `blocker-cadence` **1/10** (iter 009 overlap) · `directed` **2/10** (iter 010, 011). Healthy band: `top-score + blocker-cadence ≥ 2/10` to exercise the refined scoring formula. **Currently below band** — the pool-size ceiling (Change C) has dominated selection for 3 consecutive loops, blocking formula discrimination. MR-003 Change B (ceiling-cool-off clause 7) releases pressure at iter 016 — target: ≥1 `top-score` selection in iter 015–018 window. |
 
 ---
 
@@ -83,13 +83,13 @@ Overall confidence: **High, stable post-MR-002** (3 of 3 release blockers closed
 
 ## Current Top Opportunities
 
-1. **Iter 015 = Meta-Review 003 (Mode 4, non-coding)** — base cadence: 3 loops since MR-002 (iter 012 + 013 + 014 completed). Scope: evaluate MR-002 control-change efficacy (density-trigger log-line compliance, pool-size ceiling rule, birth-iter schema adoption, scope-expansion protocol usage, autonomous-vs-directed ratio band, trigger #2 tightening). No product code changes.
-2. **Iter 016 burn-down (STILL FORCED by MR-002 Change C)** — pool 14 → 15 after iter 014 (closed #18, opened #31 + #32; ceiling active). **Saturation cleared** — any area permissible. Top candidates (ordered): **#19** (GC stale session keys, score 11, session durability) · **#7** (widen `credit_card` regex, score 11, policy coverage) · **#14** (wire validateRenderedSOP, score 11, SOP quality gate) · **#31** (sidepanel component test harness, score 11, quality assurance — unlocks banner render-coverage) · **#20** (loadFromStorage validation, score 10, session durability).
-2. Real-extension `launchPersistentContext` E2E (#21) — closes the fidelity gap between Vitest integration and full OS-level SW restart
-3. Structured session-aware error logging — the last item from the original Phase-1 priority list not yet addressed
-4. Extension content layer unit-test coverage (capture.ts, state-observer.ts, label-extractor.ts)
-5. Move to Phase 2 planning — no release blockers remain; PRD refresh or GTM readiness work unblocked
-6. Monitor MR-002 control-change efficacy (autonomous-vs-directed ratio row in scorecard; 10-iter closure-ratio metric now at 0.077, recovery curve starting; density-response log-line compliance)
+1. **Iter 016 (Mode 1): ceiling-cool-off → top-score** — per MR-003 Change B (clause 7 cool-off), iter 016 is authorized to ignore the pool-size ceiling once and select by `top-score`. **Primary candidate: #4 Artifact + system-health refresh process (score 13, Area: agentic CI)** — directly closes the staleness gap MR-003 Change A patched manually; non-extension-app surface partially addresses Signal 5 portfolio drift. Fallback if cool-off declined: #19 (GC stale session keys, score 11, session durability, burn-down).
+2. **Iter 017 (Mode 1): Follow-up burn-down** — post-cool-off, clause 6 returns; pool still > 8 is likely. Staleness watch: #15 crosses age 10 cap by iter 016; if iter 016 = #4 and iter 017 ≠ #15, MR-004 must triage. Recommend iter 017 = #15 or #14 preemptively.
+3. **Iter 018 (Mode 4): Meta-Review 004 (base cadence)** — 3 loops post MR-003 (iter 016 + 017 + ... or 015-is-MR-003 counts as Mode 4 so base cadence triggers at iter 018). Must include staleness-cap triage if #15 crossed age 10.
+4. Real-extension `launchPersistentContext` E2E (#21) — closes the fidelity gap between Vitest integration and full OS-level SW restart
+5. Structured session-aware error logging — the last item from the original Phase-1 priority list not yet addressed
+6. Move to Phase 2 planning — no release blockers remain; PRD refresh or GTM readiness work unblocked
+7. Monitor MR-003 control-change efficacy (ceiling-cool-off invocation count; top-score autonomous ratio recovery; closure ratio 0.188 → ≥0.25 target by iter 018; portfolio-drift trigger dormant unless iter 016+ all stay extension-app)
 
 ---
 
@@ -118,53 +118,48 @@ Overall confidence: **High, stable post-MR-002** (3 of 3 release blockers closed
 
 ## Recommended Next Iteration
 
-**Iter 015: Meta-Review 003 (Mode 4, non-coding) — base-cadence trigger.** Then iter 016: forced follow-up burn-down (MR-002 Change C ceiling — pool 15 > 8).
+**Iter 016 (Mode 1): ceiling-cool-off → top-score (MR-003 Change B clause 7, single-use).** Primary candidate: #4 (Artifact + system-health refresh process, score 13). Fallback if cool-off declined: #19 (GC stale session keys, score 11, burn-down).
 
 ### Mandatory sequencing
 
-1. **Iter 015 (Mode 4): Meta-Review 003** — 3 loops elapsed since MR-002 (iter 012 + 013 + 014 completed). Stability window expires. Meta-coordinator evaluates:
-   - MR-002 Change A (density-response log-line) compliance — 0 triggers in the window (density never crossed 3), so no enforcement data yet
-   - MR-002 Change B (Birth iter field) adoption — 100% compliant, M3@012 anchor pattern established
-   - MR-002 Change C (pool-size ceiling) efficacy — 3 consecutive iter forcings (012, 013, 014); did it actually improve closure ratio? 0.0 → 0.188 trajectory says yes, pool not draining yet
-   - MR-002 Change D (scope-expansion protocol) usage — 0 invocations in the window; every iteration held scope cleanly
-   - MR-002 Change E (autonomous-vs-directed ratio band) — 0.2 stable in 0.1–0.3; no action required
-   - Agent diversity — 5 distinct primaries in rolling window, strongest in bounded-loop era
-   - Candidate policy adjustments / new governance diffs if warranted
-2. **Iter 016 (Mode 1): burn-down** — pool 15 > 8, ceiling rule still forcing. Saturation cleared. Any area.
-3. **Recommended candidate for iter 016**: **#19** (GC stale `ledgerium_active_session_events_*` keys on SW startup). Score 11, Area `session durability`, effort 1, risk 1, Birth iter 010 (age 4, aging but not stale). Pairs thematically with iter 014's persistence-trust work — both close gaps in the session-durability surface established by iter 010.
+1. **Iter 016 (Mode 1)**: per CLAUDE.md § Follow-Up Debt Policy clause 7 (new, MR-003 Change B), iter 016 is the first loop eligible for ceiling-cool-off after 3 consecutive forced burn-downs (iter 012, 013, 014). Coordinator may either:
+   - **(A) Invoke cool-off** → log `ceiling-cool-off: invoked; rationale: exercise refined scoring formula + close MR-003 Change A hygiene gap structurally` → pick **#4** (Artifact + system-health refresh process, score 13, Area agentic CI). Non-extension-app surface (partial Signal-5 relief).
+   - **(B) Decline cool-off** → continue burn-down → pick **#19** (GC stale `ledgerium_active_session_events_*` keys on SW startup, score 11, Area session durability, Birth iter 010 age 4, Effort 1 Risk 1).
+2. **Iter 017 (Mode 1)**: after cool-off or burn-down, clause 6 returns; pool likely still > 8. **Staleness-cap watch**: #15 (Birth 006, age 8) crosses the 10-loop cap at iter 016 window. Recommend iter 017 = **#15** (Extract confidence thresholds to shared constants, score 10) preemptively, or be prepared for mandatory MR-004 triage.
+3. **Iter 018 (Mode 4): Meta-Review 004** — 3 loops post MR-003 (iter 016 + 017 + ...). Must include staleness-cap scan, cool-off invocation count, portfolio-drift trigger status.
 
-### Candidates for iter 016 (ordered by score)
+### Candidates for iter 016 (ordered by score, cool-off mode)
 
-- **#19** GC stale `ledgerium_active_session_events_*` keys — score 11 (iter 010 follow-up, session durability) ← **top pick**
+- **#4** Artifact + system-health refresh process — score **13** (improvement, Area agentic CI) ← **cool-off top pick**; directly supports MR-003 Change A staleness prevention
+- **#5** Invariant-focused regression suite (segmentation + normalization) — score 12 (improvement, invariants/testing)
+- **#6** Product wedge / ICP narrative — score 12 (experiment, product/GTM)
+
+### Candidates for iter 016 (ordered by score, burn-down fallback mode)
+
+- **#19** GC stale `ledgerium_active_session_events_*` keys — score 11 (iter 010 follow-up, session durability) ← **burn-down top pick**
 - **#7** Widen policy-engine `credit_card` regex to whitespace separators — score 11 (iter 008 follow-up, policy coverage)
-- **#14** Wire `validateRenderedSOP` into pipeline — score 11 (iter 007 follow-up, SOP quality gate, age 7 loops — approaching staleness cap at 10)
-- **#31** Bootstrap sidepanel component test harness — score 11 (iter 014 follow-up, quality assurance — unlocks banner render-coverage)
+- **#14** Wire `validateRenderedSOP` into pipeline — score 11 (iter 007 follow-up, SOP quality gate, age 7 — approaching staleness cap at 10)
+- **#31** Bootstrap sidepanel component test harness — score 11 (iter 014 follow-up, quality assurance; density risk: likely spawns ≥3 FU)
 - **#20** `loadFromStorage` sessionId/in-flight flag cross-validation — score 10 (iter 010 follow-up, session durability)
-- **#26** I1b DerivedStep-level byte-identity — score 10 (iter 012 follow-up, invariants/testing)
-- **#30** Rapid-focus-blur normalizer dedup fixture — score 10 (iter 013 follow-up, invariants/testing)
-- **#15** Extract confidence thresholds to shared constants — score 10 (iter 006 follow-up, code hygiene, age 8 loops — oldest, approaching staleness cap)
+- **#15** Extract confidence thresholds to shared constants — score 10 (iter 006 follow-up, code hygiene, age 8 — oldest, staleness-cap at iter 016)
 
-### Post-016 preliminary queue
-
-- **Iter 017: continue burn-down** if pool still > 8. Projected pool after iter 016 = 14 (close 1, add 0–2) — still above ceiling.
-- **Iter 018: Real-extension `launchPersistentContext` E2E** (iter 010 follow-up #21) — closes fidelity gap between Vitest integration and OS-level SW restart.
-- **Iter 019+**: Phase 2 planning — no blockers remain, so PRD refresh / GTM work is unblocked.
-
-### Meta-review trigger check (post iter 014)
-- Loops since Meta-Review 002: **3** (iter 012 + 013 + 014) — **BASE-CADENCE TRIGGER MET** for MR-003 at iter 015.
-- Post-meta-review stability window: expires after iter 014. Iter 015 (MR-003) is authorized to change control variables.
-- Early-trigger conditions: none would have forced MR-003 ahead of base cadence (5 distinct implementer primaries in rolling window; no validation-failure run; pool at 15 does exceed 10 but base cadence is at this iteration anyway).
-- Staleness-cap scan (CLAUDE.md clause 2: any follow-up not addressed within 10 iterations is escalated at next meta-review): #15 (Birth iter 006, age 8), #14 (Birth iter 007, age 7) — approaching but not yet over the 10-cap. MR-003 should pre-flag these for iter 016/017 prioritization.
-- Closure-ratio recovery: **0.143 → 0.188** after iter 014. Target ≥0.4. Trajectory: 0.0 → 0.077 → 0.143 → 0.188 — monotonically climbing, but the rate of improvement is slowing as iter 014 added 2 and closed 1. For ratio to hit 0.4 within the 10-iter window, multiple iterations must close without adding follow-ups, OR multi-close iterations must occur. MR-003 should examine whether the follow-up generation rate is structurally higher than the closure rate and propose corrective policy.
+### Meta-review trigger check (post iter 015 / MR-003 applied)
+- Loops since Meta-Review 003: **0** (MR-003 is iter 015 Mode 4). Base cadence next fires at iter 018.
+- Post-meta-review stability window: first 3 loops after MR-003 are the stability window — do not run another meta-review until iter 018.
+- Early-trigger conditions: **portfolio-drift trigger (MR-003 Change D, new)** is dormant (14 iterations have varied surface coverage; counter resets to 0 for post-MR-003 window).
+- Staleness-cap scan: **#15 (Birth 006, age 8) at iter 015; crosses age 10 at iter 016.** If iter 016 = #4 (not #15) and iter 017 does not preemptively pick #15, MR-004 must execute mandatory keep/downgrade/delete triage per CLAUDE.md § Follow-Up Debt Policy clause 2.
+- Closure-ratio recovery: **0.188** post-iter-014. Target revised from 0.4 to ≥0.25 by iter 018 (MR-003 KPI). Trajectory slowing; structural concern acknowledged in META_REVIEW_003.md §Signal 2 but not action-taken.
+- Autonomous-vs-directed sub-partition (MR-003 Change C, new): `top-score` autonomous **1/10**, needs ≥2/10 by iter 018 to validate the refined formula. Ceiling-cool-off at iter 016 is the designed path.
 
 ## Meta-Review Status
 
-- Completed loops since initialization: **14 (iter 001–014)**
-- Last meta-review: **Meta-Review 002 (2026-04-19, covering iter 009–011)** — see `META_REVIEW_002.md`
-- Prior meta-review: Meta-Review 001 (2026-04-17, covering iter 004–008) — see `META_REVIEW_001.md`
-- Loops completed since last meta-review: **3 (iter 012 + iter 013 + iter 014)**
-- Next meta-review trigger: **BASE-CADENCE DUE at iter 015** — should cover iter 012/013/014 efficacy of MR-002 Change A/B/C/D/E and propose any warranted Change F+ diffs. Staleness-cap scan for follow-ups #15 (age 8) and #14 (age 7).
-- Status: **MR-003 due**
+- Completed loops since initialization: **15 (iter 001–015; iter 015 = MR-003 Mode 4, no product code)**
+- Last meta-review: **Meta-Review 003 (2026-04-20, covering iter 012–014)** — see `META_REVIEW_003.md`
+- Prior meta-reviews: Meta-Review 002 (2026-04-19, iter 009–011) `META_REVIEW_002.md`; Meta-Review 001 (2026-04-17, iter 004–008) `META_REVIEW_001.md`
+- Loops completed since last meta-review: **0** (iter 015 IS MR-003)
+- MR-003 applied 4 governance diffs: CLAUDE.md § Current Phase + § Known Issues hygiene (A); CLAUDE.md § Follow-Up Debt Policy clause 7 ceiling-cool-off (B); SYSTEM_HEALTH.md autonomous-ratio sub-partition (C); CLAUDE.md § Meta-Review Cadence portfolio-drift trigger (D).
+- Next meta-review trigger: **BASE-CADENCE at iter 018** — should evaluate cool-off efficacy (expect ≥1 invocation), top-score ratio recovery, closure-ratio trajectory vs revised 0.25 target, staleness-cap status on #15 / #14 / #7.
+- Status: **MR-003 complete; stability window active through iter 017; MR-004 scheduled at iter 018**
 
 ### Meta-Review 001 headline findings
 

@@ -1013,3 +1013,76 @@ Plain English; no `chrome.storage.local` jargon. Warning (amber), not error (red
 - Meta-review cadence: MR-002 completed pre-iter-012. Iter 012 + 013 + 014 = **3 loops since MR-002** → **base-cadence Meta-Review 003 is DUE at iter 015**. Stability window expires: iter 015 may change control variables.
 - **Saturation status post iter 014:** cleared. Last 3 iterations (012, 013, 014) land in 2 distinct areas (invariants/testing + UX resilience). 3-in-a-row rule inactive for iter 016.
 - Release signal (frontend-engineer self-report + coordinator independent re-verification): **GO**. Small, reversible, user-visible improvement. Zero production-logic risk surface. Pool size above ceiling → iter 016 stays forced burn-down (iter 015 is Mode 4 meta-review, non-coding).
+
+---
+
+## Iteration 015 — Meta-Review 003 (Mode 4, governance-only)
+
+Date: 2026-04-20
+Mode: **4 (Meta-review) — does not consume improvement-loop cadence counter**
+Commit: applied in this entry (coordinator-staged prior to commit)
+Artifact: `META_REVIEW_003.md` (514 lines)
+
+### Candidate Selection
+- **Rule:** base-cadence meta-review trigger. 3 bounded loops (iter 012 + 013 + 014) completed since Meta-Review 002 landed at `6e52a6f`. CLAUDE.md § Meta-Review Cadence base cadence = every 3 completed loops. No early-trigger would have forced MR-003 earlier (5 distinct implementer primaries in rolling window; zero validation-failure runs; portfolio-drift trigger did not yet exist).
+- **Scope:** evaluate MR-002 Changes A–F efficacy; surface new signals from iter 012/013/014; propose governance diffs if warranted; recommend iter 016 target; cadence self-critique.
+- **Stop condition:** Mode 4 is governance-only. No product code changes, no test changes, no package changes.
+- **Scope discipline:** `scope-expansion: n/a` — Mode 4 has no bounded-loop scope to expand.
+
+### Agents Involved
+- **meta-coordinator** (primary) — produced `META_REVIEW_003.md`, enumerated 4 proposed governance diffs (A mandatory hygiene; B mandatory cool-off clause; C optional sub-partition; D optional portfolio-drift trigger), ran per-change effectiveness scorecard on MR-002 A–F, surfaced Signal 1 (ceiling domination), Signal 2 (decelerating closure ratio), Signal 3 (mature scope discipline), Signal 4 (stale CLAUDE.md Phase), Signal 5 (web-app portfolio drift), Signal 6 (saturation near-miss), executed cadence self-critique.
+- **coordinator** — reviewed all 4 proposed diffs and **adopted all 4** (2 mandatory + 2 optional). Applied diffs to CLAUDE.md + SYSTEM_HEALTH.md. Updated IMPROVEMENT_BACKLOG.md header + portfolio summary + saturation block + selection-rule list + completed-iter table. Appended this iter-015 entry + CHANGELOG entry.
+
+### MR-002 Efficacy Scorecard (from `META_REVIEW_003.md` §Per-change effectiveness)
+
+| # | MR-002 Change | Verdict | Action taken in MR-003 |
+|---|---------------|---------|------------------------|
+| A | Density-response log line | Working structurally; not stress-tested (0 triggers in window; coordinator logged structural negatives) | No change |
+| B | Birth iter field required | Fully working; M3@anchor convention coined for Mode-3 follow-ups | No change |
+| C | Pool-size ceiling (>8) | Working as stop-loss; under-calibrated as closure engine (pool 11 → 15 net +4 despite 3 forcings) | **Supplemented by new MR-003 Change B cool-off clause 7** |
+| D | Scope-expansion protocol | Effective as deterrent; zero invocations; observably shaping behavior (iter 012 I1a/I1b split is textbook) | No change |
+| E | Autonomous-vs-directed ratio | Working; needs sub-partition to reveal `top-score` vs `burn-down` distinction | **MR-003 Change C sub-partition applied** |
+| F | Trigger #2 phase-aware guard | Dormant this window (zero open blockers); would have mis-fired without the guard | No change |
+
+**Summary:** 4 of 6 MR-002 changes verdict "working, no change needed" (67%). Real governance work concentrated in Changes A+B (~25 lines of diff). Cadence self-critique: worth running but only barely — keep 3-loop base cadence through MR-004; if MR-004 also finds majority tautology, consider introducing a "lite meta-review" variant.
+
+### Governance diffs applied in this iteration
+
+| # | Change | File(s) | Lines | Status |
+|---|--------|---------|-------|--------|
+| A | CLAUDE.md § Current Phase + § Known Issues hygiene refresh (remove stale `[BLOCKER]` listings closed in iter 009/010; add iter 009/010/012/013/014 to Resolved; update Known Issues to reflect "no current Phase-1 blockers") | `CLAUDE.md` | ~20 | ✅ applied |
+| B | CLAUDE.md § Follow-Up Debt Policy **new clause 7** — ceiling-rule cool-off: after 3 consecutive `burn-down`-forced iterations, next iter may ignore clause 6 once (single-use); requires `ceiling-cool-off: invoked; rationale: [reason]` log line | `CLAUDE.md` | ~5 | ✅ applied |
+| C | SYSTEM_HEALTH.md autonomous-vs-directed ratio row **sub-partitioned** into `top-score` / `burn-down` / `blocker-cadence` / `directed`; reveals `top-score = 1/10` which is below band | `SYSTEM_HEALTH.md` | ~3 | ✅ applied |
+| D | CLAUDE.md § Meta-Review Cadence **new early-trigger** — 10+ consecutive iterations without touching a tracked non-extension surface flags portfolio drift | `CLAUDE.md` | 1 | ✅ applied |
+
+**Total diff size:** ~29 lines across 2 governance files. No code change. No test change. No package change.
+
+### Validation
+- **Artifact integrity:** `META_REVIEW_003.md` created at 514 lines, matches MR-002 structure (executive summary → scope window → per-change scorecard → new signals → proposed diffs → non-changes → dormancy → iter-016 recommendation → KPIs → appendices).
+- **Cross-artifact consistency:** post-edit, CLAUDE.md § Current Phase matches SYSTEM_HEALTH.md blocker state matches IMPROVEMENT_BACKLOG.md header — **all three files now agree on "no Phase-1 blockers, pool at 15, MR-003 applied"**. Pre-MR-003 these 3 files were in 3-way contradiction on blocker status.
+- **No product code changes:** `git diff --stat` shows edits confined to `CLAUDE.md`, `SYSTEM_HEALTH.md`, `IMPROVEMENT_BACKLOG.md`, `ITERATION_LOG.md` (this entry), `CHANGELOG.md`, plus new `META_REVIEW_003.md`. Zero files under `apps/` or `packages/` touched. **Mode 4 stop condition respected.**
+- **Determinism / traceability preserved:** no schema change, no invariant change, no rule version change.
+
+### Outcome
+**MR-003 applied successfully. System state post-MR-003:**
+- CLAUDE.md governance-hygiene failure resolved (Change A).
+- Ceiling-rule escape hatch established (Change B) — iter 016 is first eligible loop; rationale for invoking + picking #4 (Artifact + system-health refresh process, score 13) documented in SYSTEM_HEALTH.md § Recommended Next Iteration.
+- Observability sub-partition live (Change C) — `top-score = 1/10` visible in scorecard; MR-004 can measure whether Change B actually unlocks more `top-score` selections.
+- Portfolio-drift early-trigger armed (Change D) — dormant until iter 016+ accumulate 10 consecutive non-tracked-surface iterations.
+
+### Impact
+- **Before MR-003:** 3 consecutive ceiling-forced burn-downs; refined scoring formula stress-tested on exactly 1 loop (iter 009) in entire post-MR-001 lifespan; CLAUDE.md 5-iter stale on blockers; closure ratio 0.188 decelerating toward asymptotic non-closure of 0.4 target.
+- **After MR-003:** ceiling-cool-off authorizes at least 1 discriminating `top-score` selection per 4-loop window (iter 016 is first eligible); CLAUDE.md consistent with SYSTEM_HEALTH.md + IMPROVEMENT_BACKLOG.md; closure-ratio KPI revised from 0.4 to 0.25 by iter 018 (realistic under current generation rate); portfolio-drift trigger armed for Signal 5 surveillance.
+
+### Follow-Ups Generated (Birth iter: 015)
+**Zero follow-ups.** Mode 4 is governance-only — no scope creep. All adjacent improvement-tracker work (e.g., "maybe document the artifact-as-scope-adjustment pattern in `.claude/decisions.md`" mentioned in MR-003 §Dormancy) is non-blocking coordinator memory, not a backlog item.
+
+**Follow-up density check:** 0 generated. `density-response:` log line not required.
+
+### Governance / Selection Signals
+- **Cadence counter:** base cadence post-MR-003 = 0 loops elapsed. Stability window: iter 016 + 017 must pass before any MR-004 consideration. MR-004 base-cadence trigger fires at iter 018 (3 bounded loops post MR-003).
+- **Staleness watch carried forward:** #15 (Birth 006, age 9) crosses the 10-loop cap at iter 016. If iter 016 = #4 (cool-off) and iter 017 ≠ #15, MR-004 must execute mandatory keep/downgrade/delete triage. Coordinator-recommended iter 017 target: #15 preemptively, OR #14 (Birth 007, age 8, crosses cap at iter 017).
+- **Portfolio-drift counter (new, MR-003 Change D):** armed at 0 extension-app-only consecutive iterations post-MR-003. Clock starts at iter 016.
+- **Autonomous-vs-directed sub-partition (new, MR-003 Change C):** `top-score = 1/10` currently. Target ≥2/10 by iter 018 — iter 016 cool-off is the designed mechanism.
+- **Meta-review self-critique:** surfaced that 67% of MR-002 changes were "no change needed" — possible early indicator of governance stability. Deferred to MR-004 for action consideration. Do not change cadence in same review that asks the cadence question.
+- Release signal: **GO**. Mode 4 concluded cleanly, zero regressions possible (no code changes), all 4 artifacts cross-consistent post-edit.

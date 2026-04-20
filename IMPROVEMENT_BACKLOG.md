@@ -1,6 +1,6 @@
 # Ledgerium AI — Improvement Backlog
 
-Last updated: 2026-04-19 (post-iteration 014 — persistenceTruncated UI banner landed; #18 closed, #31 + #32 opened; pool 14 → 15; iter 015 is base-cadence meta-review (Mode 4, non-coding), iter 016 still forced burn-down)  
+Last updated: 2026-04-20 (post-iteration 015 / Meta-Review 003 — 4 governance diffs applied; ceiling-cool-off clause 7 now available at iter 016; pool unchanged at 15 (Mode 4 adds no follow-ups); iter 016 authorized to cool-off → top-score pick #4 or fallback burn-down pick #19)  
 Current phase: Phase 1  
 Backlog purpose: maintain a ranked, evidence-based portfolio of the highest-value fixes, improvements, and experiments for bounded improvement loops.
 
@@ -21,14 +21,15 @@ Scoring scale:
 
 Higher total score = higher priority. Post Meta-Review 001: range widened to ~6–18 (was 10–16).
 
-### Saturation status (computed over iter 007–011)
+### Saturation status (computed over iter 010–014 — rolling 5 bounded loops; iter 015 is Mode 4 and does not consume Area cadence)
 
-- SOP area (presentation / trust / quality gate) = 1 of last 5 (iter 007) → **SATURATION CLEARED**
 - Session-durability area = 1 of last 5 (iter 010)
-- Quality-assurance area = 1 of last 5 (iter 009)
-- Capture-pipeline area = 1 of last 5 (iter 008)
 - Extension-architecture / segmentation area = 1 of last 5 (iter 011)
-- All areas clear; no `−S` penalties currently apply.
+- Invariants / testing area = 2 of last 5 (iter 012, iter 013) — **2-in-a-row watch**; picking invariants again at iter 016 would trip 3-in-a-row (#26, #30 flagged)
+- UX resilience area = 1 of last 5 (iter 014)
+- Quality assurance area = 0 of last 5
+- SOP area = 0 of last 5
+- No 3-in-a-row; no `−S` penalties currently apply. Coordinator-aware 2-in-a-row signal on invariants/testing.
 
 ### Portfolio override rules
 
@@ -42,14 +43,16 @@ See `CLAUDE.md § Selection Policy` — any of these overrides top-score:
 ## Portfolio Summary
 
 - Total candidates reviewed: 38 (27 prior + 4 iter-011 follow-ups + 1 iter-012 follow-up + 2 Mode-3 follow-ups + 2 iter-013 follow-ups + 2 iter-014 follow-ups)
-- Top priority area: **iter 015 = Meta-Review 003 (Mode 4, non-coding)** — base-cadence trigger (3 loops since MR-002: 012+013+014). Iter 016 resumes bounded loops; pool = 15 > 8, so iter 016 is still forced burn-down.
-- Open follow-up pool (Birth iter shown): #7 (008) · #14 (007) · #15 (006) · #19/20/21 (010) · #23/24 (011) · #26 (012) · #27/28 (M3 post-012) · #29/30 (013) · #31/32 (014) — **15 items open**
+- Top priority area: **iter 016 = ceiling-cool-off → top-score (MR-003 Change B clause 7, single-use)** OR fallback burn-down. Cool-off top pick: **#4** Artifact + system-health refresh process (score 13, Area agentic CI). Burn-down top pick: **#19** GC stale session keys (score 11, Area session durability).
+- Open follow-up pool (Birth iter shown): #7 (008) · #14 (007) · #15 (006) · #19/20/21 (010) · #23/24 (011) · #26 (012) · #27/28 (M3@012) · #29/30 (013) · #31/32 (014) — **15 items open** (unchanged; Mode 4 adds no follow-ups)
+- **Staleness watch (MR-003 Appendix A)**: #15 (Birth 006, age 9) crosses the 10-loop cap at iter 016. If iter 016 ≠ #15 (e.g. cool-off picks #4), MR-004 must execute mandatory keep/downgrade/delete triage per CLAUDE.md § Follow-Up Debt Policy clause 2. Recommend iter 017 = #15 preemptively.
 - Highest-risk unresolved item: no release blockers remain; highest-risk open items are iter-010 follow-ups #19–21 and iter-011 follow-ups #23/24.
-- Last completed item: persistenceTruncated UI banner (iteration 014) — review screen + history detail screen
-- Last meta-review: **Meta-Review 002 (2026-04-19)** — see `META_REVIEW_002.md`; prior: Meta-Review 001 (2026-04-17). **Next meta-review (MR-003) is due at iter 015** (base cadence: 3 loops since MR-002 = iter 012/013/014 completed).
-- Next recommended action: **iter 015 = Meta-Review 003 (Mode 4, no product code changes)**. After MR-003, iter 016 burn-down — top candidates (ranked): #19 (GC stale session keys, score 11, session durability) · #7 (widen credit_card regex, score 11, policy coverage) · #14 (wire validateRenderedSOP, score 11, SOP quality gate) · #20 (loadFromStorage validation, score 10, session durability) · #31 (sidepanel component test harness, score 11, quality assurance). **Saturation watch:** iter 014 broke the 012+013 invariants/testing streak → saturation cleared. Any area is permissible for iter 016.
-- Release-blocker burn rate (last 5 loops iter 010–014): **2/2 closed** (session persistence ✓ iter 010; segmentation convergence ✓ iter 011) — **100% of release blockers cleared**; iter 012 + 013 + 014 (test-add, fixture-add, UX-add) were non-blocker burn-downs.
-- Follow-up closure ratio (10-iter window iter 005–014): **3 / 16 = 0.188** — below the ≥0.4 testable metric but recovery curve continues (0.0 → 0.077 → 0.143 → 0.188 across iter 011 → 012 → 013 → 014). Pool-size ceiling rule remains active for iter 016.
+- Last completed item: **Meta-Review 003 (iteration 015, Mode 4)** — governance-only, 4 diffs applied to CLAUDE.md + SYSTEM_HEALTH.md; no product code changes. Prior: persistenceTruncated UI banner (iter 014).
+- Last meta-review: **Meta-Review 003 (2026-04-20)** — see `META_REVIEW_003.md`; prior: MR-002 (2026-04-19) `META_REVIEW_002.md`; MR-001 (2026-04-17) `META_REVIEW_001.md`. **Next meta-review (MR-004) due at iter 018** (base cadence: 3 loops post MR-003). Stability window active through iter 017.
+- Next recommended action: **iter 016 — ceiling-cool-off invoked, pick #4 Artifact + system-health refresh process (score 13)**. Rationale: (a) mechanizes MR-003 Change A's manual staleness-prevention work; (b) first `top-score` autonomous selection since iter 009 — exercises the refined scoring formula; (c) non-extension-app surface partially addresses MR-003 Signal 5 portfolio drift. Fallback (if cool-off declined): **#19** (GC stale session keys, score 11, burn-down, Effort 1 / Risk 1).
+- Release-blocker burn rate (last 5 loops iter 011–015, excluding Mode-4 iter 015): **0/0** — all blockers closed; future blockers will surface in Phase 2 planning.
+- Follow-up closure ratio (10-iter window iter 005–014, unchanged since iter 015 is Mode 4): **0.188**. MR-003 revised KPI target from ≥0.4 to ≥0.25 by iter 018 (see META_REVIEW_003.md §Effectiveness KPIs). Pool-size ceiling active for iter 016 unless cool-off invoked.
+- MR-003 governance diffs applied: **Change A** CLAUDE.md § Current Phase + § Known Issues hygiene refresh; **Change B** CLAUDE.md § Follow-Up Debt Policy clause 7 ceiling-cool-off; **Change C** SYSTEM_HEALTH.md autonomous-ratio sub-partition; **Change D** CLAUDE.md § Meta-Review Cadence portfolio-drift early-trigger.
 
 ---
 
@@ -120,6 +123,7 @@ Schema note (MR-002 Change B): `Birth iter` column is MANDATORY for any row tagg
 | 012 | I1a regression test — LiveStep-level cross-path equality across 12 golden fixtures | 13 |
 | 013 | Full-pipeline golden fixture (raw `.ndjson` → normalizer → segmentation) — 3 fixtures, 12 byte-identity tests, zero production code changes | 11 |
 | 014 | Surface `persistenceTruncated` flag in review UI — amber warning banner in `ReviewScreen` + `HistoryDetailScreen`; `buildBundle` regression test | 11 |
+| 015 | **Meta-Review 003** (Mode 4, governance-only) — applied 4 diffs: CLAUDE.md hygiene refresh (A), ceiling-cool-off clause 7 (B), SYSTEM_HEALTH.md autonomous-ratio sub-partition (C), portfolio-drift early-trigger (D). No product code changes. | — |
 
 > **All Phase-1 release blockers closed as of iter 011.** The release-blocker bonus `+B3` no longer applies to any item in the table.
 > All areas clear; no `−S` penalties apply.
@@ -311,6 +315,8 @@ See `CLAUDE.md § Selection Policy` for the authoritative policy.
 1. Release-blocker minimum cadence (1-in-5)
 2. Area saturation rule (no 3-in-a-row same Area)
 3. Follow-up burn-down (1-in-5 targets a prior follow-up)
+4. Pool-size density ceiling (pool > 8 → forced burn-down) — MR-002 Change C
+5. Ceiling-rule cool-off (after 3 consecutive ceiling-forced burn-downs, next iter may ignore clause 4 once, single-use) — MR-003 Change B
 
 **Within those constraints, prefer:**
 1. the highest final score
@@ -319,4 +325,4 @@ See `CLAUDE.md § Selection Policy` for the authoritative policy.
 4. reversible changes
 5. **exactly one item per iteration**
 
-The iteration log's "Candidate Selection" block MUST state which rule drove the selection: `top-score`, `blocker-cadence`, `saturation-rule`, `burn-down`, or `directed`.
+The iteration log's "Candidate Selection" block MUST state which rule drove the selection: `top-score`, `blocker-cadence`, `saturation-rule`, `burn-down`, `ceiling-cool-off`, or `directed`.

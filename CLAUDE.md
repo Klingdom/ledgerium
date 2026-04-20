@@ -136,6 +136,7 @@ Every iteration may generate follow-up backlog items. To prevent unbounded accum
    - `density-response: acknowledged, carried forward` — explicit conscious decision to defer; must include a one-sentence rationale. Silent violations are treated as a failed iteration for meta-review scoring purposes.
 5. **Birth-iter field (MR-002 Change B):** every follow-up row in `IMPROVEMENT_BACKLOG.md` MUST carry a `Birth iter` column with the iteration number that created it. Rows missing this field cannot be selected until backfilled; this enables deterministic staleness-cap enforcement (clause 2) and the meta-review `age > 10` triage query.
 6. **Pool-size density ceiling (MR-002 Change C):** if the open follow-up pool size exceeds 8 items at the start of an iteration, that iteration MUST be a burn-down selection, regardless of the 1-in-5 floor in clause 1. This is a ceiling rule: floor is "at least 1-in-5," ceiling is "when debt is growing, force immediate burn-down."
+7. **Ceiling-rule cool-off (MR-003 Change B):** after 3 consecutive iterations have selected under the `burn-down` rule due to clause 6 (pool > 8), the next iteration is authorized to ignore clause 6 *once* and select by `top-score`, `blocker-cadence`, or `directed` — provided the iteration's "Candidate Selection" block logs `ceiling-cool-off: invoked; rationale: [reason]` with a one-sentence justification. This gives the refined scoring formula at least one discriminating selection per four-loop window even in a high-debt regime. Cool-off is single-use: the iteration immediately after a cool-off is again subject to clause 6 if pool > 8.
 
 **Testable metric:** over any 10-iteration window, the ratio of (follow-ups closed) / (follow-ups created) must be ≥ 0.4.
 
@@ -325,28 +326,35 @@ No measurable outcome → incomplete work
 
 ## Current Phase
 
-Phase 1 in progress.
+Phase 1 in progress — **all release blockers closed as of iter 011.**
+Phase 2 entry planning is unblocked; no forced-blocker items remain.
 
-Priorities (ordered by release-blocker status):
-- **[BLOCKER]** add Playwright E2E tests for recording lifecycle
-- **[BLOCKER]** implement full session event persistence for service worker restart recovery
-- add structured error logging with session context
-- extract confidence thresholds (remove circular import)
-- widen policy-engine credit_card regex to accept whitespace separators
+Priorities (non-blocker; ordered by score/strategic value):
+- Phase 2 scope / PRD refresh (item #10 ICP narrative / strategic planning loop)
+- artifact + system-health refresh dashboard process (item #4, score 13)
+- structured error logging with session context (item #9, score 11)
+- real-extension launchPersistentContext E2E harness (item #21, score 9)
 
-Resolved (do not re-list):
+Follow-up pool is currently at 15 open items (ceiling rule active; ceiling-cool-off clause 7 available at iter 016).
+See IMPROVEMENT_BACKLOG.md for the full ranked pool.
+
+Resolved (do not re-list; chronological):
 - ✅ remove duplicated background logic (iter 003)
 - ✅ integrate policy engine into normalizer (iter 003) and content capture (iter 008)
 - ✅ SOP metadata strip + trust-signal trifecta (iters 004/005/006)
 - ✅ SOP release-readiness validator (iter 007)
+- ✅ Playwright E2E recording lifecycle + CI workflow (iter 009)
+- ✅ full session event persistence for service worker restart recovery (iter 010)
 - ✅ converge LiveStepBuilder / StreamingSegmenter / buildDerivedSteps / segmentEvents (iter 011)
+- ✅ I1a LiveStep cross-path regression test (iter 012); full-pipeline golden fixture (iter 013); persistenceTruncated UI banner (iter 014)
 
 ---
 
 ## Known Issues
 
-- full session event persistence missing
-- no Playwright E2E coverage
+- No current Phase-1 release blockers.
+- Follow-up pool at 15 items (see IMPROVEMENT_BACKLOG.md); pool-size ceiling rule active — next non-meta iteration forced to burn-down unless ceiling-cool-off (Follow-Up Debt Policy clause 7) is invoked.
+- Web-app surface under-surveyed by improvement loops (see MR-003 Signal 5); track for Phase 2 scope.
 
 Do not silently fix tracked issues — surface and update status
 
@@ -416,6 +424,7 @@ Examples:
   - Follow-up accumulation > 10 open items
   - 2+ iterations fail validation in a row
   - A named release blocker has survived 8+ loops
+  - 10+ consecutive iterations without touching a tracked non-extension surface (web-app, process-engine, normalization-engine, segmentation-engine, policy-engine) — flags portfolio drift (MR-003 Change D)
 
 After a meta-review completes, do not run another for at least 3 loops — changing multiple control variables more often than that makes effectiveness measurement impossible.
 

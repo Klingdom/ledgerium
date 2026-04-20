@@ -6,6 +6,54 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-20] - Iteration 015: Meta-Review 003 (Mode 4, governance-only) — 4 diffs applied
+
+### Governance-only iteration — no product code changes
+
+Per CLAUDE.md § Meta-Review Cadence, base cadence (every 3 completed improvement loops) triggered Meta-Review 003 at iter 015. Covered iter 012 + 013 + 014 and evaluated MR-002 Changes A–F efficacy. Produced `META_REVIEW_003.md` (514 lines) with 4 proposed governance diffs; coordinator adopted all 4.
+
+### Added
+- `META_REVIEW_003.md` at repo root — full effectiveness scorecard of MR-002 Changes A–F, 6 new signals surfaced from iter 012/013/014, proposed governance diffs A–D, iter 016 recommendation, cadence self-critique.
+- **CLAUDE.md § Follow-Up Debt Policy clause 7 (MR-003 Change B) — ceiling-rule cool-off:** after 3 consecutive `burn-down`-forced iterations, the next iteration is authorized to ignore clause 6 once (single-use) and select by `top-score`, `blocker-cadence`, or `directed`, provided the iteration log records `ceiling-cool-off: invoked; rationale: [reason]`. Unlocks refined-scoring-formula exercise from its 6-loop dormancy (only 1 `top-score` selection since MR-001 — iter 009).
+- **CLAUDE.md § Meta-Review Cadence new early-trigger (MR-003 Change D):** 10+ consecutive iterations without touching a tracked non-extension surface flags portfolio drift. Addresses Signal 5 (Mode-3 billing fix surfaced 4 silent web-app bugs the bounded loop never would have caught).
+
+### Changed
+- **CLAUDE.md § Current Phase + § Known Issues (MR-003 Change A, hygiene):** removed stale `[BLOCKER]` listings for Playwright E2E and session persistence (closed in iter 009/010); added iter 009/010/012/013/014 to Resolved list; rewrote Known Issues to reflect "no current Phase-1 blockers; pool at 15; web-app surface under-surveyed." Prior state contradicted SYSTEM_HEALTH.md + IMPROVEMENT_BACKLOG.md for 5 iterations.
+- **SYSTEM_HEALTH.md autonomous-vs-directed ratio row (MR-003 Change C):** sub-partitioned into `top-score` / `burn-down` / `blocker-cadence` / `directed`. Reveals `top-score autonomous = 1/10` (iter 009 only), which is below the healthy band `top-score + blocker-cadence ≥ 2/10`. MR-004 can now measure whether cool-off rule unlocks more top-score selections.
+- IMPROVEMENT_BACKLOG.md portfolio summary + saturation block + selection-rule list updated; added ceiling-cool-off and pool-size-ceiling to portfolio-override list; added `ceiling-cool-off` to the set of valid "Candidate Selection" rule tags.
+- SYSTEM_HEALTH.md Current Top Opportunities rewritten for iter 016 = cool-off → #4 (primary) or burn-down → #19 (fallback); Recommended Next Iteration section rewritten with cool-off mode vs burn-down mode candidate ranking; Meta-Review Status flipped to "MR-003 complete; stability window through iter 017; MR-004 at iter 018."
+
+### Impact
+- **Before MR-003:** CLAUDE.md 5-iter stale on blockers; refined scoring formula stress-tested on 1 loop (iter 009) in entire post-MR-001 lifespan; 3 consecutive ceiling-forced burn-downs risked permanent formula dormancy; closure ratio 0.188 decelerating toward asymptotic non-closure of the 0.4 target.
+- **After MR-003:** all three governance files (CLAUDE.md, SYSTEM_HEALTH.md, IMPROVEMENT_BACKLOG.md) now cross-consistent on blocker state and pool size; ceiling-cool-off guarantees at least 1 `top-score` discriminating selection per 4-loop window; closure-ratio KPI revised from ≥0.4 to ≥0.25 by iter 018 (realistic calibration); portfolio-drift early-trigger armed.
+
+### Validation
+- Cross-artifact consistency: `CLAUDE.md § Current Phase` (no blockers, pool 15) = `SYSTEM_HEALTH.md § Release Blockers` ("3 of 3 closed") = `IMPROVEMENT_BACKLOG.md § Portfolio Summary` (pool 15, no blockers). Pre-MR-003 these 3 files were in 3-way contradiction.
+- Mode 4 stop condition: `git diff --stat` touches only governance files (CLAUDE.md, SYSTEM_HEALTH.md, IMPROVEMENT_BACKLOG.md, ITERATION_LOG.md, CHANGELOG.md) + 1 new artifact (META_REVIEW_003.md). Zero files under `apps/` or `packages/`.
+- No schema change, no invariant change, no rule version change, no dependency change.
+
+### Governance summary
+
+| # | Change | File | Mandatory | Lines |
+|---|--------|------|-----------|-------|
+| A | Hygiene refresh (§ Current Phase + § Known Issues) | CLAUDE.md | ✅ | ~20 |
+| B | Ceiling-rule cool-off clause 7 | CLAUDE.md | ✅ | ~5 |
+| C | Autonomous-ratio sub-partition | SYSTEM_HEALTH.md | optional | ~3 |
+| D | Portfolio-drift early-trigger | CLAUDE.md | optional | 1 |
+
+**Total diff:** ~29 lines across 2 governance files.
+
+### Follow-ups
+- **Zero follow-ups generated.** Mode 4 is governance-only.
+- **Staleness watch carried forward:** #15 (Birth 006, age 9) crosses 10-loop cap at iter 016. If iter 016 = #4 (cool-off pick, not #15) and iter 017 ≠ #15, MR-004 must execute mandatory keep/downgrade/delete triage per CLAUDE.md § Follow-Up Debt Policy clause 2.
+
+### Risks (flagged, not blocking)
+- **Signal 2 — decelerating closure ratio:** deltas 0.077 → 0.066 → 0.045. Structural issue (each non-trivial loop generates ~1.3 follow-ups while closing 1). MR-003 deliberately did NOT lower the 0.4 target or intervene in generation rate; revisit at MR-004.
+- **Cadence self-critique:** 4 of 6 MR-002 changes verdict "working, no change needed" (67% tautology). If MR-004 also finds majority tautology, consider introducing a "lite meta-review" variant. **Do not shorten cadence in the same review that asks the question** — control-variable isolation principle.
+- **Signal 5 — web-app portfolio drift:** inferred from 14 iterations but partly an artifact of Phase-1 priorities (extension-app is where blockers lived). Change D trigger monitors prospectively; no action required until it fires.
+
+---
+
 ## [2026-04-19] - Iteration 014: Surface `persistenceTruncated` flag in review UI — forced burn-down by MR-002 Change C ceiling rule, third consecutive
 
 ### Added
