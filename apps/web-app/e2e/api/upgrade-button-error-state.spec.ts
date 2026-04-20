@@ -50,4 +50,23 @@ test.describe('API: Billing checkout — error response shape', () => {
       expect(['admin_bypass', 'already_subscribed']).toContain(body.code);
     }
   });
+
+  test('POST /api/billing/checkout returns 401 for unauthenticated request', async ({ browser }) => {
+    // Sends a completely unauthenticated request (no session cookie) to verify
+    // that the route does not allow anonymous users to initiate a checkout.
+    // Uses a fresh browser context with no stored auth state.
+    //
+    // Admin-bypass full E2E coverage (second test identity) is still deferred
+    // — tracked as follow-up (Birth iter: 017).
+    const context = await browser.newContext(); // no storageState → no session
+    const request = context.request;
+
+    const response = await request.post('/api/billing/checkout', {
+      data: { plan: 'starter', interval: 'monthly' },
+    });
+
+    expect(response.status()).toBe(401);
+
+    await context.close();
+  });
 });

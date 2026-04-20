@@ -6,6 +6,89 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-20] - Iteration 017: Minimum billing test suite (QA-01, `burn-down`)
+
+### Selection
+
+- **Selection rule:** `burn-down` (pool-size ceiling MR-002 Change C — pool = 23 > 8 forced burn-down; within pool, #33 QA-01 had the highest score at 12)
+- **Cool-off availability:** NOT available (consumed at iter 016; re-arms only after 3 consecutive burn-downs, iter 017 = #1)
+- **Selected item:** #33 QA-01 — Minimum billing test suite (Birth iter: `audit-intake`, P0 audit-intake promotion from `PRICING_AUDIT_001.md`)
+- **Score:** Impact 5 + Alignment 5 + Learning 2 + Confidence 5 − Effort 3 − Risk 2 = **12**
+- **Rationale:** highest-score follow-up in a forced-burn-down selection; strategic — directly protects both just-approved PRDs (Pro tier + Team trial) and the Mode-3 hardening fixes; context-locality — extending test coverage while billing context is fresh is cheaper than resuming two iterations later. Alternate candidates: #40 (better paired with Team Trial build), #15 (age-cap triage belongs at MR-004).
+
+### Scope (narrowed from backlog row; no expansion)
+
+Row wording listed four areas: "unit for plans/stripe/feature-gating boundary; integration (Stripe mock) for webhook events; checkout route error-shape contract tests." Iter 017 shipped three of four:
+
+1. Webhook handler integration tests (PRIMARY VALUE — biggest risk surface)
+2. `feature-gating.ts` unit tests (SECONDARY — boundary logic coverage)
+3. One new 401 unauth test in existing Playwright contract file (TERTIARY — cheap extension)
+
+Explicitly deferred: `plans.ts` unit tests (non-gap — no branching logic to validate at this stage). `admin_bypass` E2E contract test deferred to follow-up #41 (needs allowlisted test identity in Playwright auth state; <15-min scope guard). No scope-expansion protocol invocation — this is a legitimate narrowing, not expansion.
+
+### Added
+
+- **`apps/web-app/src/app/api/billing/webhook/route.test.ts`** (new, +348 LOC, **7 tests**)
+  - `checkout.session.completed` happy path → DB plan updated, `stripeSubscriptionId` stored
+  - `customer.subscription.updated` trialing → isActive=true, plan resolved from price ID
+  - `customer.subscription.updated` unmapped price ID on active sub → **throws** (BUG-01 regression lock)
+  - `customer.subscription.deleted` → plan reverted to `'free'`, status `'canceled'`
+  - `invoice.payment_failed` → status `'past_due'`, plan unchanged
+  - Missing `STRIPE_WEBHOOK_SECRET` → HTTP 500 (BUG-04 regression lock)
+  - Invalid Stripe signature → HTTP 400
+
+- **`apps/web-app/src/lib/feature-gating.test.ts`** (new, +199 LOC, **14 tests**)
+  - 5-tier plan boundary (free / starter / team / growth / enterprise) for representative features
+  - Admin bypass unlocks everything regardless of plan
+  - Null/undefined plan coerces to `'free'` via `toPlanType`
+  - Quota edge: at-limit user blocked; over-limit user blocked
+  - `requireFeature` throw-shape contract (2 extra tests beyond the 12 planned)
+
+- **Extended `apps/web-app/e2e/api/upgrade-button-error-state.spec.ts`** (+19 LOC, +1 test)
+  - 401 unauthenticated checkout POST returns invariant response shape
+
+### Mocking strategy (backend-engineer choice)
+
+`vi.mock('@/db')` with spies on `db.user.update`, `db.user.findFirst`, `db.upload.count` — pure unit-test pattern matching the existing `stripe.test.ts` conventions. `vi.mock('@/lib/stripe')` for `getStripe()`, `planFromPriceId()`, `getWebhookSecret()`. `vi.mock('@/lib/analytics-server')` to no-op the fire-and-forget `db.analyticsEvent.create` call inside `trackServer`. No real SQLite test DB; no new test infrastructure introduced; no new production dependencies.
+
+### Impact
+
+- **Billing revenue-integrity posture: "very strong"** (4.5 → 4.8 in SYSTEM_HEALTH scorecard). Mode 3 silenced the anti-patterns; iter 017 locks them with a 21-test regression safety net. If a future refactor re-introduces BUG-01 or BUG-04 patterns, the test suite fails loudly.
+- **Top Risk #1 closed.** "Zero integration-test coverage on billing webhook + checkout routes" (previously SYSTEM_HEALTH Top Risk #1 post-Mode-3) is no longer the top risk. New #1 is BUG-07 (Team Trial blocker).
+- **Phase-2 preparedness strengthened.** Pro tier's new price IDs extend a tested `planFromPriceId`/`getWebhookSecret`. Team trial's new event types extend tested webhook event routing.
+- **Zero production-code modifications.** Test-only iteration; scope discipline held throughout.
+
+### Validation (coordinator-independent verification)
+
+- `pnpm --filter @ledgerium/web-app typecheck` → clean
+- `pnpm --filter @ledgerium/web-app test` → **107/107 passed** (6 test files; baseline 86 + 21 new vitest tests)
+- `pnpm --filter @ledgerium/web-app build` → clean (67 static pages, no route changes)
+- `git diff --stat HEAD` → 1 modified (Playwright append) + 2 new untracked (test files). All within-scope.
+- Stderr during test run: intentional `console.error` / `console.warn` from exercised error paths in Mode 3-hardened code. Expected.
+
+### Follow-ups (Birth iter: 017)
+
+- **#41** `admin_bypass` E2E contract test — needs allowlisted test identity seeded in Playwright auth state. Deferred per <15-min scope guard. Score 7 (Impact 2 + Alignment 3 + Learning 1 + Confidence 4 − Effort 2 − Risk 1). Area: billing / quality assurance.
+
+**Density-response:** 1 follow-up generated — below the 3-item density-trigger threshold (Follow-Up Debt Policy clause 3). No `density-response:` log line required. Pool size impact: net flat at 23 (#33 closed, #41 opened).
+
+### Governance
+
+- **Agent diversity:** backend-engineer as primary breaks the frontend-engineer-back-to-back streak (014+016). Same-implementer-4+ trigger remains 3 away.
+- **Area saturation (rolling iter 013–017, Mode-4 015 excluded):** invariants/testing (013) · UX resilience (014) · web-app UI (016) · billing / quality assurance (017) — 4 distinct areas across 4 counted iterations. Diversity strong.
+- **Cadence:** iter 017 is the 2nd bounded loop post-MR-003. **MR-004 executes at iter 018** (base cadence: 3 bounded loops post-MR-003 → iter 016 + iter 017 + iter 018-boundary).
+- **MR-004 agenda additions:** (1) audit-intake pattern evaluation, (2) PRD-trigger promotion pattern evaluation, (3) cool-off clause-7 efficacy review, (4) portfolio-drift test-only surface rule, (5) **mandatory staleness-cap triage on #14 (age 10, at cap) + #15 (age 11, past cap)**.
+- **Closure-ratio impact:** iter 017 added 1 closure (#33) + 1 generation (#41). Partial KPI recovery toward ≥0.25 target.
+- **Mode-3 cadence note (reaffirmed):** Mode 3 @ iter 016→17 did NOT consume cadence; iter 017 was the next bounded loop as planned.
+
+### Risks (flagged, not blocking)
+
+- Pool still at 23 > 8. Iter 019 remains forced burn-down. Cool-off re-arm earliest at iter 022 (requires iter 019 + 020 + 021 all burn-down).
+- Three items at/past staleness cap (#14 · #15 · #7 on deck). MR-004 must produce explicit keep/downgrade/delete decisions — more staleness triage than any prior meta-review.
+- Admin-bypass E2E gap (#41) leaves one corner of the checkout contract untested. Low severity; follow-up.
+
+---
+
 ## [2026-04-20] - Mode 3 @ iter 016→17: Pricing audit + billing revenue-integrity hardening (out of cadence)
 
 ### CEO directive (scope trigger)

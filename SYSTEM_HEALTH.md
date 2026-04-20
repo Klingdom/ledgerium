@@ -1,6 +1,6 @@
 # Ledgerium AI — System Health
 
-Last updated: 2026-04-20 (post-iteration 016 + **Mode 3 @ iter 016→17 — pricing audit + billing revenue-integrity hardening**; 3 P0 bugs fixed out-of-cadence (BUG-01 silent plan fallback, BUG-03 silent upgrade button failure, BUG-04 missing WEBHOOK_SECRET); `PRICING_AUDIT_001.md` produced with 30+ findings across strategic/technical/functional/growth lenses; 4 P0 items intake to live backlog (#33–36); 3 Mode-3 follow-ups (#37–39); pool now 22 open; iter 017 still forced burn-down, #15 still at staleness cap age 10 — recommend iter 017 = #15; Mode 3 does NOT consume bounded-loop cadence counter)
+Last updated: 2026-04-20 (post-**iteration 017 — Minimum billing test suite (QA-01, `burn-down`)**; 21 new vitest tests closing the "zero webhook integration coverage" top-risk gap identified post-Mode-3; both just-approved PRDs (Pro tier + Team trial) now extend a tested handler foundation; 1 follow-up opened (#41 admin-bypass E2E); pool net-flat at 23; **MR-004 due at iter 018** (base cadence, 3 bounded loops post-MR-003 complete); staleness cap breach intensifies — #14 + #15 both at-or-past cap require MR-004 triage per Follow-Up Debt Policy clause 2)
 
 ## Executive Summary
 
@@ -8,7 +8,7 @@ Ledgerium AI is in **Phase 1** with a strong deterministic product foundation, c
 
 **Meta-Review 002** (2026-04-19) confirmed MR-001's control changes (formula rewrite, delegation rubric, Mode 5 formalization) are working first-order, but flagged a priority finding: the **density trigger** in `Follow-Up Debt Policy` clause 3 was silently violated 3 consecutive iterations (009, 010, 011 each generated ≥3 follow-ups with zero `density-response` log). MR-002 mechanized the policy into a machine-enforceable log line (Change A), added `Birth iter` as a mandatory schema field (Change B), and introduced a pool-size ceiling rule (Change C) that forces iter 012 to burn-down because the open follow-up pool is 11 items (> 8).
 
-Overall confidence: **High, strengthening post-iter-016 + Mode-3@iter-016→17** (3 of 3 release blockers closed; MR-003 governance diffs active in production — ceiling-cool-off clause 7 invoked for the first time at iter 016 to enable a user-directed dashboard simplification; 5 cluttering sections removed from web-app dashboard in a single clean −282 LOC change (zero production regressions, 79/79 web-app tests pass, build clean); **first web-app bounded iteration since iter 001** — partial relief on MR-003 Signal 5 portfolio drift; agent diversity now 6 distinct primaries in rolling 6-loop window (backend, qa, architect, frontend, devops, frontend-again); scope-expansion protocol continues working as deterrent — frontend-engineer honestly narrowed the coordinator's dead-code brief when 4 of 7 candidate items proved to have legitimate surviving consumers, preserving scope discipline). **Post-Mode-3:** billing revenue-integrity class now green — silent plan under-provisioning (BUG-01), silent button failures (BUG-03), and silent pipeline failure on missing WEBHOOK_SECRET (BUG-04) all resolved with narrow regression tests. Four P0 audit-intake items (billing test suite, copy contradiction, Starter value reframe, 80% quota upgrade link) enter live backlog; ≈27 P1/P2/P3 items held as cold pool in `PRICING_AUDIT_001.md` to protect pool-size ceiling discipline.
+Overall confidence: **High, strengthening further post-iter-017** (3 of 3 release blockers closed; MR-003 governance diffs active in production; cool-off clause 7 invoked once at iter 016 and consumed; scope-expansion protocol continues working as deterrent across 4+ iterations now). **Post-iter-017:** billing revenue-integrity class now very green — the Mode 3 hardening silenced the anti-patterns; iter 017 locks them with a 21-test regression safety net (7 webhook integration + 14 feature-gating unit + 1 additional 401 contract test). Both just-approved PRDs (`PRD_PRO_TIER.md`, `PRD_TEAM_TRIAL.md`) will extend a *tested* handler rather than an untested one. **Phase-2 preparedness strengthened:** Pro tier adds new price IDs on top of tested `planFromPriceId`/`getWebhookSecret`; Team trial extends tested webhook event routing. **Agent diversity stable:** backend-engineer at iter 017 broke the frontend-engineer-back-to-back pattern (014+016) cleanly; same-implementer-4+ trigger remains 3 away. **Remaining billing cold-pool items:** 3 P1 structural bugs (customer-creation TOCTOU #BUG-05, atomic quota race #BUG-06) plus the now-live #BUG-07 (PRD-promoted at iter 017 coordinator-approval pass) — promoted to row #40 as the hard blocker for Team Trial build.
 
 ---
 
@@ -34,7 +34,7 @@ Overall confidence: **High, strengthening post-iter-016 + Mode-3@iter-016→17**
 | GTM readiness | emerging | 2.5 | product wedge promising; analytics infrastructure ready for data-driven decisions |
 | Release readiness | strong | 5 | **3 of 3 release blockers closed** (E2E iter 009, session persistence iter 010, segmentation convergence iter 011). Zero Phase-1 blockers remain. CI gate live on PRs via `e2e-extension.yml`. Byte-equivalence regression harness guards the segmentation convergence. |
 | Autonomous-vs-directed selection ratio (MR-002 Change E; MR-003 Change C sub-partition) | below band | 3 | Last 10 bounded iterations (iter 006–014 + iter 016; iter 015 Mode 4 excluded; Mode 3 excluded) sub-partitioned: `top-score` autonomous **1/10** (iter 009) · `burn-down` autonomous **6/10** (iter 006, 007, 008, 012, 013, 014) · `blocker-cadence` **1/10** (iter 009 overlap) · `directed` **3/10** (iter 010, 011, **016**). Iter 016 invoked ceiling-cool-off but selection rule was `directed` (user-named), so `top-score` count is unchanged at 1/10. **Still below band** `top-score + blocker-cadence ≥ 2/10`. Clause 7 is single-use and has been consumed at iter 016 → iter 017 returns to burn-down; next `top-score` opportunity at iter 018/019 when another 3-consecutive-burn-down streak would re-arm cool-off. |
-| Billing revenue-integrity | strong | 4.5 | **Post-Mode-3 @ iter 016→17:** silent-plan-fallback bug class resolved (`planFromPriceId` returns `null` for unmapped IDs + emits warn log; webhook catch-block removed; `getWebhookSecret()` throws on empty/whitespace). Silent upgrade-button failures resolved (admin + already-subscribed paths now surface inline `role="alert"` error with analytics `upgrade_blocked` event). **Gap:** zero integration-test coverage on webhook event handlers and checkout route — tracked as **#33 QA-01** (score 12). Pricing-audit cold pool (`PRICING_AUDIT_001.md`) holds 3 P1 structural bugs (customer-creation TOCTOU #BUG-05, atomic quota race #BUG-06, `subscriptionStatus=trialing` default #BUG-07) pending promotion to live backlog as P0s burn down. |
+| Billing revenue-integrity | very strong | 4.8 | **Post-iter-017:** Mode-3 anti-pattern fixes (BUG-01/03/04) now locked by 21-test regression safety net (7 webhook integration covering all 5 Stripe event types + missing-secret + invalid-signature paths; 14 feature-gating unit tests with 5-tier boundary + admin bypass + null-plan coercion + quota edges; 1 new 401 contract test). Webhook handler integration coverage went from **0 → 7 tests** in iter 017 (closes previous Top Risk #1). Remaining gaps: `admin_bypass` E2E contract (follow-up #41, deferred per scope guard — needs allowlisted test identity) and `plans.ts` unit coverage (non-gap by iter 017 scoping). Pricing-audit cold pool now holds 2 P1 structural bugs (#BUG-05 customer-creation TOCTOU, #BUG-06 atomic quota race); BUG-07 promoted to live backlog as #40 on `PRD_TEAM_TRIAL.md` approval. |
 
 ---
 
@@ -74,27 +74,28 @@ Overall confidence: **High, strengthening post-iter-016 + Mode-3@iter-016→17**
 
 ## Top Risks
 
-1. **Zero integration-test coverage on billing webhook + checkout routes** — Mode-3 @ iter 016→17 added 7 unit tests for `planFromPriceId` / `getWebhookSecret` but did NOT build the full webhook event-replay suite. Tracked as **#33 QA-01** (score 12, audit-intake). No pricing change should ship until this lands.
-2. **P1 billing structural bugs held in cold pool** — `PRICING_AUDIT_001.md` documents 3 unfixed P1 bugs (customer-creation TOCTOU race, atomic quota check, `subscriptionStatus=trialing` default). Promoted one-at-a-time as P0s burn down.
-3. Static-harness E2E does not exercise real `chrome.runtime` transport / background service worker — real-extension `launchPersistentContext` tests still pending (iter 010 follow-up #21, originally iter 013)
-4. PostHog not yet connected (env vars not set) — analytics only writes to internal DB
-5. Extension content layer still has minimal unit test coverage outside target-inspector (capture.ts, state-observer.ts, label-extractor.ts untested)
-6. Follow-up pool at **22 items** (post-Mode-3 intake) — well above the pool-size ceiling (8); every bounded iter until the pool drops remains forced burn-down unless cool-off re-arms
-7. Invariant I1 (LiveStep-to-DerivedStep correspondence, design doc §5.3) is structurally guaranteed post-convergence but not explicitly tested — flagged as iter-011 follow-up #22
-8. `SEGMENTATION_RULE_VERSION` doc/code drift (`docs/invariants.md` L172 vs `rules.ts` L16) — iter-011 follow-up #23
+1. **BUG-07 blocks Team Trial build entry** — `subscriptionStatus @default("trialing")` in `schema.prisma:16` + signup-route explicit assignment will misfire trial-keyed UI + analytics surfaces. NOT a current revenue leak (entitlements verified to flow through `plan` field), IS a hard blocker for the approved `PRD_TEAM_TRIAL.md`. Live as #40, PRD-promoted; score 11; Effort 1 / Risk 1 — small fix, high-leverage.
+2. **Staleness-cap breach intensifies** — #15 (Birth 006, age 11 — 1 iter past cap) + #14 (Birth 007, age 10 — at cap) MUST be triaged at MR-004 per Follow-Up Debt Policy clause 2. #7 (Birth 008, age 9 — reaches cap at iter 018). Three items entering or past cap means MR-004's staleness scan is now material, not ceremonial.
+3. **Remaining P1 billing structural bugs in cold pool** — `PRICING_AUDIT_001.md` still holds #BUG-05 (customer-creation TOCTOU race) and #BUG-06 (atomic quota race). Stripe at-least-once retries can still cause double-grant state drift until these close. Promoted one-at-a-time as P0s burn down.
+4. Static-harness E2E does not exercise real `chrome.runtime` transport / background service worker — real-extension `launchPersistentContext` tests still pending (iter 010 follow-up #21, originally iter 013)
+5. PostHog not yet connected (env vars not set) — analytics only writes to internal DB
+6. Extension content layer still has minimal unit test coverage outside target-inspector (capture.ts, state-observer.ts, label-extractor.ts untested)
+7. Follow-up pool at **23 items** (post-iter-017; net flat — #33 closed, #41 opened) — still well above pool-size ceiling (8); every bounded iter remains forced burn-down unless cool-off re-arms after 3 consecutive burn-downs.
+8. Invariant I1 (LiveStep-to-DerivedStep correspondence, design doc §5.3) is structurally guaranteed post-convergence but not explicitly tested — flagged as iter-011 follow-up #22
+9. `SEGMENTATION_RULE_VERSION` doc/code drift (`docs/invariants.md` L172 vs `rules.ts` L16) — iter-011 follow-up #23
 
 ---
 
 ## Current Top Opportunities
 
-1. **Iter 017 (Mode 1): forced burn-down** — ceiling-cool-off clause 7 was invoked and consumed at iter 016; clause 6 returns; pool still 15 > 8. **Primary candidate: #15 Extract confidence thresholds to shared constants (score 10, Area: code hygiene, Birth 006, age 10 — staleness cap reached).** Preemptive close avoids mandatory MR-004 triage per CLAUDE.md § Follow-Up Debt Policy clause 2. Alternates: #19 (GC stale session keys, score 11, session durability) · #14 (wire validateRenderedSOP, score 11, age 9) · #7 (widen credit_card regex, score 11).
-2. **Iter 018 (Mode 4): Meta-Review 004 (base cadence)** — 3 bounded loops post MR-003 (iter 016 + iter 017 + iter 018-boundary; MR-004 evaluates the effectiveness of all MR-003 diffs especially Change B's first invocation at iter 016). Must include staleness-cap scan.
-3. **Iter 019+**: refined-formula `top-score` opportunity. After iter 017 burn-down + iter 018 Mode 4, if pool > 8 another 3-consecutive-burn-down streak (iter 019 + 020 + 021) would re-arm cool-off for iter 022. Alternatively, a top-score item (#4 Artifact + system-health refresh, score 13) enters consideration when pool naturally drops to ≤8.
-4. Further dashboard simplification — iter 016 removed 5 sections cleanly; if CEO directs additional simplification, treat as Mode 2 directed again.
-5. Real-extension `launchPersistentContext` E2E (#21) — closes fidelity gap between Vitest integration and OS-level SW restart.
-6. Structured session-aware error logging — last item from original Phase-1 priority list.
-7. Move to Phase 2 planning — PRD refresh / GTM readiness work unblocked.
-8. Monitor MR-003 control-change efficacy: ceiling-cool-off invocation count **1** (iter 016 direct) · top-score autonomous ratio unchanged at 1/10 · closure ratio unchanged at 0.188 (iter 016 added 0 closures + 0 generations) · portfolio-drift counter reset to 0 at iter 016 (web-app touched).
+1. **Iter 018 (Mode 4): Meta-Review 004 (base cadence)** — 3 bounded loops post-MR-003 (iter 016 + iter 017 + iter 018-boundary). MR-004 agenda now material: (a) audit-intake + PRD-trigger promotion pattern evaluation, (b) ceiling-cool-off clause-7 efficacy review (iter 016's `directed` invocation vs intended `top-score` use), (c) MR-003 Change D portfolio-drift trigger still dormant (counter reset at iter 016, held at iter 017 billing work), (d) **staleness-cap triage: #14 (age 10, at cap) + #15 (age 11, past cap) require explicit keep/downgrade/delete decision**, (e) closure-ratio KPI trajectory.
+2. **Iter 019 (Mode 1, post-MR-004): forced burn-down unless cool-off re-arms.** Cool-off is available again only after 3 consecutive burn-downs; iter 017 = burn-down #1; iter 018 is Mode 4 (neutral); iter 019 would be burn-down #2 if still pool > 8. Primary candidate: **#40 BUG-07** (score 11, PRD-promoted, small + high-leverage — unblocks Team Trial build) or **#15** (score 10, age 11 — IF not already triaged by MR-004 at iter 018).
+3. **Iter 020+**: if iter 019 is burn-down #2 and iter 020 is burn-down #3, clause 7 cool-off re-arms for iter 021. Otherwise continued burn-down focused on #40, then #34/35/36 (audit-intake P0s — copy + conversion), then #14 (if MR-004 preserves), then iter-010 follow-ups #19/20/21.
+4. **Team Trial feature build** — unblocked for Design phase entry once #40 (BUG-07) closes. Feature scope is approved + locked (5 CEO-delegated decisions). PRD cites 7 backend/frontend/email/QA dependencies as ordered build sequence.
+5. **Pro tier feature build** — unblocked for Design phase entry. No prerequisite beyond BUG-01 (already closed at Mode 3). Feature scope approved + locked (5 CEO-delegated decisions).
+6. Real-extension `launchPersistentContext` E2E (#21) — closes fidelity gap between Vitest integration and OS-level SW restart.
+7. Structured session-aware error logging — last item from original Phase-1 priority list.
+8. Monitor MR-003 control-change efficacy: ceiling-cool-off invocation count **1** (iter 016 direct, consumed) · top-score autonomous ratio unchanged at 1/10 · closure ratio improves at iter 017 (added 1 closure + 1 generation; net +1 closure-first iteration) · portfolio-drift counter **held at 0** at iter 017 (web-app surface touched via test files — test-only touch is debatable; MR-004 should rule on whether `apps/web-app/e2e/` + test files count toward Signal-5 surface coverage).
 
 ---
 
@@ -123,53 +124,57 @@ Overall confidence: **High, strengthening post-iter-016 + Mode-3@iter-016→17**
 
 ## Recommended Next Iteration
 
-**Iter 017 (Mode 1): forced burn-down; preemptively close #15 (Extract confidence thresholds, score 10, age 10 staleness cap reached).** Cool-off was consumed at iter 016. Mode 3 @ iter 016→17 does NOT consume the cadence counter — iter 017 is still the next bounded loop.
+**Iter 018 (Mode 4): Meta-Review 004** — base cadence has arrived (3 bounded loops post-MR-003 = iter 016 + iter 017 + iter 018-boundary). No product-code changes during Mode 4.
 
-**Alternate high-priority pick:** **#33 QA-01 — Minimum billing test suite** (score 12, audit-intake, billing/QA). Rationale: addresses the single largest remaining production risk (zero coverage on post-Mode-3 billing paths); however, it does NOT satisfy the staleness-cap preemption rationale that #15 uniquely does. Recommend iter 017 = #15 and iter 019 = #33 (post MR-004 Mode 4).
+MR-004 must cover at minimum:
+- **Audit-intake pattern evaluation** (new 2026-04-20): did P0-only live promotion + cold-pool retention protect the pool-size ceiling signal? Did the pattern prevent backlog flood from a 19-finding audit? Should this generalize to future audit-style artifacts or stay audit-specific?
+- **PRD-trigger promotion pattern evaluation** (new 2026-04-20): BUG-07 was promoted from cold pool to live backlog on `PRD_TEAM_TRIAL.md` approval. Did this produce correct signal? Should this be codified as a rule (e.g., "any PRD approval MAY promote cold-pool items if and only if the PRD explicitly cites them as hard blockers")?
+- **Ceiling-cool-off clause 7 efficacy** (first invocation at iter 016): the cool-off served a `directed` pick, not the intended `top-score` refined-formula exercise. Narrow to `top-score`-only? Or keep dual-use?
+- **Staleness-cap triage (MANDATORY per clause 2):** #14 (age 10, at cap) + #15 (age 11, past cap) require explicit keep/downgrade/delete decision. #7 (age 9) is on deck for iter 019.
+- **Closure-ratio KPI trajectory:** iter 017 added 1 closure (#33) + 1 generation (#41); partial recovery. Track whether trajectory meets ≥0.25 by iter 018.
+- **Portfolio-drift rule** (MR-003 Change D): does `apps/web-app/e2e/` + test file touches at iter 017 count toward Signal-5 surface coverage, or is only production-code surface counted? MR-004 should rule.
 
-**Two PRD-delta artifact tasks pending (Phase 3 of Mode 3):**
-- Pro tier at $99 PRD delta — product-manager to scope
-- 14-day Team trial PRD delta — product-manager to scope
-These are artifact-only (no code) and will run in parallel before iter 017. They do NOT consume cadence.
+**Iter 019 (Mode 1, post-MR-004): forced burn-down unless cool-off re-arms.** Pool remains 23 > 8. Cool-off returns only after 3 consecutive burn-downs (iter 017 was #1, iter 018 Mode 4 does not count, iter 019 would be #2). Primary candidate: **#40 BUG-07** (score 11, PRD-promoted, Effort 1 / Risk 1 — small + unblocks Team Trial build). Alternate: **#15** IF MR-004 preserves it rather than downgrades/deletes. Alternate: **#14** IF MR-004 preserves it.
 
 ### Mandatory sequencing
 
-1. **Iter 017 (Mode 1)**: per CLAUDE.md § Follow-Up Debt Policy clause 7, cool-off is single-use and was invoked at iter 016 → iter 017 is again subject to clause 6 (pool > 8 → burn-down). **#15 crosses staleness cap (age 10, Birth 006) at iter 016** → preemptive close at iter 017 avoids mandatory keep/downgrade/delete triage at MR-004. Top pick: **#15** (score 10, code hygiene, Effort 2 / Risk 1). Alternates: #19 (score 11, session durability), #7 (score 11, policy coverage), #14 (score 11, SOP quality gate, age 9 — also approaching cap).
-2. **Iter 018 (Mode 4): Meta-Review 004** — base cadence, 3 bounded loops post MR-003 (iter 016 + iter 017 + iter 018-boundary). Must evaluate: (a) MR-003 Change B cool-off efficacy — was the iter 016 `directed` invocation the right use, or should cool-off be reserved for `top-score`? (b) MR-003 Change D portfolio-drift trigger status — counter reset to 0 at iter 016 (web-app touched); still dormant. (c) Closure-ratio trajectory vs revised 0.25 KPI target. (d) Staleness-cap scan on #14 (age 10 at iter 017 if not picked), #7 (age 9 at iter 017).
-3. **Iter 019+**: burn-down continuation OR top-score opportunity when pool drops to ≤8. Monitor for second ceiling-cool-off eligibility if another 3-consecutive burn-down streak emerges.
+1. **Iter 018 (Mode 4): Meta-Review 004** — governance-only. Must produce `META_REVIEW_004.md` artifact + apply any adopted diffs. Cadence counter resets after.
+2. **Iter 019 (Mode 1)**: forced burn-down, cool-off not yet re-armed. Primary recommendation: **#40 BUG-07** (high-leverage, unblocks Team Trial). Alternate: whichever of #14/#15 survives MR-004 triage.
+3. **Iter 020+**: burn-down continuation. If iter 019 + 020 + 021 all burn-down and pool still > 8, clause 7 cool-off re-arms for iter 022 — first chance since iter 016 to exercise the refined-scoring formula via `top-score`.
 
-### Candidates for iter 017 (ordered by score, burn-down mode — pool 15 > 8)
+### Candidates for iter 019 (ordered by score, burn-down mode — pool 23 > 8)
 
-- **#19** GC stale `ledgerium_active_session_events_*` keys — score 11 (iter 010 follow-up, session durability, Effort 1 / Risk 1) ← highest-score pick
-- **#7** Widen policy-engine `credit_card` regex to whitespace separators — score 11 (iter 008 follow-up, policy coverage)
-- **#14** Wire `validateRenderedSOP` into pipeline — score 11 (iter 007 follow-up, SOP quality gate, age 9 — approaching staleness cap at iter 017)
 - **#31** Bootstrap sidepanel component test harness — score 11 (iter 014 follow-up, quality assurance; density risk flagged)
-- **#20** `loadFromStorage` sessionId/in-flight flag cross-validation — score 10 (iter 010 follow-up, session durability)
-- **#15** Extract confidence thresholds to shared constants — score 10 (iter 006 follow-up, code hygiene, **age 10 — staleness-cap reached at iter 016**) ← **coordinator recommendation: pick #15 preemptively over #19/#7/#14 to avoid MR-004 mandatory triage**
+- **#19** GC stale `ledgerium_active_session_events_*` keys — score 11 (iter 010 follow-up, session durability)
+- **#7** Widen policy-engine `credit_card` regex — score 11 (iter 008 follow-up, **age 9 at iter 017, cap at iter 018**)
+- **#14** Wire `validateRenderedSOP` — score 11 (**age 10 at iter 017, at cap — MR-004 triage required**)
+- **#40** BUG-07 Remove silent `subscriptionStatus @default("trialing")` — score 11 (PRD-promoted, billing/schema hygiene, Effort 1 / Risk 1, unblocks Team Trial build) ← **coordinator recommendation for iter 019 pending MR-004 outcome**
+- **#36** G-02 Upgrade link at 80% quota — score 11 (audit-intake, UX/conversion)
+- **#15** Extract confidence thresholds — score 10 (**age 11 at iter 017 — past cap — MR-004 triage required**)
 
-### Meta-review trigger check (post iter 016)
-- Loops since Meta-Review 003: **1** (iter 016 is a bounded loop; iter 015 was Mode 4 and does not count). Base cadence next fires at iter 018 (2 more bounded loops needed).
-- Post-meta-review stability window: active through iter 017 (1 more bounded loop). MR-004 is the next governance-change opportunity.
+### Meta-review trigger check (post iter 017)
+- Loops since Meta-Review 003: **2** (iter 016 + iter 017 bounded loops; iter 015 Mode 4, Mode 3 @ iter 016→17, and artifact-only PRD-approval commit all do NOT count). Base cadence fires at iter 018 (1 more bounded loop boundary).
+- Post-meta-review stability window: expires at iter 018. MR-004 is the next governance-change opportunity.
 - Early-trigger conditions:
-  - 3-consecutive-same-Area: web-app UI 1-in-5, no risk.
-  - Same-implementer 4+: frontend-engineer is now 2nd consecutive primary (iter 014 + iter 016) — 2 away from trigger.
-  - Follow-up accumulation > 10: pool 15; already above this threshold but **base-cadence MR-004 at iter 018 will satisfy**.
-  - Validation-failure run: 0 (iter 016 clean).
-  - Portfolio-drift trigger (MR-003 Change D): counter reset to 0 at iter 016; dormant.
-- Staleness-cap scan: **#15 at age 10 (cap reached)**, **#14 at age 9 (cap at iter 017)**, **#7 at age 8 (cap at iter 018)**. Preemptive picks in iter 017 + iter 019 can clear these before MR-004 triage.
-- Closure-ratio recovery: **0.188** (unchanged at iter 016; iter 016 added 0 closures + 0 generations since it was a non-follow-up directed Mode 2 pick). KPI target ≥0.25 by iter 018 now depends on iter 017 picking a follow-up (burn-down mandate + staleness-cap rationale both align).
-- Autonomous-vs-directed sub-partition: `top-score` **1/10** (unchanged; iter 016 was `directed` not `top-score`). Refined formula discrimination still needs a `top-score` selection — the closest opportunity is iter 019+ if pool drops to ≤8.
+  - 3-consecutive-same-Area: billing/QA 1-in-5, no risk (last 5 bounded = UX resilience 014 · web-app UI 016 · billing/QA 017 = 3 distinct). **Healthy diversity.**
+  - Same-implementer 4+: backend-engineer at iter 017 breaks the frontend-engineer-at-014+016 streak; frontend-engineer at 2, backend-engineer at 1 new. **3 away from trigger.**
+  - Follow-up accumulation > 10: pool 23; already above; **MR-004 base-cadence will satisfy.**
+  - Validation-failure run: 0 (iter 017 clean).
+  - Portfolio-drift trigger (MR-003 Change D): counter **incremented to 1** at iter 017 IF test-only touches don't count toward Signal-5 surface coverage (held at 0 if they do). MR-004 should rule.
+- Staleness-cap scan: **#15 at age 11 (past cap)**, **#14 at age 10 (at cap)**, **#7 at age 9 (cap at iter 018)**. Three items requiring MR-004 triage — more than any prior meta-review.
+- Closure-ratio recovery: **1 closure (#33) + 1 generation (#41)** at iter 017 = closure/generation = 1.0 for this iteration. Rolling 10-iter closure ratio: TBD at MR-004. Target ≥0.25 by iter 018 now more achievable.
+- Autonomous-vs-directed sub-partition: `top-score` **still 1/10** (iter 017 was `burn-down`). Cool-off re-arm opportunity at iter 022 earliest.
 
 ## Meta-Review Status
 
 - Completed loops since initialization: **16 (iter 001–016; iter 015 = MR-003 Mode 4, does not count toward cadence; Mode 3 @ iter 016→17 does not count toward cadence)**
 - Last meta-review: **Meta-Review 003 (2026-04-20, covering iter 012–014)** — see `META_REVIEW_003.md`
-- Prior meta-reviews: Meta-Review 002 (2026-04-19, iter 009–011) `META_REVIEW_002.md`; Meta-Review 001 (2026-04-17, iter 004–008) `META_REVIEW_001.md`
-- Bounded loops completed since last meta-review: **1** (iter 016)
+- Prior meta-reviews: Meta-Review 003 (2026-04-20, iter 012–014) `META_REVIEW_003.md`; Meta-Review 002 (2026-04-19, iter 009–011) `META_REVIEW_002.md`; Meta-Review 001 (2026-04-17, iter 004–008) `META_REVIEW_001.md`
+- Bounded loops completed since last meta-review: **2** (iter 016 + iter 017)
 - MR-003 applied 4 governance diffs: CLAUDE.md § Current Phase + § Known Issues hygiene (A); CLAUDE.md § Follow-Up Debt Policy clause 7 ceiling-cool-off (B); SYSTEM_HEALTH.md autonomous-ratio sub-partition (C); CLAUDE.md § Meta-Review Cadence portfolio-drift trigger (D).
-- **Iter 016 was first invocation of MR-003 Change B (ceiling-cool-off)** — logged as `ceiling-cool-off: invoked; rationale: user-directed CEO scope (dashboard simplification) with one-logical-outcome discipline`. Cool-off is single-use per clause 7; iter 017 returns to clause 6 burn-down.
-- Next meta-review trigger: **BASE-CADENCE at iter 018** — 2 more bounded loops (iter 017 + iter 018-boundary). Must evaluate MR-003 Change B efficacy and MR-003 Change D trigger status; must execute staleness-cap triage if #15 / #14 / #7 were not preemptively closed. **MR-004 agenda item added:** evaluate the audit-intake pattern (P0-only promotion + cold-pool holding in artifact doc) vs alternatives (bulk intake, selective intake by specialist review, etc.).
-- Status: **MR-003 active; stability window through iter 017; MR-004 scheduled at iter 018**
+- **Iter 016 was first invocation of MR-003 Change B (ceiling-cool-off)** — consumed; cool-off not available again until a new 3-consecutive-burn-down streak builds (iter 017 = #1 of new streak).
+- **Next meta-review trigger: BASE-CADENCE at iter 018** — 1 more bounded loop boundary. MR-004 agenda (from iter 017 + prior): (1) audit-intake pattern evaluation [new], (2) PRD-trigger promotion evaluation [new], (3) cool-off clause-7 efficacy (`directed` vs `top-score` use), (4) portfolio-drift Change D trigger — test-only surface counting rule, (5) **mandatory staleness-cap triage on #14 (age 10) + #15 (age 11) + #7 (age 9 by iter 018)**, (6) closure-ratio KPI trajectory.
+- Status: **MR-003 active; stability window expires at iter 018; MR-004 executes at iter 018**
 
 ### Meta-Review 001 headline findings
 
