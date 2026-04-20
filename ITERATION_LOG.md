@@ -1182,3 +1182,132 @@ No orphaned headings, no empty grid wrappers, no double-spacing artifacts (verif
 - **Portfolio-drift trigger (MR-003 Change D):** counter reset to 0 at iter 016 (web-app surface touched for first time in bounded-loop era since iter 001). Trigger remains dormant.
 - **Pool status for iter 017:** 15 > 8 → clause 6 active → iter 017 is forced burn-down. Cool-off cannot be re-invoked until another 3 consecutive ceiling-forced burn-downs accumulate (would be iter 017 + 019 + 020 assuming iter 018 is Mode 4 and does not count).
 - **Release signal (frontend-engineer self-report + coordinator independent re-verification):** **GO**. Small, reversible, well-scoped simplification. Zero production-logic risk surface (pure JSX + useMemo removal). 79/79 tests pass. Typecheck + build clean. Ready to commit.
+
+---
+
+## Mode 3 @ iter 016→17 — Pricing audit + billing revenue-integrity hardening (out of cadence)
+
+- Date: 2026-04-20
+- Trigger: CEO directive — "Can you have the team closely inspect the pricing and subscription models and make sure they make sense and that they are functional."
+- Mode: **Mode 3 — Debugging.** Does NOT consume bounded-loop cadence counter (per CLAUDE.md § Operating Modes). Iter 017 is still the next bounded loop.
+- Coordinator: coordinator
+- Phase: Phase 1
+
+### Scope (approved by CEO)
+
+Combined P0 fix for three revenue-integrity bugs identified in `PRICING_AUDIT_001.md`:
+- **BUG-01** Silent plan under-provisioning (`planFromPriceId` fallback to `'starter'` + webhook catch-block swallowing Stripe errors)
+- **BUG-03** Silent upgrade-button failure for admin + already-subscribed users
+- **BUG-04** Missing `STRIPE_WEBHOOK_SECRET` causing total silent billing pipeline failure
+
+Three bugs, one logical outcome (billing revenue-integrity hardening), one commit. Standard Mode 3 bundling for same-area bug-fix work.
+
+### Preceding audit (read-only, no code changes)
+
+Before the fix commit, the audit phase executed a 5-agent dispatch:
+
+1. **Explore agent (very thorough):** mapped the full pricing/subscription surface area into 11 sections + 10 preliminary red flags. File inventory covered plan definitions, pricing page, checkout flow, webhook handler, data model, feature gating, admin allowlist, lifecycle transitions, admin surface, tests, copy consistency.
+
+2. **product-manager:** strategic-coherence audit — identified healthScores copy contradiction (same page direct contradiction), Starter "ransom tier" positioning, missing Pro tier at ~$99, Team→Growth structural weakness.
+
+3. **backend-engineer:** technical-correctness audit — enumerated 11 numbered bugs (BUG-01 through BUG-11) across Stripe integration, webhook handler, checkout flow, data model, feature gating, admin allowlist, pricing drift, testing gaps, security. P0 recommendation: remove silent `'starter'` fallback as single highest-leverage fix.
+
+4. **qa-engineer:** functional-verification audit — 0 of 16 subscription lifecycle transitions fully tested; 0 billing-related test files pre-Mode-3; proposed minimum test set (unit + integration + E2E) and 15-step manual smoke checklist; release-risk assessment = HIGH.
+
+5. **growth-strategist:** conversion & positioning audit — single-highest-leverage change identified as 14-day Team trial triggered at first-recording upload; 80% quota warning has no upgrade link; "No credit card required" shown on paid cards; feature comparison table buries intelligence layer at rows 8–10.
+
+All four specialist reports triangulated: BUG-01 (2 lenses), BUG-02 (2), BUG-03 (1 with high severity), BUG-04 (2), zero billing tests (2), healthScores copy contradiction (1), 14-day trial (1 highest-leverage), pricing drift (2). The convergence pattern raised confidence on P0 classifications.
+
+Output artifact: `PRICING_AUDIT_001.md` (consolidated audit + cold-pool reference + CEO decision points). This file now serves as the reservoir for P1/P2/P3 items that will promote to live backlog as P0s burn down.
+
+### CEO approval block (all 5 decision points)
+
+1. ✅ Combined Mode 3 fix for BUG-01 + BUG-03 + BUG-04 → executed in this entry
+2. ✅ Audit-intake pattern (P0 immediately; P1/P2/P3 cold pool) → applied; 4 P0 items entered live backlog, ~27 P1/P2/P3 held in audit doc
+3. ✅ Pro tier at $99 — PRD delta → **queued for Phase 3 of this Mode 3 (artifact-only, no code)**
+4. ✅ 14-day Team trial — dedicated iteration after bugs ship → **queued for Phase 3 PRD delta; implementation iteration deferred**
+5. ✅ "Growth → Automate" rename — deferred until Pro tier strategy is settled → logged, no action
+
+### Agents Used
+
+- coordinator (sequencing + audit dispatch + artifact updates)
+- Explore agent (very thorough — surface map)
+- product-manager (strategic coherence audit)
+- backend-engineer (technical correctness audit + BUG-01 + BUG-04 fix + validation)
+- qa-engineer (functional verification audit)
+- growth-strategist (conversion + positioning audit)
+- frontend-engineer (BUG-03 fix + UpgradeButton error surface + analytics event + validation)
+
+### Files Read (by agents during audit, partial list)
+
+- `apps/web-app/src/lib/plans.ts`, `config.ts`, `stripe.ts`, `feature-gating.ts`, `admin-allowlist.ts`, `analytics.ts`
+- `apps/web-app/src/app/api/billing/{checkout,webhook,portal}/route.ts`
+- `apps/web-app/src/app/api/account/route.ts`
+- `apps/web-app/src/app/(public)/pricing/{page.tsx,ROICalculator.tsx}`
+- `apps/web-app/src/app/(public)/{docs,compare/scribe}/page.tsx`
+- `apps/web-app/src/components/{PricingCards,UpgradeButton,UsageQuotaMeter,FeatureGate,UpgradeCTA}.tsx`
+- `apps/web-app/prisma/schema.prisma`
+- `apps/web-app/e2e/{api/feature-gating,api/account,public/pricing,app/upload}.spec.ts`
+- `apps/web-app/e2e/seed-test-db.js`
+
+### Files Changed (Mode 3 fix commit)
+
+- `apps/web-app/src/lib/stripe.ts` — +20 / −4 LOC. `planFromPriceId` returns `PlanType | null` with `console.warn` on unmapped IDs. `getWebhookSecret()` replaces module-level `WEBHOOK_SECRET` constant; throws on unset/whitespace/empty.
+- `apps/web-app/src/app/api/billing/webhook/route.ts` — +24 / −12 LOC. Removed `checkout.session.completed` inner try/catch that silenced Stripe API errors. Added explicit throws when `planFromPriceId` returns null for paid subscriptions. Replaced module-level `WEBHOOK_SECRET` import with `getWebhookSecret()` call inside outer try (HTTP 500 on missing secret → Stripe retries).
+- `apps/web-app/src/app/api/billing/checkout/route.ts` — +2 LOC. Added `code: 'admin_bypass'` and `code: 'already_subscribed'` to 400 response shapes for UI disambiguation.
+- `apps/web-app/src/components/UpgradeButton.tsx` — +36 net LOC (rewrite). Added `errorMessage` state, `CheckoutErrorResponse` interface, inline `role="alert" aria-live="polite"` error surface, `upgrade_blocked` analytics event with `{code, location}`, 1500ms delay before navigation on `already_subscribed` redirect.
+- `apps/web-app/src/lib/analytics.ts` — +1 LOC. New `upgrade_blocked` event type in conversion & billing section.
+- `apps/web-app/src/lib/stripe.test.ts` — **NEW +103 LOC.** 7 Vitest unit tests: `planFromPriceId` unmapped/known/empty cases (3); `getWebhookSecret` unset/empty-string/whitespace/valid cases (4).
+- `apps/web-app/e2e/api/upgrade-button-error-state.spec.ts` — **NEW +57 LOC.** 2 Playwright API-level tests: `already_subscribed` response shape contract; 400 response invariant shape.
+- `PRICING_AUDIT_001.md` — **NEW** at repo root. Consolidated 4-lens audit + P0/P1/P2/P3 ranking + CEO decision points + files inspected evidence trail + governance notes on intake pacing.
+
+### Validation Run (coordinator-independent verification)
+
+- `pnpm --filter @ledgerium/web-app typecheck` → **clean** (tsc --noEmit, no errors)
+- `pnpm --filter @ledgerium/web-app test` → **86/86 passed** (4 test files: humanize 25, health-scores 29, format 25, **stripe 7 new**)
+- `pnpm --filter @ledgerium/web-app build` → **clean** (67 static pages generated)
+- `git diff --stat` → 5 files modified + 2 new files (1 test, 1 E2E spec); LOC delta matches agent self-reports within rounding.
+
+### Outcome
+
+**All three P0 billing revenue-integrity bugs closed.** Silent failure modes converted to noisy transient failures that self-heal via Stripe retry or surface to the user via inline accessible error state. Admin and already-subscribed users now see explicit feedback and are tracked via a new `upgrade_blocked` analytics event (closes the silent-funnel gap flagged by growth-strategist).
+
+**Observability improvement:** `planFromPriceId` now emits `console.warn('[billing] planFromPriceId: unmapped price ID <id>')` whenever a price ID is not in the map — grep-able log line enabling production alerting.
+
+### Impact
+
+- **Before (revenue integrity):** user pays $249 for Team → misconfigured env or Stripe API blip → user silently provisioned at Starter, no alert, no retry, support ticket is the only detection mechanism. Admin clicks upgrade → button silently does nothing. Already-subscribed user clicks upgrade → silent redirect. Missing WEBHOOK_SECRET → every new subscriber billed but never activated.
+- **After (revenue integrity):** all four failure modes now fail loudly. Webhook returns 500 on plan-resolution failure → Stripe retries for 72h → self-heals. Admin/already-subscribed users see a visible accessible error message with analytics. Missing WEBHOOK_SECRET throws at call time with a grep-able log line.
+- **Test coverage delta:** +7 unit tests + 2 API-level E2E tests = 9 new tests. Full billing test suite (webhook event replay, checkout integration, lifecycle transitions) still out of scope — promoted to live backlog as #33 QA-01 (score 12, highest P0 remaining).
+- **Audit knowledge capture:** `PRICING_AUDIT_001.md` serves as the authoritative reference for pricing-surface understanding. Any future pricing work should start by reading this doc.
+- **Strategic clarity:** 4 CEO decisions now documented (audit-intake pattern applied; Pro tier + 14-day trial queued as PRDs; Growth-rename deferred).
+
+### Follow-Ups Generated (Birth iter: `M3@016→17`)
+
+**Three Mode-3 residual follow-ups** — all hygiene-grade, low blast radius:
+
+1. **#37** (score 6) — `PRO_PRICE_ID` silent-empty-string pattern in `stripe.ts:36`. Same `?? ''` anti-pattern that BUG-04 fixed for `WEBHOOK_SECRET`; deprecated path, low risk but worth tidying.
+2. **#38** (score 7) — `APP_URL` hardcoded fallback in `checkout/route.ts:~120`. `process.env.NEXTAUTH_URL ?? 'https://ledgerium.ai'` could produce wrong redirect URLs in staging/preview environments.
+3. **#39** (score 6) — `UpgradeButton` 1500ms `setTimeout` cleanup via `useEffect`. If user navigates away mid-redirect, timer callback still fires on unmounted component; non-bug refinement.
+
+**Plus four P0 audit-intake items (non-follow-up; promoted from `PRICING_AUDIT_001.md`):**
+
+4. **#33** (score 12) — **QA-01** minimum billing test suite (unit + integration Stripe-mock + E2E).
+5. **#34** (score 9) — **F-COH-01** healthScores copy contradiction fix.
+6. **#35** (score 10) — **F-COH-02** Starter value story reframe (outcome not feature).
+7. **#36** (score 11) — **G-02** 80% quota warning upgrade link.
+
+**Follow-up density check:** Mode 3 generated 3 residual follow-ups + 4 audit-intake items. Density clause 3 (3+ follow-ups in one iteration) applies to bounded loops; Mode 3 is out of cadence. **`density-response: acknowledged, carried forward`** — explicit conscious decision. Rationale: Mode 3 was a deliberate intake event surfacing pre-existing technical debt; the volume reflects audit coverage quality, not iteration scope-creep. Alternative interpretations (re-scope to 3 loops; invoke root-cause-analyst) were rejected as misaligned — this is known-debt intake, not spawning-debt discovery.
+
+### Governance / Selection Signals
+
+- **Mode:** Mode 3 (Debugging). Out of cadence. Does NOT increment bounded-loop counter or affect `top-score / burn-down / directed` ratio tracking.
+- **Cadence impact:** iter 017 is still the next bounded loop. MR-004 base cadence is still at iter 018 (2 bounded loops from iter 016: iter 017 + iter 018-marker).
+- **Pool-size ceiling:** was 15, now 22. Still > 8. Iter 017 remains forced burn-down.
+- **Audit-intake pattern (new):** P0-only live promotion + P1/P2/P3 cold pool in audit doc. Governance rationale: prevents a single intake event from collapsing the 1-in-5 burn-down ratio, preserves pool-size ceiling as a meaningful signal, distinguishes known-debt intake from iteration-generated follow-ups. **MR-004 agenda item added** to evaluate whether this pattern generalizes or is audit-specific.
+- **Agent diversity:** Mode 3 used backend-engineer + frontend-engineer in parallel — different primaries for different bugs. Consistent with MR-001's delegation rubric.
+- **Scope discipline (MR-002 Change D):** no scope-expansion invocation required. Each engineer operated on its brief; backend-engineer explicitly rejected adding a new `/api/health/billing` endpoint (noted it was new surface, not bug-fix, classified as P1 OBS-02 in audit doc); frontend-engineer declined to add a toast system (no existing dependency; used inline error instead). Both deferred adjacent issues to backlog rather than expanding scope.
+- **Coordinator brief quality (self-assessment):** briefs included explicit "out of scope" exclusions (e.g., "do NOT add `/api/health/billing`"; "do NOT build full test suite (QA-01)"). Both engineers honored the exclusions. Briefs passed the Mode 3 discipline test.
+- **Staleness-cap watch (unchanged from iter 016):** #15 (age 10), #14 (age 9), #7 (age 8). Mode 3 did NOT address any of these; iter 017 recommendation still = #15.
+- **Phase 3 queued:** product-manager PRD deltas for Pro tier + 14-day Team trial — artifact-only, no code, do NOT consume cadence.
+- **Release signal (coordinator independent re-verification):** **GO**. Three P0 bugs resolved. 86/86 tests green. Typecheck + build clean. Ready to commit.

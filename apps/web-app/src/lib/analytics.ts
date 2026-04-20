@@ -95,6 +95,7 @@ export type AnalyticsEvent =
   // ── Conversion & billing ──────────────────────────────────────────────────
   | { event: 'upgrade_prompt_viewed'; location: string; plan: string }
   | { event: 'upgrade_clicked'; location: string }
+  | { event: 'upgrade_blocked'; code: 'admin_bypass' | 'already_subscribed'; location: string }
   | { event: 'checkout_started' }
   | { event: 'subscription_created'; plan: string }
   | { event: 'subscription_canceled' }

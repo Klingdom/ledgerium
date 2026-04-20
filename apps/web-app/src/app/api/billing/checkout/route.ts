@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
   // do not need (or benefit from) a Stripe subscription.
   if (isAdminUnlimited(user.email)) {
     return NextResponse.json(
-      { error: 'This account has admin-granted unlimited access and does not require a Stripe subscription.' },
+      { error: 'This account has admin-granted unlimited access and does not require a Stripe subscription.', code: 'admin_bypass' },
       { status: 400 },
     );
   }
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
   const currentPlan = toPlanType(user.plan);
   if (currentPlan !== 'free' && user.subscriptionStatus === 'active') {
     return NextResponse.json(
-      { error: 'You already have an active subscription. Manage it from your account.', redirect: '/account' },
+      { error: 'You already have an active subscription. Manage it from your account.', code: 'already_subscribed', redirect: '/account' },
       { status: 400 },
     );
   }

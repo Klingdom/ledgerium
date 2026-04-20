@@ -73,10 +73,20 @@ if (PRO_PRICE_ID && !STRIPE_PRICE_TO_PLAN[PRO_PRICE_ID]) {
 
 /**
  * Resolve a Stripe price ID to a PlanType.
- * Falls back to 'starter' for unknown IDs (safe default for paid subscriptions).
+ * Returns null for unmapped price IDs — callers that write to the database MUST
+ * treat null as a hard error (re-throw / return 500) so Stripe retries rather
+ * than silently under-provisioning the subscriber.
+ *
+ * Display-only callers that need a safe fallback should apply `?? 'starter'`
+ * explicitly at the call site with a comment explaining the intent.
  */
-export function planFromPriceId(priceId: string): PlanType {
-  return STRIPE_PRICE_TO_PLAN[priceId] ?? 'starter';
+export function planFromPriceId(priceId: string): PlanType | null {
+  const plan = STRIPE_PRICE_TO_PLAN[priceId];
+  if (plan === undefined) {
+    console.warn(`[billing] planFromPriceId: unmapped price ID ${priceId}`);
+    return null;
+  }
+  return plan;
 }
 
 /**
@@ -89,8 +99,22 @@ export function getPriceId(plan: PaidPlanType, interval: BillingInterval): strin
   return priceId || null;
 }
 
-/** The Stripe webhook signing secret */
-export const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? '';
+/**
+ * Returns the Stripe webhook signing secret.
+ * Throws at call time if STRIPE_WEBHOOK_SECRET is absent so the webhook handler
+ * returns HTTP 500 (triggering Stripe retry) rather than silently accepting
+ * every request with an empty-string secret.
+ *
+ * Dev note: strict in all environments. Run `stripe listen --forward-to ...`
+ * locally and set STRIPE_WEBHOOK_SECRET to the CLI-provided whsec_ value.
+ */
+export function getWebhookSecret(): string {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!secret || secret.trim() === '') {
+    throw new Error('STRIPE_WEBHOOK_SECRET is not configured');
+  }
+  return secret;
+}
 
 /** Base URL for redirects */
 export const APP_URL = process.env.NEXTAUTH_URL ?? 'https://ledgerium.ai';

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getStripe, WEBHOOK_SECRET, planFromPriceId } from '@/lib/stripe';
+import { getStripe, getWebhookSecret, planFromPriceId } from '@/lib/stripe';
 import type { PlanType } from '@/lib/plans';
 import { db } from '@/db';
 import { trackServer } from '@/lib/analytics-server';
@@ -19,13 +19,23 @@ export async function POST(req: NextRequest) {
   const body = await req.text();
   const sig = req.headers.get('stripe-signature');
 
-  if (!sig || !WEBHOOK_SECRET) {
-    return NextResponse.json({ error: 'Missing signature or webhook secret' }, { status: 400 });
+  if (!sig) {
+    return NextResponse.json({ error: 'Missing stripe-signature header' }, { status: 400 });
   }
 
   let event: Stripe.Event;
   try {
-    event = getStripe().webhooks.constructEvent(body, sig, WEBHOOK_SECRET);
+    // getWebhookSecret() throws if STRIPE_WEBHOOK_SECRET is unset — this
+    // surfaces as HTTP 500 so Stripe retries rather than accepting the request
+    // with an empty-string secret (BUG-04 fix).
+    let webhookSecret: string;
+    try {
+      webhookSecret = getWebhookSecret();
+    } catch (err) {
+      console.error('[billing] WEBHOOK_SECRET not configured — webhook rejected', err);
+      return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
+    }
+    event = getStripe().webhooks.constructEvent(body, sig, webhookSecret);
   } catch (err) {
     console.error('Webhook signature verification failed:', err);
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
@@ -38,21 +48,33 @@ export async function POST(req: NextRequest) {
         const userId = session.metadata?.userId;
         if (!userId) break;
 
-        // Resolve plan from the subscription's price ID instead of hardcoding "pro".
-        let plan: PlanType = 'starter';
+        // Resolve plan from the subscription's price ID.
+        // If resolution fails (Stripe API error or unmapped price ID) we re-throw
+        // so the outer catch returns HTTP 500 and Stripe retries — silent under-
+        // provisioning is worse than a retry (BUG-01 fix).
+        let plan: PlanType;
         if (session.subscription) {
-          try {
-            const subscription = await getStripe().subscriptions.retrieve(
-              session.subscription as string,
+          const subscription = await getStripe().subscriptions.retrieve(
+            session.subscription as string,
+          );
+          const priceId = subscription.items.data[0]?.price.id;
+          if (!priceId) {
+            throw new Error(
+              `[billing] checkout.session.completed: no price ID on subscription ${session.subscription}`,
             );
-            const priceId = subscription.items.data[0]?.price.id;
-            if (priceId) {
-              plan = planFromPriceId(priceId);
-            }
-          } catch (err) {
-            console.error(`[stripe] Failed to retrieve subscription for plan resolution:`, err);
-            // Fallback to 'starter' — better than failing the webhook entirely.
           }
+          const resolved = planFromPriceId(priceId);
+          if (resolved === null) {
+            throw new Error(
+              `[billing] checkout.session.completed: unmapped price ID ${priceId} — cannot provision plan`,
+            );
+          }
+          plan = resolved;
+        } else {
+          // No subscription object on the session — cannot resolve a paid plan.
+          throw new Error(
+            `[billing] checkout.session.completed: session ${session.id} has no subscription`,
+          );
         }
 
         await db.user.update({
@@ -83,11 +105,23 @@ export async function POST(req: NextRequest) {
           'none';
 
         // Resolve plan from the current price ID.
+        // For active/past_due/trialing subscriptions, an unmapped price ID is a
+        // hard error — re-throw so Stripe retries rather than silently reverting
+        // the subscriber to free (BUG-01 fix).
         const isActive = status === 'active' || status === 'past_due' || status === 'trialing';
         const priceId = subscription.items.data[0]?.price.id;
-        const plan: PlanType = isActive && priceId
-          ? planFromPriceId(priceId)
-          : 'free';
+        let plan: PlanType;
+        if (isActive && priceId) {
+          const resolved = planFromPriceId(priceId);
+          if (resolved === null) {
+            throw new Error(
+              `[billing] customer.subscription.updated: unmapped price ID ${priceId} for active subscription ${subscription.id}`,
+            );
+          }
+          plan = resolved;
+        } else {
+          plan = 'free';
+        }
 
         await db.user.update({
           where: { id: userId },

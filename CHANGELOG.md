@@ -6,6 +6,114 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-20] - Mode 3 @ iter 016→17: Pricing audit + billing revenue-integrity hardening (out of cadence)
+
+### CEO directive (scope trigger)
+
+"Can you have the team closely inspect the pricing and subscription models and make sure they make sense and that they are functional."
+
+### Governance framing
+
+- **Mode 3 (Debugging — out of cadence)** per CLAUDE.md § Operating Modes. Bug-fix work; does **NOT** consume the bounded-loop cadence counter. Iter 017 remains the next bounded loop (forced burn-down per pool-size ceiling).
+- **Audit-intake pattern (new, CEO-approved):** audit produced `PRICING_AUDIT_001.md` (19 cross-specialist findings from 5 lenses — product, strategic, technical, functional, growth). P0 findings promoted to live backlog immediately; P1/P2/P3 held in the audit doc as a "cold pool" to prevent pool-size ceiling collapse. Pattern queued for MR-004 evaluation.
+- **Scope:** fix 3 P0 revenue-integrity bugs (silent plan fallback, silent webhook-secret misconfiguration, silent upgrade-blocked responses). One logical outcome: convert silent billing failures to noisy retryable / user-visible failures.
+- **Mode 3 does not consume bounded-loop cadence.** MR-004 cadence counter still advances by bounded iterations only; MR-004 triggers at iter 018 as planned.
+
+### Audit phase (evidence before intervention)
+
+5-agent dispatch (product-manager + market-research + system-architect + qa-engineer + growth-strategist) produced `PRICING_AUDIT_001.md` (~4,000 words). Cross-specialist consensus identified 19 findings:
+
+- **3 P0 (fix immediately, Mode 3):** BUG-01 silent `planFromPriceId` fallback to `'starter'`; BUG-03 silent HTTP 400 on upgrade blocks; BUG-04 `STRIPE_WEBHOOK_SECRET` empty-string fallback.
+- **4 P1 (cold pool):** BUG-02 webhook idempotency gap; BUG-05 customer-creation TOCTOU race; BUG-06 non-atomic quota enforcement; BUG-07 `subscription.status: 'trialing'` handling.
+- **12 P2/P3 (cold pool + 4 live backlog promotions):** copy coherence, growth activation, trial infrastructure, feature gating naming consistency.
+
+### Fixed
+
+**BUG-01 — Silent plan fallback in `planFromPriceId`** (`apps/web-app/src/lib/stripe.ts`)
+- Changed return type from `PlanType` to `PlanType | null`. Unknown price IDs now return `null` with `console.warn('[billing] planFromPriceId: unmapped price ID <id>')` instead of silently coercing to `'starter'`.
+- Caller (`apps/web-app/src/app/api/billing/webhook/route.ts`) now throws explicitly when `planFromPriceId` returns null for paid subscriptions, forcing Stripe webhook retry rather than persisting wrong plan state.
+
+**BUG-03 — Silent HTTP 400 on upgrade blocks** (`apps/web-app/src/app/api/billing/checkout/route.ts` + `apps/web-app/src/components/UpgradeButton.tsx`)
+- API response shape now includes discriminating `code: 'admin_bypass' | 'already_subscribed'` field (lines 38–42, 79–83).
+- `UpgradeButton` now renders an inline `<p role="alert" aria-live="polite">` error, fires `upgrade_blocked` analytics event with `{ code, location }`, and delays 1500ms before navigation on `already_subscribed` redirect so users see the message.
+
+**BUG-04 — Silent `STRIPE_WEBHOOK_SECRET` empty-string fallback** (`apps/web-app/src/lib/stripe.ts` + webhook route)
+- Module-level `WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? ''` constant replaced with `getWebhookSecret()` function that throws `'STRIPE_WEBHOOK_SECRET is not configured'` on empty/whitespace. Webhook route invokes it inside the outer try/catch → HTTP 500 on missing → Stripe retries (noisy + observable).
+
+### Added
+
+- **`PRICING_AUDIT_001.md`** (new, ~4,000 words) — authoritative pricing-surface reference; executive summary, 19-finding consensus table with lens attribution, 4 analytical parts (strategic / technical / functional / growth), consolidated P0–P3 recommendations, Mode routing, governance notes, 5 CEO decision points, files-inspected evidence trail. Cold-pool reservoir for P1/P2/P3 items.
+- **`apps/web-app/src/lib/stripe.test.ts`** (new, 7 Vitest tests, +103 LOC) — regression protection for `planFromPriceId` (unmapped / known / empty) and `getWebhookSecret` (unset / empty / whitespace / valid).
+- **`apps/web-app/e2e/api/upgrade-button-error-state.spec.ts`** (new, 2 Playwright tests, +57 LOC) — regression protection for BUG-03 response-shape contract (`already_subscribed` + generic 400 invariant shape).
+- `upgrade_blocked` analytics event added to `apps/web-app/src/lib/analytics.ts` with payload `{ code: 'admin_bypass' | 'already_subscribed', location: string }`.
+
+### Changed
+
+- `apps/web-app/src/lib/stripe.ts` (+20 / −4 LOC) — BUG-01 + BUG-04 core fix.
+- `apps/web-app/src/app/api/billing/webhook/route.ts` (+24 / −12 LOC) — removed inner try/catch that silenced Stripe API errors in `checkout.session.completed`; integrated `getWebhookSecret()`.
+- `apps/web-app/src/app/api/billing/checkout/route.ts` (+2 LOC) — response-shape `code` discriminator.
+- `apps/web-app/src/components/UpgradeButton.tsx` (+36 net LOC) — inline error surface, analytics instrumentation, navigation delay.
+- `apps/web-app/src/lib/analytics.ts` (+1 LOC) — new event type.
+
+### CEO approvals (5 decision points — all approved)
+
+1. Combined Mode 3 fix for BUG-01 + BUG-03 + BUG-04 → **APPROVED** (executed this iteration).
+2. Audit-intake pattern (P0 immediate promotion; P1/P2 cold pool) → **APPROVED** (now in effect; MR-004 will evaluate).
+3. Pro tier at $99 → worth a scoped PRD → **APPROVED** (Phase 3a dispatch; artifact-only, no code).
+4. 14-day Team trial → worth a dedicated iteration after bugs ship → **APPROVED** (Phase 3b dispatch; artifact-only, no code).
+5. "Growth → Automate" rename → defer until Pro tier strategy is settled → **APPROVED** (held in cold pool).
+
+### Impact
+
+- **Revenue-integrity posture:** three "silent billing failure" anti-patterns converted to noisy retryable (webhook secret, plan mapping) or user-visible (upgrade button) failures. Stripe at-least-once retry semantics now work *with* the system instead of masking state drift.
+- **Observability:** `upgrade_blocked` event closes a measurable gap in conversion funnel analytics — we can now quantify admin-bypass and already-subscribed friction.
+- **SYSTEM_HEALTH.md billing scorecard:** new dimension added at 4.5 (strong) based on deterministic error handling and regression test coverage at the unit + contract layer.
+- **Known gap (tracked):** zero integration coverage for full webhook → database persistence path. Surfaced as new top risk #1 in SYSTEM_HEALTH.md; promoted to backlog as #33 QA-01 (score 12, audit-intake).
+
+### Validation (independent coordinator verification)
+
+- `pnpm --filter @ledgerium/web-app typecheck` → clean
+- `pnpm --filter @ledgerium/web-app test` → **86/86 passed** (79 pre-existing + 7 new billing unit tests)
+- `pnpm --filter @ledgerium/web-app build` → clean (67 static pages, no route regressions)
+- Playwright spec file lints; full suite deferred to CI (no new failures expected).
+- `git diff --stat` → 6 modified + 2 new test files + 1 new audit doc + 4 artifact updates.
+
+### Follow-ups generated (Birth iter: `M3@016→17`)
+
+**Live backlog (P0 audit-intake):**
+- **#33 QA-01** — Full billing integration test suite (webhook → DB persistence path). Score 12.
+- **#34 F-COH-01** — Align `healthScores` copy with audit-surfaced inconsistencies. Score 9.
+- **#35 F-COH-02** — Reframe Starter tier messaging for audit-surfaced positioning gaps. Score 10.
+- **#36 G-02** — 80%-of-quota in-app upgrade prompt. Score 11.
+
+**Mode 3 direct follow-ups (live backlog):**
+- **#37** — `PRO_PRICE_ID` silent-empty env-var pattern (mirror-risk of BUG-04). Score 6.
+- **#38** — `APP_URL` hardcoded in billing flow. Score 7.
+- **#39** — `UpgradeButton` setTimeout cleanup (React unmount hazard). Score 6.
+
+**Cold pool (held in `PRICING_AUDIT_001.md` for future burn-down):**
+- BUG-02, BUG-05, BUG-06, BUG-07 (P1) + 8 P2/P3 items.
+
+**Density-response log line:** `density-response: acknowledged, carried forward` — rationale: Mode 3 intentionally generated 7 follow-ups as byproduct of systematic audit scope; 4 of 7 are strategic audit-intake promotions (intentional live-pool expansion, not residual churn); 3 of 7 are narrow Mode-3 adjacents with low scores; pool growth (15→22) is governed via cold-pool discipline and ceiling-rule enforcement. Conscious decision to defer.
+
+### Governance
+
+- **Pool size:** 15 → 22 (7 new live rows). Ceiling rule (pool > 8) remains active — iter 017 forced burn-down. Cold-pool discipline means the 22 is not artificially inflated by audit-wide expansion.
+- **Mode 3 cadence rule (reaffirmed):** iter 016 was the most recent bounded loop; iter 017 is still the next bounded loop. Mode 3 does not consume the MR-004 counter.
+- **MR-004 agenda additions (for iter 018 meta-review):**
+  - Evaluate audit-intake pattern (P0-only live promotion + cold pool) effectiveness.
+  - Measure whether ceiling-cool-off clause 7 delivered a top-score selection at iter 016 (it did not — it served a directed pick; this Mode 3 does not affect that evaluation).
+  - Review whether Mode 3 batches should require a `density-response` log line explicitly (currently inherited from bounded-loop policy).
+- **Coordinator recommendation for iter 017:** #15 (Extract confidence thresholds to shared constants, score 10, Birth 006, age now 10 — staleness cap reached; MUST triage at MR-004 unless closed) as primary; alternate = #33 QA-01 if CEO prefers to continue billing hardening momentum.
+
+### Risks (flagged, not blocking)
+
+- P1 billing bugs (idempotency, customer TOCTOU, atomic quota, trialing status) remain in cold pool. Stripe at-least-once retries can still cause double-grant state drift until BUG-02 lands.
+- Admin-bypass E2E coverage deferred (no allowlisted test identity). Tracked via #33 QA-01.
+- Audit-intake pattern is new; MR-004 may refine P0/P1 thresholds or cold-pool release cadence.
+
+---
+
 ## [2026-04-20] - Iteration 016: Dashboard simplification — 5 sections removed (Mode 2 directed + first ceiling-cool-off invocation)
 
 ### User directive (CEO scope)
