@@ -81,13 +81,14 @@ Each improvement-loop invocation runs in one of these modes:
 3. Scope discipline must be explicitly stated in each iteration's "Candidate Selection" block.
 4. If the sequence contains 3+ items, a meta-review is MANDATORY before the next non-directed loop.
 5. Meta-review cadence counter increments by N (one per item), not by 1 (one per batch).
-6. If selected items are all in the same `Area` field, the coordinator must flag saturation risk to the user before beginning.
+6. **Same-Area saturation protocol (MR-004 Change C):** If selected items are all in the same `Area` field, the coordinator must flag saturation risk to the user AND receive explicit acknowledgement before beginning. Acknowledgement must be captured in the opening iteration's "Candidate Selection" block as `mode-5-saturation: user-ack; rationale: [reason]`. Silent "flag" without explicit user response is insufficient — the coordinator must treat absence of acknowledgement as a hard block.
 7. **Scope-expansion protocol (MR-002 Change D):** a Mode 5 item's implementation may legitimately expand beyond the backlog row's literal wording ONLY if ALL of the following conditions hold:
    a. The expansion is **evidence-based** — a specialist agent (architect, root-cause-analyst, qa-engineer) has produced an artifact demonstrating the original scope would miss the actual risk surface. Speculative "while we're here" expansions are forbidden.
    b. The expanded work still resolves to **one logical outcome** — no multi-outcome bundles. If the expansion would ship two independently reversible changes, split into two iterations.
    c. The expansion stays within the **same `Area`** as the original backlog row. Cross-area expansion is a new iteration, not an expansion.
    d. The expansion is logged as `scope-expansion: approved` in the iteration log's "Candidate Selection" block with a ≤3-sentence rationale and a reference to the evidence artifact from (a).
    e. The expansion does **not** touch surfaces modified by the immediately prior iteration — this preserves the independent-iteration guarantee in guardrail 1 and prevents unreviewable cross-iteration coupling.
+8. **Mode 5 companion-burn-down rule (MR-004 Change A):** If the proposed Mode 5 sequence contains ≥3 items AND the open follow-up pool exceeds 8, at least one iteration of the sequence MUST be a `burn-down` selection, OR the sequence MUST be preceded by one `burn-down` iteration. The burn-down iteration should target a follow-up whose Area overlaps the sequence's Area where possible, to preserve context locality. Rationale: Mode 5 directed sequences bypass the clause-6 pool-size ceiling via operating-mode precedence; without a companion burn-down the ceiling rule becomes inoperative across multi-item sequences and the follow-up pool accumulates unbounded.
 
 ---
 
@@ -136,7 +137,7 @@ Every iteration may generate follow-up backlog items. To prevent unbounded accum
    - `density-response: acknowledged, carried forward` — explicit conscious decision to defer; must include a one-sentence rationale. Silent violations are treated as a failed iteration for meta-review scoring purposes.
 5. **Birth-iter field (MR-002 Change B):** every follow-up row in `IMPROVEMENT_BACKLOG.md` MUST carry a `Birth iter` column with the iteration number that created it. Rows missing this field cannot be selected until backfilled; this enables deterministic staleness-cap enforcement (clause 2) and the meta-review `age > 10` triage query.
 6. **Pool-size density ceiling (MR-002 Change C):** if the open follow-up pool size exceeds 8 items at the start of an iteration, that iteration MUST be a burn-down selection, regardless of the 1-in-5 floor in clause 1. This is a ceiling rule: floor is "at least 1-in-5," ceiling is "when debt is growing, force immediate burn-down."
-7. **Ceiling-rule cool-off (MR-003 Change B):** after 3 consecutive iterations have selected under the `burn-down` rule due to clause 6 (pool > 8), the next iteration is authorized to ignore clause 6 *once* and select by `top-score`, `blocker-cadence`, or `directed` — provided the iteration's "Candidate Selection" block logs `ceiling-cool-off: invoked; rationale: [reason]` with a one-sentence justification. This gives the refined scoring formula at least one discriminating selection per four-loop window even in a high-debt regime. Cool-off is single-use: the iteration immediately after a cool-off is again subject to clause 6 if pool > 8.
+7. **Ceiling-rule cool-off (MR-003 Change B, narrowed by MR-004 Change B):** after 3 consecutive iterations have selected under the `burn-down` rule due to clause 6 (pool > 8), the next iteration is authorized to ignore clause 6 *once* and select by `top-score` or `blocker-cadence` — provided the iteration's "Candidate Selection" block logs `ceiling-cool-off: invoked; rationale: [reason]` with a one-sentence justification. This gives the refined scoring formula at least one discriminating selection per four-loop window even in a high-debt regime. Cool-off is single-use: the iteration immediately after a cool-off is again subject to clause 6 if pool > 8. **Exclusion (MR-004 Change B):** `directed` selections (Mode 2/5) already bypass clause 6 via operating-mode precedence and do NOT require cool-off invocation. Consuming a cool-off on a `directed` pick produces zero formula-validation evidence (observed at iter 016) and wastes a single-use resource — this is now prohibited.
 
 **Testable metric:** over any 10-iteration window, the ratio of (follow-ups closed) / (follow-ups created) must be ≥ 0.4.
 
@@ -329,13 +330,15 @@ No measurable outcome → incomplete work
 Phase 1 in progress — **all release blockers closed as of iter 011.**
 Phase 2 entry planning is unblocked; no forced-blocker items remain.
 
+**Active work: Mode 5 Path B dashboard redesign (iter 018 → 022).** PRD approved at iter 018 (`docs/prd/PRD_DASHBOARD_V2.md`). Sequence renumbered post-MR-004: iter 019 = companion burn-down (#15), iter 020 = metrics engine, iter 021 = UI build, iter 022 = accessibility/polish/E2E. MR-005 at iter 023 boundary.
+
 Priorities (non-blocker; ordered by score/strategic value):
-- Phase 2 scope / PRD refresh (item #10 ICP narrative / strategic planning loop)
+- Path B dashboard redesign (iter 019–022, PRD-gated)
 - artifact + system-health refresh dashboard process (item #4, score 13)
 - structured error logging with session context (item #9, score 11)
 - real-extension launchPersistentContext E2E harness (item #21, score 9)
 
-Follow-up pool is currently at 15 open items (ceiling rule active; ceiling-cool-off clause 7 available at iter 016).
+Follow-up pool is at 23 open items (ceiling rule active; MR-004 companion-burn-down rule satisfied by iter 019).
 See IMPROVEMENT_BACKLOG.md for the full ranked pool.
 
 Resolved (do not re-list; chronological):
@@ -353,8 +356,8 @@ Resolved (do not re-list; chronological):
 ## Known Issues
 
 - No current Phase-1 release blockers.
-- Follow-up pool at 15 items (see IMPROVEMENT_BACKLOG.md); pool-size ceiling rule active — next non-meta iteration forced to burn-down unless ceiling-cool-off (Follow-Up Debt Policy clause 7) is invoked.
-- Web-app surface under-surveyed by improvement loops (see MR-003 Signal 5); track for Phase 2 scope.
+- Follow-up pool at 23 items (see IMPROVEMENT_BACKLOG.md); pool-size ceiling rule active. MR-004 companion-burn-down rule (Mode 5 guardrail 8) satisfied for Path B via iter 019 = burn-down #15.
+- Mode 5 Path B (iter 018–022) will land 4 consecutive iterations in the web-app Area. User acknowledgement of this saturation captured at iter 018 start (CEO directive, 2026-04-20). No extension/segmentation/normalization/policy surface coverage during this window — reverse portfolio-drift trigger (MR-004 Change E proposed, deferred to post-Path-B governance iteration) will be evaluated at MR-005.
 
 Do not silently fix tracked issues — surface and update status
 

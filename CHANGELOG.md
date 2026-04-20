@@ -6,6 +6,75 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-20] - Iteration 018: Meta-Review 004 + Path B PRD (Mode 4 + Mode 5 item 1/5, `directed`)
+
+### Selection
+
+- **Selection rule:** `directed` (Mode 5 item 1/5, Path B dashboard redesign sequence). Simultaneous Mode 4 overlay (MR-004 meta-review, non-counting per CLAUDE.md § Operating Modes).
+- **Selected work:** (a) MR-004 meta-review per base cadence (3 bounded loops post-MR-003); (b) PRD draft for Workflow Intelligence Dashboard v2 per CEO Path B directive.
+- **Score:** n/a (directed + Mode 4)
+- **Rationale:** CEO authorized Path B compressed Mode 5 sequence 2026-04-20. MR-004 ran in parallel to PRD drafting because meta-coordinator is read-only on governance artifacts and product-manager writes only to `docs/prd/` — zero conflict surface, two agents dispatched in parallel.
+- **Mode 5 saturation acknowledgement (per new guardrail 6):** `mode-5-saturation: user-ack; rationale: CEO explicit approval for 4 consecutive web-app iterations iter 019–022 with full knowledge of extension/segmentation/normalization/policy surface drought during that window.`
+
+### MR-004 output
+
+- **Artifact:** `docs/meta/MR_004.md` (143 lines)
+- **Evidence coverage:** 10 agenda items — audit-intake pattern (Agenda 1), PRD-trigger promotion pattern (Agenda 2), staleness-cap triage (Agenda 3), web-app portfolio balance (Agenda 4), MR-002 Change A/B/C/D effectiveness (Agenda 5), MR-003 Change A/B effectiveness (Agenda 6), agent diversity (Agenda 7), scoring formula discrimination (Agenda 8), Mode 5 Path B governance preview (Agenda 9), open signals (Agenda 10). Every claim cited by file + line number.
+- **Top-level finding:** loop is healthy on execution quality but structurally starved of discriminating selections. Cool-off consumed at iter 016 on `directed` pick produced zero refined-formula validation evidence. Pool grew 15 → 23 over 3 loops post-MR-003 despite Change C forcing, because audit intake inflated denominator.
+- **Staleness-cap verdicts:** #14 KEEP · #15 KEEP (iter-019 pre-targeted) · #7 KEEP + flag-for-MR-005 rescan. No deletions, no downgrades.
+- **6 proposed CLAUDE.md diffs:** 3 applied this iteration (Changes A, B, C); 3 deferred to post-Path-B governance iteration (Changes D audit-intake codification, E reverse portfolio-drift trigger, F test-only surface-counting rule).
+- **Scoring refinements deferred to MR-005** per one-control-variable-at-a-time discipline (12 items within 2 points of live top = formula under-powered; PRD-bonus + staleness-bonus proposed).
+
+### PRD output
+
+- **Artifact:** `docs/prd/PRD_DASHBOARD_V2.md` (527 lines, status: Approved)
+- **Coverage:** 15 required sections. Problem & Goal · Non-Goals · Users & Moments · Success Metrics (6 measurable targets) · Page Structure (3 sections: Command Header + Insights Strip + Workflow Intelligence List) · Data Model Additions · Metrics Engine Specification with TypeScript interfaces (§7 covers Runs, AvgTime, Variation, Bottleneck, HealthScoreV2, Opportunity, Confidence, Trend-readiness) · Component Hierarchy (18 files under `apps/web-app/src/components/dashboard-v2/`) · UI States (loading, empty, no-results, error, sparse-data) · Accessibility · Mock Data Plan (5 fixture archetypes) · Plan Gating · Open Decisions · Rollout Plan · Risks.
+- **D1–D10 locked per CEO delegation:** D1 `?v2=1` query flag · D2 HealthScoreV1+V2 parallel · D3 ProcessInsight-derived Bottleneck or "—" · D4 Process Groups moved to secondary nav · D5 Portfolio sidebar collapse-by-default · D6 `workflow.toolsUsed` for Systems column · D7 UI-only time-range filter · D8 free-tier sees integer health, breakdown gated · D9 Insights strip reuses `topInsights` · D10 SOP demotes to Health Score subtext (coordinator risk flagged with reversal path).
+
+### Governance changes applied to CLAUDE.md
+
+- **MR-004 Change A (new Mode 5 guardrail 8 — companion-burn-down rule):** Mode 5 sequences of ≥3 items with pool > 8 must contain or be preceded by a `burn-down` iteration. Rationale: prevents ceiling-rule inoperability during multi-item directed sequences (Path B without companion burn-down was projected to reach pool ~27 by iter 021).
+- **MR-004 Change B (narrowed Follow-Up Debt Policy clause 7):** cool-off no longer permits `directed` selections; directed picks already bypass clause 6 via operating-mode precedence and should not consume a single-use governance resource. Rationale: iter 016 cool-off was consumed on a `directed` pick, producing zero refined-formula validation.
+- **MR-004 Change C (escalated Mode 5 guardrail 6):** "flag saturation risk" → "flag AND receive explicit acknowledgement captured as `mode-5-saturation: user-ack; rationale: [reason]` in opening iteration's Candidate Selection block." Rationale: Path B is 4 consecutive web-app iterations — the strongest form of ack-or-block protocol forces explicit decision-making.
+
+### Path B renumbered
+
+- **Previously:** 4 iterations (iter 018 PRD → 019 engine → 020 UI → 021 polish).
+- **Post-MR-004:** 5 iterations (iter 018 PRD+governance → 019 burn-down #15 → 020 engine → 021 UI → 022 polish). MR-005 at iter 023 boundary.
+- **Rationale:** MR-004 Change A companion-burn-down rule satisfied by iter 019 = preemptive close of #15 (age 11, past staleness cap, Effort 1 / Risk 1, code hygiene Area — partially offsets pure-web-app saturation).
+
+### Files changed
+
+- `docs/meta/MR_004.md` — **new, +143 lines.**
+- `docs/prd/PRD_DASHBOARD_V2.md` — **new, +527 lines + Decisions Locked section.**
+- `CLAUDE.md` — governance diffs (Mode 5 guardrails 6 + 8; Follow-Up Debt Policy clause 7; Current Phase + Known Issues sections refreshed).
+- `ITERATION_LOG.md` — iter 018 entry appended.
+- `SYSTEM_HEALTH.md` — post-MR-004 refresh (header, Overall confidence, Top Risks, Current Top Opportunities, Recommended Next Iteration, Meta-Review Status).
+- `IMPROVEMENT_BACKLOG.md` — Portfolio Summary refresh; iter 018 completion row added; MR-004 triage verdicts logged; footer pool summary updated.
+- `CHANGELOG.md` — this entry.
+
+### Validation
+
+- No production code changed. Baseline unchanged: `pnpm typecheck` clean, `pnpm test` 107/107.
+- Governance diffs verified by independent coordinator re-read of modified CLAUDE.md sections.
+- Artifact quality rubric: MR-004 (10 agenda items each with evidence + finding + recommendation) and PRD (15 sections + 10 decisions + TypeScript interfaces + file paths) both pass.
+
+### Impact
+
+- **Governance posture:** 3 control-change diffs target the top-3 MR-004 risks directly in-flight (companion burn-down prevents pool growth on Path B; narrowed cool-off prevents misuse repetition; user-ack makes saturation commitments unignorable).
+- **Path B feasibility:** PRD is dense enough (TypeScript interfaces + explicit file paths + 5-fixture mock plan) that iter 020 and 021 can execute without re-asking design questions. Iter 019 is pre-locked to #15.
+- **Staleness-cap relief:** #15 pre-targeted for iter 019 close; #14 preserved with post-Path-B close intent; #7 flagged for MR-005 rescan. No silent drift.
+
+### Follow-Ups Generated
+
+**Zero.** First iteration since pre-Mode-3 with no follow-ups added. Pool unchanged at 23.
+
+### Density-response log line
+
+0 follow-ups generated — below 3-item threshold. No `density-response:` line required.
+
+---
+
 ## [2026-04-20] - Iteration 017: Minimum billing test suite (QA-01, `burn-down`)
 
 ### Selection

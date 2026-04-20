@@ -1404,3 +1404,98 @@ Output artifact: `PRICING_AUDIT_001.md` (consolidated audit + cold-pool referenc
 - **Pool growth (without cold-pool release):** 22 → 23 (BUG-07 PRD-promoted) → 23 → 22 (iter 017 closes #33) → actually 22 with #41 added = 23. Net: flat. First iteration since iter 014 where the pool did not grow in aggregate.
 - **Staleness-cap watch (unchanged):** #15 (age 11 now — 1 iter past cap), #14 (age 10 — just hit cap), #7 (age 9). MR-004 at iter 018 MUST triage #14 and #15 per clause 2; #7 reaches cap at iter 018.
 - **Release signal (coordinator independent re-verification):** **GO**. 21 new tests, 0 production-code modifications, 0 regressions. Ready to commit.
+
+---
+
+## Iteration 018 — MR-004 meta-review + Path B PRD (Mode 4 + Mode 5 item 1/5)
+
+**Date:** 2026-04-20
+**Mode:** Mode 4 (meta-review, non-counting) concurrent with Mode 5 directed sequence item 1/5 (Path B dashboard redesign). Governance-only iteration — no production-code changes.
+**Selection rule:** `directed` (Mode 5, CEO-authorized sequence)
+**Selected item:** PRD draft for Workflow Intelligence Dashboard v2 + Meta-Review 004
+**Score:** n/a (directed + Mode 4)
+**Rationale:** CEO requested Path B compressed Mode 5 sequence (4 items originally; renumbered to 5 post-MR-004). MR-004 was due at iter 018 per base cadence (3 bounded loops since MR-003); ran in parallel to PRD draft because meta-coordinator is read-only on governance artifacts and product-manager writes only to `docs/prd/` — no conflict surface. This is item 1/5 of Path B: PRD lock + governance refresh. Scope discipline: zero production code, artifact-only iteration.
+
+### Candidate Selection
+
+- **Rule:** `directed` (Mode 5 item 1/5)
+- **Mode 5 saturation:** `mode-5-saturation: user-ack; rationale: CEO explicitly approved 4-iteration web-app Area sequence ("Accept all recommendations and move forward") on 2026-04-20 with full knowledge that extension/segmentation/normalization/policy surfaces receive zero coverage during iter 018–022.` Acknowledgement recorded per newly-adopted Mode 5 guardrail 6 (MR-004 Change C, applied this iteration).
+- **Mode 5 companion-burn-down:** MR-004 Change A introduced guardrail 8 this iteration. Path B compliance: iter 019 will be a `burn-down` iteration targeting #15 (confidence-threshold extraction). This satisfies the new guardrail: Path B sequence now contains one burn-down iteration within the 5-item sequence.
+- **Scope-expansion:** n/a (no implementation this iteration)
+
+### Agents Used
+
+- **Primary (parallel):** meta-coordinator (MR-004) + product-manager (PRD_DASHBOARD_V2 draft)
+- **Secondary:** Explore (scout pass for current dashboard + data model + baseline before dispatch)
+- **Rotation signal:** meta-coordinator has not been primary since iter 015 (MR-003); product-manager not primary since Pro tier + Team trial PRD approval. Rolling-5 primary distribution remains healthy. Same-implementer-4+ trigger is 3 away.
+
+### Files Read
+
+- `C:\Users\philk\ledgerium\CLAUDE.md`
+- `C:\Users\philk\ledgerium\SYSTEM_HEALTH.md`
+- `C:\Users\philk\ledgerium\ITERATION_LOG.md`
+- `C:\Users\philk\ledgerium\IMPROVEMENT_BACKLOG.md`
+- `C:\Users\philk\ledgerium\CHANGELOG.md`
+- `apps/web-app/src/app/(app)/dashboard/page.tsx` (scout read)
+- `apps/web-app/prisma/schema.prisma` (scout read)
+- `apps/web-app/src/lib/health-scores.ts` (scout read)
+- `apps/web-app/src/app/api/workflows/route.ts` (scout read)
+
+### Files Changed
+
+- `docs/meta/MR_004.md` — **new, +143 lines.** MR-004 report covering 10 agenda items with evidence citations. 6 proposed CLAUDE.md diffs (3 applied this iteration, 3 deferred to post-Path-B governance iteration). Scoring refinements deferred to MR-005 per one-control-variable-at-a-time stability discipline. Staleness-cap triage: #14 KEEP / #15 KEEP / #7 KEEP+flag-for-MR-005. Path B governance call: insert companion burn-down at iter 019.
+- `docs/prd/PRD_DASHBOARD_V2.md` — **new, +527 lines, status: Approved.** Complete PRD covering: Problem & Goal, Non-Goals, Users & Moments, Success Metrics (6 measurable targets), Page Structure (3 sections), Data Model Additions, Metrics Engine Specification (Runs, AvgTime, Variation, Bottleneck, HealthScoreV2, Opportunity, Confidence, Trend-readiness), Component Hierarchy (18 named files under `apps/web-app/src/components/dashboard-v2/`), 5 UI states, Accessibility commitments, Mock Data Plan (5 fixture workflow archetypes), Plan Gating, D1–D10 Open Decisions (all 10 resolved and locked on 2026-04-20 per CEO delegation), Rollout Plan (5 iterations iter 018–022), Risks & Mitigations.
+- `CLAUDE.md` — **governance diffs applied (3 of 6 proposed by MR-004):**
+  - Mode 5 guardrail 6: "flag" → "flag + explicit user acknowledgement (`mode-5-saturation: user-ack`)" (MR-004 Change C)
+  - Mode 5 guardrail 8: **new** — companion-burn-down rule for ≥3-item Mode 5 sequences with pool > 8 (MR-004 Change A)
+  - Follow-Up Debt Policy clause 7: narrowed cool-off exclusion to remove `directed` as a permitted post-cool-off selection rule (MR-004 Change B)
+  - Current Phase + Known Issues sections refreshed to reflect Path B active sequence + iter 018 close
+- `docs/prd/PRD_DASHBOARD_V2.md` — **Decisions Locked section added** at top: 10 decisions (D1–D10) resolved with CEO-delegated authority; each with locked answer cell; D10 SOP-demotion flagged with reversal path documented.
+- `SYSTEM_HEALTH.md` — updated post-MR-004 (see SYSTEM_HEALTH update below this entry).
+- `IMPROVEMENT_BACKLOG.md` — portfolio summary refreshed to reflect pool 23 carried forward; #15 pre-targeted for iter 019 burn-down per MR-004 Change A; MR-004 staleness-triage verdicts (#14 KEEP, #15 KEEP, #7 KEEP+flag) logged.
+
+**Production code changed: zero.** Governance + artifacts only.
+
+### Validation Run
+
+No code to validate. Validation criteria for this governance iteration:
+- Artifacts produced and checked against quality rubric:
+  - MR-004: 10 agenda items each have evidence citation + finding + recommendation → ✅ pass
+  - PRD: all 15 required sections present + all 10 open decisions resolved + metrics engine spec has TypeScript interface sketches + component hierarchy has file paths → ✅ pass
+- Governance diffs applied correctly (reviewed post-edit):
+  - Mode 5 guardrail 6 updated → ✅
+  - Mode 5 guardrail 8 added → ✅
+  - Follow-Up Debt Policy clause 7 narrowed → ✅
+  - Current Phase + Known Issues refreshed → ✅
+- Baseline unchanged: `pnpm typecheck` + `pnpm test` still clean at commit time (no code changed).
+
+### Outcome
+
+- **MR-004 closed.** 10 agenda items evaluated. 3 CLAUDE.md diffs applied this iteration (Changes A, B, C). 3 diffs deferred to post-Path-B governance iteration (Changes D, E, F — audit-intake codification, reverse portfolio-drift trigger, test-touch counting rule) — these do not affect the active Mode 5 sequence.
+- **PRD_DASHBOARD_V2.md approved.** 527 lines, 15 sections, 10 decisions locked. Entrance criteria satisfied for iter 020 metrics engine build.
+- **Path B renumbered:** 4 items → 5 items (iter 019 burn-down inserted per MR-004 Change A). New sequence: 018 PRD+governance → 019 burn-down #15 → 020 metrics engine → 021 UI build → 022 accessibility/polish. MR-005 at iter 023 boundary.
+- **Staleness-cap verdicts logged:** #14 KEEP (will target at iter 023+ burn-down opportunity), #15 KEEP (targeting at iter 019), #7 KEEP + flag-for-MR-005 rescan.
+
+### Impact
+
+- **Governance health:** 3 control-change diffs apply the top-2 MR-004 recommendations (companion burn-down + user-ack saturation) directly to the in-flight Mode 5 sequence; narrowed cool-off (Change B) prevents the iter-016 misuse pattern from repeating. Pool-growth risk on Path B reduced from ~27 projected-at-iter-021 to ~24 projected-at-iter-022 (one closure inserted).
+- **Path B feasibility:** PRD is dense enough that iter 020's backend-engineer can implement metrics engine without re-asking design questions (TypeScript interfaces + 8 computed metrics explicitly specified). Iter 021's frontend-engineer has explicit file paths (18 components under `dashboard-v2/`) and 5 state variants explicitly enumerated.
+- **Staleness-cap intensity:** #14 + #15 both past/at cap remain open with explicit KEEP verdicts + iter-019 burn-down action plan. No silent drift.
+- **KPI trajectory (closure ratio):** still 0.167 at iter-018 close (unchanged — Mode-4 is non-counting; Mode 5 item 1 is define-phase, no closure). Trajectory toward 0.25 target depends on iter 019 closing #15 (expected).
+
+### Follow-Ups Generated (Birth iter: 018)
+
+None from this iteration directly. MR-004 flagged 3 deferred governance diffs (audit-intake codification, reverse portfolio-drift trigger, test-touch counting rule) — these will be addressed in a post-Path-B governance iteration (iter 023+) via a single coordinated CLAUDE.md edit, not as individual backlog items. MR-005 agenda is also seeded in MR_004.md but is not a backlog item.
+
+**Density-response log line:** **0 follow-ups generated** — below the 3-item threshold. No `density-response:` line required.
+
+### Governance/Selection Signals
+
+- **Mode 5 counter:** item 1 of 5 complete. Meta-review cadence counter per guardrail 5 increments by 1 per Mode 5 item; iter 018 counts as Mode 5 item 1 (guardrail 5). MR-005 due at iter 023 boundary (4 more Mode 5 items would increment counter by 4, but MR-004 just completed so counter resets — next base cadence = 3 bounded loops post-MR-004 = iter 019 + 020 + 021 + 022 Mode 5 items = iter 023 boundary).
+- **Mode 4 skip:** iter 018 is Mode 4 overlay on Mode 5 item 1. Per CLAUDE.md Operating Modes: "Mode 4: Meta-review — coordinator invokes the meta-coordinator agent; no product code changes." This iteration has no production code, so classification as Mode 4 for cadence purposes is defensible. Mode 5 counter still increments because the PRD-draft work IS the Mode 5 item 1.
+- **Burn-down streak:** iter 017 = burn-down #1; iter 018 = non-burn-down (Mode 4 + Mode 5 define); iter 019 = will be burn-down #2 (#15 target, companion rule). Streak broken at iter 018; cool-off re-arm requires 3 consecutive burn-downs → not earliest until iter 021+ IF iter 019/020/021 are all burn-down (they will not be; only 019 is). Cool-off effectively dormant through end of Path B. Next cool-off opportunity: iter 025+ depending on post-Path-B burn-down cadence.
+- **Area saturation (rolling iter 014–018, Mode-4 and Mode-5-define counted if they touch surface):** extension (014) · governance (015 Mode 4, no Area) · web-app UI (016) · billing/QA (017) · governance + web-app docs (018). Web-app-adjacent iterations trending but not yet 3-in-a-row production-code Area. Path B iter 019–022 will run 4 consecutive web-app productions — user-acknowledgement captured above per guardrail 6.
+- **Agent diversity:** 5-bounded-loop primary distribution remains diverse (frontend 014+016, meta-coordinator 015+018, backend 017). Path B iter 020 = backend-engineer, 021 = frontend-engineer, 022 = qa-engineer + frontend-engineer. Rotation preserved within Path B.
+- **Pool growth:** 23 → 23 (net flat; no new follow-ups). First iteration since pre-Mode-3 that did not grow pool.
+- **Portfolio-drift Signal 5 counter:** held at 0 post-iter-017 per MR-004 Agenda 4 ruling (test-file touches count toward surface coverage). Reverse portfolio-drift trigger (MR-004 Change E, deferred) would arm iter 023+ at earliest.
+- **Release signal:** **GO** for artifact commit. No production code; no validation gate beyond baseline-unchanged check (satisfied). Ready to commit iter 018.
