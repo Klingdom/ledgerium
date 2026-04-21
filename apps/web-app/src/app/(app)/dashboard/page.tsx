@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -293,7 +293,19 @@ function getPrimarySystem(toolsUsed: string[]): string | null {
 // ─── Main Dashboard Page ────────────────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// Default export wraps the inner component in <Suspense> because
+// `useSearchParams()` requires a Suspense boundary in Next.js 14 — without it,
+// `next build` fails with a prerender error (missing-suspense-with-csr-bailout).
+// See: https://nextjs.org/docs/messages/missing-suspense-with-csr-bailout
 export default function DashboardPage() {
+  return (
+    <Suspense fallback={null}>
+      <DashboardPageContent />
+    </Suspense>
+  );
+}
+
+function DashboardPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
