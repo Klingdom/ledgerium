@@ -9,7 +9,9 @@ import {
   computeAiOpportunityScore,
   computeWorkflowMetrics,
   computePortfolioHealthScore,
+  computePortfolioHealthScorePrior,
   computeInsightChips,
+  PORTFOLIO_PRIOR_MIN_WORKFLOWS,
 } from './workflow-metrics.js';
 import type { WorkflowMetricsInput, WorkflowMetricsOutput } from './workflow-metrics.js';
 import {
@@ -721,5 +723,144 @@ describe('computeInsightChips', () => {
       expect(curr).toBeDefined();
       expect(severityRank(prev!.severity)).toBeGreaterThanOrEqual(severityRank(curr!.severity));
     }
+  });
+
+  // ── Action-leading chip labels (iter-024 §4.1 item b) ────────────────────────
+
+  it('high-variance chip label is action-leading (contains →)', () => {
+    const output1 = computeWorkflowMetrics(FIXTURE_AUTOMATE);
+    const output2 = computeWorkflowMetrics({ ...FIXTURE_AUTOMATE, id: 'automate-2' });
+    const chips = computeInsightChips([output1, output2], []);
+    const varianceChip = chips.find((c) => c.filterKey === 'variationScore_gt_0.7');
+    expect(varianceChip).toBeDefined();
+    expect(varianceChip!.label).toContain('→');
+    expect(varianceChip!.label).toMatch(/pulling SLA down/i);
+  });
+
+  it('automation chip label is action-leading (contains →)', () => {
+    const output1 = computeWorkflowMetrics(FIXTURE_AUTOMATE);
+    const output2 = computeWorkflowMetrics({ ...FIXTURE_AUTOMATE, id: 'automate-2' });
+    const chips = computeInsightChips([output1, output2], []);
+    const automationChip = chips.find((c) => c.filterKey === 'opportunityTag_automate');
+    expect(automationChip).toBeDefined();
+    expect(automationChip!.label).toContain('→');
+    expect(automationChip!.label).toMatch(/prioritize/i);
+  });
+
+  it('monitor chip label is action-leading (contains →)', () => {
+    const output1 = computeWorkflowMetrics(FIXTURE_MONITOR);
+    const output2 = computeWorkflowMetrics({ ...FIXTURE_MONITOR, id: 'monitor-2' });
+    const chips = computeInsightChips([output1, output2], []);
+    const monitorChip = chips.find((c) => c.filterKey === 'opportunityTag_monitor');
+    expect(monitorChip).toBeDefined();
+    expect(monitorChip!.label).toContain('→');
+    expect(monitorChip!.label).toMatch(/review/i);
+  });
+
+  it('bottleneck chip label prefixes "Bottleneck:" and contains →', () => {
+    const output = computeWorkflowMetrics(FIXTURE_FULL);
+    const chips = computeInsightChips(
+      [output],
+      [{ insightType: 'bottleneck', severity: 'critical', title: 'Data entry step' }],
+    );
+    const bottleneckChip = chips.find((c) => c.filterKey === 'bottleneck_insight');
+    expect(bottleneckChip).toBeDefined();
+    expect(bottleneckChip!.label).toMatch(/^Bottleneck:/);
+    expect(bottleneckChip!.label).toContain('→');
+  });
+
+  it('filterKey strings are unchanged by copy rewrite (contract with applyFilters)', () => {
+    const output1 = computeWorkflowMetrics(FIXTURE_AUTOMATE);
+    const output2 = computeWorkflowMetrics({ ...FIXTURE_AUTOMATE, id: 'automate-2' });
+    const chips = computeInsightChips([output1, output2], []);
+    const filterKeys = chips.map((c) => c.filterKey);
+    // filterKey must remain unchanged so WorkflowList.applyFilters() recognises them
+    expect(filterKeys).toContain('variationScore_gt_0.7');
+    expect(filterKeys).toContain('opportunityTag_automate');
+  });
+});
+
+// ── computePortfolioHealthScorePrior (iter-024 §4.1 item a) ──────────────────
+
+describe('computePortfolioHealthScorePrior', () => {
+  const REF_DATE = new Date('2024-03-01T00:00:00Z');
+  const WINDOW_DAYS = 30;
+
+  // Prior window: [2024-01-01, 2024-02-01)
+  const priorStart = new Date('2024-01-01T00:00:00Z').toISOString();
+  const priorMid = new Date('2024-01-15T00:00:00Z').toISOString();
+  const priorEnd = new Date('2024-02-01T00:00:00Z').toISOString(); // exclusive
+  // Current window: [2024-02-01, 2024-03-01)
+  const currentMid = new Date('2024-02-15T00:00:00Z').toISOString();
+
+  const makeOutput = (overall: number): WorkflowMetricsOutput => ({
+    runs: 5,
+    avgTimeMs: 60_000,
+    variationScore: 0.2,
+    variationLabel: 'low',
+    bottleneckLabel: null,
+    healthScore: {
+      overall,
+      speed: 20,
+      consistency: 20,
+      dataQuality: 10,
+      standardization: overall - 50,
+      isGated: false,
+    },
+    opportunityTag: 'healthy',
+    aiOpportunityScore: 30,
+    confidence: 0.8,
+  });
+
+  it('returns null for empty workflows array', () => {
+    expect(computePortfolioHealthScorePrior([], [], WINDOW_DAYS, REF_DATE)).toBeNull();
+  });
+
+  it('returns null when prior partition has fewer than PORTFOLIO_PRIOR_MIN_WORKFLOWS', () => {
+    // Only 2 workflows in prior window — below min of 3
+    const outputs = [makeOutput(70), makeOutput(80)];
+    const meta = [{ updatedAt: priorMid }, { updatedAt: priorMid }];
+    expect(computePortfolioHealthScorePrior(outputs, meta, WINDOW_DAYS, REF_DATE)).toBeNull();
+  });
+
+  it('returns computed score when prior partition has >= PORTFOLIO_PRIOR_MIN_WORKFLOWS', () => {
+    const outputs = [makeOutput(60), makeOutput(70), makeOutput(80)];
+    const meta = [{ updatedAt: priorMid }, { updatedAt: priorMid }, { updatedAt: priorMid }];
+    const result = computePortfolioHealthScorePrior(outputs, meta, WINDOW_DAYS, REF_DATE);
+    expect(result).not.toBeNull();
+    expect(result).toBe(Math.round((60 + 70 + 80) / 3));
+  });
+
+  it('excludes current-window workflows from the prior-period computation', () => {
+    // 3 prior + 2 current; prior scores are 60/70/80; current are 20/20
+    const outputs = [makeOutput(60), makeOutput(70), makeOutput(80), makeOutput(20), makeOutput(20)];
+    const meta = [
+      { updatedAt: priorMid },
+      { updatedAt: priorMid },
+      { updatedAt: priorMid },
+      { updatedAt: currentMid },
+      { updatedAt: currentMid },
+    ];
+    const result = computePortfolioHealthScorePrior(outputs, meta, WINDOW_DAYS, REF_DATE);
+    // Result should be based only on prior 3: (60+70+80)/3 = 70
+    expect(result).toBe(70);
+  });
+
+  it('excludes the priorEnd boundary date (half-open interval [priorStart, priorEnd))', () => {
+    // A workflow with updatedAt exactly at priorEnd should NOT be included
+    const outputs = [makeOutput(60), makeOutput(70), makeOutput(80), makeOutput(99)];
+    const meta = [
+      { updatedAt: priorMid },
+      { updatedAt: priorMid },
+      { updatedAt: priorMid },
+      { updatedAt: priorEnd }, // exactly at boundary — excluded
+    ];
+    const result = computePortfolioHealthScorePrior(outputs, meta, WINDOW_DAYS, REF_DATE);
+    // Only 3 included; boundary value 99 excluded
+    expect(result).toBe(Math.round((60 + 70 + 80) / 3));
+  });
+
+  it('PORTFOLIO_PRIOR_MIN_WORKFLOWS constant is 3', () => {
+    expect(PORTFOLIO_PRIOR_MIN_WORKFLOWS).toBe(3);
   });
 });

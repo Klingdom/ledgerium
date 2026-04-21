@@ -96,6 +96,17 @@ export function applyFilters(
 ): WorkflowRowData[] {
   let result = workflows;
 
+  // "Needs attention" filter (iter-024 §4.1 item e):
+  // health < 60 OR variationLabel === 'high'
+  // Note: delta ≤ −10 excluded from v1 (per-workflow delta not in MVP).
+  if (filters.needsAttention) {
+    result = result.filter(
+      (w) =>
+        w.metricsV2.healthScore.overall < 60 ||
+        w.metricsV2.variationLabel === 'high',
+    );
+  }
+
   // System filter (multi-select — AND logic within a row's toolsUsed)
   if (filters.systems.length > 0) {
     result = result.filter((w) =>
@@ -270,7 +281,7 @@ export default function WorkflowList({
   }
 
   function clearAllFilters() {
-    onFiltersChange({ systems: [], opportunity: null, healthStatus: null });
+    onFiltersChange({ systems: [], opportunity: null, healthStatus: null, needsAttention: false });
     onClearInsightFilter();
   }
 

@@ -51,7 +51,7 @@ function makeWorkflow(id: string, overrides: {
   };
 }
 
-const emptyFilters: FilterState = { systems: [], opportunity: null, healthStatus: null };
+const emptyFilters: FilterState = { systems: [], opportunity: null, healthStatus: null, needsAttention: false };
 
 // ── State derivation (extracted logic) ───────────────────────────────────────
 
@@ -174,5 +174,44 @@ describe('applyFilters', () => {
     );
     expect(r).toHaveLength(1);
     expect(r[0]!.id).toBe('automate-w');
+  });
+
+  // ── needsAttention filter (iter-024 §4.1 item e) ──────────────────────────
+
+  it('needsAttention filter includes workflows with health < 60', () => {
+    const lowHealthWorkflow = makeWorkflow('low-health', { healthOverall: 55 });
+    const healthyWorkflow = makeWorkflow('healthy', { healthOverall: 80 });
+    const result = applyFilters(
+      [lowHealthWorkflow, healthyWorkflow],
+      { ...emptyFilters, needsAttention: true },
+      null,
+    );
+    expect(result).toHaveLength(1);
+    expect(result[0]!.id).toBe('low-health');
+  });
+
+  it('needsAttention filter includes workflows with variationLabel === "high"', () => {
+    const highVarWorkflow = makeWorkflow('high-var', { healthOverall: 75, variationScore: 0.8 });
+    // Make variationLabel explicit in the metricsV2
+    const wWithHighVar: WorkflowRowData = {
+      ...highVarWorkflow,
+      metricsV2: {
+        ...highVarWorkflow.metricsV2,
+        variationLabel: 'high',
+      },
+    };
+    const healthyWorkflow = makeWorkflow('healthy', { healthOverall: 80, variationScore: 0.2 });
+    const result = applyFilters(
+      [wWithHighVar, healthyWorkflow],
+      { ...emptyFilters, needsAttention: true },
+      null,
+    );
+    expect(result).toHaveLength(1);
+    expect(result[0]!.id).toBe('high-var');
+  });
+
+  it('needsAttention=false does not filter (all workflows pass)', () => {
+    const r = applyFilters(workflows, { ...emptyFilters, needsAttention: false }, null);
+    expect(r).toHaveLength(workflows.length);
   });
 });

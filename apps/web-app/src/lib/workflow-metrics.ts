@@ -94,6 +94,13 @@ const HEALTHY_CHIP_MIN_COUNT = 3;
 /** Overall health score threshold that qualifies a workflow as healthy for the positive chip. */
 const HEALTHY_OVERALL_THRESHOLD = 70;
 
+/**
+ * Minimum prior-period workflow count for a meaningful portfolio delta.
+ * Below this threshold, the prior-period score is null (insufficient signal).
+ * iter-024: PRD_DASHBOARD_V2_EXECUTIVE_REFINEMENT §4.1 item (a).
+ */
+export const PORTFOLIO_PRIOR_MIN_WORKFLOWS = 3;
+
 // ── Interfaces ────────────────────────────────────────────────────────────────
 
 export interface WorkflowMetricsInput {
@@ -510,6 +517,54 @@ export function computePortfolioHealthScore(workflows: WorkflowMetricsOutput[]):
 }
 
 /**
+ * §7 Prior-period Portfolio Health Score (for period-over-period delta)
+ *
+ * Partitions workflows by `updatedAt` into [referenceDate − 2×windowDays,
+ * referenceDate − windowDays) and computes the aggregate health score for
+ * that prior cohort. Returns null if the prior-period partition contains
+ * fewer than PORTFOLIO_PRIOR_MIN_WORKFLOWS workflows (insufficient signal).
+ *
+ * @param workflows - Per-workflow metrics output (current-period cohort)
+ * @param allWorkflowsMeta - Metadata for all workflows, including `updatedAt`
+ *   (parallel array — index-aligned with `workflows`)
+ * @param windowDays - Length of each time window in days (default: 30)
+ * @param referenceDate - Point-in-time reference (default: now); used for
+ *   deterministic testing.
+ *
+ * iter-024: PRD_DASHBOARD_V2_EXECUTIVE_REFINEMENT §4.1 item (a).
+ * Note: timeRange UI state does NOT affect the prior window — 30d is always
+ * used for the prior-period baseline in MVP (D7 defers timeRange to the API
+ * in a future iteration).
+ */
+export function computePortfolioHealthScorePrior(
+  workflows: WorkflowMetricsOutput[],
+  allWorkflowsMeta: Array<{ updatedAt: string }>,
+  windowDays: number,
+  referenceDate: Date,
+): number | null {
+  if (workflows.length === 0) return null;
+
+  const refMs = referenceDate.getTime();
+  const windowMs = windowDays * 24 * 60 * 60 * 1000;
+  const priorStart = refMs - 2 * windowMs;
+  const priorEnd = refMs - windowMs;
+
+  const priorWorkflows: WorkflowMetricsOutput[] = [];
+  for (let i = 0; i < workflows.length; i++) {
+    const meta = allWorkflowsMeta[i];
+    if (!meta) continue;
+    const updatedMs = new Date(meta.updatedAt).getTime();
+    if (updatedMs >= priorStart && updatedMs < priorEnd) {
+      priorWorkflows.push(workflows[i]!);
+    }
+  }
+
+  if (priorWorkflows.length < PORTFOLIO_PRIOR_MIN_WORKFLOWS) return null;
+
+  return computePortfolioHealthScore(priorWorkflows);
+}
+
+/**
  * §7 Insight Chips
  *
  * Returns up to 5 chips, ordered by severity descending (critical → warning → info → positive).
@@ -531,19 +586,19 @@ export function computeInsightChips(
 ): InsightChip[] {
   const chips: InsightChip[] = [];
 
-  // Chip 1: High variance
+  // Chip 1: High variance — action-leading copy (iter-024 §4.1 item b)
   const highVarianceCount = workflows.filter((w) => w.variationScore > 0.7).length;
   if (highVarianceCount >= 2) {
     chips.push({
       id: 'variance_high',
       severity: 'warning',
-      label: `${highVarianceCount} workflows show high execution variance`,
+      label: `${highVarianceCount} workflows pulling SLA down → review onboarding cohort`,
       filterKey: 'variationScore_gt_0.7',
       count: highVarianceCount,
     });
   }
 
-  // Chip 2: Bottleneck/delay insight (critical or warning ProcessInsight)
+  // Chip 2: Bottleneck/delay insight (critical or warning ProcessInsight) — action-leading copy
   const bottleneckInsights = processInsights.filter(
     (i) =>
       (i.insightType === 'bottleneck' || i.insightType === 'delay') &&
@@ -553,38 +608,38 @@ export function computeInsightChips(
     chips.push({
       id: `bottleneck_${insight.title.replace(/\s+/g, '_').toLowerCase().slice(0, 40)}`,
       severity: insight.severity === 'critical' ? 'critical' : 'warning',
-      label: insight.title,
+      label: `Bottleneck: ${insight.title} → investigate step owner`,
       filterKey: 'bottleneck_insight',
       count: 1,
     });
     break; // Only the top insight
   }
 
-  // Chip 3: Automation candidates
+  // Chip 3: Automation candidates — action-leading copy
   const automationCount = workflows.filter((w) => w.opportunityTag === 'automate').length;
   if (automationCount >= 2) {
     chips.push({
       id: 'automation_candidates',
       severity: 'info',
-      label: `${automationCount} workflows are strong automation candidates`,
+      label: `${automationCount} automation opportunities → prioritize top-scored for pilot`,
       filterKey: 'opportunityTag_automate',
       count: automationCount,
     });
   }
 
-  // Chip 4: Low confidence / needs review
+  // Chip 4: Low confidence / needs review — action-leading copy
   const needsReviewCount = workflows.filter((w) => w.opportunityTag === 'monitor').length;
   if (needsReviewCount >= 2) {
     chips.push({
       id: 'needs_review',
       severity: 'warning',
-      label: `${needsReviewCount} workflows have low confidence and need review`,
+      label: `${needsReviewCount} workflows at risk → schedule review this week`,
       filterKey: 'opportunityTag_monitor',
       count: needsReviewCount,
     });
   }
 
-  // Chip 5: Healthy portfolio (positive) — only when no critical/warning chips present
+  // Chip 5: Healthy portfolio (positive) — confirmational tone; no problem chips present
   const hasProblemChips = chips.some((c) => c.severity === 'critical' || c.severity === 'warning');
   if (!hasProblemChips) {
     const healthyCount = workflows.filter(
@@ -594,7 +649,7 @@ export function computeInsightChips(
       chips.push({
         id: 'healthy_portfolio',
         severity: 'positive',
-        label: `${healthyCount} workflows running smoothly`,
+        label: `${healthyCount} workflows healthy → no action needed`,
         filterKey: 'healthScore_gte_70',
         count: healthyCount,
       });

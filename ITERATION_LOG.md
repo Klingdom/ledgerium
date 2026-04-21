@@ -4,6 +4,116 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 024
+
+- Date: 2026-04-21
+- Trigger: Mode 5 item 6/6 of Path B dashboard redesign (executive refinement bundle per `docs/prd/PRD_DASHBOARD_V2_EXECUTIVE_REFINEMENT.md` §4.1; approved 2026-04-21 per CEO acceptance). Closes Path B sequence. Next: iter 025 = MR-005 meta-review (base cadence + Mode 5 guardrail 4 both mandatory).
+- Coordinator: coordinator
+- Phase: Phase 1
+- Mode: Mode 5 (directed sequence, item 6/6). Increments improvement-loop counter by 1.
+- Commit: (pending — single commit for code + artifacts)
+
+### Candidate Selection
+
+- **Selection rule:** `directed` (Mode 5 item 6/6, user-named)
+- **Selected work:** Execute §4.1 items (a)–(f) of `PRD_DASHBOARD_V2_EXECUTIVE_REFINEMENT.md` as one logical outcome ("executive-grade comprehension of the v2 surface at GA"):
+  - (a) Portfolio health period-over-period delta in Command Header (30d current vs. 30d prior; null when insufficient prior-period signal)
+  - (b) Action-leading insight chip copy rewrite (verb-first; preserves `filterKey` contract for `applyFilters`)
+  - (c) 3-state RAG color pip on Health Score cell (green ≥80, amber 60–79, red <60) and on portfolio band (global threshold alignment 40/70 → 60/80)
+  - (d) "High variation" badge on Name cell when `variationLabel === 'high'` (v1 scope — `'very_high'` extension deferred as follow-up)
+  - (e) "Needs attention" pinned filter chip (v1 scope: `health < 60 OR variationLabel === 'high'`; delta ≤ −10 arm deferred until per-workflow delta ships)
+  - (f) Run-count qualifier `n=N` when `runs < 10`; `n=0 — no runs` when `runs === null`
+- **Score:** 13 (I=5, A=5, L=3, C=5, E=3, R=2; no release-blocker bonus; CEO saturation user-ack covers saturation penalty — no −S applied per guardrail 6 acknowledgement)
+- **Rationale:** approved addendum locks 6 sub-changes that collectively transform the v2 dashboard from "healthy metrics snapshot" into "executive action surface." Per PRD §4 the primary success metric is `workflow_row_click_rate` post-first-view; that requires scannable RAG verdicts (c), actionable insight chips (b), and an explicit triage filter (e). The delta (a) converts static state into trend narrative. The variation badge (d) and run-count qualifier (f) are honest-confidence signals that prevent over-interpreting weak data. All six are tightly coupled — shipping any subset produces an inconsistent executive surface. Guardrail 7(b) "one logical outcome" satisfied.
+- **Portfolio rule checks:**
+  - Ceiling rule (pool > 8): violated (pool = 29 at iter 024 start); Mode 5 directed precedence applies — no cool-off consumed (MR-004 Change B exclusion).
+  - Area saturation rule: 5 consecutive web-app iterations (020/021/022/023/024); CEO user-ack 2026-04-20 reaffirmed 2026-04-21 (acceptance directive extended to executive refinement) and 2026-04-21 Option A (Mode 2 interrupt). Per guardrail 6 escalation, saturation is acknowledged and documented; reverse portfolio-drift trigger continues accumulating for MR-005 at iter 025.
+  - Burn-down floor: MR-004 companion-burn-down satisfied by iter 019 = #15. Base 1-in-5 burn-down floor is next-due at iter 025 (post-MR-005 programming owns).
+- **scope-expansion: approved** — global health-band threshold alignment (40/70 → 60/80) affects BOTH `WorkflowRow` and `CommandHeader`, extending beyond the backlog row's explicit §4.1(c) mention of the row cell. Evidence: `docs/prd/PRD_DASHBOARD_V2_EXECUTIVE_REFINEMENT.md` §2.4 "Thresholds" locks 60/80 globally (not row-only) — any partial application would produce inconsistent verdicts between portfolio band and row pip, a contradiction. Stays within same Area (dashboard-v2 / executive UX). Does not touch surfaces from the immediately-prior iteration (iter 023 was schema/signup route; iter 024 is pure UI). Guardrail 7 a–e all satisfied.
+- **mode-5-saturation: user-ack** (2026-04-20 initial + 2026-04-21 reaffirmed + 2026-04-21 Option A; rationale: executive-refinement PRD acceptance explicitly extended saturation window; iter 024 is last web-app iteration before MR-005 triage at iter 025).
+
+### Agents Used
+
+- **Primary:** `frontend-engineer` — matches Delegation Rubric "UI component work in web-app." Consecutive-same-agent counter = 1 (resets the backend-engineer iter 023 counter; prior frontend-engineer streak of 2 at iter 021+022 was broken by iter 023 backend-engineer). Well below 4+ trigger.
+- **Adjacent:** none invoked. Copy rewrite (item b) was small enough that `growth-strategist` review is deferred as a polish follow-up (scope-expansion protocol — would have expanded to multi-outcome bundle).
+- **Agent diversity signal for MR-005:** across Path B (019 backend · 020 backend · 021 frontend · 022 frontend · 023 backend · 024 frontend) the mix is 3:3 backend:frontend — healthy diversity, no saturation flag.
+
+### Files Changed
+
+**Modified (11):**
+- `apps/web-app/src/lib/workflow-metrics.ts` — added `PORTFOLIO_PRIOR_MIN_WORKFLOWS = 3` constant + exported `computePortfolioHealthScorePrior(workflows, allWorkflowsMeta, windowDays, referenceDate): number | null`; rewrote all 5 chip label strings to action-leading copy (filterKey unchanged per contract); `WorkflowMetricsOutput.variationLabel: 'low' | 'medium' | 'high'` typed explicit union (no `'very_high'` — scope deferred).
+- `apps/web-app/src/app/api/workflows/route.ts` — imported `computePortfolioHealthScorePrior`; extracted `updatedAt` metadata from workflow list; computed `portfolioHealthScorePrior` + `portfolioHealthScoreDelta` (MVP: always 30d window regardless of UI timeRange, documented inline); extended `stats` response with both fields.
+- `apps/web-app/src/app/api/workflows/route.test.ts` — added `updatedAt` to mock fixture; added `computePortfolioHealthScorePrior` mock export.
+- `apps/web-app/src/components/dashboard-v2/CommandHeader.tsx` — added `portfolioHealthScoreDelta: number | null` prop; updated `healthBand()` thresholds 40/70 → 60/80; renders delta row with `ArrowUp`/`ArrowDown`/`Minus` + color coding + `aria-label` expansion.
+- `apps/web-app/src/components/dashboard-v2/WorkflowRow.tsx` — imported `AlertTriangle`; updated `healthBand()` to 60/80 with new `pipClass` field; 6px color pip in Health Score cell (left of integer); "High variation" badge in Name cell (fires on `variationLabel === 'high'` only); `n=N` qualifier when `runs < 10`; `n=0 — no runs` when null.
+- `apps/web-app/src/components/dashboard-v2/WorkflowListFilterBar.tsx` — extended `FilterState` to include `needsAttention: boolean`; updated `hasActiveFilters()` to include it; added pinned "Needs attention" chip as first element (left of Filters label) with `aria-pressed` toggle.
+- `apps/web-app/src/components/dashboard-v2/WorkflowList.tsx` — added `needsAttention` branch in `applyFilters()` (`health < 60 OR variationLabel === 'high'`); documented v1 exclusion of `delta ≤ −10`; updated `clearAllFilters` to reset `needsAttention: false`.
+- `apps/web-app/src/components/dashboard-v2/DashboardV2Shell.tsx` — extended `WorkflowsApiResponse` type; added `portfolioHealthScoreDelta` state; threaded to `CommandHeader`; updated initial `FilterState` to include `needsAttention: false`.
+- `apps/web-app/src/lib/workflow-metrics.test.ts` — +12 tests (5 prior-period boundary, 5 chip label regression, 1 filterKey contract, 1 constant).
+- `apps/web-app/src/components/dashboard-v2/WorkflowRow.test.tsx` — +5 pip tests, +3 variation badge tests, +5 run-count qualifier tests; 3 threshold tests updated to 60/80.
+- `apps/web-app/src/components/dashboard-v2/WorkflowList.test.tsx` — `needsAttention: false` in `emptyFilters`; +3 `needsAttention` filter tests.
+- `apps/web-app/src/components/dashboard-v2/DashboardV2Shell.test.tsx` — `needsAttention: false` in `emptyFilters`; +2 `hasActiveFilters` tests.
+
+**New (1):**
+- `apps/web-app/src/components/dashboard-v2/CommandHeader.test.ts` — 15 new tests covering delta label rendering, delta color class, delta `aria` fragment, health band 60/80 transitions.
+
+### Validation Run
+
+- `pnpm --filter @ledgerium/web-app typecheck` — **clean** (zero errors)
+- `pnpm --filter @ledgerium/web-app test` — **289/289 passing** across 13 test files (+44 vs iter-023 close of 245 across 12 files; +1 test file for new `CommandHeader.test.ts`)
+- Trust-but-verify spot-check: confirmed `computePortfolioHealthScorePrior` return contract (null when prior-period < 3 workflows), pip + rail + integer composition in `WorkflowRow`, "Needs attention" pinned chip ordering (FIRST in filter bar left of Filters label), `applyFilters` needs-attention predicate matches v1 spec.
+
+### Outcome
+
+- 6-of-6 §4.1 items delivered as single logical outcome per guardrail 7(b). Path B complete.
+- Executive dashboard surface now carries: trend (portfolio delta), triage (Needs attention filter), verdict (RAG pip + band), confidence (variation badge, run-count qualifier), and action (verb-first chip copy).
+- No regression to existing a11y posture: delta uses `aria-label` expansion, badge uses `aria-label` descriptive text, filter chip uses `aria-pressed`, all icons `aria-hidden="true"`. axe-core E2E expected to remain zero-tolerance green (not re-run this iter — trust the a11y-wiring iter 022 established and verify at iter 025 pre-meta-review smoke).
+
+### Artifacts Updated
+
+- `ITERATION_LOG.md` — this entry (Candidate Selection, Agents Used, Files Changed, Validation Run, Outcome, Artifacts Updated, Impact, Follow-Ups, Governance Signals, Entry Gate for Iter 025).
+- `CHANGELOG.md` — iter 024 entry prepended (top of file).
+- `IMPROVEMENT_BACKLOG.md` — row #54 struck through as done; pool 29 → 29 (closed 1 governance-tracking row, generated 4 new follow-ups → net pool movement: 29 − 1 closed + 4 new = 32; but #54 was governance-not-debt so actual debt pool: 29 + 4 = 33 open follow-ups); 4 new follow-up rows #58/#59/#60/#61; saturation status updated (5th consecutive web-app iteration); density-response: `acknowledged, carried forward` (all four follow-ups are post-launch / polish / scope-boundary work, none is iter-024 re-scope).
+- `SYSTEM_HEALTH.md` — last-updated line; test count 245 → 289; Top Opportunities rotation for MR-005; portfolio-drift extended to 5 consecutive web-app iterations (trigger MUST be evaluated at MR-005).
+- `CLAUDE.md` — Current Phase reflects Path B complete; Priorities updated (iter 024 ✅, iter 025 MR-005 next); Known Issues reflects 6 consecutive web-app iterations window closed at iter 024.
+
+### Impact
+
+- **Executive comprehension:** users of `/dashboard` (v2 default post-iter-022) now see trend, triage filter, verdict pip, and confidence signal on first render. Addresses PRD executive-refinement §1 hypothesis that the v2 surface as shipped iter 022 presented "healthy metrics" without "what to do next." Success metric target: `workflow_row_click_rate` from first dashboard view rises ≥15% vs iter-022 baseline (measurement requires #51 analytics instrumentation — PRE-requisite post-launch).
+- **Test coverage:** +44 net (245 → 289), +1 new test file. Regression surface now includes: period-over-period delta contract, RAG threshold boundaries at 60/80, chip copy stability (filterKey preserved while display text changes), variation-badge scope ('high' only), needs-attention predicate (v1 scope), run-count qualifier edge cases.
+- **Saturation accounting:** 5th consecutive web-app iteration; CEO user-ack reaffirmed 3× (2026-04-20 original + 2026-04-21 executive-refinement + 2026-04-21 Option A). Reverse portfolio-drift trigger (MR-004 Change E proposed, deferred) now has 5 data points for MR-005 evaluation.
+
+### Follow-Ups (4 new, density-response: `acknowledged, carried forward`)
+
+Density-trigger fires (>3 follow-ups generated in a single loop). Response recorded per CLAUDE.md Follow-Up Debt Policy clause 3/4: explicit acknowledgement. Rationale: all four are legitimate post-launch / scope-boundary concerns surfaced by the frontend-engineer during the cross-cutting refinement build. None is re-scope material; all are independently selectable in future burn-down cadence.
+
+- **#58** (Birth iter 024): `growth-strategist` copy review pass on rewritten chip labels — current labels are action-leading per §4.1(b) but not vetted against brand voice guidelines. Target: iter 025+ burn-down if MR-005 surfaces copy as a signal, otherwise cold.
+- **#59** (Birth iter 024): `variationLabel === 'very_high'` extension — §4.1(d) v1 scope fires on `'high'` only. PRD explicitly notes "High+" (High OR Very High) as future scope once the distribution of variation scores is observed in production. Target: post-launch once analytics (#51) provides coefficient-of-variation distribution.
+- **#60** (Birth iter 024): per-workflow delta for `needsAttention` filter precision — §4.1(e) v1 excludes the `delta ≤ −10` arm because `WorkflowMetricsOutput` carries no per-workflow period-over-period delta. Full filter precision requires extending `computeWorkflowMetrics` with prior-window signal — non-trivial scope (requires historical event timestamps per workflow, not just `updatedAt`).
+- **#61** (Birth iter 024): `PORTFOLIO_PRIOR_MIN_WORKFLOWS = 3` threshold post-launch review — arbitrary minimum prevents noisy delta on small portfolios. Once production data exists, reassess whether 3 is too strict (too many nulls) or too lenient (noisy deltas). Target: post-launch analytics review.
+
+### Governance Signals
+
+- **Selection rule logged:** `directed` (Mode 5 item 6/6).
+- **scope-expansion: approved** (documented above; evidence: `PRD_DASHBOARD_V2_EXECUTIVE_REFINEMENT.md` §2.4 global threshold lock).
+- **mode-5-saturation: user-ack** (documented above; three reaffirmations).
+- **density-response: acknowledged, carried forward** (4 follow-ups generated; rationale above).
+- **ceiling-cool-off:** NOT invoked (Mode 5 directed precedence applies — MR-004 Change B exclusion means no cool-off consumption).
+- **burn-down cadence:** MR-004 companion-burn-down satisfied by iter 019. Base 1-in-5 floor due at iter 025 (post-MR-005 ownership).
+- **Agent diversity:** `frontend-engineer` = 1 consecutive (resets from iter 023 backend = 1); Path B overall 3:3 backend:frontend — healthy.
+
+### Entry Gate for Iter 025
+
+**MR-005 meta-review is MANDATORY.** Both base cadence (3-loop cadence: 019 + 020 + 021 + 022 + 023 + 024 = 6 bounded loops post-MR-004) and Mode 5 guardrail 4 (sequence ≥3 items completed) independently require it. No product code changes at iter 025. Meta-coordinator to evaluate:
+- Reverse portfolio-drift trigger across 5 consecutive web-app iterations (MR-004 Change E proposed) — decide adopt / modify / reject.
+- Deferred MR-004 Changes D/E/F triage.
+- Pool-size ceiling discipline: pool is 33 at iter 024 close — ceiling rule has been bypassed for Mode 5 entire Path B via directed precedence. Evaluate whether operating-mode precedence is eating the ceiling rule's teeth.
+- Density-trigger accounting across iter 020 (3 fups) · iter 021 (9 fups) · iter 022 (3 fups) · iter 023 (0 fups) · iter 024 (4 fups) — pattern of detailed-PRD iterations spawning follow-ups.
+- Agent-diversity signal: Path B 3:3 backend:frontend, no saturation.
+- Post-MR-005 burn-down programming: iter 026+ MUST begin aggressive pool shrinkage. Candidate priority order: #14 staleness (past-cap, KEEP per MR-004 Agenda 3) · #34/#35/#36 audit-intake P0s · #42 v1 health-score retirement · #51 v2 analytics instrumentation (blocks PRD §4 measurable-outcome commitments) · #55 gitignore fix · #57 v2 flag full retirement (14d soak window opens iter 022 + 14d).
+
+---
+
 ## Iteration 023
 
 - Date: 2026-04-21

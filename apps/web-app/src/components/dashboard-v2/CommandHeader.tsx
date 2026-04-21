@@ -6,32 +6,44 @@
  * Renders:
  *  - Page title ("Workflows")
  *  - Inline time-range <select> (7d / 30d / 90d / All, default 30d — D7: UI-only)
- *  - Portfolio health score (integer + 3-band rail + aria label)
+ *  - Portfolio health score (integer + 3-band rail + period-over-period delta + aria label)
  *  - Top insight sentence (from highest-severity chip, or blank)
  *
  * Design tokens (PRD §5.4):
  *  - Typography: 28px for score, 20px for title, 14px body, 12px labels
  *  - Weights: 600 for score, 500 for title/labels, 400 for body
- *  - Color: red <40, amber 40–69, green 70+ — always paired with text
+ *  - Color thresholds (iter-024 PRD §2.4): red <60, amber 60–79, green ≥80
  *  - Spacing: 32px outer gutter, 24px section gap, 16px column gap
+ *
+ * iter-024 changes:
+ *  - Health band thresholds updated to 60/80 (was 40/70) per PRD_DASHBOARD_V2_EXECUTIVE_REFINEMENT §2.4
+ *  - portfolioHealthScoreDelta prop added for period-over-period delta display (§4.1 item a)
  */
 
+import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 import type { InsightChip } from '@/lib/workflow-metrics.js';
 
 export type TimeRange = '7d' | '30d' | '90d' | 'all';
 
 interface CommandHeaderProps {
   portfolioHealthScore: number | null;
+  /** Period-over-period delta (current − prior 30d). Null if prior period has insufficient data. */
+  portfolioHealthScoreDelta: number | null;
   topInsight: InsightChip | null;
   timeRange: TimeRange;
   onTimeRangeChange: (range: TimeRange) => void;
 }
 
+/**
+ * 3-state health band.
+ * Thresholds: <60 → poor/red, 60–79 → fair/amber, ≥80 → good/green
+ * iter-024: tightened from 40/70 to 60/80 per PRD_DASHBOARD_V2_EXECUTIVE_REFINEMENT §2.4.
+ */
 function healthBand(score: number): { label: 'poor' | 'fair' | 'good'; colorClass: string; railClass: string } {
-  if (score < 40) {
+  if (score < 60) {
     return { label: 'poor', colorClass: 'text-red-600', railClass: 'bg-red-500' };
   }
-  if (score < 70) {
+  if (score < 80) {
     return { label: 'fair', colorClass: 'text-amber-600', railClass: 'bg-amber-500' };
   }
   return { label: 'good', colorClass: 'text-green-600', railClass: 'bg-green-500' };
@@ -46,6 +58,7 @@ const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
 
 export default function CommandHeader({
   portfolioHealthScore,
+  portfolioHealthScoreDelta,
   topInsight,
   timeRange,
   onTimeRangeChange,
@@ -53,6 +66,33 @@ export default function CommandHeader({
   const isLoading = portfolioHealthScore === null;
   const score = portfolioHealthScore ?? 0;
   const band = isLoading ? null : healthBand(score);
+
+  // Build delta label text and aria description
+  const deltaLabel: string = (() => {
+    if (portfolioHealthScoreDelta === null) return '— vs last 30d';
+    if (portfolioHealthScoreDelta === 0) return '= 0 vs last 30d';
+    const sign = portfolioHealthScoreDelta > 0 ? '+' : '';
+    return `${sign}${portfolioHealthScoreDelta} vs last 30d`;
+  })();
+
+  const deltaAriaFragment: string = (() => {
+    if (portfolioHealthScoreDelta === null) return ', no prior-period data';
+    if (portfolioHealthScoreDelta === 0) return ', unchanged versus last 30 days';
+    if (portfolioHealthScoreDelta > 0) return `, up ${portfolioHealthScoreDelta} versus last 30 days`;
+    return `, down ${Math.abs(portfolioHealthScoreDelta)} versus last 30 days`;
+  })();
+
+  const deltaColorClass: string = (() => {
+    if (portfolioHealthScoreDelta === null || portfolioHealthScoreDelta === 0)
+      return 'text-[var(--content-tertiary)]';
+    return portfolioHealthScoreDelta > 0 ? 'text-green-600' : 'text-red-600';
+  })();
+
+  const DeltaIcon = portfolioHealthScoreDelta === null || portfolioHealthScoreDelta === 0
+    ? Minus
+    : portfolioHealthScoreDelta > 0
+    ? ArrowUp
+    : ArrowDown;
 
   return (
     <header
@@ -92,14 +132,14 @@ export default function CommandHeader({
           </select>
         </label>
 
-        {/* Portfolio health score */}
+        {/* Portfolio health score + delta */}
         <div
           className="flex flex-col items-end gap-ds-1"
           role="status"
           aria-label={
             isLoading
               ? 'Portfolio health: loading'
-              : `Portfolio health: ${score}, ${band!.label}`
+              : `Portfolio health: ${score}, ${band!.label}${deltaAriaFragment}`
           }
         >
           <span className="text-[12px] font-medium text-[var(--content-secondary)] uppercase tracking-wide">
@@ -124,6 +164,17 @@ export default function CommandHeader({
               {isLoading ? '—' : score}
             </span>
           </div>
+
+          {/* Period-over-period delta (iter-024 §4.1 item a) */}
+          {!isLoading && (
+            <div
+              className={`flex items-center gap-0.5 text-[12px] font-medium ${deltaColorClass}`}
+              aria-hidden="true"
+            >
+              <DeltaIcon size={10} aria-hidden="true" />
+              <span>{deltaLabel}</span>
+            </div>
+          )}
         </div>
       </div>
     </header>

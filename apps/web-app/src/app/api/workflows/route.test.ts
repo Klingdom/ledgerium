@@ -57,6 +57,7 @@ vi.mock('@/lib/workflow-metrics', () => ({
     confidence: 0.8,
   }),
   computePortfolioHealthScore: vi.fn().mockReturnValue(72),
+  computePortfolioHealthScorePrior: vi.fn().mockReturnValue(null),
   computeInsightChips: vi.fn().mockReturnValue([]),
 }));
 
@@ -74,6 +75,7 @@ vi.mock('@/db', () => {
     description: 'A test workflow',
     isFavorite: false,
     createdAt: new Date('2026-01-01T00:00:00Z'),
+    updatedAt: new Date('2026-04-01T00:00:00Z'),
     lastViewedAt: new Date('2026-04-01T00:00:00Z'),
     viewCount: 10,
     processDefinition: {

@@ -65,7 +65,7 @@ function deriveState(params: {
   return 'ready';
 }
 
-const emptyFilters: FilterState = { systems: [], opportunity: null, healthStatus: null };
+const emptyFilters: FilterState = { systems: [], opportunity: null, healthStatus: null, needsAttention: false };
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
@@ -147,6 +147,14 @@ describe('hasActiveFilters', () => {
 
   it('returns true when healthStatus filter is set', () => {
     expect(hasActiveFilters({ ...emptyFilters, healthStatus: 'healthy' })).toBe(true);
+  });
+
+  it('returns true when needsAttention is true (iter-024 §4.1 item e)', () => {
+    expect(hasActiveFilters({ ...emptyFilters, needsAttention: true })).toBe(true);
+  });
+
+  it('returns false when needsAttention is false and all other filters empty', () => {
+    expect(hasActiveFilters({ ...emptyFilters, needsAttention: false })).toBe(false);
   });
 });
 

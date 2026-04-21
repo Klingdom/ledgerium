@@ -37,6 +37,7 @@ import {
   Pencil,
   Archive,
   Link,
+  AlertTriangle,
   type LucideIcon,
 } from 'lucide-react';
 import type { WorkflowMetricsOutput, OpportunityTag } from '@/lib/workflow-metrics.js';
@@ -110,18 +111,24 @@ const OPPORTUNITY_CONFIG: Record<
 
 // ── Health score band ─────────────────────────────────────────────────────────
 
+/**
+ * 3-state health band.
+ * Thresholds: <60 → poor/red, 60–79 → fair/amber, ≥80 → good/green
+ * iter-024: tightened from 40/70 to 60/80 per PRD_DASHBOARD_V2_EXECUTIVE_REFINEMENT §2.4.
+ */
 function healthBand(score: number): {
   label: 'poor' | 'fair' | 'good';
   railClass: string;
   textClass: string;
+  pipClass: string;
 } {
-  if (score < 40) {
-    return { label: 'poor', railClass: 'bg-red-500', textClass: 'text-red-600' };
+  if (score < 60) {
+    return { label: 'poor', railClass: 'bg-red-500', textClass: 'text-red-600', pipClass: 'bg-red-500' };
   }
-  if (score < 70) {
-    return { label: 'fair', railClass: 'bg-amber-500', textClass: 'text-amber-600' };
+  if (score < 80) {
+    return { label: 'fair', railClass: 'bg-amber-500', textClass: 'text-amber-600', pipClass: 'bg-amber-500' };
   }
-  return { label: 'good', railClass: 'bg-green-500', textClass: 'text-green-600' };
+  return { label: 'good', railClass: 'bg-green-500', textClass: 'text-green-600', pipClass: 'bg-green-500' };
 }
 
 // ── Health Score breakdown tooltip ───────────────────────────────────────────
@@ -441,7 +448,7 @@ export default function WorkflowRow({
       tabIndex={0}
       aria-label={`Workflow: ${displayTitle}`}
     >
-      {/* Column 1: Workflow Name + subtext */}
+      {/* Column 1: Workflow Name + subtext + variation badge (item d) */}
       <th scope="row" className="px-ds-4 py-ds-3 text-left font-normal w-2/5">
         <div className="flex flex-col gap-0.5 min-w-0">
           <span className="text-[14px] font-medium text-[var(--content-primary)] truncate">
@@ -450,6 +457,16 @@ export default function WorkflowRow({
           <span className="text-[12px] font-normal text-[var(--content-tertiary)] truncate">
             {subtextParts.join(' · ')}
           </span>
+          {/* High variation badge — only shown when variationLabel === 'high' (iter-024 §4.1 item d) */}
+          {metricsV2.variationLabel === 'high' && (
+            <span
+              className="inline-flex items-center gap-[3px] self-start px-1 py-0.5 rounded-ds-sm bg-amber-50 border border-amber-200 text-[10px] font-medium text-amber-700 mt-0.5"
+              aria-label="This workflow has high run-to-run variation"
+            >
+              <AlertTriangle size={10} aria-hidden="true" />
+              High variation
+            </span>
+          )}
         </div>
       </th>
 
@@ -500,7 +517,7 @@ export default function WorkflowRow({
         </span>
       </td>
 
-      {/* Column 4: Health Score + breakdown tooltip */}
+      {/* Column 4: Health Score + color pip + run-count qualifier + breakdown tooltip */}
       <td
         className="px-ds-4 py-ds-3 relative w-1/5"
         onClick={(e) => {
@@ -510,10 +527,21 @@ export default function WorkflowRow({
       >
         <div
           className="flex flex-col items-end gap-0.5 cursor-pointer"
-          aria-label={`Health score: ${healthScore.overall}, ${band.label}`}
+          aria-label={
+            runs !== null && runs < 10
+              ? `Health score: ${healthScore.overall}, ${band.label}, based on ${runs} run${runs !== 1 ? 's' : ''} — low confidence`
+              : runs === null
+              ? `Health score: ${healthScore.overall}, ${band.label}, no runs recorded`
+              : `Health score: ${healthScore.overall}, ${band.label}`
+          }
         >
-          {/* Integer + rail */}
+          {/* Color pip + integer + rail (iter-024 §4.1 item c) */}
           <div className="flex items-center gap-ds-2">
+            {/* 6px solid color pip — primary visual verdict for scannability */}
+            <div
+              className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${band.pipClass}`}
+              aria-hidden="true"
+            />
             <div
               className="w-12 h-1 rounded-full bg-[var(--border-subtle)] overflow-hidden"
               aria-hidden="true"
@@ -540,6 +568,18 @@ export default function WorkflowRow({
           {sopSubtext && (
             <span className="text-[12px] font-normal text-[var(--content-tertiary)]">
               {sopSubtext}
+            </span>
+          )}
+
+          {/* Run-count qualifier: shown when runs < 10 or runs === null (iter-024 §4.1 item f) */}
+          {runs !== null && runs < 10 && (
+            <span className="text-[10px] text-[var(--content-tertiary)]" aria-hidden="true">
+              n={runs}
+            </span>
+          )}
+          {runs === null && (
+            <span className="text-[10px] text-[var(--content-tertiary)]" aria-hidden="true">
+              n=0 — no runs
             </span>
           )}
         </div>

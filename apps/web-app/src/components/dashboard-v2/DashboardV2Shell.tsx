@@ -47,6 +47,8 @@ interface WorkflowsApiResponse {
   workflows: WorkflowRowData[];
   stats: {
     portfolioHealthScore: number;
+    /** Period-over-period delta; null if prior period has insufficient data (iter-024 §4.1 item a) */
+    portfolioHealthScoreDelta: number | null;
     insightChips: InsightChip[];
     topInsights: Array<{ id: string; title: string; severity: string; insightType: string }>;
   };
@@ -84,6 +86,7 @@ export default function DashboardV2Shell() {
   // ── Data state ──────────────────────────────────────────────────────────────
   const [allWorkflows, setAllWorkflows] = useState<WorkflowRowData[]>([]);
   const [portfolioHealthScore, setPortfolioHealthScore] = useState<number | null>(null);
+  const [portfolioHealthScoreDelta, setPortfolioHealthScoreDelta] = useState<number | null>(null);
   const [insightChips, setInsightChips] = useState<InsightChip[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -102,6 +105,7 @@ export default function DashboardV2Shell() {
     systems: [],
     opportunity: null,
     healthStatus: null,
+    needsAttention: false,
   });
   const [insightFilterKey, setInsightFilterKey] = useState<string | null>(null);
 
@@ -125,6 +129,7 @@ export default function DashboardV2Shell() {
 
       setAllWorkflows(data.workflows ?? []);
       setPortfolioHealthScore(data.stats?.portfolioHealthScore ?? null);
+      setPortfolioHealthScoreDelta(data.stats?.portfolioHealthScoreDelta ?? null);
       setInsightChips(data.stats?.insightChips ?? []);
       setIsError(false);
     } catch {
@@ -240,6 +245,7 @@ export default function DashboardV2Shell() {
       {/* Section 1: Command Header */}
       <CommandHeader
         portfolioHealthScore={isLoading ? null : portfolioHealthScore}
+        portfolioHealthScoreDelta={isLoading ? null : portfolioHealthScoreDelta}
         topInsight={topInsight}
         timeRange={timeRange}
         onTimeRangeChange={setTimeRange}

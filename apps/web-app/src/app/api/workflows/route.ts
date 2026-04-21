@@ -7,6 +7,7 @@ import { toPlanType, hasFeature } from '@/lib/plans';
 import {
   computeWorkflowMetrics,
   computePortfolioHealthScore,
+  computePortfolioHealthScorePrior,
   computeInsightChips,
 } from '@/lib/workflow-metrics';
 import type { WorkflowMetricsInput, WorkflowMetricsOutput } from '@/lib/workflow-metrics';
@@ -765,6 +766,22 @@ export async function GET(req: NextRequest) {
     topInsights.map((i) => ({ insightType: i.insightType, severity: i.severity, title: i.title })),
   );
 
+  // Period-over-period delta for portfolio health score (iter-024 §4.1 item a).
+  // Prior-period window is always 30 days for MVP regardless of UI timeRange state —
+  // timeRange is a UI-only filter (D7); per-workflow delta is not yet available in the API.
+  const PRIOR_WINDOW_DAYS = 30;
+  const allWorkflowsMeta = allEnriched.map((w) => ({ updatedAt: w.updatedAt.toISOString() }));
+  const portfolioHealthScorePrior = computePortfolioHealthScorePrior(
+    allMetricsV2,
+    allWorkflowsMeta,
+    PRIOR_WINDOW_DAYS,
+    new Date(),
+  );
+  const portfolioHealthScoreDelta: number | null =
+    portfolioHealthScorePrior !== null
+      ? Math.round(portfolioHealthScore - portfolioHealthScorePrior)
+      : null;
+
   return NextResponse.json({
     workflows: filteredWorkflows,
     stats: {
@@ -788,6 +805,8 @@ export async function GET(req: NextRequest) {
       recordedThisMonth,
       // V2 aggregate metrics
       portfolioHealthScore,
+      portfolioHealthScorePrior,
+      portfolioHealthScoreDelta,
       insightChips,
       // Backward-compatible fields
       recentlyViewedIds: recentlyViewed.map((w) => w.id),

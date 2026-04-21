@@ -15,10 +15,11 @@ import { describe, it, expect } from 'vitest';
 import type { WorkflowMetricsOutput, HealthScoreV2, OpportunityTag } from '@/lib/workflow-metrics.js';
 
 // ── Health band derivation (duplicated from WorkflowRow for unit testability) ─
+// iter-024: thresholds tightened to 60/80 per PRD_DASHBOARD_V2_EXECUTIVE_REFINEMENT §2.4
 
 function healthBand(score: number): { label: 'poor' | 'fair' | 'good' } {
-  if (score < 40) return { label: 'poor' };
-  if (score < 70) return { label: 'fair' };
+  if (score < 60) return { label: 'poor' };
+  if (score < 80) return { label: 'fair' };
   return { label: 'good' };
 }
 
@@ -142,18 +143,19 @@ describe('healthy tag rendering', () => {
 });
 
 describe('healthBand helper', () => {
-  it('score < 40 → poor', () => {
+  // iter-024: thresholds tightened to 60/80 per PRD_DASHBOARD_V2_EXECUTIVE_REFINEMENT §2.4
+  it('score < 60 → poor (iter-024 threshold)', () => {
     expect(healthBand(0).label).toBe('poor');
-    expect(healthBand(39).label).toBe('poor');
+    expect(healthBand(59).label).toBe('poor');
   });
 
-  it('score 40–69 → fair', () => {
-    expect(healthBand(40).label).toBe('fair');
-    expect(healthBand(69).label).toBe('fair');
+  it('score 60–79 → fair (iter-024 threshold)', () => {
+    expect(healthBand(60).label).toBe('fair');
+    expect(healthBand(79).label).toBe('fair');
   });
 
-  it('score >= 70 → good', () => {
-    expect(healthBand(70).label).toBe('good');
+  it('score >= 80 → good (iter-024 threshold)', () => {
+    expect(healthBand(80).label).toBe('good');
     expect(healthBand(100).label).toBe('good');
   });
 });
@@ -276,5 +278,100 @@ describe('kebab menu API request shapes (#49)', () => {
   it('archive status value is exactly "archived" (not "deleted" or "inactive")', () => {
     const body = buildArchiveBody();
     expect(body.status).toBe('archived');
+  });
+});
+
+// ── (c) RAG color pip — health band thresholds 60/80 (iter-024 §4.1 item c) ──
+
+/**
+ * The pip color class is derived from healthBand(). We expose the pipClass
+ * here to verify the 3-state coverage without mounting the component.
+ */
+function healthBandPip(score: number): { pipClass: string } {
+  if (score < 60) return { pipClass: 'bg-red-500' };
+  if (score < 80) return { pipClass: 'bg-amber-500' };
+  return { pipClass: 'bg-green-500' };
+}
+
+describe('RAG color pip — healthBand thresholds (iter-024 §4.1 item c)', () => {
+  it('score=59 → red pip (bg-red-500)', () => {
+    expect(healthBandPip(59).pipClass).toBe('bg-red-500');
+  });
+
+  it('score=75 → amber pip (bg-amber-500)', () => {
+    expect(healthBandPip(75).pipClass).toBe('bg-amber-500');
+  });
+
+  it('score=85 → green pip (bg-green-500)', () => {
+    expect(healthBandPip(85).pipClass).toBe('bg-green-500');
+  });
+
+  it('boundary: score=60 → amber (not red)', () => {
+    expect(healthBandPip(60).pipClass).toBe('bg-amber-500');
+  });
+
+  it('boundary: score=80 → green (not amber)', () => {
+    expect(healthBandPip(80).pipClass).toBe('bg-green-500');
+  });
+});
+
+// ── (d) Variation badge (iter-024 §4.1 item d) ───────────────────────────────
+
+/**
+ * Badge fires only when variationLabel === 'high'. 'low' and 'medium' must not show it.
+ */
+function shouldShowVariationBadge(variationLabel: 'low' | 'medium' | 'high'): boolean {
+  return variationLabel === 'high';
+}
+
+describe('variation badge (iter-024 §4.1 item d)', () => {
+  it('badge shown when variationLabel === "high"', () => {
+    const metrics = makeMetrics({ variationLabel: 'high', variationScore: 0.8 });
+    expect(shouldShowVariationBadge(metrics.variationLabel)).toBe(true);
+  });
+
+  it('badge NOT shown when variationLabel === "medium"', () => {
+    const metrics = makeMetrics({ variationLabel: 'medium', variationScore: 0.5 });
+    expect(shouldShowVariationBadge(metrics.variationLabel)).toBe(false);
+  });
+
+  it('badge NOT shown when variationLabel === "low"', () => {
+    const metrics = makeMetrics({ variationLabel: 'low', variationScore: 0.2 });
+    expect(shouldShowVariationBadge(metrics.variationLabel)).toBe(false);
+  });
+});
+
+// ── (f) Run-count qualifier (iter-024 §4.1 item f) ───────────────────────────
+
+/**
+ * Mirrors the run-count qualifier rendering logic from WorkflowRow.
+ * Qualifier shown when runs !== null && runs < 10.
+ * Null runs → "n=0 — no runs".
+ */
+function buildRunCountQualifier(runs: number | null): string | null {
+  if (runs !== null && runs < 10) return `n=${runs}`;
+  if (runs === null) return 'n=0 — no runs';
+  return null; // runs >= 10: no qualifier
+}
+
+describe('run-count qualifier (iter-024 §4.1 item f)', () => {
+  it('runs=4 renders qualifier n=4', () => {
+    expect(buildRunCountQualifier(4)).toBe('n=4');
+  });
+
+  it('runs=10 does NOT render qualifier (returns null)', () => {
+    expect(buildRunCountQualifier(10)).toBeNull();
+  });
+
+  it('runs=11 does NOT render qualifier', () => {
+    expect(buildRunCountQualifier(11)).toBeNull();
+  });
+
+  it('runs=null renders honest null state "n=0 — no runs"', () => {
+    expect(buildRunCountQualifier(null)).toBe('n=0 — no runs');
+  });
+
+  it('runs=9 (boundary) renders qualifier n=9', () => {
+    expect(buildRunCountQualifier(9)).toBe('n=9');
   });
 });

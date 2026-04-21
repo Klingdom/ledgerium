@@ -4,15 +4,21 @@
  * WorkflowListFilterBar — filter controls for the Workflow Intelligence List.
  *
  * Filters (PRD §5.3):
+ *  - "Needs attention" pinned chip (iter-024 §4.1 item e) — FIRST in the bar
  *  - System (multi-select from unique toolsUsed values in user's workflow set)
  *  - Opportunity (Automate / Standardize / Optimize / Monitor / Healthy)
  *  - Health Status (healthy / needs_review / high_variation / stale)
  *  - Active-filter chip display with individual clear buttons
  *
+ * "Needs attention" filter definition (PRD §D-E5, v1):
+ *   health < 60 OR variationLabel === 'high'
+ *   Note: delta ≤ −10 per PRD confirmed definition is excluded from v1 —
+ *   per-workflow delta is not available in MVP. Tracked as a follow-up.
+ *
  * Design tokens (PRD §5.4): 12px/500 labels, 6px radius, 8px/12px spacing
  */
 
-import { X, Filter } from 'lucide-react';
+import { X, Filter, AlertTriangle } from 'lucide-react';
 import type { OpportunityTag } from '@/lib/workflow-metrics.js';
 
 export type HealthStatusFilter = 'healthy' | 'needs_review' | 'high_variation' | 'stale';
@@ -21,6 +27,8 @@ export interface FilterState {
   systems: string[];
   opportunity: OpportunityTag | null;
   healthStatus: HealthStatusFilter | null;
+  /** iter-024 §4.1 item e: health <60 OR variationLabel==='high' */
+  needsAttention: boolean;
 }
 
 interface WorkflowListFilterBarProps {
@@ -48,7 +56,8 @@ function hasActiveFilters(filters: FilterState): boolean {
   return (
     filters.systems.length > 0 ||
     filters.opportunity !== null ||
-    filters.healthStatus !== null
+    filters.healthStatus !== null ||
+    filters.needsAttention === true
   );
 }
 
@@ -72,14 +81,39 @@ export default function WorkflowListFilterBar({
     onFiltersChange({ ...filters, healthStatus: value });
   }
 
+  function toggleNeedsAttention() {
+    onFiltersChange({ ...filters, needsAttention: !filters.needsAttention });
+  }
+
   function clearAll() {
-    onFiltersChange({ systems: [], opportunity: null, healthStatus: null });
+    onFiltersChange({ systems: [], opportunity: null, healthStatus: null, needsAttention: false });
   }
 
   const active = hasActiveFilters(filters);
 
   return (
     <div className="px-ds-8 py-ds-3 flex flex-wrap items-center gap-ds-2 border-b border-[var(--border-subtle)]">
+      {/* "Needs attention" pinned chip — rendered FIRST (iter-024 §4.1 item e) */}
+      <button
+        type="button"
+        onClick={toggleNeedsAttention}
+        aria-pressed={filters.needsAttention}
+        className={`
+          inline-flex items-center gap-ds-1 px-ds-2 py-0.5
+          rounded-ds-sm border text-[12px] font-medium
+          transition-colors duration-150
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500
+          ${
+            filters.needsAttention
+              ? 'bg-red-50 border-red-300 text-red-700'
+              : 'bg-transparent border-[var(--border-default)] text-[var(--content-secondary)] hover:border-red-300 hover:text-red-700'
+          }
+        `}
+      >
+        <AlertTriangle size={12} aria-hidden="true" />
+        Needs attention
+      </button>
+
       {/* Filter icon label */}
       <span className="flex items-center gap-ds-1 text-[12px] font-medium text-[var(--content-secondary)]">
         <Filter size={12} aria-hidden="true" />
