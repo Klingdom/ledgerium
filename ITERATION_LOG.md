@@ -11,7 +11,7 @@ This file records each bounded improvement loop.
 - Coordinator: coordinator
 - Phase: Phase 1
 - Mode: Mode 5 (directed sequence, item 6/6). Increments improvement-loop counter by 1.
-- Commit: (pending — single commit for code + artifacts)
+- Commit: `0e72d8e` (single commit: 18 files changed, 915 insertions, 57 deletions)
 
 ### Candidate Selection
 
