@@ -6,6 +6,78 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-21] - Iteration 021: v2 Dashboard UI build (Mode 5 item 4/5)
+
+### Selection
+
+- **Mode:** Mode 1 (bounded loop) + Mode 5 item 4/5 (`directed`). Increments improvement-loop counter AND Mode 5 counter by 1.
+- **Trigger:** Path B dashboard redesign sequence — item 4 of 5. Entry gate from iter 020 metrics engine + Mode 3 principal-review correction (PRD contract tightened) satisfied.
+- **Rationale:** Consume the post-Mode-3 contract (4-column verdict grid, 8 components, honest dimension labels, design-token lock) by shipping the v2 UI behind `?v2=1` flag. v1 dashboard preserved.
+
+### What changed
+
+**Code — 8 new components under `apps/web-app/src/components/dashboard-v2/`:**
+- `index.ts` (barrel)
+- `DashboardV2Shell.tsx` — top-level; owns time-range + filter state + data fetch (fetch+useState+useEffect pattern; TanStack Query deferred to follow-up #46)
+- `CommandHeader.tsx` — Section 1 (title, inline time-range `<select>`, portfolio score integer + color rail + aria, top insight sentence)
+- `InsightsStrip.tsx` — Section 2 (chip row with inlined render; handles all 4 severity levels including new `positive`)
+- `WorkflowList.tsx` — Section 3 container; `state: 'loading'|'empty'|'no-results'|'error'|'sparse'|'ready'` prop drives 5 UI branches inline (no separate state-variant files)
+- `WorkflowListFilterBar.tsx` — system + opportunity + health filters + active-filter display
+- `WorkflowRow.tsx` — all 4 columns inlined: Name (+ `systems · last-run · N runs` subtext), Systems (accessible text pills — icon mapping deferred to follow-up #45), Opportunity (tag chip with text + icon), Health Score (integer + 3-band rail + breakdown tooltip gated by `isGated`)
+
+**Tests — 3 new co-located test files:**
+- `DashboardV2Shell.test.tsx` (15 tests)
+- `WorkflowList.test.tsx` (17 tests — 5 state branches × edge cases)
+- `WorkflowRow.test.tsx` — includes `FORBIDDEN_LABELS = ['efficiency', 'reliability', 'Efficiency', 'Reliability']` negative-assertion block + `HealthScoreV2` shape tests verifying `speed` / `dataQuality` present and `efficiency` / `reliability` absent — enforces post-Mode-3 honest-label contract at test level
+
+**Page integration — `apps/web-app/src/app/(app)/dashboard/page.tsx`:**
+- Branches on `searchParams.v2 === '1'` — v2 path renders `<DashboardV2Shell />`, v1 path renders existing content unchanged. One-file modification; zero v1 regressions.
+
+**Config note — `vitest.config.ts`:**
+- Added explanatory comment clarifying that `.test.tsx` (React component tests) are not discoverable at workspace level because the root config lacks the `@` alias resolution present in `apps/web-app/vitest.config.ts`. Scope-expansion to fix was invoked and correctly retracted (guardrail 7 failed "one logical outcome" test — fix cascades into alias + jsdom env handling). Follow-up #53 tracks proper resolution (vitest workspaces migration or `pnpm -r test` delegation).
+
+### Validation
+
+- `pnpm --filter web-app typecheck` — clean (tsc --noEmit silent)
+- `pnpm --filter web-app test` — **11 test files / 233 tests passing** in web-app package (+3 files / +47 tests vs iter 020 close; 0 regressions in existing 8 files)
+- `pnpm test` (workspace) — **53 files / 1728 tests passing** (unchanged — `.test.tsx` files are web-app-config-only; see follow-up #53)
+- Independent coordinator re-verification: identical green results
+- Honest-label grep across `dashboard-v2/`: only negative assertions (FORBIDDEN_LABELS test block); zero runtime label occurrences
+- Post-Mode-3 contract verified: speed/dataQuality in tooltip, 4-column grid, 8 components, `'healthy'` tag renders, `'positive'` chip severity handled
+
+### Impact
+
+- **Before state:** iter 020 metrics engine + post-Mode-3 contract existed as pure modules and PRD specifications. No UI consumed them. v1 dashboard still rendered 10-column admin-panel grid.
+- **After state:** `/dashboard?v2=1` renders 3-section command-center: Command Header + Insights Strip + 4-column Workflow Intelligence List with filter bar, default health-ascending sort, plan-gated breakdown tooltip, 5 UI state branches, honest dimension labels, 8-component consolidation, design-token compliance. v1 preserved under absent-flag.
+- **Measurable outcome:** web-app test count 186 → 233 (+47); component count 8 locked; state-machine branches reachable 5/5; honest-label negative assertions enforced by FORBIDDEN_LABELS test; v1 regression count 0.
+
+### Follow-ups (9 generated)
+
+- **#45** system icon mapping for Systems column (PRD §5.3 compliance)
+- **#46** TanStack Query adoption (architecture)
+- **#47** useSearchParams Suspense boundary wrap (Next.js 14 hygiene)
+- **#48** `?v2=1` auto-redirect per PRD D1 rollout (iter 022 commitment)
+- **#49** kebab "Edit name" + "Archive" wiring
+- **#50** D7 "(all-time)" annotation when time range ≠ All
+- **#51** v2 analytics instrumentation (PRD §4 measurable-outcome dependency)
+- **#52** PortfolioSidebar D5 integration
+- **#53** workspace vitest `.test.tsx` discovery gap (coordinator-generated from retracted scope expansion — scope discipline signal)
+
+**Density-response: acknowledged, carried forward.** Structural, not pathological — detailed-PRD build iterations surface legitimate adjacencies. Several are iter-022 polish candidates (#47/#49/#50/#51); #48 is PRD-assigned to iter 022 rollout; #45/#46/#52/#53 are post-Path-B governance/architecture.
+
+### Governance signals
+
+- `mode: 5-item-4-of-5` ✅
+- `selection-rule: directed` ✅
+- `mode-5-saturation: user-ack; rationale: CEO explicit approval 2026-04-20` ✅
+- `scope-expansion: attempted-and-retracted; rationale: workspace vitest .test.tsx config gap discovered during validation; fix cascades beyond "one logical outcome" (alias + jsdom env); follow-up #53` ✅
+- `density-response: acknowledged, carried forward` ✅
+- `agent-diversity: frontend-engineer (rotated from backend-engineer counter=2 at iter 020 close; backend counter reset)` ✅
+- **Pool trajectory:** 25 → 34 open (ceiling rule deeply violated; MR-005 at iter 023 MANDATORY)
+- **Mode 5 sequence:** iter 022 (a11y/polish/E2E) final; MR-005 triggers at iter 023 boundary
+
+---
+
 ## [2026-04-21] - Mode 3 Correction: iter 020 Principal-Level Design Review (non-counting)
 
 ### Selection

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Search,
   Upload,
@@ -50,6 +50,7 @@ import CreatePortfolioDialog from '@/components/CreatePortfolioDialog';
 import OnboardingChecklist from '@/components/OnboardingChecklist';
 import UsageQuotaMeter from '@/components/UsageQuotaMeter';
 import { ExtensionStatusToast } from '@/components/ExtensionStatusToast';
+import { DashboardV2Shell } from '@/components/dashboard-v2';
 
 // ─── Type definitions ──────────────────────────────────────────────────────────
 
@@ -294,6 +295,14 @@ function getPrimarySystem(toolsUsed: string[]): string | null {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // ── Dashboard V2 flag (D1) — render v2 shell when ?v2=1 is present ─────────
+  // DashboardV2Shell is a 'use client' component — this branch creates a clean
+  // client boundary. V1 content below remains unchanged per iter-021 scope rules.
+  if (searchParams.get('v2') === '1') {
+    return <DashboardV2Shell />;
+  }
 
   // ── State ──────────────────────────────────────────────────────────────────
 

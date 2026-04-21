@@ -6,6 +6,11 @@ export default defineConfig({
       'packages/*/src/**/*.test.ts',
       'apps/*/src/**/*.test.ts',
     ],
+    // .test.tsx files (React component tests) require app-level vitest config
+    // with `@` alias resolution and jsdom environment — run them via the package's
+    // own test script (e.g. `pnpm --filter web-app test`). Workspace-level count
+    // here does NOT include app component tests; see IMPROVEMENT_BACKLOG follow-up
+    // #53 for vitest-workspaces migration.
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
