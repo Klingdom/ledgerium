@@ -13,7 +13,7 @@ model User {
   name                 String?
   passwordHash         String   @map("password_hash")
   plan                 String   @default("free") // free, pro, team
-  subscriptionStatus   String   @default("trialing") @map("subscription_status") // trialing, active, past_due, canceled, none
+  subscriptionStatus   String   @default("none")     @map("subscription_status") // none (default until Stripe webhook sets trialing/active/past_due/canceled)
   stripeCustomerId     String?  @map("stripe_customer_id")
   stripeSubscriptionId String?  @map("stripe_subscription_id")
   uploadCount          Int      @default(0) @map("upload_count")

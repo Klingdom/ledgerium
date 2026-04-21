@@ -4,6 +4,95 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 023
+
+- Date: 2026-04-21
+- Trigger: CEO Option A directive 2026-04-21 — Mode 2 targeted fix on backlog row #40 (BUG-07) inserted between Path B items 5 and 6 to unblock approved `PRD_TEAM_TRIAL.md` (Dependency §11a). Executive-refinement bundle slides iter 023 → iter 024; MR-005 slides iter 024 → iter 025.
+- Coordinator: coordinator
+- Phase: Phase 1
+- Mode: Mode 2 (targeted fix, directed). Increments improvement-loop counter by 1.
+- Commit: `834eeb9`
+
+### Candidate Selection
+
+- **Selection rule:** `directed` (Mode 2 user-named item)
+- **Selected work:** Remove silent `subscriptionStatus @default("trialing")` in `apps/web-app/prisma/schema.prisma:16` (→ `"none"`); update hardcoded duplicate in `apps/web-app/src/app/api/auth/signup/route.ts:43` (→ `'none'`); add single regression test locking the new default. Apply schema change via `prisma db push` (project uses db-push pattern; no `apps/web-app/prisma/migrations/` directory — backlog row #12 is the scope guard for migrations baseline, out of scope).
+- **Score:** 11 (I=3, A=4, L=1, C=5, E=1, R=1; no release-blocker bonus — #40 is PRD-blocker for Team Trial, not a Phase-1 release blocker; no saturation penalty applied to Mode 2)
+- **Rationale:** unblocks `PRD_TEAM_TRIAL.md` Dependency §11a. NOT a revenue leak (entitlements correctly flow through `plan` field). IS a UX-misfire + analytics-noise blocker because trial surfaces/events key on `subscriptionStatus === 'trialing'` and new free users with no Stripe activity were silently given that value. Zero `subscriptionStatus === 'trialing'` gating logic exists anywhere in the app (audit-verified); `statusLabels['none']` already renders "Free" at `account/page.tsx:74-77` — zero UI regression risk.
+- **Portfolio rule checks:**
+  - Mode 2 takes precedence over ceiling rule (pool > 8) — per clause 7 exclusion (MR-004 Change B: directed selections bypass ceiling without consuming cool-off).
+  - Mode 2 takes precedence over Area saturation rule — original CEO saturation user-ack 2026-04-20 was reaffirmed 2026-04-21 with executive-refinement acceptance (extended window). Iter 023 is 4th consecutive web-app iteration; saturation continues to accumulate for MR-005 evaluation at iter 025.
+  - Burn-down floor: iter 019 satisfied MR-004 companion-burn-down for Path B; 1-in-5 burn-down floor is next-due at iter 024 or 025 (not iter 023 given Mode 2 precedence).
+- **scope-expansion: none** (single logical outcome: schema default + hardcoded duplicate + regression test; `statusLabels['none']` already exists, no UI work required; zero existing-user backfill by design — surfaced as potential follow-up only if product wants it).
+- **mode-5-saturation: n/a** (Mode 2, not Mode 5).
+
+### Agents Used
+
+- **Primary:** `backend-engineer` — rotates off iter 022's frontend-engineer (consecutive counter = 1 at iter 022, resets to backend-engineer = 1 at iter 023). Signal match in Delegation Rubric: "schema or migration changes" → database-engineer (absent in inventory) → backend-engineer fallback; plus "pure code-logic changes" default. Single primary agent.
+- **Adjacent:** none (work scope small enough — 2-line diff + 1 regression test — that multi-agent orchestration would exceed work size).
+- **Agent diversity:** consecutive-same-agent counter resets to backend-engineer = 1. Prior streak (frontend-engineer = 2 across iter 021 + 022) closes without triggering 4+ consecutive threshold.
+
+### Files Changed
+
+**Modified (2):**
+- `apps/web-app/prisma/schema.prisma` — line 16: `@default("trialing")` → `@default("none")`; comment updated to reflect new default
+- `apps/web-app/src/app/api/auth/signup/route.ts` — line 43: hardcoded `'trialing'` → `'none'` (removes redundant duplicate of schema default)
+
+**New (1):**
+- `apps/web-app/src/app/api/auth/signup/route.test.ts` — +87 LOC; single BUG-07 regression test asserting `db.user.create` is called with `subscriptionStatus: 'none'` on new signup. Mocking mirrors `webhook/route.test.ts` (vi.mock on `@/db`, `bcryptjs`, `@/lib/analytics-server`).
+
+**Prisma client regenerated** via `prisma db push` — schema applied to local SQLite in 141 ms; no migration file created (project uses db-push pattern).
+
+### Validation Run
+
+- `pnpm --filter @ledgerium/web-app typecheck`: **clean** (zero errors)
+- `pnpm --filter @ledgerium/web-app test`: **245/245 passing** across 12 test files (+1 vs iter-022 close of 244; +1 test file for new signup regression spec)
+- Prisma schema applied: `prisma db push` OK (141 ms)
+- Callsite audit: zero `subscriptionStatus === 'trialing'` gating logic found in app (0 matches via grep); all remaining `'trialing'` literals are legitimate Stripe webhook mappings (`webhook/route.ts:104, 111`) and webhook tests (`webhook/route.test.ts:151, 177`).
+- UI regression check: `statusLabels['none']` at `account/page.tsx:74-77` already renders "Free" with neutral styling → no UI work needed; new free users now display "Free" badge instead of false "Trial" badge.
+
+### Outcome
+
+- ✅ **Scope-locked single-outcome fix delivered.** Schema default silently set to `'trialing'` is eliminated. New free users now correctly start at `subscriptionStatus = 'none'`; trial status is only set by Stripe webhook when a real trial begins (per honest state model).
+- ✅ **PRD_TEAM_TRIAL.md Dependency §11a unblocked.** Team Trial feature can now key its trial-surface gating on `subscriptionStatus === 'trialing'` without being polluted by new-signup noise.
+- ✅ **Regression test locks the new default.** Any future reversion (accidental or intentional) is caught by CI immediately.
+- ✅ **Zero scope creep.** No migration file (project uses db-push), no existing-user backfill, no `statusLabels` edits (already handles `'none'`), no touches to `webhook/route.ts` legitimate `'trialing'` mappings.
+
+### Artifacts Updated
+
+- `IMPROVEMENT_BACKLOG.md` — row #40 marked done; pool 30 → 29; saturation status notes iter 023 as 4th consecutive web-app iteration
+- `SYSTEM_HEALTH.md` — last-updated line reflects iter 023 close; web-app test count 244 → 245; Top Opportunities rotates iter 023 → iter 024 (exec refinement) → iter 025 (MR-005)
+- `CHANGELOG.md` — iter 023 entry prepended
+- `CLAUDE.md` — Current Phase already reflects iter 023 = Mode 2, iter 024 = exec refinement, iter 025 = MR-005 (set at iter 022 close)
+
+### Impact
+
+- **Before:** new free users silently assigned `subscriptionStatus = 'trialing'` by Prisma schema default + explicit hardcode in signup route. Account page displayed false blue "Trial" badge for users who never started a Stripe trial. Team Trial feature could not reliably key on `subscriptionStatus === 'trialing'` because the signal was polluted by non-trial signups.
+- **After:** new free users assigned `subscriptionStatus = 'none'`; account page displays "Free" neutral badge (honest state). `subscriptionStatus = 'trialing'` is set exclusively by Stripe webhook when a real trial begins. Team Trial feature gating path is clean.
+- **Measurable outcome:** (1) honest UI state for 100% of new free signups (was 0% — every signup was fake-trial). (2) Team Trial feature gating signal purity: any `subscriptionStatus === 'trialing'` query is now guaranteed to reflect a real Stripe trial. (3) Single regression test guards the change (CI catches any future reversion).
+
+### Follow-Ups
+
+None generated. Potential follow-up (not opened — only open if product explicitly wants retroactive cleanup): one-time backfill UPDATE on users with `subscriptionStatus = 'trialing'` AND `stripeSubscriptionId IS NULL` to `'none'`. Intentionally deferred because (a) scope-creep risk; (b) existing users will migrate naturally when they interact with Stripe; (c) the bug manifests on new signups going forward — backfill is a separate product decision.
+
+**density-response: n/a** (zero follow-ups generated — no density trigger).
+
+### Governance Signals
+
+- **Mode 2 cadence:** 3rd Mode 2 iteration to date (prior: iter 010, iter 016). Mode 2 remains rare and pointed — consistent with coordinator discipline.
+- **Web-app saturation:** iter 023 = 4th consecutive web-app iteration (020/021/022/023). Reverse portfolio-drift trigger continues accumulating for MR-005 evaluation at iter 025 boundary (MR-005 shifted iter 024 → iter 025 per CEO Option A directive 2026-04-21).
+- **Burn-down debt:** pool 30 → 29 (closed #40); pool-size ceiling rule (>8) still violated but dormant under directed-selection precedence. Meta-review at iter 025 will need to address burn-down trajectory explicitly (pool has grown from 22 at iter 019 start → 29 at iter 023 close despite iter 019 burn-down iteration and iter 022 closing 5 items).
+- **Agent diversity:** backend-engineer consecutive counter resets to 1 after frontend-engineer streak of 2 at iter 022. No 4+ consecutive same-agent trigger.
+
+### Entry Gate for Iter 024 (executive refinement — Mode 5 item 6/6)
+
+- **Prerequisites:** iter 022 v2 dashboard UI surface + iter 023 Team-Trial signal hygiene (this iteration) both shipped. ✅
+- **Scope:** §4.1 of `PRD_DASHBOARD_V2_EXECUTIVE_REFINEMENT.md` — 6 items (a–f).
+- **Primary agent:** frontend-engineer (re-enters rotation; after iter 024 close, frontend-engineer consecutive counter will be 1; no 4+ trigger risk).
+- **Saturation:** iter 024 will be 5th consecutive web-app iteration. CEO saturation user-ack (reaffirmed 2026-04-21 with executive-refinement acceptance) covers through iter 024. Post-iter-024 is where MR-005 triggers and reverse portfolio-drift evaluation occurs.
+
+---
+
 ## Iteration 022
 
 - Date: 2026-04-21

@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
         name: name ?? null,
         passwordHash,
         plan: 'free',
-        subscriptionStatus: 'trialing',
+        subscriptionStatus: 'none',
       },
     });
 
