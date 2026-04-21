@@ -330,15 +330,16 @@ No measurable outcome → incomplete work
 Phase 1 in progress — **all release blockers closed as of iter 011.**
 Phase 2 entry planning is unblocked; no forced-blocker items remain.
 
-**Active work: Mode 5 Path B dashboard redesign (iter 018 → 022).** PRD approved at iter 018 (`docs/prd/PRD_DASHBOARD_V2.md`). Sequence renumbered post-MR-004: iter 019 = companion burn-down (#15), iter 020 = metrics engine, iter 021 = UI build, iter 022 = accessibility/polish/E2E. MR-005 at iter 023 boundary.
+**Active work: Mode 5 Path B dashboard redesign + Mode 2 interrupt for #40 BUG-07.** PRD approved at iter 018 (`docs/prd/PRD_DASHBOARD_V2.md`). Executive refinement addendum approved 2026-04-21 (`docs/prd/PRD_DASHBOARD_V2_EXECUTIVE_REFINEMENT.md`) originally extended sequence from 5 → 6 iterations. CEO directive 2026-04-21 Option A inserts #40 BUG-07 as iter 023 Mode 2 targeted fix between Path B items 5 and 6 (unblocks `PRD_TEAM_TRIAL.md`). Sequence: iter 018 = PRD, iter 019 = companion burn-down (#15), iter 020 = metrics engine, iter 021 = UI build, iter 022 = a11y/polish/E2E (complete), **iter 023 = #40 BUG-07 Mode 2 targeted fix (current)**, iter 024 = executive refinement (Mode 5 item 6/6 — portfolio delta, action-leading copy, RAG color, variation badge, "Needs attention" filter, run-count qualifier). MR-005 meta-review boundary shifted iter 024 → iter 025.
 
 Priorities (non-blocker; ordered by score/strategic value):
-- Path B dashboard redesign (iter 019–022, PRD-gated)
+- #40 BUG-07 (iter 023, Mode 2, CEO-directed — unblocks Team Trial)
+- Path B executive refinement (iter 024, Mode 5 item 6/6)
+- MR-005 meta-review (iter 025)
+- post-Path-B burn-down cadence (iter 025+): #14 past-cap staleness, #34/35/36 audit-intake P0s, #42 v1 health-score retirement, #55 gitignore fix, #57 v2 flag full retirement
 - artifact + system-health refresh dashboard process (item #4, score 13)
-- structured error logging with session context (item #9, score 11)
-- real-extension launchPersistentContext E2E harness (item #21, score 9)
 
-Follow-up pool is at 23 open items (ceiling rule active; MR-004 companion-burn-down rule satisfied by iter 019).
+Follow-up pool is at **30 open items** (iter 022 closed 5: #47-via-Mode-3 + #48/#49/#50/#52 via iter 022 code; generated 3: #55/#56/#57; ceiling rule violated; MR-004 companion-burn-down rule satisfied by iter 019; Mode 2 precedence allows iter 023 to proceed).
 See IMPROVEMENT_BACKLOG.md for the full ranked pool.
 
 Resolved (do not re-list; chronological):
@@ -356,8 +357,8 @@ Resolved (do not re-list; chronological):
 ## Known Issues
 
 - No current Phase-1 release blockers.
-- Follow-up pool at 23 items (see IMPROVEMENT_BACKLOG.md); pool-size ceiling rule active. MR-004 companion-burn-down rule (Mode 5 guardrail 8) satisfied for Path B via iter 019 = burn-down #15.
-- Mode 5 Path B (iter 018–022) will land 4 consecutive iterations in the web-app Area. User acknowledgement of this saturation captured at iter 018 start (CEO directive, 2026-04-20). No extension/segmentation/normalization/policy surface coverage during this window — reverse portfolio-drift trigger (MR-004 Change E proposed, deferred to post-Path-B governance iteration) will be evaluated at MR-005.
+- Follow-up pool at **30 items** (see IMPROVEMENT_BACKLOG.md); pool-size ceiling rule violated. MR-004 companion-burn-down rule (Mode 5 guardrail 8) satisfied for Path B via iter 019 = burn-down #15. Iter 023 = Mode 2 targeted fix on #40 BUG-07 per CEO Option A 2026-04-21 — Mode 2 precedence bypasses ceiling.
+- Mode 5 Path B + Mode 2 interrupt (iter 018–024) will land 6 consecutive web-app-adjacent iterations (iter 023 = schema + signup route = web-app; iter 024 = v2 UI refinement = web-app). Original saturation acknowledgement captured at iter 018 start (CEO directive, 2026-04-20) is reaffirmed by the 2026-04-21 "Accept coordinator recommendations and proceed" directive, and further reaffirmed by the 2026-04-21 Option A directive inserting #40 BUG-07 as iter 023. No extension/segmentation/normalization/policy surface coverage during this window — reverse portfolio-drift trigger (MR-004 Change E proposed, deferred to post-Path-B governance iteration) will be evaluated at MR-005 (iter 025 boundary).
 
 Do not silently fix tracked issues — surface and update status
 

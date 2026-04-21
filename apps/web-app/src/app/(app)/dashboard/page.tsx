@@ -309,12 +309,14 @@ function DashboardPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // ── Dashboard V2 flag (D1) — render v2 shell when ?v2=1 is present ─────────
-  // DashboardV2Shell is a 'use client' component — this branch creates a clean
-  // client boundary. V1 content below remains unchanged per iter-021 scope rules.
-  if (searchParams.get('v2') === '1') {
+  // ── Dashboard V2 — D1 auto-redirect (iter 022) ──────────────────────────────
+  // ALL users now see v2 by default. The ?v2=0 escape hatch remains for
+  // rollback during the 14-day soak period (PRD §D1). After the soak, flag
+  // retirement is tracked as follow-up #48.
+  if (searchParams.get('v2') !== '0') {
     return <DashboardV2Shell />;
   }
+  // v1 fallback — only rendered when ?v2=0 is explicitly present
 
   // ── State ──────────────────────────────────────────────────────────────────
 

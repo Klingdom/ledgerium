@@ -95,6 +95,7 @@ export default function InsightsStrip({
   return (
     <section
       aria-label="Process insights"
+      role="region"
       className="px-ds-8 py-ds-3 flex flex-wrap gap-ds-2"
     >
       {visibleChips.map((chip) => {

@@ -28,6 +28,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { Columns3 } from 'lucide-react';
 import CommandHeader, { type TimeRange } from './CommandHeader.js';
 import InsightsStrip from './InsightsStrip.js';
 import WorkflowList, {
@@ -38,6 +39,7 @@ import type { FilterState } from './WorkflowListFilterBar.js';
 import { hasActiveFilters } from './WorkflowListFilterBar.js';
 import type { WorkflowRowData } from './WorkflowRow.js';
 import type { InsightChip } from '@/lib/workflow-metrics.js';
+import PortfolioSidebar, { type PortfolioNode } from '@/components/PortfolioSidebar.js';
 
 // ── API response types ────────────────────────────────────────────────────────
 
@@ -85,6 +87,11 @@ export default function DashboardV2Shell() {
   const [insightChips, setInsightChips] = useState<InsightChip[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+
+  // D5: Portfolio sidebar state — collapsed by default per PRD §D5
+  const [portfolioSidebarOpen, setPortfolioSidebarOpen] = useState(false);
+  const [portfolios, setPortfolios] = useState<PortfolioNode[]>([]);
+  const [activePortfolioId, setActivePortfolioId] = useState<string | null>(null);
 
   // Enforce minimum skeleton display time
   const loadStartRef = useRef<number>(Date.now());
@@ -142,13 +149,55 @@ export default function DashboardV2Shell() {
     void fetchWorkflows();
   }, [fetchWorkflows]);
 
+  // D5: fetch portfolios for the sidebar (best-effort — sidebar is supplementary)
+  useEffect(() => {
+    async function fetchPortfolios() {
+      try {
+        const res = await fetch('/api/portfolios');
+        if (!res.ok) return;
+        const data = (await res.json()) as { portfolios?: PortfolioNode[] };
+        setPortfolios(data.portfolios ?? []);
+      } catch {
+        // Portfolio fetch failure is non-critical — sidebar stays empty
+      }
+    }
+    void fetchPortfolios();
+  }, []);
+
+  // #49: kebab rename — update local workflow title without re-fetch
+  const handleWorkflowRename = useCallback((id: string, newTitle: string) => {
+    setAllWorkflows((prev) =>
+      prev.map((w) => (w.id === id ? { ...w, title: newTitle } : w)),
+    );
+  }, []);
+
+  // #49: kebab archive — remove from local list immediately (optimistic)
+  const handleWorkflowArchive = useCallback((id: string) => {
+    setAllWorkflows((prev) => prev.filter((w) => w.id !== id));
+  }, []);
+
   // ── Derived data ─────────────────────────────────────────────────────────────
 
   // Apply time range (UI-only, D7)
   const timeFilteredWorkflows = filterByTimeRange(allWorkflows, timeRange);
 
+  // D5: apply portfolio filter if a portfolio is selected
+  // Scaffold: client-side grouping by workflow.portfolioIds (if present) or "Uncategorized"
+  // Follow-up: full API-driven portfolio filtering (see follow-up note in render)
+  const portfolioFilteredWorkflows =
+    activePortfolioId === null
+      ? timeFilteredWorkflows
+      : timeFilteredWorkflows.filter((w) => {
+          // WorkflowRowData may have portfolioIds field from the API response
+          const wWithPortfolio = w as WorkflowRowData & { portfolioIds?: string[] };
+          return (
+            wWithPortfolio.portfolioIds?.includes(activePortfolioId) ??
+            activePortfolioId === 'uncategorized'
+          );
+        });
+
   // Apply user filters + insight filter to determine UI state
-  const filteredWorkflows = applyFilters(timeFilteredWorkflows, filters, insightFilterKey);
+  const filteredWorkflows = applyFilters(portfolioFilteredWorkflows, filters, insightFilterKey);
 
   const availableSystems = extractSystems(allWorkflows);
 
@@ -183,7 +232,11 @@ export default function DashboardV2Shell() {
   // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col gap-0 min-h-0">
+    <div
+      className="flex flex-col gap-0 min-h-0"
+      role="region"
+      aria-label="Workflow intelligence dashboard"
+    >
       {/* Section 1: Command Header */}
       <CommandHeader
         portfolioHealthScore={isLoading ? null : portfolioHealthScore}
@@ -203,17 +256,56 @@ export default function DashboardV2Shell() {
         />
       )}
 
-      {/* Section 3: Workflow Intelligence List */}
-      <WorkflowList
-        state={listState}
-        workflows={timeFilteredWorkflows}
-        filters={filters}
-        insightFilterKey={insightFilterKey}
-        availableSystems={availableSystems}
-        onFiltersChange={setFilters}
-        onClearInsightFilter={() => setInsightFilterKey(null)}
-        onRetry={handleRetry}
-      />
+      {/* Sections 3+: sidebar + list layout */}
+      <div className="flex flex-row gap-0 min-h-0">
+        {/* D5: PortfolioSidebar — collapsed by default, expanded via filter bar button */}
+        {portfolioSidebarOpen && (
+          <aside
+            aria-label="Portfolio navigation"
+            className="flex-shrink-0 border-r border-[var(--border-subtle)]"
+          >
+            <PortfolioSidebar
+              portfolios={portfolios}
+              activePortfolioId={activePortfolioId}
+              onSelectPortfolio={setActivePortfolioId}
+              onCreatePortfolio={() => {
+                // Full portfolio creation requires CreatePortfolioDialog — deferred to
+                // follow-up: D5 portfolio API support (#50)
+              }}
+              onRefresh={() => {
+                // Re-fetch portfolios on change
+                fetch('/api/portfolios')
+                  .then((r) => r.json())
+                  .then((data: { portfolios?: PortfolioNode[] }) => {
+                    setPortfolios(data.portfolios ?? []);
+                  })
+                  .catch(() => undefined);
+              }}
+              isCollapsed={false}
+              onToggleCollapsed={() => setPortfolioSidebarOpen(false)}
+            />
+          </aside>
+        )}
+
+        {/* Section 3: Workflow Intelligence List — aria-live for filter announcements */}
+        <div className="flex-1 min-w-0" aria-live="polite" aria-atomic="false">
+          <WorkflowList
+            state={listState}
+            workflows={portfolioFilteredWorkflows}
+            filters={filters}
+            insightFilterKey={insightFilterKey}
+            availableSystems={availableSystems}
+            timeRange={timeRange}
+            onFiltersChange={setFilters}
+            onClearInsightFilter={() => setInsightFilterKey(null)}
+            onRetry={handleRetry}
+            onWorkflowRename={handleWorkflowRename}
+            onWorkflowArchive={handleWorkflowArchive}
+            portfolioSidebarOpen={portfolioSidebarOpen}
+            onTogglePortfolioSidebar={() => setPortfolioSidebarOpen((prev) => !prev)}
+          />
+        </div>
+      </div>
     </div>
   );
 }

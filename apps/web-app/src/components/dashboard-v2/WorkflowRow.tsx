@@ -40,7 +40,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { WorkflowMetricsOutput, OpportunityTag } from '@/lib/workflow-metrics.js';
-import { formatDuration, formatDateRelative } from '@/lib/format.js';
+import { formatDateRelative } from '@/lib/format.js';
+import type { TimeRange } from './CommandHeader.js';
 
 // ── Workflow shape from API response ──────────────────────────────────────────
 
@@ -56,6 +57,12 @@ export interface WorkflowRowData {
 
 interface WorkflowRowProps {
   workflow: WorkflowRowData;
+  /** D7: when time range is not "all", runs subtext gets "(all-time)" qualifier */
+  timeRange?: TimeRange;
+  /** Callback to notify parent when this workflow's title changes (kebab rename) */
+  onRename?: (id: string, newTitle: string) => void;
+  /** Callback to notify parent when this workflow is archived (kebab archive) */
+  onArchive?: (id: string) => void;
 }
 
 // ── Opportunity tag config ────────────────────────────────────────────────────
@@ -203,11 +210,30 @@ function sopReadinessLabel(confidence: number | null): string | null {
 interface KebabMenuProps {
   workflowId: string;
   workflowTitle: string;
+  triggerRef: React.RefObject<HTMLButtonElement | null>;
   onClose: () => void;
+  onRename?: (id: string, newTitle: string) => void;
+  onArchive?: (id: string) => void;
 }
 
-function KebabMenu({ workflowId, workflowTitle, onClose }: KebabMenuProps) {
+function KebabMenu({
+  workflowId,
+  workflowTitle,
+  triggerRef,
+  onClose,
+  onRename,
+  onArchive,
+}: KebabMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
+  const [isRenameBusy, setIsRenameBusy] = useState(false);
+  const [isArchiveBusy, setIsArchiveBusy] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  // Focus first menu item on open
+  useEffect(() => {
+    const firstItem = menuRef.current?.querySelector<HTMLButtonElement>('[role="menuitem"]');
+    firstItem?.focus();
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -218,6 +244,71 @@ function KebabMenu({ workflowId, workflowTitle, onClose }: KebabMenuProps) {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose]);
+
+  // Keyboard: Escape closes and returns focus to trigger
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        onClose();
+        triggerRef.current?.focus();
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose, triggerRef]);
+
+  async function handleEditName() {
+    const newTitle = window.prompt('Rename workflow:', workflowTitle);
+    if (!newTitle || newTitle.trim() === workflowTitle) {
+      onClose();
+      return;
+    }
+    setIsRenameBusy(true);
+    try {
+      const res = await fetch(`/api/workflows/${workflowId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newTitle.trim() }),
+      });
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        setStatusMessage(data.error ?? 'Rename failed. Please try again.');
+        setIsRenameBusy(false);
+        return;
+      }
+      onRename?.(workflowId, newTitle.trim());
+      onClose();
+    } catch {
+      setStatusMessage('Network error. Could not rename workflow.');
+      setIsRenameBusy(false);
+    }
+  }
+
+  async function handleArchive() {
+    if (!window.confirm(`Archive "${workflowTitle}"? You can restore it later.`)) {
+      onClose();
+      return;
+    }
+    setIsArchiveBusy(true);
+    try {
+      const res = await fetch(`/api/workflows/${workflowId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'archived' }),
+      });
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        setStatusMessage(data.error ?? 'Archive failed. Please try again.');
+        setIsArchiveBusy(false);
+        return;
+      }
+      onArchive?.(workflowId);
+      onClose();
+    } catch {
+      setStatusMessage('Network error. Could not archive workflow.');
+      setIsArchiveBusy(false);
+    }
+  }
 
   function handleCopyLink() {
     const url = `${window.location.origin}/workflows/${workflowId}`;
@@ -232,23 +323,33 @@ function KebabMenu({ workflowId, workflowTitle, onClose }: KebabMenuProps) {
       aria-label={`Actions for ${workflowTitle}`}
       className="absolute right-0 top-full mt-ds-1 z-50 w-40 rounded-[10px] bg-[var(--surface-elevated)] border border-[var(--border-default)] shadow-md py-ds-1"
     >
+      {statusMessage && (
+        <p
+          role="alert"
+          className="px-ds-3 py-ds-1 text-[12px] text-red-600"
+        >
+          {statusMessage}
+        </p>
+      )}
       <button
         role="menuitem"
         type="button"
-        className="w-full flex items-center gap-ds-2 px-ds-3 py-ds-2 text-[14px] text-[var(--content-primary)] hover:bg-[var(--surface-secondary)] transition-colors duration-150 focus:outline-none focus-visible:bg-[var(--surface-secondary)]"
-        onClick={onClose}
+        disabled={isRenameBusy}
+        className="w-full flex items-center gap-ds-2 px-ds-3 py-ds-2 text-[14px] text-[var(--content-primary)] hover:bg-[var(--surface-secondary)] transition-colors duration-150 focus:outline-none focus-visible:bg-[var(--surface-secondary)] disabled:opacity-50"
+        onClick={() => { void handleEditName(); }}
       >
         <Pencil size={12} aria-hidden="true" />
-        Edit name
+        {isRenameBusy ? 'Renaming…' : 'Edit name'}
       </button>
       <button
         role="menuitem"
         type="button"
-        className="w-full flex items-center gap-ds-2 px-ds-3 py-ds-2 text-[14px] text-[var(--content-primary)] hover:bg-[var(--surface-secondary)] transition-colors duration-150 focus:outline-none focus-visible:bg-[var(--surface-secondary)]"
-        onClick={onClose}
+        disabled={isArchiveBusy}
+        className="w-full flex items-center gap-ds-2 px-ds-3 py-ds-2 text-[14px] text-[var(--content-primary)] hover:bg-[var(--surface-secondary)] transition-colors duration-150 focus:outline-none focus-visible:bg-[var(--surface-secondary)] disabled:opacity-50"
+        onClick={() => { void handleArchive(); }}
       >
         <Archive size={12} aria-hidden="true" />
-        Archive
+        {isArchiveBusy ? 'Archiving…' : 'Archive'}
       </button>
       <button
         role="menuitem"
@@ -265,13 +366,20 @@ function KebabMenu({ workflowId, workflowTitle, onClose }: KebabMenuProps) {
 
 // ── Main WorkflowRow ──────────────────────────────────────────────────────────
 
-export default function WorkflowRow({ workflow }: WorkflowRowProps) {
+export default function WorkflowRow({
+  workflow,
+  timeRange,
+  onRename,
+  onArchive,
+}: WorkflowRowProps) {
   const router = useRouter();
   const [showTooltip, setShowTooltip] = useState(false);
   const [showKebab, setShowKebab] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [displayTitle, setDisplayTitle] = useState(workflow.title);
+  const kebabTriggerRef = useRef<HTMLButtonElement>(null);
 
-  const { metricsV2, toolsUsed, title, createdAt, lastViewedAt } = workflow;
+  const { metricsV2, toolsUsed, createdAt, lastViewedAt } = workflow;
   const { healthScore, opportunityTag, runs } = metricsV2;
 
   const opportunityStyle = OPPORTUNITY_CONFIG[opportunityTag];
@@ -282,7 +390,10 @@ export default function WorkflowRow({ workflow }: WorkflowRowProps) {
   const visibleSystems = toolsUsed.slice(0, MAX_SYSTEMS);
   const overflowCount = toolsUsed.length - MAX_SYSTEMS;
 
-  // Name subtext: systems · last-run · N runs
+  // D7: annotate runs with "(all-time)" when time range is not "all"
+  const isAllTime = !timeRange || timeRange === 'all';
+
+  // Name subtext: systems · last-run · N runs [(all-time)]
   const subtextParts: string[] = [];
   if (toolsUsed.length > 0) {
     subtextParts.push(toolsUsed.slice(0, 2).join(', ') + (toolsUsed.length > 2 ? '…' : ''));
@@ -290,7 +401,8 @@ export default function WorkflowRow({ workflow }: WorkflowRowProps) {
   const lastRunDate = lastViewedAt ?? createdAt;
   subtextParts.push(formatDateRelative(lastRunDate));
   if (runs !== null) {
-    subtextParts.push(`${runs} run${runs !== 1 ? 's' : ''}`);
+    const runsLabel = `${runs} run${runs !== 1 ? 's' : ''}${isAllTime ? '' : ' (all-time)'}`;
+    subtextParts.push(runsLabel);
   }
 
   // SOP readiness subtext (Starter+ — isGated false)
@@ -310,6 +422,11 @@ export default function WorkflowRow({ workflow }: WorkflowRowProps) {
     }
   }
 
+  function handleKebabRename(id: string, newTitle: string) {
+    setDisplayTitle(newTitle);
+    onRename?.(id, newTitle);
+  }
+
   return (
     <tr
       className={`
@@ -322,13 +439,13 @@ export default function WorkflowRow({ workflow }: WorkflowRowProps) {
       onClick={handleRowClick}
       onKeyDown={handleRowKeyDown}
       tabIndex={0}
-      aria-label={`Workflow: ${title}`}
+      aria-label={`Workflow: ${displayTitle}`}
     >
       {/* Column 1: Workflow Name + subtext */}
       <th scope="row" className="px-ds-4 py-ds-3 text-left font-normal w-2/5">
         <div className="flex flex-col gap-0.5 min-w-0">
           <span className="text-[14px] font-medium text-[var(--content-primary)] truncate">
-            {title}
+            {displayTitle}
           </span>
           <span className="text-[12px] font-normal text-[var(--content-tertiary)] truncate">
             {subtextParts.join(' · ')}
@@ -438,9 +555,10 @@ export default function WorkflowRow({ workflow }: WorkflowRowProps) {
         {isHovered && (
           <div className="relative">
             <button
+              ref={kebabTriggerRef}
               type="button"
               className="p-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 text-[var(--content-tertiary)] hover:text-[var(--content-primary)] transition-colors duration-150"
-              aria-label={`Actions for ${title}`}
+              aria-label={`Actions for ${displayTitle}`}
               aria-haspopup="menu"
               aria-expanded={showKebab}
               onClick={(e) => {
@@ -454,8 +572,11 @@ export default function WorkflowRow({ workflow }: WorkflowRowProps) {
             {showKebab && (
               <KebabMenu
                 workflowId={workflow.id}
-                workflowTitle={title}
+                workflowTitle={displayTitle}
+                triggerRef={kebabTriggerRef}
                 onClose={() => setShowKebab(false)}
+                onRename={handleKebabRename}
+                {...(onArchive ? { onArchive } : {})}
               />
             )}
           </div>

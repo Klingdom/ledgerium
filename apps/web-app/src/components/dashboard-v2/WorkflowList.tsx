@@ -29,7 +29,7 @@
  */
 
 import { useState } from 'react';
-import { ArrowUpDown, ArrowUp, ArrowDown, RefreshCw } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, Columns3 } from 'lucide-react';
 import Link from 'next/link';
 import WorkflowRow, { type WorkflowRowData } from './WorkflowRow.js';
 import WorkflowListFilterBar, {
@@ -39,6 +39,7 @@ import WorkflowListFilterBar, {
 } from './WorkflowListFilterBar.js';
 import type { OpportunityTag } from '@/lib/workflow-metrics.js';
 import { EXTENSION_CONFIG } from '@/lib/config.js';
+import type { TimeRange } from './CommandHeader.js';
 
 // ── UI state machine ──────────────────────────────────────────────────────────
 
@@ -226,14 +227,22 @@ interface WorkflowListProps {
   filters: FilterState;
   insightFilterKey: string | null;
   availableSystems: string[];
+  /** D7: passed down to WorkflowRow to annotate runs with "(all-time)" */
+  timeRange: TimeRange;
   onFiltersChange: (filters: FilterState) => void;
   onClearInsightFilter: () => void;
   onRetry: () => void;
+  /** Called when a workflow is renamed via kebab menu */
+  onWorkflowRename?: (id: string, newTitle: string) => void;
+  /** Called when a workflow is archived via kebab menu — removes it from the list */
+  onWorkflowArchive?: (id: string) => void;
+  /** D5: whether the portfolio sidebar is currently open */
+  portfolioSidebarOpen?: boolean;
+  /** D5: toggle the portfolio sidebar open/closed */
+  onTogglePortfolioSidebar?: () => void;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
-
-const SPARSE_NOTICE_KEY = 'ledgerium_v2_sparse_notice_dismissed';
 
 export default function WorkflowList({
   state,
@@ -241,9 +250,14 @@ export default function WorkflowList({
   filters,
   insightFilterKey,
   availableSystems,
+  timeRange,
   onFiltersChange,
   onClearInsightFilter,
   onRetry,
+  onWorkflowRename,
+  onWorkflowArchive,
+  portfolioSidebarOpen = false,
+  onTogglePortfolioSidebar,
 }: WorkflowListProps) {
   const [sort, setSort] = useState<SortState>({ field: 'health_score', dir: 'asc' });
   const [sparseNoticeDismissed, setSparseNoticeDismissed] = useState(false);
@@ -265,14 +279,58 @@ export default function WorkflowList({
     : applyFilters(workflows, filters, insightFilterKey);
   const sortedWorkflows = sortWorkflows(filteredWorkflows, sort);
 
+  // Screen reader announcement text — announced when filter/sort changes
+  const anyActive = hasActiveFilters(filters) || insightFilterKey !== null;
+  const srAnnouncement =
+    state === 'loading'
+      ? 'Loading workflows'
+      : state === 'error'
+      ? 'Error loading workflows'
+      : state === 'empty'
+      ? 'No workflows recorded yet'
+      : state === 'no-results'
+      ? 'No workflows match current filters'
+      : `${sortedWorkflows.length} workflow${sortedWorkflows.length !== 1 ? 's' : ''}${anyActive ? ' (filtered)' : ''}`;
+
   return (
-    <section className="flex flex-col gap-0">
-      {/* Filter bar */}
-      <WorkflowListFilterBar
-        availableSystems={availableSystems}
-        filters={filters}
-        onFiltersChange={onFiltersChange}
-      />
+    <section className="flex flex-col gap-0" aria-label="Workflow intelligence list" role="region">
+      {/* Hidden live region — announces filter/sort result counts to screen readers */}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {srAnnouncement}
+      </div>
+      {/* Filter bar + D5 portfolio toggle */}
+      <div className="flex items-center">
+        {/* D5: Portfolios icon button — toggles sidebar open/closed */}
+        {onTogglePortfolioSidebar && (
+          <button
+            type="button"
+            onClick={onTogglePortfolioSidebar}
+            className={`
+              flex items-center gap-ds-1 px-ds-3 py-ds-3 border-b border-r border-[var(--border-subtle)]
+              text-[12px] font-medium transition-colors duration-150
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500
+              ${
+                portfolioSidebarOpen
+                  ? 'bg-[var(--surface-secondary)] text-[var(--content-primary)]'
+                  : 'bg-transparent text-[var(--content-secondary)] hover:text-[var(--content-primary)]'
+              }
+            `}
+            aria-label="Toggle portfolio navigation sidebar"
+            aria-expanded={portfolioSidebarOpen}
+            aria-controls="portfolio-sidebar"
+          >
+            <Columns3 size={14} aria-hidden="true" />
+            <span className="hidden sm:inline">Portfolios</span>
+          </button>
+        )}
+        <div className="flex-1">
+          <WorkflowListFilterBar
+            availableSystems={availableSystems}
+            filters={filters}
+            onFiltersChange={onFiltersChange}
+          />
+        </div>
+      </div>
 
       {/* Sparse notice */}
       {(state === 'sparse' || (state === 'ready' && workflows.length > 0 && workflows.length < 3)) &&
@@ -419,7 +477,13 @@ export default function WorkflowList({
             {/* Sparse + Ready states: render rows */}
             {(state === 'sparse' || state === 'ready') &&
               sortedWorkflows.map((workflow) => (
-                <WorkflowRow key={workflow.id} workflow={workflow} />
+                <WorkflowRow
+                  key={workflow.id}
+                  workflow={workflow}
+                  timeRange={timeRange}
+                  {...(onWorkflowRename ? { onRename: onWorkflowRename } : {})}
+                  {...(onWorkflowArchive ? { onArchive: onWorkflowArchive } : {})}
+                />
               ))}
 
             {/* Filtered to zero within sparse/ready — inline no-results */}

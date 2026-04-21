@@ -6,6 +6,76 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-21] - Iteration 022: v2 Dashboard a11y + polish + E2E (Mode 5 item 5/6)
+
+### Selection
+
+- **Mode:** Mode 1 (bounded loop) + Mode 5 item 5/6 (`directed`). Increments improvement-loop counter AND Mode 5 counter by 1.
+- **Trigger:** Path B sequence — item 5 of 6 (sequence extended 5→6 per CEO acceptance of `PRD_DASHBOARD_V2_EXECUTIVE_REFINEMENT.md` on 2026-04-21). PRD §14 iter-022 rollout row deliverables + 4 PRD-assigned iter-021 follow-ups.
+- **Rationale:** GA-ready the v2 surface (a11y posture + PRD-assigned follow-up closures + E2E floor + `?v2=1` flag retirement) before iter 023 interrupts Path B for CEO-directed Mode 2 fix on #40 BUG-07.
+
+### What changed
+
+**A11y wiring across 4 v2 components (PRD §10):**
+- `DashboardV2Shell` — `role="region"` + `aria-label` + `aria-live="polite"` wrapper around list
+- `CommandHeader` — `aria-label="Dashboard command header"`
+- `InsightsStrip` — `role="region"`
+- `WorkflowList` — `role="region"` + `aria-label` + hidden SR announcement region (`aria-live="polite"` + `aria-atomic="true"`); D5 Portfolios toggle button with `aria-expanded` + `aria-controls`
+- `WorkflowRow` kebab — auto-focus first menu item on open, Escape closes + returns focus to trigger, `role="alert"` error region on failed PATCH
+
+**Follow-up closures (5 total):**
+- **#47** Suspense wrap for `useSearchParams()` — closed by Mode 3 commit `6799604` (deployment blocker)
+- **#48** `?v2=1` auto-redirect per PRD D1 — inverted: v2 is default, `?v2=0` is 14-day soak escape hatch
+- **#49** Kebab rename + archive wiring — real `PATCH /api/workflows/:id` with optimistic UI, busy states, error recovery
+- **#50** D7 honest `(all-time)` qualifier on runs subtext when timeRange ≠ 'all' — prop-flow `timeRange` shell → list → row
+- **#52** D5 PortfolioSidebar integration — `/api/portfolios` fetch, collapsed-by-default, Columns3 toggle in filter bar
+
+**E2E (4 new specs under `apps/web-app/e2e/app/dashboard/`):**
+- `v2-a11y.spec.ts` — axe-core baseline; fail build on critical/serious, warn on moderate, ignore minor; 2 states (empty + normal with intercepted `/api/workflows`)
+- `v2-happy-path.spec.ts`
+- `v2-plan-gating.spec.ts` — `isGated` tooltip surface per PRD D8
+- `v2-states.spec.ts` — 5-state machine coverage
+
+**Tests — +11 unit tests in `WorkflowRow.test.tsx`:**
+- 6 D7 `(all-time)` annotation boundary tests (all timeRange values × singular/plural × null handling)
+- 5 kebab API body-shape tests (rename trims title, archive uses exactly `status: 'archived'`, mutually exclusive fields)
+
+**Tooling:**
+- `@axe-core/playwright@^4.11.2` devDependency + pnpm-lock entries
+
+**Governance artifacts:**
+- New: `docs/prd/PRD_DASHBOARD_V2_EXECUTIVE_REFINEMENT.md` (iter-023 PRD addendum approved 2026-04-21)
+- `CLAUDE.md` — Path B sequence extension 5→6; MR-005 boundary shift
+- `IMPROVEMENT_BACKLOG.md` — #54 iter-023-target row added; #47/#48/#49/#50/#52 moved to closed
+
+### Validation
+
+- `pnpm --filter web-app typecheck` → clean
+- `pnpm --filter web-app test` → **11 files / 244 tests passing** (+11 vs iter 021 baseline)
+- `pnpm test` (workspace) → 53 files / 1728 tests passing (unchanged — known `.test.tsx` discovery gap #53)
+
+### Impact
+
+- A11y posture moved from "baseline component contracts" to "CI-enforced zero-critical-zero-serious axe gate"
+- `?v2=1` flag retired; v2 is default route; 14-day rollback escape (`?v2=0`) preserved per PRD D1
+- 4 stubbed/deferred UI features now functional (kebab actions, D5 sidebar, D7 honest qualifier, D1 auto-redirect)
+- 4 new E2E specs establish a regression gate for v2 surface
+- Follow-up pool: 34 → 30 net (closed 5 including #47-via-Mode-3; generated 3: #55 gitignore fix, #56 user-templates governance, #57 post-soak flag full retirement)
+
+### Follow-ups generated
+
+1. **#55** `.gitignore` monorepo-pattern fix — root patterns `e2e/.auth/` + `prisma/test.db` do not match `apps/web-app/e2e/.auth/` + `apps/web-app/prisma/test.db`; untracked `user.json` (auth session) and `test.db` (SQLite binary) accumulating. Birth iter 022.
+2. **#56** `docs/features/user-templates/` governance decision — 12-file separate feature-planning workstream held out of iter-022 commit. Birth iter 022.
+3. **#57** Post-soak `?v2=0` flag full retirement at iter 022 + 14d; removes v1 branch + ~280 LOC of v1 dashboard code. Birth iter 022 (PRD D1 commitment).
+
+### Next
+
+- **Iter 023 = #40 BUG-07 (Mode 2 targeted fix, CEO directive 2026-04-21 Option A)** — `subscriptionStatus @default("trialing")` → `"none"` + migration + callsite audit. Unblocks `PRD_TEAM_TRIAL.md`.
+- **Iter 024 = original iter-023 executive-refinement bundle (Mode 5 item 6/6)** — slid by one iter to accommodate #40 insertion.
+- **Iter 025 = MR-005 meta-review** (was iter 024).
+
+---
+
 ## [2026-04-21] - Iteration 021: v2 Dashboard UI build (Mode 5 item 4/5)
 
 ### Selection

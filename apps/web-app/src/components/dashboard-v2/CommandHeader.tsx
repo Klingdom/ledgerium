@@ -55,7 +55,10 @@ export default function CommandHeader({
   const band = isLoading ? null : healthBand(score);
 
   return (
-    <header className="flex items-start justify-between gap-ds-4 px-ds-8 py-ds-6">
+    <header
+      className="flex items-start justify-between gap-ds-4 px-ds-8 py-ds-6"
+      aria-label="Dashboard command header"
+    >
       {/* Left: title + top insight */}
       <div className="flex flex-col gap-ds-1 min-w-0">
         <h1 className="text-[20px] font-medium leading-[1.2] text-[var(--content-primary)] tracking-tight">

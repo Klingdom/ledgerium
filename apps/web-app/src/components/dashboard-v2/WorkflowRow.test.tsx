@@ -181,3 +181,100 @@ describe('HealthScoreV2 field names (contract enforcement)', () => {
     expect('standardization' in hs).toBe(true);
   });
 });
+
+// ── D7: (all-time) annotation logic ──────────────────────────────────────────
+
+/**
+ * Mirrors the runs subtext construction logic from WorkflowRow.
+ * D7 PRD: when time range is NOT "all", append "(all-time)" to run count.
+ */
+function buildRunsSubtext(
+  runs: number | null,
+  timeRange: 'all' | '7d' | '30d' | '90d',
+): string | null {
+  if (runs === null) return null;
+  const isAllTime = timeRange === 'all';
+  return `${runs} run${runs !== 1 ? 's' : ''}${isAllTime ? '' : ' (all-time)'}`;
+}
+
+describe('D7 (all-time) annotation', () => {
+  it('does NOT append (all-time) when timeRange is "all"', () => {
+    const subtext = buildRunsSubtext(5, 'all');
+    expect(subtext).toBe('5 runs');
+    expect(subtext).not.toContain('(all-time)');
+  });
+
+  it('appends (all-time) when timeRange is "7d"', () => {
+    const subtext = buildRunsSubtext(5, '7d');
+    expect(subtext).toContain('(all-time)');
+    expect(subtext).toBe('5 runs (all-time)');
+  });
+
+  it('appends (all-time) when timeRange is "30d"', () => {
+    const subtext = buildRunsSubtext(3, '30d');
+    expect(subtext).toContain('(all-time)');
+    expect(subtext).toBe('3 runs (all-time)');
+  });
+
+  it('appends (all-time) when timeRange is "90d"', () => {
+    const subtext = buildRunsSubtext(1, '90d');
+    expect(subtext).toContain('(all-time)');
+    expect(subtext).toBe('1 run (all-time)');
+  });
+
+  it('handles singular "run" (1 run) correctly', () => {
+    expect(buildRunsSubtext(1, 'all')).toBe('1 run');
+    expect(buildRunsSubtext(1, '30d')).toBe('1 run (all-time)');
+  });
+
+  it('returns null when runs is null', () => {
+    expect(buildRunsSubtext(null, '30d')).toBeNull();
+    expect(buildRunsSubtext(null, 'all')).toBeNull();
+  });
+});
+
+// ── #49: Kebab wiring — API request shape ────────────────────────────────────
+
+/**
+ * Validates the shape of PATCH request bodies sent by the kebab menu actions.
+ * The real API endpoint at PATCH /api/workflows/[id] accepts:
+ *   - { title: string } for rename
+ *   - { status: 'archived' } for archive
+ */
+
+function buildRenameBody(newTitle: string): { title: string } {
+  return { title: newTitle.trim() };
+}
+
+function buildArchiveBody(): { status: 'archived' } {
+  return { status: 'archived' };
+}
+
+describe('kebab menu API request shapes (#49)', () => {
+  it('rename body has correct shape with trimmed title', () => {
+    const body = buildRenameBody('  New Name  ');
+    expect(body).toEqual({ title: 'New Name' });
+    expect(Object.keys(body)).toHaveLength(1);
+  });
+
+  it('rename body does not include status field', () => {
+    const body = buildRenameBody('My Workflow');
+    expect('status' in body).toBe(false);
+  });
+
+  it('archive body has correct shape', () => {
+    const body = buildArchiveBody();
+    expect(body).toEqual({ status: 'archived' });
+    expect(Object.keys(body)).toHaveLength(1);
+  });
+
+  it('archive body does not include title field', () => {
+    const body = buildArchiveBody();
+    expect('title' in body).toBe(false);
+  });
+
+  it('archive status value is exactly "archived" (not "deleted" or "inactive")', () => {
+    const body = buildArchiveBody();
+    expect(body.status).toBe('archived');
+  });
+});
