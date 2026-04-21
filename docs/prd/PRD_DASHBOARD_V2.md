@@ -23,7 +23,7 @@ All 10 open decisions resolved on 2026-04-20 per CEO directive ("Accept all reco
 | D7 | Time range scope | UI-only filter over returned data; default 30d; Runs column annotated "(all-time)" until API-driven time-range follow-up lands. D7 logged as a Phase-2 follow-up backlog item. |
 | D8 | Plan gating | Free tier sees Health Score integer (ungated) and Opportunity tag (ungated); breakdown tooltip remains Starter+ gated. Matches existing gate on `healthScore` detail structure. |
 | D9 | Insights strip source | Reuse existing `topInsights` + aggregate stats from `GET /api/workflows` response. No new API endpoint or computation pass. Chip cap: 4. |
-| D10 | Breaking column change | Drop Steps and Active columns (raw data, not intelligence). Tags move to workflow detail page (accessible via row click; `tag=` filter still available in filter bar). **SOP readiness demotes to Health Score subtext** (small type, Starter+ only) + insight chip when `sopReady` count is notably low. SOP does not retain a standalone column. |
+| D10 | Breaking column change | **Updated iter 020 principal review:** grid reduces to 4 columns (Name / Systems / Opportunity / Health Score). Drop Steps, Active, Runs, Avg Time, Variation label, Bottleneck label, SOP readiness, Tags as standalone columns. Runs + Avg Time + Systems merge into Name column subtext line (`systems · last-run · N runs`). Variation + Bottleneck move to Health Score breakdown tooltip (Starter+) and the workflow detail page. SOP readiness demotes to a subtext pill under the Health Score integer (Starter+ only). Tags are accessible via `tag=` filter in filter bar and on the workflow detail page. Rationale: 9 columns communicate "spreadsheet"; 4 columns communicate "verdict." |
 
 **Coordinator risk note:** D10 SOP demotion was flagged as the highest-risk product decision in the iter 018 decision surface. CEO delegation authorized acceptance. If post-launch analytics show SOP engagement drops meaningfully, reverse in a Phase-2 iteration by re-promoting SOP to a standalone column between Opportunity and Health Score.
 
@@ -110,13 +110,14 @@ A horizontal row of chips rendered below the Command Header and above the list. 
 Chip anatomy: severity dot (red/amber/blue) + natural language label + optional count badge. Non-color: severity is also conveyed via ARIA label and icon shape (circle=info, triangle=warning, octagon=critical).
 
 Chip sources and generation rules:
-- "N workflows show high execution variance" — fires when >= 2 workflows have variationScore > 0.7. Count = number of qualifying workflows.
-- "[Step name or workflow name] drives X% of total delay" — fires when a ProcessInsight of type `bottleneck` or `delay` exists with severity `critical` or `warning`. Uses insight title directly.
-- "N workflows are strong automation candidates" — fires when >= 2 workflows have aiOpportunityScore >= 60.
-- "N workflows have low confidence and need review" — fires when >= 2 workflows have healthStatus `needs_review`.
-- "N workflows are stale" — fires when staleCount >= 2.
+- "N workflows show high execution variance" (warning) — fires when >= 2 workflows have variationScore > 0.7. Count = number of qualifying workflows.
+- "[Step name or workflow name] drives X% of total delay" (critical/warning) — fires when a ProcessInsight of type `bottleneck` or `delay` exists with severity `critical` or `warning`. Uses insight title directly.
+- "N workflows are strong automation candidates" (info) — fires when >= 2 workflows tag as `automate` (aiOpportunityScore >= 60).
+- "N workflows have low confidence and need review" (warning) — fires when >= 2 workflows tag as `monitor`.
+- "N workflows are stale" (warning) — fires when staleCount >= 2. Stale detection is route-level (age-based); surfaced into the aggregate chip pipeline by the route handler.
+- "N workflows running smoothly" (positive) — fires when >= 3 workflows have `healthScore.overall >= 70` AND no critical/warning chip is present. This is the positive-signal surface added in the iter-020 principal review: a command-center should say "this is the good news" when it is the good news, not stay silent. Suppressed whenever any problem chip is firing — we never say "all good" while flagging problems.
 
-Rules: maximum 5 chips rendered at once, ordered by severity descending. Chips only appear if their condition is true with real data. No chip renders for zero-count conditions.
+Rules: maximum 5 chips rendered at once, ordered by severity descending (critical → warning → info → positive). Chips only appear if their condition is true with real data. No chip renders for zero-count conditions.
 
 Clicking a chip applies a filter to Section 3 (e.g., clicking the variance chip filters to variationScore > 0.7). The active filter state is shown in the list filter bar. Chips are not navigation elements — they do not change the route.
 
@@ -124,33 +125,54 @@ Clicking a chip applies a filter to Section 3 (e.g., clicking the variance chip 
 
 A full-width table / list. This is the primary interaction surface.
 
-**Columns (in order):**
+**Columns (in order) — 4 columns only (post iter-020 principal review):**
+
+A 9-column grid communicates "spreadsheet." A 4-column grid communicates "verdict." We surface interpretation (Opportunity, Health Score) over raw numbers (Runs, Avg Time, Variation label, Bottleneck label), which are demoted to expanded-row detail or the workflow detail page.
 
 | Column | Source field | Notes |
 |--------|-------------|-------|
-| Workflow Name | `workflow.title` | Primary link. Subtext: last run date (relative). |
-| Systems | `workflow.toolsUsed` (parsed JSON array) | Render as icon pills or text chips. Max 3 visible, "+N" overflow. See D6. |
-| Runs | `processDefinition.runCount` or heuristic (see §7.1) | Integer. "—" if unknown. |
-| Avg Time | `processDefinition.avgDurationMs` or `workflow.durationMs` | Human-formatted (e.g., "4m 30s"). |
-| Variation | `variationScore` | Rendered as Low / Medium / High label + color band. Non-color: text label always shown. |
-| Bottleneck | Derived (see §7.4 and D3) | Step name or "—" if not available. |
-| Health Score | `computeHealthScoreV2()` (see §7.5) | 0–100 integer + color band. Plan-gated per D8. |
-| Opportunity | `computeOpportunityTag()` (see §7.6) | One of: Automate / Standardize / Optimize / Monitor / None. Tag chip. |
+| Workflow Name | `workflow.title` | Primary link. Subtext line: `systems · last-run · N runs` in muted small text. Combines what was previously Systems, Runs, Avg Time into a single disclosure line. |
+| Systems | `workflow.toolsUsed` (parsed JSON array) | Icon pills only (no text). Max 3 visible, "+N" overflow. Pure iconography; label revealed on hover. See D6. |
+| Opportunity | `computeOpportunityTag()` (see §7.6) | One of: Automate / Standardize / Optimize / Monitor / Healthy. Tag chip. Uses 2 shape signals (icon + text), not color alone. |
+| Health Score | `computeHealthScoreV2()` (see §7.5) | 0–100 integer with thin 3-band color rail + subtext: confidence or SOP-readiness pill for Starter+. Plan-gated per D8. |
 
-**Optional subtext per row (render only if minimalist):** last run date (already in Name column), confidence score as secondary text under Health Score, owner (deferred — no owner field in current schema).
+**Demoted to workflow detail page (not primary-list columns):** Runs, Avg Time, Variation label, Bottleneck label. These are diagnostic inputs, not decisions — they belong in the explainer tooltip on Health Score or on the detail page, not in the at-a-glance grid.
 
 **Default sort:** Health Score ascending (worst first). This is the "process intelligence" sort — surfaces workflows needing the most attention.
 
-**Available sorts:** Health Score (asc/desc), Runs (desc), Avg Time (desc), Variation (desc), Name (asc/desc).
+**Available sorts:** Health Score (asc/desc), Name (asc/desc), Opportunity (group by tag category).
 
-**Available filters:** System (multi-select from toolsUsed values present in the user's workflow set), Opportunity (Automate / Standardize / Optimize / Monitor), Health Status (healthy / needs_review / high_variation / stale).
+**Available filters:** System (multi-select from toolsUsed values present in the user's workflow set), Opportunity (Automate / Standardize / Optimize / Monitor / Healthy), Health Status (healthy / needs_review / high_variation / stale).
 
 **Row interactions:**
 - Click row: navigates to workflow detail page (existing route — do not build detail page in this sequence).
-- Hover: shows quick action bar (Edit name, Archive, Copy link). No expand-in-place.
-- Keyboard: Tab moves between rows; Enter activates row click; Space activates hover quick actions.
+- Hover: reveals a single subtle quick-action menu trigger (kebab `⋯`). No multi-button bar — keeps the grid quiet. Menu items: Edit name, Archive, Copy link.
+- Keyboard: Tab moves between rows; Enter activates row click; Space opens the quick-action menu.
 
-**Responsive:** on viewports < 768px, hide Systems and Bottleneck columns, keep Name / Health Score / Opportunity. On < 480px, keep Name and Health Score only.
+**Responsive:** on viewports < 768px, hide Systems column, keep Name / Opportunity / Health Score. On < 480px, collapse Opportunity into the row subtext line, keep Name and Health Score columns only.
+
+### Section 5.4 — Design Tokens (minimalist command-center register)
+
+The visual register is Linear/Notion, not Mixpanel/Datadog. Lock these tokens before iter 021 implementation begins.
+
+**Typography scale:**
+- 12 / 14 / 16 / 20 / 28 px — no other sizes permitted. Body = 14, column headers and labels = 12 (medium weight), section titles = 20, portfolio score = 28.
+- Weights: 400 (body) / 500 (emphasis, headers) / 600 (score display only). No 700+.
+- Line heights: 1.4 body, 1.2 display (score, section title).
+- Monospace (tabular figures) required for all numeric cells: Health Score integer, Runs, Avg Time. Prevents column jitter.
+
+**Spacing grid:** 4 / 8 / 12 / 16 / 24 / 32 px. Row padding = 12. Column gap = 16. Section gap = 24. Outer page gutter = 32.
+
+**Radii:** 6 (chips, tags, small controls) / 10 (cards, rows on hover). No 2–4px radii; no 12+px radii.
+
+**Color palette (monochrome + 3 semantic):**
+- Neutral scale: 0 / 50 / 100 / 200 / 400 / 600 / 900 — 7 stops only. Text sits on 900 (light) / 50 (dark). Borders use 100/200. Backgrounds use 0/50.
+- Semantic: red (critical/poor health < 40), amber (warning/fair 40–69), green (good/healthy 70+). Only three semantic hues — no brand blue for status, no purple for AI, no teal for variation.
+- Color is always paired with shape (icon) or text label. Color-only signaling is forbidden per §10 accessibility.
+
+**Elevation:** one shadow token only (row hover), no layered shadows, no gradients. Borders carry hierarchy.
+
+**Motion:** ≤ 150ms transitions on hover/focus. No page-level motion. No loading pulses longer than 1200ms cycle.
 
 ---
 
@@ -209,34 +231,42 @@ export interface WorkflowMetricsInput {
 export interface WorkflowMetricsOutput {
   runs: number | null;
   avgTimeMs: number | null;
-  variationScore: number;          // 0–1
+  variationScore: number;              // 0–1
   variationLabel: 'low' | 'medium' | 'high';
-  bottleneckLabel: string | null;  // step name or null
+  bottleneckLabel: string | null;      // step name or null
   healthScore: HealthScoreV2;
   opportunityTag: OpportunityTag;
-  confidence: number | null;       // pass-through for subtext
-  isTrendReady: boolean;           // §7.8
+  aiOpportunityScore: number;          // 0–100 — audit surface for 'automate' tag
+  confidence: number | null;           // pass-through for subtext
 }
 
 export interface HealthScoreV2 {
-  overall: number;     // 0–100
-  efficiency: number;  // 0–25
-  consistency: number; // 0–25
-  reliability: number; // 0–20 (scaled from 0–25 input; see §7.5)
-  standardization: number; // 0–20 (scaled; see §7.5)
-  isGated: boolean;    // true if caller should hide breakdown
+  overall: number;          // 0–100
+  speed: number;            // 0–30 (duration conformance — not "efficiency")
+  consistency: number;      // 0–30 (run-to-run variation)
+  dataQuality: number;      // 0–20 (extraction confidence — not "reliability")
+  standardization: number;  // 0–20 (SOP readiness + doc completeness)
+  isGated: boolean;         // true if caller should hide breakdown
 }
 
-export type OpportunityTag = 'automate' | 'standardize' | 'optimize' | 'monitor' | 'none';
+// 'healthy' is the positive fallthrough — a command-center has an opinion on every row.
+export type OpportunityTag =
+  | 'automate'
+  | 'standardize'
+  | 'optimize'
+  | 'monitor'
+  | 'healthy';
 
 export interface InsightChip {
   id: string;           // stable key for React keying
-  severity: 'critical' | 'warning' | 'info';
+  severity: 'critical' | 'warning' | 'info' | 'positive';
   label: string;        // natural language, pre-rendered
   filterKey: string;    // e.g. 'variationScore_gt_0.7'
   count: number;
 }
 ```
+
+**Dimension naming note (post iter-020 principal review).** The original draft used `efficiency` and `reliability`. Both were honest-sounding but category errors: we measure duration-band conformance, not work-output-per-input (efficiency), and we measure extraction confidence, not production incident rates (reliability). Renamed to `speed` and `dataQuality` to prevent the product from over-claiming. `aiOpportunityScore` is elevated from an internal helper to a first-class output field so the `'automate'` tag is auditable from the API response.
 
 ### 7.1 Runs
 
@@ -302,16 +332,20 @@ export function computeBottleneckLabel(input: WorkflowMetricsInput): string | nu
 
 **Recommendation (D2):** Implement `computeHealthScoreV2()` as a new function alongside the existing `computeHealthScore()`. Do not delete or modify `computeHealthScore()` — it is referenced in the plan gating path and has established behavior. Map the CEO's formula to available signals as described below. After iter 019 ships, run both functions in parallel for one iteration and compare output distributions. A follow-up item will retire the old function once parity is confirmed.
 
-**CEO formula:** `healthScore = 0.30 × efficiency + 0.30 × consistency + 0.20 × reliability + 0.20 × standardization`
+**CEO formula (updated naming):** `healthScore = 0.30 × speed + 0.30 × consistency + 0.20 × dataQuality + 0.20 × standardization`
+
+The CEO's four weights are preserved. The dimension names were corrected post iter-020 principal review (see naming note in §7 above) to honest labels.
 
 **Dimension mapping to available signals:**
 
 | Dimension | Weight | Source signals | Scoring |
 |-----------|--------|---------------|---------|
-| efficiency | 0.30 (→ 0–30 pts) | `durationMs` vs ideal range (30s–30min), `stepCount` relative to complexity | Linear interpolation within ideal range = 30 pts; outside floor = 5 pts; null = 0 |
-| consistency | 0.30 (→ 0–30 pts) | `variationScore` (inverted) | `(1 - variationScore) * 30`, rounded |
-| reliability | 0.20 (→ 0–20 pts) | `confidence` (extraction confidence as proxy for process reliability) | `confidence * 20`, rounded; null = 0 |
-| standardization | 0.20 (→ 0–20 pts) | `processMaturityScore` proxy: sopReadiness (ready=20, partial=10, not_ready=0) + documentation completeness | `(sopReadiness_pts + docScore_pts) / 2` capped at 20 |
+| speed | 0.30 (→ 0–30 pts) | `durationMs` vs ideal band | **Graduated, no binary cliff.** Ideal band [30s, 30min] → 30 pts. Adjacent bands [10s, 30s) ∪ (30min, 2h] → 18 pts. Far outside either band → 5 pts. Null duration → 0 pts. |
+| consistency | 0.30 (→ 0–30 pts) | `variationScore` (inverted) | `(1 − variationScore) × 30`, rounded |
+| dataQuality | 0.20 (→ 0–20 pts) | `confidence` (extraction confidence — how trustworthy the observed evidence is) | `confidence × 20`, rounded; null = 0 |
+| standardization | 0.20 (→ 0–20 pts) | sopReadiness (ready=20, partial=10, not_ready=0) + docScore (stepCount ≥ 3 → 20, fractional below) | `(sopReadiness_pts + docScore_pts) / 2` capped at 20 |
+
+**Graduated speed scoring rationale.** The original draft used a binary cliff (30 pts in-band, 5 pts out-of-band). A 29-second workflow would have scored identically to a 4-hour workflow — a category error that would produce bizarre Health Score movements near the boundary. The 3-band graduated scoring (30 / 18 / 5) recognises that a 20-second workflow is "a little fast" and a 1-hour workflow is "a little long," neither of which is alarming. Only durations outside [10s, 2h] register as genuinely abnormal.
 
 **Output range:** 0–100 (sum of four dimension scores). Same range as existing function.
 
@@ -327,11 +361,13 @@ export function computeHealthScoreV2(input: WorkflowMetricsInput): HealthScoreV2
 
 1. **Automate** — if `aiOpportunityScore >= 60` AND `toolsUsed.length >= 2`. Rationale: multi-system workflows with high automation signal are the primary automation target.
 2. **Standardize** — if `variationScore >= 0.67` AND `healthScoreV2.overall >= 40`. Rationale: high variation but not unhealthy — process exists but needs consistency.
-3. **Optimize** — if `healthScoreV2.efficiency < 15` AND `healthScoreV2.overall >= 40`. Rationale: otherwise-reasonable workflows with poor efficiency scores.
-4. **Monitor** — if `healthScoreV2.overall < 40` OR `healthScoreV2.reliability < 8`. Rationale: low-health or low-confidence workflows that need data quality attention before they can be acted on.
-5. **None** — if none of the above conditions are met.
+3. **Optimize** — if `healthScoreV2.speed < 15` AND `healthScoreV2.overall >= 40`. Rationale: otherwise-reasonable workflows with poor speed scores (far outside ideal duration band).
+4. **Monitor** — if `healthScoreV2.overall < 40` OR `healthScoreV2.dataQuality < 8`. Rationale: low-health or low-confidence workflows that need evidence quality attention before they can be acted on.
+5. **Healthy** — positive fallthrough when no action conditions fire. A command-center needs an opinion on every row, including "this one is fine." Surfacing `healthy` explicitly prevents users from interpreting silence as "unanalysed."
 
 Rules are evaluated top-to-bottom; first match wins. All thresholds are named constants in the metrics module (not magic numbers inline).
+
+**Principal-review change (iter 020):** the fallthrough tag was renamed from `none` to `healthy` to match the command-center register. `none` is a silent null; `healthy` is a positive signal — and positive signals belong on the primary surface.
 
 ```typescript
 export function computeOpportunityTag(input: WorkflowMetricsInput, healthScore: HealthScoreV2): OpportunityTag
@@ -341,9 +377,9 @@ export function computeOpportunityTag(input: WorkflowMetricsInput, healthScore: 
 
 Pass-through from `workflow.confidence`. Exposed in `WorkflowMetricsOutput` for use as optional subtext under the Health Score column. No new computation.
 
-### 7.8 Trend-readiness (reserved)
+### 7.8 AI Opportunity Score (exposed, auditable)
 
-`isTrendReady: boolean` — true if `processDefinition.runCount >= 5`. Indicates whether trend analysis (future Phase 2 feature) is possible. Included in output interface now so the frontend can reserve the column interaction without a metrics engine change later. No UI rendering in v2.
+`aiOpportunityScore: number` — 0–100 score that drives the `'automate'` Opportunity tag. Elevated from an internal helper to a first-class output field in iter 020. Rationale: hidden scores are gates (users cannot verify why a tag fired); exposed scores are decisions (users can see "this scored 72 for automation — here's why"). Command-center tools explain themselves.
 
 ### Portfolio Health Score (aggregate)
 
@@ -366,33 +402,29 @@ export function computeInsightChips(
 
 ---
 
-## 8. Component Hierarchy (target)
+## 8. Component Hierarchy (target — 8 components, not 18)
+
+**Principal-review change (iter 020):** the original draft listed 18 components. Five of them were state variants of the same list (Skeleton / Empty / NoResults / Error / SparseData) — those fold into one `WorkflowList` with a `state` prop. Four were single-cell atoms (HealthScoreCell / OpportunityTagChip / SystemsPillList / VariationLabel) that add abstraction cost without reuse — those inline into `WorkflowRow`. `TimeRangeSelector` and `PortfolioHealthBadge` inline into `CommandHeader`. `VariationLabel` disappears entirely (Variation column is removed per §5.3).
+
+Result: 8 components. Fewer files, more scan-ability, zero loss of function.
 
 All new components live under `apps/web-app/src/components/dashboard-v2/`. The existing `dashboard/page.tsx` is refactored to use these components; it is not replaced wholesale until the feature flag resolves (see D1).
 
 ```
 apps/web-app/src/components/dashboard-v2/
   index.ts                          — barrel export, named exports only
-  DashboardV2Shell.tsx              — top-level layout: Header + Strip + List
-  CommandHeader.tsx                 — Section 1: title, time range, portfolio score, top insight
-  TimeRangeSelector.tsx             — controlled select; emits onChange(range: TimeRange)
-  PortfolioHealthBadge.tsx          — score + color band + aria label
-  InsightsStrip.tsx                 — Section 2: chip row + dismiss logic
-  InsightChip.tsx                   — single chip: severity dot + label + count + dismiss
-  WorkflowIntelligenceList.tsx      — Section 3: filter bar + table
-  WorkflowListFilterBar.tsx         — system / opportunity / health filters + active chip display
-  WorkflowListTable.tsx             — semantic <table> with sort headers
-  WorkflowListRow.tsx               — single row; all columns; hover quick actions
-  WorkflowListSkeleton.tsx          — loading state: 5-row skeleton
-  WorkflowListEmpty.tsx             — empty state: no workflows recorded yet
-  WorkflowListNoResults.tsx         — no-results state: filters match nothing
-  WorkflowListError.tsx             — error state: API failed
-  WorkflowListSparseData.tsx        — sparse state: < 3 workflows, metrics incomplete notice
-  HealthScoreCell.tsx               — score integer + color band + breakdown tooltip (Starter+)
-  OpportunityTagChip.tsx            — tag chip: Automate / Standardize / Optimize / Monitor / None
-  SystemsPillList.tsx               — icon pills + "+N" overflow
-  VariationLabel.tsx                — Low / Medium / High + color + aria
+  DashboardV2Shell.tsx              — top-level layout: Header + Strip + List; owns time-range + filter state
+  CommandHeader.tsx                 — Section 1: title, inline time range <select>, inline portfolio score (integer + rail + aria), top insight sentence
+  InsightsStrip.tsx                 — Section 2: chip row. Inlines the chip render (severity dot + icon + label + count + dismiss) — no separate InsightChip component.
+  WorkflowList.tsx                  — Section 3 wrapper: filter bar + table body. Takes `state: 'loading' | 'empty' | 'no-results' | 'error' | 'sparse' | 'ready'` prop; renders the matching empty/skeleton/error slot inline. One file, one state machine, zero atom sprawl.
+  WorkflowListFilterBar.tsx         — system / opportunity / health filters + active-filter chip display
+  WorkflowRow.tsx                   — single row, all 4 columns inlined: Name (+ subtext line), Systems (icon pills + overflow), Opportunity (tag chip — text + icon + color), Health Score (integer + 3-band rail + subtext + breakdown tooltip for Starter+). Quick-action kebab menu integrated; no separate HoverActions component.
+  (tests co-located: *.test.tsx)
 ```
+
+**Deleted vs draft (iter-018 version of this section):** TimeRangeSelector, PortfolioHealthBadge, InsightChip, WorkflowListTable, WorkflowListSkeleton, WorkflowListEmpty, WorkflowListNoResults, WorkflowListError, WorkflowListSparseData, HealthScoreCell, OpportunityTagChip, SystemsPillList, VariationLabel.
+
+Fewer abstractions = faster reading = faster iteration. Premium products use fewer, richer components; admin-panel products use more, thinner ones.
 
 **Existing components preserved (not deleted in this sequence):**
 - `ProcessGroupsExplorer` — behavior per D4

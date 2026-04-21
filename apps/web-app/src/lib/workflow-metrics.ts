@@ -4,23 +4,41 @@
  * Pure, deterministic module. No I/O, no DB calls, no imports from route files.
  * Same inputs always produce byte-identical outputs.
  *
+ * Dimension naming note (post iter-020 principal review):
+ *   - `speed`       — duration-conformance to an ideal band. Not "efficiency"
+ *                     (we do not measure work-output-per-input); it measures
+ *                     whether a process runs within a healthy time window.
+ *   - `dataQuality` — extraction/capture confidence. Not "reliability"
+ *                     (we do not measure production incident rates); it
+ *                     measures how trustworthy the observed evidence is.
+ *   - `consistency` — run-to-run variation of the same process.
+ *   - `standardization` — documentation / SOP readiness.
+ *
+ * Honest labels prevent the product from over-claiming. See PRD §7.
+ *
  * @see docs/prd/PRD_DASHBOARD_V2.md §7
  */
 
 // ── Thresholds (see PRD §7) ───────────────────────────────────────────────────
 
-/** Ideal duration lower bound for efficiency scoring (ms). */
-const EFFICIENCY_IDEAL_DURATION_MIN_MS = 30_000;          // 30 s
-/** Ideal duration upper bound for efficiency scoring (ms). */
-const EFFICIENCY_IDEAL_DURATION_MAX_MS = 30 * 60 * 1_000; // 30 min
-/** Efficiency score awarded when duration is outside the ideal range. */
-const EFFICIENCY_FLOOR_SCORE = 5;
-/** Max efficiency sub-score (maps to 30 pts weight in CEO formula). */
-const EFFICIENCY_MAX_SCORE = 30;
+/** Ideal duration lower bound for speed scoring (ms). */
+const SPEED_IDEAL_DURATION_MIN_MS = 30_000;           // 30 s
+/** Ideal duration upper bound for speed scoring (ms). */
+const SPEED_IDEAL_DURATION_MAX_MS = 30 * 60 * 1_000;  // 30 min
+/** Adjacent-band lower bound (short side): [10s, 30s). */
+const SPEED_ADJACENT_LOWER_MIN_MS = 10_000;           // 10 s
+/** Adjacent-band upper bound (long side): (30min, 2h]. */
+const SPEED_ADJACENT_UPPER_MAX_MS = 2 * 60 * 60 * 1_000; // 2 h
+/** Speed score awarded for ideal-band durations. */
+const SPEED_IDEAL_SCORE = 30;
+/** Speed score awarded for adjacent-band durations (graceful degradation, not binary cliff). */
+const SPEED_ADJACENT_SCORE = 18;
+/** Speed score floor when duration is present but far outside ideal/adjacent ranges. */
+const SPEED_FLOOR_SCORE = 5;
 /** Max consistency sub-score (maps to 30 pts weight in CEO formula). */
 const CONSISTENCY_MAX_SCORE = 30;
-/** Max reliability sub-score (maps to 20 pts weight in CEO formula). */
-const RELIABILITY_MAX_SCORE = 20;
+/** Max data-quality sub-score (maps to 20 pts weight in CEO formula). */
+const DATA_QUALITY_MAX_SCORE = 20;
 /** Max standardization sub-score (maps to 20 pts weight in CEO formula). */
 const STANDARDIZATION_MAX_SCORE = 20;
 /** Points for sopReadiness === 'ready' in standardization scoring. */
@@ -38,15 +56,15 @@ const STANDARDIZE_VARIATION_THRESHOLD = 0.67;
 /** Minimum overall health score for 'standardize' tag (not unhealthy). */
 const STANDARDIZE_MIN_OVERALL = 40;
 
-/** Maximum efficiency sub-score allowed before 'optimize' tag fires. */
-const OPTIMIZE_MAX_EFFICIENCY = 15;
+/** Maximum speed sub-score allowed before 'optimize' tag fires. */
+const OPTIMIZE_MAX_SPEED = 15;
 /** Minimum overall health score for 'optimize' tag (not unhealthy). */
 const OPTIMIZE_MIN_OVERALL = 40;
 
 /** Overall health score below which 'monitor' tag fires. */
 const MONITOR_MAX_OVERALL = 40;
-/** Reliability sub-score below which 'monitor' tag fires. */
-const MONITOR_MIN_RELIABILITY = 8;
+/** DataQuality sub-score below which 'monitor' tag fires. */
+const MONITOR_MIN_DATA_QUALITY = 8;
 
 /** Variation score threshold for 'high' label. */
 const VARIATION_HIGH_THRESHOLD = 0.67;
@@ -55,11 +73,6 @@ const VARIATION_MEDIUM_THRESHOLD = 0.34;
 
 /** Bottleneck label max character length. */
 const BOTTLENECK_LABEL_MAX_CHARS = 30;
-/** Bottleneck display fallback when no insights exist. */
-const BOTTLENECK_NO_DATA_LABEL = '—';
-
-/** Number of runs required for trend-readiness. */
-const TREND_READY_MIN_RUNS = 5;
 
 /** Variant count divisor for variation proxy when stabilityScore is null. */
 const VARIATION_VARIANT_COUNT_DIVISOR = 10;
@@ -75,6 +88,11 @@ const AI_OPPORTUNITY_FULL_DURATION_MS = 300_000; // 5 min
 const AI_OPPORTUNITY_FULL_TOOL_COUNT = 3;
 /** AI opportunity bonus points for high optimization potential. */
 const AI_OPPORTUNITY_HIGH_OPT_BONUS = 20;
+
+/** Minimum healthy-workflow count required to emit positive portfolio chip. */
+const HEALTHY_CHIP_MIN_COUNT = 3;
+/** Overall health score threshold that qualifies a workflow as healthy for the positive chip. */
+const HEALTHY_OVERALL_THRESHOLD = 70;
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
 
@@ -106,29 +124,34 @@ export interface WorkflowMetricsInput {
 export interface WorkflowMetricsOutput {
   runs: number | null;
   avgTimeMs: number | null;
-  variationScore: number;          // 0–1
+  variationScore: number;              // 0–1
   variationLabel: 'low' | 'medium' | 'high';
-  bottleneckLabel: string | null;  // step name or null
+  bottleneckLabel: string | null;      // step name or null
   healthScore: HealthScoreV2;
   opportunityTag: OpportunityTag;
-  confidence: number | null;       // pass-through for subtext
-  isTrendReady: boolean;           // §7.8
+  aiOpportunityScore: number;          // 0–100 — audit surface for 'automate' tag
+  confidence: number | null;           // pass-through for subtext
 }
 
 export interface HealthScoreV2 {
-  overall: number;     // 0–100
-  efficiency: number;  // 0–25 (note: PRD §7 comment says 0–25 input but CEO formula maps to 0–30 pts; see note below)
-  consistency: number; // 0–25 (computed from 0–30 pts; see note below)
-  reliability: number; // 0–20 (scaled; see §7.5)
-  standardization: number; // 0–20 (scaled; see §7.5)
-  isGated: boolean;    // true if caller should hide breakdown
+  overall: number;          // 0–100
+  speed: number;            // 0–30 (duration-conformance to ideal band)
+  consistency: number;      // 0–30 (run-to-run variation)
+  dataQuality: number;      // 0–20 (extraction confidence)
+  standardization: number;  // 0–20 (SOP readiness + doc completeness)
+  isGated: boolean;         // true if caller should hide breakdown
 }
 
-export type OpportunityTag = 'automate' | 'standardize' | 'optimize' | 'monitor' | 'none';
+export type OpportunityTag =
+  | 'automate'
+  | 'standardize'
+  | 'optimize'
+  | 'monitor'
+  | 'healthy';   // positive fallthrough — nothing to act on, process is sound
 
 export interface InsightChip {
   id: string;           // stable key for React keying
-  severity: 'critical' | 'warning' | 'info';
+  severity: 'critical' | 'warning' | 'info' | 'positive';
   label: string;        // natural language, pre-rendered
   filterKey: string;    // e.g. 'variationScore_gt_0.7'
   count: number;
@@ -281,50 +304,59 @@ function computeSopReadinessProxy(
 /**
  * §7.5 — Health Score V2
  *
- * CEO formula: healthScore = 0.30×efficiency + 0.30×consistency + 0.20×reliability + 0.20×standardization
+ * CEO formula (weighted): healthScore =
+ *   0.30 × speed  +  0.30 × consistency  +  0.20 × dataQuality  +  0.20 × standardization
  *
- * Note on sub-score ranges vs PRD interface comment:
- * The interface declares efficiency 0–25 and consistency 0–25 per the comment, but the
- * CEO formula weights (0.30 each) map to 0–30 pts. The PRD §7.5 table explicitly says
- * "→ 0–30 pts" for efficiency and consistency. We use 0–30 for efficiency and consistency
- * to match the table (overall 0–100 = 30+30+20+20). The interface comment "0–25" is a PRD
- * copy error vs the formula table; we follow the table.
+ * Sub-score ranges map directly to the weight:
+ *   speed           0–30
+ *   consistency     0–30
+ *   dataQuality     0–20
+ *   standardization 0–20
+ *   overall         0–100
+ *
+ * Speed scoring (graduated, no binary cliff):
+ *   durationMs in [30s, 30min]               → 30  (ideal)
+ *   durationMs in [10s, 30s) ∪ (30min, 2h]   → 18  (adjacent — fast/slow but not alarming)
+ *   durationMs outside the above             → 5   (far outside — too short to be real, or far too long)
+ *   durationMs === null                      → 0   (no evidence; gated)
  *
  * isGated is always false here — set by route handler per plan.
  */
 export function computeHealthScoreV2(input: WorkflowMetricsInput): HealthScoreV2 {
-  // Efficiency (0–30): durationMs vs ideal range
-  let efficiency: number;
+  // Speed (0–30): graduated scoring on durationMs vs ideal band
+  let speed: number;
   if (input.durationMs == null) {
-    efficiency = 0;
+    speed = 0;
   } else if (
-    input.durationMs >= EFFICIENCY_IDEAL_DURATION_MIN_MS &&
-    input.durationMs <= EFFICIENCY_IDEAL_DURATION_MAX_MS
+    input.durationMs >= SPEED_IDEAL_DURATION_MIN_MS &&
+    input.durationMs <= SPEED_IDEAL_DURATION_MAX_MS
   ) {
-    efficiency = EFFICIENCY_MAX_SCORE;
+    speed = SPEED_IDEAL_SCORE;
+  } else if (
+    (input.durationMs >= SPEED_ADJACENT_LOWER_MIN_MS && input.durationMs < SPEED_IDEAL_DURATION_MIN_MS) ||
+    (input.durationMs > SPEED_IDEAL_DURATION_MAX_MS && input.durationMs <= SPEED_ADJACENT_UPPER_MAX_MS)
+  ) {
+    speed = SPEED_ADJACENT_SCORE;
   } else {
-    efficiency = EFFICIENCY_FLOOR_SCORE;
+    speed = SPEED_FLOOR_SCORE;
   }
 
   // Consistency (0–30): (1 - variationScore) * 30
   const { score: variationScore } = computeVariation(input);
   const consistency = Math.round((1 - variationScore) * CONSISTENCY_MAX_SCORE);
 
-  // Reliability (0–20): confidence * 20
-  const reliability = input.confidence != null
-    ? Math.round(Math.max(0, Math.min(1, input.confidence)) * RELIABILITY_MAX_SCORE)
+  // DataQuality (0–20): confidence * 20
+  const dataQuality = input.confidence != null
+    ? Math.round(Math.max(0, Math.min(1, input.confidence)) * DATA_QUALITY_MAX_SCORE)
     : 0;
 
-  // Standardization (0–20): based on sopReadiness proxy + step completeness proxy
-  // "sopReadiness_pts + docScore_pts / 2 capped at 20"
-  // PRD §7.5: (sopReadiness_pts + docScore_pts) / 2 capped at 20
-  // docScore proxy: whether stepCount is present and meaningful (0–20 scale)
+  // Standardization (0–20): (sopReadiness_pts + docScore_pts) / 2 capped at 20
+  // docScore proxy: stepCount ≥ 3 gives full 20 pts; fractional below that.
   const sopReadiness = computeSopReadinessProxy(input.confidence, input.stepCount);
   const sopPts =
     sopReadiness === 'ready' ? STANDARDIZATION_SOP_READY_PTS :
     sopReadiness === 'partial' ? STANDARDIZATION_SOP_PARTIAL_PTS :
     0;
-  // Doc completeness proxy: stepCount > 0 gives partial credit; stepCount >= 3 = full
   const docPts =
     (input.stepCount == null || input.stepCount === 0) ? 0 :
     input.stepCount >= 3 ? STANDARDIZATION_MAX_SCORE :
@@ -334,23 +366,28 @@ export function computeHealthScoreV2(input: WorkflowMetricsInput): HealthScoreV2
     STANDARDIZATION_MAX_SCORE,
   );
 
-  const overall = efficiency + consistency + reliability + standardization;
+  const overall = speed + consistency + dataQuality + standardization;
 
   return {
     overall,
-    efficiency,
+    speed,
     consistency,
-    reliability,
+    dataQuality,
     standardization,
     isGated: false,
   };
 }
 
 /**
- * Internal helper — computes AI opportunity score from available WorkflowMetricsInput fields.
- * Mirrors the logic in route.ts computeAiOpportunityScore, adapted to use pre-parsed toolsUsed.
+ * Computes AI opportunity score from available WorkflowMetricsInput fields.
+ *
+ * Exposed (not internal) so that the 'automate' tag's firing condition is
+ * auditable from the API response. Hidden scores are gates; auditable scores
+ * are decisions. We prefer decisions.
+ *
+ * Range: 0–100.
  */
-function computeAiOpportunityScore(input: WorkflowMetricsInput): number {
+export function computeAiOpportunityScore(input: WorkflowMetricsInput): number {
   let score = 0;
 
   if (input.stepCount != null) {
@@ -387,11 +424,15 @@ function computeAiOpportunityScore(input: WorkflowMetricsInput): number {
  * §7.6 — Opportunity Tag
  *
  * Decision tree, top-to-bottom; first match wins:
- * 1. Automate — aiOpportunityScore >= 60 AND toolsUsed.length >= 2
- * 2. Standardize — variationScore >= 0.67 AND overall >= 40
- * 3. Optimize — efficiency < 15 AND overall >= 40
- * 4. Monitor — overall < 40 OR reliability < 8
- * 5. None — no conditions met
+ * 1. Automate     — aiOpportunityScore >= 60 AND toolsUsed.length >= 2
+ * 2. Standardize  — variationScore >= 0.67 AND overall >= 40
+ * 3. Optimize     — speed < 15 AND overall >= 40
+ * 4. Monitor      — overall < 40 OR dataQuality < 8
+ * 5. Healthy      — nothing to act on; the process is sound
+ *
+ * The 'healthy' fallthrough is a positive signal, not a silent null. Surfacing
+ * it in the UI lets us show users their wins — the command-center needs an
+ * opinion on every row, including "this is fine."
  */
 export function computeOpportunityTag(
   input: WorkflowMetricsInput,
@@ -411,17 +452,17 @@ export function computeOpportunityTag(
   }
 
   // Rule 3: Optimize
-  if (healthScore.efficiency < OPTIMIZE_MAX_EFFICIENCY && healthScore.overall >= OPTIMIZE_MIN_OVERALL) {
+  if (healthScore.speed < OPTIMIZE_MAX_SPEED && healthScore.overall >= OPTIMIZE_MIN_OVERALL) {
     return 'optimize';
   }
 
   // Rule 4: Monitor
-  if (healthScore.overall < MONITOR_MAX_OVERALL || healthScore.reliability < MONITOR_MIN_RELIABILITY) {
+  if (healthScore.overall < MONITOR_MAX_OVERALL || healthScore.dataQuality < MONITOR_MIN_DATA_QUALITY) {
     return 'monitor';
   }
 
-  // Rule 5: None
-  return 'none';
+  // Rule 5: Healthy — positive fallthrough
+  return 'healthy';
 }
 
 // ── Top-level orchestrator ────────────────────────────────────────────────────
@@ -439,7 +480,7 @@ export function computeWorkflowMetrics(input: WorkflowMetricsInput): WorkflowMet
   const bottleneckLabel = computeBottleneckLabel(input);
   const healthScore = computeHealthScoreV2(input);
   const opportunityTag = computeOpportunityTag(input, healthScore);
-  const isTrendReady = (input.processDefinition?.runCount ?? 0) >= TREND_READY_MIN_RUNS;
+  const aiOpportunityScore = computeAiOpportunityScore(input);
 
   return {
     runs,
@@ -449,8 +490,8 @@ export function computeWorkflowMetrics(input: WorkflowMetricsInput): WorkflowMet
     bottleneckLabel,
     healthScore,
     opportunityTag,
+    aiOpportunityScore,
     confidence: input.confidence,
-    isTrendReady,
   };
 }
 
@@ -471,19 +512,18 @@ export function computePortfolioHealthScore(workflows: WorkflowMetricsOutput[]):
 /**
  * §7 Insight Chips
  *
- * Returns up to 5 chips, ordered by severity descending.
- * Each chip fires only when its count condition is met (see §5 Section 2 rules).
+ * Returns up to 5 chips, ordered by severity descending (critical → warning → info → positive).
+ * Each chip fires only when its condition is met.
  *
- * Chip rules (from PRD §5 Section 2):
- * - High variance: >= 2 workflows with variationScore > 0.7
- * - Bottleneck insight: a ProcessInsight of type 'bottleneck' or 'delay' with severity 'critical' or 'warning'
- * - Automation candidates: >= 2 workflows with opportunityTag === 'automate' (aiOpportunityScore >= 60)
- * - Needs review: >= 2 workflows with healthScore.overall < 40 OR reliability < 8 (monitor tag proxy)
- * - Stale: staleCount >= 2 (stale detection is route-level; we count workflows with null lastViewedAt here)
+ * Chip rules:
+ * - High variance (warning):      >= 2 workflows with variationScore > 0.7
+ * - Bottleneck insight (varies):  a critical/warning ProcessInsight of type 'bottleneck' or 'delay'
+ * - Automation candidates (info): >= 2 workflows tagged 'automate'
+ * - Needs review (warning):       >= 2 workflows tagged 'monitor'
+ * - Healthy portfolio (positive): >= 3 workflows with overall >= 70 AND no problem chips fired
  *
- * Note: The PRD specifies aiOpportunityScore >= 60 fires the chip and healthStatus 'needs_review' for
- * the low-confidence chip. We use WorkflowMetricsOutput signals (opportunityTag and monitor tag) as
- * the closest available proxies since WorkflowMetricsOutput does not carry healthStatus.
+ * The positive chip is only emitted when no critical/warning chips are present —
+ * a command-center should not say "all good" while simultaneously flagging problems.
  */
 export function computeInsightChips(
   workflows: WorkflowMetricsOutput[],
@@ -517,7 +557,7 @@ export function computeInsightChips(
       filterKey: 'bottleneck_insight',
       count: 1,
     });
-    break; // Only the top insight per PRD ("Uses insight title directly" implies one)
+    break; // Only the top insight
   }
 
   // Chip 3: Automation candidates
@@ -532,7 +572,7 @@ export function computeInsightChips(
     });
   }
 
-  // Chip 4: Low confidence / needs review (monitor tag = overall < 40 or reliability < 8)
+  // Chip 4: Low confidence / needs review
   const needsReviewCount = workflows.filter((w) => w.opportunityTag === 'monitor').length;
   if (needsReviewCount >= 2) {
     chips.push({
@@ -544,16 +584,30 @@ export function computeInsightChips(
     });
   }
 
-  // Chip 5: Stale (null lastViewedAt used as proxy within metrics context)
-  // Note: actual stale detection (age-based) lives in the route handler.
-  // The aggregate function receives WorkflowMetricsOutput which does not carry isStale.
-  // We emit this chip only if the caller injects count via a sentinel workflow (no direct signal).
-  // PRD §7 does not specify a stale input in computeInsightChips — this is a resolution gap.
-  // Resolution: stale chip is omitted from the pure aggregate; route handler supplements if needed.
-  // This gap is surfaced in the iteration summary.
+  // Chip 5: Healthy portfolio (positive) — only when no critical/warning chips present
+  const hasProblemChips = chips.some((c) => c.severity === 'critical' || c.severity === 'warning');
+  if (!hasProblemChips) {
+    const healthyCount = workflows.filter(
+      (w) => w.healthScore.overall >= HEALTHY_OVERALL_THRESHOLD,
+    ).length;
+    if (healthyCount >= HEALTHY_CHIP_MIN_COUNT) {
+      chips.push({
+        id: 'healthy_portfolio',
+        severity: 'positive',
+        label: `${healthyCount} workflows running smoothly`,
+        filterKey: 'healthScore_gte_70',
+        count: healthyCount,
+      });
+    }
+  }
 
-  // Sort by severity descending, take top 5
-  const severityOrder: Record<InsightChip['severity'], number> = { critical: 3, warning: 2, info: 1 };
+  // Sort by severity: critical → warning → info → positive
+  const severityOrder: Record<InsightChip['severity'], number> = {
+    critical: 4,
+    warning: 3,
+    info: 2,
+    positive: 1,
+  };
   chips.sort((a, b) => severityOrder[b.severity] - severityOrder[a.severity]);
 
   return chips.slice(0, 5);

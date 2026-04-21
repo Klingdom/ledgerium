@@ -6,6 +6,7 @@ import {
   computeBottleneckLabel,
   computeHealthScoreV2,
   computeOpportunityTag,
+  computeAiOpportunityScore,
   computeWorkflowMetrics,
   computePortfolioHealthScore,
   computeInsightChips,
@@ -238,7 +239,7 @@ describe('computeBottleneckLabel', () => {
 describe('computeHealthScoreV2', () => {
   it('overall equals sum of sub-scores (integrity check) — FIXTURE_FULL', () => {
     const hs = computeHealthScoreV2(FIXTURE_FULL);
-    expect(hs.overall).toBe(hs.efficiency + hs.consistency + hs.reliability + hs.standardization);
+    expect(hs.overall).toBe(hs.speed + hs.consistency + hs.dataQuality + hs.standardization);
   });
 
   it('overall is in range [0, 100] for all fixtures', () => {
@@ -252,7 +253,7 @@ describe('computeHealthScoreV2', () => {
   it('overall equals sum of sub-scores for all fixtures', () => {
     for (const fixture of [FIXTURE_FULL, FIXTURE_SINGLE_RECORDING, FIXTURE_SPARSE, FIXTURE_AUTOMATE, FIXTURE_MONITOR]) {
       const hs = computeHealthScoreV2(fixture);
-      expect(hs.overall).toBe(hs.efficiency + hs.consistency + hs.reliability + hs.standardization);
+      expect(hs.overall).toBe(hs.speed + hs.consistency + hs.dataQuality + hs.standardization);
     }
   });
 
@@ -267,37 +268,90 @@ describe('computeHealthScoreV2', () => {
     expect(hs.overall).toBeLessThan(40);
   });
 
-  it('efficiency is 30 for ideal duration range (30s–30min)', () => {
-    const input: WorkflowMetricsInput = {
-      ...FIXTURE_SPARSE,
-      durationMs: 60_000,  // 1 min — ideal
-    };
-    expect(computeHealthScoreV2(input).efficiency).toBe(30);
+  // ── Speed scoring (graduated) ──────────────────────────────────────────────
+
+  it('speed is 30 (ideal) for duration inside [30s, 30min]', () => {
+    const input: WorkflowMetricsInput = { ...FIXTURE_SPARSE, durationMs: 60_000 };  // 1 min
+    expect(computeHealthScoreV2(input).speed).toBe(30);
   });
 
-  it('efficiency is 5 for duration outside ideal range', () => {
-    const tooShort: WorkflowMetricsInput = { ...FIXTURE_SPARSE, durationMs: 5_000 };
-    const tooLong: WorkflowMetricsInput = { ...FIXTURE_SPARSE, durationMs: 7_200_000 };
-    expect(computeHealthScoreV2(tooShort).efficiency).toBe(5);
-    expect(computeHealthScoreV2(tooLong).efficiency).toBe(5);
+  it('speed is 30 at ideal lower boundary (30s)', () => {
+    const input: WorkflowMetricsInput = { ...FIXTURE_SPARSE, durationMs: 30_000 };
+    expect(computeHealthScoreV2(input).speed).toBe(30);
   });
 
-  it('efficiency is 0 for null duration', () => {
-    expect(computeHealthScoreV2(FIXTURE_SPARSE).efficiency).toBe(0);
+  it('speed is 30 at ideal upper boundary (30min)', () => {
+    const input: WorkflowMetricsInput = { ...FIXTURE_SPARSE, durationMs: 30 * 60 * 1_000 };
+    expect(computeHealthScoreV2(input).speed).toBe(30);
   });
 
-  it('reliability is 0 for null confidence', () => {
-    expect(computeHealthScoreV2(FIXTURE_MONITOR).reliability).toBe(0);
-    expect(computeHealthScoreV2(FIXTURE_SPARSE).reliability).toBe(0);
+  it('speed is 18 (adjacent) for short-adjacent duration [10s, 30s)', () => {
+    const input: WorkflowMetricsInput = { ...FIXTURE_SPARSE, durationMs: 20_000 };  // 20 s
+    expect(computeHealthScoreV2(input).speed).toBe(18);
   });
 
-  it('reliability is 20 for confidence 1.0', () => {
+  it('speed is 18 (adjacent) for long-adjacent duration (30min, 2h]', () => {
+    const input: WorkflowMetricsInput = { ...FIXTURE_SPARSE, durationMs: 60 * 60 * 1_000 };  // 1 h
+    expect(computeHealthScoreV2(input).speed).toBe(18);
+  });
+
+  it('speed is 18 at long-adjacent upper boundary (2h)', () => {
+    const input: WorkflowMetricsInput = { ...FIXTURE_SPARSE, durationMs: 2 * 60 * 60 * 1_000 };
+    expect(computeHealthScoreV2(input).speed).toBe(18);
+  });
+
+  it('speed is 5 (floor) for duration far outside ideal/adjacent ranges', () => {
+    const tooShort: WorkflowMetricsInput = { ...FIXTURE_SPARSE, durationMs: 5_000 };       // 5 s
+    const tooLong: WorkflowMetricsInput = { ...FIXTURE_SPARSE, durationMs: 7_200_001 };    // > 2 h
+    expect(computeHealthScoreV2(tooShort).speed).toBe(5);
+    expect(computeHealthScoreV2(tooLong).speed).toBe(5);
+  });
+
+  it('speed is 0 for null duration', () => {
+    expect(computeHealthScoreV2(FIXTURE_SPARSE).speed).toBe(0);
+  });
+
+  // ── DataQuality scoring ────────────────────────────────────────────────────
+
+  it('dataQuality is 0 for null confidence', () => {
+    expect(computeHealthScoreV2(FIXTURE_MONITOR).dataQuality).toBe(0);
+    expect(computeHealthScoreV2(FIXTURE_SPARSE).dataQuality).toBe(0);
+  });
+
+  it('dataQuality is 20 for confidence 1.0', () => {
     const input: WorkflowMetricsInput = { ...FIXTURE_SPARSE, confidence: 1 };
-    expect(computeHealthScoreV2(input).reliability).toBe(20);
+    expect(computeHealthScoreV2(input).dataQuality).toBe(20);
   });
 
   it('is deterministic — same inputs produce identical output', () => {
     expect(computeHealthScoreV2(FIXTURE_FULL)).toEqual(computeHealthScoreV2(FIXTURE_FULL));
+  });
+});
+
+// ── computeAiOpportunityScore ─────────────────────────────────────────────────
+
+describe('computeAiOpportunityScore', () => {
+  it('is exposed (auditable) — not hidden behind the opportunity tag', () => {
+    // Contract test: the function must be callable externally. If this compiles
+    // and runs, the export is live. No assertion needed beyond a finite number.
+    const score = computeAiOpportunityScore(FIXTURE_AUTOMATE);
+    expect(Number.isFinite(score)).toBe(true);
+  });
+
+  it('returns a value in [0, 100] for all fixtures', () => {
+    for (const fixture of [FIXTURE_FULL, FIXTURE_SINGLE_RECORDING, FIXTURE_SPARSE, FIXTURE_AUTOMATE, FIXTURE_MONITOR]) {
+      const score = computeAiOpportunityScore(fixture);
+      expect(score).toBeGreaterThanOrEqual(0);
+      expect(score).toBeLessThanOrEqual(100);
+    }
+  });
+
+  it('FIXTURE_AUTOMATE scores >= 60 (qualifies for automate tag)', () => {
+    expect(computeAiOpportunityScore(FIXTURE_AUTOMATE)).toBeGreaterThanOrEqual(60);
+  });
+
+  it('FIXTURE_MONITOR scores 0 (no steps, no duration, no tools)', () => {
+    expect(computeAiOpportunityScore(FIXTURE_MONITOR)).toBe(0);
   });
 });
 
@@ -317,28 +371,14 @@ describe('computeOpportunityTag', () => {
 
   it('evaluates rules top-to-bottom; standardize wins over optimize when both could fire', () => {
     // Build a fixture that satisfies rule 2 (standardize) AND rule 3 (optimize).
-    // variationScore = 0.8 (>= 0.67) → satisfies standardize condition
-    // But we also need to check that optimize (rule 3) would fire independently.
-    // efficiency < 15 fires when durationMs is null (efficiency = 0).
-    // We also need overall >= 40 for both rules.
-    // overall = efficiency(0) + consistency((1-0.8)*30=6) + reliability(0.7*20=14) + standardization
-    // Let's compute: confidence=0.7, stepCount=5, durationMs=null, stability=0.2
-    // efficiency=0, consistency=(1-0.8)*30=6, reliability=round(0.7*20)=14
-    // sopReadiness: confidence(0.7)>0.5 + stepCount(5)>0 → partial → sopPts=10
-    // docPts: stepCount(5) >= 3 → 20; standardization = round((10+20)/2) = 15
-    // overall = 0+6+14+15 = 35 — this would be < 40, so monitor fires, not standardize
-    // Need higher overall. Let's use confidence=0.9, stepCount=5, stability=0.2
-    // efficiency=0, consistency=6, reliability=round(0.9*20)=18
-    // sopReadiness: confidence(0.9)>0.8 → ready → sopPts=20
-    // docPts=20; standardization=round((20+20)/2)=20
-    // overall = 0+6+18+20 = 44 (>= 40 ✓)
-    // variationScore=0.8 >= 0.67 ✓ → standardize fires (rule 2)
-    // efficiency=0 < 15 → optimize would fire (rule 3), but rule 2 fires first
+    // variationScore = 0.8 (>= 0.67) → satisfies standardize condition.
+    // speed < 15 fires when durationMs is null (speed = 0) → would satisfy optimize.
+    // Need overall >= 40 for both rules.
     const input: WorkflowMetricsInput = {
       ...FIXTURE_SPARSE,
       confidence: 0.9,
       stepCount: 5,
-      durationMs: null,       // efficiency = 0 (< 15, would trigger optimize)
+      durationMs: null,       // speed = 0 (< 15, would trigger optimize)
       toolsUsed: [],           // toolsUsed.length = 0, so automate rule won't fire
       processDefinition: {
         runCount: 3,
@@ -351,23 +391,21 @@ describe('computeOpportunityTag', () => {
       processInsights: [],
     };
     const hs = computeHealthScoreV2(input);
-    // Verify overall >= 40 and efficiency < 15 (both conditions present)
     expect(hs.overall).toBeGreaterThanOrEqual(40);
-    expect(hs.efficiency).toBeLessThan(15);
-    // Verify variation score >= 0.67 (standardize condition)
+    expect(hs.speed).toBeLessThan(15);
     const { score: varScore } = computeVariation(input);
     expect(varScore).toBeGreaterThanOrEqual(0.67);
     // Rule 2 (standardize) should win over rule 3 (optimize)
     expect(computeOpportunityTag(input, hs)).toBe('standardize');
   });
 
-  it('returns none when no conditions are met', () => {
+  it('returns healthy when no conditions are met (positive fallthrough)', () => {
     // confidence=1, ideal duration, no tools → high health, low variation
     const input: WorkflowMetricsInput = {
       ...FIXTURE_SPARSE,
       confidence: 1,
       stepCount: 5,
-      durationMs: 120_000,   // inside ideal range → efficiency=30
+      durationMs: 120_000,   // inside ideal range → speed=30
       toolsUsed: [],
       processDefinition: {
         runCount: 8,
@@ -381,14 +419,13 @@ describe('computeOpportunityTag', () => {
     };
     const hs = computeHealthScoreV2(input);
     expect(hs.overall).toBeGreaterThanOrEqual(40);
-    expect(computeOpportunityTag(input, hs)).toBe('none');
+    expect(computeOpportunityTag(input, hs)).toBe('healthy');
   });
 
-  it('returns monitor when reliability < 8 even if overall >= 40', () => {
-    // Build a workflow with overall >= 40 but reliability = 0 (null confidence)
-    // efficiency=30 (ideal duration), consistency=(1-0.1)*30=27
-    // reliability=0 (< 8), standardization=round((0+20)/2)=10
-    // overall=30+27+0+10=67 (>= 40) but reliability=0 < 8 → monitor
+  it('returns monitor when dataQuality < 8 even if overall >= 40', () => {
+    // speed=30 (ideal duration), consistency=(1-0.1)*30=27
+    // dataQuality=0 (< 8), standardization=round((0+20)/2)=10
+    // overall=30+27+0+10=67 (>= 40) but dataQuality=0 < 8 → monitor
     const input: WorkflowMetricsInput = {
       ...FIXTURE_SPARSE,
       confidence: null,
@@ -407,7 +444,7 @@ describe('computeOpportunityTag', () => {
     };
     const hs = computeHealthScoreV2(input);
     expect(hs.overall).toBeGreaterThanOrEqual(40);
-    expect(hs.reliability).toBeLessThan(8);
+    expect(hs.dataQuality).toBeLessThan(8);
     expect(computeOpportunityTag(input, hs)).toBe('monitor');
   });
 });
@@ -423,28 +460,20 @@ describe('computeWorkflowMetrics', () => {
     expect(output.variationLabel).toBe('low');
     expect(output.bottleneckLabel).toBe('Salesforce data entry step');
     expect(output.healthScore.overall).toBe(
-      output.healthScore.efficiency + output.healthScore.consistency +
-      output.healthScore.reliability + output.healthScore.standardization,
+      output.healthScore.speed + output.healthScore.consistency +
+      output.healthScore.dataQuality + output.healthScore.standardization,
     );
     expect(output.confidence).toBe(0.85);
-    expect(output.isTrendReady).toBe(true);  // runCount=10 >= 5
   });
 
-  it('isTrendReady is true when runCount >= 5', () => {
-    expect(computeWorkflowMetrics(FIXTURE_FULL).isTrendReady).toBe(true);
-  });
-
-  it('isTrendReady is false when processDefinition is null', () => {
-    expect(computeWorkflowMetrics(FIXTURE_SINGLE_RECORDING).isTrendReady).toBe(false);
-    expect(computeWorkflowMetrics(FIXTURE_MONITOR).isTrendReady).toBe(false);
-  });
-
-  it('isTrendReady is false when runCount < 5', () => {
-    const input: WorkflowMetricsInput = {
-      ...FIXTURE_FULL,
-      processDefinition: { ...FIXTURE_FULL.processDefinition!, runCount: 4 },
-    };
-    expect(computeWorkflowMetrics(input).isTrendReady).toBe(false);
+  it('exposes aiOpportunityScore on the output (auditable automate tag)', () => {
+    const output = computeWorkflowMetrics(FIXTURE_AUTOMATE);
+    expect(typeof output.aiOpportunityScore).toBe('number');
+    expect(output.aiOpportunityScore).toBeGreaterThanOrEqual(0);
+    expect(output.aiOpportunityScore).toBeLessThanOrEqual(100);
+    // Tag is 'automate' so score must be >= 60
+    expect(output.opportunityTag).toBe('automate');
+    expect(output.aiOpportunityScore).toBeGreaterThanOrEqual(60);
   });
 
   it('confidence is passed through unchanged', () => {
@@ -509,8 +538,8 @@ describe('computePortfolioHealthScore', () => {
 // ── computeInsightChips ───────────────────────────────────────────────────────
 
 describe('computeInsightChips', () => {
-  it('returns empty array when no conditions are met', () => {
-    // All fixtures as-is don't guarantee >= 2 in any category by themselves
+  it('returns empty array when no conditions are met and fewer than 3 healthy workflows', () => {
+    // Single workflow cannot trigger the healthy chip (minimum 3 required)
     const single = computeWorkflowMetrics(FIXTURE_FULL);
     expect(computeInsightChips([single], [])).toEqual([]);
   });
@@ -567,6 +596,98 @@ describe('computeInsightChips', () => {
     expect(chips.find((c) => c.filterKey === 'bottleneck_insight')).toBeUndefined();
   });
 
+  // ── Healthy positive chip ─────────────────────────────────────────────────
+
+  it('fires healthy chip when >= 3 workflows have overall >= 70 and no problem chips', () => {
+    // Build 3 fully-healthy fixtures
+    const healthyInput: WorkflowMetricsInput = {
+      ...FIXTURE_FULL,
+      confidence: 1,
+      stepCount: 5,
+      durationMs: 120_000,
+      toolsUsed: [],   // prevent automate chip
+      processDefinition: {
+        runCount: 8,
+        variantCount: 0,
+        avgDurationMs: 120_000,
+        medianDurationMs: 120_000,
+        stabilityScore: 0.95,   // variation low
+        confidenceScore: 1,
+      },
+      processInsights: [],
+    };
+    const outputs = [
+      computeWorkflowMetrics({ ...healthyInput, id: 'h1' }),
+      computeWorkflowMetrics({ ...healthyInput, id: 'h2' }),
+      computeWorkflowMetrics({ ...healthyInput, id: 'h3' }),
+    ];
+    // Sanity: all must be healthy-tagged
+    for (const o of outputs) {
+      expect(o.healthScore.overall).toBeGreaterThanOrEqual(70);
+      expect(o.opportunityTag).toBe('healthy');
+    }
+    const chips = computeInsightChips(outputs, []);
+    const healthyChip = chips.find((c) => c.filterKey === 'healthScore_gte_70');
+    expect(healthyChip).toBeDefined();
+    expect(healthyChip!.severity).toBe('positive');
+    expect(healthyChip!.count).toBe(3);
+  });
+
+  it('does NOT fire healthy chip when any warning/critical chip is already present', () => {
+    // Two automate workflows → automation (info) + high-variance (warning) chips fire
+    const output1 = computeWorkflowMetrics(FIXTURE_AUTOMATE);
+    const output2 = computeWorkflowMetrics({ ...FIXTURE_AUTOMATE, id: 'automate-2' });
+    // Plus three healthy workflows
+    const healthyInput: WorkflowMetricsInput = {
+      ...FIXTURE_FULL,
+      confidence: 1,
+      stepCount: 5,
+      durationMs: 120_000,
+      toolsUsed: [],
+      processDefinition: {
+        runCount: 8,
+        variantCount: 0,
+        avgDurationMs: 120_000,
+        medianDurationMs: 120_000,
+        stabilityScore: 0.95,
+        confidenceScore: 1,
+      },
+      processInsights: [],
+    };
+    const output3 = computeWorkflowMetrics({ ...healthyInput, id: 'h1' });
+    const output4 = computeWorkflowMetrics({ ...healthyInput, id: 'h2' });
+    const output5 = computeWorkflowMetrics({ ...healthyInput, id: 'h3' });
+    const chips = computeInsightChips([output1, output2, output3, output4, output5], []);
+    // Variance chip is warning → healthy chip must be suppressed
+    expect(chips.find((c) => c.filterKey === 'variationScore_gt_0.7')).toBeDefined();
+    expect(chips.find((c) => c.filterKey === 'healthScore_gte_70')).toBeUndefined();
+  });
+
+  it('does NOT fire healthy chip with fewer than 3 healthy workflows', () => {
+    const healthyInput: WorkflowMetricsInput = {
+      ...FIXTURE_FULL,
+      confidence: 1,
+      stepCount: 5,
+      durationMs: 120_000,
+      toolsUsed: [],
+      processDefinition: {
+        runCount: 8,
+        variantCount: 0,
+        avgDurationMs: 120_000,
+        medianDurationMs: 120_000,
+        stabilityScore: 0.95,
+        confidenceScore: 1,
+      },
+      processInsights: [],
+    };
+    const outputs = [
+      computeWorkflowMetrics({ ...healthyInput, id: 'h1' }),
+      computeWorkflowMetrics({ ...healthyInput, id: 'h2' }),
+    ];
+    const chips = computeInsightChips(outputs, []);
+    expect(chips.find((c) => c.filterKey === 'healthScore_gte_70')).toBeUndefined();
+  });
+
   it('returns at most 5 chips', () => {
     const output1 = computeWorkflowMetrics(FIXTURE_AUTOMATE);
     const output2 = computeWorkflowMetrics({ ...FIXTURE_AUTOMATE, id: 'automate-2' });
@@ -582,7 +703,7 @@ describe('computeInsightChips', () => {
     expect(chips.length).toBeLessThanOrEqual(5);
   });
 
-  it('orders chips by severity descending (critical before warning before info)', () => {
+  it('orders chips by severity descending (critical > warning > info > positive)', () => {
     const output1 = computeWorkflowMetrics(FIXTURE_AUTOMATE);
     const output2 = computeWorkflowMetrics({ ...FIXTURE_AUTOMATE, id: 'automate-2' });
     const output3 = computeWorkflowMetrics(FIXTURE_MONITOR);
@@ -591,7 +712,8 @@ describe('computeInsightChips', () => {
       [output1, output2, output3, output4],
       [{ insightType: 'bottleneck', severity: 'critical', title: 'Critical chip' }],
     );
-    const severityRank = (s: string) => s === 'critical' ? 3 : s === 'warning' ? 2 : 1;
+    const severityRank = (s: string) =>
+      s === 'critical' ? 4 : s === 'warning' ? 3 : s === 'info' ? 2 : 1;
     for (let i = 1; i < chips.length; i++) {
       const prev = chips[i - 1];
       const curr = chips[i];

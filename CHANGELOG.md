@@ -6,6 +6,72 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-21] - Mode 3 Correction: iter 020 Principal-Level Design Review (non-counting)
+
+### Selection
+
+- **Mode:** Mode 3 (Debugging / Design Correction). Does NOT increment improvement-loop, Mode 5, meta-review, area-saturation, or agent-diversity counters.
+- **Trigger:** CEO directive at iter 020 close — *"Now do a principal-level review of what you built… then improve the implementation until it feels like a world-class process intelligence product with a minimalist command-center experience."*
+- **Target surface:** iter 020 metrics engine (`workflow-metrics.ts`) + iter 018 PRD artifact (`docs/prd/PRD_DASHBOARD_V2.md`).
+- **Rationale:** tighten the foundation before iter 021 UI build consumes it. No new functional scope; no Path B counter movement.
+
+### What changed
+
+**Code — `apps/web-app/src/lib/workflow-metrics.ts`:**
+- Renamed `HealthScoreV2.efficiency` → `speed`; `HealthScoreV2.reliability` → `dataQuality`. Honest labels (we measure duration-band conformance and extraction confidence, not the claims the previous words implied). CEO 0.30/0.30/0.20/0.20 weights preserved.
+- Graduated speed scoring (killed binary cliff): ideal [30s, 30min] → 30 / adjacent [10s, 30s) ∪ (30min, 2h] → 18 / far outside → 5 / null → 0.
+- `computeAiOpportunityScore` elevated from internal helper to named export; `aiOpportunityScore: number` added to `WorkflowMetricsOutput` — `automate` tag is now auditable from the API response.
+- `OpportunityTag`: removed `'none'` silent fallthrough, added `'healthy'` positive fallthrough (a command-center has an opinion on every row).
+- `InsightChip.severity`: added `'positive'`. `computeInsightChips`: new healthy-portfolio chip ("N workflows running smoothly") fires when ≥ 3 workflows score ≥ 70 AND no warning/critical chips are present (suppressed whenever problems are flagged).
+- Removed `isTrendReady: boolean` from `WorkflowMetricsOutput` — dead reserved-but-unused field.
+- Module header comment now documents dimension naming discipline for future readers.
+
+**Tests — `apps/web-app/src/lib/workflow-metrics.test.ts`:**
+- All `efficiency`/`reliability` assertions renamed to `speed`/`dataQuality`.
+- Added 6 graduated-speed boundary tests (ideal lower 30s, ideal upper 30min, short-adjacent 20s, long-adjacent 1h, long-adjacent upper 2h, far-outside both sides).
+- Added 4-test `computeAiOpportunityScore` block (exposed contract, range, automate-threshold, zero-case).
+- Added 3 positive-chip tests (fires with ≥3 healthy + no problem chips, suppressed when any warning chip present, suppressed with <3 healthy).
+- Removed all `isTrendReady` assertions.
+- Test count 62 → 72 (+10).
+
+**Route mock — `apps/web-app/src/app/api/workflows/route.test.ts`:**
+- Mocked `WorkflowMetricsOutput` shape updated to new interface (`speed`/`dataQuality` in health sub-scores; `aiOpportunityScore: 42`; `opportunityTag: 'healthy'`; no `isTrendReady`).
+
+**PRD — `docs/prd/PRD_DASHBOARD_V2.md`:**
+- §5.3: primary grid columns reduced from 9 → 4 (Name · Systems · Opportunity · Health Score). Runs / AvgTime / Systems collapse into Name subtext line; Variation / Bottleneck move to Health Score tooltip + detail page. "Spreadsheet" register replaced with "verdict" register.
+- §5.4: **new section** locking design tokens — typography scale (12/14/16/20/28), weights (400/500/600), mono numerics, spacing grid (4/8/12/16/24/32), radii (6/10), monochrome + 3 semantic hues only (red/amber/green), single elevation shadow token, ≤ 150ms motion.
+- §7 interfaces: updated `WorkflowMetricsOutput` + `HealthScoreV2` + `OpportunityTag` + `InsightChip` types; dimension-naming note added; `aiOpportunityScore` documented as auditable surface.
+- §7.5 scoring table: updated with `speed` + `dataQuality` rows + graduated speed scoring rationale.
+- §7.6 decision tree: rule 3 uses `speed < 15`; rule 4 uses `dataQuality < 8`; rule 5 renamed `none` → `healthy` with positive-signal rationale.
+- §7.8: replaced reserved `isTrendReady` with auditable-`aiOpportunityScore` rationale.
+- §8 Component Hierarchy: reduced from 18 → 8 components. `WorkflowList` with `state` prop replaces 5 state-variant components (Skeleton/Empty/NoResults/Error/SparseData). 4 single-cell atoms (HealthScoreCell, OpportunityTagChip, SystemsPillList, VariationLabel) inline into `WorkflowRow`. `TimeRangeSelector` + `PortfolioHealthBadge` inline into `CommandHeader`. Deleted-vs-draft list inventoried in §8.
+- §5 Section 2 chip rules: updated for `healthy` tag + positive chip + severity ordering (critical → warning → info → positive).
+- D10 decision: updated to reflect 4-column reduction (previous version only dropped Steps/Active/SOP/Tags).
+
+### Validation
+
+- `pnpm typecheck` — clean across all 10 workspace projects.
+- `pnpm test` — **1728/1728 passing across 53 test files** (+10 tests vs iter 020; 0 regressions).
+
+### Impact
+
+- **Before state:** iter 020 metrics engine shipped with category-error dimension labels (`efficiency`/`reliability`), binary speed cliff, hidden AI-opportunity score, silent `none` fallthrough, no positive-state chip. PRD §5.3 specified 9-column grid (spreadsheet register). PRD §8 specified 18 components (over-atomized, state variants not consolidated).
+- **After state:** honest dimension names (`speed`/`dataQuality`) with header-comment rationale. Graduated speed scoring prevents bizarre score movement near boundaries. `aiOpportunityScore` exposed so `automate` tag is explainable. `healthy` fallthrough gives command-center an opinion on every row. Positive portfolio chip speaks wins when wins exist. PRD §5.3 = 4-column verdict grid. PRD §5.4 locks minimalist tokens. PRD §8 = 8 components, state machine consolidated. Iter 021 now builds against a tightened contract.
+- **Measurable outcome:** test count 1718 → 1728 (+10); dimension labels 0/4 honest → 4/4 honest; hidden → auditable score surfaces = 1 elevated; column count 9 → 4 locked; component count 18 → 8 locked; design-token specification points 0 → 5 locked (typography, spacing, radii, color, motion).
+
+### Governance signals
+
+- `mode: 3`
+- `counts-toward-iteration: false`
+- `counts-toward-mode-5-sequence: false`
+- `path-b-status-unchanged: 3/5 complete`
+- `follow-up-pool-delta: 0` (no new follow-ups generated — corrections consumed temptations that would otherwise have become post-Path-B follow-ups)
+- `agent-diversity-counter: unchanged` (coordinator-executed, not delegated)
+- `product-facing-change: dimension-renames-under-CEO-authority` (reversible via single-file change if override requested)
+- `entry-gate-for-iter-021: confirmed` (typecheck + tests + PRD alignment all green)
+
+---
+
 ## [2026-04-20] - Iteration 020: Workflow-metrics engine (Mode 5 item 3/5, `directed`, PRD_DASHBOARD_V2 §7)
 
 ### Selection

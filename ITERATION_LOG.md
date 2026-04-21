@@ -91,6 +91,85 @@ Density-response: 3 follow-ups generated — at the Follow-Up Debt Policy clause
 
 ---
 
+## Mode 3 Correction — iter 020 Principal-Level Design Review (non-counting)
+
+- Date: 2026-04-21
+- Trigger: CEO directive at iter 020 close — *"Now do a principal-level review of what you built… then improve the implementation until it feels like a world-class process intelligence product with a minimalist command-center experience."*
+- Mode: **Mode 3 (Debugging / Design Correction)** — does NOT count toward improvement-loop cadence, meta-review counter, or Mode 5 item sequence.
+- Scope target: iter 020 metrics-engine surface + iter 018 PRD artifact. No new feature work; no iter 021 pre-implementation.
+
+### Rationale
+
+Seven category-level weaknesses surfaced during principal review of iter 020's output:
+1. Dimension names (`efficiency`, `reliability`) were honest-sounding but category errors — we measure duration-band conformance and extraction confidence, not the claims those words imply.
+2. Binary speed cliff (30 / 5) would produce bizarre score movement near the 30s and 30min boundaries.
+3. `aiOpportunityScore` was internal — the `'automate'` tag fired without an audit surface.
+4. `OpportunityTag` fallthrough `'none'` is silent nulling; a command-center needs an opinion on every row.
+5. No positive-state chip — the UI could only speak in problems.
+6. PRD §5.3 specified 9 columns (spreadsheet register), not a verdict register.
+7. PRD §8 specified 18 components — five were state variants of the same list, four were single-cell atoms with no reuse value.
+
+Reasoning why this is Mode 3, not Mode 1: the corrections target the *framing* of iter 020's output and iter 018's PRD, not new functional scope. Nothing new ships. The metrics engine's public contract is sharpened before iter 021 builds on it — a deliberate "tighten the foundation before the next layer" action. Under CLAUDE.md, this is design correction, not a counting iteration.
+
+### Changes Landed
+
+**Code — `apps/web-app/src/lib/workflow-metrics.ts`:**
+- Renamed `HealthScoreV2.efficiency` → `speed`, `HealthScoreV2.reliability` → `dataQuality`.
+- Replaced binary speed cliff with 3-band graduated scoring: ideal [30s, 30min] → 30 / adjacent [10s, 30s) ∪ (30min, 2h] → 18 / else → 5 / null → 0.
+- Exposed `computeAiOpportunityScore` as a named export; added `aiOpportunityScore: number` to `WorkflowMetricsOutput`.
+- Removed `isTrendReady` from `WorkflowMetricsOutput` (dead reserved-but-unused field).
+- `OpportunityTag` type: removed `'none'`, added `'healthy'`.
+- `InsightChip.severity` type: added `'positive'`.
+- `computeInsightChips`: added healthy-portfolio positive chip (≥ 3 workflows with overall ≥ 70 AND no warning/critical chips present — positive signal suppressed whenever problems are flagged).
+- Dimension naming note added as module-level header comment for future readers.
+
+**Tests — `apps/web-app/src/lib/workflow-metrics.test.ts`:**
+- All `efficiency`/`reliability` assertions renamed to `speed`/`dataQuality`.
+- Added graduated-speed boundary tests (ideal lower/upper, short-adjacent, long-adjacent, far-outside, null).
+- Added `computeAiOpportunityScore` test block (4 tests: exposed, range, FIXTURE_AUTOMATE ≥ 60, FIXTURE_MONITOR = 0).
+- Added positive-chip tests (fires when conditions met; suppressed when problem chips present; suppressed when < 3 healthy workflows).
+- Removed `isTrendReady` assertions.
+- Net test count: 62 → 72 (+10).
+
+**Route mock — `apps/web-app/src/app/api/workflows/route.test.ts`:**
+- Mock object updated to new `WorkflowMetricsOutput` shape (`speed`/`dataQuality`, `aiOpportunityScore: 42`, `opportunityTag: 'healthy'`, no `isTrendReady`).
+
+**PRD — `docs/prd/PRD_DASHBOARD_V2.md`:**
+- §5.3: columns reduced from 9 → 4 (Name · Systems · Opportunity · Health Score). Runs/AvgTime/Systems collapse into Name subtext; Variation/Bottleneck move to Health Score tooltip + detail page.
+- §5.4: **new section** — locked design tokens (type scale 12/14/16/20/28, weights 400/500/600, mono numerics, 4/8/12/16/24/32 spacing grid, radii 6/10, monochrome + 3 semantic hues only, single elevation token, ≤ 150ms motion).
+- §7 interfaces: updated to new dimension names; `aiOpportunityScore` added to output; `isTrendReady` removed; `OpportunityTag` type updated; `InsightChip.severity` includes `'positive'`; naming note added.
+- §7.5 formula table: updated with `speed`/`dataQuality` rows and graduated speed scoring explanation.
+- §7.6 decision tree: rule 3 uses `speed < 15`; rule 4 uses `dataQuality < 8`; rule 5 renamed `none` → `healthy` with positive-signal rationale.
+- §7.8: replaced reserved `isTrendReady` section with auditable-`aiOpportunityScore` rationale.
+- §8: components reduced from 18 → 8 (`WorkflowList` with state prop replaces 5 state-variant components; 4 single-cell atoms inline into `WorkflowRow`; `TimeRangeSelector` + `PortfolioHealthBadge` inline into `CommandHeader`). Deleted-vs-draft list included.
+- D10 decision updated to reflect 4-column reduction.
+- §5 Section 2 chip rules updated for `healthy` tag + positive chip + severity ordering.
+
+### Validation
+
+- `pnpm typecheck` — clean across all 10 workspace projects.
+- `pnpm test` — **1728/1728 passing across 53 test files** (+10 tests vs iter 020; 0 regressions).
+- `workflow-metrics.test.ts`: 72 tests (from 62) — all describe blocks pass including new graduated-speed boundaries, new positive-chip rules, new audit-score contract test.
+- `route.test.ts` (metricsV2 integration): 4/4 pass with new output shape.
+
+### Governance Signals
+
+- **Counts as:** Mode 3 design correction. Does NOT increment improvement-loop counter, meta-review cadence counter, Mode 5 item-sequence counter, or area-saturation counter.
+- **Mode 5 sequence unaffected:** Path B still at 3/5 complete (iter 018 → 019 → 020). Iter 021 = UI build remains next.
+- **Agent-diversity counter:** unchanged (this was coordinator-executed directly, not a backend/frontend-engineer delegation).
+- **Follow-up pool:** unchanged (no new follow-ups; this correction consumed temptations that would otherwise have become post-Path-B follow-ups).
+- **CEO authority:** explicit directive authorised product-facing dimension renames. Rename rationale is documented in `workflow-metrics.ts` header + PRD §7 naming note so the renames are reversible by a single-file change if CEO overrides.
+
+### Entry Gate for Iter 021
+
+- ✅ typecheck clean
+- ✅ tests green (1728)
+- ✅ PRD §5.3, §5.4, §7, §8, D10 reflect what iter 021 will actually build
+- ✅ component hierarchy reduced to 8 — scope of iter 021 is now tractable
+- ✅ design tokens locked — iter 021 implements, does not re-decide
+
+---
+
 ## Iteration 019
 
 - Date: 2026-04-20
