@@ -4,6 +4,100 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 025
+
+- Date: 2026-04-21
+- Trigger: **MR-005 meta-review (MANDATORY).** Both triggering conditions independently fired: (1) base 3-loop cadence — 6 bounded loops post-MR-004 (019+020+021+022+023+024) = 2× the 3-loop base cadence; (2) Mode 5 guardrail 4 — Path B directed sequence of ≥3 items completed, meta-review mandatory before next non-directed loop.
+- Coordinator: coordinator
+- Phase: Phase 1
+- Mode: **Mode 4 (meta-review, governance-only).** Does NOT count toward improvement-loop cadence. NO product code changes permitted.
+- Commit: pending (single Mode 4 governance-only commit)
+
+### Candidate Selection
+
+- **Selection rule:** `directed` (Mode 4 meta-review is cadence-mandatory; scope pre-fixed by CLAUDE.md § Meta-Review Cadence rule set)
+- **Selected work:** MR-005 meta-review covering iter 019–024 Path B (6 bounded loops) + Mode 3 principal-review @iter 020. Scope per CLAUDE.md § Meta-Review Cadence: evaluate base 3-loop cadence delta + Mode 5 guardrail 4 trigger; apply deferred MR-004 Changes D/E/F; evaluate reverse portfolio-drift trigger (5 data points ready); evaluate ceiling-rule discipline under Mode 5 directed precedence; Path B retrospective (density trigger, agent diversity, pool trajectory); post-MR-005 burn-down programming for iter 026+; staleness-cap explicit triage of 14 past-cap items.
+- **Rationale:** both cadence triggers fire independently; neither is suppressible. Mode 4 enforces no-code rule — all iter 025 output is governance artifacts (CLAUDE.md diffs + meta-review document + backlog triage).
+- **Portfolio rule checks:**
+  - Mode 4 is cadence-mandatory; portfolio rules (release-blocker cadence, Area saturation, burn-down floor) do NOT apply to meta-reviews.
+  - Area: `governance` (non-counting for Area saturation clock; Path B 5-consecutive-non-extension clock stays armed for iter 026 evaluation).
+  - Pool: 33 at iter 025 entry (unchanged through Mode 4 — no product code changes).
+- **density-response:** n/a (Mode 4 generates 0 product-code follow-ups by rule).
+- **scope-expansion:** n/a (Mode 4 fixed scope per CLAUDE.md cadence rule).
+- **mode-5-saturation:** n/a (Mode 4, not Mode 5).
+- **ceiling-cool-off:** not consumed (Mode 4 cadence-mandatory; cool-off only applicable to Mode 1 `top-score`/`blocker-cadence` picks under pool > 8).
+- **directed-agents:** `meta-coordinator` invoked as sole primary (delegation rubric match: "Mode 4 meta-review").
+
+### Agents Used
+
+- **Primary:** `meta-coordinator` — comprehensive 7-agenda scope delivered in single invocation (reverse portfolio-drift · ceiling-rule discipline · density-trigger retrospective · agent-diversity signal · deferred MR-004 Changes D/E/F triage · post-MR-005 burn-down programming · Path B retrospective).
+- **Adjacent:** none. Mode 4 artifact-only; no implementation specialists required. Agent-diversity signal for MR-005 = meta-coordinator only (expected for Mode 4).
+- **Consecutive-same-agent counter for MR-006:** `meta-coordinator` use at iter 025 does NOT increment the same-implementer counter for Mode 1/2/5 work (cadence-mandatory Mode 4 is excluded from implementer rotation analysis).
+
+### Files Changed
+
+**New (1):**
+- `docs/meta/MR_005.md` — MR-005 artifact; 7 agenda items analyzed with evidence citations; 7 applyable CLAUDE.md diffs (D-1 through D-7); staleness triage table (14 items; 10 KEEP / 3 DOWNGRADE / 0 DELETE); iter 026-028 burn-down programming (#14 → #7 → #19+#20 bundled); MR-006 effectiveness metric targets.
+
+**Modified (5 governance artifacts — NO product code):**
+- `CLAUDE.md` — 7 diffs applied: (D-1) reverse portfolio-drift trigger at N=5 (§ Meta-Review Cadence new early-trigger bullet; separately-logged `reverse-portfolio-drift: user-ack`); (D-2) scaled Mode 5 companion burn-down ⌈N/3⌉ + hard-stop ceiling at pool>15 (§ Operating Modes clause 8 replacement + new clause 9; **supersedes MR-004 Change A singular language**); (D-3) fourth density-response option `scope-guard-adjacent` (§ Follow-Up Debt Policy clause 4; stricter than `acknowledged, carried forward`); (D-4) specialist-invocation gate (§ Operating Model new subsection; `growth-strategist` ≥3 copy strings, `system-architect` ≥200 LOC new contract); (D-5) Audit-Intake Pattern codification (new section between Follow-Up Debt Policy and Coding Standards; **supersedes MR-004 Change D**); (D-6) test-only-touch counting clarifier on portfolio-drift line (**supersedes MR-004 Change F**); (D-7) Mode 5 sequence-length soft cap at N=5 (§ Operating Modes new clause 10). Current Phase block updated to reflect MR-005 complete + iter 026 next. Known Issues block updated with reverse-drift trigger status + Mode 5 D-7 cap + post-MR-005 programming.
+- `IMPROVEMENT_BACKLOG.md` — iter 025 header entry prepended; Portfolio Summary updated (next iteration = #14 iter 026; MR-005 staleness verdicts recorded 10 KEEP / 3 DOWNGRADE / 0 DELETE; MR-005 governance diffs applied recap); rows #21, #28, #32 tagged inline with `triage: MR-005 DOWNGRADE`; MR-004 governance diffs recap updated to reflect D/E/F all applied as D-5/D-1/D-6.
+- `SYSTEM_HEALTH.md` — header entry prepended; Current Top Opportunities rewritten for iter 026-028 burn-down programming + iter 029 first eligible `top-score` slot; Recommended Next Iteration block updated to iter 026 = #14; Meta-Review Status rewritten (MR-005 complete; 7 diffs applied; supersedes MR-004 Change A/D/F; 14-item staleness triage recorded; MR-006 earliest iter 028; early-trigger watch updated for iter 026-028).
+- `CHANGELOG.md` — iter 025 entry prepended (Mode 4 MR-005; 7 diffs applied; supersedes MR-004 Change A/D/F; staleness triage; iter 026-028 programming).
+- `ITERATION_LOG.md` — this entry.
+
+**Zero product code changes.** `apps/**` unchanged; `packages/**` unchanged; all test files unchanged.
+
+### Validation Run
+
+- **Mode 4 rule:** no product code changes → no `pnpm typecheck` / `pnpm test` delta expected or generated. Governance artifacts do not affect build or test surface.
+- **Pre-commit hooks:** will run on commit; expect zero failures (only markdown + governance-doc changes).
+- **Artifact integrity checks:**
+  - MR-005 diff count: 7 (D-1 through D-7) ✅
+  - CLAUDE.md Known Issues references match SYSTEM_HEALTH ✅
+  - IMPROVEMENT_BACKLOG.md #21/#28/#32 DOWNGRADE tags applied ✅
+  - `docs/meta/MR_005.md` created ✅
+  - Cadence stability window rule honored: no product code changes ✅
+
+### Outcome
+
+- **7 CLAUDE.md governance diffs applied** (D-1 through D-7) — see Files Changed.
+- **Staleness triage complete:** 14 past-cap items triaged; 10 KEEP (iter 026+ targets), 3 DOWNGRADE (#21/#28/#32 annotated inline), 0 DELETE.
+- **Iter 026-028 burn-down programming fixed:** iter 026 = #14 (process-engine, extension-adjacent, past-cap #1); iter 027 = #7 (policy-engine, full reverse-drift relief); iter 028 = #19+#20 bundled (session durability, same file).
+- **MR-004 deferred changes closed:** Change D → applied as D-5 (audit-intake codification); Change E → applied as D-1 (reverse portfolio-drift, tightened to N=5); Change F → applied as D-6 (test-touch counting).
+- **MR-004 Change A superseded:** D-2 replaces singular "at least one" language with ⌈N/3⌉ scaling + adds hard-stop ceiling.
+- **Pool trajectory:** 33 open at iter 025 entry/close (Mode 4 no-code); post-MR-005 burn-down programming projects ≤25 by iter 028 close, ≤15 by iter 035.
+
+### Impact
+
+- **Before state:** Pool at 33 (4× soft ceiling; deeply violated). Reverse portfolio-drift trigger unarmed (proposed but not codified). Mode 5 companion-burn-down rule singular "at least one" (inoperative at N>3). Density-response taxonomy 3 options (4 of 6 Path B iterations collapsed into `acknowledged, carried forward`). Specialist drought: 0 growth-strategist / system-architect invocations across 6 Path B iterations. MR-004 Changes D/E/F deferred. 14 past-cap items carried without explicit triage.
+- **After state:** Pool unchanged at 33 (Mode 4). Reverse portfolio-drift trigger codified at N=5 with separately-logged user-ack; armed at iter 024 close; clears at iter 026 if #14 selected. Mode 5 companion-burn-down rule scales ⌈N/3⌉ (2 burn-downs required for N=6 sequences; Path B would have required 2, had 1 — rule enforcement teeth restored). Hard-stop ceiling at pool>15 added (one-per-sequence override). Density-response gains `scope-guard-adjacent` fourth option (correct classification for 4 of 4 Path B responses retroactively). Specialist-invocation gate forces `growth-strategist` adjacent on ≥3 copy strings; forces `system-architect` primary/adjacent on ≥200 LOC new contract. Audit-Intake Pattern codified (cold pool + P0-only + PRD-trigger promotion). Test-touch counting rule codified. Mode 5 sequence-length soft cap at N=5 (N≥6 requires meta-coordinator pre-check). 14 past-cap items triaged: 10 KEEP, 3 DOWNGRADE, 0 DELETE. Iter 026-028 programming fixed.
+- **Measurable outcome:** MR-006 at iter 028 earliest will measure 8 effectiveness metrics: reverse-drift trigger fire rate, pool trajectory under scaled burn-down, `scope-guard-adjacent` usage rate, specialist-invocation gate fire rate, pool shrinkage targets (≤25 by iter 028, ≤15 by iter 035), first `top-score` selection since iter 009, closure ratio over 10-iter window (target ≥0.4), reverse-trigger × Mode 5 interaction. All targets numeric and reader-verifiable.
+
+### Follow-Ups
+
+- **None.** Mode 4 generates zero product-code follow-ups by rule. MR-005 effectiveness questions are tracked as MR-006 agenda items, not as backlog rows.
+
+### Governance Signals
+
+- **Meta-Review Cadence:** MR-005 complete at iter 025; stability window runs through iter 028 boundary (3-loop floor rule per MR-001). MR-006 earliest iter 028.
+- **Supersedes:** MR-004 Change A (D-2 scaled replacement); MR-004 Change D (D-5 applied); MR-004 Change F (D-6 applied). MR-004 Change E tightened from proposed N (unspecified) to N=5 with separate user-ack contract.
+- **Cadence counter:** iter 025 = Mode 4, does NOT increment counter. Counter stands at 0 post-MR-005; next 3 bounded loops (026/027/028) increment to 3 → MR-006 trigger.
+- **Area saturation log:** iter 025 = `governance` area (Mode 4, non-counting). Path B 5-consecutive-non-extension clock stays armed for iter 026 evaluation; D-1 reverse portfolio-drift trigger armed.
+- **Agent diversity:** `meta-coordinator` Mode 4 use excluded from implementer rotation. Iter 023+024 used backend+frontend; iter 026 recommended `backend-engineer` (delegation rubric); same-implementer-4+ trigger at iter 029 if iter 026+027+028 all use backend.
+- **Cool-off state:** not consumed at iter 025 (Mode 4); re-armed by 3 consecutive burn-downs 026+027+028 → first eligible `top-score` slot iter 029.
+
+### Entry Gate for Iteration 026
+
+- Iter 025 MR-005 artifact `docs/meta/MR_005.md` ✅ written.
+- 7 CLAUDE.md governance diffs (D-1 through D-7) ✅ applied.
+- 14-item staleness triage ✅ recorded in IMPROVEMENT_BACKLOG.md.
+- Iter 026-028 burn-down programming ✅ fixed.
+- Iter 025 Mode 4 commit ✅ (pending — about to land).
+- Iter 026 = #14 Wire `validateRenderedSOP` into `processSession.ts` (Mode 1, `burn-down`, `backend-engineer` primary, process-engine area).
+
+---
+
 ## Iteration 024
 
 - Date: 2026-04-21

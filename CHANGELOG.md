@@ -6,6 +6,74 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-21] - Iteration 025: MR-005 meta-review (Mode 4, governance-only — NO product code changes)
+
+### Selection
+
+- **Mode:** Mode 4 (meta-review, governance-only). Does NOT count toward improvement-loop cadence. NO product code changes permitted.
+- **Trigger:** MR-005 MANDATORY per two independent conditions — (1) base 3-loop cadence: 6 bounded loops post-MR-004 (019+020+021+022+023+024) = 2× base cadence; (2) Mode 5 guardrail 4: Path B directed sequence of ≥3 items completed. Both triggering conditions independently fire; neither is suppressible.
+- **Rationale:** Path B closed at iter 024 with pool at 33 (4× soft ceiling), density trigger firing 4 of 6 with 100% `acknowledged, carried forward` (taxonomy collapse signal), zero specialist-agent invocations across 6 iterations (Delegation Rubric bypass), 5 consecutive non-extension iterations (reverse portfolio-drift trigger armed). Three MR-004 deferred changes (D/E/F) plus 5 new MR-005 agenda items required unified governance pass.
+
+### What changed
+
+**Governance artifacts only (Mode 4 rule — NO product code):**
+
+- **`docs/meta/MR_005.md`** (NEW) — comprehensive meta-review artifact covering iter 019–024 Path B (6 bounded loops) + Mode 3 principal-review @iter 020. 7 agenda items analyzed with evidence citations; 7 applyable CLAUDE.md diffs; staleness triage (14 items); iter 026-028 burn-down programming; MR-006 effectiveness metric targets.
+
+- **`CLAUDE.md` — 7 governance diffs applied:**
+  - **D-1 Reverse portfolio-drift trigger at N=5** (Meta-Review Cadence early-triggers list — new bullet). 5+ consecutive iterations without touching ANY tracked extension surface (extension-app, segmentation-engine, normalization-engine, policy-engine) flags reverse drift. Mode 5 directed-precedence does NOT auto-suppress; requires separately-logged `reverse-portfolio-drift: user-ack; rationale: [reason]` in next iteration's Candidate Selection block. **Supersedes MR-004 Change E** with tightened N=5 threshold.
+  - **D-2 Scaled Mode 5 companion burn-down ⌈N/3⌉ + hard-stop ceiling at pool>15** (Mode 5 guardrails — clause 8 replacement + new clause 9). Replaces singular "at least one burn-down" language with ⌈N/3⌉ scaling (N=6 → 2 burn-downs required; N=9 → 3). New hard-stop: pool>15 within Mode 5 sequence forces immediate burn-down regardless of user directive; `hard-ceiling-override: user-ack` available once per sequence. **Supersedes MR-004 Change A.**
+  - **D-3 Fourth density-response option `scope-guard-adjacent`** (Follow-Up Debt Policy clause 4 — new third option). The N follow-ups are legitimate adjacencies surfaced by PRD surface area and correctly rejected by guardrail 7(b) "one logical outcome" test. Requires per-follow-up anchor citing PRD section / architecture-decision / blocked-on-other-item. Stricter than `acknowledged, carried forward` (the residual option).
+  - **D-4 Specialist-invocation gate** (Operating Model — new subsection after Rules). `growth-strategist` MUST be adjacent on iterations changing ≥3 user-visible copy strings. `system-architect` MUST be primary or adjacent on iterations implementing new-contract ≥200 LOC pure module. Closes "deferred-as-follow-up" bypass pattern observed 4× in Path B.
+  - **D-5 Audit-Intake Pattern codification** (new CLAUDE.md section between Follow-Up Debt Policy and Coding Standards). Cold pool + P0-only live promotion + PRD-trigger promotion. Formalizes `PRICING_AUDIT_001.md` working convention. **Supersedes MR-004 Change D.**
+  - **D-6 Test-only-touch counting** (inline clarifier on Meta-Review Cadence portfolio-drift line). `*.test.ts` / `*.test.tsx` / `*.spec.ts` modifications within tracked surfaces DO count as surface coverage. **Supersedes MR-004 Change F.**
+  - **D-7 Mode 5 sequence-length soft cap at N=5** (Mode 5 guardrails — new clause 10). Sequences of N ≥ 6 require meta-coordinator Mode 4 pre-check; `mode-5-length-override: user-ack` available.
+  - Current Phase block updated to reflect MR-005 complete + iter 026 = #14 burn-down.
+  - Known Issues block updated with reverse-drift trigger status, Mode 5 D-7 cap, post-MR-005 programming.
+
+- **`IMPROVEMENT_BACKLOG.md`:**
+  - Iter 025 header entry prepended.
+  - Portfolio Summary updated: next iteration = iter 026 = #14; MR-005 staleness triage verdicts recorded (10 KEEP / 3 DOWNGRADE / 0 DELETE); MR-005 governance diffs applied recap; MR-004 deferred changes marked closed.
+  - Rows #21, #28, #32 tagged inline with `triage: MR-005 DOWNGRADE`.
+  - Open follow-up pool annotation updated to reflect age-at-iter-025 for each past-cap row.
+
+- **`SYSTEM_HEALTH.md`:**
+  - Header entry prepended.
+  - Current Top Opportunities rewritten for iter 026-028 burn-down programming + iter 029 first eligible `top-score` slot (cool-off re-arms after 3 consecutive burn-downs).
+  - Recommended Next Iteration block updated to iter 026 = #14.
+  - Meta-Review Status rewritten: MR-005 complete; 7 diffs applied; supersedes MR-004 Change A/D/F; 14-item staleness triage recorded; MR-006 earliest iter 028; early-trigger watch for iter 026-028.
+
+- **`ITERATION_LOG.md`** — full iter 025 entry added at top (Mode 4, `meta-coordinator` primary, zero product code changes, 7 governance diffs applied, staleness triage complete, iter 026-028 programming fixed, MR-006 at iter 028 earliest).
+
+**Zero product code changes.** `apps/**` unchanged; `packages/**` unchanged; all test files unchanged.
+
+### Validation
+
+- Mode 4 rule: no product code changes → no typecheck/test delta expected or generated.
+- Web-app package test count: **289 unchanged** (no test-file modifications).
+- Workspace test count: **1728 unchanged**.
+- Artifact integrity checks: MR-005 diff count = 7 ✅; CLAUDE.md ↔ SYSTEM_HEALTH cross-references consistent ✅; IMPROVEMENT_BACKLOG DOWNGRADE tags applied to #21/#28/#32 ✅; `docs/meta/MR_005.md` present ✅; cadence stability-window rule honored (no product code) ✅.
+
+### Impact (Before → After)
+
+- **Pool:** 33 → 33 (Mode 4 no-code; post-MR-005 programming projects ≤25 by iter 028, ≤15 by iter 035).
+- **Reverse portfolio-drift trigger:** unarmed/proposed → **codified at N=5, armed at iter 024 close** (clears at iter 026 if #14 selected as programmed).
+- **Mode 5 companion burn-down:** singular "at least one" (inoperative at N>3) → **⌈N/3⌉ scaling** (Path B retroactively would have required 2 burn-downs, had 1 — enforcement teeth restored). Hard-stop at pool>15 added.
+- **Density-response taxonomy:** 3 options (4/6 Path B collapsed into catch-all) → **4 options with `scope-guard-adjacent`** (retroactively correct for 4 of 4 Path B responses).
+- **Specialist-invocation discipline:** no gate (0 growth-strategist / system-architect invocations across Path B) → **evidence-based forcing at ≥3 copy strings / ≥200 LOC new contract**.
+- **Audit-Intake pattern:** implicit (working convention only) → **codified** (cold pool + P0-only + PRD-trigger promotion).
+- **Test-touch counting:** implicit since MR-004 → **codified** (`.test.ts` / `.test.tsx` / `.spec.ts` count as surface coverage).
+- **Mode 5 sequence-length cap:** unbounded → **soft cap at N=5; N≥6 requires meta-coordinator pre-check**.
+- **Past-cap staleness triage:** 14 items carried without explicit verdict → **10 KEEP + 3 DOWNGRADE + 0 DELETE** (recorded in `MR_005.md` Agenda 6 and backlog inline).
+- **Iter 026-028 burn-down programming:** unfixed → **fixed** (026 = #14 process-engine; 027 = #7 policy-engine full reverse-drift relief; 028 = #19+#20 session-durability bundle).
+
+### Follow-ups
+
+- **None.** Mode 4 generates zero product-code follow-ups by rule.
+- MR-005 effectiveness questions (8 items) tracked as MR-006 agenda targets in `docs/meta/MR_005.md` § Effectiveness metric targets, not as backlog rows.
+
+---
+
 ## [2026-04-21] - Iteration 024: v2 Dashboard executive refinement (Mode 5 item 6/6 — Path B complete)
 
 ### Selection
