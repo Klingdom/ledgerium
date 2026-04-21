@@ -6,6 +6,55 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-21] - Iteration 026: `validateRenderedSOP` wired into process-engine pipeline (Mode 1, `burn-down`)
+
+### Selection
+
+- **Mode:** Mode 1 (bounded improvement loop).
+- **Rule:** `burn-down` (MANDATORY — MR-005 iter 026-028 programming + pool > 8 ceiling rule both force; top staleness item).
+- **Item:** #14 Wire `validateRenderedSOP` into `processSession` pipeline. Birth iter 007; age 19 at selection (past staleness cap #1).
+- **Primary agent:** `backend-engineer` (Delegation Rubric: "pure code-logic changes with no secondary signal").
+- **Area:** `process-engine` — tracked Phase-2 surface. Rotates OFF web-app (Path B closed iter 024; 5-consecutive-non-extension clock cleared).
+- **D-4 gate:** evaluated — 68 LOC new contract << 200 LOC threshold; no ≥3 user-visible copy strings; neither `system-architect` nor `growth-strategist` adjacency required.
+
+### What changed
+
+**New (2):**
+- `packages/process-engine/src/processSessionFull.ts` (NEW, 68 LOC) — pure composed function `processSessionFull(input, overrides?)` wiring `processSession → renderTemplates → validateRenderedSOP` into a single call. Returns `{ output: ProcessOutput, artifacts: RenderedArtifacts, sopValidation: SOPValidation }`. Exported `ProcessSessionFullResult` interface. Never throws on SOP validation failure (diagnostic in `sopValidation.ok: false` shape). Throws on invalid input (matches `processSession` contract).
+- `packages/process-engine/src/processSessionFull.test.ts` (NEW, 384 LOC, 14 tests across 7 describe blocks) — result shape (3), happy path (2), failure `too_few_steps` (2), failure `banned_recorder_artifact` (1), determinism (3 — includes `artifacts.selection` equality), invalid input throws (2), override forwarding (1).
+
+**Modified (1):**
+- `packages/process-engine/src/index.ts` — +2 lines exporting `processSessionFull` + `type ProcessSessionFullResult`.
+
+**Design choice (Option A vs Option B):** Option A (new composed public function) chosen over Option B (mutate `processSession` return shape). Rationale: `processSession`'s signature is depended on by web-app `/api/process-sessions` route, extension background job, and 116+ fixture tests; mutating it would cascade through every consumer. Option A delivers quality-gate wiring as an additive public surface; existing callers work unchanged.
+
+**Zero changes to existing product code.** `processSession.ts` preserved byte-identical. Legacy callers (web-app API route, extension BG job) continue working unchanged; migration to `processSessionFull` is a separate product decision (tracked as non-backlog adjacency — not added as follow-up row).
+
+### Validation
+
+- `pnpm --filter @ledgerium/process-engine typecheck`: **clean** (tsc --noEmit exits 0).
+- `pnpm --filter @ledgerium/process-engine test`: **443 passed / 443 total** (10 test files).
+- Process-engine package: **429 → 443 tests** (+14 new `processSessionFull.test.ts`).
+- Workspace: **1728 → 1742 tests** (+14 — new `.test.ts` picked up by workspace discovery; no `.test.tsx` gap issue here).
+- Determinism verified: `processSessionFull(input)` called twice on identical input returns deep-equal result including `artifacts.selection` metadata.
+- Zero regression on existing `processSession.test.ts` (116 tests pass unchanged).
+
+### Impact (Before → After)
+
+- **SOP quality-gate wiring:** validator was pure and exported but NOT composed with `processSession` → validator is now composed into public pipeline entry point `processSessionFull`; existing `processSession` contract preserved.
+- **Pool:** 33 → 32 (first net shrinkage since iter 023; projects ≤25 by iter 028 close per MR-005 programming).
+- **Staleness tail:** past-cap top item #14 age 19 closed → #7 age 18 becomes new staleness #1 (iter 027 programmed target).
+- **Area rotation clock:** 5-consecutive-non-extension clock reset at iter 026 (process-engine = tracked Phase-2 surface, extension-adjacent).
+- **Reverse portfolio-drift trigger D-1:** remains armed after iter 026 (process-engine is extension-adjacent, not a D-1-enumerated tracked extension surface). Full D-1 relief arrives at iter 027 with #7 policy-engine touch.
+- **Cadence counter:** +1 → 1/3 toward MR-006.
+- **Cool-off streak:** 1 of 3 consecutive burn-downs. Re-arms at iter 029 if iter 027 + iter 028 also burn-down as programmed.
+
+### Follow-ups
+
+- **Zero.** Scope held to literal backlog wording; density-trigger clause 3 did not fire.
+
+---
+
 ## [2026-04-21] - Iteration 025: MR-005 meta-review (Mode 4, governance-only — NO product code changes)
 
 ### Selection

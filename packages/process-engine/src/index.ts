@@ -1,4 +1,6 @@
 export { processSession } from './processSession.js';
+export { processSessionFull } from './processSessionFull.js';
+export type { ProcessSessionFullResult } from './processSessionFull.js';
 export { validateProcessEngineInput } from './inputValidator.js';
 export type {
   ProcessEngineInput,
