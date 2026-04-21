@@ -11,7 +11,7 @@ This file records each bounded improvement loop.
 - Coordinator: coordinator
 - Phase: Phase 1
 - Mode: Mode 2 (targeted fix, directed). Increments improvement-loop counter by 1.
-- Commit: `834eeb9`
+- Commit: `9988c3e` (initial `834eeb9` amended once to include final iteration-log commit hash)
 
 ### Candidate Selection
 
