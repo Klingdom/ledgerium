@@ -25,7 +25,7 @@ export const SENSITIVE_SELECTOR_PATTERNS: readonly RegExp[] = [
   /secret/i,
   /token/i,
   /api[_-]?key/i,
-  /credit[_-]?card/i,
+  /credit[\s_-]*card/i,
   /card[_-]?number/i,
   /cvv/i,
   /ssn/i,
@@ -69,7 +69,7 @@ export function classifySensitivity(
 
     // Payment patterns
     if (
-      /credit[_-]?card/i.test(combined) ||
+      /credit[\s_-]*card/i.test(combined) ||
       /card[_-]?number/i.test(combined) ||
       /cvv/i.test(combined)
     ) {

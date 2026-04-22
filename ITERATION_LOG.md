@@ -4,6 +4,70 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 027
+
+- Date: 2026-04-21
+- Trigger: Post-MR-005 programmed burn-down (iter 027 MANDATORY per MR_005 Agenda 6 / `CLAUDE.md § Current Phase` iter 026-028 programming). Pool > 15 hard ceiling still violated (34 entering iter 027). D-1 reverse portfolio-drift trigger armed at iter 026 close; iter 027 policy-engine touch designed to fully clear it.
+- Coordinator: coordinator
+- Phase: Phase 1
+- Mode: **Mode 1 (bounded improvement loop)**
+- Commit: pending (single Mode 1 burn-down commit)
+
+### Candidate Selection
+
+- **Selection rule:** `burn-down` (MANDATORY — MR-005 iter 027 programmed at iter 025 close; pool > 8 soft ceiling + > 15 hard ceiling both independently force burn-down; #7 at score 11 is not top-score but is programmed cleanup for the D-1-enumerated policy-engine surface)
+- **Selected work:** #7 Widen policy-engine `credit[_-]?card` regex to `/credit[\s_-]*card/i`. Birth iter 008 (iter 008 follow-up). Area = policy-engine (D-1-enumerated tracked extension surface). Primary agent `backend-engineer` per Delegation Rubric ("pure code-logic changes with no secondary signal") + programmed assignment.
+- **Rationale:** addresses 3 signals simultaneously — (a) follow-up burn-down (pool 35 → 34), (b) **fully clears D-1 reverse portfolio-drift trigger** (policy-engine = D-1-enumerated tracked extension surface; 5-consecutive-non-extension counter reset to 0), (c) E=1/R=1 scope perfectly matched to cool-off discipline (no cool-off consumption under burn-down rule).
+- **Portfolio rule checks:**
+  - `burn-down` rule (1-in-5 floor + pool > 8 ceiling): both satisfied. Pool at 35 entering iter 027.
+  - Area saturation: iter 027 `policy-engine` (distinct from iter 026 `process-engine`, iter 025 `governance`, iter 024 `web-app`). 3-in-a-row clock cleared.
+  - Release-blocker cadence: no open Phase-1 blockers; rule inapplicable.
+  - Same-implementer-4+: iter 024 `frontend-engineer`; iter 025 `meta-coordinator` (Mode 4, excluded); iter 026 `backend-engineer`; iter 027 `backend-engineer`. Consecutive counter = 2. No violation.
+  - D-4 specialist-invocation gate: delivered surface = 2 regex-literal edits + 6 new tests + 1 downstream test-assertion flip. Well under 200 LOC threshold; `system-architect` adjacency NOT required. No user-visible copy strings; `growth-strategist` adjacency NOT required.
+- **density-response:** n/a (zero follow-ups generated; clause 3 did not fire). 3 adjacent-regex gaps noted in report (`api[_-]?key`, `card[_-]?number`, `social[_-]?security` / `tax[_-]?id`) but NOT converted to backlog rows per scope discipline — they can be surfaced by a future iteration or during next meta-review.
+- **scope-expansion:** none (scope held to literal backlog wording — widen credit_card regex; the downstream `target-inspector.test.ts:172-178` assertion flip is a counter-assertion of the same single logical outcome, already encoded in the test codebase as `(known gap)`).
+- **ceiling-cool-off:** not invoked (iter 027 is burn-down by rule; cool-off only applies to `top-score`/`blocker-cadence` picks when pool > 8).
+- **reverse-portfolio-drift:** trigger **FULLY CLEARED at iter 027 close** (policy-engine is D-1-enumerated surface). No `reverse-portfolio-drift: user-ack` required (selection intrinsically clears the trigger).
+- **directed-agents:** `backend-engineer` primary; no adjacent specialists required.
+
+### Agents Used
+
+- **Primary:** `backend-engineer` — implemented 2 regex-literal edits in `sensitivity.ts`, 6 new tests in `sensitivity.test.ts`, 1 downstream test-assertion flip in `target-inspector.test.ts`.
+- **Adjacent:** none. D-4 gate did not fire.
+- **Consecutive-same-agent counter:** `backend-engineer` = 2 post-iter-027. If iter 028 also `backend-engineer` (likely for #19+#20 storage.ts burn-down), counter reaches 3. Iter 029 then becomes MANDATORY rotation (DV2-R01 can be `backend-engineer` OR `analytics`; rotation to `analytics` is the programmed path).
+
+### Files Changed
+
+**Modified (2):**
+- `packages/policy-engine/src/sensitivity.ts` — 2 lines changed:
+  - Line 28 (SENSITIVE_SELECTOR_PATTERNS constant): `/credit[_-]?card/i` → `/credit[\s_-]*card/i`
+  - Line 72 (classifySensitivity payment block): `/credit[_-]?card/i.test(combined)` → `/credit[\s_-]*card/i.test(combined)`
+- `apps/extension-app/src/content/target-inspector.test.ts` — lines 168-178 updated: known-gap comment block replaced with iter-027-gap-closed comment; assertion at line 177 flipped from `.toBe(false)` to `.toBe(true)`; test title updated from `"(known gap)"` to `"(iter-027 gap closed)"`.
+
+**Modified with test additions (1):**
+- `packages/policy-engine/src/sensitivity.test.ts` — new `describe('widened credit_card separator coverage (iter-027)', ...)` block with 6 tests: single-space, double-space, mixed-case-with-space, mixed-separators, tab-separator, and negative control `creditxcard` (non-separator character must NOT match).
+
+### Validation
+
+- **Policy-engine package:** 56 → 62 tests (+6). All passing.
+- **Workspace total:** 1775 / 1775 passing (0 failed). Pre-change run showed 1 failure in `target-inspector.test.ts:177` because the test had been encoding the known-gap behavior; flipping the assertion to the iter-027 post-state cleared the failure without adding a new test.
+- **Typecheck:** clean across all 9 packages/apps (shared-types, schema-events, normalization-engine, segmentation-engine, process-engine, intelligence-engine, agent-intelligence, extension-app, web-app).
+- **Determinism:** regex change is byte-deterministic; no clock/random inputs. `target-inspector` test uses deterministic `makeInput()` fixture.
+
+### Outcome
+
+- #7 closed (pool **35 → 34**).
+- D-1 reverse portfolio-drift trigger **FULLY CLEARED** (next check at iter 033 if iter 028-032 all miss D-1-enumerated extension surfaces).
+- Cadence counter 2/3 toward MR-006 (next meta-review due at iter 029 close).
+- Cool-off streak 2 of 3 (re-arms at iter 029 if iter 028 also burn-down as programmed).
+- Zero follow-ups generated (density-response: n/a).
+
+### Follow-ups
+
+- None (0 generated this iteration). Three adjacent-regex narrowness candidates noted but NOT added to backlog per scope discipline — may be aggregated into a future single "widen sensitivity-classifier separator class across all PATTERNS" iteration if CEO/coordinator judgment warrants.
+
+---
+
 ## Iteration 026
 
 - Date: 2026-04-21

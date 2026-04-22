@@ -166,6 +166,43 @@ describe('classifySensitivity', () => {
       expect(result.isSensitive).toBe(false);
     });
   });
+
+  describe('widened credit_card separator coverage (iter-027)', () => {
+    it('detects "credit card" (single space) in selector as payment', () => {
+      const result = classifySensitivity(undefined, 'input[aria-label="credit card"]');
+      expect(result.isSensitive).toBe(true);
+      expect(result.sensitivityClass).toBe('payment');
+    });
+
+    it('detects "credit  card" (double space) in selector as payment', () => {
+      const result = classifySensitivity(undefined, 'input[aria-label="credit  card"]');
+      expect(result.isSensitive).toBe(true);
+      expect(result.sensitivityClass).toBe('payment');
+    });
+
+    it('detects "Credit Card" (mixed case with space) in label as payment', () => {
+      const result = classifySensitivity(undefined, undefined, 'Credit Card');
+      expect(result.isSensitive).toBe(true);
+      expect(result.sensitivityClass).toBe('payment');
+    });
+
+    it('detects "credit_-card" (mixed separators) in selector as payment', () => {
+      const result = classifySensitivity(undefined, 'input.credit_-card');
+      expect(result.isSensitive).toBe(true);
+      expect(result.sensitivityClass).toBe('payment');
+    });
+
+    it('detects "credit\\tcard" (tab separator) in label as payment', () => {
+      const result = classifySensitivity(undefined, undefined, 'credit\tcard');
+      expect(result.isSensitive).toBe(true);
+      expect(result.sensitivityClass).toBe('payment');
+    });
+
+    it('does NOT match "creditxcard" (non-separator character) — negative control', () => {
+      const result = classifySensitivity(undefined, 'input.creditxcard', 'creditxcard');
+      expect(result.isSensitive).toBe(false);
+    });
+  });
 });
 
 describe('SENSITIVE_INPUT_TYPES', () => {

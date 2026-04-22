@@ -6,6 +6,49 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-21] - Iteration 027: policy-engine `credit_card` regex widened (Mode 1, `burn-down`)
+
+### Selection
+
+- **Mode:** Mode 1 (bounded improvement loop).
+- **Rule:** `burn-down` (MANDATORY — MR-005 iter 026-028 programming + pool > 8 soft + pool > 15 hard ceiling all force burn-down).
+- **Item:** #7 Widen policy-engine `credit[_-]?card` regex to `/credit[\s_-]*card/i`. Birth iter 008. Score 11. E=1/R=1.
+- **Primary agent:** `backend-engineer` (programmed + Delegation Rubric "pure code-logic changes with no secondary signal").
+- **Area:** `policy-engine` — D-1-enumerated tracked extension surface. Touch FULLY CLEARS MR-005 D-1 reverse portfolio-drift trigger.
+- **D-4 gate:** evaluated — 2 regex-literal edits + 6 new tests (well under 200 LOC threshold); no user-visible copy strings. Neither `system-architect` nor `growth-strategist` adjacency required.
+
+### What changed
+
+- `packages/policy-engine/src/sensitivity.ts:28` — SENSITIVE_SELECTOR_PATTERNS regex `/credit[_-]?card/i` → `/credit[\s_-]*card/i`. Separator class widened from "zero or one of underscore/hyphen" to "zero or more of whitespace/underscore/hyphen."
+- `packages/policy-engine/src/sensitivity.ts:72` — classifySensitivity payment-block runtime test uses the widened regex.
+- `packages/policy-engine/src/sensitivity.test.ts` — +1 describe block `'widened credit_card separator coverage (iter-027)'` with 6 tests: single-space label, double-space label, mixed-case-with-space, mixed separators `credit_-card`, tab `credit\tcard`, and negative control `creditxcard` (must NOT match). Package test count **56 → 62**.
+- `apps/extension-app/src/content/target-inspector.test.ts:168-178` — comment rewritten and single assertion flipped from `.toBe(false)` to `.toBe(true)`. The test was already documenting this specific gap as `(known gap)` using the shared classifier; iter-027 closes the gap so the counter-assertion must reflect the new correct behavior. No new tests added; only the existing assertion was updated.
+
+### Why
+
+Natural-language UI labels (e.g., `aria-label="Credit Card Number"`, placeholder `"Credit Card"`) were not being detected as sensitive by the policy-engine. The previous `/credit[_-]?card/i` regex required underscore/hyphen/no-separator — space-delimited labels fell through. The widened `/credit[\s_-]*card/i` pattern covers natural-language forms while preserving all previously-matched forms (`creditcard`, `credit_card`, `credit-card`, `Credit_Card` mixed-case). This tightens PII redaction coverage on the recorded-workflow capture path before the v3 Process Intelligence Metrics Engine begins consuming that data at finer grain.
+
+### Validation
+
+- Policy-engine package: 56 → 62 tests (all passing).
+- Workspace: 1775 / 1775 passing (0 failures). The pre-change workspace had 1 failing test because `target-inspector.test.ts:177` was explicitly documenting the gap that iter 027 closes.
+- Typecheck: clean across all 9 packages/apps.
+- Determinism: byte-deterministic; no clock/random inputs.
+
+### Impact
+
+- Pool: **35 → 34** (#7 closed).
+- **MR-005 D-1 reverse portfolio-drift trigger FULLY CLEARED** (policy-engine is D-1-enumerated; 5-consecutive-non-extension counter reset).
+- Cadence counter 2/3 toward MR-006.
+- Cool-off streak 2 of 3.
+- Zero follow-ups generated. Three adjacent-regex candidates noted (`api[_-]?key`, `card[_-]?number`, `social[_-]?security`/`tax[_-]?id`) but NOT added to backlog per scope discipline.
+
+### Next
+
+Iter 028 = #19 + #20 bundled `storage.ts` SW-startup burn-down (extension-app surface). Programmed as `backend-engineer` primary — consecutive counter would reach 3 post-iter-028, forcing rotation at iter 029 (rotate to `analytics` on DV2-R01).
+
+---
+
 ## [2026-04-21] - Iteration 026: `validateRenderedSOP` wired into process-engine pipeline (Mode 1, `burn-down`)
 
 ### Selection

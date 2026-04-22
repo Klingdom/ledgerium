@@ -165,16 +165,16 @@ describe('isSensitiveTarget — aria-label patterns', () => {
     ).toBe(true)
   })
 
-  // NOTE: The old local SENSITIVE_RE matched /credit/i which would catch "Credit card number"
-  // (space-separated). The shared classifier uses /credit[_-]?card/i and /card[_-]?number/i
-  // which require underscore or dash (not a space). Natural-language labels with spaces are
-  // therefore a known gap in the shared classifier — see judgment calls in iteration notes.
-  it('aria-label="Credit card number" (space-separated) → NOT sensitive via shared classifier (known gap)', () => {
+  // Iter 027 closed this gap: shared classifier regex widened from /credit[_-]?card/i to
+  // /credit[\s_-]*card/i, which now matches space-separated natural-language labels.
+  // (card[_-]?number/i remains narrow — candidate for a future iteration; see
+  // IMPROVEMENT_BACKLOG.md iter-027 follow-up notes.)
+  it('aria-label="Credit card number" (space-separated) → sensitive via shared classifier (iter-027 gap closed)', () => {
     expect(
       isSensitiveTarget(
         makeInput('text', { 'aria-label': 'Credit card number' }) as unknown as Element,
       ),
-    ).toBe(false)
+    ).toBe(true)
   })
 })
 
