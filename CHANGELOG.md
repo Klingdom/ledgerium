@@ -6,6 +6,73 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-22] - METRICS_DASHBOARD_REVIEW_001 (Mode 3-adjacent, multi-agent; NON-counting toward improvement-loop cadence)
+
+CEO-directed multi-agent review of shipped metrics engine + v2 workflow library dashboard ("engage all subagents to review and improve the metrics engine and corresponding workflow library dashboard"). 10 specialist agents produced 94 raw findings; deduped to 66 unique.
+
+Artifact: `docs/meta/METRICS_DASHBOARD_REVIEW_001.md` (~4,300 words; 11 numbered sections; follows DASHBOARD_V2_REVIEW_001 precedent).
+
+### Agents engaged (10 parallel)
+
+`product-manager` · `system-architect` · `ux-designer` · `qa-engineer` · `backend-engineer` · `frontend-engineer` · `analytics` · `growth-strategist` · `competitive-researcher` · security (via `general-purpose` — `security-engineer` agent type unavailable).
+
+### Intake per MR-005 D-5 (Audit-Intake Pattern)
+
+- **9 P0 → live `IMPROVEMENT_BACKLOG.md`** (rows #65–#73 MDR-P01 through MDR-P09; `Birth iter: audit-intake`).
+- **23 P1 + 22 P2 + 12 P3 = 57 items held in cold pool** in the review artifact (§4, §5, §6). Promotion paths: (a) live-P0 closure creates slot, (b) PRD-cited hard-blocker enumerated dependency, (c) MR-006 Change D staleness triage at age ≥10 iter post-intake (first window MR-008 at iter ~042).
+
+### P0 summary (9 items)
+
+- **2 engine correctness:** MDR-P01 `automate` fires for unhealthy workflows (no `overall >= 40` guard on Rule 1); MDR-P02 insight chip SLA/onboarding-cohort fabrication violates PRD §2 non-goal.
+- **3 determinism/architecture:** MDR-P03 `Date.now()`/`new Date()` leaks in request-scoped metrics path (invariant violation; PRD §4 metric #2 structurally uncomputable); MDR-P04 `recordedThisMonth` locale/TZ dependent; MDR-P05 shadow function v1/v2 `computeAiOpportunityScore` + `computeVariationScore` numeric divergence (same API response emits disagreeing `stats.*` vs `metricsV2.*`; supersedes DV2-R06).
+- **3 a11y:** MDR-P06 kebab trigger keyboard-inaccessible WCAG 2.1 SC 2.1.1 (`isHovered`-gated render); MDR-P07 `aria-controls="portfolio-sidebar"` references missing DOM id ARIA 1.2; MDR-P08 concurrent document Escape handlers double-dismiss.
+- **1 analytics decision-blocker:** MDR-P09 bounce rate has no instrumentation path + plan tier absent from v2 events → PRD §4 #2/#3/#4/#6 structurally impossible → **14-day soak clock cannot convert to `#57` flag-retirement decision without this**.
+
+### Strengths to preserve (15, per §7)
+
+Engine discipline with named constants; honest dimension naming (post iter-020); `processSessionFull` composition pattern; tenant isolation uniformity; 4-column verdict layout discipline; 6-state machine with inline state rendering; state-machine E2E coverage via route-intercept; axe-core zero-tolerance on populated + empty states; `SKELETON_MIN_MS=300`; API-key auth on `/api/sync`; typed `AnalyticsEvent` discriminated union; typed 5-category `OpportunityTag` enum (genuine competitive differentiator); PostHog forwarding `track() → posthogCapture()`; `PORTFOLIO_PRIOR_MIN_WORKFLOWS=3` null-return; `n=0 — no runs` honesty marker.
+
+### Strategic context
+
+2025-11-10 Scribe $75M Series C at $1.3B launched Scribe Optimize (LLM-inferred recommendations) overlapping Opportunity column + Insights Strip. Ledgerium's "real captured behavior + determinism + evidence-linking" is now a **live positioning battle**, not theoretical.
+
+### Pool impact
+
+- Pool 28 → **37 at intake** (+9 P0 promotions). Pool-size ceiling rule (> 8 soft; > 15 hard in Mode 5) deeply violated.
+- Iter 033 pre-scheduled #24 LiveStep type tightening (segmentation-engine) **UNCHANGED** — saturation-forced non-web-app burn-down; unaffected by this review's web-app-concentrated P0 surface.
+- Iter 034+ endorsed sequence: 034 MDR-P06+P07 bundle · 035 MDR-P01+P02 bundle · 036 MDR-P03+P04 bundle · 037 MDR-P09 · 038 MDR-P05 · 039 MDR-P08 · 040 saturation-breaker burn-down. If run as Mode 5 N=6 (034-039), MR-005 D-7 meta-coordinator pre-check FIRES.
+
+### #57 flag-retirement prerequisite chain
+
+- Was: `#51 ✅ + DV2-R02 ✅ + DV2-R03 ✅ + DV2-R06 + 14d soak`.
+- **Now:** `#51 ✅ + DV2-R02 ✅ + DV2-R03 ✅ + MDR-P09 + MDR-P01 + MDR-P02 + MDR-P05 (consolidates DV2-R06) + MDR-P06 + MDR-P07 + 14d soak`.
+
+### Governance
+
+- Mode 3-adjacent diagnostic — does NOT increment improvement-loop cadence counter.
+- MR-007 stability window iter 033-035 preserved; zero CLAUDE.md diffs proposed.
+- Cool-off recharge counter UNCHANGED at 2/3.
+- Area saturation STILL TRIPPED (iter 029/030/031 all web-app).
+- D-1 reverse portfolio-drift counter UNCHANGED at 3.
+- MR-008 earliest iter 035 per 3-loop floor.
+
+### CEO decisions pending (§11)
+
+1. Iter 034+ sequence confirmation (three bundles + standalone pattern per §9.2) or direct alternative.
+2. P0-promotion disposition (default: all 9 to live).
+3. #57 flag-retirement gating extension confirmation (MDR-P01/P02/P05/P06/P07/P09 added as prerequisites).
+4. Path C coordination decision (§9.4) — P1 items MDR-P1-03 + MDR-P2-07 overlap with Path C Build Phase A.
+
+### Files changed
+
+- `docs/meta/METRICS_DASHBOARD_REVIEW_001.md` (new, ~4,300 words)
+- `IMPROVEMENT_BACKLOG.md` (intake block + 9 new rows #65–#73)
+- `SYSTEM_HEALTH.md` (intake block prepended)
+- `CLAUDE.md` (Active work / Priorities / Known Issues updates)
+- `CHANGELOG.md` (this entry)
+
+---
+
 ## [2026-04-22] - Iteration 032: MR-007 meta-review (Mode 4, governance-only; NON-counting toward improvement-loop cadence)
 
 ### Selection
