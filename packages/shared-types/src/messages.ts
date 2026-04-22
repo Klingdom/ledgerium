@@ -8,7 +8,17 @@ export interface LiveStep {
   stepId: string;
   title: string;
   status: 'provisional' | 'finalized';
-  boundaryReason?: string;
+  boundaryReason?:
+    | 'form_submitted'
+    | 'navigation_changed'
+    | 'route_changed'
+    | 'target_changed'
+    | 'action_completed'
+    | 'app_context_changed'
+    | 'idle_gap'
+    | 'user_annotation'
+    | 'session_stop'
+    | 'explicit_boundary';
   confidence: number;
   eventCount: number;
   startedAt: number;

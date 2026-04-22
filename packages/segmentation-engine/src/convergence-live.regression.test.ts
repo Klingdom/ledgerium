@@ -24,7 +24,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 import { StreamingSegmenter } from './streaming-segmenter.js';
-import type { SegmentableEvent, DerivedStep } from './types.js';
+import type { SegmentableEvent, DerivedStep, BoundaryReason, GroupingReason } from './types.js';
 
 // __dirname is injected by the vitest runtime even in ESM test files.
 const FIXTURES_ROOT = join(__dirname, '..', 'fixtures');
@@ -37,8 +37,8 @@ interface LiveStep {
   stepId: string;
   title: string;
   status: 'provisional' | 'finalized';
-  boundaryReason?: string;
-  grouping?: string;
+  boundaryReason?: BoundaryReason;
+  grouping?: GroupingReason;
   pageLabel?: string;
   confidence: number;
   eventCount: number;

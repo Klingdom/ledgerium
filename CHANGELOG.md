@@ -6,6 +6,64 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-22] - Iteration 033 — `#24 LiveStep type tightening` CLOSED (Mode 1, `burn-down`, `backend-engineer`)
+
+MR-007 § 5 endorsed pick executed. `LiveStep.grouping?` and `LiveStep.boundaryReason?` free-form `string` fields converted to typed enum unions, closing a long-standing type-system determinism gap (Birth iter 011, age 22 iter — the past-cap staleness tail). Pure type-system narrowing; zero runtime code changes; zero test-file changes; 1782/1782 workspace tests unchanged.
+
+### Why
+
+Row #24 was born as an iter-011 follow-up when `LiveStepBuilder` / `StreamingSegmenter` / `buildDerivedSteps` / `segmentEvents` were converged onto the segmentation-engine primitive. At convergence, `BoundaryReason` and `GroupingReason` were typed as exported literal unions in `packages/segmentation-engine/src/types.ts`, but consumer `LiveStep` interfaces across the monorepo continued to type the corresponding fields as `string`. This meant any future drift between emitter output set and consumer field values would produce silent runtime divergence rather than a compile-time error — a Ledgerium determinism invariant gap at the type-system layer.
+
+### What changed (3 files, 4 field-type swaps + 1 import extension + 10 inline union literal lines)
+
+1. **`apps/extension-app/src/shared/types.ts:218-219`**
+   - `boundaryReason?: string` → `boundaryReason?: BoundaryReason`
+   - `grouping?: string` → `grouping?: GroupingReason`
+   - No import added — local type aliases already existed at lines 227-248 (forward-referenced resolution).
+
+2. **`packages/shared-types/src/messages.ts:11`**
+   - `boundaryReason?: string` replaced with inline 10-member literal union (`'form_submitted' | 'navigation_changed' | 'route_changed' | 'target_changed' | 'action_completed' | 'app_context_changed' | 'idle_gap' | 'user_annotation' | 'session_stop' | 'explicit_boundary'`).
+   - Inline used deliberately to preserve `@ledgerium/shared-types` dependency-free layering (package has zero monorepo consumers; orphan-status preserved).
+   - No `grouping?` field added — type-tightening, not shape expansion.
+
+3. **`packages/segmentation-engine/src/convergence-live.regression.test.ts:27+40+41`**
+   - Extended existing `import type` from `./types.js` to include `BoundaryReason, GroupingReason`.
+   - Private test-mirror `LiveStep.boundaryReason?: string` → `BoundaryReason`.
+   - Private test-mirror `LiveStep.grouping?: string` → `GroupingReason`.
+
+### Validation
+
+- `pnpm --filter @ledgerium/segmentation-engine typecheck` + `test` — **PASS**
+- `pnpm --filter @ledgerium/extension-app typecheck` + `test` — **PASS**
+- `pnpm --filter @ledgerium/shared-types typecheck` — **PASS**
+- Workspace `pnpm typecheck` (10 packages/apps) — **PASS**
+- Workspace `pnpm test` — **1782/1782 PASS** (unchanged before → after).
+
+### Impact
+
+- **Type-safety:** any downstream writer passing a string literal not in the enum is now a compile-time error.
+- **Determinism:** closes a type-system-level invariant gap (emitter-consumer drift detection).
+- **Pool trajectory:** 37 → 36 (clean burn-down; zero follow-ups).
+- **Counter effects:** D-1 reverse-portfolio-drift 3 → 0 (segmentation-engine D-1-enumerated); cool-off recharge 2/3 → 3/3 (first `top-score`-eligible slot iter 034); MR-008 cadence 0 → 1 of 3; Area saturation satisfied (non-web-app).
+
+### Scope-adjacent observations (NOT promoted to backlog, iter 031 precedent)
+
+1. **Type-alias duplication** — `BoundaryReason`/`GroupingReason` exist in both `apps/extension-app/src/shared/types.ts:227-248` and `packages/segmentation-engine/src/types.ts:42-63`. Pre-existing; byte-identical; low drift risk.
+2. **Orphan-package candidate** — `@ledgerium/shared-types` has zero monorepo consumers of its exports. Either dead code or pending future use; separate audit iteration candidate.
+
+### Files changed
+
+- `apps/extension-app/src/shared/types.ts`
+- `packages/shared-types/src/messages.ts`
+- `packages/segmentation-engine/src/convergence-live.regression.test.ts`
+- `ITERATION_LOG.md` (iter 033 entry prepended)
+- `IMPROVEMENT_BACKLOG.md` (row #24 closed + header updated)
+- `SYSTEM_HEALTH.md` (iter 033 entry prepended)
+- `CLAUDE.md` (Current Phase / Priorities / Known Issues / follow-up pool count updated)
+- `CHANGELOG.md` (this entry prepended)
+
+---
+
 ## [2026-04-22] - METRICS_DASHBOARD_REVIEW_001 (Mode 3-adjacent, multi-agent; NON-counting toward improvement-loop cadence)
 
 CEO-directed multi-agent review of shipped metrics engine + v2 workflow library dashboard ("engage all subagents to review and improve the metrics engine and corresponding workflow library dashboard"). 10 specialist agents produced 94 raw findings; deduped to 66 unique.

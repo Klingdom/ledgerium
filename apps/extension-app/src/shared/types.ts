@@ -215,8 +215,8 @@ export interface LiveStep {
   stepId: string
   title: string
   status: 'provisional' | 'finalized'
-  boundaryReason?: string
-  grouping?: string
+  boundaryReason?: BoundaryReason
+  grouping?: GroupingReason
   pageLabel?: string
   confidence: number
   eventCount: number

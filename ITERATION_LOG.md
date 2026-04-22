@@ -4,6 +4,107 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 033
+
+- Date: 2026-04-22
+- Trigger: **MR-007 § 5 endorsed pick** (Mode 1 bounded loop; Mode 4 iter 032 occupied the previous slot). Pool 37 > 8 forces `burn-down`; area saturation still tripped at iter 033 entry (iter 029/030/031 all web-app; Mode 4 iter 032 + Mode 3-adjacent METRICS_DASHBOARD_REVIEW_001 non-counting for Area cadence) forces non-web-app Area; D-1 reverse-portfolio-drift counter at 3 urges extension-adjacent surface selection.
+- Coordinator: coordinator
+- Agents: `backend-engineer` (primary; rotates off `frontend-engineer` 2-consecutive streak broken by iter 032 `meta-coordinator`)
+- Phase: Phase 1
+- Mode: **Mode 1 (standard bounded loop; counting toward improvement-loop cadence)**
+- Commit: pending
+
+### Candidate Selection
+
+- **Selection rule:** `burn-down` (pool 37 > 8 soft ceiling; clause 6 binds; 1-in-5 floor also satisfied — iter 027/028/030/031 all burn-down within last 5 non-meta iterations).
+- **Rule driving the pick:** `burn-down` (ceiling-rule-forced; MR-007 § 5 endorsement aligned with constraint stack).
+- **Portfolio rule checks:**
+  - Area saturation: TRIPPED (iter 029/030/031 all web-app) → iter 033 MUST be non-web-app. #24 is segmentation-engine → SATISFIED.
+  - Release-blocker cadence: no open Phase-1 blockers; rule inapplicable.
+  - Burn-down floor (1-in-5): SATISFIED (see above).
+  - Ceiling rule (pool > 8 forces burn-down): TRIPPED at 37 > 8 → `burn-down` required; #24 is follow-up `Birth iter: 011` → SATISFIED.
+  - Ceiling rule hard-stop (pool > 15, Mode 5 only): not in force (Mode 1).
+  - Cool-off recharge: counter 2/3 at iter 033 entry; iter 033 burn-down completes recharge to 3/3 at close. First top-score-eligible slot = iter 034.
+  - Agent-diversity 4+: `backend-engineer` consecutive counter 1 at iter 033 close; no 4+ risk.
+  - Reverse portfolio-drift (D-1, N=5 non-extension): counter 3 at iter 033 entry; #24 segmentation-engine is D-1-enumerated → counter clears to 0 at close.
+  - Specialist-invocation gate (D-4) clause 1 (≥3 user-visible copy strings): N/A (zero UI strings; pure type-system change).
+  - Specialist-invocation gate (D-4) clause 2 (≥200 LOC new contract): N/A (4 field-type swaps + 10-line inline literal union; pre-existing interface surface; no new contract).
+  - MR-008 cadence: iter 033 close sets counter 1/3 toward MR-008; MR-008 earliest iter 035.
+- **Density-response (Follow-Up Debt Policy clause 4):** N/A — zero follow-ups generated (2 scope-adjacent observations logged below, NEITHER promoted; follows iter 031 precedent).
+- **Selection:** `#24 LiveStep type tightening` (segmentation-engine; MR-007 § 5 endorsed). Second-best fallback #31 sidepanel test harness (score 11 but E=2/R=2 breaks zero-risk pattern) remains eligible for iter 034+.
+
+### Scope (what was done)
+
+**Backlog row #24 (Birth iter 011, age 22 iter at close):** `LiveStep` interface `grouping?: string` + `boundaryReason?: string` fields converted to typed enum unions. `BoundaryReason` (10 literal values) and `GroupingReason` (9 literal values) already existed as exported types at `packages/segmentation-engine/src/types.ts:42-63`; work was wiring them into all three `LiveStep` surfaces.
+
+**Surfaces modified (3 files):**
+
+1. **`apps/extension-app/src/shared/types.ts`** (2 lines):
+   - Line 218: `boundaryReason?: string` → `boundaryReason?: BoundaryReason`.
+   - Line 219: `grouping?: string` → `grouping?: GroupingReason`.
+   - NO import added — `BoundaryReason`/`GroupingReason` already existed as local aliases in the same file (lines 227-236 + 238-248, forward-referenced resolution). Observation-1 below captures the pre-existing duplication.
+
+2. **`packages/shared-types/src/messages.ts`** (line 11 → 11-21 via expansion):
+   - `boundaryReason?: string` replaced with inline 10-member literal union (`'form_submitted' | 'navigation_changed' | 'route_changed' | 'target_changed' | 'action_completed' | 'app_context_changed' | 'idle_gap' | 'user_annotation' | 'session_stop' | 'explicit_boundary'`).
+   - Inline literal used deliberately (not import) to keep `@ledgerium/shared-types` dependency-free per architectural layering.
+   - No `grouping?` field added — this is type-tightening, not shape expansion. Scope discipline preserved.
+
+3. **`packages/segmentation-engine/src/convergence-live.regression.test.ts`** (import + 2 lines):
+   - Line 27: added `BoundaryReason, GroupingReason` to existing `type` import from `./types.js`.
+   - Line 40: `boundaryReason?: string` → `boundaryReason?: BoundaryReason`.
+   - Line 41: `grouping?: string` → `grouping?: GroupingReason`.
+
+**Totals:** 4 field-type swaps + 10 lines of inline union + 1 import extension across 3 files (+17 / −7 lines). Zero test files modified. Zero runtime code modified.
+
+### Validation
+
+- `pnpm --filter @ledgerium/segmentation-engine typecheck` — **PASS**
+- `pnpm --filter @ledgerium/segmentation-engine test` — **PASS** (count unchanged)
+- `pnpm --filter @ledgerium/extension-app typecheck` — **PASS**
+- `pnpm --filter @ledgerium/extension-app test` — **PASS** (count unchanged)
+- `pnpm --filter @ledgerium/shared-types typecheck` — **PASS**
+- Workspace full `pnpm typecheck` (10 packages/apps) — **PASS, zero errors**
+- Workspace full `pnpm test` — **PASS, 1782/1782 (56 files)** — UNCHANGED before → after
+- Determinism invariants: preserved (no change to emitter values; only narrowing of consumer field types).
+- Zero regressions.
+
+### Scope-Adjacent Observations (logged; NOT promoted to backlog, iter 031 precedent)
+
+1. **Duplicate `BoundaryReason` / `GroupingReason` type aliases.** `apps/extension-app/src/shared/types.ts:227-248` locally redefines the same literal unions that `packages/segmentation-engine/src/types.ts:42-63` already exports and `apps/extension-app` already consumes (extension-app has `@ledgerium/segmentation-engine` in package.json; `live-steps.ts` already imports from it). Duplication is pre-existing (not introduced by iter 033). Future dedupe candidate but dropping one set requires a small consumer-sweep risk > this iteration's E=1/R=1 budget. Low drift risk — both sides currently byte-identical; mutation vector is small (both are stable domain enums).
+
+2. **`@ledgerium/shared-types` appears orphaned.** `grep -r "from '@ledgerium/shared-types'"` across the monorepo returned zero consumer imports. The package defines `LiveStep`, `LiveStepUpdatedMessage`, `ExtensionMessage` union, etc., but nothing consumes them. Either dead code or pending-future-use; separate audit iteration candidate.
+
+Neither observation is promoted to the backlog. Both are documented here for future meta-review visibility.
+
+### Follow-ups
+
+**Zero follow-ups generated.** Clean burn-down. Pool trajectory: 37 → 36 (close #24). Density clause 3 (3+ follow-ups) not triggered.
+
+### Metrics
+
+- **Before:** workspace 1782 tests, 10 packages/apps typecheck-clean. `LiveStep` field types `string` (free-form).
+- **After:** workspace 1782 tests, 10 packages/apps typecheck-clean. `LiveStep` field types `BoundaryReason` / `GroupingReason` (typed unions enforcing the canonical 10+9 emitter value set).
+- **Improvement:** any future drift between emitter and consumer — or any consumer writing an unknown string literal — is now a compile-time error (previously silent runtime divergence). Closes a Ledgerium determinism invariant gap at the type-system layer.
+- **Counter effects:** D-1 reverse-portfolio-drift counter 3 → 0 (segmentation-engine D-1-enumerated); cool-off recharge counter 2/3 → 3/3 (3 consecutive post-consumption burn-downs at iter 028+030+031+033; first `top-score` slot iter 034); MR-008 cadence 0 → 1/3.
+
+### Files Changed
+
+- `apps/extension-app/src/shared/types.ts` (+2 / −2)
+- `packages/shared-types/src/messages.ts` (+11 / −1)
+- `packages/segmentation-engine/src/convergence-live.regression.test.ts` (+3 / −2, import line + 2 field types)
+
+Governance updates follow in subsequent edit.
+
+### Outcome
+
+- `#24 LiveStep type tightening` **CLOSED** (pool 37 → 36; past-cap staleness tail closed, Birth iter 011 / age 22).
+- D-1 reverse-portfolio-drift counter cleared 3 → 0.
+- Cool-off recharge completed 2/3 → 3/3; first `top-score`-eligible slot iter 034.
+- `backend-engineer` agent rotation honored (iter 030/031 `frontend-engineer` × 2 broken by iter 032 `meta-coordinator` → iter 033 `backend-engineer`).
+- Area saturation still active at iter 033 close (iter 033 = segmentation-engine; iter 031 = web-app; iter 030 = web-app; iter 029 = web-app → rolling 5-loop Area counter recalibrates; iter 034 may re-enter web-app without tripping new 3-consecutive).
+
+---
+
 ## Iteration 032
 
 - Date: 2026-04-22
