@@ -31,6 +31,7 @@
 import { useState } from 'react';
 import { ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, Columns3 } from 'lucide-react';
 import Link from 'next/link';
+import { track } from '@/lib/analytics.js';
 import WorkflowRow, { type WorkflowRowData } from './WorkflowRow.js';
 import WorkflowListFilterBar, {
   type FilterState,
@@ -251,6 +252,9 @@ interface WorkflowListProps {
   portfolioSidebarOpen?: boolean;
   /** D5: toggle the portfolio sidebar open/closed */
   onTogglePortfolioSidebar?: () => void;
+  /** PRD §4 metric #2: perf timestamp captured at dashboard_v2_viewed emission.
+   * Passed through to WorkflowRow for elapsed-time computation on row click. */
+  dashboardViewPerfTimestampMs?: number;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -269,15 +273,21 @@ export default function WorkflowList({
   onWorkflowArchive,
   portfolioSidebarOpen = false,
   onTogglePortfolioSidebar,
+  dashboardViewPerfTimestampMs = 0,
 }: WorkflowListProps) {
   const [sort, setSort] = useState<SortState>({ field: 'health_score', dir: 'asc' });
   const [sparseNoticeDismissed, setSparseNoticeDismissed] = useState(false);
 
   function handleSort(field: SortField) {
-    setSort((prev) => ({
-      field,
-      dir: prev.field === field && prev.dir === 'asc' ? 'desc' : 'asc',
-    }));
+    const nextDir: SortDir =
+      sort.field === field && sort.dir === 'asc' ? 'desc' : 'asc';
+    setSort({ field, dir: nextDir });
+    // PRD §4 metric #3: sort engagement
+    track({
+      event: 'dashboard_v2_sort_changed',
+      column: field,
+      direction: nextDir,
+    });
   }
 
   function clearAllFilters() {
@@ -492,6 +502,7 @@ export default function WorkflowList({
                   key={workflow.id}
                   workflow={workflow}
                   timeRange={timeRange}
+                  dashboardViewPerfTimestampMs={dashboardViewPerfTimestampMs}
                   {...(onWorkflowRename ? { onRename: onWorkflowRename } : {})}
                   {...(onWorkflowArchive ? { onArchive: onWorkflowArchive } : {})}
                 />

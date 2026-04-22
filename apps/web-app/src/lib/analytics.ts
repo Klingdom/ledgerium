@@ -102,6 +102,35 @@ export type AnalyticsEvent =
   | { event: 'payment_failed' }
   | { event: 'plan_limit_hit'; limit: string; currentUsage: number }
 
+  // ── Dashboard V2 instrumentation (iter-030 / PRD §4) ─────────────────────
+  | {
+      event: 'dashboard_v2_viewed';
+      workflowCount: number;
+      hasActiveFilters: boolean;
+      portfolioFilterActive: boolean;
+    }
+  | {
+      event: 'workflow_row_clicked';
+      workflowId: string;
+      elapsedMsSinceDashboardView: number;
+      healthBand: 'red' | 'amber' | 'green';
+    }
+  | {
+      event: 'dashboard_v2_sort_changed';
+      column: string;
+      direction: 'asc' | 'desc';
+    }
+  | {
+      event: 'dashboard_v2_filter_applied';
+      filterType: 'systems' | 'opportunity' | 'healthStatus' | 'needsAttention';
+      filterValue: string;
+    }
+  | {
+      event: 'insight_chip_clicked';
+      severity: 'critical' | 'warning' | 'info' | 'positive';
+      filterKey: string;
+    }
+
   // ── Navigation ────────────────────────────────────────────────────────────
   | { event: 'page_viewed'; path: string }
 

@@ -20,6 +20,7 @@
 
 import { useState } from 'react';
 import { AlertOctagon, AlertTriangle, Info, Leaf, X, type LucideIcon } from 'lucide-react';
+import { track } from '@/lib/analytics.js';
 import type { InsightChip } from '@/lib/workflow-metrics.js';
 
 interface InsightsStripProps {
@@ -116,10 +117,23 @@ export default function InsightsStrip({
             tabIndex={0}
             aria-pressed={isActive}
             aria-label={`${style.ariaPrefix} ${chip.label}. Click to filter workflows.`}
-            onClick={() => onChipClick(chip.filterKey)}
+            onClick={() => {
+              // PRD §4 metric #5: insight chip CTR
+              track({
+                event: 'insight_chip_clicked',
+                severity: chip.severity,
+                filterKey: chip.filterKey,
+              });
+              onChipClick(chip.filterKey);
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
+                track({
+                  event: 'insight_chip_clicked',
+                  severity: chip.severity,
+                  filterKey: chip.filterKey,
+                });
                 onChipClick(chip.filterKey);
               }
             }}

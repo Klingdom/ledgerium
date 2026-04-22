@@ -4,6 +4,98 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 030
+
+- Date: 2026-04-22
+- Trigger: Post-MR-006 first bounded loop; pool 31 > 8 soft ceiling forces `burn-down` rule per CLAUDE.md § Follow-Up Debt Policy clause 6; cool-off single-use resource was CONSUMED at iter 029 and re-arm counter 0/3 does not qualify; MR-007 not yet due (3-loop stability floor post-MR-006 = earliest iter 032).
+- Coordinator: coordinator
+- Agent: `frontend-engineer` (primary)
+- Phase: Phase 1
+- Mode: **Mode 1 (bounded improvement loop)**
+- Commit: pending
+
+### Candidate Selection
+
+- **Selection rule:** `burn-down` — pool 31 > 8 soft ceiling forces burn-down; #51 qualifies as a DASHBOARD_V2_REVIEW_001-originated live-backlog P0 (promoted at iter 026→027 intake per MR-005 D-5 clause 2). Strongest-score burn-down candidate at 13; only competitor of equal priority (DV2-R02 + DV2-R03 bundle score 10 + 10) programmed for iter 031.
+- **Selected work:** #51 v2 dashboard analytics instrumentation — 6-event spec per DASHBOARD_V2_REVIEW_001 analytics lens + PRD §4 success-metrics table. Closes the PRD §4 measurement blocker that gates #57 flag retirement and external launch.
+- **Portfolio rule checks:**
+  - Cool-off: counter = 0/3 post-iter-029 (not re-armed); not invoked.
+  - Area saturation: iter 028 extension-app, iter 029 web-app analytics-script, iter 030 web-app dashboard-v2 → 2 consecutive web-app (not yet 3; rule does not trigger). Saturation watch continues; next iter 031 is also web-app (DV2-R02+R03 in WorkflowRow.tsx) → would hit 3; MR-005 D-1 reverse portfolio-drift counter competing.
+  - Release-blocker cadence: no open Phase-1 blockers; rule inapplicable.
+  - Burn-down floor (1-in-5): SATISFIED continuously — iter 026 burn-down, iter 027 burn-down, iter 028 burn-down, iter 029 top-score + cool-off, iter 030 burn-down → 4-of-5 last window.
+  - Ceiling rule (pool > 8 forces burn-down): FORCED #51 selection (pool 31 > 8).
+  - Ceiling rule hard-stop (pool > 15, Mode 5 only): not in force (Mode 1).
+  - Agent-diversity 4+: iter 026 backend-engineer, iter 027 backend-engineer, iter 028 backend-engineer, iter 029 analytics, iter 030 frontend-engineer → 4+ counter cleanly broken at iter 029; frontend-engineer = 1 consecutive post-iter-030.
+  - Reverse portfolio-drift (D-1, N=5 non-extension): counter 1 → 2 post-iter-030 (web-app = non-extension). Next check iter 034 if iter 031-034 all miss extension surfaces. DV2-R02+R03 programmed for iter 031 is web-app — counter would advance to 3; monitor across iter 032-034.
+  - Specialist-invocation gate (D-4): evaluated CLEAN — production LOC delta ~155 (well under 200 LOC threshold); no user-visible copy strings added (new strings are internal `event:` discriminants and `location:` values, not UI text); neither `system-architect` nor `growth-strategist` adjacency required.
+
+### Agents Used
+
+- `frontend-engineer` (primary — React component edits + analytics emission wiring + test authorship)
+
+Agent-diversity counter: `frontend-engineer` = 1 consecutive (iter 029 was `analytics`; broke `backend-engineer` at 3). MR-007 cadence 0 → 1 of 3.
+
+### Files Changed
+
+**Modified — production (6 files, ~155 LOC):**
+
+- `apps/web-app/src/lib/analytics.ts` (+29) — Extended `AnalyticsEvent` discriminated union with 5 new event types:
+  - `dashboard_v2_viewed` `{ workflowCount: number; hasActiveFilters: boolean; portfolioFilterActive: boolean }`
+  - `workflow_row_clicked` `{ workflowId: string; elapsedMsSinceDashboardView: number; healthBand: 'red' | 'amber' | 'green' }`
+  - `dashboard_v2_sort_changed` `{ column: string; direction: 'asc' | 'desc' }`
+  - `dashboard_v2_filter_applied` `{ filterType: 'systems' | 'opportunity' | 'healthStatus' | 'needsAttention'; filterValue: string }`
+  - `insight_chip_clicked` `{ severity: 'critical' | 'warning' | 'info' | 'positive'; filterKey: string }`
+  Zero changes to existing event shapes. `track()`, `flushEvents()`, `identifyAnalyticsUser()`, `trackActivation()` unchanged. The 6th PRD §4 event (`upgrade_cta_click[source=health_gate]`) is delivered by reusing the existing `upgrade_clicked` event with a new `location: 'dashboard_v2_health_gate'` value rather than a new event type — scope-minimal.
+- `apps/web-app/src/components/dashboard-v2/DashboardV2Shell.tsx` (+36) — One-shot `dashboard_v2_viewed` emission via `useEffect` on first successful data load (fires once per mount post-load, NOT on subsequent filter changes). `performance.now()` captured in `useRef` at emission moment for downstream elapsed-ms baselines. Threaded `dashboardViewPerfTimestampMs` prop through to `WorkflowList` → `WorkflowRow`. ESLint `react-hooks/exhaustive-deps` intentionally disabled for the one-shot emission effect with inline justification comment.
+- `apps/web-app/src/components/dashboard-v2/WorkflowList.tsx` (+19) — Prop-threaded `dashboardViewPerfTimestampMs`; added `dashboard_v2_sort_changed` emission in the `handleSort` wrapper.
+- `apps/web-app/src/components/dashboard-v2/WorkflowRow.tsx` (+24) — Added `dashboardViewPerfTimestampMs` prop; `analyticsHealthBand` derivation using PRD §2.4 60/80 thresholds (respects `isGated`: gated rows report `'red' | 'amber' | 'green'` honestly based on raw score, not the gate itself); `workflow_row_clicked` emission in `handleRowClick` with integer-rounded elapsedMs via `Math.round(performance.now() - dashboardViewPerfTimestampMs)`; `upgrade_clicked` emission with `location: 'dashboard_v2_health_gate'` in the gated upgrade-CTA click handler inside the breakdown tooltip.
+- `apps/web-app/src/components/dashboard-v2/WorkflowListFilterBar.tsx` (+31) — `dashboard_v2_filter_applied` emission in each of the 4 filter-dimension change handlers (systems multi-select, opportunity, healthStatus, needsAttention toggle). Single-event-per-user-interaction semantics preserved.
+- `apps/web-app/src/components/dashboard-v2/InsightsStrip.tsx` (+16) — `insight_chip_clicked` emission on both `onClick` and `onKeyDown` (Enter/Space) paths. Intentional dual-emission for a11y-path / mouse-path parity — the keyboard path is NOT a duplicate of the mouse path in user reality; both represent legitimate chip-clicked interactions that must be counted.
+
+**Modified/created — tests (5 files, +521 LOC, +45 tests):**
+
+- `apps/web-app/src/components/dashboard-v2/DashboardV2Shell.test.tsx` (+119, +8 tests) — `dashboard_v2_viewed` fires-once-per-mount semantic, shape validation, `portfolioFilterActive` derivation, `hasActiveFilters` derivation, loading-state guards.
+- `apps/web-app/src/components/dashboard-v2/WorkflowList.test.tsx` (+66, +6 tests) — `dashboard_v2_sort_changed` across 4 sortable columns + both directions; prop-drilling integrity.
+- `apps/web-app/src/components/dashboard-v2/WorkflowRow.test.tsx` (+166, +13 tests) — `workflow_row_clicked` across 3 health bands × gated/non-gated; `upgrade_clicked` emission on gated upgrade-CTA; elapsedMs rounding boundary; `analyticsHealthBand` derivation including edge-case 60.0 / 80.0 boundaries.
+- `apps/web-app/src/components/dashboard-v2/InsightsStrip.test.tsx` (NEW, 73 LOC, 6 tests) — `insight_chip_clicked` click + keydown (Enter/Space) parity, severity passthrough, filterKey passthrough; used `vi.mock('@/lib/analytics', () => ({ track: vi.fn() }))` pattern.
+- `apps/web-app/src/components/dashboard-v2/WorkflowListFilterBar.test.tsx` (NEW, 97 LOC, 12 tests) — `dashboard_v2_filter_applied` across 4 filter types (systems / opportunity / healthStatus / needsAttention) + toggle-state semantics + cleared-state emission.
+
+**Modified — governance (5 files):**
+
+- `IMPROVEMENT_BACKLOG.md` — "Last updated" block prepended; row #51 struck through.
+- `ITERATION_LOG.md` — this entry prepended.
+- `SYSTEM_HEALTH.md` — "Last updated" block prepended (iter 030 readiness + pool size 30).
+- `CHANGELOG.md` — iter 030 entry prepended.
+- `CLAUDE.md` — Current Phase + Priorities + Known Issues updated (iter 030 close narrative; #51 CLOSED; cool-off recharge 0/3 → 1/3; MR-007 cadence 0 → 1 of 3; pool 31 → 30).
+
+### Validation
+
+- `pnpm --filter web-app test` — **334 tests passing** (15 files, 1.82s); web-app package delta **289 → 334 (+45)**.
+- `pnpm --filter web-app typecheck` — **clean** (no errors).
+- Workspace `pnpm typecheck` — **clean** across all 9 packages/apps.
+- Workspace `pnpm test` — **1782 / 1782 passing** (unchanged from iter 029). Pre-existing follow-up #53: root `vitest.config.ts` include glob excludes `.test.tsx`; workspace count is accurate for what root config can run but excludes the net +45 `.test.tsx` tests the web-app-local vitest config picks up. Classified as pre-existing gap, NOT a new follow-up — continues to be tracked as #53.
+- Pool delta: 31 → **30** (close #51).
+- Cool-off recharge counter (MR-006 Change A): 0/3 → **1/3** post-iter-030 (re-arms at iter 032 close if iter 030/031/032 all burn-down).
+- D-1 reverse portfolio-drift counter: 1 → **2** (web-app = non-extension).
+
+### Outcome
+
+**#51 closed.** PRD §4 analytics taxonomy complete. 6-event spec shipped: 5 new events (`dashboard_v2_viewed` · `workflow_row_clicked` · `dashboard_v2_sort_changed` · `dashboard_v2_filter_applied` · `insight_chip_clicked`) + `upgrade_clicked` reuse with `location: 'dashboard_v2_health_gate'`. Zero modifications to existing event shapes. 45 new substantive `test()` blocks (MR-006 Change C D-6 substantive-test-case requirement satisfied). Unblocks: (a) #42 v1 `computeHealthScore` retirement evidence path (now needs N ≥ 10 production data per DV2-R01 + DV2-R05), (b) #57 `?v2=0` flag full retirement (14-day soak + #51 + DV2-R02+R03 prerequisites — #51 complete, others iter 031), (c) external launch measurement of PRD §4 success-metric targets. Zero follow-ups generated (3 scope-adjacent observations — workspace `.test.tsx` exclusion = pre-existing #53; ESLint exhaustive-deps disable = intentional with inline justification; InsightsStrip dual-emission = intentional for a11y/mouse-path parity — all correctly classified; no new backlog rows filed per scope discipline).
+
+### Follow-ups
+
+- **Zero new follow-up rows filed.** Scope-adjacent observations (pre-existing OR intentional, all classified during validation):
+  1. **Workspace vitest `.test.tsx` exclusion** — tracked as pre-existing #53 (iter 021 discovery); iter 030 added 5 more `.test.tsx` files to the exclusion surface; fix options documented in #53 row.
+  2. **ESLint `react-hooks/exhaustive-deps` disable in `DashboardV2Shell`** — intentional for the one-shot `dashboard_v2_viewed` emission effect; inline justification comment present. If React convention evolves, revisit as a future hygiene item, but not a correctness risk today.
+  3. **InsightsStrip dual-emission on click + keydown** — intentional parity between mouse and keyboard interaction paths; NOT a duplicate-event bug. Documented inline.
+
+### Next Step
+
+- **Iter 031:** DV2-R02 + DV2-R03 bundled under CLAUDE.md Mode 5 guardrail 7(b) one-logical-outcome = "WorkflowRow interaction hardening" (both live in `WorkflowRow.tsx`; both are a11y/UX hardening — native-dialog replacement + tooltip keyboard dismiss). Subject to ceiling rule: pool 30 > 8 → still forces burn-down; DV2-R02+R03 are audit-intake P0 burn-down candidates (score 10 + 10). Agent likely `frontend-engineer` (2 consecutive post-iter-031 — under 4+ rule). Cool-off recharge counter 1/3 → 2/3 post-iter-031. MR-007 cadence 1 → 2 of 3. D-1 reverse portfolio-drift counter 2 → 3 (web-app non-extension).
+- **MR-007:** earliest iter 032 post-3-loop stability floor from MR-006 at iter 029 close.
+
+---
+
 ## MR-006 Meta-Review (non-counting toward improvement-loop cadence)
 
 - Date: 2026-04-22

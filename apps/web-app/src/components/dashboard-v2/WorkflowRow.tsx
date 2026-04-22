@@ -25,6 +25,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { track } from '@/lib/analytics.js';
 import {
   Zap,
   GitBranch,
@@ -64,6 +65,9 @@ interface WorkflowRowProps {
   onRename?: (id: string, newTitle: string) => void;
   /** Callback to notify parent when this workflow is archived (kebab archive) */
   onArchive?: (id: string) => void;
+  /** PRD §4 metric #2: perf timestamp captured at dashboard_v2_viewed emission.
+   * Used to compute elapsedMsSinceDashboardView on row-click navigation. */
+  dashboardViewPerfTimestampMs?: number;
 }
 
 // ── Opportunity tag config ────────────────────────────────────────────────────
@@ -150,6 +154,10 @@ function HealthTooltip({ metricsV2 }: HealthTooltipProps) {
         <a
           href="/pricing"
           className="mt-ds-2 block text-[12px] font-medium text-green-600 hover:text-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded"
+          onClick={() => {
+            // PRD §4 metric #6: upgrade CTA from gated health state
+            track({ event: 'upgrade_clicked', location: 'dashboard_v2_health_gate' });
+          }}
         >
           View plans →
         </a>
@@ -378,6 +386,7 @@ export default function WorkflowRow({
   timeRange,
   onRename,
   onArchive,
+  dashboardViewPerfTimestampMs = 0,
 }: WorkflowRowProps) {
   const router = useRouter();
   const [showTooltip, setShowTooltip] = useState(false);
@@ -391,6 +400,10 @@ export default function WorkflowRow({
 
   const opportunityStyle = OPPORTUNITY_CONFIG[opportunityTag];
   const band = healthBand(healthScore.overall);
+
+  // PRD §4 metric #2: derive analytics healthBand string from the same 60/80 thresholds
+  const analyticsHealthBand: 'red' | 'amber' | 'green' =
+    healthScore.overall < 60 ? 'red' : healthScore.overall < 80 ? 'amber' : 'green';
 
   // Systems column: max 3 visible, "+N" overflow
   const MAX_SYSTEMS = 3;
@@ -416,6 +429,17 @@ export default function WorkflowRow({
   const sopSubtext = !healthScore.isGated ? sopReadinessLabel(metricsV2.confidence) : null;
 
   function handleRowClick() {
+    // PRD §4 metric #2: time-to-first-click (p50 <8s, p95 <15s)
+    const elapsed =
+      dashboardViewPerfTimestampMs > 0
+        ? Math.round(performance.now() - dashboardViewPerfTimestampMs)
+        : 0;
+    track({
+      event: 'workflow_row_clicked',
+      workflowId: workflow.id,
+      elapsedMsSinceDashboardView: elapsed,
+      healthBand: analyticsHealthBand,
+    });
     router.push(`/workflows/${workflow.id}`);
   }
 

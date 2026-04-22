@@ -29,6 +29,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Columns3 } from 'lucide-react';
+import { track } from '@/lib/analytics.js';
 import CommandHeader, { type TimeRange } from './CommandHeader.js';
 import InsightsStrip from './InsightsStrip.js';
 import WorkflowList, {
@@ -99,6 +100,14 @@ export default function DashboardV2Shell() {
   // Enforce minimum skeleton display time
   const loadStartRef = useRef<number>(Date.now());
 
+  // PRD §4 metric #1/#2: timestamp captured at dashboard_v2_viewed emission
+  // Used by WorkflowRow to compute elapsedMsSinceDashboardView for workflow_row_clicked.
+  const dashboardViewPerfTimestampRef = useRef<number>(0);
+
+  // PRD §4 metric #1: fire dashboard_v2_viewed once per mount, after data loads.
+  // Guard ensures it fires exactly once even if allWorkflows updates again.
+  const dashboardViewFiredRef = useRef<boolean>(false);
+
   // ── UI state ────────────────────────────────────────────────────────────────
   const [timeRange, setTimeRange] = useState<TimeRange>('30d');
   const [filters, setFilters] = useState<FilterState>({
@@ -153,6 +162,31 @@ export default function DashboardV2Shell() {
     loadStartRef.current = Date.now();
     void fetchWorkflows();
   }, [fetchWorkflows]);
+
+  // PRD §4 metric #1: emit dashboard_v2_viewed once after data is available.
+  // Fires when loading completes (either success or error) and hasn't yet fired this mount.
+  // Uses state values directly (not derived anyFiltersActive) to avoid TDZ in closure.
+  useEffect(() => {
+    if (isLoading) return;
+    if (dashboardViewFiredRef.current) return;
+    dashboardViewFiredRef.current = true;
+    dashboardViewPerfTimestampRef.current = performance.now();
+    const filtersActive =
+      filters.systems.length > 0 ||
+      filters.opportunity !== null ||
+      filters.healthStatus !== null ||
+      filters.needsAttention ||
+      insightFilterKey !== null;
+    track({
+      event: 'dashboard_v2_viewed',
+      workflowCount: allWorkflows.length,
+      hasActiveFilters: filtersActive,
+      portfolioFilterActive: activePortfolioId !== null,
+    });
+  // Intentional: this effect is a "fire once on first data load" pattern.
+  // allWorkflows.length is the trigger signal — other deps are snapshot values at emission time.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, allWorkflows.length]);
 
   // D5: fetch portfolios for the sidebar (best-effort — sidebar is supplementary)
   useEffect(() => {
@@ -261,6 +295,7 @@ export default function DashboardV2Shell() {
           }}
         />
       )}
+      {/* Note: insight_chip_clicked event is emitted inside InsightsStrip itself */}
 
       {/* Sections 3+: sidebar + list layout */}
       <div className="flex flex-row gap-0 min-h-0">
@@ -309,6 +344,7 @@ export default function DashboardV2Shell() {
             onWorkflowArchive={handleWorkflowArchive}
             portfolioSidebarOpen={portfolioSidebarOpen}
             onTogglePortfolioSidebar={() => setPortfolioSidebarOpen((prev) => !prev)}
+            dashboardViewPerfTimestampMs={dashboardViewPerfTimestampRef.current}
           />
         </div>
       </div>

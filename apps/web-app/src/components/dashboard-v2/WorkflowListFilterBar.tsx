@@ -19,6 +19,7 @@
  */
 
 import { X, Filter, AlertTriangle } from 'lucide-react';
+import { track } from '@/lib/analytics.js';
 import type { OpportunityTag } from '@/lib/workflow-metrics.js';
 
 export type HealthStatusFilter = 'healthy' | 'needs_review' | 'high_variation' | 'stale';
@@ -67,22 +68,48 @@ export default function WorkflowListFilterBar({
   onFiltersChange,
 }: WorkflowListFilterBarProps) {
   function toggleSystem(system: string) {
-    const next = filters.systems.includes(system)
+    const isRemoving = filters.systems.includes(system);
+    const next = isRemoving
       ? filters.systems.filter((s) => s !== system)
       : [...filters.systems, system];
     onFiltersChange({ ...filters, systems: next });
+    // PRD §4 metric #4: emit one event per user interaction (not per final state)
+    track({
+      event: 'dashboard_v2_filter_applied',
+      filterType: 'systems',
+      filterValue: system,
+    });
   }
 
   function setOpportunity(value: OpportunityTag | null) {
     onFiltersChange({ ...filters, opportunity: value });
+    // PRD §4 metric #4
+    track({
+      event: 'dashboard_v2_filter_applied',
+      filterType: 'opportunity',
+      filterValue: value ?? 'cleared',
+    });
   }
 
   function setHealthStatus(value: HealthStatusFilter | null) {
     onFiltersChange({ ...filters, healthStatus: value });
+    // PRD §4 metric #4
+    track({
+      event: 'dashboard_v2_filter_applied',
+      filterType: 'healthStatus',
+      filterValue: value ?? 'cleared',
+    });
   }
 
   function toggleNeedsAttention() {
-    onFiltersChange({ ...filters, needsAttention: !filters.needsAttention });
+    const nextValue = !filters.needsAttention;
+    onFiltersChange({ ...filters, needsAttention: nextValue });
+    // PRD §4 metric #4
+    track({
+      event: 'dashboard_v2_filter_applied',
+      filterType: 'needsAttention',
+      filterValue: nextValue ? 'on' : 'off',
+    });
   }
 
   function clearAll() {

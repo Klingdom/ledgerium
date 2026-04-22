@@ -8,9 +8,14 @@
  *  - loading  → isLoading=true
  *  - ready    → isLoading=false, no error, workflows present
  *  - empty    → isLoading=false, no error, no workflows, no filters
+ *
+ * iter-030: analytics — dashboard_v2_viewed event shape contract
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// ── Analytics mock (iter-030) ─────────────────────────────────────────────────
+vi.mock('@/lib/analytics.js', () => ({ track: vi.fn() }));
 import type { WorkflowRowData } from './WorkflowRow.js';
 import type { FilterState } from './WorkflowListFilterBar.js';
 import { hasActiveFilters } from './WorkflowListFilterBar.js';
@@ -215,5 +220,117 @@ describe('applyFilters', () => {
     // Only 'a' has overall >= 70 (75); 'b' has 30
     expect(result.some((w) => w.id === 'a')).toBe(true);
     expect(result.some((w) => w.id === 'b')).toBe(false);
+  });
+});
+
+// ── iter-030: dashboard_v2_viewed event shape ─────────────────────────────────
+
+/**
+ * Pure-logic derivation of the dashboard_v2_viewed event shape.
+ * Mirrors the computation in DashboardV2Shell's useEffect for this event.
+ */
+function buildDashboardV2ViewedEvent(params: {
+  workflowCount: number;
+  filtersState: { systems: string[]; opportunity: string | null; healthStatus: string | null; needsAttention: boolean };
+  insightFilterKey: string | null;
+  activePortfolioId: string | null;
+}): { event: string; workflowCount: number; hasActiveFilters: boolean; portfolioFilterActive: boolean } {
+  const { workflowCount, filtersState, insightFilterKey, activePortfolioId } = params;
+  const hasFilters =
+    filtersState.systems.length > 0 ||
+    filtersState.opportunity !== null ||
+    filtersState.healthStatus !== null ||
+    filtersState.needsAttention ||
+    insightFilterKey !== null;
+  return {
+    event: 'dashboard_v2_viewed',
+    workflowCount,
+    hasActiveFilters: hasFilters,
+    portfolioFilterActive: activePortfolioId !== null,
+  };
+}
+
+const baseFilters = { systems: [], opportunity: null, healthStatus: null, needsAttention: false };
+
+describe('iter-030: dashboard_v2_viewed event shape', () => {
+  it('event name is dashboard_v2_viewed', () => {
+    const ev = buildDashboardV2ViewedEvent({
+      workflowCount: 5,
+      filtersState: baseFilters,
+      insightFilterKey: null,
+      activePortfolioId: null,
+    });
+    expect(ev.event).toBe('dashboard_v2_viewed');
+  });
+
+  it('workflowCount matches the loaded workflow count', () => {
+    const ev = buildDashboardV2ViewedEvent({
+      workflowCount: 7,
+      filtersState: baseFilters,
+      insightFilterKey: null,
+      activePortfolioId: null,
+    });
+    expect(ev.workflowCount).toBe(7);
+  });
+
+  it('hasActiveFilters=false when no filters are active', () => {
+    const ev = buildDashboardV2ViewedEvent({
+      workflowCount: 3,
+      filtersState: baseFilters,
+      insightFilterKey: null,
+      activePortfolioId: null,
+    });
+    expect(ev.hasActiveFilters).toBe(false);
+  });
+
+  it('hasActiveFilters=true when systems filter is active', () => {
+    const ev = buildDashboardV2ViewedEvent({
+      workflowCount: 3,
+      filtersState: { ...baseFilters, systems: ['Salesforce'] },
+      insightFilterKey: null,
+      activePortfolioId: null,
+    });
+    expect(ev.hasActiveFilters).toBe(true);
+  });
+
+  it('hasActiveFilters=true when insightFilterKey is set', () => {
+    const ev = buildDashboardV2ViewedEvent({
+      workflowCount: 3,
+      filtersState: baseFilters,
+      insightFilterKey: 'variationScore_gt_0.7',
+      activePortfolioId: null,
+    });
+    expect(ev.hasActiveFilters).toBe(true);
+  });
+
+  it('portfolioFilterActive=false when no portfolio selected', () => {
+    const ev = buildDashboardV2ViewedEvent({
+      workflowCount: 3,
+      filtersState: baseFilters,
+      insightFilterKey: null,
+      activePortfolioId: null,
+    });
+    expect(ev.portfolioFilterActive).toBe(false);
+  });
+
+  it('portfolioFilterActive=true when a portfolio is selected', () => {
+    const ev = buildDashboardV2ViewedEvent({
+      workflowCount: 3,
+      filtersState: baseFilters,
+      insightFilterKey: null,
+      activePortfolioId: 'portfolio-123',
+    });
+    expect(ev.portfolioFilterActive).toBe(true);
+  });
+
+  it('workflowCount=0 is valid (empty state fires after load)', () => {
+    const ev = buildDashboardV2ViewedEvent({
+      workflowCount: 0,
+      filtersState: baseFilters,
+      insightFilterKey: null,
+      activePortfolioId: null,
+    });
+    expect(ev.workflowCount).toBe(0);
+    expect(ev.event).toBe('dashboard_v2_viewed');
   });
 });

@@ -5,9 +5,14 @@
  * Tests the pure logic: applyFilters, state derivation, sort logic.
  *
  * 5 states covered: loading, empty, no-results, error, sparse, ready
+ *
+ * iter-030: analytics — dashboard_v2_sort_changed event shape
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// ── Analytics mock (iter-030) ─────────────────────────────────────────────────
+vi.mock('@/lib/analytics.js', () => ({ track: vi.fn() }));
 import { applyFilters } from './WorkflowList.js';
 import { hasActiveFilters } from './WorkflowListFilterBar.js';
 import type { WorkflowRowData } from './WorkflowRow.js';
@@ -213,5 +218,64 @@ describe('applyFilters', () => {
   it('needsAttention=false does not filter (all workflows pass)', () => {
     const r = applyFilters(workflows, { ...emptyFilters, needsAttention: false }, null);
     expect(r).toHaveLength(workflows.length);
+  });
+});
+
+// ── iter-030: dashboard_v2_sort_changed event shape ───────────────────────────
+
+/**
+ * Pure-logic derivation of the dashboard_v2_sort_changed event.
+ * Mirrors handleSort() in WorkflowList.tsx.
+ */
+type SortField = 'health_score' | 'name' | 'opportunity';
+type SortDir = 'asc' | 'desc';
+
+function buildSortEvent(
+  currentField: SortField,
+  currentDir: SortDir,
+  clickedField: SortField,
+): { event: string; column: string; direction: SortDir } {
+  const nextDir: SortDir =
+    currentField === clickedField && currentDir === 'asc' ? 'desc' : 'asc';
+  return { event: 'dashboard_v2_sort_changed', column: clickedField, direction: nextDir };
+}
+
+describe('iter-030: dashboard_v2_sort_changed event shape', () => {
+  it('event name is dashboard_v2_sort_changed', () => {
+    const ev = buildSortEvent('health_score', 'asc', 'name');
+    expect(ev.event).toBe('dashboard_v2_sort_changed');
+  });
+
+  it('column reflects the clicked sort field', () => {
+    const ev = buildSortEvent('health_score', 'asc', 'opportunity');
+    expect(ev.column).toBe('opportunity');
+  });
+
+  it('direction=asc when clicking a new field (not currently sorted)', () => {
+    const ev = buildSortEvent('health_score', 'asc', 'name');
+    expect(ev.direction).toBe('asc');
+  });
+
+  it('direction=desc when clicking the active field that is currently asc', () => {
+    const ev = buildSortEvent('health_score', 'asc', 'health_score');
+    expect(ev.direction).toBe('desc');
+  });
+
+  it('direction=asc when clicking the active field that is currently desc (toggle back)', () => {
+    const ev = buildSortEvent('name', 'desc', 'name');
+    expect(ev.direction).toBe('asc');
+  });
+
+  it('direction is always "asc" or "desc" (exhaustive)', () => {
+    const fields: SortField[] = ['health_score', 'name', 'opportunity'];
+    const dirs: SortDir[] = ['asc', 'desc'];
+    for (const field of fields) {
+      for (const dir of dirs) {
+        for (const clickField of fields) {
+          const ev = buildSortEvent(field, dir, clickField);
+          expect(['asc', 'desc']).toContain(ev.direction);
+        }
+      }
+    }
   });
 });

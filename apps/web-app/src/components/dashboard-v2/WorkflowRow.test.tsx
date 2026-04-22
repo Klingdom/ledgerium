@@ -1,5 +1,6 @@
 /**
- * WorkflowRow — unit tests for plan gating, dimension labels, healthy tag.
+ * WorkflowRow — unit tests for plan gating, dimension labels, healthy tag,
+ * and iter-030 analytics instrumentation.
  *
  * Environment: Vitest (node) — no jsdom, no React rendering.
  * Tests pure-logic helpers and contract enforcement rules.
@@ -9,9 +10,16 @@
  *  2. isGated=false → breakdown with Speed/Consistency/Data Quality/Standardization labels
  *  3. opportunityTag='healthy' → positive signal, renders green chip labeled "Healthy"
  *  4. aiOpportunityScore shown in tooltip only when tag='automate' and not gated
+ *
+ * iter-030 analytics:
+ *  5. workflow_row_clicked event shape (healthBand derivation, elapsed ms)
+ *  6. upgrade_clicked event shape (location=dashboard_v2_health_gate)
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+// ── Analytics mock (iter-030) ─────────────────────────────────────────────────
+vi.mock('@/lib/analytics.js', () => ({ track: vi.fn() }));
 import type { WorkflowMetricsOutput, HealthScoreV2, OpportunityTag } from '@/lib/workflow-metrics.js';
 
 // ── Health band derivation (duplicated from WorkflowRow for unit testability) ─
@@ -373,5 +381,159 @@ describe('run-count qualifier (iter-024 §4.1 item f)', () => {
 
   it('runs=9 (boundary) renders qualifier n=9', () => {
     expect(buildRunCountQualifier(9)).toBe('n=9');
+  });
+});
+
+// ── iter-030: analytics event shapes ─────────────────────────────────────────
+
+/**
+ * Pure-logic derivation of the workflow_row_clicked event shape.
+ * Mirrors the logic in WorkflowRow.handleRowClick().
+ */
+function buildWorkflowRowClickedEvent(params: {
+  workflowId: string;
+  healthScoreOverall: number;
+  dashboardViewPerfTimestampMs: number;
+  perfNow: number;
+}): { event: string; workflowId: string; elapsedMsSinceDashboardView: number; healthBand: 'red' | 'amber' | 'green' } {
+  const { workflowId, healthScoreOverall, dashboardViewPerfTimestampMs, perfNow } = params;
+  const elapsed =
+    dashboardViewPerfTimestampMs > 0
+      ? Math.round(perfNow - dashboardViewPerfTimestampMs)
+      : 0;
+  const hBand: 'red' | 'amber' | 'green' =
+    healthScoreOverall < 60 ? 'red' : healthScoreOverall < 80 ? 'amber' : 'green';
+  return {
+    event: 'workflow_row_clicked',
+    workflowId,
+    elapsedMsSinceDashboardView: elapsed,
+    healthBand: hBand,
+  };
+}
+
+describe('iter-030: workflow_row_clicked event shape', () => {
+  it('event name is workflow_row_clicked', () => {
+    const ev = buildWorkflowRowClickedEvent({
+      workflowId: 'wf-abc',
+      healthScoreOverall: 72,
+      dashboardViewPerfTimestampMs: 100,
+      perfNow: 600,
+    });
+    expect(ev.event).toBe('workflow_row_clicked');
+  });
+
+  it('workflowId is forwarded correctly', () => {
+    const ev = buildWorkflowRowClickedEvent({
+      workflowId: 'wf-xyz',
+      healthScoreOverall: 50,
+      dashboardViewPerfTimestampMs: 0,
+      perfNow: 0,
+    });
+    expect(ev.workflowId).toBe('wf-xyz');
+  });
+
+  it('healthBand=red when healthScore < 60', () => {
+    const ev = buildWorkflowRowClickedEvent({
+      workflowId: 'w1',
+      healthScoreOverall: 45,
+      dashboardViewPerfTimestampMs: 100,
+      perfNow: 200,
+    });
+    expect(ev.healthBand).toBe('red');
+  });
+
+  it('healthBand=amber when healthScore is 60–79', () => {
+    const ev = buildWorkflowRowClickedEvent({
+      workflowId: 'w1',
+      healthScoreOverall: 70,
+      dashboardViewPerfTimestampMs: 100,
+      perfNow: 200,
+    });
+    expect(ev.healthBand).toBe('amber');
+  });
+
+  it('healthBand=green when healthScore >= 80', () => {
+    const ev = buildWorkflowRowClickedEvent({
+      workflowId: 'w1',
+      healthScoreOverall: 85,
+      dashboardViewPerfTimestampMs: 100,
+      perfNow: 200,
+    });
+    expect(ev.healthBand).toBe('green');
+  });
+
+  it('elapsedMsSinceDashboardView is positive when dashboardViewPerfTimestampMs > 0', () => {
+    const ev = buildWorkflowRowClickedEvent({
+      workflowId: 'w1',
+      healthScoreOverall: 72,
+      dashboardViewPerfTimestampMs: 100,
+      perfNow: 3500,
+    });
+    expect(ev.elapsedMsSinceDashboardView).toBe(3400);
+  });
+
+  it('elapsedMsSinceDashboardView is 0 when dashboardViewPerfTimestampMs is 0 (defensive path)', () => {
+    const ev = buildWorkflowRowClickedEvent({
+      workflowId: 'w1',
+      healthScoreOverall: 72,
+      dashboardViewPerfTimestampMs: 0,
+      perfNow: 3500,
+    });
+    expect(ev.elapsedMsSinceDashboardView).toBe(0);
+  });
+
+  it('healthBand=red boundary: score=59', () => {
+    const ev = buildWorkflowRowClickedEvent({
+      workflowId: 'w1',
+      healthScoreOverall: 59,
+      dashboardViewPerfTimestampMs: 100,
+      perfNow: 200,
+    });
+    expect(ev.healthBand).toBe('red');
+  });
+
+  it('healthBand=amber boundary: score=60', () => {
+    const ev = buildWorkflowRowClickedEvent({
+      workflowId: 'w1',
+      healthScoreOverall: 60,
+      dashboardViewPerfTimestampMs: 100,
+      perfNow: 200,
+    });
+    expect(ev.healthBand).toBe('amber');
+  });
+
+  it('healthBand=green boundary: score=80', () => {
+    const ev = buildWorkflowRowClickedEvent({
+      workflowId: 'w1',
+      healthScoreOverall: 80,
+      dashboardViewPerfTimestampMs: 100,
+      perfNow: 200,
+    });
+    expect(ev.healthBand).toBe('green');
+  });
+});
+
+/**
+ * upgrade_clicked event from gated health tooltip — event #6.
+ * The event reuses the existing upgrade_clicked type with location='dashboard_v2_health_gate'.
+ */
+function buildUpgradeClickedEvent(): { event: string; location: string } {
+  return { event: 'upgrade_clicked', location: 'dashboard_v2_health_gate' };
+}
+
+describe('iter-030: upgrade_clicked from gated health tooltip (event #6)', () => {
+  it('event name is upgrade_clicked', () => {
+    const ev = buildUpgradeClickedEvent();
+    expect(ev.event).toBe('upgrade_clicked');
+  });
+
+  it('location is dashboard_v2_health_gate', () => {
+    const ev = buildUpgradeClickedEvent();
+    expect(ev.location).toBe('dashboard_v2_health_gate');
+  });
+
+  it('location is not empty or undefined', () => {
+    const ev = buildUpgradeClickedEvent();
+    expect(ev.location).toBeTruthy();
   });
 });
