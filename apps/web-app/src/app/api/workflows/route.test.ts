@@ -37,6 +37,23 @@ vi.mock('@/lib/health-scores', () => ({
   }),
 }));
 
+vi.mock('@/lib/metrics-input-adapter', () => ({
+  // toMetricsInput output is discarded by the mocked computeWorkflowMetrics below
+  // (which returns a canned value regardless of input). A minimal stub is sufficient.
+  toMetricsInput: vi.fn().mockReturnValue({
+    id: 'wf-1',
+    confidence: 0.8,
+    stepCount: 5,
+    durationMs: 120_000,
+    phaseCount: 3,
+    toolsUsed: ['Salesforce', 'Slack'],
+    createdAt: new Date('2026-01-01T00:00:00Z'),
+    lastViewedAt: new Date('2026-04-01T00:00:00Z'),
+    processDefinition: null,
+    processInsights: [],
+  }),
+}));
+
 vi.mock('@/lib/workflow-metrics', () => ({
   computeWorkflowMetrics: vi.fn().mockReturnValue({
     runs: 8,

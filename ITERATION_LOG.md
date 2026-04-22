@@ -4,6 +4,80 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 029
+
+- Date: 2026-04-22
+- Trigger: First `top-score` eligible slot post-iter-028 cool-off re-arm (3-of-3 consecutive burn-downs 026+027+028). MANDATORY agent rotation (`backend-engineer` consecutive = 3 at iter 028 close). DASHBOARD_V2_REVIEW_001 audit-intake P0 programmed per iter 025 MR-005 Agenda 6 + DV2-REVIEW-001 § Recommended Iter Sequencing.
+- Coordinator: coordinator
+- Phase: Phase 1
+- Mode: **Mode 1 (bounded improvement loop)**
+- Commit: pending (single Mode 1 `top-score` commit)
+
+### Candidate Selection
+
+- **Selection rule:** `top-score` — cool-off re-armed at iter 028 close and CONSUMED at iter 029 (single-use invocation under MR-003 Change B narrowed by MR-004 Change B; pool > 8 soft ceiling still violated at 32 entering; pool > 15 hard ceiling applies Mode-5-only).
+- **Selected work:** **DV2-R01** — Server-side v1-vs-v2 health-score distribution comparison script + `docs/analysis/HEALTH_SCORE_DISTRIBUTION_COMPARISON.md` artifact. Birth iter `DV2-REVIEW-001` (audit-intake P0). Score 13.
+- **Tie-break:** DV2-R01 chosen over #51 (analytics instrumentation, score 13) + #4 (score 13) per DASHBOARD_V2_REVIEW_001 § Recommended Iter Sequencing rationale: (a) executes without PostHog gating, (b) directly unblocks #42, (c) ~1-day server-side script vs multi-component instrumentation pass.
+- **Rationale:** closes the measurement-blocker lens that was identified as the #1 dominant debt theme across the 8-agent review (measurement is entirely uninstrumented); produces the quantitative evidence artifact the PRD D2 parallel-run commitment requires before #42 v1 retirement; rotates cleanly off `backend-engineer` (consecutive counter 3 → 0) onto `analytics` (analytics-ops / server-side script work matches agent specialty).
+- **Portfolio rule checks:**
+  - Cool-off: INVOKED (single-use; cool-off streak 3-of-3 re-armed at iter 028 close; consumed by this `top-score` selection under pool > 8 soft violation). Iter 030 again subject to ceiling rule.
+  - Area saturation: iter 029 Area = `analytics / web-app` (distinct from iter 028 `extension-app`, iter 027 `policy-engine`, iter 026 `process-engine`, iter 025 `governance`). 3-in-a-row clock cleared.
+  - Release-blocker cadence: no open Phase-1 blockers; rule inapplicable.
+  - Same-implementer-4+: iter 026 `backend-engineer` + iter 027 `backend-engineer` + iter 028 `backend-engineer` = 3 at iter 028 close. Iter 029 MANDATORY rotation to `analytics`. Trigger cleanly avoided; `backend-engineer` counter broken 3 → 0; `analytics` counter = 1 post-iter-029.
+  - D-4 specialist-invocation gate: evaluated.
+    - Production surface: 75 LOC extract of existing byte-identical function (`toMetricsInput` from `route.ts:317-380` → new `metrics-input-adapter.ts`). Mechanical extract-and-reexport preserving existing contract — **qualifies for D-4 exception**. No new contract; no downstream iterations build on the new module (it's the same module, different file). `system-architect` adjacency NOT required.
+    - One-off Node.js script: 318 LOC but is evidence-production work (analogous to a migration script), not a durable API surface. Does NOT meet the spirit of D-4 "new contract."
+    - No user-visible copy strings (artifact is analytical markdown, not customer-facing UI). `growth-strategist` adjacency NOT required.
+- **density-response:** n/a (zero follow-ups generated; clause 3 did not fire).
+- **scope-expansion:** approved (D-4 exception — mechanical extract-and-reexport of existing byte-identical `toMetricsInput` function; justified under MR-005 D-4 exception clause "mechanical refactors that preserve existing contract byte-identically (extract-and-reexport patterns)"). Evidence: `git diff apps/web-app/src/app/api/workflows/route.ts` shows −66/+2 net (deletion of inline function + single import add); adapter file contains byte-identical function body. Route test coverage (289 web-app tests) continues green with trivial adapter mock addition.
+- **ceiling-cool-off:** INVOKED at iter 029 (cool-off streak 3-of-3 re-armed at iter 028 close per MR-003 Change B; consumed this iter under pool > 8 soft ceiling; rationale: need to execute first-eligible `top-score` pick to validate refined scoring formula discriminating power in a high-debt regime).
+- **reverse-portfolio-drift:** iter 029 = web-app surface (non-extension per D-1 enumerated tracked list); 5-consecutive-non-extension counter increments 0 → 1. No `reverse-portfolio-drift: user-ack` required yet (N < 5).
+- **directed-agents:** `analytics` primary; no adjacent specialists required (D-4 gate clean).
+
+### Agents Used
+
+- **Primary:** `analytics` — scoped-delegation prompt specified 5 deliverables (script + extracted adapter + route.ts extract + package.json script + artifact) + hard scope boundaries (no DV2-R06 shadow-function touching, no v1/v2 formula modifications, no DB seeding). Agent produced all 4 code deliverables but did NOT execute the script (partial delivery); coordinator verified, installed tsx, ran script to produce artifact, verified output.
+- **Adjacent:** none. D-4 gate clean (extract-and-reexport exception).
+- **Consecutive-same-agent counter:** `backend-engineer` counter broken 3 → 0. `analytics` consecutive counter = 1 post-iter-029 (iter 025 Mode 4 `meta-coordinator` was analytics-adjacent but Mode 4 is excluded from the Mode 1 consecutive counter).
+
+### Files Changed
+
+**Created (3):**
+- `apps/web-app/scripts/health-score-distribution.ts` — 318 LOC pure Node.js script. Instantiates fresh `PrismaClient` with explicit datasource URL (bypasses Next.js singleton env-timing race). Queries `db.workflow.findMany` filtered `status: 'active'`, ordered by `id` (deterministic). For each workflow: reads `processInsights` relation, computes v1 `computeHealthScore()`, computes v2 `computeHealthScoreV2(toMetricsInput(w, insights))`. Emits distribution statistics (count/min/max/mean/median/p25/p75/p95/stddev for both v1 + v2 overall), 60/80 band counts, 3×3 band-transition matrix, delta distribution with magnitude buckets (|Δ|≥20, ≥10, <5), Spearman ρ with mid-rank tie-breaking (skipped for N<5), gated-count. Writes programmatically-generated markdown to `docs/analysis/HEALTH_SCORE_DISTRIBUTION_COMPARISON.md`.
+- `apps/web-app/src/lib/metrics-input-adapter.ts` — 75 LOC. Extracted `toMetricsInput` function from route.ts — byte-identical behavior. D-4 exception (mechanical extract-and-reexport preserving contract). Imports `WorkflowMetricsInput` type from `./workflow-metrics`; re-exported for route + script.
+- `docs/analysis/HEALTH_SCORE_DISTRIBUTION_COMPARISON.md` — 173 lines, script-generated. Sections: Executive Summary · Methodology · Distribution Statistics (v1 + v2) · Band Distribution · Band Transition Matrix · Delta Distribution · Rank Correlation · Gating Note · Recommendation for #42. Sample size N=6 from `apps/web-app/prisma/test.db` (below recommended minimum of 10; artifact honestly flags insufficient sample and names DV2-R05 seed fixture as hard prerequisite). Key findings: V1 mean 87.83 median 88.50; V2 mean 90.17 median 89.00; Spearman ρ = -0.41; 0/6 band crossings; 2/6 workflows |Δ|≥10 (33%); 0 gated.
+
+**Modified (3):**
+- `apps/web-app/src/app/api/workflows/route.ts` — −66/+2 net diff. Line 13: import change `import type { WorkflowMetricsInput, WorkflowMetricsOutput }` → `import type { WorkflowMetricsOutput }` (WorkflowMetricsInput no longer needed locally). Line 14: new `import { toMetricsInput } from '@/lib/metrics-input-adapter'`. Lines 317-380 (original): local `function toMetricsInput(...)` + section comment block deleted. Zero other changes; call-site at line 596 (now line ~534) unchanged.
+- `apps/web-app/package.json` — +1 script line `"health-score:compare": "tsx scripts/health-score-distribution.ts"`; +1 devDependency `"tsx": "^4.19.2"`.
+- `apps/web-app/src/app/api/workflows/route.test.ts` — +1 `vi.mock('@/lib/metrics-input-adapter', ...)` block (minimal `toMetricsInput` stub matching adjacent mock pattern; required because root-vitest config lacks `@/*` alias while web-app-local config has it — existing workspace-level config gap resolved locally via vi.mock pattern consistent with `@/lib/auth` etc.). 4 previously-failing tests at workspace `pnpm test` level now pass; web-app-local `pnpm --filter` test count unchanged at 289.
+
+### Validation
+
+- **Workspace:** **1782 / 1782 passing** (unchanged from iter 028 close; all 56 test files pass).
+- **Web-app package:** **289 / 289 passing** (unchanged; 13 test files; D-4 extract is transparent to tests).
+- **Typecheck:** clean across all 9 packages/apps (including new `metrics-input-adapter.ts` + `health-score-distribution.ts`).
+- **Script run:** `pnpm --filter @ledgerium/web-app health-score:compare` exits 0; artifact written to `docs/analysis/HEALTH_SCORE_DISTRIBUTION_COMPARISON.md`; stdout summary confirms N=6, V1/V2 means, Spearman, warning about N<10.
+- **Determinism:** workflows sorted by `id` before iteration; all distribution stats use canonical sort-then-percentile; Spearman uses mid-rank tie-breaking; pure functions `computeHealthScore` + `computeHealthScoreV2` reused unchanged. Re-running the script produces byte-identical artifact output for a fixed DB state.
+- **Scope-expansion audit:** route.ts diff is exactly the extract-and-reexport (−66/+2 net); no other route.ts changes; no touches to DV2-R06 shadow functions (`computeAiOpportunityScore` line 154, variation line 568, `computeIsStale` line 107, v1 `computeSopReadiness`); no changes to `health-scores.ts` or `workflow-metrics.ts`; no new tests for the script itself (intentional — artifact's correctness is verified by stdout summary + manual inspection of numeric values).
+
+### Outcome
+
+- **DV2-R01 closed** (pool **32 → 31**). Artifact `docs/analysis/HEALTH_SCORE_DISTRIBUTION_COMPARISON.md` now exists as the quantitative evidence reference for #42 v1 retirement discussion — but honestly flags N=6 insufficient and names DV2-R05 as hard prerequisite.
+- Agent-diversity: `backend-engineer` counter broken 3 → 0; `analytics` counter = 1 post-iter-029. 4+ same-implementer trigger avoided.
+- Cool-off single-use resource CONSUMED at iter 029. Iter 030 again subject to ceiling rule (pool > 8).
+- **MR-006 meta-review DUE (MANDATORY before iter 030 Mode 1 can proceed)** — base 3-loop cadence fully filled (iter 026 + 027 + 028 counted; iter 029 = 4th loop since MR-005).
+- D-1 reverse portfolio-drift counter increments 0 → 1 (iter 029 = web-app / non-extension). Next counter check at iter 034.
+- Key quantitative finding: Spearman ρ = -0.41 between v1 and v2 overall scores at N=6 (moderate dis-agreement in ranking) — noteworthy but potentially noise at small N; artifact correctly recommends re-running post-DV2-R05.
+- Zero follow-ups generated (density-response: n/a). One adjacent observation logged (root vitest config `@/*` alias gap) but NOT converted to new follow-up — workspace #53 already tracks the broader config issue.
+
+### Follow-ups
+
+- None generated (0 follow-ups). One adjacent observation noted but NOT converted to backlog row per scope discipline:
+  - **Root vitest config `@/*` alias gap.** The root `vitest.config.ts` lacks the `@/*` path alias that the web-app-local `vitest.config.ts` has. When new `@/lib/*` modules are introduced, route tests at the workspace level fail to resolve unless they are either (a) re-mocked via `vi.mock` (the pattern chosen here) or (b) the alias is added. Iter 029 uses pattern (a) consistent with existing mocks (`@/lib/auth`, `@/lib/plans`, etc.). Workspace follow-up #53 "vitest-workspaces migration" already tracks the broader config issue. No new row added.
+
+---
+
 ## Iteration 028
 
 - Date: 2026-04-22

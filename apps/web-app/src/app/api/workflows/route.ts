@@ -10,7 +10,8 @@ import {
   computePortfolioHealthScorePrior,
   computeInsightChips,
 } from '@/lib/workflow-metrics';
-import type { WorkflowMetricsInput, WorkflowMetricsOutput } from '@/lib/workflow-metrics';
+import type { WorkflowMetricsOutput } from '@/lib/workflow-metrics';
+import { toMetricsInput } from '@/lib/metrics-input-adapter';
 
 // ── Per-workflow intelligence computation ────────────────────────────────────
 
@@ -312,71 +313,6 @@ function computeProcessMaturityScore(
   if (!isStale) score += 10;
 
   return Math.round(Math.min(score, 100));
-}
-
-// ── Metrics V2 input adapter ──────────────────────────────────────────────────
-
-/**
- * Converts a Prisma-shaped workflow row + its relations into the pure
- * WorkflowMetricsInput shape expected by the metrics engine.
- *
- * Kept in route.ts intentionally: the metrics module must stay I/O-free and
- * unaware of Prisma types. Parsing/normalisation is a route-layer concern.
- */
-function toMetricsInput(
-  w: {
-    id: string;
-    confidence: number | null;
-    stepCount: number | null;
-    durationMs: number | null;
-    phaseCount: number | null;
-    toolsUsed: string | null;
-    createdAt: Date;
-    lastViewedAt: Date | null;
-    processDefinition: {
-      runCount: number;
-      variantCount: number;
-      avgDurationMs: number | null;
-      medianDurationMs: number | null;
-      stabilityScore: number | null;
-      confidenceScore: number | null;
-    } | null;
-  },
-  processInsights: Array<{
-    insightType: string;
-    severity: string;
-    title: string;
-    observedValue: string | null;
-  }>,
-): WorkflowMetricsInput {
-  const parsedTools: string[] = w.toolsUsed ? (() => {
-    try {
-      const parsed = JSON.parse(w.toolsUsed!);
-      return Array.isArray(parsed) ? parsed.filter((t): t is string => typeof t === 'string') : [];
-    } catch {
-      return [];
-    }
-  })() : [];
-
-  return {
-    id: w.id,
-    confidence: w.confidence,
-    stepCount: w.stepCount,
-    durationMs: w.durationMs,
-    phaseCount: w.phaseCount,
-    toolsUsed: parsedTools,
-    createdAt: w.createdAt,
-    lastViewedAt: w.lastViewedAt,
-    processDefinition: w.processDefinition ? {
-      runCount: w.processDefinition.runCount,
-      variantCount: w.processDefinition.variantCount,
-      avgDurationMs: w.processDefinition.avgDurationMs,
-      medianDurationMs: w.processDefinition.medianDurationMs,
-      stabilityScore: w.processDefinition.stabilityScore,
-      confidenceScore: w.processDefinition.confidenceScore,
-    } : null,
-    processInsights,
-  };
 }
 
 // ── Helpers for system extraction ────────────────────────────────────────────
