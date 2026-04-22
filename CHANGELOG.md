@@ -6,6 +6,72 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-22] - Iteration 032: MR-007 meta-review (Mode 4, governance-only; NON-counting toward improvement-loop cadence)
+
+### Selection
+
+- **Mode:** Mode 4 (meta-review; NON-counting).
+- **Rule driving pick:** `directed` (forced by rule, not scoring).
+- **Trigger (both fire independently):**
+  1. Early trigger — 3+ consecutive iterations in the same Area field. Iter 029 + 030 + 031 all `web-app` → CLAUDE.md § Meta-Review Cadence early-trigger list forces immediate meta-review.
+  2. Base 3-loop cadence satisfied — stability floor from MR-006 at iter 029 close met at iter 032 entry (iter 030 + 031 + 032 = 3 loops post-MR-006).
+- **Coordinator occupies iter 032 slot as Mode 4 standalone** (precedent: iter 025 MR-005 standalone). Mode 1 burn-down shifts to iter 033.
+
+### What changed
+
+- **New artifact:** `docs/meta/MR_007_META_REVIEW.md` (355 lines; 12 numbered sections).
+- **MR-006 Change A/B/C/D verdicts:**
+  - Change A (cool-off recharge): **Holding; interim verdict**. Counter 0/3 → 1/3 (iter 030) → 2/3 (iter 031); iter 032 Mode 4 non-counting leaves counter at 2/3; first full recharge completes at iter 033 close if burn-down. No rollback trigger fired. Full verdict deferred to MR-008.
+  - Change B (no-change on D-2 hard-ceiling at pool>15, Mode 5 only): **Preserved**. Zero Mode 5 events in window; dormant by construction. MR-006 no-change decision confirmed.
+  - Change C (substantive-test-case for D-6 drift-counter credit): **Effective; holding**. Iter 030 = 45 substantive `it()` blocks; iter 031 = 20; both well above implied ≥12 threshold. No mock-plumbing-only iteration in window.
+  - Change D (cold-pool staleness escalation at 10-iter cap): **Effective; first live triage fires correctly** (PRICING_AUDIT_001 rows #34/#35/#36 age 15 at iter 032, past threshold 10). See triage outcome below.
+- **Cold-pool triage outcome (PRICING_AUDIT_001; first MR-006 Change D live fire):**
+  - **#34 F-COH-01** (score 9): **`promote`** — re-anchor `Birth iter: audit-intake` → `Birth iter: MR-007-promoted`; same-page contradiction unchanged; external-launch gate.
+  - **#35 F-COH-02** (score 10): **`promote`** — re-anchor; pricing-page surface unchanged; bundle-candidate with #34 under Mode 5 guardrail 7(b) "pricing-page trust-copy polish".
+  - **#36 G-02** (score 11): **`promote`** — re-anchor; HIGHEST score of three; independent of iter 030 v2 analytics (UsageQuotaMeter is app-shell-wide, not v2-specific); standalone iteration.
+  - Summary: 3× `promote`; 0 `keep-cold`; 0 `delete`.
+  - DASHBOARD_V2_REVIEW_001 cold pool (24 items) age 5 — under 10-iter threshold; NOT triaged at MR-007 (MR-008 window).
+- **Iter 033 endorsed pick:** **#24 LiveStep type tightening** (segmentation-engine, score 10, E=1/R=1, D-1-enumerated). Clears D-1 reverse-portfolio-drift counter 3 → 0; closes #1 past-cap staleness tail (age 22 at iter 033).
+- **0 governance diffs proposed to CLAUDE.md.** Control stability is the correct default when MR-006 rules are holding; introducing new control variables at MR-007 would confound the MR-008 evaluation window.
+- **4 CEO open questions status:** Q1 (cool-off recharge adoption) RESOLVED; Q2 (DV2 P1 cold-pool) carry forward to MR-008; Q3 (Path C Build opening) unchanged (awaits PRD_METRICS_ENGINE approval); Q4 (burn-rate target) proposed ≤15 by iter 040 (slip MR-006 target 2 iter) — CEO confirmation requested.
+- **11 MR-005/MR-004 rules documented as working-as-designed** (Section 9) — do not touch.
+
+### Files changed
+
+- **New:** `docs/meta/MR_007_META_REVIEW.md` (+355 LOC).
+- **Modified:** `IMPROVEMENT_BACKLOG.md` — prepended MR-007 header block; rows #34/#35/#36 `Birth iter: audit-intake` → `Birth iter: MR-007-promoted` with re-anchor annotations.
+- **Modified:** `ITERATION_LOG.md` — prepended Iteration 032 entry.
+- **Modified:** `CHANGELOG.md` — this entry.
+- **Modified:** `CLAUDE.md` — Current Phase "Active work" + Priorities + Known Issues updated.
+- **Modified:** `SYSTEM_HEALTH.md` — prepended iter 032 MR-007 "Last updated" block.
+
+**Zero product code changes** (Mode 4 rule). Zero test changes. Zero migrations.
+
+### Validation
+
+- `pnpm typecheck`: not run (Mode 4 governance-only; zero code changes). Baseline clean from iter 031 close.
+- `pnpm test`: not run (Mode 4 governance-only). Baseline workspace 1782/1782 from iter 031 close.
+- Artifact cross-check: § 4 triage justified against `PRICING_AUDIT_001.md` evidence; § 5 endorsement verified against open-pool non-web-app candidates (#24/#26/#30/#23/#29/#31 all MR-005 KEEP past-cap); § 6 pool-trajectory arithmetic verified.
+- Governance-diff count 0 confirmed (no CLAUDE.md text edits triggered by MR-007).
+
+### Impact
+
+- **3-loop stability window begins at iter 032 entry;** MR-008 earliest iter 035.
+- **Cold-pool staleness rule (MR-006 Change D) validated by first live fire** — 3 rows correctly identified, triaged, and re-anchored without intervention requiring new rules.
+- **Control stability across full post-MR-005 window** — zero new governance diffs at MR-007 is itself a north-star outcome (rules holding, no unnecessary churn).
+- **Burn-rate expectation reset:** observed ~0.5 net-closures-per-iter realistically produces ≤15 pool by iter ~040, not iter 038 as MR-006 targeted; CEO confirmation on slip requested.
+- **Iter 033 programming locked:** burn-down #24 (segmentation-engine, `backend-engineer` primary, saturation-satisfied, D-1-clearing).
+- **Agent diversity:** `meta-coordinator` at iter 032 breaks `frontend-engineer` 2-consecutive streak cleanly; iter 033 rotates to `backend-engineer`; no 4+ risk.
+
+### Next best candidates (per MR-007 § 5 + § 6)
+
+1. **#24 LiveStep type tightening** (iter 033; endorsed; segmentation-engine; score 10; E=1/R=1; D-1-clearing; past-cap #1).
+2. **#36 G-02 UsageQuotaMeter 80% upgrade CTA** (iter 034+ top-score candidate; score 11; MR-007-promoted; standalone).
+3. **#34 + #35 bundled "pricing-page trust-copy polish"** (iter 034+; scores 9+10; MR-007-promoted; Mode 5 guardrail 7(b) one-logical-outcome satisfied).
+4. **#31 sidepanel component test harness** (iter 034+ fallback if bundling unavailable; score 11; E=2/R=2; test-infrastructure leverage).
+
+---
+
 ## [2026-04-22] - Iteration 031: DV2-R02 + DV2-R03 bundled "WorkflowRow interaction hardening" (Mode 1, `burn-down`)
 
 ### Selection

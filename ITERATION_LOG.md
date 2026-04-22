@@ -4,6 +4,117 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 032
+
+- Date: 2026-04-22
+- Trigger: **MR-007 meta-review FORCED** — early trigger "3+ consecutive iterations in the same Area field" fired at iter 031 close (iter 029 + 030 + 031 all `web-app`) per CLAUDE.md § Meta-Review Cadence; base 3-loop cadence ALSO satisfied (stability floor from MR-006 at iter 029 close met at iter 032 entry). Both triggers fire independently; MR-007 is non-optional. Coordinator occupies iter 032 slot as Mode 4 standalone (precedent: iter 025 MR-005 standalone); Mode 1 burn-down shifts to iter 033 per MR-007 § 5 endorsement.
+- Coordinator: coordinator
+- Agents: `meta-coordinator` (primary; Mode 4 governance-only)
+- Phase: Phase 1
+- Mode: **Mode 4 (meta-review; NON-counting toward improvement-loop cadence)**
+- Commit: pending
+
+### Candidate Selection
+
+- **Selection rule:** N/A (Mode 4 meta-review is forced by rule, not by scoring).
+- **Rule driving the pick:** `directed` (coordinator-internal; forced by CLAUDE.md § Meta-Review Cadence early trigger "3+ consecutive same-Area" AND base 3-loop cadence simultaneously).
+- **Portfolio rule checks:**
+  - Cool-off recharge: counter 2/3 UNCHANGED (Mode 4 is non-counting; iter 032 does not advance counter).
+  - Area saturation: still TRIPPED at iter 032 entry (iter 029 + 030 + 031 all web-app); Mode 4 Area = `governance`, does NOT contribute to rolling 5-loop Area cadence (follows iter 015 MR-003 + iter 018 MR-004 + iter 025 MR-005 + iter 029 close MR-006 precedent). Iter 033 Mode 1 MUST still be non-web-app.
+  - Release-blocker cadence: no open Phase-1 blockers; rule inapplicable.
+  - Burn-down floor (1-in-5): SATISFIED — iter 027 + 028 + 030 + 031 all burn-down (Mode 4 non-counting skips iter 032; floor rolls iter 028-032 window → iter 028/030/031 = 3-of-4 burn-down, exceeds 1-in-5).
+  - Ceiling rule (pool > 8 forces burn-down): does NOT apply to Mode 4 meta-review (governance-only, zero code changes). Iter 033 Mode 1 MUST be burn-down (pool 28 > 8).
+  - Ceiling rule hard-stop (pool > 15, Mode 5 only): not in force (Mode 4).
+  - Agent-diversity 4+: `frontend-engineer` consecutive counter 2 at iter 031 close; iter 032 `meta-coordinator` breaks frontend streak cleanly.
+  - Reverse portfolio-drift (D-1, N=5 non-extension): counter 3 at iter 031 close; UNCHANGED at iter 032 (Mode 4 does not touch any tracked surface). Iter 033 `#24` target clears counter to 0 (segmentation-engine is D-1-enumerated).
+  - Specialist-invocation gate (D-4) clause 1 (≥3 user-visible copy strings): N/A (zero production-code strings).
+  - Specialist-invocation gate (D-4) clause 2 (≥200 LOC new contract): N/A (zero production code).
+  - MR-007 cadence counter: base 3-loop stability window resets at iter 032 close; **MR-008 earliest iter 035**.
+- **Density-response clause 4:** N/A — Mode 4 meta-reviews do not produce follow-ups. Zero follow-ups generated.
+- **Selection:** Mode 4 MR-007 meta-review. Commit MR-007 artifact + apply 3 cold-pool promotions (backlog row re-anchor only; no new rows) + CHANGELOG + CLAUDE.md Current Phase / Known Issues / Priorities updates + SYSTEM_HEALTH.md refresh.
+
+### Scope (what was done)
+
+**MR-007 artifact produced:** `docs/meta/MR_007_META_REVIEW.md` (355 lines; 12 numbered sections mirroring MR-006 structure).
+
+**Sections 3.1-3.4 — MR-006 Change A/B/C/D evaluation:**
+- 3.1 Change A (cool-off recharge): **Holding; interim verdict**. Counter 0/3 → 1/3 (iter 030) → 2/3 (iter 031); iter 032 Mode 4 non-counting leaves counter at 2/3; first recharge completes at iter 033 close if iter 033 burn-down. No rollback trigger fired (rollback = second consumption produces zero formula-validation evidence; zero consumptions in window). Full verdict deferred to MR-008 after first full recharge cycle completes.
+- 3.2 Change B (D-2 no-change on hard-ceiling at pool>15 Mode 5 only): **Preserved**. Zero Mode 5 events in window; rule dormant by construction. MR-006 no-change decision confirmed.
+- 3.3 Change C (substantive-test-case requirement for D-6 drift-counter credit): **Effective; holding**. Iter 030 added 45 substantive `it()` blocks (web-app 289 → 334); iter 031 added 20 substantive `it()` blocks (web-app 334 → 354); both well above implied ≥12 threshold. No mock-plumbing-only iteration in window (negative-case evaluation pending future evidence; no false-positive risk surfaced).
+- 3.4 Change D (cold-pool staleness escalation at 10-iter cap): **Effective; first live triage fired correctly**. PRICING_AUDIT_001 intake M3@016→017, age 15 at iter 032 entry → three rows require verdict. See Section 4.
+
+**Section 4 — PRICING_AUDIT_001 cold-pool triage (FIRST MR-006 Change D live fire):**
+- **#34 F-COH-01** (score 9, healthScores copy contradiction): **`promote`**. Same-page contradiction unchanged; trivial fix; external-launch trust-copy gate-item. Re-anchor `Birth iter: audit-intake` → `Birth iter: MR-007-promoted`.
+- **#35 F-COH-02** (score 10, Starter value-story reframe): **`promote`**. Pricing-page surface unchanged; low risk; external-launch gate-item. Bundle-candidate with #34 under Mode 5 guardrail 7(b) "pricing-page trust-copy polish" (same-surface both `pricing/page.tsx` + `config.ts`).
+- **#36 G-02** (score 11, UsageQuotaMeter 80% upgrade CTA): **`promote`**. Highest-score of three; independent of iter 030 analytics instrumentation (UsageQuotaMeter is rendered in app shell regardless of dashboard version; `upgrade_clicked (location: 'dashboard_v2_health_gate')` is v2-specific). Standalone iteration (different surface from #34/#35).
+- Summary: 3× `promote`; 0 `keep-cold`; 0 `delete`. DASHBOARD_V2_REVIEW_001 cold pool (24 items) age 5 — under 10-iter threshold, NOT triaged at MR-007 (MR-008 window at age ~10, iter ~036).
+
+**Section 5 — Iter 033 (shifted from iter 032) endorsed pick:**
+- **Endorsed: #24 LiveStep type tightening** (segmentation-engine, score 10, E=1/R=1, D-1-enumerated). Rationale: top-scored D-1-enumerated E=1/R=1 candidate; closes #1 past-cap staleness tail (age 22 at iter 033); clears D-1 reverse-portfolio-drift counter 3 → 0 in a single iteration.
+- Second-best: **#31 sidepanel component test harness** (score 11 but E=2/R=2 breaks window's zero-risk pattern; prefer #24 unless coordinator has evidence jsdom+testing-library wiring is well-understood).
+- Explicitly disqualified: #26 (process-engine, NOT D-1-enumerated, D-1 non-clear), #29 (tooling/DX, NOT D-1-enumerated, DX follow-up history), #23 (dominated by #24 as higher-score same-area alternative).
+- Bundle recommendation: #24 + #23 REJECTED (weaker one-logical-outcome than iter 028 precedent `session-store.ts` loadFromStorage path; doc edit + type-system edit are different logical surfaces); file #23 for iter 034+ as follow-on.
+
+**Section 6 — Pool trajectory:**
+- Scenario A (all burn-down iter 032-037): pool 28 → ~22 by iter 038; misses MR-006 revised ≤15 target by ~7.
+- Scenario B (cool-off consumed iter 033 top-score, burn-down resumes): pool → ~20 by iter 038; misses by ~5.
+- Scenario C (MR-007-promoted bundle + aggressive burn-down): pool → ~18 by iter 038; misses by ~3.
+- **Recommendation:** revise MR-006's ≤15-by-iter-038 target to **≤15 by iter 040** (slip 2 iter to match observed ~0.5 net-closures-per-iter rate). CEO confirmation requested (Section 7 Question 4).
+
+**Section 7 — 4 CEO open questions:**
+1. **Cool-off recharge adoption (MR-006 Change A):** **RESOLVED** (accepted by demonstrated implementation; close CEO question).
+2. **DV2-REVIEW-001 P1 cold-pool triage policy:** **carry forward to MR-008** (age 10 at iter ~036; triage triggers then).
+3. **Path C Build opening trigger:** **unchanged** (awaiting PRD_METRICS_ENGINE CEO approval on 17 open questions).
+4. **Burn-rate stretch target revision:** **proposed ≤15 by iter 040**; CEO confirmation requested.
+
+**Section 8 — Governance diffs proposed: 0.** Control stability is the correct default when MR-006 rules are holding; introducing new control variables at MR-007 would confound the MR-008 evaluation window and violate the "do not run another for at least 3 loops" spirit that protects control-change experiment design.
+
+**Section 9 — No-change rules:** 11 rules explicitly documented as working-as-designed (do not touch). Includes MR-005 D-1 through D-7; Ceiling rule clause 6; Same-implementer 4+; MR-004 Change B narrowed cool-off; Follow-Up Debt Policy clauses 1 + 4.
+
+**Section 10 — MR-008 cadence:**
+- **Earliest iter 035** per 3-loop stability window from MR-007 at iter 032 entry.
+- Early-trigger watch iter 032 → 034: Area saturation (iter 033 MUST non-web-app; counter risk low given candidate diversity); D-1 reverse-portfolio-drift (cleared by iter 033 #24); pool-size ceiling (continues forcing burn-down); cool-off recharge (re-arms iter 033 close if burn-down); same-implementer 4+ (rotates off frontend-engineer at iter 033); Mode 5 (none expected 032-035); validation failures (zero expected); cold-pool staleness (DV2-REVIEW-001 age 8 at iter 035 — MR-008 first DV2 triage at iter ~036).
+
+### Files Changed
+
+- **New:** `docs/meta/MR_007_META_REVIEW.md` (355 lines) — MR-007 artifact.
+- **Modified:** `IMPROVEMENT_BACKLOG.md` — prepended iter 032 MR-007 header block; rows #34/#35/#36 `Birth iter` re-anchored `audit-intake` → `MR-007-promoted` with new triage-status annotations (three of the three audit-intake P0 rows re-anchored per MR-007 § 4 verdict).
+- **Modified:** `ITERATION_LOG.md` — this entry.
+- **Modified:** `CHANGELOG.md` — iter 032 MR-007 entry prepended.
+- **Modified:** `CLAUDE.md` — Current Phase "Active work" narrative + Priorities + Known Issues updated to reflect post-MR-007 state (iter 033 Mode 1 burn-down #24 queued; cadence counter reset; MR-008 earliest iter 035; 3 cold-pool promotions recorded; 4 CEO questions updated).
+- **Modified:** `SYSTEM_HEALTH.md` — iter 032 MR-007 "Last updated" block prepended.
+
+**Zero production-code changes** (Mode 4 governance-only rule). Zero test changes. Zero migrations.
+
+### Validation
+
+- `pnpm typecheck`: not run (Mode 4 governance-only; zero code changes; typecheck result unchanged from iter 031 close = clean across all 9 packages/apps).
+- `pnpm test`: not run (Mode 4 governance-only; zero test changes; test suite count unchanged from iter 031 close = workspace 1782/1782 passing; web-app package 354/354 passing).
+- Artifact correctness: MR-007 § 4 cold-pool triage verdicts justified against `PRICING_AUDIT_001.md` § F-COH-01/F-COH-02/G-02 evidence (re-verified by meta-coordinator); § 5 iter 033 endorsement verified against `IMPROVEMENT_BACKLOG.md` open-pool non-web-app candidate set (coordinator cross-check: #24/#26/#30/#23/#29/#31 all MR-005 KEEP past-cap; scores match); § 6 pool-trajectory scenarios evaluated against post-iter-031 pool 28 baseline (arithmetic verified).
+- Governance-diff count: 0 proposed (stated explicitly in § 8); coordinator confirms no CLAUDE.md edits triggered by MR-007.
+
+### Outcome
+
+- **MR-007 meta-review CLOSED.** 3-loop stability floor begins at iter 032 entry; MR-008 earliest iter 035.
+- **3 cold-pool staleness promotions** (live-backlog rows #34/#35/#36 re-anchored `Birth iter: MR-007-promoted`; elevated for iter 033+ top-score priority; pool count unchanged at 28 — re-anchor is not a new row).
+- **Iter 033 programming endorsed: Mode 1 burn-down #24 LiveStep type tightening** (segmentation-engine, E=1/R=1, clears D-1 reverse-portfolio-drift 3 → 0). Primary agent `backend-engineer` (rotates off `frontend-engineer` × 2 consecutive).
+- **Burn-rate target revision proposal** (≤15 by iter 040) awaits CEO acknowledgement; MR-006 ≤15-by-iter-038 remains current target pending CEO action.
+- **4 CEO open questions status updated:** Q1 RESOLVED, Q2/Q3 carry forward, Q4 requires CEO confirmation.
+- **Zero governance diffs to CLAUDE.md** — control stability is the outcome; MR-006 rules hold.
+- Cool-off recharge counter UNCHANGED at 2/3 (Mode 4 non-counting). Iter 033 burn-down will complete re-arm at 3/3.
+- MR-007 cadence counter reset to 0; MR-008 earliest iter 035.
+
+### Follow-ups
+
+- **None generated this iteration.** Mode 4 meta-reviews do not produce follow-ups (governance-only, zero code changes).
+
+### Next Step
+
+- **Iter 033 = Mode 1 burn-down #24 LiveStep type tightening** per MR-007 § 5 endorsement. Saturation rule (iter 029/030/031 web-app) forces non-web-app selection — #24 segmentation-engine satisfies; ceiling rule (pool 28 > 8) forces burn-down — #24 qualifies; D-1 reverse-portfolio-drift (counter 3) cleared by #24 segmentation-engine surface. Cool-off recharge 2/3 → 3/3 at iter 033 close. First top-score eligible slot iter 034 (earliest re-consumption).
+- Await CEO directive to execute iter 033 + address Q4 burn-rate target.
+
+---
+
 ## Iteration 031
 
 - Date: 2026-04-22
