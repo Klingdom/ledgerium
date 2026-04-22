@@ -6,6 +6,74 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-22] - Iteration 031: DV2-R02 + DV2-R03 bundled "WorkflowRow interaction hardening" (Mode 1, `burn-down`)
+
+### Selection
+
+- **Mode:** Mode 1 (bounded improvement loop).
+- **Rule:** `burn-down` — pool 30 > 8 soft ceiling forces burn-down. DV2-R02 and DV2-R03 are DASHBOARD_V2_REVIEW_001-originated live-backlog P0 rows (promoted at iter 026→027 intake per MR-005 D-5 clause 2).
+- **Bundle rationale (CLAUDE.md Mode 5 guardrail 7(b)):** one-logical-outcome = "WorkflowRow interaction hardening." Both items modify `apps/web-app/src/components/dashboard-v2/WorkflowRow.tsx`; both harden existing user interactions for a11y/UX; neither introduces a new feature surface. DV2-R02 (score 10) + DV2-R03 (score 10).
+- **Primary agent:** `frontend-engineer` (2 consecutive post-iter-031; under 4+ rule). Work-type match: React component refactor + inline interaction patterns + keyboard/focus management.
+- **Adjacent agent (D-4 gate):** `growth-strategist` FIRED — 12 new user-visible copy strings added, exceeds ≥3 threshold per MR-005 D-4 clause 1. Lightweight brand-voice consult (≤30 min) produced 7 KEEP + 5 POLISH + 0 REWRITE verdicts. All 5 POLISH replacements were in-place character substitutions; applied post-review.
+- **Adjacent agent (D-4 gate) — system-architect NOT fired:** production LOC delta 227 exceeds 200 LOC threshold, but the delivery is NOT a new contract surface — `InlineEdit` and `InlineArchiveConfirm` are private React sub-components internal to `WorkflowRow.tsx`, NOT exported, NOT a new module boundary, NOT a new API. D-4 clause 2 rationale ("contract-level review happens BEFORE downstream iterations build on the surface") does not apply. Ruling documented in iteration log.
+- **Cool-off recharge:** 1/3 → **2/3** post-iter-031 (MR-006 Change A counter).
+- **Area saturation:** iter 029 + 030 + 031 all web-app → **3 consecutive** at iter 031 close. **Saturation rule now arms:** iter 032 MUST select from different Area per CLAUDE.md Selection Policy Step 2.
+
+### What changed
+
+**Modified — production (1 file, +227 LOC):**
+
+- `apps/web-app/src/components/dashboard-v2/WorkflowRow.tsx` — 652 → 879 lines. Three private sub-component additions + KebabMenu simplification:
+  - **`InlineEdit` sub-component (DV2-R02a):** replaces `window.prompt` on "Edit name." Renders as `<input>` in place of the name `<span>`. Auto-focuses on activation; pre-populates with current title with all text selected. Enter commits, Escape cancels (no PATCH), blur commits. Trimmed value identical to current title = cancel. Empty/whitespace = cancel. Busy state during `PATCH /api/workflows/:id` round-trip; `role="alert"` error message on failure. Focus returns to kebab trigger on cancel/complete. `aria-label="Rename workflow"` on input.
+  - **`InlineArchiveConfirm` sub-component (DV2-R02b):** replaces `window.confirm` on "Archive." Renders as compact affordance below the name cell with two buttons ("Archive" confirm + "Cancel"). Auto-focuses confirm button on activation. Escape cancels. Busy state + `role="alert"` error handling preserved. `role="region"` on container with `aria-label="Confirm archive for {workflowTitle}"`. Distinct accessible names on confirm vs cancel buttons per a11y hygiene.
+  - **`HealthTooltip` extension (DV2-R03):** adds `onDismiss` + `triggerRef` props. Escape key handler via `document.addEventListener('keydown', ...)` fires `onDismiss()` + returns focus to trigger. `onBlur` handler on tooltip container uses `e.relatedTarget` + `container.contains()` to determine if focus left the tooltip region (dismisses only when focus moves outside). `tabIndex={-1}` added to tooltip containers (gated + ungated variants) so blur events from children fire correctly. `role="tooltip"` added explicitly (was implicit). WCAG 2.1 SC 1.4.13 ("Content on Hover or Focus") dismissible arm now covered (hoverable + persistent were already present).
+  - **`KebabMenu` simplification:** `onRename` and `onArchive` async props removed; replaced with `onStartRename` and `onStartArchiveConfirm` synchronous activation callbacks plus `onCopyLink`. Busy state + status message state moved out (now lives in inline affordance sub-components). The menu is now a pure navigation affordance.
+  - **`workflow_row_clicked` + `upgrade_clicked` analytics emissions preserved** exactly from iter 030.
+
+**Post-review brand-voice polish (5 in-place character substitutions):**
+
+| # | Before | After | Reason |
+|---|--------|-------|--------|
+| 2 | `'Renaming…'` | `'Saving…'` | Universal commit-operation verb aligns with Linear/Notion patterns; future inline edits reuse same busy string. |
+| 3 | `'Rename failed. Please try again.'` | `'Rename failed — changes not saved.'` | Confirms outcome rather than issuing retry instruction; drops apologetic filler. |
+| 5 | `'Archive this workflow?'` | `'Archive workflow?'` | Tightens prompt without losing meaning; matches concise verb-noun pattern used in filter chips. |
+| 9 | `'Cancel archive'` (aria-label) | `'Cancel — do not archive'` (aria-label) | Improves disambiguation for screen reader users who tab directly to the button without reading the prompt. |
+| 11 | `'Archive failed. Please try again.'` | `'Archive failed — workflow not archived.'` | Parallel fix to #3; outcome confirmation over retry instruction. |
+
+Strings 1/4/6/7/8/10/12 shipped as-is per `growth-strategist` KEEP verdict.
+
+**Modified — tests (1 file, +174 LOC, +20 substantive tests):**
+
+- `apps/web-app/src/components/dashboard-v2/WorkflowRow.test.tsx` — 540 → 714 lines. 20 new `it()` blocks: 8 for DV2-R02a (activation, Enter commit, Escape cancel, blur commit, busy state, error state, focus-to-input on activation, identical-value cancel); 6 for DV2-R02b (activation, confirm PATCH, cancel no PATCH, keyboard Tab+Enter, Escape cancel, focus-return); 6 for DV2-R03 (Escape closes, blur-outside closes, blur-within does not close, hover-show preserved, click-toggle preserved, focus-return on Escape).
+
+**Modified — governance (5 files):** `CHANGELOG.md`, `ITERATION_LOG.md`, `IMPROVEMENT_BACKLOG.md`, `SYSTEM_HEALTH.md`, `CLAUDE.md`.
+
+### Validation
+
+- `pnpm --filter web-app typecheck` — **clean** (zero errors).
+- `pnpm --filter web-app test` — **354 / 354 passing** (15 test files, 1.26s). Web-app package delta: **334 → 354 (+20)**.
+- Workspace test: **1782 / 1782 passing unchanged** (pre-existing follow-up #53 — root vitest config excludes `.test.tsx`).
+- Workspace typecheck: clean across all 9 packages/apps.
+- MR-006 Change C substantive-test-case threshold (≥12 substantive test blocks for drift-counter credit): **satisfied** (20 delivered).
+
+### Outcome
+
+**DV2-R02 closed. DV2-R03 closed.** Pool: 30 → **28** (−2). Executive-grade UX credibility restored on `WorkflowRow` primary interaction paths; WCAG 2.1 SC 1.4.13 compliance arm now covered. Unblocks Playwright E2E expansion on dashboard-v2 (native-dialog mock setup no longer required for rename + archive paths). Advances the #57 flag-retirement prerequisite chain: #51 done (iter 030) + DV2-R02 done (iter 031) + DV2-R03 done (iter 031) + DV2-R06 still cold (v1 shadow-function route audit — independent promotion path).
+
+**Cool-off recharge counter:** 1/3 → **2/3**. Third consecutive burn-down at iter 032 will re-arm cool-off; earliest `top-score`-eligible slot iter 033.
+
+**MR-007 cadence counter:** 1 → **2 of 3**. Next meta-review earliest iter 032 per 3-loop stability floor from MR-006.
+
+**D-1 reverse portfolio-drift counter:** 2 → **3** (web-app = non-extension; 5-consecutive threshold not yet reached). Next check iter 034.
+
+**Area saturation:** iter 029 + 030 + 031 all web-app → **3 consecutive**. Iter 032 MUST select from a different Area per CLAUDE.md Selection Policy Step 2. This will likely force deviation from the "burn-down pool" programming toward a non-web-app burn-down candidate (e.g., past-cap staleness items in process-engine / segmentation-engine / extension-app surface) — or a forced `directed` Mode 2 pick if user directs differently.
+
+### Follow-ups
+
+- **Zero new follow-up rows filed.** 4 scope-adjacent observations documented in iteration log (workflow_renamed/workflow_archived analytics gap; defensive isEditingName+isConfirmingArchive guard; DV2-R22 pre-existing displayTitle prop-sync gap unchanged; KebabMenu early-close trade-off intentional). None classified as new debt.
+
+---
+
 ## [2026-04-22] - Iteration 030: #51 v2 analytics instrumentation (Mode 1, `burn-down`)
 
 ### Selection

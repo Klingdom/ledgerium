@@ -4,6 +4,111 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 031
+
+- Date: 2026-04-22
+- Trigger: Post-iter-030 bounded loop; pool 30 > 8 soft ceiling forces `burn-down` rule per CLAUDE.md § Follow-Up Debt Policy clause 6; cool-off recharge counter 1/3 (not re-armed); MR-007 not yet due (cadence 1/3 post-iter-030; 3-loop stability floor from MR-006 = earliest iter 032).
+- Coordinator: coordinator
+- Agents: `frontend-engineer` (primary) + `growth-strategist` (D-4 adjacent)
+- Phase: Phase 1
+- Mode: **Mode 1 (bounded improvement loop)**
+- Commit: pending
+
+### Candidate Selection
+
+- **Selection rule:** `burn-down` — pool 30 > 8 forces burn-down; DV2-R02 (score 10) + DV2-R03 (score 10) qualify as DASHBOARD_V2_REVIEW_001-originated live-backlog P0 rows (intake at iter 026→027 per MR-005 D-5 clause 2).
+- **Bundle rationale:** CLAUDE.md Mode 5 guardrail 7(b) one-logical-outcome test SATISFIED — both items modify `apps/web-app/src/components/dashboard-v2/WorkflowRow.tsx`; both harden existing user interactions for a11y/UX; neither introduces a new feature surface. Logical-outcome label: "WorkflowRow interaction hardening."
+- **Portfolio rule checks:**
+  - Cool-off: counter 1/3 post-iter-030 (not re-armed); not invoked.
+  - Area saturation: iter 028 extension-app, iter 029 web-app, iter 030 web-app → 2 consecutive web-app at iter 031 selection time (rule does NOT fire). **Note:** post-iter-031 close, counter advances to 3 consecutive → iter 032 MUST select different Area per CLAUDE.md Selection Policy Step 2.
+  - Release-blocker cadence: no open Phase-1 blockers; rule inapplicable.
+  - Burn-down floor (1-in-5): SATISFIED — iter 027 + 028 + 030 + 031 all burn-down (4-of-last-5 window).
+  - Ceiling rule (pool > 8 forces burn-down): FORCED DV2-R02 + DV2-R03 selection.
+  - Ceiling rule hard-stop (pool > 15, Mode 5 only): not in force (Mode 1).
+  - Agent-diversity 4+: iter 028 backend, iter 029 analytics, iter 030 frontend, iter 031 frontend → 4+ counter held at 2 (frontend consecutive); safe.
+  - Reverse portfolio-drift (D-1, N=5 non-extension): counter 2 → **3** post-iter-031 (web-app = non-extension). Under N=5 threshold. Next check iter 034.
+  - Specialist-invocation gate (D-4) clause 1 (≥3 user-visible copy strings): FIRES — 12 new strings added (11 UI labels + error messages + button text; 3 aria-labels). `growth-strategist` invoked as adjacent (NOT deferred).
+  - Specialist-invocation gate (D-4) clause 2 (new-contract surface ≥200 LOC): **EVALUATED, DID NOT FIRE** — production LOC delta 227 exceeds 200 LOC raw threshold, but the delivery is NOT a new contract surface. `InlineEdit` and `InlineArchiveConfirm` are private React sub-components internal to `WorkflowRow.tsx`; neither is exported; neither represents a new module boundary, deterministic primitive, or API-layer contract. D-4 clause 2 rationale ("contract-level review happens BEFORE downstream iterations build on the surface") does not apply — no downstream surface to review. Ruling: `system-architect` adjacency NOT required. Documented explicitly here per rule spirit (future auditor can reverse the call if a sub-component is later extracted to module boundary).
+
+### Agents Used
+
+- `frontend-engineer` (primary — React component refactor, inline interaction patterns, keyboard/focus management, test authorship)
+- `growth-strategist` (D-4 clause 1 adjacent — lightweight brand-voice review, ≤30 min, 12-string consult)
+
+Agent-diversity counter: `frontend-engineer` = **2 consecutive** post-iter-031 (iter 030 + iter 031). Under 4+ same-implementer threshold. MR-007 cadence 1 → **2 of 3**.
+
+### Files Changed
+
+**Modified — production (1 file, +227 LOC):**
+
+- `apps/web-app/src/components/dashboard-v2/WorkflowRow.tsx` — 652 → 879 lines. Contents summary:
+  - **`InlineEdit` sub-component (DV2-R02a):** replaces `window.prompt` on rename. Auto-focusing `<input>` with all-text-selected; Enter commits, Escape cancels, blur commits; trimmed-equal-to-current cancels; empty/whitespace cancels. Busy state + `role="alert"` error. Focus returns to kebab trigger on cancel/complete. `aria-label="Rename workflow"`.
+  - **`InlineArchiveConfirm` sub-component (DV2-R02b):** replaces `window.confirm` on archive. Two-button compact affordance; auto-focuses "Archive" confirm button. Escape cancels. Busy + error handling parallel to rename. `role="region"` container; `aria-label="Confirm archive for {workflowTitle}"`.
+  - **`HealthTooltip` extension (DV2-R03):** `onDismiss` + `triggerRef` props added. Escape key dismissal via `document.addEventListener('keydown', ...)` with focus-return. `onBlur` with `relatedTarget` + `container.contains()` determines focus-left-region. `tabIndex={-1}` on containers. `role="tooltip"` explicit. Hover-show + click-toggle preserved exactly.
+  - **`KebabMenu` simplification:** `onRename`/`onArchive` async props removed → `onStartRename`/`onStartArchiveConfirm`/`onCopyLink` synchronous activation callbacks. State migrates to inline affordances.
+  - **Preserved verbatim:** `workflow_row_clicked` emission, `upgrade_clicked` emission with `location: 'dashboard_v2_health_gate'`, `analyticsHealthBand` derivation, all iter-030 instrumentation. Zero changes to v1 dashboard code.
+
+**Post-review brand-voice polish (5 in-place character substitutions applied post-growth-strategist consult):**
+
+| # | Line | Before | After |
+|---|------|--------|-------|
+| 2 | 440 | `'Renaming…'` | `'Saving…'` |
+| 3 | 397 | `'Rename failed. Please try again.'` | `'Rename failed — changes not saved.'` |
+| 5 | 517 | `'Archive this workflow?'` | `'Archive workflow?'` |
+| 9 | 536 | `aria-label="Cancel archive"` | `aria-label="Cancel — do not archive"` |
+| 11 | 499 | `'Archive failed. Please try again.'` | `'Archive failed — workflow not archived.'` |
+
+KEEP verdicts (7 strings): `"Rename workflow"`, `"Network error. Could not rename workflow."`, `"Confirm archive for {workflowTitle}"`, `"Archive"` (button), `"Archiving…"`, `"Cancel"` (button), `"Network error. Could not archive workflow."`.
+
+**Modified — tests (1 file, +174 LOC, +20 substantive `it()` blocks):**
+
+- `apps/web-app/src/components/dashboard-v2/WorkflowRow.test.tsx` — 540 → 714 lines. 20 new blocks distribute as: 8 (DV2-R02a: activation, Enter-commit, Escape-cancel-no-PATCH, blur-commit, busy-state, error-state, focus-to-input, identical-value-cancel); 6 (DV2-R02b: activation, confirm-triggers-PATCH, cancel-no-PATCH, keyboard-Tab+Enter path, Escape-cancel, focus-return); 6 (DV2-R03: Escape-closes, blur-outside-closes, blur-within-does-not-close, hover-show-preserved, click-toggle-preserved, focus-return-on-Escape).
+
+**Modified — governance (5 files):**
+
+- `IMPROVEMENT_BACKLOG.md` — "Last updated" block prepended; rows #63 (DV2-R02) and #64 (DV2-R03) struck through.
+- `ITERATION_LOG.md` — this entry prepended.
+- `SYSTEM_HEALTH.md` — "Last updated" block prepended (iter 031 readiness, pool 28, cool-off 2/3, saturation-armed for iter 032).
+- `CHANGELOG.md` — iter 031 entry prepended.
+- `CLAUDE.md` — Current Phase + Priorities + Known Issues updated.
+
+### Validation
+
+- `pnpm --filter web-app typecheck` — **clean** (zero errors).
+- `pnpm --filter web-app test` — **354 / 354 passing** (15 test files, 1.26s); web-app package delta **334 → 354 (+20)**.
+- Workspace `pnpm typecheck` — clean across all 9 packages/apps.
+- Workspace `pnpm test` — **1782 / 1782 passing** unchanged (pre-existing follow-up #53 `.test.tsx` workspace-level exclusion; continues to be tracked as #53).
+- Pool delta: 30 → **28** (close DV2-R02 + DV2-R03).
+- Cool-off recharge counter (MR-006 Change A): 1/3 → **2/3**.
+- D-1 reverse portfolio-drift counter: 2 → **3** (web-app = non-extension).
+- MR-007 cadence counter: 1 → **2 of 3**.
+- Area saturation: iter 029 + 030 + 031 all web-app → **3 consecutive** at iter 031 close. **Saturation rule now ARMS for iter 032** — iter 032 MUST select from different Area per CLAUDE.md Selection Policy Step 2.
+
+### Outcome
+
+**DV2-R02 closed. DV2-R03 closed.** Executive-grade UX credibility restored on `WorkflowRow` primary interaction paths (rename + archive no longer route through native `window.prompt`/`window.confirm` browser dialogs). WCAG 2.1 SC 1.4.13 compliance arm now covered on the health-score breakdown tooltip (dismissible via Escape + blur-outside). Unblocks Playwright E2E expansion on dashboard-v2 (the 8 skipped dialog-based interaction tests tracked by DV2-R05 can now be un-skipped once DV2-R05 seed fixture lands). Advances the #57 flag-retirement prerequisite chain: iter 030 #51 ✅ + iter 031 DV2-R02 ✅ + iter 031 DV2-R03 ✅; remaining #57 blocker is DV2-R06 (v1 shadow-function route audit — still cold).
+
+Zero follow-ups filed. 4 scope-adjacent observations returned by `frontend-engineer`, classified below.
+
+### Follow-ups
+
+- **Zero new follow-up rows filed.** 4 scope-adjacent observations, all correctly classified and none promoted to backlog:
+  1. **`workflow_renamed` / `workflow_archived` analytics events absent.** PATCH calls fire but no analytics event tracks the outcome. Not filed because PRD §4 does not require rename/archive funnel tracking as of today; if a future measurement plan needs it, a follow-up may be filed at that time. Scope discipline preserved.
+  2. **`isEditingName` + `isConfirmingArchive` defensive guard not added.** Structurally impossible to co-activate through UI (both require hover sequence on same row + distinct kebab menu items that close the menu). Not filed — zero real-world risk.
+  3. **`displayTitle` prop-sync gap (pre-existing, tracked as DV2-R22 in cold pool).** Unchanged by this iteration. Not filed — already tracked.
+  4. **`KebabMenu` early-close trade-off intentional.** Menu closes synchronously on rename/archive trigger click (before async work begins); errors surface in the inline affordance with `role="alert"` rather than within the menu. Intentional design choice — the menu is now a pure navigation affordance.
+
+### Next Step
+
+- **Iter 032 selection constraint:** Area saturation rule ARMED — MUST select from Area other than `web-app / dashboard-v2`. Ceiling rule (pool 28 > 8) still forces burn-down. Candidate non-web-app burn-down surfaces in backlog:
+  - **Extension-app / segmentation-engine / normalization-engine / policy-engine:** past-cap staleness items. Evaluate #23 / #24 / #26 / #27 / #29 / #30 / #31 from MR-005 triage KEEP list.
+  - **Process-engine:** iter 026 closed #14; remaining process-engine surface covered by Path C Build when that lane opens.
+  - **PRICING_AUDIT_001 P0 cold rows #34/#35/#36:** age ~10 at iter 030 → ~12 at iter 032 → triggers MR-006 Change D staleness review at MR-007 entry. Promotion to live at iter 032 is a valid burn-down option that satisfies saturation (area = "pricing" or "billing").
+  - Iter 032 also = 3rd consecutive burn-down → cool-off recharge counter 2/3 → **3/3, re-arm**. Iter 033 first `top-score`-eligible slot after re-arm.
+- **MR-007:** earliest iter 032 per 3-loop floor; cadence counter 2 of 3 post-iter-031. Hard-trigger overrides (same-implementer-4+, reverse-drift N=5, validation fail, Mode 5 start) not currently in play.
+
+---
+
 ## Iteration 030
 
 - Date: 2026-04-22

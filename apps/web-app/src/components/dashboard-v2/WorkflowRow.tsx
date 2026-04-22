@@ -21,6 +21,11 @@
  *  - aria-label on health score cell
  *  - Keyboard: Enter = row click, Space = kebab menu
  *  - Focus rings on all interactive elements
+ *
+ * iter-031 interaction hardening:
+ *  - DV2-R02a: inline edit mode replaces window.prompt for rename
+ *  - DV2-R02b: inline confirm affordance replaces window.confirm for archive
+ *  - DV2-R03: tooltip Escape dismiss + blur-outside dismiss (WCAG 2.1 SC 1.4.13)
  */
 
 import { useState, useRef, useEffect } from 'react';
@@ -139,14 +144,45 @@ function healthBand(score: number): {
 
 interface HealthTooltipProps {
   metricsV2: WorkflowMetricsOutput;
+  /** DV2-R03: called when tooltip should close (Escape key or blur-outside) */
+  onDismiss: () => void;
+  /** DV2-R03: ref for returning focus to the trigger element on dismiss */
+  triggerRef: React.RefObject<HTMLElement | null>;
 }
 
-function HealthTooltip({ metricsV2 }: HealthTooltipProps) {
+function HealthTooltip({ metricsV2, onDismiss, triggerRef }: HealthTooltipProps) {
   const { healthScore, opportunityTag, aiOpportunityScore } = metricsV2;
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // DV2-R03: Escape key closes tooltip and returns focus to trigger
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        onDismiss();
+        triggerRef.current?.focus();
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onDismiss, triggerRef]);
+
+  // DV2-R03: blur-outside dismiss — fires when focus leaves the tooltip region
+  function handleBlur(e: React.FocusEvent<HTMLDivElement>) {
+    // relatedTarget is the element receiving focus; if it's outside the container, dismiss
+    if (containerRef.current && !containerRef.current.contains(e.relatedTarget as Node | null)) {
+      onDismiss();
+    }
+  }
 
   if (healthScore.isGated) {
     return (
-      <div className="absolute right-0 top-full mt-ds-2 z-50 w-56 rounded-[10px] bg-[var(--surface-elevated)] border border-[var(--border-default)] shadow-md p-ds-3 text-[12px]">
+      <div
+        ref={containerRef}
+        role="tooltip"
+        tabIndex={-1}
+        onBlur={handleBlur}
+        className="absolute right-0 top-full mt-ds-2 z-50 w-56 rounded-[10px] bg-[var(--surface-elevated)] border border-[var(--border-default)] shadow-md p-ds-3 text-[12px]"
+      >
         <div className="flex items-center gap-ds-2 text-[var(--content-secondary)]">
           <Lock size={12} aria-hidden="true" />
           <span>Upgrade to see breakdown</span>
@@ -174,7 +210,13 @@ function HealthTooltip({ metricsV2 }: HealthTooltipProps) {
   ];
 
   return (
-    <div className="absolute right-0 top-full mt-ds-2 z-50 w-64 rounded-[10px] bg-[var(--surface-elevated)] border border-[var(--border-default)] shadow-md p-ds-3">
+    <div
+      ref={containerRef}
+      role="tooltip"
+      tabIndex={-1}
+      onBlur={handleBlur}
+      className="absolute right-0 top-full mt-ds-2 z-50 w-64 rounded-[10px] bg-[var(--surface-elevated)] border border-[var(--border-default)] shadow-md p-ds-3"
+    >
       <p className="text-[12px] font-medium text-[var(--content-primary)] mb-ds-2">
         Score breakdown
       </p>
@@ -223,26 +265,25 @@ function sopReadinessLabel(confidence: number | null): string | null {
 // ── Quick-action kebab menu ───────────────────────────────────────────────────
 
 interface KebabMenuProps {
-  workflowId: string;
   workflowTitle: string;
   triggerRef: React.RefObject<HTMLButtonElement | null>;
   onClose: () => void;
-  onRename?: (id: string, newTitle: string) => void;
-  onArchive?: (id: string) => void;
+  /** DV2-R02a: signals parent to activate inline edit mode — no window.prompt */
+  onStartRename: () => void;
+  /** DV2-R02b: signals parent to activate inline archive confirmation — no window.confirm */
+  onStartArchiveConfirm: () => void;
+  onCopyLink: () => void;
 }
 
 function KebabMenu({
-  workflowId,
   workflowTitle,
   triggerRef,
   onClose,
-  onRename,
-  onArchive,
+  onStartRename,
+  onStartArchiveConfirm,
+  onCopyLink,
 }: KebabMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
-  const [isRenameBusy, setIsRenameBusy] = useState(false);
-  const [isArchiveBusy, setIsArchiveBusy] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   // Focus first menu item on open
   useEffect(() => {
@@ -272,39 +313,181 @@ function KebabMenu({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose, triggerRef]);
 
-  async function handleEditName() {
-    const newTitle = window.prompt('Rename workflow:', workflowTitle);
-    if (!newTitle || newTitle.trim() === workflowTitle) {
-      onClose();
+  return (
+    <div
+      ref={menuRef}
+      role="menu"
+      aria-label={`Actions for ${workflowTitle}`}
+      className="absolute right-0 top-full mt-ds-1 z-50 w-40 rounded-[10px] bg-[var(--surface-elevated)] border border-[var(--border-default)] shadow-md py-ds-1"
+    >
+      <button
+        role="menuitem"
+        type="button"
+        className="w-full flex items-center gap-ds-2 px-ds-3 py-ds-2 text-[14px] text-[var(--content-primary)] hover:bg-[var(--surface-secondary)] transition-colors duration-150 focus:outline-none focus-visible:bg-[var(--surface-secondary)]"
+        onClick={() => {
+          onClose();
+          onStartRename();
+        }}
+      >
+        <Pencil size={12} aria-hidden="true" />
+        Edit name
+      </button>
+      <button
+        role="menuitem"
+        type="button"
+        className="w-full flex items-center gap-ds-2 px-ds-3 py-ds-2 text-[14px] text-[var(--content-primary)] hover:bg-[var(--surface-secondary)] transition-colors duration-150 focus:outline-none focus-visible:bg-[var(--surface-secondary)]"
+        onClick={() => {
+          onClose();
+          onStartArchiveConfirm();
+        }}
+      >
+        <Archive size={12} aria-hidden="true" />
+        Archive
+      </button>
+      <button
+        role="menuitem"
+        type="button"
+        className="w-full flex items-center gap-ds-2 px-ds-3 py-ds-2 text-[14px] text-[var(--content-primary)] hover:bg-[var(--surface-secondary)] transition-colors duration-150 focus:outline-none focus-visible:bg-[var(--surface-secondary)]"
+        onClick={onCopyLink}
+      >
+        <Link size={12} aria-hidden="true" />
+        Copy link
+      </button>
+    </div>
+  );
+}
+
+// ── Inline edit affordance (DV2-R02a) ────────────────────────────────────────
+
+interface InlineEditProps {
+  currentTitle: string;
+  workflowId: string;
+  onCommit: (newTitle: string) => void;
+  onCancel: () => void;
+}
+
+function InlineEdit({ currentTitle, workflowId, onCommit, onCancel }: InlineEditProps) {
+  const [value, setValue] = useState(currentTitle);
+  const [isBusy, setIsBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus input when edit mode activates
+  useEffect(() => {
+    inputRef.current?.focus();
+    inputRef.current?.select();
+  }, []);
+
+  async function commit() {
+    const trimmed = value.trim();
+    if (!trimmed || trimmed === currentTitle) {
+      onCancel();
       return;
     }
-    setIsRenameBusy(true);
+    setIsBusy(true);
+    setError(null);
     try {
       const res = await fetch(`/api/workflows/${workflowId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: newTitle.trim() }),
+        body: JSON.stringify({ title: trimmed }),
       });
       if (!res.ok) {
         const data = (await res.json()) as { error?: string };
-        setStatusMessage(data.error ?? 'Rename failed. Please try again.');
-        setIsRenameBusy(false);
+        setError(data.error ?? 'Rename failed — changes not saved.');
+        setIsBusy(false);
         return;
       }
-      onRename?.(workflowId, newTitle.trim());
-      onClose();
+      onCommit(trimmed);
     } catch {
-      setStatusMessage('Network error. Could not rename workflow.');
-      setIsRenameBusy(false);
+      setError('Network error. Could not rename workflow.');
+      setIsBusy(false);
     }
   }
 
-  async function handleArchive() {
-    if (!window.confirm(`Archive "${workflowTitle}"? You can restore it later.`)) {
-      onClose();
-      return;
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      void commit();
     }
-    setIsArchiveBusy(true);
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      onCancel();
+    }
+  }
+
+  function handleBlur() {
+    // Blur commits (same as Enter), unless already busy or errored
+    if (!isBusy) {
+      void commit();
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-0.5 min-w-0">
+      <input
+        ref={inputRef}
+        type="text"
+        value={value}
+        disabled={isBusy}
+        aria-label="Rename workflow"
+        className="text-[14px] font-medium text-[var(--content-primary)] bg-[var(--surface-secondary)] border border-[var(--border-default)] rounded px-1 py-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 disabled:opacity-50 w-full"
+        onChange={(e) => setValue(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={handleBlur}
+      />
+      {isBusy && (
+        <span className="text-[12px] text-[var(--content-tertiary)]">Saving…</span>
+      )}
+      {error && (
+        <span role="alert" className="text-[12px] text-red-600">{error}</span>
+      )}
+    </div>
+  );
+}
+
+// ── Inline archive confirmation (DV2-R02b) ───────────────────────────────────
+
+interface InlineArchiveConfirmProps {
+  workflowId: string;
+  workflowTitle: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  /** Ref to element that triggered the confirmation, for focus-return on cancel/complete */
+  triggerRef: React.RefObject<HTMLButtonElement | null>;
+}
+
+function InlineArchiveConfirm({
+  workflowId,
+  workflowTitle,
+  onConfirm,
+  onCancel,
+  triggerRef,
+}: InlineArchiveConfirmProps) {
+  const [isBusy, setIsBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const confirmBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Focus the confirm button when the affordance appears
+  useEffect(() => {
+    confirmBtnRef.current?.focus();
+  }, []);
+
+  // Escape cancels and returns focus to trigger
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        onCancel();
+        triggerRef.current?.focus();
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onCancel, triggerRef]);
+
+  async function handleConfirmArchive() {
+    setIsBusy(true);
+    setError(null);
     try {
       const res = await fetch(`/api/workflows/${workflowId}`, {
         method: 'PATCH',
@@ -313,68 +496,53 @@ function KebabMenu({
       });
       if (!res.ok) {
         const data = (await res.json()) as { error?: string };
-        setStatusMessage(data.error ?? 'Archive failed. Please try again.');
-        setIsArchiveBusy(false);
+        setError(data.error ?? 'Archive failed — workflow not archived.');
+        setIsBusy(false);
         return;
       }
-      onArchive?.(workflowId);
-      onClose();
+      onConfirm();
     } catch {
-      setStatusMessage('Network error. Could not archive workflow.');
-      setIsArchiveBusy(false);
+      setError('Network error. Could not archive workflow.');
+      setIsBusy(false);
     }
-  }
-
-  function handleCopyLink() {
-    const url = `${window.location.origin}/workflows/${workflowId}`;
-    void navigator.clipboard.writeText(url);
-    onClose();
   }
 
   return (
     <div
-      ref={menuRef}
-      role="menu"
-      aria-label={`Actions for ${workflowTitle}`}
-      className="absolute right-0 top-full mt-ds-1 z-50 w-40 rounded-[10px] bg-[var(--surface-elevated)] border border-[var(--border-default)] shadow-md py-ds-1"
+      className="px-ds-4 py-ds-2 flex flex-col gap-ds-1"
+      role="region"
+      aria-label={`Confirm archive for ${workflowTitle}`}
     >
-      {statusMessage && (
-        <p
-          role="alert"
-          className="px-ds-3 py-ds-1 text-[12px] text-red-600"
-        >
-          {statusMessage}
-        </p>
+      <span className="text-[12px] text-[var(--content-secondary)]">
+        Archive workflow?
+      </span>
+      {error && (
+        <span role="alert" className="text-[12px] text-red-600">{error}</span>
       )}
-      <button
-        role="menuitem"
-        type="button"
-        disabled={isRenameBusy}
-        className="w-full flex items-center gap-ds-2 px-ds-3 py-ds-2 text-[14px] text-[var(--content-primary)] hover:bg-[var(--surface-secondary)] transition-colors duration-150 focus:outline-none focus-visible:bg-[var(--surface-secondary)] disabled:opacity-50"
-        onClick={() => { void handleEditName(); }}
-      >
-        <Pencil size={12} aria-hidden="true" />
-        {isRenameBusy ? 'Renaming…' : 'Edit name'}
-      </button>
-      <button
-        role="menuitem"
-        type="button"
-        disabled={isArchiveBusy}
-        className="w-full flex items-center gap-ds-2 px-ds-3 py-ds-2 text-[14px] text-[var(--content-primary)] hover:bg-[var(--surface-secondary)] transition-colors duration-150 focus:outline-none focus-visible:bg-[var(--surface-secondary)] disabled:opacity-50"
-        onClick={() => { void handleArchive(); }}
-      >
-        <Archive size={12} aria-hidden="true" />
-        {isArchiveBusy ? 'Archiving…' : 'Archive'}
-      </button>
-      <button
-        role="menuitem"
-        type="button"
-        className="w-full flex items-center gap-ds-2 px-ds-3 py-ds-2 text-[14px] text-[var(--content-primary)] hover:bg-[var(--surface-secondary)] transition-colors duration-150 focus:outline-none focus-visible:bg-[var(--surface-secondary)]"
-        onClick={handleCopyLink}
-      >
-        <Link size={12} aria-hidden="true" />
-        Copy link
-      </button>
+      <div className="flex items-center gap-ds-2">
+        <button
+          ref={confirmBtnRef}
+          type="button"
+          disabled={isBusy}
+          aria-label={`Confirm archive for ${workflowTitle}`}
+          className="px-ds-2 py-0.5 rounded text-[12px] font-medium bg-red-600 text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-50 transition-colors duration-150"
+          onClick={() => { void handleConfirmArchive(); }}
+        >
+          {isBusy ? 'Archiving…' : 'Archive'}
+        </button>
+        <button
+          type="button"
+          disabled={isBusy}
+          aria-label="Cancel — do not archive"
+          className="px-ds-2 py-0.5 rounded text-[12px] font-medium text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 disabled:opacity-50 transition-colors duration-150"
+          onClick={() => {
+            onCancel();
+            triggerRef.current?.focus();
+          }}
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   );
 }
@@ -393,7 +561,11 @@ export default function WorkflowRow({
   const [showKebab, setShowKebab] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [displayTitle, setDisplayTitle] = useState(workflow.title);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isConfirmingArchive, setIsConfirmingArchive] = useState(false);
   const kebabTriggerRef = useRef<HTMLButtonElement>(null);
+  // DV2-R03: ref for the health score cell trigger (for tooltip focus-return)
+  const tooltipTriggerRef = useRef<HTMLDivElement>(null);
 
   const { metricsV2, toolsUsed, createdAt, lastViewedAt } = workflow;
   const { healthScore, opportunityTag, runs } = metricsV2;
@@ -429,6 +601,8 @@ export default function WorkflowRow({
   const sopSubtext = !healthScore.isGated ? sopReadinessLabel(metricsV2.confidence) : null;
 
   function handleRowClick() {
+    // Do not navigate when inline interactions are active
+    if (isEditingName || isConfirmingArchive) return;
     // PRD §4 metric #2: time-to-first-click (p50 <8s, p95 <15s)
     const elapsed =
       dashboardViewPerfTimestampMs > 0
@@ -444,6 +618,7 @@ export default function WorkflowRow({
   }
 
   function handleRowKeyDown(e: React.KeyboardEvent) {
+    if (isEditingName || isConfirmingArchive) return;
     if (e.key === 'Enter') {
       handleRowClick();
     }
@@ -453,9 +628,36 @@ export default function WorkflowRow({
     }
   }
 
-  function handleKebabRename(id: string, newTitle: string) {
+  // DV2-R02a: inline edit callbacks
+  function handleRenameCommit(newTitle: string) {
     setDisplayTitle(newTitle);
-    onRename?.(id, newTitle);
+    setIsEditingName(false);
+    onRename?.(workflow.id, newTitle);
+  }
+
+  function handleRenameCancel() {
+    setIsEditingName(false);
+    kebabTriggerRef.current?.focus();
+  }
+
+  // DV2-R02b: inline archive confirm callbacks
+  function handleArchiveConfirm() {
+    setIsConfirmingArchive(false);
+    onArchive?.(workflow.id);
+  }
+
+  function handleArchiveCancel() {
+    setIsConfirmingArchive(false);
+  }
+
+  // DV2-R03: tooltip dismiss
+  function handleTooltipDismiss() {
+    setShowTooltip(false);
+  }
+
+  function handleCopyLink() {
+    const url = `${window.location.origin}/workflows/${workflow.id}`;
+    void navigator.clipboard.writeText(url);
   }
 
   return (
@@ -474,24 +676,45 @@ export default function WorkflowRow({
     >
       {/* Column 1: Workflow Name + subtext + variation badge (item d) */}
       <th scope="row" className="px-ds-4 py-ds-3 text-left font-normal w-2/5">
-        <div className="flex flex-col gap-0.5 min-w-0">
-          <span className="text-[14px] font-medium text-[var(--content-primary)] truncate">
-            {displayTitle}
-          </span>
-          <span className="text-[12px] font-normal text-[var(--content-tertiary)] truncate">
-            {subtextParts.join(' · ')}
-          </span>
-          {/* High variation badge — only shown when variationLabel === 'high' (iter-024 §4.1 item d) */}
-          {metricsV2.variationLabel === 'high' && (
-            <span
-              className="inline-flex items-center gap-[3px] self-start px-1 py-0.5 rounded-ds-sm bg-amber-50 border border-amber-200 text-[10px] font-medium text-amber-700 mt-0.5"
-              aria-label="This workflow has high run-to-run variation"
-            >
-              <AlertTriangle size={10} aria-hidden="true" />
-              High variation
+        {/* DV2-R02a: inline edit input replaces name text when editing */}
+        {isEditingName ? (
+          <InlineEdit
+            currentTitle={displayTitle}
+            workflowId={workflow.id}
+            onCommit={handleRenameCommit}
+            onCancel={handleRenameCancel}
+          />
+        ) : (
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <span className="text-[14px] font-medium text-[var(--content-primary)] truncate">
+              {displayTitle}
             </span>
-          )}
-        </div>
+            <span className="text-[12px] font-normal text-[var(--content-tertiary)] truncate">
+              {subtextParts.join(' · ')}
+            </span>
+            {/* High variation badge — only shown when variationLabel === 'high' (iter-024 §4.1 item d) */}
+            {metricsV2.variationLabel === 'high' && (
+              <span
+                className="inline-flex items-center gap-[3px] self-start px-1 py-0.5 rounded-ds-sm bg-amber-50 border border-amber-200 text-[10px] font-medium text-amber-700 mt-0.5"
+                aria-label="This workflow has high run-to-run variation"
+              >
+                <AlertTriangle size={10} aria-hidden="true" />
+                High variation
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* DV2-R02b: inline archive confirmation banner */}
+        {isConfirmingArchive && (
+          <InlineArchiveConfirm
+            workflowId={workflow.id}
+            workflowTitle={displayTitle}
+            onConfirm={handleArchiveConfirm}
+            onCancel={handleArchiveCancel}
+            triggerRef={kebabTriggerRef}
+          />
+        )}
       </th>
 
       {/* Column 2: Systems (icon pills) — hidden < 768px per PRD §5.3 */}
@@ -550,6 +773,7 @@ export default function WorkflowRow({
         }}
       >
         <div
+          ref={tooltipTriggerRef}
           className="flex flex-col items-end gap-0.5 cursor-pointer"
           aria-label={
             runs !== null && runs < 10
@@ -608,9 +832,13 @@ export default function WorkflowRow({
           )}
         </div>
 
-        {/* Breakdown tooltip */}
+        {/* DV2-R03: Breakdown tooltip — now with Escape + blur-outside dismiss */}
         {showTooltip && (
-          <HealthTooltip metricsV2={metricsV2} />
+          <HealthTooltip
+            metricsV2={metricsV2}
+            onDismiss={handleTooltipDismiss}
+            triggerRef={tooltipTriggerRef}
+          />
         )}
       </td>
 
@@ -635,12 +863,12 @@ export default function WorkflowRow({
 
             {showKebab && (
               <KebabMenu
-                workflowId={workflow.id}
                 workflowTitle={displayTitle}
                 triggerRef={kebabTriggerRef}
                 onClose={() => setShowKebab(false)}
-                onRename={handleKebabRename}
-                {...(onArchive ? { onArchive } : {})}
+                onStartRename={() => setIsEditingName(true)}
+                onStartArchiveConfirm={() => setIsConfirmingArchive(true)}
+                onCopyLink={handleCopyLink}
               />
             )}
           </div>

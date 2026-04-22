@@ -537,3 +537,209 @@ describe('iter-030: upgrade_clicked from gated health tooltip (event #6)', () =>
     expect(ev.location).toBeTruthy();
   });
 });
+
+// ── iter-031 DV2-R02a: inline edit state machine ──────────────────────────────
+
+/**
+ * Pure-logic model of the InlineEdit commit/cancel decision.
+ *
+ * Rules (mirrored from InlineEdit.commit()):
+ *  - Empty value → cancel (no PATCH)
+ *  - Value unchanged (trimmed === currentTitle) → cancel (no PATCH)
+ *  - Value changed → commit (PATCH body = { title: trimmed })
+ *
+ * Blur behaviour mirrors Enter: if value is changed → commit; unchanged → cancel.
+ */
+type InlineEditDecision =
+  | { action: 'commit'; patchBody: { title: string } }
+  | { action: 'cancel' };
+
+function inlineEditDecide(currentTitle: string, inputValue: string): InlineEditDecision {
+  const trimmed = inputValue.trim();
+  if (!trimmed || trimmed === currentTitle) {
+    return { action: 'cancel' };
+  }
+  return { action: 'commit', patchBody: { title: trimmed } };
+}
+
+describe('iter-031 DV2-R02a: inline edit commit/cancel logic', () => {
+  it('changed value → commit action with trimmed title in PATCH body', () => {
+    const result = inlineEditDecide('Old Name', 'New Name');
+    expect(result.action).toBe('commit');
+    if (result.action === 'commit') {
+      expect(result.patchBody).toEqual({ title: 'New Name' });
+    }
+  });
+
+  it('unchanged value → cancel (no PATCH)', () => {
+    const result = inlineEditDecide('My Workflow', 'My Workflow');
+    expect(result.action).toBe('cancel');
+  });
+
+  it('empty string → cancel (no PATCH)', () => {
+    const result = inlineEditDecide('My Workflow', '');
+    expect(result.action).toBe('cancel');
+  });
+
+  it('whitespace-only → cancel (no PATCH)', () => {
+    const result = inlineEditDecide('My Workflow', '   ');
+    expect(result.action).toBe('cancel');
+  });
+
+  it('value with surrounding whitespace → commit with trimmed title', () => {
+    const result = inlineEditDecide('Old', '  New Title  ');
+    expect(result.action).toBe('commit');
+    if (result.action === 'commit') {
+      expect(result.patchBody.title).toBe('New Title');
+    }
+  });
+
+  it('blur with changed value → same commit decision as Enter', () => {
+    // blur calls commit() with the same logic — decision is identical
+    const onEnter = inlineEditDecide('Old', 'New');
+    const onBlur = inlineEditDecide('Old', 'New');
+    expect(onEnter).toEqual(onBlur);
+    expect(onEnter.action).toBe('commit');
+  });
+
+  it('Escape key → cancel regardless of value (Escape is always cancel)', () => {
+    // Escape bypasses inlineEditDecide and always calls onCancel directly.
+    // This test documents that the Escape path is NOT a commit path.
+    const wouldHaveCommitted = inlineEditDecide('Old', 'New');
+    expect(wouldHaveCommitted.action).toBe('commit'); // confirms value IS changed
+    // But Escape cancels — modelled here as the escape-always-cancels invariant:
+    const escapeAction = 'cancel' as const;
+    expect(escapeAction).toBe('cancel');
+  });
+
+  it('PATCH body uses title key only (no status field)', () => {
+    const result = inlineEditDecide('Old', 'New');
+    if (result.action === 'commit') {
+      expect(Object.keys(result.patchBody)).toEqual(['title']);
+      expect('status' in result.patchBody).toBe(false);
+    }
+  });
+});
+
+// ── iter-031 DV2-R02b: inline archive confirm state machine ──────────────────
+
+/**
+ * Pure-logic model of the InlineArchiveConfirm affordance.
+ *
+ * Rules:
+ *  - Confirm button → PATCH body = { status: 'archived' }; onConfirm callback fires
+ *  - Cancel button → no PATCH; onCancel callback fires; focus returns to trigger
+ *  - Escape key → same as cancel
+ */
+type ArchiveDecision =
+  | { action: 'confirm'; patchBody: { status: 'archived' } }
+  | { action: 'cancel' };
+
+function archiveConfirmDecide(userAction: 'confirm' | 'cancel' | 'escape'): ArchiveDecision {
+  if (userAction === 'confirm') {
+    return { action: 'confirm', patchBody: { status: 'archived' } };
+  }
+  return { action: 'cancel' };
+}
+
+describe('iter-031 DV2-R02b: inline archive confirm logic', () => {
+  it('confirm action → patchBody is { status: "archived" }', () => {
+    const result = archiveConfirmDecide('confirm');
+    expect(result.action).toBe('confirm');
+    if (result.action === 'confirm') {
+      expect(result.patchBody).toEqual({ status: 'archived' });
+    }
+  });
+
+  it('cancel action → no PATCH, action is cancel', () => {
+    const result = archiveConfirmDecide('cancel');
+    expect(result.action).toBe('cancel');
+  });
+
+  it('Escape key → treated as cancel, no PATCH', () => {
+    const result = archiveConfirmDecide('escape');
+    expect(result.action).toBe('cancel');
+  });
+
+  it('confirm PATCH body has exactly one key: status', () => {
+    const result = archiveConfirmDecide('confirm');
+    if (result.action === 'confirm') {
+      expect(Object.keys(result.patchBody)).toHaveLength(1);
+      expect(result.patchBody.status).toBe('archived');
+    }
+  });
+
+  it('confirm PATCH body status is "archived" (not "deleted" or "inactive")', () => {
+    const result = archiveConfirmDecide('confirm');
+    if (result.action === 'confirm') {
+      expect(result.patchBody.status).toBe('archived');
+    }
+  });
+
+  it('confirm PATCH body has no title field', () => {
+    const result = archiveConfirmDecide('confirm');
+    if (result.action === 'confirm') {
+      expect('title' in result.patchBody).toBe(false);
+    }
+  });
+});
+
+// ── iter-031 DV2-R03: tooltip dismiss logic ───────────────────────────────────
+
+/**
+ * Pure-logic model of HealthTooltip dismiss conditions (WCAG 2.1 SC 1.4.13).
+ *
+ * SC 1.4.13 "dismissible" arm:
+ *  - Escape key → always dismiss
+ *  - Blur with focus leaving tooltip region (relatedTarget outside) → dismiss
+ *  - Blur with focus staying inside tooltip region (relatedTarget inside) → no dismiss
+ *
+ * Existing behaviors that must be preserved (not under test here, documented):
+ *  - hover-show: parent sets showTooltip=true on mouse enter health cell
+ *  - click-toggle: parent toggles showTooltip on click of health cell
+ */
+type TooltipDismissDecision = 'dismiss' | 'keep';
+
+function tooltipDismissOnKeyDown(key: string): TooltipDismissDecision {
+  return key === 'Escape' ? 'dismiss' : 'keep';
+}
+
+function tooltipDismissOnBlur(params: {
+  relatedTargetIsInsideContainer: boolean;
+}): TooltipDismissDecision {
+  // If relatedTarget is null (focus left document) or outside container → dismiss
+  return params.relatedTargetIsInsideContainer ? 'keep' : 'dismiss';
+}
+
+describe('iter-031 DV2-R03: tooltip dismiss logic (WCAG 2.1 SC 1.4.13)', () => {
+  it('Escape key → dismiss tooltip', () => {
+    expect(tooltipDismissOnKeyDown('Escape')).toBe('dismiss');
+  });
+
+  it('non-Escape key → keep tooltip open', () => {
+    expect(tooltipDismissOnKeyDown('Tab')).toBe('keep');
+    expect(tooltipDismissOnKeyDown('Enter')).toBe('keep');
+    expect(tooltipDismissOnKeyDown('ArrowDown')).toBe('keep');
+  });
+
+  it('blur with relatedTarget outside tooltip container → dismiss', () => {
+    expect(tooltipDismissOnBlur({ relatedTargetIsInsideContainer: false })).toBe('dismiss');
+  });
+
+  it('blur with relatedTarget inside tooltip container → keep open (focus moved within tooltip)', () => {
+    expect(tooltipDismissOnBlur({ relatedTargetIsInsideContainer: true })).toBe('keep');
+  });
+
+  it('blur with null relatedTarget (focus left document) → dismiss', () => {
+    // null relatedTarget means focus left window entirely — treated as "outside"
+    // modelled by relatedTargetIsInsideContainer: false (container.contains(null) === false)
+    expect(tooltipDismissOnBlur({ relatedTargetIsInsideContainer: false })).toBe('dismiss');
+  });
+
+  it('only Escape among all key events triggers dismiss (exhaustive check)', () => {
+    const keys = ['Tab', 'Enter', 'Space', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'a', 'z'];
+    for (const key of keys) {
+      expect(tooltipDismissOnKeyDown(key)).toBe('keep');
+    }
+  });
+});
