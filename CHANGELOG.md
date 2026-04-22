@@ -6,6 +6,67 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-22] - MR-006 Meta-Review (Mode 4, governance-only, non-counting toward improvement-loop cadence)
+
+### Selection
+
+- **Mode:** Mode 4 — meta-review, no product code changes.
+- **Trigger:** Base 3-loop meta-review cadence fully filled — iter 026 + 027 + 028 counted = 3; iter 029 = 4th bounded loop since MR-005 at iter 025. Per CLAUDE.md § Meta-Review Cadence, Mode 4 MANDATORY before iter 030 Mode 1 can proceed.
+- **Agent:** `meta-coordinator` (Mode 4 specialist; governance-artifact only).
+- **Window evaluated:** iter 026 → iter 029 (four bounded loops).
+
+### What changed
+
+**Artifact produced:**
+
+- `docs/meta/MR_006_META_REVIEW.md` — 351 lines. 7 sections: Executive Summary · Window Recap Table · Per-Rule Effectiveness Assessment (10 dimensions) · Recommended Control Diffs (4 changes) · No-Change Rules (10 preserved) · Next Meta-Review Trigger · Open Questions for CEO. Supersedes-note + Cadence-note + Effectiveness-metric-targets for MR-007.
+
+**Per-rule verdicts (10 dimensions evaluated):**
+
+| Rule | Verdict | Evidence |
+|------|---------|----------|
+| MR-005 D-1 reverse portfolio-drift (N=5 non-extension) | Effective | Armed iter 024, cleared iter 027 policy-engine; N=5 well-calibrated |
+| MR-005 D-2 Mode 5 hard-ceiling pool > 15 | Insufficient Evidence (preserve) | Dormant entire window; no Mode 5 occurred |
+| MR-005 D-3 density-response `scope-guard-adjacent` | Insufficient Evidence (preserve) | Zero follow-ups generated; density trigger never fired |
+| MR-005 D-4 specialist-invocation gate (≥3 copy / ≥200 LOC) | Partially Effective | Correct as negative filter 4×; no affirmative fire yet (exception clause fired cleanly at iter 029) |
+| MR-005 D-5 audit-intake pattern | Effective | DASHBOARD_V2_REVIEW_001 intake (2nd validation); clean P0 promotion + cold-pool hold |
+| MR-005 D-6 test-touch surface counting | Effective with refinement opportunity | Correct behavior in window; near-miss on thin mock-plumbing touch flagged |
+| MR-005 D-7 Mode 5 length soft-cap (N ≥ 6 pre-check) | Insufficient Evidence (preserve) | Dormant; Path C Build is first live test |
+| Cool-off single-use (MR-003 B / MR-004 B narrowed) | Effective at single-use; recharge recommended | Iter 029 consumption produced formula-validation artifact (Spearman ρ, 33% |Δ|≥10) |
+| Agent-diversity 4+ trigger | Effective (preserve) | Coordinator pre-empted at 3→rotate to `analytics`; preemption behavior is correct |
+| Ceiling rule pool > 8 forces burn-down | Effective | Forced iter 026/027/028 triple burn-down; net closure-to-intake 4/3 = 1.33 |
+
+**4 control diffs applied to `CLAUDE.md`:**
+
+1. **MR-006 Change A** — Cool-off recharge rule (`CLAUDE.md` § Follow-Up Debt Policy clause 7). Supersedes permanent single-use. After cool-off consumption, 3 consecutive burn-down iterations re-arm the resource; recharge is unbounded. Directed-exclusion (MR-004 B) preserved.
+2. **MR-006 Change B** — Formal no-change decision on D-2 hard-ceiling. Recorded to prevent speculative tuning on zero-evidence. Path C Build Phase A (earliest iter 032) will be first live evaluation.
+3. **MR-006 Change C** — Tightened MR-005 D-6 (test-touch counting). Substantive test-case modification (new `test(...)` / `it(...)` block OR materially-changed assertion) now required for drift-counter credit. Mock-plumbing-only edits (import paths, `vi.mock` stubs, harness-param passthroughs) no longer count.
+4. **MR-006 Change D** — New Audit-Intake Pattern clause 7: cold-pool staleness escalation at 10-iter post-audit-intake cap. Mirrors live-pool 10-iteration staleness rule; forces explicit `keep-cold` / `promote` / `delete` triage at next meta-review for any cold-pool item aging past 10 iterations.
+
+**No-change rules (10 preserved):** D-1, D-2 (Change B), D-3, D-4, D-5 (extended by Change D), D-7, MR-004 B directed-exclusion, same-implementer-4+, ceiling clause 6, Follow-Up Debt Policy clauses 1+4.
+
+### Validation
+
+- MR-006 is Mode 4 governance-only; no tests, no code changes. Validation = cross-check that all 4 diffs are applyable to CLAUDE.md with cited old_string/new_string pairs.
+- Change A diff applied cleanly (`CLAUDE.md § Follow-Up Debt Policy` clause 7).
+- Change C diff applied cleanly (`CLAUDE.md § Meta-Review Cadence` D-6 parenthetical bullet).
+- Change D diff applied cleanly (`CLAUDE.md § Audit-Intake Pattern` new clause 7 after existing clause 6).
+- Change B is a recorded no-change decision; no diff applied.
+
+### Outcome
+
+- **MR-006 CLOSED**. MR-007 earliest iter 032 per 3-loop stability floor. Hard-trigger exceptions: any Mode 5 start (D-7 pre-check is itself a Mode 4 event), 2 consecutive validation failures, same-implementer-4+ actually trip, reverse-drift reaching N=5.
+- **Cadence:** Mode 4 meta-reviews do NOT count toward improvement-loop cadence (per CLAUDE.md — "Mode 3-adjacent reviews do NOT increment" pattern extends to Mode 4). Iter 030 = next bounded improvement loop.
+- **Pool:** 31 (unchanged — Mode 4 is governance-only).
+
+### Follow-ups
+
+- **None from MR-006 itself.** 4 open questions recorded in artifact § 7 for CEO review (cool-off recharge adoption, DV2 P1 triage policy, Path C Build opening trigger, burn-rate stretch target revision) — these are CEO decisions, not follow-up backlog rows.
+- **Effectiveness metric targets for MR-007** recorded in artifact § Effectiveness Metric Targets (7 numbered targets; all measurable at iter 032).
+- **Cold-pool staleness alert for MR-007:** audit-intake rows from `PRICING_AUDIT_001` (#34/#35/#36) age ~9 at iter 029 close; at iter 032 will be ~12 and will trigger MR-006 Change D staleness review at MR-007 entry.
+
+---
+
 ## [2026-04-22] - Iteration 029: DV2-R01 v1-vs-v2 health-score distribution comparison artifact (Mode 1, `top-score`, MANDATORY agent rotation to `analytics`)
 
 ### Selection

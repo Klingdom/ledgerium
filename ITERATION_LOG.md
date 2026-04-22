@@ -4,6 +4,78 @@ This file records each bounded improvement loop.
 
 ---
 
+## MR-006 Meta-Review (non-counting toward improvement-loop cadence)
+
+- Date: 2026-04-22
+- Trigger: Base 3-loop meta-review cadence fully filled — iter 026 + 027 + 028 counted = 3; iter 029 = 4th bounded loop since MR-005 at iter 025. Mode 4 MANDATORY before iter 030 Mode 1 can proceed.
+- Coordinator: coordinator
+- Agent: `meta-coordinator`
+- Phase: Phase 1
+- Mode: **Mode 4 (meta-review, governance-only; NO product code changes)**
+- Commit: pending (MR-006 artifact + CLAUDE.md diffs + governance artifact updates single commit)
+
+### Candidate Selection
+
+- **Selection rule:** `directed` (Mode 4 meta-review is a governance operation, not a priority-selection). Mode 4 cadence rule auto-triggered by base 3-loop counter filling.
+- **Selected work:** MR-006 — evaluate MR-005 D-1 through D-7 effectiveness over iter 026-029 window; assess cool-off single-use rule post-iter-029 consumption; pool trajectory analysis; agent-diversity rotation effectiveness; control-change recommendations if warranted.
+- **Portfolio rule checks:**
+  - Cool-off: N/A (Mode 4 does not consume cool-off; governance-only).
+  - Area saturation: Mode 4 is `governance` Area (non-counting for Area saturation per CLAUDE.md cadence note).
+  - Release-blocker cadence: no open Phase-1 blockers; rule inapplicable.
+  - Burn-down floor: N/A (Mode 4 does not count toward improvement-loop cadence; burn-down floor tracked across iter 026-029 satisfied via triple burn-down + iter 029 `top-score` cool-off invocation).
+  - Ceiling rule (pool > 8 forces burn-down): N/A (Mode 4 precedence; no code-change improvement-loop operation).
+  - Agent-diversity 4+: N/A (Mode 4 `meta-coordinator` is its own specialist; improvement-loop same-implementer counter paused).
+  - Reverse portfolio-drift (D-1, N=5 non-extension): N/A (Mode 4 is governance-only; non-counting for surface coverage — D-1 counter held at 1 post-iter-029).
+
+### Agents Used
+
+- `meta-coordinator` (Mode 4 specialist, primary)
+
+### Files Changed
+
+- **Created:** `docs/meta/MR_006_META_REVIEW.md` — 351 lines, 7 sections.
+- **Modified:** `CLAUDE.md` — 3 control-diff edits applied:
+  - **Change A** (Follow-Up Debt Policy clause 7): cool-off recharge rule added (3 consecutive post-consumption burn-downs re-arm; unbounded recharge).
+  - **Change C** (Meta-Review Cadence D-6 parenthetical): tightened test-touch counting — substantive test-case modification required; mock-plumbing-only edits do not count.
+  - **Change D** (Audit-Intake Pattern new clause 7): cold-pool staleness escalation at 10-iter cap — forces explicit `keep-cold` / `promote` / `delete` triage at next meta-review.
+- **Modified:** `CLAUDE.md § Current Phase + § Known Issues` — MR-006 CLOSED; cool-off rechargeable; MR-007 earliest iter 032.
+- **Modified:** `CHANGELOG.md` — MR-006 entry prepended.
+- **Modified:** `SYSTEM_HEALTH.md` — "Last updated" block rewritten for MR-006 close.
+- **Modified:** `ITERATION_LOG.md` — MR-006 entry prepended (this entry).
+
+### Validation
+
+- Mode 4 is governance-only; no tests, no code changes, no pool deltas.
+- Validation = cross-check that all 3 applyable diffs applied cleanly to CLAUDE.md with cited old_string/new_string pairs (Change B is no-change-recorded, no diff).
+- Change A applied cleanly (Follow-Up Debt Policy clause 7 amended).
+- Change C applied cleanly (Meta-Review Cadence D-6 parenthetical amended).
+- Change D applied cleanly (Audit-Intake Pattern gained clause 7; rationale block extended with DV2-REVIEW-001 validation reference).
+- 10 no-change rules preserved verbatim.
+
+### Outcome
+
+- **MR-006 CLOSED.** Artifact: `docs/meta/MR_006_META_REVIEW.md`.
+- **Per-rule verdicts (10 dimensions):** 5 Effective (D-1, D-5, D-6 with refinement, cool-off single-use, agent-diversity, ceiling rule) · 1 Partially Effective (D-4) · 3 Insufficient Evidence-preserve (D-2, D-3, D-7). No false-positive rule fires observed in window.
+- **4 control diffs:** Change A (cool-off recharge), Change B (no-change on D-2 recorded), Change C (substantive test-case requirement), Change D (cold-pool staleness escalation).
+- **Pool unchanged at 31.** Mode 4 has zero direct effect on follow-up pool.
+- **Cadence:** Mode 4 non-counting. Iter 030 = next bounded improvement loop. Stability window: iter 030-032. **MR-007 earliest iter 032** per 3-loop floor.
+- **Hard-trigger exceptions for earlier MR-007:** any Mode 5 start (D-7 pre-check is itself a Mode 4 event), 2 consecutive validation failures, same-implementer-4+ actually trip, reverse-drift reaching N=5.
+
+### Follow-ups
+
+- **None generated** from MR-006 itself.
+- **4 CEO open questions queued** (artifact § 7): cool-off recharge adoption confirmation, DV2-REVIEW-001 P1 cold-pool triage policy, Path C Build opening trigger, burn-rate stretch target revision (≤15 by iter 038 vs original MR-005 ≤15 by iter 035).
+- **MR-007 effectiveness metric targets recorded** (artifact § Effectiveness Metric Targets, 7 numbered targets):
+  1. Did MR-006 Change A (cool-off recharge) fire in iter 030-034? Was it consumed productively?
+  2. Did MR-006 Change C (substantive test-touch) produce a different drift-counter outcome than un-tightened rule?
+  3. Did MR-006 Change D (cold-pool staleness escalation) fire? Audit-intake rows #34/#35/#36 age ~12 at iter 032 — MUST triage at MR-007 entry.
+  4. Pool trajectory vs ≤15 target revision.
+  5. First Mode 5 in post-MR-005 window — did Path C Build Phase A open? Did D-7 pre-check produce usable artifact?
+  6. D-4 specialist-invocation first affirmative fire.
+  7. Closure-to-intake ratio ≥ 0.4 over iter 024-033 window.
+
+---
+
 ## Iteration 029
 
 - Date: 2026-04-22
