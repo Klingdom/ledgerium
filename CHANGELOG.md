@@ -6,6 +6,50 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-22] - Iteration 028: session-store SW-startup integrity hardening (#19 + #20 bundled, Mode 1, `burn-down`)
+
+### Selection
+
+- **Mode:** Mode 1 (bounded improvement loop).
+- **Rule:** `burn-down` (MANDATORY — MR-005 iter 026-028 programming + pool > 8 soft + pool > 15 hard ceiling all force burn-down; bundled two past-cap follow-ups targeting the same code path).
+- **Item:** #19 + #20 bundled = "session-store SW-startup integrity hardening." Both rows iter-010 follow-ups, age 18 at selection (past staleness cap). Both modify the SAME function path (`loadFromStorage()`) in `apps/extension-app/src/background/session-store.ts` — one logical outcome per guardrail 7(b).
+- **Primary agent:** `backend-engineer` (3rd consecutive — iter 026 + 027 + 028). Iter 029 MANDATORY rotation.
+- **Area:** `extension-app / session-durability` — D-1-enumerated tracked extension surface. Extends MR-005 D-1 reverse portfolio-drift clearance.
+- **D-4 gate:** evaluated — ~120 LOC production delta (<< 200 LOC threshold); no user-visible copy strings. Neither `system-architect` nor `growth-strategist` adjacency required.
+
+### What changed
+
+- `apps/extension-app/src/background/session-store.ts` — `loadFromStorage()` rewritten (lines 179-253, ~74 LOC): calls `gcOrphanedEventBlobs()` before events-blob read; applies in-flight cross-validation guard; includes GC-failure catch-path fallback to original restore. New private helper `gcOrphanedEventBlobs(activeSessionId: string | null): Promise<string[]>` (lines 368-408, ~46 LOC) performs full `chrome.storage.local.get(null, ...)` keyset scan, removes `STORAGE_KEY_SESSION_EVENTS_PREFIX*` keys whose sessionId suffix ≠ active meta (or ALL matching keys if no meta), logs structured `console.warn` per removal with reason `no-active-session` or `stale-sessionId`, returns removed-key list. New private helper `isInFlightState(state: RecorderState): boolean` (lines 409-413) — explicit set `arming | recording | paused | stopping`. Production LOC delta: ~+120 (under 200 LOC D-4 threshold).
+- `apps/extension-app/src/background/session-store.test.ts` — 7 new tests added (4 GC behavior under `describe('gcOrphanedEventBlobs via loadFromStorage')`: no-meta + orphans; meta with stale orphans; meta with matching events; no-op. 3 in-flight cross-validation under `describe('in-flight meta cross-validation via loadFromStorage')`: in-flight + no blob; in-flight + empty arrays; idle + no blob preserves `true`). 1 existing test updated: `missing event payload on load` flipped from `state: 'recording'` → `state: 'idle'` because the old assertion encoded the #20 bug exactly (in-flight + no blob had asserted `true`; correct behavior for iter 028 is `false` for in-flight, `true` for idle). `chrome.storage.local.get` mock updated for `null`/all-keys signature; `remove` mock updated for optional callback. Package test count: **36 → 43**.
+- `apps/extension-app/src/background/session-restore.integration.test.ts` (lines 59-71) — mock harness updated to support the new `get(null, ...)` call path inside rewired `loadFromStorage()`. No test logic changes.
+
+### Why
+
+Two independent iter-010 follow-ups both trace to the same ~74-LOC SW-startup restore path, and both were past the 10-iteration staleness cap. **#19 (GC orphaned event blobs on SW startup)**: when a session ends or is abandoned, per-session events blobs under the `STORAGE_KEY_SESSION_EVENTS_PREFIX*` key family could persist indefinitely, creating dead storage that has no corresponding active session — a silent `chrome.storage.local` leak. **#20 (cross-validate sessionId + in-flight state in `loadFromStorage`)**: the old restore path returned `true` even when `meta.state` was in-flight (`arming | recording | paused | stopping`) but no events blob existed, implicitly asserting "recovery succeeded" when it actually hadn't — a silent restore-failure under SW-restart. Both are service-worker-restart integrity defects in the same function; bundling delivers them as one logical outcome and avoids the two fixes producing overlapping touches of the same function across consecutive iterations.
+
+### Validation
+
+- Extension-app session-store package: **36 → 43 tests** (+7 new tests; all passing).
+- Workspace: **1775 → 1782 passing** (+7; 0 failures).
+- Typecheck: clean across all 9 packages/apps.
+- Determinism: GC keyset scan is deterministic (`chrome.storage.local.get(null, ...)` key-value map; ordering irrelevant to removal correctness). In-flight cross-validation is a pure predicate on `RecorderState` + array-length checks.
+- Scope-expansion audit: confirmed zero changes outside `loadFromStorage()` / new private helpers / test-mock harness updates. No touches to `debounce/persist/flushOnSuspend/addRawEvent/clear` paths.
+
+### Impact
+
+- Pool: **34 → 32** (#19 + #20 closed; first two-closure iteration since Path B burn-down).
+- MR-005 D-1 reverse portfolio-drift clearance **extended** at iter 028 close (next check at iter 034).
+- Cadence counter 3/3 → **MR-006 meta-review DUE at iter 029 close**.
+- Cool-off streak = **3 of 3 at iter 028 close; re-armed at iter 029** → iter 029 is first `top-score` eligible slot.
+- Agent-diversity: `backend-engineer` consecutive counter = **3 post-iter-028**; iter 029 MANDATORY rotation.
+- Zero follow-ups generated (density-response: n/a). One adjacent concern noted (rehydrateEvents schema-version mismatch path still returns `true` because guard fires after `this.meta = saved`) — NOT acted on per scope discipline.
+
+### Next
+
+Iter 029 = **DV2-R01 audit-intake P0** (first `top-score` slot; MANDATORY rotation to `analytics`; MR-006 meta-review DUE at close). Server-side script producing `docs/analysis/HEALTH_SCORE_DISTRIBUTION_COMPARISON.md` artifact to unblock #42 v1 health-score retirement.
+
+---
+
 ## [2026-04-21] - Iteration 027: policy-engine `credit_card` regex widened (Mode 1, `burn-down`)
 
 ### Selection

@@ -49,14 +49,20 @@ const chromeMock = {
         }
         if (cb) cb()
       }),
-      remove: vi.fn((key: string | string[]) => {
+      remove: vi.fn((key: string | string[], cb?: () => void) => {
         if (Array.isArray(key)) {
           for (const k of key) delete mockStorage[k]
         } else {
           delete mockStorage[key]
         }
+        if (cb) cb()
       }),
-      get: vi.fn((keys: string[], cb: (result: Record<string, unknown>) => void) => {
+      get: vi.fn((keys: string[] | null, cb: (result: Record<string, unknown>) => void) => {
+        // null means "return all keys" — mirrors chrome.storage.local.get(null, cb)
+        if (keys === null) {
+          cb({ ...mockStorage })
+          return
+        }
         const result: Record<string, unknown> = {}
         for (const k of keys) {
           if (k in mockStorage) result[k] = mockStorage[k]

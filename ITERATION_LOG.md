@@ -4,6 +4,67 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 028
+
+- Date: 2026-04-22
+- Trigger: Post-MR-005 programmed burn-down (iter 028 MANDATORY per MR_005 Agenda 6 / `CLAUDE.md § Current Phase` iter 026-028 programming). Pool > 15 hard ceiling still violated (34 entering iter 028). Both #19 + #20 past staleness cap (iter-010 follow-ups, age 18 at iter 028 selection).
+- Coordinator: coordinator
+- Phase: Phase 1
+- Mode: **Mode 1 (bounded improvement loop)**
+- Commit: pending (single Mode 1 burn-down commit)
+
+### Candidate Selection
+
+- **Selection rule:** `burn-down` (MANDATORY — MR-005 iter 028 programmed at iter 025 close; pool > 8 soft + > 15 hard ceiling both force burn-down; bundled two past-cap follow-ups targeting the same code path).
+- **Selected work:** #19 + #20 bundled = "session-store SW-startup integrity hardening." Both rows iter-010 follow-ups, age 18 at selection (past staleness cap). Bundle legitimacy — both rows modify the SAME function path (`loadFromStorage()`) in `apps/extension-app/src/background/session-store.ts`; one logical outcome.
+- **Bundle justification (guardrail 7(b) one-logical-outcome):** PASSES. #19 (GC orphan event blobs on SW startup) + #20 (cross-validate sessionId/in-flight state in `loadFromStorage`) both address SW-startup integrity. Bundling prevents the two fixes from producing overlapping touches of the same function across consecutive iterations. The scope boundary is hard — any touch outside `loadFromStorage()` + its new private helpers would violate guardrail 7(b). Report confirmed scope held.
+- **Rationale:** addresses 3 signals simultaneously — (a) two follow-up burn-downs at once (pool 34 → 32), (b) extends MR-005 D-1 reverse portfolio-drift clearance (extension-app is D-1-enumerated; iter-027 policy-engine clearance reinforced), (c) both rows past staleness cap — resolving them clears MR-005 D-3 staleness tail.
+- **Portfolio rule checks:**
+  - `burn-down` rule (1-in-5 floor + pool > 8 ceiling): both satisfied. Pool at 34 entering iter 028.
+  - Area saturation: iter 028 `extension-app / session-durability` (distinct from iter 027 `policy-engine`, iter 026 `process-engine`, iter 025 `governance`, iter 024 `web-app`). 3-in-a-row clock cleared.
+  - Release-blocker cadence: no open Phase-1 blockers; rule inapplicable.
+  - Same-implementer-4+: iter 025 `meta-coordinator` (Mode 4, excluded); iter 026 `backend-engineer`; iter 027 `backend-engineer`; iter 028 `backend-engineer`. Consecutive counter = 3. **Trigger stays below 4+ threshold at iter 028 close; iter 029 MANDATORY rotation.**
+  - D-4 specialist-invocation gate: delivered surface = ~120 new production LOC (rewritten `loadFromStorage()` + 2 new private helpers). Below 200 LOC threshold; `system-architect` adjacency NOT required. No user-visible copy strings; `growth-strategist` adjacency NOT required.
+- **density-response:** n/a (zero follow-ups generated; clause 3 did not fire). One adjacent issue noted (rehydrateEvents schema-version mismatch still returns `true` because guard fires after `this.meta = saved`) — NOT acted on per scope discipline.
+- **scope-expansion:** none (scope held to `loadFromStorage()` path + its new private helpers; zero touches to debounce/persist/flushOnSuspend/addRawEvent/clear or other session-store functions).
+- **ceiling-cool-off:** not invoked (iter 028 is burn-down by rule; cool-off only applies to `top-score`/`blocker-cadence` picks when pool > 8). Cool-off streak 3-consecutive-burn-down = **3 of 3 at iter 028 close; re-armed at iter 029.**
+- **reverse-portfolio-drift:** clearance **extended at iter 028 close** (extension-app is D-1-enumerated). No `reverse-portfolio-drift: user-ack` required.
+- **directed-agents:** `backend-engineer` primary; no adjacent specialists required.
+
+### Agents Used
+
+- **Primary:** `backend-engineer` — rewrote `loadFromStorage()`, added 2 new private helpers, added 7 new tests, updated 1 existing test assertion (same pattern as iter 027: the old test literally encoded the bug #20 fixes — it asserted `state: 'recording'` with no events blob → `loadFromStorage → true`, which is exactly the bug; flipped to `state: 'idle'` to preserve a genuine happy-path assertion), updated 2 test-mock harnesses to support `chrome.storage.local.get(null, callback)` all-keyset signature.
+- **Adjacent:** none. D-4 gate did not fire.
+- **Consecutive-same-agent counter:** `backend-engineer` = 3 post-iter-028 (iter 026 + 027 + 028). **Iter 029 MANDATORY rotation** — a 4th consecutive `backend-engineer` at iter 029 trips same-implementer-4+ trigger. DV2-R01 rotates to `analytics`.
+
+### Files Changed
+
+**Modified (3):**
+- `apps/extension-app/src/background/session-store.ts` — `loadFromStorage()` rewritten (lines 179-253, ~74 LOC); 2 new private helpers added (`gcOrphanedEventBlobs(activeSessionId): Promise<string[]>` lines 368-408 and `isInFlightState(state: RecorderState): boolean` lines 409-413, ~46 LOC total). Production LOC delta: ~+120, well under 200 LOC D-4 threshold.
+- `apps/extension-app/src/background/session-store.test.ts` — 7 new tests added (4 GC behavior under `describe('gcOrphanedEventBlobs via loadFromStorage')`, 3 in-flight cross-validation under `describe('in-flight meta cross-validation via loadFromStorage')`); 1 existing test updated (`missing event payload on load`) — assertion flipped from `state: 'recording'` → `state: 'idle'` because old assertion encoded the #20 bug (in-flight + no blob → `true`); `chrome.storage.local.get` mock updated to handle `null`/all-keys signature; `remove` mock updated to accept optional callback. Package test count: 36 → 43.
+- `apps/extension-app/src/background/session-restore.integration.test.ts` — `chrome.storage.local` mock updated (same-shape addition as session-store.test.ts) to support the new `get(null, ...)` call path inside rewired `loadFromStorage()`. No test logic changed.
+
+### Validation
+
+- **Workspace:** 1775 / 1775 → **1782 / 1782 passing** (+7 new tests from session-store.test.ts). All 56 test files pass.
+- **Typecheck:** clean across all 9 packages/apps.
+- **Determinism:** GC keyset scan is deterministic (`chrome.storage.local.get(null, ...)` returns key-value map; ordering does not affect removal correctness). In-flight cross-validation is deterministic (pure predicate on `RecorderState` + array-length checks).
+- **Scope-expansion audit:** confirmed zero changes outside `loadFromStorage()` / new private helpers / test-mock harness updates. Report confirmed no touches to `debounce/persist/flushOnSuspend/addRawEvent/clear` paths.
+
+### Outcome
+
+- #19 closed + #20 closed (pool **34 → 32** — two closures in one iteration, first bundle-burn-down since iter 028's predecessor bundling pattern).
+- MR-005 D-1 reverse portfolio-drift clearance **extended** (next check at iter 034).
+- Cadence counter 3/3 → **MR-006 meta-review DUE at iter 029 close** (base 3-loop cadence fires).
+- Cool-off streak 3-consecutive-burn-down = **3 of 3 at iter 028 close; re-armed at iter 029** → iter 029 is first `top-score` eligible slot.
+- Zero follow-ups generated (density-response: n/a).
+
+### Follow-ups
+
+- None generated (0 follow-ups). One adjacent concern noted but NOT converted to backlog row per scope discipline: `rehydrateEvents` schema-version mismatch path still returns `true` from `loadFromStorage()` because the guard fires after `this.meta = saved` is set. Candidate for a future iteration if evidence warrants; may be aggregated with similar `rehydrateEvents` refinements.
+
+---
+
 ## Iteration 027
 
 - Date: 2026-04-21

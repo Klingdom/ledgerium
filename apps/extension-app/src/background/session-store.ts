@@ -175,24 +175,83 @@ export class SessionStore {
    *
    * Malformed or missing fields default to [] and a structured warning is
    * logged (not an exception) so a corrupt payload does not crash the SW.
+   *
+   * On startup this method also:
+   *   1. GCs orphaned event-blob keys whose sessionId does not match the
+   *      currently-persisted active session (or removes all if no active
+   *      session exists) — addresses iter-028 #19.
+   *   2. Cross-validates in-flight meta against the events blob.  If meta
+   *      reports an in-flight state (arming/recording/paused/stopping) but no
+   *      events blob is present OR the blob has zero events across all four
+   *      arrays, the meta is treated as an orphaned crash remnant and cleared —
+   *      addresses iter-028 #20.
    */
   async loadFromStorage(): Promise<boolean> {
     return new Promise(resolve => {
       chrome.storage.local.get([STORAGE_KEY_SESSION], result => {
         const saved = result[STORAGE_KEY_SESSION] as SessionMeta | undefined
-        if (!saved) {
-          resolve(false)
-          return
-        }
+        const activeSessionId = saved?.sessionId ?? null
 
-        this.meta = saved
+        // GC orphaned event-blob keys before reading the events blob so the
+        // subsequent read does not race against the removal.
+        this.gcOrphanedEventBlobs(activeSessionId).then(() => {
+          if (!saved) {
+            resolve(false)
+            return
+          }
 
-        // Load event arrays using the session-scoped key.
-        const eventsKey = STORAGE_KEY_SESSION_EVENTS_PREFIX + saved.sessionId
-        chrome.storage.local.get([eventsKey], eventsResult => {
-          const raw = eventsResult[eventsKey] as Partial<PersistedSessionEvents> | undefined
-          this.rehydrateEvents(raw, saved.sessionId)
-          resolve(true)
+          // Load event arrays using the session-scoped key.
+          const eventsKey = STORAGE_KEY_SESSION_EVENTS_PREFIX + saved.sessionId
+          chrome.storage.local.get([eventsKey], eventsResult => {
+            const raw = eventsResult[eventsKey] as Partial<PersistedSessionEvents> | undefined
+
+            // ── In-flight cross-validation (iter-028 #20) ─────────────────────
+            // If meta is in an in-flight state but the events blob is absent or
+            // contains zero events across all four arrays, the SW likely crashed
+            // before any events were persisted.  Restoring into this state would
+            // leave the store reporting "recording session X" with empty arrays.
+            // Treat it as an orphan: clear storage and return false.
+            if (this.isInFlightState(saved.state)) {
+              const blobMissing = raw === undefined
+              const blobEmpty = !blobMissing
+                && raw.persistSchemaVersion === PERSIST_SCHEMA_VERSION
+                && (raw.rawEvents?.length ?? 0) === 0
+                && (raw.canonicalEvents?.length ?? 0) === 0
+                && (raw.policyLog?.length ?? 0) === 0
+                && (raw.liveSteps?.length ?? 0) === 0
+
+              if (blobMissing || blobEmpty) {
+                console.warn(
+                  `[SessionStore] In-flight meta with no events detected — treating as orphan. ` +
+                  `sessionId=${saved.sessionId} state=${saved.state} ` +
+                  `reason=${blobMissing ? 'events-blob-missing' : 'events-blob-empty'}. ` +
+                  'Clearing stale meta.',
+                )
+                // Set meta so clear() can remove the keyed events blob too.
+                this.meta = saved
+                this.clear()
+                resolve(false)
+                return
+              }
+            }
+
+            this.meta = saved
+            this.rehydrateEvents(raw, saved.sessionId)
+            resolve(true)
+          })
+        }).catch(() => {
+          // GC failure is non-fatal — continue with normal restore path.
+          if (!saved) {
+            resolve(false)
+            return
+          }
+          const eventsKey = STORAGE_KEY_SESSION_EVENTS_PREFIX + saved.sessionId
+          chrome.storage.local.get([eventsKey], eventsResult => {
+            const raw = eventsResult[eventsKey] as Partial<PersistedSessionEvents> | undefined
+            this.meta = saved
+            this.rehydrateEvents(raw, saved.sessionId)
+            resolve(true)
+          })
         })
       })
     })
@@ -296,6 +355,60 @@ export class SessionStore {
   }
 
   // ─── Private: restore helpers ──────────────────────────────────────────────
+
+  /**
+   * Scan all chrome.storage.local keys and remove any that start with
+   * STORAGE_KEY_SESSION_EVENTS_PREFIX but whose sessionId suffix does NOT
+   * match `activeSessionId`.  If `activeSessionId` is null, every matching
+   * key is removed (no active session exists).
+   *
+   * Returns the list of removed keys for test assertions / logging.
+   * Safe to call before the events-blob read — removal is sequential.
+   */
+  private gcOrphanedEventBlobs(activeSessionId: string | null): Promise<string[]> {
+    return new Promise((resolve, reject) => {
+      try {
+        // chrome.storage.local.get(null, cb) returns ALL stored keys.
+        chrome.storage.local.get(null as unknown as string[], (allItems: Record<string, unknown>) => {
+          const orphanKeys = Object.keys(allItems).filter(key => {
+            if (!key.startsWith(STORAGE_KEY_SESSION_EVENTS_PREFIX)) return false
+            const suffix = key.slice(STORAGE_KEY_SESSION_EVENTS_PREFIX.length)
+            if (activeSessionId === null) return true
+            return suffix !== activeSessionId
+          })
+
+          if (orphanKeys.length === 0) {
+            resolve([])
+            return
+          }
+
+          for (const key of orphanKeys) {
+            const suffix = key.slice(STORAGE_KEY_SESSION_EVENTS_PREFIX.length)
+            const reason = activeSessionId === null ? 'no-active-session' : 'stale-sessionId'
+            console.warn(
+              `[SessionStore] GC'd orphaned event blob key="${key}" ` +
+              `suffix="${suffix}" reason="${reason}"`,
+            )
+          }
+
+          chrome.storage.local.remove(orphanKeys, () => {
+            resolve(orphanKeys)
+          })
+        })
+      } catch (err) {
+        reject(err)
+      }
+    })
+  }
+
+  /**
+   * Returns true if the given RecorderState is considered "in-flight" —
+   * i.e., a state where a session was actively recording and we would expect
+   * a non-empty events blob to exist.
+   */
+  private isInFlightState(state: RecorderState): boolean {
+    return state === 'arming' || state === 'recording' || state === 'paused' || state === 'stopping'
+  }
 
   /**
    * Populate in-memory event arrays from a persisted payload.

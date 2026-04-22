@@ -27,14 +27,20 @@ const chromeMock = {
         }
         if (cb) cb()
       }),
-      remove: vi.fn((key: string | string[]) => {
+      remove: vi.fn((key: string | string[], cb?: () => void) => {
         if (Array.isArray(key)) {
           for (const k of key) delete mockStorage[k]
         } else {
           delete mockStorage[key]
         }
+        if (cb) cb()
       }),
-      get: vi.fn((keys: string[], cb: (result: Record<string, unknown>) => void) => {
+      get: vi.fn((keys: string[] | null, cb: (result: Record<string, unknown>) => void) => {
+        // null means "return all keys" — mirrors chrome.storage.local.get(null, cb)
+        if (keys === null) {
+          cb({ ...mockStorage })
+          return
+        }
         const result: Record<string, unknown> = {}
         for (const k of keys) {
           if (k in mockStorage) result[k] = mockStorage[k]
@@ -350,6 +356,195 @@ describe('SessionStore', () => {
   })
 
   // ---------------------------------------------------------------------------
+  // GC orphaned event blobs on SW startup (iter-028 #19)
+  // ---------------------------------------------------------------------------
+
+  describe('gcOrphanedEventBlobs via loadFromStorage', () => {
+    it('removes all orphaned event-blob keys when no active-session meta exists', async () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+      // No STORAGE_KEY_SESSION in storage (no active session).
+      // Plant two orphaned event-blob keys for different sessionIds.
+      mockStorage[STORAGE_KEY_SESSION_EVENTS_PREFIX + 'orphan-1'] = { persistSchemaVersion: PERSIST_SCHEMA_VERSION, rawEvents: [], canonicalEvents: [], policyLog: [], liveSteps: [] }
+      mockStorage[STORAGE_KEY_SESSION_EVENTS_PREFIX + 'orphan-2'] = { persistSchemaVersion: PERSIST_SCHEMA_VERSION, rawEvents: [], canonicalEvents: [], policyLog: [], liveSteps: [] }
+
+      const result = await store.loadFromStorage()
+
+      expect(result).toBe(false)
+      // Both orphaned keys must be gone.
+      expect(mockStorage[STORAGE_KEY_SESSION_EVENTS_PREFIX + 'orphan-1']).toBeUndefined()
+      expect(mockStorage[STORAGE_KEY_SESSION_EVENTS_PREFIX + 'orphan-2']).toBeUndefined()
+      // Structured warnings must have been emitted for each removed key.
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('GC\'d orphaned event blob'))
+
+      warnSpy.mockRestore()
+    })
+
+    it('removes stale-sessionId orphans but preserves the current active session key', async () => {
+      vi.useFakeTimers()
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+      // Set up active session A.
+      const meta = store.initSession('Active session')
+      store.addRawEvent(makeRawEvent({ raw_event_id: 'raw-active-1', session_id: meta.sessionId }))
+      vi.advanceTimersByTime(PERSIST_DEBOUNCE_MS + 10)
+
+      // Plant orphaned blobs for sessions B and C.
+      mockStorage[STORAGE_KEY_SESSION_EVENTS_PREFIX + 'stale-B'] = { persistSchemaVersion: PERSIST_SCHEMA_VERSION, rawEvents: [], canonicalEvents: [], policyLog: [], liveSteps: [] }
+      mockStorage[STORAGE_KEY_SESSION_EVENTS_PREFIX + 'stale-C'] = { persistSchemaVersion: PERSIST_SCHEMA_VERSION, rawEvents: [], canonicalEvents: [], policyLog: [], liveSteps: [] }
+
+      const restored = new SessionStore()
+      const result = await restored.loadFromStorage()
+
+      expect(result).toBe(true)
+      // Stale keys removed.
+      expect(mockStorage[STORAGE_KEY_SESSION_EVENTS_PREFIX + 'stale-B']).toBeUndefined()
+      expect(mockStorage[STORAGE_KEY_SESSION_EVENTS_PREFIX + 'stale-C']).toBeUndefined()
+      // Active session key preserved.
+      expect(mockStorage[STORAGE_KEY_SESSION_EVENTS_PREFIX + meta.sessionId]).toBeDefined()
+      // GC warning emitted for both stale keys.
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('stale-B'))
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('stale-C'))
+
+      warnSpy.mockRestore()
+    })
+
+    it('with active session and matching events key: GC removes nothing, returns true, rehydrates events', async () => {
+      vi.useFakeTimers()
+
+      const meta = store.initSession('Clean session')
+      store.addRawEvent(makeRawEvent({ raw_event_id: 'raw-clean-1', session_id: meta.sessionId }))
+      vi.advanceTimersByTime(PERSIST_DEBOUNCE_MS + 10)
+
+      // No orphans — only the matching key exists.
+      const restored = new SessionStore()
+      const result = await restored.loadFromStorage()
+
+      expect(result).toBe(true)
+      expect(restored.getRawEvents()).toHaveLength(1)
+      expect(restored.getRawEvents()[0]?.raw_event_id).toBe('raw-clean-1')
+      // The matching events key still exists.
+      expect(mockStorage[STORAGE_KEY_SESSION_EVENTS_PREFIX + meta.sessionId]).toBeDefined()
+    })
+
+    it('with no orphaned keys at all: GC is a no-op and no warn emitted for GC', async () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+      // Empty storage — no meta, no event blobs.
+      const result = await store.loadFromStorage()
+
+      expect(result).toBe(false)
+      // No GC warning should have been emitted (nothing to remove).
+      const gcWarns = warnSpy.mock.calls.filter(args =>
+        typeof args[0] === 'string' && (args[0] as string).includes('GC\'d orphaned')
+      )
+      expect(gcWarns).toHaveLength(0)
+
+      warnSpy.mockRestore()
+    })
+  })
+
+  // ---------------------------------------------------------------------------
+  // In-flight meta cross-validation on SW startup (iter-028 #20)
+  // ---------------------------------------------------------------------------
+
+  describe('in-flight meta cross-validation via loadFromStorage', () => {
+    it('returns false and clears store when meta.state=recording and events blob is missing', async () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+      mockStorage[STORAGE_KEY_SESSION] = {
+        sessionId: 'inflight-session',
+        activityName: 'In-flight no blob',
+        startedAt: '2026-01-01T00:00:00.000Z',
+        state: 'recording',
+        pauseIntervals: [],
+        schemaVersion: SCHEMA_VERSION,
+        recorderVersion: RECORDER_VERSION,
+      }
+      // No events blob written — crash scenario.
+
+      const result = await store.loadFromStorage()
+
+      expect(result).toBe(false)
+      expect(store.getMeta()).toBeNull()
+      // Meta key must have been cleared.
+      expect(mockStorage[STORAGE_KEY_SESSION]).toBeUndefined()
+      // Structured warning must mention the orphan detection.
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('In-flight meta with no events'))
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('events-blob-missing'))
+
+      warnSpy.mockRestore()
+    })
+
+    it('returns false and clears store when meta.state=recording and events blob has all-empty arrays', async () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+      const sessionId = 'inflight-empty-arrays'
+      mockStorage[STORAGE_KEY_SESSION] = {
+        sessionId,
+        activityName: 'In-flight empty blob',
+        startedAt: '2026-01-01T00:00:00.000Z',
+        state: 'recording',
+        pauseIntervals: [],
+        schemaVersion: SCHEMA_VERSION,
+        recorderVersion: RECORDER_VERSION,
+      }
+      // Events blob exists but all four arrays are empty.
+      mockStorage[STORAGE_KEY_SESSION_EVENTS_PREFIX + sessionId] = {
+        persistSchemaVersion: PERSIST_SCHEMA_VERSION,
+        rawEvents: [],
+        canonicalEvents: [],
+        policyLog: [],
+        liveSteps: [],
+      }
+
+      const result = await store.loadFromStorage()
+
+      expect(result).toBe(false)
+      expect(store.getMeta()).toBeNull()
+      expect(mockStorage[STORAGE_KEY_SESSION]).toBeUndefined()
+      expect(mockStorage[STORAGE_KEY_SESSION_EVENTS_PREFIX + sessionId]).toBeUndefined()
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('In-flight meta with no events'))
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('events-blob-empty'))
+
+      warnSpy.mockRestore()
+    })
+
+    it('returns true and rehydrates normally when meta.state=idle and no events blob exists', async () => {
+      // iter-028 #20: idle is NOT an in-flight state — the cross-validation guard
+      // must NOT fire. rehydrateEvents defaults arrays to [] with a warning, which
+      // is the correct pre-existing behavior.
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+      mockStorage[STORAGE_KEY_SESSION] = {
+        sessionId: 'idle-session',
+        activityName: 'Just initialized',
+        startedAt: '2026-01-01T00:00:00.000Z',
+        state: 'idle',
+        pauseIntervals: [],
+        schemaVersion: SCHEMA_VERSION,
+        recorderVersion: RECORDER_VERSION,
+      }
+      // No events blob — idle sessions don't require one.
+
+      const result = await store.loadFromStorage()
+
+      expect(result).toBe(true)
+      expect(store.getMeta()?.state).toBe('idle')
+      expect(store.getRawEvents()).toEqual([])
+      // rehydrateEvents warns about missing blob but does NOT clear meta.
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('No persisted event arrays'))
+      // Must NOT have emitted the in-flight orphan warning.
+      const inFlightWarns = warnSpy.mock.calls.filter(args =>
+        typeof args[0] === 'string' && (args[0] as string).includes('In-flight meta with no events')
+      )
+      expect(inFlightWarns).toHaveLength(0)
+
+      warnSpy.mockRestore()
+    })
+  })
+
+  // ---------------------------------------------------------------------------
   // Persist / load round-trip (iter 010)
   // ---------------------------------------------------------------------------
 
@@ -410,15 +605,18 @@ describe('SessionStore', () => {
       warnSpy.mockRestore()
     })
 
-    it('missing event payload on load produces [] for all arrays with a warning', async () => {
+    it('missing event payload on load with idle meta returns true and defaults arrays to []', async () => {
+      // iter-028 #20: in-flight meta (recording/arming/paused/stopping) with no events
+      // blob is now treated as an orphan and returns false.  This test covers the IDLE
+      // case — idle meta with no events is a legitimate just-initialized state; restore
+      // path should return true and default all arrays to [].
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
 
-      // Store meta but no events key
       const fakeMeta = {
-        sessionId: 'no-events-session',
-        activityName: 'No events',
+        sessionId: 'no-events-idle-session',
+        activityName: 'No events (idle)',
         startedAt: '2026-01-01T00:00:00.000Z',
-        state: 'recording',
+        state: 'idle',
         pauseIntervals: [],
         schemaVersion: SCHEMA_VERSION,
         recorderVersion: RECORDER_VERSION,
