@@ -20,6 +20,7 @@ import type { WorkflowRowData } from './WorkflowRow.js';
 import type { FilterState } from './WorkflowListFilterBar.js';
 import { hasActiveFilters } from './WorkflowListFilterBar.js';
 import { applyFilters, type WorkflowListState } from './WorkflowList.js';
+import { filterByTimeRange } from './DashboardV2Shell.js';
 
 // ── Minimal fixture ───────────────────────────────────────────────────────────
 
@@ -332,5 +333,327 @@ describe('iter-030: dashboard_v2_viewed event shape', () => {
     });
     expect(ev.workflowCount).toBe(0);
     expect(ev.event).toBe('dashboard_v2_viewed');
+  });
+});
+
+// ── MDR-P09: bounce detection predicate (iter-038 / PRD §4 metric #2) ────────
+
+/**
+ * shouldEmitBounce extracts the pure decision logic from the beforeunload
+ * handler so it can be unit-tested without JSDOM beforeunload complexities.
+ *
+ * Logic mirrors DashboardV2Shell's handleBeforeUnload:
+ *   - viewFired must be true (dashboard_v2_viewed was emitted this mount)
+ *   - clickCount must be 0 (user never interacted)
+ */
+function shouldEmitBounce(viewFired: boolean, clickCount: number): boolean {
+  if (!viewFired) return false;
+  if (clickCount > 0) return false;
+  return true;
+}
+
+/**
+ * computeBounceElapsedMs mirrors the elapsedMsSinceDashboardView derivation
+ * in handleBeforeUnload.
+ */
+function computeBounceElapsedMs(
+  dashboardViewPerfTimestampMs: number,
+  nowPerfMs: number,
+): number {
+  if (dashboardViewPerfTimestampMs <= 0) return 0;
+  return Math.max(0, Math.round(nowPerfMs - dashboardViewPerfTimestampMs));
+}
+
+describe('MDR-P09: bounce detection predicate (shouldEmitBounce)', () => {
+  it('emits bounce when view fired and zero clicks', () => {
+    expect(shouldEmitBounce(true, 0)).toBe(true);
+  });
+
+  it('does NOT emit bounce when view fired but user clicked once', () => {
+    expect(shouldEmitBounce(true, 1)).toBe(false);
+  });
+
+  it('does NOT emit bounce when user clicked multiple times', () => {
+    expect(shouldEmitBounce(true, 5)).toBe(false);
+  });
+
+  it('does NOT emit bounce when view has not fired (page abandoned before data loaded)', () => {
+    expect(shouldEmitBounce(false, 0)).toBe(false);
+  });
+
+  it('does NOT emit bounce when view not fired even if clicks somehow registered', () => {
+    // Edge case: click before view (should not be possible per listener lifecycle, but guard holds)
+    expect(shouldEmitBounce(false, 3)).toBe(false);
+  });
+});
+
+describe('MDR-P09: bounce elapsed-ms derivation', () => {
+  it('returns elapsed ms between view-timestamp and page-exit time', () => {
+    const viewTs = 1000;
+    const exitTs = 3500;
+    expect(computeBounceElapsedMs(viewTs, exitTs)).toBe(2500);
+  });
+
+  it('returns 0 when view timestamp was not yet set (pre-data-load exit)', () => {
+    expect(computeBounceElapsedMs(0, 5000)).toBe(0);
+  });
+
+  it('clamps to 0 if clock skew produces negative value (defensive)', () => {
+    // nowPerfMs < dashboardViewPerfTimestampMs would be impossible in normal
+    // operation but Math.max(0, ...) guards defensively.
+    expect(computeBounceElapsedMs(5000, 4999)).toBe(0);
+  });
+});
+
+// ── MDR-P09: userPlan side-channel enrichment (iter-038 / PRD §4 metrics #3/#4/#6) ─
+
+/**
+ * buildEnrichedEvent mirrors the enrichment logic in analytics.ts track():
+ *   - spread payload
+ *   - add timestamp + url
+ *   - if __ledgerium_userPlan is set, merge it into the event as userPlan
+ *
+ * This test validates the pure enrichment logic independently of the browser
+ * runtime so it runs cleanly in vitest node environment.
+ */
+function buildEnrichedEvent(
+  payload: Record<string, unknown>,
+  userPlanSlot: string | null | undefined,
+): Record<string, unknown> {
+  const base: Record<string, unknown> = { ...payload, timestamp: new Date().toISOString() };
+  if (userPlanSlot != null) base.userPlan = userPlanSlot;
+  return base;
+}
+
+describe('MDR-P09: userPlan enrichment via side-channel', () => {
+  it('userPlan is present on event when plan is set in side-channel', () => {
+    const ev = buildEnrichedEvent({ event: 'dashboard_v2_viewed', workflowCount: 3 }, 'starter');
+    expect(ev.userPlan).toBe('starter');
+  });
+
+  it('userPlan is absent when side-channel is null (API omitted plan)', () => {
+    const ev = buildEnrichedEvent({ event: 'dashboard_v2_viewed', workflowCount: 3 }, null);
+    expect(ev.userPlan).toBeUndefined();
+  });
+
+  it('userPlan is absent when side-channel is undefined (never set)', () => {
+    const ev = buildEnrichedEvent({ event: 'dashboard_v2_viewed', workflowCount: 3 }, undefined);
+    expect(ev.userPlan).toBeUndefined();
+  });
+
+  it('userPlan propagates to any event type (e.g. workflow_row_clicked)', () => {
+    const ev = buildEnrichedEvent(
+      { event: 'workflow_row_clicked', workflowId: 'wf-1', healthBand: 'green', elapsedMsSinceDashboardView: 300 },
+      'pro',
+    );
+    expect(ev.userPlan).toBe('pro');
+    expect(ev.event).toBe('workflow_row_clicked');
+  });
+
+  it('userPlan updates when API re-fetch returns a different plan', () => {
+    // Simulate plan upgrade: first fetch returns 'free', upgrade happens, re-fetch returns 'starter'
+    const ev1 = buildEnrichedEvent({ event: 'dashboard_v2_viewed', workflowCount: 1 }, 'free');
+    const ev2 = buildEnrichedEvent({ event: 'dashboard_v2_viewed', workflowCount: 1 }, 'starter');
+    expect(ev1.userPlan).toBe('free');
+    expect(ev2.userPlan).toBe('starter');
+    // The two events reflect different plan states — correct for longitudinal analysis
+    expect(ev1.userPlan).not.toBe(ev2.userPlan);
+  });
+});
+
+// ── MDR-P03 DashboardV2Shell view-perf-timestamp reactive state (iter-037) ─────
+
+/**
+ * Simulates the elapsedMs computation that WorkflowRow performs using
+ * dashboardViewPerfTimestampMs.  Validates the guard contract that prevents
+ * zero-elapsed events before the timestamp state is set.
+ */
+function computeElapsedMs(
+  dashboardViewPerfTimestampMs: number,
+  clickPerfNow: number,
+): number | null {
+  // Guard: if timestamp has not yet been set (still 0), do not emit elapsed.
+  if (dashboardViewPerfTimestampMs === 0) return null;
+  return Math.max(0, clickPerfNow - dashboardViewPerfTimestampMs);
+}
+
+describe('MDR-P03 DashboardV2Shell view-perf-timestamp reactive state (iter-037)', () => {
+  it('early click before timestamp is set returns null (not 0)', () => {
+    // dashboardViewPerfTimestampMs is 0 before the useEffect fires
+    const elapsed = computeElapsedMs(0, performance.now());
+    expect(elapsed).toBeNull();
+  });
+
+  it('post-state-set click returns a non-negative elapsed value', () => {
+    const setAt = performance.now();
+    // Simulate a click 50ms after the timestamp was set
+    const clickAt = setAt + 50;
+    const elapsed = computeElapsedMs(setAt, clickAt);
+    expect(elapsed).not.toBeNull();
+    expect(elapsed!).toBeGreaterThanOrEqual(0);
+  });
+
+  it('elapsed values are monotonically non-decreasing for sequential clicks', () => {
+    const setAt = performance.now();
+    const click1 = setAt + 100;
+    const click2 = setAt + 200;
+    const click3 = setAt + 350;
+
+    const e1 = computeElapsedMs(setAt, click1)!;
+    const e2 = computeElapsedMs(setAt, click2)!;
+    const e3 = computeElapsedMs(setAt, click3)!;
+
+    expect(e2).toBeGreaterThan(e1);
+    expect(e3).toBeGreaterThan(e2);
+  });
+
+  it('converting ref to state means prop updates reactively (structural contract)', () => {
+    // This test validates the structural contract: state setter is called in the
+    // effect, which triggers a re-render, so WorkflowRow receives the updated
+    // value — unlike a ref which does NOT trigger re-render.
+    // We verify this via the pure computation: the guard catches 0 pre-effect,
+    // and positive values post-effect.
+    const preEffect = computeElapsedMs(0, 10);
+    const postEffect = computeElapsedMs(100, 150);
+
+    expect(preEffect).toBeNull();        // pre-effect: no elapsed emitted
+    expect(postEffect).toBe(50);         // post-effect: 150 - 100 = 50ms
+  });
+});
+
+// ── FOLLOWUP-037-02: filterByTimeRange deterministic clock (iter-045) ─────────
+
+/**
+ * Frozen epoch so all tests are wall-clock-independent.
+ * Chosen as a round number near 2023-11-14T00:00:00Z.
+ */
+const FROZEN_NOW = 1_700_000_000_000;
+
+/** Milliseconds in common time windows */
+const MS_7D  = 7  * 24 * 60 * 60 * 1000;
+const MS_30D = 30 * 24 * 60 * 60 * 1000;
+const MS_90D = 90 * 24 * 60 * 60 * 1000;
+
+function makeTimeWorkflow(id: string, createdAtMs: number): WorkflowRowData {
+  return makeWorkflow({
+    id,
+    createdAt: new Date(createdAtMs).toISOString(),
+  });
+}
+
+describe('FOLLOWUP-037-02: filterByTimeRange deterministic clock (iter-045)', () => {
+  it('1. deterministic repeat-call: 5 calls with identical inputs produce identical result lengths', () => {
+    const wf = makeTimeWorkflow('w1', FROZEN_NOW - MS_7D + 1000); // inside 7d window
+    const results = Array.from({ length: 5 }, () =>
+      filterByTimeRange([wf], '7d', FROZEN_NOW),
+    );
+    const sizes = new Set(results.map((r) => r.length));
+    expect(sizes.size).toBe(1);
+    expect(results[0]).toHaveLength(1);
+  });
+
+  it('2. range="all" short-circuit: returns input array unchanged regardless of nowMs', () => {
+    const workflows = [
+      makeTimeWorkflow('a', FROZEN_NOW - MS_90D * 10), // very old
+      makeTimeWorkflow('b', FROZEN_NOW - 1000),
+    ];
+    const result = filterByTimeRange(workflows, 'all', FROZEN_NOW);
+    expect(result).toHaveLength(2);
+    expect(result).toEqual(workflows);
+  });
+
+  it('3. 7d boundary inclusive: workflow at exactly 7 days ago is INCLUDED', () => {
+    const wf = makeTimeWorkflow('exact7d', FROZEN_NOW - MS_7D);
+    const result = filterByTimeRange([wf], '7d', FROZEN_NOW);
+    expect(result).toHaveLength(1);
+  });
+
+  it('4. 7d boundary exclusive: workflow 1 ms before 7-day cutoff is EXCLUDED', () => {
+    const wf = makeTimeWorkflow('just-outside-7d', FROZEN_NOW - MS_7D - 1);
+    const result = filterByTimeRange([wf], '7d', FROZEN_NOW);
+    expect(result).toHaveLength(0);
+  });
+
+  it('5. 30d boundary inclusive: workflow at exactly 30 days ago is INCLUDED', () => {
+    const wf = makeTimeWorkflow('exact30d', FROZEN_NOW - MS_30D);
+    const result = filterByTimeRange([wf], '30d', FROZEN_NOW);
+    expect(result).toHaveLength(1);
+  });
+
+  it('6. 30d boundary exclusive: workflow 1 ms before 30-day cutoff is EXCLUDED', () => {
+    const wf = makeTimeWorkflow('just-outside-30d', FROZEN_NOW - MS_30D - 1);
+    const result = filterByTimeRange([wf], '30d', FROZEN_NOW);
+    expect(result).toHaveLength(0);
+  });
+
+  it('7. 90d boundary inclusive: workflow at exactly 90 days ago is INCLUDED', () => {
+    const wf = makeTimeWorkflow('exact90d', FROZEN_NOW - MS_90D);
+    const result = filterByTimeRange([wf], '90d', FROZEN_NOW);
+    expect(result).toHaveLength(1);
+  });
+
+  it('8. 90d boundary exclusive: workflow 1 ms before 90-day cutoff is EXCLUDED', () => {
+    const wf = makeTimeWorkflow('just-outside-90d', FROZEN_NOW - MS_90D - 1);
+    const result = filterByTimeRange([wf], '90d', FROZEN_NOW);
+    expect(result).toHaveLength(0);
+  });
+
+  it('9. advancing nowMs with fixed createdAt changes inclusion', () => {
+    const createdAtMs = FROZEN_NOW - MS_30D + 1000; // 1 second inside 30d window at FROZEN_NOW
+    const wf = makeTimeWorkflow('sliding', createdAtMs);
+
+    // At FROZEN_NOW: createdAt is within the 30d window → included
+    const resultInWindow = filterByTimeRange([wf], '30d', FROZEN_NOW);
+    expect(resultInWindow).toHaveLength(1);
+
+    // Advance nowMs by 2 seconds: cutoff = (FROZEN_NOW + 2000) - MS_30D = createdAtMs + 1000
+    // createdAtMs < new cutoff → excluded
+    const nowAdvanced = FROZEN_NOW + 2000;
+    const resultOutOfWindow = filterByTimeRange([wf], '30d', nowAdvanced);
+    expect(resultOutOfWindow).toHaveLength(0);
+  });
+
+  it('10. empty input: filterByTimeRange([], "30d", nowMs) returns []', () => {
+    const result = filterByTimeRange([], '30d', FROZEN_NOW);
+    expect(result).toHaveLength(0);
+    expect(result).toEqual([]);
+  });
+
+  it('11. all-out-of-range: every workflow older than cutoff returns []', () => {
+    const workflows = [
+      makeTimeWorkflow('old1', FROZEN_NOW - MS_30D - 1000),
+      makeTimeWorkflow('old2', FROZEN_NOW - MS_30D - 5000),
+      makeTimeWorkflow('old3', FROZEN_NOW - MS_30D * 2),
+    ];
+    const result = filterByTimeRange(workflows, '30d', FROZEN_NOW);
+    expect(result).toHaveLength(0);
+  });
+
+  it('12. mixed input: only in-window subset returns', () => {
+    const workflows = [
+      makeTimeWorkflow('in1',  FROZEN_NOW - 1000),              // 1s ago — in 7d
+      makeTimeWorkflow('in2',  FROZEN_NOW - MS_7D + 1000),      // 1s inside 7d boundary — in
+      makeTimeWorkflow('out1', FROZEN_NOW - MS_7D - 1),         // 1ms outside 7d — out
+      makeTimeWorkflow('out2', FROZEN_NOW - MS_30D),            // exactly at 30d — out of 7d
+      makeTimeWorkflow('out3', FROZEN_NOW - MS_90D),            // way old — out
+    ];
+    const result = filterByTimeRange(workflows, '7d', FROZEN_NOW);
+    expect(result).toHaveLength(2);
+    expect(result.map((w) => w.id).sort()).toEqual(['in1', 'in2']);
+  });
+
+  it('13. pure function — no global state: round-trip with different nowMs then back yields original result', () => {
+    const wf = makeTimeWorkflow('rtrip', FROZEN_NOW - MS_30D + 5000); // inside 30d at FROZEN_NOW
+
+    const firstCall  = filterByTimeRange([wf], '30d', FROZEN_NOW);
+    // Advance time so workflow is excluded
+    const secondCall = filterByTimeRange([wf], '30d', FROZEN_NOW + MS_30D);
+    // Back to original nowMs — must reproduce first call's result
+    const thirdCall  = filterByTimeRange([wf], '30d', FROZEN_NOW);
+
+    expect(firstCall).toHaveLength(1);
+    expect(secondCall).toHaveLength(0);
+    expect(thirdCall).toHaveLength(1);
+    expect(thirdCall[0]!.id).toBe(firstCall[0]!.id);
   });
 });

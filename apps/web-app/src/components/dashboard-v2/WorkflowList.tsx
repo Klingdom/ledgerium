@@ -28,7 +28,7 @@
  *   the API does not yet support time-windowed run counts.
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, Columns3 } from 'lucide-react';
 import Link from 'next/link';
 import { track } from '@/lib/analytics.js';
@@ -94,6 +94,10 @@ export function applyFilters(
   workflows: WorkflowRowData[],
   filters: FilterState,
   insightFilterKey: string | null,
+  // MDR-P03: injected clock reference so age-based filters are deterministic
+  // across repeat calls at the same request boundary.  Defaults to Date.now()
+  // for call sites that are not yet clock-injection aware (backward compatible).
+  nowMs: number = Date.now(),
 ): WorkflowRowData[] {
   let result = workflows;
 
@@ -131,9 +135,11 @@ export function applyFilters(
       if (h === 'healthy') return score >= 70;
       if (h === 'needs_review') return score < 40;
       if (h === 'high_variation') return variation > 0.67;
-      // 'stale': no isStale field on WorkflowRowData — approximate by age
+      // 'stale': no isStale field on WorkflowRowData — approximate by age.
+      // Uses injected nowMs so repeated calls with the same reference yield
+      // identical results regardless of wall-clock drift.
       if (h === 'stale') {
-        const age = Date.now() - new Date(w.updatedAt).getTime();
+        const age = nowMs - new Date(w.updatedAt).getTime();
         return age > 30 * 24 * 60 * 60 * 1000; // > 30 days
       }
       return true;
@@ -278,6 +284,10 @@ export default function WorkflowList({
   const [sort, setSort] = useState<SortState>({ field: 'health_score', dir: 'asc' });
   const [sparseNoticeDismissed, setSparseNoticeDismissed] = useState(false);
 
+  // MDR-P03: stable clock boundary captured once at render so all age-based
+  // filter evaluations in this render cycle use an identical reference.
+  const nowMs = useMemo(() => Date.now(), []);
+
   function handleSort(field: SortField) {
     const nextDir: SortDir =
       sort.field === field && sort.dir === 'asc' ? 'desc' : 'asc';
@@ -297,7 +307,7 @@ export default function WorkflowList({
 
   const filteredWorkflows = state === 'loading'
     ? []
-    : applyFilters(workflows, filters, insightFilterKey);
+    : applyFilters(workflows, filters, insightFilterKey, nowMs);
   const sortedWorkflows = sortWorkflows(filteredWorkflows, sort);
 
   // Screen reader announcement text — announced when filter/sort changes

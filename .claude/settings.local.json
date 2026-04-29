@@ -118,7 +118,28 @@
       "WebFetch(domain:docs.datadoghq.com)",
       "Bash(PLAYWRIGHT_BASE_URL=http://localhost:3098 pnpm exec playwright test e2e/app/dashboard/ --reporter=list --project=authenticated --retries=0)",
       "Bash(PLAYWRIGHT_BASE_URL=http://localhost:3098 pnpm exec playwright test e2e/app/dashboard/v2-a11y.spec.ts:112 --reporter=list --project=authenticated --retries=0)",
-      "Bash(claude *)"
+      "Bash(claude *)",
+      "WebFetch(domain:help.sap.com)",
+      "WebFetch(domain:www.ibm.com)",
+      "WebFetch(domain:www.taloflow.ai)",
+      "WebFetch(domain:www.signavio.com)",
+      "WebFetch(domain:community.sap.com)",
+      "WebFetch(domain:scribe.com)",
+      "WebFetch(domain:documentation.signavio.com)",
+      "WebFetch(domain:www.tango.ai)",
+      "WebFetch(domain:theaiinsider.tech)",
+      "WebFetch(domain:www.celonis.com)",
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(npm info *)",
+      "Bash(awk 'NR==5 || NR==3' C:/Users/philk/ledgerium/IMPROVEMENT_BACKLOG.md)",
+      "Bash(awk 'NR==1 || NR==3 || NR==5' C:/Users/philk/ledgerium/SYSTEM_HEALTH.md)",
+      "Bash(awk 'NR==5' C:/Users/philk/ledgerium/IMPROVEMENT_BACKLOG.md)",
+      "Bash(awk '/^\\\\| 78 /' C:/Users/philk/ledgerium/IMPROVEMENT_BACKLOG.md)",
+      "Bash(awk 'NR==3' \"C:\\\\Users\\\\philk\\\\ledgerium\\\\SYSTEM_HEALTH.md\")",
+      "Bash(awk NR==3 {print substr\\($0, length\\($0\\)-150\\)} *)",
+      "Bash(awk NR<=20 {print NR\": \"length\\($0\\)\" chars\"} *)",
+      "Bash(awk NR<=10 {print NR\": \"length\\($0\\)\" chars\"} *)",
+      "Bash(awk NR>=360 && NR<=370 {print NR\": \"length\\($0\\)\" chars\"} *)"
     ]
   }
 }

@@ -66,9 +66,19 @@ function makeWorkflow(id: string, title: string, healthScore: number, opportunit
  * Runs axe against the current page and asserts:
  * - Zero critical violations (throws to fail the test)
  * - Zero serious violations (throws to fail the test)
- * - Logs moderate violations to the test output without failing
+ * - Logs moderate violations to the test output (developer ergonomics)
+ * - HARD assertion: moderate.length <= maxModerate (ratchet baseline, DV2-R04)
+ *
+ * @param maxModerate - Maximum permitted moderate violations. Default 0. Pass an
+ *   explicit value at the call site to make the ratchet baseline reader-visible.
+ *   If you need to raise the baseline, change the call-site value and add a
+ *   code-review comment explaining the intentional deviation.
  */
-async function assertAxeCompliance(page: import('@playwright/test').Page, label: string): Promise<void> {
+async function assertAxeCompliance(
+  page: import('@playwright/test').Page,
+  label: string,
+  maxModerate: number = 0,
+): Promise<void> {
   const results = await new AxeBuilder({ page })
     .include('#__next') // scope to Next.js root, excluding browser chrome
     .analyze();
@@ -86,6 +96,14 @@ async function assertAxeCompliance(page: import('@playwright/test').Page, label:
       `\n[axe][${label}] ${moderate.length} MODERATE violation(s) — tracked, not blocking:\n${moderateReport}\n`,
     );
   }
+
+  // Moderate ratchet — HARD assertion (DV2-R04, iter-046).
+  // Prevents silent moderate-violation accumulation across states.
+  // To raise the baseline: pass a higher maxModerate at the call site with a comment.
+  expect(
+    moderate.length,
+    `[axe][${label}] moderate violation count ${moderate.length} exceeds ratchet baseline ${maxModerate}. Either fix the new violation OR (if intentional) raise the baseline at the call site with a code-review note.`,
+  ).toBeLessThanOrEqual(maxModerate);
 
   // Critical violations — FAIL
   if (critical.length > 0) {
@@ -126,7 +144,7 @@ test('axe: zero critical/serious violations on empty state (no workflows)', asyn
   // Wait for skeleton to resolve (min 300ms per PRD §9)
   await page.waitForTimeout(700);
 
-  await assertAxeCompliance(page, 'empty-state');
+  await assertAxeCompliance(page, 'empty-state', 0);
 });
 
 // ── Test: normal state (populated table) ─────────────────────────────────────
@@ -168,7 +186,133 @@ test('axe: zero critical/serious violations on normal state (5 workflows, full t
   // Wait for full render including insights strip
   await page.waitForTimeout(700);
 
-  await assertAxeCompliance(page, 'normal-state-5-workflows');
+  await assertAxeCompliance(page, 'normal-state-5-workflows', 0);
+});
+
+// ── Test: error state (API returns 500) ──────────────────────────────────────
+
+test('axe: zero critical/serious violations on error state (API 500)', async ({ page }) => {
+  await page.route('**/api/workflows**', (route) => {
+    void route.fulfill({
+      status: 500,
+      contentType: 'application/json',
+      body: JSON.stringify({ error: 'Internal Server Error' }),
+    });
+  });
+
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+
+  // Wait for the error UI to render (skeleton resolves; isError flips true)
+  await page.waitForTimeout(700);
+
+  await assertAxeCompliance(page, 'error-state', 0);
+});
+
+// ── Test: sparse state (1 workflow, <3 row threshold) ────────────────────────
+
+test('axe: zero critical/serious violations on sparse state (1 workflow)', async ({ page }) => {
+  const workflows = [makeWorkflow('wf-sparse-001', 'Lonely Workflow', 65, 'optimize')];
+
+  await page.route('**/api/workflows**', (route) => {
+    void route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        workflows,
+        stats: {
+          portfolioHealthScore: 65,
+          insightChips: [],
+          topInsights: [],
+        },
+      }),
+    });
+  });
+
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(700);
+
+  await assertAxeCompliance(page, 'sparse-state-1-workflow', 0);
+});
+
+// ── Test: gated (free-tier) tooltip state ────────────────────────────────────
+
+test('axe: zero critical/serious violations on gated tooltip state (free-tier user)', async ({ page }) => {
+  // Free-tier user: metricsV2.healthScore.isGated = true. Clicking the row's
+  // health score cell exposes the upgrade-CTA tooltip (HealthTooltip renders
+  // lock icon + "Upgrade to see breakdown" when isGated is true).
+  //
+  // Trigger approach: the health score cell is a <td onClick> containing a
+  // <div aria-label="Health score: 72, ...">. There is no <button> — the click
+  // handler is on the <td> with stopPropagation. We click the <td> directly via
+  // the aria-label div locator. If the locator count is 0 (e.g., aria-label
+  // text differs from expected pattern), we fall back to clicking the <td>
+  // that contains the score text "72" in a <span aria-hidden>.
+  // This approach is verified against WorkflowRow.tsx lines 855-930 (iter-046).
+  const workflows = [
+    {
+      id: 'wf-gated-001',
+      title: 'Gated Workflow',
+      toolsUsed: ['Salesforce'],
+      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      lastViewedAt: null,
+      metricsV2: {
+        runs: 3,
+        avgTimeMs: 90_000,
+        variationScore: 0.3,
+        variationLabel: 'low',
+        bottleneckLabel: null,
+        healthScore: {
+          overall: 72,
+          speed: 20,
+          consistency: 20,
+          dataQuality: 16,
+          standardization: 16,
+          isGated: true, // free-tier gate — triggers upgrade-CTA tooltip
+        },
+        opportunityTag: 'healthy',
+        aiOpportunityScore: 30,
+        confidence: 0.82,
+      },
+    },
+  ];
+
+  await page.route('**/api/workflows**', (route) => {
+    void route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        workflows,
+        stats: { portfolioHealthScore: 72, insightChips: [], topInsights: [] },
+      }),
+    });
+  });
+
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(700);
+
+  // Trigger the gated tooltip by clicking the health score cell.
+  // WorkflowRow.tsx: the <td> at line 855 has onClick toggling showTooltip.
+  // The inner <div> carries aria-label="Health score: 72, ..." (lines 863-871).
+  // We locate by that aria-label pattern; the click is on the <td> parent via
+  // the div's bounding box (Playwright click on a child triggers the parent td).
+  const row = page.getByRole('row').filter({ hasText: 'Gated Workflow' });
+  await expect(row).toBeVisible();
+
+  // Primary: locate the div with aria-label matching "Health score: 72"
+  const scoreDiv = row.locator('[aria-label*="Health score: 72"]').first();
+  if (await scoreDiv.count() > 0) {
+    await scoreDiv.click();
+    await page.waitForTimeout(200); // tooltip mount
+  }
+  // Fallback: if aria-label locator misses, click the <td> containing the score
+  else {
+    const scoreTd = row.locator('td').last();
+    await scoreTd.click();
+    await page.waitForTimeout(200);
+  }
+
+  await assertAxeCompliance(page, 'gated-tooltip-state', 0);
 });
 
 // ── Focused structural checks (independent of axe) ───────────────────────────
@@ -288,6 +432,55 @@ test('insight chip has correct ARIA: role=button, aria-pressed, aria-label with 
   // aria-label must include severity prefix per InsightsStrip CHIP_STYLE.ariaPrefix
   const ariaLabel = await chip.getAttribute('aria-label');
   expect(ariaLabel).toMatch(/warning:/i);
+});
+
+// ── MDR-P06 regression: kebab trigger keyboard-accessible without mouse hover ──
+
+test('MDR-P06: kebab trigger is in DOM and focusable without mouse hover', async ({ page }) => {
+  // Regression: prior to MDR-P06 fix the trigger was wrapped in {isHovered && (...)}
+  // and never mounted for keyboard-only users. Now it is always mounted.
+  const workflows = [makeWorkflow('wf-k01', 'Keyboard Test Workflow', 75, 'healthy')];
+
+  await page.route('**/api/workflows**', (route) => {
+    void route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        workflows,
+        stats: { portfolioHealthScore: 75, insightChips: [], topInsights: [] },
+      }),
+    });
+  });
+
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(500);
+
+  // Trigger must be attached to the DOM regardless of hover state.
+  const kebabTrigger = page.locator('[aria-label^="Actions for"]').first();
+  await expect(kebabTrigger).toBeAttached();
+
+  // Programmatically focus the trigger — keyboard-only users reach it via Tab.
+  // This must not throw; prior to fix it would throw because the element did not exist.
+  await kebabTrigger.focus();
+  await expect(kebabTrigger).toBeFocused();
+});
+
+// ── MDR-P07 regression: aria-controls="portfolio-sidebar" resolves to real DOM id ──
+
+test('MDR-P07: aria-controls="portfolio-sidebar" resolves to existing DOM element', async ({ page }) => {
+  // Regression: prior to MDR-P07 fix the <aside> had no id, making the
+  // aria-controls reference broken per ARIA 1.2.
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(400);
+
+  // Open the sidebar so the <aside id="portfolio-sidebar"> is mounted.
+  const portfoliosToggle = page.locator('[aria-controls="portfolio-sidebar"]').first();
+  await expect(portfoliosToggle).toBeVisible();
+  await portfoliosToggle.click();
+
+  // After click the sidebar must be visible and must carry the declared id.
+  const sidebar = page.locator('#portfolio-sidebar');
+  await expect(sidebar).toBeVisible();
 });
 
 test('sort header buttons have aria-sort attribute', async ({ page }) => {

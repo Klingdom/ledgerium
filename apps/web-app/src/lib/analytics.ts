@@ -130,6 +130,14 @@ export type AnalyticsEvent =
       severity: 'critical' | 'warning' | 'info' | 'positive';
       filterKey: string;
     }
+  | {
+      // MDR-P09 (a): bounce instrumentation (iter-038 / PRD §4 metric #2)
+      // Fired on beforeunload when dashboard_v2_viewed has fired but zero
+      // trackable click interactions occurred during the session.
+      event: 'dashboard_bounced';
+      workflowCount: number;
+      elapsedMsSinceDashboardView: number;
+    }
 
   // ── Navigation ────────────────────────────────────────────────────────────
   | { event: 'page_viewed'; path: string }
@@ -162,17 +170,28 @@ const IS_BROWSER = typeof window !== 'undefined';
 const IS_DEV = IS_BROWSER && window.location.hostname === 'localhost';
 
 /**
- * Tracks a client-side analytics event.
- *
- * In development: logs to console.
- * In production: buffers in memory, sends to backend if configured.
+ * MDR-P09 (b): set the current user's plan for automatic enrichment of all
+ * subsequent track() calls.  Call this from the dashboard shell after the
+ * plan is resolved from the API response.  Stored in a window-level slot so
+ * it flows into EnrichedEvent.userPlan without requiring every event variant
+ * to carry the field explicitly.
  */
+export function setUserPlanForAnalytics(plan: string | undefined): void {
+  if (!IS_BROWSER) return;
+  (window as any).__ledgerium_userPlan = plan ?? null;
+}
+
 export function track(payload: AnalyticsEvent): void {
   const base: Record<string, unknown> = {
     ...payload,
     timestamp: new Date().toISOString(),
   };
-  if (IS_BROWSER) base.url = window.location.pathname;
+  if (IS_BROWSER) {
+    base.url = window.location.pathname;
+    // MDR-P09 (b): enrich every event with userPlan when available.
+    const userPlan: unknown = (window as any).__ledgerium_userPlan;
+    if (userPlan != null) base.userPlan = userPlan;
+  }
   const enriched = base as EnrichedEvent;
 
   if (IS_DEV) {

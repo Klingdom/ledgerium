@@ -53,12 +53,12 @@ Held in this artifact. Promote via P0 burn-down (D-5 path 1) OR PRD-trigger (D-5
 
 - **DV2-R04** axe-core regression gate extension — run `assertAxeCompliance` on error state, sparse state, gated (free-tier) tooltip state; add `moderate.length ≤ N` ratchet assertion to prevent silent moderate-violation accumulation. Untracked by existing backlog.
 - **DV2-R05** `seedDashboardV2Dev()` fixture (PRD §11 requirement for iter 021, never delivered) + `free@ledgerium.test` user + `e2e/.auth/free-user.json` storageState. Unblocks **4 skipped interactive E2E tests** (row click, sort with data, filter, kebab keyboard) + **4 skipped plan-gating E2E tests**.
-- **DV2-R06** Route v1 shadow-function audit: `route.ts:154` `computeAiOpportunityScore` (v1 signature differs from v2 export), `route.ts:568` variation-score v1 (different blending formula than `workflow-metrics.ts`), `route.ts:107` `computeIsStale` (uses `Date.now()` directly), v1 `computeSopReadiness`. These duplicate implementations drift silently from v2 and are the **primary #42 retirement blocker**, not `computeHealthScore()` alone.
+- ~~**DV2-R06** Route v1 shadow-function audit: `route.ts:154` `computeAiOpportunityScore` (v1 signature differs from v2 export), `route.ts:568` variation-score v1 (different blending formula than `workflow-metrics.ts`), `route.ts:107` `computeIsStale` (uses `Date.now()` directly), v1 `computeSopReadiness`. These duplicate implementations drift silently from v2 and are the **primary #42 retirement blocker**, not `computeHealthScore()` alone.~~ **DELETED AT MR-008 (iter 036, 2026-04-23) — DUPLICATE of live-backlog MDR-P05** (METRICS_DASHBOARD_REVIEW_001 §3 P0 row #69, promoted iter 032 with concrete numeric divergence evidence). MR-008 §5 cold-pool partial triage: MDR-P05 supersedes DV2-R06 scope fully (shadow-function `computeAiOpportunityScore` + `computeVariationScore` divergence is MDR-P05's exact fix; `computeIsStale` `Date.now()` leak is MDR-P03's exact fix). See `docs/meta/MR_008_META_REVIEW.md` §5.
 - **DV2-R07** Add ≥1 non-mocked route integration test — currently `route.test.ts:40–62` mocks `computeWorkflowMetrics`, `computePortfolioHealthScore`, `computePortfolioHealthScorePrior`, `computeInsightChips` entirely. Adapter `toMetricsInput` untested end-to-end. Regression in adapter mapping would not fail CI.
 - **DV2-R08** Upgrade-CTA value-led rewrite + secondary placement. Current gated tooltip says "Upgrade to see breakdown" / "View plans →" — feature-named, buried under hover+click, single touchpoint. PRD §4 10%-lift target structurally unreachable.
-- **DV2-R09** In-app what's-new banner for v2 transition (returning-user session continuity). One sentence, dismissible, tied to a user preference flag.
+- ~~**DV2-R09** In-app what's-new banner for v2 transition (returning-user session continuity). One sentence, dismissible, tied to a user preference flag.~~ **MR-010: DELETED — subsumed by #57 flag-retirement engineering-complete at iter 041; once v2 retires v1 via #57 the returning-user transition surface disappears (no dual-mode session continuity problem remains). See `docs/meta/MR_010_META_REVIEW.md` §5.**
 - **DV2-R10** `{ data, error, meta }` envelope normalization on `/api/workflows` 200 response — current 200 returns `{ workflows, stats }`; CLAUDE.md API Design contract drift.
-- **DV2-R11** Chip `{signal} → {next action}` template contract verification — PRD §2.2 action-leading rewrite may be a component-level display pattern without underlying data-layer template enforcement. If `chip.label` passthrough in `InsightsStrip.tsx` never receives `→`-formatted strings from the engine, the rewrite is cosmetic.
+- ~~**DV2-R11** Chip `{signal} → {next action}` template contract verification — PRD §2.2 action-leading rewrite may be a component-level display pattern without underlying data-layer template enforcement. If `chip.label` passthrough in `InsightsStrip.tsx` never receives `→`-formatted strings from the engine, the rewrite is cosmetic.~~ **MR-010: DELETED — verified by MDR-P02 closure at iter 035 (`workflow-metrics.ts` variance-high chip string uses computed-signal action-leading template `"${n} workflows show high execution variance → investigate consistency"`; `→` format enforced at engine boundary not component layer). See `docs/meta/MR_010_META_REVIEW.md` §5.**
 - **DV2-R12** Snapshot-table arch decision for #60 per-workflow delta — recommend **Option C** (nightly `workflow_health_snapshot(workflow_id, captured_at, health_score, variation_score)` table; aligns with Ledgerium immutability-first principle). Option A (event-level prior-window query) is per-request expensive; Option B (separate `/api/workflows/deltas`) doubles round-trips without fixing storage.
 - **DV2-R13** `DashboardV2Shell.handleCreatePortfolio` is a silent no-op (line 278) — wire to existing `CreatePortfolioDialog` (already imported in `page.tsx`) OR disable the sidebar button with tooltip.
 - **DV2-R14** Copy pass on 6 flagged user-visible strings (concretizes existing #58): sparse-state notice, empty-state body, run-count null label (`n=0 — no runs` → "No runs yet"), upgrade tooltip headline, delta null state (`— vs last 30d` → "No prior data"), "High Variation" filter option (→ "Inconsistent"). Scoped copy-review pass; `growth-strategist` sign-off required pre-ship.
@@ -69,8 +69,8 @@ Held in this artifact. Promote via P0 burn-down (D-5 path 1) OR PRD-trigger (D-5
 - **DV2-R16** Filter-bar overflow "+N more" truncation — currently `flex-wrap` only.
 - **DV2-R17** Delta label "vs last 30d" time-range awareness OR clarifying "(always 30d)" sub-label.
 - **DV2-R18** `InsightsStrip` dismissed-set reset on chip-id change across re-fetches.
-- **DV2-R19** `computeIsStale` determinism injection (`now: Date` parameter).
-- **DV2-R20** `oneMonthAgo` (`setDate(1)`) vs `PRIOR_WINDOW_DAYS` (30) window-semantics consistency in `route.ts:691`.
+- ~~**DV2-R19** `computeIsStale` determinism injection (`now: Date` parameter).~~ **MR-010: DELETED — coverage-already-shipped at iter 037 MDR-P03 closure (`route.ts:107-114` `computeIsStale(..., nowMs: number)` 3rd-param extension; single-upstream-clock-boundary `referenceNowMs` pattern at `route.ts:485-487`). See `docs/meta/MR_010_META_REVIEW.md` §5.**
+- ~~**DV2-R20** `oneMonthAgo` (`setDate(1)`) vs `PRIOR_WINDOW_DAYS` (30) window-semantics consistency in `route.ts:691`.~~ **MR-010: DELETED — coverage-already-shipped at iter 037 MDR-P04 closure (UTC-month-boundary `Date.UTC(getUTCFullYear, getUTCMonth, 1, 0, 0, 0, 0)` at `route.ts:628-635` closes TZ-dependence; windowing semantics now deterministic). See `docs/meta/MR_010_META_REVIEW.md` §5.**
 - **DV2-R21** Remove duplicate `applyFilters` call — shell computes `filteredWorkflows` at `DashboardV2Shell.tsx:205`; `WorkflowList.tsx:288` re-applies on the same inputs.
 - **DV2-R22** `useEffect` sync for `displayTitle` on `workflow.title` prop change in `WorkflowRow.tsx:386`.
 - **DV2-R23** Runtime guard for `portfolioIds` on workflow payload — remove silent `as`-cast at `DashboardV2Shell.tsx:197`.
@@ -79,7 +79,7 @@ Held in this artifact. Promote via P0 burn-down (D-5 path 1) OR PRD-trigger (D-5
 ### P3 — Informational (cold pool)
 
 - **DV2-R25** Skeleton row `key={i}` index-as-key — static count, no reorder risk; hygiene flag only.
-- **DV2-R26** Redundant `computeVariation` call in `computeOpportunityTag` — pure, no correctness risk; micro-waste.
+- ~~**DV2-R26** Redundant `computeVariation` call in `computeOpportunityTag` — pure, no correctness risk; micro-waste.~~ **MR-010: DELETED — shipped via MDR-P05 iter 039 (v1 shadow-function consolidation; `metricsV2 = computeWorkflowMetrics(metricsInput)` now computed once per workflow at top of `map()` callback; v1 `computeVariationScore` + v1 `computeAiOpportunityScore` both deleted from `route.ts`; downstream per-workflow helpers consume `metricsV2.*` directly — redundant call class eliminated). See `docs/meta/MR_010_META_REVIEW.md` §5.**
 - **DV2-R27** `tools` JSON parsed twice per workflow (`route.ts:559` + `toMetricsInput` at line 352) — micro-perf.
 
 ---
@@ -102,7 +102,7 @@ Post-MR-005 burn-down (iter 027–028) proceeds as programmed — DV2-R01/02/03 
 - **Iter 029 first eligible `top-score` slot:** Tie between #51 (live, score 13, analytics instrumentation) and DV2-R01 (new P0, distribution comparison for #42). **Recommend DV2-R01** for iter 029 because (a) executes without PostHog gating, (b) directly unblocks #42, (c) ~1-day server-side script vs multi-component instrumentation pass.
 - **Iter 030:** #51 analytics instrumentation (full 6-event spec per analytics agent's scoped recommendation).
 - **Iter 031:** DV2-R02 + DV2-R03 bundled under guardrail 7(b) one-logical-outcome = "WorkflowRow interaction hardening" (both live in `WorkflowRow.tsx`, both are a11y/UX).
-- **Iter 032+:** DV2-R04 (axe ratchet), DV2-R05 (seed), DV2-R06 (shadow-function audit — may be sub-divided), #42 v1 retirement (now unblocked).
+- **Iter 032+:** DV2-R04 (axe ratchet), DV2-R05 (seed), ~~DV2-R06 (shadow-function audit — may be sub-divided)~~ **superseded by live-backlog MDR-P05 at MR-008**, #42 v1 retirement (now unblocked).
 
 ## GA / Launch Decision Matrix
 
@@ -112,7 +112,7 @@ Post-MR-005 burn-down (iter 027–028) proceeds as programmed — DV2-R01/02/03 
 | 14-day soak period | in progress (opened iter 022) | NONE — soak is passive; concerning because generating zero signal |
 | **#57 flag retirement (~iter 036)** | **gated** | DV2-R02, DV2-R03, DV2-R05 (E2E plan-gating seed), #51 (analytics) |
 | **External launch** | **gated** | All P0s + #51 + DV2-R04 (a11y ratchet) + DV2-R08 (upgrade CTA) + DV2-R09 (what's-new) |
-| **#42 v1 retirement** | **gated** | DV2-R01 (distribution artifact), DV2-R06 (shadow-function audit) |
+| **#42 v1 retirement** | **gated** | DV2-R01 (distribution artifact), ~~DV2-R06~~ **MDR-P05 (shadow-function consolidation; supersedes DV2-R06 per MR-008)** |
 
 ---
 

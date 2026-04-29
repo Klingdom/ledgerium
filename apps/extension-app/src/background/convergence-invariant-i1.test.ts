@@ -41,9 +41,10 @@
  *
  * These three fields are trivially equal in both paths after iter-011
  * convergence (both derive them via the same segmentation-engine internals).
- * DerivedStep-level byte-identity verification is tracked as follow-up #26
- * (I1b, Birth iter 012): once LiveStepBuilder exposes getDerivedSteps(), the
- * strict comparison will close this gap without requiring the lossy projection.
+ * I1b CLOSED iter 053 — DerivedStep-level byte-identity is now asserted in
+ * this file (see describe block below). getDerivedSteps() exposes the raw
+ * DerivedStep layer so the strict comparison closes this gap without requiring
+ * the lossy toLiveStep projection.
  *
  * ─── Scope discipline confirmation ───────────────────────────────────────────
  *
@@ -80,7 +81,7 @@ function loadGoldenEvents(name: string): CanonicalEvent[] {
 }
 
 // ---------------------------------------------------------------------------
-// Live-path runner
+// Live-path runners
 // ---------------------------------------------------------------------------
 
 /**
@@ -97,6 +98,21 @@ function runLivePath(events: CanonicalEvent[], sessionId: string) {
   }
   builder.finalize()
   return builder.getFinalizedSteps()
+}
+
+/**
+ * Feeds events through LiveStepBuilder and returns the raw DerivedStep array
+ * via getDerivedSteps() (I1b accessor, iter 053).
+ *
+ * Same runner structure as runLivePath — only the final accessor differs.
+ */
+function runLivePathDerived(events: CanonicalEvent[], sessionId: string) {
+  const builder = new LiveStepBuilder(sessionId, () => {/* not used */})
+  for (const event of events) {
+    builder.processEvent(event)
+  }
+  builder.finalize()
+  return builder.getDerivedSteps()
 }
 
 /**
@@ -142,4 +158,56 @@ describe('convergence invariant I1a — live path LiveSteps === batch path via t
       expect(JSON.stringify(livePathLiveSteps)).toBe(JSON.stringify(batchPathLiveSteps))
     })
   }
+})
+
+// ---------------------------------------------------------------------------
+// I1b assertion suite — DerivedStep-level byte-identity (iter 053, row #26)
+// ---------------------------------------------------------------------------
+
+describe('I1b: LiveStepBuilder.getDerivedSteps() byte-identity vs buildDerivedSteps()', () => {
+  // Per-fixture byte-identity: streaming live path DerivedSteps must equal
+  // batch-path DerivedSteps at the JSON.stringify level for every golden fixture.
+  for (const name of FIXTURE_NAMES) {
+    it(`I1b: ${name} — getDerivedSteps() byte-identical to buildDerivedSteps()`, () => {
+      const events = loadGoldenEvents(name)
+      const livePathDerivedSteps = runLivePathDerived(events, SESSION)
+      const batchPathDerivedSteps = buildDerivedSteps(events, SESSION)
+
+      expect(JSON.stringify(livePathDerivedSteps)).toBe(JSON.stringify(batchPathDerivedSteps))
+    })
+  }
+
+  // Determinism: calling getDerivedSteps() twice on the same builder returns
+  // byte-identical results — no mutation between calls.
+  it('I1b: getDerivedSteps() is deterministic — repeat call returns byte-identical result', () => {
+    const events = loadGoldenEvents('demo')
+    const builder = new LiveStepBuilder(SESSION, () => {/* not used */})
+    for (const event of events) {
+      builder.processEvent(event)
+    }
+    builder.finalize()
+
+    const first = JSON.stringify(builder.getDerivedSteps())
+    const second = JSON.stringify(builder.getDerivedSteps())
+    expect(first).toBe(second)
+  })
+
+  // Defensive copy: mutations to the returned array do not affect the builder's
+  // internal state — a second call reflects original data.
+  it('I1b: getDerivedSteps() returns a defensive copy — mutation does not affect internal state', () => {
+    const events = loadGoldenEvents('fill-and-submit')
+    const builder = new LiveStepBuilder(SESSION, () => {/* not used */})
+    for (const event of events) {
+      builder.processEvent(event)
+    }
+    builder.finalize()
+
+    const first = builder.getDerivedSteps()
+    const originalLength = first.length
+    // Mutate the returned array.
+    first.splice(0, first.length)
+    // Internal state must be unaffected.
+    const second = builder.getDerivedSteps()
+    expect(second).toHaveLength(originalLength)
+  })
 })

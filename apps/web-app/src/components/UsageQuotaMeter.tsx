@@ -44,9 +44,19 @@ export default function UsageQuotaMeter({ used, limit, plan }: UsageQuotaMeterPr
         <span className={`text-ds-xs font-medium tabular-nums ${countColorClass}`}>
           {used} / {limit} recordings this month
         </span>
+        {isWarning && (
+          <Link
+            href="/pricing"
+            aria-label="Upgrade plan to increase recording limit"
+            className="text-[10px] font-medium text-amber-500 hover:text-amber-600 underline underline-offset-2 whitespace-nowrap"
+          >
+            Upgrade to Team for unlimited
+          </Link>
+        )}
         {isAtLimit && (
           <Link
             href="/pricing"
+            aria-label="Upgrade plan to increase recording limit"
             className="text-[10px] font-medium text-red-500 hover:text-red-600 underline underline-offset-2 whitespace-nowrap"
           >
             Upgrade for more

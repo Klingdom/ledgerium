@@ -50,6 +50,8 @@ const STANDARDIZATION_SOP_PARTIAL_PTS = 10;
 const AUTOMATE_AI_OPPORTUNITY_THRESHOLD = 60;
 /** Minimum toolsUsed length required for 'automate' tag. */
 const AUTOMATE_MIN_TOOLS = 2;
+/** Minimum overall health score for 'automate' tag (not unhealthy). */
+const AUTOMATE_MIN_OVERALL = 40;
 
 /** variationScore threshold for 'standardize' tag. */
 const STANDARDIZE_VARIATION_THRESHOLD = 0.67;
@@ -126,6 +128,39 @@ export interface WorkflowMetricsInput {
     title: string;
     observedValue: string | null;
   }>;
+  /**
+   * Layer 3 process-intelligence inputs parsed from
+   * ProcessDefinition.intelligenceJson (the cached PortfolioIntelligence blob
+   * produced by @ledgerium/intelligence-engine).
+   *
+   * iter-049 / WDC-R03: contract-prep field. Currently UNCONSUMED by the
+   * computeWorkflowMetrics orchestrator — populated by the adapter so future
+   * Path D iterations can wire Layer 3 metrics (variant share, path
+   * similarity, step-count variance, divergence rate) onto the dashboard
+   * without further changes to the adapter or its callers.
+   *
+   * Optional + nullable: null = no intelligenceJson cached, malformed JSON,
+   * or schema validation failure. Future consumers MUST treat null as "no
+   * Layer 3 signal available" and fall back to existing behavior.
+   *
+   * Field naming follows engine source-of-truth (PortfolioIntelligence):
+   * - sequenceStability        ← variance.sequenceStability (0–1, fraction of
+   *                              runs on the standard path; row's
+   *                              "path_similarity" surrogate; consumers may
+   *                              derive divergence_rate = 1 - this value)
+   * - stepCountVarianceStdDev  ← variance.stepCountVariance.stdDev
+   * - standardPathFrequency    ← variants.standardPath.frequency (0–1; row's
+   *                              "variant_share" surrogate — share of runs
+   *                              following the dominant variant)
+   * - variantCount             ← variants.variantCount (count of distinct
+   *                              execution paths observed)
+   */
+  intelligence?: {
+    sequenceStability: number | null;
+    stepCountVarianceStdDev: number | null;
+    standardPathFrequency: number | null;
+    variantCount: number | null;
+  } | null;
 }
 
 export interface WorkflowMetricsOutput {
@@ -431,7 +466,7 @@ export function computeAiOpportunityScore(input: WorkflowMetricsInput): number {
  * §7.6 — Opportunity Tag
  *
  * Decision tree, top-to-bottom; first match wins:
- * 1. Automate     — aiOpportunityScore >= 60 AND toolsUsed.length >= 2
+ * 1. Automate     — aiOpportunityScore >= 60 AND toolsUsed.length >= 2 AND overall >= 40
  * 2. Standardize  — variationScore >= 0.67 AND overall >= 40
  * 3. Optimize     — speed < 15 AND overall >= 40
  * 4. Monitor      — overall < 40 OR dataQuality < 8
@@ -449,7 +484,7 @@ export function computeOpportunityTag(
   const { score: variationScore } = computeVariation(input);
 
   // Rule 1: Automate
-  if (aiScore >= AUTOMATE_AI_OPPORTUNITY_THRESHOLD && input.toolsUsed.length >= AUTOMATE_MIN_TOOLS) {
+  if (aiScore >= AUTOMATE_AI_OPPORTUNITY_THRESHOLD && input.toolsUsed.length >= AUTOMATE_MIN_TOOLS && healthScore.overall >= AUTOMATE_MIN_OVERALL) {
     return 'automate';
   }
 
@@ -592,7 +627,7 @@ export function computeInsightChips(
     chips.push({
       id: 'variance_high',
       severity: 'warning',
-      label: `${highVarianceCount} workflows pulling SLA down → review onboarding cohort`,
+      label: `${highVarianceCount} workflows show high execution variance → investigate consistency`,
       filterKey: 'variationScore_gt_0.7',
       count: highVarianceCount,
     });

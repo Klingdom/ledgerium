@@ -279,3 +279,60 @@ describe('iter-030: dashboard_v2_sort_changed event shape', () => {
     }
   });
 });
+
+// ── MDR-P03: applyFilters nowMs injection (iter-037) ─────────────────────────
+
+describe('MDR-P03 applyFilters nowMs injection (iter-037)', () => {
+  it('applyFilters with explicit nowMs produces identical output across repeat calls with same nowMs', () => {
+    // Workflow updated 40 days ago — should match 'stale' filter
+    const fixedNowMs = new Date('2026-04-23T00:00:00.000Z').getTime();
+    const staleWorkflow = makeWorkflow('stale-w', {
+      toolsUsed: [],
+      opportunityTag: 'monitor',
+      healthOverall: 70,
+    });
+    // Manually set updatedAt to 40 days ago
+    const staleWf: WorkflowRowData = {
+      ...staleWorkflow,
+      updatedAt: new Date(fixedNowMs - 40 * 24 * 60 * 60 * 1000).toISOString(),
+    };
+    const freshWorkflow = makeWorkflow('fresh-w', {});
+
+    const filters: FilterState = { ...emptyFilters, healthStatus: 'stale' };
+
+    const r1 = applyFilters([staleWf, freshWorkflow], filters, null, fixedNowMs);
+    const r2 = applyFilters([staleWf, freshWorkflow], filters, null, fixedNowMs);
+
+    // Both calls with same nowMs → identical result
+    expect(r1.map((w) => w.id)).toEqual(r2.map((w) => w.id));
+    expect(r1).toHaveLength(1);
+    expect(r1[0]!.id).toBe('stale-w');
+  });
+
+  it('age filter uses injected nowMs, not wall-clock — same workflow is stale at T1 but not at T0', () => {
+    const updatedAt = new Date('2026-02-01T00:00:00.000Z').toISOString(); // Feb 1
+    const workflow = makeWorkflow('w1', {});
+    const wf: WorkflowRowData = { ...workflow, updatedAt };
+
+    const filters: FilterState = { ...emptyFilters, healthStatus: 'stale' };
+
+    // nowMs = 10 days after updatedAt — NOT stale (< 30 day threshold)
+    const nowMs10 = new Date('2026-02-11T00:00:00.000Z').getTime();
+    const r10 = applyFilters([wf], filters, null, nowMs10);
+    expect(r10).toHaveLength(0);
+
+    // nowMs = 40 days after updatedAt — IS stale (> 30 day threshold)
+    const nowMs40 = new Date('2026-03-13T00:00:00.000Z').getTime();
+    const r40 = applyFilters([wf], filters, null, nowMs40);
+    expect(r40).toHaveLength(1);
+  });
+
+  it('default nowMs parameter (no injection) preserves backward compatibility', () => {
+    // When nowMs is omitted, applyFilters still runs without error (uses Date.now() default)
+    const filters: FilterState = emptyFilters;
+    const wf = makeWorkflow('w1', {});
+    // Should not throw and should return the workflow
+    const result = applyFilters([wf], filters, null);
+    expect(result).toHaveLength(1);
+  });
+});

@@ -6,6 +6,240 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-04-29] - Iteration 053 — #26 I1b DerivedStep byte-identity (Mode 1, `burn-down`, `backend-engineer`)
+
+**Trigger:** Pool 30 > 8 ceiling rule forces `burn-down`; cool-off mid-recharge at 1/3 cannot bypass for `top-score`; D-1 reverse-portfolio-drift counter at 0 (cleared iter 051) preserves extension-surface latitude. Row #26 selected as highest-scoring burn-down candidate (score 10 vs #43/#44 score 9); existing test file `convergence-invariant-i1.test.ts:44-45` already cited follow-up #26 by name as deferred I1b surface — work was ambiguity-free.
+
+**Selection driver:** `burn-down` (pool ceiling rule). Cool-off NOT consumed (consumption happens only when invoked to bypass the ceiling for a `top-score`/`blocker-cadence` pick). Iter 053 is the 2nd of 3 required consecutive post-consumption `burn-down` iterations to re-arm cool-off (recharge cadence advances 1/3 → 2/3); full re-arm projected at iter 054 close IFF iter 054 also `burn-down` — but iter 054 is forced Mode 4 MR-013 (non-counting), so cool-off remains at 2/3 and full re-arm projects to iter 055.
+
+### Added
+
+- `apps/extension-app/src/background/live-steps.ts` (+19 LOC):
+  - New `private finalizedDerivedSteps: DerivedStep[] = []` field (line 103) populated alongside existing `finalizedLiveSteps` in `StreamingSegmenter` `finalized`-status callback.
+  - New `getDerivedSteps(): DerivedStep[]` public accessor (lines 134-149) returning defensive copy `[...this.finalizedDerivedSteps]` — never mutates internal state; safe for repeat-call.
+  - `reset()` extended to clear `this.finalizedDerivedSteps = []` alongside existing `finalizedLiveSteps` clear.
+
+- `apps/extension-app/src/background/convergence-invariant-i1.test.ts` (+55 LOC):
+  - New `runLivePathDerived()` helper alongside existing `runLivePath()`.
+  - New `describe('I1b: LiveStepBuilder.getDerivedSteps() byte-identity vs buildDerivedSteps()')` block with **14 substantive `it()` blocks**:
+    - 12 per-fixture byte-identity assertions: `JSON.stringify(livePathDerivedSteps) === JSON.stringify(batchPathDerivedSteps)` for each of demo, spreadsheet-cells, action-button-then-other, action-button-rapid-repeat, annotation-mid-stream, idle-gap, multi-domain-tabs, spa-route-change, error-recovery, fill-and-submit, single-action-no-label, empty-session golden fixtures.
+    - 1 determinism test: repeat `getDerivedSteps()` call returns byte-identical result.
+    - 1 defensive-copy test: external mutation of returned array does not affect internal state.
+
+### Changed
+
+- `apps/extension-app/src/background/convergence-invariant-i1.test.ts` lines 44-45 comment updated from "DerivedStep-level byte-identity verification is tracked as follow-up #26 (I1b, Birth iter 012): once LiveStepBuilder exposes getDerivedSteps(), the [...]" → "I1b CLOSED iter 053 — DerivedStep-level byte-identity is now asserted in this file."
+
+### Preserved
+
+- Existing I1a 12-test suite byte-identical (zero diff to any pre-existing assertion).
+- `apps/extension-app/src/background/live-steps.test.ts` 14 tests byte-identical.
+- `LiveStepBuilder` constructor + `update()` + `complete()` + existing private state byte-identical (zero behavioral change to live-step computation).
+- `StreamingSegmenter` byte-identical; `buildDerivedSteps()` byte-identical; `segmentEvents()` byte-identical.
+- All iter 037+038+039+041+042+043+045+046+048+049+051+052 production code byte-identical.
+- Analytics taxonomy byte-identical; PostHog privacy posture byte-identical; zero new `Date.now()` / `new Date()` introduced.
+
+### Validation
+
+- `pnpm test`: **1871 → 1885** (+14 across 59 test files; all pass).
+- `pnpm typecheck`: clean across all 10 packages/apps.
+- Byte-identity verified zero-diff on all 12 golden fixtures.
+- Determinism verified: repeat `getDerivedSteps()` byte-identical.
+- Scope confirmed: only `live-steps.ts` + `convergence-invariant-i1.test.ts` modified.
+
+### MR-005 D-4 specialist-invocation gate — did NOT fire
+
+- Clause 1 (≥3 user-visible copy strings): zero copy strings touched (internal-only API + test infrastructure).
+- Clause 2 (≥200 LOC new contract on pure module): +19 production LOC <<< 200; +55 LOC test code is **explicitly excluded** per CLAUDE.md "measured by the exported interface + public function bodies, not by test code"; `getDerivedSteps()` is a small accessor on existing class, not a new module/API/primitive contract.
+
+### Counters at iter 053 close
+
+- Pool **30 → 29** (#26 closed; **zero follow-ups generated**; 2 scope-adjacent observations logged NOT promoted: (i) `finalizedDerivedSteps` stores `DerivedStep` reference as received from callback — theoretical mutation risk from external consumers mutating object internals (vs. array) is not observed in test surface; pre-existing design pattern, not a regression; (ii) `runLivePathDerived` and `runLivePath` are structurally near-identical except for final accessor — future unification opportunity but would touch existing I1a logic — explicitly deferred per scope discipline).
+- **Cool-off recharge counter 1/3 → 2/3** per MR-006 Change A (iter 053 is 2nd of 3 required consecutive post-consumption `burn-down` iterations to re-arm; iter 054 forced Mode 4 MR-013 preserves at 2/3 unchanged; full re-arm projects iter 055 IFF iter 055 is `burn-down`).
+- **D-1 reverse portfolio-drift counter HELD AT 0** (iter 053 = extension-app D-1-enumerated tracked surface; counter remains at iter-051 FULL CLEARANCE state; next substantive D-1 check iter ~058+ if iter 054-057 all miss extension surfaces).
+- **Area saturation TRIPS 3-extension-app-consecutive at iter 053 close** (iter 051 extension + iter 052 extension + iter 053 extension); iter 054 MUST select from non-extension Area per Selection Policy Step 2 — but iter 054 is forced Mode 4 MR-013 (non-counting; resets Area saturation clock).
+- **Agent-diversity:** `backend-engineer` counter = 1 post-iter-053 (clean rotation off `qa-engineer` × 2 via iter 051+052; under 4+ trigger).
+- **MR-013 cadence 2/3 → 3/3 — FIRES at iter 053 close** per CLAUDE.md § Meta-Review Cadence (iter 051 + iter 052 + iter 053 = 3 counted bounded loops post-MR-012 stability window iter 051-053; 3-loop stability floor satisfied). Three converging triggers force MR-013 at iter 054 with zero ambiguity: (a) base 3-loop cadence; (b) same-Area 3-consecutive extension-app early-trigger; (c) cold-pool DV2 age 12 past MR-006 Change D 10-iter staleness threshold (mandatory full triage as MR-013 part-(b)).
+- **#57 flag-retirement prerequisite chain UNCHANGED at 10/10 ENGINEERING-COMPLETE** (only 14d soak-window remains; iter 053 is invariant-test-coverage extension on extension-app surface, not a #57-chain prerequisite closure; iter 053 does not advance calendar-time soak clock).
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL** (iter 053 is post-gate test-coverage hardening, not a new MDR closure).
+- **Cold-pool ages: MDR=6→7, WDC=6→7, DV2=11→12** (DV2 past 10-iter Change D staleness threshold for second consecutive iteration; mandatory full-triage queued as MR-013 part-(b) parallel to MR-011 dual-pool MDR+WDC triage precedent).
+- **Follow-Up Debt Policy testable metric (`closed / created ≥ 0.5` formally adopted MR-011):** trailing 10-iter window iter 044→053 = **7 closed** (iter 045 #79 + iter 046 #80 + iter 048 #36 + iter 049 #83 + iter 051 #5 + iter 052 #30 + **iter 053 #26**; iter 044/047/050 Mode 4 non-counting; iter 043 #78 rolled OFF) / **27 created** = **0.26 BELOW 0.5 floor — UNCHANGED from iter 052 close** (iter 053 #26 closure rolled ON to replace iter 043 #78 rolled OFF; numerator net 0). Per MR-012 §3.1 verdict TRANSIENT; projected recovery to ≥0.5 within 1-2 additional counted iterations once Mode 4 slots roll off trailing window.
+
+### Deltas
+
+- **Pool**: 30 → 29.
+- **Test count**: workspace 1871 → 1885 (+14 / 59 test files).
+- **#57 chain**: 10/10 unchanged.
+- **External-launch gate**: 7/7 unchanged.
+- **Follow-up pool**: 30 → 29 (zero follow-ups generated).
+- **Iter 054 candidate**: forced Mode 4 MR-013 governance (non-counting) per three converging triggers.
+
+---
+
+## [2026-04-29] - Iteration 052 — #30 rapid-focus-blur normalizer dedup fixture (Mode 1, `burn-down`, `qa-engineer`)
+
+**Trigger:** Pool 31 > 8 ceiling rule forces `burn-down`; cool-off at 0/3 CONSUMED (iter 048) cannot bypass; D-1 reverse-portfolio-drift counter at 0 post-iter-051 FULL CLEARANCE relaxes extension-surface preference. Row #30 selected as highest-leverage open follow-up (score 10, E=1, R=1, pure fixture, age-39 past-cap staleness tail).
+
+**Selection driver:** `burn-down` (pool ceiling rule). Cool-off NOT consumed (consumption happens only when invoked to bypass the ceiling for a `top-score`/`blocker-cadence` pick; `burn-down` selections do not consume). Iter 052 is the 1st of 3 required consecutive post-consumption `burn-down` iterations to re-arm cool-off (recharge cadence advances 0/3 → 1/3).
+
+### What changed
+
+**1 NEW golden fixture exercising BOTH dedup branches via a single 6-event raw sequence (4 NEW files + 1 modified test harness):**
+
+- `packages/normalization-engine/fixtures/golden/raw/rapid-focus-blur.ndjson` (raw RawEvent[])
+- `packages/normalization-engine/fixtures/golden/normalized/rapid-focus-blur.json` (expected CanonicalEvent[])
+- `packages/normalization-engine/fixtures/golden/pipeline-segmentation/rapid-focus-blur.json` (expected DerivedStep[])
+- `packages/normalization-engine/src/full-pipeline.regression.test.ts` — `FIXTURE_NAMES` array extended with `'rapid-focus-blur'` + 1-line JSDoc fixture-coverage description
+
+**Both dedup branches exercised in single 6-event sequence:**
+
+1. **Superseded-focus suppression** (`normalizer.ts:458-465`): rfb-2 (`element_focused` on `#search-box`) followed by rfb-3 (`element_focused` on `#email`) — rfb-2 is dropped. Confirmed absent from normalized output.
+2. **Net-zero focus-blur suppression** (`normalizer.ts:467-476`): rfb-3 (`element_focused` on `#email`) followed by rfb-4 (`element_blurred` on `#email`) with no `input_changed` between — both dropped. Confirmed absent from normalized output.
+
+**Normalized output (3 events):** `rfb-1` (session.started) + `rfb-5` (interaction.click "Save Settings in App") + `rfb-6` (session.stopped). Bracketing click `rfb-5` confirms events surrounding the dedup block pass through cleanly.
+
+**Validation:** `pnpm test` workspace **1867 → 1871 / +4 tests** (Suite 1 normalizer-layer byte-identity + determinism × new fixture = 2 tests; Suite 2 full-pipeline byte-identity + determinism × new fixture = 2 tests); `pnpm typecheck` clean across all 10 packages/apps; byte-stable across two runs (existing determinism assertions confirm).
+
+**Expecteds authored by manual dedup-logic trace** through `normalizer.ts:438-479` and segmentation-engine rule trace through `batch-segmenter.ts` + `grouping.ts` + `rules.ts`. The hand-computed outputs were validated by the passing byte-identity assertions in Suites 1 and 2 — if either were wrong, those assertions would fail. The `scripts/regenerate-pipeline-fixtures.ts` regenerate script referenced in the test docstring does NOT exist (flagged as scope-adjacent observation, NOT promoted).
+
+### Why
+
+- Long-standing gap (Birth iter 013, age 39): the existing 3 fixtures (`click-with-label`, `fill-and-submit`, `route-change`) do NOT exercise the focus/blur dedup branches. `fill-and-submit` covers only the `focus → input_changed` path; superseded-focus and net-zero focus-blur suppression carried no golden-fixture protection.
+- Silent dedup-rule drift would have escaped CI; pinning at golden-fixture byte-identity converts drift into a build-fail signal at the regression-test boundary.
+- Burn-down driver: pool 31 > 8 ceiling forces `burn-down`; cool-off at 0/3 cannot bypass for `top-score` selection. Row #30 is the highest-leverage open follow-up by score+E+R combination (score 10, E=1, R=1, pure-fixture/test additions, zero production code modification).
+
+### Impact
+
+- **Pool 31 → 30** (#30 closed; zero follow-ups generated; 1 scope-adjacent observation logged NOT promoted — 3-consecutive-`element_focused` edge case not exercised by current fixture, pre-existing limitation, candidate for future small-surface fixture iteration if follow-up pool warrants it).
+- **Cool-off recharge counter 0/3 → 1/3** (iter 052 is 1st post-consumption `burn-down`; full re-arm earliest iter 054 IFF iter 053+054 also `burn-down`).
+- **D-1 reverse portfolio-drift counter HELD AT 0** (iter 052 = normalization-engine extension surface — extension coverage maintained from iter 051 dual-package FULL CLEARANCE; counter stays cleared; next substantive D-1 check iter 056+ if iter 053-055 all miss extension surfaces).
+- **Area saturation:** iter 052 = extension; rolling 5-window post-iter-047-MR-011-reset = iter 048 web + iter 049 web + iter 050 governance non-counting + iter 051 extension + iter 052 extension = **2-web-app + 2-extension + 1-governance-non-counting**; safely below 3-consecutive trigger; iter 052 extension surface preserves rolling-5 surface diversity.
+- **Agent-diversity:** `qa-engineer` counter = 2 post-iter-052 (consecutive iter 051 + iter 052; under 4+ trigger; flagged as 2 of allowed 3 before agent-rotation pressure). Future iter 053 candidate selection should consider rotation diversity.
+- **MR-013 cadence 1/3 → 2/3** (iter 052 second counted bounded loop of post-MR-012 stability window iter 051-053 default; **earliest MR-013 execution iter 053** under compressed-cadence convention pending Diff #1 silence-as-accept ratification, OR iter 054 under standard 3-loop floor; hard-trigger exceptions unchanged).
+- **Cold-pool DV2 age 10 → 11** (already past MR-006 Change D 10-iter staleness threshold from iter 051 close; MANDATORY full-triage QUEUED for MR-013 part-(b)); MDR age 5 → 6 (under threshold); WDC age 5 → 6 (under threshold).
+- **#57 flag-retirement prerequisite chain UNCHANGED at 10/10 ENGINEERING-COMPLETE** — only 14d soak-window remains (iter 052 is post-engineering-complete invariant-protection regression hardening, not a new prerequisite closure).
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL** (iter 052 is post-gate cleanup, not a new MDR closure; launch-readiness status preserved).
+- **Follow-Up Debt Policy testable metric (`closed / created ≥ 0.5` formally adopted at MR-011):** trailing 10-iter window iter 043→052 = **7 closed** (iter 043 #78 + iter 045 #79 + iter 046 #80 + iter 048 #36 + iter 049 #83 + iter 051 #5 + **iter 052 #30**; iter 044/047/050 Mode 4 non-counting; iter 042 #31 dropped off trailing window) / **27 created** = **0.26 BELOW 0.5 floor** — UNCHANGED from iter 051 close (numerator preserved: iter 042 #31 closure rolled OFF and iter 052 #30 closure rolled ON; both #s = 1; net 0). Per MR-012 §3.1 verdict TRANSIENT not structural; recovery requires more counted iterations or fewer Mode 4 slots; projected recovery to ≥0.5 within 1-2 additional counted iterations under expected iter 053+ continued burn-down cadence (each Mode 4 slot rolling off restores one denominator-without-numerator slot).
+
+**density-response:** n/a (zero follow-ups generated; density-trigger clause 3 does not fire).
+
+**scope-expansion:** not applicable (strict one-logical-outcome — single golden fixture covering both dedup branches via a single 6-event raw sequence is one atomic unit of test-coverage delivery; the prompt explicitly authorized combining both branches if achievable cleanly without contortion).
+
+**D-4 specialist-invocation gate:** did NOT fire — (clause 1) 0 user-visible copy strings touched (test fixtures only — JSON files containing fixture data are CI-internal not user-facing UI text); (clause 2) 0 production LOC modified; new fixtures + test harness extension are explicitly excluded from the ≥200 LOC new-contract threshold per CLAUDE.md "measured by the exported interface + public function bodies, not by test code". Ruling documented.
+
+---
+
+## [2026-04-27] - Iteration 051 — #5 invariant-focused regression suite for segmentation + normalization (Mode 1, `top-score` via MR-012 §10 PRIMARY endorsement under D-1 N=5 forced clearance, `qa-engineer`)
+
+**Trigger:** MR-012 §10 PRIMARY endorsement of row #5 score 12 to discharge the D-1 reverse-portfolio-drift N=5 trip (counter held at 5 across iter 050 Mode 4 non-counting; iter 051 MUST clear by touching extension surface).
+
+**Selection driver:** `top-score` under D-1 N=5 mandatory-clearance operating-mode precedence. Cool-off NOT consumed (D-1 forced-clearance treated as operating-mode precedence parallel to `directed`/`burn-down` per MR-004 Change B narrowed cool-off-conservation logic).
+
+### What changed
+
+**2 NEW test files (zero production code modified):**
+
+- `packages/segmentation-engine/src/invariants.test.ts` — **14010 bytes / 20 substantive `it()` blocks across 5 describe groups**:
+  - Group A: 4 magic-number / version pins (`SEGMENTATION_RULE_VERSION='1.1.0'` / `IDLE_GAP_MS=45_000` / `CLICK_NAV_WINDOW_MS=2_500` / `RAPID_CLICK_DEDUP_MS=1_000`).
+  - Group B: 10 confidence-table pins via `calculateConfidence()` exercising all 9 reason branches + 1 default fallback.
+  - Group C: `BoundaryReason` 10-member union completeness via TypeScript `satisfies readonly BoundaryReason[]` + `Exclude<BoundaryReason, typeof DECLARED[number]> extends never` compile-time exhaustiveness.
+  - Group D: `GroupingReason` 9-member union completeness via the same `satisfies` + `Exclude` pattern.
+  - Group E: 4 step-ID format pins via `segmentEvents()` covering live + checkpoint + cross-path + determinism.
+
+- `packages/normalization-engine/src/invariants.test.ts` — **12252 bytes / 14 substantive `it()` blocks across 4 describe groups**:
+  - Group A: `NORMALIZATION_RULE_VERSION='1.0.0'` pin.
+  - Group B: 2 `RAW_TO_CANONICAL_TYPE` pins (count=27 + deep-equal full content via `toStrictEqual`).
+  - Group C: 4 dedup-constant behavioral tests (300ms rapid duplicate; 301ms boundary; focus-blur net-zero; superseded focus).
+  - Group D: 7 sensitive-target detection tests via `SENSITIVE_SELECTOR_RE` exercised through `normalizeEvent()`.
+
+**4 docs-vs-source drifts pinned at source** (NOT at `docs/invariants.md`) per Ledgerium "evidence before interpretation" principle:
+
+1. `SEGMENTATION_RULE_VERSION` source value `'1.1.0'` — `docs/invariants.md` §3.1 says `'1.0.0'`; pinned at source.
+2. `RAW_TO_CANONICAL_TYPE` source 27 entries — `docs/invariants.md` §2.5 enumerates 23; pinned at source via `Object.keys().length === 27` + deep-equal.
+3. `BoundaryReason` source 10-member union — `docs/invariants.md` §3.6 enumerates 8; pinned at source via compile-time exhaustiveness.
+4. `calculateConfidence` confidence-table 9 reasons + 1 default — `docs/invariants.md` §3.4 / §3.5 mentions 10 reasons; pinned at source via 10 behavioral assertions.
+
+**Total +34 substantive `it()` blocks** — MR-006 Change C operational ≥12 threshold satisfied with margin (per MR-012 verdict, operational ≥12 classified as non-binding heuristic; literal ≥1 satisfied with overwhelming margin). Fail-messages cite `docs/invariants.md` § anchors per qa-engineer convention so future drift surfaces against the canonical reference.
+
+**Validation:** `pnpm test` workspace **1833 → 1867 / +34**; `pnpm typecheck` clean across all 10 packages/apps; zero existing test assertions modified; zero new dependencies (`vitest` already on workspace).
+
+**MR-012 Diff #2 source-artifact verification rule applied PRE-DELEGATION** (proposed in MR-012 Appendix C; silence-as-accept applies at MR-013 entry — coordinator applied prospectively to prevent re-occurrence of the iter-049 narrative-vs-ground-truth gap): qa-engineer report cross-referenced against ground-truth source files BEFORE narrative encoding; the 4 drifts above were surfaced and documented during execution.
+
+### Why
+
+- D-1 reverse-portfolio-drift N=5 trip at iter 049 close (CEO Path A user-ack accepted) required mandatory clearance. Row #5 PRIMARY endorsement was the highest-scoring candidate (12) that touches BOTH segmentation-engine + normalization-engine extension surfaces simultaneously, achieving FULL CLEARANCE (counter 5 → 0) in a single iteration.
+- Long-standing invariant gap: `SEGMENTATION_RULE_VERSION` / `NORMALIZATION_RULE_VERSION` and supporting magic numbers carried no test-level pinning. Silent runtime-value drift would have escaped CI; pinning at source via `vitest` assertions converts drift into a build-fail signal.
+- Documentation-mirror drift discovered during execution (`docs/invariants.md` enumerations stale against source) was surfaced as scope-adjacent observation; pinned at source-of-truth (the runtime constants) not at the docs mirror, so the canonical reference remains the failing-test gate.
+
+### Impact
+
+- **D-1 reverse portfolio-drift counter 5 → 0** (FULL CLEARANCE via dual-extension-package touch); next substantive D-1 check iter 056+ if iter 052-055 all miss extension surfaces.
+- **Pool 32 → 31** (#5 closed; zero follow-ups generated; 1 scope-adjacent observation logged NOT promoted — `docs/invariants.md` §2.5 / §3.1 / §3.4 / §3.5 / §3.6 stale enumerations documented as future docs-only iteration candidate).
+- **Cool-off recharge counter HELD AT 0/3 CONSUMED** (D-1 forced-clearance does not advance recharge cadence; remains at iter-048-CONSUMED state; earliest re-arm iter 054 IFF iter 052+053+054 all `burn-down`).
+- **MR-013 cadence 0/3 → 1/3** (iter 051 first counted bounded loop of post-MR-012 stability window; earliest MR-013 iter 053 under compressed cadence pending Diff #1 silence-as-accept ratification, OR iter 054 under standard 3-loop floor).
+- **Cold-pool DV2 age 9 → 10 HITS MR-006 Change D 10-iter staleness threshold — MANDATORY full-triage QUEUED for MR-013 part-(b)**.
+- **Area saturation:** 2-web-app + 1-extension + 1-governance-non-counting in rolling 5-window post-iter-047-MR-011-reset; safely below 3-consecutive trigger; iter 051 extension-surface adds rolling-5 surface diversity.
+- **Agent-diversity:** `qa-engineer` counter = 1 post-iter-051 (clean rotation; 4+ trigger distant).
+- **#57 flag-retirement prerequisite chain UNCHANGED at 10/10 ENGINEERING-COMPLETE** — only 14d soak-window remains.
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL.**
+- **Follow-Up Debt Policy testable metric (`closed / created ≥ 0.5`):** trailing 10-iter window iter 042→051 = 7 closed / 27 created = **0.26 BELOW 0.5 floor — TRANSIENT per MR-012 §3.1 verdict** (drop attributed to Mode 4 zero-closure absorption + dual-closure roll-off; no remediation rule proposed; projected recovery to ≥0.5 within 2-3 additional counted iterations).
+
+### Notes
+
+- `density-response`: n/a (zero follow-ups generated; density-trigger clause 3 does not fire).
+- `scope-expansion`: not applicable (strict one-logical-outcome — single regression-suite addition across 2 extension packages with co-located invariant pins per row #5 verbatim scope; dual-package coverage is single logical unit because the 2 packages share `RULE_VERSION` boundary semantics and were endorsed together by MR-012 §10 as the FULL CLEARANCE strategy).
+- `D-4 specialist-invocation gate`: did NOT fire — (clause 1) 0 user-visible copy strings (test infrastructure only); (clause 2) test code explicitly excluded from the ≥200 LOC new-contract threshold.
+
+---
+
+## [2026-04-27] - Iteration 050 — MR-012 meta-review (Mode 4, governance-only; NON-counting toward improvement-loop cadence)
+
+**Trigger:** three converging signals fired at iter 049 close — (a) **MR-005 D-1 reverse-portfolio-drift N=5 first-fire** (counter advanced 4 → 5 at iter 049 close; CEO Path A user-ack accepted trip; **first time this rule has actually fired since codification at MR-005 / iter 025**); (b) **compressed-cadence convention** established at MR-011 (2-loop-then-meta-on-3rd-slot); (c) **base 3-loop cadence floor satisfied** under literal-text reading. MR-012 delivered as mandatory governance-only iteration per CLAUDE.md § Meta-Review Cadence.
+
+**Artifact:** `docs/meta/MR_012_META_REVIEW.md` (631 lines; 15 numbered sections + 3 appendices following MR-011 format precedent).
+
+### What changed
+
+- **Zero product code changes** (Mode 4 governance-only).
+- **14-dimension per-rule verdict pass** (1 Effective-FIRST-FIRE [D-1 N=5], 2 Effective-second-fire [D-4 first cumulative-extension; clause 7 second-empirical-validation], 1 Effective-second-cycle-consumption [Cool-off recharge], 2 Effective-with-second-sub-operational-data-point [substantive-test threshold], 1 Effective-with-transient-classification [Q4 ratio drift], 1 Effective-with-multi-bypass-evidence [Ceiling clause 6], 1 Effective-armed-held [Change D 10-iter staleness], 4 Insufficient-Evidence-preserve, 1 Preserved, 0 Refinement, 0 Failing).
+- **Two CLAUDE.md amendment diffs PROPOSED** (Appendix C; both clarification amendments codifying observed governance-narrative patterns; neither introduces a new control variable):
+  - **Diff #1 — Compressed-cadence ratification** (Q-MR-012-compressed-cadence-ratification): amend `## Meta-Review Cadence` to allow 2-3 loop cadence at coordinator discretion.
+  - **Diff #2 — Meta-coordinator source-artifact verification rule** (Q-MR-011-narrative-vs-ground-truth-reconciliation): new `### Meta-coordinator source-artifact verification (MR-012 Change A)` subsection requiring meta-coordinator to verify backlog-row narratives against source artifacts before MR §Iter-N+1-Endorsement sections.
+  - **Apply trigger for both:** CEO confirmation OR silence-as-accept at MR-013 entry per MR-008 silence-as-accept precedent. **Not applied at MR-012 close.**
+- **Cold-pool staleness check:** DV2 age 8 → 9 (1-iter margin to MR-006 Change D 10-iter threshold; coordinator to track at iter 051); MDR + WDC ages 3 → 4 (post-MR-011 reset; well under threshold). No mandatory triage at MR-012.
+- **D-1 N=5 first-fire post-mortem (§10):** rule fired CORRECTLY (counter advancement deterministic and unambiguous); user-ack pattern WORKING (auditable evidence produced); rule INTERPRETABLE (`apps/web-app/src/lib/` correctly classified as web-app surface, not extension surface). **Verdict: preserve at N=5; no tightening (N=4) and no loosening (N=7) recommended.**
+- **Q4 ratio drift quantitative analysis (§3.1):** trailing 10-iter window 0.56 (iter 046 close) → 0.52 (iter 048) → **0.30 (iter 049 close)**. **Verdict: TRANSIENT, not structural** — drop fully attributed to iter-037/038/039 closure roll-off + 3 Mode 4 zero-closure slots in trailing window; no remediation rule proposed. Forward-projects to ≥0.5 within 2-3 counted iterations under expected burn-down cadence.
+- **Substantive-test threshold (§3.2):** 2 sub-≥12 occurrences (iter 046 +3 e2e tests; iter 049 +8 unit tests) both delivered substantive category-appropriate coverage. **Verdict: PRESERVE LITERAL ≥1; classify operational ≥12 as non-binding heuristic.** No CLAUDE.md diff required (literal text already says "≥1").
+- **Iter 051 PRIMARY pick endorsement:** **#5 invariant-focused regression suite for segmentation and normalization versions** (score 12, segmentation-engine + normalization-engine extension surface; `qa-engineer` primary; D-1 counter clears 5 → 0 with dual-package coverage in single iteration). 2nd-best: **#21 Real-extension `launchPersistentContext` E2E harness** (score 9; E=4/R=3 less attractive but extension-app surface coverage).
+- **Path D R+2 endorsement:** **#84 WDC-R12 plan-gating consolidation** (Path D R+2 PRIMARY candidate, but DEFERRED to iter 052 to allow iter 051 D-1 clearance fire first).
+
+### Counters at MR-012 close
+
+- **Pool size:** 32 (unchanged; Mode 4 zero product code)
+- **Cool-off recharge counter:** 0/3 CONSUMED (held; iter 049 directed broke recharge cadence)
+- **D-1 reverse-portfolio-drift counter:** 5 (held; **iter 051 MUST clear to prevent N=6 re-fire**)
+- **Area saturation:** Mode 4 resets rolling-5 window
+- **Agent-diversity:** `meta-coordinator` at iter 050 → rotation-clean for iter 051
+- **MR-013 cadence:** RESET 2/3 → 0/3
+- **MR-013 earliest:** iter 053 under compressed cadence (if ratified) OR iter 054 under standard cadence
+- **#57 chain:** 10/10 ENGINEERING-COMPLETE (only 14d soak remains; soak opened iter 041 close 2026-04-24; earliest CEO go/no-go decision date 2026-05-08, 11 days from MR-012 date)
+- **External-launch MDR-blocker gate:** 7/7 FULL (preserved)
+- **10-iter Follow-Up Debt ratio:** 0.30 SUB-FLOOR (transient per §3.1; ratio invariant under Mode 4 non-counting)
+- **Cold-pool ages:** DV2 8 → **9** (1-iter margin); MDR 3 → 4; WDC 3 → 4
+
+### CEO actions queued
+
+- Diff #1 (compressed-cadence ratification) ruling — CEO confirm OR silence-as-accept at MR-013 entry.
+- Diff #2 (source-artifact verification rule) ruling — CEO confirm OR silence-as-accept at MR-013 entry.
+- Q3 PRD_METRICS_ENGINE_REVISED v2.0 DRAFT approval (carried forward from MR-009/MR-010/MR-011).
+- 5 pre-R+1 blocking questions: Q-ARCH-1 / Q-ARCH-2 / Q-GOV-4 / Q-MEAS-1 / DEP-08 (carried forward).
+
+### Validation
+
+Mode 4 governance-only — no `pnpm test` or `pnpm typecheck` invocations required (zero code changes). Artifact `docs/meta/MR_012_META_REVIEW.md` cross-references all upstream rules and counters; section structure matches MR-011 precedent. **NON-counting toward improvement-loop cadence.**
+
+---
+
 ## [2026-04-22] - Iteration 033 — `#24 LiveStep type tightening` CLOSED (Mode 1, `burn-down`, `backend-engineer`)
 
 MR-007 § 5 endorsed pick executed. `LiveStep.grouping?` and `LiveStep.boundaryReason?` free-form `string` fields converted to typed enum unions, closing a long-standing type-system determinism gap (Birth iter 011, age 22 iter — the past-cap staleness tail). Pure type-system narrowing; zero runtime code changes; zero test-file changes; 1782/1782 workspace tests unchanged.

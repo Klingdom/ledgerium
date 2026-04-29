@@ -27,9 +27,9 @@
  * reflects the active filter context accurately.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Columns3 } from 'lucide-react';
-import { track } from '@/lib/analytics.js';
+import { track, setUserPlanForAnalytics } from '@/lib/analytics.js';
 import CommandHeader, { type TimeRange } from './CommandHeader.js';
 import InsightsStrip from './InsightsStrip.js';
 import WorkflowList, {
@@ -52,6 +52,8 @@ interface WorkflowsApiResponse {
     portfolioHealthScoreDelta: number | null;
     insightChips: InsightChip[];
     topInsights: Array<{ id: string; title: string; severity: string; insightType: string }>;
+    /** MDR-P09 (b): server-resolved plan for free-vs-paid event segmentation */
+    userPlan?: string;
   };
 }
 
@@ -61,11 +63,19 @@ const SKELETON_MIN_MS = 300;
 
 // ── Time range filter ─────────────────────────────────────────────────────────
 
-function filterByTimeRange(workflows: WorkflowRowData[], range: TimeRange): WorkflowRowData[] {
+/**
+ * MDR-P03 site 7 / FOLLOWUP-037-02 (iter 045): age-based filter uses an
+ * injected upstream clock so repeated calls within the same render cycle
+ * yield identical results. See route.ts:485-487 for the canonical pattern.
+ */
+export function filterByTimeRange(
+  workflows: WorkflowRowData[],
+  range: TimeRange,
+  nowMs: number,
+): WorkflowRowData[] {
   if (range === 'all') return workflows;
-  const now = Date.now();
   const days = range === '7d' ? 7 : range === '30d' ? 30 : 90;
-  const cutoff = now - days * 24 * 60 * 60 * 1000;
+  const cutoff = nowMs - days * 24 * 60 * 60 * 1000;
   return workflows.filter((w) => new Date(w.createdAt).getTime() >= cutoff);
 }
 
@@ -100,13 +110,25 @@ export default function DashboardV2Shell() {
   // Enforce minimum skeleton display time
   const loadStartRef = useRef<number>(Date.now());
 
-  // PRD §4 metric #1/#2: timestamp captured at dashboard_v2_viewed emission
-  // Used by WorkflowRow to compute elapsedMsSinceDashboardView for workflow_row_clicked.
-  const dashboardViewPerfTimestampRef = useRef<number>(0);
+  // MDR-P03 site 6: converted from ref to state so WorkflowRow receives a
+  // reactive prop update — early clicks before the effect fires no longer
+  // observe the initial 0 value (which made PRD §4 metric #2 uncomputable).
+  // Guard in the useEffect below ensures elapsedMs is only emitted after this
+  // is set (non-zero), preserving the "no elapsed event before viewed" contract.
+  const [dashboardViewPerfTimestampMs, setDashboardViewPerfTimestampMs] = useState<number>(0);
 
   // PRD §4 metric #1: fire dashboard_v2_viewed once per mount, after data loads.
   // Guard ensures it fires exactly once even if allWorkflows updates again.
   const dashboardViewFiredRef = useRef<boolean>(false);
+
+  // MDR-P09 (b): server-resolved plan for free-vs-paid event segmentation.
+  const [userPlan, setUserPlan] = useState<string | undefined>(undefined);
+
+  // MDR-P09 (a): bounce detection — counts trackable click interactions since
+  // dashboard_v2_viewed fired.  useRef avoids re-renders; incremented by a
+  // capture-phase click listener attached to the shell root div.
+  const clickCountSinceViewRef = useRef<number>(0);
+  const shellRootRef = useRef<HTMLDivElement | null>(null);
 
   // ── UI state ────────────────────────────────────────────────────────────────
   const [timeRange, setTimeRange] = useState<TimeRange>('30d');
@@ -140,6 +162,11 @@ export default function DashboardV2Shell() {
       setPortfolioHealthScore(data.stats?.portfolioHealthScore ?? null);
       setPortfolioHealthScoreDelta(data.stats?.portfolioHealthScoreDelta ?? null);
       setInsightChips(data.stats?.insightChips ?? []);
+      // MDR-P09 (b): set plan for event segmentation (side-channel enriches all
+      // subsequent track() calls; see setUserPlanForAnalytics in analytics.ts).
+      const plan = data.stats?.userPlan;
+      setUserPlan(plan);
+      setUserPlanForAnalytics(plan);
       setIsError(false);
     } catch {
       if (remainingDelay > 0) {
@@ -170,7 +197,7 @@ export default function DashboardV2Shell() {
     if (isLoading) return;
     if (dashboardViewFiredRef.current) return;
     dashboardViewFiredRef.current = true;
-    dashboardViewPerfTimestampRef.current = performance.now();
+    setDashboardViewPerfTimestampMs(performance.now());
     const filtersActive =
       filters.systems.length > 0 ||
       filters.opportunity !== null ||
@@ -203,6 +230,41 @@ export default function DashboardV2Shell() {
     void fetchPortfolios();
   }, []);
 
+  // MDR-P09 (a): capture-phase click counter.  Attaches to the shell root div
+  // once dashboard_v2_viewed has fired; increments clickCountSinceViewRef on
+  // any click bubble so beforeunload can distinguish bounce from engagement.
+  useEffect(() => {
+    const el = shellRootRef.current;
+    if (!el || !dashboardViewFiredRef.current) return;
+    const handleClick = () => { clickCountSinceViewRef.current += 1; };
+    el.addEventListener('click', handleClick, true); // capture phase
+    return () => { el.removeEventListener('click', handleClick, true); };
+  // Re-run when dashboardViewFiredRef.current transitions to true (after view fires).
+  // The dependency on dashboardViewPerfTimestampMs is a proxy for that transition.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dashboardViewPerfTimestampMs]);
+
+  // MDR-P09 (a): beforeunload bounce emission.  Fires dashboard_bounced when
+  // the user exits without any tracked click interaction.
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (!dashboardViewFiredRef.current) return; // view never fired — not a bounce
+      if (clickCountSinceViewRef.current > 0) return; // user engaged — not a bounce
+      const elapsedMsSinceDashboardView = dashboardViewPerfTimestampMs > 0
+        ? Math.max(0, Math.round(performance.now() - dashboardViewPerfTimestampMs))
+        : 0;
+      track({
+        event: 'dashboard_bounced',
+        workflowCount: allWorkflows.length,
+        elapsedMsSinceDashboardView,
+      });
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => { window.removeEventListener('beforeunload', handleBeforeUnload); };
+  // allWorkflows.length and dashboardViewPerfTimestampMs are snapshot values read
+  // inside the handler — they must be in deps so the closure captures latest values.
+  }, [allWorkflows.length, dashboardViewPerfTimestampMs]);
+
   // #49: kebab rename — update local workflow title without re-fetch
   const handleWorkflowRename = useCallback((id: string, newTitle: string) => {
     setAllWorkflows((prev) =>
@@ -217,8 +279,14 @@ export default function DashboardV2Shell() {
 
   // ── Derived data ─────────────────────────────────────────────────────────────
 
+  // MDR-P03: stable clock reference for age-based filters within this render
+  // cycle.  filterByTimeRange (FOLLOWUP-037-02 iter 045) and applyFilters
+  // (iter 037) both consume this snapshot so both call sites observe identical
+  // time-window boundaries regardless of wall-clock drift mid-render.
+  const filterNowMs = useMemo(() => Date.now(), []);
+
   // Apply time range (UI-only, D7)
-  const timeFilteredWorkflows = filterByTimeRange(allWorkflows, timeRange);
+  const timeFilteredWorkflows = filterByTimeRange(allWorkflows, timeRange, filterNowMs);
 
   // D5: apply portfolio filter if a portfolio is selected
   // Scaffold: client-side grouping by workflow.portfolioIds (if present) or "Uncategorized"
@@ -236,7 +304,7 @@ export default function DashboardV2Shell() {
         });
 
   // Apply user filters + insight filter to determine UI state
-  const filteredWorkflows = applyFilters(portfolioFilteredWorkflows, filters, insightFilterKey);
+  const filteredWorkflows = applyFilters(portfolioFilteredWorkflows, filters, insightFilterKey, filterNowMs);
 
   const availableSystems = extractSystems(allWorkflows);
 
@@ -272,6 +340,7 @@ export default function DashboardV2Shell() {
 
   return (
     <div
+      ref={shellRootRef}
       className="flex flex-col gap-0 min-h-0"
       role="region"
       aria-label="Workflow intelligence dashboard"
@@ -302,6 +371,7 @@ export default function DashboardV2Shell() {
         {/* D5: PortfolioSidebar — collapsed by default, expanded via filter bar button */}
         {portfolioSidebarOpen && (
           <aside
+            id="portfolio-sidebar"
             aria-label="Portfolio navigation"
             className="flex-shrink-0 border-r border-[var(--border-subtle)]"
           >
@@ -344,7 +414,7 @@ export default function DashboardV2Shell() {
             onWorkflowArchive={handleWorkflowArchive}
             portfolioSidebarOpen={portfolioSidebarOpen}
             onTogglePortfolioSidebar={() => setPortfolioSidebarOpen((prev) => !prev)}
-            dashboardViewPerfTimestampMs={dashboardViewPerfTimestampRef.current}
+            dashboardViewPerfTimestampMs={dashboardViewPerfTimestampMs}
           />
         </div>
       </div>

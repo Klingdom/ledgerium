@@ -257,6 +257,11 @@ async function main(): Promise<void> {
             medianDurationMs: true,
             stabilityScore: true,
             confidenceScore: true,
+            // iter-049 / WDC-R03: required by toMetricsInput adapter to
+            // populate WorkflowMetricsInput.intelligence (Layer 3 slice).
+            // Unconsumed by computeHealthScoreV2 in this script — passthrough
+            // only — but required for the adapter call to typecheck.
+            intelligenceJson: true,
           },
         },
       },

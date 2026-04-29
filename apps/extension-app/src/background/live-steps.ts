@@ -100,12 +100,14 @@ export function toLiveStep(step: DerivedStep): LiveStep {
 export class LiveStepBuilder {
   private readonly segmenter: StreamingSegmenter
   private finalizedLiveSteps: LiveStep[] = []
+  private finalizedDerivedSteps: DerivedStep[] = []
 
   constructor(sessionId: string, onUpdate: (step: LiveStep) => void) {
     this.segmenter = new StreamingSegmenter(sessionId, (derivedStep) => {
       const liveStep = toLiveStep(derivedStep)
       if (derivedStep.status === 'finalized') {
         this.finalizedLiveSteps.push(liveStep)
+        this.finalizedDerivedSteps.push(derivedStep)
       }
       onUpdate(liveStep)
     })
@@ -129,8 +131,26 @@ export class LiveStepBuilder {
     return [...this.finalizedLiveSteps]
   }
 
+  /**
+   * Returns the raw DerivedStep array for all finalized steps, in the same
+   * order as getFinalizedSteps(). Exposes the DerivedStep layer below the
+   * LiveStep projection so that I1b byte-identity assertions can compare
+   * directly against segmentEvents().steps without the lossy toLiveStep
+   * projection.
+   *
+   * Returns a defensive copy — mutations to the returned array do not affect
+   * internal state.
+   *
+   * I1b invariant (iter 053): JSON.stringify(getDerivedSteps()) MUST equal
+   * JSON.stringify(buildDerivedSteps(events, sessionId)) for the same input.
+   */
+  getDerivedSteps(): DerivedStep[] {
+    return [...this.finalizedDerivedSteps]
+  }
+
   reset(): void {
     this.segmenter.reset()
     this.finalizedLiveSteps = []
+    this.finalizedDerivedSteps = []
   }
 }

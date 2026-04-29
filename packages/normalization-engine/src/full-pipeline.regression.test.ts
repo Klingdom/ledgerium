@@ -181,15 +181,19 @@ function loadExpectedSteps(name: string): DerivedStep[] {
 const SESSION = 'test-pipeline-golden';
 
 /**
- * Three fixtures covering distinct normalizer code paths:
- *   click-with-label  — basic click with target label; session start/stop lifecycle
- *   fill-and-submit   — element_focused / input_changed / form_submitted; dedup + fill_and_submit grouping
- *   route-change      — spa_route_changed → navigation.route_change
+ * Four fixtures covering distinct normalizer code paths:
+ *   click-with-label   — basic click with target label; session start/stop lifecycle
+ *   fill-and-submit    — element_focused / input_changed / form_submitted; dedup + fill_and_submit grouping
+ *   route-change       — spa_route_changed → navigation.route_change
+ *   rapid-focus-blur   — element_focused immediately superseded by another element_focused (normalizer.ts:458-465),
+ *                        then element_focused → element_blurred with no input (net-zero; normalizer.ts:467-476);
+ *                        both dedup branches exercised; dropped events confirmed absent from normalized output
  */
 const FIXTURE_NAMES = [
   'click-with-label',
   'fill-and-submit',
   'route-change',
+  'rapid-focus-blur',
 ] as const;
 
 // ---------------------------------------------------------------------------

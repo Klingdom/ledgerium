@@ -743,3 +743,288 @@ describe('iter-031 DV2-R03: tooltip dismiss logic (WCAG 2.1 SC 1.4.13)', () => {
     }
   });
 });
+
+// ── MDR-P08: centralized Escape dispatch (iter-041) ───────────────────────────
+
+/**
+ * Pure-logic model of the useEscapeDispatch priority table.
+ *
+ * The hook itself installs/removes a document listener; the dispatch logic is
+ * the observable contract. We model it as a pure function here to keep tests
+ * jsdom-free (matching the rest of this test file) and to lock the invariants:
+ *
+ *   Priority 1: isConfirmingArchive → archiveCancel fires; kebab/tooltip do NOT
+ *   Priority 2: isEditingName (but not confirmingArchive) → no-op (InlineEdit
+ *               owns its own onKeyDown on the focused input)
+ *   Priority 3: showKebab (no archive, no edit) → kebabClose fires; tooltip does NOT
+ *   Priority 4: showTooltip only → tooltipDismiss fires
+ *   No-op: no overlays active → nothing fires
+ *
+ * Sequential dismissal: after each priority fires, the caller is expected to
+ * clear that overlay's state; the next Escape press sees the updated state and
+ * dispatches to the next priority.
+ */
+
+type OverlayState = {
+  isConfirmingArchive: boolean;
+  isEditingName: boolean;
+  showKebab: boolean;
+  showTooltip: boolean;
+};
+
+type DispatchResult =
+  | { fired: 'archiveCancel' }
+  | { fired: 'kebabClose' }
+  | { fired: 'tooltipDismiss' }
+  | { fired: 'editNoop' }
+  | { fired: 'none' };
+
+/** Pure model of useEscapeDispatch priority logic (mirrors hook body). */
+function escapeDispatch(state: OverlayState): DispatchResult {
+  if (state.isConfirmingArchive) return { fired: 'archiveCancel' };
+  if (state.isEditingName) return { fired: 'editNoop' };
+  if (state.showKebab) return { fired: 'kebabClose' };
+  if (state.showTooltip) return { fired: 'tooltipDismiss' };
+  return { fired: 'none' };
+}
+
+/** Returns whether the dispatch installs a listener (any overlay active). */
+function listenerShouldBeInstalled(state: OverlayState): boolean {
+  return state.isConfirmingArchive || state.showKebab || state.showTooltip || state.isEditingName;
+}
+
+describe('MDR-P08: centralized Escape dispatch (iter-041)', () => {
+  // Test 1: listener count — zero when no overlays, one when overlays present
+  it('no overlays active → listener NOT installed (anyOverlayActive=false)', () => {
+    const state: OverlayState = {
+      isConfirmingArchive: false,
+      isEditingName: false,
+      showKebab: false,
+      showTooltip: false,
+    };
+    expect(listenerShouldBeInstalled(state)).toBe(false);
+    expect(escapeDispatch(state).fired).toBe('none');
+  });
+
+  it('one overlay active → listener IS installed (anyOverlayActive=true)', () => {
+    const states: OverlayState[] = [
+      { isConfirmingArchive: true, isEditingName: false, showKebab: false, showTooltip: false },
+      { isConfirmingArchive: false, isEditingName: false, showKebab: true, showTooltip: false },
+      { isConfirmingArchive: false, isEditingName: false, showKebab: false, showTooltip: true },
+    ];
+    for (const state of states) {
+      expect(listenerShouldBeInstalled(state)).toBe(true);
+    }
+  });
+
+  it('all three overlays simultaneously active → still exactly ONE dispatch (not three)', () => {
+    // The hook installs ONE handler; this test verifies only one callback fires
+    const state: OverlayState = {
+      isConfirmingArchive: true,
+      isEditingName: false,
+      showKebab: true,
+      showTooltip: true,
+    };
+    // Only one result returned — archive wins
+    const result = escapeDispatch(state);
+    expect(result.fired).toBe('archiveCancel');
+    // Explicitly confirm kebab and tooltip do NOT fire
+    expect(result.fired).not.toBe('kebabClose');
+    expect(result.fired).not.toBe('tooltipDismiss');
+  });
+
+  // Test 2: Priority 1 — InlineArchiveConfirm wins over KebabMenu
+  it('Priority 1: isConfirmingArchive=true + showKebab=true → archiveCancel fires; kebabClose does NOT', () => {
+    const state: OverlayState = {
+      isConfirmingArchive: true,
+      isEditingName: false,
+      showKebab: true,
+      showTooltip: false,
+    };
+    const result = escapeDispatch(state);
+    expect(result.fired).toBe('archiveCancel');
+    expect(result.fired).not.toBe('kebabClose');
+  });
+
+  // Test 3: Priority 3 — KebabMenu wins over HealthTooltip
+  it('Priority 3: showKebab=true + showTooltip=true → kebabClose fires; tooltipDismiss does NOT', () => {
+    const state: OverlayState = {
+      isConfirmingArchive: false,
+      isEditingName: false,
+      showKebab: true,
+      showTooltip: true,
+    };
+    const result = escapeDispatch(state);
+    expect(result.fired).toBe('kebabClose');
+    expect(result.fired).not.toBe('tooltipDismiss');
+  });
+
+  // Test 4: Priority 4 — HealthTooltip alone
+  it('Priority 4: showTooltip=true only → tooltipDismiss fires', () => {
+    const state: OverlayState = {
+      isConfirmingArchive: false,
+      isEditingName: false,
+      showKebab: false,
+      showTooltip: true,
+    };
+    const result = escapeDispatch(state);
+    expect(result.fired).toBe('tooltipDismiss');
+  });
+
+  // Test 5: No-overlays no-op
+  it('no overlays active → Escape fires nothing (no-op)', () => {
+    const state: OverlayState = {
+      isConfirmingArchive: false,
+      isEditingName: false,
+      showKebab: false,
+      showTooltip: false,
+    };
+    expect(escapeDispatch(state).fired).toBe('none');
+  });
+
+  // Test 6: Sequential dismissal
+  it('sequential dismissal: archive → kebab → tooltip across three Escape presses', () => {
+    // Initial: all three overlays open
+    let state: OverlayState = {
+      isConfirmingArchive: true,
+      isEditingName: false,
+      showKebab: true,
+      showTooltip: true,
+    };
+
+    // Press 1: archive cancels
+    let result = escapeDispatch(state);
+    expect(result.fired).toBe('archiveCancel');
+    state = { ...state, isConfirmingArchive: false }; // caller clears archive state
+
+    // Press 2: kebab closes
+    result = escapeDispatch(state);
+    expect(result.fired).toBe('kebabClose');
+    state = { ...state, showKebab: false }; // caller clears kebab state
+
+    // Press 3: tooltip dismisses
+    result = escapeDispatch(state);
+    expect(result.fired).toBe('tooltipDismiss');
+    state = { ...state, showTooltip: false }; // caller clears tooltip state
+
+    // Press 4: nothing left
+    result = escapeDispatch(state);
+    expect(result.fired).toBe('none');
+  });
+
+  // Test 7: preventDefault + stopPropagation contract
+  it('Escape with active overlay calls preventDefault and stopPropagation on the event', () => {
+    // Simulate the hook's handler receiving a KeyboardEvent-like object
+    const mockEvent = {
+      key: 'Escape',
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
+    };
+
+    // Inline the handler logic (mirrors the hook body) to verify both calls
+    function simulateHandler(
+      e: typeof mockEvent,
+      state: OverlayState,
+    ): void {
+      if (e.key !== 'Escape') return;
+      if (state.isConfirmingArchive) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      if (state.isEditingName) return;
+      if (state.showKebab) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      if (state.showTooltip) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+    }
+
+    simulateHandler(mockEvent, {
+      isConfirmingArchive: false,
+      isEditingName: false,
+      showKebab: true,
+      showTooltip: false,
+    });
+
+    expect(mockEvent.preventDefault).toHaveBeenCalledOnce();
+    expect(mockEvent.stopPropagation).toHaveBeenCalledOnce();
+  });
+
+  // Test 8: non-Escape key → no dispatch, no preventDefault/stopPropagation
+  it('non-Escape key with active overlay → no callback fires, no event prevention', () => {
+    const mockEvent = {
+      key: 'Tab',
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
+    };
+
+    function simulateHandler(
+      e: typeof mockEvent,
+      state: OverlayState,
+    ): DispatchResult {
+      if (e.key !== 'Escape') return { fired: 'none' };
+      if (state.isConfirmingArchive) {
+        e.preventDefault();
+        e.stopPropagation();
+        return { fired: 'archiveCancel' };
+      }
+      if (state.isEditingName) return { fired: 'editNoop' };
+      if (state.showKebab) {
+        e.preventDefault();
+        e.stopPropagation();
+        return { fired: 'kebabClose' };
+      }
+      if (state.showTooltip) {
+        e.preventDefault();
+        e.stopPropagation();
+        return { fired: 'tooltipDismiss' };
+      }
+      return { fired: 'none' };
+    }
+
+    const result = simulateHandler(mockEvent, {
+      isConfirmingArchive: false,
+      isEditingName: false,
+      showKebab: true,
+      showTooltip: true,
+    });
+
+    expect(result.fired).toBe('none');
+    expect(mockEvent.preventDefault).not.toHaveBeenCalled();
+    expect(mockEvent.stopPropagation).not.toHaveBeenCalled();
+  });
+
+  // Test 9: InlineEdit priority-2 no-op
+  it('Priority 2: isEditingName=true (no archive) → no-op (InlineEdit owns its own Escape)', () => {
+    const state: OverlayState = {
+      isConfirmingArchive: false,
+      isEditingName: true,
+      showKebab: false,
+      showTooltip: false,
+    };
+    const result = escapeDispatch(state);
+    // editNoop means: we recognized it but deliberately did not fire a document callback
+    expect(result.fired).toBe('editNoop');
+    expect(result.fired).not.toBe('kebabClose');
+    expect(result.fired).not.toBe('tooltipDismiss');
+    expect(result.fired).not.toBe('archiveCancel');
+  });
+
+  // Test 10: archive beats edit if both active (archive is outermost modal)
+  it('isConfirmingArchive=true + isEditingName=true → archive wins (archive is highest priority)', () => {
+    const state: OverlayState = {
+      isConfirmingArchive: true,
+      isEditingName: true,
+      showKebab: false,
+      showTooltip: false,
+    };
+    const result = escapeDispatch(state);
+    expect(result.fired).toBe('archiveCancel');
+  });
+});

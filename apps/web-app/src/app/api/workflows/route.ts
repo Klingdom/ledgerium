@@ -24,26 +24,6 @@ const STALE_CREATED_DAYS = 30;
 const STALE_VIEWED_DAYS = 14;
 const NEW_WORKFLOW_DAYS = 7;
 
-function computeVariationScore(
-  confidence: number | null,
-  processDefinition: { variantCount: number; stabilityScore: number | null } | null,
-): number {
-  if (processDefinition && processDefinition.variantCount > 0) {
-    // More variants = higher variation; cap at 1
-    const raw = Math.min(processDefinition.variantCount / 10, 1);
-    // Blend with inverse stability if available
-    if (processDefinition.stabilityScore != null) {
-      return Math.round(((raw + (1 - processDefinition.stabilityScore)) / 2) * 100) / 100;
-    }
-    return Math.round(raw * 100) / 100;
-  }
-  // Derive from confidence: low confidence implies higher variation
-  if (confidence != null) {
-    return Math.round((1 - confidence) * 100) / 100;
-  }
-  return 0.5; // unknown defaults to middle
-}
-
 function computeSopReadiness(confidence: number | null, stepCount: number | null): SopReadiness {
   if (stepCount == null || stepCount === 0) return 'not_ready';
   if (confidence != null && confidence > 0.8) return 'ready';
@@ -104,13 +84,12 @@ function computeDocumentationCompleteness(
   return Math.round((score / maxScore) * 100);
 }
 
-function computeIsStale(createdAt: Date, lastViewedAt: Date | null): boolean {
-  const now = Date.now();
-  const createdDaysAgo = (now - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+function computeIsStale(createdAt: Date, lastViewedAt: Date | null, nowMs: number): boolean {
+  const createdDaysAgo = (nowMs - createdAt.getTime()) / (1000 * 60 * 60 * 24);
   if (createdDaysAgo <= STALE_CREATED_DAYS) return false;
 
   if (lastViewedAt == null) return true;
-  const viewedDaysAgo = (now - lastViewedAt.getTime()) / (1000 * 60 * 60 * 24);
+  const viewedDaysAgo = (nowMs - lastViewedAt.getTime()) / (1000 * 60 * 60 * 24);
   return viewedDaysAgo > STALE_VIEWED_DAYS;
 }
 
@@ -131,15 +110,17 @@ function computeBottleneckRisk(
   return 'none';
 }
 
+// nowMs: injected clock boundary — same MDR-P03 pattern as computeIsStale (iter-037); eliminates
+// per-call Date.now() inside the per-workflow map() pipeline (FOLLOWUP-037-01, closed iter-043).
 function computeHealthStatus(
   createdAt: Date,
   isStale: boolean,
   variationScore: number,
   confidence: number | null,
   sopReadiness: SopReadiness,
+  nowMs: number,
 ): HealthStatus {
-  const now = Date.now();
-  const daysSinceCreated = (now - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+  const daysSinceCreated = (nowMs - createdAt.getTime()) / (1000 * 60 * 60 * 24);
 
   // Actionable statuses surface regardless of age
   if (isStale) return 'stale';
@@ -150,41 +131,6 @@ function computeHealthStatus(
   // Only mark as 'new' if the workflow is otherwise healthy
   if (daysSinceCreated <= NEW_WORKFLOW_DAYS) return 'new';
   return 'healthy';
-}
-
-function computeAiOpportunityScore(
-  stepCount: number | null,
-  durationMs: number | null,
-  toolsUsed: string | null,
-  optimizationPotential: RiskLevel,
-): number {
-  let score = 0;
-
-  // Repetitive step ratio proxy via step count (30% weight, up to 30 pts for 15+ steps)
-  if (stepCount != null) {
-    score += Math.min(Math.round((stepCount / 15) * 30), 30);
-  }
-
-  // Longer workflows benefit more from automation (up to 25 pts for 5min+)
-  if (durationMs != null) {
-    score += Math.min(Math.round((durationMs / 300_000) * 25), 25);
-  }
-
-  // Multi-system = orchestration opportunity (up to 25 pts for 3+ systems)
-  const toolCount = toolsUsed ? (() => {
-    try {
-      const parsed = JSON.parse(toolsUsed);
-      return Array.isArray(parsed) ? parsed.length : 0;
-    } catch { return 0; }
-  })() : 0;
-  score += Math.min(Math.round((toolCount / 3) * 25), 25);
-
-  // High optimization potential bonus (20 pts)
-  if (optimizationPotential === 'high') {
-    score += 20;
-  }
-
-  return Math.min(score, 100);
 }
 
 // ── Lightweight interpretation-derived fields ────────────────────────────────
@@ -482,8 +428,10 @@ export async function GET(req: NextRequest) {
 
   // ── Enrich each workflow ───────────────────────────────────────────────
 
-  const now = Date.now();
-  const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
+  // MDR-P03: single upstream clock boundary per request — every downstream
+  // time-dependent computation consumes this injected value, not wall-clock.
+  const referenceNowMs = Date.now();
+  const oneWeekAgo = referenceNowMs - 7 * 24 * 60 * 60 * 1000;
 
   const enrichedWorkflows = results.map((w) => {
     const tagsMapped = w.tags.map((wt) => ({
@@ -501,33 +449,16 @@ export async function GET(req: NextRequest) {
       }
     })() : [];
 
-    const variationScore = computeVariationScore(w.confidence, w.processDefinition);
-    const sopReadiness = computeSopReadiness(w.confidence, w.stepCount);
-    const optimizationPotential = computeOptimizationPotential(w.durationMs, w.stepCount, w.confidence);
-    const documentationCompleteness = computeDocumentationCompleteness(
-      w.description, w.toolsUsed, w.tags.length,
-    );
-    const isStale = computeIsStale(w.createdAt, w.lastViewedAt);
-    const bottleneckRisk = computeBottleneckRisk(w.stepCount, w.durationMs);
-    const healthStatus = computeHealthStatus(
-      w.createdAt, isStale, variationScore, w.confidence, sopReadiness,
-    );
-    const processType = computeProcessType(w.toolsUsed, w.stepCount, w.description);
-    const complexityScore = computeComplexityScore(w.stepCount, w.toolsUsed, w.durationMs);
-    const aiOpportunityScore = computeAiOpportunityScore(
-      w.stepCount, w.durationMs, w.toolsUsed, optimizationPotential,
-    );
-    const cognitiveBurdenScore = computeCognitiveBurdenScore(
-      w.stepCount, parsedTools, w.durationMs, processType,
-    );
-    const processMaturityScore = computeProcessMaturityScore(
-      w.confidence, sopReadiness, documentationCompleteness, isStale, w.processDefinition,
-    );
-
     // Exclude processDefinition, portfolios, and tags relations from spread to keep response clean
     const { processDefinition: _pd, tags: _tags, portfolios: _portfolios, ...workflowBase } = w;
 
     // ── Metrics V2 computation ────────────────────────────────────────────
+    // MDR-P05: compute metricsV2 first so variationScore and aiOpportunityScore
+    // are sourced from the single canonical v2 implementation.  The former v1
+    // shadow functions (computeVariationScore / computeAiOpportunityScore in this
+    // file) have been deleted.  All downstream consumers in this handler now read
+    // from metricsV2.* — eliminating the numeric divergence between stats.* and
+    // metricsV2.* that caused filter/chip disagreement at threshold boundaries.
     const workflowProcessInsights = insightsByWorkflowId.get(w.id) ?? [];
     const metricsInput = toMetricsInput(w, workflowProcessInsights);
     const rawMetricsV2 = computeWorkflowMetrics(metricsInput);
@@ -539,6 +470,30 @@ export async function GET(req: NextRequest) {
         isGated: !canSeeHealthScores,
       },
     };
+
+    // MDR-P05: variationScore and aiOpportunityScore are now sourced from metricsV2
+    // (the single v2 canonical source) rather than the deleted v1 shadow functions.
+    const variationScore = metricsV2.variationScore;
+    const aiOpportunityScore = metricsV2.aiOpportunityScore;
+
+    const sopReadiness = computeSopReadiness(w.confidence, w.stepCount);
+    const optimizationPotential = computeOptimizationPotential(w.durationMs, w.stepCount, w.confidence);
+    const documentationCompleteness = computeDocumentationCompleteness(
+      w.description, w.toolsUsed, w.tags.length,
+    );
+    const isStale = computeIsStale(w.createdAt, w.lastViewedAt, referenceNowMs);
+    const bottleneckRisk = computeBottleneckRisk(w.stepCount, w.durationMs);
+    const healthStatus = computeHealthStatus(
+      w.createdAt, isStale, variationScore, w.confidence, sopReadiness, referenceNowMs,
+    );
+    const processType = computeProcessType(w.toolsUsed, w.stepCount, w.description);
+    const complexityScore = computeComplexityScore(w.stepCount, w.toolsUsed, w.durationMs);
+    const cognitiveBurdenScore = computeCognitiveBurdenScore(
+      w.stepCount, parsedTools, w.durationMs, processType,
+    );
+    const processMaturityScore = computeProcessMaturityScore(
+      w.confidence, sopReadiness, documentationCompleteness, isStale, w.processDefinition,
+    );
 
     return {
       ...workflowBase,
@@ -624,12 +579,14 @@ export async function GET(req: NextRequest) {
     (w) => w.createdAt.getTime() >= oneWeekAgo,
   ).length;
 
-  const oneMonthAgo = new Date();
-  oneMonthAgo.setDate(1); // First of current month
-  oneMonthAgo.setHours(0, 0, 0, 0);
+  // MDR-P04: month boundary computed in UTC from the injected reference clock so
+  // the count is timezone-invariant — identical whether the server runs in UTC,
+  // PST, or CET.  Pattern: first millisecond of the current UTC calendar month.
+  const refDate = new Date(referenceNowMs);
+  const firstOfMonthUtcMs = Date.UTC(refDate.getUTCFullYear(), refDate.getUTCMonth(), 1, 0, 0, 0, 0);
 
   const recordedThisMonth = allEnriched.filter(
-    (w) => w.createdAt.getTime() >= oneMonthAgo.getTime(),
+    (w) => w.createdAt.getTime() >= firstOfMonthUtcMs,
   ).length;
 
   const needsReview = allEnriched.filter(
@@ -669,8 +626,14 @@ export async function GET(req: NextRequest) {
 
   const staleCount = allEnriched.filter((w) => w.isStale).length;
 
+  // MDR-P05: count from the v2 canonical opportunityTag so stats.aiOpportunityCount
+  // agrees exactly with the number of rows the UI displays as 'automate' tagged.
+  // Previously this counted w.aiOpportunityScore >= 60 (v1 numeric threshold) while
+  // the row list used metricsV2.opportunityTag — the two could disagree at boundary
+  // values because v1 and v2 score functions produce different numbers for the same
+  // input.  Now both the count and the list reflect the same v2 decision-tree result.
   const aiOpportunityCount = allEnriched.filter(
-    (w) => w.aiOpportunityScore >= 60,
+    (w) => w.metricsV2.opportunityTag === 'automate',
   ).length;
 
   const cognitiveBurdenValues = allEnriched.map((w) => w.cognitiveBurdenScore);
@@ -707,11 +670,12 @@ export async function GET(req: NextRequest) {
   // timeRange is a UI-only filter (D7); per-workflow delta is not yet available in the API.
   const PRIOR_WINDOW_DAYS = 30;
   const allWorkflowsMeta = allEnriched.map((w) => ({ updatedAt: w.updatedAt.toISOString() }));
+  // MDR-P03: construct from injected clock boundary — not a fresh wall-clock read.
   const portfolioHealthScorePrior = computePortfolioHealthScorePrior(
     allMetricsV2,
     allWorkflowsMeta,
     PRIOR_WINDOW_DAYS,
-    new Date(),
+    new Date(referenceNowMs),
   );
   const portfolioHealthScoreDelta: number | null =
     portfolioHealthScorePrior !== null
@@ -744,6 +708,10 @@ export async function GET(req: NextRequest) {
       portfolioHealthScorePrior,
       portfolioHealthScoreDelta,
       insightChips,
+      // MDR-P09 (b): thread server-resolved plan to client for event segmentation.
+      // Allows DashboardV2Shell to call setUserPlanForAnalytics() so every v2 event
+      // carries free-vs-paid context without an additional API round-trip.
+      userPlan,
       // Backward-compatible fields
       recentlyViewedIds: recentlyViewed.map((w) => w.id),
     },

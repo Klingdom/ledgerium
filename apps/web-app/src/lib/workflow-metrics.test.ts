@@ -734,7 +734,7 @@ describe('computeInsightChips', () => {
     const varianceChip = chips.find((c) => c.filterKey === 'variationScore_gt_0.7');
     expect(varianceChip).toBeDefined();
     expect(varianceChip!.label).toContain('→');
-    expect(varianceChip!.label).toMatch(/pulling SLA down/i);
+    expect(varianceChip!.label).toMatch(/high execution variance/i);
   });
 
   it('automation chip label is action-leading (contains →)', () => {
@@ -862,5 +862,126 @@ describe('computePortfolioHealthScorePrior', () => {
 
   it('PORTFOLIO_PRIOR_MIN_WORKFLOWS constant is 3', () => {
     expect(PORTFOLIO_PRIOR_MIN_WORKFLOWS).toBe(3);
+  });
+});
+
+// ── MDR-P01: automate requires healthScore.overall >= AUTOMATE_MIN_OVERALL ────
+
+describe('MDR-P01: automate requires healthScore.overall >= AUTOMATE_MIN_OVERALL', () => {
+  // Inline fixture: high aiScore (≥60) + 3 tools + unhealthy overall.
+  // stepCount=20 → aiScore contribution: round((20/15)*30)=40; isHighSteps=true → +20; toolsUsed=3 → +25; durationMs=null → 0; total=85.
+  // overall: speed=0 (durationMs null) + consistency=(1-0.5)*30=15 (processDefinition null, confidence null → default 0.5)
+  //          + dataQuality=0 (confidence null) + standardization=round((0+round((20/3)*20))/2)=round((0+20)/2)=10 → overall=25.
+  const unhealthyHighAiInput: WorkflowMetricsInput = {
+    ...FIXTURE_SPARSE,
+    stepCount: 20,
+    durationMs: null,
+    confidence: null,
+    toolsUsed: ['SAP', 'Outlook', 'SharePoint'],
+    processDefinition: null,
+    processInsights: [],
+  };
+
+  it('unhealthy overall (22-ish) with high aiScore + 3 tools → returns monitor (not automate)', () => {
+    const hs = computeHealthScoreV2(unhealthyHighAiInput);
+    expect(hs.overall).toBeLessThan(40);
+    expect(computeAiOpportunityScore(unhealthyHighAiInput)).toBeGreaterThanOrEqual(60);
+    expect(unhealthyHighAiInput.toolsUsed.length).toBeGreaterThanOrEqual(2);
+    expect(computeOpportunityTag(unhealthyHighAiInput, hs)).toBe('monitor');
+  });
+
+  it('at-threshold overall (exactly 40) with high aiScore + 3 tools → returns automate (boundary inclusive)', () => {
+    // Build input yielding overall=40: durationMs=10_000 (adjacent, speed=18) +
+    // consistency=(1-0.5)*30=15 (default variation) + dataQuality=0 + standardization=round((0+20)/2)=10 → 18+15+0+10=43... close enough.
+    // Simpler: use a processDefinition with stabilityScore=0.5 and set durationMs to adjacent band.
+    // adjacent speed=18, consistency=15, dataQuality=0, standardization with stepCount=2: round((0+round((2/3)*20))/2)=round((0+13)/2)=6 → 18+15+0+6=39. Off by 1.
+    // Use durationMs=30_000 (ideal, speed=30), consistency=15, dataQuality=0, standardization=0 → 30+15+0+0=45. Too high.
+    // Use override: craft so overall lands exactly ≥40 with a known approach.
+    // Easiest: mock the healthScore directly for the boundary test.
+    const mockHealthScore40 = {
+      overall: 40,
+      speed: 30,
+      consistency: 10,
+      dataQuality: 0,
+      standardization: 0,
+      isGated: false,
+    };
+    const highAiInput: WorkflowMetricsInput = {
+      ...FIXTURE_SPARSE,
+      stepCount: 20,
+      durationMs: 30_000,
+      confidence: null,
+      toolsUsed: ['SAP', 'Outlook', 'SharePoint'],
+      processDefinition: null,
+      processInsights: [],
+    };
+    expect(computeAiOpportunityScore(highAiInput)).toBeGreaterThanOrEqual(60);
+    expect(highAiInput.toolsUsed.length).toBeGreaterThanOrEqual(2);
+    expect(mockHealthScore40.overall).toBe(40);
+    expect(computeOpportunityTag(highAiInput, mockHealthScore40)).toBe('automate');
+  });
+
+  it('healthy overall (80) with high aiScore + 3 tools → returns automate (happy path preserved)', () => {
+    const hs = computeHealthScoreV2(FIXTURE_AUTOMATE);
+    expect(hs.overall).toBeGreaterThanOrEqual(40);
+    expect(computeAiOpportunityScore(FIXTURE_AUTOMATE)).toBeGreaterThanOrEqual(60);
+    expect(computeOpportunityTag(FIXTURE_AUTOMATE, hs)).toBe('automate');
+  });
+
+  it('unhealthy overall with high aiScore but only 1 tool → returns monitor (AUTOMATE_MIN_TOOLS guard governs; unchanged)', () => {
+    const singleToolInput: WorkflowMetricsInput = {
+      ...unhealthyHighAiInput,
+      toolsUsed: ['SAP'],
+    };
+    const hs = computeHealthScoreV2(singleToolInput);
+    expect(hs.overall).toBeLessThan(40);
+    expect(computeOpportunityTag(singleToolInput, hs)).toBe('monitor');
+  });
+
+  it('healthy overall (80) with low aiScore + 3 tools → does not return automate (AUTOMATE_AI_OPPORTUNITY_THRESHOLD governs; unchanged)', () => {
+    // FIXTURE_SINGLE_RECORDING: confidence=0.72, stepCount=5, durationMs=90s, toolsUsed=['Excel'] (1 tool).
+    // Use a fixture with 3 tools but low aiScore: stepCount=2, durationMs=null, no processDefinition.
+    const lowAiInput: WorkflowMetricsInput = {
+      ...FIXTURE_SPARSE,
+      stepCount: 2,
+      durationMs: 30_000,
+      confidence: 0.9,
+      toolsUsed: ['SAP', 'Outlook', 'SharePoint'],
+      processDefinition: null,
+      processInsights: [],
+    };
+    const hs = computeHealthScoreV2(lowAiInput);
+    expect(hs.overall).toBeGreaterThanOrEqual(40);
+    expect(computeAiOpportunityScore(lowAiInput)).toBeLessThan(60);
+    expect(computeOpportunityTag(lowAiInput, hs)).not.toBe('automate');
+  });
+});
+
+// ── MDR-P02: high-variance chip uses computed-signal language only ─────────────
+
+describe('MDR-P02: high-variance chip uses computed-signal language only', () => {
+  it('high-variance chip label contains computed-signal language and does NOT contain "SLA" or "onboarding"', () => {
+    const output1 = computeWorkflowMetrics(FIXTURE_AUTOMATE);
+    const output2 = computeWorkflowMetrics({ ...FIXTURE_AUTOMATE, id: 'automate-2' });
+    const chips = computeInsightChips([output1, output2], []);
+    const varianceChip = chips.find((c) => c.filterKey === 'variationScore_gt_0.7');
+    expect(varianceChip).toBeDefined();
+    expect(varianceChip!.label).toContain('high execution variance');
+    expect(varianceChip!.label).not.toMatch(/SLA/i);
+    expect(varianceChip!.label).not.toMatch(/onboarding/i);
+  });
+
+  it('exact-string lock: high-variance chip label matches computed template for n=3', () => {
+    const makeHighVarianceOutput = (id: string) =>
+      computeWorkflowMetrics({ ...FIXTURE_AUTOMATE, id });
+    const chips = computeInsightChips(
+      [makeHighVarianceOutput('v1'), makeHighVarianceOutput('v2'), makeHighVarianceOutput('v3')],
+      [],
+    );
+    const varianceChip = chips.find((c) => c.filterKey === 'variationScore_gt_0.7');
+    expect(varianceChip).toBeDefined();
+    expect(varianceChip!.label).toBe(
+      '3 workflows show high execution variance → investigate consistency',
+    );
   });
 });

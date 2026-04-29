@@ -198,7 +198,7 @@ P1 items represent material quality gaps. They do NOT promote to live backlog at
 ### Route / backend (5)
 
 - **MDR-P1-07** · No pagination on `db.workflow.findMany` — full-include query before filtering at 200+ rows (backend-engineer F3). Evidence: `route.ts:432–462`. Direction: add `take`/`skip` with hard cap 100; move post-query filters to Prisma `where` where possible.
-- **MDR-P1-08** · Route integration tests mock the full metrics engine (adapter contract untested end-to-end) (backend-engineer F5). Evidence: `route.test.ts:40–79`. Direction: add one non-mocked path exercising adapter→engine boundary.
+- ~~**MDR-P1-08** · Route integration tests mock the full metrics engine (adapter contract untested end-to-end) (backend-engineer F5). Evidence: `route.test.ts:40–79`. Direction: add one non-mocked path exercising adapter→engine boundary.~~ **MR-011: DELETED — duplicate of live-backlog row #81 DV2-R07** (adapter→engine boundary integration test; same scope, same evidence, same direction; DV2-R07 promoted MR-010 with `Birth iter: MR-010-promoted`, score 10, `qa-engineer` primary). Cite `docs/meta/MR_011_META_REVIEW.md` §5.1.
 - **MDR-P1-09** · `InsightChip.severity` narrow set diverges from `ProcessInsight.severity: string` DB shape — unknown severities silently produce no chip (system-architect F7). Evidence: `workflow-metrics.ts:125,585,602–616`. Direction: narrow DB severity to enum at adapter boundary with exhaustiveness check.
 - **MDR-P1-10** · Zod validation absent on `GET /api/workflows` query-parameter surface (security F1). Evidence: `route.ts:360–383` — `status`, `dir`, `sortBy` cast without enum validation. Direction: Zod schema + strict enum whitelist.
 - **MDR-P1-11** · PATCH schema uses `.passthrough()` — weakens contract, fragile to future copy-paste regressions (security F2). Evidence: `apps/web-app/src/app/api/workflows/[id]/route.ts:11–20`. Direction: switch to `.strict()`.
@@ -225,7 +225,7 @@ P1 items represent material quality gaps. They do NOT promote to live backlog at
 
 ### Copy / positioning (1)
 
-- **MDR-P1-23** · Insight chip copy is still descriptive, not prescriptive — PRD Addendum §2.2 required `{signal} → {next action}` pattern; current chips still say "3 workflows show high execution variance" (growth-strategist F1 / GR-01; also COMP-03). Direction: rewrite chip label templates in `computeInsightChips` to action-leading format; bundle with MDR-P02.
+- ~~**MDR-P1-23** · Insight chip copy is still descriptive, not prescriptive — PRD Addendum §2.2 required `{signal} → {next action}` pattern; current chips still say "3 workflows show high execution variance" (growth-strategist F1 / GR-01; also COMP-03). Direction: rewrite chip label templates in `computeInsightChips` to action-leading format; bundle with MDR-P02.~~ **MR-011: DELETED — shipped by MDR-P02 closure at iter 035** (variance-high chip rewritten to `"${n} workflows show high execution variance → investigate consistency"` action-leading format per scope-direction "bundle with MDR-P02"; coverage retired). Cite `docs/meta/MR_011_META_REVIEW.md` §5.1.
 
 ---
 
@@ -238,7 +238,7 @@ P1 items represent material quality gaps. They do NOT promote to live backlog at
 - **MDR-P2-03** · `computeAiOpportunityScore` bonus double-counts — 15 steps + 5 min maxes base (30+25) AND triggers +20 bonus (product-manager F7 / AIOPP-01). Evidence: `workflow-metrics.ts:400–427`.
 - **MDR-P2-04** · Prisma-shape coupling in `toMetricsInput` is untyped against Prisma — schema evolution won't fail typecheck at the seam (system-architect F9). Direction: type adapter input as `Prisma.WorkflowGetPayload<{...}>`.
 - **MDR-P2-05** · `toolsUsed` JSON parsing duplicated 4× in `route.ts` + once in adapter (system-architect F10, backend F8). Direction: centralize `parseToolsUsed(raw)` helper.
-- **MDR-P2-06** · `computeSopReadiness` duplicated verbatim between `workflow-metrics.ts:301–309` and `route.ts:47–52` — threshold changes must be made in two places (backend F6 / ARCH-11). Direction: single source in metrics lib.
+- ~~**MDR-P2-06** · `computeSopReadiness` duplicated verbatim between `workflow-metrics.ts:301–309` and `route.ts:47–52` — threshold changes must be made in two places (backend F6 / ARCH-11). Direction: single source in metrics lib.~~ **MR-011: DELETED — shipped by MDR-P05 v1/v2 consolidation at iter 039** (`metricsV2 = computeWorkflowMetrics(metricsInput)` now computed once per workflow at top of `map()`; `route.ts` no longer carries shadow `computeSopReadiness` — single source in `workflow-metrics.ts` is the canonical implementation; threshold-change-in-two-places risk eliminated). Cite `docs/meta/MR_011_META_REVIEW.md` §5.1.
 
 ### Route / backend (1)
 
@@ -271,7 +271,7 @@ P1 items represent material quality gaps. They do NOT promote to live backlog at
 
 - **MDR-P2-19** · "Score breakdown" tooltip header is generic — wastes first line of paid-tier feature surface (growth F5 / GR-05). Direction: "What's driving this score".
 - **MDR-P2-20** · "Needs attention" filter definition not exposed — users can't see the threshold without reading source (growth F6 / GR-06). Direction: `title` attribute with "Workflows with health below 60 or high run-to-run variation".
-- **MDR-P2-21** · "All time" / "(all-time)" spelling inconsistency across CommandHeader selector vs WorkflowRow annotation (growth F7 / GR-07). Direction: standardize on "All time".
+- ~~**MDR-P2-21** · "All time" / "(all-time)" spelling inconsistency across CommandHeader selector vs WorkflowRow annotation (growth F7 / GR-07). Direction: standardize on "All time".~~ **MR-011: DELETED — subset of WDC-P03 empty-state activation pull P0 scope** (the time-range selector and its annotation copy are part of the WDC-P03 `WorkflowList`/`CommandHeader` empty-state-and-time-range copy pass; Path D primary scope). Tracking duplication — primary tracking is WDC-P03. Cite `docs/meta/MR_011_META_REVIEW.md` §5.1.
 
 ### Security defense-in-depth (3)
 
@@ -287,7 +287,7 @@ P1 items represent material quality gaps. They do NOT promote to live backlog at
 ## 6. P3 Findings — Cold Pool (12 items)
 
 - **MDR-P3-01** · Positive chip `HEALTHY_OVERALL_THRESHOLD=70` vs RAG green threshold 80 mismatch — positive chip can count workflows showing amber (product F8 / POS-01). Direction: align at 80.
-- **MDR-P3-02** · `computeSopReadinessProxy` duplicated verbatim route.ts vs workflow-metrics.ts (system F11). Direction: export from metrics lib; route imports. (Duplicate of MDR-P2-06 but noted by architect at P3; severity-reconciled to P2.)
+- ~~**MDR-P3-02** · `computeSopReadinessProxy` duplicated verbatim route.ts vs workflow-metrics.ts (system F11). Direction: export from metrics lib; route imports. (Duplicate of MDR-P2-06 but noted by architect at P3; severity-reconciled to P2.)~~ **MR-011: DELETED — explicit duplicate of MDR-P2-06 (per item's own annotation) AND shipped by MDR-P05 v1/v2 consolidation at iter 039** (route.ts shadow eliminated; canonical implementation in `workflow-metrics.ts` is single source). Cite `docs/meta/MR_011_META_REVIEW.md` §5.1.
 - **MDR-P3-03** · `<tr>` keyboard focus conflict — row-level `onKeyDown` fires Enter on any child focus (ux F10). Direction: check `e.target === e.currentTarget` before row navigation.
 - **MDR-P3-04** · InsightsStrip icon double-announcement — both icon `aria-label` and outer container `aria-label` announced (frontend F-9). Direction: `aria-hidden="true"` on icon.
 - **MDR-P3-05** · `?v2=0` pre-hook conditional warrants a code comment flagging retire-with-#57 order dependency (frontend F-10).

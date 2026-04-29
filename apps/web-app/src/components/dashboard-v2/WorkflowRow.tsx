@@ -154,19 +154,8 @@ function HealthTooltip({ metricsV2, onDismiss, triggerRef }: HealthTooltipProps)
   const { healthScore, opportunityTag, aiOpportunityScore } = metricsV2;
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // DV2-R03: Escape key closes tooltip and returns focus to trigger
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        onDismiss();
-        triggerRef.current?.focus();
-      }
-    }
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onDismiss, triggerRef]);
-
   // DV2-R03: blur-outside dismiss — fires when focus leaves the tooltip region
+  // NOTE: Escape handling is centralized in WorkflowRow via useEscapeDispatch (MDR-P08)
   function handleBlur(e: React.FocusEvent<HTMLDivElement>) {
     // relatedTarget is the element receiving focus; if it's outside the container, dismiss
     if (containerRef.current && !containerRef.current.contains(e.relatedTarget as Node | null)) {
@@ -300,18 +289,7 @@ function KebabMenu({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose]);
-
-  // Keyboard: Escape closes and returns focus to trigger
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        onClose();
-        triggerRef.current?.focus();
-      }
-    }
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onClose, triggerRef]);
+  // NOTE: Escape handling is centralized in WorkflowRow via useEscapeDispatch (MDR-P08)
 
   return (
     <div
@@ -473,17 +451,7 @@ function InlineArchiveConfirm({
     confirmBtnRef.current?.focus();
   }, []);
 
-  // Escape cancels and returns focus to trigger
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        onCancel();
-        triggerRef.current?.focus();
-      }
-    }
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onCancel, triggerRef]);
+  // NOTE: Escape handling is centralized in WorkflowRow via useEscapeDispatch (MDR-P08)
 
   async function handleConfirmArchive() {
     setIsBusy(true);
@@ -547,6 +515,112 @@ function InlineArchiveConfirm({
   );
 }
 
+// ── Centralized Escape dispatch (MDR-P08) ────────────────────────────────────
+
+/**
+ * Installs a single document-level `keydown` listener when ANY overlay is
+ * active. Dispatches to exactly one callback on Escape using innermost-first
+ * priority, then calls preventDefault + stopPropagation to prevent bubbling to
+ * ancestor listeners (e.g. PortfolioSidebar Escape handlers in future).
+ *
+ * Priority order (highest → lowest):
+ *   1. InlineArchiveConfirm → onArchiveCancel
+ *   2. InlineEdit — handled by its own onKeyDown on the input; if active but
+ *      input does not have focus, fall through to priority 3.
+ *   3. KebabMenu open → onKebabClose
+ *   4. HealthTooltip visible → onTooltipDismiss
+ *
+ * Sub-components retain their onDismiss / onClose / onCancel prop contracts
+ * unchanged; this hook merely decides which one fires on a given keypress.
+ */
+interface EscapeDispatchConfig {
+  isConfirmingArchive: boolean;
+  isEditingName: boolean;
+  showKebab: boolean;
+  showTooltip: boolean;
+  onArchiveCancel: () => void;
+  onKebabClose: () => void;
+  onTooltipDismiss: () => void;
+  kebabTriggerRef: React.RefObject<HTMLButtonElement | null>;
+  tooltipTriggerRef: React.RefObject<HTMLDivElement | null>;
+}
+
+function useEscapeDispatch({
+  isConfirmingArchive,
+  isEditingName,
+  showKebab,
+  showTooltip,
+  onArchiveCancel,
+  onKebabClose,
+  onTooltipDismiss,
+  kebabTriggerRef,
+  tooltipTriggerRef,
+}: EscapeDispatchConfig): void {
+  const anyOverlayActive = isConfirmingArchive || showKebab || showTooltip;
+
+  // Use refs for callbacks so the effect closure never stales without
+  // re-binding. The dependency array tracks the active-state booleans only.
+  const onArchiveCancelRef = useRef(onArchiveCancel);
+  const onKebabCloseRef = useRef(onKebabClose);
+  const onTooltipDismissRef = useRef(onTooltipDismiss);
+  onArchiveCancelRef.current = onArchiveCancel;
+  onKebabCloseRef.current = onKebabClose;
+  onTooltipDismissRef.current = onTooltipDismiss;
+
+  useEffect(() => {
+    if (!anyOverlayActive) return;
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key !== 'Escape') return;
+
+      // Priority 1: InlineArchiveConfirm
+      if (isConfirmingArchive) {
+        e.preventDefault();
+        e.stopPropagation();
+        onArchiveCancelRef.current();
+        kebabTriggerRef.current?.focus();
+        return;
+      }
+
+      // Priority 2: InlineEdit — its input's own onKeyDown handles Escape when
+      // the input has focus (browser delivers to focused element first). This
+      // fallback fires only if InlineEdit is mounted but its input is not
+      // focused. In that edge case, treat as a no-op here and let the input
+      // regain focus naturally; we do NOT interfere with the edit session.
+      if (isEditingName) return;
+
+      // Priority 3: KebabMenu
+      if (showKebab) {
+        e.preventDefault();
+        e.stopPropagation();
+        onKebabCloseRef.current();
+        kebabTriggerRef.current?.focus();
+        return;
+      }
+
+      // Priority 4: HealthTooltip
+      if (showTooltip) {
+        e.preventDefault();
+        e.stopPropagation();
+        onTooltipDismissRef.current();
+        tooltipTriggerRef.current?.focus();
+        return;
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [
+    anyOverlayActive,
+    isConfirmingArchive,
+    isEditingName,
+    showKebab,
+    showTooltip,
+    kebabTriggerRef,
+    tooltipTriggerRef,
+  ]);
+}
+
 // ── Main WorkflowRow ──────────────────────────────────────────────────────────
 
 export default function WorkflowRow({
@@ -566,6 +640,19 @@ export default function WorkflowRow({
   const kebabTriggerRef = useRef<HTMLButtonElement>(null);
   // DV2-R03: ref for the health score cell trigger (for tooltip focus-return)
   const tooltipTriggerRef = useRef<HTMLDivElement>(null);
+
+  // MDR-P08: centralized single Escape listener — replaces three per-component listeners
+  useEscapeDispatch({
+    isConfirmingArchive,
+    isEditingName,
+    showKebab,
+    showTooltip,
+    onArchiveCancel: () => setIsConfirmingArchive(false),
+    onKebabClose: () => setShowKebab(false),
+    onTooltipDismiss: () => setShowTooltip(false),
+    kebabTriggerRef,
+    tooltipTriggerRef,
+  });
 
   const { metricsV2, toolsUsed, createdAt, lastViewedAt } = workflow;
   const { healthScore, opportunityTag, runs } = metricsV2;
@@ -842,37 +929,37 @@ export default function WorkflowRow({
         )}
       </td>
 
-      {/* Kebab menu trigger — only visible on row hover */}
+      {/* Kebab menu trigger — always mounted; hidden by default, revealed on
+          row hover, row focus-within, or direct focus-visible (MDR-P06 fix:
+          keyboard-only users can now reach this trigger via Tab). */}
       <td className="px-ds-2 py-ds-3 relative w-8">
-        {isHovered && (
-          <div className="relative">
-            <button
-              ref={kebabTriggerRef}
-              type="button"
-              className="p-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 text-[var(--content-tertiary)] hover:text-[var(--content-primary)] transition-colors duration-150"
-              aria-label={`Actions for ${displayTitle}`}
-              aria-haspopup="menu"
-              aria-expanded={showKebab}
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowKebab((prev) => !prev);
-              }}
-            >
-              <MoreHorizontal size={14} aria-hidden="true" />
-            </button>
+        <div className="relative">
+          <button
+            ref={kebabTriggerRef}
+            type="button"
+            className="p-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 text-[var(--content-tertiary)] hover:text-[var(--content-primary)] transition-colors duration-150 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
+            aria-label={`Actions for ${displayTitle}`}
+            aria-haspopup="menu"
+            aria-expanded={showKebab}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowKebab((prev) => !prev);
+            }}
+          >
+            <MoreHorizontal size={14} aria-hidden="true" />
+          </button>
 
-            {showKebab && (
-              <KebabMenu
-                workflowTitle={displayTitle}
-                triggerRef={kebabTriggerRef}
-                onClose={() => setShowKebab(false)}
-                onStartRename={() => setIsEditingName(true)}
-                onStartArchiveConfirm={() => setIsConfirmingArchive(true)}
-                onCopyLink={handleCopyLink}
-              />
-            )}
-          </div>
-        )}
+          {showKebab && (
+            <KebabMenu
+              workflowTitle={displayTitle}
+              triggerRef={kebabTriggerRef}
+              onClose={() => setShowKebab(false)}
+              onStartRename={() => setIsEditingName(true)}
+              onStartArchiveConfirm={() => setIsConfirmingArchive(true)}
+              onCopyLink={handleCopyLink}
+            />
+          )}
+        </div>
       </td>
     </tr>
   );
