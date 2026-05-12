@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Process Groups — Workflow Library | Ledgerium AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:22px;background:var(--surface-primary);color:var(--content-primary);-webkit-font-smoothing:antialiased}
+
+:root{
+  --surface-primary:#0D1117;
+  --surface-secondary:#161B22;
+  --surface-elevated:#1C2128;
+  --content-primary:#E2E8F0;
+  --content-secondary:#94A3B8;
+  --content-tertiary:#64748B;
+  --border-default:rgba(255,255,255,0.10);
+  --border-subtle:rgba(255,255,255,0.06);
+  --brand-400:#34d399;
+  --brand-500:#10b981;
+  --brand-600:#059669;
+  --brand-700:#047857;
+  --emerald-500:#10b981;
+  --amber-500:#f59e0b;
+  --amber-400:#fbbf24;
+  --red-400:#f87171;
+  --violet-400:#a78bfa;
+  --blue-400:#60a5fa;
+  --radius-sm:6px;--radius-md:8px;--radius-lg:12px;
+}
+
+.page{width:600px;height:450px;overflow:hidden;background:var(--surface-primary)}
+
+/* Header */
+.page-header{padding:14px 20px;border-bottom:1px solid var(--border-subtle);background:var(--surface-secondary);display:flex;align-items:center;justify-content:space-between}
+.page-title{font-size:15px;font-weight:700;color:var(--content-primary)}
+.header-meta{font-size:12px;color:var(--content-tertiary)}
+.search-bar{display:flex;align-items:center;gap:7px;background:var(--surface-elevated);border:1px solid var(--border-default);border-radius:var(--radius-md);padding:6px 10px;width:160px}
+.search-icon{width:12px;height:12px;color:var(--content-tertiary);flex-shrink:0}
+.search-text{font-size:12px;color:var(--content-tertiary)}
+
+/* Library stats */
+.stats-strip{display:flex;align-items:center;gap:20px;padding:10px 20px;border-bottom:1px solid var(--border-subtle);background:var(--surface-secondary)}
+.stat{text-align:center}
+.stat-value{font-size:16px;font-weight:700;color:var(--content-primary);font-variant-numeric:tabular-nums}
+.stat-value.green{color:var(--brand-500)}
+.stat-label{font-size:10px;color:var(--content-tertiary);text-transform:uppercase;letter-spacing:.06em}
+
+/* Content */
+.content{padding:14px 20px;height:calc(450px - 108px);overflow:hidden}
+
+/* Group cards */
+.group-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.group-card{background:var(--surface-elevated);border:1px solid var(--border-default);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer}
+.group-card:hover{border-color:rgba(255,255,255,.14)}
+
+.group-header{padding:12px 14px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:9px}
+.group-icon{width:28px;height:28px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px}
+.group-icon.finance{background:rgba(16,185,129,.15)}
+.group-icon.hr{background:rgba(139,92,246,.15)}
+.group-icon.ops{background:rgba(96,165,250,.15)}
+.group-icon.vendor{background:rgba(245,158,11,.15)}
+.group-name{font-size:12px;font-weight:600;color:var(--content-primary)}
+.group-system{font-size:10px;color:var(--content-tertiary);margin-top:1px}
+
+.group-body{padding:10px 14px}
+.workflow-item{display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:1px solid var(--border-subtle)}
+.workflow-item:last-child{border-bottom:none}
+.wi-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.wi-dot.green{background:var(--brand-500)}
+.wi-dot.amber{background:var(--amber-400)}
+.wi-name{font-size:11px;color:var(--content-secondary);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wi-runs{font-size:10px;color:var(--content-tertiary);flex-shrink:0}
+
+.group-footer{padding:8px 14px;border-top:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between}
+.gf-label{font-size:10px;color:var(--content-tertiary)}
+.gf-score{font-size:11px;font-weight:600;color:var(--brand-400)}
+.gf-variants{font-size:10px;color:var(--amber-400)}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <div class="page-title">Process Groups</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="search-bar">
+        <svg class="search-icon" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="5.5" cy="5.5" r="4"/><line x1="9" y1="9" x2="13" y2="13"/></svg>
+        <span class="search-text">Search workflows…</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-strip">
+    <div class="stat"><div class="stat-value green">32</div><div class="stat-label">Workflows</div></div>
+    <div class="stat"><div class="stat-value">4</div><div class="stat-label">Groups</div></div>
+    <div class="stat"><div class="stat-value">147</div><div class="stat-label">Total runs</div></div>
+    <div class="stat"><div class="stat-value green">88</div><div class="stat-label">Avg health</div></div>
+    <div class="stat"><div class="stat-value" style="color:var(--amber-400)">6</div><div class="stat-label">Variants</div></div>
+  </div>
+
+  <div class="content">
+    <div class="group-grid">
+
+      <!-- Finance group -->
+      <div class="group-card">
+        <div class="group-header">
+          <div class="group-icon finance">💼</div>
+          <div>
+            <div class="group-name">Finance & Procurement</div>
+            <div class="group-system">Workday · SAP · Coupa</div>
+          </div>
+        </div>
+        <div class="group-body">
+          <div class="workflow-item">
+            <div class="wi-dot green"></div>
+            <span class="wi-name">Submit expense report</span>
+            <span class="wi-runs">8 runs</span>
+          </div>
+          <div class="workflow-item">
+            <div class="wi-dot green"></div>
+            <span class="wi-name">Process vendor invoice</span>
+            <span class="wi-runs">12 runs</span>
+          </div>
+          <div class="workflow-item">
+            <div class="wi-dot amber"></div>
+            <span class="wi-name">Approve purchase requisition</span>
+            <span class="wi-runs">5 runs</span>
+          </div>
+        </div>
+        <div class="group-footer">
+          <span class="gf-label">12 workflows · Avg health</span>
+          <span class="gf-score">91</span>
+        </div>
+      </div>
+
+      <!-- HR group -->
+      <div class="group-card">
+        <div class="group-header">
+          <div class="group-icon hr">👥</div>
+          <div>
+            <div class="group-name">HR & Onboarding</div>
+            <div class="group-system">Workday · BambooHR · Okta</div>
+          </div>
+        </div>
+        <div class="group-body">
+          <div class="workflow-item">
+            <div class="wi-dot green"></div>
+            <span class="wi-name">Onboard new employee</span>
+            <span class="wi-runs">6 runs</span>
+          </div>
+          <div class="workflow-item">
+            <div class="wi-dot green"></div>
+            <span class="wi-name">Provision software access</span>
+            <span class="wi-runs">14 runs</span>
+          </div>
+          <div class="workflow-item">
+            <div class="wi-dot amber"></div>
+            <span class="wi-name">Complete I-9 verification</span>
+            <span class="wi-runs">4 runs</span>
+          </div>
+        </div>
+        <div class="group-footer">
+          <span class="gf-label">9 workflows · Avg health</span>
+          <span class="gf-score">86</span>
+        </div>
+      </div>
+
+      <!-- Operations group -->
+      <div class="group-card">
+        <div class="group-header">
+          <div class="group-icon ops">⚙️</div>
+          <div>
+            <div class="group-name">Operations</div>
+            <div class="group-system">ServiceNow · Jira · Confluence</div>
+          </div>
+        </div>
+        <div class="group-body">
+          <div class="workflow-item">
+            <div class="wi-dot green"></div>
+            <span class="wi-name">Create IT support ticket</span>
+            <span class="wi-runs">31 runs</span>
+          </div>
+          <div class="workflow-item">
+            <div class="wi-dot green"></div>
+            <span class="wi-name">Escalate incident to L2</span>
+            <span class="wi-runs">9 runs</span>
+          </div>
+          <div class="workflow-item">
+            <div class="wi-dot green"></div>
+            <span class="wi-name">Update change request status</span>
+            <span class="wi-runs">7 runs</span>
+          </div>
+        </div>
+        <div class="group-footer">
+          <span class="gf-label">7 workflows · Avg health</span>
+          <span class="gf-score">93</span>
+        </div>
+      </div>
+
+      <!-- Vendor group -->
+      <div class="group-card">
+        <div class="group-header">
+          <div class="group-icon vendor">🏢</div>
+          <div>
+            <div class="group-name">Vendor Management</div>
+            <div class="group-system">Coupa · DocuSign · Salesforce</div>
+          </div>
+        </div>
+        <div class="group-body">
+          <div class="workflow-item">
+            <div class="wi-dot green"></div>
+            <span class="wi-name">Onboard new vendor</span>
+            <span class="wi-runs">3 runs</span>
+          </div>
+          <div class="workflow-item">
+            <div class="wi-dot amber"></div>
+            <span class="wi-name">Renew vendor contract</span>
+            <span class="wi-runs">2 runs</span>
+          </div>
+          <div class="workflow-item">
+            <div class="wi-dot green"></div>
+            <span class="wi-name">Verify vendor compliance</span>
+            <span class="wi-runs">4 runs</span>
+          </div>
+        </div>
+        <div class="group-footer">
+          <span class="gf-label">4 workflows · Avg health</span>
+          <span class="gf-score" style="color:var(--amber-400)">79</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>

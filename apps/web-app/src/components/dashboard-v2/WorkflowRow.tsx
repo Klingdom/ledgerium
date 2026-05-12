@@ -49,6 +49,53 @@ import {
 import type { WorkflowMetricsOutput, OpportunityTag } from '@/lib/workflow-metrics.js';
 import { formatDateRelative } from '@/lib/format.js';
 import type { TimeRange } from './CommandHeader.js';
+import {
+  getColumnByKey,
+  type ColumnKey,
+  type ColumnAccessorContext,
+} from '@/lib/dashboard-columns/index.js';
+
+// ── Dynamic column rendering helpers ─────────────────────────────────────────
+
+/**
+ * Column keys that receive special hardcoded rendering.
+ * These are always rendered by their dedicated JSX blocks regardless of
+ * `visibleColumns`. Pending columns that slip through accessors also return null.
+ */
+const SPECIAL_RENDER_KEYS = new Set<ColumnKey>(['workflow_title', 'health_score']);
+
+/**
+ * Format an accessor return value for display in a generic `<td>` cell.
+ * Returns "—" (em-dash) for null/undefined (audit-honesty — never fabricate).
+ */
+function formatCellValue(value: unknown): string {
+  if (value === null || value === undefined) return '—';
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) return '—';
+    // Durations (large ms numbers) — show as human-readable time
+    if (value > 1000) {
+      const s = Math.round(value / 1000);
+      if (s < 60) return `${s}s`;
+      const m = Math.floor(s / 60);
+      const remS = s % 60;
+      if (m < 60) return remS > 0 ? `${m}m ${remS}s` : `${m}m`;
+      const h = Math.floor(m / 60);
+      const remM = m % 60;
+      return remM > 0 ? `${h}h ${remM}m` : `${h}h`;
+    }
+    // Percentages 0-100
+    if (value >= 0 && value <= 100 && String(value).includes('.')) {
+      return `${value.toFixed(1)}%`;
+    }
+    return String(Math.round(value));
+  }
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+  if (Array.isArray(value)) {
+    if (value.length === 0) return '—';
+    return (value as unknown[]).slice(0, 3).join(', ') + (value.length > 3 ? `…` : '');
+  }
+  return String(value);
+}
 
 // ── Workflow shape from API response ──────────────────────────────────────────
 
@@ -73,6 +120,13 @@ interface WorkflowRowProps {
   /** PRD §4 metric #2: perf timestamp captured at dashboard_v2_viewed emission.
    * Used to compute elapsedMsSinceDashboardView on row-click navigation. */
   dashboardViewPerfTimestampMs?: number;
+  /**
+   * D+4 (iter-061): ordered list of visible column keys from user preferences.
+   * workflow_title (col 0) and health_score are always rendered by their
+   * dedicated hardcoded blocks and are skipped when iterating this list.
+   * Defaults to the 6 hard-coded display columns to preserve backward-compat.
+   */
+  visibleColumns?: readonly ColumnKey[];
 }
 
 // ── Opportunity tag config ────────────────────────────────────────────────────
@@ -629,6 +683,7 @@ export default function WorkflowRow({
   onRename,
   onArchive,
   dashboardViewPerfTimestampMs = 0,
+  visibleColumns,
 }: WorkflowRowProps) {
   const router = useRouter();
   const [showTooltip, setShowTooltip] = useState(false);
@@ -656,6 +711,22 @@ export default function WorkflowRow({
 
   const { metricsV2, toolsUsed, createdAt, lastViewedAt } = workflow;
   const { healthScore, opportunityTag, runs } = metricsV2;
+
+  // D+4: build accessor context once per render for dynamic column resolution
+  const accessorContext: ColumnAccessorContext = {
+    title: workflow.title,
+    toolsUsed: workflow.toolsUsed,
+    lastViewedAt: workflow.lastViewedAt,
+    createdAt: workflow.createdAt,
+    metricsV2: workflow.metricsV2,
+  };
+
+  // Columns to render between workflow_title and health_score.
+  // If visibleColumns is provided, use it (excluding locked special-render keys).
+  // Otherwise fall back to the legacy hardcoded set.
+  const dynamicColumnKeys: ColumnKey[] = visibleColumns
+    ? visibleColumns.filter((k) => !SPECIAL_RENDER_KEYS.has(k)) as ColumnKey[]
+    : ['systems', 'opportunity_tag'];
 
   const opportunityStyle = OPPORTUNITY_CONFIG[opportunityTag];
   const band = healthBand(healthScore.overall);
@@ -804,52 +875,82 @@ export default function WorkflowRow({
         )}
       </th>
 
-      {/* Column 2: Systems (icon pills) — hidden < 768px per PRD §5.3 */}
-      <td className="px-ds-4 py-ds-3 hidden md:table-cell w-1/5">
-        {toolsUsed.length === 0 ? (
-          <span className="text-[14px] text-[var(--content-tertiary)]" aria-label="No systems">
-            —
-          </span>
-        ) : (
-          <div className="flex items-center gap-ds-1 flex-wrap">
-            {visibleSystems.map((system) => (
-              <span
-                key={system}
-                className="inline-flex items-center px-ds-2 py-0.5 rounded-ds-sm bg-[var(--surface-secondary)] text-[12px] font-medium text-[var(--content-secondary)] border border-[var(--border-subtle)]"
-                title={system}
-                aria-label={system}
-              >
-                {/* Text pill per D6 — no system icons available in current codebase */}
-                {system.length > 10 ? system.slice(0, 8) + '…' : system}
-              </span>
-            ))}
-            {overflowCount > 0 && (
-              <span
-                className="inline-flex items-center px-ds-2 py-0.5 rounded-ds-sm bg-[var(--surface-secondary)] text-[12px] font-medium text-[var(--content-tertiary)] border border-[var(--border-subtle)]"
-                title={toolsUsed.slice(MAX_SYSTEMS).join(', ')}
-                aria-label={`${overflowCount} more systems: ${toolsUsed.slice(MAX_SYSTEMS).join(', ')}`}
-              >
-                +{overflowCount}
-              </span>
-            )}
-          </div>
-        )}
-      </td>
+      {/* Dynamic middle columns (D+4): driven by visibleColumns from user preferences.
+          Falls back to [systems, opportunity_tag] when no preferences are provided,
+          preserving the pre-D+4 visual layout byte-identically. */}
+      {dynamicColumnKeys.map((colKey) => {
+        // Special rendering for the two original display columns
+        if (colKey === 'systems') {
+          return (
+            <td key="systems" className="px-ds-4 py-ds-3 hidden md:table-cell w-1/5">
+              {toolsUsed.length === 0 ? (
+                <span className="text-[14px] text-[var(--content-tertiary)]" aria-label="No systems">
+                  —
+                </span>
+              ) : (
+                <div className="flex items-center gap-ds-1 flex-wrap">
+                  {visibleSystems.map((system) => (
+                    <span
+                      key={system}
+                      className="inline-flex items-center px-ds-2 py-0.5 rounded-ds-sm bg-[var(--surface-secondary)] text-[12px] font-medium text-[var(--content-secondary)] border border-[var(--border-subtle)]"
+                      title={system}
+                      aria-label={system}
+                    >
+                      {system.length > 10 ? system.slice(0, 8) + '…' : system}
+                    </span>
+                  ))}
+                  {overflowCount > 0 && (
+                    <span
+                      className="inline-flex items-center px-ds-2 py-0.5 rounded-ds-sm bg-[var(--surface-secondary)] text-[12px] font-medium text-[var(--content-tertiary)] border border-[var(--border-subtle)]"
+                      title={toolsUsed.slice(MAX_SYSTEMS).join(', ')}
+                      aria-label={`${overflowCount} more systems: ${toolsUsed.slice(MAX_SYSTEMS).join(', ')}`}
+                    >
+                      +{overflowCount}
+                    </span>
+                  )}
+                </div>
+              )}
+            </td>
+          );
+        }
 
-      {/* Column 3: Opportunity (tag chip) — hidden < 480px per PRD §5.3 */}
-      <td className="px-ds-4 py-ds-3 hidden sm:table-cell w-1/5">
-        <span
-          className={`
-            inline-flex items-center gap-ds-1 px-ds-2 py-0.5
-            rounded-ds-sm border text-[12px] font-medium
-            ${opportunityStyle.containerClass} ${opportunityStyle.textClass}
-          `}
-          aria-label={`Opportunity: ${opportunityStyle.label}`}
-        >
-          <opportunityStyle.Icon size={12} aria-hidden="true" />
-          {opportunityStyle.label}
-        </span>
-      </td>
+        if (colKey === 'opportunity_tag') {
+          return (
+            <td key="opportunity_tag" className="px-ds-4 py-ds-3 hidden sm:table-cell w-1/5">
+              <span
+                className={`
+                  inline-flex items-center gap-ds-1 px-ds-2 py-0.5
+                  rounded-ds-sm border text-[12px] font-medium
+                  ${opportunityStyle.containerClass} ${opportunityStyle.textClass}
+                `}
+                aria-label={`Opportunity: ${opportunityStyle.label}`}
+              >
+                <opportunityStyle.Icon size={12} aria-hidden="true" />
+                {opportunityStyle.label}
+              </span>
+            </td>
+          );
+        }
+
+        // Generic dynamic column: use accessor from registry
+        const colDef = getColumnByKey(colKey);
+        if (!colDef) return null;
+
+        // Audit-honesty: pending columns always render "—" (accessor is null)
+        const rawValue = colDef.accessor ? colDef.accessor(accessorContext) : null;
+        const cellText = formatCellValue(rawValue);
+
+        return (
+          <td
+            key={colKey}
+            className="px-ds-4 py-ds-3 text-[13px] text-[var(--content-secondary)] truncate max-w-[140px]"
+            title={cellText !== '—' ? cellText : undefined}
+            aria-label={`${colDef.label}: ${cellText}`}
+          >
+            {cellText}
+          </td>
+        );
+      })}
 
       {/* Column 4: Health Score + color pip + run-count qualifier + breakdown tooltip */}
       <td

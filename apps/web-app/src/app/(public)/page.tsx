@@ -114,6 +114,45 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Try the demo (live dashboard iframe) ─────────────────────────── */}
+      <section className="border-b border-[var(--border-default)] bg-[var(--surface-secondary)] py-20">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <p className="text-center text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+            Try it without signing up
+          </p>
+          <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-3">
+            Click around the live dashboard
+          </h2>
+          <p className="text-center text-[#e2e8f0] leading-relaxed mb-12 max-w-2xl mx-auto">
+            Real sample workflows with evidence-linked metrics — the same UI you get after recording your first session. No credit card, no signup.
+          </p>
+          {/* Embedded dashboard demo (lifted from /product) */}
+          <div className="rounded-xl border border-[var(--border-default)] overflow-hidden shadow-lg shadow-[var(--border-default)]/50 bg-[var(--surface-elevated)]">
+            <div className="bg-[var(--surface-secondary)] border-b border-[var(--border-default)] px-4 py-2 flex items-center gap-2">
+              <div className="flex gap-1.5">
+                <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+                <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
+                <span className="w-3 h-3 rounded-full bg-[#28c840]" />
+              </div>
+              <span className="text-[10px] text-[var(--content-tertiary)] ml-2 font-mono">ledgerium.ai/dashboard</span>
+            </div>
+            <iframe
+              src="/dashboard.html"
+              title="Ledgerium AI Interactive Demo"
+              className="w-full border-0"
+              style={{ height: '560px' }}
+              loading="lazy"
+            />
+          </div>
+          <p className="text-center text-xs text-[var(--content-tertiary)] mt-3">
+            Interactive demo with real sample workflows.{' '}
+            <a href="/dashboard.html" className="text-brand-600 hover:text-brand-700 font-medium">
+              Open full screen &rarr;
+            </a>
+          </p>
+        </div>
+      </section>
+
       {/* ── How it works ──────────────────────────────────────────────────── */}
       <section className="border-b border-[var(--border-default)] bg-[var(--surface-elevated)] py-20">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">

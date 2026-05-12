@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workflow Detail — Submit Expense Report | Ledgerium AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:22px;background:var(--surface-primary);color:var(--content-primary);-webkit-font-smoothing:antialiased}
+
+:root{
+  --surface-primary:#0D1117;
+  --surface-secondary:#161B22;
+  --surface-elevated:#1C2128;
+  --content-primary:#E2E8F0;
+  --content-secondary:#94A3B8;
+  --content-tertiary:#64748B;
+  --border-default:rgba(255,255,255,0.10);
+  --border-subtle:rgba(255,255,255,0.06);
+  --brand-400:#34d399;
+  --brand-500:#10b981;
+  --brand-600:#059669;
+  --brand-700:#047857;
+  --emerald-500:#10b981;
+  --amber-500:#f59e0b;
+  --amber-400:#fbbf24;
+  --red-400:#f87171;
+  --violet-400:#a78bfa;
+  --blue-400:#60a5fa;
+  --radius-sm:6px;--radius-md:8px;--radius-lg:12px;
+}
+
+.page{width:600px;height:450px;overflow:hidden;background:var(--surface-primary)}
+
+/* Header */
+.page-header{background:var(--surface-secondary);border-bottom:1px solid var(--border-default);padding:14px 20px}
+.breadcrumb{font-size:11px;color:var(--content-tertiary);margin-bottom:4px}
+.breadcrumb span{color:var(--content-secondary)}
+.workflow-title{font-size:16px;font-weight:700;color:var(--content-primary);margin-bottom:6px}
+.meta-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.meta-pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--content-tertiary)}
+.dot-green{width:7px;height:7px;border-radius:50%;background:var(--brand-500);flex-shrink:0}
+.dot-amber{width:7px;height:7px;border-radius:50%;background:var(--amber-400);flex-shrink:0}
+
+/* Tab bar */
+.tab-bar{display:flex;gap:2px;padding:8px 20px 0;background:var(--surface-secondary);border-bottom:1px solid var(--border-subtle)}
+.tab{padding:6px 12px;font-size:12px;font-weight:500;color:var(--content-tertiary);border-bottom:2px solid transparent;cursor:pointer}
+.tab.active{color:var(--brand-500);border-bottom-color:var(--brand-500)}
+
+/* Content */
+.content{padding:14px 20px;height:calc(450px - 110px);overflow:hidden}
+
+/* Metrics strip */
+.metrics-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.metric-card{background:var(--surface-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:10px 12px}
+.metric-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--content-tertiary);margin-bottom:4px}
+.metric-value{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--content-primary);line-height:1.1}
+.metric-value.green{color:var(--brand-500)}
+.metric-value.amber{color:var(--amber-400)}
+.metric-sub{font-size:10px;color:var(--content-tertiary);margin-top:2px}
+
+/* Step list */
+.steps-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.steps-title{font-size:12px;font-weight:600;color:var(--content-primary)}
+.steps-count{font-size:11px;color:var(--content-tertiary)}
+
+.step-row{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-subtle)}
+.step-row:last-child{border-bottom:none}
+.step-num{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border-default);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--content-tertiary);flex-shrink:0;margin-top:1px}
+.step-num.active{border-color:var(--brand-500);color:var(--brand-500)}
+.step-body{flex:1;min-width:0}
+.step-title{font-size:12px;font-weight:500;color:var(--content-primary)}
+.step-meta{display:flex;align-items:center;gap:8px;margin-top:2px}
+.step-system{font-size:10px;color:var(--content-tertiary)}
+.step-dur{font-size:10px;color:var(--content-tertiary)}
+.step-conf{font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px}
+.conf-high{background:rgba(16,185,129,.1);color:var(--brand-400)}
+.conf-med{background:rgba(245,158,11,.1);color:var(--amber-400)}
+.chip-tag{font-size:10px;font-weight:500;padding:1px 6px;border-radius:10px;background:rgba(139,92,246,.1);color:var(--violet-400)}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="page-header">
+    <div class="breadcrumb">Workflows › <span>Submit Expense Report in Workday</span></div>
+    <div class="workflow-title">Submit Expense Report in Workday</div>
+    <div class="meta-row">
+      <span class="meta-pill"><div class="dot-green"></div> 14 steps</span>
+      <span class="meta-pill">4m 12s avg duration</span>
+      <span class="meta-pill">8 runs · last 30 days</span>
+      <span class="meta-pill"><div class="dot-amber"></div> 1 variant detected</span>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab active">Steps</div>
+    <div class="tab">SOP</div>
+    <div class="tab">Process Map</div>
+    <div class="tab">Report</div>
+    <div class="tab">Evidence</div>
+  </div>
+
+  <div class="content">
+
+    <div class="metrics-strip">
+      <div class="metric-card">
+        <div class="metric-label">Health</div>
+        <div class="metric-value green">84</div>
+        <div class="metric-sub">/ 100</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Steps</div>
+        <div class="metric-value">14</div>
+        <div class="metric-sub">5 systems</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Avg duration</div>
+        <div class="metric-value">4m 12s</div>
+        <div class="metric-sub">±38s</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Confidence</div>
+        <div class="metric-value amber">0.87</div>
+        <div class="metric-sub">Tier A</div>
+      </div>
+    </div>
+
+    <div class="steps-header">
+      <span class="steps-title">Workflow steps</span>
+      <span class="steps-count">14 steps</span>
+    </div>
+
+    <div class="step-row">
+      <div class="step-num active">1</div>
+      <div class="step-body">
+        <div class="step-title">Navigate to Expense Reports module</div>
+        <div class="step-meta">
+          <span class="step-system">Workday</span>
+          <span class="step-dur">12s</span>
+          <span class="step-conf conf-high">0.97</span>
+        </div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num active">2</div>
+      <div class="step-body">
+        <div class="step-title">Create new expense report</div>
+        <div class="step-meta">
+          <span class="step-system">Workday</span>
+          <span class="step-dur">8s</span>
+          <span class="step-conf conf-high">0.95</span>
+        </div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Add expense line items from receipts</div>
+        <div class="step-meta">
+          <span class="step-system">Workday</span>
+          <span class="step-dur">1m 44s</span>
+          <span class="step-conf conf-med">0.83</span>
+          <span class="chip-tag">variant</span>
+        </div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Attach supporting receipts and documentation</div>
+        <div class="step-meta">
+          <span class="step-system">Workday</span>
+          <span class="step-dur">42s</span>
+          <span class="step-conf conf-high">0.92</span>
+        </div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-title">Submit report for manager approval</div>
+        <div class="step-meta">
+          <span class="step-system">Workday</span>
+          <span class="step-dur">6s</span>
+          <span class="step-conf conf-high">0.99</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

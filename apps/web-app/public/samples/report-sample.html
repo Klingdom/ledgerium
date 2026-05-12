@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Process Report — Submit Expense Report | Ledgerium AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:22px;background:var(--surface-primary);color:var(--content-primary);-webkit-font-smoothing:antialiased}
+
+:root{
+  --surface-primary:#0D1117;
+  --surface-secondary:#161B22;
+  --surface-elevated:#1C2128;
+  --content-primary:#E2E8F0;
+  --content-secondary:#94A3B8;
+  --content-tertiary:#64748B;
+  --border-default:rgba(255,255,255,0.10);
+  --border-subtle:rgba(255,255,255,0.06);
+  --brand-400:#34d399;
+  --brand-500:#10b981;
+  --brand-600:#059669;
+  --brand-700:#047857;
+  --amber-400:#fbbf24;
+  --amber-500:#f59e0b;
+  --red-400:#f87171;
+  --violet-400:#a78bfa;
+  --blue-400:#60a5fa;
+  --radius-sm:6px;--radius-md:8px;--radius-lg:12px;
+}
+
+.page{width:600px;height:450px;overflow:hidden;background:var(--surface-primary)}
+
+/* Header */
+.report-header{padding:14px 20px;background:var(--surface-secondary);border-bottom:1px solid var(--border-default)}
+.report-eyebrow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--brand-500);margin-bottom:4px}
+.report-title{font-size:15px;font-weight:700;color:var(--content-primary);margin-bottom:4px}
+.report-meta{font-size:11px;color:var(--content-tertiary)}
+
+/* KPI strip */
+.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--border-subtle)}
+.kpi-cell{padding:10px 14px;border-right:1px solid var(--border-subtle)}
+.kpi-cell:last-child{border-right:none}
+.kpi-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--content-tertiary);margin-bottom:3px}
+.kpi-value{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.kpi-value.green{color:var(--brand-500)}
+.kpi-value.amber{color:var(--amber-400)}
+.kpi-value.red{color:var(--red-400)}
+.kpi-value.violet{color:var(--violet-400)}
+.kpi-trend{font-size:10px;color:var(--content-tertiary);margin-top:1px}
+.kpi-trend.up{color:var(--brand-400)}
+.kpi-trend.down{color:var(--red-400)}
+
+/* Content grid */
+.content{padding:14px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;height:calc(450px - 130px);overflow:hidden}
+
+.report-card{background:var(--surface-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);overflow:hidden}
+.card-head{padding:10px 14px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:11px;font-weight:600;color:var(--content-primary)}
+.card-badge{font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px}
+.badge-green{background:rgba(16,185,129,.1);color:var(--brand-400)}
+.badge-amber{background:rgba(245,158,11,.1);color:var(--amber-400)}
+
+/* Bar chart placeholder */
+.bar-chart{padding:10px 14px;display:flex;align-items:flex-end;gap:6px;height:80px}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.bar{border-radius:3px 3px 0 0;width:100%}
+.bar-label{font-size:9px;color:var(--content-tertiary);text-align:center}
+.bar.green{background:rgba(16,185,129,.5)}
+.bar.amber{background:rgba(245,158,11,.4)}
+.bar.brand{background:rgba(16,185,129,.7)}
+
+/* Insight list */
+.insight-list{padding:8px 0}
+.insight-item{display:flex;align-items:flex-start;gap:8px;padding:6px 14px;border-bottom:1px solid var(--border-subtle)}
+.insight-item:last-child{border-bottom:none}
+.insight-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.insight-dot.green{background:var(--brand-500)}
+.insight-dot.amber{background:var(--amber-400)}
+.insight-dot.violet{background:var(--violet-400)}
+.insight-text{font-size:11px;color:var(--content-secondary);line-height:17px}
+.insight-tag{font-size:10px;font-weight:600;padding:1px 5px;border-radius:4px;display:inline-block;margin-top:2px}
+.tag-automate{background:rgba(16,185,129,.12);color:var(--brand-400)}
+.tag-review{background:rgba(245,158,11,.12);color:var(--amber-400)}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="report-header">
+    <div class="report-eyebrow">Process Intelligence Report</div>
+    <div class="report-title">Submit Expense Report — Workday</div>
+    <div class="report-meta">8 runs · 30-day window · Generated Apr 30, 2026</div>
+  </div>
+
+  <!-- KPI strip -->
+  <div class="kpi-strip">
+    <div class="kpi-cell">
+      <div class="kpi-label">Health</div>
+      <div class="kpi-value green">84</div>
+      <div class="kpi-trend up">↑ 3 pts</div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-label">Avg duration</div>
+      <div class="kpi-value">4m 12s</div>
+      <div class="kpi-trend">stable</div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-label">Variation</div>
+      <div class="kpi-value amber">0.18</div>
+      <div class="kpi-trend down">↑ 0.04</div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-label">Confidence</div>
+      <div class="kpi-value green">0.87</div>
+      <div class="kpi-trend">Tier A</div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-label">Automate score</div>
+      <div class="kpi-value violet">72</div>
+      <div class="kpi-trend">/ 100</div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Duration chart -->
+    <div class="report-card">
+      <div class="card-head">
+        <span class="card-title">Run duration by session</span>
+        <span class="card-badge badge-green">8 runs</span>
+      </div>
+      <div class="bar-chart">
+        <div class="bar-col">
+          <div class="bar green" style="height:44px"></div>
+          <span class="bar-label">Apr 4</span>
+        </div>
+        <div class="bar-col">
+          <div class="bar green" style="height:52px"></div>
+          <span class="bar-label">Apr 7</span>
+        </div>
+        <div class="bar-col">
+          <div class="bar amber" style="height:66px"></div>
+          <span class="bar-label">Apr 11</span>
+        </div>
+        <div class="bar-col">
+          <div class="bar green" style="height:40px"></div>
+          <span class="bar-label">Apr 14</span>
+        </div>
+        <div class="bar-col">
+          <div class="bar green" style="height:48px"></div>
+          <span class="bar-label">Apr 18</span>
+        </div>
+        <div class="bar-col">
+          <div class="bar brand" style="height:38px"></div>
+          <span class="bar-label">Apr 22</span>
+        </div>
+        <div class="bar-col">
+          <div class="bar green" style="height:43px"></div>
+          <span class="bar-label">Apr 26</span>
+        </div>
+        <div class="bar-col">
+          <div class="bar green" style="height:41px"></div>
+          <span class="bar-label">Apr 30</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insights -->
+    <div class="report-card">
+      <div class="card-head">
+        <span class="card-title">Process insights</span>
+        <span class="card-badge badge-amber">3 findings</span>
+      </div>
+      <div class="insight-list">
+        <div class="insight-item">
+          <div class="insight-dot violet"></div>
+          <div>
+            <div class="insight-text">Steps 3–5 suitable for RPA automation. Deterministic data-entry pattern across all 8 runs.</div>
+            <span class="insight-tag tag-automate">Automate</span>
+          </div>
+        </div>
+        <div class="insight-item">
+          <div class="insight-dot amber"></div>
+          <div>
+            <div class="insight-text">Receipt attachment step shows 2 distinct execution paths. High variation signal detected.</div>
+            <span class="insight-tag tag-review">Review variant</span>
+          </div>
+        </div>
+        <div class="insight-item">
+          <div class="insight-dot green"></div>
+          <div>
+            <div class="insight-text">Submission step is 98% consistent across runs. Low rework risk. SOP coverage complete.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

@@ -41,6 +41,14 @@ import WorkflowListFilterBar, {
 import type { OpportunityTag } from '@/lib/workflow-metrics.js';
 import { EXTENSION_CONFIG } from '@/lib/config.js';
 import type { TimeRange } from './CommandHeader.js';
+import {
+  getColumnByKey,
+  type ColumnKey,
+} from '@/lib/dashboard-columns/index.js';
+
+// ── Locked columns (always visible regardless of user preferences) ─────────────
+
+const LOCKED_COLUMN_KEYS = new Set<ColumnKey>(['workflow_title', 'health_score']);
 
 // ── UI state machine ──────────────────────────────────────────────────────────
 
@@ -261,6 +269,12 @@ interface WorkflowListProps {
   /** PRD §4 metric #2: perf timestamp captured at dashboard_v2_viewed emission.
    * Passed through to WorkflowRow for elapsed-time computation on row click. */
   dashboardViewPerfTimestampMs?: number;
+  /**
+   * D+4 (iter-061): ordered list of visible column keys from user preferences.
+   * Drives the table header and is passed to each WorkflowRow for cell rendering.
+   * Defaults to the pre-D+4 6-column set when not provided.
+   */
+  visibleColumns?: readonly ColumnKey[];
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -280,6 +294,7 @@ export default function WorkflowList({
   portfolioSidebarOpen = false,
   onTogglePortfolioSidebar,
   dashboardViewPerfTimestampMs = 0,
+  visibleColumns,
 }: WorkflowListProps) {
   const [sort, setSort] = useState<SortState>({ field: 'health_score', dir: 'asc' });
   const [sparseNoticeDismissed, setSparseNoticeDismissed] = useState(false);
@@ -309,6 +324,16 @@ export default function WorkflowList({
     ? []
     : applyFilters(workflows, filters, insightFilterKey, nowMs);
   const sortedWorkflows = sortWorkflows(filteredWorkflows, sort);
+
+  // D+4: derive the ordered middle columns (between workflow_title and health_score)
+  // from visibleColumns, or fall back to the pre-D+4 defaults.
+  const dynamicHeaderKeys: ColumnKey[] = visibleColumns
+    ? visibleColumns.filter((k) => !LOCKED_COLUMN_KEYS.has(k)) as ColumnKey[]
+    : ['systems', 'opportunity_tag'];
+
+  // Total column count for colSpan in empty/error states:
+  // workflow_title + dynamic_cols + health_score + kebab
+  const totalColCount = 1 + dynamicHeaderKeys.length + 1 + 1;
 
   // Screen reader announcement text — announced when filter/sort changes
   const anyActive = hasActiveFilters(filters) || insightFilterKey !== null;
@@ -389,6 +414,7 @@ export default function WorkflowList({
         <table className="w-full border-collapse" aria-label="Workflows">
           <thead>
             <tr className="border-b border-[var(--border-subtle)]">
+              {/* Workflow name (locked, always first) */}
               <th
                 scope="col"
                 className="px-ds-4 py-ds-2 text-left"
@@ -400,23 +426,52 @@ export default function WorkflowList({
                   onSort={handleSort}
                 />
               </th>
-              <th
-                scope="col"
-                className="px-ds-4 py-ds-2 text-left hidden md:table-cell text-[12px] font-medium text-[var(--content-secondary)]"
-              >
-                Systems
-              </th>
-              <th
-                scope="col"
-                className="px-ds-4 py-ds-2 text-left hidden sm:table-cell"
-              >
-                <SortButton
-                  field="opportunity"
-                  label="Opportunity"
-                  currentSort={sort}
-                  onSort={handleSort}
-                />
-              </th>
+              {/* Dynamic middle columns from user preferences */}
+              {dynamicHeaderKeys.map((colKey) => {
+                // Opportunity column keeps its sort button
+                if (colKey === 'opportunity_tag') {
+                  return (
+                    <th
+                      key="opportunity_tag"
+                      scope="col"
+                      className="px-ds-4 py-ds-2 text-left hidden sm:table-cell"
+                    >
+                      <SortButton
+                        field="opportunity"
+                        label="Opportunity"
+                        currentSort={sort}
+                        onSort={handleSort}
+                      />
+                    </th>
+                  );
+                }
+                // Systems column — plain header
+                if (colKey === 'systems') {
+                  return (
+                    <th
+                      key="systems"
+                      scope="col"
+                      className="px-ds-4 py-ds-2 text-left hidden md:table-cell text-[12px] font-medium text-[var(--content-secondary)]"
+                    >
+                      Systems
+                    </th>
+                  );
+                }
+                // Generic column header from registry
+                const colDef = getColumnByKey(colKey);
+                if (!colDef) return null;
+                return (
+                  <th
+                    key={colKey}
+                    scope="col"
+                    className="px-ds-4 py-ds-2 text-left text-[12px] font-medium text-[var(--content-secondary)]"
+                    title={colDef.description}
+                  >
+                    {colDef.label}
+                  </th>
+                );
+              })}
+              {/* Health Score (locked, always last before kebab) */}
               <th
                 scope="col"
                 className="px-ds-4 py-ds-2 text-right"
@@ -443,7 +498,7 @@ export default function WorkflowList({
             {/* Error state */}
             {state === 'error' && (
               <tr>
-                <td colSpan={5} className="px-ds-4 py-ds-8 text-center">
+                <td colSpan={totalColCount} className="px-ds-4 py-ds-8 text-center">
                   <div className="flex flex-col items-center gap-ds-3">
                     <p className="text-[16px] font-medium text-[var(--content-primary)]">
                       Something went wrong loading your workflows.
@@ -464,7 +519,7 @@ export default function WorkflowList({
             {/* Empty state (no workflows at all) */}
             {state === 'empty' && (
               <tr>
-                <td colSpan={5} className="px-ds-4 py-ds-8 text-center">
+                <td colSpan={totalColCount} className="px-ds-4 py-ds-8 text-center">
                   <div className="flex flex-col items-center gap-ds-3">
                     <p className="text-[16px] font-medium text-[var(--content-primary)]">
                       No workflows recorded yet.
@@ -488,7 +543,7 @@ export default function WorkflowList({
             {/* No-results state (filters active, no match) */}
             {state === 'no-results' && (
               <tr>
-                <td colSpan={5} className="px-ds-4 py-ds-8 text-center">
+                <td colSpan={totalColCount} className="px-ds-4 py-ds-8 text-center">
                   <div className="flex flex-col items-center gap-ds-3">
                     <p className="text-[16px] font-medium text-[var(--content-primary)]">
                       No workflows match your filters.
@@ -513,6 +568,7 @@ export default function WorkflowList({
                   workflow={workflow}
                   timeRange={timeRange}
                   dashboardViewPerfTimestampMs={dashboardViewPerfTimestampMs}
+                  {...(visibleColumns !== undefined ? { visibleColumns } : {})}
                   {...(onWorkflowRename ? { onRename: onWorkflowRename } : {})}
                   {...(onWorkflowArchive ? { onArchive: onWorkflowArchive } : {})}
                 />
@@ -523,7 +579,7 @@ export default function WorkflowList({
               sortedWorkflows.length === 0 &&
               hasActiveFilters(filters) && (
                 <tr>
-                  <td colSpan={5} className="px-ds-4 py-ds-6 text-center">
+                  <td colSpan={totalColCount} className="px-ds-4 py-ds-6 text-center">
                     <div className="flex flex-col items-center gap-ds-3">
                       <p className="text-[14px] text-[var(--content-secondary)]">
                         No workflows match your filters.

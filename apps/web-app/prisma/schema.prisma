@@ -31,10 +31,11 @@ model User {
   insights            ProcessInsight[]
   tags                Tag[]
   portfolios          Portfolio[]
-  createdTeams        Team[]          @relation("TeamCreator")
-  teamMemberships     TeamMember[]
-  sentInvites         TeamInvite[]    @relation("InviteSender")
-  createdShares       WorkflowShare[] @relation("ShareCreator")
+  createdTeams          Team[]          @relation("TeamCreator")
+  teamMemberships       TeamMember[]
+  sentInvites           TeamInvite[]    @relation("InviteSender")
+  createdShares         WorkflowShare[] @relation("ShareCreator")
+  dashboardPreference   UserDashboardPreference?
 
   @@map("users")
 }
@@ -494,5 +495,37 @@ model PasswordResetToken {
   @@index([email])
   @@index([tokenHash])
   @@map("password_reset_tokens")
+}
+
+// ─── Path D: Dashboard Column-Config Persistence (iter-059 / WDC-P04) ────────
+
+/**
+ * One preference document per user.
+ *
+ * `userId @unique` enforces the 1:1 relationship — there is exactly one
+ * preference document per user at all times. `savedViews` live inside the
+ * `payload` JSON blob rather than as separate rows; this keeps the model
+ * simple for Phase 1 (D+5 can migrate to separate rows if needed).
+ *
+ * `schemaVersion` mirrors `payload.schemaVersion` for DB-side queries
+ * (e.g. "find all rows at version < 2 that need migration").
+ *
+ * `payload` is a TEXT column on SQLite (Prisma maps String to TEXT).
+ * The application layer handles JSON.stringify / JSON.parse via the
+ * `serializePreferencesForDb` / `deserializePreferencesFromDb` adapters
+ * in `apps/web-app/src/lib/dashboard-columns/persistence.ts`.
+ *
+ * @see docs/features/dashboard-v3-metrics-engine/PERSISTENCE_SCHEMA.md
+ */
+model UserDashboardPreference {
+  id            String   @id @default(uuid())
+  userId        String   @unique @map("user_id")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schemaVersion Int      @default(1) @map("schema_version")
+  payload       String   // JSON stored as TEXT (see persistence.ts adapters)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("user_dashboard_preferences")
 }
 

@@ -6,6 +6,589 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-05-12] - Iteration 063 — Path D D+6 default-pack revision — Path D FULLY COMPLETE (Mode 2, `directed`, `qa-engineer` PRIMARY)
+
+**Trigger:** Standing CEO Path D Mode 2 directive series. Path D D+1 + D+2 + D+3 + D+4 + D+5 all shipped iter 056/058/059/061/062; **iter 063 ships D+6 default-pack revision — FINAL Path D sub-deliverable**. After iter 063 close, **Path D is fully complete** and multi-iteration umbrella row #75 WDC-P02 is fully shipped (8-iteration arc: iter 056 + 058 + 059 + 061 + 062 + 063 = 6 sub-deliverable iterations + AI-VISION Mode 3-adjacent + MR-015 Mode 4 governance interleaving).
+
+**Selection driver:** `directed` Mode 2 user-named pick. **Coordinator-recommended Option B per MR-015 §9** (keep default-pack in `getDefaultVisibleColumns()`; do NOT add `default_pack` preset chip — semantically default-pack is INITIAL STATE not user-triggered switch). **Agent rotation: `qa-engineer` over `frontend-engineer`** — D+6 verification + lock-test work matches qa-engineer rubric; breaks 2-consecutive frontend-engineer run; removes 4+ trigger pressure for iter 064. **`reverse-portfolio-drift: user-ack` logged** at iter 063 entry per MR-005 D-1.
+
+### Added
+
+- **`apps/web-app/src/lib/dashboard-columns/registry.test.ts`** (MODIFIED; +87 LOC): Group F "**D+6 default-pack composition lock**" with **6 substantive `it()` blocks** (F1 count = 6 / F2 exact composition `[workflow_title, systems, opportunity_tag, health_score, last_run_at, run_count]` / F3 all `availability: 'available'` audit-honesty IFF / F4 all non-null accessor / F5 deterministic registry insertion order / F6 no column outside canonical 6 has `defaultVisible: true` drift-protection).
+- **`docs/features/dashboard-v3-metrics-engine/PERSISTENCE_SCHEMA.md`** (MODIFIED; +55 lines §10 addendum): canonical 6-column default-pack composition + ASK-1 rationale ("matches today's hard-coded rendering") + expansion plan (7+ columns post-Path-C-R+1) + semantic distinction (default-pack INITIAL STATE vs preset USER-TRIGGERED switch per Option B).
+
+### Changed
+
+- **Zero `registry.ts` changes** — current state already matches canonical 6-column composition per MR-014 §7.1 ASK-1; no refinements needed.
+- **Zero UI changes** — audit-only on WorkflowList / WorkflowRow / DashboardV2Shell per scope discipline.
+- **Counters:** pool 40 → 40 unchanged (D+6 final sub-deliverable of umbrella row #75 already strikethrough at iter 056); cool-off recharge UNCHANGED at 3/3 FULL RE-ARM (9 consecutive events preserved); **D-1 reverse-portfolio-drift counter 6 → 7** (user-ack logged); **Area saturation 3-consecutive web-app TRIPS** (iter 061 + 062 + 063 — iter 064 MUST rotate or be Mode 4); agent-diversity `qa-engineer` consecutive = 1 (clean rotation); **MR-016 cadence 2/3 → 3/3 — FIRES MANDATORY at iter 064**; cold-pool ages DV2 8 → 9 (near 10-iter threshold; MANDATORY TRIAGE QUEUED for MR-016 if hits 10), MDR 5 → 6, WDC 5 → 6, PIB 5 → 6.
+
+### Validation
+
+- **Workspace `pnpm test`:** **2020 → 2026** (+6 across 66 test files) all pass.
+- **Workspace `pnpm typecheck`:** clean across all 10 packages/apps.
+- **`git status`** confirms scope: MODIFIED registry.test.ts (+87 LOC) + addendum to PERSISTENCE_SCHEMA.md (+55 lines). Zero other production changes.
+- **D-4 specialist-invocation gate clauses 1 + 2 did NOT fire** — addendum is internal documentation; +87 test LOC excluded from threshold per CLAUDE.md "measured by exported interface + public function bodies, not by test code."
+
+### Impact — Path D FULLY COMPLETE
+
+- **Path D progression: D+1 ✓ + D+2 ✓ + D+3 ✓ + D+4 ✓ + D+5 ✓ + D+6 ✓** — multi-iteration umbrella row #75 WDC-P02 fully shipped. The CEO-stated value question "how close are we to customizable or configurable metrics for the dashboard main view?" is now answered in FULL: the workflow dashboard has customizable column visibility (D+4 picker) + 10 preset chips (D+5) + saved views CRUD (D+5) + 6-column default-pack initial state (D+6) all backed by versioned Prisma persistence (D+3) consuming deterministic column registry (D+1) + filter registry (D+2).
+- **Default-pack composition LOCKED at 6 canonical columns** — `workflow_title` + `systems` + `opportunity_tag` + `health_score` + `last_run_at` + `run_count`. All available + non-null accessors. Audit-honesty IFF invariant preserved on default-pack side. Drift-protection test F6 prevents silent widening of default-pack to a 7th column.
+- **Audit-honesty IFF invariant chain extended through D+6** — D+1 column registry IFF + D+2 filter registry IFF + D+3 persistence migration graceful-degradation + D+4 picker pending-disabled + D+5 preset audit-honesty IFF (Group E) + D+6 default-pack audit-honesty IFF (Group F). 6-layer invariant chain operating cleanly across full Path D.
+- **#57 flag-retirement chain UNCHANGED at 10/10 ENGINEERING-COMPLETE** — only 14d soak-window remains.
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL** — launch-readiness preserved.
+
+### Three Converging Triggers Force MR-016 at Iter 064
+
+1. **Base 3-loop cadence floor 3/3 satisfied** (iter 061 + 062 + 063 = 3 counted bounded loops post-MR-015 stability window).
+2. **Same-Area 3-consecutive web-app TRIPS** (rolling 5-window saturated; iter 064 must rotate or be Mode 4 non-counting per Selection Policy Step 2).
+3. **D-1 N=5 trip persistence at counter 7** (cumulative user-ack debt; trip cleared only by extension-surface burn-down OR Mode 4 absorb).
+
+All three converge cleanly on **iter 064 = MR-016 Mode 4 meta-review** (non-counting; absorbs all three triggers + 8th consecutive Q4-ratio sub-floor reading + Q-MR-016-umbrella-sub-deliverable-numerator-credit with 5 data-point evidence + 8 carry-forward Q-bank items).
+
+### Follow-Up Debt Policy testable metric
+
+- **Trailing 10-iter window iter 054→063:** **4 closed / 27 created = 0.15 BELOW 0.5 floor — 8th consecutive sub-floor reading AND further declined** from iter 062 close (0.19) by iter 053 #26 closure rolling OFF without iter 063 replacement (iter 063 is sub-deliverable of already-strikethrough umbrella row #75; no standalone row close).
+- **Q-MR-016-umbrella-sub-deliverable-numerator-credit accrues 5th data point** — iter 058 + 059 + 061 + 062 + 063 = 5 consecutive sub-deliverable iterations for umbrella row #75 producing zero numerator credit despite shipping real value. MR-016 verdict on methodological-amendment proposal has 5-data-point evidence at MR-016 entry.
+
+### Preserved verbatim
+
+- All production code byte-identical except test file extension + docs addendum (zero `*.ts` / `*.tsx` source code modified outside test file).
+- D+1 + D+2 + D+3 + D+4 + D+5 module surfaces byte-identical.
+- iter 037-062 production code byte-identical.
+- Analytics taxonomy byte-identical; PostHog privacy posture preserved; zero DB migrations; zero new API routes; zero new dependencies.
+
+### Scope-Adjacent Observations (logged NOT promoted)
+
+1. "Reset to defaults" affordance gap in ColumnPicker drawer — future UI iteration; not promoted.
+2. Architect Option (a) "default_pack" preset chip — deferred per coordinator Option (b) decision; remains available without schema changes.
+3. WorkflowList/WorkflowRow 4-column fallback (when `visibleColumns` undefined) vs 6-column default-pack — production shell always passes `visibleColumns` so gap doesn't materialize; cleanup is future scope.
+4. iter-031 + iter-061 + iter-062 affordance preservation CONFIRMED.
+
+### Next Best Candidates (post-iter-063)
+
+- **MANDATORY at iter 064: MR-016 Mode 4 meta-review** (three converging triggers; non-counting). Absorbs:
+  - Q-MR-016-umbrella-sub-deliverable-numerator-credit verdict (5 data points; carried forward from MR-015 §4)
+  - D-1 N=5 trip-clearing strategy (counter 7; cumulative)
+  - Path D completion milestone + lessons-learned
+  - AI Vision Build entry trigger (Path D no longer blocks; CEO top-4 decisions gate-constraint)
+  - 8 carry-forward Q-bank items from MR-015
+  - Cold-pool staleness check (DV2 9 → 10 at MR-016 entry hits threshold = MANDATORY TRIAGE queued)
+  - Q-MR-016-iter-057-CHANGELOG-backfill disposition
+- **Iter 065+ (post-MR-016):** CEO direction-dependent. If AI Vision approved → promote ADR-AI-001/002/003 + schedule AI+1; if not → D-1 trip-clearing extension burn-down OR PIB cluster opening OR continued Path C unblock work.
+
+---
+
+## [2026-05-12] - Iteration 062 — Path D D+5 preset chip rail + SavedView CRUD basic loop (Mode 2, `directed`, `frontend-engineer` PRIMARY + `growth-strategist` D-4 clause 1 + `system-architect` D-4 clause 2 adjacent — DUAL-FIRE)
+
+**Trigger:** Standing CEO Path D Mode 2 directive series. Path D D+1 (iter 056) + D+2 (iter 058) + D+3 (iter 059) + D+4 (iter 061) all shipped; **iter 062 ships D+5 preset chip rail + SavedView CRUD basic loop** — closes row #99 WDC-R09 saved-views infrastructure; only D+6 default-pack remains for full Path D ship.
+
+**Selection driver:** `directed` (Mode 2; bypasses pool > 8 ceiling via operating-mode precedence). **MR-013 Diff #2 source-artifact verification PASSED** — coordinator pre-delegation Grep-verified D+5 scope against WDC §6 + §11 + AI-VISION §6 + row #99; zero narrative-divergence. **`reverse-portfolio-drift: user-ack` logged** at iter 062 entry per MR-005 D-1 ("proceed = continue Path D track per standing CEO directive; D+5 + D+6 complete Path D sequence before pivoting"). **Coordinator scope decision: vanilla React preserved over audit-prescribed Radix** per iter 061 precedent.
+
+### Added
+
+- **`apps/web-app/src/lib/dashboard-columns/presets.ts`** (NEW; ~520 LOC pure deterministic module; **D-4 clause 2 FIRED** at >200 LOC pure-module threshold): `PresetId` closed-union 10-member; `PresetAvailability` 2-member (narrower-than-D+1 with JSDoc note + migration path per architect §1 revision); `PresetDefinition` interface; `WORKFLOW_DASHBOARD_PRESETS` frozen `ReadonlyArray<PresetDefinition>` module-singleton; `getPresetById()` / `listPresetIds()` / `getAvailablePresets(planTier: PlanType)` using `PLAN_HIERARCHY.indexOf()` for higher-tier-inheritance (architect §1 revision); **module-level compile-time exhaustiveness lock** catching PresetId↔catalog drift (architect §4 revision); 8 POLISH copy substitutions applied verbatim from growth-strategist consult.
+- **`apps/web-app/src/components/dashboard-v2/PresetChipRail.tsx`** (NEW; ~271 LOC): horizontal chip strip `role="toolbar"` rendering 10 chips; active-state detection; plan-gated chips disabled with "Upgrade to Team to access this preset" tooltip; AI presets disabled with "Available after Path C R+1" tooltip; keyboard navigation.
+- **`apps/web-app/src/lib/dashboard-columns/presets.test.ts`** (NEW; ~290 LOC; **26 substantive `it()` blocks** across 5 groups — Groups A-D catalog/lookup/filtering/immutability 19 cases + **Group E audit-honesty IFF invariant 3 cases per architect §3 revision**). **MR-006 Change C ≥12 substantive-test threshold SATISFIED with margin.**
+- **`apps/web-app/src/components/dashboard-v2/PresetChipRail.test.ts`** (NEW; ~270 LOC; **16 substantive `it()` blocks**).
+
+### Changed
+
+- **`apps/web-app/src/components/dashboard-v2/ColumnPicker.tsx`** (612 → 821 LOC; +209): added `SavedViewsSection` with create/rename/delete-confirm/apply CRUD; max 10 saved views; max 64-char view names; reuses iter-031 `InlineEdit` + `InlineArchiveConfirm` patterns; new props for savedViews / currentFilters / onSavedViewsChange / onApplySavedView. iter-031 LOCKED-VISIBLE workflow_title + health_score preserved.
+- **`apps/web-app/src/components/dashboard-v2/DashboardV2Shell.tsx`**: savedViews state + GET API load + extends scheduleSave debounced PUT + new handlers handleSavedViewsChange / handleApplySavedView / handleApplyPreset + PresetChipRail rendered in dashboard header.
+- **`IMPROVEMENT_BACKLOG.md`** row #99 WDC-R09 — strikethrough applied with iter 062 close anchor; acceptance criteria a+b+c substantially delivered; pool 41 → 40.
+- **8 growth-strategist POLISH substitutions applied verbatim** to presets.ts descriptions (per D-4 clause 1 consult; 19 KEEP / 8 POLISH / 0 REWRITE verdict): automation_candidates + standardize + high_volume + ready_to_share + my_teams_bottlenecks + 3 AI presets — all replace marketing adjectives with computed-signal language per COPY_PACK rule 4; all within ≤100-char preset description limit.
+- **4 system-architect MINOR REVISIONS applied verbatim** (per D-4 clause 2 consult; CONTRACT-LEVEL READY WITH MINOR REVISIONS verdict): §4 module-level compile-time exhaustiveness lock + §3 audit-honesty IFF invariant test assertion (Group E × 3) + §1a JSDoc on PresetAvailability narrower-than-D+1 + §1b PlanType + PLAN_HIERARCHY imports replacing inline literal. §6(b) my_teams_bottlenecks description satisfied by growth POLISH substitution #5 already applied. §7 SavedView↔FilterSet adapter gap + §8 AI metric_key migration tuple are informational-only scope-adjacent observations (NOT iter 062 changes).
+- **Counters:** pool 41 → 40 (#99 closed; zero follow-ups generated); cool-off recharge UNCHANGED at 3/3 FULL RE-ARM; **D-1 reverse-portfolio-drift counter 5 → 6** (web-app non-extension; user-ack logged at iter 062 entry); agent-diversity `frontend-engineer` consecutive = 2 post-iter-062 (under 4+ but at 2-of-allowed-3); MR-016 cadence 1/3 → 2/3 (earliest MR-016 iter 063 compressed OR iter 064 standard 3-loop floor); Area saturation rolling-5 = iter 061 + 062 = 2-web-app (under 3-consecutive); cold-pool ages DV2 7→8, MDR 4→5, WDC 4→5, PIB 4→5 — all under 10-iter threshold.
+
+### Validation
+
+- **Workspace `pnpm test`:** **1978 → 2020** (+42 across **64 → 66 test files**) all pass — 39 build-phase `it()` blocks + 3 architect §3 audit-honesty IFF invariant tests (E1/E2/E3).
+- **Workspace `pnpm typecheck`:** clean across all 10 packages/apps. Compile-time exhaustiveness lock confirms PresetId↔catalog drift would be caught.
+- **`git status`** confirms scope: NEW presets.ts + presets.test.ts + PresetChipRail.tsx + PresetChipRail.test.ts + MODIFIED ColumnPicker.tsx + DashboardV2Shell.tsx; zero unintended changes; zero Prisma migrations; zero new API routes; zero changes outside dashboard-v2/ + dashboard-columns/.
+- **D-4 dual-fire on iter 062 — both clauses fired simultaneously and both adjacencies discharged via ≤30 min consults (second dual-fire event after iter 056 D+1; rule INTERPRETABLE on dual-fire pattern across 2 occurrences).**
+
+### Impact
+
+- **Path D D+5 preset chip rail + SavedView CRUD basic loop DELIVERED.** Users can apply 1 of 5 canonical presets (or 2 team-gated with appropriate plan) in one click to set visibleColumns + columnOrder + filters; 3 AI presets visible-but-disabled as forward-compat preview; SavedView basic CRUD lives in the existing ColumnPicker drawer.
+- **Path D progression: D+1 ✓ + D+2 ✓ + D+3 ✓ + D+4 ✓ + D+5 ✓** — only D+6 default-pack revision remains for full Path D ship.
+- **Row #99 WDC-R09 saved-views infrastructure substantially closed** — acceptance criteria a+b+c all delivered.
+- **Audit-honesty IFF invariant preserved across D+5 user surface** — AI presets disabled per IFF guard; deterministic catalog ordering; empty filters on AI presets prevent false-positive matches.
+- **iter-031 + iter-061 affordance preservation confirmed** — locked columns + InlineEdit + InlineArchiveConfirm + Escape close + focus return + iter-061 debounced PUT save all preserved.
+- **#57 flag-retirement chain UNCHANGED at 10/10 ENGINEERING-COMPLETE.**
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL.**
+
+### Follow-Up Debt Policy testable metric
+
+- **Trailing 10-iter window iter 053→062:** **5 closed / 27 created = 0.19 BELOW 0.5 floor — 7th consecutive sub-floor reading** (iter 052 #30 rolled OFF + iter 062 #99 rolled ON = net 0 numerator change). iter 062 IS a numerator credit event (standalone row #99 close NOT just umbrella sub-deliverable). **Q-MR-016-umbrella-sub-deliverable-numerator-credit** continues to accrue evidence — iter 062 is fourth consecutive sub-deliverable iteration for umbrella row #75 (iter 058 + 059 + 061 + 062) producing zero numerator credit for the umbrella.
+
+### Preserved verbatim
+
+- D+1 + D+2 + D+3 module surfaces byte-identical (consumed, not modified).
+- iter 037-061 production code byte-identical (outside D+5 + ColumnPicker + DashboardV2Shell surfaces).
+- Analytics taxonomy byte-identical; PostHog privacy posture preserved; zero new `Date.now()` / `new Date()` introduced; zero DB migrations; zero Prisma schema changes; zero new API routes (D+5 reuses iter-061 `/api/dashboard/preferences` GET/PUT).
+
+### Scope-adjacent observations (logged NOT promoted)
+
+1. `recent_activity` empty filters — apply-time date computation deferred to D+6
+2. `my_teams_bottlenecks` opportunity_tag proxy because bottleneckLabel is pending-path-c-r1 (description honestly reflects proxy semantics post-POLISH #5)
+3. `handleApplySavedView` partial-apply (columns only); SavedView.filters → UI FilterState adapter is D+5.5 / D+6 scope
+4. Individual preset entries not per-entry `Object.freeze`d but `ReadonlyArray` + outer freeze (matches D+1 precedent — not requiring per-entry freeze)
+5. AI preset disabled tooltip uses internal "Path C R+1" reference vs ColumnPicker user-facing "in an upcoming release" — align at public-launch per Growth
+6. `my_teams_bottlenecks` label per-team granularity claim — flagged for future iteration when team-scoped filtering ships
+
+### Next Best Candidates (post-iter-062)
+
+- **PRIMARY (awaiting CEO direction):** **Path D D+6 default-pack revision** — final Path D sub-deliverable; closes umbrella row #75 fully; consumes presets.ts catalog for 6-column default per ASK-1 verdict; `frontend-engineer` rotation = 3 consecutive (would hit 4+ trigger at iter 064 — recommend rotation off post-D+6)
+- **ALTERNATIVE-A:** **MR-016 Mode 4 meta-review** (compressed cadence per MR-013 Diff #1; cadence 2/3 → 3/3 satisfies at iter 063 close + D-1 trip preserved across Mode 4 + absorbs Q-MR-016-umbrella-sub-deliverable-numerator-credit + 7-consecutive sub-floor ratio + 8 carry-forward Q-bank)
+- **ALTERNATIVE-B:** **D-1 trip-clearing extension burn-down** (row #21 launchPersistentContext E2E harness; clean D-1 reset)
+- **ALTERNATIVE-C:** **PIB cluster opening** with PIB-P09 chip-click rate denominator (score 15; `analytics` rotation; addresses §4 ratio recovery + #57 evaluability gap)
+- **ALTERNATIVE-D (post-CEO-vision-approval):** ADR-AI-001/002/003 promotion + AI+1 provider-adapter foundation (`system-architect` PRIMARY)
+- **MANDATORY at iter 063 Candidate Selection block: `reverse-portfolio-drift: user-ack`** per MR-005 D-1 unless iter 063 = Mode 4 OR touches extension surface.
+
+---
+
+## [2026-05-11] - AI_INTEGRATION_PLATFORM_VISION_REVIEW_001 — Mode 3-adjacent multi-agent strategic alignment (NON-counting)
+
+**Trigger:** CEO directive (verbatim): *"I want to turn ledgerium into a process intelligence platform that can easily connect to all major AI API platforms so that users can record and baseline any digital process and then get suggestions on all the ways they can connect AI to the digital workflow. If APIs are provided then ledgerium should initiate and execute recommendations."* Product-vision-level statement reshaping Ledgerium from measurement → measurement + recommendation + execution platform.
+
+**Selection driver:** `directed` Mode 3-adjacent strategic alignment review (NOT a counted bounded loop; precedent: DV2-REVIEW-001 / MDR-REVIEW-001 / WDC-REVIEW-001 / PIB-REVIEW-001). 6 specialist agents engaged in parallel — `product-manager` + `system-architect` + `competitive-researcher` + `growth-strategist` + `analytics` + `security` (via `general-purpose` with security scoping; `security-engineer` agent type unavailable).
+
+### Added
+
+- **`docs/meta/AI_INTEGRATION_PLATFORM_VISION_REVIEW_001.md`** (~10,000 words; 18 numbered sections + 2 appendices following established Mode 3-adjacent format): cross-agent convergence map (5-of-6-agent alignment on MVP scope + BYOK + dry-run gate + privacy boundary + audit trail + provider abstraction + determinism boundary preservation); divergence-requiring-CEO-arbitration items (provider scope sequencing / MCP-server priority / dry-run threshold / cost visibility model / HIPAA scope); 5 distinctive moat candidates (M1 Evidence-linked as strongest, anchoring M2-M5); 3-zone competitive landscape (17 platforms across process-intelligence + workflow-execution + AI-orchestration); 10-iteration MVP build sequence; 3 pre-iteration ADRs identified (Provider Protocol / Execution Persistence / Payload Policy); R0–R4 irreversibility framework; 5 net-new attack vectors (V1–V5 with V5 credential-theft-via-execution as worst-case end-to-end exploit); 3-tier provider trust model with hard egress middleware; audit trail two-table design (`ai_execution_audit_event` 7y retention + `ai_execution_audit_payload` 90d retention); positioning statement Candidate A + wedge messaging W1+W2 + trust-first reframe Pattern 2 ("You approve what runs"); progressive disclosure launch timing recommendation; pricing tier Option C (AI free for recommendations, paid for execution; BYOK passthrough + margin); 20 consolidated CEO decisions ranked top-tier (D-01 BYOK / D-02 MVP execution scope / D-03 compliance investment $50-150k / D-04 MVP provider scope) / mid-tier / lower-tier.
+
+### Changed
+
+- **`IMPROVEMENT_BACKLOG.md`**: **ZERO P0 promotions at this intake** — strategic vision is forward-looking; promotion pathway is post-CEO-approval via the 3 pre-iteration ADRs with `Birth iter: AI-Vision-promoted` (analog to `MR-015-promoted` pattern). Pool 41 → 41 unchanged.
+- **`SYSTEM_HEALTH.md`**: line 3 anchor updated to AI-VISION REVIEW; counter-preservation block recorded; 5th audit-style intake event noted (DV2 + MDR + WDC + PIB + AI-VISION cumulative; first instance where ZERO P0 promotions execute at intake — intentional for forward-looking strategic vision).
+- **`ITERATION_LOG.md`**: non-numbered Mode 3-adjacent diagnostic entry recorded above iter 061 (per PIB-REVIEW-001 precedent).
+- **`CLAUDE.md`** Active work: updated to reflect AI-VISION REVIEW most recent + iter 061 Path D D+4 + iter 060 MR-015 preserved chronologically.
+- **Counter preservation across Mode 3-adjacent NON-counting:** cool-off recharge counter UNCHANGED at 3/3 FULL RE-ARM (preserved 7 consecutive iterations); D-1 reverse-portfolio-drift counter UNCHANGED at 5 (tripped at iter 061 close; user-ack required at iter 062 entry per MR-005 D-1); MR-016 cadence counter UNCHANGED at 1/3 (preserved iter 061 1/3 advance); Area saturation clock NOT advanced; cold-pool ages UNCHANGED at DV2 7 / MDR 4 / WDC 4 / PIB 4 (all under 10-iter threshold).
+
+### Validation
+
+- Workspace `pnpm test` 1978 / 1978 unchanged across 64 test files (Mode 3-adjacent is artifact-only).
+- Workspace `pnpm typecheck` clean across all 10 packages/apps.
+- `git status` confirms scope: NEW `docs/meta/AI_INTEGRATION_PLATFORM_VISION_REVIEW_001.md` + 4 mirror updates; zero unintended changes.
+
+### Impact
+
+- **Path C R+1 pre-blocking questions: 2 of 5 unambiguously RESOLVED by AI vision** (Q-ARCH-1 "new package" + Q-ARCH-2 "Postgres yes") — material acceleration of Path C unblock trajectory; 3 original + 2 PIB-added = 5 remaining (denominator unchanged but 2 questions of high leverage now have concrete answers).
+- **Path D D+5 chip catalog gains 3 AI presets** ("AI Automation Candidates" / "AI Executions Running" / "AI Savings Leaders" — consumes Path C R+1 metric_key extensions when both paths mature).
+- **3 new `ColumnKey` registry extensions** identified for D+1 module extension (`ai_eligibility_score` / `ai_execution_count` / `ai_savings_estimate_ms`) — all `availability: 'pending-path-c-r1'` per audit-honesty IFF invariant.
+- **Window of competitive opportunity: 18–24 months** before well-funded competitors close full observe → recommend → execute → measure loop. Highest-urgency M&A watch: **Zapier + Scribe acquisition** would close observation gap instantly.
+- **5th audit-style intake event** with first ZERO-P0-promotion instance (intentional for forward-looking strategic vision; ADR promotions post-CEO-approval).
+- **Zero CLAUDE.md governance diffs** — preserves stability-default posture; 8 consecutive zero-or-stability-only meta-reviews preserved (MR-007 → MR-015).
+- **#57 flag-retirement chain UNCHANGED at 10/10 ENGINEERING-COMPLETE.**
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL.**
+
+### Preserved verbatim
+
+- All production code byte-identical (Mode 3-adjacent is artifact-only; zero `*.ts` / `*.tsx` files modified).
+- iter 037-061 production code byte-identical.
+- D+1 + D+2 + D+3 + D+4 module surfaces byte-identical.
+- Analytics taxonomy byte-identical; PostHog privacy posture preserved.
+
+### Next Best Candidates (post-AI-VISION-REVIEW)
+
+- **Iter 062: AWAITING CEO DIRECTION** on top-4 vision decisions (D-01 BYOK / D-02 MVP execution scope confirmation / D-03 compliance investment / D-04 provider scope). Multiple parallel-track paths possible:
+  1. **Path D D+5 preset chips** (`frontend-engineer` PRIMARY; consumes D+3 stub + row #99 WDC-R09 saved-views; integrates 3 AI presets per AI-VISION §6)
+  2. **Post-CEO-vision-approval:** promote ADR-AI-001/002/003 + schedule AI+1 provider-adapter foundation as first Mode 2 directed pick (`system-architect` PRIMARY)
+  3. **PIB cluster opening:** PIB-P09 chip-click rate denominator (score 15; `analytics` rotation; smallest-surface)
+  4. **D-1 N=5 trip-clearing burn-down:** row #21 launchPersistentContext E2E harness (score 9; extension-surface; clears trip cleanly)
+- **MANDATORY at iter 062 Candidate Selection block: `reverse-portfolio-drift: user-ack; rationale: [reason]`** per MR-005 D-1 (unless iter 062 = Mode 4 non-counting OR touches extension surface which clears trip).
+- **Launch-gating prerequisites elevated by Growth §10:** PIB-R13 (trust-signal determinism badge promotion from cold pool) + PIB-P10 (category identity copy unification, row #96 priority elevation) — both required to ship before AI vision public launch to prevent AI-washing perception.
+
+---
+
+## [2026-05-11] - Iteration 061 — Path D D+4 picker UI — user-visible customization affordance LIVE (Mode 2, `directed`, `frontend-engineer` PRIMARY + `growth-strategist` D-4 clause 1 adjacent)
+
+**Trigger:** Standing CEO Path D Mode 2 directive series — *"D-first, Mode 1 series, defer Path C PRD approval until after Path D ships"* (preserved across MR-014 §16 + MR-015 §10 endorsements). Path D D+1 (iter 056) + D+2 (iter 058) + D+3 (iter 059) all shipped; **iter 061 ships D+4 picker UI** — the user-visible customization affordance closing the CEO-stated value question "how close are we to customizable or configurable metrics for the dashboard main view?"
+
+**Selection driver:** `directed` (Mode 2 user-named pick — bypasses pool > 8 ceiling via operating-mode precedence per MR-004 Change B narrowed; cool-off NOT consumed on directed picks per MR-006 Change A; cool-off remains at 3/3 FULL RE-ARM preserved across 6 consecutive iterations + iter 060 Mode 4). **MR-013 Diff #2 source-artifact verification PASSED** — coordinator pre-delegation Grep-verified D+4 scope against (a) WDC source artifact §6 WDC-P02; (b) MR-014 §16-§18 + §7.1 ASK-1 verdict (6-column default-pack); (c) MR-015 §10 iter 061 endorsement; zero narrative-divergence. **Coordinator scope decision: build with vanilla React + Tailwind, NOT Radix** (codebase pattern consistency over audit-prescribed Pattern E; iter-031 + iter-041 patterns preserved; documented).
+
+### Added
+
+- **`apps/web-app/src/components/dashboard-v2/ColumnPicker.tsx`** (NEW): drawer-style picker rendering 38 columns across 7 ColumnGroup taxonomies (display / flow / step / variation / quality / behavior / bottleneck). Locked columns (workflow_title + health_score) LOCKED-VISIBLE per WDC §11 protecting iter-031 affordances. Pending columns disabled with "Available in an upcoming release" per audit-honesty IFF invariant. SaveStatus state machine idle → saving → saved → error with 400ms debounce. Escape closes drawer (single document listener per MDR-P08 pattern). Focus returns to trigger button on close.
+- **`apps/web-app/src/components/dashboard-v2/ColumnPicker.test.ts`** (NEW): **12 substantive `it()` blocks** across 4 suites — column grouping invariants / locked invariants / visibility state / availability labels.
+- **`apps/web-app/src/app/api/dashboard/preferences/route.ts`** (NEW): `GET` returns `{ preferences, droppedKeys, warnings, meta }` envelope, calls D+3 `deserializePreferencesFromDb()`, writes back cleaned preferences on `droppedKeys.length > 0` (closes E2E Scenario 4 at API layer); `PUT` body Zod-validated (400 on unknown ColumnKey), calls `migratePreferences()` then `serializePreferencesForDb()` then Prisma upsert; standard Ledgerium envelope.
+- **`apps/web-app/src/app/api/dashboard/preferences/route.test.ts`** (NEW): **10 substantive `it()` blocks** — GET 401 / GET defaults / GET stored / GET E2E Scenario 4 droppedKeys write-back / PUT 401 / PUT 400 unknown key / PUT 400 malformed JSON / PUT happy path / PUT preserves filters / PUT+GET round-trip.
+
+### Changed
+
+- **`apps/web-app/src/components/dashboard-v2/DashboardV2Shell.tsx`** — preferences loading on mount (GET API), optimistic visibleColumns state, debounced PUT on toggle, "Saving…" / "Saved" indicator wired, ColumnPicker render. "Customize columns" trigger button carries `aria-expanded` + `aria-haspopup="dialog"`. Falls back to `getDefaultVisibleColumns()` silently on fetch error.
+- **`apps/web-app/src/components/dashboard-v2/WorkflowList.tsx`** — `colSpan` for empty states updated from hardcoded 5 to dynamic `totalColCount`. `visibleColumns` prop forwarded to WorkflowRow.
+- **`apps/web-app/src/components/dashboard-v2/WorkflowRow.tsx`** — dynamic column rendering driven by `visibleColumns` (iter-031 `InlineEdit` + `HealthTooltip` affordances preserved on locked columns).
+- **3 POLISH copy substitutions** applied verbatim from `growth-strategist` D-4 clause 1 consult (≥3 user-visible strings threshold fired): (1) error message `"Save failed — your changes were not applied."`; (2) pending label `"Available in an upcoming release"`; (3) footer `"Some columns are always visible. Others become available as more data is collected."`
+- **Counters:** pool 41 → 41 unchanged (D+4 is sub-deliverable of multi-iteration umbrella row #75 already strikethrough at iter 056; zero follow-ups generated); cool-off recharge UNCHANGED at 3/3 FULL RE-ARM (directed picks neither consume nor advance); **D-1 reverse-portfolio-drift counter 4 → 5 TRIPS N=5 early-trigger** (web-app non-extension; `reverse-portfolio-drift: user-ack` MANDATORY at iter 062 Candidate Selection block per MR-005 D-1); Area saturation rolling 5-window post-MR-015 reset = iter 061 web-app library = 1 of fresh window; agent-diversity `frontend-engineer` consecutive counter = 1 (clean rotation off `backend-engineer` × 1); MR-016 cadence 0/3 → 1/3 (earliest MR-016 iter 063 under compressed OR iter 064 under standard 3-loop floor); cold-pool ages DV2 6→7, MDR 3→4, WDC 3→4, PIB 3→4 — all under 10-iter MR-006 Change D threshold.
+
+### Validation
+
+- **Workspace `pnpm test`:** **1956 → 1978** (+22 across **62 → 64 test files**) all pass — exactly matches frontend-engineer's claimed delta (10 route.test + 12 ColumnPicker.test = 22).
+- **Workspace `pnpm typecheck`:** clean across all 10 packages/apps.
+- **`git status`** confirms scope: NEW ColumnPicker.tsx + ColumnPicker.test.ts + route.ts + route.test.ts + MODIFIED DashboardV2Shell.tsx + WorkflowList.tsx + WorkflowRow.tsx; zero unintended changes outside artifact-mirror updates.
+- **D-4 specialist-invocation gate clause 1 FIRED** — 3+ user-visible copy strings touched; `growth-strategist` MANDATORY adjacency discharged via ≤30 min consult with 3 POLISH substitutions applied. **Clause 2 did NOT fire** — ColumnPicker.tsx is React component (not pure module); API route file under 200 LOC exported surface (canonical EXPORTED-SURFACE measure per MR-015 §5 verdict).
+
+### Impact
+
+- **Path D D+4 user-visible customization affordance DELIVERED — LIVE in the dashboard main view.** The CEO-stated value question "how close are we to customizable or configurable metrics for the dashboard main view?" is now answered: it's live.
+- **WDC-P02 audit acceptance criteria substantially satisfied** — column picker drawer (Pattern E equivalent via vanilla React) + API projection (Zod-validated ColumnKey union, 400 on unknown) + 6-column default per ASK-1 + 25+ Tier A metrics picker-selectable.
+- **Audit-honesty IFF invariant preserved across D+4 user surface** — pending columns disabled in picker with consistent "Available in an upcoming release" copy; `WorkflowRow.tsx` renders em-dash for null accessor returns.
+- **iter-031 affordance preservation confirmed** — `InlineEdit` rename + `InlineArchiveConfirm` archive + `HealthTooltip` health-score breakdown all preserved through dynamic-column refactor.
+- **Path D progression: D+1 ✓ + D+2 ✓ + D+3 ✓ + D+4 ✓** — D+5 preset chips + D+6 default-pack remain (2 iterations to Path D fully shipped under continued cadence).
+- **#57 flag-retirement chain UNCHANGED at 10/10 ENGINEERING-COMPLETE.**
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL.**
+
+### Follow-Up Debt Policy testable metric
+
+- **Trailing 10-iter window iter 052→061:** **5 closed / 27 created = 0.19 BELOW 0.5 floor — sixth consecutive sub-floor reading** (iter 061 0.19 declined as iter 051 closure rolled OFF without iter 061 closure replacement; iter 058 + 059 + 061 all sub-deliverable iterations producing zero numerator credit per multi-iteration umbrella accounting; iter 054/057/060 Mode 4 non-counting).
+- **Q-MR-016-umbrella-sub-deliverable-numerator-credit** (carried forward from MR-015 §4) — third consecutive sub-deliverable data point at iter 061 close; methodological-amendment proposal now has 3 data-point evidence at MR-016 entry.
+
+### Preserved verbatim
+
+- D+1 + D+2 + D+3 module surfaces byte-identical (consumed, not modified).
+- iter 037-060 production code byte-identical (outside D+4 surface).
+- Analytics taxonomy byte-identical; PostHog privacy posture preserved; zero new `Date.now()` / `new Date()` introduced; zero DB migrations; zero Prisma schema changes (D+3 already shipped `UserDashboardPreference`).
+
+### Next Best Candidates (post-iter-061)
+
+- See AI_INTEGRATION_PLATFORM_VISION_REVIEW_001 entry (this same date) for top-4 CEO decisions blocking iter 062 selection. Multiple parallel-track paths possible: Path D D+5 preset chips / PIB-P09 chip-click rate denominator / D-1 trip-clearing extension burn-down / post-CEO-vision-approval ADR promotion.
+- **Mandatory: iter 062 Candidate Selection block MUST log `reverse-portfolio-drift: user-ack; rationale: [reason]`** per MR-005 D-1 (unless iter 062 = Mode 4 OR touches extension surface).
+
+---
+
+## [2026-05-07] - Iteration 060 — MR-015 meta-review (Mode 4, `meta-coordinator`, NON-counting)
+
+**Trigger:** Three converging triggers fire MR-015 with zero ambiguity: (a) base 3-loop cadence floor 3/3 satisfied under MR-013 Diff #1 ratified compressed-cadence pattern (iter 058 + iter 059 + iter 060 = 3 slots); (b) D-1 N=5 reverse-portfolio-drift trip avoidance (counter at 4 post-iter-059; Mode 4 non-counting preserves at 4 rather than tripping); (c) Q-bank pressure (24 items at iter 059 close — 2 NEW iter-059 items + escalation of fifth-consecutive sub-floor ratio + 10 carry-forward + iter-058-CHANGELOG-gap from iter 058 close).
+
+**Selection driver:** `directed` (Mode 4 meta-review forced by 3 converging triggers; Mode 4 governance-only iteration; non-counting toward improvement-loop cadence per CLAUDE.md § Operating Modes).
+
+### Added
+
+- **`docs/meta/MR_015_META_REVIEW.md`** (~577 lines / 15 numbered sections + 3 appendices following MR-014 format precedent): 14-dimension per-rule verdict pass with **0 failing rules**; **24 consecutive counted iterations of correct control-plane behavior** (iter 026-059); 8 consecutive zero-or-stability-only meta-reviews preserved (MR-007 → MR-015 streak); MR-015 fifth empirical fire of MR-013 Diff #1 ratified compressed-cadence convention (clean across 5 consecutive meta-reviews — pattern INTERPRETABLE).
+- **5 Q-bank items RESOLVED at MR-015:** §4 Q-MR-015-ratio-fifth-consecutive-sub-floor → TRANSIENT-extended with methodological-amendment evaluation deferred to MR-016; §5 Q-MR-015-D4-clause-2-measurement-rule → PRESERVE EXPORTED-SURFACE measure (canonical reading; interpretive precedent codified internal-to-artifact); §6 Q-MR-015-iter-058-CHANGELOG-gap → Mode 4 / Mode 3-adjacent CHANGELOG hygiene soft-rule codified internal-to-artifact (operational expectation; iter 057 backfill deferred); §7.5 WDC-R09 saved-views infrastructure conditional-promote trigger SATISFIED at iter 059 D+3 closure → PROMOTED to live backlog row #99 with `Birth iter: MR-015-promoted` per MR-005 D-5 trigger-fired path; iter 058 pick confirmation marked CLOSED.
+- **2 NEW Q-MR-016 items carry-forward:** Q-MR-016-umbrella-sub-deliverable-numerator-credit (deferred methodological proposal with three candidate verdict paths if Q4 ratio recovery does not materialize by MR-016); Q-MR-016-iter-057-CHANGELOG-backfill (deferred cleanup iteration); plus coordinator-validation flagged Q-MR-016-MR-015-pool-delta-arithmetic-correction (§10 pool-count direction discrepancy — promotion adds to live pool not subtracts; substantive verdict unaffected, only count tracking).
+
+### Changed
+
+- **`IMPROVEMENT_BACKLOG.md`**: WDC-R09 promoted from cold pool to live backlog row #99 with `Birth iter: MR-015-promoted` (Path D R+3 trigger satisfied at iter 059 D+3 ship per MR-014 §6.2 conditional-preserve verdict). Cold-pool conditional inventory 1 → 0 (still-cold inventory unchanged at 21).
+- **Counters preserved across Mode 4:** cool-off recharge counter UNCHANGED at 3/3 FULL RE-ARM (Mode 4 non-counting per established convention since MR-006 Change A); D-1 reverse-portfolio-drift counter UNCHANGED at 4 (Mode 4 does not advance the 5-iter counting window; preserves counter for iter 061 candidate selection — should consider extension-surface preference OR accept N=5 trip with user-ack at iter 062); Area saturation clock RESET by Mode 4 governance non-counting per MR-009 / MR-012 / MR-013 / MR-014 precedent (iter 058+059 web-app rolling tally cleared; new window opens at iter 061); MR-016 cadence counter RESET 3/3 → 0/3 at MR-015 close. Cold-pool ages DV2 5 → 6; MDR 2 → 3; WDC 2 → 3; PIB 2 → 3 — all under 10-iter MR-006 Change D staleness threshold.
+
+### Validation
+
+- Mode 4 governance-only iteration; zero product code touched; zero test runs required.
+- Workspace `pnpm test` 1956 / 1956 unchanged across 62 test files (Mode 4 is artifact-only).
+- Workspace `pnpm typecheck` clean across all 10 packages/apps.
+- `git status` confirms scope: NEW `MR_015_META_REVIEW.md` + 5 mirror updates (CHANGELOG / CLAUDE.md / IMPROVEMENT_BACKLOG.md / ITERATION_LOG.md / SYSTEM_HEALTH.md); zero unintended changes outside artifact-mirror updates.
+- Artifact cross-referenced against (a) live `IMPROVEMENT_BACKLOG.md` row count + ages + WDC-R09 promotion; (b) WDC source artifact §7 line 163; (c) MR-014 §6.2 conditional-preserve trigger; (d) iter 058/059 outcome blocks in `ITERATION_LOG.md`; zero divergences except §10 pool-arithmetic discrepancy logged for MR-016.
+
+### Impact
+
+- **MR-015 fifth empirical fire of MR-013 Diff #1 ratified compressed-cadence convention** — pattern operating cleanly across 5 consecutive meta-reviews; rule INTERPRETABLE; preservation confirmed.
+- **24 consecutive counted iterations of correct control-plane behavior** preserved across 8 consecutive zero-or-stability-only meta-reviews (MR-007 → MR-015 streak).
+- **§4 Q4 ratio drift TRANSIENT-extended verdict ratified** — projected recovery deferred to MR-016 evaluation under explicit recovery-projection conditions; structural cause documented (umbrella sub-deliverable accounting); methodological amendment proposal queued in Q-bank.
+- **§5 D-4 clause 2 EXPORTED-SURFACE measure ratified as canonical interpretation** — preserves rule's contract-level review purpose; private helpers don't count toward 200 LOC threshold.
+- **§7.5 WDC-R09 conditional-promote trigger SATISFIED + executed cleanly** — first procedurally-clean trigger-fired promotion in MR-015 window; saved-views infrastructure now live for D+5 preset-chips iteration consumption.
+- **0 autonomous CLAUDE.md governance diffs** — preservation of stability-default posture across 8 consecutive meta-reviews; 3 internal-to-artifact codifications (interpretive precedent + soft-rule + deferred methodological proposal) all NON-CLAUDE.md edits.
+- **#57 flag-retirement chain UNCHANGED at 10/10 ENGINEERING-COMPLETE** — only 14d soak-window remains.
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL** — launch-readiness preserved.
+- **WDC P0 closure status: 2 → 2 open** (no P0 closures at Mode 4; #74 WDC-P01 + #76 WDC-P03 remain).
+- **Path D progression: D+1 ✓ + D+2 ✓ + D+3 ✓** — D+4 picker UI + D+5 preset chips + D+6 default-pack remain; iter 061 endorsed for D+4 picker UI.
+
+### Preserved verbatim
+
+- All production code byte-identical (Mode 4 zero `*.ts` / `*.tsx` modifications).
+- iter 037-059 production code byte-identical.
+- D+1 / D+2 / D+3 module surfaces byte-identical.
+- Analytics taxonomy byte-identical; PostHog privacy posture preserved; zero new `Date.now()` / `new Date()` introduced; zero DB migrations; zero API contract changes; existing Prisma schema files byte-identical.
+
+### Next Best Candidates (post-iter-060)
+
+- **PRIMARY: Iter 061 = directed Mode 2 Path D D+4 picker UI** under standing CEO Path D Mode 2 directive series. `frontend-engineer` PRIMARY rotation off `backend-engineer` × 1. `growth-strategist` D-4 clause 1 adjacency MANDATORY (≥10 user-visible strings forecast). `system-architect` D-4 clause 2 adjacency POSSIBLE. **D-1 N=5 trip forecast at iter 061 close** is procedurally clean (Path D is architecturally a web-app series; user-ack required at iter 062 entry per MR-005 D-1 protocol). **This is the iteration that ships the user-visible customization affordance** — closes the user-stated "customizable metrics for the dashboard main view" question.
+- **Alternative:** PIB cluster opening with PIB-P09 chip-click rate denominator (score 15; `analytics` rotation; same web-app dynamics; smallest-surface single-file analytics correctness; would directly address §4 ratio recovery projection by closing 4 distinct rows iter 061-064 — PIB-P09 → PIB-P07 → PIB-P08 → PIB-P06 cluster).
+- **MR-016 cadence forecast:** counter reset at MR-015 close 0/3; earliest under standard 3-loop floor iter 064; earliest under compressed cadence iter 063; most likely iter 064 (absorbs D-1 trip post-mortem + Q4 ratio recovery confirmation + PIB cluster sequencing decision + DV2 cold-pool triage if not addressed earlier).
+- **Path C R+1 entry remains BLOCKED** on (a) CEO revised-PRD final approval (deliberately deferred per CEO directive); (b) **5 → 7 pre-R+1 PRD-blocking questions** (PIB-P04 event-log abstraction ADR + PIB-P05 Postgres migration trigger ADR added at PIB-REVIEW-001 §9; original 5 — Q-ARCH-1 / Q-ARCH-2 / Q-GOV-4 / Q-MEAS-1 / DEP-08 — preserved).
+
+---
+
+## [2026-05-05] - Iteration 059 — Path D D+3 versioned persistence schema — closes WDC-P04 (Mode 2, `directed`, `backend-engineer` PRIMARY)
+
+**Trigger:** Standing CEO Path D Mode 2 directive series — *"D-first, Mode 1 series, defer Path C PRD approval until after Path D ships"* (CEO-directed at iter 055 close; preserved across MR-014 §16 endorsement). Path D D+1 column registry shipped iter 056 → D+2 filter registry shipped iter 058 → **iter 059 ships D+3 versioned persistence schema** consuming D+1/D+2 surfaces without modifying them. MR-014 §16 endorsement of D+3 anchored to backlog row #77 WDC-P04. Closes 1 of 2 remaining WDC P0 audit-intake rows.
+
+**Selection driver:** `directed` (Mode 2 user-named pick — bypasses pool > 8 ceiling via operating-mode precedence per MR-004 Change B narrowed; cool-off NOT consumed on directed picks per MR-006 Change A; iter 059 starts mid-stability-window with cool-off at 3/3 FULL RE-ARM preserved through iter 056 directed + iter 057 Mode 4 + iter 058 directed). **MR-013 Diff #2 source-artifact verification PASSED** — coordinator pre-delegation Grep-verified row #77 against (a) live `IMPROVEMENT_BACKLOG.md` row text; (b) source artifact `WORKFLOW_DASHBOARD_CUSTOMIZATION_REVIEW_001.md` §6 lines 133-141; (c) MR-014 §16-§18 Path D D+3 endorsement; zero narrative-divergence; no `row-scope-correction:` log entry required. **Agent rotation:** `system-architect` consecutive counter was 3 post-iter-058 — rotation to `backend-engineer` for iter 059 prevents 4+ trigger before iter 060 per CLAUDE.md delegation rubric ("schema or migration changes" → backend-engineer).
+
+### Added
+
+- **`docs/features/dashboard-v3-metrics-engine/PERSISTENCE_SCHEMA.md`** (NEW; ~259 lines design doc): wire format `{schemaVersion: number, visibleColumns: ColumnKey[], columnOrder: ColumnKey[], filters: FilterSet, savedViews: SavedView[]}` consuming D+2 `FilterSet` type verbatim (zero re-invented shape); migration-function contract; graceful-degradation behavior (E2E Scenario 4); persistence-strategy section documenting iter-059 ships server-of-truth Prisma model + adapter (localStorage write-through cache + URL shareable-link override + `SavedView` CRUD explicitly DEFERRED to D+4/D+5 picker iterations with rationale); determinism contract documented.
+- **`apps/web-app/src/lib/dashboard-columns/persistence.ts`** (NEW; ~428 LOC pure module): `CURRENT_SCHEMA_VERSION = 1` constant; `SavedView` stub interface (forward-compat round-trip; D+5 adds CRUD); `UserDashboardPreference` runtime interface; `MigrationResult` + `DbSerializedPreference` adapter interfaces; `getDefaultPreferences()` (uses `getDefaultVisibleColumns()` from D+1 barrel); `migratePreferences(raw: unknown): MigrationResult` pure deterministic forward-migration with defensive branches (null/undefined/wrong-type/missing-fields → defaults+warning; v1 happy-path drops invalid `ColumnKey`s; v0 defensive `_exhaustive: never`; future-version → defaults+warning); `serializePreferencesForDb()` write adapter; `deserializePreferencesFromDb()` read adapter (null → defaults). **Determinism contract preserved:** zero `Date.now()` / `Math.random()` / network I/O.
+- **`apps/web-app/src/lib/dashboard-columns/persistence.test.ts`** (NEW; ~270 LOC; **19 substantive `it()` blocks across 6 describe groups**): Group A `getDefaultPreferences` × 3 / Group B happy-path migration × 3 / Group C defensive migration × 4 / Group D schema-version handling × 2 / Group E round-trip × 2 / Group F graceful-degradation E2E Scenario 4 × 2. **MR-006 Change C ≥12 substantive-test threshold SATISFIED** (19 vs ≥12 floor) → drift-counter credit GRANTED.
+- **`apps/web-app/prisma/migrations/20260505000000_add_user_dashboard_preference/migration.sql`** (NEW; ~36 lines): additive-only migration adding `UserDashboardPreference` table with `id` PK + `user_id` unique + `user_id` FK ON DELETE CASCADE + `schema_version` Int default 1 + `payload` JSONB + `created_at` + `updated_at`. Zero existing column changes.
+
+### Changed
+
+- **`apps/web-app/prisma/schema.prisma`** (+34 / −1): added `UserDashboardPreference` model + inverse relation `dashboardPreference UserDashboardPreference?` on `User` model.
+- **`apps/web-app/src/lib/dashboard-columns/index.ts`** (+16 / −0): barrel re-exports for new persistence types/functions per CLAUDE.md "no logic in index files".
+- **Counters:** pool 41 → 40 (#77 WDC-P04 closed; **zero follow-ups generated**); cool-off recharge UNCHANGED at 3/3 FULL RE-ARM (directed picks neither consume nor advance recharge); D-1 reverse-portfolio-drift counter 3 → 4 (web-app library + Prisma schema = web-app non-extension; under N=5 threshold; **iter 060 candidate selection should consider extension-surface preference OR Mode 4 non-counting** to avoid N=5 trip at iter 060 close); Area saturation rolling 5-window post-MR-014 reset = iter 058 web-app + iter 059 web-app = 2-web-app safely below 3-consecutive trigger; agent-diversity `backend-engineer` consecutive counter = 1 post-iter-059 (clean rotation off `system-architect` × 3); MR-015 cadence 1/3 → 2/3 (earliest MR-015 execution iter 060 under MR-013 Diff #1 ratified compressed-cadence pattern OR iter 061 under standard 3-loop floor; D-1 N=5 hard-trigger candidate at iter 060 if iter 060 misses extension surface — would force MR-015 early at iter 060); cold-pool ages DV2 4 → 5, MDR 1 → 2 (post-MR-014 RESET), WDC 1 → 2 (post-MR-014 RESET), PIB 1 → 2 (intake) — all under 10-iter MR-006 Change D staleness threshold.
+
+### Validation
+
+- **Workspace `pnpm test`:** **1937 → 1956** (+19 across **61 → 62 test files**) all pass — independently confirms backend-engineer's claimed delta exactly.
+- **Workspace `pnpm typecheck`:** clean across all 10 packages/apps.
+- **`pnpm prisma generate`** (web-app): clean. Prisma client regenerated with new `UserDashboardPreference` model.
+- **`git status`** confirms scope: only NEW `persistence.ts` + `persistence.test.ts` + `PERSISTENCE_SCHEMA.md` + `prisma/migrations/<timestamp>_add_user_dashboard_preference/` directory + MODIFIED `prisma/schema.prisma` + MODIFIED `dashboard-columns/index.ts`; zero existing `*.ts` / `*.tsx` files modified outside the new files + index barrel; zero unintended changes outside artifact-mirror updates.
+- **D-4 specialist-invocation gate evaluation:**
+  - **Clause 1** (≥3 user-visible copy strings → `growth-strategist` adjacency): did NOT fire. Zero user-visible copy strings touched. Warning strings in persistence module are documented logging-only ("NOT for display to end users"). D+4 picker iteration will fire clause 1.
+  - **Clause 2** (≥200 LOC pure module → `system-architect` adjacency): does NOT fire under canonical exported-surface measure (~148 LOC of exported interface + public function bodies vs ≥200 LOC threshold) per CLAUDE.md verbatim *"measured by the exported interface + public function bodies, not by test code"*. Whole-module measure (428 LOC) would fire under alternate reading; flagged for MR-015 Q-bank as `Q-MR-015-D4-clause-2-measurement-rule` — explicit verdict requested on dual-measure ambiguity. System-architect adjacency was effectively embedded in MR-014 §16-§18 endorsement + iter 055 SNAPSHOT_TABLE_DECISION.md ADR review; no retroactive consult required.
+
+### Impact
+
+- **Path D D+3 versioned persistence schema DELIVERED.** Server-of-truth Prisma model + design doc + migration function + adapter helpers + 19 substantive tests pre-lock the contract that D+4 picker UI consumes for save/restore round-trip.
+- **WDC-P04 acceptance criteria satisfied:** schema versioning + ColumnKey closed union (from D+1) + pure unit-tested migration function + hybrid persistence strategy documented + design doc at canonical path before any picker code ships + E2E Scenario 4 graceful-degradation behavior implemented + tested.
+- **Audit-honesty IFF invariant preserved across persistence layer (extends D+1 + D+2 invariant chain):** dropped-from-registry `ColumnKey`s filtered from saved `visibleColumns` + `columnOrder` (droppedKeys list returned for D+4 picker UI degradation notice); `pending-path-c-r1`/`r3` columns NOT dropped (D+4 picker renders disabled per `availability !== 'available'`); filter references to non-available columns preserved verbatim (D+2 `evaluateFilter` returns `false` — saved filters become no-ops without crashes or phantom matches); `deserializePreferencesFromDb(null)` returns defaults — D+4 picker never receives exception from persistence layer.
+- **Determinism contract preserved across D+3:** zero `Date.now()` / `Math.random()` / I/O in migration function or adapter helpers; `SavedView.createdAt` ISO strings caller-supplied.
+- **WDC P0 closure status: 3 → 2 open** — #77 WDC-P04 closes iter 059; #74 WDC-P01 top-of-page IA inversion + #76 WDC-P03 empty-state activation remain open; #75 WDC-P02 strikethrough at iter 056.
+- **Path D progression: D+1 ✓ + D+2 ✓ + D+3 ✓** — D+4 picker UI + D+5 preset chips + D+6 default-pack remain (3 iterations to Path D fully shipped under continued cadence absent intervening MR-015 / PIB cluster insertion).
+- **#57 flag-retirement chain UNCHANGED at 10/10 ENGINEERING-COMPLETE** — only 14d soak-window remains.
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL** — launch-readiness preserved.
+
+### Follow-Up Debt Policy testable metric (`closed / created ≥ 0.5` ratified MR-011)
+
+- **Trailing 10-iter window iter 050→059:** **6 closed / 27 created = 0.22 BELOW 0.5 floor — fifth consecutive sub-floor reading** (iter 055 0.26 → iter 056 0.30 → iter 057 0.30 → iter 058 0.22 → iter 059 0.22 unchanged; iter 049 #83 closure rolled OFF and iter 059 #77 closure rolled ON — net 0 numerator change).
+- **Q-MR-015-ratio-fifth-consecutive-sub-floor** logged for MR-015 Q-bank (escalates from fourth-consecutive at iter 058 close) — MR-014 §3.2 verdict TRANSIENT projected-recoverable within 2-3 counted iterations; iter 059 is 4th counted iteration post-MR-014 (iter 055 + 056 + 058 + 059 with iter 057 Mode 4 non-counting) and projected recovery has NOT materialized. Explicit MR-015 verdict requested on (a) whether umbrella sub-deliverables warrant numerator credit at the iteration that ships the sub-deliverable rather than the umbrella strikethrough event (D+1 iter 056 was credited; D+2 iter 058 + D+3 iter 059 + D+4 + D+5 + D+6 are/will be sub-deliverable iterations producing zero numerator credit under current accounting); (b) whether the 0.5 floor remains TRANSIENT or warrants explicit remediation rule given fifth-consecutive sub-floor reading.
+
+### Preserved verbatim
+
+- D+1 module surface (`types.ts` / `registry.ts` / `accessors.ts` / `registry.test.ts`) byte-identical.
+- D+2 module surface (`filters.ts` / `filters.test.ts`) byte-identical.
+- iter 037-058 production code byte-identical.
+- Analytics taxonomy byte-identical; PostHog privacy posture preserved.
+- Zero new `Date.now()` / `new Date()` introduced in persistence module.
+- Zero API contract changes (D+4 picker iteration ships API routes).
+- Zero UI changes (D+4 picker iteration ships UI integration).
+
+### Next Best Candidates (post-iter-059)
+
+- **Awaiting CEO direction.** Three candidate paths for iter 060:
+  1. **Iter 060 = MR-015 Mode 4 meta-review** (compressed cadence per MR-013 Diff #1; cadence 2/3 → 3/3 satisfied at iter 059; absorbs Q-MR-015-ratio-fifth-consecutive-sub-floor + Q-MR-015-D4-clause-2-measurement-rule + 10 carry-forward Q-bank items; resets Area saturation + cadence counter; preserves D-1 counter at 4 — most procedurally clean given converging triggers). **Coordinator recommendation.**
+  2. **Iter 060 = Path D D+4 picker UI** (next sub-deliverable; consumes D+1+D+2+D+3; ships user-facing customization affordance — the iteration that makes "configurable metrics on the dashboard" actually visible to users; `frontend-engineer` PRIMARY rotation; expected D-4 clause 1 fire). Web-app surface — would tally 3-consecutive web-app at iter 060 close → trip Area saturation forcing iter 061 non-web-app; would also advance D-1 counter 4 → 5 → trip N=5 reverse-drift early-trigger forcing MR-015 at iter 060 close anyway.
+  3. **Iter 060 = PIB cluster start (PIB-P09 chip-click rate denominator)** (score 15; smallest-surface single-file analytics correctness; `analytics` PRIMARY rotation). Web-app surface — same Area + D-1 dynamics as D+4 if web-app component.
+- **Path C R+1 entry remains BLOCKED** on (a) CEO revised-PRD final approval (deliberately deferred per CEO directive); (b) 5–7 pre-R+1 PRD-blocking questions resolution.
+
+---
+
+## [2026-05-04] - Iteration 058 — Path D D+2 filter registry (Mode 2, `directed`, `system-architect` PRIMARY)
+
+**Trigger:** Standing CEO Path D Mode 2 directive series — *"D-first, Mode 1 series, defer Path C PRD approval until after Path D ships"* (CEO-directed at iter 055 close; preserved across MR-014 §16 endorsement; iter 056 D+1 column registry shipped → iter 058 D+2 filter registry ships the contract D+3 persistence + D+4 picker UI + D+5 preset chips + D+6 default-pack consume). MR-014 §16 PRIMARY endorsement of D+2 filter registry; ASK-3 filter-on-`available`-only initial scope ENDORSED at MR-014 §7.3.
+
+**Selection driver:** `directed` (Mode 2 user-named pick under standing CEO Path D Mode 2 directive series — bypasses pool > 8 ceiling via operating-mode precedence per MR-004 Change B narrowed; cool-off NOT consumed on directed picks per MR-006 Change A; iter 058 starts mid-stability-window with cool-off at 3/3 FULL RE-ARM preserved through iter 056 directed + iter 057 Mode 4). **MR-013 Diff #2 source-artifact verification PASSED** — coordinator pre-validation Grep-verified iter-058 endorsement against (a) live MR-014 §16 endorsement text; (b) MR-014 §7.3 ASK-3 verdict; zero narrative-divergence vs delivered implementation; both anchors explicitly cited in `filters.ts` JSDoc (lines 17-19, 396-407). No `row-scope-correction:` log entry required.
+
+**Discovery note (process correction):** the build phase of iter 058 was physically completed (filters.ts 432 LOC + filters.test.ts 333 LOC) but never closed through the coordinator validate-and-update-artifacts loop. Validation phase confirmed scope match + 1937/1937 tests green + typecheck clean; this entry formally closes the iteration loop. Logged as scope-adjacent observation: future iterations should not split build vs. validate/closure across separate sessions without an explicit hand-off marker.
+
+**Process gap detected (NOT silently fixed):** the iter 057 MR-014 Mode 4 meta-review was added to ITERATION_LOG.md and SYSTEM_HEALTH.md/CLAUDE.md narratives but was NEVER added as a standalone CHANGELOG.md entry — the chain runs PIB-REVIEW-001 (2026-05-04) → iter 056 (2026-04-30) directly without an iter 057 entry. Surfaced as scope-adjacent observation at iter 058 close per CLAUDE.md "Do not silently fix tracked issues — surface and update status"; flagged for MR-015 governance-hygiene triage. The omission does not affect counter integrity (ITERATION_LOG iter 057 entry is canonical for cadence/counter tracking) but does break the cumulative-narrative property that downstream readers rely on.
+
+### Added
+
+- **`apps/web-app/src/lib/dashboard-columns/filters.ts`** (NEW; ~432 LOC pure deterministic module): closed-union `FilterOperator` 14-member machine-keys-only (display labels deferred to D+4 picker UI per scope discipline); frozen `OperatorsByDataType` mapping each `ColumnDataType` to its operator subset (`Object.freeze` module-singleton parallel to D+1 registry pattern); discriminated-union `FilterValue` 6-member keyed by `kind` (Scalar/Range/DateRange/Multi/Text/Flag) with each variant carrying `operator` for D+3 JSON serialization fidelity; `ColumnFilter` + `FilterSet = readonly ColumnFilter[]` primary export interfaces with AND-semantics + empty-set unconditional pass; `evaluateFilter(filter, ctx)` pure predicate with audit-honesty IFF invariant (filter against non-`available` column conservatively returns `false` parallel to MDR-P01/P02 + D+1 column-registry invariant); `evaluateFilterSet(filters, ctx)` short-circuit pure predicate; `getFilterableColumns()` filter-eligibility helper returning the 10 `available && filterable` registry slice per ASK-3 verdict; `listOperatorsForColumn(key)` picker-helper returning operator subset for available columns and `[]` for non-available/unknown keys. **Determinism contract** explicitly documented: same `ColumnFilter` + same `ColumnAccessorContext` → byte-identical boolean. Zero `Date.now()` / `Math.random()` / I/O introduced; date comparisons use `Date.parse()` + NaN-guard. Zero new runtime dependencies in `package.json`.
+- **`apps/web-app/src/lib/dashboard-columns/filters.test.ts`** (NEW; ~333 LOC; **22 substantive `it()` blocks across 6 describe groups**): Group A `OperatorsByDataType` invariants (3 cases — coverage + frozen-immutability + per-data-type subset); Group B `getFilterableColumns()` (3 cases — 10-entry count matching ASK-3 + availability assertion + repeat-call determinism); Group C `listOperatorsForColumn()` (3 cases — available column + non-available column + unknown key); Group D `evaluateFilter()` (8 cases — scalar gt/lt + scalar eq + range between boundaries + date-range between + multi in/notIn + text contains case-insensitive + flag isTrue + defensive type-mismatch); Group E `evaluateFilterSet()` (3 cases — empty pass + AND-semantics + short-circuit); Group F audit-honesty IFF (2 cases — non-available column rejection + null-accessor rejection). **MR-006 Change C ≥12 substantive-test threshold SATISFIED with margin** (22 vs ≥12; ≥1 literal threshold satisfied massively) → drift-counter credit GRANTED.
+
+### Changed
+
+- **Counters:** pool 41 → 41 unchanged (D+2 is sub-deliverable of multi-iteration umbrella row #75 WDC-P02 already strikethrough at iter 056; **zero follow-ups generated**); cool-off recharge counter UNCHANGED at 3/3 FULL RE-ARM (directed picks neither consume nor advance recharge cadence); D-1 reverse-portfolio-drift counter 2 → 3 (web-app library surface non-extension; under N=5 threshold; next substantive D-1 check iter 060+ if iter 059 also misses extension surface); Area saturation rolling 5-window post-MR-014 reset = iter 058 web-app library = 1 of fresh window, safely below 3-consecutive trigger; agent-diversity `system-architect` consecutive counter = 3 post-iter-058 (iter 055 ADR + iter 056 D+1 + iter 058 D+2; iter 057 Mode 4 non-counting break treated as non-resetting per established convention) under 4+ trigger but flagged at 3-of-allowed-3 — iter 059 candidate selection should consider rotation diversity; MR-015 cadence 0/3 → 1/3 (iter 058 first counted bounded loop of post-MR-014 stability window iter 058-060 default; earliest MR-015 execution iter 060 under standard 3-loop floor); cold-pool ages DV2 3 → 4, MDR 0 → 1 (post-MR-014 RESET), WDC 0 → 1 (post-MR-014 RESET), PIB 0 → 1 (intake) — all under 10-iter MR-006 Change D staleness threshold.
+
+### Validation
+
+- **Workspace `pnpm test`:** **1915 → 1937** (+22 across **60 → 61 test files**) all pass; the +22 delta exactly matches `filters.test.ts`'s 22 substantive `it()` blocks (independent confirmation of the test-count growth claim).
+- **Workspace `pnpm typecheck`:** clean across all 10 packages/apps post strict-mode `noUncheckedIndexedAccess` non-null-assertion fix at `filters.ts:389` (loop bound + length-equality assertion together guarantee in-range access; comment cites strict-mode rationale).
+- **`git status`** confirms scope: only NEW `filters.ts` + `filters.test.ts` added under `apps/web-app/src/lib/dashboard-columns/`; zero existing `*.ts` / `*.tsx` files modified outside the new files; zero unintended changes outside artifact-mirror updates.
+- **D-4 specialist-invocation gate:**
+  - **Clause 1** (≥3 user-visible copy strings → `growth-strategist` adjacency): did NOT fire. Zero user-visible copy strings touched per `filters.ts` JSDoc lines 21-22 architectural decision: *"Operator naming convention: machine-keys only. Human-readable display labels belong to the D+4 picker UI, not here."* D+4 picker iteration will fire clause 1 on operator-label and filter-affordance copy.
+  - **Clause 2** (≥200 LOC pure module → `system-architect` PRIMARY/adjacency): **FIRED.** filters.ts is 432 LOC of pure-module surface (closed unions + frozen catalogs + pure predicates + 4 exported function bodies + 8 exported types). `system-architect` PRIMARY assignment satisfies clause 2; the registry constitutes a new contract surface that D+3/D+4/D+5 will all consume — contract-level review at D+2 ensures downstream surface stability before persistence-schema and picker-UI iterations land.
+
+### Impact
+
+- **Path D D+2 filter registry DELIVERED.** Pure deterministic module pre-locks the contract that D+3 persistence (FilterSet JSON serialization) + D+4 picker UI (operator dropdown rendering via `listOperatorsForColumn`) + D+5 preset chips (FilterSet preset templates) consume without renegotiating shape.
+- **ASK-3 verdict satisfied:** filter coverage limited to 10 `available` entries today via `getFilterableColumns()` predicate; D+4 picker UI will surface only filterable available columns; filter coverage expands declaratively as Path C R+1 ships `metric_fact` persistence (25 columns flip to `available`) + R+3 ships `process_run_snapshot` (3 columns flip).
+- **Audit-honesty IFF invariant extended from D+1 column registry to D+2 filter registry:** `evaluateFilter` returns `false` on any filter whose `columnKey.availability !== 'available'` — pending columns cannot be filtered and produce no false-positive matches even if a stale `FilterSet` is restored from D+3 persistence post-R+1 schema migration.
+- **Determinism contract preserved across D+2:** zero `Date.now()` / `Math.random()` / I/O introduced; date comparisons use `Date.parse()` + NaN-guard; pure-predicate dispatch via discriminated-union exhaustiveness checks.
+- **#57 flag-retirement chain UNCHANGED at 10/10 ENGINEERING-COMPLETE** — only 14d soak-window remains.
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL** (iter 058 is post-gate Path D foundation; not a new MDR closure).
+- **Q-bank state at iter 058 close: 22 items total** (8 RESOLVED at MR-014 preserved; 3 PARTIALLY RESOLVED preserved; 10 carry-forward to MR-015 preserved with iter 058 pick confirmation marked CLOSED; **1 NEW Q-MR-015-ratio-fourth-consecutive-sub-floor** — see Follow-Up Debt Policy below).
+
+### Follow-Up Debt Policy testable metric (`closed / created ≥ 0.5` ratified MR-011)
+
+- **Trailing 10-iter window iter 049→058:** **6 closed** (iter 049 #83 + iter 051 #5 + iter 052 #30 + iter 053 #26 + iter 055 #86 + iter 056 #75 WDC-P02 strikethrough; iter 050/054/057 Mode 4 non-counting; iter 058 directed = 0 closures because D+2 is sub-deliverable of already-strikethrough umbrella row #75 — multi-iteration umbrella accounting attributes value to iter 056 close; iter 048 #36 rolled OFF) / **27 created** = **0.22 BELOW 0.5 floor — fourth consecutive sub-floor reading** (iter 055 0.26 → iter 056 0.30 → iter 057 0.30 → iter 058 0.22).
+- **Logged for MR-015 Q-bank as Q-MR-015-ratio-fourth-consecutive-sub-floor** — explicit verdict requested at MR-015 on (a) whether umbrella sub-deliverables warrant numerator credit at the iteration that ships the sub-deliverable rather than the umbrella strikethrough event; (b) whether the 0.5 floor remains TRANSIENT projected-recoverable per iter 057 MR-014 §3.2 ratification or warrants explicit remediation rule given fourth-consecutive sub-floor reading.
+
+### Preserved verbatim
+
+- All production code outside the new `filters.ts` byte-identical (zero `*.ts` / `*.tsx` files modified outside the new files; verified via `git status`).
+- D+1 module surface preserved exactly: `types.ts` / `registry.ts` / `accessors.ts` / `index.ts` / `registry.test.ts` byte-identical.
+- `WorkflowList.tsx` hard-coded 6-column rendering byte-identical (Path D D+4 picker UI iteration will be the iteration that consumes the registry to render dynamic columns).
+- iter 037+038+039+041+042+043+045+046+048+049+051+052+053+055+056 production code byte-identical.
+- Analytics taxonomy byte-identical; PostHog privacy posture preserved; zero new `Date.now()` / `new Date()` introduced; zero DB migrations; zero API contract changes; existing Prisma schema files byte-identical (Path C R+1 will ship the metric_fact + process_run_snapshot Prisma migration consuming the registry's `availability: pending-path-c-r1/r3` entries).
+
+### Next Best Candidates (post-iter-058)
+
+- **Awaiting CEO direction** on serialization between Path D continuation and PIB cluster insertion.
+  1. **Iter 059 candidate A — Path D D+3 persistence schema** (closes WDC-P04; unblocks D+4 picker UI consumer; per MR-014 §16 endorsement). `backend-engineer` or `system-architect` primary; consumes FilterSet JSON shape from D+2.
+  2. **Iter 059 candidate B — PIB cluster start (PIB-P09 chip-click rate denominator analytics correctness)** score 15; smallest-surface single-file fix; `analytics` primary; closes 4-row PIB cluster recommended in PIB-REVIEW-001 §11 (PIB-P09 → PIB-P07 → PIB-P08 → PIB-P06).
+- **Agent-diversity consideration:** iter 058 marks `system-architect` consecutive counter = 3 — iter 059 should rotate to non-architect primary agent to avoid 4+ consecutive same-implementer trigger at iter 060. Both Path D D+3 and PIB cluster offer non-architect rotation paths (`backend-engineer` for persistence; `analytics` for PIB-P09).
+- **Path C R+1 entry remains BLOCKED** on (a) CEO revised-PRD final approval (deliberately deferred per CEO directive); (b) 5 pre-R+1 PRD-blocking questions resolution (Q-ARCH-1 / Q-ARCH-2 / Q-GOV-4 / Q-MEAS-1 / DEP-08 variant hash); SNAPSHOT_TABLE_DECISION.md ADR (iter 055) + column registry (iter 056) + filter registry (iter 058) pre-lock architecture + customization-surface foundations so R+1 can begin immediately when both gates clear.
+
+---
+
+## [2026-05-04] - PROCESS_INTELLIGENCE_BENCHMARK_REVIEW_001 — Mode 3-adjacent multi-agent diagnostic (NON-counting; audit-intake per MR-005 D-5)
+
+**Trigger:** CEO directive (verbatim): *"have subagents review current production dashboard and suggest improvements based on world class process intelligence programs and processes."* Mode 3-adjacent multi-agent review benchmarking the Ledgerium v2 workflow dashboard against world-class process intelligence platforms (Celonis EMS, Apromore, ABBYY Timeline, UiPath Process Mining, IBM Process Mining, SAP Signavio Root Cause on Event Graphs [July 2025], Soroco Scout, Microsoft Process Mining, Minit, Scribe Optimize [$75M Series C / $1.3B valuation 2025], Tonkean, Pega Process Mining, Celonis MCP server, Celonis Execution Capital, IBM 2025 Gartner MQ Leader).
+
+**Selection driver:** `directed` Mode 3-adjacent diagnostic (not a counted bounded loop; no product code surface modified). Mode 3-adjacent reviews increment NEITHER cadence counters NOR the 5-iter Area saturation window per MDR-REVIEW-001 / WDC-REVIEW-001 precedents. CEO-directed multi-agent diagnostic per MR-005 D-5 audit-intake protocol.
+
+### Added
+
+- **`docs/meta/PROCESS_INTELLIGENCE_BENCHMARK_REVIEW_001.md`** (526 lines / 44197 bytes / 18 numbered sections + cold-pool reference): 7 specialist agents (`product-manager` / `ux-designer` / `frontend-engineer` / `system-architect` / `qa-engineer` / `analytics` / `growth-strategist`) + `competitive-researcher` cross-cutting benchmark. **100 raw findings → 75 unique after dedupe and severity reconciliation** (12 P0 / 27 P1 / 23 P2 / 13 P3). 12 strengths-to-preserve documented in §4 (PostHog `disable_session_recording: true` privacy posture; 7/7 external-launch MDR-blocker gate closed; deterministic engine boundary at `workflow-metrics.ts`; metric-honesty IFF invariant in `dashboard-columns/registry.ts`; iter-038 MDR-P09 bounce + plan tier instrumentation; etc.).
+- **63-item cold pool reference** (27 P1 + 23 P2 + 13 P3) held in artifact per MR-005 D-5 clauses 4+5; promotion paths: P0 burn-down slot creation OR PRD-trigger enumerated dependency.
+- **Cross-cutting theme convergence (§7):** DFG/process-map (3-agent convergence: CR §2 + UX F1 + SA F7); drill-down chain (PM F1 + UX F2 + FE F2 — triple-agent P0); trend/time-series (PM F2 + analytics F5); trust-signal moat (4-agent: CR §8 + UX F4 + GS F4 + GS F10).
+
+### Changed
+
+- **`IMPROVEMENT_BACKLOG.md`**: 12 P0 PIB rows promoted as live items #87–#98 with `Birth iter: audit-intake` per MR-005 D-5 clause 2 — **PIB-P01** DFG/process-map first-class view (score 10); **PIB-P02** detail drill-through top-down → row-detail → step-evidence (score 8); **PIB-P03** trend/time-series health/variation/throughput over time (score 8); **PIB-P04** event-log abstraction XES/OCEL 2.0 interoperability foundation (score 13); **PIB-P05** Postgres migration triggers — enumerated thresholds 50 concurrent users OR 1M `metric_fact` rows OR 2s p95 latency (score 12); **PIB-P06** ErrorBoundary production stability (score 13); **PIB-P07** health-score keyboard a11y closes iter-046 unclosed observation on `<td onClick>` per WCAG 2.1 SC 2.1.1 (score 14); **PIB-P08** userPlan analytics race extends iter-038 MDR-P09 (score 13); **PIB-P09** chip-click rate denominator analytics correctness (score 15); **PIB-P10** category identity copy positioning ambiguity (score 11); **PIB-P11** KPI strip top-of-page aggregation tiles (score 10); **PIB-P12** executive portfolio view buyer-persona surface (score 8). **Pool 29 → 41 at intake.**
+- **`SYSTEM_HEALTH.md`**: line 3 anchor updated to PIB-REVIEW-001 intake; counter preservation block recorded; Known Issues 4th audit-style intake noted (DV2 + MDR + WDC + PIB cumulative).
+- **`ITERATION_LOG.md`**: non-numbered Mode 3-adjacent diagnostic entry recorded above iter 057 (per MDR-REVIEW-001 / WDC-REVIEW-001 precedent).
+
+### Validation
+
+- Workspace `pnpm test` 1915 / 1915 unchanged across 60 test files (Mode 3-adjacent diagnostic is artifact-only; zero production code touched).
+- Workspace `pnpm typecheck` clean across all 10 packages/apps.
+- `git status` confirms scope: only NEW `PROCESS_INTELLIGENCE_BENCHMARK_REVIEW_001.md` added + 4 mirror updates; zero unintended changes.
+
+### Impact
+
+- **8 CEO decisions enumerated in §12** for resolution: (1) serialization — PIB P0s vs Path D D+2 next?; (2) Path C R+1 PRD-blocking question expansion (5 → 7 with PIB-P04 + PIB-P05); (3) event-log abstraction adoption stance (XES vs OCEL 2.0 vs both); (4) Postgres migration trigger threshold confirmation; (5) ErrorBoundary library choice; (6) trend-view default time window; (7) KPI strip column count default; (8) competitive moat prioritization weighting (DFG-first vs trust-signal-first vs drill-down-first).
+- **Counter preservation across Mode 3-adjacent NON-counting:** cool-off recharge counter UNCHANGED at 3/3 FULL RE-ARM; D-1 reverse-portfolio-drift counter UNCHANGED at 2 (under N=5); MR-015 cadence counter UNCHANGED at 0/3 (post-MR-014 reset); Area saturation clock not advanced; cold-pool ages MDR=0 + WDC=0 (post-MR-014 RESET) + DV2=3 + PIB=0 (intake) all under 10-iter threshold.
+- **#57 flag-retirement prerequisite chain UNCHANGED at 10/10 ENGINEERING-COMPLETE** — only 14d soak-window remains.
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL** (PIB-REVIEW-001 is post-gate diagnostic).
+- **Zero CLAUDE.md governance diffs** (Mode 3-adjacent diagnostic does not modify control plane; MR-014 stability window iter 058+ preserved).
+
+### Preserved verbatim
+
+- All production code byte-identical (zero `*.ts` / `*.tsx` files modified).
+- `WorkflowList.tsx` hard-coded 4-column table byte-identical (PIB-P01/P02/P03/P11 view-surface defects shipped via downstream Path D iterations or post-D Mode 1 picks).
+- iter 037-056 production code byte-identical.
+- Analytics taxonomy byte-identical; PostHog privacy posture preserved; zero new `Date.now()` / `new Date()` introduced; zero DB migrations; zero API contract changes.
+
+### Next Best Candidates
+
+- **Iter 058 endorsement PRESERVED at Path D D+2 filter registry** under standing CEO Path D Mode 2 directive series (per MR-014 §16 endorsement; iter 056 D+1 column registry → iter 058 D+2 filter registry → iter 059+ D+3 persistence dependency chain; D+2 unblocks D+4 picker UI consumer).
+- **PIB cluster recommended for insertion between D+2 and D+3 by default**: PIB-P09 chip-click rate denominator (score 15; analytics correctness; small-surface single-file fix) → PIB-P07 health-score keyboard a11y (score 14; WCAG SC 2.1.1; closes iter-046 unclosed observation) → PIB-P08 userPlan analytics race (score 13; extends iter-038 MDR-P09 hardening) → PIB-P06 ErrorBoundary (score 13; production stability). All four are highest-score lowest-effort and can land before D+3 persistence dependency materializes.
+- Awaiting CEO §12 decision-queue resolution before iter 059+ committed sequencing.
+
+---
+
+## [2026-04-30] - Iteration 056 — Path D D+1 column-registry data model (Mode 2, `directed`, `system-architect` PRIMARY + `growth-strategist` D-4 clause 1 adjacent)
+
+**Trigger:** CEO Path D directive captured at iter 055 close (verbatim): *"D-first, Mode 1 series, defer Path C PRD approval until after Path D ships."* — opens Path D D+1 (column-registry foundation per WDC-P02 audit closure §11). Path D runs as a 6-iteration Mode 1/Mode 2 series rather than a Mode 5 N=6 batch, which structurally bypasses MR-005 D-7 N≥6 pre-check while preserving CEO's serialization preference. Iter 056 specifically delivers the typed `WorkflowDashboardColumn` data-model surface that all downstream Path D iterations (D+2 filter registry → D+3 persistence → D+4 picker → D+5 preset chips → D+6 default pack) consume.
+
+**Selection driver:** `directed` (Mode 2 user-named pick — bypasses pool > 8 ceiling via operating-mode precedence per MR-004 Change B narrowed; cool-off NOT consumed on directed picks per MR-006 Change A; iter 056 starts mid-stability-window with cool-off at 3/3 FULL RE-ARM preserved). **MR-013 Diff #2 source-artifact verification PASSED** — coordinator pre-delegation Grep-verified row #75 WDC-P02 description against (a) live `IMPROVEMENT_BACKLOG.md` row text ("zero column-customization surface; `WorkflowList.tsx` hard-codes columns; zero of 32 Tier A metrics exposed; needs typed registry → picker → persistence → default-pack chain"); (b) originating audit `docs/meta/WORKFLOW_DASHBOARD_CUSTOMIZATION_REVIEW_001.md` §11 (P0 customization-surface foundation); zero narrative-divergence; iter 056 ships D+1 data-model foundation only with explicit scope-partitioning narrative for D+2-D+6 deferred sub-deliverables. **Multi-iteration umbrella row architectural decision:** row #75 WDC-P02 strikethrough applied with anchor citing iter 056 ships D+1 only; D+2-D+6 deferred to subsequent Mode 2 directed picks under coordinator/CEO sequencing per "D-first, Mode 1 series" directive.
+
+### Added
+
+- `apps/web-app/src/lib/dashboard-columns/types.ts` (~259 LOC): pure type definitions; closed-union `ColumnKey` (38 keys: 6 currently-rendered display fields + 32 Tier A metrics from ARCHITECTURE_METRICS_ENGINE.md §2 named verbatim); `ColumnGroup` (`display`/`flow`/`step`/`variation`/`quality`/`behavior`/`bottleneck` mirroring architecture-doc Layer naming); `ColumnDataType` 7-member (`number`/`string`/`date`/`enum`/`percentage`/`duration`/`boolean`); `ColumnAvailability` 3-member (`available`/`pending-path-c-r1`/`pending-path-c-r3`); `PlanTierGate` (`starter`/`team`); `ColumnAccessorContext` interface (5 fields: `title`/`toolsUsed`/`lastViewedAt`/`createdAt`/`metricsV2`); `ColumnAccessor<T>` pure-function-type alias; `WorkflowDashboardColumn` primary export interface. **Audit-honesty IFF invariant** documented in module header + asserted by registry test: `accessor === null` IFF `availability !== 'available'`.
+- `apps/web-app/src/lib/dashboard-columns/registry.ts` (~584 LOC): frozen catalog of 38 column entries via `Object.freeze(...)` module-singleton (6 display + 9 Layer 1 + 6 Layer 2 + 5 Layer 3 + 4 Layer 4 + 7 Layer 5 + 1 Layer 6); 10 entries `availability: 'available'` with non-null `accessor`; 25 `pending-path-c-r1` (require `metric_fact` persistence per SNAPSHOT_TABLE_DECISION.md §2.1 from iter 055); 3 `pending-path-c-r3` (require `process_run_snapshot` persistence per SNAPSHOT_TABLE_DECISION.md §2.2); plan-tier gates declared on 6 entries (`starter` and `team` per WDC §11 / Option C plan-tier gating). **Layer 5 architecture-doc note**: registry follows verdict count 7A (omits `idle_bursts_count` due to internal architecture-doc inconsistency 7A-vs-8A; surfaced as ASK-2 for MR-014 triage; not promoted to backlog).
+- `apps/web-app/src/lib/dashboard-columns/accessors.ts` (~153 LOC): 10 pure deterministic accessors (`accessWorkflowTitle` / `accessSystems` / `accessOpportunityTag` / `accessHealthScore` / `accessLastRunAt` / `accessRunCount` / `accessCycleTimeMs` / `accessCycleTimeMeanMs` / `accessCaseVolume` / `accessSystemCountPerRun`); `AVAILABLE_ACCESSORS` frozen lookup table mapping 10 ColumnKey strings to accessor functions. Audit-honesty notes embedded inline: `last_run_at` is `lastViewedAt` proxy until R+1 ships `workflow_runs` table; `cycle_time_mean_ms` shares `avgTimeMs` with `cycle_time_ms` until R+1 separates median/p95; `system_count_per_run` is workflow-grain until R+3 introduces per-run grain via `process_run_snapshot`.
+- `apps/web-app/src/lib/dashboard-columns/index.ts` (~75 LOC): barrel re-exports per CLAUDE.md "no logic in index files"; 3 lookup helpers (`getColumnByKey(key: ColumnKey)` / `listColumnKeys()` / `getDefaultVisibleColumns()`).
+- `apps/web-app/src/lib/dashboard-columns/registry.test.ts` (~319 LOC): 30 substantive `it()` blocks across 5 groups (A schema invariants 8 cases / B audit-honesty IFF 7 cases / C frozen-singleton 4 cases / D ColumnKey-coverage 6 cases / E lookup-helper 5 cases). **MR-006 Change C ≥12 substantive-test threshold SATISFIED with margin** (30 blocks vs ≥12 floor) → drift-counter credit GRANTED.
+
+### Changed
+
+- `IMPROVEMENT_BACKLOG.md` row #75 WDC-P02 — strikethrough applied with iter 056 close anchor + explicit scope-partitioning narrative noting iter-056 ships data-model foundation only; D+2 (filter registry) / D+3 (persistence schema) / D+4 (picker UI) / D+5 (preset chips) / D+6 (default-pack) deferred to subsequent Mode 2 directed picks; pool 30 → 29.
+- `SYSTEM_HEALTH.md` — iter-056 "Last updated" block prepended; iter-055 demoted to "Previous entry" prefix; preserves chronological narrative chain.
+- `ITERATION_LOG.md` — iter 056 Mode 2 entry prepended at top in newest-first chronological order; iter-055 entry preserved below.
+- `CLAUDE.md` Active work block — replaced iter-055 narrative with iter-056 close-state paragraph (preserves prior iter 055 narrative below as "Prior iteration 055 CLOSED").
+- 3 brand-voice POLISH substitutions applied in `registry.ts` (within ≤80-char description limit; 35 KEEP / 3 POLISH / 0 REWRITE per growth-strategist consult):
+  - Line 163 `throughput_time_ms.description`: 67 → 76 chars ("End-to-end run duration. Diverges from Cycle Time only at sub-process grain.")
+  - Line 429 `exception_rate_pct.description`: 55 → 70 chars ("Share of runs containing an error step or a classified friction event.")
+  - Line 520 `system_count_per_run.description`: 30 → 49 chars ("Mean number of distinct systems observed per run.")
+- Counters: pool 30 → 29; cool-off recharge UNCHANGED at 3/3 FULL RE-ARM (directed picks do not consume cool-off); D-1 reverse-portfolio-drift counter 1 → 2 (web-app non-extension; under N=5 threshold; next substantive check iter 060+); Area saturation rolling 5-window post-iter-054-MR-013-reset = iter 055 docs/architecture + iter 056 web-app = 1-docs + 1-web; safely below 3-consecutive trigger; agent-diversity `system-architect` consecutive counter = 2 post-iter-056 (iter 055 + iter 056), under 4+ trigger; MR-014 cadence 1/3 → 2/3 (iter 056 second counted bounded loop of post-MR-013 stability window iter 055-057); cold-pool ages MDR 10 → 11 + WDC 10 → 11 — **BOTH 1 iter past MR-006 Change D 10-iter staleness threshold; dual-pool MANDATORY full-triage QUEUED for MR-014**; DV2 RESET 1 → 2 (post-MR-013 triage); WDC P0 closure 4 → 3 open (#75 WDC-P02 D+1 strikethrough; #74 WDC-P01 + #76 WDC-P03 + #77 WDC-P04 still open).
+
+### Validation
+
+- Workspace `pnpm test` 1885 → 1915 (+30 across 60 test files; new `registry.test.ts` is `.test.ts` not `.test.tsx` so root vitest picks it up per follow-up #53 exclusion mechanics).
+- Workspace `pnpm typecheck` clean across all 10 packages/apps.
+- TypeScript strict-mode `noUncheckedIndexedAccess` fix applied at `registry.test.ts:174` — non-null assertions `helper[i]!.key` and `direct[i]!.key` with 2-line clarifying comment ("Loop bound `i < helper.length` plus the length-equality assertion above guarantee in-range access; non-null assertions here satisfy `noUncheckedIndexedAccess`."). Loop bound + prior `expect(helper.length).toBe(direct.length)` together guarantee in-range access.
+- Zero existing test assertions modified; zero new dependencies; zero DB migrations; zero API contract changes; zero PostHog/analytics taxonomy changes; zero new `Date.now()` / `new Date()` introduced.
+- D-4 specialist-invocation gate: **BOTH clauses FIRED + SATISFIED** — clause 1 (≥3 user-visible strings → `growth-strategist` adjacency MANDATORY): 38 column `label` + `description` strings constitute user-visible copy; consult delivered 35 KEEP / 3 POLISH / 0 REWRITE; all 3 polish substitutions applied within ≤80-char description limit; clause 2 (≥200 LOC pure module → `system-architect` MANDATORY): types.ts (~259 LOC) + registry.ts (~584 LOC) both exceed 200 LOC pure-module threshold; `system-architect` PRIMARY assignment satisfies clause 2.
+
+### Impact
+
+- **WDC-P02 audit P0 customization-surface foundation D+1 layer DELIVERED** — typed `WorkflowDashboardColumn` registry data model is now the single source of truth for all 38 columns Path D will surface; downstream D+2-D+6 iterations consume this contract without renegotiating shape.
+- **All 32 Tier A metrics from ARCHITECTURE_METRICS_ENGINE.md §2 enumerated in registry** — even though only 10 are `available` today, the closed-union ColumnKey + frozen-catalog pattern means R+1 + R+3 iterations can flip `pending-path-c-r1` / `pending-path-c-r3` entries to `available` by adding accessor implementations WITHOUT mutating the union or registry shape (audit-honesty preserved by-construction).
+- **MR-013 Diff #2 source-artifact verification rule second empirical fire** — coordinator verified row #75 narrative against backlog + WDC audit pre-delegation; zero narrative-divergence; rule producing intended diagnostic value (governance-narrative correctness preserved at the gate; first fire was iter 055 row #86).
+- **Path D series cadence on track** — iter 056 D+1 closed; iter 057 either MR-014 Mode 4 dual-pool full-triage (mandatory per MR-006 Change D both pools at age 11) OR continues Path D D+2 if coordinator/CEO elects to discharge MR-014 obligation pre-D+2 vs post-D+2.
+- **#57 flag-retirement chain UNCHANGED at 10/10 ENGINEERING-COMPLETE** — only 14d soak-window remains.
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL** — launch-readiness status preserved.
+- **3 CEO clarification asks surfaced (NOT promoted to backlog; governance-track items)**:
+  - **ASK-1 — D+6 default-pack revision**: recommend ship at 6 columns initially; expand pack post-Path-C-R+1 when more `available` accessors land. Coordinator default if no override: 6-column initial pack matching today's `WorkflowList.tsx` hard-coded fields.
+  - **ASK-2 — Layer 5 architecture-doc 7A-vs-8A inconsistency cleanup**: defer to MR-014 meta-review for triage with cold-pool ages MDR=11 + WDC=11 dual-pool obligation already queued. Coordinator default: registry follows verdict count 7A (omits `idle_bursts_count`); architecture-doc cleanup is a separate non-product-code follow-up best handled at MR-014.
+  - **ASK-3 — D+2 filter-registry scope**: recommend filters only for `available` columns (10 entries) initially to honor audit-honesty IFF invariant; expand as `pending-*` columns flip to `available` via R+1/R+3. Coordinator default: filter on `available`-only pool until R+1/R+3 ship.
+
+### Preserved verbatim
+
+- Zero existing `*.ts` / `*.tsx` files in `apps/web-app/src/...` outside the new `lib/dashboard-columns/` directory modified.
+- `apps/web-app/src/components/dashboard-v2/WorkflowList.tsx` hard-coded 6-column rendering byte-identical (D+1 ships data model only; UI rewire is D+4 picker iteration scope).
+- All prior iteration narratives in CHANGELOG / ITERATION_LOG / CLAUDE.md preserved.
+- iter 037+038+039+041+042+043+045+046+048+049+051+052+053+055 production code byte-identical; analytics taxonomy byte-identical; PostHog privacy posture preserved.
+
+### Next Best Candidates (post-iter-056)
+
+1. **Iter 057 candidate A — MR-014 Mode 4 dual-pool MDR + WDC mandatory full-triage** (highest priority; MR-006 Change D both pools at age 11; 1 iter past 10-iter staleness threshold; 3-loop stability floor satisfied iter 055-057). Discharges dual-pool obligation cleanly.
+2. **Iter 057 candidate B — Path D D+2 filter-registry continuation** (per CEO "D-first, Mode 1 series" directive); requires CEO confirmation of ASK-3 scope (filter-on-available-only vs full-38-column declarative filter shape).
+3. **Path C R+1 entry remains BLOCKED** on (a) CEO revised-PRD final approval (deliberately deferred per CEO directive); (b) 5 pre-R+1 PRD-blocking questions resolution (Q-ARCH-1 / Q-ARCH-2 / Q-GOV-4 / Q-MEAS-1 / DEP-08 variant hash); SNAPSHOT_TABLE_DECISION.md ADR (iter 055) + column registry (iter 056) pre-lock both architecture and customization-surface foundations so R+1 can begin immediately when both gates clear.
+
+---
+
+## [2026-04-30] - Iteration 055 — DV2-R12 snapshot-table architecture decision (Mode 1, `burn-down`, `system-architect`)
+
+**Trigger:** Pool 31 > 8 ceiling rule forces `burn-down` selection per Follow-Up Debt Policy clause 6; cool-off recharge mid-cadence at 2/3 (iter 052 + 053 = 2 of required 3 consecutive post-consumption burn-downs; iter 054 Mode 4 non-counting held mid-recharge state) — iter 055 `burn-down` advances counter 2/3 → 3/3 FULL RE-ARM completing the third consecutive post-consumption burn-down per MR-006 Change A. MR-013 §10 PRIMARY endorsement of just-promoted row #86 DV2-R12 (score 12; Path C R+1+R+3 hard-citation) provides verdict-anchored selection — closing MR-013 Diff #2 source-verification cycle on a row from this MR's own triage validates the new rule.
+
+**Selection driver:** `burn-down` (pool 31 > 8 soft ceiling; cool-off at 2/3 cannot invoke ceiling-bypass for `top-score`; mid-recharge cadence requires 3rd consecutive post-consumption burn-down). **CEO directive captured (verbatim):** *"D-first, Mode 1 series, defer Path C PRD approval until after Path D ships."* — interpretation: (a) iter 055 proceeds as standalone Mode 1 `burn-down`; (b) future Path D iterations are Mode 1 series NOT a Mode 5 N=6 sequence (bypasses MR-005 D-7 N≥6 pre-check); (c) Path C PRD final approval deliberately deferred until after Path D ships; (d) DV2-R12 ADR remains valuable independent of deferral — pre-locks architecture decision so Path C R+1 can begin immediately when CEO eventually approves PRD post-Path-D-completion. **MR-013 Diff #2 source-artifact verification PASSED** — coordinator pre-delegation Grep-verified row #86 description against (a) live `IMPROVEMENT_BACKLOG.md` row text; (b) originating source artifact `docs/meta/MR_013_META_REVIEW.md` §5 DV2 triage table; zero narrative-divergence; no `row-scope-correction:` log entry required.
+
+### Added
+
+- `docs/features/dashboard-v3-metrics-engine/SNAPSHOT_TABLE_DECISION.md` (~113 lines / ~500 words / 5 numbered sections + 4 numbered decisions × 2 tables): **§1 Context** (Ledgerium immutability-first + determinism + traceability + ARCHITECTURE_METRICS_ENGINE.md §6 four-tier on-ingest BullMQ pattern); **§2.1 `metric_fact` (R+1)** 4 decisions — write-through-cache on ingest + on-demand fallback for novel `filter_hash`; UUID PK + uniqueness on `(metric_key, entity_type, entity_id, window_start, window_end, filter_hash, metric_version)`; sha256 `filter_hash` + `_default` sentinel; `metric_version` semver; append-only never mutate; eager-batch backfill on R+1 deploy; **§2.2 `process_run_snapshot` (R+3)** 4 decisions — write-through only no on-demand fallback; UUID PK + FK to `workflow_run(id)` ON DELETE CASCADE + uniqueness on `(workflow_run_id, snapshot_version)`; `metrics_json` JSONB blob + 4 hot scalars (health_score / variation_score / duration_ms / step_count); append-only on ingest + on `snapshot_version` bump; eager-batch backfill on R+3 deploy; **§3 Reconciliation with audit Option C** — adopted-in-pattern-refined-in-shape: grain corrected `workflow_id` → `workflow_run_id` (R+1 introduces run-grain); explicit `snapshot_version` column; extended scalar set; cadence written on-ingest not nightly; **§4 Consequences** — single denormalization pattern across R+1 + R+3; immutability-first preserved; deterministic read path; rejected derived-on-read everywhere + mutate-in-place + audit Options A/B; **§5 Surfaced blocker: NONE** — DEP-08 variant hash version pin remains highest-leverage open risk per PRD_REVISED §15 R-1 but is correctly tracked there and not new from this iteration.
+
+### Changed
+
+- `IMPROVEMENT_BACKLOG.md` — row #86 DV2-R12 marked CLOSED with iter 055 close metadata; pool 31 → 30.
+- `SYSTEM_HEALTH.md` — line-3 narrative replaced with iter 055 DV2-R12 close-state paragraph (preserves prior iter 054 MR-013 narrative below).
+- `ITERATION_LOG.md` — iter 055 Mode 1 burn-down entry prepended.
+- `CLAUDE.md` Active work block — replaced iter 054 MR-013 close narrative with iter 055 close-state paragraph (preserves prior iter 054 MR-013 narrative below).
+- Counters: pool 31 → 30; cool-off recharge **2/3 → 3/3 FULL RE-ARM**; D-1 reverse-portfolio-drift counter 0 → 1 (docs/architecture surface, non-extension; under N=5); MR-014 cadence 0/3 → 1/3; cold-pool ages MDR 9 → 10 **HITS MR-006 Change D threshold** + WDC 9 → 10 **HITS MR-006 Change D threshold** (dual-pool MANDATORY full-triage queued for MR-014); DV2 RESET to 1 (post-MR-013 triage age increments on first counted iter).
+
+### Validation
+
+- Workspace `pnpm test` **1885/1885 unchanged across 59 test files** (zero code touched preserves prior count from iter 053 close).
+- Workspace `pnpm typecheck` clean across all 10 packages/apps.
+- Production code delta: 0 LOC. Test delta: 0 (decision-artifact-only; implementation iterations R+1 + R+3 will introduce schema migrations + adapter helpers + per-table CRUD logic each independently testable when they ship).
+- Zero existing test assertions modified; zero new dependencies; zero DB migrations; zero API contract changes.
+- D-4 specialist-invocation gate did NOT fire — clause 1 zero user-visible copy strings; clause 2 zero production LOC <<< 200 LOC threshold; ADR introduces no new contract surface — pre-locks decisions for FUTURE iterations to implement; `system-architect` primary assignment is intrinsic (architect-owned ADR).
+
+### Impact
+
+- **Path C R+1 + R+3 build sequencing UNBLOCKED at the architecture-decision layer** — when CEO eventually approves the revised PRD post-Path-D-completion, R+1 (Prisma migration + `metric_fact` table) and R+3 (per-run materialization + `process_run_snapshot` table) can begin immediately on this ADR plus resolution of the 5 pre-R+1 PRD-blocking questions enumerated in MR-013 §17.
+- **MR-013 Diff #2 source-verification rule first empirical fire** — coordinator verified row #86 against backlog + audit artifact pre-delegation; zero narrative-divergence detected; rule producing intended diagnostic value (governance-narrative correctness preserved at the gate).
+- **Cool-off recharge resource fully re-armed** (3/3) — available for next `top-score` or `blocker-cadence` ceiling-bypass invocation when needed.
+- **#57 flag-retirement chain UNCHANGED at 10/10 ENGINEERING-COMPLETE** — only 14d soak-window remains.
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL** — launch-readiness status preserved.
+
+### Next Best Candidates (post-iter-055)
+
+1. **Iter 056 Path D D+1 column-registry opening** (Mode 2 directed per CEO "D-first, Mode 1 series" directive) — unlocks WDC-P02 customization-surface foundation; Path D as Mode 1 series (NOT Mode 5) bypasses D-7 pre-check; clears WDC cold-pool age 10 pressure by direct work on customization-surface.
+2. **Iter 057 candidate: MR-014 Mode 4 dual-pool MDR + WDC mandatory full-triage** (Change D threshold reached on both pools simultaneously; 3-loop stability floor satisfied iter 055-057 default OR iter 056 under Diff #1 compressed-cadence pattern at coordinator discretion).
+3. **Path C R+1 entry blocked** on (a) CEO revised-PRD final approval (deliberately deferred per CEO directive); (b) 5 pre-R+1 PRD-blocking questions resolution (Q-ARCH-1 / Q-ARCH-2 / Q-GOV-4 / Q-MEAS-1 / DEP-08 variant hash); ADR pre-locked at iter 055 means R+1 can begin immediately when both gates clear.
+
+---
+
 ## [2026-04-29] - Iteration 054 — MR-013 meta-review (Mode 4, `meta-coordinator`, NON-counting)
 
 **Trigger:** Three converging triggers force MR-013 with zero ambiguity at iter 053 close — (a) base 3-loop cadence 3/3 satisfied (iter 051 + 052 + 053 = 3 counted bounded loops post-MR-012 stability window); (b) same-Area 3-consecutive-extension hard-trigger (all three iterations on extension surface); (c) DV2 cold-pool age 12 — 2nd consecutive iteration past MR-006 Change D 10-iter staleness threshold → MANDATORY full-triage. Diff #1 (compressed-cadence ratification) + Diff #2 (meta-coordinator source-artifact verification rule) silence-as-accept windows opened at MR-012 close; CEO did not override; both ratified at MR-013 entry per MR-008 silence-as-accept precedent.

@@ -41,6 +41,15 @@ import { hasActiveFilters } from './WorkflowListFilterBar.js';
 import type { WorkflowRowData } from './WorkflowRow.js';
 import type { InsightChip } from '@/lib/workflow-metrics.js';
 import PortfolioSidebar, { type PortfolioNode } from '@/components/PortfolioSidebar.js';
+import ColumnPicker, { type SaveStatus } from './ColumnPicker.js';
+import PresetChipRail from './PresetChipRail.js';
+import {
+  type ColumnKey,
+  type UserDashboardPreference,
+  type SavedView,
+  getDefaultVisibleColumns,
+} from '@/lib/dashboard-columns/index.js';
+import type { PresetDefinition } from '@/lib/dashboard-columns/presets.js';
 
 // ── API response types ────────────────────────────────────────────────────────
 
@@ -55,6 +64,24 @@ interface WorkflowsApiResponse {
     /** MDR-P09 (b): server-resolved plan for free-vs-paid event segmentation */
     userPlan?: string;
   };
+}
+
+// ── Default visible columns (ASK-1: 6-column initial default pack) ───────────
+
+const DEFAULT_VISIBLE_KEYS: readonly ColumnKey[] = getDefaultVisibleColumns().map(
+  (col) => col.key,
+);
+
+// ── Preferences API envelope type ─────────────────────────────────────────────
+
+interface PreferencesApiResponse {
+  data: {
+    preferences: UserDashboardPreference;
+    droppedKeys: readonly ColumnKey[];
+    warnings: readonly string[];
+  } | null;
+  error: string | null;
+  meta: { schemaVersion?: number };
 }
 
 // ── Minimum skeleton display to avoid flash ───────────────────────────────────
@@ -139,6 +166,32 @@ export default function DashboardV2Shell() {
     needsAttention: false,
   });
   const [insightFilterKey, setInsightFilterKey] = useState<string | null>(null);
+
+  // ── Column picker state (D+4 iter-061) ──────────────────────────────────────
+
+  /** The ordered list of column keys the user has chosen to display. */
+  const [visibleColumns, setVisibleColumns] =
+    useState<readonly ColumnKey[]>(DEFAULT_VISIBLE_KEYS);
+
+  /** Whether the column picker drawer is open. */
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+
+  /** Save status for the column picker footer indicator. */
+  const [pickerSaveStatus, setPickerSaveStatus] = useState<SaveStatus>('idle');
+
+  /** Error message to show when pickerSaveStatus === 'error'. */
+  const [pickerSaveError, setPickerSaveError] = useState<string | null>(null);
+
+  /** Ref to the "Customize columns" trigger button — focus returns here on close. */
+  const pickerTriggerRef = useRef<HTMLButtonElement | null>(null);
+
+  /** Debounce timer for the preferences PUT request. */
+  const saveDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── D+5 SavedView state (iter-062) ──────────────────────────────────────────
+
+  /** The user's named saved views. */
+  const [savedViews, setSavedViews] = useState<readonly SavedView[]>([]);
 
   // ── Fetch ───────────────────────────────────────────────────────────────────
 
@@ -229,6 +282,152 @@ export default function DashboardV2Shell() {
     }
     void fetchPortfolios();
   }, []);
+
+  // D+4 (iter-061): Load saved column preferences on mount.
+  // D+5 (iter-062): Also loads savedViews from the same GET response.
+  // Falls back to DEFAULT_VISIBLE_KEYS if the API is unavailable or user has
+  // no stored preferences.  Errors are swallowed — customization is progressive
+  // enhancement and a missing preferences endpoint should not break the dashboard.
+  useEffect(() => {
+    async function loadPreferences() {
+      try {
+        const res = await fetch('/api/dashboard/preferences');
+        if (!res.ok) return; // 401 or server error — use defaults silently
+        const body = (await res.json()) as PreferencesApiResponse;
+        if (body.data?.preferences?.visibleColumns) {
+          setVisibleColumns(body.data.preferences.visibleColumns);
+        }
+        if (Array.isArray(body.data?.preferences?.savedViews)) {
+          setSavedViews(body.data.preferences.savedViews);
+        }
+      } catch {
+        // Network error — keep defaults; non-critical
+      }
+    }
+    void loadPreferences();
+  }, []);
+
+  // D+4 (iter-061): Debounced PUT to persist column preferences (400ms after last toggle).
+  // D+5 (iter-062): Extended to also persist savedViews when they change.
+  // Cleanup cancels any pending timer on unmount to prevent state updates on unmounted component.
+  const scheduleSave = useCallback(
+    (nextVisible: readonly ColumnKey[], nextSavedViews?: readonly SavedView[]) => {
+      if (saveDebounceRef.current !== null) {
+        clearTimeout(saveDebounceRef.current);
+      }
+      setPickerSaveStatus('saving');
+      setPickerSaveError(null);
+
+      // Capture current savedViews via closure; caller may pass updated views
+      saveDebounceRef.current = setTimeout(() => {
+        async function persist() {
+          try {
+            const res = await fetch('/api/dashboard/preferences', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                visibleColumns: nextVisible,
+                // columnOrder tracks the same order as visibleColumns for now;
+                // drag-and-drop reorder is deferred to a future iteration.
+                columnOrder: nextVisible,
+                // D+5: include savedViews in the payload
+                ...(nextSavedViews !== undefined
+                  ? { savedViews: nextSavedViews }
+                  : {}),
+              }),
+            });
+            if (!res.ok) {
+              const err = (await res.json()) as { error?: string };
+              throw new Error(err.error ?? `HTTP ${res.status}`);
+            }
+            setPickerSaveStatus('saved');
+            // Briefly show "Saved" then reset to idle
+            setTimeout(() => { setPickerSaveStatus('idle'); }, 1500);
+          } catch (err) {
+            setPickerSaveStatus('error');
+            setPickerSaveError(
+              err instanceof Error ? err.message : 'Could not save — changes not persisted.',
+            );
+          }
+        }
+        void persist();
+      }, 400);
+    },
+    [],
+  );
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (saveDebounceRef.current !== null) {
+        clearTimeout(saveDebounceRef.current);
+      }
+    };
+  }, []);
+
+  // D+4 (iter-061): Toggle a column's visibility.
+  // Optimistic update — local state is updated synchronously; debounced PUT follows.
+  const handleToggleColumn = useCallback(
+    (key: ColumnKey, nextVisible: boolean) => {
+      setVisibleColumns((prev) => {
+        const next = nextVisible
+          ? [...prev, key]
+          : prev.filter((k) => k !== key);
+        scheduleSave(next);
+        return next;
+      });
+    },
+    [scheduleSave],
+  );
+
+  // D+5 (iter-062): SavedView CRUD — update savedViews array and persist.
+  const handleSavedViewsChange = useCallback(
+    (nextViews: readonly SavedView[]) => {
+      setSavedViews(nextViews);
+      // Persist immediately (no debounce needed — user-initiated save actions
+      // are infrequent; debounce is only needed for rapid toggle sequences).
+      scheduleSave(visibleColumns, nextViews);
+    },
+    [scheduleSave, visibleColumns],
+  );
+
+  // D+5 (iter-062): Apply a saved view (update column config + filters).
+  // Note: the shell owns filter state via the existing FilterState type;
+  // SavedView filters are FilterSet (D+2) which is different from FilterState
+  // (UI-layer composite). Applying a saved view updates visibleColumns only
+  // for now; full filter apply deferred to D+6 when filter UI integration
+  // between FilterState and FilterSet is resolved (scope-adjacent observation).
+  const handleApplySavedView = useCallback(
+    (view: SavedView) => {
+      setVisibleColumns(view.visibleColumns);
+      scheduleSave(view.visibleColumns, undefined);
+    },
+    [scheduleSave],
+  );
+
+  // D+5 (iter-062): Apply a preset chip — update visibleColumns + columnOrder.
+  // The preset catalog defines filters as FilterSet (D+2); similar to saved views,
+  // full filter apply is a scope-adjacent observation (D+6 scope).
+  const handleApplyPreset = useCallback(
+    (preset: PresetDefinition) => {
+      setVisibleColumns(preset.visibleColumns);
+      scheduleSave(preset.visibleColumns, undefined);
+    },
+    [scheduleSave],
+  );
+
+  // D+5 (iter-062): Derive the current preferences snapshot for the chip rail
+  // (active-state detection).
+  const currentPreferencesSnapshot: UserDashboardPreference = useMemo(
+    () => ({
+      schemaVersion: 1,
+      visibleColumns,
+      columnOrder: visibleColumns,
+      filters: [],
+      savedViews,
+    }),
+    [visibleColumns, savedViews],
+  );
 
   // MDR-P09 (a): capture-phase click counter.  Attaches to the shell root div
   // once dashboard_v2_viewed has fired; increments clickCountSinceViewRef on
@@ -400,6 +599,36 @@ export default function DashboardV2Shell() {
 
         {/* Section 3: Workflow Intelligence List — aria-live for filter announcements */}
         <div className="flex-1 min-w-0" aria-live="polite" aria-atomic="false">
+          {/* D+5 (iter-062): Preset chip rail — above the "Customize columns" trigger */}
+          <PresetChipRail
+            currentPreferences={currentPreferencesSnapshot}
+            onApplyPreset={handleApplyPreset}
+            {...(userPlan !== undefined ? { userPlan } : {})}
+          />
+
+          {/* D+4 (iter-061): "Customize columns" trigger — positioned above the table */}
+          <div className="flex justify-end px-ds-4 py-ds-2 border-b border-[var(--border-subtle)]">
+            <button
+              ref={pickerTriggerRef}
+              type="button"
+              onClick={() => setIsPickerOpen((prev) => !prev)}
+              className="
+                inline-flex items-center gap-ds-2 px-ds-3 py-ds-1.5 rounded-ds-sm
+                text-[13px] font-medium text-[var(--content-secondary)]
+                border border-[var(--border-default)]
+                transition-colors duration-150
+                hover:bg-[var(--surface-secondary)] hover:text-[var(--content-primary)]
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500
+              "
+              aria-label="Customize columns"
+              aria-expanded={isPickerOpen}
+              aria-haspopup="dialog"
+            >
+              <Columns3 size={14} aria-hidden="true" />
+              Customize columns
+            </button>
+          </div>
+
           <WorkflowList
             state={listState}
             workflows={portfolioFilteredWorkflows}
@@ -415,9 +644,25 @@ export default function DashboardV2Shell() {
             portfolioSidebarOpen={portfolioSidebarOpen}
             onTogglePortfolioSidebar={() => setPortfolioSidebarOpen((prev) => !prev)}
             dashboardViewPerfTimestampMs={dashboardViewPerfTimestampMs}
+            visibleColumns={visibleColumns}
           />
         </div>
       </div>
+
+      {/* D+4+5 (iter-061/062): Column picker drawer — portal-style, z-indexed above the table */}
+      <ColumnPicker
+        isOpen={isPickerOpen}
+        onClose={() => setIsPickerOpen(false)}
+        visibleColumns={visibleColumns}
+        onToggleColumn={handleToggleColumn}
+        saveStatus={pickerSaveStatus}
+        saveError={pickerSaveError}
+        triggerRef={pickerTriggerRef}
+        savedViews={savedViews}
+        currentFilters={[]}
+        onSavedViewsChange={handleSavedViewsChange}
+        onApplySavedView={handleApplySavedView}
+      />
     </div>
   );
 }
