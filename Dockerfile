@@ -11,19 +11,36 @@
 
 FROM node:20-alpine AS deps
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Pin pnpm to v10.x — `pnpm@latest` pulls v11+ which uses Node APIs not in Node 20
+# (ERR_UNKNOWN_BUILTIN_MODULE at startup). v10.x matches the lockfile generator.
+RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
 
 WORKDIR /app
 
 # Copy workspace config + lockfile first (layer cache)
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-# Copy package.json files for all workspace packages needed at build time
+# Copy package.json files for ALL workspace packages — pnpm-workspace.yaml
+# declares `apps/*` + `packages/*` (16 total). pnpm install --frozen-lockfile
+# resolves the entire workspace graph from pnpm-lock.yaml; any missing
+# package.json causes the install to fail. The web-app build at runtime
+# only needs a subset, but install needs all of them to be present.
 COPY apps/web-app/package.json apps/web-app/
 COPY apps/web-app/prisma/schema.prisma apps/web-app/prisma/
+COPY apps/extension-app/package.json apps/extension-app/
 COPY packages/process-engine/package.json packages/process-engine/
 COPY packages/intelligence-engine/package.json packages/intelligence-engine/
 COPY packages/agent-intelligence/package.json packages/agent-intelligence/
+COPY packages/normalization-engine/package.json packages/normalization-engine/
+COPY packages/segmentation-engine/package.json packages/segmentation-engine/
+COPY packages/policy-engine/package.json packages/policy-engine/
+COPY packages/schema-events/package.json packages/schema-events/
+COPY packages/schema-process/package.json packages/schema-process/
+COPY packages/shared-types/package.json packages/shared-types/
+COPY packages/api-client/package.json packages/api-client/
+COPY packages/capture-core/package.json packages/capture-core/
+COPY packages/renderers/package.json packages/renderers/
+COPY packages/ui-components/package.json packages/ui-components/
 
 # Install all dependencies (including dev for build step)
 RUN pnpm install --frozen-lockfile
@@ -32,7 +49,8 @@ RUN pnpm install --frozen-lockfile
 
 FROM node:20-alpine AS builder
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Same pnpm version pin (see deps stage rationale)
+RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
 
 WORKDIR /app
 
