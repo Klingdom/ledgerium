@@ -17,8 +17,8 @@ import { defineConfig, devices } from '@playwright/test';
  * real production code (same JS bundle that ships in the extension) while
  * controlling every background response deterministically.
  *
- * The real-extension approach with launchPersistentContext is deferred to a
- * future iteration once the static-harness suite is stable.
+ * The real-extension approach with launchPersistentContext landed at iter 070
+ * in playwright.real-ext.config.ts and e2e/real-extension/sidepanel-real.spec.ts.
  *
  * Run:
  *   cd apps/extension-app && pnpm test:e2e

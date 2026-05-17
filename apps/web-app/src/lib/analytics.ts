@@ -108,6 +108,9 @@ export type AnalyticsEvent =
       workflowCount: number;
       hasActiveFilters: boolean;
       portfolioFilterActive: boolean;
+      /** WDC2-P03 (iter-067): time-range segmentation prereq — the active filter
+       *  at the moment the dashboard loaded. Enables per-range retention analysis. */
+      time_range: '7d' | '30d' | '90d' | 'all';
     }
   | {
       event: 'workflow_row_clicked';

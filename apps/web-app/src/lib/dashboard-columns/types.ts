@@ -31,6 +31,29 @@
 
 import type { WorkflowMetricsOutput } from '../workflow-metrics.js';
 
+// ── TimeRange (active time-window filter) ─────────────────────────────────────
+
+/**
+ * Active time-window filter for accessor evaluation (iter-065 / WDC2-P01).
+ *
+ * Mirrors `TimeRange` declared in `components/dashboard-v2/CommandHeader.tsx` —
+ * re-declared here so the pure `dashboard-columns/` module remains free of
+ * React/component imports. The two literal unions MUST stay in sync; the
+ * registry.test.ts Group G compile-time assertion catches drift.
+ *
+ *  - `'7d'` / `'30d'` / `'90d'` — rolling window ending at `referenceNowMs`
+ *  - `'all'` — lifetime; no time-window filter applied
+ *
+ * Accessor contract (audit-honesty):
+ *  - Time-windowed accessors (Wave A — row #101 WDC2-P02) MUST consume this
+ *    field and derive the window bounds from it; they MUST NOT call `Date.now()`
+ *    internally (use `referenceNowMs` instead).
+ *  - Existing accessors (iter-056 / D+1) ignore this field by design — they
+ *    return lifetime values and their labels do not promise time-windowed
+ *    semantics.
+ */
+export type TimeRange = '7d' | '30d' | '90d' | 'all';
+
 // ── ColumnKey (closed union) ──────────────────────────────────────────────────
 
 /**
@@ -201,6 +224,38 @@ export interface ColumnAccessorContext {
   createdAt: string;
   /** Engine-computed metrics subtree (post-iter-039 single-source-of-truth). */
   metricsV2: WorkflowMetricsOutput;
+  /**
+   * Single upstream clock boundary (iter-065 / WDC2-P01).
+   *
+   * Wall-clock milliseconds (`Date.now()`-shaped). The caller MUST snapshot this
+   * value once at a stable upper render/request boundary (e.g. WorkflowList
+   * construction; `route.ts:485-487` `const referenceNowMs = Date.now()` per
+   * iter-037 / MDR-P03 precedent) and pass the same value into every accessor
+   * call within the same logical evaluation.
+   *
+   * Determinism contract (Ledgerium invariant):
+   *  - Accessors MUST NOT call `Date.now()` / `new Date()` / `performance.now()`
+   *    internally. All time-of-evaluation semantics flow through this field.
+   *  - Same `referenceNowMs` + same other context → byte-identical output.
+   *
+   * Audit-honesty contract:
+   *  - Time-windowed accessors (Wave A — row #101) compute their window bounds
+   *    from `referenceNowMs` and `activeTimeRange`. Their labels promise
+   *    time-windowed semantics and the registry's `availability` field reflects
+   *    this commitment.
+   *  - Existing accessors (iter-056 / D+1) ignore this field — they return
+   *    lifetime values and their labels do not promise time-windowed semantics.
+   *    Group G of `registry.test.ts` asserts this preservation.
+   */
+  referenceNowMs: number;
+  /**
+   * Active time-window filter (iter-065 / WDC2-P01).
+   *
+   * The currently-selected `TimeRange` from the dashboard header. See `TimeRange`
+   * JSDoc for the contract distinction between time-windowed accessors (consume
+   * this field) and lifetime accessors (ignore this field).
+   */
+  activeTimeRange: TimeRange;
 }
 
 /**

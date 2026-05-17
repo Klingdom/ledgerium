@@ -54,12 +54,11 @@ import type { WorkflowDashboardColumn } from './types.js';
  *
  * Default-pack rationale (`defaultVisible: true` ⇔ shipped today):
  *   workflow_title · systems · opportunity_tag · health_score · last_run_at ·
- *   run_count
+ *   run_count · cycle_time_mean_ms
  *
- * These 6 are the 4 columns + 2 subtext fields rendered by `WorkflowRow.tsx`
- * today. The default pack PROPOSED in WDC §8 (7 columns including a separate
- * "Avg Time" + "Variation" column) is intentionally NOT yet wired — that is a
- * D+6 default-pack iteration scope. D+1 ships the registry, not a re-default.
+ * WDC2-P03 (iter-067): expanded to 7 columns by promoting cycle_time_mean_ms
+ * to default-visible.  The accessor reads WorkflowMetricsOutput.avgTimeMs
+ * which is available for all processed workflows.
  */
 export const WORKFLOW_DASHBOARD_COLUMNS: ReadonlyArray<WorkflowDashboardColumn> =
   Object.freeze([
@@ -229,7 +228,11 @@ export const WORKFLOW_DASHBOARD_COLUMNS: ReadonlyArray<WorkflowDashboardColumn> 
       dataType: 'duration',
       sortable: true,
       filterable: true,
-      defaultVisible: false,
+      // WDC2-P03 (iter-067): promoted to default-pack (7th column) per CEO Signal 2
+      // unblocked by iter-065 ColumnAccessorContext extension.  Accessor reads
+      // WorkflowMetricsOutput.avgTimeMs which is always available for processed
+      // workflows — audit-honesty IFF invariant preserved.
+      defaultVisible: true,
       defaultGroup: 'flow',
       planTierGate: null,
       availability: 'available',

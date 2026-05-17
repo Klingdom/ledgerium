@@ -118,3 +118,24 @@ export function getWebhookSecret(): string {
 
 /** Base URL for redirects */
 export const APP_URL = process.env.NEXTAUTH_URL ?? 'https://ledgerium.ai';
+
+/**
+ * Number of days for the free trial offered to first-time subscribers.
+ *
+ * Configurable via `STRIPE_TRIAL_DAYS` env var. Defaults to 14 if unset or
+ * invalid (parseInt returns NaN on bad input → fall back to 14).
+ *
+ * The trial is applied at Checkout Session creation time only when the user
+ * is a first-time subscriber (no prior `stripeSubscriptionId`). Returning
+ * subscribers (cancelled-then-resubscribed) do NOT receive a second trial —
+ * see `apps/web-app/src/app/api/billing/checkout/route.ts` for the eligibility
+ * gate.
+ *
+ * Set to `0` to disable trials entirely.
+ */
+export const TRIAL_PERIOD_DAYS: number = (() => {
+  const raw = process.env.STRIPE_TRIAL_DAYS;
+  if (!raw) return 14;
+  const parsed = parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 14;
+})();

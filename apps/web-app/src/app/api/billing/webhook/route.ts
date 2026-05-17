@@ -14,6 +14,18 @@ import type Stripe from 'stripe';
  * - customer.subscription.updated → sync status changes and plan tier
  * - customer.subscription.deleted → revoke paid plan → free
  * - invoice.payment_failed → mark past_due
+ * - invoice.payment_succeeded → confirm active status on every successful charge
+ * - customer.subscription.trial_will_end → emit analytics notification (no DB write)
+ *
+ * Provisioning vs notification semantics:
+ *   PROVISIONING events (checkout.session.completed, customer.subscription.updated,
+ *   customer.subscription.deleted, invoice.payment_failed, invoice.payment_succeeded)
+ *   write to the DB. Unmapped price IDs on these events are hard errors — re-throw
+ *   so Stripe retries rather than silently under-provisioning.
+ *
+ *   NOTIFICATION events (customer.subscription.trial_will_end) are informational only.
+ *   They emit analytics but do NOT write to the DB. Unmapped price IDs on notification
+ *   events are soft warnings — emit analytics with plan: null and return 200.
  */
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -170,6 +182,90 @@ export async function POST(req: NextRequest) {
         });
         console.log(`[stripe] User ${user.id} payment failed — marked past_due`);
         trackServer('payment_failed', { userId: user.id });
+        break;
+      }
+
+      case 'invoice.payment_succeeded': {
+        // PROVISIONING event — fires on every successful charge (initial + renewals).
+        // Ensures subscriptionStatus stays 'active' and handles the trial→paid
+        // transition automatically (if status was 'trialing', it flips to 'active').
+        //
+        // userId is not available directly on an invoice — we resolve it by
+        // retrieving the subscription and reading its metadata.userId.
+        // If the Stripe API call fails, re-throw so Stripe retries (provisioning
+        // semantics: HTTP 500 is safer than silently ignoring a successful payment).
+        const invoice = event.data.object as Stripe.Invoice;
+        const subscriptionId = invoice.subscription as string;
+        if (!subscriptionId) break;
+
+        const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
+        const userId = subscription.metadata?.userId;
+        if (!userId) {
+          // Subscription exists but has no userId in metadata — this may be a
+          // legacy subscription created before metadata was populated. Log and
+          // return 200 so Stripe does not retry indefinitely.
+          console.warn(
+            `[stripe] invoice.payment_succeeded: no userId on subscription ${subscriptionId} — skipping DB update`,
+          );
+          break;
+        }
+
+        await db.user.update({
+          where: { id: userId },
+          data: { subscriptionStatus: 'active' },
+        });
+        console.log(
+          `[stripe] User ${userId} payment succeeded — invoice ${invoice.id} ${invoice.amount_paid} ${invoice.currency}`,
+        );
+        // No PII: only userId, amount, currency, invoiceId are emitted.
+        // Card numbers, customer email, customer name, and invoice line items are excluded.
+        trackServer('payment_succeeded', {
+          userId,
+          amount: invoice.amount_paid,
+          currency: invoice.currency,
+          invoiceId: invoice.id,
+        });
+        break;
+      }
+
+      case 'customer.subscription.trial_will_end': {
+        // NOTIFICATION event — fires 3 days before the trial expires.
+        // This is informational only: the subscription is still active in 'trialing'
+        // state. We do NOT update the user record — that happens when the trial
+        // actually ends via customer.subscription.updated with status 'active'.
+        //
+        // Unmapped price IDs here are soft warnings (unlike provisioning events
+        // where they are hard errors). We emit analytics with plan: null so
+        // downstream dashboards can still count trial-expiry notifications.
+        const subscription = event.data.object as Stripe.Subscription;
+        const userId = subscription.metadata?.userId;
+        if (!userId) {
+          console.warn(
+            `[stripe] customer.subscription.trial_will_end: no userId on subscription ${subscription.id} — skipping`,
+          );
+          break;
+        }
+
+        const trialEnd = subscription.trial_end;
+        const priceId = subscription.items.data[0]?.price.id;
+        const plan = priceId ? planFromPriceId(priceId) : null;
+        if (priceId && plan === null) {
+          // Soft warning — notification-tier semantics: log but do not re-throw.
+          // contrast with customer.subscription.updated (provisioning-tier) which
+          // throws on unmapped price IDs.
+          console.warn(
+            `[stripe] customer.subscription.trial_will_end: unmapped price ID ${priceId} on subscription ${subscription.id} — emitting analytics with plan: null`,
+          );
+        }
+
+        console.log(
+          `[stripe] User ${userId} trial will end at ${new Date((trialEnd ?? 0) * 1000).toISOString()}`,
+        );
+        trackServer('trial_will_end', {
+          userId,
+          trialEndAt: trialEnd,
+          plan,
+        });
         break;
       }
 

@@ -712,13 +712,27 @@ export default function WorkflowRow({
   const { metricsV2, toolsUsed, createdAt, lastViewedAt } = workflow;
   const { healthScore, opportunityTag, runs } = metricsV2;
 
-  // D+4: build accessor context once per render for dynamic column resolution
+  // D+4: build accessor context once per render for dynamic column resolution.
+  //
+  // iter-065 / WDC2-P01: `referenceNowMs` + `activeTimeRange` are now mandatory
+  // fields on `ColumnAccessorContext`. Existing accessors (iter-056) ignore
+  // them — they return lifetime values. Wave A accessors (row #101) will
+  // consume them to compute time-windowed statistics.
+  //
+  // `referenceNowMs` snapshot location: per-row construction here is correct
+  // for today's lifetime accessors (any boundary is equivalent because the
+  // result does not depend on the value). Wave A landing will lift the
+  // snapshot up to a stable WorkflowList-level boundary so that all rows in
+  // the same query share one wall-clock value — matching the `route.ts:485-487`
+  // single-upstream-clock-boundary pattern from iter-037 / MDR-P03.
   const accessorContext: ColumnAccessorContext = {
     title: workflow.title,
     toolsUsed: workflow.toolsUsed,
     lastViewedAt: workflow.lastViewedAt,
     createdAt: workflow.createdAt,
     metricsV2: workflow.metricsV2,
+    referenceNowMs: Date.now(),
+    activeTimeRange: timeRange ?? 'all',
   };
 
   // Columns to render between workflow_title and health_score.

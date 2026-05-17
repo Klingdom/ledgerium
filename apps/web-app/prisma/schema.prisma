@@ -12,7 +12,7 @@ model User {
   email                String   @unique
   name                 String?
   passwordHash         String   @map("password_hash")
-  plan                 String   @default("free") // free, pro, team
+  plan                 String   @default("free") // free, starter, team, growth, enterprise (legacy: pro maps to starter via toPlanType)
   subscriptionStatus   String   @default("none")     @map("subscription_status") // none (default until Stripe webhook sets trialing/active/past_due/canceled)
   stripeCustomerId     String?  @map("stripe_customer_id")
   stripeSubscriptionId String?  @map("stripe_subscription_id")
@@ -419,7 +419,7 @@ model Team {
   name        String
   slug        String   @unique  // URL-friendly team identifier
   createdBy   String   @map("created_by")
-  plan        String   @default("free") // free, pro, enterprise
+  plan        String   @default("free") // free, starter, team, growth, enterprise (Team-scoped plan; legacy: pro maps to starter)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 

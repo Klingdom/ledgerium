@@ -139,7 +139,25 @@
       "Bash(awk NR==3 {print substr\\($0, length\\($0\\)-150\\)} *)",
       "Bash(awk NR<=20 {print NR\": \"length\\($0\\)\" chars\"} *)",
       "Bash(awk NR<=10 {print NR\": \"length\\($0\\)\" chars\"} *)",
-      "Bash(awk NR>=360 && NR<=370 {print NR\": \"length\\($0\\)\" chars\"} *)"
+      "Bash(awk NR>=360 && NR<=370 {print NR\": \"length\\($0\\)\" chars\"} *)",
+      "Bash(awk NR>=4 && NR<=15 *)",
+      "Bash(awk 'NR>=11 && NR<=20' /c/Users/philk/.claude/projects/C--Users-philk-ledgerium/8ccbc9fd-bb74-4fec-8a0d-9f7cb2213631.jsonl)",
+      "Bash(awk NR>=19 && NR<=85 {print NR\": \"length\\($0\\)\" bytes\"} *)",
+      "Bash(awk 'NR==11' \"/c/Users/philk/.claude/projects/C--Users-philk-ledgerium/8ccbc9fd-bb74-4fec-8a0d-9f7cb2213631.jsonl\")",
+      "Bash(awk -F'|' '{print $2}')",
+      "Bash(awk '/^\\\\| ID/,/^$/' \"C:/Users/philk/ledgerium/IMPROVEMENT_BACKLOG.md\")",
+      "Bash(awk NR>=230 && NR<=242 {printf \"%d|%s\\\\n\", NR, substr\\($0, 1, 200\\)} *)",
+      "Bash(awk NR>=150 && NR<=160 {printf \"%d|%s\\\\n\", NR, substr\\($0, 1, 200\\)} *)",
+      "Bash(awk NR==238 *)",
+      "Bash(awk 'NR==239' \"C:/Users/philk/ledgerium/IMPROVEMENT_BACKLOG.md\")",
+      "Bash(awk NR>=368 && NR<=372 {print NR\": \"substr\\($0,1,400\\)} *)",
+      "Bash(awk 'NR==368' C:/Users/philk/ledgerium/CLAUDE.md)",
+      "Read(//tmp/**)",
+      "Bash(awk 'NR>=112 && NR<=270 {print NR\": \"$0}' \"C:\\\\Users\\\\philk\\\\ledgerium\\\\IMPROVEMENT_BACKLOG.md\")",
+      "Bash(awk 'NR>=130 && NR<=260' \"C:\\\\Users\\\\philk\\\\ledgerium\\\\IMPROVEMENT_BACKLOG.md\")",
+      "Read(//c/Users/philk/**)",
+      "Bash(awk NR>=368 && NR<=370 {print NR\": \"substr\\($0,1,200\\)} *)",
+      "Bash(powershell.exe *)"
     ]
   }
 }

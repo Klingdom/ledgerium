@@ -27,7 +27,7 @@ const FAQ = [
   },
   {
     q: 'Can I try before I buy?',
-    a: 'Yes. The Free plan gives you 5 recordings per month with SOP and process map output (exports include a Ledgerium watermark). No credit card required. Upgrade to Starter for clean exports, or to Team for the full intelligence layer.',
+    a: 'Two ways. (1) The Free plan gives you 5 recordings per month with SOP and process map output — no credit card required, no time limit. Exports include a Ledgerium watermark. (2) Every paid plan (Starter, Team, Growth) includes a 14-day free trial. You enter a card up front, get full plan access immediately, and aren’t charged until day 15. Cancel any time during the trial from your account page or the Stripe Billing Portal to avoid all charges.',
   },
   {
     q: 'How does annual billing work?',

@@ -29,7 +29,8 @@
  *   + Tests real production code, not a hand-rolled re-render harness.
  *   - Does not test background/content script message handling.
  *   - Does not test chrome.storage persistence.
- *   - Real-extension tests (launchPersistentContext) are deferred to iter 010.
+ *   - Real-extension tests (launchPersistentContext) land in iter 070 at
+ *     e2e/real-extension/sidepanel-real.spec.ts.
  *
  * SCOPE (iter 009):
  *   Test 1 — Idle screen renders correctly and "Start Recording" is disabled

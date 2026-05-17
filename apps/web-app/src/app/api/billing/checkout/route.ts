@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
-import { getStripe, getPriceId, PRO_PRICE_ID, APP_URL } from '@/lib/stripe';
+import { getStripe, getPriceId, PRO_PRICE_ID, APP_URL, TRIAL_PERIOD_DAYS } from '@/lib/stripe';
 import { toPlanType } from '@/lib/plans';
 import { isAdminUnlimited } from '@/lib/admin-allowlist';
 import { trackServer } from '@/lib/analytics-server';
@@ -101,6 +101,25 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Trial eligibility: only first-time subscribers receive the 14-day free
+    // trial. We define "first-time" as never having held a Stripe subscription
+    // — i.e. `stripeSubscriptionId` is null AND subscription status is `'none'`.
+    // Cancelled-then-resubscribed users do NOT get a second trial. This
+    // prevents trial abuse without requiring an additional Stripe API call.
+    const isTrialEligible =
+      !user.stripeSubscriptionId &&
+      (user.subscriptionStatus === 'none' || user.subscriptionStatus === null);
+
+    const shouldApplyTrial = isTrialEligible && TRIAL_PERIOD_DAYS > 0;
+
+    // Build subscription_data: always include user metadata; conditionally
+    // include trial_period_days only when eligible AND trial duration > 0.
+    // Stripe rejects trial_period_days: 0 — we omit the field entirely.
+    const subscriptionData: Stripe.Checkout.SessionCreateParams.SubscriptionData = {
+      metadata: { userId: user.id },
+      ...(shouldApplyTrial ? { trial_period_days: TRIAL_PERIOD_DAYS } : {}),
+    };
+
     // Create Checkout Session with the resolved price ID.
     const checkoutSession = await getStripe().checkout.sessions.create({
       customer: customerId,
@@ -117,16 +136,16 @@ export async function POST(req: NextRequest) {
         userId: user.id,
         plan: requestedPlan,
         interval: requestedInterval,
+        trial: shouldApplyTrial ? String(TRIAL_PERIOD_DAYS) : 'none',
       },
-      subscription_data: {
-        metadata: { userId: user.id },
-      },
+      subscription_data: subscriptionData,
     });
 
     trackServer('checkout_started', {
       userId: user.id,
       plan: requestedPlan,
       interval: requestedInterval,
+      trialDays: shouldApplyTrial ? TRIAL_PERIOD_DAYS : 0,
     });
     return NextResponse.json({ url: checkoutSession.url });
   } catch (err) {

@@ -158,7 +158,11 @@ export default function DashboardV2Shell() {
   const shellRootRef = useRef<HTMLDivElement | null>(null);
 
   // ── UI state ────────────────────────────────────────────────────────────────
-  const [timeRange, setTimeRange] = useState<TimeRange>('30d');
+  // WDC2-P03 (iter-067): default changed '30d' → 'all' per CEO Signal 1.
+  // 8-of-8 agent convergence in WORKFLOWS_DASHBOARD_REVIEW_002: process
+  // intelligence defaults to full event-log view (Celonis / UiPath / Apromore
+  // pattern), not rolling-window (Datadog / Mixpanel operational-monitoring).
+  const [timeRange, setTimeRange] = useState<TimeRange>('all');
   const [filters, setFilters] = useState<FilterState>({
     systems: [],
     opportunity: null,
@@ -262,6 +266,9 @@ export default function DashboardV2Shell() {
       workflowCount: allWorkflows.length,
       hasActiveFilters: filtersActive,
       portfolioFilterActive: activePortfolioId !== null,
+      // WDC2-P03 (iter-067): time_range analytics prereq — segment by active
+      // filter at dashboard load so per-range retention is computable.
+      time_range: timeRange,
     });
   // Intentional: this effect is a "fire once on first data load" pattern.
   // allWorkflows.length is the trigger signal — other deps are snapshot values at emission time.

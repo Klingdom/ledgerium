@@ -345,4 +345,356 @@ describe('POST /api/billing/webhook', () => {
 
     expect(res.status).toBe(400);
   });
+
+  // ── 8. invoice.payment_succeeded — happy path ────────────────────────────
+
+  it('invoice.payment_succeeded: updates subscriptionStatus to active and emits analytics', async () => {
+    const userId = 'user_pay_001';
+    const subscriptionId = 'sub_pay_001';
+    const invoiceId = 'inv_pay_001';
+
+    const invoice: Partial<Stripe.Invoice> = {
+      id: invoiceId,
+      subscription: subscriptionId,
+      amount_paid: 4900,
+      currency: 'usd',
+    };
+
+    const stripeSubscription = {
+      id: subscriptionId,
+      metadata: { userId },
+      items: { data: [{ price: { id: 'price_starter_monthly_test' } }] },
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('invoice.payment_succeeded', invoice),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue(stripeSubscription),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+    const analyticsLib = await import('@/lib/analytics-server');
+    const req = makeRequest('{}');
+    const res = await POST(req);
+
+    expect(res.status).toBe(200);
+    expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledOnce();
+    expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: userId },
+        data: { subscriptionStatus: 'active' },
+      }),
+    );
+    expect(vi.mocked(analyticsLib.trackServer)).toHaveBeenCalledWith(
+      'payment_succeeded',
+      expect.objectContaining({ userId, amount: 4900, currency: 'usd', invoiceId }),
+    );
+  });
+
+  // ── 9. invoice.payment_succeeded — no userId on subscription metadata ───
+
+  it('invoice.payment_succeeded: no userId on subscription → returns 200 without DB write', async () => {
+    const subscriptionId = 'sub_pay_002';
+
+    const invoice: Partial<Stripe.Invoice> = {
+      id: 'inv_pay_002',
+      subscription: subscriptionId,
+      amount_paid: 4900,
+      currency: 'usd',
+    };
+
+    const stripeSubscription = {
+      id: subscriptionId,
+      metadata: {}, // no userId
+      items: { data: [{ price: { id: 'price_starter_monthly_test' } }] },
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('invoice.payment_succeeded', invoice),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue(stripeSubscription),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+    const req = makeRequest('{}');
+    const res = await POST(req);
+
+    expect(res.status).toBe(200);
+    expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+  });
+
+  // ── 10. invoice.payment_succeeded — Stripe API failure → HTTP 500 ────────
+
+  it('invoice.payment_succeeded: Stripe subscriptions.retrieve failure returns HTTP 500', async () => {
+    const subscriptionId = 'sub_pay_003';
+
+    const invoice: Partial<Stripe.Invoice> = {
+      id: 'inv_pay_003',
+      subscription: subscriptionId,
+      amount_paid: 4900,
+      currency: 'usd',
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('invoice.payment_succeeded', invoice),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockRejectedValue(new Error('Stripe API error')),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+    const req = makeRequest('{}');
+    const res = await POST(req);
+
+    // Must 500 so Stripe retries — a successful payment must not be silently dropped
+    expect(res.status).toBe(500);
+    expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+  });
+
+  // ── 11. invoice.payment_succeeded — emits correct analytics payload (no PII) ─
+
+  it('invoice.payment_succeeded: analytics payload contains no PII fields', async () => {
+    const userId = 'user_pay_004';
+    const subscriptionId = 'sub_pay_004';
+
+    const invoice: Partial<Stripe.Invoice> = {
+      id: 'inv_pay_004',
+      subscription: subscriptionId,
+      amount_paid: 24900,
+      currency: 'usd',
+    };
+
+    const stripeSubscription = {
+      id: subscriptionId,
+      metadata: { userId },
+      items: { data: [{ price: { id: 'price_team_monthly_test' } }] },
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('invoice.payment_succeeded', invoice),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue(stripeSubscription),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+    const analyticsLib = await import('@/lib/analytics-server');
+    const req = makeRequest('{}');
+    await POST(req);
+
+    const calls = vi.mocked(analyticsLib.trackServer).mock.calls;
+    expect(calls).toHaveLength(1);
+    const [, payload] = calls[0]!;
+
+    // Required fields
+    expect(payload).toHaveProperty('userId', userId);
+    expect(payload).toHaveProperty('amount', 24900);
+    expect(payload).toHaveProperty('currency', 'usd');
+    expect(payload).toHaveProperty('invoiceId', 'inv_pay_004');
+
+    // PII must NOT appear
+    expect(payload).not.toHaveProperty('email');
+    expect(payload).not.toHaveProperty('customerEmail');
+    expect(payload).not.toHaveProperty('name');
+    expect(payload).not.toHaveProperty('cardNumber');
+    expect(payload).not.toHaveProperty('lines');
+    expect(payload).not.toHaveProperty('customer_email');
+  });
+
+  // ── 12. customer.subscription.trial_will_end — happy path ───────────────
+
+  it('customer.subscription.trial_will_end: emits analytics and does NOT update DB', async () => {
+    const userId = 'user_trial_001';
+    const trialEnd = 1_700_100_000; // Unix timestamp ~Nov 2023
+
+    const subscription: Partial<Stripe.Subscription> = {
+      id: 'sub_trial_001',
+      metadata: { userId },
+      trial_end: trialEnd,
+      items: {
+        data: [{ price: { id: 'price_starter_monthly_test' } }],
+      } as Stripe.Subscription['items'],
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('customer.subscription.trial_will_end', subscription),
+        ),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('starter');
+
+    const analyticsLib = await import('@/lib/analytics-server');
+    const req = makeRequest('{}');
+    const res = await POST(req);
+
+    expect(res.status).toBe(200);
+    // NOTIFICATION event: must NOT write to DB
+    expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+    // Must emit analytics
+    expect(vi.mocked(analyticsLib.trackServer)).toHaveBeenCalledWith(
+      'trial_will_end',
+      expect.objectContaining({ userId, trialEndAt: trialEnd, plan: 'starter' }),
+    );
+  });
+
+  // ── 13. customer.subscription.trial_will_end — no userId on metadata ────
+
+  it('customer.subscription.trial_will_end: no userId on metadata → returns 200 without any action', async () => {
+    const subscription: Partial<Stripe.Subscription> = {
+      id: 'sub_trial_002',
+      metadata: {}, // no userId
+      trial_end: 1_700_100_000,
+      items: {
+        data: [{ price: { id: 'price_starter_monthly_test' } }],
+      } as Stripe.Subscription['items'],
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('customer.subscription.trial_will_end', subscription),
+        ),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+    const analyticsLib = await import('@/lib/analytics-server');
+    const req = makeRequest('{}');
+    const res = await POST(req);
+
+    expect(res.status).toBe(200);
+    expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+    expect(vi.mocked(analyticsLib.trackServer)).not.toHaveBeenCalled();
+  });
+
+  // ── 14. customer.subscription.trial_will_end — unmapped price ID ─────────
+
+  it('customer.subscription.trial_will_end: unmapped price ID emits analytics with plan: null (notification-tier semantics)', async () => {
+    const userId = 'user_trial_003';
+    const trialEnd = 1_700_200_000;
+
+    const subscription: Partial<Stripe.Subscription> = {
+      id: 'sub_trial_003',
+      metadata: { userId },
+      trial_end: trialEnd,
+      items: {
+        data: [{ price: { id: 'price_unknown_xyz' } }],
+      } as Stripe.Subscription['items'],
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('customer.subscription.trial_will_end', subscription),
+        ),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    // planFromPriceId returns null → unmapped
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue(null);
+
+    const analyticsLib = await import('@/lib/analytics-server');
+    const req = makeRequest('{}');
+    const res = await POST(req);
+
+    // NOTIFICATION tier: must NOT return 500 for unmapped price (contrast with
+    // customer.subscription.updated provisioning tier which returns 500)
+    expect(res.status).toBe(200);
+    expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+    expect(vi.mocked(analyticsLib.trackServer)).toHaveBeenCalledWith(
+      'trial_will_end',
+      expect.objectContaining({ userId, trialEndAt: trialEnd, plan: null }),
+    );
+  });
+
+  // ── 15. customer.subscription.trial_will_end — correct trial_end extraction
+
+  it('customer.subscription.trial_will_end: correctly passes trial_end Unix timestamp in analytics', async () => {
+    const userId = 'user_trial_004';
+    const trialEnd = 1_750_000_000; // some future timestamp
+
+    const subscription: Partial<Stripe.Subscription> = {
+      id: 'sub_trial_004',
+      metadata: { userId },
+      trial_end: trialEnd,
+      items: {
+        data: [{ price: { id: 'price_team_monthly_test' } }],
+      } as Stripe.Subscription['items'],
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('customer.subscription.trial_will_end', subscription),
+        ),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('team');
+
+    const analyticsLib = await import('@/lib/analytics-server');
+    const req = makeRequest('{}');
+    await POST(req);
+
+    const calls = vi.mocked(analyticsLib.trackServer).mock.calls;
+    expect(calls).toHaveLength(1);
+    const [, payload] = calls[0]!;
+    expect(payload).toHaveProperty('trialEndAt', trialEnd);
+  });
+
+  // ── 16. Both new handlers: signature verification still required ──────────
+
+  it('invoice.payment_succeeded: missing stripe-signature header returns 400', async () => {
+    const req = makeRequest('{}', null); // null = no signature header
+    const res = await POST(req);
+    expect(res.status).toBe(400);
+  });
+
+  it('customer.subscription.trial_will_end: invalid signature returns 400', async () => {
+    vi.mocked(stripeLib.getWebhookSecret).mockReturnValue('whsec_test_secret');
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockImplementation(() => {
+          throw new Error('No signatures found matching the expected signature');
+        }),
+      },
+    };
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+    const req = makeRequest('{}', 'bad_sig_trial');
+    const res = await POST(req);
+
+    expect(res.status).toBe(400);
+    expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+  });
 });

@@ -31,7 +31,7 @@ import {
   accessCaseVolume,
   accessSystemCountPerRun,
 } from './index.js';
-import type { ColumnAccessorContext, ColumnKey } from './types.js';
+import type { ColumnAccessorContext, ColumnKey, TimeRange } from './types.js';
 import type { WorkflowMetricsOutput } from '../workflow-metrics.js';
 
 // ── Test fixture: a representative WorkflowMetricsOutput ──────────────────────
@@ -65,6 +65,11 @@ function makeContext(overrides: Partial<ColumnAccessorContext> = {}): ColumnAcce
     lastViewedAt: '2026-04-29T14:00:00.000Z',
     createdAt: '2026-03-01T09:00:00.000Z',
     metricsV2: makeMetricsV2(),
+    // iter-065 / WDC2-P01 — deterministic frozen wall-clock + lifetime range
+    // for accessor tests. The existing iter-056 accessors are lifetime
+    // accessors and ignore these fields by design; Group G asserts that.
+    referenceNowMs: 1_700_000_000_000,
+    activeTimeRange: 'all',
     ...overrides,
   };
 }
@@ -128,23 +133,36 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — catalog completeness (Group A)', () => 
 });
 
 // ── Group B: Default-visibility integrity ─────────────────────────────────────
+// Updated at iter-067 (WDC2-P03): cycle_time_mean_ms promoted to default-pack,
+// expanding the default-visible set from 6 → 7.  B2 updated to reflect that
+// the default-pack now spans two groups (display + flow); the audit-honesty IFF
+// invariant (availability='available' ⇔ non-null accessor) in Group C / Group F
+// is the correct gate — group membership is descriptive, not restrictive.
 
 describe('WORKFLOW_DASHBOARD_COLUMNS — default-visibility integrity (Group B)', () => {
-  it('B1: exactly 6 columns are defaultVisible (matches shipped WorkflowRow surface)', () => {
+  it('B1: exactly 7 columns are defaultVisible (WDC2-P03: 7-column default-pack)', () => {
     const defaults = WORKFLOW_DASHBOARD_COLUMNS.filter((col) => col.defaultVisible);
-    expect(defaults.length).toBe(6);
+    expect(defaults.length).toBe(7);
   });
 
-  it('B2: every defaultVisible column is in the display group', () => {
+  it('B2: every defaultVisible column has availability="available" and non-null accessor', () => {
+    // WDC2-P03 (iter-067): cycle_time_mean_ms is defaultGroup='flow', not 'display',
+    // so the previous "all defaults are display group" assertion is intentionally
+    // relaxed to the audit-honesty IFF invariant: available ⇔ non-null accessor.
     const defaults = WORKFLOW_DASHBOARD_COLUMNS.filter((col) => col.defaultVisible);
     for (const col of defaults) {
-      expect(col.defaultGroup, `default-visible column ${col.key} should be group=display`).toBe(
-        'display',
-      );
+      expect(
+        col.availability,
+        `default-visible column ${col.key} must be available (audit-honesty IFF)`,
+      ).toBe('available');
+      expect(
+        col.accessor,
+        `default-visible column ${col.key} must have non-null accessor`,
+      ).not.toBeNull();
     }
   });
 
-  it('B3: defaultVisible set matches the 6 currently-rendered fields by key', () => {
+  it('B3: defaultVisible set matches the WDC2-P03 canonical 7-column set by key', () => {
     const expected = new Set<ColumnKey>([
       'workflow_title',
       'systems',
@@ -152,6 +170,7 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — default-visibility integrity (Group B)'
       'health_score',
       'last_run_at',
       'run_count',
+      'cycle_time_mean_ms', // WDC2-P03 (iter-067): 7th default-pack column
     ]);
     const actual = new Set(
       WORKFLOW_DASHBOARD_COLUMNS.filter((col) => col.defaultVisible).map((col) => col.key),
@@ -281,32 +300,32 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — accessor correctness (Group D)', () => 
   });
 });
 
-// ── Group F: D+6 default-pack composition lock ────────────────────────────────
+// ── Group F: D+6 default-pack composition lock (updated iter-067 WDC2-P03) ────
 //
-// These tests pin the canonical 6-column default-pack mandated by MR-014 §7.1
-// ASK-1: "ship initial default pack at 6 columns matching today's hard-coded
-// rendering; expand to 7+ columns post-Path-C-R+1 when more `available`
-// accessors land."
+// Originally pinned the canonical 6-column default-pack mandated by MR-014 §7.1
+// ASK-1.  Updated at iter-067 to reflect the WDC2-P03 7th-column promotion:
+// cycle_time_mean_ms.defaultVisible flipped false → true.
 //
 // Lock-intent: any change to `defaultVisible` flags in registry.ts that
 // widens, narrows, or re-attributes the default-pack will break one or more
 // assertions below, forcing an intentional review rather than silent drift.
 //
-// Canonical 6-column set (ASK-1 / MR-014 §7.1):
-//   workflow_title · systems · opportunity_tag · health_score · last_run_at · run_count
+// Canonical 7-column set (WDC2-P03 / iter-067):
+//   workflow_title · systems · opportunity_tag · health_score
+//   · cycle_time_mean_ms · last_run_at · run_count
 //
 // Note: workflow_title and health_score are LOCKED-VISIBLE (iter-031; WDC §11)
 // and always appear at the head/tail of the rendered row regardless of their
-// position in `getDefaultVisibleColumns()`.  The remaining 4 columns render as
+// position in `getDefaultVisibleColumns()`.  The remaining 5 columns render as
 // the "dynamic" middle cells between the two locked columns.
 
 describe('WORKFLOW_DASHBOARD_COLUMNS — D+6 default-pack composition lock (Group F)', () => {
-  it('F1: getDefaultVisibleColumns() returns exactly 6 entries (ASK-1 count)', () => {
+  it('F1: getDefaultVisibleColumns() returns exactly 7 entries (WDC2-P03 7-column default-pack)', () => {
     const defaults = getDefaultVisibleColumns();
-    expect(defaults.length).toBe(6);
+    expect(defaults.length).toBe(7);
   });
 
-  it('F2: the 6 default-visible keys are exactly the ASK-1 canonical set (set-equality)', () => {
+  it('F2: the 7 default-visible keys are exactly the WDC2-P03 canonical set (set-equality)', () => {
     const expected = new Set<ColumnKey>([
       'workflow_title',
       'health_score',
@@ -314,12 +333,13 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — D+6 default-pack composition lock (Grou
       'run_count',
       'last_run_at',
       'systems',
+      'cycle_time_mean_ms',
     ]);
     const actual = new Set<ColumnKey>(getDefaultVisibleColumns().map((col) => col.key));
     expect(actual).toEqual(expected);
   });
 
-  it('F3: all 6 default-visible columns have availability === "available" (audit-honesty — pending columns must never be in the default-pack)', () => {
+  it('F3: all 7 default-visible columns have availability === "available" (audit-honesty — pending columns must never be in the default-pack)', () => {
     for (const col of getDefaultVisibleColumns()) {
       expect(
         col.availability,
@@ -328,7 +348,7 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — D+6 default-pack composition lock (Grou
     }
   });
 
-  it('F4: all 6 default-visible columns have a non-null accessor (accessor IFF available invariant holds for defaults)', () => {
+  it('F4: all 7 default-visible columns have a non-null accessor (accessor IFF available invariant holds for defaults)', () => {
     for (const col of getDefaultVisibleColumns()) {
       expect(col.accessor, `default-pack column ${col.key} must have a non-null accessor`).not.toBeNull();
     }
@@ -336,10 +356,11 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — D+6 default-pack composition lock (Grou
 
   it('F5: getDefaultVisibleColumns() returns entries in registry insertion order (deterministic ordering)', () => {
     // getDefaultVisibleColumns() is a filter over the frozen catalog — it
-    // preserves registry insertion order by definition.  The 6 default-visible
+    // preserves registry insertion order by definition.  The 7 default-visible
     // entries appear in the catalog in this order:
-    //   [0] workflow_title · [1] systems · [2] opportunity_tag
-    //   [3] health_score   · [4] last_run_at · [5] run_count
+    //   [0] workflow_title  · [1] systems       · [2] opportunity_tag
+    //   [3] health_score    · [4] last_run_at   · [5] run_count
+    //   [6] cycle_time_mean_ms (iter-067 WDC2-P03 — sits in Tier A section)
     // Locking insertion order protects against registry reordering silently
     // changing which column appears in which table position for default users.
     const expectedOrder: ColumnKey[] = [
@@ -349,12 +370,13 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — D+6 default-pack composition lock (Grou
       'health_score',
       'last_run_at',
       'run_count',
+      'cycle_time_mean_ms',
     ];
     const actualOrder = getDefaultVisibleColumns().map((col) => col.key);
     expect(actualOrder).toEqual(expectedOrder);
   });
 
-  it('F6: no column outside the canonical 6 has defaultVisible === true (drift-protection against silent widening)', () => {
+  it('F6: no column outside the canonical 7 has defaultVisible === true (drift-protection against silent widening)', () => {
     const canonicalDefaultKeys = new Set<ColumnKey>([
       'workflow_title',
       'health_score',
@@ -362,6 +384,7 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — D+6 default-pack composition lock (Grou
       'run_count',
       'last_run_at',
       'systems',
+      'cycle_time_mean_ms', // WDC2-P03 (iter-067): 7th default-pack column
     ]);
     const nonCanonicalDefaults = WORKFLOW_DASHBOARD_COLUMNS.filter(
       (col) => col.defaultVisible && !canonicalDefaultKeys.has(col.key),
@@ -408,5 +431,121 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — determinism + helpers (Group E)', () =>
 
   it('E5: AVAILABLE_ACCESSORS is frozen (Object.freeze)', () => {
     expect(Object.isFrozen(AVAILABLE_ACCESSORS)).toBe(true);
+  });
+});
+
+// ── Group G: WDC2-P01 ColumnAccessorContext extension (iter-065) ──────────────
+//
+// Pins the iter-065 contract extension that added `referenceNowMs` and
+// `activeTimeRange` to `ColumnAccessorContext`. The 10 existing iter-056
+// accessors are LIFETIME accessors — they MUST return byte-identical results
+// regardless of the two new time-related fields. Wave A statistical accessors
+// landing in row #101 (WDC2-P02) will consume the fields; this group's intent
+// is to lock the lifetime-preservation invariant for the iter-056 set so that
+// future Wave A landings cannot silently flip an iter-056 accessor's semantics.
+//
+// Audit-honesty (Ledgerium IFF invariant): re-asserted here at the registry
+// level to cover the renaming risk surface introduced by the contract change.
+
+describe('ColumnAccessorContext — WDC2-P01 contract extension (Group G, iter-065)', () => {
+  it('G1: ColumnAccessorContext accepts referenceNowMs (number) + activeTimeRange (TimeRange) — compile-time shape', () => {
+    // The TS compiler enforces shape at construction; this runtime test
+    // verifies the fields are reachable + carry the expected primitive types.
+    const ctx = makeContext({ referenceNowMs: 1_800_000_000_000, activeTimeRange: '30d' });
+    expect(typeof ctx.referenceNowMs).toBe('number');
+    expect(ctx.referenceNowMs).toBe(1_800_000_000_000);
+    expect(ctx.activeTimeRange).toBe('30d');
+    // TimeRange closed-union — must be one of the 4 literals.
+    const validRanges: TimeRange[] = ['7d', '30d', '90d', 'all'];
+    expect(validRanges).toContain(ctx.activeTimeRange);
+  });
+
+  it('G2: every iter-056 accessor is deterministic — byte-identical output across repeat calls with identical context', () => {
+    const ctx = makeContext();
+    for (const [key, accessor] of Object.entries(AVAILABLE_ACCESSORS)) {
+      const r1 = accessor(ctx);
+      const r2 = accessor(ctx);
+      const r3 = accessor(ctx);
+      expect(r1, `accessor '${key}' call 1 vs 2 must match`).toEqual(r2);
+      expect(r2, `accessor '${key}' call 2 vs 3 must match`).toEqual(r3);
+    }
+  });
+
+  it('G3: lifetime semantics — every iter-056 accessor ignores referenceNowMs (two wall-clock values, identical other context → identical output)', () => {
+    const baseCtx = makeContext();
+    const ctxAt1700 = { ...baseCtx, referenceNowMs: 1_700_000_000_000 };
+    const ctxAt1800 = { ...baseCtx, referenceNowMs: 1_800_000_000_000 };
+    for (const [key, accessor] of Object.entries(AVAILABLE_ACCESSORS)) {
+      const at1700 = accessor(ctxAt1700);
+      const at1800 = accessor(ctxAt1800);
+      expect(
+        at1700,
+        `accessor '${key}' must be lifetime — referenceNowMs change leaked into output (got ${JSON.stringify(at1700)} vs ${JSON.stringify(at1800)})`,
+      ).toEqual(at1800);
+    }
+  });
+
+  it('G4: lifetime semantics — every iter-056 accessor ignores activeTimeRange (4 windows, identical other context → identical output)', () => {
+    const ranges: TimeRange[] = ['7d', '30d', '90d', 'all'];
+    const baseCtx = makeContext();
+    for (const [key, accessor] of Object.entries(AVAILABLE_ACCESSORS)) {
+      const referenceOutput = accessor({ ...baseCtx, activeTimeRange: 'all' });
+      for (const range of ranges) {
+        const output = accessor({ ...baseCtx, activeTimeRange: range });
+        expect(
+          output,
+          `accessor '${key}' must be lifetime — activeTimeRange '${range}' leaked into output (got ${JSON.stringify(output)} vs reference ${JSON.stringify(referenceOutput)})`,
+        ).toEqual(referenceOutput);
+      }
+    }
+  });
+
+  it('G5: audit-honesty IFF invariant preserved across registry under the extended context contract — accessor non-null IFF availability === "available"', () => {
+    // Re-walking the registry under the post-iter-065 context shape catches
+    // any availability flip or accessor null↔non-null transition that might
+    // have slipped in alongside the contract change. Mirrors Group C1 but
+    // explicitly anchored to the WDC2-P01 contract change.
+    for (const col of WORKFLOW_DASHBOARD_COLUMNS) {
+      if (col.availability === 'available') {
+        expect(
+          col.accessor,
+          `WDC2-P01: available column '${col.key}' must retain a non-null accessor`,
+        ).not.toBeNull();
+      } else {
+        expect(
+          col.accessor,
+          `WDC2-P01: pending column '${col.key}' (${col.availability}) must retain accessor=null`,
+        ).toBeNull();
+      }
+    }
+  });
+
+  it('G6: ColumnAccessorContext keyof exhaustiveness — exactly 7 keys (title, toolsUsed, lastViewedAt, createdAt, metricsV2, referenceNowMs, activeTimeRange)', () => {
+    // Compile-time exhaustiveness via the type assignment below: if a field
+    // is added to / removed from ColumnAccessorContext without updating this
+    // tuple, TS will fail at compile time. Runtime check enumerates the keys
+    // on a representative instance.
+    const expectedKeys: Array<keyof ColumnAccessorContext> = [
+      'title',
+      'toolsUsed',
+      'lastViewedAt',
+      'createdAt',
+      'metricsV2',
+      'referenceNowMs',
+      'activeTimeRange',
+    ];
+    // Compile-time exhaustiveness guard: if `keyof ColumnAccessorContext`
+    // gains/loses a member without updating `expectedKeys`, this type-only
+    // assignment fails to compile.
+    type _ExpectedExhaustive = Exclude<keyof ColumnAccessorContext, typeof expectedKeys[number]> extends never
+      ? true
+      : never;
+    const _exhaustiveCheck: _ExpectedExhaustive = true;
+    void _exhaustiveCheck;
+
+    const ctx = makeContext();
+    const actualKeys = Object.keys(ctx).sort();
+    expect(actualKeys).toEqual(expectedKeys.slice().sort());
+    expect(actualKeys.length).toBe(7);
   });
 });

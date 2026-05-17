@@ -18,6 +18,7 @@ export type {
   PlanTierGate,
   ColumnAccessor,
   ColumnAccessorContext,
+  TimeRange,
   WorkflowDashboardColumn,
 } from './types.js';
 

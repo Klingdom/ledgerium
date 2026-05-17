@@ -8,7 +8,8 @@
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:real": "playwright test --config=playwright.real-ext.config.ts"
   },
   "dependencies": {
     "@ledgerium/normalization-engine": "workspace:*",

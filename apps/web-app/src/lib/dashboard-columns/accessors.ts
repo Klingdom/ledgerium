@@ -11,8 +11,39 @@
  * no I/O. Returning `null` is a meaningful "value not available for this
  * specific row" signal (e.g. unprocessed workflow → runs === null).
  *
+ * ── ColumnAccessorContext extension (iter-065 / WDC2-P01) ─────────────────────
+ *
+ * `ColumnAccessorContext` carries two time-related fields — `referenceNowMs`
+ * and `activeTimeRange` — added at iter-065 as the architectural prerequisite
+ * for Wave A statistical surface (row #101 WDC2-P02). The accessors defined in
+ * this file (iter-056) are LIFETIME accessors:
+ *
+ *  - They return identical values regardless of `referenceNowMs` or
+ *    `activeTimeRange`. Their semantics do not depend on a time window.
+ *  - The 6 display-group accessors (workflow_title, systems, opportunity_tag,
+ *    health_score, last_run_at, run_count) read top-level row fields or
+ *    `metricsV2` scalars; none of these are time-windowed in today's engine.
+ *  - The 4 Tier A accessors (cycle_time_ms, cycle_time_mean_ms, case_volume,
+ *    system_count_per_run) read `WorkflowMetricsOutput` scalars computed by
+ *    the engine over the full case set; the engine does NOT yet expose a
+ *    time-windowed variant.
+ *
+ * Future time-windowed accessors (Wave A — row #101) MUST:
+ *  1. Consume `referenceNowMs` to derive their window-end timestamp. They MUST
+ *     NOT call `Date.now()`, `new Date()`, or `performance.now()` directly.
+ *  2. Consume `activeTimeRange` to derive their window-start timestamp from
+ *     the `referenceNowMs - window_ms` boundary (or skip windowing when
+ *     `activeTimeRange === 'all'`).
+ *  3. Preserve the audit-honesty IFF invariant: `accessor !== null IFF
+ *     availability === 'available'`. The registry test (Group C) asserts.
+ *
+ * Group G of `registry.test.ts` asserts the lifetime-preservation contract by
+ * calling each existing accessor with two different `referenceNowMs` and two
+ * different `activeTimeRange` values and asserting byte-identical results.
+ *
  * @see types.ts — ColumnAccessor signature + audit-honesty invariant
  * @see registry.ts — wires accessors to ColumnKey entries
+ * @see docs/meta/WORKFLOWS_DASHBOARD_REVIEW_002.md §5.3 + §12 — WDC2-P01 scope
  */
 
 import type { ColumnAccessor, ColumnAccessorContext } from './types.js';

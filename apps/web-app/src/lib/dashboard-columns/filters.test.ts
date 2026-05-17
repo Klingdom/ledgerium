@@ -65,6 +65,12 @@ function makeContext(overrides: Partial<ColumnAccessorContext> = {}): ColumnAcce
     lastViewedAt: '2026-04-29T14:00:00.000Z',
     createdAt: '2026-03-01T09:00:00.000Z',
     metricsV2,
+    // iter-065 / WDC2-P01 — deterministic frozen wall-clock + lifetime range
+    // for filter-predicate tests. Filter predicates do not consume these
+    // fields (filter evaluation operates on accessor outputs, which today are
+    // all lifetime), so any deterministic value preserves test semantics.
+    referenceNowMs: 1_700_000_000_000,
+    activeTimeRange: 'all',
     ...overrides,
   };
 }

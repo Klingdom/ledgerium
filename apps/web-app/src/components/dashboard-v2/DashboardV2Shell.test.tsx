@@ -229,14 +229,18 @@ describe('applyFilters', () => {
 /**
  * Pure-logic derivation of the dashboard_v2_viewed event shape.
  * Mirrors the computation in DashboardV2Shell's useEffect for this event.
+ *
+ * WDC2-P03 (iter-067): added time_range parameter — defaults to 'all' to
+ * reflect the new default state and keep existing call-sites backwards-compat.
  */
 function buildDashboardV2ViewedEvent(params: {
   workflowCount: number;
   filtersState: { systems: string[]; opportunity: string | null; healthStatus: string | null; needsAttention: boolean };
   insightFilterKey: string | null;
   activePortfolioId: string | null;
-}): { event: string; workflowCount: number; hasActiveFilters: boolean; portfolioFilterActive: boolean } {
-  const { workflowCount, filtersState, insightFilterKey, activePortfolioId } = params;
+  timeRange?: '7d' | '30d' | '90d' | 'all';
+}): { event: string; workflowCount: number; hasActiveFilters: boolean; portfolioFilterActive: boolean; time_range: '7d' | '30d' | '90d' | 'all' } {
+  const { workflowCount, filtersState, insightFilterKey, activePortfolioId, timeRange = 'all' } = params;
   const hasFilters =
     filtersState.systems.length > 0 ||
     filtersState.opportunity !== null ||
@@ -248,6 +252,7 @@ function buildDashboardV2ViewedEvent(params: {
     workflowCount,
     hasActiveFilters: hasFilters,
     portfolioFilterActive: activePortfolioId !== null,
+    time_range: timeRange,
   };
 }
 
@@ -333,6 +338,29 @@ describe('iter-030: dashboard_v2_viewed event shape', () => {
     });
     expect(ev.workflowCount).toBe(0);
     expect(ev.event).toBe('dashboard_v2_viewed');
+  });
+
+  // WDC2-P03 (iter-067): time_range analytics prereq
+  it('time_range defaults to "all" (WDC2-P03: new default reflects CEO Signal 1)', () => {
+    const ev = buildDashboardV2ViewedEvent({
+      workflowCount: 3,
+      filtersState: baseFilters,
+      insightFilterKey: null,
+      activePortfolioId: null,
+      // no timeRange param — defaults to 'all'
+    });
+    expect(ev.time_range).toBe('all');
+  });
+
+  it('time_range reflects explicit non-"all" selection (e.g. "30d")', () => {
+    const ev = buildDashboardV2ViewedEvent({
+      workflowCount: 3,
+      filtersState: baseFilters,
+      insightFilterKey: null,
+      activePortfolioId: null,
+      timeRange: '30d',
+    });
+    expect(ev.time_range).toBe('30d');
   });
 });
 
@@ -655,5 +683,46 @@ describe('FOLLOWUP-037-02: filterByTimeRange deterministic clock (iter-045)', ()
     expect(secondCall).toHaveLength(0);
     expect(thirdCall).toHaveLength(1);
     expect(thirdCall[0]!.id).toBe(firstCall[0]!.id);
+  });
+});
+
+// ── WDC2-P03 (iter-067): 'all' range edge-behavior ───────────────────────────
+//
+// Supplements the existing test 2 (range="all" short-circuit) with additional
+// edge cases that the new 'all' default makes load-bearing:
+//   - very old workflows (365 days)
+//   - N=1000 performance smoke test
+//   - epoch-boundary createdAt (new Date(0))
+//   - empty input passes through cleanly under 'all'
+
+describe("WDC2-P03: filterByTimeRange 'all' range edge cases (iter-067)", () => {
+  it("14. 'all' returns 365-day-old workflow (no date cutoff applied)", () => {
+    const MS_365D = 365 * 24 * 60 * 60 * 1000;
+    const wf = makeTimeWorkflow('year-old', FROZEN_NOW - MS_365D);
+    const result = filterByTimeRange([wf], 'all', FROZEN_NOW);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.id).toBe('year-old');
+  });
+
+  it("15. 'all' returns all N=1000 workflows (performance smoke — no filter applied)", () => {
+    const workflows = Array.from({ length: 1000 }, (_, i) =>
+      makeTimeWorkflow(`wf-${i}`, FROZEN_NOW - i * 1000),
+    );
+    const result = filterByTimeRange(workflows, 'all', FROZEN_NOW);
+    expect(result).toHaveLength(1000);
+  });
+
+  it("16. 'all' returns workflow with epoch-boundary createdAt (new Date(0).toISOString())", () => {
+    // new Date(0) = 1970-01-01T00:00:00.000Z — the Unix epoch boundary
+    const epochWorkflow = makeTimeWorkflow('epoch', 0);
+    const result = filterByTimeRange([epochWorkflow], 'all', FROZEN_NOW);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.id).toBe('epoch');
+  });
+
+  it("17. 'all' with empty input returns [] (identity on empty array)", () => {
+    const result = filterByTimeRange([], 'all', FROZEN_NOW);
+    expect(result).toHaveLength(0);
+    expect(result).toEqual([]);
   });
 });

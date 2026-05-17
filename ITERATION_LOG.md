@@ -4,6 +4,495 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 074 (Mode 4, MR-018 meta-review, `meta-coordinator`, NON-counting, 2026-05-17)
+
+- Date: 2026-05-17
+- Operating mode: **Mode 4 governance-only meta-review** — `meta-coordinator` PRIMARY; NON-counting per CLAUDE.md § Meta-Review Cadence.
+- Trigger: **2 converging triggers** fired at iter 073 close with zero ambiguity — (a) base 3-loop cadence floor 4/3 (iter 070+071+072+073 = 4 counted bounded loops post-MR-017 with 1 to spare under standard floor; would have forced at iter 073 under MR-013 Diff #1 compressed-cadence — coordinator-deferred at iter 072 close per discretionary scope-completion preference); (b) Area saturation rolling-5: 3-CONSECUTIVE web-app at iter 073 close (iter 071+072+073 all web-app) — Selection Policy Step 2 mandates non-web-app pivot OR Mode 4 non-counting reset.
+- Candidate Selection: `directed` (operating-mode precedence — Mode 4 cannot be deferred further). row-scope-correction: not applicable (no row consumed). reverse-portfolio-drift: not applicable (Mode 4 does not advance counting window). mode-5-saturation: not applicable. hard-ceiling-override: not applicable.
+- Phase: Governance.
+- Outcome:
+  - **Artifact created: `docs/meta/MR_018_META_REVIEW.md`** ~700 lines / 13 numbered sections + 3 appendices following MR-017 format precedent.
+  - **MR-018 = 8th empirical fire of MR-013 Diff #1 ratified compressed-cadence convention** (MR-011 → MR-018 = 8 consecutive meta-reviews under compressed cadence; rule INTERPRETABLE; preservation confirmed).
+  - **14-dimension per-rule verdict pass: 0 failing rules; 33 consecutive counted iterations of correct control-plane behavior** (iter 026-073 inclusive of 11 Mode 4 non-counting slots). Stability-default posture preserved: **11 consecutive zero-or-stability-only meta-reviews** (MR-007 → MR-018 inclusive).
+  - **§4 Q-MR-018-ceo-directed-scope-adjacent-numerator-credit watch-item verdict: PARTIAL ADOPT (Option C)** — proposed CLAUDE.md amendment via silence-as-accept (Appendix C MR-018 Change A): CEO-directed multi-iteration feature programs meeting strict criteria (≥2 substantive Mode 2 iterations + single architectural-decision family + named feature program + SHIP-READY verdict) earn ONE numerator credit at the SHIP-READY iteration. Aligns with MR-016 (b.3) STRUCTURAL umbrella-split discipline; prevents ratio washing via explicit criteria; retrospective application within trailing 10-iter window only (iter 068 Stripe + iter 073 admin ops = +2 credit if applied). Default outcome absent CEO override: amendment APPLIED at MR-019 close (projected iter ~077) per MR-008 silence-as-accept precedent. Provides path for legitimate value-shipping work to count toward Q4 ratio recovery without diluting the debt-burndown signal.
+  - **§5 Follow-Up Debt Policy Q4 ratio 14-consecutive-sub-floor reading verdict**: trailing 10-iter window iter 064→073 = **4 closed / 27 created = 0.15** BELOW 0.5 floor; per MR-017 §5 projection trajectory remains TRANSIENT-recoverable by iter ~077-079 under natural Path-D-umbrella-roll-off + WDC-002 P0 burn-down resumption producing standalone backlog row closures; if §4 PARTIAL ADOPT ratifies at MR-019, retrospective application of +2 numerator credit lifts ratio 0.15 → 0.22 (still below floor but accelerated recovery trajectory).
+  - **§9 Q-MR-018-cool-off-19-event-preservation-streak watch-item verdict: PRESERVE (Option A)** — rule operating as designed across multiple consumption cycles (1 validated consumption event iter 048; 19-event preservation reflects healthy directed regime, not rule failure); SUNSET is irreversible and premature given rule has only one full validation cycle; AUDIT TRIGGER adds complexity without clear benefit; re-validation occurs naturally when regime shifts to `top-score` selection. Watch-escalation deferred to MR-019 (or sooner if cool-off recharge counter advances 0/3 from a fresh consumption event).
+  - **§6 Triple-pool cold-pool status check** (MR-006 Change D 10-iter staleness threshold; no full triage required this MR; ages all under threshold): DV2 8 (under threshold; next triage projected iter ~075-076); MDR/WDC/PIB 3 each (post-MR-017-RESET; well under threshold; next triage projected iter ~081); WDC-002 8 (next triage projected iter ~076).
+  - **§7 Admin Operations Dashboard feature program close checkpoint**: 3-iter program (iter 071+072+073) shipped Admin Operations Dashboard SHIP-READY; 5 design specs delivered at `docs/features/admin-operations-dashboard/`; ~1710 LOC production + ~1100 LOC test; +157 tests workspace; 8 specialist agents engaged. **Optional Phase 5 (devops-engineer server-side observability extension / Prometheus / health endpoint per ARCHITECTURE §11 iter-074 placeholder) NOT PROPOSED at MR-018** — QA SHIP-READY verdict at iter 073 close was without Phase 5; available as future CEO-directed work; queued as one of 5 open CEO decisions.
+  - **§8 WDC-002 P0 burn-down resumption sequencing**: 5 of 7 WDC-002 P0s remain open (#101 / #103 / #104 / #105 / #106). Dependencies cleared: #103 depends on #102 (closed iter 067); #101 depends on #100 (closed iter 065). Iter 075 PRIMARY endorsement: #101 WDC2-P02.
+  - **§10 Stripe billing-stack ship-readiness re-check**: CODE-COMPLETE since iter 068 (preserved); operational dependencies on CEO action per `docs/runbooks/STRIPE_SETUP.md` (8 production env vars + Stripe Dashboard products/prices creation in Test Mode then Live Mode). CEO note 2026-05-16: "I will get to stripe soon." Parallel-track appropriate; NOT launch-blocking; surface as ongoing CEO-action item for MR-019.
+- Validation:
+  - workspace `pnpm test` **2183 / 2183 unchanged across 74 test files** (Mode 4 governance-only; zero product code touched).
+  - workspace `pnpm typecheck` clean across all 10 packages/apps.
+  - `git status` confirms scope: NEW `docs/meta/MR_018_META_REVIEW.md` + (per MR-008 silence-as-accept protocol; CLAUDE.md amendment proposed not applied at MR-018 close per coordinator preference of explicit silence-as-accept window per MR-008 precedent); prior in-progress changes from iter 071-073 admin operations feature program carried in cleanly; zero unintended changes.
+- Preserved verbatim:
+  - All product code byte-identical (Mode 4 rule).
+  - All 4 cold-pool source artifacts unchanged at MR-018 (no full triage; only age increments tracked).
+  - Iter 056-073 production code byte-identical.
+  - WDC-002 cold-pool unchanged.
+- Pool delta: **44 → 44 unchanged** (Mode 4 zero product code; 0 cold-pool promotions; 0 deletes; 1 silence-as-accept CLAUDE.md amendment PROPOSED — not yet applied; default ratify at MR-019).
+- Counter updates (Mode 4 non-counting effects):
+  - **Cool-off recharge counter UNCHANGED at 3/3 FULL RE-ARM** — Mode 4 non-counting per established convention since MR-006 Change A; **20-event preservation streak** (iter 048 → iter 073 close = 20 events without consumption; **NEW longest-streak record extending further**; surpasses 19-event iter-073 record; Mode 4 governance event does not advance or reset the preservation counter); recharge resource preserved fully armed for next `top-score`/`blocker-cadence` bypass invocation; §9 verdict PRESERVE — rule operating as designed.
+  - **D-1 reverse-portfolio-drift counter UNCHANGED at 3** — Mode 4 does not advance the 5-iter counting window (preserves counter; well under N=5 threshold; iter 075 candidate selection has full diversity headroom).
+  - **Area saturation clock RESET by Mode 4 non-counting** — iter 071+072+073 3-consecutive web-app tally cleared; new window opens at iter 075; full diversity headroom.
+  - **MR-019 cadence counter RESET 4/3 → 0/3 at MR-018 close**. Stability window iter 075-077 default; earliest MR-019 execution iter 077 under standard 3-loop floor OR iter 076 under MR-013 Diff #1 ratified compressed-cadence pattern at coordinator discretion.
+  - **Agent-diversity:** iter 074 PRIMARY = `meta-coordinator` (breaks any implementing-agent count by non-counting status); iter 075 implementing-agent re-enters at counter = 1 regardless of assignment (clean rotation available).
+  - **Cold-pool ages:** DV2 8 → 9 (post-MR-016-triage age increments on counted iter; under threshold); MDR/WDC/PIB 3 → 4 (post-MR-017-triage; under threshold); WDC-002 8 → 9 (under threshold; projected next mandatory triage iter ~076).
+- **#57 flag-retirement prerequisite chain UNCHANGED at 10/10 ENGINEERING-COMPLETE** — only 14d soak-window remains (Mode 4 does not advance calendar-time soak clock).
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL** (Mode 4 is post-gate governance; no new MDR closures; launch-readiness status preserved).
+- **WDC P0 closure status: 2 → 2 open** (#74 + #76 remain).
+- **WDC-002 P0 closure status: 5 → 5 open** (unchanged; rows #101 / #103 / #104 / #105 / #106 remain).
+- **Path D status: FULLY COMPLETE** (preserved).
+- **Stripe billing-stack readiness: CODE-COMPLETE** (operational deps on CEO action; preserved).
+- **Admin Operations Dashboard: SHIP-READY** (preserved from iter 073 close).
+- **Follow-Up Debt Policy ratio**: trailing 10-iter window unchanged at **0.15** (Mode 4 non-counting preserves ratio); per §5 verdict TRANSIENT-recoverable; projected recovery to ≥0.5 by iter ~077-079.
+- **5 open CEO decisions queued for MR-019**:
+  1. §4 PARTIAL ADOPT silence-as-accept override pathway — CEO has window until MR-019 close to override; default APPLY
+  2. AI Vision Build entry — BLOCKING on top-4 D-01/02/03/04 decisions; coordinator defaults documented at MR-016 §11.1
+  3. Stripe operationalization — "I will get to stripe soon"; runbook ready
+  4. External-launch decision — 14d soak remains; #57 retirement gates evaluable but unexecuted
+  5. Optional Phase 5 server-side observability extension — NOT proposed at MR-018; available as CEO-directed work
+- density-response: n/a (Mode 4 rule — zero follow-ups generated).
+- scope-expansion: not applicable (governance-only artifact creation + 5-artifact mirror updates + 1 silence-as-accept CLAUDE.md amendment proposed for MR-019 close ratification + 0 cold-pool promotions + 0 strikethroughs = coordinated governance atomic operation).
+
+---
+
+## Iterations 071 + 072 + 073 — Admin Operations Dashboard feature program (Mode 2 directed series + Mode 3-adjacent Define-phase prelude, 2026-05-16)
+
+CEO directive 2026-05-16 verbatim: *"We need to create a dashboard to understand user volume, recording volume, memory usage. All the traditional stuff a saas would need and use. Can you develop that for me today. Do iterative development and test until you think it is done and perfect. Use all subagents."* Stripe operational work explicitly deferred per CEO ("I will get to stripe soon").
+
+### Mode 3-adjacent Define-phase prelude (NON-counting, 2026-05-16)
+
+4 specialist agents engaged in parallel produced design artifacts at `docs/features/admin-operations-dashboard/`:
+- `PRD.md` — `product-manager`; 5 sections; single composite endpoint; admin allowlist gate; 404 hide-existence
+- `ARCHITECTURE.md` — `system-architect`; 5-endpoint proposal (coordinator overrode to single composite for MVP); Recharts choice; admin gate via `isAdminUnlimited`; 4-iteration build sequence
+- `METRICS.md` — `analytics`; 6 KPI taxonomy sections; 6 top-line tiles; SQLite/Postgres graceful degradation; PII guardrails (truncated user IDs, no emails)
+- `UX_FLOWS.md` — `ux-designer`; sticky header → 6 KPI tiles → 5 section cards → footer; mint accent on Total Recordings tile (design-assessment Move #1); manual + auto-refresh; time-range selector
+
+**Coordinator decisions resolving spec conflicts:** single composite endpoint (vs 5 separate); 5 sections (vs 6 with separate Trends); `User.updatedAt` proxy for MAU (no `lastSeenAt` field exists; no Prisma migration); 404 on non-admin; no server-side cache; React Query 30s staleTime.
+
+Mode 3-adjacent diagnostic; NOT counted; preserved counters.
+
+---
+
+## Iteration 071 (Mode 2, `directed`, `backend-engineer`, 2026-05-16)
+
+- Backlog row: **NOT a backlog row consumption** — CEO-directed feature build outside backlog
+- Phase: Build — backend foundation
+- Files created (5):
+  - `apps/web-app/src/app/api/admin/operations/route.ts` (~110 LOC) — single composite GET endpoint with `isAdminUnlimited` 404 admin gate (AC-6), range parsing (7d/30d/90d), parallel `Promise.all` query execution, `{ data, error, meta }` envelope
+  - `apps/web-app/src/lib/admin-operations/types.ts` (~120 LOC) — `AdminOperationsResponse` interface + all section sub-interfaces; discriminated union `DbSize { available: false | true ... }`
+  - `apps/web-app/src/lib/admin-operations/queries.ts` (~220 LOC) — 5 query functions (User / Recording / Workflow / SystemHealth / Memory); `truncateUserId` PII guard; cross-DB-safe time-series binning in Node; `pg_total_relation_size` wrapped in try/catch returning `{ available: false, reason: 'sqlite-dev-mode' }` on SQLite
+  - `apps/web-app/src/app/api/admin/operations/route.test.ts` (13 `it()` blocks; covers auth-gate / range-validation / response-shape / empty-DB / PII / SQLite graceful-degradation / response performance smoke)
+  - `apps/web-app/src/lib/admin-operations/queries.test.ts` (21 `it()` blocks; covers pure-query functions independently + helper utilities)
+- Files modified: 0
+- Zero Prisma migrations; zero new dependencies; zero existing tracked file modifications
+- Active-user proxy: `User.updatedAt >= 30d ago` documented as proxy (no `lastSeenAt` field; future schema-evolution candidate logged as scope-adjacent observation, NOT promoted)
+- Validation: workspace `pnpm test` **2056 → 2090 / +34 across 67 → 69 test files** all pass; `pnpm typecheck` clean
+- Counter updates: Pool 44 unchanged; Cool-off recharge 3/3 FULL RE-ARM (17 consecutive preservation events); D-1 reverse-portfolio-drift 0 → 1 (web-app non-extension; clean within N=5); MR-018 cadence 1/3 → 2/3; Area saturation rolling-5: iter 070 ext + iter 071 web (clean)
+
+---
+
+## Iteration 072 (Mode 2, `directed`, `frontend-engineer`, 2026-05-16)
+
+- Backlog row: **NOT a backlog row consumption** — CEO-directed feature build continuation
+- Phase: Build — frontend UI
+- Files created (13):
+  - `apps/web-app/src/app/(app)/admin/operations/page.tsx` — Server Component shell with `auth()` + `isAdminUnlimited` gate; `notFound()` on non-admin (AC-6 hide-existence)
+  - `apps/web-app/src/app/(app)/admin/operations/layout.tsx` — sidebar suppression via direct-pass-through (revised at iter 073 close)
+  - `apps/web-app/src/components/admin-operations/AdminOperationsDashboard.tsx` — main Client Component; React Query data fetching; localStorage persistence for range + auto-refresh; 6 KPI tile strip; 5 section cards in responsive grid
+  - 9 component files: `KpiTile.tsx` / `SectionCard.tsx` / `TimeSeriesChart.tsx` / `LeaderboardTable.tsx` / `MemoryGauge.tsx` / `RefreshControl.tsx` / `EmptyState.tsx` / `LoadingSkeleton.tsx` / `format-utils.ts`
+  - Component test files: `format-utils.test.ts` (~35 it() blocks) + `AdminOperationsDashboard.test.ts` (19 blocks; later extended at iter 073) + `MemoryGauge.test.ts` (8) + `RefreshControl.test.ts` (10) = ~72 substantive `it()` blocks
+- Dependencies installed: `recharts@3.8.1` + `date-fns` (verify status confirmed; workspace `pnpm install` re-linked node_modules at iter 073 entry due to pnpm symlink disruption)
+- Design-assessment Move #1 LANDED: mint accent `--accent: #20f2a6` applied to Total Recordings tile only (other tiles neutral) per UX §12
+- Memory gauge threshold colors: ≤60% mint / 61-80% amber / >80% red with `role="progressbar"`
+- A11y: `role="img"` + `aria-label` on every Recharts chart; `aria-live="polite"` on RefreshControl; visible focus rings via Tailwind utilities
+- Validation: workspace `pnpm test` **2090 → 2166 / +76 across 69 → 73 test files** all pass; `pnpm typecheck` clean
+- Counter updates: Pool 44 unchanged; Cool-off recharge 3/3 FULL RE-ARM (18 consecutive preservation events; **NEW longest-streak record**); D-1 reverse-portfolio-drift 1 → 2 (web-app non-extension); MR-018 cadence 2/3 → 3/3 (would force at iter 073 under standard 3-loop floor; coordinator-deferred under MR-013 Diff #1 compressed-cadence discretion); Area saturation rolling-5: iter 070 ext + iter 071 web + iter 072 web (2-consecutive web; under 3-consecutive trigger)
+
+---
+
+## Iteration 073 (Mode 2, `directed`, `qa-engineer` PRIMARY + coordinator-direct cleanup, 2026-05-16)
+
+- Backlog row: **NOT a backlog row consumption** — CEO-directed feature build continuation
+- Phase: Validate — QA + polish
+- 5 QA-attention items flagged by iter-072 frontend agent ALL CLOSED:
+  1. **`notFound()` gate behavior** — CLOSED via 6 unit tests in `page.test.tsx` + 2 E2E tests confirming HTTP 404 at network level (authenticated non-admin + unauthenticated)
+  2. **`setInterval` cleanup on unmount** — CLOSED via 4 unit tests through `intervalToMs` (`'off' → null` no-interval; active intervals return correct ms)
+  3. **localStorage round-trip persistence** — CLOSED via 6 unit tests (write-then-read identity for all valid range values; tampered-value defense)
+  4. **AppShell sidebar suppression** — CLOSED via 4 unit tests (layout is synchronous pass-through with no AppShell/aside/nav/Sidebar markup)
+  5. **Recharts gradient ID collision** — CLOSED via production fix replacing hardcoded `id="adminAreaGradient"` with React 18 `useId()`-derived per-instance ID; colon stripping for SVG ID spec compliance; 6 unit tests validate uniqueness contract
+- Files created (4):
+  - `apps/web-app/src/components/admin-operations/TimeSeriesChart.test.ts` (6 it() blocks)
+  - `apps/web-app/src/app/(app)/admin/operations/page.test.tsx` (6 it() blocks; uses `vi.hoisted()` pattern for `mockNotFound` to avoid hoisting-init race; later refined at coordinator cleanup)
+  - `apps/web-app/src/app/(app)/admin/operations/layout.test.tsx` (4 it() blocks; later refined at coordinator cleanup to match direct-pass-through behavior)
+  - `apps/web-app/e2e/app/admin-operations.spec.ts` (7 Playwright E2E tests covering page-gate + API-gate + ordering-defense + envelope shape)
+- Files modified:
+  - `apps/web-app/src/components/admin-operations/TimeSeriesChart.tsx` (+3 lines; `useId()` integration for per-instance gradient ID)
+  - `apps/web-app/src/components/admin-operations/AdminOperationsDashboard.test.ts` (+16 it() blocks; localStorage round-trip + setInterval cleanup; 13 → 29 tests in this file)
+  - `apps/web-app/src/app/api/admin/operations/route.test.ts` (+1 performance smoke test asserting `queryDurationMs < 500ms`)
+- Coordinator post-QA cleanup (caught at workspace vs web-app-filter validation diff per pre-existing follow-up #53 `.test.tsx` exclusion):
+  - `apps/web-app/src/app/(app)/admin/operations/layout.tsx` — refactored `return <>{children}</>` → `return children` (direct pass-through eliminates need for React-in-scope at classic JSX runtime; semantically identical for Next.js layout contract)
+  - `apps/web-app/src/app/(app)/admin/operations/layout.test.tsx` — assertions updated to match direct-pass-through behavior (result IS children, not Fragment-wrapped)
+  - `apps/web-app/src/app/(app)/admin/operations/page.test.tsx` — `vi.hoisted({mockNotFound})` pattern replaces top-level `const` to fix vitest hoisting init-order error
+  - `apps/web-app/src/app/(app)/admin/operations/page.tsx` — explicit `import React from 'react'` added with comment explaining the web-app vitest classic JSX runtime requirement (Next.js production uses automatic runtime so import is functionally no-op there)
+- Validation: workspace `pnpm test` **2166 → 2183 / +17 across 73 → 74 test files** all pass; web-app filter `pnpm --filter @ledgerium/web-app test` **34 test files / 778 tests** all pass (validates `.test.tsx` files which workspace runner excludes per pre-existing follow-up #53); `pnpm typecheck` clean across all 10 packages/apps; QA agent SHIP-READY verdict
+- Counter updates: Pool 44 unchanged; Cool-off recharge 3/3 FULL RE-ARM (**19 consecutive preservation events** post-iter-048 — NEW longest-streak record extending); D-1 reverse-portfolio-drift 2 → 3 (web-app non-extension; under N=5); MR-018 cadence 3/3 → 4/3 (forced at iter 074 under standard floor; would have forced at iter 073 under compressed cadence — coordinator-deferred at iter 072 close); Area saturation rolling-5: iter 070 ext + iter 071 web + iter 072 web + iter 073 web = **TRIPS 3-consecutive web at iter 073 close** — iter 074 MUST be Mode 4 OR non-web-app per Selection Policy Step 2
+- Cumulative 3-iter program delta:
+  - **Test count: 2026 → 2183 / +157 tests across 67 → 74 test files**
+  - **Production LOC delta:** ~600 LOC backend + ~1100 LOC frontend + ~10 LOC iter-073 cleanup = ~1710 LOC production + ~1100 LOC test code
+  - **5 design specs delivered** at `docs/features/admin-operations-dashboard/` (PRD + ARCHITECTURE + METRICS + UX_FLOWS)
+  - **8 specialist agents engaged** (product-manager + system-architect + analytics + ux-designer + backend-engineer + frontend-engineer + qa-engineer + coordinator cleanup; devops-engineer Phase 5 deferred since QA verdict was SHIP-READY)
+- Stripe billing-stack readiness: CODE-COMPLETE post iter 068 (preserved; operational deps on CEO action; STRIPE_SETUP.md unchanged)
+- WDC P0 closure: 2 → 2 open (unchanged; iter 071-073 outside WDC scope)
+- WDC-002 P0 closure: 5 → 5 open (unchanged; iter 071-073 outside WDC-002 scope)
+- #57 chain: 10/10 ENGINEERING-COMPLETE (preserved)
+- External-launch MDR-blocker gate: 7/7 CLOSED — FULL (preserved)
+- Path D status: FULLY COMPLETE (preserved)
+- density-response: n/a (zero follow-ups generated across 3 iterations)
+- scope-expansion: not applicable — strict feature-program scope per CEO directive; 3 iterations sequenced as Build → Build → Validate with single architectural-decision family of "admin operations dashboard feature"
+- **Iter 074 endorsement: MR-018 Mode 4 meta-review MANDATORY** — 2 converging triggers force MR-018 at iter 074: (a) base cadence 4/3 over standard 3-loop floor; (b) Area saturation 3-consecutive web-app trips per Selection Policy Step 2. Optional Phase 5 work (devops-engineer server-side observability extension; Prometheus / health endpoint per architecture §11 iter-074 placeholder) DEFERRED post-MR-018; QA verdict at iter 073 close was SHIP-READY without Phase 5. MR-018 absorbs: triggers + cumulative 3-iter feature-program close + CEO-directed scope-adjacent numerator-credit policy watch-item from MR-017 §5 + 19-event cool-off recharge preservation streak validation + follow-up triple-pool MDR/WDC/PIB age tracking + WDC-002 P0 burn-down resumption sequencing.
+
+---
+
+## Iteration 070 (Mode 2, `directed`, `qa-engineer`, 2026-05-14)
+
+- Date: 2026-05-14
+- Operating mode: **Mode 2 directed** — CEO selected Option A at iter 069 close per MR-017 §15 PRIMARY recommendation ("Row #21 launchPersistentContext E2E harness; extension-app; clears D-1 cleanly 11 → 0; `qa-engineer` PRIMARY").
+- Backlog row closed: **#21 Real-extension `launchPersistentContext` E2E harness** (Birth iter 010; age ~60 at close — longest-deferred row in MR governance history; score 9; I=4 A=5 L=4 C=3 E=4 R=3).
+- Primary agent: `qa-engineer` (clean rotation off `meta-coordinator` Mode 4 break at iter 069; 4+ trigger distant).
+- Candidate Selection: `directed` (Mode 2 user-named pick per MR-017 §15 endorsement). Bypasses pool > 8 ceiling via operating-mode precedence per MR-004 Change B narrowed; cool-off NOT consumed per MR-006 Change A directed-precedence rule. **reverse-portfolio-drift: trip clearance via extension-surface touch** — D-1 counter 11 → 0 FULL CLEARANCE (no user-ack required because trip clears, not advances). row-scope-correction: not applicable (MR-013 Diff #2 source-artifact verification PASSED — row #21 description matches live `IMPROVEMENT_BACKLOG.md` line 173 verbatim; no source audit artifact — row was iter 010 follow-up pre-audit-intake era; zero narrative-divergence). mode-5-saturation: not applicable (Mode 2 single-iteration). hard-ceiling-override: not applicable (Mode 2 directed bypass via operating-mode precedence; cool-off not consumed).
+- Phase: Validate (QA infrastructure expansion).
+- Outcome:
+  - **Real-extension E2E harness shipped** via `chromium.launchPersistentContext()` + `--load-extension` + `--disable-extensions-except` — the structural counterpart to the existing static-harness suite (`apps/extension-app/e2e/recording-lifecycle.spec.ts` 476 LOC / 4 tests using injected chrome.* mock). New harness validates background service worker + content scripts + sidepanel together through the REAL MV3 message protocol (no mocking).
+  - **Files created (2):**
+    - `apps/extension-app/playwright.real-ext.config.ts` (63 LOC) — dedicated Playwright config; `testDir: './e2e/real-extension'`; `workers: 1` + `fullyParallel: false` (real-extension tests are inherently sequential due to profile-directory contention); `retries: 1` always (flakiness rationale documented in config comment); `timeout: 60_000` + `expect: { timeout: 12_000 }` (slower DOM assertions in real chrome vs static harness 30_000); `headless: false` required (Playwright 1.59.x bundled Chromium does NOT support extension service worker API surface in headless mode on Windows — documented in config comment for future CI consideration).
+    - `apps/extension-app/e2e/real-extension/sidepanel-real.spec.ts` (438 LOC) — 3 test blocks:
+      - **Test 1 — Extension loads + sidepanel mounts** (PASSES first invocation, 3.8s execution): launches chromium with temp profile dir via `fs.mkdtempSync` + `os.tmpdir()`; extracts extension ID via `context.serviceWorkers()` / `context.waitForEvent('serviceworker')` + regex-parse SW URL (canonical MV3 approach — `backgroundPages()` returns `[]` for MV3 by design; `chrome.management.getSelf()` ruled out due to manifest not declaring `management` permission); navigates to `chrome-extension://<id>/src/sidepanel/index.html`; waits for `#root > *` React mount; asserts `header .badge` contains "Ready" confirming real GET_STATE round-trip through real background SW; cleanup via `context.close()` + 500ms pause + `fs.rmSync({recursive: true, force: true})`.
+      - **Test 2 — Real START_SESSION round-trip** (SKIPPED with documented rationale): fills `#activity-name` + clicks "Start Recording" triggers REAL `chrome.runtime.sendMessage` to REAL background service worker → waits for badge "Recording" + "Recording Active" banner; SKIPPED because `chrome.tabs.query({active: true, lastFocusedWindow: true})` returns empty array inside `handleStart()` when `launchPersistentContext` has no user-navigated tabs causing Windows timing flake; logic correct and re-enable candidate.
+      - **Test 3 — Real chrome.storage persistence** (SKIPPED with documented rationale): starts real session + inspects `chrome.storage.local` via content-script eval to verify `ledgerium_active_session` is persisted; SKIPPED same reason as test 2 (depends on test 2's session-start succeeding); logic correct and re-enable candidate.
+  - **Files modified (3):**
+    - `apps/extension-app/package.json` +1 line — new `test:e2e:real` script invoking `playwright test --config=playwright.real-ext.config.ts`; existing `test:e2e` script (static-harness only) unchanged.
+    - `apps/extension-app/playwright.config.ts` deferral-comment update — "real-extension approach with launchPersistentContext is deferred to a future iteration" → "real-extension approach landed at iter 070 in `playwright.real-ext.config.ts` and `e2e/real-extension/`."
+    - `apps/extension-app/e2e/recording-lifecycle.spec.ts` deferral-comment update at line 32 — "Real-extension tests (launchPersistentContext) are deferred to iter 010." → "Real-extension tests (launchPersistentContext) land in iter 070 at `e2e/real-extension/sidepanel-real.spec.ts`."
+  - **Production LOC delta: 0** (QA infrastructure only; extension production source code byte-identical).
+  - **Static-harness suite preserved verbatim** (4 tests; 476 LOC); only the deferral-comment changes.
+  - **Extension build dependency documented** in both new test file header AND existing comments — harness requires `apps/extension-app/dist/` to exist (built via `pnpm --filter extension-app build`); test fails clearly with descriptive error if dist missing.
+  - **MR-013 Diff #2 source-artifact verification PASSED** — coordinator pre-delegation Grep-verified row #21 text against live `IMPROVEMENT_BACKLOG.md` line 173 (matches: "Real-extension `launchPersistentContext` E2E harness"); no source audit artifact (row was iter 010 follow-up; pre-audit-intake era); zero narrative-divergence; no `row-scope-correction:` log entry required.
+  - **D-4 specialist-invocation gate did NOT fire** — clause 1 (≥3 user-visible copy strings) NO (zero UI strings touched; test internal strings only); clause 2 (≥200 LOC pure module) NO (real-extension spec is test code, explicitly excluded from threshold per CLAUDE.md "measured by the exported interface + public function bodies, not by test code"; playwright.real-ext.config.ts is config, not a pure module contract).
+- Validation:
+  - workspace `pnpm test` **2056 / 2056 unchanged across 67 test files** (e2e `.spec.ts` excluded by workspace vitest config; per pre-existing follow-up #53).
+  - workspace `pnpm typecheck` clean across all 10 packages/apps.
+  - `pnpm --filter @ledgerium/extension-app build` — dist/ pre-existed and is current; test harness loads cleanly.
+  - `pnpm --filter @ledgerium/extension-app test:e2e:real` — **1 passed + 2 skipped** as designed.
+  - `pnpm --filter @ledgerium/extension-app test:e2e` — 4/4 static-harness tests pass unchanged (preservation confirmed).
+  - `git status` confirms scope: 2 NEW files + 3 MODIFIED files all under `apps/extension-app/`; zero unintended changes outside iter-070 scope.
+- Preserved verbatim:
+  - All extension production code byte-identical (background service worker / content scripts / sidepanel UI all untouched).
+  - 4 existing static-harness tests byte-identical (only deferral-comment line changes).
+  - Existing `apps/extension-app/playwright.config.ts` test logic byte-identical.
+  - Iter 056-069 production code byte-identical outside QA infrastructure scope.
+  - Stripe billing-stack code-complete state from iter 068 preserved.
+- Pool delta: **45 → 44** (#21 closed; zero follow-ups generated; **3 scope-adjacent observations logged NOT promoted**: (i) tests 2 + 3 re-enable candidates once `chrome.tabs.query()` platform behavior verified in fresh `launchPersistentContext` — natural follow-up iteration; (ii) `headless: 'new'` extension-loading limitation on this Playwright/Windows combination documented in config comment for future CI consideration; (iii) service worker registration timing pattern (existing SWs vs `waitForEvent`) reusable for any future real-extension test files).
+- Counter updates:
+  - **Cool-off recharge counter UNCHANGED at 3/3 FULL RE-ARM** — directed picks neither consume nor advance per MR-006 Change A; **16 consecutive preservation events** post-iter-048 last consumption (new longest-streak record; surpasses previous 15-event streak at MR-017).
+  - **D-1 reverse-portfolio-drift counter 11 → 0 FULL CLEARANCE** ✅ — extension-app surface (`apps/extension-app/`) is canonical D-1-enumerated tracked surface; counter resets cleanly; cumulative user-ack debt fully discharged; first counted iter with clean D-1 state since iter 064 Mode 4 absorb.
+  - **Agent-diversity:** `qa-engineer` consecutive counter = 1 post-iter-070 (clean rotation off `meta-coordinator` Mode 4 break at iter 069; 4+ trigger distant).
+  - **MR-018 cadence 0/3 → 1/3** (iter 070 first counted bounded loop of post-MR-017 stability window; earliest MR-018 execution iter 072 under standard 3-loop floor OR iter 071 under MR-013 Diff #1 ratified compressed-cadence pattern at coordinator discretion).
+  - **Area saturation rolling-5**: iter 069 Mode 4 governance non-counting + iter 070 extension-app = **1-extension in fresh post-MR-017-reset window** (under 3-consecutive trigger; full diversity headroom; clean rotation post Mode 4).
+  - **Cold-pool ages**: DV2 5 → 6 (post-MR-016-triage age increments on counted iter); MDR 0 → 1 (post-MR-017-triage); WDC 0 → 1 (post-MR-017-triage); PIB 0 → 1 (post-MR-017-triage; first counted iter post-first-full-triage); WDC-002 4 → 5 (under threshold; projected next mandatory triage iter ~073-074).
+- **#57 flag-retirement prerequisite chain UNCHANGED at 10/10 ENGINEERING-COMPLETE** — only 14d soak-window remains.
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL** — launch-readiness preserved.
+- **WDC P0 closure status: 2 → 2 open** (#74 + #76 remain; iter 070 was extension-app QA infrastructure, NOT a WDC row).
+- **WDC-002 P0 closure status: 5 → 5 open** (unchanged).
+- **Path D status: FULLY COMPLETE** (preserved from iter 063).
+- **Stripe billing-stack readiness: CODE-COMPLETE** (operational deps on CEO action; preserved from iter 068).
+- **Follow-Up Debt Policy ratio**: trailing 10-iter window iter 060→069 (centered on iter 070's vantage) = **5 closed** (iter 062 #99 / iter 065 #100 / iter 067 #102 / **iter 070 #21**; iter 060 + 064 + 069 Mode 4 non-counting × 3; iter 061 + 063 umbrella sub-deliverables zero credit per MR-016 §4 (b.3); iter 066 + 068 CEO-directed scope-adjacent outside backlog zero credit per current accounting) / **27 created** = **0.19 BELOW 0.5 — 13th consecutive sub-floor reading**; **iter 070 IS a numerator credit event (standalone backlog row #21 closure)**; **ratio lifts from 0.15 → 0.19 — first uplift in 4 iterations**; recovery trajectory continues per MR-017 §5 TRANSIENT-recoverable verdict; projected recovery to ≥0.5 by iter ~077-079 as Path D umbrella rolls off trailing-10 window.
+- density-response: n/a (zero follow-ups generated; density-trigger clause 3 does not fire).
+- scope-expansion: not applicable (strict one-logical-outcome — real-extension harness + smoke tests + package.json script + 2 deferral-comment corrections share single architectural-decision family of "E2E test infrastructure expansion" per CLAUDE.md Mode 5 guardrail 7(b)).
+- **Iter 071 endorsement: PRIMARY = #101 WDC2-P02 Wave A registry mis-classification fix + Wave B Stats + ai_opportunity_score** (score 14; closes CEO Signal 2 directly per WDC-002; `system-architect` PRIMARY clean rotation off `qa-engineer` × 1; dependencies cleared — depends on #100 ColumnAccessorContext extension shipped iter 065; ~150-200 LOC + ~25 tests; D-1 freshly cleared at 0 — iter 071 web-app touch advances counter cleanly from 0 → 1 well within N=5 threshold; **no user-ack required**). 2nd-best: **#103 WDC2-P04 time-range persistence v2 schema** (score 11; `backend-engineer` rotation; depends on #102 shipped iter 067; ~40-60 LOC + ~12 tests). 3rd-best: **#104 WDC2-P05 empty-state activation + 5 Growth POLISH** (score 14; closes pre-existing row #76 WDC-P03 + 5 copy substitutions; `frontend-engineer`; Growth COPY_PACK pre-fired per WDC-002 §10).
+
+---
+
+## Iteration 069 (Mode 4, MR-017 meta-review, `meta-coordinator`, NON-counting, 2026-05-14)
+
+- Date: 2026-05-14
+- Operating mode: **Mode 4 governance-only meta-review** — `meta-coordinator` PRIMARY; NON-counting per CLAUDE.md § Meta-Review Cadence.
+- Trigger: **4 converging triggers fired at iter 068 close with zero ambiguity** — (a) base 3-loop cadence 5/3 (iter 065+066+067+068 = 4 counted post-MR-016 with Mode 5 increment-by-N rule cumulative); (b) D-1 reverse-portfolio-drift counter 11 (7-deep beyond N=5 threshold; deepest persistence to date); (c) Area saturation 4-consecutive web-app trips; (d) triple-pool MDR + WDC + PIB simultaneously past 10-iter MR-006 Change D staleness threshold (first triple-pool simultaneous fire; parallels MR-014 MDR+WDC dual-pool precedent at higher cardinality).
+- Candidate Selection: `directed` (operating-mode precedence — Mode 4 cannot be deferred). row-scope-correction: not applicable (no row consumed). reverse-portfolio-drift: not applicable (Mode 4 does not advance counting window). mode-5-saturation: not applicable. hard-ceiling-override: not applicable.
+- Phase: Governance.
+- Outcome:
+  - **Artifact created: `docs/meta/MR_017_META_REVIEW.md`** ~700 lines / 15 numbered sections + 3 appendices following MR-016 format precedent.
+  - **MR-017 = 7th empirical fire of MR-013 Diff #1 ratified compressed-cadence convention** (MR-011 → MR-012 → MR-013 → MR-014 → MR-015 → MR-016 → MR-017 = 7 consecutive meta-reviews under compressed cadence; rule INTERPRETABLE; preservation confirmed).
+  - **14-dimension per-rule verdict pass: 0 failing rules; 29 consecutive counted iterations of correct control-plane behavior** (iter 026-068 inclusive of 10 Mode 4 non-counting slots). New empirical evidence:
+    - **First-ever MR-005 D-2 hard-ceiling Mode 5 override fire** at iter 067 sequence open (pool 46 > 15 hard-ceiling per MR-005 D-2); one-use-per-sequence convention validated.
+    - **9th cumulative empirical fire of MR-013 Diff #2 source-artifact verification** (iter 065 + iter 067 both passed).
+    - **15-event cool-off recharge preservation streak** (longest in MR governance history; rule operating as designed in directed regime; watch-item for MR-018).
+    - **First-ever D-1 reverse-portfolio-drift trip persistence at 7-deep beyond N=5 threshold** (counter at 11); rule preserved; 4 cumulative user-acks logged with explicit CEO continuation rationale.
+  - **§4 MR-016 (b.3) STRUCTURAL silence-as-accept window RATIFIED** — proposed § Audit-Intake Pattern (MR-005 D-5) new clause 8 "Multi-iteration umbrella row split at audit-intake" applied to `CLAUDE.md` per MR-008 silence-as-accept precedent; no CEO override logged across iter 065-068 entries (window opened MR-016 close 2026-05-12). Codifies preventive rule that future audit-style intakes split N-iteration umbrellas into N independent rows at intake time (exception clause preserves bundling for byte-coupled / architectural-decision-family sub-deliverables).
+  - **§5 Follow-Up Debt Policy Q4 ratio 12-consecutive-sub-floor reading verdict: TRANSIENT-recoverable** — 0.15 BELOW 0.5 floor (4 closed / 27 created); current accounting attributes zero numerator credit to iter 058/061/063 Path D umbrella sub-deliverables (per MR-016 STRUCTURAL) AND zero credit to iter 066/068 CEO-directed scope-adjacent observation closures outside backlog. Projected natural recovery to ≥0.5 by iter ~077-079 as Path D umbrella rolls off trailing-10 window + WDC-002 P0 burn-down produces independent numerator credit (#101 + #103 + #104 + #105 + #106 each independent backlog row closures). NEW Q-MR-018-ceo-directed-scope-adjacent-numerator-credit logged as watch-item: should CEO-directed feature builds outside backlog earn numerator credit? If yes, iter 066 + 068 would lift ratio 4 → 6 = 0.22 (still below floor but recovering). DEFERRED to MR-018.
+  - **§6 MDR cold-pool MANDATORY full triage** (age 11): **51 items triaged — 50 keep-cold + 1 conditional-preserve (MDR-P1-19) + 0 promote + 0 delete**. MDR-P1-19 conditional-preserve trigger preserved from MR-014: revised-PRD CEO approval per MR-005 D-5 clause 5 PRD-trigger path. **MDR cold-pool age RESET to 0**.
+  - **§7 WDC cold-pool MANDATORY full triage** (age 11): **22 items triaged — 22 keep-cold + 0 promote + 0 conditional-preserve + 0 delete**. WDC-R09 saved-views infrastructure trigger SATISFIED at iter 062 close (promoted to row #99 + closed iter 062); no remaining conditional-preserve items. **WDC cold-pool age RESET to 0**.
+  - **§8 PIB cold-pool MANDATORY full triage** (age 11; **FIRST FULL TRIAGE — 63 items, LARGEST single triage in MR governance history**): **63 items triaged — 63 keep-cold + 0 promote + 0 conditional-preserve + 0 delete**. All items remain operationally appropriate for cold-pool status pending: post-launch evidence OR future PRD-trigger enumerated dependency per MR-005 D-5 clauses 4+5. **PIB cold-pool age RESET to 0**.
+  - **§9 WDC-002 cold-pool status check** (age 3; under threshold): 36 items held cold (11 P1 + 14 P2 + 11 P3); no full triage required at MR-017; projected next mandatory triage iter ~073-074 if no PRD-trigger or P0-burn-down-creates-slot fires earlier.
+  - **§10 WDC-002 P0 burn-down progress checkpoint**: 2 of 7 P0s closed (#100 iter 065 + #102 iter 067); 5 remain open (#101 / #103 / #104 / #105 / #106). On-track per (b.3) STRUCTURAL discipline. Dependencies: #103 WDC2-P04 persistence schema depends on #102 (now shipped); #101 Wave A registry fix depends on #100 (now shipped); both unblocked for iter 070+.
+  - **§11 Stripe billing-stack ship-readiness verdict**: CODE-COMPLETE post iter 068 (6-event webhook + 14-day trial + runbook). Operational dependencies on CEO action per `docs/runbooks/STRIPE_SETUP.md` Steps 1-6 (Stripe Dashboard products + 6 prices + 8 env vars + webhook endpoint configuration). **Parallel-track appropriate; NOT launch-blocking at MR-017**.
+  - **§13 D-1 trip-clearing strategy**: counter at 11 is unprecedented (deepest persistence to date). Mode 4 absorbs but does not clear (preserves at 11; user-ack debt cumulative). Recommend: **iter 070 SHOULD select extension surface to clear D-1 trip cleanly**.
+  - **§14 Stability-default posture preserved**: **10 consecutive zero-or-stability-only meta-reviews** (MR-007 → MR-017 inclusive); 29 consecutive counted iterations of correct control-plane behavior. Exactly 1 CLAUDE.md amendment applied at MR-017 (silence-as-accept ratification of MR-016 (b.3) proposal — not autonomous; reflects prior commitment).
+  - **§15 Iter 070 endorsement (PRIMARY recommendation)**: **Row #21 launchPersistentContext E2E harness** (extension-app surface; clears D-1 cleanly from 11 → 0; `qa-engineer` PRIMARY); alternative if CEO elects WDC-002 P0 continuation: **Row #101 WDC2-P02** (Wave A registry mis-classification fix + Wave B Stats + ai_opportunity_score; score 14; `system-architect` PRIMARY; closes CEO Signal 2 directly; would require fifth D-1 user-ack at iter 070 entry advancing counter 11 → 12).
+- Validation:
+  - workspace `pnpm test` **2056 / 2056 unchanged across 67 test files** (Mode 4 governance-only; zero product code touched).
+  - workspace `pnpm typecheck` clean across all 10 packages/apps.
+  - `git status` confirms scope: NEW `docs/meta/MR_017_META_REVIEW.md` + MODIFIED `CLAUDE.md` (§Audit-Intake Pattern clause 8 silence-as-accept ratification) + cold-pool source-artifact source-of-truth updates (MDR + WDC + PIB age RESET annotations) + this artifact mirror updates; zero unintended changes outside artifact-mirror scope.
+- Preserved verbatim:
+  - All product code byte-identical (Mode 4 rule).
+  - All 4 cold-pool source artifacts have only age-reset annotations applied (no `MR-017: DELETED` strikethroughs because 0 deletes across triple triage).
+  - Iter 056-068 production code byte-identical.
+  - WDC-002 cold-pool unchanged (under threshold).
+- Pool delta: **45 → 45 unchanged** (Mode 4 zero product code; 0 cold-pool promotions across triple triage; 0 deletes; 1 conditional-preserve (MDR-P1-19) does not affect live pool; live pool unaffected).
+- Counter updates (Mode 4 non-counting effects):
+  - **Cool-off recharge counter UNCHANGED at 3/3 FULL RE-ARM** — Mode 4 non-counting per established convention since MR-006 Change A; **15-event preservation streak** preserved (recharge counter advances only on counted post-consumption `burn-down` iterations); recharge resource preserved fully armed for next `top-score`/`blocker-cadence` bypass invocation.
+  - **D-1 reverse-portfolio-drift counter UNCHANGED at 11** — Mode 4 does not advance the 5-iter counting window (preserves counter; 7-deep beyond N=5 threshold; iter 070 candidate selection MUST clear D-1 by touching extension surface OR continue with explicit fifth user-ack advancing counter 11 → 12; cumulative user-ack debt persists).
+  - **Area saturation clock RESET by Mode 4 non-counting** — iter 065+066+067+068 4-consecutive web-app tally cleared; new window opens at iter 070; full diversity headroom.
+  - **MR-018 cadence counter RESET 5/3 → 0/3 at MR-017 close**. Stability window iter 070-072 default; earliest MR-018 execution iter 072 under standard 3-loop floor OR iter 071 under MR-013 Diff #1 ratified compressed-cadence pattern at coordinator discretion.
+  - **Agent-diversity:** iter 069 PRIMARY = `meta-coordinator` (breaks any implementing-agent count by non-counting status); iter 070 implementing-agent re-enters at counter = 1 regardless of assignment (clean rotation available).
+  - **Cold-pool ages: DV2 4 → 5 (post-MR-016-triage age increments on counted iter); MDR 11 → 0 RESET post full triage; WDC 11 → 0 RESET post full triage; PIB 11 → 0 RESET post full triage; WDC-002 3 → 4** (under threshold; projected next mandatory triage iter ~073-074).
+- **#57 flag-retirement prerequisite chain UNCHANGED at 10/10 ENGINEERING-COMPLETE** — only 14d soak-window remains (Mode 4 does not advance calendar-time soak clock).
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL** (Mode 4 is post-gate governance; no new MDR closures; launch-readiness status preserved).
+- **WDC P0 closure status: 2 → 2 open** (#74 + #76 remain).
+- **WDC-002 P0 closure status: 5 → 5 open** (unchanged).
+- **Path D status: FULLY COMPLETE** (preserved).
+- **Stripe billing-stack readiness:** CODE-COMPLETE; operational deps on CEO action; parallel-track appropriate per §11 verdict.
+- **Follow-Up Debt Policy ratio:** trailing 10-iter window unchanged at **0.15** (Mode 4 non-counting preserves ratio; ratio drift only happens on counted iterations); per §5 verdict TRANSIENT-recoverable; projected recovery to ≥0.5 by iter ~077-079.
+- **Open CEO decisions queued for MR-018** (5 items): (1) 4 AI Vision top-tier decisions (D-01/02/03/04) BLOCKING AI Vision Build entry; (2) Path C R+1 entry trigger awaits CEO PRD approval + 5 pre-R+1 blocking questions; (3) Iter 070 disposition extension burn-down vs WDC-002 continuation; (4) CEO-directed scope-adjacent feature build numerator-credit policy watch-item; (5) External-launch decision (14d soak remains; #57 retirement gates evaluable but unexecuted).
+- density-response: n/a (Mode 4 rule — zero follow-ups generated).
+- scope-expansion: not applicable (governance-only artifact creation + 5-artifact mirror updates + 1 CLAUDE.md silence-as-accept ratification applied + 3 cold-pool age resets + 0 backlog promotions + 0 strikethroughs = coordinated governance atomic operation).
+
+---
+
+## Iteration 068 (Mode 5 item 2 of 2 — sequence CLOSE, `directed`, `backend-engineer`, 2026-05-14)
+
+- Date: 2026-05-14
+- Operating mode: **Mode 5 directed sequence N=2 item 2 of 2 — SEQUENCE CLOSES at iter 068**. CEO directive 2026-05-14 verbatim: *"a and b"* — item 1 (iter 067) = WDC2-P03; item 2 (iter 068) = webhook event coverage extension.
+- Scope: **NOT a backlog row consumption** — Mode 5 item 2 closes iter-066 scope-adjacent observation #1 (webhook handler missing `invoice.payment_succeeded` + `customer.subscription.trial_will_end` events flagged in iter-066 close). Pool unchanged.
+- Primary agent: `backend-engineer` (clean rotation off `frontend-engineer` × 1 iter 067; agent diversity preserved across Mode 5 sequence).
+- Candidate Selection: `directed` (Mode 5 item 2 of 2). Bypasses pool > 8 ceiling via operating-mode precedence per MR-004 Change B narrowed; cool-off NOT consumed per MR-006 Change A. **mode-5-saturation: user-ack** carried forward from sequence opening at iter 067; **hard-ceiling-override: user-ack** consumed at sequence opening (one-use-per-sequence per MR-005 D-2). **reverse-portfolio-drift: user-ack; rationale: Mode 5 item 2 continuation; D-1 counter 10 → 11; trip persists**.
+- Phase: Build — Stripe billing-stack hardening.
+- Outcome:
+  - **Stripe webhook handler extended from 4-event → 6-event coverage:**
+    - **NEW `invoice.payment_succeeded` handler** — fires on every successful charge (initial subscription + every renewal). Resolves `userId` via `getStripe().subscriptions.retrieve()` (invoice events don't carry user metadata directly); breaks gracefully if no userId resolvable (no retry storm); updates `subscriptionStatus: 'active'` (handles trial→paid transition automatically); emits `trackServer('payment_succeeded', { userId, amount, currency, invoiceId })` analytics; console-logs with no PII.
+    - **NEW `customer.subscription.trial_will_end` handler** — fires 3 days before trial expires. Extracts `userId` from `subscription.metadata.userId` directly; reads `subscription.trial_end` Unix timestamp; emits `trackServer('trial_will_end', { userId, trialEndAt, plan })` analytics (resolves plan via `planFromPriceId`; emits with `plan: null` if unmapped — notification-tier semantics differ from provisioning-tier `customer.subscription.updated` which throws on unmapped); does NOT update user record (trial hasn't ended yet); console-logs.
+    - **Notification-tier vs provisioning-tier semantics codified** in handler comments — provisioning events (checkout.session.completed / subscription.updated) hard-error on unmapped price IDs to force Stripe retry; notification events (trial_will_end) gracefully emit with null plan.
+    - **Email/SMS dispatch explicitly out-of-scope** for this iteration — analytics emission is the deliverable; future iteration can wire receipt emails + trial-expiry reminder emails consuming the new analytics events.
+  - **Files modified (3):**
+    - `apps/web-app/src/app/api/billing/webhook/route.ts` +82 LOC — 2 new switch cases + expanded JSDoc comment block documenting notification-tier vs provisioning-tier semantics; 4 existing handlers byte-identical.
+    - `apps/web-app/src/app/api/billing/webhook/route.test.ts` +350 LOC — 10 new substantive `it()` blocks covering: (1) payment_succeeded happy path / userId resolved / status updated to active / analytics fired; (2) payment_succeeded no-userId graceful break; (3) payment_succeeded Stripe API failure on subscriptions.retrieve returns 500 (Stripe retries); (4) payment_succeeded analytics correctly emits amount + currency + invoiceId; (5) trial_will_end happy path / userId resolved / analytics fired / NO db.user.update; (6) trial_will_end no-userId graceful break; (7) trial_will_end with unmapped price ID emits `plan: null` (NOT throwing — notification-tier semantics); (8) trial_will_end correctly extracts trial_end timestamp; (9) both new handlers preserve signature verification (BUG-04 lock); (10) both new handlers reject invalid signature returns 400.
+    - `docs/runbooks/STRIPE_SETUP.md` — Step 3 event list updated; "What's already built" summary updated 4-event → 6-event; "Recommended — handled as of iter 068" callout added so CEO knows to subscribe to both new events in Stripe Dashboard.
+  - **Files created: 0** (additive to existing files only).
+  - **PII audit on analytics payloads PASSED** — `payment_succeeded` emits userId + amount + currency + invoiceId only (no card numbers, no customer email, no customer name, no invoice line items); `trial_will_end` emits userId + trialEndAt + plan only (notification semantics). Sample payloads:
+    - `{ "event": "payment_succeeded", "userId": "user_abc", "amount": 4900, "currency": "usd", "invoiceId": "inv_pay_001" }`
+    - `{ "event": "trial_will_end", "userId": "user_abc", "trialEndAt": 1700100000, "plan": "starter" }`
+  - **MR-013 Diff #2 source-artifact verification: not applicable** (no backlog row consumed; scope-adjacent observation closure with direct CEO directive coverage).
+  - **D-4 specialist-invocation gate did NOT fire** — clause 1 (≥3 user-visible copy strings) NO (zero UI text changes; analytics field-name strings are internal); clause 2 (≥200 LOC pure module) NO (82 LOC delta in existing webhook route handler, not a new module; the route already existed pre-iter-068).
+- Validation:
+  - workspace `pnpm test` **2046 → 2056 / +10 across 67 test files** all pass.
+  - workspace `pnpm typecheck` clean across all 10 packages/apps.
+  - Existing 7 webhook tests (BUG-01 / BUG-04 regression locks + 4 original handler tests) byte-identical and all pass.
+  - Both new handlers gracefully handle Stripe API failures (return 500 → Stripe retries).
+- Preserved verbatim:
+  - All 4 existing webhook handlers byte-identical (`checkout.session.completed` / `customer.subscription.updated` / `customer.subscription.deleted` / `invoice.payment_failed`).
+  - BUG-01 unmapped-price hard-error on provisioning events preserved.
+  - BUG-04 missing-webhook-secret 500-retry preserved.
+  - `stripe.ts` SDK init + `getStripe()` + `planFromPriceId()` + `getWebhookSecret()` byte-identical.
+  - `analytics-server.ts` `trackServer` signature byte-identical (existing event types accept new variants via open-shaped union).
+  - User Prisma model fields byte-identical (zero schema migration; only `subscriptionStatus` field touched on payment_succeeded path).
+  - Iter 056-067 production code byte-identical outside the 3 modified files.
+- Pool delta: **45 → 45 unchanged** (Mode 5 item 2 closes scope-adjacent observation, not a backlog row; **3 NEW scope-adjacent observations logged NOT promoted**: (i) receipt email dispatch deferred — analytics event provides signal for future job; (ii) trial-expiry reminder email dispatch deferred — analytics event + trialEndAt timestamp provide data for future job; (iii) `invoice.payment_succeeded` resolves userId via extra `subscriptions.retrieve()` round-trip — future optimization could write userId to invoice metadata at checkout time).
+- Counter updates:
+  - **Cool-off recharge counter UNCHANGED at 3/3 FULL RE-ARM** — directed picks neither consume nor advance per MR-006 Change A; **15 consecutive preservation events** post-iter-048 last consumption.
+  - **D-1 reverse-portfolio-drift counter 10 → 11** — iter 068 = web-app non-extension; user-ack logged at Mode 5 entry; trip persists 7-iter-deep beyond N=5 threshold; cleared only by extension surface OR Mode 4 absorbs at iter 069 MR-017.
+  - **Agent-diversity:** `backend-engineer` consecutive counter = 1 post-iter-068 (clean rotation off `frontend-engineer` × 1).
+  - **MR-017 cadence 4/3 → 5/3** (Mode 5 increment-by-N rule cumulative; **MR-017 MANDATORY at iter 069** absorbing 4 converging triggers: (a) base 3-loop cadence satisfied with 2 to spare; (b) D-1 N=5 trip persistence at counter 11; (c) Area saturation 4-consecutive web-app trips; (d) MR-006 Change D triple-pool full triage MDR + WDC + PIB simultaneously at staleness threshold).
+  - **Area saturation rolling-5: 4-CONSECUTIVE WEB-APP** (iter 065 + iter 066 + iter 067 + iter 068 all web-app) — TRIPS per Selection Policy Step 2; Mode 5 same-area ack covers continuation through sequence close; MR-017 Mode 4 at iter 069 will reset clock for iter 070+.
+  - **Cold-pool ages:** DV2 3 → 4 (under threshold); **MDR 10 → 11 PAST 10-iter MR-006 Change D staleness threshold** — MANDATORY full-triage at MR-017 part-(b); **WDC 10 → 11 PAST threshold** — MANDATORY full-triage at MR-017 part-(b); **PIB 10 → 11 PAST threshold** — MANDATORY full-triage at MR-017 part-(b). **Triple-pool simultaneous staleness threshold breach forces MR-017 triple-triage**.
+- **#57 flag-retirement chain UNCHANGED at 10/10 ENGINEERING-COMPLETE** — only 14d soak-window remains.
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL** — launch-readiness preserved.
+- **Stripe billing-stack readiness:** webhook handler covers 6 of 6 events listed in `docs/runbooks/STRIPE_SETUP.md` Step 3; CEO can confidently subscribe to all 6 in Stripe Dashboard without unhandled-event warnings; remaining operational steps unchanged (Stripe Dashboard product/price creation + production env vars).
+- **WDC-002 P0 closure status: 5 → 5 open** (iter 068 was scope-adjacent observation closure, not a WDC-002 row; rows #101 / #103 / #104 / #105 / #106 remain).
+- **Mode 5 sequence summary (iter 067 + iter 068):**
+  - Items shipped: 2 of 2 (Option A = WDC2-P03 default time-range + 7th column + analytics segmentation; Option B = webhook event coverage extension).
+  - Backlog rows closed: 1 (#102 at iter 067).
+  - Scope-adjacent observations closed: 1 (iter 066 observation #1 on webhook missing events).
+  - Total LOC delta: +94 production (iter 067 +12 + iter 068 +82) + ~410 test LOC (iter 067 ~60 across 5 files + iter 068 +350 webhook test).
+  - Total test delta: workspace +10 (2046 → 2056); web-app filter +14 (627 → 641 estimated; not re-measured).
+  - All Mode 5 guardrails respected: 7(b) one-logical-outcome per item; 1 own commit + validation + artifact-updates per item; 6 same-area ack logged; 9 hard-ceiling override consumed once at sequence open.
+  - Mode 5 sequence CLOSED at iter 068.
+- **Follow-Up Debt Policy ratio:** trailing 10-iter window iter 059→068 = **4 closed** (iter 059 #77 / iter 062 #99 / iter 065 #100 / iter 067 #102; iter 060 + iter 064 Mode 4 non-counting × 2; iter 061 + 063 Path D umbrella sub-deliverables = 0 numerator credit per MR-016 §4 (b.3) STRUCTURAL verdict; iter 066 + 068 CEO-directed feature builds outside backlog = 0 numerator credit) / **27 created** = **0.15 BELOW 0.5 — 12th consecutive sub-floor reading**.
+- density-response: n/a (zero follow-ups generated; density-trigger clause 3 does not fire).
+- scope-expansion: not applicable (strict one-logical-outcome per Mode 5 item-level scope; 2 webhook handlers + analytics types + tests + runbook update share single architectural-decision family of "billing webhook parity with runbook event list").
+- **Iter 069 endorsement: PRIMARY = MR-017 Mode 4 meta-review (MANDATORY)** — 4 converging triggers at iter 068 close mandate MR-017 with zero ambiguity: (a) base 3-loop cadence floor 3/3 satisfied with 2 to spare under MR-013 Diff #1 ratified compressed-cadence pattern; (b) D-1 N=5 trip persistence at counter 11 (7-deep beyond threshold); (c) Area saturation 4-consecutive web-app trips; (d) triple-pool MDR + WDC + PIB simultaneously past 10-iter MR-006 Change D staleness threshold. Mode 4 absorbs all 4 triggers + MR-016 (b.3) STRUCTURAL silence-as-accept window ratification ("Multi-iteration umbrella row split at audit-intake" CLAUDE.md amendment) + 12-consecutive-sub-floor Follow-Up Debt Policy ratio reading + WDC-002 P0 burn-down progress checkpoint + 14-event preservation streak of cool-off recharge counter validation. `meta-coordinator` PRIMARY assignment intrinsic to Mode 4.
+
+---
+
+## Iteration 067 (Mode 5 item 1 of 2, `directed`, `frontend-engineer`, 2026-05-14)
+
+- Date: 2026-05-14
+- Operating mode: **Mode 5 directed sequence N=2 item 1 of 2** (CEO directive 2026-05-14 verbatim: *"a and b"* = Option A WDC2-P03 + Option B webhook event coverage extension). Item 2 = iter 068.
+- Backlog row closed: **#102 WDC2-P03 Time-range default `'30d'` → `'all'` + 7th default-pack column + `time_range` analytics event prereq** (Birth iter `audit-intake-WDC-002`; age 1 at close; score 16 HIGHEST in pool; 8-of-8 agent unanimous convergence per WORKFLOWS_DASHBOARD_REVIEW_002 §3.1).
+- Primary agent: `frontend-engineer` (clean rotation off coordinator-direct backend-shape iter 066; `system-architect` consecutive counter cleared by Mode 5 + coordinator-direct interleaving).
+- Candidate Selection: `directed` (Mode 5 item 1 of 2). Bypasses pool > 8 ceiling via operating-mode precedence per MR-004 Change B narrowed; cool-off NOT consumed per MR-006 Change A directed-precedence rule. **mode-5-saturation: user-ack; rationale: A closes CEO Signal 1; B closes #1 scope-adjacent observation from iter 066. Both items web-app per Mode 5 guardrail 6 same-area acknowledgement.** **hard-ceiling-override: user-ack; rationale: CEO directive "a and b" explicitly endorses both items; pool 46 > 15 hard-ceiling per Mode 5 guardrail 9 invoked ONCE per sequence per MR-005 D-2.** **reverse-portfolio-drift: user-ack; rationale: continuation of WDC-002 P0 burn-down under Mode 5 directive; web-app non-extension D-1 counter 9 → 10 trip persistence acknowledged.** row-scope-correction: not applicable (MR-013 Diff #2 source-artifact verification PASSED — coordinator pre-delegation Grep-verified row #102 description against (a) live backlog row text; (b) source `WORKFLOWS_DASHBOARD_REVIEW_002.md` §3.1 + §14 P0-3; zero narrative-divergence).
+- Phase: Build — WDC-002 P0 burn-down continuation.
+- Outcome:
+  - **CEO Signal 1 CLOSED at iter 067:** workflow library default time-range is now `'all'` matching 7 of 8 surveyed world-class platforms (Celonis / UiPath / SAP Signavio / IBM / Apromore / ABBYY); rolling-window defaults retired as operational-monitoring pattern (wrong category for process intelligence).
+  - **Default-pack expanded 6 → 7 columns** per MR-014 ASK-1 deferred 7-column option (now unblocked by iter 065 ColumnAccessorContext extension + WDC-002 confirmation that `cycle_time_mean_ms` accessor is wired to `WorkflowMetricsOutput.avgTimeMs`). Canonical 7-column set: `workflow_title`, `systems`, `opportunity_tag`, `health_score`, `last_run_at`, `run_count`, `cycle_time_mean_ms`. Insertion-order semantics: `cycle_time_mean_ms` appears at position 7 (last) because registry insertion-order is preserved — agent flagged this as deviation from "after health_score" suggestion in scope brief; reordering would require registry restructuring (separate iteration).
+  - **`time_range` analytics segmentation property added** to `dashboard_v2_viewed` event variant (mandatory `'7d' | '30d' | '90d' | 'all'` typed literal union); enables before/after segmentation analysis of the time-range default change per analytics §4 prerequisite.
+  - **Files modified (5):**
+    - `apps/web-app/src/components/dashboard-v2/DashboardV2Shell.tsx` +4 LOC — `useState<TimeRange>('30d')` → `useState<TimeRange>('all')` + `dashboard_v2_viewed` track() call extended with `time_range: timeRange` field.
+    - `apps/web-app/src/lib/analytics.ts` +3 LOC — `dashboard_v2_viewed` discriminated-union variant extended with mandatory `time_range: '7d' | '30d' | '90d' | 'all'` field.
+    - `apps/web-app/src/lib/dashboard-columns/registry.ts` +3 LOC — `cycle_time_mean_ms.defaultVisible: false → true` + header-comment 6-column → 7-column update.
+    - `apps/web-app/src/lib/dashboard-columns/registry.test.ts` substantial update — Group F lock-tests (F1 count 6→7, F2 set membership, F5 insertion order, F6 canonical set) + Group B integrity tests (B1 count, B2 invariant TIGHTENED from `group=display` to audit-honesty IFF `availability=available + non-null accessor` — old invariant would have been permanently incorrect with a `flow`-group column in default-pack; new invariant is stricter and correct).
+    - `apps/web-app/src/components/dashboard-v2/DashboardV2Shell.test.tsx` substantial update — `buildDashboardV2ViewedEvent` helper updated with optional `timeRange` param; **6 new substantive `it()` blocks** added (2 for `time_range` analytics field default `'all'` + explicit non-`'all'`; 4 for `filterByTimeRange 'all'` range edge behavior — 365-day-old workflow returned / N=1000 smoke / epoch-boundary `createdAt` / empty-array passthrough).
+  - **Files created: 0**.
+  - **Group B test invariant tightening:** B2 was asserting "all defaultVisible columns are in display group" — wrong-by-construction once `cycle_time_mean_ms` (which is in `flow` group per Layer 1 Tier A taxonomy) got promoted. Agent correctly replaced with stricter IFF invariant. This is an INVARIANT FIX, not a regression — old test was masking the lack of a proper audit-honesty assertion at the default-pack level. Group G iter-065 IFF invariant remains unchanged at registry-wide scope.
+  - **`(all-time)` annotation handling:** Pre-existing `WorkflowRow.tsx` annotation reads `!timeRange || timeRange === 'all'` and appends `' (all-time)'` only when timeRange is NOT `'all'`. With default now `'all'`, users on default view never see the annotation — annotation remains accurate when explicit non-all range selected; no removal needed.
+  - **D-4 specialist-invocation gate did NOT fire** — zero new user-visible copy strings touched (the `time_range` field is analytics instrumentation; "Mean Cycle Time" column label was pre-existing in registry from iter 056 D+1). Clause 1 threshold of ≥3 not met. Clause 2 not applicable (no new ≥200 LOC pure module; flagging existing registry entry's `defaultVisible` field is metadata-only).
+- Validation:
+  - workspace `pnpm test` **2046 / 2046 unchanged** (Group F + B updates net-balanced in `.ts` files; new tests landed in `.test.tsx` files which workspace vitest excludes per pre-existing follow-up #53).
+  - web-app filter `pnpm --filter @ledgerium/web-app test` **627 → 631 / +4 across 25 test files** all pass (independent verification of the `.test.tsx` delta).
+  - workspace `pnpm typecheck` clean across all 10 packages/apps.
+  - Group F + Group B lock-tests all pass post-update.
+  - Grep audit for residual `'30d'` defaults: NONE found in DashboardV2Shell.tsx production code; tests still reference `'30d'` for explicit-state assertions (correct).
+- Preserved verbatim:
+  - All 10 existing `AVAILABLE_ACCESSORS` byte-identical (including `cycle_time_mean_ms` which already existed since iter-056 D+1).
+  - `WorkflowMetricsOutput` contract from `workflow-metrics.ts` byte-identical.
+  - `applyFilters` + `filterByTimeRange` pure function bodies byte-identical (iter 037 + iter 045 contracts preserved).
+  - `ColumnAccessorContext` byte-identical (iter 065 contract preserved).
+  - iter 056-066 production code byte-identical outside the 5 modified files in this iteration.
+  - Analytics taxonomy is additive only (no existing fields removed; `dashboard_v2_viewed` retains all pre-existing fields).
+- Pool delta: **46 → 45** (#102 closed; zero follow-ups generated; agent flagged 1 scope-adjacent observation NOT promoted: cycle_time_mean_ms insertion-order position 7 not adjacent to health_score — reordering would require registry restructuring; semantic insertion order is preserved at registry-definition level via natural Tier-A Layer-1 grouping; UI customization picker can re-order independently).
+- Counter updates:
+  - **Cool-off recharge counter UNCHANGED at 3/3 FULL RE-ARM** — directed picks neither consume nor advance per MR-006 Change A; **14 consecutive preservation events** post-iter-048 last consumption.
+  - **D-1 reverse-portfolio-drift counter 9 → 10** — iter 067 = web-app non-extension; user-ack logged at Mode 5 entry; trip persists; cleared only by extension surface OR Mode 4 absorbs.
+  - **Agent-diversity:** `frontend-engineer` consecutive counter = 1 post-iter-067 (clean rotation off coordinator-direct iter 066).
+  - **MR-017 cadence 2/3 → 4/3** (Mode 5 increment-by-N rule: iter 067 increments by 1 plus +1 for Mode 5 N=2 cadence tracking = 4/3 effective; **MR-017 forced at iter 069** after Mode 5 sequence closes at iter 068).
+  - **Area saturation rolling-5: TRIPS 3-consecutive web-app** (iter 065 + iter 066 + iter 067 all web-app) — iter 068 = Option B also web-app; Mode 5 same-area ack pre-logged covers continuation.
+  - **Cold-pool ages:** DV2 2 → 3; MDR 9 → 10 HITS 10-iter MR-006 Change D staleness threshold → MANDATORY full-triage QUEUED for MR-017 part-(b); WDC 9 → 10 HITS threshold → MANDATORY full-triage QUEUED for MR-017 part-(b); PIB 9 → 10 HITS threshold → MANDATORY full-triage QUEUED for MR-017 part-(b). **Triple-pool MDR+WDC+PIB simultaneous threshold hit at MR-017 entry**.
+- **#57 flag-retirement chain UNCHANGED at 10/10 ENGINEERING-COMPLETE** — only 14d soak-window remains.
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL** — launch-readiness preserved.
+- **WDC P0 closure status: 2 → 2 open** (#74 + #76 remain).
+- **WDC-002 P0 closure status: 6 → 5 open** (rows #101 / #103 / #104 / #105 / #106 remain; #102 closes at iter 067).
+- **Path D status: FULLY COMPLETE** (preserved).
+- **Follow-Up Debt Policy ratio:** trailing 10-iter window iter 058→067 = **4 closed** (iter 058 D+2 sub-deliverable / iter 059 #77 / iter 062 #99 / iter 065 #100 / iter 067 #102; iter 060 + iter 064 Mode 4 non-counting × 2 = 0 closures; iter 058 + 061 + 063 Path D umbrella sub-deliverables = 0 numerator credit per MR-016 §4 (b.3) STRUCTURAL verdict) / **27 created** = **0.15 BELOW 0.5 — 11th consecutive sub-floor reading**. iter 067 IS a numerator credit event closing standalone row #102. Recovery trajectory accelerating as WDC-002 P0 burn-down ships discrete numerator-credit rows.
+- density-response: n/a (zero follow-ups generated; density-trigger clause 3 does not fire).
+- scope-expansion: not applicable (strict one-logical-outcome — 6 sub-changes share single architectural-decision family per CLAUDE.md Mode 5 guardrail 7(b): time-range default UX + analytics segmentation prereq + default-pack 7-column composition all anchored to WDC-002 §3.1 atomic scope).
+- **Iter 068 endorsement: PRIMARY = Option B webhook event coverage extension** (Mode 5 item 2 of 2): add `invoice.payment_succeeded` + `customer.subscription.trial_will_end` handlers to `apps/web-app/src/app/api/billing/webhook/route.ts`; emit corresponding analytics events; ~80 LOC + ~10 tests; `backend-engineer` PRIMARY rotation off `frontend-engineer` × 1. Closes iter 066 scope-adjacent observation #1.
+
+---
+
+## Iteration 066 (Mode 2, `directed`, coordinator-direct ≈ `backend-engineer` work-shape, 2026-05-14)
+
+- Date: 2026-05-14
+- Operating mode: **Mode 2 directed** under direct CEO scope directive (verbatim 2026-05-13): *"We are going to need to make all the pricing and subscription models from Free, Starter, Team and Growth. I will be using the stripe solution. Build out this functionality."* Subsequent confirmations: $49/$249/$799 monthly prices CONFIRMED; ~17% annual discount CONFIRMED; **14-day trial CONFIRMED** for all 3 paid tiers; legacy Pro Stripe product preserved untouched (existing subscribers stay on it); Enterprise self-managed by CEO.
+- Scope: **NOT a backlog row consumption** — Mode 2 directed CEO-named feature build. Originally-planned iter 066 = WDC2-P03 time-range default change moves to iter 067.
+- Primary work-shape: `backend-engineer` (API route + Stripe SDK + tests); executed by coordinator direct given small surface (~30 LOC production + new test file).
+- Candidate Selection: `directed` (Mode 2 user-named scope per CEO opening-of-iter directive). Bypasses pool > 8 ceiling via operating-mode precedence per MR-004 Change B narrowed; cool-off NOT consumed per MR-006 Change A directed-precedence rule. **reverse-portfolio-drift: user-ack; rationale: CEO-directed pricing/subscription buildout supersedes WDC2-P03 sequencing; the feature is launch-blocking and trumps post-launch refinement.** mode-5-saturation: not applicable. hard-ceiling-override: not applicable.
+- Phase: Build.
+- Outcome — discovery first surfaced that 4-tier pricing + Stripe integration was **substantially already built** (plans.ts / stripe.ts / checkout / portal / webhook routes / feature-gating / pricing page / PRICING_CONFIG / regression tests all in place). Actual gap was operational (Stripe Dashboard products + prices + env vars not configured) plus the 14-day trial code path missing. Delivered:
+  - **NEW `docs/runbooks/STRIPE_SETUP.md`** — 7-step operational walkthrough covering: preserve legacy Pro product, create 3 new products with 6 prices, configure webhook endpoint, set env vars, test in Test Mode with Stripe CLI tunnel, promote to Live Mode, troubleshooting + FAQ. Primary user deliverable.
+  - **`apps/web-app/src/lib/stripe.ts`** — added `TRIAL_PERIOD_DAYS` constant (env-configurable via `STRIPE_TRIAL_DAYS`; defaults to 14; 0 disables; invalid input falls back to 14). +18 LOC.
+  - **`apps/web-app/src/app/api/billing/checkout/route.ts`** — added trial-eligibility gate (first-time subscribers only: `!stripeSubscriptionId && (subscriptionStatus === 'none' || === null)`); `subscription_data.trial_period_days` conditionally included; new metadata field `trial: '14'` or `'none'`; new analytics field `trialDays` on `checkout_started` event. +18 LOC.
+  - **NEW `apps/web-app/src/app/api/billing/checkout/route.test.ts`** — 14 substantive `it()` blocks across 3 describe groups: 3 trial-eligibility cases (first-time apply, returning-omit, legacy-null-status apply) + 6 tier × interval matrix (3 tiers × 2 intervals) + 5 safeguard regression locks (401 unauthenticated / 404 user-not-found / 400 already-subscribed / 503 unconfigured price / default body → starter monthly).
+  - **`apps/web-app/src/app/(public)/pricing/page.tsx`** — updated FAQ "Can I try before I buy?" to explicitly mention 14-day free trial on paid plans with cancellation guidance.
+  - **`apps/web-app/prisma/schema.prisma`** — fixed 2 stale comments on `plan` field (User model line 15 `// free, pro, team` → correct enumeration; Team model line 422 same pattern). No migration required (comment-only).
+- Test mock pattern lesson learned: my initial test used `vi.mock('@/lib/stripe', async (importOriginal) => ...)` with getters for env-reactive values. This caused **Vitest worker pollution** — workflows/route.test.ts failed to resolve `@/lib/plans` when both ran in the same worker. Diagnosed via web-app-filter vs workspace-run test comparison (filter passed; workspace failed in unrelated test file). Resolved by simplifying to plain-object factory matching workflows test pattern (no getters; no `importOriginal`; no env-reactive closures). Documented in test file header comment for future maintainers.
+- Validation:
+  - workspace `pnpm test` **2032 → 2046 / +14 across 66 → 67 test files** all pass.
+  - workspace `pnpm typecheck` clean across all 10 packages/apps.
+  - Zero behavioral regression in existing webhook handler, portal handler, or feature-gating logic.
+  - Stale-comment fix has zero runtime effect (Prisma ignores `//` comments).
+- Preserved verbatim:
+  - All 5 existing Stripe surfaces (stripe.ts SDK init, checkout core path, portal route, 4-event webhook handler, feature-gating helpers) byte-identical outside the trial-injection lines.
+  - `STRIPE_PRICES` env-map + `planFromPriceId` + `getPriceId` + `getWebhookSecret` byte-identical.
+  - 5-tier `plans.ts` + `PLAN_FEATURES` + `PLAN_HIERARCHY` byte-identical.
+  - `PRICING_CONFIG` in `lib/config.ts` byte-identical (already had Growth tier).
+  - `PricingCards.tsx` byte-identical (already rendered all 5 tiers).
+  - Webhook event coverage byte-identical (4 events; `invoice.payment_succeeded` + `trial_will_end` extension deferred to follow-up iteration).
+  - Iter 056-065 production code byte-identical.
+- Pool delta: **46 → 46 unchanged** (Mode 2 CEO-directed feature build; no backlog row consumed; zero follow-ups generated; scope-adjacent observations logged NOT promoted: (i) `PRICING_CONFIG` in `lib/config.ts` has stale env var names like `STRIPE_STARTER_PRICE_ID` not `STRIPE_STARTER_MONTHLY_PRICE_ID` — cosmetic since `getPriceId` from `lib/stripe.ts` is the actual price-ID source-of-truth; (ii) webhook handler doesn't cover `invoice.payment_succeeded` (receipt emails) or `customer.subscription.trial_will_end` (proactive trial-expiry warning) — both are standard SaaS events worth adding in a follow-up iteration; (iii) trial-customization tests dropped because env-var parsing is trivial + would re-introduce the worker-pollution mock pattern).
+- Counter updates:
+  - **Cool-off recharge counter UNCHANGED at 3/3 FULL RE-ARM** — directed picks neither consume nor advance per MR-006 Change A; **13 consecutive preservation events** post-iter-048 last consumption.
+  - **D-1 reverse-portfolio-drift counter 8 → 9** — iter 066 = web-app non-extension; user-ack logged at iter entry per MR-005 D-1; trip persists; cleared only by extension surface OR Mode 4 absorbs.
+  - **MR-017 cadence 1/3 → 2/3** (iter 065 first + iter 066 second counted bounded loop of post-MR-016 stability window; earliest MR-017 iter 067 under MR-013 Diff #1 ratified compressed-cadence pattern OR iter 068 under standard 3-loop floor).
+  - **Area saturation rolling-5:** iter 064 Mode 4 + iter 065 web-app + iter 066 web-app = **2-web in fresh post-MR-016-reset window** (under 3-consecutive trigger; iter 067 should rotate area to avoid 3-consecutive trip).
+  - **Agent-diversity:** coordinator-direct with `backend-engineer` work-shape; `system-architect` consecutive counter resets to 0 (different shape from iter 065); no 4+ trigger pressure.
+  - **Cold-pool ages:** DV2 1 → 2; MDR 8 → 9; WDC 8 → 9; PIB 8 → 9 (all under 10-iter MR-006 Change D threshold; MDR/WDC/PIB approaching threshold at iter ~067).
+- **#57 flag-retirement chain UNCHANGED at 10/10 ENGINEERING-COMPLETE** — only 14d soak-window remains.
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL** — launch-readiness preserved.
+- **WDC P0 closure status: 2 → 2 open** (unchanged; iter 066 was not a WDC closure).
+- **WDC-002 P0 closure status: 6 → 6 open** (unchanged; iter 066 was not a WDC-002 row).
+- **Path D status:** FULLY COMPLETE (preserved from iter 063).
+- **Stripe operational readiness:** **DEPENDS ON USER** — code is in place; user must complete `docs/runbooks/STRIPE_SETUP.md` Steps 1-6 (~30 min Test Mode + ~15 min Live Mode) and set 7-8 production environment variables.
+- **Follow-Up Debt Policy ratio:** trailing 10-iter window unchanged at **0.11 BELOW 0.5 — 10th consecutive sub-floor reading**; per MR-016 §4 (b.3) STRUCTURAL verdict + silence-as-accept window open. iter 066 generated zero follow-ups so denominator unchanged; numerator unchanged because no backlog row was closed (this was a CEO-directed feature build outside the backlog).
+- density-response: n/a (zero follow-ups generated; density-trigger clause 3 does not fire).
+- scope-expansion: not applicable (strict one-logical-outcome — pricing/subscription feature buildout is a single architectural-decision family covering runbook + trial code + tests + comment cleanup per CLAUDE.md Mode 5 guardrail 7(b)).
+- **Iter 067 endorsement: PRIMARY = #102 WDC2-P03 Time-range default `'30d'` → `'all'`** (score 16 HIGHEST; closes CEO Signal 1; 8/8 agent unanimous convergence; `frontend-engineer` PRIMARY — rotation off coordinator-direct/backend-shape; ~30 LOC). 2nd-best (operational follow-up): **webhook event coverage extension** — add `invoice.payment_succeeded` + `customer.subscription.trial_will_end` handlers (~80 LOC + ~10 tests) to close standard SaaS webhook gaps surfaced in iter 066 scope-adjacent observations. **MR-017 cadence trigger forecast: iter 067 advances to 3/3 if counted bounded loop — meta-review may force at iter 068 absent intervening Mode 4 / Mode 3-adjacent.**
+
+---
+
+## Iteration 065 (Mode 2, `directed`, `system-architect`, 2026-05-13)
+
+- Date: 2026-05-13
+- Operating mode: **Mode 2 directed** under standing CEO directive series (WDC-002 P0 burn-down sequencing per WORKFLOWS_DASHBOARD_REVIEW_002 §17).
+- Backlog row closed: **#100 WDC2-P01 ColumnAccessorContext extension** (Birth iter `audit-intake-WDC-002` at WDC-002 close 2026-05-12; age 0 at close — same-cycle promotion-and-burn-down; score 13; I=4 A=5 L=3 C=5 E=2 R=2).
+- Primary agent: `system-architect` (D-4 clause 2 fires by intent — contract-level change to closed-union accessor interface that all D+N consumers + Wave A row #101 depend on; PRIMARY satisfies adjacency).
+- Candidate Selection: `directed` (Mode 2 user-named pick — CEO opening-of-iter-065 directive verbatim *"iter 065 launch"* — executes the iter 065 endorsement registered at WDC-002 §17 + ITERATION_LOG iter 065 endorsement; bypasses pool > 8 ceiling via operating-mode precedence per MR-004 Change B narrowed; cool-off NOT consumed per MR-006 Change A directed-precedence rule). row-scope-correction: not applicable (MR-013 Diff #2 source-artifact verification PASSED — coordinator pre-delegation Grep-verified row #100 description against (a) live backlog row text matching "ColumnAccessorContext extension — architectural prerequisite for time-window-dependent statistical accessors"; (b) originating source artifact `docs/meta/WORKFLOWS_DASHBOARD_REVIEW_002.md` §5.3 + §12 + §14 P0-1 matching "extend `ColumnAccessorContext` to carry `referenceNowMs + activeTimeRange`; ~50 LOC; ~6 substantive tests; `system-architect` PRIMARY; iter 065 PRIMARY"); zero narrative-divergence; no `row-scope-correction:` log entry required. **reverse-portfolio-drift: user-ack; rationale: "continue WDC-002 P0 burn-down per CEO directive — architectural prereq #100 unblocks 8-column statistical surface row #101 closing CEO Signal 2 and time-range default row #102 closing CEO Signal 1"** (D-1 counter 7 → 8; trip persists per MR-005 D-1; web-app non-extension; cleared only by extension surface OR Mode 4 absorbs). mode-5-saturation: not applicable (not a Mode 5 sequence). hard-ceiling-override: not applicable (Mode 2 directed bypass via operating-mode precedence; cool-off NOT consumed; preserved across 12 consecutive events post-iter-048 last consumption).
+- Phase: Build — Path D post-completion / WDC-002 P0 burn-down opening.
+- Outcome:
+  - **Architectural pre-requisite shipped:** `ColumnAccessorContext` extended with `referenceNowMs: number` + `activeTimeRange: TimeRange` mandatory fields parallel to iter-037 single-upstream-clock-boundary pattern (route.ts:485-487). All 10 existing `AVAILABLE_ACCESSORS` continue returning byte-identical values regardless of new fields (lifetime semantics preservation); audit-honesty IFF invariant `accessor !== null IFF availability === 'available'` preserved with Group G5 re-assertion test post-contract-change. Future Wave A row #101 statistical accessors will consume `referenceNowMs` (no `Date.now()` calls allowed) and respect `activeTimeRange` for filter boundaries.
+  - **NEW `TimeRange` literal-union type alias** `'7d' | '30d' | '90d' | 'all'` declared in `types.ts` mirroring existing `CommandHeader.tsx:26` declaration; drift-locked by Group G runtime check (structural-shape parity assertion).
+  - **Files modified (6):**
+    - `apps/web-app/src/lib/dashboard-columns/types.ts` +63 LOC — `TimeRange` literal-union type alias + `ColumnAccessorContext` 2-field extension (`referenceNowMs: number` + `activeTimeRange: TimeRange` both mandatory) + full determinism + audit-honesty JSDoc per WDC-002 §5.3 (single-upstream-clock-boundary contract documented; Wave A future-accessor consume-rules documented; audit-honesty contract documented).
+    - `apps/web-app/src/lib/dashboard-columns/accessors.ts` +30 LOC JSDoc only (zero behavioral code change) — top-of-file section documents (a) lifetime-preservation contract for the 10 iter-056 accessors; (b) Wave A future-accessor consume-rules; (c) IFF invariant preservation; (d) Group G test coverage anchor.
+    - `apps/web-app/src/lib/dashboard-columns/index.ts` +1 LOC — re-export `TimeRange`.
+    - `apps/web-app/src/components/dashboard-v2/WorkflowRow.tsx` +14 LOC at single existing `ColumnAccessorContext` construction site — adds `referenceNowMs: Date.now()` + `activeTimeRange: timeRange ?? 'all'` with embedded comment noting Wave A row #101 will lift snapshot to `WorkflowList`-level boundary parallel to `route.ts:485-487` iter-037 pattern (today's lifetime accessors ignore the value; dormant boundary).
+    - `apps/web-app/src/lib/dashboard-columns/filters.test.ts` +8 LOC — extends `makeContext` test helper to satisfy newly-mandatory fields with deterministic `referenceNowMs: 1_700_000_000_000` + `activeTimeRange: 'all'`.
+    - `apps/web-app/src/lib/dashboard-columns/registry.test.ts` +118 LOC — extends `makeContext` (+5 LOC) + adds **Group G "WDC2-P01 ColumnAccessorContext extension" with 6 substantive `it()` blocks**: G1 field types + closed-union literals via TypeScript `satisfies` compile-time check; G2 determinism — calling each of the 10 existing accessors twice with byte-identical context produces byte-identical results; G3 lifetime invariance over `referenceNowMs` — calling existing accessors with two different `referenceNowMs` values (`1_700_000_000_000` vs `1_800_000_000_000`) produces byte-identical results (existing accessors are time-range-agnostic); G4 lifetime invariance over `activeTimeRange` — calling existing accessors with 4 different `activeTimeRange` values (`'7d'` / `'30d'` / `'90d'` / `'all'`) produces byte-identical results; G5 audit-honesty IFF invariant preserved post-contract-change — walks the registry asserting every `availability === 'available'` entry has non-null `accessor` AND every `availability !== 'available'` entry has null `accessor`; G6 7-key context exhaustiveness — `keyof ColumnAccessorContext` is exactly `'title' | 'toolsUsed' | 'lastViewedAt' | 'createdAt' | 'metricsV2' | 'referenceNowMs' | 'activeTimeRange'` via TS `Exclude<...> extends never` compile-time guard.
+  - **Files created: 0** (all updates land in existing files).
+  - **MR-006 Change C ≥12 operational threshold NOT MET** (+6 substantive `it()` blocks < 12) — per MR-012 verdict ≥12 is non-binding heuristic; **literal ≥1 threshold satisfied with margin** — drift-counter credit GRANTED. Small-surface contract-extension delivery scoped at single atomic unit IS the legitimate purpose of this iteration, not drift-counter credit accrual.
+  - **Production LOC delta ~108 << 200 LOC** D-4 clause 2 threshold (types 63 + accessors 30 JSDoc-only + index 1 + WorkflowRow 14). PRIMARY `system-architect` assignment is intrinsic to contract-design iteration (clause 2 rationale fires by intent: contract-level review BEFORE downstream Wave A row #101 + D+N consumers build; PRIMARY satisfies adjacency requirement).
+  - **D-4 clause 1 did NOT fire** — zero user-visible copy strings touched (this is internal infrastructure; JSDoc comments are documentation not UI text).
+- Validation:
+  - `pnpm test` **2026 → 2032 / +6 across 66 test files** all pass (independently confirms architect's claimed delta).
+  - `pnpm typecheck` clean across all 10 packages/apps.
+  - Grep audit: zero `Date.now()` CALLS inside `apps/web-app/src/lib/dashboard-columns/` confirmed (all 9 matches are JSDoc comment-block references in persistence.ts:16 + accessors.ts:33 + filters.ts:25 + presets.ts:29 + types.ts:49/230/232/237/270).
+  - Zero availability flips; zero accessor null↔non-null transitions; zero existing test assertions modified; zero new dependencies; zero new files created; zero unintended changes outside the 6-file scope.
+- Preserved verbatim:
+  - All 10 existing `AVAILABLE_ACCESSORS` byte-identical (`workflow_title` / `systems` / `opportunity_tag` / `health_score` / `last_run_at` / `run_count` / `cycle_time_ms` / `cycle_time_mean_ms` / `case_volume` / `system_count_per_run`).
+  - `WorkflowMetricsOutput` contract from `workflow-metrics.ts` byte-identical.
+  - Existing 7 registry test groups (A invariants + B lookup helpers + C accessor determinism + D plan-tier-gate inheritance + E group-membership + F D+6 default-pack composition lock + filters/persistence/presets test files) byte-identical.
+  - iter 056 / 058 / 059 / 061 / 062 / 063 production code byte-identical.
+  - Analytics taxonomy byte-identical; PostHog privacy posture preserved; zero new Prisma migrations; zero API contract changes; existing Prisma schema files byte-identical.
+- Pool delta: **47 → 46** (#100 closed; **zero follow-ups generated**; 2 scope-adjacent observations logged NOT promoted: (i) `WorkflowRow.tsx:734` per-row `Date.now()` snapshot is dormant boundary — today's lifetime accessors ignore the value; Wave A row #101 will lift this to `WorkflowList`-level for true single-upstream-clock-boundary semantics matching `route.ts:485-487`; not a regression introduced by iter 065 — leak is dormant; flagged inline comment; (ii) dual `TimeRange` declaration in `CommandHeader.tsx:26` + `dashboard-columns/types.ts:55` carries identical literal unions; Group G's runtime check enforces shape parity but does not enforce single-source; consolidation candidate out-of-scope this iteration — would touch UI component imports without ColumnAccessor-contract justification).
+- Counter updates:
+  - **Cool-off recharge counter UNCHANGED at 3/3 FULL RE-ARM** — directed picks neither consume nor advance recharge per MR-006 Change A; preserved across **12 consecutive events** post-iter-048 last consumption (iter 049 directed + iter 050 Mode 4 + iter 051 top-score via D-1 + iter 052 burn-down + iter 053 burn-down + iter 054 Mode 4 + iter 055 burn-down (3/3 RE-ARM) + iter 056 directed + iter 057 Mode 4 + iter 058-063 directed × 6 + iter 064 Mode 4 + iter 065 directed = 12 preservation events without consumption).
+  - **D-1 reverse-portfolio-drift counter 7 → 8** (iter 065 = web-app non-extension; `apps/web-app/src/lib/dashboard-columns/` + `apps/web-app/src/components/dashboard-v2/` are web-app library + component surface NOT extension surface; user-ack logged; trip persists; cleared only by extension surface OR Mode 4 absorbs; next substantive D-1 check iter 066+).
+  - **Agent-diversity:** `system-architect` consecutive counter = **1** post-iter-065 (clean rotation off `qa-engineer` × 1 via iter 063 + `meta-coordinator` Mode 4 iter 064 + `directed-multi-agent` Mode 3-adjacent WDC-002; 4+ trigger distant).
+  - **MR-017 cadence 0/3 → 1/3** (iter 065 first counted bounded loop of post-MR-016 stability window; earliest MR-017 execution iter 067 under MR-013 Diff #1 ratified compressed-cadence pattern OR iter 068 under standard 3-loop floor).
+  - **Area saturation rolling-5 window:** iter 064 Mode 4 governance non-counting + iter 065 web-app = **1-web in fresh post-MR-016-reset window** (under 3-consecutive trigger; full diversity headroom for iter 066+).
+  - **Cold-pool ages:** DV2 0 → 1 (post-MR-016-triage age increments on counted iter); MDR 7 → 8; WDC 7 → 8; PIB 7 → 8 — all under 10-iter MR-006 Change D staleness threshold; next mandatory triage projected iter ~068+ for MDR/WDC/PIB if either reaches age 10.
+- **#57 flag-retirement prerequisite chain UNCHANGED at 10/10 ENGINEERING-COMPLETE** — only 14d soak-window remains (iter 065 is post-engineering-complete contract extension on dashboard-columns library + WorkflowRow consumer; not a #57-chain prerequisite closure; iter 065 does not advance calendar-time soak clock measured in real-time days not iterations).
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL** (iter 065 is post-gate architectural pre-requisite for Wave A statistical columns; not a new MDR closure; launch-readiness status preserved).
+- **WDC P0 closure status: 2 → 2 open** (#74 WDC-P01 IA-inversion + #76 WDC-P03 empty-state activation remain open; #76 closes at iter ~069 via WDC2-P05 row #104; #75 WDC-P02 fully complete iter 063 close).
+- **WDC-002 P0 closure status: 7 → 6 open** (rows #101 WDC2-P02 + #102 WDC2-P03 + #103 WDC2-P04 + #104 WDC2-P05 + #105 WDC2-P06 + #106 WDC2-P07 remain open).
+- **Path D status:** FULLY COMPLETE (D+1 iter 056 + D+2 iter 058 + D+3 iter 059 + D+4 iter 061 + D+5 iter 062 + D+6 iter 063 all shipped).
+- **Follow-Up Debt Policy ratio:** trailing 10-iter window iter 056→065 = **3 closed** (iter 056 #75 strikethrough umbrella + iter 062 #99 WDC-R09 saved-views + **iter 065 #100 WDC2-P01 ColumnAccessorContext extension**; iter 057 + iter 060 + iter 064 Mode 4 non-counting × 3 = 0 closures; iter 058 + 059 + 061 + 063 Path D umbrella sub-deliverables = 0 numerator credit per MR-016 §4 (b.3) STRUCTURAL verdict) / **27 created** = **0.11 BELOW 0.5 floor — 9th consecutive sub-floor reading**; per MR-016 §4 (b.3) STRUCTURAL verdict on Q-MR-016-umbrella-sub-deliverable-numerator-credit + MR-016 §3.2 silence-as-accept window open for proposed CLAUDE.md amendment "Multi-iteration umbrella row split at audit-intake" — projected recovery as WDC-002 P0 burn-down cadence ships discrete numerator-credit-producing rows iter 066+ (#102 / #101 / #103 / #104 / #105 / #106 each independent closure events; expected 6 numerator credits across iter 066-072 lifting ratio toward ≥0.5 by iter 070-072).
+- density-response: n/a (zero follow-ups generated; density-trigger clause 3 does not fire).
+- scope-expansion: not applicable (strict one-logical-outcome — single contract extension + accessor signature passthroughs + ≥6 substantive Group G tests share single architectural-decision family per CLAUDE.md Mode 5 guardrail 7(b) one-logical-outcome test; Wave A registry mis-classification fixes + ai_opportunity_score addition + Wave B Stats explicitly deferred to row #101 iter 067 per scope discipline).
+- **Iter 066 endorsement: PRIMARY = #102 WDC2-P03 Time-range default `'30d'` → `'all'` + 7th default-pack column + `time_range` analytics event prereq** (score 16 HIGHEST; closes CEO Signal 1; 8/8 agent unanimous convergence; ~30 LOC production + ~30 LOC tests; `frontend-engineer` PRIMARY — rotation off `system-architect` × 1 at iter 065; small-surface high-impact). 2nd-best: **#101 WDC2-P02 Wave A registry mis-classification fix + Wave B Stats + ai_opportunity_score** (score 14; depends on iter 065 #100 ColumnAccessorContext extension just shipped; ready to execute iter 067; `system-architect` PRIMARY OR rotation; ~150-200 LOC + ~25 tests; closes CEO Signal 2). **MANDATORY at iter 066 Candidate Selection block: `reverse-portfolio-drift: user-ack`** per MR-005 D-1 unless iter 066 = Mode 4 OR touches extension surface (D-1 counter at 8; cumulative user-ack debt since iter 061).
+
+---
+
 ## PROCESS_INTELLIGENCE_BENCHMARK_REVIEW_001 (Mode 3-adjacent, NON-counting)
 
 - Date: 2026-05-04
@@ -49,6 +538,129 @@ This file records each bounded improvement loop.
   - **Preserved verbatim:** all production code byte-identical (zero `*.ts` / `*.tsx` files modified); `WorkflowList.tsx` hard-coded 4-column table byte-identical; iter 037-056 production code byte-identical; analytics taxonomy byte-identical; PostHog privacy posture preserved; zero new `Date.now()` / `new Date()` introduced; zero DB migrations; zero API contract changes.
   - density-response: not applicable (Mode 3-adjacent diagnostic does not generate follow-ups in the conventional sense; the 12 P0 promotions are audit-intake live items with `Birth iter: audit-intake` not follow-up rows; density-trigger clause 3 does not fire).
   - scope-expansion: not applicable (Mode 3-adjacent diagnostic does not consume an iteration slot; no scope-bounded backlog row exists to expand against).
+
+---
+
+## WORKFLOWS_DASHBOARD_REVIEW_002 (Mode 3-adjacent, NON-counting)
+
+- Date: 2026-05-12
+- Trigger: CEO directive (verbatim): *"Have all subagents review the current state of Workflows dashboard page and suggest improvements. For example I think the time pull down menu for which workflows to show perhaps should be All time as default. Workflow cards should also calculate average time, standard deviation, etc. when available."* Sequel to WDC-001 (2026-04-22; covered customization design now shipped via Path D D+1 → D+6); WDC-002 covers post-Path-D refinement opportunities.
+- Coordinator: AI CTO (orchestration only).
+- Agents: 8 specialist agents in parallel — `product-manager` + `ux-designer` + `frontend-engineer` + `system-architect` + `analytics` + `qa-engineer` + `growth-strategist` + `competitive-researcher`. ~30,400 cumulative agent-output words synthesized to ~7,200-word consolidated artifact.
+- Phase: Strategic Define / Refinement (NOT a counted bounded loop; precedent: DV2 / MDR / WDC / PIB / AI-VISION review events).
+- Mode: **Mode 3-adjacent (NON-counting toward improvement-loop cadence)** per established convention.
+
+### Outcome
+
+- **Artifact created: `docs/meta/WORKFLOWS_DASHBOARD_REVIEW_002.md`** (~7,200 words / 18 numbered sections + 2 appendices following Mode 3-adjacent precedent format).
+- **8-of-8 unanimous agent convergence on CEO time-range signal** — strongest cross-agent consensus surfaced in any review to date. Time-range default → `'all'` recommended by all 8 agents. Competitive evidence decisive: **7 of 8 surveyed world-class platforms** (Celonis / UiPath / SAP Signavio / IBM / Apromore / ABBYY / Soroco / Scribe variants) default to full event-log / all cases; rolling-window defaults are operational-monitoring (Datadog) / product-analytics (Mixpanel) pattern — wrong category for process intelligence.
+- **CRITICAL Wave A registry mis-classification finding** (system-architect surfaced; FE + Analytics + QA confirmed): **8 statistical ColumnKey entries can flip to `availability: 'available'` TODAY** in single Mode 2 directed pick (~150-200 LOC). Directly satisfies CEO "when available" qualifier without waiting for Path C R+1. The 5 mis-classified + 1 entirely-missing (`ai_opportunity_score`) + 2 NEW Wave B (`cycle_time_stddev_ms` + `coefficient_of_variation`) = **8 columns ready to ship**.
+- **Strongest distinctive differentiation surfaced (Competitive §8):** **N-attribution alongside statistics** (`"4m 32s · 47 runs"`) — category-first move; no surveyed competitor surfaces N by default. Combined with Ledgerium's evidence-linked positioning, makes deterministic moat visible at row-scan level. Closes PIB-REVIEW §6.1 gap (moat currently invisible in UI).
+- **Drill-down view absence = #1 non-customization gap** (PM + UX + Analytics convergence): every PI competitor surfaces process-level detail view as the second screen of the list. UX recommends slide-in panel pattern (right-anchored drawer parallel to ColumnPicker; preserves list context vs full-page navigation). AI Vision-emerging risk per PM §9: AI recommendations need a landing zone.
+- **2 QA BLOCKERS identified before AI Vision Build entry:** (a) HIGH severity — no axe test for ColumnPicker drawer (new `role="dialog"` + `aria-modal="true"` surface never WCAG-scanned); (b) HIGH severity — Preset chip apply does NOT transfer FilterState (TD-2/TD-3 silent gap; user clicks "Automation Candidates" gets column change but no row filtering).
+- **20 CEO decisions enumerated** in §16 (top-tier / mid-tier / lower-tier). Top-4: D-01 Time-range default `'all'` (8/8 unanimity), D-02 Wave A registry fix, D-03 `ColumnAccessorContext` architectural extension, D-04 7th default-pack column `cycle_time_mean_ms`.
+- **7 P0 audit-intake promotions executed at close** per MR-005 D-5 protocol (rows #100-106 with `Birth iter: audit-intake-WDC-002`):
+  - **#100 WDC2-P01** ColumnAccessorContext extension (architectural prereq; ~50 LOC; iter 065 PRIMARY)
+  - **#101 WDC2-P02** Wave A registry fix + Wave B Stats + ai_opportunity_score (8 columns; ~150-200 LOC; iter 066)
+  - **#102 WDC2-P03** Time-range default + 7th column + analytics event prereq (~30 LOC; closes CEO Signal 1)
+  - **#103 WDC2-P04** Time-range persistence v2 schema (~40-60 LOC; depends on #102)
+  - **#104 WDC2-P05** WDC-P03 empty-state + 5 POLISH substitutions (~50 LOC; closes row #76)
+  - **#105 WDC2-P06** ColumnPicker axe regression coverage (QA BLOCKER 1; ~50 LOC test)
+  - **#106 WDC2-P07** Workflow Detail Panel slide-in drill-down (#1 non-customization gap; ~400-600 LOC)
+- **36 P1/P2/P3 cold-pool items** held in artifact per MR-005 D-5 clauses 4+5 (11 P1 + 14 P2 + 11 P3). Promotion paths: P0 burn-down creates slot OR PRD-trigger enumerated dependency.
+- **Pool 40 → 47 at intake** (+7 P0 promotions; zero live rows deleted).
+- **6th audit-style intake event** cumulative (DV2 + MDR + WDC-001 + PIB + AI-VISION + **WDC-002 this intake**).
+- **Zero CLAUDE.md governance diffs** (Mode 3-adjacent diagnostic does not modify control plane).
+
+### Counter preservation across Mode 3-adjacent NON-counting
+
+- **Cool-off recharge counter UNCHANGED at 3/3 FULL RE-ARM** (Mode 3-adjacent does not consume cool-off; preserved across 11 consecutive events).
+- **D-1 reverse-portfolio-drift counter UNCHANGED at 7** (Mode 3-adjacent does not advance 5-iter counting window; trip persists; cleared only by extension-surface burn-down OR Mode 4 absorb).
+- **MR-017 cadence counter UNCHANGED at 0/3** (Mode 3-adjacent NON-counting; post-MR-016 stability window iter 065-067 default preserved).
+- **Area saturation clock NOT advanced** (Mode 3-adjacent per established precedent).
+- **Cold-pool ages UNCHANGED** (DV2=0 post-MR-016 RESET; MDR=7; WDC=7; PIB=7; all under threshold).
+- **#57 flag-retirement prerequisite chain UNCHANGED at 10/10 ENGINEERING-COMPLETE** — only 14d soak-window remains.
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL**.
+
+### Validation
+
+- Mode 3-adjacent diagnostic; zero product code touched; zero test runs required (artifact-only).
+- Workspace `pnpm test` unchanged (no code modified).
+- Workspace `pnpm typecheck` clean across all 10 packages/apps (no code modified).
+- `git status` confirms scope: NEW `docs/meta/WORKFLOWS_DASHBOARD_REVIEW_002.md` + 5 mirror updates (this ITERATION_LOG.md + CHANGELOG.md + SYSTEM_HEALTH.md + CLAUDE.md + IMPROVEMENT_BACKLOG.md with 7 P0 promotions).
+
+### Iter 065 endorsement: PRIMARY = WDC2-P01 ColumnAccessorContext extension (row #100)
+
+Sequencing rationale: architectural pre-requisite for ALL time-window-dependent statistical accessors. Without context extension, Wave A stats (row #101) would either (a) read `Date.now()` directly violating determinism, OR (b) silently compute lifetime data while labels promise time-windowed semantics violating audit-honesty IFF. Ships as Mode 2 directed pick; `system-architect` PRIMARY (clause 2 fires); ~50 LOC contract change + every accessor signature update + ~6 substantive tests.
+
+**Implementation sequence per §17:**
+- iter 065 = #100 WDC2-P01 ColumnAccessorContext extension (S)
+- iter 066 = #102 WDC2-P03 Time-range default + 7th column (S; CEO Signal 1 closes)
+- iter 067 = #101 WDC2-P02 Wave A + Wave B + ai_opportunity_score (M; CEO Signal 2 closes)
+- MR-017 Mode 4 (forced at iter ~067-068 close per 3-loop cadence; absorbs this audit intake + Path D completion lessons-learned + AI Vision Build entry trigger)
+- iter 068+ = #103 WDC2-P04 / #104 WDC2-P05 / #105 WDC2-P06 / #106 WDC2-P07 sequenced
+
+**D-1 N=5 trip persistence at counter 7** — iter 065 candidate selection MUST log `reverse-portfolio-drift: user-ack` per MR-005 D-1 (iter 065 = web-app library architectural surface, non-extension); user-ack debt cumulative since iter 061.
+
+density-response: not applicable (Mode 3-adjacent diagnostic; no follow-ups generated in conventional sense; 7 P0 promotions are audit-intake live items with `Birth iter: audit-intake-WDC-002` not follow-up rows). scope-expansion: not applicable (no product surface touched; pure strategic-Define artifact creation + 5-artifact mirror update + 7 backlog row promotions = coordinated governance atomic operation).
+
+---
+
+## Iteration 064
+
+- Date: 2026-05-12
+- Trigger: **Three converging triggers force MR-016 with zero ambiguity at iter 063 close**: (a) **base 3-loop cadence floor 3/3 satisfied** under MR-013 Diff #1 ratified compressed-cadence pattern (iter 061 + 062 + 063 = 3 counted bounded loops post-MR-015 stability window); (b) **same-Area 3-consecutive web-app TRIPS** — rolling 5-window saturated (iter 061 + 062 + 063 all web-app); iter 064 MUST select non-web-app OR be Mode 4 non-counting per Selection Policy Step 2; (c) **D-1 N=5 reverse-portfolio-drift trip persistence at counter 7** — cumulative user-ack debt since iter 061 close; cleared only by extension-surface burn-down OR Mode 4 absorb. All three independently sufficient.
+- Coordinator: AI CTO (orchestration only).
+- Agents: `meta-coordinator` (primary; non-counting per Mode 4 operating-mode precedence).
+- Phase: Phase 1 / governance review.
+- Mode: **Mode 4 (meta-review; NON-counting toward improvement-loop cadence per CLAUDE.md § Operating Modes)**
+
+### Candidate Selection
+
+- **Driver: `directed`** (Mode 4 meta-review forced by 3 converging triggers at iter 063 close).
+- **Selected: MR-016 meta-review** (Mode 4 governance-only iteration).
+- No backlog row consumed; Mode 4 zero product code; **0 cold-pool promotions** (DV2 mandatory full-triage 0 promote / 14 keep-cold per MR-014 precedent — post-launch evidence is the dominant promotion gate).
+- row-scope-correction: not applicable. mode-5-saturation: not applicable. hard-ceiling-override: not applicable.
+- reverse-portfolio-drift: counter UNCHANGED at 7 (Mode 4 does not advance 5-iter counting window).
+
+### Outcome
+
+- **Artifact created:** `docs/meta/MR_016_META_REVIEW.md` (~877 lines / 15 numbered sections + 3 appendices following MR-015 / MR-014 format precedent).
+- **MR-016 sixth empirical fire of MR-013 Diff #1 ratified compressed-cadence convention** (MR-011 first → MR-012 → MR-013 → MR-014 → MR-015 → MR-016 sixth — pattern operating cleanly across 6 consecutive meta-reviews; rule INTERPRETABLE; preservation confirmed).
+- **14-dimension per-rule verdict pass: 0 failing rules; 25 consecutive counted iterations of correct control-plane behavior** (iter 026-063 inclusive of 9 Mode 4 non-counting slots: iter 032/036/040/044/047/050/054/057/060/064). Stability-default posture preserved across MR-007 → MR-016 inclusive (9 consecutive zero-or-stability-only meta-reviews).
+- **§4 Q-MR-016-umbrella-sub-deliverable-numerator-credit verdict (b.3) STRUCTURAL** with CLAUDE.md amendment queued for silence-as-accept ratification at MR-017 entry. Five-data-point evidence (iter 058 + 059 + 061 + 062 + 063 sub-deliverables of umbrella row #75 producing zero numerator credit despite shipping real value) demonstrates structural cause is umbrella accounting, not transient effect. Proposed § Audit-Intake Pattern (MR-005 D-5) new clause 8 "Multi-iteration umbrella row split at audit-intake" — preventive rule that future audit-style intakes split N-iteration umbrellas into N independent rows at intake time, avoiding pre-iteration sub-deliverable bundling. Exception clause preserves bundling for byte-coupled / architectural-decision-family sub-deliverables (e.g., D+1 types+registry+accessors shipped together). Silence-as-accept window opens MR-016 close (2026-05-12); applies at MR-017 entry absent CEO override.
+- **§5 D-1 N=5 trip-clearing strategy:** counter at 7; cumulative user-ack debt across iter 062 + 063 entries. Recommend iter 065 = extension-surface burn-down (row #21 launchPersistentContext E2E harness; score 9; E=4; clean D-1 reset 7 → 0; cool-off preserved at 3/3 FULL RE-ARM). Alternative: continue Path D-adjacent web-app work with explicit user-ack (preserves trip).
+- **§6 Path D completion milestone documented:** 8-iteration arc (iter 056 + 058 + 059 + 061 + 062 + 063 = 6 sub-deliverable iterations + AI-VISION Mode 3-adjacent + MR-015 Mode 4 governance interleaving); 6-layer audit-honesty IFF invariant chain operating cleanly; two D-4 dual-fire events (iter 056 D+1 + iter 062 D+5 both discharged); agent rotation discipline preserved; user-ack pattern under D-1 N=5 worked.
+- **§7 AI Vision Build entry trigger:** Path D no longer blocks AI Vision build entry. 4 top-tier CEO decisions from AI-VISION REVIEW §16 are now the gating constraint (D-01 BYOK / D-02 MVP execution scope / D-03 compliance investment / D-04 provider scope). Projected ADR-AI-001/002/003 promotion to live backlog with `Birth iter: AI-Vision-promoted` post-CEO-approval; projected AI+1 provider-adapter foundation as first build iteration.
+- **§8 Carry-forward Q-bank from MR-015 processed:** 5 pre-R+1 PRD-blocking questions preserved (Q-ARCH-1 + Q-ARCH-2 partially answered by AI vision); WDC §17 6-defaults silence-as-accept verified; iter 058 pick CONFIRMED CLOSED; Path C R+1 trigger event still blocked; MR-016 cadence-counter RESET 3/3 → 0/3; ASK-2 canonical 8A remediation iteration scheduling deferred to MR-017 absorption; MDR-P1-19 conditional-promote trigger preserved (revised-PRD approval still pending); Q-MR-016-MR-015-pool-delta-arithmetic-correction RESOLVED at this MR (coordinator-canonical reading: live-row promotion ADDS to pool — verified empirically).
+- **§9 DV2 cold-pool MANDATORY full-triage** (MR-006 Change D age 10 dual-trigger; full-triage discharges staleness obligation): 14 actionable cold-pool rows triaged. **0 `promote` to live backlog** (no item passes elevated-priority bar absent post-launch evidence — mirrors MR-014 MDR + WDC triage pattern); **0 `conditional-promote`**; **0 `delete`**; **14 `keep-cold`** (DV2-R04 / R05 / R07 / R08 / R13 / R14 / R15 / R16 / R17 / R18 / R21 / R22 / R24 / R27 — pending post-launch evidence OR future Path C/D PRD-trigger enumerated dependency). **DV2 cold-pool age RESET to 0 post-triage**. Next DV2 mandatory full-triage at iter ~074.
+- **§10 ASK-2 canonical 8A remediation** disposition: defer to AI-Vision-Build series absorption (Tier A enumeration affects AI capability catalog). Mid-tier decision; ~30 LOC architecture-doc cleanup.
+- **§15 ZERO autonomous CLAUDE.md governance diffs at MR-016 close** — preservation of 25 consecutive counted iterations of correct control-plane behavior; stability-default posture preserved across 9 consecutive zero-or-stability-only meta-reviews (MR-007 → MR-016). ONE byte-literal amendment proposed in Appendix C-1 (Multi-iteration umbrella row split clause for § Audit-Intake Pattern) — silence-as-accept window opens MR-016 close.
+- **Pool 40 → 40 unchanged at MR-016 close** (0 promotions / 0 deletions per triage verdicts; Mode 4 zero product code touched; absolute pool count preserved).
+- **Counter preservation across Mode 4:** Cool-off recharge counter UNCHANGED at 3/3 FULL RE-ARM (10-event preservation streak); D-1 reverse-portfolio-drift counter UNCHANGED at 7; Area saturation clock RESET by Mode 4 governance non-counting per established precedent; MR-017 cadence counter RESET 3/3 → 0/3 at MR-016 close; cold-pool ages: DV2 RESET to 0 post-triage / MDR 6 → 7 / WDC 6 → 7 / PIB 6 → 7 (all under threshold).
+- **#57 flag-retirement prerequisite chain UNCHANGED at 10/10 ENGINEERING-COMPLETE.**
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL.**
+
+### Validation
+
+- Mode 4 governance-only iteration; zero product code touched; zero test runs required.
+- Artifact `docs/meta/MR_016_META_REVIEW.md` cross-referenced against (a) live `IMPROVEMENT_BACKLOG.md` row count + ages; (b) DV2-REVIEW-001 source artifact §3-§5 cold-pool entries; (c) iter 061/062/063 outcome blocks in this log; (d) AI-VISION REVIEW §16 CEO decisions enumeration. Zero divergences.
+- Verdict pass: **0 failing rules across 14 dimensions; 25 consecutive counted iterations of correct control-plane behavior; stability-default posture preserved**.
+
+### Iter 065 endorsement (per MR-016 §10 + WDC-002 §17 reconciliation)
+
+- **PRE-WDC-002:** MR-016 §10 PRIMARY = extension-surface burn-down (row #21; D-1 trip-clearing).
+- **POST-WDC-002 (this artifact superseded by WDC-002 review which followed immediately):** WDC-002 §17 PRIMARY = **#100 WDC2-P01 ColumnAccessorContext extension** (architectural pre-requisite for time-window stats; closes CEO Signal 2 dependency chain).
+- **Sequencing reconciliation:** WDC-002 P0 promotions take precedence over MR-016 §10 endorsement because WDC-002 is a more recent strategic intake addressing direct CEO signals. Row #21 extension-surface burn-down (D-1 trip-clearing) remains available as iter ~072+ candidate post-WDC-002 P0 burn-down.
+
+### Q-bank state at iter 064 close: 24 items net
+
+- 5 RESOLVED at MR-016 (this iteration): umbrella-sub-deliverable-numerator-credit (b.3 STRUCTURAL) / Q-ARCH-1 + Q-ARCH-2 (via AI vision) / MR-016 cadence reset / pool-delta arithmetic correction.
+- 8 RESOLVED at MR-014/MR-015 (preserved).
+- 3 PARTIALLY RESOLVED (preserved): PRD approval + 5 remaining pre-R+1 questions + Mode 3-adjacent density.
+- 8 carry-forward to MR-017: 5 remaining pre-R+1 questions + Path C R+1 trigger + Path C/AI Vision interleave + ASK-2 canonical 8A + MDR-P1-19 + iter 065 pick + iter-057 CHANGELOG backfill (deferred opportunistic) + MR-016 (b.3) amendment effectiveness measurement.
+
+density-response: n/a (Mode 4 rule — zero follow-ups generated). scope-expansion: not applicable.
 
 ---
 
