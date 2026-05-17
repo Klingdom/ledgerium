@@ -20,11 +20,13 @@ WORKDIR /app
 # Copy workspace config + lockfile first (layer cache)
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-# Copy package.json files for ALL workspace packages — pnpm-workspace.yaml
-# declares `apps/*` + `packages/*` (16 total). pnpm install --frozen-lockfile
-# resolves the entire workspace graph from pnpm-lock.yaml; any missing
-# package.json causes the install to fail. The web-app build at runtime
-# only needs a subset, but install needs all of them to be present.
+# Copy package.json files for all initialized workspace packages.
+# pnpm-workspace.yaml declares `apps/*` + `packages/*`; pnpm only treats
+# directories WITH package.json as workspace members. The 5 packages
+# without package.json (api-client / capture-core / renderers /
+# schema-process / ui-components) are scaffolds — pnpm ignores them.
+# `pnpm install --frozen-lockfile` resolves the workspace graph from
+# pnpm-lock.yaml; the 10 initialized packages below must all be present.
 COPY apps/web-app/package.json apps/web-app/
 COPY apps/web-app/prisma/schema.prisma apps/web-app/prisma/
 COPY apps/extension-app/package.json apps/extension-app/
@@ -35,12 +37,7 @@ COPY packages/normalization-engine/package.json packages/normalization-engine/
 COPY packages/segmentation-engine/package.json packages/segmentation-engine/
 COPY packages/policy-engine/package.json packages/policy-engine/
 COPY packages/schema-events/package.json packages/schema-events/
-COPY packages/schema-process/package.json packages/schema-process/
 COPY packages/shared-types/package.json packages/shared-types/
-COPY packages/api-client/package.json packages/api-client/
-COPY packages/capture-core/package.json packages/capture-core/
-COPY packages/renderers/package.json packages/renderers/
-COPY packages/ui-components/package.json packages/ui-components/
 
 # Install all dependencies (including dev for build step)
 RUN pnpm install --frozen-lockfile
