@@ -24,6 +24,20 @@ services:
       - AUTH_TRUST_HOST=true
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-me}
       - NEXTAUTH_URL=${NEXTAUTH_URL:-https://ledgerium.ai}
+      # ── Stripe billing (iter 066-068; env vars set by GitHub Actions → host shell)
+      # If unset on the host (no GitHub Secret configured), defaults to empty
+      # string; the checkout/webhook routes handle empty gracefully (HTTP 503 /
+      # HTTP 500 with BUG-04 retry semantics) instead of throwing at startup.
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
+      - STRIPE_STARTER_MONTHLY_PRICE_ID=${STRIPE_STARTER_MONTHLY_PRICE_ID:-}
+      - STRIPE_STARTER_ANNUAL_PRICE_ID=${STRIPE_STARTER_ANNUAL_PRICE_ID:-}
+      - STRIPE_TEAM_MONTHLY_PRICE_ID=${STRIPE_TEAM_MONTHLY_PRICE_ID:-}
+      - STRIPE_TEAM_ANNUAL_PRICE_ID=${STRIPE_TEAM_ANNUAL_PRICE_ID:-}
+      - STRIPE_GROWTH_MONTHLY_PRICE_ID=${STRIPE_GROWTH_MONTHLY_PRICE_ID:-}
+      - STRIPE_GROWTH_ANNUAL_PRICE_ID=${STRIPE_GROWTH_ANNUAL_PRICE_ID:-}
+      - STRIPE_PRO_PRICE_ID=${STRIPE_PRO_PRICE_ID:-}
+      - STRIPE_TRIAL_DAYS=${STRIPE_TRIAL_DAYS:-14}
     networks:
       - proxy-net
 
