@@ -238,7 +238,7 @@ function HealthTooltip({ metricsV2, onDismiss, triggerRef }: HealthTooltipProps)
             track({ event: 'upgrade_clicked', location: 'dashboard_v2_health_gate' });
           }}
         >
-          View plans →
+          Compare plans →
         </a>
       </div>
     );

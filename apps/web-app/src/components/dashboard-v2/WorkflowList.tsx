@@ -396,7 +396,7 @@ export default function WorkflowList({
             className="mx-ds-8 mt-ds-3 px-ds-3 py-ds-2 rounded-ds-sm bg-amber-50 border border-amber-200 text-[14px] text-amber-700 flex items-center justify-between gap-ds-4"
           >
             <span>
-              Metrics improve as more workflows are recorded. Some scores may be incomplete.
+              Your first workflow is recorded. Record 2 more to unlock health score comparison across your library.
             </span>
             <button
               type="button"
@@ -501,7 +501,7 @@ export default function WorkflowList({
                 <td colSpan={totalColCount} className="px-ds-4 py-ds-8 text-center">
                   <div className="flex flex-col items-center gap-ds-3">
                     <p className="text-[16px] font-medium text-[var(--content-primary)]">
-                      Something went wrong loading your workflows.
+                      Could not load workflows — check your connection and retry.
                     </p>
                     <button
                       type="button"
@@ -525,7 +525,7 @@ export default function WorkflowList({
                       No workflows recorded yet.
                     </p>
                     <p className="text-[14px] text-[var(--content-secondary)]">
-                      Install the browser extension to start recording workflows.
+                      Record any digital process once — Ledgerium measures cycle time, identifies patterns, and surfaces where your team spends time.
                     </p>
                     <Link
                       href={EXTENSION_CONFIG.chromeStoreUrl}
@@ -533,7 +533,7 @@ export default function WorkflowList({
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-ds-2 px-ds-4 py-ds-2 rounded-ds-sm border border-[var(--border-default)] text-[14px] font-medium text-[var(--content-primary)] transition-colors duration-150 hover:bg-[var(--surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                     >
-                      Install extension →
+                      Install extension to start →
                     </Link>
                   </div>
                 </td>

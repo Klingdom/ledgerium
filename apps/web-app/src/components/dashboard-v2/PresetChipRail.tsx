@@ -147,9 +147,9 @@ function PresetChip({
   // Tooltip copy (shown on hover via title attribute)
   let tooltipText = preset.description;
   if (isPending) {
-    tooltipText = 'Available after Path C R+1';
+    tooltipText = 'Coming in an upcoming release';
   } else if (isDisabledByPlan) {
-    tooltipText = 'Upgrade to Team to access this preset';
+    tooltipText = 'Team plan includes this preset — see plans →';
   }
 
   const handleClick = useCallback(() => {

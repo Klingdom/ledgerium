@@ -558,6 +558,7 @@ export default function DashboardV2Shell() {
         topInsight={topInsight}
         timeRange={timeRange}
         onTimeRangeChange={setTimeRange}
+        workflowCount={allWorkflows.length}
       />
 
       {/* Section 2: Insights Strip */}

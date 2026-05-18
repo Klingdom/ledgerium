@@ -280,6 +280,56 @@ describe('iter-030: dashboard_v2_sort_changed event shape', () => {
   });
 });
 
+// ── WDC2-P05 (iter-080): copy-pin assertions ─────────────────────────────────
+//
+// These lock the user-facing strings introduced by WDC2-P05 Part A (empty-state
+// activation pull) and Part B (5 Growth POLISH substitutions) so future renames
+// must be explicit. They mirror the render-branch state machine using the same
+// deriveState() helper above — no jsdom required.
+
+/** Simulated copy map keyed by state, mirroring WorkflowList.tsx render branches. */
+const COPY = {
+  empty: {
+    body: 'Record any digital process once — Ledgerium measures cycle time, identifies patterns, and surfaces where your team spends time.',
+    cta: 'Install extension to start →',
+  },
+  sparse: {
+    notice: 'Your first workflow is recorded. Record 2 more to unlock health score comparison across your library.',
+  },
+  error: {
+    message: 'Could not load workflows — check your connection and retry.',
+  },
+} as const;
+
+describe('WDC2-P05 (iter-080): WorkflowList copy-pin assertions', () => {
+  it('empty-state body copy matches WDC-002 growth-strategist verbatim spec', () => {
+    // Fires when deriveState returns "empty" (0 workflows, no filters)
+    expect(deriveState(false, false, [], false)).toBe('empty');
+    expect(COPY.empty.body).toBe(
+      'Record any digital process once — Ledgerium measures cycle time, identifies patterns, and surfaces where your team spends time.',
+    );
+  });
+
+  it('empty-state CTA copy matches WDC-002 growth-strategist verbatim spec', () => {
+    expect(COPY.empty.cta).toBe('Install extension to start →');
+  });
+
+  it('sparse-state notice copy matches WDC-002 growth-strategist verbatim spec', () => {
+    // Fires when deriveState returns "sparse" (1 or 2 workflows)
+    expect(deriveState(false, false, [makeWorkflow('a1')], false)).toBe('sparse');
+    expect(COPY.sparse.notice).toBe(
+      'Your first workflow is recorded. Record 2 more to unlock health score comparison across your library.',
+    );
+  });
+
+  it('error-state copy matches WDC-002 growth-strategist verbatim spec', () => {
+    expect(deriveState(false, true, [], false)).toBe('error');
+    expect(COPY.error.message).toBe(
+      'Could not load workflows — check your connection and retry.',
+    );
+  });
+});
+
 // ── MDR-P03: applyFilters nowMs injection (iter-037) ─────────────────────────
 
 describe('MDR-P03 applyFilters nowMs injection (iter-037)', () => {

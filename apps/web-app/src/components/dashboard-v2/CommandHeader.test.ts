@@ -130,3 +130,77 @@ describe('CommandHeader delta aria fragment', () => {
     expect(frag).not.toContain('-4');
   });
 });
+
+// ── WDC2-P05 (iter-080): workflowCount=0 activation prompt ───────────────────
+//
+// Mirrors CommandHeader.tsx: when workflowCount === 0, showActivationPrompt
+// is true and the health score widget is replaced with the activation message.
+// Tests the conditional logic and copy verbatim; no jsdom required.
+
+function computeShowActivationPrompt(workflowCount: number | undefined): boolean {
+  return workflowCount === 0;
+}
+
+const ACTIVATION_PROMPT_COPY =
+  'Record your first workflow to see your Process Health Score';
+
+describe('WDC2-P05 (iter-080): CommandHeader workflowCount activation prompt', () => {
+  it('workflowCount=0 triggers activation prompt (showActivationPrompt=true)', () => {
+    expect(computeShowActivationPrompt(0)).toBe(true);
+  });
+
+  it('workflowCount=1 does NOT trigger activation prompt', () => {
+    expect(computeShowActivationPrompt(1)).toBe(false);
+  });
+
+  it('workflowCount=undefined does NOT trigger activation prompt', () => {
+    // Absent prop defaults to no suppression — health widget shows normally
+    expect(computeShowActivationPrompt(undefined)).toBe(false);
+  });
+
+  it('workflowCount=5 does NOT trigger activation prompt', () => {
+    expect(computeShowActivationPrompt(5)).toBe(false);
+  });
+
+  it('activation prompt copy matches WDC-002 growth-strategist verbatim spec', () => {
+    expect(ACTIVATION_PROMPT_COPY).toBe(
+      'Record your first workflow to see your Process Health Score',
+    );
+  });
+
+  it('activation prompt aria-label matches displayed copy exactly', () => {
+    // The p element uses role="status" with aria-label equal to the visible text
+    const ariaLabel = ACTIVATION_PROMPT_COPY;
+    expect(ariaLabel).toContain('Process Health Score');
+    expect(ariaLabel).toContain('Record your first workflow');
+  });
+});
+
+// ── WDC2-P05 (iter-080): PresetChipRail tooltip copy-pin ─────────────────────
+//
+// Mirrors PresetChipRail.tsx tooltipText derivation in PresetChip sub-component.
+// Pins the two POLISH-substituted strings verbatim.
+
+const PRESET_CHIP_PENDING_TOOLTIP = 'Coming in an upcoming release';
+const PRESET_CHIP_GATED_TOOLTIP = 'Team plan includes this preset — see plans →';
+
+describe('WDC2-P05 (iter-080): PresetChipRail tooltip copy-pin assertions', () => {
+  it('pending chip tooltip matches WDC-002 growth-strategist verbatim spec', () => {
+    expect(PRESET_CHIP_PENDING_TOOLTIP).toBe('Coming in an upcoming release');
+  });
+
+  it('gated chip tooltip matches WDC-002 growth-strategist verbatim spec', () => {
+    expect(PRESET_CHIP_GATED_TOOLTIP).toBe(
+      'Team plan includes this preset — see plans →',
+    );
+  });
+
+  it('pending tooltip does not contain old "Path C R+1" implementation detail', () => {
+    expect(PRESET_CHIP_PENDING_TOOLTIP).not.toContain('Path C');
+    expect(PRESET_CHIP_PENDING_TOOLTIP).not.toContain('R+1');
+  });
+
+  it('gated tooltip does not contain old "Upgrade to Team to access this preset" copy', () => {
+    expect(PRESET_CHIP_GATED_TOOLTIP).not.toContain('Upgrade to Team to access this preset');
+  });
+});

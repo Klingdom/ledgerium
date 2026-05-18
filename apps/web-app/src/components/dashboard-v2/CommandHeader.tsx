@@ -32,6 +32,12 @@ interface CommandHeaderProps {
   topInsight: InsightChip | null;
   timeRange: TimeRange;
   onTimeRangeChange: (range: TimeRange) => void;
+  /**
+   * Total workflow count (from allWorkflows before filters).
+   * When 0, replaces the portfolio health score widget with a first-workflow
+   * activation prompt per WDC2-P05 (iter-080) / row #76 WDC-P03.
+   */
+  workflowCount?: number;
 }
 
 /**
@@ -62,10 +68,14 @@ export default function CommandHeader({
   topInsight,
   timeRange,
   onTimeRangeChange,
+  workflowCount,
 }: CommandHeaderProps) {
   const isLoading = portfolioHealthScore === null;
   const score = portfolioHealthScore ?? 0;
   const band = isLoading ? null : healthBand(score);
+
+  // When no workflows exist, suppress the health score widget entirely (WDC2-P05 iter-080 / row #76)
+  const showActivationPrompt = workflowCount === 0;
 
   // Build delta label text and aria description
   const deltaLabel: string = (() => {
@@ -132,50 +142,60 @@ export default function CommandHeader({
           </select>
         </label>
 
-        {/* Portfolio health score + delta */}
-        <div
-          className="flex flex-col items-end gap-ds-1"
-          role="status"
-          aria-label={
-            isLoading
-              ? 'Portfolio health: loading'
-              : `Portfolio health: ${score}, ${band!.label}${deltaAriaFragment}`
-          }
-        >
-          <span className="text-[12px] font-medium text-[var(--content-secondary)] uppercase tracking-wide">
-            Portfolio Health
-          </span>
-          <div className="flex items-center gap-ds-2">
-            {/* 3-band rail */}
-            <div className="w-16 h-1.5 rounded-full bg-[var(--border-subtle)] overflow-hidden">
-              {!isLoading && (
-                <div
-                  className={`h-full rounded-full transition-all duration-150 ${band!.railClass}`}
-                  style={{ width: `${score}%` }}
-                  aria-hidden="true"
-                />
-              )}
-            </div>
-            <span
-              className={`text-[28px] font-semibold leading-[1.2] tabular-nums ${
-                isLoading ? 'text-[var(--content-tertiary)]' : band!.colorClass
-              }`}
-            >
-              {isLoading ? '—' : score}
+        {/* Portfolio health score + delta — suppressed when no workflows exist (WDC2-P05 iter-080) */}
+        {showActivationPrompt ? (
+          <p
+            className="text-[14px] font-normal text-[var(--content-secondary)] text-right max-w-xs"
+            role="status"
+            aria-label="Record your first workflow to see your Process Health Score"
+          >
+            Record your first workflow to see your Process Health Score
+          </p>
+        ) : (
+          <div
+            className="flex flex-col items-end gap-ds-1"
+            role="status"
+            aria-label={
+              isLoading
+                ? 'Portfolio health: loading'
+                : `Portfolio health: ${score}, ${band!.label}${deltaAriaFragment}`
+            }
+          >
+            <span className="text-[12px] font-medium text-[var(--content-secondary)] uppercase tracking-wide">
+              Portfolio Health
             </span>
-          </div>
-
-          {/* Period-over-period delta (iter-024 §4.1 item a) */}
-          {!isLoading && (
-            <div
-              className={`flex items-center gap-0.5 text-[12px] font-medium ${deltaColorClass}`}
-              aria-hidden="true"
-            >
-              <DeltaIcon size={10} aria-hidden="true" />
-              <span>{deltaLabel}</span>
+            <div className="flex items-center gap-ds-2">
+              {/* 3-band rail */}
+              <div className="w-16 h-1.5 rounded-full bg-[var(--border-subtle)] overflow-hidden">
+                {!isLoading && (
+                  <div
+                    className={`h-full rounded-full transition-all duration-150 ${band!.railClass}`}
+                    style={{ width: `${score}%` }}
+                    aria-hidden="true"
+                  />
+                )}
+              </div>
+              <span
+                className={`text-[28px] font-semibold leading-[1.2] tabular-nums ${
+                  isLoading ? 'text-[var(--content-tertiary)]' : band!.colorClass
+                }`}
+              >
+                {isLoading ? '—' : score}
+              </span>
             </div>
-          )}
-        </div>
+
+            {/* Period-over-period delta (iter-024 §4.1 item a) */}
+            {!isLoading && (
+              <div
+                className={`flex items-center gap-0.5 text-[12px] font-medium ${deltaColorClass}`}
+                aria-hidden="true"
+              >
+                <DeltaIcon size={10} aria-hidden="true" />
+                <span>{deltaLabel}</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );
