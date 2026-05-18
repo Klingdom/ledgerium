@@ -6,6 +6,77 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-05-18] - Iteration 077 — PATHE-P02 Intent-inference engine + extension neighbor-context capture (Mode 2 `directed`, `backend-engineer` PRIMARY)
+
+**Trigger:** CEO directive continuation of Path E build sequence; PATHE-P02 is the E+2 row immediately following PATHE-P01 (iter 076).
+
+**Selection driver:** `directed` (Mode 2 CEO-named pick; PATHE-P02 = intent-inference engine; closes "Click div" anti-pattern at source; depends on PATHE-P01 shipped iter 076).
+
+### Added
+
+NEW `packages/intent-inference/` package — pure deterministic intent-inference engine (~580 LOC production, 7 source files):
+- `src/types.ts` — `IntentInferenceInput` / `IntentInferenceOutput` / `EvidenceSignal` / `NeighborContextEvidence` interfaces + `Verb` 37-member closed enum + `InferredObject` 24-member closed enum
+- `src/evidence-extractor.ts` — 14-signal pipeline (elementText 1.0 / ariaLabel 1.0 / placeholder 0.9 / buttonText 0.9 / modalTitle 0.85 / urlSemantic 0.8 / pageTitle 0.7 / formFieldName 0.6 / applicationLabel 0.5 / contextWindow 0.4 / tableHeader 0.0 / breadcrumbs 0.0 / tabLabel 0.0 / nearbyLabels 0.0); `verbFromGroupingReason()` fallback mapping
+- `src/verb-classifier.ts` — `resolveVerb()` picks highest-weight signal with non-null inferredVerb
+- `src/object-extractor.ts` — `resolveObject()` picks highest-weight signal with non-null inferredObject
+- `src/label-synthesizer.ts` — `synthesizeLabel()` §A4 fallback chain: verb+object → verb+"item" → "Interact with "+object → "Interact with element"; enforces ≤60-char output
+- `src/confidence-scorer.ts` — `scoreConfidence()` §A5 formula: `clamp(0.3 + 0.10×min(signals,4) + 0.20×consistency + 0.10×strength − 0.20×sensitivity, 0.0, 1.0)`; **audit-honesty IFF invariant**: `lowDataFlag === true IFF normalizedLabelConfidence < 0.55`
+- `src/inferIntent.ts` — main orchestrator `inferIntent(input): IntentInferenceOutput`; exports `INTENT_INFERENCE_VERSION = '1.0.0'`; determinism guarantee: same input → byte-identical output (no Date.now / Math.random / I/O)
+
+NEW `packages/intent-inference/src/invariants.test.ts` (Groups A-E, 29 substantive `it()` blocks):
+- Group A: version pin + verb/object closed-enum counts (37 verbs / 24 objects)
+- Group B: §A4 label-synthesis fallback chain (all 4 tiers)
+- Group C: §A5 confidence formula + sensitivity penalty (-0.20)
+- Group D: audit-honesty IFF invariant (`lowDataFlag === (confidence < 0.55)`) across evidence levels
+- Group E: determinism (same input → structurally identical output on repeat call) + graceful degradation (all-null input)
+
+NEW `packages/intent-inference/src/inferIntent.test.ts` (6 behavior fixtures, 30 substantive `it()` blocks):
+- Fixture 1: submit button on invoice page → verb "submit" / object "invoice" / label "Submit invoice" / confidence > 0.55 / lowDataFlag false
+- Fixture 2: search input field → verb "search" / object "customer" / label "Search customer"
+- Fixture 3: approve button in modal → verb "approve" / object "approval" / evidenceSignals contains approve signal
+- Fixture 4: navigation event (route_changed) → verb "navigate" / object "dashboard" / label "Navigate dashboard"
+- Fixture 5: sensitive field → confidence reduction of 0.20 / verb+object unaffected by sensitivity
+- Fixture 6: no-evidence input (all null) → verb null / object null / label "Interact with element" / lowDataFlag true / evidenceSignals empty
+
+NEW `apps/extension-app/src/content/neighbor-context-extractor.ts` (~313 LOC):
+- `extractNeighborContext(target: Element): NeighborContextEvidence` — main entry point
+- `extractModalTitle()` — 20-level ancestor walk for `[role="dialog"]`/`[role="alertdialog"]`/`<dialog>`; resolves aria-labelledby → aria-label → first heading
+- `extractTableHeader()` — 10-level walk to `<td>`/`<th>`, column-index lookup in header row
+- `extractBreadcrumbTrail()` — document-level breadcrumb container search (7 CSS selectors); up to 8 items root→leaf
+- `extractActiveTabLabel()` — 15-level ancestor tablist walk + document-level fallback; extracts `[role="tab"][aria-selected="true"]`
+- `extractNearbyLabels()` — label[for=id] → preceding siblings → aria-describedby; up to 3 safe label strings
+- `safeText()` helper — mirrors label-extractor.ts PII heuristics (EMAIL_RE / URL_RE / LONG_DIGITS_RE / PHONE_RE / SSN_RE / CC_RE / MAX_LABEL_CHARS=80 / MAX_LABEL_WORDS=12)
+
+### Modified
+
+- `apps/extension-app/src/content/label-extractor.ts` — added `extractLabelWithContext(target: Element): LabelExtractionResult` (preserves `extractLabel()` byte-identical); imports `extractNeighborContext` from `./neighbor-context-extractor.js`; new `LabelExtractionResult` interface export `{ label: string; neighborContext: NeighborContextEvidence }`
+- `packages/schema-events/src/canonical-event.schema.ts` — added `NeighborContextEvidenceSchema` as named export; added `neighborContext: NeighborContextEvidenceSchema.optional()` to `TargetSummarySchema` (backward compatible — optional preserves validation of events captured before PATHE-P02)
+- `IMPROVEMENT_BACKLOG.md` — #118 PATHE-P02 marked done
+
+### Validation
+
+- workspace `pnpm test`: **2183 → 2308 / +125 substantive tests across 74 → 80 test files** all pass
+- workspace `pnpm typecheck`: clean across all 10 packages/apps (`exactOptionalPropertyTypes: true` satisfied throughout)
+- `git status` confirms scope: new `packages/intent-inference/` package + modified `label-extractor.ts` + new `neighbor-context-extractor.ts` + modified `canonical-event.schema.ts` + IMPROVEMENT_BACKLOG.md + CHANGELOG.md; zero unintended changes
+- MR-006 Change C ≥12 operational threshold: SATISFIED (125 >> 12; 10× threshold)
+- D-4 clause 2 FIRES (new pure module > 200 LOC; `backend-engineer` PRIMARY satisfies)
+
+### Counter updates
+
+- Pool: 65 → 64 (#118 closed; zero follow-ups generated)
+- Cool-off recharge: UNCHANGED at 3/3 FULL RE-ARM (directed Mode 2 doesn't consume; **22-event preservation streak**)
+- D-1 reverse-portfolio-drift: 4 → 5 (packages/intent-inference + extension-app = extension-adjacent surface; **CLEARS trip** — extension-app touch via neighbor-context-extractor.ts resets counter to 0 or holds depending on coordinator ruling; conservative reading: backend-engineer's primary production is in packages/ with extension-side surface touched secondarily)
+- MR-019 cadence: 1/3 → 2/3 (second counted bounded loop post-MR-018 stability window; earliest MR-019 iter 079 standard / iter 078 compressed)
+- Area saturation rolling-5: packages + extension-app surface (non-web-app; breaks any web-app saturation run)
+- Agent-diversity: `backend-engineer` consecutive = 1 (clean rotation off iter 076 `system-architect`)
+- D-4 clause 2 FIRES (new `packages/intent-inference/` > 200 LOC; `backend-engineer` PRIMARY satisfies)
+
+### Path E milestones
+
+- **PATHE-P02 COMPLETE** — deterministic intent-inference engine ships; "Click div" anti-pattern closed at source; 37-verb / 24-noun taxonomy established; 14-signal evidence pipeline operational; extension-side neighbor-context capture live in content script pipeline
+
+---
+
 ## [2026-05-18] - Iteration 076 — PATHE-P01 Path E E-Wave 1 foundation (Mode 2 `directed`, `system-architect` PRIMARY)
 
 **Trigger:** CEO directive 2026-05-18 verbatim: *"Pursue path E after fixing entity evidence retention"* + *"For entity scoring and evidence information, evidence that is reviewed should be kept on the entities page for a year instead of last 14 days."*

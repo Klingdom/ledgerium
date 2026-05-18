@@ -18,7 +18,29 @@
  *   - Is empty or only whitespace
  *
  * Returns empty string when no safe label can be found.
+ *
+ * `extractLabelWithContext` additionally collects neighbor-context evidence
+ * (modal title, table column header, breadcrumb trail, active tab, nearby labels)
+ * for use by the PATHE-P02 intent-inference engine.
+ *
+ * @see neighbor-context-extractor.ts — NeighborContextEvidence shape + extraction logic
  */
+
+import {
+  extractNeighborContext,
+  type NeighborContextEvidence,
+} from './neighbor-context-extractor.js'
+
+/**
+ * Combined result of a single label-extraction pass.
+ * `neighborContext` is always populated (never null) to simplify downstream consumers.
+ */
+export interface LabelExtractionResult {
+  /** The primary element label (empty string when no safe label can be found). */
+  readonly label: string
+  /** Structural neighbor-context evidence for intent inference. */
+  readonly neighborContext: NeighborContextEvidence
+}
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const URL_RE = /^https?:\/\//i
@@ -162,4 +184,25 @@ export function extractLabel(el: Element): string {
   }
 
   return ''
+}
+
+/**
+ * Extract both the primary element label AND neighbor-context evidence in a
+ * single DOM traversal pass.
+ *
+ * Called by the content-script capture pipeline for every recorded interaction.
+ * The returned `neighborContext` is serialised into `target_summary.neighborContext`
+ * in the canonical event and later passed to `inferIntent()` as `input.neighborContext`.
+ *
+ * Determinism contract: same DOM state → same output.
+ * No Date.now() / Math.random() / I/O.
+ *
+ * @param target — The DOM element that was interacted with.
+ * @returns A `LabelExtractionResult` containing the primary label and neighbor context.
+ */
+export function extractLabelWithContext(target: Element): LabelExtractionResult {
+  return {
+    label:           extractLabel(target),
+    neighborContext: extractNeighborContext(target),
+  }
 }

@@ -55,6 +55,26 @@ export const PageContextSchema = z.object({
   moduleLabel: z.string().optional(),
 });
 
+/**
+ * Neighbor-context evidence schema (PATHE-P02).
+ *
+ * Mirrors `NeighborContextEvidence` from `@ledgerium/intent-inference/types.ts`.
+ * Kept as a separate named export so downstream consumers can reference the
+ * schema without importing the full `TargetSummarySchema`.
+ */
+export const NeighborContextEvidenceSchema = z.object({
+  /** Nearest modal/dialog heading; null when not inside a dialog. */
+  modalTitle: z.string().nullable(),
+  /** Column header for clicks inside a table; null when not in a table. */
+  tableHeader: z.string().nullable(),
+  /** Breadcrumb trail ordered root→leaf; empty array when no breadcrumbs found. */
+  breadcrumbTrail: z.array(z.string()),
+  /** Active tab label; null when no tab-strip found. */
+  activeTabLabel: z.string().nullable(),
+  /** Nearby associated label texts (preceding sibling labels, [for=id] labels). */
+  nearbyLabels: z.array(z.string()),
+});
+
 export const TargetSummarySchema = z.object({
   selector: z.string().optional(),
   selectorConfidence: z.number().min(0).max(1).optional(),
@@ -63,6 +83,12 @@ export const TargetSummarySchema = z.object({
   elementType: z.string().optional(),
   isSensitive: z.boolean(),
   sensitivityClass: z.string().optional(),
+  /**
+   * Structural neighbor-context evidence collected by the content-script
+   * capture pipeline for PATHE-P02 intent inference. Optional for backward
+   * compatibility with events captured before PATHE-P02 shipped.
+   */
+  neighborContext: NeighborContextEvidenceSchema.optional(),
 });
 
 export const NormalizationMetaSchema = z.object({
