@@ -158,6 +158,14 @@ Every iteration may generate follow-up backlog items. To prevent unbounded accum
 
 **Testable metric:** over any 10-iteration window, the ratio of (follow-ups closed) / (follow-ups created) must be ≥ 0.5. Ratified at MR-011 (iter 047 close) per silence-as-accept of MR-008 §6 / MR-010 §6.1 proposal; supersedes prior ≥ 0.4 floor and supersedes any absolute pool-size target. Rationale: ratio is invariant to audit-intake magnitude and structurally meaningful; absolute targets proven brittle to large audit-intake events. Observed at ratification: iter 037→046 = 0.56 (15 closed / 27 created) — third consecutive counted iteration above proposed target.
 
+**Numerator-credit semantics (MR-018 Change A, ratified MR-019 per silence-as-accept).** The Follow-Up Debt Policy testable metric (closed / created ≥ 0.5 over any 10-iter window) recognizes the following as numerator credit events:
+
+1. **Backlog row closure** — a row in `IMPROVEMENT_BACKLOG.md` is closed by strikethrough or removed via standard Mode 1 / Mode 2 / Mode 5 iteration mechanics. One numerator credit per row.
+
+2. **CEO-directed multi-iteration feature program ship-completion** — a CEO-directed feature program meeting ALL of the following criteria earns ONE numerator credit at the SHIP-READY iteration (the last iteration of the program), regardless of iteration count: (a) multi-iteration: ≥2 substantive Mode 2 directed iterations; (b) single architectural-decision family (shared design specs, shared module, shared subsystem); (c) single named feature program (named explicitly in CEO directive or in coordinator endorsement); (d) SHIP-READY verdict at the sequence-close iteration (validated by specialist agent verdict or by validation gate); (e) credit attaches at the SHIP-READY iteration, not retroactively to earlier iterations of the program.
+
+One-off single-iteration CEO-directed work that does not constitute a feature program does NOT earn credit (it earns credit only if it closes a backlog row per clause 1). Scope-adjacent observations addressed inline do not earn credit. This rule aligns numerator-credit semantics with the MR-016 (b.3) STRUCTURAL umbrella-split discipline — a CEO-directed multi-iteration feature program is structurally analogous to an audit-intake umbrella row split into N independent rows at intake (each producing independent numerator credit when shipped). Validated by MR-018 evidence: iter 066+068 Stripe billing-stack buildout (2-iter, 1 credit at iter 068 SHIP-READY); iter 071+072+073 admin operations dashboard program (3-iter, 1 credit at iter 073 SHIP-READY).
+
 ---
 
 ## Audit-Intake Pattern (MR-005 Change D-5 / MR-004 Change D)
