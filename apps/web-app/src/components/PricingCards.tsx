@@ -135,10 +135,17 @@ export function PricingCards() {
                 </p>
               )}
 
-              {plan.id !== 'free' && plan.id !== 'enterprise' ? (
+              {/*
+                CTA routing (post CEO directive 2026-05-18 "Option B"):
+                  - Free + Enterprise: existing self-serve link (signup or mailto:sales)
+                  - Starter: existing Stripe Checkout flow via UpgradeButton (1-user solo plan ships today)
+                  - Team + Growth: waitlist mailto until multi-user invites land per TEAM-001 workspace build
+                    (advertised seats: 5 users / 15 users; data model + invite flow under construction)
+              */}
+              {plan.id === 'starter' ? (
                 <UpgradeButton
                   fallbackHref={plan.ctaHref}
-                  plan={plan.id as 'starter' | 'team' | 'growth'}
+                  plan={'starter'}
                   interval={isAnnual ? 'annual' : 'monthly'}
                   className={`w-full text-center ${
                     plan.highlighted
@@ -148,6 +155,32 @@ export function PricingCards() {
                 >
                   {plan.cta}
                 </UpgradeButton>
+              ) : plan.id === 'team' || plan.id === 'growth' ? (
+                <a
+                  href={`mailto:hello@ledgerium.ai?subject=${encodeURIComponent(
+                    `Team Plan Waitlist — ${plan.name}`,
+                  )}&body=${encodeURIComponent(
+                    `Please notify me when multi-user invites launch for the ${plan.name} plan.\n\n` +
+                      `Tier: ${plan.name} (${plan.seats})\n` +
+                      `Email: [your email]\n` +
+                      `Company: [optional]\n` +
+                      `Estimated team size: [optional]\n`,
+                  )}`}
+                  className={`w-full text-center ${
+                    plan.highlighted
+                      ? 'btn-primary shadow-sm shadow-brand-600/20'
+                      : 'btn-secondary'
+                  }`}
+                  onClick={() => {
+                    track({
+                      event: 'team_waitlist_clicked',
+                      plan: plan.id as 'team' | 'growth',
+                      location: 'pricing_cards',
+                    });
+                  }}
+                >
+                  Join Waitlist
+                </a>
               ) : (
                 <Link
                   href={plan.ctaHref}
@@ -162,7 +195,11 @@ export function PricingCards() {
                 </Link>
               )}
 
-              {plan.price !== null ? (
+              {plan.id === 'team' || plan.id === 'growth' ? (
+                <p className="mt-2 mb-4 text-center text-ds-xs text-amber-400">
+                  Multi-user invites launching Q3 2026
+                </p>
+              ) : plan.price !== null ? (
                 <p className="mt-2 mb-4 text-center text-ds-xs text-[var(--content-tertiary)]">
                   No credit card required
                 </p>

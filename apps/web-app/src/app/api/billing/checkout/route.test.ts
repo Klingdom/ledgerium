@@ -180,10 +180,16 @@ describe('POST /api/billing/checkout (iter 066 trial + tier matrix)', () => {
   // ── Tier × interval matrix (6 combos: 3 paid tiers × 2 intervals) ──────────
 
   describe('tier × interval matrix', () => {
-    const tiers = ['starter', 'team', 'growth'] as const;
+    // Post CEO directive 2026-05-18 "Option B": Team and Growth are blocked from
+    // self-serve Stripe Checkout until multi-user invite infrastructure ships
+    // via TEAM-001 workspace build. Only Starter creates Checkout Sessions;
+    // Team and Growth return 402 with code='awaiting_workspace_build'.
+    // Revert these test expectations when TEAM-P01..P06 ship.
+    const purchasableTiers = ['starter'] as const;
+    const waitlistTiers = ['team', 'growth'] as const;
     const intervals = ['monthly', 'annual'] as const;
 
-    for (const tier of tiers) {
+    for (const tier of purchasableTiers) {
       for (const interval of intervals) {
         it(`creates Checkout Session for ${tier} × ${interval} with correct price ID`, async () => {
           vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
@@ -199,6 +205,29 @@ describe('POST /api/billing/checkout (iter 066 trial + tier matrix)', () => {
           expect(args.metadata.plan).toBe(tier);
           expect(args.metadata.interval).toBe(interval);
           expect(args.metadata.userId).toBe(TEST_USER_ID);
+        });
+      }
+    }
+
+    // CEO directive 2026-05-18 "Option B": Team + Growth gated to waitlist.
+    // Server-side defense-in-depth: even direct API calls with plan=team or
+    // plan=growth must be rejected with 402 + code='awaiting_workspace_build'.
+    // Revert when TEAM-P01..P06 ship.
+    for (const tier of waitlistTiers) {
+      for (const interval of intervals) {
+        it(`rejects ${tier} × ${interval} with 402 awaiting_workspace_build (multi-user gate)`, async () => {
+          vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+
+          const res = await POST(makeRequest({ plan: tier, interval }));
+          expect(res.status).toBe(402);
+          const body = await res.json();
+          expect(body.code).toBe('awaiting_workspace_build');
+          expect(body.plan).toBe(tier);
+          expect(body.starterFallbackAvailable).toBe(true);
+          expect(body.waitlistMailto).toBe('hello@ledgerium.ai');
+
+          // Should NOT have called Stripe Checkout create
+          expect(mockCheckoutCreate).not.toHaveBeenCalled();
         });
       }
     }
@@ -220,10 +249,14 @@ describe('POST /api/billing/checkout (iter 066 trial + tier matrix)', () => {
     });
 
     it('returns 400 with code=already_subscribed for active paid users', async () => {
+      // CEO directive 2026-05-18 "Option B": Team + Growth are waitlist-gated
+      // (402 awaiting_workspace_build). Use starter for this safeguard test —
+      // an existing 'team' subscriber requesting an upgrade to 'starter' would
+      // be caught by the already_subscribed gate (current_plan > free + active).
       vi.mocked(db.user.findUnique).mockResolvedValue(
         makeUser({ plan: 'team', subscriptionStatus: 'active' }) as never,
       );
-      const res = await POST(makeRequest({ plan: 'growth', interval: 'monthly' }));
+      const res = await POST(makeRequest({ plan: 'starter', interval: 'monthly' }));
       expect(res.status).toBe(400);
       const body = await res.json();
       expect(body.code).toBe('already_subscribed');
@@ -235,7 +268,9 @@ describe('POST /api/billing/checkout (iter 066 trial + tier matrix)', () => {
       // is also empty so the legacy fallback can't rescue this case.
       vi.mocked(getPriceId).mockReturnValueOnce(null);
 
-      const res = await POST(makeRequest({ plan: 'team', interval: 'monthly' }));
+      // Use starter (the only purchasable plan post CEO directive 2026-05-18 "Option B");
+      // team/growth would short-circuit at the workspace-build gate before reaching getPriceId.
+      const res = await POST(makeRequest({ plan: 'starter', interval: 'monthly' }));
       expect(res.status).toBe(503);
     });
 

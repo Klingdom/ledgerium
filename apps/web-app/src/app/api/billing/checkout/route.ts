@@ -8,9 +8,25 @@ import { trackServer } from '@/lib/analytics-server';
 import type { PaidPlanType, BillingInterval } from '@/lib/stripe';
 import type Stripe from 'stripe';
 
-/** Valid plan values for checkout. */
+/** Valid plan values for checkout (post CEO directive 2026-05-18 "Option B"). */
 const VALID_PLANS: PaidPlanType[] = ['starter', 'team', 'growth'];
 const VALID_INTERVALS: BillingInterval[] = ['monthly', 'annual'];
+
+/**
+ * Plans temporarily blocked from self-serve Stripe Checkout per CEO directive
+ * 2026-05-18 "Option B". Team and Growth are advertised on the pricing page
+ * but route to a waitlist (mailto:hello@ledgerium.ai) until multi-user invite
+ * infrastructure ships via TEAM-001 workspace build. This server-side guard
+ * is defense-in-depth: even if the pricing UI is bypassed (direct API call
+ * with plan=team or plan=growth), the request is rejected before a Stripe
+ * Checkout Session is created. Prevents charging customers for advertised
+ * functionality that the data model does not yet support (5 / 15 seat counts
+ * require Workspace + WorkspaceMember + WorkspaceInvite tables).
+ *
+ * Reverts when TEAM-P01 through TEAM-P06 ship. Remove this set + the gate
+ * block below at that time.
+ */
+const BLOCKED_PLANS_AWAITING_WORKSPACE_BUILD = new Set<PaidPlanType>(['team', 'growth']);
 
 /**
  * POST /api/billing/checkout
@@ -55,6 +71,27 @@ export async function POST(req: NextRequest) {
     }
   } catch {
     // No body or invalid JSON — use defaults.
+  }
+
+  // Multi-user gate: reject Team and Growth purchases until Workspace build
+  // ships per TEAM-001 (CEO directive 2026-05-18 "Option B"). This gate is
+  // server-side defense-in-depth — the pricing UI already routes Team/Growth
+  // CTAs to a mailto waitlist, so a request reaching this branch implies a
+  // direct API call. Honor the customer by NOT charging them for advertised
+  // functionality (5 / 15 seat counts) that the data model cannot yet fulfill.
+  if (BLOCKED_PLANS_AWAITING_WORKSPACE_BUILD.has(requestedPlan)) {
+    return NextResponse.json(
+      {
+        error:
+          'Multi-user invites are launching Q3 2026. Please join the waitlist at ' +
+          'mailto:hello@ledgerium.ai?subject=Team Plan Waitlist or upgrade to Starter for solo use today.',
+        code: 'awaiting_workspace_build',
+        plan: requestedPlan,
+        waitlistMailto: 'hello@ledgerium.ai',
+        starterFallbackAvailable: true,
+      },
+      { status: 402 }, // Payment Required — semantically: "this plan exists but cannot accept payment yet"
+    );
   }
 
   // Resolve the Stripe price ID for the requested plan + interval.

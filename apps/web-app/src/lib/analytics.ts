@@ -101,6 +101,11 @@ export type AnalyticsEvent =
   | { event: 'subscription_canceled' }
   | { event: 'payment_failed' }
   | { event: 'plan_limit_hit'; limit: string; currentUsage: number }
+  // Team/Growth waitlist (post CEO directive 2026-05-18 "Option B"): Team + Growth
+  // are blocked from Stripe Checkout until multi-user invites land via TEAM-001
+  // workspace build. Pricing CTAs route to mailto waitlist; this event captures
+  // demand signal + tier interest for prioritization.
+  | { event: 'team_waitlist_clicked'; plan: 'team' | 'growth'; location: 'pricing_cards' | 'comparison_table' | 'bottom_cta' }
 
   // ── Dashboard V2 instrumentation (iter-030 / PRD §4) ─────────────────────
   | {

@@ -19,7 +19,15 @@ export const metadata: Metadata = {
 const FAQ = [
   {
     q: 'How does Ledgerium count users?',
-    a: 'Every plan includes a set number of user seats. Anyone on your team can capture workflows using the Chrome extension, view the generated SOPs and process maps, and act on the intelligence reports. Free includes 1 user. Starter includes 1 user. Team includes 5 users. Growth includes 15 users. Enterprise is custom.',
+    a: 'Every plan includes a set number of user seats. Free includes 1 user. Starter includes 1 user. Team includes 5 users. Growth includes 15 users. Enterprise is custom. Anyone on your team can capture workflows using the Chrome extension, view the generated SOPs and process maps, and act on the intelligence reports.',
+  },
+  {
+    q: 'When can my team join my Ledgerium workspace?',
+    a: 'Multi-user invites are launching Q3 2026. Until then, Free and Starter plans are fully self-serve, and Team and Growth tiers route to a waitlist (hello@ledgerium.ai). We will email you the moment invites go live. We chose not to charge for advertised seat counts until the underlying workspace infrastructure ships — full self-serve invite flow is in active development.',
+  },
+  {
+    q: 'Can I share workflows with my team today?',
+    a: 'Yes. Every plan (including Free) supports public sharing via link. You can share SOPs and process maps with anyone — viewers do not need a Ledgerium account. Internal team workspaces with co-recording and shared libraries arrive with the Q3 2026 multi-user release.',
   },
   {
     q: 'What is the intelligence layer?',
@@ -169,6 +177,23 @@ export default function PricingPage() {
       {/* Pricing cards */}
       <section className="py-12 bg-[var(--surface-primary)]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          {/*
+            Multi-user gap notice (post CEO directive 2026-05-18 "Option B"):
+            Team and Growth plans currently route to a waitlist mailto.
+            Free and Starter remain fully self-serve. This notice honors
+            advertised functionality by being explicit about the gap window
+            rather than charging customers for unfulfilled seat counts.
+          */}
+          <div className="mx-auto max-w-3xl mb-8 rounded-xl border border-amber-500/30 bg-amber-950/20 px-5 py-3 text-center">
+            <p className="text-sm text-amber-200">
+              <span className="font-semibold">Heads up:</span>{' '}
+              Multi-user invites are launching Q3 2026. Free and Starter plans are{' '}
+              <span className="font-semibold">fully self-serve today</span>.
+              Team and Growth tiers route to a waitlist until our multi-user invite
+              infrastructure ships.
+            </p>
+          </div>
+
           <PricingCards />
 
           <p className="text-center text-sm text-[var(--content-tertiary)] mt-10 leading-relaxed max-w-xl mx-auto">
