@@ -6,6 +6,50 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-05-17] - SOP_PROCESSMAP_REVIEW_001 — Mode 3-adjacent multi-agent strategic review CLOSED (NON-counting; audit-intake per MR-005 D-5; 4 P0 promotions; 7th audit-style intake event)
+
+**Trigger:** CEO directive 2026-05-17 verbatim: *"I want the subagents to review all templates and formats for process maps and SOPs and suggest improvements. These process map and sop outputs need to be the highest quality, best practice sourced, artifacts that users will be excited to use and share."*
+
+**Selection driver:** `directed` Mode 3-adjacent multi-agent strategic review. 8 specialist agents engaged in parallel.
+
+### Added
+
+- **`docs/meta/SOP_PROCESSMAP_REVIEW_001.md`** (~9,500 words / 17 numbered sections + 2 appendices). Cumulative agent output ~36,500 words synthesized at 3.8× compression. 7-of-7 unanimous agent convergence on shareability gap (no public URL + no OG metadata + no growth loop). 6-of-7 convergence on N-attribution as category-first move + Process Map as CSS dot strip (not real flowchart). EPA QA/G-6 = TIER C; ISO 9001 = TIER D (largest gap); FDA SOP governance = TIER D+.
+- **15 P1/P2/P3 cold-pool items** held in artifact per MR-005 D-5 clauses 4+5 (5 P1 + 6 P2 + 4 P3).
+- **20 CEO decisions enumerated** (top-10 ranked + 10 mid/lower-tier captured in agent sections).
+
+### Changed
+
+- **`IMPROVEMENT_BACKLOG.md`** — 4 P0 SOPPM-001 rows promoted as #107-#110 with `Birth iter: audit-intake-SOPPM-001`: **#107 SOPPM-P01** Public shareable URL + OG metadata + "Made with Ledgerium" growth loop (score 16 HIGHEST; `frontend-engineer` + `growth-strategist` D-4 adjacent; iter ~077+ PRIMARY); **#108 SOPPM-P02** Variant confidence badge + N-attribution on SOP cover + step body (score 16; category-first differentiator; iter ~078+); **#109 SOPPM-P03** sop-view ARIA fix + axe regression coverage (score 13; 2 HARD WCAG violations + pre-AI-Vision-Build prereq; iter ~079+); **#110 SOPPM-P04** Determinism leak remediation + `sopSchemaVersion` closed-union + `migrateSOP` adapter (score 13; AI Vision Build architectural prereq; iter ~080+). **Pool 44 → 48 at intake.**
+- **`SYSTEM_HEALTH.md`**: line 3 anchor updated to SOPPM-001 intake; counter preservation block recorded; 7th audit-style intake event noted.
+- **`ITERATION_LOG.md`**: non-numbered Mode 3-adjacent diagnostic entry recorded above iter 074 MR-018 entry.
+
+### Counter updates (Mode 3-adjacent NON-counting effects)
+
+- Pool: 44 → 48 (+4 P0 promotions)
+- Cool-off recharge: UNCHANGED at 3/3 FULL RE-ARM (20-event preservation streak preserved)
+- D-1 reverse-portfolio-drift: UNCHANGED at 3
+- MR-019 cadence: UNCHANGED at 0/3
+- Area saturation rolling-5: NOT advanced
+- Cold-pool ages: UNCHANGED at MR-018 close values
+- NEW SOPPM-001 cold-pool age 0 (next mandatory triage projected iter ~085)
+
+### Operational notes
+
+- **#57 chain UNCHANGED at 10/10 ENGINEERING-COMPLETE**
+- **External-launch MDR-blocker gate UNCHANGED at 7/7 CLOSED — FULL**
+- **Stripe billing-stack: PRODUCTION-LIVE** (CEO closed operational deps between iter 074 and SOPPM-001 review; `/api/billing/checkout` returning Stripe Checkout redirects in production)
+- **Admin Operations Dashboard SHIP-READY** (preserved)
+- **Path D FULLY COMPLETE** (preserved)
+
+### Validation
+
+- `pnpm test` **2183 / 2183 unchanged across 74 test files** (Mode 3-adjacent zero product code)
+- `pnpm typecheck` clean across all 10 packages/apps
+- `git status` confirms scope: NEW `SOP_PROCESSMAP_REVIEW_001.md` + 5 mirror updates + 4 P0 backlog promotions; zero unintended changes
+
+---
+
 ## [2026-05-17] - Iteration 074 — MR-018 Mode 4 meta-review CLOSED (2 converging triggers; stability-default preserved on 14/14 control variables; 1 CLAUDE.md amendment PROPOSED via silence-as-accept; 8th compressed-cadence empirical fire)
 
 **Trigger:** 2 converging triggers fired at iter 073 close with zero ambiguity — (a) base 3-loop cadence floor 4/3; (b) Area saturation 3-consecutive web-app (iter 071+072+073).
