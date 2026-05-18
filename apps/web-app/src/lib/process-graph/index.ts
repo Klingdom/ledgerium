@@ -100,3 +100,22 @@ export {
 
 // ── Archive (v2.0 frozen snapshot) ────────────────────────────────────────────
 export { PROCESS_GRAPH_V2_0_SNAPSHOT } from './archive/v2_0_0.js';
+
+// ── Confidence Language Taxonomy (PATHE-P03) ──────────────────────────────────
+export type {
+  ConfidenceBand,
+  ConfidenceLabel,
+  ConfidenceColorHint,
+} from './confidence-language.js';
+
+export {
+  HIGH_CONFIDENCE_FLOOR,
+  MEDIUM_CONFIDENCE_FLOOR,
+  LOW_CONFIDENCE_FLOOR,
+  MIN_OBSERVATIONS_FOR_HIGH,
+  confidenceToBand,
+  bandToLabel,
+  formatLowConfidenceLabel,
+  inferredToLabel,
+  bandToColorHint,
+} from './confidence-language.js';
