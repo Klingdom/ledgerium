@@ -36,6 +36,7 @@ model User {
   sentInvites           TeamInvite[]    @relation("InviteSender")
   createdShares         WorkflowShare[] @relation("ShareCreator")
   dashboardPreference   UserDashboardPreference?
+  processEvidenceReviews ProcessEvidenceReview[]
 
   @@map("users")
 }
@@ -95,6 +96,13 @@ model Workflow {
 
   processDefinitionId String? @map("process_definition_id")
 
+  // ─── Path E (iter 076 / PATHE-P01) ──────────────────────────────────────
+  // Nullable pointers added additively. Existing rows retain NULL until
+  // PATHE-P08 variant clustering + PATHE-P10 graph merge fill them at ingest.
+  variantId                   String? @map("variant_id")                       // FK to Variant.id; null at v1.0 migration
+  variantFingerprint          String? @map("variant_fingerprint")              // matches Variant.variantHash; computed at ingest
+  processGraphVersionAtIngest String? @map("process_graph_version_at_ingest")  // audit trail of graph-detector version at run-ingest time
+
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   upload            Upload?            @relation(fields: [sourceUploadId], references: [id])
   artifacts         WorkflowArtifact[]
@@ -103,11 +111,13 @@ model Workflow {
   shares            WorkflowShare[]
   tags              WorkflowTag[]
   portfolios        WorkflowPortfolio[]
+  processGraphs     ProcessGraph[]
 
   @@index([userId])
   @@index([status])
   @@index([createdAt])
   @@index([processDefinitionId])
+  @@index([variantId])
   @@map("workflows")
 }
 
@@ -527,5 +537,170 @@ model UserDashboardPreference {
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@map("user_dashboard_preferences")
+}
+
+// ─── Path E — Process Graph (iter 076 / PATHE-P01) ──────────────────────────
+//
+// Append-only versioned graph root per system-architect §A Decision #2.
+// `graphVersion` is a monotonic revision counter; `graphSchemaVersion` is the
+// semver wire-format pin (`'2.0'` at PATHE-P01 launch).
+//
+// Immutability: rows are NEVER mutated. New revision = INSERT with higher
+// graphVersion. Prior revisions preserved for byte-identical webhook replay
+// + audit trail per Path E §M.
+//
+// JSON payloads are stored as TEXT (SQLite); the application layer handles
+// `parseProcessGraphJson` / `serializeProcessGraphToJson` round-trips.
+
+model ProcessGraph {
+  id                 String   @id @default(uuid())
+  workflowId         String   @map("workflow_id")
+  graphVersion       Int      @default(1) @map("graph_version")
+  graphSchemaVersion String   @default("2.0") @map("graph_schema_version")
+  runCount           Int      @default(0) @map("run_count")
+  computedAtMs       BigInt   @map("computed_at_ms")
+  isInferred         Boolean  @default(false) @map("is_inferred")
+  confidenceScore   Float    @default(0) @map("confidence_score")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  workflow        Workflow         @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  nodes           ProcessNode[]
+  edges           ProcessEdge[]
+  decisionPoints  DecisionPoint[]
+  variants        Variant[]
+
+  @@unique([workflowId, graphVersion])
+  @@index([workflowId])
+  @@map("process_graphs")
+}
+
+model ProcessNode {
+  id                 String  @id
+  processGraphId     String  @map("process_graph_id")
+  nodeType           String  @map("node_type")         // closed union — validated at app layer
+  rawLabel           String  @map("raw_label")
+  normalizedLabel    String? @map("normalized_label")
+  applicationLabel   String? @map("application_label")
+  routeTemplate      String? @map("route_template")
+  confidenceScore    Float   @map("confidence_score")
+  isInferred         Boolean @map("is_inferred")
+  observationCount   Int     @map("observation_count")
+  rawEvidenceJson    String  @default("[]") @map("raw_evidence_json") // JSON: EvidencePointer[]
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  processGraph ProcessGraph @relation(fields: [processGraphId], references: [id], onDelete: Cascade)
+
+  @@index([processGraphId])
+  @@map("process_nodes")
+}
+
+model ProcessEdge {
+  id                String  @id
+  processGraphId    String  @map("process_graph_id")
+  fromNodeId        String  @map("from_node_id")
+  toNodeId          String  @map("to_node_id")
+  edgeType          String  @map("edge_type")          // closed union — validated at app layer
+  runFrequency      Int     @map("run_frequency")
+  runFrequencyPct   Float   @map("run_frequency_pct")
+  confidenceScore   Float   @map("confidence_score")
+  isInferred        Boolean @map("is_inferred")
+  rawEvidenceJson   String  @default("[]") @map("raw_evidence_json")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  processGraph ProcessGraph @relation(fields: [processGraphId], references: [id], onDelete: Cascade)
+
+  @@index([processGraphId])
+  @@index([fromNodeId])
+  @@index([toNodeId])
+  @@map("process_edges")
+}
+
+model DecisionPoint {
+  id              String  @id @default(uuid())
+  processGraphId  String  @map("process_graph_id")
+  nodeId          String  @map("node_id")
+  decisionType    String  @map("decision_type")
+  confidenceScore Float   @map("confidence_score")
+  isInferred      Boolean @map("is_inferred")
+  rawEvidenceJson String  @default("[]") @map("raw_evidence_json")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  processGraph ProcessGraph @relation(fields: [processGraphId], references: [id], onDelete: Cascade)
+  conditions   Condition[]
+
+  @@index([processGraphId])
+  @@index([nodeId])
+  @@map("decision_points")
+}
+
+model Condition {
+  id              String  @id @default(uuid())
+  decisionPointId String  @map("decision_point_id")
+  description     String
+  conditionType   String  @map("condition_type")
+  confidenceScore Float   @map("confidence_score")
+  isInferred      Boolean @map("is_inferred")
+  rawEvidenceJson String  @default("[]") @map("raw_evidence_json")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  decisionPoint DecisionPoint @relation(fields: [decisionPointId], references: [id], onDelete: Cascade)
+
+  @@index([decisionPointId])
+  @@map("conditions")
+}
+
+model Variant {
+  id                String  @id @default(uuid())
+  processGraphId    String  @map("process_graph_id")
+  variantHash       String  @map("variant_hash")
+  variantLabel      String  @map("variant_label")
+  runCount          Int     @map("run_count")
+  runFrequencyPct   Float   @map("run_frequency_pct")
+  meanDurationMs    Int?    @map("mean_duration_ms")
+  stepCount         Int     @map("step_count")
+  nodeSequenceJson  String  @default("[]") @map("node_sequence_json")
+  rawEvidenceJson   String  @default("[]") @map("raw_evidence_json")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  processGraph ProcessGraph @relation(fields: [processGraphId], references: [id], onDelete: Cascade)
+
+  @@unique([processGraphId, variantHash])
+  @@index([processGraphId])
+  @@index([variantHash])
+  @@map("variants")
+}
+
+// ─── Path E — Reviewed-Evidence Retention (CEO directive 2026-05-18 / Appendix C)
+//
+// One row per explicit user review action. Drives the 365-day retention floor
+// for Team / Growth / Enterprise tiers vs 90-day floor for Free / Starter.
+//
+// Audit-honesty IFF invariant:
+//   `EvidencePointer.reviewedAt !== null` IFF a ProcessEvidenceReview row
+//   exists with matching (workflow_run_id, step_index).
+//
+// Cleanup: daily BullMQ `cleanup_expired_evidence_reviews` at 02:00 UTC
+// queries `retention_until_ms < <now_ms>` and soft-deletes; hard-deletes on
+// day +30.
+
+model ProcessEvidenceReview {
+  id                  String   @id @default(uuid())
+  evidencePointerId   String   @map("evidence_pointer_id")  // composite "workflowRunId:stepIndex"
+  workflowRunId       String   @map("workflow_run_id")
+  stepIndex           Int      @map("step_index")
+  reviewedBy          String   @map("reviewed_by")
+  reviewedAtMs        BigInt   @map("reviewed_at_ms")
+  reviewAction        String   @map("review_action")        // mark_reviewed | expand_evidence | act_on_recommendation
+  retentionUntilMs    BigInt   @map("retention_until_ms")
+  planTierAtReview    String   @map("plan_tier_at_review")
+  createdAtMs         BigInt   @map("created_at_ms")
+
+  reviewer User @relation(fields: [reviewedBy], references: [id], onDelete: Cascade)
+
+  @@index([evidencePointerId])
+  @@index([retentionUntilMs])
+  @@index([workflowRunId, stepIndex])
+  @@map("process_evidence_reviews")
 }
 

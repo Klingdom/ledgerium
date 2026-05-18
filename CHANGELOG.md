@@ -6,6 +6,134 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-05-18] - Iteration 076 — PATHE-P01 Path E E-Wave 1 foundation (Mode 2 `directed`, `system-architect` PRIMARY)
+
+**Trigger:** CEO directive 2026-05-18 verbatim: *"Pursue path E after fixing entity evidence retention"* + *"For entity scoring and evidence information, evidence that is reviewed should be kept on the entities page for a year instead of last 14 days."*
+
+**Selection driver:** `directed` (Mode 2 CEO-named pick; PATHE-P01 = architectural-foundation row that all 21 subsequent PATHE rows depend on; first iteration of Path E build sequence).
+
+### Added
+
+NEW `apps/web-app/src/lib/process-graph/` module (21 files; ~700 LOC production + ~200 LOC tests; 4 new test files with 62 substantive `it()` blocks: topology 21 + retention-policy 19 + variant-hash 7 + migrate-process-graph 15):
+- `types/closed-unions.ts` — 5 closed unions (NodeType 15 / EdgeType 11 / DecisionType 9 / ConditionType 10 / VariantLabel 9) + `PROCESS_GRAPH_SCHEMA_VERSION = '2.0'`
+- `types/entities.ts` — ProcessGraph / ProcessNode / ProcessEdge / DecisionPoint / Condition / Variant / **EvidencePointer with `reviewedAt: number | null` per CEO directive Appendix C** / ProcessEvidenceReview
+- `catalog/{node-types,edge-types,decision-types,condition-types,variant-labels}.ts` — frozen arrays + compile-time exhaustiveness locks parallel to Path D D+1 ColumnKey pattern
+- `adapters/retention-policy.ts` — `reviewedEvidenceRetentionUntil()` (365-day for Team/Growth/Enterprise; 90-day for Free/Starter)
+- `adapters/variant-hash.ts` — `computeVariantHash()` v2.0.0 with algorithm version pinned INSIDE SHA-256 payload — **CLOSES DEP-08** (PRD §15 R-1 highest-leverage open risk)
+- `adapters/migrate-process-graph.ts` — v1.0 → v2.0 honest degraded synthesis (`isInferred: true`, `confidenceScore: 0.40`)
+- `adapters/parse-process-graph-json.ts` — Prisma JSON ↔ entity round-trip
+- `validation/topology.ts` — `validateGraphTopology()` enforces Groups A-E invariants
+- `validation/zod-schemas.ts` — runtime validation
+- `archive/v2_0_0.ts` — frozen v2.0 contract snapshot
+- `index.ts` — barrel re-export
+
+NEW `apps/web-app/prisma/migrations/20260518_path_e_e_wave_1_graph_schema/migration.sql` (additive only):
+- 7 CREATE TABLE statements: `process_graphs`, `process_nodes`, `process_edges`, `decision_points`, `conditions`, `variants`, `process_evidence_reviews`
+- 3 ALTER TABLE statements on `workflows`: `variant_id` + `variant_fingerprint` + `process_graph_version_at_ingest` (all nullable additive)
+- 14 CREATE INDEX statements; all FK ON DELETE CASCADE
+- BIGINT ms timestamps on `process_evidence_reviews` for deterministic retention arithmetic
+
+### Modified
+
+- `apps/web-app/prisma/schema.prisma` — added 7 new Prisma models + 3 nullable fields to `Workflow` + 2 relations
+- `IMPROVEMENT_BACKLOG.md` — #117 PATHE-P01 marked done; 22 PATHE rows promoted earlier (#117-#138)
+
+### Validation
+
+- workspace `pnpm test`: **2183 → 2245 / +62 substantive `it()` blocks across 74 → 78 test files** all pass
+- workspace `pnpm typecheck`: clean across all 10 packages/apps (1 TS error fixed at coordinator validation: `migrate-process-graph.test.ts:129` discriminant narrowing `r.ok.warnings` → `r.warnings`)
+- `pnpm prisma generate`: clean — regenerated client with 7 new models
+- `git status` confirms scope: only new files under `apps/web-app/src/lib/process-graph/` + new migration directory + modified `prisma/schema.prisma` + IMPROVEMENT_BACKLOG.md + CHANGELOG.md; zero unintended changes
+
+### Counter updates
+
+- Pool: 66 → 65 (#117 closed; zero follow-ups generated)
+- Cool-off recharge: UNCHANGED at 3/3 FULL RE-ARM (directed Mode 2 doesn't consume; **21-event preservation streak — NEW longest-streak record extending**)
+- D-1 reverse-portfolio-drift: 3 → 4 (web-app non-extension touch; under N=5 threshold)
+- MR-019 cadence: 0/3 → 1/3 (first counted bounded loop post-MR-018 stability window; earliest MR-019 iter 079 standard / iter 078 compressed)
+- Area saturation rolling-5: 1-web-app in fresh window
+- Agent-diversity: `system-architect` consecutive = 1 (clean rotation off iter 074 `meta-coordinator`)
+- D-4 clause 2 FIRES (~700 LOC pure module > 200 LOC threshold; `system-architect` PRIMARY satisfies)
+
+### Path E milestones
+
+- **Path E E-Wave 1 foundation ESTABLISHED** — 21 subsequent PATHE rows (#118-#138) can now consume `apps/web-app/src/lib/process-graph/` contracts
+- **DEP-08 CLOSED** (PRD §15 R-1 highest-leverage open risk): `variantHash` algorithm version pinned INSIDE hash payload; Path C R+1 inherits resolution
+- **CEO directive Reviewed-Evidence Retention spec landed**: `EvidencePointer.reviewedAt` field + `ProcessEvidenceReview` model + `reviewedEvidenceRetentionUntil()` helper + plan-tier gating
+- **Audit-honesty IFF invariant chain extended**: `node.isInferred === true IFF confidenceScore < 0.55` + same on Edge + Condition + `evidencePointer.reviewedAt !== null IFF process_evidence_reviews row exists`
+
+### Open items flagged
+
+1. EdgeType has 11 members (sequence + branch + merge + exception + retry + loop + fallback + escalation + approval + rejection + automation_candidate) — review row description said 10; shipped 11 with reconciliation documented in `catalog/edge-types.ts` JSDoc
+2. Migration directory naming `20260518_...` vs D+3 iter 059 precedent `20260505000000_...` — acceptable per Prisma
+3. `prisma migrate dev` not executed locally — additive-only SQL deferred to CI/CD on next push
+
+### Operational status preserved
+
+- #57 chain UNCHANGED at 10/10 ENGINEERING-COMPLETE
+- External-launch gate UNCHANGED at 7/7 CLOSED — FULL
+- Stripe billing-stack PRODUCTION-LIVE
+- Admin Operations Dashboard SHIP-READY
+- Path D FULLY COMPLETE
+- PRICING-001 P0 closure 6/6 open
+- WDC-002 P0 closure 5/5 open
+- SOPPM-001 P0 closure 4/4 open
+- **PATHE-001 P0 closure 21/22 open** (#117 closed iter 076; #118-#138 remain)
+
+---
+
+## [2026-05-18] - DECISION_AWARE_WORKFLOW_VISION_REVIEW_001 — Mode 3-adjacent multi-agent strategic review CLOSED (NON-counting; 9th audit-style intake event; 22 P0 promotions; ~75,000 words → ~15,000-word artifact at ~5× compression)
+
+**Trigger:** CEO directive 2026-05-17 verbatim (delivered 2026-05-18): *"Review this prompt. Have subagent also review it. Determine what capabilities and features the current system has compared to these new requirements and develop a complete plan to implement this at a world class level."*
+
+8 specialist agents engaged in parallel (gap-analysis + system-architect + product-manager + ux-designer + competitive-researcher + backend-engineer + frontend-engineer + analytics).
+
+### Added
+
+- **`docs/meta/DECISION_AWARE_WORKFLOW_VISION_REVIEW_001.md`** (~15,000 words; 16 sections + 3 appendices including Appendix C CEO directive amendment for Reviewed-Evidence Retention Policy)
+- **`docs/features/path-e-decision-aware-workflow/PRD_PATH_E_DECISION_AWARE_WORKFLOW.md`** (product-manager artifact)
+- **22 P0 backlog rows #117-#138** with `Birth iter: audit-intake-PATHE-001`
+- 16 P1/P2/P3 cold-pool items held in artifact per MR-005 D-5
+
+### Key findings
+
+1. **Ledgerium is ~35-40% Path-E ready** — `@xyflow/react@^12.10.1` + `elkjs@^0.11.1` already installed; substantial existing infrastructure (WorkflowCanvas + WorkflowDecisionNode + WorkflowVariantsMap + WorkflowInspectorPanel + BPMN 2.0 export + detectVariants + computePathSignature + 6 of 9 recommendation types)
+2. **Path E IS the deterministic substrate AI Vision Build's moat depends on** — sequence Path E BEFORE AI Vision Build entry
+3. **Row 5/8/9 of competitive scoring matrix are ALL ZEROS across 10 competitors** — Ledgerium can own this category
+4. **Critical technical correction**: elkjs NOT dagre for layout (dagre is acyclic-only; Path E retry edges are cycles)
+5. **Realistic iteration estimate: 16-22 net** (MVP scope Phases 1-4 = 7-9 iterations)
+
+### 4-Wave Mode 5 shaping
+
+- E-Wave 1 Foundation (N=4): types + intent inferrer + confidence-copy + variantHash v2.0.0
+- E-Wave 2 Intelligence (N=5): decision detection 12 signals + multi-dim clustering + co-occurrence matrix
+- E-Wave 3 Merge + UI (N=5): graph merge + Process Map UI (~6,060 LOC) + side panel + V3 metrics + analytics events
+- E-Wave 4 Polish + Differentiation (Mode 1 × 8): decision-aware SOP + AI commentary + path comparator + variant explorer + Mermaid/agent-spec + Execution Theater + Embeddable iframe + Deviation Alert + Evidence Map demo
+
+### 8 distinctive moves NOT in CEO's prompt
+
+System-architect (Path E before AI Vision Build) / UX (Execution Theater + Embeddable iframe + Diff View deferred) / Frontend (elkjs correctness) / Backend (Co-occurrence matrix pre-pass) / PM (Deviation Alert) / Analytics (Confidence calibration ratio) / Competitive (Evidence Map vs Static SOP demo).
+
+### CEO directive amendment (Appendix C)
+
+CEO directive 2026-05-18: *"For entity scoring and evidence information, evidence that is reviewed should be kept on the entities page for a year instead of last 14 days."* — Captured as Reviewed-Evidence Retention Policy (365-day reviewed-evidence retention for Team/Growth/Enterprise; 90-day for Free/Starter; baked into PATHE-P01 scope #117).
+
+### Counter updates (Mode 3-adjacent NON-counting)
+
+- Pool: 44 → 66 (+22 P0 promotions: rows #117-#138)
+- Cool-off recharge: UNCHANGED at 3/3 (20-event preservation streak preserved)
+- D-1: UNCHANGED at 3
+- MR-019 cadence: UNCHANGED at 0/3
+- 9th audit-style intake event cumulative (DV2 + MDR + WDC + PIB + AI-VISION + WDC-002 + SOPPM-001 + PRICING-001 + **PATHE-001**)
+- New PATHE-001 cold-pool age 0
+
+### Validation
+
+- workspace `pnpm test` 2183 / 2183 unchanged (Mode 3-adjacent zero product code)
+- workspace `pnpm typecheck` clean across all 10 packages/apps
+
+---
+
 ## [2026-05-17] - SOP_PROCESSMAP_REVIEW_001 — Mode 3-adjacent multi-agent strategic review CLOSED (NON-counting; audit-intake per MR-005 D-5; 4 P0 promotions; 7th audit-style intake event)
 
 **Trigger:** CEO directive 2026-05-17 verbatim: *"I want the subagents to review all templates and formats for process maps and SOPs and suggest improvements. These process map and sop outputs need to be the highest quality, best practice sourced, artifacts that users will be excited to use and share."*
