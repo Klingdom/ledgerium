@@ -1,25 +1,25 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, HelpCircle } from 'lucide-react';
+import { ArrowRight, Check, HelpCircle } from 'lucide-react';
 import { PricingCards } from '@/components/PricingCards';
 import { ROICalculator } from './ROICalculator';
 import { TrackedLink } from '@/components/TrackedLink';
 
 export const metadata: Metadata = {
-  title: 'SOP Software Pricing — Process Documentation Tool Plans | Ledgerium',
+  title: 'Record Once. Know Everything. — Process Intelligence Pricing | Ledgerium',
   description:
-    'Free plan available. SOP software pricing from $49/mo for individuals to enterprise. Automated process documentation with workflow recording, SOPs, and process intelligence.',
+    'Free plan available. One Chrome extension captures every workflow and turns it into AI-generated SOPs, process maps, variation analysis, and automation candidates. Plans from $49/mo.',
   openGraph: {
-    title: 'SOP Software Pricing — Process Documentation Tool Plans | Ledgerium',
+    title: 'Record Once. Know Everything. — Process Intelligence Pricing | Ledgerium',
     description:
-      'Start free. Upgrade for unlimited recordings, process intelligence, and compliance-grade exports. Automated SOP generation from $49/mo.',
+      'Start free. One recording produces a structured SOP, a visual process map, variation analysis, and automation candidates — all backed by real behavior, not assumptions.',
   },
 };
 
 const FAQ = [
   {
-    q: 'What is a "recorder" vs. a "seat"?',
-    a: 'A recorder is someone who captures workflows using the Chrome extension. A seat is anyone on your team who can view, share, and act on the generated SOPs, process maps, and intelligence reports. Most teams have 1-3 recorders and many more viewers.',
+    q: 'How does Ledgerium count users?',
+    a: 'Every plan includes a set number of user seats. Anyone on your team can capture workflows using the Chrome extension, view the generated SOPs and process maps, and act on the intelligence reports. Free includes 1 user. Starter includes 1 user. Team includes 5 users. Growth includes 15 users. Enterprise is custom.',
   },
   {
     q: 'What is the intelligence layer?',
@@ -52,23 +52,36 @@ const FAQ = [
 ];
 
 // Feature comparison table data
+// Category dividers render between rows where `category` is set on the row immediately following.
+// Vocabulary refocus per CEO directive 2026-05-17: users / workflows / outputs (NOT recorders / viewers / recordings).
 const COMPARISON_FEATURES = [
-  { label: 'Price (monthly)',      free: '$0',        starter: '$49',      team: '$249',      growth: '$799',    enterprise: 'Custom' },
-  { label: 'Seats',               free: '1 user',    starter: '1 recorder', team: '3 rec + 5 viewers', growth: '10 rec, 15 seats', enterprise: 'Custom' },
-  { label: 'Recordings / month',  free: '5',         starter: '15',       team: 'Unlimited', growth: 'Unlimited', enterprise: 'Custom' },
-  { label: 'SOP + process map',   free: true,        starter: true,       team: true,        growth: true,      enterprise: true },
-  { label: 'Public sharing',      free: true,        starter: true,       team: true,        growth: true,      enterprise: true },
-  { label: 'Clean exports',       free: false,       starter: true,       team: true,        growth: true,      enterprise: true },
-  { label: 'Health scores',       free: false,       starter: true,       team: true,        growth: true,      enterprise: true },
-  { label: 'Full intelligence',   free: false,       starter: false,      team: true,        growth: true,      enterprise: true },
-  { label: 'Bottleneck analysis', free: false,       starter: false,      team: true,        growth: true,      enterprise: true },
-  { label: 'Automation scoring',  free: false,       starter: false,      team: true,        growth: true,      enterprise: true },
-  { label: 'Shared team library', free: false,       starter: false,      team: true,        growth: true,      enterprise: true },
-  { label: 'Advanced analytics',  free: false,       starter: false,      team: false,       growth: true,      enterprise: true },
-  { label: 'AI agent composition',free: false,       starter: false,      team: false,       growth: true,      enterprise: true },
-  { label: 'SSO & RBAC',          free: false,       starter: false,      team: false,       growth: false,     enterprise: 'coming-soon' },
-  { label: 'Audit trail',         free: false,       starter: false,      team: false,       growth: false,     enterprise: 'coming-soon' },
-  { label: 'On-premise option',   free: false,       starter: false,      team: false,       growth: false,     enterprise: 'coming-soon' },
+  // What You Capture
+  { label: 'Price (monthly)',      free: '$0',        starter: '$49',      team: '$249',      growth: '$799',    enterprise: 'Custom', category: 'What You Capture' },
+  { label: 'User seats',           free: '1 user',    starter: '1 user',   team: '5 users',   growth: '15 users', enterprise: 'Custom' },
+  { label: 'Workflows / month',    free: '5',         starter: '15',       team: 'Unlimited', growth: 'Unlimited', enterprise: 'Custom' },
+
+  // What You Get
+  { label: 'AI-generated SOPs',           free: true,  starter: true,  team: true,  growth: true,  enterprise: true,  category: 'What You Get' },
+  { label: 'Visual process maps',         free: true,  starter: true,  team: true,  growth: true,  enterprise: true },
+  { label: 'Process health scores',       free: false, starter: true,  team: true,  growth: true,  enterprise: true },
+  { label: 'Full intelligence layer',     free: false, starter: false, team: true,  growth: true,  enterprise: true },
+  { label: 'Bottleneck & friction analysis', free: false, starter: false, team: true, growth: true, enterprise: true },
+  { label: 'Automation opportunity scoring', free: false, starter: false, team: true, growth: true, enterprise: true },
+  { label: 'Variation analysis across runs', free: false, starter: false, team: true, growth: true, enterprise: true },
+
+  // Sharing & Collaboration
+  { label: 'Public sharing link',     free: true,  starter: true,  team: true,  growth: true,  enterprise: true,  category: 'Sharing & Collaboration' },
+  { label: 'Clean exports — PDF, Markdown, JSON', free: false, starter: true,  team: true,  growth: true,  enterprise: true },
+  { label: 'Shared team workspace',   free: false, starter: false, team: true,  growth: true,  enterprise: true },
+  { label: 'Team library & portfolios', free: false, starter: false, team: true, growth: true, enterprise: true },
+
+  // Advanced & Enterprise
+  { label: 'Advanced cross-workflow analytics', free: false, starter: false, team: false, growth: true, enterprise: true, category: 'Advanced & Enterprise' },
+  { label: 'AI agent composition',    free: false, starter: false, team: false, growth: true, enterprise: true },
+  { label: 'Integration risk assessment', free: false, starter: false, team: false, growth: true, enterprise: true },
+  { label: 'SSO & RBAC',              free: false, starter: false, team: false, growth: false, enterprise: 'coming-soon' },
+  { label: 'Audit trail',             free: false, starter: false, team: false, growth: false, enterprise: 'coming-soon' },
+  { label: 'On-premise deployment',   free: false, starter: false, team: false, growth: false, enterprise: 'coming-soon' },
 ] as const;
 
 type CellValue = boolean | string;
@@ -111,14 +124,44 @@ export default function PricingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
-      {/* Hero */}
-      <section className="pt-20 pb-10 bg-gradient-to-b from-brand-900/20 to-[var(--surface-primary)]">
+      {/* Hero — PRICING-P02: Record Once. Know Everything. + 4-bullet output grid */}
+      <section className="pt-20 pb-10 bg-gradient-to-b from-brand-900/30 via-brand-900/10 to-transparent">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
-          <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)]">
-            Simple pricing that scales with your team
+          <h1 className="text-4xl sm:text-5xl font-bold text-[var(--content-primary)] tracking-tight leading-[1.1]">
+            Record Once. Know Everything.
           </h1>
-          <p className="mt-4 text-lg text-[#e2e8f0]">
-            Start free. Upgrade when you need intelligence, team collaboration, or compliance-grade exports.
+          <p className="mt-5 text-base sm:text-lg text-[#e2e8f0] leading-relaxed">
+            One Chrome extension. Every time you work a process, Ledgerium captures it and turns it into:
+          </p>
+          {/* 4-bullet output grid (UX §A spec) */}
+          <ul className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-left max-w-xl mx-auto">
+            <li className="flex items-start gap-2">
+              <Check className="h-4 w-4 text-brand-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <span className="text-sm text-[#e2e8f0] leading-snug">
+                An AI-generated SOP — ready to share or train from
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Check className="h-4 w-4 text-brand-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <span className="text-sm text-[#e2e8f0] leading-snug">
+                A visual process map — built from real behavior, not assumptions
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Check className="h-4 w-4 text-brand-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <span className="text-sm text-[#e2e8f0] leading-snug">
+                Variation analysis — see how your team's process differs run to run
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Check className="h-4 w-4 text-brand-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <span className="text-sm text-[#e2e8f0] leading-snug">
+                Automation candidates — ranked by opportunity score, backed by evidence
+              </span>
+            </li>
+          </ul>
+          <p className="mt-6 text-sm text-[var(--content-tertiary)]">
+            Free forever on 5 workflows. No credit card. No setup.
           </p>
         </div>
       </section>
@@ -140,10 +183,10 @@ export default function PricingPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex flex-wrap justify-center gap-x-0 divide-x divide-[var(--border-default)]">
             {[
-              { plan: 'Free', tagline: 'Capture & document' },
-              { plan: 'Starter', tagline: 'Clean exports' },
-              { plan: 'Team', tagline: 'Understand & improve' },
-              { plan: 'Growth', tagline: 'Automate' },
+              { plan: 'Free', tagline: 'Map your first workflows' },
+              { plan: 'Starter', tagline: 'Document solo, share cleanly' },
+              { plan: 'Team', tagline: 'Measure how your team works' },
+              { plan: 'Growth', tagline: 'Find what to automate at scale' },
             ].map(({ plan, tagline }) => (
               <div key={plan} className="px-6 py-4 text-sm text-center min-w-[140px]">
                 <span className="font-bold text-[var(--content-primary)]">{plan}</span>
@@ -190,38 +233,50 @@ export default function PricingPage() {
                 </tr>
               </thead>
               <tbody>
-                {COMPARISON_FEATURES.map((row, i) => (
-                  <tr
-                    key={row.label}
-                    className={`border-b border-[var(--border-default)] last:border-0 ${
-                      i % 2 === 0
-                        ? 'bg-[var(--surface-primary)]'
-                        : 'bg-[var(--surface-secondary)]'
-                    }`}
-                  >
-                    <td className={`px-5 py-3.5 font-medium text-[var(--content-primary)] sticky left-0 z-10 ${
-                      i % 2 === 0 ? 'bg-[var(--surface-primary)]' : 'bg-[var(--surface-secondary)]'
-                    }`}>
-                      {row.label}
-                    </td>
-                    <td className="px-4 py-3.5 text-center">
-                      <ComparisonCell value={row.free} />
-                    </td>
-                    <td className="px-4 py-3.5 text-center">
-                      <ComparisonCell value={row.starter} />
-                    </td>
-                    {/* Team column — highlighted with subtle brand tint */}
-                    <td className="px-4 py-3.5 text-center bg-brand-900/10 border-x border-brand-800/30">
-                      <ComparisonCell value={row.team} />
-                    </td>
-                    <td className="px-4 py-3.5 text-center">
-                      <ComparisonCell value={row.growth} />
-                    </td>
-                    <td className="px-4 py-3.5 text-center">
-                      <ComparisonCell value={row.enterprise} />
-                    </td>
-                  </tr>
-                ))}
+                {COMPARISON_FEATURES.map((row, i) => {
+                  const hasCategory = 'category' in row && row.category;
+                  return (
+                    <>
+                      {hasCategory && (
+                        <tr key={`cat-${row.label}`} className="bg-brand-900/20 border-t-2 border-brand-800/40">
+                          <td colSpan={6} className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-brand-400 sticky left-0 bg-brand-900/20 z-10">
+                            {row.category}
+                          </td>
+                        </tr>
+                      )}
+                      <tr
+                        key={row.label}
+                        className={`border-b border-[var(--border-default)] last:border-0 ${
+                          i % 2 === 0
+                            ? 'bg-[var(--surface-primary)]'
+                            : 'bg-[var(--surface-secondary)]'
+                        }`}
+                      >
+                        <td className={`px-5 py-3.5 font-medium text-[var(--content-primary)] sticky left-0 z-10 ${
+                          i % 2 === 0 ? 'bg-[var(--surface-primary)]' : 'bg-[var(--surface-secondary)]'
+                        }`}>
+                          {row.label}
+                        </td>
+                        <td className="px-4 py-3.5 text-center">
+                          <ComparisonCell value={row.free} />
+                        </td>
+                        <td className="px-4 py-3.5 text-center">
+                          <ComparisonCell value={row.starter} />
+                        </td>
+                        {/* Team column — highlighted with subtle brand tint */}
+                        <td className="px-4 py-3.5 text-center bg-brand-900/10 border-x border-brand-800/30">
+                          <ComparisonCell value={row.team} />
+                        </td>
+                        <td className="px-4 py-3.5 text-center">
+                          <ComparisonCell value={row.growth} />
+                        </td>
+                        <td className="px-4 py-3.5 text-center">
+                          <ComparisonCell value={row.enterprise} />
+                        </td>
+                      </tr>
+                    </>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -269,7 +324,7 @@ export default function PricingPage() {
       <section className="py-20 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
           <h2 className="text-2xl font-bold text-[var(--content-primary)]">
-            Record 5 workflows free. See what you&apos;ve been missing.
+            Map your first workflow. See exactly what your SOP looks like before you buy.
           </h2>
           <div className="mt-8">
             <TrackedLink
@@ -278,7 +333,7 @@ export default function PricingPage() {
               properties={{ location: 'pricing_cta', destination: '/signup' }}
               className="btn-primary gap-2 text-base px-7 py-3.5 shadow-sm shadow-brand-600/20"
             >
-              Create free account
+              Map Your First Workflow Free
               <ArrowRight className="h-4 w-4" />
             </TrackedLink>
           </div>

@@ -73,10 +73,22 @@ export function PricingCards() {
                 </span>
               )}
 
-              <div className="mb-5">
+              <div className="mb-4">
                 <h3 className="text-lg font-bold text-[var(--content-primary)]">{plan.name}</h3>
                 <p className="text-xs text-[#e2e8f0] mt-1 leading-relaxed">{plan.description}</p>
               </div>
+
+              {/* Best For row (PRICING-P02 / CEO Rec #8) */}
+              {plan.bestFor && (
+                <div className="mb-4 pb-4 border-b border-[var(--border-default)]">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--content-tertiary)] mb-1">
+                    Best For
+                  </p>
+                  <p className="text-xs text-[var(--content-secondary)] italic leading-snug">
+                    {plan.bestFor}
+                  </p>
+                </div>
+              )}
 
               <div className="mb-1">
                 {displayPrice !== null ? (
@@ -111,10 +123,17 @@ export function PricingCards() {
               )}
 
               {plan.seats && (
-                <p className="text-xs font-semibold text-brand-600 mb-5">{plan.seats}</p>
+                <p className="text-xs font-semibold text-brand-600 mb-3">{plan.seats}</p>
               )}
 
-              {!plan.seats && <div className="mb-5" />}
+              {!plan.seats && <div className="mb-3" />}
+
+              {/* Outcome microcopy (PRICING-P02 / CEO Rec #5) */}
+              {plan.outcomeMicrocopy && (
+                <p className="text-xs text-brand-400 mb-4 leading-snug">
+                  {plan.outcomeMicrocopy}
+                </p>
+              )}
 
               {plan.id !== 'free' && plan.id !== 'enterprise' ? (
                 <UpgradeButton

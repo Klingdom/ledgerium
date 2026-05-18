@@ -30,6 +30,16 @@ export const DEMO_CONFIG = {
 } as const;
 
 export const PRICING_CONFIG = {
+  /**
+   * Per PRICING_PAGE_REVIEW_001 (2026-05-17) + CEO directive same date:
+   * "keep current pricing models, update CTAs, subscriptions features and functions,
+   *  and the other information suggested to improve the pricing page.
+   *  Update models for focus on users, workflows, and outputs rather than recorders and viewers."
+   *
+   * Vocabulary refocus: users / workflows / outputs (NOT recorders / viewers / recordings).
+   * Field additions: `bestFor` + `outcomeMicrocopy` (rendered on PricingCards).
+   * Pricing unchanged: Free $0 / Starter $49 / Team $249 / Growth $799 / Enterprise Custom.
+   */
   plans: [
     {
       id: 'free',
@@ -38,19 +48,21 @@ export const PRICING_CONFIG = {
       annualPrice: null,
       interval: 'forever',
       seats: '1 user',
-      description: 'Try the full workflow',
-      cta: 'Get Started Free',
+      description: 'Map your first workflows',
+      bestFor: 'Individuals exploring process documentation',
+      outcomeMicrocopy: 'Document 5 workflows. See exactly what your SOP looks like before you buy.',
+      cta: 'Map Your First Workflow Free',
       ctaHref: '/signup',
       highlighted: false,
       features: [
-        '5 recordings per month',
-        'SOP + process map output',
+        'Document 5 workflows per month',
+        'Get SOP + process map for every workflow',
         'Share via public link',
         'Watermarked exports',
       ],
       limits: [
         'No intelligence layer',
-        'No team features',
+        'No team workspace',
       ],
     },
     {
@@ -59,23 +71,25 @@ export const PRICING_CONFIG = {
       price: 49,
       annualPrice: 41,
       interval: 'month',
-      seats: '1 recorder',
-      description: 'For operations team leads',
-      cta: 'Start Trial',
+      seats: '1 user',
+      description: 'For solo ops professionals',
+      bestFor: 'Solo ops professionals who need clean, shareable exports',
+      outcomeMicrocopy: 'Document your core workflows and get clean exports your team can use.',
+      cta: 'Start 14-Day Trial',
       ctaHref: '/signup?plan=starter',
       highlighted: false,
       stripePriceId: process.env.STRIPE_STARTER_PRICE_ID ?? null,
       features: [
-        '15 recordings per month',
-        'All SOP & map formats',
+        'Document 15 workflows per month',
+        'All SOP & process map formats',
         'Basic process health scores',
-        'Clean exports (JSON, Markdown)',
+        'Clean exports — JSON, Markdown, PDF',
         'Personal workspace',
       ],
       limits: [
         'No bottleneck analysis',
         'No automation scoring',
-        'No team features',
+        'No team workspace',
       ],
     },
     {
@@ -84,20 +98,22 @@ export const PRICING_CONFIG = {
       price: 249,
       annualPrice: 207,
       interval: 'month',
-      seats: '3 recorders + 5 viewer seats',
+      seats: '5 users',
       description: 'For process improvement teams',
-      cta: 'Start Team Trial',
+      bestFor: 'Process improvement teams ready to measure, not just document',
+      outcomeMicrocopy: 'Standardize how your team works — and measure whether the standard is holding.',
+      cta: 'Start Team Trial — Full intelligence included',
       ctaHref: '/signup?plan=team',
       highlighted: true,
       stripePriceId: process.env.STRIPE_TEAM_PRICE_ID ?? null,
       features: [
-        'Unlimited recordings',
-        'Full intelligence layer',
-        'Bottleneck & friction analysis',
+        'Unlimited workflow documentation',
+        'Full intelligence layer — bottleneck & friction analysis',
         'Automation opportunity scoring',
         'Variant & rework detection',
-        'Shared library & portfolios',
-        'Team workspace',
+        'Variation analysis across runs',
+        'Shared team workspace & library',
+        'Public sharing with team branding',
       ],
       limits: [
         'No compliance features',
@@ -109,16 +125,18 @@ export const PRICING_CONFIG = {
       price: 799,
       annualPrice: 665,
       interval: 'month',
-      seats: 'Up to 15 seats · 10 recorders',
-      description: 'For AI implementation leads',
-      cta: 'Start Trial',
+      seats: '15 users',
+      description: 'For ops leaders automating at scale',
+      bestFor: 'Ops and automation leaders who need to find and act on inefficiencies at scale',
+      outcomeMicrocopy: 'Find what to automate, what to train on, and where your process breaks down at scale.',
+      cta: 'Start Trial — Automation scoring + AI tools',
       ctaHref: '/signup?plan=growth',
       highlighted: false,
       stripePriceId: process.env.STRIPE_GROWTH_PRICE_ID ?? null,
       features: [
         'Everything in Team',
-        'Advanced analytics',
-        'Cross-workflow comparison',
+        'Advanced cross-workflow analytics',
+        'Cross-workflow comparison & benchmarking',
         'Priority export formats',
         'AI agent composition',
         'Integration risk assessment',
@@ -132,12 +150,14 @@ export const PRICING_CONFIG = {
       annualPrice: null,
       interval: null,
       seats: 'Custom',
-      description: 'For compliance & scale',
-      cta: 'Contact Sales',
+      description: 'For compliance-governed organizations',
+      bestFor: 'Compliance-governed orgs requiring audit trails and custom deployment',
+      outcomeMicrocopy: 'Enterprise-grade process governance with audit trail and full AI integration.',
+      cta: 'Talk to Sales',
       ctaHref: 'mailto:hello@ledgerium.ai?subject=Ledgerium Enterprise',
       highlighted: false,
       features: [
-        'Custom seats & recorders',
+        'Custom user seats & permissions',
         'SSO & RBAC',
         'Audit trail & compliance exports',
         'Dedicated support',
