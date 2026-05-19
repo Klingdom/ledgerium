@@ -430,6 +430,17 @@ model Team {
   slug        String   @unique  // URL-friendly team identifier
   createdBy   String   @map("created_by")
   plan        String   @default("free") // free, starter, team, growth, enterprise (Team-scoped plan; legacy: pro maps to starter)
+
+  /// Workspace-to-Stripe relationship (iter 081 / TEAM-P01).
+  /// Separate from User.stripeCustomerId which is preserved for solo subscribers.
+  /// Consumed by TEAM-P03 webhook handler.
+  stripeCustomerId     String?  @map("stripe_customer_id")
+
+  /// Workspace-level Stripe subscription ID (iter 081 / TEAM-P01).
+  /// Separate from User.stripeSubscriptionId which is preserved for solo subscribers.
+  /// Consumed by TEAM-P03 webhook handler and TEAM-P02 effective-plan derivation.
+  stripeSubscriptionId String?  @map("stripe_subscription_id")
+
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -447,6 +458,22 @@ model TeamMember {
   userId    String   @map("user_id")
   role      String   @default("member") // owner, admin, member, viewer
   joinedAt  DateTime @default(now()) @map("joined_at")
+
+  /// Soft-deactivate status (iter 081 / TEAM-P01 / D-05 Option A).
+  /// Values: 'active' | 'deactivated' | 'pending'.
+  /// Consumed by TEAM-P02 effective-plan derivation + TEAM-P03 downgrade cascade.
+  /// All existing rows acquire status = 'active' at migration time (NOT NULL DEFAULT).
+  status              String    @default("active") @map("status")
+
+  /// Timestamp when soft-deactivate fired (iter 081 / TEAM-P01).
+  /// NULL means the member has never been deactivated.
+  /// Consumed by TEAM-P03 webhook + TEAM-P07 plan-change banner.
+  deactivatedAt       DateTime? @map("deactivated_at")
+
+  /// 30-day grace window deadline (iter 081 / TEAM-P01 / D-05).
+  /// Computed as deactivated_at + 30 days at deactivation time.
+  /// Consumed by TEAM-P07 plan-change banner.
+  reactivationDeadline DateTime? @map("reactivation_deadline")
 
   team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -467,9 +494,15 @@ model TeamInvite {
   expiresAt   DateTime  @map("expires_at")
   createdAt   DateTime  @default(now()) @map("created_at")
 
+  /// Invite revocation timestamp (iter 081 / TEAM-P01).
+  /// NULL means the invite has not been revoked.
+  /// Consumed by TEAM-P02 invite-accept endpoint + TEAM-P07 acceptance landing.
+  revokedAt   DateTime? @map("revoked_at")
+
   team    Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
   inviter User @relation("InviteSender", fields: [invitedBy], references: [id], onDelete: Cascade)
 
+  @@unique([teamId, email])
   @@index([teamId])
   @@index([email])
   @@index([token])
