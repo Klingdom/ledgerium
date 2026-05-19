@@ -3,11 +3,24 @@ import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import crypto from 'crypto';
 import { checkFeatureAccess } from '@/lib/feature-gating';
+import { getPlanConfig, toPlanType } from '@/lib/plans';
+import { countActiveMembers, countPendingInvites } from '@/lib/workspace/seat-management';
 
 /**
  * POST /api/teams/:id/invite — create an invite link for a team
- * GET /api/teams/:id/invite — list pending invites
+ * GET  /api/teams/:id/invite — list pending invites
+ *
+ * Part A changes (iter 082 / TEAM-P02):
+ *   - Self-invite guard          → 400
+ *   - Duplicate-pending guard    → 409
+ *   - Seat-quota guard           → 402  (activeMembers + pendingInvites >= maxSeats)
+ *   - Token stored as SHA-256 hash; raw token returned to caller only once
  */
+
+/** SHA-256 hash of a raw invite token. Never store the raw token. */
+function hashInviteToken(rawToken: string): string {
+  return crypto.createHash('sha256').update(rawToken).digest('hex');
+}
 
 export async function POST(
   req: NextRequest,
@@ -54,6 +67,11 @@ export async function POST(
       return NextResponse.json({ error: 'Valid email is required' }, { status: 400 });
     }
 
+    // ── Guard 1: Self-invite ────────────────────────────────────────────────
+    if (email === user.email.toLowerCase()) {
+      return NextResponse.json({ error: 'You cannot invite yourself' }, { status: 400 });
+    }
+
     // Check if user is already a member
     const existingUser = await db.user.findUnique({ where: { email } });
     if (existingUser) {
@@ -65,22 +83,69 @@ export async function POST(
       }
     }
 
-    // Create invite token (expires in 7 days)
-    const token = crypto.randomBytes(20).toString('hex');
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    // ── Guard 2: Duplicate-pending invite ───────────────────────────────────
+    // Uses @@unique([teamId, email]) — findFirst is the safe cross-DB query.
+    const nowMs = Date.now();
+    const existingPending = await (db as any).teamInvite.findFirst({
+      where: {
+        teamId: params.id,
+        email,
+        acceptedAt: null,
+        revokedAt: null,
+        expiresAt: { gt: new Date(nowMs) },
+      },
+    });
+    if (existingPending) {
+      return NextResponse.json(
+        { error: 'A pending invite for this email already exists', inviteId: existingPending.id },
+        { status: 409 },
+      );
+    }
+
+    // ── Guard 3: Seat-quota ─────────────────────────────────────────────────
+    const team = await (db as any).team.findUnique({
+      where: { id: params.id },
+      select: { plan: true },
+    });
+    const teamPlan = toPlanType(team?.plan ?? 'free');
+    const { maxSeats } = getPlanConfig(teamPlan);
+
+    if (maxSeats !== Number.MAX_SAFE_INTEGER) {
+      const [activeMemberCount, pendingInviteCount] = await Promise.all([
+        countActiveMembers(params.id),
+        countPendingInvites(params.id, nowMs),
+      ]);
+      if (activeMemberCount + pendingInviteCount >= maxSeats) {
+        return NextResponse.json(
+          {
+            error: 'Seat quota reached — upgrade your plan or remove existing members',
+            activeMembers: activeMemberCount,
+            pendingInvites: pendingInviteCount,
+            maxSeats,
+          },
+          { status: 402 },
+        );
+      }
+    }
+
+    // ── Create invite (hashed token) ────────────────────────────────────────
+    const rawToken = crypto.randomBytes(20).toString('hex');
+    const tokenHash = hashInviteToken(rawToken);
+    const expiresAt = new Date(nowMs + 7 * 24 * 60 * 60 * 1000);
 
     const invite = await (db as any).teamInvite.create({
       data: {
         teamId: params.id,
         email,
         role,
-        token,
+        token: tokenHash,
         invitedBy: session.user.id,
         expiresAt,
       },
     });
 
-    const inviteUrl = `${process.env.NEXTAUTH_URL ?? 'https://ledgerium.ai'}/teams/join?token=${token}`;
+    // Return raw token to caller — it will never be stored in plain form.
+    const inviteUrl = `${process.env.NEXTAUTH_URL ?? 'https://ledgerium.ai'}/teams/join?token=${rawToken}`;
 
     return NextResponse.json({
       inviteId: invite.id,
@@ -115,6 +180,7 @@ export async function GET(
       where: {
         teamId: params.id,
         acceptedAt: null,
+        revokedAt: null,
         expiresAt: { gt: new Date() },
       },
       orderBy: { createdAt: 'desc' },

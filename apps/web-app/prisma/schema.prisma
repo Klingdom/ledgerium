@@ -34,6 +34,7 @@ model User {
   createdTeams          Team[]          @relation("TeamCreator")
   teamMemberships       TeamMember[]
   sentInvites           TeamInvite[]    @relation("InviteSender")
+  acceptedInvites       TeamInvite[]    @relation("InviteAcceptor")
   createdShares         WorkflowShare[] @relation("ShareCreator")
   dashboardPreference   UserDashboardPreference?
   processEvidenceReviews ProcessEvidenceReview[]
@@ -50,9 +51,16 @@ model ApiKey {
   lastUsedAt DateTime? @map("last_used_at")
   createdAt DateTime @default(now()) @map("created_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Workspace FK (iter 082 / TEAM-P02 Part G).
+  /// NULL means the key belongs to the user's personal (solo) context.
+  /// OnDelete SetNull: deleting a team removes the FK but preserves the key row.
+  teamId    String?  @map("team_id")
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team Team? @relation(fields: [teamId], references: [id], onDelete: SetNull)
 
   @@index([userId])
+  @@index([teamId])
   @@map("api_keys")
 }
 
@@ -447,6 +455,7 @@ model Team {
   creator     User         @relation("TeamCreator", fields: [createdBy], references: [id])
   members     TeamMember[]
   invites     TeamInvite[]
+  apiKeys     ApiKey[]
 
   @@index([createdBy])
   @@map("teams")
@@ -499,8 +508,14 @@ model TeamInvite {
   /// Consumed by TEAM-P02 invite-accept endpoint + TEAM-P07 acceptance landing.
   revokedAt   DateTime? @map("revoked_at")
 
-  team    Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  inviter User @relation("InviteSender", fields: [invitedBy], references: [id], onDelete: Cascade)
+  /// The user who accepted this invite (iter 082 / TEAM-P02 Part G).
+  /// NULL until the invite is accepted.
+  /// OnDelete SetNull: deleting the user nulls the FK but preserves the audit trail.
+  acceptedBy  String?   @map("accepted_by")
+
+  team            Team  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  inviter         User  @relation("InviteSender", fields: [invitedBy], references: [id], onDelete: Cascade)
+  acceptedByUser  User? @relation("InviteAcceptor", fields: [acceptedBy], references: [id], onDelete: SetNull)
 
   @@unique([teamId, email])
   @@index([teamId])

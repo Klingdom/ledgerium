@@ -183,6 +183,58 @@ export function buildFeatureFlags(user: User): FeatureFlagsResponse {
   };
 }
 
+// ── Effective-plan derivation (TEAM-P02 Part F) ──────────────────────────────
+
+/**
+ * Derive the effective plan for a user by taking the maximum across:
+ *   - The user's solo `plan` field (legacy individual subscriptions), AND
+ *   - Every active workspace membership's team plan.
+ *
+ * "Active" membership means `TeamMember.status = 'active'`.
+ *
+ * Uses `PLAN_HIERARCHY.indexOf` for comparison so plan comparisons are
+ * always consistent with the canonical hierarchy ordering.
+ *
+ * @param userId - ID of the user whose effective plan to compute.
+ * @returns The highest-ranking PlanType the user holds across all contexts.
+ */
+export async function effectivePlanFor(userId: string): Promise<PlanType> {
+  // Fetch the user's solo plan.
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { plan: true },
+  });
+
+  let bestPlan: PlanType = toPlanType(user?.plan ?? 'free');
+  let bestIdx = PLAN_HIERARCHY.indexOf(bestPlan);
+
+  // Fetch all active workspace memberships with their team plan.
+  const memberships = await (db as any).teamMember.findMany({
+    where: {
+      userId,
+      status: 'active',
+    },
+    select: {
+      team: {
+        select: { plan: true },
+      },
+    },
+  });
+
+  for (const membership of memberships) {
+    const workspacePlan = toPlanType(membership.team?.plan ?? 'free');
+    const idx = PLAN_HIERARCHY.indexOf(workspacePlan);
+    if (idx > bestIdx) {
+      bestIdx = idx;
+      bestPlan = workspacePlan;
+    }
+  }
+
+  return bestPlan;
+}
+
+// ── Feature flags with live usage ─────────────────────────────────────────────
+
 /**
  * Build a complete feature flags response with live recording count.
  * Use this for the /api/account endpoint.
