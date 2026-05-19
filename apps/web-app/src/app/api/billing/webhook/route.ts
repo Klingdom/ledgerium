@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStripe, getWebhookSecret, planFromPriceId } from '@/lib/stripe';
 import type { PlanType } from '@/lib/plans';
+import { PLAN_FEATURES } from '@/lib/plans';
 import { db } from '@/db';
 import { trackServer } from '@/lib/analytics-server';
 import type Stripe from 'stripe';
+import {
+  resolveTeamFromCustomer,
+  notifyOwnerOfDowngrade,
+} from '@/lib/workspace/team-billing';
+import { softDeactivateExcessMembers } from '@/lib/workspace/seat-management';
 
 /**
  * POST /api/billing/webhook
@@ -105,8 +111,6 @@ export async function POST(req: NextRequest) {
 
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
-        const userId = subscription.metadata?.userId;
-        if (!userId) break;
 
         const status = subscription.status;
         const planStatus =
@@ -135,6 +139,66 @@ export async function POST(req: NextRequest) {
           plan = 'free';
         }
 
+        // ── Team-first resolution (TEAM-P03 Part B) ──────────────────────────
+        // If a workspace is linked to this Stripe customer, sync Team.plan and
+        // cascade a soft-deactivate if the new plan's maxSeats is lower than the
+        // current active-member count. The solo-subscriber User.plan path is
+        // preserved byte-identical below if no team is found.
+        const customerId = subscription.customer as string;
+        if (customerId) {
+          const team = await resolveTeamFromCustomer(customerId);
+          if (team) {
+            const previousPlan = team.plan as PlanType;
+            const nowMs = Date.now();
+
+            await (db as any).team.update({
+              where: { id: team.id },
+              data: {
+                plan,
+                stripeSubscriptionId: subscription.id,
+              },
+            });
+
+            // Cascade soft-deactivate when the new plan seats < current active
+            // member count (downgrade scenario).
+            const newMaxSeats = PLAN_FEATURES[plan].maxSeats;
+            const { deactivatedIds } = await softDeactivateExcessMembers(
+              team.id,
+              newMaxSeats,
+              nowMs,
+            );
+
+            if (deactivatedIds.length > 0) {
+              await notifyOwnerOfDowngrade({
+                teamId: team.id,
+                teamName: team.name,
+                fromPlan: previousPlan,
+                toPlan: plan,
+                deactivatedMemberIds: deactivatedIds,
+                nowMs,
+              });
+            }
+
+            console.log(
+              `[stripe] Team ${team.id} subscription updated: ${status} → plan ${plan}` +
+                (deactivatedIds.length > 0
+                  ? `; ${deactivatedIds.length} member(s) deactivated`
+                  : ''),
+            );
+            trackServer('subscription_updated', {
+              teamId: team.id,
+              plan,
+              status,
+              deactivatedCount: deactivatedIds.length,
+            });
+            break;
+          }
+        }
+
+        // ── Solo-subscriber path (preserved byte-identical) ──────────────────
+        const userId = subscription.metadata?.userId;
+        if (!userId) break;
+
         await db.user.update({
           where: { id: userId },
           data: {
@@ -149,6 +213,60 @@ export async function POST(req: NextRequest) {
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
+
+        // ── Team-first resolution (TEAM-P03 Part C) ──────────────────────────
+        // If a workspace is linked to this Stripe customer, revert Team.plan to
+        // 'free', clear the subscription ID, and cascade soft-deactivate down to
+        // maxSeats = 1 (free-plan limit). The solo-subscriber User.plan path is
+        // preserved byte-identical below if no team is found.
+        const deletedCustomerId = subscription.customer as string;
+        if (deletedCustomerId) {
+          const deletedTeam = await resolveTeamFromCustomer(deletedCustomerId);
+          if (deletedTeam) {
+            const previousPlanDeleted = deletedTeam.plan as PlanType;
+            const nowMsDeleted = Date.now();
+
+            await (db as any).team.update({
+              where: { id: deletedTeam.id },
+              data: {
+                plan: 'free',
+                stripeSubscriptionId: null,
+              },
+            });
+
+            // Free plan allows exactly 1 seat — cascade deactivate excess members.
+            const { deactivatedIds: deletedDeactivatedIds } = await softDeactivateExcessMembers(
+              deletedTeam.id,
+              PLAN_FEATURES['free'].maxSeats,
+              nowMsDeleted,
+            );
+
+            if (deletedDeactivatedIds.length > 0) {
+              await notifyOwnerOfDowngrade({
+                teamId: deletedTeam.id,
+                teamName: deletedTeam.name,
+                fromPlan: previousPlanDeleted,
+                toPlan: 'free',
+                deactivatedMemberIds: deletedDeactivatedIds,
+                nowMs: nowMsDeleted,
+              });
+            }
+
+            console.log(
+              `[stripe] Team ${deletedTeam.id} subscription canceled — reverted to free` +
+                (deletedDeactivatedIds.length > 0
+                  ? `; ${deletedDeactivatedIds.length} member(s) deactivated`
+                  : ''),
+            );
+            trackServer('subscription_canceled', {
+              teamId: deletedTeam.id,
+              deactivatedCount: deletedDeactivatedIds.length,
+            });
+            break;
+          }
+        }
+
+        // ── Solo-subscriber path (preserved byte-identical) ──────────────────
         const userId = subscription.metadata?.userId;
         if (!userId) break;
 
