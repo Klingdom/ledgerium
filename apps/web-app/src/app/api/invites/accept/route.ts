@@ -21,11 +21,108 @@ import crypto from 'crypto';
  *   - Invite expired       → 410 Gone
  *   - Invite already used  → 409 Conflict
  *
+ * Rate limiting (per-IP, module-level in-memory, zero external deps):
+ *   - 10 requests per 60-second sliding window → 429 Too Many Requests
+ *   - 5 consecutive 404s → 1-hour lockout → 429 Too Many Requests
+ *
  * Race protection: authenticated join uses an SERIALIZABLE transaction to
  * prevent double-acceptance under concurrent requests.
  *
  * @iter 082 / TEAM-P02 Part C
+ * @iter 084 / TEAM-P03.6 rate-limiting added
  */
+
+// ── In-memory rate-limit store ──────────────────────────────────────────────
+
+interface RateLimitEntry {
+  /** Number of requests in the current window. */
+  count: number;
+  /** Timestamp (ms) when the current window started. */
+  windowStart: number;
+  /** Consecutive 404-not-found responses since last success or window reset. */
+  failureStreak: number;
+  /** If non-zero, requests are blocked until this timestamp (ms). */
+  lockedUntil: number;
+}
+
+const rateLimits = new Map<string, RateLimitEntry>();
+
+const RATE_LIMIT_WINDOW_MS = 60_000;   // 1-minute sliding window
+const RATE_LIMIT_MAX = 10;             // max requests per window
+const LOCKOUT_STREAK = 5;             // consecutive 404s that trigger lockout
+const LOCKOUT_DURATION_MS = 60 * 60_000; // 1-hour lockout
+
+function getIp(req: NextRequest): string {
+  const forwarded = req.headers.get('x-forwarded-for');
+  if (forwarded) return forwarded.split(',')[0]!.trim();
+  return req.headers.get('x-real-ip') ?? 'unknown';
+}
+
+/**
+ * Check rate limit for the given IP.
+ * Returns true if the request should be blocked (rate-limited), false if allowed.
+ */
+function checkRateLimit(ip: string, now: number): boolean {
+  const entry = rateLimits.get(ip);
+  if (!entry) return false;
+
+  // Hard lockout check.
+  if (entry.lockedUntil > now) return true;
+
+  // Sliding-window check.
+  if (now - entry.windowStart < RATE_LIMIT_WINDOW_MS) {
+    return entry.count >= RATE_LIMIT_MAX;
+  }
+
+  return false;
+}
+
+/**
+ * Increment request count for the given IP, resetting the window if stale.
+ */
+function recordRequest(ip: string, now: number): void {
+  const entry = rateLimits.get(ip);
+  if (!entry || now - entry.windowStart >= RATE_LIMIT_WINDOW_MS) {
+    rateLimits.set(ip, { count: 1, windowStart: now, failureStreak: entry?.failureStreak ?? 0, lockedUntil: entry?.lockedUntil ?? 0 });
+    return;
+  }
+  entry.count += 1;
+}
+
+/**
+ * Record a 404 "token not found" failure.
+ * Triggers lockout when the streak reaches LOCKOUT_STREAK.
+ */
+function recordFailure(ip: string, now: number): void {
+  const entry = rateLimits.get(ip);
+  const streak = (entry?.failureStreak ?? 0) + 1;
+  const lockedUntil = streak >= LOCKOUT_STREAK ? now + LOCKOUT_DURATION_MS : (entry?.lockedUntil ?? 0);
+  rateLimits.set(ip, {
+    count: entry?.count ?? 1,
+    windowStart: entry?.windowStart ?? now,
+    failureStreak: streak,
+    lockedUntil,
+  });
+}
+
+/**
+ * Record a successful token match (resets the failure streak).
+ */
+function recordSuccess(ip: string): void {
+  const entry = rateLimits.get(ip);
+  if (entry) {
+    entry.failureStreak = 0;
+    entry.lockedUntil = 0;
+  }
+}
+
+/** NOT exported — use vi.resetModules() + dynamic import in tests for isolation. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function _resetRateLimitsForTesting(): void {
+  rateLimits.clear();
+}
+
+// ── Token hashing ────────────────────────────────────────────────────────────
 
 /** SHA-256 hash of a raw invite token — mirrors the hash stored at creation time. */
 function hashInviteToken(rawToken: string): string {
@@ -39,6 +136,15 @@ export async function POST(req: NextRequest) {
   if (!rawToken || typeof rawToken !== 'string' || rawToken.trim() === '') {
     return NextResponse.json({ error: 'token is required' }, { status: 400 });
   }
+
+  // ── Rate limiting ───────────────────────────────────────────────────────────
+  const ip = getIp(req);
+  const nowMs = Date.now();
+
+  if (checkRateLimit(ip, nowMs)) {
+    return NextResponse.json({ error: 'Too many requests — please wait before trying again' }, { status: 429 });
+  }
+  recordRequest(ip, nowMs);
 
   const tokenHash = hashInviteToken(rawToken.trim());
 
@@ -55,6 +161,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!invite) {
+      recordFailure(ip, nowMs);
       return NextResponse.json({ error: 'Invite not found' }, { status: 404 });
     }
     if (invite.revokedAt !== null) {
@@ -67,6 +174,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invite has already been accepted' }, { status: 409 });
     }
 
+    recordSuccess(ip);
     return NextResponse.json({
       requiresAuth: true,
       teamId: invite.teamId,
@@ -78,7 +186,6 @@ export async function POST(req: NextRequest) {
 
   // ── Authenticated path ──────────────────────────────────────────────────────
   const userId = session.user.id;
-  const nowMs = Date.now();
 
   try {
     const result = await (db as any).$transaction(
@@ -90,7 +197,7 @@ export async function POST(req: NextRequest) {
         });
 
         if (!invite) {
-          return { error: 'Invite not found', status: 404 };
+          return { error: 'Invite not found', status: 404, isNotFound: true };
         }
         if (invite.revokedAt !== null) {
           return { error: 'Invite has been revoked', status: 410 };
@@ -150,9 +257,15 @@ export async function POST(req: NextRequest) {
     );
 
     if ('error' in result) {
+      if ((result as any).isNotFound) {
+        recordFailure(ip, nowMs);
+      } else if ('ok' in result) {
+        recordSuccess(ip);
+      }
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
 
+    recordSuccess(ip);
     return NextResponse.json(result);
   } catch (err) {
     console.error('[invites/accept/POST]', err);

@@ -58,6 +58,14 @@ export async function PATCH(
       );
     }
 
+    // Guard: only an owner can promote someone to owner.
+    if (newRole === 'owner' && callerMembership.role !== 'owner') {
+      return NextResponse.json(
+        { error: 'Only an owner can promote a member to owner', code: 'forbidden_role_elevation' },
+        { status: 403 },
+      );
+    }
+
     // Fetch target membership by TeamMember.id (not userId).
     const targetMembership = await (db as any).teamMember.findFirst({
       where: { id: params.memberId, teamId: params.id },

@@ -1,15 +1,18 @@
 /**
  * Tests for PATCH /api/teams/:id/members/:memberId and DELETE /api/teams/:id/members/:memberId
  * (iter 082 / TEAM-P02 Part D — per-member endpoints)
+ * Updated iter 084 / TEAM-P03.6 Sub-task 5 — admin→owner role-elevation guard.
  *
  * Covers:
  *   PATCH (role change):
  *   - 401 when unauthenticated
  *   - 400 when role is invalid
  *   - 403 when caller is not owner/admin
+ *   - 403 when admin tries to promote to owner (code: 'forbidden_role_elevation')
  *   - 404 when target member not found
  *   - 400 when demoting the sole owner
  *   - 200 { ok: true, memberId, role } on success
+ *   - 200 when owner promotes to owner (owner→owner allowed)
  *
  *   DELETE (by memberId):
  *   - 401 when unauthenticated
@@ -134,8 +137,31 @@ describe('PATCH /api/teams/:id/members/:memberId', () => {
     expect(body.error).toMatch(/sole owner/i);
   });
 
-  it('allows promoting a member to owner (no sole-owner check needed)', async () => {
+  it('allows owner to promote a member to owner', async () => {
+    // caller is OWNER_CALLER (role: 'owner') — elevation is permitted
     const res = await PATCH(makePatchRequest({ role: 'owner' }), PARAMS);
+    expect(res.status).toBe(200);
+  });
+
+  // ── Sub-task 5 (TEAM-P03.6): admin cannot promote to owner ──────────────────
+
+  it('returns 403 with code forbidden_role_elevation when admin tries to promote to owner', async () => {
+    mockTeamMemberFindUnique.mockResolvedValue({ role: 'admin' });
+    const res = await PATCH(makePatchRequest({ role: 'owner' }), PARAMS);
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.code).toBe('forbidden_role_elevation');
+  });
+
+  it('admin can still change roles that are not owner (member → admin)', async () => {
+    mockTeamMemberFindUnique.mockResolvedValue({ role: 'admin' });
+    const res = await PATCH(makePatchRequest({ role: 'admin' }), PARAMS);
+    expect(res.status).toBe(200);
+  });
+
+  it('admin can change member to member (no-op is allowed)', async () => {
+    mockTeamMemberFindUnique.mockResolvedValue({ role: 'admin' });
+    const res = await PATCH(makePatchRequest({ role: 'member' }), PARAMS);
     expect(res.status).toBe(200);
   });
 

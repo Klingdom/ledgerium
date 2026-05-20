@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import crypto from 'crypto';
-import { checkFeatureAccess } from '@/lib/feature-gating';
 import { getPlanConfig, toPlanType } from '@/lib/plans';
 import { countActiveMembers, countPendingInvites } from '@/lib/workspace/seat-management';
 
@@ -34,20 +33,6 @@ export async function POST(
   const user = await db.user.findUnique({ where: { id: session.user.id } });
   if (!user) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
-  }
-
-  // Gate: inviting team members is a Team+ (teamWorkspace) feature
-  const access = checkFeatureAccess(user, 'teamWorkspace');
-  if (!access.allowed) {
-    return NextResponse.json(
-      {
-        error: 'Feature not available on your plan',
-        feature: 'teamWorkspace',
-        requiredPlan: access.requiredPlan,
-        upgradeUrl: '/pricing',
-      },
-      { status: 403 },
-    );
   }
 
   try {
@@ -102,13 +87,29 @@ export async function POST(
       );
     }
 
-    // ── Guard 3: Seat-quota ─────────────────────────────────────────────────
+    // ── Guard 3: Workspace plan gate + Seat-quota ───────────────────────────
+    // Gate is based on the workspace plan, not the caller's personal plan.
+    // A free personal user who owns a Team-plan workspace CAN invite.
     const team = await (db as any).team.findUnique({
       where: { id: params.id },
       select: { plan: true },
     });
     const teamPlan = toPlanType(team?.plan ?? 'free');
-    const { maxSeats } = getPlanConfig(teamPlan);
+    const teamPlanConfig = getPlanConfig(teamPlan);
+
+    if (!teamPlanConfig.features?.teamWorkspace) {
+      return NextResponse.json(
+        {
+          error: 'Feature not available on your workspace plan',
+          feature: 'teamWorkspace',
+          requiredPlan: 'team',
+          upgradeUrl: '/pricing',
+        },
+        { status: 403 },
+      );
+    }
+
+    const { maxSeats } = teamPlanConfig;
 
     if (maxSeats !== Number.MAX_SAFE_INTEGER) {
       const [activeMemberCount, pendingInviteCount] = await Promise.all([
@@ -128,19 +129,31 @@ export async function POST(
       }
     }
 
-    // ── Create invite (hashed token) ────────────────────────────────────────
+    // ── Create or re-create invite (hashed token) ──────────────────────────
+    // Upsert on @@unique([teamId, email]) so expired/revoked invites can be
+    // re-sent without hitting a P2002 unique-constraint violation.
     const rawToken = crypto.randomBytes(20).toString('hex');
     const tokenHash = hashInviteToken(rawToken);
     const expiresAt = new Date(nowMs + 7 * 24 * 60 * 60 * 1000);
 
-    const invite = await (db as any).teamInvite.create({
-      data: {
+    const invite = await (db as any).teamInvite.upsert({
+      where: { teamId_email: { teamId: params.id, email } },
+      create: {
         teamId: params.id,
         email,
         role,
         token: tokenHash,
         invitedBy: session.user.id,
         expiresAt,
+      },
+      update: {
+        role,
+        token: tokenHash,
+        invitedBy: session.user.id,
+        expiresAt,
+        acceptedAt: null,
+        acceptedBy: null,
+        revokedAt: null,
       },
     });
 

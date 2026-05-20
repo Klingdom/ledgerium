@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import crypto from 'crypto';
 import { checkFeatureAccess } from '@/lib/feature-gating';
+import { toPlanType } from '@/lib/plans';
 
 /**
  * GET /api/teams — list user's teams
@@ -90,6 +91,7 @@ export async function POST(req: NextRequest) {
       data: {
         name,
         slug,
+        plan: toPlanType(user.plan),
         createdBy: session.user.id,
         members: {
           create: {

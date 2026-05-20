@@ -95,6 +95,67 @@ export async function POST(req: NextRequest) {
           );
         }
 
+        // ── Team-first resolution (TEAM-P03.6 Sub-task 1) ───────────────────
+        // When a team/growth/enterprise plan is purchased, create or link the
+        // Team row so downstream subscription.updated/deleted handlers can
+        // resolve it via resolveTeamFromCustomer().
+        // The solo-subscriber User.plan update below runs unconditionally —
+        // both paths execute so the User record stays in sync.
+        const customerId = session.customer as string;
+        if (customerId && plan !== 'free' && plan !== 'starter') {
+          const existingTeam = await resolveTeamFromCustomer(customerId);
+          if (!existingTeam) {
+            // Look for a workspace owned by this user that has no Stripe link yet.
+            const unlinkedTeam = await (db as any).team.findFirst({
+              where: { createdBy: userId, stripeCustomerId: null },
+            });
+            if (unlinkedTeam) {
+              // Link the existing workspace to Stripe IDs and stamp the plan.
+              await (db as any).team.update({
+                where: { id: unlinkedTeam.id },
+                data: {
+                  plan,
+                  stripeCustomerId: customerId,
+                  stripeSubscriptionId: session.subscription as string,
+                },
+              });
+              console.log(
+                `[stripe] Team ${unlinkedTeam.id} linked to Stripe customer ${customerId} — plan ${plan}`,
+              );
+            } else {
+              // No workspace exists yet — provision one now and create the
+              // owner membership in a single atomic operation.
+              const userRecord = await db.user.findUnique({
+                where: { id: userId },
+                select: { name: true, email: true },
+              });
+              const baseName = userRecord?.name ?? userRecord?.email ?? userId;
+              const newTeam = await (db as any).team.create({
+                data: {
+                  name: `${baseName}'s Workspace`,
+                  slug: `ws-${userId.slice(0, 8)}-${customerId.slice(-6)}`,
+                  plan,
+                  stripeCustomerId: customerId,
+                  stripeSubscriptionId: session.subscription as string,
+                  createdBy: userId,
+                },
+              });
+              await (db as any).teamMember.create({
+                data: {
+                  teamId: newTeam.id,
+                  userId,
+                  role: 'owner',
+                  status: 'active',
+                  joinedAt: new Date(),
+                },
+              });
+              console.log(
+                `[stripe] Team ${newTeam.id} provisioned for user ${userId} — plan ${plan}`,
+              );
+            }
+          }
+        }
+
         await db.user.update({
           where: { id: userId },
           data: {

@@ -24,10 +24,15 @@ vi.mock('@/db', () => ({
     user: {
       update: vi.fn().mockResolvedValue({}),
       findFirst: vi.fn().mockResolvedValue(null),
+      findUnique: vi.fn().mockResolvedValue(null),
     },
     team: {
       findFirst: vi.fn().mockResolvedValue(null),
       update: vi.fn().mockResolvedValue({}),
+      create: vi.fn().mockResolvedValue({ id: 'team_new_001', name: "Test Workspace" }),
+    },
+    teamMember: {
+      create: vi.fn().mockResolvedValue({}),
     },
     analyticsEvent: {
       create: vi.fn().mockResolvedValue({}),
@@ -1276,5 +1281,687 @@ describe('POST /api/billing/webhook', () => {
       }),
     );
     expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+  });
+
+  // ── 29-43. TEAM-P03.6 Sub-task 1: checkout.session.completed team creation/linking ──
+
+  // ── 29. team plan purchase: no existing team, no unlinked workspace → creates new ──
+
+  it('TEAM-P03.6: checkout.session.completed (team plan) — no team, no unlinked workspace: creates new team and owner membership', async () => {
+    const userId = 'user_team_purchase_029';
+    const customerId = 'cus_team_purchase_029';
+    const subscriptionId = 'sub_team_purchase_029';
+    const priceId = 'price_team_monthly_test';
+
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_029',
+      metadata: { userId },
+      subscription: subscriptionId,
+      customer: customerId,
+    };
+
+    const stripeSubscription = {
+      items: { data: [{ price: { id: priceId } }] },
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue(stripeSubscription),
+      },
+    };
+
+    const newTeam = { id: 'team_created_029', name: "Alice's Workspace" };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('team');
+    // No existing linked team
+    vi.mocked(teamBillingLib.resolveTeamFromCustomer).mockResolvedValue(null);
+    // No unlinked workspace either
+    vi.mocked(dbLib.db as any).team.findFirst.mockResolvedValue(null);
+    // User lookup returns a name for the workspace name
+    vi.mocked(dbLib.db.user.findUnique).mockResolvedValue({ name: 'Alice', email: 'alice@example.com' } as any);
+    // team.create returns the new team
+    vi.mocked(dbLib.db as any).team.create.mockResolvedValue(newTeam);
+
+    const res = await POST(makeRequest('{}'));
+
+    expect(res.status).toBe(200);
+    // team.create must be called with the correct fields
+    expect(vi.mocked(dbLib.db as any).team.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          plan: 'team',
+          stripeCustomerId: customerId,
+          stripeSubscriptionId: subscriptionId,
+          createdBy: userId,
+        }),
+      }),
+    );
+    // teamMember.create must be called to make the purchaser an owner
+    expect(vi.mocked(dbLib.db as any).teamMember.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          teamId: newTeam.id,
+          userId,
+          role: 'owner',
+        }),
+      }),
+    );
+    // User.update still runs unconditionally (solo-subscriber sync)
+    expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledOnce();
+  });
+
+  // ── 30. team plan purchase: unlinked workspace exists → links it ──────────
+
+  it('TEAM-P03.6: checkout.session.completed (team plan) — unlinked workspace found: links Stripe IDs and stamps plan', async () => {
+    const userId = 'user_link_030';
+    const customerId = 'cus_link_030';
+    const subscriptionId = 'sub_link_030';
+
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_030',
+      metadata: { userId },
+      subscription: subscriptionId,
+      customer: customerId,
+    };
+
+    const stripeSubscription = {
+      items: { data: [{ price: { id: 'price_growth_monthly_test' } }] },
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue(stripeSubscription),
+      },
+    };
+
+    const unlinkedTeam = { id: 'team_unlinked_030', name: 'Existing Corp', stripeCustomerId: null };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('growth');
+    vi.mocked(teamBillingLib.resolveTeamFromCustomer).mockResolvedValue(null);
+    // Unlinked workspace found
+    vi.mocked(dbLib.db as any).team.findFirst.mockResolvedValue(unlinkedTeam);
+
+    const res = await POST(makeRequest('{}'));
+
+    expect(res.status).toBe(200);
+    // team.update must link the Stripe IDs and stamp the plan
+    expect(vi.mocked(dbLib.db as any).team.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: unlinkedTeam.id },
+        data: expect.objectContaining({
+          plan: 'growth',
+          stripeCustomerId: customerId,
+          stripeSubscriptionId: subscriptionId,
+        }),
+      }),
+    );
+    // team.create must NOT be called — we're linking, not creating
+    expect(vi.mocked(dbLib.db as any).team.create).not.toHaveBeenCalled();
+    // teamMember.create must NOT be called — existing team already has members
+    expect(vi.mocked(dbLib.db as any).teamMember.create).not.toHaveBeenCalled();
+    // User.update still runs unconditionally
+    expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledOnce();
+  });
+
+  // ── 31. team plan purchase: already linked team → skips create/link ────────
+
+  it('TEAM-P03.6: checkout.session.completed (team plan) — team already linked: skips create and link', async () => {
+    const userId = 'user_already_031';
+    const customerId = 'cus_already_031';
+
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_031',
+      metadata: { userId },
+      subscription: 'sub_already_031',
+      customer: customerId,
+    };
+
+    const stripeSubscription = {
+      items: { data: [{ price: { id: 'price_team_monthly_test' } }] },
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue(stripeSubscription),
+      },
+    };
+
+    const alreadyLinkedTeam = { id: 'team_linked_031', name: 'Already Linked Corp', stripeCustomerId: customerId };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('team');
+    // Team already resolved → skip all creation/linking
+    vi.mocked(teamBillingLib.resolveTeamFromCustomer).mockResolvedValue(alreadyLinkedTeam as any);
+
+    const res = await POST(makeRequest('{}'));
+
+    expect(res.status).toBe(200);
+    // Neither create nor update (for team linking) should be called
+    expect(vi.mocked(dbLib.db as any).team.create).not.toHaveBeenCalled();
+    expect(vi.mocked(dbLib.db as any).teamMember.create).not.toHaveBeenCalled();
+    // team.update must NOT be called for linking either
+    expect(vi.mocked(dbLib.db as any).team.update).not.toHaveBeenCalled();
+    // User.update still runs unconditionally
+    expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledOnce();
+  });
+
+  // ── 32. starter plan purchase: team-gated path skipped ────────────────────
+
+  it('TEAM-P03.6: checkout.session.completed (starter plan) — no team creation attempted (starter is not team-gated)', async () => {
+    const userId = 'user_starter_032';
+    const customerId = 'cus_starter_032';
+
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_032',
+      metadata: { userId },
+      subscription: 'sub_starter_032',
+      customer: customerId,
+    };
+
+    const stripeSubscription = {
+      items: { data: [{ price: { id: 'price_starter_monthly_test' } }] },
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue(stripeSubscription),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('starter');
+
+    const res = await POST(makeRequest('{}'));
+
+    expect(res.status).toBe(200);
+    // Starter plan → team-first block should not run
+    expect(vi.mocked(teamBillingLib.resolveTeamFromCustomer)).not.toHaveBeenCalled();
+    expect(vi.mocked(dbLib.db as any).team.create).not.toHaveBeenCalled();
+    expect(vi.mocked(dbLib.db as any).teamMember.create).not.toHaveBeenCalled();
+    // User.update still runs
+    expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledOnce();
+  });
+
+  // ── 33. no userId in metadata → entire checkout handler short-circuits ─────
+
+  it('TEAM-P03.6: checkout.session.completed — no userId in metadata: handler breaks early, no DB writes', async () => {
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_033',
+      metadata: {}, // no userId
+      subscription: 'sub_033',
+      customer: 'cus_033',
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+    const res = await POST(makeRequest('{}'));
+
+    expect(res.status).toBe(200);
+    expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+    expect(vi.mocked(dbLib.db as any).team.create).not.toHaveBeenCalled();
+  });
+
+  // ── 34. enterprise plan purchase: team creation fires same as team plan ────
+
+  it('TEAM-P03.6: checkout.session.completed (enterprise plan) — team creation logic fires for enterprise', async () => {
+    const userId = 'user_enterprise_034';
+    const customerId = 'cus_enterprise_034';
+    const subscriptionId = 'sub_enterprise_034';
+
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_034',
+      metadata: { userId },
+      subscription: subscriptionId,
+      customer: customerId,
+    };
+
+    const stripeSubscription = {
+      items: { data: [{ price: { id: 'price_enterprise_annual_test' } }] },
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue(stripeSubscription),
+      },
+    };
+
+    const newTeam = { id: 'team_enterprise_034', name: "Bob's Enterprise Workspace" };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('enterprise');
+    vi.mocked(teamBillingLib.resolveTeamFromCustomer).mockResolvedValue(null);
+    vi.mocked(dbLib.db as any).team.findFirst.mockResolvedValue(null);
+    vi.mocked(dbLib.db.user.findUnique).mockResolvedValue({ name: 'Bob', email: 'bob@example.com' } as any);
+    vi.mocked(dbLib.db as any).team.create.mockResolvedValue(newTeam);
+
+    const res = await POST(makeRequest('{}'));
+
+    expect(res.status).toBe(200);
+    expect(vi.mocked(dbLib.db as any).team.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          plan: 'enterprise',
+          stripeCustomerId: customerId,
+          createdBy: userId,
+        }),
+      }),
+    );
+    expect(vi.mocked(dbLib.db as any).teamMember.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ teamId: newTeam.id, role: 'owner' }),
+      }),
+    );
+  });
+
+  // ── 35. workspace name uses user.name when available ──────────────────────
+
+  it('TEAM-P03.6: checkout.session.completed — workspace name derived from user.name when present', async () => {
+    const userId = 'user_name_035';
+    const customerId = 'cus_name_035';
+
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_035',
+      metadata: { userId },
+      subscription: 'sub_name_035',
+      customer: customerId,
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue({
+          items: { data: [{ price: { id: 'price_team_monthly_test' } }] },
+        }),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('team');
+    vi.mocked(teamBillingLib.resolveTeamFromCustomer).mockResolvedValue(null);
+    vi.mocked(dbLib.db as any).team.findFirst.mockResolvedValue(null);
+    vi.mocked(dbLib.db.user.findUnique).mockResolvedValue({ name: 'Carol Jones', email: 'carol@example.com' } as any);
+    vi.mocked(dbLib.db as any).team.create.mockResolvedValue({ id: 'team_035', name: "Carol Jones's Workspace" });
+
+    await POST(makeRequest('{}'));
+
+    expect(vi.mocked(dbLib.db as any).team.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          name: "Carol Jones's Workspace",
+        }),
+      }),
+    );
+  });
+
+  // ── 36. workspace name falls back to email when name is null ──────────────
+
+  it('TEAM-P03.6: checkout.session.completed — workspace name falls back to email when user.name is null', async () => {
+    const userId = 'user_email_036';
+    const customerId = 'cus_email_036';
+
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_036',
+      metadata: { userId },
+      subscription: 'sub_email_036',
+      customer: customerId,
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue({
+          items: { data: [{ price: { id: 'price_growth_monthly_test' } }] },
+        }),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('growth');
+    vi.mocked(teamBillingLib.resolveTeamFromCustomer).mockResolvedValue(null);
+    vi.mocked(dbLib.db as any).team.findFirst.mockResolvedValue(null);
+    // name is null — should fall back to email
+    vi.mocked(dbLib.db.user.findUnique).mockResolvedValue({ name: null, email: 'dave@example.com' } as any);
+    vi.mocked(dbLib.db as any).team.create.mockResolvedValue({ id: 'team_036', name: "dave@example.com's Workspace" });
+
+    await POST(makeRequest('{}'));
+
+    expect(vi.mocked(dbLib.db as any).team.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          name: "dave@example.com's Workspace",
+        }),
+      }),
+    );
+  });
+
+  // ── 37. workspace name falls back to userId when user record is null ───────
+
+  it('TEAM-P03.6: checkout.session.completed — workspace name falls back to userId when user.findUnique returns null', async () => {
+    const userId = 'user_fallback_037';
+    const customerId = 'cus_fallback_037';
+
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_037',
+      metadata: { userId },
+      subscription: 'sub_fallback_037',
+      customer: customerId,
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue({
+          items: { data: [{ price: { id: 'price_team_monthly_test' } }] },
+        }),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('team');
+    vi.mocked(teamBillingLib.resolveTeamFromCustomer).mockResolvedValue(null);
+    vi.mocked(dbLib.db as any).team.findFirst.mockResolvedValue(null);
+    // user record not found
+    vi.mocked(dbLib.db.user.findUnique).mockResolvedValue(null);
+    vi.mocked(dbLib.db as any).team.create.mockResolvedValue({ id: 'team_037', name: `${userId}'s Workspace` });
+
+    await POST(makeRequest('{}'));
+
+    expect(vi.mocked(dbLib.db as any).team.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          name: `${userId}'s Workspace`,
+        }),
+      }),
+    );
+  });
+
+  // ── 38. resolveTeamFromCustomer called with session.customer ──────────────
+
+  it('TEAM-P03.6: checkout.session.completed (team plan) — resolveTeamFromCustomer called with session.customer', async () => {
+    const userId = 'user_resolve_038';
+    const customerId = 'cus_resolve_038';
+
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_038',
+      metadata: { userId },
+      subscription: 'sub_resolve_038',
+      customer: customerId,
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue({
+          items: { data: [{ price: { id: 'price_team_monthly_test' } }] },
+        }),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('team');
+    vi.mocked(teamBillingLib.resolveTeamFromCustomer).mockResolvedValue(null);
+    vi.mocked(dbLib.db as any).team.findFirst.mockResolvedValue(null);
+    vi.mocked(dbLib.db.user.findUnique).mockResolvedValue(null);
+    vi.mocked(dbLib.db as any).team.create.mockResolvedValue({ id: 'team_038' });
+
+    await POST(makeRequest('{}'));
+
+    expect(vi.mocked(teamBillingLib.resolveTeamFromCustomer)).toHaveBeenCalledWith(customerId);
+  });
+
+  // ── 39. team.findFirst called with createdBy + stripeCustomerId: null ─────
+
+  it('TEAM-P03.6: checkout.session.completed (team plan) — team.findFirst called to locate unlinked workspace', async () => {
+    const userId = 'user_findfirst_039';
+    const customerId = 'cus_findfirst_039';
+
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_039',
+      metadata: { userId },
+      subscription: 'sub_findfirst_039',
+      customer: customerId,
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue({
+          items: { data: [{ price: { id: 'price_team_monthly_test' } }] },
+        }),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('team');
+    vi.mocked(teamBillingLib.resolveTeamFromCustomer).mockResolvedValue(null);
+    vi.mocked(dbLib.db as any).team.findFirst.mockResolvedValue(null);
+    vi.mocked(dbLib.db.user.findUnique).mockResolvedValue(null);
+    vi.mocked(dbLib.db as any).team.create.mockResolvedValue({ id: 'team_039' });
+
+    await POST(makeRequest('{}'));
+
+    expect(vi.mocked(dbLib.db as any).team.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          createdBy: userId,
+          stripeCustomerId: null,
+        }),
+      }),
+    );
+  });
+
+  // ── 40. user.update runs unconditionally even when team creation succeeds ──
+
+  it('TEAM-P03.6: checkout.session.completed (team plan) — user.update runs unconditionally after team creation', async () => {
+    const userId = 'user_unconditional_040';
+    const customerId = 'cus_unconditional_040';
+    const subscriptionId = 'sub_unconditional_040';
+
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_040',
+      metadata: { userId },
+      subscription: subscriptionId,
+      customer: customerId,
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue({
+          items: { data: [{ price: { id: 'price_team_monthly_test' } }] },
+        }),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('team');
+    vi.mocked(teamBillingLib.resolveTeamFromCustomer).mockResolvedValue(null);
+    vi.mocked(dbLib.db as any).team.findFirst.mockResolvedValue(null);
+    vi.mocked(dbLib.db.user.findUnique).mockResolvedValue({ name: 'Eve', email: 'eve@example.com' } as any);
+    vi.mocked(dbLib.db as any).team.create.mockResolvedValue({ id: 'team_040' });
+
+    const res = await POST(makeRequest('{}'));
+
+    expect(res.status).toBe(200);
+    // User.update MUST run even though team creation also happened
+    expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledOnce();
+    expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: userId },
+        data: expect.objectContaining({
+          plan: 'team',
+          subscriptionStatus: 'active',
+          stripeSubscriptionId: subscriptionId,
+          stripeCustomerId: customerId,
+        }),
+      }),
+    );
+  });
+
+  // ── 41. user.update runs unconditionally even when workspace is linked ─────
+
+  it('TEAM-P03.6: checkout.session.completed (growth plan) — user.update runs unconditionally after workspace linking', async () => {
+    const userId = 'user_linkupdate_041';
+    const customerId = 'cus_linkupdate_041';
+    const subscriptionId = 'sub_linkupdate_041';
+
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_041',
+      metadata: { userId },
+      subscription: subscriptionId,
+      customer: customerId,
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue({
+          items: { data: [{ price: { id: 'price_growth_monthly_test' } }] },
+        }),
+      },
+    };
+
+    const unlinkedTeam = { id: 'team_unlinked_041', name: 'Unlinked Corp', stripeCustomerId: null };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('growth');
+    vi.mocked(teamBillingLib.resolveTeamFromCustomer).mockResolvedValue(null);
+    vi.mocked(dbLib.db as any).team.findFirst.mockResolvedValue(unlinkedTeam);
+
+    const res = await POST(makeRequest('{}'));
+
+    expect(res.status).toBe(200);
+    // team.update links the workspace
+    expect(vi.mocked(dbLib.db as any).team.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: unlinkedTeam.id },
+        data: expect.objectContaining({ plan: 'growth' }),
+      }),
+    );
+    // User.update MUST still run unconditionally
+    expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledOnce();
+    expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: userId },
+        data: expect.objectContaining({ plan: 'growth', stripeCustomerId: customerId }),
+      }),
+    );
+  });
+
+  // ── 42. BUG-01 regression preserved: unmapped price at checkout → HTTP 500 ──
+
+  it('TEAM-P03.6: checkout.session.completed — unmapped price ID returns HTTP 500 (BUG-01 regression lock)', async () => {
+    const userId = 'user_bug01_042';
+    const customerId = 'cus_bug01_042';
+
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_042',
+      metadata: { userId },
+      subscription: 'sub_bug01_042',
+      customer: customerId,
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue({
+          items: { data: [{ price: { id: 'price_unknown_unmapped' } }] },
+        }),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue(null); // unmapped
+
+    const res = await POST(makeRequest('{}'));
+
+    // BUG-01: must HTTP 500 so Stripe retries
+    expect(res.status).toBe(500);
+    expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+    expect(vi.mocked(dbLib.db as any).team.create).not.toHaveBeenCalled();
+  });
+
+  // ── 43. BUG-04 regression preserved: missing webhook secret → HTTP 500 ─────
+
+  it('TEAM-P03.6: checkout.session.completed — missing STRIPE_WEBHOOK_SECRET returns HTTP 500 (BUG-04 regression lock)', async () => {
+    delete process.env.STRIPE_WEBHOOK_SECRET;
+
+    vi.mocked(stripeLib.getWebhookSecret).mockImplementation(() => {
+      throw new Error('STRIPE_WEBHOOK_SECRET is not set');
+    });
+
+    const res = await POST(makeRequest('{}'));
+
+    // BUG-04: must HTTP 500 so Stripe retries
+    expect(res.status).toBe(500);
+    expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+    expect(vi.mocked(dbLib.db as any).team.create).not.toHaveBeenCalled();
   });
 });
