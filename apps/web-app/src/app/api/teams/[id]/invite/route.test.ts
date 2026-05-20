@@ -34,6 +34,7 @@ import crypto from 'crypto';
 const {
   mockTeamMemberFindUnique,
   mockTeamMemberCount,
+  mockTeamMemberFindMany,
   mockTeamInviteFindFirst,
   mockTeamInviteCreate,
   mockTeamInviteUpsert,
@@ -50,6 +51,7 @@ const {
 } = vi.hoisted(() => ({
   mockTeamMemberFindUnique: vi.fn(),
   mockTeamMemberCount: vi.fn(),
+  mockTeamMemberFindMany: vi.fn(),
   mockTeamInviteFindFirst: vi.fn(),
   mockTeamInviteCreate: vi.fn(),
   mockTeamInviteUpsert: vi.fn(),
@@ -73,6 +75,7 @@ vi.mock('@/db', () => ({
     teamMember: {
       findUnique: mockTeamMemberFindUnique,
       count: mockTeamMemberCount,
+      findMany: mockTeamMemberFindMany,
     },
     teamInvite: {
       findFirst: mockTeamInviteFindFirst,
@@ -135,6 +138,13 @@ describe('POST /api/teams/:id/invite', () => {
     mockGetPlanConfig.mockReturnValue({ features: { teamWorkspace: true }, maxSeats: 10 });
     mockTeamInviteFindFirst.mockResolvedValue(null);
     mockTeamMemberCount.mockResolvedValue(0);
+    // Sub-task 4 (iter 085 / TEAM-P03.7): refactor counts active members via
+    // db.teamMember.findMany inline instead of countActiveMembers helper.
+    // Default: 1 owner + 1 active non-owner (caller is owner; 1 other member).
+    mockTeamMemberFindMany.mockResolvedValue([
+      { role: 'owner' },
+      { role: 'member' },
+    ]);
     mockCountActiveMembers.mockResolvedValue(2);
     mockCountPendingInvites.mockResolvedValue(0);
     // Sub-task 4: upsert used for idempotent re-invite
@@ -241,19 +251,26 @@ describe('POST /api/teams/:id/invite', () => {
 
   // ── Seat-quota guard ──────────────────────────────────────────────────────
 
-  it('returns 402 when active + pending seats >= maxSeats', async () => {
+  it('returns 402 when active non-owner + pending seats >= availableNonOwnerSeats', async () => {
     mockGetPlanConfig.mockReturnValue({ features: { teamWorkspace: true }, maxSeats: 3 });
-    mockCountActiveMembers.mockResolvedValue(2);
-    mockCountPendingInvites.mockResolvedValue(1);
+    // 1 owner + 2 non-owner members → ownerCount=1; availableNonOwnerSeats = 3-1 = 2.
+    // Pending=0 → 2 active non-owner + 0 pending >= 2 → 402.
+    mockTeamMemberFindMany.mockResolvedValue([
+      { role: 'owner' },
+      { role: 'member' },
+      { role: 'member' },
+    ]);
+    mockCountPendingInvites.mockResolvedValue(0);
     const res = await POST(
       makePostRequest({ email: 'invitee@example.com', role: 'member' }),
       PARAMS,
     );
     expect(res.status).toBe(402);
     const body = await res.json();
-    expect(typeof body.activeMembers).toBe('number');
-    expect(typeof body.pendingInvites).toBe('number');
+    expect(body.code).toBe('seat_quota_exceeded');
+    expect(typeof body.currentSeats).toBe('number');
     expect(typeof body.maxSeats).toBe('number');
+    expect(typeof body.ownerCount).toBe('number');
   });
 
   it('does NOT check seat quota when maxSeats is MAX_SAFE_INTEGER (unlimited)', async () => {
@@ -261,16 +278,221 @@ describe('POST /api/teams/:id/invite', () => {
       features: { teamWorkspace: true },
       maxSeats: Number.MAX_SAFE_INTEGER,
     });
-    mockCountActiveMembers.mockResolvedValue(999);
+    mockTeamMemberFindMany.mockResolvedValue([
+      { role: 'owner' },
+      ...new Array(998).fill({ role: 'member' }),
+    ]);
     mockCountPendingInvites.mockResolvedValue(999);
     const res = await POST(
       makePostRequest({ email: 'invitee@example.com', role: 'member' }),
       PARAMS,
     );
     expect(res.status).toBe(200);
-    // seat-management helpers should NOT have been called
-    expect(mockCountActiveMembers).not.toHaveBeenCalled();
+    // seat-management helpers should NOT have been called for unlimited plans
+    expect(mockTeamMemberFindMany).not.toHaveBeenCalled();
     expect(mockCountPendingInvites).not.toHaveBeenCalled();
+  });
+
+  // ── Sub-task 4 (iter 085 / TEAM-P03.7): owner-overflow protection ─────────
+
+  describe('Sub-task 4: owner-overflow protection (iter 085)', () => {
+    it('allows non-owner invite when 1 owner + 1 non-owner on Team plan maxSeats=5', async () => {
+      // ownerCount=1; activeNonOwnerCount=1; pending=0; availableNonOwnerSeats=4.
+      // 1 + 0 < 4 → 200.
+      mockGetPlanConfig.mockReturnValue({ features: { teamWorkspace: true }, maxSeats: 5 });
+      mockTeamMemberFindMany.mockResolvedValue([
+        { role: 'owner' },
+        { role: 'member' },
+      ]);
+      mockCountPendingInvites.mockResolvedValue(0);
+      const res = await POST(
+        makePostRequest({ email: 'newinvitee@example.com', role: 'member' }),
+        PARAMS,
+      );
+      expect(res.status).toBe(200);
+    });
+
+    it('returns 402 with availableNonOwnerSeats=0 when ownerCount equals maxSeats', async () => {
+      // Edge case: 5 owners on Team plan with maxSeats=5 → availableNonOwnerSeats=0.
+      // ANY non-owner invite returns 402.
+      mockGetPlanConfig.mockReturnValue({ features: { teamWorkspace: true }, maxSeats: 5 });
+      mockTeamMemberFindMany.mockResolvedValue([
+        { role: 'owner' },
+        { role: 'owner' },
+        { role: 'owner' },
+        { role: 'owner' },
+        { role: 'owner' },
+      ]);
+      mockCountPendingInvites.mockResolvedValue(0);
+      const res = await POST(
+        makePostRequest({ email: 'newinvitee@example.com', role: 'member' }),
+        PARAMS,
+      );
+      expect(res.status).toBe(402);
+      const body = await res.json();
+      expect(body.maxSeats).toBe(0);
+      expect(body.ownerCount).toBe(5);
+      expect(body.error).toMatch(/promote a member to owner|remove an owner/i);
+    });
+
+    it('returns 402 with availableNonOwnerSeats=0 when ownerCount EXCEEDS maxSeats (overflow)', async () => {
+      // Critical regression scenario: 6 owners on Team plan with maxSeats=5
+      // (owners are protected from soft-deactivation per iter 082 so this
+      // state is reachable). availableNonOwnerSeats = max(0, 5-6) = 0.
+      // Pre-iter-085 the old `activeMemberCount + pendingInviteCount >= maxSeats`
+      // check (with ALL 6 owners counting as active members) returned 402
+      // forever — invites were permanently blocked. Sub-task 4 fix excludes
+      // owners from quota → 0 + 0 < 0 fails (`>=`) so STILL 402 but with
+      // explicit owner-overflow messaging.
+      mockGetPlanConfig.mockReturnValue({ features: { teamWorkspace: true }, maxSeats: 5 });
+      mockTeamMemberFindMany.mockResolvedValue([
+        { role: 'owner' },
+        { role: 'owner' },
+        { role: 'owner' },
+        { role: 'owner' },
+        { role: 'owner' },
+        { role: 'owner' },
+      ]);
+      mockCountPendingInvites.mockResolvedValue(0);
+      const res = await POST(
+        makePostRequest({ email: 'newinvitee@example.com', role: 'member' }),
+        PARAMS,
+      );
+      expect(res.status).toBe(402);
+      const body = await res.json();
+      expect(body.maxSeats).toBe(0); // availableNonOwnerSeats clamped to 0
+      expect(body.ownerCount).toBe(6);
+    });
+
+    it('owner-only workspace WITH ownerCount <= maxSeats CAN invite non-owners', async () => {
+      // 2 owners + 0 non-owner on Team plan maxSeats=5.
+      // availableNonOwnerSeats = 5-2 = 3. Pending=0. 0+0 < 3 → 200.
+      mockGetPlanConfig.mockReturnValue({ features: { teamWorkspace: true }, maxSeats: 5 });
+      mockTeamMemberFindMany.mockResolvedValue([
+        { role: 'owner' },
+        { role: 'owner' },
+      ]);
+      mockCountPendingInvites.mockResolvedValue(0);
+      const res = await POST(
+        makePostRequest({ email: 'newinvitee@example.com', role: 'member' }),
+        PARAMS,
+      );
+      expect(res.status).toBe(200);
+    });
+
+    it('pending invites count against available non-owner seats', async () => {
+      // 1 owner + 2 non-owner + 2 pending on Team plan maxSeats=5.
+      // availableNonOwnerSeats = 5-1 = 4. 2 + 2 >= 4 → 402.
+      mockGetPlanConfig.mockReturnValue({ features: { teamWorkspace: true }, maxSeats: 5 });
+      mockTeamMemberFindMany.mockResolvedValue([
+        { role: 'owner' },
+        { role: 'member' },
+        { role: 'member' },
+      ]);
+      mockCountPendingInvites.mockResolvedValue(2);
+      const res = await POST(
+        makePostRequest({ email: 'newinvitee@example.com', role: 'member' }),
+        PARAMS,
+      );
+      expect(res.status).toBe(402);
+      const body = await res.json();
+      expect(body.currentSeats).toBe(4); // 2 active non-owner + 2 pending
+      expect(body.maxSeats).toBe(4); // availableNonOwnerSeats = 5-1
+    });
+
+    it('removed/deactivated members do NOT count against quota (status filter)', async () => {
+      // Removed members would not be in the findMany result because the
+      // route filters where status='active'. This test verifies the route
+      // queries with status='active' filter — passing an empty findMany
+      // result (representing a workspace where removed members exist but
+      // were filtered out) yields availableNonOwnerSeats = maxSeats.
+      mockGetPlanConfig.mockReturnValue({ features: { teamWorkspace: true }, maxSeats: 5 });
+      mockTeamMemberFindMany.mockResolvedValue([
+        { role: 'owner' }, // only the caller-owner is active
+      ]);
+      mockCountPendingInvites.mockResolvedValue(0);
+      const res = await POST(
+        makePostRequest({ email: 'newinvitee@example.com', role: 'member' }),
+        PARAMS,
+      );
+      expect(res.status).toBe(200);
+      // Verify the findMany call uses status: 'active' filter.
+      expect(mockTeamMemberFindMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ status: 'active' }),
+        }),
+      );
+    });
+
+    it('admin role counts as non-owner (uses non-owner quota)', async () => {
+      // admin is not 'owner' — it consumes a non-owner seat.
+      // 1 owner + 1 admin on maxSeats=2 → availableNonOwnerSeats = 2-1 = 1.
+      // 1 active non-owner + 0 pending >= 1 → 402.
+      mockGetPlanConfig.mockReturnValue({ features: { teamWorkspace: true }, maxSeats: 2 });
+      mockTeamMemberFindMany.mockResolvedValue([
+        { role: 'owner' },
+        { role: 'admin' },
+      ]);
+      mockCountPendingInvites.mockResolvedValue(0);
+      const res = await POST(
+        makePostRequest({ email: 'newinvitee@example.com', role: 'member' }),
+        PARAMS,
+      );
+      expect(res.status).toBe(402);
+      const body = await res.json();
+      expect(body.ownerCount).toBe(1);
+    });
+
+    it('viewer role counts as non-owner (uses non-owner quota)', async () => {
+      mockGetPlanConfig.mockReturnValue({ features: { teamWorkspace: true }, maxSeats: 2 });
+      mockTeamMemberFindMany.mockResolvedValue([
+        { role: 'owner' },
+        { role: 'viewer' },
+      ]);
+      mockCountPendingInvites.mockResolvedValue(0);
+      const res = await POST(
+        makePostRequest({ email: 'newinvitee@example.com', role: 'member' }),
+        PARAMS,
+      );
+      expect(res.status).toBe(402);
+    });
+
+    it('uses ownerCount-aware messaging when ownerCount >= maxSeats', async () => {
+      mockGetPlanConfig.mockReturnValue({ features: { teamWorkspace: true }, maxSeats: 3 });
+      mockTeamMemberFindMany.mockResolvedValue([
+        { role: 'owner' },
+        { role: 'owner' },
+        { role: 'owner' },
+      ]);
+      mockCountPendingInvites.mockResolvedValue(0);
+      const res = await POST(
+        makePostRequest({ email: 'newinvitee@example.com', role: 'member' }),
+        PARAMS,
+      );
+      expect(res.status).toBe(402);
+      const body = await res.json();
+      // Owner-overflow path uses different messaging than standard "limit"
+      expect(body.error).toMatch(/promote a member to owner|remove an owner/i);
+      expect(body.error).not.toMatch(/upgrade to add more seats/i);
+    });
+
+    it('uses standard messaging when below owner-overflow threshold', async () => {
+      mockGetPlanConfig.mockReturnValue({ features: { teamWorkspace: true }, maxSeats: 3 });
+      mockTeamMemberFindMany.mockResolvedValue([
+        { role: 'owner' },
+        { role: 'member' },
+        { role: 'member' },
+      ]);
+      mockCountPendingInvites.mockResolvedValue(0);
+      const res = await POST(
+        makePostRequest({ email: 'newinvitee@example.com', role: 'member' }),
+        PARAMS,
+      );
+      expect(res.status).toBe(402);
+      const body = await res.json();
+      // Standard non-overflow messaging
+      expect(body.error).toMatch(/member limit|upgrade to add more seats/i);
+    });
   });
 
   // ── Token hashing (Sub-task 4 happy path) ────────────────────────────────

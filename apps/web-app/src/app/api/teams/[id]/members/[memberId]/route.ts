@@ -141,8 +141,19 @@ export async function DELETE(
       }
     }
 
-    await (db as any).teamMember.delete({
+    // Sub-task 6 (iter 085 / TEAM-P03.7): soft-deactivate (status='removed')
+    // instead of hard-delete to preserve audit trail. Hard-delete loses the
+    // record of who-was-removed-when, breaking compliance + admin operations.
+    // Re-use deactivatedAt column for removal timestamp; reactivationDeadline
+    // stays null (removal is voluntary and terminal — no grace window).
+    // The TeamMember row is preserved; seat-quota queries filter on
+    // status='active' so removed members do NOT count toward quota.
+    await (db as any).teamMember.update({
       where: { id: params.memberId },
+      data: {
+        status: 'removed',
+        deactivatedAt: new Date(),
+      },
     });
 
     return NextResponse.json({ ok: true });

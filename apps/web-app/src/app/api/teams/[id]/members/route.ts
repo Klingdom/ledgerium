@@ -131,8 +131,17 @@ export async function DELETE(
       }
     }
 
-    await (db as any).teamMember.deleteMany({
+    // Sub-task 6 (iter 085 / TEAM-P03.7): soft-deactivate (status='removed')
+    // instead of hard-delete to preserve audit trail. Parity with the
+    // memberId-based DELETE handler at
+    // /api/teams/:id/members/:memberId/route.ts. updateMany honors the
+    // (teamId, userId) selector identical to the original deleteMany call.
+    await (db as any).teamMember.updateMany({
       where: { teamId: params.id, userId: targetUserId },
+      data: {
+        status: 'removed',
+        deactivatedAt: new Date(),
+      },
     });
 
     return NextResponse.json({ ok: true });

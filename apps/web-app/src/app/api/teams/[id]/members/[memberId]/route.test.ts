@@ -183,13 +183,14 @@ describe('PATCH /api/teams/:id/members/:memberId', () => {
 
 // ─── DELETE tests ─────────────────────────────────────────────────────────────
 
-describe('DELETE /api/teams/:id/members/:memberId', () => {
+describe('DELETE /api/teams/:id/members/:memberId — Sub-task 6 soft-delete (iter 085)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAuth.mockResolvedValue({ user: { id: 'caller-1' } });
     mockTeamMemberFindUnique.mockResolvedValue(OWNER_CALLER);
     mockTeamMemberFindFirst.mockResolvedValue(TARGET_MEMBER);
     mockTeamMemberCount.mockResolvedValue(2); // 2 owners — removal safe
+    mockTeamMemberUpdate.mockResolvedValue({});
     mockTeamMemberDelete.mockResolvedValue({});
   });
 
@@ -233,10 +234,46 @@ describe('DELETE /api/teams/:id/members/:memberId', () => {
     expect(body.ok).toBe(true);
   });
 
-  it('deletes by TeamMember.id (not userId)', async () => {
+  // ── Sub-task 6 (iter 085 / TEAM-P03.7): soft-deactivate semantics ──────
+
+  it('Sub-task 6: soft-deactivates the member (status=removed) instead of hard-delete', async () => {
     await DELETE(makeDeleteRequest(), PARAMS);
-    expect(mockTeamMemberDelete).toHaveBeenCalledOnce();
-    const deleteCall = mockTeamMemberDelete.mock.calls[0][0];
-    expect(deleteCall.where.id).toBe('mem-1');
+    expect(mockTeamMemberUpdate).toHaveBeenCalledOnce();
+    expect(mockTeamMemberDelete).not.toHaveBeenCalled();
+    const updateCall = mockTeamMemberUpdate.mock.calls[0][0];
+    expect(updateCall.where).toEqual({ id: 'mem-1' });
+    expect(updateCall.data.status).toBe('removed');
+  });
+
+  it('Sub-task 6: sets deactivatedAt to a fresh Date (audit trail timestamp)', async () => {
+    await DELETE(makeDeleteRequest(), PARAMS);
+    const updateCall = mockTeamMemberUpdate.mock.calls[0][0];
+    expect(updateCall.data.deactivatedAt).toBeInstanceOf(Date);
+  });
+
+  it('Sub-task 6: TeamMember.delete NEVER called (audit trail preserved)', async () => {
+    await DELETE(makeDeleteRequest(), PARAMS);
+    expect(mockTeamMemberDelete).not.toHaveBeenCalled();
+  });
+
+  it('Sub-task 6: admin can soft-remove members (parity with owner)', async () => {
+    mockTeamMemberFindUnique.mockResolvedValue({ role: 'admin' });
+    const res = await DELETE(makeDeleteRequest(), PARAMS);
+    expect(res.status).toBe(200);
+    expect(mockTeamMemberUpdate).toHaveBeenCalledOnce();
+  });
+
+  it('Sub-task 6: owner removal succeeds when multiple owners exist', async () => {
+    mockTeamMemberFindFirst.mockResolvedValue({
+      id: 'mem-owner-extra',
+      teamId: 't1',
+      userId: 'target-owner',
+      role: 'owner',
+      status: 'active',
+    });
+    mockTeamMemberCount.mockResolvedValue(3); // 3 owners; can remove this one
+    const res = await DELETE(makeDeleteRequest(), PARAMS);
+    expect(res.status).toBe(200);
+    expect(mockTeamMemberUpdate).toHaveBeenCalledOnce();
   });
 });

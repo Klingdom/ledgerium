@@ -51,13 +51,16 @@ model ApiKey {
   lastUsedAt DateTime? @map("last_used_at")
   createdAt DateTime @default(now()) @map("created_at")
 
-  /// Workspace FK (iter 082 / TEAM-P02 Part G).
+  /// Workspace FK (iter 082 / TEAM-P02 Part G; cascade flip iter 085 / TEAM-P03.7 Sub-task 3).
   /// NULL means the key belongs to the user's personal (solo) context.
-  /// OnDelete SetNull: deleting a team removes the FK but preserves the key row.
+  /// OnDelete Cascade (was SetNull pre-iter-085): deleting a team REVOKES all
+  /// workspace-scoped keys; orphaning would leave keys with retained capability
+  /// against a deleted workspace, which is a security risk per
+  /// TEAM_WORKSPACE_QUALITY_REVIEW_001 §6 review.
   teamId    String?  @map("team_id")
 
   user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  team Team? @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  team Team? @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([teamId])
@@ -449,6 +452,13 @@ model Team {
   /// Consumed by TEAM-P03 webhook handler and TEAM-P02 effective-plan derivation.
   stripeSubscriptionId String?  @map("stripe_subscription_id")
 
+  /// Workspace subscription status (iter 085 / TEAM-P03.7 Sub-task 1).
+  /// 5-value closed union: 'active' | 'trialing' | 'past_due' | 'canceled' | 'unpaid'.
+  /// Stripe enums `incomplete` and `incomplete_expired` normalize to 'unpaid'.
+  /// Consumed by TEAM-P03.7 webhook handlers + TEAM-P07 plan-change banner (future).
+  /// All existing rows backfill with default 'active' at migration time.
+  subscriptionStatus  String   @default("active") @map("subscription_status")
+
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -468,8 +478,14 @@ model TeamMember {
   role      String   @default("member") // owner, admin, member, viewer
   joinedAt  DateTime @default(now()) @map("joined_at")
 
-  /// Soft-deactivate status (iter 081 / TEAM-P01 / D-05 Option A).
-  /// Values: 'active' | 'deactivated' | 'pending'.
+  /// Soft-deactivate status (iter 081 / TEAM-P01 / D-05 Option A;
+  /// extended at iter 085 / TEAM-P03.7 Sub-task 6 with 'removed' terminal state).
+  /// 4-value closed union:
+  ///   'active'        — current member
+  ///   'deactivated'   — soft-deactivated by webhook downgrade; reactivable within 30d
+  ///   'pending'       — invite accepted but not yet provisioned (reserved for future)
+  ///   'removed'       — voluntarily removed by owner/admin (TEAM-P03.7); terminal state;
+  ///                     audit-preserved (deactivatedAt set; NOT counted toward seat quota)
   /// Consumed by TEAM-P02 effective-plan derivation + TEAM-P03 downgrade cascade.
   /// All existing rows acquire status = 'active' at migration time (NOT NULL DEFAULT).
   status              String    @default("active") @map("status")

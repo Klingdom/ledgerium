@@ -218,11 +218,16 @@ export async function POST(req: NextRequest) {
           return { error: 'This invite was sent to a different email address', status: 403 };
         }
 
-        // Check if user is already a member of this team.
+        // Sub-task 6 (iter 085 / TEAM-P03.7): handle re-acceptance of a
+        // previously-removed member. A TeamMember row with status='removed'
+        // is a terminal-but-resurrectable state. If found, reactivate it
+        // (status='active', clear deactivatedAt) instead of treating as
+        // "already a member" or attempting INSERT (which would violate
+        // @@unique([teamId, userId])).
         const existingMembership = await tx.teamMember.findUnique({
           where: { teamId_userId: { teamId: invite.teamId, userId } },
         });
-        if (existingMembership) {
+        if (existingMembership && existingMembership.status === 'active') {
           return { error: 'You are already a member of this workspace', status: 409 };
         }
 
@@ -235,16 +240,31 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        // Create the team membership.
-        await tx.teamMember.create({
-          data: {
-            teamId: invite.teamId,
-            userId,
-            role: invite.role,
-            joinedAt: new Date(nowMs),
-            status: 'active',
-          },
-        });
+        // Create or resurrect the team membership.
+        if (existingMembership) {
+          // Resurrect previously-removed (or deactivated) member.
+          await tx.teamMember.update({
+            where: { id: existingMembership.id },
+            data: {
+              role: invite.role,
+              status: 'active',
+              joinedAt: new Date(nowMs),
+              deactivatedAt: null,
+              reactivationDeadline: null,
+            },
+          });
+        } else {
+          // Create a fresh membership.
+          await tx.teamMember.create({
+            data: {
+              teamId: invite.teamId,
+              userId,
+              role: invite.role,
+              joinedAt: new Date(nowMs),
+              status: 'active',
+            },
+          });
+        }
 
         return {
           ok: true,
@@ -268,6 +288,23 @@ export async function POST(req: NextRequest) {
     recordSuccess(ip);
     return NextResponse.json(result);
   } catch (err) {
+    // Sub-task 5 (iter 085 / TEAM-P03.7): translate Prisma P2034 serialization
+    // failures to HTTP 409 with a retryable hint. P2034 is common under
+    // SERIALIZABLE isolation on Postgres production with concurrent
+    // invite-accept requests. system-architect §2 review of iter 082 TEAM-P02
+    // surfaced this: previously P2034 returned HTTP 500 which made clients
+    // treat it as a permanent failure instead of a transient retry candidate.
+    if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'P2034') {
+      return NextResponse.json(
+        {
+          error: 'Concurrent acceptance detected — please retry',
+          code: 'serialization_failure',
+          retryable: true,
+        },
+        { status: 409 },
+      );
+    }
+
     console.error('[invites/accept/POST]', err);
     return NextResponse.json({ error: 'Failed to accept invite' }, { status: 500 });
   }

@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import crypto from 'crypto';
 import { getPlanConfig, toPlanType } from '@/lib/plans';
-import { countActiveMembers, countPendingInvites } from '@/lib/workspace/seat-management';
+import { countPendingInvites } from '@/lib/workspace/seat-management';
 
 /**
  * POST /api/teams/:id/invite — create an invite link for a team
@@ -112,17 +112,34 @@ export async function POST(
     const { maxSeats } = teamPlanConfig;
 
     if (maxSeats !== Number.MAX_SAFE_INTEGER) {
-      const [activeMemberCount, pendingInviteCount] = await Promise.all([
-        countActiveMembers(params.id),
-        countPendingInvites(params.id, nowMs),
-      ]);
-      if (activeMemberCount + pendingInviteCount >= maxSeats) {
+      // Sub-task 4 (iter 085 / TEAM-P03.7): sole-owner-overflow protection.
+      // Owners are protected from soft-deactivation per iter 082
+      // softDeactivateExcessMembers. They can overflow the seat quota and
+      // remain active. Exclude them from the quota check; otherwise an
+      // owner-overflow state (e.g., 6 owners on a Team plan with maxSeats=5)
+      // permanently blocks ALL invites (backend-engineer F6 from quality review).
+      const activeMembers = await (db as any).teamMember.findMany({
+        where: { teamId: params.id, status: 'active' },
+        select: { role: true },
+      });
+      const ownerCount = activeMembers.filter((m: { role: string }) => m.role === 'owner').length;
+      const activeNonOwnerCount = activeMembers.length - ownerCount;
+      const pendingInviteCount = await countPendingInvites(params.id, nowMs);
+
+      // Seats available for non-owner members: maxSeats minus owner-count, clamped to 0.
+      const availableNonOwnerSeats = Math.max(0, maxSeats - ownerCount);
+
+      if (activeNonOwnerCount + pendingInviteCount >= availableNonOwnerSeats) {
         return NextResponse.json(
           {
-            error: 'Seat quota reached — upgrade your plan or remove existing members',
-            activeMembers: activeMemberCount,
-            pendingInvites: pendingInviteCount,
-            maxSeats,
+            error: ownerCount >= maxSeats
+              ? 'No seats available for additional teammates — promote a member to owner OR remove an owner to make room'
+              : 'This workspace is at its member limit — upgrade to add more seats or remove an existing member',
+            code: 'seat_quota_exceeded',
+            currentSeats: activeNonOwnerCount + pendingInviteCount,
+            maxSeats: availableNonOwnerSeats,
+            ownerCount,
+            upgradeUrl: '/pricing',
           },
           { status: 402 },
         );

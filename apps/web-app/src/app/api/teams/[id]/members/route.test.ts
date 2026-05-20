@@ -30,12 +30,14 @@ const {
   mockTeamMemberFindMany,
   mockTeamMemberCount,
   mockTeamMemberDeleteMany,
+  mockTeamMemberUpdateMany,
   mockAuth,
 } = vi.hoisted(() => ({
   mockTeamMemberFindUnique: vi.fn(),
   mockTeamMemberFindMany: vi.fn(),
   mockTeamMemberCount: vi.fn(),
   mockTeamMemberDeleteMany: vi.fn(),
+  mockTeamMemberUpdateMany: vi.fn(),
   mockAuth: vi.fn(),
 }));
 
@@ -48,6 +50,7 @@ vi.mock('@/db', () => ({
       findMany: mockTeamMemberFindMany,
       count: mockTeamMemberCount,
       deleteMany: mockTeamMemberDeleteMany,
+      updateMany: mockTeamMemberUpdateMany,
     },
   },
 }));
@@ -168,6 +171,7 @@ describe('DELETE /api/teams/:id/members (legacy body-based)', () => {
       .mockResolvedValueOnce({ teamId: 't1', userId: 'target-1', role: 'member' }); // target
     mockTeamMemberCount.mockResolvedValue(2); // 2 owners — safe to remove one
     mockTeamMemberDeleteMany.mockResolvedValue({ count: 1 });
+    mockTeamMemberUpdateMany.mockResolvedValue({ count: 1 });
   });
 
   it('returns 401 when unauthenticated', async () => {
@@ -214,5 +218,22 @@ describe('DELETE /api/teams/:id/members (legacy body-based)', () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
+  });
+
+  // ── Sub-task 6 (iter 085 / TEAM-P03.7): soft-deactivate semantics ──────
+
+  it('Sub-task 6: legacy DELETE soft-deactivates (status=removed) instead of deleteMany', async () => {
+    await DELETE(makeDeleteRequest('t1', { userId: 'target-1' }), PARAMS);
+    expect(mockTeamMemberUpdateMany).toHaveBeenCalledOnce();
+    expect(mockTeamMemberDeleteMany).not.toHaveBeenCalled();
+    const updateCall = mockTeamMemberUpdateMany.mock.calls[0][0];
+    expect(updateCall.where).toEqual({ teamId: 't1', userId: 'target-1' });
+    expect(updateCall.data.status).toBe('removed');
+    expect(updateCall.data.deactivatedAt).toBeInstanceOf(Date);
+  });
+
+  it('Sub-task 6: TeamMember.deleteMany NEVER called by legacy handler (audit trail preserved)', async () => {
+    await DELETE(makeDeleteRequest('t1', { userId: 'target-1' }), PARAMS);
+    expect(mockTeamMemberDeleteMany).not.toHaveBeenCalled();
   });
 });

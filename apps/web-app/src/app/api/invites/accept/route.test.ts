@@ -37,6 +37,7 @@ const {
   mockTeamInviteUpdate,
   mockTeamMemberFindUnique,
   mockTeamMemberCreate,
+  mockTeamMemberUpdate,
   mockUserFindUnique,
   mockTransaction,
   mockAuth,
@@ -45,6 +46,7 @@ const {
   mockTeamInviteUpdate: vi.fn(),
   mockTeamMemberFindUnique: vi.fn(),
   mockTeamMemberCreate: vi.fn(),
+  mockTeamMemberUpdate: vi.fn(),
   mockUserFindUnique: vi.fn(),
   mockTransaction: vi.fn(),
   mockAuth: vi.fn(),
@@ -61,6 +63,7 @@ vi.mock('@/db', () => ({
     teamMember: {
       findUnique: mockTeamMemberFindUnique,
       create: mockTeamMemberCreate,
+      update: mockTeamMemberUpdate,
     },
     user: { findUnique: mockUserFindUnique },
     $transaction: mockTransaction,
@@ -199,6 +202,7 @@ describe('POST /api/invites/accept — authenticated path', () => {
         teamMember: {
           findUnique: mockTeamMemberFindUnique,
           create: mockTeamMemberCreate,
+          update: mockTeamMemberUpdate,
         },
         user: { findUnique: mockUserFindUnique },
       };
@@ -247,8 +251,14 @@ describe('POST /api/invites/accept — authenticated path', () => {
     expect(body.error).toMatch(/different email/i);
   });
 
-  it('returns 409 when user is already a member of the workspace', async () => {
-    mockTeamMemberFindUnique.mockResolvedValue({ teamId: 't1', userId: 'user-1', role: 'member' });
+  it('returns 409 when user is already an ACTIVE member of the workspace', async () => {
+    mockTeamMemberFindUnique.mockResolvedValue({
+      id: 'mem-existing-active',
+      teamId: 't1',
+      userId: 'user-1',
+      role: 'member',
+      status: 'active',
+    });
     const res = await POST(makeRequest({ token: RAW_TOKEN }));
     expect(res.status).toBe(409);
     const body = await res.json();
@@ -281,6 +291,201 @@ describe('POST /api/invites/accept — authenticated path', () => {
     expect(createCall.data.role).toBe('member');
     expect(createCall.data.status).toBe('active');
     expect(createCall.data.joinedAt).toBeInstanceOf(Date);
+  });
+});
+
+// ─── Tests: Sub-task 5 (iter 085 / TEAM-P03.7) — P2034 retry ────────────────
+
+describe('POST /api/invites/accept — Sub-task 5: P2034 serialization retry (iter 085)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockAuth.mockResolvedValue({ user: { id: 'user-p2034' } });
+    mockTeamInviteFindFirst.mockResolvedValue(VALID_INVITE);
+    mockUserFindUnique.mockResolvedValue({ email: 'invitee@example.com' });
+    mockTeamMemberFindUnique.mockResolvedValue(null);
+  });
+
+  it('translates Prisma P2034 to HTTP 409 with retryable=true', async () => {
+    const p2034Err = Object.assign(new Error('Serialization failure'), { code: 'P2034' });
+    mockTransaction.mockRejectedValueOnce(p2034Err);
+
+    const res = await POST(makeRequest({ token: RAW_TOKEN }));
+
+    expect(res.status).toBe(409);
+    const body = await res.json();
+    expect(body.code).toBe('serialization_failure');
+    expect(body.retryable).toBe(true);
+    expect(body.error).toMatch(/concurrent|retry/i);
+  });
+
+  it('other errors still return HTTP 500 (regression lock)', async () => {
+    const genericErr = new Error('Some other DB failure');
+    mockTransaction.mockRejectedValueOnce(genericErr);
+
+    const res = await POST(makeRequest({ token: RAW_TOKEN }));
+
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.error).toMatch(/failed to accept/i);
+    expect(body.code).toBeUndefined();
+    expect(body.retryable).toBeUndefined();
+  });
+
+  it('error with code !== P2034 still returns 500', async () => {
+    const p2002Err = Object.assign(new Error('Unique constraint failed'), { code: 'P2002' });
+    mockTransaction.mockRejectedValueOnce(p2002Err);
+
+    const res = await POST(makeRequest({ token: RAW_TOKEN }));
+    expect(res.status).toBe(500);
+  });
+
+  it('error without code field still returns 500', async () => {
+    const plainErr = new Error('Unstructured failure');
+    mockTransaction.mockRejectedValueOnce(plainErr);
+
+    const res = await POST(makeRequest({ token: RAW_TOKEN }));
+    expect(res.status).toBe(500);
+  });
+
+  it('successful path is not affected by P2034 handler', async () => {
+    mockTransaction.mockImplementation(async (callback: Function) => {
+      const tx = {
+        teamInvite: {
+          findFirst: mockTeamInviteFindFirst,
+          update: mockTeamInviteUpdate,
+        },
+        teamMember: {
+          findUnique: mockTeamMemberFindUnique,
+          create: mockTeamMemberCreate,
+          update: mockTeamMemberUpdate,
+        },
+        user: { findUnique: mockUserFindUnique },
+      };
+      return callback(tx);
+    });
+    mockTeamInviteUpdate.mockResolvedValue({});
+    mockTeamMemberCreate.mockResolvedValue({});
+
+    const res = await POST(makeRequest({ token: RAW_TOKEN }));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.code).toBeUndefined();
+    expect(body.retryable).toBeUndefined();
+  });
+});
+
+// ─── Tests: Sub-task 6 (iter 085 / TEAM-P03.7) — resurrect removed member ───
+
+describe('POST /api/invites/accept — Sub-task 6: resurrect removed member (iter 085)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockAuth.mockResolvedValue({ user: { id: 'user-resurrect' } });
+    mockTeamInviteFindFirst.mockResolvedValue(VALID_INVITE);
+    mockUserFindUnique.mockResolvedValue({ email: 'invitee@example.com' });
+    mockTeamInviteUpdate.mockResolvedValue({});
+    mockTeamMemberCreate.mockResolvedValue({});
+    mockTeamMemberUpdate.mockResolvedValue({});
+    mockTransaction.mockImplementation(async (callback: Function) => {
+      const tx = {
+        teamInvite: {
+          findFirst: mockTeamInviteFindFirst,
+          update: mockTeamInviteUpdate,
+        },
+        teamMember: {
+          findUnique: mockTeamMemberFindUnique,
+          create: mockTeamMemberCreate,
+          update: mockTeamMemberUpdate,
+        },
+        user: { findUnique: mockUserFindUnique },
+      };
+      return callback(tx);
+    });
+  });
+
+  it('previously-removed member: resurrects via update (status=active), does NOT call create', async () => {
+    mockTeamMemberFindUnique.mockResolvedValue({
+      id: 'mem-removed-1',
+      teamId: 't1',
+      userId: 'user-resurrect',
+      role: 'member',
+      status: 'removed',
+      deactivatedAt: new Date(Date.now() - 7 * 86400_000),
+    });
+
+    const res = await POST(makeRequest({ token: RAW_TOKEN }));
+
+    expect(res.status).toBe(200);
+    expect(mockTeamMemberUpdate).toHaveBeenCalledOnce();
+    expect(mockTeamMemberCreate).not.toHaveBeenCalled();
+    const updateCall = mockTeamMemberUpdate.mock.calls[0][0];
+    expect(updateCall.where).toEqual({ id: 'mem-removed-1' });
+    expect(updateCall.data.status).toBe('active');
+    expect(updateCall.data.deactivatedAt).toBeNull();
+    expect(updateCall.data.reactivationDeadline).toBeNull();
+    expect(updateCall.data.joinedAt).toBeInstanceOf(Date);
+  });
+
+  it('previously-deactivated member: also resurrects (status=active)', async () => {
+    mockTeamMemberFindUnique.mockResolvedValue({
+      id: 'mem-deact-1',
+      teamId: 't1',
+      userId: 'user-resurrect',
+      role: 'member',
+      status: 'deactivated',
+      deactivatedAt: new Date(Date.now() - 14 * 86400_000),
+    });
+
+    const res = await POST(makeRequest({ token: RAW_TOKEN }));
+
+    expect(res.status).toBe(200);
+    expect(mockTeamMemberUpdate).toHaveBeenCalledOnce();
+    expect(mockTeamMemberCreate).not.toHaveBeenCalled();
+    const updateCall = mockTeamMemberUpdate.mock.calls[0][0];
+    expect(updateCall.data.status).toBe('active');
+  });
+
+  it('resurrected member: uses role from new invite, not preserved old role', async () => {
+    mockTeamMemberFindUnique.mockResolvedValue({
+      id: 'mem-removed-role',
+      teamId: 't1',
+      userId: 'user-resurrect',
+      role: 'admin', // old role
+      status: 'removed',
+    });
+    // New invite gives 'member' role
+    mockTeamInviteFindFirst.mockResolvedValue({ ...VALID_INVITE, role: 'member' });
+
+    await POST(makeRequest({ token: RAW_TOKEN }));
+
+    const updateCall = mockTeamMemberUpdate.mock.calls[0][0];
+    expect(updateCall.data.role).toBe('member');
+  });
+
+  it('active member still returns 409 (no resurrection of active membership)', async () => {
+    mockTeamMemberFindUnique.mockResolvedValue({
+      id: 'mem-active',
+      teamId: 't1',
+      userId: 'user-resurrect',
+      role: 'member',
+      status: 'active',
+    });
+
+    const res = await POST(makeRequest({ token: RAW_TOKEN }));
+    expect(res.status).toBe(409);
+    expect(mockTeamMemberUpdate).not.toHaveBeenCalled();
+    expect(mockTeamMemberCreate).not.toHaveBeenCalled();
+  });
+
+  it('no existing membership: creates fresh (default path preserved)', async () => {
+    mockTeamMemberFindUnique.mockResolvedValue(null);
+
+    const res = await POST(makeRequest({ token: RAW_TOKEN }));
+
+    expect(res.status).toBe(200);
+    expect(mockTeamMemberCreate).toHaveBeenCalledOnce();
+    expect(mockTeamMemberUpdate).not.toHaveBeenCalled();
+    const createCall = mockTeamMemberCreate.mock.calls[0][0];
+    expect(createCall.data.status).toBe('active');
   });
 });
 

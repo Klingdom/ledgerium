@@ -10,6 +10,8 @@ import {
   notifyOwnerOfDowngrade,
 } from '@/lib/workspace/team-billing';
 import { softDeactivateExcessMembers } from '@/lib/workspace/seat-management';
+import { normalizeStripeStatus } from '@/lib/workspace/subscription-status';
+import type { NormalizedSubscriptionStatus } from '@/lib/workspace/subscription-status';
 
 /**
  * POST /api/billing/webhook
@@ -200,6 +202,10 @@ export async function POST(req: NextRequest) {
           plan = 'free';
         }
 
+        // Sub-task 1 (iter 085 / TEAM-P03.7): normalize Stripe status to our
+        // 5-value closed union before writing to Team.subscriptionStatus.
+        const normalizedStatus = normalizeStripeStatus(status);
+
         // ── Team-first resolution (TEAM-P03 Part B) ──────────────────────────
         // If a workspace is linked to this Stripe customer, sync Team.plan and
         // cascade a soft-deactivate if the new plan's maxSeats is lower than the
@@ -217,6 +223,8 @@ export async function POST(req: NextRequest) {
               data: {
                 plan,
                 stripeSubscriptionId: subscription.id,
+                // Sub-task 1 (iter 085): write normalized status alongside plan.
+                subscriptionStatus: normalizedStatus,
               },
             });
 
@@ -256,19 +264,32 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // ── Solo-subscriber path (preserved byte-identical) ──────────────────
-        const userId = subscription.metadata?.userId;
-        if (!userId) break;
+        // ── Solo-subscriber path ─────────────────────────────────────────────
+        // Sub-task 7 (iter 085 / TEAM-P03.7): replace mutable metadata.userId
+        // lookup with cryptographically-grounded stripeSubscriptionId lookup.
+        // Stripe metadata is mutable; a Stripe dashboard compromise must NOT
+        // pivot to user-account-plan compromise. User.stripeSubscriptionId is
+        // set at checkout.session.completed (line 164) so this lookup succeeds
+        // for legitimate users.
+        const soloUser = await db.user.findFirst({
+          where: { stripeSubscriptionId: subscription.id },
+        });
+        if (!soloUser) {
+          console.warn(
+            `[stripe] customer.subscription.updated: no user found for subscription ${subscription.id} — skipping DB update`,
+          );
+          break;
+        }
 
         await db.user.update({
-          where: { id: userId },
+          where: { id: soloUser.id },
           data: {
             plan,
             subscriptionStatus: planStatus,
           },
         });
-        console.log(`[stripe] User ${userId} subscription updated: ${status} → plan ${plan}`);
-        trackServer('subscription_updated', { userId, plan, status });
+        console.log(`[stripe] User ${soloUser.id} subscription updated: ${status} → plan ${plan}`);
+        trackServer('subscription_updated', { userId: soloUser.id, plan, status });
         break;
       }
 
@@ -327,20 +348,29 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // ── Solo-subscriber path (preserved byte-identical) ──────────────────
-        const userId = subscription.metadata?.userId;
-        if (!userId) break;
+        // ── Solo-subscriber path ─────────────────────────────────────────────
+        // Sub-task 7 (iter 085 / TEAM-P03.7): replace mutable metadata.userId
+        // lookup with cryptographically-grounded stripeSubscriptionId lookup.
+        const deletedSoloUser = await db.user.findFirst({
+          where: { stripeSubscriptionId: subscription.id },
+        });
+        if (!deletedSoloUser) {
+          console.warn(
+            `[stripe] customer.subscription.deleted: no user found for subscription ${subscription.id} — skipping DB update`,
+          );
+          break;
+        }
 
         await db.user.update({
-          where: { id: userId },
+          where: { id: deletedSoloUser.id },
           data: {
             plan: 'free',
             subscriptionStatus: 'canceled',
             stripeSubscriptionId: null,
           },
         });
-        console.log(`[stripe] User ${userId} subscription canceled — reverted to free`);
-        trackServer('subscription_canceled', { userId });
+        console.log(`[stripe] User ${deletedSoloUser.id} subscription canceled — reverted to free`);
+        trackServer('subscription_canceled', { userId: deletedSoloUser.id });
         break;
       }
 
@@ -349,6 +379,32 @@ export async function POST(req: NextRequest) {
         const subscriptionId = invoice.subscription as string;
         if (!subscriptionId) break;
 
+        // ── Sub-task 2 (iter 085 / TEAM-P03.7): team-first resolution ────────
+        // Workspace subscribers must have their Team.subscriptionStatus marked
+        // past_due so the workspace UI can show a billing-attention banner.
+        // The solo-subscriber User.update path below is preserved byte-identical
+        // for non-team customers.
+        const failedTeam = await (db as any).team.findFirst({
+          where: { stripeSubscriptionId: subscriptionId },
+        });
+
+        if (failedTeam) {
+          await (db as any).team.update({
+            where: { id: failedTeam.id },
+            data: { subscriptionStatus: 'past_due' },
+          });
+          console.log(`[stripe] Team ${failedTeam.id} payment failed — marked past_due`);
+          // No PII: only teamId, amount, currency are emitted.
+          trackServer('payment_failed', {
+            entity: 'team',
+            teamId: failedTeam.id,
+            amountFailed: invoice.amount_due,
+            currency: invoice.currency,
+          });
+          break;
+        }
+
+        // ── Solo-subscriber path (preserved byte-identical) ──────────────────
         // Find user by subscription ID
         const user = await db.user.findFirst({
           where: { stripeSubscriptionId: subscriptionId },
