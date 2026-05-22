@@ -402,12 +402,64 @@ describe('POST /api/billing/webhook', () => {
     expect(res.status).toBe(400);
   });
 
-  // ── 8. invoice.payment_succeeded — happy path ────────────────────────────
+  // ── 8. invoice.payment_succeeded — team path (TEAM-P03.9 Sub-task C) ────
+  // New handler: DB lookup via stripeSubscriptionId (no subscriptions.retrieve).
+  // Team-first: if a Team row matches the subscriptionId, update team and skip user.
 
-  it('invoice.payment_succeeded: updates subscriptionStatus to active and emits analytics', async () => {
-    const userId = 'user_pay_001';
-    const subscriptionId = 'sub_pay_001';
-    const invoiceId = 'inv_pay_001';
+  it('invoice.payment_succeeded: team path — sets team subscriptionStatus active and emits team analytics', async () => {
+    const subscriptionId = 'sub_pay_team_001';
+    const invoiceId = 'inv_pay_team_001';
+
+    const invoice: Partial<Stripe.Invoice> = {
+      id: invoiceId,
+      subscription: subscriptionId,
+      amount_paid: 24900,
+      currency: 'usd',
+    };
+
+    const mockTeam = {
+      id: 'team_pay_001',
+      stripeSubscriptionId: subscriptionId,
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('invoice.payment_succeeded', invoice),
+        ),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    // Team path: team.findFirst resolves; user.findFirst must NOT be called
+    vi.mocked(dbLib.db as any).team.findFirst.mockResolvedValue(mockTeam);
+
+    const analyticsLib = await import('@/lib/analytics-server');
+    const req = makeRequest('{}');
+    const res = await POST(req);
+
+    expect(res.status).toBe(200);
+    expect(vi.mocked(dbLib.db as any).team.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'team_pay_001' },
+        data: { subscriptionStatus: 'active' },
+      }),
+    );
+    // User.update must NOT be called when team is found
+    expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+    expect(vi.mocked(analyticsLib.trackServer)).toHaveBeenCalledWith(
+      'payment_succeeded',
+      expect.objectContaining({ entity: 'team', teamId: 'team_pay_001', amount: 24900, currency: 'usd', invoiceId }),
+    );
+  });
+
+  // ── 9. invoice.payment_succeeded — solo path (TEAM-P03.9 Sub-task C) ─────
+  // When no team matches the subscriptionId, fall through to solo user resolution.
+
+  it('invoice.payment_succeeded: solo path — sets user subscriptionStatus active and emits user analytics', async () => {
+    const userId = 'user_pay_solo_001';
+    const subscriptionId = 'sub_pay_solo_001';
+    const invoiceId = 'inv_pay_solo_001';
 
     const invoice: Partial<Stripe.Invoice> = {
       id: invoiceId,
@@ -416,10 +468,9 @@ describe('POST /api/billing/webhook', () => {
       currency: 'usd',
     };
 
-    const stripeSubscription = {
-      id: subscriptionId,
-      metadata: { userId },
-      items: { data: [{ price: { id: 'price_starter_monthly_test' } }] },
+    const mockUser = {
+      id: userId,
+      stripeSubscriptionId: subscriptionId,
     };
 
     const mockStripeClient = {
@@ -428,47 +479,46 @@ describe('POST /api/billing/webhook', () => {
           makeEvent('invoice.payment_succeeded', invoice),
         ),
       },
-      subscriptions: {
-        retrieve: vi.fn().mockResolvedValue(stripeSubscription),
-      },
     };
 
     vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    // team.findFirst returns null (default mock) — fall through to solo
+    vi.mocked(dbLib.db.user.findFirst).mockResolvedValue(mockUser as any);
 
     const analyticsLib = await import('@/lib/analytics-server');
     const req = makeRequest('{}');
     const res = await POST(req);
 
     expect(res.status).toBe(200);
-    expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledOnce();
     expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: userId },
         data: { subscriptionStatus: 'active' },
       }),
     );
+    // team.update must NOT be called when only user matches
+    expect(vi.mocked(dbLib.db as any).team.update).not.toHaveBeenCalled();
     expect(vi.mocked(analyticsLib.trackServer)).toHaveBeenCalledWith(
       'payment_succeeded',
       expect.objectContaining({ userId, amount: 4900, currency: 'usd', invoiceId }),
     );
+    // Solo analytics must NOT include entity: 'team'
+    const [, payload] = vi.mocked(analyticsLib.trackServer).mock.calls[0]!;
+    expect(payload).not.toHaveProperty('entity');
   });
 
-  // ── 9. invoice.payment_succeeded — no userId on subscription metadata ───
+  // ── 10. invoice.payment_succeeded — neither team nor user found ────────────
+  // When the subscriptionId matches no DB row, log a warning and return 200
+  // (Stripe must not retry an unrecognised subscription).
 
-  it('invoice.payment_succeeded: no userId on subscription → returns 200 without DB write', async () => {
-    const subscriptionId = 'sub_pay_002';
+  it('invoice.payment_succeeded: no team and no user found — returns 200, no DB write', async () => {
+    const subscriptionId = 'sub_pay_unknown_001';
 
     const invoice: Partial<Stripe.Invoice> = {
-      id: 'inv_pay_002',
+      id: 'inv_pay_unknown_001',
       subscription: subscriptionId,
       amount_paid: 4900,
       currency: 'usd',
-    };
-
-    const stripeSubscription = {
-      id: subscriptionId,
-      metadata: {}, // no userId
-      items: { data: [{ price: { id: 'price_starter_monthly_test' } }] },
     };
 
     const mockStripeClient = {
@@ -477,70 +527,35 @@ describe('POST /api/billing/webhook', () => {
           makeEvent('invoice.payment_succeeded', invoice),
         ),
       },
-      subscriptions: {
-        retrieve: vi.fn().mockResolvedValue(stripeSubscription),
-      },
     };
 
     vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    // Both team.findFirst and user.findFirst return null (default mocks)
 
     const req = makeRequest('{}');
     const res = await POST(req);
 
     expect(res.status).toBe(200);
+    expect(vi.mocked(dbLib.db as any).team.update).not.toHaveBeenCalled();
     expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
   });
 
-  // ── 10. invoice.payment_succeeded — Stripe API failure → HTTP 500 ────────
+  // ── 11. invoice.payment_succeeded — team path analytics: no PII ───────────
+  // Team analytics payload must include identifying team fields but no user PII.
 
-  it('invoice.payment_succeeded: Stripe subscriptions.retrieve failure returns HTTP 500', async () => {
-    const subscriptionId = 'sub_pay_003';
-
-    const invoice: Partial<Stripe.Invoice> = {
-      id: 'inv_pay_003',
-      subscription: subscriptionId,
-      amount_paid: 4900,
-      currency: 'usd',
-    };
-
-    const mockStripeClient = {
-      webhooks: {
-        constructEvent: vi.fn().mockReturnValue(
-          makeEvent('invoice.payment_succeeded', invoice),
-        ),
-      },
-      subscriptions: {
-        retrieve: vi.fn().mockRejectedValue(new Error('Stripe API error')),
-      },
-    };
-
-    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
-
-    const req = makeRequest('{}');
-    const res = await POST(req);
-
-    // Must 500 so Stripe retries — a successful payment must not be silently dropped
-    expect(res.status).toBe(500);
-    expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
-  });
-
-  // ── 11. invoice.payment_succeeded — emits correct analytics payload (no PII) ─
-
-  it('invoice.payment_succeeded: analytics payload contains no PII fields', async () => {
-    const userId = 'user_pay_004';
-    const subscriptionId = 'sub_pay_004';
+  it('invoice.payment_succeeded: team path analytics payload has no PII fields', async () => {
+    const subscriptionId = 'sub_pay_pii_001';
 
     const invoice: Partial<Stripe.Invoice> = {
-      id: 'inv_pay_004',
+      id: 'inv_pay_pii_001',
       subscription: subscriptionId,
       amount_paid: 24900,
       currency: 'usd',
     };
 
-    const stripeSubscription = {
-      id: subscriptionId,
-      metadata: { userId },
-      items: { data: [{ price: { id: 'price_team_monthly_test' } }] },
+    const mockTeam = {
+      id: 'team_pii_001',
+      stripeSubscriptionId: subscriptionId,
     };
 
     const mockStripeClient = {
@@ -549,12 +564,10 @@ describe('POST /api/billing/webhook', () => {
           makeEvent('invoice.payment_succeeded', invoice),
         ),
       },
-      subscriptions: {
-        retrieve: vi.fn().mockResolvedValue(stripeSubscription),
-      },
     };
 
     vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(dbLib.db as any).team.findFirst.mockResolvedValue(mockTeam);
 
     const analyticsLib = await import('@/lib/analytics-server');
     const req = makeRequest('{}');
@@ -565,18 +578,47 @@ describe('POST /api/billing/webhook', () => {
     const [, payload] = calls[0]!;
 
     // Required fields
-    expect(payload).toHaveProperty('userId', userId);
+    expect(payload).toHaveProperty('entity', 'team');
+    expect(payload).toHaveProperty('teamId', 'team_pii_001');
     expect(payload).toHaveProperty('amount', 24900);
     expect(payload).toHaveProperty('currency', 'usd');
-    expect(payload).toHaveProperty('invoiceId', 'inv_pay_004');
+    expect(payload).toHaveProperty('invoiceId', 'inv_pay_pii_001');
 
     // PII must NOT appear
     expect(payload).not.toHaveProperty('email');
     expect(payload).not.toHaveProperty('customerEmail');
     expect(payload).not.toHaveProperty('name');
-    expect(payload).not.toHaveProperty('cardNumber');
-    expect(payload).not.toHaveProperty('lines');
-    expect(payload).not.toHaveProperty('customer_email');
+    expect(payload).not.toHaveProperty('userId');
+  });
+
+  // ── 11b. invoice.payment_succeeded — missing subscriptionId → no-op ───────
+  // Edge case: invoice with no subscription field should return 200 silently.
+
+  it('invoice.payment_succeeded: missing subscriptionId — returns 200, no DB write', async () => {
+    // subscription intentionally omitted (not undefined) to satisfy exactOptionalPropertyTypes
+    const invoice: Partial<Stripe.Invoice> = {
+      id: 'inv_pay_nosub_001',
+      amount_paid: 4900,
+      currency: 'usd',
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('invoice.payment_succeeded', invoice),
+        ),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+    const req = makeRequest('{}');
+    const res = await POST(req);
+
+    expect(res.status).toBe(200);
+    expect(vi.mocked(dbLib.db as any).team.findFirst).not.toHaveBeenCalled();
+    expect(vi.mocked(dbLib.db.user.findFirst)).not.toHaveBeenCalled();
+    expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
   });
 
   // ── 12. customer.subscription.trial_will_end — happy path ───────────────
@@ -1033,11 +1075,59 @@ describe('POST /api/billing/webhook', () => {
     expect(vi.mocked(dbLib.db as any).team.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: 'team_del_001' },
-        data: expect.objectContaining({ plan: 'free', stripeSubscriptionId: null }),
+        data: expect.objectContaining({
+          plan: 'free',
+          subscriptionStatus: 'canceled', // TEAM-P03.9 Sub-task D regression lock
+          stripeSubscriptionId: null,
+        }),
       }),
     );
     // User.update must NOT be called — this is a workspace subscription
     expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+  });
+
+  // ── 22b. customer.subscription.deleted — team subscriptionStatus set to canceled ─
+
+  it('TEAM-P03.9 Sub-task D: customer.subscription.deleted — team subscriptionStatus is set to canceled not null', async () => {
+    const customerId = 'cus_team_del_d01';
+
+    const mockTeam = {
+      id: 'team_del_d01',
+      name: 'Zeta Inc',
+      plan: 'starter',
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: 'sub_del_d01',
+      members: [],
+    };
+
+    const subscription: Partial<Stripe.Subscription> = {
+      id: 'sub_del_d01',
+      status: 'canceled',
+      customer: customerId,
+      metadata: {},
+      items: { data: [] } as unknown as Stripe.Subscription['items'],
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('customer.subscription.deleted', subscription),
+        ),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(teamBillingLib.resolveTeamFromCustomer).mockResolvedValue(mockTeam as any);
+    vi.mocked(seatMgmtLib.softDeactivateExcessMembers).mockResolvedValue({ deactivatedIds: [] });
+
+    const req = makeRequest('{}');
+    const res = await POST(req);
+
+    expect(res.status).toBe(200);
+
+    // subscriptionStatus MUST be 'canceled' — a missing field would leave stale 'active' status
+    const teamUpdateCall = vi.mocked(dbLib.db as any).team.update.mock.calls[0]?.[0];
+    expect(teamUpdateCall?.data?.subscriptionStatus).toBe('canceled');
   });
 
   // ── 23. customer.subscription.deleted — team path: cascade deactivate ─────

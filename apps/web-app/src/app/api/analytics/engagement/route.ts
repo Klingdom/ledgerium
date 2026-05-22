@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
+import { effectivePlanFor } from '@/lib/feature-gating';
 
 /**
  * GET /api/analytics/engagement
@@ -94,7 +95,11 @@ export async function GET() {
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
 
-    const scoredUsers = users.map((user) => {
+    // effectivePlanFor is async (workspace-aware plan lookup); Promise.all
+    // is acceptable here because this is an admin-only endpoint used only in
+    // the operations dashboard, not a hot user-facing path. N+1 is a known
+    // accepted trade-off per TEAM-P03.9 Sub-task B-3 iteration brief.
+    const scoredUsers = await Promise.all(users.map(async (user) => {
       const userEvents: Array<{ eventName: string; properties: string | null; createdAt: Date }> =
         eventsByUser.get(user.id) ?? [];
 
@@ -192,14 +197,16 @@ export async function GET() {
         userId: user.id,
         email: user.email,
         name: user.name ?? null,
-        plan: user.plan,
+        // effectivePlanFor returns the highest plan across solo subscription AND
+        // all active workspace memberships (TEAM-P03.9 Sub-task B-3 fix).
+        plan: await effectivePlanFor(user.id),
         engagementScore,
         breakdown,
         lastActive,
         signupDate: user.createdAt.toISOString(),
         workflowCount: user.uploadCount,
       };
-    });
+    }));
 
     // Sort descending by score
     scoredUsers.sort((a, b) => b.engagementScore - a.engagementScore);

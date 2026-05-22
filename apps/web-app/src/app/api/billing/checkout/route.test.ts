@@ -49,6 +49,11 @@ vi.mock('@/lib/plans', () => ({
   toPlanType: vi.fn((plan: string) => plan),
 }));
 
+vi.mock('@/lib/feature-gating', () => ({
+  // Default: free plan — overridden per test where workspace membership matters.
+  effectivePlanFor: vi.fn().mockResolvedValue('free'),
+}));
+
 // Stripe lib — static factory, no getters. Each call to getPriceId returns a
 // deterministic test price ID derived from the (plan, interval) tuple.
 const mockCheckoutCreate = vi.fn();
@@ -76,6 +81,7 @@ import { POST } from './route';
 import { db } from '@/db';
 import { auth } from '@/lib/auth';
 import { getPriceId } from '@/lib/stripe';
+import { effectivePlanFor } from '@/lib/feature-gating';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -256,6 +262,9 @@ describe('POST /api/billing/checkout (iter 066 trial + tier matrix)', () => {
       vi.mocked(db.user.findUnique).mockResolvedValue(
         makeUser({ plan: 'team', subscriptionStatus: 'active' }) as never,
       );
+      // TEAM-P03.9 Sub-task B-1: effectivePlanFor now drives the already_subscribed gate
+      // (replaced toPlanType(user.plan)). Mock must return 'team' so the guard fires.
+      vi.mocked(effectivePlanFor).mockResolvedValueOnce('team');
       const res = await POST(makeRequest({ plan: 'starter', interval: 'monthly' }));
       expect(res.status).toBe(400);
       const body = await res.json();
@@ -283,6 +292,44 @@ describe('POST /api/billing/checkout (iter 066 trial + tier matrix)', () => {
       const args = mockCheckoutCreate.mock.calls[0]![0];
       expect(args.metadata.plan).toBe('starter');
       expect(args.metadata.interval).toBe('monthly');
+    });
+  });
+
+  // ── Sub-task B-1: effectivePlanFor workspace-aware double-billing guard ─────
+  // (TEAM-P03.9 — replaces toPlanType(user.plan) which only saw solo subscriptions)
+
+  describe('workspace-aware double-billing guard (TEAM-P03.9 Sub-task B-1)', () => {
+    it('blocks a workspace member on a paid team plan from creating a duplicate solo subscription', async () => {
+      // User row shows plan='free' (no direct solo sub), but they are a member of
+      // a paid Team workspace. effectivePlanFor returns 'team'.
+      vi.mocked(db.user.findUnique).mockResolvedValue(
+        makeUser({ plan: 'free', subscriptionStatus: 'active' }) as never,
+      );
+      vi.mocked(effectivePlanFor).mockResolvedValue('team');
+
+      const res = await POST(makeRequest({ plan: 'starter', interval: 'monthly' }));
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.code).toBe('already_subscribed');
+      // Stripe Checkout must NOT be created — no double-billing
+      expect(mockCheckoutCreate).not.toHaveBeenCalled();
+    });
+
+    it('allows a free-plan user with no workspace membership to proceed to checkout', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+      vi.mocked(effectivePlanFor).mockResolvedValue('free');
+
+      const res = await POST(makeRequest({ plan: 'starter', interval: 'monthly' }));
+      expect(res.status).toBe(200);
+      expect(mockCheckoutCreate).toHaveBeenCalledOnce();
+    });
+
+    it('calls effectivePlanFor with the correct userId', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+      vi.mocked(effectivePlanFor).mockResolvedValue('free');
+
+      await POST(makeRequest({ plan: 'starter', interval: 'monthly' }));
+      expect(vi.mocked(effectivePlanFor)).toHaveBeenCalledWith(TEST_USER_ID);
     });
   });
 });

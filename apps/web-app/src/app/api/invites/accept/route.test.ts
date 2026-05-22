@@ -762,3 +762,112 @@ describe('POST /api/invites/accept — rate limiting (TEAM-P03.6 Sub-task 6)', (
     expect(res.status).not.toBe(429);
   });
 });
+
+// ─── Tests: Sub-task A — SHA-256 hashing regression lock (TEAM-P03.9) ────────
+//
+// These tests verify that /api/invites/accept correctly hashes the raw token
+// with SHA-256 before DB lookup (not the old orphan /api/teams/join behaviour
+// which compared raw tokens against the hashed DB column, always returning 404).
+
+describe('POST /api/invites/accept — SHA-256 hashing regression lock (TEAM-P03.9 Sub-task A)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockAuth.mockResolvedValue(null);
+    mockTeamInviteFindFirst.mockResolvedValue(VALID_INVITE);
+  });
+
+  it('looks up invite by SHA-256 hash of the raw token, not the raw token itself', async () => {
+    // The DB stores hashed tokens; if the route did NOT hash, findFirst would be
+    // called with the raw value and the mock — which checks by reference — would
+    // not receive TOKEN_HASH.
+    await POST(makeRequest({ token: RAW_TOKEN }));
+    expect(mockTeamInviteFindFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ token: TOKEN_HASH }),
+      }),
+    );
+  });
+
+  it('raw token value is NOT passed directly to the DB lookup', async () => {
+    await POST(makeRequest({ token: RAW_TOKEN }));
+    // Confirm the raw token string was never passed to findFirst
+    const callArgs = mockTeamInviteFindFirst.mock.calls[0]?.[0];
+    expect(callArgs?.where?.token).not.toBe(RAW_TOKEN);
+  });
+
+  it('returns 404 when the SHA-256 hash matches no invite (mirrors old orphan bug scenario)', async () => {
+    // Old /api/teams/join passed raw token to hashed column → always 404.
+    // Canonical endpoint must hash correctly; when hash truly misses → 404.
+    mockTeamInviteFindFirst.mockResolvedValue(null);
+    const res = await POST(makeRequest({ token: RAW_TOKEN }));
+    expect(res.status).toBe(404);
+  });
+
+  it('unauthenticated success response includes teamId, teamName, role, and requiresAuth', async () => {
+    const res = await POST(makeRequest({ token: RAW_TOKEN }));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body).toMatchObject({
+      requiresAuth: true,
+      teamId: VALID_INVITE.teamId,
+      teamName: VALID_INVITE.team.name,
+      role: VALID_INVITE.role,
+    });
+  });
+
+  it('authenticated success response includes ok:true, teamId, teamName, role', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    // Wire the transaction to run the callback synchronously.
+    mockTransaction.mockImplementation(async (fn: Function) =>
+      fn({
+        teamInvite: {
+          findFirst: vi.fn().mockResolvedValue(VALID_INVITE),
+          update: vi.fn().mockResolvedValue({}),
+        },
+        teamMember: {
+          findUnique: vi.fn().mockResolvedValue(null),
+          create: vi.fn().mockResolvedValue({}),
+        },
+        user: {
+          findUnique: vi.fn().mockResolvedValue({ email: VALID_INVITE.email }),
+        },
+      }),
+    );
+    const res = await POST(makeRequest({ token: RAW_TOKEN }));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body).toMatchObject({
+      ok: true,
+      teamId: VALID_INVITE.teamId,
+      teamName: VALID_INVITE.team.name,
+      role: VALID_INVITE.role,
+    });
+  });
+
+  it('authenticated path DB lookup also uses SHA-256 hash (not raw token)', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    let capturedHash: string | undefined;
+    mockTransaction.mockImplementation(async (fn: Function) => {
+      const txInviteFindFirst = vi.fn().mockImplementation((args: any) => {
+        capturedHash = args?.where?.token;
+        return Promise.resolve(VALID_INVITE);
+      });
+      return fn({
+        teamInvite: {
+          findFirst: txInviteFindFirst,
+          update: vi.fn().mockResolvedValue({}),
+        },
+        teamMember: {
+          findUnique: vi.fn().mockResolvedValue(null),
+          create: vi.fn().mockResolvedValue({}),
+        },
+        user: {
+          findUnique: vi.fn().mockResolvedValue({ email: VALID_INVITE.email }),
+        },
+      });
+    });
+    await POST(makeRequest({ token: RAW_TOKEN }));
+    expect(capturedHash).toBe(TOKEN_HASH);
+    expect(capturedHash).not.toBe(RAW_TOKEN);
+  });
+});

@@ -45,6 +45,23 @@ interface RateLimitEntry {
   lockedUntil: number;
 }
 
+/**
+ * In-memory rate-limit state keyed by client IP.
+ *
+ * COLD-START RISK (TEAM-P03.9 Sub-task E — CEO-acked): In serverless/edge
+ * runtimes (Vercel, etc.) each new function instance starts with an empty Map.
+ * A coordinated burst from multiple IPs across cold-started instances will not
+ * benefit from cross-instance rate-limit accumulation. The sliding-window and
+ * failure-streak counters are therefore per-instance, not globally consistent.
+ *
+ * Accepted trade-off (CEO ack 2026-05-18 TEAM-P03.9): this endpoint is
+ * invite-only with a 48-hour token TTL, and the failure-streak lockout (5 ×
+ * 404 → 1-hour ban) still applies within a single warm instance. A Redis-backed
+ * global rate-limiter is the correct long-term solution and is tracked as a
+ * follow-up (TEAM-P04 infrastructure layer). For now the in-process Map
+ * provides meaningful protection against unsophisticated enumeration attacks on
+ * a single warm instance without introducing an external dependency.
+ */
 const rateLimits = new Map<string, RateLimitEntry>();
 
 const RATE_LIMIT_WINDOW_MS = 60_000;   // 1-minute sliding window

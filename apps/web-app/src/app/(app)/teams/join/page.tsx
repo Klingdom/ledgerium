@@ -42,7 +42,7 @@ function JoinTeamContent() {
     }
 
     async function join() {
-      const res = await fetch('/api/teams/join', {
+      const res = await fetch('/api/invites/accept', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token }),

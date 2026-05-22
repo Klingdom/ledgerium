@@ -312,6 +312,7 @@ export async function POST(req: NextRequest) {
               where: { id: deletedTeam.id },
               data: {
                 plan: 'free',
+                subscriptionStatus: 'canceled',
                 stripeSubscriptionId: null,
               },
             });
@@ -425,37 +426,67 @@ export async function POST(req: NextRequest) {
         // Ensures subscriptionStatus stays 'active' and handles the trial→paid
         // transition automatically (if status was 'trialing', it flips to 'active').
         //
-        // userId is not available directly on an invoice — we resolve it by
-        // retrieving the subscription and reading its metadata.userId.
-        // If the Stripe API call fails, re-throw so Stripe retries (provisioning
-        // semantics: HTTP 500 is safer than silently ignoring a successful payment).
+        // SECURITY (TEAM-P03.9 Sub-task C): the previous implementation resolved
+        // userId via getStripe().subscriptions.retrieve(subscriptionId) and reading
+        // subscription.metadata?.userId. That metadata field is MUTABLE — an
+        // attacker who gains write access to the Stripe Dashboard can pivot to any
+        // userId without owning the subscription. This is replaced with a
+        // cryptographically-grounded stripeSubscriptionId DB lookup, mirroring the
+        // correct pattern in invoice.payment_failed (lines above). The Stripe API
+        // call is removed entirely.
         const invoice = event.data.object as Stripe.Invoice;
         const subscriptionId = invoice.subscription as string;
         if (!subscriptionId) break;
 
-        const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
-        const userId = subscription.metadata?.userId;
-        if (!userId) {
-          // Subscription exists but has no userId in metadata — this may be a
-          // legacy subscription created before metadata was populated. Log and
-          // return 200 so Stripe does not retry indefinitely.
+        // ── Team-first resolution (mirrors invoice.payment_failed pattern) ────
+        const succeededTeam = await (db as any).team.findFirst({
+          where: { stripeSubscriptionId: subscriptionId },
+        });
+
+        if (succeededTeam) {
+          await (db as any).team.update({
+            where: { id: succeededTeam.id },
+            data: { subscriptionStatus: 'active' },
+          });
+          console.log(
+            `[stripe] Team ${succeededTeam.id} payment succeeded — invoice ${invoice.id} ${invoice.amount_paid} ${invoice.currency}`,
+          );
+          // No PII: only teamId, amount, currency, invoiceId are emitted.
+          trackServer('payment_succeeded', {
+            entity: 'team',
+            teamId: succeededTeam.id,
+            amount: invoice.amount_paid,
+            currency: invoice.currency,
+            invoiceId: invoice.id,
+          });
+          break;
+        }
+
+        // ── Solo-subscriber path ─────────────────────────────────────────────
+        const succeededUser = await db.user.findFirst({
+          where: { stripeSubscriptionId: subscriptionId },
+        });
+        if (!succeededUser) {
+          // No team and no user match this subscriptionId — may be a legacy
+          // subscription created before stripeSubscriptionId was populated.
+          // Log and return 200 so Stripe does not retry indefinitely.
           console.warn(
-            `[stripe] invoice.payment_succeeded: no userId on subscription ${subscriptionId} — skipping DB update`,
+            `[stripe] invoice.payment_succeeded: no team or user found for subscription ${subscriptionId} — skipping DB update`,
           );
           break;
         }
 
         await db.user.update({
-          where: { id: userId },
+          where: { id: succeededUser.id },
           data: { subscriptionStatus: 'active' },
         });
         console.log(
-          `[stripe] User ${userId} payment succeeded — invoice ${invoice.id} ${invoice.amount_paid} ${invoice.currency}`,
+          `[stripe] User ${succeededUser.id} payment succeeded — invoice ${invoice.id} ${invoice.amount_paid} ${invoice.currency}`,
         );
         // No PII: only userId, amount, currency, invoiceId are emitted.
         // Card numbers, customer email, customer name, and invoice line items are excluded.
         trackServer('payment_succeeded', {
-          userId,
+          userId: succeededUser.id,
           amount: invoice.amount_paid,
           currency: invoice.currency,
           invoiceId: invoice.id,

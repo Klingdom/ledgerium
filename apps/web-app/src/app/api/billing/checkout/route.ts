@@ -4,6 +4,7 @@ import { db } from '@/db';
 import { getStripe, getPriceId, PRO_PRICE_ID, APP_URL, TRIAL_PERIOD_DAYS } from '@/lib/stripe';
 import { toPlanType } from '@/lib/plans';
 import { isAdminUnlimited } from '@/lib/admin-allowlist';
+import { effectivePlanFor } from '@/lib/feature-gating';
 import { trackServer } from '@/lib/analytics-server';
 import type { PaidPlanType, BillingInterval } from '@/lib/stripe';
 import type Stripe from 'stripe';
@@ -110,8 +111,10 @@ export async function POST(req: NextRequest) {
   }
 
   // If user already has an active subscription at or above the requested plan,
-  // redirect to portal for plan management instead.
-  const currentPlan = toPlanType(user.plan);
+  // redirect to portal for plan management instead. Uses effectivePlanFor so
+  // workspace members on a paid team plan are also blocked from double-billing
+  // (TEAM-P03.9 Sub-task B-1 — fixes solo-plan-only toPlanType check).
+  const currentPlan = await effectivePlanFor(user.id);
   if (currentPlan !== 'free' && user.subscriptionStatus === 'active') {
     return NextResponse.json(
       { error: 'You already have an active subscription. Manage it from your account.', code: 'already_subscribed', redirect: '/account' },
