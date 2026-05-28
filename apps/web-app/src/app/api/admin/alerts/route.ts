@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { canAccessAdmin } from '@/lib/admin-allowlist';
 import { computeAlerts, type AlertSeverity } from '@/lib/compute-alerts';
 import { sendAlertNotification } from '@/lib/notifications';
 
@@ -28,11 +29,8 @@ const SEVERITY_ORDER: Record<AlertSeverity, number> = { P1: 1, P2: 2, P3: 3 };
 export async function GET() {
   const session = await auth();
 
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  if (!session.user.isAdmin) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!canAccessAdmin(session)) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
   try {
@@ -60,11 +58,8 @@ export async function GET() {
 export async function POST(request: Request) {
   const session = await auth();
 
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  if (!session.user.isAdmin) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!canAccessAdmin(session)) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
   // Parse optional threshold from body — default P2 (sends P1 + P2)

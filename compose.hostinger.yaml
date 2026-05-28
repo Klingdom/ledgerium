@@ -41,8 +41,62 @@ services:
     networks:
       - proxy-net
 
+  # ── Self-hosted Umami analytics (D-1 decision: self-hosted on Hostinger VPS)
+  # Umami runs as its own sidecar on port 3001 (host) → 3000 (container).
+  # It uses a dedicated Postgres instance (umami-db) on the same proxy-net.
+  # The NEXT_PUBLIC_UMAMI_SCRIPT_URL in the web app points to the analytics
+  # subdomain served by the reverse proxy in front of this container.
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    container_name: umami
+    restart: unless-stopped
+    depends_on:
+      - umami-db
+    ports:
+      - "3001:3000"
+    environment:
+      - DATABASE_URL=postgresql://umami:${UMAMI_DB_PASSWORD}@umami-db:5432/umami
+      - DATABASE_TYPE=postgresql
+      - APP_SECRET=${UMAMI_APP_SECRET}
+      # TRACKER_SCRIPT_NAME keeps the default filename so the browser request
+      # to /script.js resolves correctly via the reverse-proxy subdomain.
+      - TRACKER_SCRIPT_NAME=script.js
+    # Reverse-proxy routing:
+    # The external `proxy-net` network means an existing reverse proxy manages
+    # TLS + subdomain routing on this VPS. No Traefik/Caddy config was found
+    # in the repository — see docs/runbooks/UMAMI_SETUP.md §4 for the three
+    # possible approaches depending on which proxy Hostinger provisions.
+    # If Traefik is in use, uncomment the labels block below:
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.umami.rule=Host(`analytics.ledgerium.ai`)"
+    #   - "traefik.http.routers.umami.tls=true"
+    #   - "traefik.http.routers.umami.tls.certresolver=letsencrypt"
+    #   - "traefik.http.services.umami.loadbalancer.server.port=3000"
+    networks:
+      - proxy-net
+
+  umami-db:
+    image: postgres:15-alpine
+    container_name: umami-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=umami
+      - POSTGRES_USER=umami
+      - POSTGRES_PASSWORD=${UMAMI_DB_PASSWORD}
+    volumes:
+      - umami-db-data:/var/lib/postgresql/data
+    # umami-db is intentionally NOT exposed on host ports — it is only
+    # reachable by the `umami` container on the shared proxy-net.
+    networks:
+      - proxy-net
+
 volumes:
   ledgerium-data:
+    driver: local
+  # Dedicated volume for Umami's Postgres data. Separate from ledgerium-data
+  # so `docker volume rm ledgerium-data` does not affect analytics history.
+  umami-db-data:
     driver: local
 
 networks:

@@ -218,6 +218,8 @@ export interface LiveStep {
   boundaryReason?: BoundaryReason
   grouping?: GroupingReason
   pageLabel?: string
+  /** Real document.title from the page being recorded (e.g., "Inbox (3) – phil@mediafier.ai"). */
+  pageTitle?: string
   confidence: number
   eventCount: number
   startedAt: number
@@ -303,10 +305,8 @@ export interface HistoryEntry {
 
 export interface ExtensionSettings {
   uploadUrl: string
-  apiKey: string
   allowedDomains: string[]
   blockedDomains: string[]
-  telemetryEnabled: boolean  // opt-in analytics for recording lifecycle
 }
 
 // ─── Message bus ──────────────────────────────────────────────────────────────

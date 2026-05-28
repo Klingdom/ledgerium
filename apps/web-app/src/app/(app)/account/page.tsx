@@ -14,12 +14,14 @@ import {
   Trash2,
   Plus,
   BarChart3,
+  Activity,
   Settings,
   HelpCircle,
 } from 'lucide-react';
 import { PRICING_CONFIG } from '@/lib/config';
 import { PLAN_HIERARCHY } from '@/lib/plans';
 import type { PlanType } from '@/lib/plans';
+import { isAdminUnlimited } from '@/lib/admin-allowlist';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -676,14 +678,30 @@ export default function AccountPage() {
         )}
       </div>
 
-      {/* Admin — only visible to admins */}
-      {session?.user?.isAdmin && (
+      {/* Admin — only visible to allowlisted admins (ADM-002 PR-1 / iter 090) */}
+      {isAdminUnlimited(session?.user?.email) && (
         <div className="card px-ds-5 py-ds-5 border-brand-200 bg-brand-50/30">
           <div className="flex items-center gap-ds-3 mb-ds-4">
             <Settings className="h-5 w-5 text-brand-600" />
             <h2 className="text-ds-base font-semibold text-[var(--content-primary)]">Admin</h2>
           </div>
           <div className="space-y-ds-2">
+            {/* Operations Dashboard link — ADM-002 PR-4 / iter 093 */}
+            <Link
+              href="/admin/operations"
+              className="flex items-center gap-ds-3 rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-elevated)] px-ds-4 py-ds-3 hover:border-brand-200 transition-colors"
+              aria-label="Operations Dashboard"
+            >
+              <Activity className="h-4 w-4 text-brand-600" />
+              <div>
+                <p className="text-ds-sm font-medium text-[var(--content-primary)]">
+                  Operations Dashboard
+                </p>
+                <p className="text-ds-xs text-[var(--content-secondary)]">
+                  Users, recordings, system health
+                </p>
+              </div>
+            </Link>
             <Link
               href="/analytics/product"
               className="flex items-center gap-ds-3 rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-elevated)] px-ds-4 py-ds-3 hover:border-brand-200 transition-colors"

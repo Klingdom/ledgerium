@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  width:1400px;height:560px;overflow:hidden;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.canvas{
+  width:1400px;height:560px;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#0f172a 0%,#0d2318 40%,#0f172a 70%,#0a1628 100%);
+  display:flex;align-items:center;
+}
+
+/* Background */
+.grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:48px 48px;
+}
+.glow-left{
+  position:absolute;
+  width:600px;height:600px;top:-200px;left:-100px;border-radius:50%;
+  background:radial-gradient(circle,rgba(5,150,105,.16) 0%,transparent 65%);
+}
+.glow-center{
+  position:absolute;
+  width:400px;height:400px;top:-80px;left:50%;transform:translateX(-50%);border-radius:50%;
+  background:radial-gradient(circle,rgba(16,185,129,.08) 0%,transparent 65%);
+}
+.glow-right{
+  position:absolute;
+  width:500px;height:500px;bottom:-200px;right:-80px;border-radius:50%;
+  background:radial-gradient(circle,rgba(59,130,246,.1) 0%,transparent 65%);
+}
+
+/* === LEFT SECTION: Branding + headline === */
+.section-left{
+  position:relative;z-index:1;
+  width:420px;flex-shrink:0;
+  padding:0 48px 0 64px;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.wordmark{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.logo-mark{
+  width:48px;height:48px;border-radius:12px;
+  background:linear-gradient(135deg,#059669,#047857);
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;font-weight:700;color:#fff;
+  box-shadow:0 6px 20px rgba(5,150,105,.5);
+  flex-shrink:0;
+}
+.brand-name{font-size:24px;font-weight:700;color:#f1f5f9;letter-spacing:-.02em}
+.brand-tagline{font-size:11px;font-weight:500;color:#10b981;letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+.headline{
+  font-size:42px;font-weight:800;color:#fff;line-height:1.1;
+  letter-spacing:-.04em;margin-bottom:16px;
+}
+.headline span{
+  color:#10b981;
+  display:inline-block;
+}
+.sub{
+  font-size:15px;color:#94a3b8;line-height:1.6;margin-bottom:28px;
+  max-width:320px;
+}
+.pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(5,150,105,.12);border:1px solid rgba(5,150,105,.25);
+  border-radius:20px;padding:6px 16px;
+}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:#10b981;flex-shrink:0}
+.pill-text{font-size:11px;font-weight:600;color:#10b981;letter-spacing:.07em;text-transform:uppercase}
+
+/* === CENTER SECTION: Vertical divider + stat pills === */
+.divider{
+  position:relative;z-index:1;
+  width:1px;height:320px;
+  background:linear-gradient(to bottom,transparent,rgba(16,185,129,.25),transparent);
+  flex-shrink:0;margin:0 8px;
+}
+
+.section-center{
+  position:relative;z-index:1;
+  width:220px;flex-shrink:0;
+  padding:0 28px;
+  display:flex;flex-direction:column;justify-content:center;gap:16px;
+}
+.stat-card{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;
+  padding:16px 18px;
+}
+.stat-num{font-size:32px;font-weight:800;color:#fff;letter-spacing:-.04em;line-height:1}
+.stat-num span{font-size:18px;font-weight:600;color:#10b981;margin-left:2px}
+.stat-label{font-size:12px;color:#64748b;margin-top:4px;font-weight:500}
+.stat-label strong{color:#94a3b8;font-weight:600}
+
+/* === RIGHT SECTION: Three feature panels === */
+.divider2{
+  position:relative;z-index:1;
+  width:1px;height:320px;
+  background:linear-gradient(to bottom,transparent,rgba(16,185,129,.25),transparent);
+  flex-shrink:0;margin:0 8px;
+}
+.section-right{
+  position:relative;z-index:1;
+  flex:1;
+  padding:0 48px 0 28px;
+  display:flex;flex-direction:column;justify-content:center;gap:16px;
+}
+.feature-card{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:12px;
+  padding:16px 20px;
+  display:flex;align-items:flex-start;gap:14px;
+}
+.feat-icon{
+  width:36px;height:36px;border-radius:9px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;margin-top:1px;
+}
+.feat-icon svg{width:18px;height:18px}
+.feat-body{}
+.feat-title{font-size:14px;font-weight:700;color:#e2e8f0;margin-bottom:3px;letter-spacing:-.01em}
+.feat-desc{font-size:12px;color:#64748b;line-height:1.5}
+.feat-tag{
+  display:inline-flex;align-items:center;
+  font-size:10px;font-weight:600;color:#10b981;
+  text-transform:uppercase;letter-spacing:.06em;
+  background:rgba(16,185,129,.12);border-radius:4px;
+  padding:2px 6px;margin-top:5px;
+}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="canvas">
+  <div class="grid"></div>
+  <div class="glow-left"></div>
+  <div class="glow-center"></div>
+  <div class="glow-right"></div>
+
+  <!-- Left: brand + headline -->
+  <div class="section-left">
+    <div class="wordmark">
+      <div class="logo-mark">L</div>
+      <div>
+        <div class="brand-name">Ledgerium</div>
+        <div class="brand-tagline">AI Recorder</div>
+      </div>
+    </div>
+    <div class="headline">Every process<br>you run becomes<br><span>intelligence.</span></div>
+    <div class="sub">Record any digital workflow once. Ledgerium builds your SOP, maps the process, and measures cycle time — automatically.</div>
+    <div class="pill">
+      <span class="pill-dot"></span>
+      <span class="pill-text">Free to install · No code required</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Center: key stats -->
+  <div class="section-center">
+    <div class="stat-card">
+      <div class="stat-num">1<span>click</span></div>
+      <div class="stat-label"><strong>Start recording</strong> any workflow</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">~30<span>s</span></div>
+      <div class="stat-label"><strong>SOP generated</strong> after session ends</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">100<span>%</span></div>
+      <div class="stat-label"><strong>Evidence-linked</strong> process intelligence</div>
+    </div>
+  </div>
+
+  <div class="divider2"></div>
+
+  <!-- Right: feature cards -->
+  <div class="section-right">
+    <div class="feature-card">
+      <div class="feat-icon" style="background:rgba(20,184,166,.15)">
+        <svg viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="#14b8a6" stroke-width="1.5"/><path d="M9 5v4l3 2" stroke="#14b8a6" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="feat-body">
+        <div class="feat-title">Live step capture &amp; segmentation</div>
+        <div class="feat-desc">Every click, form fill, and navigation is captured and organized into named, meaningful steps in real time.</div>
+        <div class="feat-tag">Real-time</div>
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <div class="feat-icon" style="background:rgba(5,150,105,.15)">
+        <svg viewBox="0 0 18 18" fill="none"><rect x="2" y="4" width="14" height="10" rx="2.5" stroke="#059669" stroke-width="1.5"/><path d="M5.5 9h7M5.5 11.5h5" stroke="#059669" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="feat-body">
+        <div class="feat-title">Auto-generated SOPs &amp; process maps</div>
+        <div class="feat-desc">Clean documentation and visual flow diagrams are ready the moment you stop recording. No manual work.</div>
+        <div class="feat-tag">Instant</div>
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <div class="feat-icon" style="background:rgba(139,92,246,.15)">
+        <svg viewBox="0 0 18 18" fill="none"><path d="M2 14 L5.5 8.5 L9 11 L12.5 5.5 L16 8" stroke="#8b5cf6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="feat-body">
+        <div class="feat-title">Cycle time &amp; health scoring</div>
+        <div class="feat-desc">Measure step duration, detect variance, surface automation opportunities across your workflow library.</div>
+        <div class="feat-tag">Intelligence</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

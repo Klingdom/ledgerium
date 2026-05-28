@@ -6,6 +6,499 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-05-26] - Iteration 097 — CHROME-001 PR-CHROME-A: manifest cleanup + icons + console stripping + privacy policy + submission runbook (Mode 2 `directed`, `frontend-engineer` × 1)
+
+**Trigger:** CEO-directed Chrome Web Store submission sprint (PR-CHROME-A). Target review verdict: MINOR-CLEANUP. **D-1 reverse-portfolio-drift counter 22 → 0 FULL CLEARANCE** (extension-app surface touched).
+
+### Added
+
+- `apps/extension-app/icons/icon-16.png` (214B) — area-averaged 16×16 downscale of 1024px master (pure Node.js/zlib, no external deps)
+- `apps/extension-app/icons/icon-32.png` (596B) — area-averaged 32×32 downscale
+- `apps/extension-app/icons/icon-48.png` (1106B) — area-averaged 48×48 downscale
+- `apps/web-app/src/app/(public)/privacy/extension/page.tsx` — extension-specific privacy policy; 10 sections; `PolicySection` + `PermissionRow` helpers; all 6 permission entries justified per Chrome Store requirements; route `ledgerium.ai/privacy/extension`
+- `docs/runbooks/CHROME_STORE_SUBMISSION.md` — 8 BLOCKING checklist items; build + bundle steps; verbatim permission justification strings for all 6 Chrome Store Dashboard fields; 399-char privacy listing copy; data safety table; submission steps; 2-phase target path table; post-approval steps
+
+### Changed
+
+- `apps/extension-app/manifest.json` — removed `activeTab` (redundant when `tabs` present; `chrome.tabs.onUpdated/onActivated` require `tabs`); all 4 icon sizes declared in `icons` + `action.default_icon`; `"incognito": "not_allowed"` confirmed present; WAR scope narrowed to `https://*.ledgerium.ai/*`
+- `apps/extension-app/vite.config.ts` — added `build: { minify: 'esbuild', sourcemap: false }` + `esbuild: { drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [] }` (BLOCKER-2: console.log stripping verified)
+
+### Validation
+
+- extension-app `pnpm test` **244/244** all pass (11 test files)
+- `NODE_ENV=production` build succeeds in 3.67s; `grep -r "console.log" apps/extension-app/dist/` → **0 matches**
+- E2E static harness `test:e2e` **4/4** pass
+- workspace `pnpm typecheck` clean across all 11 packages/apps
+- Icons present in `dist/icons/`: icon-16.png (0.21kB) + icon-32.png (0.60kB) + icon-48.png (1.11kB) + icon-128.png (910.66kB)
+
+---
+
+## [2026-05-26] - Iteration 096 — ADM-002 PR-7 user-detail slide-in drawer (Mode 2 `directed`, `frontend-engineer` × 1 + ux-designer adjacency)
+
+**Trigger:** CEO drill-down sprint #2; closes #1 admin workflow gap ("find user X and help them"). Consumes PR-6 endpoint.
+
+### Added
+
+NEW components at `apps/web-app/src/components/admin-operations/user-detail/`:
+- `UserDetailDrawer.tsx` — right-anchored slide-in; ARIA dialog; Escape + click-outside close; focus management
+- `UserDetailIdentity.tsx` — email/name/plan badge/subscription status/createdAt
+- `UserDetailActivity.tsx` — uploadCount/workflowCount/lastActivityAt
+- `UserDetailMemberships.tsx` — workspace list with role badges + empty state
+- `UserDetailActions.tsx` — disabled placeholder buttons (PR-9/PR-10 will activate)
+
+### Changed
+
+- `LeaderboardTable.tsx` — additive `onRowClick?: (userId: string) => void` prop; backward-compatible
+- `AdminOperationsDashboard.tsx` — owns drawer state; passes `onRowClick={setSelectedUserId}` to LeaderboardTable
+
+### Validation
+
+- web-app filter `pnpm test` **1267 → 1310 / +43 across 60 → 66 test files** all pass (MR-006 ≥12 satisfied 3.5×)
+- workspace `pnpm typecheck` clean across all 10 packages/apps
+
+### Impact
+
+- **#1 admin workflow CLOSED** — admins can click any user in top-uploaders leaderboard → drawer with full context
+- WDC-002 §8 slide-in pattern reused; MDR-P08 useEscapeDispatch reused
+- Pool 56 → 55 (#167 closed)
+- Cool-off recharge UNCHANGED at 3/3 FULL RE-ARM (preservation streak 43-51 events; longest-streak record continues)
+- D-1 reverse-portfolio-drift 21 → 22 (user-ack #18 logged)
+- Area saturation rolling-5: 18-consecutive web-app
+- Agent-diversity `frontend-engineer` × 1 (clean rotation)
+- Numerator credit: +1 at iter 096 close
+
+### QA attention items (logged NOT promoted)
+
+1. Retry button in error state resets status to idle but doesn't actually re-fetch (needs retryKey increment pattern)
+2. previousFocusRef behavior depends on browser focus capture timing
+3. UserDetailActions placeholder buttons disabled until PR-9/PR-10
+
+### Next iter 097 = PR-8 high-intent user surface
+
+Pending CEO direction on Mode 3-adjacent home page review (just received).
+
+---
+
+## [2026-05-26] - Iteration 095 — ADM-002 PR-6 user-detail endpoint (Mode 2 `directed`, `backend-engineer` × 1 clean rotation)
+
+**Trigger:** CEO drill-down sprint opener — PR-6 of 18; foundational endpoint for PR-7 drawer + PR-9 trial extension + PR-10 quota boost.
+
+### Added
+
+- `apps/web-app/src/app/api/admin/users/[id]/route.ts` — ~160 LOC GET handler with `{data, error, meta}` envelope
+- `apps/web-app/src/app/api/admin/users/[id]/route.test.ts` — 13 substantive `it()` blocks
+
+### Behavior
+
+- Auth gate: `canAccessAdmin(session)` → 404 for non-admin (NOT 401/403) per AUTH-2; user-not-found 404 indistinguishable from auth 404 (no enumeration)
+- 5 parallel Prisma queries via `Promise.all` (user / uploadCount / workflowCount / lastUpload / memberships with team name)
+- DET-1: single `referenceNowMs = Date.now()` at handler entry; `meta.generatedAt` ISO-8601 + `meta.durationMs`
+- DB-1: cross-DB safe (findUnique / count / findMany / findFirst; no raw SQL)
+- PII-1 exception logged: full `email` returned (admin-only endpoint serving admin context; documented)
+- AUDIT-1: read-only; no audit row required
+- TYPE-1: exported `AdminUserDetailData` + `AdminUserDetailApiResponse` interfaces
+- Response shape: `user` (10 fields) + `activity` (uploadCount/workflowCount/lastActivityAt) + `memberships` (array with teamId/teamName/role/status/joinedAt)
+
+### Validation
+
+- web-app filter `pnpm test` **1254 → 1267 / +13 across 59 → 60 test files** all pass (MR-006 Change C ≥12 satisfied at 13)
+- workspace `pnpm typecheck` clean across all 10 packages/apps
+- 13-item CONTRIBUTING.md checklist self-verified per PR-5
+
+### Impact
+
+- Foundational endpoint UNBLOCKS PR-7 (drawer) + PR-9 (trial extension) + PR-10 (quota boost)
+- Pool 57 → 56 (#166 closed)
+- Cool-off recharge UNCHANGED at 3/3 FULL RE-ARM (preservation streak 42-50 events; longest-streak record continues)
+- D-1 reverse-portfolio-drift 20 → 21 (user-ack #17 logged)
+- Area saturation rolling-5: 17-consecutive web-app (Mode 5 sat ack from iter 081 continues to cover)
+- Agent-diversity `backend-engineer` × 1 (clean rotation; CD-3 fully reset)
+- Numerator credit: +1 at iter 095 close
+
+### Scope-adjacent observations logged NOT promoted
+
+1. `trialEndsAt: null` placeholder — User Prisma model has no `trialEndsAt` field; **PR-9 (trial extension) will need additive schema migration**
+2. `workflowCount` filter coupled to soft-delete semantics (`status: { not: 'deleted' }`)
+3. `lastActivityAt` derived from Upload only (not workflow execution)
+
+### Next iter 096 = PR-7 user-detail slide-in drawer
+
+`frontend-engineer` PRIMARY + `ux-designer` adjacent. Right-anchored drawer matching WDC-002 §8 + iter-061 ColumnPicker. Escape close via `useEscapeDispatch` MDR-P08. LeaderboardTable rows become clickable.
+
+---
+
+## [2026-05-26] - Iteration 094 — ADM-002 PR-5 CONTRIBUTING + PR template (Mode 2 `directed`, `system-architect` × 1 clean rotation continues)
+
+**Trigger:** CEO foundation sprint completion (5 of 5); codifies 13-item Architectural + Security + PII review checklist as permanent governance artifact. **ADM-002 FOUNDATION SPRINT COMPLETE.**
+
+### Added
+
+- `CONTRIBUTING.md` (NEW; 187 LOC) — PR-based delivery workflow preamble + 13-item checklist verbatim from ADM-002 §5 + 10-step review workflow verbatim from ADM-002 §7 + 5 PENDING ADR registry
+- `.github/PULL_REQUEST_TEMPLATE.md` (NEW; 50 LOC) — auto-applied to all PRs; checklist as markdown checkboxes (single-line presentation; semantics preserved)
+
+### Validation
+
+- web-app filter `pnpm test` **1254 UNCHANGED** across 59 test files (docs-only iteration; no test deltas expected)
+- workspace `pnpm typecheck` clean across all 10 packages/apps
+- Markdown structural verification via Grep: 13 checklist items present in both files
+
+### Impact
+
+- **PR-based workflow now governance-codified** — future admin PRs (PRs 6-18) automatically receive the checklist on PR open via GitHub native template loading
+- 5 PENDING ADRs documented for future write before related PRs: ADR-ADMIN-AUTHZ / ADR-ADMIN-AUDIT / ADR-ADMIN-PII / ADR-ADMIN-DEPLOY / ADR-ADMIN-INGEST
+- Pool 58 → 57 (#165 closed)
+- Cool-off recharge UNCHANGED at 3/3 FULL RE-ARM (preservation streak 41-49 events; longest-streak record continues)
+- D-1 reverse-portfolio-drift 19 → 20 (user-ack #16 logged for docs-only; web-app surface counts)
+- Area saturation rolling-5: 15+1-consecutive (Mode 5 sat ack from iter 081 continues to cover)
+- Agent-diversity `system-architect` × 1 (clean rotation; backend-engineer × 4 CD-3 fully reset by frontend × 1 + system-architect × 1)
+- Numerator credit: +1 at iter 094 close
+- **ADM-002 P0 SECURITY DEFECTS ALL CLOSED**: auth split-brain (PR-1) + bootstrap race+CSRF+rate-limit (PR-2) + cron secret log-exposure (PR-3)
+- Foundation sprint cumulative: +75 substantive tests (1179 → 1254 across 52 → 59 test files); 5 PRs / 5 iterations / 5 days; 4 specialist agents engaged (backend-engineer × 3 + frontend-engineer × 1 + system-architect × 1)
+
+---
+
+## [2026-05-26] - Iteration 093 — ADM-002 PR-4 account-page link (Mode 2 `directed`, `frontend-engineer` MANDATORY rotation)
+
+**Trigger:** CEO foundation sprint continuation; closes navigational gap (Account page admin section had ZERO link to `/admin/operations` despite iter 071-073 ship).
+
+### Added
+
+- Operations Dashboard `<Link>` in account page admin section with `Activity` icon (BarChart3 already taken by Product Analytics), label "Operations Dashboard", subtitle "Users, recordings, system health"
+- `apps/web-app/src/app/(app)/account/page.test.ts` — 12 tests across 3 describe groups (gating + link contract + render order)
+
+### Changed
+
+- `apps/web-app/src/app/(app)/account/page.tsx` — added Activity import + new Link BEFORE existing Product Analytics link (additive; existing Product Analytics link byte-identical)
+- Gate condition UNCHANGED from PR-1 (`isAdminUnlimited(session?.user?.email)`)
+
+### Validation
+
+- web-app filter `pnpm test` **1242 → 1254 / +12 across 58 → 59 test files** all pass (MR-006 Change C ≥12 satisfied at exactly 12)
+- workspace `pnpm typecheck` clean across all 10 packages/apps
+
+### Impact
+
+- **Navigational gap CLOSED** — admins navigating from Account page can now discover Operations Dashboard without URL memorization
+- Demo-relevant: PDLT-001 §2 admin dashboard discoverability for org-level/IT evaluator demos
+- Pool 59 → 58 (#164 closed)
+- Cool-off recharge UNCHANGED at 3/3 FULL RE-ARM (preservation streak 40-48 events; longest-streak record continues)
+- D-1 reverse-portfolio-drift 18 → 19 (user-ack #15 logged)
+- Area saturation rolling-5: 15-consecutive web-app
+- **Agent-diversity: CLEAN ROTATION** — `frontend-engineer` × 1 breaks 4-consecutive `backend-engineer` run; CD-3 threshold cleared
+- Numerator credit: +1 at iter 093 close
+- Next iter 094 = PR-5 PR template + CONTRIBUTING.md (`system-architect` — second consecutive non-backend agent; clean rotation continues)
+
+---
+
+## [2026-05-26] - Iteration 092 — ADM-002 PR-3 cron secret cleanup (Mode 2 `directed`, `backend-engineer` × 4 reaches CD-3)
+
+**Trigger:** CEO continuation of ADM-002 foundation sprint; closes P1 log-exposure risk (`CRON_SECRET` in query param visible in access/CDN/proxy/browser-history logs).
+
+### Changed
+
+- `apps/web-app/src/app/api/admin/alerts/check/route.ts` — removed `?secret=` query path entirely (no deprecation); replaced `!==` comparison with `crypto.timingSafeEqual` (length guard before timingSafeEqual); missing `CRON_SECRET` env → 500 (config error) not 401
+- Bearer-token regex match: `/^Bearer\s+(.+)$/i` — rejects lowercase `bearer` and missing-space edge cases
+
+### Added
+
+- `apps/web-app/src/app/api/admin/alerts/check/route.test.ts` — 10 tests covering all auth paths including removed `?secret=` confirmed-inoperative
+
+### Validation
+
+- web-app filter `pnpm test` **1232 → 1242 / +10 across 57 → 58 test files** all pass
+- workspace `pnpm typecheck` clean across all 10 packages/apps
+
+### Impact
+
+- **P1 log-exposure risk CLOSED** — secret values can no longer be logged via query strings; rotation no longer reveals retroactively-exposed values
+- **Timing-attack resistance** added (low theoretical risk in cron context but cryptographic best-practice)
+- Pool 60 → 59 (#163 closed)
+- Cool-off recharge UNCHANGED at 3/3 FULL RE-ARM (preservation streak 39-47 events; longest-streak record continues)
+- D-1 reverse-portfolio-drift 17 → 18 (user-ack #14 logged)
+- Area saturation rolling-5: 14-consecutive web-app
+- Agent-diversity: `backend-engineer` consecutive = **4 (CD-3 threshold REACHED)**; PR-4 `frontend-engineer` rotation MANDATORY
+- Numerator credit: +1 at iter 092 close
+- Next iter 093 = PR-4 account-page link (`frontend-engineer` MANDATORY rotation; breaks 4-consecutive backend run cleanly)
+
+---
+
+## [2026-05-26] - Iteration 091 — ADM-002 PR-2 bootstrap hardening (Mode 2 `directed`, `backend-engineer` × 3 under CD-3)
+
+**Trigger:** CEO continuation of foundation sprint; closes P0 bootstrap race + P1 CSRF + P1 rate-limit gaps.
+
+### Added
+
+- `apps/web-app/src/lib/rate-limit/bootstrap-buckets.ts` — per-IP token bucket (3 req/hour); mirrors iter-088 invite-buckets pattern; `@ledgerium-rate-limit-cold-start-acceptable-risk` JSDoc
+- `apps/web-app/src/lib/rate-limit/bootstrap-buckets.test.ts` — 7 tests
+- `apps/web-app/src/app/api/admin/bootstrap/route.test.ts` — 20 tests covering 5-guard chain + P2034 + PII-safe audit
+- `admin_bootstrap_claimed` variant in `analytics.ts` AnalyticsEvent discriminated union (PII-safe: email domain only / partial IP / UA family)
+
+### Changed
+
+- **`POST /api/admin/bootstrap/route.ts`** rewritten with 5-guard chain in order: `DISABLE_ADMIN_BOOTSTRAP=true` → 404 / missing `X-Admin-Bootstrap-Confirm: true` → 400 / per-IP rate limit (3/hour) → 429 / no session → 401 / SERIALIZABLE `$transaction` check-and-promote → 403 (existing) or 200 (success)
+- Prisma SERIALIZABLE isolation; P2034 conflict → 409 with `code: 'serialization_failure', retryable: true` (parallels iter 085 invite-accept pattern)
+- `trackServer('admin_bootstrap_claimed')` emitted on successful promotion (fire-and-forget; non-blocking)
+- `iter-087-p0-flags.test.ts` updated for new mandatory `req: NextRequest` signature (Demo-F1 test intent preserved exactly)
+
+### Validation
+
+- web-app filter `pnpm test` **1204 → 1232 / +28 across 55 → 57 test files** all pass (MR-006 Change C ≥12 SATISFIED 2.3×)
+- workspace `pnpm typecheck` clean across all 10 packages/apps
+- BUG-01 + BUG-04 regression locks preserved byte-identical
+
+### Impact
+
+- **P0 race condition CLOSED** — SERIALIZABLE transaction + P2034 retryable
+- **P1 CSRF CLOSED** — explicit confirmation header required (cross-origin browser POSTs cannot set arbitrary headers)
+- **P1 rate limit CLOSED** — 3 req/hour/IP; cold-start risk acked per established convention
+- **Audit trail** — every successful bootstrap emits PII-safe analytics event
+- Pool 61 → 60 (#162 closed)
+- Cool-off recharge UNCHANGED at 3/3 FULL RE-ARM (preservation streak 38-46 events; longest-streak record continues)
+- D-1 reverse-portfolio-drift 16 → 17 (user-ack #13 logged)
+- Area saturation rolling-5: 13-consecutive web-app (Mode 5 sat ack continues)
+- Agent-diversity `backend-engineer` consecutive = 3 (CD-3 threshold approaching; PR-3 also backend → CD-3 trigger imminent; PR-4 frontend-engineer rotation MANDATORY)
+- Numerator credit: +1 at iter 091 close (closes row #162)
+- Next iter 092 = PR-3 cron secret cleanup (`backend-engineer` × 4 = CD-3 threshold reached; final use of consecutive backend before MANDATORY rotation)
+
+---
+
+## [2026-05-26] - Iteration 090 — ADM-002 PR-1 auth unification (Mode 2 `directed`, `backend-engineer` PRIMARY clean continuation)
+
+**Trigger:** CEO directive *"accept all prs and proceed to development"* — ratifies ADM-002 §10 D-01 through D-18 per silence-as-accept; foundation sprint position 1 of 5; closes P0 auth split-brain security defect.
+
+**Selection driver:** `directed` (Mode 2 CEO-named pick of row #161 ADM-002 PR-1; foundation sprint sequence open).
+
+### Added
+
+- `apps/web-app/src/lib/admin-allowlist.ts` — unified `canAccessAdmin(session)` predicate replacing 3-mechanism split-brain
+- `apps/web-app/src/lib/admin-allowlist.test.ts` — 13 tests (6 isAdminUnlimited + 7 canAccessAdmin including privilege-inversion regression)
+- `apps/web-app/src/app/api/admin/alerts/route.test.ts` — 7 tests (3 GET + 4 POST)
+- `apps/web-app/src/app/api/admin/cleanup-events/route.test.ts` — 5 tests
+
+### Changed
+
+- **`/api/admin/alerts/route.ts`** — both GET + POST use `canAccessAdmin(session)`; return 404 (not 401/403) for non-admin
+- **`/api/admin/cleanup-events/route.ts`** — uses `canAccessAdmin(session)`; returns 404; null-safety fix on session logging
+- **`apps/web-app/src/app/(app)/account/page.tsx`** — admin section guard uses `isAdminUnlimited(session?.user?.email)` (Client Component primitive)
+- **Authorization model post-PR-1**: ALL admin surfaces (alerts GET/POST + cleanup-events + operations route + operations page + account section) gate exclusively on `isAdminUnlimited(email)`; `session.user.isAdmin` DB flag no longer consumed for gating; privilege inversion closed
+- **`POST /api/admin/bootstrap/route.ts`** — UNCHANGED (Sub-task 4 disposition: no input gating reads of `session.user.isAdmin`; route logic untouched; bootstrap continues disabled in prod via `DISABLE_ADMIN_BOOTSTRAP=true`)
+
+### Validation
+
+- web-app filter `pnpm test` **1179 → 1204 / +25 across 52 → 55 test files** all pass (MR-006 Change C ≥12 threshold SATISFIED with 2× margin)
+- workspace `pnpm typecheck` clean across all 10 packages/apps
+- Files modified: 4 production .ts (+1 unchanged bootstrap.ts) + 3 NEW test files
+- LOC delta: +25 prod / -12 prod (net +13) + +25 substantive test `it()` blocks
+- BUG-01 + BUG-04 regression locks preserved byte-identical
+
+### Impact
+
+- **P0 SECURITY DEFECT CLOSED** (ADM-002 §1 finding #1) — privilege inversion no longer possible; bootstrap-promoted users do NOT gain destructive endpoint access without allowlist membership
+- **Endpoint existence consistently hidden** via 404 across all admin routes (ADM-SEC-03 per qa-engineer §6)
+- **18 ADM-002 PRs split into independent backlog rows #161-#178** per MR-016 Change A structural-umbrella-split discipline ratified MR-017; preserves numerator-credit accuracy for each PR ship
+- Pool 44 → 61 at ADM-002 ratification + iter 090 close (44 + 18 PR rows added − 1 PR-1 closed = 61)
+- Cool-off recharge UNCHANGED at 3/3 FULL RE-ARM (preservation streak 37-45 events; longest-streak record continues)
+- D-1 reverse-portfolio-drift 15 → 16 (web-app non-extension; user-ack #12 logged per MR-005 D-1; trip persists)
+- Area saturation rolling-5: 12-consecutive web-app (Mode 5 sat ack from iter 081 continues to cover)
+- Agent-diversity `backend-engineer` consecutive = 2 (clean post-iter-089; well under CD-3 × 4)
+- Numerator credit: +1 attaches at iter 090 close (closes row #161 ADM-002 PR-1)
+- Next iter 091 = PR-2 bootstrap hardening (`backend-engineer` × 3 still under CD-3)
+
+---
+
+## [2026-05-26] - Iteration 089 — OP-3 demo account seed script (Mode 2 `directed`, `backend-engineer` PRIMARY clean rotation)
+
+**Trigger:** CEO directive *"Complete OP-3"* — pre-demo data infrastructure for 2026-05-25 onward demos. Operational ops-prep parallel to TEAM-INFRA-01 (#157); not a backlog row consumption.
+
+**Selection driver:** `directed` (Mode 2; ships pre-demo seed-script infrastructure; bypasses pool > 8 ceiling via operating-mode precedence per MR-004 Change B narrowed).
+
+### Added
+
+- `apps/web-app/scripts/seed-demo-account.ts` — 653 LOC deterministic + idempotent seed script
+- `apps/web-app/scripts/seed-demo-account.test.ts` — 615 LOC / 39 substantive `it()` blocks across 9 describe groups
+- `docs/runbooks/DEMO_ACCOUNT_SEED.md` — 197 LOC operational runbook
+- `apps/web-app/package.json` — added `"seed:demo": "tsx scripts/seed-demo-account.ts"` npm script
+- `apps/web-app/vitest.config.ts` — added `scripts/**/*.test.ts` to test discovery
+
+### Demo account specification (verified via local execution)
+
+- User: `demo@ledgerium.ai` (configurable via `DEMO_EMAIL`)
+- Password: `Demo2026!Workspace` (configurable via `DEMO_PASSWORD`; bcrypt cost 12)
+- Plan: `team` / subscriptionStatus: `active` / isAdmin: `false`
+- Workspace: `Acme Operations` (Team workspace; owner-role TeamMember active)
+- 6 demo workflows with full intelligence outputs:
+  - **Customer support ticket triage** — high-volume + healthy state (Zendesk + Slack)
+  - **Invoice approval workflow** — HIGH AI opportunity score (~80; near automate threshold; NetSuite + Outlook + DocuSign)
+  - **Sales lead qualification** — HIGH VARIATION (4-5 variants surfaced; demo M2 distinctive moment; Salesforce + LinkedIn + Gmail)
+  - **Quarterly compliance review** — rich SOP + long-form documentation (Confluence + Jira + Drata)
+  - **New employee onboarding** — multi-system rich Process Map (Workday + Okta + Slack + Notion)
+  - **Marketing campaign approval** — healthy + low variance (Asana + Slack + Google Drive)
+
+### Determinism + idempotency
+
+- `REFERENCE_TIMESTAMP_MS = 1_716_595_200_000` (2024-05-25 UTC) — zero `Date.now()` in script body
+- Cascade-aware deletion (Team before User — FK safety) before recreation
+- Re-runnable: deletes existing demo data + recreates from scratch
+- Total execution time: ~8-15 seconds (bcrypt cost 12 dominates)
+
+### Validation
+
+- web-app filter `pnpm test` **1140 → 1179 / +39 across 51 → 52 test files** all pass (MR-006 Change C ≥12 threshold SATISFIED with 3.25× margin)
+- workspace `pnpm typecheck` clean across all 10 packages/apps
+- **Script executed successfully against local dev DB** — all 6 workflows + ProcessDefinitions created; 0 errors
+- Zero new npm dependencies; zero Prisma schema migrations
+
+### Impact
+
+- Pre-demo data infrastructure NOW SHIPPED — CEO can seed demo account in production with `pnpm --filter @ledgerium/web-app seed:demo` (with `DATABASE_URL` pointed at production)
+- Per PDLT-001 §12: pre-seeded demo account is the #1 pre-demo investment (converts 10-15% failure rate into "graceful pivot")
+- Demo workflows cover 5 of 5 distinctive moments (M1 evidence-linked / M2 variant detection / M3 baseline / M4 deterministic / M5 observed SOPs)
+- Pool 44 → 44 UNCHANGED (no backlog row closed; OP-3 is operational ops-prep tracked in PDLT-001 not as a backlog row)
+- Cool-off recharge UNCHANGED at 3/3 FULL RE-ARM (preservation streak 36-44 events; longest-streak record continues)
+- D-1 reverse-portfolio-drift 14 → 15 (web-app non-extension; user-ack #11 logged)
+- Area saturation rolling-5: 11-consecutive web-app (Mode 5 saturation user-ack from iter 081 continues to cover)
+- Agent-diversity `backend-engineer` consecutive = 1 (CLEAN ROTATION back from growth-strategist × 1 at iter 088; CD-3 exception fully reset)
+- TEAM-001 sequence: no progression (operational ops-prep)
+- Numerator credit: ZERO at iter 089 close (no backlog row closure; operational ops-prep does not qualify per CLAUDE.md § Follow-Up Debt Policy clause 1)
+
+### Next iteration
+
+- **Iter 090 forecast**: CEO direction needed. Top candidates from PDLT-001 + WDC-002 P0 burn-down:
+  - **OP-4** record fallback video (CEO operational; ~30 min)
+  - **OP-5** UptimeRobot setup (CEO operational; ~10 min)
+  - **SOPPM-P02 #108** Variant confidence badge + N-attribution (HIGHEST demo-improvement code work; score 16; `frontend-engineer`)
+  - **WDC2-P05 #104** Empty-state activation pull (score 14; `frontend-engineer`)
+
+---
+
+## [2026-05-25] - Iteration 088 — TEAM-P03.8 Operational polish + rate-limit (Mode 2 `directed`, `growth-strategist` PRIMARY clean rotation)
+
+**Trigger:** CEO directive *"proceed to next iteration"* — closes row #155 TEAM-P03.8 polish + rate-limit; mandatory rotation off `backend-engineer` × 6 (CD-3 exception consumed at iter 087); preserves agent-diversity.
+
+**Selection driver:** `directed` (Mode 2 CEO-named continuation of TEAM-001 sequence; bypasses pool > 8 ceiling via operating-mode precedence per MR-004 Change B narrowed).
+
+### Added
+
+- `apps/web-app/src/lib/rate-limit/invite-buckets.ts` — extracted per-team in-memory token bucket rate limiter (20 invites/hour) with `@ledgerium-rate-limit-cold-start-acceptable-risk` JSDoc + NODE_ENV=test bypass; coordinator-cleanup extracted from route.ts to satisfy Next.js route module export constraints
+- 'viewer' role added to VALID_ROLES Set in `members/[memberId]/route.ts:29`; role hierarchy documented as `owner > admin > member > viewer`
+- React `cache()` request-scoped memoization wrapping `effectivePlanFor` with vitest-fallback passthrough
+
+### Changed
+
+- **Sub-task 1: 5 POLISH copy substitutions** — 3 fresh applied to `invite/route.ts` (lines 153/184/202) + 1 to `members/route.ts:35` + 1 already-polished by iter 084-087 work (verified, no change needed)
+- **Sub-task 5: `effectivePlanFor` cache wrap** — wraps with `reactCache` passthrough at `feature-gating.ts:208`; vitest fallback identity-passthrough handles "cache is not a function" test-env error
+- **Sub-task 6: per-team invite rate limit** — 20 invites/hour rolling window; per-team key (not per-user) protects Resend quota; 429 response with `code: 'rate_limit_exceeded'` + `retryAfterSeconds`
+
+### Coordinator-cleanup fixes (post growth-strategist delegation)
+
+3 typecheck blockers fixed inline:
+1. `_resetInviteRateLimitBuckets` exported from route.ts violated Next.js `OmitWithTag` constraint → extracted rate-limit module to `lib/rate-limit/invite-buckets.ts`
+2. `feature-gating.test.ts` 3 partial-user mock failures (`{ plan: 'starter' }` missing required User fields) → added `as any` casts matching established test-mock pattern
+3. `cache is not a function` runtime error in vitest → wrapped with `reactCache` passthrough fallback
+
+### Deferred (NOT shipped iter 088)
+
+- **Sub-task 4: `TeamMemberStatusChange` audit table** — additive Prisma migration violates devops discipline during 2026-05-25 demo week (`scripts/docker-start.sh:35` uses `prisma db push --accept-data-loss`); coordinator-default DEFER to post-demo iteration when TEAM-INFRA-01 row #157 ships `prisma migrate deploy` swap
+- **Sub-task 2: AC-6 status code 400 → 409** — ALREADY SHIPPED at iter 087 P0-I (verified; no production change this iteration)
+
+### Validation
+
+- web-app filter `pnpm test` **1127 → 1140 / +13 across 51 test files** all pass (canonical correctness gate; MR-006 Change C ≥12 threshold SATISFIED at exactly 13)
+- workspace `pnpm typecheck` clean across all 10 packages/apps
+- Files modified: 7 production .ts + 3 test .ts; Files added: `lib/rate-limit/invite-buckets.ts`
+- BUG-01 + BUG-04 regression locks preserved byte-identical
+- Solo-subscriber Stripe path preserved byte-identical
+
+### Impact
+
+- TEAM-001 P0 closure: **8 of 11+ closed** (#155 + 7 prior)
+- Demo-quality user-visible copy improved (4 verbatim POLISH substitutions in error messages)
+- Resend email quota DoS protection in place BEFORE TEAM-P04 ships (iter 089)
+- 4-role hierarchy now matches UMAP-001 §3 AC-11 documented contract
+- effectivePlanFor perf-optimized (prevents N+1 DB queries within Server Component render)
+- Pool 45 → 44 (#155 closed)
+- Cool-off recharge UNCHANGED at 3/3 FULL RE-ARM (preservation streak 35-43 events; longest-streak record continues)
+- D-1 reverse-portfolio-drift 13 → 14 (user-ack #10 logged)
+- Area saturation rolling-5: 10-consecutive web-app (Mode 5 sat ack from iter 081 continues to cover)
+- Agent-diversity `growth-strategist` consecutive = 1 (CLEAN ROTATION off backend-engineer × 6)
+- Next iter 089 forecast: TEAM-P04 Resend integration (row #142) — `backend-engineer` rotation back; depends on TEAM-INFRA-01 row #157 RESEND_API_KEY env var (parallel-ship if DNS propagation complete)
+
+---
+
+## [2026-05-25] - Iteration 087 — TEAM-P03.10 EMERGENCY + demo-period feature flags (Mode 2 `directed`, `backend-engineer` PRIMARY 6th consecutive CD-3 EXCEPTION JUSTIFIED-CONTINUED)
+
+**Trigger:** CEO directive 2026-05-24 *"Complete testing plan and iter087"* — closes 8 P0 BLOCKERS from `docs/meta/TEAM_WORKSPACE_SYSTEMS_TEST_REVIEW_001.md` AND ships 3 demo-period feature flags per `docs/meta/PRE_DEMO_LAUNCH_AND_TESTING_PLAN_001.md` D-06; single coordinated risk-mitigation iteration 24h before demos start 2026-05-25.
+
+**Selection driver:** `directed` (Mode 2 CEO-named pick of row #158 + demo flags as combined ship per PDLT-001 §9 D-06).
+
+### Added
+
+- `apps/web-app/src/app/api/teams/iter-087-p0-flags.test.ts` — 12 substantive `it()` blocks covering all 3 demo-period feature flags
+- `docs/runbooks/DEMO_MODE_ENV_VARS.md` — operational runbook for demo-period env vars
+- 3 NEW analytics events in `apps/web-app/src/lib/analytics.ts`: `workspace_downgraded` / `workspace_canceled` / `member_reactivated`
+- `prisma.$transaction` wrappers at 2 critical Stripe + invite paths (P0-J + P0-K SERIALIZABLE)
+
+### Changed
+
+- **P0-E** `status: 'active'` filter at 7 team-management call sites — closes removed-admin session retention security vector (7-day exposure window)
+- **P0-F** Free user "Create Team" returns `code: 'plan_upgrade_required'`; `/teams/page.tsx` renders inline upgrade CTA
+- **P0-G** `trackServer('team_created'/'team_invite_sent'/'team_invite_accepted')` wired (M-1 + M-2 now measurable)
+- **P0-H** `/teams/join` page handles `requiresAuth: true` → redirects to `/signup?token=` + replays accept post-auth
+- **P0-I** Sole-owner protection returns HTTP 409 (was 400) at 3 sites
+- **P0-J** `checkout.session.completed` wraps Team + TeamMember creation in `prisma.$transaction([...])`
+- **P0-K** Invite creation wraps quota check + upsert in SERIALIZABLE transaction
+- **P0-L** `GET /api/teams` excludes removed/deactivated members
+- **Demo-F1** `/api/admin/bootstrap` returns 404 when `DISABLE_ADMIN_BOOTSTRAP=true`
+- **Demo-F2** `auth.ts` reads `NEXTAUTH_SESSION_MAXAGE` env var (default 7-day preserved)
+- **Demo-F3** `POST /api/teams` + `POST /api/teams/[id]/invite` return 404 when `DEMO_MODE_DISABLE_TEAMS=true`
+
+### Validation
+
+- web-app filter `pnpm test` **1114 → 1127 / +13 across 50 → 51 test files** all pass (canonical correctness gate)
+- workspace `pnpm typecheck` clean across all 10 packages/apps
+- LOC delta: +388 / −165 across 18 files (+223 net)
+- BUG-01 + BUG-04 regression locks preserved byte-identical; solo-subscriber Stripe path byte-identical
+- 2 test-mock issues self-fixed inline (P0-E `findFirst` mock + P0-J `$transaction` mock)
+
+### Impact
+
+- TEAM-001 P0 BLOCKER closure: **8 of 8 closed** (row #158 fully shipped)
+- Multi-user backend NOW SAFE for real customers
+- Demo-period audience-trigger surfaces MITIGATED (admin-bootstrap disabled / 1-day TTL toggle / teams API disable-able)
+- Pool 47 → 45 (#158 closed; rows #159/#160 added at UMAP-001 close 2026-05-23)
+- Cool-off recharge UNCHANGED at 3/3 FULL RE-ARM (preservation streak extends to 34-42 events)
+- D-1 reverse-portfolio-drift 12 → 13 (user-ack #9 logged)
+- Area saturation rolling-5: 9-consecutive web-app (Mode 5 sat ack from iter 081 continues)
+- Agent-diversity `backend-engineer` consecutive = 6 (CD-3 EXCEPTION JUSTIFIED-CONTINUED; rotation MANDATORY at iter 088 to `growth-strategist`)
+- TEAM-001 sequence progression: 7 of 11+ P0 rows closed (#139 + #140 + #141 + #153 + #154 + #156 + #158)
+- Demos UNBLOCKED 24h before demo window opens 2026-05-25
+
+---
+
+## [2026-05-24] - PRE_DEMO_LAUNCH_AND_TESTING_PLAN_001 (PDLT-001) — Mode 3-adjacent multi-agent strategic review CLOSED (NON-counting; 6 specialist agents; pre-demo prep)
+
+**Trigger:** CEO directive 2026-05-24 *"I am going to start demos to groups and orgs this week coming up. Engage all subagents to create a pre-demo launch plan and testing plan."*
+
+**Agents:** 6 in parallel — `product-manager` + `qa-engineer` + `growth-strategist` + `devops-engineer` + `system-architect` + `competitive-researcher`. Cumulative output ~10,500 words → ~5,500-word artifact at `docs/meta/PRE_DEMO_LAUNCH_AND_TESTING_PLAN_001.md`.
+
+**Outcome:** 12-section artifact + 3 appendices. 15 CEO decisions enumerated. 6-of-6 convergence on: START Resend domain verification TODAY (24-72h critical path) / production-with-dedicated-demo-account isolation strategy / pre-recorded fallback video mandatory / NEVER demo multi-user UI + Stripe checkout + invite email / pre-seeded demo account is #1 pre-demo investment. 10 live-failure recovery scripts. Demo-ready/broken/risky feature inventory + 30-min canonical script + 15-min + 60-min variants documented.
+
+**Non-counting effects:** Pool unchanged; cool-off unchanged; D-1 unchanged; iteration counter NOT advanced.
+
+---
+
+## [2026-05-23] - USER_MANAGEMENT_ACCOUNT_PAGE_REVIEW_001 (UMAP-001) — Mode 3-adjacent multi-agent strategic mini-review CLOSED (NON-counting; 4 specialist agents; TEAM-001 UI re-scope)
+
+**Trigger:** CEO directive 2026-05-23 *"Create a way to manage multi-user invite process using email alias. User management should be a part of the Account page if the subscription allows for multi-users."* Re-scopes TEAM-001 UI from dedicated workspace pages → integrated section on Account page.
+
+**Agents:** 4 in parallel — `product-manager` + `ux-designer` + `frontend-engineer` + `growth-strategist`. Cumulative ~7,800 words → ~4,200-word artifact at `docs/meta/USER_MANAGEMENT_ACCOUNT_PAGE_REVIEW_001.md`.
+
+**Backlog row changes:** Row #143 TEAM-P05 DEFERRED post-MVP (WorkspaceSwitcher no longer MVP-needed; Account-page seat bar supersedes K.2 nav indicator) / Row #144 TEAM-P06 SUPERSEDED by new rows #159 + #160 / NEW row #159 TEAM-P06-REVISED Account-page foundation (~480 LOC; iter ~091) / NEW row #160 TEAM-P06.5 invite layer + confirmation email integration (~400 LOC; iter ~092) / Row #145 TEAM-P07 unchanged scope.
+
+**Non-counting effects:** Pool 44 → 46 (2 row additions); cool-off unchanged; D-1 unchanged; iteration counter NOT advanced.
+
+---
+
 ## [2026-05-18] - Iteration 077 — PATHE-P02 Intent-inference engine + extension neighbor-context capture (Mode 2 `directed`, `backend-engineer` PRIMARY)
 
 **Trigger:** CEO directive continuation of Path E build sequence; PATHE-P02 is the E+2 row immediately following PATHE-P01 (iter 076).

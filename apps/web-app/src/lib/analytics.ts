@@ -71,6 +71,12 @@ export type AnalyticsEvent =
   | { event: 'team_invite_sent'; teamId: string; role: string }
   | { event: 'team_invite_accepted'; teamId: string }
   | { event: 'team_member_removed'; teamId: string }
+  /** Fired when a subscription downgrade causes members to be soft-deactivated
+   *  (P0-G / iter 087 / TEAM-P03.10). PII-free: counts only, no names. */
+  | { event: 'workspace_downgraded'; teamId: string; deactivatedCount: number; newPlan: string }
+  /** Fired when a Team workspace is fully canceled (subscription deleted).
+   *  Companion to subscription_canceled for workspace-scoped funnel analysis. */
+  | { event: 'workspace_canceled'; teamId: string; deactivatedCount: number }
 
   // ── Tags & organization ───────────────────────────────────────────────────
   | { event: 'tag_created'; tagName: string }
@@ -145,6 +151,23 @@ export type AnalyticsEvent =
       event: 'dashboard_bounced';
       workflowCount: number;
       elapsedMsSinceDashboardView: number;
+    }
+
+  // ── Admin ─────────────────────────────────────────────────────────────────
+  /**
+   * Fired when the first admin is successfully promoted via POST
+   * /api/admin/bootstrap.
+   * All fields are PII-safe: no full email, no full IP, no raw UA.
+   * @iter 091 / ADM-002 PR-2 Sub-task 4
+   */
+  | {
+      event: 'admin_bootstrap_claimed';
+      /** e.g. "mediafier.ai" — domain only, no local-part. */
+      emailDomain: string;
+      /** e.g. "192.168.x.x" — first two octets only. */
+      ipPrefix: string;
+      /** Browser family string ("Chrome", "Safari", "curl", "unknown", …). */
+      userAgentFamily: string;
     }
 
   // ── Navigation ────────────────────────────────────────────────────────────

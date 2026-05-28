@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { canAccessAdmin } from '@/lib/admin-allowlist';
 import { db } from '@/db';
 
 const DEFAULT_RETENTION_DAYS = 90;
@@ -22,11 +23,8 @@ const MIN_RETENTION_DAYS = 7;    // safety floor: never delete last 7 days
 export async function GET(req: NextRequest) {
   const session = await auth();
 
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  if (!session.user.isAdmin) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!canAccessAdmin(session)) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
   try {
@@ -97,7 +95,7 @@ export async function GET(req: NextRequest) {
     const retainedCount = await (db as any).analyticsEvent.count();
 
     console.info(
-      `[admin/cleanup-events] Deleted ${deletedCount} events older than ${olderThan.toISOString()} (requestedBy=${session.user.id})`,
+      `[admin/cleanup-events] Deleted ${deletedCount} events older than ${olderThan.toISOString()} (requestedBy=${session?.user?.id ?? 'unknown'})`,
     );
 
     return NextResponse.json({

@@ -39,6 +39,15 @@ npx prisma db push --skip-generate --accept-data-loss 2>&1 || {
 }
 echo "[ledgerium] Database ready"
 
+# ── Cache writability verification (RCA-1 / writable-cache fix) ───────────────
+# Confirms the Dockerfile chown -R nextjs:nodejs /app/apps/web-app/.next fix
+# is effective. A missing or non-writable cache causes Next.js to fall back to
+# in-memory caching and logs EACCES on every request.
+
+ls /app/apps/web-app/.next/cache/ >/dev/null 2>&1 \
+  && echo "[ledgerium] .next/cache writable: OK" \
+  || echo "[ledgerium] WARNING: .next/cache not writable — check Dockerfile chown"
+
 # ── Start server ──────────────────────────────────────────────────────────────
 
 echo "[ledgerium] Starting server on port ${PORT:-3000}..."

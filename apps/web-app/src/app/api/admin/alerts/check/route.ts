@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { computeAlerts } from '@/lib/compute-alerts';
 import { sendAlertNotification } from '@/lib/notifications';
@@ -12,9 +13,12 @@ import { sendAlertNotification } from '@/lib/notifications';
  * by Vercel Cron, Railway Cron, or any external scheduler without a browser
  * session.
  *
- * The secret must be provided via one of:
+ * The secret MUST be provided via:
  *   Authorization: Bearer <CRON_SECRET>
- *   ?secret=<CRON_SECRET>
+ *
+ * Query-parameter delivery (?secret=...) is NOT supported — query strings
+ * appear in access logs, CDN logs, and browser history, creating a
+ * log-exposure risk that cannot be mitigated by secret rotation.
  *
  * Required env var: CRON_SECRET
  *
@@ -30,14 +34,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
   }
 
-  // Accept the secret via Authorization header or query param
+  // Accept the secret ONLY via Authorization: Bearer <CRON_SECRET>
+  // Query-param delivery is intentionally not supported (log-exposure risk).
   const authHeader = request.headers.get('authorization') ?? '';
-  const querySecret = request.nextUrl.searchParams.get('secret') ?? '';
-  const provided = authHeader.startsWith('Bearer ')
-    ? authHeader.slice('Bearer '.length).trim()
-    : querySecret.trim();
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
+  const provided = match?.[1] ?? '';
 
-  if (provided !== cronSecret) {
+  // Timing-safe comparison — prevents timing oracle on secret value.
+  // Length check is safe because expectedBuf is a server-side constant.
+  const providedBuf = Buffer.from(provided, 'utf8');
+  const expectedBuf = Buffer.from(cronSecret, 'utf8');
+
+  if (
+    providedBuf.length !== expectedBuf.length ||
+    !crypto.timingSafeEqual(providedBuf, expectedBuf)
+  ) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

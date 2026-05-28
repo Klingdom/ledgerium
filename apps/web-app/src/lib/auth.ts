@@ -35,7 +35,10 @@ const nextAuth = NextAuth({
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 7 * 24 * 60 * 60, // 7 days — forces re-authentication weekly
+    // Demo-F2 (iter 087 / TEAM-P03.10): configurable session TTL via env var.
+    // Set NEXTAUTH_SESSION_MAXAGE=<seconds> to shorten for demo period (e.g. 3600 = 1 hour).
+    // Default: 604800 = 7 days.
+    maxAge: parseInt(process.env.NEXTAUTH_SESSION_MAXAGE ?? '604800', 10),
   },
   pages: {
     signIn: '/login',

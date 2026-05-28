@@ -127,30 +127,38 @@ export async function POST(req: NextRequest) {
             } else {
               // No workspace exists yet — provision one now and create the
               // owner membership in a single atomic operation.
+              // P0-J (iter 087 / TEAM-P03.10): wrap team.create + teamMember.create
+              // in a single array-style transaction to prevent a partial-provisioning
+              // state where the Team row exists but the owner membership does not.
               const userRecord = await db.user.findUnique({
                 where: { id: userId },
                 select: { name: true, email: true },
               });
               const baseName = userRecord?.name ?? userRecord?.email ?? userId;
-              const newTeam = await (db as any).team.create({
-                data: {
-                  name: `${baseName}'s Workspace`,
-                  slug: `ws-${userId.slice(0, 8)}-${customerId.slice(-6)}`,
-                  plan,
-                  stripeCustomerId: customerId,
-                  stripeSubscriptionId: session.subscription as string,
-                  createdBy: userId,
-                },
-              });
-              await (db as any).teamMember.create({
-                data: {
-                  teamId: newTeam.id,
-                  userId,
-                  role: 'owner',
-                  status: 'active',
-                  joinedAt: new Date(),
-                },
-              });
+              const newTeamId = `team_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+              await (db as any).$transaction([
+                (db as any).team.create({
+                  data: {
+                    id: newTeamId,
+                    name: `${baseName}'s Workspace`,
+                    slug: `ws-${userId.slice(0, 8)}-${customerId.slice(-6)}`,
+                    plan,
+                    stripeCustomerId: customerId,
+                    stripeSubscriptionId: session.subscription as string,
+                    createdBy: userId,
+                  },
+                }),
+                (db as any).teamMember.create({
+                  data: {
+                    teamId: newTeamId,
+                    userId,
+                    role: 'owner',
+                    status: 'active',
+                    joinedAt: new Date(),
+                  },
+                }),
+              ]);
+              const newTeam = { id: newTeamId };
               console.log(
                 `[stripe] Team ${newTeam.id} provisioned for user ${userId} — plan ${plan}`,
               );
@@ -260,6 +268,17 @@ export async function POST(req: NextRequest) {
               status,
               deactivatedCount: deactivatedIds.length,
             });
+            // P0-G (iter 087 / TEAM-P03.10): workspace_downgraded fires when
+            // a plan change causes excess members to be soft-deactivated.
+            // PII-free: only teamId, plan names, and count emitted.
+            if (deactivatedIds.length > 0) {
+              trackServer('workspace_downgraded', {
+                teamId: team.id,
+                fromPlan: previousPlan,
+                toPlan: plan,
+                deactivatedCount: deactivatedIds.length,
+              });
+            }
             break;
           }
         }
@@ -342,6 +361,14 @@ export async function POST(req: NextRequest) {
                   : ''),
             );
             trackServer('subscription_canceled', {
+              teamId: deletedTeam.id,
+              deactivatedCount: deletedDeactivatedIds.length,
+            });
+            // P0-G (iter 087 / TEAM-P03.10): workspace_canceled fires whenever
+            // a team subscription is fully canceled (deletion event). Emitted
+            // unconditionally — every cancellation is a workspace-level event.
+            // PII-free: only teamId and deactivated count emitted.
+            trackServer('workspace_canceled', {
               teamId: deletedTeam.id,
               deactivatedCount: deletedDeactivatedIds.length,
             });

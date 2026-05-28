@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useHistory } from '../hooks/useHistory.js'
-import { STORAGE_KEY_SETTINGS } from '../../shared/constants.js'
+import { STORAGE_KEY_SETTINGS, STORAGE_KEY_APIKEY } from '../../shared/constants.js'
 import { MSG } from '../../shared/types.js'
 import type { HistoryEntry, ExtensionSettings } from '../../shared/types.js'
 
@@ -75,7 +75,6 @@ function SyncSettings() {
   const [isOpen, setIsOpen] = useState(false)
   const [syncUrl, setSyncUrl] = useState('')
   const [apiKey, setApiKey] = useState('')
-  const [telemetryEnabled, setTelemetryEnabled] = useState(false)
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
@@ -83,20 +82,22 @@ function SyncSettings() {
       const s = result[STORAGE_KEY_SETTINGS] as ExtensionSettings | undefined
       if (s) {
         setSyncUrl(s.uploadUrl ?? '')
-        setApiKey(s.apiKey ?? '')
-        setTelemetryEnabled(s.telemetryEnabled ?? false)
       }
+    })
+    chrome.storage.local.get([STORAGE_KEY_APIKEY], result => {
+      const stored = result[STORAGE_KEY_APIKEY] as string | undefined
+      if (stored) setApiKey(stored)
     })
   }, [])
 
   const handleSave = useCallback(() => {
     chrome.runtime.sendMessage({
       type: MSG.SETTINGS_UPDATED,
-      payload: { uploadUrl: syncUrl.trim(), apiKey: apiKey.trim(), telemetryEnabled },
+      payload: { uploadUrl: syncUrl.trim(), apiKey: apiKey.trim() },
     })
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
-  }, [syncUrl, apiKey, telemetryEnabled])
+  }, [syncUrl, apiKey])
 
   if (!isOpen) {
     return (
@@ -136,15 +137,6 @@ function SyncSettings() {
             className="w-full rounded-lg bg-white border border-gray-200 text-xs text-gray-900 placeholder-gray-400 font-mono px-3 py-2 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-colors"
           />
         </div>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={telemetryEnabled}
-            onChange={e => setTelemetryEnabled(e.target.checked)}
-            className="rounded"
-          />
-          <span className="text-zinc-400">Share anonymous usage analytics</span>
-        </label>
         <button onClick={handleSave} className="w-full py-2 rounded-lg text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors">
           {saved ? 'Saved' : 'Save'}
         </button>

@@ -37,6 +37,9 @@ vi.mock('@/db', () => ({
     analyticsEvent: {
       create: vi.fn().mockResolvedValue({}),
     },
+    // P0-J (iter 087 / TEAM-P03.10): array-style $transaction used by checkout.session.completed
+    // to atomically create team + owner membership. Promise.all resolves the array of Prisma promises.
+    $transaction: vi.fn().mockImplementation((operations: Promise<unknown>[]) => Promise.all(operations)),
   },
 }));
 
@@ -1459,11 +1462,15 @@ describe('POST /api/billing/webhook', () => {
         }),
       }),
     );
-    // teamMember.create must be called to make the purchaser an owner
+    // teamMember.create must be called to make the purchaser an owner.
+    // P0-J: route generates newTeamId before the $transaction so both calls
+    // receive the same generated id (not the mock return value of team.create).
+    const teamCreateCall = vi.mocked(dbLib.db as any).team.create.mock.calls[0][0];
+    const generatedTeamId = teamCreateCall.data.id;
     expect(vi.mocked(dbLib.db as any).teamMember.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          teamId: newTeam.id,
+          teamId: generatedTeamId,
           userId,
           role: 'owner',
         }),
@@ -1698,9 +1705,13 @@ describe('POST /api/billing/webhook', () => {
         }),
       }),
     );
+    // P0-J: route generates newTeamId before the $transaction — inspect what
+    // was passed to team.create to get the actual generated id.
+    const enterpriseTeamCreateCall = vi.mocked(dbLib.db as any).team.create.mock.calls[0][0];
+    const enterpriseGeneratedTeamId = enterpriseTeamCreateCall.data.id;
     expect(vi.mocked(dbLib.db as any).teamMember.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ teamId: newTeam.id, role: 'owner' }),
+        data: expect.objectContaining({ teamId: enterpriseGeneratedTeamId, role: 'owner' }),
       }),
     );
   });

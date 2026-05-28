@@ -6,7 +6,12 @@
  * Displays truncated userId (first 8 + "..." + last 4) alongside
  * a count. No PII per PRD §6 / METRICS.md §6.
  *
+ * Supports optional `onRowClick` for opening the UserDetailDrawer.
+ * When provided, each row is wrapped in a <button> for full keyboard
+ * accessibility (Tab, Enter, Space).
+ *
  * @iter 072
+ * @extended iter 096 / ADM-002 PR-7 — added onRowClick prop
  */
 
 interface LeaderboardRow {
@@ -21,6 +26,8 @@ interface LeaderboardTableProps {
   /** Maximum rows to render (default 10) */
   maxRows?: number;
   'data-testid'?: string;
+  /** Optional click handler — receives the userId of the clicked row. */
+  onRowClick?: (userId: string) => void;
 }
 
 export function LeaderboardTable({
@@ -28,6 +35,7 @@ export function LeaderboardTable({
   countLabel = 'Uploads',
   maxRows = 10,
   'data-testid': testId,
+  onRowClick,
 }: LeaderboardTableProps) {
   const visible = rows.slice(0, maxRows);
 
@@ -61,19 +69,41 @@ export function LeaderboardTable({
         </tr>
       </thead>
       <tbody>
-        {visible.map((row, i) => (
-          <tr
-            key={row.userId}
-            className={`${i < visible.length - 1 ? 'border-b border-[var(--border-default)]' : ''}`}
-          >
-            <td className="py-2 font-mono text-[12px] text-[var(--content-secondary)]">
-              {row.userId}
-            </td>
-            <td className="py-2 text-right tabular-nums text-[var(--content-primary)]">
-              {row.uploadCount.toLocaleString('en-US')}
-            </td>
-          </tr>
-        ))}
+        {visible.map((row, i) => {
+          const isClickable = onRowClick !== undefined;
+          const rowClass = [
+            i < visible.length - 1 ? 'border-b border-[var(--border-default)]' : '',
+            isClickable ? 'cursor-pointer hover:bg-[var(--surface-secondary)] focus-within:bg-[var(--surface-secondary)]' : '',
+          ]
+            .filter(Boolean)
+            .join(' ');
+
+          return (
+            <tr
+              key={row.userId}
+              className={rowClass}
+            >
+              <td className="py-2 font-mono text-[12px] text-[var(--content-secondary)]">
+                {isClickable ? (
+                  <button
+                    type="button"
+                    onClick={() => onRowClick(row.userId)}
+                    className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent,#20f2a6)] rounded"
+                    aria-label={`View details for user ${row.userId}`}
+                    data-testid="leaderboard-row-button"
+                  >
+                    {row.userId}
+                  </button>
+                ) : (
+                  row.userId
+                )}
+              </td>
+              <td className="py-2 text-right tabular-nums text-[var(--content-primary)]">
+                {row.uploadCount.toLocaleString('en-US')}
+              </td>
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );

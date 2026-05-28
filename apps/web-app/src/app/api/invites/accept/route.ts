@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import crypto from 'crypto';
+import { trackServer } from '@/lib/analytics-server';
 
 /**
  * POST /api/invites/accept — accept a workspace invite
@@ -30,6 +31,7 @@ import crypto from 'crypto';
  *
  * @iter 082 / TEAM-P02 Part C
  * @iter 084 / TEAM-P03.6 rate-limiting added
+ * @iter 087 / TEAM-P03.10 P0-G: trackServer('team_invite_accepted') after successful join
  */
 
 // ── In-memory rate-limit store ──────────────────────────────────────────────
@@ -303,6 +305,14 @@ export async function POST(req: NextRequest) {
     }
 
     recordSuccess(ip);
+
+    // P0-G: server-side analytics — PII-free (no email).
+    try {
+      trackServer('team_invite_accepted', { teamId: result.teamId, role: result.role, userId });
+    } catch {
+      // Non-fatal.
+    }
+
     return NextResponse.json(result);
   } catch (err) {
     // Sub-task 5 (iter 085 / TEAM-P03.7): translate Prisma P2034 serialization

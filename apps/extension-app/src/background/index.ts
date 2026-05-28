@@ -4,13 +4,12 @@ import { SessionStore } from './session-store.js'
 import { HistoryStore } from './history-store.js'
 import { normalizeRawEvent } from './normalizer.js'
 import { uploadBundle } from './uploader.js'
-import { trackExtension, flushTelemetry } from './telemetry.js'
 import { buildBundle } from './bundle-builder.js'
 import { LiveStepBuilder } from './live-steps.js'
 import { buildWorkflowReport } from './workflow-report-builder.js'
 import type { WorkflowReport } from './workflow-report-builder.js'
 import { nowIso } from '../shared/utils.js'
-import { STORAGE_KEY_SETTINGS } from '../shared/constants.js'
+import { STORAGE_KEY_SETTINGS, STORAGE_KEY_APIKEY } from '../shared/constants.js'
 import { MSG } from '../shared/types.js'
 import type { ExtensionSettings, RawEvent, SessionBundle } from '../shared/types.js'
 
@@ -20,7 +19,8 @@ const sm = new RecorderStateMachine()
 const store = new SessionStore()
 const historyStore = new HistoryStore()
 let liveBuilder: LiveStepBuilder | null = null
-let settings: ExtensionSettings = { uploadUrl: '', apiKey: '', allowedDomains: [], blockedDomains: [], telemetryEnabled: false }
+let settings: ExtensionSettings = { uploadUrl: '', allowedDomains: [], blockedDomains: [] }
+let apiKey = ''
 let lastBundle: SessionBundle | null = null
 let lastWorkflowReport: WorkflowReport | null = null
 
@@ -30,9 +30,36 @@ const SESSION_STATE_KEY = 'ledgerium_sw_state'
 // ─── Settings ─────────────────────────────────────────────────────────────────
 
 function loadSettings(): void {
-  chrome.storage.sync.get([STORAGE_KEY_SETTINGS], result => {
-    const saved = result[STORAGE_KEY_SETTINGS] as ExtensionSettings | undefined
-    if (saved) settings = saved
+  // Load sync settings (uploadUrl, domain lists)
+  chrome.storage.sync.get([STORAGE_KEY_SETTINGS], syncResult => {
+    const saved = syncResult[STORAGE_KEY_SETTINGS] as (ExtensionSettings & { apiKey?: string; telemetryEnabled?: boolean }) | undefined
+    if (saved) {
+      const { apiKey: _legacyApiKey, telemetryEnabled: _legacy, ...rest } = saved
+      settings = rest
+
+      // One-time migration: if apiKey was previously stored in sync, move it to local
+      if (_legacyApiKey) {
+        chrome.storage.local.get([STORAGE_KEY_APIKEY], localResult => {
+          const existingLocal = localResult[STORAGE_KEY_APIKEY] as string | undefined
+          if (!existingLocal) {
+            // Migrate to local — apiKey must not live in sync storage (CHROME-002)
+            chrome.storage.local.set({ [STORAGE_KEY_APIKEY]: _legacyApiKey })
+            apiKey = _legacyApiKey
+            // Remove from sync
+            const cleaned: ExtensionSettings = { uploadUrl: settings.uploadUrl, allowedDomains: settings.allowedDomains, blockedDomains: settings.blockedDomains }
+            chrome.storage.sync.set({ [STORAGE_KEY_SETTINGS]: cleaned })
+          } else {
+            apiKey = existingLocal
+          }
+        })
+      }
+    }
+  })
+
+  // Load apiKey from local storage (its canonical home after CHROME-002)
+  chrome.storage.local.get([STORAGE_KEY_APIKEY], localResult => {
+    const stored = localResult[STORAGE_KEY_APIKEY] as string | undefined
+    if (stored) apiKey = stored
   })
 }
 
@@ -186,6 +213,18 @@ async function handleStart(activityName: string, uploadUrl?: string): Promise<vo
       broadcastToExtension({ type: MSG.LIVE_STEP_UPDATED, payload: { step } })
     })
 
+    // Transition to 'recording' BEFORE telling content scripts to start, so the
+    // RAW_EVENT_CAPTURED guard at the message-handler ("if (sm.state !== 'recording')
+    // break") admits the very first event the content script emits. Pre-iter-099
+    // the auto-emit captureNavigation() page_loaded event was the first thing through
+    // and it was silently dropped at this guard; removing that auto-emit per CEO
+    // directive (2026-05-27) exposed the latent race for real user clicks that
+    // arrive fast after Start Recording. See CLAUDE.md § Extension Reliability
+    // Invariant — known regression history.
+    sm.transition('recording')
+    store.updateState('recording')
+    broadcastStateUpdate()
+
     // v2 trust model: Only capture on the tab the user is currently viewing.
     // We do NOT inject or activate capture on all tabs — that would break trust.
     // Capture activates when the user clicks into a tab (onActivated) or
@@ -193,21 +232,18 @@ async function handleStart(activityName: string, uploadUrl?: string): Promise<vo
     const [activeTab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true })
     if (activeTab?.id) {
       await injectIntoTab(activeTab.id)
+      // Mirror the onActivated handler's 100ms post-injection delay (line 479).
+      // The programmatically-injected ES module needs a microtask window to
+      // evaluate fully and register its chrome.runtime.onMessage listener BEFORE
+      // START_SESSION is dispatched. Without this delay, START_SESSION can be
+      // dropped silently, leaving attachDOMListeners() un-called → zero capture.
+      await new Promise(resolve => setTimeout(resolve, 100))
       chrome.tabs.sendMessage(activeTab.id, {
         type: MSG.START_SESSION,
         payload: { sessionId: meta.sessionId, startedAt: meta.startedAt },
       }).catch(() => { /* content script may not be ready yet */ })
       console.log(`[LDG-BG] Recording started on active tab ${activeTab.id}: ${activeTab.url}`)
     }
-
-    sm.transition('recording')
-    store.updateState('recording')
-    broadcastStateUpdate()
-
-    trackExtension('recording.started', {
-      sessionId: meta.sessionId,
-      activityName,
-    })
 
     // Persist state and start keepalive so the SW survives the session
     persistRecordingState(meta.sessionId, activityName)
@@ -257,18 +293,9 @@ async function handleStop(): Promise<void> {
     console.log('[LDG-BG] buildBundle complete, steps:', bundle.derivedSteps.length)
     lastBundle = bundle
 
-    // Generate canonical workflow report from deterministic outputs
+    // Generate canonical workflow report from deterministic engine outputs
     lastWorkflowReport = buildWorkflowReport(bundle)
     console.log('[LDG-BG] workflowReport generated, steps:', lastWorkflowReport.metrics.stepCount)
-
-    trackExtension('recording.stopped', {
-      sessionId: store.getMeta()?.sessionId,
-      eventCount: store.getCanonicalEvents().length,
-      stepCount: bundle.derivedSteps.length,
-      durationMs: bundle.sessionJson.endedAt
-        ? new Date(bundle.sessionJson.endedAt).getTime() - new Date(bundle.sessionJson.startedAt).getTime()
-        : null,
-    })
 
     // Persist to activity history before transitioning — this way history is
     // always available even if the user discards the review screen immediately.
@@ -289,7 +316,7 @@ async function handleStop(): Promise<void> {
       broadcastToExtension({ type: MSG.UPLOAD_PROGRESS, payload: { percent: 0, status: 'uploading' } })
       const result = await uploadBundle(bundle, uploadUrl, percent => {
         broadcastToExtension({ type: MSG.UPLOAD_PROGRESS, payload: { percent, status: 'uploading' } })
-      }, settings.apiKey || undefined)
+      }, apiKey || undefined)
       broadcastToExtension({
         type: MSG.UPLOAD_PROGRESS,
         payload: {
@@ -298,33 +325,13 @@ async function handleStop(): Promise<void> {
           ...(result.error ? { error: result.error } : {}),
         },
       })
-      if (result.success) {
-        trackExtension('recording.synced', {
-          sessionId: store.getMeta()?.sessionId,
-        })
-      } else {
-        trackExtension('recording.sync_failed', {
-          sessionId: store.getMeta()?.sessionId,
-          error: result.error ?? 'unknown',
-        })
-      }
     }
-
-    // Flush telemetry (piggyback after upload, best-effort)
-    void flushTelemetry(
-      store.getMeta()?.uploadUrl ?? settings.uploadUrl,
-      settings.apiKey,
-      settings.telemetryEnabled ?? false,
-    )
   } catch (err) {
     transitionToError(err)
   }
 }
 
 function handleDiscard(): void {
-  trackExtension('recording.discarded', {
-    sessionId: store.getMeta()?.sessionId,
-  })
   broadcastAllTabs({ type: MSG.DISCARD_SESSION, payload: {} })
   clearInjectionState()
   liveBuilder?.reset()
@@ -432,9 +439,15 @@ chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<s
     }
 
     case MSG.SETTINGS_UPDATED: {
-      const updated = message.payload as Partial<ExtensionSettings>
-      settings = { ...settings, ...updated }
+      const updated = message.payload as Partial<ExtensionSettings & { apiKey?: string }>
+      const { apiKey: newApiKey, ...restUpdated } = updated
+      settings = { ...settings, ...restUpdated }
+      // Persist non-sensitive settings to sync; apiKey goes to local only (CHROME-002)
       chrome.storage.sync.set({ [STORAGE_KEY_SETTINGS]: settings })
+      if (newApiKey !== undefined) {
+        apiKey = newApiKey
+        chrome.storage.local.set({ [STORAGE_KEY_APIKEY]: newApiKey })
+      }
       break
     }
   }
@@ -456,6 +469,11 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
   const startedAt = store.getMeta()?.startedAt
   await injectIntoTab(tabId)
+  // Mirror the onActivated handler's 100ms post-injection delay (see line 479).
+  // Without this delay the freshly-injected ES module can miss START_SESSION
+  // before its chrome.runtime.onMessage listener registers, causing zero
+  // capture after page navigation during a recording session.
+  await new Promise(resolve => setTimeout(resolve, 100))
   chrome.tabs.sendMessage(tabId, {
     type: MSG.START_SESSION,
     payload: { sessionId, startedAt },

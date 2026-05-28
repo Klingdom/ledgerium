@@ -23,6 +23,7 @@ import {
   requireFeature,
   buildFeatureFlags,
   checkRecordingLimit,
+  effectivePlanFor,
 } from './feature-gating.js';
 
 // ─── Module mocks ──────────────────────────────────────────────────────────────
@@ -34,6 +35,12 @@ vi.mock('@/db', () => ({
     },
     analyticsEvent: {
       create: vi.fn().mockResolvedValue({}),
+    },
+    user: {
+      findUnique: vi.fn().mockResolvedValue({ plan: 'free' }),
+    },
+    teamMember: {
+      findMany: vi.fn().mockResolvedValue([]),
     },
   },
 }));
@@ -195,5 +202,55 @@ describe('checkRecordingLimit', () => {
     expect(result.limit).toBe(Number.MAX_SAFE_INTEGER);
     // Admin path skips DB entirely
     expect(vi.mocked(dbLib.db.upload.count)).not.toHaveBeenCalled();
+  });
+});
+
+// ─── effectivePlanFor (iter 088 Sub-task 5: React cache() wrap) ──────────────
+
+describe('effectivePlanFor (iter 088 Sub-task 5)', () => {
+  let dbLib: typeof import('@/db');
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    dbLib = await import('@/db');
+  });
+
+  it('effectivePlanFor is exported and is a function (cache() wraps the async fn)', () => {
+    expect(typeof effectivePlanFor).toBe('function');
+  });
+
+  it('returns solo user plan when no workspace memberships exist', async () => {
+    vi.mocked(dbLib.db.user.findUnique).mockResolvedValue({ plan: 'starter' } as any);
+    vi.mocked((dbLib.db as any).teamMember.findMany).mockResolvedValue([]);
+    const plan = await effectivePlanFor('user-solo');
+    expect(plan).toBe('starter');
+  });
+
+  it('returns workspace plan when it is higher than solo plan', async () => {
+    vi.mocked(dbLib.db.user.findUnique).mockResolvedValue({ plan: 'free' } as any);
+    vi.mocked((dbLib.db as any).teamMember.findMany).mockResolvedValue([
+      { team: { plan: 'growth' } },
+    ]);
+    const plan = await effectivePlanFor('user-workspace');
+    // 'growth' > 'free' — workspace plan wins
+    expect(plan).toBe('growth');
+  });
+
+  it('returns solo plan when it is higher than all workspace plans', async () => {
+    vi.mocked(dbLib.db.user.findUnique).mockResolvedValue({ plan: 'enterprise' } as any);
+    vi.mocked((dbLib.db as any).teamMember.findMany).mockResolvedValue([
+      { team: { plan: 'team' } },
+      { team: { plan: 'free' } },
+    ]);
+    const plan = await effectivePlanFor('user-enterprise');
+    // 'enterprise' > 'team' and 'free'
+    expect(plan).toBe('enterprise');
+  });
+
+  it('handles null/missing plan on user row by falling back to free', async () => {
+    vi.mocked(dbLib.db.user.findUnique).mockResolvedValue(null);
+    vi.mocked((dbLib.db as any).teamMember.findMany).mockResolvedValue([]);
+    const plan = await effectivePlanFor('user-missing');
+    expect(plan).toBe('free');
   });
 });

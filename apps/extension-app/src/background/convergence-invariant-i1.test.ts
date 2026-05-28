@@ -120,7 +120,19 @@ function runLivePathDerived(events: CanonicalEvent[], sessionId: string) {
  * This is the I1a "batch path via toLiveStep" defined in §5.3 revision.
  */
 function runBatchPath(events: CanonicalEvent[], sessionId: string) {
-  return buildDerivedSteps(events, sessionId).map(toLiveStep)
+  // Resolve pageTitle by the same rule LiveStepBuilder uses at runtime:
+  // first source event's page_context.pageTitle. Keeps I1a byte-identity
+  // between live and batch paths including the presentation-layer pageTitle
+  // field (added iter 099 for sidebar tab/page name display).
+  const eventById = new Map<string, CanonicalEvent>()
+  for (const e of events) eventById.set(e.event_id, e)
+  return buildDerivedSteps(events, sessionId).map((s) => {
+    const firstSourceId = s.source_event_ids[0]
+    const pageTitle = firstSourceId !== undefined
+      ? eventById.get(firstSourceId)?.page_context?.pageTitle
+      : undefined
+    return toLiveStep(s, pageTitle)
+  })
 }
 
 // ---------------------------------------------------------------------------

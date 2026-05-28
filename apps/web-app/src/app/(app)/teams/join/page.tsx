@@ -49,6 +49,16 @@ function JoinTeamContent() {
       });
       const data = await res.json();
 
+      if (res.ok && data.requiresAuth) {
+        // P0-H (iter 087 / TEAM-P03.10): unauthenticated visitor — redirect to
+        // signup so they can create or sign into an account, then re-accept.
+        // The token is preserved so the post-auth flow can auto-accept on return.
+        const params = new URLSearchParams({ token: token! });
+        if (data.email) params.set('email', data.email);
+        router.replace(`/signup?${params.toString()}`);
+        return;
+      }
+
       if (res.ok) {
         setStatus('success');
         setTeamName(data.teamName);

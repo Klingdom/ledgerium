@@ -27,6 +27,7 @@ import { NextRequest } from 'next/server';
 
 const {
   mockTeamMemberFindUnique,
+  mockTeamMemberFindFirst,
   mockTeamMemberFindMany,
   mockTeamMemberCount,
   mockTeamMemberDeleteMany,
@@ -34,6 +35,7 @@ const {
   mockAuth,
 } = vi.hoisted(() => ({
   mockTeamMemberFindUnique: vi.fn(),
+  mockTeamMemberFindFirst: vi.fn(),
   mockTeamMemberFindMany: vi.fn(),
   mockTeamMemberCount: vi.fn(),
   mockTeamMemberDeleteMany: vi.fn(),
@@ -47,6 +49,7 @@ vi.mock('@/db', () => ({
   db: {
     teamMember: {
       findUnique: mockTeamMemberFindUnique,
+      findFirst: mockTeamMemberFindFirst,
       findMany: mockTeamMemberFindMany,
       count: mockTeamMemberCount,
       deleteMany: mockTeamMemberDeleteMany,
@@ -93,7 +96,8 @@ describe('GET /api/teams/:id/members', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAuth.mockResolvedValue({ user: { id: 'caller-1' } });
-    mockTeamMemberFindUnique.mockResolvedValue({ teamId: 't1', userId: 'caller-1', role: 'admin' });
+    // GET uses findFirst (P0-E: status:'active' guard)
+    mockTeamMemberFindFirst.mockResolvedValue({ teamId: 't1', userId: 'caller-1', role: 'admin', status: 'active' });
     mockTeamMemberFindMany.mockResolvedValue([MEMBER_ROW]);
     mockTeamMemberCount.mockResolvedValue(1);
   });
@@ -104,8 +108,8 @@ describe('GET /api/teams/:id/members', () => {
     expect(res.status).toBe(401);
   });
 
-  it('returns 403 when caller is not a team member', async () => {
-    mockTeamMemberFindUnique.mockResolvedValue(null);
+  it('returns 403 when caller is not an active team member (P0-E)', async () => {
+    mockTeamMemberFindFirst.mockResolvedValue(null);
     const res = await GET(makeGetRequest(), PARAMS);
     expect(res.status).toBe(403);
   });
@@ -165,10 +169,9 @@ describe('DELETE /api/teams/:id/members (legacy body-based)', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     mockAuth.mockResolvedValue({ user: { id: 'caller-1' } });
-    // caller membership (owner/admin check)
-    mockTeamMemberFindUnique
-      .mockResolvedValueOnce({ teamId: 't1', userId: 'caller-1', role: 'owner' }) // caller
-      .mockResolvedValueOnce({ teamId: 't1', userId: 'target-1', role: 'member' }); // target
+    // DELETE uses findFirst for caller (P0-E) and findUnique for target (composite key lookup)
+    mockTeamMemberFindFirst.mockResolvedValue({ teamId: 't1', userId: 'caller-1', role: 'owner', status: 'active' });
+    mockTeamMemberFindUnique.mockResolvedValue({ teamId: 't1', userId: 'target-1', role: 'member' });
     mockTeamMemberCount.mockResolvedValue(2); // 2 owners — safe to remove one
     mockTeamMemberDeleteMany.mockResolvedValue({ count: 1 });
     mockTeamMemberUpdateMany.mockResolvedValue({ count: 1 });
@@ -185,32 +188,34 @@ describe('DELETE /api/teams/:id/members (legacy body-based)', () => {
     expect(res.status).toBe(400);
   });
 
-  it('returns 403 when caller is a regular member', async () => {
-    mockTeamMemberFindUnique.mockReset();
-    mockTeamMemberFindUnique.mockResolvedValue({ role: 'member' });
+  it('returns 403 when caller is a regular member (P0-E active guard)', async () => {
+    mockTeamMemberFindFirst.mockResolvedValue({ role: 'member', status: 'active' });
+    const res = await DELETE(makeDeleteRequest('t1', { userId: 'target-1' }), PARAMS);
+    expect(res.status).toBe(403);
+  });
+
+  it('returns 403 when caller has no active membership (P0-E: removed/deactivated)', async () => {
+    mockTeamMemberFindFirst.mockResolvedValue(null); // findFirst with status:'active' returns null
     const res = await DELETE(makeDeleteRequest('t1', { userId: 'target-1' }), PARAMS);
     expect(res.status).toBe(403);
   });
 
   it('returns 404 when target member is not found', async () => {
-    mockTeamMemberFindUnique.mockReset();
-    mockTeamMemberFindUnique
-      .mockResolvedValueOnce({ role: 'owner' }) // caller
-      .mockResolvedValueOnce(null); // target not found
+    mockTeamMemberFindUnique.mockResolvedValue(null); // target not found
     const res = await DELETE(makeDeleteRequest('t1', { userId: 'target-1' }), PARAMS);
     expect(res.status).toBe(404);
   });
 
-  it('returns 400 when attempting to remove the sole owner', async () => {
-    mockTeamMemberFindUnique.mockReset();
-    mockTeamMemberFindUnique
-      .mockResolvedValueOnce({ role: 'owner' }) // caller
-      .mockResolvedValueOnce({ teamId: 't1', userId: 'target-1', role: 'owner' }); // target IS owner
+  it('returns 409 with code sole_owner_protection when attempting to remove the sole owner (P0-I)', async () => {
+    // caller findFirst returns owner, target findUnique returns owner, count=1 sole owner
+    mockTeamMemberFindFirst.mockResolvedValue({ teamId: 't1', userId: 'caller-1', role: 'owner', status: 'active' });
+    mockTeamMemberFindUnique.mockResolvedValue({ teamId: 't1', userId: 'target-1', role: 'owner' });
     mockTeamMemberCount.mockResolvedValue(1); // only 1 owner
     const res = await DELETE(makeDeleteRequest('t1', { userId: 'target-1' }), PARAMS);
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(409);
     const body = await res.json();
     expect(body.error).toMatch(/sole owner/i);
+    expect(body.code).toBe('sole_owner_protection');
   });
 
   it('returns 200 { ok: true } on successful removal', async () => {

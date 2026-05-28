@@ -63,12 +63,26 @@ function StepCard({ step, index }: { step: LiveStep; index: number }) {
           </p>
           <div className="flex items-center gap-2 mt-1">
             <span className="text-[10px] font-medium text-gray-400 uppercase">{label}</span>
-            {step.pageLabel && (
-              <>
-                <span className="text-gray-300">&middot;</span>
-                <p className="text-[11px] text-gray-400 truncate">{step.pageLabel}</p>
-              </>
-            )}
+            {(() => {
+              // Prefer real document.title (e.g., "Inbox (3) – phil@mediafier.ai") over
+              // the derived application label (e.g., "Gmail"). Fall back to pageLabel
+              // when the page didn't set a title.
+              const pageName = step.pageTitle && step.pageTitle.trim().length > 0
+                ? step.pageTitle
+                : step.pageLabel
+              if (!pageName) return null
+              return (
+                <>
+                  <span className="text-gray-300">&middot;</span>
+                  <p
+                    className="text-[11px] text-gray-400 truncate"
+                    title={pageName}
+                  >
+                    {pageName}
+                  </p>
+                </>
+              )
+            })()}
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">

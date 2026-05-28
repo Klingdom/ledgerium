@@ -63,10 +63,16 @@ function toSegmentableEvent(e: CanonicalEvent): SegmentableEvent {
  * Maps a DerivedStep from the segmentation engine to the LiveStep shape
  * used by the extension sidebar. This is the adapter boundary.
  *
+ * `pageTitle` is resolved by LiveStepBuilder at the adapter boundary because
+ * the segmentation-engine's DerivedStep.page_context does NOT carry pageTitle
+ * (only domain / applicationLabel / routeTemplate). Keeping that contract
+ * unchanged preserves the I1 convergence invariant against frozen golden
+ * fixtures in @ledgerium/segmentation-engine.
+ *
  * Exported for test use only (convergence-invariant-i1.test.ts). This is not
  * a production API surface — do not import outside of tests.
  */
-export function toLiveStep(step: DerivedStep): LiveStep {
+export function toLiveStep(step: DerivedStep, pageTitle?: string): LiveStep {
   return {
     stepId: step.step_id,
     title: step.title,
@@ -75,6 +81,9 @@ export function toLiveStep(step: DerivedStep): LiveStep {
     grouping: step.grouping_reason,
     ...(step.page_context?.applicationLabel !== undefined
       ? { pageLabel: step.page_context.applicationLabel }
+      : {}),
+    ...(pageTitle !== undefined && pageTitle !== ''
+      ? { pageTitle }
       : {}),
     confidence: step.confidence,
     eventCount: step.source_event_ids.length,
@@ -101,10 +110,22 @@ export class LiveStepBuilder {
   private readonly segmenter: StreamingSegmenter
   private finalizedLiveSteps: LiveStep[] = []
   private finalizedDerivedSteps: DerivedStep[] = []
+  /**
+   * CanonicalEvents indexed by event_id. Used at the adapter boundary to
+   * resolve LiveStep.pageTitle from the FIRST source event of each step,
+   * since DerivedStep.page_context does not carry pageTitle through the
+   * segmentation-engine contract.
+   *
+   * Cleared on reset(). For very long sessions this map grows linearly with
+   * event count, which is acceptable — typical recording sessions produce
+   * O(hundreds) of events, well within memory budget.
+   */
+  private eventById = new Map<string, CanonicalEvent>()
 
   constructor(sessionId: string, onUpdate: (step: LiveStep) => void) {
     this.segmenter = new StreamingSegmenter(sessionId, (derivedStep) => {
-      const liveStep = toLiveStep(derivedStep)
+      const pageTitle = this.resolvePageTitleForStep(derivedStep)
+      const liveStep = toLiveStep(derivedStep, pageTitle)
       if (derivedStep.status === 'finalized') {
         this.finalizedLiveSteps.push(liveStep)
         this.finalizedDerivedSteps.push(derivedStep)
@@ -113,7 +134,15 @@ export class LiveStepBuilder {
     })
   }
 
+  private resolvePageTitleForStep(step: DerivedStep): string | undefined {
+    const firstSourceId = step.source_event_ids[0]
+    if (firstSourceId === undefined) return undefined
+    const sourceEvent = this.eventById.get(firstSourceId)
+    return sourceEvent?.page_context?.pageTitle
+  }
+
   processEvent(event: CanonicalEvent): void {
+    this.eventById.set(event.event_id, event)
     this.segmenter.processEvent(toSegmentableEvent(event))
   }
 
@@ -124,7 +153,8 @@ export class LiveStepBuilder {
 
   getProvisionalStep(): LiveStep | null {
     const step = this.segmenter.getProvisionalStep()
-    return step !== null ? toLiveStep(step) : null
+    if (step === null) return null
+    return toLiveStep(step, this.resolvePageTitleForStep(step))
   }
 
   getFinalizedSteps(): LiveStep[] {
@@ -152,5 +182,6 @@ export class LiveStepBuilder {
     this.segmenter.reset()
     this.finalizedLiveSteps = []
     this.finalizedDerivedSteps = []
+    this.eventById.clear()
   }
 }

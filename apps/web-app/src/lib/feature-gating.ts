@@ -9,7 +9,23 @@
  * @see FEATURE_GATING_DESIGN.md for architecture details
  */
 
+import * as React from 'react';
 import { NextResponse } from 'next/server';
+
+/**
+ * React `cache()` request-scoped memoization with vitest-environment fallback.
+ *
+ * Production: `React.cache` exposed in React 18.3+ for Server Components → wraps
+ * the function with request-scoped memoization.
+ *
+ * Test: `React.cache` may be undefined under vitest (no Server Component runtime)
+ * → identity passthrough preserves function signature without memoization.
+ *
+ * @iter 088 coordinator-cleanup — original `import { cache } from 'react'` failed
+ * with `TypeError: cache is not a function` in vitest environment.
+ */
+const reactCache: <T extends (...args: any[]) => any>(fn: T) => T =
+  (React as any).cache ?? ((fn) => fn);
 import type { User } from '@prisma/client';
 import {
   toPlanType,
@@ -197,8 +213,14 @@ export function buildFeatureFlags(user: User): FeatureFlagsResponse {
  *
  * @param userId - ID of the user whose effective plan to compute.
  * @returns The highest-ranking PlanType the user holds across all contexts.
+ *
+ * Request-scoped memoization via React cache() (iter 088 Sub-task 5 perf fix).
+ * Same-request calls with the same userId return the cached value, eliminating
+ * redundant DB round-trips when multiple Server Components check effective plan.
+ * React cache() is a no-op outside a React render cycle (API routes), which is
+ * acceptable — each API handler invocation is a single request anyway.
  */
-export async function effectivePlanFor(userId: string): Promise<PlanType> {
+export const effectivePlanFor = reactCache(async (userId: string): Promise<PlanType> => {
   // Fetch the user's solo plan.
   const user = await db.user.findUnique({
     where: { id: userId },
@@ -231,7 +253,7 @@ export async function effectivePlanFor(userId: string): Promise<PlanType> {
   }
 
   return bestPlan;
-}
+});
 
 // ── Feature flags with live usage ─────────────────────────────────────────────
 

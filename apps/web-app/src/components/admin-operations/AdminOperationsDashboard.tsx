@@ -19,6 +19,7 @@
  *   3. Footer timestamp
  *
  * @iter 072
+ * @extended iter 096 / ADM-002 PR-7 — UserDetailDrawer integration
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -30,6 +31,7 @@ import { LeaderboardTable } from './LeaderboardTable.js';
 import { MemoryGauge } from './MemoryGauge.js';
 import { RefreshControl } from './RefreshControl.js';
 import { LoadingSkeleton } from './LoadingSkeleton.js';
+import { UserDetailDrawer } from './user-detail/UserDetailDrawer.js';
 import {
   formatNumber,
   formatBytes,
@@ -96,6 +98,9 @@ export function AdminOperationsDashboard() {
   const [apiResponse, setApiResponse] = useState<AdminOperationsApiResponse | null>(null);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<Date | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Drawer state — null means closed
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   // Prevent state updates after unmount
   const mountedRef = useRef(true);
@@ -321,6 +326,7 @@ export function AdminOperationsDashboard() {
                     countLabel="Uploads"
                     maxRows={5}
                     data-testid="top-uploaders-table"
+                    onRowClick={(userId) => setSelectedUserId(userId)}
                   />
                 </>
               )}
@@ -518,6 +524,12 @@ export function AdminOperationsDashboard() {
           </p>
         )}
       </main>
+
+      {/* ── User Detail Drawer (ADM-002 PR-7) ── */}
+      <UserDetailDrawer
+        selectedUserId={selectedUserId}
+        onClose={() => setSelectedUserId(null)}
+      />
     </div>
   );
 }

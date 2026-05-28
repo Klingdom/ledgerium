@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledgerium — Active Recording</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:400px;height:600px;overflow:hidden;background:#F9FAFB;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased;color:#111827}
+
+/* ── Sidepanel shell ───────────────────────────────────────── */
+.sidepanel{display:flex;flex-direction:column;height:600px;background:#F9FAFB}
+
+/* ── Recording header ─────────────────────────────────────── */
+.recording-header{
+  padding:10px 16px 8px;
+  background:#ecfdf5;
+  border-bottom:1px solid #d1fae5;
+  flex-shrink:0;
+}
+.recording-badge{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.recording-left{display:flex;align-items:center;gap:8px}
+.recording-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:#059669;
+  animation:recording-pulse 1.5s ease-in-out infinite;
+  flex-shrink:0;
+}
+@keyframes recording-pulse{0%{opacity:1}50%{opacity:.4}100%{opacity:1}}
+.recording-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#047857}
+.event-count{font-size:11px;font-weight:600;color:#059669;font-variant-numeric:tabular-nums}
+.activity-name{font-size:13px;font-weight:500;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── Step feed ────────────────────────────────────────────── */
+.step-feed{flex:1;overflow-y:auto;background:#F9FAFB;padding:8px 12px;display:flex;flex-direction:column;gap:6px}
+
+.step-card{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+  display:flex;
+}
+.step-card-border{width:3px;flex-shrink:0}
+.step-card-body{flex:1;padding:8px 10px;min-width:0}
+.step-header{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:3px}
+.step-num{font-size:11px;font-weight:600;color:#9ca3af;font-variant-numeric:tabular-nums;flex-shrink:0}
+.step-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;flex-shrink:0}
+.step-title{font-size:12px;font-weight:500;color:#111827;line-height:1.4;margin-bottom:3px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.step-page{font-size:10px;color:#9ca3af;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.step-events{font-size:10px;color:#9ca3af}
+.confidence-bar{display:flex;align-items:center;gap:4px}
+.conf-track{width:36px;height:3px;background:#f3f4f6;border-radius:99px;overflow:hidden}
+.conf-fill{height:3px;border-radius:99px}
+
+/* active step */
+.step-card.provisional{opacity:.65}
+.step-card.provisional .step-card-border{animation:border-pulse 1s ease-in-out infinite}
+@keyframes border-pulse{0%{opacity:1}50%{opacity:.5}100%{opacity:1}}
+
+/* ── Color codes ─────────────────────────────────────────── */
+.teal{background:#14b8a6;color:#0f766e}
+.blue{background:#3b82f6;color:#1d4ed8}
+.violet{background:#8b5cf6;color:#6d28d9}
+.amber{background:#f59e0b;color:#b45309}
+.emerald{background:#10b981;color:#047857}
+.teal-fill{background:#14b8a6}
+.blue-fill{background:#3b82f6}
+.violet-fill{background:#8b5cf6}
+.amber-fill{background:#f59e0b}
+.emerald-fill{background:#10b981}
+.teal-bg{background:rgba(20,184,166,.08)}
+.blue-bg{background:rgba(59,130,246,.08)}
+.violet-bg{background:rgba(139,92,246,.08)}
+.amber-bg{background:rgba(245,158,11,.08)}
+.emerald-bg{background:rgba(16,185,129,.08)}
+
+/* ── Control bar ──────────────────────────────────────────── */
+.control-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px 12px;
+  border-top:1px solid #e5e7eb;
+  background:#fff;
+  gap:8px;
+  flex-shrink:0;
+}
+.btn-danger{font-size:12px;font-weight:500;color:#dc2626;background:none;border:none;padding:8px 10px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.btn-secondary{font-size:12px;font-weight:500;color:#374151;background:#fff;border:1px solid #e5e7eb;padding:8px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.btn-primary{font-size:12px;font-weight:600;color:#fff;background:#059669;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;white-space:nowrap;box-shadow:0 1px 3px rgba(5,150,105,.3)}
+.btn-group{display:flex;gap:6px}
+</style>
+</head>
+<body>
+<div class="sidepanel">
+
+  <!-- Recording header -->
+  <div class="recording-header">
+    <div class="recording-badge">
+      <div class="recording-left">
+        <span class="recording-dot"></span>
+        <span class="recording-label">Recording Active</span>
+      </div>
+      <span class="event-count">47 events</span>
+    </div>
+    <p class="activity-name">Qualifying Sales Lead in HubSpot CRM</p>
+  </div>
+
+  <!-- Step feed -->
+  <div class="step-feed">
+
+    <!-- Step 1: Navigation (teal) — finalized -->
+    <div class="step-card">
+      <div class="step-card-border teal-bg" style="width:3px;background:#14b8a6"></div>
+      <div class="step-card-body">
+        <div class="step-header">
+          <span class="step-num">1</span>
+          <span class="step-label teal" style="background:none;font-size:10px;color:#0f766e">Navigation</span>
+        </div>
+        <div class="step-title">Open HubSpot CRM and navigate to Contacts</div>
+        <div class="step-page">app.hubspot.com · /contacts</div>
+        <div class="step-footer">
+          <span class="step-events">8 events</span>
+          <div class="confidence-bar">
+            <div class="conf-track"><div class="conf-fill teal-fill" style="width:86%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Form interaction (blue) — finalized -->
+    <div class="step-card">
+      <div class="step-card-border" style="width:3px;background:#3b82f6"></div>
+      <div class="step-card-body">
+        <div class="step-header">
+          <span class="step-num">2</span>
+          <span class="step-label" style="background:none;font-size:10px;color:#1d4ed8">Form</span>
+        </div>
+        <div class="step-title">Search and open lead record for Acme Corp</div>
+        <div class="step-page">app.hubspot.com · /contacts/search</div>
+        <div class="step-footer">
+          <span class="step-events">11 events</span>
+          <div class="confidence-bar">
+            <div class="conf-track"><div class="conf-fill blue-fill" style="width:92%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Data entry (violet) — finalized -->
+    <div class="step-card">
+      <div class="step-card-border" style="width:3px;background:#8b5cf6"></div>
+      <div class="step-card-body">
+        <div class="step-header">
+          <span class="step-num">3</span>
+          <span class="step-label" style="background:none;font-size:10px;color:#6d28d9">Data Entry</span>
+        </div>
+        <div class="step-title">Review contact profile and check deal stage</div>
+        <div class="step-page">app.hubspot.com · /contacts/482671</div>
+        <div class="step-footer">
+          <span class="step-events">9 events</span>
+          <div class="confidence-bar">
+            <div class="conf-track"><div class="conf-fill violet-fill" style="width:78%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Form (blue) — finalized -->
+    <div class="step-card">
+      <div class="step-card-border" style="width:3px;background:#3b82f6"></div>
+      <div class="step-card-body">
+        <div class="step-header">
+          <span class="step-num">4</span>
+          <span class="step-label" style="background:none;font-size:10px;color:#1d4ed8">Form</span>
+        </div>
+        <div class="step-title">Update lead score and qualification status</div>
+        <div class="step-page">app.hubspot.com · /contacts/482671</div>
+        <div class="step-footer">
+          <span class="step-events">12 events</span>
+          <div class="confidence-bar">
+            <div class="conf-track"><div class="conf-fill blue-fill" style="width:95%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: Send/Action (emerald) — finalized -->
+    <div class="step-card">
+      <div class="step-card-border" style="width:3px;background:#10b981"></div>
+      <div class="step-card-body">
+        <div class="step-header">
+          <span class="step-num">5</span>
+          <span class="step-label" style="background:none;font-size:10px;color:#047857">Action</span>
+        </div>
+        <div class="step-title">Add follow-up task and assign to sales rep</div>
+        <div class="step-page">app.hubspot.com · /contacts/482671/tasks</div>
+        <div class="step-footer">
+          <span class="step-events">7 events</span>
+          <div class="confidence-bar">
+            <div class="conf-track"><div class="conf-fill emerald-fill" style="width:88%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 6 PROVISIONAL — teal, pulsing, partial opacity -->
+    <div class="step-card provisional" style="opacity:.6">
+      <div class="step-card-border" style="width:3px;background:#14b8a6;animation:border-pulse 1.2s ease-in-out infinite"></div>
+      <div class="step-card-body">
+        <div class="step-header">
+          <span class="step-num">6</span>
+          <span class="step-label" style="background:none;font-size:10px;color:#0f766e">Navigation</span>
+        </div>
+        <div class="step-title">Navigate to Deals pipeline view</div>
+        <div class="step-page">app.hubspot.com · /deals</div>
+        <div class="step-footer">
+          <span class="step-events">—</span>
+          <div class="confidence-bar">
+            <div class="conf-track"><div class="conf-fill teal-fill" style="width:45%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /step-feed -->
+
+  <!-- Control bar -->
+  <div class="control-bar">
+    <button class="btn-danger">Discard</button>
+    <div class="btn-group">
+      <button class="btn-secondary">Pause</button>
+      <button class="btn-primary">Stop &amp; Review</button>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

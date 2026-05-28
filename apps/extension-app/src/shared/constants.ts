@@ -12,6 +12,7 @@ export const RECORDER_VERSION = '2.0.0' as const
 export const RENDERER_VERSION = '0.1.0' as const
 export const STORAGE_KEY_SESSION = 'ledgerium_active_session' as const
 export const STORAGE_KEY_SETTINGS = 'ledgerium_settings' as const
+export const STORAGE_KEY_APIKEY = 'ledgerium_apikey' as const
 export const STORAGE_KEY_HISTORY_INDEX = 'ledgerium_history_index' as const
 export const STORAGE_KEY_BUNDLE_PREFIX = 'ledgerium_bundle_' as const
 export const MAX_HISTORY_ENTRIES = 25 as const

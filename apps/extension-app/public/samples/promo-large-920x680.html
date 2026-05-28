@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  width:920px;height:680px;overflow:hidden;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.canvas{
+  width:920px;height:680px;position:relative;overflow:hidden;
+  background:linear-gradient(145deg,#0f172a 0%,#1a2e1a 55%,#0a1628 100%);
+  display:flex;
+}
+
+/* Background decoration */
+.grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+.glow-top{
+  position:absolute;
+  width:500px;height:500px;top:-150px;right:-100px;border-radius:50%;
+  background:radial-gradient(circle,rgba(5,150,105,.18) 0%,transparent 70%);
+}
+.glow-bottom{
+  position:absolute;
+  width:300px;height:300px;bottom:-100px;left:-60px;border-radius:50%;
+  background:radial-gradient(circle,rgba(59,130,246,.1) 0%,transparent 70%);
+}
+
+/* Left column — headline + features */
+.left{
+  position:relative;z-index:1;
+  width:400px;flex-shrink:0;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:52px 44px 52px 52px;
+}
+.wordmark{
+  display:flex;align-items:center;gap:10px;margin-bottom:32px;
+}
+.logo-mark{
+  width:40px;height:40px;border-radius:10px;
+  background:linear-gradient(135deg,#059669,#047857);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:700;color:#fff;
+  box-shadow:0 4px 16px rgba(5,150,105,.45);
+  flex-shrink:0;
+}
+.brand-name{font-size:22px;font-weight:700;color:#f1f5f9;letter-spacing:-.02em}
+.brand-sub{font-size:11px;font-weight:500;color:#10b981;letter-spacing:.05em;text-transform:uppercase}
+.headline{
+  font-size:32px;font-weight:800;color:#fff;line-height:1.2;
+  letter-spacing:-.03em;margin-bottom:14px;
+}
+.headline span{color:#10b981}
+.sub{
+  font-size:14px;color:#94a3b8;line-height:1.6;margin-bottom:28px;
+}
+
+/* Feature list */
+.features{display:flex;flex-direction:column;gap:12px;margin-bottom:32px}
+.feature{display:flex;align-items:flex-start;gap:10px}
+.feat-icon{
+  width:28px;height:28px;border-radius:7px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  margin-top:1px;
+}
+.feat-icon svg{width:14px;height:14px}
+.feat-text{}
+.feat-title{font-size:12px;font-weight:600;color:#e2e8f0;letter-spacing:-.01em}
+.feat-desc{font-size:11px;color:#64748b;margin-top:1px}
+
+.pill{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(5,150,105,.15);border:1px solid rgba(5,150,105,.3);
+  border-radius:20px;padding:5px 14px;
+}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:#10b981}
+.pill-text{font-size:11px;font-weight:600;color:#10b981;letter-spacing:.06em;text-transform:uppercase}
+
+/* Right column — sidepanel mockup */
+.right{
+  position:relative;z-index:1;
+  flex:1;
+  display:flex;align-items:center;justify-content:center;
+  padding:32px 40px 32px 16px;
+}
+.device-frame{
+  width:320px;
+  background:#fff;
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.08),
+    0 20px 60px rgba(0,0,0,.5),
+    0 4px 16px rgba(0,0,0,.3);
+}
+/* Header */
+.panel-header{
+  background:#ecfdf5;
+  border-bottom:1px solid #d1fae5;
+  padding:10px 14px 8px;
+}
+.rec-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
+.rec-left{display:flex;align-items:center;gap:7px}
+.rec-dot{
+  width:7px;height:7px;border-radius:50%;background:#059669;flex-shrink:0;
+}
+.rec-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#047857}
+.rec-count{font-size:10px;font-weight:600;color:#059669}
+.activity{font-size:12px;font-weight:500;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Steps */
+.steps{padding:8px 10px;display:flex;flex-direction:column;gap:5px;background:#f9fafb}
+.step{
+  background:#fff;border:1px solid #e5e7eb;border-radius:8px;
+  overflow:hidden;display:flex;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+.step-bar{width:3px;flex-shrink:0}
+.step-body{flex:1;padding:7px 9px;min-width:0}
+.step-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+.step-num{font-size:10px;font-weight:600;color:#9ca3af}
+.step-chip{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.step-title{font-size:11px;font-weight:500;color:#111827;line-height:1.35;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step-url{font-size:9px;color:#9ca3af;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step-footer{display:flex;align-items:center;justify-content:space-between;margin-top:3px}
+.step-evts{font-size:9px;color:#9ca3af}
+.conf-track{width:30px;height:2px;background:#f3f4f6;border-radius:99px;overflow:hidden}
+.conf-fill{height:2px;border-radius:99px}
+
+/* provisional */
+.provisional{opacity:.6}
+
+/* Controls */
+.ctrl-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 12px 10px;
+  background:#fff;border-top:1px solid #e5e7eb;
+  gap:6px;
+}
+.btn-danger{font-size:11px;font-weight:500;color:#dc2626;background:none;border:none;padding:6px 8px;border-radius:6px}
+.btn-grp{display:flex;gap:5px}
+.btn-sec{font-size:11px;font-weight:500;color:#374151;background:#fff;border:1px solid #e5e7eb;padding:6px 12px;border-radius:6px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.btn-pri{font-size:11px;font-weight:600;color:#fff;background:#059669;border:none;padding:6px 14px;border-radius:6px;box-shadow:0 1px 3px rgba(5,150,105,.3)}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="canvas">
+  <div class="grid"></div>
+  <div class="glow-top"></div>
+  <div class="glow-bottom"></div>
+
+  <!-- Left: headline + features -->
+  <div class="left">
+    <div class="wordmark">
+      <div class="logo-mark">L</div>
+      <div>
+        <div class="brand-name">Ledgerium</div>
+        <div class="brand-sub">AI Recorder</div>
+      </div>
+    </div>
+
+    <div class="headline">Record once.<br><span>Understand everything.</span></div>
+    <div class="sub">Turn any digital workflow into<br>structured process intelligence.</div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feat-icon" style="background:rgba(20,184,166,.15)">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M2 8h12M8 2v12" stroke="#14b8a6" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div class="feat-text">
+          <div class="feat-title">Automatic step capture</div>
+          <div class="feat-desc">Clicks, forms, and navigation — captured as structured steps</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feat-icon" style="background:rgba(5,150,105,.15)">
+          <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="4" width="12" height="8" rx="2" stroke="#059669" stroke-width="1.5"/><path d="M5 8h6M5 10.5h4" stroke="#059669" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="feat-text">
+          <div class="feat-title">Instant SOP generation</div>
+          <div class="feat-desc">Clean, shareable SOPs from every recorded session</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feat-icon" style="background:rgba(139,92,246,.15)">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M2 12 L5 8 L8 10 L11 5 L14 7" stroke="#8b5cf6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="feat-text">
+          <div class="feat-title">Cycle time intelligence</div>
+          <div class="feat-desc">Step-level timing, variance, and health scoring</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feat-icon" style="background:rgba(59,130,246,.15)">
+          <svg viewBox="0 0 16 16" fill="none"><circle cx="5" cy="8" r="2" stroke="#3b82f6" stroke-width="1.5"/><circle cx="11" cy="4" r="2" stroke="#3b82f6" stroke-width="1.5"/><circle cx="11" cy="12" r="2" stroke="#3b82f6" stroke-width="1.5"/><path d="M7 7.5 L9.3 5.2M7 8.5 L9.3 10.8" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="feat-text">
+          <div class="feat-title">Process maps &amp; variants</div>
+          <div class="feat-desc">Visual flow diagrams with variant detection</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pill">
+      <span class="pill-dot"></span>
+      <span class="pill-text">Free to install</span>
+    </div>
+  </div>
+
+  <!-- Right: sidepanel mockup -->
+  <div class="right">
+    <div class="device-frame">
+      <!-- Recording header -->
+      <div class="panel-header">
+        <div class="rec-row">
+          <div class="rec-left">
+            <span class="rec-dot"></span>
+            <span class="rec-label">Recording Active</span>
+          </div>
+          <span class="rec-count">47 events</span>
+        </div>
+        <div class="activity">Qualifying Sales Lead in HubSpot CRM</div>
+      </div>
+
+      <!-- Step feed -->
+      <div class="steps">
+        <div class="step">
+          <div class="step-bar" style="background:#14b8a6"></div>
+          <div class="step-body">
+            <div class="step-top">
+              <span class="step-num">1</span>
+              <span class="step-chip" style="color:#0f766e">Navigation</span>
+            </div>
+            <div class="step-title">Open HubSpot CRM and navigate to Contacts</div>
+            <div class="step-url">app.hubspot.com · /contacts</div>
+            <div class="step-footer">
+              <span class="step-evts">8 events</span>
+              <div class="conf-track"><div class="conf-fill" style="background:#14b8a6;width:86%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-bar" style="background:#3b82f6"></div>
+          <div class="step-body">
+            <div class="step-top">
+              <span class="step-num">2</span>
+              <span class="step-chip" style="color:#1d4ed8">Form</span>
+            </div>
+            <div class="step-title">Search and open lead record for Acme Corp</div>
+            <div class="step-url">app.hubspot.com · /contacts/search</div>
+            <div class="step-footer">
+              <span class="step-evts">11 events</span>
+              <div class="conf-track"><div class="conf-fill" style="background:#3b82f6;width:92%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-bar" style="background:#8b5cf6"></div>
+          <div class="step-body">
+            <div class="step-top">
+              <span class="step-num">3</span>
+              <span class="step-chip" style="color:#6d28d9">Data Entry</span>
+            </div>
+            <div class="step-title">Review contact profile and check deal stage</div>
+            <div class="step-url">app.hubspot.com · /contacts/482671</div>
+            <div class="step-footer">
+              <span class="step-evts">9 events</span>
+              <div class="conf-track"><div class="conf-fill" style="background:#8b5cf6;width:78%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-bar" style="background:#3b82f6"></div>
+          <div class="step-body">
+            <div class="step-top">
+              <span class="step-num">4</span>
+              <span class="step-chip" style="color:#1d4ed8">Form</span>
+            </div>
+            <div class="step-title">Update lead score and qualification status</div>
+            <div class="step-url">app.hubspot.com · /contacts/482671</div>
+            <div class="step-footer">
+              <span class="step-evts">12 events</span>
+              <div class="conf-track"><div class="conf-fill" style="background:#3b82f6;width:95%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-bar" style="background:#10b981"></div>
+          <div class="step-body">
+            <div class="step-top">
+              <span class="step-num">5</span>
+              <span class="step-chip" style="color:#047857">Action</span>
+            </div>
+            <div class="step-title">Add follow-up task and assign to sales rep</div>
+            <div class="step-url">app.hubspot.com · /contacts/482671/tasks</div>
+            <div class="step-footer">
+              <span class="step-evts">7 events</span>
+              <div class="conf-track"><div class="conf-fill" style="background:#10b981;width:88%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step provisional">
+          <div class="step-bar" style="background:#14b8a6"></div>
+          <div class="step-body">
+            <div class="step-top">
+              <span class="step-num">6</span>
+              <span class="step-chip" style="color:#0f766e">Navigation</span>
+            </div>
+            <div class="step-title">Navigate to Deals pipeline view</div>
+            <div class="step-url">app.hubspot.com · /deals</div>
+            <div class="step-footer">
+              <span class="step-evts">—</span>
+              <div class="conf-track"><div class="conf-fill" style="background:#14b8a6;width:45%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="ctrl-bar">
+        <button class="btn-danger">Discard</button>
+        <div class="btn-grp">
+          <button class="btn-sec">Pause</button>
+          <button class="btn-pri">Stop &amp; Review</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

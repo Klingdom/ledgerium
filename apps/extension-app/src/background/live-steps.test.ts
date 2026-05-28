@@ -140,6 +140,56 @@ describe('LiveStepBuilder adapter field mapping', () => {
     expect(steps[0]!.pageLabel).toBeUndefined()
   })
 
+  it('pageTitle maps from page_context.pageTitle when non-empty', () => {
+    const events = [
+      makeCanonicalEvent({
+        event_id: 'e1', event_type: 'interaction.click', t_ms: 1000,
+        page_context: {
+          url: 'https://mail.google.com/inbox',
+          urlNormalized: 'https://mail.google.com/inbox',
+          domain: 'mail.google.com',
+          routeTemplate: '/inbox',
+          pageTitle: 'Inbox (3) - phil@mediafier.ai - Gmail',
+          applicationLabel: 'Gmail',
+        },
+        target_summary: { label: 'Compose', selector: '#compose', isSensitive: false },
+      }),
+    ]
+    const steps = collectFinalized(events, 'sess')
+    expect(steps[0]!.pageTitle).toBe('Inbox (3) - phil@mediafier.ai - Gmail')
+    expect(steps[0]!.pageLabel).toBe('Gmail')
+  })
+
+  it('pageTitle is absent when page_context.pageTitle is empty string', () => {
+    const events = [
+      makeCanonicalEvent({
+        event_id: 'e1', event_type: 'interaction.click', t_ms: 1000,
+        page_context: {
+          url: 'https://app.example.com/',
+          urlNormalized: 'https://app.example.com/',
+          domain: 'app.example.com',
+          routeTemplate: '/',
+          pageTitle: '',
+          applicationLabel: 'App',
+        },
+        target_summary: { label: 'Submit', selector: '#submit', isSensitive: false },
+      }),
+    ]
+    const steps = collectFinalized(events, 'sess')
+    expect(steps[0]!.pageTitle).toBeUndefined()
+    expect(steps[0]!.pageLabel).toBe('App')
+  })
+
+  it('pageTitle is absent when no page_context', () => {
+    const events = [
+      makeCanonicalEvent({
+        event_id: 'e1', event_type: 'interaction.click', t_ms: 1000,
+      }),
+    ]
+    const steps = collectFinalized(events, 'sess')
+    expect(steps[0]!.pageTitle).toBeUndefined()
+  })
+
   it('confidence maps from DerivedStep confidence', () => {
     const events = [
       makeCanonicalEvent({

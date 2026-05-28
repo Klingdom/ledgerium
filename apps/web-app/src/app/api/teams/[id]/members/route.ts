@@ -27,12 +27,12 @@ export async function GET(
   }
 
   try {
-    // Verify caller is a member
-    const membership = await (db as any).teamMember.findUnique({
-      where: { teamId_userId: { teamId: params.id, userId: session.user.id } },
+    // Verify caller is an active member (P0-E: status:'active' guard)
+    const membership = await (db as any).teamMember.findFirst({
+      where: { teamId: params.id, userId: session.user.id, status: 'active' },
     });
     if (!membership) {
-      return NextResponse.json({ error: 'Not a member of this team' }, { status: 403 });
+      return NextResponse.json({ error: 'Not a member of this workspace' }, { status: 403 });
     }
 
     // Parse pagination + filter query params.
@@ -102,9 +102,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'userId is required' }, { status: 400 });
     }
 
-    // Verify caller is owner or admin
-    const callerMembership = await (db as any).teamMember.findUnique({
-      where: { teamId_userId: { teamId: params.id, userId: session.user.id } },
+    // Verify caller is an active owner or admin (P0-E: status:'active' guard)
+    const callerMembership = await (db as any).teamMember.findFirst({
+      where: { teamId: params.id, userId: session.user.id, status: 'active' },
     });
     if (!callerMembership || !['owner', 'admin'].includes(callerMembership.role)) {
       return NextResponse.json({ error: 'Only owners and admins can remove members' }, { status: 403 });
@@ -119,14 +119,15 @@ export async function DELETE(
     }
 
     // Sole-owner protection: count owners; refuse if this is the last one.
+    // P0-I: UMAP-001 AC-6 mandates HTTP 409 (conflict) not 400 for this case.
     if (targetMembership.role === 'owner') {
       const ownerCount = await (db as any).teamMember.count({
         where: { teamId: params.id, role: 'owner' },
       });
       if (ownerCount <= 1) {
         return NextResponse.json(
-          { error: 'Cannot remove the sole owner of a workspace' },
-          { status: 400 },
+          { error: 'Cannot remove the sole owner of a workspace', code: 'sole_owner_protection' },
+          { status: 409 },
         );
       }
     }

@@ -77,10 +77,10 @@ export class CaptureEngine {
     this.isRecording = true
     this.isPaused = false
 
-    // Emit initial page-load event (top frame only — iframes are internal plumbing)
-    if (this.isTopFrame) {
-      this.captureNavigation(location.href, document.title, false)
-    }
+    // Per CEO directive 2026-05-27: first captured event must be the user's first
+    // action AFTER pressing Start Recording — NOT an automatic page-load snapshot
+    // of the current tab. URL/title context is still captured in every subsequent
+    // event payload, so the page is fully traceable through actual user activity.
 
     this.attachDOMListeners()
     // Window focus/blur and history/state-change events are meaningful only in the top

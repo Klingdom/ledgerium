@@ -183,12 +183,9 @@ function ExportView({
   uploadStatus: ProcessScreenProps['uploadStatus']
   onDiscard: () => void
 }) {
-  const openFullView = useCallback(() => {
-    if (!meta) return
-    chrome.tabs.create({
-      url: chrome.runtime.getURL(`src/viewer/index.html?sessionId=${meta.sessionId}`),
-    })
-  }, [meta])
+  // ETR-P01 (2026-05-28): full-page viewer at src/viewer/index.html was removed
+  // in iter 098 (Chrome Web Store single-purpose policy compliance). The Map view
+  // in the sidepanel is the canonical map surface; no full-page view exists.
 
   const exportJson = useCallback(() => {
     if (!bundle) return
@@ -519,12 +516,6 @@ function ExportView({
               : 'Download Workflow Report'}
         </button>
 
-        <button
-          onClick={openFullView}
-          className="btn-secondary w-full text-xs"
-        >
-          Open Full Workflow Map
-        </button>
         <button
           onClick={exportEnrichedJson}
           className="btn-ghost w-full text-xs"

@@ -187,6 +187,35 @@ Rationale: the pattern was validated by `PRICING_AUDIT_001.md` (iter M3@016→17
 
 ---
 
+## Extension Reliability Invariant (CEO-mandated, 2026-05-28)
+
+The Chrome browser extension at `apps/extension-app/` is shipping product and is being submitted to the Chrome Web Store. **It MUST continue to capture user behavior events end-to-end at all times.** Breaking the capture pipeline is treated as a P0 release blocker.
+
+### Hard rules
+
+1. **Pre-change verification (MANDATORY).** Before merging any change that touches files under `apps/extension-app/src/content/`, `apps/extension-app/src/background/`, `apps/extension-app/manifest.json`, or `packages/{normalization,segmentation,policy}-engine/`, the change author MUST run a real-extension validation gate, not just unit tests. Unit tests have repeatedly failed to catch capture-pipeline breaks (iter 097 content_scripts removal; iter 099 pageTitle regression).
+2. **Real-extension harness is the validation gate of record.** `playwright.real-ext.config.ts` + `e2e/real-extension/sidepanel-real.spec.ts` (iter 070 launchPersistentContext pattern) MUST pass before any extension change is declared shipped. If the harness is skipped or known-flaky on the target surface, the change MUST be tested manually in a real Chrome profile and the manual evidence logged in the iteration entry.
+3. **Forbidden silent-changes list.** None of the following may be modified without explicit CEO approval, even if the change "looks redundant" or "Chrome reviewer recommends it":
+   - `manifest.json` `content_scripts` declarative block
+   - `manifest.json` `permissions` array
+   - `manifest.json` `host_permissions`
+   - The CaptureEngine `attachDOMListeners()` call site in `content/capture.ts`
+   - The RAW_EVENT_CAPTURED message bus path (content → background)
+   - The `normalizeRawEvent()` → `liveBuilder.processEvent()` → `store.appendEvent()` pipeline in `background/index.ts`
+   - `injection-manager.ts` `injectIntoTab()` behavior
+4. **Pre-existing-working-behavior rule.** When the user reports a regression in the recorder ("worked before, doesn't work now"), the first action is `git log -p` on the suspect files to find what changed — NOT a speculative redesign. If the regression was introduced by recent work, REVERT FIRST, then redesign with the working baseline as the starting point.
+5. **No "while we're here" cleanups.** Changes outside the explicit user directive are forbidden when touching extension files. The user has explicitly stated: *"You must stay focused on my requirements and building the best product possible."* (2026-05-27).
+6. **Validation before declaring done.** Before reporting "shipped" to the user, the agent MUST: (a) zip the dist, (b) request user load+test in a real Chrome session, OR (c) run the real-extension harness with passing results recorded.
+
+### Known regression history (do not repeat)
+
+- **iter 097 content_scripts removal** — Chrome Reviewer recommendation cited as "redundant"; broke capture entirely. Unit tests + static E2E + typecheck all passed; only real-extension testing would have caught it.
+- **iter 099 pageTitle add (this session)** — added `eventById` Map tracking + `toLiveStep(step, pageTitle)` 2nd-param signature. Unit tests passed including I1 convergence invariant; CEO reports capture broken in real session immediately after.
+
+Pattern: **unit tests CANNOT certify extension-app health.** Manifest, content-script injection, and chrome.runtime message bus are runtime-only failure modes.
+
+---
+
 ## Coding Standards
 
 ### General

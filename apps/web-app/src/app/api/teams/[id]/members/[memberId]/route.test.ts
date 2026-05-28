@@ -88,8 +88,13 @@ describe('PATCH /api/teams/:id/members/:memberId', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAuth.mockResolvedValue({ user: { id: 'caller-1' } });
-    mockTeamMemberFindUnique.mockResolvedValue(OWNER_CALLER);
-    mockTeamMemberFindFirst.mockResolvedValue(TARGET_MEMBER);
+    // Route uses findFirst for BOTH caller (1st call) and target (2nd call).
+    // mockTeamMemberFindUnique is set here but unused by the route — kept for
+    // the per-test overrides below that use it to signal "change the caller role".
+    // The actual mock chain: 1st findFirst → caller, 2nd findFirst → target.
+    mockTeamMemberFindFirst
+      .mockResolvedValueOnce({ ...OWNER_CALLER, status: 'active' }) // caller
+      .mockResolvedValue(TARGET_MEMBER); // target (and any subsequent calls)
     mockTeamMemberCount.mockResolvedValue(2); // 2 owners — demotion safe
     mockTeamMemberUpdate.mockResolvedValue({});
   });
@@ -111,28 +116,40 @@ describe('PATCH /api/teams/:id/members/:memberId', () => {
   });
 
   it('returns 403 when caller is a regular member', async () => {
-    mockTeamMemberFindUnique.mockResolvedValue({ role: 'member' });
+    mockTeamMemberFindFirst
+      .mockReset()
+      .mockResolvedValueOnce({ role: 'member', status: 'active' }) // caller
+      .mockResolvedValue(TARGET_MEMBER);
     const res = await PATCH(makePatchRequest({ role: 'admin' }), PARAMS);
     expect(res.status).toBe(403);
   });
 
   it('returns 403 when caller is not in the team at all', async () => {
-    mockTeamMemberFindUnique.mockResolvedValue(null);
+    mockTeamMemberFindFirst
+      .mockReset()
+      .mockResolvedValueOnce(null) // caller not found
+      .mockResolvedValue(TARGET_MEMBER);
     const res = await PATCH(makePatchRequest({ role: 'admin' }), PARAMS);
     expect(res.status).toBe(403);
   });
 
   it('returns 404 when target member is not found', async () => {
-    mockTeamMemberFindFirst.mockResolvedValue(null);
+    mockTeamMemberFindFirst
+      .mockReset()
+      .mockResolvedValueOnce({ ...OWNER_CALLER, status: 'active' }) // caller
+      .mockResolvedValue(null); // target not found
     const res = await PATCH(makePatchRequest({ role: 'admin' }), PARAMS);
     expect(res.status).toBe(404);
   });
 
-  it('returns 400 when demoting the sole owner', async () => {
-    mockTeamMemberFindFirst.mockResolvedValue(TARGET_OWNER);
+  it('returns 409 when demoting the sole owner', async () => {
+    mockTeamMemberFindFirst
+      .mockReset()
+      .mockResolvedValueOnce({ ...OWNER_CALLER, status: 'active' }) // caller
+      .mockResolvedValue(TARGET_OWNER); // target is owner
     mockTeamMemberCount.mockResolvedValue(1); // only 1 owner
     const res = await PATCH(makePatchRequest({ role: 'admin' }), PARAMS);
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(409);
     const body = await res.json();
     expect(body.error).toMatch(/sole owner/i);
   });
@@ -146,7 +163,10 @@ describe('PATCH /api/teams/:id/members/:memberId', () => {
   // ── Sub-task 5 (TEAM-P03.6): admin cannot promote to owner ──────────────────
 
   it('returns 403 with code forbidden_role_elevation when admin tries to promote to owner', async () => {
-    mockTeamMemberFindUnique.mockResolvedValue({ role: 'admin' });
+    mockTeamMemberFindFirst
+      .mockReset()
+      .mockResolvedValueOnce({ role: 'admin', status: 'active', teamId: 't1', userId: 'caller-1' })
+      .mockResolvedValue(TARGET_MEMBER);
     const res = await PATCH(makePatchRequest({ role: 'owner' }), PARAMS);
     expect(res.status).toBe(403);
     const body = await res.json();
@@ -154,13 +174,19 @@ describe('PATCH /api/teams/:id/members/:memberId', () => {
   });
 
   it('admin can still change roles that are not owner (member → admin)', async () => {
-    mockTeamMemberFindUnique.mockResolvedValue({ role: 'admin' });
+    mockTeamMemberFindFirst
+      .mockReset()
+      .mockResolvedValueOnce({ role: 'admin', status: 'active', teamId: 't1', userId: 'caller-1' })
+      .mockResolvedValue(TARGET_MEMBER);
     const res = await PATCH(makePatchRequest({ role: 'admin' }), PARAMS);
     expect(res.status).toBe(200);
   });
 
   it('admin can change member to member (no-op is allowed)', async () => {
-    mockTeamMemberFindUnique.mockResolvedValue({ role: 'admin' });
+    mockTeamMemberFindFirst
+      .mockReset()
+      .mockResolvedValueOnce({ role: 'admin', status: 'active', teamId: 't1', userId: 'caller-1' })
+      .mockResolvedValue(TARGET_MEMBER);
     const res = await PATCH(makePatchRequest({ role: 'member' }), PARAMS);
     expect(res.status).toBe(200);
   });
@@ -175,7 +201,10 @@ describe('PATCH /api/teams/:id/members/:memberId', () => {
   });
 
   it('admin can change member roles (not just owner)', async () => {
-    mockTeamMemberFindUnique.mockResolvedValue({ role: 'admin' });
+    mockTeamMemberFindFirst
+      .mockReset()
+      .mockResolvedValueOnce({ role: 'admin', status: 'active', teamId: 't1', userId: 'caller-1' })
+      .mockResolvedValue(TARGET_MEMBER);
     const res = await PATCH(makePatchRequest({ role: 'member' }), PARAMS);
     expect(res.status).toBe(200);
   });
@@ -187,8 +216,10 @@ describe('DELETE /api/teams/:id/members/:memberId — Sub-task 6 soft-delete (it
   beforeEach(() => {
     vi.clearAllMocks();
     mockAuth.mockResolvedValue({ user: { id: 'caller-1' } });
-    mockTeamMemberFindUnique.mockResolvedValue(OWNER_CALLER);
-    mockTeamMemberFindFirst.mockResolvedValue(TARGET_MEMBER);
+    // Route uses findFirst for BOTH caller (1st call) and target (2nd call).
+    mockTeamMemberFindFirst
+      .mockResolvedValueOnce({ ...OWNER_CALLER, status: 'active' }) // caller
+      .mockResolvedValue(TARGET_MEMBER); // target (and any subsequent calls)
     mockTeamMemberCount.mockResolvedValue(2); // 2 owners — removal safe
     mockTeamMemberUpdate.mockResolvedValue({});
     mockTeamMemberDelete.mockResolvedValue({});
@@ -201,28 +232,40 @@ describe('DELETE /api/teams/:id/members/:memberId — Sub-task 6 soft-delete (it
   });
 
   it('returns 403 when caller is a regular member', async () => {
-    mockTeamMemberFindUnique.mockResolvedValue({ role: 'member' });
+    mockTeamMemberFindFirst
+      .mockReset()
+      .mockResolvedValueOnce({ role: 'member', status: 'active' }) // caller
+      .mockResolvedValue(TARGET_MEMBER);
     const res = await DELETE(makeDeleteRequest(), PARAMS);
     expect(res.status).toBe(403);
   });
 
   it('returns 403 when caller is not in the team at all', async () => {
-    mockTeamMemberFindUnique.mockResolvedValue(null);
+    mockTeamMemberFindFirst
+      .mockReset()
+      .mockResolvedValueOnce(null) // caller not found
+      .mockResolvedValue(TARGET_MEMBER);
     const res = await DELETE(makeDeleteRequest(), PARAMS);
     expect(res.status).toBe(403);
   });
 
   it('returns 404 when target member is not found', async () => {
-    mockTeamMemberFindFirst.mockResolvedValue(null);
+    mockTeamMemberFindFirst
+      .mockReset()
+      .mockResolvedValueOnce({ ...OWNER_CALLER, status: 'active' }) // caller
+      .mockResolvedValue(null); // target not found
     const res = await DELETE(makeDeleteRequest(), PARAMS);
     expect(res.status).toBe(404);
   });
 
-  it('returns 400 when removing the sole owner', async () => {
-    mockTeamMemberFindFirst.mockResolvedValue(TARGET_OWNER);
+  it('returns 409 when removing the sole owner', async () => {
+    mockTeamMemberFindFirst
+      .mockReset()
+      .mockResolvedValueOnce({ ...OWNER_CALLER, status: 'active' }) // caller
+      .mockResolvedValue(TARGET_OWNER); // target is an owner
     mockTeamMemberCount.mockResolvedValue(1); // only 1 owner
     const res = await DELETE(makeDeleteRequest(), PARAMS);
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(409);
     const body = await res.json();
     expect(body.error).toMatch(/sole owner/i);
   });
@@ -257,23 +300,62 @@ describe('DELETE /api/teams/:id/members/:memberId — Sub-task 6 soft-delete (it
   });
 
   it('Sub-task 6: admin can soft-remove members (parity with owner)', async () => {
-    mockTeamMemberFindUnique.mockResolvedValue({ role: 'admin' });
+    mockTeamMemberFindFirst
+      .mockReset()
+      .mockResolvedValueOnce({ role: 'admin', status: 'active', teamId: 't1', userId: 'caller-1' })
+      .mockResolvedValue(TARGET_MEMBER);
     const res = await DELETE(makeDeleteRequest(), PARAMS);
     expect(res.status).toBe(200);
     expect(mockTeamMemberUpdate).toHaveBeenCalledOnce();
   });
 
   it('Sub-task 6: owner removal succeeds when multiple owners exist', async () => {
-    mockTeamMemberFindFirst.mockResolvedValue({
+    const TARGET_EXTRA_OWNER = {
       id: 'mem-owner-extra',
       teamId: 't1',
       userId: 'target-owner',
       role: 'owner',
       status: 'active',
-    });
+    };
+    mockTeamMemberFindFirst
+      .mockReset()
+      .mockResolvedValueOnce({ ...OWNER_CALLER, status: 'active' }) // caller
+      .mockResolvedValue(TARGET_EXTRA_OWNER); // target is an owner
     mockTeamMemberCount.mockResolvedValue(3); // 3 owners; can remove this one
     const res = await DELETE(makeDeleteRequest(), PARAMS);
     expect(res.status).toBe(200);
     expect(mockTeamMemberUpdate).toHaveBeenCalledOnce();
+  });
+});
+
+// ─── iter 088 Sub-task 3: VALID_ROLES includes 'viewer' (UMAP-001 §3 AC-11) ──
+
+describe('PATCH /api/teams/:id/members/:memberId — iter 088 Sub-task 3: viewer role accepted', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockAuth.mockResolvedValue({ user: { id: 'caller-1' } });
+    mockTeamMemberFindFirst
+      .mockResolvedValueOnce({ ...OWNER_CALLER, status: 'active' }) // caller
+      .mockResolvedValue(TARGET_MEMBER); // target
+    mockTeamMemberCount.mockResolvedValue(2);
+    mockTeamMemberUpdate.mockResolvedValue({});
+  });
+
+  it('PATCH with role=viewer returns 200 (UMAP-001 §3 AC-11, iter 088 Sub-task 3)', async () => {
+    const res = await PATCH(makePatchRequest({ role: 'viewer' }), PARAMS);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+    expect(body.role).toBe('viewer');
+  });
+
+  it('PATCH with role=superuser still returns 400 and error lists viewer among valid roles', async () => {
+    const res = await PATCH(makePatchRequest({ role: 'superuser' }), PARAMS);
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    // Error message enumerates VALID_ROLES — must include 'viewer' post Sub-task 3
+    expect(body.error).toContain('viewer');
+    // Must still reject non-existent roles
+    expect(body.error).toMatch(/must be one of/i);
   });
 });

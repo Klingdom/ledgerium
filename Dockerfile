@@ -72,6 +72,15 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV NEXTAUTH_SECRET=build-time-placeholder
 ENV NEXTAUTH_URL=http://localhost:3000
+
+# RCA-5 fix: NEXT_PUBLIC_* vars are inlined at build time by Next.js.
+# They must be declared as ARG+ENV here so `next build` embeds the correct
+# values. Passed in by the GitHub Actions build-push step via --build-arg.
+ARG NEXT_PUBLIC_UMAMI_SCRIPT_URL
+ARG NEXT_PUBLIC_UMAMI_WEBSITE_ID
+ENV NEXT_PUBLIC_UMAMI_SCRIPT_URL=$NEXT_PUBLIC_UMAMI_SCRIPT_URL
+ENV NEXT_PUBLIC_UMAMI_WEBSITE_ID=$NEXT_PUBLIC_UMAMI_WEBSITE_ID
+
 RUN npx next build
 
 # ─── Stage 3: Production runtime ────────────────────────────────────────────
@@ -100,11 +109,16 @@ COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY scripts/docker-start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
-# Create persistent data directory and set ownership
+# Create persistent data directory and set ownership.
+# RCA-1 fix: also chown the .next/ build output so the `nextjs` non-root
+# user can write the incremental cache at runtime. Without this, Next.js
+# logs EACCES on /.next/cache writes and falls back to in-memory caching,
+# producing "Unable to write to the cache" warnings on every request.
 RUN mkdir -p /app/data/uploads && \
     addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs && \
-    chown -R nextjs:nodejs /app/data
+    chown -R nextjs:nodejs /app/data && \
+    chown -R nextjs:nodejs /app/apps/web-app/.next
 
 # Environment defaults
 ENV NODE_ENV=production

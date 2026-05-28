@@ -22,9 +22,9 @@ export async function DELETE(
   }
 
   try {
-    // Verify caller is owner or admin
-    const membership = await (db as any).teamMember.findUnique({
-      where: { teamId_userId: { teamId: params.id, userId: session.user.id } },
+    // Verify caller is an active owner or admin (P0-E: status:'active' guard)
+    const membership = await (db as any).teamMember.findFirst({
+      where: { teamId: params.id, userId: session.user.id, status: 'active' },
     });
     if (!membership || !['owner', 'admin'].includes(membership.role)) {
       return NextResponse.json(

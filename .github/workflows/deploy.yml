@@ -69,6 +69,12 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          # RCA-5 fix: pass NEXT_PUBLIC_* vars as Docker build-args so Next.js
+          # inlines them at build time. Sourced from GitHub Actions Variables
+          # (Settings → Secrets and variables → Actions → Variables tab).
+          build-args: |
+            NEXT_PUBLIC_UMAMI_SCRIPT_URL=${{ vars.NEXT_PUBLIC_UMAMI_SCRIPT_URL }}
+            NEXT_PUBLIC_UMAMI_WEBSITE_ID=${{ vars.NEXT_PUBLIC_UMAMI_WEBSITE_ID }}
 
   deploy:
     needs: build-and-push
@@ -103,3 +109,8 @@ jobs:
             STRIPE_GROWTH_ANNUAL_PRICE_ID=${{ secrets.STRIPE_GROWTH_ANNUAL_PRICE_ID }}
             STRIPE_PRO_PRICE_ID=${{ secrets.STRIPE_PRO_PRICE_ID }}
             STRIPE_TRIAL_DAYS=${{ vars.STRIPE_TRIAL_DAYS || '14' }}
+            DISABLE_ADMIN_BOOTSTRAP=${{ vars.DISABLE_ADMIN_BOOTSTRAP || 'true' }}
+            NEXTAUTH_SESSION_MAXAGE=${{ vars.NEXTAUTH_SESSION_MAXAGE || '86400' }}
+            DEMO_MODE_DISABLE_TEAMS=${{ vars.DEMO_MODE_DISABLE_TEAMS || 'true' }}
+            UMAMI_APP_SECRET=${{ secrets.UMAMI_APP_SECRET }}
+            UMAMI_DB_PASSWORD=${{ secrets.UMAMI_DB_PASSWORD }}

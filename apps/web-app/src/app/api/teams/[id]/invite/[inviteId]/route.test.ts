@@ -19,11 +19,13 @@ import { NextRequest } from 'next/server';
 
 const {
   mockTeamMemberFindUnique,
+  mockTeamMemberFindFirst,
   mockTeamInviteFindFirst,
   mockTeamInviteUpdate,
   mockAuth,
 } = vi.hoisted(() => ({
   mockTeamMemberFindUnique: vi.fn(),
+  mockTeamMemberFindFirst: vi.fn(),
   mockTeamInviteFindFirst: vi.fn(),
   mockTeamInviteUpdate: vi.fn(),
   mockAuth: vi.fn(),
@@ -33,7 +35,10 @@ const {
 
 vi.mock('@/db', () => ({
   db: {
-    teamMember: { findUnique: mockTeamMemberFindUnique },
+    teamMember: {
+      findUnique: mockTeamMemberFindUnique,
+      findFirst: mockTeamMemberFindFirst,
+    },
     teamInvite: {
       findFirst: mockTeamInviteFindFirst,
       update: mockTeamInviteUpdate,
@@ -72,7 +77,8 @@ describe('DELETE /api/teams/:id/invite/:inviteId — Part B', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAuth.mockResolvedValue({ user: { id: 'caller-1' } });
-    mockTeamMemberFindUnique.mockResolvedValue(OWNER_MEMBERSHIP);
+    // P0-E: route uses findFirst with status:'active' guard for caller auth
+    mockTeamMemberFindFirst.mockResolvedValue(OWNER_MEMBERSHIP);
     mockTeamInviteFindFirst.mockResolvedValue(PENDING_INVITE);
     mockTeamInviteUpdate.mockResolvedValue({});
   });
@@ -84,13 +90,13 @@ describe('DELETE /api/teams/:id/invite/:inviteId — Part B', () => {
   });
 
   it('returns 403 when caller is a regular member (not owner/admin)', async () => {
-    mockTeamMemberFindUnique.mockResolvedValue({ role: 'member' });
+    mockTeamMemberFindFirst.mockResolvedValue({ role: 'member', status: 'active' });
     const res = await DELETE(makeRequest(), PARAMS);
     expect(res.status).toBe(403);
   });
 
-  it('returns 403 when caller is not in the team at all', async () => {
-    mockTeamMemberFindUnique.mockResolvedValue(null);
+  it('returns 403 when caller is not in the team at all (P0-E: no active membership)', async () => {
+    mockTeamMemberFindFirst.mockResolvedValue(null);
     const res = await DELETE(makeRequest(), PARAMS);
     expect(res.status).toBe(403);
   });
@@ -135,7 +141,7 @@ describe('DELETE /api/teams/:id/invite/:inviteId — Part B', () => {
   });
 
   it('admin can also revoke invites (not just owner)', async () => {
-    mockTeamMemberFindUnique.mockResolvedValue({ role: 'admin' });
+    mockTeamMemberFindFirst.mockResolvedValue({ role: 'admin', status: 'active' });
     const res = await DELETE(makeRequest(), PARAMS);
     expect(res.status).toBe(200);
   });
