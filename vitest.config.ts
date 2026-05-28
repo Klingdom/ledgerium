@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config'
+import path from 'path'
 
 export default defineConfig({
   test: {
@@ -61,6 +62,14 @@ export default defineConfig({
     },
   },
   resolve: {
+    // Web-app uses `@/` path alias for `apps/web-app/src/`. Workspace-root
+    // pnpm test picks up apps/*/src/**/*.test.ts (per include glob above), so
+    // the alias must be resolvable here too — otherwise CI fails with
+    // "Failed to load url @/lib/plans". Only web-app uses this alias;
+    // extension-app and packages do not, so there's no collision.
+    alias: {
+      '@': path.resolve(__dirname, 'apps/web-app/src'),
+    },
     conditions: ['source', 'import', 'module', 'default'],
   },
 })
