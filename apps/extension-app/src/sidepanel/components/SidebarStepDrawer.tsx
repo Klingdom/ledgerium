@@ -18,7 +18,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function ConfidenceBar({ value }: { value: number }) {
   const pct = Math.round(value * 100)
-  const color = pct >= 85 ? 'bg-emerald-500' : pct >= 70 ? 'bg-blue-500' : 'bg-amber-500'
+  // Confidence bands: ≥85% strong-emerald · 70-84% sky (matches form-submit category)
+  // · <70% amber. Per CEO directive 2026-05-28 (replaces generic bg-blue-500).
+  const color = pct >= 85 ? 'bg-emerald-500' : pct >= 70 ? 'bg-sky-500' : 'bg-amber-500'
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">

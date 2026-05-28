@@ -396,9 +396,10 @@ describe('processSession', () => {
 
     it('assigns correct category colors to task nodes', () => {
       const { processMap } = processSession(makeInput());
-      // nodes[1] is click_then_navigate = teal, nodes[2] is fill_and_submit = blue
-      expect(processMap.nodes[1]!.categoryColor).toBe('#2dd4bf');
-      expect(processMap.nodes[2]!.categoryColor).toBe('#60a5fa');
+      // nodes[1] is click_then_navigate (brand emerald), nodes[2] is fill_and_submit (sky)
+      // Palette aligned to Ledgerium brand per CEO directive 2026-05-28.
+      expect(processMap.nodes[1]!.categoryColor).toBe('#10b981');
+      expect(processMap.nodes[2]!.categoryColor).toBe('#0ea5e9');
     });
 
     it('task nodes Y positions increase monotonically', () => {
@@ -1427,7 +1428,8 @@ describe('processSession', () => {
       const step = processDefinition.stepDefinitions[1]!;
       expect(step.category).toBe('send_action');
       expect(step.categoryLabel).toBe('Send / Submit');
-      expect(step.categoryColor).toBe('#34d399');
+      // Deeper brand emerald per CEO directive 2026-05-28 (was #34d399).
+      expect(step.categoryColor).toBe('#059669');
     });
 
     it('file_action gets correct category label and color', () => {

@@ -53,13 +53,19 @@ export interface CategoryConfig {
   bg: string;
 }
 
+// Category color palette — aligned to Ledgerium brand emerald.
+// The most-common step types (Navigation, Send) use brand-green shades so the
+// recorder reads "green on white" matching the website's `--accent: #20f2a6`.
+// Other categories use distinct hues for visual differentiation per step type.
+// CEO directive 2026-05-28: restore green dominance to recorder UI; do NOT
+// revert without explicit ack.
 export const CATEGORY_CONFIG: Record<GroupingReason, CategoryConfig> = {
-  click_then_navigate:  { label: 'Navigation',      color: '#2dd4bf', bg: 'rgba(45,212,191,0.07)' },
-  fill_and_submit:      { label: 'Form Submit',     color: '#60a5fa', bg: 'rgba(96,165,250,0.07)' },
+  click_then_navigate:  { label: 'Navigation',      color: '#10b981', bg: 'rgba(16,185,129,0.07)' },
+  fill_and_submit:      { label: 'Form Submit',     color: '#0ea5e9', bg: 'rgba(14,165,233,0.07)' },
   repeated_click_dedup: { label: 'Repeated Action', color: '#fb923c', bg: 'rgba(251,146,60,0.07)' },
   single_action:        { label: 'Action',          color: '#94a3b8', bg: 'rgba(148,163,184,0.07)' },
   data_entry:           { label: 'Data Entry',      color: '#a78bfa', bg: 'rgba(167,139,250,0.07)' },
-  send_action:          { label: 'Send / Submit',   color: '#34d399', bg: 'rgba(52,211,153,0.07)' },
+  send_action:          { label: 'Send / Submit',   color: '#059669', bg: 'rgba(5,150,105,0.07)' },
   file_action:          { label: 'File Action',     color: '#fbbf24', bg: 'rgba(251,191,36,0.07)' },
   error_handling:       { label: 'Error Handling',  color: '#f87171', bg: 'rgba(248,113,113,0.07)' },
   annotation:           { label: 'Annotation',      color: '#c084fc', bg: 'rgba(192,132,252,0.07)' },

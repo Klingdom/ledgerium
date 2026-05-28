@@ -22,7 +22,8 @@ interface ProcessScreenProps {
 function UploadBar({ progress, status }: { progress: number | null; status: ProcessScreenProps['uploadStatus'] }) {
   if (!status) return null
   const pct = progress ?? 0
-  const barColor = status === 'complete' ? 'bg-emerald-500' : status === 'failed' ? 'bg-red-500' : 'bg-blue-500'
+  // In-flight uploads use brand emerald (was bg-blue-500); CEO directive 2026-05-28.
+  const barColor = status === 'complete' ? 'bg-emerald-500' : status === 'failed' ? 'bg-red-500' : 'bg-emerald-400'
   const label = status === 'complete' ? 'Upload complete' : status === 'failed' ? 'Upload failed' : `Uploading… ${pct}%`
   return (
     <div className="px-3 py-2 border-b border-gray-200 flex-none">

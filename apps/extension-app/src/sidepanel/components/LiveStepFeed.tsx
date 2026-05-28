@@ -5,13 +5,16 @@ interface LiveStepFeedProps {
   steps: LiveStep[]
 }
 
+// Step border palette mirrors process-engine CATEGORY_CONFIG. Brand-emerald
+// dominates the most-common step types (navigation + send) per CEO directive
+// 2026-05-28. Keep in sync with packages/process-engine/src/types.ts.
 const GROUPING_COLORS: Record<string, string> = {
-  click_then_navigate: 'border-l-teal-500',
-  fill_and_submit: 'border-l-blue-500',
+  click_then_navigate: 'border-l-emerald-500',
+  fill_and_submit: 'border-l-sky-500',
   repeated_click_dedup: 'border-l-amber-500',
   error_handling: 'border-l-red-500',
   data_entry: 'border-l-violet-500',
-  send_action: 'border-l-emerald-500',
+  send_action: 'border-l-emerald-600',
   annotation: 'border-l-purple-500',
 }
 
