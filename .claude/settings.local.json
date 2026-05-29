@@ -188,7 +188,21 @@
       "Bash(grep -c \"attachDOMListeners\\\\|addEventListener\" apps/extension-app/dist/assets/index.ts-DQuuY2tQ.js)",
       "Bash(grep -c \"normalizeRawEvent\\\\|liveBuilder\\\\|processEvent\" apps/extension-app/dist/assets/index.ts-D0D2KTwS.js)",
       "Bash(rm -f /c/Users/philk/Desktop/ledgerium-recorder-v2.0.0.zip apps/web-app/public/ledgerium-recorder-chrome-extension.zip)",
-      "Bash(cp /c/Users/philk/Desktop/ledgerium-recorder-v2.0.0.zip apps/web-app/public/ledgerium-recorder-chrome-extension.zip)"
+      "Bash(cp /c/Users/philk/Desktop/ledgerium-recorder-v2.0.0.zip apps/web-app/public/ledgerium-recorder-chrome-extension.zip)",
+      "Bash(tail -60 SYSTEM_HEALTH.md)",
+      "Bash(head -40 ITERATION_LOG.md)",
+      "Bash(echo \"lint exit: $?\")",
+      "Bash(ls -la .github/workflows/)",
+      "Bash(ls -la vercel.json railway.json railway.toml render.yaml render.com fly.toml Dockerfile docker-compose.yml)",
+      "Bash(ls apps/web-app/vercel.json apps/web-app/next.config.*)",
+      "Bash(ls docs/runbooks/)",
+      "Bash(node -e \"console.log\\(JSON.stringify\\(require\\('./package.json'\\).scripts,null,2\\)\\)\")",
+      "Bash(node -e \"console.log\\(JSON.stringify\\(require\\('./apps/web-app/package.json'\\).scripts,null,2\\)\\)\")",
+      "Bash(gh --version)",
+      "Bash(ls -la .env .env.*)",
+      "Bash(grep -c \"NEXTAUTH_SECRET\" .env)",
+      "Bash(ls -la apps/web-app/.env apps/web-app/.env.*)",
+      "Bash(printenv NEXTAUTH_SECRET)"
     ]
   }
 }
