@@ -11,47 +11,31 @@ import {
   Monitor,
   Download,
   FileJson,
-  ListChecks,
-  FileText,
   Eye,
-  Zap,
   Share2,
   Star,
   Copy,
   Check,
   Link2,
   Plus,
-  Brain,
-  Bot,
   HelpCircle,
 } from 'lucide-react';
 import { formatDuration, formatDate, formatConfidence } from '@/lib/format';
 import { track, trackActivation } from '@/lib/analytics';
 import { completeStep } from '@/lib/onboarding';
-import { WorkflowTab } from '@/components/detail/WorkflowTab';
 import { WorkflowPageShell } from '@/components/workflow-view/WorkflowPageShell';
-import { SOPTab } from '@/components/detail/SOPTab';
 import { SOPPageShell } from '@/components/sop-view/SOPPageShell';
-import { ReportTab } from '@/components/detail/ReportTab';
 import { WorkflowReportPage } from '@/components/detail/WorkflowReportPage';
 import { EvidenceTab } from '@/components/detail/EvidenceTab';
 import { IntelligenceTab } from '@/components/detail/IntelligenceTab';
-import { InterpretationTab } from '@/components/detail/InterpretationTab';
-import { InsightsPanel } from '@/components/detail/InsightsPanel';
 import { AgentIntelligenceTab } from '@/components/detail/AgentIntelligenceTab';
 import { SOPUsefulnessSurvey } from '@/components/shared/SOPUsefulnessSurvey';
 
-type TabId = 'workflow' | 'sop' | 'report' | 'insights' | 'interpretation' | 'intelligence' | 'agent-intelligence' | 'evidence';
+type ViewId = 'process' | 'analysis';
 
-const TABS: { id: TabId; label: string; icon: React.ElementType; docsAnchor: string }[] = [
-  { id: 'workflow', label: 'Workflow', icon: Layers, docsAnchor: 'process-map' },
-  { id: 'sop', label: 'SOP', icon: ListChecks, docsAnchor: 'sop-tab' },
-  { id: 'report', label: 'Report', icon: FileText, docsAnchor: 'report-tab' },
-  { id: 'insights', label: 'Insights', icon: Zap, docsAnchor: 'insights-tab' },
-  { id: 'interpretation', label: 'Interpretation', icon: Brain, docsAnchor: 'interpretation-tab' },
-  { id: 'intelligence', label: 'Intelligence', icon: BarChart3, docsAnchor: 'intelligence-tab' },
-  { id: 'agent-intelligence', label: 'AI Agents', icon: Bot, docsAnchor: 'agents-tab' },
-  { id: 'evidence', label: 'Evidence', icon: Eye, docsAnchor: 'evidence-tab' },
+const TABS: { id: ViewId; label: string; icon: React.ElementType; docsAnchor: string }[] = [
+  { id: 'process', label: 'Process', icon: Layers, docsAnchor: 'process-map' },
+  { id: 'analysis', label: 'Analysis', icon: BarChart3, docsAnchor: 'report-tab' },
 ];
 
 export default function WorkflowDetailPage() {
@@ -59,7 +43,7 @@ export default function WorkflowDetailPage() {
   const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabId>('workflow');
+  const [activeTab, setActiveTab] = useState<ViewId>('process');
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -70,9 +54,13 @@ export default function WorkflowDetailPage() {
   // Tracks whether we've already fired the 30-second SOP dwell event this session.
   const sopViewedFiredRef = useRef(false);
 
-  // Fire `sop_section_viewed` once the user has spent 30 continuous seconds on the SOP tab.
+  // Guard: only auto-trigger analysis once per page load.
+  const analysisAutoFiredRef = useRef(false);
+
+  // Fire `sop_section_viewed` once the user has spent 30 continuous seconds on the Process view.
+  // Rekeyed from activeTab === 'sop' to activeTab === 'process' because SOP now lives in Process view.
   useEffect(() => {
-    if (activeTab !== 'sop') return;
+    if (activeTab !== 'process') return;
 
     const SOP_DWELL_MS = 30_000;
     const timer = setTimeout(() => {
@@ -84,6 +72,16 @@ export default function WorkflowDetailPage() {
 
     return () => clearTimeout(timer);
   }, [activeTab, id]);
+
+  // Auto-load analysis data when the Analysis view first becomes active.
+  useEffect(() => {
+    if (activeTab !== 'analysis') return;
+    if (analysisAutoFiredRef.current) return;
+    analysisAutoFiredRef.current = true;
+    handleRunIntelligence();
+    handleRunAgentIntelligence();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
   useEffect(() => {
     async function load() {
@@ -104,11 +102,15 @@ export default function WorkflowDetailPage() {
     track({ event: 'workflow_viewed', workflowId: id, tab: 'workflow' });
   }, [id, router]);
 
-  function handleTabChange(tab: TabId) {
+  function handleTabChange(tab: ViewId) {
     setActiveTab(tab);
     track({ event: 'tab_switched', tab });
-    if (tab === 'sop') { completeStep('view_sop'); trackActivation('first_sop', { workflowId: id }); }
-    if (tab === 'workflow') { completeStep('view_process_map'); trackActivation('first_map', { workflowId: id }); }
+    if (tab === 'process') {
+      completeStep('view_process_map');
+      trackActivation('first_map', { workflowId: id });
+      completeStep('view_sop');
+      trackActivation('first_sop', { workflowId: id });
+    }
   }
 
   async function handleToggleFavorite() {
@@ -315,7 +317,7 @@ export default function WorkflowDetailPage() {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* View tabs (2 views) */}
       <div className="border-b border-[var(--border-default)] mb-ds-6 no-print overflow-x-auto">
         <nav className="flex gap-ds-6 min-w-max">
           {TABS.map(({ id: tabId, label, icon: Icon, docsAnchor }) => (
@@ -336,7 +338,7 @@ export default function WorkflowDetailPage() {
                   href={`/docs#${docsAnchor}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  title={`Learn about the ${label} tab`}
+                  title={`Learn about the ${label} view`}
                   className="mb-1 ml-0.5 text-[var(--content-tertiary)] hover:text-brand-400 transition-colors"
                 >
                   <HelpCircle className="h-3.5 w-3.5" />
@@ -347,26 +349,14 @@ export default function WorkflowDetailPage() {
         </nav>
       </div>
 
-      {/* Tab content */}
-      {activeTab === 'workflow' && (
-        <WorkflowPageShell
-          processOutput={processOutput}
-          processMap={processMap}
-          sopArtifact={sopArtifact}
-          workflowRecord={{
-            id: workflow.id,
-            title: workflow.title,
-            confidence: workflow.confidence,
-            createdAt: workflow.createdAt,
-            status: workflow.status ?? 'active',
-          }}
-        />
-      )}
-      {activeTab === 'sop' && (
-        <>
-          <SOPPageShell
-            sop={sopArtifact}
-            templateArtifacts={sopTemplates}
+      {/* ── Process view ────────────────────────────────────────────────────── */}
+      {activeTab === 'process' && (
+        <div className="space-y-ds-10">
+          {/* Process map */}
+          <WorkflowPageShell
+            processOutput={processOutput}
+            processMap={processMap}
+            sopArtifact={sopArtifact}
             workflowRecord={{
               id: workflow.id,
               title: workflow.title,
@@ -374,45 +364,86 @@ export default function WorkflowDetailPage() {
               createdAt: workflow.createdAt,
               status: workflow.status ?? 'active',
             }}
-            workflowId={id}
           />
-          {showSurvey && (
-            <SOPUsefulnessSurvey workflowId={id} />
-          )}
-        </>
+
+          {/* Procedure / SOP */}
+          <section>
+            <h2 className="text-ds-lg font-semibold text-[var(--content-primary)] mb-ds-4">Procedure</h2>
+            <SOPPageShell
+              sop={sopArtifact}
+              templateArtifacts={sopTemplates}
+              workflowRecord={{
+                id: workflow.id,
+                title: workflow.title,
+                confidence: workflow.confidence,
+                createdAt: workflow.createdAt,
+                status: workflow.status ?? 'active',
+              }}
+              workflowId={id}
+            />
+            {showSurvey && (
+              <SOPUsefulnessSurvey workflowId={id} />
+            )}
+          </section>
+        </div>
       )}
-      {activeTab === 'report' && (
-        <WorkflowReportPage
-          workflow={{
-            id: workflow.id,
-            title: workflow.title,
-            durationMs: workflow.durationMs ?? 0,
-            stepCount: workflow.stepCount ?? 0,
-            phaseCount: workflow.phaseCount ?? 0,
-            confidence: workflow.confidence ?? 0,
-            toolsUsed: workflow.toolsUsed ?? [],
-            status: workflow.status ?? 'active',
-            createdAt: workflow.createdAt,
-            updatedAt: workflow.updatedAt,
-            isFavorite: isFavorite,
-            shareToken: workflow.shareToken,
-          }}
-          report={workflowReport}
-          insights={workflowInsights}
-          interpretation={interpretation}
-          intelligence={intelligenceData}
-          agentIntelligence={agentIntelligenceData}
-          processOutput={processOutput}
-          sop={sopArtifact}
-          onRunIntelligence={handleRunIntelligence}
-          onRunAgentIntelligence={handleRunAgentIntelligence}
-        />
+
+      {/* ── Analysis view ────────────────────────────────────────────────────── */}
+      {activeTab === 'analysis' && (
+        <div className="space-y-ds-10">
+          {/* Report — includes insights, interpretation, bottlenecks, automation, steps */}
+          <WorkflowReportPage
+            workflow={{
+              id: workflow.id,
+              title: workflow.title,
+              durationMs: workflow.durationMs ?? 0,
+              stepCount: workflow.stepCount ?? 0,
+              phaseCount: workflow.phaseCount ?? 0,
+              confidence: workflow.confidence ?? 0,
+              toolsUsed: workflow.toolsUsed ?? [],
+              status: workflow.status ?? 'active',
+              createdAt: workflow.createdAt,
+              updatedAt: workflow.updatedAt,
+              isFavorite: isFavorite,
+              shareToken: workflow.shareToken,
+            }}
+            report={workflowReport}
+            insights={workflowInsights}
+            interpretation={interpretation}
+            intelligence={intelligenceData}
+            agentIntelligence={agentIntelligenceData}
+            processOutput={processOutput}
+            sop={sopArtifact}
+            onRunIntelligence={handleRunIntelligence}
+            onRunAgentIntelligence={handleRunAgentIntelligence}
+          />
+
+          {/* Deep analysis — multi-run timestudy, variance, variants */}
+          <section>
+            <h2 className="text-ds-lg font-semibold text-[var(--content-primary)] mb-ds-4">Process Intelligence</h2>
+            <IntelligenceTab workflowId={id} />
+          </section>
+
+          {/* Agent intelligence — composed agents, skills, integration risk, roadmap */}
+          <section>
+            <h2 className="text-ds-lg font-semibold text-[var(--content-primary)] mb-ds-4">Agent Intelligence</h2>
+            <AgentIntelligenceTab workflowId={id} />
+          </section>
+
+          {/* Raw evidence — collapsed by default */}
+          <details className="group">
+            <summary className="cursor-pointer list-none flex items-center gap-ds-2 text-ds-sm font-medium text-[var(--content-secondary)] hover:text-[var(--content-primary)] transition-colors py-ds-2 select-none">
+              <Eye className="h-4 w-4" />
+              Raw evidence (JSON)
+              <span className="ml-1 text-[var(--content-tertiary)] text-xs group-open:hidden">▶</span>
+              <span className="ml-1 text-[var(--content-tertiary)] text-xs hidden group-open:inline">▼</span>
+            </summary>
+            <div className="mt-ds-3">
+              <EvidenceTab processOutput={processOutput} />
+            </div>
+          </details>
+        </div>
       )}
-      {activeTab === 'insights' && <InsightsPanel insights={workflowInsights} />}
-      {activeTab === 'interpretation' && <InterpretationTab interpretation={interpretation} />}
-      {activeTab === 'intelligence' && <IntelligenceTab workflowId={id} />}
-      {activeTab === 'agent-intelligence' && <AgentIntelligenceTab workflowId={id} />}
-      {activeTab === 'evidence' && <EvidenceTab processOutput={processOutput} />}
 
       {/* Post-view guidance */}
       <div className="mt-ds-8 card px-ds-6 py-ds-5 bg-[var(--surface-secondary)] no-print">
