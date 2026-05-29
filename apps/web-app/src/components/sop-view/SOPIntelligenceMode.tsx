@@ -22,8 +22,6 @@ import {
   Sparkles, ChevronRight, Send, Info,
 } from 'lucide-react';
 import type { SOPViewModel, SOPViewStep, SOPRecommendation, SOPViewInsight } from './types';
-import { AutomationHintBlock } from '../shared/AutomationHintBlock';
-import { ImpactBadge } from '../shared/ImpactBadge';
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 
@@ -103,7 +101,7 @@ function SmartHeader({ viewModel }: { viewModel: SOPViewModel }) {
   const s = viewModel.smartSummary;
 
   return (
-    <div className="bg-[var(--surface-secondary)] border border-[var(--border-default)] rounded-2xl px-6 py-5 overflow-hidden relative">
+    <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl px-6 py-5 text-white overflow-hidden relative">
       {/* Subtle grid pattern */}
       <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
 
@@ -112,28 +110,28 @@ function SmartHeader({ viewModel }: { viewModel: SOPViewModel }) {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-lg bg-[var(--surface-elevated)]/10 flex items-center justify-center">
-              <Brain className="h-3.5 w-3.5 text-[var(--content-secondary)]" aria-hidden="true" />
+              <Brain className="h-3.5 w-3.5 text-violet-300" aria-hidden="true" />
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--content-secondary)]">AI Intelligence</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-violet-300">AI Intelligence</span>
           </div>
           {m.confidence !== null && (
             <div className="flex items-center gap-1.5" aria-label={`Confidence: ${Math.round(m.confidence * 100)}%`} role="status">
-              <div className="w-12 h-1 bg-[var(--surface-elevated)] rounded-full overflow-hidden">
-                <div className="h-full rounded-full bg-surface-accent-muted transition-all" style={{ width: `${Math.round(m.confidence * 100)}%` }} />
+              <div className="w-12 h-1 bg-[var(--surface-elevated)]/10 rounded-full overflow-hidden">
+                <div className="h-full rounded-full bg-violet-300 transition-all" style={{ width: `${Math.round(m.confidence * 100)}%` }} />
               </div>
-              <span className="text-[10px] font-semibold text-[var(--content-secondary)]">{Math.round(m.confidence * 100)}%</span>
+              <span className="text-[10px] font-semibold text-violet-200">{Math.round(m.confidence * 100)}%</span>
             </div>
           )}
         </div>
 
         {/* Summary text */}
-        <p className="text-[13px] font-medium text-[var(--content-primary)] leading-relaxed mb-1">{s.oneLiner}</p>
-        <p className="text-[10px] text-[var(--content-secondary)]">{s.statsSentence}</p>
+        <p className="text-[13px] font-medium text-white/90 leading-relaxed mb-1">{s.oneLiner}</p>
+        <p className="text-[10px] text-white/60">{s.statsSentence}</p>
 
         {/* Primary insight chip */}
-        <div className="mt-3 flex items-start gap-2 bg-[var(--surface-elevated)] rounded-lg px-3 py-2 border border-[var(--border-default)]">
-          <Sparkles className="h-3.5 w-3.5 text-[var(--content-secondary)] mt-0.5 flex-shrink-0" aria-hidden="true" />
-          <p className="text-[10px] text-[var(--content-primary)] leading-relaxed">{s.primaryInsight}</p>
+        <div className="mt-3 flex items-start gap-2 bg-[var(--surface-elevated)]/5 rounded-lg px-3 py-2 border border-white/10">
+          <Sparkles className="h-3.5 w-3.5 text-violet-300 mt-0.5 flex-shrink-0" aria-hidden="true" />
+          <p className="text-[10px] text-white/80 leading-relaxed">{s.primaryInsight}</p>
         </div>
       </div>
     </div>
@@ -149,6 +147,7 @@ function DynamicSummaryCard({ viewModel }: { viewModel: SOPViewModel }) {
   const steps = viewModel.steps;
   const frictionSteps = steps.filter(s => s.hasHighFriction);
   const decisionSteps = steps.filter(s => s.isDecisionPoint);
+  const errorSteps = steps.filter(s => s.isErrorHandling);
   const autoSteps = steps.filter(s => s.automationHint);
 
   const signals = [
@@ -189,20 +188,20 @@ function SmartStepCard({
   isExpanded: boolean;
   onToggle: () => void;
 }) {
-  // Determine step "intelligence markers" — using style vars rather than raw colors
-  const markers: Array<{ label: string; tokenClass: string }> = [];
-  if (step.hasHighFriction) markers.push({ label: 'Bottleneck', tokenClass: 'bg-surface-danger text-content-on-danger' });
-  if (step.isErrorHandling) markers.push({ label: 'Recovery', tokenClass: 'bg-surface-warning text-content-on-warning' });
-  if (step.isDecisionPoint) markers.push({ label: 'Decision', tokenClass: 'bg-surface-warning text-content-on-warning' });
-  if (step.automationHint) markers.push({ label: 'Automatable', tokenClass: 'bg-surface-info text-content-on-info' });
-  if (step.isLowConfidence) markers.push({ label: 'Review', tokenClass: 'bg-surface-info text-content-on-info' });
+  // Determine step "intelligence markers"
+  const markers: Array<{ label: string; color: string; bg: string }> = [];
+  if (step.hasHighFriction) markers.push({ label: 'Bottleneck', color: '#dc2626', bg: '#fef2f2' });
+  if (step.isErrorHandling) markers.push({ label: 'Recovery', color: '#ea580c', bg: '#fff7ed' });
+  if (step.isDecisionPoint) markers.push({ label: 'Decision', color: '#d97706', bg: '#fffbeb' });
+  if (step.automationHint) markers.push({ label: 'Automatable', color: '#7c3aed', bg: '#f5f3ff' });
+  if (step.isLowConfidence) markers.push({ label: 'Review', color: '#0284c7', bg: '#f0f9ff' });
 
   return (
     <div
       id={`sop-step-${step.id}`}
       className={`rounded-xl border transition-all ${
-        step.hasHighFriction ? 'border-border-danger bg-surface-danger' :
-        step.automationHint ? 'border-border-info bg-surface-info' :
+        step.hasHighFriction ? 'border-red-200 bg-red-50/10' :
+        step.automationHint ? 'border-violet-200 bg-violet-50/10' :
         'border-[var(--border-default)] bg-[var(--surface-elevated)]'
       } ${isExpanded ? 'shadow-sm' : ''}`}
     >
@@ -219,7 +218,7 @@ function SmartStepCard({
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-ds-xs font-semibold text-[var(--content-primary)] truncate">{step.title}</span>
             {markers.map(m => (
-              <span key={m.label} className={`text-[7px] font-bold uppercase tracking-wider px-1 py-0.5 rounded flex-shrink-0 ${m.tokenClass}`}>
+              <span key={m.label} className="text-[7px] font-bold uppercase tracking-wider px-1 py-0.5 rounded flex-shrink-0" style={{ color: m.color, background: m.bg }}>
                 {m.label}
               </span>
             ))}
@@ -244,11 +243,11 @@ function SmartStepCard({
                 const isVerify = line.startsWith('✓');
                 const isNote = line.startsWith('→');
                 return (
-                  <div key={i} className={`flex gap-2.5 px-3 py-2 text-[11px] ${i < arr.length - 1 ? 'border-b border-[var(--border-subtle)]' : ''} ${isVerify ? 'bg-surface-success' : ''}`}>
-                    <span className={`flex-shrink-0 min-w-[14px] font-bold ${isVerify ? 'text-content-on-success' : isNote ? 'text-[var(--content-tertiary)]' : 'text-[var(--content-tertiary)] tabular-nums'}`}>
+                  <div key={i} className={`flex gap-2.5 px-3 py-2 text-[11px] ${i < arr.length - 1 ? 'border-b border-[var(--border-subtle)]' : ''} ${isVerify ? 'bg-emerald-50/50' : ''}`}>
+                    <span className={`flex-shrink-0 min-w-[14px] font-bold ${isVerify ? 'text-emerald-600' : isNote ? 'text-[var(--content-tertiary)]' : 'text-[var(--content-tertiary)] tabular-nums'}`}>
                       {line.match(/^\d+\./)?.[0] ?? (isVerify ? '✓' : isNote ? '→' : '')}
                     </span>
-                    <span className={isVerify ? 'text-content-on-success font-medium' : isNote ? 'text-[var(--content-secondary)] italic' : 'text-[var(--content-primary)]'}>
+                    <span className={isVerify ? 'text-emerald-700 font-medium' : isNote ? 'text-[var(--content-secondary)] italic' : 'text-[var(--content-primary)]'}>
                       {line.replace(/^\d+\.\s*/, '').replace(/^[✓→]\s*/, '')}
                     </span>
                   </div>
@@ -257,34 +256,32 @@ function SmartStepCard({
             </div>
           )}
 
-          {/* Intelligence annotations — automation hint */}
+          {/* Intelligence annotations */}
           {step.automationHint && (
-            <AutomationHintBlock hint={step.automationHint} />
+            <div className="flex items-start gap-2 bg-violet-50 border border-violet-200 rounded-lg px-3 py-2">
+              <Zap className="h-3 w-3 text-violet-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <span className="text-[9px] font-bold text-violet-600 uppercase tracking-wider">Automation Opportunity</span>
+                <p className="text-[10px] text-violet-700 mt-0.5">{step.automationHint}</p>
+              </div>
+            </div>
           )}
 
           {step.frictionIndicators.length > 0 && step.frictionIndicators.map((f, i) => (
             <div key={i} className={`flex items-start gap-2 rounded-lg px-3 py-2 border ${
-              f.severity === 'high' ? 'bg-surface-danger border-border-danger' :
-              f.severity === 'medium' ? 'bg-surface-warning border-border-warning' :
-              'bg-surface-info border-border-info'
+              f.severity === 'high' ? 'bg-red-50 border-red-200' : f.severity === 'medium' ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-200'
             }`}>
               <AlertTriangle className={`h-3 w-3 mt-0.5 flex-shrink-0 ${
-                f.severity === 'high' ? 'text-red-500' : // lint-color-tokens: ok — icon brand
-                f.severity === 'medium' ? 'text-amber-500' : // lint-color-tokens: ok — icon brand
-                'text-blue-500' // lint-color-tokens: ok — icon brand
+                f.severity === 'high' ? 'text-red-500' : f.severity === 'medium' ? 'text-amber-500' : 'text-blue-500'
               }`} />
-              <p className={`text-[10px] ${
-                f.severity === 'high' ? 'text-content-on-danger' :
-                f.severity === 'medium' ? 'text-content-on-warning' :
-                'text-content-on-info'
-              }`}>{f.label}</p>
+              <p className={`text-[10px] ${f.severity === 'high' ? 'text-red-700' : f.severity === 'medium' ? 'text-amber-700' : 'text-blue-700'}`}>{f.label}</p>
             </div>
           ))}
 
           {step.expectedOutcome && (
             <div className="flex items-start gap-2 text-[10px]">
-              <CheckCircle2 className="h-3 w-3 text-emerald-500 mt-0.5 flex-shrink-0" /> {/* lint-color-tokens: ok — icon brand */}
-              <span className="text-[var(--content-secondary)]"><strong className="text-content-on-success">Expected:</strong> {step.expectedOutcome}</span>
+              <CheckCircle2 className="h-3 w-3 text-emerald-500 mt-0.5 flex-shrink-0" />
+              <span className="text-[var(--content-secondary)]"><strong className="text-emerald-700">Expected:</strong> {step.expectedOutcome}</span>
             </div>
           )}
         </div>
@@ -328,9 +325,9 @@ function RealVsExpectedSection({ viewModel }: { viewModel: SOPViewModel }) {
             <span className="text-[10px] text-[var(--content-secondary)] text-center">{row.expected}</span>
             <span className="text-[10px] font-semibold text-[var(--content-primary)] text-center">{row.actual}</span>
             <div className="flex justify-end">
-              {row.status === 'match' && <span className="text-[8px] font-bold text-content-on-success bg-surface-success px-1.5 py-0.5 rounded">OK</span>}
-              {row.status === 'deviation' && <span className="text-[8px] font-bold text-content-on-danger bg-surface-danger px-1.5 py-0.5 rounded">DEVIATION</span>}
-              {row.status === 'warning' && <span className="text-[8px] font-bold text-content-on-warning bg-surface-warning px-1.5 py-0.5 rounded">REVIEW</span>}
+              {row.status === 'match' && <span className="text-[8px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">OK</span>}
+              {row.status === 'deviation' && <span className="text-[8px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">DEVIATION</span>}
+              {row.status === 'warning' && <span className="text-[8px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">REVIEW</span>}
             </div>
           </div>
         ))}
@@ -414,12 +411,12 @@ function IntelligenceLayerSection({ viewModel }: { viewModel: SOPViewModel }) {
 // ═════════════════════════════════════════════════════════════════════════════
 
 function OptimizationSection({ recommendations }: { recommendations: SOPRecommendation[] }) {
-  const TYPE_CONFIG: Record<string, { icon: React.ElementType; tokenClass: string }> = {
-    automation: { icon: Zap, tokenClass: 'bg-surface-info' },
-    integration: { icon: ArrowRight, tokenClass: 'bg-surface-info' },
-    simplification: { icon: TrendingUp, tokenClass: 'bg-surface-info' },
-    training: { icon: Brain, tokenClass: 'bg-surface-warning' },
-    quality: { icon: Shield, tokenClass: 'bg-surface-danger' },
+  const TYPE_CONFIG: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
+    automation: { icon: Zap, color: '#7c3aed', bg: '#f5f3ff' },
+    integration: { icon: ArrowRight, color: '#0891b2', bg: '#ecfeff' },
+    simplification: { icon: TrendingUp, color: '#2563eb', bg: '#eff6ff' },
+    training: { icon: Brain, color: '#d97706', bg: '#fffbeb' },
+    quality: { icon: Shield, color: '#dc2626', bg: '#fef2f2' },
   };
 
   return (
@@ -432,16 +429,16 @@ function OptimizationSection({ recommendations }: { recommendations: SOPRecommen
           return (
             <div key={rec.id} className="bg-[var(--surface-elevated)] border border-[var(--border-default)] rounded-xl px-4 py-3">
               <div className="flex items-start gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${config.tokenClass}`}>
-                  <Icon className="h-4 w-4 text-[var(--content-primary)]" />
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: config.bg }}>
+                  <Icon className="h-4 w-4" style={{ color: config.color }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 mb-0.5">
                     <span className="text-ds-xs font-semibold text-[var(--content-primary)]">{rec.title}</span>
-                    <ImpactBadge
-                      impact={rec.impact as 'high' | 'medium' | 'low'}
-                      label={`${rec.impact} impact`}
-                    />
+                    <span className={`text-[8px] font-bold uppercase tracking-wider px-1 py-0.5 rounded ${
+                      rec.impact === 'high' ? 'text-red-600 bg-red-50' :
+                      rec.impact === 'medium' ? 'text-amber-600 bg-amber-50' : 'text-[var(--content-secondary)] bg-[var(--surface-secondary)]'
+                    }`}>{rec.impact} impact</span>
                   </div>
                   <p className="text-[10px] text-[var(--content-secondary)] leading-relaxed">{rec.detail}</p>
                 </div>
@@ -527,14 +524,14 @@ function AskThisProcessPanel({ viewModel }: { viewModel: SOPViewModel }) {
   return (
     <div className="bg-[var(--surface-elevated)] border border-[var(--border-default)] rounded-2xl overflow-hidden shadow-sm">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)]">
+      <div className="px-4 py-3 border-b border-[var(--border-subtle)] bg-gradient-to-r from-violet-50/50 to-transparent">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-surface-info flex items-center justify-center">
-            <MessageSquare className="h-3.5 w-3.5 text-content-on-info" />
+          <div className="w-6 h-6 rounded-lg bg-violet-100 flex items-center justify-center">
+            <MessageSquare className="h-3.5 w-3.5 text-violet-600" />
           </div>
           <div>
             <span className="text-ds-xs font-semibold text-[var(--content-primary)]">Ask This Process</span>
-            <span className="text-[8px] font-medium text-content-on-info bg-surface-info px-1.5 py-0.5 rounded ml-2">Beta</span>
+            <span className="text-[8px] font-medium text-violet-500 bg-violet-50 px-1.5 py-0.5 rounded ml-2">Beta</span>
           </div>
         </div>
       </div>
@@ -547,7 +544,7 @@ function AskThisProcessPanel({ viewModel }: { viewModel: SOPViewModel }) {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Ask about this procedure..."
-            className="flex-1 bg-transparent text-ds-xs text-[var(--content-primary)] placeholder:text-[var(--content-tertiary)] outline-none min-w-0"
+            className="flex-1 bg-transparent text-ds-xs text-[var(--content-primary)] placeholder-gray-400 outline-none min-w-0"
             disabled
             aria-disabled="true"
             aria-label="AI conversation input — coming soon"
@@ -569,7 +566,7 @@ function AskThisProcessPanel({ viewModel }: { viewModel: SOPViewModel }) {
             role="listitem"
             className="w-full text-left flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[10px] text-[var(--content-secondary)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] transition-colors cursor-not-allowed"
           >
-            <Sparkles className="h-3 w-3 text-[var(--content-tertiary)] flex-shrink-0" />
+            <Sparkles className="h-3 w-3 text-violet-300 flex-shrink-0" />
             {prompt}
           </button>
         ))}

@@ -19,31 +19,6 @@
   /* Accent — the brand green, usable in both themes */
   --accent: #20f2a6;
   --accent-muted: #059669;
-
-  /* ── Semantic surface + content tokens (EXPORT_TEMPLATE_REVIEW_001 §3, */
-  /*    Iteration B 2026-05-28). All pairs hit WCAG AA contrast ≥4.5:1 in */
-  /*    both themes; see ux-designer audit for the math. */
-  /*    Use these instead of raw Tailwind color utilities (bg-emerald-50, */
-  /*    text-amber-700, etc.) so surfaces adapt to the theme automatically. */
-  --surface-success:           #0D2B1F;
-  --content-on-success:        #6EE7B7;
-  --border-success:            #059669;
-
-  --surface-warning:           #2D1F00;
-  --content-on-warning:        #FCD34D;
-  --border-warning:            #D97706;
-
-  --surface-danger:            #2D0A0A;
-  --content-on-danger:         #FCA5A5;
-  --border-danger:             #DC2626;
-
-  --surface-info:              #0A1929;
-  --content-on-info:           #93C5FD;
-  --border-info:               #2563EB;
-
-  --surface-accent-muted:      #0A1F14;
-  --content-on-accent-muted:   #34D399;
-  --border-accent-muted:       #10B981;
 }
 
 .light {
@@ -60,27 +35,6 @@
   /* Borders */
   --border-default: #E2E8F0;
   --border-subtle: #F1F5F9;
-
-  /* Semantic tokens — light theme values (mirror dark in semantic meaning) */
-  --surface-success:           #ECFDF5;
-  --content-on-success:        #065F46;
-  --border-success:            #A7F3D0;
-
-  --surface-warning:           #FFFBEB;
-  --content-on-warning:        #92400E;
-  --border-warning:            #FDE68A;
-
-  --surface-danger:            #FEF2F2;
-  --content-on-danger:         #991B1B;
-  --border-danger:             #FECACA;
-
-  --surface-info:              #EFF6FF;
-  --content-on-info:           #1E40AF;
-  --border-info:               #BFDBFE;
-
-  --surface-accent-muted:      #D1FAE5;
-  --content-on-accent-muted:   #064E3B;
-  --border-accent-muted:       #6EE7B7;
 }
 
 @tailwind base;

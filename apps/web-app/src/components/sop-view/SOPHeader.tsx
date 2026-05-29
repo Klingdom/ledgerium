@@ -31,11 +31,11 @@ export function SOPHeader({ metadata }: Props) {
           )}
         </div>
         {metadata.isComplete ? (
-          <span className="text-[10px] font-medium text-content-on-success bg-surface-success border border-border-success rounded px-1.5 py-0.5 flex-shrink-0">
+          <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-1.5 py-0.5 flex-shrink-0">
             Complete
           </span>
         ) : (
-          <span className="text-[10px] font-medium text-content-on-warning bg-surface-warning border border-border-warning rounded px-1.5 py-0.5 flex-shrink-0">
+          <span className="text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 flex-shrink-0">
             Partial
           </span>
         )}
@@ -71,7 +71,7 @@ export function SOPHeader({ metadata }: Props) {
           <>
             <Divider />
             <span
-              className="text-[10px] font-medium text-content-on-warning bg-surface-warning border border-border-warning rounded px-1.5 py-0.5 flex items-center gap-1"
+              className="text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 flex items-center gap-1"
               aria-label={`${metadata.frictionCount} friction point${metadata.frictionCount !== 1 ? 's' : ''} detected`}
             >
               <AlertTriangle className="h-2.5 w-2.5" aria-hidden="true" />

@@ -23,33 +23,15 @@ const config: Config = {
           primary: 'var(--surface-primary)',
           secondary: 'var(--surface-secondary)',
           elevated: 'var(--surface-elevated)',
-          // Semantic backgrounds (EXPORT_TEMPLATE_REVIEW_001 §3 / Iter B):
-          success: 'var(--surface-success)',
-          warning: 'var(--surface-warning)',
-          danger: 'var(--surface-danger)',
-          info: 'var(--surface-info)',
-          'accent-muted': 'var(--surface-accent-muted)',
         },
         content: {
           primary: 'var(--content-primary)',
           secondary: 'var(--content-secondary)',
           tertiary: 'var(--content-tertiary)',
-          // Semantic foreground tokens — pair with the matching surface above.
-          // Each pair hits WCAG AA contrast ≥4.5:1 in both themes.
-          'on-success': 'var(--content-on-success)',
-          'on-warning': 'var(--content-on-warning)',
-          'on-danger': 'var(--content-on-danger)',
-          'on-info': 'var(--content-on-info)',
-          'on-accent-muted': 'var(--content-on-accent-muted)',
         },
         border: {
           DEFAULT: 'var(--border-default)',
           subtle: 'var(--border-subtle)',
-          success: 'var(--border-success)',
-          warning: 'var(--border-warning)',
-          danger: 'var(--border-danger)',
-          info: 'var(--border-info)',
-          'accent-muted': 'var(--border-accent-muted)',
         },
       },
       fontSize: {

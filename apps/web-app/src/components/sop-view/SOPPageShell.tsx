@@ -301,7 +301,7 @@ function SOPStepRail({
               aria-current={isExpanded ? 'step' : undefined}
               className={`w-7 h-7 rounded-lg text-[10px] font-bold flex items-center justify-center transition-all duration-150 ${
                 isExpanded
-                  ? 'text-[var(--content-on-brand,#fff)] shadow-sm' // lint-color-tokens: ok — text on dynamic colored brand bg
+                  ? 'text-white shadow-sm'
                   : 'text-[var(--content-tertiary)] hover:text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
               }`}
               style={isExpanded ? {
@@ -325,8 +325,7 @@ function SOPStepRail({
 // IntelligenceModeContent and IntelligenceSidePanel moved to SOPIntelligenceMode.tsx
 
 // ─── Compact Step Card (shared by all modes) ─────────────────────────────────
-// Note: SOPStepCardCompact is defined below but not currently imported by any
-// active consumer; it is preserved for future use as a cross-mode utility.
+
 function SOPStepCardCompact({
   step,
   isExpanded,
@@ -373,7 +372,7 @@ function SOPStepCardCompact({
               {step.categoryLabel}
             </span>
             {step.isDecisionPoint && (
-              <span className="text-[8px] font-bold uppercase tracking-wider px-1 py-0.5 rounded text-content-on-warning bg-surface-warning flex-shrink-0">
+              <span className="text-[8px] font-bold uppercase tracking-wider px-1 py-0.5 rounded text-amber-700 bg-amber-50 flex-shrink-0">
                 Decision
               </span>
             )}
@@ -427,14 +426,14 @@ function SOPStepCardCompact({
                   className={`flex gap-2 px-3 py-1.5 text-[11px] ${i < arr.length - 1 ? 'border-b border-[var(--border-subtle)]' : ''}`}
                 >
                   <span className={`flex-shrink-0 min-w-[14px] ${
-                    line.startsWith('✓') ? 'text-content-on-success font-bold' :
+                    line.startsWith('✓') ? 'text-emerald-600 font-bold' :
                     line.startsWith('→') ? 'text-[var(--content-tertiary)] italic' :
                     'text-[var(--content-tertiary)] tabular-nums font-bold'
                   }`}>
                     {line.match(/^\d+\./)?.[0] ?? (line.startsWith('✓') ? '✓' : line.startsWith('→') ? '→' : '')}
                   </span>
                   <span className={
-                    line.startsWith('✓') ? 'text-content-on-success' :
+                    line.startsWith('✓') ? 'text-emerald-700' :
                     line.startsWith('→') ? 'text-[var(--content-secondary)] italic' :
                     'text-[var(--content-primary)]'
                   }>
@@ -447,8 +446,8 @@ function SOPStepCardCompact({
 
           {/* Decision callout */}
           {step.isDecisionPoint && step.decisionLabel && (
-            <div className="bg-surface-warning border border-border-warning rounded-lg px-3 py-2">
-              <p className="text-[10px] font-medium text-content-on-warning">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              <p className="text-[10px] font-medium text-amber-800">
                 <span className="font-bold">Decision:</span> {step.decisionLabel}
               </p>
             </div>
@@ -461,9 +460,9 @@ function SOPStepCardCompact({
                 <div
                   key={i}
                   className={`text-[10px] px-3 py-1.5 rounded-lg border ${
-                    f.severity === 'high' ? 'bg-surface-danger border-border-danger text-content-on-danger' :
-                    f.severity === 'medium' ? 'bg-surface-warning border-border-warning text-content-on-warning' :
-                    'bg-surface-info border-border-info text-content-on-info'
+                    f.severity === 'high' ? 'bg-red-50 border-red-200 text-red-700' :
+                    f.severity === 'medium' ? 'bg-amber-50 border-amber-200 text-amber-700' :
+                    'bg-blue-50 border-blue-200 text-blue-700'
                   }`}
                 >
                   {f.label}
@@ -475,7 +474,7 @@ function SOPStepCardCompact({
           {/* Expected outcome */}
           {step.expectedOutcome && (
             <p className="text-[10px] text-[var(--content-secondary)]">
-              <span className="text-content-on-success font-medium">→</span> {step.expectedOutcome}
+              <span className="text-emerald-600 font-medium">→</span> {step.expectedOutcome}
             </p>
           )}
 
@@ -483,7 +482,7 @@ function SOPStepCardCompact({
           {step.warnings.length > 0 && (
             <div className="space-y-1">
               {step.warnings.map((w, i) => (
-                <p key={i} className="text-[10px] text-content-on-warning bg-surface-warning border border-border-warning rounded-lg px-3 py-1.5">
+                <p key={i} className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5">
                   ⚠ {w}
                 </p>
               ))}
