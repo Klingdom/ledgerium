@@ -3,6 +3,7 @@ import { hash } from 'bcryptjs';
 import { db } from '@/db';
 import { z } from 'zod';
 import { trackServer } from '@/lib/analytics-server';
+import { ensureSampleWorkflow } from '@/lib/sample-workflow';
 
 const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -43,6 +44,11 @@ export async function POST(req: NextRequest) {
         subscriptionStatus: 'none',
       },
     });
+
+    // Every new account gets the built-in example workflow so the dashboard,
+    // SOP, and process-map views are populated immediately. Non-fatal:
+    // ensureSampleWorkflow never throws (returns null on failure).
+    await ensureSampleWorkflow(user.id);
 
     trackServer('signup_completed', { userId: user.id, email: user.email });
 
