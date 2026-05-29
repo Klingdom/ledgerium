@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // TEMP (hydration-debug): emit browser source maps so the production
+  // hydration error (#418/#425) resolves to a real component/file/line.
+  // Remove after the root cause is identified.
+  productionBrowserSourceMaps: true,
   transpilePackages: ['@ledgerium/process-engine', '@ledgerium/intelligence-engine'],
   webpack: (config) => {
     // Resolve .js imports to .ts files in workspace packages (ESM → TS source)
