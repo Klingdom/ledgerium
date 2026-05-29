@@ -418,16 +418,20 @@ export default function WorkflowDetailPage() {
             onRunAgentIntelligence={handleRunAgentIntelligence}
           />
 
-          {/* Deep analysis — multi-run timestudy, variance, variants */}
+          {/* Deep analysis — multi-run timestudy, variance, variants
+               data= threads the already-fetched intelligence result so no second fetch is made.
+               hideBottlenecks= suppresses the duplicate that WorkflowReportPage already shows. */}
           <section>
             <h2 className="text-ds-lg font-semibold text-[var(--content-primary)] mb-ds-4">Process Intelligence</h2>
-            <IntelligenceTab workflowId={id} />
+            <IntelligenceTab workflowId={id} data={intelligenceData} hideBottlenecks />
           </section>
 
-          {/* Agent intelligence — composed agents, skills, integration risk, roadmap */}
+          {/* Agent intelligence — composed agents, skills, integration risk, roadmap
+               hideOpportunities= suppresses the duplicate that WorkflowReportPage already shows.
+               Self-fetch is preserved; agentIntelligenceData feeds WorkflowReportPage only. */}
           <section>
             <h2 className="text-ds-lg font-semibold text-[var(--content-primary)] mb-ds-4">Agent Intelligence</h2>
-            <AgentIntelligenceTab workflowId={id} />
+            <AgentIntelligenceTab workflowId={id} hideOpportunities />
           </section>
 
           {/* Raw evidence — collapsed by default */}

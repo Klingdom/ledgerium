@@ -21,6 +21,11 @@ import {
 
 interface Props {
   workflowId: string;
+  /** When true, suppresses the Opportunities section (used in the 2-view Analysis
+   *  page where WorkflowReportPage already renders AutomationSection). Defaults to
+   *  false so any other caller sees the section as before. Self-fetch behavior is
+   *  preserved unchanged regardless of this prop. */
+  hideOpportunities?: boolean;
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -493,7 +498,7 @@ function RoadmapSection({ artifacts }: { artifacts: any }) {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
-export function AgentIntelligenceTab({ workflowId }: Props) {
+export function AgentIntelligenceTab({ workflowId, hideOpportunities = false }: Props) {
   const [result, setResult] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -569,16 +574,19 @@ export function AgentIntelligenceTab({ workflowId }: Props) {
 
       {/* Collapsible sections */}
       <div className="space-y-ds-3 mt-ds-4">
-        <Section
-          id="opportunities"
-          title="Opportunities"
-          icon={<Target className="h-4 w-4 text-brand-500" />}
-          activeSection={activeSection}
-          onToggle={handleToggleSection}
-          {...(opportunityCount > 0 ? { badge: String(opportunityCount) } : {})}
-        >
-          <OpportunitiesSection opportunities={opportunities} />
-        </Section>
+        {/* Opportunities — omitted when hideOpportunities is true (already shown in WorkflowReportPage) */}
+        {!hideOpportunities && (
+          <Section
+            id="opportunities"
+            title="Opportunities"
+            icon={<Target className="h-4 w-4 text-brand-500" />}
+            activeSection={activeSection}
+            onToggle={handleToggleSection}
+            {...(opportunityCount > 0 ? { badge: String(opportunityCount) } : {})}
+          >
+            <OpportunitiesSection opportunities={opportunities} />
+          </Section>
+        )}
 
         <Section
           id="agents"
