@@ -19,8 +19,8 @@ export function SOPEmptyState() {
 export function SOPErrorState({ message }: { message?: string | undefined }) {
   return (
     <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-center px-8" role="alert">
-      <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center mb-4">
-        <AlertTriangle className="h-6 w-6 text-red-400" />
+      <div className="w-14 h-14 rounded-2xl bg-surface-danger border border-border-danger flex items-center justify-center mb-4">
+        <AlertTriangle className="h-6 w-6 text-red-400" /> {/* lint-color-tokens: ok — icon brand */}
       </div>
       <h3 className="text-ds-sm font-semibold text-[var(--content-primary)] mb-1.5">Failed to load SOP</h3>
       <p className="text-ds-xs text-[var(--content-secondary)] max-w-sm leading-relaxed line-clamp-3">
@@ -59,7 +59,7 @@ export function SOPSkeleton() {
       {/* Content skeleton — step cards */}
       <div className="flex-1 p-5 space-y-3 animate-pulse overflow-hidden">
         {/* Quick start placeholder */}
-        <div className="h-20 bg-emerald-50/50 rounded-xl border border-emerald-100" />
+        <div className="h-20 bg-surface-success rounded-xl border border-border-success" />
 
         {/* Step card placeholders */}
         {[1, 2, 3, 4].map(i => (

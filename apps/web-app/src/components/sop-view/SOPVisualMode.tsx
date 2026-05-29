@@ -19,6 +19,8 @@ import {
   Play, Square, Shield,
 } from 'lucide-react';
 import type { SOPViewModel, SOPViewStep, SOPViewPhase, SOPWorkflowDNA, SOPRecommendation } from './types';
+import { SeverityPill } from '../shared/SeverityPill';
+import { ImpactBadge } from '../shared/ImpactBadge';
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 
@@ -93,7 +95,7 @@ export function SOPVisualMode({ viewModel, expandedSteps, onToggleStep }: Props)
 function OverviewHeader({ viewModel }: { viewModel: SOPViewModel }) {
   const m = viewModel.metadata;
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-white border border-[var(--border-default)] rounded-2xl px-5 py-4">
+    <div className="bg-[var(--surface-elevated)] border border-[var(--border-default)] rounded-2xl px-5 py-4">
       <div className="flex items-start justify-between gap-4 mb-3">
         <div>
           <p className="text-[10px] font-bold text-[var(--content-tertiary)] uppercase tracking-wider mb-1">Process Overview</p>
@@ -130,7 +132,7 @@ function OverviewHeader({ viewModel }: { viewModel: SOPViewModel }) {
           </span>
         )}
         {m.frictionCount > 0 && (
-          <span className="flex items-center gap-1 text-amber-600">
+          <span className="flex items-center gap-1 text-content-on-warning">
             <AlertTriangle className="h-3 w-3" />
             {m.frictionCount} friction point{m.frictionCount !== 1 ? 's' : ''}
           </span>
@@ -179,8 +181,8 @@ function ProcessFlowMap({
         >
           {/* Start marker */}
           <div className="flex items-center gap-1 flex-shrink-0 mr-2">
-            <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
-              <Play className="h-3 w-3 text-white" fill="white" />
+            <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center"> {/* lint-color-tokens: ok — icon brand badge */}
+              <Play className="h-3 w-3 text-white" fill="white" /> {/* lint-color-tokens: ok — icon on brand badge */}
             </div>
           </div>
 
@@ -214,14 +216,14 @@ function ProcessFlowMap({
                   {dot.isDecision ? (
                     // Diamond for decisions
                     <div
-                      className="w-4 h-4 rotate-45 rounded-sm border-2"
-                      style={{ borderColor: '#d97706', background: '#fffbeb' }}
+                      className="w-4 h-4 rotate-45 rounded-sm border-2 bg-surface-warning"
+                      style={{ borderColor: '#d97706' }}
                     />
                   ) : dot.isError ? (
-                    // Red circle for errors
+                    // Circle for errors
                     <div
-                      className="w-4 h-4 rounded-full border-2"
-                      style={{ borderColor: '#dc2626', background: '#fef2f2' }}
+                      className="w-4 h-4 rounded-full border-2 bg-surface-danger"
+                      style={{ borderColor: '#dc2626' }}
                     />
                   ) : (
                     // Standard dot
@@ -233,7 +235,7 @@ function ProcessFlowMap({
 
                   {/* Friction ring indicator */}
                   {hasFriction && (
-                    <div className="absolute -inset-1 rounded-full border border-red-300 animate-pulse" />
+                    <div className="absolute -inset-1 rounded-full border border-border-danger animate-pulse" />
                   )}
 
                   {/* Step number tooltip on hover */}
@@ -249,7 +251,7 @@ function ProcessFlowMap({
           <div className="flex items-center gap-1 flex-shrink-0 ml-2">
             <div className="w-3 h-px bg-[var(--surface-secondary)]" />
             <div className="w-6 h-6 rounded-full bg-[var(--content-tertiary)] flex items-center justify-center">
-              <Square className="h-2.5 w-2.5 text-white" fill="white" />
+              <Square className="h-2.5 w-2.5 text-white" fill="white" /> {/* lint-color-tokens: ok — icon on structural badge */}
             </div>
           </div>
         </div>
@@ -304,9 +306,7 @@ function PhaseSection({
           <span className="text-[10px] text-[var(--content-tertiary)] ml-2">{phase.stepCount} step{phase.stepCount !== 1 ? 's' : ''}</span>
         </div>
         {phase.hasFriction && (
-          <span className="text-[8px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
-            Friction
-          </span>
+          <SeverityPill severity="medium" label="Friction" />
         )}
       </div>
 
@@ -353,10 +353,10 @@ function VisualStepCard({
           <div className="flex items-center gap-1.5">
             <span className="text-ds-xs font-medium text-[var(--content-primary)] truncate">{step.title}</span>
             {step.isDecisionPoint && (
-              <GitBranch className="h-3 w-3 text-amber-500 flex-shrink-0" />
+              <GitBranch className="h-3 w-3 text-amber-500 flex-shrink-0" /> /* lint-color-tokens: ok — icon brand */
             )}
             {step.hasHighFriction && (
-              <AlertTriangle className="h-3 w-3 text-red-400 flex-shrink-0" />
+              <AlertTriangle className="h-3 w-3 text-red-400 flex-shrink-0" /> /* lint-color-tokens: ok — icon brand */
             )}
           </div>
         </div>
@@ -392,11 +392,17 @@ function VisualStepCard({
                   className={`flex gap-2 px-3 py-1.5 text-[10px] ${i < arr.length - 1 ? 'border-b border-[var(--border-subtle)]' : ''}`}
                 >
                   <span className={`flex-shrink-0 min-w-[12px] font-bold ${
-                    line.startsWith('✓') ? 'text-emerald-600' : line.startsWith('→') ? 'text-[var(--content-tertiary)]' : 'text-[var(--content-tertiary)] tabular-nums'
+                    line.startsWith('✓') ? 'text-content-on-success' :
+                    line.startsWith('→') ? 'text-[var(--content-tertiary)]' :
+                    'text-[var(--content-tertiary)] tabular-nums'
                   }`}>
                     {line.match(/^\d+\./)?.[0] ?? (line.startsWith('✓') ? '✓' : line.startsWith('→') ? '→' : '')}
                   </span>
-                  <span className={line.startsWith('✓') ? 'text-emerald-700' : line.startsWith('→') ? 'text-[var(--content-secondary)] italic' : 'text-[var(--content-primary)]'}>
+                  <span className={
+                    line.startsWith('✓') ? 'text-content-on-success' :
+                    line.startsWith('→') ? 'text-[var(--content-secondary)] italic' :
+                    'text-[var(--content-primary)]'
+                  }>
                     {line.replace(/^\d+\.\s*/, '').replace(/^[✓→]\s*/, '')}
                   </span>
                 </div>
@@ -407,14 +413,14 @@ function VisualStepCard({
           {/* Expected outcome */}
           {step.expectedOutcome && (
             <div className="flex items-start gap-2 text-[10px]">
-              <Target className="h-3 w-3 text-emerald-500 mt-0.5 flex-shrink-0" />
+              <Target className="h-3 w-3 text-emerald-500 mt-0.5 flex-shrink-0" /> {/* lint-color-tokens: ok — icon brand */}
               <span className="text-[var(--content-secondary)]">{step.expectedOutcome}</span>
             </div>
           )}
 
           {/* Decision */}
           {step.isDecisionPoint && step.decisionLabel && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-[10px] text-amber-800">
+            <div className="bg-surface-warning border border-border-warning rounded-lg px-3 py-2 text-[10px] text-content-on-warning">
               <strong>Decision:</strong> {step.decisionLabel}
             </div>
           )}
@@ -424,9 +430,9 @@ function VisualStepCard({
             <div className="space-y-1">
               {step.frictionIndicators.map((f, i) => (
                 <div key={i} className={`text-[10px] px-3 py-1.5 rounded-lg border flex items-start gap-1.5 ${
-                  f.severity === 'high' ? 'bg-red-50 border-red-200 text-red-700' :
-                  f.severity === 'medium' ? 'bg-amber-50 border-amber-200 text-amber-700' :
-                  'bg-blue-50 border-blue-200 text-blue-700'
+                  f.severity === 'high' ? 'bg-surface-danger border-border-danger text-content-on-danger' :
+                  f.severity === 'medium' ? 'bg-surface-warning border-border-warning text-content-on-warning' :
+                  'bg-surface-info border-border-info text-content-on-info'
                 }`}>
                   <AlertTriangle className="h-3 w-3 mt-0.5 flex-shrink-0" />
                   {f.label}
@@ -486,9 +492,9 @@ function BottlenecksSection({ steps }: { steps: SOPViewStep[] }) {
       <SectionLabel icon={AlertTriangle} label="Bottlenecks & Friction" count={steps.length} />
       <div className="space-y-2 mt-2">
         {steps.map(step => (
-          <div key={step.id} className="bg-[var(--surface-elevated)] border border-red-200 rounded-xl px-4 py-3 flex items-start gap-3">
-            <div className="w-7 h-7 rounded-lg bg-red-50 border border-red-200 flex items-center justify-center flex-shrink-0">
-              <span className="text-[10px] font-bold text-red-600">{step.ordinal}</span>
+          <div key={step.id} className="bg-[var(--surface-elevated)] border border-border-danger rounded-xl px-4 py-3 flex items-start gap-3">
+            <div className="w-7 h-7 rounded-lg bg-surface-danger border border-border-danger flex items-center justify-center flex-shrink-0">
+              <span className="text-[10px] font-bold text-content-on-danger">{step.ordinal}</span>
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-ds-xs font-semibold text-[var(--content-primary)]">{step.title}</p>
@@ -498,18 +504,20 @@ function BottlenecksSection({ steps }: { steps: SOPViewStep[] }) {
               <div className="mt-1.5 space-y-1">
                 {step.frictionIndicators.map((f, i) => (
                   <p key={i} className={`text-[10px] ${
-                    f.severity === 'high' ? 'text-red-700' : f.severity === 'medium' ? 'text-amber-700' : 'text-blue-700'
+                    f.severity === 'high' ? 'text-content-on-danger' :
+                    f.severity === 'medium' ? 'text-content-on-warning' :
+                    'text-content-on-info'
                   }`}>
                     {f.label}
                   </p>
                 ))}
               </div>
             </div>
-            <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded flex-shrink-0 ${
-              step.hasHighFriction ? 'text-red-600 bg-red-50 border border-red-200' : 'text-amber-600 bg-amber-50 border border-amber-200'
-            }`}>
-              {step.hasHighFriction ? 'High' : 'Medium'}
-            </span>
+            <SeverityPill
+              severity={step.hasHighFriction ? 'high' : 'medium'}
+              label={step.hasHighFriction ? 'High' : 'Medium'}
+              className="flex-shrink-0"
+            />
           </div>
         ))}
       </div>
@@ -522,10 +530,10 @@ function BottlenecksSection({ steps }: { steps: SOPViewStep[] }) {
 // ═════════════════════════════════════════════════════════════════════════════
 
 function AutomationSection({ recommendations }: { recommendations: SOPRecommendation[] }) {
-  const TYPE_STYLES: Record<string, { icon: React.ElementType; color: string; bg: string; border: string }> = {
-    automation: { icon: Zap, color: '#7c3aed', bg: '#f5f3ff', border: '#c4b5fd' },
-    integration: { icon: ArrowRight, color: '#0891b2', bg: '#ecfeff', border: '#67e8f9' },
-    simplification: { icon: TrendingUp, color: '#2563eb', bg: '#eff6ff', border: '#93c5fd' },
+  const TYPE_STYLES: Record<string, { icon: React.ElementType; tokenBg: string }> = {
+    automation: { icon: Zap, tokenBg: 'bg-surface-info' },
+    integration: { icon: ArrowRight, tokenBg: 'bg-surface-info' },
+    simplification: { icon: TrendingUp, tokenBg: 'bg-surface-info' },
   };
 
   return (
@@ -536,21 +544,17 @@ function AutomationSection({ recommendations }: { recommendations: SOPRecommenda
           const style = TYPE_STYLES[rec.type] ?? TYPE_STYLES['automation']!;
           const Icon = style.icon;
           return (
-            <div key={rec.id} className="bg-[var(--surface-elevated)] border rounded-xl px-4 py-3 flex items-start gap-3" style={{ borderColor: style.border }}>
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ background: style.bg }}
-              >
-                <Icon className="h-4 w-4" style={{ color: style.color }} />
+            <div key={rec.id} className="bg-[var(--surface-elevated)] border border-border-info rounded-xl px-4 py-3 flex items-start gap-3">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${style.tokenBg}`}>
+                <Icon className="h-4 w-4 text-content-on-info" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 mb-0.5">
                   <p className="text-ds-xs font-semibold text-[var(--content-primary)]">{rec.title}</p>
-                  <span className={`text-[8px] font-bold uppercase tracking-wider px-1 py-0.5 rounded ${
-                    rec.impact === 'high' ? 'text-red-600 bg-red-50' :
-                    rec.impact === 'medium' ? 'text-amber-600 bg-amber-50' :
-                    'text-[var(--content-secondary)] bg-[var(--surface-secondary)]'
-                  }`}>{rec.impact}</span>
+                  <ImpactBadge
+                    impact={rec.impact as 'high' | 'medium' | 'low'}
+                    label={rec.impact}
+                  />
                 </div>
                 <p className="text-[10px] text-[var(--content-secondary)] leading-relaxed">{rec.detail}</p>
                 {rec.affectedStepOrdinals.length > 0 && (
