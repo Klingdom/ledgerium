@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`dark ${inter.className}`}>
+    <html lang="en" className={`dark ${inter.className}`} suppressHydrationWarning>
       <head>
         {/* Umami analytics — privacy-friendly, no consent required */}
         {process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL && (

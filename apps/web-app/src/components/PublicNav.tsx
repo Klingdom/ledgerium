@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, X, ArrowRight } from 'lucide-react';
 import { LogoFull } from '@/components/shared/LogoMark';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
@@ -26,7 +26,18 @@ export function PublicNav() {
   const { data: session } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const isAuthenticated = !!session?.user;
+  // Gate auth-dependent markup behind a mounted flag so the server HTML and the
+  // client's first paint are identical (both render the logged-out CTAs). For a
+  // returning user with a session/stale cookie, `useSession()` can resolve a
+  // different value on first client render than the server produced — causing a
+  // structural hydration mismatch (#418) on every page. Switching to the
+  // authenticated state only after mount makes hydration deterministic.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isAuthenticated = mounted && !!session?.user;
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--border-default)] bg-[var(--surface-elevated)]/95 backdrop-blur-sm">
