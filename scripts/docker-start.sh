@@ -28,14 +28,38 @@ echo "[ledgerium] Environment validated"
 
 mkdir -p /app/data/uploads 2>/dev/null || true
 
-# ── Database migration ────────────────────────────────────────────────────────
+# ── Safety backup (added 2026-05-29) ──────────────────────────────────────────
+# Back up the SQLite DB before any schema push, so a boot can NEVER silently
+# destroy data again (root cause of the 2026-05 data loss). Best-effort:
+# never blocks startup. Keeps the 10 most recent backups.
+
+DB_FILE="$(find /app -name 'ledgerium.db' -type f 2>/dev/null | head -1 || true)"
+if [ -n "$DB_FILE" ] && [ -f "$DB_FILE" ]; then
+  BACKUP="${DB_FILE}.backup-$(date -u +%Y%m%dT%H%M%SZ)"
+  if cp "$DB_FILE" "$BACKUP" 2>/dev/null; then
+    echo "[ledgerium] DB backed up to $BACKUP"
+  else
+    echo "[ledgerium] WARNING: DB backup failed (continuing startup)"
+  fi
+  # Bound disk usage: keep only the 10 newest backups.
+  ls -1t "${DB_FILE}".backup-* 2>/dev/null | tail -n +11 | xargs -r rm -f 2>/dev/null || true
+else
+  echo "[ledgerium] No existing DB found to back up (fresh install?)"
+fi
+
+# ── Database migration (data-loss-safe) ───────────────────────────────────────
+# IMPORTANT: --accept-data-loss is intentionally REMOVED. Without it, Prisma
+# applies additive changes (new tables/columns) normally but ERRORS instead of
+# destroying rows if a push would be destructive — turning silent data loss into
+# a loud, recoverable failure. The server still starts on the existing schema.
 
 cd /app/apps/web-app
-echo "[ledgerium] Running database migration..."
-npx prisma db push --skip-generate --accept-data-loss 2>&1 || {
-  echo "[ledgerium] WARNING: prisma db push failed, retrying with generate..."
+echo "[ledgerium] Running database migration (non-destructive)..."
+npx prisma db push --skip-generate 2>&1 || {
+  echo "[ledgerium] WARNING: prisma db push failed (needs generate, or would cause data loss)."
+  echo "[ledgerium] Retrying generate + non-destructive push. NOT using --accept-data-loss."
   npx prisma generate 2>&1 || true
-  npx prisma db push --accept-data-loss 2>&1 || echo "[ledgerium] WARNING: database setup failed"
+  npx prisma db push --skip-generate 2>&1 || echo "[ledgerium] WARNING: db push skipped — starting on existing schema WITHOUT data loss."
 }
 echo "[ledgerium] Database ready"
 
