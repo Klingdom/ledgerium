@@ -16,9 +16,17 @@ import { formatDuration } from '@/lib/format';
 
 interface Props {
   workflowId: string;
+  /** Pre-fetched intelligence data. When provided, skips the self-fetch empty-state
+   *  and renders directly from this value. When absent, preserves the original
+   *  self-fetch + "Analyze Workflow" button behavior unchanged. */
+  data?: any;
+  /** When true, suppresses the Bottlenecks section (used in the 2-view Analysis
+   *  page where WorkflowReportPage already renders bottlenecks). Defaults to false
+   *  so any other caller sees the section as before. */
+  hideBottlenecks?: boolean;
 }
 
-export function IntelligenceTab({ workflowId }: Props) {
+export function IntelligenceTab({ workflowId, data, hideBottlenecks = false }: Props) {
   const [intelligence, setIntelligence] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,12 +37,12 @@ export function IntelligenceTab({ workflowId }: Props) {
     try {
       const res = await fetch(`/api/workflows/${workflowId}/analyze`, { method: 'POST' });
       if (!res.ok) {
-        const data = await res.json();
-        setError(data.error ?? 'Analysis failed');
+        const fetchedData = await res.json();
+        setError(fetchedData.error ?? 'Analysis failed');
         return;
       }
-      const data = await res.json();
-      setIntelligence(data.intelligence);
+      const fetchedData = await res.json();
+      setIntelligence(fetchedData.intelligence);
     } catch {
       setError('Failed to run analysis');
     } finally {
@@ -42,7 +50,10 @@ export function IntelligenceTab({ workflowId }: Props) {
     }
   }, [workflowId]);
 
-  if (!intelligence && !isLoading) {
+  // When pre-fetched data is supplied, use it directly and bypass empty / loading states.
+  const resolved = data ?? intelligence;
+
+  if (!resolved && !isLoading) {
     return (
       <div className="text-center py-ds-12">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface-secondary)]">
@@ -70,7 +81,7 @@ export function IntelligenceTab({ workflowId }: Props) {
     );
   }
 
-  const { metrics, timestudy, variance, variants, bottlenecks } = intelligence;
+  const { metrics, timestudy, variance, variants, bottlenecks } = resolved;
 
   return (
     <div className="ds-document">
@@ -98,8 +109,8 @@ export function IntelligenceTab({ workflowId }: Props) {
         </div>
       </div>
 
-      {/* Bottlenecks */}
-      {bottlenecks?.bottlenecks?.length > 0 && (
+      {/* Bottlenecks — omitted when hideBottlenecks is true (already shown in WorkflowReportPage) */}
+      {!hideBottlenecks && bottlenecks?.bottlenecks?.length > 0 && (
         <section className="ds-section">
           <h3 className="ds-section-label flex items-center gap-1.5">
             <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
