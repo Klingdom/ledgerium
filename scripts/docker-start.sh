@@ -28,24 +28,30 @@ echo "[ledgerium] Environment validated"
 
 mkdir -p /app/data/uploads 2>/dev/null || true
 
-# ── Safety backup (added 2026-05-29) ──────────────────────────────────────────
+# ── Safety backup (added 2026-05-29, hardened 2026-06-01) ─────────────────────
 # Back up the SQLite DB before any schema push, so a boot can NEVER silently
 # destroy data again (root cause of the 2026-05 data loss). Best-effort:
-# never blocks startup. Keeps the 10 most recent backups.
+# never blocks startup. Keeps the 10 most recent backups per DB file.
+#
+# Back up EVERY ledgerium.db found under /app — the production DB lives on the
+# /app/data volume, while a harmless dev seed DB may also ship at
+# apps/web-app/prisma/data. Backing up all of them guarantees the real prod DB
+# is covered regardless of how the relative DATABASE_URL resolves at runtime
+# (avoids the "find | head -1 backs up the wrong file" false-confidence bug).
 
-DB_FILE="$(find /app -name 'ledgerium.db' -type f 2>/dev/null | head -1 || true)"
-if [ -n "$DB_FILE" ] && [ -f "$DB_FILE" ]; then
+find /app -name 'ledgerium.db' -type f 2>/dev/null | while IFS= read -r DB_FILE; do
+  [ -f "$DB_FILE" ] || continue
   BACKUP="${DB_FILE}.backup-$(date -u +%Y%m%dT%H%M%SZ)"
   if cp "$DB_FILE" "$BACKUP" 2>/dev/null; then
-    echo "[ledgerium] DB backed up to $BACKUP"
+    echo "[ledgerium] DB backed up: $BACKUP"
   else
-    echo "[ledgerium] WARNING: DB backup failed (continuing startup)"
+    echo "[ledgerium] WARNING: DB backup failed for $DB_FILE (continuing startup)"
   fi
-  # Bound disk usage: keep only the 10 newest backups.
-  ls -1t "${DB_FILE}".backup-* 2>/dev/null | tail -n +11 | xargs -r rm -f 2>/dev/null || true
-else
-  echo "[ledgerium] No existing DB found to back up (fresh install?)"
-fi
+  # Bound disk usage: keep only the 10 newest backups for this DB file.
+  ls -1t "${DB_FILE}".backup-* 2>/dev/null | tail -n +11 | while IFS= read -r OLD; do
+    rm -f "$OLD" 2>/dev/null || true
+  done
+done
 
 # ── Database migration (data-loss-safe) ───────────────────────────────────────
 # IMPORTANT: --accept-data-loss is intentionally REMOVED. Without it, Prisma
