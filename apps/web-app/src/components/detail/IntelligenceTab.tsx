@@ -20,13 +20,22 @@ interface Props {
    *  and renders directly from this value. When absent, preserves the original
    *  self-fetch + "Analyze Workflow" button behavior unchanged. */
   data?: any;
+  /** When true and data is null, shows a spinner instead of the empty-state CTA.
+   *  Only meaningful when data is not yet available (page-level fetch in progress).
+   *  Defaults to false so any other caller is unaffected. */
+  isLoadingData?: boolean;
   /** When true, suppresses the Bottlenecks section (used in the 2-view Analysis
    *  page where WorkflowReportPage already renders bottlenecks). Defaults to false
    *  so any other caller sees the section as before. */
   hideBottlenecks?: boolean;
 }
 
-export function IntelligenceTab({ workflowId, data, hideBottlenecks = false }: Props) {
+export function IntelligenceTab({
+  workflowId,
+  data,
+  isLoadingData = false,
+  hideBottlenecks = false,
+}: Props) {
   const [intelligence, setIntelligence] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +62,20 @@ export function IntelligenceTab({ workflowId, data, hideBottlenecks = false }: P
   // When pre-fetched data is supplied, use it directly and bypass empty / loading states.
   const resolved = data ?? intelligence;
 
-  if (!resolved && !isLoading) {
+  // FIX 1: show spinner when the component's own fetch is running OR the parent
+  // is still fetching and no resolved data is available yet. This prevents the
+  // "Analyze Workflow" CTA from rendering during the page-level auto-fetch window.
+  if (!resolved && (isLoading || isLoadingData)) {
+    return (
+      <div className="text-center py-ds-12">
+        <RefreshCw className="mx-auto h-8 w-8 text-brand-500 animate-spin" />
+        <p className="mt-ds-3 text-ds-sm text-[var(--content-secondary)]">Running intelligence analysis...</p>
+      </div>
+    );
+  }
+
+  // Empty state — only shown when there is no resolved data AND no fetch in progress.
+  if (!resolved) {
     return (
       <div className="text-center py-ds-12">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface-secondary)]">
@@ -68,15 +90,6 @@ export function IntelligenceTab({ workflowId, data, hideBottlenecks = false }: P
           <Zap className="h-4 w-4" />
           Analyze Workflow
         </button>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="text-center py-ds-12">
-        <RefreshCw className="mx-auto h-8 w-8 text-brand-500 animate-spin" />
-        <p className="mt-ds-3 text-ds-sm text-[var(--content-secondary)]">Running intelligence analysis...</p>
       </div>
     );
   }

@@ -23,9 +23,16 @@ interface Props {
   workflowId: string;
   /** When true, suppresses the Opportunities section (used in the 2-view Analysis
    *  page where WorkflowReportPage already renders AutomationSection). Defaults to
-   *  false so any other caller sees the section as before. Self-fetch behavior is
-   *  preserved unchanged regardless of this prop. */
+   *  false so any other caller sees the section as before. */
   hideOpportunities?: boolean;
+  /** Pre-fetched agent intelligence data. When provided, renders from it directly
+   *  and skips the self-fetch + empty-state. When absent, preserves the original
+   *  self-fetch + "Run agent intelligence" button behavior unchanged. */
+  data?: any;
+  /** When true and data is null, shows a spinner instead of the empty-state CTA.
+   *  Only meaningful when data is not yet available (page-level fetch in progress).
+   *  Defaults to false so any other caller is unaffected. */
+  isLoadingData?: boolean;
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -498,12 +505,21 @@ function RoadmapSection({ artifacts }: { artifacts: any }) {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
-export function AgentIntelligenceTab({ workflowId, hideOpportunities = false }: Props) {
+export function AgentIntelligenceTab({
+  workflowId,
+  hideOpportunities = false,
+  data,
+  isLoadingData = false,
+}: Props) {
   const [result, setResult] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Default-expanded sections
-  const [activeSection, setActiveSection] = useState<string>('opportunities');
+  // FIX 3: when opportunities are hidden, default-open the first visible section ('agents')
+  // so the card is never blank on first render. Falls back to 'opportunities' for callers
+  // that don't set hideOpportunities.
+  const [activeSection, setActiveSection] = useState<string>(
+    hideOpportunities ? 'agents' : 'opportunities'
+  );
 
   const analyze = useCallback(async () => {
     setIsLoading(true);
@@ -511,12 +527,12 @@ export function AgentIntelligenceTab({ workflowId, hideOpportunities = false }: 
     try {
       const res = await fetch(`/api/workflows/${workflowId}/agent-intelligence`, { method: 'POST' });
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setError((data as any).error ?? 'Agent intelligence analysis failed');
+        const fetchedData = await res.json().catch(() => ({}));
+        setError((fetchedData as any).error ?? 'Agent intelligence analysis failed');
         return;
       }
-      const data = await res.json();
-      setResult(data.data);
+      const fetchedData = await res.json();
+      setResult(fetchedData.data);
     } catch {
       setError('Failed to run agent intelligence analysis');
     } finally {
@@ -528,8 +544,24 @@ export function AgentIntelligenceTab({ workflowId, hideOpportunities = false }: 
     setActiveSection((prev) => (prev === id ? '' : id));
   }
 
+  // FIX 2: when pre-fetched data is supplied, use it directly.
+  const resolved = data ?? result;
+
+  // ── Loading state (page-level fetch in progress) ─────────────────────────
+  // Show spinner when: the component's own fetch is running, OR the parent
+  // is still fetching and no resolved data is available yet.
+  if (!resolved && (isLoading || isLoadingData)) {
+    return (
+      <div className="text-center py-ds-12">
+        <RefreshCw className="mx-auto h-8 w-8 text-brand-500 animate-spin" />
+        <p className="mt-ds-3 text-ds-sm text-[var(--content-secondary)]">Running agent intelligence pipeline...</p>
+      </div>
+    );
+  }
+
   // ── Empty state ──────────────────────────────────────────────────────────
-  if (!result && !isLoading) {
+  // Only shown when there is no resolved data AND no fetch is in progress.
+  if (!resolved) {
     return (
       <div className="text-center py-ds-12">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface-secondary)]">
@@ -548,18 +580,8 @@ export function AgentIntelligenceTab({ workflowId, hideOpportunities = false }: 
     );
   }
 
-  // ── Loading state ────────────────────────────────────────────────────────
-  if (isLoading) {
-    return (
-      <div className="text-center py-ds-12">
-        <RefreshCw className="mx-auto h-8 w-8 text-brand-500 animate-spin" />
-        <p className="mt-ds-3 text-ds-sm text-[var(--content-secondary)]">Running agent intelligence pipeline...</p>
-      </div>
-    );
-  }
-
   // ── Results ──────────────────────────────────────────────────────────────
-  const { opportunities, agentComposition, skillLibrary, integrationRisk, artifacts, metadata } = result;
+  const { opportunities, agentComposition, skillLibrary, integrationRisk, artifacts, metadata } = resolved;
 
   const opportunityCount = opportunities?.totalOpportunities ?? opportunities?.opportunities?.length ?? 0;
   const agentCount = agentComposition?.agentCount ?? agentComposition?.agents?.length ?? 0;
