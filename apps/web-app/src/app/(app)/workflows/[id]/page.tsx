@@ -49,6 +49,8 @@ export default function WorkflowDetailPage() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [intelligenceData, setIntelligenceData] = useState<any>(null);
   const [agentIntelligenceData, setAgentIntelligenceData] = useState<any>(null);
+  const [intelligenceLoading, setIntelligenceLoading] = useState(false);
+  const [agentLoading, setAgentLoading] = useState(false);
   const [showSurvey, setShowSurvey] = useState(false);
 
   // Tracks whether we've already fired the 30-second SOP dwell event this session.
@@ -57,8 +59,13 @@ export default function WorkflowDetailPage() {
   // Guard: only auto-trigger analysis once per page load.
   const analysisAutoFiredRef = useRef(false);
 
+  // Guard: fire process-map activation exactly once after data loads on the default Process view.
+  const mapActivationFiredRef = useRef(false);
+
   // Fire `sop_section_viewed` once the user has spent 30 continuous seconds on the Process view.
   // Rekeyed from activeTab === 'sop' to activeTab === 'process' because SOP now lives in Process view.
+  // FIX 4: SOP activation (view_sop / first_sop) is also fired here so it reflects genuine SOP
+  // engagement (dwell time) rather than merely clicking the Process tab.
   useEffect(() => {
     if (activeTab !== 'process') return;
 
@@ -68,10 +75,23 @@ export default function WorkflowDetailPage() {
       sopViewedFiredRef.current = true;
       setShowSurvey(true);
       track({ event: 'sop_section_viewed', workflowId: id, durationMs: SOP_DWELL_MS });
+      completeStep('view_sop');
+      trackActivation('first_sop', { workflowId: id });
     }, SOP_DWELL_MS);
 
     return () => clearTimeout(timer);
   }, [activeTab, id]);
+
+  // FIX 4: fire process-map activation once data has loaded on the default Process view.
+  // Guards with a ref so it fires exactly once per page load regardless of re-renders.
+  useEffect(() => {
+    if (!data) return;
+    if (activeTab !== 'process') return;
+    if (mapActivationFiredRef.current) return;
+    mapActivationFiredRef.current = true;
+    completeStep('view_process_map');
+    trackActivation('first_map', { workflowId: id });
+  }, [data, activeTab, id]);
 
   // Auto-load analysis data when the Analysis view first becomes active.
   useEffect(() => {
@@ -99,18 +119,12 @@ export default function WorkflowDetailPage() {
       setIsLoading(false);
     }
     load();
-    track({ event: 'workflow_viewed', workflowId: id, tab: 'workflow' });
+    track({ event: 'workflow_viewed', workflowId: id, tab: 'process' });
   }, [id, router]);
 
   function handleTabChange(tab: ViewId) {
     setActiveTab(tab);
     track({ event: 'tab_switched', tab });
-    if (tab === 'process') {
-      completeStep('view_process_map');
-      trackActivation('first_map', { workflowId: id });
-      completeStep('view_sop');
-      trackActivation('first_sop', { workflowId: id });
-    }
   }
 
   async function handleToggleFavorite() {
@@ -153,6 +167,7 @@ export default function WorkflowDetailPage() {
   }
 
   async function handleRunIntelligence() {
+    setIntelligenceLoading(true);
     try {
       const res = await fetch(`/api/workflows/${id}/analyze`, { method: 'POST' });
       if (!res.ok) return;
@@ -160,10 +175,13 @@ export default function WorkflowDetailPage() {
       setIntelligenceData(result.intelligence ?? null);
     } catch {
       // Non-fatal — user can retry from within the report page
+    } finally {
+      setIntelligenceLoading(false);
     }
   }
 
   async function handleRunAgentIntelligence() {
+    setAgentLoading(true);
     try {
       const res = await fetch(`/api/workflows/${id}/agent-intelligence`, { method: 'POST' });
       if (!res.ok) return;
@@ -171,6 +189,8 @@ export default function WorkflowDetailPage() {
       setAgentIntelligenceData(result.data ?? null);
     } catch {
       // Non-fatal — user can retry from within the report page
+    } finally {
+      setAgentLoading(false);
     }
   }
 
@@ -420,18 +440,21 @@ export default function WorkflowDetailPage() {
 
           {/* Deep analysis — multi-run timestudy, variance, variants
                data= threads the already-fetched intelligence result so no second fetch is made.
+               isLoadingData= shows a spinner during the page-level auto-fetch so the "Analyze
+               Workflow" CTA is not shown while the fetch is in flight.
                hideBottlenecks= suppresses the duplicate that WorkflowReportPage already shows. */}
           <section>
             <h2 className="text-ds-lg font-semibold text-[var(--content-primary)] mb-ds-4">Process Intelligence</h2>
-            <IntelligenceTab workflowId={id} data={intelligenceData} hideBottlenecks />
+            <IntelligenceTab workflowId={id} data={intelligenceData} isLoadingData={intelligenceLoading} hideBottlenecks />
           </section>
 
           {/* Agent intelligence — composed agents, skills, integration risk, roadmap
-               hideOpportunities= suppresses the duplicate that WorkflowReportPage already shows.
-               Self-fetch is preserved; agentIntelligenceData feeds WorkflowReportPage only. */}
+               data= threads the already-fetched result to eliminate the double-fetch.
+               isLoadingData= shows a spinner during the page-level auto-fetch.
+               hideOpportunities= suppresses the duplicate that WorkflowReportPage already shows. */}
           <section>
             <h2 className="text-ds-lg font-semibold text-[var(--content-primary)] mb-ds-4">Agent Intelligence</h2>
-            <AgentIntelligenceTab workflowId={id} hideOpportunities />
+            <AgentIntelligenceTab workflowId={id} data={agentIntelligenceData} isLoadingData={agentLoading} hideOpportunities />
           </section>
 
           {/* Raw evidence — collapsed by default */}
