@@ -4,10 +4,12 @@ import { useRef, useState } from 'react';
 import {
   ArrowLeft,
   CheckCircle,
+  XCircle,
   ChevronDown,
   ChevronRight,
   Zap,
   AlertTriangle,
+  AlertCircle,
   RotateCcw,
 } from 'lucide-react';
 import { formatDuration } from '@/lib/format';
@@ -188,6 +190,44 @@ interface AgentOpportunity {
   description?: string;
 }
 
+interface ComposedAgent {
+  agentName?: string;
+  role?: string;
+  interactionMode?: string;
+  capabilityScore?: number;
+  systems?: string[];
+  tasks?: unknown[];
+  skills?: unknown[];
+}
+
+interface SkillItem {
+  skillName?: string;
+  skillType?: string;
+  reusabilityScore?: number;
+  autonomous?: boolean;
+}
+
+interface IntegrationItem {
+  system?: string;
+  readiness?: string;
+  complexity?: number;
+  estimatedSetupTimeMs?: number;
+}
+
+interface IntegrationRiskItem {
+  title?: string;
+  severity?: string;
+  category?: string;
+}
+
+interface RoadmapPhase {
+  phase?: number;
+  title?: string;
+  estimatedEffort?: string;
+  description?: string;
+  prerequisites?: string[];
+}
+
 interface AgentIntelligenceData {
   opportunities?: {
     opportunities?: AgentOpportunity[];
@@ -196,6 +236,10 @@ interface AgentIntelligenceData {
   workflow?: {
     automationScore?: number;
   };
+  agentComposition?: { agentCount?: number; agents?: ComposedAgent[] };
+  skillLibrary?: { uniqueSkillCount?: number; reusableSkillCount?: number; skills?: SkillItem[] };
+  integrationRisk?: { overallRiskLevel?: string; integrations?: IntegrationItem[]; risks?: IntegrationRiskItem[] };
+  artifacts?: { roadmap?: RoadmapPhase[] };
 }
 
 interface StepDefinition {
@@ -247,6 +291,10 @@ const SECTION_IDS = [
   'rpt-steps',
   'rpt-structure',
   'rpt-rework',
+  'rpt-agents',
+  'rpt-skills',
+  'rpt-integrations',
+  'rpt-roadmap',
 ] as const;
 
 const SECTION_LABELS: Record<string, string> = {
@@ -263,6 +311,10 @@ const SECTION_LABELS: Record<string, string> = {
   'rpt-steps': 'Step Breakdown',
   'rpt-structure': 'Friction & Decisions',
   'rpt-rework': 'Rework Patterns',
+  'rpt-agents': 'Composed Agents',
+  'rpt-skills': 'Skill Library',
+  'rpt-integrations': 'Integrations & Risks',
+  'rpt-roadmap': 'Implementation Roadmap',
 };
 
 // ── Phase accent colors ────────────────────────────────────────────────────────
@@ -1445,6 +1497,316 @@ function TimestudySection({ intelligence }: { intelligence: IntelligenceData | n
   );
 }
 
+// ── Agent intelligence helpers (migrated from AgentIntelligenceTab) ───────────
+
+const AGENT_ROLE_COLORS: Record<string, string> = {
+  executor: 'bg-green-100 text-green-800',
+  assistant: 'bg-blue-100 text-blue-800',
+  orchestrator: 'bg-purple-100 text-purple-800',
+  monitor: 'bg-[var(--surface-secondary)] text-[var(--content-primary)]',
+  specialist: 'bg-amber-100 text-amber-800',
+};
+
+const AGENT_SEVERITY_COLORS: Record<string, string> = {
+  low: 'bg-green-100 text-green-800',
+  medium: 'bg-yellow-100 text-yellow-800',
+  high: 'bg-orange-100 text-orange-800',
+  critical: 'bg-red-100 text-red-800',
+};
+
+const AGENT_READINESS_COLORS: Record<string, string> = {
+  api_available: 'bg-green-100 text-green-800',
+  sdk_available: 'bg-blue-100 text-blue-800',
+  webhook_only: 'bg-yellow-100 text-yellow-800',
+  unknown: 'bg-yellow-100 text-yellow-800',
+  manual_only: 'bg-red-100 text-red-800',
+};
+
+function agentPill(label: string, colorClass: string) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
+        colorClass || 'bg-[var(--surface-secondary)] text-[var(--content-primary)]'
+      }`}
+    >
+      {label.replace(/_/g, ' ')}
+    </span>
+  );
+}
+
+// ── Section: Composed Agents ──────────────────────────────────────────────────
+
+function ComposedAgentsSection({ agentIntelligence }: { agentIntelligence: AgentIntelligenceData | null | undefined }) {
+  const agents = agentIntelligence?.agentComposition?.agents ?? [];
+  if (agents.length === 0) return null;
+
+  return (
+    <div id="rpt-agents" className="scroll-mt-20">
+      <SectionHeading>Composed Agents</SectionHeading>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-ds-4">
+        {agents.map((agent, i) => {
+          const systems = agent.systems ?? [];
+          const taskCount = agent.tasks?.length ?? 0;
+          const skillCount = agent.skills?.length ?? 0;
+          const capability = Math.min(agent.capabilityScore ?? 0, 100);
+          return (
+            <div key={i} className="card px-ds-4 py-ds-4 space-y-ds-2">
+              <div className="flex items-start justify-between gap-ds-2">
+                <div className="min-w-0">
+                  <p className="text-ds-sm font-semibold text-[var(--content-primary)]">{agent.agentName ?? `Agent ${i + 1}`}</p>
+                  {agent.interactionMode && <p className="text-ds-xs text-[var(--content-secondary)]">{agent.interactionMode}</p>}
+                </div>
+                {agent.role && (
+                  <span
+                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium flex-shrink-0 ${
+                      AGENT_ROLE_COLORS[agent.role] ?? 'bg-[var(--surface-secondary)] text-[var(--content-primary)]'
+                    }`}
+                  >
+                    {agent.role}
+                  </span>
+                )}
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[11px] text-[var(--content-secondary)]">Capability</span>
+                  <span className="text-[11px] font-medium text-[var(--content-primary)]">{agent.capabilityScore ?? 0}/100</span>
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-[var(--surface-secondary)]">
+                  <div className="h-1.5 rounded-full bg-brand-500" style={{ width: `${capability}%` }} />
+                </div>
+              </div>
+              {systems.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {systems.map((sys) => (
+                    <span key={sys} className="inline-flex items-center rounded-full bg-[var(--surface-secondary)] px-2 py-0.5 text-[11px] text-[var(--content-secondary)]">
+                      {sys}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <div className="flex items-center gap-ds-4 text-[11px] text-[var(--content-secondary)]">
+                {taskCount > 0 && <span>{taskCount} task{taskCount !== 1 ? 's' : ''}</span>}
+                {skillCount > 0 && <span>{skillCount} skill{skillCount !== 1 ? 's' : ''}</span>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Section: Skill Library ────────────────────────────────────────────────────
+
+function SkillLibrarySection({ agentIntelligence }: { agentIntelligence: AgentIntelligenceData | null | undefined }) {
+  const lib = agentIntelligence?.skillLibrary;
+  const skills = lib?.skills ?? [];
+  if (skills.length === 0) return null;
+  const uniqueCount = lib?.uniqueSkillCount ?? skills.length;
+  const reusableCount = lib?.reusableSkillCount ?? 0;
+
+  return (
+    <div id="rpt-skills" className="scroll-mt-20">
+      <SectionHeading>Skill Library</SectionHeading>
+      <div className="flex items-center gap-ds-4 mb-ds-3 text-ds-xs text-[var(--content-secondary)]">
+        <span><strong className="text-[var(--content-primary)]">{uniqueCount}</strong> unique skills</span>
+        <span><strong className="text-[var(--content-primary)]">{reusableCount}</strong> reusable</span>
+      </div>
+      <div className="card overflow-hidden">
+        <table className="w-full text-ds-xs">
+          <thead>
+            <tr className="border-b border-[var(--border-default)] bg-[var(--surface-secondary)]">
+              <th className="text-left py-ds-2 px-ds-4 text-[var(--content-secondary)] font-medium">Skill</th>
+              <th className="text-left py-ds-2 px-ds-4 text-[var(--content-secondary)] font-medium hidden sm:table-cell">Type</th>
+              <th className="text-left py-ds-2 px-ds-4 text-[var(--content-secondary)] font-medium w-32">Reusability</th>
+              <th className="text-center py-ds-2 px-ds-4 text-[var(--content-secondary)] font-medium w-16 hidden md:table-cell">Autonomous</th>
+            </tr>
+          </thead>
+          <tbody>
+            {skills.map((skill, i) => (
+              <tr key={i} className="border-b border-[var(--border-subtle)] hover:bg-[var(--surface-secondary)]">
+                <td className="py-ds-2 px-ds-4 font-medium text-[var(--content-primary)]">{skill.skillName ?? '—'}</td>
+                <td className="py-ds-2 px-ds-4 hidden sm:table-cell">{skill.skillType ? agentPill(skill.skillType, 'bg-indigo-100 text-indigo-800') : '—'}</td>
+                <td className="py-ds-2 px-ds-4">
+                  <div className="flex items-center gap-ds-2">
+                    <div className="h-1.5 flex-1 rounded-full bg-[var(--surface-secondary)]">
+                      <div className="h-1.5 rounded-full bg-brand-400" style={{ width: `${Math.min(skill.reusabilityScore ?? 0, 100)}%` }} />
+                    </div>
+                    <span className="tabular-nums text-[var(--content-secondary)] w-8 text-right">{skill.reusabilityScore ?? 0}</span>
+                  </div>
+                </td>
+                <td className="py-ds-2 px-ds-4 text-center hidden md:table-cell">
+                  {skill.autonomous ? (
+                    <CheckCircle className="h-3.5 w-3.5 text-green-500 mx-auto" />
+                  ) : (
+                    <XCircle className="h-3.5 w-3.5 text-[var(--content-tertiary)] mx-auto" />
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ── Section: Integrations & Risks ─────────────────────────────────────────────
+
+function IntegrationsSection({ agentIntelligence }: { agentIntelligence: AgentIntelligenceData | null | undefined }) {
+  const ir = agentIntelligence?.integrationRisk;
+  const integrations = ir?.integrations ?? [];
+  const risks = ir?.risks ?? [];
+  const overall = ir?.overallRiskLevel ?? '';
+  if (integrations.length === 0 && risks.length === 0 && !overall) return null;
+
+  return (
+    <div id="rpt-integrations" className="scroll-mt-20">
+      <SectionHeading>Integrations &amp; Risks</SectionHeading>
+      <div className="space-y-ds-5">
+        {overall && (
+          <div
+            className={`flex items-center gap-ds-2 rounded-lg px-ds-4 py-ds-3 text-ds-sm font-medium border ${
+              AGENT_SEVERITY_COLORS[overall] ?? 'bg-[var(--surface-secondary)] text-[var(--content-primary)]'
+            } border-current/20`}
+          >
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            Overall risk: <span className="capitalize">{overall}</span>
+          </div>
+        )}
+
+        {integrations.length > 0 && (
+          <div>
+            <p className="text-ds-xs font-semibold text-[var(--content-secondary)] uppercase tracking-wide mb-ds-2">Integrations</p>
+            <div className="card overflow-hidden">
+              <table className="w-full text-ds-xs">
+                <thead>
+                  <tr className="border-b border-[var(--border-default)] bg-[var(--surface-secondary)]">
+                    <th className="text-left py-ds-2 px-ds-4 text-[var(--content-secondary)] font-medium">System</th>
+                    <th className="text-left py-ds-2 px-ds-4 text-[var(--content-secondary)] font-medium">Readiness</th>
+                    <th className="text-left py-ds-2 px-ds-4 text-[var(--content-secondary)] font-medium hidden sm:table-cell">Complexity</th>
+                    <th className="text-right py-ds-2 px-ds-4 text-[var(--content-secondary)] font-medium hidden md:table-cell">Setup Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {integrations.map((integ, i) => {
+                    const complexity = integ.complexity ?? 0;
+                    return (
+                      <tr key={i} className="border-b border-[var(--border-subtle)] hover:bg-[var(--surface-secondary)]">
+                        <td className="py-ds-2 px-ds-4 font-medium text-[var(--content-primary)]">{integ.system ?? '—'}</td>
+                        <td className="py-ds-2 px-ds-4">{integ.readiness ? agentPill(integ.readiness, AGENT_READINESS_COLORS[integ.readiness] ?? '') : '—'}</td>
+                        <td className="py-ds-2 px-ds-4 hidden sm:table-cell">
+                          {integ.complexity != null ? (
+                            <div className="flex items-center gap-0.5">
+                              {Array.from({ length: 5 }).map((_, dotIdx) => (
+                                <div
+                                  key={dotIdx}
+                                  className={`h-2 w-2 rounded-full ${dotIdx < complexity ? 'bg-[var(--content-primary)]' : 'bg-[var(--surface-secondary)]'}`}
+                                />
+                              ))}
+                            </div>
+                          ) : (
+                            '—'
+                          )}
+                        </td>
+                        <td className="py-ds-2 px-ds-4 text-right text-[var(--content-primary)] tabular-nums hidden md:table-cell">
+                          {integ.estimatedSetupTimeMs != null ? formatDuration(integ.estimatedSetupTimeMs) : '—'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {risks.length > 0 && (
+          <div>
+            <p className="text-ds-xs font-semibold text-[var(--content-secondary)] uppercase tracking-wide mb-ds-2">Risks</p>
+            <div className="space-y-ds-2">
+              {risks.map((risk, i) => (
+                <div key={i} className="card px-ds-4 py-ds-3">
+                  <div className="flex items-start gap-ds-3">
+                    <AlertTriangle
+                      className={`h-4 w-4 flex-shrink-0 mt-0.5 ${
+                        risk.severity === 'critical' || risk.severity === 'high' ? 'text-red-500' : 'text-yellow-500'
+                      }`}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-ds-2 flex-wrap">
+                        <p className="text-ds-sm font-medium text-[var(--content-primary)]">{risk.title ?? '—'}</p>
+                        {risk.severity && (
+                          <span
+                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                              AGENT_SEVERITY_COLORS[risk.severity] ?? 'bg-[var(--surface-secondary)] text-[var(--content-primary)]'
+                            }`}
+                          >
+                            {risk.severity}
+                          </span>
+                        )}
+                        {risk.category && (
+                          <span className="inline-flex items-center rounded-full bg-[var(--surface-secondary)] px-2 py-0.5 text-[11px] text-[var(--content-secondary)]">
+                            {risk.category.replace(/_/g, ' ')}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Section: Implementation Roadmap ───────────────────────────────────────────
+
+function RoadmapSection({ agentIntelligence }: { agentIntelligence: AgentIntelligenceData | null | undefined }) {
+  const roadmap = agentIntelligence?.artifacts?.roadmap ?? [];
+  if (roadmap.length === 0) return null;
+
+  return (
+    <div id="rpt-roadmap" className="scroll-mt-20">
+      <SectionHeading>Implementation Roadmap</SectionHeading>
+      <div className="relative">
+        <div className="absolute left-5 top-6 bottom-6 w-0.5 bg-[var(--surface-secondary)]" aria-hidden />
+        <div className="space-y-ds-4">
+          {roadmap.map((phase, i) => {
+            const prereqs = phase.prerequisites ?? [];
+            return (
+              <div key={i} className="relative flex items-start gap-ds-4">
+                <div className="relative z-10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border-2 border-brand-300 bg-[var(--surface-elevated)] text-ds-sm font-bold text-brand-700">
+                  {phase.phase ?? i + 1}
+                </div>
+                <div className="card flex-1 px-ds-4 py-ds-3 mb-0">
+                  <div className="flex items-start justify-between gap-ds-2 flex-wrap">
+                    <p className="text-ds-sm font-semibold text-[var(--content-primary)]">{phase.title ?? `Phase ${phase.phase ?? i + 1}`}</p>
+                    {phase.estimatedEffort && <span className="text-[11px] text-[var(--content-secondary)] flex-shrink-0">{phase.estimatedEffort}</span>}
+                  </div>
+                  {phase.description && <p className="mt-ds-1 text-ds-xs text-[var(--content-secondary)]">{phase.description}</p>}
+                  {prereqs.length > 0 && (
+                    <div className="mt-ds-2 flex flex-wrap gap-1">
+                      {prereqs.map((prereq, pi) => (
+                        <span key={pi} className="inline-flex items-center rounded-full bg-[var(--surface-secondary)] px-2 py-0.5 text-[11px] text-[var(--content-secondary)]">
+                          {prereq}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Section 10: Right Rail Navigator ──────────────────────────────────────────
 
 function RightRailNavigator({ sectionIds }: { sectionIds: readonly string[] }) {
@@ -1524,6 +1886,19 @@ export function WorkflowReportPage({
       const studies = intelligence?.timestudy?.stepPositionTimestudies?.length ?? 0;
       return studies > 0 && (intelligence?.metrics?.runCount ?? 1) >= 2;
     }
+    if (id === 'rpt-agents') {
+      return (agentIntelligence?.agentComposition?.agents?.length ?? 0) > 0;
+    }
+    if (id === 'rpt-skills') {
+      return (agentIntelligence?.skillLibrary?.skills?.length ?? 0) > 0;
+    }
+    if (id === 'rpt-integrations') {
+      const ir = agentIntelligence?.integrationRisk;
+      return (ir?.integrations?.length ?? 0) > 0 || (ir?.risks?.length ?? 0) > 0 || !!ir?.overallRiskLevel;
+    }
+    if (id === 'rpt-roadmap') {
+      return (agentIntelligence?.artifacts?.roadmap?.length ?? 0) > 0;
+    }
     return true;
   });
 
@@ -1551,6 +1926,10 @@ export function WorkflowReportPage({
         <StepBreakdownSection processOutput={processOutput} intelligence={intelligence} />
         <ProcessStructureSection interpretation={interpretation} />
         <ReworkPatternsSection interpretation={interpretation} />
+        <ComposedAgentsSection agentIntelligence={agentIntelligence} />
+        <SkillLibrarySection agentIntelligence={agentIntelligence} />
+        <IntegrationsSection agentIntelligence={agentIntelligence} />
+        <RoadmapSection agentIntelligence={agentIntelligence} />
 
         {/* Footer */}
         <footer className="text-[10px] text-[var(--content-tertiary)] pb-4 border-t border-[var(--border-subtle)] pt-4">
