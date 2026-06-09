@@ -138,7 +138,42 @@ interface IntelligenceBottleneck {
   category?: string;
 }
 
+interface IntelligenceMetrics {
+  medianDurationMs?: number;
+  meanDurationMs?: number;
+  medianStepCount?: number;
+  meanStepCount?: number;
+  runCount?: number;
+  completionRate?: number;
+}
+
+interface TimestudyStep {
+  position: number;
+  category?: string;
+  meanDurationMs?: number;
+  medianDurationMs?: number;
+  p90DurationMs?: number;
+}
+
+interface IntelligenceVariance {
+  sequenceStability?: number;
+  durationVariance?: { coefficientOfVariation?: number };
+  highVarianceSteps?: unknown[];
+}
+
+interface IntelligenceVariant {
+  variantId: string;
+  isStandardPath?: boolean;
+  pathSignature?: { signature?: string };
+  frequency?: number;
+  runCount?: number;
+}
+
 interface IntelligenceData {
+  metrics?: IntelligenceMetrics;
+  timestudy?: { stepPositionTimestudies?: TimestudyStep[] };
+  variance?: IntelligenceVariance;
+  variants?: { variantCount?: number; variants?: IntelligenceVariant[] };
   bottlenecks?: {
     bottlenecks?: IntelligenceBottleneck[];
   };
@@ -204,6 +239,8 @@ const SECTION_IDS = [
   'rpt-scores',
   'rpt-phases',
   'rpt-metrics',
+  'rpt-variance',
+  'rpt-timestudy',
   'rpt-insights',
   'rpt-automation',
   'rpt-bottlenecks',
@@ -218,6 +255,8 @@ const SECTION_LABELS: Record<string, string> = {
   'rpt-scores': 'Process Health',
   'rpt-phases': 'Phase Timeline',
   'rpt-metrics': 'Run Metrics',
+  'rpt-variance': 'Variance & Variants',
+  'rpt-timestudy': 'Step Duration',
   'rpt-insights': 'Insights',
   'rpt-automation': 'Automation',
   'rpt-bottlenecks': 'Bottlenecks',
@@ -1237,6 +1276,156 @@ function RunMetricsSection({ insights, processOutput }: RunMetricsSectionProps) 
   );
 }
 
+// ── Section: Variance & Variants ──────────────────────────────────────────────
+
+/**
+ * Variance & Variants — the multi-run story (how consistently the process runs
+ * and how many distinct paths exist). Variance/variant figures are only
+ * meaningful across ≥2 runs, so a single-run workflow gets an honest activation
+ * nudge instead of trivial 100%/1-variant noise. Pure render → hydration-safe.
+ */
+function VarianceVariantsSection({ intelligence }: { intelligence: IntelligenceData | null | undefined }) {
+  const variance = intelligence?.variance;
+  const variants = intelligence?.variants;
+  const variantList = variants?.variants ?? [];
+  const runCount = intelligence?.metrics?.runCount ?? 1;
+
+  const hasIntel = variance != null || variantList.length > 0;
+  if (!hasIntel) return null;
+
+  if (runCount < 2) {
+    return (
+      <div id="rpt-variance" className="scroll-mt-20">
+        <SectionHeading>Variance &amp; Variants</SectionHeading>
+        <div className="card px-5 py-6 text-center">
+          <p className="text-ds-sm text-[var(--content-secondary)]">
+            Recorded once. Run this workflow again to unlock variance, variant paths, and trend analysis.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const stability = variance?.sequenceStability;
+  const cv = variance?.durationVariance?.coefficientOfVariation;
+  const highVar = variance?.highVarianceSteps?.length ?? 0;
+  const standard = variantList.find((v) => v.isStandardPath);
+  const variantCount = variants?.variantCount ?? variantList.length;
+
+  return (
+    <div id="rpt-variance" className="scroll-mt-20">
+      <SectionHeading>Variance &amp; Variants</SectionHeading>
+      <p className="mb-4 text-ds-sm text-[var(--content-secondary)]">
+        {standard?.frequency != null ? (
+          <>
+            <span className="font-semibold text-[var(--content-primary)]">{Math.round(standard.frequency * 100)}%</span>{' '}
+            of {runCount} runs follow the standard path across {variantCount} variant{variantCount !== 1 ? 's' : ''}.
+          </>
+        ) : (
+          <>{variantCount} variant path{variantCount !== 1 ? 's' : ''} across {runCount} runs.</>
+        )}
+      </p>
+
+      <div className="grid grid-cols-3 gap-ds-4">
+        <div className="card px-ds-4 py-ds-3">
+          <p className="ds-metric-label">Sequence stability</p>
+          <p className="ds-metric-value">{stability != null ? `${Math.round(stability * 100)}%` : '—'}</p>
+        </div>
+        <div className="card px-ds-4 py-ds-3">
+          <p className="ds-metric-label">Duration CV</p>
+          <p className="ds-metric-value">{cv != null ? cv.toFixed(2) : '—'}</p>
+        </div>
+        <div className="card px-ds-4 py-ds-3">
+          <p className="ds-metric-label">High-variance steps</p>
+          <p className="ds-metric-value">{highVar}</p>
+        </div>
+      </div>
+
+      {variantList.length > 0 && (
+        <div className="mt-ds-4 space-y-ds-2">
+          {variantList.map((v) => (
+            <div
+              key={v.variantId}
+              className={`card px-ds-5 py-ds-3 ${v.isStandardPath ? 'border-brand-200 bg-brand-50/30' : ''}`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-ds-sm font-medium text-[var(--content-primary)] flex items-center gap-ds-2">
+                    {v.variantId}
+                    {v.isStandardPath && (
+                      <span className="ds-tag ds-tag-brand text-[10px] flex items-center gap-0.5">
+                        <CheckCircle className="h-3 w-3" />
+                        Standard
+                      </span>
+                    )}
+                  </p>
+                  {v.pathSignature?.signature && (
+                    <p className="text-ds-xs text-[var(--content-tertiary)] mt-0.5 font-mono truncate">
+                      {v.pathSignature.signature}
+                    </p>
+                  )}
+                </div>
+                <div className="flex-shrink-0 text-right">
+                  <p className="text-ds-sm font-semibold text-[var(--content-primary)]">
+                    {v.frequency != null ? `${Math.round(v.frequency * 100)}%` : '—'}
+                  </p>
+                  <p className="text-ds-xs text-[var(--content-tertiary)]">
+                    {v.runCount ?? 0} run{(v.runCount ?? 0) !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Section: Step Duration Analysis (timestudy) ───────────────────────────────
+
+/**
+ * Per-step mean/median/p90 across runs. Multi-run only — these statistics are
+ * not meaningful for a single run (no spread, no real p90), so the section is
+ * hidden below 2 runs. Pure render → hydration-safe.
+ */
+function TimestudySection({ intelligence }: { intelligence: IntelligenceData | null | undefined }) {
+  const studies = intelligence?.timestudy?.stepPositionTimestudies ?? [];
+  const runCount = intelligence?.metrics?.runCount ?? 1;
+  if (studies.length === 0 || runCount < 2) return null;
+
+  return (
+    <div id="rpt-timestudy" className="scroll-mt-20">
+      <SectionHeading>Step Duration Analysis</SectionHeading>
+      <p className="mb-3 text-ds-xs text-[var(--content-tertiary)]">Per-step timing across {runCount} runs.</p>
+      <div className="card overflow-hidden">
+        <table className="w-full text-ds-xs">
+          <thead>
+            <tr className="border-b border-[var(--border-default)] bg-[var(--surface-secondary)]">
+              <th className="text-left py-ds-2 px-ds-4 text-[var(--content-secondary)] font-medium">Step</th>
+              <th className="text-left py-ds-2 px-ds-4 text-[var(--content-secondary)] font-medium">Category</th>
+              <th className="text-right py-ds-2 px-ds-4 text-[var(--content-secondary)] font-medium">Mean</th>
+              <th className="text-right py-ds-2 px-ds-4 text-[var(--content-secondary)] font-medium">Median</th>
+              <th className="text-right py-ds-2 px-ds-4 text-[var(--content-secondary)] font-medium">P90</th>
+            </tr>
+          </thead>
+          <tbody>
+            {studies.map((s) => (
+              <tr key={s.position} className="border-b border-[var(--border-subtle)] hover:bg-[var(--surface-secondary)]">
+                <td className="py-ds-2 px-ds-4 font-medium text-[var(--content-primary)] tabular-nums">{s.position}</td>
+                <td className="py-ds-2 px-ds-4 text-[var(--content-secondary)]">{s.category ?? '—'}</td>
+                <td className="py-ds-2 px-ds-4 text-right text-[var(--content-primary)] tabular-nums">{s.meanDurationMs ? formatDuration(s.meanDurationMs) : '—'}</td>
+                <td className="py-ds-2 px-ds-4 text-right text-[var(--content-primary)] tabular-nums">{s.medianDurationMs ? formatDuration(s.medianDurationMs) : '—'}</td>
+                <td className="py-ds-2 px-ds-4 text-right text-[var(--content-primary)] tabular-nums">{s.p90DurationMs ? formatDuration(s.p90DurationMs) : '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 // ── Section 10: Right Rail Navigator ──────────────────────────────────────────
 
 function RightRailNavigator({ sectionIds }: { sectionIds: readonly string[] }) {
@@ -1309,6 +1498,13 @@ export function WorkflowReportPage({
       );
       return hasStepTiming || insights?.timeBreakdown != null;
     }
+    if (id === 'rpt-variance') {
+      return intelligence?.variance != null || (intelligence?.variants?.variants?.length ?? 0) > 0;
+    }
+    if (id === 'rpt-timestudy') {
+      const studies = intelligence?.timestudy?.stepPositionTimestudies?.length ?? 0;
+      return studies > 0 && (intelligence?.metrics?.runCount ?? 1) >= 2;
+    }
     return true;
   });
 
@@ -1321,6 +1517,8 @@ export function WorkflowReportPage({
         <ProcessScoresSection interpretation={interpretation} />
         <PhaseTimelineSection interpretation={interpretation} />
         <RunMetricsSection insights={insights} processOutput={processOutput} />
+        <VarianceVariantsSection intelligence={intelligence} />
+        <TimestudySection intelligence={intelligence} />
         <InsightsFeedSection insights={insights} />
         <AutomationSection
           agentIntelligence={agentIntelligence}
