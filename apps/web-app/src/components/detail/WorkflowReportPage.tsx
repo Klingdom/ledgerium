@@ -1311,6 +1311,7 @@ function VarianceVariantsSection({ intelligence }: { intelligence: IntelligenceD
   const highVar = variance?.highVarianceSteps?.length ?? 0;
   const standard = variantList.find((v) => v.isStandardPath);
   const variantCount = variants?.variantCount ?? variantList.length;
+  const metrics = intelligence?.metrics;
 
   return (
     <div id="rpt-variance" className="scroll-mt-20">
@@ -1325,6 +1326,24 @@ function VarianceVariantsSection({ intelligence }: { intelligence: IntelligenceD
           <>{variantCount} variant path{variantCount !== 1 ? 's' : ''} across {runCount} runs.</>
         )}
       </p>
+
+      {/* Cross-run metrics (preserved from the retired IntelligenceTab) */}
+      <div className="mb-ds-4 grid grid-cols-3 gap-ds-4">
+        <div className="card px-ds-4 py-ds-3">
+          <p className="ds-metric-label">Runs analyzed</p>
+          <p className="ds-metric-value">{metrics?.runCount ?? runCount}</p>
+        </div>
+        <div className="card px-ds-4 py-ds-3">
+          <p className="ds-metric-label">Completion</p>
+          <p className="ds-metric-value">
+            {metrics?.completionRate != null ? `${Math.round(metrics.completionRate * 100)}%` : '—'}
+          </p>
+        </div>
+        <div className="card px-ds-4 py-ds-3">
+          <p className="ds-metric-label">Median duration</p>
+          <p className="ds-metric-value">{metrics?.medianDurationMs ? formatDuration(metrics.medianDurationMs) : '—'}</p>
+        </div>
+      </div>
 
       <div className="grid grid-cols-3 gap-ds-4">
         <div className="card px-ds-4 py-ds-3">

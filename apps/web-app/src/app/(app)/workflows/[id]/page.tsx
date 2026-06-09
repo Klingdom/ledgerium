@@ -27,7 +27,6 @@ import { WorkflowPageShell } from '@/components/workflow-view/WorkflowPageShell'
 import { SOPPageShell } from '@/components/sop-view/SOPPageShell';
 import { WorkflowReportPage } from '@/components/detail/WorkflowReportPage';
 import { EvidenceTab } from '@/components/detail/EvidenceTab';
-import { IntelligenceTab } from '@/components/detail/IntelligenceTab';
 import { AgentIntelligenceTab } from '@/components/detail/AgentIntelligenceTab';
 import { SOPUsefulnessSurvey } from '@/components/shared/SOPUsefulnessSurvey';
 
@@ -49,7 +48,10 @@ export default function WorkflowDetailPage() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [intelligenceData, setIntelligenceData] = useState<any>(null);
   const [agentIntelligenceData, setAgentIntelligenceData] = useState<any>(null);
-  const [intelligenceLoading, setIntelligenceLoading] = useState(false);
+  // Loading flag still drives handleRunIntelligence's fetch lifecycle; the value
+  // is no longer rendered (IntelligenceTab retired — WorkflowReportPage shows the
+  // intelligence sections directly).
+  const [, setIntelligenceLoading] = useState(false);
   const [agentLoading, setAgentLoading] = useState(false);
   const [showSurvey, setShowSurvey] = useState(false);
 
@@ -437,16 +439,6 @@ export default function WorkflowDetailPage() {
             onRunIntelligence={handleRunIntelligence}
             onRunAgentIntelligence={handleRunAgentIntelligence}
           />
-
-          {/* Deep analysis — multi-run timestudy, variance, variants
-               data= threads the already-fetched intelligence result so no second fetch is made.
-               isLoadingData= shows a spinner during the page-level auto-fetch so the "Analyze
-               Workflow" CTA is not shown while the fetch is in flight.
-               hideBottlenecks= suppresses the duplicate that WorkflowReportPage already shows. */}
-          <section>
-            <h2 className="text-ds-lg font-semibold text-[var(--content-primary)] mb-ds-4">Process Intelligence</h2>
-            <IntelligenceTab workflowId={id} data={intelligenceData} isLoadingData={intelligenceLoading} hideBottlenecks />
-          </section>
 
           {/* Agent intelligence — composed agents, skills, integration risk, roadmap
                data= threads the already-fetched result to eliminate the double-fetch.
