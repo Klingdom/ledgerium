@@ -27,7 +27,6 @@ import { WorkflowPageShell } from '@/components/workflow-view/WorkflowPageShell'
 import { SOPPageShell } from '@/components/sop-view/SOPPageShell';
 import { WorkflowReportPage } from '@/components/detail/WorkflowReportPage';
 import { EvidenceTab } from '@/components/detail/EvidenceTab';
-import { AgentIntelligenceTab } from '@/components/detail/AgentIntelligenceTab';
 import { SOPUsefulnessSurvey } from '@/components/shared/SOPUsefulnessSurvey';
 
 type ViewId = 'process' | 'analysis';
@@ -52,7 +51,10 @@ export default function WorkflowDetailPage() {
   // is no longer rendered (IntelligenceTab retired — WorkflowReportPage shows the
   // intelligence sections directly).
   const [, setIntelligenceLoading] = useState(false);
-  const [agentLoading, setAgentLoading] = useState(false);
+  // Loading flag still drives handleRunAgentIntelligence's fetch lifecycle; the
+  // value is no longer rendered (AgentIntelligenceTab retired — WorkflowReportPage
+  // shows the agent sections directly).
+  const [, setAgentLoading] = useState(false);
   const [showSurvey, setShowSurvey] = useState(false);
 
   // Tracks whether we've already fired the 30-second SOP dwell event this session.
@@ -439,15 +441,6 @@ export default function WorkflowDetailPage() {
             onRunIntelligence={handleRunIntelligence}
             onRunAgentIntelligence={handleRunAgentIntelligence}
           />
-
-          {/* Agent intelligence — composed agents, skills, integration risk, roadmap
-               data= threads the already-fetched result to eliminate the double-fetch.
-               isLoadingData= shows a spinner during the page-level auto-fetch.
-               hideOpportunities= suppresses the duplicate that WorkflowReportPage already shows. */}
-          <section>
-            <h2 className="text-ds-lg font-semibold text-[var(--content-primary)] mb-ds-4">Agent Intelligence</h2>
-            <AgentIntelligenceTab workflowId={id} data={agentIntelligenceData} isLoadingData={agentLoading} hideOpportunities />
-          </section>
 
           {/* Raw evidence — collapsed by default */}
           <details className="group">
