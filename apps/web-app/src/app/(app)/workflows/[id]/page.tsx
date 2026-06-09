@@ -227,7 +227,7 @@ export default function WorkflowDetailPage() {
     let content: string;
     let filename: string;
     if (type === 'report') {
-      content = JSON.stringify(workflowReport, null, 2);
+      content = JSON.stringify(workflowReport ?? null, null, 2);
       filename = `${workflow.title.replace(/\s+/g, '-').toLowerCase()}-report.json`;
     } else if (type === 'sop') {
       content = JSON.stringify(sopArtifact, null, 2);
@@ -431,13 +431,11 @@ export default function WorkflowDetailPage() {
               isFavorite: isFavorite,
               shareToken: workflow.shareToken,
             }}
-            report={workflowReport}
             insights={workflowInsights}
             interpretation={interpretation}
             intelligence={intelligenceData}
             agentIntelligence={agentIntelligenceData}
             processOutput={processOutput}
-            sop={sopArtifact}
             onRunIntelligence={handleRunIntelligence}
             onRunAgentIntelligence={handleRunAgentIntelligence}
           />

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   ArrowLeft,
   CheckCircle,
@@ -264,13 +264,11 @@ interface ProcessOutputData {
 
 export interface WorkflowReportPageProps {
   workflow: WorkflowSummary;
-  report: Record<string, unknown> | null | undefined;
   insights: InsightsData | null | undefined;
   interpretation: InterpretationData | null | undefined;
   intelligence: IntelligenceData | null | undefined;
   agentIntelligence: AgentIntelligenceData | null | undefined;
   processOutput: ProcessOutputData | null | undefined;
-  sop: Record<string, unknown> | null | undefined;
   onRunIntelligence?: (() => void) | undefined;
   onRunAgentIntelligence?: (() => void) | undefined;
 }
@@ -446,7 +444,8 @@ function HeroSection({ workflow }: { workflow: WorkflowSummary }) {
     >
       {/* Title row */}
       <div className="flex items-center gap-3 mb-1 flex-wrap">
-        <h1 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">{workflow.title}</h1>
+        {/* h2 — the page-level header in page.tsx owns the single <h1> for this route */}
+        <h2 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">{workflow.title}</h2>
       </div>
 
       {/* Interpretive lead sentence */}
@@ -535,7 +534,7 @@ function ProcessScoresSection({ interpretation }: { interpretation: Interpretati
   if (!interpretation?.scores) {
     return (
       <div id="rpt-scores" className="scroll-mt-20">
-        <SectionHeading>Process Intelligence</SectionHeading>
+        <SectionHeading>Process Health</SectionHeading>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {['Complexity', 'Friction', 'Linearity', 'Manual Intensity'].map((label) => (
             <div key={label} className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-ds-lg px-5 py-4 animate-pulse">
@@ -554,7 +553,7 @@ function ProcessScoresSection({ interpretation }: { interpretation: Interpretati
 
   return (
     <div id="rpt-scores" className="scroll-mt-20">
-      <SectionHeading>Process Intelligence</SectionHeading>
+      <SectionHeading>Process Health</SectionHeading>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <ProcessHealthScoreBar
           label="Complexity"
@@ -684,8 +683,10 @@ function InsightsFeedSection({ insights }: { insights: InsightsData | null | und
   const highCount = sorted.filter((i) => i.severity === 'high').length;
   const mediumCount = sorted.filter((i) => i.severity === 'medium').length;
 
-  const normalizedInsights: InsightActionCardInsight[] = filtered.map((ins, idx) => ({
-    id: String(idx),
+  const normalizedInsights: InsightActionCardInsight[] = filtered.map((ins) => ({
+    // Stable key derived from content so cards keep their expanded state when the
+    // category filter changes (re-indexing on filter caused remounts).
+    id: ins.id ?? `${ins.severity}:${ins.category}:${ins.title}`,
     title: ins.title,
     description: ins.description,
     category: ins.category,
@@ -920,7 +921,15 @@ function StepBreakdownSection({
     );
   }
 
+  // Pre-compute phase-divider flags in a single pass BEFORE render, so the
+  // render .map() stays a pure function (no outer-`let` mutation inside map —
+  // Strict/Concurrent-mode safe). Replicates "last non-null phaseOrdinal".
+  const showDividerByOrdinal = new Map<number, boolean>();
   let lastPhaseOrdinal: number | null = null;
+  for (const step of steps) {
+    showDividerByOrdinal.set(step.ordinal, step.phaseOrdinal != null && step.phaseOrdinal !== lastPhaseOrdinal);
+    if (step.phaseOrdinal != null) lastPhaseOrdinal = step.phaseOrdinal;
+  }
 
   return (
     <div id="rpt-steps" className="scroll-mt-20">
@@ -933,9 +942,7 @@ function StepBreakdownSection({
       <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-ds-lg overflow-hidden divide-y divide-[var(--border-subtle)]">
         {steps.map((step) => {
           const isBottleneck = bottleneckPositions.has(step.ordinal);
-          const showPhaseDivider =
-            step.phaseOrdinal != null && step.phaseOrdinal !== lastPhaseOrdinal;
-          if (step.phaseOrdinal != null) lastPhaseOrdinal = step.phaseOrdinal;
+          const showPhaseDivider = showDividerByOrdinal.get(step.ordinal) ?? false;
           const isExpanded = expandedStep === step.ordinal;
           const phaseColorIdx = (step.phaseOrdinal ?? 1) - 1;
           const phaseAccent = PHASE_COLORS[phaseColorIdx % PHASE_COLORS.length] ?? 'bg-blue-500';
@@ -1690,9 +1697,9 @@ function IntegrationsSection({ agentIntelligence }: { agentIntelligence: AgentIn
       <div className="space-y-ds-5">
         {overall && (
           <div
-            className={`flex items-center gap-ds-2 rounded-lg px-ds-4 py-ds-3 text-ds-sm font-medium border ${
+            className={`flex items-center gap-ds-2 rounded-lg px-ds-4 py-ds-3 text-ds-sm font-medium ${
               AGENT_SEVERITY_COLORS[overall] ?? 'bg-[var(--surface-secondary)] text-[var(--content-primary)]'
-            } border-current/20`}
+            }`}
           >
             <AlertCircle className="h-4 w-4 flex-shrink-0" />
             Overall risk: <span className="capitalize">{overall}</span>
@@ -1886,50 +1893,53 @@ export function WorkflowReportPage({
   onRunIntelligence,
   onRunAgentIntelligence,
 }: WorkflowReportPageProps) {
-  const mainRef = useRef<HTMLDivElement>(null);
-
-  // Only include sections that have at least a chance of rendering
-  const visibleSections = SECTION_IDS.filter((id) => {
-    if (id === 'rpt-rework') {
-      return (interpretation?.rework?.length ?? 0) > 0;
-    }
-    if (id === 'rpt-lead') {
-      const lev = deriveTimeLeverage(insights, processOutput);
-      return lev != null && lev.longestPct >= 25;
-    }
-    if (id === 'rpt-metrics') {
-      const hasStepTiming = (processOutput?.processDefinition?.stepDefinitions ?? []).some(
-        (s) => (s.durationMs ?? 0) > 0,
-      );
-      return hasStepTiming || insights?.timeBreakdown != null;
-    }
-    if (id === 'rpt-variance') {
-      return intelligence?.variance != null || (intelligence?.variants?.variants?.length ?? 0) > 0;
-    }
-    if (id === 'rpt-timestudy') {
-      const studies = intelligence?.timestudy?.stepPositionTimestudies?.length ?? 0;
-      return studies > 0 && (intelligence?.metrics?.runCount ?? 1) >= 2;
-    }
-    if (id === 'rpt-agents') {
-      return (agentIntelligence?.agentComposition?.agents?.length ?? 0) > 0;
-    }
-    if (id === 'rpt-skills') {
-      return (agentIntelligence?.skillLibrary?.skills?.length ?? 0) > 0;
-    }
-    if (id === 'rpt-integrations') {
-      const ir = agentIntelligence?.integrationRisk;
-      return (ir?.integrations?.length ?? 0) > 0 || (ir?.risks?.length ?? 0) > 0 || !!ir?.overallRiskLevel;
-    }
-    if (id === 'rpt-roadmap') {
-      return (agentIntelligence?.artifacts?.roadmap?.length ?? 0) > 0;
-    }
-    return true;
-  });
+  // Only list a section in the right-rail nav when it will actually render
+  // meaningful content (avoids dead/placeholder nav links). Memoized so the
+  // array identity is stable across the async intelligence/agent fetches —
+  // otherwise the scroll-spy IntersectionObserver is torn down and rebuilt on
+  // every data update, losing scroll position.
+  const visibleSections = useMemo(
+    () =>
+      SECTION_IDS.filter((id) => {
+        if (id === 'rpt-scores') return interpretation?.scores != null;
+        if (id === 'rpt-phases') return (interpretation?.phases?.length ?? 0) > 0;
+        if (id === 'rpt-structure') {
+          return (interpretation?.friction?.length ?? 0) > 0 || (interpretation?.decisions?.length ?? 0) > 0;
+        }
+        if (id === 'rpt-rework') return (interpretation?.rework?.length ?? 0) > 0;
+        if (id === 'rpt-lead') {
+          const lev = deriveTimeLeverage(insights, processOutput);
+          return lev != null && lev.longestPct >= 25;
+        }
+        if (id === 'rpt-metrics') {
+          const hasStepTiming = (processOutput?.processDefinition?.stepDefinitions ?? []).some(
+            (s) => (s.durationMs ?? 0) > 0,
+          );
+          return hasStepTiming || insights?.timeBreakdown != null;
+        }
+        if (id === 'rpt-variance') {
+          return intelligence?.variance != null || (intelligence?.variants?.variants?.length ?? 0) > 0;
+        }
+        if (id === 'rpt-timestudy') {
+          const studies = intelligence?.timestudy?.stepPositionTimestudies?.length ?? 0;
+          return studies > 0 && (intelligence?.metrics?.runCount ?? 1) >= 2;
+        }
+        if (id === 'rpt-agents') return (agentIntelligence?.agentComposition?.agents?.length ?? 0) > 0;
+        if (id === 'rpt-skills') return (agentIntelligence?.skillLibrary?.skills?.length ?? 0) > 0;
+        if (id === 'rpt-integrations') {
+          const ir = agentIntelligence?.integrationRisk;
+          return (ir?.integrations?.length ?? 0) > 0 || (ir?.risks?.length ?? 0) > 0 || !!ir?.overallRiskLevel;
+        }
+        if (id === 'rpt-roadmap') return (agentIntelligence?.artifacts?.roadmap?.length ?? 0) > 0;
+        return true;
+      }),
+    [insights, interpretation, intelligence, agentIntelligence, processOutput],
+  );
 
   return (
     <div className="flex gap-8 items-start">
       {/* Main content */}
-      <div ref={mainRef} className="flex-1 min-w-0 space-y-10">
+      <div className="flex-1 min-w-0 space-y-10">
         <HeroSection workflow={workflow} />
         <LeadInsightSection insights={insights} processOutput={processOutput} />
         <ProcessScoresSection interpretation={interpretation} />
