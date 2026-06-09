@@ -757,13 +757,26 @@ function InsightsFeedSection({ insights }: { insights: InsightsData | null | und
 
 function AutomationSection({
   agentIntelligence,
+  intelligence,
   onRunAgentIntelligence,
 }: {
   agentIntelligence: AgentIntelligenceData | null | undefined;
+  intelligence: IntelligenceData | null | undefined;
   onRunAgentIntelligence?: (() => void) | undefined;
 }) {
   const opportunities = agentIntelligence?.opportunities?.opportunities ?? [];
   const totalSavingsMs = agentIntelligence?.opportunities?.totalSavingsMs;
+
+  // Confidence banding — automation estimates are only as reliable as the number
+  // of recorded runs they derive from. Surfacing the evidence basis turns a raw
+  // score into an honest budget conversation.
+  const runCount = intelligence?.metrics?.runCount ?? 1;
+  const confidence =
+    runCount >= 10
+      ? { label: 'high confidence', cls: 'text-emerald-600' }
+      : runCount >= 2
+      ? { label: 'medium confidence', cls: 'text-amber-600' }
+      : { label: 'low confidence', cls: 'text-[var(--content-tertiary)]' };
 
   return (
     <div id="rpt-automation" className="scroll-mt-20">
@@ -775,6 +788,17 @@ function AutomationSection({
           </span>
         )}
       </div>
+
+      {opportunities.length > 0 && (
+        <p className="mb-4 text-ds-xs text-[var(--content-secondary)]">
+          Estimates based on{' '}
+          <span className="font-medium text-[var(--content-primary)]">
+            {runCount} recorded run{runCount !== 1 ? 's' : ''}
+          </span>{' '}
+          · <span className={`font-medium ${confidence.cls}`}>{confidence.label}</span>
+          {runCount < 2 && ' — record this workflow again to sharpen the estimate.'}
+        </p>
+      )}
 
       {opportunities.length === 0 ? (
         <SkeletonCard
@@ -1916,6 +1940,7 @@ export function WorkflowReportPage({
         <InsightsFeedSection insights={insights} />
         <AutomationSection
           agentIntelligence={agentIntelligence}
+          intelligence={intelligence}
           onRunAgentIntelligence={onRunAgentIntelligence}
         />
         <BottlenecksSection
