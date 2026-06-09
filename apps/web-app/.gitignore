@@ -11,6 +11,11 @@ build/
 # local data
 data/
 
+# e2e / smoke test artifacts (session cookies + throwaway db)
+e2e/.auth/
+prisma/smoke.db
+prisma/smoke.db-journal
+
 # env
 .env
 .env.local

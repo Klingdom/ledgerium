@@ -21,7 +21,7 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   retries: 0,
-  timeout: 60_000,
+  timeout: 90_000,
 
   reporter: process.env.CI ? 'github' : 'list',
 
@@ -32,7 +32,23 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
 
-  // No globalSetup / auth — public pages only.
+  // Seeds prisma/smoke.db with one user (Slice 1b). Public tests stay auth-free
+  // via project scoping below; only the `authed` project uses storageState.
+  globalSetup: './e2e/smoke/global-setup-smoke.ts',
+
+  projects: [
+    // Public hydration gate — no auth, no seeded data required.
+    { name: 'public', testMatch: /hydration\.smoke\.spec\.ts/ },
+    // Auth setup — logs the seeded smoke user in, saves storageState.
+    { name: 'setup', testMatch: /auth\.smoke\.setup\.ts/ },
+    // Authenticated Analysis-view gate — depends on setup's storageState.
+    {
+      name: 'authed',
+      testMatch: /analysis\.smoke\.spec\.ts/,
+      dependencies: ['setup'],
+      use: { storageState: './e2e/.auth/smoke-user.json' },
+    },
+  ],
 
   webServer: {
     // Starts the already-built app.  The build was done WITHOUT umami env
