@@ -200,6 +200,7 @@ export interface WorkflowReportPageProps {
 
 const SECTION_IDS = [
   'rpt-hero',
+  'rpt-lead',
   'rpt-scores',
   'rpt-phases',
   'rpt-metrics',
@@ -213,6 +214,7 @@ const SECTION_IDS = [
 
 const SECTION_LABELS: Record<string, string> = {
   'rpt-hero': 'Overview',
+  'rpt-lead': 'Start Here',
   'rpt-scores': 'Process Health',
   'rpt-phases': 'Phase Timeline',
   'rpt-metrics': 'Run Metrics',
@@ -294,6 +296,21 @@ function SkeletonCard({ message, onAction, actionLabel }: SkeletonCardProps) {
 function HeroSection({ workflow }: { workflow: WorkflowSummary }) {
   const confidencePct = Math.round((workflow.confidence ?? 0) * 100);
 
+  // Deterministic interpretive identity sentence (single-run safe; composed from
+  // the always-present workflow summary — no Date/random/env, hydration-safe).
+  const systems = workflow.toolsUsed;
+  const systemsPhrase =
+    systems.length === 0
+      ? ''
+      : systems.length === 1
+      ? ` in ${systems.join('')}`
+      : ` across ${systems.length} systems`;
+  const phasesPhrase =
+    workflow.phaseCount > 0 ? ` in ${workflow.phaseCount} phase${workflow.phaseCount !== 1 ? 's' : ''}` : '';
+  const leadSentence = `A ${workflow.stepCount}-step process${systemsPhrase}${phasesPhrase}, completing in ${formatDuration(
+    workflow.durationMs,
+  )} at ${confidencePct}% extraction confidence.`;
+
   // Animated counters — refs attached to parent container
   const [durationSec] = useCountUp(Math.round(workflow.durationMs / 1000), 800);
   const [steps] = useCountUp(workflow.stepCount, 700);
@@ -340,6 +357,9 @@ function HeroSection({ workflow }: { workflow: WorkflowSummary }) {
       <div className="flex items-center gap-3 mb-1 flex-wrap">
         <h1 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">{workflow.title}</h1>
       </div>
+
+      {/* Interpretive lead sentence */}
+      <p className="mt-1 max-w-3xl text-ds-sm text-[var(--content-secondary)]">{leadSentence}</p>
 
       {/* Metrics band */}
       <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 divide-x divide-[var(--border-subtle)] rounded-ds-md border border-[var(--border-subtle)] bg-[var(--surface-elevated)] overflow-hidden">
@@ -1080,58 +1100,108 @@ function ReworkPatternsSection({ interpretation }: { interpretation: Interpretat
   );
 }
 
-// ── Section: Run Metrics ──────────────────────────────────────────────────────
+// ── Time-leverage helper (shared by Lead Insight + Run Metrics) ───────────────
 
-interface RunMetricsSectionProps {
-  workflow: WorkflowSummary;
+interface TimeLeverage {
+  totalLabel: string;
+  longestLabel: string;
+  longestOrdinal: number;
+  longestPct: number;
+}
+
+/**
+ * The single highest-leverage timing signal: which step owns the most process
+ * time, and what share. Prefers the authoritative `insights.timeBreakdown` from
+ * the insights pipeline; otherwise computes deterministically from processOutput
+ * step durations (single-run safe). Pure — no Date/random/env. Returns null when
+ * there is no step timing to summarize.
+ */
+function deriveTimeLeverage(
+  insights: InsightsData | null | undefined,
+  processOutput: ProcessOutputData | null | undefined,
+): TimeLeverage | null {
+  const tb = insights?.timeBreakdown;
+  if (tb) {
+    return {
+      totalLabel: tb.totalDurationLabel,
+      longestLabel: tb.longestStepDurationLabel,
+      longestOrdinal: tb.longestStepOrdinal,
+      longestPct: tb.longestStepPercentage,
+    };
+  }
+  const steps = processOutput?.processDefinition?.stepDefinitions ?? [];
+  const totalStepMs = steps.reduce((sum, s) => sum + (s.durationMs ?? 0), 0);
+  if (totalStepMs <= 0) return null;
+  let longest: StepDefinition | null = null;
+  for (const s of steps) {
+    if ((s.durationMs ?? 0) > (longest?.durationMs ?? 0)) longest = s;
+  }
+  if (!longest) return null;
+  return {
+    totalLabel: formatDuration(totalStepMs),
+    longestLabel: formatDuration(longest.durationMs ?? 0),
+    longestOrdinal: longest.ordinal,
+    longestPct: Math.round(((longest.durationMs ?? 0) / totalStepMs) * 100),
+  };
+}
+
+// ── Section: Lead Insight ("Start here") ──────────────────────────────────────
+
+interface LeadInsightSectionProps {
   insights: InsightsData | null | undefined;
   processOutput: ProcessOutputData | null | undefined;
 }
 
 /**
- * Run Metrics — step-timing summary plus the single highest-leverage signal:
- * which step owns the most process time. Prefers the authoritative
- * `insights.timeBreakdown` from the insights pipeline; when absent (e.g. a
- * single-run workflow with no insights artifact) it computes the same figures
- * deterministically from the step durations in processOutput. Pure render —
- * no Date/random/env — so it is hydration-safe.
+ * The one signal you can't miss — a prominent callout naming the step that owns
+ * the most process time. Renders only when there is a clear leader (≥25% of
+ * active step time). Pure render → hydration-safe.
  */
-function RunMetricsSection({ workflow: _workflow, insights, processOutput }: RunMetricsSectionProps) {
+function LeadInsightSection({ insights, processOutput }: LeadInsightSectionProps) {
+  const lev = deriveTimeLeverage(insights, processOutput);
+  if (!lev || lev.longestPct < 25) return null;
+
+  return (
+    <div id="rpt-lead" className="scroll-mt-20">
+      <div className="flex items-start gap-3 rounded-ds-lg border border-amber-200 bg-amber-50/60 px-5 py-4">
+        <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-amber-100">
+          <Zap className="h-4 w-4 text-amber-600" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-amber-700">Start here</p>
+          <p className="mt-1 text-ds-sm text-[var(--content-primary)]">
+            <span className="font-semibold">Step {lev.longestOrdinal}</span> owns{' '}
+            <span className="font-semibold">{lev.longestPct}%</span> of active process time
+            {' '}({lev.longestLabel} of {lev.totalLabel}) — the highest-leverage place to optimize or automate first.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Section: Run Metrics ──────────────────────────────────────────────────────
+
+interface RunMetricsSectionProps {
+  insights: InsightsData | null | undefined;
+  processOutput: ProcessOutputData | null | undefined;
+}
+
+/**
+ * Run Metrics — step-timing summary (count, avg, active time, longest step).
+ * Uses the shared time-leverage helper. Single-run safe and hydration-safe.
+ */
+function RunMetricsSection({ insights, processOutput }: RunMetricsSectionProps) {
   const steps = processOutput?.processDefinition?.stepDefinitions ?? [];
   const stepDurations = steps.map((s) => s.durationMs ?? 0).filter((d) => d > 0);
   const totalStepMs = stepDurations.reduce((sum, d) => sum + d, 0);
   const avgStepMs = stepDurations.length > 0 ? Math.round(totalStepMs / stepDurations.length) : 0;
 
-  const tb = insights?.timeBreakdown;
-
-  let totalLabel: string | null = null;
-  let longestLabel: string | null = null;
-  let longestOrdinal: number | null = null;
-  let longestPct: number | null = null;
-
-  if (tb) {
-    // Authoritative figures from the insights pipeline.
-    totalLabel = tb.totalDurationLabel;
-    longestLabel = tb.longestStepDurationLabel;
-    longestOrdinal = tb.longestStepOrdinal;
-    longestPct = tb.longestStepPercentage;
-  } else if (totalStepMs > 0) {
-    // Deterministic fallback from step durations (single-run safe).
-    let longest: StepDefinition | null = null;
-    for (const s of steps) {
-      if ((s.durationMs ?? 0) > (longest?.durationMs ?? 0)) longest = s;
-    }
-    if (longest) {
-      totalLabel = formatDuration(totalStepMs);
-      longestLabel = formatDuration(longest.durationMs ?? 0);
-      longestOrdinal = longest.ordinal;
-      longestPct = Math.round(((longest.durationMs ?? 0) / totalStepMs) * 100);
-    }
-  }
+  const leverage = deriveTimeLeverage(insights, processOutput);
 
   // No step timing and no time-breakdown → nothing meaningful to show.
   // (Mirrored in `visibleSections` so the TOC entry is hidden too.)
-  if (stepDurations.length === 0 && !tb) {
+  if (stepDurations.length === 0 && insights?.timeBreakdown == null) {
     return null;
   }
 
@@ -1147,30 +1217,22 @@ function RunMetricsSection({ workflow: _workflow, insights, processOutput }: Run
           <p className="ds-metric-label">Avg step</p>
           <p className="ds-metric-value">{avgStepMs > 0 ? formatDuration(avgStepMs) : '—'}</p>
         </div>
-        {totalLabel != null && (
+        {leverage != null && (
           <div className="card px-ds-4 py-ds-3">
             <p className="ds-metric-label">Active step time</p>
-            <p className="ds-metric-value">{totalLabel}</p>
+            <p className="ds-metric-value">{leverage.totalLabel}</p>
           </div>
         )}
-        {longestLabel != null && (
+        {leverage != null && (
           <div className="card px-ds-4 py-ds-3">
             <p className="ds-metric-label">Longest step</p>
-            <p className="ds-metric-value">{longestLabel}</p>
-            {longestOrdinal != null && longestPct != null && (
-              <p className="text-ds-xs text-[var(--content-tertiary)]">
-                Step {longestOrdinal} · {longestPct}% of step time
-              </p>
-            )}
+            <p className="ds-metric-value">{leverage.longestLabel}</p>
+            <p className="text-ds-xs text-[var(--content-tertiary)]">
+              Step {leverage.longestOrdinal} · {leverage.longestPct}% of step time
+            </p>
           </div>
         )}
       </div>
-      {longestOrdinal != null && longestPct != null && longestPct >= 25 && (
-        <p className="mt-ds-3 text-ds-sm text-[var(--content-secondary)]">
-          <span className="font-semibold text-[var(--content-primary)]">Step {longestOrdinal}</span>{' '}
-          accounts for {longestPct}% of active step time — the highest-leverage place to start.
-        </p>
-      )}
     </div>
   );
 }
@@ -1237,6 +1299,10 @@ export function WorkflowReportPage({
     if (id === 'rpt-rework') {
       return (interpretation?.rework?.length ?? 0) > 0;
     }
+    if (id === 'rpt-lead') {
+      const lev = deriveTimeLeverage(insights, processOutput);
+      return lev != null && lev.longestPct >= 25;
+    }
     if (id === 'rpt-metrics') {
       const hasStepTiming = (processOutput?.processDefinition?.stepDefinitions ?? []).some(
         (s) => (s.durationMs ?? 0) > 0,
@@ -1251,9 +1317,10 @@ export function WorkflowReportPage({
       {/* Main content */}
       <div ref={mainRef} className="flex-1 min-w-0 space-y-10">
         <HeroSection workflow={workflow} />
+        <LeadInsightSection insights={insights} processOutput={processOutput} />
         <ProcessScoresSection interpretation={interpretation} />
         <PhaseTimelineSection interpretation={interpretation} />
-        <RunMetricsSection workflow={workflow} insights={insights} processOutput={processOutput} />
+        <RunMetricsSection insights={insights} processOutput={processOutput} />
         <InsightsFeedSection insights={insights} />
         <AutomationSection
           agentIntelligence={agentIntelligence}
