@@ -574,10 +574,10 @@ export default function ProductAnalyticsPage() {
                           </td>
                           <td className="py-ds-2 px-ds-4 text-right text-[var(--content-primary)] tabular-nums">{user.workflowCount}</td>
                           <td className="py-ds-2 px-ds-4 text-[var(--content-secondary)] text-ds-xs">
-                            {user.lastActive ? new Date(user.lastActive).toLocaleDateString() : '—'}
+                            {user.lastActive ? new Date(user.lastActive).toLocaleDateString('en-US', { timeZone: 'UTC' }) : '—'}
                           </td>
                           <td className="py-ds-2 px-ds-4 text-[var(--content-secondary)] text-ds-xs">
-                            {new Date(user.signupDate).toLocaleDateString()}
+                            {new Date(user.signupDate).toLocaleDateString('en-US', { timeZone: 'UTC' })}
                           </td>
                         </tr>
                       );
@@ -628,7 +628,7 @@ export default function ProductAnalyticsPage() {
                     <tr key={cohort.week} className="border-b border-[var(--border-subtle)] last:border-0">
                       <td className="py-ds-2 px-ds-4 whitespace-nowrap">
                         <p className="text-[var(--content-primary)] font-medium text-ds-xs">
-                          Week of {new Date(cohort.week).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                          Week of {new Date(cohort.week).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}
                         </p>
                         <p className="text-[var(--content-tertiary)] text-[10px]">{cohort.signups} users</p>
                       </td>

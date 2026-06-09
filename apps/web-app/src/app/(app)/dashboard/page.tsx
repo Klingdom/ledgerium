@@ -728,8 +728,8 @@ function DashboardPageContent() {
             <h1 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">
               Process Intelligence
             </h1>
-            <p className="text-ds-sm text-[var(--content-secondary)] mt-0.5">
-              Operational command center &middot; {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+            <p className="text-ds-sm text-[var(--content-secondary)] mt-0.5" suppressHydrationWarning>
+              Operational command center &middot; {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'UTC' })}
             </p>
           </div>
           {stats && (

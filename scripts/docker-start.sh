@@ -28,14 +28,37 @@ echo "[ledgerium] Environment validated"
 
 mkdir -p /app/data/uploads 2>/dev/null || true
 
-# ── Database migration ────────────────────────────────────────────────────────
+# ── Safety backup (hardened 2026-06-09) ───────────────────────────────────────
+# Back up EVERY ledgerium.db found under /app BEFORE any schema push, so a boot
+# can NEVER silently destroy data again (root cause of the 2026-05 data loss).
+# Best-effort: never blocks startup. Keeps the 10 most recent backups per DB file.
+# (Backs up all matches so the real prod DB on the /app/data volume is covered
+# regardless of how the relative DATABASE_URL resolves.)
+
+find /app -name 'ledgerium.db' -type f 2>/dev/null | while IFS= read -r DB_FILE; do
+  [ -f "$DB_FILE" ] || continue
+  BACKUP="${DB_FILE}.backup-$(date -u +%Y%m%dT%H%M%SZ)"
+  if cp "$DB_FILE" "$BACKUP" 2>/dev/null; then
+    echo "[ledgerium] DB backed up: $BACKUP"
+  else
+    echo "[ledgerium] WARNING: DB backup failed for $DB_FILE (continuing startup)"
+  fi
+  ls -1t "${DB_FILE}".backup-* 2>/dev/null | tail -n +11 | while IFS= read -r OLD; do
+    rm -f "$OLD" 2>/dev/null || true
+  done
+done
+
+# ── Database migration (NON-destructive — NEVER --accept-data-loss) ───────────
+# --accept-data-loss was the trigger of the 2026-05 data loss; we never pass it.
+# If a migration would require destructive changes the push fails loudly and the
+# previous DB (backed up above) is preserved rather than silently wiped.
 
 cd /app/apps/web-app
-echo "[ledgerium] Running database migration..."
-npx prisma db push --skip-generate --accept-data-loss 2>&1 || {
+echo "[ledgerium] Running database migration (non-destructive)..."
+npx prisma db push --skip-generate 2>&1 || {
   echo "[ledgerium] WARNING: prisma db push failed, retrying with generate..."
   npx prisma generate 2>&1 || true
-  npx prisma db push --accept-data-loss 2>&1 || echo "[ledgerium] WARNING: database setup failed"
+  npx prisma db push 2>&1 || echo "[ledgerium] WARNING: database setup failed (DB preserved)"
 }
 echo "[ledgerium] Database ready"
 

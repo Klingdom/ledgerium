@@ -416,7 +416,7 @@ export default function AccountPage() {
             <dt className="text-[var(--content-secondary)]">Member since</dt>
             <dd className="text-[var(--content-primary)]">
               {account?.user?.createdAt
-                ? new Date(account.user.createdAt).toLocaleDateString()
+                ? new Date(account.user.createdAt).toLocaleDateString('en-US', { timeZone: 'UTC' })
                 : '—'}
             </dd>
           </div>
@@ -661,7 +661,7 @@ export default function AccountPage() {
                   <p className="text-ds-xs font-mono text-[var(--content-primary)]">{k.prefix}...</p>
                   <p className="text-ds-xs text-[var(--content-tertiary)]">
                     {k.label}
-                    {k.lastUsedAt && <> · Last used {new Date(k.lastUsedAt).toLocaleDateString()}</>}
+                    {k.lastUsedAt && <> · Last used {new Date(k.lastUsedAt).toLocaleDateString('en-US', { timeZone: 'UTC' })}</>}
                     {!k.lastUsedAt && <> · Never used</>}
                   </p>
                 </div>

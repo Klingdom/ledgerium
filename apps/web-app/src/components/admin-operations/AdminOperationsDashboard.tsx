@@ -515,7 +515,7 @@ export function AdminOperationsDashboard() {
           <p className="mt-6 text-center text-[11px] text-[var(--content-tertiary)]">
             Generated at{' '}
             {apiResponse?.meta.generatedAt
-              ? new Date(apiResponse.meta.generatedAt).toLocaleTimeString()
+              ? new Date(apiResponse.meta.generatedAt).toLocaleTimeString('en-US', { timeZone: 'UTC' })
               : '—'}{' '}
             · Query took{' '}
             {apiResponse?.meta.queryDurationMs != null

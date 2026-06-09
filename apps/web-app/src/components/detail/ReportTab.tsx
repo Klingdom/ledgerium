@@ -35,7 +35,7 @@ export function ReportTab({ report }: Props) {
         )}
         <div className="mt-ds-4 flex flex-wrap gap-ds-6">
           <QuickStat label="Duration" value={header?.durationLabel ?? '—'} />
-          <QuickStat label="Generated" value={header?.generatedAt ? new Date(header.generatedAt).toLocaleDateString() : '—'} />
+          <QuickStat label="Generated" value={header?.generatedAt ? new Date(header.generatedAt).toLocaleDateString('en-US', { timeZone: 'UTC' }) : '—'} />
         </div>
       </header>
 

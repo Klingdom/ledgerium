@@ -28,6 +28,12 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:3099',
     ...devices['Desktop Chrome'],
+    // TZ-divergence: the browser hydrates in a NON-UTC timezone while the server
+    // (webServer below) runs in UTC. This reproduces the production VPS condition
+    // (server UTC vs user-browser TZ) so a date rendered without a fixed timeZone
+    // mismatches on hydration here too — catching the "flash → unstyled" class the
+    // smoke gate previously could not (server+client were the same TZ).
+    timezoneId: 'America/New_York',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -61,6 +67,9 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       NODE_ENV: 'production',
+      // Server runs in UTC (like the VPS); the browser hydrates in America/New_York
+      // (use.timezoneId). Any date rendered without a fixed timeZone mismatches.
+      TZ: 'UTC',
       DATABASE_URL: 'file:./smoke.db',
       NEXTAUTH_SECRET: 'smoke-secret-not-for-prod',
       NEXTAUTH_URL: 'http://localhost:3099',

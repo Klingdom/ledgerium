@@ -15,10 +15,15 @@ export function formatDuration(ms: number | null | undefined): string {
 export function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return '';
   const d = new Date(dateStr);
+  // timeZone:'UTC' makes this deterministic across server (VPS, UTC) and the
+  // client (user's browser TZ). Without it the SSR'd string can differ from the
+  // hydrated string near a day boundary → React hydration mismatch → the
+  // "flash → unstyled" crash. (Flash-class fix, 2026-06-09.)
   return d.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
+    timeZone: 'UTC',
   });
 }
 

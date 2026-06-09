@@ -242,7 +242,7 @@ export default function TeamDetailPage() {
                   <p className="text-ds-sm text-[var(--content-primary)]">{invite.email}</p>
                   <p className="text-ds-xs text-[var(--content-tertiary)] flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    Expires {new Date(invite.expiresAt).toLocaleDateString()}
+                    Expires {new Date(invite.expiresAt).toLocaleDateString('en-US', { timeZone: 'UTC' })}
                   </p>
                 </div>
                 <span className="ds-tag ds-tag-neutral text-[11px]">{invite.role}</span>
