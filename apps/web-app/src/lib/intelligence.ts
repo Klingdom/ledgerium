@@ -15,7 +15,6 @@
 
 import {
   analyzePortfolio,
-  computePathSignature,
   analyzeSopAlignment,
   computeStandardizationScore,
   computeDocumentationDriftScore,
@@ -58,6 +57,7 @@ import type {
 } from '@ledgerium/intelligence-engine';
 import type { ProcessRun, ProcessDefinition as EngineProcessDefinition, SOP } from '@ledgerium/process-engine';
 import { db } from '@/db';
+import { groupWorkflowsForClustering } from './workflowGrouping';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -116,38 +116,24 @@ async function getWorkflowsWithOutputs(userId: string, workflowIds?: string[]): 
   }));
 }
 
-// ─── Path signature computation ─────────────────────────────────────────────
-
-function getPathSignatureForBundle(bundle: ProcessRunBundle): string {
-  const sig = computePathSignature(bundle);
-  return sig.signature;
-}
-
 // ─── Auto-cluster into ProcessDefinitions ───────────────────────────────────
 
 /**
- * Groups workflows by path signature and creates/updates ProcessDefinition records.
- * Conservative: only groups workflows with identical path signatures.
+ * Groups workflows into ProcessDefinition records.
+ *
+ * By default (flag off) this groups only workflows with byte-identical path
+ * signatures — the historical conservative behavior. When
+ * LEDGERIUM_SIMILARITY_CLUSTERING is enabled, distinct-but-similar signatures are
+ * additionally merged via the deterministic clustering engine (Process Variation
+ * Phase 1). Identical-signature grouping is a strict subset of the merged output,
+ * so enabling the flag can never group less. Grouping logic lives in the pure,
+ * unit-tested `workflowGrouping` module.
  */
 export async function clusterWorkflows(userId: string): Promise<void> {
   const workflows = await getWorkflowsWithOutputs(userId);
 
-  // Group by path signature
-  const groups = new Map<string, WorkflowWithArtifacts[]>();
-  for (const w of workflows) {
-    if (!w.processOutput) continue;
-    const bundle: ProcessRunBundle = {
-      processRun: w.processOutput.processRun,
-      processDefinition: w.processOutput.processDefinition,
-    };
-    const sig = getPathSignatureForBundle(bundle);
-    const existing = groups.get(sig);
-    if (existing) {
-      existing.push(w);
-    } else {
-      groups.set(sig, [w]);
-    }
-  }
+  // Group by path signature (similarity-merged behind a flag; exact-signature fallback).
+  const groups = groupWorkflowsForClustering(workflows);
 
   // Phase 5 tracking maps — populated per group, used for family detection after
   const groupFingerprintMap = new Map<string, StepFingerprint[]>();

@@ -483,6 +483,14 @@ describe('computeWorkflowMetrics', () => {
     expect(computeWorkflowMetrics(FIXTURE_MONITOR).confidence).toBeNull();
   });
 
+  it('surfaces variantCount from the process group (Process Variation Phase 1)', () => {
+    // FIXTURE_FULL has a process group with variantCount 2.
+    expect(computeWorkflowMetrics(FIXTURE_FULL).variantCount).toBe(2);
+    // Single recording (no process group) → null, never fabricated.
+    expect(computeWorkflowMetrics(FIXTURE_SINGLE_RECORDING).variantCount).toBeNull();
+    expect(computeWorkflowMetrics(FIXTURE_MONITOR).variantCount).toBeNull();
+  });
+
   it('healthScore.isGated is always false from engine', () => {
     for (const f of [FIXTURE_FULL, FIXTURE_SINGLE_RECORDING, FIXTURE_SPARSE, FIXTURE_AUTOMATE, FIXTURE_MONITOR]) {
       expect(computeWorkflowMetrics(f).healthScore.isGated).toBe(false);

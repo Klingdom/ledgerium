@@ -768,6 +768,12 @@ export default function WorkflowRow({
     const runsLabel = `${runs} run${runs !== 1 ? 's' : ''}${isAllTime ? '' : ' (all-time)'}`;
     subtextParts.push(runsLabel);
   }
+  // Process-variation grouping signal: distinct variant paths, shown only when the
+  // group has real multi-run variation (honest — never "1 variant" noise).
+  const variantCount = metricsV2.variantCount ?? null;
+  if (runs !== null && runs >= 2 && variantCount !== null && variantCount >= 2) {
+    subtextParts.push(`${variantCount} variants`);
+  }
 
   // SOP readiness subtext (Starter+ — isGated false)
   const sopSubtext = !healthScore.isGated ? sopReadinessLabel(metricsV2.confidence) : null;

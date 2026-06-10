@@ -173,6 +173,9 @@ export interface WorkflowMetricsOutput {
   opportunityTag: OpportunityTag;
   aiOpportunityScore: number;          // 0–100 — audit surface for 'automate' tag
   confidence: number | null;           // pass-through for subtext
+  /** Distinct path variants in this process group (Process Variation Phase 1).
+   *  Optional + nullable: only meaningful across ≥2 runs; the row gates display. */
+  variantCount?: number | null;
 }
 
 export interface HealthScoreV2 {
@@ -534,6 +537,7 @@ export function computeWorkflowMetrics(input: WorkflowMetricsInput): WorkflowMet
     opportunityTag,
     aiOpportunityScore,
     confidence: input.confidence,
+    variantCount: input.processDefinition?.variantCount ?? null,
   };
 }
 

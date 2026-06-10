@@ -197,3 +197,36 @@ export type { ComponentReuseDecision, ComponentReuseResult, ComponentReuseDimens
 // Automation opportunity scoring
 export { scoreAutomationOpportunity, deriveAutomationFactors } from './automationScorer.js';
 export type { AutomationFactors, AutomationScoreResult } from './automationScorer.js';
+
+// ─── Similarity Clustering (Process Variation Phase 1, C+1) ───────────────────
+// Pure + deterministic + UNWIRED. Groups SIMILAR recordings (not just byte-identical
+// path signatures). Exact-signature grouping is a strict subset of the output.
+export {
+  editDistance,
+  lcsSimilarity,
+  traceSimilarity,
+  DEFAULT_SIMILARITY_WEIGHTS,
+  LCS_HARD_FLOOR,
+} from './clustering/traceSimilarity.js';
+export type { SimilarityWeights } from './clustering/traceSimilarity.js';
+export {
+  clusterSignatures,
+  DEFAULT_CLUSTER_THRESHOLD,
+  CLUSTERING_ALGORITHM,
+} from './clustering/clusterSignatures.js';
+export type {
+  ClusterMemberInput,
+  ClusterOptions,
+  Cluster,
+  ClusterResult,
+} from './clustering/clusterSignatures.js';
+
+// ─── Diverge → Reconverge analysis (Process Variation Phase 2, C+4) ───────────
+// Pure + deterministic. LCS-backbone alignment + DFG split/join cross-check.
+export { analyzeDivergence, DIVERGENCE_ALGORITHM } from './divergenceAnalyzer.js';
+export type {
+  DivergenceRun,
+  DivergenceBranch,
+  DivergenceAnalysis,
+  DivergenceOptions,
+} from './divergenceAnalyzer.js';

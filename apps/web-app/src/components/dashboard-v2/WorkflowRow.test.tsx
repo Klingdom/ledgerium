@@ -236,6 +236,31 @@ describe('D7 (all-time) annotation', () => {
     expect(buildRunsSubtext(1, 'all')).toBe('1 run');
     expect(buildRunsSubtext(1, '30d')).toBe('1 run (all-time)');
   });
+});
+
+// ── Process-variation grouping signal (Phase 1) ──────────────────────────────
+
+/** Mirrors the variant subtext gating in WorkflowRow (honest: never "1 variant"). */
+function buildVariantsSubtextPart(runs: number | null, variantCount: number | null | undefined): string | null {
+  const vc = variantCount ?? null;
+  if (runs !== null && runs >= 2 && vc !== null && vc >= 2) return `${vc} variants`;
+  return null;
+}
+
+describe('grouping signal — variant subtext', () => {
+  it('shows "K variants" only with multi-run, multi-variant groups', () => {
+    expect(buildVariantsSubtextPart(5, 3)).toBe('3 variants');
+    expect(buildVariantsSubtextPart(2, 2)).toBe('2 variants');
+  });
+
+  it('is suppressed for single-run, single-variant, or missing data', () => {
+    expect(buildVariantsSubtextPart(1, 4)).toBeNull();   // single run → no variant noise
+    expect(buildVariantsSubtextPart(5, 1)).toBeNull();   // one variant is not a distribution
+    expect(buildVariantsSubtextPart(5, 0)).toBeNull();
+    expect(buildVariantsSubtextPart(5, null)).toBeNull();
+    expect(buildVariantsSubtextPart(5, undefined)).toBeNull();
+    expect(buildVariantsSubtextPart(null, 3)).toBeNull();
+  });
 
   it('returns null when runs is null', () => {
     expect(buildRunsSubtext(null, '30d')).toBeNull();

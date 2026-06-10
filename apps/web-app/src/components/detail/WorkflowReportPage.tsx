@@ -11,7 +11,9 @@ import {
   AlertTriangle,
   AlertCircle,
   RotateCcw,
+  GitBranch,
 } from 'lucide-react';
+import { deriveDivergence } from '@/lib/reportDivergence';
 import { formatDuration } from '@/lib/format';
 import { useCountUp } from '@/hooks/useCountUp';
 import { useScrollSpy } from '@/hooks/useScrollSpy';
@@ -1406,6 +1408,16 @@ function VarianceVariantsSection({ intelligence }: { intelligence: IntelligenceD
   const variantCount = variants?.variantCount ?? variantList.length;
   const metrics = intelligence?.metrics;
 
+  // Deterministic Pareto order: most-frequent first, stable tie-break by id.
+  const sortedVariants = [...variantList].sort(
+    (a, b) =>
+      (b.frequency ?? 0) - (a.frequency ?? 0) ||
+      (a.variantId < b.variantId ? -1 : a.variantId > b.variantId ? 1 : 0),
+  );
+
+  // Diverge → reconverge story (Phase 2): where runs leave and rejoin the standard path.
+  const divergence = deriveDivergence(sortedVariants, runCount);
+
   return (
     <div id="rpt-variance" className="scroll-mt-20">
       <SectionHeading>Variance &amp; Variants</SectionHeading>
@@ -1453,9 +1465,9 @@ function VarianceVariantsSection({ intelligence }: { intelligence: IntelligenceD
         </div>
       </div>
 
-      {variantList.length > 0 && (
+      {sortedVariants.length > 0 && (
         <div className="mt-ds-4 space-y-ds-2">
-          {variantList.map((v) => (
+          {sortedVariants.map((v) => (
             <div
               key={v.variantId}
               className={`card px-ds-5 py-ds-3 ${v.isStandardPath ? 'border-brand-200 bg-brand-50/30' : ''}`}
@@ -1486,8 +1498,69 @@ function VarianceVariantsSection({ intelligence }: { intelligence: IntelligenceD
                   </p>
                 </div>
               </div>
+              {/* Variant frequency (Pareto) bar — width = share of runs, standard path in brand color. */}
+              <div className="mt-ds-2 h-1 w-full rounded-full bg-[var(--surface-secondary)] overflow-hidden">
+                <div
+                  className={`h-full rounded-full ${v.isStandardPath ? 'bg-brand-500' : 'bg-[var(--content-tertiary)]'}`}
+                  style={{ width: `${Math.round((v.frequency ?? 0) * 100)}%` }}
+                />
+              </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Diverge → reconverge: where runs leave the standard path and rejoin it. */}
+      {divergence && (
+        <div className="mt-ds-5">
+          <h4 className="mb-ds-2 flex items-center gap-ds-2 text-ds-sm font-semibold text-[var(--content-primary)]">
+            <GitBranch className="h-4 w-4 text-[var(--content-tertiary)]" />
+            Where runs diverge
+          </h4>
+          <p className="mb-ds-3 text-ds-xs text-[var(--content-secondary)]">
+            {Math.round(divergence.conformingPct * 100)}% of runs follow the standard path end-to-end. The rest branch off and rejoin:
+          </p>
+
+          {/* Standard-path spine */}
+          <div className="mb-ds-3 flex flex-wrap items-center gap-1">
+            {divergence.backbone.map((cat, i) => (
+              <span key={`${cat}-${i}`} className="inline-flex items-center gap-1">
+                <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-700">{cat}</span>
+                {i < divergence.backbone.length - 1 && (
+                  <ChevronRight className="h-3 w-3 text-[var(--content-tertiary)]" />
+                )}
+              </span>
+            ))}
+          </div>
+
+          <div className="space-y-ds-2">
+            {divergence.branches.map((b) => (
+              <div key={b.key} className="card px-ds-4 py-ds-3">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="min-w-0 text-ds-sm text-[var(--content-primary)]">
+                    After <span className="font-medium">{b.afterLabel}</span>
+                    {b.altSteps.length > 0 ? (
+                      <> → <span className="font-medium text-amber-600">{b.altSteps.join(' → ')}</span></>
+                    ) : (
+                      <> → <span className="font-medium text-amber-600">skip {b.skippedBackbone.join(', ')}</span></>
+                    )}
+                    {' '}→ rejoins at <span className="font-medium">{b.rejoinLabel}</span>
+                  </p>
+                  <div className="flex-shrink-0 text-right">
+                    <p className="text-ds-sm font-semibold text-[var(--content-primary)]">{Math.round(b.runShare * 100)}%</p>
+                    <p className="text-ds-xs text-[var(--content-tertiary)]">
+                      {b.runCount} run{b.runCount !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                </div>
+                {b.dfgConfirmed && (
+                  <p className="mt-1 text-[10px] text-[var(--content-tertiary)]">
+                    Confirmed branch point (directly-follows graph)
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
