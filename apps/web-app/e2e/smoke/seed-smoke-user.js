@@ -42,6 +42,56 @@ async function seed() {
       },
     });
     console.log('[smoke] user seeded:', SMOKE_EMAIL, '->', dbPath);
+
+    // ── HOSTILE-DATA workflow (regression repro for the 2026-06-09 outage) ──────
+    // A real `workflow_interpretation` artifact whose friction/rework items OMIT
+    // `stepOrdinals` (the TS type marks it required) and whose `decisions` is null
+    // instead of an array. The consolidated Report rendered f.stepOrdinals.length /
+    // r.stepOrdinals.length → TypeError → "Application error" + unstyled page. The
+    // seeded SAMPLE has no interpretation artifact, so the gate never hit this.
+    // With the asArray() hardening this must now render WITHOUT a client exception.
+    const HOSTILE_ID = 'smoke-hostile-001';
+    await db.workflow.upsert({
+      where: { id: HOSTILE_ID },
+      update: {},
+      create: {
+        id: HOSTILE_ID,
+        userId: 'smoke-user-001',
+        title: 'Hostile Data (smoke regression)',
+        toolsUsed: JSON.stringify(['SystemA', 'SystemB']),
+        durationMs: 60_000,
+        stepCount: 3,
+        phaseCount: 1,
+        confidence: 0.8,
+        status: 'active',
+        sessionId: 'smoke-hostile-session',
+      },
+    });
+    const hostileInterpretation = {
+      summary: 'Smoke hostile interpretation',
+      processType: 'transaction',
+      scores: { complexity: 2, friction: 3, linearity: 4, manualIntensity: 2 },
+      phases: [],
+      // friction item WITHOUT stepOrdinals (real AI output can omit it):
+      friction: [
+        { type: 'manual_lookup', description: 'Manual PO lookup', severity: 'medium', evidence: 'ev1' },
+      ],
+      decisions: null, // null, not an array
+      // rework item WITHOUT stepOrdinals:
+      rework: [
+        { type: 'repeated_entry', description: 'Re-entered the amount', occurrences: 2, severity: 'low', evidence: 'ev2' },
+      ],
+      insights: null,
+    };
+    await db.workflowArtifact.deleteMany({ where: { workflowId: HOSTILE_ID } });
+    await db.workflowArtifact.create({
+      data: {
+        workflowId: HOSTILE_ID,
+        artifactType: 'workflow_interpretation',
+        contentJson: JSON.stringify(hostileInterpretation),
+      },
+    });
+    console.log('[smoke] hostile-data workflow seeded:', HOSTILE_ID);
   } finally {
     await db.$disconnect();
   }

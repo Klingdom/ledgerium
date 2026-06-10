@@ -20,6 +20,16 @@ import { InsightActionCard, type InsightActionCardInsight } from '@/components/s
 import { AutomationScoreChip } from '@/components/shared/AutomationScoreChip';
 import { BottleneckRow } from '@/components/shared/BottleneckRow';
 
+// Defensive: real artifact JSON (workflow_interpretation / intelligence / agent
+// payloads) can carry `null` or a non-array where the typed interface says array,
+// and can omit fields the type marks required. `asArray` coerces to [] so one
+// malformed artifact never throws and blanks the whole Report with an unstyled
+// "Application error" (the production outage 2026-06-09). The seeded sample never
+// hits these shapes, which is why the smoke gate passed.
+function asArray<T>(v: readonly T[] | null | undefined): T[] {
+  return Array.isArray(v) ? (v as T[]) : [];
+}
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 interface WorkflowSummary {
@@ -668,7 +678,7 @@ function InsightsFeedSection({ insights }: { insights: InsightsData | null | und
     );
   }
 
-  const allInsights = insights.insights ?? [];
+  const allInsights = asArray(insights.insights);
   const sorted = [...allInsights].sort((a, b) => {
     const order: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3, info: 4 };
     return (order[a.severity] ?? 5) - (order[b.severity] ?? 5);
@@ -857,11 +867,11 @@ function BottlenecksSection({
   processOutput: ProcessOutputData | null | undefined;
   onRunIntelligence?: (() => void) | undefined;
 }) {
-  const bottlenecks = intelligence?.bottlenecks?.bottlenecks ?? [];
+  const bottlenecks = asArray(intelligence?.bottlenecks?.bottlenecks);
 
   // Build a title lookup from step definitions
   const stepMap = new Map<number, StepDefinition>();
-  (processOutput?.processDefinition?.stepDefinitions ?? []).forEach((s) => {
+  asArray(processOutput?.processDefinition?.stepDefinitions).forEach((s) => {
     stepMap.set(s.ordinal, s);
   });
 
@@ -904,12 +914,12 @@ function StepBreakdownSection({
   processOutput: ProcessOutputData | null | undefined;
   intelligence: IntelligenceData | null | undefined;
 }) {
-  const steps = processOutput?.processDefinition?.stepDefinitions ?? [];
+  const steps = asArray(processOutput?.processDefinition?.stepDefinitions);
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
 
   // Build a bottleneck set for marking steps
   const bottleneckPositions = new Set(
-    (intelligence?.bottlenecks?.bottlenecks ?? []).map((b) => b.position),
+    asArray(intelligence?.bottlenecks?.bottlenecks).map((b) => b.position),
   );
 
   if (steps.length === 0) {
@@ -1074,8 +1084,8 @@ const SEVERITY_BADGE_CLASSES: Record<string, string> = {
 };
 
 function ProcessStructureSection({ interpretation }: { interpretation: InterpretationData | null | undefined }) {
-  const friction = interpretation?.friction ?? [];
-  const decisions = interpretation?.decisions ?? [];
+  const friction = asArray(interpretation?.friction);
+  const decisions = asArray(interpretation?.decisions);
 
   if (friction.length === 0 && decisions.length === 0) {
     return (
@@ -1122,9 +1132,9 @@ function ProcessStructureSection({ interpretation }: { interpretation: Interpret
                     {f.evidence && (
                       <p className="text-ds-xs text-[var(--content-tertiary)] mt-1">{f.evidence}</p>
                     )}
-                    {f.stepOrdinals.length > 0 && (
+                    {asArray(f.stepOrdinals).length > 0 && (
                       <p className="text-[10px] text-[var(--content-tertiary)] mt-1">
-                        Steps: {f.stepOrdinals.join(', ')}
+                        Steps: {asArray(f.stepOrdinals).join(', ')}
                       </p>
                     )}
                   </div>
@@ -1174,7 +1184,7 @@ function ProcessStructureSection({ interpretation }: { interpretation: Interpret
 // ── Section 9: Rework Patterns ─────────────────────────────────────────────────
 
 function ReworkPatternsSection({ interpretation }: { interpretation: InterpretationData | null | undefined }) {
-  const rework = interpretation?.rework ?? [];
+  const rework = asArray(interpretation?.rework);
   if (rework.length === 0) return null;
 
   const totalOccurrences = rework.reduce((sum, r) => sum + r.occurrences, 0);
@@ -1204,9 +1214,9 @@ function ReworkPatternsSection({ interpretation }: { interpretation: Interpretat
                 {r.evidence && (
                   <p className="text-ds-xs text-[var(--content-tertiary)] mt-1">{r.evidence}</p>
                 )}
-                {r.stepOrdinals.length > 0 && (
+                {asArray(r.stepOrdinals).length > 0 && (
                   <p className="text-[10px] text-[var(--content-tertiary)] mt-1">
-                    Steps: {r.stepOrdinals.join(', ')}
+                    Steps: {asArray(r.stepOrdinals).join(', ')}
                   </p>
                 )}
               </div>
@@ -1251,7 +1261,7 @@ function deriveTimeLeverage(
       longestPct: tb.longestStepPercentage,
     };
   }
-  const steps = processOutput?.processDefinition?.stepDefinitions ?? [];
+  const steps = asArray(processOutput?.processDefinition?.stepDefinitions);
   const totalStepMs = steps.reduce((sum, s) => sum + (s.durationMs ?? 0), 0);
   if (totalStepMs <= 0) return null;
   let longest: StepDefinition | null = null;
@@ -1314,7 +1324,7 @@ interface RunMetricsSectionProps {
  * Uses the shared time-leverage helper. Single-run safe and hydration-safe.
  */
 function RunMetricsSection({ insights, processOutput }: RunMetricsSectionProps) {
-  const steps = processOutput?.processDefinition?.stepDefinitions ?? [];
+  const steps = asArray(processOutput?.processDefinition?.stepDefinitions);
   const stepDurations = steps.map((s) => s.durationMs ?? 0).filter((d) => d > 0);
   const totalStepMs = stepDurations.reduce((sum, d) => sum + d, 0);
   const avgStepMs = stepDurations.length > 0 ? Math.round(totalStepMs / stepDurations.length) : 0;
@@ -1370,7 +1380,7 @@ function RunMetricsSection({ insights, processOutput }: RunMetricsSectionProps) 
 function VarianceVariantsSection({ intelligence }: { intelligence: IntelligenceData | null | undefined }) {
   const variance = intelligence?.variance;
   const variants = intelligence?.variants;
-  const variantList = variants?.variants ?? [];
+  const variantList = asArray(variants?.variants);
   const runCount = intelligence?.metrics?.runCount ?? 1;
 
   const hasIntel = variance != null || variantList.length > 0;
@@ -1912,7 +1922,7 @@ export function WorkflowReportPage({
           return lev != null && lev.longestPct >= 25;
         }
         if (id === 'rpt-metrics') {
-          const hasStepTiming = (processOutput?.processDefinition?.stepDefinitions ?? []).some(
+          const hasStepTiming = asArray(processOutput?.processDefinition?.stepDefinitions).some(
             (s) => (s.durationMs ?? 0) > 0,
           );
           return hasStepTiming || insights?.timeBreakdown != null;

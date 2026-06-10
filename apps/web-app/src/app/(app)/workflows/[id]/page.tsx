@@ -19,6 +19,7 @@ import {
   Link2,
   Plus,
   HelpCircle,
+  FileText,
 } from 'lucide-react';
 import { formatDuration, formatDate, formatConfidence } from '@/lib/format';
 import { track, trackActivation } from '@/lib/analytics';
@@ -29,11 +30,12 @@ import { WorkflowReportPage } from '@/components/detail/WorkflowReportPage';
 import { EvidenceTab } from '@/components/detail/EvidenceTab';
 import { SOPUsefulnessSurvey } from '@/components/shared/SOPUsefulnessSurvey';
 
-type ViewId = 'process' | 'analysis';
+type ViewId = 'workflow' | 'sop' | 'report';
 
 const TABS: { id: ViewId; label: string; icon: React.ElementType; docsAnchor: string }[] = [
-  { id: 'process', label: 'Process', icon: Layers, docsAnchor: 'process-map' },
-  { id: 'analysis', label: 'Analysis', icon: BarChart3, docsAnchor: 'report-tab' },
+  { id: 'workflow', label: 'Workflow', icon: Layers, docsAnchor: 'process-map' },
+  { id: 'sop', label: 'SOP', icon: FileText, docsAnchor: 'sop' },
+  { id: 'report', label: 'Report', icon: BarChart3, docsAnchor: 'report-tab' },
 ];
 
 export default function WorkflowDetailPage() {
@@ -41,7 +43,7 @@ export default function WorkflowDetailPage() {
   const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<ViewId>('process');
+  const [activeTab, setActiveTab] = useState<ViewId>('workflow');
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -66,12 +68,11 @@ export default function WorkflowDetailPage() {
   // Guard: fire process-map activation exactly once after data loads on the default Process view.
   const mapActivationFiredRef = useRef(false);
 
-  // Fire `sop_section_viewed` once the user has spent 30 continuous seconds on the Process view.
-  // Rekeyed from activeTab === 'sop' to activeTab === 'process' because SOP now lives in Process view.
-  // FIX 4: SOP activation (view_sop / first_sop) is also fired here so it reflects genuine SOP
-  // engagement (dwell time) rather than merely clicking the Process tab.
+  // Fire `sop_section_viewed` once the user has spent 30 continuous seconds on the SOP tab.
+  // SOP activation (view_sop / first_sop) fires here so it reflects genuine SOP engagement
+  // (dwell time) rather than merely clicking the SOP tab.
   useEffect(() => {
-    if (activeTab !== 'process') return;
+    if (activeTab !== 'sop') return;
 
     const SOP_DWELL_MS = 30_000;
     const timer = setTimeout(() => {
@@ -90,16 +91,16 @@ export default function WorkflowDetailPage() {
   // Guards with a ref so it fires exactly once per page load regardless of re-renders.
   useEffect(() => {
     if (!data) return;
-    if (activeTab !== 'process') return;
+    if (activeTab !== 'workflow') return;
     if (mapActivationFiredRef.current) return;
     mapActivationFiredRef.current = true;
     completeStep('view_process_map');
     trackActivation('first_map', { workflowId: id });
   }, [data, activeTab, id]);
 
-  // Auto-load analysis data when the Analysis view first becomes active.
+  // Auto-load analysis data when the Report tab first becomes active.
   useEffect(() => {
-    if (activeTab !== 'analysis') return;
+    if (activeTab !== 'report') return;
     if (analysisAutoFiredRef.current) return;
     analysisAutoFiredRef.current = true;
     handleRunIntelligence();
@@ -123,7 +124,7 @@ export default function WorkflowDetailPage() {
       setIsLoading(false);
     }
     load();
-    track({ event: 'workflow_viewed', workflowId: id, tab: 'process' });
+    track({ event: 'workflow_viewed', workflowId: id, tab: 'workflow' });
   }, [id, router]);
 
   function handleTabChange(tab: ViewId) {
@@ -374,7 +375,7 @@ export default function WorkflowDetailPage() {
       </div>
 
       {/* ── Process view ────────────────────────────────────────────────────── */}
-      {activeTab === 'process' && (
+      {activeTab === 'workflow' && (
         <div className="space-y-ds-10">
           {/* Process map */}
           <WorkflowPageShell
@@ -389,7 +390,12 @@ export default function WorkflowDetailPage() {
               status: workflow.status ?? 'active',
             }}
           />
+        </div>
+      )}
 
+      {/* ── SOP view ──────────────────────────────────────────────────────────── */}
+      {activeTab === 'sop' && (
+        <div className="space-y-ds-10">
           {/* Procedure / SOP */}
           <section>
             <h2 className="text-ds-lg font-semibold text-[var(--content-primary)] mb-ds-4">Procedure</h2>
@@ -412,8 +418,8 @@ export default function WorkflowDetailPage() {
         </div>
       )}
 
-      {/* ── Analysis view ────────────────────────────────────────────────────── */}
-      {activeTab === 'analysis' && (
+      {/* ── Report view ───────────────────────────────────────────────────────── */}
+      {activeTab === 'report' && (
         <div className="space-y-ds-10">
           {/* Report — includes insights, interpretation, bottlenecks, automation, steps */}
           <WorkflowReportPage

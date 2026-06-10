@@ -56,10 +56,11 @@ test('[hydration] authenticated Analysis view (/workflows/[id]) — Process + An
   ).toHaveURL(new RegExp(`/workflows/${id}`));
   await page.waitForTimeout(1000);
 
-  // 3. Switch to the Analysis view → mounts WorkflowReportPage and auto-loads
+  // 3. Switch to the Report tab → mounts WorkflowReportPage and auto-loads
   //    intelligence + agent data. rpt-hero renders from the main workflow data
   //    (independent of the intelligence/agent fetches), so it appears promptly.
-  await page.getByRole('button', { name: 'Analysis' }).click();
+  // Scope to the tab nav — there is also an export button named "Report".
+  await page.locator('nav').getByRole('button', { name: 'Report' }).first().click();
   await page.locator('#rpt-hero').waitFor({ state: 'visible', timeout: 30_000 });
   // Give the intelligence/agent fetches time to resolve and render their sections.
   await page.waitForTimeout(2500);
@@ -94,4 +95,44 @@ test('[hydration] authenticated Analysis view (/workflows/[id]) — Process + An
     bodyText.trim().length,
     'Analysis <body> was empty/whitespace — page likely crashed before rendering',
   ).toBeGreaterThan(50);
+});
+
+/**
+ * Regression for the 2026-06-09 outage: the Report crashed ("Application error" +
+ * unstyled) on REAL workflow data the seeded sample never had — a
+ * workflow_interpretation artifact whose friction/rework items omit `stepOrdinals`
+ * and whose `decisions` is null. seed-smoke-user.js seeds workflow
+ * `smoke-hostile-001` with exactly that shape. Before the asArray() hardening this
+ * threw `TypeError: Cannot read properties of undefined (reading 'length')`; it must
+ * now render the Report with NO client-side exception.
+ */
+test('[hydration] Report on hostile real-data workflow — no client-side exception (outage regression)', async ({ page }) => {
+  const pageErrors: string[] = [];
+  const consoleErrors: string[] = [];
+  page.on('pageerror', (err) => pageErrors.push(err.message));
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') consoleErrors.push(msg.text());
+  });
+
+  await page.goto('/workflows/smoke-hostile-001', { waitUntil: 'networkidle' });
+  await expect(page).toHaveURL(/\/workflows\/smoke-hostile-001/); // not redirected
+  await page.waitForTimeout(800);
+
+  // Switch to the Report tab → renders Friction & Decisions + Rework from the
+  // hostile interpretation artifact (the exact crash path).
+  // Scope to the tab nav — there is also an export button named "Report".
+  await page.locator('nav').getByRole('button', { name: 'Report' }).first().click();
+  await page.locator('#rpt-hero').waitFor({ state: 'visible', timeout: 30_000 });
+  await page.waitForTimeout(1500);
+
+  const crashErrors = [...pageErrors, ...consoleErrors].filter((t) =>
+    /Cannot read propert|undefined|not iterable|Minified React error|client-side exception|Application error|hydrat/i.test(t),
+  );
+  expect(
+    crashErrors,
+    `Hostile-data Report threw a client-side exception (the outage bug):\n${crashErrors.join('\n')}\n\nAll page errors:\n${pageErrors.join('\n')}`,
+  ).toEqual([]);
+  await expect(page.locator('text=Application error')).toHaveCount(0);
+  // The friction/rework sections actually rendered (proof we hit the crash path).
+  expect(await page.locator('#rpt-structure, #rpt-rework').count()).toBeGreaterThan(0);
 });
