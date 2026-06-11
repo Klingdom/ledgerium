@@ -20,6 +20,7 @@ const SIDEBAR_LINKS = [
   { id: 'getting-started', label: 'Getting Started' },
   { id: 'dashboard', label: 'Dashboard & Workflow Library' },
   { id: 'workflow-detail', label: 'Workflow Detail View' },
+  { id: 'process-variants', label: 'Process Variants' },
   { id: 'process-intelligence', label: 'Process Intelligence' },
   { id: 'recommendations', label: 'Recommendations Center' },
   { id: 'teams', label: 'Teams & Collaboration' },
@@ -1310,6 +1311,89 @@ export default function DocsPage() {
                 All outputs are deterministic — the same recording always produces the same
                 evidence structure, making it suitable for audit and compliance purposes.
               </Tip>
+
+              <SectionDivider />
+
+              <H3 id="process-variants">3.9 Process Variants &amp; variation detection</H3>
+              <P>
+                When you record the same process more than once, Ledgerium compares the
+                recordings to show how execution varied across runs — which steps were always
+                taken, where paths diverged, and how often each path was followed. Variation
+                detection is based entirely on what was observed in the recordings: it reports
+                the frequency of each path and where paths diverge or rejoin. It does{' '}
+                <strong className="text-[var(--content-primary)]">not</strong> infer the
+                conditions that caused a run to take one path versus another.
+              </P>
+              <P>
+                Open it from the <strong className="text-[var(--content-primary)]">Workflow</strong>{' '}
+                tab by selecting <strong className="text-[var(--content-primary)]">Process Variants</strong>{' '}
+                in the map mode switcher. Variation analysis requires at least two recordings of
+                the same process and is available on Team plans and above.
+              </P>
+
+              <H4>The variant map</H4>
+              <Screenshot
+                src="/docs/screenshots/workflow-variants-map.png"
+                alt="Process Variants map: a green standard-path spine with amber dashed branches that peel off and rejoin, each labelled with a run count and percentage."
+                caption="The variant map — the green spine is the most-common path; amber branches show where some runs took different steps and then rejoined."
+              />
+              <UL>
+                <li><strong className="text-[var(--content-primary)]">Green spine</strong> — the standard path, followed by the largest share of runs.</li>
+                <li><strong className="text-[var(--content-primary)]">Amber branches</strong> — paths that diverge from the spine and later rejoin. Each branch is labelled with its run count and percentage (for example, &ldquo;2 runs · 25%&rdquo;).</li>
+                <li><strong className="text-[var(--content-primary)]">&ldquo;diverges&rdquo; marker</strong> — backbone steps where a branch leaves the standard path carry a small &ldquo;diverges&rdquo; label. This marks an observed split, not an inferred decision rule.</li>
+                <li><strong className="text-[var(--content-primary)]">Header summary</strong> — the share of runs that followed the standard path end-to-end, the total run count, and how many branches were detected.</li>
+                <li><strong className="text-[var(--content-primary)]">Complexity slider</strong> — when there are several branches, drag the slider (top-right) to show only the most-frequent ones. It is labelled &ldquo;showing N/M&rdquo;.</li>
+              </UL>
+              <P>
+                Click any branch to see the evidence — a panel lists the recordings (run IDs) that
+                took that path. Every branch traces back to its source runs.
+              </P>
+              <Screenshot
+                src="/docs/screenshots/workflow-variants-evidence.png"
+                alt="Variant map with a branch selected; a panel lists the recordings that took that path."
+                caption="Click any branch to see exactly which recordings took it."
+              />
+
+              <H4>DNA view</H4>
+              <P>
+                Select <strong className="text-[var(--content-primary)]">DNA</strong> in the view
+                toggle to see every recorded path as a row of colour-coded step tokens, sorted
+                most-frequent first. Tokens outlined in amber are steps that differ from the
+                standard path — useful for scanning many paths at a glance.
+              </P>
+              <Screenshot
+                src="/docs/screenshots/workflow-variants-dna.png"
+                alt="Variants DNA view: rows of colour-coded step tokens, most-frequent first, with amber-outlined tokens marking divergences."
+                caption="DNA view — each row is one recorded path; amber-outlined tokens differ from the standard path."
+              />
+
+              <H4>List view</H4>
+              <P>
+                Select <strong className="text-[var(--content-primary)]">List</strong> for a
+                detailed breakdown. The left rail shows one card per path with a role badge —{' '}
+                <strong className="text-[var(--content-primary)]">Standard Path</strong>,{' '}
+                <strong className="text-[var(--content-primary)]">Fastest</strong>,{' '}
+                <strong className="text-[var(--content-primary)]">Longest</strong>,{' '}
+                <strong className="text-[var(--content-primary)]">Exception Heavy</strong>, or{' '}
+                <strong className="text-[var(--content-primary)]">Variant</strong> — plus its
+                frequency, step count, duration, and a frequency bar. Selecting a path shows its
+                step sequence (steps that differ from the standard are marked{' '}
+                <strong className="text-[var(--content-primary)]">DIVERGES</strong>), its summary
+                metrics, and a <strong className="text-[var(--content-primary)]">Compare vs Standard</strong>{' '}
+                option.
+              </P>
+              <Screenshot
+                src="/docs/screenshots/workflow-variants-list.png"
+                alt="Variants list view: path cards with role badges on the left, and a selected path's step sequence and metrics on the right."
+                caption="List view — inspect any path's steps and compare it to the standard."
+              />
+
+              <Note>
+                If a workflow has only one recording, the view shows a single-path summary. If it
+                has several recordings that all followed the <em>same</em> path, it honestly shows
+                &ldquo;Consistent process — N runs, all the same path&rdquo; rather than inventing
+                variation. Branches only appear when runs genuinely differ.
+              </Note>
             </section>
 
             {/* ── 4. PROCESS INTELLIGENCE ─────────────────────── */}

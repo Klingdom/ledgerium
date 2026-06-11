@@ -204,18 +204,21 @@ export function WorkflowVariantsMap({ graph, intelligence, status, onRetry, onSe
         <span className="flex-1" />
         <div className="flex overflow-hidden rounded-lg border border-[var(--border-subtle)] text-[10px] font-medium">
           <button
+            data-testid="variants-view-map"
             onClick={() => setView('map')}
             className={`px-2.5 py-1 transition-colors ${view === 'map' ? 'bg-violet-600 text-white' : 'text-[var(--content-secondary)] hover:bg-[var(--surface-elevated)]'}`}
           >
             Map
           </button>
           <button
+            data-testid="variants-view-dna"
             onClick={() => setView('dna')}
             className={`px-2.5 py-1 transition-colors ${view === 'dna' ? 'bg-violet-600 text-white' : 'text-[var(--content-secondary)] hover:bg-[var(--surface-elevated)]'}`}
           >
             DNA
           </button>
           <button
+            data-testid="variants-view-list"
             onClick={() => setView('list')}
             className={`px-2.5 py-1 transition-colors ${view === 'list' ? 'bg-violet-600 text-white' : 'text-[var(--content-secondary)] hover:bg-[var(--surface-elevated)]'}`}
           >

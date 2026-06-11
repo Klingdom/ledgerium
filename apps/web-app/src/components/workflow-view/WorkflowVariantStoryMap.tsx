@@ -145,7 +145,7 @@ function StoryMapInner({ variants, onSelectNode }: Props) {
   const selectedEdge = map.edges.find((e) => e.id === selectedEdgeId) ?? null;
 
   return (
-    <div className="absolute inset-0">
+    <div className="absolute inset-0" data-testid="variants-story-map">
       {/* Headline + complexity slider */}
       <div className="absolute top-0 left-0 right-0 z-10 flex items-center gap-2 px-4 py-2 bg-[var(--surface-elevated)]/90 backdrop-blur-sm border-b border-[var(--border-subtle)]">
         <GitBranch className="h-3.5 w-3.5 text-emerald-600" />

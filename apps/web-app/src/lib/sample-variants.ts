@@ -55,12 +55,14 @@ const SHORTCUT: Step[] = [
   { title: 'Archive to records', category: 'single_action', durationMs: 1000 },
 ];
 
-// Exception: a failed notification triggers an error-handling retry — longest path.
+// Exception: a failed notification triggers an error-handling retry then an
+// escalation — two error steps make this the "exception-heavy", longest path.
 const EXCEPTION: Step[] = [
   { title: 'Open expense report', category: 'click_then_navigate', durationMs: 1500 },
   { title: 'Review line items', category: 'data_entry', durationMs: 8500 },
   { title: 'Approve report', category: 'fill_and_submit', durationMs: 4000 },
-  { title: 'Retry notification (failed)', category: 'error_handling', durationMs: 6000 },
+  { title: 'Notification failed — retry', category: 'error_handling', durationMs: 4000 },
+  { title: 'Escalate to manager', category: 'error_handling', durationMs: 4000 },
   { title: 'Notify employee', category: 'send_action', durationMs: 2000 },
   { title: 'Archive to records', category: 'single_action', durationMs: 1000 },
 ];

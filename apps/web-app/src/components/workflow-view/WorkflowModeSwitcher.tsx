@@ -28,6 +28,7 @@ export function WorkflowModeSwitcher({ activeMode, onModeChange }: Props) {
         return (
           <button
             key={mode}
+            data-testid={`workflow-mode-${mode}`}
             onClick={() => onModeChange(mode)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium transition-all ${
               isActive

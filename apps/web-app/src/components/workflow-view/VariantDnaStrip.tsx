@@ -20,7 +20,7 @@ export function VariantDnaStrip({ variants }: Props) {
   );
 
   return (
-    <div className="absolute inset-0 overflow-auto bg-[var(--surface-secondary)] p-4">
+    <div className="absolute inset-0 overflow-auto bg-[var(--surface-secondary)] p-4" data-testid="variant-dna-strip">
       <div className="mx-auto max-w-5xl space-y-2">
         <p className="mb-3 text-[10px] text-[var(--content-tertiary)]">
           Each row is a recorded path, most frequent first. Outlined cells are where the path deviates from the standard.
