@@ -4,6 +4,7 @@ import { db } from '@/db';
 import { z } from 'zod';
 import { trackServer } from '@/lib/analytics-server';
 import { ensureSampleWorkflow } from '@/lib/sample-workflow';
+import { ensureSampleVariants } from '@/lib/sample-variants';
 
 const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -45,10 +46,11 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Every new account gets the built-in example workflow so the dashboard,
-    // SOP, and process-map views are populated immediately. Non-fatal:
-    // ensureSampleWorkflow never throws (returns null on failure).
+    // Every new account gets the built-in example workflows so the dashboard,
+    // SOP, process-map, and Variants views are populated immediately. Non-fatal:
+    // both helpers never throw (return null on failure).
     await ensureSampleWorkflow(user.id);
+    await ensureSampleVariants(user.id);
 
     trackServer('signup_completed', { userId: user.id, email: user.email });
 

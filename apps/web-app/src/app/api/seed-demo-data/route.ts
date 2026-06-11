@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { runProcessEngine, buildWorkflowReportFromOutput } from '@/lib/ingestion';
+import { ensureSampleVariants } from '@/lib/sample-variants';
 
 /**
  * POST /api/seed-demo-data
@@ -88,6 +89,11 @@ export async function POST(_req: NextRequest) {
       );
     }
   }
+
+  // Also populate the variant sample set so demos include the Process Variants tab.
+  const variants = await ensureSampleVariants(userId);
+  if (variants?.created) created.push('Approve Expense Report (Sample)');
+  else if (variants) skipped.push('Approve Expense Report (Sample)');
 
   return NextResponse.json({ created, skipped });
 }

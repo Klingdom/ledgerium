@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { ensureSampleWorkflow } from '@/lib/sample-workflow';
+import { ensureSampleVariants } from '@/lib/sample-variants';
 
 /**
  * POST /api/sample-workflow
  *
- * Creates the built-in sample workflow ("Create Purchase Order") for the
- * signed-in user so they can immediately explore an SOP, process map, and
- * report without recording first. Idempotent — returns the existing one if
- * already present. Sample data + creation logic live in @/lib/sample-workflow.
+ * Creates the built-in sample workflows for the signed-in user so they can
+ * immediately explore the product without recording first:
+ *  - "Create Purchase Order" — SOP / process map / report.
+ *  - "Approve Expense Report" recorded 8 ways — the Process Variants tab.
+ * Idempotent — returns the existing PO sample if already present.
  */
 export async function POST(_req: NextRequest) {
   const session = await auth();
@@ -23,6 +25,9 @@ export async function POST(_req: NextRequest) {
       { status: 500 },
     );
   }
+
+  // Also populate the variant sample set (non-fatal — never throws).
+  await ensureSampleVariants(session.user.id);
 
   return NextResponse.json({ id: result.id, alreadyExists: !result.created });
 }
