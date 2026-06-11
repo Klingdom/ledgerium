@@ -1,5 +1,17 @@
 'use client';
 
+/**
+ * WorkflowTaskNode — Flow Intelligence Map step node.
+ *
+ * P0 legibility fixes applied (MAP_DESIGN_SPEC §1.2 + P0 punch-list):
+ *  - Left-rail 4px accent border replaces background-flood fill
+ *  - White-on-accent ordinal badge (font-weight 700, min-width adequate for 2 digits)
+ *  - Step label font-weight 600 (up from 500/medium)
+ *  - Handles: 10×10 white+accent-ring (always visible)
+ *  - Minimum font size 9px everywhere (was 8px on category badge)
+ *  - Stronger box-shadow visible at 0.5× zoom and in screenshots
+ */
+
 import { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
@@ -14,7 +26,6 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
   selected,
 }: NodeProps<TaskFlowNode>) {
   const n = data.viewNode;
-  const accentAlpha = (hex: string, a: string) => `${hex}${a}`;
 
   return (
     <div
@@ -23,75 +34,122 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
       tabIndex={0}
       className="group transition-all duration-150 cursor-pointer"
       style={{
-        width: 280,
-        background: selected ? n.bgHoverColor : n.bgColor,
-        border: `1.5px solid ${selected ? n.accentColor : accentAlpha(n.accentColor, '25')}`,
-        borderRadius: 12,
-        padding: '10px 14px',
+        width: 260,
+        minHeight: 72,
+        background: selected ? n.bgHoverColor : `${n.accentColor}0f`,
+        // Left-rail accent (4px) + subtle border on other sides
+        border: `1px solid ${n.accentColor}20`,
+        borderLeft: `4px solid ${n.accentColor}`,
+        borderRadius: 10,
+        padding: '10px 12px 10px 14px',
         boxShadow: selected
-          ? `0 0 0 2px ${accentAlpha(n.accentColor, '20')}, 0 4px 12px rgba(0,0,0,0.08)`
-          : '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)',
+          ? `0 0 0 3px ${n.accentColor}25, 0 4px 16px rgba(0,0,0,0.10)`
+          : '0 1px 4px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)',
+        transition: 'all 0.15s ease',
       }}
     >
+      {/* Target handle — accent-ring, always visible */}
       <Handle
         type="target"
         position={Position.Top}
         style={{
-          background: selected ? n.accentColor : '#cbd5e1',
-          border: `1px solid ${selected ? n.accentColor : '#e2e8f0'}`,
-          width: 8,
-          height: 8,
+          width: 10,
+          height: 10,
+          background: '#ffffff',
+          border: `2px solid ${n.accentColor}`,
+          top: -5,
         }}
       />
 
-      {/* Row 1: ordinal + category + duration */}
-      <div className="flex items-center gap-1.5 mb-1.5">
+      {/* Row 1: ordinal badge + category label + duration */}
+      <div className="flex items-center gap-1.5 mb-2">
+        {/* White-on-accent ordinal badge — large enough for two-digit numbers */}
         <span
-          className="text-[10px] font-bold min-w-[16px] text-center rounded px-1 py-0.5"
-          style={{ color: n.accentColor, background: accentAlpha(n.accentColor, '12') }}
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            lineHeight: '18px',
+            minWidth: 20,
+            height: 20,
+            textAlign: 'center',
+            color: '#ffffff',
+            background: n.accentColor,
+            borderRadius: 5,
+            padding: '0 4px',
+            flexShrink: 0,
+          }}
         >
           {n.ordinal}
         </span>
+
+        {/* Category label — 9px minimum per P0-6 */}
         <span
-          className="text-[8px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded"
-          style={{ color: n.accentColor, background: accentAlpha(n.accentColor, '10') }}
+          style={{
+            fontSize: 9,
+            fontWeight: 700,
+            letterSpacing: '0.07em',
+            textTransform: 'uppercase' as const,
+            color: n.accentColor,
+          }}
         >
           {n.categoryLabel}
         </span>
-        <span className="flex-1" />
+
+        <span style={{ flex: 1 }} />
+
+        {/* Duration — 10px minimum */}
         {n.durationMs > 0 && (
-          <span className="flex items-center gap-0.5 text-[10px] text-[var(--content-tertiary)] group-hover:text-[var(--content-secondary)] transition-colors">
-            <Clock className="w-2.5 h-2.5" />
+          <span
+            className="flex items-center gap-0.5 group-hover:text-[var(--content-secondary)] transition-colors"
+            style={{ fontSize: 10, color: '#6b7280' }}
+          >
+            <Clock style={{ width: 10, height: 10 }} />
             {n.durationLabel}
           </span>
         )}
       </div>
 
-      {/* Row 2: Title */}
+      {/* Row 2: Step label — 12px / 600 weight for clarity */}
       <p
-        className="text-[12px] font-medium leading-[1.4] mb-1 group-hover:text-[var(--content-primary)] transition-colors"
         style={{
-          color: selected ? n.textColor : '#374151',
+          fontSize: 12,
+          fontWeight: 600,
+          lineHeight: 1.35,
+          color: selected ? n.textColor : '#111827',
+          marginBottom: 6,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           display: '-webkit-box',
           WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
+          WebkitBoxOrient: 'vertical' as const,
         }}
       >
         {n.label}
       </p>
 
-      {/* Row 3: System + indicators */}
-      <div className="flex items-center gap-1.5">
+      {/* Row 3: System chip + indicator icons */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         {n.system && (
-          <span className="text-[9px] font-medium text-[var(--content-secondary)] bg-[var(--surface-secondary)] group-hover:bg-[var(--surface-secondary)]/60 rounded px-1.5 py-0.5 truncate max-w-[120px] transition-colors">
+          <span
+            style={{
+              fontSize: 9,
+              fontWeight: 500,
+              color: '#4b5563',
+              background: '#f3f4f6',
+              border: '1px solid #e5e7eb',
+              borderRadius: 4,
+              padding: '1px 6px',
+              maxWidth: 110,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
             {n.system}
           </span>
         )}
-        <span className="flex-1" />
+        <span style={{ flex: 1 }} />
 
-        {/* Indicator icons — each has aria-label for screen readers */}
         {n.hasHighFriction && (
           <span aria-label="Bottleneck detected" title="Bottleneck detected" className="flex items-center">
             <AlertTriangle className="w-3 h-3 text-red-500" />
@@ -116,14 +174,16 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
         )}
       </div>
 
+      {/* Source handle — accent-ring, always visible */}
       <Handle
         type="source"
         position={Position.Bottom}
         style={{
-          background: selected ? n.accentColor : '#cbd5e1',
-          border: `1px solid ${selected ? n.accentColor : '#e2e8f0'}`,
-          width: 8,
-          height: 8,
+          width: 10,
+          height: 10,
+          background: '#ffffff',
+          border: `2px solid ${n.accentColor}`,
+          bottom: -5,
         }}
       />
     </div>

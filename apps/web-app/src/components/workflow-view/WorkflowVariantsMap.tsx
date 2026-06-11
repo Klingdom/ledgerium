@@ -23,6 +23,11 @@ import type { ViewVariantPath } from './adapters/viewModel';
 import { CATEGORY_STYLES } from './constants';
 import { WorkflowVariantStoryMap } from './WorkflowVariantStoryMap';
 import { VariantDnaStrip } from './VariantDnaStrip';
+import { WorkflowFlowCanvas } from './WorkflowCanvas';
+import {
+  buildVariantFlowModel,
+  portfolioIntelligenceToVariantInput,
+} from '@/lib/variantFlowModel';
 import { formatDuration } from '@/lib/format';
 
 // ─── Props ───────────────────────────────────────────────────────────────────
@@ -178,6 +183,29 @@ export function WorkflowVariantsMap({ graph, intelligence, status, onRetry, onSe
   const [comparePathId, setComparePathId] = useState<string | null>(null);
   const [view, setView] = useState<'map' | 'list' | 'dna'>('map');
 
+  // Build the flow-canvas model for the "Map" view (variant flow with decision nodes).
+  // Real recorded step labels + durations are threaded through from the server
+  // (analyzeWorkflowVariants attaches variantStepTitles/variantStepDurations) so the
+  // flow nodes show the actual step names, not bare category labels.
+  const variantFlowModel = useMemo(() => {
+    const extra = intelligence as unknown as
+      | {
+          variantStepTitles?: Record<string, string[]>;
+          variantStepDurations?: Record<string, number[]>;
+        }
+      | null
+      | undefined;
+    const titleMap = new Map<string, string[]>(
+      Object.entries(extra?.variantStepTitles ?? ({} as Record<string, string[]>)),
+    );
+    const durMap = new Map<string, number[]>(
+      Object.entries(extra?.variantStepDurations ?? ({} as Record<string, number[]>)),
+    );
+    const input = portfolioIntelligenceToVariantInput(intelligence, titleMap, durMap);
+    if (input.variants.length < 2) return null;
+    return buildVariantFlowModel(input);
+  }, [intelligence]);
+
   const selectedPath = paths.find(p => p.id === selectedPathId) ?? null;
   const comparePath = comparePathId ? paths.find(p => p.id === comparePathId) ?? null : null;
 
@@ -229,7 +257,16 @@ export function WorkflowVariantsMap({ graph, intelligence, status, onRetry, onSe
 
       <div className="relative flex-1 overflow-hidden">
         {view === 'map' ? (
-          <WorkflowVariantStoryMap variants={variantData.paths} onSelectNode={onSelectNode} />
+          variantFlowModel ? (
+            /* Flow Intelligence canvas enriched with decision diamonds + branch lanes */
+            <VariantFlowCanvasWrapper
+              model={variantFlowModel}
+              onSelectNode={onSelectNode}
+            />
+          ) : (
+            /* Fallback: original story map when flow model not available */
+            <WorkflowVariantStoryMap variants={variantData.paths} onSelectNode={onSelectNode} />
+          )
         ) : view === 'dna' ? (
           <VariantDnaStrip variants={variantData.paths} />
         ) : (
@@ -811,6 +848,113 @@ function SinglePathView({
             })}
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Variant Flow Canvas Wrapper ─────────────────────────────────────────────
+//
+// Renders the flow intelligence canvas (same node/edge/minimap design the CEO
+// likes) enriched with decision diamonds at divergence points and branch lanes.
+// An always-visible legend explains the visual language.
+
+import type { NormalizedViewModel as NVM } from './adapters/viewModel';
+
+function VariantFlowCanvasWrapper({
+  model,
+  onSelectNode,
+}: {
+  model: NVM;
+  onSelectNode: (id: string | null) => void;
+}) {
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const toolbar = {
+    showLabels: true,
+    showMetrics: true,
+    showInsights: true,
+    showMinimap: false,
+    showLegend: false,
+  };
+
+  const handleSelect = (id: string | null) => {
+    setSelectedNodeId(id);
+    onSelectNode(id);
+  };
+
+  const decisionCount = model.nodes.filter((n) => n.isDecisionPoint).length;
+  const branchCount   = model.nodes.filter((n) => !n.id.startsWith('vfm-bb-') && !n.id.startsWith('vfm-start') && !n.id.startsWith('vfm-end') && n.nodeType === 'task').length;
+
+  return (
+    <div className="absolute inset-0 flex flex-col" data-testid="variants-story-map">
+      {/* Always-visible legend bar */}
+      <div
+        style={{
+          padding: '6px 16px',
+          background: 'rgba(255,255,255,0.97)',
+          backdropFilter: 'blur(8px)',
+          borderBottom: '1px solid #e5e7eb',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 16,
+          flexShrink: 0,
+          flexWrap: 'wrap',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <GitBranch style={{ width: 13, height: 13, color: '#059669' }} />
+          <span style={{ fontSize: 11, color: '#374151' }}>
+            <strong style={{ color: '#111827' }}>{decisionCount}</strong> decision point{decisionCount !== 1 ? 's' : ''} ·{' '}
+            <strong style={{ color: '#111827' }}>{branchCount}</strong> branch step{branchCount !== 1 ? 's' : ''} ·{' '}
+            <strong style={{ color: '#111827' }}>{model.variants.length}</strong> path{model.variants.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          {/* Standard path legend */}
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, color: '#4b5563' }}>
+            <svg width="22" height="8">
+              <line x1="0" y1="4" x2="22" y2="4" stroke="#9ca3af" strokeWidth="2.5" />
+            </svg>
+            Standard path
+          </span>
+          {/* Branch path legend */}
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, color: '#4b5563' }}>
+            <svg width="22" height="8">
+              <line x1="0" y1="4" x2="22" y2="4" stroke="#d97706" strokeWidth="2" strokeDasharray="4 3" />
+            </svg>
+            Variant path
+          </span>
+          {/* Decision diamond legend */}
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, color: '#4b5563' }}>
+            <span
+              style={{
+                display: 'inline-block',
+                width: 10,
+                height: 10,
+                background: '#d97706',
+                borderRadius: 2,
+                transform: 'rotate(45deg)',
+                flexShrink: 0,
+              }}
+            />
+            Branch point
+          </span>
+          {/* Honesty note */}
+          <span style={{ fontSize: 9, color: '#9ca3af', fontStyle: 'italic' }}>
+            Branch points show observed splits only — no inferred conditions
+          </span>
+        </div>
+      </div>
+
+      {/* Flow canvas */}
+      <div className="relative flex-1">
+        <WorkflowFlowCanvas
+          graph={model}
+          toolbar={toolbar}
+          selectedNodeId={selectedNodeId}
+          onSelectNode={handleSelect}
+        />
       </div>
     </div>
   );

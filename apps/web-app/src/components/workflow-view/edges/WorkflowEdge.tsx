@@ -1,5 +1,12 @@
 'use client';
 
+/**
+ * WorkflowEdge — flow canvas edge component.
+ *
+ * P0-3 fix (MAP_DESIGN_SPEC P0-3): edge label chip font raised to 10px (was 8px).
+ * Also adds box-shadow to lift label off the path (P2-10).
+ */
+
 import { memo } from 'react';
 import {
   BaseEdge,
@@ -25,6 +32,7 @@ export const WorkflowEdgeComponent = memo(function WorkflowEdgeComponent({
 }: EdgeProps<WorkflowFlowEdge>) {
   const viewEdge = data?.viewEdge;
   const isException = viewEdge?.isExceptionPath ?? false;
+  const isDashed = viewEdge?.isDashed ?? false;
   const label = viewEdge?.label ?? '';
 
   const [edgePath, labelX, labelY] = getSmoothStepPath({
@@ -37,7 +45,7 @@ export const WorkflowEdgeComponent = memo(function WorkflowEdgeComponent({
     borderRadius: 12,
   });
 
-  const strokeColor = viewEdge?.strokeColor ?? '#cbd5e1';
+  const strokeColor = viewEdge?.strokeColor ?? '#9ca3af';
   const strokeWidth = selected ? 3 : (viewEdge?.strokeWidth ?? 2);
 
   return (
@@ -48,12 +56,12 @@ export const WorkflowEdgeComponent = memo(function WorkflowEdgeComponent({
         style={{
           stroke: selected ? '#6366f1' : strokeColor,
           strokeWidth,
-          strokeDasharray: isException ? '6 3' : undefined,
+          strokeDasharray: isDashed ? '6 3' : (isException ? '6 3' : undefined),
           transition: 'stroke 0.15s ease, stroke-width 0.15s ease',
         }}
       />
 
-      {/* Edge label */}
+      {/* Edge label chip — 10px minimum (P0-3) */}
       {label && (
         <EdgeLabelRenderer>
           <div
@@ -64,11 +72,16 @@ export const WorkflowEdgeComponent = memo(function WorkflowEdgeComponent({
             }}
           >
             <span
-              className="text-[8px] font-medium px-1.5 py-0.5 rounded-full whitespace-nowrap"
               style={{
-                color: isException ? '#991b1b' : '#6b7280',
-                background: isException ? '#fef2f2' : '#f9fafb',
-                border: `1px solid ${isException ? '#fca5a5' : '#e5e7eb'}`,
+                fontSize: 10,
+                fontWeight: 600,
+                padding: '2px 7px',
+                borderRadius: 10,
+                whiteSpace: 'nowrap',
+                color: isException ? '#991b1b' : '#374151',
+                background: isException ? '#fef2f2' : '#ffffff',
+                border: `1px solid ${isException ? '#fca5a5' : '#d1d5db'}`,
+                boxShadow: '0 1px 3px rgba(0,0,0,0.07)',
               }}
             >
               {label}

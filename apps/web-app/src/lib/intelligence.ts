@@ -447,7 +447,13 @@ export async function analyzeWorkflow(userId: string, workflowId: string): Promi
 export async function analyzeWorkflowVariants(
   userId: string,
   workflowId: string,
-): Promise<PortfolioIntelligence | null> {
+): Promise<
+  | (PortfolioIntelligence & {
+      variantStepTitles?: Record<string, string[]>;
+      variantStepDurations?: Record<string, number[]>;
+    })
+  | null
+> {
   const all = await getWorkflowsWithOutputs(userId);
   const target = all.find((w) => w.id === workflowId);
   // Require a usable step sequence on the target, or computePathSignature throws.
@@ -502,7 +508,38 @@ export async function analyzeWorkflowVariants(
       `${memberSet.size} run(s), ${result.variants?.variantCount ?? '?'} variant(s), ` +
       `metrics.runCount=${result.metrics?.runCount ?? bundles.length}`,
     );
-    return result;
+
+    // Per-variant REAL recorded step labels + durations from a representative run,
+    // so the flow map renders the actual recorded names ("Approve report") instead
+    // of bare category labels. Honest: these are the genuine titles of a real run
+    // that followed this variant's path (no fabrication). Deterministic: signatures
+    // are precomputed once and the first exact category-sequence match wins
+    // (same-signature runs share titles by construction).
+    const bundleSigs = bundles.map((b) => {
+      try {
+        return { b, cats: computePathSignature(b).stepCategories ?? [] };
+      } catch {
+        return { b, cats: [] as string[] };
+      }
+    });
+    const variantStepTitles: Record<string, string[]> = {};
+    const variantStepDurations: Record<string, number[]> = {};
+    for (const variant of result.variants?.variants ?? []) {
+      const wantCats = variant.pathSignature?.stepCategories ?? [];
+      if (wantCats.length === 0) continue;
+      const match = bundleSigs.find(
+        ({ cats }) => cats.length === wantCats.length && cats.every((c, i) => c === wantCats[i]),
+      );
+      if (!match) continue;
+      const defs = (match.b.processDefinition?.stepDefinitions ?? []) as Array<{
+        title?: string;
+        durationMs?: number;
+      }>;
+      variantStepTitles[variant.variantId] = defs.map((s) => String(s?.title ?? '').trim());
+      variantStepDurations[variant.variantId] = defs.map((s) => Number(s?.durationMs ?? 0));
+    }
+
+    return Object.assign(result, { variantStepTitles, variantStepDurations });
   } catch (err) {
     console.error(`[variants] ${workflowId}: analyzePortfolio threw on ${bundles.length} bundle(s)`, err);
     return null;

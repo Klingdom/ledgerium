@@ -5,11 +5,22 @@ import { clusterWorkflows } from '@/lib/intelligence';
 /**
  * Sample VARIANT set seeding — a demo of the Process Variants tab.
  *
- * Creates ONE process ("Approve Expense Report") recorded 8 different ways, so the
- * Variants tab shows its full feature set: a standard-path spine, branches that
- * peel off and rejoin (an extra clarification step, an error-handling retry), a
- * shortcut that skips a step, the Variant DNA strip, the complexity slider, and
- * the click-a-branch evidence drill.
+ * Creates ONE process ("Approve Expense Report") recorded 16 different ways,
+ * so the Variants tab shows its full feature set: a standard-path spine,
+ * branches that peel off and rejoin (an extra clarification step, a manager-
+ * review gate, a reject/resubmit rework loop, a shortcut, an exception-heavy
+ * path), the Variant DNA strip, the complexity slider, and the click-a-branch
+ * evidence drill.
+ *
+ * 6 distinct variants:
+ *  1. STANDARD        — the dominant happy path (5 steps, ×5 runs)
+ *  2. INSERTION_A     — "Request clarification" inserted before Approve (6 steps, ×3 runs)
+ *  3. INSERTION_B     — "Manager review" gate inserted after Approve (6 steps, ×2 runs)
+ *  4. SHORTCUT        — auto-notification skips the Notify step (4 steps, ×2 runs)
+ *  5. REWORK          — report rejected and resubmitted once (7 steps, ×2 runs)
+ *  6. EXCEPTION       — notification failure triggers error-handling + escalation (7 steps, ×2 runs)
+ *
+ * Total: 16 recordings, 6 variants, ≥3 story-map branches.
  *
  * Deterministic (fixed timestamps) and idempotent: no-ops if the set already
  * exists. Triggered via POST /api/sample-variants (and a dashboard button).
@@ -28,7 +39,8 @@ interface Step {
   durationMs: number;
 }
 
-// ── The standard path (most runs follow this) ────────────────────────────────
+// ── Variant 1: Standard path (most runs follow this) ─────────────────────────
+// click_then_navigate → data_entry → fill_and_submit → send_action → single_action
 const STANDARD: Step[] = [
   { title: 'Open expense report', category: 'click_then_navigate', durationMs: 1500 },
   { title: 'Review line items', category: 'data_entry', durationMs: 8000 },
@@ -37,8 +49,11 @@ const STANDARD: Step[] = [
   { title: 'Archive to records', category: 'single_action', durationMs: 1000 },
 ];
 
-// Branch: an extra "Request clarification" step before approval (diverge → rejoin).
-const INSERTION: Step[] = [
+// ── Variant 2: Insertion A — Request clarification before approval ─────────────
+// click_then_navigate → data_entry → single_action → fill_and_submit → send_action → single_action
+// Branch diverges after data_entry, inserts a single_action clarification step,
+// then rejoins at fill_and_submit. 6-step path.
+const INSERTION_A: Step[] = [
   { title: 'Open expense report', category: 'click_then_navigate', durationMs: 1500 },
   { title: 'Review line items', category: 'data_entry', durationMs: 8000 },
   { title: 'Request clarification', category: 'single_action', durationMs: 5000 },
@@ -47,37 +62,88 @@ const INSERTION: Step[] = [
   { title: 'Archive to records', category: 'single_action', durationMs: 1000 },
 ];
 
-// Shortcut: skips notifying the employee (auto-notified) — fastest path.
-const SHORTCUT: Step[] = [
+// ── Variant 3: Insertion B — Manager review gate after approval ────────────────
+// click_then_navigate → data_entry → fill_and_submit → single_action → send_action → single_action
+// Branch diverges after fill_and_submit, inserts a single_action manager-review
+// step, then rejoins at send_action. 6-step path.
+const INSERTION_B: Step[] = [
   { title: 'Open expense report', category: 'click_then_navigate', durationMs: 1500 },
-  { title: 'Review line items', category: 'data_entry', durationMs: 7000 },
-  { title: 'Approve report', category: 'fill_and_submit', durationMs: 3500 },
-  { title: 'Archive to records', category: 'single_action', durationMs: 1000 },
-];
-
-// Exception: a failed notification triggers an error-handling retry then an
-// escalation — two error steps make this the "exception-heavy", longest path.
-const EXCEPTION: Step[] = [
-  { title: 'Open expense report', category: 'click_then_navigate', durationMs: 1500 },
-  { title: 'Review line items', category: 'data_entry', durationMs: 8500 },
+  { title: 'Review line items', category: 'data_entry', durationMs: 9000 },
   { title: 'Approve report', category: 'fill_and_submit', durationMs: 4000 },
-  { title: 'Notification failed — retry', category: 'error_handling', durationMs: 4000 },
-  { title: 'Escalate to manager', category: 'error_handling', durationMs: 4000 },
+  { title: 'Escalate to manager for sign-off', category: 'single_action', durationMs: 7000 },
   { title: 'Notify employee', category: 'send_action', durationMs: 2000 },
   { title: 'Archive to records', category: 'single_action', durationMs: 1000 },
 ];
 
-// 8 recordings: standard ×4 (dominant), insertion ×2, shortcut ×1, exception ×1.
-// `jitter` varies the Review step so the standard runs have realistic spread.
+// ── Variant 4: Shortcut — auto-notification skips the Notify step ─────────────
+// click_then_navigate → data_entry → fill_and_submit → single_action
+// 4-step path; fastest overall duration.
+const SHORTCUT: Step[] = [
+  { title: 'Open expense report', category: 'click_then_navigate', durationMs: 1400 },
+  { title: 'Review line items', category: 'data_entry', durationMs: 7000 },
+  { title: 'Approve report', category: 'fill_and_submit', durationMs: 3500 },
+  { title: 'Archive to records', category: 'single_action', durationMs: 900 },
+];
+
+// ── Variant 5: Rework loop — report rejected and resubmitted ──────────────────
+// click_then_navigate → data_entry → fill_and_submit → data_entry → fill_and_submit → send_action → single_action
+// Reviewer rejects the report; employee updates and resubmits before approval.
+// 7-step path (longer than standard by 2 steps); longer duration.
+const REWORK: Step[] = [
+  { title: 'Open expense report', category: 'click_then_navigate', durationMs: 1500 },
+  { title: 'Review line items', category: 'data_entry', durationMs: 8500 },
+  { title: 'Flag for rework', category: 'fill_and_submit', durationMs: 2000 },
+  { title: 'Employee updates report', category: 'data_entry', durationMs: 10000 },
+  { title: 'Approve revised report', category: 'fill_and_submit', durationMs: 4000 },
+  { title: 'Notify employee', category: 'send_action', durationMs: 2000 },
+  { title: 'Archive to records', category: 'single_action', durationMs: 1000 },
+];
+
+// ── Variant 6: Exception — notification failure, retry, and escalation ─────────
+// click_then_navigate → data_entry → fill_and_submit → error_handling → error_handling → send_action → single_action
+// Two error_handling steps make this the "Exception Heavy", longest-duration path.
+const EXCEPTION: Step[] = [
+  { title: 'Open expense report', category: 'click_then_navigate', durationMs: 1500 },
+  { title: 'Review line items', category: 'data_entry', durationMs: 8500 },
+  { title: 'Approve report', category: 'fill_and_submit', durationMs: 4000 },
+  { title: 'Notification failed — retry', category: 'error_handling', durationMs: 4500 },
+  { title: 'Escalate to manager', category: 'error_handling', durationMs: 4500 },
+  { title: 'Notify employee', category: 'send_action', durationMs: 2000 },
+  { title: 'Archive to records', category: 'single_action', durationMs: 1000 },
+];
+
+// 16 recordings:
+//   standard ×5 (dominant: ~31% frequency)
+//   insertion_a ×3 (clarification before approve)
+//   insertion_b ×2 (manager review after approve)
+//   shortcut ×2    (fastest path — skips notify)
+//   rework ×2      (reject + resubmit loop)
+//   exception ×2   (error_handling ×2 — exception heavy, longest path)
+//
+// `jitter` varies the Review step (index 1) for realistic per-run duration spread.
 const RECORDINGS: { variant: Step[]; jitter: number }[] = [
+  // Standard path × 5
   { variant: STANDARD, jitter: 0 },
   { variant: STANDARD, jitter: 600 },
   { variant: STANDARD, jitter: -400 },
   { variant: STANDARD, jitter: 1200 },
-  { variant: INSERTION, jitter: 0 },
-  { variant: INSERTION, jitter: 500 },
+  { variant: STANDARD, jitter: -200 },
+  // Insertion A (clarification) × 3
+  { variant: INSERTION_A, jitter: 0 },
+  { variant: INSERTION_A, jitter: 500 },
+  { variant: INSERTION_A, jitter: 800 },
+  // Insertion B (manager review) × 2
+  { variant: INSERTION_B, jitter: 0 },
+  { variant: INSERTION_B, jitter: 600 },
+  // Shortcut × 2
   { variant: SHORTCUT, jitter: 0 },
+  { variant: SHORTCUT, jitter: 300 },
+  // Rework loop × 2
+  { variant: REWORK, jitter: 0 },
+  { variant: REWORK, jitter: 1000 },
+  // Exception × 2
   { variant: EXCEPTION, jitter: 0 },
+  { variant: EXCEPTION, jitter: -300 },
 ];
 
 export interface EnsureSampleVariantsResult {
@@ -149,9 +215,9 @@ export async function ensureSampleVariants(userId: string): Promise<EnsureSample
     }
 
     // Group + compute intelligence (BEST-EFFORT) so the dashboard shows the runs
-    // grouped. The Variants tab also gathers the 8 via read-time similarity, so a
+    // grouped. The Variants tab also gathers the 16 via read-time similarity, so a
     // slow/failed clusterWorkflows on a large portfolio must NOT block the seed —
-    // the 8 workflows are already persisted above.
+    // the 16 workflows are already persisted above.
     try {
       await clusterWorkflows(userId);
     } catch (err) {
@@ -168,8 +234,8 @@ export async function ensureSampleVariants(userId: string): Promise<EnsureSample
 // ─── Bundle builders ─────────────────────────────────────────────────────────
 
 /**
- * Build the 8 deterministic recording bundles (exported for tests). Each carries
- * its sessionId in sessionJson; recordings are spaced one day apart.
+ * Build the 16 deterministic recording bundles (exported for tests). Each
+ * carries its sessionId in sessionJson; recordings are spaced one day apart.
  */
 export function buildSampleVariantBundles() {
   let startMs = BASE_NOW;

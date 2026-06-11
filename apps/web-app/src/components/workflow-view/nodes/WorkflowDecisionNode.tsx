@@ -1,5 +1,19 @@
 'use client';
 
+/**
+ * WorkflowDecisionNode — true diamond-shaped branch-point node.
+ *
+ * P0-4 fix (MAP_DESIGN_SPEC §1.3): replaced rectangle+icon with a
+ * CSS-rotated container producing a real diamond shape, per the
+ * BPMN gateway convention. Outer div is 280×160 (pre-CSS-transform bounding
+ * box used by React Flow); inner 160×160 div rotated 45° becomes ~226px
+ * diagonal diamond. Content counter-rotated inside.
+ *
+ * The diamond conveys: "observed split in the data" — NOT a conditional gate
+ * with an inferred business rule. Labels use observed-count language only
+ * (honesty requirement from LAYOUT_PLAN §3 + variantFlowModel design).
+ */
+
 import { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
@@ -15,49 +29,108 @@ export const WorkflowDecisionNode = memo(function WorkflowDecisionNode({
   const n = data.viewNode;
 
   return (
-    <div className="relative" style={{ width: 280 }} role="button" aria-label={`Decision: ${n.decisionLabel || n.label}`} tabIndex={0}>
-      <Handle type="target" position={Position.Top} className="!bg-amber-300 !border-amber-400 !w-2 !h-2" />
-
-      {/* Diamond background */}
-      <div
-        className="mx-auto transition-all duration-150 cursor-pointer"
+    <div
+      style={{ width: 280, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+      role="button"
+      aria-label={`Decision: ${n.decisionLabel || n.label}`}
+      tabIndex={0}
+    >
+      {/* Target handle — outside the rotated container */}
+      <Handle
+        type="target"
+        position={Position.Top}
         style={{
-          width: 200,
+          width: 10,
+          height: 10,
+          background: '#ffffff',
+          border: '2px solid #d97706',
+          top: -5,
+        }}
+      />
+
+      {/* Diamond outer shape — 160×160 square rotated 45° → ~226px diamond */}
+      <div
+        style={{
+          width: 160,
+          height: 160,
           background: selected ? '#fef3c7' : '#fffbeb',
-          border: `1.5px solid ${selected ? '#d97706' : '#fcd34d'}`,
-          borderRadius: 12,
-          padding: '10px 14px',
+          border: `2px solid ${selected ? '#d97706' : '#fbbf24'}`,
+          borderRadius: 16,           // chamfered corners = standard BPMN gateway
+          transform: 'rotate(45deg)',
           boxShadow: selected
-            ? '0 0 0 2px rgba(217,119,6,0.15), 0 4px 12px rgba(0,0,0,0.06)'
-            : '0 1px 3px rgba(0,0,0,0.04)',
+            ? '0 0 0 3px rgba(217,119,6,0.18), 0 4px 16px rgba(0,0,0,0.08)'
+            : '0 2px 8px rgba(217,119,6,0.12)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          cursor: 'pointer',
+          transition: 'all 0.15s ease',
         }}
       >
-        {/* Decision icon */}
-        <div className="flex items-center gap-1.5 mb-1">
-          <svg width="12" height="12" viewBox="0 0 12 12" className="flex-shrink-0">
-            <path d="M6 0L12 6L6 12L0 6Z" fill="#d97706" opacity="0.2" />
-            <path d="M6 1L11 6L6 11L1 6Z" fill="none" stroke="#d97706" strokeWidth="1" />
-          </svg>
-          <span className="text-[8px] font-bold uppercase tracking-wider text-amber-700">Decision</span>
-          <span className="flex-1" />
-          <span className="text-[10px] font-bold text-amber-600">{n.ordinal}</span>
-        </div>
-
-        {/* Decision label */}
-        <p className="text-[11px] font-medium text-amber-900 leading-tight"
+        {/* Inner content — counter-rotated so text reads normally */}
+        <div
           style={{
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
+            transform: 'rotate(-45deg)',
+            textAlign: 'center',
+            padding: '8px 12px',
+            maxWidth: 110,
           }}
         >
-          {n.decisionLabel || n.label}
-        </p>
+          <span
+            style={{
+              display: 'block',
+              fontSize: 9,
+              fontWeight: 700,
+              letterSpacing: '0.07em',
+              textTransform: 'uppercase' as const,
+              color: '#d97706',
+              marginBottom: 4,
+            }}
+          >
+            ◆ Decision
+          </span>
+          <p
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              color: '#92400e',
+              lineHeight: 1.3,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical' as const,
+              marginBottom: 3,
+            }}
+          >
+            {n.decisionLabel || n.label}
+          </p>
+          <span
+            style={{
+              display: 'block',
+              fontSize: 10,
+              fontWeight: 700,
+              color: '#d97706',
+            }}
+          >
+            {n.ordinal}
+          </span>
+        </div>
       </div>
 
-      <Handle type="source" position={Position.Bottom} className="!bg-amber-300 !border-amber-400 !w-2 !h-2" />
+      {/* Source handle — outside the rotated container */}
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        style={{
+          width: 10,
+          height: 10,
+          background: '#ffffff',
+          border: '2px solid #d97706',
+          bottom: -5,
+        }}
+      />
     </div>
   );
 });
