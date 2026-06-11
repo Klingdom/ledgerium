@@ -348,6 +348,7 @@ function DashboardPageContent() {
 
   // Sample workflow loading
   const [loadingSample, setLoadingSample] = useState(false);
+  const [loadingVariantsDemo, setLoadingVariantsDemo] = useState(false);
 
   // User plan (for usage quota meter)
   const [userPlan, setUserPlan] = useState<string>('free');
@@ -609,6 +610,28 @@ function DashboardPageContent() {
     setLoadingSample(false);
   }
 
+  // Creates a sample process recorded 8 different ways and opens it, so the user
+  // can explore the Process Variants tab (branch map, DNA strip, evidence drill).
+  async function handleLoadVariantsDemo() {
+    if (loadingVariantsDemo) return;
+    setLoadingVariantsDemo(true);
+    track({ event: 'sample_workflow_loaded' });
+    try {
+      const res = await fetch('/api/sample-variants', { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.id) {
+          router.push(`/workflows/${data.id}`);
+          return;
+        }
+        await fetchWorkflows();
+      }
+    } catch {
+      // non-fatal
+    }
+    setLoadingVariantsDemo(false);
+  }
+
   // ── Client-side filters ────────────────────────────────────────────────────
 
   const displayedWorkflows = useMemo(() => {
@@ -748,6 +771,15 @@ function DashboardPageContent() {
               <BarChart3 className="h-3.5 w-3.5" />
               Analytics
             </Link>
+            <button
+              onClick={handleLoadVariantsDemo}
+              disabled={loadingVariantsDemo}
+              className="btn-secondary gap-1.5 text-xs"
+              title="Create a sample process recorded 8 ways to explore the Variants tab"
+            >
+              <GitBranch className="h-3.5 w-3.5" />
+              {loadingVariantsDemo ? 'Creating…' : 'Variants demo'}
+            </button>
             <Link href="/upload" className="btn-primary gap-1.5">
               <Upload className="h-4 w-4" />
               Upload
