@@ -9,7 +9,7 @@
  * no Date/random) so the diagram is reproducible and hydration-safe. Client-only.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -87,6 +87,10 @@ interface Props {
 }
 
 function StoryMapInner({ variants, onSelectNode }: Props) {
+  // Complexity control: 99 = show all; the slider narrows to the top-N branches.
+  const [maxBranches, setMaxBranches] = useState(99);
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
+
   const map = useMemo(
     () =>
       buildVariantStoryMap(
@@ -95,9 +99,11 @@ function StoryMapInner({ variants, onSelectNode }: Props) {
           isStandard: v.isStandard,
           runCount: v.runCount,
           stepCategories: v.stepCategories,
+          evidenceRunIds: v.evidenceRunIds,
         })),
+        { maxBranches },
       ),
-    [variants],
+    [variants, maxBranches],
   );
 
   const { rfNodes, rfEdges } = useMemo(() => {
@@ -136,16 +142,32 @@ function StoryMapInner({ variants, onSelectNode }: Props) {
   }
 
   const conformPct = map.totalRuns > 0 ? Math.round((map.conformingRunCount / map.totalRuns) * 100) : 0;
+  const selectedEdge = map.edges.find((e) => e.id === selectedEdgeId) ?? null;
 
   return (
     <div className="absolute inset-0">
-      {/* Headline */}
+      {/* Headline + complexity slider */}
       <div className="absolute top-0 left-0 right-0 z-10 flex items-center gap-2 px-4 py-2 bg-[var(--surface-elevated)]/90 backdrop-blur-sm border-b border-[var(--border-subtle)]">
         <GitBranch className="h-3.5 w-3.5 text-emerald-600" />
         <span className="text-[11px] text-[var(--content-secondary)]">
           <span className="font-semibold text-[var(--content-primary)]">{conformPct}%</span> of {map.totalRuns} runs
           follow the standard path. {map.branchCount} branch{map.branchCount !== 1 ? 'es' : ''} off and rejoin.
         </span>
+        <span className="flex-1" />
+        {map.branchCount > 1 && (
+          <label className="flex items-center gap-1.5 text-[10px] text-[var(--content-tertiary)]">
+            <span className="whitespace-nowrap">showing {map.shownBranchCount}/{map.branchCount}</span>
+            <input
+              type="range"
+              min={1}
+              max={map.branchCount}
+              value={Math.min(maxBranches, map.branchCount)}
+              onChange={(e) => setMaxBranches(Number(e.target.value))}
+              className="w-20 accent-emerald-600"
+              aria-label="Number of variant branches to show"
+            />
+          </label>
+        )}
       </div>
 
       <ReactFlow
@@ -156,14 +178,35 @@ function StoryMapInner({ variants, onSelectNode }: Props) {
         fitViewOptions={{ padding: 0.2 }}
         nodesDraggable={false}
         nodesConnectable={false}
-        elementsSelectable={false}
         proOptions={{ hideAttribution: true }}
-        onPaneClick={() => onSelectNode(null)}
+        onPaneClick={() => { onSelectNode(null); setSelectedEdgeId(null); }}
+        onEdgeClick={(_, edge) => setSelectedEdgeId(edge.id)}
         minZoom={0.2}
         maxZoom={1.5}
       >
         <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="var(--border-subtle)" />
       </ReactFlow>
+
+      {/* Evidence drill — the source runs behind a branch */}
+      {selectedEdge && selectedEdge.evidenceRunIds.length > 0 && (
+        <div className="absolute bottom-3 left-3 right-3 z-10 rounded-xl border border-[var(--border-default)] bg-[var(--surface-elevated)] shadow-lg px-4 py-3">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-ds-xs font-medium text-[var(--content-primary)]">
+              {selectedEdge.runCount} run{selectedEdge.runCount !== 1 ? 's' : ''} took this path
+            </p>
+            <button
+              onClick={() => setSelectedEdgeId(null)}
+              className="text-[var(--content-tertiary)] hover:text-[var(--content-primary)] text-xs leading-none"
+              aria-label="Close evidence"
+            >
+              ✕
+            </button>
+          </div>
+          <p className="mt-1 font-mono text-[9px] text-[var(--content-tertiary)] break-all leading-relaxed">
+            {selectedEdge.evidenceRunIds.join('  ·  ')}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

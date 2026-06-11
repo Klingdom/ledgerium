@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { buildVariantStoryMap, type StoryVariantInput } from './variantStoryMap';
 
-function v(id: string, cats: string[], runCount: number, isStandard = false): StoryVariantInput {
-  return { id, stepCategories: cats, runCount, isStandard };
+function v(id: string, cats: string[], runCount: number, isStandard = false, evidenceRunIds: string[] = []): StoryVariantInput {
+  return { id, stepCategories: cats, runCount, isStandard, evidenceRunIds };
 }
 
 const STD = v('v1', ['click', 'fill', 'submit'], 7, true);
@@ -62,6 +62,27 @@ describe('buildVariantStoryMap — spine + branch', () => {
     expect(map.totalRuns).toBe(12); // 7 + 3 + 2
     expect(map.conformingRunCount).toBe(7); // only the standard runs follow the spine
     expect(map.branchCount).toBe(2);
+  });
+});
+
+describe('buildVariantStoryMap — complexity filter + evidence', () => {
+  it('draws only the top-N most-frequent branches', () => {
+    const map = buildVariantStoryMap([STD, INSERT, SHORTCUT], { maxBranches: 1 })!;
+    expect(map.branchCount).toBe(2);
+    expect(map.shownBranchCount).toBe(1);
+    expect(map.hiddenBranchCount).toBe(1);
+    // INSERT (3 runs) outranks SHORTCUT (2 runs) → the validate branch is shown, shortcut hidden.
+    expect(map.nodes.some((n) => n.kind === 'branch' && n.category === 'validate')).toBe(true);
+    expect(map.edges.some((e) => e.kind === 'shortcut')).toBe(false);
+  });
+
+  it('carries source run ids on branch edges, none on the spine', () => {
+    const std = v('v1', ['click', 'fill', 'submit'], 7, true, ['ra', 'rb']);
+    const ins = v('v2', ['click', 'fill', 'validate', 'submit'], 3, false, ['ri1', 'ri2', 'ri3']);
+    const map = buildVariantStoryMap([std, ins])!;
+    const branchIn = map.edges.find((e) => e.kind === 'branch' && e.id.endsWith('-in'))!;
+    expect(branchIn.evidenceRunIds).toEqual(['ri1', 'ri2', 'ri3']);
+    expect(map.edges.find((e) => e.kind === 'spine')!.evidenceRunIds).toEqual([]);
   });
 });
 

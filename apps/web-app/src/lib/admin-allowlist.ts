@@ -14,6 +14,7 @@ import type { Session } from 'next-auth';
 
 const ALLOWLIST: ReadonlySet<string> = new Set([
   'philklingmbb@gmail.com',
+  'phil@mediafier.ai',
 ]);
 
 /** True if the email is on the admin-unlimited allowlist. */

@@ -22,6 +22,7 @@ import { buildVariantData } from './adapters/variantAdapter';
 import type { ViewVariantPath } from './adapters/viewModel';
 import { CATEGORY_STYLES } from './constants';
 import { WorkflowVariantStoryMap } from './WorkflowVariantStoryMap';
+import { VariantDnaStrip } from './VariantDnaStrip';
 import { formatDuration } from '@/lib/format';
 
 // ─── Props ───────────────────────────────────────────────────────────────────
@@ -171,7 +172,7 @@ export function WorkflowVariantsMap({ graph, intelligence, onSelectNode }: Props
     paths.find(p => p.isStandard)?.id ?? paths[0]?.id ?? null,
   );
   const [comparePathId, setComparePathId] = useState<string | null>(null);
-  const [view, setView] = useState<'map' | 'list'>('map');
+  const [view, setView] = useState<'map' | 'list' | 'dna'>('map');
 
   const selectedPath = paths.find(p => p.id === selectedPathId) ?? null;
   const comparePath = comparePathId ? paths.find(p => p.id === comparePathId) ?? null : null;
@@ -196,6 +197,12 @@ export function WorkflowVariantsMap({ graph, intelligence, onSelectNode }: Props
             Map
           </button>
           <button
+            onClick={() => setView('dna')}
+            className={`px-2.5 py-1 transition-colors ${view === 'dna' ? 'bg-violet-600 text-white' : 'text-[var(--content-secondary)] hover:bg-[var(--surface-elevated)]'}`}
+          >
+            DNA
+          </button>
+          <button
             onClick={() => setView('list')}
             className={`px-2.5 py-1 transition-colors ${view === 'list' ? 'bg-violet-600 text-white' : 'text-[var(--content-secondary)] hover:bg-[var(--surface-elevated)]'}`}
           >
@@ -207,6 +214,8 @@ export function WorkflowVariantsMap({ graph, intelligence, onSelectNode }: Props
       <div className="relative flex-1 overflow-hidden">
         {view === 'map' ? (
           <WorkflowVariantStoryMap variants={variantData.paths} onSelectNode={onSelectNode} />
+        ) : view === 'dna' ? (
+          <VariantDnaStrip variants={variantData.paths} />
         ) : (
           <div className="absolute inset-0 flex overflow-hidden">
       {/* ── Left: Path cards rail ──────────────────────────────────────── */}

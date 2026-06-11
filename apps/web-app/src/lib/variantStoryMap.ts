@@ -18,6 +18,8 @@ export interface StoryVariantInput {
   isStandard?: boolean;
   runCount?: number;
   stepCategories: string[];
+  /** Real source run ids for this variant (the evidence link). */
+  evidenceRunIds?: string[];
 }
 
 export type StoryNodeKind = 'backbone' | 'branch';
@@ -48,6 +50,8 @@ export interface StoryEdge {
   runCount: number;
   /** Number of alternative steps on this branch (label context). */
   altCount: number;
+  /** Source run ids for branch/rejoin/shortcut edges (the evidence link); [] for spine. */
+  evidenceRunIds: string[];
 }
 
 export interface VariantStoryMap {
@@ -57,8 +61,18 @@ export interface VariantStoryMap {
   totalRuns: number;
   /** Run-weighted count of runs that follow the spine end-to-end. */
   conformingRunCount: number;
+  /** Total distinct branches discovered. */
   branchCount: number;
+  /** Branches actually drawn after the complexity filter. */
+  shownBranchCount: number;
+  /** Branches hidden by the complexity filter (top-N). */
+  hiddenBranchCount: number;
   version: string;
+}
+
+export interface StoryMapOptions {
+  /** Draw only the top-N most-frequent branches (spaghetti control). Default: all. */
+  maxBranches?: number;
 }
 
 const SPACING_X = 170;
@@ -69,7 +83,10 @@ export const STORY_MAP_VERSION = 'variant-story/1.0.0';
  * Build the variant story map. Returns null when there is no standard path or
  * fewer than two variants (nothing to branch).
  */
-export function buildVariantStoryMap(variants: StoryVariantInput[]): VariantStoryMap | null {
+export function buildVariantStoryMap(
+  variants: StoryVariantInput[],
+  options: StoryMapOptions = {},
+): VariantStoryMap | null {
   const withSteps = variants.filter((v) => v.stepCategories.length > 0);
   if (withSteps.length < 2) return null;
 
@@ -81,6 +98,7 @@ export function buildVariantStoryMap(variants: StoryVariantInput[]): VariantStor
   const analysis = analyzeDivergence(backbone, runs);
 
   const runCountByVariant = new Map(withSteps.map((v) => [v.id, v.runCount ?? 0]));
+  const evidenceByVariant = new Map(withSteps.map((v) => [v.id, v.evidenceRunIds ?? []]));
   const totalRuns = withSteps.reduce((s, v) => s + (v.runCount ?? 0), 0) || withSteps.length;
 
   // Run-weighted conforming count (variants that take no branch).
@@ -89,6 +107,25 @@ export function buildVariantStoryMap(variants: StoryVariantInput[]): VariantStor
   const conformingRunCount = withSteps
     .filter((v) => !divergingIds.has(v.id))
     .reduce((s, v) => s + (v.runCount ?? 0), 0);
+
+  // Rank branches by run-weighted frequency (deterministic tie-break), then apply
+  // the complexity filter (top-N). The spine and ranking are always deterministic.
+  const ranked = analysis.branches
+    .map((b) => {
+      const weight = b.evidenceRunIds.reduce((s, id) => s + (runCountByVariant.get(id) ?? 0), 0);
+      const runIds = [...new Set(b.evidenceRunIds.flatMap((id) => evidenceByVariant.get(id) ?? []))].sort();
+      return { b, weight, runShare: totalRuns > 0 ? weight / totalRuns : 0, runIds };
+    })
+    .sort(
+      (x, y) =>
+        y.weight - x.weight ||
+        x.b.divergeAfterIndex - y.b.divergeAfterIndex ||
+        x.b.reconvergeAtIndex - y.b.reconvergeAtIndex ||
+        (x.b.altSteps.join('>') < y.b.altSteps.join('>') ? -1 : x.b.altSteps.join('>') > y.b.altSteps.join('>') ? 1 : 0),
+    );
+
+  const maxBranches = options.maxBranches ?? ranked.length;
+  const shown = ranked.slice(0, Math.max(0, maxBranches));
 
   // ── Spine ────────────────────────────────────────────────────────────────
   const nodes: StoryNode[] = backbone.map((category, i) => ({
@@ -104,13 +141,12 @@ export function buildVariantStoryMap(variants: StoryVariantInput[]): VariantStor
 
   const edges: StoryEdge[] = [];
   for (let i = 0; i < backbone.length - 1; i++) {
-    edges.push({ id: `spine-${i}`, source: `bb-${i}`, target: `bb-${i + 1}`, kind: 'spine', runShare: 1, runCount: totalRuns, altCount: 0 });
+    edges.push({ id: `spine-${i}`, source: `bb-${i}`, target: `bb-${i + 1}`, kind: 'spine', runShare: 1, runCount: totalRuns, altCount: 0, evidenceRunIds: [] });
   }
 
-  // ── Branches ───────────────────────────────────────────────────────────────
-  analysis.branches.forEach((b, lane) => {
+  // ── Branches (top-N) ─────────────────────────────────────────────────────
+  shown.forEach(({ b, runShare, runIds }, lane) => {
     const weight = b.evidenceRunIds.reduce((s, id) => s + (runCountByVariant.get(id) ?? 0), 0);
-    const runShare = totalRuns > 0 ? weight / totalRuns : 0;
     const laneY = (lane + 1) * SPACING_Y;
 
     if (b.divergeAfterIndex >= 0) {
@@ -127,7 +163,7 @@ export function buildVariantStoryMap(variants: StoryVariantInput[]): VariantStor
 
     if (b.altSteps.length === 0) {
       // Shortcut (skipped backbone steps): a dashed bypass between anchors.
-      edges.push({ id: `shortcut-${lane}`, source: sourceBackboneId, target: targetBackboneId, kind: 'shortcut', runShare, runCount: weight, altCount: 0 });
+      edges.push({ id: `shortcut-${lane}`, source: sourceBackboneId, target: targetBackboneId, kind: 'shortcut', runShare, runCount: weight, altCount: 0, evidenceRunIds: runIds });
       return;
     }
 
@@ -140,11 +176,11 @@ export function buildVariantStoryMap(variants: StoryVariantInput[]): VariantStor
       nodes.push({ id, kind: 'branch', category, backboneIndex: null, x: startX + (endX - startX) * t, y: laneY, isDecision: false, runShare });
     });
 
-    edges.push({ id: `branch-${lane}-in`, source: sourceBackboneId, target: branchNodeIds[0]!, kind: 'branch', runShare, runCount: weight, altCount: count });
+    edges.push({ id: `branch-${lane}-in`, source: sourceBackboneId, target: branchNodeIds[0]!, kind: 'branch', runShare, runCount: weight, altCount: count, evidenceRunIds: runIds });
     for (let k = 0; k < branchNodeIds.length - 1; k++) {
-      edges.push({ id: `branch-${lane}-${k}`, source: branchNodeIds[k]!, target: branchNodeIds[k + 1]!, kind: 'branch', runShare, runCount: weight, altCount: count });
+      edges.push({ id: `branch-${lane}-${k}`, source: branchNodeIds[k]!, target: branchNodeIds[k + 1]!, kind: 'branch', runShare, runCount: weight, altCount: count, evidenceRunIds: runIds });
     }
-    edges.push({ id: `rejoin-${lane}`, source: branchNodeIds[branchNodeIds.length - 1]!, target: targetBackboneId, kind: 'rejoin', runShare, runCount: weight, altCount: count });
+    edges.push({ id: `rejoin-${lane}`, source: branchNodeIds[branchNodeIds.length - 1]!, target: targetBackboneId, kind: 'rejoin', runShare, runCount: weight, altCount: count, evidenceRunIds: runIds });
   });
 
   return {
@@ -154,6 +190,8 @@ export function buildVariantStoryMap(variants: StoryVariantInput[]): VariantStor
     totalRuns,
     conformingRunCount,
     branchCount: analysis.branches.length,
+    shownBranchCount: shown.length,
+    hiddenBranchCount: analysis.branches.length - shown.length,
     version: `${STORY_MAP_VERSION}#${analysis.version}`,
   };
 }
