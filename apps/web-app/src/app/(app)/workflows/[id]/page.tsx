@@ -53,6 +53,11 @@ export default function WorkflowDetailPage() {
   // the user opens variants mode). Separate from the single-run report intelligence.
   const [variantIntelligence, setVariantIntelligence] = useState<any>(null);
   const variantLoadFiredRef = useRef(false);
+  // Visible status for the variants tab so failures aren't hidden behind the
+  // "single recording" placeholder. idle → loading → loaded | forbidden | unprocessed | error.
+  const [variantsStatus, setVariantsStatus] = useState<
+    'idle' | 'loading' | 'loaded' | 'unprocessed' | 'forbidden' | 'error'
+  >('idle');
   // Loading flag still drives handleRunIntelligence's fetch lifecycle; the value
   // is no longer rendered (IntelligenceTab retired — WorkflowReportPage shows the
   // intelligence sections directly).
@@ -194,17 +199,26 @@ export default function WorkflowDetailPage() {
   async function handleLoadVariants() {
     if (variantLoadFiredRef.current) return;
     variantLoadFiredRef.current = true;
+    setVariantsStatus('loading');
     try {
       const res = await fetch(`/api/workflows/${id}/variants`, { method: 'POST' });
-      if (!res.ok) {
-        variantLoadFiredRef.current = false;
-        return;
-      }
+      if (res.status === 403) { setVariantsStatus('forbidden'); return; }
+      if (res.status === 422) { setVariantsStatus('unprocessed'); return; }
+      if (!res.ok) { setVariantsStatus('error'); return; }
       const result = await res.json();
       setVariantIntelligence(result.intelligence ?? null);
+      setVariantsStatus('loaded');
     } catch {
-      variantLoadFiredRef.current = false; // non-fatal — allow retry
+      setVariantsStatus('error');
     }
+  }
+
+  // Explicit retry — clears the fire-once guard (the auto-effect never auto-retries
+  // a terminal forbidden/error/unprocessed state, to avoid a fetch loop).
+  function handleRetryVariants() {
+    variantLoadFiredRef.current = false;
+    setVariantsStatus('idle');
+    void handleLoadVariants();
   }
 
   async function handleRunAgentIntelligence() {
@@ -412,7 +426,9 @@ export default function WorkflowDetailPage() {
               status: workflow.status ?? 'active',
             }}
             variantIntelligence={variantIntelligence}
+            variantsStatus={variantsStatus}
             onRequestVariants={handleLoadVariants}
+            onRetryVariants={handleRetryVariants}
           />
         </div>
       )}

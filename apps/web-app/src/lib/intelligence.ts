@@ -448,7 +448,10 @@ export async function analyzeWorkflowVariants(
   const all = await getWorkflowsWithOutputs(userId);
   const target = all.find((w) => w.id === workflowId);
   // Require a usable step sequence on the target, or computePathSignature throws.
-  if (!target?.processOutput?.processDefinition?.stepDefinitions) return null;
+  if (!target?.processOutput?.processDefinition?.stepDefinitions) {
+    console.warn(`[variants] ${workflowId}: target missing processOutput.processDefinition.stepDefinitions — returning null (single-run view)`);
+    return null;
+  }
 
   const withOutput = all.filter(
     (w) => w.processOutput?.processDefinition?.stepDefinitions != null,
@@ -467,9 +470,17 @@ export async function analyzeWorkflowVariants(
   const memberSet = new Set(memberIds);
 
   const bundles = loadBundlesForWorkflows(all.filter((w) => memberSet.has(w.id)));
-  if (bundles.length === 0) return null;
+  if (bundles.length === 0) {
+    console.warn(`[variants] ${workflowId}: 0 bundles after gather — returning null`);
+    return null;
+  }
 
-  return analyzePortfolio({ runs: bundles });
+  const result = analyzePortfolio({ runs: bundles });
+  console.log(
+    `[variants] ${workflowId}: gathered ${memberIds.length}/${withOutput.length} similar runs → ` +
+    `${result.variants?.variantCount ?? '?'} variant(s), ${result.metrics?.runCount ?? bundles.length} run(s)`,
+  );
+  return result;
 }
 
 // ─── Analyze portfolio (all or subset) ──────────────────────────────────────

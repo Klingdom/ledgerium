@@ -57,8 +57,12 @@ interface Props {
   error?: string | null;
   /** Multi-run variant intelligence (PortfolioIntelligence) for the Variants map. */
   variantIntelligence?: any;
+  /** Load status for the variants tab (drives loading/error/forbidden states). */
+  variantsStatus?: 'idle' | 'loading' | 'loaded' | 'unprocessed' | 'forbidden' | 'error' | undefined;
   /** Called once when the user first opens variants mode, to lazy-load the above. */
-  onRequestVariants?: () => void;
+  onRequestVariants?: (() => void) | undefined;
+  /** Explicit retry for the variants load (clears the fire-once guard). */
+  onRetryVariants?: (() => void) | undefined;
 }
 
 // ─── Default toolbar state ────────────────────────────���──────────────────────
@@ -81,7 +85,9 @@ export function WorkflowPageShell({
   isLoading,
   error,
   variantIntelligence,
+  variantsStatus,
   onRequestVariants,
+  onRetryVariants,
 }: Props) {
   // ── State ──────────────────────��───────────────────────────��────────────
 
@@ -310,6 +316,8 @@ export function WorkflowPageShell({
             <WorkflowVariantsMap
               graph={viewModel.graph}
               intelligence={variantIntelligence}
+              status={variantsStatus}
+              onRetry={onRetryVariants}
               onSelectNode={handleSelectNode}
             />
           )}

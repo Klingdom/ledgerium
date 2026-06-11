@@ -30,6 +30,10 @@ import { formatDuration } from '@/lib/format';
 interface Props {
   graph: NormalizedViewModel;
   intelligence?: any;
+  /** Load status — drives loading/error/forbidden/unprocessed states. */
+  status?: 'idle' | 'loading' | 'loaded' | 'unprocessed' | 'forbidden' | 'error' | undefined;
+  /** Retry the variants load. */
+  onRetry?: (() => void) | undefined;
   onSelectNode: (id: string | null) => void;
 }
 
@@ -164,7 +168,7 @@ function classifyPaths(paths: ViewVariantPath[], graph: NormalizedViewModel): Cl
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
-export function WorkflowVariantsMap({ graph, intelligence, onSelectNode }: Props) {
+export function WorkflowVariantsMap({ graph, intelligence, status, onRetry, onSelectNode }: Props) {
   const variantData = useMemo(() => buildVariantData(graph, intelligence), [graph, intelligence]);
   const paths = useMemo(() => classifyPaths(variantData.paths, graph), [variantData.paths, graph]);
 
@@ -178,6 +182,13 @@ export function WorkflowVariantsMap({ graph, intelligence, onSelectNode }: Props
   const comparePath = comparePathId ? paths.find(p => p.id === comparePathId) ?? null : null;
 
   const standardPath = paths.find(p => p.isStandard) ?? paths[0] ?? null;
+
+  // Surface the REAL load state instead of the misleading "single recording" view
+  // when the variant intelligence failed/loading/gated.
+  if (status === 'forbidden') return <VariantsStateView kind="forbidden" />;
+  if (status === 'error') return <VariantsStateView kind="error" onRetry={onRetry} />;
+  if (status === 'unprocessed') return <VariantsStateView kind="unprocessed" onRetry={onRetry} />;
+  if (status === 'loading' || status === 'idle') return <VariantsStateView kind="loading" />;
 
   // No multi-variant data: either a true single recording, OR multiple runs that
   // all followed the SAME path (consistent — zero variation, NOT "single recording").
@@ -662,6 +673,54 @@ function VariantInsightsCards({
           </div>
         );
       })}
+    </div>
+  );
+}
+
+// ─── Load-state views (loading / error / forbidden / unprocessed) ─────────────
+
+function VariantsStateView({
+  kind,
+  onRetry,
+}: {
+  kind: 'loading' | 'error' | 'forbidden' | 'unprocessed';
+  onRetry?: (() => void) | undefined;
+}) {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center p-6">
+      <div className="max-w-md text-center">
+        {kind === 'loading' && (
+          <>
+            <div className="mx-auto mb-3 h-6 w-6 animate-spin rounded-full border-2 border-[var(--border-subtle)] border-t-violet-600" />
+            <p className="text-ds-sm font-medium text-[var(--content-primary)]">Analyzing runs…</p>
+            <p className="mt-1 text-[11px] text-[var(--content-tertiary)]">Gathering similar recordings and comparing how they differ.</p>
+          </>
+        )}
+        {kind === 'forbidden' && (
+          <>
+            <div className="mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-violet-50"><Zap className="h-4 w-4 text-violet-600" /></div>
+            <p className="text-ds-sm font-medium text-[var(--content-primary)]">Variant analysis is a Team feature</p>
+            <p className="mt-1 text-[11px] text-[var(--content-tertiary)]">Upgrade to compare how your process varies across runs.</p>
+            <a href="/pricing" className="mt-3 inline-block rounded-lg bg-violet-600 px-3 py-1.5 text-[11px] font-medium text-white hover:bg-violet-700">See plans →</a>
+          </>
+        )}
+        {kind === 'unprocessed' && (
+          <>
+            <div className="mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-blue-50"><Info className="h-4 w-4 text-blue-500" /></div>
+            <p className="text-ds-sm font-medium text-[var(--content-primary)]">This recording isn&apos;t analyzed yet</p>
+            <p className="mt-1 text-[11px] text-[var(--content-tertiary)]">It needs to finish processing before variant analysis can run.</p>
+            {onRetry && <button onClick={onRetry} className="mt-3 rounded-lg border border-[var(--border-default)] px-3 py-1.5 text-[11px] font-medium text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]">Retry</button>}
+          </>
+        )}
+        {kind === 'error' && (
+          <>
+            <div className="mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-red-50"><AlertTriangle className="h-4 w-4 text-red-500" /></div>
+            <p className="text-ds-sm font-medium text-[var(--content-primary)]">Couldn&apos;t load variant analysis</p>
+            <p className="mt-1 text-[11px] text-[var(--content-tertiary)]">Something went wrong gathering the runs. Try again.</p>
+            {onRetry && <button onClick={onRetry} className="mt-3 rounded-lg border border-[var(--border-default)] px-3 py-1.5 text-[11px] font-medium text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]">Retry</button>}
+          </>
+        )}
+      </div>
     </div>
   );
 }
