@@ -355,6 +355,7 @@ function DashboardPageContent() {
 
   // Ref to ensure auto-seed fires only once per session
   const hasSeedAttempted = useRef<boolean>(false);
+  const adminSeedFired = useRef<boolean>(false);
 
   // View mode toggle
   const [viewMode, setViewMode] = useState<ViewMode>('workflows');
@@ -490,6 +491,19 @@ function DashboardPageContent() {
     track({ event: 'sample_workflow_auto_seeded' });
     handleLoadSample();
   }, [isLoading, stats, loadingSample]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Admin auto-seed: ensure the Process Variants demo ("Approve Expense Report")
+  // exists on allowlisted admin accounts without a click. Server-gated — non-admins
+  // get a fast no-op; idempotent. Fires once per load; refetches only if it created.
+  useEffect(() => {
+    if (isLoading) return;
+    if (adminSeedFired.current) return;
+    adminSeedFired.current = true;
+    fetch('/api/admin/seed-sample-variants', { method: 'POST' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d?.created) fetchWorkflows(); })
+      .catch(() => { /* non-fatal */ });
+  }, [isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Tag management handlers ────────────────────────────────────────────────
 
