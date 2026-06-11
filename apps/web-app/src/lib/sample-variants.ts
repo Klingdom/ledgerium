@@ -146,8 +146,15 @@ export async function ensureSampleVariants(userId: string): Promise<EnsureSample
 
     }
 
-    // Group + compute intelligence so the dashboard + Variants tab reflect the runs.
-    await clusterWorkflows(userId);
+    // Group + compute intelligence (BEST-EFFORT) so the dashboard shows the runs
+    // grouped. The Variants tab also gathers the 8 via read-time similarity, so a
+    // slow/failed clusterWorkflows on a large portfolio must NOT block the seed —
+    // the 8 workflows are already persisted above.
+    try {
+      await clusterWorkflows(userId);
+    } catch (err) {
+      console.warn('[ensureSampleVariants] clusterWorkflows failed (non-fatal)', (err as Error)?.message);
+    }
 
     return primaryId ? { id: primaryId, created: true, count: RECORDINGS.length } : null;
   } catch (err) {

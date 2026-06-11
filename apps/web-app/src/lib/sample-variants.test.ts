@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { analyzePortfolio } from '@ledgerium/intelligence-engine';
+import { analyzePortfolio, clusterSignatures, computePathSignature } from '@ledgerium/intelligence-engine';
 import { runProcessEngine } from '@/lib/ingestion';
 import { buildVariantStoryMap, type StoryVariantInput } from '@/lib/variantStoryMap';
 import { buildSampleVariantBundles } from './sample-variants';
@@ -32,6 +32,14 @@ describe('sample-variants demo data', () => {
     // The standard path is the most frequent (4 of 8 runs).
     expect(standard!.runCount).toBe(4);
     expect(intel.metrics.runCount).toBe(8);
+  });
+
+  it('clusters all 8 recordings into ONE cohort (Variants tab works without persisted grouping)', () => {
+    const members = runs.map((r, i) => ({ id: `w${i}`, signature: computePathSignature(r) }));
+    const { clusters } = clusterSignatures(members);
+    // single-link should merge all 8 around the standard-path hub
+    expect(clusters).toHaveLength(1);
+    expect(clusters[0]!.size).toBe(8);
   });
 
   it('produces a branchy story map (spine + ≥2 branches that rejoin)', () => {
