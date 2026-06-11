@@ -53,7 +53,7 @@ function StoryNodeComponent({ data }: { data: any }) {
           {style.label}
         </span>
         {data.isDecision && (
-          <span className="mt-0.5 block text-[8px] font-semibold text-emerald-700">decision</span>
+          <span className="mt-0.5 block text-[8px] font-semibold text-amber-700">diverges</span>
         )}
       </div>
       <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />

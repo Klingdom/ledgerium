@@ -106,16 +106,27 @@ async function getWorkflowsWithOutputs(userId: string, workflowIds?: string[]): 
     orderBy: { createdAt: 'desc' },
   });
 
-  return workflows.map((w) => ({
-    id: w.id,
-    userId: w.userId,
-    title: w.title,
-    durationMs: w.durationMs,
-    stepCount: w.stepCount,
-    processOutput: w.artifacts[0]?.contentJson
-      ? JSON.parse(w.artifacts[0].contentJson)
-      : null,
-  }));
+  return workflows.map((w) => {
+    // Guard per-row: one corrupt artifact must not throw and 500 the whole
+    // user's analysis (e.g. every variants-map open). Skip the bad row instead.
+    let processOutput: WorkflowWithArtifacts['processOutput'] = null;
+    const raw = w.artifacts[0]?.contentJson;
+    if (raw) {
+      try {
+        processOutput = JSON.parse(raw);
+      } catch {
+        processOutput = null;
+      }
+    }
+    return {
+      id: w.id,
+      userId: w.userId,
+      title: w.title,
+      durationMs: w.durationMs,
+      stepCount: w.stepCount,
+      processOutput,
+    };
+  });
 }
 
 // ─── Auto-cluster into ProcessDefinitions ───────────────────────────────────
@@ -436,9 +447,12 @@ export async function analyzeWorkflowVariants(
 ): Promise<PortfolioIntelligence | null> {
   const all = await getWorkflowsWithOutputs(userId);
   const target = all.find((w) => w.id === workflowId);
-  if (!target?.processOutput) return null;
+  // Require a usable step sequence on the target, or computePathSignature throws.
+  if (!target?.processOutput?.processDefinition?.stepDefinitions) return null;
 
-  const withOutput = all.filter((w) => w.processOutput);
+  const withOutput = all.filter(
+    (w) => w.processOutput?.processDefinition?.stepDefinitions != null,
+  );
   const { clusters } = clusterSignatures(
     withOutput.map((w) => ({
       id: w.id,

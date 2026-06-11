@@ -179,9 +179,11 @@ export function WorkflowVariantsMap({ graph, intelligence, onSelectNode }: Props
 
   const standardPath = paths.find(p => p.isStandard) ?? paths[0] ?? null;
 
-  // No variant data state
+  // No multi-variant data: either a true single recording, OR multiple runs that
+  // all followed the SAME path (consistent — zero variation, NOT "single recording").
   if (!variantData.hasVariantData) {
-    return <SinglePathView graph={graph} path={paths[0] ?? null} onSelectNode={onSelectNode} />;
+    const totalRuns = variantData.paths.reduce((s, p) => s + (p.runCount ?? 0), 0);
+    return <SinglePathView graph={graph} path={paths[0] ?? null} totalRuns={totalRuns} onSelectNode={onSelectNode} />;
   }
 
   return (
@@ -669,30 +671,45 @@ function VariantInsightsCards({
 function SinglePathView({
   graph,
   path,
+  totalRuns,
   onSelectNode,
 }: {
   graph: NormalizedViewModel;
   path: ClassifiedPath | null;
+  totalRuns: number;
   onSelectNode: (id: string | null) => void;
 }) {
   const taskNodes = graph.nodes.filter(n => n.nodeType === 'task' || n.nodeType === 'exception' || n.nodeType === 'decision');
+  const isConsistentMultiRun = totalRuns >= 2;
 
   return (
     <div className="absolute inset-0 overflow-y-auto p-5">
       <div className="max-w-2xl mx-auto space-y-4">
-        {/* Info banner */}
-        <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-start gap-3">
-          <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-          <div>
-            <p className="text-ds-xs font-medium text-blue-800">Single recording — no variants to compare yet</p>
-            <p className="text-[10px] text-blue-600 mt-0.5">
-              Record this workflow multiple times to discover how the process varies across runs. Variant analysis requires at least 2 recordings of the same process.
-            </p>
+        {/* Banner — consistent multi-run (zero variation) vs a true single recording */}
+        {isConsistentMultiRun ? (
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 flex items-start gap-3">
+            <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-ds-xs font-medium text-emerald-800">Consistent process — {totalRuns} runs, all the same path</p>
+              <p className="text-[10px] text-emerald-700 mt-0.5">
+                All {totalRuns} recordings followed the identical sequence, so there&apos;s no variation to compare yet. The standard path below is what every run did.
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-start gap-3">
+            <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-ds-xs font-medium text-blue-800">Single recording — no variants to compare yet</p>
+              <p className="text-[10px] text-blue-600 mt-0.5">
+                Record this workflow multiple times to discover how the process varies across runs. Variant analysis requires at least 2 recordings of the same process.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Current path summary */}
-        {path && <PathSummaryCard path={path} totalRuns={1} />}
+        {path && <PathSummaryCard path={path} totalRuns={Math.max(1, totalRuns)} />}
 
         {/* Step sequence */}
         <div className="bg-[var(--surface-elevated)] rounded-xl border border-[var(--border-default)] shadow-sm overflow-hidden">
