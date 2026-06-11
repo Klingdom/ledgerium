@@ -456,15 +456,23 @@ export async function analyzeWorkflowVariants(
   const withOutput = all.filter(
     (w) => w.processOutput?.processDefinition?.stepDefinitions != null,
   );
-  const { clusters } = clusterSignatures(
-    withOutput.map((w) => ({
-      id: w.id,
-      signature: computePathSignature({
-        processRun: w.processOutput!.processRun,
-        processDefinition: w.processOutput!.processDefinition,
-      }),
-    })),
-  );
+  // Compute signatures defensively — one malformed workflow must not throw and 500
+  // the whole gather (which would silently blank the Variants tab for the user).
+  const signed: { id: string; signature: ReturnType<typeof computePathSignature> }[] = [];
+  for (const w of withOutput) {
+    try {
+      signed.push({
+        id: w.id,
+        signature: computePathSignature({
+          processRun: w.processOutput!.processRun,
+          processDefinition: w.processOutput!.processDefinition,
+        }),
+      });
+    } catch (err) {
+      console.warn(`[variants] ${workflowId}: skipping ${w.id} — computePathSignature threw`, err);
+    }
+  }
+  const { clusters } = clusterSignatures(signed);
   const memberIds =
     clusters.find((c) => c.memberIds.includes(workflowId))?.memberIds ?? [workflowId];
   const memberSet = new Set(memberIds);
@@ -475,12 +483,17 @@ export async function analyzeWorkflowVariants(
     return null;
   }
 
-  const result = analyzePortfolio({ runs: bundles });
-  console.log(
-    `[variants] ${workflowId}: gathered ${memberIds.length}/${withOutput.length} similar runs → ` +
-    `${result.variants?.variantCount ?? '?'} variant(s), ${result.metrics?.runCount ?? bundles.length} run(s)`,
-  );
-  return result;
+  try {
+    const result = analyzePortfolio({ runs: bundles });
+    console.log(
+      `[variants] ${workflowId}: gathered ${memberIds.length}/${withOutput.length} similar runs → ` +
+      `${result.variants?.variantCount ?? '?'} variant(s), ${result.metrics?.runCount ?? bundles.length} run(s)`,
+    );
+    return result;
+  } catch (err) {
+    console.error(`[variants] ${workflowId}: analyzePortfolio threw on ${bundles.length} bundle(s)`, err);
+    return null;
+  }
 }
 
 // ─── Analyze portfolio (all or subset) ──────────────────────────────────────
