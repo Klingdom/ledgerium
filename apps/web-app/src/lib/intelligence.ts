@@ -69,6 +69,8 @@ interface WorkflowWithArtifacts {
   title: string;
   durationMs: number | null;
   stepCount: number | null;
+  /** The persisted process group this recording belongs to (the dashboard "N runs"). */
+  processDefinitionId: string | null;
   processOutput: { processRun: ProcessRun; processDefinition: EngineProcessDefinition; sop?: SOP } | null;
 }
 
@@ -124,6 +126,7 @@ async function getWorkflowsWithOutputs(userId: string, workflowIds?: string[]): 
       title: w.title,
       durationMs: w.durationMs,
       stepCount: w.stepCount,
+      processDefinitionId: w.processDefinitionId ?? null,
       processOutput,
     };
   });
@@ -456,8 +459,17 @@ export async function analyzeWorkflowVariants(
   const withOutput = all.filter(
     (w) => w.processOutput?.processDefinition?.stepDefinitions != null,
   );
-  // Compute signatures defensively — one malformed workflow must not throw and 500
-  // the whole gather (which would silently blank the Variants tab for the user).
+
+  // Cohort 1 — the PERSISTED process group (exactly what the dashboard counts as
+  // "N runs"). This guarantees the runs the user already sees grouped are analyzed
+  // together, regardless of the similarity threshold.
+  const groupIds = target.processDefinitionId
+    ? withOutput.filter((w) => w.processDefinitionId === target.processDefinitionId).map((w) => w.id)
+    : [];
+
+  // Cohort 2 — similarity gather (catches near-identical runs not yet grouped, e.g.
+  // in separate process definitions). Signatures computed defensively so one
+  // malformed workflow can't throw and 500 the whole request.
   const signed: { id: string; signature: ReturnType<typeof computePathSignature> }[] = [];
   for (const w of withOutput) {
     try {
@@ -473,11 +485,11 @@ export async function analyzeWorkflowVariants(
     }
   }
   const { clusters } = clusterSignatures(signed);
-  const memberIds =
-    clusters.find((c) => c.memberIds.includes(workflowId))?.memberIds ?? [workflowId];
-  const memberSet = new Set(memberIds);
+  const clusterIds = clusters.find((c) => c.memberIds.includes(workflowId))?.memberIds ?? [];
 
-  const bundles = loadBundlesForWorkflows(all.filter((w) => memberSet.has(w.id)));
+  // Union of both cohorts (+ always the target itself).
+  const memberSet = new Set<string>([workflowId, ...groupIds, ...clusterIds]);
+  const bundles = loadBundlesForWorkflows(withOutput.filter((w) => memberSet.has(w.id)));
   if (bundles.length === 0) {
     console.warn(`[variants] ${workflowId}: 0 bundles after gather — returning null`);
     return null;
@@ -486,8 +498,9 @@ export async function analyzeWorkflowVariants(
   try {
     const result = analyzePortfolio({ runs: bundles });
     console.log(
-      `[variants] ${workflowId}: gathered ${memberIds.length}/${withOutput.length} similar runs → ` +
-      `${result.variants?.variantCount ?? '?'} variant(s), ${result.metrics?.runCount ?? bundles.length} run(s)`,
+      `[variants] ${workflowId}: group=${groupIds.length} cluster=${clusterIds.length} → ` +
+      `${memberSet.size} run(s), ${result.variants?.variantCount ?? '?'} variant(s), ` +
+      `metrics.runCount=${result.metrics?.runCount ?? bundles.length}`,
     );
     return result;
   } catch (err) {
