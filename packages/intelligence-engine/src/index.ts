@@ -223,7 +223,7 @@ export type {
 
 // ─── Diverge → Reconverge analysis (Process Variation Phase 2, C+4) ───────────
 // Pure + deterministic. LCS-backbone alignment + DFG split/join cross-check.
-export { analyzeDivergence, DIVERGENCE_ALGORITHM } from './divergenceAnalyzer.js';
+export { analyzeDivergence, divergentStepIndices, DIVERGENCE_ALGORITHM } from './divergenceAnalyzer.js';
 export type {
   DivergenceRun,
   DivergenceBranch,

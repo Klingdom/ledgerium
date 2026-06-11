@@ -15,6 +15,8 @@
 
 import {
   analyzePortfolio,
+  computePathSignature,
+  clusterSignatures,
   analyzeSopAlignment,
   computeStandardizationScore,
   computeDocumentationDriftScore,
@@ -409,6 +411,48 @@ export async function analyzeWorkflow(userId: string, workflowId: string): Promi
   if (workflows.length === 0) return null;
 
   const bundles = loadBundlesForWorkflows(workflows);
+  if (bundles.length === 0) return null;
+
+  return analyzePortfolio({ runs: bundles });
+}
+
+// ─── Multi-run variant analysis (Process Variants map) ──────────────────────
+
+/**
+ * Analyze the runs that are SIMILAR to the target workflow, together, so the
+ * Process Variants map can show how the process actually varies across runs.
+ *
+ * The comparison set is assembled at request time with the deterministic
+ * clustering engine. This is READ-ONLY — it writes nothing, so it carries NONE of
+ * the ProcessDefinition key-churn risk of the persisted `clusterWorkflows` path; it
+ * simply groups the user's recordings by path similarity to find the cohort that
+ * belongs to this process, then runs the standard portfolio analysis over them.
+ *
+ * Falls back to the single run when no similar runs exist (honest single-run view).
+ */
+export async function analyzeWorkflowVariants(
+  userId: string,
+  workflowId: string,
+): Promise<PortfolioIntelligence | null> {
+  const all = await getWorkflowsWithOutputs(userId);
+  const target = all.find((w) => w.id === workflowId);
+  if (!target?.processOutput) return null;
+
+  const withOutput = all.filter((w) => w.processOutput);
+  const { clusters } = clusterSignatures(
+    withOutput.map((w) => ({
+      id: w.id,
+      signature: computePathSignature({
+        processRun: w.processOutput!.processRun,
+        processDefinition: w.processOutput!.processDefinition,
+      }),
+    })),
+  );
+  const memberIds =
+    clusters.find((c) => c.memberIds.includes(workflowId))?.memberIds ?? [workflowId];
+  const memberSet = new Set(memberIds);
+
+  const bundles = loadBundlesForWorkflows(all.filter((w) => memberSet.has(w.id)));
   if (bundles.length === 0) return null;
 
   return analyzePortfolio({ runs: bundles });

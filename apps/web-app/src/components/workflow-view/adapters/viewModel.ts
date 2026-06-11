@@ -215,6 +215,8 @@ export interface ViewVariantPath {
   stepCategories: string[];
   /** Step ordinals where this path diverges from standard. */
   divergencePoints: number[];
+  /** Source run ids that followed this path — the evidence link. */
+  evidenceRunIds: string[];
 }
 
 // ─── Complete normalized view model ──────────────────────────────────────────

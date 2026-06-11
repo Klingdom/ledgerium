@@ -7,6 +7,7 @@
  * with divergence highlighting. Falls back to single-path display.
  */
 
+import { divergentStepIndices } from '@ledgerium/intelligence-engine';
 import type { NormalizedViewModel, ViewNode, ViewVariantPath } from './viewModel';
 
 // ─── Output types ────────────────────────────────────────────────────────────
@@ -88,7 +89,7 @@ function extractVariantsFromIntelligence(intelligence: any): ViewVariantPath[] {
   if (!intelligence?.variants?.variants) return [];
 
   const rawVariants: any[] = intelligence.variants.variants;
-  return rawVariants.map((v: any, i: number) => ({
+  const base: ViewVariantPath[] = rawVariants.map((v: any, i: number) => ({
     id: v.variantId ?? `variant-${i + 1}`,
     label: v.isStandardPath ? 'Standard Path' : `Variant ${i + 1}`,
     isStandard: v.isStandardPath === true,
@@ -97,5 +98,15 @@ function extractVariantsFromIntelligence(intelligence: any): ViewVariantPath[] {
     avgDurationMs: null,
     stepCategories: v.pathSignature?.stepCategories ?? [],
     divergencePoints: [],
+    evidenceRunIds: Array.isArray(v.evidenceRunIds) ? v.evidenceRunIds : [],
   }));
+
+  // Real divergence points: LCS-aligned (not positional) against the standard path.
+  const standard = base.find((b) => b.isStandard) ?? base[0];
+  const backbone = standard?.stepCategories ?? [];
+  return base.map((b) =>
+    b.isStandard
+      ? b
+      : { ...b, divergencePoints: divergentStepIndices(b.stepCategories, backbone) },
+  );
 }

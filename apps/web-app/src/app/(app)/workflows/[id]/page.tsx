@@ -49,6 +49,10 @@ export default function WorkflowDetailPage() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [intelligenceData, setIntelligenceData] = useState<any>(null);
   const [agentIntelligenceData, setAgentIntelligenceData] = useState<any>(null);
+  // Multi-run variant intelligence for the Process Variants map (lazy-loaded when
+  // the user opens variants mode). Separate from the single-run report intelligence.
+  const [variantIntelligence, setVariantIntelligence] = useState<any>(null);
+  const variantLoadFiredRef = useRef(false);
   // Loading flag still drives handleRunIntelligence's fetch lifecycle; the value
   // is no longer rendered (IntelligenceTab retired — WorkflowReportPage shows the
   // intelligence sections directly).
@@ -182,6 +186,24 @@ export default function WorkflowDetailPage() {
       // Non-fatal — user can retry from within the report page
     } finally {
       setIntelligenceLoading(false);
+    }
+  }
+
+  // Lazy-load multi-run variant intelligence the first time the user opens the
+  // Process Variants map. Fire-once; allow retry on failure.
+  async function handleLoadVariants() {
+    if (variantLoadFiredRef.current) return;
+    variantLoadFiredRef.current = true;
+    try {
+      const res = await fetch(`/api/workflows/${id}/variants`, { method: 'POST' });
+      if (!res.ok) {
+        variantLoadFiredRef.current = false;
+        return;
+      }
+      const result = await res.json();
+      setVariantIntelligence(result.intelligence ?? null);
+    } catch {
+      variantLoadFiredRef.current = false; // non-fatal — allow retry
     }
   }
 
@@ -389,6 +411,8 @@ export default function WorkflowDetailPage() {
               createdAt: workflow.createdAt,
               status: workflow.status ?? 'active',
             }}
+            variantIntelligence={variantIntelligence}
+            onRequestVariants={handleLoadVariants}
           />
         </div>
       )}

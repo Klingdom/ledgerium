@@ -10,7 +10,7 @@
  * `canvasSlot` prop — each mode provides its own canvas component.
  */
 
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { WorkflowHeader } from './WorkflowHeader';
 import { WorkflowModeSwitcher } from './WorkflowModeSwitcher';
 import { WorkflowToolbar } from './WorkflowToolbar';
@@ -55,6 +55,10 @@ interface Props {
   isLoading?: boolean;
   /** Error message if data failed to load. */
   error?: string | null;
+  /** Multi-run variant intelligence (PortfolioIntelligence) for the Variants map. */
+  variantIntelligence?: any;
+  /** Called once when the user first opens variants mode, to lazy-load the above. */
+  onRequestVariants?: () => void;
 }
 
 // ─── Default toolbar state ────────────────────────────���──────────────────────
@@ -76,6 +80,8 @@ export function WorkflowPageShell({
   workflowRecord,
   isLoading,
   error,
+  variantIntelligence,
+  onRequestVariants,
 }: Props) {
   // ── State ──────────────────────��───────────────────────────��────────────
 
@@ -97,6 +103,11 @@ export function WorkflowPageShell({
   }, [processOutput, processMapProp, sopArtifact]);
 
   const viewModel = useWorkflowViewModel(mergedOutput, workflowRecord);
+
+  // Lazy-load multi-run variant intelligence the first time variants mode opens.
+  useEffect(() => {
+    if (mode === 'variants' && !variantIntelligence) onRequestVariants?.();
+  }, [mode, variantIntelligence, onRequestVariants]);
 
   // ── Inspector data resolution (from normalized graph) ──────────────────
   // Uses the normalized ViewNode/ViewEdge/ViewPhase objects — no raw engine
@@ -298,7 +309,7 @@ export function WorkflowPageShell({
           {mode === 'variants' && (
             <WorkflowVariantsMap
               graph={viewModel.graph}
-              intelligence={processOutput?.intelligence ?? processOutput?.processDefinition?.intelligence}
+              intelligence={variantIntelligence}
               onSelectNode={handleSelectNode}
             />
           )}

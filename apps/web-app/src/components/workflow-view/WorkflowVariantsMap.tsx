@@ -21,6 +21,7 @@ import type { NormalizedViewModel, ViewNode } from './adapters/viewModel';
 import { buildVariantData } from './adapters/variantAdapter';
 import type { ViewVariantPath } from './adapters/viewModel';
 import { CATEGORY_STYLES } from './constants';
+import { WorkflowVariantStoryMap } from './WorkflowVariantStoryMap';
 import { formatDuration } from '@/lib/format';
 
 // ─── Props ───────────────────────────────────────────────────────────────────
@@ -58,6 +59,7 @@ function classifyPaths(paths: ViewVariantPath[], graph: NormalizedViewModel): Cl
       avgDurationMs: graph.totalDurationMs,
       stepCategories: graph.nodes.filter(n => n.nodeType === 'task').map(n => n.category),
       divergencePoints: [],
+      evidenceRunIds: [],
       role: 'standard',
       roleLabel: 'Observed',
       roleColor: '#059669',
@@ -73,13 +75,26 @@ function classifyPaths(paths: ViewVariantPath[], graph: NormalizedViewModel): Cl
   const standardDur = standard.avgDurationMs ?? 0;
   const standardSteps = standard.stepCategories.length;
 
-  // Find fastest/longest by duration if available
+  // Find fastest/longest by duration if available. Deterministic tie-break by id
+  // so equal-duration paths always resolve to the same winner regardless of order.
   const withDuration = paths.filter(p => p.avgDurationMs !== null);
   const fastestId = withDuration.length > 1
-    ? withDuration.reduce((min, p) => (p.avgDurationMs ?? Infinity) < (min.avgDurationMs ?? Infinity) ? p : min).id
+    ? withDuration.reduce((min, p) => {
+        const dp = p.avgDurationMs ?? Infinity;
+        const dm = min.avgDurationMs ?? Infinity;
+        if (dp < dm) return p;
+        if (dp === dm && p.id < min.id) return p;
+        return min;
+      }).id
     : null;
   const longestId = withDuration.length > 1
-    ? withDuration.reduce((max, p) => (p.avgDurationMs ?? 0) > (max.avgDurationMs ?? 0) ? p : max).id
+    ? withDuration.reduce((max, p) => {
+        const dp = p.avgDurationMs ?? 0;
+        const dm = max.avgDurationMs ?? 0;
+        if (dp > dm) return p;
+        if (dp === dm && p.id < max.id) return p;
+        return max;
+      }).id
     : null;
 
   return paths.map(p => {
@@ -139,10 +154,10 @@ function classifyPaths(paths: ViewVariantPath[], graph: NormalizedViewModel): Cl
       stepCountDelta: stepDelta,
     };
   }).sort((a, b) => {
-    // Standard first, then by frequency descending
-    if (a.isStandard) return -1;
-    if (b.isStandard) return 1;
-    return b.frequency - a.frequency;
+    // Standard first, then by frequency descending, with a stable id tie-break.
+    if (a.isStandard && !b.isStandard) return -1;
+    if (b.isStandard && !a.isStandard) return 1;
+    return (b.frequency - a.frequency) || a.id.localeCompare(b.id);
   });
 }
 
@@ -156,6 +171,7 @@ export function WorkflowVariantsMap({ graph, intelligence, onSelectNode }: Props
     paths.find(p => p.isStandard)?.id ?? paths[0]?.id ?? null,
   );
   const [comparePathId, setComparePathId] = useState<string | null>(null);
+  const [view, setView] = useState<'map' | 'list'>('map');
 
   const selectedPath = paths.find(p => p.id === selectedPathId) ?? null;
   const comparePath = comparePathId ? paths.find(p => p.id === comparePathId) ?? null : null;
@@ -168,7 +184,31 @@ export function WorkflowVariantsMap({ graph, intelligence, onSelectNode }: Props
   }
 
   return (
-    <div className="absolute inset-0 flex overflow-hidden">
+    <div className="absolute inset-0 flex flex-col">
+      {/* View toggle: Map (story map) | List (path cards) */}
+      <div className="flex items-center px-4 py-1.5 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)]">
+        <span className="flex-1" />
+        <div className="flex overflow-hidden rounded-lg border border-[var(--border-subtle)] text-[10px] font-medium">
+          <button
+            onClick={() => setView('map')}
+            className={`px-2.5 py-1 transition-colors ${view === 'map' ? 'bg-violet-600 text-white' : 'text-[var(--content-secondary)] hover:bg-[var(--surface-elevated)]'}`}
+          >
+            Map
+          </button>
+          <button
+            onClick={() => setView('list')}
+            className={`px-2.5 py-1 transition-colors ${view === 'list' ? 'bg-violet-600 text-white' : 'text-[var(--content-secondary)] hover:bg-[var(--surface-elevated)]'}`}
+          >
+            List
+          </button>
+        </div>
+      </div>
+
+      <div className="relative flex-1 overflow-hidden">
+        {view === 'map' ? (
+          <WorkflowVariantStoryMap variants={variantData.paths} onSelectNode={onSelectNode} />
+        ) : (
+          <div className="absolute inset-0 flex overflow-hidden">
       {/* ── Left: Path cards rail ──────────────────────────────────────── */}
       <div className="w-80 flex-shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-elevated)] overflow-y-auto">
         {/* Overview header */}
@@ -242,6 +282,9 @@ export function WorkflowVariantsMap({ graph, intelligence, onSelectNode }: Props
 
             {/* Insights cards */}
             <VariantInsightsCards path={selectedPath} graph={graph} standardPath={standardPath} />
+          </div>
+        )}
+      </div>
           </div>
         )}
       </div>
@@ -448,8 +491,6 @@ function StepSequenceView({
   standardPath: ClassifiedPath | null;
   onSelectNode: (id: string | null) => void;
 }) {
-  const standardCategories = standardPath?.stepCategories ?? [];
-
   return (
     <div className="bg-[var(--surface-elevated)] rounded-xl border border-[var(--border-default)] shadow-sm overflow-hidden">
       <div className="px-4 py-3 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)]">
@@ -464,8 +505,9 @@ function StepSequenceView({
       <div className="divide-y divide-[var(--border-subtle)]">
         {path.stepCategories.map((cat, i) => {
           const style = CATEGORY_STYLES[cat as keyof typeof CATEGORY_STYLES] ?? CATEGORY_STYLES.single_action;
-          const matchesStandard = i < standardCategories.length && standardCategories[i] === cat;
-          const isDivergence = !matchesStandard && standardCategories.length > 0 && !path.isStandard;
+          // LCS-aligned divergence (not positional): only steps genuinely off the
+          // standard backbone are flagged — an inserted step no longer cascades.
+          const isDivergence = !path.isStandard && path.divergencePoints.includes(i);
 
           // Try to find the corresponding node in the graph
           const taskNodes = graph.nodes.filter(n => n.nodeType === 'task' || n.nodeType === 'exception' || n.nodeType === 'decision');

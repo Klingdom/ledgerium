@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { analyzeDivergence, type DivergenceRun } from './divergenceAnalyzer.js';
+import { analyzeDivergence, divergentStepIndices, type DivergenceRun } from './divergenceAnalyzer.js';
 
 const BACKBONE = ['click', 'fill', 'submit'];
 
@@ -117,6 +117,26 @@ describe('analyzeDivergence — determinism', () => {
     const runs = [run('a', ['click', 'fill', 'validate', 'submit'])];
     expect(analyzeDivergence(BACKBONE, runs)).toEqual(analyzeDivergence(BACKBONE, runs));
     expect(analyzeDivergence(BACKBONE, runs).version).toBe('lcs-backbone/1.0.0#min1');
+  });
+});
+
+describe('divergentStepIndices (LCS, not positional)', () => {
+  it('returns [] when the steps follow the backbone exactly', () => {
+    expect(divergentStepIndices(['click', 'fill', 'submit'], BACKBONE)).toEqual([]);
+  });
+
+  it('flags ONLY the inserted step — not everything after it (the tab bug)', () => {
+    // positional comparison would mark indices 2 AND 3 as divergent; LCS marks only 2.
+    expect(divergentStepIndices(['click', 'fill', 'validate', 'submit'], BACKBONE)).toEqual([2]);
+  });
+
+  it('flags head and tail extras correctly', () => {
+    expect(divergentStepIndices(['login', 'click', 'fill', 'submit'], BACKBONE)).toEqual([0]);
+    expect(divergentStepIndices(['click', 'fill', 'submit', 'logout'], BACKBONE)).toEqual([3]);
+  });
+
+  it('a shortcut (skipped backbone step) has no divergent variant indices', () => {
+    expect(divergentStepIndices(['click', 'submit'], BACKBONE)).toEqual([]);
   });
 });
 
