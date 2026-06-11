@@ -9,6 +9,10 @@
 services:
   web:
     image: ghcr.io/klingdom/ledgerium:latest
+    # CRITICAL: always pull the freshly-pushed :latest on every deploy. Without
+    # this, `docker compose up -d` reuses the cached local image and the VPS keeps
+    # running stale code — "successful" deploys that never actually update the app.
+    pull_policy: always
     container_name: ledgerium-ai
     restart: unless-stopped
     ports:
