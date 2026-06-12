@@ -152,6 +152,20 @@ export type AnalyticsEvent =
       workflowCount: number;
       elapsedMsSinceDashboardView: number;
     }
+  // ── Batch B (2026-06-12): top-of-page band instrumentation ────────────────
+  | {
+      // Fired when a user clicks a KPI tile in the top-of-page band.
+      event: 'dashboard_kpi_tile_clicked';
+      tileId: 'total_workflows' | 'cycle_time' | 'automation_candidates' | 'avg_health';
+      value: number | null;
+    }
+  | {
+      // Fired when a user clicks a segment of the opportunity-distribution bar
+      // to filter the workflow list (ANALYTICS_DASHBOARD_REVIEW §5).
+      event: 'dashboard_opportunity_segment_clicked';
+      segment: 'automate' | 'standardize' | 'optimize' | 'monitor' | 'healthy';
+      count: number;
+    }
 
   // ── Admin ─────────────────────────────────────────────────────────────────
   /**

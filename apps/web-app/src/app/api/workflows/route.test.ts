@@ -276,6 +276,73 @@ describe('MDR-P03: request-scoped time injection (iter-037)', () => {
     expect(b1.stats.recordedThisWeek).toBe(b2.stats.recordedThisWeek);
   });
 
+  // ── Batch B (2026-06-12): top-of-page band aggregates ─────────────────────
+  it('stats includes Batch B band aggregates with the expected shapes', async () => {
+    const { auth } = await import('@/lib/auth');
+    const { hasFeature } = await import('@/lib/plans');
+    vi.mocked(auth).mockResolvedValue({
+      user: { id: 'user-1', email: 'test@test.com' },
+    } as unknown as Awaited<ReturnType<typeof auth>>);
+    vi.mocked(hasFeature).mockReturnValue(true);
+
+    const { GET } = await import('./route');
+    const response = await GET(makeGetRequest());
+    const body = (await response.json()) as {
+      stats: {
+        opportunityCounts: Record<string, number>;
+        healthBandCounts: { poor: number; fair: number; good: number };
+        medianCycleTimeMs: number | null;
+        activityByWeek: Array<{ weekStartIso: string; count: number }>;
+      };
+    };
+
+    // opportunityCounts: all five canonical tags present as numbers.
+    for (const tag of ['automate', 'standardize', 'optimize', 'monitor', 'healthy']) {
+      expect(typeof body.stats.opportunityCounts[tag]).toBe('number');
+    }
+    // The mocked workflow is tagged 'healthy' (computeWorkflowMetrics mock) → count 1.
+    expect(body.stats.opportunityCounts.healthy).toBe(1);
+
+    // healthBandCounts: three numeric bands. Mock overall=72 → fair.
+    expect(typeof body.stats.healthBandCounts.poor).toBe('number');
+    expect(body.stats.healthBandCounts.fair).toBe(1);
+
+    // medianCycleTimeMs: single workflow with avgTimeMs=115_000 → median is itself.
+    expect(body.stats.medianCycleTimeMs).toBe(115_000);
+
+    // activityByWeek: exactly 12 trailing weekly buckets, oldest-first.
+    expect(Array.isArray(body.stats.activityByWeek)).toBe(true);
+    expect(body.stats.activityByWeek).toHaveLength(12);
+    for (const bucket of body.stats.activityByWeek) {
+      expect(typeof bucket.weekStartIso).toBe('string');
+      expect(typeof bucket.count).toBe('number');
+    }
+  });
+
+  it('Batch B activityByWeek is deterministic under a frozen clock', async () => {
+    const { auth } = await import('@/lib/auth');
+    const { hasFeature } = await import('@/lib/plans');
+    vi.mocked(auth).mockResolvedValue({
+      user: { id: 'user-1', email: 'test@test.com' },
+    } as unknown as Awaited<ReturnType<typeof auth>>);
+    vi.mocked(hasFeature).mockReturnValue(true);
+
+    const frozenMs = new Date('2026-06-12T12:00:00.000Z').getTime();
+    vi.useFakeTimers();
+    vi.setSystemTime(frozenMs);
+
+    const { GET } = await import('./route');
+    const r1 = await GET(makeGetRequest());
+    const b1 = (await r1.json()) as { stats: { activityByWeek: unknown } };
+    const r2 = await GET(makeGetRequest());
+    const b2 = (await r2.json()) as { stats: { activityByWeek: unknown } };
+
+    // Identical frozen clock → byte-identical bucket array.
+    expect(JSON.stringify(b1.stats.activityByWeek)).toBe(
+      JSON.stringify(b2.stats.activityByWeek),
+    );
+  });
+
   it('computeIsStale regression: injected nowMs matches Date.now() behavior at call time', () => {
     // Validate the pure function directly — the route.ts helper is internal,
     // so we reproduce the logic here to confirm the contract.

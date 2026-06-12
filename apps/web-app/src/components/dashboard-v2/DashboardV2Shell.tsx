@@ -32,6 +32,12 @@ import { Columns3 } from 'lucide-react';
 import { track, setUserPlanForAnalytics } from '@/lib/analytics.js';
 import CommandHeader, { type TimeRange } from './CommandHeader.js';
 import InsightsStrip from './InsightsStrip.js';
+import TopBand from './band/TopBand.js';
+import type {
+  OpportunityCounts,
+  ActivityWeekBucket,
+} from '@/lib/dashboard-band-stats.js';
+import type { OpportunityTag } from '@/lib/workflow-metrics.js';
 import WorkflowList, {
   type WorkflowListState,
   applyFilters,
@@ -63,8 +69,23 @@ interface WorkflowsApiResponse {
     topInsights: Array<{ id: string; title: string; severity: string; insightType: string }>;
     /** MDR-P09 (b): server-resolved plan for free-vs-paid event segmentation */
     userPlan?: string;
+    // ── Batch B (2026-06-12): top-of-page band aggregates ───────────────────
+    recordedThisMonth?: number;
+    aiOpportunityCount?: number;
+    opportunityCounts?: OpportunityCounts;
+    medianCycleTimeMs?: number | null;
+    activityByWeek?: ActivityWeekBucket[];
   };
 }
+
+/** Default zeroed opportunity counts — used before data loads. */
+const EMPTY_OPPORTUNITY_COUNTS: OpportunityCounts = {
+  automate: 0,
+  standardize: 0,
+  optimize: 0,
+  monitor: 0,
+  healthy: 0,
+};
 
 // ── Default visible columns (ASK-1: 6-column initial default pack) ───────────
 
@@ -128,6 +149,15 @@ export default function DashboardV2Shell() {
   const [insightChips, setInsightChips] = useState<InsightChip[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+
+  // ── Batch B (2026-06-12): top-of-page band aggregates ───────────────────────
+  const [recordedThisMonth, setRecordedThisMonth] = useState<number>(0);
+  const [aiOpportunityCount, setAiOpportunityCount] = useState<number>(0);
+  const [opportunityCounts, setOpportunityCounts] = useState<OpportunityCounts>(
+    EMPTY_OPPORTUNITY_COUNTS,
+  );
+  const [medianCycleTimeMs, setMedianCycleTimeMs] = useState<number | null>(null);
+  const [activityByWeek, setActivityByWeek] = useState<ActivityWeekBucket[]>([]);
 
   // D5: Portfolio sidebar state — collapsed by default per PRD §D5
   const [portfolioSidebarOpen, setPortfolioSidebarOpen] = useState(false);
@@ -219,6 +249,12 @@ export default function DashboardV2Shell() {
       setPortfolioHealthScore(data.stats?.portfolioHealthScore ?? null);
       setPortfolioHealthScoreDelta(data.stats?.portfolioHealthScoreDelta ?? null);
       setInsightChips(data.stats?.insightChips ?? []);
+      // Batch B (2026-06-12): hydrate top-of-page band aggregates.
+      setRecordedThisMonth(data.stats?.recordedThisMonth ?? 0);
+      setAiOpportunityCount(data.stats?.aiOpportunityCount ?? 0);
+      setOpportunityCounts(data.stats?.opportunityCounts ?? EMPTY_OPPORTUNITY_COUNTS);
+      setMedianCycleTimeMs(data.stats?.medianCycleTimeMs ?? null);
+      setActivityByWeek(data.stats?.activityByWeek ?? []);
       // MDR-P09 (b): set plan for event segmentation (side-channel enriches all
       // subsequent track() calls; see setUserPlanForAnalytics in analytics.ts).
       const plan = data.stats?.userPlan;
@@ -514,6 +550,26 @@ export default function DashboardV2Shell() {
 
   const availableSystems = extractSystems(allWorkflows);
 
+  // Batch B (2026-06-12): band-only derived counts from the full set.
+  // highVariationCount drives the narrator; cycleTimeSampleCount is the honest
+  // denominator for the median-cycle-time tile ("across N workflows").
+  const highVariationCount = useMemo(
+    () => allWorkflows.filter((w) => w.metricsV2.variationLabel === 'high').length,
+    [allWorkflows],
+  );
+  const cycleTimeSampleCount = useMemo(
+    () => allWorkflows.filter((w) => w.metricsV2.avgTimeMs != null).length,
+    [allWorkflows],
+  );
+
+  // Batch B: toggle the opportunity filter when an OpportunityBar segment is clicked.
+  const handleOpportunitySegmentClick = useCallback((tag: OpportunityTag) => {
+    setFilters((prev) => ({
+      ...prev,
+      opportunity: prev.opportunity === tag ? null : tag,
+    }));
+  }, []);
+
   const anyFiltersActive =
     hasActiveFilters(filters) || insightFilterKey !== null;
 
@@ -559,6 +615,25 @@ export default function DashboardV2Shell() {
         timeRange={timeRange}
         onTimeRangeChange={setTimeRange}
         workflowCount={allWorkflows.length}
+      />
+
+      {/* Batch B (2026-06-12): top-of-page graphics band (mounts between header and list) */}
+      <TopBand
+        data={{
+          isLoading,
+          totalWorkflows: allWorkflows.length,
+          recordedThisMonth,
+          medianCycleTimeMs,
+          cycleTimeSampleCount,
+          automationCandidates: aiOpportunityCount,
+          avgHealthScore: portfolioHealthScore,
+          avgHealthScoreDelta: portfolioHealthScoreDelta,
+          highVariationCount,
+          opportunityCounts,
+          activityByWeek,
+        }}
+        activeOpportunity={filters.opportunity}
+        onOpportunitySegmentClick={handleOpportunitySegmentClick}
       />
 
       {/* Section 2: Insights Strip */}

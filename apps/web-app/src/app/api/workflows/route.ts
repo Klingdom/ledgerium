@@ -12,6 +12,12 @@ import {
 } from '@/lib/workflow-metrics';
 import type { WorkflowMetricsOutput } from '@/lib/workflow-metrics';
 import { toMetricsInput } from '@/lib/metrics-input-adapter';
+import {
+  computeOpportunityCounts,
+  computeHealthBandCounts,
+  computeMedianCycleTimeMs,
+  computeActivityByWeek,
+} from '@/lib/dashboard-band-stats';
 
 // ── Per-workflow intelligence computation ────────────────────────────────────
 
@@ -689,6 +695,26 @@ export async function GET(req: NextRequest) {
       ? Math.round(portfolioHealthScore - portfolioHealthScorePrior)
       : null;
 
+  // ── Batch B (2026-06-12): top-of-page band aggregates ──────────────────────
+  // All four are pure functions of the enriched set + the single injected
+  // referenceNowMs boundary (no fresh Date.now() — deterministic per request).
+  // opportunityCounts / healthBandCounts / medianCycleTimeMs ride existing
+  // per-workflow data; activityByWeek buckets createdAt into 12 trailing weeks
+  // anchored on referenceNowMs so identical inputs + clock → identical buckets.
+  const opportunityCounts = computeOpportunityCounts(
+    allEnriched.map((w) => w.metricsV2.opportunityTag),
+  );
+  const healthBandCounts = computeHealthBandCounts(
+    allEnriched.map((w) => w.metricsV2.healthScore.overall),
+  );
+  const medianCycleTimeMs = computeMedianCycleTimeMs(
+    allEnriched.map((w) => w.metricsV2.avgTimeMs),
+  );
+  const activityByWeek = computeActivityByWeek(
+    allEnriched.map((w) => w.createdAt.getTime()),
+    referenceNowMs,
+  );
+
   return NextResponse.json({
     workflows: filteredWorkflows,
     stats: {
@@ -714,6 +740,11 @@ export async function GET(req: NextRequest) {
       portfolioHealthScore,
       portfolioHealthScorePrior,
       portfolioHealthScoreDelta,
+      // Batch B (2026-06-12): top-of-page band aggregates (additive; backward-compatible)
+      opportunityCounts,
+      healthBandCounts,
+      medianCycleTimeMs,
+      activityByWeek,
       insightChips,
       // MDR-P09 (b): thread server-resolved plan to client for event segmentation.
       // Allows DashboardV2Shell to call setUserPlanForAnalytics() so every v2 event
