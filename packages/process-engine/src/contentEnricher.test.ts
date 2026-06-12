@@ -266,6 +266,34 @@ describe('detectDecisionPoints', () => {
     const decisions = detectDecisionPoints(steps, []);
     expect(decisions.size).toBe(0);
   });
+
+  // HONESTY INVARIANT (architecture review Finding C-1):
+  // Title-keyword matching MUST NOT produce a fabricated conditional label.
+  // A single recording is a linear path; no branch is observed from title keywords alone.
+  it('does NOT fabricate a condition from approval/rejection keywords in step titles (honesty invariant)', () => {
+    const approvalKeywords = ['Approve Invoice', 'Reject Request', 'Deny Access', 'Decline Application'];
+    for (const title of approvalKeywords) {
+      const steps = [makeStep({ step_id: 's1', grouping_reason: 'single_action', ordinal: 1, title })];
+      const decisions = detectDecisionPoints(steps, []);
+      // Must NOT produce a decision entry for a keyword-only step
+      expect(decisions.has('s1'), `Expected no fabricated decision for title: "${title}"`).toBe(false);
+      // Must NEVER contain a fabricated question form
+      for (const label of decisions.values()) {
+        expect(label, `Fabricated conditional found for title "${title}"`).not.toMatch(/Should .+ be approved or rejected/i);
+        expect(label, `Fabricated conditional found for title "${title}"`).not.toMatch(/approved or rejected/i);
+      }
+    }
+  });
+
+  it('only produces observed-validation decisions (submit→error or data_entry→error)', () => {
+    // keyword-only approval step with NO error_handling successor — must NOT become a decision
+    const steps = [
+      makeStep({ step_id: 's1', grouping_reason: 'single_action', ordinal: 1, title: 'Approve Purchase Order' }),
+      makeStep({ step_id: 's2', grouping_reason: 'click_then_navigate', ordinal: 2, title: 'Navigate to Dashboard' }),
+    ];
+    const decisions = detectDecisionPoints(steps, []);
+    expect(decisions.size).toBe(0);
+  });
 });
 
 // ─── Common issue extraction ─────────────────────────────────────────────────

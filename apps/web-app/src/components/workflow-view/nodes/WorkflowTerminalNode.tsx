@@ -1,5 +1,14 @@
 'use client';
 
+/**
+ * WorkflowTerminalNode — Start / End terminator node.
+ *
+ * Visio-grade changes (VISIO_VISUAL_SPEC §1.5):
+ *  - Height 44 + borderRadius 22 = true pill (borderRadius = height/2, ISO 5807 terminator)
+ *  - Start: 2.5px border (strong entry signal), End: 1.5px border (understated terminus)
+ *  - Width 160 (spec §1.2 terminal token)
+ */
+
 import { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
@@ -21,15 +30,18 @@ export const WorkflowTerminalNode = memo(function WorkflowTerminalNode({
       <div
         className="mx-auto flex items-center justify-center gap-2 transition-all duration-150 cursor-pointer"
         style={{
-          width: 140,
-          height: 40,
+          width: 160,
+          height: 44,
           background: isStart
             ? (selected ? '#d1fae5' : '#ecfdf5')
             : (selected ? '#e2e8f0' : '#f1f5f9'),
-          border: `1.5px solid ${isStart
-            ? (selected ? '#059669' : '#6ee7b7')
-            : (selected ? '#64748b' : '#94a3b8')}`,
-          borderRadius: 20,
+          // Start: thicker border signals "entry" at a glance (Visio convention)
+          // End: understated — reads as terminus
+          border: isStart
+            ? `2.5px solid ${selected ? '#059669' : '#6ee7b7'}`
+            : `1.5px solid ${selected ? '#374151' : '#9ca3af'}`,
+          // True pill: borderRadius = height/2 (ISO 5807 terminator)
+          borderRadius: 22,
           boxShadow: selected
             ? `0 0 0 2px ${isStart ? 'rgba(5,150,105,0.15)' : 'rgba(100,116,139,0.15)'}`
             : 'none',

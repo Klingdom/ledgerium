@@ -10,6 +10,10 @@
  *  - Handles: 10×10 white+accent-ring (always visible)
  *  - Minimum font size 9px everywhere (was 8px on category badge)
  *  - Stronger box-shadow visible at 0.5× zoom and in screenshots
+ *
+ * Visio-grade changes (VISIO_VISUAL_SPEC P0 punch-list):
+ *  V-P0-2: borderRadius: 3 — Visio process rectangle (was 10, looked like a card)
+ *  V-P0-6: Right and Left handles added for same-lane horizontal flow (swimlane view)
  */
 
 import { memo } from 'react';
@@ -40,7 +44,8 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
         // Left-rail accent (4px) + subtle border on other sides
         border: `1px solid ${n.accentColor}20`,
         borderLeft: `4px solid ${n.accentColor}`,
-        borderRadius: 10,
+        // V-P0-2: 3px = Visio process rectangle. 10px looked like an app card.
+        borderRadius: 3,
         padding: '10px 12px 10px 14px',
         boxShadow: selected
           ? `0 0 0 3px ${n.accentColor}25, 0 4px 16px rgba(0,0,0,0.10)`
@@ -174,16 +179,45 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
         )}
       </div>
 
-      {/* Source handle — accent-ring, always visible */}
+      {/* Source handle — accent-ring, always visible (primary: downward vertical flow) */}
       <Handle
         type="source"
         position={Position.Bottom}
+        id="bottom"
         style={{
           width: 10,
           height: 10,
           background: '#ffffff',
           border: `2px solid ${n.accentColor}`,
           bottom: -5,
+        }}
+      />
+
+      {/* V-P0-6: Right handle — outgoing connector for same-lane horizontal flow (swimlane) */}
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="right"
+        style={{
+          width: 10,
+          height: 10,
+          background: '#ffffff',
+          border: `2px solid ${n.accentColor}`,
+          right: -5,
+        }}
+      />
+
+      {/* V-P0-6: Left handle — incoming connector for same-lane horizontal flow (swimlane) */}
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="left"
+        style={{
+          width: 10,
+          height: 10,
+          background: '#ffffff',
+          border: `2px solid ${n.accentColor}`,
+          left: -5,
         }}
       />
     </div>

@@ -64,8 +64,10 @@ function SwimlaneLaneBand({ lane }: { lane: SwimlaneLane }) {
         top: lane.bounds.y,
         width: Math.max(lane.bounds.width, 5000),
         height: lane.bounds.height,
-        background: `${lane.color}06`,
-        borderBottom: `1px solid ${lane.color}15`,
+        // V-P1-3: alternating lane tint — barely-visible per Visio cross-functional convention
+        background: lane.laneIndex % 2 === 0 ? 'transparent' : `${lane.color}05`,
+        // V-P1-2: solid separator — always visible (was barely-visible color-tinted line)
+        borderBottom: '1px solid #d1d5db',
         zIndex: -1,
       }}
     />
@@ -193,6 +195,40 @@ function SwimlaneCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvas
 
   return (
     <div className="absolute inset-0">
+      {/*
+        V-P0-4: SVG arrowhead marker definitions (same IDs as WorkflowCanvas.tsx —
+        they are in separate DOM trees so no ID collision). Copy-paste is intentional.
+      */}
+      <svg style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
+        <defs>
+          {/* Sequence flow — slate closed triangle */}
+          <marker id="arrow-seq" markerWidth="9" markerHeight="9"
+                  refX="7" refY="3.5" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,7 L9,3.5 z" fill="#9ca3af" />
+          </marker>
+          {/* Exception/error — red closed triangle */}
+          <marker id="arrow-exc" markerWidth="9" markerHeight="9"
+                  refX="7" refY="3.5" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,7 L9,3.5 z" fill="#fca5a5" />
+          </marker>
+          {/* Decision branch — amber closed triangle */}
+          <marker id="arrow-dec" markerWidth="9" markerHeight="9"
+                  refX="7" refY="3.5" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,7 L9,3.5 z" fill="#d97706" />
+          </marker>
+          {/* Selected — indigo closed triangle */}
+          <marker id="arrow-sel" markerWidth="9" markerHeight="9"
+                  refX="7" refY="3.5" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,7 L9,3.5 z" fill="#6366f1" />
+          </marker>
+          {/* Cross-lane handoff — violet closed triangle */}
+          <marker id="arrow-handoff" markerWidth="9" markerHeight="9"
+                  refX="7" refY="3.5" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,7 L9,3.5 z" fill="#8b5cf6" />
+          </marker>
+        </defs>
+      </svg>
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -203,7 +239,7 @@ function SwimlaneCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvas
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        fitViewOptions={{ padding: 0.15, maxZoom: 1.2 }}
+        fitViewOptions={{ padding: 0.30, maxZoom: 1.2 }}
         minZoom={0.1}
         maxZoom={2.5}
         panOnScroll
@@ -213,12 +249,12 @@ function SwimlaneCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvas
         proOptions={{ hideAttribution: true }}
         className="workflow-swimlane-canvas"
       >
+        {/* V-P0-8: Line grid — reinforces orthogonal connector routing (swimlane) */}
         <Background
-          variant={BackgroundVariant.Dots}
-          color="var(--border-subtle)"
-          gap={24}
-          size={1}
-          className="!bg-[var(--surface-secondary)]"
+          variant={BackgroundVariant.Lines}
+          color="#f3f4f6"
+          gap={20}
+          className="!bg-white"
         />
 
         {toolbar.showMinimap && (

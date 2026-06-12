@@ -12,6 +12,11 @@
  * The diamond conveys: "observed split in the data" — NOT a conditional gate
  * with an inferred business rule. Labels use observed-count language only
  * (honesty requirement from LAYOUT_PLAN §3 + variantFlowModel design).
+ *
+ * Visio-grade changes (VISIO_VISUAL_SPEC P0 punch-list):
+ *  V-P0-5 / V-P1-13: borderRadius: 4 — sharp BPMN diamond (was 16, looked like squircle)
+ *  V-P1-15: Right and Left source handles for decision branches in all directions
+ *  Header text updated to "◆ Branch point" per spec §1.4 (observed-data language)
  */
 
 import { memo } from 'react';
@@ -55,7 +60,9 @@ export const WorkflowDecisionNode = memo(function WorkflowDecisionNode({
           height: 160,
           background: selected ? '#fef3c7' : '#fffbeb',
           border: `2px solid ${selected ? '#d97706' : '#fbbf24'}`,
-          borderRadius: 16,           // chamfered corners = standard BPMN gateway
+          // V-P0-5 / V-P1-13: 4px = just enough to prevent aliasing, reads as sharp BPMN diamond
+          // (was 16, which produced a "squircle diamond" — not authentic Visio/BPMN)
+          borderRadius: 4,
           transform: 'rotate(45deg)',
           boxShadow: selected
             ? '0 0 0 3px rgba(217,119,6,0.18), 0 4px 16px rgba(0,0,0,0.08)'
@@ -88,7 +95,7 @@ export const WorkflowDecisionNode = memo(function WorkflowDecisionNode({
               marginBottom: 4,
             }}
           >
-            ◆ Decision
+            ◆ Branch point
           </span>
           <p
             style={{
@@ -119,16 +126,45 @@ export const WorkflowDecisionNode = memo(function WorkflowDecisionNode({
         </div>
       </div>
 
-      {/* Source handle — outside the rotated container */}
+      {/* Source handle — bottom (primary / most-common exit path) */}
       <Handle
         type="source"
         position={Position.Bottom}
+        id="bottom"
         style={{
           width: 10,
           height: 10,
           background: '#ffffff',
           border: '2px solid #d97706',
           bottom: -5,
+        }}
+      />
+
+      {/* V-P1-15: Right source handle — alternate path exit */}
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="right"
+        style={{
+          width: 10,
+          height: 10,
+          background: '#ffffff',
+          border: '2px solid #d97706',
+          right: -5,
+        }}
+      />
+
+      {/* V-P1-15: Left source handle — rare/exception path exit */}
+      <Handle
+        type="source"
+        position={Position.Left}
+        id="left"
+        style={{
+          width: 10,
+          height: 10,
+          background: '#ffffff',
+          border: '2px solid #d97706',
+          left: -5,
         }}
       />
     </div>

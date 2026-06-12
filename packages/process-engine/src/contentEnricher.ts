@@ -508,10 +508,14 @@ function detectBacktracking(
  * Infers decision points from observed behavior patterns with context-specific
  * labels derived from the preceding step's title, field names, and system.
  *
- * A decision is inferred when:
- * - An error_handling step follows a submit/send step (validation decision)
- * - The flow branches to different pages based on form submission
- * - An approval or review pattern is detected in step titles
+ * A decision is inferred when (OBSERVED signals only — no title-keyword heuristics):
+ * - An error_handling step follows a submit/send step (validation gate observed in THIS run)
+ * - An error_handling step follows a data_entry step (validation gate observed in THIS run)
+ *
+ * Title-keyword matching (/approv|reject|deny|decline/) was intentionally removed.
+ * A single recording is a linear path — title keywords cannot establish an observed branch.
+ * Fabricated conditionals ("Should X be approved or rejected?") violate the honesty
+ * invariant: decision shapes show OBSERVED data only (architecture review Finding C-1).
  */
 export function detectDecisionPoints(
   steps: DerivedStepInput[],
@@ -565,16 +569,16 @@ export function detectDecisionPoints(
     }
   }
 
-  // Pattern: approval/review steps detected by title semantics
-  for (const step of steps) {
-    if (decisions.has(step.step_id)) continue;
-    const titleLower = step.title.toLowerCase();
-    if (/\b(approv|reject|deny|decline)\b/.test(titleLower)) {
-      const entity = inferEntityFromContext(events, steps);
-      const subject = entity ?? 'the record';
-      decisions.set(step.step_id, `Should ${subject} be approved or rejected?`);
-    }
-  }
+  // HONESTY INVARIANT: do NOT infer decision points from step-title keywords.
+  // A single recording is a single path — it cannot contain an observed branch.
+  // The former title-regex pattern (/\b(approv|reject|deny|decline)\b/) fabricated
+  // a conditional label ("Should X be approved or rejected?") from a keyword alone,
+  // violating the Ledgerium invariant: decision shapes show OBSERVED signal only.
+  // Patterns (i) and (ii) above (submit→error, data_entry→error) are kept because
+  // they reflect a genuinely observed sequence in THIS run (submit followed by an
+  // error_handling step = a validation outcome was observed).
+  // Title-keyword-only inference is classified 'inferred' by the architecture review
+  // (Finding C-1) and must NOT produce a diamond or fabricated condition label.
 
   return decisions;
 }

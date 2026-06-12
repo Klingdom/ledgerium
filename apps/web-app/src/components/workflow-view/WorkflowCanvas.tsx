@@ -119,6 +119,43 @@ function FlowCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvasRead
 
   return (
     <div className="absolute inset-0">
+      {/*
+        V-P0-3: SVG arrowhead marker definitions.
+        Zero-size element placed as a sibling of the ReactFlow element so it lives
+        in the same DOM tree as the edges. markerUnits="strokeWidth" scales the
+        arrowhead proportionally with the stroke weight (thicker edges → bigger heads).
+        IDs must match the markerId logic in WorkflowEdge.tsx.
+      */}
+      <svg style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
+        <defs>
+          {/* Sequence flow — slate closed triangle */}
+          <marker id="arrow-seq" markerWidth="9" markerHeight="9"
+                  refX="7" refY="3.5" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,7 L9,3.5 z" fill="#9ca3af" />
+          </marker>
+          {/* Exception/error — red closed triangle */}
+          <marker id="arrow-exc" markerWidth="9" markerHeight="9"
+                  refX="7" refY="3.5" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,7 L9,3.5 z" fill="#fca5a5" />
+          </marker>
+          {/* Decision branch — amber closed triangle */}
+          <marker id="arrow-dec" markerWidth="9" markerHeight="9"
+                  refX="7" refY="3.5" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,7 L9,3.5 z" fill="#d97706" />
+          </marker>
+          {/* Selected — indigo closed triangle */}
+          <marker id="arrow-sel" markerWidth="9" markerHeight="9"
+                  refX="7" refY="3.5" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,7 L9,3.5 z" fill="#6366f1" />
+          </marker>
+          {/* Cross-lane handoff — violet closed triangle */}
+          <marker id="arrow-handoff" markerWidth="9" markerHeight="9"
+                  refX="7" refY="3.5" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,7 L9,3.5 z" fill="#8b5cf6" />
+          </marker>
+        </defs>
+      </svg>
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -129,7 +166,7 @@ function FlowCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvasRead
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        fitViewOptions={{ padding: 0.15, maxZoom: 1.5 }}
+        fitViewOptions={{ padding: 0.25, maxZoom: 1.2 }}
         minZoom={0.1}
         maxZoom={2.5}
         panOnScroll
@@ -139,12 +176,12 @@ function FlowCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvasRead
         proOptions={{ hideAttribution: true }}
         className="workflow-flow-canvas"
       >
+        {/* V-P0-8: Line grid (not dot grid) — reinforces orthogonal connector routing */}
         <Background
-          variant={BackgroundVariant.Dots}
-          color="var(--border-subtle)"
-          gap={24}
-          size={1}
-          className="!bg-[var(--surface-secondary)]"
+          variant={BackgroundVariant.Lines}
+          color="#f3f4f6"
+          gap={20}
+          className="!bg-white"
         />
 
         {toolbar.showMinimap && (
