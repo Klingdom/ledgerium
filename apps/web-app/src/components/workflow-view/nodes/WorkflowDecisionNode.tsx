@@ -17,6 +17,12 @@
  *  V-P0-5 / V-P1-13: borderRadius: 4 — sharp BPMN diamond (was 16, looked like squircle)
  *  V-P1-15: Right and Left source handles for decision branches in all directions
  *  Header text updated to "◆ Branch point" per spec §1.4 (observed-data language)
+ *
+ * P0 honesty (ARCH_FINAL_PLAN §1.2, PROCESS_MAPPING_MASTER_PLAN §6 D-3):
+ *  'observed-divergence'  → solid diamond (multi-run divergence)
+ *  'observed-validation'  → DASHED diamond + "observed in 1 run" pill
+ *  Only these two provenances reach this component — ShapeResolver enforces that
+ *  'inferred'/null decisions are demoted to taskNode before they ever get here.
  */
 
 import { memo } from 'react';
@@ -33,9 +39,16 @@ export const WorkflowDecisionNode = memo(function WorkflowDecisionNode({
 }: NodeProps<DecisionFlowNode>) {
   const n = data.viewNode;
 
+  // Dashed treatment for single-run observed-validation decisions (D-3).
+  // Solid for observed-divergence (multi-run). Only these two provenances
+  // reach this component — ShapeResolver guarantees 'inferred'/null → taskNode.
+  const isValidation = n.decisionProvenance === 'observed-validation';
+  const borderStyle = isValidation ? 'dashed' : 'solid';
+  const borderColor = selected ? '#d97706' : '#fbbf24';
+
   return (
     <div
-      style={{ width: 280, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+      style={{ width: 280, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}
       role="button"
       aria-label={`Decision: ${n.decisionLabel || n.label}`}
       tabIndex={0}
@@ -59,7 +72,7 @@ export const WorkflowDecisionNode = memo(function WorkflowDecisionNode({
           width: 160,
           height: 160,
           background: selected ? '#fef3c7' : '#fffbeb',
-          border: `2px solid ${selected ? '#d97706' : '#fbbf24'}`,
+          border: `2px ${borderStyle} ${borderColor}`,
           // V-P0-5 / V-P1-13: 4px = just enough to prevent aliasing, reads as sharp BPMN diamond
           // (was 16, which produced a "squircle diamond" — not authentic Visio/BPMN)
           borderRadius: 4,
@@ -125,6 +138,26 @@ export const WorkflowDecisionNode = memo(function WorkflowDecisionNode({
           </span>
         </div>
       </div>
+
+      {/* "Observed in 1 run" pill for single-trace validation decisions (D-3) */}
+      {isValidation && (
+        <span
+          style={{
+            marginTop: 6,
+            fontSize: 9,
+            fontWeight: 600,
+            color: '#92400e',
+            background: '#fef9c3',
+            border: '1px dashed #fbbf24',
+            borderRadius: 4,
+            padding: '1px 6px',
+            letterSpacing: '0.04em',
+          }}
+          aria-label="Observed in 1 run"
+        >
+          observed in 1 run
+        </span>
+      )}
 
       {/* Source handle — bottom (primary / most-common exit path) */}
       <Handle

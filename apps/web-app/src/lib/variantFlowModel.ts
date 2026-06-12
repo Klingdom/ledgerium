@@ -351,6 +351,7 @@ export function buildVariantFlowModel(
       warnings: [],
       automationScore: null,
       frequency: 1,
+      decisionProvenance: isDecision ? 'observed-divergence' : null,
     });
   }
 
@@ -416,6 +417,7 @@ export function buildVariantFlowModel(
         warnings: [],
         automationScore: null,
         frequency: bl.runShare,
+        decisionProvenance: null,
       });
     }
   }
@@ -558,6 +560,11 @@ export function buildVariantFlowModel(
     hasFriction: false,
     hasMultipleSystems: false,
     isComplete: true,
+
+    // Multi-run provenance: variant model always represents ≥2 runs.
+    runCount: safeTotal,
+    isMultiRun: true,
+    provenanceNotice: '',
   };
 }
 
@@ -609,6 +616,7 @@ function makeTerminalNode(
     warnings: [],
     automationScore: null,
     frequency: 1,
+    decisionProvenance: null,
   };
 }
 

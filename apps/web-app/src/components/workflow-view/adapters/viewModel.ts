@@ -112,6 +112,23 @@ export interface ViewNode {
   automationScore: number | null;
   /** Frequency of this step across runs (0-1, null if single run). */
   frequency: number | null;
+
+  // ── Provenance (honesty chokepoint — P0-1) ─────────────────────────────
+
+  /**
+   * Why this node is a decision — the single honesty discriminator.
+   *
+   *  'observed-divergence' : ≥2 runs diverged here (variantFlowModel; multi-run evidence).
+   *  'observed-validation' : submit→error / data_entry→error in THIS run (contentEnricher
+   *                          A-i/A-ii; structurally observed in one run).
+   *  'inferred'            : heuristic only — NEVER renders a diamond (chokepoint guard;
+   *                          currently dead after the title-regex removal in contentEnricher).
+   *  null                  : not a decision node.
+   *
+   * A node may have nodeType === 'decision' ONLY when provenance is
+   * 'observed-divergence' or 'observed-validation'. The ShapeResolver enforces this.
+   */
+  decisionProvenance: 'observed-divergence' | 'observed-validation' | 'inferred' | null;
 }
 
 // ─── Normalized edge ─────────────────────────────────────────────────────────
@@ -249,6 +266,21 @@ export interface NormalizedViewModel {
   hasFriction: boolean;
   hasMultipleSystems: boolean;
   isComplete: boolean;
+
+  // ── Provenance metadata (honesty chokepoint — P0-1) ────────────────────
+
+  /** Number of runs summarized. 1 = single trace. */
+  runCount: number;
+  /**
+   * True iff decisions/branches are evidence-backed from ≥2 runs.
+   * false = single trace; the ShapeResolver demotes any 'inferred' decisions.
+   */
+  isMultiRun: boolean;
+  /**
+   * Static, time-free provenance notice for the UI.
+   * Non-empty when isMultiRun === false; empty string when multi-run.
+   */
+  provenanceNotice: string;
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -354,6 +386,11 @@ export function buildNormalizedViewModel(
 
       automationScore: null,
       frequency: null,
+
+      // Provenance: contentEnricher A-i/A-ii produces observed-validation decisions;
+      // the title-regex fabrication was already removed so isDecisionPoint here is always
+      // a structurally observed validation gate. Null for non-decision nodes.
+      decisionProvenance: meta.isDecisionPoint === true ? 'observed-validation' : null,
     };
   });
 
@@ -486,6 +523,11 @@ export function buildNormalizedViewModel(
     hasFriction: allFriction.length > 0,
     hasMultipleSystems: systems.length > 1,
     isComplete: processRun.completionStatus === 'complete',
+
+    // Single-trace provenance (engine path = always 1 run).
+    runCount: 1,
+    isMultiRun: false,
+    provenanceNotice: 'Single recording — branches appear once this workflow has multiple runs.',
   };
 }
 

@@ -7,6 +7,7 @@
  */
 
 import type { NormalizedViewModel, ViewNode, ViewEdge, ViewPhase } from './viewModel';
+import { resolveShape } from './shapeResolver';
 
 // ─── React Flow compatible output ────────────────────────────────────────────
 
@@ -54,9 +55,9 @@ export function buildFlowData(model: NormalizedViewModel): FlowAdapterOutput {
 
   const nodes: FlowNode[] = model.nodes.map(viewNode => ({
     id: viewNode.id,
-    type: viewNode.nodeType === 'decision' ? 'decisionNode'
-        : (viewNode.nodeType === 'start' || viewNode.nodeType === 'end') ? 'terminalNode'
-        : 'taskNode',
+    // Use ShapeResolver — the single honesty chokepoint.
+    // 'inferred' decisions are demoted to taskNode here; they never become decisionNode.
+    type: resolveShape(viewNode).rfType,
     position: viewNode.position,
     data: { viewNode },
   }));

@@ -54,6 +54,16 @@ export default defineConfig({
       dependencies: ['setup'],
       use: { storageState: './e2e/.auth/smoke-user.json' },
     },
+    // NEW-T2: Authenticated canvas hydration gate — workflow page, all four
+    // map modes (flow / swimlane / variants / systems).  Depends on setup
+    // (smoke user must be logged in and the seeded workflow must be reachable
+    // via POST /api/sample-variants which runs in-process against smoke.db).
+    {
+      name: 'canvas-authed',
+      testMatch: /canvas\.smoke\.spec\.ts/,
+      dependencies: ['setup'],
+      use: { storageState: './e2e/.auth/smoke-user.json' },
+    },
   ],
 
   webServer: {
