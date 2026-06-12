@@ -41,6 +41,7 @@ import {
   accessHealthScore,
   accessLastRunAt,
   accessRunCount,
+  accessDateRecorded,
   accessCycleTimeMs,
   accessCycleTimeMeanMs,
   accessCaseVolume,
@@ -49,16 +50,19 @@ import {
 import type { WorkflowDashboardColumn } from './types.js';
 
 /**
- * The full registry — frozen at module load. 38 entries: 6 display columns +
+ * The full registry — frozen at module load. 39 entries: 7 display columns +
  * 32 Tier A architecture metrics.
  *
  * Default-pack rationale (`defaultVisible: true` ⇔ shipped today):
  *   workflow_title · systems · opportunity_tag · health_score · last_run_at ·
- *   run_count · cycle_time_mean_ms
+ *   run_count · cycle_time_mean_ms · date_recorded
  *
  * WDC2-P03 (iter-067): expanded to 7 columns by promoting cycle_time_mean_ms
  * to default-visible.  The accessor reads WorkflowMetricsOutput.avgTimeMs
  * which is available for all processed workflows.
+ *
+ * Batch A / dashboard-redesign (2026-06-12): added date_recorded display column
+ * (Workflow.createdAt) + promoted it to default-visible (8 default columns).
  */
 export const WORKFLOW_DASHBOARD_COLUMNS: ReadonlyArray<WorkflowDashboardColumn> =
   Object.freeze([
@@ -140,6 +144,24 @@ export const WORKFLOW_DASHBOARD_COLUMNS: ReadonlyArray<WorkflowDashboardColumn> 
       planTierGate: null,
       availability: 'available',
       accessor: accessRunCount,
+    },
+    {
+      // Batch A / dashboard-redesign P0 item 1 (2026-06-12).
+      // Source: Workflow.createdAt — the earliest wall-clock moment the workflow
+      // was created.  Accessor is a lifetime accessor (ignores referenceNowMs +
+      // activeTimeRange) and satisfies the Group G lifetime-preservation contract.
+      // Render as absolute date ("Jun 12, 2026") — deterministic + hydration-safe.
+      key: 'date_recorded',
+      label: 'Date Recorded',
+      description: 'Date the workflow was first recorded in the system.',
+      dataType: 'date',
+      sortable: true,
+      filterable: true,
+      defaultVisible: true,
+      defaultGroup: 'display',
+      planTierGate: null,
+      availability: 'available',
+      accessor: accessDateRecorded,
     },
 
     // ── Layer 1: Operational flow (9 Tier A metrics) ────────────────────────

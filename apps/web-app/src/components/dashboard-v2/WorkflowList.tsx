@@ -39,7 +39,7 @@ import WorkflowListFilterBar, {
   hasActiveFilters,
 } from './WorkflowListFilterBar.js';
 import type { OpportunityTag } from '@/lib/workflow-metrics.js';
-import { EXTENSION_CONFIG } from '@/lib/config.js';
+// EXTENSION_CONFIG.chromeStoreUrl was the empty-state CTA target (Batch A: replaced with /install)
 import type { TimeRange } from './CommandHeader.js';
 import {
   getColumnByKey,
@@ -62,10 +62,30 @@ export type WorkflowListState =
 
 // ── Sort types ────────────────────────────────────────────────────────────────
 
-type SortField = 'health_score' | 'name' | 'opportunity';
+/**
+ * Batch A (2026-06-12): extended with run_count, cycle_time, last_run,
+ * date_recorded, case_volume (P0 item 2 of dashboard-redesign).
+ *
+ * Source mapping (honest per FEASIBILITY_DASHBOARD_REVIEW §1):
+ *   run_count     = metricsV2.runs (ProcessDefinition.runCount)
+ *   cycle_time    = metricsV2.avgTimeMs (ProcessDefinition.avgDurationMs)
+ *   last_run      = processDefinitionUpdatedAt (ProcessDefinition.updatedAt)
+ *   date_recorded = createdAt (Workflow.createdAt)
+ *   case_volume   = metricsV2.runs (alias of run_count — sorts identically)
+ */
+type SortField =
+  | 'health_score'
+  | 'name'
+  | 'opportunity'
+  | 'run_count'
+  | 'cycle_time'
+  | 'last_run'
+  | 'date_recorded'
+  | 'case_volume';
+
 type SortDir = 'asc' | 'desc';
 
-interface SortState {
+export interface SortState {
   field: SortField;
   dir: SortDir;
 }
@@ -78,7 +98,7 @@ const OPPORTUNITY_ORDER: Record<OpportunityTag, number> = {
   healthy: 4,
 };
 
-function sortWorkflows(workflows: WorkflowRowData[], sort: SortState): WorkflowRowData[] {
+export function sortWorkflows(workflows: WorkflowRowData[], sort: SortState): WorkflowRowData[] {
   const sorted = [...workflows];
   sorted.sort((a, b) => {
     let diff = 0;
@@ -90,6 +110,31 @@ function sortWorkflows(workflows: WorkflowRowData[], sort: SortState): WorkflowR
       diff =
         OPPORTUNITY_ORDER[a.metricsV2.opportunityTag] -
         OPPORTUNITY_ORDER[b.metricsV2.opportunityTag];
+    } else if (sort.field === 'run_count' || sort.field === 'case_volume') {
+      // case_volume is an alias of run_count — both sort by ProcessDefinition.runCount.
+      // Null (unprocessed workflows) sort last regardless of direction.
+      const av = a.metricsV2.runs ?? -1;
+      const bv = b.metricsV2.runs ?? -1;
+      diff = av - bv;
+    } else if (sort.field === 'cycle_time') {
+      // avgTimeMs — null sorts last (Infinity sentinel → always after finite values).
+      const av = a.metricsV2.avgTimeMs ?? Infinity;
+      const bv = b.metricsV2.avgTimeMs ?? Infinity;
+      diff = av - bv;
+    } else if (sort.field === 'last_run') {
+      // ProcessDefinition.updatedAt proxy.  Null (no processDefinition) sorts last.
+      const at = a.processDefinitionUpdatedAt ? new Date(a.processDefinitionUpdatedAt).getTime() : -1;
+      const bt = b.processDefinitionUpdatedAt ? new Date(b.processDefinitionUpdatedAt).getTime() : -1;
+      diff = at - bt;
+    } else if (sort.field === 'date_recorded') {
+      // Workflow.createdAt — always present; deterministic ISO parse.
+      const at = new Date(a.createdAt).getTime();
+      const bt = new Date(b.createdAt).getTime();
+      diff = at - bt;
+    }
+    // Stable tie-break by id ensures deterministic ordering when primary diff === 0.
+    if (diff === 0) {
+      diff = a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
     }
     return sort.dir === 'asc' ? diff : -diff;
   });
@@ -296,7 +341,9 @@ export default function WorkflowList({
   dashboardViewPerfTimestampMs = 0,
   visibleColumns,
 }: WorkflowListProps) {
-  const [sort, setSort] = useState<SortState>({ field: 'health_score', dir: 'asc' });
+  // Batch A (2026-06-12): default sort changed from health_score asc → date_recorded desc
+  // (newest first) per dashboard-redesign P0 item 3.
+  const [sort, setSort] = useState<SortState>({ field: 'date_recorded', dir: 'desc' });
   const [sparseNoticeDismissed, setSparseNoticeDismissed] = useState(false);
 
   // MDR-P03: stable clock boundary captured once at render so all age-based
@@ -445,7 +492,7 @@ export default function WorkflowList({
                     </th>
                   );
                 }
-                // Systems column — plain header
+                // Systems column — plain header (not sortable)
                 if (colKey === 'systems') {
                   return (
                     <th
@@ -457,7 +504,38 @@ export default function WorkflowList({
                     </th>
                   );
                 }
-                // Generic column header from registry
+                // Batch A (2026-06-12): sortable columns with SortButton headers.
+                // run_count, cycle_time_mean_ms, last_run_at, date_recorded each map
+                // to a SortField so users can click the column header to sort.
+                if (colKey === 'run_count') {
+                  return (
+                    <th key="run_count" scope="col" className="px-ds-4 py-ds-2 text-left">
+                      <SortButton field="run_count" label="Runs" currentSort={sort} onSort={handleSort} />
+                    </th>
+                  );
+                }
+                if (colKey === 'cycle_time_mean_ms') {
+                  return (
+                    <th key="cycle_time_mean_ms" scope="col" className="px-ds-4 py-ds-2 text-left">
+                      <SortButton field="cycle_time" label="Cycle Time" currentSort={sort} onSort={handleSort} />
+                    </th>
+                  );
+                }
+                if (colKey === 'last_run_at') {
+                  return (
+                    <th key="last_run_at" scope="col" className="px-ds-4 py-ds-2 text-left">
+                      <SortButton field="last_run" label="Last Run" currentSort={sort} onSort={handleSort} />
+                    </th>
+                  );
+                }
+                if (colKey === 'date_recorded') {
+                  return (
+                    <th key="date_recorded" scope="col" className="px-ds-4 py-ds-2 text-left">
+                      <SortButton field="date_recorded" label="Date Recorded" currentSort={sort} onSort={handleSort} />
+                    </th>
+                  );
+                }
+                // Generic column header from registry (plain label for non-sortable columns)
                 const colDef = getColumnByKey(colKey);
                 if (!colDef) return null;
                 return (
@@ -527,13 +605,20 @@ export default function WorkflowList({
                     <p className="text-[14px] text-[var(--content-secondary)]">
                       Record any digital process once — Ledgerium measures cycle time, identifies patterns, and surfaces where your team spends time.
                     </p>
+                    {/* Batch A (2026-06-12): CTA points to /install (internal route),
+                        not EXTENSION_CONFIG.chromeStoreUrl (placeholder dead link).
+                        Secondary CTA to /upload restores the v1 upload path. */}
                     <Link
-                      href={EXTENSION_CONFIG.chromeStoreUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      href="/install"
                       className="inline-flex items-center gap-ds-2 px-ds-4 py-ds-2 rounded-ds-sm border border-[var(--border-default)] text-[14px] font-medium text-[var(--content-primary)] transition-colors duration-150 hover:bg-[var(--surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                     >
                       Install extension to start →
+                    </Link>
+                    <Link
+                      href="/upload"
+                      className="inline-flex items-center gap-ds-2 px-ds-4 py-ds-2 rounded-ds-sm text-[14px] font-medium text-[var(--content-secondary)] transition-colors duration-150 hover:text-[var(--content-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded"
+                    >
+                      Upload a recording →
                     </Link>
                   </div>
                 </td>

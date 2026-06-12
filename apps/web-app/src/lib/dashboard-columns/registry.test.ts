@@ -30,6 +30,7 @@ import {
   accessCycleTimeMs,
   accessCaseVolume,
   accessSystemCountPerRun,
+  accessDateRecorded,
 } from './index.js';
 import type { ColumnAccessorContext, ColumnKey, TimeRange } from './types.js';
 import type { WorkflowMetricsOutput } from '../workflow-metrics.js';
@@ -64,6 +65,9 @@ function makeContext(overrides: Partial<ColumnAccessorContext> = {}): ColumnAcce
     toolsUsed: ['Salesforce', 'NetSuite', 'DocuSign'],
     lastViewedAt: '2026-04-29T14:00:00.000Z',
     createdAt: '2026-03-01T09:00:00.000Z',
+    // Batch A (2026-06-12): processDefinitionUpdatedAt — honest "Last Run" proxy
+    // backed by ProcessDefinition.updatedAt (not lastViewedAt).  See accessLastRunAt.
+    processDefinitionUpdatedAt: '2026-04-28T10:00:00.000Z',
     metricsV2: makeMetricsV2(),
     // iter-065 / WDC2-P01 — deterministic frozen wall-clock + lifetime range
     // for accessor tests. The existing iter-056 accessors are lifetime
@@ -77,8 +81,9 @@ function makeContext(overrides: Partial<ColumnAccessorContext> = {}): ColumnAcce
 // ── Group A: Catalog completeness ─────────────────────────────────────────────
 
 describe('WORKFLOW_DASHBOARD_COLUMNS — catalog completeness (Group A)', () => {
-  it('A1: catalog enumerates exactly 38 columns (6 display + 32 Tier A)', () => {
-    expect(WORKFLOW_DASHBOARD_COLUMNS.length).toBe(38);
+  it('A1: catalog enumerates exactly 39 columns (7 display + 32 Tier A)', () => {
+    // Batch A (2026-06-12): date_recorded added as 7th display column.
+    expect(WORKFLOW_DASHBOARD_COLUMNS.length).toBe(39);
   });
 
   it('A2: every ColumnKey is unique across the catalog', () => {
@@ -138,11 +143,14 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — catalog completeness (Group A)', () => 
 // the default-pack now spans two groups (display + flow); the audit-honesty IFF
 // invariant (availability='available' ⇔ non-null accessor) in Group C / Group F
 // is the correct gate — group membership is descriptive, not restrictive.
+//
+// Batch A (2026-06-12): date_recorded promoted to default-pack (8 columns).
 
 describe('WORKFLOW_DASHBOARD_COLUMNS — default-visibility integrity (Group B)', () => {
-  it('B1: exactly 7 columns are defaultVisible (WDC2-P03: 7-column default-pack)', () => {
+  it('B1: exactly 8 columns are defaultVisible (Batch A: 8-column default-pack)', () => {
+    // Batch A (2026-06-12): date_recorded added as 8th default-pack column.
     const defaults = WORKFLOW_DASHBOARD_COLUMNS.filter((col) => col.defaultVisible);
-    expect(defaults.length).toBe(7);
+    expect(defaults.length).toBe(8);
   });
 
   it('B2: every defaultVisible column has availability="available" and non-null accessor', () => {
@@ -162,7 +170,8 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — default-visibility integrity (Group B)'
     }
   });
 
-  it('B3: defaultVisible set matches the WDC2-P03 canonical 7-column set by key', () => {
+  it('B3: defaultVisible set matches the Batch A canonical 8-column set by key', () => {
+    // Batch A (2026-06-12): date_recorded promoted to default-pack.
     const expected = new Set<ColumnKey>([
       'workflow_title',
       'systems',
@@ -171,6 +180,7 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — default-visibility integrity (Group B)'
       'last_run_at',
       'run_count',
       'cycle_time_mean_ms', // WDC2-P03 (iter-067): 7th default-pack column
+      'date_recorded',      // Batch A (2026-06-12): 8th default-pack column
     ]);
     const actual = new Set(
       WORKFLOW_DASHBOARD_COLUMNS.filter((col) => col.defaultVisible).map((col) => col.key),
@@ -185,7 +195,7 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — default-visibility integrity (Group B)'
     }
   });
 
-  it('B5: getDefaultVisibleColumns() returns the same 6 entries as the .filter view', () => {
+  it('B5: getDefaultVisibleColumns() returns the same 8 entries as the .filter view', () => {
     const helper = getDefaultVisibleColumns();
     const direct = WORKFLOW_DASHBOARD_COLUMNS.filter((col) => col.defaultVisible);
     expect(helper.length).toBe(direct.length);
@@ -275,9 +285,12 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — accessor correctness (Group D)', () => 
     expect(accessSystems(ctx)).toEqual(['Salesforce', 'NetSuite', 'DocuSign']);
   });
 
-  it('D5: accessLastRunAt returns lastViewedAt and null when never viewed', () => {
-    expect(accessLastRunAt(makeContext())).toBe('2026-04-29T14:00:00.000Z');
-    expect(accessLastRunAt(makeContext({ lastViewedAt: null }))).toBeNull();
+  it('D5: accessLastRunAt returns processDefinitionUpdatedAt (honest Last Run proxy — Batch A rewire)', () => {
+    // Batch A (2026-06-12): rewired from lastViewedAt → processDefinitionUpdatedAt
+    // so the "Last Run" column is backed by ProcessDefinition.updatedAt (when
+    // the process last gained a run) rather than a view timestamp.
+    expect(accessLastRunAt(makeContext())).toBe('2026-04-28T10:00:00.000Z');
+    expect(accessLastRunAt(makeContext({ processDefinitionUpdatedAt: null }))).toBeNull();
   });
 
   it('D6: accessWorkflowTitle returns the title string and null on blank title', () => {
@@ -298,34 +311,46 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — accessor correctness (Group D)', () => 
     expect(accessSystemCountPerRun(makeContext())).toBe(3);
     expect(accessSystemCountPerRun(makeContext({ toolsUsed: [] }))).toBe(0);
   });
+
+  it('D10: accessDateRecorded returns createdAt ISO string (Batch A / date_recorded column)', () => {
+    expect(accessDateRecorded(makeContext())).toBe('2026-03-01T09:00:00.000Z');
+    // Different createdAt values → different return values
+    const laterCtx = makeContext({ createdAt: '2026-06-12T08:00:00.000Z' });
+    expect(accessDateRecorded(laterCtx)).toBe('2026-06-12T08:00:00.000Z');
+  });
 });
 
-// ── Group F: D+6 default-pack composition lock (updated iter-067 WDC2-P03) ────
+// ── Group F: default-pack composition lock (updated Batch A 2026-06-12) ────────
 //
 // Originally pinned the canonical 6-column default-pack mandated by MR-014 §7.1
 // ASK-1.  Updated at iter-067 to reflect the WDC2-P03 7th-column promotion:
 // cycle_time_mean_ms.defaultVisible flipped false → true.
 //
+// Updated at Batch A (2026-06-12) to reflect the 8th-column promotion:
+// date_recorded.defaultVisible flipped to true (dashboard-redesign P0 item 4).
+//
 // Lock-intent: any change to `defaultVisible` flags in registry.ts that
 // widens, narrows, or re-attributes the default-pack will break one or more
 // assertions below, forcing an intentional review rather than silent drift.
 //
-// Canonical 7-column set (WDC2-P03 / iter-067):
+// Canonical 8-column set (Batch A / 2026-06-12):
 //   workflow_title · systems · opportunity_tag · health_score
-//   · cycle_time_mean_ms · last_run_at · run_count
+//   · cycle_time_mean_ms · last_run_at · run_count · date_recorded
 //
 // Note: workflow_title and health_score are LOCKED-VISIBLE (iter-031; WDC §11)
 // and always appear at the head/tail of the rendered row regardless of their
-// position in `getDefaultVisibleColumns()`.  The remaining 5 columns render as
+// position in `getDefaultVisibleColumns()`.  The remaining 6 columns render as
 // the "dynamic" middle cells between the two locked columns.
 
 describe('WORKFLOW_DASHBOARD_COLUMNS — D+6 default-pack composition lock (Group F)', () => {
-  it('F1: getDefaultVisibleColumns() returns exactly 7 entries (WDC2-P03 7-column default-pack)', () => {
+  it('F1: getDefaultVisibleColumns() returns exactly 8 entries (Batch A: 8-column default-pack)', () => {
+    // Batch A (2026-06-12): date_recorded promoted, expanding to 8 default columns.
     const defaults = getDefaultVisibleColumns();
-    expect(defaults.length).toBe(7);
+    expect(defaults.length).toBe(8);
   });
 
-  it('F2: the 7 default-visible keys are exactly the WDC2-P03 canonical set (set-equality)', () => {
+  it('F2: the 8 default-visible keys are exactly the Batch A canonical set (set-equality)', () => {
+    // Batch A (2026-06-12): date_recorded added as 8th default-pack column.
     const expected = new Set<ColumnKey>([
       'workflow_title',
       'health_score',
@@ -334,6 +359,7 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — D+6 default-pack composition lock (Grou
       'last_run_at',
       'systems',
       'cycle_time_mean_ms',
+      'date_recorded',
     ]);
     const actual = new Set<ColumnKey>(getDefaultVisibleColumns().map((col) => col.key));
     expect(actual).toEqual(expected);
@@ -356,11 +382,12 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — D+6 default-pack composition lock (Grou
 
   it('F5: getDefaultVisibleColumns() returns entries in registry insertion order (deterministic ordering)', () => {
     // getDefaultVisibleColumns() is a filter over the frozen catalog — it
-    // preserves registry insertion order by definition.  The 7 default-visible
+    // preserves registry insertion order by definition.  The 8 default-visible
     // entries appear in the catalog in this order:
-    //   [0] workflow_title  · [1] systems       · [2] opportunity_tag
-    //   [3] health_score    · [4] last_run_at   · [5] run_count
-    //   [6] cycle_time_mean_ms (iter-067 WDC2-P03 — sits in Tier A section)
+    //   [0] workflow_title  · [1] systems         · [2] opportunity_tag
+    //   [3] health_score    · [4] last_run_at      · [5] run_count
+    //   [6] date_recorded   (Batch A 2026-06-12 — display group, after run_count)
+    //   [7] cycle_time_mean_ms (iter-067 WDC2-P03 — sits in Tier A section)
     // Locking insertion order protects against registry reordering silently
     // changing which column appears in which table position for default users.
     const expectedOrder: ColumnKey[] = [
@@ -370,13 +397,15 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — D+6 default-pack composition lock (Grou
       'health_score',
       'last_run_at',
       'run_count',
+      'date_recorded',
       'cycle_time_mean_ms',
     ];
     const actualOrder = getDefaultVisibleColumns().map((col) => col.key);
     expect(actualOrder).toEqual(expectedOrder);
   });
 
-  it('F6: no column outside the canonical 7 has defaultVisible === true (drift-protection against silent widening)', () => {
+  it('F6: no column outside the canonical 8 has defaultVisible === true (drift-protection against silent widening)', () => {
+    // Batch A (2026-06-12): date_recorded added as 8th canonical default-pack column.
     const canonicalDefaultKeys = new Set<ColumnKey>([
       'workflow_title',
       'health_score',
@@ -385,6 +414,7 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — D+6 default-pack composition lock (Grou
       'last_run_at',
       'systems',
       'cycle_time_mean_ms', // WDC2-P03 (iter-067): 7th default-pack column
+      'date_recorded',      // Batch A (2026-06-12): 8th default-pack column
     ]);
     const nonCanonicalDefaults = WORKFLOW_DASHBOARD_COLUMNS.filter(
       (col) => col.defaultVisible && !canonicalDefaultKeys.has(col.key),
@@ -411,10 +441,12 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — determinism + helpers (Group E)', () =>
     expect(getColumnByKey('not_a_real_column_key')).toBeUndefined();
   });
 
-  it('E3: listColumnKeys() returns all 38 keys', () => {
+  it('E3: listColumnKeys() returns all 39 keys', () => {
+    // Batch A (2026-06-12): date_recorded added → 39 total.
     const keys = listColumnKeys();
-    expect(keys.length).toBe(38);
+    expect(keys.length).toBe(39);
     expect(keys).toContain('workflow_title');
+    expect(keys).toContain('date_recorded');
     expect(keys).toContain('cycle_time_ms');
     expect(keys).toContain('max_wait_step_id');
   });
@@ -520,16 +552,20 @@ describe('ColumnAccessorContext — WDC2-P01 contract extension (Group G, iter-0
     }
   });
 
-  it('G6: ColumnAccessorContext keyof exhaustiveness — exactly 7 keys (title, toolsUsed, lastViewedAt, createdAt, metricsV2, referenceNowMs, activeTimeRange)', () => {
+  it('G6: ColumnAccessorContext keyof exhaustiveness — exactly 8 keys (title, toolsUsed, lastViewedAt, createdAt, processDefinitionUpdatedAt, metricsV2, referenceNowMs, activeTimeRange)', () => {
     // Compile-time exhaustiveness via the type assignment below: if a field
     // is added to / removed from ColumnAccessorContext without updating this
     // tuple, TS will fail at compile time. Runtime check enumerates the keys
     // on a representative instance.
+    //
+    // Batch A (2026-06-12): processDefinitionUpdatedAt added (honest "Last Run"
+    // proxy backed by ProcessDefinition.updatedAt).
     const expectedKeys: Array<keyof ColumnAccessorContext> = [
       'title',
       'toolsUsed',
       'lastViewedAt',
       'createdAt',
+      'processDefinitionUpdatedAt',
       'metricsV2',
       'referenceNowMs',
       'activeTimeRange',
@@ -546,6 +582,6 @@ describe('ColumnAccessorContext — WDC2-P01 contract extension (Group G, iter-0
     const ctx = makeContext();
     const actualKeys = Object.keys(ctx).sort();
     expect(actualKeys).toEqual(expectedKeys.slice().sort());
-    expect(actualKeys.length).toBe(7);
+    expect(actualKeys.length).toBe(8);
   });
 });

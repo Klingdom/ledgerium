@@ -13,11 +13,11 @@ import { describe, it, expect, vi } from 'vitest';
 
 // ── Analytics mock (iter-030) ─────────────────────────────────────────────────
 vi.mock('@/lib/analytics.js', () => ({ track: vi.fn() }));
-import { applyFilters } from './WorkflowList.js';
+import { applyFilters, sortWorkflows } from './WorkflowList.js';
 import { hasActiveFilters } from './WorkflowListFilterBar.js';
 import type { WorkflowRowData } from './WorkflowRow.js';
 import type { FilterState } from './WorkflowListFilterBar.js';
-import type { WorkflowListState } from './WorkflowList.js';
+import type { WorkflowListState, SortState } from './WorkflowList.js';
 
 // ── Fixture helpers ───────────────────────────────────────────────────────────
 
@@ -27,17 +27,25 @@ function makeWorkflow(id: string, overrides: {
   healthOverall?: number;
   variationScore?: number;
   isGated?: boolean;
+  createdAt?: string;
+  processDefinitionUpdatedAt?: string | null;
+  runs?: number | null;
+  avgTimeMs?: number | null;
 } = {}): WorkflowRowData {
   return {
     id,
     title: `Workflow ${id}`,
     toolsUsed: overrides.toolsUsed ?? [],
-    createdAt: new Date().toISOString(),
+    createdAt: overrides.createdAt ?? new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     lastViewedAt: null,
+    // Batch A (2026-06-12): processDefinitionUpdatedAt for honest "Last Run" proxy
+    processDefinitionUpdatedAt: overrides.processDefinitionUpdatedAt !== undefined
+      ? overrides.processDefinitionUpdatedAt
+      : new Date().toISOString(),
     metricsV2: {
-      runs: 3,
-      avgTimeMs: 60_000,
+      runs: overrides.runs !== undefined ? overrides.runs : 3,
+      avgTimeMs: overrides.avgTimeMs !== undefined ? overrides.avgTimeMs : 60_000,
       variationScore: overrides.variationScore ?? 0.3,
       variationLabel: 'low',
       bottleneckLabel: null,
@@ -384,5 +392,99 @@ describe('MDR-P03 applyFilters nowMs injection (iter-037)', () => {
     // Should not throw and should return the workflow
     const result = applyFilters([wf], filters, null);
     expect(result).toHaveLength(1);
+  });
+});
+
+// ── Batch A (2026-06-12): sortWorkflows — new sort fields ─────────────────────
+//
+// Tests for the 5 new SortField values added by dashboard-redesign P0 item 2:
+// run_count, cycle_time, last_run, date_recorded, case_volume.
+// All comparators are pure deterministic functions over WorkflowRowData.
+
+describe('Batch A: sortWorkflows — new sort fields (2026-06-12)', () => {
+  it('sort by run_count asc — ascending by runs (nulls last via -1 sentinel)', () => {
+    const a = makeWorkflow('a', { runs: 5 });
+    const b = makeWorkflow('b', { runs: 2 });
+    const c = makeWorkflow('c', { runs: null });
+    const sort: SortState = { field: 'run_count', dir: 'asc' };
+    const result = sortWorkflows([a, b, c], sort);
+    expect(result.map((w) => w.id)).toEqual(['c', 'b', 'a']);
+  });
+
+  it('sort by run_count desc — descending by runs', () => {
+    const a = makeWorkflow('a', { runs: 5 });
+    const b = makeWorkflow('b', { runs: 2 });
+    const sort: SortState = { field: 'run_count', dir: 'desc' };
+    const result = sortWorkflows([a, b], sort);
+    expect(result.map((w) => w.id)).toEqual(['a', 'b']);
+  });
+
+  it('sort by case_volume — sorts identically to run_count (alias)', () => {
+    const a = makeWorkflow('a', { runs: 10 });
+    const b = makeWorkflow('b', { runs: 3 });
+    const sortRuns: SortState = { field: 'run_count', dir: 'asc' };
+    const sortCv: SortState = { field: 'case_volume', dir: 'asc' };
+    const r1 = sortWorkflows([a, b], sortRuns).map((w) => w.id);
+    const r2 = sortWorkflows([a, b], sortCv).map((w) => w.id);
+    expect(r1).toEqual(r2);
+  });
+
+  it('sort by cycle_time asc — ascending by avgTimeMs (null sorts last via Infinity)', () => {
+    const fast = makeWorkflow('fast', { avgTimeMs: 30_000 });
+    const slow = makeWorkflow('slow', { avgTimeMs: 120_000 });
+    const none = makeWorkflow('none', { avgTimeMs: null });
+    const sort: SortState = { field: 'cycle_time', dir: 'asc' };
+    const result = sortWorkflows([slow, none, fast], sort);
+    expect(result.map((w) => w.id)).toEqual(['fast', 'slow', 'none']);
+  });
+
+  it('sort by cycle_time desc — descending by avgTimeMs', () => {
+    const fast = makeWorkflow('fast', { avgTimeMs: 30_000 });
+    const slow = makeWorkflow('slow', { avgTimeMs: 120_000 });
+    const sort: SortState = { field: 'cycle_time', dir: 'desc' };
+    const result = sortWorkflows([fast, slow], sort);
+    expect(result.map((w) => w.id)).toEqual(['slow', 'fast']);
+  });
+
+  it('sort by last_run asc — ascending by processDefinitionUpdatedAt (null sorts last via -1)', () => {
+    const old = makeWorkflow('old', { processDefinitionUpdatedAt: '2026-01-01T00:00:00.000Z' });
+    const recent = makeWorkflow('recent', { processDefinitionUpdatedAt: '2026-06-01T00:00:00.000Z' });
+    const none = makeWorkflow('none', { processDefinitionUpdatedAt: null });
+    const sort: SortState = { field: 'last_run', dir: 'asc' };
+    const result = sortWorkflows([recent, none, old], sort);
+    expect(result.map((w) => w.id)).toEqual(['none', 'old', 'recent']);
+  });
+
+  it('sort by last_run desc — most recent first', () => {
+    const old = makeWorkflow('old', { processDefinitionUpdatedAt: '2026-01-01T00:00:00.000Z' });
+    const recent = makeWorkflow('recent', { processDefinitionUpdatedAt: '2026-06-01T00:00:00.000Z' });
+    const sort: SortState = { field: 'last_run', dir: 'desc' };
+    const result = sortWorkflows([old, recent], sort);
+    expect(result.map((w) => w.id)).toEqual(['recent', 'old']);
+  });
+
+  it('sort by date_recorded asc — oldest first', () => {
+    const a = makeWorkflow('a', { createdAt: '2026-01-15T00:00:00.000Z' });
+    const b = makeWorkflow('b', { createdAt: '2026-06-12T00:00:00.000Z' });
+    const sort: SortState = { field: 'date_recorded', dir: 'asc' };
+    const result = sortWorkflows([b, a], sort);
+    expect(result.map((w) => w.id)).toEqual(['a', 'b']);
+  });
+
+  it('sort by date_recorded desc — newest first (default sort direction)', () => {
+    const a = makeWorkflow('a', { createdAt: '2026-01-15T00:00:00.000Z' });
+    const b = makeWorkflow('b', { createdAt: '2026-06-12T00:00:00.000Z' });
+    const sort: SortState = { field: 'date_recorded', dir: 'desc' };
+    const result = sortWorkflows([a, b], sort);
+    expect(result.map((w) => w.id)).toEqual(['b', 'a']);
+  });
+
+  it('stable tie-break by id when primary sort values are equal', () => {
+    const w1 = makeWorkflow('w1', { runs: 5 });
+    const w2 = makeWorkflow('w2', { runs: 5 });
+    const sort: SortState = { field: 'run_count', dir: 'asc' };
+    const result = sortWorkflows([w2, w1], sort);
+    // ids 'w1' < 'w2' lexicographically → 'w1' first
+    expect(result.map((w) => w.id)).toEqual(['w1', 'w2']);
   });
 });

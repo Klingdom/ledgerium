@@ -80,6 +80,7 @@ export type ColumnKey =
   | 'health_score'
   | 'last_run_at'
   | 'run_count'
+  | 'date_recorded'
   // ── Layer 1: Operational flow (12 metrics + 8 aggregations = 9 Tier A) ─────
   | 'cycle_time_ms'
   | 'throughput_time_ms'
@@ -222,6 +223,16 @@ export interface ColumnAccessorContext {
   lastViewedAt: string | null;
   /** ISO timestamp of workflow creation. */
   createdAt: string;
+  /**
+   * ISO timestamp from `ProcessDefinition.updatedAt` — when the process
+   * definition last gained or changed a run.  Used as the honest "Last Run"
+   * proxy (Batch A / dashboard-redesign P0 item 2).  Null when no
+   * ProcessDefinition exists for this workflow yet.
+   *
+   * Accessor contract: `accessLastRunAt` reads this field (not `lastViewedAt`)
+   * so the "Last Run" column label is semantically honest.
+   */
+  processDefinitionUpdatedAt: string | null;
   /** Engine-computed metrics subtree (post-iter-039 single-source-of-truth). */
   metricsV2: WorkflowMetricsOutput;
   /**

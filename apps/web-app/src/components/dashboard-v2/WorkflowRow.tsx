@@ -47,7 +47,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { WorkflowMetricsOutput, OpportunityTag } from '@/lib/workflow-metrics.js';
-import { formatDateRelative } from '@/lib/format.js';
+import { formatDate, formatDateRelative } from '@/lib/format.js';
 import type { TimeRange } from './CommandHeader.js';
 import {
   getColumnByKey,
@@ -106,6 +106,13 @@ export interface WorkflowRowData {
   createdAt: string;
   updatedAt: string;
   lastViewedAt: string | null;
+  /**
+   * ISO timestamp from `ProcessDefinition.updatedAt` — when the process
+   * definition last gained or changed a run.  Used as the honest "Last Run"
+   * proxy (Batch A / dashboard-redesign P0 item 2).  Null when no
+   * ProcessDefinition exists for this workflow yet.
+   */
+  processDefinitionUpdatedAt: string | null;
   metricsV2: WorkflowMetricsOutput;
 }
 
@@ -730,6 +737,8 @@ export default function WorkflowRow({
     toolsUsed: workflow.toolsUsed,
     lastViewedAt: workflow.lastViewedAt,
     createdAt: workflow.createdAt,
+    // Batch A (2026-06-12): processDefinitionUpdatedAt for honest "Last Run" proxy
+    processDefinitionUpdatedAt: workflow.processDefinitionUpdatedAt,
     metricsV2: workflow.metricsV2,
     referenceNowMs: Date.now(),
     activeTimeRange: timeRange ?? 'all',
@@ -958,7 +967,12 @@ export default function WorkflowRow({
 
         // Audit-honesty: pending columns always render "—" (accessor is null)
         const rawValue = colDef.accessor ? colDef.accessor(accessorContext) : null;
-        const cellText = formatCellValue(rawValue);
+        // Date columns: format as absolute date string ("Jun 12, 2026") using
+        // the UTC-anchored formatDate helper — deterministic across server/client
+        // (hydration-safe).  Do NOT use Date.now()-relative strings in render.
+        const cellText = colDef.dataType === 'date' && typeof rawValue === 'string'
+          ? formatDate(rawValue) || '—'
+          : formatCellValue(rawValue);
 
         return (
           <td

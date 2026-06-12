@@ -33,6 +33,7 @@ export {
   accessHealthScore,
   accessLastRunAt,
   accessRunCount,
+  accessDateRecorded,
   accessCycleTimeMs,
   accessCycleTimeMeanMs,
   accessCaseVolume,

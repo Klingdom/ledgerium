@@ -108,6 +108,9 @@ vi.mock('@/db', () => {
       // mocked above so this value is not parsed by the test path. Included
       // to satisfy the adapter's parameter shape under strict typecheck.
       intelligenceJson: null,
+      // Batch A (2026-06-12): required by processDefinitionUpdatedAt field added
+      // to the route response for the honest "Last Run" proxy.
+      updatedAt: new Date('2026-05-15T10:00:00.000Z'),
     },
     tags: [],
     portfolios: [],

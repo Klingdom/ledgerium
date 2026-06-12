@@ -32,6 +32,8 @@ function makeWorkflow(overrides: Partial<WorkflowRowData> = {}): WorkflowRowData
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     lastViewedAt: null,
+    // Batch A (2026-06-12): processDefinitionUpdatedAt for honest "Last Run" proxy
+    processDefinitionUpdatedAt: new Date().toISOString(),
     metricsV2: {
       runs: 5,
       avgTimeMs: 120_000,

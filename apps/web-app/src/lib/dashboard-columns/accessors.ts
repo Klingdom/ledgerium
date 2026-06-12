@@ -83,17 +83,18 @@ export const accessHealthScore: ColumnAccessor<number> = (ctx) => {
 };
 
 /**
- * `last_run_at` accessor — ISO timestamp of last view (proxy for last run
- * today; iter-049 / WDC follow-up will swap to actual last-run timestamp once
- * `workflow_runs` table lands at Path C R+1). Returns null if never viewed.
+ * `last_run_at` accessor — ISO timestamp from `ProcessDefinition.updatedAt`,
+ * which records when the process definition last gained or changed a run.
+ * Returns null when no ProcessDefinition exists for this workflow.
  *
- * Honesty note: `lastViewedAt` is the field actually surfaced by the API
- * today; the column is labelled "Last Run" because that is the user-facing
- * semantic on the v2 dashboard subtext. Once R+1 ships, the accessor and the
- * registry column comment will be tightened together.
+ * Honesty note: this was rewired from `lastViewedAt` (a view-proxy) to
+ * `processDefinitionUpdatedAt` (`ProcessDefinition.updatedAt`) in Batch A of
+ * the dashboard redesign (2026-06-12).  A true per-run `lastRunAt` timestamp
+ * lands at Path C R+1 (`process_run_snapshot`); at that point this accessor
+ * will be tightened to the run-level field.
  */
 export const accessLastRunAt: ColumnAccessor<string> = (ctx) => {
-  return ctx.lastViewedAt;
+  return ctx.processDefinitionUpdatedAt;
 };
 
 /**
@@ -155,6 +156,24 @@ export const accessSystemCountPerRun: ColumnAccessor<number> = (ctx) => {
 };
 
 /**
+ * `date_recorded` accessor — ISO timestamp of workflow creation (`Workflow.createdAt`).
+ * This is the earliest wall-clock moment the workflow existed in the system.
+ *
+ * Lifetime accessor: returns the same value regardless of `referenceNowMs` or
+ * `activeTimeRange`. The field is set once at record creation and never changes.
+ *
+ * Rendering note: consumers MUST format this as an absolute date string
+ * (e.g. "Jun 12, 2026") using a deterministic formatter — NOT as a relative
+ * "N days ago" string derived from `Date.now()` at render time, which would
+ * cause a Next.js hydration mismatch between server and client.
+ *
+ * Batch A / dashboard-redesign P0 item 1 (2026-06-12).
+ */
+export const accessDateRecorded: ColumnAccessor<string> = (ctx) => {
+  return ctx.createdAt;
+};
+
+/**
  * Lookup table mapping every `ColumnKey` whose availability is `'available'`
  * to its accessor. Consumers (picker, row renderer, sort/filter helpers) call
  * the accessor via `getAccessor(key)` from index.ts to avoid switch-case
@@ -174,6 +193,7 @@ export const AVAILABLE_ACCESSORS: Record<string, ColumnAccessor> = Object.freeze
   cycle_time_mean_ms: accessCycleTimeMeanMs as ColumnAccessor,
   case_volume: accessCaseVolume as ColumnAccessor,
   system_count_per_run: accessSystemCountPerRun as ColumnAccessor,
+  date_recorded: accessDateRecorded as ColumnAccessor,
 });
 
 /**

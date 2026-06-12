@@ -522,6 +522,13 @@ export async function GET(req: NextRequest) {
         stabilityScore: w.processDefinition.stabilityScore,
         confidenceScore: w.processDefinition.confidenceScore,
       } : null,
+      // Batch A (2026-06-12): honest "Last Run" proxy.
+      // ProcessDefinition.updatedAt records when the process definition last
+      // gained or changed a run — closer to "last run" than Workflow.lastViewedAt
+      // (a view timestamp).  A true per-run lastRunAt lands at Path C R+1.
+      processDefinitionUpdatedAt: w.processDefinition
+        ? w.processDefinition.updatedAt.toISOString()
+        : null,
       // Health score V1: only included for Starter+ users (unchanged)
       ...(canSeeHealthScores ? {
         healthScore: computeHealthScore({

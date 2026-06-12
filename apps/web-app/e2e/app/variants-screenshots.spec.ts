@@ -94,6 +94,13 @@ test.describe('Process Variants documentation', () => {
     await page.waitForTimeout(2000); // React Flow render
     await shot(page, 'workflow-process-map');
 
+    // ── Dashboard list (Batch A: Date Recorded column + sorts) ────────────────
+    // Exercises the changed dashboard page under the no-page-error assertion and
+    // captures the workflow library with the new columns.
+    await page.goto('/dashboard', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1500);
+    await shot(page, 'dashboard-list');
+
     // ── E2E assertions: nothing crashed ───────────────────────────────────────
     await expect(page.locator('text=Application error')).toHaveCount(0);
     expect(errors, `no uncaught page errors:\n${errors.join('\n')}`).toEqual([]);

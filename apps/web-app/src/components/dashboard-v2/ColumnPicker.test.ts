@@ -66,13 +66,15 @@ function allGroupedColumns(
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('ColumnPicker: column grouping (iter-061)', () => {
-  it('total columns across all groups equals registry size (38)', () => {
+  it('total columns across all groups equals registry size (39)', () => {
+    // Batch A (2026-06-12): date_recorded added → 39 total.
     const grouped = buildGroupedColumns(new Set<ColumnKey>());
     const total = GROUP_ORDER.reduce((sum, g) => sum + grouped[g].length, 0);
-    expect(total).toBe(38);
+    expect(total).toBe(39);
   });
 
   it('every registered column appears in exactly one group', () => {
+    // Batch A (2026-06-12): date_recorded added → 39 unique keys.
     const grouped = buildGroupedColumns(new Set<ColumnKey>());
     const seen = new Set<ColumnKey>();
     for (const g of GROUP_ORDER) {
@@ -81,7 +83,7 @@ describe('ColumnPicker: column grouping (iter-061)', () => {
         seen.add(col.key);
       }
     }
-    expect(seen.size).toBe(38);
+    expect(seen.size).toBe(39);
   });
 
   it('all 7 canonical groups are present', () => {

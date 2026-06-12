@@ -64,6 +64,8 @@ function makeContext(overrides: Partial<ColumnAccessorContext> = {}): ColumnAcce
     toolsUsed: ['Salesforce', 'NetSuite', 'DocuSign'],
     lastViewedAt: '2026-04-29T14:00:00.000Z',
     createdAt: '2026-03-01T09:00:00.000Z',
+    // Batch A (2026-06-12): required by updated ColumnAccessorContext contract
+    processDefinitionUpdatedAt: '2026-04-28T10:00:00.000Z',
     metricsV2,
     // iter-065 / WDC2-P01 — deterministic frozen wall-clock + lifetime range
     // for filter-predicate tests. Filter predicates do not consume these
@@ -111,9 +113,10 @@ describe('OperatorsByDataType — invariants (Group A)', () => {
 // ── Group B: getFilterableColumns ─────────────────────────────────────────────
 
 describe('getFilterableColumns (Group B)', () => {
-  it('B1: returns exactly 10 entries today (available + filterable)', () => {
-    // Per ASK-3 verdict (MR-014): filter coverage = 10 available entries.
-    expect(getFilterableColumns().length).toBe(10);
+  it('B1: returns exactly 11 entries today (available + filterable)', () => {
+    // Per ASK-3 verdict (MR-014): filter coverage = available entries.
+    // Batch A (2026-06-12): date_recorded added as 11th available+filterable column.
+    expect(getFilterableColumns().length).toBe(11);
   });
 
   it('B2: every returned entry has availability === "available" AND filterable === true', () => {
