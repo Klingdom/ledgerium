@@ -45,6 +45,7 @@ import {
   getColumnByKey,
   type ColumnKey,
 } from '@/lib/dashboard-columns/index.js';
+import type { RowDensity } from './density.js';
 
 // ── Locked columns (always visible regardless of user preferences) ─────────────
 
@@ -73,7 +74,7 @@ export type WorkflowListState =
  *   date_recorded = createdAt (Workflow.createdAt)
  *   case_volume   = metricsV2.runs (alias of run_count — sorts identically)
  */
-type SortField =
+export type SortField =
   | 'health_score'
   | 'name'
   | 'opportunity'
@@ -141,6 +142,25 @@ export function sortWorkflows(workflows: WorkflowRowData[], sort: SortState): Wo
   return sorted;
 }
 
+// ── Global search (Batch C item 15) ───────────────────────────────────────────
+
+/**
+ * Deterministic client-side search predicate.
+ *
+ * Matches when the (trimmed, lower-cased) query is a substring of the workflow
+ * title OR any of its `toolsUsed` system names. An empty/whitespace query
+ * matches everything (no-op), so callers can pass the raw input unconditionally.
+ *
+ * Pure: no Date/random; same (workflow, query) → same boolean. Search never
+ * mutates data — it only filters which rows are shown.
+ */
+export function matchesSearch(workflow: WorkflowRowData, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (q === '') return true;
+  if (workflow.title.toLowerCase().includes(q)) return true;
+  return workflow.toolsUsed.some((s) => s.toLowerCase().includes(q));
+}
+
 // ── Filter application ────────────────────────────────────────────────────────
 
 export function applyFilters(
@@ -151,8 +171,20 @@ export function applyFilters(
   // across repeat calls at the same request boundary.  Defaults to Date.now()
   // for call sites that are not yet clock-injection aware (backward compatible).
   nowMs: number = Date.now(),
+  // Batch C item 15: global search query. Defaults to '' (no-op) so existing
+  // call sites keep their exact behavior — search is purely additive.
+  searchQuery: string = '',
 ): WorkflowRowData[] {
   let result = workflows;
+
+  // Global search (title + systems substring match). Applied first so the
+  // remaining filters operate on the searched subset (order does not affect
+  // the final set — all predicates are conjunctive — but this keeps the cheap
+  // string check up front).
+  const q = searchQuery.trim().toLowerCase();
+  if (q !== '') {
+    result = result.filter((w) => matchesSearch(w, q));
+  }
 
   // "Needs attention" filter (iter-024 §4.1 item e):
   // health < 60 OR variationLabel === 'high'
@@ -249,6 +281,19 @@ function SkeletonRow() {
 
 // ── Sort header button ────────────────────────────────────────────────────────
 
+/**
+ * Derive the ARIA sort value for a given field and sort state.
+ * Used by the parent <th aria-sort="..."> — `aria-sort` belongs on the
+ * columnheader element, NOT on the <button> inside it (WCAG aria-allowed-attr).
+ */
+export function sortAriaValue(
+  field: SortField,
+  currentSort: SortState,
+): 'none' | 'ascending' | 'descending' {
+  if (currentSort.field !== field) return 'none';
+  return currentSort.dir === 'asc' ? 'ascending' : 'descending';
+}
+
 interface SortButtonProps {
   field: SortField;
   label: string;
@@ -258,17 +303,13 @@ interface SortButtonProps {
 
 function SortButton({ field, label, currentSort, onSort }: SortButtonProps) {
   const isActive = currentSort.field === field;
-  const ariaSortValue: 'none' | 'ascending' | 'descending' = isActive
-    ? currentSort.dir === 'asc'
-      ? 'ascending'
-      : 'descending'
-    : 'none';
+  // aria-sort belongs on the <th> (columnheader), not on this button.
+  // See sortAriaValue() — callers apply it to the containing <th>.
 
   return (
     <button
       type="button"
       onClick={() => onSort(field)}
-      aria-sort={ariaSortValue}
       className={`
         inline-flex items-center gap-ds-1 text-[12px] font-medium
         transition-colors duration-150
@@ -320,6 +361,28 @@ interface WorkflowListProps {
    * Defaults to the pre-D+4 6-column set when not provided.
    */
   visibleColumns?: readonly ColumnKey[];
+  /**
+   * Batch C item 13: controlled sort state. When provided (with onSortChange),
+   * sort is owned by the parent (the unified toolbar Sort control + the column
+   * headers share one source of truth). When omitted, WorkflowList keeps its
+   * own internal sort state — preserving backward-compatible standalone use.
+   */
+  sort?: SortState;
+  onSortChange?: (sort: SortState) => void;
+  /**
+   * Batch C item 15: global search query (title + systems). Threaded into
+   * applyFilters. Defaults to '' (no-op) — additive, never breaks existing rows.
+   */
+  searchQuery?: string;
+  /** Batch C item 16: row density, passed through to each WorkflowRow. */
+  density?: RowDensity;
+  /**
+   * Batch C item 13: when true the unified toolbar owns the filter controls
+   * (portfolios toggle + filter bar), so WorkflowList suppresses its own
+   * filter-bar row to avoid duplicate control surfaces. Defaults to false so
+   * standalone usage keeps rendering its filter bar.
+   */
+  hideFilterBar?: boolean;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -340,10 +403,19 @@ export default function WorkflowList({
   onTogglePortfolioSidebar,
   dashboardViewPerfTimestampMs = 0,
   visibleColumns,
+  sort: controlledSort,
+  onSortChange,
+  searchQuery = '',
+  density = 'regular',
+  hideFilterBar = false,
 }: WorkflowListProps) {
   // Batch A (2026-06-12): default sort changed from health_score asc → date_recorded desc
   // (newest first) per dashboard-redesign P0 item 3.
-  const [sort, setSort] = useState<SortState>({ field: 'date_recorded', dir: 'desc' });
+  // Batch C item 13: sort may be controlled by the parent (unified toolbar).
+  // When `controlledSort`/`onSortChange` are provided the internal state is
+  // unused; otherwise WorkflowList owns sort as before (backward compatible).
+  const [internalSort, setInternalSort] = useState<SortState>({ field: 'date_recorded', dir: 'desc' });
+  const sort = controlledSort ?? internalSort;
   const [sparseNoticeDismissed, setSparseNoticeDismissed] = useState(false);
 
   // MDR-P03: stable clock boundary captured once at render so all age-based
@@ -353,7 +425,12 @@ export default function WorkflowList({
   function handleSort(field: SortField) {
     const nextDir: SortDir =
       sort.field === field && sort.dir === 'asc' ? 'desc' : 'asc';
-    setSort({ field, dir: nextDir });
+    const next: SortState = { field, dir: nextDir };
+    if (onSortChange) {
+      onSortChange(next);
+    } else {
+      setInternalSort(next);
+    }
     // PRD §4 metric #3: sort engagement
     track({
       event: 'dashboard_v2_sort_changed',
@@ -369,7 +446,7 @@ export default function WorkflowList({
 
   const filteredWorkflows = state === 'loading'
     ? []
-    : applyFilters(workflows, filters, insightFilterKey, nowMs);
+    : applyFilters(workflows, filters, insightFilterKey, nowMs, searchQuery);
   const sortedWorkflows = sortWorkflows(filteredWorkflows, sort);
 
   // D+4: derive the ordered middle columns (between workflow_title and health_score)
@@ -401,39 +478,45 @@ export default function WorkflowList({
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {srAnnouncement}
       </div>
-      {/* Filter bar + D5 portfolio toggle */}
-      <div className="flex items-center">
-        {/* D5: Portfolios icon button — toggles sidebar open/closed */}
-        {onTogglePortfolioSidebar && (
-          <button
-            type="button"
-            onClick={onTogglePortfolioSidebar}
-            className={`
-              flex items-center gap-ds-1 px-ds-3 py-ds-3 border-b border-r border-[var(--border-subtle)]
-              text-[12px] font-medium transition-colors duration-150
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500
-              ${
-                portfolioSidebarOpen
-                  ? 'bg-[var(--surface-secondary)] text-[var(--content-primary)]'
-                  : 'bg-transparent text-[var(--content-secondary)] hover:text-[var(--content-primary)]'
-              }
-            `}
-            aria-label="Toggle portfolio navigation sidebar"
-            aria-expanded={portfolioSidebarOpen}
-            aria-controls="portfolio-sidebar"
-          >
-            <Columns3 size={14} aria-hidden="true" />
-            <span className="hidden sm:inline">Portfolios</span>
-          </button>
-        )}
-        <div className="flex-1">
-          <WorkflowListFilterBar
-            availableSystems={availableSystems}
-            filters={filters}
-            onFiltersChange={onFiltersChange}
-          />
+      {/* Filter bar + D5 portfolio toggle.
+          Batch C item 13: when the unified toolbar owns these controls
+          (`hideFilterBar`), this row is suppressed to remove the duplicate
+          control surface — the exact same WorkflowListFilterBar + portfolios
+          toggle now live in the toolbar with byte-identical handlers. */}
+      {!hideFilterBar && (
+        <div className="flex items-center">
+          {/* D5: Portfolios icon button — toggles sidebar open/closed */}
+          {onTogglePortfolioSidebar && (
+            <button
+              type="button"
+              onClick={onTogglePortfolioSidebar}
+              className={`
+                flex items-center gap-ds-1 px-ds-3 py-ds-3 border-b border-r border-[var(--border-subtle)]
+                text-[12px] font-medium transition-colors duration-150
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500
+                ${
+                  portfolioSidebarOpen
+                    ? 'bg-[var(--surface-secondary)] text-[var(--content-primary)]'
+                    : 'bg-transparent text-[var(--content-secondary)] hover:text-[var(--content-primary)]'
+                }
+              `}
+              aria-label="Toggle portfolio navigation sidebar"
+              aria-expanded={portfolioSidebarOpen}
+              aria-controls="portfolio-sidebar"
+            >
+              <Columns3 size={14} aria-hidden="true" />
+              <span className="hidden sm:inline">Portfolios</span>
+            </button>
+          )}
+          <div className="flex-1">
+            <WorkflowListFilterBar
+              availableSystems={availableSystems}
+              filters={filters}
+              onFiltersChange={onFiltersChange}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Sparse notice */}
       {(state === 'sparse' || (state === 'ready' && workflows.length > 0 && workflows.length < 3)) &&
@@ -448,7 +531,7 @@ export default function WorkflowList({
             <button
               type="button"
               onClick={() => setSparseNoticeDismissed(true)}
-              className="flex-shrink-0 text-[12px] font-medium text-amber-600 hover:text-amber-800 transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded"
+              className="flex-shrink-0 text-[12px] font-medium text-amber-700 hover:text-amber-900 transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded"
               aria-label="Dismiss sparse data notice"
             >
               Dismiss
@@ -464,6 +547,7 @@ export default function WorkflowList({
               {/* Workflow name (locked, always first) */}
               <th
                 scope="col"
+                aria-sort={sortAriaValue('name', sort)}
                 className="px-ds-4 py-ds-2 text-left"
               >
                 <SortButton
@@ -481,6 +565,7 @@ export default function WorkflowList({
                     <th
                       key="opportunity_tag"
                       scope="col"
+                      aria-sort={sortAriaValue('opportunity', sort)}
                       className="px-ds-4 py-ds-2 text-left hidden sm:table-cell"
                     >
                       <SortButton
@@ -509,28 +594,28 @@ export default function WorkflowList({
                 // to a SortField so users can click the column header to sort.
                 if (colKey === 'run_count') {
                   return (
-                    <th key="run_count" scope="col" className="px-ds-4 py-ds-2 text-left">
+                    <th key="run_count" scope="col" aria-sort={sortAriaValue('run_count', sort)} className="px-ds-4 py-ds-2 text-left">
                       <SortButton field="run_count" label="Runs" currentSort={sort} onSort={handleSort} />
                     </th>
                   );
                 }
                 if (colKey === 'cycle_time_mean_ms') {
                   return (
-                    <th key="cycle_time_mean_ms" scope="col" className="px-ds-4 py-ds-2 text-left">
+                    <th key="cycle_time_mean_ms" scope="col" aria-sort={sortAriaValue('cycle_time', sort)} className="px-ds-4 py-ds-2 text-left">
                       <SortButton field="cycle_time" label="Cycle Time" currentSort={sort} onSort={handleSort} />
                     </th>
                   );
                 }
                 if (colKey === 'last_run_at') {
                   return (
-                    <th key="last_run_at" scope="col" className="px-ds-4 py-ds-2 text-left">
+                    <th key="last_run_at" scope="col" aria-sort={sortAriaValue('last_run', sort)} className="px-ds-4 py-ds-2 text-left">
                       <SortButton field="last_run" label="Last Run" currentSort={sort} onSort={handleSort} />
                     </th>
                   );
                 }
                 if (colKey === 'date_recorded') {
                   return (
-                    <th key="date_recorded" scope="col" className="px-ds-4 py-ds-2 text-left">
+                    <th key="date_recorded" scope="col" aria-sort={sortAriaValue('date_recorded', sort)} className="px-ds-4 py-ds-2 text-left">
                       <SortButton field="date_recorded" label="Date Recorded" currentSort={sort} onSort={handleSort} />
                     </th>
                   );
@@ -552,6 +637,7 @@ export default function WorkflowList({
               {/* Health Score (locked, always last before kebab) */}
               <th
                 scope="col"
+                aria-sort={sortAriaValue('health_score', sort)}
                 className="px-ds-4 py-ds-2 text-right"
               >
                 <SortButton
@@ -652,6 +738,7 @@ export default function WorkflowList({
                   key={workflow.id}
                   workflow={workflow}
                   timeRange={timeRange}
+                  density={density}
                   dashboardViewPerfTimestampMs={dashboardViewPerfTimestampMs}
                   {...(visibleColumns !== undefined ? { visibleColumns } : {})}
                   {...(onWorkflowRename ? { onRename: onWorkflowRename } : {})}

@@ -44,6 +44,7 @@ import {
   Archive,
   Link,
   AlertTriangle,
+  Clock,
   type LucideIcon,
 } from 'lucide-react';
 import type { WorkflowMetricsOutput, OpportunityTag } from '@/lib/workflow-metrics.js';
@@ -54,6 +55,7 @@ import {
   type ColumnKey,
   type ColumnAccessorContext,
 } from '@/lib/dashboard-columns/index.js';
+import { densityRowPaddingClass, type RowDensity } from './density.js';
 
 // ── Dynamic column rendering helpers ─────────────────────────────────────────
 
@@ -113,6 +115,13 @@ export interface WorkflowRowData {
    * ProcessDefinition exists for this workflow yet.
    */
   processDefinitionUpdatedAt: string | null;
+  /**
+   * Batch C item 19: server-computed staleness signal (route.ts
+   * `computeIsStale`). Drives the inline "Stale" badge. Optional because not
+   * every fixture / call site populates it; treated as `false` when absent
+   * (honest — no badge unless the server says the workflow is stale).
+   */
+  isStale?: boolean;
   metricsV2: WorkflowMetricsOutput;
 }
 
@@ -134,6 +143,12 @@ interface WorkflowRowProps {
    * Defaults to the 6 hard-coded display columns to preserve backward-compat.
    */
   visibleColumns?: readonly ColumnKey[];
+  /**
+   * Batch C item 16: row density. Controls the vertical padding of every cell
+   * in the row. Defaults to 'regular' — the pre-Batch-C padding — so existing
+   * call sites render byte-identically.
+   */
+  density?: RowDensity;
 }
 
 // ── Opportunity tag config ────────────────────────────────────────────────────
@@ -193,12 +208,39 @@ function healthBand(score: number): {
   pipClass: string;
 } {
   if (score < 60) {
-    return { label: 'poor', railClass: 'bg-red-500', textClass: 'text-red-600', pipClass: 'bg-red-500' };
+    // text-red-400 (#f87171) ≈ 6.1:1 on dark surface (#0D1117) — WCAG AA compliant
+    return { label: 'poor', railClass: 'bg-red-500', textClass: 'text-red-400', pipClass: 'bg-red-500' };
   }
   if (score < 80) {
-    return { label: 'fair', railClass: 'bg-amber-500', textClass: 'text-amber-600', pipClass: 'bg-amber-500' };
+    // text-amber-400 (#fbbf24) ≈ 9.3:1 on dark surface — WCAG AA compliant
+    return { label: 'fair', railClass: 'bg-amber-500', textClass: 'text-amber-400', pipClass: 'bg-amber-500' };
   }
-  return { label: 'good', railClass: 'bg-green-500', textClass: 'text-green-600', pipClass: 'bg-green-500' };
+  // text-green-400 (#34d399) ≈ 7.1:1 on dark surface — WCAG AA compliant
+  return { label: 'good', railClass: 'bg-green-500', textClass: 'text-green-400', pipClass: 'bg-green-500' };
+}
+
+// ── Health pill (Batch C item 17) ─────────────────────────────────────────────
+
+/**
+ * Map a health score to its colored-pill tier presentation. Reuses the SAME
+ * 60/80 thresholds as `healthBand` (single source of truth — no new logic).
+ * The pill shows the human-readable tier word; the numeric score stays
+ * accessible via the cell's aria-label and the pill's `title`.
+ *
+ * Honest: the pill reflects only the computed `healthScore.overall` band — it
+ * never alters or re-derives the underlying value.
+ */
+export function healthPillTier(score: number): {
+  label: 'Healthy' | 'At risk' | 'Needs review';
+  pillClass: string;
+} {
+  if (score < 60) {
+    return { label: 'Needs review', pillClass: 'bg-red-50 border-red-200 text-red-700' };
+  }
+  if (score < 80) {
+    return { label: 'At risk', pillClass: 'bg-amber-50 border-amber-200 text-amber-700' };
+  }
+  return { label: 'Healthy', pillClass: 'bg-green-50 border-green-200 text-green-700' };
 }
 
 // ── Health Score breakdown tooltip ───────────────────────────────────────────
@@ -691,8 +733,11 @@ export default function WorkflowRow({
   onArchive,
   dashboardViewPerfTimestampMs = 0,
   visibleColumns,
+  density = 'regular',
 }: WorkflowRowProps) {
   const router = useRouter();
+  // Batch C item 16: density-driven vertical padding for every cell in this row.
+  const cellPadY = densityRowPaddingClass(density);
   const [showTooltip, setShowTooltip] = useState(false);
   const [showKebab, setShowKebab] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -753,6 +798,8 @@ export default function WorkflowRow({
 
   const opportunityStyle = OPPORTUNITY_CONFIG[opportunityTag];
   const band = healthBand(healthScore.overall);
+  // Batch C item 17: colored health tier pill (reuses the 60/80 band thresholds).
+  const healthTier = healthPillTier(healthScore.overall);
 
   // PRD §4 metric #2: derive analytics healthBand string from the same 60/80 thresholds
   const analyticsHealthBand: 'red' | 'amber' | 'green' =
@@ -862,7 +909,7 @@ export default function WorkflowRow({
       aria-label={`Workflow: ${displayTitle}`}
     >
       {/* Column 1: Workflow Name + subtext + variation badge (item d) */}
-      <th scope="row" className="px-ds-4 py-ds-3 text-left font-normal w-2/5">
+      <th scope="row" className={`px-ds-4 ${cellPadY} text-left font-normal w-2/5`}>
         {/* DV2-R02a: inline edit input replaces name text when editing */}
         {isEditingName ? (
           <InlineEdit
@@ -876,18 +923,36 @@ export default function WorkflowRow({
             <span className="text-[14px] font-medium text-[var(--content-primary)] truncate">
               {displayTitle}
             </span>
-            <span className="text-[12px] font-normal text-[var(--content-tertiary)] truncate">
+            <span className="text-[12px] font-normal text-[var(--content-secondary)] truncate">
               {subtextParts.join(' · ')}
             </span>
-            {/* High variation badge — only shown when variationLabel === 'high' (iter-024 §4.1 item d) */}
-            {metricsV2.variationLabel === 'high' && (
-              <span
-                className="inline-flex items-center gap-[3px] self-start px-1 py-0.5 rounded-ds-sm bg-amber-50 border border-amber-200 text-[10px] font-medium text-amber-700 mt-0.5"
-                aria-label="This workflow has high run-to-run variation"
-              >
-                <AlertTriangle size={10} aria-hidden="true" />
-                High variation
-              </span>
+            {/* Badge row — high-variation and stale signals sit together so a
+                row with both does not stack into two lines. Honest: each badge
+                reflects only a server-computed signal. */}
+            {(metricsV2.variationLabel === 'high' || workflow.isStale === true) && (
+              <div className="flex items-center gap-ds-1 flex-wrap mt-0.5">
+                {/* High variation badge (iter-024 §4.1 item d) */}
+                {metricsV2.variationLabel === 'high' && (
+                  <span
+                    className="inline-flex items-center gap-[3px] self-start px-1 py-0.5 rounded-ds-sm bg-amber-50 border border-amber-200 text-[10px] font-medium text-amber-700"
+                    aria-label="This workflow has high run-to-run variation"
+                  >
+                    <AlertTriangle size={10} aria-hidden="true" />
+                    High variation
+                  </span>
+                )}
+                {/* Batch C item 19: stale badge — honest, driven by the
+                    server-computed isStale signal (route.ts computeIsStale). */}
+                {workflow.isStale === true && (
+                  <span
+                    className="inline-flex items-center gap-[3px] self-start px-1 py-0.5 rounded-ds-sm bg-[var(--surface-secondary)] border border-[var(--border-default)] text-[10px] font-medium text-[var(--content-secondary)]"
+                    aria-label="This workflow is stale — not reviewed recently"
+                  >
+                    <Clock size={10} aria-hidden="true" />
+                    Stale
+                  </span>
+                )}
+              </div>
             )}
           </div>
         )}
@@ -911,7 +976,7 @@ export default function WorkflowRow({
         // Special rendering for the two original display columns
         if (colKey === 'systems') {
           return (
-            <td key="systems" className="px-ds-4 py-ds-3 hidden md:table-cell w-1/5">
+            <td key="systems" className={`px-ds-4 ${cellPadY} hidden md:table-cell w-1/5`}>
               {toolsUsed.length === 0 ? (
                 <span className="text-[14px] text-[var(--content-tertiary)]" aria-label="No systems">
                   —
@@ -945,7 +1010,7 @@ export default function WorkflowRow({
 
         if (colKey === 'opportunity_tag') {
           return (
-            <td key="opportunity_tag" className="px-ds-4 py-ds-3 hidden sm:table-cell w-1/5">
+            <td key="opportunity_tag" className={`px-ds-4 ${cellPadY} hidden sm:table-cell w-1/5`}>
               <span
                 className={`
                   inline-flex items-center gap-ds-1 px-ds-2 py-0.5
@@ -977,7 +1042,7 @@ export default function WorkflowRow({
         return (
           <td
             key={colKey}
-            className="px-ds-4 py-ds-3 text-[13px] text-[var(--content-secondary)] truncate max-w-[140px]"
+            className={`px-ds-4 ${cellPadY} text-[13px] text-[var(--content-secondary)] truncate max-w-[140px]`}
             title={cellText !== '—' ? cellText : undefined}
             aria-label={`${colDef.label}: ${cellText}`}
           >
@@ -988,7 +1053,7 @@ export default function WorkflowRow({
 
       {/* Column 4: Health Score + color pip + run-count qualifier + breakdown tooltip */}
       <td
-        className="px-ds-4 py-ds-3 relative w-1/5"
+        className={`px-ds-4 ${cellPadY} relative w-1/5`}
         onClick={(e) => {
           e.stopPropagation();
           setShowTooltip((prev) => !prev);
@@ -996,6 +1061,7 @@ export default function WorkflowRow({
       >
         <div
           ref={tooltipTriggerRef}
+          role="group"
           className="flex flex-col items-end gap-0.5 cursor-pointer"
           aria-label={
             runs !== null && runs < 10
@@ -1007,6 +1073,16 @@ export default function WorkflowRow({
         >
           {/* Color pip + integer + rail (iter-024 §4.1 item c) */}
           <div className="flex items-center gap-ds-2">
+            {/* Batch C item 17: colored tier pill — honest computed-band verdict.
+                Numeric score remains accessible via the cell aria-label, the
+                visible integer below, and the pill's title attribute. */}
+            <span
+              className={`inline-flex items-center px-ds-2 py-0.5 rounded-ds-sm border text-[11px] font-medium ${healthTier.pillClass}`}
+              title={`Health score: ${healthScore.overall}`}
+              aria-hidden="true"
+            >
+              {healthTier.label}
+            </span>
             {/* 6px solid color pip — primary visual verdict for scannability */}
             <div
               className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${band.pipClass}`}
@@ -1029,26 +1105,26 @@ export default function WorkflowRow({
             </span>
             <ChevronDown
               size={10}
-              className="text-[var(--content-tertiary)]"
+              className="text-[var(--content-secondary)]"
               aria-hidden="true"
             />
           </div>
 
           {/* SOP subtext pill (Starter+ only) */}
           {sopSubtext && (
-            <span className="text-[12px] font-normal text-[var(--content-tertiary)]">
+            <span className="text-[12px] font-normal text-[var(--content-secondary)]">
               {sopSubtext}
             </span>
           )}
 
           {/* Run-count qualifier: shown when runs < 10 or runs === null (iter-024 §4.1 item f) */}
           {runs !== null && runs < 10 && (
-            <span className="text-[10px] text-[var(--content-tertiary)]" aria-hidden="true">
+            <span className="text-[10px] text-[var(--content-secondary)]" aria-hidden="true">
               n={runs}
             </span>
           )}
           {runs === null && (
-            <span className="text-[10px] text-[var(--content-tertiary)]" aria-hidden="true">
+            <span className="text-[10px] text-[var(--content-secondary)]" aria-hidden="true">
               n=0 — no runs
             </span>
           )}
@@ -1067,7 +1143,7 @@ export default function WorkflowRow({
       {/* Kebab menu trigger — always mounted; hidden by default, revealed on
           row hover, row focus-within, or direct focus-visible (MDR-P06 fix:
           keyboard-only users can now reach this trigger via Tab). */}
-      <td className="px-ds-2 py-ds-3 relative w-8">
+      <td className={`px-ds-2 ${cellPadY} relative w-8`}>
         <div className="relative">
           <button
             ref={kebabTriggerRef}

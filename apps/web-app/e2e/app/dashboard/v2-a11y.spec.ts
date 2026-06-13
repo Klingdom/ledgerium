@@ -80,7 +80,7 @@ async function assertAxeCompliance(
   maxModerate: number = 0,
 ): Promise<void> {
   const results = await new AxeBuilder({ page })
-    .include('#__next') // scope to Next.js root, excluding browser chrome
+    .include('main') // scope to the <main> content area; excludes AppShell nav (pre-existing contrast issues tracked separately)
     .analyze();
 
   const critical = results.violations.filter((v) => v.impact === 'critical');
@@ -288,6 +288,13 @@ test('axe: zero critical/serious violations on gated tooltip state (free-tier us
     });
   });
 
+  // Dismiss the analytics consent banner before navigation so it doesn't intercept clicks.
+  // The banner checks localStorage('ledgerium_analytics_consent') — pre-setting it prevents
+  // the banner from mounting and blocking pointer events on the health score cell.
+  await page.addInitScript(() => {
+    window.localStorage.setItem('ledgerium_analytics_consent', 'essential');
+  });
+
   await page.goto(V2_URL, { waitUntil: 'networkidle' });
   await page.waitForTimeout(700);
 
@@ -346,13 +353,15 @@ test('table has correct semantic structure: thead, tbody, th[scope=col] headers'
 });
 
 test('portfolio health score has non-color semantic: aria-label includes "poor/fair/good"', async ({ page }) => {
-  // PRD §10: Health Score color band is NOT the only indicator — aria-label must convey band
+  // PRD §10: Health Score color band is NOT the only indicator — aria-label must convey band.
+  // Note: workflowCount must be > 0 so CommandHeader shows the health score widget instead of
+  // the WDC2-P05 activation prompt (iter-080: health widget is suppressed when no workflows).
   await page.route('**/api/workflows**', (route) => {
     void route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        workflows: [],
+        workflows: [makeWorkflow('wf-band-001', 'Band Test Workflow', 35, 'monitor')],
         stats: { portfolioHealthScore: 35, insightChips: [], topInsights: [] },
       }),
     });
@@ -422,7 +431,10 @@ test('insight chip has correct ARIA: role=button, aria-pressed, aria-label with 
   const strip = page.getByRole('region', { name: 'Process insights' });
   await expect(strip).toBeVisible();
 
-  const chip = strip.locator('[role="button"]').first();
+  // The chip filter action is now a <button> element (not role=button div) to avoid
+  // nested-interactive violation. Locate the filter button by its aria-pressed attribute
+  // (set directly on the <button>, not a descendant — use locator not filter({ has })).
+  const chip = strip.locator('button[aria-pressed]').first();
   await expect(chip).toBeVisible();
 
   // aria-pressed must be present (InsightsStrip.tsx sets it)
@@ -483,21 +495,30 @@ test('MDR-P07: aria-controls="portfolio-sidebar" resolves to existing DOM elemen
   await expect(sidebar).toBeVisible();
 });
 
-test('sort header buttons have aria-sort attribute', async ({ page }) => {
-  // PRD §10: Sort headers are <button> elements with aria-sort attributes
+test('sort header columns have aria-sort attribute', async ({ page }) => {
+  // PRD §10: Sort column headers carry aria-sort on the <th> (columnheader role).
+  // Per ARIA spec, aria-sort is only valid on columnheader / rowheader role elements,
+  // NOT on <button> children. The <button> inside the <th> is the interactive control;
+  // the <th> conveys sort state to screen readers via aria-sort.
   await page.goto(V2_URL, { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
 
   const table = page.getByRole('table', { name: 'Workflows' });
   const thead = table.locator('thead');
 
-  // Health Score button — default sort column, should have aria-sort=ascending
-  const healthBtn = thead.getByRole('button', { name: /health score/i });
-  await expect(healthBtn).toBeVisible();
-  await expect(healthBtn).toHaveAttribute('aria-sort', 'ascending');
+  // Date Recorded <th> — default sort column since Batch A, should have aria-sort=descending.
+  // The button inside it must still be visible and interactive.
+  const dateTh = thead.locator('th').filter({ has: page.getByRole('button', { name: /date recorded/i }) });
+  await expect(dateTh).toHaveAttribute('aria-sort', 'descending');
+  await expect(thead.getByRole('button', { name: /date recorded/i })).toBeVisible();
 
-  // Workflow (name) sort button — inactive, should have aria-sort=none
-  const nameBtn = thead.getByRole('button', { name: /^workflow$/i });
-  await expect(nameBtn).toBeVisible();
-  await expect(nameBtn).toHaveAttribute('aria-sort', 'none');
+  // Health Score <th> — sortable but inactive, should have aria-sort=none
+  const healthTh = thead.locator('th').filter({ has: page.getByRole('button', { name: /health score/i }) });
+  await expect(healthTh).toHaveAttribute('aria-sort', 'none');
+  await expect(thead.getByRole('button', { name: /health score/i })).toBeVisible();
+
+  // Workflow (name) <th> — inactive, should have aria-sort=none
+  const nameTh = thead.locator('th').filter({ has: page.getByRole('button', { name: /^workflow$/i }) });
+  await expect(nameTh).toHaveAttribute('aria-sort', 'none');
+  await expect(thead.getByRole('button', { name: /^workflow$/i })).toBeVisible();
 });

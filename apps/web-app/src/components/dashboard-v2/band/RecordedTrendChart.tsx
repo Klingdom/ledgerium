@@ -30,7 +30,7 @@ import {
 } from 'recharts';
 import type { ActivityWeekBucket } from '@/lib/dashboard-band-stats.js';
 import { ACCENT, GRID_COLOR, AXIS_TEXT, TOOLTIP_BG, TOOLTIP_BORDER, TOOLTIP_TEXT } from './band-colors.js';
-import { formatWeekTick, shouldSuppressTrend } from './trend-utils.js';
+import { formatWeekTick, shouldSuppressTrend, computeYTicks } from './trend-utils.js';
 
 interface RecordedTrendChartProps {
   data: ActivityWeekBucket[];
@@ -55,13 +55,18 @@ export default function RecordedTrendChart({ data, height = 160 }: RecordedTrend
           role="img"
           aria-label="Not enough recording activity yet to show a trend"
         >
-          <p className="text-[13px] text-[var(--content-tertiary)]">
+          <p className="text-[13px] text-[var(--content-secondary)]">
             Not enough recording activity yet.
           </p>
         </div>
       </div>
     );
   }
+
+  // Integer Y-axis ticks — recordings are whole numbers, so the axis must never
+  // render fractional ticks (recharts auto-domain does on small integer counts).
+  const yTicks = computeYTicks(data);
+  const yMax = yTicks[yTicks.length - 1] ?? 1;
 
   return (
     <div className="flex flex-col gap-ds-1">
@@ -88,6 +93,8 @@ export default function RecordedTrendChart({ data, height = 160 }: RecordedTrend
             />
             <YAxis
               allowDecimals={false}
+              domain={[0, yMax]}
+              ticks={yTicks}
               tick={{ fontSize: 11, fill: AXIS_TEXT }}
               axisLine={false}
               tickLine={false}

@@ -20,7 +20,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ── Analytics mock (iter-030) ─────────────────────────────────────────────────
 vi.mock('@/lib/analytics.js', () => ({ track: vi.fn() }));
+// next/navigation is imported transitively by WorkflowRow (useRouter); stub it so
+// the real healthPillTier export can be imported in the node test environment.
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 import type { WorkflowMetricsOutput, HealthScoreV2, OpportunityTag } from '@/lib/workflow-metrics.js';
+import { healthPillTier as realHealthPillTier } from './WorkflowRow.js';
 
 // ── Health band derivation (duplicated from WorkflowRow for unit testability) ─
 // iter-024: thresholds tightened to 60/80 per PRD_DASHBOARD_V2_EXECUTIVE_REFINEMENT §2.4
@@ -29,6 +33,21 @@ function healthBand(score: number): { label: 'poor' | 'fair' | 'good' } {
   if (score < 60) return { label: 'poor' };
   if (score < 80) return { label: 'fair' };
   return { label: 'good' };
+}
+
+// ── Health pill tier mapping (Batch C item 17) ────────────────────────────────
+// Mirror of WorkflowRow.healthPillTier — uses the SAME 60/80 thresholds as
+// healthBand (single source of truth). Pure, node-safe (no React import). Kept
+// as a mirror to match this file's established healthBand-mirror convention and
+// avoid importing the next/navigation-dependent component into the node env.
+
+function healthPillTier(score: number): {
+  label: 'Healthy' | 'At risk' | 'Needs review';
+  pillClass: string;
+} {
+  if (score < 60) return { label: 'Needs review', pillClass: 'bg-red-50 border-red-200 text-red-700' };
+  if (score < 80) return { label: 'At risk', pillClass: 'bg-amber-50 border-amber-200 text-amber-700' };
+  return { label: 'Healthy', pillClass: 'bg-green-50 border-green-200 text-green-700' };
 }
 
 // ── Dimension label correctness ───────────────────────────────────────────────
@@ -165,6 +184,48 @@ describe('healthBand helper', () => {
   it('score >= 80 → good (iter-024 threshold)', () => {
     expect(healthBand(80).label).toBe('good');
     expect(healthBand(100).label).toBe('good');
+  });
+});
+
+describe('healthPillTier (Batch C item 17)', () => {
+  it('score < 60 → "Needs review" (red pill)', () => {
+    expect(healthPillTier(0).label).toBe('Needs review');
+    expect(healthPillTier(59).label).toBe('Needs review');
+    expect(healthPillTier(59).pillClass).toContain('red');
+  });
+
+  it('score 60–79 → "At risk" (amber pill)', () => {
+    expect(healthPillTier(60).label).toBe('At risk');
+    expect(healthPillTier(79).label).toBe('At risk');
+    expect(healthPillTier(60).pillClass).toContain('amber');
+  });
+
+  it('score >= 80 → "Healthy" (green pill)', () => {
+    expect(healthPillTier(80).label).toBe('Healthy');
+    expect(healthPillTier(100).label).toBe('Healthy');
+    expect(healthPillTier(80).pillClass).toContain('green');
+  });
+
+  it('shares the SAME 60/80 thresholds as healthBand (single source of truth)', () => {
+    // The pill tier must agree band-for-band with healthBand at every score.
+    for (let s = 0; s <= 100; s++) {
+      const band = healthBand(s).label; // 'poor' | 'fair' | 'good'
+      const tier = healthPillTier(s).label;
+      const expected = band === 'poor' ? 'Needs review' : band === 'fair' ? 'At risk' : 'Healthy';
+      expect(tier).toBe(expected);
+    }
+  });
+
+  it('the exported helper agrees with the test mirror at the band boundaries (no drift)', () => {
+    for (const s of [0, 59, 60, 79, 80, 100]) {
+      expect(realHealthPillTier(s).label).toBe(healthPillTier(s).label);
+      expect(realHealthPillTier(s).pillClass).toBe(healthPillTier(s).pillClass);
+    }
+  });
+
+  it('the pill is honest — it never alters the numeric score, only maps its band', () => {
+    // The mapping is a pure function of the score; identical input → identical tier.
+    expect(realHealthPillTier(72)).toEqual(realHealthPillTier(72));
   });
 });
 

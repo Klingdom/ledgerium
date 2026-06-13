@@ -104,71 +104,70 @@ export default function InsightsStrip({
         const isActive = activeFilterKey === chip.filterKey;
 
         return (
+          // Outer container is a plain non-interactive div — avoids nested-interactive
+          // (ARIA: role=button cannot contain a <button> child).
+          // The chip filter action is on the <button> inside; the dismiss is a sibling button.
           <div
             key={chip.id}
             className={`
-              inline-flex items-center gap-ds-2 px-ds-2 py-1
-              rounded-ds-sm border text-[12px] font-medium
-              transition-colors duration-150 cursor-pointer
+              inline-flex items-center rounded-ds-sm border text-[12px] font-medium
               ${style.container} ${style.text}
               ${isActive ? 'ring-2 ring-offset-1 ring-current' : ''}
             `}
-            role="button"
-            tabIndex={0}
-            aria-pressed={isActive}
-            aria-label={`${style.ariaPrefix} ${chip.label}. Click to filter workflows.`}
-            onClick={() => {
-              // PRD §4 metric #5: insight chip CTR
-              track({
-                event: 'insight_chip_clicked',
-                severity: chip.severity,
-                filterKey: chip.filterKey,
-              });
-              onChipClick(chip.filterKey);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
+          >
+            {/* Chip filter button — the primary interactive surface */}
+            <button
+              type="button"
+              className={`
+                inline-flex items-center gap-ds-2 px-ds-2 py-1
+                rounded-ds-sm transition-colors duration-150 cursor-pointer
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-current
+                bg-transparent
+              `}
+              aria-pressed={isActive}
+              aria-label={`${style.ariaPrefix} ${chip.label}. Click to filter workflows.`}
+              onClick={() => {
+                // PRD §4 metric #5: insight chip CTR
                 track({
                   event: 'insight_chip_clicked',
                   severity: chip.severity,
                   filterKey: chip.filterKey,
                 });
                 onChipClick(chip.filterKey);
-              }
-            }}
-          >
-            {/* Severity icon shape — color + shape, never color-only */}
-            <style.Icon
-              size={12}
-              className={style.text}
-              aria-label={style.iconLabel}
-            />
+              }}
+            >
+              {/* Severity icon shape — color + shape, never color-only */}
+              <style.Icon
+                size={12}
+                className={style.text}
+                aria-label={style.iconLabel}
+              />
 
-            {/* Severity dot — supplementary, aria-hidden */}
-            <span
-              className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${style.dot}`}
-              aria-hidden="true"
-            />
-
-            {/* Label */}
-            <span>{chip.label}</span>
-
-            {/* Count badge */}
-            {chip.count > 1 && (
+              {/* Severity dot — supplementary, aria-hidden */}
               <span
-                className="ml-ds-1 rounded-full bg-white/60 px-1.5 py-px text-[12px] font-medium tabular-nums"
+                className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${style.dot}`}
                 aria-hidden="true"
-              >
-                {chip.count}
-              </span>
-            )}
+              />
 
-            {/* Dismiss button */}
+              {/* Label */}
+              <span>{chip.label}</span>
+
+              {/* Count badge */}
+              {chip.count > 1 && (
+                <span
+                  className="ml-ds-1 rounded-full bg-white/60 px-1.5 py-px text-[12px] font-medium tabular-nums"
+                  aria-hidden="true"
+                >
+                  {chip.count}
+                </span>
+              )}
+            </button>
+
+            {/* Dismiss button — sibling of the chip button, never nested */}
             <button
               type="button"
               onClick={(e) => handleDismiss(e, chip.id)}
-              className="ml-ds-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-current p-0.5 hover:bg-white/40 transition-colors duration-150"
+              className="mr-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-current p-0.5 hover:bg-white/40 transition-colors duration-150"
               aria-label={`Dismiss ${chip.label} insight`}
             >
               <X size={10} aria-hidden="true" />

@@ -49,7 +49,7 @@ interface KpiTileStripProps {
 function HealthDelta({ delta }: { delta: number | null }) {
   if (delta === null) {
     return (
-      <span className="inline-flex items-center gap-0.5 text-[12px] font-medium text-[var(--content-tertiary)]">
+      <span className="inline-flex items-center gap-0.5 text-[12px] font-medium text-[var(--content-secondary)]">
         <Minus size={10} aria-hidden="true" />
         <span>— vs last 30d</span>
       </span>
@@ -57,7 +57,7 @@ function HealthDelta({ delta }: { delta: number | null }) {
   }
   if (delta === 0) {
     return (
-      <span className="inline-flex items-center gap-0.5 text-[12px] font-medium text-[var(--content-tertiary)]">
+      <span className="inline-flex items-center gap-0.5 text-[12px] font-medium text-[var(--content-secondary)]">
         <Minus size={10} aria-hidden="true" />
         <span>= 0 vs last 30d</span>
       </span>
@@ -111,7 +111,7 @@ function TileShell({ tileId, label, value, hero, trackValue, children }: TileShe
       >
         {value}
       </span>
-      <div className="min-h-[16px] text-[12px] text-[var(--content-tertiary)]">
+      <div className="min-h-[16px] text-[12px] text-[var(--content-secondary)]">
         {children}
       </div>
     </button>

@@ -107,13 +107,14 @@ export default function HealthGauge({ score, size = 96 }: HealthGaugeProps) {
         )}
       </svg>
       <div className="-mt-2 flex flex-col items-center">
+        {/* Score text uses --content-primary for WCAG AA contrast on dark backgrounds.
+            The arc color already conveys the health band; text is the numeric value. */}
         <span
-          className="text-[22px] font-semibold leading-none tabular-nums"
-          style={{ color: hasScore ? band!.colorVar : 'var(--content-tertiary)' }}
+          className="text-[22px] font-semibold leading-none tabular-nums text-[var(--content-primary)]"
         >
           {hasScore ? Math.round(clamped) : '—'}
         </span>
-        <span className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--content-tertiary)]">
+        <span className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--content-secondary)]">
           Health
         </span>
       </div>

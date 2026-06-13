@@ -18,7 +18,7 @@ vi.mock('@/lib/analytics.js', () => ({ track: vi.fn() }));
 import { gaugeBand, arcGeometry } from './HealthGauge';
 import { deriveSegments } from './OpportunityBar';
 import { buildNarrator } from './NarratorSummary';
-import { formatWeekTick, totalRecorded, shouldSuppressTrend } from './trend-utils';
+import { formatWeekTick, totalRecorded, shouldSuppressTrend, computeYTicks } from './trend-utils';
 import type { OpportunityCounts } from '@/lib/dashboard-band-stats';
 
 // ── HealthGauge ────────────────────────────────────────────────────────────────
@@ -181,5 +181,66 @@ describe('trend-utils', () => {
         { weekStartIso: 'b', count: 1 },
       ]),
     ).toBe(false);
+  });
+});
+
+// ── computeYTicks (trend Y-axis integer tick fix, Batch C) ─────────────────────
+
+describe('computeYTicks (integer Y-axis ticks)', () => {
+  it('empty data → [0, 1] flat baseline with one unit of headroom', () => {
+    expect(computeYTicks([])).toEqual([0, 1]);
+  });
+
+  it('all-zero counts → [0, 1] (no fractional ticks on a flat zero series)', () => {
+    expect(
+      computeYTicks([
+        { weekStartIso: 'a', count: 0 },
+        { weekStartIso: 'b', count: 0 },
+      ]),
+    ).toEqual([0, 1]);
+  });
+
+  it('small max (≤ 5) → every integer from 0 to max', () => {
+    expect(
+      computeYTicks([
+        { weekStartIso: 'a', count: 1 },
+        { weekStartIso: 'b', count: 3 },
+        { weekStartIso: 'c', count: 2 },
+      ]),
+    ).toEqual([0, 1, 2, 3]);
+  });
+
+  it('max of exactly 5 → 0..5 inclusive', () => {
+    expect(computeYTicks([{ weekStartIso: 'a', count: 5 }])).toEqual([0, 1, 2, 3, 4, 5]);
+  });
+
+  it('large max (> 5) → 0, midpoint, max only (≤ 5 distinct ticks)', () => {
+    expect(computeYTicks([{ weekStartIso: 'a', count: 12 }])).toEqual([0, 6, 12]);
+  });
+
+  it('all returned ticks are integers (never fractional)', () => {
+    const ticks = computeYTicks([
+      { weekStartIso: 'a', count: 7 },
+      { weekStartIso: 'b', count: 3 },
+    ]);
+    for (const t of ticks) {
+      expect(Number.isInteger(t)).toBe(true);
+    }
+  });
+
+  it('returns ticks in strictly ascending order, deduped', () => {
+    // max=2 → midpoint would be 1 — Set already guarantees no dupes; verify order.
+    const ticks = computeYTicks([{ weekStartIso: 'a', count: 9 }]);
+    for (let i = 1; i < ticks.length; i++) {
+      expect(ticks[i]!).toBeGreaterThan(ticks[i - 1]!);
+    }
+  });
+
+  it('is deterministic for the same input', () => {
+    const data = [
+      { weekStartIso: 'a', count: 4 },
+      { weekStartIso: 'b', count: 8 },
+    ];
+    expect(computeYTicks(data)).toEqual(computeYTicks(data));
   });
 });

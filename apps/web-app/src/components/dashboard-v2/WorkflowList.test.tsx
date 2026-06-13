@@ -13,7 +13,7 @@ import { describe, it, expect, vi } from 'vitest';
 
 // ── Analytics mock (iter-030) ─────────────────────────────────────────────────
 vi.mock('@/lib/analytics.js', () => ({ track: vi.fn() }));
-import { applyFilters, sortWorkflows } from './WorkflowList.js';
+import { applyFilters, sortWorkflows, matchesSearch } from './WorkflowList.js';
 import { hasActiveFilters } from './WorkflowListFilterBar.js';
 import type { WorkflowRowData } from './WorkflowRow.js';
 import type { FilterState } from './WorkflowListFilterBar.js';
@@ -486,5 +486,96 @@ describe('Batch A: sortWorkflows — new sort fields (2026-06-12)', () => {
     const result = sortWorkflows([w2, w1], sort);
     // ids 'w1' < 'w2' lexicographically → 'w1' first
     expect(result.map((w) => w.id)).toEqual(['w1', 'w2']);
+  });
+});
+
+// ── Batch C item 15: global search ────────────────────────────────────────────
+//
+// matchesSearch is a pure predicate (title + systems substring); applyFilters
+// threads the searchQuery through as an additive, default-'' (no-op) filter.
+
+describe('Batch C: matchesSearch (2026-06-12)', () => {
+  it('empty / whitespace query matches every workflow (no-op)', () => {
+    const w = makeWorkflow('a', { toolsUsed: ['Salesforce'] });
+    expect(matchesSearch(w, '')).toBe(true);
+    expect(matchesSearch(w, '   ')).toBe(true);
+  });
+
+  it('matches on workflow title substring (case-insensitive)', () => {
+    const w = makeWorkflow('a'); // title = "Workflow a"
+    expect(matchesSearch(w, 'workflow')).toBe(true);
+    expect(matchesSearch(w, 'WORKFLOW')).toBe(true);
+    expect(matchesSearch(w, 'flow a')).toBe(true);
+  });
+
+  it('matches on a system name substring (case-insensitive)', () => {
+    const w = makeWorkflow('a', { toolsUsed: ['Salesforce', 'Slack'] });
+    expect(matchesSearch(w, 'sales')).toBe(true);
+    expect(matchesSearch(w, 'SLACK')).toBe(true);
+  });
+
+  it('returns false when neither title nor systems contain the query', () => {
+    const w = makeWorkflow('a', { toolsUsed: ['Salesforce'] });
+    expect(matchesSearch(w, 'netsuite')).toBe(false);
+    expect(matchesSearch(w, 'zzz')).toBe(false);
+  });
+
+  it('trims surrounding whitespace before matching', () => {
+    const w = makeWorkflow('a', { toolsUsed: ['Workday'] });
+    expect(matchesSearch(w, '  workday  ')).toBe(true);
+  });
+});
+
+describe('Batch C: applyFilters search integration (2026-06-12)', () => {
+  const workflows = [
+    makeWorkflow('invoice', { toolsUsed: ['Salesforce'] }),
+    makeWorkflow('payroll', { toolsUsed: ['Workday'] }),
+    makeWorkflow('onboard', { toolsUsed: ['Slack', 'Notion'] }),
+  ];
+  // Note: makeWorkflow titles are `Workflow ${id}` — search "payroll" hits the id.
+
+  it('default (no searchQuery arg) preserves the full result set — backward compatible', () => {
+    expect(applyFilters(workflows, emptyFilters, null)).toHaveLength(3);
+  });
+
+  it('empty-string searchQuery is a no-op', () => {
+    expect(applyFilters(workflows, emptyFilters, null, Date.now(), '')).toHaveLength(3);
+  });
+
+  it('search narrows by title substring', () => {
+    const r = applyFilters(workflows, emptyFilters, null, Date.now(), 'payroll');
+    expect(r).toHaveLength(1);
+    expect(r[0]!.id).toBe('payroll');
+  });
+
+  it('search narrows by system name', () => {
+    const r = applyFilters(workflows, emptyFilters, null, Date.now(), 'notion');
+    expect(r).toHaveLength(1);
+    expect(r[0]!.id).toBe('onboard');
+  });
+
+  it('search composes with other filters (conjunctive)', () => {
+    // System filter Salesforce → only 'invoice'; search 'payroll' → none match both.
+    const r = applyFilters(
+      workflows,
+      { ...emptyFilters, systems: ['Salesforce'] },
+      null,
+      Date.now(),
+      'payroll',
+    );
+    expect(r).toHaveLength(0);
+  });
+
+  it('search yielding no match returns [] (drives the no-results state honestly)', () => {
+    const r = applyFilters(workflows, emptyFilters, null, Date.now(), 'no-such-thing');
+    expect(r).toHaveLength(0);
+  });
+
+  it('is deterministic for the same query (search never mutates data)', () => {
+    const r1 = applyFilters(workflows, emptyFilters, null, Date.now(), 'work');
+    const r2 = applyFilters(workflows, emptyFilters, null, Date.now(), 'work');
+    expect(r1.map((w) => w.id)).toEqual(r2.map((w) => w.id));
+    // original array is untouched
+    expect(workflows).toHaveLength(3);
   });
 });

@@ -27,3 +27,34 @@ export function totalRecorded(data: ReadonlyArray<ActivityWeekBucket>): number {
 export function shouldSuppressTrend(data: ReadonlyArray<ActivityWeekBucket>): boolean {
   return data.length === 0 || totalRecorded(data) < 3;
 }
+
+/**
+ * Compute integer Y-axis ticks for the recorded-per-week bar chart.
+ *
+ * The recharts auto-domain produces fractional / uneven ticks on small integer
+ * counts (e.g. a max of 3 yields ticks like 0, 0.75, 1.5, 2.25, 3). Recordings
+ * are whole numbers, so the axis must use whole-number ticks only. This returns
+ * a small, evenly-spaced set of integer ticks from 0 to the rounded-up max.
+ *
+ * Rules (deterministic, no Date/random):
+ *   - max ≤ 0  → [0, 1] (a flat baseline with a single unit headroom)
+ *   - max ≤ 5  → every integer 0..max (so each bar height is readable)
+ *   - max > 5  → 0, the max, and an evenly-spaced middle integer (≤ 5 ticks),
+ *     deduped, so the axis stays uncluttered on tall counts.
+ *
+ * The returned array is suitable for both the YAxis `ticks` and the upper bound
+ * of an explicit `domain={[0, maxTick]}` so recharts never injects a fractional
+ * tick of its own.
+ */
+export function computeYTicks(data: ReadonlyArray<ActivityWeekBucket>): number[] {
+  const max = data.reduce((m, b) => (b.count > m ? b.count : m), 0);
+  if (max <= 0) return [0, 1];
+  if (max <= 5) {
+    return Array.from({ length: max + 1 }, (_, i) => i);
+  }
+  // Larger ranges: 0, midpoint (rounded), and max — keep ≤ 5 distinct ticks.
+  const mid = Math.round(max / 2);
+  const ticks = [0, mid, max];
+  // Dedupe while preserving ascending order.
+  return Array.from(new Set(ticks)).sort((a, b) => a - b);
+}

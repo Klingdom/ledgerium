@@ -28,7 +28,6 @@
  */
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Columns3 } from 'lucide-react';
 import { track, setUserPlanForAnalytics } from '@/lib/analytics.js';
 import CommandHeader, { type TimeRange } from './CommandHeader.js';
 import InsightsStrip from './InsightsStrip.js';
@@ -40,6 +39,7 @@ import type {
 import type { OpportunityTag } from '@/lib/workflow-metrics.js';
 import WorkflowList, {
   type WorkflowListState,
+  type SortState,
   applyFilters,
 } from './WorkflowList.js';
 import type { FilterState } from './WorkflowListFilterBar.js';
@@ -48,7 +48,8 @@ import type { WorkflowRowData } from './WorkflowRow.js';
 import type { InsightChip } from '@/lib/workflow-metrics.js';
 import PortfolioSidebar, { type PortfolioNode } from '@/components/PortfolioSidebar.js';
 import ColumnPicker, { type SaveStatus } from './ColumnPicker.js';
-import PresetChipRail from './PresetChipRail.js';
+import UnifiedToolbar from './UnifiedToolbar.js';
+import { useDensity } from './density.js';
 import {
   type ColumnKey,
   type UserDashboardPreference,
@@ -200,6 +201,28 @@ export default function DashboardV2Shell() {
     needsAttention: false,
   });
   const [insightFilterKey, setInsightFilterKey] = useState<string | null>(null);
+
+  // ── Batch C unified-toolbar state ───────────────────────────────────────────
+
+  // item 15: global search. `searchInput` is the raw controlled-input value;
+  // `searchQuery` is the debounced value actually applied to the list (200ms,
+  // matching the existing search debounce convention).
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // item 13: sort lifted to the shell so the toolbar Sort control and the
+  // WorkflowList column headers share a single source of truth.  Default is
+  // date_recorded desc (Batch A P0 item 3), identical to WorkflowList's prior
+  // internal default.
+  const [sort, setSort] = useState<SortState>({ field: 'date_recorded', dir: 'desc' });
+
+  // item 13: filter panel open/closed (the WorkflowListFilterBar now lives in
+  // an expandable panel inside the toolbar).
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+
+  // item 16: SSR-safe row density (default 'regular'; reconciles to localStorage
+  // after mount — no hydration mismatch).
+  const [density, setDensity] = useDensity();
 
   // ── Column picker state (D+4 iter-061) ──────────────────────────────────────
 
@@ -408,6 +431,16 @@ export default function DashboardV2Shell() {
     };
   }, []);
 
+  // Batch C item 15: debounce the search input (200ms) before applying it to the
+  // list — deterministic, no network. The debounce smooths rapid typing without
+  // altering any data; an empty query is a no-op filter.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setSearchQuery(searchInput);
+    }, 200);
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
   // D+4 (iter-061): Toggle a column's visibility.
   // Optimistic update — local state is updated synchronously; debounced PUT follows.
   const handleToggleColumn = useCallback(
@@ -545,8 +578,11 @@ export default function DashboardV2Shell() {
           );
         });
 
-  // Apply user filters + insight filter to determine UI state
-  const filteredWorkflows = applyFilters(portfolioFilteredWorkflows, filters, insightFilterKey, filterNowMs);
+  // Apply user filters + insight filter + search to determine UI state.
+  // Batch C item 15: searchQuery threaded in so the derived state machine
+  // distinguishes "no-results" (active search/filter, nothing matched) from
+  // "empty" (genuinely no workflows).
+  const filteredWorkflows = applyFilters(portfolioFilteredWorkflows, filters, insightFilterKey, filterNowMs, searchQuery);
 
   const availableSystems = extractSystems(allWorkflows);
 
@@ -571,7 +607,7 @@ export default function DashboardV2Shell() {
   }, []);
 
   const anyFiltersActive =
-    hasActiveFilters(filters) || insightFilterKey !== null;
+    hasActiveFilters(filters) || insightFilterKey !== null || searchQuery.trim() !== '';
 
   // Derive UI state
   function deriveState(): WorkflowListState {
@@ -682,35 +718,31 @@ export default function DashboardV2Shell() {
 
         {/* Section 3: Workflow Intelligence List — aria-live for filter announcements */}
         <div className="flex-1 min-w-0" aria-live="polite" aria-atomic="false">
-          {/* D+5 (iter-062): Preset chip rail — above the "Customize columns" trigger */}
-          <PresetChipRail
+          {/* Batch C item 13: ONE unified two-row toolbar replaces the three
+              previously-stacked control surfaces (PresetChipRail + Customize
+              columns button + WorkflowListFilterBar). Every control reuses the
+              existing handler unchanged — this is a composition/relocation. */}
+          <UnifiedToolbar
+            portfolioSidebarOpen={portfolioSidebarOpen}
+            onTogglePortfolioSidebar={() => setPortfolioSidebarOpen((prev) => !prev)}
+            searchQuery={searchInput}
+            onSearchChange={setSearchInput}
+            availableSystems={availableSystems}
+            filters={filters}
+            onFiltersChange={setFilters}
+            isFilterPanelOpen={isFilterPanelOpen}
+            onToggleFilterPanel={() => setIsFilterPanelOpen((prev) => !prev)}
+            sort={sort}
+            onSortChange={setSort}
+            density={density}
+            onDensityChange={setDensity}
+            onOpenColumns={() => setIsPickerOpen((prev) => !prev)}
+            isColumnsOpen={isPickerOpen}
+            columnsTriggerRef={pickerTriggerRef}
             currentPreferences={currentPreferencesSnapshot}
             onApplyPreset={handleApplyPreset}
             {...(userPlan !== undefined ? { userPlan } : {})}
           />
-
-          {/* D+4 (iter-061): "Customize columns" trigger — positioned above the table */}
-          <div className="flex justify-end px-ds-4 py-ds-2 border-b border-[var(--border-subtle)]">
-            <button
-              ref={pickerTriggerRef}
-              type="button"
-              onClick={() => setIsPickerOpen((prev) => !prev)}
-              className="
-                inline-flex items-center gap-ds-2 px-ds-3 py-ds-1.5 rounded-ds-sm
-                text-[13px] font-medium text-[var(--content-secondary)]
-                border border-[var(--border-default)]
-                transition-colors duration-150
-                hover:bg-[var(--surface-secondary)] hover:text-[var(--content-primary)]
-                focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500
-              "
-              aria-label="Customize columns"
-              aria-expanded={isPickerOpen}
-              aria-haspopup="dialog"
-            >
-              <Columns3 size={14} aria-hidden="true" />
-              Customize columns
-            </button>
-          </div>
 
           <WorkflowList
             state={listState}
@@ -728,6 +760,11 @@ export default function DashboardV2Shell() {
             onTogglePortfolioSidebar={() => setPortfolioSidebarOpen((prev) => !prev)}
             dashboardViewPerfTimestampMs={dashboardViewPerfTimestampMs}
             visibleColumns={visibleColumns}
+            sort={sort}
+            onSortChange={setSort}
+            searchQuery={searchQuery}
+            density={density}
+            hideFilterBar
           />
         </div>
       </div>
