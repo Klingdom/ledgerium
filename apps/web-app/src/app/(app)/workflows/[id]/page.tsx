@@ -384,6 +384,7 @@ export default function WorkflowDetailPage() {
           {TABS.map(({ id: tabId, label, icon: Icon, docsAnchor }) => (
             <span key={tabId} className="flex items-center gap-0.5 flex-shrink-0">
               <button
+                data-testid={`workflow-tab-${tabId}`}
                 onClick={() => handleTabChange(tabId)}
                 className={`flex items-center gap-1.5 border-b-2 pb-ds-3 pt-ds-1 text-ds-sm font-medium transition-colors whitespace-nowrap ${
                   activeTab === tabId

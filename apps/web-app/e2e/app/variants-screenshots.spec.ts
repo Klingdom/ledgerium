@@ -94,6 +94,24 @@ test.describe('Process Variants documentation', () => {
     await page.waitForTimeout(2000); // React Flow render
     await shot(page, 'workflow-process-map');
 
+    // ── Report tab: variance/variants must reflect the multi-run COHORT ────────
+    // The sample has 16 recordings; after pointing /analyze at the cohort
+    // analyzer, the Variance & Variants section must NOT show the single-run
+    // "recorded once" placeholder.
+    const analyzeResp = page.waitForResponse(
+      (r) => r.url().includes('/analyze') && r.request().method() === 'POST',
+      { timeout: 30_000 },
+    );
+    await page.getByTestId('workflow-tab-report').click();
+    await analyzeResp.catch(() => undefined); // best-effort; render assertion below is the gate
+    await page.locator('#rpt-variance').waitFor({ state: 'visible', timeout: 30_000 });
+    await page.waitForTimeout(1500);
+    await shot(page, 'workflow-report');
+    await expect(
+      page.locator('text=Run this workflow again to unlock'),
+      'multi-run sample must not show the single-run variance placeholder',
+    ).toHaveCount(0);
+
     // ── Dashboard list (Batch A: Date Recorded column + sorts) ────────────────
     // Exercises the changed dashboard page under the no-page-error assertion and
     // captures the workflow library with the new columns.

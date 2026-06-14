@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { analyzeWorkflow } from '@/lib/intelligence';
+import { analyzeWorkflowVariants } from '@/lib/intelligence';
 import { db } from '@/db';
 import { checkFeatureAccess } from '@/lib/feature-gating';
 
 /**
  * POST /api/workflows/[id]/analyze
- * Run intelligence analysis on a single workflow.
- * Requires intelligenceLayer feature (Team+).
+ * Run intelligence analysis across the workflow's full run COHORT (the persisted
+ * process-definition group ∪ similarity cluster ∪ self) — the same cross-run
+ * analysis the Variants tab uses — so the Report's variance/variant figures
+ * reflect every run, not just the single open recording. A genuinely single-run
+ * workflow falls back to one bundle (runCount 1) so the honest "recorded once"
+ * state still fires. Requires intelligenceLayer feature (Team+).
  */
 export async function POST(
   _req: NextRequest,
@@ -46,7 +50,7 @@ export async function POST(
   }
 
   try {
-    const intelligence = await analyzeWorkflow(session.user.id, params.id);
+    const intelligence = await analyzeWorkflowVariants(session.user.id, params.id);
     if (!intelligence) {
       return NextResponse.json({ error: 'No process output available for analysis' }, { status: 422 });
     }
