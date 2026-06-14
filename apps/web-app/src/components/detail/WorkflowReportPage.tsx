@@ -13,6 +13,7 @@ import {
   RotateCcw,
   GitBranch,
 } from 'lucide-react';
+import { useId } from 'react';
 import { deriveDivergence } from '@/lib/reportDivergence';
 import { formatDuration } from '@/lib/format';
 import { buildReportVerdict, cvBand, type ReportVerdictInput } from './reportVerdict';
@@ -24,12 +25,26 @@ import {
   type ConsistencyTile,
   type ScorecardTile,
 } from './reportScorecard';
+import {
+  deriveDistribution,
+  deriveConsistencyScore,
+  rankBottleneckContributions,
+  formatDriftSignals,
+  deriveInsightCards,
+  type CycleTimeDistribution,
+  type ConsistencyScore,
+  type ConsistencyBand,
+  type BottleneckContributionRow,
+  type FormattedDriftSignal,
+  type DriftSeverity,
+  type InsightCard,
+  type InsightCardType,
+} from './reportEvidence';
 import { useCountUp } from '@/hooks/useCountUp';
 import { useScrollSpy } from '@/hooks/useScrollSpy';
 import { ProcessHealthScoreBar } from '@/components/shared/ProcessHealthScoreBar';
 import { InsightActionCard, type InsightActionCardInsight } from '@/components/shared/InsightActionCard';
 import { AutomationScoreChip } from '@/components/shared/AutomationScoreChip';
-import { BottleneckRow } from '@/components/shared/BottleneckRow';
 
 // Defensive: real artifact JSON (workflow_interpretation / intelligence / agent
 // payloads) can carry `null` or a non-array where the typed interface says array,
@@ -165,6 +180,8 @@ interface IntelligenceBottleneck {
   runCount?: number;
   isHighDuration?: boolean;
   isHighVariance?: boolean;
+  // R-C: evidence run ids for insight-card anchors. Real engine field.
+  evidenceRunIds?: string[];
 }
 
 interface IntelligenceMetrics {
@@ -177,6 +194,8 @@ interface IntelligenceMetrics {
   meanStepCount?: number;
   runCount?: number;
   completionRate?: number;
+  // R-C: mean error/exception steps per run. Real engine field (ProcessMetrics).
+  errorStepFrequency?: number;
 }
 
 interface TimestudyStep {
@@ -189,7 +208,9 @@ interface TimestudyStep {
 
 interface IntelligenceVariance {
   sequenceStability?: number;
-  durationVariance?: { coefficientOfVariation?: number };
+  durationVariance?: { coefficientOfVariation?: number; stdDevMs?: number | null };
+  // R-C: step-count spread across runs. Real engine field (VarianceReport).
+  stepCountVariance?: { min?: number; max?: number; stdDev?: number | null };
   highVarianceSteps?: unknown[];
 }
 
@@ -199,6 +220,18 @@ interface IntelligenceVariant {
   pathSignature?: { signature?: string; stepCount?: number };
   frequency?: number;
   runCount?: number;
+  // R-C: evidence run ids for insight-card anchors. Real engine field.
+  evidenceRunIds?: string[];
+}
+
+// R-C: drift signal shape from the engine's DriftReport.driftSignals[].
+interface IntelligenceDriftSignal {
+  driftType: string;
+  severity: string;
+  description: string;
+  baselineValue: number | string;
+  currentValue: number | string;
+  evidenceRunIds?: string[];
 }
 
 interface IntelligenceData {
@@ -209,6 +242,10 @@ interface IntelligenceData {
   bottlenecks?: {
     bottlenecks?: IntelligenceBottleneck[];
   };
+  // R-C: standard-path summary (dominant path coverage) for insight cards.
+  standardPath?: { frequency?: number; runCount?: number; evidenceRunIds?: string[] };
+  // R-C: drift report — only present when a baseline window was provided.
+  drift?: { driftSignals?: IntelligenceDriftSignal[] };
   // Per-variant real recorded step titles, populated by analyzeWorkflowVariants
   // (intelligence.ts). Used to label the Pareto without exposing the hash.
   variantStepTitles?: Record<string, string[]>;
@@ -313,10 +350,14 @@ const SECTION_IDS = [
   'rpt-scorecard',
   'rpt-hero',
   'rpt-lead',
+  'rpt-insight-cards',
   'rpt-scores',
   'rpt-phases',
   'rpt-metrics',
+  'rpt-distribution',
+  'rpt-consistency',
   'rpt-variance',
+  'rpt-drift',
   'rpt-timestudy',
   'rpt-insights',
   'rpt-automation',
@@ -335,10 +376,14 @@ const SECTION_LABELS: Record<string, string> = {
   'rpt-scorecard': 'Scorecard',
   'rpt-hero': 'Overview',
   'rpt-lead': 'Start Here',
+  'rpt-insight-cards': 'Key Actions',
   'rpt-scores': 'Process Health',
   'rpt-phases': 'Phase Timeline',
   'rpt-metrics': 'Run Metrics',
+  'rpt-distribution': 'Cycle-Time Spread',
+  'rpt-consistency': 'Consistency',
   'rpt-variance': 'Variance & Variants',
+  'rpt-drift': 'Drift',
   'rpt-timestudy': 'Step Duration',
   'rpt-insights': 'Insights',
   'rpt-automation': 'Automation',
@@ -569,9 +614,25 @@ interface LeadFigures {
   variantCount: number | null;
   dominantPathRunCount: number | null;
   dominantPathPercent: number | null;
+  /** Dominant-path share of runs, 0–1 (standardPath.frequency). */
+  dominantPathFrequency: number | null;
   medianDurationMs: number | null;
   topBottleneck: { title: string; percentOfCycleTime: number } | null;
   automationScore: number | null;
+  // R-C additions — all from real engine fields, no fabrication.
+  /** Cycle-time 5-number summary (ms). */
+  distribution: {
+    minDurationMs: number | null;
+    medianDurationMs: number | null;
+    meanDurationMs: number | null;
+    p90DurationMs: number | null;
+    maxDurationMs: number | null;
+  };
+  highVarianceStepCount: number | null;
+  topAutomationTitle: string | null;
+  opportunityTag: string | null;
+  /** Evidence run ids for insight-card anchors (dominant variant + bottlenecks). */
+  evidenceRunIds: string[];
 }
 
 function num(v: number | null | undefined): number | null {
@@ -612,14 +673,41 @@ function deriveLeadFigures(
 
   // Automation score — deterministic workflow score, else best opportunity score.
   const wfScore = num(agentIntelligence?.workflow?.automationScore);
-  const oppScores = asArray(agentIntelligence?.opportunities?.opportunities)
-    .map((o) => num(o.score))
-    .filter((s): s is number => s != null);
+  const opps = asArray(agentIntelligence?.opportunities?.opportunities);
+  const oppScores = opps.map((o) => num(o.score)).filter((s): s is number => s != null);
   const automationScore = wfScore ?? (oppScores.length > 0 ? Math.max(...oppScores) : null);
 
+  // Highest-scoring automation opportunity title (for the Automate insight card).
+  // Deterministic: score desc, stable by title. Observed — never fabricated.
+  const topAutomation = [...opps]
+    .filter((o) => (o.title ?? '').trim().length > 0)
+    .sort(
+      (a, b) =>
+        (num(b.score) ?? 0) - (num(a.score) ?? 0) ||
+        ((a.title ?? '') < (b.title ?? '') ? -1 : (a.title ?? '') > (b.title ?? '') ? 1 : 0),
+    )[0];
+  const topAutomationTitle = topAutomation?.title?.trim() ? topAutomation.title.trim() : null;
+
   const dominantPathRunCount = num(standard?.runCount);
+  const dominantPathFrequency = num(standard?.frequency);
   const dominantPathPercent =
-    standard?.frequency != null ? Math.round((standard.frequency ?? 0) * 100) : null;
+    dominantPathFrequency != null ? Math.round(dominantPathFrequency * 100) : null;
+
+  // High-variance step count (engine detail; surfaced for the Investigate card).
+  const highVarianceStepCount = Array.isArray(variance?.highVarianceSteps)
+    ? variance!.highVarianceSteps.length
+    : null;
+
+  // Evidence anchor run ids — prefer the dominant variant's evidence, fall back to
+  // the standardPath, then the top bottleneck's. All are real engine fields.
+  const evidenceRunIds =
+    (Array.isArray(standard?.evidenceRunIds) && standard!.evidenceRunIds.length > 0
+      ? standard!.evidenceRunIds
+      : Array.isArray(intelligence?.standardPath?.evidenceRunIds) && intelligence!.standardPath!.evidenceRunIds!.length > 0
+      ? intelligence!.standardPath!.evidenceRunIds!
+      : Array.isArray(bottlenecks[0]?.evidenceRunIds)
+      ? (bottlenecks[0]!.evidenceRunIds as string[])
+      : []) ?? [];
 
   return {
     runCount,
@@ -628,9 +716,23 @@ function deriveLeadFigures(
     variantCount,
     dominantPathRunCount,
     dominantPathPercent,
+    dominantPathFrequency,
     medianDurationMs: num(intelligence?.metrics?.medianDurationMs),
     topBottleneck,
     automationScore,
+    distribution: {
+      minDurationMs: num(intelligence?.metrics?.minDurationMs),
+      medianDurationMs: num(intelligence?.metrics?.medianDurationMs),
+      meanDurationMs: num(intelligence?.metrics?.meanDurationMs),
+      p90DurationMs: num(intelligence?.metrics?.p90DurationMs),
+      maxDurationMs: num(intelligence?.metrics?.maxDurationMs),
+    },
+    highVarianceStepCount,
+    topAutomationTitle,
+    // opportunityTag is a deterministic workflow-metrics field not present on this
+    // payload today; left null until plumbed (honest — never guessed).
+    opportunityTag: null,
+    evidenceRunIds,
   };
 }
 
@@ -1104,59 +1206,10 @@ function AutomationOpportunityCard({ opportunity }: { opportunity: AgentOpportun
   );
 }
 
-// ── Section 6: Bottlenecks ─────────────────────────────────────────────────────
-
-function BottlenecksSection({
-  intelligence,
-  processOutput,
-  onRunIntelligence,
-}: {
-  intelligence: IntelligenceData | null | undefined;
-  processOutput: ProcessOutputData | null | undefined;
-  onRunIntelligence?: (() => void) | undefined;
-}) {
-  const bottlenecks = asArray(intelligence?.bottlenecks?.bottlenecks);
-  const cohortRunCount = intelligence?.metrics?.runCount;
-
-  // Build a title lookup from step definitions
-  const stepMap = new Map<number, StepDefinition>();
-  asArray(processOutput?.processDefinition?.stepDefinitions).forEach((s) => {
-    stepMap.set(s.ordinal, s);
-  });
-
-  return (
-    <div id="rpt-bottlenecks" className="scroll-mt-20">
-      <SectionHeading>Bottlenecks</SectionHeading>
-      {bottlenecks.length === 0 ? (
-        <SkeletonCard
-          message="No bottleneck data available. Run intelligence analysis to identify slow steps."
-          {...(onRunIntelligence != null ? { onAction: onRunIntelligence, actionLabel: 'Run Analysis' } : {})}
-        />
-      ) : (
-        <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-ds-lg overflow-hidden divide-y divide-[var(--border-subtle)]">
-          {bottlenecks.map((b) => {
-            const step = stepMap.get(b.position);
-            return (
-              <BottleneckRow
-                key={b.position}
-                position={b.position}
-                title={step?.title ?? `Step ${b.position}`}
-                system={step?.system}
-                durationMs={b.meanDurationMs}
-                averageDurationMs={b.overallMeanStepDurationMs}
-                category={b.category ?? step?.category}
-                runCount={b.runCount}
-                totalRunCount={cohortRunCount}
-                isHighDuration={b.isHighDuration}
-                isHighVariance={b.isHighVariance}
-              />
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
+// ── Section 6: Bottlenecks — see BottleneckContributionSection (R-C) below. ────
+// The legacy flat BottlenecksSection was replaced by the ranked contribution view
+// (BottleneckContributionSection) which subsumes its behavior and adds % share +
+// the Primary-bottleneck badge while preserving the R-B run-count context.
 
 // ── Section 7: Step Breakdown ──────────────────────────────────────────────────
 
@@ -1927,6 +1980,458 @@ function TimestudySection({ intelligence }: { intelligence: IntelligenceData | n
   );
 }
 
+// ── R-C Section: Cycle-Time Distribution (deterministic SVG box/range plot) ───
+
+const DISTRIBUTION_MARKER_COLORS: Record<string, string> = {
+  min: 'var(--content-tertiary, #6b7280)',
+  median: 'var(--accent, #16a34a)',
+  mean: 'var(--content-secondary, #4b5563)',
+  p90: 'var(--severity-warning, #d97706)',
+  max: 'var(--content-tertiary, #6b7280)',
+};
+
+/**
+ * Cycle-Time Distribution — an honest box/range plot of the engine's 5-number
+ * summary (min / median / mean / p90 / max). This is NOT a fabricated histogram:
+ * the engine does not expose per-run durations on this payload, so we plot the
+ * summary spread deterministically in pure SVG/CSS. Median is the reference line.
+ * Multi-run only (gated at runCount >= 2 by deriveDistribution). Hydration-safe.
+ */
+function CycleTimeDistributionSection({ figures }: { figures: LeadFigures }) {
+  const dist: CycleTimeDistribution | null = deriveDistribution({
+    runCount: figures.runCount,
+    minDurationMs: figures.distribution.minDurationMs,
+    medianDurationMs: figures.distribution.medianDurationMs,
+    meanDurationMs: figures.distribution.meanDurationMs,
+    p90DurationMs: figures.distribution.p90DurationMs,
+    maxDurationMs: figures.distribution.maxDurationMs,
+  });
+
+  return (
+    <div id="rpt-distribution" className="scroll-mt-20">
+      <SectionHeading>Cycle-Time Spread</SectionHeading>
+      {dist == null ? (
+        <SkeletonCard message="Record this workflow again to see how run durations spread across runs." />
+      ) : (
+        <div className="card px-ds-5 py-ds-5">
+          <p className="mb-ds-4 text-ds-xs text-[var(--content-tertiary)]">
+            Run-duration envelope across {figures.runCount} runs · summary statistics, not per-run samples.
+          </p>
+
+          {/* Range track: min → max, with the median reference line. */}
+          <div className="relative h-12">
+            {/* Base track */}
+            <div className="absolute left-0 right-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-[var(--surface-secondary)]" />
+            {/* Filled span from min to max (the observed envelope) */}
+            <div className="absolute left-0 right-0 top-1/2 h-2 -translate-y-1/2 overflow-hidden rounded-full">
+              <div className="h-full w-full bg-gradient-to-r from-[var(--surface-secondary)] via-brand-200 to-[var(--severity-warning,#d97706)]/40" />
+            </div>
+            {/* Markers */}
+            {dist.markers.map((m) => (
+              <div
+                key={m.key}
+                className="absolute top-0 flex h-full flex-col items-center"
+                style={{ left: `${m.position}%`, transform: 'translateX(-50%)' }}
+              >
+                <span className="mb-0.5 text-[9px] font-semibold uppercase tracking-wide text-[var(--content-tertiary)]">
+                  {m.label}
+                </span>
+                <span
+                  className={`block ${m.isReference ? 'h-5 w-[3px]' : 'h-3.5 w-[2px]'} rounded-full`}
+                  style={{ background: DISTRIBUTION_MARKER_COLORS[m.key] ?? 'var(--content-tertiary)' }}
+                  aria-hidden
+                />
+                <span className="mt-0.5 text-[10px] font-medium tabular-nums text-[var(--content-secondary)]">
+                  {formatDuration(m.valueMs)}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-ds-4 text-ds-xs text-[var(--content-tertiary)]">
+            The reference line marks the median ({formatDuration(figures.distribution.medianDurationMs ?? dist.minMs)}).
+            Spread: {formatDuration(dist.minMs)} → {formatDuration(dist.maxMs)}.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── R-C Section: Consistency Gauge (reuses the HealthGauge SVG arc pattern) ────
+
+const CONSISTENCY_BAND_COLOR: Record<ConsistencyBand, string> = {
+  'Highly consistent': 'var(--accent, #16a34a)',
+  'Mostly consistent': 'var(--accent, #16a34a)',
+  'Moderate variance': 'var(--severity-warning, #d97706)',
+  'High variance': 'var(--severity-danger, #dc2626)',
+};
+
+/**
+ * Consistency gauge — a deterministic 0–100 score rendered with the same SVG arc
+ * geometry pattern as the dashboard HealthGauge (no chart lib, no animation, no
+ * Date/random). The score derives from sequenceStability and/or CV; the band word
+ * matches the engine threshold. Multi-run only. Hydration-safe via useId-pinned id.
+ */
+function ConsistencyGaugeSection({ figures }: { figures: LeadFigures }) {
+  const instanceId = useId().replace(/:/g, '');
+  const consistency: ConsistencyScore | null = deriveConsistencyScore({
+    runCount: figures.runCount,
+    sequenceStability: figures.sequenceStability,
+    coefficientOfVariation: figures.coefficientOfVariation,
+  });
+
+  if (consistency == null) {
+    return (
+      <div id="rpt-consistency" className="scroll-mt-20">
+        <SectionHeading>Consistency</SectionHeading>
+        <SkeletonCard message="Record this workflow again to compute a consistency score across runs." />
+      </div>
+    );
+  }
+
+  // Semicircular arc geometry (matches HealthGauge.arcGeometry).
+  const size = 132;
+  const strokeWidth = Math.max(6, Math.round(size * 0.1));
+  const r = (size - strokeWidth) / 2;
+  const cx = size / 2;
+  const cy = size / 2;
+  const path = `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`;
+  const arcLength = Math.PI * r;
+  const filledLength = (consistency.score / 100) * arcLength;
+  const height = size / 2 + strokeWidth;
+  const color = CONSISTENCY_BAND_COLOR[consistency.band];
+
+  const basisParts: string[] = [];
+  if (consistency.basis.usedSequenceStability) basisParts.push('sequence stability');
+  if (consistency.basis.usedCv) basisParts.push('duration variation');
+
+  return (
+    <div id="rpt-consistency" className="scroll-mt-20">
+      <SectionHeading>Consistency</SectionHeading>
+      <div className="card flex flex-col items-center gap-ds-2 px-ds-5 py-ds-5 sm:flex-row sm:items-center sm:gap-ds-6">
+        {/* Arc gauge */}
+        <div
+          className="flex flex-col items-center"
+          role="img"
+          aria-label={`Consistency score: ${consistency.score} out of 100, ${consistency.band}`}
+        >
+          <svg width={size} height={height} viewBox={`0 0 ${size} ${height}`} aria-hidden="true">
+            <path
+              d={path}
+              fill="none"
+              stroke="var(--border-subtle, #e5e7eb)"
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+            />
+            <path
+              id={`consistency-fill-${instanceId}`}
+              d={path}
+              fill="none"
+              stroke={color}
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+              strokeDasharray={`${filledLength} ${arcLength}`}
+            />
+          </svg>
+          <div className="-mt-3 flex flex-col items-center">
+            <span className="text-[28px] font-semibold leading-none tabular-nums text-[var(--content-primary)]">
+              {consistency.score}
+            </span>
+            <span className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--content-secondary)]">
+              / 100
+            </span>
+          </div>
+        </div>
+
+        {/* Band + disclosure */}
+        <div className="min-w-0 text-center sm:text-left">
+          <p className="text-ds-lg font-semibold text-[var(--content-primary)]" style={{ color }}>
+            {consistency.band}
+          </p>
+          {consistency.cvBand != null && (
+            <p className="mt-1 text-ds-sm text-[var(--content-secondary)]">
+              Timing is {consistency.cvBand} (CV ≥ 0.50 = high variance).
+            </p>
+          )}
+          <p className="mt-1 text-ds-xs text-[var(--content-tertiary)]">
+            {basisParts.length > 0 ? `Derived from ${basisParts.join(' and ')} across ${figures.runCount} runs. ` : ''}
+            Based on observed behavior, not a defined target.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── R-C Section: Insight Cards (Standardize / Automate / Investigate) ─────────
+
+const INSIGHT_CARD_STYLES: Record<
+  InsightCardType,
+  { badge: string; border: string; label: string }
+> = {
+  standardize: {
+    badge: 'bg-amber-50 text-amber-700',
+    border: 'border-amber-200',
+    label: 'Standardize',
+  },
+  automate: {
+    badge: 'bg-blue-50 text-blue-700',
+    border: 'border-blue-200',
+    label: 'Automate',
+  },
+  investigate: {
+    badge: 'bg-violet-50 text-violet-700',
+    border: 'border-violet-200',
+    label: 'Investigate',
+  },
+};
+
+/**
+ * Insight cards — 0–3 honest, observed-only action cards built from real signals
+ * (variant divergence, automation score/tag, high-variance steps, top bottleneck).
+ * Each card: one-line finding + one-line recommendation + an evidence anchor (the
+ * N runs / run-ids the finding is based on). Deterministic, hydration-safe.
+ */
+function InsightCardsSection({ figures }: { figures: LeadFigures }) {
+  const cards: InsightCard[] = deriveInsightCards({
+    runCount: figures.runCount,
+    variantCount: figures.variantCount,
+    dominantPathFrequency: figures.dominantPathFrequency,
+    dominantPathRunCount: figures.dominantPathRunCount,
+    automationScore: figures.automationScore,
+    opportunityTag: figures.opportunityTag,
+    topAutomationTitle: figures.topAutomationTitle,
+    highVarianceStepCount: figures.highVarianceStepCount,
+    topBottleneck: figures.topBottleneck,
+    evidenceRunIds: figures.evidenceRunIds,
+  });
+
+  if (cards.length === 0) return null;
+
+  return (
+    <div id="rpt-insight-cards" className="scroll-mt-20">
+      <SectionHeading>Key Actions</SectionHeading>
+      <div className="grid grid-cols-1 gap-ds-4 md:grid-cols-2 xl:grid-cols-3">
+        {cards.map((card) => {
+          const style = INSIGHT_CARD_STYLES[card.type];
+          return (
+            <div
+              key={card.key}
+              className={`flex flex-col gap-ds-2 rounded-ds-lg border ${style.border} bg-[var(--surface-elevated)] px-ds-4 py-ds-4`}
+            >
+              <span
+                className={`inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${style.badge}`}
+              >
+                {style.label}
+              </span>
+              <p className="text-ds-sm font-semibold text-[var(--content-primary)] leading-snug">
+                {card.title}
+              </p>
+              <p className="text-ds-sm text-[var(--content-secondary)] leading-snug">{card.finding}</p>
+              <p className="text-ds-xs text-[var(--content-secondary)] leading-snug">
+                <span className="font-medium text-[var(--content-primary)]">Recommendation: </span>
+                {card.recommendation}
+              </p>
+              {/* Evidence anchor — the runs the finding is based on. */}
+              <div className="mt-auto border-t border-[var(--border-subtle)] pt-ds-2">
+                <p className="text-[10px] font-medium uppercase tracking-wide text-[var(--content-tertiary)]">
+                  Evidence
+                </p>
+                <p className="text-[11px] text-[var(--content-secondary)]">{card.evidence.label}</p>
+                {card.evidence.runIds.length > 0 && (
+                  <p className="mt-0.5 truncate font-mono text-[10px] text-[var(--content-tertiary)]" title={card.evidence.runIds.join(', ')}>
+                    {card.evidence.runIds.join(' · ')}
+                  </p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── R-C Section: Bottleneck Contribution Ranking (CSS bars) ───────────────────
+
+const BOTTLENECK_FLAG_CLASSES: Record<string, string> = {
+  Both: 'bg-red-50 text-red-700',
+  Slow: 'bg-amber-50 text-amber-700',
+  Variable: 'bg-blue-50 text-blue-700',
+};
+
+/**
+ * Bottleneck contribution ranking — a ranked CSS-bar view of the bottleneck
+ * steps by share of total bottleneck cycle time. Extends the R-B BottleneckRow
+ * run-count context into a ranked contribution view (top row = "Primary
+ * bottleneck"). Deterministic, observed-only, hydration-safe.
+ */
+function BottleneckContributionSection({
+  intelligence,
+  processOutput,
+  onRunIntelligence,
+}: {
+  intelligence: IntelligenceData | null | undefined;
+  processOutput: ProcessOutputData | null | undefined;
+  onRunIntelligence?: (() => void) | undefined;
+}) {
+  const bottlenecks = asArray(intelligence?.bottlenecks?.bottlenecks);
+  const cohortRunCount = num(intelligence?.metrics?.runCount);
+
+  const stepMap = new Map<number, StepDefinition>();
+  asArray(processOutput?.processDefinition?.stepDefinitions).forEach((s) => stepMap.set(s.ordinal, s));
+
+  const rows: BottleneckContributionRow[] = rankBottleneckContributions(
+    bottlenecks.map((b) => ({
+      position: b.position,
+      title: stepMap.get(b.position)?.title ?? `Step ${b.position}`,
+      system: stepMap.get(b.position)?.system,
+      category: b.category ?? stepMap.get(b.position)?.category,
+      meanDurationMs: b.meanDurationMs,
+      runCount: b.runCount,
+      isHighDuration: b.isHighDuration,
+      isHighVariance: b.isHighVariance,
+    })),
+  );
+
+  return (
+    <div id="rpt-bottlenecks" className="scroll-mt-20">
+      <SectionHeading>Bottlenecks</SectionHeading>
+      {rows.length === 0 ? (
+        <SkeletonCard
+          message="No bottleneck data available. Run intelligence analysis to identify slow steps."
+          {...(onRunIntelligence != null ? { onAction: onRunIntelligence, actionLabel: 'Run Analysis' } : {})}
+        />
+      ) : (
+        <>
+          <p className="mb-ds-3 text-ds-xs text-[var(--content-tertiary)]">
+            Ranked by share of total bottleneck cycle time across {cohortRunCount ?? bottlenecks.length} runs.
+          </p>
+          <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-ds-lg overflow-hidden divide-y divide-[var(--border-subtle)]">
+            {rows.map((row) => (
+              <div key={row.position} className="px-ds-4 py-ds-3">
+                <div className="flex items-center gap-ds-3">
+                  {/* Rank badge */}
+                  <div className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-red-50 border border-red-200 text-[11px] font-bold tabular-nums text-red-700">
+                    {row.position}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-ds-2 flex-wrap">
+                      <p className="min-w-0 truncate text-ds-sm font-medium text-[var(--content-primary)]">
+                        {row.title}
+                      </p>
+                      {row.isPrimary && (
+                        <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700">
+                          Primary bottleneck
+                        </span>
+                      )}
+                      {row.flag && (
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                            BOTTLENECK_FLAG_CLASSES[row.flag] ?? 'bg-[var(--surface-secondary)] text-[var(--content-secondary)]'
+                          }`}
+                        >
+                          {row.flag}
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-0.5 flex items-center gap-ds-2 flex-wrap text-[10px] text-[var(--content-tertiary)]">
+                      {row.system && <span>{row.system}</span>}
+                      {row.category && (
+                        <span className="ds-tag ds-tag-neutral text-[10px]">{row.category.replace(/_/g, ' ')}</span>
+                      )}
+                      {row.runCount != null && (
+                        <span>
+                          {cohortRunCount != null
+                            ? `appears in ${row.runCount} of ${cohortRunCount} runs`
+                            : `${row.runCount} run${row.runCount !== 1 ? 's' : ''}`}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0 text-right">
+                    <p className="text-ds-sm font-semibold text-[var(--content-primary)] tabular-nums">
+                      {row.percentOfTotal}%
+                    </p>
+                    <p className="text-[10px] text-[var(--content-tertiary)] tabular-nums">
+                      {formatDuration(row.meanDurationMs)}
+                    </p>
+                  </div>
+                </div>
+                {/* Contribution bar */}
+                <div className="mt-ds-2 h-2 w-full overflow-hidden rounded-full bg-[var(--surface-secondary)]" aria-hidden>
+                  <div
+                    className={`h-full rounded-full ${row.isPrimary ? 'bg-red-500' : 'bg-red-400'}`}
+                    style={{ width: `${Math.min(row.barWidth, 100)}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── R-C Section: Drift ────────────────────────────────────────────────────────
+
+const DRIFT_SEVERITY_CLASSES: Record<DriftSeverity, string> = {
+  high: 'bg-red-50 text-red-700',
+  medium: 'bg-amber-50 text-amber-700',
+  low: 'bg-blue-50 text-blue-700',
+};
+
+/**
+ * Drift section — surfaces the engine's drift.driftSignals[] (timing / structural
+ * / exception-rate / step-count), which the report never showed. Each signal:
+ * type, severity, description, baseline → current. Honest empty state when there
+ * are no signals (or no baseline window). Deterministic, hydration-safe.
+ */
+function DriftSection({ intelligence }: { intelligence: IntelligenceData | null | undefined }) {
+  const runCount = num(intelligence?.metrics?.runCount) ?? 1;
+  const signals: FormattedDriftSignal[] = formatDriftSignals(intelligence?.drift?.driftSignals);
+
+  // Below 2 runs there is no observed window to compare; hide entirely so the nav
+  // doesn't dangle (mirrored in visibleSections).
+  if (runCount < 2) return null;
+
+  return (
+    <div id="rpt-drift" className="scroll-mt-20">
+      <SectionHeading>Drift</SectionHeading>
+      {signals.length === 0 ? (
+        <div className="card px-ds-5 py-ds-5 text-center">
+          <p className="text-ds-sm text-[var(--content-secondary)]">
+            No significant drift detected across the observed run window.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-ds-2">
+          {signals.map((sig) => (
+            <div key={sig.key} className="card px-ds-4 py-ds-3">
+              <div className="flex items-center gap-ds-2 flex-wrap mb-1">
+                <span className="text-ds-sm font-semibold text-[var(--content-primary)]">{sig.typeLabel}</span>
+                <span
+                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${DRIFT_SEVERITY_CLASSES[sig.severity]}`}
+                >
+                  {sig.severity}
+                </span>
+              </div>
+              <p className="text-ds-sm text-[var(--content-secondary)]">{sig.description}</p>
+              <p className="mt-1 text-ds-xs text-[var(--content-tertiary)] tabular-nums">
+                Baseline <span className="font-medium text-[var(--content-secondary)]">{sig.baselineLabel}</span>
+                {' → '}
+                Current <span className="font-medium text-[var(--content-secondary)]">{sig.currentLabel}</span>
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Agent intelligence helpers (migrated from AgentIntelligenceTab) ───────────
 
 const AGENT_ROLE_COLORS: Record<string, string> = {
@@ -2329,6 +2834,51 @@ export function WorkflowReportPage({
         if (id === 'rpt-variance') {
           return intelligence?.variance != null || (intelligence?.variants?.variants?.length ?? 0) > 0;
         }
+        if (id === 'rpt-distribution') {
+          // Mirrors deriveDistribution gating: ≥2 runs AND a real min/max envelope.
+          return (
+            deriveDistribution({
+              runCount: leadFigures.runCount,
+              minDurationMs: leadFigures.distribution.minDurationMs,
+              medianDurationMs: leadFigures.distribution.medianDurationMs,
+              meanDurationMs: leadFigures.distribution.meanDurationMs,
+              p90DurationMs: leadFigures.distribution.p90DurationMs,
+              maxDurationMs: leadFigures.distribution.maxDurationMs,
+            }) != null
+          );
+        }
+        if (id === 'rpt-consistency') {
+          // Mirrors deriveConsistencyScore gating.
+          return (
+            deriveConsistencyScore({
+              runCount: leadFigures.runCount,
+              sequenceStability: leadFigures.sequenceStability,
+              coefficientOfVariation: leadFigures.coefficientOfVariation,
+            }) != null
+          );
+        }
+        if (id === 'rpt-insight-cards') {
+          // Mirrors deriveInsightCards — list only when ≥1 honest card renders.
+          return (
+            deriveInsightCards({
+              runCount: leadFigures.runCount,
+              variantCount: leadFigures.variantCount,
+              dominantPathFrequency: leadFigures.dominantPathFrequency,
+              dominantPathRunCount: leadFigures.dominantPathRunCount,
+              automationScore: leadFigures.automationScore,
+              opportunityTag: leadFigures.opportunityTag,
+              topAutomationTitle: leadFigures.topAutomationTitle,
+              highVarianceStepCount: leadFigures.highVarianceStepCount,
+              topBottleneck: leadFigures.topBottleneck,
+              evidenceRunIds: leadFigures.evidenceRunIds,
+            }).length > 0
+          );
+        }
+        if (id === 'rpt-drift') {
+          // Mirrors DriftSection: ≥2 runs (always render the honest empty state
+          // above the threshold so users see "no drift detected").
+          return (intelligence?.metrics?.runCount ?? 1) >= 2;
+        }
         if (id === 'rpt-timestudy') {
           const studies = intelligence?.timestudy?.stepPositionTimestudies?.length ?? 0;
           return studies > 0 && (intelligence?.metrics?.runCount ?? 1) >= 2;
@@ -2342,7 +2892,7 @@ export function WorkflowReportPage({
         if (id === 'rpt-roadmap') return (agentIntelligence?.artifacts?.roadmap?.length ?? 0) > 0;
         return true;
       }),
-    [insights, interpretation, intelligence, agentIntelligence, processOutput],
+    [insights, interpretation, intelligence, agentIntelligence, processOutput, leadFigures],
   );
 
   return (
@@ -2353,10 +2903,14 @@ export function WorkflowReportPage({
         <ReportScorecardSection figures={leadFigures} />
         <HeroSection workflow={workflow} />
         <LeadInsightSection insights={insights} processOutput={processOutput} />
+        <InsightCardsSection figures={leadFigures} />
         <ProcessScoresSection interpretation={interpretation} />
         <PhaseTimelineSection interpretation={interpretation} />
         <RunMetricsSection insights={insights} processOutput={processOutput} workflow={workflow} />
+        <CycleTimeDistributionSection figures={leadFigures} />
+        <ConsistencyGaugeSection figures={leadFigures} />
         <VarianceVariantsSection intelligence={intelligence} />
+        <DriftSection intelligence={intelligence} />
         <TimestudySection intelligence={intelligence} />
         <InsightsFeedSection insights={insights} intelligence={intelligence} />
         <AutomationSection
@@ -2364,7 +2918,7 @@ export function WorkflowReportPage({
           intelligence={intelligence}
           onRunAgentIntelligence={onRunAgentIntelligence}
         />
-        <BottlenecksSection
+        <BottleneckContributionSection
           intelligence={intelligence}
           processOutput={processOutput}
           onRunIntelligence={onRunIntelligence}

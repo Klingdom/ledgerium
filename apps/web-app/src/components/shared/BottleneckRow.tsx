@@ -9,13 +9,22 @@ export interface BottleneckRowProps {
   durationMs: number;
   averageDurationMs: number;
   category?: string | undefined;
+  /** Runs that contributed to this step's mean (run-count context). */
+  runCount?: number | undefined;
+  /** Total runs in the cohort, for "appears in X of N runs". */
+  totalRunCount?: number | undefined;
+  /** Which engine criterion fired — surfaces "Slow" / "Variable" / "Both". */
+  isHighDuration?: boolean | undefined;
+  isHighVariance?: boolean | undefined;
 }
 
 /**
  * BottleneckRow — single row in the bottleneck list.
  *
  * Shows ordinal badge, step title, system name, mini duration bar (100px),
- * duration label, and a delta ratio compared to average.
+ * duration label, and a delta ratio compared to average. When provided, also
+ * shows run-count context and the criterion flag (Slow / Variable / Both) so a
+ * consistently-slow step reads differently from an unpredictable one.
  */
 export function BottleneckRow({
   position,
@@ -24,6 +33,10 @@ export function BottleneckRow({
   durationMs,
   averageDurationMs,
   category,
+  runCount,
+  totalRunCount,
+  isHighDuration,
+  isHighVariance,
 }: BottleneckRowProps) {
   const ratio = averageDurationMs > 0 ? durationMs / averageDurationMs : 1;
   // Bar fill width: cap at 100% visually but use ratio to scale
@@ -32,6 +45,23 @@ export function BottleneckRow({
     (averageDurationMs / Math.max(durationMs, averageDurationMs * 3)) * 100,
     100,
   );
+
+  // Criterion flag (ANALYTICS P0-2): a slow-but-consistent step is a different
+  // problem from an unpredictable one. Show which engine criterion fired.
+  const flagLabel =
+    isHighDuration && isHighVariance
+      ? 'Both'
+      : isHighDuration
+      ? 'Slow'
+      : isHighVariance
+      ? 'Variable'
+      : null;
+  const flagClass =
+    flagLabel === 'Both'
+      ? 'bg-red-50 text-red-700'
+      : flagLabel === 'Slow'
+      ? 'bg-amber-50 text-amber-700'
+      : 'bg-blue-50 text-blue-700';
 
   return (
     <div className="flex items-center gap-4 px-4 py-3 hover:bg-[var(--surface-secondary)] transition-colors">
@@ -43,13 +73,25 @@ export function BottleneckRow({
       {/* Title + system */}
       <div className="flex-1 min-w-0">
         <p className="text-ds-sm font-medium text-[var(--content-primary)] truncate">{title}</p>
-        <div className="flex items-center gap-2 mt-0.5">
+        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
           {system && (
             <span className="text-[10px] text-[var(--content-tertiary)]">{system}</span>
           )}
           {category && (
             <span className="ds-tag ds-tag-neutral text-[10px]">
               {category.replace(/_/g, ' ')}
+            </span>
+          )}
+          {flagLabel && (
+            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${flagClass}`}>
+              {flagLabel}
+            </span>
+          )}
+          {runCount != null && (
+            <span className="text-[10px] text-[var(--content-tertiary)]">
+              {totalRunCount != null
+                ? `appears in ${runCount} of ${totalRunCount} runs`
+                : `${runCount} run${runCount !== 1 ? 's' : ''}`}
             </span>
           )}
         </div>
