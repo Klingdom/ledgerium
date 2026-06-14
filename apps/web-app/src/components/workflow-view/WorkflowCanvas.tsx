@@ -55,7 +55,7 @@ interface Props {
   selectedNodeId: string | null;
   onSelectNode: (id: string | null) => void;
   /** Ref callback to expose zoom controls to the toolbar. */
-  onCanvasReady?: (controls: CanvasControls) => void;
+  onCanvasReady?: ((controls: CanvasControls) => void) | undefined;
 }
 
 export interface CanvasControls {

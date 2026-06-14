@@ -319,6 +319,7 @@ export function WorkflowPageShell({
               status={variantsStatus}
               onRetry={onRetryVariants}
               onSelectNode={handleSelectNode}
+              onCanvasReady={handleCanvasReady}
             />
           )}
 

@@ -24,6 +24,7 @@ import { CATEGORY_STYLES } from './constants';
 import { WorkflowVariantStoryMap } from './WorkflowVariantStoryMap';
 import { VariantDnaStrip } from './VariantDnaStrip';
 import { WorkflowFlowCanvas } from './WorkflowCanvas';
+import type { CanvasControls } from './WorkflowCanvas';
 import {
   buildVariantFlowModel,
   portfolioIntelligenceToVariantInput,
@@ -40,6 +41,8 @@ interface Props {
   /** Retry the variants load. */
   onRetry?: (() => void) | undefined;
   onSelectNode: (id: string | null) => void;
+  /** Wires the shell toolbar zoom/fit controls to the variant flow canvas. */
+  onCanvasReady?: ((controls: CanvasControls) => void) | undefined;
 }
 
 // ─── Path classification ─────────────────────────────────────────────────────
@@ -173,7 +176,7 @@ function classifyPaths(paths: ViewVariantPath[], graph: NormalizedViewModel): Cl
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
-export function WorkflowVariantsMap({ graph, intelligence, status, onRetry, onSelectNode }: Props) {
+export function WorkflowVariantsMap({ graph, intelligence, status, onRetry, onSelectNode, onCanvasReady }: Props) {
   const variantData = useMemo(() => buildVariantData(graph, intelligence), [graph, intelligence]);
   const paths = useMemo(() => classifyPaths(variantData.paths, graph), [variantData.paths, graph]);
 
@@ -262,6 +265,7 @@ export function WorkflowVariantsMap({ graph, intelligence, status, onRetry, onSe
             <VariantFlowCanvasWrapper
               model={variantFlowModel}
               onSelectNode={onSelectNode}
+              onCanvasReady={onCanvasReady}
             />
           ) : (
             /* Fallback: original story map when flow model not available */
@@ -864,9 +868,11 @@ import type { NormalizedViewModel as NVM } from './adapters/viewModel';
 function VariantFlowCanvasWrapper({
   model,
   onSelectNode,
+  onCanvasReady,
 }: {
   model: NVM;
   onSelectNode: (id: string | null) => void;
+  onCanvasReady?: ((controls: CanvasControls) => void) | undefined;
 }) {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const toolbar = {
@@ -954,6 +960,7 @@ function VariantFlowCanvasWrapper({
           toolbar={toolbar}
           selectedNodeId={selectedNodeId}
           onSelectNode={handleSelect}
+          onCanvasReady={onCanvasReady}
         />
       </div>
     </div>
