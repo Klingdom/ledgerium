@@ -15,6 +15,15 @@ import {
 } from 'lucide-react';
 import { deriveDivergence } from '@/lib/reportDivergence';
 import { formatDuration } from '@/lib/format';
+import { buildReportVerdict, cvBand, type ReportVerdictInput } from './reportVerdict';
+import {
+  buildScorecard,
+  buildParetoRows,
+  type ScorecardInput,
+  type ConsistencyColor,
+  type ConsistencyTile,
+  type ScorecardTile,
+} from './reportScorecard';
 import { useCountUp } from '@/hooks/useCountUp';
 import { useScrollSpy } from '@/hooks/useScrollSpy';
 import { ProcessHealthScoreBar } from '@/components/shared/ProcessHealthScoreBar';
@@ -150,11 +159,20 @@ interface IntelligenceBottleneck {
   overallMeanStepDurationMs: number;
   durationRatio: number;
   category?: string;
+  // Surfaced for the R-B honesty fixes (run-count context + which criterion
+  // fired). Present on the real engine payload (BottleneckStep); the interface
+  // was previously lossy.
+  runCount?: number;
+  isHighDuration?: boolean;
+  isHighVariance?: boolean;
 }
 
 interface IntelligenceMetrics {
   medianDurationMs?: number;
   meanDurationMs?: number;
+  p90DurationMs?: number;
+  minDurationMs?: number;
+  maxDurationMs?: number;
   medianStepCount?: number;
   meanStepCount?: number;
   runCount?: number;
@@ -178,7 +196,7 @@ interface IntelligenceVariance {
 interface IntelligenceVariant {
   variantId: string;
   isStandardPath?: boolean;
-  pathSignature?: { signature?: string };
+  pathSignature?: { signature?: string; stepCount?: number };
   frequency?: number;
   runCount?: number;
 }
@@ -191,6 +209,9 @@ interface IntelligenceData {
   bottlenecks?: {
     bottlenecks?: IntelligenceBottleneck[];
   };
+  // Per-variant real recorded step titles, populated by analyzeWorkflowVariants
+  // (intelligence.ts). Used to label the Pareto without exposing the hash.
+  variantStepTitles?: Record<string, string[]>;
 }
 
 interface AgentOpportunity {
@@ -288,6 +309,8 @@ export interface WorkflowReportPageProps {
 // ── Section IDs (for scroll spy) ──────────────────────────────────────────────
 
 const SECTION_IDS = [
+  'rpt-verdict',
+  'rpt-scorecard',
   'rpt-hero',
   'rpt-lead',
   'rpt-scores',
@@ -308,6 +331,8 @@ const SECTION_IDS = [
 ] as const;
 
 const SECTION_LABELS: Record<string, string> = {
+  'rpt-verdict': 'Verdict',
+  'rpt-scorecard': 'Scorecard',
   'rpt-hero': 'Overview',
   'rpt-lead': 'Start Here',
   'rpt-scores': 'Process Health',
@@ -527,6 +552,205 @@ function MetricCell({ label, value }: { label: string; value: string }) {
   );
 }
 
+// ── Decision-grade lead (R-B): verdict + 5-tile scorecard ─────────────────────
+
+/**
+ * Derive the observed-only figures that feed BOTH the executive verdict and the
+ * scorecard from a single place, so the two cards never disagree. Pure — every
+ * number traces to an engine field; nothing is fabricated or defaulted to a
+ * guess. The "% of cycle time" for the top bottleneck is its mean-duration share
+ * of the summed per-step mean durations (timestudy), which is honest and
+ * observed; falls back to durationRatio-implied share when timestudy is absent.
+ */
+interface LeadFigures {
+  runCount: number;
+  sequenceStability: number | null;
+  coefficientOfVariation: number | null;
+  variantCount: number | null;
+  dominantPathRunCount: number | null;
+  dominantPathPercent: number | null;
+  medianDurationMs: number | null;
+  topBottleneck: { title: string; percentOfCycleTime: number } | null;
+  automationScore: number | null;
+}
+
+function num(v: number | null | undefined): number | null {
+  return typeof v === 'number' && Number.isFinite(v) ? v : null;
+}
+
+function deriveLeadFigures(
+  intelligence: IntelligenceData | null | undefined,
+  agentIntelligence: AgentIntelligenceData | null | undefined,
+  processOutput: ProcessOutputData | null | undefined,
+): LeadFigures {
+  const runCount = num(intelligence?.metrics?.runCount) ?? 1;
+  const variance = intelligence?.variance;
+  const variantList = asArray(intelligence?.variants?.variants);
+  const standard = variantList.find((v) => v.isStandardPath);
+  const variantCount = num(intelligence?.variants?.variantCount) ?? (variantList.length || null);
+
+  // Top bottleneck % of cycle time — mean-duration share of summed per-step means.
+  const studies = asArray(intelligence?.timestudy?.stepPositionTimestudies);
+  const cycleMeanSum = studies.reduce((sum, s) => sum + (num(s.meanDurationMs) ?? 0), 0);
+  const bottlenecks = asArray(intelligence?.bottlenecks?.bottlenecks);
+  const stepMap = new Map<number, StepDefinition>();
+  asArray(processOutput?.processDefinition?.stepDefinitions).forEach((s) => stepMap.set(s.ordinal, s));
+
+  let topBottleneck: { title: string; percentOfCycleTime: number } | null = null;
+  if (bottlenecks.length > 0) {
+    // Engine already sorts by durationRatio desc; take the first as the headline.
+    const top = bottlenecks[0]!;
+    const title = stepMap.get(top.position)?.title ?? `Step ${top.position}`;
+    const pct =
+      cycleMeanSum > 0
+        ? Math.round((top.meanDurationMs / cycleMeanSum) * 100)
+        : null;
+    if (pct != null && pct > 0) {
+      topBottleneck = { title, percentOfCycleTime: pct };
+    }
+  }
+
+  // Automation score — deterministic workflow score, else best opportunity score.
+  const wfScore = num(agentIntelligence?.workflow?.automationScore);
+  const oppScores = asArray(agentIntelligence?.opportunities?.opportunities)
+    .map((o) => num(o.score))
+    .filter((s): s is number => s != null);
+  const automationScore = wfScore ?? (oppScores.length > 0 ? Math.max(...oppScores) : null);
+
+  const dominantPathRunCount = num(standard?.runCount);
+  const dominantPathPercent =
+    standard?.frequency != null ? Math.round((standard.frequency ?? 0) * 100) : null;
+
+  return {
+    runCount,
+    sequenceStability: num(variance?.sequenceStability),
+    coefficientOfVariation: num(variance?.durationVariance?.coefficientOfVariation),
+    variantCount,
+    dominantPathRunCount,
+    dominantPathPercent,
+    medianDurationMs: num(intelligence?.metrics?.medianDurationMs),
+    topBottleneck,
+    automationScore,
+  };
+}
+
+/**
+ * Executive Verdict — the decision-grade lead card at the very top of the report.
+ * Deterministic + observed-only via buildReportVerdict. Single-run shows one
+ * honest sentence; multi-run shows 2–4 plain-English sentences.
+ */
+function ExecutiveVerdictSection({
+  figures,
+}: {
+  figures: LeadFigures;
+}) {
+  const verdictInput: ReportVerdictInput = {
+    runCount: figures.runCount,
+    sequenceStability: figures.sequenceStability,
+    coefficientOfVariation: figures.coefficientOfVariation,
+    variantCount: figures.variantCount,
+    dominantPathRunCount: figures.dominantPathRunCount,
+    topBottleneck: figures.topBottleneck,
+    standardizationOpportunity:
+      figures.variantCount != null &&
+      figures.variantCount >= 2 &&
+      figures.dominantPathPercent != null
+        ? { variantCount: figures.variantCount, dominantPathPercent: figures.dominantPathPercent }
+        : null,
+  };
+  const sentences = buildReportVerdict(verdictInput);
+
+  return (
+    <div id="rpt-verdict" className="scroll-mt-20">
+      <div className="rounded-ds-lg border border-brand-200 bg-gradient-to-br from-brand-50/70 to-white px-6 py-5">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-brand-700 mb-2">
+          Verdict
+        </p>
+        <div className="space-y-1.5">
+          {sentences.map((s, i) => (
+            <p
+              key={i}
+              className={
+                i === 0
+                  ? 'text-ds-lg font-semibold leading-snug text-[var(--content-primary)]'
+                  : 'text-ds-sm leading-snug text-[var(--content-secondary)]'
+              }
+            >
+              {s}
+            </p>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const CONSISTENCY_TILE_CLASSES: Record<ConsistencyColor, { value: string; dot: string }> = {
+  green: { value: 'text-emerald-600', dot: 'bg-emerald-500' },
+  amber: { value: 'text-amber-600', dot: 'bg-amber-500' },
+  red: { value: 'text-red-600', dot: 'bg-red-500' },
+};
+
+/** One scorecard tile. The consistency tile is color-coded by CV band. */
+function ScorecardTileCard({ tile }: { tile: ScorecardTile | ConsistencyTile }) {
+  const isConsistency = tile.id === 'consistency';
+  const color = isConsistency ? (tile as ConsistencyTile).color : null;
+  const valueClass =
+    color != null ? CONSISTENCY_TILE_CLASSES[color].value : 'text-[var(--content-primary)]';
+
+  return (
+    <div className="flex flex-col items-start gap-ds-1 rounded-ds-md border border-[var(--border-subtle)] bg-[var(--surface-primary)] px-ds-4 py-ds-3">
+      <span className="text-[11px] font-medium uppercase tracking-wide text-[var(--content-secondary)]">
+        {tile.label}
+      </span>
+      <span className={`flex items-center gap-1.5 text-[22px] font-semibold leading-none tabular-nums ${valueClass}`}>
+        {color != null && (
+          <span className={`h-2.5 w-2.5 flex-shrink-0 rounded-full ${CONSISTENCY_TILE_CLASSES[color].dot}`} aria-hidden />
+        )}
+        <span className="truncate" title={tile.value}>{tile.value}</span>
+      </span>
+      <span className="min-h-[16px] text-[12px] text-[var(--content-secondary)]">
+        {tile.interpretation}
+      </span>
+    </div>
+  );
+}
+
+/**
+ * 5-tile KPI scorecard below the verdict. Multi-run-only figures are gated and
+ * show "—" / "1 run" for single-run. CONSISTENCY is color-coded by CV with the
+ * band word + threshold disclosure. Deterministic via buildScorecard.
+ */
+function ReportScorecardSection({ figures }: { figures: LeadFigures }) {
+  const scInput: ScorecardInput = {
+    runCount: figures.runCount,
+    medianDurationMs: figures.medianDurationMs,
+    medianDurationLabel:
+      figures.medianDurationMs != null ? formatDuration(figures.medianDurationMs) : null,
+    coefficientOfVariation: figures.coefficientOfVariation,
+    variantCount: figures.variantCount,
+    topBottleneck: figures.topBottleneck,
+    automationScore: figures.automationScore,
+  };
+  const sc = buildScorecard(scInput);
+
+  return (
+    <div id="rpt-scorecard" className="scroll-mt-20">
+      <div
+        className="grid grid-cols-2 gap-ds-3 sm:grid-cols-3 lg:grid-cols-5"
+        role="group"
+        aria-label="Report scorecard"
+      >
+        <ScorecardTileCard tile={sc.cycleTime} />
+        <ScorecardTileCard tile={sc.consistency} />
+        <ScorecardTileCard tile={sc.variantCount} />
+        <ScorecardTileCard tile={sc.bottleneckStep} />
+        <ScorecardTileCard tile={sc.automationScore} />
+      </div>
+    </div>
+  );
+}
+
 // ── Section 2: Process Scores ──────────────────────────────────────────────────
 
 function interpretComplexity(s: number): string {
@@ -662,20 +886,42 @@ const INSIGHT_CATEGORIES = [
   { key: 'process_health', label: 'Process Health' },
 ];
 
-function InsightsFeedSection({ insights }: { insights: InsightsData | null | undefined }) {
+function InsightsFeedSection({
+  insights,
+  intelligence,
+}: {
+  insights: InsightsData | null | undefined;
+  intelligence: IntelligenceData | null | undefined;
+}) {
   const [activeCategory, setActiveCategory] = useState('all');
+  const runCount = intelligence?.metrics?.runCount ?? 1;
 
   if (!insights || !insights.hasInsights) {
+    // ANALYTICS P0-5: "No inefficiencies detected" is only a defensible claim
+    // across ≥2 runs — you cannot assert a single recording is efficient
+    // relative to a baseline that does not exist yet. Single-run shows an honest
+    // "record again to compare" state instead of a false green all-clear.
+    const isMultiRun = runCount >= 2;
     return (
       <div id="rpt-insights" className="scroll-mt-20">
         <SectionHeading>Insights</SectionHeading>
-        <div className="bg-emerald-50 border border-emerald-200 rounded-ds-lg px-6 py-8 text-center">
-          <CheckCircle className="mx-auto h-8 w-8 text-emerald-500 mb-3" />
-          <h3 className="text-ds-base font-medium text-[var(--content-primary)]">No inefficiencies detected</h3>
-          <p className="mt-1 text-ds-sm text-[var(--content-secondary)]">
-            {insights?.noInsightsMessage ?? 'This workflow appears well-structured.'}
-          </p>
-        </div>
+        {isMultiRun ? (
+          <div className="bg-emerald-50 border border-emerald-200 rounded-ds-lg px-6 py-8 text-center">
+            <CheckCircle className="mx-auto h-8 w-8 text-emerald-500 mb-3" />
+            <h3 className="text-ds-base font-medium text-[var(--content-primary)]">No inefficiencies detected</h3>
+            <p className="mt-1 text-ds-sm text-[var(--content-secondary)]">
+              {insights?.noInsightsMessage ?? 'This workflow appears well-structured across the recorded runs.'}
+            </p>
+          </div>
+        ) : (
+          <div className="card px-6 py-8 text-center">
+            <CheckCircle className="mx-auto h-8 w-8 text-[var(--content-tertiary)] mb-3" />
+            <h3 className="text-ds-base font-medium text-[var(--content-primary)]">Analysis complete</h3>
+            <p className="mt-1 text-ds-sm text-[var(--content-secondary)]">
+              Record this workflow again to compare runs and surface inefficiencies.
+            </p>
+          </div>
+        )}
       </div>
     );
   }
@@ -870,6 +1116,7 @@ function BottlenecksSection({
   onRunIntelligence?: (() => void) | undefined;
 }) {
   const bottlenecks = asArray(intelligence?.bottlenecks?.bottlenecks);
+  const cohortRunCount = intelligence?.metrics?.runCount;
 
   // Build a title lookup from step definitions
   const stepMap = new Map<number, StepDefinition>();
@@ -898,6 +1145,10 @@ function BottlenecksSection({
                 durationMs={b.meanDurationMs}
                 averageDurationMs={b.overallMeanStepDurationMs}
                 category={b.category ?? step?.category}
+                runCount={b.runCount}
+                totalRunCount={cohortRunCount}
+                isHighDuration={b.isHighDuration}
+                isHighVariance={b.isHighVariance}
               />
             );
           })}
@@ -1319,13 +1570,19 @@ function LeadInsightSection({ insights, processOutput }: LeadInsightSectionProps
 interface RunMetricsSectionProps {
   insights: InsightsData | null | undefined;
   processOutput: ProcessOutputData | null | undefined;
+  workflow: WorkflowSummary;
 }
 
 /**
- * Run Metrics — step-timing summary (count, avg, active time, longest step).
- * Uses the shared time-leverage helper. Single-run safe and hydration-safe.
+ * Run Metrics — step-timing summary (count, avg, active step time, total elapsed,
+ * longest step). Uses the shared time-leverage helper. Single-run + hydration-safe.
+ *
+ * Honesty (ANALYTICS P0-4): the summed step durations ("Active step time") and
+ * the wall-clock run duration ("Total elapsed", workflow.durationMs) are
+ * DIFFERENT numbers — idle/navigation gaps live between steps. They are now
+ * labelled distinctly so two unlabelled figures are never shown side by side.
  */
-function RunMetricsSection({ insights, processOutput }: RunMetricsSectionProps) {
+function RunMetricsSection({ insights, processOutput, workflow }: RunMetricsSectionProps) {
   const steps = asArray(processOutput?.processDefinition?.stepDefinitions);
   const stepDurations = steps.map((s) => s.durationMs ?? 0).filter((d) => d > 0);
   const totalStepMs = stepDurations.reduce((sum, d) => sum + d, 0);
@@ -1338,6 +1595,13 @@ function RunMetricsSection({ insights, processOutput }: RunMetricsSectionProps) 
   if (stepDurations.length === 0 && insights?.timeBreakdown == null) {
     return null;
   }
+
+  // The gap between wall-clock duration and summed step time, surfaced honestly
+  // when both are known and the gap is material (≥ 1s) so the two numbers no
+  // longer appear to silently contradict each other.
+  const totalElapsedMs = workflow.durationMs;
+  const gapMs =
+    totalStepMs > 0 && totalElapsedMs > totalStepMs ? totalElapsedMs - totalStepMs : 0;
 
   return (
     <div id="rpt-metrics" className="scroll-mt-20">
@@ -1355,8 +1619,18 @@ function RunMetricsSection({ insights, processOutput }: RunMetricsSectionProps) 
           <div className="card px-ds-4 py-ds-3">
             <p className="ds-metric-label">Active step time</p>
             <p className="ds-metric-value">{leverage.totalLabel}</p>
+            <p className="text-ds-xs text-[var(--content-tertiary)]">Σ measured step durations</p>
           </div>
         )}
+        <div className="card px-ds-4 py-ds-3">
+          <p className="ds-metric-label">Total elapsed</p>
+          <p className="ds-metric-value">{formatDuration(totalElapsedMs)}</p>
+          <p className="text-ds-xs text-[var(--content-tertiary)]">
+            {gapMs > 1000
+              ? `Wall-clock · ${formatDuration(gapMs)} between steps`
+              : 'Wall-clock run duration'}
+          </p>
+        </div>
         {leverage != null && (
           <div className="card px-ds-4 py-ds-3">
             <p className="ds-metric-label">Longest step</p>
@@ -1384,6 +1658,7 @@ function VarianceVariantsSection({ intelligence }: { intelligence: IntelligenceD
   const variants = intelligence?.variants;
   const variantList = asArray(variants?.variants);
   const runCount = intelligence?.metrics?.runCount ?? 1;
+  const variantStepTitles = intelligence?.variantStepTitles;
 
   const hasIntel = variance != null || variantList.length > 0;
   if (!hasIntel) return null;
@@ -1417,6 +1692,21 @@ function VarianceVariantsSection({ intelligence }: { intelligence: IntelligenceD
 
   // Diverge → reconverge story (Phase 2): where runs leave and rejoin the standard path.
   const divergence = deriveDivergence(sortedVariants, runCount);
+
+  // Variant frequency Pareto (R-B): human-readable labels (no raw hash), long
+  // tail grouped into "Unique executions". Denominator = cohort run count.
+  const paretoRows = buildParetoRows(
+    variantList.map((v) => ({
+      variantId: v.variantId,
+      isStandardPath: v.isStandardPath,
+      frequency: v.frequency,
+      runCount: v.runCount,
+      signature: v.pathSignature?.signature,
+      stepCount: v.pathSignature?.stepCount,
+      stepTitles: variantStepTitles?.[v.variantId],
+    })),
+    runCount,
+  );
 
   return (
     <div id="rpt-variance" className="scroll-mt-20">
@@ -1457,7 +1747,24 @@ function VarianceVariantsSection({ intelligence }: { intelligence: IntelligenceD
         </div>
         <div className="card px-ds-4 py-ds-3">
           <p className="ds-metric-label">Duration CV</p>
-          <p className="ds-metric-value">{cv != null ? cv.toFixed(2) : '—'}</p>
+          <p
+            className={`ds-metric-value ${
+              cv != null
+                ? cv < 0.25
+                  ? 'text-emerald-600'
+                  : cv <= 0.5
+                  ? 'text-amber-600'
+                  : 'text-red-600'
+                : ''
+            }`}
+          >
+            {cv != null ? cv.toFixed(2) : '—'}
+          </p>
+          {cv != null && (
+            <p className="text-ds-xs text-[var(--content-tertiary)]">
+              {cvBand(cv)} · CV ≥ 0.50 = high variance
+            </p>
+          )}
         </div>
         <div className="card px-ds-4 py-ds-3">
           <p className="ds-metric-label">High-variance steps</p>
@@ -1465,48 +1772,57 @@ function VarianceVariantsSection({ intelligence }: { intelligence: IntelligenceD
         </div>
       </div>
 
-      {sortedVariants.length > 0 && (
-        <div className="mt-ds-4 space-y-ds-2">
-          {sortedVariants.map((v) => (
-            <div
-              key={v.variantId}
-              className={`card px-ds-5 py-ds-3 ${v.isStandardPath ? 'border-brand-200 bg-brand-50/30' : ''}`}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-ds-sm font-medium text-[var(--content-primary)] flex items-center gap-ds-2">
-                    {v.variantId}
-                    {v.isStandardPath && (
-                      <span className="ds-tag ds-tag-brand text-[10px] flex items-center gap-0.5">
+      {paretoRows.length > 0 && (
+        <div className="mt-ds-4">
+          <h4 className="mb-ds-3 text-ds-sm font-semibold text-[var(--content-primary)]">
+            How runs split across paths
+          </h4>
+          <div className="space-y-ds-2">
+            {paretoRows.map((row) => (
+              <div
+                key={row.key}
+                className={`rounded-ds-md border px-ds-4 py-ds-3 ${
+                  row.isStandardPath
+                    ? 'border-brand-200 bg-brand-50/30'
+                    : 'border-[var(--border-subtle)] bg-[var(--surface-primary)]'
+                }`}
+                {...(row.signatureTooltip ? { title: row.signatureTooltip } : {})}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <p className="min-w-0 truncate text-ds-sm font-medium text-[var(--content-primary)] flex items-center gap-ds-2">
+                    <span className="truncate">{row.label}</span>
+                    {row.isStandardPath && (
+                      <span className="ds-tag ds-tag-brand text-[10px] flex flex-shrink-0 items-center gap-0.5">
                         <CheckCircle className="h-3 w-3" />
-                        Standard
+                        Reference path
                       </span>
                     )}
                   </p>
-                  {v.pathSignature?.signature && (
-                    <p className="text-ds-xs text-[var(--content-tertiary)] mt-0.5 font-mono truncate">
-                      {v.pathSignature.signature}
+                  <div className="flex-shrink-0 text-right">
+                    <p className="text-ds-sm font-semibold text-[var(--content-primary)] tabular-nums">
+                      {row.percent}%
                     </p>
-                  )}
+                    <p className="text-ds-xs text-[var(--content-tertiary)] tabular-nums">
+                      {row.runCount} run{row.runCount !== 1 ? 's' : ''}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-shrink-0 text-right">
-                  <p className="text-ds-sm font-semibold text-[var(--content-primary)]">
-                    {v.frequency != null ? `${Math.round(v.frequency * 100)}%` : '—'}
-                  </p>
-                  <p className="text-ds-xs text-[var(--content-tertiary)]">
-                    {v.runCount ?? 0} run{(v.runCount ?? 0) !== 1 ? 's' : ''}
-                  </p>
+                {/* Plain-CSS Pareto bar — width = share of runs; reference path in brand. */}
+                <div className="mt-ds-2 h-2 w-full rounded-full bg-[var(--surface-secondary)] overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${
+                      row.isStandardPath
+                        ? 'bg-brand-500'
+                        : row.isGrouped
+                        ? 'bg-[var(--content-tertiary)] opacity-50'
+                        : 'bg-[var(--content-tertiary)] opacity-70'
+                    }`}
+                    style={{ width: `${Math.min(row.percent, 100)}%` }}
+                  />
                 </div>
               </div>
-              {/* Variant frequency (Pareto) bar — width = share of runs, standard path in brand color. */}
-              <div className="mt-ds-2 h-1 w-full rounded-full bg-[var(--surface-secondary)] overflow-hidden">
-                <div
-                  className={`h-full rounded-full ${v.isStandardPath ? 'bg-brand-500' : 'bg-[var(--content-tertiary)]'}`}
-                  style={{ width: `${Math.round((v.frequency ?? 0) * 100)}%` }}
-                />
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 
@@ -1981,9 +2297,19 @@ export function WorkflowReportPage({
   // array identity is stable across the async intelligence/agent fetches —
   // otherwise the scroll-spy IntersectionObserver is torn down and rebuilt on
   // every data update, losing scroll position.
+  // Single observed-only derivation feeding BOTH the verdict and the scorecard,
+  // so the two decision-grade lead cards never disagree. Memoized for identity
+  // stability across the async intelligence/agent fetches.
+  const leadFigures = useMemo(
+    () => deriveLeadFigures(intelligence, agentIntelligence, processOutput),
+    [intelligence, agentIntelligence, processOutput],
+  );
+
   const visibleSections = useMemo(
     () =>
       SECTION_IDS.filter((id) => {
+        // Verdict + scorecard always render (single-run shows honest "—" states).
+        if (id === 'rpt-verdict' || id === 'rpt-scorecard') return true;
         if (id === 'rpt-scores') return interpretation?.scores != null;
         if (id === 'rpt-phases') return (interpretation?.phases?.length ?? 0) > 0;
         if (id === 'rpt-structure') {
@@ -2023,14 +2349,16 @@ export function WorkflowReportPage({
     <div className="flex gap-8 items-start">
       {/* Main content */}
       <div className="flex-1 min-w-0 space-y-10">
+        <ExecutiveVerdictSection figures={leadFigures} />
+        <ReportScorecardSection figures={leadFigures} />
         <HeroSection workflow={workflow} />
         <LeadInsightSection insights={insights} processOutput={processOutput} />
         <ProcessScoresSection interpretation={interpretation} />
         <PhaseTimelineSection interpretation={interpretation} />
-        <RunMetricsSection insights={insights} processOutput={processOutput} />
+        <RunMetricsSection insights={insights} processOutput={processOutput} workflow={workflow} />
         <VarianceVariantsSection intelligence={intelligence} />
         <TimestudySection intelligence={intelligence} />
-        <InsightsFeedSection insights={insights} />
+        <InsightsFeedSection insights={insights} intelligence={intelligence} />
         <AutomationSection
           agentIntelligence={agentIntelligence}
           intelligence={intelligence}
