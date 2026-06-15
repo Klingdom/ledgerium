@@ -38,7 +38,15 @@ export async function GET(
 
   const workflow = await db.workflow.findFirst({
     where: { id: params.id, userId: session.user.id },
-    include: { artifacts: true },
+    include: {
+      artifacts: true,
+      // Additive (render-only) — surfaces the already-computed cohort
+      // intelligence (sopAlignment + documentationDrift) for the SOP "living
+      // document" freshness pill. Read-only; no engine call.
+      processDefinition: {
+        select: { intelligenceJson: true, runCount: true },
+      },
+    },
   });
 
   if (!workflow) {
@@ -95,10 +103,26 @@ export async function GET(
       })
     : undefined;
 
+  // ── SOP living-document intelligence (additive, render-only) ───────────────
+  // Surface only the alignment + drift slices already computed and stored by the
+  // intelligence pipeline in ProcessDefinition.intelligenceJson. No engine call;
+  // defensive parse so a missing/legacy/malformed JSON degrades to null.
+  const sopIntelligence = extractSopIntelligence(
+    (workflow as { processDefinition?: { intelligenceJson?: string | null; runCount?: number } | null }).processDefinition,
+  );
+
+  // Strip the heavy relation from the response payload (we only surface the
+  // derived slice above).
+  const { processDefinition: _pd, ...workflowRest } = workflow as Record<string, unknown> & {
+    processDefinition?: unknown;
+  };
+
   return NextResponse.json({
     workflow: {
-      ...workflow,
-      toolsUsed: workflow.toolsUsed ? JSON.parse(workflow.toolsUsed) : [],
+      ...workflowRest,
+      toolsUsed: (workflowRest as { toolsUsed?: string | null }).toolsUsed
+        ? JSON.parse((workflowRest as { toolsUsed: string }).toolsUsed)
+        : [],
       // Only present for Starter+ users
       ...(healthScore !== undefined ? { healthScore } : {}),
     },
@@ -109,7 +133,42 @@ export async function GET(
       contentJson: a.contentJson ? JSON.parse(a.contentJson) : null,
       createdAt: a.createdAt,
     })),
+    // Additive top-level field; null when no cohort intelligence exists.
+    sopIntelligence,
   });
+}
+
+/**
+ * Extract the SOP-relevant alignment + drift slice from the persisted
+ * PortfolioIntelligence JSON. Pure + defensive — returns null on absent or
+ * malformed input. Render-only consumers gate on totalRunCount >= 2.
+ */
+function extractSopIntelligence(
+  processDefinition: { intelligenceJson?: string | null; runCount?: number } | null | undefined,
+): {
+  sopAlignment: unknown;
+  documentationDrift: unknown;
+  runCount: number;
+} | null {
+  if (!processDefinition?.intelligenceJson) return null;
+  try {
+    const parsed = JSON.parse(processDefinition.intelligenceJson) as {
+      sopAlignment?: unknown;
+      documentationDrift?: unknown;
+      runCount?: number;
+    };
+    const sopAlignment = parsed.sopAlignment ?? null;
+    const documentationDrift = parsed.documentationDrift ?? null;
+    // Nothing useful to surface — keep the payload small.
+    if (!sopAlignment && !documentationDrift) return null;
+    return {
+      sopAlignment,
+      documentationDrift,
+      runCount: processDefinition.runCount ?? (typeof parsed.runCount === 'number' ? parsed.runCount : 0),
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function PATCH(

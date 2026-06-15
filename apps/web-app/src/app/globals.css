@@ -402,4 +402,123 @@
       text-align: right;
     }
   }
+
+  /* ── SOP — Compliance Deliverable (Print / Save-as-PDF) ──────────────────────
+     Scoped to the SOP via `.sop-print-root` (mirrors the report R-D pattern).
+     Forces every step open, strips app chrome / rail / mode switcher / buttons /
+     consent banner, white canvas + black text, and renders an evidence cover +
+     fixed honesty footer. window.print() (a click handler) is the trigger —
+     no new dependency. */
+  @media print {
+    /* White canvas, black body text. */
+    .sop-print-root {
+      background: #ffffff !important;
+      color: #111827 !important;
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      overflow: visible !important;
+      display: block !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Keep meaning-encoding fills (confidence dots, accent badges). */
+    .sop-print-root *,
+    .sop-print-root svg {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* The flex content row + scroll panes must linearize and not clip. */
+    .sop-print-root > div {
+      overflow: visible !important;
+      height: auto !important;
+      max-height: none !important;
+      display: block !important;
+    }
+
+    /* Strip SOP chrome: step rail, mode switcher + control buttons, and any
+       app-shell chrome the global `nav, button` hide may miss. */
+    .sop-no-print,
+    .sop-print-root nav,
+    .sop-print-root button,
+    [data-app-nav],
+    [data-tab-strip],
+    [data-consent-banner],
+    [data-cookie-banner] {
+      display: none !important;
+    }
+
+    /* Force every step body open in print — the expand/collapse accordion is
+       irrelevant on paper. Step bodies are identified by their id pattern. */
+    .sop-print-root [id^='sop-step-body-'] {
+      display: block !important;
+    }
+
+    /* Cards / sections keep their visual unit intact across pages. */
+    .sop-print-root [class*='rounded-xl'],
+    .sop-print-root [class*='rounded-2xl'],
+    .sop-print-root [class*='rounded-lg'] {
+      break-inside: avoid;
+    }
+
+    /* Print-only evidence cover. */
+    .sop-print-cover {
+      margin-bottom: 8mm;
+      padding-bottom: 4mm;
+      border-bottom: 1pt solid #d1d5db;
+    }
+    .sop-print-cover-kicker {
+      font-size: 10pt;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #4b5563;
+    }
+    .sop-print-cover-title {
+      font-size: 18pt;
+      font-weight: 700;
+      color: #111827;
+      margin-top: 1mm;
+    }
+    .sop-print-cover-objective {
+      font-size: 10pt;
+      color: #374151;
+      margin-top: 1.5mm;
+    }
+    .sop-print-cover-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2mm 5mm;
+      font-size: 9pt;
+      color: #4b5563;
+      margin-top: 3mm;
+    }
+    .sop-print-cover-disclosure {
+      font-size: 8pt;
+      color: #6b7280;
+      margin-top: 3mm;
+      font-style: italic;
+    }
+
+    /* Fixed honesty footer on EVERY printed page. */
+    .sop-print-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 4mm 16mm;
+      border-top: 0.5pt solid #d1d5db;
+      font-size: 7pt;
+      color: #6b7280;
+      background: #ffffff;
+      display: flex !important;
+      justify-content: space-between;
+      gap: 8mm;
+    }
+    .sop-print-footer-disclosure {
+      text-align: right;
+    }
+  }
 }

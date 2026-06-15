@@ -127,6 +127,11 @@ test.describe('Process Variants documentation', () => {
     await page.emulateMedia({ media: 'screen' });
     await page.waitForTimeout(300);
 
+    // ── SOP tab (P0: alignment/freshness pill + per-step evidence snippet) ─────
+    await page.getByTestId('workflow-tab-sop').click();
+    await page.waitForTimeout(2000);
+    await shot(page, 'workflow-sop');
+
     // ── Dashboard list (Batch A: Date Recorded column + sorts) ────────────────
     // Exercises the changed dashboard page under the no-page-error assertion and
     // captures the workflow library with the new columns.

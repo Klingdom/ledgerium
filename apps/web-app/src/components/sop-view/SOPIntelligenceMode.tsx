@@ -14,12 +14,11 @@
  * 8. Ask This Process (scaffolded conversation panel)
  */
 
-import { useState } from 'react';
 import {
   Brain, Zap, Target, AlertTriangle, TrendingUp, Activity,
   Clock, Layers, Monitor, GitBranch, CheckCircle2, XCircle,
   Repeat, ArrowRight, Shield, BarChart3, MessageSquare,
-  Sparkles, ChevronRight, Send, Info,
+  Sparkles, ChevronRight, Info,
 } from 'lucide-react';
 import type { SOPViewModel, SOPViewStep, SOPRecommendation, SOPViewInsight } from './types';
 
@@ -510,15 +509,14 @@ function WorkflowDNASection({ viewModel }: { viewModel: SOPViewModel }) {
 // ═════════════════════════════════════════════════════════════════════════════
 
 function AskThisProcessPanel({ viewModel }: { viewModel: SOPViewModel }) {
-  const [query, setQuery] = useState('');
-
-  const suggestedPrompts = [
+  // Honesty fix (SOP_WORLDCLASS_BENCHMARK §"Honesty fixes"): the previous
+  // disabled input + disabled buttons read as a broken feature. This is now a
+  // non-interactive coming-soon tile — NO input, NO buttons, no false affordance.
+  // The example questions are plain text, presented as a preview of intent.
+  const exampleQuestions = [
     'Why is this step here?',
     'What can be automated?',
-    'What is the fastest path?',
     'Where do users get stuck?',
-    'How can this be simplified?',
-    'What are the biggest risks?',
   ];
 
   return (
@@ -527,49 +525,32 @@ function AskThisProcessPanel({ viewModel }: { viewModel: SOPViewModel }) {
       <div className="px-4 py-3 border-b border-[var(--border-subtle)] bg-gradient-to-r from-violet-50/50 to-transparent">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-lg bg-violet-100 flex items-center justify-center">
-            <MessageSquare className="h-3.5 w-3.5 text-violet-600" />
+            <MessageSquare className="h-3.5 w-3.5 text-violet-600" aria-hidden="true" />
           </div>
           <div>
             <span className="text-ds-xs font-semibold text-[var(--content-primary)]">Ask This Process</span>
-            <span className="text-[8px] font-medium text-violet-500 bg-violet-50 px-1.5 py-0.5 rounded ml-2">Beta</span>
+            <span className="text-[8px] font-medium text-violet-500 bg-violet-50 px-1.5 py-0.5 rounded ml-2">Coming soon</span>
           </div>
         </div>
       </div>
 
-      {/* Input area */}
-      <div className="px-4 py-3 border-b border-[var(--border-subtle)]">
-        <div className="flex items-center gap-2 bg-[var(--surface-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2">
-          <input
-            type="text"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            placeholder="Ask about this procedure..."
-            className="flex-1 bg-transparent text-ds-xs text-[var(--content-primary)] placeholder-gray-400 outline-none min-w-0"
-            disabled
-            aria-disabled="true"
-            aria-label="AI conversation input — coming soon"
-          />
-          <button disabled aria-disabled="true" aria-label="Send question" className="p-1 rounded text-[var(--content-tertiary)] cursor-not-allowed">
-            <Send className="h-3.5 w-3.5" aria-hidden="true" />
-          </button>
-        </div>
-        <p className="text-[9px] text-[var(--content-tertiary)] mt-1.5" id="ask-panel-hint">AI conversation coming soon. Try these prompts:</p>
-      </div>
-
-      {/* Suggested prompts */}
-      <div className="px-4 py-3 space-y-1" role="list" aria-label="Suggested questions">
-        {suggestedPrompts.map((prompt, i) => (
-          <button
-            key={i}
-            disabled
-            aria-disabled="true"
-            role="listitem"
-            className="w-full text-left flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[10px] text-[var(--content-secondary)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] transition-colors cursor-not-allowed"
-          >
-            <Sparkles className="h-3 w-3 text-violet-300 flex-shrink-0" />
-            {prompt}
-          </button>
-        ))}
+      {/* Coming-soon body — descriptive, non-interactive */}
+      <div className="px-4 py-4">
+        <p className="text-[11px] text-[var(--content-secondary)] leading-relaxed">
+          Soon you'll be able to ask questions about this procedure and get answers
+          grounded in the observed evidence behind every step.
+        </p>
+        <p className="text-[9px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider mt-3 mb-1.5">
+          Examples
+        </p>
+        <ul className="space-y-1">
+          {exampleQuestions.map((q, i) => (
+            <li key={i} className="flex items-center gap-2 text-[10px] text-[var(--content-tertiary)]">
+              <Sparkles className="h-3 w-3 text-violet-300 flex-shrink-0" aria-hidden="true" />
+              {q}
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* Context summary */}

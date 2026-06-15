@@ -12,7 +12,7 @@
  * 3. Intelligence — friction analysis, optimization, quality insights
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { Download, Printer } from 'lucide-react';
 import { SOPHeader } from './SOPHeader';
 import { SOPModeSwitcher } from './SOPModeSwitcher';
@@ -21,7 +21,9 @@ import { SOPExecutionMode } from './SOPExecutionMode';
 import { SOPVisualMode } from './SOPVisualMode';
 import { SOPIntelligenceMode } from './SOPIntelligenceMode';
 import { useSOPViewModel } from './hooks/useSOPViewModel';
-import type { SOPViewMode, SOPViewStep } from './types';
+import { track } from '@/lib/analytics';
+import { formatDate } from '@/lib/format';
+import type { SOPViewMode, SOPViewStep, SOPViewModel, SopIntelligenceInput, StepPageContextMap } from './types';
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 
@@ -42,6 +44,10 @@ interface Props {
   workflowId?: string;
   isLoading?: boolean;
   error?: string | null;
+  /** Additive (render-only) cohort intelligence for the alignment pill. */
+  sopIntelligence?: SopIntelligenceInput | null;
+  /** Per-step page context (real captured page titles) keyed by ordinal. */
+  stepPageContext?: StepPageContextMap | null;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -53,12 +59,59 @@ export function SOPPageShell({
   workflowId,
   isLoading,
   error,
+  sopIntelligence,
+  stepPageContext,
 }: Props) {
   const [mode, setMode] = useState<SOPViewMode>('execution');
   const [expandedSteps, setExpandedSteps] = useState<Set<string>>(() => new Set());
   const [expandAllInit, setExpandAllInit] = useState(false);
 
-  const viewModel = useSOPViewModel(sop, workflowRecord, templateArtifacts);
+  // Stable extras identity so the view-model memo doesn't rebuild every render.
+  const extras = useMemo(
+    () => ({ sopIntelligence: sopIntelligence ?? null, stepPageContext: stepPageContext ?? null }),
+    [sopIntelligence, stepPageContext],
+  );
+
+  const viewModel = useSOPViewModel(sop, workflowRecord, templateArtifacts, extras);
+
+  // ── sop_viewed (mount, once per workflow) + sop_alignment_viewed ──────────
+  const sopViewFiredRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!viewModel || !workflowId) return;
+    if (sopViewFiredRef.current === workflowId) return;
+    sopViewFiredRef.current = workflowId;
+
+    const a = viewModel.alignment;
+    track({
+      event: 'sop_viewed',
+      workflowId,
+      stepCount: viewModel.metadata.stepCount,
+      runCount: a.runCount,
+      hasAlignmentData: a.hasSignal,
+      hasDriftData: sopIntelligence?.documentationDrift != null,
+      averageConfidence: viewModel.metadata.confidence ?? 0,
+      frictionCount: viewModel.metadata.frictionCount,
+      sopMode: mode,
+    });
+
+    // Alignment-viewed only when a real (gated N>=2) signal is shown.
+    if (a.hasSignal && a.alignmentPct !== null) {
+      const align = sopIntelligence?.sopAlignment ?? null;
+      const drift = sopIntelligence?.documentationDrift ?? null;
+      track({
+        event: 'sop_alignment_viewed',
+        workflowId,
+        alignmentScore: Math.round((align?.alignmentScore ?? a.alignmentPct / 100) * 100) / 100,
+        alignmentLevel: align?.alignmentLevel ?? a.kind,
+        totalRunCount: a.runCount,
+        driftScore: drift?.score ?? 0,
+        driftLevel: drift?.level ?? 'aligned',
+      });
+    }
+    // mode is intentionally captured at first-view; re-firing on mode change is
+    // covered by sop_mode_switched (P1).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewModel, workflowId]);
 
   // Initialize expanded steps based on mode (only on first render or mode change)
   const initExpandedForMode = useCallback((m: SOPViewMode, steps: SOPViewStep[]) => {
@@ -169,6 +222,16 @@ export function SOPPageShell({
       anchor.remove();
       // Revoke on next tick so the browser has time to start the download.
       setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+
+      if (workflowId) {
+        track({
+          event: 'sop_exported',
+          workflowId,
+          format: 'markdown',
+          stepCount: viewModel?.metadata.stepCount ?? 0,
+          runCount: viewModel?.alignment.runCount ?? 0,
+        });
+      }
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('[SOPPageShell] Export error:', err);
@@ -177,7 +240,23 @@ export function SOPPageShell({
     } finally {
       setIsExporting(false);
     }
-  }, [workflowId, selectedTemplate, isExporting]);
+  }, [workflowId, selectedTemplate, isExporting, viewModel]);
+
+  // PDF / Print — window.print() is a click handler (no new dep). The scoped
+  // `.sop-print-root` @media print block in globals.css forces steps open, hides
+  // chrome, and renders the evidence cover + honesty footer.
+  const handlePrint = useCallback(() => {
+    if (workflowId) {
+      track({
+        event: 'sop_exported',
+        workflowId,
+        format: 'pdf',
+        stepCount: viewModel?.metadata.stepCount ?? 0,
+        runCount: viewModel?.alignment.runCount ?? 0,
+      });
+    }
+    window.print();
+  }, [workflowId, viewModel]);
 
   // ── Loading / Error / Empty ──────────────────────────────────────────────
 
@@ -191,12 +270,15 @@ export function SOPPageShell({
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col h-[calc(100vh-200px)] min-h-[500px] bg-[var(--surface-elevated)] rounded-xl border border-[var(--border-default)] shadow-sm overflow-hidden">
+    <div className="sop-print-root flex flex-col h-[calc(100vh-200px)] min-h-[500px] bg-[var(--surface-elevated)] rounded-xl border border-[var(--border-default)] shadow-sm overflow-hidden">
+      {/* ── Print-only evidence cover (hidden on screen) ─────────────────── */}
+      <SOPPrintCover viewModel={viewModel} />
+
       {/* ── Header ─────────────────────────────────────────────────────── */}
-      <SOPHeader metadata={viewModel.metadata} />
+      <SOPHeader metadata={viewModel.metadata} alignment={viewModel.alignment} />
 
       {/* ── Mode switcher + controls row ───────────────────────────────── */}
-      <div className="flex items-center justify-between px-ds-5 py-ds-1.5 border-b border-[var(--border-subtle)]">
+      <div className="sop-no-print flex items-center justify-between px-ds-5 py-ds-1.5 border-b border-[var(--border-subtle)]">
         <SOPModeSwitcher activeMode={mode} onModeChange={handleModeChange} />
 
         <div className="flex items-center gap-1.5">
@@ -206,6 +288,16 @@ export function SOPPageShell({
             className="text-[10px] font-medium text-[var(--content-secondary)] hover:text-[var(--content-primary)] px-2 py-1 rounded-md hover:bg-[var(--surface-secondary)] transition-colors"
           >
             {allExpanded ? 'Collapse all' : 'Expand all'}
+          </button>
+
+          {/* Print / PDF — window.print() (no new dep). */}
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-1 text-[10px] font-medium text-[var(--content-secondary)] hover:text-[var(--content-primary)] px-2 py-1 rounded-md hover:bg-[var(--surface-secondary)] transition-colors"
+            title="Print or save SOP as PDF"
+          >
+            <Printer className="h-3 w-3" />
+            Print / PDF
           </button>
 
           {/* Export — requires both a workflowId and at least one template artifact */}
@@ -218,7 +310,7 @@ export function SOPPageShell({
               aria-busy={isExporting}
             >
               <Download className="h-3 w-3" />
-              {isExporting ? 'Exporting…' : 'Export'}
+              {isExporting ? 'Exporting…' : 'Export Markdown'}
             </button>
           )}
         </div>
@@ -263,6 +355,51 @@ export function SOPPageShell({
           )}
         </div>
       </div>
+
+      {/* ── Print-only honesty footer (hidden on screen) ─────────────────── */}
+      <div className="sop-print-footer hidden print:flex" aria-hidden>
+        <span className="sop-print-footer-meta">
+          Ledgerium AI — {viewModel.metadata.title || 'Standard Operating Procedure'}
+        </span>
+        <span className="sop-print-footer-disclosure">
+          All data derived from observed behavior
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ─── Print-only evidence cover ───────────────────────────────────────────────
+
+function SOPPrintCover({ viewModel }: { viewModel: SOPViewModel }) {
+  const m = viewModel.metadata;
+  const a = viewModel.alignment;
+  const confidencePct = m.confidence !== null ? `${Math.round(m.confidence * 100)}%` : '—';
+  // Deterministic + hydration-safe: the SOP's own generation date (UTC), NOT a
+  // wall-clock read — never use Date.now()/new Date() in render.
+  const generated = m.createdAt ? formatDate(m.createdAt) : '';
+  const runLabel =
+    a.runCount <= 0 ? 'Based on observed behavior'
+    : a.runCount === 1 ? 'Based on 1 recording'
+    : `Based on ${a.runCount} recordings`;
+
+  return (
+    <div className="sop-print-cover hidden print:block" aria-hidden>
+      <p className="sop-print-cover-kicker">Ledgerium AI — Standard Operating Procedure</p>
+      <p className="sop-print-cover-title">{m.title || 'Standard Operating Procedure'}</p>
+      {m.objective && <p className="sop-print-cover-objective">{m.objective}</p>}
+      <div className="sop-print-cover-meta">
+        <span>{m.stepCount} step{m.stepCount !== 1 ? 's' : ''}</span>
+        <span>{runLabel}</span>
+        <span>Confidence {confidencePct}</span>
+        {a.hasSignal && a.alignmentPct !== null && (
+          <span>{a.label} · {a.alignmentPct}% aligned</span>
+        )}
+        {generated && <span>Generated {generated}</span>}
+      </div>
+      <p className="sop-print-cover-disclosure">
+        All data derived from observed behavior. Evidence-linked. No AI inference applied.
+      </p>
     </div>
   );
 }
@@ -282,7 +419,7 @@ function SOPStepRail({
 
   return (
     <nav
-      className="w-12 flex-shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-secondary)] overflow-y-auto py-3 hidden sm:block"
+      className="sop-no-print w-12 flex-shrink-0 border-r border-[var(--border-subtle)] bg-[var(--surface-secondary)] overflow-y-auto py-3 hidden sm:block"
       aria-label="Step navigation"
       role="navigation"
     >

@@ -13,6 +13,7 @@ import type {
   QualityIndicators,
   GroupingReason,
 } from '@ledgerium/process-engine';
+import type { AlignmentPill } from './adapters/sopIntelligence';
 
 // ─── SOP modes ───────────────────────────────────────────────────────────────
 
@@ -24,11 +25,11 @@ export const SOP_MODE_LABELS: Record<SOPViewMode, { label: string; description: 
     description: 'Step-by-step instructions for frontline operators',
   },
   visual: {
-    label: 'Visual Process',
+    label: 'Flow View',
     description: 'Phase-grouped view showing system context and flow',
   },
   intelligence: {
-    label: 'Intelligence',
+    label: 'Analysis',
     description: 'Friction analysis, optimization, and quality insights',
   },
 };
@@ -96,11 +97,26 @@ export interface SOPViewStep {
   decisionLabel: string;
   hasSensitiveData: boolean;
   expectedOutcome: string;
+  /**
+   * Whether `expectedOutcome` was OBSERVED in captured evidence (a verify-type
+   * instruction / system-feedback event exists in this step) vs INFERRED from a
+   * generic completion projection. Honesty: inferred outcomes must NOT render a
+   * "verified" green check (SOP_WORLDCLASS_BENCHMARK §"Honesty fixes").
+   */
+  outcomeObserved: boolean;
   warnings: string[];
   instructions: SOPViewInstruction[];
   /** Pre-formatted detail text (newline-separated numbered list). */
   detailText: string;
   inputs: string[];
+  /** Expected outputs/deliverables for this step (computed, render-only). */
+  outputs: string[];
+  /**
+   * Per-step evidence snippet derived from real captured signals only
+   * (applicationLabel · pageTitle · action/target label). Omitted-when-absent;
+   * `hasEvidence` is false when no real signal exists.
+   */
+  evidence: SOPViewStepEvidence;
   frictionIndicators: SOPViewFriction[];
   hasHighFriction: boolean;
   /** Phase/system group this step belongs to (for visual mode). */
@@ -118,6 +134,15 @@ export interface SOPViewInstruction {
   system: string;
   isSensitive: boolean;
   targetLabel: string;
+}
+
+export interface SOPViewStepEvidence {
+  /** Ordered present-only parts: [app, page, action]. */
+  parts: string[];
+  /** Pre-joined "App · Page · Action" snippet ('' if none). */
+  text: string;
+  /** Whether any real captured evidence signal is present. */
+  hasEvidence: boolean;
 }
 
 export interface SOPViewFriction {
@@ -241,8 +266,28 @@ export interface SOPViewModel {
   smartSummary: SOPSmartSummary;
   /** Enterprise template enrichment (roles, controls, risks). */
   enterprise: SOPEnterpriseData;
+  /**
+   * Living-SOP freshness/conformance pill derived from cohort intelligence
+   * (alignment + documentation drift). Gated at N>=2; an 'insufficient'
+   * disclosure for single-run SOPs. Always present (never null) — render-only.
+   */
+  alignment: AlignmentPill;
 }
 
 // ─── Re-exports ──────────────────────────────────────────────────────────────
 
 export type { SOP, SOPStep, SOPInstruction, FrictionIndicator, QualityIndicators, GroupingReason };
+export type { AlignmentPill };
+export type {
+  AlignmentPillKind,
+  SopIntelligenceInput,
+  StepEvidenceSignals,
+} from './adapters/sopIntelligence';
+
+/**
+ * Per-step page context (pageTitle map keyed by step ordinal), sourced from the
+ * process_map node metadata. Threaded into the SOP view to build the evidence
+ * snippet without bundling raw events. Render-only; honest (real captured page
+ * titles only).
+ */
+export type StepPageContextMap = Record<number, { pageTitle?: string | null }>;

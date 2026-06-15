@@ -57,6 +57,59 @@ export type AnalyticsEvent =
   | { event: 'analysis_run'; workflowId?: string }
   | { event: 'insights_viewed'; workflowId: string; insightCount: number }
 
+  // ── SOP world-class instrumentation (ANALYTICS_SOP_WORLDCLASS, 2026-06-15) ──
+  // PII-free: positions / counts / taxonomy only. No SOP titles or step content.
+  | {
+      event: 'sop_viewed';
+      workflowId: string;
+      stepCount: number;
+      runCount: number;
+      hasAlignmentData: boolean;
+      hasDriftData: boolean;
+      averageConfidence: number;
+      frictionCount: number;
+      sopMode: 'execution' | 'visual' | 'intelligence';
+    }
+  | {
+      event: 'sop_step_expanded';
+      workflowId: string;
+      stepOrdinal: number;
+      stepCategory: string;
+      instructionCount: number;
+      hasHighFriction: boolean;
+      elapsedMsSinceSopView: number;
+    }
+  | {
+      event: 'sop_step_checked';
+      workflowId: string;
+      stepOrdinal: number;
+      allChecked: boolean;
+      elapsedMsSinceSopView: number;
+    }
+  | {
+      event: 'sop_mode_switched';
+      workflowId: string;
+      fromMode: 'execution' | 'visual' | 'intelligence';
+      toMode: 'execution' | 'visual' | 'intelligence';
+      elapsedMsSinceSopView: number;
+    }
+  | {
+      event: 'sop_exported';
+      workflowId: string;
+      format: string; // 'markdown' | 'pdf' (taxonomy only)
+      stepCount: number;
+      runCount: number;
+    }
+  | {
+      event: 'sop_alignment_viewed';
+      workflowId: string;
+      alignmentScore: number; // 0-1, 2dp
+      alignmentLevel: string; // 'high' | 'moderate' | 'low' | 'critical'
+      totalRunCount: number;
+      driftScore: number; // 0-100
+      driftLevel: string;
+    }
+
   // ── Sharing & collaboration ───────────────────────────────────────────────
   | { event: 'share_link_created'; workflowId: string }
   | { event: 'share_link_disabled'; workflowId: string }

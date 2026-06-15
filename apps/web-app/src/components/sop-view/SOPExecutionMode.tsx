@@ -18,7 +18,7 @@ import { useState } from 'react';
 import {
   Clock, Layers, Monitor, Target, AlertTriangle, CheckCircle2,
   ChevronRight, Zap, GitBranch, Lightbulb, Shield, Info,
-  ArrowRight, BarChart3,
+  ArrowRight, BarChart3, Eye,
 } from 'lucide-react';
 import type { SOPViewModel, SOPViewStep, SOPViewDecision, SOPViewInsight, SOPRecommendation } from './types';
 
@@ -167,6 +167,14 @@ function QuickStartSection({ viewModel }: { viewModel: SOPViewModel }) {
           <p className="text-ds-xs text-[var(--content-primary)]">{qs.whenToUseIt}</p>
         </div>
 
+        {/* Scope (computed-but-previously-hidden field) */}
+        {viewModel.metadata.scope && (
+          <div>
+            <p className="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider mb-0.5">Scope</p>
+            <p className="text-ds-xs text-[var(--content-primary)] leading-relaxed">{viewModel.metadata.scope}</p>
+          </div>
+        )}
+
         {/* Prerequisites + Systems (side by side on desktop) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {qs.prerequisites.length > 0 && (
@@ -309,6 +317,41 @@ function ExecutionStepCard({
       {/* ── Expanded body ─────────────────────────────────────────── */}
       {isExpanded && (
         <div className="px-4 pb-4 pl-[52px] space-y-3 border-t border-[var(--border-subtle)] pt-3">
+          {/* Evidence snippet — real captured signals only (omitted when absent) */}
+          {step.evidence.hasEvidence && (
+            <div className="flex items-center gap-1.5 text-[10px] text-[var(--content-tertiary)]">
+              <Eye className="h-3 w-3 flex-shrink-0" aria-hidden="true" />
+              <span>
+                <span className="font-medium text-[var(--content-secondary)]">Observed in</span>{' '}
+                {step.evidence.text}
+              </span>
+            </div>
+          )}
+
+          {/* Actor / inputs / outputs (computed-but-previously-hidden fields) */}
+          {(step.actor || step.inputs.length > 0 || step.outputs.length > 0) && (
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+              {step.actor && (
+                <div className="text-[10px]">
+                  <span className="font-semibold text-[var(--content-tertiary)] uppercase tracking-wider">Role</span>
+                  <span className="ml-1.5 text-[var(--content-secondary)]">{step.actor}</span>
+                </div>
+              )}
+              {step.inputs.length > 0 && (
+                <div className="text-[10px]">
+                  <span className="font-semibold text-[var(--content-tertiary)] uppercase tracking-wider">Inputs</span>
+                  <span className="ml-1.5 text-[var(--content-secondary)]">{step.inputs.join(', ')}</span>
+                </div>
+              )}
+              {step.outputs.length > 0 && (
+                <div className="text-[10px]">
+                  <span className="font-semibold text-[var(--content-tertiary)] uppercase tracking-wider">Outputs</span>
+                  <span className="ml-1.5 text-[var(--content-secondary)]">{step.outputs.join(', ')}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Instructions */}
           {step.detailText && (
             <div className="bg-[var(--surface-secondary)] rounded-lg border border-[var(--border-subtle)] overflow-hidden">
@@ -359,15 +402,27 @@ function ExecutionStepCard({
             </div>
           )}
 
-          {/* Expected outcome */}
+          {/* Expected outcome — observed vs inferred (honesty: an INFERRED
+              outcome must NOT show a "verified" green check). */}
           {step.expectedOutcome && (
-            <div className="flex items-start gap-2 text-[10px]">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 mt-0.5 flex-shrink-0" />
-              <div>
-                <span className="font-semibold text-emerald-700">Expected:</span>
-                <span className="text-[var(--content-secondary)] ml-1">{step.expectedOutcome}</span>
+            step.outcomeObserved ? (
+              <div className="flex items-start gap-2 text-[10px]">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                <div>
+                  <span className="font-semibold text-emerald-700">Observed outcome:</span>
+                  <span className="text-[var(--content-secondary)] ml-1">{step.expectedOutcome}</span>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex items-start gap-2 text-[10px]">
+                <Info className="h-3.5 w-3.5 text-[var(--content-tertiary)] mt-0.5 flex-shrink-0" aria-hidden="true" />
+                <div>
+                  <span className="font-semibold text-[var(--content-secondary)]">Expected outcome</span>
+                  <span className="text-[8px] font-bold uppercase tracking-wider text-[var(--content-tertiary)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded px-1 py-0.5 ml-1.5">Inferred</span>
+                  <span className="text-[var(--content-secondary)] ml-1">{step.expectedOutcome}</span>
+                </div>
+              </div>
+            )
           )}
 
           {/* Friction indicators */}

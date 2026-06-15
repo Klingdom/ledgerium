@@ -5,7 +5,7 @@
 
 import { useMemo } from 'react';
 import { buildSOPViewModel } from '../adapters/sopViewModel';
-import type { SOPViewModel } from '../types';
+import type { SOPViewModel, SopIntelligenceInput, StepPageContextMap } from '../types';
 
 interface WorkflowRecord {
   id: string;
@@ -21,13 +21,19 @@ interface TemplateArtifacts {
   decision_based?: any;
 }
 
+interface Extras {
+  sopIntelligence?: SopIntelligenceInput | null;
+  stepPageContext?: StepPageContextMap | null;
+}
+
 export function useSOPViewModel(
   rawSop: any,
   workflowRecord?: WorkflowRecord,
   templateArtifacts?: TemplateArtifacts,
+  extras?: Extras,
 ): SOPViewModel | null {
   return useMemo(
-    () => buildSOPViewModel(rawSop, workflowRecord, templateArtifacts),
-    [rawSop, workflowRecord, templateArtifacts],
+    () => buildSOPViewModel(rawSop, workflowRecord, templateArtifacts, extras),
+    [rawSop, workflowRecord, templateArtifacts, extras],
   );
 }

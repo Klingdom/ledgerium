@@ -261,6 +261,18 @@ export default function WorkflowDetailPage() {
     decision_based: artifacts.find((a: any) => a.artifactType === 'template_sop_decision_based')?.contentJson,
   };
 
+  // Per-step page context (real captured page titles) keyed by ordinal, sourced
+  // from the process_map node metadata. Threaded into the SOP for the per-step
+  // evidence snippet — render-only, honest (no fabricated pages).
+  const sopStepPageContext: Record<number, { pageTitle?: string | null }> = {};
+  for (const node of (processMap?.nodes ?? []) as any[]) {
+    if (typeof node?.ordinal === 'number' && node?.metadata?.pageTitle) {
+      sopStepPageContext[node.ordinal] = { pageTitle: node.metadata.pageTitle };
+    }
+  }
+  // Cohort intelligence (alignment + drift) surfaced additively by the API.
+  const sopIntelligence = data?.sopIntelligence ?? null;
+
   function handleExport(type: string) {
     let content: string;
     let filename: string;
@@ -481,6 +493,8 @@ export default function WorkflowDetailPage() {
                 status: workflow.status ?? 'active',
               }}
               workflowId={id}
+              sopIntelligence={sopIntelligence}
+              stepPageContext={sopStepPageContext}
             />
             {showSurvey && (
               <SOPUsefulnessSurvey workflowId={id} />

@@ -14,6 +14,8 @@
 import { CATEGORY_STYLES, confidenceColor } from '../../workflow-view/constants';
 import { humanizeStepLabel, humanizeShortLabel, humanizeInstructionText } from '../../shared/humanize';
 import type { InstructionContext } from '../../shared/humanize';
+import { deriveAlignmentPill, deriveStepEvidence } from './sopIntelligence';
+import type { SopIntelligenceInput } from './sopIntelligence';
 import type {
   SOPViewModel,
   SOPMetadata,
@@ -30,6 +32,7 @@ import type {
   SOPSmartSummary,
   SOPEnterpriseData,
   RecommendationType,
+  StepPageContextMap,
 } from '../types';
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -40,6 +43,11 @@ export function buildSOPViewModel(
   rawSop: any,
   workflowRecord?: { id: string; title: string; confidence: number | null; createdAt: string; status: string },
   templateArtifacts?: { operator_centric?: any; enterprise?: any; decision_based?: any },
+  /** Additive (render-only) cohort intelligence + per-step page context. */
+  extras?: {
+    sopIntelligence?: SopIntelligenceInput | null;
+    stepPageContext?: StepPageContextMap | null;
+  },
 ): SOPViewModel | null {
   if (!rawSop) return null;
 
@@ -82,7 +90,8 @@ export function buildSOPViewModel(
   // ── Steps (normalized + humanized) ───────────────────────────────────────
 
   const rawSteps: any[] = rawSop.steps ?? [];
-  const steps: SOPViewStep[] = rawSteps.map((s, i) => normalizeStep(s, rawSteps, i));
+  const pageCtx = extras?.stepPageContext ?? null;
+  const steps: SOPViewStep[] = rawSteps.map((s, i) => normalizeStep(s, rawSteps, i, pageCtx));
 
   // ── Phases ───────────────────────────────────────────────────────────────
 
@@ -142,6 +151,10 @@ export function buildSOPViewModel(
   const commonMistakes: string[] = operatorData?.commonMistakes ?? [];
   const qualityAdvisory = operatorData?.qualityAdvisory ?? qi?.qualityAdvisory ?? null;
 
+  // ── Living-SOP alignment pill (gated N>=2; render-only) ──────────────────
+
+  const alignment = deriveAlignmentPill(extras?.sopIntelligence ?? null);
+
   return {
     metadata,
     steps,
@@ -159,6 +172,7 @@ export function buildSOPViewModel(
     workflowDNA,
     smartSummary,
     enterprise,
+    alignment,
   };
 }
 
@@ -166,7 +180,12 @@ export function buildSOPViewModel(
 // STEP NORMALIZATION + LABEL HUMANIZATION
 // ═════════════════════════════════════════════════════════════════════════════
 
-function normalizeStep(raw: any, allSteps: any[], index: number): SOPViewStep {
+function normalizeStep(
+  raw: any,
+  allSteps: any[],
+  index: number,
+  pageCtx?: StepPageContextMap | null,
+): SOPViewStep {
   const cat = raw.category ?? 'single_action';
   const style = CATEGORY_STYLES[cat as keyof typeof CATEGORY_STYLES] ?? CATEGORY_STYLES.single_action;
   const frictionRaw: any[] = raw.frictionIndicators ?? [];
@@ -214,6 +233,24 @@ function normalizeStep(raw: any, allSteps: any[], index: number): SOPViewStep {
   const rawAction = safe(raw.action, '');
   const humanizedAction = rawAction && rawAction !== humanizedTitle ? rawAction : humanizedTitle;
 
+  // Observed-vs-inferred outcome (honesty): the expected outcome is OBSERVED
+  // when this step carries a verify-type instruction (derived from a real
+  // captured system-feedback event). Otherwise it is an INFERRED projection and
+  // MUST NOT render with a "verified" green check.
+  const outcomeObserved = instructions.some(i => i.type === 'verify');
+
+  // Per-step evidence snippet from real captured signals only.
+  // applicationLabel: step.system (or first instruction's system)
+  // pageTitle: from process_map node metadata, keyed by ordinal (real titles)
+  // actionLabel: first instruction's non-sensitive targetLabel
+  const ordinal = raw.ordinal ?? index + 1;
+  const firstTargetInstr = instructions.find(i => !i.isSensitive && i.targetLabel);
+  const evidence = deriveStepEvidence({
+    applicationLabel: sys || instructions.find(i => i.system)?.system || null,
+    pageTitle: pageCtx?.[ordinal]?.pageTitle ?? null,
+    actionLabel: firstTargetInstr?.targetLabel ?? null,
+  });
+
   return {
     id: raw.stepId ?? `step-${raw.ordinal ?? index + 1}`,
     ordinal: raw.ordinal ?? index + 1,
@@ -234,10 +271,13 @@ function normalizeStep(raw: any, allSteps: any[], index: number): SOPViewStep {
     decisionLabel: safe(raw.decisionLabel, ''),
     hasSensitiveData: (raw.warnings ?? []).length > 0 || instructions.some(i => i.isSensitive),
     expectedOutcome: safe(raw.expectedOutcome, ''),
+    outcomeObserved,
     warnings: raw.warnings ?? [],
     instructions,
     detailText: humanizeDetailText(raw.detail ?? '', sys),
     inputs: raw.inputs ?? [],
+    outputs: Array.isArray(raw.outputs) ? raw.outputs.filter((o: any) => typeof o === 'string' && o.trim()) : [],
+    evidence,
     frictionIndicators: frictionRaw.map(normalizeFriction),
     hasHighFriction: frictionRaw.some((f: any) => f.severity === 'high'),
     phaseId: '',
