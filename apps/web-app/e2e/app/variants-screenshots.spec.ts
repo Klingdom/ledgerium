@@ -134,6 +134,13 @@ test.describe('Process Variants documentation', () => {
     await page.waitForTimeout(1500);
     await shot(page, 'dashboard-list');
 
+    // ── LSS lens (Measure & Analyze): switcher + Pareto panel ─────────────────
+    const lssTab = page.getByRole('tab', { name: /measure/i });
+    await lssTab.waitFor({ state: 'visible', timeout: 15_000 });
+    await lssTab.click();
+    await page.waitForTimeout(1200);
+    await shot(page, 'dashboard-lss');
+
     // ── E2E assertions: nothing crashed ───────────────────────────────────────
     await expect(page.locator('text=Application error')).toHaveCount(0);
     expect(errors, `no uncaught page errors:\n${errors.join('\n')}`).toEqual([]);

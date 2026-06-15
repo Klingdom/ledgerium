@@ -49,7 +49,17 @@ import type { InsightChip } from '@/lib/workflow-metrics.js';
 import PortfolioSidebar, { type PortfolioNode } from '@/components/PortfolioSidebar.js';
 import ColumnPicker, { type SaveStatus } from './ColumnPicker.js';
 import UnifiedToolbar from './UnifiedToolbar.js';
+import LensSwitcher from './LensSwitcher.js';
+import LssParetoPanel from './LssParetoPanel.js';
 import { useDensity } from './density.js';
+import { useLens } from './lens.js';
+import {
+  getLensConfig,
+  DEFAULT_LENS,
+  type Lens,
+  type LensSortField,
+} from '@/lib/dashboard-lenses/lenses.js';
+import type { ParetoWorkflowInput } from '@/lib/dashboard-lenses/pareto.js';
 import {
   type ColumnKey,
   type UserDashboardPreference,
@@ -224,6 +234,28 @@ export default function DashboardV2Shell() {
   // after mount — no hydration mismatch).
   const [density, setDensity] = useDensity();
 
+  // ── Persona LENS state (DASHBOARD_PERSONAS_REVIEW_001 P0, v1) ─────────────────
+  // SSR-safe active lens (default 'library'; reconciles to localStorage after
+  // mount — no hydration mismatch). Switching is client-only — no refetch.
+  const [activeLens, setLens] = useLens();
+
+  // The user's library-lens column pack — the columns to restore when switching
+  // back to 'library'. Tracks the persisted/picker columns so the LSS lens can
+  // temporarily override the visible pack WITHOUT losing the user's choices.
+  // Library renders EXACTLY these (today's behavior). Updated whenever the user
+  // edits columns while in the library lens (see handleToggleColumn / load).
+  const libraryColumnsRef = useRef<readonly ColumnKey[]>(DEFAULT_VISIBLE_KEYS);
+  // The library lens's sort, captured so switching back restores it (LSS forces
+  // its own default sort). Default mirrors the shell's initial sort.
+  const librarySortRef = useRef<SortState>({ field: 'date_recorded', dir: 'desc' });
+  // Mirror of the active lens for use inside effects with stable (empty) deps —
+  // avoids re-running the mount-only preferences load when the lens changes.
+  const activeLensRef = useRef<Lens>(activeLens);
+  activeLensRef.current = activeLens;
+  // Tracks whether the post-mount lens reconciliation has run, so it applies the
+  // localStorage-restored lens pack/sort exactly once.
+  const lensReconciledRef = useRef<boolean>(false);
+
   // ── Column picker state (D+4 iter-061) ──────────────────────────────────────
 
   /** The ordered list of column keys the user has chosen to display. */
@@ -361,7 +393,15 @@ export default function DashboardV2Shell() {
         if (!res.ok) return; // 401 or server error — use defaults silently
         const body = (await res.json()) as PreferencesApiResponse;
         if (body.data?.preferences?.visibleColumns) {
-          setVisibleColumns(body.data.preferences.visibleColumns);
+          const saved = body.data.preferences.visibleColumns;
+          // The saved pack is the user's LIBRARY pack — remember it so the lens
+          // switcher can restore it. Only push to live visibleColumns when the
+          // library lens is active; a non-default lens owns the visible pack as
+          // a view override (lens persistence is client-only / localStorage).
+          libraryColumnsRef.current = saved;
+          if (getLensConfig(activeLensRef.current).columnPack === null) {
+            setVisibleColumns(saved);
+          }
         }
         if (Array.isArray(body.data?.preferences?.savedViews)) {
           setSavedViews(body.data.preferences.savedViews);
@@ -450,6 +490,11 @@ export default function DashboardV2Shell() {
           ? [...prev, key]
           : prev.filter((k) => k !== key);
         scheduleSave(next);
+        // Keep the library-pack memory in sync when the user edits columns while
+        // on the library lens, so a lens round-trip restores their edits.
+        if (activeLensRef.current === 'library') {
+          libraryColumnsRef.current = next;
+        }
         return next;
       });
     },
@@ -491,6 +536,69 @@ export default function DashboardV2Shell() {
     },
     [scheduleSave],
   );
+
+  // ── Lens switch (DASHBOARD_PERSONAS_REVIEW_001 P0, v1) ────────────────────────
+  // Switching lenses is CLIENT-ONLY: it re-frames the same in-memory workflows
+  // (no refetch) and applies the lens's column pack + default sort. It MUST NOT
+  // persist to the DB (the LSS pack is a view override, not the user's saved
+  // library pack — persisting it would regress the library default on reload).
+  //
+  // map the pure-module LensSortField → the WorkflowList SortField (identical
+  // literal spaces; the cast is total and the type guarantees membership).
+  const handleLensChange = useCallback(
+    (nextLens: Lens) => {
+      if (nextLens === activeLens) return;
+
+      // Leaving the library lens: snapshot the user's current columns + sort so
+      // returning to 'library' restores EXACTLY today's behavior.
+      if (activeLens === 'library') {
+        libraryColumnsRef.current = visibleColumns;
+        librarySortRef.current = sort;
+      }
+
+      const config = getLensConfig(nextLens);
+
+      if (config.columnPack !== null) {
+        // Apply the lens pack as a view override (state only — no scheduleSave).
+        setVisibleColumns(config.columnPack);
+      } else {
+        // library: restore the user's saved/preferred pack verbatim.
+        setVisibleColumns(libraryColumnsRef.current);
+      }
+
+      if (config.defaultSort !== null) {
+        const field = config.defaultSort.field as LensSortField & SortState['field'];
+        setSort({ field, dir: config.defaultSort.dir });
+      } else {
+        // library: restore the captured library sort.
+        setSort(librarySortRef.current);
+      }
+
+      setLens(nextLens);
+      track({ event: 'dashboard_lens_changed', lens: nextLens, workflowCount: allWorkflows.length });
+    },
+    [activeLens, visibleColumns, sort, setLens, allWorkflows.length],
+  );
+
+  // Post-mount lens reconciliation: useLens restores the persisted lens from
+  // localStorage after mount (SSR-safe — first paint is always 'library'). When
+  // it reconciles to a non-library lens, apply that lens's column pack + default
+  // sort exactly once so the LSS view is correct on a hard reload. Runs only on
+  // the activeLens transition, after first paint, and never overrides the
+  // library lens (which preserves today's behavior verbatim).
+  useEffect(() => {
+    if (lensReconciledRef.current) return;
+    if (activeLens === DEFAULT_LENS) return; // nothing to apply for the default
+    lensReconciledRef.current = true;
+    const config = getLensConfig(activeLens);
+    if (config.columnPack !== null) {
+      setVisibleColumns(config.columnPack);
+    }
+    if (config.defaultSort !== null) {
+      const field = config.defaultSort.field as LensSortField & SortState['field'];
+      setSort({ field, dir: config.defaultSort.dir });
+    }
+  }, [activeLens]);
 
   // D+5 (iter-062): Derive the current preferences snapshot for the chip rail
   // (active-state detection).
@@ -586,6 +694,22 @@ export default function DashboardV2Shell() {
 
   const availableSystems = extractSystems(allWorkflows);
 
+  // LSS lens (v1): map the currently-visible workflows into the pure Pareto
+  // input shape. Computed only when the LSS lens is active to avoid needless
+  // work on the default lens. Deterministic — depends only on the filtered set.
+  const paretoInputs: ParetoWorkflowInput[] = useMemo(() => {
+    if (activeLens !== 'lss') return [];
+    return filteredWorkflows.map((w) => ({
+      id: w.id,
+      title: w.title,
+      avgTimeMs: w.metricsV2.avgTimeMs,
+      runs: w.metricsV2.runs,
+      // metricsV2.variantCount is a data field (NOT a registry column this pass);
+      // honest absence → undefined → the variation strip renders "—".
+      variantCount: w.metricsV2.variantCount ?? null,
+    }));
+  }, [activeLens, filteredWorkflows]);
+
   // Batch B (2026-06-12): band-only derived counts from the full set.
   // highVariationCount drives the narrator; cycleTimeSampleCount is the honest
   // denominator for the median-cycle-time tile ("across N workflows").
@@ -652,6 +776,20 @@ export default function DashboardV2Shell() {
         onTimeRangeChange={setTimeRange}
         workflowCount={allWorkflows.length}
       />
+
+      {/* Persona LENS switcher (DASHBOARD_PERSONAS_REVIEW_001 P0, v1): client-only
+          tablist re-framing the same data. 'library' = today's behavior verbatim. */}
+      <div className="px-ds-4 pt-ds-2">
+        <LensSwitcher activeLens={activeLens} onLensChange={handleLensChange} />
+      </div>
+
+      {/* LSS "Measure & Analyze" above-list panel: the Pareto of total observed
+          time (mean × runs) + variation strip. Only when the LSS lens is active. */}
+      {activeLens === 'lss' && !isLoading && !isError && (
+        <div className="px-ds-4 pt-ds-3">
+          <LssParetoPanel workflows={paretoInputs} />
+        </div>
+      )}
 
       {/* Batch B (2026-06-12): top-of-page graphics band (mounts between header and list) */}
       <TopBand

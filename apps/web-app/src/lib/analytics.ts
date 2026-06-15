@@ -152,6 +152,13 @@ export type AnalyticsEvent =
       workflowCount: number;
       elapsedMsSinceDashboardView: number;
     }
+  | {
+      // Persona LENS switcher (DASHBOARD_PERSONAS_REVIEW_001 P0, v1).
+      // Fired when the user switches the active dashboard lens (client-only).
+      event: 'dashboard_lens_changed';
+      lens: 'library' | 'lss';
+      workflowCount: number;
+    }
   // ── Batch B (2026-06-12): top-of-page band instrumentation ────────────────
   | {
       // Fired when a user clicks a KPI tile in the top-of-page band.
