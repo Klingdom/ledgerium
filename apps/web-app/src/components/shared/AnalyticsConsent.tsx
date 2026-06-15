@@ -45,8 +45,9 @@ export function AnalyticsConsent(): JSX.Element | null {
       role="dialog"
       aria-live="polite"
       aria-label="Analytics consent"
+      data-consent-banner
       className={[
-        'fixed bottom-0 left-0 right-0 z-50',
+        'fixed bottom-0 left-0 right-0 z-50 no-print',
         'transition-transform duration-300 ease-out',
         visible ? 'translate-y-0' : 'translate-y-full',
       ].join(' ')}

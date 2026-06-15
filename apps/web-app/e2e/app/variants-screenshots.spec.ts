@@ -112,6 +112,21 @@ test.describe('Process Variants documentation', () => {
       'multi-run sample must not show the single-run variance placeholder',
     ).toHaveCount(0);
 
+    // ── Print / Save-as-PDF layout (R-D) ──────────────────────────────────────
+    // Emulate print media so the report-print stylesheet applies, screenshot the
+    // stakeholder deliverable, assert no page error was thrown by the print path,
+    // then reset to screen media so the rest of the run is unaffected.
+    const printErrorsBefore = errors.length;
+    await page.emulateMedia({ media: 'print' });
+    await page.waitForTimeout(600);
+    await shot(page, 'workflow-report-print');
+    expect(
+      errors.length,
+      `print-media emulation threw a page error:\n${errors.slice(printErrorsBefore).join('\n')}`,
+    ).toBe(printErrorsBefore);
+    await page.emulateMedia({ media: 'screen' });
+    await page.waitForTimeout(300);
+
     // ── Dashboard list (Batch A: Date Recorded column + sorts) ────────────────
     // Exercises the changed dashboard page under the no-page-error assertion and
     // captures the workflow library with the new columns.

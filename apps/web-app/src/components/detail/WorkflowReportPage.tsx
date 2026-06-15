@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   CheckCircle,
@@ -16,6 +16,9 @@ import {
 import { useId } from 'react';
 import { deriveDivergence } from '@/lib/reportDivergence';
 import { formatDuration } from '@/lib/format';
+import { track } from '@/lib/analytics';
+import { SECTION_IDS, SECTION_LABELS } from './reportSections';
+import { buildReportMeta, groupVisibleSections, type ReportMeta } from './reportMeta';
 import { buildReportVerdict, cvBand, type ReportVerdictInput } from './reportVerdict';
 import {
   buildScorecard,
@@ -345,57 +348,10 @@ export interface WorkflowReportPageProps {
 
 // ── Section IDs (for scroll spy) ──────────────────────────────────────────────
 
-const SECTION_IDS = [
-  'rpt-verdict',
-  'rpt-scorecard',
-  'rpt-hero',
-  'rpt-lead',
-  'rpt-insight-cards',
-  'rpt-scores',
-  'rpt-phases',
-  'rpt-metrics',
-  'rpt-distribution',
-  'rpt-consistency',
-  'rpt-variance',
-  'rpt-drift',
-  'rpt-timestudy',
-  'rpt-insights',
-  'rpt-automation',
-  'rpt-bottlenecks',
-  'rpt-steps',
-  'rpt-structure',
-  'rpt-rework',
-  'rpt-agents',
-  'rpt-skills',
-  'rpt-integrations',
-  'rpt-roadmap',
-] as const;
-
-const SECTION_LABELS: Record<string, string> = {
-  'rpt-verdict': 'Verdict',
-  'rpt-scorecard': 'Scorecard',
-  'rpt-hero': 'Overview',
-  'rpt-lead': 'Start Here',
-  'rpt-insight-cards': 'Key Actions',
-  'rpt-scores': 'Process Health',
-  'rpt-phases': 'Phase Timeline',
-  'rpt-metrics': 'Run Metrics',
-  'rpt-distribution': 'Cycle-Time Spread',
-  'rpt-consistency': 'Consistency',
-  'rpt-variance': 'Variance & Variants',
-  'rpt-drift': 'Drift',
-  'rpt-timestudy': 'Step Duration',
-  'rpt-insights': 'Insights',
-  'rpt-automation': 'Automation',
-  'rpt-bottlenecks': 'Bottlenecks',
-  'rpt-steps': 'Step Breakdown',
-  'rpt-structure': 'Friction & Decisions',
-  'rpt-rework': 'Rework Patterns',
-  'rpt-agents': 'Composed Agents',
-  'rpt-skills': 'Skill Library',
-  'rpt-integrations': 'Integrations & Risks',
-  'rpt-roadmap': 'Implementation Roadmap',
-};
+// SECTION_IDS + SECTION_LABELS live in ./reportSections (pure data) so the
+// grouped-nav logic in ./reportMeta and its coverage test reference one source
+// of truth without importing this heavy component. SECTION_LABELS['rpt-metrics']
+// is "Step Timing" (R-D PRT-P1-05).
 
 // ── Phase accent colors ────────────────────────────────────────────────────────
 
@@ -482,11 +438,20 @@ function HeroSection({ workflow }: { workflow: WorkflowSummary }) {
     workflow.durationMs,
   )} at ${confidencePct}% extraction confidence.`;
 
-  // Animated counters — refs attached to parent container
-  const [durationSec] = useCountUp(Math.round(workflow.durationMs / 1000), 800);
-  const [steps] = useCountUp(workflow.stepCount, 700);
-  const [phases] = useCountUp(workflow.phaseCount, 700, { delay: 100 });
-  const [confValue] = useCountUp(confidencePct, 900, { delay: 150 });
+  // Animated counters — refs attached to parent container.
+  // PRT-P0-06: respect prefers-reduced-motion. When reduce is set, pass duration 0
+  // so useCountUp resolves immediately to the final value — this eliminates the
+  // "STEPS 0" artifact (a 0-frame flash) for motion-sensitive users (WCAG 2.1
+  // SC 2.3.3). Detected in an effect (not in render) so SSR === CSR (hydration-safe).
+  const [reduceMotion, setReduceMotion] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    setReduceMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }, []);
+  const [durationSec] = useCountUp(Math.round(workflow.durationMs / 1000), reduceMotion ? 0 : 800);
+  const [steps] = useCountUp(workflow.stepCount, reduceMotion ? 0 : 700);
+  const [phases] = useCountUp(workflow.phaseCount, reduceMotion ? 0 : 700, { delay: 100 });
+  const [confValue] = useCountUp(confidencePct, reduceMotion ? 0 : 900, { delay: 150 });
 
   const confColor =
     confidencePct >= 80
@@ -522,7 +487,7 @@ function HeroSection({ workflow }: { workflow: WorkflowSummary }) {
   return (
     <div
       id="rpt-hero"
-      className="bg-gradient-to-br from-brand-50/80 to-white border border-blue-100 rounded-ds-lg px-6 py-5"
+      className="report-no-print bg-gradient-to-br from-brand-50/80 to-white border border-blue-100 rounded-ds-lg px-6 py-5"
     >
       {/* Title row */}
       <div className="flex items-center gap-3 mb-1 flex-wrap">
@@ -530,8 +495,9 @@ function HeroSection({ workflow }: { workflow: WorkflowSummary }) {
         <h2 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">{workflow.title}</h2>
       </div>
 
-      {/* Interpretive lead sentence */}
-      <p className="mt-1 max-w-3xl text-ds-sm text-[var(--content-secondary)]">{leadSentence}</p>
+      {/* Interpretive lead sentence — PRT-P1-04: upgraded to primary content color
+          (the most informative single sentence on the report). */}
+      <p className="mt-1 max-w-3xl text-ds-sm text-[var(--content-primary)]">{leadSentence}</p>
 
       {/* Metrics band */}
       <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 divide-x divide-[var(--border-subtle)] rounded-ds-md border border-[var(--border-subtle)] bg-[var(--surface-elevated)] overflow-hidden">
@@ -765,16 +731,20 @@ function ExecutiveVerdictSection({
   return (
     <div id="rpt-verdict" className="scroll-mt-20">
       <div className="rounded-ds-lg border border-brand-200 bg-gradient-to-br from-brand-50/70 to-white px-6 py-5">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-brand-700 mb-2">
-          Verdict
-        </p>
+        {/* Label row — "Observed verdict" (GROWTH §5a) + evidence-linked badge (R-D §3). */}
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-brand-700">
+            Observed verdict
+          </p>
+          <EvidenceLinkedBadge />
+        </div>
         <div className="space-y-1.5">
           {sentences.map((s, i) => (
             <p
               key={i}
               className={
                 i === 0
-                  ? 'text-ds-lg font-semibold leading-snug text-[var(--content-primary)]'
+                  ? 'report-verdict-primary text-ds-lg font-semibold leading-snug text-[var(--content-primary)]'
                   : 'text-ds-sm leading-snug text-[var(--content-secondary)]'
               }
             >
@@ -784,6 +754,33 @@ function ExecutiveVerdictSection({
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Evidence-linked header badge (R-D §3 / GROWTH §1). Purely declarative markup —
+ * no state, no API. The `title`/`aria-label` carry the full disclosure on hover;
+ * a sibling print-only span spells the disclosure inline since tooltips do not
+ * survive print. Exact GROWTH strings.
+ */
+function EvidenceLinkedBadge() {
+  const disclosure =
+    'Every figure traces to recorded events. No benchmarks, no estimates — only what was observed in your runs.';
+  return (
+    <>
+      <span
+        className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-700 cursor-default print:hidden"
+        title={disclosure}
+        aria-label={`Evidence-linked: ${disclosure}`}
+      >
+        <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-500" aria-hidden />
+        Evidence-linked
+      </span>
+      {/* Print: tooltips don't render — spell the disclosure inline. */}
+      <span className="hidden text-[8pt] text-gray-500 print:inline">
+        ● Evidence-linked · {disclosure}
+      </span>
+    </>
   );
 }
 
@@ -1336,13 +1333,14 @@ function StepBreakdownSection({
                 )}
 
                 <ChevronDown
-                  className={`flex-shrink-0 h-4 w-4 text-[var(--content-tertiary)] transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                  className={`step-expand-chevron flex-shrink-0 h-4 w-4 text-[var(--content-tertiary)] transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                 />
               </button>
 
-              {/* Expanded detail */}
+              {/* Expanded detail (step-detail-panel: forced visible in print so
+                  evidence is never hidden behind the accordion). */}
               {isExpanded && (
-                <div className="px-4 pb-4 pt-1 bg-[var(--surface-secondary)] border-t border-[var(--border-subtle)]">
+                <div className="step-detail-panel px-4 pb-4 pt-1 bg-[var(--surface-secondary)] border-t border-[var(--border-subtle)]">
                   {step.evidence && (
                     <div className="mb-2">
                       <p className="text-[10px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wide mb-1">Evidence</p>
@@ -1657,8 +1655,8 @@ function RunMetricsSection({ insights, processOutput, workflow }: RunMetricsSect
     totalStepMs > 0 && totalElapsedMs > totalStepMs ? totalElapsedMs - totalStepMs : 0;
 
   return (
-    <div id="rpt-metrics" className="scroll-mt-20">
-      <SectionHeading>Run Metrics</SectionHeading>
+    <div id="rpt-metrics" className="report-no-print scroll-mt-20">
+      <SectionHeading>Step Timing</SectionHeading>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-ds-4">
         <div className="card px-ds-4 py-ds-3">
           <p className="ds-metric-label">Steps analyzed</p>
@@ -2024,7 +2022,7 @@ function CycleTimeDistributionSection({ figures }: { figures: LeadFigures }) {
             <div className="absolute left-0 right-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-[var(--surface-secondary)]" />
             {/* Filled span from min to max (the observed envelope) */}
             <div className="absolute left-0 right-0 top-1/2 h-2 -translate-y-1/2 overflow-hidden rounded-full">
-              <div className="h-full w-full bg-gradient-to-r from-[var(--surface-secondary)] via-brand-200 to-[var(--severity-warning,#d97706)]/40" />
+              <div className="report-gradient-track h-full w-full bg-gradient-to-r from-[var(--surface-secondary)] via-brand-200 to-[var(--severity-warning,#d97706)]/40" />
             </div>
             {/* Markers */}
             {dist.markers.map((m) => (
@@ -2362,7 +2360,7 @@ function BottleneckContributionSection({
                 {/* Contribution bar */}
                 <div className="mt-ds-2 h-2 w-full overflow-hidden rounded-full bg-[var(--surface-secondary)]" aria-hidden>
                   <div
-                    className={`h-full rounded-full ${row.isPrimary ? 'bg-red-500' : 'bg-red-400'}`}
+                    className={`bottleneck-bar h-full rounded-full ${row.isPrimary ? 'bg-red-500' : 'bg-red-400'}`}
                     style={{ width: `${Math.min(row.barWidth, 100)}%` }}
                   />
                 </div>
@@ -2744,37 +2742,110 @@ function RoadmapSection({ agentIntelligence }: { agentIntelligence: AgentIntelli
 
 // ── Section 10: Right Rail Navigator ──────────────────────────────────────────
 
-function RightRailNavigator({ sectionIds }: { sectionIds: readonly string[] }) {
-  const activeId = useScrollSpy([...sectionIds]);
+/**
+ * RightRailNavigator — grouped section nav (UX §4). Sections are grouped into
+ * Summary / Health & Spread / Evidence / Actions via SECTION_GROUPS; a group
+ * label renders only when ≥1 of its IDs is visible. Reads `visibleSections` (the
+ * report's source of truth) — it never re-derives visibility.
+ */
+function RightRailNavigator({ visibleSections }: { visibleSections: readonly string[] }) {
+  const activeId = useScrollSpy([...visibleSections]);
+  const groups = useMemo(() => groupVisibleSections(visibleSections), [visibleSections]);
 
   return (
-    <nav className="hidden xl:block sticky top-20 w-48 flex-shrink-0">
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--content-tertiary)] mb-3">
-        On this page
+    <nav className="report-no-print hidden xl:block sticky top-20 w-52 flex-shrink-0">
+      <p className="text-[9px] font-semibold uppercase tracking-widest text-[var(--content-tertiary)] mb-3">
+        Report sections
       </p>
-      <ul className="space-y-0.5">
-        {sectionIds.map((id) => {
-          const isActive = activeId === id;
+      {groups.map((group) => (
+        <div key={group.label}>
+          <p className="mt-4 mb-1 px-3 text-[8px] font-semibold uppercase tracking-widest text-[var(--content-tertiary)]">
+            {group.label}
+          </p>
+          <ul>
+            {group.ids.map((id) => {
+              const isActive = activeId === id;
+              return (
+                <li key={id}>
+                  <a
+                    href={`#${id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className={`block border-l-2 pl-5 py-0.5 text-[11px] transition-colors ${
+                      isActive
+                        ? 'border-brand-500 text-brand-600 font-semibold'
+                        : 'border-transparent text-[var(--content-tertiary)] hover:text-[var(--content-secondary)]'
+                    }`}
+                  >
+                    {SECTION_LABELS[id] ?? id}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+/**
+ * MobileSectionTOC — a sticky grouped pill strip for < 1280px (xl:hidden), where
+ * the right rail is not shown. Tapping a pill opens a dropdown of that group's
+ * section entries; selecting one smooth-scrolls and closes. Hidden in print.
+ *
+ * Render-stable: no Date/random; the open-group is plain UI state.
+ */
+function MobileSectionTOC({ visibleSections }: { visibleSections: readonly string[] }) {
+  const groups = useMemo(() => groupVisibleSections(visibleSections), [visibleSections]);
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
+
+  if (groups.length === 0) return null;
+
+  return (
+    <nav className="report-no-print xl:hidden sticky top-0 z-30 -mx-4 mb-2 border-b border-[var(--border-subtle)] bg-white/95 px-4 py-2 backdrop-blur-sm">
+      <p className="sr-only">Report sections</p>
+      <div className="flex flex-wrap gap-1.5">
+        {groups.map((group) => {
+          const isOpen = openGroup === group.label;
           return (
-            <li key={id}>
-              <a
-                href={`#${id}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className={`block border-l-2 pl-3 py-1 text-ds-xs transition-colors ${
-                  isActive
-                    ? 'border-brand-500 text-brand-600 font-semibold'
-                    : 'border-transparent text-[var(--content-tertiary)] hover:text-[var(--content-secondary)]'
+            <div key={group.label} className="relative">
+              <button
+                type="button"
+                aria-expanded={isOpen}
+                onClick={() => setOpenGroup(isOpen ? null : group.label)}
+                className={`rounded-full border px-3 py-1 text-[11px] font-medium transition-colors ${
+                  isOpen
+                    ? 'border-brand-200 bg-brand-50 text-brand-700'
+                    : 'border-[var(--border-subtle)] text-[var(--content-secondary)] hover:text-[var(--content-primary)]'
                 }`}
               >
-                {SECTION_LABELS[id] ?? id}
-              </a>
-            </li>
+                {group.label}
+              </button>
+              {isOpen && (
+                <ul className="absolute left-0 top-full z-40 mt-1 min-w-[180px] rounded-ds-md border border-[var(--border-subtle)] bg-white py-1 shadow-lg">
+                  {group.ids.map((id) => (
+                    <li key={id}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+                          setOpenGroup(null);
+                        }}
+                        className="block w-full px-4 py-2 text-left text-[12px] text-[var(--content-primary)] hover:bg-[var(--surface-secondary)]"
+                      >
+                        {SECTION_LABELS[id] ?? id}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           );
         })}
-      </ul>
+      </div>
     </nav>
   );
 }
@@ -2808,6 +2879,14 @@ export function WorkflowReportPage({
   const leadFigures = useMemo(
     () => deriveLeadFigures(intelligence, agentIntelligence, processOutput),
     [intelligence, agentIntelligence, processOutput],
+  );
+
+  // Deterministic, hydration-safe report metadata (print/PDF header + footer +
+  // screen sub-header + screen footer). Single recorded date, never a fabricated
+  // range. Exact GROWTH copy. Memoized for identity stability.
+  const reportMeta: ReportMeta = useMemo(
+    () => buildReportMeta({ runCount: leadFigures.runCount, createdAt: workflow.createdAt }),
+    [leadFigures.runCount, workflow.createdAt],
   );
 
   const visibleSections = useMemo(
@@ -2895,10 +2974,74 @@ export function WorkflowReportPage({
     [insights, interpretation, intelligence, agentIntelligence, processOutput, leadFigures],
   );
 
+  // Whether the AI intelligence layer produced any renderable content (used by
+  // the report_viewed event; PII-free boolean).
+  const hasAgentIntelligence =
+    (agentIntelligence?.agentComposition?.agents?.length ?? 0) > 0 ||
+    (agentIntelligence?.skillLibrary?.skills?.length ?? 0) > 0 ||
+    (agentIntelligence?.opportunities?.opportunities?.length ?? 0) > 0 ||
+    (agentIntelligence?.artifacts?.roadmap?.length ?? 0) > 0;
+
+  // Print-header "Start here" lead callout (UX §1.6) — same computation as the
+  // on-screen LeadInsightSection, rendered inline in print only.
+  const printLead = deriveTimeLeverage(insights, processOutput);
+  const hasPrintLead = printLead != null && printLead.longestPct >= 25;
+
+  // ── report_viewed — fire exactly once per mount (ANALYTICS_RD §1.1). ──────────
+  // Guarded by a ref + an empty-ish dep keyed on workflow.id so tab re-renders
+  // and async intelligence fetches do not re-fire. PII-free: opaque id + numeric
+  // aggregates + a boolean only.
+  const reportViewedFiredRef = useRef(false);
+  useEffect(() => {
+    if (reportViewedFiredRef.current) return;
+    if (!workflow.id) return;
+    reportViewedFiredRef.current = true;
+    track({
+      event: 'report_viewed',
+      workflowId: workflow.id,
+      runCount: leadFigures.runCount,
+      sectionCount: visibleSections.length,
+      hasAgentIntelligence,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workflow.id]);
+
   return (
-    <div className="flex gap-8 items-start">
+    <div className="report-print-root flex gap-8 items-start">
+      {/* ── Print-only page header (UX §1.4) — hidden on screen. ─────────────── */}
+      <div className="report-print-header hidden print:block" aria-hidden>
+        <p className="text-[11pt] font-semibold uppercase tracking-wide text-gray-600">
+          Ledgerium AI — Process Intelligence Report
+        </p>
+        <div className="flex items-baseline justify-between gap-4">
+          <p className="text-[16pt] font-bold text-gray-900">{workflow.title}</p>
+          <p className="text-[9pt] text-gray-500">{reportMeta.recordedDate}</p>
+        </div>
+        {hasPrintLead && (
+          <p className="report-print-lead mt-1 text-[9pt] text-gray-700">
+            Start here: Step {printLead!.longestOrdinal} owns {printLead!.longestPct}% of active
+            process time ({printLead!.longestLabel} of {printLead!.totalLabel}).
+          </p>
+        )}
+      </div>
+
+      {/* Mobile TOC (xl:hidden) — grouped, sticky; hidden in print. */}
+      <MobileSectionTOC visibleSections={visibleSections} />
+
       {/* Main content */}
       <div className="flex-1 min-w-0 space-y-10">
+        {/* Title framing (GROWTH §4) — document-type label + workflow sub-label +
+            run-count/evidence/date sub-header. The page-level <h1> in page.tsx owns
+            the workflow title for the route; this frames the Report as a document
+            category without introducing a second <h1>. Hidden in print (the print
+            header carries the document identity). */}
+        <div className="report-no-print">
+          <h2 className="text-ds-2xl font-bold tracking-tight text-[var(--content-primary)]">
+            Process Intelligence Report
+          </h2>
+          <p className="mt-0.5 text-ds-sm text-[var(--content-secondary)]">{workflow.title}</p>
+          <p className="mt-1 text-ds-xs text-[var(--content-tertiary)]">{reportMeta.subHeader}</p>
+        </div>
         <ExecutiveVerdictSection figures={leadFigures} />
         <ReportScorecardSection figures={leadFigures} />
         <HeroSection workflow={workflow} />
@@ -2931,14 +3074,20 @@ export function WorkflowReportPage({
         <IntegrationsSection agentIntelligence={agentIntelligence} />
         <RoadmapSection agentIntelligence={agentIntelligence} />
 
-        {/* Footer */}
-        <footer className="text-[10px] text-[var(--content-tertiary)] pb-4 border-t border-[var(--border-subtle)] pt-4">
-          Generated from observed workflow behavior · Evidence-backed · Ledgerium AI
+        {/* Screen footer — GROWTH §5e (run count + observed-behavior claim). */}
+        <footer className="report-no-print text-[10px] text-[var(--content-tertiary)] pb-4 border-t border-[var(--border-subtle)] pt-4">
+          {reportMeta.screenFooter}
         </footer>
       </div>
 
-      {/* Right rail */}
-      <RightRailNavigator sectionIds={visibleSections} />
+      {/* Right rail — grouped section nav (hidden xl:block; hidden in print). */}
+      <RightRailNavigator visibleSections={visibleSections} />
+
+      {/* ── Print-only honesty footer (UX §1.7 / GROWTH §3) — fixed on every page. */}
+      <div className="report-print-footer hidden print:flex" aria-hidden>
+        <span className="report-print-footer-meta">{reportMeta.footerLine1}</span>
+        <span className="report-print-footer-disclosure">{reportMeta.footerLine2}</span>
+      </div>
     </div>
   );
 }

@@ -263,4 +263,143 @@
       display: none !important;
     }
   }
+
+  /* ── R-D Report — Stakeholder Deliverable (Print / Save-as-PDF) ──────────────
+     Scoped to the report via `.report-print-root`. Turns the on-screen report
+     into a clean, ink-friendly A4 PDF: app chrome / rail / buttons stripped,
+     white canvas + black text, decision sections only, honest header + footer on
+     every page. window.print() (a click handler) is the trigger — no new dep. */
+  @media print {
+    /* Page setup (UX §1.1) — A4 default; bottom margin taller for the footer. */
+    @page {
+      size: A4;
+      margin: 18mm 16mm 22mm 16mm;
+    }
+
+    /* White canvas, black body text — no gradients survive (UX §1.2). */
+    body,
+    .report-print-root {
+      background: #ffffff !important;
+      color: #111827 !important;
+    }
+
+    /* Force colored fills that ENCODE MEANING to survive (severity dots, bars,
+       gauge arcs). Browsers strip backgrounds by default without this. */
+    .report-print-root *,
+    .report-print-root svg {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* Strip app-shell chrome that the global `nav, button` hide may miss — the
+       consent/cookie banner CONTAINER (not just its buttons) must not print as an
+       empty bar. */
+    [data-app-nav],
+    [data-tab-strip],
+    [data-consent-banner],
+    [data-cookie-banner],
+    .report-no-print {
+      display: none !important;
+    }
+
+    /* Sections that do NOT belong in the stakeholder PDF (UX §8). Hidden by id so
+       both empty + populated render branches are covered without touching JSX. */
+    #rpt-hero,
+    #rpt-lead,
+    #rpt-scores,
+    #rpt-phases,
+    #rpt-metrics,
+    #rpt-timestudy,
+    #rpt-insights,
+    #rpt-automation,
+    #rpt-agents,
+    #rpt-skills,
+    #rpt-integrations,
+    #rpt-roadmap {
+      display: none !important;
+    }
+
+    /* Linearize: the rail is hidden, so the flex column already fills; drop the
+       two-column gap so content uses the full page width. */
+    .report-print-root {
+      display: block !important;
+    }
+
+    /* Hyperlinks: strip underline + href expansion in the report. */
+    .report-print-root a {
+      text-decoration: none;
+      color: inherit;
+    }
+    .report-print-root a[href]::after {
+      content: '';
+    }
+
+    /* Card / section break rules — keep visual units intact across pages. */
+    .report-print-root [class*='rounded-ds-lg'],
+    .report-print-root [class*='rounded-ds-md'],
+    .report-print-root .card {
+      break-inside: avoid;
+    }
+    .report-print-root h2,
+    .report-print-root h3 {
+      break-after: avoid;
+    }
+    #rpt-insight-cards > div > div,
+    #rpt-bottlenecks .divide-y > div,
+    #rpt-steps .divide-y > div,
+    .report-divergence-table {
+      break-inside: avoid;
+    }
+
+    /* Always-expanded evidence in print (UX §1.5) — accordion is irrelevant. */
+    .step-detail-panel {
+      display: block !important;
+    }
+    .step-expand-chevron {
+      display: none !important;
+    }
+
+    /* Bottleneck contribution bars + distribution gradient must keep their fills. */
+    .bottleneck-bar,
+    .report-gradient-track {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .report-gradient-track {
+      background: linear-gradient(to right, #e5e7eb, #bbf7d0, #fde68a) !important;
+    }
+
+    /* Verdict first sentence dominates page 1. */
+    .report-verdict-primary {
+      font-size: 13pt !important;
+      font-weight: 700 !important;
+    }
+
+    /* Print-only page header (UX §1.4). */
+    .report-print-header {
+      margin-bottom: 6mm;
+      padding-bottom: 3mm;
+      border-bottom: 1pt solid #d1d5db;
+    }
+
+    /* Fixed honesty footer on EVERY printed page (UX §1.7 / GROWTH §3). The
+       differentiating disclosure phrase is mandatory + immutable. */
+    .report-print-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 4mm 16mm;
+      border-top: 0.5pt solid #d1d5db;
+      font-size: 7pt;
+      color: #6b7280;
+      background: #ffffff;
+      display: flex !important;
+      justify-content: space-between;
+      gap: 8mm;
+    }
+    .report-print-footer-disclosure {
+      text-align: right;
+    }
+  }
 }

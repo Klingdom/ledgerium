@@ -20,6 +20,7 @@ import {
   Plus,
   HelpCircle,
   FileText,
+  Printer,
 } from 'lucide-react';
 import { formatDuration, formatDate, formatConfidence } from '@/lib/format';
 import { track, trackActivation } from '@/lib/analytics';
@@ -283,6 +284,24 @@ export default function WorkflowDetailPage() {
     track({ event: 'workflow_exported', workflowId: id, format: type });
   }
 
+  // R-D: "Save as PDF" → browser print dialog (Chrome/Edge/Safari "Save as PDF").
+  // Fire the analytics event BEFORE window.print() so it reaches the buffer before
+  // the print dialog steals focus. window.print() runs only in this click handler
+  // (never at render/module scope) → SSR-safe + deterministic.
+  function handlePrintReport() {
+    track({ event: 'report_print_clicked', workflowId: id, location: 'report_page_header' });
+    if (typeof window !== 'undefined') {
+      window.print();
+    }
+  }
+
+  // R-D: report-surface-specific data-export event, fired alongside the existing
+  // workflow_exported funnel (not a replacement). PII-free.
+  function handleDataExport() {
+    track({ event: 'report_data_export_clicked', workflowId: id, format: 'json' });
+    handleExport('workflow');
+  }
+
   return (
     <div>
       {/* Back + Header */}
@@ -364,15 +383,26 @@ export default function WorkflowDetailPage() {
                 </button>
               )}
             </div>
-            {/* Export */}
-            <button onClick={() => handleExport('report')} className="btn-secondary gap-1 text-xs">
-              <Download className="h-3.5 w-3.5" /> Report
+            {/* Save as PDF — primary stakeholder action (R-D). Replaces the
+                misleading raw-JSON "Report" button; triggers window.print(). */}
+            <button
+              onClick={handlePrintReport}
+              className="btn-primary gap-1 text-xs"
+              title="Save this report as a PDF — includes verdict, scorecard, and evidence footer"
+            >
+              <Printer className="h-3.5 w-3.5" /> Save as PDF
             </button>
             <button onClick={() => handleExport('sop')} className="btn-secondary gap-1 text-xs">
               <Download className="h-3.5 w-3.5" /> SOP
             </button>
-            <button onClick={() => handleExport('workflow')} className="btn-secondary gap-1 text-xs">
-              <FileJson className="h-3.5 w-3.5" /> JSON
+            {/* Download data (JSON) — honest label: raw data, not the rendered
+                report (relabels the former ambiguous "JSON" button). */}
+            <button
+              onClick={handleDataExport}
+              className="btn-secondary gap-1 text-xs"
+              title="Download the raw recorded-event data for this workflow as JSON"
+            >
+              <FileJson className="h-3.5 w-3.5" /> Download data (JSON)
             </button>
           </div>
         </div>

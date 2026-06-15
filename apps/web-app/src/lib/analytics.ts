@@ -184,6 +184,64 @@ export type AnalyticsEvent =
       userAgentFamily: string;
     }
 
+  // ── Report engagement (R-D, 2026-06-14) ─────────────────────────────────────
+  // PII-free: opaque workflowId + numeric aggregates + taxonomy labels only.
+  // Never any step/workflow/section/evidence content in properties.
+  | {
+      event: 'report_viewed';
+      workflowId: string;
+      /** intelligence?.metrics?.runCount ?? 1 */
+      runCount: number;
+      /** Count of visibleSections at mount time. */
+      sectionCount: number;
+      /** Whether the AI intelligence layer produced any content. */
+      hasAgentIntelligence: boolean;
+    }
+  | {
+      event: 'report_print_clicked';
+      workflowId: string;
+      location: 'report_page_header' | 'report_page_footer';
+    }
+  | {
+      event: 'report_data_export_clicked';
+      workflowId: string;
+      format: 'json';
+    }
+  | {
+      event: 'report_section_viewed';
+      workflowId: string;
+      /** One of the SECTION_IDS string constants. */
+      sectionId: string;
+      /** Human-readable label from SECTION_LABELS. */
+      sectionLabel: string;
+      runCount: number;
+      /** Milliseconds since report_viewed fired. */
+      elapsedMsSinceReportView: number;
+    }
+  | {
+      event: 'report_insight_card_expanded';
+      workflowId: string;
+      severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
+      /** Taxonomy category string — no content. */
+      category: string;
+      /** Zero-based position in the current filtered list. */
+      insightIndex: number;
+    }
+  | {
+      event: 'report_key_action_card_viewed';
+      workflowId: string;
+      /** InsightCard.type — taxonomy label, no content. */
+      cardType: string;
+      cardIndex: number;
+    }
+  | {
+      event: 'report_evidence_anchor_viewed';
+      workflowId: string;
+      cardType: string;
+      /** Count of evidence run IDs backing the finding. NOT the IDs themselves. */
+      evidenceRunCount: number;
+    }
+
   // ── Navigation ────────────────────────────────────────────────────────────
   | { event: 'page_viewed'; path: string }
 

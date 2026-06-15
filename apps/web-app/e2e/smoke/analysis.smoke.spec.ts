@@ -59,7 +59,9 @@ test('[hydration] authenticated Analysis view (/workflows/[id]) — Process + An
   // 3. Switch to the Report tab → mounts WorkflowReportPage and auto-loads
   //    intelligence + agent data. rpt-hero renders from the main workflow data
   //    (independent of the intelligence/agent fetches), so it appears promptly.
-  // Scope to the tab nav — there is also an export button named "Report".
+  // Scope to the tab nav for precision — the "Report" name collision with the old
+  // export button was removed in R-D (the export button is now "Save as PDF" /
+  // "Download data (JSON)"), so this selector resolves the tab uniquely.
   await page.locator('nav').getByRole('button', { name: 'Report' }).first().click();
   await page.locator('#rpt-hero').waitFor({ state: 'visible', timeout: 30_000 });
   // Give the intelligence/agent fetches time to resolve and render their sections.
@@ -120,7 +122,8 @@ test('[hydration] Report on hostile real-data workflow — no client-side except
 
   // Switch to the Report tab → renders Friction & Decisions + Rework from the
   // hostile interpretation artifact (the exact crash path).
-  // Scope to the tab nav — there is also an export button named "Report".
+  // Scope to the tab nav for precision — the old "Report" export-button name
+  // collision was removed in R-D; this resolves the tab uniquely.
   await page.locator('nav').getByRole('button', { name: 'Report' }).first().click();
   await page.locator('#rpt-hero').waitFor({ state: 'visible', timeout: 30_000 });
   await page.waitForTimeout(1500);
