@@ -62,9 +62,11 @@ const BASE_SOP = {
 const WORKFLOW = { id: 'wf-1', title: 'Process Invoice', confidence: 0.9, createdAt: '2026-06-01T00:00:00.000Z', status: 'active' };
 
 describe('buildSOPViewModel — alignment pill wiring', () => {
-  it('surfaces an aligned pill when cohort intelligence has N>=2', () => {
+  it('surfaces an honest conformance pill when cohort intelligence has N>=2', () => {
     const vm = buildSOPViewModel(BASE_SOP, WORKFLOW, undefined, {
       sopIntelligence: {
+        // alignmentScore (self-similarity) ~0.88 is IGNORED for the headline;
+        // conformance is 7/8 = 88% from aligned/total.
         sopAlignment: { alignmentScore: 0.88, alignmentLevel: 'high', alignedRunCount: 7, totalRunCount: 8, driftIndicators: [] },
         documentationDrift: { score: 12, level: 'aligned', findings: [] },
         runCount: 8,
@@ -72,16 +74,20 @@ describe('buildSOPViewModel — alignment pill wiring', () => {
     });
     expect(vm).not.toBeNull();
     expect(vm!.alignment.kind).toBe('aligned');
-    expect(vm!.alignment.alignmentPct).toBe(88);
+    expect(vm!.alignment.conformancePct).toBe(88); // 7/8
+    expect(vm!.alignment.alignedRunCount).toBe(7);
     expect(vm!.alignment.runCount).toBe(8);
+    expect(vm!.alignment.label).toBe('7 of 8 runs follow this SOP');
     expect(vm!.alignment.hasSignal).toBe(true);
+    // N=8 (< 10) → no reassuring green check even at 88%.
+    expect(vm!.alignment.showCheck).toBe(false);
   });
 
   it('surfaces the single-run disclosure (NOT a verdict) when no intelligence is present', () => {
     const vm = buildSOPViewModel(BASE_SOP, WORKFLOW);
     expect(vm!.alignment.kind).toBe('insufficient');
     expect(vm!.alignment.hasSignal).toBe(false);
-    expect(vm!.alignment.alignmentPct).toBeNull();
+    expect(vm!.alignment.conformancePct).toBeNull();
   });
 });
 

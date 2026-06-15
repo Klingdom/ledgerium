@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Layers, Monitor, Target, Shield, Users, AlertTriangle, CheckCircle2, GitBranch } from 'lucide-react';
+import { Clock, Layers, Monitor, Target, Shield, Users, AlertTriangle, CheckCircle2, GitBranch, ClipboardCheck } from 'lucide-react';
 import type { SOPMetadata, AlignmentPill } from './types';
 import { confidenceColor } from '../workflow-view/constants';
 import { formatDate } from '@/lib/format';
@@ -115,12 +115,18 @@ export function SOPHeader({ metadata, alignment }: Props) {
 }
 
 /**
- * Living-SOP alignment/drift pill.
+ * Living-SOP CONFORMANCE pill.
  *
- * Honesty: when N < 2 the engine signal is meaningless, so we render a NEUTRAL
+ * Honesty (SOP_EXPERT_P0_REVIEW): the headline is the REAL conformance rate —
+ * "{aligned} of {total} runs follow this SOP" (fraction of ALL recorded runs on
+ * the documented path), NOT a structural self-similarity dressed as "Aligned
+ * 100%". The deviation is surfaced ("N deviate"), because the deviation is the
+ * point. The reassuring green check is reserved for genuinely high adherence on
+ * a meaningful sample (`a.showCheck`) — otherwise a neutral indicator.
+ *
+ * When N < 2 the engine signal is meaningless, so we render a NEUTRAL
  * data-insufficiency disclosure ("Based on 1 recording — review before
- * distributing"), NOT a red/critical verdict. Only at N >= 2 do we show the real
- * Aligned/Drifting conformance signal.
+ * distributing"), NOT a red/critical verdict.
  */
 function AlignmentBadge({ alignment: a }: { alignment: AlignmentPill }) {
   // Single-run (or no-cohort) disclosure — amber, neutral, not a condemnation.
@@ -143,25 +149,35 @@ function AlignmentBadge({ alignment: a }: { alignment: AlignmentPill }) {
   }
 
   const drifting = a.kind === 'drifting';
-  const Icon = drifting ? GitBranch : CheckCircle2;
+  // Icon grammar: green check ONLY when genuinely high adherence + meaningful N
+  // (a.showCheck). Drifting → branch. Otherwise a neutral clipboard-check (a
+  // conformance reading, not a reassurance).
+  const Icon = drifting ? GitBranch : a.showCheck ? CheckCircle2 : ClipboardCheck;
   const cls = drifting
     ? 'text-amber-700 bg-amber-50 border-amber-200'
-    : 'text-emerald-700 bg-emerald-50 border-emerald-200';
-  const ariaLabel = `${a.label} · ${a.alignmentPct}% aligned · based on ${a.runCount} runs`;
+    : a.showCheck
+      ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
+      : 'text-[var(--content-secondary)] bg-[var(--surface-secondary)] border-[var(--border-default)]';
+  const ariaLabel =
+    `${a.alignedRunCount} of ${a.runCount} runs follow this SOP` +
+    (a.conformancePct !== null ? ` (${a.conformancePct}% conformance)` : '') +
+    (a.detail ? ` — ${a.detail}` : '');
 
   return (
     <span
       className={`text-[10px] font-medium border rounded px-1.5 py-0.5 flex items-center gap-1 ${cls}`}
-      title={a.detail ?? ariaLabel}
+      title={ariaLabel}
       role="status"
       aria-label={ariaLabel}
     >
       <Icon className="h-2.5 w-2.5" aria-hidden="true" />
       <span className="font-semibold">{a.label}</span>
-      {a.alignmentPct !== null && <span>· {a.alignmentPct}%</span>}
-      <span className="text-[var(--content-tertiary)] font-normal hidden sm:inline">
-        · {a.runCount} runs
-      </span>
+      {a.conformancePct !== null && <span>· {a.conformancePct}%</span>}
+      {a.detail && (
+        <span className="text-[var(--content-tertiary)] font-normal hidden sm:inline">
+          · {a.detail}
+        </span>
+      )}
     </span>
   );
 }

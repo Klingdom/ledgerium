@@ -412,8 +412,23 @@
   @media print {
     /* White canvas, black body text. */
     .sop-print-root {
+      /* Reset the dark-mode design tokens to light values so dark-mode users
+         don't print dark-on-dark cards. Child components read these via
+         var(--surface-*) / var(--content-*) / var(--border-*) utility classes,
+         which the element-level background/color overrides below cannot reach —
+         the variables themselves must be reset. (UX_SOP_P0_REVIEW FIX-01.) */
+      --surface-primary: #ffffff !important;
+      --surface-secondary: #f8fafc !important;
+      --surface-elevated: #ffffff !important;
+      --content-primary: #111827 !important;
+      --content-secondary: #374151 !important;
+      --content-tertiary: #6b7280 !important;
+      --border-default: #e2e8f0 !important;
+      --border-subtle: #f1f5f9 !important;
       background: #ffffff !important;
       color: #111827 !important;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
       height: auto !important;
       min-height: 0 !important;
       max-height: none !important;
@@ -439,10 +454,13 @@
     }
 
     /* Strip SOP chrome: step rail, mode switcher + control buttons, and any
-       app-shell chrome the global `nav, button` hide may miss. */
+       app-shell chrome the global `nav, button` hide may miss.
+       EXCEPT `.sop-print-keep` — the completion checklist items are rendered as
+       <button> for interactivity on screen but MUST remain visible (as an
+       uninteractive list) on paper. (UX_SOP_P0_REVIEW FIX-02.) */
     .sop-no-print,
     .sop-print-root nav,
-    .sop-print-root button,
+    .sop-print-root button:not(.sop-print-keep),
     [data-app-nav],
     [data-tab-strip],
     [data-consent-banner],
@@ -450,8 +468,16 @@
       display: none !important;
     }
 
+    /* Completion-checklist buttons stay visible but read as a flat list — drop
+       the pointer affordance in print. */
+    .sop-print-root .sop-print-keep {
+      cursor: default !important;
+    }
+
     /* Force every step body open in print — the expand/collapse accordion is
-       irrelevant on paper. Step bodies are identified by their id pattern. */
+       irrelevant on paper. Step bodies are identified by their id pattern
+       ([id^='sop-step-body-']); both the compact card AND the execution-mode
+       card assign this id so EVERY mode prints full step content. */
     .sop-print-root [id^='sop-step-body-'] {
       display: block !important;
     }

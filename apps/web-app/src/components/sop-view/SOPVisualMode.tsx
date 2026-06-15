@@ -93,7 +93,7 @@ export function SOPVisualMode({ viewModel, expandedSteps, onToggleStep }: Props)
 function OverviewHeader({ viewModel }: { viewModel: SOPViewModel }) {
   const m = viewModel.metadata;
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-white border border-[var(--border-default)] rounded-2xl px-5 py-4">
+    <div className="bg-gradient-to-br from-slate-50 to-transparent border border-[var(--border-default)] rounded-2xl px-5 py-4">
       <div className="flex items-start justify-between gap-4 mb-3">
         <div>
           <p className="text-[10px] font-bold text-[var(--content-tertiary)] uppercase tracking-wider mb-1">Process Overview</p>

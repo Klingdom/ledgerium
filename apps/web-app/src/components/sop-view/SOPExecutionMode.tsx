@@ -137,7 +137,7 @@ function QuickStartSection({ viewModel }: { viewModel: SOPViewModel }) {
   const qs = viewModel.quickStart;
 
   return (
-    <div className="bg-gradient-to-br from-emerald-50/80 to-white border border-emerald-200 rounded-2xl overflow-hidden">
+    <div className="bg-gradient-to-br from-emerald-50/80 to-transparent border border-emerald-200 rounded-2xl overflow-hidden">
       {/* Header */}
       <div className="px-5 py-3 border-b border-emerald-100 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -316,10 +316,14 @@ function ExecutionStepCard({
 
       {/* ── Expanded body ─────────────────────────────────────────── */}
       {isExpanded && (
-        <div className="px-4 pb-4 pl-[52px] space-y-3 border-t border-[var(--border-subtle)] pt-3">
+        // id matches the print selector [id^='sop-step-body-'] so Execution-mode
+        // steps print their full body (parity with the compact card; today only
+        // the compact card carried the id → execution steps printed empty).
+        // (QA_SOP_P0_REVIEW P1-A.)
+        <div id={`sop-step-body-${step.id}`} className="px-4 pb-4 pl-[52px] space-y-3 border-t border-[var(--border-subtle)] pt-3">
           {/* Evidence snippet — real captured signals only (omitted when absent) */}
           {step.evidence.hasEvidence && (
-            <div className="flex items-center gap-1.5 text-[10px] text-[var(--content-tertiary)]">
+            <div className="flex items-center gap-1.5 text-[11px] text-[var(--content-secondary)]">
               <Eye className="h-3 w-3 flex-shrink-0" aria-hidden="true" />
               <span>
                 <span className="font-medium text-[var(--content-secondary)]">Observed in</span>{' '}
@@ -553,7 +557,7 @@ function CompletionSection({ criteria }: { criteria: string[] }) {
                 aria-checked={checked.has(i)}
                 aria-label={c}
                 type="button"
-                className="flex items-start gap-2.5 text-left w-full group"
+                className="sop-print-keep flex items-start gap-2.5 text-left w-full group"
               >
                 <span className={`w-4 h-4 rounded border flex items-center justify-center mt-0.5 flex-shrink-0 transition-colors ${
                   checked.has(i)

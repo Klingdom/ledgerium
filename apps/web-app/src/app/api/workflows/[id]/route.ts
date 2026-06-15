@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { renderAllTemplates } from '@/lib/ingestion';
 import { computeHealthScore } from '@/lib/health-scores';
 import { toPlanType, hasFeature } from '@/lib/plans';
+import { extractSopIntelligence } from '@/lib/sopIntelligenceExtract';
 
 /** Validation schema for workflow PATCH body fields. */
 const patchSchema = z.object({
@@ -136,39 +137,6 @@ export async function GET(
     // Additive top-level field; null when no cohort intelligence exists.
     sopIntelligence,
   });
-}
-
-/**
- * Extract the SOP-relevant alignment + drift slice from the persisted
- * PortfolioIntelligence JSON. Pure + defensive — returns null on absent or
- * malformed input. Render-only consumers gate on totalRunCount >= 2.
- */
-function extractSopIntelligence(
-  processDefinition: { intelligenceJson?: string | null; runCount?: number } | null | undefined,
-): {
-  sopAlignment: unknown;
-  documentationDrift: unknown;
-  runCount: number;
-} | null {
-  if (!processDefinition?.intelligenceJson) return null;
-  try {
-    const parsed = JSON.parse(processDefinition.intelligenceJson) as {
-      sopAlignment?: unknown;
-      documentationDrift?: unknown;
-      runCount?: number;
-    };
-    const sopAlignment = parsed.sopAlignment ?? null;
-    const documentationDrift = parsed.documentationDrift ?? null;
-    // Nothing useful to surface — keep the payload small.
-    if (!sopAlignment && !documentationDrift) return null;
-    return {
-      sopAlignment,
-      documentationDrift,
-      runCount: processDefinition.runCount ?? (typeof parsed.runCount === 'number' ? parsed.runCount : 0),
-    };
-  } catch {
-    return null;
-  }
 }
 
 export async function PATCH(

@@ -151,6 +151,19 @@ export async function clusterWorkflows(userId: string): Promise<void> {
   // Group by path signature (similarity-merged behind a flag; exact-signature fallback).
   const groups = groupWorkflowsForClustering(workflows);
 
+  // Pre-sign every workflow with a usable step sequence ONCE, so the SOP
+  // conformance cohort gather below is O(n²) over signatures (not over re-parses)
+  // and one malformed workflow can't throw the whole clustering pass.
+  const signedWorkflows: { id: string; signature: ReturnType<typeof computePathSignature> }[] = [];
+  for (const w of workflows) {
+    if (!w.processOutput?.processDefinition?.stepDefinitions) continue;
+    try {
+      signedWorkflows.push({ id: w.id, signature: computePathSignature(w.processOutput) });
+    } catch {
+      // Skip — same defensive posture as analyzeWorkflowVariants.
+    }
+  }
+
   // Phase 5 tracking maps — populated per group, used for family detection after
   const groupFingerprintMap = new Map<string, StepFingerprint[]>();
   const groupNormalizedTitles = new Map<string, NormalizedTitle>();
@@ -222,8 +235,31 @@ export async function clusterWorkflows(userId: string): Promise<void> {
         let documentationDrift: DocumentationDriftScore | null = null;
 
         if (sopSteps.length > 0) {
-          const dominantVariant = intelligence.variants.standardPath ?? null;
-          sopAlignment = analyzeSopAlignment(sopSteps, bundles, dominantVariant);
+          // HONESTY (SOP_EXPERT_P0_REVIEW Fix 0): conformance must be measured
+          // against the FULL recorded cohort of this process — every run, including
+          // the deviating ones — not just this byte-identical path-signature group.
+          //
+          // If we passed only `bundles` (the standard-path group, e.g. 5 runs), the
+          // engine's totalRunCount would exclude the deviating runs by construction
+          // and alignedRunCount/totalRunCount would report ~100% forever — a
+          // tautology (the SOP vs the runs it was distilled from). That is the exact
+          // defect the review flagged as launch-blocking.
+          //
+          // So we gather the similarity cohort (single-link clustering over ALL the
+          // user's signed runs, same gather analyzeWorkflowVariants uses at request
+          // time) and compute alignment over that superset. Now totalRunCount = the
+          // real cohort (e.g. 16) and alignedRunCount = runs that actually fit the
+          // SOP (e.g. ~5) → honest conformance ≈ 31%, not 100%. The dominant variant
+          // is recomputed over the full cohort so structuralSimilarity is honest too.
+          const conformanceBundles = gatherConformanceCohort(group, signedWorkflows, workflows);
+          const conformanceIntel =
+            conformanceBundles.length > bundles.length
+              ? safeAnalyzePortfolio(conformanceBundles)
+              : null;
+          const cohortBundles = conformanceIntel ? conformanceBundles : bundles;
+          const dominantVariant =
+            (conformanceIntel ?? intelligence).variants.standardPath ?? null;
+          sopAlignment = analyzeSopAlignment(sopSteps, cohortBundles, dominantVariant);
           documentationDrift = computeDocumentationDriftScore(sopAlignment);
         }
 
@@ -933,6 +969,45 @@ async function runComponentDetection(
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/**
+ * Gather the FULL conformance cohort for an SOP-bearing process group: every
+ * recorded run similar enough to belong to this process, across all variants —
+ * NOT just the byte-identical path-signature group.
+ *
+ * Determinism: union of (a) the group itself and (b) the single-link similarity
+ * cluster that contains the group's members. `clusterSignatures` is pure +
+ * deterministic (sorted input, lexical-root union). Returns at least the group's
+ * own bundles, so a group with no similar neighbours behaves exactly as before.
+ *
+ * This is the honest denominator for SOP conformance (SOP_EXPERT_P0_REVIEW Fix 0).
+ */
+function gatherConformanceCohort(
+  group: WorkflowWithArtifacts[],
+  signedWorkflows: { id: string; signature: ReturnType<typeof computePathSignature> }[],
+  allWorkflows: WorkflowWithArtifacts[],
+): ProcessRunBundle[] {
+  const memberSet = new Set<string>(group.map((w) => w.id));
+  if (signedWorkflows.length >= 2) {
+    const { clusters } = clusterSignatures(signedWorkflows);
+    // Any cluster that overlaps this group contributes its full membership.
+    for (const cluster of clusters) {
+      if (cluster.memberIds.some((id) => memberSet.has(id))) {
+        for (const id of cluster.memberIds) memberSet.add(id);
+      }
+    }
+  }
+  return loadBundlesForWorkflows(allWorkflows.filter((w) => memberSet.has(w.id)));
+}
+
+/** analyzePortfolio with a defensive guard — never throws the clustering pass. */
+function safeAnalyzePortfolio(bundles: ProcessRunBundle[]): PortfolioIntelligence | null {
+  try {
+    return analyzePortfolio({ runs: bundles });
+  } catch {
+    return null;
+  }
+}
 
 function deriveFamilyNameFromTitles(names: string[]): string {
   if (names.length === 0) return 'Unknown Family';

@@ -95,13 +95,15 @@ export function SOPPageShell({
     });
 
     // Alignment-viewed only when a real (gated N>=2) signal is shown.
-    if (a.hasSignal && a.alignmentPct !== null) {
+    if (a.hasSignal && a.conformancePct !== null) {
       const align = sopIntelligence?.sopAlignment ?? null;
       const drift = sopIntelligence?.documentationDrift ?? null;
       track({
         event: 'sop_alignment_viewed',
         workflowId,
-        alignmentScore: Math.round((align?.alignmentScore ?? a.alignmentPct / 100) * 100) / 100,
+        // Report the HONEST conformance rate (aligned/total), not the structural
+        // self-similarity alignmentScore. 2dp per the event schema.
+        alignmentScore: Math.round(a.conformancePct) / 100,
         alignmentLevel: align?.alignmentLevel ?? a.kind,
         totalRunCount: a.runCount,
         driftScore: drift?.score ?? 0,
@@ -392,8 +394,8 @@ function SOPPrintCover({ viewModel }: { viewModel: SOPViewModel }) {
         <span>{m.stepCount} step{m.stepCount !== 1 ? 's' : ''}</span>
         <span>{runLabel}</span>
         <span>Confidence {confidencePct}</span>
-        {a.hasSignal && a.alignmentPct !== null && (
-          <span>{a.label} · {a.alignmentPct}% aligned</span>
+        {a.hasSignal && a.conformancePct !== null && (
+          <span>Conformance {a.conformancePct}% · {a.alignedRunCount} of {a.runCount} runs follow this SOP</span>
         )}
         {generated && <span>Generated {generated}</span>}
       </div>
