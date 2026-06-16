@@ -53,6 +53,13 @@ import type { RowDensity } from './density.js';
 
 const LOCKED_COLUMN_KEYS = new Set<ColumnKey>(['workflow_title', 'health_score']);
 
+// ── Numeric-column alignment (atglance-review #15) ─────────────────────────────
+// Right-align numeric columns (registry-dataType-driven) for fast scanning. The
+// helpers live in ./columnAlign.ts so WorkflowRow can consume them too without a
+// circular import; re-exported here for ergonomic colocated import + tests.
+export { isNumericColumn, columnAlignClass } from './columnAlign.js';
+import { columnAlignClass } from './columnAlign.js';
+
 // ── UI state machine ──────────────────────────────────────────────────────────
 
 export type WorkflowListState =
@@ -561,6 +568,32 @@ export default function WorkflowList({
     [filteredWorkflows, sort],
   );
 
+  // atglance-review #15: detect near-duplicate VISIBLE row titles so each
+  // colliding row can show a deterministic, observed disambiguator (its recorded
+  // date+time) in the subtitle — making e.g. the 16× "Approve Expense Report
+  // (Sample)" rows distinguishable. GATED to ACTUAL collisions: a title appearing
+  // only once is NOT in this set, so unique-title libraries get zero added
+  // clutter. "Near-same" = case-insensitive, whitespace-collapsed title equality
+  // (deterministic; never fuzzy). Computed over the rendered (sorted+filtered)
+  // set so it reflects exactly what the user sees.
+  const duplicateTitleKeys = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const w of sortedWorkflows) {
+      const key = w.title.trim().toLowerCase().replace(/\s+/g, ' ');
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    const dups = new Set<string>();
+    for (const [key, n] of counts) {
+      if (n > 1) dups.add(key);
+    }
+    return dups;
+  }, [sortedWorkflows]);
+
+  /** Normalize a title to its collision key (same rule as duplicateTitleKeys). */
+  function titleCollisionKey(title: string): string {
+    return title.trim().toLowerCase().replace(/\s+/g, ' ');
+  }
+
   // D+4: derive the ordered middle columns (between workflow_title and health_score)
   // from visibleColumns, or fall back to the pre-D+4 defaults.
   const dynamicHeaderKeys: ColumnKey[] = visibleColumns
@@ -637,8 +670,14 @@ export default function WorkflowList({
             role="status"
             className="mx-ds-8 mt-ds-3 px-ds-3 py-ds-2 rounded-ds-sm bg-amber-50 border border-amber-200 text-[14px] text-amber-700 flex items-center justify-between gap-ds-4"
           >
+            {/* atglance-review #14 (GROWTH_DASHBOARD_REVIEW §8): invert the sparse
+                copy — point at the IMMEDIATE reward (open the recorded workflow to
+                see its process map, cycle time, and where AI fits) FIRST, then the
+                library benefit as secondary. Honest: claims only what the detail
+                page shows (steps + timing + opportunity) and keeps the run-count
+                disclosure ("Record 2 more…"). */}
             <span>
-              Your first workflow is recorded. Record 2 more to unlock health score comparison across your library.
+              Open your first workflow to see its process map, cycle time, and where AI fits. Record 2 more to compare health across your library.
             </span>
             <button
               type="button"
@@ -654,8 +693,15 @@ export default function WorkflowList({
       {/* Main table — always rendered for semantic structure; content varies by state */}
       <div className="px-ds-8 py-ds-3">
         <table className="w-full border-collapse" aria-label="Workflows">
+          {/* atglance-review #15: STICKY header. The column-header row stays
+              visible while the list scrolls — `position: sticky` on each header
+              <th> (border-collapse tables don't honor sticky on <thead>/<tr>, so
+              the sticky lives on the cells via the [&>th] arbitrary variant). A
+              solid surface background + z-index keep scrolling rows from showing
+              through. CSS-only — aria-sort + scope + the header tooltips are
+              untouched. Sticks within the page's existing scroll container. */}
           <thead>
-            <tr className="border-b border-[var(--border-subtle)]">
+            <tr className="border-b border-[var(--border-subtle)] [&>th]:sticky [&>th]:top-0 [&>th]:z-10 [&>th]:bg-[var(--surface-primary)]">
               {/* Workflow name (locked, always first) */}
               <th
                 scope="col"
@@ -706,42 +752,48 @@ export default function WorkflowList({
                 // Batch A (2026-06-12): sortable columns with SortButton headers.
                 // run_count, cycle_time_mean_ms, last_run_at, date_recorded each map
                 // to a SortField so users can click the column header to sort.
+                // atglance-review #15: numeric columns right-align (driven by the
+                // registry dataType — number/duration/date → text-right) for fast
+                // scanning; the SortButton is inline so text-right on the <th>
+                // right-aligns it. aria-sort + scope are preserved unchanged.
                 if (colKey === 'run_count') {
                   return (
-                    <th key="run_count" scope="col" aria-sort={sortAriaValue('run_count', sort)} className="px-ds-4 py-ds-2 text-left" title={SORTABLE_HEADER_GLOSS.run_count}>
+                    <th key="run_count" scope="col" aria-sort={sortAriaValue('run_count', sort)} className="px-ds-4 py-ds-2 text-right" title={SORTABLE_HEADER_GLOSS.run_count}>
                       <SortButton field="run_count" label="Runs" currentSort={sort} onSort={handleSort} />
                     </th>
                   );
                 }
                 if (colKey === 'cycle_time_mean_ms') {
                   return (
-                    <th key="cycle_time_mean_ms" scope="col" aria-sort={sortAriaValue('cycle_time', sort)} className="px-ds-4 py-ds-2 text-left" title={SORTABLE_HEADER_GLOSS.cycle_time}>
+                    <th key="cycle_time_mean_ms" scope="col" aria-sort={sortAriaValue('cycle_time', sort)} className="px-ds-4 py-ds-2 text-right" title={SORTABLE_HEADER_GLOSS.cycle_time}>
                       <SortButton field="cycle_time" label="Cycle Time" currentSort={sort} onSort={handleSort} />
                     </th>
                   );
                 }
                 if (colKey === 'last_run_at') {
                   return (
-                    <th key="last_run_at" scope="col" aria-sort={sortAriaValue('last_run', sort)} className="px-ds-4 py-ds-2 text-left" title={SORTABLE_HEADER_GLOSS.last_run}>
+                    <th key="last_run_at" scope="col" aria-sort={sortAriaValue('last_run', sort)} className="px-ds-4 py-ds-2 text-right" title={SORTABLE_HEADER_GLOSS.last_run}>
                       <SortButton field="last_run" label="Last Run" currentSort={sort} onSort={handleSort} />
                     </th>
                   );
                 }
                 if (colKey === 'date_recorded') {
                   return (
-                    <th key="date_recorded" scope="col" aria-sort={sortAriaValue('date_recorded', sort)} className="px-ds-4 py-ds-2 text-left" title={SORTABLE_HEADER_GLOSS.date_recorded}>
+                    <th key="date_recorded" scope="col" aria-sort={sortAriaValue('date_recorded', sort)} className="px-ds-4 py-ds-2 text-right" title={SORTABLE_HEADER_GLOSS.date_recorded}>
                       <SortButton field="date_recorded" label="Date Recorded" currentSort={sort} onSort={handleSort} />
                     </th>
                   );
                 }
-                // Generic column header from registry (plain label for non-sortable columns)
+                // Generic column header from registry (plain label for non-sortable
+                // columns). atglance-review #15: alignment is registry-dataType-driven
+                // so any numeric metric column added to the default pack scans right.
                 const colDef = getColumnByKey(colKey);
                 if (!colDef) return null;
                 return (
                   <th
                     key={colKey}
                     scope="col"
-                    className="px-ds-4 py-ds-2 text-left text-[12px] font-medium text-[var(--content-secondary)]"
+                    className={`px-ds-4 py-ds-2 ${columnAlignClass(colDef.dataType)} text-[12px] font-medium text-[var(--content-secondary)]`}
                     title={colDef.description}
                   >
                     {colDef.label}
@@ -865,6 +917,8 @@ export default function WorkflowList({
                   // row so no row calls Date.now() in render.
                   referenceNowMs={nowMs}
                   isHighlighted={highlightWorkflowId === workflow.id}
+                  // atglance-review #15: only colliding titles get a disambiguator.
+                  isDuplicateTitle={duplicateTitleKeys.has(titleCollisionKey(workflow.title))}
                   {...(visibleColumns !== undefined ? { visibleColumns } : {})}
                   {...(onWorkflowRename ? { onRename: onWorkflowRename } : {})}
                   {...(onWorkflowArchive ? { onArchive: onWorkflowArchive } : {})}

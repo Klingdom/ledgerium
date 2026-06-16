@@ -140,6 +140,59 @@ describe('DashboardV2Shell state derivation', () => {
   });
 });
 
+// ── atglance-review #14: first-run chrome suppression rule ────────────────────
+//
+// The shell suppresses the analyst chrome (lens tabs, KPI band, opportunity bar,
+// weekly chart, facts row, toolbar, preset chips, insights strip, active-filters
+// bar) and renders the FirstRunTutorial INSTEAD iff `isFirstRun`. `isFirstRun`
+// is exactly the 'empty' viewState (0 workflows, no active filters) — it reuses
+// the existing state machine, it does NOT invent a new threshold.
+
+/** Mirror of the shell's isFirstRun derivation (listState === 'empty'). */
+function isFirstRun(state: WorkflowListState): boolean {
+  return state === 'empty';
+}
+
+describe('atglance-review #14: first-run chrome-suppression rule', () => {
+  it('SUPPRESSES the analyst chrome only on the empty (0-workflow, no-filter) case', () => {
+    expect(
+      isFirstRun(
+        deriveState({ isLoading: false, isError: false, filteredWorkflows: [], anyFiltersActive: false }),
+      ),
+    ).toBe(true);
+  });
+
+  it('does NOT suppress chrome at sparse (1–2 workflows) — the chrome MAY remain', () => {
+    const state = deriveState({
+      isLoading: false,
+      isError: false,
+      filteredWorkflows: [makeWorkflow()],
+      anyFiltersActive: false,
+    });
+    expect(state).toBe('sparse');
+    expect(isFirstRun(state)).toBe(false);
+  });
+
+  it('does NOT suppress chrome at ready (3+ workflows)', () => {
+    const workflows = [makeWorkflow({ id: '1' }), makeWorkflow({ id: '2' }), makeWorkflow({ id: '3' })];
+    const state = deriveState({ isLoading: false, isError: false, filteredWorkflows: workflows, anyFiltersActive: false });
+    expect(isFirstRun(state)).toBe(false);
+  });
+
+  it('does NOT treat "no-results" (filters active, nothing matched) as first-run', () => {
+    // A user who filtered to zero is NOT a newcomer — keep the chrome so they can
+    // clear the filter; the tutorial is only the genuine 0-workflow case.
+    const state = deriveState({ isLoading: false, isError: false, filteredWorkflows: [], anyFiltersActive: true });
+    expect(state).toBe('no-results');
+    expect(isFirstRun(state)).toBe(false);
+  });
+
+  it('does NOT suppress chrome while loading or on error', () => {
+    expect(isFirstRun(deriveState({ isLoading: true, isError: false, filteredWorkflows: [], anyFiltersActive: false }))).toBe(false);
+    expect(isFirstRun(deriveState({ isLoading: false, isError: true, filteredWorkflows: [], anyFiltersActive: false }))).toBe(false);
+  });
+});
+
 describe('hasActiveFilters', () => {
   it('returns false for empty filter state', () => {
     expect(hasActiveFilters(emptyFilters)).toBe(false);

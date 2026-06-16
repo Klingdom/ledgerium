@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatDuration, formatConfidence, formatDate, formatDateRelative } from './format.js'
+import { formatDuration, formatConfidence, formatDate, formatDateRelative, formatDateTime } from './format.js'
 
 // ─── formatDuration ───────────────────────────────────────────────────────────
 
@@ -94,6 +94,36 @@ describe('formatDate', () => {
     expect(result).toMatch(/Jan/)
     expect(result).toMatch(/15/)
     expect(result).toMatch(/2026/)
+  })
+})
+
+// ─── formatDateTime (atglance-review #15 row disambiguator) ───────────────────
+
+describe('formatDateTime', () => {
+  it('returns empty string for null/undefined (honest fallback)', () => {
+    expect(formatDateTime(null)).toBe('')
+    expect(formatDateTime(undefined)).toBe('')
+  })
+
+  it('renders an absolute UTC date + 24h time — deterministic across timezones', () => {
+    // 14:05 UTC must render as "14:05" regardless of the test runner's TZ.
+    const result = formatDateTime('2026-06-12T14:05:00Z')
+    expect(result).toMatch(/Jun/)
+    expect(result).toMatch(/12/)
+    expect(result).toMatch(/2026/)
+    expect(result).toMatch(/14:05/)
+  })
+
+  it('is deterministic — same input yields the same string (no Date.now())', () => {
+    const a = formatDateTime('2026-01-01T00:00:00Z')
+    const b = formatDateTime('2026-01-01T00:00:00Z')
+    expect(a).toBe(b)
+  })
+
+  it('two recordings at different times produce different disambiguators', () => {
+    const morning = formatDateTime('2026-06-12T09:00:00Z')
+    const evening = formatDateTime('2026-06-12T21:30:00Z')
+    expect(morning).not.toBe(evening)
   })
 })
 

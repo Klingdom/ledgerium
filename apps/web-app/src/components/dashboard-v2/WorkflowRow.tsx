@@ -49,7 +49,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { WorkflowMetricsOutput, OpportunityTag } from '@/lib/workflow-metrics.js';
-import { formatDate, formatDateRelative } from '@/lib/format.js';
+import { formatDate, formatDateRelative, formatDateTime } from '@/lib/format.js';
 import type { TimeRange } from './CommandHeader.js';
 import {
   getColumnByKey,
@@ -58,6 +58,7 @@ import {
   type ColumnDataType,
 } from '@/lib/dashboard-columns/index.js';
 import { densityRowPaddingClass, type RowDensity } from './density.js';
+import { isNumericColumn } from './columnAlign.js';
 
 // ── Dynamic column rendering helpers ─────────────────────────────────────────
 
@@ -190,6 +191,15 @@ interface WorkflowRowProps {
    * presentational — no data change. Defaults to false.
    */
   isHighlighted?: boolean;
+  /**
+   * atglance-review #15: true when ≥2 VISIBLE rows share this row's title
+   * (computed once by WorkflowList over the rendered set). When true the row
+   * appends a deterministic, OBSERVED disambiguator (its recorded date+time, UTC)
+   * to the subtitle so near-duplicate rows are distinguishable. Gated to actual
+   * collisions — unique-title rows pass false and render no extra clutter.
+   * Defaults to false.
+   */
+  isDuplicateTitle?: boolean;
 }
 
 // ── Opportunity tag config ────────────────────────────────────────────────────
@@ -785,6 +795,7 @@ export default function WorkflowRow({
   // ignore it, so a stable default keeps render deterministic + hydration-safe.
   referenceNowMs = 0,
   isHighlighted = false,
+  isDuplicateTitle = false,
 }: WorkflowRowProps) {
   const router = useRouter();
   // Batch C item 16: density-driven vertical padding for every cell in this row.
@@ -883,6 +894,25 @@ export default function WorkflowRow({
   const variantCount = metricsV2.variantCount ?? null;
   if (runs !== null && runs >= 2 && variantCount !== null && variantCount >= 2) {
     subtextParts.push(`${variantCount} variants`);
+  }
+
+  // atglance-review #15: disambiguate near-duplicate row titles. When ≥2 visible
+  // rows share this title, append a DETERMINISTIC, OBSERVED distinguisher so the
+  // rows are tellable apart (e.g. 16× "Approve Expense Report (Sample)").
+  //
+  // Field choice + HONESTY: the richest observed fields (systems, last-run, runs)
+  // are already in the subtext and are identical across the seeded duplicates, so
+  // they do not distinguish. The recorded date+time (Workflow.createdAt) is the
+  // most useful field that is (a) always present and observed, and (b) not already
+  // a fully-shown column — so it is the honest distinguisher (also the mandated
+  // fallback). Rendered via the UTC formatDateTime (no render-time Date.now() —
+  // hydration-safe). FLAGGED: no richer per-recording observed distinguisher
+  // (e.g. recorder identity / source URL) is reliably available on WorkflowRowData
+  // today; if one lands later it can supersede this date+time fallback.
+  const disambiguator =
+    isDuplicateTitle ? formatDateTime(createdAt) : '';
+  if (disambiguator !== '') {
+    subtextParts.push(`Recorded ${disambiguator}`);
   }
 
   // SIGNALS #5: surface the hidden ROW signals, honesty-gated.
@@ -1145,10 +1175,16 @@ export default function WorkflowRow({
           ? formatDate(rawValue) || '—'
           : formatCellValue(rawValue, colDef.dataType);
 
+        // atglance-review #15: right-align numeric/duration/percentage/date cells
+        // (registry-dataType-driven, matching the header alignment) so columns scan
+        // cleanly. Text columns stay left. `tabular-nums` keeps digit widths even.
+        const numeric = isNumericColumn(colDef.dataType);
         return (
           <td
             key={colKey}
-            className={`px-ds-4 ${cellPadY} text-[13px] text-[var(--content-secondary)] truncate max-w-[140px]`}
+            className={`px-ds-4 ${cellPadY} text-[13px] text-[var(--content-secondary)] truncate max-w-[140px] ${
+              numeric ? 'text-right tabular-nums' : 'text-left'
+            }`}
             title={cellText !== '—' ? cellText : undefined}
             aria-label={`${colDef.label}: ${cellText}`}
           >

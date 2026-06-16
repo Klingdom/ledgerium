@@ -27,6 +27,29 @@ export function formatDate(dateStr: string | null | undefined): string {
   });
 }
 
+/**
+ * Format an ISO timestamp as an absolute date + time in UTC, e.g.
+ * "Jun 12, 2026, 14:05". Used as a DETERMINISTIC, observed row disambiguator
+ * (atglance-review #15) when multiple visible rows share the same title.
+ *
+ * timeZone:'UTC' + a fixed 24-hour clock make this byte-identical across server
+ * (UTC VPS) and client (any browser TZ) — no hydration mismatch, no Date.now().
+ * Returns '' for null/undefined (callers fall back honestly).
+ */
+export function formatDateTime(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  return d.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'UTC',
+  });
+}
+
 export function formatDateRelative(dateStr: string | null | undefined): string {
   if (!dateStr) return '';
   const d = new Date(dateStr);

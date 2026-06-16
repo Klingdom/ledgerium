@@ -139,6 +139,25 @@ test.describe('Process Variants documentation', () => {
     await page.waitForTimeout(1500);
     await shot(page, 'dashboard-list');
 
+    // Best-effort capture of the workflow ROWS (#15: right-aligned numerics +
+    // near-duplicate row disambiguation on the 16x "Approve Expense Report
+    // (Sample)" rows). Wrapped so it can never fail the suite.
+    try {
+      await page.getByRole('button', { name: /^Accept$/ }).first().click({ timeout: 2000 });
+    } catch {
+      /* consent may already be accepted */
+    }
+    try {
+      await page.locator('table').first().scrollIntoViewIfNeeded({ timeout: 3000 });
+      await page.mouse.wheel(0, 520);
+      await page.waitForTimeout(500);
+      await shot(page, 'dashboard-rows');
+      await page.mouse.wheel(0, -2000);
+      await page.waitForTimeout(300);
+    } catch {
+      /* row screenshot is best-effort; unit tests cover #15 */
+    }
+
     // ── Navigation batch (#9/#10/#11): at-a-glance surfaces filter the list ────
     // Dismiss the analytics consent banner so it can't intercept mid-page clicks.
     const consentAccept = page.getByRole('button', { name: /^Accept$/ });

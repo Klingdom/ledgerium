@@ -31,6 +31,7 @@ import {
   formatCellValue,
   formatDurationMs,
 } from './WorkflowRow.js';
+import { formatDateTime } from '@/lib/format.js';
 
 // ── Health band derivation (duplicated from WorkflowRow for unit testability) ─
 // iter-024: thresholds tightened to 60/80 per PRD_DASHBOARD_V2_EXECUTIVE_REFINEMENT §2.4
@@ -1276,5 +1277,70 @@ describe('atglance-review #18: row a11y wiring', () => {
 
   it('mouse click-anywhere-to-open is preserved on the row', () => {
     expect(src).toMatch(/onClick=\{handleRowClick\}/);
+  });
+});
+
+// ── atglance-review #15: numeric cell right-align + row disambiguation ─────────
+// Source-pins (node env — no DOM render): the generic registry cells right-align
+// when the column dataType is numeric (driven by isNumericColumn, NOT value-shape),
+// and near-duplicate row titles get a deterministic, observed disambiguator
+// (recorded date+time via the UTC formatDateTime — no render-time Date.now()).
+
+describe('atglance-review #15: WorkflowRow numeric alignment + disambiguator', () => {
+  const src = readFileSync(
+    fileURLToPath(new URL('./WorkflowRow.tsx', import.meta.url)),
+    'utf8',
+  );
+
+  it('generic registry cells right-align numeric columns via isNumericColumn(dataType)', () => {
+    expect(src).toMatch(/isNumericColumn\(colDef\.dataType\)/);
+    // The cell applies text-right + tabular-nums when numeric, text-left otherwise.
+    expect(src).toMatch(/numeric\s*\?\s*'text-right tabular-nums'\s*:\s*'text-left'/);
+  });
+
+  it('imports the alignment helper from the dedicated module (no circular import)', () => {
+    expect(src).toMatch(/import \{ isNumericColumn \} from '\.\/columnAlign\.js'/);
+  });
+
+  it('the disambiguator is gated to actual collisions (isDuplicateTitle prop)', () => {
+    // Only colliding titles get the extra subtitle clutter.
+    expect(src).toMatch(/isDuplicateTitle\s*\?\s*formatDateTime\(createdAt\)\s*:\s*''/);
+    expect(src).toMatch(/subtextParts\.push\(`Recorded \$\{disambiguator\}`\)/);
+  });
+
+  it('the disambiguator renders via the UTC formatDateTime — never Date.now() in render', () => {
+    expect(src).toMatch(/import \{ formatDate, formatDateRelative, formatDateTime \}/);
+    // No executable Date.now() survives (the #17 invariant — re-asserted here).
+    const codeOnly = src
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+    expect(codeOnly.includes('Date.now()')).toBe(false);
+  });
+
+  it('PRESERVES the row-open title button, the dataType cells, and the #5 badges', () => {
+    // Title-button row-open affordance (prior batch) intact.
+    expect(src).toMatch(/aria-label=\{`Open workflow: \$\{displayTitle\}`\}/);
+    expect(src).toMatch(/onClick=\{handleRowClick\}/);
+    // Registry-dataType cell formatting intact.
+    expect(src).toMatch(/formatCellValue\(rawValue,\s*colDef\.dataType\)/);
+    // #5 row badges (high-variation / bottleneck / stale) intact.
+    expect(src).toContain('High variation');
+    expect(src).toMatch(/Bottleneck \(observed\)/);
+    expect(src).toContain('Stale');
+  });
+});
+
+// ── formatDateTime is the observed disambiguator (UTC, deterministic) ──────────
+
+describe('atglance-review #15: disambiguator value (formatDateTime)', () => {
+  it('two rows recorded at different times get different disambiguators', () => {
+    const a = formatDateTime('2026-06-12T09:00:00Z');
+    const b = formatDateTime('2026-06-12T21:30:00Z');
+    expect(a).not.toBe(b);
+    expect(a).toMatch(/Jun.*12.*2026.*09:00/);
+  });
+
+  it('is deterministic for the same recorded timestamp (no fabrication)', () => {
+    expect(formatDateTime('2026-01-01T00:00:00Z')).toBe(formatDateTime('2026-01-01T00:00:00Z'));
   });
 });

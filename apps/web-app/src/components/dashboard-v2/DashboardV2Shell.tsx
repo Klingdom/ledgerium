@@ -32,6 +32,7 @@ import { track, setUserPlanForAnalytics } from '@/lib/analytics.js';
 import CommandHeader, { type TimeRange } from './CommandHeader.js';
 import InsightsStrip from './InsightsStrip.js';
 import TopBand from './band/TopBand.js';
+import FirstRunTutorial from './FirstRunTutorial.js';
 import type {
   OpportunityCounts,
   ActivityWeekBucket,
@@ -1021,6 +1022,15 @@ export default function DashboardV2Shell() {
   }
   const listState = deriveState();
 
+  // atglance-review #14: the FIRST-RUN case — a genuinely empty library (0
+  // workflows, no active filters). When true the analyst chrome (lens tabs, KPI
+  // band, opportunity bar, weekly chart, facts row, toolbar, preset chips,
+  // insights strip, active-filters bar) is SUPPRESSED and the focused
+  // record→measure→act tutorial is rendered instead — the empty page becomes
+  // the activation surface, not an analyst cockpit wrapped around an empty
+  // table. Reuses the existing viewState machine ('empty') — no new threshold.
+  const isFirstRun = listState === 'empty';
+
   // Top insight: highest-severity chip
   const topInsight =
     insightChips.length > 0
@@ -1054,21 +1064,32 @@ export default function DashboardV2Shell() {
         workflowCount={allWorkflows.length}
       />
 
-      {/* Persona LENS switcher (DASHBOARD_PERSONAS_REVIEW_001 P0, v1): client-only
-          tablist re-framing the same data. 'library' = today's behavior verbatim. */}
-      <div className="px-ds-4 pt-ds-2">
-        <LensSwitcher activeLens={activeLens} onLensChange={handleLensChange} />
-      </div>
+      {/* atglance-review #14: suppress the analyst chrome on the first-run
+          (0-workflow) case. The LensSwitcher / LSS panel / TopBand / InsightsStrip
+          are meaningless without data and intimidate a newcomer; the FirstRunTutorial
+          below replaces the toolbar+list with a focused record→measure→act path. */}
+      {!isFirstRun && (
+        <>
+          {/* Persona LENS switcher (DASHBOARD_PERSONAS_REVIEW_001 P0, v1): client-only
+              tablist re-framing the same data. 'library' = today's behavior verbatim. */}
+          <div className="px-ds-4 pt-ds-2">
+            <LensSwitcher activeLens={activeLens} onLensChange={handleLensChange} />
+          </div>
 
-      {/* LSS "Measure & Analyze" above-list panel: the Pareto of total observed
-          time (mean × runs) + variation strip. Only when the LSS lens is active. */}
-      {activeLens === 'lss' && !isLoading && !isError && (
-        <div className="px-ds-4 pt-ds-3">
-          <LssParetoPanel workflows={paretoInputs} onSelectWorkflow={handleSelectWorkflow} />
-        </div>
+          {/* LSS "Measure & Analyze" above-list panel: the Pareto of total observed
+              time (mean × runs) + variation strip. Only when the LSS lens is active. */}
+          {activeLens === 'lss' && !isLoading && !isError && (
+            <div className="px-ds-4 pt-ds-3">
+              <LssParetoPanel workflows={paretoInputs} onSelectWorkflow={handleSelectWorkflow} />
+            </div>
+          )}
+        </>
       )}
 
-      {/* Batch B (2026-06-12): top-of-page graphics band (mounts between header and list) */}
+      {/* Batch B (2026-06-12): top-of-page graphics band (mounts between header and list).
+          TopBand already self-suppresses at 0 workflows; the !isFirstRun guard makes
+          the chrome-suppression contract explicit + symmetric with the rest. */}
+      {!isFirstRun && (
       <TopBand
         data={{
           isLoading,
@@ -1096,9 +1117,10 @@ export default function DashboardV2Shell() {
         onKpiFilter={handleKpiTileFilter}
         onNarratorFilter={handleNarratorFilter}
       />
+      )}
 
-      {/* Section 2: Insights Strip */}
-      {!isLoading && !isError && insightChips.length > 0 && (
+      {/* Section 2: Insights Strip (suppressed on the first-run case per #14) */}
+      {!isFirstRun && !isLoading && !isError && insightChips.length > 0 && (
         <InsightsStrip
           chips={insightChips}
           activeFilterKey={insightFilterKey}
@@ -1107,7 +1129,15 @@ export default function DashboardV2Shell() {
       )}
       {/* Note: insight_chip_clicked event is emitted inside InsightsStrip itself */}
 
-      {/* Sections 3+: sidebar + list layout */}
+      {/* atglance-review #14: FIRST-RUN activation surface. When the library is
+          genuinely empty (no workflows, no filters) render the focused
+          record→measure→act tutorial INSTEAD of the toolbar + list — pointing the
+          newcomer clearly at the first action. The analyst chrome above is
+          suppressed. Honest copy + real CTAs only (no fabricated stats). */}
+      {isFirstRun ? (
+        <FirstRunTutorial />
+      ) : (
+      /* Sections 3+: sidebar + list layout */
       <div className="flex flex-row gap-0 min-h-0">
         {/* D5: PortfolioSidebar — collapsed by default, expanded via filter bar button */}
         {portfolioSidebarOpen && (
@@ -1204,6 +1234,7 @@ export default function DashboardV2Shell() {
           />
         </div>
       </div>
+      )}
 
       {/* D+4+5 (iter-061/062): Column picker drawer — portal-style, z-indexed above the table */}
       <ColumnPicker

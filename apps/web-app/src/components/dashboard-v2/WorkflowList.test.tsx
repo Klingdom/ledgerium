@@ -10,10 +10,20 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 // ── Analytics mock (iter-030) ─────────────────────────────────────────────────
 vi.mock('@/lib/analytics.js', () => ({ track: vi.fn() }));
-import { applyFilters, sortWorkflows, matchesSearch, SORTABLE_HEADER_GLOSS } from './WorkflowList.js';
+import {
+  applyFilters,
+  sortWorkflows,
+  matchesSearch,
+  SORTABLE_HEADER_GLOSS,
+  isNumericColumn,
+  columnAlignClass,
+} from './WorkflowList.js';
+import type { ColumnDataType } from '@/lib/dashboard-columns/index.js';
 import { hasActiveFilters } from './WorkflowListFilterBar.js';
 import type { WorkflowRowData } from './WorkflowRow.js';
 import type { FilterState } from './WorkflowListFilterBar.js';
@@ -302,7 +312,9 @@ const COPY = {
     cta: 'Install extension to start →',
   },
   sparse: {
-    notice: 'Your first workflow is recorded. Record 2 more to unlock health score comparison across your library.',
+    // atglance-review #14 (2026-06-16): rewritten to INVITE the first click into
+    // the workflow (the aha-moment) instead of deferring it ("record 2 more").
+    notice: 'Open your first workflow to see its process map, cycle time, and where AI fits. Record 2 more to compare health across your library.',
   },
   error: {
     message: 'Could not load workflows — check your connection and retry.',
@@ -322,12 +334,25 @@ describe('WDC2-P05 (iter-080): WorkflowList copy-pin assertions', () => {
     expect(COPY.empty.cta).toBe('Install extension to start →');
   });
 
-  it('sparse-state notice copy matches WDC-002 growth-strategist verbatim spec', () => {
+  it('sparse-state notice copy matches the atglance-review #14 first-open invitation', () => {
     // Fires when deriveState returns "sparse" (1 or 2 workflows)
     expect(deriveState(false, false, [makeWorkflow('a1')], false)).toBe('sparse');
     expect(COPY.sparse.notice).toBe(
-      'Your first workflow is recorded. Record 2 more to unlock health score comparison across your library.',
+      'Open your first workflow to see its process map, cycle time, and where AI fits. Record 2 more to compare health across your library.',
     );
+  });
+
+  it('sparse copy INVITES the first open (aha-moment first) and keeps the honest run-count disclosure', () => {
+    const lc = COPY.sparse.notice.toLowerCase();
+    // Leads with the immediate reward — opening the recorded workflow.
+    expect(lc).toContain('open your first workflow');
+    // Names only what the detail page honestly shows.
+    expect(lc).toContain('process map');
+    expect(lc).toContain('cycle time');
+    // Library benefit is preserved as secondary (honest run-count disclosure).
+    expect(lc).toContain('record 2 more');
+    // It no longer DEFERS the aha-moment with the old "unlock … comparison" framing.
+    expect(lc).not.toContain('unlock health score comparison');
   });
 
   it('error-state copy matches WDC-002 growth-strategist verbatim spec', () => {
@@ -608,5 +633,141 @@ describe('atglance-review #13: SORTABLE_HEADER_GLOSS', () => {
         expect(lc).not.toContain(forbidden);
       }
     }
+  });
+});
+
+// ── atglance-review #15: right-align numeric columns (registry-dataType-driven) ─
+
+describe('atglance-review #15: numeric column alignment (dataType-driven)', () => {
+  it('numeric/duration/percentage/date dataTypes are right-aligned (scannable)', () => {
+    const numericTypes: ColumnDataType[] = ['number', 'duration', 'percentage', 'date'];
+    for (const t of numericTypes) {
+      expect(isNumericColumn(t)).toBe(true);
+      expect(columnAlignClass(t)).toBe('text-right');
+    }
+  });
+
+  it('text dataTypes (string/enum/boolean) stay left-aligned', () => {
+    const textTypes: ColumnDataType[] = ['string', 'enum', 'boolean'];
+    for (const t of textTypes) {
+      expect(isNumericColumn(t)).toBe(false);
+      expect(columnAlignClass(t)).toBe('text-left');
+    }
+  });
+
+  it('undefined dataType is treated as text (left) — never accidentally right-aligns', () => {
+    expect(isNumericColumn(undefined)).toBe(false);
+    expect(columnAlignClass(undefined)).toBe('text-left');
+  });
+
+  it('the default-pack numeric columns (Runs, Cycle Time, dates) resolve to right-align', () => {
+    // Maps the registry dataTypes of the scannable default columns named in #15.
+    const runs: ColumnDataType = 'number'; // run_count
+    const cycle: ColumnDataType = 'duration'; // cycle_time_mean_ms
+    const recorded: ColumnDataType = 'date'; // date_recorded / last_run_at
+    expect(columnAlignClass(runs)).toBe('text-right');
+    expect(columnAlignClass(cycle)).toBe('text-right');
+    expect(columnAlignClass(recorded)).toBe('text-right');
+  });
+});
+
+// ── atglance-review #15: near-duplicate row title disambiguation gating ────────
+//
+// The collision detection in WorkflowList computes, over the rendered set, the
+// set of titles that appear ≥2 times (case-insensitive, whitespace-collapsed).
+// Only those rows get a disambiguator → unique titles get zero clutter. These
+// tests pin that gating rule (the same pure logic the component uses).
+
+/** Mirror of WorkflowList's collision-key normalization (deterministic). */
+function titleCollisionKey(title: string): string {
+  return title.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+/** Mirror of WorkflowList's duplicate-title set computation over a rendered set. */
+function computeDuplicateTitleKeys(titles: string[]): Set<string> {
+  const counts = new Map<string, number>();
+  for (const t of titles) {
+    const k = titleCollisionKey(t);
+    counts.set(k, (counts.get(k) ?? 0) + 1);
+  }
+  const dups = new Set<string>();
+  for (const [k, n] of counts) if (n > 1) dups.add(k);
+  return dups;
+}
+
+describe('atglance-review #15: duplicate-title disambiguation gating', () => {
+  it('flags a title that appears ≥2 times in the visible set', () => {
+    const dups = computeDuplicateTitleKeys([
+      'Approve Expense Report (Sample)',
+      'Approve Expense Report (Sample)',
+      'Approve Expense Report (Sample)',
+      'Onboard New Hire',
+    ]);
+    expect(dups.has(titleCollisionKey('Approve Expense Report (Sample)'))).toBe(true);
+    // The unique title is NOT flagged → it gets NO added clutter (gating).
+    expect(dups.has(titleCollisionKey('Onboard New Hire'))).toBe(false);
+  });
+
+  it('a fully unique-title library produces ZERO flagged collisions', () => {
+    const dups = computeDuplicateTitleKeys(['Alpha', 'Beta', 'Gamma']);
+    expect(dups.size).toBe(0);
+  });
+
+  it('collision detection is case-insensitive and whitespace-collapsed (near-same)', () => {
+    const dups = computeDuplicateTitleKeys(['Approve  Report', 'approve report']);
+    expect(dups.has(titleCollisionKey('Approve Report'))).toBe(true);
+    expect(dups.size).toBe(1);
+  });
+
+  it('the 16× sample case flags exactly the one colliding title', () => {
+    const titles = Array.from({ length: 16 }, () => 'Approve Expense Report (Sample)');
+    const dups = computeDuplicateTitleKeys(titles);
+    expect(dups.size).toBe(1);
+    expect(dups.has(titleCollisionKey('Approve Expense Report (Sample)'))).toBe(true);
+  });
+});
+
+// ── atglance-review #15: sticky header + right-align (source-pin) ─────────────
+// Node env (no DOM render): assert the table markup keeps the sticky header CSS
+// and the numeric headers right-align — while preserving aria-sort + scope + the
+// header tooltips. Catches a regression even without a Playwright render.
+
+describe('atglance-review #15: sticky header + numeric right-align (source)', () => {
+  const src = readFileSync(
+    fileURLToPath(new URL('./WorkflowList.tsx', import.meta.url)),
+    'utf8',
+  );
+
+  it('the header row carries the CSS sticky classes (sticky / top-0 / bg + z-index)', () => {
+    // Sticky lives on the header cells via the [&>th] arbitrary variant because
+    // border-collapse tables do not honor sticky on <thead>/<tr>.
+    expect(src).toContain('[&>th]:sticky');
+    expect(src).toContain('[&>th]:top-0');
+    expect(src).toContain('[&>th]:z-10');
+    expect(src).toMatch(/\[&>th\]:bg-\[var\(--surface-primary\)\]/);
+  });
+
+  it('numeric column headers (Runs / Cycle Time / Last Run / Date Recorded) are text-right', () => {
+    // Each sortable numeric <th> right-aligns; the SortButton is inline so the
+    // text-right applies to it.
+    expect(src).toMatch(/key="run_count"[\s\S]*?text-right/);
+    expect(src).toMatch(/key="cycle_time_mean_ms"[\s\S]*?text-right/);
+    expect(src).toMatch(/key="last_run_at"[\s\S]*?text-right/);
+    expect(src).toMatch(/key="date_recorded"[\s\S]*?text-right/);
+  });
+
+  it('generic registry columns align via columnAlignClass(dataType) — not value-shape', () => {
+    expect(src).toMatch(/columnAlignClass\(colDef\.dataType\)/);
+  });
+
+  it('aria-sort + scope + header title tooltips are preserved on the numeric headers', () => {
+    // The sticky/right-align change must NOT strip the a11y attributes.
+    expect(src).toMatch(/key="run_count"[\s\S]*?aria-sort=\{sortAriaValue\('run_count', sort\)\}/);
+    expect(src).toMatch(/key="run_count"[\s\S]*?title=\{SORTABLE_HEADER_GLOSS\.run_count\}/);
+    expect(src).toMatch(/key="date_recorded"[\s\S]*?scope="col"/);
+  });
+
+  it('passes isDuplicateTitle to each WorkflowRow (collision-gated disambiguator)', () => {
+    expect(src).toMatch(/isDuplicateTitle=\{duplicateTitleKeys\.has\(titleCollisionKey\(workflow\.title\)\)\}/);
   });
 });
