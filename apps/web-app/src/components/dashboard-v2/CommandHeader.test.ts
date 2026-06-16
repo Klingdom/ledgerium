@@ -9,6 +9,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { healthVerdictWord } from './CommandHeader.js';
 
 // ── Mirrors CommandHeader.tsx healthBand ──────────────────────────────────────
@@ -245,5 +247,28 @@ describe('atglance-review #2: CommandHeader healthVerdictWord (non-numeric verdi
     for (const label of ['poor', 'fair', 'good'] as const) {
       expect(healthVerdictWord(label)).not.toMatch(/\d/);
     }
+  });
+});
+
+// ── atglance-review: bottleneck de-duplication ────────────────────────────────
+// The highest-severity insight (e.g. "Bottleneck: Step 2 …") must appear ONCE on
+// the page — as the dismissible amber InsightsStrip chip below the charts — NOT
+// also as a faint duplicate line in the CommandHeader. Source-level assertion
+// (node env — no DOM render).
+
+describe('atglance-review: CommandHeader no longer renders the top-insight line', () => {
+  const src = readFileSync(
+    fileURLToPath(new URL('./CommandHeader.tsx', import.meta.url)),
+    'utf8',
+  );
+
+  it('does not render {topInsight.label} (the duplicate bottleneck copy is removed)', () => {
+    expect(src).not.toContain('{topInsight.label}');
+    // Also no conditional {topInsight && (...)} render block.
+    expect(src).not.toMatch(/\{topInsight && \(/);
+  });
+
+  it('still keeps the persistent purpose subtitle as the orientation line', () => {
+    expect(src).toMatch(/Your recorded workflows, measured from real runs/);
   });
 });

@@ -175,12 +175,19 @@ export type AnalyticsEvent =
       /** WDC2-P03 (iter-067): time-range segmentation prereq — the active filter
        *  at the moment the dashboard loaded. Enables per-range retention analysis. */
       time_range: '7d' | '30d' | '90d' | 'all';
+      /** atglance-review #20: the active lens at load. Without it every
+       *  downstream event is un-segmentable by lens (Library vs LSS). */
+      lens: 'library' | 'lss';
     }
   | {
       event: 'workflow_row_clicked';
       workflowId: string;
       elapsedMsSinceDashboardView: number;
       healthBand: 'red' | 'amber' | 'green';
+      /** atglance-review #20: which at-a-glance surface produced the row open,
+       *  for per-surface navigation attribution. 'list_row' = direct list click
+       *  (default); 'kpi_drill' / 'pareto' = navigated via a band/lens affordance. */
+      originSurface: 'list_row' | 'kpi_drill' | 'pareto';
     }
   | {
       event: 'dashboard_v2_sort_changed';
@@ -228,6 +235,26 @@ export type AnalyticsEvent =
       event: 'dashboard_opportunity_segment_clicked';
       segment: 'automate' | 'standardize' | 'optimize' | 'monitor' | 'healthy';
       count: number;
+    }
+  // ── atglance-review #20: navigation/comprehension instrumentation ─────────
+  | {
+      // Fired when the column-customization drawer opens. Measures discovery of
+      // the "configurable metrics" feature (zero usage signal before this).
+      event: 'dashboard_column_picker_opened';
+      visibleColumnCount: number;
+    }
+  | {
+      // Fired when the zero-workflow empty-state CTA is clicked — the terminal
+      // click of the activation funnel (land → install).
+      event: 'dashboard_empty_state_cta_clicked';
+      cta: 'install' | 'upload';
+    }
+  | {
+      // Fired when an LSS-lens Pareto bar (legend entry) is clicked to drill to
+      // the matching row. Measures whether the "vital few" framing drives
+      // navigation to high-leverage workflows.
+      event: 'dashboard_pareto_bar_clicked';
+      workflowId: string;
     }
 
   // ── Admin ─────────────────────────────────────────────────────────────────

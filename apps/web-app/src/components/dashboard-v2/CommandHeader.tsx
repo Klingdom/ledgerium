@@ -35,6 +35,12 @@ interface CommandHeaderProps {
   portfolioHealthScore: number | null;
   /** Period-over-period delta (current − prior 30d). Null if prior period has insufficient data. */
   portfolioHealthScoreDelta: number | null;
+  /**
+   * @deprecated atglance-review bottleneck de-dup — no longer rendered here.
+   * The highest-severity insight now appears once below the charts as the
+   * dismissible InsightsStrip chip. Prop retained (accepted-but-unused) to keep
+   * the shell call site stable; safe to remove in a follow-up cleanup.
+   */
   topInsight: InsightChip | null;
   timeRange: TimeRange;
   onTimeRangeChange: (range: TimeRange) => void;
@@ -142,11 +148,13 @@ export default function CommandHeader({
           Your recorded workflows, measured from real runs — cycle time,
           variation, and where AI could help.
         </p>
-        {topInsight && (
-          <p className="text-[13px] font-normal leading-[1.4] text-[var(--content-tertiary)] truncate max-w-xl">
-            {topInsight.label}
-          </p>
-        )}
+        {/* atglance-review bottleneck de-dup: the top-insight line is NO LONGER
+            rendered here. The same highest-severity chip (e.g. "Bottleneck: Step
+            2 …") already appears once below the charts as the dismissible amber
+            InsightsStrip chip — rendering it here too produced a faint duplicate
+            in the same viewport. Orientation (purpose subtitle) now leads; the
+            single alert lives in the dismissible chip. `topInsight` is retained
+            as an accepted-but-unused prop to keep the call site stable. */}
       </div>
 
       {/* Right: time range selector + portfolio score */}

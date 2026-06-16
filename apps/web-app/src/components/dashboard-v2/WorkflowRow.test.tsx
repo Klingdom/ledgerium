@@ -26,7 +26,11 @@ vi.mock('@/lib/analytics.js', () => ({ track: vi.fn() }));
 // the real healthPillTier export can be imported in the node test environment.
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 import type { WorkflowMetricsOutput, HealthScoreV2, OpportunityTag } from '@/lib/workflow-metrics.js';
-import { healthPillTier as realHealthPillTier } from './WorkflowRow.js';
+import {
+  healthPillTier as realHealthPillTier,
+  formatCellValue,
+  formatDurationMs,
+} from './WorkflowRow.js';
 
 // ── Health band derivation (duplicated from WorkflowRow for unit testability) ─
 // iter-024: thresholds tightened to 60/80 per PRD_DASHBOARD_V2_EXECUTIVE_REFINEMENT §2.4
@@ -483,7 +487,13 @@ function buildWorkflowRowClickedEvent(params: {
   healthScoreOverall: number;
   dashboardViewPerfTimestampMs: number;
   perfNow: number;
-}): { event: string; workflowId: string; elapsedMsSinceDashboardView: number; healthBand: 'red' | 'amber' | 'green' } {
+}): {
+  event: string;
+  workflowId: string;
+  elapsedMsSinceDashboardView: number;
+  healthBand: 'red' | 'amber' | 'green';
+  originSurface: 'list_row' | 'kpi_drill' | 'pareto';
+} {
   const { workflowId, healthScoreOverall, dashboardViewPerfTimestampMs, perfNow } = params;
   const elapsed =
     dashboardViewPerfTimestampMs > 0
@@ -496,6 +506,8 @@ function buildWorkflowRowClickedEvent(params: {
     workflowId,
     elapsedMsSinceDashboardView: elapsed,
     healthBand: hBand,
+    // atglance-review #20: a direct list-row click always reports 'list_row'.
+    originSurface: 'list_row',
   };
 }
 
@@ -1152,5 +1164,117 @@ describe('atglance-review #17: WorkflowRow uses one threaded clock, never per-ro
       .replace(/\/\*[\s\S]*?\*\//g, '')
       .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
     expect(codeOnly.includes('Date.now()')).toBe(false);
+  });
+});
+
+// ── atglance-review #19: formatCellValue is registry-dataType driven ──────────
+// The generic cell formatter must derive its unit from the column registry
+// `dataType`, NOT from the value shape. The old shape-guessing rendered a count
+// of 1500 as "25m" and a percentage of 42 as a bare "42".
+
+describe('atglance-review #19: formatCellValue (registry-dataType driven)', () => {
+  it('null / undefined / non-finite → "—" (never fabricate)', () => {
+    expect(formatCellValue(null, 'number')).toBe('—');
+    expect(formatCellValue(undefined, 'duration')).toBe('—');
+    expect(formatCellValue(Number.NaN, 'number')).toBe('—');
+    expect(formatCellValue(Number.POSITIVE_INFINITY, 'duration')).toBe('—');
+  });
+
+  it('a count ≥ 1000 with dataType="number" renders as the integer, NOT a duration', () => {
+    // The exact bug from the review: 1500 must NOT become "25m".
+    expect(formatCellValue(1500, 'number')).toBe('1500');
+    expect(formatCellValue(1500, 'number')).not.toMatch(/m|s|h/);
+    expect(formatCellValue(2400, 'number')).toBe('2400');
+  });
+
+  it('dataType="duration" formats milliseconds as human time', () => {
+    expect(formatCellValue(25_000, 'duration')).toBe('25s');
+    expect(formatCellValue(90_000, 'duration')).toBe('1m 30s');
+    expect(formatCellValue(3_600_000, 'duration')).toBe('1h');
+    expect(formatCellValue(5_400_000, 'duration')).toBe('1h 30m');
+  });
+
+  it('dataType="percentage" renders integers without ".0" and decimals to 1 place', () => {
+    // Engine percentages are already 0–100 display units.
+    expect(formatCellValue(42, 'percentage')).toBe('42%');
+    expect(formatCellValue(42.5, 'percentage')).toBe('42.5%');
+    expect(formatCellValue(100, 'percentage')).toBe('100%');
+    expect(formatCellValue(0, 'percentage')).toBe('0%');
+  });
+
+  it('dataType="number" rounds to an integer', () => {
+    expect(formatCellValue(3.7, 'number')).toBe('4');
+    expect(formatCellValue(12, 'number')).toBe('12');
+  });
+
+  it('no dataType (legacy/standalone) falls back to a conservative integer — never re-guesses duration/percent', () => {
+    // The fallback must NOT re-introduce the shape-guessing: 1500 stays "1500".
+    expect(formatCellValue(1500)).toBe('1500');
+    expect(formatCellValue(42.0)).toBe('42');
+  });
+
+  it('booleans render Yes/No; empty arrays render "—"; arrays join (max 3 + ellipsis)', () => {
+    expect(formatCellValue(true, 'boolean')).toBe('Yes');
+    expect(formatCellValue(false, 'boolean')).toBe('No');
+    expect(formatCellValue([], 'enum')).toBe('—');
+    expect(formatCellValue(['a', 'b', 'c', 'd'], 'enum')).toBe('a, b, c…');
+  });
+
+  it('formatDurationMs covers the second/minute/hour boundaries', () => {
+    expect(formatDurationMs(0)).toBe('0s');
+    expect(formatDurationMs(59_000)).toBe('59s');
+    expect(formatDurationMs(60_000)).toBe('1m');
+    expect(formatDurationMs(61_000)).toBe('1m 1s');
+    expect(formatDurationMs(7_260_000)).toBe('2h 1m');
+  });
+
+  it('date columns are formatted upstream (caller uses formatDate), not by formatCellValue', () => {
+    // Source proof: the cell render special-cases dataType==='date' BEFORE calling
+    // formatCellValue, so date values never hit the generic numeric path.
+    const src = readFileSync(
+      fileURLToPath(new URL('./WorkflowRow.tsx', import.meta.url)),
+      'utf8',
+    );
+    expect(src).toMatch(/colDef\.dataType === 'date'[\s\S]*?formatDate\(rawValue\)/);
+    expect(src).toMatch(/formatCellValue\(rawValue,\s*colDef\.dataType\)/);
+  });
+});
+
+// ── atglance-review #18: health-cell keyboard opener + row a11y restructure ───
+// Source-level assertions (node env — no DOM render here): the health breakdown
+// trigger is a real <button> with aria-expanded/aria-controls, and the whole-row
+// click target no longer traps keyboard focus (tabIndex/Space=kebab removed).
+
+describe('atglance-review #18: row a11y wiring', () => {
+  const src = readFileSync(
+    fileURLToPath(new URL('./WorkflowRow.tsx', import.meta.url)),
+    'utf8',
+  );
+
+  it('the health breakdown trigger is a <button> with aria-expanded + aria-controls', () => {
+    expect(src).toMatch(/aria-expanded=\{showTooltip\}/);
+    expect(src).toMatch(/aria-controls=\{healthTooltipId\}/);
+    // The trigger ref is now a button element (keyboard-operable).
+    expect(src).toMatch(/tooltipTriggerRef = useRef<HTMLButtonElement>/);
+  });
+
+  it('the HealthTooltip receives the matching id for aria-controls', () => {
+    expect(src).toMatch(/id=\{healthTooltipId\}/);
+  });
+
+  it('the title is a navigation <button> (primary affordance), not just text', () => {
+    expect(src).toMatch(/aria-label=\{`Open workflow: \$\{displayTitle\}`\}/);
+  });
+
+  it('the whole <tr> is no longer a focusable element with a Space=kebab binding', () => {
+    // tabIndex={0} on the row and the old onKeyDown handler are removed.
+    expect(src).not.toContain('onKeyDown={handleRowKeyDown}');
+    expect(src).not.toMatch(/<tr[\s\S]*?tabIndex=\{0\}/);
+    // The surprising Space → open kebab binding is gone.
+    expect(src).not.toMatch(/if \(e\.key === ' '\)[\s\S]*?setShowKebab\(true\)/);
+  });
+
+  it('mouse click-anywhere-to-open is preserved on the row', () => {
+    expect(src).toMatch(/onClick=\{handleRowClick\}/);
   });
 });

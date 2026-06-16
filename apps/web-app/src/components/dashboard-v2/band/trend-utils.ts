@@ -58,3 +58,20 @@ export function computeYTicks(data: ReadonlyArray<ActivityWeekBucket>): number[]
   // Dedupe while preserving ascending order.
   return Array.from(new Set(ticks)).sort((a, b) => a - b);
 }
+
+/**
+ * Whether the Y-axis domain is degenerate (max count ≤ 1) and should not render
+ * a Y-axis at all.
+ *
+ * With a max of 0 or 1 there is no meaningful vertical scale — the only honest
+ * tick set is "0 / 1", and rendering an axis there invites the repeated-label
+ * artifact the COMPETITIVE review flagged ("3 / 3 / 3"). When degenerate, the
+ * chart hides the Y-axis entirely (the bars + tooltip still communicate the
+ * count) rather than drawing a misleading or redundant scale.
+ *
+ * Deterministic; reads only the pre-computed bucket counts (no clock/random).
+ */
+export function isDegenerateYDomain(data: ReadonlyArray<ActivityWeekBucket>): boolean {
+  const max = data.reduce((m, b) => (b.count > m ? b.count : m), 0);
+  return max <= 1;
+}

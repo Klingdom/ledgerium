@@ -54,6 +54,7 @@ import {
   getColumnByKey,
   type ColumnKey,
   type ColumnAccessorContext,
+  type ColumnDataType,
 } from '@/lib/dashboard-columns/index.js';
 import { densityRowPaddingClass, type RowDensity } from './density.js';
 
@@ -66,30 +67,50 @@ import { densityRowPaddingClass, type RowDensity } from './density.js';
  */
 const SPECIAL_RENDER_KEYS = new Set<ColumnKey>(['workflow_title', 'health_score']);
 
+/** Format a millisecond duration as "Xs" / "Xm Ys" / "Xh Ym". */
+export function formatDurationMs(value: number): string {
+  const s = Math.round(value / 1000);
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  const remS = s % 60;
+  if (m < 60) return remS > 0 ? `${m}m ${remS}s` : `${m}m`;
+  const h = Math.floor(m / 60);
+  const remM = m % 60;
+  return remM > 0 ? `${h}h ${remM}m` : `${h}h`;
+}
+
 /**
  * Format an accessor return value for display in a generic `<td>` cell.
+ *
+ * atglance-review #19 (honesty/correctness): the unit is driven by the column
+ * registry `dataType` — NOT guessed from the value shape. Value-shape guessing
+ * previously rendered a count of 1500 as "25m" (a duration) and a percentage of
+ * 42 as a bare "42"; registry-driven formatting renders each value with the unit
+ * the column actually declares. Date columns are formatted upstream (the caller
+ * uses the UTC-anchored `formatDate`) and reach here only as a fallthrough.
+ *
  * Returns "—" (em-dash) for null/undefined (audit-honesty — never fabricate).
  */
-function formatCellValue(value: unknown): string {
+export function formatCellValue(value: unknown, dataType?: ColumnDataType): string {
   if (value === null || value === undefined) return '—';
   if (typeof value === 'number') {
     if (!Number.isFinite(value)) return '—';
-    // Durations (large ms numbers) — show as human-readable time
-    if (value > 1000) {
-      const s = Math.round(value / 1000);
-      if (s < 60) return `${s}s`;
-      const m = Math.floor(s / 60);
-      const remS = s % 60;
-      if (m < 60) return remS > 0 ? `${m}m ${remS}s` : `${m}m`;
-      const h = Math.floor(m / 60);
-      const remM = m % 60;
-      return remM > 0 ? `${h}h ${remM}m` : `${h}h`;
+    switch (dataType) {
+      case 'duration':
+        // Engine durations are milliseconds (registry types.ts:150).
+        return formatDurationMs(value);
+      case 'percentage':
+        // Engine percentages are already 0–100 display units (registry
+        // types.ts:151). Integers render without a trailing ".0".
+        return Number.isInteger(value) ? `${value}%` : `${value.toFixed(1)}%`;
+      case 'number':
+        return String(Math.round(value));
+      default:
+        // No declared dataType (standalone/legacy call sites): fall back to a
+        // conservative integer render — never re-introduce the duration/percent
+        // shape-guessing that mislabeled counts.
+        return String(Math.round(value));
     }
-    // Percentages 0-100
-    if (value >= 0 && value <= 100 && String(value).includes('.')) {
-      return `${value.toFixed(1)}%`;
-    }
-    return String(Math.round(value));
   }
   if (typeof value === 'boolean') return value ? 'Yes' : 'No';
   if (Array.isArray(value)) {
@@ -270,9 +291,11 @@ interface HealthTooltipProps {
   onDismiss: () => void;
   /** DV2-R03: ref for returning focus to the trigger element on dismiss */
   triggerRef: React.RefObject<HTMLElement | null>;
+  /** atglance-review #18: id for the trigger button's aria-controls reference. */
+  id: string;
 }
 
-function HealthTooltip({ metricsV2, onDismiss, triggerRef }: HealthTooltipProps) {
+function HealthTooltip({ metricsV2, onDismiss, triggerRef, id }: HealthTooltipProps) {
   const { healthScore, opportunityTag, aiOpportunityScore } = metricsV2;
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -289,6 +312,7 @@ function HealthTooltip({ metricsV2, onDismiss, triggerRef }: HealthTooltipProps)
     return (
       <div
         ref={containerRef}
+        id={id}
         role="tooltip"
         tabIndex={-1}
         onBlur={handleBlur}
@@ -323,6 +347,7 @@ function HealthTooltip({ metricsV2, onDismiss, triggerRef }: HealthTooltipProps)
   return (
     <div
       ref={containerRef}
+      id={id}
       role="tooltip"
       tabIndex={-1}
       onBlur={handleBlur}
@@ -664,7 +689,8 @@ interface EscapeDispatchConfig {
   onKebabClose: () => void;
   onTooltipDismiss: () => void;
   kebabTriggerRef: React.RefObject<HTMLButtonElement | null>;
-  tooltipTriggerRef: React.RefObject<HTMLDivElement | null>;
+  // atglance-review #18: the tooltip trigger is now a <button> (keyboard-operable).
+  tooltipTriggerRef: React.RefObject<HTMLButtonElement | null>;
 }
 
 function useEscapeDispatch({
@@ -770,7 +796,10 @@ export default function WorkflowRow({
   const [isConfirmingArchive, setIsConfirmingArchive] = useState(false);
   const kebabTriggerRef = useRef<HTMLButtonElement>(null);
   // DV2-R03: ref for the health score cell trigger (for tooltip focus-return)
-  const tooltipTriggerRef = useRef<HTMLDivElement>(null);
+  const tooltipTriggerRef = useRef<HTMLButtonElement>(null);
+  // atglance-review #18: stable id linking the health breakdown trigger button to
+  // the tooltip it controls (aria-controls / aria-expanded).
+  const healthTooltipId = `wf-health-tooltip-${workflow.id}`;
 
   // MDR-P08: centralized single Escape listener — replaces three per-component listeners
   useEscapeDispatch({
@@ -871,19 +900,24 @@ export default function WorkflowRow({
       workflowId: workflow.id,
       elapsedMsSinceDashboardView: elapsed,
       healthBand: analyticsHealthBand,
+      // atglance-review #20: a direct click on the list row (vs. a band/Pareto
+      // drill, which scrolls+highlights rather than navigating). The honest
+      // origin for this handler is always the list row itself.
+      originSurface: 'list_row',
     });
     router.push(`/workflows/${workflow.id}`);
   }
 
-  function handleRowKeyDown(e: React.KeyboardEvent) {
-    if (isEditingName || isConfirmingArchive) return;
-    if (e.key === 'Enter') {
-      handleRowClick();
-    }
-    if (e.key === ' ') {
-      e.preventDefault();
-      setShowKebab(true);
-    }
+  // atglance-review #18: the row is NO LONGER a focusable element with its own
+  // key bindings. Keyboard navigation now flows through the dedicated controls in
+  // the row — the title button (Enter/Space → open workflow), the health-cell
+  // button (Enter/Space → breakdown), and the kebab button — each a real <button>
+  // that natively handles activation. The old whole-row tabIndex={0} +
+  // Space=open-kebab binding (a surprising foot-gun) is removed. Mouse users keep
+  // click-anywhere-to-open via the <tr> onClick below.
+  function handleTitleActivate(e: React.MouseEvent) {
+    e.stopPropagation();
+    handleRowClick();
   }
 
   // DV2-R02a: inline edit callbacks
@@ -935,9 +969,6 @@ export default function WorkflowRow({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => { setIsHovered(false); setShowTooltip(false); }}
       onClick={handleRowClick}
-      onKeyDown={handleRowKeyDown}
-      tabIndex={0}
-      aria-label={`Workflow: ${displayTitle}`}
     >
       {/* Column 1: Workflow Name + subtext + variation badge (item d) */}
       <th scope="row" className={`px-ds-4 ${cellPadY} text-left font-normal w-2/5`}>
@@ -951,9 +982,20 @@ export default function WorkflowRow({
           />
         ) : (
           <div className="flex flex-col gap-0.5 min-w-0">
-            <span className="text-[14px] font-medium text-[var(--content-primary)] truncate">
+            {/* atglance-review #18: the title is the row's PRIMARY navigation
+                affordance — a real <button> so keyboard/AT users open the
+                workflow via Enter/Space without the row being a giant click
+                target that traps the kebab + inline-edit. Mouse users still get
+                click-anywhere-to-open via the <tr> onClick. stopPropagation
+                avoids a double-fire when the click also bubbles to the row. */}
+            <button
+              type="button"
+              onClick={handleTitleActivate}
+              className="text-left text-[14px] font-medium text-[var(--content-primary)] truncate bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded"
+              aria-label={`Open workflow: ${displayTitle}`}
+            >
               {displayTitle}
-            </span>
+            </button>
             <span className="text-[12px] font-normal text-[var(--content-secondary)] truncate">
               {subtextParts.join(' · ')}
             </span>
@@ -1068,7 +1110,7 @@ export default function WorkflowRow({
         // (hydration-safe).  Do NOT use Date.now()-relative strings in render.
         const cellText = colDef.dataType === 'date' && typeof rawValue === 'string'
           ? formatDate(rawValue) || '—'
-          : formatCellValue(rawValue);
+          : formatCellValue(rawValue, colDef.dataType);
 
         return (
           <td
@@ -1083,23 +1125,28 @@ export default function WorkflowRow({
       })}
 
       {/* Column 4: Health Score + color pip + run-count qualifier + breakdown tooltip */}
-      <td
-        className={`px-ds-4 ${cellPadY} relative w-1/5`}
-        onClick={(e) => {
-          e.stopPropagation();
-          setShowTooltip((prev) => !prev);
-        }}
-      >
-        <div
+      <td className={`px-ds-4 ${cellPadY} relative w-1/5`}>
+        {/* atglance-review #18: the breakdown trigger is now a real <button> so
+            keyboard users can open the tooltip (Enter/Space natively activate it
+            and the click is consumed before the row's Space=kebab binding). The
+            inner content is all aria-hidden, so the button has no nested
+            interactive. Escape dismissal is unchanged (useEscapeDispatch). */}
+        <button
+          type="button"
           ref={tooltipTriggerRef}
-          role="group"
-          className="flex flex-col items-end gap-0.5 cursor-pointer"
+          aria-expanded={showTooltip}
+          aria-controls={healthTooltipId}
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowTooltip((prev) => !prev);
+          }}
+          className="flex flex-col items-end gap-0.5 cursor-pointer w-full bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded"
           aria-label={
             runs !== null && runs < 10
-              ? `Health score: ${healthScore.overall}, ${band.label}, based on ${runs} run${runs !== 1 ? 's' : ''} — low confidence`
+              ? `Health score: ${healthScore.overall}, ${band.label}, based on ${runs} run${runs !== 1 ? 's' : ''} — low confidence. Show breakdown.`
               : runs === null
-              ? `Health score: ${healthScore.overall}, ${band.label}, no runs recorded`
-              : `Health score: ${healthScore.overall}, ${band.label}`
+              ? `Health score: ${healthScore.overall}, ${band.label}, no runs recorded. Show breakdown.`
+              : `Health score: ${healthScore.overall}, ${band.label}. Show breakdown.`
           }
         >
           {/* Color pip + integer + rail (iter-024 §4.1 item c) */}
@@ -1159,7 +1206,7 @@ export default function WorkflowRow({
               n=0 — no runs
             </span>
           )}
-        </div>
+        </button>
 
         {/* DV2-R03: Breakdown tooltip — now with Escape + blur-outside dismiss */}
         {showTooltip && (
@@ -1167,6 +1214,7 @@ export default function WorkflowRow({
             metricsV2={metricsV2}
             onDismiss={handleTooltipDismiss}
             triggerRef={tooltipTriggerRef}
+            id={healthTooltipId}
           />
         )}
       </td>

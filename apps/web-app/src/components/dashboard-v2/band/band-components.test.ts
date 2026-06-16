@@ -18,7 +18,7 @@ vi.mock('@/lib/analytics.js', () => ({ track: vi.fn() }));
 import { gaugeBand, arcGeometry } from './HealthGauge';
 import { deriveSegments, OPPORTUNITY_GLOSS } from './OpportunityBar';
 import { buildNarrator, buildNarratorParts } from './NarratorSummary';
-import { formatWeekTick, totalRecorded, shouldSuppressTrend, computeYTicks } from './trend-utils';
+import { formatWeekTick, totalRecorded, shouldSuppressTrend, computeYTicks, isDegenerateYDomain } from './trend-utils';
 import type { OpportunityCounts } from '@/lib/dashboard-band-stats';
 
 // ── HealthGauge ────────────────────────────────────────────────────────────────
@@ -337,5 +337,60 @@ describe('computeYTicks (integer Y-axis ticks)', () => {
       { weekStartIso: 'b', count: 8 },
     ];
     expect(computeYTicks(data)).toEqual(computeYTicks(data));
+  });
+
+  it('produces DISTINCT ticks (no repeated labels like "3 / 3 / 3")', () => {
+    // The COMPETITIVE review flagged repeated tick labels. Across a range of maxes
+    // the returned ticks must always be strictly distinct.
+    for (const max of [1, 2, 3, 5, 7, 12, 30, 100]) {
+      const ticks = computeYTicks([{ weekStartIso: 'a', count: max }]);
+      expect(new Set(ticks).size, `max=${max} ticks must be distinct`).toBe(ticks.length);
+    }
+  });
+});
+
+// ── isDegenerateYDomain (suppress Y-axis when max ≤ 1) ─────────────────────────
+
+describe('isDegenerateYDomain (degenerate Y-axis suppression)', () => {
+  it('empty data → degenerate (max 0)', () => {
+    expect(isDegenerateYDomain([])).toBe(true);
+  });
+
+  it('all-zero counts → degenerate', () => {
+    expect(
+      isDegenerateYDomain([
+        { weekStartIso: 'a', count: 0 },
+        { weekStartIso: 'b', count: 0 },
+      ]),
+    ).toBe(true);
+  });
+
+  it('max of exactly 1 → degenerate (no meaningful vertical scale)', () => {
+    expect(
+      isDegenerateYDomain([
+        { weekStartIso: 'a', count: 1 },
+        { weekStartIso: 'b', count: 0 },
+        { weekStartIso: 'c', count: 1 },
+      ]),
+    ).toBe(true);
+  });
+
+  it('max of 2 → NOT degenerate (axis renders)', () => {
+    expect(
+      isDegenerateYDomain([
+        { weekStartIso: 'a', count: 2 },
+        { weekStartIso: 'b', count: 1 },
+      ]),
+    ).toBe(false);
+  });
+
+  it('larger maxes → NOT degenerate', () => {
+    expect(isDegenerateYDomain([{ weekStartIso: 'a', count: 3 }])).toBe(false);
+    expect(isDegenerateYDomain([{ weekStartIso: 'a', count: 30 }])).toBe(false);
+  });
+
+  it('is deterministic for the same input', () => {
+    const data = [{ weekStartIso: 'a', count: 1 }];
+    expect(isDegenerateYDomain(data)).toBe(isDegenerateYDomain(data));
   });
 });

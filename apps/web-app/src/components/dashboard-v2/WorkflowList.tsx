@@ -458,6 +458,14 @@ interface WorkflowListProps {
   /** Batch C item 16: row density, passed through to each WorkflowRow. */
   density?: RowDensity;
   /**
+   * atglance-review #19: single shared clock boundary for age-based filters.
+   * When the shell owns the filter pipeline it threads its `filterNowMs` here so
+   * the list's `applyFilters` observes the SAME wall-clock value the shell used
+   * for `deriveState` — one filter result, never two clocks disagreeing at an
+   * age boundary. Defaults to a stable post-mount snapshot for standalone use.
+   */
+  nowMs?: number;
+  /**
    * Batch C item 13: when true the unified toolbar owns the filter controls
    * (portfolios toggle + filter bar), so WorkflowList suppresses its own
    * filter-bar row to avoid duplicate control surfaces. Defaults to false so
@@ -491,6 +499,7 @@ export default function WorkflowList({
   highlightWorkflowId = null,
   density = 'regular',
   hideFilterBar = false,
+  nowMs: nowMsProp,
 }: WorkflowListProps) {
   // Batch A (2026-06-12): default sort changed from health_score asc → date_recorded desc
   // (newest first) per dashboard-redesign P0 item 3.
@@ -506,7 +515,12 @@ export default function WorkflowList({
   // atglance-review item #17: this same boundary is also threaded into every
   // WorkflowRow's accessorContext (referenceNowMs) so no row reads Date.now()
   // in render — one wall-clock value per render, shared by all rows.
-  const nowMs = useMemo(() => Date.now(), []);
+  // atglance-review #19: when the shell threads `nowMs` (it owns the filter
+  // pipeline), use ITS boundary so both pipelines share one clock; otherwise
+  // fall back to a stable local snapshot (standalone usage). The local fallback
+  // is unconditionally evaluated to keep hook order stable; the prop wins.
+  const localNowMs = useMemo(() => Date.now(), []);
+  const nowMs = nowMsProp ?? localNowMs;
 
   function handleSort(field: SortField) {
     const nextDir: SortDir =
@@ -530,10 +544,22 @@ export default function WorkflowList({
     onClearInsightFilter();
   }
 
-  const filteredWorkflows = state === 'loading'
-    ? []
-    : applyFilters(workflows, filters, insightFilterKey, nowMs, searchQuery, presetFilters);
-  const sortedWorkflows = sortWorkflows(filteredWorkflows, sort);
+  // atglance-review #19 (perf): memoize filter+sort so they run ONCE per real
+  // input change, not on every keystroke/hover re-render. Behavior is unchanged —
+  // same applyFilters/sortWorkflows over the same inputs, only recomputation is
+  // elided. The shell threads its `nowMs` so this is the same logical result the
+  // shell computed for deriveState (single source of truth).
+  const filteredWorkflows = useMemo(
+    () =>
+      state === 'loading'
+        ? []
+        : applyFilters(workflows, filters, insightFilterKey, nowMs, searchQuery, presetFilters),
+    [state, workflows, filters, insightFilterKey, nowMs, searchQuery, presetFilters],
+  );
+  const sortedWorkflows = useMemo(
+    () => sortWorkflows(filteredWorkflows, sort),
+    [filteredWorkflows, sort],
+  );
 
   // D+4: derive the ordered middle columns (between workflow_title and health_score)
   // from visibleColumns, or fall back to the pre-D+4 defaults.
@@ -785,12 +811,18 @@ export default function WorkflowList({
                         Secondary CTA to /upload restores the v1 upload path. */}
                     <Link
                       href="/install"
+                      onClick={() =>
+                        track({ event: 'dashboard_empty_state_cta_clicked', cta: 'install' })
+                      }
                       className="inline-flex items-center gap-ds-2 px-ds-4 py-ds-2 rounded-ds-sm border border-[var(--border-default)] text-[14px] font-medium text-[var(--content-primary)] transition-colors duration-150 hover:bg-[var(--surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                     >
                       Install extension to start →
                     </Link>
                     <Link
                       href="/upload"
+                      onClick={() =>
+                        track({ event: 'dashboard_empty_state_cta_clicked', cta: 'upload' })
+                      }
                       className="inline-flex items-center gap-ds-2 px-ds-4 py-ds-2 rounded-ds-sm text-[14px] font-medium text-[var(--content-secondary)] transition-colors duration-150 hover:text-[var(--content-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded"
                     >
                       Upload a recording →

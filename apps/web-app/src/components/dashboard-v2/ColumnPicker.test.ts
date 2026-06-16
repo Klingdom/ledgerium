@@ -16,6 +16,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import {
   WORKFLOW_DASHBOARD_COLUMNS,
   type ColumnKey,
@@ -177,5 +179,41 @@ describe('ColumnPicker: pending column availability labels (iter-061)', () => {
     for (const status of statuses) {
       expect(['available', 'pending-path-c-r1', 'pending-path-c-r3']).toContain(status);
     }
+  });
+});
+
+// ── atglance-review #18: real focus trap on the aria-modal dialog ─────────────
+// The drawer is role="dialog" aria-modal="true"; Tab must cycle within it rather
+// than escape to the page behind. Source-level assertions (node env — no DOM
+// render) verify the trap exists and that Escape-close + focus-return remain.
+
+describe('atglance-review #18: ColumnPicker focus trap', () => {
+  const src = readFileSync(
+    fileURLToPath(new URL('./ColumnPicker.tsx', import.meta.url)),
+    'utf8',
+  );
+
+  it('has a Tab-cycle focus trap handler wired to the drawer onKeyDown', () => {
+    expect(src).toMatch(/handleTrapKeyDown/);
+    expect(src).toMatch(/onKeyDown=\{handleTrapKeyDown\}/);
+    // The trap keys on Tab and queries focusable children.
+    expect(src).toMatch(/if \(e\.key !== 'Tab'\) return/);
+    expect(src).toMatch(/querySelectorAll/);
+  });
+
+  it('wraps focus at both ends (Tab on last → first, Shift+Tab on first → last)', () => {
+    expect(src).toMatch(/if \(e\.shiftKey\)/);
+    expect(src).toMatch(/first\.focus\(\)/);
+    expect(src).toMatch(/last\.focus\(\)/);
+  });
+
+  it('preserves Escape-close and focus-return (not regressed by the trap)', () => {
+    expect(src).toMatch(/if \(e\.key === 'Escape'\)[\s\S]*?onClose\(\)/);
+    expect(src).toMatch(/triggerRef\.current\?\.focus\(\)/);
+  });
+
+  it('the dialog is still aria-modal with role=dialog', () => {
+    expect(src).toMatch(/role="dialog"/);
+    expect(src).toMatch(/aria-modal="true"/);
   });
 });

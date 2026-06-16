@@ -30,7 +30,7 @@ import {
 } from 'recharts';
 import type { ActivityWeekBucket } from '@/lib/dashboard-band-stats.js';
 import { ACCENT, GRID_COLOR, AXIS_TEXT, TOOLTIP_BG, TOOLTIP_BORDER, TOOLTIP_TEXT } from './band-colors.js';
-import { formatWeekTick, shouldSuppressTrend, computeYTicks } from './trend-utils.js';
+import { formatWeekTick, shouldSuppressTrend, computeYTicks, isDegenerateYDomain } from './trend-utils.js';
 
 interface RecordedTrendChartProps {
   data: ActivityWeekBucket[];
@@ -67,6 +67,10 @@ export default function RecordedTrendChart({ data, height = 160 }: RecordedTrend
   // render fractional ticks (recharts auto-domain does on small integer counts).
   const yTicks = computeYTicks(data);
   const yMax = yTicks[yTicks.length - 1] ?? 1;
+  // Degenerate domain (max ≤ 1): suppress the Y-axis entirely rather than render
+  // a redundant "0 / 1" scale (the COMPETITIVE review "3 / 3 / 3" artifact class).
+  // Bars + tooltip still convey the count honestly.
+  const hideYAxis = isDegenerateYDomain(data);
 
   return (
     <div className="flex flex-col gap-ds-1">
@@ -91,15 +95,17 @@ export default function RecordedTrendChart({ data, height = 160 }: RecordedTrend
               tickLine={false}
               interval="preserveStartEnd"
             />
-            <YAxis
-              allowDecimals={false}
-              domain={[0, yMax]}
-              ticks={yTicks}
-              tick={{ fontSize: 11, fill: AXIS_TEXT }}
-              axisLine={false}
-              tickLine={false}
-              width={32}
-            />
+            {!hideYAxis && (
+              <YAxis
+                allowDecimals={false}
+                domain={[0, yMax]}
+                ticks={yTicks}
+                tick={{ fontSize: 11, fill: AXIS_TEXT }}
+                axisLine={false}
+                tickLine={false}
+                width={32}
+              />
+            )}
             <Tooltip
               cursor={{ fill: GRID_COLOR, opacity: 0.3 }}
               contentStyle={{

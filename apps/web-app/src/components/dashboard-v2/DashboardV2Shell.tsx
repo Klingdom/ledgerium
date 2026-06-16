@@ -385,6 +385,9 @@ export default function DashboardV2Shell() {
       // WDC2-P03 (iter-067): time_range analytics prereq — segment by active
       // filter at dashboard load so per-range retention is computable.
       time_range: timeRange,
+      // atglance-review #20: the active lens at load (read via ref so this
+      // fire-once effect captures the hydrated lens without adding a dep).
+      lens: activeLensRef.current,
     });
   // Intentional: this effect is a "fire once on first data load" pattern.
   // allWorkflows.length is the trigger signal — other deps are snapshot values at emission time.
@@ -525,6 +528,21 @@ export default function DashboardV2Shell() {
     },
     [scheduleSave],
   );
+
+  // atglance-review #20: toggle the column picker and emit the open event only
+  // on the false→true transition (never on close), so usage signal counts opens.
+  const handleToggleColumnPicker = useCallback(() => {
+    setIsPickerOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        track({
+          event: 'dashboard_column_picker_opened',
+          visibleColumnCount: visibleColumns.length,
+        });
+      }
+      return next;
+    });
+  }, [visibleColumns.length]);
 
   // D+5 (iter-062): SavedView CRUD — update savedViews array and persist.
   const handleSavedViewsChange = useCallback(
@@ -711,31 +729,55 @@ export default function DashboardV2Shell() {
   // time-window boundaries regardless of wall-clock drift mid-render.
   const filterNowMs = useMemo(() => Date.now(), []);
 
+  // atglance-review #19 (perf): every derived chain below is memoized on its real
+  // inputs so the full time→portfolio→filter pipeline does NOT re-run on every
+  // keystroke/hover re-render — only when an actual input changes. The single
+  // `filterNowMs` boundary is threaded into WorkflowList (below) so the list's
+  // pipeline observes the SAME clock — one logical filter result, not a parallel
+  // pipeline that can disagree at an age boundary (closes FRONTEND review #4).
+
   // Apply time range (UI-only, D7)
-  const timeFilteredWorkflows = filterByTimeRange(allWorkflows, timeRange, filterNowMs);
+  const timeFilteredWorkflows = useMemo(
+    () => filterByTimeRange(allWorkflows, timeRange, filterNowMs),
+    [allWorkflows, timeRange, filterNowMs],
+  );
 
   // D5: apply portfolio filter if a portfolio is selected
   // Scaffold: client-side grouping by workflow.portfolioIds (if present) or "Uncategorized"
   // Follow-up: full API-driven portfolio filtering (see follow-up note in render)
-  const portfolioFilteredWorkflows =
-    activePortfolioId === null
-      ? timeFilteredWorkflows
-      : timeFilteredWorkflows.filter((w) => {
-          // WorkflowRowData may have portfolioIds field from the API response
-          const wWithPortfolio = w as WorkflowRowData & { portfolioIds?: string[] };
-          return (
-            wWithPortfolio.portfolioIds?.includes(activePortfolioId) ??
-            activePortfolioId === 'uncategorized'
-          );
-        });
+  const portfolioFilteredWorkflows = useMemo(
+    () =>
+      activePortfolioId === null
+        ? timeFilteredWorkflows
+        : timeFilteredWorkflows.filter((w) => {
+            // WorkflowRowData may have portfolioIds field from the API response
+            const wWithPortfolio = w as WorkflowRowData & { portfolioIds?: string[] };
+            return (
+              wWithPortfolio.portfolioIds?.includes(activePortfolioId) ??
+              activePortfolioId === 'uncategorized'
+            );
+          }),
+    [timeFilteredWorkflows, activePortfolioId],
+  );
 
   // Apply user filters + insight filter + search to determine UI state.
   // Batch C item 15: searchQuery threaded in so the derived state machine
   // distinguishes "no-results" (active search/filter, nothing matched) from
   // "empty" (genuinely no workflows).
-  const filteredWorkflows = applyFilters(portfolioFilteredWorkflows, filters, insightFilterKey, filterNowMs, searchQuery, presetFilters);
+  const filteredWorkflows = useMemo(
+    () =>
+      applyFilters(
+        portfolioFilteredWorkflows,
+        filters,
+        insightFilterKey,
+        filterNowMs,
+        searchQuery,
+        presetFilters,
+      ),
+    [portfolioFilteredWorkflows, filters, insightFilterKey, filterNowMs, searchQuery, presetFilters],
+  );
 
-  const availableSystems = extractSystems(allWorkflows);
+  const availableSystems = useMemo(() => extractSystems(allWorkflows), [allWorkflows]);
 
   // LSS lens (v1): map the currently-visible workflows into the pure Pareto
   // input shape. Computed only when the LSS lens is active to avoid needless
@@ -906,6 +948,9 @@ export default function DashboardV2Shell() {
   // apply a transient highlight. Observed-only: it navigates to a REAL row by id;
   // it never fabricates a target and never mutates data.
   const handleSelectWorkflow = useCallback((workflowId: string) => {
+    // atglance-review #20: measure whether the "vital few" Pareto framing drives
+    // navigation. Opaque workflowId only — no workflow content (PostHog posture).
+    track({ event: 'dashboard_pareto_bar_clicked', workflowId });
     setHighlightWorkflowId(workflowId);
     if (highlightTimerRef.current !== null) {
       clearTimeout(highlightTimerRef.current);
@@ -1074,7 +1119,7 @@ export default function DashboardV2Shell() {
             onSortChange={setSort}
             density={density}
             onDensityChange={setDensity}
-            onOpenColumns={() => setIsPickerOpen((prev) => !prev)}
+            onOpenColumns={handleToggleColumnPicker}
             isColumnsOpen={isPickerOpen}
             columnsTriggerRef={pickerTriggerRef}
             currentPreferences={currentPreferencesSnapshot}
@@ -1114,6 +1159,7 @@ export default function DashboardV2Shell() {
             onSortChange={setSort}
             searchQuery={searchQuery}
             density={density}
+            nowMs={filterNowMs}
             hideFilterBar
           />
         </div>

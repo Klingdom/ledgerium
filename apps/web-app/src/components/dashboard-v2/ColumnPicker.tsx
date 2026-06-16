@@ -622,6 +622,42 @@ export default function ColumnPicker({
     [onClose],
   );
 
+  // ── Focus trap (atglance-review #18 / FRONTEND review #7) ────────────────────
+  // The drawer is role="dialog" aria-modal="true" but Tab could previously escape
+  // to the page behind it. Cycle Tab / Shift+Tab within the drawer's focusable
+  // children so keyboard focus stays inside the modal. Escape-close + focus-return
+  // are handled by the effects above; this only contains Tab navigation.
+  const handleTrapKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== 'Tab') return;
+    const drawer = drawerRef.current;
+    if (!drawer) return;
+    const focusable = drawer.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    );
+    if (focusable.length === 0) {
+      // No focusable child — keep focus on the drawer itself.
+      e.preventDefault();
+      drawer.focus();
+      return;
+    }
+    const first = focusable[0]!;
+    const last = focusable[focusable.length - 1]!;
+    const active = document.activeElement;
+    if (e.shiftKey) {
+      // Shift+Tab on the first element (or the drawer) wraps to the last.
+      if (active === first || active === drawer) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      // Tab on the last element wraps to the first.
+      if (active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  }, []);
+
   if (!isOpen) return null;
 
   const hasSavedViewCrud = onSavedViewsChange !== undefined && onApplySavedView !== undefined;
@@ -646,6 +682,7 @@ export default function ColumnPicker({
           focus:outline-none
         "
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={handleTrapKeyDown}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-ds-4 py-ds-3 border-b border-[var(--border-subtle)] flex-shrink-0">

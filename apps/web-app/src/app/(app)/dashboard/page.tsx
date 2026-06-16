@@ -316,7 +316,10 @@ function DashboardPageContent() {
   if (searchParams.get('v2') !== '0') {
     return <DashboardV2Shell />;
   }
-  // v1 fallback — only rendered when ?v2=0 is explicitly present
+  // v1 fallback — only rendered when ?v2=0 is explicitly present.
+  // DEPRECATED (atglance-review #19): this ~1300-LOC v1 branch is dead for all
+  // users and governance-gated on the #57 soak. Retire it as a SEPARATE step
+  // once CEO confirms soak complete — NOT in this code-health batch.
 
   // ── State ──────────────────────────────────────────────────────────────────
 
