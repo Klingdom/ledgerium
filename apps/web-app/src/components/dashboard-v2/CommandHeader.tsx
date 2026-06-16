@@ -5,8 +5,14 @@
  *
  * Renders:
  *  - Page title ("Workflows")
+ *  - Persistent honest purpose subtitle (atglance-review item #1)
  *  - Inline time-range <select> (7d / 30d / 90d / All, default 30d — D7: UI-only)
- *  - Portfolio health score (integer + 3-band rail + period-over-period delta + aria label)
+ *  - Portfolio health VERDICT WORD + 3-band rail + period-over-period delta.
+ *    The health SCORE NUMBER is intentionally NOT rendered here — it appears
+ *    exactly once on the page, in the HealthGauge (atglance-review item #2,
+ *    "kill the triple-88"). The header shows a non-numeric verdict word
+ *    (Good / Fair / Needs attention) so the orientation signal survives without
+ *    duplicating the number.
  *  - Top insight sentence (from highest-severity chip, or blank)
  *
  * Design tokens (PRD §5.4):
@@ -53,6 +59,17 @@ function healthBand(score: number): { label: 'poor' | 'fair' | 'good'; colorClas
     return { label: 'fair', colorClass: 'text-amber-600', railClass: 'bg-amber-500' };
   }
   return { label: 'good', colorClass: 'text-green-600', railClass: 'bg-green-500' };
+}
+
+/**
+ * Human-readable, non-numeric verdict word for a health band. Used in the header
+ * so the orientation signal survives WITHOUT duplicating the health score number
+ * (atglance-review item #2). The number itself lives only in the HealthGauge.
+ */
+export function healthVerdictWord(label: 'poor' | 'fair' | 'good'): string {
+  if (label === 'poor') return 'Needs attention';
+  if (label === 'fair') return 'Fair';
+  return 'Good';
 }
 
 const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
@@ -112,13 +129,21 @@ export default function CommandHeader({
       className="flex items-start justify-between gap-ds-4 px-ds-8 py-ds-6"
       aria-label="Dashboard command header"
     >
-      {/* Left: title + top insight */}
+      {/* Left: title + persistent purpose line + (optional) top insight */}
       <div className="flex flex-col gap-ds-1 min-w-0">
         <h1 className="text-[20px] font-medium leading-[1.2] text-[var(--content-primary)] tracking-tight">
           Workflows
         </h1>
+        {/* Item #1 (atglance-review) — orient before alert. A persistent, honest
+            one-line purpose statement that does NOT depend on insight data, so a
+            newcomer learns what the page is before reading any alert. Claims only
+            what the engine computes (cycle time, variation, automation tag). */}
+        <p className="text-[13px] font-normal leading-[1.4] text-[var(--content-secondary)] mt-ds-1 max-w-xl">
+          Your recorded workflows, measured from real runs — cycle time,
+          variation, and where AI could help.
+        </p>
         {topInsight && (
-          <p className="text-[14px] font-normal leading-[1.4] text-[var(--content-secondary)] mt-ds-1 truncate max-w-xl">
+          <p className="text-[13px] font-normal leading-[1.4] text-[var(--content-tertiary)] truncate max-w-xl">
             {topInsight.label}
           </p>
         )}
@@ -161,14 +186,15 @@ export default function CommandHeader({
             aria-label={
               isLoading
                 ? 'Portfolio health: loading'
-                : `Portfolio health: ${score}, ${band!.label}${deltaAriaFragment}`
+                : `Portfolio health: ${healthVerdictWord(band!.label)}${deltaAriaFragment}. See the gauge below for the exact score.`
             }
           >
             <span className="text-[12px] font-medium text-[var(--content-secondary)] uppercase tracking-wide">
               Portfolio Health
             </span>
             <div className="flex items-center gap-ds-2">
-              {/* 3-band rail */}
+              {/* 3-band rail (non-numeric visual; width encodes the score
+                  without rendering the integer). */}
               <div className="w-16 h-1.5 rounded-full bg-[var(--border-subtle)] overflow-hidden">
                 {!isLoading && (
                   <div
@@ -178,12 +204,15 @@ export default function CommandHeader({
                   />
                 )}
               </div>
+              {/* Item #2 — verdict WORD, not the score number. The score number
+                  appears exactly once on the page, in the HealthGauge. */}
               <span
-                className={`text-[28px] font-semibold leading-[1.2] tabular-nums ${
+                className={`text-[16px] font-semibold leading-[1.2] ${
                   isLoading ? 'text-[var(--content-tertiary)]' : band!.colorClass
                 }`}
+                aria-hidden="true"
               >
-                {isLoading ? '—' : score}
+                {isLoading ? '—' : healthVerdictWord(band!.label)}
               </span>
             </div>
 

@@ -17,6 +17,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 // ── Analytics mock (iter-030) ─────────────────────────────────────────────────
 vi.mock('@/lib/analytics.js', () => ({ track: vi.fn() }));
@@ -1112,5 +1114,43 @@ describe('MDR-P08: centralized Escape dispatch (iter-041)', () => {
     };
     const result = escapeDispatch(state);
     expect(result.fired).toBe('archiveCancel');
+  });
+});
+
+// ── atglance-review #17: single shared clock boundary (no per-row Date.now) ────
+//
+// The hydration/determinism fix: WorkflowRow's accessorContext must seed
+// `referenceNowMs` from a THREADED prop (the list-level single clock boundary),
+// NOT a fresh per-row `Date.now()`. This is the recurring production-crash class
+// the review flagged. We assert against the component SOURCE so the regression
+// (re-introducing Date.now() in the accessorContext build) is caught under the
+// gate even without a DOM render.
+
+describe('atglance-review #17: WorkflowRow uses one threaded clock, never per-row Date.now()', () => {
+  const src = readFileSync(
+    fileURLToPath(new URL('./WorkflowRow.tsx', import.meta.url)),
+    'utf8',
+  );
+
+  it('accessorContext seeds referenceNowMs from the threaded prop (not Date.now())', () => {
+    // The object literal must reference the prop, not call the clock.
+    expect(src).toMatch(/referenceNowMs,\s*\n\s*activeTimeRange:/);
+    // The old per-row landmine must be gone.
+    expect(src).not.toContain('referenceNowMs: Date.now()');
+  });
+
+  it('the component declares a referenceNowMs prop with a STABLE default (not Date.now())', () => {
+    // Destructured with a literal default — a fresh per-render clock is forbidden.
+    expect(src).toMatch(/referenceNowMs\s*=\s*0/);
+  });
+
+  it('WorkflowRow has no executable Date.now() call (comments aside)', () => {
+    // Strip // line comments and /* */ block comments, then assert no clock call
+    // survives in executable code. The threaded `referenceNowMs` prop is the only
+    // clock source, snapshotted once at the WorkflowList boundary.
+    const codeOnly = src
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+    expect(codeOnly.includes('Date.now()')).toBe(false);
   });
 });

@@ -9,6 +9,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { healthVerdictWord } from './CommandHeader.js';
 
 // ── Mirrors CommandHeader.tsx healthBand ──────────────────────────────────────
 
@@ -202,5 +203,47 @@ describe('WDC2-P05 (iter-080): PresetChipRail tooltip copy-pin assertions', () =
 
   it('gated tooltip does not contain old "Upgrade to Team to access this preset" copy', () => {
     expect(PRESET_CHIP_GATED_TOOLTIP).not.toContain('Upgrade to Team to access this preset');
+  });
+});
+
+// ── atglance-review #1: persistent honest purpose subtitle ────────────────────
+//
+// The purpose line is a static literal in CommandHeader (does not depend on
+// insight data). Pinned here verbatim so a refactor can't silently weaken it,
+// and asserted honesty-safe (only claims signals the engine computes).
+
+const PURPOSE_SUBTITLE =
+  'Your recorded workflows, measured from real runs — cycle time, variation, and where AI could help.';
+
+describe('atglance-review #1: CommandHeader purpose subtitle', () => {
+  it('states what the page is, observed-only (cycle time / variation / AI)', () => {
+    expect(PURPOSE_SUBTITLE).toContain('measured from real runs');
+    expect(PURPOSE_SUBTITLE).toContain('cycle time');
+    expect(PURPOSE_SUBTITLE).toContain('variation');
+  });
+
+  it('does not fabricate a target, benchmark, ROI, or savings claim', () => {
+    for (const forbidden of ['ROI', 'savings', 'benchmark', 'sigma', 'DPMO', 'industry average']) {
+      expect(PURPOSE_SUBTITLE.toLowerCase()).not.toContain(forbidden.toLowerCase());
+    }
+  });
+});
+
+// ── atglance-review #2: kill the triple-88 — verdict word, not the number ─────
+//
+// The header now renders a non-numeric VERDICT WORD (the health score number
+// appears once, in the HealthGauge). healthVerdictWord is the real export.
+
+describe('atglance-review #2: CommandHeader healthVerdictWord (non-numeric verdict)', () => {
+  it('maps each band to a plain, non-numeric verdict word', () => {
+    expect(healthVerdictWord('poor')).toBe('Needs attention');
+    expect(healthVerdictWord('fair')).toBe('Fair');
+    expect(healthVerdictWord('good')).toBe('Good');
+  });
+
+  it('never returns a digit (the score number lives only in the gauge)', () => {
+    for (const label of ['poor', 'fair', 'good'] as const) {
+      expect(healthVerdictWord(label)).not.toMatch(/\d/);
+    }
   });
 });

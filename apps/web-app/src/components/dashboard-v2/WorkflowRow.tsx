@@ -149,6 +149,19 @@ interface WorkflowRowProps {
    * call sites render byte-identically.
    */
   density?: RowDensity;
+  /**
+   * atglance-review item #17 — SINGLE shared clock boundary. The list computes
+   * one `referenceNowMs` snapshot (WorkflowList's `nowMs = useMemo(() =>
+   * Date.now(), [])`) and threads it into every row, so all rows in one render
+   * share ONE wall-clock value — matching the `route.ts` single-upstream-clock
+   * pattern. Removes the latent hydration/determinism landmine of a per-row
+   * `Date.now()`. Today's accessors are lifetime accessors that ignore this
+   * value; Wave A time-windowed accessors will consume it deterministically.
+   *
+   * Optional + defaulted so standalone/test call sites that don't thread a clock
+   * still get a STABLE (non-Date.now()) value — never a fresh per-row clock.
+   */
+  referenceNowMs?: number;
 }
 
 // ── Opportunity tag config ────────────────────────────────────────────────────
@@ -734,6 +747,10 @@ export default function WorkflowRow({
   dashboardViewPerfTimestampMs = 0,
   visibleColumns,
   density = 'regular',
+  // atglance-review item #17: single shared clock threaded from WorkflowList.
+  // Default 0 is a STABLE sentinel (NOT Date.now()) — today's lifetime accessors
+  // ignore it, so a stable default keeps render deterministic + hydration-safe.
+  referenceNowMs = 0,
 }: WorkflowRowProps) {
   const router = useRouter();
   // Batch C item 16: density-driven vertical padding for every cell in this row.
@@ -771,12 +788,12 @@ export default function WorkflowRow({
   // them — they return lifetime values. Wave A accessors (row #101) will
   // consume them to compute time-windowed statistics.
   //
-  // `referenceNowMs` snapshot location: per-row construction here is correct
-  // for today's lifetime accessors (any boundary is equivalent because the
-  // result does not depend on the value). Wave A landing will lift the
-  // snapshot up to a stable WorkflowList-level boundary so that all rows in
-  // the same query share one wall-clock value — matching the `route.ts:485-487`
-  // single-upstream-clock-boundary pattern from iter-037 / MDR-P03.
+  // atglance-review item #17 (DONE): `referenceNowMs` is now threaded from the
+  // SINGLE WorkflowList-level boundary (`nowMs = useMemo(() => Date.now(), [])`)
+  // instead of a fresh per-row `Date.now()`. All rows in one render share one
+  // wall-clock value — matching the `route.ts:485-487` single-upstream-clock
+  // pattern from iter-037 / MDR-P03. This removes the latent hydration/
+  // determinism landmine the moment a Wave A time-windowed accessor consumes it.
   const accessorContext: ColumnAccessorContext = {
     title: workflow.title,
     toolsUsed: workflow.toolsUsed,
@@ -785,7 +802,7 @@ export default function WorkflowRow({
     // Batch A (2026-06-12): processDefinitionUpdatedAt for honest "Last Run" proxy
     processDefinitionUpdatedAt: workflow.processDefinitionUpdatedAt,
     metricsV2: workflow.metricsV2,
-    referenceNowMs: Date.now(),
+    referenceNowMs,
     activeTimeRange: timeRange ?? 'all',
   };
 

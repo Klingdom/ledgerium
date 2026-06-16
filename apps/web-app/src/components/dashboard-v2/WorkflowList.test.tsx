@@ -13,7 +13,7 @@ import { describe, it, expect, vi } from 'vitest';
 
 // ── Analytics mock (iter-030) ─────────────────────────────────────────────────
 vi.mock('@/lib/analytics.js', () => ({ track: vi.fn() }));
-import { applyFilters, sortWorkflows, matchesSearch } from './WorkflowList.js';
+import { applyFilters, sortWorkflows, matchesSearch, SORTABLE_HEADER_GLOSS } from './WorkflowList.js';
 import { hasActiveFilters } from './WorkflowListFilterBar.js';
 import type { WorkflowRowData } from './WorkflowRow.js';
 import type { FilterState } from './WorkflowListFilterBar.js';
@@ -577,5 +577,36 @@ describe('Batch C: applyFilters search integration (2026-06-12)', () => {
     expect(r1.map((w) => w.id)).toEqual(r2.map((w) => w.id));
     // original array is untouched
     expect(workflows).toHaveLength(3);
+  });
+});
+
+// ── atglance-review #13: sortable column-header glosses (definitions only) ─────
+
+describe('atglance-review #13: SORTABLE_HEADER_GLOSS', () => {
+  it('glosses the key sortable columns a newcomer meets', () => {
+    expect(SORTABLE_HEADER_GLOSS.cycle_time).toBeTruthy();
+    expect(SORTABLE_HEADER_GLOSS.run_count).toBeTruthy();
+    expect(SORTABLE_HEADER_GLOSS.health_score).toBeTruthy();
+    expect(SORTABLE_HEADER_GLOSS.last_run).toBeTruthy();
+    expect(SORTABLE_HEADER_GLOSS.date_recorded).toBeTruthy();
+    expect(SORTABLE_HEADER_GLOSS.opportunity).toBeTruthy();
+  });
+
+  it('cycle-time gloss is a plain definition that disclaims it is "not a target"', () => {
+    expect(SORTABLE_HEADER_GLOSS.cycle_time!.toLowerCase()).toContain('on average');
+    expect(SORTABLE_HEADER_GLOSS.cycle_time!.toLowerCase()).toContain('not a target');
+  });
+
+  it('last-run gloss honestly labels the updatedAt proxy', () => {
+    expect(SORTABLE_HEADER_GLOSS.last_run!.toLowerCase()).toContain('proxy');
+  });
+
+  it('no header gloss fabricates a benchmark / sigma / DPMO / ROI', () => {
+    for (const text of Object.values(SORTABLE_HEADER_GLOSS)) {
+      const lc = text.toLowerCase();
+      for (const forbidden of ['benchmark', 'sigma', 'dpmo', 'industry average']) {
+        expect(lc).not.toContain(forbidden);
+      }
+    }
   });
 });

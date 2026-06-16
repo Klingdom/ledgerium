@@ -139,8 +139,10 @@ test.describe('Process Variants documentation', () => {
     await page.waitForTimeout(1500);
     await shot(page, 'dashboard-list');
 
-    // ── LSS lens (Measure & Analyze): switcher + Pareto panel ─────────────────
-    const lssTab = page.getByRole('tab', { name: /measure/i });
+    // ── LSS lens ("Time & Impact"): switcher + Pareto panel ───────────────────
+    // Target the stable lens id (immune to label copy changes) rather than the
+    // visible tab text, which the at-a-glance legibility batch renamed.
+    const lssTab = page.locator('#lens-tab-lss');
     await lssTab.waitFor({ state: 'visible', timeout: 15_000 });
     await lssTab.click();
     await page.waitForTimeout(1200);

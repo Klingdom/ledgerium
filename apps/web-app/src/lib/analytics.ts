@@ -215,8 +215,11 @@ export type AnalyticsEvent =
   // ── Batch B (2026-06-12): top-of-page band instrumentation ────────────────
   | {
       // Fired when a user clicks a KPI tile in the top-of-page band.
+      // atglance-review item #2: 'avg_health' tile removed (health number now
+      // renders once, in the HealthGauge); 'distinct_systems' tile added as the
+      // honest fill (already-computed availableSystems.length).
       event: 'dashboard_kpi_tile_clicked';
-      tileId: 'total_workflows' | 'cycle_time' | 'automation_candidates' | 'avg_health';
+      tileId: 'total_workflows' | 'cycle_time' | 'automation_candidates' | 'distinct_systems';
       value: number | null;
     }
   | {

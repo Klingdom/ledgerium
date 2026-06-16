@@ -800,6 +800,9 @@ export default function DashboardV2Shell() {
           medianCycleTimeMs,
           cycleTimeSampleCount,
           automationCandidates: aiOpportunityCount,
+          // Item #2 fill: distinct systems — reuses the already-computed
+          // availableSystems list (no new computation).
+          distinctSystemCount: availableSystems.length,
           avgHealthScore: portfolioHealthScore,
           avgHealthScoreDelta: portfolioHealthScoreDelta,
           highVariationCount,

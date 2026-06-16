@@ -22,6 +22,7 @@
  * @batch B (2026-06-12)
  */
 
+import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 import type { OpportunityTag } from '@/lib/workflow-metrics.js';
 import type {
   OpportunityCounts,
@@ -33,6 +34,36 @@ import OpportunityBar from './OpportunityBar.js';
 import RecordedTrendChart from './RecordedTrendChart.js';
 import NarratorSummary, { type NarratorInput } from './NarratorSummary.js';
 
+/**
+ * The portfolio health period-over-period delta — the ONLY tile/widget with a
+ * real prior-period value (ANALYTICS_DASHBOARD_REVIEW §6). Surfaced beneath the
+ * HealthGauge after the Avg Health KPI tile was removed (item #2). Honest: a
+ * null delta renders "— vs last 30d" (no fabricated change).
+ */
+function HealthDelta({ delta }: { delta: number | null }) {
+  if (delta === null || delta === 0) {
+    const label = delta === 0 ? '= 0 vs last 30d' : '— vs last 30d';
+    return (
+      <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-[var(--content-secondary)]">
+        <Minus size={10} aria-hidden="true" />
+        <span>{label}</span>
+      </span>
+    );
+  }
+  const up = delta > 0;
+  const Icon = up ? ArrowUp : ArrowDown;
+  return (
+    <span
+      className={`inline-flex items-center gap-0.5 text-[11px] font-medium ${
+        up ? 'text-green-600' : 'text-red-600'
+      }`}
+    >
+      <Icon size={10} aria-hidden="true" />
+      <span>{`${up ? '+' : ''}${delta} vs last 30d`}</span>
+    </span>
+  );
+}
+
 export interface TopBandData {
   isLoading: boolean;
   totalWorkflows: number;
@@ -40,7 +71,17 @@ export interface TopBandData {
   medianCycleTimeMs: number | null;
   cycleTimeSampleCount: number;
   automationCandidates: number;
+  /**
+   * Item #2 fill: distinct systems observed (shell's `availableSystems.length`).
+   * Replaces the removed Avg Health KPI tile — an already-computed honest stat.
+   */
+  distinctSystemCount: number;
+  /**
+   * Portfolio health score 0–100, or null. Rendered ONLY by the HealthGauge —
+   * the single on-page representation of the health number (item #2).
+   */
   avgHealthScore: number | null;
+  /** Period-over-period health delta; surfaced near the gauge as the one true delta. */
   avgHealthScoreDelta: number | null;
   highVariationCount: number;
   opportunityCounts: OpportunityCounts;
@@ -72,8 +113,7 @@ export default function TopBand({
     medianCycleTimeMs: data.medianCycleTimeMs,
     cycleTimeSampleCount: data.cycleTimeSampleCount,
     automationCandidates: data.automationCandidates,
-    avgHealthScore: data.avgHealthScore,
-    avgHealthScoreDelta: data.avgHealthScoreDelta,
+    distinctSystemCount: data.distinctSystemCount,
   };
 
   const narratorInput: NarratorInput = {
@@ -88,13 +128,27 @@ export default function TopBand({
       aria-label="Portfolio overview"
       className="flex flex-col gap-ds-4 px-ds-8 py-ds-4 border-b border-[var(--border-subtle)]"
     >
+      {/* Row 0: NARRATOR — promoted to the TOP of the band (atglance-review #1,
+          "orient before alert"). A newcomer reads what + how-many + what's-wrong
+          first, before the KPI tiles and charts. Honest logic unchanged. */}
+      <NarratorSummary input={narratorInput} />
+
       {/* Row 1: KPI tiles (4) + health gauge */}
       <div className="flex flex-col gap-ds-4 lg:flex-row lg:items-stretch">
         <div className="flex-1 min-w-0">
           <KpiTileStrip data={kpiData} />
         </div>
-        <div className="flex items-center justify-center rounded-ds-md border border-[var(--border-subtle)] bg-[var(--surface-primary)] px-ds-6 py-ds-3 lg:w-[150px] lg:flex-shrink-0">
+        {/* HealthGauge is the SINGLE on-page representation of the portfolio
+            health NUMBER (item #2). The one true period-over-period delta is
+            surfaced directly beneath it. The container tooltip glosses the
+            composite (item #9 / #6) — documented composition + band thresholds
+            only, no invented benchmark. */}
+        <div
+          className="flex flex-col items-center justify-center gap-ds-1 rounded-ds-md border border-[var(--border-subtle)] bg-[var(--surface-primary)] px-ds-6 py-ds-3 lg:w-[150px] lg:flex-shrink-0"
+          title="A 0–100 composite of confidence, SOP readiness, maturity, and review status across your workflows. 80+ is good, 60–79 fair, under 60 needs attention."
+        >
           <HealthGauge score={data.avgHealthScore} />
+          <HealthDelta delta={data.avgHealthScoreDelta} />
         </div>
       </div>
 
@@ -111,9 +165,6 @@ export default function TopBand({
           <RecordedTrendChart data={data.activityByWeek} />
         </div>
       </div>
-
-      {/* Row 3: narrator */}
-      <NarratorSummary input={narratorInput} />
     </section>
   );
 }

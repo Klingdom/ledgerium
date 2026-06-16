@@ -19,6 +19,21 @@ import type { OpportunityTag } from '@/lib/workflow-metrics.js';
 import type { OpportunityCounts } from '@/lib/dashboard-band-stats.js';
 import { OPPORTUNITY_ORDER, OPPORTUNITY_COLOR, OPPORTUNITY_LABEL } from './band-colors.js';
 
+/**
+ * Item #13 (atglance-review) — opportunity-tag gloss. Definitions ONLY: each
+ * string describes what the verdict MEANS in terms of the real scoring inputs
+ * (runs, variation, cycle time). NO fabricated thresholds stated as fact, no
+ * targets/benchmarks. Surfaced as `title` tooltips on each segment + legend
+ * entry, and as a compact one-line legend caption.
+ */
+export const OPPORTUNITY_GLOSS: Record<OpportunityTag, string> = {
+  automate: 'Repeatable and stable — a candidate to automate.',
+  standardize: 'Same process performed many different ways — worth standardizing first.',
+  optimize: 'Slow or heavy relative to its peers — worth optimizing.',
+  monitor: 'Not enough runs yet to judge — keep recording.',
+  healthy: 'No action needed right now.',
+};
+
 export interface OpportunitySegment {
   tag: OpportunityTag;
   count: number;
@@ -109,19 +124,22 @@ export default function OpportunityBar({
                     backgroundColor: OPPORTUNITY_COLOR[seg.tag],
                     opacity: activeOpportunity !== null && !isActive ? 0.45 : 1,
                   }}
-                  aria-label={`${OPPORTUNITY_LABEL[seg.tag]}: ${seg.count} workflows (${seg.pct}%). Click to filter.`}
+                  title={`${OPPORTUNITY_LABEL[seg.tag]} — ${OPPORTUNITY_GLOSS[seg.tag]}`}
+                  aria-label={`${OPPORTUNITY_LABEL[seg.tag]}: ${seg.count} workflows (${seg.pct}%). ${OPPORTUNITY_GLOSS[seg.tag]} Click to filter.`}
                   aria-pressed={isActive}
                 />
               );
             })}
           </div>
 
-          {/* Legend — text + color swatch, never color-only */}
+          {/* Legend — text + color swatch, never color-only. Each entry carries
+              the verdict gloss as a tooltip (item #13). */}
           <ul className="flex flex-wrap gap-x-ds-3 gap-y-ds-1">
             {segments.map((seg) => (
               <li
                 key={seg.tag}
                 className="inline-flex items-center gap-ds-1 text-[11px] text-[var(--content-secondary)]"
+                title={`${OPPORTUNITY_LABEL[seg.tag]} — ${OPPORTUNITY_GLOSS[seg.tag]}`}
               >
                 <span
                   className="h-2 w-2 rounded-sm"
@@ -134,6 +152,16 @@ export default function OpportunityBar({
               </li>
             ))}
           </ul>
+
+          {/* Item #13 — opportunity-tag legend: what each verdict MEANS.
+              Definitions only (no thresholds asserted as targets). */}
+          <p className="text-[11px] leading-[1.5] text-[var(--content-tertiary)]">
+            <span className="font-medium text-[var(--content-secondary)]">Automate</span> = repeatable &amp; stable ·{' '}
+            <span className="font-medium text-[var(--content-secondary)]">Standardize</span> = same process, many ways ·{' '}
+            <span className="font-medium text-[var(--content-secondary)]">Optimize</span> = slow or heavy ·{' '}
+            <span className="font-medium text-[var(--content-secondary)]">Monitor</span> = needs more runs ·{' '}
+            <span className="font-medium text-[var(--content-secondary)]">Healthy</span> = no action needed.
+          </p>
         </>
       )}
     </div>

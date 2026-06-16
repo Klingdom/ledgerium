@@ -16,7 +16,7 @@ import { describe, it, expect, vi } from 'vitest';
 vi.mock('@/lib/analytics.js', () => ({ track: vi.fn() }));
 
 import { gaugeBand, arcGeometry } from './HealthGauge';
-import { deriveSegments } from './OpportunityBar';
+import { deriveSegments, OPPORTUNITY_GLOSS } from './OpportunityBar';
 import { buildNarrator } from './NarratorSummary';
 import { formatWeekTick, totalRecorded, shouldSuppressTrend, computeYTicks } from './trend-utils';
 import type { OpportunityCounts } from '@/lib/dashboard-band-stats';
@@ -85,6 +85,37 @@ describe('OpportunityBar.deriveSegments', () => {
     const { segments } = deriveSegments(counts);
     const sum = segments.reduce((s, seg) => s + seg.pct, 0);
     expect(sum).toBeCloseTo(100, 1);
+  });
+});
+
+// ── atglance-review #13: opportunity-tag gloss (definitions only) ──────────────
+
+describe('OpportunityBar.OPPORTUNITY_GLOSS (item #13 — verdict legend)', () => {
+  it('glosses all 5 opportunity verdicts', () => {
+    expect(Object.keys(OPPORTUNITY_GLOSS).sort()).toEqual([
+      'automate',
+      'healthy',
+      'monitor',
+      'optimize',
+      'standardize',
+    ]);
+  });
+
+  it('each gloss is a plain-language definition, not a fabricated target/benchmark', () => {
+    for (const text of Object.values(OPPORTUNITY_GLOSS)) {
+      expect(text.length).toBeGreaterThan(0);
+      const lc = text.toLowerCase();
+      for (const forbidden of ['target', 'benchmark', 'sigma', 'dpmo', 'roi', 'savings', '%']) {
+        expect(lc).not.toContain(forbidden);
+      }
+    }
+  });
+
+  it('definitions reference the real scoring inputs (runs / variation / stability)', () => {
+    expect(OPPORTUNITY_GLOSS.automate.toLowerCase()).toContain('stable');
+    expect(OPPORTUNITY_GLOSS.standardize.toLowerCase()).toContain('many different ways');
+    expect(OPPORTUNITY_GLOSS.monitor.toLowerCase()).toContain('runs');
+    expect(OPPORTUNITY_GLOSS.healthy.toLowerCase()).toContain('no action');
   });
 });
 

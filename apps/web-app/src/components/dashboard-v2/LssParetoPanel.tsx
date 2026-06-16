@@ -128,13 +128,28 @@ export default function LssParetoPanel({ workflows }: LssParetoPanelProps) {
     >
       <PanelHeader grandTotalMs={grandTotalMs} barCount={n} />
 
-      {/* Vital-few summary — honest "where your time goes". */}
+      {/* Item #13 — plain-language lead takeaway: turns the Pareto from an
+          expert chart into an obvious "focus here" insight before any jargon. */}
+      <p className="text-[13px] text-[var(--content-secondary)]">
+        A few workflows eat most of your time. The tallest bars below are where
+        focus pays off most.
+      </p>
+
+      {/* Vital-few summary — honest "where your time goes". "the vital few" is
+          made self-explaining by the sentence above + the gloss tooltip. */}
       <p className="text-[13px] text-[var(--content-secondary)]">
         <span className="font-semibold text-[var(--content-primary)]">
           {vitalFewCount} of {includedCount}
         </span>{' '}
         workflow{includedCount === 1 ? '' : 's'} account for ~{vitalFewThresholdPct}% of
-        total observed time — the vital few.
+        total observed time —{' '}
+        <span
+          className="underline decoration-dotted underline-offset-2"
+          title="The small number of workflows that together drive most of the total observed time — the ones worth tackling first."
+        >
+          the vital few
+        </span>
+        .
       </p>
 
       {/* Pareto chart — pure SVG, deterministic, no animation. */}
@@ -262,8 +277,16 @@ function PanelHeader({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-ds-2">
+      {/* Item #13 — lead the header with meaning; keep "Pareto" as a parenthetical
+          gloss for experts rather than the headline. */}
       <h2 className="text-[14px] font-semibold text-[var(--content-primary)]">
-        Time impact (Pareto)
+        Where your time goes{' '}
+        <span
+          className="text-[12px] font-normal text-[var(--content-tertiary)]"
+          title="A Pareto chart ranks your workflows by total observed time so the few that drive most of the work stand out first."
+        >
+          (Pareto)
+        </span>
       </h2>
       {barCount > 0 && (
         <span className="text-[12px] text-[var(--content-secondary)] tabular-nums">
@@ -283,12 +306,16 @@ function VariationStrip({
 
   return (
     <div className="border-t border-[var(--border-subtle)] pt-ds-2 flex flex-wrap items-center gap-ds-4">
-      <span className="text-[11px] font-medium uppercase tracking-wide text-[var(--content-tertiary)]">
+      <span
+        className="text-[11px] font-medium uppercase tracking-wide text-[var(--content-tertiary)]"
+        title="How consistent are these runs? Based only on workflows with 2 or more recorded runs."
+      >
         Consistency signals
       </span>
 
       <Stat
         label="Variants"
+        title="Distinct ways the same process was actually performed across its runs."
         value={
           variantSpread
             ? variantSpread.min === variantSpread.max
@@ -305,6 +332,7 @@ function VariationStrip({
 
       <Stat
         label="Cycle-time spread"
+        title="The range between the fastest and slowest workflow's average run time."
         value={
           cycleSpreadMs
             ? `${formatDuration(cycleSpreadMs.min)} – ${formatDuration(cycleSpreadMs.max)}`
@@ -316,9 +344,20 @@ function VariationStrip({
   );
 }
 
-function Stat({ label, value, sub }: { label: string; value: string; sub: string }) {
+function Stat({
+  label,
+  value,
+  sub,
+  title,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  /** Item #13 — plain-language gloss for the stat label (definitions only). */
+  title?: string | undefined;
+}) {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col" {...(title !== undefined ? { title } : {})}>
       <span className="text-[13px] font-semibold text-[var(--content-primary)] tabular-nums">
         {value}
       </span>

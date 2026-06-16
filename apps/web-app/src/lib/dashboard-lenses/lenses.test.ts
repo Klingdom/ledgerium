@@ -99,6 +99,22 @@ describe('lss lens config', () => {
   it('LSS panel is the pareto above-list panel', () => {
     expect(LENS_CONFIGS.lss.panel).toBe('pareto');
   });
+
+  // ── atglance-review #8: plain-language lens label + honest caption ──────────
+  it('LSS tab uses a plain-language label (no DMAIC jargon in the headline)', () => {
+    // Renamed "Measure & Analyze" → "Time & Impact" (legible to non-analysts).
+    expect(LENS_CONFIGS.lss.label).toBe('Time & Impact');
+    expect(LENS_CONFIGS.lss.label).not.toContain('Measure & Analyze');
+  });
+
+  it('LSS description is jargon-avoided and observed-only (no "Lean Six Sigma" / "Pareto" / sigma)', () => {
+    const d = LENS_CONFIGS.lss.description.toLowerCase();
+    expect(d).toContain('where your time goes');
+    expect(d).not.toContain('lean six sigma');
+    expect(d).not.toContain('pareto');
+    expect(d).not.toContain('sigma');
+    expect(d).not.toContain('dpmo');
+  });
 });
 
 describe('resolveAvailableColumns gate', () => {

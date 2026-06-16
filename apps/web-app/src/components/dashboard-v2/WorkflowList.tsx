@@ -99,6 +99,25 @@ const OPPORTUNITY_ORDER: Record<OpportunityTag, number> = {
   healthy: 4,
 };
 
+/**
+ * Item #13 (atglance-review) — column-header glosses. The sortable `<th>`
+ * elements render via SortButton with no registry `description`, so a non-expert
+ * meets bare jargon ("Cycle Time", "Runs", "Health Score"). These are plain,
+ * honest definitions only — NO fabricated targets/benchmarks. Applied as `title`
+ * on the `<th>` (columnheader) so they don't interfere with the sort button.
+ */
+export const SORTABLE_HEADER_GLOSS: Partial<Record<SortField, string>> = {
+  name: 'The name of the recorded process. Click to sort A–Z.',
+  opportunity:
+    'The engine\'s verdict for this workflow (automate / standardize / optimize / monitor / healthy) — a candidacy signal, not an ROI estimate.',
+  run_count: 'How many times this process has been recorded.',
+  cycle_time: 'How long a run of this process takes, on average. Shown as time, not a target.',
+  last_run: 'When this process was most recently active (uses the process definition\'s last-updated time as a proxy).',
+  date_recorded: 'When this process was first recorded.',
+  health_score:
+    'A 0–100 composite of confidence, SOP readiness, maturity, and review status. 80+ good, 60–79 fair, under 60 needs attention.',
+};
+
 export function sortWorkflows(workflows: WorkflowRowData[], sort: SortState): WorkflowRowData[] {
   const sorted = [...workflows];
   sorted.sort((a, b) => {
@@ -420,6 +439,9 @@ export default function WorkflowList({
 
   // MDR-P03: stable clock boundary captured once at render so all age-based
   // filter evaluations in this render cycle use an identical reference.
+  // atglance-review item #17: this same boundary is also threaded into every
+  // WorkflowRow's accessorContext (referenceNowMs) so no row reads Date.now()
+  // in render — one wall-clock value per render, shared by all rows.
   const nowMs = useMemo(() => Date.now(), []);
 
   function handleSort(field: SortField) {
@@ -549,6 +571,7 @@ export default function WorkflowList({
                 scope="col"
                 aria-sort={sortAriaValue('name', sort)}
                 className="px-ds-4 py-ds-2 text-left"
+                title={SORTABLE_HEADER_GLOSS.name}
               >
                 <SortButton
                   field="name"
@@ -567,6 +590,7 @@ export default function WorkflowList({
                       scope="col"
                       aria-sort={sortAriaValue('opportunity', sort)}
                       className="px-ds-4 py-ds-2 text-left hidden sm:table-cell"
+                      title={SORTABLE_HEADER_GLOSS.opportunity}
                     >
                       <SortButton
                         field="opportunity"
@@ -594,28 +618,28 @@ export default function WorkflowList({
                 // to a SortField so users can click the column header to sort.
                 if (colKey === 'run_count') {
                   return (
-                    <th key="run_count" scope="col" aria-sort={sortAriaValue('run_count', sort)} className="px-ds-4 py-ds-2 text-left">
+                    <th key="run_count" scope="col" aria-sort={sortAriaValue('run_count', sort)} className="px-ds-4 py-ds-2 text-left" title={SORTABLE_HEADER_GLOSS.run_count}>
                       <SortButton field="run_count" label="Runs" currentSort={sort} onSort={handleSort} />
                     </th>
                   );
                 }
                 if (colKey === 'cycle_time_mean_ms') {
                   return (
-                    <th key="cycle_time_mean_ms" scope="col" aria-sort={sortAriaValue('cycle_time', sort)} className="px-ds-4 py-ds-2 text-left">
+                    <th key="cycle_time_mean_ms" scope="col" aria-sort={sortAriaValue('cycle_time', sort)} className="px-ds-4 py-ds-2 text-left" title={SORTABLE_HEADER_GLOSS.cycle_time}>
                       <SortButton field="cycle_time" label="Cycle Time" currentSort={sort} onSort={handleSort} />
                     </th>
                   );
                 }
                 if (colKey === 'last_run_at') {
                   return (
-                    <th key="last_run_at" scope="col" aria-sort={sortAriaValue('last_run', sort)} className="px-ds-4 py-ds-2 text-left">
+                    <th key="last_run_at" scope="col" aria-sort={sortAriaValue('last_run', sort)} className="px-ds-4 py-ds-2 text-left" title={SORTABLE_HEADER_GLOSS.last_run}>
                       <SortButton field="last_run" label="Last Run" currentSort={sort} onSort={handleSort} />
                     </th>
                   );
                 }
                 if (colKey === 'date_recorded') {
                   return (
-                    <th key="date_recorded" scope="col" aria-sort={sortAriaValue('date_recorded', sort)} className="px-ds-4 py-ds-2 text-left">
+                    <th key="date_recorded" scope="col" aria-sort={sortAriaValue('date_recorded', sort)} className="px-ds-4 py-ds-2 text-left" title={SORTABLE_HEADER_GLOSS.date_recorded}>
                       <SortButton field="date_recorded" label="Date Recorded" currentSort={sort} onSort={handleSort} />
                     </th>
                   );
@@ -639,6 +663,7 @@ export default function WorkflowList({
                 scope="col"
                 aria-sort={sortAriaValue('health_score', sort)}
                 className="px-ds-4 py-ds-2 text-right"
+                title={SORTABLE_HEADER_GLOSS.health_score}
               >
                 <SortButton
                   field="health_score"
@@ -740,6 +765,9 @@ export default function WorkflowList({
                   timeRange={timeRange}
                   density={density}
                   dashboardViewPerfTimestampMs={dashboardViewPerfTimestampMs}
+                  // item #17: thread the single shared clock boundary into every
+                  // row so no row calls Date.now() in render.
+                  referenceNowMs={nowMs}
                   {...(visibleColumns !== undefined ? { visibleColumns } : {})}
                   {...(onWorkflowRename ? { onRename: onWorkflowRename } : {})}
                   {...(onWorkflowArchive ? { onArchive: onWorkflowArchive } : {})}

@@ -210,9 +210,9 @@ export const LENS_CONFIGS: Readonly<Record<Lens, LensConfig>> = Object.freeze({
   }),
   lss: Object.freeze({
     id: 'lss',
-    label: 'Measure & Analyze',
+    label: 'Time & Impact',
     description:
-      'Lean Six Sigma view: cycle time, run volume, and a Pareto of where your time goes.',
+      'See where your time goes — longest processes first, with a chart of the few that drive most of the work.',
     columnPack: LSS_COLUMN_PACK,
     // Default sort: longest total cycle time first — the Measure-phase entry
     // point (highest-leverage processes at the top). cycle_time desc per PM I-01.
