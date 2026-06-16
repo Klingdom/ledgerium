@@ -3,33 +3,46 @@
 /**
  * KpiTileStrip — 4 KPI tiles for the top-of-page band.
  *
- * Tiles (DASHBOARD_REDESIGN_REVIEW item 7 / DD-3; atglance-review #2 + #6 + #9):
+ * Tiles (DASHBOARD_REDESIGN_REVIEW item 7 / DD-3; atglance-review #2 + #6 + #9;
+ * SIGNALS batch #4):
  *   1. Total Workflows (hero, largest) — secondary: "+N recorded this month"
  *   2. Median Cycle Time (across workflows) — secondary: honest "across N workflows"
  *   3. Automation Candidates (aiOpportunityCount) — secondary: "of M workflows"
- *   4. Distinct Systems — secondary: "observed across your workflows"
+ *   4. High-Variance Workflows (NEW, SIGNALS #4) — secondary: honest denominator
+ *      "of K multi-run workflows"; K==0 → "needs ≥2 runs" (no fabricated 0).
+ *
+ * SIGNALS #4 — strip-redundancy resolution: **Distinct Systems was DEMOTED out
+ * of this primary strip** into the Tier-2 SignalFactsRow (#7) so the same stat
+ * is never shown twice. Primary strip is now Total Workflows · Median Cycle Time
+ * · Automation Candidates · High-Variance (+ the HealthGauge hero, rendered by
+ * TopBand).
  *
  * Item #9 (atglance-review) — "make clickable things navigate":
  *   ONLY the Automation Candidates tile maps to a real, honest list filter
  *   (opportunityTag === 'automate'). That tile is an interactive <button> that
  *   applies the filter and reflects active state. The other three tiles
- *   (Total Workflows / Median Cycle Time / Distinct Systems) have NO honest
- *   single-filter target, so they render as NON-interactive <div>s — not dead
- *   buttons. We do NOT fabricate an action for a tile that cannot honestly
- *   navigate. Every tile still carries an analytics click event + provenance
- *   tooltip (the non-interactive ones via an explicit info affordance).
+ *   (Total Workflows / Median Cycle Time / High-Variance) have NO honest
+ *   single-OPPORTUNITY-filter target, so they render as NON-interactive <div>s —
+ *   not dead buttons. (High-variation IS a healthStatus filter, surfaced via the
+ *   clickable Narrator clause, not this opportunity-typed tile handler — we do
+ *   not fabricate an opportunity action for it.) Every tile still carries an
+ *   analytics click event + provenance tooltip.
  *
  * HONESTY (ANALYTICS_DASHBOARD_REVIEW §6 + item #6):
  *   No tile shows a fabricated delta or percentage. Median cycle time states its
- *   honest denominator ("across N timed workflows"). Missing values render "—".
- *   Every tile carries a provenance/units tooltip (item #6).
+ *   honest denominator ("across N timed workflows"). The High-Variance tile
+ *   gates its denominator to multi-run workflows (variation is undefined for a
+ *   single run) and reports an honest "needs ≥2 runs" state when none exist.
+ *   Variation is a PROXY, labeled as such. Missing values render "—". Every tile
+ *   carries a provenance/units tooltip (item #6).
  *
- * @batch B (2026-06-12)
+ * @batch B (2026-06-12) · SIGNALS (2026-06-16)
  */
 
 import { track } from '@/lib/analytics.js';
 import { formatDuration } from '@/lib/format.js';
 import type { OpportunityTag } from '@/lib/workflow-metrics.js';
+import type { HighVarianceTileState } from '@/lib/dashboard-band-stats.js';
 
 export interface KpiTileData {
   totalWorkflows: number;
@@ -40,17 +53,18 @@ export interface KpiTileData {
   cycleTimeSampleCount: number;
   automationCandidates: number;
   /**
-   * Item #2 fill: distinct systems observed across the workflow set. Reuses the
-   * shell's already-computed `availableSystems.length` — no new computation.
+   * SIGNALS #4: the honest High-Variance tile state — count of high-variation
+   * workflows with the multi-run (runs ≥ 2) honest denominator. `available`
+   * false ⇒ render the "needs ≥2 runs" state, never a fabricated 0.
    */
-  distinctSystemCount: number;
+  highVariance: HighVarianceTileState;
 }
 
 type KpiTileId =
   | 'total_workflows'
   | 'cycle_time'
   | 'automation_candidates'
-  | 'distinct_systems';
+  | 'high_variance';
 
 interface KpiTileStripProps {
   data: KpiTileData;
@@ -157,7 +171,7 @@ export default function KpiTileStrip({ data, activeOpportunity, onFilter }: KpiT
     medianCycleTimeMs,
     cycleTimeSampleCount,
     automationCandidates,
-    distinctSystemCount,
+    highVariance,
   } = data;
 
   return (
@@ -207,15 +221,22 @@ export default function KpiTileStrip({ data, activeOpportunity, onFilter }: KpiT
         {`of ${totalWorkflows} workflow${totalWorkflows === 1 ? '' : 's'}`}
       </TileShell>
 
-      {/* Tile 4 — Distinct Systems — non-interactive (no honest filter). */}
+      {/* Tile 4 — High-Variance Workflows (SIGNALS #4) — non-interactive.
+          Variation is a PROXY (run-to-run observed variation), labeled as such.
+          The denominator is gated to MULTI-RUN workflows (runs ≥ 2) because
+          variation is undefined for a single run. When there are no multi-run
+          workflows the tile shows an honest "—" + "needs ≥2 runs" rather than a
+          fabricated 0. No DPMO/sigma/CV. */}
       <TileShell
-        tileId="distinct_systems"
-        label="Distinct Systems"
-        value={String(distinctSystemCount)}
-        trackValue={distinctSystemCount}
-        provenance="Count of unique systems observed across all recorded workflows. Derived from observed runs."
+        tileId="high_variance"
+        label="High-Variance Workflows"
+        value={highVariance.available ? String(highVariance.count) : '—'}
+        trackValue={highVariance.available ? highVariance.count : null}
+        provenance="Workflows with high run-to-run variation — a consistency proxy, not a defect rate. Counted only across multi-run workflows (variation needs ≥2 runs). The standardize signal."
       >
-        {distinctSystemCount === 1 ? 'observed in your workflows' : 'observed across your workflows'}
+        {highVariance.available
+          ? `of ${highVariance.multiRunCount} multi-run workflow${highVariance.multiRunCount === 1 ? '' : 's'}`
+          : 'needs ≥2 runs to measure'}
       </TileShell>
     </div>
   );

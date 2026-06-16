@@ -223,10 +223,17 @@ export type AnalyticsEvent =
   | {
       // Fired when a user clicks a KPI tile in the top-of-page band.
       // atglance-review item #2: 'avg_health' tile removed (health number now
-      // renders once, in the HealthGauge); 'distinct_systems' tile added as the
-      // honest fill (already-computed availableSystems.length).
+      // renders once, in the HealthGauge).
+      // SIGNALS batch (2026-06-16): 'distinct_systems' demoted out of the strip
+      // into the Tier-2 facts row; 'high_variance' added as the scannable
+      // standardize signal (#4). Taxonomy label only — numeric/opaque, no content.
       event: 'dashboard_kpi_tile_clicked';
-      tileId: 'total_workflows' | 'cycle_time' | 'automation_candidates' | 'distinct_systems';
+      tileId:
+        | 'total_workflows'
+        | 'cycle_time'
+        | 'automation_candidates'
+        | 'distinct_systems'
+        | 'high_variance';
       value: number | null;
     }
   | {

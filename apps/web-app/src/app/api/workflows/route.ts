@@ -610,6 +610,20 @@ export async function GET(req: NextRequest) {
     (w) => w.sopReadiness === 'ready',
   ).length;
 
+  // SIGNALS batch (2026-06-16): observed library-facts aggregates surfaced
+  // additively for the at-a-glance Tier-2 facts row (#7) + the High-Variance
+  // tile denominator (#4). Both derive from the already-computed per-workflow
+  // metricsV2.runs — NO new engine math. Variation is undefined for a single
+  // run, so multiRunWorkflowCount (runs ≥ 2) is the honest variance denominator.
+  const totalRuns = allEnriched.reduce((sum, w) => {
+    const r = w.metricsV2.runs;
+    return sum + (r != null && r > 0 ? r : 0);
+  }, 0);
+  const multiRunWorkflowCount = allEnriched.filter((w) => {
+    const r = w.metricsV2.runs;
+    return r != null && r >= 2;
+  }).length;
+
   const confidenceValues = allEnriched
     .map((w) => w.confidence)
     .filter((c): c is number => c != null);
@@ -745,6 +759,10 @@ export async function GET(req: NextRequest) {
       healthBandCounts,
       medianCycleTimeMs,
       activityByWeek,
+      // SIGNALS batch (2026-06-16): observed library-facts (additive; sourced
+      // from already-computed metricsV2.runs — no new engine computation).
+      totalRuns,
+      multiRunWorkflowCount,
       insightChips,
       // MDR-P09 (b): thread server-resolved plan to client for event segmentation.
       // Allows DashboardV2Shell to call setUserPlanForAnalytics() so every v2 event

@@ -45,6 +45,7 @@ import {
   Link,
   AlertTriangle,
   Clock,
+  OctagonAlert,
   type LucideIcon,
 } from 'lucide-react';
 import type { WorkflowMetricsOutput, OpportunityTag } from '@/lib/workflow-metrics.js';
@@ -884,6 +885,21 @@ export default function WorkflowRow({
     subtextParts.push(`${variantCount} variants`);
   }
 
+  // SIGNALS #5: surface the hidden ROW signals, honesty-gated.
+  //  - High-variation badge: variation is undefined for a single run, so it is
+  //    shown ONLY when the workflow has a confirmed multi-run history (runs ≥ 2)
+  //    AND the engine labels it 'high'. Variation is a PROXY (observed run-to-run
+  //    variation), labeled as such in the badge's aria-label/tooltip.
+  //  - Bottleneck chip: shown ONLY when the engine produced a bottleneckLabel
+  //    (derived from observed bottleneck/delay insights). Omitted entirely when
+  //    absent — never a placeholder.
+  const showHighVariation =
+    metricsV2.variationLabel === 'high' && runs !== null && runs >= 2;
+  const bottleneckLabel =
+    typeof metricsV2.bottleneckLabel === 'string' && metricsV2.bottleneckLabel.trim().length > 0
+      ? metricsV2.bottleneckLabel.trim()
+      : null;
+
   // SOP readiness subtext (Starter+ — isGated false)
   const sopSubtext = !healthScore.isGated ? sopReadinessLabel(metricsV2.confidence) : null;
 
@@ -999,19 +1015,36 @@ export default function WorkflowRow({
             <span className="text-[12px] font-normal text-[var(--content-secondary)] truncate">
               {subtextParts.join(' · ')}
             </span>
-            {/* Badge row — high-variation and stale signals sit together so a
-                row with both does not stack into two lines. Honest: each badge
-                reflects only a server-computed signal. */}
-            {(metricsV2.variationLabel === 'high' || workflow.isStale === true) && (
+            {/* Badge row — high-variation, bottleneck, and stale signals sit
+                together so a row with several does not stack into many lines.
+                Honest: each badge reflects ONLY a server-computed signal and is
+                omitted entirely when absent (SIGNALS #5 honesty gate). */}
+            {(showHighVariation || bottleneckLabel !== null || workflow.isStale === true) && (
               <div className="flex items-center gap-ds-1 flex-wrap mt-0.5">
-                {/* High variation badge (iter-024 §4.1 item d) */}
-                {metricsV2.variationLabel === 'high' && (
+                {/* High-variation badge (SIGNALS #5; gated to runs ≥ 2 — variation
+                    is undefined for a single run). Variation is a PROXY, labeled
+                    as such in the aria-label + title. */}
+                {showHighVariation && (
                   <span
                     className="inline-flex items-center gap-[3px] self-start px-1 py-0.5 rounded-ds-sm bg-amber-50 border border-amber-200 text-[10px] font-medium text-amber-700"
-                    aria-label="This workflow has high run-to-run variation"
+                    aria-label="High run-to-run variation — a consistency proxy across multiple runs, not a defect rate. Consider standardizing."
+                    title="High run-to-run variation (a consistency proxy across this workflow's runs, not a defect rate). Consider standardizing."
                   >
                     <AlertTriangle size={10} aria-hidden="true" />
                     High variation
+                  </span>
+                )}
+                {/* Bottleneck chip (SIGNALS #5 / F18): the engine's observed
+                    bottleneck/delay step. Shown only when present; omitted when
+                    absent (never a placeholder). */}
+                {bottleneckLabel !== null && (
+                  <span
+                    className="inline-flex items-center gap-[3px] self-start px-1 py-0.5 rounded-ds-sm bg-red-50 border border-red-200 text-[10px] font-medium text-red-700 max-w-[180px]"
+                    aria-label={`Bottleneck: ${bottleneckLabel}. An observed friction point from this workflow's runs.`}
+                    title={`Bottleneck (observed): ${bottleneckLabel}`}
+                  >
+                    <OctagonAlert size={10} aria-hidden="true" className="flex-shrink-0" />
+                    <span className="truncate">{bottleneckLabel}</span>
                   </span>
                 )}
                 {/* Batch C item 19: stale badge — honest, driven by the

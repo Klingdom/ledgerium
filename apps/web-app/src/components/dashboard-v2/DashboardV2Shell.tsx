@@ -99,6 +99,13 @@ interface WorkflowsApiResponse {
     opportunityCounts?: OpportunityCounts;
     medianCycleTimeMs?: number | null;
     activityByWeek?: ActivityWeekBucket[];
+    // ── SIGNALS batch (2026-06-16): observed library-facts counts ───────────
+    // All additive, backward-compatible, and sourced from already-computed
+    // engine output (no new engine math). Threaded so the band can surface them.
+    needsReview?: number;
+    recordedThisWeek?: number;
+    totalRuns?: number;
+    multiRunWorkflowCount?: number;
   };
 }
 
@@ -182,6 +189,9 @@ export default function DashboardV2Shell() {
   );
   const [medianCycleTimeMs, setMedianCycleTimeMs] = useState<number | null>(null);
   const [activityByWeek, setActivityByWeek] = useState<ActivityWeekBucket[]>([]);
+  // SIGNALS batch (2026-06-16): observed library-facts counts threaded from the
+  // route stats (already-computed; needsReview + a sum/count over metricsV2.runs).
+  const [needsReviewCount, setNeedsReviewCount] = useState<number>(0);
 
   // D5: Portfolio sidebar state — collapsed by default per PRD §D5
   const [portfolioSidebarOpen, setPortfolioSidebarOpen] = useState(false);
@@ -335,6 +345,8 @@ export default function DashboardV2Shell() {
       setOpportunityCounts(data.stats?.opportunityCounts ?? EMPTY_OPPORTUNITY_COUNTS);
       setMedianCycleTimeMs(data.stats?.medianCycleTimeMs ?? null);
       setActivityByWeek(data.stats?.activityByWeek ?? []);
+      // SIGNALS batch (2026-06-16): observed needs-review count (route stat).
+      setNeedsReviewCount(data.stats?.needsReview ?? 0);
       // MDR-P09 (b): set plan for event segmentation (side-channel enriches all
       // subsequent track() calls; see setUserPlanForAnalytics in analytics.ts).
       const plan = data.stats?.userPlan;
@@ -807,6 +819,29 @@ export default function DashboardV2Shell() {
     [allWorkflows],
   );
 
+  // SIGNALS batch (2026-06-16): observed library-facts aggregates derived from
+  // the SAME already-computed per-workflow `metricsV2.runs` (no new engine math,
+  // matching the existing highVariationCount client-derive pattern).
+  //  - multiRunWorkflowCount = the honest denominator for the High-Variance tile
+  //    (#4): variation is undefined for a single run, so only runs ≥ 2 count.
+  //  - totalRuns = the evidence denominator surfaced in the Tier-2 facts row (#7).
+  const multiRunWorkflowCount = useMemo(
+    () =>
+      allWorkflows.filter((w) => {
+        const r = w.metricsV2.runs;
+        return r != null && r >= 2;
+      }).length,
+    [allWorkflows],
+  );
+  const totalRuns = useMemo(
+    () =>
+      allWorkflows.reduce((sum, w) => {
+        const r = w.metricsV2.runs;
+        return sum + (r != null && r > 0 ? r : 0);
+      }, 0),
+    [allWorkflows],
+  );
+
   // Batch B: toggle the opportunity filter when an OpportunityBar segment is
   // clicked.  Clearing the active preset keeps the unified active-filters model
   // coherent: a manual ad-hoc filter change supersedes the one-click preset view.
@@ -1042,12 +1077,17 @@ export default function DashboardV2Shell() {
           medianCycleTimeMs,
           cycleTimeSampleCount,
           automationCandidates: aiOpportunityCount,
-          // Item #2 fill: distinct systems — reuses the already-computed
-          // availableSystems list (no new computation).
+          // SIGNALS #7: distinct systems — reuses the already-computed
+          // availableSystems list (no new computation). Demoted from the KPI
+          // strip into the Tier-2 facts row by #4.
           distinctSystemCount: availableSystems.length,
           avgHealthScore: portfolioHealthScore,
           avgHealthScoreDelta: portfolioHealthScoreDelta,
           highVariationCount,
+          // SIGNALS #4 / #7: honest denominators + observed counts (already-computed).
+          multiRunWorkflowCount,
+          totalRuns,
+          needsReviewCount,
           opportunityCounts,
           activityByWeek,
         }}

@@ -29,11 +29,16 @@ import type {
   OpportunityCounts,
   ActivityWeekBucket,
 } from '@/lib/dashboard-band-stats.js';
+import {
+  buildHighVarianceTileState,
+  buildSparklineState,
+} from '@/lib/dashboard-band-stats.js';
 import KpiTileStrip, { type KpiTileData } from './KpiTileStrip.js';
 import HealthGauge from './HealthGauge.js';
 import OpportunityBar from './OpportunityBar.js';
 import RecordedTrendChart from './RecordedTrendChart.js';
 import NarratorSummary, { type NarratorInput } from './NarratorSummary.js';
+import SignalFactsRow from './SignalFactsRow.js';
 
 /**
  * The portfolio health period-over-period delta — the ONLY tile/widget with a
@@ -73,8 +78,9 @@ export interface TopBandData {
   cycleTimeSampleCount: number;
   automationCandidates: number;
   /**
-   * Item #2 fill: distinct systems observed (shell's `availableSystems.length`).
-   * Replaces the removed Avg Health KPI tile — an already-computed honest stat.
+   * Distinct systems observed (shell's `availableSystems.length`). SIGNALS #4
+   * DEMOTED this out of the KPI strip into the Tier-2 SignalFactsRow (#7) — it
+   * is consumed there, not by KpiTileStrip, so the stat is never shown twice.
    */
   distinctSystemCount: number;
   /**
@@ -84,7 +90,17 @@ export interface TopBandData {
   avgHealthScore: number | null;
   /** Period-over-period health delta; surfaced near the gauge as the one true delta. */
   avgHealthScoreDelta: number | null;
+  /** Count of workflows with `variationLabel === 'high'` (numerator for #4). */
   highVariationCount: number;
+  /**
+   * SIGNALS #4: count of MULTI-RUN workflows (runs ≥ 2) — the honest denominator
+   * for the High-Variance tile. Variation is undefined for a single run.
+   */
+  multiRunWorkflowCount: number;
+  /** SIGNALS #7: sum of observed runs across the library (the evidence denominator). */
+  totalRuns: number;
+  /** SIGNALS #7: observed count of needs_review-status workflows (stats.needsReview). */
+  needsReviewCount: number;
   opportunityCounts: OpportunityCounts;
   activityByWeek: ActivityWeekBucket[];
 }
@@ -123,13 +139,23 @@ export default function TopBand({
     return null;
   }
 
+  // SIGNALS #4: derive the honest High-Variance tile state (numerator gated to
+  // the multi-run denominator). Pure — no clock, no fabrication.
+  const highVariance = buildHighVarianceTileState(
+    data.highVariationCount,
+    data.multiRunWorkflowCount,
+  );
+  // SIGNALS #7: derive the sparkline points + honest period-over-period delta
+  // from the SAME pre-computed activityByWeek buckets (route referenceNowMs).
+  const sparkline = buildSparklineState(data.activityByWeek);
+
   const kpiData: KpiTileData = {
     totalWorkflows: data.totalWorkflows,
     recordedThisMonth: data.recordedThisMonth,
     medianCycleTimeMs: data.medianCycleTimeMs,
     cycleTimeSampleCount: data.cycleTimeSampleCount,
     automationCandidates: data.automationCandidates,
-    distinctSystemCount: data.distinctSystemCount,
+    highVariance,
   };
 
   const narratorInput: NarratorInput = {
@@ -175,6 +201,19 @@ export default function TopBand({
           <HealthDelta delta={data.avgHealthScoreDelta} />
         </div>
       </div>
+
+      {/* Row 1.5: Tier-2 "library facts" row (SIGNALS #7) — compact observed
+          counts (Total runs · Distinct systems · Needs review · Recorded this
+          week) + an honest sparkline/delta. Distinct Systems lives HERE now
+          (demoted from the KPI strip by #4) so nothing is shown twice. */}
+      <SignalFactsRow
+        data={{
+          totalRuns: data.totalRuns,
+          distinctSystemCount: data.distinctSystemCount,
+          needsReviewCount: data.needsReviewCount,
+          sparkline,
+        }}
+      />
 
       {/* Row 2: opportunity bar + trend chart */}
       <div className="flex flex-col gap-ds-4 lg:flex-row lg:items-stretch">
