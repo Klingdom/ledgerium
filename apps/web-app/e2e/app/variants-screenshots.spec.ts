@@ -139,6 +139,25 @@ test.describe('Process Variants documentation', () => {
     await page.waitForTimeout(1500);
     await shot(page, 'dashboard-list');
 
+    // ── Navigation batch (#9/#10/#11): at-a-glance surfaces filter the list ────
+    // Dismiss the analytics consent banner so it can't intercept mid-page clicks.
+    const consentAccept = page.getByRole('button', { name: /^Accept$/ });
+    if (await consentAccept.count()) await consentAccept.first().click().catch(() => undefined);
+    // The active-filters bar must be absent until a filter is applied.
+    const activeFilters = page.getByRole('region', { name: 'Active filters' });
+    await expect(activeFilters, 'active-filters bar hidden when nothing is filtered').toHaveCount(0);
+    // Click the interactive Automation Candidates KPI tile → applies an opportunity
+    // filter → the unified active-filters bar appears (the #9 wiring + #11 backbone).
+    const autoTile = page.getByRole('button', { name: /Automation Candidates.*Click to filter/i });
+    await autoTile.waitFor({ state: 'visible', timeout: 15_000 });
+    await autoTile.click();
+    await activeFilters.waitFor({ state: 'visible', timeout: 10_000 });
+    await shot(page, 'dashboard-filtered');
+    // Clear all routes through the single source of truth → the bar disappears.
+    await activeFilters.getByRole('button', { name: /Clear all/i }).click();
+    await expect(activeFilters, 'Clear all removes the active-filters bar').toHaveCount(0);
+    await page.waitForTimeout(400);
+
     // ── LSS lens ("Time & Impact"): switcher + Pareto panel ───────────────────
     // Target the stable lens id (immune to label copy changes) rather than the
     // visible tab text, which the at-a-glance legibility batch renamed.

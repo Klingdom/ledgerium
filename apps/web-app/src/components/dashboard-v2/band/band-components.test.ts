@@ -17,7 +17,7 @@ vi.mock('@/lib/analytics.js', () => ({ track: vi.fn() }));
 
 import { gaugeBand, arcGeometry } from './HealthGauge';
 import { deriveSegments, OPPORTUNITY_GLOSS } from './OpportunityBar';
-import { buildNarrator } from './NarratorSummary';
+import { buildNarrator, buildNarratorParts } from './NarratorSummary';
 import { formatWeekTick, totalRecorded, shouldSuppressTrend, computeYTicks } from './trend-utils';
 import type { OpportunityCounts } from '@/lib/dashboard-band-stats';
 
@@ -183,6 +183,70 @@ describe('NarratorSummary.buildNarrator', () => {
       opportunityCounts: { ...emptyCounts, healthy: 1 },
     });
     expect(s).toBe('Your 1 workflow average a health score of 95.');
+  });
+});
+
+// ── NarratorSummary.buildNarratorParts (atglance-review #9 — clause→filter) ─────
+//
+// The structured narrator exposes which honest filter the follow-up clause maps
+// to, so the component can wire the clause as an interactive "navigate" target.
+// The lead clause (portfolio-wide average) has NO honest filter target.
+
+describe('NarratorSummary.buildNarratorParts (#9 clause→filter mapping)', () => {
+  it('high-variation clause maps to the high_variation health-status filter', () => {
+    const parts = buildNarratorParts({
+      totalWorkflows: 12,
+      avgHealthScore: 72,
+      highVariationCount: 3,
+      opportunityCounts: emptyCounts,
+    });
+    expect(parts).not.toBeNull();
+    expect(parts!.follow?.filter).toEqual({ kind: 'healthStatus', value: 'high_variation' });
+    // The joined sentence is byte-identical to buildNarrator (single source).
+    expect(`${parts!.lead}${parts!.follow?.text ?? ''}`).toBe(
+      'Your 12 workflows average a health score of 72. 3 have high variation — consider standardizing.',
+    );
+  });
+
+  it('automation clause maps to the automate opportunity filter', () => {
+    const parts = buildNarratorParts({
+      totalWorkflows: 4,
+      avgHealthScore: 88,
+      highVariationCount: 0,
+      opportunityCounts: { ...emptyCounts, automate: 1 },
+    });
+    expect(parts!.follow?.filter).toEqual({ kind: 'opportunity', value: 'automate' });
+  });
+
+  it('monitor clause maps to the monitor opportunity filter', () => {
+    const parts = buildNarratorParts({
+      totalWorkflows: 4,
+      avgHealthScore: 70,
+      highVariationCount: 0,
+      opportunityCounts: { ...emptyCounts, monitor: 2 },
+    });
+    expect(parts!.follow?.filter).toEqual({ kind: 'opportunity', value: 'monitor' });
+  });
+
+  it('lead-only narrator has no follow clause and therefore no filter target (honest)', () => {
+    const parts = buildNarratorParts({
+      totalWorkflows: 1,
+      avgHealthScore: 95,
+      highVariationCount: 0,
+      opportunityCounts: { ...emptyCounts, healthy: 1 },
+    });
+    expect(parts!.follow).toBeNull();
+  });
+
+  it('returns null when there are no workflows (honest omission)', () => {
+    expect(
+      buildNarratorParts({
+        totalWorkflows: 0,
+        avgHealthScore: 50,
+        highVariationCount: 0,
+        opportunityCounts: emptyCounts,
+      }),
+    ).toBeNull();
   });
 });
 

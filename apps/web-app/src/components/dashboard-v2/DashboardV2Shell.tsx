@@ -42,13 +42,21 @@ import WorkflowList, {
   type SortState,
   applyFilters,
 } from './WorkflowList.js';
-import type { FilterState } from './WorkflowListFilterBar.js';
+import type { FilterState, HealthStatusFilter } from './WorkflowListFilterBar.js';
 import { hasActiveFilters } from './WorkflowListFilterBar.js';
 import type { WorkflowRowData } from './WorkflowRow.js';
 import type { InsightChip } from '@/lib/workflow-metrics.js';
 import PortfolioSidebar, { type PortfolioNode } from '@/components/PortfolioSidebar.js';
 import ColumnPicker, { type SaveStatus } from './ColumnPicker.js';
 import UnifiedToolbar from './UnifiedToolbar.js';
+import ActiveFiltersBar from './ActiveFiltersBar.js';
+import {
+  deriveActiveFilterChips,
+  clearActiveFilterChip,
+  CLEARED_FILTER_STATE,
+  type ActiveFilterChip,
+  type ActiveFilterState,
+} from './activeFilters.js';
 import LensSwitcher from './LensSwitcher.js';
 import LssParetoPanel from './LssParetoPanel.js';
 import { useDensity } from './density.js';
@@ -66,7 +74,12 @@ import {
   type SavedView,
   getDefaultVisibleColumns,
 } from '@/lib/dashboard-columns/index.js';
-import type { PresetDefinition } from '@/lib/dashboard-columns/presets.js';
+import {
+  getPresetById,
+  type PresetDefinition,
+  type PresetId,
+} from '@/lib/dashboard-columns/presets.js';
+import type { FilterSet } from '@/lib/dashboard-columns/filters.js';
 
 // ── API response types ────────────────────────────────────────────────────────
 
@@ -211,6 +224,18 @@ export default function DashboardV2Shell() {
     needsAttention: false,
   });
   const [insightFilterKey, setInsightFilterKey] = useState<string | null>(null);
+
+  // atglance-review #10/#11: the active preset's ROW filters flow through the
+  // single applyFilters pipeline (via FilterSet → evaluateFilterSet) so applying
+  // a preset filters rows, not just columns. `activePresetId` drives the
+  // active-filters bar chip + lets the chip rail show the applied preset.
+  const [activePresetId, setActivePresetId] = useState<PresetId | null>(null);
+  const [presetFilters, setPresetFilters] = useState<FilterSet | null>(null);
+
+  // atglance-review #9: the workflow row to scroll-to + briefly highlight when a
+  // Pareto bar is clicked (observed-only drill — navigates to the real row).
+  const [highlightWorkflowId, setHighlightWorkflowId] = useState<string | null>(null);
+  const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Batch C unified-toolbar state ───────────────────────────────────────────
 
@@ -526,13 +551,31 @@ export default function DashboardV2Shell() {
     [scheduleSave],
   );
 
-  // D+5 (iter-062): Apply a preset chip — update visibleColumns + columnOrder.
-  // The preset catalog defines filters as FilterSet (D+2); similar to saved views,
-  // full filter apply is a scope-adjacent observation (D+6 scope).
+  // atglance-review #10: Apply a preset chip — update visibleColumns + columnOrder
+  // AND apply the preset's ROW filters through the single applyFilters pipeline
+  // (FilterSet → evaluateFilterSet). Closes the deferred "chips filter columns,
+  // not rows" over-promise: "Automation Candidates" now actually shows automation
+  // candidates.
+  //
+  // Applying a preset is a one-click VIEW: it replaces the ad-hoc filter
+  // mechanisms (panel filters + opportunity segment + insight chip) with the
+  // preset's own constraint, so the active-filters bar shows a single coherent
+  // "Preset: …" chip rather than a confusing compound state. Search is preserved
+  // (orthogonal free-text). The preset's FilterSet may be empty (e.g. Recent
+  // Activity has no expressible row filter) — that honestly filters nothing,
+  // changing only the columns, never fabricating a row constraint.
   const handleApplyPreset = useCallback(
     (preset: PresetDefinition) => {
       setVisibleColumns(preset.visibleColumns);
       scheduleSave(preset.visibleColumns, undefined);
+      // Apply the preset's row filters via the single pipeline.
+      setPresetFilters(preset.filters.length > 0 ? preset.filters : null);
+      setActivePresetId(preset.id);
+      // Clear the ad-hoc filter mechanisms so the preset is the dominant view.
+      setFilters({ systems: [], opportunity: null, healthStatus: null, needsAttention: false });
+      setInsightFilterKey(null);
+      // PRD §4 / item #20: preset_view_applied was previously unwired for v2.
+      track({ event: 'preset_view_applied', preset: preset.id });
     },
     [scheduleSave],
   );
@@ -690,7 +733,7 @@ export default function DashboardV2Shell() {
   // Batch C item 15: searchQuery threaded in so the derived state machine
   // distinguishes "no-results" (active search/filter, nothing matched) from
   // "empty" (genuinely no workflows).
-  const filteredWorkflows = applyFilters(portfolioFilteredWorkflows, filters, insightFilterKey, filterNowMs, searchQuery);
+  const filteredWorkflows = applyFilters(portfolioFilteredWorkflows, filters, insightFilterKey, filterNowMs, searchQuery, presetFilters);
 
   const availableSystems = extractSystems(allWorkflows);
 
@@ -722,16 +765,170 @@ export default function DashboardV2Shell() {
     [allWorkflows],
   );
 
-  // Batch B: toggle the opportunity filter when an OpportunityBar segment is clicked.
+  // Batch B: toggle the opportunity filter when an OpportunityBar segment is
+  // clicked.  Clearing the active preset keeps the unified active-filters model
+  // coherent: a manual ad-hoc filter change supersedes the one-click preset view.
   const handleOpportunitySegmentClick = useCallback((tag: OpportunityTag) => {
+    setActivePresetId(null);
+    setPresetFilters(null);
     setFilters((prev) => ({
       ...prev,
       opportunity: prev.opportunity === tag ? null : tag,
     }));
   }, []);
 
+  // atglance-review #11: a manual filter-panel change supersedes the active
+  // preset (single coherent active state). Wraps setFilters so every ad-hoc
+  // filter mechanism feeds the SAME model.
+  const handleFiltersChange = useCallback((next: FilterState) => {
+    setActivePresetId(null);
+    setPresetFilters(null);
+    setFilters(next);
+  }, []);
+
+  // atglance-review #9: wire the at-a-glance surfaces (KPI tiles, narrator) into
+  // the SAME opportunity filter the OpportunityBar segment-click already uses, so
+  // clicking them navigates the list and the active-filters bar reflects it.
+  // ONLY honest targets are wired — see KpiTileStrip/NarratorSummary for which
+  // tiles/clauses are interactive vs. clearly non-interactive.
+  const applyOpportunityFilter = useCallback((tag: OpportunityTag) => {
+    setActivePresetId(null);
+    setPresetFilters(null);
+    setInsightFilterKey(null);
+    setFilters((prev) => ({
+      ...prev,
+      // Toggle: clicking the same tile/clause again clears it.
+      opportunity: prev.opportunity === tag ? null : tag,
+    }));
+  }, []);
+
+  // KPI tile → filter. Only the Automation Candidates tile maps to a real,
+  // honest opportunity filter (opportunityTag === 'automate'). All other tiles
+  // (total workflows / median cycle time / distinct systems) have NO honest
+  // single-filter target and are rendered non-interactive by KpiTileStrip — this
+  // handler is only ever called for the automation_candidates tile.
+  const handleKpiTileFilter = useCallback(
+    (tag: OpportunityTag) => {
+      applyOpportunityFilter(tag);
+    },
+    [applyOpportunityFilter],
+  );
+
+  // Narrator clause → filter. The narrator's follow-up clause is one of: high
+  // variation / automation candidates / needs-remediation (monitor). Each maps
+  // to a real honest filter; NarratorSummary makes only the clause with a real
+  // target interactive (and passes the matching tag here).
+  const handleNarratorFilter = useCallback(
+    (tag: OpportunityTag, healthStatus: HealthStatusFilter | null) => {
+      if (healthStatus !== null) {
+        setActivePresetId(null);
+        setPresetFilters(null);
+        setInsightFilterKey(null);
+        setFilters((prev) => ({
+          ...prev,
+          healthStatus: prev.healthStatus === healthStatus ? null : healthStatus,
+          opportunity: null,
+        }));
+        return;
+      }
+      applyOpportunityFilter(tag);
+    },
+    [applyOpportunityFilter],
+  );
+
+  // atglance-review #11: insight-chip toggle also supersedes the active preset.
+  const handleInsightChipClick = useCallback((key: string) => {
+    setActivePresetId(null);
+    setPresetFilters(null);
+    setInsightFilterKey((prev) => (prev === key ? null : key));
+  }, []);
+
   const anyFiltersActive =
-    hasActiveFilters(filters) || insightFilterKey !== null || searchQuery.trim() !== '';
+    hasActiveFilters(filters) ||
+    insightFilterKey !== null ||
+    searchQuery.trim() !== '' ||
+    activePresetId !== null;
+
+  // atglance-review #11: the unified active-filters model. ONE projection of the
+  // four source mechanisms (panel filters, opportunity segment, insight chip,
+  // preset) + search — the same state applyFilters consumes. The bar renders
+  // these chips; clearing any chip routes back to the correct source setter.
+  const activePresetLabel = activePresetId !== null
+    ? getPresetById(activePresetId)?.label ?? null
+    : null;
+  const activeFilterChips: ActiveFilterChip[] = deriveActiveFilterChips({
+    filters,
+    insightFilterKey,
+    searchQuery,
+    presetId: activePresetId,
+    presetLabel: activePresetLabel,
+  });
+
+  // Apply an ActiveFilterState diff back to the shell's individual setters. The
+  // pure reducers in activeFilters.ts are the single source of truth for WHICH
+  // constraint each clear affects; this maps the resulting state onto the
+  // shell's state slots (including the preset's FilterSet, which mirrors presetId).
+  const applyActiveFilterState = useCallback((next: ActiveFilterState) => {
+    setFilters(next.filters);
+    setInsightFilterKey(next.insightFilterKey);
+    setSearchInput(next.searchQuery);
+    setSearchQuery(next.searchQuery);
+    if (next.presetId === null) {
+      setActivePresetId(null);
+      setPresetFilters(null);
+    }
+  }, []);
+
+  // Clear every constraint across all four sources + search (single Clear-all).
+  const handleClearAllFilters = useCallback(() => {
+    applyActiveFilterState(CLEARED_FILTER_STATE);
+  }, [applyActiveFilterState]);
+
+  // Clear a single active-filter chip, routed via the pure reducer.
+  const handleClearChip = useCallback(
+    (chip: ActiveFilterChip) => {
+      applyActiveFilterState(
+        clearActiveFilterChip(
+          {
+            filters,
+            insightFilterKey,
+            searchQuery,
+            presetId: activePresetId,
+          },
+          chip,
+        ),
+      );
+    },
+    [applyActiveFilterState, filters, insightFilterKey, searchQuery, activePresetId],
+  );
+
+  // atglance-review #9: Pareto bar drill — scroll the matching row into view and
+  // apply a transient highlight. Observed-only: it navigates to a REAL row by id;
+  // it never fabricates a target and never mutates data.
+  const handleSelectWorkflow = useCallback((workflowId: string) => {
+    setHighlightWorkflowId(workflowId);
+    if (highlightTimerRef.current !== null) {
+      clearTimeout(highlightTimerRef.current);
+    }
+    // Defer the scroll so the highlight class is applied before scrolling.
+    requestAnimationFrame(() => {
+      const el = document.getElementById(`wf-row-${workflowId}`);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    highlightTimerRef.current = setTimeout(() => {
+      setHighlightWorkflowId(null);
+      highlightTimerRef.current = null;
+    }, 2400);
+  }, []);
+
+  // Cleanup the highlight timer on unmount.
+  useEffect(() => {
+    return () => {
+      if (highlightTimerRef.current !== null) {
+        clearTimeout(highlightTimerRef.current);
+      }
+    };
+  }, []);
 
   // Derive UI state
   function deriveState(): WorkflowListState {
@@ -787,7 +984,7 @@ export default function DashboardV2Shell() {
           time (mean × runs) + variation strip. Only when the LSS lens is active. */}
       {activeLens === 'lss' && !isLoading && !isError && (
         <div className="px-ds-4 pt-ds-3">
-          <LssParetoPanel workflows={paretoInputs} />
+          <LssParetoPanel workflows={paretoInputs} onSelectWorkflow={handleSelectWorkflow} />
         </div>
       )}
 
@@ -811,6 +1008,8 @@ export default function DashboardV2Shell() {
         }}
         activeOpportunity={filters.opportunity}
         onOpportunitySegmentClick={handleOpportunitySegmentClick}
+        onKpiFilter={handleKpiTileFilter}
+        onNarratorFilter={handleNarratorFilter}
       />
 
       {/* Section 2: Insights Strip */}
@@ -818,9 +1017,7 @@ export default function DashboardV2Shell() {
         <InsightsStrip
           chips={insightChips}
           activeFilterKey={insightFilterKey}
-          onChipClick={(key) => {
-            setInsightFilterKey((prev) => (prev === key ? null : key));
-          }}
+          onChipClick={handleInsightChipClick}
         />
       )}
       {/* Note: insight_chip_clicked event is emitted inside InsightsStrip itself */}
@@ -870,7 +1067,7 @@ export default function DashboardV2Shell() {
             onSearchChange={setSearchInput}
             availableSystems={availableSystems}
             filters={filters}
-            onFiltersChange={setFilters}
+            onFiltersChange={handleFiltersChange}
             isFilterPanelOpen={isFilterPanelOpen}
             onToggleFilterPanel={() => setIsFilterPanelOpen((prev) => !prev)}
             sort={sort}
@@ -885,15 +1082,27 @@ export default function DashboardV2Shell() {
             {...(userPlan !== undefined ? { userPlan } : {})}
           />
 
+          {/* atglance-review #11: unified active-filters bar — ONE row above the
+              list showing every active constraint from all four mechanisms +
+              search, each removable, with a single Clear-all. Renders nothing
+              when no filters are active. */}
+          <ActiveFiltersBar
+            chips={activeFilterChips}
+            onClearChip={handleClearChip}
+            onClearAll={handleClearAllFilters}
+          />
+
           <WorkflowList
             state={listState}
             workflows={portfolioFilteredWorkflows}
             filters={filters}
             insightFilterKey={insightFilterKey}
+            presetFilters={presetFilters}
+            highlightWorkflowId={highlightWorkflowId}
             availableSystems={availableSystems}
             timeRange={timeRange}
-            onFiltersChange={setFilters}
-            onClearInsightFilter={() => setInsightFilterKey(null)}
+            onFiltersChange={handleFiltersChange}
+            onClearInsightFilter={handleClearAllFilters}
             onRetry={handleRetry}
             onWorkflowRename={handleWorkflowRename}
             onWorkflowArchive={handleWorkflowArchive}

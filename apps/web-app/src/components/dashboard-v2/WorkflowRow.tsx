@@ -162,6 +162,12 @@ interface WorkflowRowProps {
    * still get a STABLE (non-Date.now()) value — never a fresh per-row clock.
    */
   referenceNowMs?: number;
+  /**
+   * atglance-review #9: when true, this row is briefly highlighted because the
+   * user clicked the matching Pareto bar (scroll-to + highlight drill). Purely
+   * presentational — no data change. Defaults to false.
+   */
+  isHighlighted?: boolean;
 }
 
 // ── Opportunity tag config ────────────────────────────────────────────────────
@@ -751,6 +757,7 @@ export default function WorkflowRow({
   // Default 0 is a STABLE sentinel (NOT Date.now()) — today's lifetime accessors
   // ignore it, so a stable default keeps render deterministic + hydration-safe.
   referenceNowMs = 0,
+  isHighlighted = false,
 }: WorkflowRowProps) {
   const router = useRouter();
   // Batch C item 16: density-driven vertical padding for every cell in this row.
@@ -913,9 +920,16 @@ export default function WorkflowRow({
 
   return (
     <tr
+      id={`wf-row-${workflow.id}`}
       className={`
         group relative cursor-pointer transition-all duration-150
-        ${isHovered ? 'bg-[var(--surface-secondary)] rounded-[10px] shadow-sm' : 'bg-transparent'}
+        ${
+          isHighlighted
+            ? 'bg-green-50 rounded-[10px] ring-2 ring-green-500'
+            : isHovered
+              ? 'bg-[var(--surface-secondary)] rounded-[10px] shadow-sm'
+              : 'bg-transparent'
+        }
         focus-within:outline-none
       `}
       onMouseEnter={() => setIsHovered(true)}

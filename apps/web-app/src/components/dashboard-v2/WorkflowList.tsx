@@ -44,7 +44,9 @@ import type { TimeRange } from './CommandHeader.js';
 import {
   getColumnByKey,
   type ColumnKey,
+  type ColumnAccessorContext,
 } from '@/lib/dashboard-columns/index.js';
+import { evaluateFilterSet, type FilterSet } from '@/lib/dashboard-columns/filters.js';
 import type { RowDensity } from './density.js';
 
 // ── Locked columns (always visible regardless of user preferences) ─────────────
@@ -180,6 +182,37 @@ export function matchesSearch(workflow: WorkflowRowData, query: string): boolean
   return workflow.toolsUsed.some((s) => s.toLowerCase().includes(q));
 }
 
+// ── Accessor-context builder (preset FilterSet evaluation) ────────────────────
+
+/**
+ * Build a `ColumnAccessorContext` from a `WorkflowRowData` so a preset's
+ * `FilterSet` can be evaluated through the existing pure `evaluateFilterSet`
+ * path (atglance-review #10). This keeps ONE filter pipeline: preset row-filters
+ * run through the same deterministic, audit-honest evaluator the column registry
+ * defines, rather than a hand-rolled parallel predicate.
+ *
+ * `referenceNowMs` is the injected render-cycle clock (no `Date.now()` here);
+ * `activeTimeRange: 'all'` because preset row-filtering is lifetime — the
+ * time-window is applied separately upstream via `filterByTimeRange`. None of
+ * the preset FilterSets reference time-windowed accessors today, so this is
+ * inert; it is supplied to satisfy the context contract honestly.
+ */
+function buildAccessorContext(
+  w: WorkflowRowData,
+  nowMs: number,
+): ColumnAccessorContext {
+  return {
+    title: w.title,
+    toolsUsed: w.toolsUsed,
+    lastViewedAt: w.lastViewedAt,
+    createdAt: w.createdAt,
+    processDefinitionUpdatedAt: w.processDefinitionUpdatedAt,
+    metricsV2: w.metricsV2,
+    referenceNowMs: nowMs,
+    activeTimeRange: 'all',
+  };
+}
+
 // ── Filter application ────────────────────────────────────────────────────────
 
 export function applyFilters(
@@ -193,6 +226,13 @@ export function applyFilters(
   // Batch C item 15: global search query. Defaults to '' (no-op) so existing
   // call sites keep their exact behavior — search is purely additive.
   searchQuery: string = '',
+  // atglance-review #10/#11: the active preset's row filters (a FilterSet),
+  // evaluated through the existing pure `evaluateFilterSet`. Defaults to null
+  // (no preset) so existing call sites keep their exact behavior — additive.
+  // An empty FilterSet passes unconditionally per evaluateFilterSet semantics,
+  // so presets with no expressible row filter (e.g. Recent Activity) do not
+  // over-promise: applying them changes columns but honestly filters nothing.
+  presetFilters: FilterSet | null = null,
 ): WorkflowRowData[] {
   let result = workflows;
 
@@ -262,6 +302,16 @@ export function applyFilters(
       result = result.filter((w) => w.metricsV2.healthScore.overall >= 70);
     }
     // bottleneck_insight: no per-workflow filter key — show all (the chip is global)
+  }
+
+  // Preset row filters (atglance-review #10): when a preset is active, apply its
+  // FilterSet through the existing pure evaluator. AND-semantics with everything
+  // above (single conjunctive pipeline). An empty/non-expressible FilterSet
+  // passes unconditionally per evaluateFilterSet — honest no-op, never fabricated.
+  if (presetFilters !== null && presetFilters.length > 0) {
+    result = result.filter((w) =>
+      evaluateFilterSet(presetFilters, buildAccessorContext(w, nowMs)),
+    );
   }
 
   return result;
@@ -393,6 +443,18 @@ interface WorkflowListProps {
    * applyFilters. Defaults to '' (no-op) — additive, never breaks existing rows.
    */
   searchQuery?: string;
+  /**
+   * atglance-review #10: the active preset's row filters (a FilterSet). Threaded
+   * into applyFilters so an applied preset filters ROWS (not just columns) via the
+   * single pipeline. Defaults to null (no preset) — additive, never breaks rows.
+   */
+  presetFilters?: FilterSet | null;
+  /**
+   * atglance-review #9: the workflow id to briefly highlight (Pareto bar drill).
+   * The matching row renders highlighted + the shell scrolls it into view.
+   * Defaults to null (no highlight). Presentational only — never filters rows.
+   */
+  highlightWorkflowId?: string | null;
   /** Batch C item 16: row density, passed through to each WorkflowRow. */
   density?: RowDensity;
   /**
@@ -425,6 +487,8 @@ export default function WorkflowList({
   sort: controlledSort,
   onSortChange,
   searchQuery = '',
+  presetFilters = null,
+  highlightWorkflowId = null,
   density = 'regular',
   hideFilterBar = false,
 }: WorkflowListProps) {
@@ -468,7 +532,7 @@ export default function WorkflowList({
 
   const filteredWorkflows = state === 'loading'
     ? []
-    : applyFilters(workflows, filters, insightFilterKey, nowMs, searchQuery);
+    : applyFilters(workflows, filters, insightFilterKey, nowMs, searchQuery, presetFilters);
   const sortedWorkflows = sortWorkflows(filteredWorkflows, sort);
 
   // D+4: derive the ordered middle columns (between workflow_title and health_score)
@@ -768,6 +832,7 @@ export default function WorkflowList({
                   // item #17: thread the single shared clock boundary into every
                   // row so no row calls Date.now() in render.
                   referenceNowMs={nowMs}
+                  isHighlighted={highlightWorkflowId === workflow.id}
                   {...(visibleColumns !== undefined ? { visibleColumns } : {})}
                   {...(onWorkflowRename ? { onRename: onWorkflowRename } : {})}
                   {...(onWorkflowArchive ? { onArchive: onWorkflowArchive } : {})}

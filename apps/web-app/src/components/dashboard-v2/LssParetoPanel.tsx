@@ -41,9 +41,16 @@ const CUMULATIVE_COLOR = 'var(--severity-warning, #d97706)';
 export interface LssParetoPanelProps {
   /** Candidate workflows (shell maps WorkflowRowData → ParetoWorkflowInput). */
   workflows: readonly ParetoWorkflowInput[];
+  /**
+   * atglance-review #9: scroll-to + highlight the matching workflow row when a
+   * Pareto bar (or its legend entry) is clicked. Observed-only drill — it
+   * navigates to the real row; it never fabricates a drill target. Optional so
+   * standalone/test usage renders a non-interactive Pareto.
+   */
+  onSelectWorkflow?: (workflowId: string) => void;
 }
 
-export default function LssParetoPanel({ workflows }: LssParetoPanelProps) {
+export default function LssParetoPanel({ workflows, onSelectWorkflow }: LssParetoPanelProps) {
   // useId-pinned gradient/clip ids (collision-safe per iter-073 Recharts fix
   // convention) — even though we use plain SVG, unique ids keep multiple panel
   // instances from colliding.
@@ -230,27 +237,48 @@ export default function LssParetoPanel({ workflows }: LssParetoPanelProps) {
         </svg>
       </div>
 
-      {/* Bar legend with explicit N-attribution (accessible table-free list). */}
+      {/* Bar legend with explicit N-attribution (accessible table-free list).
+          atglance-review #9: each entry is a real button (when wired) that
+          scrolls to + highlights the matching workflow row — an observed-only
+          drill into the actual row, never a fabricated target. */}
       <ul className="flex flex-col gap-0.5">
-        {barRects.map((b) => (
-          <li
-            key={`legend-${b.id}`}
-            className="flex items-center justify-between gap-ds-2 text-[12px]"
-          >
-            <span className="flex items-center gap-ds-2 min-w-0">
-              <span
-                aria-hidden="true"
-                className="inline-block w-2 h-2 rounded-full flex-shrink-0"
-                style={{ background: b.isVitalFew ? ACCENT : TAIL_COLOR }}
-              />
-              <span className="truncate text-[var(--content-primary)]">{b.title}</span>
-            </span>
-            <span className="flex-shrink-0 tabular-nums text-[var(--content-secondary)]">
-              {formatDuration(b.totalObservedMs)} total ·{' '}
-              <span title="Observed run count">{b.runs} run{b.runs === 1 ? '' : 's'}</span>
-            </span>
-          </li>
-        ))}
+        {barRects.map((b) => {
+          const rowContent = (
+            <>
+              <span className="flex items-center gap-ds-2 min-w-0">
+                <span
+                  aria-hidden="true"
+                  className="inline-block w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ background: b.isVitalFew ? ACCENT : TAIL_COLOR }}
+                />
+                <span className="truncate text-[var(--content-primary)]">{b.title}</span>
+              </span>
+              <span className="flex-shrink-0 tabular-nums text-[var(--content-secondary)]">
+                {formatDuration(b.totalObservedMs)} total ·{' '}
+                <span title="Observed run count">{b.runs} run{b.runs === 1 ? '' : 's'}</span>
+              </span>
+            </>
+          );
+          return (
+            <li key={`legend-${b.id}`}>
+              {onSelectWorkflow ? (
+                <button
+                  type="button"
+                  onClick={() => onSelectWorkflow(b.id)}
+                  className="flex w-full items-center justify-between gap-ds-2 text-[12px] text-left rounded px-ds-1 -mx-ds-1 transition-colors duration-150 hover:bg-[var(--surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                  aria-label={`Go to ${b.title} in the list`}
+                  title="Scroll to this workflow in the list"
+                >
+                  {rowContent}
+                </button>
+              ) : (
+                <div className="flex items-center justify-between gap-ds-2 text-[12px]">
+                  {rowContent}
+                </div>
+              )}
+            </li>
+          );
+        })}
       </ul>
 
       {excludedCount > 0 && (

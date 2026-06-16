@@ -24,6 +24,7 @@
 
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 import type { OpportunityTag } from '@/lib/workflow-metrics.js';
+import type { HealthStatusFilter } from '../WorkflowListFilterBar.js';
 import type {
   OpportunityCounts,
   ActivityWeekBucket,
@@ -94,12 +95,27 @@ interface TopBandProps {
   activeOpportunity: OpportunityTag | null;
   /** Toggle the opportunity filter when a bar segment is clicked. */
   onOpportunitySegmentClick: (tag: OpportunityTag) => void;
+  /**
+   * atglance-review #9: apply the matching opportunity filter when a KPI tile
+   * that maps to a real, honest filter is clicked (Automation Candidates →
+   * 'automate'). Tiles with no honest filter target are rendered non-interactive
+   * by KpiTileStrip and never call this.
+   */
+  onKpiFilter: (tag: OpportunityTag) => void;
+  /**
+   * atglance-review #9: apply the matching filter when the narrator's follow-up
+   * clause (which always names a real signal) is clicked. `healthStatus` is set
+   * for the high-variation clause; `tag` for the automation/monitor clauses.
+   */
+  onNarratorFilter: (tag: OpportunityTag, healthStatus: HealthStatusFilter | null) => void;
 }
 
 export default function TopBand({
   data,
   activeOpportunity,
   onOpportunitySegmentClick,
+  onKpiFilter,
+  onNarratorFilter,
 }: TopBandProps) {
   // Suppress the entire band while loading or when there are no workflows —
   // the header + list states already cover those cases honestly.
@@ -131,12 +147,20 @@ export default function TopBand({
       {/* Row 0: NARRATOR — promoted to the TOP of the band (atglance-review #1,
           "orient before alert"). A newcomer reads what + how-many + what's-wrong
           first, before the KPI tiles and charts. Honest logic unchanged. */}
-      <NarratorSummary input={narratorInput} />
+      <NarratorSummary
+        input={narratorInput}
+        activeOpportunity={activeOpportunity}
+        onFilter={onNarratorFilter}
+      />
 
       {/* Row 1: KPI tiles (4) + health gauge */}
       <div className="flex flex-col gap-ds-4 lg:flex-row lg:items-stretch">
         <div className="flex-1 min-w-0">
-          <KpiTileStrip data={kpiData} />
+          <KpiTileStrip
+            data={kpiData}
+            activeOpportunity={activeOpportunity}
+            onFilter={onKpiFilter}
+          />
         </div>
         {/* HealthGauge is the SINGLE on-page representation of the portfolio
             health NUMBER (item #2). The one true period-over-period delta is
