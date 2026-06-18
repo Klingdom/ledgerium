@@ -30,7 +30,7 @@ export default function ExtensionPrivacyPage() {
             Ledgerium AI Recorder — Extension Privacy Policy
           </h1>
           <p className="mt-4 text-sm text-[#e2e8f0]">
-            Effective Date: May 26, 2026
+            Effective Date: June 18, 2026
           </p>
           <p className="mt-2 text-xs text-[var(--content-tertiary)]">
             This policy applies specifically to the Ledgerium AI Recorder Chrome extension.{' '}
@@ -94,10 +94,6 @@ export default function ExtensionPrivacyPage() {
                 Extension&apos;s core workflow-recording functionality:
               </p>
               <div className="rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-default)] p-4 space-y-4">
-                <PermissionRow
-                  permission="tabs"
-                  reason="Required to detect tab navigation events (URL changes, tab switches) during an active recording session. Without this permission, the Extension cannot track multi-tab workflows — a core feature of workflow recording."
-                />
                 <PermissionRow
                   permission="storage"
                   reason="Required to persist the active recording session state across browser restarts and service worker sleep cycles. Session data is stored locally until you explicitly upload or discard it."

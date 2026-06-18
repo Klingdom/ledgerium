@@ -3,6 +3,7 @@ import { processSession, eventTypeLabel } from '@ledgerium/process-engine'
 import type { ProcessOutput, StepDefinition, SOPStep } from '@ledgerium/process-engine'
 import type { SessionMeta, LiveStep, SessionBundle, CanonicalEvent } from '../../shared/types.js'
 import { MSG } from '../../shared/types.js'
+import { STORAGE_KEY_APIKEY, STORAGE_KEY_SETTINGS } from '../../shared/constants.js'
 import { SidebarProcessMap } from '../components/SidebarProcessMap.js'
 import { SidebarStepDrawer } from '../components/SidebarStepDrawer.js'
 import { ControlBar } from '../components/ControlBar.js'
@@ -165,6 +166,84 @@ function SOPView({ output, eventsByStepId }: { output: ProcessOutput; eventsBySt
   )
 }
 
+// ─── HTML output encoder ──────────────────────────────────────────────────────
+//
+// escapeHtml — encodes all dynamic values before interpolation into the
+// Workflow Report HTML template.  Prevents stored XSS: captured third-party
+// page content (step titles, app names, SOP text, observations, etc.) is
+// stored verbatim in chrome.storage and must be entity-encoded before it
+// appears in a downloaded HTML file opened in a browser.
+//
+// Coerces any unknown value to string first, so numeric/boolean metrics
+// remain safe even if they arrive as strings under future schema changes.
+//
+// Exported so it can be tested directly — see ProcessScreen-report.test.ts.
+export function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+// ─── openInWebsite security helpers ──────────────────────────────────────────
+//
+// Three pure / near-pure helpers extracted for testability.  Each corrects one
+// of the three security defects identified in the CHROME-002 audit:
+//
+//   resolveApiKey  — Defect 1: API key MUST come from chrome.storage.local
+//                    (STORAGE_KEY_APIKEY), not from the sync settings object.
+//                    The CHROME-002 migration moved the key to local storage;
+//                    reading it from sync would silently miss it.
+//
+//   isSyncUrlSafe  — Defect 2: the API key MUST NOT be sent over cleartext.
+//                    Mirrors the guard in src/background/uploader.ts:15.
+//
+//   sanitizeWorkflowId — Defect 3: data.workflowId arrives from the server and
+//                    must not be interpolated raw into a URL.  Only
+//                    alphanumerics, hyphens, and underscores are permitted;
+//                    the validated value is then passed through encodeURIComponent.
+
+/**
+ * Read the API key from chrome.storage.local using the canonical key
+ * STORAGE_KEY_APIKEY.  Returns undefined if the key has not been set.
+ *
+ * CHROME-002 fix: the API key was migrated OUT of chrome.storage.sync.
+ * Callers must not read it from the sync settings object.
+ */
+export function resolveApiKey(): Promise<string | undefined> {
+  return new Promise(resolve => {
+    chrome.storage.local.get([STORAGE_KEY_APIKEY], result => {
+      const key = result[STORAGE_KEY_APIKEY] as string | undefined
+      resolve(key || undefined)
+    })
+  })
+}
+
+/**
+ * Returns true only when the URL starts with 'https://'.
+ * Mirrors the guard in src/background/uploader.ts:15 — the API key and
+ * workflow payload must never travel over cleartext.
+ */
+export function isSyncUrlSafe(url: string): boolean {
+  return url.startsWith('https://')
+}
+
+/** Pattern that a safe workflow ID must fully match. */
+const WORKFLOW_ID_PATTERN = /^[A-Za-z0-9_-]+$/
+
+/**
+ * Validate and encode a workflowId received from the server.
+ * Returns encodeURIComponent(id) when the id consists solely of
+ * alphanumerics, hyphens, and underscores; returns null otherwise so
+ * the caller can fall back to the dashboard URL.
+ */
+export function sanitizeWorkflowId(id: unknown): string | null {
+  if (typeof id !== 'string' || !WORKFLOW_ID_PATTERN.test(id)) return null
+  return encodeURIComponent(id)
+}
+
 // ─── Export view ──────────────────────────────────────────────────────────────
 
 function ExportView({
@@ -251,24 +330,24 @@ function ExportView({
 
         const stepsHtml = steps.map(s =>
           `<tr>
-            <td>${s.ordinal}</td>
-            <td>${s.title}</td>
-            <td>${s.application}</td>
-            <td>${s.durationLabel}</td>
-            <td>${s.eventCount}</td>
+            <td>${escapeHtml(s.ordinal)}</td>
+            <td>${escapeHtml(s.title)}</td>
+            <td>${escapeHtml(s.application)}</td>
+            <td>${escapeHtml(s.durationLabel)}</td>
+            <td>${escapeHtml(s.eventCount)}</td>
           </tr>`
         ).join('')
 
         const phasesHtml = phases.map(p =>
-          `<li><strong>${p.title}</strong> — ${p.stepCount} step(s)</li>`
+          `<li><strong>${escapeHtml(p.title)}</strong> — ${escapeHtml(p.stepCount)} step(s)</li>`
         ).join('')
 
         const sopHtml = sopPhases.map(p => {
           const instructions = (p.instructions as Array<Record<string, unknown>>) ?? []
           const instHtml = instructions.map(i =>
-            `<li>${i.text}</li>`
+            `<li>${escapeHtml(i.text)}</li>`
           ).join('')
-          return `<h3>${p.phaseTitle}</h3><ol>${instHtml}</ol>`
+          return `<h3>${escapeHtml(p.phaseTitle)}</h3><ol>${instHtml}</ol>`
         }).join('')
 
         const formatMsForReport = (ms: number): string => {
@@ -284,7 +363,7 @@ function ExportView({
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Workflow Report — ${header.activityName}</title>
+<title>Workflow Report — ${escapeHtml(header.activityName)}</title>
 <style>
   @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 24px; color: #1a1a2e; line-height: 1.5; font-size: 13px; }
@@ -310,22 +389,22 @@ function ExportView({
 </head>
 <body>
   <h1>Workflow Report</h1>
-  <p style="font-size:15px;color:#334155;margin-bottom:2px;"><strong>${header.activityName}</strong></p>
+  <p style="font-size:15px;color:#334155;margin-bottom:2px;"><strong>${escapeHtml(header.activityName)}</strong></p>
   <div class="meta">
-    <span>Session: ${(header.sessionId as string).slice(0, 8)}…</span>
-    <span>Duration: ${header.durationLabel}</span>
-    <span>Generated: ${new Date(header.generatedAt as string).toLocaleString()}</span>
+    <span>Session: ${escapeHtml((header.sessionId as string).slice(0, 8))}…</span>
+    <span>Duration: ${escapeHtml(header.durationLabel)}</span>
+    <span>Generated: ${escapeHtml(new Date(header.generatedAt as string).toLocaleString())}</span>
   </div>
 
   <h2>Executive Summary</h2>
   <div class="stats">
-    <div class="stat"><div class="value">${metrics.stepCount}</div><div class="label">Steps</div></div>
-    <div class="stat"><div class="value">${metrics.phaseCount}</div><div class="label">Phases</div></div>
-    <div class="stat"><div class="value">${metrics.toolCount}</div><div class="label">Tools</div></div>
+    <div class="stat"><div class="value">${escapeHtml(metrics.stepCount)}</div><div class="label">Steps</div></div>
+    <div class="stat"><div class="value">${escapeHtml(metrics.phaseCount)}</div><div class="label">Phases</div></div>
+    <div class="stat"><div class="value">${escapeHtml(metrics.toolCount)}</div><div class="label">Tools</div></div>
   </div>
-  <p><strong>Applications:</strong> ${tools.map((t: string) => `<span class="badge">${t}</span>`).join('')}</p>
-  <p><strong>Confidence:</strong> ${summary.workflowConfidence}</p>
-  ${observations.length > 0 ? `<ul class="observations">${observations.map((o: string) => `<li>${o}</li>`).join('')}</ul>` : ''}
+  <p><strong>Applications:</strong> ${tools.map((t: string) => `<span class="badge">${escapeHtml(t)}</span>`).join('')}</p>
+  <p><strong>Confidence:</strong> ${escapeHtml(summary.workflowConfidence)}</p>
+  ${observations.length > 0 ? `<ul class="observations">${observations.map((o: string) => `<li>${escapeHtml(o)}</li>`).join('')}</ul>` : ''}
 
   <h2>Workflow Phases</h2>
   <ul>${phasesHtml}</ul>
@@ -338,29 +417,29 @@ function ExportView({
 
   <h2>Metrics</h2>
   <div class="stats">
-    <div class="stat"><div class="value">${metrics.totalDurationLabel}</div><div class="label">Total Duration</div></div>
-    <div class="stat"><div class="value">${formatMsForReport(Number(metrics.activeDurationMs) || 0)}</div><div class="label">Active Time</div></div>
-    <div class="stat"><div class="value">${formatMsForReport(Number(metrics.idleDurationMs) || 0)}</div><div class="label">Idle Time</div></div>
+    <div class="stat"><div class="value">${escapeHtml(metrics.totalDurationLabel)}</div><div class="label">Total Duration</div></div>
+    <div class="stat"><div class="value">${escapeHtml(formatMsForReport(Number(metrics.activeDurationMs) || 0))}</div><div class="label">Active Time</div></div>
+    <div class="stat"><div class="value">${escapeHtml(formatMsForReport(Number(metrics.idleDurationMs) || 0))}</div><div class="label">Idle Time</div></div>
   </div>
   <div class="stats">
-    <div class="stat"><div class="value">${metrics.navigationCount}</div><div class="label">Navigations</div></div>
-    <div class="stat"><div class="value">${metrics.clickCount}</div><div class="label">Clicks</div></div>
-    <div class="stat"><div class="value">${metrics.inputCount}</div><div class="label">Inputs</div></div>
+    <div class="stat"><div class="value">${escapeHtml(metrics.navigationCount)}</div><div class="label">Navigations</div></div>
+    <div class="stat"><div class="value">${escapeHtml(metrics.clickCount)}</div><div class="label">Clicks</div></div>
+    <div class="stat"><div class="value">${escapeHtml(metrics.inputCount)}</div><div class="label">Inputs</div></div>
   </div>
   <div class="stats">
-    <div class="stat"><div class="value">${metrics.fileActionCount}</div><div class="label">File Actions</div></div>
-    <div class="stat"><div class="value">${metrics.sendActionCount}</div><div class="label">Send Actions</div></div>
-    <div class="stat"><div class="value">${metrics.lowConfidenceStepCount}</div><div class="label">Low-Confidence Steps</div></div>
+    <div class="stat"><div class="value">${escapeHtml(metrics.fileActionCount)}</div><div class="label">File Actions</div></div>
+    <div class="stat"><div class="value">${escapeHtml(metrics.sendActionCount)}</div><div class="label">Send Actions</div></div>
+    <div class="stat"><div class="value">${escapeHtml(metrics.lowConfidenceStepCount)}</div><div class="label">Low-Confidence Steps</div></div>
   </div>
 
   <h2>Standard Operating Procedure</h2>
-  <p><em>${sop.overview}</em></p>
+  <p><em>${escapeHtml(sop.overview)}</em></p>
   ${sopHtml}
-  ${criteria.length > 0 ? `<h3>Completion Criteria</h3><ul>${criteria.map((c: string) => `<li>${c}</li>`).join('')}</ul>` : ''}
+  ${criteria.length > 0 ? `<h3>Completion Criteria</h3><ul>${criteria.map((c: string) => `<li>${escapeHtml(c)}</li>`).join('')}</ul>` : ''}
 
   <div class="footer">
     <p>Generated by Ledgerium AI — Deterministic Workflow Intelligence</p>
-    <p>Schema v${header.schemaVersion} · Recorder v${header.recorderVersion} · Segmentation v${header.segmentationRuleVersion}</p>
+    <p>Schema v${escapeHtml(header.schemaVersion)} · Recorder v${escapeHtml(header.recorderVersion)} · Segmentation v${escapeHtml(header.segmentationRuleVersion)}</p>
   </div>
 </body>
 </html>`
@@ -390,16 +469,28 @@ function ExportView({
   const openInWebsite = useCallback(() => {
     if (!bundle) return
 
-    // Read settings to get the sync URL and API key
-    chrome.storage.sync.get(['ledgerium_settings'], async (result) => {
-      const s = result['ledgerium_settings'] as { uploadUrl?: string; apiKey?: string } | undefined
+    // Read sync URL from sync storage (its canonical home) and API key from
+    // local storage (CHROME-002: the key was migrated out of sync into local).
+    chrome.storage.sync.get([STORAGE_KEY_SETTINGS], async (result) => {
+      const s = result[STORAGE_KEY_SETTINGS] as { uploadUrl?: string } | undefined
       const syncUrl = s?.uploadUrl
-      const apiKey = s?.apiKey
+
+      // Defect 1 fix: read the API key from local storage, not from the sync
+      // settings object.  Matches the IdleScreen.tsx pattern (lines 87-90).
+      const apiKey = await resolveApiKey()
 
       if (!syncUrl || !apiKey) {
         // No sync configured — open the web app with instructions
         const baseUrl = syncUrl?.replace('/api/sync', '') ?? 'https://ledgerium.ai'
         chrome.tabs.create({ url: `${baseUrl}/upload` })
+        return
+      }
+
+      // Defect 2 fix: enforce HTTPS before sending the API key.
+      // Mirrors the guard in src/background/uploader.ts:15.
+      if (!isSyncUrlSafe(syncUrl)) {
+        setOpenWebStatus('error')
+        setTimeout(() => setOpenWebStatus('idle'), 3000)
         return
       }
 
@@ -428,11 +519,14 @@ function ExportView({
           return
         }
 
-        const data = await response.json() as { workflowId?: string }
+        const data = await response.json() as { workflowId?: unknown }
         const baseUrl = syncUrl.replace('/api/sync', '')
 
-        if (data.workflowId) {
-          chrome.tabs.create({ url: `${baseUrl}/workflows/${data.workflowId}` })
+        // Defect 3 fix: validate and encode the server-supplied workflowId
+        // before interpolating it into a URL.
+        const safeWorkflowId = sanitizeWorkflowId(data.workflowId)
+        if (safeWorkflowId) {
+          chrome.tabs.create({ url: `${baseUrl}/workflows/${safeWorkflowId}` })
         } else {
           chrome.tabs.create({ url: `${baseUrl}/dashboard` })
         }
