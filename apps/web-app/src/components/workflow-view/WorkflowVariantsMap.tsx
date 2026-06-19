@@ -12,7 +12,7 @@
  * single-path view with guidance on how to generate variant data.
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import {
   GitBranch, TrendingUp, Clock, Zap, AlertTriangle, CheckCircle2,
   ChevronRight, ArrowRight, BarChart3, Target, Layers, Info,
@@ -30,12 +30,17 @@ import {
   portfolioIntelligenceToVariantInput,
 } from '@/lib/variantFlowModel';
 import { formatDuration } from '@/lib/format';
+import { buildDirectlyFollowsGraph } from '@/lib/dfgModel';
+import { DfgFrequencyMap } from './DfgFrequencyMap';
+import { track } from '@/lib/analytics';
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 
 interface Props {
   graph: NormalizedViewModel;
   intelligence?: any;
+  /** Opaque server workflow UUID — threaded to DfgFrequencyMap analytics. */
+  workflowId?: string | undefined;
   /** Load status — drives loading/error/forbidden/unprocessed states. */
   status?: 'idle' | 'loading' | 'loaded' | 'unprocessed' | 'forbidden' | 'error' | undefined;
   /** Retry the variants load. */
@@ -176,7 +181,7 @@ function classifyPaths(paths: ViewVariantPath[], graph: NormalizedViewModel): Cl
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
-export function WorkflowVariantsMap({ graph, intelligence, status, onRetry, onSelectNode, onCanvasReady }: Props) {
+export function WorkflowVariantsMap({ graph, intelligence, workflowId, status, onRetry, onSelectNode, onCanvasReady }: Props) {
   const variantData = useMemo(() => buildVariantData(graph, intelligence), [graph, intelligence]);
   const paths = useMemo(() => classifyPaths(variantData.paths, graph), [variantData.paths, graph]);
 
@@ -184,7 +189,14 @@ export function WorkflowVariantsMap({ graph, intelligence, status, onRetry, onSe
     paths.find(p => p.isStandard)?.id ?? paths[0]?.id ?? null,
   );
   const [comparePathId, setComparePathId] = useState<string | null>(null);
-  const [view, setView] = useState<'map' | 'list' | 'dna'>('map');
+  const [view, setView] = useState<'map' | 'frequency' | 'dna' | 'list'>('map');
+  const variantViewStartRef = useRef<number>(0);
+
+  // Record the exact moment this variant panel first becomes visible.
+  // Set exactly once on mount — all elapsed-time analytics compute relative to this.
+  useEffect(() => {
+    variantViewStartRef.current = Date.now();
+  }, []);
 
   // Build the flow-canvas model for the "Map" view (variant flow with decision nodes).
   // Real recorded step labels + durations are threaded through from the server
@@ -207,6 +219,28 @@ export function WorkflowVariantsMap({ graph, intelligence, status, onRetry, onSe
     const input = portfolioIntelligenceToVariantInput(intelligence, titleMap, durMap);
     if (input.variants.length < 2) return null;
     return buildVariantFlowModel(input);
+  }, [intelligence]);
+
+  // Build the DFG for the "Frequency" view. Reuses the same variantInput computed
+  // inside variantFlowModel but duplicated here to keep memos independent and avoid
+  // ordering coupling. Cost is negligible — pure in-memory aggregation.
+  const dfg = useMemo(() => {
+    const extra = intelligence as unknown as
+      | {
+          variantStepTitles?: Record<string, string[]>;
+          variantStepDurations?: Record<string, number[]>;
+        }
+      | null
+      | undefined;
+    const titleMap = new Map<string, string[]>(
+      Object.entries(extra?.variantStepTitles ?? ({} as Record<string, string[]>)),
+    );
+    const durMap = new Map<string, number[]>(
+      Object.entries(extra?.variantStepDurations ?? ({} as Record<string, number[]>)),
+    );
+    const input = portfolioIntelligenceToVariantInput(intelligence, titleMap, durMap);
+    if (input.variants.length < 2) return null;
+    return buildDirectlyFollowsGraph(input.variants);
   }, [intelligence]);
 
   const selectedPath = paths.find(p => p.id === selectedPathId) ?? null;
@@ -236,21 +270,52 @@ export function WorkflowVariantsMap({ graph, intelligence, status, onRetry, onSe
         <div className="flex overflow-hidden rounded-lg border border-[var(--border-subtle)] text-[10px] font-medium">
           <button
             data-testid="variants-view-map"
-            onClick={() => setView('map')}
+            onClick={() => {
+              if (view !== 'map') {
+                const fromView = view === 'frequency' ? 'frequency_map' : view === 'dna' ? 'dna' : 'list';
+                track({ event: 'variant_view_toggled', workflowId: workflowId ?? '', fromView, toView: 'map', elapsedMsSinceVariantView: Date.now() - (variantViewStartRef.current ?? 0) });
+              }
+              setView('map');
+            }}
             className={`px-2.5 py-1 transition-colors ${view === 'map' ? 'bg-violet-600 text-white' : 'text-[var(--content-secondary)] hover:bg-[var(--surface-elevated)]'}`}
           >
             Map
           </button>
           <button
+            data-testid="variants-view-frequency"
+            onClick={() => {
+              if (view !== 'frequency') {
+                const fromView = view === 'map' ? 'map' : view === 'dna' ? 'dna' : 'list';
+                track({ event: 'variant_view_toggled', workflowId: workflowId ?? '', fromView, toView: 'frequency_map', elapsedMsSinceVariantView: Date.now() - (variantViewStartRef.current ?? 0) });
+              }
+              setView('frequency');
+            }}
+            className={`px-2.5 py-1 transition-colors ${view === 'frequency' ? 'bg-violet-600 text-white' : 'text-[var(--content-secondary)] hover:bg-[var(--surface-elevated)]'}`}
+          >
+            Frequency
+          </button>
+          <button
             data-testid="variants-view-dna"
-            onClick={() => setView('dna')}
+            onClick={() => {
+              if (view !== 'dna') {
+                const fromView = view === 'frequency' ? 'frequency_map' : view === 'map' ? 'map' : 'list';
+                track({ event: 'variant_view_toggled', workflowId: workflowId ?? '', fromView, toView: 'dna', elapsedMsSinceVariantView: Date.now() - (variantViewStartRef.current ?? 0) });
+              }
+              setView('dna');
+            }}
             className={`px-2.5 py-1 transition-colors ${view === 'dna' ? 'bg-violet-600 text-white' : 'text-[var(--content-secondary)] hover:bg-[var(--surface-elevated)]'}`}
           >
             DNA
           </button>
           <button
             data-testid="variants-view-list"
-            onClick={() => setView('list')}
+            onClick={() => {
+              if (view !== 'list') {
+                const fromView = view === 'frequency' ? 'frequency_map' : view === 'dna' ? 'dna' : 'map';
+                track({ event: 'variant_view_toggled', workflowId: workflowId ?? '', fromView, toView: 'list', elapsedMsSinceVariantView: Date.now() - (variantViewStartRef.current ?? 0) });
+              }
+              setView('list');
+            }}
             className={`px-2.5 py-1 transition-colors ${view === 'list' ? 'bg-violet-600 text-white' : 'text-[var(--content-secondary)] hover:bg-[var(--surface-elevated)]'}`}
           >
             List
@@ -270,6 +335,21 @@ export function WorkflowVariantsMap({ graph, intelligence, status, onRetry, onSe
           ) : (
             /* Fallback: original story map when flow model not available */
             <WorkflowVariantStoryMap variants={variantData.paths} onSelectNode={onSelectNode} />
+          )
+        ) : view === 'frequency' ? (
+          dfg ? (
+            <DfgFrequencyMap
+              dfg={dfg}
+              workflowId={workflowId ?? ''}
+              variantCount={paths.length}
+              standardFrequency={paths.find(p => p.isStandard)?.frequency ?? 0}
+              decisionPointCount={variantFlowModel?.nodes.filter(n => n.isDecisionPoint).length ?? 0}
+              variantViewStartRef={variantViewStartRef}
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-[var(--content-secondary)] text-ds-sm">
+              Not enough runs to build a frequency map.
+            </div>
           )
         ) : view === 'dna' ? (
           <VariantDnaStrip variants={variantData.paths} />

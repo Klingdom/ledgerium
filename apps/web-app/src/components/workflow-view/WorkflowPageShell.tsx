@@ -316,6 +316,7 @@ export function WorkflowPageShell({
             <WorkflowVariantsMap
               graph={viewModel.graph}
               intelligence={variantIntelligence}
+              workflowId={workflowRecord?.id}
               status={variantsStatus}
               onRetry={onRetryVariants}
               onSelectNode={handleSelectNode}

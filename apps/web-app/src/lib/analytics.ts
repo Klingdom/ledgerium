@@ -110,6 +110,96 @@ export type AnalyticsEvent =
       driftLevel: string;
     }
 
+  // ── Variants tab — Celonis frequency map (ANALYTICS_PLAN.md, 2026-06-17) ──────
+  // PII-free: opaque workflowId; numeric/taxonomy props only.
+  // No step titles, node labels, or content strings in any payload.
+  | {
+      event: 'variant_map_viewed';
+      workflowId: string;
+      /** Total runs feeding the DFG. */
+      totalRuns: number;
+      /** Number of distinct variant paths (≥ 2 to reach this view). */
+      variantCount: number;
+      /** Standard-path frequency, 2 dp (0.00–1.00). */
+      standardFrequency: number;
+      /** Number of decision points (divergence nodes) in the flow model. */
+      decisionPointCount: number;
+      /** Which sub-view the user landed on: 'frequency_map' | 'dna' | 'list'. */
+      initialView: 'frequency_map' | 'dna' | 'list';
+    }
+  | {
+      event: 'variant_view_toggled';
+      workflowId: string;
+      fromView: 'map' | 'frequency_map' | 'dna' | 'list';
+      toView: 'map' | 'frequency_map' | 'dna' | 'list';
+      /** Milliseconds since variant_map_viewed fired. */
+      elapsedMsSinceVariantView: number;
+    }
+  | {
+      event: 'variant_coverage_slider_changed';
+      workflowId: string;
+      /** Coverage threshold at slider release (0–100, integer percent).
+       *  Fire on debounced final value only — not on every tick. */
+      coveragePct: number;
+      /** Variant paths visible at the chosen coverage threshold. */
+      visibleVariantCount: number;
+      /** Total variant paths before filtering. */
+      totalVariantCount: number;
+      /** Milliseconds since variant_map_viewed fired. */
+      elapsedMsSinceVariantView: number;
+    }
+  | {
+      event: 'variant_path_highlighted';
+      workflowId: string;
+      /** PathRole taxonomy label: 'standard' | 'fastest' | 'longest' | 'exception' | 'variant'. */
+      pathRole: 'standard' | 'fastest' | 'longest' | 'exception' | 'variant';
+      /** Frequency of the highlighted path, 2 dp. */
+      pathFrequency: number;
+      /** Run count of the highlighted path. */
+      pathRunCount: number;
+      /** Milliseconds since variant_map_viewed fired. */
+      elapsedMsSinceVariantView: number;
+    }
+  | {
+      event: 'variant_node_clicked';
+      workflowId: string;
+      /** Category from CATEGORY_STYLES taxonomy — no label content.
+       *  e.g. 'single_action' | 'navigation' | 'error_handling' | 'decision' */
+      nodeCategory: string;
+      /** Whether this node is a decision/divergence point. */
+      isDecisionPoint: boolean;
+      /** Whether the node is on the standard path spine. */
+      isOnStandardPath: boolean;
+      /** Milliseconds since variant_map_viewed fired. */
+      elapsedMsSinceVariantView: number;
+    }
+  | {
+      event: 'variant_edge_clicked';
+      workflowId: string;
+      /** Edge frequency weight, 2 dp (fraction of total runs traversing this edge). */
+      edgeFrequency: number;
+      /** Whether this edge is on the standard path. */
+      isStandardEdge: boolean;
+      /** Milliseconds since variant_map_viewed fired. */
+      elapsedMsSinceVariantView: number;
+    }
+  | {
+      event: 'variant_legend_viewed';
+      workflowId: string;
+      /** Which legend/help surface was opened: 'map_legend' | 'coverage_help'. */
+      surface: 'map_legend' | 'coverage_help';
+      /** Milliseconds since variant_map_viewed fired. */
+      elapsedMsSinceVariantView: number;
+    }
+  | {
+      event: 'dfg_performance_mode_toggled';
+      workflowId: string;
+      /** Encoding mode selected: 'frequency' (visit counts) | 'performance' (durations). */
+      mode: 'frequency' | 'performance';
+      /** Milliseconds since variant_map_viewed fired. */
+      elapsedMsSinceVariantView: number;
+    }
+
   // ── Sharing & collaboration ───────────────────────────────────────────────
   | { event: 'share_link_created'; workflowId: string }
   | { event: 'share_link_disabled'; workflowId: string }
