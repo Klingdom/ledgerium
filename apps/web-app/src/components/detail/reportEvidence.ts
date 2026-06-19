@@ -23,6 +23,10 @@
  */
 
 import { cvBand, type CvBand } from './reportVerdict.js';
+// Single source of truth for the high-variance CV threshold (Wave 0 RPT-P1-9):
+// previously duplicated here as a local const that could silently diverge from
+// the canonical, unit-tested definition in reportScorecard.
+import { HIGH_VARIANCE_CV_THRESHOLD } from './reportScorecard.js';
 
 export { cvBand };
 export type { CvBand };
@@ -177,8 +181,6 @@ export function consistencyBand(score: number): ConsistencyBand {
  * Returns null when neither signal is available or runCount < 2 (a single run is
  * trivially "100% stable" and would communicate false certainty).
  */
-const HIGH_VARIANCE_CV_THRESHOLD = 0.5;
-
 export function deriveConsistencyScore(
   input: ConsistencyScoreInput,
 ): ConsistencyScore | null {

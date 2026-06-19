@@ -428,6 +428,45 @@ export type AnalyticsEvent =
       /** Count of evidence run IDs backing the finding. NOT the IDs themselves. */
       evidenceRunCount: number;
     }
+  | {
+      event: 'report_nav_used';
+      workflowId: string;
+      /** One of the SECTION_IDS string constants — taxonomy only, no content. */
+      targetSectionId: string;
+      navSurface: 'right_rail' | 'mobile_toc';
+      /** Milliseconds since report_viewed fired. */
+      elapsedMsSinceReportView: number;
+    }
+  | {
+      event: 'report_step_expanded';
+      workflowId: string;
+      /** 1-based ordinal position in the step list. No step name. */
+      stepOrdinal: number;
+      /** Total number of steps rendered in the Step Breakdown section. */
+      totalStepCount: number;
+      /** Milliseconds since report_viewed fired. */
+      elapsedMsSinceReportView: number;
+    }
+  | {
+      event: 'report_insight_filter_changed';
+      workflowId: string;
+      fromCategory: 'all' | 'time_analysis' | 'rework' | 'system_efficiency' | 'automation' | 'process_health';
+      toCategory: 'all' | 'time_analysis' | 'rework' | 'system_efficiency' | 'automation' | 'process_health';
+      /** Count of insights visible after the filter change. */
+      insightCountInNewCategory: number;
+      /** Milliseconds since report_viewed fired. */
+      elapsedMsSinceReportView: number;
+    }
+  | {
+      event: 'report_scroll_depth';
+      workflowId: string;
+      /** Milestone reached: 25 | 50 | 75 | 100 (integer percent). */
+      depthPct: 25 | 50 | 75 | 100;
+      /** Milliseconds since report_viewed fired. */
+      elapsedMsSinceReportView: number;
+      /** Total visible sections at this scroll-depth milestone. */
+      visibleSectionCount: number;
+    }
 
   // ── Navigation ────────────────────────────────────────────────────────────
   | { event: 'page_viewed'; path: string }

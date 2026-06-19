@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   CheckCircle,
@@ -57,6 +57,20 @@ import { AutomationScoreChip } from '@/components/shared/AutomationScoreChip';
 // hits these shapes, which is why the smoke gate passed.
 function asArray<T>(v: readonly T[] | null | undefined): T[] {
   return Array.isArray(v) ? (v as T[]) : [];
+}
+
+// ── Report analytics context (Wave 0 RPT-P0-4/5) ──────────────────────────────
+// Threads the opaque workflowId + an elapsed-time getter to nested sections
+// (nav, step accordion, insight filter) so each can emit PII-free engagement
+// events without prop-drilling. Value is memoized in the page component.
+interface ReportAnalyticsCtx {
+  workflowId: string;
+  /** Milliseconds since report_viewed fired (the report-view zero-point). */
+  getElapsedMs: () => number;
+}
+const ReportAnalyticsContext = createContext<ReportAnalyticsCtx | null>(null);
+function useReportAnalytics(): ReportAnalyticsCtx | null {
+  return useContext(ReportAnalyticsContext);
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -993,6 +1007,7 @@ function InsightsFeedSection({
   intelligence: IntelligenceData | null | undefined;
 }) {
   const [activeCategory, setActiveCategory] = useState('all');
+  const analytics = useReportAnalytics();
   const runCount = intelligence?.metrics?.runCount ?? 1;
 
   if (!insights || !insights.hasInsights) {
@@ -1085,7 +1100,20 @@ function InsightsFeedSection({
           <button
             key={cat.key}
             type="button"
-            onClick={() => setActiveCategory(cat.key)}
+            onClick={() => {
+              if (analytics && cat.key !== activeCategory) {
+                track({
+                  event: 'report_insight_filter_changed',
+                  workflowId: analytics.workflowId,
+                  fromCategory: activeCategory as 'all' | 'time_analysis' | 'rework' | 'system_efficiency' | 'automation' | 'process_health',
+                  toCategory: cat.key as 'all' | 'time_analysis' | 'rework' | 'system_efficiency' | 'automation' | 'process_health',
+                  insightCountInNewCategory:
+                    cat.key === 'all' ? sorted.length : sorted.filter((i) => i.category === cat.key).length,
+                  elapsedMsSinceReportView: analytics.getElapsedMs(),
+                });
+              }
+              setActiveCategory(cat.key);
+            }}
             className={`rounded-full px-3 py-1 text-[11px] font-medium transition-colors ${
               activeCategory === cat.key
                 ? 'bg-brand-600 text-white'
@@ -1219,6 +1247,7 @@ function StepBreakdownSection({
 }) {
   const steps = asArray(processOutput?.processDefinition?.stepDefinitions);
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
+  const analytics = useReportAnalytics();
 
   // Build a bottleneck set for marking steps
   const bottleneckPositions = new Set(
@@ -1278,7 +1307,19 @@ function StepBreakdownSection({
               {/* Step row */}
               <button
                 type="button"
-                onClick={() => setExpandedStep(isExpanded ? null : step.ordinal)}
+                onClick={() => {
+                  const willExpand = !isExpanded;
+                  setExpandedStep(willExpand ? step.ordinal : null);
+                  if (willExpand && analytics) {
+                    track({
+                      event: 'report_step_expanded',
+                      workflowId: analytics.workflowId,
+                      stepOrdinal: step.ordinal,
+                      totalStepCount: steps.length,
+                      elapsedMsSinceReportView: analytics.getElapsedMs(),
+                    });
+                  }
+                }}
                 className="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-[var(--surface-secondary)] transition-colors"
               >
                 {/* Ordinal badge */}
@@ -1337,10 +1378,17 @@ function StepBreakdownSection({
                 />
               </button>
 
-              {/* Expanded detail (step-detail-panel: forced visible in print so
-                  evidence is never hidden behind the accordion). */}
-              {isExpanded && (
-                <div className="step-detail-panel px-4 pb-4 pt-1 bg-[var(--surface-secondary)] border-t border-[var(--border-subtle)]">
+              {/* Expanded detail (step-detail-panel). Wave 0 RPT-P0-2: the panel
+                  renders ALWAYS but is hidden on screen when collapsed via
+                  `hidden print:block`, so collapsed step evidence is never dropped
+                  from the printed/PDF report. (It previously used conditional
+                  render, which unmounted the node and broke print fidelity — CSS
+                  cannot restore an unmounted subtree in print.) */}
+              <div
+                className={`step-detail-panel px-4 pb-4 pt-1 bg-[var(--surface-secondary)] border-t border-[var(--border-subtle)] ${
+                  isExpanded ? '' : 'hidden print:block'
+                }`}
+              >
                   {step.evidence && (
                     <div className="mb-2">
                       <p className="text-[10px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wide mb-1">Evidence</p>
@@ -1361,7 +1409,6 @@ function StepBreakdownSection({
                     <p className="text-ds-xs text-[var(--content-tertiary)]">No additional detail available.</p>
                   )}
                 </div>
-              )}
             </div>
           );
         })}
@@ -2478,7 +2525,7 @@ function ComposedAgentsSection({ agentIntelligence }: { agentIntelligence: Agent
       <SectionHeading>Composed Agents</SectionHeading>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-ds-4">
         {agents.map((agent, i) => {
-          const systems = agent.systems ?? [];
+          const systems = asArray(agent.systems);
           const taskCount = agent.tasks?.length ?? 0;
           const skillCount = agent.skills?.length ?? 0;
           const capability = Math.min(agent.capabilityScore ?? 0, 100);
@@ -2588,8 +2635,8 @@ function SkillLibrarySection({ agentIntelligence }: { agentIntelligence: AgentIn
 
 function IntegrationsSection({ agentIntelligence }: { agentIntelligence: AgentIntelligenceData | null | undefined }) {
   const ir = agentIntelligence?.integrationRisk;
-  const integrations = ir?.integrations ?? [];
-  const risks = ir?.risks ?? [];
+  const integrations = asArray(ir?.integrations);
+  const risks = asArray(ir?.risks);
   const overall = ir?.overallRiskLevel ?? '';
   if (integrations.length === 0 && risks.length === 0 && !overall) return null;
 
@@ -2748,8 +2795,14 @@ function RoadmapSection({ agentIntelligence }: { agentIntelligence: AgentIntelli
  * label renders only when ≥1 of its IDs is visible. Reads `visibleSections` (the
  * report's source of truth) — it never re-derives visibility.
  */
-function RightRailNavigator({ visibleSections }: { visibleSections: readonly string[] }) {
-  const activeId = useScrollSpy([...visibleSections]);
+function RightRailNavigator({
+  visibleSections,
+  activeId,
+}: {
+  visibleSections: readonly string[];
+  activeId: string | null;
+}) {
+  const analytics = useReportAnalytics();
   const groups = useMemo(() => groupVisibleSections(visibleSections), [visibleSections]);
 
   return (
@@ -2771,6 +2824,15 @@ function RightRailNavigator({ visibleSections }: { visibleSections: readonly str
                     href={`#${id}`}
                     onClick={(e) => {
                       e.preventDefault();
+                      if (analytics) {
+                        track({
+                          event: 'report_nav_used',
+                          workflowId: analytics.workflowId,
+                          targetSectionId: id,
+                          navSurface: 'right_rail',
+                          elapsedMsSinceReportView: analytics.getElapsedMs(),
+                        });
+                      }
                       document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
                     }}
                     className={`block border-l-2 pl-5 py-0.5 text-[11px] transition-colors ${
@@ -2801,6 +2863,7 @@ function RightRailNavigator({ visibleSections }: { visibleSections: readonly str
 function MobileSectionTOC({ visibleSections }: { visibleSections: readonly string[] }) {
   const groups = useMemo(() => groupVisibleSections(visibleSections), [visibleSections]);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const analytics = useReportAnalytics();
 
   if (groups.length === 0) return null;
 
@@ -2831,6 +2894,15 @@ function MobileSectionTOC({ visibleSections }: { visibleSections: readonly strin
                       <button
                         type="button"
                         onClick={() => {
+                          if (analytics) {
+                            track({
+                              event: 'report_nav_used',
+                              workflowId: analytics.workflowId,
+                              targetSectionId: id,
+                              navSurface: 'mobile_toc',
+                              elapsedMsSinceReportView: analytics.getElapsedMs(),
+                            });
+                          }
                           document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
                           setOpenGroup(null);
                         }}
@@ -2881,6 +2953,16 @@ export function WorkflowReportPage({
     [intelligence, agentIntelligence, processOutput],
   );
 
+  // Single deterministic time-leverage derivation (Wave 0 RPT-P1-9): previously
+  // computed twice (the rpt-lead gate + the print lead). One memo, two consumers.
+  const timeLeverage = useMemo(
+    () => deriveTimeLeverage(insights, processOutput),
+    [insights, processOutput],
+  );
+
+  // Report-view zero-point for elapsed-time analytics (set in the mount effect).
+  const reportViewTimestampRef = useRef<number>(0);
+
   // Deterministic, hydration-safe report metadata (print/PDF header + footer +
   // screen sub-header + screen footer). Single recorded date, never a fabricated
   // range. Exact GROWTH copy. Memoized for identity stability.
@@ -2901,8 +2983,7 @@ export function WorkflowReportPage({
         }
         if (id === 'rpt-rework') return (interpretation?.rework?.length ?? 0) > 0;
         if (id === 'rpt-lead') {
-          const lev = deriveTimeLeverage(insights, processOutput);
-          return lev != null && lev.longestPct >= 25;
+          return timeLeverage != null && timeLeverage.longestPct >= 25;
         }
         if (id === 'rpt-metrics') {
           const hasStepTiming = asArray(processOutput?.processDefinition?.stepDefinitions).some(
@@ -2971,7 +3052,7 @@ export function WorkflowReportPage({
         if (id === 'rpt-roadmap') return (agentIntelligence?.artifacts?.roadmap?.length ?? 0) > 0;
         return true;
       }),
-    [insights, interpretation, intelligence, agentIntelligence, processOutput, leadFigures],
+    [insights, interpretation, intelligence, agentIntelligence, processOutput, leadFigures, timeLeverage],
   );
 
   // Whether the AI intelligence layer produced any renderable content (used by
@@ -2984,7 +3065,7 @@ export function WorkflowReportPage({
 
   // Print-header "Start here" lead callout (UX §1.6) — same computation as the
   // on-screen LeadInsightSection, rendered inline in print only.
-  const printLead = deriveTimeLeverage(insights, processOutput);
+  const printLead = timeLeverage;
   const hasPrintLead = printLead != null && printLead.longestPct >= 25;
 
   // ── report_viewed — fire exactly once per mount (ANALYTICS_RD §1.1). ──────────
@@ -2996,6 +3077,7 @@ export function WorkflowReportPage({
     if (reportViewedFiredRef.current) return;
     if (!workflow.id) return;
     reportViewedFiredRef.current = true;
+    reportViewTimestampRef.current = Date.now();
     track({
       event: 'report_viewed',
       workflowId: workflow.id,
@@ -3006,7 +3088,71 @@ export function WorkflowReportPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workflow.id]);
 
+  // ── Scroll-spy hoisted to the page (Wave 0 RPT-P0-1) ──────────────────────────
+  // One IntersectionObserver over the memoized visibleSections (stable ref),
+  // shared with the right rail and used to emit report_section_viewed on all
+  // viewports (the right rail is xl-only, so the spy could not live only there).
+  const activeSectionId = useScrollSpy(visibleSections);
+
+  const reportAnalyticsValue = useMemo<ReportAnalyticsCtx>(
+    () => ({
+      workflowId: workflow.id,
+      getElapsedMs: () => Date.now() - (reportViewTimestampRef.current || Date.now()),
+    }),
+    [workflow.id],
+  );
+
+  // report_section_viewed — fire once per section entry, with a dwell guard so
+  // fast scroll-through does not over-count. PII-free (id + label + run count).
+  const lastSectionFiredRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!workflow.id || !activeSectionId) return;
+    if (lastSectionFiredRef.current === activeSectionId) return;
+    const sectionId = activeSectionId;
+    const timer = setTimeout(() => {
+      lastSectionFiredRef.current = sectionId;
+      track({
+        event: 'report_section_viewed',
+        workflowId: workflow.id,
+        sectionId,
+        sectionLabel: SECTION_LABELS[sectionId] ?? sectionId,
+        runCount: leadFigures.runCount,
+        elapsedMsSinceReportView: Date.now() - (reportViewTimestampRef.current || Date.now()),
+      });
+    }, 1200);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSectionId, workflow.id]);
+
+  // report_scroll_depth — 25/50/75/100 milestones, each fired once per mount.
+  const scrollDepthFiredRef = useRef<Set<number>>(new Set());
+  useEffect(() => {
+    if (!workflow.id) return;
+    function onScroll() {
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - window.innerHeight;
+      if (max <= 0) return;
+      const pct = (doc.scrollTop / max) * 100;
+      for (const milestone of [25, 50, 75, 100] as const) {
+        if (pct + 0.5 >= milestone && !scrollDepthFiredRef.current.has(milestone)) {
+          scrollDepthFiredRef.current.add(milestone);
+          track({
+            event: 'report_scroll_depth',
+            workflowId: workflow.id,
+            depthPct: milestone,
+            elapsedMsSinceReportView: Date.now() - (reportViewTimestampRef.current || Date.now()),
+            visibleSectionCount: visibleSections.length,
+          });
+        }
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workflow.id, visibleSections.length]);
+
   return (
+    <ReportAnalyticsContext.Provider value={reportAnalyticsValue}>
     <div className="report-print-root flex gap-8 items-start">
       {/* ── Print-only page header (UX §1.4) — hidden on screen. ─────────────── */}
       <div className="report-print-header hidden print:block" aria-hidden>
@@ -3081,7 +3227,7 @@ export function WorkflowReportPage({
       </div>
 
       {/* Right rail — grouped section nav (hidden xl:block; hidden in print). */}
-      <RightRailNavigator visibleSections={visibleSections} />
+      <RightRailNavigator visibleSections={visibleSections} activeId={activeSectionId} />
 
       {/* ── Print-only honesty footer (UX §1.7 / GROWTH §3) — fixed on every page. */}
       <div className="report-print-footer hidden print:flex" aria-hidden>
@@ -3089,5 +3235,6 @@ export function WorkflowReportPage({
         <span className="report-print-footer-disclosure">{reportMeta.footerLine2}</span>
       </div>
     </div>
+    </ReportAnalyticsContext.Provider>
   );
 }
