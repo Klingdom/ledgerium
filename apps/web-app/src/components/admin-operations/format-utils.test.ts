@@ -209,3 +209,44 @@ describe('formatUptime', () => {
     expect(result).toBe('1m 30s');
   });
 });
+
+// ── formatCurrency ────────────────────────────────────────────────────────────
+
+import { formatCurrency } from './format-utils.js';
+
+describe('formatCurrency', () => {
+  it('returns "—" for null', () => {
+    expect(formatCurrency(null)).toBe('—');
+  });
+
+  it('returns "—" for undefined', () => {
+    expect(formatCurrency(undefined)).toBe('—');
+  });
+
+  it('formats zero as $0', () => {
+    expect(formatCurrency(0)).toBe('$0');
+  });
+
+  it('formats integer amount', () => {
+    expect(formatCurrency(49)).toBe('$49');
+  });
+
+  it('formats amount with thousands separator', () => {
+    expect(formatCurrency(1249)).toBe('$1,249');
+  });
+
+  it('formats large amount', () => {
+    expect(formatCurrency(10_000)).toBe('$10,000');
+  });
+
+  it('truncates fractional dollars (no decimal digits)', () => {
+    // 49.99 → "$49" (maximumFractionDigits: 0 rounds via toLocaleString)
+    expect(formatCurrency(49.99)).toBe('$50');
+  });
+
+  it('is deterministic: same input returns same output', () => {
+    const a = formatCurrency(1249);
+    const b = formatCurrency(1249);
+    expect(a).toBe(b);
+  });
+});

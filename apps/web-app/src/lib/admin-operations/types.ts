@@ -11,13 +11,76 @@
  *   - DB size and heap memory exposed only to authenticated admin
  *
  * @module admin-operations/types
- * @iter 071
+ * @iter 071 — original
+ * @iter Iteration A — Growth Intelligence Extension (additive fields)
  */
 
 // ── Shared ─────────────────────────────────────────────────────────────────────
 
 /** ISO-8601 date string (YYYY-MM-DD) used for time-series bucket keys. */
 export type IsoDateString = string;
+
+// ── Subscription breakdown — new types (Growth Intelligence Extension) ─────────
+
+/**
+ * Closed union of plan identifiers we track.
+ * Normalised via toPlanType() so unknown DB values become 'free'.
+ */
+export type NormalizedPlan =
+  | 'free'
+  | 'starter'
+  | 'team'
+  | 'growth'
+  | 'enterprise';
+
+/**
+ * Closed union of subscription statuses we track.
+ * Unknown DB values are normalised to 'none'.
+ */
+export type NormalizedSubscriptionStatus =
+  | 'none'
+  | 'trialing'
+  | 'active'
+  | 'past_due'
+  | 'canceled';
+
+/** Estimated Monthly Recurring Revenue breakdown. */
+export interface MrrEstimate {
+  /**
+   * Σ price[plan] × count(plan ∈ {starter,team,growth} AND status ∈ billableStatuses).
+   * Enterprise excluded (separate count).
+   */
+  estimatedUsd: number;
+  /** Per-plan USD contribution to MRR. */
+  byPlanUsd: Record<'starter' | 'team' | 'growth', number>;
+  /** Number of enterprise users (excluded from MRR, shown separately). */
+  enterpriseCount: number;
+  /** Audit trail: prices and statuses used to compute the estimate. */
+  basis: {
+    monthlyPriceUsd: Record<'starter' | 'team' | 'growth', number>;
+    billableStatuses: readonly string[];
+  };
+}
+
+/** Subscription breakdown section returned by getSubscriptionBreakdown(). */
+export interface SubscriptionBreakdownSection {
+  /** User count per plan tier (zero-filled over closed union). */
+  byPlan: Record<NormalizedPlan, number>;
+  /** User count per subscription status (zero-filled over closed union). */
+  byStatus: Record<NormalizedSubscriptionStatus, number>;
+  /** MRR estimate. */
+  mrr: MrrEstimate;
+  /**
+   * Count of users whose plan is not 'free' AND subscriptionStatus is 'active'.
+   * Equals paying subscribers.
+   */
+  paidUserCount: number;
+  /**
+   * paidUserCount / totalUsers × 100.
+   * 0 when totalUsers === 0 (null-safe).
+   */
+  freeToPaidConversionPct: number;
+}
 
 /** Numeric time-range in days. Matches the ?range= query param values. */
 export type TimeRangeDays = 7 | 30 | 90;
@@ -40,6 +103,13 @@ export interface UserVolumeSection {
   newUsersTimeSeries: DailyBucket[];
   /** Top 10 uploaders by upload count; userId truncated for privacy */
   topUploaders: Array<{ userId: string; uploadCount: number }>;
+  /**
+   * Activation rate: distinct users with ≥1 non-deleted workflow / totalUsers × 100.
+   * 0 when totalUsers === 0 (null-safe).
+   */
+  activationRatePct: number;
+  /** Sum of all daily buckets in newUsersTimeSeries — signups in the selected range. */
+  newUsersInRange: number;
 }
 
 // ── Section 2: Recording volume ────────────────────────────────────────────────
@@ -70,6 +140,12 @@ export interface WorkflowProcessingSection {
   processingSuccessRate: number | null;
   /** Daily new-workflow creation counts for the selected range */
   workflowsTimeSeries: DailyBucket[];
+  /**
+   * Daily workflow-update counts for the selected range.
+   * Uses Workflow.updatedAt in range, status ≠ deleted.
+   * Engagement signal distinct from creation.
+   */
+  workflowUpdatesTimeSeries: DailyBucket[];
 }
 
 // ── Section 4: System health ───────────────────────────────────────────────────
@@ -121,6 +197,7 @@ export interface MemoryUsageSection {
 // ── Top-level KPI tiles ────────────────────────────────────────────────────────
 
 export interface KpiTiles {
+  // ── Existing 6 tiles (preserved verbatim) ─────────────────────────────────
   totalUsers: number;
   mau30d: number;
   uploadsInRange: number;
@@ -129,6 +206,17 @@ export interface KpiTiles {
   /** Heap used in bytes */
   nodeHeapUsedBytes: number;
   errorEvents24hTotal: number;
+  // ── New growth tiles (Growth Intelligence Extension) ────────────────────────
+  /** Estimated Monthly Recurring Revenue in USD (active subscribers only). */
+  mrrUsd: number;
+  /** Count of users with plan ≠ free AND subscriptionStatus = active. */
+  payingSubscribers: number;
+  /** Total signups in the selected range (sum of newUsersTimeSeries). */
+  signupsInRange: number;
+  /** paidUserCount / totalUsers × 100. */
+  freeToPaidConversionPct: number;
+  /** Distinct users with ≥1 non-deleted workflow / totalUsers × 100. */
+  activationRatePct: number;
 }
 
 // ── Top-level response ─────────────────────────────────────────────────────────
@@ -136,7 +224,7 @@ export interface KpiTiles {
 export interface AdminOperationsResponse {
   /** The range that was applied to time-windowed queries */
   rangeApplied: TimeRangeDays;
-  /** Six KPI tiles displayed at the top of the dashboard */
+  /** KPI tiles displayed at the top of the dashboard (6 original + 5 growth) */
   kpi: KpiTiles;
   /** Section 1 — User volume */
   userVolume: UserVolumeSection;
@@ -148,6 +236,8 @@ export interface AdminOperationsResponse {
   systemHealth: SystemHealthSection;
   /** Section 5 — Node runtime memory */
   memoryUsage: MemoryUsageSection;
+  /** Section 6 — Subscription breakdown (Growth Intelligence Extension) */
+  subscriptionBreakdown: SubscriptionBreakdownSection;
 }
 
 // ── API envelope ───────────────────────────────────────────────────────────────

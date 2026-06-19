@@ -13,13 +13,14 @@
  *   - status: 'idle' | 'loading' | 'success' | 'error'
  *   - lastUpdatedAt: Date | null
  *
- * Layout (UX §3):
- *   1. Sticky header strip — 6 KPI tiles + refresh control + range selector
- *   2. 5 section cards in a 2-column grid (wide screens)
+ * Layout:
+ *   1. Sticky header strip — two KPI rows (5 growth + 5 product/ops) + refresh control + range selector
+ *   2. 7 section cards in a 2-column grid (wide screens)
  *   3. Footer timestamp
  *
- * @iter 072
+ * @iter 072 — original
  * @extended iter 096 / ADM-002 PR-7 — UserDetailDrawer integration
+ * @extended iter B — Growth Intelligence Extension (KPI rework + Growth Overview + Subscription Breakdown)
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -32,10 +33,13 @@ import { MemoryGauge } from './MemoryGauge.js';
 import { RefreshControl } from './RefreshControl.js';
 import { LoadingSkeleton } from './LoadingSkeleton.js';
 import { UserDetailDrawer } from './user-detail/UserDetailDrawer.js';
+import { SubscriptionPlanBar } from './SubscriptionPlanBar.js';
+import { SubscriptionStatusBar } from './SubscriptionStatusBar.js';
 import {
   formatNumber,
   formatBytes,
   formatPercent,
+  formatCurrency,
   formatUptime,
   formatRelativeTime,
 } from './format-utils.js';
@@ -172,6 +176,12 @@ export function AdminOperationsDashboard() {
 
   const kpiTiles = data?.kpi;
 
+  // ── Subscription breakdown state derivation ──────────────────────────────────
+
+  const sub = data?.subscriptionBreakdown;
+  const hasStripeData = sub != null && sub.paidUserCount + sub.byStatus.trialing > 0;
+  const hasPaidUsers = (sub?.paidUserCount ?? 0) > 0;
+
   return (
     <div className="min-h-screen bg-[var(--surface-primary)]">
       {/* ── Sticky header ── */}
@@ -213,65 +223,100 @@ export function AdminOperationsDashboard() {
             </div>
           </div>
 
-          {/* Row 2: 6 KPI tiles */}
-          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {isLoading ? (
-              Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="rounded-lg bg-[var(--surface-secondary)] px-4 py-3">
-                  <LoadingSkeleton variant="tile" />
-                </div>
-              ))
-            ) : (
-              <>
-                <KpiTile
-                  label="Total Recordings"
-                  value={formatNumber(kpiTiles?.uploadsInRange)}
-                  delta={`in ${RANGE_LABELS[range]}`}
-                  accent
-                />
-                <KpiTile
-                  label="Total Users"
-                  value={formatNumber(kpiTiles?.totalUsers)}
-                />
-                <KpiTile
-                  label="MAU (30d)"
-                  value={formatNumber(kpiTiles?.mau30d)}
-                  sublabel="last 30d"
-                />
-                {(() => {
-                  const dbParts = kpiTiles?.dbSizeBytes != null
-                    ? formatBytes(kpiTiles.dbSizeBytes).split(' ')
-                    : null;
-                  const dbValue = dbParts != null ? (dbParts[0] ?? '—') : '—';
-                  const dbUnit = dbParts?.[1];
-                  return (
-                    <KpiTile
-                      label="DB Size"
-                      value={dbValue}
-                      {...(dbUnit !== undefined ? { unit: dbUnit } : {})}
-                    />
-                  );
-                })()}
-                {(() => {
-                  const heapParts = kpiTiles?.nodeHeapUsedBytes != null
-                    ? formatBytes(kpiTiles.nodeHeapUsedBytes).split(' ')
-                    : null;
-                  const heapValue = heapParts != null ? (heapParts[0] ?? '—') : '—';
-                  const heapUnit = heapParts?.[1];
-                  return (
-                    <KpiTile
-                      label="Heap Used"
-                      value={heapValue}
-                      {...(heapUnit !== undefined ? { unit: heapUnit } : {})}
-                    />
-                  );
-                })()}
-                <KpiTile
-                  label="Errors (24h)"
-                  value={formatNumber(kpiTiles?.errorEvents24hTotal)}
-                />
-              </>
-            )}
+          {/* ── KPI rows: two rows of 5 ── */}
+
+          {/* Row 2 — Growth row */}
+          <div className="mt-3">
+            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--content-tertiary)]">
+              Growth
+            </p>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="rounded-lg bg-[var(--surface-secondary)] px-4 py-3">
+                    <LoadingSkeleton variant="tile" />
+                  </div>
+                ))
+              ) : (
+                <>
+                  <KpiTile
+                    label="Total Users"
+                    value={formatNumber(kpiTiles?.totalUsers)}
+                  />
+                  <KpiTile
+                    label="New Signups"
+                    value={formatNumber(kpiTiles?.signupsInRange)}
+                    delta={`in ${RANGE_LABELS[range]}`}
+                  />
+                  <KpiTile
+                    label="Paid Users"
+                    value={formatNumber(kpiTiles?.payingSubscribers)}
+                  />
+                  <KpiTile
+                    label="Est. MRR"
+                    value={formatCurrency(kpiTiles?.mrrUsd)}
+                    sublabel="active subs, list price"
+                    accent
+                  />
+                  <KpiTile
+                    label="Free → Paid %"
+                    value={formatPercent(kpiTiles?.freeToPaidConversionPct)}
+                  />
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Row 3 — Product / Ops row */}
+          <div className="mt-3">
+            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--content-tertiary)]">
+              Product / Ops
+            </p>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="rounded-lg bg-[var(--surface-secondary)] px-4 py-3">
+                    <LoadingSkeleton variant="tile" />
+                  </div>
+                ))
+              ) : (
+                <>
+                  <KpiTile
+                    label="Total Recordings"
+                    value={formatNumber(kpiTiles?.uploadsInRange)}
+                    delta={`in ${RANGE_LABELS[range]}`}
+                  />
+                  <KpiTile
+                    label="Activation %"
+                    value={formatPercent(kpiTiles?.activationRatePct)}
+                    sublabel="≥1 workflow / total users"
+                  />
+                  <KpiTile
+                    label="MAU 30d"
+                    value={formatNumber(kpiTiles?.mau30d)}
+                    sublabel="active accounts, 30d"
+                  />
+                  {(() => {
+                    const dbParts = kpiTiles?.dbSizeBytes != null
+                      ? formatBytes(kpiTiles.dbSizeBytes).split(' ')
+                      : null;
+                    const dbValue = dbParts != null ? (dbParts[0] ?? '—') : '—';
+                    const dbUnit = dbParts?.[1];
+                    return (
+                      <KpiTile
+                        label="DB Size"
+                        value={dbValue}
+                        {...(dbUnit !== undefined ? { unit: dbUnit } : {})}
+                      />
+                    );
+                  })()}
+                  <KpiTile
+                    label="Errors (24h)"
+                    value={formatNumber(kpiTiles?.errorEvents24hTotal)}
+                  />
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -288,6 +333,49 @@ export function AdminOperationsDashboard() {
         )}
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+
+          {/* ── Section: Growth Overview (full width) ── */}
+          <div className="lg:col-span-2">
+            <SectionCard
+              title="Growth Overview"
+              isLoading={isLoading}
+              loadingVariant="chart"
+              isEmpty={false}
+              data-testid="section-growth-overview"
+            >
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                {/* Left: signup trend */}
+                <div className="flex flex-col gap-2">
+                  <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--content-tertiary)]">
+                    New Signups / Day
+                  </p>
+                  <TimeSeriesChart
+                    data={data?.userVolume.newUsersTimeSeries ?? []}
+                    ariaLabel="New signups per day chart"
+                    seriesALabel="Signups"
+                  />
+                </div>
+                {/* Right: workflow created + uploads (dual chart) */}
+                <div className="flex flex-col gap-2">
+                  <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--content-tertiary)]">
+                    Workflows Created vs Uploads / Day
+                  </p>
+                  <TimeSeriesChart
+                    data={data?.workflowProcessing.workflowsTimeSeries ?? []}
+                    ariaLabel="Workflows created and uploads per day chart"
+                    seriesALabel="Workflows"
+                    seriesB={{
+                      data: data?.recordingVolume.uploadsTimeSeries ?? [],
+                      label: 'Uploads',
+                      strokeColor: '#f59e0b',
+                      fillColor: '#f59e0b',
+                    }}
+                  />
+                </div>
+              </div>
+            </SectionCard>
+          </div>
+
           {/* ── Section 1: User Volume ── */}
           <SectionCard
             title="User Volume"
@@ -508,6 +596,112 @@ export function AdminOperationsDashboard() {
               </div>
             </SectionCard>
           </div>
+
+          {/* ── Section 6: Subscription Breakdown — full width ── */}
+          <div className="lg:col-span-2">
+            <SectionCard
+              title="Subscription Breakdown"
+              isLoading={isLoading}
+              loadingVariant="list"
+              isEmpty={false}
+              data-testid="section-subscription-breakdown"
+            >
+              {!isLoading && !hasStripeData ? (
+                /* Empty state: Stripe not configured */
+                <div className="flex flex-col items-center gap-2 py-6 text-center">
+                  <p className="text-[14px] font-medium text-[var(--content-primary)]">
+                    Subscription data unavailable — configure Stripe
+                  </p>
+                  <p className="max-w-sm text-[12px] text-[var(--content-tertiary)]">
+                    Set <code className="font-mono">STRIPE_SECRET_KEY</code> and run at least one
+                    sync to populate subscription data.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-6">
+                  {/* Plan distribution bar */}
+                  <div className="flex flex-col gap-2">
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--content-tertiary)]">
+                      Plan Distribution
+                    </p>
+                    <SubscriptionPlanBar
+                      byPlan={sub?.byPlan ?? {
+                        free: 0, starter: 0, team: 0, growth: 0, enterprise: 0,
+                      }}
+                    />
+                  </div>
+
+                  {/* Status distribution bar */}
+                  <div className="flex flex-col gap-2">
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--content-tertiary)]">
+                      Subscription Status
+                    </p>
+                    <SubscriptionStatusBar
+                      byStatus={sub?.byStatus ?? {
+                        none: 0, trialing: 0, active: 0, past_due: 0, canceled: 0,
+                      }}
+                    />
+                  </div>
+
+                  {/* Spotlight tiles: Est. MRR + conversion */}
+                  {!hasPaidUsers ? (
+                    <p className="text-[13px] text-[var(--content-tertiary)]" data-testid="no-paid-subscribers-msg">
+                      No paid subscribers yet.
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                      {/* Est. MRR */}
+                      <div className="flex flex-col gap-0.5 rounded-lg bg-[var(--surface-secondary)] px-4 py-3">
+                        <p className="text-[11px] text-[var(--content-tertiary)]">
+                          Est. MRR
+                          {' '}
+                          <span
+                            title="List price × active subscribers; excludes annual plans, discounts, and enterprise."
+                            className="cursor-help underline decoration-dotted"
+                          >
+                            (Est.)
+                          </span>
+                        </p>
+                        <p className="text-[20px] font-semibold tabular-nums text-[var(--accent,#20f2a6)]" data-testid="mrr-spotlight">
+                          {formatCurrency(sub?.mrr.estimatedUsd)}
+                        </p>
+                        {(sub?.mrr.enterpriseCount ?? 0) > 0 && (
+                          <p className="text-[11px] text-[var(--content-tertiary)]">
+                            +{formatNumber(sub?.mrr.enterpriseCount)} enterprise (custom pricing)
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Paid subscribers */}
+                      <div className="flex flex-col gap-0.5 rounded-lg bg-[var(--surface-secondary)] px-4 py-3">
+                        <p className="text-[11px] text-[var(--content-tertiary)]">Paid subscribers</p>
+                        <p className="text-[20px] font-semibold tabular-nums text-[var(--content-primary)]">
+                          {formatNumber(sub?.paidUserCount)}
+                        </p>
+                      </div>
+
+                      {/* Free → Paid % */}
+                      <div className="flex flex-col gap-0.5 rounded-lg bg-[var(--surface-secondary)] px-4 py-3">
+                        <p className="text-[11px] text-[var(--content-tertiary)]">Free → Paid %</p>
+                        <p className="text-[20px] font-semibold tabular-nums text-[var(--content-primary)]">
+                          {formatPercent(sub?.freeToPaidConversionPct, { fractionDigits: 1 })}
+                        </p>
+                      </div>
+
+                      {/* Active trials */}
+                      <div className="flex flex-col gap-0.5 rounded-lg bg-[var(--surface-secondary)] px-4 py-3">
+                        <p className="text-[11px] text-[var(--content-tertiary)]">Active trials</p>
+                        <p className="text-[20px] font-semibold tabular-nums text-[var(--content-primary)]">
+                          {formatNumber(sub?.byStatus.trialing ?? 0)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </SectionCard>
+          </div>
+
         </div>
 
         {/* Footer */}

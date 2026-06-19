@@ -25,6 +25,7 @@ vi.mock('@/db', () => ({
     user: {
       count: vi.fn(),
       findMany: vi.fn(),
+      groupBy: vi.fn(), // added Iter C QA — required for getSubscriptionBreakdown
     },
     upload: {
       count: vi.fn(),
@@ -54,12 +55,13 @@ import {
   getRecordingVolume,
   getWorkflowVolume,
   getSystemHealth,
+  getSubscriptionBreakdown,
 } from './queries.js';
 
 // ── Helper: typed mock access ─────────────────────────────────────────────────
 
 const mockDb = db as unknown as {
-  user: { count: ReturnType<typeof vi.fn>; findMany: ReturnType<typeof vi.fn> };
+  user: { count: ReturnType<typeof vi.fn>; findMany: ReturnType<typeof vi.fn>; groupBy: ReturnType<typeof vi.fn> };
   upload: { count: ReturnType<typeof vi.fn>; findMany: ReturnType<typeof vi.fn>; groupBy: ReturnType<typeof vi.fn> };
   workflow: { count: ReturnType<typeof vi.fn>; findMany: ReturnType<typeof vi.fn> };
   analyticsEvent: { groupBy: ReturnType<typeof vi.fn> };
@@ -205,7 +207,7 @@ describe('getUserVolume', () => {
   const start = new Date('2026-05-01T00:00:00Z');
   const end = new Date('2026-05-07T23:59:59Z');
 
-  it('returns totalUsers, mau30d, timeseries, and topUploaders', async () => {
+  it('returns totalUsers, mau30d, timeseries, topUploaders, activationRatePct, and newUsersInRange', async () => {
     mockDb.user.count
       .mockResolvedValueOnce(150)   // totalUsers
       .mockResolvedValueOnce(42);   // mau30d
@@ -214,6 +216,12 @@ describe('getUserVolume', () => {
     ]);
     mockDb.upload.groupBy.mockResolvedValue([
       { userId: 'abcdef12-3456-7890-abcd-ef1234567890', _count: { id: 5 } },
+    ]);
+    // Growth Intelligence Extension — activation rate query
+    mockDb.workflow.findMany.mockResolvedValue([
+      { userId: 'user-a' },
+      { userId: 'user-b' },
+      { userId: 'user-a' }, // duplicate — should be counted once via Set
     ]);
 
     const result = await getUserVolume(start, end);
@@ -225,6 +233,11 @@ describe('getUserVolume', () => {
     expect(may2?.count).toBe(1);
     expect(result.topUploaders[0]!.userId).toBe('abcdef12...7890');
     expect(result.topUploaders[0]!.uploadCount).toBe(5);
+    // Growth Intelligence Extension — new fields
+    // 2 distinct users / 150 totalUsers * 100 = 1.33%
+    expect(result.activationRatePct).toBe(Math.round((2 / 150) * 10000) / 100);
+    // newUsersTimeSeries has 1 signup on 2026-05-02 → sum = 1
+    expect(result.newUsersInRange).toBe(1);
   });
 });
 
@@ -316,5 +329,192 @@ describe('getSystemHealth', () => {
       expect(result.dbSize.reason).toBe('sqlite-dev-mode');
     }
     expect(result.errorEvents24hTotal).toBe(0);
+  });
+});
+
+// ── getSubscriptionBreakdown — edge cases (Iter C QA) ─────────────────────────
+//
+// Edge cases verified:
+//   (a) zero users → conversion 0, MRR 0, no divide-by-zero
+//   (b) all users trialing → MRR excludes them (active-only)
+//   (c) past_due/canceled > 0 → surfaced in byStatus
+//   (d) enterprise users → excluded from MRR dollar sum, counted in enterpriseCount
+//   (e) single compound groupBy (joint distribution) is the mechanism
+//   (f) unknown plan string normalised via toPlanType (unknown → 'free')
+//   (g) empty groupBy result (no-data / SQLite fresh DB) → zeroed output, no throw
+//   (h) formatCurrency edge cases covered in format-utils.test.ts (cross-ref)
+
+describe('getSubscriptionBreakdown — edge cases (Iter C QA)', () => {
+
+  // ── (a) zero users ───────────────────────────────────────────────────────────
+
+  it('(a) zero users: MRR is 0, paidUserCount is 0, freeToPaidConversionPct is 0 (no divide-by-zero)', async () => {
+    mockDb.user.groupBy.mockResolvedValue([]);
+
+    const result = await getSubscriptionBreakdown();
+
+    expect(result.mrr.estimatedUsd).toBe(0);
+    expect(result.paidUserCount).toBe(0);
+    expect(result.freeToPaidConversionPct).toBe(0);
+    // All plan counts should be zero
+    expect(result.byPlan.free).toBe(0);
+    expect(result.byPlan.starter).toBe(0);
+    expect(result.byPlan.team).toBe(0);
+    expect(result.byPlan.growth).toBe(0);
+    expect(result.byPlan.enterprise).toBe(0);
+    // All status counts should be zero
+    expect(result.byStatus.none).toBe(0);
+    expect(result.byStatus.trialing).toBe(0);
+    expect(result.byStatus.active).toBe(0);
+    expect(result.byStatus.past_due).toBe(0);
+    expect(result.byStatus.canceled).toBe(0);
+  });
+
+  // ── (b) all users trialing — active-only MRR excludes trialing ───────────────
+
+  it('(b) all 10 users are trialing starter: MRR is 0 (active-only), byStatus.trialing is 10', async () => {
+    mockDb.user.groupBy.mockResolvedValue([
+      { plan: 'starter', subscriptionStatus: 'trialing', _count: { id: 10 } },
+    ]);
+
+    const result = await getSubscriptionBreakdown();
+
+    expect(result.mrr.estimatedUsd).toBe(0);        // trialing not in MRR_BILLABLE_STATUSES
+    expect(result.paidUserCount).toBe(0);            // only active counts toward paidUserCount
+    expect(result.byStatus.trialing).toBe(10);
+    expect(result.byPlan.starter).toBe(10);
+    // freeToPaidConversionPct: 0 paid / 10 total = 0
+    expect(result.freeToPaidConversionPct).toBe(0);
+  });
+
+  // ── (c) past_due and canceled surfaced in byStatus ───────────────────────────
+
+  it('(c) past_due and canceled users appear in byStatus counts', async () => {
+    mockDb.user.groupBy.mockResolvedValue([
+      { plan: 'team', subscriptionStatus: 'past_due', _count: { id: 3 } },
+      { plan: 'starter', subscriptionStatus: 'canceled', _count: { id: 2 } },
+      { plan: 'starter', subscriptionStatus: 'active', _count: { id: 5 } },
+    ]);
+
+    const result = await getSubscriptionBreakdown();
+
+    expect(result.byStatus.past_due).toBe(3);
+    expect(result.byStatus.canceled).toBe(2);
+    expect(result.byStatus.active).toBe(5);
+    // MRR: only active starter (5 × price.starter) — past_due and canceled excluded
+    expect(result.mrr.estimatedUsd).toBeGreaterThan(0);
+    // paidUserCount = active non-free only = 5
+    expect(result.paidUserCount).toBe(5);
+  });
+
+  // ── (d) enterprise excluded from MRR, counted in enterpriseCount ─────────────
+
+  it('(d) enterprise users: excluded from MRR dollar sum, reflected in enterpriseCount', async () => {
+    mockDb.user.groupBy.mockResolvedValue([
+      { plan: 'enterprise', subscriptionStatus: 'active', _count: { id: 4 } },
+      { plan: 'starter', subscriptionStatus: 'active', _count: { id: 2 } },
+    ]);
+
+    const result = await getSubscriptionBreakdown();
+
+    // Enterprise NOT in MRR — only starter × 2 contributes
+    expect(result.mrr.estimatedUsd).toBeGreaterThan(0);
+    expect(result.mrr.estimatedUsd).toBe(result.mrr.byPlanUsd.starter); // only starter in MRR
+    // Enterprise count is tracked separately
+    expect(result.mrr.enterpriseCount).toBe(4);
+    expect(result.byPlan.enterprise).toBe(4);
+    // paidUserCount = active non-free non-enterprise = starter 2 only
+    expect(result.paidUserCount).toBe(2);
+  });
+
+  // ── (e) joint distribution: counts must match sum of groupBy rows ─────────────
+
+  it('(e) joint compound groupBy: byPlan and byStatus totals both equal sum of all row counts', async () => {
+    mockDb.user.groupBy.mockResolvedValue([
+      { plan: 'free',    subscriptionStatus: 'none',    _count: { id: 50 } },
+      { plan: 'starter', subscriptionStatus: 'trialing', _count: { id: 5 } },
+      { plan: 'starter', subscriptionStatus: 'active',   _count: { id: 10 } },
+      { plan: 'team',    subscriptionStatus: 'active',   _count: { id: 3 } },
+      { plan: 'growth',  subscriptionStatus: 'active',   _count: { id: 2 } },
+    ]);
+
+    const result = await getSubscriptionBreakdown();
+
+    const totalFromPlan = Object.values(result.byPlan).reduce((s, v) => s + v, 0);
+    const totalFromStatus = Object.values(result.byStatus).reduce((s, v) => s + v, 0);
+    const rowTotal = 50 + 5 + 10 + 3 + 2; // 70
+
+    expect(totalFromPlan).toBe(rowTotal);
+    expect(totalFromStatus).toBe(rowTotal);
+  });
+
+  // ── (f) unknown plan string normalised to 'free' via toPlanType ──────────────
+
+  it('(f) unknown plan string "legacy_plan" normalises to "free" (toPlanType fallback)', async () => {
+    mockDb.user.groupBy.mockResolvedValue([
+      { plan: 'legacy_plan', subscriptionStatus: 'active', _count: { id: 7 } },
+    ]);
+
+    const result = await getSubscriptionBreakdown();
+
+    // Unknown plan → toPlanType → 'free' (not a billable MRR plan)
+    expect(result.byPlan.free).toBe(7);
+    // Not in MRR_PLANS → MRR remains 0
+    expect(result.mrr.estimatedUsd).toBe(0);
+    // paidUserCount = 0 (free plan is not billable)
+    expect(result.paidUserCount).toBe(0);
+  });
+
+  // ── (g) empty DB / SQLite no-data: empty groupBy → zeroed output, no throw ──
+
+  it('(g) empty groupBy result (fresh DB / no users): all counts zero, no exception', async () => {
+    mockDb.user.groupBy.mockResolvedValue([]);
+
+    // Must not throw — await directly and assert on result
+    const result = await getSubscriptionBreakdown();
+
+    expect(result.mrr.estimatedUsd).toBe(0);
+    expect(result.paidUserCount).toBe(0);
+    expect(result.freeToPaidConversionPct).toBe(0);
+    expect(result.mrr.enterpriseCount).toBe(0);
+    // Zero-filled closed unions present
+    expect(Object.keys(result.byPlan)).toEqual(
+      expect.arrayContaining(['free', 'starter', 'team', 'growth', 'enterprise']),
+    );
+    expect(Object.keys(result.byStatus)).toEqual(
+      expect.arrayContaining(['none', 'trialing', 'active', 'past_due', 'canceled']),
+    );
+  });
+
+  // ── MRR correctness: mixed active plans compute correct dollar sum ────────────
+
+  it('MRR correctness: 2 active starter + 1 active team → estimatedUsd = (2×starter) + (1×team)', async () => {
+    const { MONTHLY_PRICE_USD } = await import('./pricing.js');
+
+    mockDb.user.groupBy.mockResolvedValue([
+      { plan: 'starter', subscriptionStatus: 'active', _count: { id: 2 } },
+      { plan: 'team',    subscriptionStatus: 'active', _count: { id: 1 } },
+    ]);
+
+    const result = await getSubscriptionBreakdown();
+
+    const expected = 2 * MONTHLY_PRICE_USD.starter + 1 * MONTHLY_PRICE_USD.team;
+    expect(result.mrr.estimatedUsd).toBe(expected);
+    expect(result.mrr.byPlanUsd.starter).toBe(2 * MONTHLY_PRICE_USD.starter);
+    expect(result.mrr.byPlanUsd.team).toBe(1 * MONTHLY_PRICE_USD.team);
+    expect(result.mrr.byPlanUsd.growth).toBe(0);
+    expect(result.paidUserCount).toBe(3);
+    // freeToPaidConversionPct: 3 paid / 3 total * 100 = 100
+    expect(result.freeToPaidConversionPct).toBe(100);
+  });
+
+  // ── R-1 drift guard: MRR basis echoes MONTHLY_PRICE_USD ─────────────────────
+
+  it('mrr.basis.billableStatuses contains "active" (R-1 MRR_BILLABLE_STATUSES pass-through)', async () => {
+    mockDb.user.groupBy.mockResolvedValue([]);
+
+    const result = await getSubscriptionBreakdown();
+
+    expect(result.mrr.basis.billableStatuses).toContain('active');
   });
 });

@@ -39,6 +39,8 @@ model User {
   dashboardPreference   UserDashboardPreference?
   processEvidenceReviews ProcessEvidenceReview[]
 
+  @@index([createdAt])
+  @@index([updatedAt])
   @@map("users")
 }
 
@@ -82,6 +84,7 @@ model Upload {
   workflows Workflow[]
 
   @@index([userId])
+  @@index([uploadedAt])
   @@map("uploads")
 }
 

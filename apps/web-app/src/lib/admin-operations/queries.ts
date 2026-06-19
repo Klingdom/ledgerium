@@ -19,12 +19,17 @@
  */
 
 import { db } from '@/db';
+import { toPlanType } from '@/lib/plans';
+import { MONTHLY_PRICE_USD, MRR_BILLABLE_STATUSES, ENTERPRISE_PLAN } from './pricing.js';
 import type {
   UserVolumeSection,
   RecordingVolumeSection,
   WorkflowProcessingSection,
   SystemHealthSection,
   MemoryUsageSection,
+  SubscriptionBreakdownSection,
+  NormalizedPlan,
+  NormalizedSubscriptionStatus,
   DailyBucket,
   DbSize,
   ErrorEventRow,
@@ -171,11 +176,29 @@ export async function getUserVolume(
     uploadCount: row._count.id,
   }));
 
+  // Activation rate: distinct users with ≥1 non-deleted workflow / totalUsers × 100.
+  const workflowUserRows = await db.workflow.findMany({
+    where: { status: { not: 'deleted' } },
+    select: { userId: true },
+  });
+  const distinctUserIds = new Set(workflowUserRows.map((w) => w.userId));
+  const activationRatePct =
+    totalUsers === 0
+      ? 0
+      : Math.round((distinctUserIds.size / totalUsers) * 10000) / 100;
+
+  const newUsersInRange = newUsersTimeSeries.reduce(
+    (sum, bucket) => sum + bucket.count,
+    0,
+  );
+
   return {
     totalUsers,
     mau30d,
     newUsersTimeSeries,
     topUploaders,
+    activationRatePct,
+    newUsersInRange,
   };
 }
 
@@ -266,6 +289,7 @@ export async function getWorkflowVolume(
     totalWorkflows,
     processedCount,
     workflowsRaw,
+    workflowUpdatesRaw,
   ] = await Promise.all([
     // Total non-deleted workflows
     db.workflow.count({
@@ -293,6 +317,18 @@ export async function getWorkflowVolume(
       },
       select: { createdAt: true },
     }),
+
+    // Workflow update timestamps in range (engagement signal)
+    db.workflow.findMany({
+      where: {
+        updatedAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+        status: { not: 'deleted' },
+      },
+      select: { updatedAt: true },
+    }),
   ]);
 
   const processingSuccessRate =
@@ -306,10 +342,17 @@ export async function getWorkflowVolume(
     endDate,
   );
 
+  const workflowUpdatesTimeSeries = binByDay(
+    workflowUpdatesRaw.map((w) => w.updatedAt),
+    startDate,
+    endDate,
+  );
+
   return {
     totalWorkflows,
     processingSuccessRate,
     workflowsTimeSeries,
+    workflowUpdatesTimeSeries,
   };
 }
 
@@ -377,6 +420,139 @@ export async function getSystemHealth(): Promise<SystemHealthSection> {
     dbSize,
     errorEvents24h,
     errorEvents24hTotal,
+  };
+}
+
+/**
+ * Section 6 — Subscription breakdown (Growth Intelligence Extension).
+ *
+ * Range-independent snapshot (like getSystemHealth) — always reflects
+ * current DB state, not windowed by the date range parameter.
+ *
+ * CORRECTNESS NOTE (R-5):
+ *   We use a SINGLE compound groupBy({ by: ['plan','subscriptionStatus'] }).
+ *   This gives joint distribution rows like:
+ *     { plan: 'starter', subscriptionStatus: 'active', _count: { id: 5 } }
+ *   Two separate marginal groupBys would give:
+ *     { plan: 'starter', _count: N }  AND  { subscriptionStatus: 'active', _count: M }
+ *   Marginals cannot reconstruct the billable intersection (plan=X AND status=active),
+ *   so MRR would be incorrect.
+ *
+ * MRR formula: Σ price[plan] × count(row where plan ∈ {starter,team,growth} AND status ∈ ['active'])
+ *
+ * No Date.now() in the fold — pure deterministic reduction over DB rows.
+ * No PII — counts only. No Stripe ids or email addresses.
+ */
+export async function getSubscriptionBreakdown(): Promise<SubscriptionBreakdownSection> {
+  // Known plan and status keys for zero-filled closed unions
+  const KNOWN_PLANS: NormalizedPlan[] = [
+    'free',
+    'starter',
+    'team',
+    'growth',
+    'enterprise',
+  ];
+  const KNOWN_STATUSES: NormalizedSubscriptionStatus[] = [
+    'none',
+    'trialing',
+    'active',
+    'past_due',
+    'canceled',
+  ];
+
+  // Billable plans for MRR (enterprise is excluded — separate count)
+  const MRR_PLANS = ['starter', 'team', 'growth'] as const;
+
+  // Single compound groupBy — gives joint (plan × subscriptionStatus) distribution
+  const jointRows = await db.user.groupBy({
+    by: ['plan', 'subscriptionStatus'],
+    _count: { id: true },
+  });
+
+  // Initialise zero-filled maps
+  const byPlan = Object.fromEntries(
+    KNOWN_PLANS.map((p) => [p, 0]),
+  ) as Record<NormalizedPlan, number>;
+
+  const byStatus = Object.fromEntries(
+    KNOWN_STATUSES.map((s) => [s, 0]),
+  ) as Record<NormalizedSubscriptionStatus, number>;
+
+  const byPlanUsd = Object.fromEntries(
+    MRR_PLANS.map((p) => [p, 0]),
+  ) as Record<'starter' | 'team' | 'growth', number>;
+
+  let enterpriseCount = 0;
+  let paidUserCount = 0;
+  let totalUsersFromJoint = 0;
+
+  // Fold the joint distribution rows
+  for (const row of jointRows) {
+    const count = row._count.id;
+    totalUsersFromJoint += count;
+
+    // Normalize plan string (handles legacy 'pro' → 'starter', unknown → 'free')
+    const rawPlan = row.plan ?? 'free';
+    const normalizedPlan: NormalizedPlan =
+      rawPlan === 'enterprise'
+        ? 'enterprise'
+        : (toPlanType(rawPlan) as NormalizedPlan);
+
+    // Normalize subscription status string
+    const rawStatus = row.subscriptionStatus ?? 'none';
+    const normalizedStatus: NormalizedSubscriptionStatus = (
+      KNOWN_STATUSES as readonly string[]
+    ).includes(rawStatus)
+      ? (rawStatus as NormalizedSubscriptionStatus)
+      : 'none';
+
+    // Accumulate plan and status counts
+    byPlan[normalizedPlan] = (byPlan[normalizedPlan] ?? 0) + count;
+    byStatus[normalizedStatus] = (byStatus[normalizedStatus] ?? 0) + count;
+
+    // Enterprise count (shown separately; excluded from MRR)
+    if (normalizedPlan === ENTERPRISE_PLAN) {
+      enterpriseCount += count;
+    }
+
+    // MRR contribution: plan ∈ MRR_PLANS AND status ∈ MRR_BILLABLE_STATUSES
+    const isBillablePlan = (MRR_PLANS as readonly string[]).includes(normalizedPlan);
+    const isBillableStatus = (MRR_BILLABLE_STATUSES as readonly string[]).includes(
+      normalizedStatus,
+    );
+
+    if (isBillablePlan && isBillableStatus) {
+      const plan = normalizedPlan as 'starter' | 'team' | 'growth';
+      byPlanUsd[plan] = (byPlanUsd[plan] ?? 0) + MONTHLY_PRICE_USD[plan] * count;
+      // paidUserCount = active non-free subscribers
+      paidUserCount += count;
+    }
+  }
+
+  const estimatedUsd = Object.values(byPlanUsd).reduce(
+    (sum, v) => sum + v,
+    0,
+  );
+
+  const freeToPaidConversionPct =
+    totalUsersFromJoint === 0
+      ? 0
+      : Math.round((paidUserCount / totalUsersFromJoint) * 10000) / 100;
+
+  return {
+    byPlan,
+    byStatus,
+    mrr: {
+      estimatedUsd,
+      byPlanUsd,
+      enterpriseCount,
+      basis: {
+        monthlyPriceUsd: { ...MONTHLY_PRICE_USD },
+        billableStatuses: MRR_BILLABLE_STATUSES,
+      },
+    },
+    paidUserCount,
+    freeToPaidConversionPct,
   };
 }
 

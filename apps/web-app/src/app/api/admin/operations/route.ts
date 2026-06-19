@@ -30,6 +30,7 @@ import {
   getWorkflowVolume,
   getSystemHealth,
   getMemoryUsage,
+  getSubscriptionBreakdown,
 } from '@/lib/admin-operations/queries';
 import type {
   AdminOperationsApiResponse,
@@ -101,11 +102,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       recordingVolume,
       workflowProcessing,
       systemHealth,
+      subscriptionBreakdown,
     ] = await Promise.all([
       getUserVolume(startDate, endDate),
       getRecordingVolume(startDate, endDate),
       getWorkflowVolume(startDate, endDate),
       getSystemHealth(),
+      getSubscriptionBreakdown(),
     ]);
 
     // Memory is synchronous — no async needed
@@ -114,7 +117,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const queryDurationMs = Date.now() - startMs;
 
     // ── Assemble KPI tiles ─────────────────────────────────────────────────────
+    // Existing 6 tiles preserved verbatim; 5 new growth tiles appended.
     const kpi = {
+      // ── Existing 6 (unchanged) ───────────────────────────────────────────────
       totalUsers: userVolume.totalUsers,
       mau30d: userVolume.mau30d,
       uploadsInRange: recordingVolume.uploadsInRange,
@@ -123,6 +128,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         : null,
       nodeHeapUsedBytes: memoryUsage.heapUsedBytes,
       errorEvents24hTotal: systemHealth.errorEvents24hTotal,
+      // ── New growth tiles ─────────────────────────────────────────────────────
+      mrrUsd: subscriptionBreakdown.mrr.estimatedUsd,
+      payingSubscribers: subscriptionBreakdown.paidUserCount,
+      signupsInRange: userVolume.newUsersInRange,
+      freeToPaidConversionPct: subscriptionBreakdown.freeToPaidConversionPct,
+      activationRatePct: userVolume.activationRatePct,
     };
 
     const body: AdminOperationsApiResponse = {
@@ -134,6 +145,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         workflowProcessing,
         systemHealth,
         memoryUsage,
+        subscriptionBreakdown,
       },
       error: null,
       meta: {

@@ -133,6 +133,22 @@ export function formatIsoDate(date: string | null | undefined): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
 }
 
+// ── Currency ──────────────────────────────────────────────────────────────────
+
+/**
+ * Format a dollar amount as a currency string with no fraction digits.
+ *
+ * Examples:
+ *   formatCurrency(0)       → "$0"
+ *   formatCurrency(49)      → "$49"
+ *   formatCurrency(1249)    → "$1,249"
+ *   formatCurrency(null)    → "—"
+ */
+export function formatCurrency(dollars: number | null | undefined): string {
+  if (dollars == null) return '—';
+  return '$' + dollars.toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+
 // ── Uptime ────────────────────────────────────────────────────────────────────
 
 /**
