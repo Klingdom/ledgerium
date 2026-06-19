@@ -20,6 +20,7 @@ import {
   useReactFlow,
   ReactFlowProvider,
   type Node,
+  type Edge,
   type NodeTypes,
   type EdgeTypes,
   type OnSelectionChangeParams,
@@ -71,8 +72,8 @@ function FlowCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvasRead
   const reactFlowInstance = useReactFlow();
   const flowData = useMemo(() => buildFlowData(graph), [graph]);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(flowData.nodes as any[]);
-  const [edges, , onEdgesChange] = useEdgesState(flowData.edges as any[]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>(flowData.nodes as Node[]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(flowData.edges as Edge[]);
 
   // Sync selection state from parent
   useEffect(() => {
@@ -84,11 +85,14 @@ function FlowCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvasRead
     );
   }, [selectedNodeId, setNodes]);
 
-  // Update nodes/edges when graph data changes
+  // Update nodes/edges when graph data changes.
+  // QW3 stale-edges fix: previously only setNodes ran here, leaving edges stale
+  // after navigation/filter changed the graph. setEdges now syncs both.
   useEffect(() => {
     const newFlow = buildFlowData(graph);
-    setNodes(newFlow.nodes as any[]);
-  }, [graph, setNodes]);
+    setNodes(newFlow.nodes as Node[]);
+    setEdges(newFlow.edges as Edge[]);
+  }, [graph, setNodes, setEdges]);
 
   // Expose controls to parent
   useEffect(() => {
@@ -99,7 +103,9 @@ function FlowCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvasRead
       fitView: () => reactFlowInstance.fitView({ padding: 0.15, duration: 300 }),
       resetView: () => {
         reactFlowInstance.setViewport({ x: 0, y: 0, zoom: 1 }, { duration: 300 });
-        setTimeout(() => reactFlowInstance.fitView({ padding: 0.15, duration: 300 }), 50);
+        // QW3: sequence the fit on the next animation frame instead of an
+        // arbitrary wall-clock setTimeout(50) — frame-synced, not timer-raced.
+        requestAnimationFrame(() => reactFlowInstance.fitView({ padding: 0.15, duration: 300 }));
       },
     });
   }, [reactFlowInstance, onCanvasReady]);
@@ -187,7 +193,7 @@ function FlowCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvasRead
         {toolbar.showMinimap && (
           <MiniMap
             nodeColor={(node: Node) => {
-              const vn = (node.data as any)?.viewNode;
+              const vn = (node.data as { viewNode?: { accentColor?: string } })?.viewNode;
               return vn?.accentColor ?? '#94a3b8';
             }}
             nodeStrokeWidth={0}

@@ -23,6 +23,7 @@ import {
   useReactFlow,
   ReactFlowProvider,
   type Node,
+  type Edge,
   type NodeProps,
   type NodeTypes,
   type EdgeTypes,
@@ -147,8 +148,8 @@ function SwimlaneCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvas
   const reactFlowInstance = useReactFlow();
   const swimlaneData = useMemo(() => buildSwimlaneData(graph), [graph]);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(swimlaneData.nodes as any[]);
-  const [edges, , onEdgesChange] = useEdgesState(swimlaneData.edges as any[]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>(swimlaneData.nodes as Node[]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(swimlaneData.edges as Edge[]);
 
   // Sync selection from parent
   useEffect(() => {
@@ -160,11 +161,14 @@ function SwimlaneCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvas
     );
   }, [selectedNodeId, setNodes]);
 
-  // Rebuild nodes/edges when graph changes
+  // Rebuild nodes/edges when graph changes.
+  // QW3 stale-edges fix: previously only setNodes ran here, leaving edges stale
+  // after navigation/filter changed the graph. setEdges now syncs both.
   useEffect(() => {
     const newData = buildSwimlaneData(graph);
-    setNodes(newData.nodes as any[]);
-  }, [graph, setNodes]);
+    setNodes(newData.nodes as Node[]);
+    setEdges(newData.edges as Edge[]);
+  }, [graph, setNodes, setEdges]);
 
   // Expose controls to parent shell
   useEffect(() => {
@@ -175,7 +179,9 @@ function SwimlaneCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvas
       fitView: () => reactFlowInstance.fitView({ padding: 0.15, duration: 300 }),
       resetView: () => {
         reactFlowInstance.setViewport({ x: 0, y: 0, zoom: 1 }, { duration: 300 });
-        setTimeout(() => reactFlowInstance.fitView({ padding: 0.15, duration: 300 }), 50);
+        // QW3: sequence the fit on the next animation frame instead of an
+        // arbitrary wall-clock setTimeout(50) — frame-synced, not timer-raced.
+        requestAnimationFrame(() => reactFlowInstance.fitView({ padding: 0.15, duration: 300 }));
       },
     });
   }, [reactFlowInstance, onCanvasReady]);
@@ -261,7 +267,7 @@ function SwimlaneCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvas
           <MiniMap
             nodeColor={(node: Node) => {
               if (node.type === 'laneHeader') return 'transparent';
-              const vn = (node.data as any)?.viewNode;
+              const vn = (node.data as { viewNode?: { accentColor?: string } })?.viewNode;
               return vn?.accentColor ?? '#94a3b8';
             }}
             nodeStrokeWidth={0}
