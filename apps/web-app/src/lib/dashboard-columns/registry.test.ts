@@ -31,6 +31,13 @@ import {
   accessCaseVolume,
   accessSystemCountPerRun,
   accessDateRecorded,
+  // Wave A statistical accessors (WDC2-P02 / row #101):
+  accessVariantCount,
+  accessTopVariantSharePct,
+  accessPathLengthStddev,
+  accessPathSimilarityAvg,
+  accessCycleTimeMedianMs,
+  accessAiOpportunityScore,
 } from './index.js';
 import type { ColumnAccessorContext, ColumnKey, TimeRange } from './types.js';
 import type { WorkflowMetricsOutput } from '../workflow-metrics.js';
@@ -81,9 +88,10 @@ function makeContext(overrides: Partial<ColumnAccessorContext> = {}): ColumnAcce
 // ── Group A: Catalog completeness ─────────────────────────────────────────────
 
 describe('WORKFLOW_DASHBOARD_COLUMNS — catalog completeness (Group A)', () => {
-  it('A1: catalog enumerates exactly 39 columns (7 display + 32 Tier A)', () => {
+  it('A1: catalog enumerates exactly 40 columns (7 display + 32 Tier A + ai_opportunity_score)', () => {
+    // WDC2-P02 (iter-075): ai_opportunity_score added as 40th entry.
     // Batch A (2026-06-12): date_recorded added as 7th display column.
-    expect(WORKFLOW_DASHBOARD_COLUMNS.length).toBe(39);
+    expect(WORKFLOW_DASHBOARD_COLUMNS.length).toBe(40);
   });
 
   it('A2: every ColumnKey is unique across the catalog', () => {
@@ -441,14 +449,15 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — determinism + helpers (Group E)', () =>
     expect(getColumnByKey('not_a_real_column_key')).toBeUndefined();
   });
 
-  it('E3: listColumnKeys() returns all 39 keys', () => {
-    // Batch A (2026-06-12): date_recorded added → 39 total.
+  it('E3: listColumnKeys() returns all 40 keys', () => {
+    // WDC2-P02 (iter-075): ai_opportunity_score added → 40 total.
     const keys = listColumnKeys();
-    expect(keys.length).toBe(39);
+    expect(keys.length).toBe(40);
     expect(keys).toContain('workflow_title');
     expect(keys).toContain('date_recorded');
     expect(keys).toContain('cycle_time_ms');
     expect(keys).toContain('max_wait_step_id');
+    expect(keys).toContain('ai_opportunity_score');
   });
 
   it('E4: accessor calls are deterministic — same context → identical output across repeats', () => {
@@ -583,5 +592,267 @@ describe('ColumnAccessorContext — WDC2-P01 contract extension (Group G, iter-0
     const actualKeys = Object.keys(ctx).sort();
     expect(actualKeys).toEqual(expectedKeys.slice().sort());
     expect(actualKeys.length).toBe(8);
+  });
+});
+
+// ── Group H: Wave A statistical columns (WDC2-P02 / row #101, iter-075) ──────
+//
+// Six columns flipped from `pending-path-c-r1` to `available`:
+//   variant_count, top_variant_share_pct, path_length_stddev,
+//   path_similarity_avg, cycle_time_median_ms, ai_opportunity_score
+//
+// Each accessor enforces a minimum-run threshold (hardcoded in the accessor,
+// mirrored by `minRunsRequired` on the column definition):
+//   N ≥ 5  — variant_count, top_variant_share_pct, path_length_stddev,
+//             path_similarity_avg  (needs a stable variant population)
+//   N ≥ 2  — cycle_time_median_ms  (a median needs ≥ 2 data points)
+//   none   — ai_opportunity_score  (meaningful from a single run)
+//
+// Group H also verifies:
+//   - IFF invariant: all 6 entries are `available` with non-null accessors
+//   - accessor returns null when runs is null or below threshold
+//   - accessor returns the correct derived value when threshold is met
+//   - `minRunsRequired` on the column definition matches the accessor constant
+
+describe('Wave A statistical columns — WDC2-P02 (Group H, iter-075)', () => {
+  // ── H1: audit-honesty IFF for all 6 new available columns ────────────────
+
+  it('H1: all 6 Wave A columns have availability="available" and non-null accessor (IFF invariant)', () => {
+    const waveAKeys = [
+      'variant_count',
+      'top_variant_share_pct',
+      'path_length_stddev',
+      'path_similarity_avg',
+      'cycle_time_median_ms',
+      'ai_opportunity_score',
+    ] as const;
+    for (const key of waveAKeys) {
+      const col = getColumnByKey(key);
+      expect(col, `Wave A column '${key}' must be in registry`).toBeDefined();
+      expect(
+        col!.availability,
+        `Wave A column '${key}' must be available`,
+      ).toBe('available');
+      expect(
+        col!.accessor,
+        `Wave A column '${key}' must have non-null accessor`,
+      ).not.toBeNull();
+    }
+  });
+
+  // ── H2: minRunsRequired field matches accessor threshold constants ─────────
+
+  it('H2: minRunsRequired matches accessor enforcement thresholds (N≥5 stat, N≥2 median, none for ai_score)', () => {
+    expect(getColumnByKey('variant_count')!.minRunsRequired).toBe(5);
+    expect(getColumnByKey('top_variant_share_pct')!.minRunsRequired).toBe(5);
+    expect(getColumnByKey('path_length_stddev')!.minRunsRequired).toBe(5);
+    expect(getColumnByKey('path_similarity_avg')!.minRunsRequired).toBe(5);
+    expect(getColumnByKey('cycle_time_median_ms')!.minRunsRequired).toBe(2);
+    // ai_opportunity_score: no minimum run requirement
+    const aiCol = getColumnByKey('ai_opportunity_score');
+    expect(aiCol!.minRunsRequired == null || aiCol!.minRunsRequired === 0).toBe(true);
+  });
+
+  // ── H3: N≥5 accessors return null when runs is null ───────────────────────
+
+  it('H3: N≥5 accessors return null when runs is null (unprocessed workflow)', () => {
+    const ctx = makeContext({
+      metricsV2: makeMetricsV2({
+        runs: null,
+        variantCount: 3,
+        standardPathFrequency: 0.6,
+        stepCountVarianceStdDev: 1.2,
+        sequenceStability: 0.75,
+      }),
+    });
+    expect(accessVariantCount(ctx)).toBeNull();
+    expect(accessTopVariantSharePct(ctx)).toBeNull();
+    expect(accessPathLengthStddev(ctx)).toBeNull();
+    expect(accessPathSimilarityAvg(ctx)).toBeNull();
+  });
+
+  // ── H4: N≥5 accessors return null when runs < 5 ──────────────────────────
+
+  it('H4: N≥5 accessors return null when runs is 4 (below threshold)', () => {
+    const ctx = makeContext({
+      metricsV2: makeMetricsV2({
+        runs: 4,
+        variantCount: 3,
+        standardPathFrequency: 0.6,
+        stepCountVarianceStdDev: 1.2,
+        sequenceStability: 0.75,
+      }),
+    });
+    expect(accessVariantCount(ctx)).toBeNull();
+    expect(accessTopVariantSharePct(ctx)).toBeNull();
+    expect(accessPathLengthStddev(ctx)).toBeNull();
+    expect(accessPathSimilarityAvg(ctx)).toBeNull();
+  });
+
+  // ── H5: N≥5 accessors return values when runs ≥ 5 ────────────────────────
+
+  it('H5: N≥5 accessors return correct values when runs is 5 (threshold met exactly)', () => {
+    const ctx = makeContext({
+      metricsV2: makeMetricsV2({
+        runs: 5,
+        variantCount: 3,
+        standardPathFrequency: 0.6,
+        stepCountVarianceStdDev: 1.2,
+        sequenceStability: 0.75,
+      }),
+    });
+    expect(accessVariantCount(ctx)).toBe(3);
+    expect(accessTopVariantSharePct(ctx)).toBeCloseTo(60, 5); // 0.6 × 100
+    expect(accessPathLengthStddev(ctx)).toBeCloseTo(1.2, 5);
+    expect(accessPathSimilarityAvg(ctx)).toBeCloseTo(0.75, 5);
+  });
+
+  // ── H6: N≥5 accessors return null when underlying data is null ────────────
+
+  it('H6: N≥5 accessors return null when underlying intelligence data is null (runs ≥ 5, no data)', () => {
+    const ctx = makeContext({
+      metricsV2: makeMetricsV2({
+        runs: 10,
+        variantCount: null,
+        standardPathFrequency: null,
+        stepCountVarianceStdDev: null,
+        sequenceStability: null,
+      }),
+    });
+    expect(accessVariantCount(ctx)).toBeNull();
+    expect(accessTopVariantSharePct(ctx)).toBeNull();
+    expect(accessPathLengthStddev(ctx)).toBeNull();
+    expect(accessPathSimilarityAvg(ctx)).toBeNull();
+  });
+
+  // ── H7: cycle_time_median_ms threshold ───────────────────────────────────
+
+  it('H7: cycle_time_median_ms returns null when runs < 2 and correct value at N≥2', () => {
+    // runs = 1 → below threshold
+    const below = makeContext({ metricsV2: makeMetricsV2({ runs: 1, medianDurationMs: 120_000 }) });
+    expect(accessCycleTimeMedianMs(below)).toBeNull();
+
+    // runs = null → below threshold
+    const nullRuns = makeContext({ metricsV2: makeMetricsV2({ runs: null, medianDurationMs: 120_000 }) });
+    expect(accessCycleTimeMedianMs(nullRuns)).toBeNull();
+
+    // runs = 2 → threshold met exactly
+    const atThreshold = makeContext({ metricsV2: makeMetricsV2({ runs: 2, medianDurationMs: 120_000 }) });
+    expect(accessCycleTimeMedianMs(atThreshold)).toBe(120_000);
+
+    // runs ≥ 5, null data → returns null even with enough runs
+    const noData = makeContext({ metricsV2: makeMetricsV2({ runs: 10, medianDurationMs: null }) });
+    expect(accessCycleTimeMedianMs(noData)).toBeNull();
+  });
+
+  // ── H8: ai_opportunity_score — no threshold, returns raw score ───────────
+
+  it('H8: accessAiOpportunityScore returns score regardless of run count', () => {
+    // The default makeContext() has runs=42 and aiOpportunityScore=65.
+    expect(accessAiOpportunityScore(makeContext())).toBe(65);
+
+    // runs=null still returns the score (no min-run gate)
+    const noRuns = makeContext({ metricsV2: makeMetricsV2({ runs: null, aiOpportunityScore: 72 }) });
+    expect(accessAiOpportunityScore(noRuns)).toBe(72);
+
+    // runs=1 — still returns the score
+    const oneRun = makeContext({ metricsV2: makeMetricsV2({ runs: 1, aiOpportunityScore: 40 }) });
+    expect(accessAiOpportunityScore(oneRun)).toBe(40);
+  });
+
+  // ── H9: top_variant_share_pct multiplication check ───────────────────────
+
+  it('H9: accessTopVariantSharePct multiplies standardPathFrequency by 100 correctly', () => {
+    const ctx = makeContext({
+      metricsV2: makeMetricsV2({ runs: 10, standardPathFrequency: 0.473 }),
+    });
+    const result = accessTopVariantSharePct(ctx);
+    expect(result).not.toBeNull();
+    expect(result!).toBeCloseTo(47.3, 5);
+  });
+
+  // ── H10: all 6 Wave A accessors are deterministic ────────────────────────
+
+  it('H10: all 6 Wave A accessors are deterministic — same context produces identical output across 3 calls', () => {
+    const ctx = makeContext({
+      metricsV2: makeMetricsV2({
+        runs: 10,
+        variantCount: 3,
+        standardPathFrequency: 0.6,
+        stepCountVarianceStdDev: 1.2,
+        sequenceStability: 0.75,
+        medianDurationMs: 90_000,
+        aiOpportunityScore: 65,
+      }),
+    });
+    const waveAAccessors = [
+      accessVariantCount,
+      accessTopVariantSharePct,
+      accessPathLengthStddev,
+      accessPathSimilarityAvg,
+      accessCycleTimeMedianMs,
+      accessAiOpportunityScore,
+    ] as const;
+    for (const accessor of waveAAccessors) {
+      const r1 = accessor(ctx);
+      const r2 = accessor(ctx);
+      const r3 = accessor(ctx);
+      expect(r1).toEqual(r2);
+      expect(r2).toEqual(r3);
+    }
+  });
+
+  // ── H11: Wave A accessors appear in AVAILABLE_ACCESSORS lookup ───────────
+
+  it('H11: all 6 Wave A column keys are present in AVAILABLE_ACCESSORS', () => {
+    const waveAKeys = [
+      'variant_count',
+      'top_variant_share_pct',
+      'path_length_stddev',
+      'path_similarity_avg',
+      'cycle_time_median_ms',
+      'ai_opportunity_score',
+    ];
+    for (const key of waveAKeys) {
+      expect(
+        AVAILABLE_ACCESSORS[key],
+        `Wave A key '${key}' must be present in AVAILABLE_ACCESSORS`,
+      ).toBeDefined();
+    }
+  });
+
+  // ── H12: Wave A accessors are lifetime (ignore referenceNowMs + activeTimeRange) ──
+
+  it('H12: Wave A accessors are lifetime — output unchanged across referenceNowMs and activeTimeRange values', () => {
+    const baseCtx = makeContext({
+      metricsV2: makeMetricsV2({
+        runs: 10,
+        variantCount: 3,
+        standardPathFrequency: 0.6,
+        stepCountVarianceStdDev: 1.2,
+        sequenceStability: 0.75,
+        medianDurationMs: 90_000,
+        aiOpportunityScore: 65,
+      }),
+    });
+    const waveAAccessors = [
+      accessVariantCount,
+      accessTopVariantSharePct,
+      accessPathLengthStddev,
+      accessPathSimilarityAvg,
+      accessCycleTimeMedianMs,
+      accessAiOpportunityScore,
+    ] as const;
+    const ranges: TimeRange[] = ['7d', '30d', '90d', 'all'];
+    for (const accessor of waveAAccessors) {
+      const reference = accessor({ ...baseCtx, referenceNowMs: 1_700_000_000_000, activeTimeRange: 'all' });
+      // Different wall-clock values must not change the output:
+      expect(accessor({ ...baseCtx, referenceNowMs: 1_800_000_000_000 })).toEqual(reference);
+      expect(accessor({ ...baseCtx, referenceNowMs: 0 })).toEqual(reference);
+      // Different time ranges must not change the output:
+      for (const range of ranges) {
+        expect(accessor({ ...baseCtx, activeTimeRange: range })).toEqual(reference);
+      }
+    }
   });
 });

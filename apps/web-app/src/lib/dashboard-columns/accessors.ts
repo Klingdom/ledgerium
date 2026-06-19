@@ -173,6 +173,108 @@ export const accessDateRecorded: ColumnAccessor<string> = (ctx) => {
   return ctx.createdAt;
 };
 
+// ── Wave A statistical accessors (WDC2-P02 / row #101) ───────────────────────
+//
+// These 6 accessors flip columns from `pending-path-c-r1` to `available`.
+// They read from `ctx.metricsV2.*` fields that were propagated from
+// `WorkflowMetricsInput.intelligence` and `.processDefinition.medianDurationMs`
+// by `computeWorkflowMetrics` (workflow-metrics.ts, iter-075).
+//
+// All Wave A accessors are LIFETIME accessors: they return byte-identical
+// values regardless of `referenceNowMs` or `activeTimeRange` because the
+// underlying intelligence data is computed over the full case set (not
+// windowed).  Group G of registry.test.ts asserts this invariant.
+//
+// Minimum-sample-size enforcement: each accessor checks `ctx.metricsV2.runs`
+// against the column's `minRunsRequired` threshold, hard-coded here to avoid
+// coupling the accessor signature to the column definition object.  The column
+// definition's `minRunsRequired` field mirrors the same constant for display
+// in the picker tooltip; these must be kept in sync manually.
+//
+//   N ≥ 2  — median / mean (need at least two data points)
+//   N ≥ 5  — std-dev / similarity / variant-frequency (stable population)
+
+const MIN_RUNS_MEAN_MEDIAN = 2;   // cycle_time_median_ms
+const MIN_RUNS_STAT = 5;           // variant_count, top_variant_share_pct,
+                                   // path_length_stddev, path_similarity_avg
+
+/**
+ * `variant_count` accessor — distinct path variants in the process group.
+ * Source: `metricsV2.variantCount` ← `intelligenceJson.variantCount`.
+ * Returns null below N≥5 (statistically unreliable population).
+ */
+export const accessVariantCount: ColumnAccessor<number> = (ctx) => {
+  const runs = ctx.metricsV2.runs;
+  if (runs === null || runs < MIN_RUNS_STAT) return null;
+  const val = ctx.metricsV2.variantCount;
+  if (val == null) return null;
+  return val;
+};
+
+/**
+ * `top_variant_share_pct` accessor — share (%) of runs following the most-common path.
+ * Source: `metricsV2.standardPathFrequency × 100` ← `intelligenceJson.standardPathFrequency`.
+ * Returns null below N≥5.
+ */
+export const accessTopVariantSharePct: ColumnAccessor<number> = (ctx) => {
+  const runs = ctx.metricsV2.runs;
+  if (runs === null || runs < MIN_RUNS_STAT) return null;
+  const freq = ctx.metricsV2.standardPathFrequency;
+  if (freq == null) return null;
+  return freq * 100;
+};
+
+/**
+ * `path_length_stddev` accessor — std-dev of step counts across runs.
+ * Source: `metricsV2.stepCountVarianceStdDev` ← `intelligenceJson.stepCountVarianceStdDev`.
+ * Returns null below N≥5.
+ */
+export const accessPathLengthStddev: ColumnAccessor<number> = (ctx) => {
+  const runs = ctx.metricsV2.runs;
+  if (runs === null || runs < MIN_RUNS_STAT) return null;
+  const val = ctx.metricsV2.stepCountVarianceStdDev;
+  if (val == null) return null;
+  return val;
+};
+
+/**
+ * `path_similarity_avg` accessor — sequence stability score (0–1).
+ * Source: `metricsV2.sequenceStability` ← `intelligenceJson.sequenceStability`.
+ * Returns null below N≥5.
+ */
+export const accessPathSimilarityAvg: ColumnAccessor<number> = (ctx) => {
+  const runs = ctx.metricsV2.runs;
+  if (runs === null || runs < MIN_RUNS_STAT) return null;
+  const val = ctx.metricsV2.sequenceStability;
+  if (val == null) return null;
+  return val;
+};
+
+/**
+ * `cycle_time_median_ms` accessor — median run duration in milliseconds.
+ * Source: `metricsV2.medianDurationMs` ← `ProcessDefinition.medianDurationMs`.
+ * Returns null below N≥2 (a median needs at least two data points).
+ */
+export const accessCycleTimeMedianMs: ColumnAccessor<number> = (ctx) => {
+  const runs = ctx.metricsV2.runs;
+  if (runs === null || runs < MIN_RUNS_MEAN_MEDIAN) return null;
+  const val = ctx.metricsV2.medianDurationMs;
+  if (val == null) return null;
+  return val;
+};
+
+/**
+ * `ai_opportunity_score` accessor — 0–100 AI automation opportunity score.
+ * Source: `metricsV2.aiOpportunityScore` (already computed by the engine;
+ * this column makes the raw score visible alongside the opportunity_tag enum).
+ *
+ * No minimum-run guard: the score is computed from feature-weighted inputs
+ * that are meaningful even from a single run (step count, tool count, etc.).
+ */
+export const accessAiOpportunityScore: ColumnAccessor<number> = (ctx) => {
+  return ctx.metricsV2.aiOpportunityScore;
+};
+
 /**
  * Lookup table mapping every `ColumnKey` whose availability is `'available'`
  * to its accessor. Consumers (picker, row renderer, sort/filter helpers) call
@@ -194,6 +296,13 @@ export const AVAILABLE_ACCESSORS: Record<string, ColumnAccessor> = Object.freeze
   case_volume: accessCaseVolume as ColumnAccessor,
   system_count_per_run: accessSystemCountPerRun as ColumnAccessor,
   date_recorded: accessDateRecorded as ColumnAccessor,
+  // Wave A statistical accessors (WDC2-P02 / row #101):
+  variant_count: accessVariantCount as ColumnAccessor,
+  top_variant_share_pct: accessTopVariantSharePct as ColumnAccessor,
+  path_length_stddev: accessPathLengthStddev as ColumnAccessor,
+  path_similarity_avg: accessPathSimilarityAvg as ColumnAccessor,
+  cycle_time_median_ms: accessCycleTimeMedianMs as ColumnAccessor,
+  ai_opportunity_score: accessAiOpportunityScore as ColumnAccessor,
 });
 
 /**

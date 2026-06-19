@@ -118,7 +118,9 @@ export type ColumnKey =
   | 'data_entry_time_ms'
   | 'navigation_overhead_pct'
   // ── Layer 6: Bottleneck and constraint (1 Tier A) ───────────────────────────
-  | 'max_wait_step_id';
+  | 'max_wait_step_id'
+  // ── AI / opportunity signal (WDC2-P02 / row #101, Wave A) ───────────────────
+  | 'ai_opportunity_score';
 
 // ── ColumnGroup (UX taxonomy for picker grouping) ─────────────────────────────
 
@@ -321,4 +323,15 @@ export interface WorkflowDashboardColumn {
   readonly availability: ColumnAvailability;
   /** Pure derivation from row context; null IFF availability !== 'available'. */
   readonly accessor: ColumnAccessor | null;
+  /**
+   * Minimum number of recorded runs required before this column's value is
+   * meaningful.  When `metricsV2.runs` is below this threshold the accessor
+   * returns null so the cell renders "—" rather than a statistically-unreliable
+   * value.  Undefined (or 0) means no minimum (column is meaningful from run 1).
+   *
+   * Conventions (WDC2-P02 / row #101):
+   *   N ≥ 2  — median / mean (need at least two data points)
+   *   N ≥ 5  — std-dev / similarity / variant-frequency (need stable population)
+   */
+  readonly minRunsRequired?: number;
 }

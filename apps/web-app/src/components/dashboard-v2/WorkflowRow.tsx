@@ -1179,16 +1179,35 @@ export default function WorkflowRow({
         // (registry-dataType-driven, matching the header alignment) so columns scan
         // cleanly. Text columns stay left. `tabular-nums` keeps digit widths even.
         const numeric = isNumericColumn(colDef.dataType);
+
+        // N-attribution (WDC2-P02 / row #101):
+        // Statistical columns (those with `minRunsRequired`) surface sample size
+        // alongside the value so users can assess reliability.  Only shown when
+        // the column has a value (not "—") and a runs count is available.
+        // Format: "VALUE · N runs" with the "· N runs" part in tertiary styling.
+        const isStatColumn = (colDef.minRunsRequired ?? 0) > 0;
+        const nRuns = accessorContext.metricsV2.runs;
+        const showNAttrib = isStatColumn && cellText !== '—' && nRuns !== null && nRuns > 0;
+
         return (
           <td
             key={colKey}
             className={`px-ds-4 ${cellPadY} text-[13px] text-[var(--content-secondary)] truncate max-w-[140px] ${
               numeric ? 'text-right tabular-nums' : 'text-left'
             }`}
-            title={cellText !== '—' ? cellText : undefined}
-            aria-label={`${colDef.label}: ${cellText}`}
+            title={showNAttrib ? `${cellText} · ${nRuns} runs` : (cellText !== '—' ? cellText : undefined)}
+            aria-label={`${colDef.label}: ${cellText}${showNAttrib ? ` (${nRuns} runs)` : ''}`}
           >
-            {cellText}
+            {showNAttrib ? (
+              <>
+                {cellText}
+                <span className="ml-1 text-[11px] text-[var(--content-tertiary)] tabular-nums" aria-hidden="true">
+                  · {nRuns} runs
+                </span>
+              </>
+            ) : (
+              cellText
+            )}
           </td>
         );
       })}

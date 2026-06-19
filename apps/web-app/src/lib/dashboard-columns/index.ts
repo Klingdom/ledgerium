@@ -38,6 +38,13 @@ export {
   accessCycleTimeMeanMs,
   accessCaseVolume,
   accessSystemCountPerRun,
+  // Wave A statistical accessors (WDC2-P02 / row #101):
+  accessVariantCount,
+  accessTopVariantSharePct,
+  accessPathLengthStddev,
+  accessPathSimilarityAvg,
+  accessCycleTimeMedianMs,
+  accessAiOpportunityScore,
   AVAILABLE_ACCESSORS,
 } from './accessors.js';
 

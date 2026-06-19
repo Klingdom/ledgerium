@@ -176,6 +176,20 @@ export interface WorkflowMetricsOutput {
   /** Distinct path variants in this process group (Process Variation Phase 1).
    *  Optional + nullable: only meaningful across ≥2 runs; the row gates display. */
   variantCount?: number | null;
+  // ── Wave A statistical fields (WDC2-P02 / row #101) ──────────────────────────
+  // These fields are propagated from WorkflowMetricsInput through
+  // computeWorkflowMetrics so that dashboard-column accessors can read them
+  // from ColumnAccessorContext.metricsV2 without requiring a separate field on
+  // WorkflowRowData or a new API endpoint.  All are null when the underlying
+  // intelligenceJson / medianDurationMs is absent.
+  /** Median run duration in milliseconds.  Source: ProcessDefinition.medianDurationMs. */
+  medianDurationMs?: number | null;
+  /** Sequence stability score (0–1).  Source: intelligenceJson.sequenceStability. */
+  sequenceStability?: number | null;
+  /** Std-dev of step counts across runs.  Source: intelligenceJson.stepCountVarianceStdDev. */
+  stepCountVarianceStdDev?: number | null;
+  /** Frequency (0–1) of the most-common variant.  Source: intelligenceJson.standardPathFrequency. */
+  standardPathFrequency?: number | null;
 }
 
 export interface HealthScoreV2 {
@@ -538,6 +552,12 @@ export function computeWorkflowMetrics(input: WorkflowMetricsInput): WorkflowMet
     aiOpportunityScore,
     confidence: input.confidence,
     variantCount: input.processDefinition?.variantCount ?? null,
+    // Wave A statistical pass-through fields (WDC2-P02 / row #101):
+    // propagated from input so column accessors read via metricsV2.
+    medianDurationMs: input.processDefinition?.medianDurationMs ?? null,
+    sequenceStability: input.intelligence?.sequenceStability ?? null,
+    stepCountVarianceStdDev: input.intelligence?.stepCountVarianceStdDev ?? null,
+    standardPathFrequency: input.intelligence?.standardPathFrequency ?? null,
   };
 }
 

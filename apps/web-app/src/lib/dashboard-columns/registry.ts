@@ -46,12 +46,19 @@ import {
   accessCycleTimeMeanMs,
   accessCaseVolume,
   accessSystemCountPerRun,
+  // Wave A statistical accessors (WDC2-P02 / row #101):
+  accessVariantCount,
+  accessTopVariantSharePct,
+  accessPathLengthStddev,
+  accessPathSimilarityAvg,
+  accessCycleTimeMedianMs,
+  accessAiOpportunityScore,
 } from './accessors.js';
 import type { WorkflowDashboardColumn } from './types.js';
 
 /**
- * The full registry — frozen at module load. 39 entries: 7 display columns +
- * 32 Tier A architecture metrics.
+ * The full registry — frozen at module load. 40 entries: 7 display columns +
+ * 32 Tier A architecture metrics + 1 AI/opportunity signal (ai_opportunity_score).
  *
  * Default-pack rationale (`defaultVisible: true` ⇔ shipped today):
  *   workflow_title · systems · opportunity_tag · health_score · last_run_at ·
@@ -263,15 +270,16 @@ export const WORKFLOW_DASHBOARD_COLUMNS: ReadonlyArray<WorkflowDashboardColumn> 
     {
       key: 'cycle_time_median_ms',
       label: 'Median Cycle Time',
-      description: 'Median run duration across the selected time window.',
+      description: 'Median run duration. Requires ≥2 recorded runs.',
       dataType: 'duration',
       sortable: true,
       filterable: true,
       defaultVisible: false,
       defaultGroup: 'flow',
       planTierGate: null,
-      availability: 'pending-path-c-r1',
-      accessor: null,
+      availability: 'available',
+      accessor: accessCycleTimeMedianMs,
+      minRunsRequired: 2,
     },
     {
       key: 'cycle_time_p95_ms',
@@ -371,28 +379,30 @@ export const WORKFLOW_DASHBOARD_COLUMNS: ReadonlyArray<WorkflowDashboardColumn> 
     {
       key: 'variant_count',
       label: 'Variant Count',
-      description: 'Number of distinct execution paths observed.',
+      description: 'Distinct execution paths observed. Requires ≥5 runs.',
       dataType: 'number',
       sortable: true,
       filterable: true,
       defaultVisible: false,
       defaultGroup: 'variation',
       planTierGate: null,
-      availability: 'pending-path-c-r1',
-      accessor: null,
+      availability: 'available',
+      accessor: accessVariantCount,
+      minRunsRequired: 5,
     },
     {
       key: 'top_variant_share_pct',
       label: 'Top Variant Share',
-      description: 'Share of runs following the most-frequent variant path.',
+      description: 'Share of runs following the most-frequent path. Requires ≥5 runs.',
       dataType: 'percentage',
       sortable: true,
       filterable: true,
       defaultVisible: false,
       defaultGroup: 'variation',
       planTierGate: null,
-      availability: 'pending-path-c-r1',
-      accessor: null,
+      availability: 'available',
+      accessor: accessTopVariantSharePct,
+      minRunsRequired: 5,
     },
     {
       key: 'path_length_avg',
@@ -410,28 +420,30 @@ export const WORKFLOW_DASHBOARD_COLUMNS: ReadonlyArray<WorkflowDashboardColumn> 
     {
       key: 'path_length_stddev',
       label: 'Path Length StdDev',
-      description: 'Standard deviation of step count across runs.',
+      description: 'Std-dev of step count across runs. Requires ≥5 runs.',
       dataType: 'number',
       sortable: true,
       filterable: true,
       defaultVisible: false,
       defaultGroup: 'variation',
       planTierGate: 'starter',
-      availability: 'pending-path-c-r1',
-      accessor: null,
+      availability: 'available',
+      accessor: accessPathLengthStddev,
+      minRunsRequired: 5,
     },
     {
       key: 'path_similarity_avg',
       label: 'Path Similarity',
-      description: 'Mean similarity of variants to the standard path.',
+      description: 'Sequence stability across runs (0–1). Requires ≥5 runs.',
       dataType: 'number',
       sortable: true,
       filterable: true,
       defaultVisible: false,
       defaultGroup: 'variation',
       planTierGate: 'starter',
-      availability: 'pending-path-c-r1',
-      accessor: null,
+      availability: 'available',
+      accessor: accessPathSimilarityAvg,
+      minRunsRequired: 5,
     },
 
     // ── Layer 4: Quality and outcome (4 Tier A metrics) ─────────────────────
@@ -604,5 +616,24 @@ export const WORKFLOW_DASHBOARD_COLUMNS: ReadonlyArray<WorkflowDashboardColumn> 
       planTierGate: 'team',
       availability: 'pending-path-c-r3',
       accessor: null,
+    },
+    // ── AI / opportunity signal (WDC2-P02 / row #101, Wave A) ───────────────
+    // `ai_opportunity_score` is NOT in the Tier A architecture-metric list
+    // (it is computed by the opportunity engine, not a raw measurement).
+    // It is added here so the column picker exposes the score alongside the
+    // `opportunity_tag` enum — "automate (82)" is more actionable than
+    // "automate" alone, per WDC-002 §5.3 + CEO Signal 2.
+    {
+      key: 'ai_opportunity_score',
+      label: 'AI Score',
+      description: 'AI automation opportunity score (0–100).',
+      dataType: 'number',
+      sortable: true,
+      filterable: true,
+      defaultVisible: false,
+      defaultGroup: 'bottleneck',
+      planTierGate: null,
+      availability: 'available',
+      accessor: accessAiOpportunityScore,
     },
   ]);

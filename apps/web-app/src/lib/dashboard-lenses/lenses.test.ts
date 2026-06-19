@@ -119,9 +119,11 @@ describe('lss lens config', () => {
 
 describe('resolveAvailableColumns gate', () => {
   it('drops pending-path-c columns, preserves order + dedupes', () => {
+    // WDC2-P02 (iter-075): variant_count is now available; use path_length_avg
+    // (still pending-path-c-r1 — no mean path length source) as pending example.
     const proposed: ColumnKey[] = [
       'workflow_title',
-      'variant_count', // pending → dropped
+      'path_length_avg', // pending → dropped
       'run_count',
       'run_count', // dup → dropped
       'cycle_time_p95_ms', // pending → dropped
@@ -135,9 +137,11 @@ describe('resolveAvailableColumns gate', () => {
   });
 
   it('isColumnAvailable agrees with the registry availability field', () => {
+    // WDC2-P02 (iter-075): variant_count flipped to available.
     expect(isColumnAvailable('cycle_time_mean_ms')).toBe(true);
     expect(isColumnAvailable('run_count')).toBe(true);
-    expect(isColumnAvailable('variant_count')).toBe(false);
+    expect(isColumnAvailable('variant_count')).toBe(true);  // now available
+    expect(isColumnAvailable('path_length_avg')).toBe(false); // still pending
     expect(isColumnAvailable('cycle_time_p95_ms')).toBe(false);
   });
 });
