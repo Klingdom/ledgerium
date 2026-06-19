@@ -468,6 +468,17 @@ export type AnalyticsEvent =
       visibleSectionCount: number;
     }
 
+  // ── Workflow comparison (baseline vs after → ROI) ──────────────────────────
+  | {
+      event: 'workflow_comparison_viewed';
+      /** Confidence band from the smaller run count. */
+      confidence: 'high' | 'medium' | 'low';
+      /** Whether a positive time-saving ROI was computed. */
+      hasSavings: boolean;
+      /** Whether the "after" workflow was slower than the baseline. */
+      slower: boolean;
+    }
+
   // ── Navigation ────────────────────────────────────────────────────────────
   | { event: 'page_viewed'; path: string }
 

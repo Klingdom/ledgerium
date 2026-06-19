@@ -13,6 +13,7 @@ import {
   Zap,
   Download,
   HelpCircle,
+  ArrowLeftRight,
 } from 'lucide-react';
 import { EXTENSION_CONFIG } from '@/lib/config';
 import { LogoFull } from '@/components/shared/LogoMark';
@@ -20,6 +21,7 @@ import { ThemeToggle } from '@/components/shared/ThemeToggle';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Workflows', icon: LayoutDashboard },
+  { href: '/compare', label: 'Compare', icon: ArrowLeftRight },
   { href: '/analytics', label: 'Intelligence', icon: BarChart3 },
   { href: '/recommendations', label: 'Actions', icon: Zap },
   { href: '/teams', label: 'Teams', icon: Users },
