@@ -758,7 +758,7 @@ function ExecutiveVerdictSection({
               key={i}
               className={
                 i === 0
-                  ? 'report-verdict-primary text-ds-lg font-semibold leading-snug text-[var(--content-primary)]'
+                  ? 'report-verdict-primary text-ds-xl font-semibold leading-snug text-[var(--content-primary)]'
                   : 'text-ds-sm leading-snug text-[var(--content-secondary)]'
               }
             >
@@ -766,6 +766,11 @@ function ExecutiveVerdictSection({
             </p>
           ))}
         </div>
+        {/* Wave 1: the evidence-linked moat made legible — visible above the fold
+            (screen only; print uses the badge's inline print disclosure). */}
+        <p className="mt-3 text-ds-sm text-[var(--content-secondary)] print:hidden">
+          Every figure traces to recorded events. No benchmarks, no estimates — only what was observed in your runs.
+        </p>
       </div>
     </div>
   );
@@ -1030,9 +1035,9 @@ function InsightsFeedSection({
         ) : (
           <div className="card px-6 py-8 text-center">
             <CheckCircle className="mx-auto h-8 w-8 text-[var(--content-tertiary)] mb-3" />
-            <h3 className="text-ds-base font-medium text-[var(--content-primary)]">Analysis complete</h3>
+            <h3 className="text-ds-base font-medium text-[var(--content-primary)]">Single-run baseline captured</h3>
             <p className="mt-1 text-ds-sm text-[var(--content-secondary)]">
-              Record this workflow again to compare runs and surface inefficiencies.
+              Record this workflow again to compare runs and detect patterns.
             </p>
           </div>
         )}
@@ -3189,9 +3194,11 @@ export function WorkflowReportPage({
           <p className="mt-1 text-ds-xs text-[var(--content-tertiary)]">{reportMeta.subHeader}</p>
         </div>
         <ExecutiveVerdictSection figures={leadFigures} />
+        {/* Wave 1 lead-first: the "Start Here" action callout sits directly under
+            the verdict, before the metric grid (scorecard + hero band). */}
+        <LeadInsightSection insights={insights} processOutput={processOutput} />
         <ReportScorecardSection figures={leadFigures} />
         <HeroSection workflow={workflow} />
-        <LeadInsightSection insights={insights} processOutput={processOutput} />
         <InsightCardsSection figures={leadFigures} />
         <ProcessScoresSection interpretation={interpretation} />
         <PhaseTimelineSection interpretation={interpretation} />

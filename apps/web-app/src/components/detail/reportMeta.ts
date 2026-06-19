@@ -128,7 +128,9 @@ export interface SectionGroup {
  * a visible section.
  */
 export const SECTION_GROUPS: readonly SectionGroup[] = [
-  { label: 'Summary', ids: ['rpt-verdict', 'rpt-scorecard', 'rpt-hero', 'rpt-lead'] },
+  // Wave 1 lead-first: the "Start Here" action callout (rpt-lead) renders directly
+  // under the verdict, before the scorecard — nav order matches the new DOM order.
+  { label: 'Summary', ids: ['rpt-verdict', 'rpt-lead', 'rpt-scorecard', 'rpt-hero'] },
   {
     label: 'Health & Spread',
     ids: ['rpt-distribution', 'rpt-consistency', 'rpt-variance', 'rpt-drift'],

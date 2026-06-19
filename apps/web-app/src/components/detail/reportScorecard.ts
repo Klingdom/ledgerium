@@ -133,7 +133,7 @@ export function buildScorecard(input: ScorecardInput): {
       band: null,
       interpretation: isMultiRun
         ? 'Variance data not available'
-        : 'Needs 2+ runs',
+        : 'Record 2+ runs to unlock',
     };
   }
 
@@ -144,7 +144,7 @@ export function buildScorecard(input: ScorecardInput): {
     label: 'Variant Count',
     value: isMultiRun && isFiniteNum(vc) ? String(vc) : DASH,
     interpretation: !isMultiRun
-      ? '1 run'
+      ? 'Record 2+ runs to unlock'
       : !isFiniteNum(vc)
       ? 'Variant data not available'
       : vc === 1

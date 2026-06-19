@@ -40,7 +40,7 @@ describe('buildScorecard — single run gating (honesty)', () => {
     expect(sc.consistency.band).toBeNull();
     expect(sc.consistency.interpretation).toMatch(/2\+ runs/);
     expect(sc.variantCount.value).toBe('—');
-    expect(sc.variantCount.interpretation).toMatch(/1 run/);
+    expect(sc.variantCount.interpretation).toMatch(/2\+ runs/);
   });
 
   it('still shows single-run cycle time, bottleneck and automation', () => {
