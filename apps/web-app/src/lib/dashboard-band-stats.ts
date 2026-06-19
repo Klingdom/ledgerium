@@ -281,3 +281,141 @@ export function buildSparklineState(
 
   return { points, delta: recentTotal - priorTotal, recentCount };
 }
+
+// ── Portfolio timestudy summary (2026-06-19) ───────────────────────────────────
+//
+// A deterministic, observed-only aggregate over a slice of the workflow library
+// (the whole portfolio OR the currently-filtered/shown set), feeding the
+// "Portfolio Timestudy" summary band rendered above AND below the list. ONE pure
+// function → both bands consume the same object → they can never disagree.
+//
+// HONESTY (WORKFLOW_LIBRARY_SUMMARY_REVIEW_001):
+//  - Every average carries its own honest denominator (timed-only, run-bearing,
+//    system-bearing, ungated) — never divide a sparse numerator by N.
+//  - Cycle time is a PROXY on per-workflow durations (no per-run duration array
+//    exists yet — Path C R+1). The case-weighted mean (Σ avgTimeMs×runs / Σ runs)
+//    is the timestudy "where time concentrates" number; the median is the robust
+//    "typical workflow" number. Both are labeled in the UI.
+//  - Systems is per-WORKFLOW (toolsUsed.length), NOT per-run — no run-grain system
+//    attribution exists. Labeled honestly in the UI.
+//  - Health score is plan-gated: averaged over UNGATED workflows only; when every
+//    workflow is gated the band renders an upsell state, never a fabricated number.
+//  - Determinism: pure; order-invariant; no Date.now()/Math.random().
+
+export interface PortfolioSummaryInput {
+  /** metricsV2.runs — confirmed observed run count, nullable. */
+  runs: number | null;
+  /** metricsV2.avgTimeMs — per-workflow representative duration (ms), nullable. */
+  avgTimeMs: number | null;
+  /** toolsUsed.length — distinct systems observed for this workflow. */
+  systemCount: number;
+  /** metricsV2.healthScore.overall — 0–100 composite. */
+  healthOverall: number;
+  /** metricsV2.healthScore.isGated — true for plans without health-score access. */
+  healthGated: boolean;
+}
+
+export interface PortfolioSummary {
+  /** Workflows in scope (the denominator the band labels). */
+  workflowCount: number;
+  /** Σ runs (>0) — total observed cases / workload. */
+  totalRuns: number;
+  /** totalRuns / runBearingCount, 1 dp; null when no run-bearing workflows. */
+  avgRuns: number | null;
+  /** Workflows with runs > 0 — the honest denominator for avgRuns. */
+  runBearingCount: number;
+  /** Median of per-workflow durations (ms) across timed workflows; null if none. */
+  medianCycleTimeMs: number | null;
+  /** Case-weighted mean duration (ms) = Σ(avgTimeMs×runs)/Σruns; null if none. */
+  caseWeightedCycleTimeMs: number | null;
+  /** Count of timed workflows (avgTimeMs != null). */
+  cycleTimeSampleCount: number;
+  /** Σ runs over timed + run-bearing workflows — the M in "case-weighted across M runs". */
+  cycleTimeRunCount: number;
+  /** Mean systems per workflow (toolsUsed.length), 1 dp; null if none have ≥1 system. */
+  avgSystemsPerWorkflow: number | null;
+  /** Workflows with ≥1 system — the denominator for avgSystemsPerWorkflow. */
+  systemsSampleCount: number;
+  /** Mean health score over UNGATED workflows (integer); null if none ungated. */
+  avgHealthScore: number | null;
+  /** Count of ungated workflows — the honest denominator for avgHealthScore. */
+  healthSampleCount: number;
+  /** True when there is ≥1 workflow in scope and EVERY one is health-gated. */
+  healthFullyGated: boolean;
+}
+
+/**
+ * Compute the deterministic portfolio timestudy summary over a slice of workflows.
+ * Pure; order-invariant; honest denominators per field. See module honesty notes.
+ */
+export function computePortfolioSummary(
+  rows: ReadonlyArray<PortfolioSummaryInput>,
+): PortfolioSummary {
+  const workflowCount = rows.length;
+
+  // Runs / case volume.
+  let totalRuns = 0;
+  let runBearingCount = 0;
+  for (const r of rows) {
+    if (r.runs != null && Number.isFinite(r.runs) && r.runs > 0) {
+      totalRuns += r.runs;
+      runBearingCount += 1;
+    }
+  }
+  const avgRuns = runBearingCount > 0 ? Math.round((totalRuns / runBearingCount) * 10) / 10 : null;
+
+  // Cycle time — median (robust) + case-weighted mean (where time concentrates).
+  const medianCycleTimeMs = computeMedianCycleTimeMs(rows.map((r) => r.avgTimeMs));
+  let cycleTimeSampleCount = 0;
+  let cwNumerator = 0;
+  let cwRuns = 0;
+  for (const r of rows) {
+    const timed = r.avgTimeMs != null && Number.isFinite(r.avgTimeMs);
+    if (timed) cycleTimeSampleCount += 1;
+    if (timed && r.runs != null && Number.isFinite(r.runs) && r.runs > 0) {
+      cwNumerator += r.avgTimeMs! * r.runs;
+      cwRuns += r.runs;
+    }
+  }
+  const caseWeightedCycleTimeMs = cwRuns > 0 ? Math.round(cwNumerator / cwRuns) : null;
+
+  // Systems per workflow (observed; not per-run).
+  let sysSum = 0;
+  let systemsSampleCount = 0;
+  for (const r of rows) {
+    if (r.systemCount > 0) {
+      sysSum += r.systemCount;
+      systemsSampleCount += 1;
+    }
+  }
+  const avgSystemsPerWorkflow =
+    systemsSampleCount > 0 ? Math.round((sysSum / systemsSampleCount) * 10) / 10 : null;
+
+  // Health score — ungated only.
+  let healthSum = 0;
+  let healthSampleCount = 0;
+  for (const r of rows) {
+    if (!r.healthGated && Number.isFinite(r.healthOverall)) {
+      healthSum += r.healthOverall;
+      healthSampleCount += 1;
+    }
+  }
+  const avgHealthScore = healthSampleCount > 0 ? Math.round(healthSum / healthSampleCount) : null;
+  const healthFullyGated = workflowCount > 0 && healthSampleCount === 0;
+
+  return {
+    workflowCount,
+    totalRuns,
+    avgRuns,
+    runBearingCount,
+    medianCycleTimeMs,
+    caseWeightedCycleTimeMs,
+    cycleTimeSampleCount,
+    cycleTimeRunCount: cwRuns,
+    avgSystemsPerWorkflow,
+    systemsSampleCount,
+    avgHealthScore,
+    healthSampleCount,
+    healthFullyGated,
+  };
+}

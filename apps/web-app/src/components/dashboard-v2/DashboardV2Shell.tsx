@@ -32,7 +32,9 @@ import { track, setUserPlanForAnalytics } from '@/lib/analytics.js';
 import CommandHeader, { type TimeRange } from './CommandHeader.js';
 import InsightsStrip from './InsightsStrip.js';
 import TopBand from './band/TopBand.js';
+import PortfolioTimestudyBand from './band/PortfolioTimestudyBand.js';
 import FirstRunTutorial from './FirstRunTutorial.js';
+import { computePortfolioSummary, type PortfolioSummaryInput } from '@/lib/dashboard-band-stats.js';
 import type {
   OpportunityCounts,
   ActivityWeekBucket,
@@ -843,6 +845,27 @@ export default function DashboardV2Shell() {
     [allWorkflows],
   );
 
+  // Portfolio timestudy summary over the SHOWN/filtered set — recomputes on every
+  // filter / search / preset change. One deterministic source feeds the band
+  // rendered BOTH above and below the list (they can never disagree). Client-side
+  // because the band must reflect the filtered view, not the whole portfolio
+  // (WORKFLOW_LIBRARY_SUMMARY_REVIEW_001 §5).
+  const portfolioSummary = useMemo(
+    () =>
+      computePortfolioSummary(
+        filteredWorkflows.map(
+          (w): PortfolioSummaryInput => ({
+            runs: w.metricsV2.runs,
+            avgTimeMs: w.metricsV2.avgTimeMs,
+            systemCount: w.toolsUsed.length,
+            healthOverall: w.metricsV2.healthScore.overall,
+            healthGated: w.metricsV2.healthScore.isGated,
+          }),
+        ),
+      ),
+    [filteredWorkflows],
+  );
+
   // Batch B: toggle the opportunity filter when an OpportunityBar segment is
   // clicked.  Clearing the active preset keeps the unified active-filters model
   // coherent: a manual ad-hoc filter change supersedes the one-click preset view.
@@ -1207,6 +1230,15 @@ export default function DashboardV2Shell() {
             onClearAll={handleClearAllFilters}
           />
 
+          {/* Portfolio timestudy summary — header band bookending the list (top). */}
+          {allWorkflows.length > 0 && (
+            <PortfolioTimestudyBand
+              summary={portfolioSummary}
+              totalWorkflowCount={allWorkflows.length}
+              position="top"
+            />
+          )}
+
           <WorkflowList
             state={listState}
             workflows={portfolioFilteredWorkflows}
@@ -1232,6 +1264,15 @@ export default function DashboardV2Shell() {
             nowMs={filterNowMs}
             hideFilterBar
           />
+
+          {/* Portfolio timestudy summary — footer totals band bookending the list (bottom). */}
+          {allWorkflows.length > 0 && (
+            <PortfolioTimestudyBand
+              summary={portfolioSummary}
+              totalWorkflowCount={allWorkflows.length}
+              position="bottom"
+            />
+          )}
         </div>
       </div>
       )}

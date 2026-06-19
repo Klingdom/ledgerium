@@ -17,8 +17,9 @@ import {
   computeTotalRuns,
   buildHighVarianceTileState,
   buildSparklineState,
+  computePortfolioSummary,
 } from './dashboard-band-stats';
-import type { ActivityWeekBucket } from './dashboard-band-stats';
+import type { ActivityWeekBucket, PortfolioSummaryInput } from './dashboard-band-stats';
 import type { OpportunityTag } from './workflow-metrics';
 
 // Fixed clock — 2026-06-12T00:00:00.000Z. Used across the activity tests.
@@ -242,5 +243,93 @@ describe('buildSparklineState (honesty-gated delta)', () => {
       delta: -3,
       recentCount: 0,
     });
+  });
+});
+
+// ── computePortfolioSummary — honest portfolio timestudy aggregate ──────────────
+
+describe('computePortfolioSummary', () => {
+  const mk = (o: Partial<PortfolioSummaryInput>): PortfolioSummaryInput => ({
+    runs: null,
+    avgTimeMs: null,
+    systemCount: 0,
+    healthOverall: 0,
+    healthGated: false,
+    ...o,
+  });
+
+  it('returns an honest empty summary for no rows (no fabricated zeros for ratios)', () => {
+    const s = computePortfolioSummary([]);
+    expect(s.workflowCount).toBe(0);
+    expect(s.totalRuns).toBe(0);
+    expect(s.avgRuns).toBeNull();
+    expect(s.medianCycleTimeMs).toBeNull();
+    expect(s.caseWeightedCycleTimeMs).toBeNull();
+    expect(s.avgSystemsPerWorkflow).toBeNull();
+    expect(s.avgHealthScore).toBeNull();
+    expect(s.healthFullyGated).toBe(false); // no workflows ⇒ not "fully gated"
+  });
+
+  it('sums runs and averages over run-bearing workflows only', () => {
+    const s = computePortfolioSummary([mk({ runs: 200 }), mk({ runs: 3 }), mk({ runs: null }), mk({ runs: 0 })]);
+    expect(s.totalRuns).toBe(203);
+    expect(s.runBearingCount).toBe(2);
+    expect(s.avgRuns).toBe(101.5);
+  });
+
+  it('case-weights cycle time and exposes the timed + run denominators', () => {
+    const s = computePortfolioSummary([
+      mk({ avgTimeMs: 30_000, runs: 200 }),
+      mk({ avgTimeMs: 600_000, runs: 3 }),
+    ]);
+    expect(s.caseWeightedCycleTimeMs).toBe(Math.round(7_800_000 / 203)); // (30000*200 + 600000*3)/203
+    expect(s.cycleTimeRunCount).toBe(203);
+    expect(s.cycleTimeSampleCount).toBe(2);
+    expect(s.medianCycleTimeMs).toBe(315_000); // median of [30000, 600000]
+  });
+
+  it('excludes untimed / run-less workflows from the weighted cycle time', () => {
+    const s = computePortfolioSummary([
+      mk({ avgTimeMs: 1000, runs: 5 }),
+      mk({ avgTimeMs: null, runs: 100 }), // untimed → excluded from weighted mean
+      mk({ avgTimeMs: 9000, runs: null }), // no runs → excluded from weighted mean, still a timed sample
+    ]);
+    expect(s.caseWeightedCycleTimeMs).toBe(1000);
+    expect(s.cycleTimeRunCount).toBe(5);
+    expect(s.cycleTimeSampleCount).toBe(2);
+  });
+
+  it('averages systems per workflow over system-bearing workflows only', () => {
+    const s = computePortfolioSummary([mk({ systemCount: 3 }), mk({ systemCount: 1 }), mk({ systemCount: 0 })]);
+    expect(s.systemsSampleCount).toBe(2);
+    expect(s.avgSystemsPerWorkflow).toBe(2);
+  });
+
+  it('averages health over UNGATED workflows only', () => {
+    const s = computePortfolioSummary([
+      mk({ healthOverall: 80, healthGated: false }),
+      mk({ healthOverall: 60, healthGated: false }),
+      mk({ healthOverall: 100, healthGated: true }), // gated → excluded
+    ]);
+    expect(s.healthSampleCount).toBe(2);
+    expect(s.avgHealthScore).toBe(70);
+    expect(s.healthFullyGated).toBe(false);
+  });
+
+  it('flags fully-gated health (no number) when every workflow is gated', () => {
+    const s = computePortfolioSummary([
+      mk({ healthOverall: 80, healthGated: true }),
+      mk({ healthOverall: 60, healthGated: true }),
+    ]);
+    expect(s.avgHealthScore).toBeNull();
+    expect(s.healthFullyGated).toBe(true);
+  });
+
+  it('is deterministic and order-invariant', () => {
+    const rows = [
+      mk({ runs: 5, avgTimeMs: 1000, systemCount: 2, healthOverall: 90 }),
+      mk({ runs: 10, avgTimeMs: 2000, systemCount: 1, healthOverall: 50 }),
+    ];
+    expect(computePortfolioSummary(rows)).toEqual(computePortfolioSummary([...rows].reverse()));
   });
 });
