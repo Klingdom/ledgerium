@@ -1,16 +1,16 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import DemoProcessMap from '@/components/demo/DemoProcessMap';
 import {
   Play,
-  MousePointer2,
   Layers,
   FileText,
-  Library,
   ArrowRight,
   CheckCircle,
   Map,
   LayoutDashboard,
+  BarChart3,
 } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -23,47 +23,47 @@ const STEPS = [
   {
     step: 1,
     icon: Play,
-    title: 'Start recording',
-    what: 'Open the Ledgerium sidebar in Chrome. Name the workflow — "Create purchase order," "Process expense report," "Onboard new vendor." Click Record.',
-    result: 'The extension starts capturing silently. A live step feed shows your progress as you work.',
-    screenshot: '/img/screenshot-upload.png',
-    screenshotAlt: 'Ledgerium upload workflow interface',
+    title: 'Record a workflow',
+    what: 'Open the Ledgerium side panel in Chrome. Name the workflow — "Create purchase order," "Process expense report," "Onboard new vendor" — and click Record. Then do your work normally across your ERP, CRM, and internal tools.',
+    result: 'Every click, form entry, and navigation is captured as structured data — no screenshots, no typed content, no screen recording. Multi-system, multi-tab workflows are fully supported.',
+    screenshot: '/img/demo/extension.png',
+    screenshotAlt: 'Ledgerium browser extension ready to record a workflow',
   },
   {
     step: 2,
-    icon: MousePointer2,
-    title: 'Do the workflow normally',
-    what: 'Navigate your ERP, CRM, or internal tools. Fill forms, click buttons, switch between systems. Work exactly as you normally would.',
-    result: 'Every click, form entry, and navigation is captured as structured data — no screenshots, no typed content, no screen recording. Multi-system, multi-tab workflows are fully supported.',
-    screenshot: '/img/screenshot-dashboard.png',
-    screenshotAlt: 'Ledgerium dashboard showing recorded workflows with metrics',
+    icon: LayoutDashboard,
+    title: 'See your workflow library',
+    what: 'Every recording lands in your dashboard. The portfolio timestudy band gives you a baseline — average cycle time, total cases, runs, systems, and health score — and each row shows its run count N next to every metric.',
+    result: 'This is not a document list. It is a measured baseline. Sort by health, filter by time range, and see which processes to investigate before you open a single recording.',
+    screenshot: '/img/demo/dashboard.png',
+    screenshotAlt: 'Ledgerium workflow library with portfolio timestudy band, cycle-time columns, and health scores',
   },
   {
     step: 3,
-    icon: Layers,
-    title: 'Stop and review',
-    what: 'Click Stop. The engine segments your session into logical workflow steps with timing, system context, and confidence scores.',
-    result: 'You see your workflow as structured steps — not a video to watch. Each step traces to specific observed actions.',
-    screenshot: '/img/screenshot-workflow.png',
-    screenshotAlt: 'Ledgerium workflow detail showing structured steps and process map',
+    icon: Map,
+    title: 'Explore the process map',
+    what: 'Open any workflow. The process map renders from observed transitions — switch to the frequency overlay to see how often each path was actually taken, or Variants to compare how different runs diverged.',
+    result: 'The map was measured, not drawn. The thick paths are the route most runs actually took. Every edge is a real transition.',
+    screenshot: '/img/demo/workflow-view.png',
+    screenshotAlt: 'Ledgerium workflow view showing the directly-follows process map with observed transitions',
   },
   {
     step: 4,
     icon: FileText,
     title: 'Get your SOP instantly',
-    what: 'Ledgerium generates a complete SOP with step-by-step instructions, system context, expected outcomes, and a visual process map showing phases and transitions.',
-    result: 'A ready-to-share SOP with prerequisites, warnings, and completion criteria — generated from evidence, not memory.',
-    screenshot: '/img/screenshot-sop.png',
-    screenshotAlt: 'Ledgerium generated SOP with step-by-step instructions and roles',
+    what: 'Ledgerium generates a complete SOP with step-by-step instructions, system context, and expected outcomes. Every step cites the events it came from — and you can ask the workflow a question and get an answer grounded in the evidence.',
+    result: 'A ready-to-share SOP with prerequisites, warnings, and completion criteria — generated from what was observed, not from memory. Share it with a public link.',
+    screenshot: '/img/demo/sop-view.png',
+    screenshotAlt: 'Ledgerium generated SOP with step-by-step instructions and evidence citations',
   },
   {
     step: 5,
-    icon: Library,
-    title: 'Build your workflow library',
-    what: 'Every recording syncs to your searchable library. Find any workflow by title, system, or date. Keep your team\'s process documentation always up to date.',
-    result: 'When the process changes, record it again. The new SOP replaces the old one. Documentation stays current automatically.',
-    screenshot: '/img/screenshot-process-groups.png',
-    screenshotAlt: 'Ledgerium process groups showing workflow families and variants',
+    icon: BarChart3,
+    title: 'Read the report',
+    what: 'The report leads with a verdict, then a scorecard, a step-duration timestudy, and a before/after ROI estimate. Toggle steps as removed or automated to see the projected cycle time.',
+    result: 'The ROI number is arithmetic over your own observed step durations — based on your real run history, not a consultant\'s estimate.',
+    screenshot: '/img/demo/report-view.png',
+    screenshotAlt: 'Ledgerium workflow report showing health verdict, scorecard, cycle-time distribution, and bottleneck analysis',
   },
 ];
 
@@ -127,8 +127,30 @@ export default function DemoPage() {
         </div>
       </section>
 
-      {/* Output summary */}
+      {/* Live interactive process map — the real product component, no login */}
       <section className="py-16 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+          <p className="text-center text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+            Try it live — no login required
+          </p>
+          <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-3">
+            A real process map, built from a real recording
+          </h2>
+          <p className="text-center text-[#e2e8f0] leading-relaxed mb-8 max-w-2xl mx-auto">
+            This is the actual Ledgerium process map — a sample &ldquo;Submit expense report&rdquo; workflow
+            recorded 47 times. Edge thickness is how often each path was taken. Switch to{' '}
+            <span className="text-brand-400 font-medium">Performance</span> mode to see where the time goes,
+            and drag the coverage slider to focus on the dominant path. Nothing here is drawn — it is measured.
+          </p>
+          <DemoProcessMap />
+          <p className="text-center text-xs text-[var(--content-tertiary)] mt-3">
+            Sample data shown. Every edge and timing is computed from observed runs — same engine you get on your own recordings.
+          </p>
+        </div>
+      </section>
+
+      {/* Output summary */}
+      <section className="py-16 bg-[var(--surface-elevated)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <h2 className="text-center text-xl font-bold text-[var(--content-primary)] mb-10">
             Every recording produces
@@ -156,17 +178,17 @@ export default function DemoPage() {
           <div className="rounded-xl border border-brand-700/30 bg-brand-900/15 p-8 text-center">
             <LayoutDashboard className="h-8 w-8 text-brand-600 mx-auto mb-3" />
             <h3 className="text-lg font-bold text-[var(--content-primary)] mb-2">
-              See the dashboard with real sample workflows
+              Explore a sample workflow yourself
             </h3>
             <p className="text-sm text-[#e2e8f0] mb-5 max-w-lg mx-auto">
-              Browse 10 real workflow recordings — view SOPs, process maps,
-              agent intelligence, and evidence traces. No signup required.
+              Create a free account and open a sample workflow instantly — its SOP, process map,
+              and report are all derived from a real recording. No extension install required to look around.
             </p>
-            <a href="/dashboard.html" className="btn-primary gap-2 px-6 py-3">
+            <Link href="/signup" className="btn-primary gap-2 px-6 py-3">
               <LayoutDashboard className="h-4 w-4" />
-              Explore the live dashboard
+              Create free account
               <ArrowRight className="h-4 w-4" />
-            </a>
+            </Link>
           </div>
         </div>
       </section>

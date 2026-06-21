@@ -71,23 +71,23 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Hero product screenshot */}
+          {/* Hero product screenshot — real current-state workflow library */}
           <div className="mt-16 mx-auto max-w-5xl px-4 sm:px-6">
             <div className="rounded-xl border border-[var(--border-default)] overflow-hidden shadow-lg shadow-[var(--border-default)]/50 bg-[var(--surface-elevated)]">
               <Image
-                src="/img/screenshot-dashboard.png"
-                alt="Ledgerium AI dashboard showing recorded workflows with process intelligence metrics"
-                width={1200}
-                height={700}
+                src="/img/demo/dashboard.png"
+                alt="Ledgerium AI workflow library showing recorded workflows with cycle-time, run counts, and process health scores"
+                width={900}
+                height={560}
                 className="w-full h-auto"
                 priority
               />
             </div>
             <p className="text-center text-xs text-[var(--content-tertiary)] mt-3">
-              Your workflow library — every recording becomes structured documentation.{' '}
-              <a href="/dashboard.html" className="text-brand-600 hover:text-brand-700 font-medium">
-                Explore the live demo &rarr;
-              </a>
+              Your workflow library — every number comes from a real recording, not an estimate.{' '}
+              <Link href="/demo" className="text-brand-600 hover:text-brand-700 font-medium">
+                Walk through the product &rarr;
+              </Link>
             </p>
           </div>
         </div>
@@ -103,7 +103,7 @@ export default function HomePage() {
               { icon: Zap, label: 'Same input, same output — always' },
               { icon: Eye, label: 'Evidence-linked output' },
               { icon: Shield, label: 'Privacy-by-architecture' },
-              { icon: CheckCircle, label: '1,393 tests passing' },
+              { icon: CheckCircle, label: 'Measured, not estimated' },
             ].map(({ icon: Icon, label }) => (
               <div key={label} className="flex items-center justify-center gap-2.5 text-[var(--content-secondary)]">
                 <Icon className="h-4 w-4 flex-shrink-0 text-brand-600" />
@@ -121,12 +121,12 @@ export default function HomePage() {
             Try it without signing up
           </p>
           <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-3">
-            Click around the live dashboard
+            The dashboard you get after your first recording
           </h2>
           <p className="text-center text-[#e2e8f0] leading-relaxed mb-12 max-w-2xl mx-auto">
-            Real sample workflows with evidence-linked metrics — the same UI you get after recording your first session. No credit card, no signup.
+            Real sample workflows with evidence-linked metrics — the same workflow library you get from day one. Every cycle time and run count is measured from an actual recording.
           </p>
-          {/* Embedded dashboard demo (lifted from /product) */}
+          {/* Real product screenshot — current-state workflow library */}
           <div className="rounded-xl border border-[var(--border-default)] overflow-hidden shadow-lg shadow-[var(--border-default)]/50 bg-[var(--surface-elevated)]">
             <div className="bg-[var(--surface-secondary)] border-b border-[var(--border-default)] px-4 py-2 flex items-center gap-2">
               <div className="flex gap-1.5">
@@ -136,19 +136,20 @@ export default function HomePage() {
               </div>
               <span className="text-[10px] text-[var(--content-tertiary)] ml-2 font-mono">ledgerium.ai/dashboard</span>
             </div>
-            <iframe
-              src="/dashboard.html"
-              title="Ledgerium AI Interactive Demo"
-              className="w-full border-0"
-              style={{ height: '560px' }}
+            <Image
+              src="/img/demo/dashboard.png"
+              alt="Ledgerium workflow library with the portfolio timestudy band, cycle-time columns, run counts, and process health scores"
+              width={900}
+              height={560}
+              className="w-full h-auto block"
               loading="lazy"
             />
           </div>
           <p className="text-center text-xs text-[var(--content-tertiary)] mt-3">
-            Interactive demo with real sample workflows.{' '}
-            <a href="/dashboard.html" className="text-brand-600 hover:text-brand-700 font-medium">
-              Open full screen &rarr;
-            </a>
+            Every number shown comes from a real recording. Same input, same output — always.{' '}
+            <Link href="/demo" className="text-brand-600 hover:text-brand-700 font-medium">
+              See all four views &rarr;
+            </Link>
           </p>
         </div>
       </section>
@@ -211,18 +212,18 @@ export default function HomePage() {
                 See what a generated SOP looks like
               </h2>
               <p className="text-[#e2e8f0] leading-relaxed mb-6">
-                This SOP was generated automatically from a 3-minute browser recording of an expense report workflow in Workday. Every instruction traces back to an observed event.
+                This SOP was generated automatically from a real browser recording — every instruction traces back to an observed event. Nothing was written by hand, nothing was rewritten by AI.
               </p>
-              <a
-                href="/dashboard.html"
+              <Link
+                href="/demo"
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:text-brand-500 transition-colors"
               >
-                Explore the full interactive demo
+                Walk through all four views
                 <ArrowRight className="h-3.5 w-3.5" />
-              </a>
+              </Link>
             </div>
 
-            {/* Right: framed iframe */}
+            {/* Right: framed real SOP screenshot */}
             <div>
               {/* Browser chrome */}
               <div className="rounded-xl border border-[var(--border-default)] overflow-hidden shadow-lg shadow-black/30 bg-[var(--surface-elevated)]">
@@ -235,16 +236,17 @@ export default function HomePage() {
                   {/* URL bar */}
                   <div className="ml-2 flex-1 rounded-md bg-[var(--surface-primary)] border border-[var(--border-subtle)] px-3 py-1">
                     <span className="text-[11px] text-[var(--content-tertiary)] font-mono">
-                      ledgerium.ai/samples/sop-execution-sample.html
+                      ledgerium.ai/workflows
                     </span>
                   </div>
                 </div>
-                {/* iframe */}
-                <iframe
-                  src="/samples/sop-execution-sample.html"
-                  title="Example generated SOP — Expense Report Workflow"
-                  className="w-full"
-                  style={{ height: '400px', border: 'none', display: 'block' }}
+                {/* Real SOP view screenshot */}
+                <Image
+                  src="/img/demo/sop-view.png"
+                  alt="Example generated SOP with step-by-step instructions, system context, and evidence citations"
+                  width={900}
+                  height={560}
+                  className="w-full h-auto block"
                   loading="lazy"
                 />
               </div>
