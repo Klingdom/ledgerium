@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import DemoProcessMap from '@/components/demo/DemoProcessMap';
 import {
   Play,
   Layers,
@@ -126,8 +127,30 @@ export default function DemoPage() {
         </div>
       </section>
 
-      {/* Output summary */}
+      {/* Live interactive process map — the real product component, no login */}
       <section className="py-16 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+          <p className="text-center text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+            Try it live — no login required
+          </p>
+          <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-3">
+            A real process map, built from a real recording
+          </h2>
+          <p className="text-center text-[#e2e8f0] leading-relaxed mb-8 max-w-2xl mx-auto">
+            This is the actual Ledgerium process map — a sample &ldquo;Submit expense report&rdquo; workflow
+            recorded 47 times. Edge thickness is how often each path was taken. Switch to{' '}
+            <span className="text-brand-400 font-medium">Performance</span> mode to see where the time goes,
+            and drag the coverage slider to focus on the dominant path. Nothing here is drawn — it is measured.
+          </p>
+          <DemoProcessMap />
+          <p className="text-center text-xs text-[var(--content-tertiary)] mt-3">
+            Sample data shown. Every edge and timing is computed from observed runs — same engine you get on your own recordings.
+          </p>
+        </div>
+      </section>
+
+      {/* Output summary */}
+      <section className="py-16 bg-[var(--surface-elevated)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <h2 className="text-center text-xl font-bold text-[var(--content-primary)] mb-10">
             Every recording produces
