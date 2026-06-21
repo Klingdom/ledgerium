@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { TrackedLink } from '@/components/TrackedLink';
-import DemoProcessMap from '@/components/demo/DemoProcessMap';
+import DemoVariantsMap from '@/components/demo/DemoVariantsMap';
 import {
   Play,
   Layers,
@@ -321,15 +321,18 @@ export default function ProductPage() {
             Try it live — no signup
           </p>
           <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-3">
-            Click into a real process map
+            Click between the real product views
           </h2>
           <p className="text-center text-[#e2e8f0] leading-relaxed mb-8 max-w-2xl mx-auto">
-            This is the actual Ledgerium process map running on a sample expense-report workflow
-            recorded 47 times. Edge thickness is how often each path was taken. Switch to{' '}
-            <span className="text-brand-400 font-medium">Performance</span> mode to see where the time goes,
-            and drag the coverage slider to focus on the dominant path. Nothing here is drawn — it is measured.
+            This is the actual Ledgerium variants explorer running on a sample
+            &ldquo;Approve Expense Report&rdquo; workflow — 6 paths across 16 recorded runs.
+            Switch between <span className="text-brand-400 font-medium">Map</span>,{' '}
+            <span className="text-brand-400 font-medium">Frequency</span>,{' '}
+            <span className="text-brand-400 font-medium">DNA</span>, and{' '}
+            <span className="text-brand-400 font-medium">List</span> views to see the dominant path,
+            the rework loop, and the exception path. Nothing here is drawn — it is measured.
           </p>
-          <DemoProcessMap />
+          <DemoVariantsMap />
           <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
             <TrackedLink
               href="/signup"
