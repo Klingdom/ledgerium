@@ -187,9 +187,47 @@ export const FEATURE_REGISTRY: readonly Feature[] = [
     estReadTimeMin: 4,
     captures: [
       {
+        // Workflow tab (default): DFG process map + steps panel
+        // Demo user "Customer support ticket triage" — 6 runs, sop+process_map artifacts
         state: 'loaded',
-        url: '/workflows/sample-workflow-id',
-        description: 'Workflow detail page with steps, SOP, and process map.',
+        url: '/workflows/a0c336a4-3a8f-4ee0-9b41-5582eb7eba82',
+        description: 'Workflow tab — DFG frequency map and steps list for a 6-run workflow.',
+        setup: async (page) => {
+          // Default tab is 'workflow' — wait for the process map to render
+          await page.waitForSelector('[data-testid="workflow-page-shell"], .react-flow, canvas', {
+            timeout: 8000,
+          }).catch(() => { /* map may not be present if no runs; proceed anyway */ });
+          await page.waitForTimeout(1000);
+        },
+      },
+      {
+        // SOP tab: rendered SOP document
+        state: 'sop',
+        url: '/workflows/a0c336a4-3a8f-4ee0-9b41-5582eb7eba82',
+        description: 'SOP tab — auto-generated standard operating procedure document.',
+        setup: async (page) => {
+          // Wait for content to load, then click the SOP tab.
+          // Use data-testid to avoid strict-mode ambiguity with a secondary SOP button
+          // that may appear in the workflow action bar.
+          await page.waitForSelector('[data-testid="workflow-tab-sop"]', { timeout: 10000 });
+          await page.waitForTimeout(500);
+          await page.locator('[data-testid="workflow-tab-sop"]').click();
+          await page.waitForTimeout(1500);
+        },
+      },
+      {
+        // Report tab: timestudy metrics, health score, variants, intelligence
+        state: 'report',
+        url: '/workflows/a0c336a4-3a8f-4ee0-9b41-5582eb7eba82',
+        description: 'Report tab — timestudy metrics, health score, and variant analysis.',
+        setup: async (page) => {
+          // Wait for content to load, then click the Report tab.
+          // Use data-testid for precision.
+          await page.waitForSelector('[data-testid="workflow-tab-report"]', { timeout: 10000 });
+          await page.waitForTimeout(500);
+          await page.locator('[data-testid="workflow-tab-report"]').click();
+          await page.waitForTimeout(2000);
+        },
       },
     ],
     related: ['dashboard', 'process-intelligence', 'recommendations'],

@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { TrackedLink } from '@/components/TrackedLink';
 import {
   Play,
-  MousePointer2,
   Layers,
   FileText,
   Library,
@@ -14,7 +13,6 @@ import {
   LayoutDashboard,
   Zap,
   BarChart3,
-  Bot,
   Shield,
   GitCompare,
   Eye,
@@ -45,48 +43,52 @@ const TOUR_STEPS = [
       alt: 'Ledgerium Chrome extension side panel capturing workflow steps in real time',
       width: 360,
       height: 640,
+      url: 'Ledgerium Recorder',
       type: 'extension' as const,
     },
   },
   {
     step: 2,
-    icon: MousePointer2,
-    title: 'Process',
-    what: 'Click Stop. The deterministic engine segments your session into logical steps with timing, system context, and confidence scores.',
-    result: 'Same input always produces the same output. Every step traces to specific observed browser events.',
+    icon: Map,
+    title: 'See the process map',
+    what: 'Click any workflow. The process map renders from observed transitions. Switch to the frequency overlay to see how often each path was actually taken, or Variants to compare how different runs diverged.',
+    result: 'The map was measured, not drawn. The thick paths are the route most runs actually took — every edge is a real transition.',
     image: {
-      src: '/docs/screenshots/workflow-evidence-tab.png',
-      alt: 'Workflow evidence tab showing structured events and confidence scores',
-      width: 1200,
-      height: 750,
+      src: '/img/demo/workflow-view.png',
+      alt: 'Workflow process map with directly-follows graph showing observed step transitions and frequencies',
+      width: 900,
+      height: 560,
+      url: 'ledgerium.ai/workflows',
       type: 'webapp' as const,
     },
   },
   {
     step: 3,
     icon: FileText,
-    title: 'Analyze',
-    what: 'Ledgerium generates a complete SOP, visual process map, workflow report, and actionable insights — all from a single recording.',
-    result: 'Ready-to-share documentation with prerequisites, system context, and expected outcomes — generated from evidence, not memory.',
+    title: 'Get the SOP',
+    what: 'Ledgerium generates a complete step-by-step SOP from the recording. Every step cites the events it came from — and you can ask the workflow a question and get an answer grounded in the captured evidence.',
+    result: 'Ready-to-share documentation with prerequisites, system context, and expected outcomes — generated from what was observed, not from memory.',
     image: {
-      src: '/docs/screenshots/workflow-sop-tab.png',
-      alt: 'SOP tab showing generated standard operating procedure from recorded workflow',
-      width: 1200,
-      height: 750,
+      src: '/img/demo/sop-view.png',
+      alt: 'Generated standard operating procedure with step-by-step instructions and evidence citations',
+      width: 900,
+      height: 560,
+      url: 'ledgerium.ai/workflows',
       type: 'webapp' as const,
     },
   },
   {
     step: 4,
-    icon: Zap,
-    title: 'Act',
-    what: 'Build a searchable library. Get process health scores, bottleneck detection, and AI agent compositions as your library grows.',
-    result: 'The more you record, the more intelligence you unlock — variant analysis, automation scoring, and cross-workflow comparison.',
+    icon: BarChart3,
+    title: 'See the report',
+    what: 'The report leads with a verdict, then a scorecard, a step-duration timestudy, and a before/after ROI estimate. Toggle steps as removed or automated to see the projected cycle time.',
+    result: 'The ROI number is arithmetic over your own observed step durations — based on your real run history, not a consultant’s estimate.',
     image: {
-      src: '/docs/screenshots/analytics-dashboard.png',
-      alt: 'Analytics dashboard showing process health scores and intelligence metrics across workflow library',
-      width: 1200,
-      height: 750,
+      src: '/img/demo/report-view.png',
+      alt: 'Workflow report showing process health verdict, scorecard, cycle-time distribution, and bottleneck analysis',
+      width: 900,
+      height: 560,
+      url: 'ledgerium.ai/workflows',
       type: 'webapp' as const,
     },
   },
@@ -96,28 +98,28 @@ const TOUR_STEPS = [
 
 const OUTPUTS = [
   {
-    icon: Layers,
-    label: 'Workflow Steps',
-    sub: 'With timing and evidence',
-    image: { src: '/img/screenshot-workflow.png', alt: 'Workflow steps view' },
-  },
-  {
-    icon: FileText,
-    label: 'SOP Document',
-    sub: 'Step-by-step instructions',
-    image: { src: '/img/screenshot-sop.png', alt: 'Generated SOP document' },
+    icon: LayoutDashboard,
+    label: 'Workflow Library',
+    sub: 'Searchable and measured',
+    image: { src: '/img/demo/dashboard.png', alt: 'Workflow library dashboard with cycle-time metrics and health scores' },
   },
   {
     icon: Map,
     label: 'Process Map',
-    sub: 'Phases and transitions',
-    image: { src: '/docs/screenshots/workflow-flow-view.png', alt: 'Visual process flow map' },
+    sub: 'Observed transitions',
+    image: { src: '/img/demo/workflow-view.png', alt: 'Visual process map built from observed step transitions' },
   },
   {
-    icon: CheckCircle,
+    icon: FileText,
+    label: 'SOP Document',
+    sub: 'Step-by-step, evidence-cited',
+    image: { src: '/img/demo/sop-view.png', alt: 'Generated SOP document with step-by-step instructions' },
+  },
+  {
+    icon: BarChart3,
     label: 'Workflow Report',
-    sub: 'Health scores and export',
-    image: { src: '/img/screenshot-report.png', alt: 'Workflow health report' },
+    sub: 'Verdict, scorecard and ROI',
+    image: { src: '/img/demo/report-view.png', alt: 'Workflow report with health verdict, scorecard, and cycle-time analysis' },
   },
 ];
 
@@ -140,9 +142,9 @@ const INTELLIGENCE_FEATURES = [
     description: 'Compare how different people do the same process. See where variants emerge and which path is most efficient.',
   },
   {
-    icon: Bot,
-    title: 'AI Agent Composition',
-    description: 'Automatically identify which steps an AI agent could handle and generate implementation-ready agent profiles.',
+    icon: Zap,
+    title: 'Before / After ROI',
+    description: 'Compare a baseline recording against an improved one. Time saved and dollar ROI are computed from your own observed step durations — never a benchmark or an estimate.',
   },
 ];
 
@@ -202,7 +204,7 @@ const COMPARISON_ROWS = [
 
 /* ── Frame components ───────────────────────────────────────────────────── */
 
-function WebAppFrame({ src, alt, width, height }: { src: string; alt: string; width: number; height: number }) {
+function WebAppFrame({ src, alt, width, height, url = 'ledgerium.ai/dashboard' }: { src: string; alt: string; width: number; height: number; url?: string }) {
   return (
     <div className="rounded-xl border border-[var(--border-default)] overflow-hidden shadow-xl shadow-black/40 bg-[var(--surface-elevated)]">
       <div className="bg-[var(--surface-secondary)] border-b border-[var(--border-default)] px-4 py-2 flex items-center gap-2 flex-shrink-0">
@@ -211,7 +213,7 @@ function WebAppFrame({ src, alt, width, height }: { src: string; alt: string; wi
           <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
           <span className="w-3 h-3 rounded-full bg-[#28c840]" />
         </div>
-        <span className="text-[10px] text-[var(--content-tertiary)] ml-2 font-mono">ledgerium.ai/dashboard</span>
+        <span className="text-[10px] text-[var(--content-tertiary)] ml-2 font-mono">{url}</span>
       </div>
       <Image
         src={src}
@@ -277,40 +279,35 @@ export default function ProductPage() {
                 Get Started Free
                 <ArrowRight className="h-4 w-4" />
               </TrackedLink>
-              <a href="/dashboard.html" className="btn-secondary text-base px-7 py-3.5 gap-2">
+              <Link href="/demo" className="btn-secondary text-base px-7 py-3.5 gap-2">
                 <LayoutDashboard className="h-4 w-4" />
-                Interactive Demo
-              </a>
+                See how it works
+              </Link>
             </div>
             <p className="mt-4 text-xs text-[var(--content-tertiary)]">
               No credit card required. Explore sample workflows instantly.
             </p>
           </div>
 
-          {/* Embedded demo preview */}
+          {/* Real product screenshot — the workflow library you get on day one */}
           <div className="mt-16 mx-auto max-w-5xl">
-            <div className="rounded-xl border border-[var(--border-default)] overflow-hidden shadow-lg shadow-[var(--border-default)]/50 bg-[var(--surface-elevated)]">
-              <div className="bg-[var(--surface-secondary)] border-b border-[var(--border-default)] px-4 py-2 flex items-center gap-2">
-                <div className="flex gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
-                  <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
-                  <span className="w-3 h-3 rounded-full bg-[#28c840]" />
-                </div>
-                <span className="text-[10px] text-[var(--content-tertiary)] ml-2 font-mono">ledgerium.ai/dashboard</span>
+            <div className="relative">
+              <div className="absolute inset-0 -m-6 rounded-3xl bg-brand-600/5 blur-2xl pointer-events-none" />
+              <div className="relative">
+                <WebAppFrame
+                  src="/img/demo/dashboard.png"
+                  alt="Ledgerium workflow library showing recorded workflows with cycle-time metrics, run counts, and process health scores"
+                  width={900}
+                  height={560}
+                  url="ledgerium.ai/dashboard"
+                />
               </div>
-              <iframe
-                src="/dashboard.html"
-                title="Ledgerium AI Interactive Demo"
-                className="w-full border-0"
-                style={{ height: '560px' }}
-                loading="lazy"
-              />
             </div>
             <p className="text-center text-xs text-[var(--content-tertiary)] mt-3">
-              Interactive demo with real sample workflows.{' '}
-              <a href="/dashboard.html" className="text-brand-600 hover:text-brand-700 font-medium">
-                Open full screen &rarr;
-              </a>
+              Your workflow library — every number comes from a real recording.{' '}
+              <Link href="/demo" className="text-brand-600 hover:text-brand-700 font-medium">
+                Walk through all four views &rarr;
+              </Link>
             </p>
           </div>
         </div>
@@ -356,7 +353,7 @@ export default function ProductPage() {
                     {image.type === 'extension' ? (
                       <ExtensionFrame src={image.src} alt={image.alt} width={image.width} height={image.height} />
                     ) : (
-                      <WebAppFrame src={image.src} alt={image.alt} width={image.width} height={image.height} />
+                      <WebAppFrame src={image.src} alt={image.alt} width={image.width} height={image.height} url={image.url} />
                     )}
                   </div>
                 </div>
@@ -427,33 +424,35 @@ export default function ProductPage() {
             </h2>
             <p className="text-[#e2e8f0] max-w-2xl mx-auto">
               Individual recordings produce documentation. A growing library unlocks
-              process intelligence — health scores, bottleneck detection, variant analysis,
-              and AI automation opportunities.
+              process intelligence — a portfolio timestudy baseline, health scores,
+              bottleneck detection, variant analysis, and automation opportunity scoring.
             </p>
           </div>
 
-          {/* Hero analytics screenshot */}
+          {/* Hero — the real workflow library with the portfolio timestudy baseline */}
           <div className="mb-10 relative">
             <div className="absolute inset-0 -m-4 rounded-3xl bg-brand-600/5 blur-2xl pointer-events-none" />
             <div className="relative">
               <WebAppFrame
-                src="/docs/screenshots/analytics-dashboard.png"
-                alt="Analytics dashboard showing process health scores, bottleneck detection, and intelligence metrics"
-                width={1200}
-                height={750}
+                src="/img/demo/dashboard.png"
+                alt="Workflow library with the portfolio timestudy baseline, cycle-time columns, run counts, and health scores"
+                width={900}
+                height={560}
+                url="ledgerium.ai/dashboard"
               />
             </div>
           </div>
 
-          {/* Detail screenshot — process detail view */}
+          {/* Detail — drill into a single process report */}
           <div className="mb-14 mx-auto max-w-3xl relative">
             <div className="absolute inset-0 -m-4 rounded-3xl bg-brand-600/5 blur-2xl pointer-events-none" />
             <div className="relative">
               <WebAppFrame
-                src="/docs/screenshots/analytics-process-detail.png"
-                alt="Process detail view showing deep-dive analytics and step-level breakdown"
-                width={1200}
-                height={750}
+                src="/img/demo/report-view.png"
+                alt="Process report showing health verdict, scorecard, cycle-time distribution, and bottleneck analysis"
+                width={900}
+                height={560}
+                url="ledgerium.ai/workflows"
               />
             </div>
             <p className="text-center text-xs text-[var(--content-tertiary)] mt-3">
