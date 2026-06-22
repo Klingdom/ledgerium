@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { TrackedLink } from '@/components/TrackedLink';
 import DemoVariantsMap from '@/components/demo/DemoVariantsMap';
+import DemoDashboard from '@/components/demo/DemoDashboard';
 import {
   Play,
   Layers,
@@ -290,22 +291,16 @@ export default function ProductPage() {
             </p>
           </div>
 
-          {/* Real product screenshot — the workflow library you get on day one */}
+          {/* Live workflow library demo — interactive, dummy data, no signup */}
           <div className="mt-16 mx-auto max-w-5xl">
             <div className="relative">
               <div className="absolute inset-0 -m-6 rounded-3xl bg-brand-600/5 blur-2xl pointer-events-none" />
               <div className="relative">
-                <WebAppFrame
-                  src="/img/demo/dashboard.png"
-                  alt="Ledgerium workflow library showing recorded workflows with cycle-time metrics, run counts, and process health scores"
-                  width={900}
-                  height={560}
-                  url="ledgerium.ai/dashboard"
-                />
+                <DemoDashboard />
               </div>
             </div>
             <p className="text-center text-xs text-[var(--content-tertiary)] mt-3">
-              Your workflow library — every number comes from a real recording.{' '}
+              Your workflow library — filter it, every number comes from a real recording.{' '}
               <Link href="/demo" className="text-brand-600 hover:text-brand-700 font-medium">
                 Walk through all four views &rarr;
               </Link>
