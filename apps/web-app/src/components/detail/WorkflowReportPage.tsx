@@ -18,6 +18,7 @@ import { deriveDivergence } from '@/lib/reportDivergence';
 import { formatDuration } from '@/lib/format';
 import { track } from '@/lib/analytics';
 import { SECTION_IDS, SECTION_LABELS } from './reportSections';
+import { RoiSection, type RoiStep } from './RoiSection';
 import { buildReportMeta, groupVisibleSections, type ReportMeta } from './reportMeta';
 import { buildReportVerdict, cvBand, type ReportVerdictInput } from './reportVerdict';
 import {
@@ -2976,6 +2977,15 @@ export function WorkflowReportPage({
     [leadFigures.runCount, workflow.createdAt],
   );
 
+  const roiSteps: RoiStep[] = useMemo(
+    () =>
+      asArray(processOutput?.processDefinition?.stepDefinitions)
+        .filter((s) => (s.durationMs ?? 0) > 0)
+        .map((s) => ({ ordinal: s.ordinal, title: s.title, durationMs: s.durationMs ?? 0 })),
+    [processOutput],
+  );
+  const roiObservedRuns = num(intelligence?.metrics?.runCount) ?? null;
+
   const visibleSections = useMemo(
     () =>
       SECTION_IDS.filter((id) => {
@@ -2995,6 +3005,10 @@ export function WorkflowReportPage({
             (s) => (s.durationMs ?? 0) > 0,
           );
           return hasStepTiming || insights?.timeBreakdown != null;
+        }
+        if (id === 'rpt-roi') {
+          // ROI needs per-step durations to compute effort + what-if.
+          return asArray(processOutput?.processDefinition?.stepDefinitions).some((s) => (s.durationMs ?? 0) > 0);
         }
         if (id === 'rpt-variance') {
           return intelligence?.variance != null || (intelligence?.variants?.variants?.length ?? 0) > 0;
@@ -3214,6 +3228,7 @@ export function WorkflowReportPage({
           intelligence={intelligence}
           onRunAgentIntelligence={onRunAgentIntelligence}
         />
+        <RoiSection steps={roiSteps} observedRuns={roiObservedRuns} />
         <BottleneckContributionSection
           intelligence={intelligence}
           processOutput={processOutput}

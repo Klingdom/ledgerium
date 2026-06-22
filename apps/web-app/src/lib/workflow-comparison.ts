@@ -254,3 +254,147 @@ export function computeWorkflowComparison(
     healthGated,
   };
 }
+
+// ── Single-workflow ROI (current labor cost) + what-if projection ─────────────
+// For the report: one workflow has no observed "after", so we surface its
+// CURRENT cost (volume × effort × persona-cost) — honest "cost", not "savings".
+// The what-if recomputes a PROJECTED after by removing/automating steps; the
+// caller labels it "projected — not yet observed".
+
+export interface SingleWorkflowRoiInput {
+  /** Observed labor time per run (ms) — summed active step time (proxy). */
+  laborMsPerRun: number | null;
+  /** Projected runs per month (user assumption). */
+  monthlyRuns: number;
+  /** Effective loaded $/hr. */
+  hourlyRate: number;
+  /** Optional persona/role provenance. */
+  personaKey?: string | null;
+}
+
+export interface SingleWorkflowRoiResult {
+  laborMsPerRun: number | null;
+  effectiveHourlyRate: number | null;
+  personaKey: string | null;
+  personaLabel: string | null;
+  monthlyHours: number | null;
+  monthlyCost: number | null;
+  annualHours: number | null;
+  annualCost: number | null;
+}
+
+/** Current labor cost of running a workflow = effort/hr × runs × loaded rate. */
+export function computeSingleWorkflowRoi(input: SingleWorkflowRoiInput): SingleWorkflowRoiResult {
+  const labor = num(input.laborMsPerRun);
+  const monthlyRuns = num(input.monthlyRuns);
+  const hourlyRate = num(input.hourlyRate);
+  const valid =
+    labor !== null && labor >= 0 && monthlyRuns !== null && monthlyRuns > 0 && hourlyRate !== null && hourlyRate >= 0;
+  const persona = getPersonaByKey(input.personaKey);
+
+  let monthlyHours: number | null = null;
+  let monthlyCost: number | null = null;
+  let annualHours: number | null = null;
+  let annualCost: number | null = null;
+  if (valid) {
+    monthlyHours = Math.round(((labor! * monthlyRuns!) / MS_PER_HOUR) * 10) / 10;
+    monthlyCost = Math.round(monthlyHours * hourlyRate!);
+    annualHours = Math.round(monthlyHours * 12 * 10) / 10;
+    annualCost = Math.round(monthlyCost * 12);
+  }
+  return {
+    laborMsPerRun: labor,
+    effectiveHourlyRate: hourlyRate !== null && hourlyRate >= 0 ? hourlyRate : null,
+    personaKey: input.personaKey ?? null,
+    personaLabel: persona?.label ?? null,
+    monthlyHours,
+    monthlyCost,
+    annualHours,
+    annualCost,
+  };
+}
+
+export interface WhatIfStepInput {
+  ordinal: number;
+  durationMs: number;
+}
+
+export interface WhatIfRoiInput {
+  steps: WhatIfStepInput[];
+  /** Ordinals removed entirely (contribute 0 to projected effort). */
+  removedOrdinals: number[];
+  /** Ordinals automated (contribute durationMs × residual; default residual 0). */
+  automatedOrdinals: number[];
+  /** Residual fraction (0–1) of an automated step's time. Default 0 (full automation). */
+  automatedResidual?: number;
+  monthlyRuns: number;
+  hourlyRate: number;
+  personaKey?: string | null;
+}
+
+export interface WhatIfRoiResult {
+  baselineLaborMsPerRun: number;
+  projectedLaborMsPerRun: number;
+  /** baseline − projected (≥0 by construction — removing/automating only reduces). */
+  timeSavedPerRunMs: number;
+  reductionPct: number | null;
+  current: SingleWorkflowRoiResult;
+  projected: SingleWorkflowRoiResult;
+  monthlyHoursSaved: number | null;
+  monthlyDollarsSaved: number | null;
+  annualHoursSaved: number | null;
+  annualDollarsSaved: number | null;
+}
+
+/** Projected ROI of removing/automating steps. Deterministic; never fabricates. */
+export function computeWhatIfRoi(input: WhatIfRoiInput): WhatIfRoiResult {
+  const rRaw = num(input.automatedResidual);
+  const residual = rRaw !== null && rRaw >= 0 && rRaw <= 1 ? rRaw : 0;
+  const removed = new Set(input.removedOrdinals);
+  const automated = new Set(input.automatedOrdinals);
+
+  let baseline = 0;
+  let projected = 0;
+  for (const s of input.steps) {
+    const d = num(s.durationMs) ?? 0;
+    baseline += d;
+    if (removed.has(s.ordinal)) continue; // contributes 0
+    projected += automated.has(s.ordinal) ? d * residual : d;
+  }
+  const timeSavedPerRunMs = Math.max(0, baseline - projected);
+  const reductionPct = baseline > 0 ? Math.round((timeSavedPerRunMs / baseline) * 1000) / 10 : null;
+
+  const base = {
+    monthlyRuns: input.monthlyRuns,
+    hourlyRate: input.hourlyRate,
+    personaKey: input.personaKey ?? null,
+  };
+  const current = computeSingleWorkflowRoi({ laborMsPerRun: baseline, ...base });
+  const projectedRoi = computeSingleWorkflowRoi({ laborMsPerRun: projected, ...base });
+
+  let monthlyHoursSaved: number | null = null;
+  let monthlyDollarsSaved: number | null = null;
+  let annualHoursSaved: number | null = null;
+  let annualDollarsSaved: number | null = null;
+  if (timeSavedPerRunMs > 0 && current.monthlyCost !== null && projectedRoi.monthlyCost !== null) {
+    monthlyDollarsSaved = current.monthlyCost - projectedRoi.monthlyCost;
+    annualDollarsSaved = monthlyDollarsSaved * 12;
+  }
+  if (timeSavedPerRunMs > 0 && current.monthlyHours !== null && projectedRoi.monthlyHours !== null) {
+    monthlyHoursSaved = Math.round((current.monthlyHours - projectedRoi.monthlyHours) * 10) / 10;
+    annualHoursSaved = Math.round(monthlyHoursSaved * 12 * 10) / 10;
+  }
+
+  return {
+    baselineLaborMsPerRun: baseline,
+    projectedLaborMsPerRun: projected,
+    timeSavedPerRunMs,
+    reductionPct,
+    current,
+    projected: projectedRoi,
+    monthlyHoursSaved,
+    monthlyDollarsSaved,
+    annualHoursSaved,
+    annualDollarsSaved,
+  };
+}

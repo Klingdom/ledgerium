@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   computeWorkflowComparison,
+  computeSingleWorkflowRoi,
+  computeWhatIfRoi,
   type ComparisonWorkflowInput,
   type RoiInput,
 } from './workflow-comparison';
@@ -186,5 +188,60 @@ describe('computeWorkflowComparison — labor cost (volume × effort × persona)
     expect(c.roi.monthlyDollarsSaved).toBeNull(); // no fabricated savings
     expect(c.roi.baselineMonthlyCost).toBe(250);
     expect(c.roi.afterMonthlyCost).toBe(500); // honest: after costs more
+  });
+});
+
+describe('computeSingleWorkflowRoi — current labor cost', () => {
+  it('computes monthly/annual cost = effort × runs × rate', () => {
+    const r = computeSingleWorkflowRoi({ laborMsPerRun: 3_600_000, monthlyRuns: 10, hourlyRate: 50 });
+    expect(r.monthlyHours).toBe(10);
+    expect(r.monthlyCost).toBe(500);
+    expect(r.annualCost).toBe(6000);
+    expect(r.effectiveHourlyRate).toBe(50);
+  });
+  it('resolves persona and returns null cost when effort/inputs missing', () => {
+    expect(computeSingleWorkflowRoi({ laborMsPerRun: 3_600_000, monthlyRuns: 10, hourlyRate: 50, personaKey: 'ap_clerk' }).personaLabel).toBe('AP / AR Clerk');
+    expect(computeSingleWorkflowRoi({ laborMsPerRun: null, monthlyRuns: 10, hourlyRate: 50 }).monthlyCost).toBeNull();
+    expect(computeSingleWorkflowRoi({ laborMsPerRun: 1000, monthlyRuns: 0, hourlyRate: 50 }).monthlyCost).toBeNull();
+  });
+});
+
+describe('computeWhatIfRoi — projected after (remove / automate steps)', () => {
+  const steps = [
+    { ordinal: 1, durationMs: 1_000_000 },
+    { ordinal: 2, durationMs: 2_000_000 },
+    { ordinal: 3, durationMs: 3_000_000 },
+  ]; // total 6,000,000ms (≈100 min)
+
+  it('removing a step projects a faster after with positive saving', () => {
+    const r = computeWhatIfRoi({ steps, removedOrdinals: [3], automatedOrdinals: [], monthlyRuns: 10, hourlyRate: 60 });
+    expect(r.baselineLaborMsPerRun).toBe(6_000_000);
+    expect(r.projectedLaborMsPerRun).toBe(3_000_000);
+    expect(r.timeSavedPerRunMs).toBe(3_000_000);
+    expect(r.reductionPct).toBe(50);
+    // 6M ms/run = 1.667 hr → 16.7 hr/mo × $60 = $1002; projected 0.833 hr → 8.3 × $60 = $498
+    expect(r.current.monthlyCost).toBe(1002);
+    expect(r.projected.monthlyCost).toBe(498);
+    expect(r.monthlyDollarsSaved).toBe(504);
+    expect(r.annualDollarsSaved).toBe(6048);
+  });
+
+  it('automating a step (residual 0) removes its time too', () => {
+    const r = computeWhatIfRoi({ steps, removedOrdinals: [], automatedOrdinals: [2], monthlyRuns: 10, hourlyRate: 60 });
+    expect(r.projectedLaborMsPerRun).toBe(4_000_000); // 1M + 0 + 3M
+    expect(r.timeSavedPerRunMs).toBe(2_000_000);
+  });
+
+  it('no change ⇒ no saving (no fabrication)', () => {
+    const r = computeWhatIfRoi({ steps, removedOrdinals: [], automatedOrdinals: [], monthlyRuns: 10, hourlyRate: 60 });
+    expect(r.timeSavedPerRunMs).toBe(0);
+    expect(r.monthlyDollarsSaved).toBeNull();
+    expect(r.reductionPct).toBe(0);
+  });
+
+  it('is deterministic', () => {
+    const a = computeWhatIfRoi({ steps, removedOrdinals: [3], automatedOrdinals: [2], monthlyRuns: 7, hourlyRate: 55 });
+    const b = computeWhatIfRoi({ steps, removedOrdinals: [3], automatedOrdinals: [2], monthlyRuns: 7, hourlyRate: 55 });
+    expect(a).toEqual(b);
   });
 });
