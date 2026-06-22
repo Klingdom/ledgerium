@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { TrackedLink } from '@/components/TrackedLink';
+import DemoDashboard from '@/components/demo/DemoDashboard';
 import {
   ArrowRight,
   PlayCircle,
@@ -126,25 +127,8 @@ export default function HomePage() {
           <p className="text-center text-[#e2e8f0] leading-relaxed mb-12 max-w-2xl mx-auto">
             Real sample workflows with evidence-linked metrics — the same workflow library you get from day one. Every cycle time and run count is measured from an actual recording.
           </p>
-          {/* Real product screenshot — current-state workflow library */}
-          <div className="rounded-xl border border-[var(--border-default)] overflow-hidden shadow-lg shadow-[var(--border-default)]/50 bg-[var(--surface-elevated)]">
-            <div className="bg-[var(--surface-secondary)] border-b border-[var(--border-default)] px-4 py-2 flex items-center gap-2">
-              <div className="flex gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
-                <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
-                <span className="w-3 h-3 rounded-full bg-[#28c840]" />
-              </div>
-              <span className="text-[10px] text-[var(--content-tertiary)] ml-2 font-mono">ledgerium.ai/dashboard</span>
-            </div>
-            <Image
-              src="/img/demo/dashboard.png"
-              alt="Ledgerium workflow library with the portfolio timestudy band, cycle-time columns, run counts, and process health scores"
-              width={900}
-              height={560}
-              className="w-full h-auto block"
-              loading="lazy"
-            />
-          </div>
+          {/* Live, interactive workflow library demo (dummy data) */}
+          <DemoDashboard />
           <p className="text-center text-xs text-[var(--content-tertiary)] mt-3">
             Every number shown comes from a real recording. Same input, same output — always.{' '}
             <Link href="/demo" className="text-brand-600 hover:text-brand-700 font-medium">
