@@ -152,7 +152,7 @@ export const SECTION_GROUPS: readonly SectionGroup[] = [
   },
   {
     label: 'Actions',
-    ids: ['rpt-automation', 'rpt-agents', 'rpt-skills', 'rpt-integrations', 'rpt-roadmap'],
+    ids: ['rpt-automation', 'rpt-roi', 'rpt-agents', 'rpt-skills', 'rpt-integrations', 'rpt-roadmap'],
   },
 ] as const;
 

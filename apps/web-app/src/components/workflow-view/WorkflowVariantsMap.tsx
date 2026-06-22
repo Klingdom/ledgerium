@@ -198,6 +198,15 @@ export function WorkflowVariantsMap({ graph, intelligence, workflowId, status, o
     variantViewStartRef.current = Date.now();
   }, []);
 
+  // Re-sync the selected path when `paths` changes — e.g. `intelligence` loads
+  // async after mount, so the initial useState selection (computed from the
+  // fallback paths) becomes stale and no card would be highlighted.
+  useEffect(() => {
+    if (!paths.some((p) => p.id === selectedPathId)) {
+      setSelectedPathId(paths.find((p) => p.isStandard)?.id ?? paths[0]?.id ?? null);
+    }
+  }, [paths, selectedPathId]);
+
   // Build the flow-canvas model for the "Map" view (variant flow with decision nodes).
   // Real recorded step labels + durations are threaded through from the server
   // (analyzeWorkflowVariants attaches variantStepTitles/variantStepDurations) so the

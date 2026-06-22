@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ledgerium — Demo Plan (30 & 60 min)</title>
+<style>
+  :root{
+    --green:#15803d; --green-600:#16a34a; --green-50:#f0fdf4; --green-100:#dcfce7;
+    --ink:#0f172a; --body:#334155; --muted:#64748b; --line:#e2e8f0; --bg:#ffffff;
+    --amber:#b45309; --amber-50:#fffbeb;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{
+    margin:0;background:#f8fafc;color:var(--body);
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:32px 28px 64px}
+  header.masthead{border-bottom:3px solid var(--green);padding-bottom:18px;margin-bottom:8px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .dot{width:13px;height:13px;border-radius:3px;background:var(--green-600);transform:rotate(45deg)}
+  .brand b{font-size:18px;color:var(--ink);letter-spacing:-.2px}
+  h1{font-size:30px;line-height:1.15;color:var(--ink);margin:14px 0 6px;letter-spacing:-.5px}
+  .sub{color:var(--muted);font-size:14px;margin:0}
+  .pos{
+    background:var(--green-50);border:1px solid var(--green-100);border-left:4px solid var(--green-600);
+    border-radius:10px;padding:16px 18px;margin:22px 0;color:var(--ink);font-size:15.5px
+  }
+  .pos .lab{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin-bottom:6px}
+  .spine{font-weight:600;color:var(--green)}
+  h2{font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--green);
+     margin:38px 0 14px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+  h3{font-size:17px;color:var(--ink);margin:26px 0 10px}
+  p{margin:0 0 12px}
+  ul,ol{margin:0 0 14px;padding-left:22px}
+  li{margin:6px 0}
+  a{color:var(--green-600)}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;vertical-align:middle}
+  .b30{background:var(--green-100);color:var(--green)}
+  .b60{background:#e0e7ff;color:#3730a3}
+  table{width:100%;border-collapse:collapse;margin:8px 0 18px;font-size:14px}
+  th,td{text-align:left;vertical-align:top;padding:9px 11px;border-bottom:1px solid var(--line)}
+  thead th{background:#f1f5f9;color:var(--ink);font-size:12px;letter-spacing:.03em;text-transform:uppercase;border-bottom:2px solid var(--line)}
+  tbody tr:nth-child(even){background:#fafcff}
+  td.t{white-space:nowrap;font-weight:700;color:var(--green);width:64px}
+  td.seg{font-weight:600;color:var(--ink);width:165px}
+  .arrow td:first-child{color:var(--green-600);font-weight:700}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:14px 0;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .note{background:var(--amber-50);border:1px solid #fde68a;border-left:4px solid var(--amber);border-radius:8px;padding:12px 14px;color:#7c2d12;font-size:14px;margin:14px 0}
+  .qa dt{font-weight:700;color:var(--ink);margin-top:14px}
+  .qa dd{margin:4px 0 0;padding-left:0}
+  .phrases li{font-weight:600;color:var(--ink)}
+  .printbtn{position:fixed;top:18px;right:18px;background:var(--green-600);color:#fff;border:0;
+    padding:9px 16px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;box-shadow:0 2px 6px rgba(21,128,61,.3)}
+  .printbtn:hover{background:var(--green)}
+  footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+  @media (max-width:680px){.grid2{grid-template-columns:1fr}}
+  @media print{
+    body{background:#fff}.wrap{max-width:none;padding:0 6px}
+    .printbtn{display:none}
+    h2{break-after:avoid}table,.card,.note,.pos{break-inside:avoid}
+    h3{break-after:avoid}
+    a{color:var(--ink);text-decoration:none}
+  }
+</style>
+</head>
+<body>
+<button class="printbtn" onclick="window.print()">Print / Save PDF</button>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="brand"><span class="dot"></span><b>Ledgerium AI</b></div>
+    <h1>Demo Run-Sheet — 30 &amp; 60 Minutes</h1>
+    <p class="sub">Record &rarr; Baseline &rarr; Understand &rarr; Automate. Every output traces back to real recorded events.</p>
+  </header>
+
+  <div class="pos">
+    <span class="lab">Open and close with this</span>
+    Most process documentation is opinion and tribal knowledge that's stale the day it's written. Ledgerium captures what your team
+    <em>actually does</em> from real behavior, and turns it — deterministically — into a visual process map, a ready-to-use SOP,
+    hard metrics, and a prioritized list of exactly where AI and automation pay off. <strong>Record once; every output traces back to the real events.</strong>
+    <p style="margin:10px 0 0">Narrative spine for both versions: <span class="spine">Map &rarr; SOP &rarr; Metrics/Insights &rarr; Automation recommendations</span> — recommendations always come <em>last</em>, after evidence earns trust.</p>
+  </div>
+
+  <h2>Pre-Demo Prep Checklist <span style="color:var(--muted);text-transform:none;letter-spacing:0">— do this 15 min before</span></h2>
+  <div class="card">
+    <ol>
+      <li><strong>Pin / favorite your 3–4 hero workflows</strong> so the library leads with them, not "Email Test" recordings. Best heroes (rich, multi-system, "Automate"-tagged):
+        <ul>
+          <li><strong>Onboard New Hire — Jordan Rivera</strong> (Workday, Slack, Jira +1 · 4 systems · 18m · SOP-ready)</li>
+          <li><strong>Insurance Claim Review &amp; Adjudication</strong> (Guidewire ClaimCenter/PolicyCenter · 3 systems · 14m)</li>
+          <li><strong>New Vendor Setup &amp; Approval</strong> (SAP, Google Sheets · 13m)</li>
+          <li><strong>Process Refund #ORD-77291</strong> (Shopify, Gmail · "Automate")</li>
+        </ul>
+      </li>
+      <li><strong>Pre-run the on-demand analyses</strong> (Intelligence + AI Agents) on each hero — no empty "Run analysis" states or waiting on stage.</li>
+      <li><strong>Have one multi-run workflow ready</strong> (anything showing "7 runs") for the variance/variants story.</li>
+      <li><strong>Know your Health-Score answer cold</strong> (see Q&amp;A) — it's the #1 question.</li>
+      <li><strong>Pick one short process to record live</strong> — a clean 4–6 step flow across 2 systems.</li>
+    </ol>
+  </div>
+
+  <h2>30-Minute Plan <span class="badge b30">THE COMPLETE STORY</span></h2>
+  <p>One workflow told completely beats five skimmed. Depth on one builds belief.</p>
+  <table>
+    <thead><tr><th>Time</th><th>Segment</th><th>Click / Show</th><th>Say (the point)</th></tr></thead>
+    <tbody>
+      <tr><td class="t">0–3</td><td class="seg">Frame the problem</td><td>Slide or home page</td><td>"Three things every ops team struggles with: docs go stale, automation is guesswork, and nobody can prove how a process really runs. Ledgerium fixes all three from one recording."</td></tr>
+      <tr><td class="t">3–7</td><td class="seg">Capture — the magic moment</td><td>Chrome extension recording (live or just-finished)</td><td>"I clicked Record and did the work — no flowcharting, no interviews. Ledgerium watched the real behavior across every app and tab." <em>Real behavior, zero manual mapping.</em></td></tr>
+      <tr><td class="t">7–12</td><td class="seg">Workflow Library (command center)</td><td>Dashboard with hero workflows</td><td>Walk columns: <strong>Opportunity status</strong>, <strong>Health Score</strong>, <strong>Systems</strong>, <strong>Mean Cycle Time</strong>, <strong>Runs</strong>. "Portfolio triage at a glance — what's healthy, what's an automation candidate, what needs attention." Point at "Automate" rows.</td></tr>
+      <tr><td class="t">12–24</td><td class="seg">Deep dive: ONE hero (the heart)</td><td>Open Jordan Rivera onboarding</td><td>Walk the natural progression &darr;</td></tr>
+      <tr class="arrow"><td>&rarr; Map</td><td class="seg">Process Map</td><td>Visual flow + system lanes (toggle a template)</td><td>"Exactly how it runs — every step, across these 4 systems, with the handoffs."</td></tr>
+      <tr class="arrow"><td>&rarr; SOP</td><td class="seg">Auto-generated SOP</td><td>SOP view (Operator / Enterprise / Decision)</td><td>"A ready-to-follow SOP — generated from the recording, not written by hand." (Time-to-SOP killer feature.)</td></tr>
+      <tr class="arrow"><td>&rarr; Metrics</td><td class="seg">Metrics &amp; Insights</td><td>Health-score breakdown + bottlenecks/friction</td><td>"Hard numbers: cycle time, where it slows down, where friction happens — measured, not estimated."</td></tr>
+      <tr class="arrow"><td>&rarr; Auto</td><td class="seg">Automation opportunities</td><td>AI Agents / opportunities view</td><td>"The payoff: where AI and automation fit, scored, with estimated time savings — <em>because</em> we baselined the real process first."</td></tr>
+      <tr><td class="t">24–27</td><td class="seg">The moat (say it explicitly)</td><td>Hover a metric / open Evidence briefly</td><td>"Every step, number, and recommendation traces back to the actual recorded events. Deterministic and evidence-linked. No black box. That's what no competitor does."</td></tr>
+      <tr><td class="t">27–30</td><td class="seg">Close + CTA</td><td>Pricing page / back to library</td><td>Recap the loop; name tiers (Free &rarr; Starter &rarr; Team &rarr; Growth &rarr; Enterprise); ask: "Record three real processes this week and you'll have maps, SOPs, and an automation roadmap by Friday."</td></tr>
+    </tbody>
+  </table>
+
+  <h2>60-Minute Plan <span class="badge b60">SAME ARC, EXPANDED</span></h2>
+  <p>Keep the 30-minute backbone; insert these expansions.</p>
+
+  <h3>After "Capture" — record live, end-to-end <span class="badge b60">~10 min</span></h3>
+  <p>Actually record your prepared 4–6 step process during the call, refresh, and show the workflow appearing with its SOP. The "I did it 60 seconds ago and here's the SOP" moment is your single most persuasive beat — budget real time for it.</p>
+
+  <h3>Expand the Workflow Library <span class="badge b60">~8 min</span></h3>
+  <ul>
+    <li>Filter/sort by opportunity tag and health score — "let me show you only the automation candidates."</li>
+    <li>Walk <strong>portfolio health</strong> and what it aggregates. Tell the triage story: "If I own 40 workflows, this is my Monday-morning worklist."</li>
+  </ul>
+
+  <h3>Deep dive across multiple industries <span class="badge b60">~15 min</span></h3>
+  <p>Prove "any digital process" — pick 3 from different domains and hit just the standout of each:</p>
+  <ul>
+    <li><strong>Finance:</strong> Process Vendor Invoice (NetSuite) — controls / compliance angle.</li>
+    <li><strong>Healthcare:</strong> Patient Intake (EpicCare, BCBS Portal) — multi-system, regulated.</li>
+    <li><strong>IT:</strong> IT Access Provisioning (ServiceNow, Azure AD, GlobalProtect) — classic automation target.</li>
+  </ul>
+
+  <div class="grid2">
+    <div class="card">
+      <h3 style="margin-top:0">Intelligence across runs <span class="badge b60">~8 min</span></h3>
+      <p style="margin:0">Use your multi-run workflow:</p>
+      <ul style="margin-bottom:0">
+        <li><strong>Variance &amp; sequence stability</strong> — "how consistent is it across runs?"</li>
+        <li><strong>Variants</strong> — "the different paths people actually take, and which is standard."</li>
+        <li><strong>Bottlenecks across runs</strong> — "this step is consistently slowest — focus here."</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">AI Agents deep dive <span class="badge b60">~6 min</span></h3>
+      <ul style="margin-bottom:0">
+        <li>Composed agents, skill library, <strong>integration readiness</strong>, <strong>implementation roadmap</strong>.</li>
+        <li>"Not just 'automate this' — a sequenced plan with which systems are ready and what it takes."</li>
+        <li>Vision: "Record any process &rarr; see where AI fits &rarr; ultimately execute it, with a full audit trail."</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Evidence / determinism deep dive <span class="badge b60">~4 min</span></h3>
+  <p>Open the raw evidence view. "For skeptics and auditors: this is the immutable source. Every artifact above is reproducible from it — matters for compliance and for trusting AI recommendations."</p>
+
+  <h3>Collaboration + business case <span class="badge b60">~5 min</span></h3>
+  <ul>
+    <li><strong>Share links</strong> for stakeholder review.</li>
+    <li>ROI frame: "Time-to-SOP from days to minutes × number of processes × number of teams; plus the automation hours these scored opportunities surface."</li>
+  </ul>
+  <p style="color:var(--muted)"><em>Leave ~6–8 min for Q&amp;A.</em></p>
+
+  <h2>Reusable Talking Points <span style="color:var(--muted);text-transform:none;letter-spacing:0">— memorize 3–4</span></h2>
+  <div class="card">
+    <ul class="phrases" style="margin:0">
+      <li>"We capture <em>reality, not opinion</em>."</li>
+      <li>"<em>Record once</em>, get the map, the SOP, the metrics, and the automation roadmap."</li>
+      <li>"<em>Every output traces to the source events</em> — deterministic, evidence-linked."</li>
+      <li>"We tell you <em>where AI fits — and prove why</em> — because we baselined the real process first."</li>
+      <li>"Recommendations come <em>last, after the evidence</em> — that's deliberate."</li>
+    </ul>
+  </div>
+
+  <h2>Anticipated Questions &amp; Crisp Answers</h2>
+  <dl class="qa">
+    <dt>How is the Health Score calculated?</dt>
+    <dd>"0–100, weighted across four honest dimensions: <strong>Speed</strong> (healthy time band, 30 pts), <strong>Consistency</strong> (run-to-run variation, 30 pts), <strong>Data Quality</strong> (extraction confidence, 20 pts), <strong>Standardization</strong> (SOP/doc readiness, 20 pts). Transparent — not a vanity metric."</dd>
+    <dt>How does it decide "Automate" vs "Standardize"?</dt>
+    <dd>"A transparent rule order: high automation-opportunity score + multiple systems + healthy &rarr; <strong>Automate</strong>; high run-to-run variance &rarr; <strong>Standardize</strong>; too slow &rarr; <strong>Optimize</strong>; low trust/health &rarr; <strong>Monitor</strong>; otherwise <strong>Healthy</strong>. Every tag is auditable."</dd>
+    <dt>Why is everything "Healthy" / stability 100%?</dt>
+    <dd><em>(Honest one — turn it into a strength.)</em> "Most of these are single captures, so consistency is at its max by definition. Variance and variant analysis gets genuinely interesting once a process is recorded multiple times — which is exactly when we surface 'standardize' and 'automate' signals."</dd>
+    <dt>How is this different from Scribe / Tango?</dt>
+    <dd>"They make a how-to guide. We baseline the process, measure it, find variants and bottlenecks across runs, and tell you where AI pays off — with an evidence trail. They document; we generate process <em>intelligence</em>."</dd>
+    <dt>How is this different from Celonis / UiPath process mining?</dt>
+    <dd>"Mining needs months of clean event-log integrations. We capture real behavior directly from the browser in minutes, and link every insight back to actual evidence. Faster to value — and the recommend&rarr;execute loop is the moat."</dd>
+    <dt>Is our data safe / where does it run?</dt>
+    <dd>Speak to determinism + immutable raw evidence + your security posture. Have a one-liner ready.</dd>
+  </dl>
+
+  <h2>Quick Reference — Which Workflow For Which Moment</h2>
+  <table>
+    <thead><tr><th>Moment</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td class="seg">Library / triage</td><td>Full hero set (Jordan Rivera, Insurance Claim, Vendor Setup, Refund)</td></tr>
+      <tr><td class="seg">Deep dive (30-min)</td><td><strong>Jordan Rivera onboarding</strong> (4 systems, rich, "Automate")</td></tr>
+      <tr><td class="seg">Process-map showcase</td><td>Insurance Claim or IT Access Provisioning (multi-system)</td></tr>
+      <tr><td class="seg">SOP showcase</td><td>Vendor Setup or Patient Intake</td></tr>
+      <tr><td class="seg">Automation story</td><td>Refund (Shopify/Gmail) or Jordan Rivera</td></tr>
+      <tr><td class="seg">Multi-run intelligence (60-min)</td><td>Any "7 runs" workflow</td></tr>
+      <tr><td class="seg">Industry breadth (60-min)</td><td>Invoice (finance) · Patient Intake (healthcare) · IT Access (IT)</td></tr>
+    </tbody>
+  </table>
+
+  <footer>
+    Ledgerium AI — Demo Run-Sheet · Tip: lead with the map, save recommendations for last. Use the <strong>Print / Save PDF</strong> button (top-right) for a hard copy.
+  </footer>
+</div>
+</body>
+</html>

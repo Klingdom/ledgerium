@@ -477,6 +477,8 @@ export type AnalyticsEvent =
       hasSavings: boolean;
       /** Whether the "after" workflow was slower than the baseline. */
       slower: boolean;
+      /** Persona/role key the loaded rate came from; null for a custom rate. */
+      personaKey: string | null;
     }
 
   // ── Navigation ────────────────────────────────────────────────────────────

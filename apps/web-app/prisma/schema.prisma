@@ -38,6 +38,7 @@ model User {
   createdShares         WorkflowShare[] @relation("ShareCreator")
   dashboardPreference   UserDashboardPreference?
   processEvidenceReviews ProcessEvidenceReview[]
+  workflowBaselines     WorkflowBaseline[]
 
   @@index([createdAt])
   @@index([updatedAt])
@@ -126,6 +127,7 @@ model Workflow {
   tags              WorkflowTag[]
   portfolios        WorkflowPortfolio[]
   processGraphs     ProcessGraph[]
+  baselines         WorkflowBaseline[]
 
   @@index([userId])
   @@index([status])
@@ -559,6 +561,32 @@ model WorkflowShare {
   @@index([sharedWith])
   @@index([workflowId])
   @@map("workflow_shares")
+}
+
+// A frozen "before" snapshot of a workflow's comparison metrics at a point in
+// time. Lets a user mark a baseline, improve the process (more runs accumulate),
+// then compare the saved baseline against the live workflow. Append-only by
+// convention (no UPDATE — capture a new snapshot to re-baseline).
+model WorkflowBaseline {
+  id            String   @id @default(uuid())
+  workflowId    String   @map("workflow_id")
+  userId        String   @map("user_id")
+  label         String?
+  // Frozen comparison metrics captured from the workflow at baseline time.
+  avgTimeMs     Int?     @map("avg_time_ms")
+  runs          Int?
+  stepCount     Int?     @map("step_count")
+  systemCount   Int      @default(0) @map("system_count")
+  healthOverall Float    @default(0) @map("health_overall")
+  healthGated   Boolean  @default(false) @map("health_gated")
+  capturedAt    DateTime @default(now()) @map("captured_at")
+
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([workflowId])
+  @@map("workflow_baselines")
 }
 
 model PasswordResetToken {

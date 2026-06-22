@@ -221,11 +221,9 @@ function variantLabel(v: ParetoVariantInput): string {
     const head = titles.slice(0, 3).join(' → ');
     return titles.length > 3 ? `${head} → … (${titles.length} steps)` : head;
   }
-  const count = isFiniteNum(v.stepCount)
-    ? v.stepCount
-    : isFiniteNum(v.signature ? v.signature.split(':').length : null)
-    ? (v.signature as string).split(':').length
-    : null;
+  // Use only the real engine step count. The path signature is an opaque hash —
+  // splitting it on ':' and counting segments is NOT a step count (honesty).
+  const count = isFiniteNum(v.stepCount) ? v.stepCount : null;
   if (isFiniteNum(count)) {
     return `${count}-step path`;
   }

@@ -19,6 +19,14 @@ import {
   type MetricDelta,
   type DeltaDirection,
 } from '@/lib/workflow-comparison';
+import {
+  DEFAULT_PERSONA_CATALOG,
+  DEFAULT_PERSONA_KEY,
+  getPersonaByKey,
+  getDefaultPersona,
+} from '@/lib/persona-costs';
+
+const CUSTOM_PERSONA = 'custom';
 
 interface ApiWorkflow {
   id: string;
@@ -46,6 +54,36 @@ function toInput(w: ApiWorkflow): ComparisonWorkflowInput {
   };
 }
 
+interface SavedBaseline {
+  id: string;
+  workflowId: string;
+  label: string | null;
+  workflowTitle: string | null;
+  avgTimeMs: number | null;
+  runs: number | null;
+  stepCount: number | null;
+  systemCount: number;
+  healthOverall: number;
+  healthGated: boolean;
+  capturedAt: string;
+}
+
+/** Selector values for saved baselines are prefixed so they don't collide with workflow IDs. */
+const SAVED_PREFIX = 'baseline:';
+
+function baselineToInput(b: SavedBaseline): ComparisonWorkflowInput {
+  return {
+    id: `${SAVED_PREFIX}${b.id}`,
+    title: b.label?.trim() || (b.workflowTitle ? `${b.workflowTitle} (baseline)` : 'Saved baseline'),
+    runs: b.runs,
+    avgTimeMs: b.avgTimeMs,
+    stepCount: b.stepCount,
+    systemCount: b.systemCount,
+    healthOverall: b.healthOverall,
+    healthGated: b.healthGated,
+  };
+}
+
 // ── delta presentation ────────────────────────────────────────────────────────
 
 const DIR_CLASS: Record<DeltaDirection, string> = {
@@ -70,7 +108,7 @@ function formatValue(key: string, v: number | null, gated: boolean): string {
   if (key === 'health' && gated) return '—';
   if (v == null) return '—';
   if (key === 'cycleTime') return formatDuration(v);
-  return String(v);
+  return v.toLocaleString();
 }
 
 // ── page ────────────────────────────────────────────────────────────────────
@@ -79,12 +117,36 @@ export default function ComparePage() {
   const [workflows, setWorkflows] = useState<ApiWorkflow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+  const [baselines, setBaselines] = useState<SavedBaseline[]>([]);
+  const [savingBaseline, setSavingBaseline] = useState(false);
+
+  function loadBaselines() {
+    return fetch('/api/baselines')
+      .then((r) => (r.ok ? r.json() : { data: [] }))
+      .then((d: { data?: SavedBaseline[] }) => setBaselines(Array.isArray(d.data) ? d.data : []))
+      .catch(() => {});
+  }
+  useEffect(() => {
+    void loadBaselines();
+  }, []);
 
   const [baselineId, setBaselineId] = useState<string>('');
   const [afterId, setAfterId] = useState<string>('');
-  const [hourlyRate, setHourlyRate] = useState<number>(50);
+  const [personaKey, setPersonaKey] = useState<string>(DEFAULT_PERSONA_KEY);
+  const [hourlyRate, setHourlyRate] = useState<number>(getDefaultPersona().loadedHourlyRate);
   const [monthlyRuns, setMonthlyRuns] = useState<number>(20);
   const monthlyRunsTouched = useRef(false);
+
+  // Selecting a role pre-fills its loaded rate; typing a rate flips to "custom".
+  function selectPersona(key: string) {
+    setPersonaKey(key);
+    const p = getPersonaByKey(key);
+    if (p) setHourlyRate(p.loadedHourlyRate);
+  }
+  function editRate(rate: number) {
+    setHourlyRate(rate);
+    setPersonaKey(CUSTOM_PERSONA);
+  }
 
   // Load the library (same endpoint the dashboard uses) + optional ?baseline=&after=.
   useEffect(() => {
@@ -112,8 +174,22 @@ export default function ComparePage() {
     };
   }, []);
 
-  const baseline = useMemo(() => workflows.find((w) => w.id === baselineId) ?? null, [workflows, baselineId]);
+  // The baseline can be a live workflow OR a saved snapshot (value prefixed "baseline:").
+  const baselineInput = useMemo<ComparisonWorkflowInput | null>(() => {
+    if (baselineId.startsWith(SAVED_PREFIX)) {
+      const snap = baselines.find((b) => `${SAVED_PREFIX}${b.id}` === baselineId);
+      return snap ? baselineToInput(snap) : null;
+    }
+    const wf = workflows.find((w) => w.id === baselineId);
+    return wf ? toInput(wf) : null;
+  }, [baselineId, baselines, workflows]);
   const after = useMemo(() => workflows.find((w) => w.id === afterId) ?? null, [workflows, afterId]);
+
+  // The selected "before" workflow when it's a live one (eligible to snapshot).
+  const baselineWorkflow = useMemo(
+    () => (baselineId.startsWith(SAVED_PREFIX) ? null : workflows.find((w) => w.id === baselineId) ?? null),
+    [baselineId, workflows],
+  );
 
   // Default monthly-runs from the "after" workflow's observed runs until the user
   // edits it (honest starting estimate, clearly editable).
@@ -124,15 +200,53 @@ export default function ComparePage() {
   }, [after]);
 
   const comparison = useMemo(() => {
-    if (!baseline || !after || baseline.id === after.id) return null;
-    return computeWorkflowComparison(toInput(baseline), toInput(after), { monthlyRuns, hourlyRate });
-  }, [baseline, after, monthlyRuns, hourlyRate]);
+    if (!baselineInput || !after || baselineInput.id === after.id) return null;
+    return computeWorkflowComparison(baselineInput, toInput(after), {
+      monthlyRuns,
+      hourlyRate,
+      personaKey: personaKey === CUSTOM_PERSONA ? null : personaKey,
+    });
+  }, [baselineInput, after, monthlyRuns, hourlyRate, personaKey]);
+
+  // Capture the selected live "before" workflow as a saved baseline snapshot.
+  async function saveBaseline() {
+    const wf = baselineWorkflow;
+    if (!wf || savingBaseline) return;
+    setSavingBaseline(true);
+    try {
+      const m = wf.metricsV2;
+      const res = await fetch(`/api/workflows/${wf.id}/baseline`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          avgTimeMs: m?.avgTimeMs != null ? Math.round(m.avgTimeMs) : null,
+          runs: m?.runs ?? null,
+          stepCount: m?.stepCount ?? null,
+          systemCount: Array.isArray(wf.toolsUsed) ? wf.toolsUsed.length : 0,
+          healthOverall: m?.healthScore?.overall ?? 0,
+          healthGated: m?.healthScore?.isGated ?? false,
+        }),
+      });
+      if (res.ok) {
+        const created = (await res.json())?.data as SavedBaseline | undefined;
+        await loadBaselines();
+        if (created?.id) setBaselineId(`${SAVED_PREFIX}${created.id}`);
+      }
+    } catch {
+      /* non-fatal */
+    } finally {
+      setSavingBaseline(false);
+    }
+  }
+
+  // Observed run count on the "after" side — context for the volume assumption.
+  const observedRuns = after?.metricsV2?.runs ?? null;
 
   // Fire one analytics event per distinct baseline→after pairing.
   const lastFiredPairRef = useRef<string>('');
   useEffect(() => {
-    if (!comparison || !baseline || !after) return;
-    const pair = `${baseline.id}>${after.id}`;
+    if (!comparison || !baselineInput || !after) return;
+    const pair = `${baselineInput.id}>${after.id}`;
     if (lastFiredPairRef.current === pair) return;
     lastFiredPairRef.current = pair;
     track({
@@ -140,8 +254,9 @@ export default function ComparePage() {
       confidence: comparison.confidence,
       hasSavings: comparison.roi.monthlyHoursSaved != null,
       slower: comparison.roi.slower,
+      personaKey: comparison.roi.personaKey,
     });
-  }, [comparison, baseline, after]);
+  }, [comparison, baselineInput, after]);
 
   const confidenceLabel =
     comparison?.confidence === 'high'
@@ -184,15 +299,29 @@ export default function ComparePage() {
       ) : (
         <>
           {/* Selectors */}
-          <section className="grid grid-cols-1 gap-ds-3 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
-            <WorkflowSelect
-              label="Baseline (before)"
-              value={baselineId}
-              onChange={setBaselineId}
-              workflows={workflows}
-              excludeId={afterId}
-            />
-            <div className="hidden items-center justify-center pb-2 sm:flex">
+          <section className="grid grid-cols-1 gap-ds-3 sm:grid-cols-[1fr_auto_1fr] sm:items-start">
+            <div className="flex flex-col gap-1.5">
+              <WorkflowSelect
+                label="Baseline (before)"
+                value={baselineId}
+                onChange={setBaselineId}
+                workflows={workflows}
+                excludeId={afterId}
+                baselines={baselines}
+              />
+              {baselineWorkflow && (
+                <button
+                  type="button"
+                  onClick={saveBaseline}
+                  disabled={savingBaseline}
+                  className="self-start text-[11px] font-medium text-brand-600 hover:text-brand-500 disabled:opacity-50"
+                  title="Freeze this workflow's current metrics as a reusable baseline"
+                >
+                  {savingBaseline ? 'Saving…' : '★ Save as baseline'}
+                </button>
+              )}
+            </div>
+            <div className="hidden items-center justify-center pt-7 sm:flex">
               <ArrowRight className="h-5 w-5 text-[var(--content-tertiary)]" aria-hidden />
             </div>
             <WorkflowSelect
@@ -304,10 +433,16 @@ export default function ComparePage() {
                           ` · $${comparison.roi.annualDollarsSaved.toLocaleString()}/yr`}
                       </p>
                     )}
+                    {comparison.roi.baselineMonthlyCost != null && comparison.roi.afterMonthlyCost != null && (
+                      <p className="mt-1.5 text-[11px] text-[var(--content-secondary)]">
+                        Labor cost: ~${comparison.roi.baselineMonthlyCost.toLocaleString()}/mo now →{' '}
+                        ~${comparison.roi.afterMonthlyCost.toLocaleString()}/mo after
+                      </p>
+                    )}
                   </div>
 
-                  {/* Assumptions (editable) */}
-                  <div className="flex items-end gap-ds-3">
+                  {/* Assumptions (editable): volume × persona-cost */}
+                  <div className="flex flex-wrap items-end gap-ds-3">
                     <label className="flex flex-col text-[11px] text-[var(--content-secondary)]">
                       Runs / month
                       <input
@@ -320,24 +455,47 @@ export default function ComparePage() {
                         }}
                         className="mt-0.5 w-24 rounded-ds-md border border-[var(--border-subtle)] bg-[var(--surface-primary)] px-2 py-1 text-ds-sm tabular-nums text-[var(--content-primary)]"
                       />
+                      {observedRuns != null && (
+                        <span className="mt-0.5 text-[10px] text-[var(--content-tertiary)]">
+                          observed: {observedRuns} run{observedRuns === 1 ? '' : 's'} — set your volume
+                        </span>
+                      )}
                     </label>
                     <label className="flex flex-col text-[11px] text-[var(--content-secondary)]">
-                      $ / hour
+                      Who does this work
+                      <select
+                        value={personaKey}
+                        onChange={(e) => selectPersona(e.target.value)}
+                        className="mt-0.5 w-48 rounded-ds-md border border-[var(--border-subtle)] bg-[var(--surface-primary)] px-2 py-1 text-ds-sm font-normal text-[var(--content-primary)]"
+                      >
+                        {DEFAULT_PERSONA_CATALOG.map((p) => (
+                          <option key={p.key} value={p.key}>
+                            {p.label} — ${p.loadedHourlyRate}/hr
+                          </option>
+                        ))}
+                        <option value={CUSTOM_PERSONA}>Custom rate…</option>
+                      </select>
+                    </label>
+                    <label className="flex flex-col text-[11px] text-[var(--content-secondary)]">
+                      $ / hr (loaded)
                       <input
                         type="number"
                         min={0}
                         value={Number.isFinite(hourlyRate) ? hourlyRate : ''}
-                        onChange={(e) => setHourlyRate(Number(e.target.value))}
+                        onChange={(e) => editRate(Number(e.target.value))}
                         className="mt-0.5 w-24 rounded-ds-md border border-[var(--border-subtle)] bg-[var(--surface-primary)] px-2 py-1 text-ds-sm tabular-nums text-[var(--content-primary)]"
                       />
                     </label>
                   </div>
                 </div>
 
-                <p className="mt-ds-3 text-[11px] text-[var(--content-tertiary)]">
-                  {comparison.roi.timeSavedPerRunMs != null && comparison.roi.timeSavedPerRunMs > 0
-                    ? `Based on ~${formatDuration(comparison.roi.timeSavedPerRunMs)} saved per run (observed) × ${monthlyRuns} runs/month × $${hourlyRate}/hr. Cycle time is a per-workflow average — adjust runs/month to your real volume.`
-                    : 'Cycle time is a per-workflow average (a proxy until per-run timing lands). Savings shown only when the after process is genuinely faster.'}
+                <p className="mt-ds-3 text-[11px] text-[var(--content-tertiary)] leading-relaxed">
+                  <span className="font-medium text-[var(--content-secondary)]">Assumptions:</span>{' '}
+                  {monthlyRuns} runs/mo (your estimate) · ${hourlyRate}/hr{' '}
+                  ({comparison.roi.personaLabel ? `${comparison.roi.personaLabel} — default, editable` : 'custom rate'}){' '}
+                  · time saved is <span className="text-[var(--content-secondary)]">observed</span> from{' '}
+                  {comparison.baselineRuns}+{comparison.afterRuns} runs.{' '}
+                  Cycle time is a per-workflow average (a proxy until per-run timing lands); a slower &ldquo;after&rdquo; shows no savings.
                 </p>
               </section>
             </>
@@ -354,13 +512,16 @@ function WorkflowSelect({
   onChange,
   workflows,
   excludeId,
+  baselines,
 }: {
   label: string;
   value: string;
   onChange: (id: string) => void;
   workflows: ApiWorkflow[];
   excludeId: string;
+  baselines?: SavedBaseline[];
 }) {
+  const hasBaselines = baselines && baselines.length > 0;
   return (
     <label className="flex flex-col text-[11px] font-semibold uppercase tracking-wide text-[var(--content-secondary)]">
       {label}
@@ -369,12 +530,24 @@ function WorkflowSelect({
         onChange={(e) => onChange(e.target.value)}
         className="mt-1 rounded-ds-md border border-[var(--border-subtle)] bg-[var(--surface-primary)] px-3 py-2 text-ds-sm font-normal normal-case text-[var(--content-primary)]"
       >
-        <option value="">Select a workflow…</option>
-        {workflows.map((w) => (
-          <option key={w.id} value={w.id} disabled={w.id === excludeId}>
-            {w.title?.trim() || 'Untitled workflow'}
-          </option>
-        ))}
+        <option value="">Select…</option>
+        {hasBaselines && (
+          <optgroup label="★ Saved baselines">
+            {baselines!.map((b) => (
+              <option key={b.id} value={`${SAVED_PREFIX}${b.id}`}>
+                {b.label?.trim() ||
+                  `${b.workflowTitle ?? 'Workflow'} — saved ${new Date(b.capturedAt).toLocaleDateString()}`}
+              </option>
+            ))}
+          </optgroup>
+        )}
+        <optgroup label="Workflows">
+          {workflows.map((w) => (
+            <option key={w.id} value={w.id} disabled={w.id === excludeId}>
+              {w.title?.trim() || 'Untitled workflow'}
+            </option>
+          ))}
+        </optgroup>
       </select>
     </label>
   );
