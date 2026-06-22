@@ -1081,7 +1081,7 @@ function InsightsFeedSection({
       {/* Heading + severity badges */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <SectionHeading>Insights</SectionHeading>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2">
           {criticalCount > 0 && (
             <span className="inline-flex items-center rounded-full bg-red-500 text-white text-[10px] font-bold px-2 py-0.5">
               {criticalCount} critical
@@ -1200,7 +1200,7 @@ function AutomationSection({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {opportunities.map((opp, idx) => (
-            <AutomationOpportunityCard key={idx} opportunity={opp} />
+            <AutomationOpportunityCard key={opp.title ?? opp.category ?? idx} opportunity={opp} />
           ))}
         </div>
       )}
@@ -2357,7 +2357,8 @@ function BottleneckContributionSection({
       ) : (
         <>
           <p className="mb-ds-3 text-ds-xs text-[var(--content-tertiary)]">
-            Ranked by share of total bottleneck cycle time across {cohortRunCount ?? bottlenecks.length} runs.
+            Ranked by share of total bottleneck cycle time
+            {cohortRunCount != null ? ` across ${cohortRunCount} runs` : ''}.
           </p>
           <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-ds-lg overflow-hidden divide-y divide-[var(--border-subtle)]">
             {rows.map((row) => (
