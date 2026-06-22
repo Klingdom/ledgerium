@@ -140,8 +140,9 @@ function slowestIndex(w: DemoWorkflow): number {
   return idx;
 }
 function healthClasses(score: number): { text: string; rail: string } {
-  if (score < 50) return { text: 'text-red-400', rail: 'bg-red-500' };
-  if (score < 75) return { text: 'text-amber-400', rail: 'bg-amber-500' };
+  // Match the real product's bands (WorkflowRow healthBand: <60 poor, <80 fair).
+  if (score < 60) return { text: 'text-red-400', rail: 'bg-red-500' };
+  if (score < 80) return { text: 'text-amber-400', rail: 'bg-amber-500' };
   return { text: 'text-green-400', rail: 'bg-green-500' };
 }
 function slug(title: string): string {

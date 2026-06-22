@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Fragment } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Check, HelpCircle } from 'lucide-react';
 import { PricingCards } from '@/components/PricingCards';
@@ -103,7 +104,7 @@ function ComparisonCell({ value }: { value: CellValue }) {
     );
   }
   if (value === true) {
-    return <span className="text-brand-400 font-semibold text-base leading-none">✓</span>;
+    return <Check className="h-4 w-4 mx-auto text-brand-400" aria-label="Included" />;
   }
   if (value === false) {
     return <span className="text-[var(--content-tertiary)]">—</span>;
@@ -261,7 +262,7 @@ export default function PricingPage() {
                 {COMPARISON_FEATURES.map((row, i) => {
                   const hasCategory = 'category' in row && row.category;
                   return (
-                    <>
+                    <Fragment key={row.label}>
                       {hasCategory && (
                         <tr key={`cat-${row.label}`} className="bg-brand-900/20 border-t-2 border-brand-800/40">
                           <td colSpan={6} className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-brand-400 sticky left-0 bg-brand-900/20 z-10">
@@ -299,7 +300,7 @@ export default function PricingPage() {
                           <ComparisonCell value={row.enterprise} />
                         </td>
                       </tr>
-                    </>
+                    </Fragment>
                   );
                 })}
               </tbody>
@@ -336,7 +337,7 @@ export default function PricingPage() {
             Still not sure? See it in action first.
           </p>
           <Link
-            href="/product"
+            href="/demo"
             className="inline-flex items-center gap-1.5 mt-3 text-sm font-semibold text-brand-400 hover:text-brand-300 transition-colors"
           >
             Explore the interactive demo

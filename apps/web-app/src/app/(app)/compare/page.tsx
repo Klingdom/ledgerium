@@ -108,7 +108,7 @@ function formatValue(key: string, v: number | null, gated: boolean): string {
   if (key === 'health' && gated) return '—';
   if (v == null) return '—';
   if (key === 'cycleTime') return formatDuration(v);
-  return String(v);
+  return v.toLocaleString();
 }
 
 // ── page ────────────────────────────────────────────────────────────────────
