@@ -135,3 +135,56 @@ describe('computeWorkflowComparison — confidence + determinism', () => {
     expect(a).toEqual(b);
   });
 });
+
+describe('computeWorkflowComparison — labor cost (volume × effort × persona)', () => {
+  it('computes baseline/after labor cost per period', () => {
+    // baseline 1hr/run, after 0.5hr/run, 10 runs/mo, $50/hr
+    const c = computeWorkflowComparison(
+      wf({ avgTimeMs: 3_600_000 }),
+      wf({ avgTimeMs: 1_800_000 }),
+      roi({ monthlyRuns: 10, hourlyRate: 50 }),
+    );
+    expect(c.roi.baselineMonthlyCost).toBe(500); // 1 × 10 × 50
+    expect(c.roi.afterMonthlyCost).toBe(250); // 0.5 × 10 × 50
+    expect(c.roi.baselineAnnualCost).toBe(6000);
+    expect(c.roi.afterAnnualCost).toBe(3000);
+    expect(c.roi.effectiveHourlyRate).toBe(50);
+    // savings still computed
+    expect(c.roi.monthlyDollarsSaved).toBe(250);
+  });
+
+  it('resolves persona provenance from the catalog', () => {
+    const c = computeWorkflowComparison(wf({ avgTimeMs: 3_600_000 }), wf({ avgTimeMs: 1_800_000 }), roi({ personaKey: 'ops_manager' }));
+    expect(c.roi.personaKey).toBe('ops_manager');
+    expect(c.roi.personaLabel).toBe('Ops Manager');
+  });
+
+  it('a custom rate (no persona) yields null persona provenance', () => {
+    const c = computeWorkflowComparison(wf({ avgTimeMs: 3_600_000 }), wf({ avgTimeMs: 1_800_000 }), roi());
+    expect(c.roi.personaKey).toBeNull();
+    expect(c.roi.personaLabel).toBeNull();
+    expect(c.roi.effectiveHourlyRate).toBe(50);
+  });
+
+  it('null costs when a side is untimed or assumptions invalid', () => {
+    const untimed = computeWorkflowComparison(wf({ avgTimeMs: null }), wf({ avgTimeMs: 1_800_000 }), roi());
+    expect(untimed.roi.baselineMonthlyCost).toBeNull();
+    expect(untimed.roi.afterMonthlyCost).toBe(500); // 0.5hr × 20 runs (default) × $50
+
+    const zeroVol = computeWorkflowComparison(wf({ avgTimeMs: 3_600_000 }), wf({ avgTimeMs: 1_800_000 }), roi({ monthlyRuns: 0 }));
+    expect(zeroVol.roi.baselineMonthlyCost).toBeNull();
+    expect(zeroVol.roi.afterMonthlyCost).toBeNull();
+  });
+
+  it('still computes cost for a slower after (cost view is independent of savings)', () => {
+    const c = computeWorkflowComparison(
+      wf({ avgTimeMs: 1_800_000 }),
+      wf({ avgTimeMs: 3_600_000 }),
+      roi({ monthlyRuns: 10, hourlyRate: 50 }),
+    );
+    expect(c.roi.slower).toBe(true);
+    expect(c.roi.monthlyDollarsSaved).toBeNull(); // no fabricated savings
+    expect(c.roi.baselineMonthlyCost).toBe(250);
+    expect(c.roi.afterMonthlyCost).toBe(500); // honest: after costs more
+  });
+});

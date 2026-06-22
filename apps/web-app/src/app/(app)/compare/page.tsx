@@ -19,6 +19,14 @@ import {
   type MetricDelta,
   type DeltaDirection,
 } from '@/lib/workflow-comparison';
+import {
+  DEFAULT_PERSONA_CATALOG,
+  DEFAULT_PERSONA_KEY,
+  getPersonaByKey,
+  getDefaultPersona,
+} from '@/lib/persona-costs';
+
+const CUSTOM_PERSONA = 'custom';
 
 interface ApiWorkflow {
   id: string;
@@ -82,9 +90,21 @@ export default function ComparePage() {
 
   const [baselineId, setBaselineId] = useState<string>('');
   const [afterId, setAfterId] = useState<string>('');
-  const [hourlyRate, setHourlyRate] = useState<number>(50);
+  const [personaKey, setPersonaKey] = useState<string>(DEFAULT_PERSONA_KEY);
+  const [hourlyRate, setHourlyRate] = useState<number>(getDefaultPersona().loadedHourlyRate);
   const [monthlyRuns, setMonthlyRuns] = useState<number>(20);
   const monthlyRunsTouched = useRef(false);
+
+  // Selecting a role pre-fills its loaded rate; typing a rate flips to "custom".
+  function selectPersona(key: string) {
+    setPersonaKey(key);
+    const p = getPersonaByKey(key);
+    if (p) setHourlyRate(p.loadedHourlyRate);
+  }
+  function editRate(rate: number) {
+    setHourlyRate(rate);
+    setPersonaKey(CUSTOM_PERSONA);
+  }
 
   // Load the library (same endpoint the dashboard uses) + optional ?baseline=&after=.
   useEffect(() => {
@@ -125,8 +145,15 @@ export default function ComparePage() {
 
   const comparison = useMemo(() => {
     if (!baseline || !after || baseline.id === after.id) return null;
-    return computeWorkflowComparison(toInput(baseline), toInput(after), { monthlyRuns, hourlyRate });
-  }, [baseline, after, monthlyRuns, hourlyRate]);
+    return computeWorkflowComparison(toInput(baseline), toInput(after), {
+      monthlyRuns,
+      hourlyRate,
+      personaKey: personaKey === CUSTOM_PERSONA ? null : personaKey,
+    });
+  }, [baseline, after, monthlyRuns, hourlyRate, personaKey]);
+
+  // Observed run count on the "after" side — context for the volume assumption.
+  const observedRuns = after?.metricsV2?.runs ?? null;
 
   // Fire one analytics event per distinct baseline→after pairing.
   const lastFiredPairRef = useRef<string>('');
@@ -140,6 +167,7 @@ export default function ComparePage() {
       confidence: comparison.confidence,
       hasSavings: comparison.roi.monthlyHoursSaved != null,
       slower: comparison.roi.slower,
+      personaKey: comparison.roi.personaKey,
     });
   }, [comparison, baseline, after]);
 
@@ -304,10 +332,16 @@ export default function ComparePage() {
                           ` · $${comparison.roi.annualDollarsSaved.toLocaleString()}/yr`}
                       </p>
                     )}
+                    {comparison.roi.baselineMonthlyCost != null && comparison.roi.afterMonthlyCost != null && (
+                      <p className="mt-1.5 text-[11px] text-[var(--content-secondary)]">
+                        Labor cost: ~${comparison.roi.baselineMonthlyCost.toLocaleString()}/mo now →{' '}
+                        ~${comparison.roi.afterMonthlyCost.toLocaleString()}/mo after
+                      </p>
+                    )}
                   </div>
 
-                  {/* Assumptions (editable) */}
-                  <div className="flex items-end gap-ds-3">
+                  {/* Assumptions (editable): volume × persona-cost */}
+                  <div className="flex flex-wrap items-end gap-ds-3">
                     <label className="flex flex-col text-[11px] text-[var(--content-secondary)]">
                       Runs / month
                       <input
@@ -320,24 +354,47 @@ export default function ComparePage() {
                         }}
                         className="mt-0.5 w-24 rounded-ds-md border border-[var(--border-subtle)] bg-[var(--surface-primary)] px-2 py-1 text-ds-sm tabular-nums text-[var(--content-primary)]"
                       />
+                      {observedRuns != null && (
+                        <span className="mt-0.5 text-[10px] text-[var(--content-tertiary)]">
+                          observed: {observedRuns} run{observedRuns === 1 ? '' : 's'} — set your volume
+                        </span>
+                      )}
                     </label>
                     <label className="flex flex-col text-[11px] text-[var(--content-secondary)]">
-                      $ / hour
+                      Who does this work
+                      <select
+                        value={personaKey}
+                        onChange={(e) => selectPersona(e.target.value)}
+                        className="mt-0.5 w-48 rounded-ds-md border border-[var(--border-subtle)] bg-[var(--surface-primary)] px-2 py-1 text-ds-sm font-normal text-[var(--content-primary)]"
+                      >
+                        {DEFAULT_PERSONA_CATALOG.map((p) => (
+                          <option key={p.key} value={p.key}>
+                            {p.label} — ${p.loadedHourlyRate}/hr
+                          </option>
+                        ))}
+                        <option value={CUSTOM_PERSONA}>Custom rate…</option>
+                      </select>
+                    </label>
+                    <label className="flex flex-col text-[11px] text-[var(--content-secondary)]">
+                      $ / hr (loaded)
                       <input
                         type="number"
                         min={0}
                         value={Number.isFinite(hourlyRate) ? hourlyRate : ''}
-                        onChange={(e) => setHourlyRate(Number(e.target.value))}
+                        onChange={(e) => editRate(Number(e.target.value))}
                         className="mt-0.5 w-24 rounded-ds-md border border-[var(--border-subtle)] bg-[var(--surface-primary)] px-2 py-1 text-ds-sm tabular-nums text-[var(--content-primary)]"
                       />
                     </label>
                   </div>
                 </div>
 
-                <p className="mt-ds-3 text-[11px] text-[var(--content-tertiary)]">
-                  {comparison.roi.timeSavedPerRunMs != null && comparison.roi.timeSavedPerRunMs > 0
-                    ? `Based on ~${formatDuration(comparison.roi.timeSavedPerRunMs)} saved per run (observed) × ${monthlyRuns} runs/month × $${hourlyRate}/hr. Cycle time is a per-workflow average — adjust runs/month to your real volume.`
-                    : 'Cycle time is a per-workflow average (a proxy until per-run timing lands). Savings shown only when the after process is genuinely faster.'}
+                <p className="mt-ds-3 text-[11px] text-[var(--content-tertiary)] leading-relaxed">
+                  <span className="font-medium text-[var(--content-secondary)]">Assumptions:</span>{' '}
+                  {monthlyRuns} runs/mo (your estimate) · ${hourlyRate}/hr{' '}
+                  ({comparison.roi.personaLabel ? `${comparison.roi.personaLabel} — default, editable` : 'custom rate'}){' '}
+                  · time saved is <span className="text-[var(--content-secondary)]">observed</span> from{' '}
+                  {comparison.baselineRuns}+{comparison.afterRuns} runs.{' '}
+                  Cycle time is a per-workflow average (a proxy until per-run timing lands); a slower &ldquo;after&rdquo; shows no savings.
                 </p>
               </section>
             </>

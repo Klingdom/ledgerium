@@ -20,6 +20,8 @@
  *  - Determinism: pure; no Date.now()/Math.random(); same inputs → same output.
  */
 
+import { getPersonaByKey } from './persona-costs';
+
 const MS_PER_HOUR = 3_600_000;
 
 export interface ComparisonWorkflowInput {
@@ -57,10 +59,16 @@ export interface MetricDelta {
 }
 
 export interface RoiInput {
-  /** Estimated runs per month (user-supplied assumption). */
+  /** Projected runs per month (user-supplied assumption). */
   monthlyRuns: number;
-  /** Fully-loaded hourly rate (user-supplied). */
+  /** Effective fully-loaded hourly rate used in the math (resolved from persona or custom). */
   hourlyRate: number;
+  /**
+   * Optional provenance: which persona/role the rate came from (from the
+   * persona-costs catalog). Echoed into the result for the report-out. null/omitted
+   * ⇒ a custom rate the user typed directly.
+   */
+  personaKey?: string | null;
 }
 
 export interface RoiResult {
@@ -72,6 +80,20 @@ export interface RoiResult {
   monthlyDollarsSaved: number | null;
   annualHoursSaved: number | null;
   annualDollarsSaved: number | null;
+
+  // ── Labor cost = volume × effort × persona-cost (the "what it costs to run" view) ──
+  /** The effective loaded $/hr applied (echoes the input rate when valid). */
+  effectiveHourlyRate: number | null;
+  /** Persona/role key the rate came from; null when a custom rate was used. */
+  personaKey: string | null;
+  /** Persona/role display label resolved from the catalog; null for custom. */
+  personaLabel: string | null;
+  /** baseline labor cost / month = (baseline.avgTimeMs/hr) × monthlyRuns × rate. */
+  baselineMonthlyCost: number | null;
+  /** after labor cost / month. */
+  afterMonthlyCost: number | null;
+  baselineAnnualCost: number | null;
+  afterAnnualCost: number | null;
 }
 
 export type ComparisonConfidence = 'high' | 'medium' | 'low';
@@ -191,6 +213,19 @@ export function computeWorkflowComparison(
     annualDollarsSaved = Math.round(monthlyDollarsSaved * 12);
   }
 
+  // ── Labor-cost view: volume × effort × persona-cost ──────────────────────────
+  // Cost to run each side per period = (effort hrs/run) × runs/month × loaded rate.
+  // Computed whenever a side is timed and assumptions are valid — independent of
+  // whether there is a saving. Persona is provenance only (which role's rate).
+  const persona = getPersonaByKey(roiInput.personaKey);
+  const effectiveHourlyRate = hourlyRate !== null && hourlyRate >= 0 ? hourlyRate : null;
+  const baselineMonthlyCost =
+    bTime !== null && inputsValid ? Math.round((bTime / MS_PER_HOUR) * monthlyRuns! * hourlyRate!) : null;
+  const afterMonthlyCost =
+    aTime !== null && inputsValid ? Math.round((aTime / MS_PER_HOUR) * monthlyRuns! * hourlyRate!) : null;
+  const baselineAnnualCost = baselineMonthlyCost !== null ? baselineMonthlyCost * 12 : null;
+  const afterAnnualCost = afterMonthlyCost !== null ? afterMonthlyCost * 12 : null;
+
   const minRuns = Math.min(bRuns, aRuns);
   const confidence: ComparisonConfidence = minRuns >= 10 ? 'high' : minRuns >= 2 ? 'medium' : 'low';
 
@@ -205,6 +240,13 @@ export function computeWorkflowComparison(
       monthlyDollarsSaved,
       annualHoursSaved,
       annualDollarsSaved,
+      effectiveHourlyRate,
+      personaKey: roiInput.personaKey ?? null,
+      personaLabel: persona?.label ?? null,
+      baselineMonthlyCost,
+      afterMonthlyCost,
+      baselineAnnualCost,
+      afterAnnualCost,
     },
     confidence,
     baselineRuns: bRuns,
