@@ -3,7 +3,7 @@ import { hash } from 'bcryptjs';
 import { db } from '@/db';
 import { z } from 'zod';
 import { trackServer } from '@/lib/analytics-server';
-import { ensureSampleWorkflow } from '@/lib/sample-workflow';
+import { ensureSampleWorkflow, ensureAdditionalSampleWorkflows } from '@/lib/sample-workflow';
 import { ensureSampleVariants } from '@/lib/sample-variants';
 
 const signupSchema = z.object({
@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
     // both helpers never throw (return null on failure).
     await ensureSampleWorkflow(user.id);
     await ensureSampleVariants(user.id);
+    await ensureAdditionalSampleWorkflows(user.id);
 
     trackServer('signup_completed', { userId: user.id, email: user.email });
 
