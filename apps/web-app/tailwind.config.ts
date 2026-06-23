@@ -63,6 +63,15 @@ const config: Config = {
         'ds-md': '0.5rem',   /* 8px — cards, inputs */
         'ds-lg': '0.75rem',  /* 12px — containers */
       },
+      keyframes: {
+        'demo-pulse': {
+          '0%, 100%': { transform: 'scale(1)', opacity: '1' },
+          '50%': { transform: 'scale(1.25)', opacity: '0.8' },
+        },
+      },
+      animation: {
+        'demo-pulse': 'demo-pulse 1.8s ease-in-out 3',
+      },
     },
   },
   plugins: [],

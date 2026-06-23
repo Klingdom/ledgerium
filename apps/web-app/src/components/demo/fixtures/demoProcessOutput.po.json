@@ -1,0 +1,703 @@
+{
+  "processRun": {
+    "runId": "demo-approve-expense-std",
+    "sessionId": "demo-approve-expense-std",
+    "activityName": "Approve Expense Report (Sample)",
+    "startedAt": "2023-11-14T22:13:20.000Z",
+    "endedAt": "2023-11-14T22:13:39.000Z",
+    "durationMs": 19000,
+    "durationLabel": "19s",
+    "stepCount": 5,
+    "eventCount": 5,
+    "humanEventCount": 5,
+    "systemEventCount": 0,
+    "systemsUsed": [
+      "Concur"
+    ],
+    "errorStepCount": 0,
+    "navigationStepCount": 1,
+    "completionStatus": "complete",
+    "engineVersion": "1.2.0"
+  },
+  "processDefinition": {
+    "definitionId": "demo-approve-expense-std-def",
+    "name": "Approve Expense Report (Sample)",
+    "version": "1.0",
+    "description": "\"Approve Expense Report (Sample)\" is a 5-step workflow in Concur, covering the end-to-end process from initiation through completion.",
+    "purpose": "Standardize how \"Approve Expense Report (Sample)\" is performed in Concur to ensure consistent execution, accurate data handling, and reliable outcomes.",
+    "scope": "This process covers the end-to-end workflow from initiation to completion across Concur, encompassing 5 steps.",
+    "systems": [
+      "Concur"
+    ],
+    "domains": [
+      "concur.example.com"
+    ],
+    "estimatedDurationMs": 18500,
+    "estimatedDurationLabel": "19s",
+    "stepDefinitions": [
+      {
+        "ordinal": 1,
+        "stepId": "demo-approve-expense-std-step-1",
+        "title": "Open expense report",
+        "category": "click_then_navigate",
+        "categoryLabel": "Navigation",
+        "categoryColor": "#10b981",
+        "categoryBg": "rgba(16,185,129,0.07)",
+        "operationalDefinition": "Navigate to \"the next page\" in Concur to proceed with the next phase.",
+        "purpose": "Opens a new page or view to proceed to the next stage of the workflow.",
+        "systems": [
+          "Concur"
+        ],
+        "domains": [
+          "concur.example.com"
+        ],
+        "inputs": [
+          "Current page context",
+          "Navigation target URL",
+          "Access to Concur"
+        ],
+        "outputs": [
+          "Target page loaded in browser",
+          "Navigation state updated"
+        ],
+        "completionCondition": "Target page loads successfully",
+        "confidence": 0.9,
+        "durationMs": 1500,
+        "durationLabel": "2s",
+        "eventCount": 1,
+        "hasSensitiveEvents": false,
+        "sourceEventIds": [
+          "demo-approve-expense-std-e1"
+        ]
+      },
+      {
+        "ordinal": 2,
+        "stepId": "demo-approve-expense-std-step-2",
+        "title": "Review line items",
+        "category": "data_entry",
+        "categoryLabel": "Data Entry",
+        "categoryColor": "#a78bfa",
+        "categoryBg": "rgba(167,139,250,0.07)",
+        "operationalDefinition": "Enter Review line items in Concur.",
+        "purpose": "Enters or updates data in the system, building toward a complete record.",
+        "systems": [
+          "Concur"
+        ],
+        "domains": [
+          "concur.example.com"
+        ],
+        "inputs": [
+          "Review line items",
+          "Access to Concur"
+        ],
+        "outputs": [
+          "Data saved in Concur",
+          "Fields accepted by the system"
+        ],
+        "completionCondition": "All required values entered and accepted by the system",
+        "confidence": 0.88,
+        "durationMs": 8000,
+        "durationLabel": "8s",
+        "eventCount": 1,
+        "hasSensitiveEvents": false,
+        "sourceEventIds": [
+          "demo-approve-expense-std-e2"
+        ]
+      },
+      {
+        "ordinal": 3,
+        "stepId": "demo-approve-expense-std-step-3",
+        "title": "Approve report",
+        "category": "single_action",
+        "categoryLabel": "Action",
+        "categoryColor": "#94a3b8",
+        "categoryBg": "rgba(148,163,184,0.07)",
+        "operationalDefinition": "Click \"Approve report\" in Concur.",
+        "purpose": "Performs a discrete user interaction within the workflow.",
+        "systems": [
+          "Concur"
+        ],
+        "domains": [
+          "concur.example.com"
+        ],
+        "inputs": [
+          "\"Approve report\" element",
+          "Concur interface"
+        ],
+        "outputs": [
+          "Page updated accordingly"
+        ],
+        "completionCondition": "Action completed on \"Expense Report\"",
+        "confidence": 0.9,
+        "durationMs": 4000,
+        "durationLabel": "4s",
+        "eventCount": 1,
+        "hasSensitiveEvents": false,
+        "sourceEventIds": [
+          "demo-approve-expense-std-e3"
+        ]
+      },
+      {
+        "ordinal": 4,
+        "stepId": "demo-approve-expense-std-step-4",
+        "title": "Notify employee",
+        "category": "send_action",
+        "categoryLabel": "Send / Submit",
+        "categoryColor": "#059669",
+        "categoryBg": "rgba(5,150,105,0.07)",
+        "operationalDefinition": "Click \"Notify employee\" in Concur to execute the action.",
+        "purpose": "Executes a completion action (send, save, submit) that advances the workflow.",
+        "systems": [
+          "Concur"
+        ],
+        "domains": [
+          "concur.example.com"
+        ],
+        "inputs": [
+          "\"Notify employee\" button available",
+          "All prerequisite data entered",
+          "Access to Concur"
+        ],
+        "outputs": [
+          "\"Notify employee\" action confirmed by Concur",
+          "Concur state updated"
+        ],
+        "completionCondition": "\"Notify employee\" action confirmed by Concur",
+        "confidence": 0.88,
+        "durationMs": 2000,
+        "durationLabel": "2s",
+        "eventCount": 1,
+        "hasSensitiveEvents": false,
+        "sourceEventIds": [
+          "demo-approve-expense-std-e4"
+        ]
+      },
+      {
+        "ordinal": 5,
+        "stepId": "demo-approve-expense-std-step-5",
+        "title": "Archive to records",
+        "category": "single_action",
+        "categoryLabel": "Action",
+        "categoryColor": "#94a3b8",
+        "categoryBg": "rgba(148,163,184,0.07)",
+        "operationalDefinition": "Click \"Archive to records\" in Concur.",
+        "purpose": "Performs a discrete user interaction within the workflow.",
+        "systems": [
+          "Concur"
+        ],
+        "domains": [
+          "concur.example.com"
+        ],
+        "inputs": [
+          "\"Archive to records\" element",
+          "Concur interface"
+        ],
+        "outputs": [
+          "Page updated accordingly"
+        ],
+        "completionCondition": "Action completed on \"Records\"",
+        "confidence": 0.86,
+        "durationMs": 1000,
+        "durationLabel": "1s",
+        "eventCount": 1,
+        "hasSensitiveEvents": false,
+        "sourceEventIds": [
+          "demo-approve-expense-std-e5"
+        ]
+      }
+    ],
+    "ruleVersion": "1.2.0"
+  },
+  "processMap": {
+    "id": "demo-approve-expense-std-map",
+    "name": "Approve Expense Report (Sample)",
+    "version": "1.2.0",
+    "sessionId": "demo-approve-expense-std",
+    "systems": [
+      "Concur"
+    ],
+    "phases": [
+      {
+        "id": "demo-approve-expense-std-phase-1",
+        "name": "Concur — Enter & Submit Review line items",
+        "system": "Concur",
+        "stepNodeIds": [
+          "demo-approve-expense-std-step-1",
+          "demo-approve-expense-std-step-2",
+          "demo-approve-expense-std-step-3",
+          "demo-approve-expense-std-step-4",
+          "demo-approve-expense-std-step-5"
+        ]
+      }
+    ],
+    "nodes": [
+      {
+        "id": "demo-approve-expense-std-start",
+        "stepId": "demo-approve-expense-std-start",
+        "ordinal": 0,
+        "title": "Start",
+        "nodeType": "start",
+        "category": "single_action",
+        "categoryLabel": "Trigger",
+        "categoryColor": "#64748b",
+        "categoryBg": "rgba(100,116,139,0.07)",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "metadata": {
+          "systems": [],
+          "durationLabel": "",
+          "eventCount": 0,
+          "humanEventCount": 0,
+          "eventTypeSummary": {}
+        }
+      },
+      {
+        "id": "demo-approve-expense-std-step-1",
+        "stepId": "demo-approve-expense-std-step-1",
+        "ordinal": 1,
+        "title": "Open expense report",
+        "nodeType": "task",
+        "category": "click_then_navigate",
+        "categoryLabel": "Navigation",
+        "categoryColor": "#10b981",
+        "categoryBg": "rgba(16,185,129,0.07)",
+        "position": {
+          "x": 0,
+          "y": 68
+        },
+        "metadata": {
+          "systems": [
+            "Concur"
+          ],
+          "domain": "concur.example.com",
+          "durationMs": 1500,
+          "durationLabel": "2s",
+          "eventCount": 1,
+          "humanEventCount": 1,
+          "pageTitle": "Expense Report",
+          "routeTemplate": "/expense/view",
+          "dominantAction": "Click",
+          "eventTypeSummary": {
+            "interaction.click": 1
+          }
+        },
+        "phaseId": "demo-approve-expense-std-phase-1"
+      },
+      {
+        "id": "demo-approve-expense-std-step-2",
+        "stepId": "demo-approve-expense-std-step-2",
+        "ordinal": 2,
+        "title": "Review line items",
+        "nodeType": "task",
+        "category": "data_entry",
+        "categoryLabel": "Data Entry",
+        "categoryColor": "#a78bfa",
+        "categoryBg": "rgba(167,139,250,0.07)",
+        "position": {
+          "x": 0,
+          "y": 172
+        },
+        "metadata": {
+          "systems": [
+            "Concur"
+          ],
+          "domain": "concur.example.com",
+          "durationMs": 8000,
+          "durationLabel": "8s",
+          "eventCount": 1,
+          "humanEventCount": 1,
+          "pageTitle": "Expense Report",
+          "routeTemplate": "/expense/view",
+          "dominantAction": "Data entry",
+          "eventTypeSummary": {
+            "interaction.input_change": 1
+          }
+        },
+        "phaseId": "demo-approve-expense-std-phase-1"
+      },
+      {
+        "id": "demo-approve-expense-std-step-3",
+        "stepId": "demo-approve-expense-std-step-3",
+        "ordinal": 3,
+        "title": "Approve report",
+        "nodeType": "task",
+        "category": "single_action",
+        "categoryLabel": "Action",
+        "categoryColor": "#94a3b8",
+        "categoryBg": "rgba(148,163,184,0.07)",
+        "position": {
+          "x": 0,
+          "y": 276
+        },
+        "metadata": {
+          "systems": [
+            "Concur"
+          ],
+          "domain": "concur.example.com",
+          "durationMs": 4000,
+          "durationLabel": "4s",
+          "eventCount": 1,
+          "humanEventCount": 1,
+          "pageTitle": "Expense Report",
+          "routeTemplate": "/expense/view",
+          "dominantAction": "Click",
+          "eventTypeSummary": {
+            "interaction.click": 1
+          }
+        },
+        "phaseId": "demo-approve-expense-std-phase-1"
+      },
+      {
+        "id": "demo-approve-expense-std-step-4",
+        "stepId": "demo-approve-expense-std-step-4",
+        "ordinal": 4,
+        "title": "Submit Notify employee",
+        "nodeType": "task",
+        "category": "send_action",
+        "categoryLabel": "Send / Submit",
+        "categoryColor": "#059669",
+        "categoryBg": "rgba(5,150,105,0.07)",
+        "position": {
+          "x": 0,
+          "y": 380
+        },
+        "metadata": {
+          "systems": [
+            "Concur"
+          ],
+          "domain": "concur.example.com",
+          "durationMs": 2000,
+          "durationLabel": "2s",
+          "eventCount": 1,
+          "humanEventCount": 1,
+          "pageTitle": "Notification",
+          "routeTemplate": "/expense/notify",
+          "dominantAction": "Click",
+          "eventTypeSummary": {
+            "interaction.click": 1
+          }
+        },
+        "phaseId": "demo-approve-expense-std-phase-1"
+      },
+      {
+        "id": "demo-approve-expense-std-step-5",
+        "stepId": "demo-approve-expense-std-step-5",
+        "ordinal": 5,
+        "title": "Archive to records",
+        "nodeType": "task",
+        "category": "single_action",
+        "categoryLabel": "Action",
+        "categoryColor": "#94a3b8",
+        "categoryBg": "rgba(148,163,184,0.07)",
+        "position": {
+          "x": 0,
+          "y": 484
+        },
+        "metadata": {
+          "systems": [
+            "Concur"
+          ],
+          "domain": "concur.example.com",
+          "durationMs": 1000,
+          "durationLabel": "1s",
+          "eventCount": 1,
+          "humanEventCount": 1,
+          "pageTitle": "Records",
+          "routeTemplate": "/records",
+          "dominantAction": "Click",
+          "eventTypeSummary": {
+            "interaction.click": 1
+          }
+        },
+        "phaseId": "demo-approve-expense-std-phase-1"
+      },
+      {
+        "id": "demo-approve-expense-std-end",
+        "stepId": "demo-approve-expense-std-end",
+        "ordinal": 6,
+        "title": "End",
+        "nodeType": "end",
+        "category": "single_action",
+        "categoryLabel": "Complete",
+        "categoryColor": "#64748b",
+        "categoryBg": "rgba(100,116,139,0.07)",
+        "position": {
+          "x": 0,
+          "y": 588
+        },
+        "metadata": {
+          "systems": [],
+          "durationLabel": "",
+          "eventCount": 0,
+          "humanEventCount": 0,
+          "eventTypeSummary": {}
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge-demo-approve-expense-std-start-demo-approve-expense-std-step-1",
+        "source": "demo-approve-expense-std-start",
+        "target": "demo-approve-expense-std-step-1",
+        "type": "sequence",
+        "boundaryReason": "navigation_changed",
+        "boundaryLabel": "Workflow begins"
+      },
+      {
+        "id": "edge-demo-approve-expense-std-step-1-demo-approve-expense-std-step-2",
+        "source": "demo-approve-expense-std-step-1",
+        "target": "demo-approve-expense-std-step-2",
+        "type": "sequence",
+        "boundaryReason": "action_completed",
+        "boundaryLabel": "Action completed"
+      },
+      {
+        "id": "edge-demo-approve-expense-std-step-2-demo-approve-expense-std-step-3",
+        "source": "demo-approve-expense-std-step-2",
+        "target": "demo-approve-expense-std-step-3",
+        "type": "sequence",
+        "boundaryReason": "action_completed",
+        "boundaryLabel": "Action completed"
+      },
+      {
+        "id": "edge-demo-approve-expense-std-step-3-demo-approve-expense-std-step-4",
+        "source": "demo-approve-expense-std-step-3",
+        "target": "demo-approve-expense-std-step-4",
+        "type": "sequence",
+        "boundaryReason": "app_context_changed",
+        "boundaryLabel": "Application switch"
+      },
+      {
+        "id": "edge-demo-approve-expense-std-step-4-demo-approve-expense-std-step-5",
+        "source": "demo-approve-expense-std-step-4",
+        "target": "demo-approve-expense-std-step-5",
+        "type": "sequence",
+        "boundaryReason": "session_stop",
+        "boundaryLabel": "Session stopped"
+      },
+      {
+        "id": "edge-demo-approve-expense-std-step-5-demo-approve-expense-std-end",
+        "source": "demo-approve-expense-std-step-5",
+        "target": "demo-approve-expense-std-end",
+        "type": "sequence",
+        "boundaryLabel": "Workflow completes"
+      }
+    ],
+    "objective": "Review and approve a expense report in Concur, including Review line items entry, submission for processing",
+    "trigger": "When a expense report requires review and approval in Concur",
+    "outcome": "Approve Expense Report (Sample) completed — \"Records\" reached",
+    "durationLabel": "17s"
+  },
+  "sop": {
+    "sopId": "demo-approve-expense-std-sop",
+    "title": "Approve Expense Report (Sample)",
+    "version": "2.0",
+    "purpose": "This procedure documents how to review and approve a expense report in Concur, resulting in a completed expense report. The workflow covers data entry, submission.",
+    "scope": "Performed by: Operator. Systems: Concur. Covers the complete approve Expense Report (Sample) workflow from initiation to completion.",
+    "systems": [
+      "Concur"
+    ],
+    "prerequisites": [
+      "Active, authenticated session in Concur",
+      "Required data available: Review line items"
+    ],
+    "estimatedTime": "17s",
+    "inputs": [
+      "Access to: Concur",
+      "Review line items",
+      "Access to Concur"
+    ],
+    "outputs": [
+      "\"Approve Expense Report (Sample)\" workflow completed",
+      "Data submitted and recorded in system",
+      "Concur confirms the \"Notify employee\" action was successful"
+    ],
+    "completionCriteria": [
+      "The approve Expense Report (Sample) record reflects the completed state",
+      "All procedure steps executed and verified in Concur"
+    ],
+    "steps": [
+      {
+        "ordinal": 1,
+        "stepId": "demo-approve-expense-std-step-1",
+        "title": "Open expense report",
+        "category": "click_then_navigate",
+        "action": "Open expense report",
+        "instructions": [
+          {
+            "sequence": 1,
+            "instruction": "Click \"Open expense report\"",
+            "eventType": "interaction.click",
+            "sourceEventId": "demo-approve-expense-std-e1",
+            "system": "Concur",
+            "isSensitive": false,
+            "redacted": false,
+            "targetLabel": "Open expense report",
+            "instructionType": "action"
+          }
+        ],
+        "detail": "1. Click \"Open expense report\"",
+        "system": "Concur",
+        "inputs": [
+          "Current page context",
+          "Navigation target URL",
+          "Access to Concur"
+        ],
+        "expectedOutcome": "Target page loads with expected content",
+        "warnings": [],
+        "durationLabel": "2s",
+        "confidence": 0.9,
+        "sourceStepId": "demo-approve-expense-std-step-1",
+        "actor": "Operator"
+      },
+      {
+        "ordinal": 2,
+        "stepId": "demo-approve-expense-std-step-2",
+        "title": "Review line items",
+        "category": "data_entry",
+        "action": "Enter Review line items",
+        "instructions": [
+          {
+            "sequence": 1,
+            "instruction": "Enter value in \"Review line items\"",
+            "eventType": "interaction.input_change",
+            "sourceEventId": "demo-approve-expense-std-e2",
+            "system": "Concur",
+            "isSensitive": false,
+            "redacted": false,
+            "targetLabel": "Review line items",
+            "instructionType": "action"
+          }
+        ],
+        "detail": "1. Enter value in \"Review line items\"",
+        "system": "Concur",
+        "inputs": [
+          "Review line items",
+          "Access to Concur"
+        ],
+        "expectedOutcome": "All required values entered and accepted by the system",
+        "warnings": [],
+        "durationLabel": "8s",
+        "confidence": 0.88,
+        "sourceStepId": "demo-approve-expense-std-step-2",
+        "actor": "Operator"
+      },
+      {
+        "ordinal": 3,
+        "stepId": "demo-approve-expense-std-step-3",
+        "title": "Approve report",
+        "category": "single_action",
+        "action": "Approve report",
+        "instructions": [
+          {
+            "sequence": 1,
+            "instruction": "Click \"Approve report\"",
+            "eventType": "interaction.click",
+            "sourceEventId": "demo-approve-expense-std-e3",
+            "system": "Concur",
+            "isSensitive": false,
+            "redacted": false,
+            "targetLabel": "Approve report",
+            "instructionType": "action"
+          }
+        ],
+        "detail": "1. Click \"Approve report\"",
+        "system": "Concur",
+        "inputs": [
+          "\"Approve report\" element",
+          "Concur interface"
+        ],
+        "expectedOutcome": "Action completed on \"Expense Report\"",
+        "warnings": [],
+        "durationLabel": "4s",
+        "confidence": 0.9,
+        "sourceStepId": "demo-approve-expense-std-step-3",
+        "actor": "Operator"
+      },
+      {
+        "ordinal": 4,
+        "stepId": "demo-approve-expense-std-step-4",
+        "title": "Submit Notify employee",
+        "category": "send_action",
+        "action": "Click \"Notify employee\"",
+        "instructions": [
+          {
+            "sequence": 1,
+            "instruction": "Click \"Notify employee\"",
+            "eventType": "interaction.click",
+            "sourceEventId": "demo-approve-expense-std-e4",
+            "system": "Concur",
+            "isSensitive": false,
+            "redacted": false,
+            "targetLabel": "Notify employee",
+            "instructionType": "action"
+          }
+        ],
+        "detail": "1. Click \"Notify employee\"",
+        "system": "Concur",
+        "inputs": [
+          "\"Notify employee\" button available",
+          "All prerequisite data entered",
+          "Access to Concur"
+        ],
+        "expectedOutcome": "Concur confirms the \"Notify employee\" action was successful",
+        "warnings": [],
+        "durationLabel": "2s",
+        "confidence": 0.88,
+        "sourceStepId": "demo-approve-expense-std-step-4",
+        "actor": "Operator"
+      },
+      {
+        "ordinal": 5,
+        "stepId": "demo-approve-expense-std-step-5",
+        "title": "Archive to records",
+        "category": "single_action",
+        "action": "Archive to records",
+        "instructions": [
+          {
+            "sequence": 1,
+            "instruction": "Click \"Archive to records\"",
+            "eventType": "interaction.click",
+            "sourceEventId": "demo-approve-expense-std-e5",
+            "system": "Concur",
+            "isSensitive": false,
+            "redacted": false,
+            "targetLabel": "Archive to records",
+            "instructionType": "action"
+          }
+        ],
+        "detail": "1. Click \"Archive to records\"",
+        "system": "Concur",
+        "inputs": [
+          "\"Archive to records\" element",
+          "Concur interface"
+        ],
+        "expectedOutcome": "Action completed on \"Records\"",
+        "warnings": [],
+        "durationLabel": "1s",
+        "confidence": 0.86,
+        "sourceStepId": "demo-approve-expense-std-step-5",
+        "actor": "Operator"
+      }
+    ],
+    "notes": [
+      "This procedure was derived from observed browser workflow activity. All instructions link to source evidence."
+    ],
+    "generatedAt": "2023-11-14T22:13:20.000Z",
+    "trigger": "When a expense report requires review and approval in Concur",
+    "roles": [
+      "Operator"
+    ],
+    "businessObjective": "Review and approve a expense report in Concur, including Review line items entry, submission for processing",
+    "qualityIndicators": {
+      "averageConfidence": 0.88,
+      "lowConfidenceStepCount": 0,
+      "errorStepCount": 0,
+      "systemCount": 1,
+      "frictionCount": 0,
+      "isComplete": true
+    }
+  }
+}

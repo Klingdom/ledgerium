@@ -5,6 +5,8 @@ import { TrackedLink } from '@/components/TrackedLink';
 import DemoVariantsMap from '@/components/demo/DemoVariantsMap';
 import DemoDashboard from '@/components/demo/DemoDashboard';
 import RealProductDemo from '@/components/demo/RealProductDemo';
+import DemoAnnotatedDashboardHeader from '@/components/demo/DemoAnnotatedDashboardHeader';
+import DemoAnnotatedWorkflowViews from '@/components/demo/DemoAnnotatedWorkflowViews';
 import {
   Play,
   Layers,
@@ -310,6 +312,23 @@ export default function ProductPage() {
         </div>
       </section>
 
+      {/* ── Annotated Dashboard Header — Container 1 ─────────────────── */}
+      <section className="py-20 bg-[var(--surface-primary)] border-t border-[var(--border-default)]">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <p className="text-center text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+            Live demo — no signup
+          </p>
+          <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-3">
+            The workflow library dashboard
+          </h2>
+          <p className="text-center text-[#e2e8f0] leading-relaxed mb-8 max-w-2xl mx-auto">
+            The dashboard aggregates every recorded workflow into a portfolio baseline.
+            Click any numbered marker to learn what each surface measures.
+          </p>
+          <DemoAnnotatedDashboardHeader />
+        </div>
+      </section>
+
       {/* ── Live interactive demo — the real process map, no signup ──── */}
       <section className="py-20 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
@@ -346,6 +365,23 @@ export default function ProductPage() {
           <p className="text-center text-xs text-[var(--content-tertiary)] mt-4">
             Sample data shown. Every edge and timing is computed from observed runs — the same engine that runs on your own recordings.
           </p>
+        </div>
+      </section>
+
+      {/* ── Annotated Workflow Views — Container 2 ───────────────────── */}
+      <section className="py-20 bg-[var(--surface-primary)] border-t border-[var(--border-default)]">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <p className="text-center text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+            Drill into any workflow
+          </p>
+          <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-3">
+            Process map, SOP, and variants — in one place
+          </h2>
+          <p className="text-center text-[#e2e8f0] leading-relaxed mb-8 max-w-2xl mx-auto">
+            Click any numbered marker to learn what each view surfaces. Switch between
+            the process map and the generated SOP.
+          </p>
+          <DemoAnnotatedWorkflowViews />
         </div>
       </section>
 
