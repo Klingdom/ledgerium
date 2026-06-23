@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { TrackedLink } from '@/components/TrackedLink';
 import DemoDashboard from '@/components/demo/DemoDashboard';
+import RealProductDemo from '@/components/demo/RealProductDemo';
 import {
   ArrowRight,
   PlayCircle,
@@ -127,8 +128,8 @@ export default function HomePage() {
           <p className="text-center text-[#e2e8f0] leading-relaxed mb-12 max-w-2xl mx-auto">
             Real sample workflows with evidence-linked metrics — the same workflow library you get from day one. Every cycle time and run count is measured from an actual recording.
           </p>
-          {/* Live, interactive workflow library demo (dummy data) */}
-          <DemoDashboard />
+          {/* Live, interactive workflow library demo (real components + sample data) */}
+          <RealProductDemo />
           <p className="text-center text-xs text-[var(--content-tertiary)] mt-3">
             Every number shown comes from a real recording. Same input, same output — always.{' '}
             <Link href="/demo" className="text-brand-600 hover:text-brand-700 font-medium">

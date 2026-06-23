@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { TrackedLink } from '@/components/TrackedLink';
 import DemoVariantsMap from '@/components/demo/DemoVariantsMap';
 import DemoDashboard from '@/components/demo/DemoDashboard';
+import RealProductDemo from '@/components/demo/RealProductDemo';
 import {
   Play,
   Layers,
@@ -291,12 +292,12 @@ export default function ProductPage() {
             </p>
           </div>
 
-          {/* Live workflow library demo — interactive, dummy data, no signup */}
+          {/* Live workflow library demo — real product components, sample data */}
           <div className="mt-16 mx-auto max-w-5xl">
             <div className="relative">
               <div className="absolute inset-0 -m-6 rounded-3xl bg-brand-600/5 blur-2xl pointer-events-none" />
               <div className="relative">
-                <DemoDashboard />
+                <RealProductDemo />
               </div>
             </div>
             <p className="text-center text-xs text-[var(--content-tertiary)] mt-3">
