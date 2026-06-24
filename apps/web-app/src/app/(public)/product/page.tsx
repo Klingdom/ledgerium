@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { TrackedLink } from '@/components/TrackedLink';
-import DemoVariantsMap from '@/components/demo/DemoVariantsMap';
-import DemoDashboard from '@/components/demo/DemoDashboard';
-import RealProductDemo from '@/components/demo/RealProductDemo';
+import DemoAnnotatedDashboardHeader from '@/components/demo/DemoAnnotatedDashboardHeader';
+import DemoAnnotatedWorkflowViews from '@/components/demo/DemoAnnotatedWorkflowViews';
+import DemoAnnotatedReport from '@/components/demo/DemoAnnotatedReport';
 import {
   Play,
   Layers,
@@ -291,61 +291,55 @@ export default function ProductPage() {
               No credit card required. Explore sample workflows instantly.
             </p>
           </div>
-
-          {/* Live workflow library demo — real product components, sample data */}
-          <div className="mt-16 mx-auto max-w-5xl">
-            <div className="relative">
-              <div className="absolute inset-0 -m-6 rounded-3xl bg-brand-600/5 blur-2xl pointer-events-none" />
-              <div className="relative">
-                <RealProductDemo />
-              </div>
-            </div>
-            <p className="text-center text-xs text-[var(--content-tertiary)] mt-3">
-              Your workflow library — filter it, every number comes from a real recording.{' '}
-              <Link href="/demo" className="text-brand-600 hover:text-brand-700 font-medium">
-                Walk through all four views &rarr;
-              </Link>
-            </p>
-          </div>
         </div>
       </section>
 
-      {/* ── Live interactive demo — the real process map, no signup ──── */}
-      <section className="py-20 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
+      {/* ── Annotated Dashboard Header — Container 1 ─────────────────── */}
+      <section className="py-20 bg-[var(--surface-primary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <p className="text-center text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
-            Try it live — no signup
+            Live demo — no signup
           </p>
           <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-3">
-            Click between the real product views
+            The workflow library dashboard
           </h2>
           <p className="text-center text-[#e2e8f0] leading-relaxed mb-8 max-w-2xl mx-auto">
-            This is the actual Ledgerium variants explorer running on a sample
-            &ldquo;Approve Expense Report&rdquo; workflow — 6 paths across 16 recorded runs.
-            Switch between <span className="text-brand-400 font-medium">Map</span>,{' '}
-            <span className="text-brand-400 font-medium">Frequency</span>,{' '}
-            <span className="text-brand-400 font-medium">DNA</span>, and{' '}
-            <span className="text-brand-400 font-medium">List</span> views to see the dominant path,
-            the rework loop, and the exception path. Nothing here is drawn — it is measured.
+            The dashboard aggregates every recorded workflow into a portfolio baseline.
+            Click any numbered marker to learn what each surface measures.
           </p>
-          <DemoVariantsMap />
-          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <TrackedLink
-              href="/signup"
-              event="cta_clicked"
-              properties={{ location: 'product_live_demo', destination: '/signup' }}
-              className="btn-primary text-base px-7 py-3.5 gap-2 shadow-sm shadow-brand-600/20"
-            >
-              Try it on your own workflows
-              <ArrowRight className="h-4 w-4" />
-            </TrackedLink>
-            <Link href="/demo" className="btn-secondary text-base px-7 py-3.5">
-              See the full walkthrough
-            </Link>
-          </div>
-          <p className="text-center text-xs text-[var(--content-tertiary)] mt-4">
-            Sample data shown. Every edge and timing is computed from observed runs — the same engine that runs on your own recordings.
+          <DemoAnnotatedDashboardHeader />
+        </div>
+      </section>
+
+      {/* ── Annotated Workflow Views — Container 2 ───────────────────── */}
+      <section className="py-20 bg-[var(--surface-primary)] border-t border-[var(--border-default)]">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <p className="text-center text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+            Drill into any workflow
           </p>
+          <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-3">
+            Process map, SOP, and variants — in one place
+          </h2>
+          <p className="text-center text-[#e2e8f0] leading-relaxed mb-8 max-w-2xl mx-auto">
+            Click any numbered marker to learn what each view surfaces. Switch between
+            the process map and the generated SOP.
+          </p>
+          <DemoAnnotatedWorkflowViews />
+        </div>
+      </section>
+
+      {/* ── Container 3: the Workflow Report ───────────────────────────── */}
+      <section className="py-20 border-t border-[var(--border-subtle)]">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-4">
+            The report
+          </h2>
+          <p className="text-center text-[#e2e8f0] leading-relaxed mb-8 max-w-2xl mx-auto">
+            Every recorded workflow produces a full quantitative report — scorecard,
+            timestudy, bottlenecks, automation, ROI, and more. Scroll inside it, and
+            click any numbered marker to learn what a section surfaces.
+          </p>
+          <DemoAnnotatedReport />
         </div>
       </section>
 

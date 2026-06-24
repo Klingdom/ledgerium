@@ -127,7 +127,7 @@ export async function ensureAdditionalSampleWorkflows(userId: string): Promise<v
 
 const NOW = 1_700_000_000_000;
 
-function buildSampleBundle() {
+export function buildSampleBundle() {
   return {
     sessionJson: {
       sessionId: SESSION_ID,

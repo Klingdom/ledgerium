@@ -1,0 +1,1176 @@
+{
+  "steps": [
+    {
+      "stepId": "sample-variants-001-step-1",
+      "sourceWorkflowId": "sample-variants-001",
+      "actionType": "navigate",
+      "inferredIntent": "Navigate to Expense in Concur",
+      "verb": "open",
+      "object": "report",
+      "qualifier": "expense",
+      "system": "concur",
+      "entity": "report",
+      "domain": "concur.example.com",
+      "inputData": [
+        "Current page context",
+        "Navigation target URL",
+        "Access to Concur"
+      ],
+      "outputData": [
+        "Target page loaded in browser",
+        "Navigation state updated"
+      ],
+      "preconditions": [
+        "Concur is accessible and user is authenticated"
+      ],
+      "postconditions": [
+        "Target page loads with expected content",
+        "Output produced: Target page loaded in browser, Navigation state updated",
+        "User has navigated to the next page or view"
+      ],
+      "automationClassification": "full_automation",
+      "estimatedDurationMs": 1500,
+      "confidence": 0.95,
+      "inferenceMethod": "deterministic",
+      "evidenceEventIds": [
+        "sample-variants-001-e1"
+      ],
+      "rawReference": {
+        "stepOrdinal": 1,
+        "rawTitle": "Open expense report",
+        "category": "click_then_navigate",
+        "systems": [
+          "Concur"
+        ],
+        "domains": [
+          "concur.example.com"
+        ]
+      }
+    },
+    {
+      "stepId": "sample-variants-001-step-2",
+      "sourceWorkflowId": "sample-variants-001",
+      "actionType": "verify",
+      "inferredIntent": "Review line in Concur",
+      "verb": "review",
+      "object": "element",
+      "qualifier": "line items",
+      "system": "concur",
+      "entity": null,
+      "domain": "concur.example.com",
+      "inputData": [
+        "Access to Concur"
+      ],
+      "outputData": [
+        "Data saved in Concur",
+        "Fields accepted by the system"
+      ],
+      "preconditions": [
+        "Previous step has completed successfully",
+        "Required input data is available: Access to Concur",
+        "Concur is accessible and user is authenticated"
+      ],
+      "postconditions": [
+        "All required values entered and accepted by the system",
+        "Output produced: Data saved in Concur, Fields accepted by the system",
+        "Data has been entered into the target field(s)"
+      ],
+      "automationClassification": "ai_assisted",
+      "estimatedDurationMs": 8000,
+      "confidence": 0.7833333333333333,
+      "inferenceMethod": "heuristic",
+      "evidenceEventIds": [
+        "sample-variants-001-e2"
+      ],
+      "rawReference": {
+        "stepOrdinal": 2,
+        "rawTitle": "Review line items",
+        "category": "data_entry",
+        "systems": [
+          "Concur"
+        ],
+        "domains": [
+          "concur.example.com"
+        ]
+      }
+    },
+    {
+      "stepId": "sample-variants-001-step-3",
+      "sourceWorkflowId": "sample-variants-001",
+      "actionType": "click",
+      "inferredIntent": "Approve report in Concur",
+      "verb": "approve",
+      "object": "report",
+      "qualifier": null,
+      "system": "concur",
+      "entity": "report",
+      "domain": "concur.example.com",
+      "inputData": [
+        "Concur form"
+      ],
+      "outputData": [
+        "Record created or updated in Concur",
+        "Confirmation of successful submission"
+      ],
+      "preconditions": [
+        "Previous step has completed successfully",
+        "Required input data is available: Concur form",
+        "Concur is accessible and user is authenticated"
+      ],
+      "postconditions": [
+        "Confirmation message appears and record is saved in Concur",
+        "Output produced: Record created or updated in Concur, Confirmation of successful submission",
+        "Form or action has been submitted successfully"
+      ],
+      "automationClassification": "ai_assisted",
+      "estimatedDurationMs": 4000,
+      "confidence": 0.95,
+      "inferenceMethod": "deterministic",
+      "evidenceEventIds": [
+        "sample-variants-001-e3"
+      ],
+      "rawReference": {
+        "stepOrdinal": 3,
+        "rawTitle": "Approve report",
+        "category": "fill_and_submit",
+        "systems": [
+          "Concur"
+        ],
+        "domains": [
+          "concur.example.com"
+        ]
+      }
+    },
+    {
+      "stepId": "sample-variants-001-step-4",
+      "sourceWorkflowId": "sample-variants-001",
+      "actionType": "send",
+      "inferredIntent": "Notify employee in Concur",
+      "verb": "notify",
+      "object": "element",
+      "qualifier": "employee",
+      "system": "concur",
+      "entity": null,
+      "domain": "concur.example.com",
+      "inputData": [
+        "\"Notify employee\" button available",
+        "All prerequisite data entered",
+        "Access to Concur"
+      ],
+      "outputData": [
+        "\"Notify employee\" action confirmed by Concur",
+        "Concur state updated"
+      ],
+      "preconditions": [
+        "Previous step has completed successfully",
+        "Content to be sent has been prepared and reviewed",
+        "Concur is accessible and user is authenticated"
+      ],
+      "postconditions": [
+        "Concur confirms the \"Notify employee\" action was successful",
+        "Output produced: \"Notify employee\" action confirmed by Concur, Concur state updated",
+        "Form or action has been submitted successfully"
+      ],
+      "automationClassification": "ai_assisted",
+      "estimatedDurationMs": 2000,
+      "confidence": 0.7833333333333333,
+      "inferenceMethod": "heuristic",
+      "evidenceEventIds": [
+        "sample-variants-001-e4"
+      ],
+      "rawReference": {
+        "stepOrdinal": 4,
+        "rawTitle": "Notify employee",
+        "category": "send_action",
+        "systems": [
+          "Concur"
+        ],
+        "domains": [
+          "concur.example.com"
+        ]
+      }
+    },
+    {
+      "stepId": "sample-variants-001-step-5",
+      "sourceWorkflowId": "sample-variants-001",
+      "actionType": "click",
+      "inferredIntent": "Click archive in Concur",
+      "verb": "click",
+      "object": "element",
+      "qualifier": "archive records",
+      "system": "concur",
+      "entity": null,
+      "domain": "concur.example.com",
+      "inputData": [
+        "\"Archive to records\" element",
+        "Concur interface"
+      ],
+      "outputData": [
+        "Page updated accordingly"
+      ],
+      "preconditions": [
+        "Previous step has completed successfully",
+        "Concur is accessible and user is authenticated"
+      ],
+      "postconditions": [
+        "Action completed on \"Expense Report\"",
+        "Output produced: Page updated accordingly"
+      ],
+      "automationClassification": "full_automation",
+      "estimatedDurationMs": 1000,
+      "confidence": 0.7833333333333333,
+      "inferenceMethod": "heuristic",
+      "evidenceEventIds": [
+        "sample-variants-001-e5"
+      ],
+      "rawReference": {
+        "stepOrdinal": 5,
+        "rawTitle": "Archive to records",
+        "category": "single_action",
+        "systems": [
+          "Concur"
+        ],
+        "domains": [
+          "concur.example.com"
+        ]
+      }
+    }
+  ],
+  "activities": [
+    {
+      "activityId": "act-1",
+      "activityName": "Click in Concur",
+      "stepIds": [
+        "sample-variants-001-step-1",
+        "sample-variants-001-step-2",
+        "sample-variants-001-step-3",
+        "sample-variants-001-step-4",
+        "sample-variants-001-step-5"
+      ],
+      "purpose": "Open and Review report in Concur",
+      "system": "concur",
+      "systems": [
+        "concur"
+      ],
+      "inputs": [
+        "Current page context",
+        "Navigation target URL",
+        "Access to Concur",
+        "Concur form",
+        "\"Notify employee\" button available",
+        "All prerequisite data entered",
+        "\"Archive to records\" element",
+        "Concur interface"
+      ],
+      "outputs": [
+        "Target page loaded in browser",
+        "Navigation state updated",
+        "Data saved in Concur",
+        "Fields accepted by the system",
+        "Record created or updated in Concur",
+        "Confirmation of successful submission",
+        "\"Notify employee\" action confirmed by Concur",
+        "Concur state updated",
+        "Page updated accordingly"
+      ],
+      "estimatedDurationMs": 16500,
+      "stepCount": 5,
+      "automationClassification": "ai_assisted",
+      "confidence": 0.85
+    }
+  ],
+  "workflow": {
+    "workflowId": "sample-variants-001",
+    "workflowName": "Approve Expense Report (Sample)",
+    "activities": [
+      {
+        "activityId": "act-1",
+        "activityName": "Click in Concur",
+        "stepIds": [
+          "sample-variants-001-step-1",
+          "sample-variants-001-step-2",
+          "sample-variants-001-step-3",
+          "sample-variants-001-step-4",
+          "sample-variants-001-step-5"
+        ],
+        "purpose": "Open and Review report in Concur",
+        "system": "concur",
+        "systems": [
+          "concur"
+        ],
+        "inputs": [
+          "Current page context",
+          "Navigation target URL",
+          "Access to Concur",
+          "Concur form",
+          "\"Notify employee\" button available",
+          "All prerequisite data entered",
+          "\"Archive to records\" element",
+          "Concur interface"
+        ],
+        "outputs": [
+          "Target page loaded in browser",
+          "Navigation state updated",
+          "Data saved in Concur",
+          "Fields accepted by the system",
+          "Record created or updated in Concur",
+          "Confirmation of successful submission",
+          "\"Notify employee\" action confirmed by Concur",
+          "Concur state updated",
+          "Page updated accordingly"
+        ],
+        "estimatedDurationMs": 16500,
+        "stepCount": 5,
+        "automationClassification": "ai_assisted",
+        "confidence": 0.85
+      }
+    ],
+    "decisionPoints": [],
+    "systems": [
+      "concur"
+    ],
+    "totalDurationMs": 16500,
+    "stepCount": 5,
+    "activityCount": 1,
+    "dependencies": [],
+    "automationClassification": "ai_assisted",
+    "automationScore": 75,
+    "confidence": 0.85
+  },
+  "decisionPoints": [],
+  "skillLibrary": {
+    "skills": [
+      {
+        "skillId": "skill-approve_report_in_concur",
+        "skillName": "approve_report_in_concur",
+        "description": "Approve report in Concur",
+        "skillType": "decision",
+        "inputSchema": [
+          {
+            "name": "Concur form",
+            "description": "Concur Form",
+            "required": true
+          }
+        ],
+        "outputSchema": [
+          {
+            "name": "Record created or updated in Concur",
+            "description": "Record Created Or Updated In Concur",
+            "required": false
+          },
+          {
+            "name": "Confirmation of successful submission",
+            "description": "Confirmation Of Successful Submission",
+            "required": false
+          }
+        ],
+        "requiredSystems": [
+          "concur"
+        ],
+        "sourceStepIds": [
+          "sample-variants-001-step-3"
+        ],
+        "sourceActivityIds": [
+          "act-1"
+        ],
+        "automationClassification": "ai_assisted",
+        "reusabilityScore": 0.25,
+        "confidence": 0.95,
+        "verb": "approve",
+        "object": "report"
+      },
+      {
+        "skillId": "skill-click_element_in_concur",
+        "skillName": "click_element_in_concur",
+        "description": "Click element in Concur",
+        "skillType": "navigation",
+        "inputSchema": [
+          {
+            "name": "\"Archive to records\" element",
+            "description": "\"Archive To Records\" Element",
+            "required": true
+          },
+          {
+            "name": "Concur interface",
+            "description": "Concur Interface",
+            "required": true
+          }
+        ],
+        "outputSchema": [
+          {
+            "name": "Page updated accordingly",
+            "description": "Page Updated Accordingly",
+            "required": false
+          }
+        ],
+        "requiredSystems": [
+          "concur"
+        ],
+        "sourceStepIds": [
+          "sample-variants-001-step-5"
+        ],
+        "sourceActivityIds": [
+          "act-1"
+        ],
+        "automationClassification": "full_automation",
+        "reusabilityScore": 0.4,
+        "confidence": 0.783,
+        "verb": "click",
+        "object": "element"
+      },
+      {
+        "skillId": "skill-notify_element_in_concur",
+        "skillName": "notify_element_in_concur",
+        "description": "Notify element via Concur",
+        "skillType": "communication",
+        "inputSchema": [
+          {
+            "name": "\"Notify employee\" button available",
+            "description": "\"Notify Employee\" Button Available",
+            "required": true
+          },
+          {
+            "name": "All prerequisite data entered",
+            "description": "All Prerequisite Data Entered",
+            "required": true
+          },
+          {
+            "name": "Access to Concur",
+            "description": "Access To Concur",
+            "required": true
+          }
+        ],
+        "outputSchema": [
+          {
+            "name": "\"Notify employee\" action confirmed by Concur",
+            "description": "\"Notify Employee\" Action Confirmed By Concur",
+            "required": false
+          },
+          {
+            "name": "Concur state updated",
+            "description": "Concur State Updated",
+            "required": false
+          }
+        ],
+        "requiredSystems": [
+          "concur"
+        ],
+        "sourceStepIds": [
+          "sample-variants-001-step-4"
+        ],
+        "sourceActivityIds": [
+          "act-1"
+        ],
+        "automationClassification": "ai_assisted",
+        "reusabilityScore": 0.25,
+        "confidence": 0.783,
+        "verb": "notify",
+        "object": "element"
+      },
+      {
+        "skillId": "skill-open_report_in_concur",
+        "skillName": "open_report_in_concur",
+        "description": "Open report in Concur",
+        "skillType": "navigation",
+        "inputSchema": [
+          {
+            "name": "Current page context",
+            "description": "Current Page Context",
+            "required": true
+          },
+          {
+            "name": "Navigation target URL",
+            "description": "Navigation Target URL",
+            "required": true
+          },
+          {
+            "name": "Access to Concur",
+            "description": "Access To Concur",
+            "required": true
+          }
+        ],
+        "outputSchema": [
+          {
+            "name": "Target page loaded in browser",
+            "description": "Target Page Loaded In Browser",
+            "required": false
+          },
+          {
+            "name": "Navigation state updated",
+            "description": "Navigation State Updated",
+            "required": false
+          }
+        ],
+        "requiredSystems": [
+          "concur"
+        ],
+        "sourceStepIds": [
+          "sample-variants-001-step-1"
+        ],
+        "sourceActivityIds": [
+          "act-1"
+        ],
+        "automationClassification": "full_automation",
+        "reusabilityScore": 0.4,
+        "confidence": 0.95,
+        "verb": "open",
+        "object": "report"
+      },
+      {
+        "skillId": "skill-review_element_in_concur",
+        "skillName": "review_element_in_concur",
+        "description": "Review element in Concur",
+        "skillType": "verification",
+        "inputSchema": [
+          {
+            "name": "Access to Concur",
+            "description": "Access To Concur",
+            "required": true
+          }
+        ],
+        "outputSchema": [
+          {
+            "name": "Data saved in Concur",
+            "description": "Data Saved In Concur",
+            "required": false
+          },
+          {
+            "name": "Fields accepted by the system",
+            "description": "Fields Accepted By The System",
+            "required": false
+          }
+        ],
+        "requiredSystems": [
+          "concur"
+        ],
+        "sourceStepIds": [
+          "sample-variants-001-step-2"
+        ],
+        "sourceActivityIds": [
+          "act-1"
+        ],
+        "automationClassification": "ai_assisted",
+        "reusabilityScore": 0.25,
+        "confidence": 0.783,
+        "verb": "review",
+        "object": "element"
+      }
+    ],
+    "clusters": [
+      {
+        "clusterId": "cluster-approve_report",
+        "canonicalSkillName": "approve_report",
+        "skillIds": [
+          "skill-approve_report_in_concur"
+        ],
+        "occurrenceCount": 1,
+        "workflowCount": 1,
+        "averageReusabilityScore": 0.25,
+        "averageConfidence": 0.95
+      },
+      {
+        "clusterId": "cluster-click_element",
+        "canonicalSkillName": "click_element",
+        "skillIds": [
+          "skill-click_element_in_concur"
+        ],
+        "occurrenceCount": 1,
+        "workflowCount": 1,
+        "averageReusabilityScore": 0.4,
+        "averageConfidence": 0.783
+      },
+      {
+        "clusterId": "cluster-notify_element",
+        "canonicalSkillName": "notify_element",
+        "skillIds": [
+          "skill-notify_element_in_concur"
+        ],
+        "occurrenceCount": 1,
+        "workflowCount": 1,
+        "averageReusabilityScore": 0.25,
+        "averageConfidence": 0.783
+      },
+      {
+        "clusterId": "cluster-open_report",
+        "canonicalSkillName": "open_report",
+        "skillIds": [
+          "skill-open_report_in_concur"
+        ],
+        "occurrenceCount": 1,
+        "workflowCount": 1,
+        "averageReusabilityScore": 0.4,
+        "averageConfidence": 0.95
+      },
+      {
+        "clusterId": "cluster-review_element",
+        "canonicalSkillName": "review_element",
+        "skillIds": [
+          "skill-review_element_in_concur"
+        ],
+        "occurrenceCount": 1,
+        "workflowCount": 1,
+        "averageReusabilityScore": 0.25,
+        "averageConfidence": 0.783
+      }
+    ],
+    "uniqueSkillCount": 5,
+    "reusableSkillCount": 0,
+    "skillTypeDistribution": {
+      "data_extraction": 0,
+      "data_entry": 0,
+      "navigation": 2,
+      "verification": 1,
+      "communication": 1,
+      "file_operation": 0,
+      "decision": 1,
+      "integration": 0,
+      "monitoring": 0
+    }
+  },
+  "opportunities": {
+    "opportunities": [
+      {
+        "opportunityId": "opp-1",
+        "category": "content_generation",
+        "classification": "ai_assist_candidate",
+        "title": "AI-assisted content creation (1 steps)",
+        "description": "1 steps involve content creation (emails, reports, documents). AI can generate drafts, reducing the human effort to review and approve rather than author from scratch.",
+        "affectedStepIds": [
+          "sample-variants-001-step-4"
+        ],
+        "affectedActivityIds": [
+          "act-1"
+        ],
+        "relatedSkillIds": [
+          "skill-notify_element_in_concur"
+        ],
+        "systems": [
+          "concur"
+        ],
+        "evidence": [
+          {
+            "signal": "content_creation_detected",
+            "sourceStepIds": [
+              "sample-variants-001-step-4"
+            ],
+            "metric": "count=1",
+            "reasoning": "Content creation detected: Notify employee in Concur — AI can generate drafts"
+          }
+        ],
+        "score": 40,
+        "scoringFactors": {
+          "timeSaved": 8,
+          "frequency": 20,
+          "feasibility": 70,
+          "reliability": 78
+        },
+        "estimatedTimeSavingsMs": 1400,
+        "confidence": 0.783
+      }
+    ],
+    "totalOpportunities": 1,
+    "categoryBreakdown": {
+      "repetition": 0,
+      "deterministic_logic": 0,
+      "data_movement": 0,
+      "content_generation": 1,
+      "multi_system_orchestration": 0,
+      "friction_reduction": 0,
+      "decision_support": 0
+    },
+    "classificationBreakdown": {
+      "automation_candidate": 0,
+      "ai_assist_candidate": 1,
+      "integration_opportunity": 0,
+      "agent_orchestration_candidate": 0
+    },
+    "topScore": 40,
+    "totalEstimatedTimeSavingsMs": 1400
+  },
+  "agentComposition": {
+    "agents": [
+      {
+        "agentId": "agent-1",
+        "agentName": "Concur Agent",
+        "description": "Handles Concur-related tasks in the workflow",
+        "role": "specialist",
+        "interactionMode": "supervised",
+        "skillIds": [
+          "skill-approve_report_in_concur",
+          "skill-click_element_in_concur",
+          "skill-notify_element_in_concur",
+          "skill-open_report_in_concur",
+          "skill-review_element_in_concur"
+        ],
+        "tools": [],
+        "tasks": [
+          {
+            "taskId": "task-1",
+            "description": "Open and Review report in Concur",
+            "activityIds": [
+              "act-1"
+            ],
+            "stepIds": [
+              "sample-variants-001-step-1",
+              "sample-variants-001-step-2",
+              "sample-variants-001-step-3",
+              "sample-variants-001-step-4",
+              "sample-variants-001-step-5"
+            ],
+            "requiredSkillIds": [
+              "skill-approve_report_in_concur",
+              "skill-click_element_in_concur",
+              "skill-notify_element_in_concur",
+              "skill-open_report_in_concur",
+              "skill-review_element_in_concur"
+            ],
+            "executionOrder": 1,
+            "requiresApproval": false,
+            "estimatedDurationMs": 16500
+          }
+        ],
+        "systems": [
+          "concur"
+        ],
+        "opportunityIds": [
+          "opp-1"
+        ],
+        "coveredActivityIds": [
+          "act-1"
+        ],
+        "coveredStepIds": [
+          "sample-variants-001-step-1",
+          "sample-variants-001-step-2",
+          "sample-variants-001-step-3",
+          "sample-variants-001-step-4",
+          "sample-variants-001-step-5"
+        ],
+        "automationClassification": "ai_assisted",
+        "capabilityScore": 75,
+        "confidence": 0.85
+      }
+    ],
+    "collaborations": [],
+    "agentCount": 1,
+    "coveredStepCount": 5,
+    "coverageRatio": 1,
+    "roleDistribution": {
+      "executor": 0,
+      "assistant": 0,
+      "orchestrator": 0,
+      "monitor": 0,
+      "specialist": 1
+    },
+    "averageCapabilityScore": 75
+  },
+  "integrationRisk": {
+    "integrations": [
+      {
+        "integrationId": "int-concur",
+        "system": "concur",
+        "integrationName": "Concur Integration",
+        "integrationType": "browser_rpa",
+        "readiness": "unknown",
+        "requiredCapabilities": [],
+        "dependentAgentIds": [
+          "agent-1"
+        ],
+        "dependentSkillIds": [
+          "skill-approve_report_in_concur",
+          "skill-click_element_in_concur",
+          "skill-notify_element_in_concur",
+          "skill-open_report_in_concur",
+          "skill-review_element_in_concur"
+        ],
+        "affectedStepIds": [
+          "sample-variants-001-step-1",
+          "sample-variants-001-step-2",
+          "sample-variants-001-step-3",
+          "sample-variants-001-step-4",
+          "sample-variants-001-step-5"
+        ],
+        "complexity": 5,
+        "notes": "No known API mapping for concur. Browser automation may be required."
+      }
+    ],
+    "risks": [
+      {
+        "riskId": "risk-1",
+        "category": "reliability",
+        "severity": "high",
+        "title": "Fragile Integration Reliability",
+        "description": "Browser-based automation or unknown-API systems increases the chance of automation failures.",
+        "impact": "Browser-based automation is fragile — UI changes can break the agent",
+        "mitigation": "Prefer API integrations where available. Add retry logic with exponential backoff.",
+        "affectedStepIds": [
+          "sample-variants-001-step-1",
+          "sample-variants-001-step-2",
+          "sample-variants-001-step-3",
+          "sample-variants-001-step-4",
+          "sample-variants-001-step-5"
+        ],
+        "affectedAgentIds": [
+          "agent-1"
+        ],
+        "systems": [
+          "concur"
+        ],
+        "confidence": 0.75
+      },
+      {
+        "riskId": "risk-2",
+        "category": "integration",
+        "severity": "high",
+        "title": "High-Complexity Integration Requirements",
+        "description": "1 integration(s) with complexity ≥ 4 will require significant implementation effort.",
+        "impact": "Complex integration with concur increases implementation time and maintenance burden",
+        "mitigation": "Evaluate alternative integration approaches. Consider phased rollout.",
+        "affectedStepIds": [
+          "sample-variants-001-step-1",
+          "sample-variants-001-step-2",
+          "sample-variants-001-step-3",
+          "sample-variants-001-step-4",
+          "sample-variants-001-step-5"
+        ],
+        "affectedAgentIds": [
+          "agent-1"
+        ],
+        "systems": [
+          "concur"
+        ],
+        "confidence": 0.85
+      }
+    ],
+    "integrationCount": 1,
+    "readinessBreakdown": {
+      "api_available": 0,
+      "api_limited": 0,
+      "no_api": 0,
+      "unknown": 1
+    },
+    "riskCount": 2,
+    "severityBreakdown": {
+      "low": 0,
+      "medium": 0,
+      "high": 2,
+      "critical": 0
+    },
+    "categoryBreakdown": {
+      "data_integrity": 0,
+      "security": 0,
+      "reliability": 1,
+      "compliance": 0,
+      "human_displacement": 0,
+      "integration": 1,
+      "complexity": 0
+    },
+    "overallRiskLevel": "high",
+    "implementationReadinessScore": 45
+  },
+  "artifacts": {
+    "agentConfigs": [
+      {
+        "agentId": "agent-1",
+        "name": "Concur Agent",
+        "description": "Handles Concur-related tasks in the workflow",
+        "role": "specialist",
+        "interactionMode": "supervised",
+        "config": {
+          "systems": [
+            "concur"
+          ],
+          "tools": [],
+          "skills": [
+            "skill-approve_report_in_concur",
+            "skill-click_element_in_concur",
+            "skill-notify_element_in_concur",
+            "skill-open_report_in_concur",
+            "skill-review_element_in_concur"
+          ],
+          "maxConcurrentTasks": 3,
+          "requiresHumanApproval": false,
+          "retryPolicy": {
+            "maxRetries": 3,
+            "backoffMs": 1000
+          }
+        },
+        "taskPlan": [
+          {
+            "taskId": "task-1",
+            "description": "Open and Review report in Concur",
+            "activityIds": [
+              "act-1"
+            ],
+            "stepIds": [
+              "sample-variants-001-step-1",
+              "sample-variants-001-step-2",
+              "sample-variants-001-step-3",
+              "sample-variants-001-step-4",
+              "sample-variants-001-step-5"
+            ],
+            "requiredSkillIds": [
+              "skill-approve_report_in_concur",
+              "skill-click_element_in_concur",
+              "skill-notify_element_in_concur",
+              "skill-open_report_in_concur",
+              "skill-review_element_in_concur"
+            ],
+            "executionOrder": 1,
+            "requiresApproval": false,
+            "estimatedDurationMs": 16500
+          }
+        ]
+      }
+    ],
+    "skillManifests": [
+      {
+        "skillId": "skill-approve_report_in_concur",
+        "name": "approve_report_in_concur",
+        "description": "Approve report in Concur",
+        "skillType": "decision",
+        "inputs": [
+          {
+            "name": "Concur form",
+            "description": "Concur Form",
+            "required": true
+          }
+        ],
+        "outputs": [
+          {
+            "name": "Record created or updated in Concur",
+            "description": "Record Created Or Updated In Concur",
+            "required": false
+          },
+          {
+            "name": "Confirmation of successful submission",
+            "description": "Confirmation Of Successful Submission",
+            "required": false
+          }
+        ],
+        "requiredIntegrations": [
+          "int-concur"
+        ],
+        "autonomous": false,
+        "reusabilityScore": 0.25
+      },
+      {
+        "skillId": "skill-click_element_in_concur",
+        "name": "click_element_in_concur",
+        "description": "Click element in Concur",
+        "skillType": "navigation",
+        "inputs": [
+          {
+            "name": "\"Archive to records\" element",
+            "description": "\"Archive To Records\" Element",
+            "required": true
+          },
+          {
+            "name": "Concur interface",
+            "description": "Concur Interface",
+            "required": true
+          }
+        ],
+        "outputs": [
+          {
+            "name": "Page updated accordingly",
+            "description": "Page Updated Accordingly",
+            "required": false
+          }
+        ],
+        "requiredIntegrations": [
+          "int-concur"
+        ],
+        "autonomous": true,
+        "reusabilityScore": 0.4
+      },
+      {
+        "skillId": "skill-notify_element_in_concur",
+        "name": "notify_element_in_concur",
+        "description": "Notify element via Concur",
+        "skillType": "communication",
+        "inputs": [
+          {
+            "name": "\"Notify employee\" button available",
+            "description": "\"Notify Employee\" Button Available",
+            "required": true
+          },
+          {
+            "name": "All prerequisite data entered",
+            "description": "All Prerequisite Data Entered",
+            "required": true
+          },
+          {
+            "name": "Access to Concur",
+            "description": "Access To Concur",
+            "required": true
+          }
+        ],
+        "outputs": [
+          {
+            "name": "\"Notify employee\" action confirmed by Concur",
+            "description": "\"Notify Employee\" Action Confirmed By Concur",
+            "required": false
+          },
+          {
+            "name": "Concur state updated",
+            "description": "Concur State Updated",
+            "required": false
+          }
+        ],
+        "requiredIntegrations": [
+          "int-concur"
+        ],
+        "autonomous": false,
+        "reusabilityScore": 0.25
+      },
+      {
+        "skillId": "skill-open_report_in_concur",
+        "name": "open_report_in_concur",
+        "description": "Open report in Concur",
+        "skillType": "navigation",
+        "inputs": [
+          {
+            "name": "Current page context",
+            "description": "Current Page Context",
+            "required": true
+          },
+          {
+            "name": "Navigation target URL",
+            "description": "Navigation Target URL",
+            "required": true
+          },
+          {
+            "name": "Access to Concur",
+            "description": "Access To Concur",
+            "required": true
+          }
+        ],
+        "outputs": [
+          {
+            "name": "Target page loaded in browser",
+            "description": "Target Page Loaded In Browser",
+            "required": false
+          },
+          {
+            "name": "Navigation state updated",
+            "description": "Navigation State Updated",
+            "required": false
+          }
+        ],
+        "requiredIntegrations": [
+          "int-concur"
+        ],
+        "autonomous": true,
+        "reusabilityScore": 0.4
+      },
+      {
+        "skillId": "skill-review_element_in_concur",
+        "name": "review_element_in_concur",
+        "description": "Review element in Concur",
+        "skillType": "verification",
+        "inputs": [
+          {
+            "name": "Access to Concur",
+            "description": "Access To Concur",
+            "required": true
+          }
+        ],
+        "outputs": [
+          {
+            "name": "Data saved in Concur",
+            "description": "Data Saved In Concur",
+            "required": false
+          },
+          {
+            "name": "Fields accepted by the system",
+            "description": "Fields Accepted By The System",
+            "required": false
+          }
+        ],
+        "requiredIntegrations": [
+          "int-concur"
+        ],
+        "autonomous": false,
+        "reusabilityScore": 0.25
+      }
+    ],
+    "integrationConfigs": [
+      {
+        "integrationId": "int-concur",
+        "system": "concur",
+        "name": "Concur Integration",
+        "integrationType": "browser_rpa",
+        "readiness": "unknown",
+        "capabilities": [],
+        "setupSteps": [
+          "Configure browser automation environment",
+          "Define page selectors",
+          "Implement error recovery",
+          "Add screenshot-based validation"
+        ],
+        "complexity": 5,
+        "estimatedSetupTime": "2-4 weeks"
+      }
+    ],
+    "roadmap": [
+      {
+        "phase": 1,
+        "title": "Foundation — Integration Setup",
+        "description": "Set up required API integrations and authentication flows",
+        "agentIds": [],
+        "integrationIds": [
+          "int-concur"
+        ],
+        "riskIds": [
+          "risk-2"
+        ],
+        "estimatedEffort": "1-2 days",
+        "prerequisites": []
+      },
+      {
+        "phase": 2,
+        "title": "AI Assistance — Deploy Assistant & Specialist Agents",
+        "description": "Deploy AI-assisted agents that work alongside humans",
+        "agentIds": [
+          "agent-1"
+        ],
+        "integrationIds": [
+          "int-concur"
+        ],
+        "riskIds": [],
+        "estimatedEffort": "1-2 days",
+        "prerequisites": [
+          1
+        ]
+      },
+      {
+        "phase": 3,
+        "title": "Optimization — Monitor & Improve",
+        "description": "Monitor agent performance and optimize based on real-world data",
+        "agentIds": [],
+        "integrationIds": [],
+        "riskIds": [],
+        "estimatedEffort": "Ongoing",
+        "prerequisites": [
+          1,
+          2
+        ]
+      }
+    ],
+    "summary": {
+      "totalAgents": 1,
+      "totalSkills": 5,
+      "totalIntegrations": 1,
+      "totalPhases": 3,
+      "automationScore": 75,
+      "implementationReadinessScore": 45,
+      "estimatedTimeSavingsMs": 1400
+    }
+  },
+  "metadata": {
+    "engineVersion": "0.1.0",
+    "processedAt": "2024-01-15T09:00:00.000Z",
+    "sourceRunId": "sample-variants-001",
+    "pipelineDurationMs": 0
+  }
+}

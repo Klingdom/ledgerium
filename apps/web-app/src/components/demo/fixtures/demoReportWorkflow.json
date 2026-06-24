@@ -1,0 +1,15 @@
+{
+  "id": "8a7f3a48-3b9a-4790-92a4-6ba5ce59db08",
+  "title": "Approve Expense Report (Sample)",
+  "durationMs": 19000,
+  "stepCount": 5,
+  "phaseCount": 1,
+  "confidence": 0.9,
+  "toolsUsed": [
+    "Concur"
+  ],
+  "status": "active",
+  "createdAt": "2026-06-23T23:32:42.387Z",
+  "updatedAt": "2026-06-23T23:32:42.990Z",
+  "isFavorite": false
+}
