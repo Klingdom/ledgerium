@@ -1,0 +1,771 @@
+{
+  "processTitle": "Approve Expense Report (Sample)",
+  "runCount": 16,
+  "ruleVersion": "1.0.0",
+  "computedAt": "2024-01-15T09:00:00.000Z",
+  "metrics": {
+    "runCount": 16,
+    "completedRunCount": 16,
+    "completionRate": 1,
+    "errorStepFrequency": 0.25,
+    "navigationStepFrequency": 1,
+    "medianDurationMs": 24750,
+    "meanDurationMs": 23825,
+    "p90DurationMs": 32500,
+    "minDurationMs": 14800,
+    "maxDurationMs": 33500,
+    "medianStepCount": 6,
+    "meanStepCount": 5.6875,
+    "uniqueSystems": [
+      "Concur"
+    ],
+    "evidenceRunIds": [
+      "sample-variants-016",
+      "sample-variants-015",
+      "sample-variants-014",
+      "sample-variants-013",
+      "sample-variants-012",
+      "sample-variants-011",
+      "sample-variants-010",
+      "sample-variants-009",
+      "sample-variants-008",
+      "sample-variants-007",
+      "sample-variants-006",
+      "sample-variants-005",
+      "sample-variants-004",
+      "sample-variants-003",
+      "sample-variants-002",
+      "sample-variants-001"
+    ],
+    "ruleVersion": "1.0.0",
+    "computedAt": "2024-01-15T09:00:00.000Z"
+  },
+  "timestudy": {
+    "ruleVersion": "1.0.0",
+    "runCount": 16,
+    "computedAt": "2024-01-15T09:00:00.000Z",
+    "totalDuration": {
+      "meanMs": 23825,
+      "medianMs": 24750,
+      "p90Ms": 32500,
+      "minMs": 14800,
+      "maxMs": 33500,
+      "stdDevMs": 5756.246606947969
+    },
+    "stepPositionTimestudies": [
+      {
+        "position": 1,
+        "category": "click_then_navigate",
+        "runCount": 16,
+        "meanDurationMs": 1487.5,
+        "medianDurationMs": 1500,
+        "minDurationMs": 1400,
+        "maxDurationMs": 1500,
+        "p90DurationMs": 1500,
+        "stdDevMs": 33.071891388307385,
+        "evidenceRunIds": [
+          "sample-variants-001",
+          "sample-variants-002",
+          "sample-variants-003",
+          "sample-variants-004",
+          "sample-variants-005",
+          "sample-variants-006",
+          "sample-variants-007",
+          "sample-variants-008",
+          "sample-variants-009",
+          "sample-variants-010",
+          "sample-variants-011",
+          "sample-variants-012",
+          "sample-variants-013",
+          "sample-variants-014",
+          "sample-variants-015",
+          "sample-variants-016"
+        ]
+      },
+      {
+        "position": 2,
+        "category": "data_entry",
+        "runCount": 16,
+        "meanDurationMs": 8381.25,
+        "medianDurationMs": 8500,
+        "minDurationMs": 7000,
+        "maxDurationMs": 9600,
+        "p90DurationMs": 9500,
+        "stdDevMs": 724.7575025482662,
+        "evidenceRunIds": [
+          "sample-variants-001",
+          "sample-variants-002",
+          "sample-variants-003",
+          "sample-variants-004",
+          "sample-variants-005",
+          "sample-variants-006",
+          "sample-variants-007",
+          "sample-variants-008",
+          "sample-variants-009",
+          "sample-variants-010",
+          "sample-variants-011",
+          "sample-variants-012",
+          "sample-variants-013",
+          "sample-variants-014",
+          "sample-variants-015",
+          "sample-variants-016"
+        ]
+      },
+      {
+        "position": 3,
+        "category": "fill_and_submit",
+        "runCount": 16,
+        "meanDurationMs": 3875,
+        "medianDurationMs": 4000,
+        "minDurationMs": 2000,
+        "maxDurationMs": 5000,
+        "p90DurationMs": 5000,
+        "stdDevMs": 838.5254915624212,
+        "evidenceRunIds": [
+          "sample-variants-001",
+          "sample-variants-002",
+          "sample-variants-003",
+          "sample-variants-004",
+          "sample-variants-005",
+          "sample-variants-006",
+          "sample-variants-007",
+          "sample-variants-008",
+          "sample-variants-009",
+          "sample-variants-010",
+          "sample-variants-011",
+          "sample-variants-012",
+          "sample-variants-013",
+          "sample-variants-014",
+          "sample-variants-015",
+          "sample-variants-016"
+        ]
+      },
+      {
+        "position": 4,
+        "category": "send_action",
+        "runCount": 16,
+        "meanDurationMs": 4175,
+        "medianDurationMs": 4000,
+        "minDurationMs": 900,
+        "maxDurationMs": 10000,
+        "p90DurationMs": 10000,
+        "stdDevMs": 2841.984341969533,
+        "evidenceRunIds": [
+          "sample-variants-001",
+          "sample-variants-002",
+          "sample-variants-003",
+          "sample-variants-004",
+          "sample-variants-005",
+          "sample-variants-006",
+          "sample-variants-007",
+          "sample-variants-008",
+          "sample-variants-009",
+          "sample-variants-010",
+          "sample-variants-011",
+          "sample-variants-012",
+          "sample-variants-013",
+          "sample-variants-014",
+          "sample-variants-015",
+          "sample-variants-016"
+        ]
+      },
+      {
+        "position": 5,
+        "category": "send_action",
+        "runCount": 14,
+        "meanDurationMs": 2285.714285714286,
+        "medianDurationMs": 2000,
+        "minDurationMs": 1000,
+        "maxDurationMs": 4500,
+        "p90DurationMs": 4500,
+        "stdDevMs": 1319.0132366156706,
+        "evidenceRunIds": [
+          "sample-variants-001",
+          "sample-variants-002",
+          "sample-variants-003",
+          "sample-variants-004",
+          "sample-variants-005",
+          "sample-variants-006",
+          "sample-variants-007",
+          "sample-variants-008",
+          "sample-variants-009",
+          "sample-variants-010",
+          "sample-variants-013",
+          "sample-variants-014",
+          "sample-variants-015",
+          "sample-variants-016"
+        ]
+      },
+      {
+        "position": 6,
+        "category": "single_action",
+        "runCount": 9,
+        "meanDurationMs": 1444.4444444444443,
+        "medianDurationMs": 1000,
+        "minDurationMs": 1000,
+        "maxDurationMs": 2000,
+        "p90DurationMs": 2000,
+        "stdDevMs": 496.9039949999532,
+        "evidenceRunIds": [
+          "sample-variants-006",
+          "sample-variants-007",
+          "sample-variants-008",
+          "sample-variants-009",
+          "sample-variants-010",
+          "sample-variants-013",
+          "sample-variants-014",
+          "sample-variants-015",
+          "sample-variants-016"
+        ]
+      },
+      {
+        "position": 7,
+        "category": "single_action",
+        "runCount": 4,
+        "meanDurationMs": 1000,
+        "medianDurationMs": 1000,
+        "minDurationMs": 1000,
+        "maxDurationMs": 1000,
+        "p90DurationMs": 1000,
+        "stdDevMs": 0,
+        "evidenceRunIds": [
+          "sample-variants-013",
+          "sample-variants-014",
+          "sample-variants-015",
+          "sample-variants-016"
+        ]
+      }
+    ],
+    "evidenceRunIds": [
+      "sample-variants-016",
+      "sample-variants-015",
+      "sample-variants-014",
+      "sample-variants-013",
+      "sample-variants-012",
+      "sample-variants-011",
+      "sample-variants-010",
+      "sample-variants-009",
+      "sample-variants-008",
+      "sample-variants-007",
+      "sample-variants-006",
+      "sample-variants-005",
+      "sample-variants-004",
+      "sample-variants-003",
+      "sample-variants-002",
+      "sample-variants-001"
+    ]
+  },
+  "variance": {
+    "ruleVersion": "1.0.0",
+    "runCount": 16,
+    "computedAt": "2024-01-15T09:00:00.000Z",
+    "durationVariance": {
+      "stdDevMs": 5756.246606947969,
+      "coefficientOfVariation": 0.2416053140376902,
+      "isHighVariance": false
+    },
+    "stepCountVariance": {
+      "min": 4,
+      "max": 7,
+      "stdDev": 0.982264602843857,
+      "isHighVariance": true
+    },
+    "sequenceStability": 0.3125,
+    "highVarianceSteps": [
+      {
+        "position": 4,
+        "category": "error_handling",
+        "coefficientOfVariation": 0.6807148124477923,
+        "meanDurationMs": 4175,
+        "stdDevMs": 2841.984341969533,
+        "runCount": 16,
+        "evidenceRunIds": [
+          "sample-variants-001",
+          "sample-variants-002",
+          "sample-variants-003",
+          "sample-variants-004",
+          "sample-variants-005",
+          "sample-variants-006",
+          "sample-variants-007",
+          "sample-variants-008",
+          "sample-variants-009",
+          "sample-variants-010",
+          "sample-variants-011",
+          "sample-variants-012",
+          "sample-variants-013",
+          "sample-variants-014",
+          "sample-variants-015",
+          "sample-variants-016"
+        ]
+      },
+      {
+        "position": 5,
+        "category": "error_handling",
+        "coefficientOfVariation": 0.5770682910193559,
+        "meanDurationMs": 2285.714285714286,
+        "stdDevMs": 1319.0132366156706,
+        "runCount": 14,
+        "evidenceRunIds": [
+          "sample-variants-001",
+          "sample-variants-002",
+          "sample-variants-003",
+          "sample-variants-004",
+          "sample-variants-005",
+          "sample-variants-006",
+          "sample-variants-007",
+          "sample-variants-008",
+          "sample-variants-009",
+          "sample-variants-010",
+          "sample-variants-013",
+          "sample-variants-014",
+          "sample-variants-015",
+          "sample-variants-016"
+        ]
+      }
+    ],
+    "evidenceRunIds": [
+      "sample-variants-016",
+      "sample-variants-015",
+      "sample-variants-014",
+      "sample-variants-013",
+      "sample-variants-012",
+      "sample-variants-011",
+      "sample-variants-010",
+      "sample-variants-009",
+      "sample-variants-008",
+      "sample-variants-007",
+      "sample-variants-006",
+      "sample-variants-005",
+      "sample-variants-004",
+      "sample-variants-003",
+      "sample-variants-002",
+      "sample-variants-001"
+    ]
+  },
+  "variants": {
+    "ruleVersion": "1.0.0",
+    "runCount": 16,
+    "computedAt": "2024-01-15T09:00:00.000Z",
+    "variantCount": 6,
+    "standardPath": {
+      "variantId": "variant-1",
+      "pathSignature": {
+        "signature": "click_then_navigate:data_entry:fill_and_submit:send_action:single_action",
+        "stepCategories": [
+          "click_then_navigate",
+          "data_entry",
+          "fill_and_submit",
+          "send_action",
+          "single_action"
+        ],
+        "stepCount": 5
+      },
+      "runCount": 5,
+      "frequency": 0.3125,
+      "isStandardPath": true,
+      "similarityToStandard": 1,
+      "evidenceRunIds": [
+        "sample-variants-001",
+        "sample-variants-002",
+        "sample-variants-003",
+        "sample-variants-004",
+        "sample-variants-005"
+      ]
+    },
+    "variants": [
+      {
+        "variantId": "variant-1",
+        "pathSignature": {
+          "signature": "click_then_navigate:data_entry:fill_and_submit:send_action:single_action",
+          "stepCategories": [
+            "click_then_navigate",
+            "data_entry",
+            "fill_and_submit",
+            "send_action",
+            "single_action"
+          ],
+          "stepCount": 5
+        },
+        "runCount": 5,
+        "frequency": 0.3125,
+        "isStandardPath": true,
+        "similarityToStandard": 1,
+        "evidenceRunIds": [
+          "sample-variants-001",
+          "sample-variants-002",
+          "sample-variants-003",
+          "sample-variants-004",
+          "sample-variants-005"
+        ]
+      },
+      {
+        "variantId": "variant-2",
+        "pathSignature": {
+          "signature": "click_then_navigate:data_entry:single_action:fill_and_submit:send_action:single_action",
+          "stepCategories": [
+            "click_then_navigate",
+            "data_entry",
+            "single_action",
+            "fill_and_submit",
+            "send_action",
+            "single_action"
+          ],
+          "stepCount": 6
+        },
+        "runCount": 3,
+        "frequency": 0.1875,
+        "isStandardPath": false,
+        "similarityToStandard": 0.6,
+        "evidenceRunIds": [
+          "sample-variants-006",
+          "sample-variants-007",
+          "sample-variants-008"
+        ]
+      },
+      {
+        "variantId": "variant-3",
+        "pathSignature": {
+          "signature": "click_then_navigate:data_entry:fill_and_submit:data_entry:fill_and_submit:send_action:single_action",
+          "stepCategories": [
+            "click_then_navigate",
+            "data_entry",
+            "fill_and_submit",
+            "data_entry",
+            "fill_and_submit",
+            "send_action",
+            "single_action"
+          ],
+          "stepCount": 7
+        },
+        "runCount": 2,
+        "frequency": 0.125,
+        "isStandardPath": false,
+        "similarityToStandard": 0.6809523809523809,
+        "evidenceRunIds": [
+          "sample-variants-013",
+          "sample-variants-014"
+        ]
+      },
+      {
+        "variantId": "variant-4",
+        "pathSignature": {
+          "signature": "click_then_navigate:data_entry:fill_and_submit:error_handling:error_handling:send_action:single_action",
+          "stepCategories": [
+            "click_then_navigate",
+            "data_entry",
+            "fill_and_submit",
+            "error_handling",
+            "error_handling",
+            "send_action",
+            "single_action"
+          ],
+          "stepCount": 7
+        },
+        "runCount": 2,
+        "frequency": 0.125,
+        "isStandardPath": false,
+        "similarityToStandard": 0.5142857142857142,
+        "evidenceRunIds": [
+          "sample-variants-015",
+          "sample-variants-016"
+        ]
+      },
+      {
+        "variantId": "variant-5",
+        "pathSignature": {
+          "signature": "click_then_navigate:data_entry:fill_and_submit:single_action",
+          "stepCategories": [
+            "click_then_navigate",
+            "data_entry",
+            "fill_and_submit",
+            "single_action"
+          ],
+          "stepCount": 4
+        },
+        "runCount": 2,
+        "frequency": 0.125,
+        "isStandardPath": false,
+        "similarityToStandard": 0.52,
+        "evidenceRunIds": [
+          "sample-variants-011",
+          "sample-variants-012"
+        ]
+      },
+      {
+        "variantId": "variant-6",
+        "pathSignature": {
+          "signature": "click_then_navigate:data_entry:fill_and_submit:single_action:send_action:single_action",
+          "stepCategories": [
+            "click_then_navigate",
+            "data_entry",
+            "fill_and_submit",
+            "single_action",
+            "send_action",
+            "single_action"
+          ],
+          "stepCount": 6
+        },
+        "runCount": 2,
+        "frequency": 0.125,
+        "isStandardPath": false,
+        "similarityToStandard": 0.6,
+        "evidenceRunIds": [
+          "sample-variants-009",
+          "sample-variants-010"
+        ]
+      }
+    ],
+    "variantSimilarityThreshold": 0.75,
+    "evidenceRunIds": [
+      "sample-variants-016",
+      "sample-variants-015",
+      "sample-variants-014",
+      "sample-variants-013",
+      "sample-variants-012",
+      "sample-variants-011",
+      "sample-variants-010",
+      "sample-variants-009",
+      "sample-variants-008",
+      "sample-variants-007",
+      "sample-variants-006",
+      "sample-variants-005",
+      "sample-variants-004",
+      "sample-variants-003",
+      "sample-variants-002",
+      "sample-variants-001"
+    ]
+  },
+  "bottlenecks": {
+    "ruleVersion": "1.0.0",
+    "runCount": 16,
+    "computedAt": "2024-01-15T09:00:00.000Z",
+    "bottleneckCount": 3,
+    "bottlenecks": [
+      {
+        "position": 2,
+        "category": "data_entry",
+        "meanDurationMs": 8381.25,
+        "overallMeanStepDurationMs": 3689.010989010989,
+        "durationRatio": 2.271950402144772,
+        "isHighDuration": true,
+        "isHighVariance": false,
+        "coefficientOfVariation": 0.08647367666496837,
+        "runCount": 16,
+        "evidenceRunIds": [
+          "sample-variants-001",
+          "sample-variants-002",
+          "sample-variants-003",
+          "sample-variants-004",
+          "sample-variants-005",
+          "sample-variants-006",
+          "sample-variants-007",
+          "sample-variants-008",
+          "sample-variants-009",
+          "sample-variants-010",
+          "sample-variants-011",
+          "sample-variants-012",
+          "sample-variants-013",
+          "sample-variants-014",
+          "sample-variants-015",
+          "sample-variants-016"
+        ]
+      },
+      {
+        "position": 4,
+        "category": "error_handling",
+        "meanDurationMs": 4175,
+        "overallMeanStepDurationMs": 3689.010989010989,
+        "durationRatio": 1.1317396484956808,
+        "isHighDuration": false,
+        "isHighVariance": true,
+        "coefficientOfVariation": 0.6807148124477923,
+        "runCount": 16,
+        "evidenceRunIds": [
+          "sample-variants-001",
+          "sample-variants-002",
+          "sample-variants-003",
+          "sample-variants-004",
+          "sample-variants-005",
+          "sample-variants-006",
+          "sample-variants-007",
+          "sample-variants-008",
+          "sample-variants-009",
+          "sample-variants-010",
+          "sample-variants-011",
+          "sample-variants-012",
+          "sample-variants-013",
+          "sample-variants-014",
+          "sample-variants-015",
+          "sample-variants-016"
+        ]
+      },
+      {
+        "position": 5,
+        "category": "error_handling",
+        "meanDurationMs": 2285.714285714286,
+        "overallMeanStepDurationMs": 3689.010989010989,
+        "durationRatio": 0.6196008340780459,
+        "isHighDuration": false,
+        "isHighVariance": true,
+        "coefficientOfVariation": 0.5770682910193559,
+        "runCount": 14,
+        "evidenceRunIds": [
+          "sample-variants-001",
+          "sample-variants-002",
+          "sample-variants-003",
+          "sample-variants-004",
+          "sample-variants-005",
+          "sample-variants-006",
+          "sample-variants-007",
+          "sample-variants-008",
+          "sample-variants-009",
+          "sample-variants-010",
+          "sample-variants-013",
+          "sample-variants-014",
+          "sample-variants-015",
+          "sample-variants-016"
+        ]
+      }
+    ],
+    "bottleneckDurationMultiplier": 1.5,
+    "highVarianceCvThreshold": 0.5,
+    "evidenceRunIds": [
+      "sample-variants-016",
+      "sample-variants-015",
+      "sample-variants-014",
+      "sample-variants-013",
+      "sample-variants-012",
+      "sample-variants-011",
+      "sample-variants-010",
+      "sample-variants-009",
+      "sample-variants-008",
+      "sample-variants-007",
+      "sample-variants-006",
+      "sample-variants-005",
+      "sample-variants-004",
+      "sample-variants-003",
+      "sample-variants-002",
+      "sample-variants-001"
+    ]
+  },
+  "standardPath": {
+    "pathSignature": {
+      "signature": "click_then_navigate:data_entry:fill_and_submit:send_action:single_action",
+      "stepCategories": [
+        "click_then_navigate",
+        "data_entry",
+        "fill_and_submit",
+        "send_action",
+        "single_action"
+      ],
+      "stepCount": 5
+    },
+    "runCount": 5,
+    "frequency": 0.3125,
+    "evidenceRunIds": [
+      "sample-variants-001",
+      "sample-variants-002",
+      "sample-variants-003",
+      "sample-variants-004",
+      "sample-variants-005"
+    ]
+  },
+  "variantStepTitles": {
+    "variant-1": [
+      "Open expense report",
+      "Review line items",
+      "Approve report",
+      "Notify employee",
+      "Archive to records"
+    ],
+    "variant-2": [
+      "Open expense report",
+      "Review line items",
+      "Request clarification",
+      "Approve report",
+      "Notify employee",
+      "Archive to records"
+    ],
+    "variant-3": [
+      "Open expense report",
+      "Review line items",
+      "Flag for rework",
+      "Employee updates report",
+      "Approve revised report",
+      "Notify employee",
+      "Archive to records"
+    ],
+    "variant-4": [
+      "Open expense report",
+      "Review line items",
+      "Approve report",
+      "Notification failed — retry",
+      "Escalate to manager",
+      "Notify employee",
+      "Archive to records"
+    ],
+    "variant-5": [
+      "Open expense report",
+      "Review line items",
+      "Approve report",
+      "Archive to records"
+    ],
+    "variant-6": [
+      "Open expense report",
+      "Review line items",
+      "Approve report",
+      "Escalate to manager for sign-off",
+      "Notify employee",
+      "Archive to records"
+    ]
+  },
+  "variantStepDurations": {
+    "variant-1": [
+      1500,
+      7800,
+      4000,
+      2000,
+      1000
+    ],
+    "variant-2": [
+      1500,
+      8800,
+      5000,
+      4000,
+      2000,
+      1000
+    ],
+    "variant-3": [
+      1500,
+      9500,
+      2000,
+      10000,
+      4000,
+      2000,
+      1000
+    ],
+    "variant-4": [
+      1500,
+      8200,
+      4000,
+      4500,
+      4500,
+      2000,
+      1000
+    ],
+    "variant-5": [
+      1400,
+      7300,
+      3500,
+      900
+    ],
+    "variant-6": [
+      1500,
+      9600,
+      4000,
+      7000,
+      2000,
+      1000
+    ]
+  }
+}

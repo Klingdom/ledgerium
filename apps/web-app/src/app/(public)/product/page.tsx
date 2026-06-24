@@ -7,6 +7,7 @@ import DemoDashboard from '@/components/demo/DemoDashboard';
 import RealProductDemo from '@/components/demo/RealProductDemo';
 import DemoAnnotatedDashboardHeader from '@/components/demo/DemoAnnotatedDashboardHeader';
 import DemoAnnotatedWorkflowViews from '@/components/demo/DemoAnnotatedWorkflowViews';
+import DemoAnnotatedReport from '@/components/demo/DemoAnnotatedReport';
 import {
   Play,
   Layers,
@@ -382,6 +383,21 @@ export default function ProductPage() {
             the process map and the generated SOP.
           </p>
           <DemoAnnotatedWorkflowViews />
+        </div>
+      </section>
+
+      {/* ── Container 3: the Workflow Report ───────────────────────────── */}
+      <section className="py-20 border-t border-[var(--border-subtle)]">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-4">
+            The report
+          </h2>
+          <p className="text-center text-[#e2e8f0] leading-relaxed mb-8 max-w-2xl mx-auto">
+            Every recorded workflow produces a full quantitative report — scorecard,
+            timestudy, bottlenecks, automation, ROI, and more. Scroll inside it, and
+            click any numbered marker to learn what a section surfaces.
+          </p>
+          <DemoAnnotatedReport />
         </div>
       </section>
 
