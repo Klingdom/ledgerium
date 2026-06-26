@@ -78,6 +78,15 @@ function proseSources(page: SeoPage): string[] {
       ...page.steps.flatMap((s) => [s.title, s.detail]),
       ...page.commonMistakes,
     );
+  } else if (page.type === 'sopTemplate') {
+    base.push(
+      page.whoUsesIt,
+      page.whenToUseIt,
+      page.howLedgeriumGenerates,
+      ...page.sopSections.flatMap((s) => [s.heading, s.detail]),
+      ...page.exampleProcedure.flatMap((s) => [s.title, s.detail]),
+      ...page.commonMistakes,
+    );
   }
   return base;
 }

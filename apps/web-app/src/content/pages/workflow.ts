@@ -458,6 +458,462 @@ const purchaseOrder: WorkflowPage = {
   published: true,
 };
 
+const employeeOnboarding: WorkflowPage = {
+  type: 'workflow',
+  slug: 'employee-onboarding-workflow',
+  metaTitle: 'Employee Onboarding Workflow: How to Document It',
+  metaDescription:
+    'Document your employee onboarding workflow by recording it once. Capture the real HR, IT, and manager setup steps in an SOP and a process map.',
+  h1: 'How to document an employee onboarding workflow',
+  eyebrow: 'Workflow',
+  shortAnswer:
+    'To document an employee onboarding workflow, record the real setup of a new hire from offer acceptance to a productive first week, then generate a step-by-step SOP and a process map from it. Onboarding spans HR, IT, and the hiring manager, so a written-from-memory checklist usually misses a system or a handoff. Ledgerium records the real onboarding in the browser, captures the account provisioning, access grants, and equipment steps, and generates the SOP, the process map, and a report that shows where new hires wait before they can work.',
+  primaryKeyword: 'employee onboarding workflow',
+  secondaryKeywords: ['employee onboarding SOP', 'new hire onboarding process', 'IT onboarding checklist'],
+  searchIntent: 'commercial',
+  tags: ['workflow', 'hr', 'it', 'onboarding', 'workday'],
+  related: ['persona:hr-teams', 'software:workday', 'sopTemplate:employee-onboarding-sop-template'],
+  originalDataPoint:
+    'Most onboarding delay sits in cross-team handoffs, where HR finishes a step and IT has not yet started. Ledgerium timestamps each step, so the report shows how long a new hire waits between HR provisioning and IT access rather than only how long each task takes to perform.',
+  honestLimitation:
+    'Equipment shipping, badge printing, and any setup done in person are not captured. Ledgerium records the browser-based onboarding steps; physical and offline tasks need a linked note.',
+  whoUsesIt:
+    'HR coordinators, IT provisioning staff, and the hiring manager who owns the first week. People operations leads use it to standardize onboarding across departments.',
+  systems: ['HRIS or HR system', 'Identity and access management', 'IT ticketing or device management', 'Email'],
+  oldWay:
+    'Each team keeps its own partial checklist and assumes the others have theirs. A system gets forgotten, an access grant is missed, and the new hire spends day one waiting for a login that nobody owned.',
+  ledgeriumWay:
+    'Record one real onboarding. Ledgerium captures the HR, IT, and manager steps in order across each system and generates the SOP, the process map, and a report that highlights the handoffs where new hires wait.',
+  steps: [
+    { title: 'Create the employee record', detail: 'HR enters the new hire into the HR system with role, start date, and department.' },
+    { title: 'Provision accounts and identity', detail: 'IT creates the directory account and core logins, and assigns the right access groups.' },
+    { title: 'Grant application access', detail: 'Add the new hire to the tools their role needs, based on the access matrix.' },
+    { title: 'Prepare equipment and workspace', detail: 'Assign and configure the laptop and any role-specific tools or licenses.' },
+    { title: 'Run the first-week handoff', detail: 'The manager confirms access works, shares the first tasks, and closes the onboarding.' },
+  ],
+  commonMistakes: [
+    'Treating onboarding as HR alone when IT and the manager own half the steps',
+    'Leaving the access matrix undocumented, so each new hire gets a different set of tools',
+    'Not capturing the handoff wait between HR provisioning and IT setup',
+  ],
+  metrics: [
+    { label: 'Time to productive', note: 'Start date to working access confirmed, split by HR, IT, and manager steps.' },
+    { label: 'Handoff wait time', note: 'How long a new hire waits between HR finishing and IT starting.' },
+    { label: 'Access completeness', note: 'Share of new hires who have full role access on day one.' },
+  ],
+  aiOpportunities: [
+    'Auto-provision the standard access set from the role in the HR record',
+    'Generate the IT setup tickets from the new hire record for review',
+    'Flag onboardings missing a required access grant before the start date',
+  ],
+  faqs: [
+    {
+      q: 'What are the steps in an employee onboarding workflow?',
+      a: 'Typically: create the employee record, provision accounts and identity, grant application access, prepare equipment, then run the first-week handoff. The exact systems depend on your HR and IT stack.',
+    },
+    {
+      q: 'How do I document onboarding across HR and IT?',
+      a: 'Record one real onboarding as each team performs its steps, then generate the SOP and process map from the recording. A single pass captures the HR, IT, and manager steps and the handoffs between them.',
+    },
+    {
+      q: 'Why do new hires wait on day one?',
+      a: 'Usually because an IT access step started late or a system was forgotten. Capturing per-step timing shows where the handoff wait lives, so the right team can close it.',
+    },
+    {
+      q: 'Can Ledgerium document onboarding across several systems?',
+      a: 'Yes. A single recording captures the steps across each browser-based system in the onboarding, the HR system, identity tools, and ticketing, so the SOP reflects the full cross-team flow.',
+    },
+    {
+      q: 'What can be automated in onboarding?',
+      a: 'Common candidates are auto-provisioning the standard access set, generating IT setup tickets from the role, and flagging missing access before the start date. Ledgerium scores these from the recorded process.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const vendorSetup: WorkflowPage = {
+  type: 'workflow',
+  slug: 'vendor-setup-workflow',
+  metaTitle: 'Vendor Setup Workflow: How to Document It',
+  metaDescription:
+    'Document your vendor setup workflow by recording it once. Capture the real request, validation, approval, and activation steps in an SOP and a process map.',
+  h1: 'How to document a vendor setup workflow',
+  eyebrow: 'Workflow',
+  shortAnswer:
+    'To document a vendor setup workflow, record the real process of adding a new vendor from request to active master record, then generate a step-by-step SOP and a process map from it. Vendor setup carries control risk, the tax and banking checks decide whether payments are safe, yet those checks are rarely written down clearly. Ledgerium records the real setup in the browser, captures the validation and approval routing, and generates the SOP, the process map, and a report that shows where requests wait and where they get returned.',
+  primaryKeyword: 'vendor setup workflow',
+  secondaryKeywords: ['vendor setup SOP', 'vendor onboarding process', 'vendor master data process'],
+  searchIntent: 'commercial',
+  tags: ['workflow', 'finance', 'procurement', 'vendor-management', 'sap'],
+  related: ['persona:compliance-teams', 'software:sap', 'sopTemplate:vendor-setup-sop-template'],
+  originalDataPoint:
+    'In vendor setup, the control points are the tax and banking validations, and that is where requests get returned. Ledgerium records each validation step, so the report shows how often setups bounce back at banking validation rather than only that a vendor was eventually added.',
+  honestLimitation:
+    'Validations confirmed by phone with a bank or tax authority outside the browser are not captured. Ledgerium records the browser-based setup steps; offline confirmations need a note.',
+  whoUsesIt:
+    'Procurement requesters, vendor master data and accounts payable staff, and the finance approver who owns the control. Auditors review it when testing payment and supplier controls.',
+  systems: ['ERP or accounting system', 'Vendor or supplier portal', 'Tax or banking validation tools', 'Email'],
+  oldWay:
+    'The setup steps and the validation rules live in tribal knowledge, so each clerk validates a little differently. Some checks get skipped under time pressure, which is exactly how bad banking details slip into the master record.',
+  ledgeriumWay:
+    'Record one real vendor setup. Ledgerium captures the request, the tax and banking validation, the approval routing, and activation, and generates the SOP, the process map, and a report that highlights where requests get returned.',
+  steps: [
+    { title: 'Receive the vendor request', detail: 'A requester submits the new vendor with category, contact, and supporting documents.' },
+    { title: 'Enter vendor master data', detail: 'Create the vendor record with name, address, terms, and payment details.' },
+    { title: 'Validate tax and banking', detail: 'Verify the tax registration and banking details against required evidence.' },
+    { title: 'Route for approval', detail: 'Send to the finance approver based on category and spend thresholds.' },
+    { title: 'Activate the vendor', detail: 'Approve and activate the vendor so it is available for purchase orders and payment.' },
+  ],
+  commonMistakes: [
+    'Leaving the tax and banking validation rules undocumented, so checks vary by clerk',
+    'Documenting the request but skipping the approval routing and activation steps',
+    'Not capturing how often setups get returned and at which validation',
+  ],
+  metrics: [
+    { label: 'Time to activate', note: 'Request received to active vendor, split into work and wait time.' },
+    { label: 'Return rate', note: 'Share of vendor setups returned for correction before approval.' },
+    { label: 'Validation completeness', note: 'Share of activated vendors with all required checks recorded.' },
+  ],
+  aiOpportunities: [
+    'Pre-check tax and banking details against required evidence before approval',
+    'Auto-flag duplicate vendor records before a new one is created',
+    'Detect setups stalled beyond target validation time and escalate them',
+  ],
+  faqs: [
+    {
+      q: 'What are the steps in a vendor setup workflow?',
+      a: 'Typically: receive the vendor request, enter the master data, validate tax and banking, route for approval, then activate the vendor. The tax and banking validations are the control steps most guides leave vague.',
+    },
+    {
+      q: 'How do I document the vendor setup process clearly?',
+      a: 'Record one real setup from request to activation, then generate the SOP and process map from it. This captures the validation rules and the approval routing that tribal knowledge usually hides.',
+    },
+    {
+      q: 'Where do vendor setups get returned?',
+      a: 'Most often at tax or banking validation, where evidence is missing or details do not match. Capturing each validation step shows how often setups bounce back and at which check.',
+    },
+    {
+      q: 'Can Ledgerium document vendor setup across systems?',
+      a: 'Yes. A single recording captures the steps across each browser-based system in the setup, the accounting system, the vendor portal, and validation tools, in one pass.',
+    },
+    {
+      q: 'What can be automated in vendor setup?',
+      a: 'Common candidates are pre-checking tax and banking details, flagging duplicate vendors, and escalating stalled setups. Ledgerium scores these from the recorded process.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const salesforceLeadQualification: WorkflowPage = {
+  type: 'workflow',
+  slug: 'salesforce-lead-qualification-workflow',
+  metaTitle: 'Salesforce Lead Qualification Workflow Guide',
+  metaDescription:
+    'Document your Salesforce lead qualification workflow by recording it once. Capture the real enrich, qualify, and routing steps in an SOP and process map.',
+  h1: 'How to document a Salesforce lead qualification workflow',
+  eyebrow: 'Workflow',
+  shortAnswer:
+    'To document a Salesforce lead qualification workflow, record a rep qualifying and routing a real lead from capture to assignment, then generate a step-by-step SOP and a process map from it. Qualification criteria and routing rules often live in one rep’s head, so leads get worked inconsistently and good ones slip. Ledgerium records the real qualification in the browser, captures the enrichment lookups and the criteria checks, and generates the SOP, the process map, and a report that shows where leads wait and where routing varies.',
+  primaryKeyword: 'Salesforce lead qualification workflow',
+  secondaryKeywords: ['lead qualification SOP', 'lead routing process', 'Salesforce qualification process'],
+  searchIntent: 'commercial',
+  tags: ['workflow', 'sales', 'revops', 'salesforce', 'qualification'],
+  related: ['persona:revops-managers', 'software:salesforce', 'sopTemplate:lead-qualification-sop-template'],
+  originalDataPoint:
+    'Lead leakage usually happens between capture and assignment, where a lead sits unworked. Ledgerium timestamps each step, so the report shows how long a lead waits before a rep qualifies it rather than only how long the qualification call takes.',
+  honestLimitation:
+    'Qualification done on a discovery call or over the phone is not captured. Ledgerium records the browser-based steps in the CRM and enrichment tools; the call rationale needs a note.',
+  whoUsesIt:
+    'Sales development reps, account executives, and the RevOps manager who owns routing rules and conversion. Sales leaders review it to standardize how leads are qualified.',
+  systems: ['Salesforce', 'Lead enrichment tools', 'Email and calendar', 'Marketing or web forms'],
+  oldWay:
+    'Each rep qualifies leads their own way and routing rules are remembered, not written. Leads route to the wrong owner, good ones sit too long, and the real criteria only surface in pipeline reviews.',
+  ledgeriumWay:
+    'Record one real qualification. Ledgerium captures the capture, enrichment, criteria check, and routing in order and generates the SOP, the process map, and a report that highlights where leads wait and where routing diverges.',
+  steps: [
+    { title: 'Capture the lead', detail: 'The lead lands in Salesforce from a form, list, or inbound source with its source fields.' },
+    { title: 'Enrich the record', detail: 'Add firmographic and contact data from enrichment tools to complete the record.' },
+    { title: 'Qualify against criteria', detail: 'Check the lead against the fit and intent criteria that define a qualified lead.' },
+    { title: 'Route and assign', detail: 'Assign the lead to the right owner based on territory, segment, or round-robin rules.' },
+    { title: 'Log and set next step', detail: 'Record the qualification outcome and set the first follow-up activity.' },
+  ],
+  commonMistakes: [
+    'Leaving the qualification criteria undocumented, so each rep applies a different bar',
+    'Documenting the capture but skipping the routing rules that decide ownership',
+    'Not capturing how long leads wait between capture and first qualification',
+  ],
+  metrics: [
+    { label: 'Time to first touch', note: 'Lead capture to first qualification activity, split into wait and work time.' },
+    { label: 'Routing accuracy', note: 'Share of leads assigned to the correct owner the first time.' },
+    { label: 'Rep variance', note: 'How much the qualification path varies between reps.' },
+  ],
+  aiOpportunities: [
+    'Auto-enrich the lead record from connected data sources for review',
+    'Score the lead against the fit and intent criteria before a rep opens it',
+    'Suggest the correct owner from territory and segment routing rules',
+  ],
+  faqs: [
+    {
+      q: 'What are the steps in a Salesforce lead qualification workflow?',
+      a: 'Typically: capture the lead, enrich the record, qualify it against criteria, route and assign it, then log the outcome and set the next step. The criteria and routing rules are the parts most guides leave undocumented.',
+    },
+    {
+      q: 'How do I document lead qualification consistently?',
+      a: 'Record one real qualification as a rep works a lead, then generate the SOP and process map from it. This captures the criteria checks and routing rules that usually live only in a rep’s head.',
+    },
+    {
+      q: 'Where do leads leak in qualification?',
+      a: 'Most leakage happens between capture and first touch, where a lead sits unworked, and at routing, where it goes to the wrong owner. Per-step timing makes both visible.',
+    },
+    {
+      q: 'Can Ledgerium document steps outside Salesforce?',
+      a: 'Yes. A single recording captures the steps across each browser-based tool the rep uses, including enrichment tools and email, so the SOP reflects the full qualification flow.',
+    },
+    {
+      q: 'What can be automated in lead qualification?',
+      a: 'Common candidates are auto-enriching the record, scoring fit and intent before a rep opens the lead, and suggesting the right owner. Ledgerium scores these from the recorded process.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const contractReview: WorkflowPage = {
+  type: 'workflow',
+  slug: 'contract-review-workflow',
+  metaTitle: 'Contract Review Workflow: How to Document It',
+  metaDescription:
+    'Document your contract review workflow by recording it once. Capture the real intake, legal review, redline, and approval steps in an SOP and process map.',
+  h1: 'How to document a contract review workflow',
+  eyebrow: 'Workflow',
+  shortAnswer:
+    'To document a contract review workflow, record the real review of a contract from intake to signature, then generate a step-by-step SOP and a process map from it. Contract review hides delay in legal queues and approval routing, and the rules for who reviews what are rarely clear. Ledgerium records the real review in the browser, captures the redline rounds and the approval routing, and generates the SOP, the process map, and a report that shows where contracts wait between review and approval.',
+  primaryKeyword: 'contract review workflow',
+  secondaryKeywords: ['contract review SOP', 'contract approval process', 'legal review workflow'],
+  searchIntent: 'commercial',
+  tags: ['workflow', 'legal', 'operations', 'approval', 'contracts'],
+  related: ['persona:operations-managers', 'software:sharepoint', 'sopTemplate:contract-review-sop-template'],
+  originalDataPoint:
+    'Contract delay is mostly the wait in the legal queue and the redline rounds, not the reading itself. Ledgerium timestamps each step, so the report shows how many redline rounds a typical contract takes and how long it waits in review rather than only that it was signed.',
+  honestLimitation:
+    'Negotiation done by phone or in a meeting outside the browser is not captured. Ledgerium records the browser-based review and approval steps; the negotiation rationale needs a note.',
+  whoUsesIt:
+    'Contract requesters, legal reviewers, and the operations or deal-desk lead who owns turnaround time. Compliance reviews it when testing how contracts are approved and stored.',
+  systems: ['Contract or document repository', 'Document editor', 'E-signature tool', 'Email'],
+  oldWay:
+    'Requesters email contracts to legal and hope, with no clear rule for who reviews what or what gets escalated. Versions multiply, the redline history scatters across inboxes, and turnaround is unpredictable.',
+  ledgeriumWay:
+    'Record one real contract review. Ledgerium captures the intake, the legal review, the redline rounds, the approval routing, and signature, and generates the SOP, the process map, and a report that highlights where contracts wait.',
+  steps: [
+    { title: 'Intake the contract', detail: 'The requester submits the contract with type, value, and counterparty details.' },
+    { title: 'Run legal review', detail: 'Legal reviews the terms against playbook positions and risk thresholds.' },
+    { title: 'Exchange redlines', detail: 'Mark up the contract and exchange revised versions until terms are agreed.' },
+    { title: 'Route for approval', detail: 'Send to the right approver based on contract type, value, and risk.' },
+    { title: 'Sign and store', detail: 'Collect signatures and file the executed contract in the repository.' },
+  ],
+  commonMistakes: [
+    'Leaving the review thresholds undocumented, so it is unclear what legal must see',
+    'Documenting the review but skipping the redline rounds where most time goes',
+    'Not capturing where contracts wait between legal review and approval',
+  ],
+  metrics: [
+    { label: 'Turnaround time', note: 'Intake to signature, split into review, redline, and approval time.' },
+    { label: 'Redline rounds', note: 'How many revision rounds a typical contract takes before agreement.' },
+    { label: 'Queue wait time', note: 'How long a contract waits in the legal review queue.' },
+  ],
+  aiOpportunities: [
+    'Pre-classify the contract by type and value to set the review path',
+    'Flag clauses that deviate from playbook positions for legal review',
+    'Detect contracts stalled beyond target turnaround and escalate them',
+  ],
+  faqs: [
+    {
+      q: 'What are the steps in a contract review workflow?',
+      a: 'Typically: intake the contract, run legal review, exchange redlines, route for approval, then sign and store it. The review thresholds and redline rounds are where most guides lose accuracy.',
+    },
+    {
+      q: 'How do I document the contract review process?',
+      a: 'Record one real review from intake to signature, then generate the SOP and process map from it. This captures the review thresholds and the approval routing that emails and memory leave unclear.',
+    },
+    {
+      q: 'Where do contracts get stuck in review?',
+      a: 'Mostly in the legal queue and in repeated redline rounds. Capturing per-step timing shows how long a contract waits and how many revision rounds it really takes.',
+    },
+    {
+      q: 'Can Ledgerium document review across repository and signature tools?',
+      a: 'Yes. A single recording captures the steps across each browser-based system in the review, the repository, the editor, and the e-signature tool, so the SOP reflects the full flow.',
+    },
+    {
+      q: 'What can be automated in contract review?',
+      a: 'Common candidates are pre-classifying contracts to set the review path, flagging off-playbook clauses, and escalating stalled contracts. Ledgerium scores these from the recorded process.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const travelRequest: WorkflowPage = {
+  type: 'workflow',
+  slug: 'travel-request-workflow',
+  metaTitle: 'Travel Request Workflow: How to Document It',
+  metaDescription:
+    'Document your travel request workflow by recording it once. Capture the real request, policy check, approval, and booking steps in an SOP and process map.',
+  h1: 'How to document a travel request workflow',
+  eyebrow: 'Workflow',
+  shortAnswer:
+    'To document a travel request workflow, record the real process from request to booked trip, then generate a step-by-step SOP and a process map from it. Travel requests stall on policy checks and approval routing that employees cannot see, so they guess and get returned. Ledgerium records the real request and approval in the browser, captures the policy checks and routing, and generates the SOP, the process map, and a report that shows where requests wait and where they get sent back.',
+  primaryKeyword: 'travel request workflow',
+  secondaryKeywords: ['travel request SOP', 'travel approval process', 'business travel request process'],
+  searchIntent: 'commercial',
+  tags: ['workflow', 'operations', 'finance', 'travel', 'approval'],
+  related: ['persona:operations-managers', 'software:netsuite', 'sopTemplate:travel-request-sop-template'],
+  originalDataPoint:
+    'Travel delay is mostly the wait for approval before booking, where prices change while a request sits. Ledgerium timestamps each step, so the report shows how long a request waits between submission and approval rather than only how long the booking takes.',
+  honestLimitation:
+    'Bookings completed by a travel agent over phone or email are not captured. Ledgerium records the browser-based request, approval, and self-service booking steps; offline booking needs a note.',
+  whoUsesIt:
+    'Employees requesting travel, managers and finance approvers, and the operations lead who owns the travel policy. Finance reviews it when testing travel spend controls.',
+  systems: ['Travel or expense system', 'Email and calendar', 'Booking or agency portal'],
+  oldWay:
+    'The travel policy lives in a document nobody opens and the approval routing is unclear. Employees submit requests that miss policy limits, get returned, and resubmit while fares climb.',
+  ledgeriumWay:
+    'Record one real travel request and approval. Ledgerium captures the policy checks and routing and generates the SOP, the process map, and a report that highlights where requests wait and why they get returned.',
+  steps: [
+    { title: 'Submit the request', detail: 'The employee enters the trip with dates, destination, purpose, and estimated cost.' },
+    { title: 'Check against policy', detail: 'Verify the request against travel policy limits and any pre-trip approval rules.' },
+    { title: 'Route for approval', detail: 'Send to the right approver based on cost, destination, or trip type.' },
+    { title: 'Approve or return', detail: 'The approver confirms the trip or returns it for changes.' },
+    { title: 'Book the trip', detail: 'Book flights, lodging, and ground travel against the approved request.' },
+  ],
+  commonMistakes: [
+    'Leaving the policy limits undocumented, so employees submit requests that get returned',
+    'Documenting the request but skipping the approval routing rules',
+    'Not capturing how long requests wait before approval while prices change',
+  ],
+  metrics: [
+    { label: 'Time to approval', note: 'Submission to approval, split into policy check and approval wait.' },
+    { label: 'Return rate', note: 'Share of requests returned for changes before approval.' },
+    { label: 'Pre-booking wait', note: 'How long an approved request waits before the trip is booked.' },
+  ],
+  aiOpportunities: [
+    'Pre-check the request against policy limits before it routes for approval',
+    'Suggest the correct approver from cost and destination rules',
+    'Detect requests stalled beyond target approval time and escalate them',
+  ],
+  faqs: [
+    {
+      q: 'What are the steps in a travel request workflow?',
+      a: 'Typically: submit the request, check it against policy, route for approval, approve or return it, then book the trip. The policy limits and approval routing are the parts employees most often cannot see.',
+    },
+    {
+      q: 'How do I document the travel request process?',
+      a: 'Record one real request and approval, then generate the SOP and process map from it. This captures the policy checks and routing that the written policy usually leaves vague.',
+    },
+    {
+      q: 'Why do travel requests get returned?',
+      a: 'Usually because a policy limit was missed or the trip needed pre-approval that the employee did not know about. Recording a real request makes the actual rules visible and reduces rework.',
+    },
+    {
+      q: 'Can Ledgerium document travel approval and booking?',
+      a: 'Yes. A single recording captures the browser-based steps across the travel system, email, and the booking portal, so the SOP and process map show the real approval and booking path.',
+    },
+    {
+      q: 'What can be automated in travel requests?',
+      a: 'Common candidates are pre-checking requests against policy, suggesting the right approver, and escalating stalled requests. Ledgerium scores these from the recorded process.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const passwordReset: WorkflowPage = {
+  type: 'workflow',
+  slug: 'password-reset-workflow',
+  metaTitle: 'Password Reset Workflow: How to Document It',
+  metaDescription:
+    'Document your IT password reset workflow by recording it once. Capture the real verification, reset, and confirmation steps in an SOP and process map.',
+  h1: 'How to document a password reset workflow',
+  eyebrow: 'Workflow',
+  shortAnswer:
+    'To document a password reset workflow, record a helpdesk agent resetting a real user password from identity check to confirmed access, then generate a step-by-step SOP and a process map from it. The identity verification step is a security control, yet it is often done from memory and varies by agent. Ledgerium records the real reset in the browser, captures the verification and the reset steps, and generates the SOP, the process map, and a report that shows where the identity check is skipped or inconsistent.',
+  primaryKeyword: 'password reset workflow',
+  secondaryKeywords: ['password reset SOP', 'IT helpdesk password reset process', 'account unlock process'],
+  searchIntent: 'commercial',
+  tags: ['workflow', 'it', 'helpdesk', 'security', 'servicenow'],
+  related: ['persona:compliance-teams', 'software:servicenow', 'sopTemplate:password-reset-sop-template'],
+  originalDataPoint:
+    'The control that matters in a password reset is identity verification, and it is the step most likely to be rushed. Ledgerium records each step, so the report shows whether the verification was performed and how consistently rather than only that the password was reset.',
+  honestLimitation:
+    'Identity checks done by phone or over a desk-side visit outside the browser are not captured. Ledgerium records the browser-based reset and ticket steps; the verbal verification needs a note.',
+  whoUsesIt:
+    'IT helpdesk and service desk agents, the IT support lead who owns reset handling time, and security teams who own the verification control. Auditors review it when testing access controls.',
+  systems: ['IT ticketing or service desk', 'Identity and access management', 'Directory or admin console', 'Email'],
+  oldWay:
+    'Each agent resets passwords their own way and the identity check is remembered, not enforced. Under pressure the verification gets shortened, which is exactly how a reset goes to the wrong person.',
+  ledgeriumWay:
+    'Record one real password reset. Ledgerium captures the identity verification, the reset, and the confirmation in order and generates the SOP, the process map, and a report that highlights where the verification is inconsistent.',
+  steps: [
+    { title: 'Receive the request', detail: 'The reset request arrives as a ticket with the user and the affected account.' },
+    { title: 'Verify identity', detail: 'Confirm the user identity against the required verification method before any reset.' },
+    { title: 'Reset the password', detail: 'Reset the password or unlock the account in the identity or directory tool.' },
+    { title: 'Confirm access', detail: 'Have the user confirm they can sign in and the issue is resolved.' },
+    { title: 'Log and close', detail: 'Record the verification method used and close the ticket with the right category.' },
+  ],
+  commonMistakes: [
+    'Leaving the identity verification method undocumented, so the security control varies by agent',
+    'Documenting the reset but skipping the access-confirmation and logging steps',
+    'Not capturing whether the verification step was actually performed',
+  ],
+  metrics: [
+    { label: 'Handling time', note: 'Request received to confirmed access, split into verification and reset.' },
+    { label: 'Verification rate', note: 'Share of resets where the identity check was recorded.' },
+    { label: 'Agent variance', note: 'How much the verification path varies between agents.' },
+  ],
+  aiOpportunities: [
+    'Prompt the agent through the required verification before the reset is allowed',
+    'Auto-classify and route the reset ticket from its content',
+    'Flag resets where the verification step appears to be skipped for review',
+  ],
+  faqs: [
+    {
+      q: 'What are the steps in a password reset workflow?',
+      a: 'Typically: receive the request, verify identity, reset the password, confirm access, then log and close the ticket. The identity verification step is the security control and the one most often rushed.',
+    },
+    {
+      q: 'How do I document the password reset process?',
+      a: 'Record one real reset as an agent works the ticket, then generate the SOP and process map from it. This captures the verification method and the steps that vary between agents.',
+    },
+    {
+      q: 'Why does identity verification matter so much here?',
+      a: 'Because a reset sent to the wrong person is an account takeover. Recording the real reset shows whether the verification was performed and how consistently, which is what auditors test.',
+    },
+    {
+      q: 'Can Ledgerium document resets across ticketing and identity tools?',
+      a: 'Yes. A single recording captures the steps across each browser-based system in the reset, the ticketing tool, identity tools, and the directory console, so the SOP reflects the full flow.',
+    },
+    {
+      q: 'What can be automated in password resets?',
+      a: 'Common candidates are prompting the agent through verification, auto-classifying the ticket, and flagging resets that skip the check. Ledgerium scores these from the recorded process.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
 export const WORKFLOW_PAGES: readonly WorkflowPage[] = [
   invoiceApproval,
   customerOnboarding,
@@ -465,4 +921,10 @@ export const WORKFLOW_PAGES: readonly WorkflowPage[] = [
   zendeskTicket,
   expenseReporting,
   purchaseOrder,
+  employeeOnboarding,
+  vendorSetup,
+  salesforceLeadQualification,
+  contractReview,
+  travelRequest,
+  passwordReset,
 ];

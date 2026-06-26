@@ -464,6 +464,468 @@ const processExcellenceLead: PersonaPage = {
   published: true,
 };
 
+const complianceTeams: PersonaPage = {
+  type: 'persona',
+  slug: 'compliance-teams',
+  metaTitle: 'Ledgerium AI for Compliance Teams',
+  metaDescription:
+    'Compliance teams use Ledgerium to document control processes from real work, keeping audit-ready SOPs and process maps current, not from memory.',
+  h1: 'Ledgerium AI for compliance teams',
+  eyebrow: 'For compliance',
+  shortAnswer:
+    'Ledgerium helps compliance, risk, and audit teams document control processes from how the work is really done, then keep that documentation current. Instead of relying on procedures written from memory that drift between audits, you record the real workflow and get an SOP, a process map, and timing that show how the control actually operates, including the exceptions. That gives you evidence-linked, current documentation auditors can follow, and a fast way to re-check whether a control is still being performed as designed.',
+  primaryKeyword: 'compliance process documentation',
+  secondaryKeywords: ['audit-ready SOPs', 'document control processes', 'process documentation for audits'],
+  searchIntent: 'commercial',
+  tags: ['persona', 'compliance', 'audit', 'controls', 'documentation'],
+  related: ['problem:how-to-prepare-for-a-process-audit', 'workflow:contract-review-workflow', 'compare:manual-sop-documentation'],
+  originalDataPoint:
+    'Ledgerium captures each step with system context and timing, so a compliance team can show not just that a control exists on paper but how it was actually performed, which is the evidence auditors ask for and recall-based procedures cannot provide.',
+  honestLimitation:
+    'Ledgerium documents browser-based work. Manual sign-offs, paper approvals, and decisions made offline still need a person to record the context.',
+  whoThisIsFor:
+    'Compliance, risk, and internal audit teams who need evidence-linked, current process documentation to support audits, controls, and regulatory reviews.',
+  painPoints: [
+    'Procedures are written from memory and drift between audit cycles',
+    'No evidence of how a control was actually performed, only that it should exist',
+    'Audit prep means scrambling to reconstruct current-state under deadline',
+    'Exceptions and workarounds are invisible until an auditor finds them',
+  ],
+  whatTheySearchFor: [
+    'How to prepare for a process audit',
+    'How to document a business process for compliance',
+    'How to keep SOPs up to date',
+    'Audit-ready process documentation',
+  ],
+  jobsToBeDone: [
+    'Document how a control is actually performed, with evidence',
+    'Keep control documentation current between audits',
+    'Surface exceptions and workarounds before an auditor does',
+    'Reduce the scramble of audit preparation',
+  ],
+  commonWorkflowsToDocument: [
+    'Approval and authorization controls',
+    'Contract review and sign-off',
+    'Vendor onboarding and due diligence',
+    'Month-end close and reconciliation controls',
+  ],
+  dayInTheLife:
+    'A compliance lead gets the audit notice and pulls the control procedures, only to find they describe a process the team stopped following two reorganizations ago. The real control lives in how three people actually do the work, and proving it operated as designed means a week of interviews and screenshots assembled by hand. By the time the evidence is ready, the version everyone documented is already out of date again.',
+  howLedgeriumHelps:
+    'Record each control process as someone performs it normally. Ledgerium produces an SOP, a process map, and timing that reflect how the control actually operates, including the exceptions people forget to mention. You get evidence-linked documentation auditors can follow, and re-recording later shows whether the control is still being performed as designed, so you walk into the audit with current proof instead of reconstructed memory.',
+  faqs: [
+    {
+      q: 'How does Ledgerium help compliance teams?',
+      a: 'It records how a control process is actually performed and generates an SOP, a process map, and timing from it. You get evidence-linked, current documentation auditors can follow, instead of procedures written from memory that drift between audits.',
+    },
+    {
+      q: 'Does it give evidence of how a control was performed?',
+      a: 'Yes. The recording captures each step with system context and timing, so you can show how the control actually operated, not just that a procedure exists on paper. That is the evidence auditors ask for.',
+    },
+    {
+      q: 'How does it keep control documentation current?',
+      a: 'Re-record the process when it changes, or on a schedule. The new recording becomes the current SOP and map, so documentation reflects how the control runs today rather than how it ran at the last audit.',
+    },
+    {
+      q: 'Will it surface exceptions and workarounds?',
+      a: 'Yes. Because it records the real workflow, the steps people skip, repeat, or work around appear in the documentation, so you find control gaps before an auditor does.',
+    },
+    {
+      q: 'Does Ledgerium replace our audit evidence process?',
+      a: 'No. It documents how browser-based control work is performed and provides current process evidence. Manual sign-offs and offline approvals still need a person to record the context, and formal evidence retention stays in your existing system.',
+    },
+  ],
+  jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const hrTeams: PersonaPage = {
+  type: 'persona',
+  slug: 'hr-teams',
+  metaTitle: 'Ledgerium AI for HR and People Ops Teams',
+  metaDescription:
+    'HR teams use Ledgerium to document onboarding, offboarding, and people processes from real work, so SOPs stay current and easy to follow.',
+  h1: 'Ledgerium AI for HR and people ops teams',
+  eyebrow: 'For people ops',
+  shortAnswer:
+    'Ledgerium helps HR and people ops teams document onboarding, offboarding, and the rest of the people processes that run across multiple systems. These workflows touch the HRIS, IT provisioning, payroll, and email, and the real steps are rarely written down in one place. You record the actual process and get an SOP, a process map, and timing that show how it really runs, so you can standardize it, hand it off without losing knowledge, and onboard new HR coordinators faster.',
+  primaryKeyword: 'HR process documentation',
+  secondaryKeywords: ['document onboarding process', 'people ops SOPs', 'HR workflow documentation'],
+  searchIntent: 'commercial',
+  tags: ['persona', 'hr', 'people-ops', 'onboarding', 'documentation'],
+  related: ['workflow:employee-onboarding-workflow', 'software:workday', 'problem:how-to-reduce-onboarding-time'],
+  originalDataPoint:
+    'Employee onboarding spans the HRIS, IT, and payroll, and Ledgerium timestamps each step across those systems, so an HR team can see where a new hire actually waits, usually between handoffs to other teams rather than inside HR’s own tasks.',
+  honestLimitation:
+    'Ledgerium captures browser-based work. In-person orientation, paper forms, and conversations still need an HR coordinator to add the context.',
+  whoThisIsFor:
+    'HR and people ops teams who document onboarding, offboarding, and people processes and need the procedures to stay accurate as systems and policies change.',
+  painPoints: [
+    'Onboarding steps live in one coordinator’s head and break when they are out',
+    'Procedures span the HRIS, IT, and payroll with no single documented flow',
+    'SOPs go stale every time a system or policy changes',
+    'New HR coordinators take too long to run processes confidently',
+  ],
+  whatTheySearchFor: [
+    'How to document an onboarding process',
+    'How to reduce onboarding time',
+    'How to capture tribal knowledge in HR',
+    'How to keep SOPs up to date',
+  ],
+  jobsToBeDone: [
+    'Document people processes across every system they touch',
+    'Standardize onboarding and offboarding so they run the same way every time',
+    'Capture one coordinator’s knowledge before they leave or change roles',
+    'Onboard new HR staff with documentation they can trust',
+  ],
+  commonWorkflowsToDocument: [
+    'New-hire onboarding and provisioning',
+    'Offboarding and access removal',
+    'Leave and benefits requests',
+    'Employee data changes and approvals',
+  ],
+  dayInTheLife:
+    'An HR coordinator runs onboarding from a checklist that is half memory and half a document last updated two systems ago, then a new hire’s laptop access stalls because the IT handoff step was never written down. The process touches four tools and three teams, and the only person who knows the whole flow is on leave. New coordinators learn it by shadowing, which works until the day they are on their own.',
+  howLedgeriumHelps:
+    'Record onboarding and your other people processes as they are actually performed. Ledgerium produces an SOP, a process map across the HRIS, IT, and payroll, and timing that show where new hires wait. You get a single documented flow the whole team can follow, knowledge captured before a coordinator moves on, and onboarding for new HR staff that does not depend on shadowing one person.',
+  faqs: [
+    {
+      q: 'How does Ledgerium help HR teams?',
+      a: 'It records how onboarding, offboarding, and other people processes are actually performed and generates an SOP, a process map, and timing. You get current, easy-to-follow documentation across every system the process touches.',
+    },
+    {
+      q: 'Can it document a process that spans the HRIS, IT, and payroll?',
+      a: 'Yes. A single recording captures the steps across each browser-based system, so the SOP and map reflect the full onboarding flow, including the handoffs to IT and payroll, not just the HRIS steps.',
+    },
+    {
+      q: 'Will it help capture knowledge before a coordinator leaves?',
+      a: 'Yes. Recording a process turns one person’s checklist-in-their-head into structured documentation, so the process survives when they are out or change roles.',
+    },
+    {
+      q: 'How does it help with onboarding new HR staff?',
+      a: 'New coordinators follow an SOP generated from how the work is really done, rather than shadowing one person, so they run processes confidently sooner and make fewer mistakes.',
+    },
+    {
+      q: 'Does it handle in-person and paper steps?',
+      a: 'It documents browser-based work. In-person orientation, paper forms, and conversations still need a coordinator to add context, but the system steps and handoffs are captured automatically.',
+    },
+  ],
+  jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const customerSuccessTeams: PersonaPage = {
+  type: 'persona',
+  slug: 'customer-success-teams',
+  metaTitle: 'Ledgerium AI for Customer Success Teams',
+  metaDescription:
+    'Customer success teams use Ledgerium to document onboarding, QBRs, and renewal playbooks from real work, keeping SOPs current and consistent.',
+  h1: 'Ledgerium AI for customer success teams',
+  eyebrow: 'For customer success',
+  shortAnswer:
+    'Ledgerium helps customer success teams standardize the playbooks that drive retention. Customer onboarding, QBR prep, and renewals run across the CRM, the support tool, and billing, and every CSM tends to do them a little differently. You record the real process and get an SOP, a process map, and timing that show how the playbook actually runs, so you can make it consistent across the team, onboard new CSMs faster, and find the steps that slow a customer’s first value.',
+  primaryKeyword: 'customer success process documentation',
+  secondaryKeywords: ['document onboarding playbook', 'customer success SOPs', 'standardize CS playbooks'],
+  searchIntent: 'commercial',
+  tags: ['persona', 'customer-success', 'onboarding', 'playbooks', 'standardization'],
+  related: ['workflow:customer-onboarding-workflow', 'software:zendesk', 'compare:tango'],
+  originalDataPoint:
+    'Ledgerium measures how much the same playbook varies between CSMs, so a CS leader can quantify the consistency gap in onboarding or renewal rather than guessing why some customers get a smoother experience than others.',
+  honestLimitation:
+    'Ledgerium captures browser-based work. Customer calls, judgment calls, and relationship context still need a CSM to record alongside the system steps.',
+  whoThisIsFor:
+    'Customer success teams and CS leaders who standardize onboarding, QBRs, and renewal playbooks and want them performed consistently across every CSM.',
+  painPoints: [
+    'Every CSM runs onboarding and renewals a little differently',
+    'Playbooks live in slides that nobody updates after a process change',
+    'New CSMs ramp slowly because the real motion is undocumented',
+    'No clear view of which steps delay a customer’s first value',
+  ],
+  whatTheySearchFor: [
+    'How to document a customer onboarding process',
+    'How to standardize workflows',
+    'How to reduce onboarding time',
+    'Customer success playbook documentation',
+  ],
+  jobsToBeDone: [
+    'Document onboarding, QBR, and renewal playbooks from real work',
+    'Make the playbooks consistent across every CSM',
+    'Ramp new CSMs faster on the real motion',
+    'Find the steps that delay a customer’s first value',
+  ],
+  commonWorkflowsToDocument: [
+    'Customer onboarding and kickoff',
+    'QBR preparation and delivery',
+    'Renewal and expansion process',
+    'Escalation and support handoff',
+  ],
+  dayInTheLife:
+    'A CS leader reviews two onboardings that went very differently and realizes the playbook is a slide deck nobody has opened since the last tool migration. Each CSM fills the gaps from memory, so the customer experience depends on who picked up the account. A new CSM started this week and is learning the renewal motion by asking colleagues, who each describe a slightly different version.',
+  howLedgeriumHelps:
+    'Record your onboarding, QBR, and renewal playbooks as your strongest CSMs actually run them. Ledgerium produces an SOP, a process map across the CRM, support, and billing, and timing that show where customers wait. You get a consistent standard for the whole team, a faster ramp for new CSMs, and the evidence to fix the steps that delay first value.',
+  faqs: [
+    {
+      q: 'How does Ledgerium help customer success teams?',
+      a: 'It records how your playbooks are actually run and generates an SOP, a process map, and timing. You get consistent, current documentation of onboarding, QBRs, and renewals across every CSM, instead of slides nobody updates.',
+    },
+    {
+      q: 'Can it make our playbooks consistent across CSMs?',
+      a: 'Yes. Recording the playbook from a strong run gives you a standard the whole team can follow, and re-recording shows how much the motion still varies between CSMs so you can close the gap.',
+    },
+    {
+      q: 'Will it help new CSMs ramp faster?',
+      a: 'Yes. New CSMs follow an SOP built from how the work is really done, rather than asking colleagues for half-remembered versions, so they run onboarding and renewals confidently sooner.',
+    },
+    {
+      q: 'Does it document playbooks that span several tools?',
+      a: 'Yes. A single recording captures the steps across the CRM, support tool, and billing, so the SOP and map reflect the full playbook rather than just the steps in one system.',
+    },
+    {
+      q: 'Does it capture customer calls and judgment?',
+      a: 'No. It documents browser-based work. Calls and judgment calls still need a CSM to record the context, but the system steps and handoffs in the playbook are captured automatically.',
+    },
+  ],
+  jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const trainingManagers: PersonaPage = {
+  type: 'persona',
+  slug: 'training-managers',
+  metaTitle: 'Ledgerium AI for Training Managers',
+  metaDescription:
+    'Training managers use Ledgerium to build training material from how the job is really done, recording real workflows into clear, current SOPs.',
+  h1: 'Ledgerium AI for training managers',
+  eyebrow: 'For L&D and training',
+  shortAnswer:
+    'Ledgerium helps L&D and training managers build training material from how the job is really done, not from an idealized procedure. You record an experienced person running the workflow and get a step-by-step SOP, a process map, and timing you can turn into training content. That means your material reflects the real steps, including the workarounds and exceptions trainees actually hit, and you can refresh it by re-recording when the process changes instead of rewriting a manual from scratch.',
+  primaryKeyword: 'training material documentation',
+  secondaryKeywords: ['build training from real work', 'document a process for training', 'create SOPs for training'],
+  searchIntent: 'commercial',
+  tags: ['persona', 'training', 'l-and-d', 'sop', 'documentation'],
+  related: ['problem:how-to-capture-tribal-knowledge', 'workflow:employee-onboarding-workflow', 'compare:screen-recording'],
+  originalDataPoint:
+    'Ledgerium records the exceptions and workarounds an expert handles without thinking, the lookups, the second-system checks, so training material covers the real job rather than the clean path that leaves trainees stuck the first time something unusual happens.',
+  honestLimitation:
+    'Ledgerium captures browser-based work. Hands-on tasks, equipment, and verbal coaching still need a trainer to document alongside the recorded steps.',
+  whoThisIsFor:
+    'L&D and training managers who build and maintain training material and want it to reflect how the job is actually performed.',
+  painPoints: [
+    'Training material is built from an ideal procedure trainees never see in practice',
+    'Manuals go stale the moment a system or step changes',
+    'Capturing how an expert really works takes hours of shadowing',
+    'Trainees get stuck on the exceptions the material left out',
+  ],
+  whatTheySearchFor: [
+    'How to document a process for training',
+    'How to capture tribal knowledge',
+    'How to create SOPs automatically',
+    'How to build training material from real work',
+  ],
+  jobsToBeDone: [
+    'Build training material from how the job is really done',
+    'Capture an expert’s real steps without long shadowing sessions',
+    'Cover the exceptions and workarounds trainees actually hit',
+    'Refresh training when the process changes without rewriting it',
+  ],
+  commonWorkflowsToDocument: [
+    'System and tool training for new roles',
+    'Onboarding tasks for new hires',
+    'Customer-facing and support procedures',
+    'Back-office and processing workflows',
+  ],
+  dayInTheLife:
+    'A training manager builds a course from a procedure document, then watches the first cohort get stuck the moment a real case does not match the clean example. The expert who actually knows the workflow is too busy to sit for a long capture session, so the material covers the happy path and skips the workarounds that make up half the job. Three months later a system update makes the screenshots wrong, and the rebuild starts over.',
+  howLedgeriumHelps:
+    'Have an experienced person record the workflow once as they really run it. Ledgerium produces a step-by-step SOP, a process map, and timing you can shape into training content that includes the exceptions and workarounds. You capture the expert’s real method without hours of shadowing, and when the process changes you re-record instead of rewriting the manual from scratch.',
+  faqs: [
+    {
+      q: 'How does Ledgerium help training managers?',
+      a: 'It records how an experienced person really runs a workflow and generates a step-by-step SOP, a process map, and timing. You build training material from the real job, including the workarounds, instead of from an idealized procedure.',
+    },
+    {
+      q: 'Why is recorded material better than a written procedure?',
+      a: 'A procedure describes the clean path. A recording captures the real steps, including the lookups and exceptions an expert handles without thinking, so trainees are prepared for the cases they actually meet.',
+    },
+    {
+      q: 'Do I need the expert for hours of shadowing?',
+      a: 'No. The expert records the workflow once as they perform it normally, which takes about as long as running the process once, far less than repeated shadowing sessions.',
+    },
+    {
+      q: 'How do I keep training current when the process changes?',
+      a: 'Re-record the workflow after the change. The new recording becomes the updated SOP and map, so you refresh the material instead of rewriting a manual and replacing every screenshot by hand.',
+    },
+    {
+      q: 'Does it cover hands-on or in-person tasks?',
+      a: 'It documents browser-based work. Hands-on tasks, equipment, and verbal coaching still need a trainer to add context, but the system steps trainees follow are captured automatically.',
+    },
+  ],
+  jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const aiTransformationTeams: PersonaPage = {
+  type: 'persona',
+  slug: 'ai-transformation-teams',
+  metaTitle: 'Ledgerium AI for AI Transformation Teams',
+  metaDescription:
+    'AI transformation teams use Ledgerium to baseline processes from real work, finding where automation fits before they automate anything.',
+  h1: 'Ledgerium AI for AI transformation teams',
+  eyebrow: 'For AI and automation',
+  shortAnswer:
+    'Ledgerium helps AI and automation teams find where AI fits before they build anything, starting from a measured process baseline. Automating a process nobody has documented means automating the workarounds and the waste along with the work. You record the real workflow and get a process map, timing, and a report that scores repetitive, high-volume, rule-based steps, so you target automation at the steps that actually pay off, and you keep the baseline to measure what the automation changed.',
+  primaryKeyword: 'process baseline for AI automation',
+  secondaryKeywords: ['identify AI automation opportunities', 'document processes before automating', 'AI automation candidates'],
+  searchIntent: 'commercial',
+  tags: ['persona', 'ai-automation', 'process-intelligence', 'baseline', 'automation'],
+  related: ['problem:how-to-identify-ai-automation-opportunities', 'workflow:invoice-approval-workflow', 'compare:task-mining'],
+  originalDataPoint:
+    'Ledgerium scores each step of a recorded process for repetition, volume, and how rule-based it is, so an automation team can rank candidates by real evidence rather than picking the process that complained loudest.',
+  honestLimitation:
+    'Ledgerium identifies and baselines automation candidates from observed work. It does not build the automation, and steps in desktop-only software are not observed directly.',
+  whoThisIsFor:
+    'AI and automation teams who need a measured process baseline to decide where AI or automation fits, and to prove what it changed afterward.',
+  painPoints: [
+    'Automation gets pointed at the loudest process, not the best candidate',
+    'Automating an undocumented process bakes in the workarounds and waste',
+    'No baseline to prove the automation actually improved anything',
+    'Picking candidates relies on opinion rather than measured evidence',
+  ],
+  whatTheySearchFor: [
+    'How to identify AI automation opportunities',
+    'How to baseline a workflow',
+    'How to find process waste',
+    'How to document a process before automating',
+  ],
+  jobsToBeDone: [
+    'Baseline a process from real work before automating it',
+    'Rank automation candidates by measured evidence',
+    'Document the real steps so automation does not encode the workarounds',
+    'Measure what the automation changed against the baseline',
+  ],
+  commonWorkflowsToDocument: [
+    'Invoice and approval processing',
+    'High-volume data entry and lookups',
+    'Lead qualification and routing',
+    'Ticket triage and resolution',
+  ],
+  dayInTheLife:
+    'An automation lead has a backlog of process candidates and a roadmap built mostly on which department asked the loudest. The most-requested process turns out to be full of judgment calls that resist automation, while a quieter, high-volume task would have paid off faster. There is no baseline on either, so even after a build ships, proving it saved time comes down to anecdotes.',
+  howLedgeriumHelps:
+    'Record the candidate processes as they run today. Ledgerium produces a process map, timing, and a report that scores each step for repetition, volume, and how rule-based it is. You rank candidates on measured evidence, document the real steps so the automation does not encode the workarounds, and keep the baseline to show exactly what the automation changed after it ships.',
+  faqs: [
+    {
+      q: 'How does Ledgerium help AI and automation teams?',
+      a: 'It records a process and produces a map, timing, and a report that scores steps for repetition, volume, and how rule-based they are. You find where automation fits on measured evidence and keep a baseline to prove the result.',
+    },
+    {
+      q: 'Why baseline a process before automating it?',
+      a: 'Automating an undocumented process encodes its workarounds and waste. Recording the real workflow first shows what the process actually does, so you automate the right steps and have a baseline to measure the change against.',
+    },
+    {
+      q: 'How does it rank automation candidates?',
+      a: 'It scores each step of the recorded process for repetition, volume, and how rule-based it is. That ranks candidates by evidence rather than by which department asked the loudest.',
+    },
+    {
+      q: 'Does Ledgerium build the automation?',
+      a: 'No. It identifies and baselines the candidates and documents the real steps. Building the automation happens in your own tools, and Ledgerium then measures what changed by re-recording the process.',
+    },
+    {
+      q: 'Can it prove the automation worked?',
+      a: 'Yes. Re-record the process after the change and compare it to the baseline. The reduction in steps, time, or rework is concrete rather than asserted from anecdotes.',
+    },
+  ],
+  jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const bpoOperations: PersonaPage = {
+  type: 'persona',
+  slug: 'bpo-operations',
+  metaTitle: 'Ledgerium AI for BPO Operations Teams',
+  metaDescription:
+    'BPO operations use Ledgerium to document client processes from real work before offshore handoff, keeping SOPs and process maps current.',
+  h1: 'Ledgerium AI for BPO operations',
+  eyebrow: 'For BPO operations',
+  shortAnswer:
+    'Ledgerium helps BPO and outsourcing operations document a client process before handing it to an offshore team, then keep it current as it runs. Transitions are tight and the client’s real process lives in people’s heads, so reconstructing it through calls is slow and leaves gaps the offshore team discovers later. You record the workflow and get an SOP, a process map, and timing the delivery team can follow, and re-recording keeps the documentation accurate as the process and the client’s systems change.',
+  primaryKeyword: 'BPO process documentation',
+  secondaryKeywords: ['document client processes', 'offshore transition documentation', 'process documentation for outsourcing'],
+  searchIntent: 'commercial',
+  tags: ['persona', 'bpo', 'outsourcing', 'transition', 'documentation'],
+  related: ['problem:how-to-document-a-workflow-across-multiple-systems', 'workflow:purchase-order-workflow', 'compare:process-mining'],
+  originalDataPoint:
+    'Ledgerium captures the cross-system steps a client mentions in passing during transition, the lookups, the second-screen checks, so the offshore team gets the real workflow rather than the simplified version that surfaces gaps in week two of go-live.',
+  honestLimitation:
+    'Ledgerium documents browser-based work. Client-specific judgment, phone-based steps, and desktop-only systems still need a person to record the context for the delivery team.',
+  whoThisIsFor:
+    'BPO and outsourcing operations teams who must document a client process before offshore handoff and keep it current once the delivery team runs it.',
+  painPoints: [
+    'Client processes live in tribal knowledge that transition calls capture incompletely',
+    'Tight transition timelines leave no room to reconstruct every workflow by hand',
+    'Gaps in the handoff documentation surface during go-live, not before',
+    'Documentation goes stale as the client’s process and systems change',
+  ],
+  whatTheySearchFor: [
+    'How to document a workflow across multiple systems',
+    'How to document a client process for transition',
+    'How to keep SOPs up to date',
+    'Offshore transition process documentation',
+  ],
+  jobsToBeDone: [
+    'Document the client process before offshore handoff',
+    'Capture the real cross-system steps the delivery team will follow',
+    'Reduce gaps that surface during go-live',
+    'Keep documentation current as the client process changes',
+  ],
+  commonWorkflowsToDocument: [
+    'Invoice and purchase-order processing',
+    'Order-to-cash and procurement steps',
+    'Data entry and reconciliation tasks',
+    'Ticket handling and back-office support',
+  ],
+  dayInTheLife:
+    'A transition manager has six weeks to move a client’s back-office work to an offshore team, and the client’s process documentation is a one-page summary plus whatever the outgoing staff remember on a call. The delivery team builds their procedures from those notes, then hits the gaps in week two of go-live when a real case does not match what was described. Every client runs their systems a little differently, and the documentation is already drifting by the time the team is fully ramped.',
+  howLedgeriumHelps:
+    'Have the client team record their processes as they really run them during transition. Ledgerium produces an SOP, a process map across each system, and timing the offshore team can follow from day one. You capture the real cross-system steps instead of a simplified summary, reduce the gaps that surface at go-live, and keep the documentation accurate by re-recording as the client’s process and systems change.',
+  faqs: [
+    {
+      q: 'How does Ledgerium help BPO operations?',
+      a: 'The client team records their processes during transition, and Ledgerium generates an SOP, a process map, and timing the offshore team can follow. You hand off the real workflow instead of a simplified summary, with fewer gaps at go-live.',
+    },
+    {
+      q: 'Can it document a process that spans several client systems?',
+      a: 'Yes. A single recording captures the steps across each browser-based system, so the SOP and map reflect the full cross-system workflow the delivery team will actually run.',
+    },
+    {
+      q: 'How does it reduce go-live gaps?',
+      a: 'Because it records the real process, the lookups, checks, and exceptions a client mentions only in passing appear in the documentation, so the offshore team meets fewer surprises after handoff.',
+    },
+    {
+      q: 'How does it keep documentation current after transition?',
+      a: 'Re-record the process when the client’s workflow or systems change. The new recording becomes the updated SOP and map, so the delivery team works from current documentation rather than a stale transition pack.',
+    },
+    {
+      q: 'Does it capture phone-based or judgment steps?',
+      a: 'It documents browser-based work. Client-specific judgment, phone steps, and desktop-only systems still need a person to record the context, but the system steps and handoffs are captured automatically.',
+    },
+  ],
+  jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
 export const PERSONA_PAGES: readonly PersonaPage[] = [
   operationsManager,
   consultants,
@@ -471,4 +933,10 @@ export const PERSONA_PAGES: readonly PersonaPage[] = [
   businessAnalyst,
   maIntegrationLead,
   processExcellenceLead,
+  complianceTeams,
+  hrTeams,
+  customerSuccessTeams,
+  trainingManagers,
+  aiTransformationTeams,
+  bpoOperations,
 ];

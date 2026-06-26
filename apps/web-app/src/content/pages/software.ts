@@ -351,4 +351,364 @@ const zendesk: SoftwarePage = {
   published: true,
 };
 
-export const SOFTWARE_PAGES: readonly SoftwarePage[] = [salesforce, netsuite, servicenow, jira, zendesk];
+const sap: SoftwarePage = {
+  type: 'software',
+  slug: 'sap',
+  vendor: 'SAP',
+  metaTitle: 'How to Document a Workflow in SAP',
+  metaDescription:
+    'Document an SAP workflow by recording it once. Capture the real role screens, transaction steps, and postings, and generate an SOP and process map.',
+  h1: 'How to document a workflow in SAP',
+  eyebrow: 'Software guide',
+  shortAnswer:
+    'To document a workflow in SAP, record someone performing the real process, a purchase requisition, a goods receipt, or an invoice verification, then generate a step-by-step SOP and a process map from it. SAP screens depend on role, transaction code, and configuration, so a written-from-memory guide rarely matches what the user actually runs. Ledgerium records the real interaction in the browser and produces the SOP, process map, and a workflow intelligence report, so the documentation reflects the transactions and fields that role actually touches.',
+  primaryKeyword: 'SAP workflow documentation',
+  secondaryKeywords: ['document SAP process', 'SAP SOP', 'SAP transaction documentation'],
+  searchIntent: 'commercial',
+  tags: ['software', 'sap', 'erp', 'finance', 'workflow'],
+  related: ['workflow:purchase-order-workflow', 'software:netsuite', 'compare:process-mining'],
+  originalDataPoint:
+    'SAP shows different transactions and fields depending on role, transaction code, and configuration. Ledgerium records the process as the actual role performs it, so the SOP reflects the screens and entries that user works through rather than a configuration-team view of the system.',
+  honestLimitation:
+    'Ledgerium captures the browser-based steps in SAP, including Fiori and web GUI sessions. Background jobs, workflow steps, and ABAP routines that run server-side are not observed directly; document their effect from the user-visible result.',
+  documentationFrame: 'How to document a workflow in SAP',
+  commonWorkflows: [
+    'Purchase requisition entry and release',
+    'Goods receipt posting',
+    'Invoice verification and matching',
+    'Financial postings and journal entries',
+  ],
+  documentationChallenges: [
+    'Role and transaction-code differences mean users see different screens',
+    'Field-heavy entry screens hide which fields actually matter for the step',
+    'Release strategies and postings depend on rules that are easy to leave out',
+  ],
+  oldWay:
+    'A key user writes the steps from memory, often listing transaction codes without the field entries that make each screen work. New users hit fields the guide never mentions, so they ask the person next to them instead.',
+  ledgeriumWay:
+    'Record the real process as the role that performs it. Ledgerium captures the actual transaction screens, field entries, and release steps and generates the SOP, the process map, and a report that highlights where the process waits or reworks.',
+  commonMistakes: [
+    'Listing transaction codes without the field entries the step depends on',
+    'Documenting from a configuration view instead of the role that runs the work',
+    'Leaving release strategy and posting rules out of the routing steps',
+  ],
+  faqs: [
+    {
+      q: 'How do I document an SAP process?',
+      a: 'Record a real run of the process as the role that performs it, then generate the SOP and process map from the recording. The result reflects the transactions, fields, and entries that role actually works through.',
+    },
+    {
+      q: 'Why do SAP guides drift from what users see?',
+      a: 'SAP screens depend on role, transaction code, and configuration, and entry screens carry many fields. A guide written from memory or a config view references things the role may not have. Recording the real process avoids that gap.',
+    },
+    {
+      q: 'Can Ledgerium document a process that spans SAP and other tools?',
+      a: 'Yes. A single recording captures the steps across SAP and the other browser-based systems in the process, such as email and a vendor portal, so the SOP reflects the full flow.',
+    },
+    {
+      q: 'Does Ledgerium capture SAP background jobs and workflows?',
+      a: 'It captures what the user does and sees in the browser. Background jobs and server-side workflow steps are not observed directly, so document their effect from the user-visible result.',
+    },
+    {
+      q: 'Is this affiliated with SAP?',
+      a: 'No. This is an independent guide. SAP is a trademark of its owner, and Ledgerium is not affiliated with or endorsed by SAP.',
+    },
+  ],
+  jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const quickbooks: SoftwarePage = {
+  type: 'software',
+  slug: 'quickbooks',
+  vendor: 'QuickBooks',
+  metaTitle: 'How to Document a Workflow in QuickBooks',
+  metaDescription:
+    'Document a QuickBooks workflow by recording it once. Capture the real bill approval, invoicing, and reconciliation steps in an SOP and a process map.',
+  h1: 'How to document a workflow in QuickBooks',
+  eyebrow: 'Software guide',
+  shortAnswer:
+    'To document a workflow in QuickBooks, record someone performing the real process, a bill approval, an invoice, or a bank reconciliation, then generate a step-by-step SOP and a process map from it. Small teams often hold these steps in one person’s head, so the process is undocumented until that person is out. Ledgerium records the real interaction in the browser, including the lookups and approvals outside QuickBooks, and produces the SOP, process map, and a workflow intelligence report tied to how your books are actually kept.',
+  primaryKeyword: 'QuickBooks workflow documentation',
+  secondaryKeywords: ['document QuickBooks process', 'QuickBooks SOP', 'bookkeeping workflow documentation'],
+  searchIntent: 'commercial',
+  tags: ['software', 'quickbooks', 'accounting', 'finance', 'workflow'],
+  related: ['workflow:month-end-close-workflow', 'persona:compliance-teams', 'compare:manual-sop-documentation'],
+  originalDataPoint:
+    'In small teams, bookkeeping steps live in one person’s memory and the approval and review steps happen in email or chat. Ledgerium records the real run across QuickBooks and those tools, so the SOP shows the full month-end and approval work that QuickBooks alone never documents.',
+  honestLimitation:
+    'Ledgerium captures the browser-based steps in QuickBooks Online. Bank feeds, recurring transactions, and rules that post automatically are not observed directly; document their effect from the user-visible result.',
+  documentationFrame: 'How to document a workflow in QuickBooks',
+  commonWorkflows: [
+    'Bill entry and approval',
+    'Invoicing and payment recording',
+    'Bank and credit card reconciliation',
+    'Month-end review and close steps',
+  ],
+  documentationChallenges: [
+    'Steps live in one person’s head with nothing written down',
+    'Approvals and reviews happen in email, outside the books',
+    'Reconciliation judgment calls are hard to describe from memory',
+  ],
+  oldWay:
+    'The bookkeeper keeps the process in their head and a few notes. When they are out or hand off the work, the next person guesses at the order, misses a review step, and the close slips.',
+  ledgeriumWay:
+    'Record the real process as the bookkeeper works. Ledgerium captures the bill, invoice, and reconciliation steps across QuickBooks and email and generates the SOP, the process map, and a report that highlights where the close slows down.',
+  commonMistakes: [
+    'Documenting data entry but skipping the review and approval steps',
+    'Leaving the reconciliation judgment calls undocumented',
+    'Stopping at the QuickBooks boundary when approvals happen in email',
+  ],
+  faqs: [
+    {
+      q: 'How do I document a QuickBooks process?',
+      a: 'Record a real run of the process as the bookkeeper works, then generate the SOP and process map from the recording. The result reflects the entry, review, and reconciliation steps your books actually use.',
+    },
+    {
+      q: 'Why is bookkeeping so often undocumented?',
+      a: 'On small teams the steps live in one person’s memory and the approvals happen in email. Nothing is written down until a handoff forces it. Recording a real run captures the process before that pressure hits.',
+    },
+    {
+      q: 'Can Ledgerium capture steps outside QuickBooks?',
+      a: 'Yes. A single recording captures the steps across QuickBooks and the other browser-based tools in the process, such as email approvals and a bank portal, so the SOP reflects the full flow.',
+    },
+    {
+      q: 'Does Ledgerium capture QuickBooks bank rules and recurring transactions?',
+      a: 'It captures what the user does and sees in the browser. Bank feeds, rules, and recurring transactions that post automatically are not observed directly, so document their effect from the user-visible result.',
+    },
+    {
+      q: 'Is this affiliated with QuickBooks or Intuit?',
+      a: 'No. This is an independent guide. QuickBooks is a trademark of its owner, and Ledgerium is not affiliated with or endorsed by QuickBooks or Intuit.',
+    },
+  ],
+  jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const hubspot: SoftwarePage = {
+  type: 'software',
+  slug: 'hubspot',
+  vendor: 'HubSpot',
+  metaTitle: 'How to Document a Workflow in HubSpot',
+  metaDescription:
+    'Document a HubSpot workflow by recording it once. Capture the real lead handoff, deal stage, and pipeline steps, and generate an SOP and process map.',
+  h1: 'How to document a workflow in HubSpot',
+  eyebrow: 'Software guide',
+  shortAnswer:
+    'To document a workflow in HubSpot, record someone performing the real process, a lead handoff, a deal stage change, or a ticket move, then generate a step-by-step SOP and a process map from it. HubSpot pipelines and properties are configured per team, so a generic guide rarely matches how reps actually move records. Ledgerium records the real interaction in the browser and produces the SOP, process map, and a workflow intelligence report, so the documentation matches your portal and the way the team actually works deals and tickets.',
+  primaryKeyword: 'HubSpot workflow documentation',
+  secondaryKeywords: ['document HubSpot process', 'HubSpot SOP', 'CRM workflow documentation'],
+  searchIntent: 'commercial',
+  tags: ['software', 'hubspot', 'crm', 'revenue-operations', 'workflow'],
+  related: ['workflow:salesforce-lead-qualification-workflow', 'software:salesforce', 'persona:revops-managers'],
+  originalDataPoint:
+    'HubSpot pipelines, stages, and properties are configured per team, so what counts as a stage change differs across portals. Ledgerium records the real steps a rep takes, so the SOP reflects how that team actually moves deals and tickets rather than a default pipeline.',
+  honestLimitation:
+    'Ledgerium captures the browser-based steps in HubSpot. Automation, sequence enrollment, and workflow actions that run in the background are not observed directly; document their effect from the user-visible result.',
+  documentationFrame: 'How to document a workflow in HubSpot',
+  commonWorkflows: [
+    'Lead handoff from marketing to sales',
+    'Deal stage progression and updates',
+    'Ticket pipeline handling',
+    'Sequence enrollment and follow-up',
+  ],
+  documentationChallenges: [
+    'Per-team pipelines and properties mean stage steps differ across portals',
+    'Automation enrolls and moves records in ways reps do not see',
+    'Work spans HubSpot plus email, calendars, and other tools',
+  ],
+  oldWay:
+    'A RevOps lead writes the playbook from memory against a default pipeline. Because each team configures stages and properties differently, the guide references steps reps do not follow, and it drifts as the portal changes.',
+  ledgeriumWay:
+    'Record the real process as the rep works the record. Ledgerium captures the actual stage moves, property updates, and follow-up steps and generates the SOP, the process map, and a report that highlights where deals stall.',
+  commonMistakes: [
+    'Documenting a default pipeline instead of the team’s configured stages',
+    'Skipping the steps automation and sequences perform behind the scenes',
+    'Stopping at the HubSpot boundary when follow-up happens in email or calendar',
+  ],
+  faqs: [
+    {
+      q: 'How do I document a HubSpot workflow?',
+      a: 'Record a real run of the process as the rep works the record, then generate the SOP and process map from the recording. The result reflects the actual stages, properties, and follow-up steps your team uses.',
+    },
+    {
+      q: 'Why do generic HubSpot guides not match my portal?',
+      a: 'HubSpot pipelines, stages, and properties are configured per team. A guide written against a default pipeline references steps your reps may not follow. Recording the real process avoids that mismatch.',
+    },
+    {
+      q: 'Can Ledgerium document work that spans HubSpot and other tools?',
+      a: 'Yes. A single recording captures the steps across HubSpot and the other browser-based tools in the process, such as email and calendar, so the SOP reflects the full flow.',
+    },
+    {
+      q: 'Does Ledgerium capture HubSpot automation and sequences?',
+      a: 'It captures what the user does and sees in the browser. Automation and sequence enrollment that run in the background are not observed directly, so document their effect from the user-visible result.',
+    },
+    {
+      q: 'Is this affiliated with HubSpot?',
+      a: 'No. This is an independent guide. HubSpot is a trademark of its owner, and Ledgerium is not affiliated with or endorsed by HubSpot.',
+    },
+  ],
+  jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const workday: SoftwarePage = {
+  type: 'software',
+  slug: 'workday',
+  vendor: 'Workday',
+  metaTitle: 'How to Document a Workflow in Workday',
+  metaDescription:
+    'Document a Workday workflow by recording it once. Capture the real onboarding, time-off, and approval steps, and generate an SOP and process map.',
+  h1: 'How to document a workflow in Workday',
+  eyebrow: 'Software guide',
+  shortAnswer:
+    'To document a workflow in Workday, record someone performing the real process, a hire and onboarding, a time-off request, or an expense approval, then generate a step-by-step SOP and a process map from it. Workday business processes and security groups vary by tenant, so a generic guide rarely matches what an employee or approver actually sees. Ledgerium records the real interaction in the browser and produces the SOP, process map, and a workflow intelligence report, so the documentation reflects your tenant and the role doing the work.',
+  primaryKeyword: 'Workday workflow documentation',
+  secondaryKeywords: ['document Workday process', 'Workday SOP', 'HR workflow documentation'],
+  searchIntent: 'commercial',
+  tags: ['software', 'workday', 'hcm', 'human-resources', 'workflow'],
+  related: ['workflow:employee-onboarding-workflow', 'software:servicenow', 'persona:hr-teams'],
+  originalDataPoint:
+    'Workday business processes and what each security group can do vary by tenant, so an employee, a manager, and an HR partner each see a different slice of the same process. Ledgerium records the process as the actual role performs it, so the SOP reflects what that role sees and does rather than an HR-admin view.',
+  honestLimitation:
+    'Ledgerium captures the browser-based steps in Workday. Business process routing, conditions, and integrations that run server-side are not observed directly; document their effect from the user-visible result.',
+  documentationFrame: 'How to document a workflow in Workday',
+  commonWorkflows: [
+    'Hire and onboarding tasks',
+    'Time-off request and approval',
+    'Job change and transfer',
+    'Expense report submission and approval',
+  ],
+  documentationChallenges: [
+    'Security groups mean employees, managers, and HR see different steps',
+    'Business process routing depends on conditions that are easy to miss',
+    'Tasks land in inboxes, so the routing is hard to describe from memory',
+  ],
+  oldWay:
+    'An HR partner writes the steps from an admin view that employees and managers never use. The guide references inbox items and actions the role performing the work does not have, so it confuses the people it is meant to help.',
+  ledgeriumWay:
+    'Record the real process as the role that performs it. Ledgerium captures the actual tasks, inbox routing, and approval steps and generates the SOP, the process map, and a report that highlights where requests wait.',
+  commonMistakes: [
+    'Documenting from an HR-admin view instead of the role that runs the process',
+    'Leaving the inbox routing and approval conditions out of the steps',
+    'Stopping at the Workday boundary when onboarding continues in other systems',
+  ],
+  faqs: [
+    {
+      q: 'How do I document a Workday process?',
+      a: 'Record a real run of the process as the role that performs it, then generate the SOP and process map from the recording. The result reflects what that role actually sees and does in your tenant.',
+    },
+    {
+      q: 'Why do Workday guides drift from reality?',
+      a: 'Workday business processes and security groups vary by tenant, so each role sees a different slice. A guide written from an admin view references steps employees and managers do not have. Recording the real role avoids that gap.',
+    },
+    {
+      q: 'Can Ledgerium document an onboarding that spans Workday and other tools?',
+      a: 'Yes. A single recording captures the steps across Workday and the other browser-based systems in the process, such as an IT request portal, so the SOP reflects the full flow.',
+    },
+    {
+      q: 'Does Ledgerium capture Workday business process routing?',
+      a: 'It captures what the user does and sees in the browser, including the inbox items they act on. The routing and conditions that run server-side are not observed directly, so document their effect from the user-visible result.',
+    },
+    {
+      q: 'Is this affiliated with Workday?',
+      a: 'No. This is an independent guide. Workday is a trademark of its owner, and Ledgerium is not affiliated with or endorsed by Workday.',
+    },
+  ],
+  jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const sharepoint: SoftwarePage = {
+  type: 'software',
+  slug: 'sharepoint',
+  vendor: 'SharePoint',
+  metaTitle: 'How to Document a Workflow in SharePoint',
+  metaDescription:
+    'Document a SharePoint workflow by recording it once. Capture the real approval, access request, and publishing steps in an SOP and a process map.',
+  h1: 'How to document a workflow in SharePoint',
+  eyebrow: 'Software guide',
+  shortAnswer:
+    'To document a workflow in SharePoint, record someone performing the real process, a document approval, an access request, or a page publish, then generate a step-by-step SOP and a process map from it. SharePoint sites are configured per team with their own libraries, permissions, and approval flows, so a generic guide rarely matches a given site. Ledgerium records the real interaction in the browser and produces the SOP, process map, and a workflow intelligence report, so the documentation reflects your site and how the team actually handles content.',
+  primaryKeyword: 'SharePoint workflow documentation',
+  secondaryKeywords: ['document SharePoint process', 'SharePoint SOP', 'document approval workflow documentation'],
+  searchIntent: 'commercial',
+  tags: ['software', 'sharepoint', 'document-management', 'intranet', 'workflow'],
+  related: [
+    'workflow:contract-review-workflow',
+    'problem:how-to-document-a-process-without-interviewing-everyone',
+    'compare:process-street',
+  ],
+  originalDataPoint:
+    'SharePoint sites differ by library structure, permission level, and approval flow, so the same task looks different across teams. Ledgerium records the real steps a contributor takes, so the SOP reflects how that site actually handles approval and publishing rather than a generic library example.',
+  honestLimitation:
+    'Ledgerium captures the browser-based steps in SharePoint. Power Automate flows and retention policies that run in the background are not observed directly; document their effect from the user-visible result.',
+  documentationFrame: 'How to document a workflow in SharePoint',
+  commonWorkflows: [
+    'Document review and approval',
+    'Site and library access requests',
+    'Records management and retention steps',
+    'Page authoring and publishing',
+  ],
+  documentationChallenges: [
+    'Per-site configuration means libraries, permissions, and flows differ',
+    'Power Automate flows move documents in ways contributors do not see',
+    'Approval and publishing steps span SharePoint plus email and Teams',
+  ],
+  oldWay:
+    'A site owner writes the steps from memory against a standard library. Because each site is configured differently, the guide references columns, permissions, and approval flows the team does not have, and it drifts as the site changes.',
+  ledgeriumWay:
+    'Record the real process as the contributor works the content. Ledgerium captures the actual library steps, approval routing, and publishing actions and generates the SOP, the process map, and a report that highlights where content waits.',
+  commonMistakes: [
+    'Documenting a standard library instead of the team’s configured site',
+    'Skipping the steps Power Automate flows perform behind the scenes',
+    'Stopping at the SharePoint boundary when approvals happen in email or Teams',
+  ],
+  faqs: [
+    {
+      q: 'How do I document a SharePoint process?',
+      a: 'Record a real run of the process as the contributor works the content, then generate the SOP and process map from the recording. The result reflects the actual library, approval, and publishing steps your site uses.',
+    },
+    {
+      q: 'Why do generic SharePoint guides not match my site?',
+      a: 'SharePoint sites are configured per team with their own libraries, permissions, and approval flows. A guide written against a standard library references things your site may not have. Recording the real process avoids that mismatch.',
+    },
+    {
+      q: 'Can Ledgerium document an approval that spans SharePoint and other tools?',
+      a: 'Yes. A single recording captures the steps across SharePoint and the other browser-based tools in the process, such as email and Teams, so the SOP reflects the full flow.',
+    },
+    {
+      q: 'Does Ledgerium capture Power Automate flows?',
+      a: 'It captures what the user does and sees in the browser. Power Automate flows and retention policies that run in the background are not observed directly, so document their effect from the user-visible result.',
+    },
+    {
+      q: 'Is this affiliated with SharePoint or Microsoft?',
+      a: 'No. This is an independent guide. SharePoint is a trademark of its owner, and Ledgerium is not affiliated with or endorsed by SharePoint or Microsoft.',
+    },
+  ],
+  jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+export const SOFTWARE_PAGES: readonly SoftwarePage[] = [
+  salesforce,
+  netsuite,
+  servicenow,
+  jira,
+  zendesk,
+  sap,
+  quickbooks,
+  hubspot,
+  workday,
+  sharepoint,
+];

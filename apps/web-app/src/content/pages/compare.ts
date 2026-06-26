@@ -224,4 +224,227 @@ const processMining: ComparePage = {
   published: true,
 };
 
-export const COMPARE_PAGES: readonly ComparePage[] = [tango, manualSop, processMining];
+const taskMining: ComparePage = {
+  type: 'compare',
+  slug: 'task-mining',
+  metaTitle: 'Workflow Recording vs Task Mining Compared',
+  metaDescription:
+    'Task mining samples desktop activity broadly and produces noisy data to analyze. Ledgerium records one real browser workflow into a usable SOP and map.',
+  h1: 'Workflow recording vs task mining',
+  eyebrow: 'Comparison',
+  shortAnswer:
+    'Task mining and workflow recording both watch how people work, but they aim at different things. Task mining runs on the desktop and samples a wide stream of activity across many applications, which produces a large, noisy dataset that needs analysis before it means anything. Ledgerium records one chosen browser workflow as you perform it and turns that single run into an SOP, a process map, and an intelligence report directly. Task mining suits broad discovery across a whole department. Workflow recording suits documenting one process you already know matters.',
+  primaryKeyword: 'workflow recording vs task mining',
+  secondaryKeywords: ['task mining alternative', 'desktop activity capture vs workflow recording', 'document a workflow without noisy data'],
+  searchIntent: 'commercial',
+  tags: ['comparison', 'process-intelligence', 'task-mining', 'documentation'],
+  related: ['compare:process-mining', 'workflow:expense-reporting-workflow', 'persona:business-analysts'],
+  originalDataPoint:
+    'Task mining captures broad activity and leaves you to find the signal in it. Ledgerium captures one targeted workflow as structured steps with millisecond timing, so the output is already a readable SOP and map, not a dataset waiting for an analyst.',
+  honestLimitation:
+    'Ledgerium captures browser-based workflows through a Chrome extension. Task mining tools can observe activity in native desktop applications that Ledgerium does not see.',
+  competitor: 'task mining',
+  whyItMatters:
+    'Broad capture and targeted capture solve different problems. Task mining is built for discovery, finding which processes exist across a team, and that breadth comes with a large dataset and an analysis step. If you already know the process you need documented, that analysis overhead is wasted effort, and a targeted recording gets you a usable SOP far faster.',
+  rows: [
+    { label: 'Capture scope', competitor: 'Broad desktop activity sampling', ledgerium: 'One targeted browser workflow' },
+    { label: 'Output', competitor: 'Activity dataset to analyze', ledgerium: 'SOP, process map, intelligence report' },
+    { label: 'Analysis step before value', competitor: 'Required', ledgerium: 'Not required' },
+    { label: 'Data noise', competitor: 'High, needs filtering', ledgerium: 'Low, scoped to one process' },
+    { label: 'Native desktop apps', competitor: true, ledgerium: false },
+    { label: 'Produces a ready SOP', competitor: false, ledgerium: true },
+  ],
+  competitorStrength:
+    'Task mining is stronger for discovery at scale. When you do not yet know which processes a department runs or where the volume sits, sampling activity across many desktops surfaces candidates that a single targeted recording would never reveal.',
+  whenCompetitorFits: [
+    'Broad discovery of which processes exist across a team',
+    'You need to see activity in native desktop applications',
+    'You have an analyst team to interpret a large activity dataset',
+  ],
+  whenLedgeriumFits: [
+    'You already know which process needs documenting',
+    'You want a usable SOP and map without an analysis step',
+    'The work runs across browser systems',
+    'You want documentation generated from real work, not memory',
+  ],
+  verifiedAsOf: 'June 2026',
+  faqs: [
+    {
+      q: 'What is the difference between task mining and workflow recording?',
+      a: 'Task mining samples broad desktop activity across many applications and produces a dataset you analyze to find processes. Workflow recording captures one chosen workflow as you perform it and turns that single run into an SOP and process map directly.',
+    },
+    {
+      q: 'When is task mining the better choice?',
+      a: 'When the goal is discovery across a department and you do not yet know which processes exist or where the volume is. Sampling activity across many desktops surfaces candidate processes that a single recording cannot.',
+    },
+    {
+      q: 'Why is task mining data described as noisy?',
+      a: 'Because it captures a wide stream of everything happening on the desktop, most of which is unrelated to any one process. Turning that into a documented workflow takes a filtering and analysis step. Recording one process avoids that step.',
+    },
+    {
+      q: 'Does Ledgerium watch everything I do on my computer?',
+      a: 'No. Ledgerium only records the specific browser workflow you start, and it captures structured interaction events rather than desktop-wide activity or screenshots. Capture is scoped to the process you choose to document.',
+    },
+    {
+      q: 'Can I use both together?',
+      a: 'Yes. Many teams use task mining to discover which processes are worth attention, then use Ledgerium to record and document the specific workflows that discovery surfaces. One finds the candidates, the other documents them.',
+    },
+  ],
+  jsonLd: ['FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const screenRecording: ComparePage = {
+  type: 'compare',
+  slug: 'screen-recording',
+  metaTitle: 'Workflow Recording vs Screen Recording',
+  metaDescription:
+    'A screen recording is great for a quick show-and-tell but is not structured or measurable. Ledgerium captures structured steps and timing, no screenshots.',
+  h1: 'Workflow recording vs screen recording',
+  eyebrow: 'Comparison',
+  shortAnswer:
+    'A screen recording captures video of what happened on screen, which is perfect for a quick show-and-tell a colleague can watch once. But video is not structured, searchable, diffable, or measurable. You cannot ask a video where time was lost or compare two runs without watching both end to end. Ledgerium captures the same work as structured steps with per-step timing, so the result is an SOP and a process map you can search, measure, and compare, and it records no screenshots at all. Screen recording fits explaining; workflow recording fits documenting and measuring.',
+  primaryKeyword: 'workflow recording vs screen recording',
+  secondaryKeywords: ['Loom alternative for SOPs', 'screen recording vs SOP', 'structured workflow capture vs video'],
+  searchIntent: 'commercial',
+  tags: ['comparison', 'sop', 'screen-recording', 'process-intelligence'],
+  related: ['compare:tango', 'problem:how-to-document-a-workflow-across-multiple-systems', 'persona:training-managers'],
+  originalDataPoint:
+    'A video forces a viewer to watch in real time to find anything. Ledgerium records each step as structured data with millisecond timing, so a reader can jump to a step, search the SOP, or diff two runs to see exactly where cycle time changed, none of which a video supports.',
+  honestLimitation:
+    'Ledgerium captures browser-based workflows through a Chrome extension and records no screen content. Work in native desktop applications outside the browser is not captured, and a video can show visual detail that a structured step list does not.',
+  competitor: 'screen recording',
+  whyItMatters:
+    'Video and structured capture answer different questions. A screen recording is fast to make and easy to watch, but it is a flat artifact: nothing in it can be searched, measured, or compared. If you need documentation that supports improvement, audit, or automation planning, a video leaves you re-watching footage instead of reading data.',
+  rows: [
+    { label: 'Output format', competitor: 'Video file', ledgerium: 'Structured steps, SOP, process map' },
+    { label: 'Searchable', competitor: false, ledgerium: true },
+    { label: 'Per-step timing', competitor: false, ledgerium: 'Yes, millisecond precision' },
+    { label: 'Diff two runs', competitor: false, ledgerium: true },
+    { label: 'Captures screen content', competitor: 'Yes, full video', ledgerium: 'No screenshots, no screen content' },
+    { label: 'Update after a change', competitor: 'Re-shoot the video', ledgerium: 'Re-record' },
+  ],
+  competitorStrength:
+    'Screen recording is faster and richer for a quick visual explanation. When you just want to show a colleague how something looks and moves, narrated video carries tone, context, and on-screen detail that a structured step list does not.',
+  whenCompetitorFits: [
+    'A quick show-and-tell to explain something once',
+    'Content where visual and verbal nuance matters more than data',
+    'Informal sharing where measurement is not the goal',
+  ],
+  whenLedgeriumFits: [
+    'You need documentation you can search and measure',
+    'You want to compare how a workflow changes over time',
+    'You are preparing a process for audit or automation',
+    'You want a privacy model with no screenshots or screen content',
+  ],
+  verifiedAsOf: 'June 2026',
+  faqs: [
+    {
+      q: 'Is a screen recording good enough for an SOP?',
+      a: 'For a one-time explanation, yes. For an SOP that needs to be searched, kept current, measured, or used for audit, no. Video is a flat artifact you re-watch; a structured recording produces a readable, measurable document instead.',
+    },
+    {
+      q: 'What does Ledgerium capture instead of video?',
+      a: 'It records the work as structured interaction steps, clicks, inputs, navigation, with per-step timing and system context, then generates an SOP and process map. It captures no screenshots and no screen content.',
+    },
+    {
+      q: 'Can I search or measure a screen recording?',
+      a: 'Not directly. A video has no structure to search and no timing data to measure, so finding a step or comparing two runs means watching footage. Ledgerium produces searchable steps and millisecond timing you can measure and diff.',
+    },
+    {
+      q: 'Does Ledgerium record my screen?',
+      a: 'No. Ledgerium never captures screenshots or screen content. It records structural browser interaction events only, which is a deliberate privacy choice that avoids capturing sensitive on-screen data.',
+    },
+    {
+      q: 'When should I still use screen recording?',
+      a: 'When you want a quick visual show-and-tell and the verbal and on-screen nuance matters more than searchable, measurable data. Many teams record a short video to explain context and use Ledgerium for the documented, measurable SOP.',
+    },
+  ],
+  jsonLd: ['FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const processStreet: ComparePage = {
+  type: 'compare',
+  slug: 'process-street',
+  metaTitle: 'Ledgerium vs Process Street Compared',
+  metaDescription:
+    'Process Street runs recurring checklists well once written. Ledgerium generates the SOP from real recorded work instead of authoring checklists by hand.',
+  h1: 'Ledgerium vs Process Street: recorded work or hand-built checklists?',
+  eyebrow: 'Comparison',
+  shortAnswer:
+    'Process Street and Ledgerium meet at documentation but start from opposite ends. Process Street is checklist and SOP software: once you author a checklist, it runs that recurring process well, with assignments, conditional logic, and tracking on every run. Ledgerium does not author checklists by hand. It records the real workflow as you perform it and generates the SOP and process map from what actually happened. If your priority is executing recurring checklists you maintain, Process Street fits. If your priority is producing an accurate SOP from real work without writing it from memory, Ledgerium fits.',
+  primaryKeyword: 'Process Street alternative',
+  secondaryKeywords: ['Ledgerium vs Process Street', 'checklist software vs recorded SOP', 'generate SOP instead of writing checklists'],
+  searchIntent: 'commercial',
+  tags: ['comparison', 'sop', 'checklists', 'process-intelligence'],
+  related: ['compare:manual-sop-documentation', 'sopTemplate:invoice-approval-sop-template', 'persona:operations-managers'],
+  originalDataPoint:
+    'Checklist software starts empty: someone authors every step from memory before the first run. Ledgerium starts from a recording, so the first SOP draft reflects the real workflow including the steps and system handoffs an author would forget to write down.',
+  honestLimitation:
+    'Ledgerium captures browser-based workflows through a Chrome extension and documents what it observes. It is not a checklist-execution platform: it does not assign, track, and enforce recurring checklist runs the way dedicated checklist software does.',
+  competitor: 'Process Street',
+  whyItMatters:
+    'Authoring and recording produce different first drafts. A hand-built checklist captures what the author remembers, which is where workarounds, exceptions, and cross-system steps go missing. Recording the real work removes that gap. But once a process is documented, running it repeatedly with assignments and tracking is its own job, and that is the part checklist software is built for.',
+  rows: [
+    { label: 'How the SOP starts', competitor: 'Authored by hand from memory', ledgerium: 'Generated from a real recording' },
+    { label: 'Captures workarounds and exceptions', competitor: 'Only if the author writes them', ledgerium: 'Captured as they happen' },
+    { label: 'Recurring checklist execution', competitor: 'Yes, with assignments and tracking', ledgerium: false },
+    { label: 'Per-step timing and bottleneck data', competitor: false, ledgerium: true },
+    { label: 'Process map from the work', competitor: false, ledgerium: true },
+    { label: 'Conditional logic on runs', competitor: true, ledgerium: false },
+  ],
+  competitorStrength:
+    'Process Street is better for ongoing recurring-checklist execution. Once a process is written down, it assigns tasks, applies conditional logic, and tracks completion across every run, which is exactly the operational job Ledgerium does not do.',
+  whenCompetitorFits: [
+    'Running recurring checklists with assignments and tracking',
+    'Processes that need conditional logic on each run',
+    'Teams that want a platform to execute, not just document, a workflow',
+  ],
+  whenLedgeriumFits: [
+    'You want the SOP generated from real work, not written from memory',
+    'The process spans several browser systems',
+    'You also need timing, bottleneck, and automation signals',
+    'You want documentation that reflects the work rather than a memory of it',
+  ],
+  verifiedAsOf: 'June 2026',
+  faqs: [
+    {
+      q: 'Is Ledgerium a Process Street alternative?',
+      a: 'For producing the SOP itself, yes. Process Street has you author checklists by hand, then runs them; Ledgerium records the real workflow and generates the SOP and process map from it. They overlap on documentation but differ on how the document is created.',
+    },
+    {
+      q: 'Can Ledgerium run recurring checklists like Process Street?',
+      a: 'No. Ledgerium documents and measures workflows but does not assign, track, and enforce recurring checklist runs. For ongoing checklist execution with assignments and conditional logic, Process Street is the stronger fit.',
+    },
+    {
+      q: 'What is the main advantage of recording over authoring a checklist?',
+      a: 'A recording captures what actually happened, including workarounds, exceptions, and cross-system steps an author would forget. A hand-built checklist only contains what the writer remembered, so it tends to describe an idealized process.',
+    },
+    {
+      q: 'Can I use Ledgerium and Process Street together?',
+      a: 'Yes, and it is a natural fit. Record the real workflow in Ledgerium to produce an accurate SOP, then build the recurring checklist in Process Street from that SOP so the checklist your team runs reflects the real process.',
+    },
+    {
+      q: 'How is pricing different?',
+      a: 'Ledgerium offers a free tier with 5 documented workflows per month and paid plans starting at 49 dollars per month. Verify current Process Street pricing on Process Street’s own pricing page, as plans change.',
+    },
+  ],
+  jsonLd: ['FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+export const COMPARE_PAGES: readonly ComparePage[] = [
+  tango,
+  manualSop,
+  processMining,
+  taskMining,
+  screenRecording,
+  processStreet,
+];

@@ -12,6 +12,7 @@ import { WORKFLOW_PAGES } from './pages/workflow';
 import { SOFTWARE_PAGES } from './pages/software';
 import { PERSONA_PAGES } from './pages/persona';
 import { PROBLEM_PAGES } from './pages/problem';
+import { SOP_TEMPLATE_PAGES } from './pages/sop-template';
 
 /**
  * URL prefix per page type.
@@ -72,6 +73,7 @@ export const ALL_PAGES: readonly SeoPage[] = [
   ...SOFTWARE_PAGES,
   ...PERSONA_PAGES,
   ...PROBLEM_PAGES,
+  ...SOP_TEMPLATE_PAGES,
 ];
 
 export function getPagesByType<T extends PageType>(type: T): SeoPage[] {

@@ -562,6 +562,566 @@ const findWaste: ProblemPage = {
   published: true,
 };
 
+const standardizeWorkflows: ProblemPage = {
+  type: 'problem',
+  slug: 'how-to-standardize-workflows',
+  metaTitle: 'How to Standardize a Workflow Across a Team',
+  metaDescription:
+    'Standardize a workflow by recording how each person runs it, comparing the variation, and agreeing on one documented version the team follows.',
+  h1: 'How to standardize a workflow',
+  eyebrow: 'Problem',
+  shortAnswer:
+    'To standardize how a team performs a workflow, record several people running it, compare the variation between their runs, agree on one best version, and document it as the SOP everyone follows. Standardization fails when the standard is written from memory and never matches what people actually do. Ledgerium AI records the real runs, surfaces where they differ, and generates an SOP from the agreed version, so the standard is built from observed work rather than an opinion about how the process should run.',
+  primaryKeyword: 'how to standardize a workflow',
+  secondaryKeywords: ['standardize a process', 'standard work documentation', 'reduce workflow variation'],
+  searchIntent: 'informational',
+  tags: ['problem', 'standardization', 'process-excellence', 'sop'],
+  related: ['problem:how-to-reduce-process-variation', 'persona:process-excellence-leads', 'compare:process-street'],
+  originalDataPoint:
+    'Ledgerium captures how the same workflow differs run to run, so you can see exactly where two people diverge before you write a standard, instead of standardizing on a guess about which version is correct.',
+  honestLimitation:
+    'Ledgerium standardizes the browser-based steps it observes. Deciding which version is the right standard still needs a person who understands the trade-offs.',
+  whyItHappens:
+    'Workflows drift apart because each person learns them slightly differently and no documented standard reflects the real work. A written standard built from memory does not match anyone, so people ignore it and keep running their own version.',
+  diagnostic: [
+    'Two people produce different results from the same workflow',
+    'There is a written standard but nobody actually follows it',
+    'Quality depends on who happens to run the process',
+  ],
+  manualApproach:
+    'Pick one person you trust, write down how they do it, and tell everyone to follow that. It ignores why the others do it differently, misses the exceptions, and the standard is out of date the moment the process changes.',
+  ledgeriumApproach:
+    'Record several people running the workflow. Ledgerium shows where the runs differ, you agree on the best version, and the SOP is generated from that agreed run, including the exceptions, so the standard reflects real work.',
+  steps: [
+    { title: 'Record several runs', detail: 'Capture the same workflow as a few different people perform it.' },
+    { title: 'Compare the variation', detail: 'Review where the runs differ in steps, order, and time.' },
+    { title: 'Agree on the best version', detail: 'Decide which path is the standard and why, with the team.' },
+    { title: 'Generate the standard SOP', detail: 'Turn the agreed run into the documented standard everyone follows.' },
+    { title: 'Re-record to keep it honest', detail: 'Re-record periodically to confirm people are still following the standard.' },
+  ],
+  commonMistakes: [
+    'Standardizing on one person without understanding why others differ',
+    'Writing the standard from memory so it matches nobody',
+    'Publishing a standard once and never checking it is followed',
+  ],
+  faqs: [
+    {
+      q: 'How do I standardize a workflow across a team?',
+      a: 'Record several people running it, compare where their runs differ, agree on the best version, and document that as the SOP. The standard is built from real work rather than from memory.',
+    },
+    {
+      q: 'Why do written standards get ignored?',
+      a: 'Because they are written from memory and do not match what people actually do. A standard generated from a real, agreed run reflects the work, so people are far more likely to follow it.',
+    },
+    {
+      q: 'How do I know which version should be the standard?',
+      a: 'Compare the recorded runs side by side. Seeing where people diverge, and how long each path takes, lets the team choose the best version with evidence instead of opinion.',
+    },
+    {
+      q: 'Does standardizing remove necessary exceptions?',
+      a: 'No. Recording the real runs captures the legitimate exceptions, so the standard documents how to handle them rather than pretending the process is a single clean path.',
+    },
+    {
+      q: 'How do I keep the standard from drifting again?',
+      a: 'Re-record the workflow periodically. Comparing new runs to the standard shows whether people are still following it and where it needs to be refreshed.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const prepareForAudit: ProblemPage = {
+  type: 'problem',
+  slug: 'how-to-prepare-for-a-process-audit',
+  metaTitle: 'How to Prepare for a Process Audit',
+  metaDescription:
+    'Prepare for a process audit by recording how the work is really done, generating SOPs and process maps, so your evidence matches actual practice.',
+  h1: 'How to prepare for a process audit',
+  eyebrow: 'Problem',
+  shortAnswer:
+    'To prepare for a process audit, document how the work is actually performed, not how a policy says it should be, so your SOPs and process maps match what an auditor will observe. Audits go badly when the documentation describes an ideal process the team does not follow. Ledgerium AI records the real workflow and generates SOPs and process maps from it, so your evidence reflects actual practice and the gap between written procedure and real work is closed before the auditor finds it.',
+  primaryKeyword: 'how to prepare for a process audit',
+  secondaryKeywords: ['audit process documentation', 'process audit evidence', 'audit readiness documentation'],
+  searchIntent: 'informational',
+  tags: ['problem', 'audit', 'compliance', 'documentation'],
+  related: ['persona:compliance-teams', 'workflow:month-end-close-workflow', 'sopTemplate:invoice-approval-sop-template'],
+  originalDataPoint:
+    'Because Ledgerium documents from a real run, the SOP and the observed work are the same source, so the documentation an auditor reviews matches the practice they would see, which removes the most common audit finding.',
+  honestLimitation:
+    'Ledgerium evidences the browser-based steps it records. Approvals, sign-offs, and offline controls still need their own records attached to the documentation.',
+  whyItHappens:
+    'Audit preparation is painful because the documentation was written for the policy, not for the work. The team runs a different process than the binder describes, so auditors find gaps between what is written and what is done.',
+  diagnostic: [
+    'Your written procedures do not match how the team actually works',
+    'Audit prep means scrambling to recreate documentation after the fact',
+    'Past audits flagged gaps between policy and practice',
+  ],
+  manualApproach:
+    'Pull the old procedure documents, interview the team to see what changed, and rewrite the binder before the auditor arrives. It is rushed, depends on recall, and still leaves gaps between the document and the real process.',
+  ledgeriumApproach:
+    'Record the process as it actually runs. Ledgerium generates the SOP and process map from that recording, so the documentation and the observed work share one source and the auditor sees consistency rather than a gap.',
+  steps: [
+    { title: 'List the audited processes', detail: 'Identify the workflows the audit will examine.' },
+    { title: 'Record real runs', detail: 'Capture each process as the team actually performs it today.' },
+    { title: 'Generate the evidence', detail: 'Produce SOPs and process maps from the recordings.' },
+    { title: 'Attach offline controls', detail: 'Add approvals, sign-offs, and records that happen off-screen.' },
+    { title: 'Review for gaps', detail: 'Confirm the documentation matches practice before the audit.' },
+  ],
+  commonMistakes: [
+    'Documenting the policy instead of the real process',
+    'Recreating documentation from memory under time pressure',
+    'Leaving offline approvals and controls out of the evidence',
+  ],
+  faqs: [
+    {
+      q: 'How do I prepare documentation for a process audit?',
+      a: 'Record how the work is actually performed and generate SOPs and process maps from the recording. The documentation then matches what an auditor observes instead of describing an ideal process.',
+    },
+    {
+      q: 'Why do audits find gaps between policy and practice?',
+      a: 'Because the documentation was written for the policy, not the work, and the team runs a different process. Documenting from a real run closes that gap before the auditor finds it.',
+    },
+    {
+      q: 'What evidence does a recorded process provide?',
+      a: 'A step-by-step SOP and a process map drawn from the observed run, showing the real steps and systems. You attach offline approvals and sign-offs to complete the record.',
+    },
+    {
+      q: 'How current does audit documentation need to be?',
+      a: 'It should reflect the process as it runs now. Re-recording when the process changes keeps the SOP and map aligned with current practice rather than a past version.',
+    },
+    {
+      q: 'Does this cover approvals that happen off-screen?',
+      a: 'Recording captures the browser steps precisely. Offline approvals and controls still need their own records, which you attach to the generated documentation at the right step.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const documentAcrossSystems: ProblemPage = {
+  type: 'problem',
+  slug: 'how-to-document-a-workflow-across-multiple-systems',
+  metaTitle: 'How to Document a Workflow Across Systems',
+  metaDescription:
+    'Document a workflow that spans several systems by recording one real run, so the cross-system handoffs are captured instead of lost between tools.',
+  h1: 'How to document a workflow across multiple systems',
+  eyebrow: 'Problem',
+  shortAnswer:
+    'To document a process that spans several tools, record one real run that moves across all of them, so the handoffs between systems are captured instead of falling through the cracks. Multi-system processes are hard to document because no single tool sees the whole path, and the steps between systems are where the real work hides. Ledgerium AI records the workflow across each browser-based system in one session and generates an SOP and process map that includes the lookups, copies, and handoffs that connect the tools together.',
+  primaryKeyword: 'how to document a workflow across multiple systems',
+  secondaryKeywords: ['cross-system process documentation', 'document a process across tools', 'multi-system workflow'],
+  searchIntent: 'informational',
+  tags: ['problem', 'documentation', 'cross-system', 'process-mapping'],
+  related: ['software:salesforce', 'persona:business-analysts', 'problem:how-to-document-a-business-process'],
+  originalDataPoint:
+    'Ledgerium records the steps between systems, the lookups, copies, and re-keying that connect one tool to the next, which is exactly the work each individual system has no record of and interviews routinely skip.',
+  honestLimitation:
+    'Ledgerium captures the browser-based systems in the path. Steps that happen in desktop software or outside the browser need a person to add them to the recording.',
+  whyItHappens:
+    'Cross-system processes resist documentation because each tool only sees its own slice, and the glue work between tools lives in nobody’s system of record. Documenting from one system misses the handoffs, which is where the delays and errors usually start.',
+  diagnostic: [
+    'A process touches several tools and no document shows the whole path',
+    'The handoffs between systems are where errors and delays appear',
+    'Each team documents only its own system, not the connections',
+  ],
+  manualApproach:
+    'Ask each system owner how their part works, then try to stitch the pieces together into one flow. The seams between systems get lost, the re-keying steps go undocumented, and the end-to-end picture never quite fits together.',
+  ledgeriumApproach:
+    'Record one real run that moves across every browser-based system in the process. Ledgerium captures the handoffs as they happen and generates a single SOP and process map that shows the whole path, tool to tool.',
+  steps: [
+    { title: 'Map the systems involved', detail: 'List the tools the process touches from start to finish.' },
+    { title: 'Record end to end', detail: 'Capture one real run that moves across all the systems in one session.' },
+    { title: 'Generate the unified map', detail: 'Produce an SOP and process map that includes the cross-system handoffs.' },
+    { title: 'Add offline steps', detail: 'Note any steps that happen outside the browser to complete the path.' },
+    { title: 'Validate with each owner', detail: 'Confirm each system’s part is right and the connections hold together.' },
+  ],
+  commonMistakes: [
+    'Documenting each system separately and losing the handoffs',
+    'Skipping the re-keying and lookup steps between tools',
+    'Assuming the system of record shows the whole process',
+  ],
+  faqs: [
+    {
+      q: 'How do I document a process that spans multiple systems?',
+      a: 'Record one real run that moves across all the tools in one session. Ledgerium captures the handoffs between systems and generates a single SOP and process map of the whole path.',
+    },
+    {
+      q: 'Why are multi-system processes hard to document?',
+      a: 'Because each tool only sees its own slice and the work between tools lives in nobody’s system of record. A recording follows the work across systems and captures the handoffs directly.',
+    },
+    {
+      q: 'Where do cross-system processes usually break?',
+      a: 'At the handoffs, the lookups, copies, and re-keying between tools. These steps go undocumented because no single system records them, which is where delays and errors start.',
+    },
+    {
+      q: 'Can one recording cover several different tools?',
+      a: 'Yes. A single session captures the steps across each browser-based system in the process, so the documentation shows the whole path rather than disconnected fragments per tool.',
+    },
+    {
+      q: 'What about steps outside the browser?',
+      a: 'Ledgerium records browser-based systems. Steps in desktop software or offline are added to the recording by a person, so the end-to-end documentation stays complete.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const keepSopsCurrent: ProblemPage = {
+  type: 'problem',
+  slug: 'how-to-keep-sops-up-to-date',
+  metaTitle: 'How to Keep SOPs Up to Date (Not Stale)',
+  metaDescription:
+    'Keep SOPs up to date by generating them from recordings, then re-recording when the process changes, so updating is a re-record not a rewrite.',
+  h1: 'How to keep SOPs up to date',
+  eyebrow: 'Problem',
+  shortAnswer:
+    'To keep SOPs current instead of stale, generate them from recordings of real work and re-record when the process changes, so updating is a quick re-record rather than a manual rewrite nobody has time for. SOPs go stale because hand-editing a document after every change is a job no one owns. Ledgerium AI generates the SOP from a recording, so when the process changes you re-record and the SOP regenerates, which keeps the documentation tied to how the work is actually done today.',
+  primaryKeyword: 'how to keep SOPs up to date',
+  secondaryKeywords: ['keep SOPs current', 'update SOPs', 'stop SOPs going stale'],
+  searchIntent: 'informational',
+  tags: ['problem', 'sop', 'documentation', 'maintenance'],
+  related: ['problem:how-to-create-sops-automatically', 'persona:training-managers', 'compare:process-street'],
+  originalDataPoint:
+    'Because the SOP is generated from a recording, updating after a process change is a re-record, not a line-by-line rewrite, which removes the manual maintenance cost that is the real reason SOPs go stale.',
+  honestLimitation:
+    'Re-recording refreshes the observed steps. A process owner still reviews the regenerated SOP to confirm rationale and approvals are still correct.',
+  whyItHappens:
+    'SOPs go stale because keeping them current is manual work that competes with everyone’s real job. The process changes, the document does not get edited, and within months the SOP describes a process that no longer exists.',
+  diagnostic: [
+    'Your SOPs were written once and never updated since',
+    'People know the SOP is wrong so they ignore it',
+    'Nobody owns the job of keeping the documentation current',
+  ],
+  manualApproach:
+    'Assign someone to review every SOP on a schedule, interview the team about what changed, and edit each document by hand. The reviews slip, the edits pile up, and the library falls behind the real processes.',
+  ledgeriumApproach:
+    'Generate each SOP from a recording. When the process changes, re-record it and the SOP regenerates from the new run, so keeping documentation current is a fast capture rather than a manual rewrite cycle.',
+  steps: [
+    { title: 'Generate SOPs from recordings', detail: 'Build the SOP library from real runs rather than hand-written docs.' },
+    { title: 'Set a re-record trigger', detail: 'Re-record whenever a process changes or on a regular review cadence.' },
+    { title: 'Regenerate the SOP', detail: 'Let the SOP refresh from the new recording instead of a manual edit.' },
+    { title: 'Review the changes', detail: 'Have the owner confirm rationale and approvals are still correct.' },
+    { title: 'Republish for the team', detail: 'Share the refreshed SOP so people trust and follow it again.' },
+  ],
+  commonMistakes: [
+    'Treating SOPs as write-once instead of living documents',
+    'Relying on manual edit cycles that always fall behind',
+    'Skipping the owner review after regenerating the SOP',
+  ],
+  faqs: [
+    {
+      q: 'How do I keep SOPs from going stale?',
+      a: 'Generate them from recordings and re-record when the process changes. Updating becomes a quick re-record that regenerates the SOP, rather than a manual rewrite that never happens.',
+    },
+    {
+      q: 'Why do SOPs become outdated so fast?',
+      a: 'Because keeping them current is manual work that competes with everyone’s real job. The process changes, the document does not get edited, and the SOP drifts from reality.',
+    },
+    {
+      q: 'How often should SOPs be updated?',
+      a: 'Whenever the process changes, plus a regular review cadence. Re-recording makes both cheap, so you can refresh SOPs as often as the work actually changes.',
+    },
+    {
+      q: 'Do I still need to review a regenerated SOP?',
+      a: 'Yes. Re-recording refreshes the observed steps, but a process owner should confirm the rationale and approvals are still correct before republishing.',
+    },
+    {
+      q: 'What makes people trust an SOP again?',
+      a: 'When it matches the real work. SOPs generated from current recordings reflect how the job is done today, so people stop ignoring them and start following them.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const measureImprovement: ProblemPage = {
+  type: 'problem',
+  slug: 'how-to-measure-process-improvement',
+  metaTitle: 'How to Measure Process Improvement',
+  metaDescription:
+    'Measure process improvement by baselining the workflow first, then re-recording after the change, so the gain is proven, not just claimed.',
+  h1: 'How to measure process improvement',
+  eyebrow: 'Problem',
+  shortAnswer:
+    'To measure whether a process change actually improved things, baseline the workflow before the change, make the change, then re-record and compare, so the gain in time, steps, or rework is proven rather than asserted. Improvements lose support when the impact cannot be shown in numbers. Ledgerium AI records the before and after of the same workflow and compares timing, wait time, rework, and variation, so you can see the real effect of a change instead of relying on impressions about whether it helped.',
+  primaryKeyword: 'how to measure process improvement',
+  secondaryKeywords: ['measure process change', 'prove process improvement', 'before and after process'],
+  searchIntent: 'informational',
+  tags: ['problem', 'measurement', 'continuous-improvement', 'process-intelligence'],
+  related: ['problem:how-to-baseline-a-workflow', 'persona:process-excellence-leads', 'workflow:expense-reporting-workflow'],
+  originalDataPoint:
+    'Ledgerium compares the same workflow before and after a change across timing, wait time, rework, and variation, so the improvement is shown as a measured difference rather than a claimed one, on the same evidence base both times.',
+  honestLimitation:
+    'A before-and-after comparison reflects the runs you record. For high-volume processes, more runs on each side give a more reliable measure of the change.',
+  whyItHappens:
+    'Improvements cannot be measured because no one captured the before, so the after has nothing to compare against. Teams change a process, feel it is better, and then lose the argument when someone asks for proof and there is none.',
+  diagnostic: [
+    'You changed a process but cannot say by how much it improved',
+    'A past improvement was reversed because impact could not be proven',
+    'Debates about whether a change helped come down to opinion',
+  ],
+  manualApproach:
+    'Estimate the before from memory, change the process, and ask people if it feels faster. The before is unreliable, the after is subjective, and the comparison cannot survive a skeptical question.',
+  ledgeriumApproach:
+    'Record the workflow before the change as a baseline, then re-record after. Ledgerium compares timing, wait time, rework, and variation across the two runs, so the improvement is a measured difference, not an impression.',
+  steps: [
+    { title: 'Baseline before changing', detail: 'Record the workflow as it runs today to fix the starting point.' },
+    { title: 'Make one change', detail: 'Implement the single improvement you want to measure.' },
+    { title: 'Re-record after', detail: 'Capture the workflow again once the change is in place.' },
+    { title: 'Compare the numbers', detail: 'Review the difference in time, steps, wait, and rework.' },
+    { title: 'Report the result', detail: 'Share the measured change so the improvement keeps its support.' },
+  ],
+  commonMistakes: [
+    'Changing the process without capturing a before',
+    'Judging improvement by feel instead of measured numbers',
+    'Changing several things at once so the cause is unclear',
+  ],
+  faqs: [
+    {
+      q: 'How do I measure whether a process change improved things?',
+      a: 'Baseline the workflow before the change, make the change, then re-record and compare. The difference in time, steps, and rework is measured, so the improvement is proven rather than claimed.',
+    },
+    {
+      q: 'Why do improvements lose support?',
+      a: 'Because the impact cannot be shown in numbers. Without a captured before, the after has nothing to compare against, and the change gets reversed when someone asks for proof.',
+    },
+    {
+      q: 'What should I measure to prove improvement?',
+      a: 'Timing split into work and wait, rework, and variation between people. Comparing these before and after shows where the change actually helped and by how much.',
+    },
+    {
+      q: 'Why change only one thing at a time?',
+      a: 'Because changing several things at once makes the cause unclear. Measuring one change against the baseline tells you which change produced the result.',
+    },
+    {
+      q: 'How many runs do I need to measure a change?',
+      a: 'One run on each side gives a directional read; several runs on each side give a more reliable measure, especially for high-volume work where runs vary.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const identifyBottlenecks: ProblemPage = {
+  type: 'problem',
+  slug: 'how-to-identify-process-bottlenecks',
+  metaTitle: 'How to Identify Process Bottlenecks',
+  metaDescription:
+    'Find process bottlenecks by recording the workflow and reviewing where work waits, so you target the step that holds up the whole process.',
+  h1: 'How to identify process bottlenecks',
+  eyebrow: 'Problem',
+  shortAnswer:
+    'To find where a process slows down, record the workflow and review where work piles up and waits, rather than guessing from the step that feels busiest. The bottleneck is usually a wait or a handoff, not the active work, so it stays invisible until you separate work time from wait time. Ledgerium AI records the real process and shows where time is spent waiting versus working, which step holds up the rest, and how much, so you fix the constraint that actually limits the process instead of a step that merely looks busy.',
+  primaryKeyword: 'how to identify process bottlenecks',
+  secondaryKeywords: ['find process bottlenecks', 'process bottleneck analysis', 'where a process slows down'],
+  searchIntent: 'informational',
+  tags: ['problem', 'bottleneck', 'process-excellence', 'continuous-improvement'],
+  related: ['problem:how-to-find-process-waste', 'persona:operations-managers', 'workflow:purchase-order-workflow'],
+  originalDataPoint:
+    'Ledgerium separates work time from wait time on each step, so a queue that adds days of delay is visible even when the active task itself is fast, which is the bottleneck a stopwatch on the busy step would never find.',
+  honestLimitation:
+    'Ledgerium measures the browser-based steps it records. A bottleneck in a physical or desktop-only step needs separate observation to quantify.',
+  whyItHappens:
+    'Bottlenecks are misdiagnosed because people feel the busy step, not the queue in front of it. The constraint is usually a handoff where work waits for someone, but without measuring wait time the team optimizes the visible step and the process stays slow.',
+  diagnostic: [
+    'The process takes far longer end to end than the work inside it',
+    'Work piles up waiting at one handoff before it moves on',
+    'Speeding up the busy step did not make the process faster',
+  ],
+  manualApproach:
+    'Ask the team which step feels slowest and add capacity there. It targets the busiest-feeling step rather than the real constraint, so the queue moves somewhere else and the end-to-end time barely changes.',
+  ledgeriumApproach:
+    'Record the real process. Ledgerium shows where work waits versus where it is active, ranks the steps by delay, and points to the constraint that holds up the rest, so you fix the bottleneck that actually limits throughput.',
+  steps: [
+    { title: 'Record the end-to-end process', detail: 'Capture the workflow from start to finish, ideally across several runs.' },
+    { title: 'Separate work from wait', detail: 'Review where time is active versus where work sits waiting.' },
+    { title: 'Find the constraint', detail: 'Identify the step or handoff that holds up everything after it.' },
+    { title: 'Fix the bottleneck', detail: 'Address the real constraint rather than the busiest-looking step.' },
+    { title: 'Re-record to confirm', detail: 'Capture again to check the bottleneck moved or shrank.' },
+  ],
+  commonMistakes: [
+    'Adding capacity to the busy step instead of the real constraint',
+    'Ignoring wait time at handoffs where work actually queues',
+    'Diagnosing the bottleneck from feel rather than measurement',
+  ],
+  faqs: [
+    {
+      q: 'How do I find a bottleneck in a process?',
+      a: 'Record the workflow and review where work waits, not just where it is busy. Ledgerium separates work from wait and ranks steps by delay, so the real constraint becomes visible.',
+    },
+    {
+      q: 'Why is the bottleneck usually not the busy step?',
+      a: 'Because the constraint is often a handoff where work queues, which is invisible until you measure wait time. People feel the busy step and miss the queue in front of it.',
+    },
+    {
+      q: 'Why did speeding up a step not help?',
+      a: 'Because it was not the constraint. Optimizing a non-bottleneck step just moves the queue elsewhere. Measuring the process points you to the step that actually limits throughput.',
+    },
+    {
+      q: 'How do I confirm I fixed the right bottleneck?',
+      a: 'Re-record the process after the change. If the end-to-end time dropped and the queue shrank, you addressed the real constraint rather than a step that only looked busy.',
+    },
+    {
+      q: 'Does a bottleneck move after you fix it?',
+      a: 'Often yes. Removing one constraint can expose the next one. Re-recording after each change shows where the new bottleneck is so you can keep improving throughput.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const reduceVariation: ProblemPage = {
+  type: 'problem',
+  slug: 'how-to-reduce-process-variation',
+  metaTitle: 'How to Reduce Process Variation Between People',
+  metaDescription:
+    'Reduce process variation by recording how different people run the same workflow, comparing the runs, and standardizing on one documented version.',
+  h1: 'How to reduce process variation',
+  eyebrow: 'Problem',
+  shortAnswer:
+    'To reduce how much a process differs between people, record several people running the same workflow, compare where their runs diverge, and standardize on one documented version with the exceptions made explicit. Variation hides because each person believes they follow the same process when they do not. Ledgerium AI records the real runs, quantifies how much they differ in steps and time, and generates an SOP from the agreed version, so the team converges on consistent work measured from real runs rather than assumed sameness.',
+  primaryKeyword: 'how to reduce process variation',
+  secondaryKeywords: ['reduce variation between people', 'process consistency', 'reduce variability in a workflow'],
+  searchIntent: 'informational',
+  tags: ['problem', 'variation', 'standardization', 'process-excellence'],
+  related: ['problem:how-to-standardize-workflows', 'persona:bpo-operations', 'workflow:zendesk-ticket-resolution-workflow'],
+  originalDataPoint:
+    'Ledgerium quantifies how much the same workflow differs run to run, so variation is a measured number rather than a hunch, which lets a team see whether two people really run the process the same way before assuming they do.',
+  honestLimitation:
+    'Ledgerium measures variation in the browser-based steps it records. Variation in judgment or offline handling still needs a person to interpret and document.',
+  whyItHappens:
+    'Variation persists because everyone assumes they run the process the same way, and nothing measures whether that is true. Small differences in order, lookups, and decisions accumulate into inconsistent results that nobody can trace back to a cause.',
+  diagnostic: [
+    'The same workflow produces different results depending on who runs it',
+    'Quality and timing swing depending on the person',
+    'People believe they follow the same process but the outputs differ',
+  ],
+  manualApproach:
+    'Tell everyone to follow the SOP and assume that fixes it. Without measuring how the runs actually differ, the variation stays invisible, the SOP does not match anyone, and the inconsistency continues.',
+  ledgeriumApproach:
+    'Record several people running the workflow. Ledgerium measures where the runs diverge in steps and time, you agree on the best version, and the SOP is generated from it, so the team converges on consistent, documented work.',
+  steps: [
+    { title: 'Record multiple people', detail: 'Capture the same workflow as several people perform it.' },
+    { title: 'Measure the variation', detail: 'Review how much the runs differ in steps, order, and time.' },
+    { title: 'Find the divergence points', detail: 'Identify exactly where people take different paths and why.' },
+    { title: 'Agree on the standard', detail: 'Choose one version, with explicit exceptions, as the documented process.' },
+    { title: 'Re-record to verify', detail: 'Capture again later to confirm the runs have converged.' },
+  ],
+  commonMistakes: [
+    'Assuming everyone runs the process the same way without checking',
+    'Issuing an SOP without measuring where runs actually diverge',
+    'Treating every difference as error instead of a real exception',
+  ],
+  faqs: [
+    {
+      q: 'How do I reduce variation between people in a process?',
+      a: 'Record several people running the workflow, measure where the runs diverge, and standardize on one documented version with explicit exceptions. The team converges on consistent work measured from real runs.',
+    },
+    {
+      q: 'Why does process variation stay hidden?',
+      a: 'Because everyone assumes they follow the same process and nothing measures whether that is true. Small differences accumulate into inconsistent results that are hard to trace without recordings.',
+    },
+    {
+      q: 'How do I tell real exceptions from inconsistency?',
+      a: 'Compare the recorded runs. Some divergence is a legitimate exception worth documenting; some is avoidable inconsistency. Seeing the runs side by side lets the team decide which is which.',
+    },
+    {
+      q: 'Does reducing variation mean removing all flexibility?',
+      a: 'No. The goal is consistent handling of the same situation. Recording captures the legitimate exceptions so the standard documents them rather than forcing a single rigid path.',
+    },
+    {
+      q: 'How do I confirm variation actually dropped?',
+      a: 'Re-record the workflow across several people later and compare. If the runs have converged in steps and time, the variation has measurably reduced.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
+const documentWithoutInterviews: ProblemPage = {
+  type: 'problem',
+  slug: 'how-to-document-a-process-without-interviewing-everyone',
+  metaTitle: 'How to Document a Process Without Interviews',
+  metaDescription:
+    'Document a process without rounds of interviews by recording one real run, then generating the SOP and process map from what was actually done.',
+  h1: 'How to document a process without interviewing everyone',
+  eyebrow: 'Problem',
+  shortAnswer:
+    'To capture a process without rounds of interviews, record one real run as someone performs it and generate the SOP and process map from the recording, instead of reconstructing the process through meetings. Interviews are slow, depend on recall, and miss the automatic steps people forget to mention. Ledgerium AI records the actual work, including the lookups and exceptions, and turns it into documentation, so you skip the interview cycle and the result reflects what was really done rather than what people remembered to say.',
+  primaryKeyword: 'how to document a process without interviewing everyone',
+  secondaryKeywords: ['document a process without interviews', 'capture a process fast', 'no-interview process documentation'],
+  searchIntent: 'informational',
+  tags: ['problem', 'documentation', 'efficiency', 'process-mapping'],
+  related: ['problem:how-to-capture-tribal-knowledge', 'persona:consultants', 'compare:manual-sop-documentation'],
+  originalDataPoint:
+    'A recording captures the automatic steps an expert would never think to mention in an interview, so the documentation includes the lookups, copies, and exceptions that rounds of meetings routinely miss.',
+  honestLimitation:
+    'Recording captures what happens in the browser. The reasoning behind a judgment call still benefits from a short note the person adds to the relevant step.',
+  whyItHappens:
+    'Process documentation depends on interviews because no record of the real work exists, so analysts reconstruct it by asking people. The result is slow, biased toward what people remember, and misses the steps that are automatic and never get described.',
+  diagnostic: [
+    'Documenting a process means scheduling several rounds of interviews',
+    'The write-up depends on what people happened to remember',
+    'Automatic steps and workarounds never make it into the document',
+  ],
+  manualApproach:
+    'Schedule interviews with each person, take notes, draft the steps, and circulate it for corrections, then repeat when someone says it is wrong. It consumes everyone’s time and still produces a document built from memory.',
+  ledgeriumApproach:
+    'Have one person record the process as they run it. Ledgerium generates the SOP and process map from the recording, including the automatic steps, so you skip the interview cycle and document from real work.',
+  steps: [
+    { title: 'Pick one person who runs it', detail: 'Choose someone who performs the process well and regularly.' },
+    { title: 'Record one real run', detail: 'Capture the process as it actually happens in the browser.' },
+    { title: 'Generate the documentation', detail: 'Turn the recording into a step-by-step SOP and a process map.' },
+    { title: 'Add the why', detail: 'Have the person annotate judgment calls the recording cannot explain.' },
+    { title: 'Review once, not repeatedly', detail: 'A single review confirms the draft instead of rounds of interviews.' },
+  ],
+  commonMistakes: [
+    'Reconstructing a process from memory across many interviews',
+    'Missing the automatic steps people never think to mention',
+    'Repeating interview cycles every time the document is wrong',
+  ],
+  faqs: [
+    {
+      q: 'How do I document a process without interviewing everyone?',
+      a: 'Record one real run as someone performs the process and generate the SOP and process map from it. You document from real work and skip the rounds of interviews entirely.',
+    },
+    {
+      q: 'Why are interviews a weak way to document a process?',
+      a: 'They are slow, depend on recall, and miss the automatic steps people forget to mention. A recording captures the real work directly, including the lookups and exceptions.',
+    },
+    {
+      q: 'Do I need to record everyone who runs the process?',
+      a: 'No. One real run captures the actual steps. If you want to reduce variation, recording a few people helps, but a single run already beats reconstructing the process from interviews.',
+    },
+    {
+      q: 'How does recording capture the reasoning?',
+      a: 'It captures the steps precisely; the reasoning behind judgment calls is added as a short note on the relevant step, which is faster and more accurate than a full interview.',
+    },
+    {
+      q: 'How much time does this save over interviews?',
+      a: 'You replace several interview rounds and a reconstructed draft with one recording and a single review, so documenting goes from a multi-meeting effort to a single capture.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-26',
+  published: true,
+};
+
 export const PROBLEM_PAGES: readonly ProblemPage[] = [
   documentProcess,
   createSops,
@@ -571,4 +1131,12 @@ export const PROBLEM_PAGES: readonly ProblemPage[] = [
   currentStateMaps,
   baselineWorkflow,
   findWaste,
+  standardizeWorkflows,
+  prepareForAudit,
+  documentAcrossSystems,
+  keepSopsCurrent,
+  measureImprovement,
+  identifyBottlenecks,
+  reduceVariation,
+  documentWithoutInterviews,
 ];

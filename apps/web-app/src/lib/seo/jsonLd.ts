@@ -85,13 +85,19 @@ function softwareApplication(page: SeoPage): JsonLdObject {
 }
 
 function howTo(page: SeoPage): JsonLdObject | null {
-  if (page.type !== 'workflow') return null;
+  // Steps source varies by type: workflow + problem use `steps`, SOP templates
+  // use `exampleProcedure`. (Fixes a prior gap where problem pages declared
+  // HowTo but emitted none.)
+  let steps: readonly { title: string; detail: string }[] | null = null;
+  if (page.type === 'workflow' || page.type === 'problem') steps = page.steps;
+  else if (page.type === 'sopTemplate') steps = page.exampleProcedure;
+  if (!steps) return null;
   return {
     '@context': 'https://schema.org',
     '@type': 'HowTo',
     name: page.h1,
     description: page.shortAnswer,
-    step: page.steps.map((s, i) => ({
+    step: steps.map((s, i) => ({
       '@type': 'HowToStep',
       position: i + 1,
       name: s.title,

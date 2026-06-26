@@ -165,5 +165,30 @@ export interface ProblemPage extends BasePage {
   readonly commonMistakes: readonly string[];
 }
 
+export interface SopSection {
+  readonly heading: string;
+  readonly detail: string;
+}
+
+export interface SopTemplatePage extends BasePage {
+  readonly type: 'sopTemplate';
+  readonly whoUsesIt: string;
+  readonly whenToUseIt: string;
+  /** Editable SOP structure (Purpose, Scope, Roles, Procedure, Exceptions, Records...). */
+  readonly sopSections: readonly SopSection[];
+  /** Worked example procedure. */
+  readonly exampleProcedure: readonly WorkflowStep[];
+  readonly commonMistakes: readonly string[];
+  readonly howLedgeriumGenerates: string;
+  /** Slug of the paired workflow page, if any (renders a "see the full workflow" link). */
+  readonly relatedWorkflowSlug?: string;
+}
+
 /** Authored union. Extend as later types are authored. */
-export type SeoPage = WorkflowPage | SoftwarePage | ComparePage | PersonaPage | ProblemPage;
+export type SeoPage =
+  | WorkflowPage
+  | SoftwarePage
+  | ComparePage
+  | PersonaPage
+  | ProblemPage
+  | SopTemplatePage;
