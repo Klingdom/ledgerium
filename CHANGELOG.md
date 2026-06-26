@@ -6,6 +6,33 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-06-26] - Iteration 098 — SEO/AEO page engine (Phase 1 / Tranche 0) SHIP-READY (Mode 2 `directed`, CEO feature program; 9-agent review + coordinator build)
+
+**Trigger:** CEO-directed "Many Narrow Doors + Workflow Knowledge Graph" SEO/AEO page engine. 9 specialist agents reviewed the super prompt (artifacts `docs/meta/SEO_AEO_SUPERPROMPT_REVIEW_001.md` + `SEO_AEO_SUPERPROMPT_V2.md`), then Tranche 0 was built and instrumented. Coverage is a first-class KPI per CEO directive.
+
+### Added
+
+- Content engine: `apps/web-app/src/content/types.ts` (discriminated-union model), `registry.ts` (reserved-slug carve-out, route derivation), `pages/{compare,workflow,software,persona,problem}.ts` (28 published pages).
+- SEO lib: `apps/web-app/src/lib/seo/{url,related,metadata,jsonLd,sitemap,validate}.ts` + `content.test.ts` (6 tests: gate + determinism + near-duplicate cosine).
+- Quality gate: `apps/web-app/scripts/validate-seo-content.ts` + `validate:seo` npm script (unique slug/canonical/title-meta, dangling-link, orphan, word-floor, near-dup, meta-length, determinism).
+- Routes: `/compare/[slug]`, `/workflow-library/[slug]` (+ index), `/software/[slug]` (+ index), `/use-cases/personas/[slug]` (+ index), `/use-cases/problems/[slug]` (+ index).
+- Components: `apps/web-app/src/components/seo/{SeoPageView,Blocks,FaqBlock,HubIndex,ComparePageView,WorkflowPageView,SoftwarePageView,PersonaPageView,ProblemPageView}.tsx`.
+- 5 page types (compare ×3, workflow ×6, software ×5, persona ×6, problem ×8) + 4 hub indexes, all SSG.
+- Analytics events `seo_page_viewed` (with AI/organic `referrerClass`), `seo_scroll_depth`, `seo_faq_expanded`, `seo_related_page_clicked`.
+- GSC verification via `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` + `metadataBase` in root layout; runbook `docs/runbooks/SEO_GSC_SETUP.md`.
+
+### Changed
+
+- `apps/web-app/src/app/sitemap.ts` — merges engine-generated (published-only) entries with the existing static set (static wins; no replacement).
+- `apps/web-app/src/lib/analytics.ts` — extended `AnalyticsEvent` union with 4 SEO events.
+- FAQ rendering — accessible accordion (button + `aria-expanded`); answers retained in DOM for crawlers and FAQPage JSON-LD.
+
+### Notes
+
+- FAQ/HowTo JSON-LD emitted for LLM/answer-engine parsing only (Google rich results deprecated: HowTo 2023, FAQPage 2026) — no rich-result claims.
+- Route collisions reconciled: workflow pages namespaced `/workflow-library`; `/compare/scribe` + `/use-cases/{operations,compliance,ai-implementation}` reserved and preserved.
+- Validation: `validate:seo` 28/28; typecheck clean; `pnpm test` 2083/2083; `pnpm build` SSG of all 28 pages + 4 hubs.
+
 ## [2026-05-26] - Iteration 097 — CHROME-001 PR-CHROME-A: manifest cleanup + icons + console stripping + privacy policy + submission runbook (Mode 2 `directed`, `frontend-engineer` × 1)
 
 **Trigger:** CEO-directed Chrome Web Store submission sprint (PR-CHROME-A). Target review verdict: MINOR-CLEANUP. **D-1 reverse-portfolio-drift counter 22 → 0 FULL CLEARANCE** (extension-app surface touched).

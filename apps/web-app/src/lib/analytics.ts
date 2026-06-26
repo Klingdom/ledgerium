@@ -490,6 +490,35 @@ export type AnalyticsEvent =
   // ── Marketing ─────────────────────────────────────────────────────────────
   | { event: 'cta_clicked'; location: string; destination: string }
 
+  // ── SEO/AEO page engine (Phase 1 / Tranche 0) ─────────────────────────────
+  // PII-free: page taxonomy + opaque slug + referrer class only.
+  | {
+      event: 'seo_page_viewed';
+      pageType: string;
+      slug: string;
+      referrerClass: 'organic' | 'ai' | 'direct' | 'other';
+    }
+  | {
+      event: 'seo_related_page_clicked';
+      fromType: string;
+      fromSlug: string;
+      toType: string;
+      toSlug: string;
+      linkRank: number;
+    }
+  | {
+      event: 'seo_scroll_depth';
+      pageType: string;
+      slug: string;
+      depthPct: 25 | 50 | 75 | 90;
+    }
+  | {
+      event: 'seo_faq_expanded';
+      pageType: string;
+      slug: string;
+      questionIndex: number;
+    }
+
   // ── Errors ────────────────────────────────────────────────────────────────
   | { event: 'upload_failed'; error: string }
   | { event: 'api_error'; endpoint: string; status: number }

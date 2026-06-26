@@ -4,6 +4,25 @@ This file records each bounded improvement loop.
 
 ---
 
+## Iteration 098 (Mode 2, `directed`, CEO-directed feature program, multi-agent review + coordinator-direct build, 2026-06-26)
+
+- Date: 2026-06-26
+- Trigger: CEO directive — "Engage all subagents to review this super prompt and improve it prior to initiating" (SEO/AEO "Many Narrow Doors + Workflow Knowledge Graph" page engine), then "start Phase 1 / Tranche 0", then "build the next page type — personas", "build the problem page type", and "wire GSC + remaining instrumentation and log the iteration". CEO coverage directive: measure by coverage, not just traffic (~5,625-page category targets).
+- Mode: Mode 2 directed CEO feature program (web-app surface; outside backlog; zero backlog-row consumption). SHIP-READY close of the Tranche-0 program at this iteration → ONE Follow-Up Debt numerator credit per MR-018 Change A (multi-iteration CEO-directed feature program, single architectural-decision family `apps/web-app/src/content` + `lib/seo`, named program, SHIP-READY verdict).
+- Define phase (Mode 3-adjacent, NON-counting): 9 specialist agents reviewed the super prompt in parallel (product-manager · system-architect · frontend-engineer · growth-strategist · competitive-researcher · market-research · analytics · ux-designer · qa-engineer). Consolidated to `docs/meta/SEO_AEO_SUPERPROMPT_REVIEW_001.md` + revised execution spec `docs/meta/SEO_AEO_SUPERPROMPT_V2.md`. Key correction: FAQ/HowTo rich results are deprecated (HowTo Sept 2023, FAQPage May 2026) — emit for LLM/AEO parsing only; added scaled-content-abuse guardrails, discriminated-union model, measurement system, build-time quality gate.
+- Build outcome (Tranche 0):
+  - **Engine:** discriminated-union content model (`content/types.ts`), registry with reserved-slug carve-out (`content/registry.ts`), SEO lib (`lib/seo/{url,related,metadata,jsonLd,sitemap,validate}.ts`), build-time gate `scripts/validate-seo-content.ts` (`pnpm validate:seo`) + `lib/seo/content.test.ts` (6 tests incl. determinism + near-duplicate cosine).
+  - **5 page types live:** compare, workflow, software, persona, problem — **28 published pages + 4 hub indexes** (`/workflow-library`, `/software`, `/use-cases/personas`, `/use-cases/problems`), all prerendered SSG.
+  - **Route-collision reconciliation:** workflow SEO pages namespaced at `/workflow-library/[slug]` (authed app owns `/workflows/[id]`); `/compare/scribe` + `/use-cases/{operations,compliance,ai-implementation}` reserved and preserved; sitemap MERGES generated + static (static wins).
+  - **GSC + instrumentation:** env-driven GSC verification (`NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`) + `metadataBase` in root layout; sitemap already in robots.txt; 5 analytics events (`seo_page_viewed` + `referrerClass` AI-referral classification, `seo_scroll_depth`, `seo_faq_expanded`, `seo_related_page_clicked`, plus existing `cta_clicked`); FAQ converted to accessible accordion (button + aria-expanded, answers retained in DOM for crawlers/JSON-LD). Runbook `docs/runbooks/SEO_GSC_SETUP.md`.
+- Validation: `pnpm --filter @ledgerium/web-app validate:seo` **OK — 28 pages**; `pnpm typecheck` clean; `pnpm test` **2083/2083** across 108 files (incl. 6 new SEO tests); `pnpm build` compiled successfully with all 28 leaf pages + 4 hubs prerendered SSG; `/compare/scribe` + authed `/compare` + `/workflows/[id]` coexist with zero collision.
+- Deviations from V2 spec (flagged): (i) workflow namespace `/workflow-library` not `/workflows` (hard collision); (ii) rendering = SSG via `generateStaticParams` + runtime `notFound()` guard rather than ISR — the `(public)` layout's `force-dynamic` hydration fix was left intact; (iii) only the persona/problem/compare/workflow/software types built (not sopTemplate/aiOpportunity/department/industry) — Tranche-1+ scope.
+- Counters: Pool unchanged (CEO-directed outside backlog; zero backlog rows consumed). Follow-Up Debt numerator credit +1 at this SHIP-READY close. D-1 reverse-portfolio-drift: web-app surface (non-extension) — counter advances; user-directed program.
+- Scope-adjacent (NOT promoted; Tranche-1 follow-ups): GSC submission is an external human action; faceted filtering on hub indexes; remaining ship-first page types (sopTemplate/aiOpportunity/department/industry); scaling existing clusters toward category targets under the indexation health gate; 10% publish holdout.
+- Next iteration: awaiting CEO directive — scale a cluster toward Tranche 1 under the health gate, build another page type, or other backlog work.
+
+---
+
 ## Iteration 097 (Mode 2, `directed`, `frontend-engineer` × 1, 2026-05-26)
 
 - Date: 2026-05-26
