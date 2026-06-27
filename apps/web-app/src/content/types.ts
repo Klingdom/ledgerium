@@ -184,6 +184,35 @@ export interface SopTemplatePage extends BasePage {
   readonly relatedWorkflowSlug?: string;
 }
 
+export interface AiOpportunityPage extends BasePage {
+  readonly type: 'aiOpportunity';
+  readonly functionArea: string;
+  readonly commonRepetitiveWork: readonly string[];
+  readonly whereAiHelps: readonly string[];
+  readonly whereAutomationHelps: readonly string[];
+  readonly whereHumansStayInvolved: readonly string[];
+  readonly readinessChecklist: readonly string[];
+  readonly exampleAnalysis: string;
+}
+
+export interface DepartmentPage extends BasePage {
+  readonly type: 'department';
+  readonly overview: string;
+  readonly commonWorkflows: readonly string[];
+  readonly documentationProblems: readonly string[];
+  readonly sopNeeds: readonly string[];
+  readonly aiOpportunities: readonly string[];
+}
+
+export interface IndustryPage extends BasePage {
+  readonly type: 'industry';
+  readonly industryContext: string;
+  readonly commonWorkflows: readonly string[];
+  readonly documentationConcerns: readonly string[];
+  readonly complianceConcerns: readonly string[];
+  readonly aiOpportunities: readonly string[];
+}
+
 /** Authored union. Extend as later types are authored. */
 export type SeoPage =
   | WorkflowPage
@@ -191,4 +220,7 @@ export type SeoPage =
   | ComparePage
   | PersonaPage
   | ProblemPage
-  | SopTemplatePage;
+  | SopTemplatePage
+  | AiOpportunityPage
+  | DepartmentPage
+  | IndustryPage;

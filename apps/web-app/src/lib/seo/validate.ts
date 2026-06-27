@@ -87,6 +87,32 @@ function proseSources(page: SeoPage): string[] {
       ...page.exampleProcedure.flatMap((s) => [s.title, s.detail]),
       ...page.commonMistakes,
     );
+  } else if (page.type === 'aiOpportunity') {
+    base.push(
+      page.functionArea,
+      page.exampleAnalysis,
+      ...page.commonRepetitiveWork,
+      ...page.whereAiHelps,
+      ...page.whereAutomationHelps,
+      ...page.whereHumansStayInvolved,
+      ...page.readinessChecklist,
+    );
+  } else if (page.type === 'department') {
+    base.push(
+      page.overview,
+      ...page.commonWorkflows,
+      ...page.documentationProblems,
+      ...page.sopNeeds,
+      ...page.aiOpportunities,
+    );
+  } else if (page.type === 'industry') {
+    base.push(
+      page.industryContext,
+      ...page.commonWorkflows,
+      ...page.documentationConcerns,
+      ...page.complianceConcerns,
+      ...page.aiOpportunities,
+    );
   }
   return base;
 }

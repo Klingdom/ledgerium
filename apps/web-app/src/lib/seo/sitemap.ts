@@ -11,7 +11,16 @@ export function generateSeoSitemapEntries(): MetadataRoute.Sitemap {
   const base = SITE_CONFIG.url;
 
   // Hub/index pages for the live engine types.
-  const hubPrefixes = [ROUTE_PREFIX.workflow, ROUTE_PREFIX.software, ROUTE_PREFIX.persona, ROUTE_PREFIX.problem, ROUTE_PREFIX.sopTemplate];
+  const hubPrefixes = [
+    ROUTE_PREFIX.workflow,
+    ROUTE_PREFIX.software,
+    ROUTE_PREFIX.persona,
+    ROUTE_PREFIX.problem,
+    ROUTE_PREFIX.sopTemplate,
+    ROUTE_PREFIX.aiOpportunity,
+    ROUTE_PREFIX.department,
+    ROUTE_PREFIX.industry,
+  ];
   const hubs: MetadataRoute.Sitemap = hubPrefixes.map((path) => ({
     url: `${base}${path}`,
     changeFrequency: 'weekly',

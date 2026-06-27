@@ -914,6 +914,462 @@ const passwordReset: WorkflowPage = {
   published: true,
 };
 
+const refundProcessing: WorkflowPage = {
+  type: 'workflow',
+  slug: 'refund-processing-workflow',
+  metaTitle: 'Refund Processing Workflow: How to Document It',
+  metaDescription:
+    'Document your refund processing workflow by recording it once. Capture the real request, verify, approve, and issue steps in an SOP and process map.',
+  h1: 'How to document a refund processing workflow',
+  eyebrow: 'Workflow',
+  shortAnswer:
+    'To document a refund processing workflow, record an agent handling a real refund from request to issued payment, then generate a step-by-step SOP and a process map from it. Refunds carry money out the door, so the verification and approval checks matter, yet they are rarely written down clearly. Ledgerium records the real refund in the browser, captures the eligibility check and approval routing, and generates the SOP, the process map, and a report that shows where refunds wait and get returned.',
+  primaryKeyword: 'refund processing workflow',
+  secondaryKeywords: ['refund processing SOP', 'customer refund process', 'document refund processing'],
+  searchIntent: 'commercial',
+  tags: ['workflow', 'finance', 'customer-support', 'refunds', 'approval'],
+  related: ['persona:customer-success-teams', 'software:zendesk', 'problem:how-to-document-a-finance-process'],
+  originalDataPoint:
+    'Most refund delay sits in the approval wait and the eligibility check, not in issuing the payment. Ledgerium timestamps each step, so the report shows how long a refund waits for approval rather than only how long the payment posting takes.',
+  honestLimitation:
+    'Refund decisions agreed by phone or in a chat outside the browser are not captured. Ledgerium records the browser-based refund steps; offline rationale needs a note.',
+  whoUsesIt:
+    'Support agents and finance clerks who issue refunds, the team lead who owns refund turnaround, and the finance approver who owns the control. Auditors review it when testing cash-out controls.',
+  systems: ['Support or order system', 'Payment or billing system', 'Accounting system', 'Email'],
+  oldWay:
+    'The refund rules and approval thresholds live in tribal knowledge, so each agent verifies a little differently. Some checks get skipped under pressure, which is exactly how a refund goes out on an ineligible order.',
+  ledgeriumWay:
+    'Record one real refund. Ledgerium captures the request, the eligibility check, the approval routing, and the issued payment, and generates the SOP, the process map, and a report that highlights where refunds wait and get returned.',
+  steps: [
+    { title: 'Receive the refund request', detail: 'The request arrives with the order, the customer, and the reason for the refund.' },
+    { title: 'Verify eligibility', detail: 'Check the order, payment, and policy to confirm the refund is allowed.' },
+    { title: 'Route for approval', detail: 'Send to the right approver based on amount and reason thresholds.' },
+    { title: 'Issue the refund', detail: 'Process the refund to the original payment method once approved.' },
+    { title: 'Log and confirm', detail: 'Record the outcome, notify the customer, and close the request with the right reason code.' },
+  ],
+  commonMistakes: [
+    'Leaving the eligibility and approval thresholds undocumented, so checks vary by agent',
+    'Documenting the issue step but skipping the verification and logging steps',
+    'Not capturing how long refunds wait for approval before the payment goes out',
+  ],
+  metrics: [
+    { label: 'Time to refund', note: 'Request received to issued payment, split into work and wait time.' },
+    { label: 'Approval wait time', note: 'How long a refund waits between routing and approval.' },
+    { label: 'Return rate', note: 'Share of refund requests returned for correction before approval.' },
+  ],
+  aiOpportunities: [
+    'Pre-check refund eligibility against order and policy before it routes for approval',
+    'Suggest the correct approver from amount and reason rules',
+    'Detect refunds stalled beyond target approval time and escalate them',
+  ],
+  faqs: [
+    {
+      q: 'What are the steps in a refund processing workflow?',
+      a: 'Typically: receive the refund request, verify eligibility, route for approval, issue the refund, then log and confirm it. The eligibility check and approval thresholds are the parts most guides leave vague.',
+    },
+    {
+      q: 'How do I document the refund process clearly?',
+      a: 'Record one real refund as an agent works it, then generate the SOP and process map from it. This captures the eligibility checks and approval routing that tribal knowledge usually hides.',
+    },
+    {
+      q: 'Where do refunds get stuck?',
+      a: 'Most often in approval wait and at the eligibility check, where policy or evidence holds the refund. Capturing per-step timing shows how long refunds wait and at which step.',
+    },
+    {
+      q: 'Can Ledgerium document refunds across systems?',
+      a: 'Yes. A single recording captures the steps across each browser-based system in the refund, the support or order system, the payment system, and the accounting system, in one pass.',
+    },
+    {
+      q: 'What can be automated in refund processing?',
+      a: 'Common candidates are pre-checking eligibility, suggesting the right approver, and escalating stalled refunds. Ledgerium scores these from the recorded process.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-27',
+  published: true,
+};
+
+const journalEntry: WorkflowPage = {
+  type: 'workflow',
+  slug: 'journal-entry-workflow',
+  metaTitle: 'Journal Entry Workflow: How to Document It',
+  metaDescription:
+    'Document your journal entry workflow by recording it once. Capture the real prepare, support, review, and post steps in an SOP and process map.',
+  h1: 'How to document a journal entry workflow',
+  eyebrow: 'Workflow',
+  shortAnswer:
+    'To document a journal entry workflow, record an accountant preparing and posting a real entry from first draft to posted ledger, then generate a step-by-step SOP and a process map from it. The control that matters is the support behind each entry, yet the backup and review rules are rarely written down. Ledgerium records the real entry in the browser, captures the supporting documents and the review routing, and generates the SOP, the process map, and a report that shows where entries wait for review.',
+  primaryKeyword: 'journal entry workflow',
+  secondaryKeywords: ['journal entry SOP', 'journal entry process documentation', 'document a finance process'],
+  searchIntent: 'commercial',
+  tags: ['workflow', 'finance', 'accounting', 'journal-entry', 'quickbooks'],
+  related: ['software:quickbooks', 'persona:compliance-teams', 'problem:how-to-document-a-finance-process'],
+  originalDataPoint:
+    'In journal entries, the control is the link between the entry and its supporting evidence, and that is where review stalls. Ledgerium records each step, so the report shows whether support was attached before review rather than only that the entry was posted.',
+  honestLimitation:
+    'Entries prepared in desktop spreadsheets outside the browser are not captured directly. Ledgerium records the browser-based preparation, review, and posting steps; offline spreadsheet work needs a linked note.',
+  whoUsesIt:
+    'Staff and senior accountants who prepare entries, the reviewer who approves them, and the controller who owns the ledger. Auditors review it when testing how entries are supported and approved.',
+  systems: ['Accounting system or ERP', 'Spreadsheets', 'Document or evidence repository', 'Email'],
+  oldWay:
+    'The entry steps and the support requirements live in one accountant’s head, so backup documents and review sign-offs are inconsistent. When that person is out, entries get posted thin or wait, and the audit trail suffers.',
+  ledgeriumWay:
+    'Record one real journal entry. Ledgerium captures the preparation, the supporting documents, the review, and the posting in order, and generates the SOP, the process map, and a report that highlights where entries wait for review.',
+  steps: [
+    { title: 'Prepare the entry', detail: 'Build the journal entry with accounts, amounts, and the period it belongs to.' },
+    { title: 'Attach supporting documents', detail: 'Gather and attach the backup that justifies each line of the entry.' },
+    { title: 'Submit for review', detail: 'Route the entry to the reviewer based on type and amount thresholds.' },
+    { title: 'Review and approve', detail: 'The reviewer checks the entry against its support and approves or returns it.' },
+    { title: 'Post and file', detail: 'Post the approved entry to the ledger and file the support for the audit trail.' },
+  ],
+  commonMistakes: [
+    'Posting entries without the supporting documents the audit trail requires',
+    'Leaving the review thresholds undocumented, so it is unclear what a reviewer must approve',
+    'Not capturing how long entries wait between submission and review',
+  ],
+  metrics: [
+    { label: 'Time to post', note: 'Preparation to posted entry, split into work and review wait time.' },
+    { label: 'Review wait time', note: 'How long an entry waits between submission and review.' },
+    { label: 'Return rate', note: 'Share of entries returned for correction before posting.' },
+  ],
+  aiOpportunities: [
+    'Draft recurring entries from prior-period patterns for accountant review',
+    'Check that required supporting documents are attached before review',
+    'Detect entries stalled beyond target review time and escalate them',
+  ],
+  faqs: [
+    {
+      q: 'What are the steps in a journal entry workflow?',
+      a: 'Typically: prepare the entry, attach supporting documents, submit for review, review and approve, then post and file it. The support requirements and review thresholds are the parts most guides leave vague.',
+    },
+    {
+      q: 'How do I document a journal entry process clearly?',
+      a: 'Record one real entry from draft to posting, then generate the SOP and process map from it. This captures the support requirements and the review routing that usually live in one accountant’s head.',
+    },
+    {
+      q: 'Why does the support behind an entry matter so much?',
+      a: 'Because an entry without backup fails the audit trail. Recording the real entry shows whether the support was attached before review, which is exactly what auditors test.',
+    },
+    {
+      q: 'Can Ledgerium document journal entries across systems?',
+      a: 'Yes. A single recording captures the steps across each browser-based system in the entry, the accounting system, the evidence repository, and email, in one pass.',
+    },
+    {
+      q: 'What can be automated in journal entries?',
+      a: 'Common candidates are drafting recurring entries, checking that required support is attached, and escalating stalled entries. Ledgerium scores these from the recorded process.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-27',
+  published: true,
+};
+
+const accessProvisioning: WorkflowPage = {
+  type: 'workflow',
+  slug: 'access-provisioning-workflow',
+  metaTitle: 'Access Provisioning Workflow Documentation',
+  metaDescription:
+    'Document your access provisioning workflow by recording it once. Capture the real request, approve, and provision steps in an SOP and process map.',
+  h1: 'How to document an access provisioning workflow',
+  eyebrow: 'Workflow',
+  shortAnswer:
+    'To document an access provisioning workflow, record an IT agent granting a real user access from request to confirmed login, then generate a step-by-step SOP and a process map from it. Who approves which access is a control, yet the approval rules and the access matrix are rarely documented where the work happens. Ledgerium records the real provisioning in the browser, captures the approval routing and the grants, and generates the SOP, the process map, and a report that shows where requests wait and where access is over-granted.',
+  primaryKeyword: 'access provisioning workflow',
+  secondaryKeywords: ['access provisioning SOP', 'user access request process', 'access management workflow'],
+  searchIntent: 'commercial',
+  tags: ['workflow', 'it', 'security', 'access-management', 'servicenow'],
+  related: ['software:servicenow', 'persona:compliance-teams', 'problem:how-to-document-a-process-for-compliance'],
+  originalDataPoint:
+    'In access provisioning, the control is the approval before the grant, and it is the step most likely to be rushed when a user is blocked. Ledgerium records each step, so the report shows whether the approval happened before access was granted rather than only that the user can now log in.',
+  honestLimitation:
+    'Approvals given verbally or in a side conversation outside the browser are not captured. Ledgerium records the browser-based request, approval, and provisioning steps; offline sign-off needs a note.',
+  whoUsesIt:
+    'IT provisioning and service desk staff, the access approver who owns each system, and the security lead who owns least-privilege. Auditors review it when testing access controls.',
+  systems: ['IT ticketing or service desk', 'Identity and access management', 'Directory or admin console', 'Email'],
+  oldWay:
+    'Access requests get granted on trust, with the approval step remembered rather than enforced and the access matrix living in tribal knowledge. Under pressure the grant happens before the approval, which is exactly how over-broad access spreads.',
+  ledgeriumWay:
+    'Record one real provisioning. Ledgerium captures the request, the approval, the grant, and the confirmation in order across each system, and generates the SOP, the process map, and a report that highlights where requests wait and where approvals are skipped.',
+  steps: [
+    { title: 'Receive the access request', detail: 'The request arrives with the user, the system, and the access level needed.' },
+    { title: 'Approve the request', detail: 'Route to the owner of the system for approval based on the access matrix.' },
+    { title: 'Provision the access', detail: 'Grant the approved access in the identity or directory tool for that system.' },
+    { title: 'Confirm the access works', detail: 'Have the user confirm they can reach the system at the right level.' },
+    { title: 'Log and close', detail: 'Record the approval and the grant, and close the ticket with the right category.' },
+  ],
+  commonMistakes: [
+    'Granting access before the approval is recorded, so the control is bypassed',
+    'Leaving the access matrix undocumented, so each request gets a different level',
+    'Not capturing whether the approval step was actually performed',
+  ],
+  metrics: [
+    { label: 'Time to access', note: 'Request received to confirmed login, split into approval wait and grant time.' },
+    { label: 'Approval rate', note: 'Share of grants where the approval was recorded before access.' },
+    { label: 'Agent variance', note: 'How much the provisioning path varies between agents.' },
+  ],
+  aiOpportunities: [
+    'Suggest the approver and access level from the system and the access matrix',
+    'Prompt the agent through the required approval before the grant is allowed',
+    'Flag grants where the approval step appears to be skipped for review',
+  ],
+  faqs: [
+    {
+      q: 'What are the steps in an access provisioning workflow?',
+      a: 'Typically: receive the access request, approve it, provision the access, confirm it works, then log and close the ticket. The approval step and the access matrix are the controls most guides leave vague.',
+    },
+    {
+      q: 'How do I document the access provisioning process?',
+      a: 'Record one real provisioning as an agent works the ticket, then generate the SOP and process map from it. This captures the approval routing and the access levels that usually live in tribal knowledge.',
+    },
+    {
+      q: 'Why does the approval step matter so much here?',
+      a: 'Because access granted without approval is how over-broad permissions spread. Recording the real provisioning shows whether the approval happened before the grant, which is what auditors test.',
+    },
+    {
+      q: 'Can Ledgerium document provisioning across ticketing and identity tools?',
+      a: 'Yes. A single recording captures the steps across each browser-based system in the provisioning, the ticketing tool, identity tools, and the directory console, so the SOP reflects the full flow.',
+    },
+    {
+      q: 'What can be automated in access provisioning?',
+      a: 'Common candidates are suggesting the approver and access level, prompting the agent through approval, and flagging skipped approvals. Ledgerium scores these from the recorded process.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-27',
+  published: true,
+};
+
+const salesOrderProcessing: WorkflowPage = {
+  type: 'workflow',
+  slug: 'sales-order-processing-workflow',
+  metaTitle: 'Sales Order Processing Workflow Guide',
+  metaDescription:
+    'Document your sales order processing workflow by recording it once. Capture the real entry, validation, and fulfillment steps in an SOP and map.',
+  h1: 'How to document a sales order processing workflow',
+  eyebrow: 'Workflow',
+  shortAnswer:
+    'To document a sales order processing workflow, record an order being processed from entry to fulfillment handoff, then generate a step-by-step SOP and a process map from it. Order processing spans entry, validation, and a credit check across several systems, so a written-from-memory guide usually misses a check or a handoff. Ledgerium records the real order in the browser, captures the validation and the credit check, and generates the SOP, the process map, and a report that shows where orders wait before they reach fulfillment.',
+  primaryKeyword: 'sales order processing workflow',
+  secondaryKeywords: ['sales order SOP', 'order processing documentation', 'order-to-cash workflow'],
+  searchIntent: 'commercial',
+  tags: ['workflow', 'sales-operations', 'order-management', 'netsuite', 'fulfillment'],
+  related: ['software:salesforce', 'persona:revops-managers', 'problem:how-to-document-a-workflow-across-multiple-systems'],
+  originalDataPoint:
+    'In order processing, the credit check and the validation are where orders get held, not the order entry itself. Ledgerium timestamps each step, so the report shows how long an order waits at the credit check rather than only how long entry takes.',
+  honestLimitation:
+    'Orders taken by phone or confirmed by email outside the browser are not captured directly. Ledgerium records the browser-based entry, validation, and confirmation steps; offline order details need a note.',
+  whoUsesIt:
+    'Order management and sales operations staff, the credit or finance reviewer, and the sales ops lead who owns order turnaround. Fulfillment reviews it at the order-to-fulfillment handoff.',
+  systems: ['CRM', 'ERP or order management system', 'Credit or finance system', 'Email'],
+  oldWay:
+    'The order steps and the credit rules are written from memory and skip the validation and the credit check, so new reps confirm orders that later get held, and fulfillment receives orders that are not really ready.',
+  ledgeriumWay:
+    'Record one real order. Ledgerium captures the entry, the validation, the credit check, the confirmation, and the fulfillment handoff, and generates the SOP, the process map, and a report that highlights where orders wait.',
+  steps: [
+    { title: 'Enter the order', detail: 'Capture the order with customer, items, quantities, pricing, and terms.' },
+    { title: 'Validate the order', detail: 'Check pricing, availability, and required fields before the order can proceed.' },
+    { title: 'Run the credit check', detail: 'Confirm the customer is within credit terms and limits.' },
+    { title: 'Confirm the order', detail: 'Confirm the validated order with the customer and commit it.' },
+    { title: 'Hand off to fulfillment', detail: 'Release the confirmed order to fulfillment or the warehouse.' },
+  ],
+  commonMistakes: [
+    'Documenting order entry but skipping the validation and credit-check steps',
+    'Leaving the credit rules undocumented, so orders proceed that should be held',
+    'Not capturing where orders wait between validation and the credit check',
+  ],
+  metrics: [
+    { label: 'Cycle time per order', note: 'Order entry to fulfillment handoff, split into work and wait time.' },
+    { label: 'Credit-check wait', note: 'How long an order waits at the credit check before confirmation.' },
+    { label: 'Hold rate', note: 'Share of orders held at validation or the credit check.' },
+  ],
+  aiOpportunities: [
+    'Validate pricing and availability on entry and flag only the exceptions',
+    'Auto-run the credit check and surface only orders that breach terms',
+    'Detect orders stalled beyond target time before fulfillment and escalate them',
+  ],
+  faqs: [
+    {
+      q: 'What are the steps in a sales order processing workflow?',
+      a: 'Typically: enter the order, validate it, run the credit check, confirm the order, then hand off to fulfillment. The validation and credit check are the steps most guides leave out.',
+    },
+    {
+      q: 'How do I document the order processing flow?',
+      a: 'Record one real order from entry to fulfillment handoff, then generate the SOP and process map from it. This captures the validation and credit rules that written-from-memory guides usually miss.',
+    },
+    {
+      q: 'Where do sales orders get held?',
+      a: 'Most often at the credit check and at validation, where a limit or a required field stops the order. Capturing per-step timing shows how long orders wait and at which check.',
+    },
+    {
+      q: 'Can Ledgerium document order processing across systems?',
+      a: 'Yes. A single recording captures the steps across each browser-based system in the order, the CRM, the order management system, and the credit system, in one pass.',
+    },
+    {
+      q: 'What can be automated in order processing?',
+      a: 'Common candidates are validating pricing and availability on entry, auto-running the credit check, and escalating stalled orders. Ledgerium scores these from the recorded process.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-27',
+  published: true,
+};
+
+const incidentManagement: WorkflowPage = {
+  type: 'workflow',
+  slug: 'incident-management-workflow',
+  metaTitle: 'Incident Management Workflow: How to Document It',
+  metaDescription:
+    'Document your IT incident management workflow by recording it once. Capture the real log, triage, investigate, and resolve steps in an SOP.',
+  h1: 'How to document an incident management workflow',
+  eyebrow: 'Workflow',
+  shortAnswer:
+    'To document an incident management workflow, record an agent handling a real IT incident from first log to closed ticket, then generate a step-by-step SOP and a process map from it. Incident handling varies a lot between agents, especially the triage and investigation, which is why a written-from-memory runbook rarely matches the real response. Ledgerium records the real incident in the browser, captures the triage decisions and the lookups, and generates the SOP, the process map, and a report that shows where resolution time is spent.',
+  primaryKeyword: 'incident management workflow',
+  secondaryKeywords: ['incident management SOP', 'IT incident process documentation', 'ITSM incident workflow'],
+  searchIntent: 'commercial',
+  tags: ['workflow', 'it', 'itsm', 'incident', 'servicenow'],
+  related: ['software:servicenow', 'persona:operations-managers', 'workflow:password-reset-workflow'],
+  originalDataPoint:
+    'Most incident time is investigation and the wait for the right team, not the fix itself. Ledgerium timestamps each step, so the report separates investigation time and reassignment wait from the actual resolution, which is where the biggest gains usually hide.',
+  honestLimitation:
+    'Coordination done on a call or in a war room outside the browser is not captured. Ledgerium records the browser-based triage, investigation, and resolution steps; offline coordination needs a note.',
+  whoUsesIt:
+    'Service desk and operations agents, the major-incident or shift lead who owns resolution time, and the IT manager standardizing the response. Quality reviewers use it to coach consistency.',
+  systems: ['IT service management tool', 'Monitoring or alerting tools', 'Internal admin or infrastructure tools', 'Email or chat'],
+  oldWay:
+    'Each agent works incidents their own way and the runbook captures only the obvious steps, not the triage judgment or the investigation path. New agents copy whoever is nearby, so the response varies and incidents bounce between teams.',
+  ledgeriumWay:
+    'Record one real incident. Ledgerium captures the log, the triage, the investigation, the resolution, and the close in order, and generates the SOP, the process map, and a report that highlights where resolution time goes.',
+  steps: [
+    { title: 'Log the incident', detail: 'The incident is recorded with the symptom, the affected service, and the reporter.' },
+    { title: 'Triage and prioritize', detail: 'Set severity, category, and the team to own it based on impact.' },
+    { title: 'Investigate', detail: 'Diagnose the cause using monitoring and the relevant admin tools.' },
+    { title: 'Resolve', detail: 'Apply the fix or workaround and confirm the service is restored.' },
+    { title: 'Close', detail: 'Record the cause and resolution, confirm with the reporter, and close the ticket.' },
+  ],
+  commonMistakes: [
+    'Documenting the fix but not the triage judgment and the investigation path',
+    'Leaving the severity and routing rules undocumented, so incidents bounce between teams',
+    'Not capturing where investigation and reassignment time is actually spent',
+  ],
+  metrics: [
+    { label: 'Resolution time', note: 'Incident logged to resolved, split into triage, investigation, and fix.' },
+    { label: 'Reassignment wait', note: 'How long an incident waits when it moves between teams.' },
+    { label: 'Agent variance', note: 'How much the response path varies between agents.' },
+  ],
+  aiOpportunities: [
+    'Suggest the severity and owning team from the incident content for review',
+    'Surface similar past incidents and their resolutions during investigation',
+    'Detect incidents stalled beyond target resolution time and escalate them',
+  ],
+  faqs: [
+    {
+      q: 'What are the steps in an incident management workflow?',
+      a: 'Typically: log the incident, triage and prioritize it, investigate, resolve, then close it. The triage judgment and the investigation path are where most of the time and variation live.',
+    },
+    {
+      q: 'How do I document incident handling without slowing agents down?',
+      a: 'Record one real incident while an agent works normally, then generate the SOP and process map from it. There is no separate writing step, so it does not add to the agent’s workload.',
+    },
+    {
+      q: 'Why does incident handling vary so much between agents?',
+      a: 'Because triage and investigation are usually undocumented. Runbooks capture the known fix, not how agents diagnose. Recording a real incident makes the diagnosis steps visible and repeatable.',
+    },
+    {
+      q: 'Can Ledgerium capture steps in tools outside the ITSM system?',
+      a: 'Yes. A single recording captures the steps across each browser-based tool an agent uses during an incident, so the SOP reflects the full cross-tool response, not just the ticket.',
+    },
+    {
+      q: 'What can be automated in incident management?',
+      a: 'Common candidates are suggesting severity and owning team, surfacing similar past incidents, and escalating stalled incidents. Ledgerium scores these from the recorded process.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-27',
+  published: true,
+};
+
+const returnsProcessing: WorkflowPage = {
+  type: 'workflow',
+  slug: 'returns-processing-workflow',
+  metaTitle: 'Returns Processing Workflow: How to Document It',
+  metaDescription:
+    'Document your returns processing workflow by recording it once. Capture the real request, authorize, receive, and refund steps in an SOP.',
+  h1: 'How to document a returns processing workflow',
+  eyebrow: 'Workflow',
+  shortAnswer:
+    'To document a returns processing workflow, record a real product return from request to refund or replacement, then generate a step-by-step SOP and a process map from it. Returns span a request, an authorization, the physical receipt, and a refund or replacement, so a written-from-memory guide usually misses the authorization rules or the inspection step. Ledgerium records the real return in the browser, captures the authorization and the resolution routing, and generates the SOP, the process map, and a report that shows where returns wait.',
+  primaryKeyword: 'returns processing workflow',
+  secondaryKeywords: ['returns processing SOP', 'RMA process documentation', 'product return workflow'],
+  searchIntent: 'commercial',
+  tags: ['workflow', 'operations', 'returns', 'rma', 'netsuite'],
+  related: ['software:netsuite', 'persona:operations-managers', 'problem:how-to-reduce-rework'],
+  originalDataPoint:
+    'In returns, the delay sits in the authorization and the wait for the item to arrive and be inspected, not in issuing the refund. Ledgerium timestamps each step, so the report shows how long a return waits for authorization and receipt rather than only how long the refund takes.',
+  honestLimitation:
+    'The physical inspection of a returned item happens off-screen and is not captured. Ledgerium records the browser-based request, authorization, and resolution steps; the inspection result needs a note.',
+  whoUsesIt:
+    'Returns and operations staff who process RMAs, the warehouse team that receives and inspects, and the ops lead who owns return turnaround. Finance reviews it where refunds are involved.',
+  systems: ['Order or returns system', 'Warehouse or inventory system', 'Payment or billing system', 'Email'],
+  oldWay:
+    'The return rules and the authorization thresholds live in tribal knowledge, so each agent decides a little differently. Some returns get authorized that should not be, and customers wait while the item sits unreceived.',
+  ledgeriumWay:
+    'Record one real return. Ledgerium captures the request, the authorization, the receipt, and the refund or replacement, and generates the SOP, the process map, and a report that highlights where returns wait.',
+  steps: [
+    { title: 'Receive the return request', detail: 'The request arrives with the order, the item, and the reason for the return.' },
+    { title: 'Authorize the return', detail: 'Check the return against policy and issue or deny the authorization.' },
+    { title: 'Receive the item', detail: 'Record receipt of the returned item and the inspection outcome.' },
+    { title: 'Resolve with refund or replacement', detail: 'Issue a refund or ship a replacement based on the authorized resolution.' },
+    { title: 'Log and close', detail: 'Record the outcome and close the return with the right reason code.' },
+  ],
+  commonMistakes: [
+    'Leaving the authorization rules undocumented, so returns get approved inconsistently',
+    'Documenting the refund but skipping the authorization and receipt steps',
+    'Not capturing how long returns wait for authorization and for the item to arrive',
+  ],
+  metrics: [
+    { label: 'Time to resolve', note: 'Request received to refund or replacement, split into work and wait time.' },
+    { label: 'Authorization wait', note: 'How long a return waits between request and authorization.' },
+    { label: 'Denial rate', note: 'Share of return requests denied at authorization.' },
+  ],
+  aiOpportunities: [
+    'Pre-check the return against policy before it routes for authorization',
+    'Auto-match the received item to its return authorization for review',
+    'Detect returns stalled beyond target authorization time and escalate them',
+  ],
+  faqs: [
+    {
+      q: 'What are the steps in a returns processing workflow?',
+      a: 'Typically: receive the return request, authorize it, receive the item, resolve with a refund or replacement, then log and close it. The authorization rules and the receipt step are the parts most guides leave vague.',
+    },
+    {
+      q: 'How do I document the returns process clearly?',
+      a: 'Record one real return from request to resolution, then generate the SOP and process map from it. This captures the authorization rules and the routing that tribal knowledge usually hides.',
+    },
+    {
+      q: 'Where do returns get stuck?',
+      a: 'Most often at authorization and while waiting for the item to arrive and be inspected. Capturing per-step timing shows how long returns wait and at which step.',
+    },
+    {
+      q: 'Can Ledgerium document returns across systems?',
+      a: 'Yes. A single recording captures the steps across each browser-based system in the return, the returns system, the warehouse system, and billing, in one pass.',
+    },
+    {
+      q: 'What can be automated in returns processing?',
+      a: 'Common candidates are pre-checking returns against policy, matching received items to authorizations, and escalating stalled returns. Ledgerium scores these from the recorded process.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-27',
+  published: true,
+};
+
 export const WORKFLOW_PAGES: readonly WorkflowPage[] = [
   invoiceApproval,
   customerOnboarding,
@@ -927,4 +1383,10 @@ export const WORKFLOW_PAGES: readonly WorkflowPage[] = [
   contractReview,
   travelRequest,
   passwordReset,
+  refundProcessing,
+  journalEntry,
+  accessProvisioning,
+  salesOrderProcessing,
+  incidentManagement,
+  returnsProcessing,
 ];

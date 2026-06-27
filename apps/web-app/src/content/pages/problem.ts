@@ -1122,6 +1122,426 @@ const documentWithoutInterviews: ProblemPage = {
   published: true,
 };
 
+const reduceRework: ProblemPage = {
+  type: 'problem',
+  slug: 'how-to-reduce-rework',
+  metaTitle: 'How to Reduce Rework and Do-Overs in a Process',
+  metaDescription:
+    'Reduce rework by recording where work loops back for correction, finding the upstream step that causes do-overs, and fixing the root cause.',
+  h1: 'How to reduce rework',
+  eyebrow: 'Problem',
+  shortAnswer:
+    'To reduce rework and do-overs, record the workflow, find where items loop back for correction, and trace each loop to the upstream step that caused it, then fix that root cause rather than the symptom. Rework hides because the correction happens far from the mistake that produced it. Ledgerium AI records the real process, flags where work returns for redo, and shows the earlier step where the error entered, so you fix the cause of the do-over instead of getting faster at repeating it.',
+  primaryKeyword: 'how to reduce rework',
+  secondaryKeywords: ['reduce do-overs', 'cut rework in a process', 'fix rework root cause'],
+  searchIntent: 'informational',
+  tags: ['problem', 'rework', 'process-excellence', 'continuous-improvement'],
+  related: ['problem:how-to-find-process-waste', 'persona:process-excellence-leads', 'workflow:refund-processing-workflow'],
+  originalDataPoint:
+    'Ledgerium links each redo to the earlier step that introduced the error, so the cause of rework is shown as a traceable connection between two steps rather than guessed at from where the correction happens.',
+  honestLimitation:
+    'Ledgerium traces rework in the browser-based steps it records. A do-over caused by a physical or offline step needs separate observation to connect to its cause.',
+  whyItHappens:
+    'Rework persists because the do-over happens downstream of the mistake, so the team sees the correction but not the cause. People get better at fixing errors instead of preventing them, and the same defect keeps entering at the same earlier step run after run.',
+  diagnostic: [
+    'Items regularly come back for correction before they can move on',
+    'The same kind of error shows up again and again',
+    'People are skilled at fixing mistakes but the mistakes keep happening',
+  ],
+  manualApproach:
+    'Add a review step to catch the errors, or coach whoever made the last correction. It treats the symptom, catches some defects later, and leaves the upstream step that produces them untouched, so the rework continues.',
+  ledgeriumApproach:
+    'Record the real process. Ledgerium shows where work loops back, links each redo to the earlier step that introduced the error, and quantifies how often it happens, so you fix the root cause and the do-overs stop rather than just getting caught later.',
+  steps: [
+    { title: 'Record the process', detail: 'Capture real runs of the workflow, including the corrections.' },
+    { title: 'Find the loops', detail: 'Review where work returns for redo instead of moving forward.' },
+    { title: 'Trace to the cause', detail: 'Link each redo to the upstream step that introduced the error.' },
+    { title: 'Fix the root cause', detail: 'Change the earlier step so the defect stops entering the process.' },
+    { title: 'Re-record to confirm', detail: 'Capture again to check the rework loop shrank or disappeared.' },
+  ],
+  commonMistakes: [
+    'Adding a review step to catch errors instead of preventing them',
+    'Fixing the correction step while ignoring the upstream cause',
+    'Coaching the person who corrects rather than the step that fails',
+  ],
+  faqs: [
+    {
+      q: 'How do I reduce rework in a process?',
+      a: 'Record the workflow, find where items loop back for correction, and trace each loop to the upstream step that caused it. Fixing that root cause stops the do-over rather than catching it later.',
+    },
+    {
+      q: 'Why does rework keep happening?',
+      a: 'Because the do-over happens downstream of the mistake, so the team fixes the symptom and never changes the earlier step that introduces the error. The same defect keeps entering run after run.',
+    },
+    {
+      q: 'How do I find the cause of a do-over?',
+      a: 'A recording links the correction back to the earlier step where the error entered. Seeing the two together points you at the root cause instead of the place the rework surfaces.',
+    },
+    {
+      q: 'Is adding a review step a good fix for rework?',
+      a: 'It catches some defects later but does not stop them. The review is a symptom fix; changing the upstream step that produces the error is what actually reduces rework.',
+    },
+    {
+      q: 'How do I prove rework went down?',
+      a: 'Re-record the process after the change and compare. If the loops where work returned for correction shrank, the rework measurably dropped.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-27',
+  published: true,
+};
+
+const documentApprovalWorkflows: ProblemPage = {
+  type: 'problem',
+  slug: 'how-to-document-approval-workflows',
+  metaTitle: 'How to Document an Approval Workflow',
+  metaDescription:
+    'Document an approval workflow by recording a real run, capturing the routing, dollar thresholds, and exception paths approvers actually use.',
+  h1: 'How to document an approval workflow',
+  eyebrow: 'Problem',
+  shortAnswer:
+    'To document an approval workflow, record a real run from request to final sign-off and capture the routing rules, the dollar or risk thresholds that change who approves, and the exception paths people take when something does not fit. Approval processes are hard to write from memory because the routing and thresholds live in people’s habits. Ledgerium AI records how an approval actually moves, including the escalations and exceptions, and generates an SOP and process map, so the documented routing matches what approvers really do.',
+  primaryKeyword: 'how to document an approval workflow',
+  secondaryKeywords: ['document approval routing', 'approval workflow documentation', 'map approval thresholds'],
+  searchIntent: 'informational',
+  tags: ['problem', 'approvals', 'documentation', 'process-mapping'],
+  related: ['workflow:invoice-approval-workflow', 'sopTemplate:invoice-approval-sop-template', 'persona:operations-managers'],
+  originalDataPoint:
+    'Ledgerium captures the threshold points where an approval path changes, who signs off, and how escalations are handled, so the routing is documented from observed approvals rather than from an approval matrix that describes intent.',
+  honestLimitation:
+    'Ledgerium records browser-based approval steps. Sign-offs that happen by email, chat, or in person need their own records attached to the documentation at the right step.',
+  whyItHappens:
+    'Approval workflows resist documentation because the routing depends on conditions, the amount, the type of request, an approver’s availability, and those rules live in habit rather than in a written matrix. The documented version shows one clean path while the real process branches at every threshold.',
+  diagnostic: [
+    'Nobody can say exactly who approves what above which amount',
+    'Approvals stall and no one is sure where they are waiting',
+    'Exceptions get routed by asking around rather than by a rule',
+  ],
+  manualApproach:
+    'Write an approval matrix from memory and a policy document, then hope it matches practice. It captures the intended routing but misses the real thresholds, the escalations, and the exception paths people actually use when a request does not fit the matrix.',
+  ledgeriumApproach:
+    'Record real approvals as they move from request to sign-off. Ledgerium captures the routing, the threshold points where the path changes, and the exception handling, then generates an SOP and process map, so the documented workflow reflects how approvals truly flow.',
+  steps: [
+    { title: 'Record a full approval', detail: 'Capture a real request from submission to final sign-off.' },
+    { title: 'Capture the routing', detail: 'Note who the request goes to and in what order.' },
+    { title: 'Mark the thresholds', detail: 'Record the amounts or risk levels that change who approves.' },
+    { title: 'Document the exceptions', detail: 'Capture the escalation paths for requests that do not fit.' },
+    { title: 'Generate and review', detail: 'Produce the SOP and map and confirm the routing with an approver.' },
+  ],
+  commonMistakes: [
+    'Writing an approval matrix from policy instead of from real approvals',
+    'Documenting one threshold path and missing the escalations',
+    'Leaving the exception routing undocumented so people ask around',
+  ],
+  faqs: [
+    {
+      q: 'How do I document an approval workflow?',
+      a: 'Record a real approval from request to final sign-off and capture the routing, the thresholds that change who approves, and the exception paths. Ledgerium generates an SOP and process map from the recording.',
+    },
+    {
+      q: 'Why are approval workflows hard to document?',
+      a: 'Because the routing depends on conditions and thresholds that live in habit rather than a written matrix. The intended path looks clean while the real process branches at every threshold.',
+    },
+    {
+      q: 'How do I capture approval thresholds?',
+      a: 'Record approvals at different amounts or risk levels. The recording shows where the routing changes, so the documented thresholds come from real behavior rather than a guessed-at policy.',
+    },
+    {
+      q: 'What about exception approvals?',
+      a: 'Recording captures the escalations and the paths people take when a request does not fit the matrix, so the exception handling is documented instead of being passed around by word of mouth.',
+    },
+    {
+      q: 'How do I keep the approval routing current?',
+      a: 'Re-record an approval when the policy or thresholds change. The SOP and map regenerate, so the documented routing stays aligned with how approvals actually move.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-27',
+  published: true,
+};
+
+const trainEmployees: ProblemPage = {
+  type: 'problem',
+  slug: 'how-to-train-employees-on-a-process',
+  metaTitle: 'How to Train Employees on a Process',
+  metaDescription:
+    'Train staff on a process using documentation generated from real work, so they learn how the job is actually done instead of by trial and error.',
+  h1: 'How to train employees on a process',
+  eyebrow: 'Problem',
+  shortAnswer:
+    'To train staff on a process, give them documentation generated from how the job is actually done, then have them follow it on a real task while an experienced person reviews the result. Training fails when the material describes an ideal process the team does not run. Ledgerium AI records the real workflows, including the exceptions, and turns them into SOPs and process maps trainees can follow step by step, so people learn the job as it truly works rather than picking it up by watching and guessing.',
+  primaryKeyword: 'how to train employees on a process',
+  secondaryKeywords: ['train staff on a process', 'process training material', 'train using SOPs'],
+  searchIntent: 'informational',
+  tags: ['problem', 'training', 'documentation', 'onboarding'],
+  related: ['problem:how-to-reduce-onboarding-time', 'persona:training-managers', 'sopTemplate:employee-onboarding-sop-template'],
+  originalDataPoint:
+    'Because the training material is generated from a real run, every trainee follows the same documented steps and exceptions, which removes the variation that comes from each person learning by watching a different colleague.',
+  honestLimitation:
+    'Generated SOPs cover the observed browser steps. Judgment, customer rapport, and offline context still need an experienced person to teach alongside the documentation.',
+  whyItHappens:
+    'Training stays slow because the material is written from memory and does not match the real process, so trainees learn by shadowing and absorb whatever the person they watch happens to do. The result is inconsistent, depends on who trained whom, and leaves gaps the SOP should have covered.',
+  diagnostic: [
+    'New staff learn the job by watching whoever is free that day',
+    'Two people trained on the same process work differently',
+    'Training material does not match how the work is really done',
+  ],
+  manualApproach:
+    'Pair the trainee with an experienced colleague and run a few sessions from slides. It depends on who does the training, varies between trainees, and the slides describe an ideal process rather than the real steps and exceptions.',
+  ledgeriumApproach:
+    'Record the real workflows and generate SOPs and process maps. Trainees follow documentation built from actual work, including the exceptions, and practice on real tasks, so training is consistent across people and reflects how the job is genuinely done.',
+  steps: [
+    { title: 'Record the real workflows', detail: 'Capture the processes a trainee must learn, as experts run them.' },
+    { title: 'Generate the training docs', detail: 'Turn the recordings into SOPs and process maps to follow.' },
+    { title: 'Sequence the learning path', detail: 'Order the SOPs the way a new staff member should learn them.' },
+    { title: 'Practice on real tasks', detail: 'Have the trainee follow the SOP on a live task, not a slide.' },
+    { title: 'Review and refresh', detail: 'Check the result and re-record when the process changes.' },
+  ],
+  commonMistakes: [
+    'Training from slides that describe an ideal rather than the real process',
+    'Letting each trainer teach the job their own way',
+    'Using material that goes stale after the first training cohort',
+  ],
+  faqs: [
+    {
+      q: 'How do I train employees on a process effectively?',
+      a: 'Give them documentation generated from real work and have them practice on a live task while an experienced person reviews the result. They learn the job as it actually works, not from idealized slides.',
+    },
+    {
+      q: 'Why is shadowing a weak way to train?',
+      a: 'Because trainees absorb whatever the person they watch happens to do, so training varies by who trained whom and leaves gaps. Documentation built from real work is consistent across every trainee.',
+    },
+    {
+      q: 'What makes training material trustworthy?',
+      a: 'When it matches the real process. SOPs generated from recordings show the actual steps and exceptions, so trainees follow how the job is genuinely done rather than a version nobody runs.',
+    },
+    {
+      q: 'How do I keep training material current?',
+      a: 'Re-record a workflow when it changes and regenerate the SOP, so the training path stays accurate for every new cohort instead of drifting from the real process.',
+    },
+    {
+      q: 'Can trainees learn the exceptions, not just the happy path?',
+      a: 'Yes. Recording the real workflow captures the exceptions and workarounds, which is exactly the knowledge trainees usually have to pick up the hard way.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-27',
+  published: true,
+};
+
+const documentFinanceProcess: ProblemPage = {
+  type: 'problem',
+  slug: 'how-to-document-a-finance-process',
+  metaTitle: 'How to Document a Finance Process',
+  metaDescription:
+    'Document a finance process by recording a real run across each system, capturing the controls, approvals, and cross-system steps an auditor checks.',
+  h1: 'How to document a finance process',
+  eyebrow: 'Problem',
+  shortAnswer:
+    'To document a finance process, record a real run across each system it touches and capture the controls, the approvals, and the reconciliation steps that connect one tool to the next, so the documentation matches what actually happens at close. Finance work is hard to document because the controls and cross-system steps live in the preparer’s routine. Ledgerium AI records the real workflow, including the lookups and sign-offs between systems, and generates an SOP and process map, so the controls are documented from real work rather than from a policy binder.',
+  primaryKeyword: 'how to document a finance process',
+  secondaryKeywords: ['document financial controls', 'finance process documentation', 'document a close process'],
+  searchIntent: 'informational',
+  tags: ['problem', 'finance', 'controls', 'documentation'],
+  related: ['workflow:journal-entry-workflow', 'department:finance', 'aiOpportunity:finance-operations'],
+  originalDataPoint:
+    'Ledgerium records the control steps a preparer performs between systems, the reconciliations, checks, and sign-offs, so the documented controls come from observed work rather than from a policy that states what should happen.',
+  honestLimitation:
+    'Ledgerium records the browser-based finance steps. Controls performed in desktop software or on paper need a person to add them to the recording and attach the supporting evidence.',
+  whyItHappens:
+    'Finance processes resist documentation because they cross several systems and carry controls the preparer performs from habit, a reconciliation here, a sign-off there. The binder describes the policy while the real work includes the lookups, the re-keying, and the checks that never made it onto paper.',
+  diagnostic: [
+    'A close step lives only in one preparer’s routine',
+    'The control is performed but not written down anywhere',
+    'The process crosses several systems and no document shows the whole path',
+  ],
+  manualApproach:
+    'Pull the policy, interview the preparer about what they actually do, and write up the controls and steps before the next close. It depends on recall, misses the automatic checks, and leaves the cross-system reconciliation steps undocumented.',
+  ledgeriumApproach:
+    'Record the finance process as it runs across each system. Ledgerium captures the controls, approvals, and reconciliation steps between tools and generates an SOP and process map, so the documentation reflects the real work, including the checks the preparer does without thinking.',
+  steps: [
+    { title: 'Map the systems and controls', detail: 'List the tools the process touches and the controls it carries.' },
+    { title: 'Record a real close run', detail: 'Capture the process end to end across each system.' },
+    { title: 'Capture the controls', detail: 'Note the reconciliations, checks, and sign-offs as they happen.' },
+    { title: 'Generate the documentation', detail: 'Produce an SOP and process map including the cross-system steps.' },
+    { title: 'Attach offline records', detail: 'Add approvals and evidence that happen outside the browser.' },
+  ],
+  commonMistakes: [
+    'Documenting the policy instead of the controls the preparer actually performs',
+    'Missing the reconciliation steps between systems',
+    'Leaving offline approvals and evidence out of the documentation',
+  ],
+  faqs: [
+    {
+      q: 'How do I document a finance process?',
+      a: 'Record a real run across each system and capture the controls, approvals, and reconciliation steps. Ledgerium generates an SOP and process map, so the documentation matches what actually happens at close.',
+    },
+    {
+      q: 'Why are finance processes hard to document?',
+      a: 'Because they cross several systems and carry controls the preparer performs from habit. The policy binder misses the automatic checks and the cross-system steps that the real work depends on.',
+    },
+    {
+      q: 'Does recording capture financial controls?',
+      a: 'It captures the control steps the preparer performs in the browser, the reconciliations and checks, as they happen. Offline approvals and evidence are attached to the documentation at the right step.',
+    },
+    {
+      q: 'How does this help with audit?',
+      a: 'Because the SOP is documented from a real run, the controls described match what an auditor observes, which closes the common gap between the written procedure and the work performed.',
+    },
+    {
+      q: 'How do I keep finance documentation current?',
+      a: 'Re-record the process when a system or control changes and regenerate the SOP, so the documented controls stay aligned with how the close is actually run.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-27',
+  published: true,
+};
+
+const measureCycleTime: ProblemPage = {
+  type: 'problem',
+  slug: 'how-to-measure-cycle-time',
+  metaTitle: 'How to Measure Process Cycle Time',
+  metaDescription:
+    'Measure process cycle time by recording a workflow and splitting it into work time and wait time, so you see where the days actually go.',
+  h1: 'How to measure process cycle time',
+  eyebrow: 'Problem',
+  shortAnswer:
+    'To measure process cycle time, record the workflow from start to finish and split the total into work time, the active steps, and wait time, the queues and handoffs in between, so you see where the days actually go. People underestimate cycle time because they only feel the active work, not the waiting. Ledgerium AI records the real process and separates work from wait on every step, so cycle time is measured from observed runs rather than estimated.',
+  primaryKeyword: 'how to measure process cycle time',
+  secondaryKeywords: ['measure cycle time', 'work time vs wait time', 'process cycle time analysis'],
+  searchIntent: 'informational',
+  tags: ['problem', 'cycle-time', 'measurement', 'process-intelligence'],
+  related: ['problem:how-to-identify-process-bottlenecks', 'persona:operations-managers', 'workflow:incident-management-workflow'],
+  originalDataPoint:
+    'Ledgerium splits every step into work time and wait time, so cycle time is reported as activity plus queues rather than a single estimate, which usually reveals that the wait, not the work, is most of the elapsed time.',
+  honestLimitation:
+    'Ledgerium measures the browser-based steps it records. Wait time inside physical or desktop-only steps needs separate observation to include in the cycle time.',
+  whyItHappens:
+    'Cycle time gets underestimated because people report the active work and forget the waiting between steps. A task that takes ten minutes of work can take three days of cycle time, and without separating work from wait the queues that consume most of the elapsed time stay invisible.',
+  diagnostic: [
+    'A process takes days end to end but only minutes of actual work',
+    'Nobody can say how much of the cycle is work versus waiting',
+    'Estimates of how long the process takes are based on the active steps only',
+  ],
+  manualApproach:
+    'Ask people how long the process takes and average their answers. They report the active work they remember and leave out the waiting, so the estimate captures a fraction of the real cycle time and the queues stay hidden.',
+  ledgeriumApproach:
+    'Record the process from start to finish. Ledgerium measures each step and splits it into work time and wait time, so cycle time is the sum of observed activity and queues, and you can see which part, the work or the wait, drives the elapsed time.',
+  steps: [
+    { title: 'Record end to end', detail: 'Capture the workflow from the first step to the last.' },
+    { title: 'Split work from wait', detail: 'Review how much of each step is active versus waiting.' },
+    { title: 'Total the cycle time', detail: 'Add work and wait across the steps to get the real cycle time.' },
+    { title: 'Find the biggest wait', detail: 'Identify the queue or handoff that adds the most elapsed time.' },
+    { title: 'Re-record to track it', detail: 'Capture again after a change to see cycle time move.' },
+  ],
+  commonMistakes: [
+    'Reporting only the active work and ignoring the waiting',
+    'Estimating cycle time from memory instead of measuring it',
+    'Treating a fast task as a fast cycle when it waits in a queue',
+  ],
+  faqs: [
+    {
+      q: 'How do I measure process cycle time?',
+      a: 'Record the workflow from start to finish and split the total into work time and wait time. Cycle time is the sum of observed activity and queues, measured from real runs rather than estimated.',
+    },
+    {
+      q: 'What is the difference between work time and wait time?',
+      a: 'Work time is the active steps someone performs; wait time is the queues and handoffs in between. Cycle time is both together, and the wait is usually the larger and more hidden part.',
+    },
+    {
+      q: 'Why is cycle time usually underestimated?',
+      a: 'Because people report the active work they remember and forget the waiting. A ten-minute task can carry days of cycle time once the queues between steps are counted.',
+    },
+    {
+      q: 'Which part of cycle time should I reduce first?',
+      a: 'Usually the largest wait. The recording ranks where elapsed time accumulates, so you target the queue that adds the most rather than speeding up an already-fast active step.',
+    },
+    {
+      q: 'How do I track cycle time over time?',
+      a: 'Re-record the process after a change and compare. Watching the work and wait split move shows whether the cycle time actually dropped and where the remaining delay sits.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-27',
+  published: true,
+};
+
+const documentForCompliance: ProblemPage = {
+  type: 'problem',
+  slug: 'how-to-document-a-process-for-compliance',
+  metaTitle: 'How to Document a Process for Compliance',
+  metaDescription:
+    'Produce compliance-ready process documentation by recording how the work is really done, so your SOPs and evidence match what an auditor observes.',
+  h1: 'How to document a process for compliance',
+  eyebrow: 'Problem',
+  shortAnswer:
+    'To produce compliance-ready process documentation, record how the work is actually performed and generate the SOPs, process maps, and step evidence from that recording, so what you hand a reviewer matches what the team really does. Compliance documentation fails when it describes a policy the team does not follow. Ledgerium AI records the real workflow, including the controls and exceptions, and produces documentation tied to the observed run, so the evidence reflects practice and the gap between the written procedure and the work is closed before a reviewer finds it.',
+  primaryKeyword: 'how to document a process for compliance',
+  secondaryKeywords: ['compliance process documentation', 'audit-ready documentation', 'compliance evidence from real work'],
+  searchIntent: 'informational',
+  tags: ['problem', 'compliance', 'documentation', 'audit'],
+  related: ['problem:how-to-prepare-for-a-process-audit', 'persona:compliance-teams', 'industry:banking'],
+  originalDataPoint:
+    'Because Ledgerium documents from a real run, the SOP and the observed work share one source, so the control a reviewer reads about is the same control they would watch performed, which removes the most common compliance finding.',
+  honestLimitation:
+    'Ledgerium evidences the browser-based steps it records. Approvals, retention, and sign-offs performed offline still need their own records attached to the documentation.',
+  whyItHappens:
+    'Compliance documentation drifts from reality because it is written to satisfy a regulation rather than to describe the work. The team runs a different process than the binder states, so reviewers find a gap between what is documented and what is actually done.',
+  diagnostic: [
+    'Your documented procedures do not match how the team really works',
+    'Compliance evidence is recreated from memory when a review is due',
+    'Past reviews flagged gaps between the written policy and practice',
+  ],
+  manualApproach:
+    'Write procedures from the regulation, collect screenshots, and assemble a binder before the review. It describes the intended process, depends on recall, and leaves a gap between the documented control and the work the team actually performs.',
+  ledgeriumApproach:
+    'Record the process as it actually runs. Ledgerium generates the SOP, process map, and step evidence from that recording, so the documentation and the observed work share one source and a reviewer sees the control performed rather than only described.',
+  steps: [
+    { title: 'List the in-scope processes', detail: 'Identify the workflows the compliance requirement covers.' },
+    { title: 'Record real runs', detail: 'Capture each process as the team actually performs it today.' },
+    { title: 'Generate the evidence', detail: 'Produce SOPs, process maps, and step evidence from the recordings.' },
+    { title: 'Attach offline controls', detail: 'Add approvals, sign-offs, and records that happen off-screen.' },
+    { title: 'Review and refresh', detail: 'Confirm the documentation matches practice and re-record on change.' },
+  ],
+  commonMistakes: [
+    'Writing documentation to the regulation instead of the real process',
+    'Recreating evidence from memory under review pressure',
+    'Leaving offline approvals and controls out of the evidence',
+  ],
+  faqs: [
+    {
+      q: 'How do I produce compliance-ready process documentation?',
+      a: 'Record how the work is actually performed and generate SOPs, process maps, and step evidence from the recording. The documentation matches what a reviewer observes rather than describing an ideal process.',
+    },
+    {
+      q: 'Why does compliance documentation drift from reality?',
+      a: 'Because it is written to satisfy a regulation rather than to describe the work, so the team runs a different process than the binder states. Documenting from a real run closes that gap.',
+    },
+    {
+      q: 'What evidence does a recorded process provide?',
+      a: 'A step-by-step SOP and a process map drawn from the observed run, showing the real steps, systems, and controls. Offline approvals and sign-offs are attached to complete the record.',
+    },
+    {
+      q: 'How current does compliance documentation need to be?',
+      a: 'It should reflect the process as it runs now. Re-recording when the process changes keeps the SOP, map, and evidence aligned with current practice rather than a past version.',
+    },
+    {
+      q: 'Is recorded documentation enough on its own?',
+      a: 'It documents the browser-based steps and controls precisely. Offline approvals, retention records, and sign-offs still need to be attached so the compliance evidence is complete.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-06-27',
+  published: true,
+};
+
 export const PROBLEM_PAGES: readonly ProblemPage[] = [
   documentProcess,
   createSops,
@@ -1139,4 +1559,10 @@ export const PROBLEM_PAGES: readonly ProblemPage[] = [
   identifyBottlenecks,
   reduceVariation,
   documentWithoutInterviews,
+  reduceRework,
+  documentApprovalWorkflows,
+  trainEmployees,
+  documentFinanceProcess,
+  measureCycleTime,
+  documentForCompliance,
 ];

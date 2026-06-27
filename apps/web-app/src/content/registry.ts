@@ -13,6 +13,9 @@ import { SOFTWARE_PAGES } from './pages/software';
 import { PERSONA_PAGES } from './pages/persona';
 import { PROBLEM_PAGES } from './pages/problem';
 import { SOP_TEMPLATE_PAGES } from './pages/sop-template';
+import { AI_OPPORTUNITY_PAGES } from './pages/ai-opportunity';
+import { DEPARTMENT_PAGES } from './pages/department';
+import { INDUSTRY_PAGES } from './pages/industry';
 
 /**
  * URL prefix per page type.
@@ -74,6 +77,9 @@ export const ALL_PAGES: readonly SeoPage[] = [
   ...PERSONA_PAGES,
   ...PROBLEM_PAGES,
   ...SOP_TEMPLATE_PAGES,
+  ...AI_OPPORTUNITY_PAGES,
+  ...DEPARTMENT_PAGES,
+  ...INDUSTRY_PAGES,
 ];
 
 export function getPagesByType<T extends PageType>(type: T): SeoPage[] {
