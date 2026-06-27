@@ -8,8 +8,15 @@ import { UmamiAnalytics } from '@/components/UmamiAnalytics';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ledgerium.ai'),
   title: 'Ledgerium AI — Workflow Workspace',
   description: 'Turn recorded workflows into durable, searchable, reusable process intelligence.',
+  // Google Search Console domain/property verification. Set
+  // NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION to the token from GSC ("HTML tag" method);
+  // Next renders <meta name="google-site-verification"> only when present.
+  ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } }
+    : {}),
 };
 
 export default function RootLayout({
