@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: 'Workflow Documentation by Industry',
   description:
     'Industry-specific workflow documentation for manufacturing, healthcare, insurance, banking, SaaS, and more. Generated from how the work really runs, not memory.',
-  alternates: { canonical: 'https://ledgerium.ai/industries' },
+  alternates: { canonical: '/industries' },
 };
 
 export default function IndustriesIndex() {

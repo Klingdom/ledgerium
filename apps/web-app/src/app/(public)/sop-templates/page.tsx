@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: 'Free, Editable SOP Templates for Real Processes',
   description:
     'Editable SOP templates for invoice approval, onboarding, expenses, purchase orders, and the month-end close. Or record the real process and generate the SOP.',
-  alternates: { canonical: 'https://ledgerium.ai/sop-templates' },
+  alternates: { canonical: '/sop-templates' },
 };
 
 export default function SopTemplatesIndex() {

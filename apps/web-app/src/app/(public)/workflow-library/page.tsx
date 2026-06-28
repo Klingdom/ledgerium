@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: 'Workflow Library: Document Real Business Workflows',
   description:
     'A growing library of business workflows and how to document each one from real work. Record a workflow once and generate an SOP, process map, and intelligence report.',
-  alternates: { canonical: 'https://ledgerium.ai/workflow-library' },
+  alternates: { canonical: '/workflow-library' },
 };
 
 export default function WorkflowLibraryIndex() {

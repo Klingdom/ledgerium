@@ -4,7 +4,18 @@ import { useEffect } from 'react';
 import { track } from '@/lib/analytics';
 import type { PageType } from '@/content/types';
 
-const AI_REFERRERS = ['chatgpt.com', 'perplexity.ai', 'claude.ai', 'copilot.microsoft.com', 'gemini.google.com'];
+const AI_REFERRERS = [
+  'chatgpt.com',
+  'perplexity.ai',
+  'claude.ai',
+  'copilot.microsoft.com',
+  'gemini.google.com',
+  'grok.com',
+  'you.com',
+  'phind.com',
+  'meta.ai',
+  'poe.com',
+];
 
 function classifyReferrer(): 'organic' | 'ai' | 'direct' | 'other' {
   if (typeof document === 'undefined') return 'direct';
