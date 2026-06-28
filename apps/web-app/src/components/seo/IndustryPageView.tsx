@@ -2,6 +2,7 @@ import type { IndustryPage } from '@/content/types';
 import { SeoPageView } from './SeoPageView';
 import {
   Breadcrumbs,
+  DataPointCallout,
   SeoHero,
   ProseSection,
   BulletList,
@@ -10,6 +11,7 @@ import {
   HonestLimitation,
   RelatedPagesGrid,
   FinalCta,
+  KeyTakeaways,
 } from './Blocks';
 import { FaqBlock } from './FaqBlock';
 
@@ -18,7 +20,9 @@ export function IndustryPageView({ page }: { page: IndustryPage }) {
     <>
       <SeoPageView pageType={page.type} slug={page.slug} />
       <Breadcrumbs page={page} />
-      <SeoHero eyebrow={page.eyebrow} h1={page.h1} shortAnswer={page.shortAnswer} ctaLabel="Document your workflows" location="industry_hero" />
+      <SeoHero eyebrow={page.eyebrow} h1={page.h1} shortAnswer={page.shortAnswer} ctaLabel="Document your workflows" location="industry_hero" author={page.author} updatedAt={page.updatedAt} />
+      <DataPointCallout text={page.originalDataPoint} />
+      <KeyTakeaways items={page.keyTakeaways} />
 
       <ProseSection title="Industry context">
         <p>{page.industryContext}</p>
@@ -32,7 +36,7 @@ export function IndustryPageView({ page }: { page: IndustryPage }) {
       <BulletList title="Compliance concerns" items={page.complianceConcerns} />
       <BulletList title="AI and automation opportunities" items={page.aiOpportunities} />
 
-      <HowLedgeriumCaptures />
+      <HowLedgeriumCaptures introSentence={page.mechanismIntro} />
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />

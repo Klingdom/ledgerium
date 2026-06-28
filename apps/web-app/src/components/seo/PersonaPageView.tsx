@@ -2,6 +2,7 @@ import type { PersonaPage } from '@/content/types';
 import { SeoPageView } from './SeoPageView';
 import {
   Breadcrumbs,
+  DataPointCallout,
   SeoHero,
   ProseSection,
   BulletList,
@@ -10,6 +11,7 @@ import {
   HonestLimitation,
   RelatedPagesGrid,
   FinalCta,
+  KeyTakeaways,
 } from './Blocks';
 import { FaqBlock } from './FaqBlock';
 
@@ -18,7 +20,9 @@ export function PersonaPageView({ page }: { page: PersonaPage }) {
     <>
       <SeoPageView pageType={page.type} slug={page.slug} />
       <Breadcrumbs page={page} />
-      <SeoHero eyebrow={page.eyebrow} h1={page.h1} shortAnswer={page.shortAnswer} ctaLabel="Record your first workflow" location="persona_hero" />
+      <SeoHero eyebrow={page.eyebrow} h1={page.h1} shortAnswer={page.shortAnswer} ctaLabel="Record your first workflow" location="persona_hero" author={page.author} updatedAt={page.updatedAt} />
+      <DataPointCallout text={page.originalDataPoint} />
+      <KeyTakeaways items={page.keyTakeaways} />
 
       <ProseSection title="A day in this role">
         <p className="text-sm text-[var(--content-tertiary)]">{page.whoThisIsFor}</p>
@@ -37,7 +41,7 @@ export function PersonaPageView({ page }: { page: PersonaPage }) {
         <p>{page.howLedgeriumHelps}</p>
       </ProseSection>
 
-      <HowLedgeriumCaptures />
+      <HowLedgeriumCaptures introSentence={page.mechanismIntro} />
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />

@@ -4,6 +4,7 @@ import type { SopTemplatePage } from '@/content/types';
 import { SeoPageView } from './SeoPageView';
 import {
   Breadcrumbs,
+  DataPointCallout,
   SeoHero,
   ProseSection,
   MidCta,
@@ -12,6 +13,7 @@ import {
   HonestLimitation,
   RelatedPagesGrid,
   FinalCta,
+  KeyTakeaways,
 } from './Blocks';
 import { FaqBlock } from './FaqBlock';
 
@@ -20,7 +22,9 @@ export function SopTemplatePageView({ page }: { page: SopTemplatePage }) {
     <>
       <SeoPageView pageType={page.type} slug={page.slug} />
       <Breadcrumbs page={page} />
-      <SeoHero eyebrow={page.eyebrow} h1={page.h1} shortAnswer={page.shortAnswer} ctaLabel="Generate the SOP from real work" location="sop_hero" />
+      <SeoHero eyebrow={page.eyebrow} h1={page.h1} shortAnswer={page.shortAnswer} ctaLabel="Generate the SOP from real work" location="sop_hero" author={page.author} updatedAt={page.updatedAt} />
+      <DataPointCallout text={page.originalDataPoint} />
+      <KeyTakeaways items={page.keyTakeaways} />
 
       <ProseSection title="Who uses this SOP and when">
         <p>{page.whoUsesIt}</p>
@@ -77,7 +81,7 @@ export function SopTemplatePageView({ page }: { page: SopTemplatePage }) {
         <p>{page.howLedgeriumGenerates}</p>
       </ProseSection>
 
-      <HowLedgeriumCaptures />
+      <HowLedgeriumCaptures introSentence={page.mechanismIntro} />
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />

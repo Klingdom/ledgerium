@@ -47,6 +47,8 @@ export function GET(): Response {
     if (hub) lines.push(`Index: ${base}${hub.path}`);
     for (const p of group) {
       lines.push(`- [${p.h1}](${base}${ROUTE_PREFIX[type]}/${p.slug}): ${p.metaDescription}`);
+      lines.push(`  ${p.shortAnswer}`);
+      lines.push(`  From Ledgerium recordings: ${p.originalDataPoint}`);
     }
     lines.push('');
   }

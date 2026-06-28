@@ -12,6 +12,18 @@ import type { SeoPage } from '@/content/types';
 
 const SIGNUP = '/signup';
 
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+/** Deterministic "Month YYYY" from an ISO date (YYYY-MM-DD). */
+function formatUpdated(iso: string): string {
+  const [y, m] = iso.split('-');
+  const name = MONTH_NAMES[Number(m) - 1];
+  return name ? `${name} ${y}` : iso;
+}
+
 export function Breadcrumbs({ page }: { page: SeoPage }) {
   const hub = PARENT_HUB[page.type];
   return (
@@ -37,12 +49,16 @@ export function SeoHero({
   shortAnswer,
   ctaLabel,
   location,
+  author,
+  updatedAt,
 }: {
   eyebrow: string;
   h1: string;
   shortAnswer: string;
   ctaLabel: string;
   location: string;
+  author?: { name: string };
+  updatedAt?: string;
 }) {
   return (
     <section className="relative overflow-hidden">
@@ -53,8 +69,20 @@ export function SeoHero({
         <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)] leading-[1.1] tracking-tight">
           {h1}
         </h1>
+        {/* Visible E-E-A-T byline + freshness (also in JSON-LD) */}
+        {(author || updatedAt) && (
+          <p className="mt-4 text-xs text-[var(--content-tertiary)]">
+            {author && <>By {author.name}</>}
+            {author && updatedAt && <span aria-hidden> · </span>}
+            {updatedAt && <>Updated {formatUpdated(updatedAt)}</>}
+            <span aria-hidden> · </span>
+            <Link href="/methodology" className="text-brand-500 hover:text-brand-400 underline underline-offset-2">
+              How we research this
+            </Link>
+          </p>
+        )}
         {/* AEO direct answer — first, before any selling */}
-        <p className="mt-6 text-lg text-[#e2e8f0] leading-relaxed">{shortAnswer}</p>
+        <p className="seo-answer mt-6 text-lg text-[#e2e8f0] leading-relaxed">{shortAnswer}</p>
         <div className="mt-8 flex flex-col sm:flex-row gap-3">
           <TrackedLink
             href={SIGNUP}
@@ -75,7 +103,48 @@ export function SeoHero({
   );
 }
 
-export function HowLedgeriumCaptures() {
+/**
+ * Renders the page's single original, citable fact as a prominent, quotable
+ * call-out near the top of the page — the highest-leverage AEO element. Marked
+ * `seo-datapoint` for Speakable extraction.
+ */
+export function DataPointCallout({ text }: { text: string }) {
+  return (
+    <section className="py-8 bg-[var(--surface-primary)]">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6">
+        <aside role="note" className="seo-datapoint rounded-xl border-l-4 border-brand-600 bg-brand-900/10 px-5 py-4">
+          <p className="text-xs font-semibold text-brand-500 uppercase tracking-widest mb-1.5">From Ledgerium recordings</p>
+          <p className="text-[15px] text-[var(--content-primary)] leading-relaxed">{text}</p>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Quotable TL;DR — 3-5 self-contained takeaways near the top of the page, in the
+ * first-30% zone answer engines extract from. Renders nothing until backfilled.
+ */
+export function KeyTakeaways({ items }: { items?: readonly string[] | undefined }) {
+  if (!items || items.length === 0) return null;
+  return (
+    <section className="py-10 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6">
+        <h2 className="text-sm font-semibold text-[var(--content-tertiary)] uppercase tracking-widest mb-4">Key takeaways</h2>
+        <ul className="space-y-3">
+          {items.map((t) => (
+            <li key={t} className="flex items-start gap-3 text-[15px] text-[var(--content-primary)] leading-relaxed">
+              <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-brand-500" />
+              {t}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+export function HowLedgeriumCaptures({ introSentence }: { introSentence?: string | undefined } = {}) {
   const steps = [
     { icon: Chrome, title: 'Install the extension', text: 'Add the Ledgerium recorder to Chrome. No screenshots and no keystrokes are ever captured.' },
     { icon: Circle, title: 'Record the real workflow', text: 'Perform the process once. Ledgerium captures the structured steps, timing, and system context.' },
@@ -84,7 +153,10 @@ export function HowLedgeriumCaptures() {
   return (
     <section className="py-16 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
-        <h2 className="text-xl font-bold text-[var(--content-primary)] mb-8">How Ledgerium captures this</h2>
+        <h2 className="text-xl font-bold text-[var(--content-primary)] mb-4">How Ledgerium captures this</h2>
+        {introSentence && (
+          <p className="text-[15px] text-[#e2e8f0] leading-relaxed mb-8 max-w-3xl">{introSentence}</p>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           {steps.map(({ icon: Icon, title, text }, i) => (
             <div key={title} className="card p-6 flex flex-col gap-3">
