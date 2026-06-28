@@ -93,6 +93,17 @@ export interface BasePage {
   readonly related: readonly string[];
   /** >=1 real Ledgerium-sourced fact. Required for a page to be published. */
   readonly originalDataPoint: string;
+  /**
+   * 3–5 self-contained, quotable sentences (AEO TL;DR). Each must stand alone
+   * out of context. Required (gate-enforced) since the iter backfill completed.
+   */
+  readonly keyTakeaways: readonly string[];
+  /**
+   * One sentence, UNIQUE per page, naming the specific subject + what Ledgerium
+   * records + the insight produced. De-boilerplates the capture section for AEO.
+   * Required (gate-enforced) since the iter backfill completed.
+   */
+  readonly mechanismIntro: string;
   /** One honest product constraint relevant to the page topic. */
   readonly honestLimitation: string;
   /** 3–10 entries. First answer must be page-specific (uniqueness floor). */

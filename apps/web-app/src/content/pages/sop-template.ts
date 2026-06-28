@@ -20,6 +20,14 @@ const invoiceApproval: SopTemplatePage = {
   relatedWorkflowSlug: 'invoice-approval-workflow',
   originalDataPoint:
     'A generic template documents the happy path. A Ledgerium-generated invoice approval SOP includes the real exception and rework loop captured from the recording, which is where most approval delay actually lives.',
+  mechanismIntro:
+    'Ledgerium captures how invoices really get approved by recording one approval from receipt to posting, so the generated SOP fills the procedure and exceptions with the actual PO match, threshold check, and rework loop.',
+  keyTakeaways: [
+    'An invoice approval SOP documents how payments clear control, covering the PO match, the threshold check, routing, and posting for payment.',
+    'A generic template documents the happy path, while a recording captures the rejection and rework loop where most approval delay actually lives.',
+    'Approval thresholds left undocumented make routing ambiguous, and a recorded approval captures who signs off by amount, department, or vendor automatically.',
+    'Re-recording an approval after a system change regenerates the SOP, which keeps it matched to the live process instead of drifting in a hand-edited document.',
+  ],
   honestLimitation:
     'A template is a starting structure. To reflect your real thresholds and routing, you still fill it in or, better, generate it from a recording of a real approval.',
   whoUsesIt:
@@ -94,6 +102,14 @@ const customerOnboarding: SopTemplatePage = {
   relatedWorkflowSlug: 'customer-onboarding-workflow',
   originalDataPoint:
     'A generated onboarding SOP captures the cross-team handoffs where new customers actually wait, which a template written from one team’s view usually leaves out.',
+  mechanismIntro:
+    'Ledgerium captures customer onboarding by recording one real activation from signed deal to first value across several teams and systems, so the generated SOP reflects the cross-team handoffs where new customers actually wait.',
+  keyTakeaways: [
+    'A customer onboarding SOP covers provisioning, configuration, billing, kickoff, and confirming activation across the teams that move a signed deal to active.',
+    'Onboarding spans several teams and systems, so a template written from one team\'s view leaves out the handoffs where customers wait longest.',
+    'A recording captures the real handoff points, giving a generated report that shows where activation stalls so the slow steps can be fixed.',
+    'Re-recording an onboarding after the process changes regenerates the SOP instead of editing a checklist that nobody updates.',
+  ],
   honestLimitation:
     'A template is a starting structure. Your real handoffs and systems are captured best by recording an actual onboarding rather than filling in a blank outline.',
   whoUsesIt:
@@ -168,6 +184,14 @@ const expenseReport: SopTemplatePage = {
   relatedWorkflowSlug: 'expense-reporting-workflow',
   originalDataPoint:
     'A generated expense SOP captures the rejection and resubmission loop from a real recording, which is where most reimbursement delay lives and which a happy-path template omits.',
+  mechanismIntro:
+    'Ledgerium captures the expense process by recording one real submission and approval, so the generated SOP documents the policy checks and routing a blank template leaves vague.',
+  keyTakeaways: [
+    'An expense report SOP covers capturing receipts, creating and submitting the report, approval against policy, and reimbursement.',
+    'Policy checks and approval routing are the hardest parts to document, and a recording captures them as they happen rather than leaving them vague.',
+    'A happy-path template omits the rejection and resubmission loop where most reimbursement delay actually lives.',
+    'Expense reports get returned when policy and required receipts are undocumented where people submit, and an SOP generated from real work reduces that guesswork.',
+  ],
   honestLimitation:
     'A template is a starting structure. The real policy checks and routing are captured best by recording an actual submission rather than filling in a blank outline.',
   whoUsesIt:
@@ -242,6 +266,14 @@ const purchaseOrder: SopTemplatePage = {
   relatedWorkflowSlug: 'purchase-order-workflow',
   originalDataPoint:
     'A generated PO SOP records the three-way match step by step, so it shows where the match fails and at which document, not just that an order was placed.',
+  mechanismIntro:
+    'Ledgerium captures the purchase order process by recording one real PO from requisition to match, so the generated SOP documents the approval thresholds and three-way match step by step rather than leaving them vague.',
+  keyTakeaways: [
+    'A purchase order SOP covers requisition, approval, issuing the PO, receiving, and the three-way match against PO, receipt, and invoice.',
+    'Approval thresholds and the three-way match are the steps most templates skip, and a recording captures the actual routing and checks.',
+    'A generated PO SOP records the three-way match step by step, showing where the match fails and at which document, not just that an order was placed.',
+    'Purchase orders stall in approval wait time and match exceptions, which the generated timing report makes visible.',
+  ],
   honestLimitation:
     'A template is a starting structure. The real approval routing and match steps are captured best by recording an actual PO process.',
   whoUsesIt:
@@ -316,6 +348,14 @@ const monthEndClose: SopTemplatePage = {
   relatedWorkflowSlug: 'month-end-close-workflow',
   originalDataPoint:
     'A generated close SOP records the serial dependencies in order, so it shows which task blocks the next, which is the information a flat checklist template never captures.',
+  mechanismIntro:
+    'Ledgerium captures the month-end close by recording one real close in the order the accountant runs it, so the generated SOP shows which dependent task blocks the next instead of a flat checklist.',
+  keyTakeaways: [
+    'A month-end close SOP covers reconciliations, journal entries, variance review, reporting, and locking the period, with the sign-offs at each stage.',
+    'The close is a long set of dependent tasks, so the order and the reviews matter as much as the individual steps.',
+    'A generated close SOP records the serial dependencies in order, showing which task blocks the next, which a flat checklist never captures.',
+    'Re-recording a close after a change regenerates the SOP, so it reflects the live sequence rather than a checklist maintained by hand.',
+  ],
   honestLimitation:
     'A template is a starting structure. The real order, reconciliations, and sign-offs are captured best by recording an actual close.',
   whoUsesIt:
@@ -389,6 +429,14 @@ const employeeOnboarding: SopTemplatePage = {
   related: ['sopTemplate:customer-onboarding-sop-template', 'problem:how-to-reduce-onboarding-time', 'persona:operations-managers'],
   originalDataPoint:
     'A generated onboarding SOP captures the IT account and access setup steps across systems, which is the part HR-written templates most often leave incomplete.',
+  mechanismIntro:
+    'Ledgerium captures employee onboarding by recording one real setup across HR, IT, and the hiring manager, so the generated SOP includes the account provisioning and access requests HR-written templates most often leave incomplete.',
+  keyTakeaways: [
+    'An employee onboarding SOP covers the HR record, account provisioning, access, equipment, and first-week onboarding across HR, IT, and the manager.',
+    'Onboarding spans HR, IT, and the hiring manager, so the handoffs are the parts a single-team template most often leaves incomplete.',
+    'A recording captures the IT account and access setup across systems, so those steps end up in the SOP instead of being assumed.',
+    'Confirming access was actually granted is a step templates skip, and a recorded onboarding captures it as it happens.',
+  ],
   honestLimitation:
     'A template is a starting structure. Your real account setup and access steps are captured best by recording an actual onboarding.',
   whoUsesIt:
@@ -463,6 +511,14 @@ const vendorSetup: SopTemplatePage = {
   relatedWorkflowSlug: 'vendor-setup-workflow',
   originalDataPoint:
     'A generated vendor setup SOP captures the verification and banking-detail checks step by step, so it shows exactly where a control is applied, which a happy-path template usually skips entirely.',
+  mechanismIntro:
+    'Ledgerium captures vendor setup by recording one real setup from request to active record, so the generated SOP documents the verification and banking-detail checks step by step where a happy-path template skips them.',
+  keyTakeaways: [
+    'A vendor setup SOP covers collecting details, the duplicate check, verification, approval, and activating the supplier record.',
+    'The banking-detail verification is where fraud enters, and a recording captures that control step exactly where it is applied.',
+    'A skipped duplicate check creates two records for one supplier, a mistake a recorded setup makes visible in the procedure.',
+    'A generated vendor setup SOP makes the verification and approval steps explicit, so they are followed every time rather than skipped under time pressure.',
+  ],
   honestLimitation:
     'A template is a starting structure. Your real verification steps and approval routing are captured best by recording an actual vendor setup rather than filling in a blank outline.',
   whoUsesIt:
@@ -537,6 +593,14 @@ const contractReview: SopTemplatePage = {
   relatedWorkflowSlug: 'contract-review-workflow',
   originalDataPoint:
     'A generated contract review SOP records the redline and re-review loop from a real recording, which is where most signature delay lives and which a single-pass template never captures.',
+  mechanismIntro:
+    'Ledgerium captures contract review by recording one real review from intake to signature, so the generated SOP documents the legal and finance routing and the redline loop a single-pass template never captures.',
+  keyTakeaways: [
+    'A contract review SOP covers intake, routing by type and value, review, the redline loop, and signature.',
+    'The legal and finance review routing and the redline loop are the hardest parts to document, and a recording captures the actual routing and sign-offs.',
+    'A generated contract review SOP records the redline and re-review loop where most signature delay lives, which a single-pass template never captures.',
+    'Contract reviews stall in the redline loop and waiting on reviewer sign-off, which the generated timing report makes visible.',
+  ],
   honestLimitation:
     'A template is a starting structure. Your real review routing and sign-off thresholds are captured best by recording an actual review rather than filling in a blank outline.',
   whoUsesIt:
@@ -611,6 +675,14 @@ const ticketResolution: SopTemplatePage = {
   relatedWorkflowSlug: 'zendesk-ticket-resolution-workflow',
   originalDataPoint:
     'A generated ticket SOP captures the escalation and reassignment steps from a real recording, which is where most resolution delay lives and which a first-contact template usually omits.',
+  mechanismIntro:
+    'Ledgerium captures support ticket resolution by recording one real ticket from open to close in the help desk, so the generated SOP documents the triage rules and escalation path a first-contact template usually omits.',
+  keyTakeaways: [
+    'A support ticket resolution SOP covers triage, diagnosis, resolution or escalation, customer confirmation, and close.',
+    'Triage rules and the escalation path are the steps most templates miss, and a recorded ticket captures them from the actual help desk.',
+    'A generated ticket SOP captures the escalation and reassignment steps where most resolution delay lives, which a first-contact template omits.',
+    'Closing tickets without confirming the issue is resolved is a common mistake a recorded resolution exposes in the procedure.',
+  ],
   honestLimitation:
     'A template is a starting structure. Your real triage rules and escalation path are captured best by recording an actual ticket rather than filling in a blank outline.',
   whoUsesIt:
@@ -685,6 +757,14 @@ const travelRequest: SopTemplatePage = {
   relatedWorkflowSlug: 'travel-request-workflow',
   originalDataPoint:
     'A generated travel request SOP captures the policy check and the routing by cost from a real recording, so it shows which approver each request reaches, not just that travel was approved.',
+  mechanismIntro:
+    'Ledgerium captures the travel request process by recording one real request from submission to booking, so the generated SOP documents the policy check and routing by cost a blank template leaves vague.',
+  keyTakeaways: [
+    'A travel request SOP covers the request, the policy check, routing by cost, approval, and booking.',
+    'Policy limits and approval routing by cost are the steps templates leave vague, and a recording captures them as they happen.',
+    'A generated travel request SOP shows which approver each request reaches by cost, not just that travel was approved.',
+    'Travel requests get returned when policy limits and the approver by cost are undocumented where people submit, and an SOP from real work reduces that guesswork.',
+  ],
   honestLimitation:
     'A template is a starting structure. Your real policy limits and approval routing are captured best by recording an actual request rather than filling in a blank outline.',
   whoUsesIt:
@@ -759,6 +839,14 @@ const leadQualification: SopTemplatePage = {
   relatedWorkflowSlug: 'salesforce-lead-qualification-workflow',
   originalDataPoint:
     'A generated qualification SOP captures the scoring criteria and the handoff to sales from a real recording, so it shows how a lead is actually judged and routed, not just that it was qualified.',
+  mechanismIntro:
+    'Ledgerium captures lead qualification by recording one real qualification from new lead to handoff in the CRM, so the generated SOP documents the scoring criteria and routing a blank template leaves vague.',
+  keyTakeaways: [
+    'A lead qualification SOP covers receiving the lead, research, scoring against criteria, routing or nurture, and logging the decision.',
+    'Scoring criteria and the handoff to sales are the steps templates leave vague, and a recording captures them from the actual CRM steps.',
+    'A generated qualification SOP shows how a lead is actually judged and routed, not just that it was qualified.',
+    'A clear SOP and the generated report show where reps diverge in scoring, so the criteria can be tightened toward consistency.',
+  ],
   honestLimitation:
     'A template is a starting structure. Your real scoring criteria and handoff rules are captured best by recording an actual qualification rather than filling in a blank outline.',
   whoUsesIt:
@@ -833,6 +921,14 @@ const passwordReset: SopTemplatePage = {
   relatedWorkflowSlug: 'password-reset-workflow',
   originalDataPoint:
     'A generated password reset SOP captures the identity verification step exactly as the agent performs it, so it shows where the control is applied, which a quick how-to template usually glosses over.',
+  mechanismIntro:
+    'Ledgerium captures the IT password reset process by recording one real reset from request to confirmed sign-in, so the generated SOP documents the identity verification step a quick how-to template usually glosses over.',
+  keyTakeaways: [
+    'An IT password reset SOP covers the request, identity verification, the reset, secure delivery, and logging.',
+    'Identity verification is the control that stops a reset becoming a security hole, and a recording captures it exactly as the agent performs it.',
+    'A reset without proper verification hands an account to whoever asked, so a generated SOP makes the verification step explicit and hard to skip.',
+    'An unlogged reset leaves no audit trail of the access action, a gap a recorded reset closes by capturing the logging step.',
+  ],
   honestLimitation:
     'A template is a starting structure. Your real verification rules and logging steps are captured best by recording an actual reset rather than filling in a blank outline.',
   whoUsesIt:

@@ -26,6 +26,8 @@ function proseSources(page: SeoPage): string[] {
     page.shortAnswer,
     page.originalDataPoint,
     page.honestLimitation,
+    ...(page.keyTakeaways ?? []),
+    page.mechanismIntro ?? '',
     ...page.faqs.flatMap((f) => [f.q, f.a]),
   ];
   if (page.type === 'workflow') {
@@ -165,6 +167,7 @@ export function validateContent(pages: readonly SeoPage[] = ALL_PAGES): Validati
   const slugByType = new Map<string, Set<string>>();
   const titles = new Map<string, string>();
   const descriptions = new Map<string, string>();
+  const mechIntros = new Map<string, string>();
   const known = new Set(pages.map((p) => `${p.type}:${p.slug}`));
 
   for (const p of pages) {
@@ -193,6 +196,25 @@ export function validateContent(pages: readonly SeoPage[] = ALL_PAGES): Validati
 
     if (!p.originalDataPoint.trim()) errors.push(`${id}: missing originalDataPoint (required to publish)`);
     if (!p.honestLimitation.trim()) errors.push(`${id}: missing honestLimitation`);
+
+    // ── AEO structural requirements (blocking; backfill complete) ─────────────
+    if (!p.mechanismIntro || !p.mechanismIntro.trim()) {
+      if (p.published) errors.push(`${id}: missing mechanismIntro`);
+    } else {
+      const key = p.mechanismIntro.trim().toLowerCase();
+      if (mechIntros.has(key)) errors.push(`${id}: duplicate mechanismIntro with ${mechIntros.get(key)}`);
+      else mechIntros.set(key, id);
+    }
+    if (!p.keyTakeaways || p.keyTakeaways.length === 0) {
+      if (p.published) errors.push(`${id}: missing keyTakeaways`);
+    } else {
+      if (p.keyTakeaways.length < 3 || p.keyTakeaways.length > 5) {
+        errors.push(`${id}: keyTakeaways count ${p.keyTakeaways.length} outside 3–5`);
+      }
+      for (const t of p.keyTakeaways) {
+        if (words([t]).length > 60) errors.push(`${id}: a keyTakeaway exceeds 60 words`);
+      }
+    }
 
     if (Number.isNaN(Date.parse(p.updatedAt))) errors.push(`${id}: updatedAt "${p.updatedAt}" is not a valid date`);
 

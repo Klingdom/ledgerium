@@ -44,6 +44,15 @@ const finance: DepartmentPage = {
     'Ledgerium captures browser-based finance work. Steps performed in desktop spreadsheets or offline still need a linked note.',
   originalDataPoint:
     'Across finance processes, most cycle time is wait time, not work time. Ledgerium timestamps each step, so the report shows how long an invoice or close task waits rather than how long the action takes.',
+  mechanismIntro:
+    'Finance teams document invoice approval and the month-end close from memory if at all, and Ledgerium records the real cross-system steps in each task so the output shows where the work actually stalls rather than how the procedure is supposed to run.',
+  keyTakeaways: [
+    'Finance workflows span an ERP plus spreadsheets and email, so a single-system guide misses the cross-system steps that actually carry the work.',
+    'Month-end close and approval steps that live in one head become an audit risk the moment that person is unavailable.',
+    'Documentation written from recall describes an ideal flow no one follows, while a recording captures the real sequence and exceptions.',
+    'Ledgerium produces evidence-linked, audit-ready procedures traceable to the recorded steps, which supports both onboarding and audit.',
+    'Timestamped steps reveal that most finance cycle time is wait time, showing how long an invoice or close task waits rather than how long the action takes.',
+  ],
   faqs: [
     {
       q: 'How do I document finance workflows?',
@@ -114,6 +123,15 @@ const hr: DepartmentPage = {
     'Ledgerium captures browser-based HR work. Steps done in desktop tools or in-person conversations still need a linked note.',
   originalDataPoint:
     'Across onboarding processes, most cycle time is wait time between handoffs, not work time. Ledgerium timestamps each step, so the report shows how long a new hire waits on access or paperwork rather than how long the task takes.',
+  mechanismIntro:
+    'HR and people ops run onboarding, leave, and case handling across an HRIS, email, and tickets, and Ledgerium records the real steps so the documentation shows how a new hire is actually set up rather than how the policy describes it.',
+  keyTakeaways: [
+    'HR processes touch sensitive data and span an HRIS plus email, spreadsheets, and ticketing, so single-system guides leave steps out.',
+    'New-hire provisioning that depends on a single coordinator becomes inconsistent the moment that coordinator is out.',
+    'Policy SOPs written from recall lag behind how cases are actually handled, while a recording captures the real sequence.',
+    'Ledgerium produces defensible, evidence-linked records traceable to the recorded steps, which supports sensitive HR cases and survives team turnover.',
+    'Timestamped onboarding steps show most cycle time is wait time between handoffs, revealing how long a new hire waits on access or paperwork.',
+  ],
   faqs: [
     {
       q: 'How do I document HR workflows?',
@@ -184,6 +202,15 @@ const operations: DepartmentPage = {
     'Ledgerium captures browser-based operations work. Steps performed on the floor or in desktop tools still need a linked note.',
   originalDataPoint:
     'Across operations processes, most cycle time is wait time at handoffs, not work time. Ledgerium timestamps each step, so the report shows how long an order waits between teams rather than how long the action takes.',
+  mechanismIntro:
+    'Operations teams own throughput and the handoffs between functions, and Ledgerium records order processing, fulfillment, and exception handling as they really run so the output shows where work waits between teams rather than the idealized path.',
+  keyTakeaways: [
+    'Operations workflows cross several systems and people, so small inconsistencies at handoffs compound into rework and delay.',
+    'The real flow lives with a few experienced operators, leaving SOPs that describe an ideal path exceptions ignore.',
+    'Recording the live process captures undocumented handoffs between systems that single-system guides miss.',
+    'Ledgerium baselines the real flow so variation and repeated steps become visible, supporting consistent execution across shifts and sites.',
+    'Timestamped steps show most operations cycle time is wait time at handoffs, revealing how long an order waits between teams.',
+  ],
   faqs: [
     {
       q: 'How do I document operations workflows?',
@@ -254,6 +281,15 @@ const customerSupport: DepartmentPage = {
     'Ledgerium captures browser-based support work. Phone calls and steps in desktop tools still need a linked note.',
   originalDataPoint:
     'Across support processes, most cycle time is wait time between replies and handoffs, not work time. Ledgerium timestamps each step, so the report shows how long a ticket waits on an escalation rather than how long the reply takes.',
+  mechanismIntro:
+    'Customer support resolves tickets, escalations, and refunds across a helpdesk and internal tools, and Ledgerium records how agents actually resolve cases so the SOP reflects the real path rather than a macro written from recall.',
+  keyTakeaways: [
+    'Support workflows span a helpdesk plus internal tools and knowledge bases, so each case follows a slightly different path that guides rarely capture.',
+    'Resolution steps that live with senior agents leave newer agents without a reliable path to follow.',
+    'Macros and SOPs written from memory lag behind real ticket handling, while a recording captures the steps agents actually take.',
+    'Ledgerium builds an SOP from how the best agents resolve cases, which ramps new agents faster than a generic guide.',
+    'Timestamped steps show most support cycle time is wait time between replies and handoffs, revealing how long a ticket waits on an escalation.',
+  ],
   faqs: [
     {
       q: 'How do I document customer support workflows?',
@@ -324,6 +360,15 @@ const salesOperations: DepartmentPage = {
     'Ledgerium captures browser-based sales ops work. Steps in desktop spreadsheets or offline approvals still need a linked note.',
   originalDataPoint:
     'Across sales ops processes, most cycle time is wait time between handoffs, not work time. Ledgerium timestamps each step, so the report shows how long a lead waits before qualification rather than how long the action takes.',
+  mechanismIntro:
+    'Sales operations runs lead qualification, quoting, and CRM hygiene across a CRM plus quoting and finance tools, and Ledgerium records the real steps so the SOP shows the exact fields and path each process expects rather than a rule kept in a few heads.',
+  keyTakeaways: [
+    'Sales ops workflows span a CRM plus quoting, finance, and spreadsheets, so a memory-based SOP drifts from how reps actually work the pipeline.',
+    'Qualification rules that live with a few reps produce inconsistent routing the forecast cannot trust.',
+    'A recorded SOP shows the exact fields and steps each process expects, keeping CRM data consistent across reps.',
+    'SOPs written from recall lag behind the current CRM configuration, while a recording stays tied to how the system works now.',
+    'Timestamped steps show most sales ops cycle time is wait time between handoffs, revealing how long a lead waits before qualification.',
+  ],
   faqs: [
     {
       q: 'How do I document sales operations workflows?',
@@ -394,6 +439,15 @@ const procurement: DepartmentPage = {
     'Ledgerium captures browser-based procurement work. Steps in desktop spreadsheets or offline vendor calls still need a linked note.',
   originalDataPoint:
     'Across procurement processes, most cycle time is wait time in approval queues, not work time. Ledgerium timestamps each step, so the report shows how long a purchase order waits for sign-off rather than how long the action takes.',
+  mechanismIntro:
+    'Procurement runs purchase orders, vendor setup, and invoice matching across an ERP plus email and spreadsheets, and Ledgerium records how requests really move through approval so the output shows where a purchase order waits for sign-off.',
+  keyTakeaways: [
+    'Procurement workflows span an ERP plus email and spreadsheets, so cross-system approval steps go undocumented in single-system guides.',
+    'Approval thresholds that live with one buyer turn every exception into an unrepeatable judgment call.',
+    'SOPs written from recall describe an ideal flow exceptions ignore, while a recording captures how requests actually move through approval.',
+    'Ledgerium produces audit-ready vendor and PO records traceable to the recorded steps, stronger support than a procedure written from memory.',
+    'Timestamped steps show most procurement cycle time is wait time in approval queues, revealing how long a purchase order waits for sign-off.',
+  ],
   faqs: [
     {
       q: 'How do I document procurement workflows?',
@@ -464,6 +518,15 @@ const it: DepartmentPage = {
     'Ledgerium captures browser-based IT work. Steps in desktop admin tools or terminals still need a linked note.',
   originalDataPoint:
     'Across IT processes, most cycle time is wait time in approval and queue handoffs, not work time. Ledgerium timestamps each step, so the report shows how long an access request waits for sign-off rather than how long the action takes.',
+  mechanismIntro:
+    'IT teams provision access, reset passwords, and manage incidents across a service desk plus identity and admin consoles, and Ledgerium records how requests are really fulfilled so the runbook reflects the live console flow rather than a memory-based guide.',
+  keyTakeaways: [
+    'IT workflows span a service desk plus identity, directory, and admin consoles, so cross-console steps fall out of memory-based runbooks.',
+    'Provisioning steps that live with one admin make least-privilege grants inconsistent and hard to review.',
+    'Runbooks written from recall lag behind the current console layout, while a recording stays tied to how the tools work now.',
+    'A recorded SOP shows the exact systems and grants each request touches, giving access reviewers traceable evidence rather than recall.',
+    'Timestamped steps show most IT cycle time is wait time in approval and queue handoffs, revealing how long an access request waits for sign-off.',
+  ],
   faqs: [
     {
       q: 'How do I document IT workflows?',
@@ -534,6 +597,15 @@ const compliance: DepartmentPage = {
     'Ledgerium captures browser-based compliance work. Steps in desktop tools or offline interviews still need a linked note.',
   originalDataPoint:
     'Across compliance processes, most cycle time is wait time on evidence requests, not work time. Ledgerium timestamps each step, so the report shows how long a control test waits on evidence rather than how long the review takes.',
+  mechanismIntro:
+    'Compliance teams test controls and collect evidence across a GRC tool plus email and the systems under review, and Ledgerium records how testing is really performed so the procedure proves the documented control is the one actually followed.',
+  keyTakeaways: [
+    'Compliance proof depends on documentation that matches reality, yet most testing steps live with a single analyst.',
+    'Compliance workflows span a GRC tool plus email, evidence stores, and the systems under review, so cross-system evidence steps go undocumented.',
+    'SOPs written from recall describe an ideal control no one follows exactly, while a recording captures the real testing sequence.',
+    'Ledgerium produces audit-ready, evidence-linked procedures traceable to the recorded steps, stronger audit evidence than recall.',
+    'Timestamped steps show most compliance cycle time is wait time on evidence requests, revealing how long a control test waits on evidence.',
+  ],
   faqs: [
     {
       q: 'How do I document compliance workflows?',

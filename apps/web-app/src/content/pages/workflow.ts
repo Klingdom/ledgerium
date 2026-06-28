@@ -19,6 +19,14 @@ const invoiceApproval: WorkflowPage = {
   related: ['workflow:customer-onboarding-workflow', 'software:netsuite', 'compare:manual-sop-documentation'],
   originalDataPoint:
     'In invoice approval, most cycle time is wait time, not work time. Ledgerium separates the two by recording the timestamp of each step, so the report shows how long an invoice sits between routing and approval rather than how long the approval click takes.',
+  mechanismIntro:
+    'Ledgerium captures an invoice approval workflow by recording each browser step from purchase order match through approval routing to payment posting with timestamps, so the report separates the hours an invoice waits between routing steps from the seconds the actual approval click takes.',
+  keyTakeaways: [
+    'Invoice approval cycle time is dominated by wait time, the hours an invoice sits after routing, not the approval action itself.',
+    'Approval SOPs written from memory routinely omit the rejection loop and the approval-limit thresholds that decide who signs off.',
+    'Recording one real approval captures the purchase order match, the threshold check, and the routing that walkthroughs skip.',
+    'Ledgerium timestamps every step and scores AI candidates like auto-matching invoices to purchase orders from the recorded run.',
+  ],
   honestLimitation:
     'Approval decisions made over email or in a hallway are not captured. Ledgerium records the steps performed in the browser; rationale added outside it needs a note.',
   whoUsesIt:
@@ -95,6 +103,14 @@ const customerOnboarding: WorkflowPage = {
   related: ['workflow:invoice-approval-workflow', 'software:salesforce', 'compare:tango'],
   originalDataPoint:
     'Onboarding delay usually lives in handoffs between teams, not inside any single task. Ledgerium timestamps each step, so the report shows how long a new customer waits at each handoff rather than only how long the active work takes.',
+  mechanismIntro:
+    'Ledgerium captures a customer onboarding workflow by recording the real path from signed deal through account provisioning, billing setup, and kickoff handoff, so the process map shows how long a new customer waits at each cross-team handoff.',
+  keyTakeaways: [
+    'Customer onboarding spans sales, success, and billing, which is why a checklist written once quickly stops matching the real sequence.',
+    'Onboarding delay concentrates in the handoffs between teams rather than inside any single provisioning or configuration task.',
+    'Recording one onboarding captures the cross-team handoffs and waiting points that a memory-based checklist leaves out.',
+    'Ledgerium measures time to value by stage and flags onboardings that exceed the target so they can be routed for help.',
+  ],
   honestLimitation:
     'Steps done in native desktop tools or over a call are not captured. Ledgerium records the browser-based onboarding steps; offline context needs a human note.',
   whoUsesIt:
@@ -171,6 +187,14 @@ const monthEndClose: WorkflowPage = {
   related: ['workflow:invoice-approval-workflow', 'software:netsuite', 'compare:process-mining'],
   originalDataPoint:
     'The month-end close is mostly serial dependencies, one task cannot start until another finishes. Ledgerium timestamps each step, so the report shows which dependency is the real bottleneck holding up the close rather than which task feels busiest.',
+  mechanismIntro:
+    'Ledgerium captures a month-end close workflow by recording the real close in order from reconciliations through journal entries to locking the period, so the report shows which serial dependency is the bottleneck holding up the close.',
+  keyTakeaways: [
+    'The month-end close is a long, ordered checklist spread across the accounting system, spreadsheets, and bank portals.',
+    'Close delay comes from serial dependencies where one task cannot start until another finishes, not from the busiest-feeling task.',
+    'Close checklists that live only in memory slip the moment their owner is out, because the exact order and sign-offs go undocumented.',
+    'Ledgerium records the reconciliations and review steps in sequence and surfaces which close tasks consistently run late.',
+  ],
   honestLimitation:
     'Steps performed in desktop spreadsheets outside the browser are not captured directly. Ledgerium records the browser-based close steps; offline spreadsheet work needs a linked note.',
   whoUsesIt:
@@ -247,6 +271,14 @@ const zendeskTicket: WorkflowPage = {
   related: ['workflow:customer-onboarding-workflow', 'software:zendesk', 'compare:tango'],
   originalDataPoint:
     'Most ticket time is investigation, not typing the reply. Ledgerium timestamps each step, so the report separates time spent looking things up in other tools from time spent responding, which is where the biggest support gains usually hide.',
+  mechanismIntro:
+    'Ledgerium captures a Zendesk ticket resolution workflow by recording an agent from ticket arrival through triage and the lookups in other tools to close, so the report separates investigation time from the time spent typing the response.',
+  keyTakeaways: [
+    'Zendesk ticket resolution varies widely between agents because the investigation steps, unlike the canned replies, are rarely documented.',
+    'Most resolution time goes to investigation and lookups in other tools, not to writing the reply itself.',
+    'Macros capture replies but not how an agent diagnoses an issue, which is the part recording a real resolution makes visible.',
+    'Ledgerium captures steps across every browser tool an agent touches and scores AI candidates like suggesting category and priority.',
+  ],
   honestLimitation:
     'Conversations that happen over phone or chat outside the browser are not captured. Ledgerium records the browser-based resolution steps; offline context needs a note.',
   whoUsesIt:
@@ -323,6 +355,14 @@ const expenseReporting: WorkflowPage = {
   related: ['workflow:invoice-approval-workflow', 'software:netsuite', 'compare:manual-sop-documentation'],
   originalDataPoint:
     'Most expense delay is rejection and resubmission, not the first submission. Ledgerium captures the rework loop, so the report shows how often reports bounce back and why, which a happy-path SOP never reveals.',
+  mechanismIntro:
+    'Ledgerium captures an expense reporting workflow by recording the real path from receipt capture through report creation and the policy-checked approval to reimbursement, so the report shows how often expense reports bounce back and at which policy check.',
+  keyTakeaways: [
+    'Expense reporting frustration comes from policy rules and approval routing that are rarely written where employees actually submit.',
+    'Most expense delay is the rejection and resubmission loop, not the first submission, which a happy-path SOP never reveals.',
+    'Recording one real submission captures the policy checks and the routing that the written policy usually leaves vague.',
+    'Ledgerium measures rejection rate and resubmission count and flags approvers who consistently exceed the target approval time.',
+  ],
   honestLimitation:
     'Receipts captured only on a mobile app outside the browser are not recorded directly. Ledgerium captures the browser-based submission and approval steps.',
   whoUsesIt:
@@ -399,6 +439,14 @@ const purchaseOrder: WorkflowPage = {
   related: ['workflow:invoice-approval-workflow', 'software:netsuite', 'compare:process-mining'],
   originalDataPoint:
     'In purchasing, the three-way match between PO, receipt, and invoice is where errors surface. Ledgerium records the match step by step, so the report shows how often the match fails and at which document, not just that the order was placed.',
+  mechanismIntro:
+    'Ledgerium captures a purchase order workflow by recording the real path from requisition through approval routing and receiving to the three-way match, so the report shows how often the match fails and at which document.',
+  keyTakeaways: [
+    'Purchasing spans requesters, approvers, and receiving, so a memory-based guide usually misses the approval thresholds and the three-way match.',
+    'The three-way match between purchase order, receipt, and invoice is where purchasing errors actually surface.',
+    'Recording one real purchase order captures the routing thresholds and the match checks that written-from-memory guides leave out.',
+    'Ledgerium measures approval wait time and match failure rate and flags requisitions stalled beyond the target.',
+  ],
   honestLimitation:
     'Approvals given verbally or by email outside the procurement system are not captured. Ledgerium records the browser-based PO steps; offline approvals need a note.',
   whoUsesIt:
@@ -475,6 +523,14 @@ const employeeOnboarding: WorkflowPage = {
   related: ['persona:hr-teams', 'software:workday', 'sopTemplate:employee-onboarding-sop-template'],
   originalDataPoint:
     'Most onboarding delay sits in cross-team handoffs, where HR finishes a step and IT has not yet started. Ledgerium timestamps each step, so the report shows how long a new hire waits between HR provisioning and IT access rather than only how long each task takes to perform.',
+  mechanismIntro:
+    'Ledgerium captures an employee onboarding workflow by recording the real setup across HR, IT, and the hiring manager from offer acceptance through account provisioning and access grants, so the report shows where a new hire waits between HR provisioning and IT access.',
+  keyTakeaways: [
+    'Employee onboarding spans HR, IT, and the hiring manager, so a single-team checklist usually forgets a system or an access grant.',
+    'Most onboarding delay is the handoff wait where HR has finished a step and IT has not yet started.',
+    'An undocumented access matrix means every new hire ends up with a different set of tools.',
+    'Ledgerium measures time to productive and access completeness and flags onboardings missing a required grant before the start date.',
+  ],
   honestLimitation:
     'Equipment shipping, badge printing, and any setup done in person are not captured. Ledgerium records the browser-based onboarding steps; physical and offline tasks need a linked note.',
   whoUsesIt:
@@ -551,6 +607,14 @@ const vendorSetup: WorkflowPage = {
   related: ['persona:compliance-teams', 'software:sap', 'sopTemplate:vendor-setup-sop-template'],
   originalDataPoint:
     'In vendor setup, the control points are the tax and banking validations, and that is where requests get returned. Ledgerium records each validation step, so the report shows how often setups bounce back at banking validation rather than only that a vendor was eventually added.',
+  mechanismIntro:
+    'Ledgerium captures a vendor setup workflow by recording the real path from request through tax and banking validation and approval routing to an active master record, so the report shows how often setups bounce back at banking validation.',
+  keyTakeaways: [
+    'Vendor setup carries control risk because the tax and banking checks decide whether payments are safe.',
+    'The control points in vendor setup are the tax and banking validations, and that is where requests get returned.',
+    'Validation rules living in tribal knowledge mean each clerk validates differently and some checks get skipped under pressure.',
+    'Ledgerium measures return rate and validation completeness and flags duplicate vendor records before a new one is created.',
+  ],
   honestLimitation:
     'Validations confirmed by phone with a bank or tax authority outside the browser are not captured. Ledgerium records the browser-based setup steps; offline confirmations need a note.',
   whoUsesIt:
@@ -627,6 +691,14 @@ const salesforceLeadQualification: WorkflowPage = {
   related: ['persona:revops-managers', 'software:salesforce', 'sopTemplate:lead-qualification-sop-template'],
   originalDataPoint:
     'Lead leakage usually happens between capture and assignment, where a lead sits unworked. Ledgerium timestamps each step, so the report shows how long a lead waits before a rep qualifies it rather than only how long the qualification call takes.',
+  mechanismIntro:
+    'Ledgerium captures a Salesforce lead qualification workflow by recording a rep from lead capture through enrichment lookups and the criteria check to routing, so the report shows how long a lead waits before a rep qualifies it and where routing varies.',
+  keyTakeaways: [
+    'Salesforce lead qualification suffers when the criteria and routing rules are remembered rather than written, so leads get worked inconsistently.',
+    'Lead leakage concentrates between capture and assignment, where a lead sits unworked, and at routing, where it lands on the wrong owner.',
+    'Recording one qualification captures the enrichment lookups and the criteria checks that usually go undocumented.',
+    'Ledgerium measures time to first touch and routing accuracy and scores AI candidates like scoring fit and intent before a rep opens the lead.',
+  ],
   honestLimitation:
     'Qualification done on a discovery call or over the phone is not captured. Ledgerium records the browser-based steps in the CRM and enrichment tools; the call rationale needs a note.',
   whoUsesIt:
@@ -703,6 +775,14 @@ const contractReview: WorkflowPage = {
   related: ['persona:operations-managers', 'software:sharepoint', 'sopTemplate:contract-review-sop-template'],
   originalDataPoint:
     'Contract delay is mostly the wait in the legal queue and the redline rounds, not the reading itself. Ledgerium timestamps each step, so the report shows how many redline rounds a typical contract takes and how long it waits in review rather than only that it was signed.',
+  mechanismIntro:
+    'Ledgerium captures a contract review workflow by recording the real review from intake through legal review and the redline rounds to signature, so the report shows how many redline rounds a typical contract takes and how long it waits in the legal queue.',
+  keyTakeaways: [
+    'Contract review hides delay in the legal queue and the redline rounds, while the rules for who reviews what stay unclear.',
+    'Most contract delay is the wait in the legal queue and repeated redline rounds, not the reading itself.',
+    'Emailing contracts to legal scatters the redline history across inboxes and makes turnaround unpredictable.',
+    'Ledgerium measures turnaround time, redline rounds, and queue wait time and flags clauses that deviate from playbook positions.',
+  ],
   honestLimitation:
     'Negotiation done by phone or in a meeting outside the browser is not captured. Ledgerium records the browser-based review and approval steps; the negotiation rationale needs a note.',
   whoUsesIt:
@@ -779,6 +859,14 @@ const travelRequest: WorkflowPage = {
   related: ['persona:operations-managers', 'software:netsuite', 'sopTemplate:travel-request-sop-template'],
   originalDataPoint:
     'Travel delay is mostly the wait for approval before booking, where prices change while a request sits. Ledgerium timestamps each step, so the report shows how long a request waits between submission and approval rather than only how long the booking takes.',
+  mechanismIntro:
+    'Ledgerium captures a travel request workflow by recording the real path from request through the policy check and approval routing to a booked trip, so the report shows how long a request waits between submission and approval while fares move.',
+  keyTakeaways: [
+    'Travel requests stall on policy checks and approval routing that employees cannot see, so they guess and get returned.',
+    'Most travel delay is the wait for approval before booking, where prices change while a request sits.',
+    'A travel policy buried in a document nobody opens leads employees to submit requests that miss limits and resubmit as fares climb.',
+    'Ledgerium measures time to approval and return rate and flags requests stalled beyond the target approval time.',
+  ],
   honestLimitation:
     'Bookings completed by a travel agent over phone or email are not captured. Ledgerium records the browser-based request, approval, and self-service booking steps; offline booking needs a note.',
   whoUsesIt:
@@ -855,6 +943,14 @@ const passwordReset: WorkflowPage = {
   related: ['persona:compliance-teams', 'software:servicenow', 'sopTemplate:password-reset-sop-template'],
   originalDataPoint:
     'The control that matters in a password reset is identity verification, and it is the step most likely to be rushed. Ledgerium records each step, so the report shows whether the verification was performed and how consistently rather than only that the password was reset.',
+  mechanismIntro:
+    'Ledgerium captures a password reset workflow by recording a helpdesk agent from the reset ticket through identity verification and the reset to confirmed access, so the report shows whether the identity check was performed and how consistently.',
+  keyTakeaways: [
+    'Password reset identity verification is a security control, yet it is often done from memory and varies by agent.',
+    'The verification step is the one most likely to be rushed under pressure, which is exactly how a reset goes to the wrong person.',
+    'Recording the real reset shows whether the verification happened and how consistently, which is what auditors test.',
+    'Ledgerium measures verification rate and agent variance and can prompt the agent through verification before a reset is allowed.',
+  ],
   honestLimitation:
     'Identity checks done by phone or over a desk-side visit outside the browser are not captured. Ledgerium records the browser-based reset and ticket steps; the verbal verification needs a note.',
   whoUsesIt:
@@ -931,6 +1027,14 @@ const refundProcessing: WorkflowPage = {
   related: ['persona:customer-success-teams', 'software:zendesk', 'problem:how-to-document-a-finance-process'],
   originalDataPoint:
     'Most refund delay sits in the approval wait and the eligibility check, not in issuing the payment. Ledgerium timestamps each step, so the report shows how long a refund waits for approval rather than only how long the payment posting takes.',
+  mechanismIntro:
+    'Ledgerium captures a refund processing workflow by recording an agent from the refund request through the eligibility check and approval routing to the issued payment, so the report shows how long a refund waits for approval before money leaves.',
+  keyTakeaways: [
+    'Refund processing moves money out the door, so the eligibility and approval checks matter even when they are rarely written down.',
+    'Most refund delay is the approval wait and the eligibility check, not the act of issuing the payment.',
+    'Refund rules held in tribal knowledge mean each agent verifies differently and some checks get skipped under pressure.',
+    'Ledgerium measures approval wait time and return rate and flags refunds stalled beyond the target approval time.',
+  ],
   honestLimitation:
     'Refund decisions agreed by phone or in a chat outside the browser are not captured. Ledgerium records the browser-based refund steps; offline rationale needs a note.',
   whoUsesIt:
@@ -1007,6 +1111,14 @@ const journalEntry: WorkflowPage = {
   related: ['software:quickbooks', 'persona:compliance-teams', 'problem:how-to-document-a-finance-process'],
   originalDataPoint:
     'In journal entries, the control is the link between the entry and its supporting evidence, and that is where review stalls. Ledgerium records each step, so the report shows whether support was attached before review rather than only that the entry was posted.',
+  mechanismIntro:
+    'Ledgerium captures a journal entry workflow by recording an accountant from first draft through attaching supporting documents and review routing to the posted ledger, so the report shows whether the support was attached before review.',
+  keyTakeaways: [
+    'The control in a journal entry is the link between the entry and its supporting evidence, which is where review stalls.',
+    'Support requirements and review thresholds that live in one accountant memory make backup and sign-offs inconsistent.',
+    'An entry posted without backup fails the audit trail, so recording whether support was attached before review matters.',
+    'Ledgerium measures review wait time and return rate and checks that required supporting documents are attached before review.',
+  ],
   honestLimitation:
     'Entries prepared in desktop spreadsheets outside the browser are not captured directly. Ledgerium records the browser-based preparation, review, and posting steps; offline spreadsheet work needs a linked note.',
   whoUsesIt:
@@ -1083,6 +1195,14 @@ const accessProvisioning: WorkflowPage = {
   related: ['software:servicenow', 'persona:compliance-teams', 'problem:how-to-document-a-process-for-compliance'],
   originalDataPoint:
     'In access provisioning, the control is the approval before the grant, and it is the step most likely to be rushed when a user is blocked. Ledgerium records each step, so the report shows whether the approval happened before access was granted rather than only that the user can now log in.',
+  mechanismIntro:
+    'Ledgerium captures an access provisioning workflow by recording an IT agent from the access request through approval routing and the grant to confirmed login, so the report shows whether the approval happened before access was granted.',
+  keyTakeaways: [
+    'In access provisioning the control is the approval before the grant, the step most likely to be rushed when a user is blocked.',
+    'Access granted before approval is recorded is exactly how over-broad permissions spread across systems.',
+    'An undocumented access matrix means each request gets a different level, which least-privilege reviews then have to unwind.',
+    'Ledgerium measures approval rate and time to access and flags grants where the approval step appears to be skipped.',
+  ],
   honestLimitation:
     'Approvals given verbally or in a side conversation outside the browser are not captured. Ledgerium records the browser-based request, approval, and provisioning steps; offline sign-off needs a note.',
   whoUsesIt:
@@ -1159,6 +1279,14 @@ const salesOrderProcessing: WorkflowPage = {
   related: ['software:salesforce', 'persona:revops-managers', 'problem:how-to-document-a-workflow-across-multiple-systems'],
   originalDataPoint:
     'In order processing, the credit check and the validation are where orders get held, not the order entry itself. Ledgerium timestamps each step, so the report shows how long an order waits at the credit check rather than only how long entry takes.',
+  mechanismIntro:
+    'Ledgerium captures a sales order processing workflow by recording an order from entry through validation and the credit check to the fulfillment handoff, so the report shows how long an order waits at the credit check before it reaches fulfillment.',
+  keyTakeaways: [
+    'Sales order processing spans entry, validation, and a credit check across several systems, so a memory-based guide misses a check or a handoff.',
+    'Orders get held at the credit check and validation, not at order entry itself.',
+    'Skipping the validation and credit check in the documentation lets new reps confirm orders that later get held.',
+    'Ledgerium measures credit-check wait and hold rate and flags orders stalled beyond the target before fulfillment.',
+  ],
   honestLimitation:
     'Orders taken by phone or confirmed by email outside the browser are not captured directly. Ledgerium records the browser-based entry, validation, and confirmation steps; offline order details need a note.',
   whoUsesIt:
@@ -1235,6 +1363,14 @@ const incidentManagement: WorkflowPage = {
   related: ['software:servicenow', 'persona:operations-managers', 'workflow:password-reset-workflow'],
   originalDataPoint:
     'Most incident time is investigation and the wait for the right team, not the fix itself. Ledgerium timestamps each step, so the report separates investigation time and reassignment wait from the actual resolution, which is where the biggest gains usually hide.',
+  mechanismIntro:
+    'Ledgerium captures an incident management workflow by recording an agent from the first incident log through triage and investigation lookups to the closed ticket, so the report separates investigation and reassignment wait from the actual fix.',
+  keyTakeaways: [
+    'Incident handling varies widely between agents, especially the triage judgment and the investigation path a runbook rarely documents.',
+    'Most incident time is investigation and the wait for the right team, not applying the fix.',
+    'Runbooks capture the known fix but not how agents diagnose, which is why incidents bounce between teams.',
+    'Ledgerium measures resolution time and reassignment wait and surfaces similar past incidents during investigation.',
+  ],
   honestLimitation:
     'Coordination done on a call or in a war room outside the browser is not captured. Ledgerium records the browser-based triage, investigation, and resolution steps; offline coordination needs a note.',
   whoUsesIt:
@@ -1311,6 +1447,14 @@ const returnsProcessing: WorkflowPage = {
   related: ['software:netsuite', 'persona:operations-managers', 'problem:how-to-reduce-rework'],
   originalDataPoint:
     'In returns, the delay sits in the authorization and the wait for the item to arrive and be inspected, not in issuing the refund. Ledgerium timestamps each step, so the report shows how long a return waits for authorization and receipt rather than only how long the refund takes.',
+  mechanismIntro:
+    'Ledgerium captures a returns processing workflow by recording a return from request through authorization and the physical receipt to a refund or replacement, so the report shows how long a return waits for authorization and for the item to arrive.',
+  keyTakeaways: [
+    'Returns processing spans a request, an authorization, the physical receipt, and a refund or replacement across several systems.',
+    'Return delay sits in the authorization and the wait for the item to arrive and be inspected, not in issuing the refund.',
+    'Authorization rules held in tribal knowledge mean some returns get approved that should not be, while customers wait.',
+    'Ledgerium measures authorization wait and denial rate and matches received items to their return authorization for review.',
+  ],
   honestLimitation:
     'The physical inspection of a returned item happens off-screen and is not captured. Ledgerium records the browser-based request, authorization, and resolution steps; the inspection result needs a note.',
   whoUsesIt:

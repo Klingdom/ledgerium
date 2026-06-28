@@ -24,6 +24,15 @@ const scribe: CompetitorsPage = {
   related: ['compare:tango', 'compare:process-mining', 'persona:consultants'],
   originalDataPoint:
     'Most of Scribe’s competitors produce visual guides or in-app overlays. The structured-capture segment, where Ledgerium sits, is distinct: it records interaction data with timing so a process can be measured and diffed, not just displayed.',
+  mechanismIntro:
+    'In the Scribe competitor landscape of screenshot guides, video tools, and adoption platforms, Ledgerium occupies the structured process-capture segment, recording interaction data with timing so a process can be measured and diffed rather than only displayed.',
+  keyTakeaways: [
+    'Scribe sits in the visual-guide segment, which is the right fit for fast how-tos that show where to click.',
+    'Process documentation is several overlapping markets, so matching the segment to the job matters more than picking a single name.',
+    'Structured process capture records the real workflow as data with timing, producing SOPs you can measure rather than visual guides.',
+    'In-app adoption platforms like Whatfix and WalkMe guide users live, a different problem from documenting a process.',
+    'The honest first step is identifying which segment matches your goal before comparing individual tools.',
+  ],
   honestLimitation:
     'This is a category map, not a feature ranking. Capabilities and pricing change; verify specifics on each vendor’s own site before deciding.',
   landscape:
@@ -91,6 +100,15 @@ const tango: CompetitorsPage = {
   related: ['compare:tango', 'persona:operations-managers', 'problem:how-to-document-a-business-process'],
   originalDataPoint:
     'Tango and most of its peers produce visual guides built from screenshots. The structured-capture segment, where Ledgerium sits, is different: it records interaction data with timing, so a documented workflow can be measured and compared over time, not just viewed.',
+  mechanismIntro:
+    'Across the Tango competitor field of screenshot guides, video tools, and adoption platforms, Ledgerium holds the structured process-capture segment, recording interaction data with timing so a documented workflow can be measured and compared over time.',
+  keyTakeaways: [
+    'Tango sits in the visual-guide segment, well suited to fast how-tos that show each click.',
+    'Step-by-step documentation looks like one market but is really several built for distinct outcomes.',
+    'Structured process capture records a workflow as measurable data documented from real work, not from memory.',
+    'Buyers often shortlist across segments without noticing the tools answer different questions, which wastes time.',
+    'Naming the job first, whether to show or to measure a process, points to the right segment.',
+  ],
   honestLimitation:
     'This is a category map, not a feature ranking. Capabilities and pricing change often; verify the specifics on each vendor’s own site before deciding.',
   landscape:
@@ -158,6 +176,15 @@ const celonis: CompetitorsPage = {
   related: ['compare:process-mining', 'persona:process-excellence-leads', 'problem:how-to-find-process-waste'],
   originalDataPoint:
     'Most Celonis competitors read event logs already sitting in source systems. The structured-capture segment, where Ledgerium sits, starts earlier: it records the interaction data with timing as the work happens, which suits processes that never produced a clean log to mine.',
+  mechanismIntro:
+    'In the Celonis competitor landscape of process mining, task mining, and RPA, Ledgerium occupies the structured process-capture segment, recording a workflow from real use rather than mining logs that may not exist.',
+  keyTakeaways: [
+    'Celonis sits in the process mining segment, strongest where high-volume system logs already exist to read.',
+    'Process intelligence covers several approaches, from mining existing logs to recording a workflow directly from real use.',
+    'Structured process capture suits processes that never produced a clean log, baselining a specific cross-system workflow without a mining deployment.',
+    'Task mining tools like Soroco and RPA suites like UiPath answer different questions from log-based mining.',
+    'The honest first step is naming whether you have logs to mine or a workflow to document from scratch.',
+  ],
   honestLimitation:
     'This is a category map, not a feature ranking. Process intelligence capabilities and pricing change quickly; verify the specifics on each vendor’s own site before deciding.',
   landscape:
@@ -225,6 +252,15 @@ const uipath: CompetitorsPage = {
   related: ['compare:task-mining', 'persona:ai-transformation-teams', 'problem:how-to-identify-ai-automation-opportunities'],
   originalDataPoint:
     'RPA suites like UiPath excel at executing steps once a process is well understood. The structured-capture segment, where Ledgerium sits, works one stage earlier: it records the real workflow with timing so a team can see where automation actually fits before building a robot.',
+  mechanismIntro:
+    'Within the UiPath competitor landscape of RPA, task mining, and process mining, Ledgerium sits in the structured process-capture segment, recording the real workflow before any robot is built so a team can see where automation actually fits.',
+  keyTakeaways: [
+    'UiPath sits in the RPA segment, excelling at executing well-defined, repetitive steps at scale once a process is understood.',
+    'The automation market separates discovery, which decides what to automate, from execution, which runs the steps.',
+    'Structured process capture documents and baselines a workflow first, so robots are not built on processes nobody recorded.',
+    'Task mining tools like Soroco and process mining like Celonis cover the discovery stage from different angles.',
+    'Naming your current stage, discovering, documenting, or executing, is the honest starting point.',
+  ],
   honestLimitation:
     'This is a category map, not a feature ranking. Automation capabilities and pricing change quickly; verify the specifics on each vendor’s own site before deciding.',
   landscape:
@@ -292,6 +328,15 @@ const soroco: CompetitorsPage = {
   related: ['compare:task-mining', 'persona:business-analysts', 'competitors:celonis'],
   originalDataPoint:
     'Task mining tools like Soroco aggregate desktop activity across many people to surface patterns. The structured-capture segment, where Ledgerium sits, works at the other scope: it records one workflow in full detail with timing, so a single process can be documented and baselined precisely.',
+  mechanismIntro:
+    'In the Soroco competitor field of task mining and work observability, Ledgerium holds the structured process-capture segment, recording one workflow in full detail with timing rather than aggregating broad desktop activity.',
+  keyTakeaways: [
+    'Soroco sits in the task mining segment, strongest at aggregate visibility into desktop work across teams.',
+    'Work observability spans breadth and depth, from wide activity signals to one workflow documented in detail.',
+    'Structured process capture fits teams that need a single process documented and measured precisely, not a team-wide overview.',
+    'Process mining like Celonis and RPA suites like UiPath sit at different scopes again.',
+    'Deciding whether you need wide signals or one workflow documented from real work is the honest first move.',
+  ],
   honestLimitation:
     'This is a category map, not a feature ranking. Work observability capabilities and pricing change quickly; verify the specifics on each vendor’s own site before deciding.',
   landscape:
@@ -359,6 +404,15 @@ const whatfix: CompetitorsPage = {
   related: ['compare:screen-recording', 'persona:revops-managers', 'problem:how-to-measure-process-improvement'],
   originalDataPoint:
     'Adoption platforms like Whatfix guide users live inside one application. The structured-capture segment, where Ledgerium sits, works across applications and after capture: it records the real workflow with timing so the process can be measured and documented, not just walked through in the moment.',
+  mechanismIntro:
+    'Across the Whatfix competitor landscape of adoption platforms, guide builders, and video tools, Ledgerium occupies the structured process-capture segment, recording a cross-system workflow with timing rather than overlaying guidance inside one app.',
+  keyTakeaways: [
+    'Whatfix sits in the in-app adoption segment, strongest for live, at-scale onboarding within an application.',
+    'Digital adoption sits inside a broader documentation market whose tools serve different moments.',
+    'Structured process capture records the workflow as data so it can be measured and baselined, not just walked through live.',
+    'WalkMe is the close adoption peer, while guide tools and video tools explain after the fact.',
+    'Naming the moment you need, coaching, explaining, or measuring, comes before comparing tools.',
+  ],
   honestLimitation:
     'This is a category map, not a feature ranking. Digital adoption capabilities and pricing change quickly; verify the specifics on each vendor’s own site before deciding.',
   landscape:
@@ -426,6 +480,15 @@ const walkme: CompetitorsPage = {
   related: ['compare:screen-recording', 'persona:compliance-teams', 'competitors:whatfix'],
   originalDataPoint:
     'Adoption platforms like WalkMe guide users live inside enterprise applications. The structured-capture segment, where Ledgerium sits, works across applications and after capture: it records the real workflow with timing so the process itself can be measured and documented, not only walked through in the moment.',
+  mechanismIntro:
+    'In the WalkMe competitor landscape of enterprise adoption suites, guide builders, and screen recorders, Ledgerium sits in the structured process-capture segment, recording the real cross-system workflow as timed data rather than driving software rollout.',
+  keyTakeaways: [
+    'WalkMe pioneered the enterprise digital adoption platform, strong for driving usage and reporting adoption to leadership.',
+    'Driving software adoption is a different goal from documenting how a process actually works.',
+    'Structured process capture records the workflow as measurable data and turns it into an SOP, a process map, and a report.',
+    'Whatfix is the closest adoption peer, while guide builders and knowledge bases store procedures rather than measure them.',
+    'Separating the change-management question from the process-documentation question is the first step.',
+  ],
   honestLimitation:
     'This is a category map, not a feature ranking. Digital adoption capabilities and pricing change quickly; verify the specifics on each vendor’s own site before deciding.',
   landscape:
@@ -493,6 +556,15 @@ const kissflow: CompetitorsPage = {
   related: ['compare:manual-sop-documentation', 'persona:operations-managers', 'problem:how-to-create-current-state-process-maps'],
   originalDataPoint:
     'Workflow and BPM tools like Kissflow run a process you have already designed. The structured-capture segment, where Ledgerium sits, works before the design: it records how the work actually happens today with timing, so the current state is documented before anyone builds a workflow on top of it.',
+  mechanismIntro:
+    'Within the Kissflow competitor landscape of low-code builders, checklist tools, and BPM suites, Ledgerium holds the structured process-capture segment, recording how work actually happens today before anyone builds a workflow on top of it.',
+  keyTakeaways: [
+    'Kissflow sits in the low-code workflow and BPM segment, strongest for building and running approval-style processes.',
+    'Workflow tooling spans design, execution, and discovery, each answering a different question.',
+    'Structured process capture documents the current state from real work so an accurate baseline exists before design.',
+    'Checklist tools like Process Street and process intelligence like Celonis serve adjacent stages.',
+    'Naming whether you are designing, running, or first documenting the process avoids baking in assumptions.',
+  ],
   honestLimitation:
     'This is a category map, not a feature ranking. Workflow and BPM capabilities and pricing change quickly; verify the specifics on each vendor’s own site before deciding.',
   landscape:
@@ -560,6 +632,15 @@ const getguru: CompetitorsPage = {
   related: ['compare:manual-sop-documentation', 'persona:consultants', 'problem:how-to-document-a-business-process'],
   originalDataPoint:
     'Knowledge tools like Guru store and surface content people have already written. The structured-capture segment, where Ledgerium sits, produces the content from the work itself: it records the real workflow with timing, so an SOP is documented from real activity rather than written from memory.',
+  mechanismIntro:
+    'In the Guru competitor landscape of knowledge bases, wikis, and guide generators, Ledgerium occupies the structured process-capture segment, recording a workflow as measurable data rather than storing content people already wrote.',
+  keyTakeaways: [
+    'Guru sits in the knowledge base segment, strongest for verifying and serving answers in the flow of work.',
+    'Knowledge management overlaps with documentation but stores authored content rather than recording how work happens.',
+    'Structured process capture produces an SOP documented from real activity, which a knowledge base can then store and serve.',
+    'Wikis like Notion and guide generators like Scribe and Tango cover adjacent jobs.',
+    'Deciding whether you need retrieval or a process documented from real work comes first.',
+  ],
   honestLimitation:
     'This is a category map, not a feature ranking. Knowledge management capabilities and pricing change quickly; verify the specifics on each vendor’s own site before deciding.',
   landscape:
@@ -627,6 +708,15 @@ const abbyy: CompetitorsPage = {
   related: ['compare:process-mining', 'persona:ma-integration-leads', 'problem:how-to-identify-process-bottlenecks'],
   originalDataPoint:
     'Process intelligence suites like ABBYY analyze processes from data that systems already produce. The structured-capture segment, where Ledgerium sits, starts at the source: it records the interaction data with timing as the work happens, which suits cross-system workflows that never generated a clean log to analyze.',
+  mechanismIntro:
+    'Across the ABBYY competitor landscape of process mining, task mining, and document understanding, Ledgerium sits in the structured process-capture segment, recording interaction data at the source for workflows that never generated a clean log to analyze.',
+  keyTakeaways: [
+    'ABBYY sits in the process intelligence and mining segment, often paired with document and content understanding.',
+    'Process intelligence brings together several methods, from mining existing logs to recording a workflow directly.',
+    'Structured process capture suits cross-system workflows that never produced a clean log, baselining them without a mining deployment.',
+    'Task mining like Soroco and RPA like UiPath analyze and automate at different stages.',
+    'Deciding whether you have data to mine or a workflow to document from real work is the honest first step.',
+  ],
   honestLimitation:
     'This is a category map, not a feature ranking. Process intelligence capabilities and pricing change quickly; verify the specifics on each vendor’s own site before deciding.',
   landscape:

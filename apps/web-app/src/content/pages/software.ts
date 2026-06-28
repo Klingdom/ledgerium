@@ -24,6 +24,15 @@ const salesforce: SoftwarePage = {
   related: ['workflow:customer-onboarding-workflow', 'software:netsuite', 'compare:tango'],
   originalDataPoint:
     'Salesforce orgs are heavily customized, so the same standard process looks different across companies. Ledgerium documents your actual org by recording real clicks and page flows, rather than describing a generic Salesforce screen that may not exist in your instance.',
+  mechanismIntro:
+    'Salesforce orgs are customized so heavily that two teams running the same standard process click through different layouts, and Ledgerium records the real path so the SOP shows your instance rather than a generic screen.',
+  keyTakeaways: [
+    'Salesforce lead qualification, opportunity handoff, and case resolution each follow a path shaped by your org configuration, which a generic guide cannot predict.',
+    'Admin-built automation in Salesforce hides steps users never see, making the real flow hard to describe from memory.',
+    'A guide written against a standard Salesforce layout references buttons and fields a customized org may not have, and trust erodes the first time it is wrong.',
+    'Recording the process in your own Salesforce org captures the actual clicks, page flows, and cross-system steps in one pass.',
+    'Ledgerium generates the SOP, process map, and a report flagging where the Salesforce process slows down from a single recorded run.',
+  ],
   honestLimitation:
     'Ledgerium captures the browser-based steps inside Salesforce. Automations that run server-side, such as flows and triggers, are not observed directly; document their effect from what the user sees.',
   documentationFrame: 'How to document a workflow in Salesforce',
@@ -93,6 +102,15 @@ const netsuite: SoftwarePage = {
   related: ['workflow:invoice-approval-workflow', 'software:salesforce', 'compare:manual-sop-documentation'],
   originalDataPoint:
     'NetSuite screens and available actions change by role and permission. Ledgerium records the process as the actual role performs it, so the SOP reflects what that user can see and do rather than an administrator’s view of the system.',
+  mechanismIntro:
+    'NetSuite shows different screens and actions to each role, so Ledgerium records the process as the person who actually performs it works, producing an SOP that matches what that role can see and do rather than an administrator view.',
+  keyTakeaways: [
+    'NetSuite screens and available actions change by role and permission, so the same purchase order approval looks different to a clerk and an administrator.',
+    'Approval routing in NetSuite depends on amount and subsidiary rules that are easy to leave out of a written guide.',
+    'A NetSuite SOP written from an admin view references menus and actions the role running the work does not actually have.',
+    'Recording the run as the performing role captures the real approval routing and steps for vendor setup, invoice processing, and month-end close.',
+    'Ledgerium produces the SOP, process map, and a report showing where the NetSuite process waits or reworks from one session.',
+  ],
   honestLimitation:
     'Ledgerium captures the browser-based steps in NetSuite. Scheduled scripts and back-end workflow actions are not observed directly; document their effect from the user-visible result.',
   documentationFrame: 'How to document a workflow in NetSuite',
@@ -162,6 +180,15 @@ const servicenow: SoftwarePage = {
   related: ['software:jira', 'workflow:zendesk-ticket-resolution-workflow', 'compare:process-mining'],
   originalDataPoint:
     'ServiceNow workflows differ by fulfiller group and configuration. Ledgerium records the process as the actual fulfiller performs it, so the SOP reflects what that group sees and does rather than a platform-admin view of the workflow.',
+  mechanismIntro:
+    'ServiceNow is configured so differently per organization that fulfiller groups see their own forms and routing, and Ledgerium records the real fulfillment so the SOP reflects your instance instead of a platform-admin view.',
+  keyTakeaways: [
+    'ServiceNow forms, fields, and routing are configured per organization, so a generic incident or request guide rarely matches what fulfillers see.',
+    'Different ServiceNow fulfiller groups work different steps and fields, which a single written procedure cannot capture.',
+    'Flow Designer automation moves records through steps fulfillers never see, leaving gaps in any from-memory documentation.',
+    'Recording a real incident, service request, or change as the fulfiller works captures the actual forms and assignment routing.',
+    'Ledgerium generates the SOP, process map, and a report highlighting where ServiceNow requests wait from one recorded run.',
+  ],
   honestLimitation:
     'Ledgerium captures the browser-based steps in ServiceNow. Flow Designer actions and server-side scripts are not observed directly; document their effect from the user-visible result.',
   documentationFrame: 'How to document a workflow in ServiceNow',
@@ -231,6 +258,15 @@ const jira: SoftwarePage = {
   related: ['software:servicenow', 'software:zendesk', 'compare:tango'],
   originalDataPoint:
     'Jira workflows are configured per project, so the same status name can mean different things across teams. Ledgerium records the real transitions a team performs, so the SOP reflects how that project actually moves work rather than a default scheme.',
+  mechanismIntro:
+    'Jira workflows are configured per project, so the same status name means different things across teams, and Ledgerium records the real transitions a team performs so the SOP reflects how that board actually moves work.',
+  keyTakeaways: [
+    'Jira status names and transitions are configured per project, so a default-scheme guide references steps a given team does not use.',
+    'Automation rules in Jira move issues between statuses in ways users never see, which from-memory documentation misses.',
+    'A Jira workflow written against a default scheme drifts immediately because each project is configured differently.',
+    'Recording triage, board transitions, and bug resolution on the team’s actual board captures the real statuses and screens.',
+    'Ledgerium produces the SOP, process map, and a report flagging where Jira issues stall from a single recording.',
+  ],
   honestLimitation:
     'Ledgerium captures the browser-based steps in Jira. Automation rules and integrations that run in the background are not observed directly; document their effect from the user-visible result.',
   documentationFrame: 'How to document a workflow in Jira',
@@ -300,6 +336,15 @@ const zendesk: SoftwarePage = {
   related: ['workflow:zendesk-ticket-resolution-workflow', 'software:servicenow', 'compare:tango'],
   originalDataPoint:
     'Macros capture canned replies, not how agents diagnose issues. Ledgerium records the real investigation steps an agent takes across tools, so the SOP shows the diagnosis work that Zendesk’s own configuration never documents.',
+  mechanismIntro:
+    'Zendesk macros capture canned replies but not how agents diagnose issues, so Ledgerium records the real investigation across tools and produces an SOP showing the diagnosis work Zendesk configuration never documents.',
+  keyTakeaways: [
+    'Zendesk macros document replies, not the investigation steps agents take to diagnose an issue across other tools.',
+    'Zendesk is configured per team with custom fields, macros, and routing, so a generic support guide misses how agents actually work.',
+    'Support investigation steps that live outside Zendesk go undocumented when only the help desk is captured.',
+    'Recording a real resolution as the agent works captures triage, cross-tool investigation, and response together.',
+    'Ledgerium generates the SOP, process map, and a report highlighting where ticket time is spent from one session.',
+  ],
   honestLimitation:
     'Ledgerium captures the browser-based steps in Zendesk. Triggers, automations, and routing rules that run in the background are not observed directly; document their effect from the user-visible result.',
   documentationFrame: 'How to document a workflow in Zendesk',
@@ -369,6 +414,15 @@ const sap: SoftwarePage = {
   related: ['workflow:purchase-order-workflow', 'software:netsuite', 'compare:process-mining'],
   originalDataPoint:
     'SAP shows different transactions and fields depending on role, transaction code, and configuration. Ledgerium records the process as the actual role performs it, so the SOP reflects the screens and entries that user works through rather than a configuration-team view of the system.',
+  mechanismIntro:
+    'SAP shows different transactions and fields by role, transaction code, and configuration, so Ledgerium records the run as the actual role performs it and produces an SOP covering the screens and entries that user works through.',
+  keyTakeaways: [
+    'SAP screens depend on role, transaction code, and configuration, so a from-memory guide references transactions a given role may not run.',
+    'SAP entry screens carry many fields, and a guide listing transaction codes without the field entries leaves users stuck.',
+    'Release strategies and posting rules in SAP depend on conditions that are easy to omit from a written procedure.',
+    'Recording a purchase requisition, goods receipt, or invoice verification as the role works captures the real field entries and release steps.',
+    'Ledgerium produces the SOP, process map, and a report showing where the SAP process waits or reworks from one recording.',
+  ],
   honestLimitation:
     'Ledgerium captures the browser-based steps in SAP, including Fiori and web GUI sessions. Background jobs, workflow steps, and ABAP routines that run server-side are not observed directly; document their effect from the user-visible result.',
   documentationFrame: 'How to document a workflow in SAP',
@@ -438,6 +492,15 @@ const quickbooks: SoftwarePage = {
   related: ['workflow:month-end-close-workflow', 'persona:compliance-teams', 'compare:manual-sop-documentation'],
   originalDataPoint:
     'In small teams, bookkeeping steps live in one person’s memory and the approval and review steps happen in email or chat. Ledgerium records the real run across QuickBooks and those tools, so the SOP shows the full month-end and approval work that QuickBooks alone never documents.',
+  mechanismIntro:
+    'QuickBooks bookkeeping often lives in one person’s memory with approvals happening in email, so Ledgerium records the real run across QuickBooks and those tools to produce an SOP of the full month-end and approval work.',
+  keyTakeaways: [
+    'QuickBooks bookkeeping steps on small teams live in one person’s memory, leaving the process undocumented until that person is out.',
+    'Approvals and reviews for the books happen in email outside QuickBooks, so a QuickBooks-only guide misses them.',
+    'Bank reconciliation judgment calls are hard to describe from memory and rarely get written down.',
+    'Recording the bookkeeper at work captures bill, invoice, and reconciliation steps across QuickBooks and email in one pass.',
+    'Ledgerium generates the SOP, process map, and a report highlighting where the close slows down from a single recording.',
+  ],
   honestLimitation:
     'Ledgerium captures the browser-based steps in QuickBooks Online. Bank feeds, recurring transactions, and rules that post automatically are not observed directly; document their effect from the user-visible result.',
   documentationFrame: 'How to document a workflow in QuickBooks',
@@ -507,6 +570,15 @@ const hubspot: SoftwarePage = {
   related: ['workflow:salesforce-lead-qualification-workflow', 'software:salesforce', 'persona:revops-managers'],
   originalDataPoint:
     'HubSpot pipelines, stages, and properties are configured per team, so what counts as a stage change differs across portals. Ledgerium records the real steps a rep takes, so the SOP reflects how that team actually moves deals and tickets rather than a default pipeline.',
+  mechanismIntro:
+    'HubSpot pipelines, stages, and properties are configured per team, so what counts as a stage change differs across portals, and Ledgerium records the steps a rep takes so the SOP reflects how that team moves deals and tickets.',
+  keyTakeaways: [
+    'HubSpot pipelines, stages, and properties are configured per team, so a default-pipeline playbook references steps reps do not follow.',
+    'HubSpot automation and sequences enroll and move records in ways reps never see, which from-memory documentation misses.',
+    'HubSpot work spans email and calendars, so a portal-only guide stops short of the full follow-up flow.',
+    'Recording a rep working a record captures the real stage moves, property updates, and follow-up steps.',
+    'Ledgerium produces the SOP, process map, and a report flagging where HubSpot deals stall from one recording.',
+  ],
   honestLimitation:
     'Ledgerium captures the browser-based steps in HubSpot. Automation, sequence enrollment, and workflow actions that run in the background are not observed directly; document their effect from the user-visible result.',
   documentationFrame: 'How to document a workflow in HubSpot',
@@ -576,6 +648,15 @@ const workday: SoftwarePage = {
   related: ['workflow:employee-onboarding-workflow', 'software:servicenow', 'persona:hr-teams'],
   originalDataPoint:
     'Workday business processes and what each security group can do vary by tenant, so an employee, a manager, and an HR partner each see a different slice of the same process. Ledgerium records the process as the actual role performs it, so the SOP reflects what that role sees and does rather than an HR-admin view.',
+  mechanismIntro:
+    'Workday business processes and security groups vary by tenant, so an employee, manager, and HR partner each see a different slice, and Ledgerium records the run as the actual role performs it to produce a matching SOP.',
+  keyTakeaways: [
+    'Workday business processes and security groups vary by tenant, so each role sees a different slice of the same process.',
+    'Workday tasks land in inboxes and route on conditions that are hard to describe from memory.',
+    'A Workday SOP written from an HR-admin view references inbox items and actions employees and managers do not have.',
+    'Recording a hire, time-off request, or expense approval as the performing role captures the real tasks and inbox routing.',
+    'Ledgerium generates the SOP, process map, and a report showing where Workday requests wait from a single recording.',
+  ],
   honestLimitation:
     'Ledgerium captures the browser-based steps in Workday. Business process routing, conditions, and integrations that run server-side are not observed directly; document their effect from the user-visible result.',
   documentationFrame: 'How to document a workflow in Workday',
@@ -649,6 +730,15 @@ const sharepoint: SoftwarePage = {
   ],
   originalDataPoint:
     'SharePoint sites differ by library structure, permission level, and approval flow, so the same task looks different across teams. Ledgerium records the real steps a contributor takes, so the SOP reflects how that site actually handles approval and publishing rather than a generic library example.',
+  mechanismIntro:
+    'SharePoint sites are configured per team with their own libraries, permissions, and approval flows, so Ledgerium records a contributor working the content to produce an SOP that reflects how that site actually handles approval and publishing.',
+  keyTakeaways: [
+    'SharePoint sites are configured per team with their own libraries, permissions, and approval flows, so a standard-library guide misses real steps.',
+    'Power Automate flows in SharePoint move documents in ways contributors never see, leaving gaps in from-memory documentation.',
+    'SharePoint approval and publishing steps span email and Teams, so a SharePoint-only guide stops short of the full flow.',
+    'A SharePoint SOP written against a standard library references columns and permissions a configured site may not have.',
+    'Ledgerium produces the SOP, process map, and a report highlighting where SharePoint content waits from one recording.',
+  ],
   honestLimitation:
     'Ledgerium captures the browser-based steps in SharePoint. Power Automate flows and retention policies that run in the background are not observed directly; document their effect from the user-visible result.',
   documentationFrame: 'How to document a workflow in SharePoint',

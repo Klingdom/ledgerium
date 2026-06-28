@@ -19,6 +19,15 @@ const operationsManager: PersonaPage = {
   related: ['workflow:invoice-approval-workflow', 'workflow:month-end-close-workflow', 'compare:tango'],
   originalDataPoint:
     'Ledgerium separates work time from wait time on every recorded process, so an operations manager can see that most cycle time is usually waiting and handoffs, not the active task, which is where the fastest improvements come from.',
+  mechanismIntro:
+    'Ledgerium captures the work of an operations manager by recording the real cross-system steps and timing in each recurring process, so the report shows where handoffs and wait time stall a workflow rather than the manager\'s recollection.',
+  keyTakeaways: [
+    'Operations managers carry the most risk in handoffs between teams and systems, the part a memory-written SOP tends to compress into a single line.',
+    'A current-state baseline is the missing piece for most operations teams, because without one no improvement can be measured against anything concrete.',
+    'Recording a workflow once captures the workarounds and exceptions an experienced operator handles automatically and never thinks to document.',
+    'Ledgerium separates work time from wait time on every recorded process, so the fastest improvements show up as waiting and handoffs rather than the active task.',
+    'New hires reach productivity faster following an SOP generated from real work instead of an idealized procedure nobody actually follows.',
+  ],
   honestLimitation:
     'Ledgerium documents browser-based work. Steps that happen in native desktop software or offline still need a human to add context.',
   whoThisIsFor:
@@ -96,6 +105,14 @@ const consultants: PersonaPage = {
   related: ['workflow:customer-onboarding-workflow', 'software:salesforce', 'compare:manual-sop-documentation'],
   originalDataPoint:
     'Because Ledgerium records the real workflow with timing, a consultant gets a current-state map backed by observed evidence rather than interview recall, which clients challenge far less than a workshop-built diagram.',
+  mechanismIntro:
+    'Ledgerium captures a consultant\'s client current-state by recording the real workflow with timing as the client team performs it, so the process map rests on observed evidence instead of a week of interview recall.',
+  keyTakeaways: [
+    'Consultants lose the most billable time to current-state mapping, the interviews and workshops a client barely values yet the engagement cannot start without.',
+    'A diagram built from recall invites dispute in the readout, while a current-state map drawn from a recording reflects what the client team actually did.',
+    'Recording a client process compresses current-state capture from days to hours and produces SOP and process-map deliverables a consultant can reuse across similar engagements.',
+    'A recorded process is a measurable baseline, so re-recording after a change makes the improvement a consultant delivered concrete in timing and rework.',
+  ],
   honestLimitation:
     'Ledgerium captures browser-based work. Processes that run mainly in desktop software or on paper still need supplementary observation.',
   whoThisIsFor:
@@ -173,6 +190,15 @@ const revopsManager: PersonaPage = {
   related: ['software:salesforce', 'workflow:customer-onboarding-workflow', 'compare:tango'],
   originalDataPoint:
     'Revenue handoffs lose time between teams, not inside a single task. Ledgerium timestamps each step, so a RevOps manager can see how long a lead or deal waits at each handoff rather than only how long the active work takes.',
+  mechanismIntro:
+    'Ledgerium captures the revenue motion by recording the real lead-routing, handoff, and renewal steps across Salesforce, email, and billing, so the process map timestamps how long a deal waits at each handoff.',
+  keyTakeaways: [
+    'RevOps managers lose time to handoffs between sales, success, and finance, not inside any single task, which is where revenue quietly stalls.',
+    'Lead routing and handoff logic that lives only in people\'s heads produces three reps each working the same motion differently.',
+    'A single recording captures the steps across every browser-based system in the motion, so the SOP reflects the full cross-system process rather than just the CRM.',
+    'Ledgerium timestamps each step, so a RevOps manager sees how long a lead or deal waits at each handoff instead of only the active work time.',
+    'Repetitive steps and handoff delays are the strongest automation candidates, and Ledgerium scores them from the recorded process.',
+  ],
   honestLimitation:
     'Ledgerium records browser-based steps. Automations that run inside the CRM, such as flows and assignment rules, are not observed directly and need documenting from their visible effect.',
   whoThisIsFor:
@@ -250,6 +276,14 @@ const businessAnalyst: PersonaPage = {
   related: ['workflow:purchase-order-workflow', 'software:servicenow', 'compare:process-mining'],
   originalDataPoint:
     'Ledgerium records the steps between systems that stakeholders forget in interviews, the lookups, copies, and manual checks, so an analyst’s as-is reflects the real process rather than the cleaned-up version people describe.',
+  mechanismIntro:
+    'Ledgerium captures a business analyst\'s as-is process by recording the lookups, copies, and manual checks between systems, so the process map shows the real workflow rather than the cleaned-up version stakeholders describe.',
+  keyTakeaways: [
+    'Business analysts lose weeks to as-is mapping when every new interview surfaces another exception that changes the diagram again.',
+    'Stakeholders describe an idealized process, so a recording is what captures the workarounds and lookups they forget to mention.',
+    'Exceptions that surface late derail scope, and recording the real process puts them up front instead of mid-build against the wrong baseline.',
+    'An evidence-based as-is anchors requirements and gap analysis in observed work and leaves a measurable baseline to compare the to-be against.',
+  ],
   honestLimitation:
     'Ledgerium captures browser-based work. Decisions made verbally and offline steps still need the analyst to add context.',
   whoThisIsFor:
@@ -327,6 +361,15 @@ const maIntegrationLead: PersonaPage = {
   related: ['workflow:month-end-close-workflow', 'software:netsuite', 'compare:process-mining'],
   originalDataPoint:
     'When key people leave after a deal, their process knowledge usually goes with them. Ledgerium captures the real workflow as structured, recorded evidence, so the acquired-company process survives even after the person who ran it departs.',
+  mechanismIntro:
+    'Ledgerium captures an acquired company\'s processes by recording the real workflows as its team runs them under a tight post-close clock, so the current-state survives even after the person who ran it leaves.',
+  keyTakeaways: [
+    'M&A integration leads work against tight post-close timelines that leave no room to reconstruct a target\'s processes through rounds of interviews.',
+    'Process knowledge usually departs with the key people who leave after a deal, and recording turns one person\'s tribal knowledge into structured documentation.',
+    'Documenting a workflow takes roughly the time to run it once, far faster than reconstructing it from memory under deadline.',
+    'Two companies recorded the same way can be compared step by step to find overlaps, gaps, and differences, which is the basis for a harmonization plan.',
+    'A recorded current-state is a measurable baseline, so re-recording after harmonization shows whether the integrated process actually works.',
+  ],
   honestLimitation:
     'Ledgerium captures browser-based work. Processes in legacy desktop systems or on paper at the target need supplementary capture.',
   whoThisIsFor:
@@ -404,6 +447,15 @@ const processExcellenceLead: PersonaPage = {
   related: ['workflow:invoice-approval-workflow', 'compare:process-mining', 'software:servicenow'],
   originalDataPoint:
     'Ledgerium measures variation between people running the same process, so an improvement lead can quantify how much a workflow differs run to run, which is the standardization gap that value-stream workshops only estimate.',
+  mechanismIntro:
+    'Ledgerium captures a process excellence lead\'s current-state by recording several real runs of the same workflow, so the process map quantifies the variation between people that value-stream workshops only estimate.',
+  keyTakeaways: [
+    'Process excellence leads build value-stream maps from workshops and recall, which gives them no hard baseline to prove an improvement landed.',
+    'Variation between people is the standardization gap, and recording several runs of one process puts a number on it instead of a guess.',
+    'Ledgerium measures work time, wait time, and rework from real runs, so waste is targeted with evidence rather than intuition.',
+    'A standard quietly erodes after rollout, and re-recording later shows whether people still follow it or whether the process has drifted.',
+    'Proving a gain becomes concrete when Ledgerium compares a re-recorded process against the original baseline in time, steps, and rework.',
+  ],
   honestLimitation:
     'Ledgerium captures browser-based work. Physical and desktop-only steps in a value stream still need separate observation.',
   whoThisIsFor:
@@ -481,6 +533,15 @@ const complianceTeams: PersonaPage = {
   related: ['problem:how-to-prepare-for-a-process-audit', 'workflow:contract-review-workflow', 'compare:manual-sop-documentation'],
   originalDataPoint:
     'Ledgerium captures each step with system context and timing, so a compliance team can show not just that a control exists on paper but how it was actually performed, which is the evidence auditors ask for and recall-based procedures cannot provide.',
+  mechanismIntro:
+    'Ledgerium captures how a control is actually performed by recording each step with system context and timing, so a compliance team can show an auditor how the control operated, not just that a procedure exists on paper.',
+  keyTakeaways: [
+    'Compliance teams hold procedures written from memory that drift between audit cycles until they describe a process the team stopped following.',
+    'Auditors ask how a control was actually performed, and a recording with system context and timing provides that evidence where recall-based procedures cannot.',
+    'Exceptions and workarounds stay invisible until an auditor finds them, and recording the real workflow surfaces those control gaps first.',
+    'Re-recording on a schedule keeps control documentation current, so the SOP reflects how the control runs today rather than at the last audit.',
+    'Audit preparation stops being a week-long scramble when current process evidence already exists instead of being reconstructed from memory under deadline.',
+  ],
   honestLimitation:
     'Ledgerium documents browser-based work. Manual sign-offs, paper approvals, and decisions made offline still need a person to record the context.',
   whoThisIsFor:
@@ -558,6 +619,15 @@ const hrTeams: PersonaPage = {
   related: ['workflow:employee-onboarding-workflow', 'software:workday', 'problem:how-to-reduce-onboarding-time'],
   originalDataPoint:
     'Employee onboarding spans the HRIS, IT, and payroll, and Ledgerium timestamps each step across those systems, so an HR team can see where a new hire actually waits, usually between handoffs to other teams rather than inside HR’s own tasks.',
+  mechanismIntro:
+    'Ledgerium captures people processes by recording onboarding and offboarding steps across the HRIS, IT, and payroll, so the timing shows where a new hire actually waits, usually at handoffs to other teams.',
+  keyTakeaways: [
+    'HR teams run onboarding from a checklist half in one coordinator\'s head, which breaks the moment that person is out.',
+    'People processes span the HRIS, IT, and payroll, and a single recording captures the full flow including the IT and payroll handoffs.',
+    'New-hire wait time concentrates between handoffs to other teams rather than inside HR\'s own tasks, which Ledgerium timestamps step by step.',
+    'Recording a process turns a coordinator\'s checklist-in-their-head into structured documentation that survives a leave or a role change.',
+    'New HR coordinators run processes confidently sooner following an SOP built from real work instead of shadowing one person.',
+  ],
   honestLimitation:
     'Ledgerium captures browser-based work. In-person orientation, paper forms, and conversations still need an HR coordinator to add the context.',
   whoThisIsFor:
@@ -635,6 +705,15 @@ const customerSuccessTeams: PersonaPage = {
   related: ['workflow:customer-onboarding-workflow', 'software:zendesk', 'compare:tango'],
   originalDataPoint:
     'Ledgerium measures how much the same playbook varies between CSMs, so a CS leader can quantify the consistency gap in onboarding or renewal rather than guessing why some customers get a smoother experience than others.',
+  mechanismIntro:
+    'Ledgerium captures a CS playbook by recording how strong CSMs actually run onboarding, QBRs, and renewals across the CRM, support tool, and billing, so it measures how much the same playbook varies between CSMs.',
+  keyTakeaways: [
+    'Customer success teams let every CSM run onboarding and renewals a little differently, so the experience depends on who picked up the account.',
+    'Playbooks living in slides nobody updates after a process change leave new CSMs ramping by asking colleagues for half-remembered versions.',
+    'Ledgerium measures how much a playbook varies between CSMs, turning a vague consistency gap into a number a CS leader can close.',
+    'A single recording captures the steps across the CRM, support tool, and billing, so the SOP reflects the full playbook rather than one system.',
+    'Recorded timing shows which steps delay a customer\'s first value, giving the team evidence to fix the slow points.',
+  ],
   honestLimitation:
     'Ledgerium captures browser-based work. Customer calls, judgment calls, and relationship context still need a CSM to record alongside the system steps.',
   whoThisIsFor:
@@ -712,6 +791,14 @@ const trainingManagers: PersonaPage = {
   related: ['problem:how-to-capture-tribal-knowledge', 'workflow:employee-onboarding-workflow', 'compare:screen-recording'],
   originalDataPoint:
     'Ledgerium records the exceptions and workarounds an expert handles without thinking, the lookups, the second-system checks, so training material covers the real job rather than the clean path that leaves trainees stuck the first time something unusual happens.',
+  mechanismIntro:
+    'Ledgerium captures an expert\'s real method by recording the lookups, second-system checks, and workarounds they handle without thinking, so training material covers the real job rather than the clean path.',
+  keyTakeaways: [
+    'Training managers build courses from an ideal procedure trainees never meet in practice, so the first cohort gets stuck on the first unusual case.',
+    'Manuals go stale the moment a system update makes the screenshots wrong, and re-recording refreshes the material instead of a rebuild from scratch.',
+    'A recording captures the exceptions and workarounds an expert handles automatically, which make up half the job and most of what the happy path leaves out.',
+    'An expert records a workflow in about the time it takes to run it once, far less than repeated shadowing sessions.',
+  ],
   honestLimitation:
     'Ledgerium captures browser-based work. Hands-on tasks, equipment, and verbal coaching still need a trainer to document alongside the recorded steps.',
   whoThisIsFor:
@@ -789,6 +876,15 @@ const aiTransformationTeams: PersonaPage = {
   related: ['problem:how-to-identify-ai-automation-opportunities', 'workflow:invoice-approval-workflow', 'compare:task-mining'],
   originalDataPoint:
     'Ledgerium scores each step of a recorded process for repetition, volume, and how rule-based it is, so an automation team can rank candidates by real evidence rather than picking the process that complained loudest.',
+  mechanismIntro:
+    'Ledgerium captures automation candidates by recording each process and scoring its steps for repetition, volume, and how rule-based they are, so an automation team ranks candidates on evidence rather than the process that complained loudest.',
+  keyTakeaways: [
+    'AI transformation teams often point automation at the loudest process, which can be full of judgment calls that resist automation while a quieter high-volume task pays off faster.',
+    'Automating an undocumented process bakes in its workarounds and waste, so recording the real workflow first decides what is worth automating.',
+    'Ledgerium scores each step for repetition, volume, and how rule-based it is, ranking candidates by measured evidence instead of opinion.',
+    'A recorded baseline is what makes the result provable, so re-recording after a build shows the change in steps, time, or rework rather than anecdotes.',
+    'Ledgerium identifies and baselines candidates but does not build the automation, which keeps the measurement honest and tool-independent.',
+  ],
   honestLimitation:
     'Ledgerium identifies and baselines automation candidates from observed work. It does not build the automation, and steps in desktop-only software are not observed directly.',
   whoThisIsFor:
@@ -866,6 +962,14 @@ const bpoOperations: PersonaPage = {
   related: ['problem:how-to-document-a-workflow-across-multiple-systems', 'workflow:purchase-order-workflow', 'compare:process-mining'],
   originalDataPoint:
     'Ledgerium captures the cross-system steps a client mentions in passing during transition, the lookups, the second-screen checks, so the offshore team gets the real workflow rather than the simplified version that surfaces gaps in week two of go-live.',
+  mechanismIntro:
+    'Ledgerium captures a client process before offshore handoff by recording the real cross-system steps during transition, so the delivery team gets the workflow instead of the simplified summary that surfaces gaps in week two of go-live.',
+  keyTakeaways: [
+    'BPO operations teams run tight transition timelines where the client\'s real process lives in tribal knowledge that calls capture incompletely.',
+    'Gaps in handoff documentation surface during go-live rather than before, because the lookups and checks a client mentions in passing never make the transition pack.',
+    'A single recording captures the steps across each client system, so the delivery team follows the full cross-system workflow from day one.',
+    'Re-recording as the client\'s process and systems change keeps the delivery team on current documentation instead of a stale transition pack.',
+  ],
   honestLimitation:
     'Ledgerium documents browser-based work. Client-specific judgment, phone-based steps, and desktop-only systems still need a person to record the context for the delivery team.',
   whoThisIsFor:
