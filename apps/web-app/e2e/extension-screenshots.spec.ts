@@ -82,6 +82,7 @@ for (const screen of SCREENS) {
   test(`screenshot: ${screen.name}`, async ({ browser }) => {
     const context = await browser.newContext({
       viewport: SIDE_PANEL_VIEWPORT,
+      deviceScaleFactor: 2,
     });
     const page = await context.newPage();
 
