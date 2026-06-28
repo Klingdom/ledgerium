@@ -40,7 +40,15 @@ function webPage(page: SeoPage): JsonLdObject {
     url: pageUrl(page),
     inLanguage: 'en',
     isPartOf: { '@type': 'WebSite', '@id': `${SITE_CONFIG.url}/#website` },
+    datePublished: page.updatedAt,
     dateModified: page.updatedAt,
+    // Entity anchoring for answer engines.
+    about: { '@type': 'Thing', name: page.primaryKeyword },
+    ...(page.secondaryKeywords.length > 0
+      ? { mentions: page.secondaryKeywords.map((k) => ({ '@type': 'Thing', name: k })) }
+      : {}),
+    // Voice / answer-engine extraction targets (the answer-first lede + data callout).
+    speakable: { '@type': 'SpeakableSpecification', cssSelector: ['.seo-answer', '.seo-datapoint'] },
   };
 }
 

@@ -2,6 +2,7 @@ import type { CompetitorsPage } from '@/content/types';
 import { SeoPageView } from './SeoPageView';
 import {
   Breadcrumbs,
+  DataPointCallout,
   SeoHero,
   ProseSection,
   MidCta,
@@ -10,6 +11,7 @@ import {
   HonestLimitation,
   RelatedPagesGrid,
   FinalCta,
+  KeyTakeaways,
 } from './Blocks';
 import { FaqBlock } from './FaqBlock';
 
@@ -18,7 +20,9 @@ export function CompetitorsPageView({ page }: { page: CompetitorsPage }) {
     <>
       <SeoPageView pageType={page.type} slug={page.slug} />
       <Breadcrumbs page={page} />
-      <SeoHero eyebrow={page.eyebrow} h1={page.h1} shortAnswer={page.shortAnswer} ctaLabel="Start free" location="competitors_hero" />
+      <SeoHero eyebrow={page.eyebrow} h1={page.h1} shortAnswer={page.shortAnswer} ctaLabel="Start free" location="competitors_hero" author={page.author} updatedAt={page.updatedAt} />
+      <DataPointCallout text={page.originalDataPoint} />
+      <KeyTakeaways items={page.keyTakeaways} />
 
       <ProseSection title="The landscape">
         <p>{page.landscape}</p>
@@ -60,7 +64,7 @@ export function CompetitorsPageView({ page }: { page: CompetitorsPage }) {
 
       <BulletList title="How to evaluate this space" items={page.evaluationCriteria} />
 
-      <HowLedgeriumCaptures />
+      <HowLedgeriumCaptures introSentence={page.mechanismIntro} />
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />

@@ -44,6 +44,15 @@ const manufacturing: IndustryPage = {
     'Ledgerium captures browser-based ERP and office work. Machine and shop-floor steps outside the browser need separate capture.',
   originalDataPoint:
     'Manufacturing ERP workflows differ by role and plant configuration. Ledgerium records the process as the actual role performs it, so the SOP reflects what that user sees rather than an administrator’s view.',
+  mechanismIntro:
+    'Manufacturing surrounds production with ERP and office workflows like order processing and quality records, and Ledgerium records the process as the actual role performs it so the SOP reflects what that user sees rather than a standard administrator view.',
+  keyTakeaways: [
+    'Manufacturing applies strong process rigor on the shop floor while the surrounding ERP and office workflows stay frequently undocumented.',
+    'ERP steps differ by role and plant configuration, so generic guides rarely match what a given plant actually does.',
+    'Recording a long-tenured employee captures retiring-staff knowledge as structured SOPs, including the shortcuts taken automatically.',
+    'Ledgerium produces evidence-linked, traceable documentation showing that the documented process is the one actually followed for audits and quality.',
+    'Recording the role-specific process captures the real ERP steps that a guide written from an admin view leaves out.',
+  ],
   faqs: [
     {
       q: 'How do I document manufacturing workflows?',
@@ -114,6 +123,15 @@ const healthcare: IndustryPage = {
     'Ledgerium captures browser-based admin work and records no screenshots or PHI. Clinical decisions and steps inside dedicated medical devices need separate handling.',
   originalDataPoint:
     'Healthcare admin workflows vary by payer and clinic configuration. Ledgerium records the process as the actual role performs it and captures no PHI, so the SOP reflects the real steps without exposing patient data.',
+  mechanismIntro:
+    'Healthcare back-office work like admissions, billing, and prior authorization varies by clinic and payer, and Ledgerium records the real admin steps while capturing no screenshots and no PHI, so documentation reflects the office without exposing patient data.',
+  keyTakeaways: [
+    'Healthcare admin workflows differ by clinic, payer, and role, so generic guides rarely match a given front desk or billing team.',
+    'Ledgerium records workflow steps and structure but no screenshots or PHI, so processes are documented without exposing patient data.',
+    'Procedures that change with payer rules and rarely get updated leave staff following steps no document describes.',
+    'Evidence-linked SOPs traceable to the recorded steps support HIPAA controls by showing staff follow the approved procedure.',
+    'Knowledge held by experienced front-desk and billing staff becomes structured documentation before it leaves with them.',
+  ],
   faqs: [
     {
       q: 'How do I document healthcare admin workflows?',
@@ -184,6 +202,15 @@ const insurance: IndustryPage = {
     'Ledgerium captures browser-based claims and policy work. Phone calls, field inspections, and steps outside the browser need separate capture.',
   originalDataPoint:
     'Insurance claims and underwriting workflows vary by line of business and role. Ledgerium records the process as the actual adjuster or underwriter performs it, so the SOP reflects the real steps rather than a manual’s assumptions.',
+  mechanismIntro:
+    'Insurance runs claims intake, underwriting, and policy administration across legacy and modern systems, and Ledgerium records the process as the actual adjuster or underwriter performs it so the SOP reflects the real steps rather than the assumptions in a manual.',
+  keyTakeaways: [
+    'Insurance steps differ by line of business and role, so a manual written for one team rarely reflects how another handles the work.',
+    'Claims, underwriting, and policy administration span legacy and modern systems, leaving procedures documented from memory and out of date.',
+    'Recording an experienced adjuster captures judgment-driven steps as structured SOPs before that person moves on.',
+    'Evidence-linked documentation traceable to the recorded steps shows consistent claims handling for regulatory and audit review.',
+    'Recording the live process keeps claims and underwriting documentation tied to how the work is actually done now.',
+  ],
   faqs: [
     {
       q: 'How do I document insurance claims and underwriting workflows?',
@@ -254,6 +281,15 @@ const banking: IndustryPage = {
     'Ledgerium captures browser-based banking operations work. Core mainframe terminals and steps outside the browser need separate capture.',
   originalDataPoint:
     'Banking operations workflows vary by product and role. Ledgerium records the process as the actual operator performs it, so the SOP reflects the real steps and provides audit evidence rather than an idealized procedure.',
+  mechanismIntro:
+    'Banking onboarding, KYC, and back-office operations run under heavy controls but vary by team, and Ledgerium records the process as the actual operator performs it so the SOP provides audit evidence rather than an idealized procedure.',
+  keyTakeaways: [
+    'Banking system steps differ by product and role, so a generic procedure rarely matches how a given operations group works.',
+    'Onboarding, KYC, and back-office operations are often documented from memory and vary by team despite heavy controls.',
+    'Evidence-linked documentation traceable to the recorded steps supports KYC, AML, and SOX reviews by showing the process actually followed.',
+    'Recording a long-tenured operator turns operations knowledge into structured SOPs before that person leaves.',
+    'Recording the live process keeps banking operations documentation tied to current practice as systems and rules change.',
+  ],
   faqs: [
     {
       q: 'How do I document banking and operations workflows?',
@@ -324,6 +360,15 @@ const saas: IndustryPage = {
     'Ledgerium captures browser-based SaaS workflows. Steps inside desktop apps or external partner systems need separate capture.',
   originalDataPoint:
     'SaaS processes change with each release and rarely get re-documented. Ledgerium records how the workflow runs today across your tools, so the SOP reflects current practice rather than an onboarding doc written months ago.',
+  mechanismIntro:
+    'SaaS teams run onboarding, support, and RevOps across the CRM, support desk, and billing tools that change every release, and Ledgerium records how each workflow runs today so the SOP reflects current practice rather than a doc written months ago.',
+  keyTakeaways: [
+    'SaaS processes change with nearly every release, so documentation written once is stale within weeks.',
+    'Onboarding, support, and RevOps steps span the CRM, support desk, and billing tools, leaving knowledge with early employees and team leads.',
+    'Re-recording a workflow after a release refreshes the SOP from how it actually runs now instead of from memory.',
+    'Ledgerium records the steps across multiple tools in one workflow, so the SOP reflects the full path rather than one system in isolation.',
+    'Evidence-linked documentation traceable to the recorded steps shows consistent handling for SOC 2 and security reviews.',
+  ],
   faqs: [
     {
       q: 'How do I document SaaS onboarding and support workflows?',
@@ -394,6 +439,15 @@ const professionalServices: IndustryPage = {
     'Ledgerium captures browser-based delivery and billing work. Client meetings and steps outside the browser need separate capture.',
   originalDataPoint:
     'Professional services delivery varies by client and consultant. Ledgerium records the process as the actual person performs it, so the SOP reflects how work is really done and shortens ramp time for new hires.',
+  mechanismIntro:
+    'Professional services firms run client onboarding, delivery, and billing that vary by client and partner, and Ledgerium records the process as the actual person performs it so the SOP reflects how work is really done and shortens new-hire ramp.',
+  keyTakeaways: [
+    'Professional services steps vary by client, partner, and engagement, and the real path is rarely written down to match the work.',
+    'New hires ramp slowly because onboarding relies on shadowing rather than written SOPs.',
+    'An SOP built from how an experienced colleague works shortens ramp time beyond watching over a shoulder.',
+    'Recording an experienced consultant turns their approach into structured SOPs before they roll off, including automatic shortcuts.',
+    'Recording the real process per workflow makes client-driven variation visible and easier to standardize.',
+  ],
   faqs: [
     {
       q: 'How do I document professional services workflows?',
@@ -464,6 +518,15 @@ const government: IndustryPage = {
     'Ledgerium captures browser-based case and records work. Paper-based steps and legacy terminals outside the browser need separate capture.',
   originalDataPoint:
     'Public sector workflows vary by office and legacy system. Ledgerium records the process as the actual caseworker performs it, so the SOP reflects the real steps and provides evidence the procedure is followed.',
+  mechanismIntro:
+    'Public sector teams process cases, approvals, and records through defined procedures that vary by office, and Ledgerium records the process as the actual caseworker performs it so the SOP provides evidence the procedure is followed.',
+  keyTakeaways: [
+    'Public sector system steps vary by office and legacy system, so the written procedure and the real process frequently diverge.',
+    'Staff turnover and long-running legacy systems leave case, approval, and records steps documented from memory.',
+    'Evidence-linked documentation traceable to the recorded steps shows consistent case handling for audits and public accountability.',
+    'Recording a long-tenured public servant captures their knowledge as structured SOPs before they retire.',
+    'Recording the live process keeps documentation tied to how the work is actually done as policy changes.',
+  ],
   faqs: [
     {
       q: 'How do I document public sector workflows?',
@@ -534,6 +597,15 @@ const education: IndustryPage = {
     'Ledgerium captures browser-based admissions and administrative work. In-person steps and offline systems need separate capture.',
   originalDataPoint:
     'Education admin workflows shift each term and span several systems. Ledgerium records the process as the actual administrator performs it, so the SOP reflects the current steps rather than a handbook written for a past cycle.',
+  mechanismIntro:
+    'Education institutions run admissions, enrollment, and records across a student information system and supporting tools that shift each term, and Ledgerium records the process as the actual administrator performs it so the SOP reflects the current steps rather than a past-cycle handbook.',
+  keyTakeaways: [
+    'Education admin steps change each term and intake cycle, so the written guide rarely matches the current system.',
+    'Admissions, enrollment, and records workflows span the student system and supporting tools, leaving knowledge with experienced staff.',
+    'Re-recording a workflow at the start of a cycle refreshes the SOP from how it actually runs now instead of from memory.',
+    'Ledgerium records steps across the student information system and supporting tools in one workflow, so the SOP reflects the full path.',
+    'Evidence-linked documentation traceable to the recorded steps supports accreditation reviews of student records handling.',
+  ],
   faqs: [
     {
       q: 'How do I document admissions and enrollment workflows?',

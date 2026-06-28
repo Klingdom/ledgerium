@@ -2,6 +2,7 @@ import type { WorkflowPage } from '@/content/types';
 import { SeoPageView } from './SeoPageView';
 import {
   Breadcrumbs,
+  DataPointCallout,
   SeoHero,
   ProseSection,
   OldWayLedgeriumWay,
@@ -11,6 +12,7 @@ import {
   HonestLimitation,
   RelatedPagesGrid,
   FinalCta,
+  KeyTakeaways,
 } from './Blocks';
 import { FaqBlock } from './FaqBlock';
 
@@ -19,7 +21,9 @@ export function WorkflowPageView({ page }: { page: WorkflowPage }) {
     <>
       <SeoPageView pageType={page.type} slug={page.slug} />
       <Breadcrumbs page={page} />
-      <SeoHero eyebrow={page.eyebrow} h1={page.h1} shortAnswer={page.shortAnswer} ctaLabel="Capture this workflow once" location="workflow_hero" />
+      <SeoHero eyebrow={page.eyebrow} h1={page.h1} shortAnswer={page.shortAnswer} ctaLabel="Capture this workflow once" location="workflow_hero" author={page.author} updatedAt={page.updatedAt} />
+      <DataPointCallout text={page.originalDataPoint} />
+      <KeyTakeaways items={page.keyTakeaways} />
 
       <ProseSection title="Who uses this workflow">
         <p>{page.whoUsesIt}</p>
@@ -64,7 +68,7 @@ export function WorkflowPageView({ page }: { page: WorkflowPage }) {
       <BulletList title="Common mistakes" items={page.commonMistakes} />
       <BulletList title="AI and automation opportunities" items={page.aiOpportunities} />
 
-      <HowLedgeriumCaptures />
+      <HowLedgeriumCaptures introSentence={page.mechanismIntro} />
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />

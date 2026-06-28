@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import Link from 'next/link';
 import { TrackedLink } from '@/components/TrackedLink';
-import DemoDashboard from '@/components/demo/DemoDashboard';
 import RealProductDemo from '@/components/demo/RealProductDemo';
 import {
   ArrowRight,
@@ -11,32 +9,76 @@ import {
   FileText,
   Map,
   Library,
-  Clock,
-  Users,
   TrendingUp,
   BookOpen,
   Shield,
   Zap,
   CheckCircle,
   MousePointer2,
+  Sparkles,
+  GraduationCap,
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Ledgerium AI — Record Real Workflows. Get SOPs Instantly.',
+  title: 'Ledgerium AI — Record Real Workflows. Get SOPs, Process Maps & AI Insights.',
   description:
-    'Record how work actually happens in the browser. Generate SOPs, process maps, and workflow documentation in minutes — not weeks. Built for ops teams who maintain SOPs for internal tools.',
+    'Record how work actually happens in the browser. Get structured SOPs and process maps, see which workflows are ready for AI, and turn expert work into training docs — in minutes, not weeks.',
   openGraph: {
-    title: 'Ledgerium AI — Record Real Workflows. Get SOPs Instantly.',
-    description: 'Your SOP says 5 steps. Your team takes 17. Record what actually happens and get documentation automatically.',
+    title: 'Ledgerium AI — Record Real Workflows. Get SOPs, Process Maps & AI Insights.',
+    description:
+      'Your SOP says 5 steps. Your team takes 17. Record what actually happens and get SOPs, process maps, AI-readiness scores, and training docs automatically.',
   },
 };
+
+/* ── The three things every recording produces ──────────────────────────── */
+
+const HERO_OUTCOMES = [
+  {
+    label: 'Process Map',
+    src: '/img/demo/workflow-view.png',
+    alt: 'Process map built from observed step transitions',
+  },
+  {
+    label: 'SOP',
+    src: '/img/demo/sop-view.png',
+    alt: 'Generated standard operating procedure with evidence citations',
+  },
+  {
+    label: 'AI Opportunity Report',
+    src: '/img/demo/report-view.png',
+    alt: 'Workflow report with AI-readiness scoring and cycle-time analysis',
+  },
+];
+
+/* ── Three core value props ─────────────────────────────────────────────── */
+
+const VALUE_PROPS = [
+  {
+    icon: Map,
+    eyebrow: 'Capture once',
+    title: 'Process maps & SOPs',
+    desc: 'Record any browser workflow once. Get a step-by-step SOP and a visual process map built from what actually happened — not from memory.',
+  },
+  {
+    icon: Sparkles,
+    eyebrow: 'Find the leverage',
+    title: 'AI use-case identification',
+    desc: 'Every workflow is scored for AI readiness — based on step volume, run time, and how many systems it touches. See which workflows are candidates for automation, from your real process data, not a guess.',
+  },
+  {
+    icon: GraduationCap,
+    eyebrow: 'Keep the knowledge',
+    title: 'Skill & expertise documentation',
+    desc: 'Turn an expert’s recording into onboarding and training material automatically. Capture how your best people actually work before that knowledge walks out the door.',
+  },
+];
 
 export default function HomePage() {
   return (
     <>
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 pt-20 pb-24 sm:pt-28 sm:pb-32">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 pt-20 pb-20 sm:pt-28 sm:pb-24">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-[var(--content-primary)] leading-[1.1] tracking-tight">
               Your SOP says 5 steps.{' '}
@@ -44,9 +86,9 @@ export default function HomePage() {
               <span className="text-brand-600">Your team takes 17.</span>
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-[#e2e8f0] leading-relaxed max-w-2xl mx-auto">
-              Record real workflows in the browser. Get structured SOPs,
-              process maps, and documentation — instantly. No interviews.
-              No workshops. No guessing.
+              Record real workflows in the browser. Get structured SOPs and
+              process maps, see which workflows are ready for AI, and turn expert
+              work into training docs — automatically.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
               <TrackedLink
@@ -73,23 +115,38 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Hero product screenshot — real current-state workflow library */}
-          <div className="mt-16 mx-auto max-w-5xl px-4 sm:px-6">
-            <div className="rounded-xl border border-[var(--border-default)] overflow-hidden shadow-lg shadow-[var(--border-default)]/50 bg-[var(--surface-elevated)]">
-              <Image
-                src="/img/demo/dashboard.png"
-                alt="Ledgerium AI workflow library showing recorded workflows with cycle-time, run counts, and process health scores"
-                width={900}
-                height={560}
-                className="w-full h-auto"
-                priority
-              />
+          {/* Hero outcome row — the three things one recording produces */}
+          <div className="mt-14 mx-auto max-w-5xl px-2 sm:px-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+              {HERO_OUTCOMES.map(({ label, src, alt }, index) => (
+                <figure key={label} className="group">
+                  <div className="rounded-xl border border-[var(--border-default)] overflow-hidden shadow-md shadow-black/20 bg-[var(--surface-elevated)] transition-transform group-hover:-translate-y-0.5">
+                    <Image
+                      src={src}
+                      alt={alt}
+                      width={480}
+                      height={300}
+                      sizes="(max-width: 640px) 100vw, 33vw"
+                      className="w-full h-40 object-cover object-top sm:h-auto sm:object-contain block"
+                      priority={index === 0}
+                    />
+                  </div>
+                  <figcaption className="mt-2.5 text-center text-xs font-semibold text-[var(--content-secondary)]">
+                    {label}
+                  </figcaption>
+                </figure>
+              ))}
             </div>
-            <p className="text-center text-xs text-[var(--content-tertiary)] mt-3">
-              Your workflow library — every number comes from a real recording, not an estimate.{' '}
-              <Link href="/demo" className="text-brand-600 hover:text-brand-700 font-medium">
+            <p className="text-center text-xs text-[var(--content-tertiary)] mt-5">
+              One recording. Three outputs — every detail traces back to a real, observed event.{' '}
+              <TrackedLink
+                href="/demo"
+                event="cta_clicked"
+                properties={{ location: 'homepage_hero_caption', destination: '/demo' }}
+                className="text-brand-600 hover:text-brand-700 font-medium"
+              >
                 Walk through the product &rarr;
-              </Link>
+              </TrackedLink>
             </p>
           </div>
         </div>
@@ -109,33 +166,38 @@ export default function HomePage() {
             ].map(({ icon: Icon, label }) => (
               <div key={label} className="flex items-center justify-center gap-2.5 text-[var(--content-secondary)]">
                 <Icon className="h-4 w-4 flex-shrink-0 text-brand-600" />
-                <span className="text-sm font-medium whitespace-nowrap">{label}</span>
+                <span className="text-sm font-medium text-center sm:whitespace-nowrap">{label}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Try the demo (live dashboard iframe) ─────────────────────────── */}
+      {/* ── Three core value props (fast-scan) ────────────────────────────── */}
       <section className="border-b border-[var(--border-default)] bg-[var(--surface-secondary)] py-20">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <p className="text-center text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
-            Try it without signing up
-          </p>
-          <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-3">
-            The dashboard you get after your first recording
-          </h2>
-          <p className="text-center text-[#e2e8f0] leading-relaxed mb-12 max-w-2xl mx-auto">
-            Real sample workflows with evidence-linked metrics — the same workflow library you get from day one. Every cycle time and run count is measured from an actual recording.
-          </p>
-          {/* Live, interactive workflow library demo (real components + sample data) */}
-          <RealProductDemo />
-          <p className="text-center text-xs text-[var(--content-tertiary)] mt-3">
-            Every number shown comes from a real recording. Same input, same output — always.{' '}
-            <Link href="/demo" className="text-brand-600 hover:text-brand-700 font-medium">
-              See all four views &rarr;
-            </Link>
-          </p>
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="max-w-2xl mx-auto text-center mb-12">
+            <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+              Why record your workflows
+            </p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
+              One recording. Three kinds of value.
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {VALUE_PROPS.map(({ icon: Icon, eyebrow, title, desc }) => (
+              <div key={title} className="card p-7 flex flex-col gap-3 h-full">
+                <div className="w-11 h-11 rounded-xl bg-brand-900/15 border border-brand-700/30 flex items-center justify-center">
+                  <Icon className="h-5 w-5 text-brand-600" />
+                </div>
+                <p className="text-[11px] font-bold text-brand-600 uppercase tracking-widest">
+                  {eyebrow}
+                </p>
+                <h3 className="text-lg font-semibold text-[var(--content-primary)] -mt-1">{title}</h3>
+                <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -166,7 +228,7 @@ export default function HomePage() {
                 step: '3',
                 icon: FileText,
                 title: 'Use',
-                desc: 'Get a structured SOP, visual process map, and exportable workflow report. Save it to your library, search it later, share it with your team.',
+                desc: 'Get a structured SOP, a visual process map, and a report that scores each workflow for AI readiness. Save it to your library, search it later, share it with your team.',
               },
             ].map(({ step, icon: Icon, title, desc }) => (
               <div key={step} className="text-center">
@@ -184,8 +246,40 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Try the demo (live dashboard, moved below context) ─────────────── */}
+      <section className="border-b border-[var(--border-default)] bg-[var(--surface-secondary)] py-20">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <p className="text-center text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+            Try it without signing up
+          </p>
+          <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-3">
+            The workflow library you get after your first recording
+          </h2>
+          <p className="text-center text-[#e2e8f0] leading-relaxed mb-6 max-w-2xl mx-auto">
+            Real sample workflows with evidence-linked metrics. Every cycle time, run count, and AI-readiness score is measured from an actual recording.
+          </p>
+          <div className="text-xs font-medium text-brand-600 mb-8 flex items-center justify-center gap-1.5">
+            <MousePointer2 className="h-3.5 w-3.5" />
+            Click any workflow row to open its SOP, process map, and report.
+          </div>
+          {/* Live, interactive workflow library demo (real components + sample data) */}
+          <RealProductDemo />
+          <p className="text-center text-xs text-[var(--content-tertiary)] mt-3">
+            Every number shown comes from a real recording. Same input, same output — always.{' '}
+            <TrackedLink
+              href="/demo"
+              event="cta_clicked"
+              properties={{ location: 'homepage_demo_footer', destination: '/demo' }}
+              className="text-brand-600 hover:text-brand-700 font-medium"
+            >
+              See all four views &rarr;
+            </TrackedLink>
+          </p>
+        </div>
+      </section>
+
       {/* ── Example Output ────────────────────────────────────────────────── */}
-      <section className="py-24 bg-[var(--surface-secondary)] border-b border-[var(--border-default)]">
+      <section className="py-24 bg-[var(--surface-elevated)] border-b border-[var(--border-default)]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left: text */}
@@ -199,13 +293,15 @@ export default function HomePage() {
               <p className="text-[#e2e8f0] leading-relaxed mb-6">
                 This SOP was generated automatically from a real browser recording — every instruction traces back to an observed event. Nothing was written by hand, nothing was rewritten by AI.
               </p>
-              <Link
+              <TrackedLink
                 href="/demo"
+                event="cta_clicked"
+                properties={{ location: 'homepage_sop_example', destination: '/demo' }}
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:text-brand-500 transition-colors"
               >
                 Walk through all four views
                 <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
+              </TrackedLink>
             </div>
 
             {/* Right: framed real SOP screenshot */}
@@ -231,6 +327,7 @@ export default function HomePage() {
                   alt="Example generated SOP with step-by-step instructions, system context, and evidence citations"
                   width={900}
                   height={560}
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                   className="w-full h-auto block"
                   loading="lazy"
                 />
@@ -244,7 +341,7 @@ export default function HomePage() {
       </section>
 
       {/* ── What you get ──────────────────────────────────────────────────── */}
-      <section className="py-24 bg-[var(--surface-elevated)]">
+      <section className="py-24 bg-[var(--surface-secondary)] border-b border-[var(--border-default)]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-14">
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
@@ -258,14 +355,14 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
-              { icon: Eye, title: 'Workflow Steps', desc: 'Structured steps with timing, confidence, tools, and evidence — derived from real browser activity.' },
-              { icon: FileText, title: 'Standard Operating Procedures', desc: 'Step-by-step instructions with event-level detail. Prerequisites, inputs, outputs, and completion criteria included.' },
-              { icon: Map, title: 'Process Maps', desc: 'Visual workflow diagrams with phases, system boundaries, and transition labels. Ready to review or export.' },
-              { icon: Library, title: 'Workflow Library', desc: 'Every workflow saved to a persistent, searchable collection. Find any workflow by title, tool, or date.' },
-              { icon: Clock, title: 'History & Metrics', desc: 'Duration, step count, phase count, and confidence for every recording. Track how workflows vary over time.' },
+              { icon: FileText, title: 'Standard Operating Procedures', desc: 'Step-by-step instructions with event-level detail. Prerequisites, inputs, outputs, and completion criteria — generated from what was observed.' },
+              { icon: Map, title: 'Process Maps', desc: 'Visual workflow diagrams with phases, system boundaries, and transition labels. Built from observed transitions, ready to review or export.' },
+              { icon: Sparkles, title: 'AI Opportunity Scoring', desc: 'Every workflow scored for AI readiness on step volume, run time, and system breadth — the signals that show where AI could take over.' },
+              { icon: GraduationCap, title: 'Skill & Training Docs', desc: 'Generated SOPs double as onboarding material. New hires follow the real steps an expert took — not an outdated guide written from memory.' },
+              { icon: Library, title: 'Workflow Library', desc: 'Every workflow saved to a persistent, searchable collection with cycle-time and run history. Find any workflow by title, tool, or date.' },
               { icon: CheckCircle, title: 'Reports & Export', desc: 'Download workflow reports, SOP documents, and raw data. Share any SOP via a public link — recipients see the output and can sign up free.' },
             ].map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="flex gap-4 p-5 rounded-xl border border-transparent hover:border-[var(--border-default)] hover:bg-[var(--surface-secondary)] transition-all">
+              <div key={title} className="flex gap-4 p-5 rounded-xl border border-transparent hover:border-[var(--border-default)] hover:bg-[var(--surface-elevated)] transition-all">
                 <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-brand-900/15 flex items-center justify-center">
                   <Icon className="h-4 w-4 text-brand-600" />
                 </div>
@@ -280,7 +377,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Built Different ───────────────────────────────────────────────── */}
-      <section className="py-24 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
+      <section className="py-24 bg-[var(--surface-elevated)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-14">
             <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
@@ -356,17 +453,17 @@ export default function HomePage() {
       <section className="py-20 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-4">
-            Built for teams that maintain SOPs
+            Built for teams that run on browser-based work
           </h2>
           <p className="text-center text-[#e2e8f0] mb-12 max-w-2xl mx-auto">
-            If your team documents workflows in browser-based tools — ERP, CRM, ticketing, HR systems — Ledgerium records what actually happens and generates the documentation for you.
+            If your team works in browser-based tools — ERP, CRM, ticketing, HR systems — Ledgerium records what actually happens and turns it into documentation, AI-readiness insight, and training material.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
               { icon: TrendingUp, title: 'Operations Teams', desc: 'Record your ERP, CRM, and internal tool workflows. Get SOPs that match how work actually happens — not how someone remembers it.' },
               { icon: BookOpen, title: 'Training & Onboarding', desc: 'Capture expert workflows and turn them into onboarding docs instantly. New hires follow real steps, not outdated guides.' },
+              { icon: Sparkles, title: 'AI & Automation Leads', desc: 'See which workflows are candidates for AI — scored from real process data — so you target automation where it actually pays off.' },
               { icon: Shield, title: 'Compliance & Audit', desc: 'Every step traces to observed evidence. Generate audit-ready process documentation with full traceability.' },
-              { icon: Users, title: 'Process Improvement', desc: 'See where the real process diverges from the documented one. Find the steps that take the longest and the workarounds nobody wrote down.' },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="card p-6 hover:shadow-md transition-shadow">
                 <Icon className="h-5 w-5 text-brand-600 mb-3" />
@@ -406,8 +503,8 @@ export default function HomePage() {
             Start recording what actually happens.
           </h2>
           <p className="mt-5 text-[#e2e8f0] leading-relaxed">
-            Install the extension, record a workflow, and get structured output
-            in under 5 minutes. Free to start.
+            Install the extension, record a workflow, and get a SOP, process map,
+            and AI-readiness report in under 5 minutes. Free to start.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <TrackedLink
@@ -419,9 +516,14 @@ export default function HomePage() {
               Create free account
               <ArrowRight className="h-4 w-4" />
             </TrackedLink>
-            <Link href="/install" className="btn-secondary text-base px-7 py-3.5">
+            <TrackedLink
+              href="/install"
+              event="cta_clicked"
+              properties={{ location: 'homepage_bottom_cta', destination: '/install' }}
+              className="btn-secondary text-base px-7 py-3.5"
+            >
               Install extension
-            </Link>
+            </TrackedLink>
           </div>
         </div>
       </section>

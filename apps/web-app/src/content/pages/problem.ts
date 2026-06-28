@@ -19,6 +19,14 @@ const documentProcess: ProblemPage = {
   related: ['problem:how-to-create-sops-automatically', 'persona:operations-managers', 'compare:manual-sop-documentation'],
   originalDataPoint:
     'Recording a process captures the steps between systems, the lookups, copies, and manual checks, that interviews miss. These in-between steps are usually where the undocumented work and rework actually live.',
+  mechanismIntro:
+    'Ledgerium documents a business process by recording one real run in the browser, including the lookups and copies between systems, so the generated SOP and process map show the in-between steps that interviews leave out.',
+  keyTakeaways: [
+    'Business process documentation goes stale because it is written from memory at a single point in time, missing the exceptions and workarounds.',
+    'The undocumented work usually lives in the in-between steps, the lookups, copies, and manual checks that move data between systems.',
+    'Recording one real run captures the steps a process owner performs automatically and would never think to describe in an interview.',
+    'Ledgerium generates the SOP and process map from the recording, so re-recording after a change refreshes the documentation instead of requiring a rewrite.',
+  ],
   honestLimitation:
     'Ledgerium documents browser-based work. Steps done in desktop software or offline still need a person to add context to the recording.',
   whyItHappens:
@@ -89,6 +97,14 @@ const createSops: ProblemPage = {
   related: ['problem:how-to-document-a-business-process', 'compare:tango', 'persona:operations-managers'],
   originalDataPoint:
     'Because the SOP is generated from a recording, updating it after a process change is a re-record, not a rewrite. The manual equivalent is editing a document by hand every time the process drifts.',
+  mechanismIntro:
+    'Ledgerium creates an SOP automatically by recording the actual clicks, inputs, and decisions of a real workflow, so the generated procedure reflects the steps people perform rather than the steps an author remembers.',
+  keyTakeaways: [
+    'Automatic SOP creation works by generating the procedure from a recording of real work, so the SOP captures actual clicks, inputs, and decisions.',
+    'Hand-written SOPs reflect the author\'s memory and are often never written or left to rot while the team follows the undocumented process.',
+    'Updating a generated SOP after a process change is a re-record, not a line-by-line rewrite of a document.',
+    'Repeatable browser-based workflows like approvals, onboarding, and back-office routines are the strongest fit for automatic SOPs.',
+  ],
   honestLimitation:
     'A generated SOP is an accurate draft of the observed steps. A process owner should still review it to add rationale, approvals, and any offline context.',
   whyItHappens:
@@ -159,6 +175,15 @@ const aiOpportunities: ProblemPage = {
   related: ['problem:how-to-find-process-waste', 'persona:process-excellence-leads', 'workflow:invoice-approval-workflow'],
   originalDataPoint:
     'Ledgerium scores automation candidates from the recorded process by combining how often a step repeats with how much time it takes, so the highest-value candidate is identified from observed data rather than from opinion.',
+  mechanismIntro:
+    'Ledgerium identifies AI automation opportunities by recording how a process really runs and scoring each step on repetition and time, so the report flags the repetitive, rule-based steps that are the strongest automation candidates.',
+  keyTakeaways: [
+    'AI automation opportunities are the repetitive, rule-based, high-volume steps with clear inputs and outputs, while judgment and exceptions stay with people.',
+    'Teams pick automation targets from opinion and visibility, so they automate the loud task instead of the costly one.',
+    'Recording a real run produces a measured baseline that shows which step actually consumes the most time.',
+    'Ledgerium scores candidates by combining how often a step repeats with how much time it takes, so the highest-value target comes from data.',
+    'Re-recording after automating confirms the time saved against the original baseline.',
+  ],
   honestLimitation:
     'Ledgerium surfaces and scores opportunities from observed browser work. Deciding what to actually automate still needs human judgment about risk and exceptions.',
   whyItHappens:
@@ -229,6 +254,14 @@ const reduceOnboarding: ProblemPage = {
   related: ['problem:how-to-capture-tribal-knowledge', 'persona:operations-managers', 'workflow:customer-onboarding-workflow'],
   originalDataPoint:
     'Because Ledgerium captures the real steps including exceptions, new hires follow what the job actually requires rather than a happy-path document, which removes most of the trial-and-error that slows ramp time.',
+  mechanismIntro:
+    'Ledgerium shortens onboarding by recording the workflows a new hire must learn, including the exceptions, and turning them into SOPs and process maps trainees can follow step by step rather than learning by trial and error.',
+  keyTakeaways: [
+    'Onboarding is slow because the real process lives in people\'s heads and existing SOPs describe an ideal no one follows.',
+    'Most ramp time is lost to trial-and-error shadowing, which is inconsistent and pulls experienced staff away from their work.',
+    'Recording the key workflows captures the exceptions and workarounds new hires usually learn the hard way.',
+    'SOPs generated from real recordings are consistent across hires and free experienced staff from constant repeat questions.',
+  ],
   honestLimitation:
     'Generated SOPs cover the observed browser steps. Judgment, culture, and offline context still need a person to teach.',
   whyItHappens:
@@ -299,6 +332,15 @@ const tribalKnowledge: ProblemPage = {
   related: ['problem:how-to-document-a-business-process', 'persona:ma-integration-leads', 'workflow:month-end-close-workflow'],
   originalDataPoint:
     'Experts perform shortcuts and exception handling automatically and rarely think to mention them in an interview. Ledgerium records those steps as they happen, so the captured knowledge includes the parts the expert would never have described.',
+  mechanismIntro:
+    'Ledgerium captures tribal knowledge by recording an expert running their key processes, including the automatic shortcuts and exception handling, and generating SOPs and process maps that outlast the person.',
+  keyTakeaways: [
+    'Tribal knowledge is risky because a critical process lives in one person\'s head and disappears when they leave.',
+    'Much of what an expert knows is automatic and hard to articulate, so interviews miss the shortcuts and exception handling.',
+    'Recording captures the steps an expert performs without thinking, including the parts they would never describe.',
+    'Ledgerium generates documentation from the recording, so the process survives the person and key-person risk drops.',
+    'Capturing key processes while experts are still in role removes the risk of waiting until someone gives notice.',
+  ],
   honestLimitation:
     'Recording captures what the expert does in the browser. The why behind a judgment call still needs the expert to explain it as a note.',
   whyItHappens:
@@ -369,6 +411,14 @@ const currentStateMaps: ProblemPage = {
   related: ['problem:how-to-baseline-a-workflow', 'persona:business-analysts', 'compare:process-mining'],
   originalDataPoint:
     'A workshop map is an agreement about the process; a recorded map is a record of it. Ledgerium builds the current-state map from observed steps with timing, so it reflects the real path including the cross-system handoffs a whiteboard usually omits.',
+  mechanismIntro:
+    'Ledgerium creates a current state process map by recording the actual steps and timing of a real run, so the map shows the real path including the cross-system handoffs a workshop whiteboard smooths over.',
+  keyTakeaways: [
+    'A current state map is only useful if it reflects reality, and workshop maps drift toward the ideal process.',
+    'The real handoffs and exceptions get smoothed over when a map is drawn from memory in a room.',
+    'Recording one real run captures the cross-system handoffs and detours a whiteboard usually omits.',
+    'Ledgerium builds the map from observed steps with timing, so it can be trusted as a baseline for designing the future state.',
+  ],
   honestLimitation:
     'Ledgerium maps the browser-based steps. Physical or desktop-only steps in the process need separate observation to complete the map.',
   whyItHappens:
@@ -439,6 +489,15 @@ const baselineWorkflow: ProblemPage = {
   related: ['problem:how-to-find-process-waste', 'persona:process-excellence-leads', 'workflow:invoice-approval-workflow'],
   originalDataPoint:
     'Ledgerium captures variation between people running the same workflow, so a baseline includes not just the average time but how much the process differs run to run, which is the standardization gap most baselines never quantify.',
+  mechanismIntro:
+    'Ledgerium baselines a workflow by recording how it runs today and reporting timing, wait time, rework, and variation between people, so any later change can be measured against a real starting point rather than an impression.',
+  keyTakeaways: [
+    'A workflow baseline is the recorded starting point that lets an improvement be proven rather than asserted.',
+    'Stopwatch baselines miss most of the picture because they ignore wait time, rework, and variation between people.',
+    'Recording captures how much the same process differs run to run, the standardization gap most baselines never quantify.',
+    'Ledgerium reports timing split into work and wait alongside rework, so the starting point is precise.',
+    'Several runs give a more representative baseline and reveal variation, especially for high-volume work.',
+  ],
   honestLimitation:
     'A recorded baseline reflects the runs you capture. For high-volume processes, more recordings give a more representative baseline.',
   whyItHappens:
@@ -509,6 +568,14 @@ const findWaste: ProblemPage = {
   related: ['problem:how-to-baseline-a-workflow', 'problem:how-to-identify-ai-automation-opportunities', 'persona:process-excellence-leads'],
   originalDataPoint:
     'Ledgerium separates work time from wait time on every step, so the report shows that most waste is usually waiting and handoffs rather than the active task, which is the waste a stopwatch on the busy step never reveals.',
+  mechanismIntro:
+    'Ledgerium finds process waste by recording a real run and separating work time from wait time on every step, so the report shows that most waste is the waiting and handoffs rather than the active task.',
+  keyTakeaways: [
+    'Most process waste hides in wait time and handoffs, not the active work people actually feel.',
+    'Value-stream workshops surface the visible, annoying tasks and underestimate the costly wait time and rework.',
+    'Recording separates work from wait and flags rework, so the biggest waste becomes visible with evidence behind it.',
+    'Ledgerium ranks where time is actually lost, so teams target the costliest waste rather than the most visible one.',
+  ],
   honestLimitation:
     'Ledgerium measures the browser-based steps. Waste in physical or desktop-only steps needs separate observation to quantify.',
   whyItHappens:
@@ -579,6 +646,15 @@ const standardizeWorkflows: ProblemPage = {
   related: ['problem:how-to-reduce-process-variation', 'persona:process-excellence-leads', 'compare:process-street'],
   originalDataPoint:
     'Ledgerium captures how the same workflow differs run to run, so you can see exactly where two people diverge before you write a standard, instead of standardizing on a guess about which version is correct.',
+  mechanismIntro:
+    'Ledgerium standardizes a workflow by recording several people running it, surfacing where their runs diverge in steps and time, and generating an SOP from the agreed best version.',
+  keyTakeaways: [
+    'Standardization fails when the standard is written from memory and never matches what people actually do.',
+    'Workflows drift apart because each person learns them slightly differently and no documented standard reflects the real work.',
+    'Recording several runs shows exactly where two people diverge before a standard is written.',
+    'Ledgerium generates the SOP from the agreed run, including the legitimate exceptions, so the standard documents reality.',
+    'Re-recording later confirms whether people are still following the standard.',
+  ],
   honestLimitation:
     'Ledgerium standardizes the browser-based steps it observes. Deciding which version is the right standard still needs a person who understands the trade-offs.',
   whyItHappens:
@@ -649,6 +725,14 @@ const prepareForAudit: ProblemPage = {
   related: ['persona:compliance-teams', 'workflow:month-end-close-workflow', 'sopTemplate:invoice-approval-sop-template'],
   originalDataPoint:
     'Because Ledgerium documents from a real run, the SOP and the observed work are the same source, so the documentation an auditor reviews matches the practice they would see, which removes the most common audit finding.',
+  mechanismIntro:
+    'Ledgerium prepares a process for audit by recording how the work actually runs and generating the SOP and process map from that same source, so the documentation an auditor reviews matches the practice they would observe.',
+  keyTakeaways: [
+    'Audits go badly when the documentation describes an ideal process the team does not actually follow.',
+    'The most common audit finding is the gap between the written procedure and the real work.',
+    'Documenting from a real run makes the SOP and the observed work share one source, closing that gap before the auditor finds it.',
+    'Offline approvals and sign-offs still need their own records attached to the generated documentation.',
+  ],
   honestLimitation:
     'Ledgerium evidences the browser-based steps it records. Approvals, sign-offs, and offline controls still need their own records attached to the documentation.',
   whyItHappens:
@@ -719,6 +803,14 @@ const documentAcrossSystems: ProblemPage = {
   related: ['software:salesforce', 'persona:business-analysts', 'problem:how-to-document-a-business-process'],
   originalDataPoint:
     'Ledgerium records the steps between systems, the lookups, copies, and re-keying that connect one tool to the next, which is exactly the work each individual system has no record of and interviews routinely skip.',
+  mechanismIntro:
+    'Ledgerium documents a workflow across multiple systems by recording one real run that moves through every browser-based tool, so the SOP and process map capture the lookups, copies, and handoffs that connect the tools.',
+  keyTakeaways: [
+    'Multi-system processes are hard to document because no single tool sees the whole path from start to finish.',
+    'The glue work between tools, the lookups, copies, and re-keying, lives in nobody\'s system of record.',
+    'Recording one end-to-end run captures the handoffs where cross-system delays and errors usually start.',
+    'Ledgerium produces a single SOP and map of the whole path rather than disconnected fragments per tool.',
+  ],
   honestLimitation:
     'Ledgerium captures the browser-based systems in the path. Steps that happen in desktop software or outside the browser need a person to add them to the recording.',
   whyItHappens:
@@ -789,6 +881,15 @@ const keepSopsCurrent: ProblemPage = {
   related: ['problem:how-to-create-sops-automatically', 'persona:training-managers', 'compare:process-street'],
   originalDataPoint:
     'Because the SOP is generated from a recording, updating after a process change is a re-record, not a line-by-line rewrite, which removes the manual maintenance cost that is the real reason SOPs go stale.',
+  mechanismIntro:
+    'Ledgerium keeps an SOP current by generating it from a recording, so when the process changes a quick re-record regenerates the procedure instead of a manual line-by-line rewrite nobody owns.',
+  keyTakeaways: [
+    'SOPs go stale because hand-editing a document after every change is a job no one has time for.',
+    'An SOP generated from a recording updates by re-record, which removes the manual maintenance cost that causes staleness.',
+    'Manual review cadences slip and edits pile up, so the SOP library falls behind the real processes.',
+    'People trust an SOP again when it matches current work, which a fresh recording guarantees.',
+    'A process owner still reviews the regenerated SOP to confirm rationale and approvals stay correct.',
+  ],
   honestLimitation:
     'Re-recording refreshes the observed steps. A process owner still reviews the regenerated SOP to confirm rationale and approvals are still correct.',
   whyItHappens:
@@ -859,6 +960,15 @@ const measureImprovement: ProblemPage = {
   related: ['problem:how-to-baseline-a-workflow', 'persona:process-excellence-leads', 'workflow:expense-reporting-workflow'],
   originalDataPoint:
     'Ledgerium compares the same workflow before and after a change across timing, wait time, rework, and variation, so the improvement is shown as a measured difference rather than a claimed one, on the same evidence base both times.',
+  mechanismIntro:
+    'Ledgerium measures process improvement by recording the workflow before and after a change and comparing timing, wait time, rework, and variation, so the gain shows as a measured difference rather than a claimed one.',
+  keyTakeaways: [
+    'Process improvement cannot be measured when no one captured the before, leaving the after nothing to compare against.',
+    'Improvements lose support when the impact cannot be shown in numbers and get reversed under a skeptical question.',
+    'Recording before and after on the same evidence base turns the gain into a measured difference, not an impression.',
+    'Changing one thing at a time keeps the cause of the result clear when compared to the baseline.',
+    'Several runs on each side give a more reliable measure, especially for high-volume work.',
+  ],
   honestLimitation:
     'A before-and-after comparison reflects the runs you record. For high-volume processes, more runs on each side give a more reliable measure of the change.',
   whyItHappens:
@@ -929,6 +1039,15 @@ const identifyBottlenecks: ProblemPage = {
   related: ['problem:how-to-find-process-waste', 'persona:operations-managers', 'workflow:purchase-order-workflow'],
   originalDataPoint:
     'Ledgerium separates work time from wait time on each step, so a queue that adds days of delay is visible even when the active task itself is fast, which is the bottleneck a stopwatch on the busy step would never find.',
+  mechanismIntro:
+    'Ledgerium identifies a process bottleneck by recording the end-to-end workflow and ranking steps by delay, so a queue that adds days of wait is visible even when the active task itself is fast.',
+  keyTakeaways: [
+    'A process bottleneck is usually a wait or a handoff where work queues, not the step that feels busiest.',
+    'The constraint stays invisible until work time is separated from wait time on each step.',
+    'Speeding up a non-bottleneck step just moves the queue elsewhere and barely changes end-to-end time.',
+    'Ledgerium ranks steps by delay and points to the constraint that holds up everything after it.',
+    'Re-recording after a fix shows whether the bottleneck shrank or moved to the next step.',
+  ],
   honestLimitation:
     'Ledgerium measures the browser-based steps it records. A bottleneck in a physical or desktop-only step needs separate observation to quantify.',
   whyItHappens:
@@ -999,6 +1118,15 @@ const reduceVariation: ProblemPage = {
   related: ['problem:how-to-standardize-workflows', 'persona:bpo-operations', 'workflow:zendesk-ticket-resolution-workflow'],
   originalDataPoint:
     'Ledgerium quantifies how much the same workflow differs run to run, so variation is a measured number rather than a hunch, which lets a team see whether two people really run the process the same way before assuming they do.',
+  mechanismIntro:
+    'Ledgerium reduces process variation by recording several people running the same workflow and quantifying how much their runs differ in steps and time, then generating an SOP from the agreed version.',
+  keyTakeaways: [
+    'Process variation hides because each person believes they follow the same process when they do not.',
+    'Small differences in order, lookups, and decisions accumulate into inconsistent results nobody can trace.',
+    'Recording makes variation a measured number rather than a hunch about whether two people work the same way.',
+    'Ledgerium captures the legitimate exceptions, so the standard documents them instead of forcing one rigid path.',
+    'Re-recording across several people later confirms whether the runs have measurably converged.',
+  ],
   honestLimitation:
     'Ledgerium measures variation in the browser-based steps it records. Variation in judgment or offline handling still needs a person to interpret and document.',
   whyItHappens:
@@ -1069,6 +1197,14 @@ const documentWithoutInterviews: ProblemPage = {
   related: ['problem:how-to-capture-tribal-knowledge', 'persona:consultants', 'compare:manual-sop-documentation'],
   originalDataPoint:
     'A recording captures the automatic steps an expert would never think to mention in an interview, so the documentation includes the lookups, copies, and exceptions that rounds of meetings routinely miss.',
+  mechanismIntro:
+    'Ledgerium documents a process without interviews by recording one real run and generating the SOP and process map from what was actually done, so the lookups and exceptions people forget to mention are captured directly.',
+  keyTakeaways: [
+    'Documenting a process without interviews works by recording one real run rather than reconstructing it through meetings.',
+    'Interviews are slow, depend on recall, and miss the automatic steps experts never think to mention.',
+    'A single recording captures the lookups, copies, and exceptions that rounds of meetings routinely skip.',
+    'One recording plus a single review replaces several interview rounds and a reconstructed draft.',
+  ],
   honestLimitation:
     'Recording captures what happens in the browser. The reasoning behind a judgment call still benefits from a short note the person adds to the relevant step.',
   whyItHappens:
@@ -1139,6 +1275,15 @@ const reduceRework: ProblemPage = {
   related: ['problem:how-to-find-process-waste', 'persona:process-excellence-leads', 'workflow:refund-processing-workflow'],
   originalDataPoint:
     'Ledgerium links each redo to the earlier step that introduced the error, so the cause of rework is shown as a traceable connection between two steps rather than guessed at from where the correction happens.',
+  mechanismIntro:
+    'Ledgerium reduces rework by recording where work loops back for correction and linking each redo to the earlier step that introduced the error, so the root cause is a traceable connection rather than a guess.',
+  keyTakeaways: [
+    'Rework hides because the do-over happens far downstream of the mistake that produced it.',
+    'Teams get better at fixing the same defect instead of preventing it, so it keeps entering at the same earlier step.',
+    'Recording links each correction back to the upstream step where the error entered the process.',
+    'Adding a review step catches some defects later but does not stop the upstream cause.',
+    'Re-recording after a fix shows whether the rework loop shrank or disappeared.',
+  ],
   honestLimitation:
     'Ledgerium traces rework in the browser-based steps it records. A do-over caused by a physical or offline step needs separate observation to connect to its cause.',
   whyItHappens:
@@ -1209,6 +1354,15 @@ const documentApprovalWorkflows: ProblemPage = {
   related: ['workflow:invoice-approval-workflow', 'sopTemplate:invoice-approval-sop-template', 'persona:operations-managers'],
   originalDataPoint:
     'Ledgerium captures the threshold points where an approval path changes, who signs off, and how escalations are handled, so the routing is documented from observed approvals rather than from an approval matrix that describes intent.',
+  mechanismIntro:
+    'Ledgerium documents an approval workflow by recording a real request from submission to sign-off, capturing the routing, the thresholds that change who approves, and the exception paths approvers actually use.',
+  keyTakeaways: [
+    'Approval workflows are hard to document because the routing and thresholds live in habit rather than a written matrix.',
+    'The documented version shows one clean path while the real process branches at every threshold.',
+    'Recording approvals at different amounts shows where the routing changes and how escalations are handled.',
+    'Ledgerium captures the exception paths people take when a request does not fit, so they stop being passed around by word of mouth.',
+    'Sign-offs by email, chat, or in person still need their own records attached at the right step.',
+  ],
   honestLimitation:
     'Ledgerium records browser-based approval steps. Sign-offs that happen by email, chat, or in person need their own records attached to the documentation at the right step.',
   whyItHappens:
@@ -1279,6 +1433,15 @@ const trainEmployees: ProblemPage = {
   related: ['problem:how-to-reduce-onboarding-time', 'persona:training-managers', 'sopTemplate:employee-onboarding-sop-template'],
   originalDataPoint:
     'Because the training material is generated from a real run, every trainee follows the same documented steps and exceptions, which removes the variation that comes from each person learning by watching a different colleague.',
+  mechanismIntro:
+    'Ledgerium trains employees on a process by recording the real workflows, including the exceptions, and turning them into SOPs and process maps trainees follow on a live task rather than picking the job up by watching.',
+  keyTakeaways: [
+    'Process training fails when the material describes an ideal process the team does not actually run.',
+    'Shadowing makes trainees absorb whatever the colleague they watch happens to do, so training varies by who trained whom.',
+    'Documentation generated from a real run is consistent across every trainee and shows the actual steps and exceptions.',
+    'Ledgerium lets trainees practice on a live task following the SOP, so they learn the job as it genuinely works.',
+    'Re-recording when the process changes keeps the training path accurate for every new cohort.',
+  ],
   honestLimitation:
     'Generated SOPs cover the observed browser steps. Judgment, customer rapport, and offline context still need an experienced person to teach alongside the documentation.',
   whyItHappens:
@@ -1349,6 +1512,15 @@ const documentFinanceProcess: ProblemPage = {
   related: ['workflow:journal-entry-workflow', 'department:finance', 'aiOpportunity:finance-operations'],
   originalDataPoint:
     'Ledgerium records the control steps a preparer performs between systems, the reconciliations, checks, and sign-offs, so the documented controls come from observed work rather than from a policy that states what should happen.',
+  mechanismIntro:
+    'Ledgerium documents a finance process by recording a real close run across each system, capturing the reconciliations, checks, and sign-offs the preparer performs between tools, and generating an SOP and process map from it.',
+  keyTakeaways: [
+    'Finance processes resist documentation because they cross several systems and carry controls the preparer performs from habit.',
+    'The policy binder describes intent while the real work includes lookups, re-keying, and checks that never made it onto paper.',
+    'Recording captures the control steps a preparer performs between systems as they happen.',
+    'Because the SOP comes from a real run, the controls described match what an auditor would observe.',
+    'Controls performed in desktop software or on paper still need a person to add them and attach the evidence.',
+  ],
   honestLimitation:
     'Ledgerium records the browser-based finance steps. Controls performed in desktop software or on paper need a person to add them to the recording and attach the supporting evidence.',
   whyItHappens:
@@ -1419,6 +1591,15 @@ const measureCycleTime: ProblemPage = {
   related: ['problem:how-to-identify-process-bottlenecks', 'persona:operations-managers', 'workflow:incident-management-workflow'],
   originalDataPoint:
     'Ledgerium splits every step into work time and wait time, so cycle time is reported as activity plus queues rather than a single estimate, which usually reveals that the wait, not the work, is most of the elapsed time.',
+  mechanismIntro:
+    'Ledgerium measures process cycle time by recording a workflow end to end and splitting each step into work time and wait time, so the report shows whether the active steps or the queues drive the elapsed days.',
+  keyTakeaways: [
+    'Cycle time is work time plus wait time, and the wait between steps is usually the larger and more hidden part.',
+    'People underestimate cycle time because they report the active work they remember and forget the queues.',
+    'A task that takes ten minutes of work can carry days of cycle time once the handoffs are counted.',
+    'Ledgerium splits every step into work and wait, so cycle time is measured from observed runs rather than estimated.',
+    'Re-recording after a change shows whether the cycle time actually dropped and where the remaining delay sits.',
+  ],
   honestLimitation:
     'Ledgerium measures the browser-based steps it records. Wait time inside physical or desktop-only steps needs separate observation to include in the cycle time.',
   whyItHappens:
@@ -1489,6 +1670,15 @@ const documentForCompliance: ProblemPage = {
   related: ['problem:how-to-prepare-for-a-process-audit', 'persona:compliance-teams', 'industry:banking'],
   originalDataPoint:
     'Because Ledgerium documents from a real run, the SOP and the observed work share one source, so the control a reviewer reads about is the same control they would watch performed, which removes the most common compliance finding.',
+  mechanismIntro:
+    'Ledgerium produces compliance-ready documentation by recording how the work is really performed and generating the SOP, process map, and step evidence from that run, so what a reviewer reads matches the control they would watch performed.',
+  keyTakeaways: [
+    'Compliance documentation fails when it describes a policy the team does not actually follow.',
+    'Reviewers find a gap when the binder is written to satisfy a regulation rather than to describe the work.',
+    'Documenting from a real run makes the SOP and the observed work share one source, closing the gap before a reviewer finds it.',
+    'Ledgerium generates step evidence tied to the observed run, so the control read about is the same control performed.',
+    'Offline approvals, retention records, and sign-offs still need their own records attached to complete the evidence.',
+  ],
   honestLimitation:
     'Ledgerium evidences the browser-based steps it records. Approvals, retention, and sign-offs performed offline still need their own records attached to the documentation.',
   whyItHappens:

@@ -20,6 +20,15 @@ const accountsPayable: AiOpportunityPage = {
   functionArea: 'Accounts payable',
   originalDataPoint:
     'Ledgerium scores AP automation candidates from the recorded process by combining how often a step repeats with how much time it takes, so the highest-value candidate is identified from observed data rather than from opinion.',
+  mechanismIntro:
+    'Accounts payable hides its cost in matching and approval-chasing rather than the approval click, so Ledgerium records a real AP run and scores each step by repetition and time to surface the highest-value automation candidate.',
+  keyTakeaways: [
+    'Accounts payable automation candidates are strongest in matching invoices to purchase orders, coding expenses, and flagging exceptions.',
+    'Approving payments, resolving disputes, and anything outside the documented rules should keep a human involved in accounts payable.',
+    'AP time usually goes to matching and chasing approvals, not to the approval click itself, which per-step timing makes visible.',
+    'A readiness check for AP automation needs a recorded current workflow, documented thresholds, captured exception paths, and a baseline.',
+    'Ledgerium scores AP candidates by combining how often a step repeats with how much time it takes, targeting costly work with evidence.',
+  ],
   honestLimitation:
     'Ledgerium surfaces and scores opportunities from observed browser work. Deciding what to actually automate still needs human judgment about risk, controls, and exceptions.',
   commonRepetitiveWork: [
@@ -97,6 +106,15 @@ const hrOnboarding: AiOpportunityPage = {
   functionArea: 'HR onboarding',
   originalDataPoint:
     'Ledgerium scores onboarding automation candidates from the recorded process by combining how often a step repeats with how much time it takes, so the highest-value candidate is documented from real work rather than guessed at in a planning meeting.',
+  mechanismIntro:
+    'HR onboarding spends most of its time re-keying new-hire data across HR, payroll, and IT rather than on the welcome note, so Ledgerium records a real onboarding run and scores steps by repetition and time to find the best candidates.',
+  keyTakeaways: [
+    'HR onboarding automation candidates are strongest in account provisioning, sending standard documents, and scheduling first-week tasks.',
+    'Accommodation reviews, sensitive conversations, and exceptions in pay or contract terms should keep a human involved in onboarding.',
+    'Onboarding time usually goes to re-entering the same new-hire data across systems, not the welcome steps, which timing makes visible.',
+    'AI can draft welcome messages, check documents for missing fields, and answer common policy questions from approved sources.',
+    'Ledgerium scores onboarding candidates by combining how often a step repeats with how much time it takes, documenting them from real work.',
+  ],
   honestLimitation:
     'Ledgerium surfaces and scores opportunities from observed browser work. Deciding what to actually automate still needs human judgment about employee experience, privacy, and local employment rules.',
   commonRepetitiveWork: [
@@ -174,6 +192,15 @@ const customerSupport: AiOpportunityPage = {
   functionArea: 'Customer support',
   originalDataPoint:
     'Ledgerium scores support automation candidates from the recorded process by combining how often a step repeats with how much time it takes, so the highest-value candidate is documented from real agent work instead of assumed from ticket counts.',
+  mechanismIntro:
+    'Customer support loses most time to looking up account details across tools rather than writing the reply, so Ledgerium records a real ticket run and scores steps by repetition and time to identify the strongest candidates.',
+  keyTakeaways: [
+    'Customer support automation candidates are strongest in triaging tickets, drafting standard replies, and looking up account details.',
+    'Refunds, escalations, and upset-customer recovery should keep a human involved in customer support.',
+    'Support time usually goes to hunting for account details across tools, not the reply itself, which per-step timing makes visible.',
+    'AI can suggest a ticket category and priority, draft first replies from approved articles, and summarize long threads.',
+    'Ledgerium scores support candidates by combining how often a step repeats with how much time it takes, documented from real agent work.',
+  ],
   honestLimitation:
     'Ledgerium surfaces and scores opportunities from observed browser work. Deciding what to actually automate still needs human judgment about tone, customer risk, and edge cases the rules do not cover.',
   commonRepetitiveWork: [
@@ -251,6 +278,15 @@ const salesOperations: AiOpportunityPage = {
   functionArea: 'Sales operations',
   originalDataPoint:
     'Ledgerium scores sales-ops automation candidates from the recorded process by combining how often a step repeats with how much time it takes, so the highest-value candidate is documented from real work rather than guessed from pipeline reports.',
+  mechanismIntro:
+    'Sales operations spends most time enriching records and re-keying deal data between the CRM and quoting tools rather than on the routing decision, so Ledgerium records a real sales-ops run and scores steps by repetition and time.',
+  keyTakeaways: [
+    'Sales operations automation candidates are strongest in enriching leads, updating CRM records, and generating routine quotes.',
+    'Discount approvals, forecast calls, and deal strategy should keep a human involved in sales operations.',
+    'Sales-ops time usually goes to enriching records and re-keying deal data across systems, not the routing click.',
+    'AI can score and prioritize leads, draft follow-up emails from deal context, and flag stale or at-risk opportunities.',
+    'Ledgerium scores sales-ops candidates by combining how often a step repeats with how much time it takes, documented from real work.',
+  ],
   honestLimitation:
     'Ledgerium surfaces and scores opportunities from observed browser work. Deciding what to actually automate still needs human judgment about deal risk, customer relationships, and revenue policy.',
   commonRepetitiveWork: [
@@ -328,6 +364,15 @@ const procurement: AiOpportunityPage = {
   functionArea: 'Procurement',
   originalDataPoint:
     'Ledgerium scores procurement automation candidates from the recorded process by combining how often a step repeats with how much time it takes, so the highest-value candidate is documented from real buyer work instead of inferred from spend reports.',
+  mechanismIntro:
+    'Procurement spends most of its time entering vendor details and re-keying order data into finance rather than on the approval step, so Ledgerium records a real purchasing run and scores steps by repetition and time.',
+  keyTakeaways: [
+    'Procurement automation candidates are strongest in creating purchase orders, matching them to receipts, and onboarding routine vendors.',
+    'Supplier selection, contract negotiation, and dispute resolution should keep a human involved in procurement.',
+    'Procurement time usually goes to vendor data entry and re-keying orders across systems, not the approval action.',
+    'AI can extract requisition line items, suggest the right vendor and category from history, and flag off-contract requests.',
+    'Ledgerium scores procurement candidates by combining how often a step repeats with how much time it takes, documented from real buyer work.',
+  ],
   honestLimitation:
     'Ledgerium surfaces and scores opportunities from observed browser work. Deciding what to actually automate still needs human judgment about supplier risk, controls, and negotiation.',
   commonRepetitiveWork: [
@@ -405,6 +450,15 @@ const financeOperations: AiOpportunityPage = {
   functionArea: 'Finance operations',
   originalDataPoint:
     'Ledgerium scores finance-ops automation candidates from the recorded process by combining how often a step repeats with how much time it takes, so the highest-value candidate is documented from real work instead of assumed from the close calendar.',
+  mechanismIntro:
+    'Finance operations spends most of its time pulling and formatting data across the ERP and spreadsheets rather than on the posting click, so Ledgerium records a real finance run and scores steps by repetition and time.',
+  keyTakeaways: [
+    'Finance operations automation candidates are strongest in reconciling accounts, posting routine journal entries, and pulling close data.',
+    'Adjustments, estimates, and final sign-off should keep a human involved in finance operations.',
+    'Finance-ops time usually goes to pulling and re-keying data across the ERP and spreadsheets, not the final posting.',
+    'AI can match transactions, draft variance explanations, and flag entries that fall outside normal ranges.',
+    'Ledgerium scores finance-ops candidates by combining how often a step repeats with how much time it takes, documented from real work.',
+  ],
   honestLimitation:
     'Ledgerium surfaces and scores opportunities from observed browser work. Deciding what to actually automate still needs human judgment about controls, materiality, and audit requirements.',
   commonRepetitiveWork: [
@@ -482,6 +536,15 @@ const complianceWorkflows: AiOpportunityPage = {
   functionArea: 'Compliance',
   originalDataPoint:
     'Ledgerium scores compliance automation candidates from the recorded process by combining how often a step repeats with how much time it takes, so the highest-value candidate is documented from real work rather than described from memory in a control narrative.',
+  mechanismIntro:
+    'Compliance spends most of its time collecting evidence and re-entering control data across systems rather than on the sign-off, so Ledgerium records a real compliance run and scores steps by repetition and time.',
+  keyTakeaways: [
+    'Compliance automation candidates are strongest in collecting evidence, checking records against a standard, and assembling audit packets.',
+    'Risk judgments, control sign-offs, and regulator responses should keep a human involved in compliance work.',
+    'Compliance time usually goes to collecting evidence and re-keying control data across systems, not the sign-off itself.',
+    'AI can summarize policies, map them to controls, flag records missing required fields, and draft control descriptions for review.',
+    'Ledgerium scores compliance candidates by combining how often a step repeats with how much time it takes, documented from real work.',
+  ],
   honestLimitation:
     'Ledgerium surfaces and scores opportunities from observed browser work. Deciding what to actually automate still needs human judgment about regulatory risk, accountability, and control design.',
   commonRepetitiveWork: [
@@ -559,6 +622,15 @@ const erpWorkflows: AiOpportunityPage = {
   functionArea: 'ERP operations',
   originalDataPoint:
     'Ledgerium scores ERP automation candidates from the recorded process by combining how often a step repeats with how much time it takes, so the highest-value candidate is documented from real work instead of guessed from a system map.',
+  mechanismIntro:
+    'ERP operations spends most of its time re-keying the same data across the ERP and outside tools rather than on the posting step, so Ledgerium records a real ERP run and scores steps by repetition and time.',
+  keyTakeaways: [
+    'ERP automation candidates are strongest in entering orders, maintaining master data, and moving records between modules.',
+    'Configuration changes, exception handling, and approvals should keep a human involved in ERP operations.',
+    'ERP time usually goes to re-keying the same data across the ERP and outside tools, not the posting click.',
+    'AI can extract order fields from documents, suggest master-data values from existing records, and flag records that break validation rules.',
+    'Ledgerium scores ERP candidates by combining how often a step repeats with how much time it takes, documented from real work.',
+  ],
   honestLimitation:
     'Ledgerium surfaces and scores opportunities from observed browser work. Deciding what to actually automate still needs human judgment about data integrity, controls, and downstream module effects.',
   commonRepetitiveWork: [
