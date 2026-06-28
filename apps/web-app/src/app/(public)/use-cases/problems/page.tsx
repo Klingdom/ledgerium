@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: 'Process Documentation Problems, Solved Practically',
   description:
     'Practical answers to common process problems: how to document a process, create SOPs automatically, capture tribal knowledge, baseline a workflow, and find waste.',
-  alternates: { canonical: 'https://ledgerium.ai/use-cases/problems' },
+  alternates: { canonical: '/use-cases/problems' },
 };
 
 export default function ProblemsIndex() {

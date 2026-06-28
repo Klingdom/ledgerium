@@ -59,8 +59,9 @@ export function UTMCapture() {
       if (value) utmValues[param] = value;
     }
 
-    // Only persist when at least one UTM param was found
-    if (Object.keys(utmValues).length === 0) return;
+    // Always record first-touch — including the landing path and referrer — even
+    // when there are no UTM params. Organic-search and AI-referral visitors arrive
+    // without UTMs; bailing here previously left that (primary) cohort unattributed.
 
     // Derive referrer domain (empty string when there is no referrer)
     let referrerDomain = '';

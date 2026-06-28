@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: 'Who Ledgerium AI Helps: Roles and Personas',
   description:
     'See how Ledgerium helps operations managers, consultants, RevOps, business analysts, and improvement leads document real workflows and find process improvements.',
-  alternates: { canonical: 'https://ledgerium.ai/use-cases/personas' },
+  alternates: { canonical: '/use-cases/personas' },
 };
 
 export default function PersonasIndex() {

@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: 'AI Opportunities by Function: Where AI Actually Helps',
   description:
     'Where AI and automation genuinely help across finance, HR, support, sales ops, and procurement, and where humans should stay. Find your candidates from real work.',
-  alternates: { canonical: 'https://ledgerium.ai/ai-opportunities' },
+  alternates: { canonical: '/ai-opportunities' },
 };
 
 export default function AiOpportunitiesIndex() {

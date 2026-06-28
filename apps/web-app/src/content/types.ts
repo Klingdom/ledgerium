@@ -25,6 +25,8 @@ export type PageType =
   | 'persona'
   | 'problem'
   | 'compare'
+  | 'alternatives'
+  | 'competitors'
   | 'libraryIndex';
 
 export type SearchIntent = 'informational' | 'commercial' | 'transactional';
@@ -213,6 +215,44 @@ export interface IndustryPage extends BasePage {
   readonly aiOpportunities: readonly string[];
 }
 
+export interface AlternativeOption {
+  readonly name: string;
+  readonly bestFor: string;
+  /** Honest one-liner: what it is and a real tradeoff. */
+  readonly note: string;
+}
+
+export interface AlternativesPage extends BasePage {
+  readonly type: 'alternatives';
+  /** The tool people want alternatives to, e.g. "Scribe". */
+  readonly targetTool: string;
+  readonly whyPeopleSwitch: string;
+  /** 5-8 options, including Ledgerium, each with an honest note. */
+  readonly options: readonly AlternativeOption[];
+  readonly ledgeriumAngle: string;
+  readonly whenTargetStillFits: string;
+  readonly evaluationCriteria: readonly string[];
+  /** "verified as of [Month YYYY]" for all third-party claims. */
+  readonly verifiedAsOf: string;
+}
+
+export interface CompetitorSegment {
+  readonly segment: string;
+  readonly players: string;
+  readonly fitFor: string;
+}
+
+export interface CompetitorsPage extends BasePage {
+  readonly type: 'competitors';
+  /** The tool or category whose competitive landscape this maps, e.g. "Scribe". */
+  readonly subject: string;
+  readonly landscape: string;
+  readonly segments: readonly CompetitorSegment[];
+  readonly ledgeriumPosition: string;
+  readonly evaluationCriteria: readonly string[];
+  readonly verifiedAsOf: string;
+}
+
 /** Authored union. Extend as later types are authored. */
 export type SeoPage =
   | WorkflowPage
@@ -223,4 +263,6 @@ export type SeoPage =
   | SopTemplatePage
   | AiOpportunityPage
   | DepartmentPage
-  | IndustryPage;
+  | IndustryPage
+  | AlternativesPage
+  | CompetitorsPage;

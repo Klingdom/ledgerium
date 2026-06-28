@@ -15,34 +15,44 @@ export const metadata: Metadata = {
 
 const POSTS = [
   {
-    slug: 'why-your-sops-are-already-outdated',
-    title: 'Why Your SOPs Are Already Outdated',
+    slug: 'what-is-process-intelligence',
+    title: 'What Is Process Intelligence? A Practical Definition',
     excerpt:
-      "Most process documentation is written from memory, not observation. Here's why that matters — and what to do about it.",
-    date: '2026-04-10',
+      'Process intelligence turns observed work into a measurable, improvable model. A practical definition, how it differs from documentation and process mining, and where to start.',
+    date: '2026-06-28',
     category: 'Process Intelligence',
-    readTime: '5 min read',
+    readTime: '7 min read',
     hasPage: true,
   },
   {
     slug: 'screenshot-tools-vs-structured-capture',
     title: "Screenshot Tools vs. Structured Capture: What's the Difference?",
     excerpt:
-      'Scribe and Tango give you annotated screenshots. Ledgerium gives you structured process data. Here\'s why that distinction matters.',
-    date: '2026-04-08',
+      'Scribe and Tango give you annotated screenshots. Structured capture gives you process data you can measure, diff, and automate. Here is why that matters.',
+    date: '2026-06-26',
     category: 'Competitive',
-    readTime: '4 min read',
-    hasPage: false,
+    readTime: '5 min read',
+    hasPage: true,
   },
   {
     slug: 'capture-before-you-automate',
     title: 'Capture Before You Automate',
     excerpt:
-      "Organizations are deploying AI agents into processes they've never measured. The observation layer is the missing foundation.",
-    date: '2026-04-05',
+      'Teams are deploying AI agents into processes they have never measured. The observation layer is the missing foundation before any automation.',
+    date: '2026-06-24',
     category: 'AI & Automation',
     readTime: '6 min read',
-    hasPage: false,
+    hasPage: true,
+  },
+  {
+    slug: 'why-your-sops-are-already-outdated',
+    title: 'Why Your SOPs Are Already Outdated',
+    excerpt:
+      'Most process documentation is written from memory, not observation. Here is why that matters, and what to do about it.',
+    date: '2026-04-10',
+    category: 'Process Intelligence',
+    readTime: '5 min read',
+    hasPage: true,
   },
 ];
 

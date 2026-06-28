@@ -113,6 +113,21 @@ function proseSources(page: SeoPage): string[] {
       ...page.complianceConcerns,
       ...page.aiOpportunities,
     );
+  } else if (page.type === 'alternatives') {
+    base.push(
+      page.whyPeopleSwitch,
+      page.ledgeriumAngle,
+      page.whenTargetStillFits,
+      ...page.options.flatMap((o) => [o.name, o.bestFor, o.note]),
+      ...page.evaluationCriteria,
+    );
+  } else if (page.type === 'competitors') {
+    base.push(
+      page.landscape,
+      page.ledgeriumPosition,
+      ...page.segments.flatMap((s) => [s.segment, s.players, s.fitFor]),
+      ...page.evaluationCriteria,
+    );
   }
   return base;
 }

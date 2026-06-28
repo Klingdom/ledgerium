@@ -38,6 +38,8 @@ function webPage(page: SeoPage): JsonLdObject {
     name: page.metaTitle,
     description: page.metaDescription,
     url: pageUrl(page),
+    inLanguage: 'en',
+    isPartOf: { '@type': 'WebSite', '@id': `${SITE_CONFIG.url}/#website` },
     dateModified: page.updatedAt,
   };
 }
@@ -61,6 +63,7 @@ function article(page: SeoPage): JsonLdObject {
     headline: page.h1,
     description: page.shortAnswer,
     url: pageUrl(page),
+    datePublished: page.updatedAt,
     dateModified: page.updatedAt,
     author: {
       '@type': 'Person',

@@ -5,15 +5,29 @@ import { LogoFull } from '@/components/shared/LogoMark';
 const FOOTER_LINKS = {
   Product: [
     { href: '/product', label: 'Features' },
-    { href: '/dashboard.html', label: 'Interactive Demo' },
     { href: '/pricing', label: 'Pricing' },
     { href: '/install', label: 'Get Extension' },
+    { href: '/dashboard.html', label: 'Interactive Demo' },
+  ],
+  Library: [
+    { href: '/workflow-library', label: 'Workflow Library' },
+    { href: '/sop-templates', label: 'SOP Templates' },
+    { href: '/software', label: 'Software Guides' },
+    { href: '/ai-opportunities', label: 'AI Opportunities' },
+  ],
+  Explore: [
+    { href: '/departments', label: 'By Department' },
+    { href: '/industries', label: 'By Industry' },
+    { href: '/use-cases/personas', label: 'By Role' },
+    { href: '/use-cases/problems', label: 'By Problem' },
   ],
   'Use Cases': [
     { href: '/use-cases/operations', label: 'Operations Teams' },
     { href: '/use-cases/compliance', label: 'Compliance & Audit' },
     { href: '/use-cases/ai-implementation', label: 'AI & Automation' },
     { href: '/compare/scribe', label: 'Ledgerium vs. Scribe' },
+    { href: '/alternatives', label: 'Alternatives' },
+    { href: '/competitors', label: 'Competitors' },
   ],
   Resources: [
     { href: '/docs', label: 'User Guide' },
@@ -33,16 +47,16 @@ export function Footer() {
   return (
     <footer className="border-t border-[var(--border-default)] bg-[var(--surface-elevated)]">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
-            <LogoFull size={20} />
-            <p className="text-sm text-[#e2e8f0] leading-relaxed">
-              Evidence-based workflow intelligence. Record real work, generate real documentation.
-            </p>
-          </div>
+        {/* Brand */}
+        <div className="mb-10 max-w-sm">
+          <LogoFull size={20} />
+          <p className="mt-3 text-sm text-[#e2e8f0] leading-relaxed">
+            Evidence-based workflow intelligence. Record real work, generate real documentation.
+          </p>
+        </div>
 
-          {/* Link columns */}
+        {/* Link columns */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
           {Object.entries(FOOTER_LINKS).map(([heading, links]) => (
             <div key={heading}>
               <p className="text-xs font-semibold text-[var(--content-tertiary)] uppercase tracking-wider mb-3">

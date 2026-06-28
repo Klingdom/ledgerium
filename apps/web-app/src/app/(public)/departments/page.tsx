@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: 'Workflows by Department: Document and Improve',
   description:
     'Document and improve workflows by department: finance, HR, operations, support, sales ops, procurement, IT, and compliance. Generated from how the work really runs.',
-  alternates: { canonical: 'https://ledgerium.ai/departments' },
+  alternates: { canonical: '/departments' },
 };
 
 export default function DepartmentsIndex() {

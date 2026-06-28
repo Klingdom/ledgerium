@@ -16,6 +16,8 @@ import { SOP_TEMPLATE_PAGES } from './pages/sop-template';
 import { AI_OPPORTUNITY_PAGES } from './pages/ai-opportunity';
 import { DEPARTMENT_PAGES } from './pages/department';
 import { INDUSTRY_PAGES } from './pages/industry';
+import { ALTERNATIVES_PAGES } from './pages/alternatives';
+import { COMPETITORS_PAGES } from './pages/competitors';
 
 /**
  * URL prefix per page type.
@@ -34,6 +36,8 @@ export const ROUTE_PREFIX: Record<PageType, string> = {
   persona: '/use-cases/personas',
   problem: '/use-cases/problems',
   compare: '/compare',
+  alternatives: '/alternatives',
+  competitors: '/competitors',
   libraryIndex: '/workflow-library',
 };
 
@@ -49,6 +53,8 @@ export const PARENT_HUB: Record<PageType, { label: string; path: string } | null
   problem: { label: 'Problems', path: '/use-cases/problems' },
   // No public /compare hub (the authed app owns /compare); breadcrumb stops at Home.
   compare: null,
+  alternatives: { label: 'Alternatives', path: '/alternatives' },
+  competitors: { label: 'Competitors', path: '/competitors' },
   libraryIndex: null,
 };
 
@@ -80,6 +86,8 @@ export const ALL_PAGES: readonly SeoPage[] = [
   ...AI_OPPORTUNITY_PAGES,
   ...DEPARTMENT_PAGES,
   ...INDUSTRY_PAGES,
+  ...ALTERNATIVES_PAGES,
+  ...COMPETITORS_PAGES,
 ];
 
 export function getPagesByType<T extends PageType>(type: T): SeoPage[] {
