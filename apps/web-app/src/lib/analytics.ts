@@ -19,6 +19,7 @@
  */
 
 import { captureEvent as posthogCapture, identifyUser as posthogIdentify, isPostHogEnabled } from './posthog';
+import type { NavItemId } from '@/components/nav/navConfig';
 
 // ─── Event taxonomy ──────────────────────────────────────────────────────────
 
@@ -489,6 +490,20 @@ export type AnalyticsEvent =
 
   // ── Marketing ─────────────────────────────────────────────────────────────
   | { event: 'cta_clicked'; location: string; destination: string }
+  // Marketing nav (NAVIGATION_IA_001 — Iteration A)
+  | { event: 'nav_menu_opened'; menu: 'solutions' | 'resources'; device: 'desktop' | 'mobile' }
+  | {
+      event: 'nav_link_clicked';
+      item: NavItemId;
+      href: string;
+      group: 'top_level' | 'solutions' | 'resources';
+      column:
+        | 'popular' | 'by_role' | 'by_department' | 'by_industry'
+        | 'templates_guides' | 'software' | 'learn' | 'company'
+        | null;
+      interactionPath: 'direct' | 'via_menu';
+      device: 'desktop' | 'mobile';
+    }
 
   // ── SEO/AEO page engine (Phase 1 / Tranche 0) ─────────────────────────────
   // PII-free: page taxonomy + opaque slug + referrer class only.
