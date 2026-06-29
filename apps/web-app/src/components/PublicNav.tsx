@@ -149,6 +149,7 @@ export function PublicNav() {
                   aria-haspopup="true"
                   aria-expanded={openMenu === item.id}
                   aria-controls={`nav-panel-${item.id}`}
+                  aria-current={isMenuActive(item) ? 'page' : undefined}
                   onClick={() => toggleMenu(item, 'desktop')}
                   className={`${navLinkClass(isMenuActive(item) || openMenu === item.id)} cursor-pointer`}
                 >
