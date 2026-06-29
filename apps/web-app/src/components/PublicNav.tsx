@@ -42,6 +42,7 @@ export function PublicNav() {
   const headerRef = useRef<HTMLElement | null>(null);
   const triggerRefs = useRef<Partial<Record<NavMenuId, HTMLButtonElement | null>>>({});
   const panelRefs = useRef<Partial<Record<NavMenuId, HTMLDivElement | null>>>({});
+  const hamburgerRef = useRef<HTMLButtonElement | null>(null);
 
   // Close everything on route change (the nav is mounted once and never remounts).
   useEffect(() => {
@@ -89,6 +90,19 @@ export function PublicNav() {
     return () => {
       document.body.style.overflow = prev;
     };
+  }, [mobileOpen]);
+
+  // Escape closes the mobile drawer and returns focus to the hamburger.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setMobileOpen(false);
+        hamburgerRef.current?.focus();
+      }
+    }
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
   }, [mobileOpen]);
 
   function toggleMenu(menu: NavMenu, device: 'desktop' | 'mobile') {
@@ -247,10 +261,13 @@ export function PublicNav() {
 
         {/* Mobile menu button */}
         <button
+          ref={hamburgerRef}
+          type="button"
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden rounded-lg p-2 text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]"
+          className="md:hidden rounded-lg p-2 text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
           aria-label="Toggle menu"
           aria-expanded={mobileOpen}
+          aria-controls="mobile-nav-drawer"
         >
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -258,7 +275,7 @@ export function PublicNav() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-[var(--border-subtle)] bg-[var(--surface-elevated)] shadow-lg flex flex-col max-h-[calc(100dvh-3.5rem)]">
+        <div id="mobile-nav-drawer" className="md:hidden border-t border-[var(--border-subtle)] bg-[var(--surface-elevated)] shadow-lg flex flex-col max-h-[calc(100dvh-3.5rem)]">
           <div className="flex-1 overflow-y-auto px-4 py-3 space-y-1">
             {TOP_NAV.map((item) =>
               item.kind === 'link' ? (

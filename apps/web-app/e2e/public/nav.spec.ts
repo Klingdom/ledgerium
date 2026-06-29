@@ -112,19 +112,58 @@ test.describe('PublicNav — axe (header, panel open)', () => {
   });
 });
 
-test.describe('PublicNav — mobile', () => {
-  test.use({ viewport: { width: 375, height: 800 } });
+test.describe('PublicNav — mobile (Iteration C, 375x667)', () => {
+  test.use({ viewport: { width: 375, height: 667 } });
 
-  test('drawer opens, Solutions accordion curates to hubs, Start free pinned', async ({ page }) => {
+  test('hamburger toggles aria-expanded', async ({ page }) => {
+    await page.goto('/product', { waitUntil: 'networkidle' });
+    const burger = page.getByLabel('Toggle menu');
+    await expect(burger).toHaveAttribute('aria-expanded', 'false');
+    await burger.click();
+    await expect(burger).toHaveAttribute('aria-expanded', 'true');
+    await burger.click();
+    await expect(burger).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('drawer opens, Solutions accordion curates to hubs (6), full leaf list hidden', async ({ page }) => {
     await page.goto('/product', { waitUntil: 'networkidle' });
     await page.getByLabel('Toggle menu').click();
-    const solutionsBtn = page.getByRole('button', { name: 'Solutions' });
-    await solutionsBtn.click();
+    await page.getByRole('button', { name: 'Solutions' }).click();
     await expect(page.getByRole('link', { name: 'Operations teams' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'View all roles' })).toBeVisible();
-    // The full per-leaf list is NOT shown on mobile (curated to 6).
     await expect(page.getByRole('link', { name: 'Business Analysts' })).toHaveCount(0);
-    // Pinned CTA reachable in either auth state.
-    await expect(page.getByRole('link', { name: /start free|go to app/i }).first()).toBeVisible();
+  });
+
+  test('pinned CTA stays in viewport with all accordions expanded', async ({ page }) => {
+    await page.goto('/product', { waitUntil: 'networkidle' });
+    await page.getByLabel('Toggle menu').click();
+    await page.getByRole('button', { name: 'Solutions' }).click();
+    await page.getByRole('button', { name: 'Resources' }).click();
+    const cta = page.getByRole('link', { name: /start free|go to app/i }).first();
+    await expect(cta).toBeVisible();
+    const box = await cta.boundingBox();
+    expect(box).not.toBeNull();
+    if (box) {
+      expect(box.y).toBeGreaterThanOrEqual(0);
+      expect(box.y + box.height).toBeLessThanOrEqual(667);
+    }
+  });
+
+  test('body scroll is locked while the drawer is open and restored on close', async ({ page }) => {
+    await page.goto('/product', { waitUntil: 'networkidle' });
+    await page.getByLabel('Toggle menu').click();
+    expect(await page.evaluate(() => document.body.style.overflow)).toBe('hidden');
+    await page.getByLabel('Toggle menu').click();
+    expect(await page.evaluate(() => document.body.style.overflow)).not.toBe('hidden');
+  });
+
+  test('Escape closes the drawer and returns focus to the hamburger', async ({ page }) => {
+    await page.goto('/product', { waitUntil: 'networkidle' });
+    const burger = page.getByLabel('Toggle menu');
+    await burger.click();
+    await expect(page.getByRole('button', { name: 'Solutions' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(burger).toHaveAttribute('aria-expanded', 'false');
+    await expect(burger).toBeFocused();
   });
 });
