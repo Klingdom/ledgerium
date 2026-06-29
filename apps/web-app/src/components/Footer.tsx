@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { SITE_CONFIG } from '@/lib/config';
 import { LogoFull } from '@/components/shared/LogoMark';
+import { TrackedLink } from '@/components/TrackedLink';
 
 const FOOTER_LINKS = {
   Product: [
@@ -65,12 +65,14 @@ export function Footer() {
               <ul className="space-y-2">
                 {links.map(({ href, label }) => (
                   <li key={href}>
-                    <Link
+                    <TrackedLink
                       href={href}
+                      event="cta_clicked"
+                      properties={{ location: 'footer_nav', destination: href }}
                       className="text-sm text-[#e2e8f0] hover:text-[var(--content-primary)] transition-colors"
                     >
                       {label}
-                    </Link>
+                    </TrackedLink>
                   </li>
                 ))}
               </ul>
