@@ -50,6 +50,8 @@ export interface Faq {
 export interface WorkflowStep {
   readonly title: string;
   readonly detail: string;
+  /** Optional system/tool this step runs in (renders a chip when present). */
+  readonly system?: string;
 }
 
 export interface Metric {
