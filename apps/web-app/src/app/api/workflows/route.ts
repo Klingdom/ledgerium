@@ -387,7 +387,28 @@ export async function GET(req: NextRequest) {
       orderBy: { [orderByField]: sortDir },
       include: {
         tags: { include: { tag: true } },
-        processDefinition: true,
+        // DB-perf (DATABASE_HEALTH_REVIEW_002 P0-3): select ONLY the
+        // ProcessDefinition fields consumed downstream in this handler
+        // (route summary + processMaturity) and by toMetricsInput()
+        // (metrics-input-adapter). This drops the large unused JSON-TEXT
+        // blobs (explanationJson, systems, metricsJson, pathSignature,
+        // signature hashes, …) that `processDefinition: true` was pulling
+        // into the Node heap on every dashboard load. Behaviour-identical:
+        // every field read anywhere in this file / the adapter is retained.
+        processDefinition: {
+          select: {
+            id: true,
+            canonicalName: true,
+            variantCount: true,
+            runCount: true,
+            avgDurationMs: true,
+            medianDurationMs: true,
+            stabilityScore: true,
+            confidenceScore: true,
+            intelligenceJson: true,
+            updatedAt: true,
+          },
+        },
         portfolios: { select: { portfolioId: true } },
       },
     }),
