@@ -131,6 +131,7 @@ model Workflow {
 
   @@index([userId])
   @@index([status])
+  @@index([userId, status])
   @@index([createdAt])
   @@index([processDefinitionId])
   @@index([variantId])
@@ -510,6 +511,7 @@ model TeamMember {
 
   @@unique([teamId, userId])
   @@index([userId])
+  @@index([teamId, status])
   @@map("team_members")
 }
 
