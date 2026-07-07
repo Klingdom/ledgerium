@@ -12,40 +12,41 @@ const scribe: CompetitorsPage = {
   subject: 'Scribe',
   metaTitle: 'Scribe Competitors: The 2026 Landscape',
   metaDescription:
-    'A map of Scribe competitors and the broader process-documentation landscape, grouped by what each segment does and who it fits, as of June 2026.',
+    'A map of Scribe competitors and the broader process-documentation landscape, grouped by what each segment does and who it fits, as of July 2026.',
   h1: 'Scribe competitors and the process-documentation landscape',
   eyebrow: 'Competitors',
   shortAnswer:
-    'Scribe competes in the process-documentation space, where tools fall into a few groups: screenshot guide generators like Tango and Guidde, video walkthrough tools like Loom, in-app adoption platforms like Whatfix and WalkMe, and structured process-capture tools like Ledgerium. Each group answers a different need. Screenshot tools show where to click; adoption tools guide users inside an app; structured-capture tools record measurable process data. Knowing which segment you need matters more than picking a single name, so this page maps the landscape rather than ranking it.',
+    "Scribe competes in the process-documentation space, where tools fall into a few groups: screenshot guide generators like Tango and Guidde, video walkthrough tools like Loom, in-app adoption platforms like Whatfix and WalkMe, AI-agent process-mining layers like Scribe's own Optimize, and structured process-capture tools like Ledgerium. Screenshot tools show where to click; AI-agent layers infer process maps from mined activity; structured-capture tools compute measurable data deterministically. Knowing which segment you need matters more than picking a single name, so this page maps the landscape rather than ranking it.",
   primaryKeyword: 'Scribe competitors',
   secondaryKeywords: ['Scribe rivals', 'companies like Scribe', 'process documentation tools'],
   searchIntent: 'commercial',
   tags: ['competitors', 'sop', 'process-documentation', 'landscape'],
   related: ['compare:tango', 'compare:process-mining', 'persona:consultants'],
   originalDataPoint:
-    'Most of Scribe’s competitors produce visual guides or in-app overlays. The structured-capture segment, where Ledgerium sits, is distinct: it records interaction data with timing so a process can be measured and diffed, not just displayed.',
+    "Most of Scribe’s competitors produce visual guides, in-app overlays, or — like Scribe’s own Optimize — AI-inferred process maps. The structured-capture segment, where Ledgerium sits, is distinct: it computes process metrics deterministically from structured interaction data with timing, so results can be measured, diffed, and reproduced exactly, not just displayed or inferred.",
   mechanismIntro:
-    'In the Scribe competitor landscape of screenshot guides, video tools, and adoption platforms, Ledgerium occupies the structured process-capture segment, recording interaction data with timing so a process can be measured and diffed rather than only displayed.',
+    'In the Scribe competitor landscape of screenshot guides, video tools, adoption platforms, and AI-agent process-mining layers, Ledgerium occupies the structured process-capture segment, computing process metrics deterministically from interaction data with timing, so results can be measured and diffed exactly, not just inferred or displayed.',
   keyTakeaways: [
-    'Scribe sits in the visual-guide segment, which is the right fit for fast how-tos that show where to click.',
+    "Scribe's core product sits in the visual-guide segment; its newer Optimize agents add a separate AI-agent process-mining layer.",
     'Process documentation is several overlapping markets, so matching the segment to the job matters more than picking a single name.',
-    'Structured process capture records the real workflow as data with timing, producing SOPs you can measure rather than visual guides.',
-    'In-app adoption platforms like Whatfix and WalkMe guide users live, a different problem from documenting a process.',
-    'The honest first step is identifying which segment matches your goal before comparing individual tools.',
+    "Structured process capture computes the real workflow as data with timing, producing SOPs and metrics that reproduce exactly rather than a visual guide or an AI's inference.",
+    'In-app adoption platforms like Whatfix and WalkMe guide users live, a different problem from documenting or mining a process.',
+    'The honest first step is identifying which segment matches your goal — showing, mining, or measuring — before comparing individual tools.',
   ],
   honestLimitation:
     'This is a category map, not a feature ranking. Capabilities and pricing change; verify specifics on each vendor’s own site before deciding.',
   landscape:
-    'Process documentation is not one market but several overlapping ones. Some tools optimize for fast visual how-tos, some for guiding users live inside software, and some for capturing measurable process data. Scribe sits in the visual-guide segment. Buyers often compare across segments without realizing the tools solve different problems, which is why matching the segment to the job is the first step.',
+    "Process documentation is not one market but several overlapping ones. Some tools optimize for fast visual how-tos, some for guiding users live inside software, some for mining activity into AI-inferred process maps, and some for capturing measurable process data computed deterministically. Scribe's core product sits in the visual-guide segment, and its Optimize agents now reach into the AI-agent mining segment too. Buyers often compare across segments without realizing the tools solve different problems, which is why matching the segment to the job is the first step.",
   segments: [
     { segment: 'Screenshot guide generators', players: 'Scribe, Tango, Guidde', fitFor: 'Quick visual how-tos that show where to click' },
+    { segment: 'AI-agent process mining', players: "Scribe's Optimize agents and similar", fitFor: 'Mining cross-app activity into AI-inferred process maps and automation rankings' },
     { segment: 'Video walkthrough tools', players: 'Loom and similar screen recorders', fitFor: 'Fast, informal show-and-tell for visual learners' },
     { segment: 'In-app adoption platforms', players: 'Whatfix, WalkMe', fitFor: 'Guiding users live inside an application at scale' },
     { segment: 'Knowledge base and authoring', players: 'Document360 and similar', fitFor: 'Hand-authored manuals and searchable knowledge bases' },
-    { segment: 'Structured process capture', players: 'Ledgerium', fitFor: 'Measurable SOPs and process data recorded from real work' },
+    { segment: 'Structured process capture', players: 'Ledgerium', fitFor: 'Measurable SOPs and process data computed deterministically from real work' },
   ],
   ledgeriumPosition:
-    'Ledgerium sits in the structured process-capture segment. Instead of producing a visual guide, it records the real workflow as structured interaction data with timing and system context, then generates an SOP, a process map, and an intelligence report. That makes it the option for teams whose goal is to measure and improve a process, not just document where to click.',
+    'Ledgerium sits in the structured process-capture segment. Instead of producing a visual guide or an AI-inferred process map, it records the real workflow as structured interaction data with timing and system context, then computes an SOP, a process map, and an intelligence report deterministically — the same recording always produces the same result. That makes it the option for teams whose goal is to measure and reproduce a process, not just document where to click or infer where it might be automated.',
   evaluationCriteria: [
     'Which segment matches your actual goal?',
     'Do you need to measure and diff the process, or just show it?',
@@ -53,19 +54,19 @@ const scribe: CompetitorsPage = {
     'Do you need audit-ready or automation-ready output?',
     'What is the privacy posture (do screenshots capture visible data)?',
   ],
-  verifiedAsOf: 'June 2026',
+  verifiedAsOf: 'July 2026',
   faqs: [
     {
       q: 'Who are Scribe’s main competitors?',
-      a: 'In the visual-guide segment, Tango and Guidde are the closest. Adjacent segments include video tools like Loom, in-app adoption platforms like Whatfix and WalkMe, and structured process-capture tools like Ledgerium. They solve different problems.',
+      a: "In the visual-guide segment, Tango and Guidde are the closest. Scribe's own Optimize agents also compete in the AI-agent process-mining segment. Adjacent segments include video tools like Loom, in-app adoption platforms like Whatfix and WalkMe, and structured process-capture tools like Ledgerium. Each solves a different problem.",
     },
     {
       q: 'How is the process-documentation landscape organized?',
-      a: 'Into a few groups: screenshot guide generators, video walkthroughs, in-app adoption platforms, knowledge-base authoring, and structured process capture. Picking the right group matters more than picking a single tool.',
+      a: 'Into a few groups: screenshot guide generators, AI-agent process mining, video walkthroughs, in-app adoption platforms, knowledge-base authoring, and structured process capture. Picking the right group matters more than picking a single tool.',
     },
     {
       q: 'Where does Ledgerium fit among Scribe competitors?',
-      a: 'In the structured process-capture segment. It records measurable interaction data with timing rather than producing a visual guide, so it fits teams that want to measure and improve a process.',
+      a: 'In the structured process-capture segment. It computes measurable interaction data with timing deterministically, rather than producing a visual guide or an AI-inferred process map, so it fits teams that want to measure and reproduce a process exactly.',
     },
     {
       q: 'How do I evaluate competitors in this space?',
@@ -78,7 +79,7 @@ const scribe: CompetitorsPage = {
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
   author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
-  updatedAt: '2026-06-27',
+  updatedAt: '2026-07-07',
   published: true,
 };
 

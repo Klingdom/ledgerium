@@ -17,11 +17,11 @@ import {
 export const metadata: Metadata = {
   title: 'Scribe Alternative: Ledgerium vs Scribe Comparison | Ledgerium AI',
   description:
-    'Scribe alternative for teams who need more than screenshots. Compare Ledgerium vs Scribe: structured data capture vs annotated images, process intelligence vs visual guides.',
+    'Scribe alternative for teams who need deterministic process data, not AI-inferred maps. Compare Ledgerium vs Scribe (including Optimize): evidence-linked capture vs screenshots and AI process mining.',
   openGraph: {
     title: 'Scribe Alternative: Ledgerium vs Scribe Comparison | Ledgerium AI',
     description:
-      'Scribe captures annotated screenshots. Ledgerium captures structured interaction data. See the structural difference and decide which tool fits your workflow needs.',
+      'Scribe captures annotated screenshots and, via Optimize, AI-generated process maps. Ledgerium captures structured events and computes every metric deterministically. See the real difference.',
   },
 };
 
@@ -43,7 +43,7 @@ const COMPARISON_ROWS: ComparisonRow[] = [
   },
   {
     label: 'Output format',
-    scribe: 'Visual walkthrough (images)',
+    scribe: 'Visual walkthrough (images); AI process maps via Optimize',
     ledgerium: 'Structured data (JSON, Markdown)',
   },
   {
@@ -77,9 +77,14 @@ const COMPARISON_ROWS: ComparisonRow[] = [
     ledgerium: true,
   },
   {
-    label: 'Process intelligence',
+    label: 'Evidence-linked to source events',
     scribe: false,
-    ledgerium: 'Bottleneck, friction, automation scoring',
+    ledgerium: true,
+  },
+  {
+    label: 'Process intelligence',
+    scribe: 'Via Optimize (AI-agent mining, launched 2025)',
+    ledgerium: 'Built-in, deterministic bottleneck and automation scoring',
   },
   {
     label: 'Price (individual)',
@@ -98,11 +103,11 @@ const COMPARISON_ROWS: ComparisonRow[] = [
 const COMPARE_FAQ = [
   {
     q: 'Is Ledgerium a Scribe alternative?',
-    a: 'Yes. Ledgerium is a Scribe alternative for teams that need structured process data, not just annotated screenshots. Where Scribe produces a visual walkthrough, Ledgerium captures structured interaction events with timing data, system context, and confidence scores — output you can diff, version, and feed into automation.',
+    a: 'Yes. Ledgerium is a Scribe alternative for teams that need structured process data, not just annotated screenshots. Where Scribe produces a visual walkthrough (and, via its Optimize agents, an AI-inferred process map), Ledgerium captures structured interaction events with timing data, system context, and confidence scores — output that is deterministic and traceable to source events, and that you can diff, version, and feed into automation.',
   },
   {
     q: 'What is the main difference between Ledgerium and Scribe?',
-    a: 'Scribe captures annotated screenshots — a visual record of what the screen looked like at each step. Ledgerium captures structural interaction data: clicks, inputs, navigation events, timing, and system context. The result is structured process data rather than a screenshot guide.',
+    a: "Scribe's core product captures annotated screenshots — a visual record of what the screen looked like at each step. In late 2025 Scribe added Optimize, an AI-agent layer that mines cross-app activity to generate process maps and rank automation opportunities. Ledgerium takes a different approach: it captures structured interaction events and computes every metric deterministically, with each number traced back to the source event that produced it — not inferred by an AI agent.",
   },
   {
     q: 'Does Ledgerium take screenshots like Scribe?',
@@ -113,8 +118,12 @@ const COMPARE_FAQ = [
     a: "Ledgerium generates SOPs automatically from recorded browser workflows, similar to Scribe. The difference is output quality: Ledgerium's SOPs are backed by structured data with timing, step-by-step evidence, and process health scores, whereas Scribe SOPs are screenshot-based walkthroughs. If you need compliance-grade or automation-ready documentation, Ledgerium is the stronger fit.",
   },
   {
+    q: 'Does Scribe have process intelligence now?',
+    a: "As of mid-2026, yes — Scribe's Optimize agents mine cross-app workflow activity, generate process maps, and rank automation opportunities by estimated ROI. The distinction that remains is how the output is produced: Optimize's maps are AI-inferred and can vary between runs, while Ledgerium's metrics are computed deterministically from captured events, so the same recording always produces the same result.",
+  },
+  {
     q: 'Which tool is better for compliance documentation?',
-    a: 'Ledgerium. Compliance teams need evidence-linked, traceable process documentation — not screenshot guides. Ledgerium captures structured interaction data traceable to source browser events, supports process diffing to detect drift, and produces deterministic output you can use as audit evidence.',
+    a: 'Ledgerium. Compliance teams need evidence-linked, deterministic process documentation that traces back to source events — not screenshot guides, and not AI-inferred process maps whose output can vary between runs. Ledgerium captures structured interaction data traceable to source browser events, supports process diffing to detect drift, and produces the same output every time you recompute it, which is what audit evidence requires.',
   },
 ] as const;
 
@@ -232,6 +241,7 @@ export default function CompareScribePage() {
                   'Annotated screenshots at each step',
                   'Visual walkthroughs showing what the screen looks like',
                   'Step-by-step images with overlaid callouts',
+                  'Optimize (2025): a separate AI-agent layer that mines activity to map processes',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5 text-sm text-[var(--content-secondary)] leading-relaxed">
                     <span className="mt-1 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--content-tertiary)]" />
@@ -244,7 +254,9 @@ export default function CompareScribePage() {
                   Output
                 </p>
                 <p className="text-sm text-[var(--content-secondary)] font-medium">
-                  A screenshot guide — a visual record of what the screen looked like.
+                  Core: a screenshot guide. Via Optimize: an AI-inferred process map — output
+                  that isn&apos;t traced back to individual source events and isn&apos;t
+                  guaranteed to reproduce identically on rerun.
                 </p>
               </div>
             </div>
@@ -362,10 +374,13 @@ export default function CompareScribePage() {
                 </h2>
               </div>
               <p className="text-[15px] text-[#e2e8f0] leading-relaxed">
-                Scribe is a good fit if you need quick visual walkthroughs for showing
-                someone where to click. It&apos;s fast, familiar, and well-established.
-                If your goal is to produce a screenshot-based guide that helps a new
-                colleague navigate an interface, Scribe handles that well.
+                Scribe&apos;s core product is a good fit if you need quick visual
+                walkthroughs for showing someone where to click. It&apos;s fast,
+                familiar, and well-established. If your goal is to produce a
+                screenshot-based guide that helps a new colleague navigate an
+                interface, Scribe handles that well. Its newer Optimize layer adds
+                AI-based process mapping, but that output is inferred by AI agents
+                rather than traced to source events.
               </p>
               <ul className="mt-5 space-y-2.5">
                 {[
@@ -438,8 +453,8 @@ export default function CompareScribePage() {
               },
               {
                 icon: BarChart2,
-                title: 'Detect bottlenecks',
-                desc: 'Structured data enables bottleneck and friction analysis across runs, teams, and time.',
+                title: 'Detect bottlenecks, reproducibly',
+                desc: "Structured, evidence-linked data enables bottleneck and friction analysis that returns the same finding every time you rerun it — not an AI agent's best guess.",
               },
               {
                 icon: Shield,
@@ -454,7 +469,7 @@ export default function CompareScribePage() {
               {
                 icon: Database,
                 title: 'Deterministic output',
-                desc: 'The same recording always produces the same result. You can verify and trust it.',
+                desc: 'The same recording always produces the same result — unlike AI-agent-based process mining, which can infer differently between runs.',
               },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="card p-6 flex flex-col gap-3">
