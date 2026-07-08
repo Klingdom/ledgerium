@@ -21,6 +21,7 @@
 import Link from 'next/link';
 import { track } from '@/lib/analytics';
 import type { AnalyticsEvent } from '@/lib/analytics';
+import { isNativeHref, isNewTabHref } from '@/lib/href';
 
 type TrackableEvent = Extract<AnalyticsEvent, { event: string }>;
 
@@ -35,6 +36,8 @@ export function TrackedLink({
   event: eventName,
   properties,
   children,
+  href,
+  className,
   ...linkProps
 }: TrackedLinkProps) {
   function handleClick() {
@@ -45,8 +48,25 @@ export function TrackedLink({
     }
   }
 
+  // Non-route hrefs (external protocols + static /public assets like
+  // /dashboard.html) must use a native <a>: next/link client navigation finds
+  // no app route and renders the not-found page, making the link appear dead.
+  const hrefStr = typeof href === 'string' ? href : '';
+  if (isNativeHref(hrefStr)) {
+    return (
+      <a
+        href={hrefStr}
+        onClick={handleClick}
+        className={className}
+        {...(isNewTabHref(hrefStr) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+      >
+        {children}
+      </a>
+    );
+  }
+
   return (
-    <Link {...linkProps} onClick={handleClick}>
+    <Link href={href} className={className} {...linkProps} onClick={handleClick}>
       {children}
     </Link>
   );
