@@ -42,7 +42,7 @@ import {
 } from 'lucide-react';
 import { formatDuration, formatDateRelative, formatConfidence } from '@/lib/format';
 import { track } from '@/lib/analytics';
-import { EXTENSION_CONFIG } from '@/lib/config';
+import { ExtensionInstallButton } from '@/components/ExtensionInstallButton';
 import { PLAN_FEATURES, toPlanType } from '@/lib/plans';
 import ProcessGroupsExplorer from '@/components/ProcessGroupsExplorer';
 import PortfolioSidebar, { type PortfolioNode } from '@/components/PortfolioSidebar';
@@ -2066,14 +2066,13 @@ function EmptyDashboard({
             </a>
           </p>
           <div className="mt-ds-6 flex flex-wrap items-center justify-center gap-ds-3">
-            <a
-              href={EXTENSION_CONFIG.directDownloadUrl}
-              download
+            <ExtensionInstallButton
+              location="dashboard_footer_cta"
               className="btn-primary gap-1.5"
             >
               <Download className="h-4 w-4" />
               Download Chrome Extension
-            </a>
+            </ExtensionInstallButton>
             <Link href="/upload" className="btn-secondary gap-1.5">
               <Upload className="h-4 w-4" />
               Upload a workflow

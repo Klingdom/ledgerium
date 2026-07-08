@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { EXTENSION_CONFIG } from '@/lib/config';
+import { ExtensionInstallButton } from '@/components/ExtensionInstallButton';
 import {
   Download,
   Chrome,
@@ -38,14 +38,13 @@ export default function InstallExtensionPage() {
             SOPs, process maps, and a searchable library.
           </p>
           <div className="mt-8">
-            <a
-              href={EXTENSION_CONFIG.directDownloadUrl}
-              download="ledgerium-recorder-chrome-extension.zip"
+            <ExtensionInstallButton
+              location="install_extension_page_hero"
               className="btn-primary text-base px-8 py-3.5 gap-2.5 inline-flex shadow-sm shadow-brand-600/20"
             >
               <Download className="h-5 w-5" />
               Install Chrome Extension
-            </a>
+            </ExtensionInstallButton>
           </div>
           <p className="mt-3 text-xs text-[var(--content-tertiary)]">
             Also works with Edge, Brave, and other Chromium-based browsers
@@ -229,14 +228,13 @@ export default function InstallExtensionPage() {
             Install the extension and record your first workflow in under 2 minutes.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a
-              href={EXTENSION_CONFIG.directDownloadUrl}
-              download="ledgerium-recorder-chrome-extension.zip"
+            <ExtensionInstallButton
+              location="install_extension_page_footer"
               className="btn-primary gap-2 shadow-sm shadow-brand-600/20"
             >
               <Chrome className="h-4 w-4" />
               Install Extension
-            </a>
+            </ExtensionInstallButton>
             <Link href="/demo" className="btn-secondary gap-2">
               See how it works
               <ArrowRight className="h-4 w-4" />

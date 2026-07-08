@@ -15,7 +15,7 @@ import {
   HelpCircle,
   ArrowLeftRight,
 } from 'lucide-react';
-import { EXTENSION_CONFIG } from '@/lib/config';
+import { ExtensionInstallButton } from '@/components/ExtensionInstallButton';
 import { LogoFull } from '@/components/shared/LogoMark';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 
@@ -62,15 +62,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             })}
 
             <div className="ml-ds-2 flex items-center gap-ds-2 border-l border-[var(--border-default)] pl-ds-3">
-              <a
-                href={EXTENSION_CONFIG.directDownloadUrl}
-                download
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-ds-md px-ds-3 py-ds-2 text-ds-sm font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 transition-colors"
+              <ExtensionInstallButton
+                location="app_nav"
                 title="Download Chrome Extension"
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-ds-md px-ds-3 py-ds-2 text-ds-sm font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 transition-colors"
               >
                 <Download className="h-3.5 w-3.5" />
                 <span className="hidden lg:inline">Get Extension</span>
-              </a>
+              </ExtensionInstallButton>
               <span className="hidden text-ds-xs text-[var(--content-tertiary)] sm:inline">
                 {session?.user?.email}
               </span>

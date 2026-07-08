@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { EXTENSION_CONFIG } from '@/lib/config';
+import { ExtensionInstallButton } from '@/components/ExtensionInstallButton';
 import {
   Download,
   Chrome,
@@ -56,14 +56,13 @@ export default function InstallPage() {
             </Link>
           </p>
           <div className="mt-6">
-            <a
-              href={EXTENSION_CONFIG.directDownloadUrl}
-              download="ledgerium-recorder-chrome-extension.zip"
+            <ExtensionInstallButton
+              location="install_page_hero"
               className="btn-primary text-base px-8 py-3.5 gap-2.5 inline-flex shadow-sm shadow-brand-600/20"
             >
               <Download className="h-5 w-5" />
               Download Chrome Extension
-            </a>
+            </ExtensionInstallButton>
           </div>
           <p className="mt-3 text-xs text-[var(--content-tertiary)]">
             Also works with Edge, Brave, and other Chromium-based browsers
@@ -458,14 +457,13 @@ export default function InstallPage() {
             Download the extension and follow the 4 steps above — up and running in under 2 minutes.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a
-              href={EXTENSION_CONFIG.directDownloadUrl}
-              download="ledgerium-recorder-chrome-extension.zip"
+            <ExtensionInstallButton
+              location="install_page_footer"
               className="btn-primary gap-2 shadow-sm shadow-brand-600/20"
             >
               <Download className="h-4 w-4" />
               Download Extension
-            </a>
+            </ExtensionInstallButton>
             <Link href="/product" className="btn-secondary gap-2">
               See the product
               <ArrowRight className="h-4 w-4" />

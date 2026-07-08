@@ -490,6 +490,10 @@ export type AnalyticsEvent =
 
   // ── Marketing ─────────────────────────────────────────────────────────────
   | { event: 'cta_clicked'; location: string; destination: string }
+  // Install funnel entry (signup → install). `method` distinguishes the
+  // Web Store one-click path from the current direct-download sideload path;
+  // `location` records which CTA on which surface was clicked.
+  | { event: 'extension_install_clicked'; method: 'web_store' | 'direct_download'; location: string }
   // Marketing nav (NAVIGATION_IA_001 — Iteration A)
   | { event: 'nav_menu_opened'; menu: 'solutions' | 'resources'; device: 'desktop' | 'mobile' }
   | {
