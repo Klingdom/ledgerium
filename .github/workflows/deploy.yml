@@ -97,12 +97,19 @@ jobs:
             NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
             NEXTAUTH_URL=${{ vars.NEXTAUTH_URL || 'https://ledgerium.ai' }}
             DATABASE_URL=file:/app/data/ledgerium.db
-            # Transactional email (password reset, team invites). Without
-            # RESEND_API_KEY, sendEmail() silently no-ops — no reset emails send.
-            # Set the RESEND_API_KEY secret + verify the ledgerium.ai sending
-            # domain in Resend to enable delivery.
+            # Transactional email (password reset, team invites).
+            # Option A — Hostinger SMTP (active once SMTP_PASSWORD secret is set).
+            # Host/port/user default to the ledgerium.ai Hostinger mailbox, so the
+            # ONLY required secret is SMTP_PASSWORD (the hello@ledgerium.ai mailbox
+            # password). SMTP takes precedence over Resend in @/lib/email.ts.
+            SMTP_HOST=${{ vars.SMTP_HOST || 'smtp.hostinger.com' }}
+            SMTP_PORT=${{ vars.SMTP_PORT || '465' }}
+            SMTP_SECURE=${{ vars.SMTP_SECURE || 'true' }}
+            SMTP_USER=${{ vars.SMTP_USER || 'hello@ledgerium.ai' }}
+            SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
+            # Optional dedicated-provider alternative — left wired for future use.
             RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
-            EMAIL_FROM=${{ vars.EMAIL_FROM || 'Ledgerium AI <noreply@ledgerium.ai>' }}
+            EMAIL_FROM=${{ vars.EMAIL_FROM || 'Ledgerium AI <hello@ledgerium.ai>' }}
             NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL || 'https://ledgerium.ai' }}
             DATA_DIR=/app/data
             UPLOAD_DIR=/app/data/uploads

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { statSync, statfsSync } from 'node:fs';
 import path from 'node:path';
 import { db } from '@/db';
+import { selectEmailProvider, isEmailDeliveryConfigured } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,7 +70,8 @@ export async function GET() {
     // provider misconfiguration is the root cause of reset/invite emails
     // silently never being delivered (see @/lib/email.ts).
     const emailInfo = {
-      providerConfigured: !!process.env.RESEND_API_KEY,
+      providerConfigured: isEmailDeliveryConfigured(),
+      provider: selectEmailProvider(),
       fromConfigured: !!process.env.EMAIL_FROM,
       siteUrlConfigured: !!process.env.NEXT_PUBLIC_SITE_URL,
     };

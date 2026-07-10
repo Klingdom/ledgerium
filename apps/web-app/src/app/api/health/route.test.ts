@@ -24,6 +24,7 @@ beforeEach(() => {
   vi.resetModules();
   process.env = { ...ORIGINAL_ENV };
   delete process.env.RESEND_API_KEY;
+  delete process.env.SMTP_PASSWORD;
   delete process.env.EMAIL_FROM;
   delete process.env.NEXT_PUBLIC_SITE_URL;
 });
@@ -41,12 +42,13 @@ describe('GET /api/health — email observability', () => {
     expect(res.status).toBe(200);
     expect(json.email).toEqual({
       providerConfigured: false,
+      provider: 'console',
       fromConfigured: false,
       siteUrlConfigured: false,
     });
   });
 
-  it('reports true for each configured env var independently', async () => {
+  it('reports true + provider when configured (Resend)', async () => {
     process.env.RESEND_API_KEY = 're_test_key';
     process.env.EMAIL_FROM = 'Ledgerium AI <noreply@ledgerium.ai>';
     process.env.NEXT_PUBLIC_SITE_URL = 'https://ledgerium.ai';
@@ -57,9 +59,21 @@ describe('GET /api/health — email observability', () => {
 
     expect(json.email).toEqual({
       providerConfigured: true,
+      provider: 'resend',
       fromConfigured: true,
       siteUrlConfigured: true,
     });
+  });
+
+  it('reports provider smtp when SMTP_PASSWORD is set (Hostinger)', async () => {
+    process.env.SMTP_PASSWORD = 'mailbox-secret';
+
+    const { GET } = await import('./route');
+    const res = await GET();
+    const json = await res.json();
+
+    expect(json.email.provider).toBe('smtp');
+    expect(json.email.providerConfigured).toBe(true);
   });
 
   it('never includes the raw secret value — booleans only', async () => {
