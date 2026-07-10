@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes, createHash } from 'crypto';
 import { db } from '@/db';
 import { sendEmail } from '@/lib/email';
+import { normalizeEmail } from '@/lib/email-normalize';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
     message: 'If an account exists with this email, a reset link has been sent.',
   });
 
-  const user = await db.user.findUnique({ where: { email: email.toLowerCase().trim() } });
+  const user = await db.user.findUnique({ where: { email: normalizeEmail(email) } });
   if (!user) return successResponse;
 
   // Invalidate any existing unused tokens for this email
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest) {
 
   const resetUrl = `${SITE_URL}/reset-password?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
 
-  await sendEmail({
+  const result = await sendEmail({
     to: user.email,
     subject: 'Reset your Ledgerium password',
     html: `
@@ -63,6 +64,16 @@ export async function POST(req: NextRequest) {
       </div>
     `,
   });
+
+  // Delivery failures were previously invisible — the route always returned
+  // the enumeration-safe success response regardless of whether the email
+  // actually sent. Surface the failure server-side (never client-side, to
+  // preserve the enumeration-safe contract) so an operator can notice and use
+  // the admin password-reset-link endpoint as a fallback delivery path.
+  // Never log the raw token/resetUrl here — only the account identifier.
+  if (!result.success) {
+    console.error('[forgot-password] email delivery failed for', user.email);
+  }
 
   return successResponse;
 }

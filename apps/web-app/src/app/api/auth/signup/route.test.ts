@@ -84,4 +84,42 @@ describe('POST /api/auth/signup', () => {
       }),
     );
   });
+
+  // ── Email normalization regression (2026-07-09) ──────────────────────────
+  // Root cause: signup previously stored/looked-up email RAW while
+  // forgot-password lowercased, so any mixed-case signup could never be
+  // found by the password-reset lookup. Both the duplicate-check and the
+  // create must use the same normalized (lowercased/trimmed) form.
+
+  it('normalizes a mixed-case email for the duplicate-check lookup', async () => {
+    const req = makeRequest({
+      email: 'Mixed.Case@Example.COM',
+      password: 'password123',
+      name: 'Test User',
+    });
+
+    await POST(req);
+
+    expect(vi.mocked(dbLib.db.user.findUnique)).toHaveBeenCalledWith({
+      where: { email: 'mixed.case@example.com' },
+    });
+  });
+
+  it('stores the normalized (lowercased) email on create', async () => {
+    const req = makeRequest({
+      email: 'Mixed.Case@Example.COM',
+      password: 'password123',
+      name: 'Test User',
+    });
+
+    await POST(req);
+
+    expect(vi.mocked(dbLib.db.user.create)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          email: 'mixed.case@example.com',
+        }),
+      }),
+    );
+  });
 });

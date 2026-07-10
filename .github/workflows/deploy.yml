@@ -97,6 +97,13 @@ jobs:
             NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
             NEXTAUTH_URL=${{ vars.NEXTAUTH_URL || 'https://ledgerium.ai' }}
             DATABASE_URL=file:/app/data/ledgerium.db
+            # Transactional email (password reset, team invites). Without
+            # RESEND_API_KEY, sendEmail() silently no-ops — no reset emails send.
+            # Set the RESEND_API_KEY secret + verify the ledgerium.ai sending
+            # domain in Resend to enable delivery.
+            RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
+            EMAIL_FROM=${{ vars.EMAIL_FROM || 'Ledgerium AI <noreply@ledgerium.ai>' }}
+            NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL || 'https://ledgerium.ai' }}
             DATA_DIR=/app/data
             UPLOAD_DIR=/app/data/uploads
             STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}

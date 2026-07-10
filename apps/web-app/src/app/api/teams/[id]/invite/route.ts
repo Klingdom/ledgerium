@@ -6,6 +6,7 @@ import { getPlanConfig, toPlanType } from '@/lib/plans';
 import { countPendingInvites } from '@/lib/workspace/seat-management';
 import { trackServer } from '@/lib/analytics-server';
 import { checkInviteRateLimit } from '@/lib/rate-limit/invite-buckets';
+import { normalizeEmail } from '@/lib/email-normalize';
 
 /**
  * POST /api/teams/:id/invite — create an invite link for a team
@@ -72,7 +73,7 @@ export async function POST(
     }
 
     const body = await req.json();
-    const email = body.email?.trim()?.toLowerCase();
+    const email = body.email ? normalizeEmail(body.email) : body.email;
     const role = body.role ?? 'member';
 
     if (!email || !email.includes('@')) {

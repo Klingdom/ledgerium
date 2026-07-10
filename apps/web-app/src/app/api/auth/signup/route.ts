@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { trackServer } from '@/lib/analytics-server';
 import { ensureSampleWorkflow, ensureAdditionalSampleWorkflows } from '@/lib/sample-workflow';
 import { ensureSampleVariants } from '@/lib/sample-variants';
+import { normalizeEmail } from '@/lib/email-normalize';
 
 const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -24,7 +25,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { email, password, name } = parsed.data;
+    const { password, name } = parsed.data;
+    // Root-cause fix: normalize email before both the duplicate-check lookup
+    // and the create — storing raw casing let mixed-case signups become
+    // unfindable by the (already-normalized) forgot-password lookup.
+    const email = normalizeEmail(parsed.data.email);
 
     const existing = await db.user.findUnique({ where: { email } });
     if (existing) {

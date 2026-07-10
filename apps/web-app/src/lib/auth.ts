@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
-import { db } from '@/db';
+import { findUserByEmailForLogin } from '@/lib/auth-user-lookup';
 
 const nextAuth = NextAuth({
   trustHost: true,
@@ -15,10 +15,10 @@ const nextAuth = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const email = credentials.email as string;
+        const rawEmail = credentials.email as string;
         const password = credentials.password as string;
 
-        const user = await db.user.findUnique({ where: { email } });
+        const user = await findUserByEmailForLogin(rawEmail);
         if (!user) return null;
 
         const isValid = await compare(password, user.passwordHash);

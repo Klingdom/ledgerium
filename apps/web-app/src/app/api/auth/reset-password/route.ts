@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createHash } from 'crypto';
 import { hash } from 'bcryptjs';
 import { db } from '@/db';
+import { normalizeEmail } from '@/lib/email-normalize';
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
   const resetToken = await db.passwordResetToken.findFirst({
     where: {
       tokenHash,
-      email: email.toLowerCase().trim(),
+      email: normalizeEmail(email),
       usedAt: null,
       expiresAt: { gt: new Date() },
     },

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { trackServer } from '@/lib/analytics-server';
+import { normalizeEmail } from '@/lib/email-normalize';
 
 /**
  * GET /api/workflows/:id/share — list who this workflow is shared with
@@ -97,7 +98,7 @@ export async function POST(
 
     if (email) {
       // Share with a specific user by email
-      const targetUser = await db.user.findUnique({ where: { email: email.trim().toLowerCase() } });
+      const targetUser = await db.user.findUnique({ where: { email: normalizeEmail(email) } });
       if (!targetUser) {
         return NextResponse.json({ error: 'User not found. They must have a Ledgerium account.' }, { status: 404 });
       }

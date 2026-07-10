@@ -1,0 +1,77 @@
+name: Mint password reset link
+
+# Operational fallback for the password-reset-email defect: mint a real,
+# single-use reset link for a user straight from the LIVE production database,
+# without depending on outbound email and without any manual system access.
+#
+# Usage: Actions tab → "Mint password reset link" → Run workflow → enter the
+# user's email. The link appears in the run's Summary.
+#
+# Auth: calls POST /api/admin/password-reset-link with an HMAC ops token
+# derived from the existing NEXTAUTH_SECRET (no new secret required). The token
+# is masked in logs and never persisted.
+
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: 'User email to mint a reset link for'
+        required: true
+        type: string
+
+jobs:
+  mint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mint reset link
+        env:
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://ledgerium.ai' }}
+          EMAIL: ${{ inputs.email }}
+        run: |
+          set -euo pipefail
+          if [ -z "${NEXTAUTH_SECRET:-}" ]; then
+            echo "::error::NEXTAUTH_SECRET is not configured as a repo secret."
+            exit 1
+          fi
+
+          # Token is bound to the current unix-minute window so a captured
+          # token is not replayable beyond a couple of minutes.
+          LABEL='admin-password-reset-link.v1'
+          WINDOW=$(( $(date +%s) / 60 ))
+          TOKEN=$(printf '%s' "${LABEL}:${WINDOW}" | openssl dgst -sha256 -hmac "$NEXTAUTH_SECRET" | awk '{print $NF}')
+          echo "::add-mask::$TOKEN"
+
+          RESP=$(curl -sS -w '\n%{http_code}' -X POST "$SITE_URL/api/admin/password-reset-link" \
+            -H 'content-type: application/json' \
+            -H "x-ops-token: $TOKEN" \
+            -d "$(jq -nc --arg e "$EMAIL" '{email:$e}')")
+
+          BODY=$(printf '%s' "$RESP" | sed '$d')
+          CODE=$(printf '%s' "$RESP" | tail -n1)
+
+          if [ "$CODE" != "200" ]; then
+            echo "::error::Endpoint returned HTTP $CODE. A 404 means the user was not found (check the email) or the ops token was rejected (is the fix deployed?). Body: $BODY"
+            exit 1
+          fi
+
+          URL=$(printf '%s' "$BODY" | jq -r '.data.resetUrl')
+          EXP=$(printf '%s' "$BODY" | jq -r '.data.expiresAt')
+
+          echo "Reset link minted for $EMAIL (single-use, expires $EXP)."
+          # Emit on a parseable line so the run output can be retrieved via gh.
+          # Same visibility as the run summary; the link is single-use + ~1h TTL.
+          echo "MINTED_RESET_URL=$URL"
+          {
+            echo "### 🔑 Password reset link"
+            echo ""
+            echo "**User:** \`$EMAIL\`"
+            echo ""
+            echo "**Expires:** $EXP (single-use, ~1 hour)"
+            echo ""
+            echo '```'
+            echo "$URL"
+            echo '```'
+            echo ""
+            echo "> ⚠️ This link is a live account-takeover primitive. Send it to the user immediately and do not share the run link. Re-run this workflow if it expires. Once transactional email is configured (RESEND_API_KEY), this workflow is no longer needed."
+          } >> "$GITHUB_STEP_SUMMARY"

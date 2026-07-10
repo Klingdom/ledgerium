@@ -13,9 +13,11 @@ export const dynamic = 'force-dynamic';
  *
  * Contract: returns 200 `{ status: 'ok' }` when the DB is reachable, 503
  * `{ status: 'error' }` when it is not. The `db` object adds non-fatal
- * observability (size, read latency, disk pressure). Observability failures
- * NEVER flip the status — only DB connectivity does. We intentionally time a
- * READ, not a write, so the every-30s health probe adds zero write-lock load.
+ * observability (size, read latency, disk pressure). The `email` object adds
+ * non-fatal transactional-email configuration observability (booleans only —
+ * never the secret values themselves). Observability failures NEVER flip the
+ * status — only DB connectivity does. We intentionally time a READ, not a
+ * write, so the every-30s health probe adds zero write-lock load.
  */
 
 /** Resolve the SQLite file path from a `file:` DATABASE_URL, if applicable. */
@@ -61,10 +63,22 @@ export async function GET() {
       }
     }
 
+    // Email observability (booleans only — never log/return secret values).
+    // Non-fatal: this never affects `status`, only DB connectivity does.
+    // Reports whether the transactional-email pipeline is configured — a
+    // provider misconfiguration is the root cause of reset/invite emails
+    // silently never being delivered (see @/lib/email.ts).
+    const emailInfo = {
+      providerConfigured: !!process.env.RESEND_API_KEY,
+      fromConfigured: !!process.env.EMAIL_FROM,
+      siteUrlConfigured: !!process.env.NEXT_PUBLIC_SITE_URL,
+    };
+
     return NextResponse.json({
       status: 'ok',
       timestamp: new Date().toISOString(),
       db: dbInfo,
+      email: emailInfo,
     });
   } catch {
     return NextResponse.json(
