@@ -104,6 +104,57 @@ async function sendViaResend({ to, subject, html }: SendEmailParams): Promise<{ 
   }
 }
 
+// ── Diagnostic (admin) ──────────────────────────────────────────────────────
+
+export interface EmailDiagnostic {
+  provider: EmailProvider;
+  attempted: boolean;
+  success: boolean;
+  error: string | null;
+  config: { host?: string; port?: number; secure?: boolean; user?: string; from: string };
+}
+
+/**
+ * Attempt a real test send and RETURN the outcome (including the underlying
+ * error message on failure) so delivery problems can be diagnosed without
+ * server log access. Never throws.
+ */
+export async function runEmailDiagnostic(to: string): Promise<EmailDiagnostic> {
+  const provider = selectEmailProvider();
+  const from = fromAddress();
+  const subject = 'Ledgerium email delivery test';
+  const html = '<p>SMTP delivery test — if you received this, transactional email is working.</p>';
+
+  if (provider === 'smtp') {
+    const host = process.env.SMTP_HOST ?? HOSTINGER_SMTP_HOST;
+    const port = Number(process.env.SMTP_PORT ?? '465');
+    const secure = (process.env.SMTP_SECURE ?? (port === 465 ? 'true' : 'false')) === 'true';
+    const user = process.env.SMTP_USER ?? DEFAULT_SMTP_USER;
+    const config = { host, port, secure, user, from };
+    try {
+      const transporter = getSmtpTransporter();
+      await transporter.verify();
+      await transporter.sendMail({ from, to, subject, html });
+      return { provider, attempted: true, success: true, error: null, config };
+    } catch (err) {
+      return { provider, attempted: true, success: false, error: (err as Error).message, config };
+    }
+  }
+
+  if (provider === 'resend') {
+    const result = await sendViaResend({ to, subject, html });
+    return {
+      provider,
+      attempted: true,
+      success: result.success,
+      error: result.success ? null : 'Resend send failed (see server logs)',
+      config: { from },
+    };
+  }
+
+  return { provider, attempted: false, success: false, error: 'No email provider configured', config: { from } };
+}
+
 // ── Public API ──────────────────────────────────────────────────────────────
 
 export async function sendEmail(params: SendEmailParams): Promise<{ success: boolean }> {

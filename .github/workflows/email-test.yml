@@ -1,0 +1,61 @@
+name: Email delivery diagnostic
+
+# Sends a real test email via the configured provider and prints the exact
+# outcome (including the SMTP error on failure) to the run log — so email
+# delivery can be diagnosed without server access.
+#
+# Usage: Actions → "Email delivery diagnostic" → Run workflow → (optional) enter
+# a recipient. Reads the outcome from the run log.
+
+on:
+  workflow_dispatch:
+    inputs:
+      to:
+        description: 'Recipient for the test email (defaults to hello@ledgerium.ai)'
+        required: false
+        type: string
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send diagnostic email
+        env:
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://ledgerium.ai' }}
+          TO: ${{ inputs.to }}
+        run: |
+          set -uo pipefail
+          if [ -z "${NEXTAUTH_SECRET:-}" ]; then
+            echo "::error::NEXTAUTH_SECRET is not configured."
+            exit 1
+          fi
+          LABEL='admin-email-test.v1'
+          WINDOW=$(( $(date +%s) / 60 ))
+          TOKEN=$(printf '%s' "${LABEL}:${WINDOW}" | openssl dgst -sha256 -hmac "$NEXTAUTH_SECRET" | awk '{print $NF}')
+          echo "::add-mask::$TOKEN"
+
+          BODY_JSON='{}'
+          if [ -n "${TO:-}" ]; then BODY_JSON="$(jq -nc --arg t "$TO" '{to:$t}')"; fi
+
+          RESP=$(curl -sS -w '\n%{http_code}' -X POST "$SITE_URL/api/admin/email-test" \
+            -H 'content-type: application/json' \
+            -H "x-ops-token: $TOKEN" \
+            -d "$BODY_JSON")
+          BODY=$(printf '%s' "$RESP" | sed '$d')
+          CODE=$(printf '%s' "$RESP" | tail -n1)
+
+          echo "HTTP $CODE"
+          echo "RESULT: $BODY"
+          echo "$BODY" | jq . 2>/dev/null || true
+
+          # Surface the provider + error prominently.
+          PROVIDER=$(printf '%s' "$BODY" | jq -r '.data.provider // "unknown"' 2>/dev/null)
+          SUCCESS=$(printf '%s' "$BODY" | jq -r '.data.success // false' 2>/dev/null)
+          ERR=$(printf '%s' "$BODY" | jq -r '.data.error // ""' 2>/dev/null)
+          echo "PROVIDER=$PROVIDER SUCCESS=$SUCCESS"
+          [ -n "$ERR" ] && echo "EMAIL_ERROR=$ERR" || true
+
+          if [ "$SUCCESS" != "true" ]; then
+            echo "::warning::Email test did not succeed — provider=$PROVIDER error=$ERR"
+          fi
