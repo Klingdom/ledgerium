@@ -6,6 +6,7 @@ import { trackServer } from '@/lib/analytics-server';
 import { ensureSampleWorkflow, ensureAdditionalSampleWorkflows } from '@/lib/sample-workflow';
 import { ensureSampleVariants } from '@/lib/sample-variants';
 import { normalizeEmail } from '@/lib/email-normalize';
+import { checkAuthRateLimit, AUTH_RATE_LIMITS } from '@/lib/rate-limit/auth-buckets';
 
 const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -30,6 +31,18 @@ export async function POST(req: NextRequest) {
     // and the create — storing raw casing let mixed-case signups become
     // unfindable by the (already-normalized) forgot-password lookup.
     const email = normalizeEmail(parsed.data.email);
+
+    // Abuse protection: 10 requests per IP per hour, checked before creating
+    // the user (and before the duplicate-check lookup, which would otherwise
+    // remain an unthrottled probe surface).
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+    const rl = checkAuthRateLimit(`signup:${ip}`, Date.now(), AUTH_RATE_LIMITS.signup);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests' },
+        { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } },
+      );
+    }
 
     const existing = await db.user.findUnique({ where: { email } });
     if (existing) {

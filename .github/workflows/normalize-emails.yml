@@ -1,0 +1,67 @@
+name: Normalize user emails (backfill)
+
+# One-time (idempotent) backfill: lowercase/trim existing User.email rows so
+# pre-fix mixed-case accounts can self-reset. Runs against the LIVE database.
+#
+# Defaults to a DRY RUN (zero writes) that reports what would change + any
+# case-collisions. Set apply=true to actually write (safe rows only; collisions
+# are always skipped and reported).
+#
+# Usage: Actions → "Normalize user emails (backfill)" → Run workflow →
+# apply=false first (review), then apply=true.
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: 'Write changes? (false = dry-run report only)'
+        required: true
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run backfill
+        env:
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://ledgerium.ai' }}
+          APPLY: ${{ inputs.apply }}
+        run: |
+          set -uo pipefail
+          if [ -z "${NEXTAUTH_SECRET:-}" ]; then
+            echo "::error::NEXTAUTH_SECRET is not configured."
+            exit 1
+          fi
+          LABEL='admin-normalize-emails.v1'
+          WINDOW=$(( $(date +%s) / 60 ))
+          TOKEN=$(printf '%s' "${LABEL}:${WINDOW}" | openssl dgst -sha256 -hmac "$NEXTAUTH_SECRET" | awk '{print $NF}')
+          echo "::add-mask::$TOKEN"
+
+          BODY_JSON="$(jq -nc --argjson a "$([ "$APPLY" = "true" ] && echo true || echo false)" '{apply:$a}')"
+          echo "Mode: apply=$APPLY"
+
+          RESP=$(curl -sS -w '\n%{http_code}' -X POST "$SITE_URL/api/admin/normalize-emails" \
+            -H 'content-type: application/json' \
+            -H "x-ops-token: $TOKEN" \
+            -d "$BODY_JSON")
+          BODY=$(printf '%s' "$RESP" | sed '$d')
+          CODE=$(printf '%s' "$RESP" | tail -n1)
+
+          echo "HTTP $CODE"
+          echo "$BODY" | jq . 2>/dev/null || echo "$BODY"
+
+          {
+            echo "### Email normalization backfill (apply=$APPLY)"
+            echo ""
+            echo '```json'
+            echo "$BODY" | jq . 2>/dev/null || echo "$BODY"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$CODE" != "200" ]; then
+            echo "::error::normalize-emails returned HTTP $CODE"
+            exit 1
+          fi

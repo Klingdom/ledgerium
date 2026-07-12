@@ -3,6 +3,7 @@ import { randomBytes, createHash } from 'crypto';
 import { db } from '@/db';
 import { sendEmail } from '@/lib/email';
 import { normalizeEmail } from '@/lib/email-normalize';
+import { checkAuthRateLimit, AUTH_RATE_LIMITS } from '@/lib/rate-limit/auth-buckets';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -11,6 +12,18 @@ export async function POST(req: NextRequest) {
 
   if (!email || typeof email !== 'string') {
     return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+  }
+
+  // Abuse protection: 5 requests per IP per 15 minutes. Checked before the
+  // user lookup so a scripted attacker cannot use this endpoint to probe
+  // account existence (or exhaust the email-sending budget) at high volume.
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+  const rl = checkAuthRateLimit(`forgot:${ip}`, Date.now(), AUTH_RATE_LIMITS.forgotPassword);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } },
+    );
   }
 
   // Always return success to prevent email enumeration

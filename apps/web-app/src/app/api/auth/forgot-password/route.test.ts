@@ -36,14 +36,29 @@ vi.mock('@/lib/email', () => ({
   sendEmail: vi.fn(),
 }));
 
+// Rate-limit module is mocked so route-level tests can deterministically
+// force the allow / block outcome without racing NODE_ENV=test's own
+// bypass short-circuit inside checkAuthRateLimit itself (auth-buckets.test.ts
+// covers the real bucket logic directly).
+vi.mock('@/lib/rate-limit/auth-buckets', () => ({
+  checkAuthRateLimit: vi.fn(() => ({ allowed: true })),
+  AUTH_RATE_LIMITS: {
+    forgotPassword: { max: 5, windowMs: 15 * 60 * 1000 },
+    signup: { max: 10, windowMs: 60 * 60 * 1000 },
+    login: { max: 10, windowMs: 15 * 60 * 1000 },
+  },
+}));
+
 import { db } from '@/db';
 import { sendEmail } from '@/lib/email';
+import { checkAuthRateLimit } from '@/lib/rate-limit/auth-buckets';
 import { POST } from './route';
 
 const mockUserFindUnique = db.user.findUnique as ReturnType<typeof vi.fn>;
 const mockTokenUpdateMany = db.passwordResetToken.updateMany as ReturnType<typeof vi.fn>;
 const mockTokenCreate = db.passwordResetToken.create as ReturnType<typeof vi.fn>;
 const mockSendEmail = sendEmail as ReturnType<typeof vi.fn>;
+const mockCheckAuthRateLimit = checkAuthRateLimit as ReturnType<typeof vi.fn>;
 
 function makeRequest(body: unknown): NextRequest {
   return new NextRequest('http://localhost/api/auth/forgot-password', {
@@ -64,6 +79,7 @@ beforeEach(() => {
   mockTokenUpdateMany.mockResolvedValue({ count: 0 });
   mockTokenCreate.mockResolvedValue({ id: 'token_1' });
   mockSendEmail.mockResolvedValue({ success: true });
+  mockCheckAuthRateLimit.mockReturnValue({ allowed: true });
   consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 
@@ -162,5 +178,62 @@ describe('POST /api/auth/forgot-password', () => {
     await POST(makeRequest({ email: 'user@example.com' }));
 
     expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+});
+
+// ── Rate limiting (abuse protection) ───────────────────────────────────────────
+
+describe('POST /api/auth/forgot-password — rate limiting', () => {
+  it('returns 429 with a Retry-After header when the rate limit is exceeded, before any user lookup', async () => {
+    mockCheckAuthRateLimit.mockReturnValue({ allowed: false, retryAfterSeconds: 900 });
+
+    const res = await POST(makeRequest({ email: 'user@example.com' }));
+    const json = await res.json();
+
+    expect(res.status).toBe(429);
+    expect(json.error).toBe('Too many requests');
+    expect(res.headers.get('Retry-After')).toBe('900');
+    expect(mockUserFindUnique).not.toHaveBeenCalled();
+    expect(mockSendEmail).not.toHaveBeenCalled();
+  });
+
+  it('keys the rate-limit check with the "forgot:" purpose prefix and the derived IP', async () => {
+    const req = new NextRequest('http://localhost/api/auth/forgot-password', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-forwarded-for': '203.0.113.7, 10.0.0.1',
+      },
+      body: JSON.stringify({ email: 'user@example.com' }),
+    });
+
+    await POST(req);
+
+    expect(mockCheckAuthRateLimit).toHaveBeenCalledWith(
+      'forgot:203.0.113.7',
+      expect.any(Number),
+      { max: 5, windowMs: 15 * 60 * 1000 },
+    );
+  });
+
+  it('falls back to "unknown" when no x-forwarded-for header is present', async () => {
+    await POST(makeRequest({ email: 'user@example.com' }));
+
+    expect(mockCheckAuthRateLimit).toHaveBeenCalledWith(
+      'forgot:unknown',
+      expect.any(Number),
+      { max: 5, windowMs: 15 * 60 * 1000 },
+    );
+  });
+
+  it('allowed requests proceed to the enumeration-safe success response as before', async () => {
+    mockCheckAuthRateLimit.mockReturnValue({ allowed: true });
+    mockUserFindUnique.mockResolvedValue(null);
+
+    const res = await POST(makeRequest({ email: 'ghost@example.com' }));
+    const json = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(json.message).toBe('If an account exists with this email, a reset link has been sent.');
   });
 });
