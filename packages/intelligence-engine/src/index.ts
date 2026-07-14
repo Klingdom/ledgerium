@@ -260,3 +260,18 @@ export type {
   PortfolioTimeSinkTotals,
   PortfolioTimeSinkReport,
 } from './crossWorkflow/aggregateTimeSinks.js';
+
+// ─── Cross-Workflow Intelligence — T2 N-Way Process Diff ──────────────────────
+// Pure + deterministic. Reuses `lcsAlignment()` (divergenceAnalyzer.ts) for
+// step-level alignment against a chosen baseline — no new alignment math.
+export { compareWorkflows, COMPARE_WORKFLOWS_ALGORITHM } from './crossWorkflow/compareWorkflows.js';
+export type {
+  CompareStep,
+  WorkflowCompareInput,
+  CompareWorkflowsOptions,
+  ProcessDiffCellStatus,
+  ProcessDiffCell,
+  ProcessDiffRow,
+  ProcessDiffWorkflowSummary,
+  ProcessDiffReport,
+} from './crossWorkflow/compareWorkflows.js';

@@ -10,7 +10,8 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, ArrowDown, ArrowUp, Minus } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowRight, ArrowDown, ArrowUp, Minus, GitCompare } from 'lucide-react';
 import { formatDuration } from '@/lib/format';
 import { track } from '@/lib/analytics';
 import {
@@ -281,6 +282,14 @@ export default function ComparePage() {
           Compare a baseline recording against an improved one — and see the time and cost saved.
           Every figure is observed from real runs, not estimated.
         </p>
+        <Link
+          href="/compare/diff"
+          onClick={() => track({ event: 'cta_clicked', location: 'compare_page', destination: '/compare/diff' })}
+          className="mt-ds-2 inline-flex items-center gap-1.5 text-ds-sm font-medium text-brand-600 hover:text-brand-500"
+        >
+          <GitCompare className="h-4 w-4" aria-hidden />
+          Compare process steps across 2–6 workflows →
+        </Link>
       </header>
 
       {isLoading ? (

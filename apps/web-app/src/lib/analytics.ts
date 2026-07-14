@@ -482,6 +482,25 @@ export type AnalyticsEvent =
       personaKey: string | null;
     }
 
+  // ── N-Way Process Diff (T2, Cross-Workflow Intelligence program) ──────────
+  // PII-free: counts + taxonomy only — never step labels or workflow titles.
+  | {
+      event: 'process_diff_viewed';
+      workflowCount: number;
+      rowCount: number;
+      lens: 'structural' | 'temporal';
+    }
+  | {
+      event: 'process_diff_lens_toggled';
+      fromLens: 'structural' | 'temporal';
+      toLens: 'structural' | 'temporal';
+      elapsedMsSinceProcessDiffView: number;
+    }
+  | {
+      event: 'process_diff_baseline_changed';
+      workflowCount: number;
+    }
+
   // ── Navigation ────────────────────────────────────────────────────────────
   | { event: 'page_viewed'; path: string }
 
