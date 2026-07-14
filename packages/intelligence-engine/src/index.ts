@@ -247,3 +247,16 @@ export type {
   DivergenceAnalysis,
   DivergenceOptions,
 } from './divergenceAnalyzer.js';
+
+// ─── Cross-Workflow Intelligence — T1 Portfolio Time-Sink Ranking ─────────────
+// Pure + deterministic map-reduce over already-computed per-workflow
+// timestudy/bottleneck outputs. No new clustering or similarity math.
+export { aggregateTimeSinks, TIME_SINK_MODEL_VERSION } from './crossWorkflow/aggregateTimeSinks.js';
+export type {
+  TimeSinkInput,
+  TimeSinkStepDurationRange,
+  TimeSinkTopBottleneck,
+  PortfolioTimeSinkEntry,
+  PortfolioTimeSinkTotals,
+  PortfolioTimeSinkReport,
+} from './crossWorkflow/aggregateTimeSinks.js';

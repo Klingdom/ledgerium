@@ -212,6 +212,28 @@ export default function AnalyticsPage() {
       ) : (
         <>
           {/* ═══════════════════════════════════════════════════════════════
+              Entry point — Portfolio Time-Sink Ranking (T1)
+              ═══════════════════════════════════════════════════════════════ */}
+          <Link
+            href="/analytics/time-sinks"
+            onClick={() => track({ event: 'cta_clicked', location: 'analytics_page', destination: '/analytics/time-sinks' })}
+            className="card flex items-center justify-between px-ds-5 py-ds-4 hover:border-brand-200 transition-colors"
+          >
+            <div className="flex items-center gap-ds-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-ds-md bg-brand-50">
+                <Clock className="h-4.5 w-4.5 text-brand-600" />
+              </div>
+              <div>
+                <h2 className="text-ds-sm font-semibold text-[var(--content-primary)]">Where your time goes</h2>
+                <p className="text-ds-xs text-[var(--content-secondary)]">
+                  Every workflow ranked by cumulative recorded time, with its biggest bottleneck.
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-[var(--content-tertiary)] flex-shrink-0" />
+          </Link>
+
+          {/* ═══════════════════════════════════════════════════════════════
               SECTION 1 — Executive Summary Strip
               ═══════════════════════════════════════════════════════════════ */}
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-ds-3">
