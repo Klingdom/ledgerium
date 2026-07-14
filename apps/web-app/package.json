@@ -19,7 +19,8 @@
     "db:generate": "prisma generate",
     "validate:seo": "tsx scripts/validate-seo-content.ts",
     "health-score:compare": "tsx scripts/health-score-distribution.ts",
-    "seed:demo": "tsx scripts/seed-demo-account.ts"
+    "seed:demo": "tsx scripts/seed-demo-account.ts",
+    "calibrate:clustering": "tsx scripts/calibrate-clustering.ts"
   },
   "dependencies": {
     "@ledgerium/agent-intelligence": "workspace:*",

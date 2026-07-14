@@ -221,6 +221,23 @@ export type {
   ClusterResult,
 } from './clustering/clusterSignatures.js';
 
+// ─── Clustering Threshold Calibration (Cross-Workflow Intelligence, Phase 0) ──
+// Pure + deterministic + read-only analysis layer on top of `clusterSignatures`
+// / `traceSimilarity`. Computes the pairwise similarity distribution for a real
+// population of recordings and sweeps `clusterSignatures` across a threshold
+// range to recommend a defensible production threshold (widest stable plateau).
+export { calibrateThreshold, CALIBRATION_VERSION } from './calibration/calibrateThreshold.js';
+export type {
+  CalibrationMember,
+  CalibrationOptions,
+  CalibrationReport,
+  CalibrationParams,
+  SimilarityDistribution,
+  SimilarityHistogramBucket,
+  ThresholdSweepPoint,
+  PlateauRange,
+} from './calibration/calibrateThreshold.js';
+
 // ─── Diverge → Reconverge analysis (Process Variation Phase 2, C+4) ───────────
 // Pure + deterministic. LCS-backbone alignment + DFG split/join cross-check.
 export { analyzeDivergence, divergentStepIndices, DIVERGENCE_ALGORITHM } from './divergenceAnalyzer.js';
