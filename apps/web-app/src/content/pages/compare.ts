@@ -494,6 +494,333 @@ const processStreet: ComparePage = {
   published: true,
 };
 
+const celonis: ComparePage = {
+  type: 'compare',
+  slug: 'celonis',
+  metaTitle: 'Ledgerium vs Celonis: Capture Before You Mine',
+  metaDescription:
+    'Celonis mines event logs from enterprise systems at scale. Ledgerium records the human, cross-system workflow those logs never see. See how they fit together.',
+  h1: 'Ledgerium vs Celonis: two points in the same process lifecycle',
+  eyebrow: 'Comparison',
+  shortAnswer:
+    'Celonis and Ledgerium both help you understand how work happens, but they sit at different points in the process lifecycle. Celonis is enterprise process mining: it reads the event logs your systems already produce and analyzes cases for conformance and bottlenecks at scale. Ledgerium records the human, cross-system workflow directly as structured steps with timing, capturing work that never lands in a system log. Ledgerium is not a Celonis replacement. It produces the clean, baselined evidence teams often lack before a mining project can even start.',
+  primaryKeyword: 'Ledgerium vs Celonis',
+  secondaryKeywords: ['Celonis alternative for undocumented processes', 'process capture before process mining', 'baseline a workflow without event logs'],
+  searchIntent: 'commercial',
+  tags: ['comparison', 'process-mining', 'process-intelligence', 'enterprise'],
+  related: ['compare:process-mining', 'competitors:celonis', 'persona:process-excellence-leads'],
+  originalDataPoint:
+    'Celonis needs an event log to reconstruct a process. When a workflow crosses several browser tools that never wrote those events, there is nothing to mine. Ledgerium records that same workflow as structured steps with millisecond timing, turning an unminable process into a documented, measurable one.',
+  mechanismIntro:
+    'Celonis reconstructs a process from the event logs your enterprise systems already emit, while Ledgerium records the human, cross-system clicks and timing before any log exists, producing the clean baseline that mining needs as its input.',
+  keyTakeaways: [
+    'Celonis is enterprise process mining, strongest at analyzing high volumes of historical cases inside well-logged systems for conformance and bottlenecks.',
+    'Mining reconstructs a process only from events a system already writes to a log, so the manual steps between systems stay invisible.',
+    'Ledgerium records the human, cross-system workflow directly, producing a baseline for processes that never generated a clean log to mine.',
+    'Ledgerium does not replace Celonis; it supplies the documented starting evidence a mining program often lacks before it begins.',
+    'Enterprise conformance analysis at scale fits Celonis, while baselining a specific undocumented workflow fits Ledgerium.',
+  ],
+  honestLimitation:
+    'Celonis analyzes millions of historical cases across an enterprise; Ledgerium captures observed runs, not log history at that scale, and only for browser-based work reached through a Chrome extension.',
+  competitor: 'Celonis',
+  whyItMatters:
+    'Buying a mining platform for a process that never produced a usable log is a common and expensive mismatch. Mining answers "how does this logged process really run at scale?" Recording answers "what does this undocumented, cross-system process actually look like?" Getting that order right is the difference between a stalled deployment and a documented baseline you can build on.',
+  rows: [
+    { label: 'Category', competitor: 'Enterprise process mining', ledgerium: 'Structured workflow capture' },
+    { label: 'Data source', competitor: 'System event logs', ledgerium: 'Directly recorded interaction data' },
+    { label: 'Captures off-log manual steps', competitor: false, ledgerium: true },
+    { label: 'Scale of cases analyzed', competitor: 'Millions from history', ledgerium: 'Observed runs' },
+    { label: 'Setup effort', competitor: 'Log extraction and modeling project', ledgerium: 'Install and record' },
+    { label: 'Produces a ready SOP', competitor: false, ledgerium: true },
+    { label: 'Best positioned for', competitor: 'System-wide conformance at scale', ledgerium: 'Baseline evidence before mining' },
+  ],
+  competitorStrength:
+    'Celonis is far stronger for enterprise-scale analysis. Where a high-volume process runs inside well-instrumented systems, its Process Intelligence and Context Model correlate millions of cases across the business in ways a set of recorded runs never could.',
+  whenCompetitorFits: [
+    'High-volume processes inside enterprise systems that already log cleanly',
+    'You need conformance and bottleneck analysis across millions of historical cases',
+    'You have the data engineering to extract and model event logs',
+  ],
+  whenLedgeriumFits: [
+    'The process spans browser tools that never produced a clean event log',
+    'You need a documented baseline before deciding whether to mine at all',
+    'You want an SOP and process map, not only system-wide analytics',
+    'The valuable steps are the manual handoffs a log would miss',
+  ],
+  verifiedAsOf: 'July 2026',
+  faqs: [
+    {
+      q: 'Is Ledgerium a Celonis alternative?',
+      a: 'Only for a specific job. Celonis mines event logs to analyze processes at enterprise scale; Ledgerium records a cross-system workflow directly to document and baseline it. For an undocumented process with no usable log, Ledgerium is the better starting point, but it does not replace enterprise mining where logs already exist.',
+    },
+    {
+      q: 'Can Ledgerium and Celonis be used together?',
+      a: 'Yes, and it is the honest positioning. Use Ledgerium to record and baseline a cross-system workflow, then feed that documented understanding into a Celonis program once the process is instrumented enough to produce the logs mining depends on.',
+    },
+    {
+      q: 'Why do mining projects stall on cross-system work?',
+      a: 'Process mining can only see events a system writes to a log. When work hops between several browser tools, the steps in between are never logged, so the reconstructed process has gaps. Recording the workflow directly avoids that dependency.',
+    },
+    {
+      q: 'Does Ledgerium do process mining?',
+      a: 'No. Ledgerium is not a log-based mining tool. It records the real workflow as structured interaction data with timing and generates an SOP, process map, and intelligence report from the observed runs, which is a complement to log-based mining, not a substitute for it.',
+    },
+    {
+      q: 'Which should a team try first?',
+      a: 'If the process already lives in well-logged systems and the question is scale, start with mining. If the process is undocumented and spans several tools, record it with Ledgerium first to get a baseline, then decide whether mining adds anything.',
+    },
+  ],
+  jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
+const uipath: ComparePage = {
+  type: 'compare',
+  slug: 'uipath',
+  metaTitle: 'Ledgerium vs UiPath: Document Before You Automate',
+  metaDescription:
+    'UiPath runs software robots and agentic automation once a process is defined. Ledgerium records and baselines that process first. See where each one fits.',
+  h1: 'Ledgerium vs UiPath: baseline the work before you automate it',
+  eyebrow: 'Comparison',
+  shortAnswer:
+    'UiPath and Ledgerium are often mentioned together but do opposite jobs. UiPath is an automation platform: its robots and agentic Maestro orchestration execute steps once a process is defined and stable. Ledgerium records the real workflow first, as structured steps with timing, so you can see what the process actually is and where the effort goes. Ledgerium does not run bots. It produces the documented, measured baseline that tells you which steps are worth automating and gives your automation team an accurate specification to build against.',
+  primaryKeyword: 'Ledgerium vs UiPath',
+  secondaryKeywords: ['document a process before RPA', 'UiPath process baseline', 'what to automate with UiPath'],
+  searchIntent: 'commercial',
+  tags: ['comparison', 'automation', 'rpa', 'process-intelligence'],
+  related: ['compare:process-mining', 'competitors:uipath', 'problem:how-to-baseline-a-workflow'],
+  originalDataPoint:
+    'Automating a badly understood process just makes the mess run faster. Ledgerium records each step with millisecond timing, so before a single robot is built you can see which steps consume the time and are worth automating, and which are exceptions a bot would break on.',
+  mechanismIntro:
+    'UiPath orchestrates software robots to execute steps once a process is defined, while Ledgerium records the real workflow with per-step timing first, producing the documented baseline that decides which steps are worth automating.',
+  keyTakeaways: [
+    'UiPath is an automation platform whose robots and agentic Maestro orchestration execute a process once it is defined and stable.',
+    'Automation needs a clear, documented process as input; automating an unclear one just runs the confusion faster.',
+    'Ledgerium records the real workflow with per-step timing, producing the baseline that shows which steps are worth a robot.',
+    'Ledgerium runs no bots and orchestrates nothing; it documents and measures the process an automation team then builds against.',
+    'Executing repetitive steps at scale fits UiPath, while defining and baselining the process first fits Ledgerium.',
+  ],
+  honestLimitation:
+    'Ledgerium documents and measures a workflow; it does not execute anything. It has no unattended robots, no orchestration, and no runtime, so the actual automation still has to be built and run in a platform like UiPath.',
+  competitor: 'UiPath',
+  whyItMatters:
+    'Most failed automation starts from a process nobody wrote down accurately. UiPath answers "how do we execute these steps without a human?" Ledgerium answers "what are the steps, where does the time go, and which are stable enough to automate?" Skipping the second question is why bots get built for the wrong steps and break on the first exception.',
+  rows: [
+    { label: 'Category', competitor: 'RPA and agentic automation', ledgerium: 'Structured workflow capture' },
+    { label: 'Primary job', competitor: 'Executing steps with software robots', ledgerium: 'Documenting and measuring the process' },
+    { label: 'Needs a defined process first', competitor: true, ledgerium: false },
+    { label: 'Per-step timing baseline', competitor: false, ledgerium: 'Yes, millisecond precision' },
+    { label: 'Shows which steps are worth automating', competitor: 'Via discovery add-ons', ledgerium: 'From the recorded baseline' },
+    { label: 'Runs unattended bots', competitor: true, ledgerium: false },
+    { label: 'Produces a ready SOP', competitor: false, ledgerium: true },
+  ],
+  competitorStrength:
+    'UiPath is in a different league for execution. Once a process is well defined, its attended and unattended robots and agentic Maestro layer run high volumes of repetitive steps continuously, which is work Ledgerium neither does nor attempts.',
+  whenCompetitorFits: [
+    'A stable, well-understood process ready to run without a human',
+    'High-volume repetitive steps that justify building and maintaining robots',
+    'You already have the documented specification a bot needs to be built',
+  ],
+  whenLedgeriumFits: [
+    'You need to document and baseline the process before automating it',
+    'You want to see which steps consume the time and are worth a robot',
+    'The workflow crosses several browser systems and has never been mapped',
+    'Your automation team needs an accurate spec drawn from real work',
+  ],
+  verifiedAsOf: 'July 2026',
+  faqs: [
+    {
+      q: 'Is Ledgerium an alternative to UiPath?',
+      a: 'Not directly. UiPath executes steps with robots; Ledgerium records and measures the process so you know what to automate. They are complementary: Ledgerium produces the baseline and specification, UiPath builds and runs the automation against it.',
+    },
+    {
+      q: 'Why document a process before using UiPath?',
+      a: 'A robot is only as good as the process it copies. If the underlying workflow is undocumented, the automation inherits every hidden exception and inefficiency. Recording the workflow first shows which steps are stable, which consume the time, and which are exceptions a bot would break on.',
+    },
+    {
+      q: 'Does Ledgerium build or run automations?',
+      a: 'No. Ledgerium has no robots, no orchestration, and no runtime. It records the real workflow and generates an SOP, process map, and intelligence report. The automation itself is built and run in a platform like UiPath.',
+    },
+    {
+      q: 'How does Ledgerium help pick automation candidates?',
+      a: 'Because every step is captured with timing and system context, the intelligence report highlights where time concentrates and how consistent each step is, so an automation team can target the steps that are both costly and stable rather than guessing.',
+    },
+    {
+      q: 'Can the two work together on one process?',
+      a: 'Yes. A common pattern is to record a workflow in Ledgerium to produce the documented baseline, then hand that specification to a UiPath team to automate the steps the baseline shows are worth it.',
+    },
+  ],
+  jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
+const sapSignavio: ComparePage = {
+  type: 'compare',
+  slug: 'sap-signavio',
+  metaTitle: 'Ledgerium vs SAP Signavio Compared',
+  metaDescription:
+    'SAP Signavio analyzes variants and conformance from ERP transaction logs. Ledgerium records the manual steps around the ERP that the logs never capture.',
+  h1: 'Ledgerium vs SAP Signavio: inside the ERP vs around it',
+  eyebrow: 'Comparison',
+  shortAnswer:
+    'SAP Signavio and Ledgerium look at the same processes from different sides. Signavio is process intelligence built around the ERP: it reads transaction and event logs, then models variants and measures conformance against a target process at scale. Ledgerium records the human steps that happen around the ERP, the lookups, copy-paste, and cross-tab checks that never reach a transaction log. Ledgerium does not do variant or conformance mining. It captures the off-system reality that a log-based view is blind to, and turns one workflow into a documented, measurable SOP.',
+  primaryKeyword: 'Ledgerium vs SAP Signavio',
+  secondaryKeywords: ['SAP Signavio alternative for off-ERP steps', 'capture manual steps around SAP', 'document a workflow SAP logs miss'],
+  searchIntent: 'commercial',
+  tags: ['comparison', 'process-mining', 'erp', 'process-intelligence'],
+  related: ['compare:process-mining', 'software:sap', 'persona:business-analysts'],
+  originalDataPoint:
+    'ERP logs record what happened inside the ERP, never the manual work around it. Ledgerium recordings routinely show a third or more of a workflow happening in other tabs, the exact off-system steps a Signavio variant model cannot see because they were never a transaction.',
+  mechanismIntro:
+    'SAP Signavio analyzes variants and conformance from ERP transaction logs, while Ledgerium records the manual steps around the ERP with timing, producing the off-system evidence a log-based view cannot capture.',
+  keyTakeaways: [
+    'SAP Signavio is ERP-centric process intelligence, strongest at variant analysis and conformance measurement built on transaction logs.',
+    'Transaction logs capture what happens inside the ERP, not the manual lookups and cross-tab steps that surround it.',
+    'Ledgerium records those off-system steps directly with timing, producing evidence a log-based model structurally cannot see.',
+    'Ledgerium does not perform variant or conformance mining and is not an enterprise SAP analytics suite.',
+    'Analyzing variants inside the ERP fits Signavio, while documenting the manual work around it fits Ledgerium.',
+  ],
+  honestLimitation:
+    'Ledgerium does not analyze ERP variants or measure conformance across large case volumes, and it captures only browser-based work through a Chrome extension. Signavio operates on far more transaction history than a set of recorded runs.',
+  competitor: 'SAP Signavio',
+  whyItMatters:
+    'A conformance model that only sees ERP transactions can declare a process compliant while the real friction lives in the untracked steps around it. Signavio answers "how do the logged variants of this process differ?" Ledgerium answers "what actually happens between and around those transactions?" Missing the off-system half is how improvement projects fix the wrong thing.',
+  rows: [
+    { label: 'Category', competitor: 'ERP-centric process intelligence', ledgerium: 'Structured workflow capture' },
+    { label: 'Data source', competitor: 'ERP transaction and event logs', ledgerium: 'Directly recorded browser workflow' },
+    { label: 'Variant and conformance analysis', competitor: true, ledgerium: false },
+    { label: 'Captures steps outside the ERP', competitor: false, ledgerium: true },
+    { label: 'Setup effort', competitor: 'Connector and modeling deployment', ledgerium: 'Install and record' },
+    { label: 'Produces a ready SOP', competitor: false, ledgerium: true },
+  ],
+  competitorStrength:
+    'SAP Signavio is stronger wherever the process lives inside the ERP. Its variant analysis and conformance checking against a modeled target, backed by transaction history at scale, is exactly the enterprise view Ledgerium does not provide.',
+  whenCompetitorFits: [
+    'Processes that run largely inside SAP and log their transactions cleanly',
+    'You need variant analysis or conformance checking across many cases',
+    'You are running an enterprise ERP transformation with modeling needs',
+  ],
+  whenLedgeriumFits: [
+    'The friction lives in manual steps around the ERP, not the transactions',
+    'You need to document one cross-system workflow, not model the whole ERP',
+    'You want an SOP and process map generated from the real work',
+    'The steps that matter never became an ERP transaction to mine',
+  ],
+  verifiedAsOf: 'July 2026',
+  faqs: [
+    {
+      q: 'Is Ledgerium a SAP Signavio alternative?',
+      a: 'For a narrow job, yes. Signavio models and analyzes processes from ERP logs; Ledgerium records the manual, cross-system steps those logs never capture. If the work you care about happens around the ERP rather than inside it, Ledgerium documents what Signavio cannot see, but it does not replace enterprise ERP process intelligence.',
+    },
+    {
+      q: 'Why can SAP Signavio not see certain steps?',
+      a: 'It analyzes what the ERP records as transactions and events. Manual work that happens in other browser tools, a lookup, a copy-paste, a check in another system, never becomes an ERP transaction, so a log-based model has no record of it. Recording the workflow directly captures those steps.',
+    },
+    {
+      q: 'Can Ledgerium and Signavio complement each other?',
+      a: 'Yes. Signavio gives the in-ERP variant and conformance view; Ledgerium documents the off-ERP manual reality. Used together they cover both halves of a process an ERP-only model would only half-see.',
+    },
+    {
+      q: 'Does Ledgerium measure conformance?',
+      a: 'No. Ledgerium documents and baselines a specific workflow from observed runs. It does not compare large case volumes against a modeled target process, which is the conformance analysis Signavio is built for.',
+    },
+    {
+      q: 'Do I need SAP to use Ledgerium?',
+      a: 'No. Ledgerium records any browser-based workflow regardless of the underlying systems. It is useful precisely because it captures the work that spans SAP and the many other tools around it, without needing access to the ERP logs.',
+    },
+  ],
+  jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
+const zapier: ComparePage = {
+  type: 'compare',
+  slug: 'zapier',
+  metaTitle: 'Ledgerium vs Zapier: Map the Workflow First',
+  metaDescription:
+    'Zapier wires apps together through API triggers and actions. Ledgerium records the human workflow first, so you know which handoffs are worth automating.',
+  h1: 'Ledgerium vs Zapier: see the workflow before you wire it',
+  eyebrow: 'Comparison',
+  shortAnswer:
+    'Zapier and Ledgerium sit on opposite sides of automation. Zapier is iPaaS: it connects apps through API triggers and actions so a handoff between tools runs on its own. Ledgerium records the end-to-end human workflow as structured steps with timing, showing the full path a task takes across every system a person touches. Ledgerium does not connect apps or move data. It gives you the map of what actually happens, so you can see which handoffs are repetitive and worth wiring in Zapier and which are judgment steps that should stay human.',
+  primaryKeyword: 'Ledgerium vs Zapier',
+  secondaryKeywords: ['map a workflow before automating in Zapier', 'what to automate with Zapier', 'document a process for automation'],
+  searchIntent: 'commercial',
+  tags: ['comparison', 'automation', 'ipaas', 'process-intelligence'],
+  related: ['problem:how-to-standardize-workflows', 'persona:operations-managers', 'workflow:invoice-approval-workflow'],
+  originalDataPoint:
+    'A Zapier zap automates one handoff, but people rarely know which handoffs in a workflow are the costly ones. Ledgerium records the whole path with timing across every tab, so the repetitive, time-consuming handoffs worth a zap are visible instead of guessed at.',
+  mechanismIntro:
+    'Zapier connects apps through API triggers and actions to automate handoffs, while Ledgerium records the end-to-end human workflow with timing first, producing the documented process that shows which handoffs are worth wiring together.',
+  keyTakeaways: [
+    'Zapier is an iPaaS platform that connects apps through triggers and actions so a handoff between tools runs automatically.',
+    'A zap automates one handoff at a time but does not tell you which handoffs in a workflow are the costly, repetitive ones.',
+    'Ledgerium records the full human workflow with timing, making the automatable handoffs visible instead of guessed at.',
+    'Ledgerium moves no data and connects no apps; it documents the process that decides what is worth a zap.',
+    'Automating a known handoff between apps fits Zapier, while mapping the whole workflow first fits Ledgerium.',
+  ],
+  honestLimitation:
+    'Ledgerium does not integrate with or move data between applications. It has no triggers, actions, or connectors; it documents and measures a workflow but cannot execute any part of it the way an iPaaS tool does.',
+  competitor: 'Zapier',
+  whyItMatters:
+    'It is easy to build a zap for a handoff that was never the bottleneck. Zapier answers "how do I connect these two apps automatically?" Ledgerium answers "across this whole workflow, which handoffs are repetitive and costly enough to connect?" Without the second answer, teams automate the convenient step instead of the expensive one and wonder why nothing got faster.',
+  rows: [
+    { label: 'Category', competitor: 'iPaaS app automation', ledgerium: 'Structured workflow capture' },
+    { label: 'Primary job', competitor: 'Wiring app triggers to actions', ledgerium: 'Documenting the human workflow' },
+    { label: 'Connects and moves data between apps', competitor: true, ledgerium: false },
+    { label: 'Records manual, in-browser steps', competitor: false, ledgerium: true },
+    { label: 'Shows which handoffs are worth automating', competitor: false, ledgerium: true },
+    { label: 'Per-step timing', competitor: false, ledgerium: 'Yes, millisecond precision' },
+    { label: 'Produces a ready SOP', competitor: false, ledgerium: true },
+  ],
+  competitorStrength:
+    'Zapier is the stronger tool the moment you know what to connect. Its large library of app integrations and its trigger-action model make wiring a known handoff between tools fast and reliable, which is execution work Ledgerium does not do.',
+  whenCompetitorFits: [
+    'You already know the specific handoff between two apps you want to automate',
+    'The systems involved expose the triggers and actions Zapier supports',
+    'The goal is to move data between tools without a person in the loop',
+  ],
+  whenLedgeriumFits: [
+    'You need to see the whole workflow before deciding what to automate',
+    'The process spans many tools and has never been mapped end to end',
+    'You want an SOP and timing data, not just a connection between two apps',
+    'You want to target the costly handoffs rather than the convenient ones',
+  ],
+  verifiedAsOf: 'July 2026',
+  faqs: [
+    {
+      q: 'Is Ledgerium a Zapier alternative?',
+      a: 'No. Zapier connects apps and moves data between them; Ledgerium records and documents the human workflow. They solve different halves of the same goal: Ledgerium shows which handoffs are worth automating, and Zapier automates the ones you choose.',
+    },
+    {
+      q: 'Why map a workflow before building zaps?',
+      a: 'A zap automates a single handoff, but the handoff you can build most easily is often not the one costing the most time. Recording the whole workflow with timing shows where the repetitive, expensive handoffs actually are, so you wire the steps that matter.',
+    },
+    {
+      q: 'Does Ledgerium connect to my apps?',
+      a: 'No. Ledgerium has no connectors, triggers, or actions and moves no data. It records structured browser interaction events to document and measure a workflow. The connecting and data-moving is what a tool like Zapier does.',
+    },
+    {
+      q: 'Can I use Ledgerium and Zapier together?',
+      a: 'Yes, and it is a natural sequence. Record the workflow in Ledgerium to see the full path and where time concentrates, then use Zapier to automate the specific handoffs the recording shows are repetitive and worth connecting.',
+    },
+    {
+      q: 'What does Ledgerium capture that a zap does not show?',
+      a: 'A zap only knows about the two apps it links. Ledgerium captures the entire human path across every tab and tool, including the manual steps between apps, so you see the whole process rather than one automated connection inside it.',
+    },
+  ],
+  jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
 export const COMPARE_PAGES: readonly ComparePage[] = [
   tango,
   manualSop,
@@ -501,4 +828,8 @@ export const COMPARE_PAGES: readonly ComparePage[] = [
   taskMining,
   screenRecording,
   processStreet,
+  celonis,
+  uipath,
+  sapSignavio,
+  zapier,
 ];

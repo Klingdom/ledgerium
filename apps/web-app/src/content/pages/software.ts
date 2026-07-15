@@ -790,6 +790,240 @@ const sharepoint: SoftwarePage = {
   published: true,
 };
 
+const microsoftDynamics: SoftwarePage = {
+  type: 'software',
+  slug: 'microsoft-dynamics',
+  vendor: 'Microsoft Dynamics 365',
+  metaTitle: 'How to Document a Workflow in Microsoft Dynamics 365',
+  metaDescription:
+    'Document a Microsoft Dynamics 365 workflow by recording it once. Capture the real ERP and CRM steps across finance and sales in an SOP and process map.',
+  h1: 'How to document a workflow in Microsoft Dynamics 365',
+  eyebrow: 'Software guide',
+  shortAnswer:
+    'To document a workflow in Microsoft Dynamics 365, record someone performing the real process — a sales order, a vendor payment, or a customer case — then generate a step-by-step SOP and a process map from it. Dynamics 365 spans several apps and is customized per deployment, so a generic guide rarely matches the forms a team uses. Ledgerium records the real interaction in the browser, including the steps that cross the ERP and CRM apps, and produces the SOP, process map, and a workflow intelligence report tied to your deployment.',
+  primaryKeyword: 'Microsoft Dynamics 365 workflow documentation',
+  secondaryKeywords: ['document Dynamics 365 process', 'Dynamics 365 SOP', 'Dynamics 365 ERP workflow documentation'],
+  searchIntent: 'commercial',
+  tags: ['software', 'microsoft-dynamics', 'erp', 'crm', 'workflow'],
+  related: ['workflow:sales-order-processing-workflow', 'software:netsuite', 'persona:revops-managers'],
+  originalDataPoint:
+    'Dynamics 365 is not one app but a suite — Finance, Sales, Customer Service, and Business Central — and a single business process often hops between them. Ledgerium records the real path across those apps, so the SOP shows the cross-app sequence a guide scoped to one module would never capture.',
+  mechanismIntro:
+    'Dynamics 365 is a suite of apps customized per deployment, and one process often hops between Finance, Sales, and Customer Service, so Ledgerium records the real cross-app path to produce an SOP that matches the deployment rather than a single-module guide.',
+  keyTakeaways: [
+    'Dynamics 365 is a suite — Finance, Sales, Customer Service, and Business Central — so a process is often documented against one app while the real work crosses several.',
+    'Each Dynamics 365 deployment is customized with its own forms, fields, and business rules, so a generic module guide references screens a given team does not have.',
+    'Model-driven app security roles change what each user can see and do, so the same order looks different to a sales rep and a finance clerk.',
+    'Recording a sales order, a vendor payment, or a customer case as the user works captures the real forms and the hops between apps in one pass.',
+    'Ledgerium generates the SOP, process map, and a report showing where the Dynamics 365 process waits or reworks from a single recorded run.',
+  ],
+  honestLimitation:
+    'Ledgerium captures the browser-based steps across the Dynamics 365 apps. Power Automate flows, Dataverse plug-ins, and business rules that run server-side are not observed directly; document their effect from the user-visible result.',
+  documentationFrame: 'How to document a workflow in Microsoft Dynamics 365',
+  commonWorkflows: [
+    'Sales order entry and fulfillment',
+    'Vendor payment and financial posting',
+    'Customer case handling in Customer Service',
+    'Quote-to-cash across Sales and Finance',
+  ],
+  documentationChallenges: [
+    'A process crosses several Dynamics 365 apps, so single-module guides stop short',
+    'Per-deployment customization means forms and fields differ across companies',
+    'Security roles change what each user sees, so one written procedure does not fit all',
+  ],
+  oldWay:
+    'An analyst documents the steps from one Dynamics 365 app, usually the one they know best. The process actually spans Sales, Finance, and Customer Service, so the guide describes part of the flow and leaves the hand-offs between apps undocumented.',
+  ledgeriumWay:
+    'Record the real process as the user works it across the Dynamics 365 apps. Ledgerium captures the forms, field entries, and the hops between Sales, Finance, and Customer Service, then generates the SOP, the process map, and a report that highlights where the flow waits or reworks.',
+  commonMistakes: [
+    'Documenting one Dynamics 365 app when the process spans several',
+    'Writing against a standard form instead of the deployment’s customized screens',
+    'Leaving the hand-offs between the ERP and CRM apps out of the steps',
+  ],
+  faqs: [
+    {
+      q: 'How do I document a Microsoft Dynamics 365 process?',
+      a: 'Record a real run as the user works it across the Dynamics 365 apps, then generate the SOP and process map from the recording. Because it captures the actual forms and the hops between apps, the result matches your deployment rather than a single-module example.',
+    },
+    {
+      q: 'Why do generic Dynamics 365 guides fall short?',
+      a: 'Dynamics 365 is a suite of customized apps, and one process crosses several of them. A guide scoped to a single module misses the hand-offs and references forms your deployment may not have. Recording the real path captures the whole flow.',
+    },
+    {
+      q: 'Can Ledgerium capture a process that spans the ERP and CRM apps?',
+      a: 'Yes. A single recording follows the user across Sales, Finance, Customer Service, and the other browser-based systems in the process, so the SOP reflects the cross-app flow rather than one app in isolation.',
+    },
+    {
+      q: 'Does Ledgerium capture Power Automate flows and plug-ins?',
+      a: 'It captures what the user does and sees in the browser. Power Automate flows, Dataverse plug-ins, and server-side business rules are not observed directly, so document their effect from the user-visible result.',
+    },
+    {
+      q: 'Is this affiliated with Microsoft?',
+      a: 'No. This is an independent guide. Microsoft Dynamics 365 is a trademark of its owner, and Ledgerium is not affiliated with or endorsed by Microsoft.',
+    },
+  ],
+  jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
+const coupa: SoftwarePage = {
+  type: 'software',
+  slug: 'coupa',
+  vendor: 'Coupa',
+  metaTitle: 'How to Document a Workflow in Coupa',
+  metaDescription:
+    'Document a Coupa workflow by recording it once. Capture the real requisition, approval, and invoice-matching steps, and generate an SOP and process map.',
+  h1: 'How to document a workflow in Coupa',
+  eyebrow: 'Software guide',
+  shortAnswer:
+    'To document a workflow in Coupa, record someone performing the real process — a requisition, a purchase order, or an invoice reconciliation — then generate a step-by-step SOP and a process map from it. Coupa routes each request through approval chains set by amount and cost center, and much of the real work happens around it in email. Ledgerium records the full path in the browser, including the approvals and supplier sourcing outside Coupa, and produces the SOP, process map, and a workflow intelligence report tied to how your account runs procurement.',
+  primaryKeyword: 'Coupa workflow documentation',
+  secondaryKeywords: ['document Coupa process', 'Coupa SOP', 'procurement approval workflow documentation'],
+  searchIntent: 'commercial',
+  tags: ['software', 'coupa', 'procurement', 'spend-management', 'workflow'],
+  related: ['workflow:purchase-order-workflow', 'software:sap', 'department:procurement'],
+  originalDataPoint:
+    'A Coupa requisition routes through approval chains set by amount, commodity, and cost center, and much of the real work — sourcing a supplier, chasing an approver, coding to the right account — happens in email and other tabs. Ledgerium records that full path, so the SOP shows the approval and sourcing steps Coupa’s own configuration never writes down.',
+  mechanismIntro:
+    'Coupa routes requisitions through approval chains set by amount and cost center while the sourcing and chasing happen in other tabs, so Ledgerium records the full path to produce an SOP covering the approval and sourcing steps Coupa configuration never documents.',
+  keyTakeaways: [
+    'Coupa approval chains route on amount, commodity, and cost center, so the same requisition takes a different path depending on what is being bought and by whom.',
+    'The judgment work in procurement — picking a supplier, coding to the right account, chasing an approver — happens around Coupa in email and other tabs, not inside a single form.',
+    'Coupa is configured per company, so a generic requisition or invoice guide references approval steps and fields a given account does not use.',
+    'Recording a real requisition, a purchase order, or an invoice reconciliation as the buyer works captures the approval routing and the sourcing steps together.',
+    'Ledgerium generates the SOP, process map, and a report showing where a Coupa request stalls waiting on an approver from one recorded run.',
+  ],
+  honestLimitation:
+    'Ledgerium captures the browser-based steps in Coupa. Approval routing, budget checks, and supplier-integration actions that run server-side are not observed directly; document their effect from the user-visible result.',
+  documentationFrame: 'How to document a workflow in Coupa',
+  commonWorkflows: [
+    'Requisition creation and approval routing',
+    'Purchase order issue and change',
+    'Invoice reconciliation and exception handling',
+    'Supplier onboarding and setup',
+  ],
+  documentationChallenges: [
+    'Approval chains depend on amount, commodity, and cost-center rules that are easy to leave out',
+    'Sourcing and approver chasing happen in email, outside Coupa',
+    'Per-company configuration means forms and approval steps differ across accounts',
+  ],
+  oldWay:
+    'A procurement lead writes the steps from memory, describing the requisition form but not the approval chain or the supplier sourcing that surrounds it. New buyers hit an approval route the guide never mentions and end up asking a colleague how it really works.',
+  ledgeriumWay:
+    'Record the real process as the buyer works it. Ledgerium captures the requisition entry, the approval routing, and the sourcing and chasing steps across Coupa and email, then generates the SOP, the process map, and a report that highlights where requests stall.',
+  commonMistakes: [
+    'Documenting the requisition form but not the approval chain that routes it',
+    'Leaving the supplier sourcing and approver chasing out because they happen in email',
+    'Writing against a standard Coupa setup instead of the account’s configured rules',
+  ],
+  faqs: [
+    {
+      q: 'How do I document a Coupa process?',
+      a: 'Record a real run as the buyer works it, then generate the SOP and process map from the recording. Because it captures the approval routing and the sourcing steps around the form, the result reflects how procurement actually runs in your account.',
+    },
+    {
+      q: 'Why do Coupa guides miss the approval steps?',
+      a: 'Coupa approval chains route on amount, commodity, and cost center, and the sourcing and chasing happen in email. A form-only guide leaves both out. Recording a real requisition captures the routing and the surrounding work together.',
+    },
+    {
+      q: 'Can Ledgerium capture procurement steps outside Coupa?',
+      a: 'Yes. A single recording follows the buyer across Coupa and the other browser-based tools in the process, such as email approvals and a supplier portal, so the SOP reflects the full spend workflow.',
+    },
+    {
+      q: 'Does Ledgerium capture Coupa approval routing and budget checks?',
+      a: 'It captures what the user does and sees in the browser, including the approvals they submit and act on. The routing rules and budget checks that run server-side are not observed directly, so document their effect from the user-visible result.',
+    },
+    {
+      q: 'Is this affiliated with Coupa?',
+      a: 'No. This is an independent guide. Coupa is a trademark of its owner, and Ledgerium is not affiliated with or endorsed by Coupa.',
+    },
+  ],
+  jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
+const docusign: SoftwarePage = {
+  type: 'software',
+  slug: 'docusign',
+  vendor: 'DocuSign',
+  metaTitle: 'How to Document a DocuSign Approval Workflow',
+  metaDescription:
+    'Document a DocuSign document workflow by recording it once. Capture the real preparation, sending, and post-signature steps in an SOP and process map.',
+  h1: 'How to document a DocuSign document workflow',
+  eyebrow: 'Software guide',
+  shortAnswer:
+    'To document a document workflow in DocuSign, record someone performing the real process — assembling the document, routing it for internal review, sending the envelope, and filing it once it is signed — then generate a step-by-step SOP and a process map from it. DocuSign records the signing event and its audit trail, but not the human steps that prepare and follow the envelope. Ledgerium records that surrounding work in the browser and produces the SOP, process map, and a workflow intelligence report, so the document workflow around DocuSign is measured, not just the signature.',
+  primaryKeyword: 'DocuSign document workflow',
+  secondaryKeywords: ['document workflow documentation', 'DocuSign SOP', 'e-signature approval workflow documentation'],
+  searchIntent: 'commercial',
+  tags: ['software', 'docusign', 'e-signature', 'document-workflow', 'workflow'],
+  related: ['workflow:contract-review-workflow', 'problem:how-to-document-approval-workflows', 'software:sharepoint'],
+  originalDataPoint:
+    'DocuSign’s audit trail proves who signed an envelope and when, but it says nothing about the human document workflow around it — how the document was assembled, who reviewed it internally, and what happened once it came back signed. Ledgerium records those surrounding steps, so the SOP measures the full document workflow, not only the signing event DocuSign already logs.',
+  mechanismIntro:
+    'DocuSign logs the signing event and its audit trail but not the human document workflow around it, so Ledgerium records the assembly, internal review, and post-signature filing steps to produce an SOP that measures the whole document workflow rather than only the signature.',
+  keyTakeaways: [
+    'DocuSign records the signing event and a legal audit trail, but it does not capture the human document workflow that prepares and follows each envelope.',
+    'Most of the elapsed time in a document workflow is internal — assembling the document, routing it for review, and chasing an internal approval before it is ever sent for signature.',
+    'What happens after an envelope is signed — filing it, updating a system of record, triggering the next step — lives outside DocuSign and usually goes undocumented.',
+    'Recording a real document workflow as the user works it captures the preparation, sending, and post-signature steps around DocuSign in one pass.',
+    'Ledgerium generates the SOP, process map, and a report showing where the document workflow waits — often on internal review, not on the signer — from a single recording.',
+  ],
+  honestLimitation:
+    'Ledgerium captures the browser-based steps around a DocuSign envelope. The signing ceremony itself and the events inside DocuSign’s audit trail are recorded by DocuSign, not Ledgerium; use both together — DocuSign for the signature of record, Ledgerium for the workflow around it.',
+  documentationFrame: 'How to document a workflow in DocuSign',
+  commonWorkflows: [
+    'Document assembly and internal review before sending',
+    'Envelope preparation, recipient routing, and sending',
+    'Signature chasing and reminders',
+    'Post-signature filing and system-of-record updates',
+  ],
+  documentationChallenges: [
+    'The preparation and internal-review steps happen before DocuSign, so an envelope-only guide misses them',
+    'Post-signature filing and hand-offs happen after DocuSign and go undocumented',
+    'Most of the waiting is on internal review, which the DocuSign audit trail does not measure',
+  ],
+  oldWay:
+    'The team treats DocuSign’s audit trail as the process record, but it only covers the signing itself. The document assembly, the internal review, and the filing afterward stay as tribal knowledge, so a handoff or an audit finds no written record of how a document actually moves.',
+  ledgeriumWay:
+    'Record the real document workflow as the user works it. Ledgerium captures the preparation, the internal review, the sending, and the post-signature filing around DocuSign, then generates the SOP, the process map, and a report that highlights where the workflow waits.',
+  commonMistakes: [
+    'Treating the DocuSign audit trail as the whole process record',
+    'Documenting the envelope but not the internal review that precedes it',
+    'Stopping at the signature and leaving the post-signature filing undocumented',
+  ],
+  faqs: [
+    {
+      q: 'How do I document a DocuSign document workflow?',
+      a: 'Record a real run of the workflow as the user works it — assembling the document, routing it for internal review, sending the envelope, and filing it once signed — then generate the SOP and process map from the recording. The result covers the human steps around DocuSign, not just the signing event.',
+    },
+    {
+      q: 'Doesn’t DocuSign already document the workflow?',
+      a: 'DocuSign records the signing event and a legal audit trail, which proves who signed and when. It does not capture the human document workflow around the envelope — the preparation, internal review, and post-signature filing. Recording those steps measures the full workflow.',
+    },
+    {
+      q: 'Where does the time actually go in a document workflow?',
+      a: 'Often on internal review and approval before the envelope is sent, not on the signer. Ledgerium records those steps and produces a report showing where the workflow waits, which the DocuSign audit trail does not measure.',
+    },
+    {
+      q: 'Can Ledgerium capture the steps that happen after signing?',
+      a: 'Yes. A single recording follows the user across DocuSign and the other browser-based tools in the process, including the filing and system-of-record updates that happen once an envelope is signed.',
+    },
+    {
+      q: 'Is this affiliated with DocuSign?',
+      a: 'No. This is an independent guide. DocuSign is a trademark of its owner, and Ledgerium is not affiliated with or endorsed by DocuSign. Ledgerium complements DocuSign by documenting the workflow around the signature.',
+    },
+  ],
+  jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
 export const SOFTWARE_PAGES: readonly SoftwarePage[] = [
   salesforce,
   netsuite,
@@ -801,4 +1035,7 @@ export const SOFTWARE_PAGES: readonly SoftwarePage[] = [
   hubspot,
   workday,
   sharepoint,
+  microsoftDynamics,
+  coupa,
+  docusign,
 ];
