@@ -10,7 +10,7 @@ const scribe: AlternativesPage = {
   type: 'alternatives',
   slug: 'scribe',
   targetTool: 'Scribe',
-  metaTitle: 'Best Scribe Alternatives in 2026',
+  metaTitle: 'Scribe Alternatives in 2026: Deterministic vs AI-Inferred',
   metaDescription:
     'The best Scribe alternatives for teams that need deterministic process data, not AI-inferred maps. Compare options by what each is best for.',
   h1: 'The best Scribe alternatives',
@@ -247,7 +247,7 @@ const guidde: AlternativesPage = {
   type: 'alternatives',
   slug: 'guidde',
   targetTool: 'Guidde',
-  metaTitle: 'Best Guidde Alternatives in 2026',
+  metaTitle: 'Guidde Alternatives in 2026: Beyond How-To Video',
   metaDescription:
     'The best Guidde alternatives for teams who need measurable SOPs, not just how-to videos. Compare options by what each tool is built for.',
   h1: 'The best Guidde alternatives',
@@ -405,7 +405,7 @@ const walkme: AlternativesPage = {
   type: 'alternatives',
   slug: 'walkme',
   targetTool: 'WalkMe',
-  metaTitle: 'Best WalkMe Alternatives in 2026',
+  metaTitle: 'WalkMe Alternatives in 2026: 6 Options Compared by Fit',
   metaDescription:
     'The best WalkMe alternatives for teams weighing digital adoption against process measurement. Compare options by the job you need done.',
   h1: 'The best WalkMe alternatives',

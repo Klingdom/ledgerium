@@ -543,7 +543,7 @@ const kissflow: CompetitorsPage = {
   type: 'competitors',
   slug: 'kissflow',
   subject: 'Kissflow',
-  metaTitle: 'Kissflow Competitors: The 2026 Landscape',
+  metaTitle: 'Kissflow Competitors in 2026: 5 Workflow Tool Categories',
   metaDescription:
     'A map of Kissflow competitors across workflow and BPM tools, grouped by what each segment does and who it fits, as of June 2026.',
   h1: 'Kissflow competitors and the workflow tooling landscape',
