@@ -816,17 +816,27 @@ function ScorecardTileCard({ tile }: { tile: ScorecardTile | ConsistencyTile }) 
   const color = isConsistency ? (tile as ConsistencyTile).color : null;
   const valueClass =
     color != null ? CONSISTENCY_TILE_CLASSES[color].value : 'text-[var(--content-primary)]';
+  // The bottleneck-step tile's value is a step sentence, not a short KPI number —
+  // render it smaller and allow it to wrap to 2 lines instead of the 22px
+  // single-line truncate used for numeric tiles.
+  const isTextValue = tile.id === 'bottleneck_step';
 
   return (
     <div className="flex flex-col items-start gap-ds-1 rounded-ds-md border border-[var(--border-subtle)] bg-[var(--surface-primary)] px-ds-4 py-ds-3">
       <span className="text-[11px] font-medium uppercase tracking-wide text-[var(--content-secondary)]">
         {tile.label}
       </span>
-      <span className={`flex items-center gap-1.5 text-[22px] font-semibold leading-none tabular-nums ${valueClass}`}>
+      <span
+        className={`flex items-center gap-1.5 ${
+          isTextValue
+            ? 'text-[13px] font-medium leading-snug'
+            : 'text-[22px] font-semibold leading-none tabular-nums'
+        } ${valueClass}`}
+      >
         {color != null && (
           <span className={`h-2.5 w-2.5 flex-shrink-0 rounded-full ${CONSISTENCY_TILE_CLASSES[color].dot}`} aria-hidden />
         )}
-        <span className="truncate" title={tile.value}>{tile.value}</span>
+        <span className={isTextValue ? 'line-clamp-2' : 'truncate'} title={tile.value}>{tile.value}</span>
       </span>
       <span className="min-h-[16px] text-[12px] text-[var(--content-secondary)]">
         {tile.interpretation}
