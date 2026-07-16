@@ -1766,6 +1766,258 @@ const employeeOffboarding: WorkflowPage = {
   published: true,
 };
 
+const documentApproval: WorkflowPage = {
+  type: 'workflow',
+  slug: 'document-approval-workflow',
+  metaTitle: 'Document Approval Workflow: How to Document It',
+  metaDescription:
+    'Document your document approval workflow by recording it once. Capture the real draft, review, approval routing, e-sign, and filing steps in an SOP.',
+  h1: 'How to document a document approval workflow',
+  eyebrow: 'Workflow',
+  shortAnswer:
+    'To document a document approval workflow, record a real document moving from draft through internal review, approval routing, e-signature, and filing, then generate a step-by-step SOP and a process map from the recording. A general approval flow touches several people and tools, so a policy written from memory rarely matches who actually signs and in what order. Ledgerium records the real approval in the browser, captures the review rounds and the routing rules, and generates the SOP, the process map, and a report that shows where documents wait between approvers.',
+  primaryKeyword: 'document approval workflow',
+  secondaryKeywords: ['document approval process', 'approval routing SOP', 'document sign-off workflow'],
+  searchIntent: 'commercial',
+  tags: ['workflow', 'operations', 'approval', 'documents', 'e-signature'],
+  related: ['software:docusign', 'persona:legal-operations-managers', 'problem:how-to-document-approval-workflows'],
+  originalDataPoint:
+    'In a document approval workflow, the delay lives in the wait between approvers and the repeated review rounds, not in reading the document. Ledgerium timestamps each step, so the report shows how long a document sits with each approver and how many review rounds it takes rather than only that it was eventually signed.',
+  mechanismIntro:
+    'Ledgerium captures a document approval workflow by recording a document from draft through internal review, approval routing, and e-signature to final filing, so the report shows where a document waits between approvers and how many review rounds it takes.',
+  keyTakeaways: [
+    'A document approval workflow is the general path a document takes from draft through review, approval routing, e-signature, and filing, distinct from a finance-specific invoice approval.',
+    'As of 2026, most document approvals still route by email attachment, which scatters the approval trail across inboxes and breaks version control.',
+    'Most approval delay is the wait between approvers and the repeated review rounds, not the time spent reading the document.',
+    'Ledgerium timestamps every step and scores AI candidates like routing a document to the right approver from its type and value.',
+  ],
+  honestLimitation:
+    'Approvals given verbally or comments left in a desktop editor outside the browser are not captured. Ledgerium records the browser-based review, routing, and e-signature steps; offline sign-off needs a note.',
+  whoUsesIt:
+    'Document owners and authors, the reviewers and approvers who sign off, and the operations or legal-ops lead who owns the approval policy. Auditors review it when testing document controls.',
+  systems: ['Document management system', 'E-signature platform', 'Email', 'Shared drive or repository'],
+  oldWay:
+    'The approval policy lives in a document nobody opens, and in practice each document is routed by whoever remembers the last one. Reviewers are skipped, versions fork across inboxes, and the real signing order only becomes clear when something goes wrong.',
+  ledgeriumWay:
+    'Record one real document approval. Ledgerium captures the draft, the review rounds, the routing, the e-signature, and the filing, and generates the SOP, the process map, and a report that highlights where documents wait between approvers.',
+  steps: [
+    { title: 'Draft the document', detail: 'The author prepares the document and the version that enters the approval flow.' },
+    { title: 'Route for internal review', detail: 'Send the draft to reviewers who mark up changes and request edits.' },
+    { title: 'Route for approval', detail: 'Send the reviewed document to the approvers whose sign-off the policy requires.' },
+    { title: 'Capture e-signatures', detail: 'Collect the required signatures on the approved version through the e-signature tool.' },
+    { title: 'File the signed document', detail: 'Store the fully executed document in the repository with the right metadata.' },
+  ],
+  commonMistakes: [
+    'Documenting the sign-off but leaving the routing rules that decide who approves what undocumented',
+    'Skipping the review rounds and version control, so approvers sign different versions',
+    'Not capturing the wait time between approvers, which is where the delay hides',
+  ],
+  metrics: [
+    { label: 'Approval cycle time', note: 'Draft ready to fully filed, split into work time and wait time.' },
+    { label: 'Review rounds', note: 'How many review-and-edit rounds a typical document takes before approval.' },
+    { label: 'Approver wait time', note: 'How long a document sits with an approver before sign-off.' },
+  ],
+  aiOpportunities: [
+    'Route a document to the right approver from its type, value, and department',
+    'Summarize the review changes between versions for the approver to check',
+    'Detect documents stalled beyond target approval time and escalate them',
+  ],
+  faqs: [
+    {
+      q: 'What are the steps in a document approval workflow?',
+      a: 'Typically: draft the document, route it for internal review, route it for approval, capture the required e-signatures, then file the signed version. The routing rules that decide who approves what are the part most policies leave vague.',
+    },
+    {
+      q: 'How is a document approval workflow different from an invoice approval workflow?',
+      a: 'An invoice approval workflow is finance-specific and ends in a payment. A document approval workflow is the general path any document takes through review, sign-off, e-signature, and filing, whatever its type.',
+    },
+    {
+      q: 'How do I document an approval workflow quickly?',
+      a: 'Record one real approval as the document moves through review and sign-off, then generate the SOP and process map from it. This captures the routing rules and review rounds a memory-based policy usually misses.',
+    },
+    {
+      q: 'Where do document approvals get stuck?',
+      a: 'In the wait between approvers and in repeated review rounds. Capturing per-step timing shows how long a document sits with each approver rather than only that it was eventually signed.',
+    },
+    {
+      q: 'Can Ledgerium document approvals across several tools?',
+      a: 'Yes. A single recording captures the browser-based steps across the document system, the e-signature tool, and email, so the SOP reflects the full routing, not one tool.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-16',
+  published: true,
+};
+
+const insuranceClaimsProcessing: WorkflowPage = {
+  type: 'workflow',
+  slug: 'insurance-claims-processing-workflow',
+  metaTitle: 'Insurance Claims Processing Workflow Documentation',
+  metaDescription:
+    'Document your insurance claims processing workflow by recording it once. Capture the real FNOL, coverage, document collection, adjudication, and settlement.',
+  h1: 'How to document an insurance claims processing workflow',
+  eyebrow: 'Workflow',
+  shortAnswer:
+    'To document an insurance claims processing workflow, record a real claim from the first notice of loss through coverage verification, document collection, adjudication, and settlement, then generate a step-by-step SOP and a process map from the recording. Claims cross the policy system, the claims system, and a stack of supporting documents, so a guide written from memory usually misses a coverage check. Ledgerium records the real claim in the browser, captures the verification and adjudication steps, and generates the SOP, the process map, and a report that shows where claims wait for documents or a decision.',
+  primaryKeyword: 'insurance claims processing workflow',
+  secondaryKeywords: ['insurance document workflow', 'claims processing SOP', 'claims adjudication process'],
+  searchIntent: 'commercial',
+  tags: ['workflow', 'insurance', 'claims', 'adjudication', 'operations'],
+  related: ['industry:insurance', 'persona:insurance-claims-managers', 'software:sharepoint'],
+  originalDataPoint:
+    'In insurance claims, the delay sits in coverage verification and the wait for supporting documents, not in issuing the settlement. Ledgerium timestamps each step, so the report shows how long a claim waits for a missing document or a coverage decision rather than only how long the payout takes to process.',
+  mechanismIntro:
+    'Ledgerium captures an insurance claims processing workflow by recording a claim from first notice of loss through coverage verification, document collection, and adjudication to settlement, so the report shows where a claim waits for a missing document or an adjudication decision.',
+  keyTakeaways: [
+    'Insurance claims processing runs from the first notice of loss through coverage verification, document collection, adjudication, and settlement across the policy and claims systems.',
+    'As of 2026, chasing missing supporting documents remains the single biggest source of claims cycle-time delay, ahead of the adjudication decision itself.',
+    'Most claims delay is waiting on documents and coverage checks, not the settlement payment, which a happy-path guide never reveals.',
+    'Ledgerium measures claims cycle time by stage and flags claims stalled waiting on a document or a coverage decision.',
+  ],
+  honestLimitation:
+    'Loss inspections, medical exams, and adjuster field visits happen off-screen and are not captured. Ledgerium records the browser-based verification, adjudication, and settlement steps; offline assessments need a linked note.',
+  whoUsesIt:
+    'Claims handlers and adjusters, the coverage and fraud reviewers, and the claims manager who owns cycle time and leakage. Compliance and auditors review it when testing claims-handling controls.',
+  systems: ['Claims management system', 'Policy administration system', 'Document repository', 'Payment system'],
+  oldWay:
+    'The claims steps and the coverage rules live in adjuster experience, so each handler works a claim a little differently. Required documents get requested late, coverage checks vary, and the claim sits while the file is chased across email and the document store.',
+  ledgeriumWay:
+    'Record one real claim. Ledgerium captures the first notice of loss, the coverage verification, the document collection, the adjudication, and the settlement, and generates the SOP, the process map, and a report that highlights where claims wait for documents or a decision.',
+  steps: [
+    { title: 'Log the first notice of loss', detail: 'Capture the claim details, policy number, and loss description when the claim is reported.' },
+    { title: 'Verify coverage', detail: 'Confirm the policy is active and the loss is covered under its terms and limits.' },
+    { title: 'Collect supporting documents', detail: 'Request and gather the evidence the claim requires, such as photos, reports, and receipts.' },
+    { title: 'Adjudicate the claim', detail: 'Review the evidence against the policy and decide the claim and the payable amount.' },
+    { title: 'Settle the claim', detail: 'Issue the settlement or denial and close the claim with the outcome recorded.' },
+  ],
+  commonMistakes: [
+    'Leaving the coverage rules and required-document list to adjuster memory, so checks vary by handler',
+    'Documenting the settlement but skipping the coverage verification and document-collection steps',
+    'Not capturing how long claims wait for missing documents or a coverage decision',
+  ],
+  metrics: [
+    { label: 'Claims cycle time', note: 'First notice of loss to settlement, split into work time and wait time.' },
+    { label: 'Document wait time', note: 'How long a claim waits for the supporting documents it needs.' },
+    { label: 'Reopen rate', note: 'Share of claims reopened after settlement for a missed detail.' },
+  ],
+  aiOpportunities: [
+    'Pre-check coverage against the policy terms before a handler opens the claim',
+    'Extract the required fields from submitted documents for handler review',
+    'Detect claims stalled waiting on a document beyond the target and escalate them',
+  ],
+  faqs: [
+    {
+      q: 'What are the steps in an insurance claims processing workflow?',
+      a: 'Typically: log the first notice of loss, verify coverage, collect supporting documents, adjudicate the claim, then settle it. Verifying coverage and collecting documents are the steps where most of the cycle time is spent.',
+    },
+    {
+      q: 'Why is the insurance claims process so document-heavy?',
+      a: 'Because adjudication depends on evidence: coverage proof, loss documentation, and third-party reports. Missing documents are the most common reason a claim sits, which is why recording the collection step makes the delay visible.',
+    },
+    {
+      q: 'How do I document claims processing clearly?',
+      a: 'Record one real claim from first notice of loss to settlement, then generate the SOP and process map from it. This captures the coverage rules and document requirements that usually live in adjuster experience.',
+    },
+    {
+      q: 'Can Ledgerium document claims across the policy and claims systems?',
+      a: 'Yes. A single recording captures the browser-based steps across the claims system, the policy system, and the document repository, so the SOP reflects the full cross-system claim, not one tool.',
+    },
+    {
+      q: 'What can be automated in claims processing?',
+      a: 'Common candidates are pre-checking coverage, extracting fields from submitted documents, and escalating claims stalled on a missing document. Ledgerium scores these from the recorded process.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-16',
+  published: true,
+};
+
+const expenseApproval: WorkflowPage = {
+  type: 'workflow',
+  slug: 'expense-approval-workflow',
+  metaTitle: 'Expense Approval Workflow: How to Document It',
+  metaDescription:
+    'Document your expense approval workflow by recording it once. Capture the real policy check, manager approval, finance approval, and reimbursement steps.',
+  h1: 'How to document an expense approval workflow',
+  eyebrow: 'Workflow',
+  shortAnswer:
+    'To document an expense approval workflow, record a submitted expense moving through the policy check, manager approval, finance approval, and reimbursement, then generate a step-by-step SOP and a process map from the recording. The approval side is where spend control lives: who signs at each amount, which policy checks gate the sign-off, and what happens when an approver is out. Ledgerium records the real approval in the browser, captures the policy checks and the routing between approvers, and generates the SOP, the process map, and a report that shows where approvals wait and who holds them up.',
+  primaryKeyword: 'expense approval workflow',
+  secondaryKeywords: ['expense approval process', 'manager and finance approval', 'expense approval SOP'],
+  searchIntent: 'commercial',
+  tags: ['workflow', 'finance', 'expenses', 'approval', 'sap'],
+  related: ['workflow:invoice-approval-workflow', 'persona:shared-services-leaders', 'software:sap'],
+  originalDataPoint:
+    'In expense approval, most delay is an expense sitting with one approver, not the reimbursement run. Ledgerium timestamps each sign-off, so the report shows which approver and which threshold hold expenses longest rather than only that the expense was eventually paid.',
+  mechanismIntro:
+    'Ledgerium captures an expense approval workflow by recording a submitted expense through the policy check, manager sign-off, and finance sign-off to reimbursement, so the report shows which approver holds an expense longest and where the routing waits between tiers.',
+  keyTakeaways: [
+    'An expense approval workflow is the approver side of employee spend: the policy check, the manager and finance sign-offs, and the reimbursement, distinct from vendor invoice approval and from the submission-focused expense report.',
+    'As of 2026, dual approval, a manager tier then a finance tier, remains the standard control on employee expenses above a threshold, and it is where most approval time is spent.',
+    'Most approval delay is an expense sitting with one approver, often because the approval limits and delegation rules are undocumented.',
+    'Ledgerium measures approval time per tier and flags approvers and thresholds that consistently exceed the target sign-off time.',
+  ],
+  honestLimitation:
+    'Approvals nudged in a chat tool or agreed verbally outside the browser are not captured. Ledgerium records the browser-based policy-check and sign-off steps; off-system approvals need a note.',
+  whoUsesIt:
+    'Managers and finance approvers who sign off on spend, the AP or expenses team that runs reimbursement, and the finance lead who owns the approval policy and limits. Auditors review it when testing spend controls.',
+  systems: ['Expense management system', 'ERP or accounting system', 'Email', 'Payment or payroll system'],
+  oldWay:
+    'The approval limits and the delegation rules live in the finance lead’s head, so expenses route to whoever is guessed to be the right approver. Sign-offs stall when an approver is on leave with no delegate, and the real thresholds only surface when a large expense is questioned.',
+  ledgeriumWay:
+    'Record one real expense approval. Ledgerium captures the policy check, the manager sign-off, the finance sign-off, and the reimbursement, and generates the SOP, the process map, and a report that highlights which approver and which threshold hold expenses up.',
+  steps: [
+    { title: 'Receive the submitted expense', detail: 'The submitted expense arrives for approval with its receipts and policy flags.' },
+    { title: 'Run the policy check', detail: 'Confirm the expense meets policy on amount, category, and required receipts before routing.' },
+    { title: 'Route for manager approval', detail: 'Send the expense to the employee’s manager for the first sign-off.' },
+    { title: 'Route for finance approval', detail: 'Send expenses above the threshold to finance for the second sign-off.' },
+    { title: 'Reimburse', detail: 'Post the approved expense to the reimbursement run and pay the employee.' },
+  ],
+  commonMistakes: [
+    'Leaving the approval limits and delegation rules undocumented, so expenses route to the wrong approver',
+    'Documenting the manager sign-off but skipping the finance tier that governs larger amounts',
+    'Not capturing which approver holds expenses the longest',
+  ],
+  metrics: [
+    { label: 'Approval time per tier', note: 'Submission to final sign-off, split across the manager and finance tiers.' },
+    { label: 'Approver wait time', note: 'How long an expense sits with an approver before sign-off.' },
+    { label: 'Escalation rate', note: 'Share of expenses that need a reminder or reassignment to get approved.' },
+  ],
+  aiOpportunities: [
+    'Route each expense to the correct approver from the amount and policy tier',
+    'Reassign an expense automatically when its approver is out of office',
+    'Detect approvers exceeding the target sign-off time and escalate their queue',
+  ],
+  faqs: [
+    {
+      q: 'What are the steps in an expense approval workflow?',
+      a: 'Typically: receive the submitted expense, run the policy check, route it for manager approval, route larger amounts for finance approval, then reimburse. The approval limits and the finance tier are the parts most policies leave vague.',
+    },
+    {
+      q: 'How is expense approval different from expense reporting?',
+      a: 'Expense reporting is the employee side, capturing receipts and submitting the report. Expense approval is the approver side, running the policy check and the manager and finance sign-offs that release reimbursement.',
+    },
+    {
+      q: 'Why do expense approvals stall?',
+      a: 'Usually because an expense sits with one approver, often when the approval limits or the delegation rules are undocumented and an approver is out. Per-step timing shows which approver holds expenses up.',
+    },
+    {
+      q: 'Can Ledgerium document approval routing across tiers?',
+      a: 'Yes. It records the routing as it happens in the browser across the expense system and email, so the SOP and process map show the real manager and finance sign-off path, not an idealized one.',
+    },
+    {
+      q: 'What can be automated in expense approval?',
+      a: 'Common candidates are routing each expense to the right approver, reassigning when an approver is out, and escalating slow approvers. Ledgerium scores these from the recorded process.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-16',
+  published: true,
+};
+
 export const WORKFLOW_PAGES: readonly WorkflowPage[] = [
   invoiceApproval,
   customerOnboarding,
@@ -1788,4 +2040,7 @@ export const WORKFLOW_PAGES: readonly WorkflowPage[] = [
   procureToPay,
   orderToCash,
   employeeOffboarding,
+  documentApproval,
+  insuranceClaimsProcessing,
+  expenseApproval,
 ];

@@ -1024,6 +1024,244 @@ const docusign: SoftwarePage = {
   published: true,
 };
 
+const box: SoftwarePage = {
+  type: 'software',
+  slug: 'box',
+  vendor: 'Box',
+  metaTitle: 'How to Document a Box Document Workflow',
+  metaDescription:
+    'Document a Box document workflow by recording it once. Capture the real folder review, permission, and approval hand-off steps in an SOP and process map.',
+  h1: 'How to document a Box document workflow',
+  eyebrow: 'Software guide',
+  shortAnswer:
+    'To document a workflow in Box, record someone performing the real process — uploading a file to the right folder, requesting review, routing it through a Box approval, and updating permissions once it is final — then generate a step-by-step SOP and a process map. Box stores the content and its version history, but the routing around each file lives in folder conventions and people’s heads. Ledgerium records that surrounding work in the browser and produces the SOP, process map, and a workflow intelligence report, so the workflow around Box is measured, not just where the file landed.',
+  primaryKeyword: 'Box document workflow',
+  secondaryKeywords: ['document workflow documentation', 'Box SOP', 'content management workflow documentation'],
+  searchIntent: 'commercial',
+  tags: ['software', 'box', 'content-cloud', 'document-management', 'workflow'],
+  related: [
+    'workflow:contract-review-workflow',
+    'software:sharepoint',
+    'problem:how-to-document-approval-workflows',
+  ],
+  originalDataPoint:
+    'Box records where a file lives and how its versions changed, but it does not capture the folder conventions, permission choices, and review hand-offs a team performs around each document. Ledgerium records those surrounding steps, so the SOP shows the real content workflow — which folder, who reviews, what permission to grant — that Box’s version history never spells out.',
+  mechanismIntro:
+    'Box holds the content and its version history but not the folder conventions and permission choices a team applies around each file, so Ledgerium records the real upload, review, and permission steps to produce an SOP of the document workflow rather than only where the file was stored.',
+  keyTakeaways: [
+    'Box stores files, folders, and version history, but it does not capture the human document workflow — which folder to use, who reviews, and what permission level to grant.',
+    'Folder structure and permission conventions in Box are team knowledge that new contributors learn by asking, not from anything written down.',
+    'A Box review and approval often spans email and other tabs, so watching only the content cloud misses where the document actually waits.',
+    'Recording a real document workflow as the contributor works captures the upload, folder placement, review routing, and permission steps around Box in one pass.',
+    'Ledgerium generates the SOP, process map, and a report showing where the document workflow stalls — usually on review, not on the upload — from a single recording.',
+  ],
+  honestLimitation:
+    'Ledgerium captures the browser-based steps a person takes around Box content. File storage, version history, and shared-link tracking are handled by Box itself; use both together — Box for the content of record, Ledgerium for the workflow around it.',
+  documentationFrame: 'How to document a workflow in Box',
+  commonWorkflows: [
+    'File upload and folder placement',
+    'Document review and Box approval routing',
+    'Permission and shared-link management',
+    'Final filing and metadata tagging',
+  ],
+  documentationChallenges: [
+    'Folder conventions and permission rules are tribal knowledge, not written procedure',
+    'Review and approval steps span Box plus email and other tabs',
+    'Version history shows what changed but not who was supposed to review it',
+  ],
+  oldWay:
+    'The team treats the folder tree as the process — if the file is in the right place, the work is done. But which folder, who reviews before it lands, and what permission to grant are learned by asking a colleague, so a new contributor guesses and the convention drifts.',
+  ledgeriumWay:
+    'Record the real document workflow as the contributor works it. Ledgerium captures the upload, the folder placement, the review routing, and the permission changes around Box, then generates the SOP, the process map, and a report that highlights where the document waits.',
+  commonMistakes: [
+    'Treating the folder structure as the whole process and skipping the review routing',
+    'Leaving permission and shared-link decisions undocumented',
+    'Stopping at the Box boundary when the review and approval happen in email',
+  ],
+  faqs: [
+    {
+      q: 'How do I document a Box document workflow?',
+      a: 'Record a real run of the workflow as the contributor works it — uploading the file, placing it in the right folder, routing it for review, and setting permissions once it is final — then generate the SOP and process map from the recording. The result covers the human steps around Box, not just where the file was stored.',
+    },
+    {
+      q: 'Doesn’t Box already track the document?',
+      a: 'Box tracks the file, its folder, and its version history, which shows what changed and when. It does not capture the human workflow around it — which folder to use, who reviews, and what permission to grant. Recording those steps measures the full document workflow.',
+    },
+    {
+      q: 'Can Ledgerium capture the review and approval steps outside Box?',
+      a: 'Yes. A single recording follows the contributor across Box and the other browser-based tools in the process, such as email review and approval, so the SOP reflects the full document flow rather than only the content cloud.',
+    },
+    {
+      q: 'Does Ledgerium capture Box relay or workflow automation?',
+      a: 'It captures what the user does and sees in the browser. Automation that moves files or updates metadata in the background is not observed directly, so document its effect from the user-visible result.',
+    },
+    {
+      q: 'Is this affiliated with Box?',
+      a: 'No. This is an independent guide. Box is a trademark of its owner, and Ledgerium is not affiliated with or endorsed by Box. Ledgerium complements Box by documenting the workflow around the content.',
+    },
+  ],
+  jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-16',
+  published: true,
+};
+
+const billCom: SoftwarePage = {
+  type: 'software',
+  slug: 'bill-com',
+  vendor: 'BILL (Bill.com)',
+  metaTitle: 'How to Document a BILL Approval Workflow',
+  metaDescription:
+    'Document a BILL (Bill.com) approval workflow by recording it once. Capture the real bill capture, approval routing, and accounting-sync steps in an SOP.',
+  h1: 'How to document a BILL approval workflow',
+  eyebrow: 'Software guide',
+  shortAnswer:
+    'To document an approval workflow in BILL (Bill.com), record someone performing the real process — a bill landing in the inbox, coding it to the general ledger, routing it through the approval chain, and syncing it to the accounting system — then generate a step-by-step SOP and a process map. BILL automates bill capture and routing, but the coding judgment and approver chasing live in email and the AP clerk’s memory. Ledgerium records that real path in the browser and produces the SOP, process map, and a workflow intelligence report tied to how your team pays bills.',
+  primaryKeyword: 'BILL approval workflow',
+  secondaryKeywords: ['Bill.com workflow documentation', 'BILL SOP', 'accounts payable approval workflow documentation'],
+  searchIntent: 'commercial',
+  tags: ['software', 'bill-com', 'accounts-payable', 'ap-automation', 'workflow'],
+  related: ['workflow:invoice-approval-workflow', 'department:finance', 'persona:shared-services-leaders'],
+  originalDataPoint:
+    'BILL routes each bill through an approval chain, but the real AP work — reading the invoice, coding it to the right general-ledger account and cost center, and chasing the approver who is out — happens around the routing, in email and other tabs. Ledgerium records that full path, so the SOP shows the coding and chasing steps BILL’s own routing never writes down.',
+  mechanismIntro:
+    'BILL automates bill capture and routing while the general-ledger coding and approver chasing happen around it in email, so Ledgerium records the full path to produce an SOP covering the AP coding and approval steps BILL’s routing never documents.',
+  keyTakeaways: [
+    'BILL captures the bill and routes it through an approval chain, but the general-ledger coding judgment behind each bill is not something the routing records.',
+    'The slow part of AP is usually chasing an approver who is out of office, which happens in email and never shows in a bill-capture tool.',
+    'BILL syncs to the accounting system — QuickBooks, NetSuite, or Sage — and the mapping rules for that sync are AP knowledge a generic guide leaves out.',
+    'Recording a real bill from inbox to payment as the AP clerk works captures the coding, the approval routing, and the accounting sync together.',
+    'Ledgerium generates the SOP, process map, and a report showing where a bill stalls waiting on an approver from one recorded run.',
+  ],
+  honestLimitation:
+    'Ledgerium captures the browser-based steps an AP clerk takes in and around BILL. The approval routing engine and the accounting-sync that run server-side are handled by BILL; document their effect from the user-visible result.',
+  documentationFrame: 'How to document a workflow in BILL (Bill.com)',
+  commonWorkflows: [
+    'Bill capture and inbox intake',
+    'General-ledger coding and cost-center assignment',
+    'Approval routing and approver follow-up',
+    'Payment scheduling and accounting sync',
+  ],
+  documentationChallenges: [
+    'General-ledger coding judgment lives in the AP clerk’s memory, not in the tool',
+    'Approver chasing happens in email, outside BILL',
+    'The accounting-sync mapping rules are easy to leave out of a written guide',
+  ],
+  oldWay:
+    'The AP clerk keeps the coding rules and the approval chain in their head. When they are out, the next person guesses which account a bill belongs to, misses an approver, and a payment slips or a sync breaks.',
+  ledgeriumWay:
+    'Record the real process as the AP clerk works a bill from inbox to payment. Ledgerium captures the coding, the approval routing, and the accounting sync across BILL and email, then generates the SOP, the process map, and a report that highlights where bills stall.',
+  commonMistakes: [
+    'Documenting the approval chain but not the coding judgment that precedes it',
+    'Leaving the approver follow-up out because it happens in email',
+    'Skipping the accounting-sync mapping that connects BILL to the general ledger',
+  ],
+  faqs: [
+    {
+      q: 'How do I document a BILL approval workflow?',
+      a: 'Record a real run as the AP clerk works a bill from inbox to payment, then generate the SOP and process map from the recording. Because it captures the coding, the approval routing, and the accounting sync, the result reflects how your team actually pays bills.',
+    },
+    {
+      q: 'Why do BILL guides miss the real AP work?',
+      a: 'BILL automates bill capture and routing, but the coding judgment and the approver chasing happen around it, in email and the clerk’s memory. A tool-only guide leaves both out. Recording a real bill captures the routing and the surrounding work together.',
+    },
+    {
+      q: 'Can Ledgerium capture AP steps outside BILL?',
+      a: 'Yes. A single recording follows the clerk across BILL and the other browser-based tools in the process, such as email approvals and the accounting system, so the SOP reflects the full accounts-payable workflow.',
+    },
+    {
+      q: 'Does Ledgerium capture BILL routing and the accounting sync?',
+      a: 'It captures what the user does and sees in the browser, including the approvals they submit. The routing engine and the accounting sync that run server-side are not observed directly, so document their effect from the user-visible result.',
+    },
+    {
+      q: 'Is this affiliated with BILL or Bill.com?',
+      a: 'No. This is an independent guide. BILL and Bill.com are trademarks of their owner, and Ledgerium is not affiliated with or endorsed by BILL. Ledgerium complements BILL by documenting the workflow around the approval.',
+    },
+  ],
+  jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-16',
+  published: true,
+};
+
+const sapConcur: SoftwarePage = {
+  type: 'software',
+  slug: 'sap-concur',
+  vendor: 'SAP Concur',
+  metaTitle: 'How to Document a Concur Expense Approval Workflow',
+  metaDescription:
+    'Document a Concur expense approval workflow by recording it once. Capture the real receipt, itemization, policy-check, and approval steps in an SOP.',
+  h1: 'How to document a Concur expense approval workflow',
+  eyebrow: 'Software guide',
+  shortAnswer:
+    'To document an expense approval workflow in SAP Concur, record someone performing the real process — matching a receipt to a corporate-card charge, itemizing it, checking it against policy, and routing the report for approval — then generate a step-by-step SOP and a process map. Concur enforces policy and routes the report, but the judgment behind a flag and the approver back-and-forth live in email and the submitter’s experience. Ledgerium records that real path in the browser and produces the SOP, process map, and a workflow intelligence report tied to how your team handles expenses.',
+  primaryKeyword: 'Concur expense approval workflow',
+  secondaryKeywords: ['SAP Concur workflow documentation', 'Concur SOP', 'expense report approval workflow documentation'],
+  searchIntent: 'commercial',
+  tags: ['software', 'sap-concur', 'expense-management', 'travel-and-expense', 'workflow'],
+  related: ['workflow:expense-reporting-workflow', 'department:finance', 'software:coupa'],
+  originalDataPoint:
+    'Concur flags an expense against policy, but what a submitter does with that flag — re-itemizing, attaching a justification, or splitting a charge across cost centers — is judgment the policy engine never records. Ledgerium records those real steps, so the SOP shows how your team actually resolves a flagged expense rather than only that a rule fired.',
+  mechanismIntro:
+    'Concur enforces expense policy and routes the report while the judgment around a flagged charge and the approver back-and-forth happen in email, so Ledgerium records the full path to produce an SOP covering the receipt, itemization, and resolution steps Concur’s policy engine never documents.',
+  keyTakeaways: [
+    'Concur matches receipts, applies policy rules, and routes the report, but it does not record how a submitter resolves a flagged or out-of-policy expense.',
+    'Itemizing a hotel folio or splitting a charge across cost centers is judgment work that a policy engine enforces but never explains.',
+    'The back-and-forth when an approver sends a report back happens in email and comments, outside the structured Concur flow.',
+    'Recording a real expense report as the submitter works captures the receipt matching, the itemization, the policy resolution, and the approval routing together.',
+    'Ledgerium generates the SOP, process map, and a report showing where an expense report waits — often on a sent-back item, not on the first submit — from one recording.',
+  ],
+  honestLimitation:
+    'Ledgerium captures the browser-based steps a person takes in and around SAP Concur. The policy-audit rules and the corporate-card feed that run inside Concur are handled by Concur; document their effect from the user-visible result.',
+  documentationFrame: 'How to document a workflow in SAP Concur',
+  commonWorkflows: [
+    'Receipt capture and corporate-card matching',
+    'Expense itemization and cost-center coding',
+    'Policy check and flagged-item resolution',
+    'Report submission and approval routing',
+  ],
+  documentationChallenges: [
+    'Resolving a flagged or out-of-policy expense is judgment the policy engine does not explain',
+    'The approver back-and-forth happens in email and comments, outside the structured flow',
+    'Itemization and cost-center splits are learned by experience, not written down',
+  ],
+  oldWay:
+    'New submitters learn Concur by trial and error — a report gets sent back for a missing itemization or a policy flag, and they fix it by asking a colleague what the reviewer wanted. The real rules for resolving a flag stay as experience nobody has written down.',
+  ledgeriumWay:
+    'Record the real process as the submitter works an expense report. Ledgerium captures the receipt matching, the itemization, the policy resolution, and the approval routing across Concur and email, then generates the SOP, the process map, and a report that highlights where reports wait.',
+  commonMistakes: [
+    'Documenting a clean submission but not how a flagged item gets resolved',
+    'Leaving the approver back-and-forth out because it happens in email',
+    'Skipping the itemization and cost-center splits that a policy engine enforces silently',
+  ],
+  faqs: [
+    {
+      q: 'How do I document a Concur expense approval workflow?',
+      a: 'Record a real run as the submitter works an expense report — matching receipts, itemizing, resolving policy flags, and routing for approval — then generate the SOP and process map from the recording. The result covers the judgment steps around Concur, not just that a report was submitted.',
+    },
+    {
+      q: 'Doesn’t Concur already enforce the workflow?',
+      a: 'Concur applies policy rules and routes the report, which keeps submissions compliant. It does not record how a submitter resolves a flagged expense or the back-and-forth with an approver. Recording those steps measures the full expense workflow.',
+    },
+    {
+      q: 'Can Ledgerium capture the approval back-and-forth outside Concur?',
+      a: 'Yes. A single recording follows the submitter across Concur and the other browser-based tools in the process, such as email and comments, so the SOP reflects the full expense approval flow rather than only the structured form.',
+    },
+    {
+      q: 'Does Ledgerium capture Concur policy rules and the card feed?',
+      a: 'It captures what the user does and sees in the browser, including how they respond to a policy flag. The audit rules and corporate-card feed that run inside Concur are not observed directly, so document their effect from the user-visible result.',
+    },
+    {
+      q: 'Is this affiliated with SAP Concur?',
+      a: 'No. This is an independent guide. SAP Concur is a trademark of its owner, and Ledgerium is not affiliated with or endorsed by SAP Concur. Ledgerium complements Concur by documenting the workflow around the approval.',
+    },
+  ],
+  jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-16',
+  published: true,
+};
+
 export const SOFTWARE_PAGES: readonly SoftwarePage[] = [
   salesforce,
   netsuite,
@@ -1038,4 +1276,7 @@ export const SOFTWARE_PAGES: readonly SoftwarePage[] = [
   microsoftDynamics,
   coupa,
   docusign,
+  box,
+  billCom,
+  sapConcur,
 ];
