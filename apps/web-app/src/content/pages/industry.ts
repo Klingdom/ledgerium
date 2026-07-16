@@ -634,6 +634,85 @@ const education: IndustryPage = {
   published: true,
 };
 
+const retail: IndustryPage = {
+  type: 'industry',
+  slug: 'retail',
+  metaTitle: 'Retail Operations Workflow Documentation',
+  metaDescription:
+    'Document retail store ops, e-commerce fulfillment, and returns workflows by recording how they really run. Get SOPs, process maps, and AI opportunities.',
+  h1: 'Retail workflow documentation',
+  eyebrow: 'Industry',
+  shortAnswer:
+    'Retail runs on repeatable back-office workflows like store opening routines, e-commerce fulfillment, returns and exchanges, and vendor onboarding, yet most are learned on the floor and passed along by word of mouth. Recording how each one runs produces an SOP, a process map, and a report showing where handoffs stall and which steps are worth automating. Ledgerium captures the real browser-based steps across your POS back office, e-commerce platform, and inventory systems, so documentation reflects how store and fulfillment teams truly work rather than a stale binder.',
+  primaryKeyword: 'retail workflow documentation',
+  secondaryKeywords: ['retail SOPs', 'document retail operations', 'store operations documentation'],
+  searchIntent: 'commercial',
+  tags: ['industry', 'retail', 'operations', 'documentation'],
+  related: ['workflow:sales-order-processing-workflow', 'workflow:returns-processing-workflow', 'persona:operations-managers'],
+  industryContext:
+    'Retail sits between physical stores and digital storefronts, and the operational workflows that connect them, replenishment, fulfillment, returns, and supplier setup, are rarely written down. Steps differ by channel, banner, and season, and high turnover among associates and fulfillment staff means the how-to knowledge walks out the door faster than any manual is updated.',
+  commonWorkflows: [
+    'Store opening and closing procedures',
+    'E-commerce order fulfillment and shipping',
+    'Returns, exchanges, and refunds',
+    'Vendor onboarding and product setup',
+  ],
+  documentationConcerns: [
+    'Steps differ by channel, store banner, and season',
+    'High associate and fulfillment-staff turnover',
+    'Peak-season temporary hires must ramp in days',
+  ],
+  complianceConcerns: [
+    'Consistent handling of refunds and chargebacks',
+    'PCI-aligned handling of payment steps',
+    'Evidence that loss-prevention procedures are followed',
+  ],
+  aiOpportunities: [
+    'Flagging fulfillment steps that miss shipping cutoffs',
+    'Drafting routine product-setup entries for review',
+    'Spotting variation in how stores process the same return',
+  ],
+  honestLimitation:
+    'Ledgerium captures browser-based retail back-office work. Point-of-sale terminals, barcode scanners, and floor tasks outside the browser need separate capture.',
+  originalDataPoint:
+    'Retail fulfillment and returns workflows vary by sales channel and season. Ledgerium records the process as the actual associate performs it, so the SOP reflects the real channel-specific steps rather than a corporate binder written for a past season.',
+  mechanismIntro:
+    'Retail connects stores and digital storefronts through fulfillment, returns, and vendor-setup workflows that shift by channel and season, and Ledgerium records the process as the actual associate performs it so the SOP reflects the real channel-specific steps rather than a corporate binder.',
+  keyTakeaways: [
+    'Retail operational workflows that connect stores and e-commerce, like replenishment, fulfillment, and returns, are rarely written down and vary by channel, banner, and season.',
+    'High turnover among associates and fulfillment staff means how-to knowledge leaves faster than any printed manual is updated.',
+    'Recording a workflow once turns a seasonal or temporary hire’s ramp-up into a repeatable SOP they can follow in days rather than weeks.',
+    'Evidence-linked documentation traceable to the recorded steps shows refunds, chargebacks, and loss-prevention procedures are consistently followed.',
+    'Ledgerium records steps across the POS back office, e-commerce platform, and inventory tools in one workflow, so the SOP reflects the full cross-system path.',
+  ],
+  faqs: [
+    {
+      q: 'How do I document retail store and fulfillment workflows?',
+      a: 'Record each store, fulfillment, or returns workflow once as an associate performs it, then generate the SOP and process map from the recording. It captures the real channel-specific steps a corporate binder leaves out.',
+    },
+    {
+      q: 'How does this help with seasonal and high-turnover hiring?',
+      a: 'New and temporary hires follow an SOP built from how an experienced associate actually works, so they ramp in days instead of shadowing someone through peak season.',
+    },
+    {
+      q: 'Can this document a workflow across POS, e-commerce, and inventory tools?',
+      a: 'Yes. Ledgerium records the steps across your back-office systems in one workflow, so the SOP reflects the full path rather than one system in isolation.',
+    },
+    {
+      q: 'How does this support refund and loss-prevention consistency?',
+      a: 'It produces evidence-linked documentation traceable to the recorded steps, which shows returns, refunds, and loss-prevention procedures are handled the same way across stores.',
+    },
+    {
+      q: 'Where can AI help in retail back-office work?',
+      a: 'In repetitive fulfillment and product-setup steps like routine entries and cutoff detection. Merchandising and pricing decisions should keep a human involved.',
+    },
+  ],
+  jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
 export const INDUSTRY_PAGES: readonly IndustryPage[] = [
   manufacturing,
   healthcare,
@@ -643,4 +722,5 @@ export const INDUSTRY_PAGES: readonly IndustryPage[] = [
   professionalServices,
   government,
   education,
+  retail,
 ];

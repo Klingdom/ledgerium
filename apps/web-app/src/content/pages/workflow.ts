@@ -1514,6 +1514,258 @@ const returnsProcessing: WorkflowPage = {
   published: true,
 };
 
+const procureToPay: WorkflowPage = {
+  type: 'workflow',
+  slug: 'procure-to-pay',
+  metaTitle: 'Procure-to-Pay (P2P) Workflow: How to Document It',
+  metaDescription:
+    'Document your procure-to-pay workflow by recording it once. Capture the real requisition, PO, receipt, invoice match, and payment steps in an SOP and a map.',
+  h1: 'How to document a procure-to-pay workflow',
+  eyebrow: 'Workflow',
+  shortAnswer:
+    'To document a procure-to-pay workflow, record the full cycle from a purchase requisition through the vendor payment, then generate a step-by-step SOP and a process map from it. Procure-to-pay crosses procurement and accounts payable, so a written-from-memory guide usually loses the seam where the purchase order and the invoice reconcile. Ledgerium records the real cycle in the browser, captures the requisition, the PO, the receipt, the invoice match, and the payment run, and generates the SOP, the process map, and a report that shows where the cycle stalls between the two teams.',
+  primaryKeyword: 'procure-to-pay workflow',
+  secondaryKeywords: ['procure-to-pay process', 'P2P workflow documentation', 'procure-to-pay SOP'],
+  searchIntent: 'commercial',
+  tags: ['workflow', 'finance', 'procurement', 'accounts-payable', 'coupa'],
+  related: ['workflow:purchase-order-workflow', 'software:coupa', 'persona:shared-services-leaders'],
+  originalDataPoint:
+    'In procure-to-pay, the cycle time hides in the handoff from procurement to accounts payable, where a PO waits for an invoice that waits for a receipt. Ledgerium timestamps each step across both teams, so the report shows how long the cycle sits at that seam rather than only how long the payment run takes.',
+  mechanismIntro:
+    'Ledgerium captures a procure-to-pay workflow by recording the full cycle from purchase requisition through PO issue, goods receipt, and invoice match to the vendor payment run, so the report shows where the cycle stalls at the seam between procurement and accounts payable.',
+  keyTakeaways: [
+    'Procure-to-pay is one end-to-end cycle that crosses procurement and accounts payable, so a single-team guide loses the seam where the purchase order and the invoice reconcile.',
+    'As of 2026, most finance teams still match purchase orders and invoices across two separate systems, which is exactly where the procure-to-pay cycle leaks time.',
+    'Recording one full cycle captures the requisition, the PO, the receipt, the invoice match, and the payment run that memory-based guides split across teams and lose.',
+    'Ledgerium measures cycle time across the procurement-to-AP handoff and scores AI candidates like auto-matching the PO, receipt, and invoice before payment.',
+  ],
+  honestLimitation:
+    'Payments released directly in a bank portal outside the browser are not captured beyond the browser steps. Ledgerium records the browser-based procure-to-pay steps; offline banking actions need a note.',
+  whoUsesIt:
+    'Procurement and accounts payable staff, the requesters who start the cycle, and the shared-services or finance lead who owns procure-to-pay. Auditors review it when testing spend and payment controls.',
+  systems: ['ERP or accounting system', 'Procurement or purchasing system', 'Vendor portal', 'Payment or banking portal'],
+  oldWay:
+    'Procurement documents its half of the cycle and accounts payable documents theirs, and neither owns the seam between them. A PO is issued, an invoice arrives, and the reconciliation drifts because no single document describes the full requisition-to-payment cycle.',
+  ledgeriumWay:
+    'Record one full procure-to-pay cycle. Ledgerium captures the requisition, the PO, the receipt, the invoice match, and the payment across both teams and generates the SOP, the process map, and a report that highlights where the cycle stalls at the handoff.',
+  steps: [
+    { title: 'Raise the purchase requisition', detail: 'A requester enters what they need with quantities, cost coding, and justification.' },
+    { title: 'Issue the purchase order', detail: 'Procurement approves the requisition and issues the PO to the vendor.' },
+    { title: 'Receive goods and invoice', detail: 'Record the goods receipt and capture the vendor invoice against the PO.' },
+    { title: 'Match and approve for payment', detail: 'Match PO, receipt, and invoice, resolve exceptions, and approve the invoice.' },
+    { title: 'Run the payment', detail: 'Post the approved invoice into the payment run and pay the vendor.' },
+  ],
+  commonMistakes: [
+    'Documenting procurement and accounts payable separately and losing the reconciliation seam between them',
+    'Skipping the goods receipt so the three-way match cannot be verified',
+    'Not capturing where the cycle waits at the procurement-to-AP handoff',
+  ],
+  metrics: [
+    { label: 'Cycle time per requisition', note: 'Requisition raised to vendor paid, split into work and wait time.' },
+    { label: 'Handoff wait time', note: 'How long the cycle waits at the procurement-to-AP handoff.' },
+    { label: 'Match exception rate', note: 'Share of invoices where the three-way match fails first time.' },
+  ],
+  aiOpportunities: [
+    'Auto-match the PO, receipt, and invoice and flag only the exceptions',
+    'Pre-fill cost coding on the requisition from vendor and history for review',
+    'Detect cycles stalled at the procurement-to-AP handoff and escalate them',
+  ],
+  faqs: [
+    {
+      q: 'What are the steps in a procure-to-pay workflow?',
+      a: 'Typically: raise the purchase requisition, issue the purchase order, receive goods and invoice, match and approve for payment, then run the payment. The reconciliation across procurement and accounts payable is the part most guides lose.',
+    },
+    {
+      q: 'How is procure-to-pay different from a purchase order workflow?',
+      a: 'A purchase order workflow ends at the three-way match. Procure-to-pay continues through invoice approval and the vendor payment, so it spans procurement and accounts payable as one end-to-end cycle.',
+    },
+    {
+      q: 'Where does the procure-to-pay cycle stall?',
+      a: 'Usually at the seam between procurement and accounts payable, where a PO waits for an invoice that waits for a receipt. Capturing per-step timing across both teams makes that handoff wait visible.',
+    },
+    {
+      q: 'Can Ledgerium document procure-to-pay across both teams?',
+      a: 'Yes. A single recording captures the browser-based steps across the procurement system, the accounting system, the vendor portal, and the payment portal, so the SOP reflects the full cycle.',
+    },
+    {
+      q: 'What can be automated in procure-to-pay?',
+      a: 'Common candidates are auto-matching the PO, receipt, and invoice, pre-filling cost coding, and escalating stalled cycles. Ledgerium scores these from the recorded process.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
+const orderToCash: WorkflowPage = {
+  type: 'workflow',
+  slug: 'order-to-cash',
+  metaTitle: 'Order-to-Cash (O2C) Workflow: How to Document It',
+  metaDescription:
+    'Document your order-to-cash workflow by recording it once. Capture the real order, fulfillment, invoicing, collections, and cash-application steps in an SOP.',
+  h1: 'How to document an order-to-cash workflow',
+  eyebrow: 'Workflow',
+  shortAnswer:
+    'To document an order-to-cash workflow, record the full revenue cycle from a customer order through invoicing to the cash applied against it, then generate a step-by-step SOP and a process map from it. Order-to-cash ends in collections and cash application, the steps that move days sales outstanding yet rarely get written down. Ledgerium records the real cycle in the browser, captures the order, the fulfillment, the invoice, the collections follow-ups, and the cash application, and generates the SOP, the process map, and a report that shows where cash gets held up.',
+  primaryKeyword: 'order-to-cash workflow',
+  secondaryKeywords: ['order-to-cash process', 'O2C workflow documentation', 'order-to-cash SOP'],
+  searchIntent: 'commercial',
+  tags: ['workflow', 'finance', 'accounts-receivable', 'collections', 'netsuite'],
+  related: ['workflow:sales-order-processing-workflow', 'software:netsuite', 'persona:revops-managers'],
+  originalDataPoint:
+    'In order-to-cash, most of the delay is on the back half — the collections follow-ups after the invoice goes out, not the order or the shipment. Ledgerium timestamps each step, so the report shows how long an invoice waits in collections before cash is applied rather than only how fast the order was fulfilled.',
+  mechanismIntro:
+    'Ledgerium captures an order-to-cash workflow by recording the full revenue cycle from customer order through fulfillment, invoicing, and collections follow-up to cash application, so the report shows where cash is held between the invoice and the payment landing.',
+  keyTakeaways: [
+    'Order-to-cash is one revenue cycle that runs from the customer order through fulfillment and invoicing to the cash applied, ending in collections rather than at the shipment.',
+    'As of 2026, days sales outstanding remains the headline order-to-cash metric, yet the collections steps that actually move it are the least documented part of the cycle.',
+    'Most order-to-cash delay lives on the back half, in the collections follow-ups after the invoice, not in taking or fulfilling the order.',
+    'Ledgerium measures days sales outstanding by stage and scores AI candidates like matching incoming remittances to open invoices for cash application.',
+  ],
+  honestLimitation:
+    'Collections calls made by phone outside the browser are not captured. Ledgerium records the browser-based order, invoice, and cash-application steps; the call outcomes need a note.',
+  whoUsesIt:
+    'Order management, billing, and collections staff, the credit team, and the finance lead who owns days sales outstanding. Auditors review it when testing revenue and cash-application controls.',
+  systems: ['CRM or order system', 'ERP or billing system', 'Collections or AR tool', 'Payment or banking portal'],
+  oldWay:
+    'Sales documents the order, operations documents fulfillment, and finance documents billing, but the collections steps that release the cash are tribal knowledge. The cycle looks done at the shipment, so the follow-ups that actually bring cash in go unwritten.',
+  ledgeriumWay:
+    'Record one full order-to-cash cycle. Ledgerium captures the order, the fulfillment, the invoice, the collections follow-ups, and the cash application and generates the SOP, the process map, and a report that highlights where cash is held after the invoice.',
+  steps: [
+    { title: 'Capture the customer order', detail: 'The order lands with customer, items, pricing, and terms.' },
+    { title: 'Fulfill and ship', detail: 'Fulfill the order and confirm the shipment or service delivery.' },
+    { title: 'Invoice the customer', detail: 'Generate and send the invoice against the fulfilled order.' },
+    { title: 'Follow up in collections', detail: 'Chase the open invoice with reminders until it is paid.' },
+    { title: 'Apply the cash', detail: 'Match the incoming payment to the invoice and close the receivable.' },
+  ],
+  commonMistakes: [
+    'Treating the order-to-cash cycle as done at the shipment and leaving collections undocumented',
+    'Leaving the collections and cash-application steps as tribal knowledge',
+    'Not capturing how long invoices sit in collections before cash is applied',
+  ],
+  metrics: [
+    { label: 'Days sales outstanding', note: 'Invoice issued to cash applied, split by stage.' },
+    { label: 'Collections wait time', note: 'How long an invoice sits in collections before payment.' },
+    { label: 'Cash-application accuracy', note: 'Share of payments matched to the right invoice first time.' },
+  ],
+  aiOpportunities: [
+    'Match incoming remittances to open invoices for cash application',
+    'Draft collections reminders from the aged-receivables status for review',
+    'Detect invoices trending past terms and prioritize collections early',
+  ],
+  faqs: [
+    {
+      q: 'What are the steps in an order-to-cash workflow?',
+      a: 'Typically: capture the customer order, fulfill and ship, invoice the customer, follow up in collections, then apply the cash. The collections and cash-application steps are the parts most guides leave out.',
+    },
+    {
+      q: 'How is order-to-cash different from sales order processing?',
+      a: 'Sales order processing ends at the fulfillment handoff. Order-to-cash continues through invoicing, collections, and cash application, so it covers the finance back half that actually brings the cash in.',
+    },
+    {
+      q: 'Where does cash get held up in order-to-cash?',
+      a: 'Mostly on the back half, in collections after the invoice goes out. Capturing per-step timing shows how long an invoice waits before cash is applied rather than only how fast the order shipped.',
+    },
+    {
+      q: 'Can Ledgerium document order-to-cash across systems?',
+      a: 'Yes. A single recording captures the browser-based steps across the order system, the billing system, the collections tool, and the payment portal, so the SOP reflects the full revenue cycle.',
+    },
+    {
+      q: 'What can be automated in order-to-cash?',
+      a: 'Common candidates are matching remittances to open invoices, drafting collections reminders, and prioritizing invoices trending past terms. Ledgerium scores these from the recorded process.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
+const employeeOffboarding: WorkflowPage = {
+  type: 'workflow',
+  slug: 'employee-offboarding',
+  metaTitle: 'Employee Offboarding Workflow: How to Document It',
+  metaDescription:
+    'Document your employee offboarding workflow by recording it once. Capture the real deprovisioning, access revocation, and asset-return steps in an SOP and map.',
+  h1: 'How to document an employee offboarding workflow',
+  eyebrow: 'Workflow',
+  shortAnswer:
+    'To document an employee offboarding workflow, record the real exit of a departing employee from the termination notice to fully revoked access and returned assets, then generate a step-by-step SOP and a process map from it. Offboarding is the reverse of onboarding: the risk is access left active, not access granted late. Ledgerium records the real offboarding in the browser, captures the deprovisioning, the access revocation, and the asset return, and generates the SOP, the process map, and a report that shows where accounts stay open after someone leaves.',
+  primaryKeyword: 'employee offboarding workflow',
+  secondaryKeywords: ['employee offboarding SOP', 'offboarding process documentation', 'IT offboarding checklist'],
+  searchIntent: 'commercial',
+  tags: ['workflow', 'hr', 'it', 'offboarding', 'workday'],
+  related: ['workflow:employee-onboarding-workflow', 'software:workday', 'persona:hr-teams'],
+  originalDataPoint:
+    'In offboarding, the risk is not how long a step takes but whether the access revocation actually happened before the last day. Ledgerium records each revocation step, so the report shows which accounts were closed and when rather than only that the employee was marked as a leaver.',
+  mechanismIntro:
+    'Ledgerium captures an employee offboarding workflow by recording the real exit from termination notice through account deprovisioning and access revocation to asset return, so the report shows where accounts stay active after an employee last day.',
+  keyTakeaways: [
+    'Employee offboarding is the reverse of onboarding: the risk is access left active after someone leaves, not access granted late on day one.',
+    'As of 2026, orphaned accounts left active after an employee departs remain a leading source of findings in access-control audits.',
+    'Offboarding spans HR, IT, and the manager, so a single-team checklist usually forgets a system and leaves an account open.',
+    'Ledgerium measures time to fully revoked access and flags accounts still active after the last day, which is exactly what auditors test.',
+  ],
+  honestLimitation:
+    'Badge deactivation and equipment collection done in person are not captured. Ledgerium records the browser-based deprovisioning and access-revocation steps; physical exit tasks need a linked note.',
+  whoUsesIt:
+    'HR coordinators, IT deprovisioning staff, and the departing employee’s manager. Security and compliance leads own the access-revocation control and auditors review it in access reviews.',
+  systems: ['HRIS or HR system', 'Identity and access management', 'IT ticketing or device management', 'Payroll system'],
+  oldWay:
+    'Each team keeps a partial exit checklist and assumes the others revoke their systems. An account gets forgotten, access lingers for weeks after the last day, and nobody owns the revocation that a security review later flags.',
+  ledgeriumWay:
+    'Record one real offboarding. Ledgerium captures the deprovisioning, the access revocation, and the asset return across each system and generates the SOP, the process map, and a report that highlights accounts still active after the last day.',
+  steps: [
+    { title: 'Receive the termination notice', detail: 'HR records the departure with the last day, reason, and manager.' },
+    { title: 'Plan the offboarding', detail: 'Build the exit checklist of systems, assets, and access to revoke.' },
+    { title: 'Revoke access and deprovision', detail: 'IT disables accounts and removes access across each system by the last day.' },
+    { title: 'Recover assets and transfer knowledge', detail: 'Collect equipment and hand off the departing employee’s work and documents.' },
+    { title: 'Run final pay and close', detail: 'Process the final paycheck, confirm all access is revoked, and close the record.' },
+  ],
+  commonMistakes: [
+    'Treating offboarding as HR alone when IT owns the access revocation',
+    'Leaving the revocation checklist undocumented, so a system stays open after the last day',
+    'Not capturing whether every account was actually revoked before the departure',
+  ],
+  metrics: [
+    { label: 'Time to revoke access', note: 'Last day to all access revoked, split by system.' },
+    { label: 'Orphaned account rate', note: 'Share of leavers with an account still active after the last day.' },
+    { label: 'Asset return rate', note: 'Share of assigned equipment recovered at exit.' },
+  ],
+  aiOpportunities: [
+    'Generate the revocation checklist from the systems in the employee record',
+    'Auto-flag accounts still active after the last day for review',
+    'Draft the knowledge-transfer summary from the departing employee’s work',
+  ],
+  faqs: [
+    {
+      q: 'What are the steps in an employee offboarding workflow?',
+      a: 'Typically: receive the termination notice, plan the offboarding, revoke access and deprovision, recover assets and transfer knowledge, then run final pay and close. The access revocation is the control most guides leave vague.',
+    },
+    {
+      q: 'How is offboarding different from onboarding?',
+      a: 'Onboarding grants access and equipment to make a new hire productive. Offboarding reverses it, revoking access and recovering assets, where the risk is an account left active rather than a login granted late.',
+    },
+    {
+      q: 'Why does access revocation matter so much in offboarding?',
+      a: 'Because an account left active after someone leaves is a standing security risk and a common audit finding. Recording the offboarding shows which accounts were revoked and when, which is what access reviews test.',
+    },
+    {
+      q: 'Can Ledgerium document offboarding across HR and IT?',
+      a: 'Yes. A single recording captures the browser-based steps across the HR system, identity tools, and ticketing, so the SOP reflects the full cross-team revocation flow, not just the HR record.',
+    },
+    {
+      q: 'What can be automated in offboarding?',
+      a: 'Common candidates are generating the revocation checklist from the employee record, flagging accounts still active after the last day, and drafting the knowledge-transfer summary. Ledgerium scores these from the recorded process.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
 export const WORKFLOW_PAGES: readonly WorkflowPage[] = [
   invoiceApproval,
   customerOnboarding,
@@ -1533,4 +1785,7 @@ export const WORKFLOW_PAGES: readonly WorkflowPage[] = [
   salesOrderProcessing,
   incidentManagement,
   returnsProcessing,
+  procureToPay,
+  orderToCash,
+  employeeOffboarding,
 ];

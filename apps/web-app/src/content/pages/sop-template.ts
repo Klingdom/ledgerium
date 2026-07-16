@@ -985,6 +985,416 @@ const passwordReset: SopTemplatePage = {
   published: true,
 };
 
+const refundProcessing: SopTemplatePage = {
+  type: 'sopTemplate',
+  slug: 'refund-processing',
+  metaTitle: 'Refund Processing SOP Template (Editable)',
+  metaDescription:
+    'A free, editable refund processing SOP template with roles, steps, and approval checks. Or record a real refund and let Ledgerium generate the SOP for you.',
+  h1: 'Refund processing SOP template',
+  eyebrow: 'SOP template',
+  shortAnswer:
+    'A refund processing SOP template gives you a ready structure to document how a refund moves from customer request to money returned: purpose, scope, roles, the step-by-step procedure, exceptions, and records. The steps most templates leave vague are the eligibility check against policy and the approval routing by amount. Recording a real refund lets Ledgerium generate the SOP from the actual steps in your order and payment systems, so the eligibility rules and approval thresholds are documented from real work, not from memory.',
+  primaryKeyword: 'refund processing SOP template',
+  secondaryKeywords: ['refund SOP template', 'refund approval procedure', 'customer refund SOP'],
+  searchIntent: 'commercial',
+  tags: ['sop-template', 'finance', 'refunds', 'approval', 'customer-service'],
+  related: ['workflow:refund-processing-workflow', 'sopTemplate:invoice-approval-sop-template', 'persona:customer-success-teams'],
+  relatedWorkflowSlug: 'refund-processing-workflow',
+  originalDataPoint:
+    'A generated refund SOP captures the eligibility check and the approval routing by amount from a real recording, and times each step, so it shows where refunds wait — usually in approval — not just that money was returned.',
+  mechanismIntro:
+    'Ledgerium captures the refund process by recording one real refund from customer request to money returned across the order and payment systems, so the generated SOP documents the eligibility check and approval routing by amount and times each step a blank template leaves vague.',
+  keyTakeaways: [
+    'A refund processing SOP covers the request, the eligibility check against policy, approval routing by amount, issuing the refund, and reconciling it.',
+    'Eligibility rules and approval thresholds are the steps templates leave vague, and a recording captures them as they happen in the order and payment systems.',
+    'A generated refund SOP times each step, so it shows where refunds wait — usually in approval — rather than only that money was returned.',
+    'Issuing a refund without an eligibility check exposes revenue to abuse, a gap a recorded refund closes by capturing the check in the procedure.',
+  ],
+  honestLimitation:
+    'A template is a starting structure. Your real eligibility rules and approval thresholds are captured best by recording an actual refund rather than filling in a blank outline.',
+  whoUsesIt:
+    'Support and finance staff who process refunds, the approver who signs off above a threshold, and the finance lead who owns refund policy. Auditors reference it when testing revenue controls.',
+  whenToUseIt:
+    'Use it when onboarding support or finance staff, standardizing how refunds are approved across the team, or documenting a revenue control for an audit.',
+  sopSections: [
+    { heading: 'Purpose', detail: 'Why the procedure exists and the revenue control it enforces over refunds.' },
+    { heading: 'Scope', detail: 'Which refund types and channels the procedure covers, and what is out of scope.' },
+    { heading: 'Roles', detail: 'Who requests, who checks eligibility, who approves by amount, and who issues the refund.' },
+    { heading: 'Procedure', detail: 'The ordered steps from customer request to a reconciled refund.' },
+    { heading: 'Exceptions', detail: 'How to handle ineligible requests, partial refunds, and chargebacks.' },
+    { heading: 'Records', detail: 'What evidence of eligibility and approval is kept, and where, for audit.' },
+  ],
+  exampleProcedure: [
+    { title: 'Receive the refund request', detail: 'Log the request with the order number and reason.' },
+    { title: 'Check eligibility', detail: 'Confirm the order and reason meet the refund policy.' },
+    { title: 'Route for approval', detail: 'Send to the correct approver based on the refund amount.' },
+    { title: 'Issue the refund', detail: 'Process the refund to the original payment method.' },
+    { title: 'Reconcile and record', detail: 'Match the refund to the order and log the approval.' },
+  ],
+  commonMistakes: [
+    'Leaving the eligibility rules out, so refunds are judged inconsistently',
+    'Issuing refunds without an approval step above a threshold',
+    'Not reconciling the refund back to the original order',
+  ],
+  howLedgeriumGenerates:
+    'Record one real refund from request to reconciled. Ledgerium generates this SOP from the actual steps in your order and payment systems, including the eligibility check and approval routing, and you re-record to keep it current as policy changes.',
+  faqs: [
+    {
+      q: 'What should a refund processing SOP include?',
+      a: 'Purpose, scope, roles, the step-by-step procedure, exceptions, and records. The procedure should cover the request, eligibility check, approval routing, issuing the refund, and reconciliation.',
+    },
+    {
+      q: 'Is this refund SOP template free?',
+      a: 'Yes. Use the structure here as a starting point, or record a real refund and have Ledgerium generate a complete SOP from the actual steps.',
+    },
+    {
+      q: 'How do I document the eligibility rules?',
+      a: 'Recording a real refund captures the eligibility check against policy as the agent runs it, so the rules end up in the SOP instead of being described vaguely.',
+    },
+    {
+      q: 'Where do refunds usually get stuck?',
+      a: 'In approval wait time above a threshold. A clear SOP plus the generated timing report shows where refunds stall.',
+    },
+    {
+      q: 'How do we keep the SOP current?',
+      a: 'Re-record a refund after a policy or system change and regenerate the SOP, rather than editing a document by hand.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
+const journalEntry: SopTemplatePage = {
+  type: 'sopTemplate',
+  slug: 'journal-entry',
+  metaTitle: 'Journal Entry SOP Template (Editable)',
+  metaDescription:
+    'A free, editable journal entry SOP template with roles, steps, and approvals for the general ledger. Or record a real entry and let Ledgerium build the SOP.',
+  h1: 'Journal entry SOP template',
+  eyebrow: 'SOP template',
+  shortAnswer:
+    'A journal entry SOP template gives you a ready structure to document how an accountant posts an entry to the general ledger: purpose, scope, roles, the step-by-step procedure, exceptions, and records. The steps most templates leave vague are the supporting documentation, the account coding, and the reviewer sign-off before posting. Recording a real entry lets Ledgerium generate the SOP from the actual steps in your accounting system, so the coding rules and the review are documented from real work, not from memory.',
+  primaryKeyword: 'journal entry SOP template',
+  secondaryKeywords: ['journal entry procedure', 'GL posting SOP', 'accounting journal SOP template'],
+  searchIntent: 'commercial',
+  tags: ['sop-template', 'finance', 'accounting', 'general-ledger', 'approval'],
+  related: ['workflow:journal-entry-workflow', 'sopTemplate:month-end-close-sop-template', 'persona:process-excellence-leads'],
+  relatedWorkflowSlug: 'journal-entry-workflow',
+  originalDataPoint:
+    'A generated journal entry SOP records the preparer-and-reviewer separation and times the review step, so it shows how long entries wait for sign-off before posting, which a happy-path template never captures.',
+  mechanismIntro:
+    'Ledgerium captures the journal entry process by recording one real entry from source document to posted transaction in the accounting system, so the generated SOP documents the account coding and the reviewer sign-off and times each step a blank template leaves vague.',
+  keyTakeaways: [
+    'A journal entry SOP covers gathering support, coding the debits and credits, review, posting to the general ledger, and filing the entry.',
+    'Account coding and the reviewer sign-off before posting are the steps templates leave vague, and a recording captures them as they happen.',
+    'A generated journal entry SOP records the preparer-and-reviewer separation and times the review, showing how long entries wait for sign-off.',
+    'Posting an unbalanced or uncoded entry corrupts the ledger, a mistake a recorded entry exposes by capturing the coding and balance check.',
+  ],
+  honestLimitation:
+    'A template is a starting structure. Your real coding rules and review thresholds are captured best by recording an actual entry rather than filling in a blank outline.',
+  whoUsesIt:
+    'Staff accountants who prepare entries, the senior accountant or controller who reviews and approves, and auditors who test the ledger. The controller owns the coding policy.',
+  whenToUseIt:
+    'Use it when onboarding accountants, standardizing how entries are coded and reviewed, or documenting a financial control for an audit.',
+  sopSections: [
+    { heading: 'Purpose', detail: 'Why the procedure exists and the ledger accuracy and separation of duties it enforces.' },
+    { heading: 'Scope', detail: 'Which entry types and entities the procedure covers, and what is out of scope.' },
+    { heading: 'Roles', detail: 'Who prepares the entry, who reviews the coding, and who approves posting.' },
+    { heading: 'Procedure', detail: 'The ordered steps from source document to a posted, filed entry.' },
+    { heading: 'Exceptions', detail: 'How to handle reversals, recurring entries, and coding disputes.' },
+    { heading: 'Records', detail: 'What support is attached and where the approved entry is filed, for audit.' },
+  ],
+  exampleProcedure: [
+    { title: 'Gather the support', detail: 'Collect the source documents that justify the entry.' },
+    { title: 'Code the entry', detail: 'Enter the debits and credits against the correct accounts.' },
+    { title: 'Check the balance', detail: 'Confirm the entry balances and coding matches policy.' },
+    { title: 'Route for review', detail: 'Send to the reviewer who signs off before posting.' },
+    { title: 'Post and file', detail: 'Post the approved entry and file the support for audit.' },
+  ],
+  commonMistakes: [
+    'Leaving the account coding rules out, so entries are coded inconsistently',
+    'Posting without a reviewer sign-off, breaking separation of duties',
+    'Not attaching the source documents that justify the entry',
+  ],
+  howLedgeriumGenerates:
+    'Record one real entry from source document to posted transaction. Ledgerium generates this SOP from the actual steps in your accounting system, including the coding and the review, and you re-record to keep it current as the chart of accounts changes.',
+  faqs: [
+    {
+      q: 'What should a journal entry SOP include?',
+      a: 'Purpose, scope, roles, the step-by-step procedure, exceptions, and records. The procedure should cover gathering support, coding, the balance check, review, and posting to the general ledger.',
+    },
+    {
+      q: 'Is this journal entry SOP template free?',
+      a: 'Yes. Use the structure here as a starting point, or record a real entry and have Ledgerium generate a complete SOP from the actual steps.',
+    },
+    {
+      q: 'How do I document the account coding?',
+      a: 'Recording a real entry captures the coding an accountant applies as they apply it, so the coding rules end up in the SOP instead of living in one person’s head.',
+    },
+    {
+      q: 'Why does the reviewer sign-off matter?',
+      a: 'It enforces separation of duties so no one both prepares and posts unchecked. A recorded entry captures the review step so it is never skipped.',
+    },
+    {
+      q: 'How do we keep the SOP current?',
+      a: 'Re-record an entry after a chart-of-accounts or system change and regenerate the SOP, rather than editing a document by hand.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
+const systemAccessRequest: SopTemplatePage = {
+  type: 'sopTemplate',
+  slug: 'system-access-request',
+  metaTitle: 'System Access Request SOP Template (Editable)',
+  metaDescription:
+    'A free, editable system access request SOP template with roles, steps, and approvals. Or record a real access request and let Ledgerium generate the SOP.',
+  h1: 'System access request SOP template',
+  eyebrow: 'SOP template',
+  shortAnswer:
+    'A system access request SOP template gives you a ready structure to document how an employee gets access to a system: purpose, scope, roles, the step-by-step procedure, exceptions, and records. The steps most templates leave vague are the approval from the system owner and the least-privilege check that grants only the access the role needs. Recording a real access request lets Ledgerium generate the SOP from the actual steps in your ticketing and identity systems, so the approval and provisioning are documented from real work, not from memory.',
+  primaryKeyword: 'system access request SOP template',
+  secondaryKeywords: ['access request procedure', 'user access provisioning SOP', 'IT access request SOP template'],
+  searchIntent: 'commercial',
+  tags: ['sop-template', 'it', 'access-management', 'provisioning', 'approval'],
+  related: ['workflow:access-provisioning-workflow', 'software:servicenow', 'persona:it-directors'],
+  relatedWorkflowSlug: 'access-provisioning-workflow',
+  originalDataPoint:
+    'A generated access request SOP captures the system-owner approval and the least-privilege grant step by step and times the provisioning wait, so it shows where access requests stall, which a happy-path template never captures.',
+  mechanismIntro:
+    'Ledgerium captures the system access request process by recording one real request from submission to granted access across the ticketing and identity systems, so the generated SOP documents the owner approval and least-privilege provisioning and times each step a blank template leaves vague.',
+  keyTakeaways: [
+    'A system access request SOP covers the request, manager and system-owner approval, the least-privilege grant, provisioning, and confirming access.',
+    'The system-owner approval and the least-privilege check are the steps templates leave vague, and a recording captures them as they happen.',
+    'A generated access request SOP times the provisioning wait, so it shows where requests stall between approval and access granted.',
+    'Granting broad access instead of only what the role needs creates security risk, a gap a recorded request closes by capturing the least-privilege check.',
+  ],
+  honestLimitation:
+    'A template is a starting structure. Your real approval routing and least-privilege rules are captured best by recording an actual access request rather than filling in a blank outline.',
+  whoUsesIt:
+    'Employees requesting access, the manager and system owner who approve, and the IT team that provisions. The security lead owns the access policy and auditors reference it for access controls.',
+  whenToUseIt:
+    'Use it when onboarding IT staff, standardizing how access is requested and approved across systems, or documenting an access control for a security audit.',
+  sopSections: [
+    { heading: 'Purpose', detail: 'Why the procedure exists and the least-privilege and access control it enforces.' },
+    { heading: 'Scope', detail: 'Which systems and access levels the procedure covers, and what is out of scope.' },
+    { heading: 'Roles', detail: 'Who requests, who approves as manager and system owner, and who provisions.' },
+    { heading: 'Procedure', detail: 'The ordered steps from request to confirmed, least-privilege access.' },
+    { heading: 'Exceptions', detail: 'How to handle privileged access, temporary access, and denied requests.' },
+    { heading: 'Records', detail: 'What approval evidence is kept and where access grants are logged, for audit.' },
+  ],
+  exampleProcedure: [
+    { title: 'Submit the request', detail: 'Enter the system, role, and business reason for access.' },
+    { title: 'Approve the request', detail: 'Manager and system owner approve the access level.' },
+    { title: 'Apply least privilege', detail: 'Confirm the grant is limited to what the role requires.' },
+    { title: 'Provision the access', detail: 'Create or update the account in the identity system.' },
+    { title: 'Confirm and log', detail: 'Verify the user has access and log the grant for review.' },
+  ],
+  commonMistakes: [
+    'Leaving the system-owner approval out, so access is granted without review',
+    'Granting broad access instead of only what the role needs',
+    'Not logging the grant, so there is no audit trail of who has access',
+  ],
+  howLedgeriumGenerates:
+    'Record one real access request from submission to granted access. Ledgerium generates this SOP from the actual steps in your ticketing and identity systems, including the approval and least-privilege check, and you re-record to keep it current as systems change.',
+  faqs: [
+    {
+      q: 'What should a system access request SOP include?',
+      a: 'Purpose, scope, roles, the step-by-step procedure, exceptions, and records. The procedure should cover the request, manager and system-owner approval, the least-privilege grant, provisioning, and confirming access.',
+    },
+    {
+      q: 'Is this access request SOP template free?',
+      a: 'Yes. Use the structure here as a starting point, or record a real access request and have Ledgerium generate a complete SOP from the actual steps.',
+    },
+    {
+      q: 'How do I document the least-privilege check?',
+      a: 'Recording a real request captures the check that limits access to what the role needs, so the control ends up in the SOP instead of being described vaguely.',
+    },
+    {
+      q: 'Where do access requests usually get stuck?',
+      a: 'In approval and the provisioning wait. A clear SOP plus the generated timing report shows where requests stall.',
+    },
+    {
+      q: 'How do we keep the SOP current?',
+      a: 'Re-record an access request after a system or policy change and regenerate the SOP, rather than editing a document by hand.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
+const salesOrderProcessing: SopTemplatePage = {
+  type: 'sopTemplate',
+  slug: 'sales-order-processing',
+  metaTitle: 'Sales Order Processing SOP Template (Editable)',
+  metaDescription:
+    'A free, editable sales order processing SOP template with roles, steps, and order checks. Or record a real order and let Ledgerium generate the SOP.',
+  h1: 'Sales order processing SOP template',
+  eyebrow: 'SOP template',
+  shortAnswer:
+    'A sales order processing SOP template gives you a ready structure to document how an order moves from received to shipped: purpose, scope, roles, the step-by-step procedure, exceptions, and records. The steps most templates leave vague are the credit check, the inventory allocation, and the pricing confirmation before fulfillment. Recording a real order lets Ledgerium generate the SOP from the actual steps in your order system, so the credit and allocation checks are documented from real work, not from memory.',
+  primaryKeyword: 'sales order processing SOP template',
+  secondaryKeywords: ['order processing SOP', 'sales order procedure', 'order fulfillment SOP template'],
+  searchIntent: 'commercial',
+  tags: ['sop-template', 'operations', 'sales-order', 'fulfillment', 'order-management'],
+  related: ['workflow:sales-order-processing-workflow', 'sopTemplate:purchase-order-sop-template', 'persona:operations-managers'],
+  relatedWorkflowSlug: 'sales-order-processing-workflow',
+  originalDataPoint:
+    'A generated sales order SOP captures the credit check and inventory allocation step by step and times each stage, so it shows where orders wait between entry and shipment, which a happy-path template never captures.',
+  mechanismIntro:
+    'Ledgerium captures the sales order process by recording one real order from receipt to shipment in the order system, so the generated SOP documents the credit check, inventory allocation, and pricing confirmation and times each step a blank template leaves vague.',
+  keyTakeaways: [
+    'A sales order SOP covers order entry, the credit check, inventory allocation, pricing confirmation, and fulfillment through shipment.',
+    'The credit check and inventory allocation are the steps templates leave vague, and a recording captures them as they happen in the order system.',
+    'A generated sales order SOP times each stage, so it shows where orders wait between entry and shipment rather than only that an order shipped.',
+    'Fulfilling an order before the credit check or allocation confirms exposes revenue and stock, a gap a recorded order closes in the procedure.',
+  ],
+  honestLimitation:
+    'A template is a starting structure. Your real credit rules and allocation logic are captured best by recording an actual order rather than filling in a blank outline.',
+  whoUsesIt:
+    'Order management and customer service staff who enter orders, the finance team that runs credit checks, and the warehouse that fulfills. The operations lead owns the procedure and auditors reference it for order controls.',
+  whenToUseIt:
+    'Use it when onboarding order management staff, standardizing how orders are processed across the team, or documenting an order control for an audit.',
+  sopSections: [
+    { heading: 'Purpose', detail: 'Why the procedure exists and the revenue and inventory controls it enforces over orders.' },
+    { heading: 'Scope', detail: 'Which order types and channels the procedure covers, and what is out of scope.' },
+    { heading: 'Roles', detail: 'Who enters the order, who runs the credit check, and who allocates and ships.' },
+    { heading: 'Procedure', detail: 'The ordered steps from received order to a shipped, invoiced order.' },
+    { heading: 'Exceptions', detail: 'How to handle credit holds, backorders, and pricing disputes.' },
+    { heading: 'Records', detail: 'What evidence of credit and allocation is kept and where, for audit.' },
+  ],
+  exampleProcedure: [
+    { title: 'Enter the order', detail: 'Capture the customer, items, quantities, and pricing.' },
+    { title: 'Run the credit check', detail: 'Confirm the customer is within credit terms before proceeding.' },
+    { title: 'Allocate inventory', detail: 'Reserve stock against the order or flag a backorder.' },
+    { title: 'Confirm pricing', detail: 'Verify pricing and discounts match the agreed terms.' },
+    { title: 'Fulfill and invoice', detail: 'Ship the order and generate the invoice.' },
+  ],
+  commonMistakes: [
+    'Leaving the credit check out, so orders ship to accounts on hold',
+    'Allocating inventory without confirming stock, creating backorders late',
+    'Not confirming pricing against the agreed terms before fulfillment',
+  ],
+  howLedgeriumGenerates:
+    'Record one real order from receipt to shipment. Ledgerium generates this SOP from the actual steps in your order system, including the credit check and allocation, and you re-record to keep it current as the process changes.',
+  faqs: [
+    {
+      q: 'What should a sales order processing SOP include?',
+      a: 'Purpose, scope, roles, the step-by-step procedure, exceptions, and records. The procedure should cover order entry, the credit check, inventory allocation, pricing confirmation, and fulfillment.',
+    },
+    {
+      q: 'Is this sales order SOP template free?',
+      a: 'Yes. Use the structure here as a starting point, or record a real order and have Ledgerium generate a complete SOP from the actual steps.',
+    },
+    {
+      q: 'How do I document the credit and allocation checks?',
+      a: 'Recording a real order captures the credit check and inventory allocation as they happen, so those control steps end up in the SOP instead of being described vaguely.',
+    },
+    {
+      q: 'Where do sales orders usually get stuck?',
+      a: 'On credit holds and backorders. A clear SOP plus the generated timing report shows where orders wait between entry and shipment.',
+    },
+    {
+      q: 'How do we keep the SOP current?',
+      a: 'Re-record an order after a process or system change and regenerate the SOP, rather than editing a document by hand.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
+const incidentManagement: SopTemplatePage = {
+  type: 'sopTemplate',
+  slug: 'incident-management',
+  metaTitle: 'Incident Management SOP Template (Editable)',
+  metaDescription:
+    'A free, editable incident management SOP template with roles, steps, and escalation. Or record a real incident response and let Ledgerium generate the SOP.',
+  h1: 'Incident management SOP template',
+  eyebrow: 'SOP template',
+  shortAnswer:
+    'An incident management SOP template gives you a ready structure to document how an operations team responds to an incident: purpose, scope, roles, the step-by-step procedure, exceptions, and records. The steps most templates leave vague are the severity classification, the on-call escalation, and the post-incident review. Recording a real incident response lets Ledgerium generate the SOP from the actual steps in your incident tooling, so the severity rules and escalation path are documented from real work, not from memory.',
+  primaryKeyword: 'incident management SOP template',
+  secondaryKeywords: ['incident response SOP', 'IT incident procedure', 'major incident SOP template'],
+  searchIntent: 'commercial',
+  tags: ['sop-template', 'it', 'operations', 'incident-response', 'escalation'],
+  related: ['workflow:incident-management-workflow', 'software:servicenow', 'persona:it-directors'],
+  relatedWorkflowSlug: 'incident-management-workflow',
+  originalDataPoint:
+    'A generated incident management SOP captures the severity classification and on-call escalation step by step and times detection to resolution, so it shows where response time is lost, which a happy-path template never captures.',
+  mechanismIntro:
+    'Ledgerium captures the incident management process by recording one real incident response from detection to resolution in the incident tooling, so the generated SOP documents the severity classification and escalation path and times each step a checklist leaves vague.',
+  keyTakeaways: [
+    'An incident management SOP covers detection, severity classification, escalation, containment, resolution, and the post-incident review.',
+    'Severity classification and on-call escalation are the steps templates leave vague, and a recording captures them as they happen in the incident tooling.',
+    'A generated incident SOP times detection to resolution, so it shows where response time is lost rather than only that the incident was closed.',
+    'Closing an incident without a post-incident review loses the root cause, a gap a recorded response closes by capturing the review step.',
+  ],
+  honestLimitation:
+    'A template is a starting structure. Your real severity rules and escalation path are captured best by recording an actual incident response rather than filling in a blank outline.',
+  whoUsesIt:
+    'On-call engineers and operations staff who respond, the incident commander who coordinates, and the service owner who runs the post-incident review. Managers reference it for response targets.',
+  whenToUseIt:
+    'Use it when onboarding on-call staff, standardizing how incidents are classified and escalated across the team, or documenting a response process for a review.',
+  sopSections: [
+    { heading: 'Purpose', detail: 'Why the procedure exists and the response and reliability targets it supports.' },
+    { heading: 'Scope', detail: 'Which systems and incident types the procedure covers, and what is out of scope.' },
+    { heading: 'Roles', detail: 'Who responds on call, who commands the incident, and who runs the review.' },
+    { heading: 'Procedure', detail: 'The ordered steps from detection to a resolved, reviewed incident.' },
+    { heading: 'Exceptions', detail: 'How to handle major incidents, escalations, and cross-team response.' },
+    { heading: 'Records', detail: 'What is logged during the incident and where the post-incident review is filed.' },
+  ],
+  exampleProcedure: [
+    { title: 'Detect and log', detail: 'Open the incident and record the first symptoms and time.' },
+    { title: 'Classify severity', detail: 'Set severity from the classification rules to drive response.' },
+    { title: 'Escalate on call', detail: 'Page the on-call owner and escalate if severity requires.' },
+    { title: 'Contain and resolve', detail: 'Mitigate the impact, then apply and confirm the fix.' },
+    { title: 'Review and close', detail: 'Run the post-incident review and close the incident.' },
+  ],
+  commonMistakes: [
+    'Leaving the severity classification out, so response is sized inconsistently',
+    'Documenting the fix but not the on-call escalation path',
+    'Closing incidents without a post-incident review, losing the root cause',
+  ],
+  howLedgeriumGenerates:
+    'Record one real incident response from detection to resolution. Ledgerium generates this SOP from the actual steps in your incident tooling, including the severity classification and escalation, and you re-record to keep it current as the process changes.',
+  faqs: [
+    {
+      q: 'What should an incident management SOP include?',
+      a: 'Purpose, scope, roles, the step-by-step procedure, exceptions, and records. The procedure should cover detection, severity classification, escalation, containment, resolution, and the post-incident review.',
+    },
+    {
+      q: 'Is this incident management SOP template free?',
+      a: 'Yes. Use the structure here as a starting point, or record a real incident response and have Ledgerium generate a complete SOP from the actual steps.',
+    },
+    {
+      q: 'How do I document the escalation path?',
+      a: 'Recording a real incident that escalates captures who is paged and when, so the on-call escalation path ends up in the SOP instead of being passed on by word of mouth.',
+    },
+    {
+      q: 'Where is response time usually lost?',
+      a: 'In classification and escalation delay. A clear SOP plus the generated timing report shows where detection-to-resolution time is lost.',
+    },
+    {
+      q: 'How do we keep the SOP current?',
+      a: 'Re-record an incident response after a tooling or process change and regenerate the SOP, rather than editing a document by hand.',
+    },
+  ],
+  jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
 export const SOP_TEMPLATE_PAGES: readonly SopTemplatePage[] = [
   invoiceApproval,
   customerOnboarding,
@@ -998,4 +1408,9 @@ export const SOP_TEMPLATE_PAGES: readonly SopTemplatePage[] = [
   travelRequest,
   leadQualification,
   passwordReset,
+  refundProcessing,
+  journalEntry,
+  systemAccessRequest,
+  salesOrderProcessing,
+  incidentManagement,
 ];

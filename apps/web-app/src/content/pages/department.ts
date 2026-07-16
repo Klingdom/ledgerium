@@ -634,6 +634,85 @@ const compliance: DepartmentPage = {
   published: true,
 };
 
+const legal: DepartmentPage = {
+  type: 'department',
+  slug: 'legal',
+  metaTitle: 'Legal Workflows: Document, Standardize, Improve',
+  metaDescription:
+    'Document legal workflows like contract review, redlines, and approval routing by recording how they really run. Get SOPs, process maps, and AI opportunities.',
+  h1: 'Legal workflows',
+  eyebrow: 'Department',
+  shortAnswer:
+    'Legal teams run on document-heavy workflows like contract review, redlining, approval routing, and matter intake, and most of the real routing lives in a lead lawyer’s or paralegal’s head rather than in a written procedure. Recording how each one actually runs produces an SOP, a process map, and a report showing where a document waits for sign-off and which steps are worth automating. Ledgerium captures the real steps across your contract, e-signature, and matter-management systems, so the documentation matches how legal work is really routed and gives you a baseline to standardize against.',
+  primaryKeyword: 'legal workflows',
+  secondaryKeywords: ['legal process documentation', 'contract workflow documentation', 'document legal processes'],
+  searchIntent: 'commercial',
+  tags: ['department', 'legal', 'documentation', 'process-intelligence'],
+  related: ['workflow:contract-review-workflow', 'sopTemplate:contract-review-sop-template', 'persona:compliance-teams'],
+  overview:
+    'Legal teams are the natural home of document workflows, contracts, redlines, approvals, and matter files, yet the routing that moves a document from draft to signature usually lives with a few people rather than in a procedure. Most legal work spans a contract or matter-management system plus email, a document store, and an e-signature tool, which is exactly why a written-from-memory SOP drifts from how approvals really happen.',
+  commonWorkflows: [
+    'Contract review and redlining',
+    'Approval routing and sign-off',
+    'Matter intake and conflict checks',
+    'E-signature and executed-document filing',
+  ],
+  documentationProblems: [
+    'Approval routing lives in a lead lawyer’s head',
+    'Redline and version history spans email and drafts',
+    'Steps across the matter system and e-signature tool get left out',
+  ],
+  sopNeeds: [
+    'Consistent review and approval routing',
+    'Defensible records of who approved each version',
+    'Onboarding material for new paralegals and counsel',
+  ],
+  aiOpportunities: [
+    'Drafting intake and conflict-check checklists from the recorded flow',
+    'Routing contracts to the right reviewer automatically',
+    'Flagging approvals and matters trending past their target',
+  ],
+  honestLimitation:
+    'Ledgerium captures browser-based legal work. Steps in desktop document editors or offline negotiations still need a linked note.',
+  originalDataPoint:
+    'Across contract workflows, most cycle time is wait time in approval routing, not drafting time. Ledgerium timestamps each step, so the report shows how long a contract waits for a reviewer or signature rather than how long the edit takes.',
+  mechanismIntro:
+    'Legal teams route contracts, redlines, and approvals across a matter system, a document store, and an e-signature tool, and Ledgerium records the real routing so the SOP shows how a document actually moves from draft to signature rather than how a procedure assumes it does.',
+  keyTakeaways: [
+    'Legal is the natural home of document workflows, contracts, redlines, approvals, and matter files, yet the routing that moves a document to signature rarely sits in a written procedure.',
+    'Contract review and approval routing that live with a few people become a bottleneck the moment those people are unavailable.',
+    'A recorded SOP shows who approved which version and in what order, giving legal a defensible record traceable to the actual steps.',
+    'Ledgerium records steps across the matter system, document store, and e-signature tool in one workflow, so the SOP reflects the full routing path rather than one tool in isolation.',
+    'Timestamped steps show most legal cycle time is wait time in approval routing, revealing how long a contract waits for a reviewer or signature.',
+  ],
+  faqs: [
+    {
+      q: 'How do I document legal document workflows?',
+      a: 'Record each contract, approval, or matter-intake workflow once as someone runs it, then generate the SOP and process map from the recording. It captures the real routing steps that a memory-based procedure leaves out.',
+    },
+    {
+      q: 'Which legal processes are worth documenting first?',
+      a: 'Start with contract review and approval routing. They run often, carry the most sign-off risk, and have the clearest payoff from consistent, traceable routing.',
+    },
+    {
+      q: 'Can Ledgerium help prove who approved a contract?',
+      a: 'Yes. A recording shows who approved which version and in what order, giving you a defensible record traceable to the actual steps rather than reconstructed from email.',
+    },
+    {
+      q: 'Where can AI help in legal workflows?',
+      a: 'In repetitive, rule-based steps like intake checklists, conflict-check routing, and reminders. Legal judgment and negotiation should keep a qualified human involved.',
+    },
+    {
+      q: 'How do I keep legal SOPs current?',
+      a: 'Re-record the workflow after a template, policy, or system change and regenerate the SOP, instead of hand-editing procedure documents each cycle.',
+    },
+  ],
+  jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
 export const DEPARTMENT_PAGES: readonly DepartmentPage[] = [
   finance,
   hr,
@@ -643,4 +722,5 @@ export const DEPARTMENT_PAGES: readonly DepartmentPage[] = [
   procurement,
   it,
   compliance,
+  legal,
 ];

@@ -1030,6 +1030,358 @@ const bpoOperations: PersonaPage = {
   published: true,
 };
 
+const itDirectors: PersonaPage = {
+  type: 'persona',
+  slug: 'it-directors',
+  metaTitle: 'Ledgerium AI for IT Directors and Leaders',
+  metaDescription:
+    'IT directors use Ledgerium to document access provisioning and admin workflows by recording the real process into SOPs, maps, and automation scoring.',
+  h1: 'Ledgerium AI for IT directors',
+  eyebrow: 'For IT leadership',
+  shortAnswer:
+    'Ledgerium helps IT directors document the access-provisioning and system-administration workflows that sprawl across a growing stack of SaaS tools. Joiner-mover-leaver requests, license assignments, and permission changes run through the identity provider, the ticketing system, and a dozen apps, and the real steps rarely match the runbook. You record the actual process and get an SOP, a process map, and timing that show where provisioning stalls, so you can standardize it across the team, cut onboarding delays, and see which repetitive admin steps are worth automating.',
+  primaryKeyword: 'IT process documentation',
+  secondaryKeywords: ['document access provisioning', 'IT runbook documentation', 'IT workflow SOPs'],
+  searchIntent: 'commercial',
+  tags: ['persona', 'it', 'access-provisioning', 'sop', 'documentation'],
+  related: [
+    'workflow:access-provisioning-workflow',
+    'software:servicenow',
+    'problem:how-to-document-a-workflow-across-multiple-systems',
+  ],
+  originalDataPoint:
+    'Access provisioning touches the identity provider, the ticketing tool, and each target app, and Ledgerium timestamps every step, so an IT director can see that most provisioning delay is approval and handoff waiting rather than the few minutes of actual account setup.',
+  mechanismIntro:
+    'Ledgerium captures IT operations by recording the real access-provisioning and administration steps across the identity provider, ticketing tool, and each SaaS app, so the process map shows where a request waits instead of relying on a runbook nobody updated.',
+  keyTakeaways: [
+    'IT directors carry provisioning risk in the handoffs between the identity provider, the ticketing queue, and each app owner, the part a runbook compresses into a single line.',
+    'System sprawl means one joiner request can touch a dozen tools, and a single recording captures every browser-based step instead of the three that made it into the runbook.',
+    'Ledgerium timestamps each step, so an IT director sees provisioning delay concentrate in approval and handoff waiting rather than in the minutes of actual account setup.',
+    'Repetitive, rule-based provisioning steps are the strongest automation candidates, and Ledgerium scores them from the recorded process before anyone builds a workflow.',
+    'A recorded provisioning process is a measurable baseline, so re-recording after a change shows whether the new runbook actually shortened onboarding.',
+  ],
+  honestLimitation:
+    'Ledgerium documents browser-based work. Steps that run in a native desktop admin console, a terminal, or on-premises tooling still need an engineer to add the context.',
+  whoThisIsFor:
+    'IT directors and IT operations leaders who own access provisioning, system administration, and the runbooks that keep a sprawling SaaS and identity stack consistent.',
+  painPoints: [
+    'Runbooks describe an ideal flow that drifts as the stack grows',
+    'Provisioning spans the identity provider, ticketing, and a dozen apps with no single documented flow',
+    'Onboarding access stalls in approvals and handoffs no one can see',
+    'Repetitive admin work is an automation target nobody has scored',
+  ],
+  whatTheySearchFor: [
+    'How to document an IT process',
+    'How to document access provisioning',
+    'How to standardize IT runbooks',
+    'How to document a workflow across multiple systems',
+  ],
+  jobsToBeDone: [
+    'Document access-provisioning and admin workflows across the stack',
+    'Standardize runbooks so any engineer runs them the same way',
+    'Cut the approval and handoff delay in onboarding access',
+    'Find repetitive admin steps worth automating',
+  ],
+  commonWorkflowsToDocument: [
+    'Joiner-mover-leaver access provisioning',
+    'License and permission assignment',
+    'Software and SaaS onboarding requests',
+    'Offboarding and access revocation',
+  ],
+  dayInTheLife:
+    'An IT director fields an escalation that a new hire still cannot log in on day three, and traces it to a provisioning step that lives in one engineer’s head and was skipped. The stack has grown to dozens of SaaS tools, the runbook covers a fraction of them, and every engineer provisions access a little differently. The real question is not what the runbook says, but how access actually gets granted across the identity provider, the ticketing queue, and each app.',
+  howLedgeriumHelps:
+    'Record each provisioning and admin workflow as an engineer runs it normally. Ledgerium turns the recording into an SOP, a process map across the identity provider, ticketing, and each app, and timing that shows where requests wait. You get a single documented flow the whole team can follow, plus the evidence to decide which repetitive steps are worth automating.',
+  faqs: [
+    {
+      q: 'How does Ledgerium help IT directors?',
+      a: 'It records the real access-provisioning and administration workflows across your stack and generates an SOP, a process map, and timing. You get current, consistent runbooks and clear automation candidates instead of documentation that drifts as tools are added.',
+    },
+    {
+      q: 'Can it document provisioning that spans the identity provider and many apps?',
+      a: 'Yes. A single recording captures the steps across each browser-based system in the flow, so the SOP and map reflect the full cross-system provisioning process, not just the identity provider.',
+    },
+    {
+      q: 'Will this help standardize our runbooks?',
+      a: 'Yes. Recording a strong run gives every engineer a standard to follow, and re-recording later shows whether the team is actually provisioning access the same way.',
+    },
+    {
+      q: 'How do I find what to automate?',
+      a: 'The report highlights repetitive, rule-based steps and the handoff delays around them, which are the strongest automation candidates. Ledgerium scores these from the recorded process before you build anything.',
+    },
+    {
+      q: 'Does Ledgerium capture desktop admin tools?',
+      a: 'It captures browser-based work. Steps in a native desktop console, a terminal, or on-prem tooling need an engineer to add context, but the browser-based provisioning steps and handoffs are captured automatically.',
+    },
+  ],
+  jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
+const sharedServicesLeaders: PersonaPage = {
+  type: 'persona',
+  slug: 'shared-services-leaders',
+  metaTitle: 'Ledgerium AI for Shared Services Leaders',
+  metaDescription:
+    'Shared services leaders use Ledgerium to document high-volume workflows across business units, recording the real process into SOPs and automation scoring.',
+  h1: 'Ledgerium AI for shared services leaders',
+  eyebrow: 'For shared services',
+  shortAnswer:
+    'Ledgerium helps shared services leaders standardize the high-volume, repeatable workflows a shared services center runs on behalf of many business units. The same invoice, hire, or reconciliation is processed hundreds of times, yet each business unit and each agent tends to do it a little differently. You record the real process and get an SOP, a process map, and timing that show how the work actually runs and where it varies, so you can standardize the motion across every unit, hit your SLAs, and rank the repetitive steps worth automating.',
+  primaryKeyword: 'shared services process documentation',
+  secondaryKeywords: ['document high-volume workflows', 'shared services SOPs', 'standardize processes across business units'],
+  searchIntent: 'commercial',
+  tags: ['persona', 'shared-services', 'standardization', 'process-intelligence', 'documentation'],
+  related: ['workflow:invoice-approval-workflow', 'problem:how-to-standardize-workflows', 'compare:process-mining'],
+  originalDataPoint:
+    'A shared services center runs the same process hundreds of times a month, and Ledgerium measures how much that process varies between agents and between business units, so a leader can put a number on the standardization gap that drives rework and missed SLAs.',
+  mechanismIntro:
+    'Ledgerium captures a shared services operation by recording several real runs of a high-volume workflow across agents and business units, so the process map quantifies the variation and throughput a center runs on instead of an SLA dashboard summary.',
+  keyTakeaways: [
+    'Shared services leaders run the same workflow at high volume across many business units, so a small per-run inconsistency multiplies into significant rework and missed SLAs.',
+    'Each business unit tends to run the shared process a little differently, and recording several runs turns that variation into a number a leader can standardize against.',
+    'Ledgerium separates work time from wait time and rework at volume, so throughput bottlenecks show up as the specific steps that stall rather than a whole-queue average.',
+    'Repetitive, high-volume steps are the strongest automation candidates in a shared services center, and Ledgerium scores them from the recorded process.',
+    'A recorded process is a measurable baseline, so re-recording after a standardization push shows whether every business unit actually converged on the same motion.',
+  ],
+  honestLimitation:
+    'Ledgerium documents browser-based work. High-volume steps that run in a native desktop application or on paper still need an agent to record the context.',
+  whoThisIsFor:
+    'Shared services and global business services leaders who run high-volume, repeatable operations for multiple business units and are accountable for SLAs, throughput, and consistency.',
+  painPoints: [
+    'The same process runs differently across business units and agents',
+    'High volume turns a small inconsistency into significant rework',
+    'SLA dashboards show misses but not which step caused them',
+    'Repetitive work is a clear automation target nobody has scored',
+  ],
+  whatTheySearchFor: [
+    'How to standardize workflows across business units',
+    'How to document a high-volume process',
+    'How to find process waste',
+    'How to baseline a workflow',
+  ],
+  jobsToBeDone: [
+    'Document the real high-volume process across every business unit',
+    'Standardize the motion so each unit runs it the same way',
+    'Find the step causing SLA misses and rework',
+    'Rank the repetitive steps worth automating',
+  ],
+  commonWorkflowsToDocument: [
+    'Invoice and payment processing at volume',
+    'Employee data changes and onboarding requests',
+    'Account reconciliations and close tasks',
+    'Vendor and customer master-data maintenance',
+  ],
+  dayInTheLife:
+    'A shared services leader reviews an SLA miss and finds two business units run the same reconciliation completely differently, so a fix that works for one breaks for the other. The center processes the task hundreds of times a month, but the only record of how each unit does it is agent habit. Everyone agrees the process varies, nobody can put a number on it, and the standard rolled out last quarter has already drifted at high volume.',
+  howLedgeriumHelps:
+    'Record the process from several real runs across the business units you serve. Ledgerium produces an SOP, a process map, and timing with the variation between agents and units. You standardize the motion on evidence, target the specific step behind SLA misses and rework, keep a baseline for every improvement, and rank the repetitive steps worth automating in a high-volume queue.',
+  faqs: [
+    {
+      q: 'How does Ledgerium help shared services leaders?',
+      a: 'It records real runs of your high-volume workflows and generates an SOP, a process map, and timing with the variation between agents and business units. You get an evidence-based standard, the step behind SLA misses, and clear automation candidates.',
+    },
+    {
+      q: 'Can it standardize a process across several business units?',
+      a: 'Yes. Recording how each unit runs the same process shows exactly where they diverge, so you can build one standard from the strongest run and re-record to confirm every unit converged.',
+    },
+    {
+      q: 'Will it help me hit SLAs?',
+      a: 'The report separates work time from wait time and rework, so an SLA miss traces to the specific step that stalled rather than a whole-queue average, which is where the fastest recovery is.',
+    },
+    {
+      q: 'How do I find what to automate at volume?',
+      a: 'Ledgerium scores repetitive, high-volume, rule-based steps from the recorded process, so you rank automation candidates by real evidence rather than by which queue complained loudest.',
+    },
+    {
+      q: 'Does it capture desktop or paper steps?',
+      a: 'It documents browser-based work. Steps in a native desktop application or on paper still need an agent to add context, but the system steps and handoffs at volume are captured automatically.',
+    },
+  ],
+  jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
+const insuranceClaimsManagers: PersonaPage = {
+  type: 'persona',
+  slug: 'insurance-claims-managers',
+  metaTitle: 'Ledgerium AI for Insurance Claims Managers',
+  metaDescription:
+    'Insurance claims managers use Ledgerium to document FNOL-to-adjudication claims workflows by recording the real process into SOPs and timing.',
+  h1: 'Ledgerium AI for insurance claims managers',
+  eyebrow: 'For claims operations',
+  shortAnswer:
+    'Ledgerium helps insurance claims managers document the claims workflows that run from first notice of loss through adjudication and settlement, including the document handling in between. FNOL intake, coverage verification, and adjudication cross the claims system, the policy admin system, and email, and the supporting documents a handler chases rarely follow a written procedure. You record the real process and get an SOP, a process map, and timing that show where a claim waits, so you can standardize how handlers work, cut cycle time, and see which document-heavy steps are worth automating.',
+  primaryKeyword: 'insurance claims process documentation',
+  secondaryKeywords: ['insurance document workflow', 'document claims handling process', 'claims workflow SOPs'],
+  searchIntent: 'commercial',
+  tags: ['persona', 'insurance', 'claims', 'document-handling', 'documentation'],
+  related: [
+    'industry:insurance',
+    'problem:how-to-document-a-workflow-across-multiple-systems',
+    'compare:process-mining',
+  ],
+  originalDataPoint:
+    'A claim moves from FNOL to settlement across the claims system, the policy admin system, and a trail of supporting documents, and Ledgerium timestamps each step, so a claims manager can see that most cycle time is a claim waiting on documents and reviews rather than the handler’s active adjudication work.',
+  mechanismIntro:
+    'Ledgerium captures claims handling by recording the real FNOL, coverage-verification, adjudication, and document-handling steps across the claims system, policy admin system, and email, so the process map shows where a claim waits instead of the handler’s recollection.',
+  keyTakeaways: [
+    'Claims managers carry the most risk in the document handling between FNOL and adjudication, the coverage checks and supporting-document chases a written procedure tends to skip.',
+    'A claim crosses the claims system, the policy admin system, and email, and a single recording captures the full cross-system handling instead of the steps that made it into the desk manual.',
+    'Ledgerium timestamps each step, so a claims manager sees cycle time concentrate in a claim waiting on documents and reviews rather than in the handler’s active adjudication.',
+    'Handlers each work a claim a little differently, and recording several claims turns that variation into a standard new adjusters can actually follow.',
+    'Document-heavy, repetitive claims steps are strong automation candidates, and Ledgerium scores them from the recorded process before anyone builds a workflow.',
+  ],
+  honestLimitation:
+    'Ledgerium documents browser-based work. Phone calls with claimants, physical inspections, and decisions made offline still need a handler to record the context.',
+  whoThisIsFor:
+    'Insurance claims managers and claims operations leaders who own how handlers process claims from first notice of loss through adjudication and settlement, and the document handling in between.',
+  painPoints: [
+    'Desk manuals skip the document handling between FNOL and adjudication',
+    'A claim spans the claims system, policy admin, and email with no single documented flow',
+    'Handlers each adjudicate a little differently',
+    'Cycle time is lost waiting on documents and reviews no one can see',
+  ],
+  whatTheySearchFor: [
+    'How to document a claims process',
+    'Insurance document workflow',
+    'How to document a workflow across multiple systems',
+    'How to standardize claims handling',
+  ],
+  jobsToBeDone: [
+    'Document the real claims workflow from FNOL to settlement',
+    'Capture the document handling handlers do between systems',
+    'Standardize how handlers adjudicate and ramp new adjusters faster',
+    'Find the document-heavy steps worth automating',
+  ],
+  commonWorkflowsToDocument: [
+    'FNOL intake and claim setup',
+    'Coverage verification and reserving',
+    'Adjudication and supporting-document review',
+    'Settlement and claim closure',
+  ],
+  dayInTheLife:
+    'A claims manager reviews two claims that took very different times to settle and finds each handler chased the supporting documents in their own order, so coverage verification stalled on one and not the other. The desk manual covers the clean path from FNOL to payment but skips the document handling that fills most of a handler’s day. The claim lives across the claims system, the policy admin system, and email, and the only record of how it really moves is handler habit.',
+  howLedgeriumHelps:
+    'Record how your handlers actually process claims, from FNOL intake through adjudication and settlement. Ledgerium produces an SOP, a process map across the claims and policy admin systems, and timing that shows where claims wait on documents and reviews. You get a standard handlers can follow, a faster ramp for new adjusters, and the evidence to decide which document-heavy steps are worth automating.',
+  faqs: [
+    {
+      q: 'How does Ledgerium help insurance claims managers?',
+      a: 'It records how handlers actually process claims from FNOL through adjudication and generates an SOP, a process map, and timing. You get a consistent handling standard and see where cycle time is lost to document handling and reviews.',
+    },
+    {
+      q: 'Can it document an insurance document workflow across systems?',
+      a: 'Yes. A single recording captures the steps across the claims system, the policy admin system, and email, including the supporting-document handling, so the SOP and map reflect the full cross-system claim rather than one system.',
+    },
+    {
+      q: 'Will it help standardize how handlers adjudicate?',
+      a: 'Yes. Recording several claims shows how much handling varies between handlers, so you can build a standard from a strong run and re-record to confirm handlers are actually following it.',
+    },
+    {
+      q: 'How do I find what to automate in claims?',
+      a: 'Ledgerium scores repetitive, document-heavy, rule-based steps from the recorded process, so you rank automation candidates by evidence rather than by which claim type feels busiest.',
+    },
+    {
+      q: 'Does it capture calls and inspections?',
+      a: 'It documents browser-based work. Claimant calls, physical inspections, and offline decisions still need a handler to record the context, but the system steps and document handling are captured automatically.',
+    },
+  ],
+  jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
+const legalOperationsManagers: PersonaPage = {
+  type: 'persona',
+  slug: 'legal-operations-managers',
+  metaTitle: 'Ledgerium AI for Legal Operations Managers',
+  metaDescription:
+    'Legal operations managers use Ledgerium to document intake, contract, and approval-routing workflows by recording the real process into SOPs, maps, and timing.',
+  h1: 'Ledgerium AI for legal operations managers',
+  eyebrow: 'For legal ops',
+  shortAnswer:
+    'Ledgerium helps legal operations managers document the intake, contract, and approval-routing workflows that legal runs across the business. A legal request moves from intake through review, redlining, approval, and signature across the matter system, the contract tool, email, and DocuSign, and the routing rarely matches the playbook. You record the real process and get an SOP, a process map, and timing that show where a request or contract waits, so you can standardize how legal handles work, cut turnaround time, and see which routing and intake steps are worth automating.',
+  primaryKeyword: 'legal operations process documentation',
+  secondaryKeywords: ['document legal intake process', 'contract workflow documentation', 'legal ops SOPs'],
+  searchIntent: 'commercial',
+  tags: ['persona', 'legal-ops', 'contract-lifecycle', 'intake', 'documentation'],
+  related: ['workflow:contract-review-workflow', 'software:docusign', 'problem:how-to-document-approval-workflows'],
+  originalDataPoint:
+    'A contract moves from intake through review, approval, and signature across the matter system, the contract tool, email, and DocuSign, and Ledgerium timestamps each step, so a legal ops manager can see that most turnaround time is a request waiting in an approval or signature queue rather than the lawyer’s active review.',
+  mechanismIntro:
+    'Ledgerium captures legal operations by recording the real intake, review, redlining, approval-routing, and signature steps across the matter system, contract tool, email, and DocuSign, so the process map shows where a request waits instead of the playbook nobody follows.',
+  keyTakeaways: [
+    'Legal ops managers lose turnaround time to the approval and signature routing between intake and execution, the queues a playbook compresses into a single line.',
+    'A contract crosses the matter system, the contract tool, email, and DocuSign, and a single recording captures the full routing instead of the few steps in the playbook.',
+    'Ledgerium timestamps each step, so a legal ops manager sees turnaround concentrate in requests waiting in approval or signature queues rather than in the lawyer’s active review.',
+    'Intake and routing that live in one coordinator’s head produce inconsistent handling, and recording turns that tribal knowledge into a standard the team can follow.',
+    'Repetitive intake and routing steps are strong automation candidates, and Ledgerium scores them from the recorded process before legal ops builds a workflow.',
+  ],
+  honestLimitation:
+    'Ledgerium documents browser-based work. Negotiation calls, legal judgment, and approvals given verbally still need a coordinator to record the context.',
+  whoThisIsFor:
+    'Legal operations managers who own legal intake, the contract lifecycle, and the approval and signature routing that moves legal work across the business.',
+  painPoints: [
+    'Intake and routing logic live in one coordinator’s head',
+    'A contract spans the matter system, contract tool, email, and DocuSign with no single documented flow',
+    'Turnaround stalls in approval and signature queues no one can see',
+    'Repetitive intake and routing steps are automation targets nobody has scored',
+  ],
+  whatTheySearchFor: [
+    'How to document a legal intake process',
+    'How to document approval workflows',
+    'How to document a contract workflow',
+    'How to standardize legal operations',
+  ],
+  jobsToBeDone: [
+    'Document the real intake, contract, and routing workflows',
+    'Standardize how legal handles requests end to end',
+    'Cut the approval and signature delay in turnaround',
+    'Find the intake and routing steps worth automating',
+  ],
+  commonWorkflowsToDocument: [
+    'Legal request and matter intake',
+    'Contract review and redlining',
+    'Approval and signature routing',
+    'Outside counsel engagement and handoff',
+  ],
+  dayInTheLife:
+    'A legal ops manager fields a complaint that a routine NDA took two weeks, and traces it to an approval that sat in an inbox because the routing rule lives in one coordinator’s head. Legal work moves across the matter system, the contract tool, email, and DocuSign, and every request is handled a little differently depending on who picked it up. The playbook describes an ideal flow, but the real turnaround is buried in queues nobody can see.',
+  howLedgeriumHelps:
+    'Record how legal actually handles intake, contracts, and routing as your team runs them. Ledgerium produces an SOP, a process map across the matter system, contract tool, email, and DocuSign, and timing that shows where requests and contracts wait. You get a standard the whole team can follow, a faster ramp for new coordinators, and the evidence to decide which intake and routing steps are worth automating.',
+  faqs: [
+    {
+      q: 'How does Ledgerium help legal operations managers?',
+      a: 'It records how legal actually handles intake, contracts, and approval routing and generates an SOP, a process map, and timing. You get a consistent standard and see where turnaround is lost to approval and signature queues.',
+    },
+    {
+      q: 'Can it document a contract workflow that spans several tools?',
+      a: 'Yes. A single recording captures the steps across the matter system, the contract tool, email, and DocuSign, so the SOP and map reflect the full intake-to-signature routing rather than one system.',
+    },
+    {
+      q: 'Will it help standardize legal intake?',
+      a: 'Yes. Recording how requests are actually handled turns intake and routing logic that lived in one coordinator’s head into a standard the team can follow, and re-recording shows whether they are following it.',
+    },
+    {
+      q: 'How do I find what to automate in legal ops?',
+      a: 'Ledgerium scores repetitive intake and routing steps from the recorded process, so you rank automation candidates by evidence rather than by which request type feels most tedious.',
+    },
+    {
+      q: 'Does it capture negotiation and legal judgment?',
+      a: 'It documents browser-based work. Negotiation calls and legal judgment still need a coordinator to record the context, but the intake, routing, and signature steps are captured automatically.',
+    },
+  ],
+  jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  updatedAt: '2026-07-15',
+  published: true,
+};
+
 export const PERSONA_PAGES: readonly PersonaPage[] = [
   operationsManager,
   consultants,
@@ -1043,4 +1395,8 @@ export const PERSONA_PAGES: readonly PersonaPage[] = [
   trainingManagers,
   aiTransformationTeams,
   bpoOperations,
+  itDirectors,
+  sharedServicesLeaders,
+  insuranceClaimsManagers,
+  legalOperationsManagers,
 ];
