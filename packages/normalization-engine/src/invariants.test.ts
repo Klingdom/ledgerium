@@ -55,15 +55,18 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 
 describe('Group A — rule version (docs/invariants.md §6)', () => {
-  it('NORMALIZATION_RULE_VERSION equals 1.0.0', () => {
+  it('NORMALIZATION_RULE_VERSION equals 1.1.0 (bumped for F-1 privacy fix)', () => {
     expect(
       NORMALIZATION_RULE_VERSION,
       [
-        'docs/invariants.md §6 pins NORMALIZATION_RULE_VERSION = "1.0.0".',
-        'Changing this value requires: architectural approval, a new rule version,',
-        'and a docs/invariants.md update.',
+        'docs/invariants.md §6 pins NORMALIZATION_RULE_VERSION = "1.1.0"',
+        '(bumped from 1.0.0: F-1 privacy fix — page_context.url is now',
+        'screened via origin+routeTemplate, and deriveRouteTemplate() gained a',
+        'compound-slug (":slug") parameterization rule). Changing this value',
+        'again requires: architectural approval, a new rule version, and a',
+        'docs/invariants.md update.',
       ].join(' '),
-    ).toBe('1.0.0');
+    ).toBe('1.1.0');
   });
 });
 

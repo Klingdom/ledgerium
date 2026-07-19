@@ -33,8 +33,8 @@ function resetSeq() { seq = 0 }
 // ---------------------------------------------------------------------------
 
 describe('NORMALIZATION_RULE_VERSION', () => {
-  it('is exactly "1.0.0" (invariant)', () => {
-    expect(NORMALIZATION_RULE_VERSION).toBe('1.0.0')
+  it('is exactly "1.1.0" (invariant — bumped for F-1 privacy fix)', () => {
+    expect(NORMALIZATION_RULE_VERSION).toBe('1.1.0')
   })
 })
 
@@ -135,6 +135,48 @@ describe('normalizeEvent', () => {
       )
       expect(canonical?.page_context).toBeUndefined()
     })
+
+    describe('F-1 privacy fix: page_context.url is screened, not raw', () => {
+      it('does not leak an entity-bearing path slug through page_context.url', () => {
+        const { canonical } = normalizeEvent(
+          makeRaw({
+            event_type: 'click',
+            url: 'https://app.example.com/patients/sarah-connor/notes',
+          }),
+        )
+        expect(canonical?.page_context?.url).not.toContain('sarah-connor')
+        expect(canonical?.page_context?.url).toBe(
+          'https://app.example.com/patients/:slug/notes',
+        )
+      })
+
+      it('populates url as origin + routeTemplate for a safe static route', () => {
+        const { canonical } = normalizeEvent(
+          makeRaw({ event_type: 'click', url: 'https://app.salesforce.com/leads' }),
+        )
+        expect(canonical?.page_context?.url).toBe('https://app.salesforce.com/leads')
+        expect(canonical?.page_context?.routeTemplate).toBe('/leads')
+      })
+
+      it('strips query string and fragment from page_context.url via the screened form', () => {
+        const { canonical } = normalizeEvent(
+          makeRaw({
+            event_type: 'click',
+            url: 'https://app.example.com/orders/42?token=secret#section',
+          }),
+        )
+        expect(canonical?.page_context?.url).toBe('https://app.example.com/orders/:id')
+        expect(canonical?.page_context?.url).not.toContain('token')
+        expect(canonical?.page_context?.url).not.toContain('section')
+      })
+
+      it('returns an empty url when the URL is malformed', () => {
+        const { canonical } = normalizeEvent(
+          makeRaw({ event_type: 'click', url: 'not a valid url %%' }),
+        )
+        expect(canonical?.page_context?.url).toBe('')
+      })
+    })
   })
 
   describe('domain blocking', () => {
@@ -221,9 +263,9 @@ describe('normalizeEvent', () => {
       expect(canonical?.normalization_meta.sourceEventId).toBe('evt-abc-123')
     })
 
-    it('normalizationRuleVersion is "1.0.0"', () => {
+    it('normalizationRuleVersion is "1.1.0" (bumped for F-1 privacy fix)', () => {
       const { canonical } = normalizeEvent(makeRaw())
-      expect(canonical?.normalization_meta.normalizationRuleVersion).toBe('1.0.0')
+      expect(canonical?.normalization_meta.normalizationRuleVersion).toBe('1.1.0')
     })
 
     it('schema_version is "1.0.0"', () => {

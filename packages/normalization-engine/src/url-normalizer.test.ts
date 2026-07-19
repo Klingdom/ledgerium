@@ -187,6 +187,116 @@ describe('deriveRouteTemplate', () => {
       ).toBe('/tasks/:id/comments/:id');
     });
   });
+
+  // ---------------------------------------------------------------------
+  // F-1 privacy fix: compound (kebab-case, multi-word) slug segments
+  // ---------------------------------------------------------------------
+
+  describe('compound-slug segment replacement (F-1 privacy fix)', () => {
+    it('replaces a two-word person-name-shaped slug with :slug', () => {
+      expect(deriveRouteTemplate('/patients/sarah-connor/notes')).toBe(
+        '/patients/:slug/notes',
+      );
+    });
+
+    it('replaces a three-word company-name-shaped slug with :slug', () => {
+      expect(deriveRouteTemplate('/deals/acme-corp-renewal')).toBe(
+        '/deals/:slug',
+      );
+    });
+
+    it('replaces a compound slug at the end of the path', () => {
+      expect(deriveRouteTemplate('/companies/globex-industries')).toBe(
+        '/companies/:slug',
+      );
+    });
+
+    it('replaces multiple compound slugs in the same path', () => {
+      expect(
+        deriveRouteTemplate('/accounts/john-smith/invoices/acme-corp-2024'),
+      ).toBe('/accounts/:slug/invoices/:slug');
+    });
+
+    it('does not double-classify a compound slug that also matches the hex rule (hex rule wins, still parameterized)', () => {
+      // 'abcdef0123' alone is a 10-char hex run (rule 3); hyphenating it
+      // routes it through the compound-slug rule instead — either way it
+      // is parameterized, which is what matters for the privacy fix.
+      expect(deriveRouteTemplate('/x/ab-cdef0123')).toBe('/x/:slug');
+    });
+  });
+
+  describe('safe single-word route nouns are NOT over-parameterized (regression)', () => {
+    it('leaves common single-word static route segments unchanged', () => {
+      expect(deriveRouteTemplate('/dashboard')).toBe('/dashboard');
+      expect(deriveRouteTemplate('/settings')).toBe('/settings');
+      expect(deriveRouteTemplate('/reports')).toBe('/reports');
+      expect(deriveRouteTemplate('/contacts/new')).toBe('/contacts/new');
+      expect(deriveRouteTemplate('/home')).toBe('/home');
+    });
+
+    it('leaves an underscore-separated (non-hyphenated) multi-word segment unchanged', () => {
+      // Underscore is not the compound-slug signal — only '-' is.
+      expect(deriveRouteTemplate('/reports/monthly_summary')).toBe(
+        '/reports/monthly_summary',
+      );
+    });
+
+    it('leaves a single word containing no hyphen unchanged regardless of length', () => {
+      expect(deriveRouteTemplate('/administration')).toBe('/administration');
+    });
+  });
+
+  describe('accepted false-positive: legitimate multi-word static routes', () => {
+    it('parameterizes common two-word static UI routes (documented tradeoff)', () => {
+      // These are legitimate, non-sensitive static routes that happen to
+      // share the compound-slug shape. This is an intentional accepted
+      // cost — see isCompoundSlugSegment() doc comment.
+      expect(deriveRouteTemplate('/auth/sign-in')).toBe('/auth/:slug');
+      expect(deriveRouteTemplate('/errors/not-found')).toBe('/errors/:slug');
+    });
+  });
+
+  describe('determinism', () => {
+    it('returns byte-identical output across repeated calls with the same input', () => {
+      const input = '/patients/sarah-connor/visits/123/notes/abc123def456';
+      const first = deriveRouteTemplate(input);
+      const second = deriveRouteTemplate(input);
+      const third = deriveRouteTemplate(input);
+      expect(first).toBe(second);
+      expect(second).toBe(third);
+      expect(first).toBe('/patients/:slug/visits/:id/notes/:id');
+    });
+  });
+
+  describe('edge cases', () => {
+    it('returns an empty string for an empty pathname', () => {
+      expect(deriveRouteTemplate('')).toBe('');
+    });
+
+    it('leaves the root path "/" unchanged', () => {
+      expect(deriveRouteTemplate('/')).toBe('/');
+    });
+
+    it('preserves a trailing slash after a compound slug', () => {
+      expect(deriveRouteTemplate('/patients/sarah-connor/')).toBe(
+        '/patients/:slug/',
+      );
+    });
+
+    it('preserves a leading segment with no slash prefix', () => {
+      expect(deriveRouteTemplate('patients/sarah-connor')).toBe(
+        'patients/:slug',
+      );
+    });
+
+    it('does not parameterize a lone hyphen segment', () => {
+      expect(deriveRouteTemplate('/items/-')).toBe('/items/-');
+    });
+
+    it('collapses a double-hyphen segment into two tokens and parameterizes it', () => {
+      expect(deriveRouteTemplate('/items/foo--bar')).toBe('/items/:slug');
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -271,5 +381,89 @@ describe('TRACKING_PARAMS', () => {
     expect(TRACKING_PARAMS.has('id')).toBe(false);
     expect(TRACKING_PARAMS.has('q')).toBe(false);
     expect(TRACKING_PARAMS.has('page')).toBe(false);
+  });
+});
+
+// ─── F-1 position rule: person-collection identifiers ────────────────────────
+//
+// Closes the single-token false negative the shape rules cannot reach:
+// '/patients/connor' has no hyphen, no digits, and is structurally identical
+// to a static route word. Position is the only available signal.
+
+describe('deriveRouteTemplate — person-collection position rule (F-1)', () => {
+  it('parameterizes a single-token surname after a person collection', () => {
+    expect(deriveRouteTemplate('/patients/connor')).toBe('/patients/:id');
+  });
+
+  it('parameterizes a single-token company name after /customers', () => {
+    expect(deriveRouteTemplate('/customers/acmecorp')).toBe('/customers/:id');
+  });
+
+  it('parameterizes regardless of collection-noun casing', () => {
+    expect(deriveRouteTemplate('/Patients/connor')).toBe('/Patients/:id');
+  });
+
+  it('handles the singular form of the collection noun', () => {
+    expect(deriveRouteTemplate('/patient/connor')).toBe('/patient/:id');
+  });
+
+  it('still parameterizes deeper path segments normally', () => {
+    expect(deriveRouteTemplate('/patients/connor/notes')).toBe('/patients/:id/notes');
+  });
+
+  it('does NOT parameterize a segment after a non-person collection', () => {
+    expect(deriveRouteTemplate('/reports/quarterly')).toBe('/reports/quarterly');
+  });
+
+  it('does NOT parameterize the collection noun itself', () => {
+    expect(deriveRouteTemplate('/patients')).toBe('/patients');
+  });
+
+  it('leaves a bare person-collection with trailing slash intact', () => {
+    expect(deriveRouteTemplate('/users/')).toBe('/users/');
+  });
+
+  it('composes with the integer rule', () => {
+    expect(deriveRouteTemplate('/users/12345/settings')).toBe('/users/:id/settings');
+  });
+
+  it('composes with the compound-slug rule', () => {
+    expect(deriveRouteTemplate('/customers/acme-corp-renewal')).toBe('/customers/:slug');
+  });
+
+  it('is deterministic across repeated calls', () => {
+    const input = '/patients/connor/notes';
+    const results = new Set([
+      deriveRouteTemplate(input),
+      deriveRouteTemplate(input),
+      deriveRouteTemplate(input),
+    ]);
+    expect(results.size).toBe(1);
+  });
+});
+
+describe('deriveRouteTemplate — static route verbs are NOT identifiers (F-1)', () => {
+  it('leaves /contacts/new intact', () => {
+    expect(deriveRouteTemplate('/contacts/new')).toBe('/contacts/new');
+  });
+
+  it('leaves /admin/users/list intact', () => {
+    expect(deriveRouteTemplate('/admin/users/list')).toBe('/admin/users/list');
+  });
+
+  it('leaves /patients/search intact', () => {
+    expect(deriveRouteTemplate('/patients/search')).toBe('/patients/search');
+  });
+
+  it('leaves /users/me intact', () => {
+    expect(deriveRouteTemplate('/users/me')).toBe('/users/me');
+  });
+
+  it('still parameterizes a real identifier in the same collection', () => {
+    expect(deriveRouteTemplate('/contacts/connor')).toBe('/contacts/:id');
+  });
+
+  it('matches route verbs case-insensitively', () => {
+    expect(deriveRouteTemplate('/contacts/New')).toBe('/contacts/New');
   });
 });

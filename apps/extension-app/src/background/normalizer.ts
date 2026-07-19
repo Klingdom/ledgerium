@@ -134,17 +134,28 @@ export function normalizeRawEvent(raw: RawEvent, blockedDomains: string[], allow
   // Build page context
   const urlNorm = raw.url ? normalizeUrl(raw.url) : ''
   let routeTemplate = ''
+  let urlOrigin = ''
   if (raw.url) {
     try {
-      routeTemplate = deriveRouteTemplate(new URL(raw.url).pathname)
+      const parsedUrl = new URL(raw.url)
+      routeTemplate = deriveRouteTemplate(parsedUrl.pathname)
+      urlOrigin = parsedUrl.origin
     } catch {
       routeTemplate = ''
+      urlOrigin = ''
     }
   }
   const appLabel = deriveAppLabel(domain)
 
+  // F-1 privacy fix: `url` previously carried the raw URL (including
+  // unscreened entity-bearing path slugs, e.g. "/patients/sarah-connor")
+  // verbatim, even though no consumer reads this field. It is now
+  // populated with origin + the already-screened routeTemplate, so it can
+  // never leak more than routeTemplate deliberately exposes.
+  const screenedUrl = urlOrigin !== '' ? `${urlOrigin}${routeTemplate}` : ''
+
   const pageContext: CanonicalEvent['page_context'] = raw.url ? {
-    url: raw.url,
+    url: screenedUrl,
     urlNormalized: urlNorm,
     domain,
     routeTemplate,

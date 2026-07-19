@@ -1,3 +1,11 @@
+// @vitest-environment jsdom
+//
+// REQUIRED: the workspace-root vitest config runs `environment: 'node'` and its
+// include glob picks up apps/*/src/**/*.test.ts — so this file executes under
+// BOTH the root runner (CI's `pnpm test`, which gates deploy) and the
+// extension-app runner (which sets jsdom globally). `getSafePageTitle()` reads
+// `document.title`, so without this per-file pragma the suite passes under the
+// package filter and fails at root with "document is not defined".
 /**
  * Unit tests for safe-page-title.ts — PII screening for document.title.
  *
