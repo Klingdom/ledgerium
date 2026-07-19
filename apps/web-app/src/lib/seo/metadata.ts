@@ -14,6 +14,7 @@ const OG_TYPE: Record<PageType, 'article' | 'website'> = {
   compare: 'article',
   alternatives: 'article',
   competitors: 'article',
+  answer: 'article',
   software: 'website',
   department: 'website',
   industry: 'website',

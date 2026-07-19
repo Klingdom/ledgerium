@@ -15,6 +15,7 @@ const HUB_TYPES: readonly PageType[] = [
   'industry',
   'alternatives',
   'competitors',
+  'answer',
 ];
 
 /** Newest `updatedAt` among published leaves of a type, for the hub's lastModified. */

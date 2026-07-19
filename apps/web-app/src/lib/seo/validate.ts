@@ -130,6 +130,21 @@ function proseSources(page: SeoPage): string[] {
       ...page.segments.flatMap((s) => [s.segment, s.players, s.fitFor]),
       ...page.evaluationCriteria,
     );
+  } else if (page.type === 'answer') {
+    base.push(
+      page.term,
+      page.definition,
+      ...page.inDepth.flatMap((s) => [s.heading, s.body]),
+      ...(page.comparisonTable
+        ? [
+            page.comparisonTable.itemA,
+            page.comparisonTable.itemB,
+            ...page.comparisonTable.rows.flatMap((r) => [r.label, r.itemA, r.itemB]),
+          ]
+        : []),
+      ...page.relatedTerms.map((t) => t.term),
+      ...page.sources.map((s) => s.label),
+    );
   }
   return base;
 }

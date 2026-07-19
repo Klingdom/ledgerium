@@ -18,6 +18,7 @@ import { DEPARTMENT_PAGES } from './pages/department';
 import { INDUSTRY_PAGES } from './pages/industry';
 import { ALTERNATIVES_PAGES } from './pages/alternatives';
 import { COMPETITORS_PAGES } from './pages/competitors';
+import { ANSWER_PAGES } from './pages/answer';
 
 /**
  * URL prefix per page type.
@@ -38,6 +39,7 @@ export const ROUTE_PREFIX: Record<PageType, string> = {
   compare: '/compare',
   alternatives: '/alternatives',
   competitors: '/competitors',
+  answer: '/answers',
   libraryIndex: '/workflow-library',
 };
 
@@ -55,6 +57,7 @@ export const PARENT_HUB: Record<PageType, { label: string; path: string } | null
   compare: null,
   alternatives: { label: 'Alternatives', path: '/alternatives' },
   competitors: { label: 'Competitors', path: '/competitors' },
+  answer: { label: 'Answers', path: '/answers' },
   libraryIndex: null,
 };
 
@@ -88,6 +91,7 @@ export const ALL_PAGES: readonly SeoPage[] = [
   ...INDUSTRY_PAGES,
   ...ALTERNATIVES_PAGES,
   ...COMPETITORS_PAGES,
+  ...ANSWER_PAGES,
 ];
 
 export function getPagesByType<T extends PageType>(type: T): SeoPage[] {
