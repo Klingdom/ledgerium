@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { getPagesByType, pagePath } from '@/content/registry';
+import { HubPageView } from '@/components/seo/HubPageView';
 
 export const metadata: Metadata = {
   title: 'Compare Ledgerium to Other Tools',
@@ -45,6 +46,7 @@ export default function ComparisonsHubPage() {
 
   return (
     <>
+      <HubPageView hubType="comparisons" pageCount={cards.length} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <section className="pt-16 pb-10 bg-gradient-to-b from-brand-900/20 to-[var(--surface-primary)]">

@@ -17,6 +17,7 @@ export default function AiOpportunitiesIndex() {
       title="Where AI actually helps"
       intro="Find the repetitive, rule-based work AI and automation can take on, by function area, and see where humans should stay involved. Record a real workflow to score your strongest candidates with evidence."
       pages={pages}
+      hubType="aiOpportunity"
     />
   );
 }

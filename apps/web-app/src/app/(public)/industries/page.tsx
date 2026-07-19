@@ -17,6 +17,7 @@ export default function IndustriesIndex() {
       title="Workflow documentation by industry"
       intro="Every industry has workflows and compliance concerns that generic guides miss. Find yours to see common workflows, documentation and compliance concerns, and where AI can help."
       pages={pages}
+      hubType="industry"
     />
   );
 }

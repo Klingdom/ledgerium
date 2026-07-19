@@ -17,6 +17,7 @@ export default function ProblemsIndex() {
       title="Operational problems, answered"
       intro="Clear, practical answers to the process problems teams actually face. Each guide gives the fastest way to solve it and shows how Ledgerium documents the work from real behavior, not memory."
       pages={pages}
+      hubType="problem"
     />
   );
 }

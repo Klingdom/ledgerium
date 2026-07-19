@@ -17,6 +17,7 @@ export default function AlternativesIndex() {
       title="Alternatives to popular tools"
       intro="Looking to switch? These roundups compare the real alternatives to popular workflow and SOP tools by what each is best for, including where structured, recorded process data fits."
       pages={pages}
+      hubType="alternatives"
     />
   );
 }

@@ -17,6 +17,7 @@ export default function CompetitorsIndex() {
       title="Competitor landscapes"
       intro="Understand the competitive landscape around popular tools and categories. Each map groups the space by what each segment does and who it fits, so you can match the segment to your goal."
       pages={pages}
+      hubType="competitors"
     />
   );
 }

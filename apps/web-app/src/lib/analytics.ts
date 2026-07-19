@@ -536,6 +536,35 @@ export type AnalyticsEvent =
       slug: string;
       referrerClass: 'organic' | 'ai' | 'direct' | 'other';
     }
+  // SEO attribution unblock (SEO_AEO_EXPANSION_001 §2.2 Batch 2), PART 1 of 2:
+  // taxonomy decision for the 11 hub/index pages, which currently fire zero
+  // page-view events. Deliberately a DISTINCT event from `seo_page_viewed`
+  // rather than `seo_page_viewed` with a synthetic/magic `slug` value —
+  // `seo_page_viewed.slug` identifies exactly one leaf content page today,
+  // and that 1:1 (pageType, slug) → single-URL mapping is what lets
+  // SEO_AEO_EXPANSION_001 §2.2's "reconcile seo_page_viewed organic-referrer
+  // volume against GSC clicks" sanity check work per-URL. A hub page has no
+  // slug — inventing one (`'_index'`, `''`) would corrupt that reconciliation
+  // and require every downstream query to special-case it. Hub pages are also
+  // a behaviorally distinct surface (browse/discovery of a category) from
+  // leaf pages (informational/commercial landing) — worth segmenting on its
+  // own terms once there is enough hub traffic to analyze funnel differences.
+  // PART 2 (component + page wiring) implements the emission of this event;
+  // see docs handoff for the exact component contract and the 11 page.tsx
+  // paths to wire.
+  | {
+      event: 'seo_hub_viewed';
+      /** The PageType this hub indexes (e.g. 'alternatives', 'software',
+       *  'persona'), matching the `pageType` string already used by
+       *  `seo_page_viewed` on that type's leaf pages — OR the literal string
+       *  'comparisons' for the one hand-built hub at /comparisons, which
+       *  predates the typed content registry and isn't keyed to a single
+       *  PageType (it lists `compare` pages plus a hand-built entry). */
+      hubType: string;
+      /** Number of cards rendered on the hub at view time. */
+      pageCount: number;
+      referrerClass: 'organic' | 'ai' | 'direct' | 'other';
+    }
   | {
       event: 'seo_related_page_clicked';
       fromType: string;
@@ -569,7 +598,41 @@ interface EnrichedEvent {
   timestamp: string;
   url?: string;
   userPlan?: string;
-  sessionId?: string;
+  /**
+   * SEO-attribution unblock (SITE_STATE_REVIEW_002 P1-6 / SEO_AEO_EXPANSION_001
+   * §2.2 Batch 2, PART 1 of 2, this iteration): a long-lived anonymous VISITOR
+   * identifier, persisted in localStorage under VISITOR_ID_STORAGE_KEY and
+   * stable across page loads/sessions on the same browser profile.
+   *
+   * Deliberately named `visitorId`, NOT `sessionId` — this codebase's dominant
+   * usage of `sessionId` means "recorded process/extension session ID"
+   * (see apps/web-app/src/lib/ingestion.ts, sample-workflow.ts, bpmn-export.ts,
+   * etc.). Reusing that name here for an unrelated marketing-attribution
+   * concept would be a landmine for the next reader. This field has NO
+   * relationship to a recording session; it identifies a browser, not a
+   * captured workflow.
+   *
+   * Purpose: joins anonymous SEO landing-page traffic (`seo_page_viewed`,
+   * `seo_scroll_depth`, etc.) to `signup_completed` when the visitor converts
+   * — today's only join key was the coarse `landing_path` first-touch proxy
+   * (see getFirstTouchUTM below), which breaks whenever a visitor returns via
+   * a different landing page before signing up. `visitorId` is exact-match
+   * and survives that case.
+   *
+   * Privacy: random UUID, unrelated to any PII, never sent to a third party
+   * beyond our own `/api/analytics/events` endpoint and (when configured)
+   * PostHog, which already receives its own persistent `distinct_id` under
+   * this same "anonymous, no session recording" posture (see posthog.ts
+   * `disable_session_recording: true`). This is functionally the same class
+   * of identifier PostHog already sets client-side; it does not expand the
+   * product's privacy posture. GDPR/consent note: this ID is set
+   * unconditionally today (matching the pre-existing UTMCapture /
+   * getFirstTouchUTM behavior, which already persists first-touch data to
+   * localStorage without a consent gate) — if/when a cookie-consent banner is
+   * introduced, both mechanisms need to move behind it together. Flagging,
+   * not deciding, that policy question here.
+   */
+  visitorId?: string;
   [key: string]: unknown;
 }
 
@@ -590,6 +653,90 @@ export function setUserPlanForAnalytics(plan: string | undefined): void {
   (window as any).__ledgerium_userPlan = plan ?? null;
 }
 
+// ─── Anonymous visitor ID (SEO attribution unblock, PART 1) ──────────────────
+
+const VISITOR_ID_STORAGE_KEY = 'ledgerium_visitor_id';
+
+/**
+ * In-memory cache so repeated track() calls in the same page load don't each
+ * re-read localStorage. Reset per page load (module-scoped, not persisted).
+ * `undefined` = not yet resolved this page load; `null` = resolved to
+ * "unavailable" (non-browser context); `string` = resolved visitor ID.
+ */
+let cachedVisitorId: string | null | undefined;
+
+/**
+ * Generates a collision-resistant anonymous ID. Prefers crypto.randomUUID();
+ * falls back to crypto.getRandomValues() (broader browser support — notably
+ * older Safari versions that lack randomUUID but have getRandomValues); falls
+ * back further to a Math.random()-based ID as a last resort.
+ *
+ * The last-resort fallback is NOT cryptographically strong, but that's an
+ * acceptable tradeoff here: this is an anonymous attribution identifier, not
+ * a security token, and its failure mode on collision is "two visitors' SEO
+ * events get attributed to the same visitorId" — a minor analytics-accuracy
+ * degradation, not a security or privacy breach.
+ */
+function generateVisitorId(): string {
+  const cryptoObj = typeof crypto === 'undefined' ? undefined : crypto;
+
+  if (cryptoObj && typeof cryptoObj.randomUUID === 'function') {
+    return cryptoObj.randomUUID();
+  }
+
+  if (cryptoObj && typeof cryptoObj.getRandomValues === 'function') {
+    const bytes = cryptoObj.getRandomValues(new Uint8Array(16));
+    // RFC 4122 v4 version/variant bits, formatted as a standard UUID string.
+    bytes[6] = (bytes[6]! & 0x0f) | 0x40;
+    bytes[8] = (bytes[8]! & 0x3f) | 0x80;
+    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  }
+
+  // Last-resort fallback — no Web Crypto API available at all.
+  return `vid-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
+}
+
+/**
+ * Returns the current browser's persistent anonymous visitor ID, generating
+ * and persisting one on first call if none exists yet. Returns `null` in any
+ * non-browser (SSR / server component / build-time) context — this function
+ * never touches `window`/`localStorage` unless IS_BROWSER is true, so it is
+ * safe to call from code that may run during Next.js server rendering.
+ *
+ * Storage can throw (Safari private browsing, storage disabled by policy,
+ * quota exceeded, etc.) — every localStorage access is wrapped in try/catch.
+ * On a storage failure, a fresh ID is still generated and cached in memory
+ * for the remainder of this page load so events are not left unattributed,
+ * but it will NOT survive a reload (storage remaining unavailable). Analytics
+ * must never throw or break the page — this function never does.
+ */
+export function getOrCreateVisitorId(): string | null {
+  if (!IS_BROWSER) return null;
+  if (cachedVisitorId !== undefined) return cachedVisitorId;
+
+  try {
+    const existing = localStorage.getItem(VISITOR_ID_STORAGE_KEY);
+    if (existing) {
+      cachedVisitorId = existing;
+      return existing;
+    }
+  } catch {
+    // Storage read blocked — fall through to generate a session-only ID below.
+  }
+
+  const generated = generateVisitorId();
+  try {
+    localStorage.setItem(VISITOR_ID_STORAGE_KEY, generated);
+  } catch {
+    // Storage write blocked — the ID lives only in the in-memory cache for
+    // this page load and will be re-generated next load if storage remains
+    // unavailable. This is an explicit, honest degradation, not a silent one.
+  }
+  cachedVisitorId = generated;
+  return generated;
+}
+
 export function track(payload: AnalyticsEvent): void {
   const base: Record<string, unknown> = {
     ...payload,
@@ -600,6 +747,10 @@ export function track(payload: AnalyticsEvent): void {
     // MDR-P09 (b): enrich every event with userPlan when available.
     const userPlan: unknown = (window as any).__ledgerium_userPlan;
     if (userPlan != null) base.userPlan = userPlan;
+    // SEO attribution unblock: enrich every event with the persistent
+    // anonymous visitorId, mirroring the userPlan enrichment pattern above.
+    const visitorId = getOrCreateVisitorId();
+    if (visitorId != null) base.visitorId = visitorId;
   }
   const enriched = base as EnrichedEvent;
 
