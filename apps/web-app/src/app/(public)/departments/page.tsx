@@ -17,6 +17,7 @@ export default function DepartmentsIndex() {
       title="Workflows by department"
       intro="Every department runs on workflows that are rarely documented well. Find your department to see its common workflows, the documentation problems, and where AI can help, all backed by recording the real work."
       pages={pages}
+      hubType="department"
     />
   );
 }

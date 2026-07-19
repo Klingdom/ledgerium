@@ -17,6 +17,7 @@ export default function WorkflowLibraryIndex() {
       title="Workflow Library"
       intro="Find your workflow and see how to document it from real work, not memory. Each guide covers the real steps, where time is lost, and what is worth automating."
       pages={pages}
+      hubType="workflow"
     />
   );
 }

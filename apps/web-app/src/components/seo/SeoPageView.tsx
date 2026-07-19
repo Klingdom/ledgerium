@@ -3,34 +3,7 @@
 import { useEffect } from 'react';
 import { track } from '@/lib/analytics';
 import type { PageType } from '@/content/types';
-
-const AI_REFERRERS = [
-  'chatgpt.com',
-  'perplexity.ai',
-  'claude.ai',
-  'copilot.microsoft.com',
-  'gemini.google.com',
-  'grok.com',
-  'you.com',
-  'phind.com',
-  'meta.ai',
-  'poe.com',
-];
-
-function classifyReferrer(): 'organic' | 'ai' | 'direct' | 'other' {
-  if (typeof document === 'undefined') return 'direct';
-  const ref = document.referrer;
-  if (!ref) return 'direct';
-  let host = '';
-  try {
-    host = new URL(ref).hostname.replace(/^www\./, '');
-  } catch {
-    return 'other';
-  }
-  if (AI_REFERRERS.some((d) => host === d || host.endsWith(`.${d}`))) return 'ai';
-  if (/(^|\.)(google|bing|duckduckgo|yahoo|ecosia)\.[a-z.]+$/.test(host)) return 'organic';
-  return 'other';
-}
+import { classifyReferrer } from './referrerClassification';
 
 const SCROLL_MILESTONES: ReadonlyArray<25 | 50 | 75 | 90> = [25, 50, 75, 90];
 

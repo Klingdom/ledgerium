@@ -17,6 +17,7 @@ export default function PersonasIndex() {
       title="Who Ledgerium helps"
       intro="Ledgerium fits any role that needs to document how work really happens. Find your role and see the workflows you can capture, the questions it answers, and how the documentation gets generated from real work."
       pages={pages}
+      hubType="persona"
     />
   );
 }

@@ -17,6 +17,7 @@ export default function SoftwareIndex() {
       title="Document workflows in your software"
       intro="Every guide shows how to document a real process inside a specific tool, captured from how your team actually works, so the SOP matches your own configured account."
       pages={pages}
+      hubType="software"
     />
   );
 }

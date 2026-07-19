@@ -17,6 +17,7 @@ export default function SopTemplatesIndex() {
       title="SOP templates"
       intro="Start from a clear, editable SOP structure for common business processes. Better still, record the real process once and Ledgerium generates the SOP from the actual steps, so it matches how your team really works."
       pages={pages}
+      hubType="sopTemplate"
     />
   );
 }

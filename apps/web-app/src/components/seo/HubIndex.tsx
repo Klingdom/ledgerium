@@ -2,22 +2,31 @@ import Link from 'next/link';
 import { SITE_CONFIG } from '@/lib/config';
 import { ROUTE_PREFIX } from '@/content/registry';
 import type { SeoPage } from '@/content/types';
+import { HubPageView } from './HubPageView';
 
 /**
  * Index/hub page for one engine page type. Lists published pages and emits an
  * ItemList JSON-LD. Tranche 0 ships a clean grouped grid; faceted filtering is a
  * Tranche-1 follow-up once page counts justify it.
+ *
+ * `hubType` is REQUIRED (not optional) so that any hub page that forgets to
+ * pass it fails at compile time — see SEO_AEO_EXPANSION_001 §2.2 Batch 2,
+ * PART 2 of 2. This is the completeness gate for the 10 hub pages that render
+ * through this shared component (the 11th, /comparisons, is hand-built and
+ * mounts HubPageView directly).
  */
 export function HubIndex({
   eyebrow,
   title,
   intro,
   pages,
+  hubType,
 }: {
   eyebrow: string;
   title: string;
   intro: string;
   pages: readonly SeoPage[];
+  hubType: string;
 }) {
   const itemList = {
     '@context': 'https://schema.org',
@@ -32,6 +41,7 @@ export function HubIndex({
 
   return (
     <>
+      <HubPageView hubType={hubType} pageCount={pages.length} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }} />
       <nav aria-label="Breadcrumb" className="mx-auto max-w-5xl px-4 sm:px-6 pt-8">
         <ol className="flex items-center gap-2 text-xs text-[var(--content-tertiary)]">
