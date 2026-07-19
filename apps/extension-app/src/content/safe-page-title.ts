@@ -19,17 +19,8 @@
  * count limits.
  */
 
-import { applySafetyHeuristics } from './label-extractor.js'
+import { screenFreeText } from './free-text-screen.js'
 import { extractDomain, deriveAppLabel } from '../shared/utils.js'
-
-/**
- * Non-anchored email pattern for page-title screening.
- *
- * The EMAIL_RE in label-extractor.ts uses `^` and `$` anchors and therefore
- * only matches a string that IS entirely an email address.  Page titles embed
- * addresses inside longer text, so we need an unanchored match.
- */
-const EMAIL_IN_TITLE_RE = /[^\s@]+@[^\s@]+\.[^\s@]+/
 
 /**
  * Pure screening function for a raw page title string.
@@ -42,10 +33,15 @@ const EMAIL_IN_TITLE_RE = /[^\s@]+@[^\s@]+\.[^\s@]+/
  * Exported for unit testing.  Does NOT access any DOM globals.
  */
 export function screenPageTitle(rawTitle: string): string | null {
-  if (!rawTitle.trim()) return ''           // empty → safe, emit ''
-  if (EMAIL_IN_TITLE_RE.test(rawTitle)) return null   // embedded email → reject
-  // Delegate to shared heuristics (phone / SSN / CC / digit-seq / word-count / URL)
-  return applySafetyHeuristics(rawTitle)
+  // Delegates to the shared free-text guard, which applies the UNANCHORED
+  // email + URL pre-screens (page titles embed both inside longer text) before
+  // the shared phone / SSN / CC / digit-run / word-count heuristics.
+  //
+  // This previously used a private unanchored email regex declared in this
+  // file. It was consolidated into free-text-screen.ts when the same need
+  // arose for state-change text (F-2) — two copies of a redaction pattern is a
+  // drift risk. Consolidating also closed this function's embedded-URL gap.
+  return screenFreeText(rawTitle)
 }
 
 /**

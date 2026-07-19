@@ -15,8 +15,35 @@
 
 import { STATE_CHANGE_DEBOUNCE_MS } from '../shared/constants.js'
 import type { StateChangeKind } from '../shared/types.js'
+import { screenFreeText } from './free-text-screen.js'
 
 export type StateChangeCallback = (kind: StateChangeKind, details?: string) => void
+
+/**
+ * PII screening for a single state-change label candidate.
+ *
+ * SECURITY (F-2, Funnel & SOP Review 001): the state-observer path captures
+ * modal / toast / alert / error text — precisely the class of UI text designed
+ * to echo user- and record-specific data back to the screen ("Payment declined
+ * — card ending 4242", "Failed to save record for Sarah Connor"). Before this
+ * fix, `nodeLabel()` returned raw `textContent` with NO screening, making it
+ * the only text-extraction path in the extension without a guard.
+ *
+ * Delegates to the shared `screenFreeText` guard. That guard — not
+ * `applySafetyHeuristics` directly — is required here: the label extractor's
+ * email and URL patterns are ANCHORED and therefore do not reject PII embedded
+ * mid-sentence, which is the normal shape of toast and error copy. See
+ * free-text-screen.ts for the full rationale.
+ *
+ * Returns `undefined` on rejection rather than falling through to an
+ * unscreened alternative — absent beats leaked.
+ *
+ * Pure. Exported for unit testing; does not touch DOM globals. Mirrors the
+ * `screenPageTitle` / `getSafePageTitle` split used for the F-0 fix.
+ */
+export function screenStateLabel(raw: string): string | undefined {
+  return screenFreeText(raw) ?? undefined
+}
 
 export class StateObserver {
   private observer: MutationObserver | null = null
@@ -153,11 +180,27 @@ export class StateObserver {
     return signals >= 2
   }
 
+  /**
+   * PII-screened label for an observed state-change node.
+   *
+   * SECURITY (F-2, Funnel & SOP Review 001): this path captures modal / toast /
+   * alert / error text — precisely the class of UI text designed to echo user-
+   * and record-specific data back to the screen ("Payment declined — card
+   * ending 4242", "Failed to save record for Sarah Connor"). Before this fix it
+   * returned raw `textContent` with NO screening, making it the only text-
+   * extraction path in the extension without a guard.
+   *
+   * Both candidates now pass through the shared `applySafetyHeuristics` used by
+   * the label extractor (email / URL / long-digit-run / phone / SSN / CC /
+   * word-count rejection + 80-char truncation). A rejected candidate returns
+   * `undefined` rather than falling through to an unscreened alternative —
+   * absent beats leaked.
+   */
   private nodeLabel(node: Element): string | undefined {
     const ariaLabel = node.getAttribute('aria-label')?.trim()
-    if (ariaLabel) return ariaLabel.slice(0, 80)
+    if (ariaLabel) return screenStateLabel(ariaLabel)
     const text = node.textContent?.trim()
-    if (text) return text.slice(0, 80)
+    if (text) return screenStateLabel(text)
     return undefined
   }
 
