@@ -27,6 +27,7 @@ export type PageType =
   | 'compare'
   | 'alternatives'
   | 'competitors'
+  | 'answer'
   | 'libraryIndex';
 
 export type SearchIntent = 'informational' | 'commercial' | 'transactional';
@@ -40,7 +41,8 @@ export type JsonLdType =
   | 'BreadcrumbList'
   | 'ItemList'
   | 'WebPage'
-  | 'Organization';
+  | 'Organization'
+  | 'DefinedTerm';
 
 export interface Faq {
   readonly q: string;
@@ -266,6 +268,55 @@ export interface CompetitorsPage extends BasePage {
   readonly verifiedAsOf: string;
 }
 
+/** Definitional body + "how does X work" expansion section for an AnswerPage. */
+export interface AnswerSection {
+  readonly heading: string;
+  readonly body: string;
+}
+
+/** Concept-vs-concept definitional table (e.g. process mining vs task mining). */
+export interface ComparisonRow {
+  readonly label: string;
+  readonly itemA: string;
+  readonly itemB: string;
+}
+export interface ComparisonTable {
+  readonly itemA: string; // e.g. "Process mining"
+  readonly itemB: string; // e.g. "Task mining"
+  readonly rows: readonly ComparisonRow[];
+}
+
+/** Inline glossary chip → /answers/<slug>. Presentational; authority lives in `related`. */
+export interface GlossaryLink {
+  readonly term: string;
+  /** Slug of another `answer` page. SHOULD also appear in `related` as `answer:<slug>`. */
+  readonly slug: string;
+}
+
+/** Freshness / citation entry. Feeds the on-page Sources block + optional Article.citation. */
+export interface AnswerSource {
+  readonly label: string;
+  readonly url?: string;
+  /** ISO date the source was checked. Feeds the visible "verified" line. */
+  readonly retrievedAt?: string;
+}
+
+export interface AnswerPage extends BasePage {
+  readonly type: 'answer';
+  /** Canonical defined term. Feeds DefinedTerm.name. */
+  readonly term: string;
+  /** Formal 2–4 sentence definition. UNIQUE wording vs shortAnswer. Feeds DefinedTerm.description. */
+  readonly definition: string;
+  /** Definitional body + "how does X work" expansion. 2–4 sections. Clears the 400-word floor. */
+  readonly inDepth: readonly AnswerSection[];
+  /** Present ⇒ this is an "X vs Y (definitional)" page. Absent ⇒ a "what is X" page. */
+  readonly comparisonTable?: ComparisonTable;
+  /** Inline glossary cross-links. */
+  readonly relatedTerms: readonly GlossaryLink[];
+  /** Citation / freshness sources. */
+  readonly sources: readonly AnswerSource[];
+}
+
 /** Authored union. Extend as later types are authored. */
 export type SeoPage =
   | WorkflowPage
@@ -278,4 +329,5 @@ export type SeoPage =
   | DepartmentPage
   | IndustryPage
   | AlternativesPage
-  | CompetitorsPage;
+  | CompetitorsPage
+  | AnswerPage;

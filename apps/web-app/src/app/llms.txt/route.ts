@@ -10,6 +10,7 @@ import type { PageType } from '@/content/types';
 export const dynamic = 'force-static';
 
 const TYPE_ORDER: { type: PageType; heading: string }[] = [
+  { type: 'answer', heading: 'Definitions & answers' },
   { type: 'workflow', heading: 'Workflow documentation guides' },
   { type: 'sopTemplate', heading: 'SOP templates' },
   { type: 'software', heading: 'Document workflows in specific software' },

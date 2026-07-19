@@ -95,6 +95,22 @@ function softwareApplication(page: SeoPage): JsonLdObject {
   };
 }
 
+function definedTerm(page: SeoPage): JsonLdObject | null {
+  if (page.type !== 'answer') return null;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'DefinedTerm',
+    name: page.term,
+    description: page.definition,
+    url: pageUrl(page),
+    inDefinedTermSet: {
+      '@type': 'DefinedTermSet',
+      name: 'Ledgerium Process Glossary',
+      url: `${SITE_CONFIG.url}/answers`,
+    },
+  };
+}
+
 function howTo(page: SeoPage): JsonLdObject | null {
   // Steps source varies by type: workflow + problem use `steps`, SOP templates
   // use `exampleProcedure`. (Fixes a prior gap where problem pages declared
@@ -148,6 +164,11 @@ export function generateJsonLd(page: SeoPage): JsonLdObject[] {
       case 'HowTo': {
         const h = howTo(page);
         if (h) out.push(h);
+        break;
+      }
+      case 'DefinedTerm': {
+        const d = definedTerm(page);
+        if (d) out.push(d);
         break;
       }
       case 'ItemList':
