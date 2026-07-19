@@ -148,7 +148,7 @@ export function normalizeRawEvent(raw: RawEvent, blockedDomains: string[], allow
     urlNormalized: urlNorm,
     domain,
     routeTemplate,
-    pageTitle: raw.page_title ?? '',
+    pageTitle: raw.page_title ?? '',   // PII screening applied upstream in getSafePageTitle() (content/safe-page-title.ts)
     applicationLabel: appLabel,
   } : undefined
 

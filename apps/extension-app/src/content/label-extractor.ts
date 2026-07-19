@@ -54,7 +54,7 @@ const PHONE_RE = /(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/
 const SSN_RE = /\d{3}-\d{2}-\d{4}/
 const CC_RE = /\b(?:\d{4}[-\s]?){3}\d{4}\b/
 
-function applySafetyHeuristics(raw: string): string | null {
+export function applySafetyHeuristics(raw: string): string | null {
   const text = raw.trim()
   if (!text) return null
   if (EMAIL_RE.test(text)) return null
