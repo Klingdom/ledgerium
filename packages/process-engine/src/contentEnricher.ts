@@ -736,6 +736,17 @@ export function cleanStepTitle(
     .replace(/^\s*[-–—]\s*/, '')
     .trim();
 
+  // P0-c B2: strip bare spreadsheet cell-coordinate tokens (e.g. A1, B16, AA123).
+  // These coordinates belong in step detail / instruction text, not in the imperative title.
+  // Pattern: 1-3 uppercase letters followed by 1-5 digits, e.g. A1, BC7, AAA12345.
+  if (/\b[A-Z]{1,3}\d{1,5}\b/.test(cleaned)) {
+    cleaned = cleaned
+      .split(/\s+/)
+      .filter(token => !/^[A-Z]{1,3}\d{1,5}$/.test(token))
+      .join(' ')
+      .trim();
+  }
+
   // If title became empty after cleaning, try to derive from events or use generic
   if (!cleaned) {
     cleaned = groupingReason === 'data_entry' ? 'data fields'

@@ -67,6 +67,17 @@ export type {
   InsightItem,
 } from './workflowInterpreter.js';
 
+// ─── SOP specificity / Step Vagueness Rate ───────────────────────────────────
+
+export {
+  isVagueInstruction,
+  computeStepSpecificity,
+  computeSopVagueness,
+  VAGUE_INSTRUCTION_STRINGS,
+  VAGUE_INSTRUCTION_PREFIXES,
+} from './specificity.js';
+export type { StepSpecificityResult, SopVaguenessResult } from './specificity.js';
+
 // ─── Template system ─────────────────────────────────────────────────────────
 
 export {

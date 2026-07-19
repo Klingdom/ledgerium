@@ -170,7 +170,7 @@ function validOutput(stepOverrides?: Partial<SOPStep>[]): ProcessOutput {
 describe('validateRenderedSOP — passes valid SOP', () => {
   it('returns ok: true for a 3-step SOP with all rules satisfied', () => {
     const result = validateRenderedSOP(validRenderedSOP(), validOutput());
-    expect(result).toEqual({ ok: true });
+    expect(result.ok).toBe(true);
   });
 });
 

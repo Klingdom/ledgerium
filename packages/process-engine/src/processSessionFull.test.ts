@@ -267,7 +267,7 @@ describe('processSessionFull — result shape', () => {
 describe('processSessionFull — happy path', () => {
   it('returns sopValidation ok: true for a valid two-step session', () => {
     const { sopValidation } = processSessionFull(makeInput());
-    expect(sopValidation).toEqual({ ok: true });
+    expect(sopValidation.ok).toBe(true);
   });
 
   it('artifacts.sop is the RenderedSOP that drove sopValidation', () => {

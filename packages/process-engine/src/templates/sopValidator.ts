@@ -13,6 +13,8 @@
 import type { RenderedSOP } from '../templateTypes.js';
 import type { ProcessOutput } from '../types.js';
 import { renderSOPMarkdown } from './markdownRenderer.js';
+import { computeSopVagueness } from '../specificity.js';
+import type { SopVaguenessResult } from '../specificity.js';
 
 // ─── Named constants ─────────────────────────────────────────────────────────
 
@@ -51,7 +53,7 @@ const PROSE_ONLY_PURPOSE_PREFIX = 'This SOP describes ';
 // ─── Result type ─────────────────────────────────────────────────────────────
 
 export type SOPValidation =
-  | { ok: true }
+  | { ok: true; specificity?: SopVaguenessResult }
   | { ok: false; reason: string; diagnostic: string; suggestion: string };
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
@@ -172,5 +174,5 @@ export function validateRenderedSOP(
     };
   }
 
-  return { ok: true };
+  return { ok: true, specificity: computeSopVagueness(output.sop) };
 }

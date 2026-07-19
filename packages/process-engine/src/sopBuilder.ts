@@ -250,7 +250,15 @@ function deriveInstruction(
     // ── Human interaction events ────────────────────────────────────────────
 
     case 'interaction.click': {
-      if (label) return `Click "${label}"`;
+      if (label) {
+        // P0-c B3: single-word labels use typographic curly quotes so readers
+        // can distinguish them from sentence punctuation.
+        // Multi-word labels (e.g. "Submit Invoice") stay in straight quotes
+        // to preserve their existing presentation.
+        const openQ = label.includes(' ') ? '"' : '“';
+        const closeQ = label.includes(' ') ? '"' : '”';
+        return `Click ${openQ}${label}${closeQ}`;
+      }
       // Never output raw HTML element types (div, span, svg, use, p, etc.)
       // Use semantic role only for meaningful ARIA roles
       const SEMANTIC_ROLES = new Set(['button', 'link', 'tab', 'menuitem', 'option', 'checkbox', 'radio', 'switch', 'combobox', 'listbox', 'textbox']);
@@ -258,8 +266,9 @@ function deriveInstruction(
       // Fallback: use page/section context instead of meaningless element type
       const pageLabel = page?.pageTitle ?? page?.applicationLabel;
       if (pageLabel) return `Click the target element on "${pageLabel}"`;
-      // Last resort — at least include the application name if available
-      if (page?.applicationLabel) return `Click the target element in ${page.applicationLabel}`;
+      // Last resort — at least include the application name if available.
+      // P0-c B1: omit the now-redundant "the target element" noise.
+      if (page?.applicationLabel) return `Click in ${page.applicationLabel}`;
       return 'Click the target element';
     }
 
@@ -559,8 +568,21 @@ function buildAction(
     }
     case 'file_action':
       return 'Upload or attach the required file';
-    case 'error_handling':
+    case 'error_handling': {
+      // P0-c B4: if the error step contains a labeled recovery click,
+      // surface that label so the reader knows which control to use.
+      const recoveryEvt = events.find(
+        e => e.event_type === 'interaction.click' && safeTargetLabel(e) !== undefined,
+      );
+      const recoveryLabel = recoveryEvt !== undefined ? safeTargetLabel(recoveryEvt) : undefined;
+      if (recoveryLabel !== undefined) {
+        // Match B3 quoting convention: single-word → typographic curly quotes.
+        const oQ = recoveryLabel.includes(' ') ? '”' : '”';
+        const cQ = recoveryLabel.includes(' ') ? '”' : '”';
+        return `Resolve error — click ${oQ}${recoveryLabel}${cQ} to continue`;
+      }
       return 'Resolve the error and continue';
+    }
     case 'annotation': {
       const text = events.find(e => e.event_type === 'session.annotation_added')?.annotation_text;
       return text ? `Note: ${text}` : title;
