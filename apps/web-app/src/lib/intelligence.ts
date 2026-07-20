@@ -60,6 +60,7 @@ import type {
 import type { ProcessRun, ProcessDefinition as EngineProcessDefinition, SOP } from '@ledgerium/process-engine';
 import { db } from '@/db';
 import { groupWorkflowsForClustering } from './workflowGrouping';
+import { LATEST_ARTIFACT_ORDER_BY } from './artifacts';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -102,6 +103,8 @@ async function getWorkflowsWithOutputs(userId: string, workflowIds?: string[]): 
     include: {
       artifacts: {
         where: { artifactType: 'process_output' },
+        // B-3: deterministic — take the newest row if more than one exists.
+        orderBy: LATEST_ARTIFACT_ORDER_BY,
         select: { contentJson: true },
       },
     },

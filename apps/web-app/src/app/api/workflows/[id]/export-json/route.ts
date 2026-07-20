@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { requireFeature } from '@/lib/feature-gating';
+import { LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
 
 /**
  * GET /api/workflows/[id]/export-json
@@ -47,12 +48,15 @@ export async function GET(
     return NextResponse.json({ error: 'Workflow not found' }, { status: 404 });
   }
 
-  // Retrieve the process_output artifact
+  // Retrieve the process_output artifact. B-3: order deterministically and
+  // take the newest — see @/lib/artifacts for why a uniqueness constraint is
+  // not the fix here.
   const artifact = await db.workflowArtifact.findFirst({
     where: {
       workflowId: params.id,
       artifactType: 'process_output',
     },
+    orderBy: LATEST_ARTIFACT_ORDER_BY,
     select: { contentJson: true },
   });
   if (!artifact?.contentJson) {

@@ -7,6 +7,8 @@ import { renderAllTemplates } from '@/lib/ingestion';
 import { computeHealthScore } from '@/lib/health-scores';
 import { toPlanType, hasFeature } from '@/lib/plans';
 import { extractSopIntelligence } from '@/lib/sopIntelligenceExtract';
+import { findLatestArtifact, LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
+import { PROCESS_ENGINE_VERSION } from '@ledgerium/process-engine';
 
 /** Validation schema for workflow PATCH body fields. */
 const patchSchema = z.object({
@@ -40,7 +42,14 @@ export async function GET(
   const workflow = await db.workflow.findFirst({
     where: { id: params.id, userId: session.user.id },
     include: {
-      artifacts: true,
+      // Deterministic order (B-3): multiple rows of the same artifactType can
+      // exist (regeneration is append-only, see
+      // docs/features/sop-authoring/OVERLAY_ARCHITECTURE_DECISION.md). Newest
+      // first, `id` as a tiebreak on createdAt collisions — see
+      // @/lib/artifacts. Ordering here also makes every downstream `.find()`
+      // over this response's `artifacts` array (e.g. the workflow detail
+      // page) deterministic for free, without each consumer re-deriving it.
+      artifacts: { orderBy: LATEST_ARTIFACT_ORDER_BY },
       // Additive (render-only) — surfaces the already-computed cohort
       // intelligence (sopAlignment + documentationDrift) for the SOP "living
       // document" freshness pill. Read-only; no engine call.
@@ -63,28 +72,56 @@ export async function GET(
     },
   }).catch(() => { /* non-critical */ });
 
-  // Lazy template backfill — generate templates for older workflows that lack them
+  // Lazy template backfill — generate templates for older workflows that lack
+  // them.
+  //
+  // B-3 fix: the check-then-write is wrapped in a single interactive
+  // transaction, and the *existence check is re-run inside it* against the
+  // transaction's own connection rather than trusting the `artifacts` array
+  // captured above. Two concurrent GETs on the same never-templated workflow
+  // each open their own transaction; SQLite serializes writes, so whichever
+  // transaction's write executes first is observed by the other transaction's
+  // re-check before it writes — the second transaction sees the
+  // just-inserted `template_selection` row and skips writing. This makes the
+  // backfill idempotent without a uniqueness constraint (which would forbid
+  // the append-only regeneration model — see
+  // docs/features/sop-authoring/OVERLAY_ARCHITECTURE_DECISION.md).
   let artifacts = workflow.artifacts;
   const hasTemplates = artifacts.some((a) => a.artifactType === 'template_selection');
   if (!hasTemplates) {
-    const processOutputArtifact = artifacts.find((a) => a.artifactType === 'process_output');
+    const processOutputArtifact = findLatestArtifact(artifacts, 'process_output');
     if (processOutputArtifact?.contentJson) {
       try {
         const processOutput = JSON.parse(processOutputArtifact.contentJson);
         const templateArtifacts = renderAllTemplates(processOutput);
         if (templateArtifacts.length > 0) {
-          await db.workflowArtifact.createMany({
-            data: templateArtifacts.map((ta) => ({
-              workflowId: params.id,
-              artifactType: ta.artifactType,
-              schemaVersion: '1.0.0',
-              contentJson: ta.contentJson,
-            })),
+          await db.$transaction(async (tx) => {
+            const stillMissing = await tx.workflowArtifact.findFirst({
+              where: { workflowId: params.id, artifactType: 'template_selection' },
+              select: { id: true },
+            });
+            if (stillMissing) {
+              // A concurrent request already backfilled this workflow —
+              // nothing to write. The re-fetch below picks up its result.
+              return;
+            }
+            await tx.workflowArtifact.createMany({
+              data: templateArtifacts.map((ta) => ({
+                workflowId: params.id,
+                artifactType: ta.artifactType,
+                // B-16: stamp the engine version that actually generated
+                // this content, not a hardcoded literal.
+                schemaVersion: PROCESS_ENGINE_VERSION,
+                contentJson: ta.contentJson,
+              })),
+            });
           });
-          // Re-fetch artifacts to include the newly generated templates
+          // Re-fetch — either this request wrote the templates, or a
+          // concurrent request did; either way the array captured above is
+          // stale. Deterministic order per LATEST_ARTIFACT_ORDER_BY.
           const updated = await db.workflow.findFirst({
             where: { id: params.id },
-            include: { artifacts: true },
+            include: { artifacts: { orderBy: LATEST_ARTIFACT_ORDER_BY } },
           });
           if (updated) artifacts = updated.artifacts;
         }

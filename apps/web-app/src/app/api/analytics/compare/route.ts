@@ -6,6 +6,7 @@ import { transformWorkflow, analyzePortfolio } from '@ledgerium/agent-intelligen
 import type { TransformationResult } from '@ledgerium/agent-intelligence';
 import type { ProcessOutput } from '@ledgerium/process-engine';
 import { z } from 'zod';
+import { LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
 
 const compareSchema = z.object({
   workflowIds: z.array(z.string()).min(2, 'At least 2 workflow IDs are required'),
@@ -71,6 +72,8 @@ export async function POST(req: NextRequest) {
     include: {
       artifacts: {
         where: { artifactType: 'process_output' },
+        // B-3: deterministic — take the newest row if more than one exists.
+        orderBy: LATEST_ARTIFACT_ORDER_BY,
         select: { contentJson: true },
       },
     },

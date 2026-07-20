@@ -11,6 +11,7 @@ import {
 } from '@ledgerium/intelligence-engine';
 import type { ProcessOutput } from '@ledgerium/process-engine';
 import { z } from 'zod';
+import { LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
 
 /**
  * POST /api/analytics/process-diff — T2 N-Way Process Diff
@@ -179,6 +180,8 @@ export async function POST(req: NextRequest) {
         title: true,
         artifacts: {
           where: { artifactType: 'process_output' },
+          // B-3: deterministic — take the newest row if more than one exists.
+          orderBy: LATEST_ARTIFACT_ORDER_BY,
           select: { contentJson: true },
         },
       },

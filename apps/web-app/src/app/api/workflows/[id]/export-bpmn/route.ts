@@ -4,6 +4,7 @@ import { db } from '@/db';
 import { checkFeatureAccess } from '@/lib/feature-gating';
 import { generateBpmnXml } from '@/lib/bpmn-export';
 import type { ProcessOutput } from '@ledgerium/process-engine';
+import { LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
 
 /**
  * GET /api/workflows/[id]/export-bpmn
@@ -48,6 +49,8 @@ export async function GET(
       title: true,
       artifacts: {
         where: { artifactType: 'process_output' },
+        // B-3: deterministic — take the newest row if more than one exists.
+        orderBy: LATEST_ARTIFACT_ORDER_BY,
         select: { contentJson: true },
       },
     },

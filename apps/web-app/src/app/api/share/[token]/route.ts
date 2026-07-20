@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { trackServer } from '@/lib/analytics-server';
+import { findLatestArtifact, LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
 
 /**
  * GET /api/share/{token}
@@ -19,7 +20,9 @@ export async function GET(
       shareToken: params.token,
       status: 'active',
     } as any,
-    include: { artifacts: true },
+    // B-3: order deterministically; findLatestArtifact below re-derives this
+    // anyway, but ordering here keeps the two in agreement.
+    include: { artifacts: { orderBy: LATEST_ARTIFACT_ORDER_BY } },
   });
 
   if (!workflow) {
@@ -32,9 +35,11 @@ export async function GET(
     data: { viewCount: { increment: 1 } } as any,
   }).catch(() => {});
 
-  // Only return SOP and report artifacts — not raw evidence or source bundle
-  const sopArtifact = workflow.artifacts.find(a => a.artifactType === 'sop');
-  const reportArtifact = workflow.artifacts.find(a => a.artifactType === 'workflow_report');
+  // Only return SOP and report artifacts — not raw evidence or source bundle.
+  // B-3: select the current row deterministically rather than whichever one
+  // happens to be first.
+  const sopArtifact = findLatestArtifact(workflow.artifacts, 'sop');
+  const reportArtifact = findLatestArtifact(workflow.artifacts, 'workflow_report');
 
   trackServer('shared_workflow_viewed', {
     token: params.token,
