@@ -5,6 +5,29 @@
 # off-host object storage. Addresses DB-health-review-001 P0: backups must live
 # OFF the data volume.
 #
+# EVIDENCE COUPLING (SOP_BUILDER_REVIEW B-4): every WorkflowArtifact row of
+# type `source_bundle` points at a file under UPLOAD_DIR — the raw uploaded
+# session bundle — and that file is the ONLY copy of that evidence anywhere
+# (the extension discards raw events at export; nothing else holds them). A
+# DB backup alone restores rows pointing at files that may not exist. So this
+# script runs scripts/evidence-backup.sh FIRST, every time, before it
+# snapshots the DB. The app always writes a bundle file before it inserts the
+# row referencing it, so "evidence scan happens, then DB snapshot happens" is
+# what guarantees every source_bundle row in this DB snapshot already has (or
+# will already have, per an earlier evidence-backup run) a corresponding
+# backed-up file. See evidence-backup.sh's own header for the residual skew
+# window this ordering leaves open (bounded to one backup cycle) and why it
+# is accepted rather than solved with heavier machinery.
+#
+# A failed evidence backup does NOT block the DB backup below — the DB is the
+# smaller, higher-frequency, more time-sensitive artifact and its own RPO
+# should not depend on evidence-backup succeeding. It DOES get logged loudly:
+# if you see the WARNING below, do not treat the DB backup produced by THIS
+# run as evidence-complete; prefer a DB backup from a cycle where the
+# evidence step also reported success. Set SKIP_EVIDENCE_BACKUP=1 to opt out
+# of this coupling entirely (e.g. to run a DB-only backup for testing) — do
+# not set this in production; it silently re-introduces B-4.
+#
 # Env (all optional except where noted):
 #   DATABASE_FILE     path to the live DB        (default: /app/data/ledgerium.db)
 #   BACKUP_TMP_DIR    scratch dir for the dump   (default: /tmp)
@@ -12,6 +35,8 @@
 #   BACKUP_S3_ENDPOINT  S3-compatible endpoint (e.g. Cloudflare R2) — optional
 #   AGE_RECIPIENT     age public key; if set, the backup is encrypted with `age`
 #   BACKUP_RETAIN_LOCAL  keep N local dumps in BACKUP_TMP_DIR (default: 3)
+#   SKIP_EVIDENCE_BACKUP  set to 1 to skip the evidence-backup.sh step (default: unset — do not use in production)
+#   See scripts/evidence-backup.sh for its own env vars (UPLOAD_DIR, UPLOADS_BACKUP_S3_URI, etc.)
 #
 # Usage:  sh scripts/db-backup.sh
 # Cron :  0 * * * * sh /app/scripts/db-backup.sh >> /var/log/ledgerium-backup.log 2>&1
@@ -27,6 +52,24 @@ log() { echo "[db-backup] $*"; }
 
 [ -f "$DB_FILE" ] || { log "FATAL: DB file not found at $DB_FILE"; exit 1; }
 command -v sqlite3 >/dev/null 2>&1 || { log "FATAL: sqlite3 not installed"; exit 1; }
+
+# 0) Evidence backup runs FIRST — see the header note above for why order
+#    matters. Non-fatal: a failure here is loudly logged but does not stop
+#    the DB backup that follows.
+if [ -z "${SKIP_EVIDENCE_BACKUP:-}" ]; then
+  EVIDENCE_SCRIPT="$(dirname "$0")/evidence-backup.sh"
+  if [ -f "$EVIDENCE_SCRIPT" ]; then
+    if sh "$EVIDENCE_SCRIPT"; then
+      log "evidence backup ok"
+    else
+      log "WARNING: evidence backup FAILED — the DB snapshot below may reference source_bundle files not yet captured off-host. See evidence-backup.sh output above."
+    fi
+  else
+    log "WARNING: $EVIDENCE_SCRIPT not found — evidence (UPLOAD_DIR) is NOT being backed up. This DB backup alone is insufficient per SOP_BUILDER_REVIEW B-4."
+  fi
+else
+  log "WARNING: SKIP_EVIDENCE_BACKUP=1 — evidence (UPLOAD_DIR) is NOT being backed up this run."
+fi
 
 # 1) Consistent online backup (does NOT block writers; safe on a live DB).
 log "backing up $DB_FILE -> $DUMP"
