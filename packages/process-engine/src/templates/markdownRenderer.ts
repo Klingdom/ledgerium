@@ -302,7 +302,11 @@ function renderOperatorMarkdown(sop: OperatorSOP): string {
 
   // 3. Inline metadata strip
   const metaStrip = renderMetadataStrip({
-    version: '1.0',
+    version: sop.version,
+    // OperatorSOP does not carry a per-document approvalStatus field; this
+    // system has no approval workflow yet, so 'unapproved' is the only
+    // honest value regardless (see SOPApprovalStatus in ../types.js).
+    approvalStatus: 'unapproved',
     stepCount: sop.steps.length,
     systemCount: sop.systemsNeeded.length || 1,
     averageConfidence: sop.averageConfidence ?? 1,
@@ -415,6 +419,7 @@ function renderEnterpriseMarkdown(sop: EnterpriseSOP): string {
   lines.push(renderEnterpriseMetadataTable({
     sopId: sop.sopId,
     version: sop.version,
+    approvalStatus: sop.revisionMetadata.approvalStatus,
     generatedAt: sop.revisionMetadata.generatedAt,
     engineVersion: sop.revisionMetadata.engineVersion ?? PROCESS_ENGINE_VERSION,
     basedOn: sop.revisionMetadata.basedOn,
@@ -580,7 +585,11 @@ function renderDecisionMarkdown(sop: DecisionSOP): string {
   // 3. Inline metadata strip (Decision uses same compact form as Operator — §9.1)
   const totalActions = sop.branches.reduce((acc, b) => acc + b.actions.length, 0);
   const metaStrip = renderMetadataStrip({
-    version: '1.0',
+    version: sop.version,
+    // DecisionSOP does not carry a per-document approvalStatus field; this
+    // system has no approval workflow yet, so 'unapproved' is the only
+    // honest value regardless (see SOPApprovalStatus in ../types.js).
+    approvalStatus: 'unapproved',
     stepCount: sop.branches.length,
     systemCount: 1,
     averageConfidence: sop.averageConfidence ?? 1,

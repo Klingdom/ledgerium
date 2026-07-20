@@ -38,6 +38,8 @@ import type {
   CanonicalEventInput,
   GroupingReason,
 } from './types.js';
+import { PROCESS_ENGINE_VERSION } from './types.js';
+import { computeSOPContentHash } from './contentHash.js';
 import {
   analyzeStep,
   formatDuration,
@@ -152,12 +154,40 @@ export function buildSOP(input: ProcessEngineInput): SOP {
     0,
   );
 
+  // ── Document identity (B-1) ─────────────────────────────────────────────
+  // `purpose`/`scope` computed once here (rather than inline in the return
+  // below) so the exact same values feed both the returned SOP and the
+  // content hash — computing them twice would be wasteful and risks the two
+  // call sites silently drifting apart.
+  const purpose = generatePurpose(sessionJson.activityName, finalizedSteps, normalizedEvents);
+  const scope = generateScope(sessionJson.activityName, allSystems, roles);
+
+  // Deterministic content-identity fingerprint. Only title/purpose/scope and
+  // per-step ordinal/title/action/expectedOutcome/instruction text feed the
+  // hash — see serializeSOPContentForHash for the exact, auditable input.
+  // `generatedAt` and `sopId` are intentionally excluded: same evidence run
+  // twice must hash identically even though sopId is session-derived and
+  // generatedAt is the observation timestamp, not content.
+  const contentHash = computeSOPContentHash({
+    title: sessionJson.activityName,
+    purpose,
+    scope,
+    steps: steps.map(s => ({
+      ordinal: s.ordinal,
+      title: s.title,
+      action: s.action,
+      expectedOutcome: s.expectedOutcome,
+      instructions: s.instructions.map(i => ({ instruction: i.instruction })),
+    })),
+  });
+  const version = `${PROCESS_ENGINE_VERSION}+${contentHash.slice(0, 8)}`;
+
   return {
     sopId: `${sessionJson.sessionId}-sop`,
     title: sessionJson.activityName,
-    version: '2.0',
-    purpose: generatePurpose(sessionJson.activityName, finalizedSteps, normalizedEvents),
-    scope: generateScope(sessionJson.activityName, allSystems, roles),
+    version,
+    purpose,
+    scope,
     systems: allSystems,
     prerequisites: generatePrerequisites(finalizedSteps, normalizedEvents, allSystems),
     estimatedTime: formatDuration(totalDurationMs) || 'Varies',
@@ -169,6 +199,9 @@ export function buildSOP(input: ProcessEngineInput): SOP {
     steps,
     notes: generateNotes(finalizedSteps, normalizedEvents, friction),
     generatedAt: sessionJson.startedAt,
+    engineVersion: PROCESS_ENGINE_VERSION,
+    contentHash,
+    approvalStatus: 'unapproved',
     // New canonical fields
     trigger: inferTrigger(sessionJson.activityName, finalizedSteps, normalizedEvents),
     roles,

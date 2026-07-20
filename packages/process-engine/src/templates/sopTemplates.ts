@@ -138,6 +138,7 @@ function renderOperatorCentric(output: ProcessOutput): OperatorSOP {
 
   return {
     templateType: 'operator_centric',
+    version: sop.version,
     taskTitle: sop.title,
     whatThisIsFor: sop.businessObjective ?? sop.purpose,
     whenToUseIt: sop.trigger ?? deriveWhenToUseIt(sop.title),
@@ -274,8 +275,9 @@ function renderEnterprise(output: ProcessOutput): EnterpriseSOP {
     averageConfidence: output.sop.qualityIndicators?.averageConfidence ?? 1,
     revisionMetadata: {
       generatedAt: sop.generatedAt,
-      engineVersion: PROCESS_ENGINE_VERSION,
+      engineVersion: sop.engineVersion ?? PROCESS_ENGINE_VERSION,
       basedOn: `Recorded session ${output.processRun.sessionId}`,
+      approvalStatus: sop.approvalStatus,
     },
   };
 }
@@ -403,6 +405,7 @@ function renderDecisionBased(output: ProcessOutput): DecisionSOP {
 
   return {
     templateType: 'decision_based',
+    version: sop.version,
     title: sop.title,
     purpose: sop.purpose,
     triggerCondition: sop.trigger ?? `When ${sop.title.toLowerCase()} is required`,

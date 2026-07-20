@@ -9,6 +9,7 @@ import type {
   SOP,
   SOPStep,
   SOPInstruction,
+  SOPApprovalStatus,
   FrictionIndicator,
   QualityIndicators,
   GroupingReason,
@@ -55,7 +56,14 @@ export interface SOPMetadata {
   errorStepCount: number;
   lowConfidenceStepCount: number;
   isComplete: boolean;
+  /**
+   * Content identity — `${engineVersion}+${contentHash.slice(0, 8)}`. NOT a
+   * controlled-document revision number; see `approvalStatus` for whether
+   * this document has been reviewed. Ref: docs/meta/SOP_BUILDER_REVIEW_001.md B-1.
+   */
   version: string;
+  /** See `SOPApprovalStatus` — currently always `'unapproved'`. */
+  approvalStatus: SOPApprovalStatus;
   sourceNote: string;
 }
 
@@ -287,7 +295,7 @@ export interface SOPViewModel {
 
 // ─── Re-exports ──────────────────────────────────────────────────────────────
 
-export type { SOP, SOPStep, SOPInstruction, FrictionIndicator, QualityIndicators, GroupingReason };
+export type { SOP, SOPStep, SOPInstruction, SOPApprovalStatus, FrictionIndicator, QualityIndicators, GroupingReason };
 export type { AlignmentPill };
 export type {
   AlignmentPillKind,

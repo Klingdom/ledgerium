@@ -348,6 +348,8 @@ describe('Enterprise SOP Renderer', () => {
     expect(sop.controls.length).toBeGreaterThan(0);
     expect(sop.risks.length).toBeGreaterThan(0);
     expect(sop.revisionMetadata.engineVersion).toBeDefined();
+    // B-1: the document must not imply approval it does not have.
+    expect(sop.revisionMetadata.approvalStatus).toBe('unapproved');
   });
 
   it('includes decision points section', () => {
@@ -614,19 +616,21 @@ describe('renderMetadataStrip helper', () => {
   it('produces the correct format with plural steps and systems', () => {
     const strip = renderMetadataStrip({
       version: '2.0',
+      approvalStatus: 'unapproved',
       stepCount: 12,
       systemCount: 3,
       averageConfidence: 0.87,
       generatedAt: '2026-04-17T14:32:47Z',
     });
     expect(strip).toBe(
-      '*Ledgerium SOP · v2.0 · 12 steps · 3 systems · 87% confidence · Generated 2026-04-17*',
+      '*Ledgerium SOP · v2.0 · Unapproved · 12 steps · 3 systems · 87% confidence · Generated 2026-04-17*',
     );
   });
 
   it('handles singular step and system correctly', () => {
     const strip = renderMetadataStrip({
       version: '1.0',
+      approvalStatus: 'unapproved',
       stepCount: 1,
       systemCount: 1,
       averageConfidence: 0.9,
@@ -641,6 +645,7 @@ describe('renderMetadataStrip helper', () => {
   it('rounds confidence to nearest integer', () => {
     const strip = renderMetadataStrip({
       version: '1.0',
+      approvalStatus: 'unapproved',
       stepCount: 5,
       systemCount: 2,
       averageConfidence: 0.876,
@@ -652,6 +657,7 @@ describe('renderMetadataStrip helper', () => {
   it('trims generatedAt to YYYY-MM-DD', () => {
     const strip = renderMetadataStrip({
       version: '1.0',
+      approvalStatus: 'unapproved',
       stepCount: 3,
       systemCount: 1,
       averageConfidence: 0.9,
@@ -659,6 +665,18 @@ describe('renderMetadataStrip helper', () => {
     });
     expect(strip).toContain('Generated 2026-04-17');
     expect(strip).not.toContain('T14');
+  });
+
+  it('states approval status explicitly alongside the version identity (B-1)', () => {
+    const strip = renderMetadataStrip({
+      version: '1.4.0+ab12cd34',
+      approvalStatus: 'unapproved',
+      stepCount: 4,
+      systemCount: 1,
+      averageConfidence: 0.9,
+      generatedAt: '2026-04-17T00:00:00Z',
+    });
+    expect(strip).toContain('v1.4.0+ab12cd34 · Unapproved ·');
   });
 });
 

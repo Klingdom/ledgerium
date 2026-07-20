@@ -55,6 +55,13 @@ export const SAMPLE_SOP: SOP = {
   outputs: ['Saved opportunity'],
   completionCriteria: ['Opportunity visible in pipeline'],
   generatedAt: '2026-06-10T14:03:00.000Z',
+  // Fixed fixture values — this is a hand-built test fixture, not real
+  // engine output, so `version`/`engineVersion`/`contentHash` are not
+  // derived via computeSOPContentHash. `approvalStatus` is honest either
+  // way: this system has no approval workflow yet.
+  engineVersion: '1.0.0',
+  contentHash: 'fixture0deadbeef',
+  approvalStatus: 'unapproved',
   businessObjective: 'Ensure every qualified lead becomes a tracked opportunity.',
   steps: [
     step({

@@ -84,6 +84,10 @@ export function buildSOPViewModel(
     lowConfidenceStepCount: qi?.lowConfidenceStepCount ?? 0,
     isComplete: qi?.isComplete ?? true,
     version: rawSop.version ?? '1.0',
+    // Closed union with one member today (see SOPApprovalStatus) — fallback
+    // matches the only honest value, for the rare case rawSop predates this
+    // field.
+    approvalStatus: rawSop.approvalStatus ?? 'unapproved',
     sourceNote: `Derived from observed workflow behavior. ${rawSop.steps?.length ?? 0} steps, evidence-linked.`,
   };
 

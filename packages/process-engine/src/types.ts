@@ -7,7 +7,21 @@
  *
  * No UI, browser, or framework dependencies.
  *
- * Schema version: 1.3.0
+ * Schema version: 1.4.0
+ * Changes from 1.3.0:
+ *  - SOP.version is no longer a hardcoded literal. It is now a deterministic
+ *    content-identity composite `${engineVersion}+${contentHash.slice(0, 8)}`
+ *    (see ./contentHash.ts). Two regenerations from identical evidence at the
+ *    same engine version now correctly produce an identical version, instead
+ *    of every SOP the system has ever produced carrying the same string.
+ *  - SOP gained `engineVersion` (the PROCESS_ENGINE_VERSION that generated
+ *    this content), `contentHash` (the full deterministic fingerprint), and
+ *    `approvalStatus` (closed union, currently always `'unapproved'` — there
+ *    is no approval workflow yet, so the document says so honestly instead
+ *    of implying one). `generatedAt` is unchanged in value (still sourced
+ *    from `sessionJson.startedAt`, never the wall clock) but is now
+ *    documented as an observation timestamp, not a publication/effective
+ *    date. See docs/meta/SOP_BUILDER_REVIEW_001.md B-1 and §7 step 2a.
  * Changes from 1.2.0:
  *  - SOP template renderers (sopTemplates.ts / renderHelpers.ts): removed
  *    fabricated content from EnterpriseSOP.controls / .risks / .escalationRules,
@@ -41,8 +55,13 @@
  * the gap for). Consumers (e.g. EnterpriseSOP.revisionMetadata.engineVersion)
  * treat this value as the identity of "what this document claims," so a
  * meaning-changing edit without a bump is itself a truthfulness defect.
+ *
+ * Bumped 1.3.0 → 1.4.0: `SOP.version` output semantics changed from a
+ * hardcoded literal to a deterministic content-identity composite (see the
+ * "Changes from 1.3.0" note above) — this is itself exactly the class of
+ * meaning-changing edit this convention exists to catch.
  */
-export const PROCESS_ENGINE_VERSION = '1.3.0' as const;
+export const PROCESS_ENGINE_VERSION = '1.4.0' as const;
 
 // ─── Grouping / boundary reasons (mirrors segmentation-engine) ───────────────
 
@@ -417,9 +436,33 @@ export interface SOPStep {
   decisionLabel?: string;
 }
 
+/**
+ * Document approval status.
+ *
+ * Closed union with exactly one member today: this system has no approval
+ * workflow yet (see docs/meta/SOP_BUILDER_REVIEW_001.md §7 step 2b, which is
+ * separately gated on an open product decision), so every generated SOP is
+ * honestly `'unapproved'`. The type makes that absence undeniable — nothing
+ * can silently default, infer, or fabricate a different value while this
+ * union has one member. Widen this union when an approval workflow ships.
+ */
+export type SOPApprovalStatus = 'unapproved';
+
 export interface SOP {
   sopId: string;
   title: string;
+  /**
+   * Document content identity: `${engineVersion}+${contentHash.slice(0, 8)}`
+   * (see `computeSOPContentHash` in ./contentHash.ts).
+   *
+   * This is a CONTENT identity, not a controlled-document revision number.
+   * Two regenerations from identical evidence at the same engine version
+   * produce the identical `version` — that is the intended behavior, not a
+   * bug: it lets two copies be compared for content equality. It does NOT
+   * mean either copy has been reviewed or approved — see `approvalStatus`.
+   *
+   * Ref: docs/meta/SOP_BUILDER_REVIEW_001.md B-1.
+   */
   version: string;
   purpose: string;
   scope: string;
@@ -434,7 +477,29 @@ export interface SOP {
   completionCriteria: string[];
   steps: SOPStep[];
   notes: string[];
+  /**
+   * Timestamp of the OBSERVATION this SOP was generated from —
+   * `sessionJson.startedAt`, deliberately NOT the wall-clock time the
+   * document was built. Sourcing it from evidence rather than `Date.now()`
+   * is what keeps SOP generation deterministic (same input → byte-identical
+   * output); do not change the source of this value.
+   *
+   * This is NOT a publication date, an effective date, or an approval date.
+   * It does not indicate the document has been reviewed or is in force.
+   * Renderers MUST NOT present it as such — see `approvalStatus`.
+   */
   generatedAt: string;
+  /** Process engine version that generated this content (see `PROCESS_ENGINE_VERSION`). */
+  engineVersion: string;
+  /**
+   * Full deterministic content-identity fingerprint of this document (see
+   * `computeSOPContentHash` in ./contentHash.ts). `version` embeds the first
+   * 8 characters of this value; the full value is retained here for
+   * traceability.
+   */
+  contentHash: string;
+  /** See `SOPApprovalStatus`. */
+  approvalStatus: SOPApprovalStatus;
   /** When this SOP should be invoked — the triggering condition. */
   trigger?: string;
   /** Roles or actors involved in this procedure (inferred from behavior). */
