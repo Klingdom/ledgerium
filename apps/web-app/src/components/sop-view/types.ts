@@ -209,7 +209,18 @@ export interface SOPViewDecision {
   stepOrdinal: number;
   stepId: string;
   question: string;
-  options: Array<{ condition: string; action: string }>;
+  /**
+   * `condition` is OPTIONAL and absent unless the branch condition was actually
+   * observed. It previously carried fabricated text ("{system} accepts",
+   * "Validation passes") invented from the system name alone — asserting what a
+   * system does when nothing of the kind was recorded.
+   *
+   * Renderers MUST NOT substitute a placeholder when it is absent: show the
+   * action alone. Absent beats boilerplate.
+   *
+   * Ref: docs/meta/SOP_BUILDER_REVIEW_001.md §2.
+   */
+  options: Array<{ condition?: string | undefined; action: string }>;
 }
 
 // ─── Common issue ────────────────────────────────────────────────────────────

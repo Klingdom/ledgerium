@@ -296,7 +296,9 @@ function EnterpriseSOPView({ data }: { data: any }) {
               <div key={i} className="ds-callout ds-callout-warning">
                 <p className="text-ds-sm font-medium text-[var(--content-primary)]">At step {dp.atStepOrdinal}: {dp.question}</p>
                 {dp.options?.map((opt: any, j: number) => (
-                  <p key={j} className="text-ds-xs text-[var(--content-secondary)] mt-ds-1">&rarr; If {opt.condition}: {opt.action}</p>
+                  <p key={j} className="text-ds-xs text-[var(--content-secondary)] mt-ds-1">
+                    {opt.condition ? <>&rarr; If {opt.condition}: {opt.action}</> : <>&rarr; {opt.action}</>}
+                  </p>
                 ))}
               </div>
             ))}

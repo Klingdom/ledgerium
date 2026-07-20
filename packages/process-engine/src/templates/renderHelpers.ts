@@ -261,10 +261,9 @@ export function stepCaution(step: SOPStep): string {
 export function deriveCommonMistakes(output: ProcessOutput): string[] {
   const mistakes: string[] = [];
 
-  const errorSteps = output.sop.steps.filter(s => s.category === 'error_handling');
-  if (errorSteps.length > 0) {
-    mistakes.push('Submitting forms before all required fields are complete');
-  }
+  // No specific cause is asserted from the mere existence of an error step —
+  // the recording shows THAT an error occurred, not WHY (missing fields,
+  // wrong value, stale data, etc. are all equally plausible and unobserved).
 
   const friction = output.sop.frictionSummary ?? [];
   for (const f of friction) {
@@ -279,9 +278,8 @@ export function deriveCommonMistakes(output: ProcessOutput): string[] {
     }
   }
 
-  if (mistakes.length === 0) {
-    mistakes.push('Skipping prerequisite data gathering before starting the workflow');
-  }
+  // No generic fallback — `mistakes` may legitimately be empty when no
+  // friction was observed.
 
   return [...new Set(mistakes)].slice(0, 5);
 }

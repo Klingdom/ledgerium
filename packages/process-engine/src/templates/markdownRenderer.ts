@@ -513,25 +513,32 @@ function renderEnterpriseMarkdown(sop: EnterpriseSOP): string {
     for (const dp of sop.decisionPoints) {
       lines.push(`${mdBold(`At Step ${dp.atStepOrdinal}:`)} ${dp.question}`);
       for (const opt of dp.options) {
-        lines.push(mdBullet(`${mdBold(opt.condition)}: ${opt.action}`));
+        // `condition` is omitted when no success/failure criterion was
+        // observed — render the option using `action` alone rather than
+        // inventing a condition string.
+        lines.push(mdBullet(opt.condition ? `${mdBold(opt.condition)}: ${opt.action}` : opt.action));
       }
       lines.push('');
     }
   }
 
-  // Controls
-  lines.push(mdHeading(2, 'Controls & Checkpoints'));
-  for (const c of sop.controls) {
-    lines.push(mdBullet(c));
+  // Controls — omitted entirely when no control was observed.
+  if (sop.controls.length > 0) {
+    lines.push(mdHeading(2, 'Controls & Checkpoints'));
+    for (const c of sop.controls) {
+      lines.push(mdBullet(c));
+    }
+    lines.push('');
   }
-  lines.push('');
 
-  // Risks
-  lines.push(mdHeading(2, 'Risks & Cautions'));
-  for (const r of sop.risks) {
-    lines.push(mdBullet(r));
+  // Risks — omitted entirely when no risk was observed.
+  if (sop.risks.length > 0) {
+    lines.push(mdHeading(2, 'Risks & Cautions'));
+    for (const r of sop.risks) {
+      lines.push(mdBullet(r));
+    }
+    lines.push('');
   }
-  lines.push('');
 
   // Outputs
   lines.push(mdHeading(2, 'Outputs'));
@@ -640,12 +647,14 @@ function renderDecisionMarkdown(sop: DecisionSOP): string {
     lines.push('');
   }
 
-  // Escalation
-  lines.push(mdHeading(2, 'Escalation Rules'));
-  for (const rule of sop.escalationRules) {
-    lines.push(mdBullet(rule));
+  // Escalation — omitted entirely when no escalation rule was observed.
+  if (sop.escalationRules.length > 0) {
+    lines.push(mdHeading(2, 'Escalation Rules'));
+    for (const rule of sop.escalationRules) {
+      lines.push(mdBullet(rule));
+    }
+    lines.push('');
   }
-  lines.push('');
 
   // Exception handling
   lines.push(mdHeading(2, 'Exception Handling'));

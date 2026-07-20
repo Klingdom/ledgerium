@@ -394,10 +394,19 @@ function ExecutionStepCard({
               <div className="space-y-1">
                 {decision.options.map((opt, i) => (
                   <div key={i} className="flex items-start gap-2 text-[10px]">
-                    <span className="font-bold text-amber-600 mt-px">If:</span>
+                    {/* "If:" and the condition render only when the branch
+                        condition was actually observed. Absent beats
+                        boilerplate — see SOPViewDecision in types.ts. */}
+                    {opt.condition ? (
+                      <span className="font-bold text-amber-600 mt-px">If:</span>
+                    ) : null}
                     <div>
-                      <span className="text-amber-800">{opt.condition}</span>
-                      <span className="text-amber-600 mx-1.5">→</span>
+                      {opt.condition ? (
+                        <>
+                          <span className="text-amber-800">{opt.condition}</span>
+                          <span className="text-amber-600 mx-1.5">→</span>
+                        </>
+                      ) : null}
                       <span className="text-amber-700 font-medium">{opt.action}</span>
                     </div>
                   </div>
@@ -485,7 +494,8 @@ function DecisionSummaryCard({ decision }: { decision: SOPViewDecision }) {
         {decision.options.map((opt, i) => (
           <div key={i} className="flex items-start gap-2 text-[10px] text-amber-700">
             <ArrowRight className="h-3 w-3 mt-0.5 flex-shrink-0 text-amber-400" />
-            <span><strong>{opt.condition}</strong> → {opt.action}</span>
+            {/* Condition shown only when observed — see types.ts. */}
+            <span>{opt.condition ? <><strong>{opt.condition}</strong> → </> : null}{opt.action}</span>
           </div>
         ))}
       </div>

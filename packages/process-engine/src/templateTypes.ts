@@ -300,7 +300,13 @@ export interface EnterpriseSOPStep {
 export interface EnterpriseSOPDecision {
   atStepOrdinal: number;
   question: string;
-  options: Array<{ condition: string; action: string }>;
+  /**
+   * `condition` is omitted when the underlying success/failure criterion was
+   * never observed (e.g. no system-specific confirmation or error event was
+   * captured). Renderers MUST NOT invent a condition string when this field
+   * is absent — render the option using `action` alone.
+   */
+  options: Array<{ condition?: string | undefined; action: string }>;
 }
 
 /**

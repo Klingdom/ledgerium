@@ -360,7 +360,7 @@ describe('Enterprise SOP Renderer', () => {
 });
 
 describe('Decision-Based SOP Renderer', () => {
-  it('renders with branches and escalation', () => {
+  it('renders with branches; escalation rules stay empty (no org structure observed)', () => {
     const output = processSession(complexWorkflow());
     const sop = renderSOP(output, 'decision_based');
 
@@ -368,7 +368,11 @@ describe('Decision-Based SOP Renderer', () => {
     if (sop.templateType !== 'decision_based') return;
     expect(sop.title).toBe('Process Invoice');
     expect(sop.branches.length).toBeGreaterThan(0);
-    expect(sop.escalationRules.length).toBeGreaterThan(0);
+    // iter-2026-07-20: escalationRules no longer invents org structure
+    // ("escalate to a supervisor", "contact support") that was never
+    // observed in the recording — it is honestly empty absent a real
+    // data source. See docs/meta/SOP_BUILDER_REVIEW_001.md §2.
+    expect(sop.escalationRules).toEqual([]);
     expect(sop.exceptionHandling.length).toBeGreaterThan(0);
     expect(sop.completionCriteria.length).toBeGreaterThan(0);
   });
@@ -444,13 +448,16 @@ describe('Markdown Export', () => {
     expect(md).toContain('Controls');
   });
 
-  it('renders decision-based SOP markdown', () => {
+  it('renders decision-based SOP markdown; omits the Escalation Rules heading when empty', () => {
     const output = processSession(complexWorkflow());
     const sop = renderSOP(output, 'decision_based');
     const md = renderSOPMarkdown(sop);
 
     expect(md).toContain('Decision Paths');
-    expect(md).toContain('Escalation Rules');
+    // iter-2026-07-20: escalationRules is honestly empty for this fixture
+    // (no org structure was observed), so the heading is omitted entirely
+    // rather than rendering an empty section.
+    expect(md).not.toContain('Escalation Rules');
     expect(md).toContain('Exception Handling');
   });
 });

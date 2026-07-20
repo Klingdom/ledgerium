@@ -7,7 +7,16 @@
  *
  * No UI, browser, or framework dependencies.
  *
- * Schema version: 1.2.0
+ * Schema version: 1.3.0
+ * Changes from 1.2.0:
+ *  - SOP template renderers (sopTemplates.ts / renderHelpers.ts): removed
+ *    fabricated content from EnterpriseSOP.controls / .risks / .escalationRules,
+ *    OperatorSOP.commonMistakes, and EnterpriseSOPDecision.options[].condition
+ *    (now optional — omitted rather than invented). These fields no longer
+ *    fall back to boilerplate text asserting facts, controls, or org
+ *    structure that were never observed in the recording; they may now
+ *    legitimately be empty arrays / omit `condition`. See
+ *    docs/meta/SOP_BUILDER_REVIEW_001.md §2 and §7 step 1.
  * Changes from 1.1.0:
  *  - SOPInstruction: new type — event-level granularity within SOP steps
  *  - SOPStep: added instructions[] (event-level), detail now derived from instructions
@@ -18,7 +27,22 @@
 
 // ─── Engine version ───────────────────────────────────────────────────────────
 
-export const PROCESS_ENGINE_VERSION = '1.2.0' as const;
+/**
+ * Engine + generated-output schema version.
+ *
+ * Convention (established at 1.2.0 → 1.3.0, 2026-07-20): this constant MUST
+ * be bumped for ANY change to the semantics of generated SOP/process-map
+ * output — not just type/shape changes. That includes wording changes that
+ * alter what a rendered document asserts (e.g. removing fabricated content,
+ * changing a fallback string, adding/removing a template field's fallback
+ * behavior). Prior to 1.3.0 there was no such convention; wording-only
+ * changes landed without a version bump (see
+ * docs/meta/SOP_BUILDER_REVIEW_001.md B-1 for the audit finding this closes
+ * the gap for). Consumers (e.g. EnterpriseSOP.revisionMetadata.engineVersion)
+ * treat this value as the identity of "what this document claims," so a
+ * meaning-changing edit without a bump is itself a truthfulness defect.
+ */
+export const PROCESS_ENGINE_VERSION = '1.3.0' as const;
 
 // ─── Grouping / boundary reasons (mirrors segmentation-engine) ───────────────
 

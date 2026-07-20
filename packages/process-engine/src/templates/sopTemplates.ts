@@ -205,24 +205,22 @@ function renderEnterprise(output: ProcessOutput): EnterpriseSOP {
       const nextStep = sop.steps.find(s => s.ordinal === step.ordinal + 1);
       const isNextError = nextStep?.category === 'error_handling';
       const successAction = sop.steps.find(s => s.ordinal > step.ordinal && s.category !== 'error_handling');
-      const successLabel = step.system
-        ? `${step.system} accepts the submission`
-        : 'Validation passes';
-      const failureLabel = step.system
-        ? `${step.system} returns an error`
-        : 'Validation fails';
       const failureAction = isNextError && nextStep
         ? `${nextStep.title} (step ${nextStep.ordinal}), then retry`
         : successAction
           ? `Resolve the issue, then resume at step ${successAction.ordinal}`
           : 'Resolve the error (see exception handling) then retry';
 
+      // Success/failure criteria (`condition`) are intentionally omitted: no
+      // system-specific confirmation or error message was observed for this
+      // decision point, so no condition text is asserted. See
+      // EnterpriseSOPDecision.options in templateTypes.ts.
       return {
         atStepOrdinal: step.ordinal,
         question: step.decisionLabel!,
         options: [
-          { condition: successLabel, action: successAction ? `Continue to step ${successAction.ordinal}: ${successAction.title}` : 'Continue to next step' },
-          { condition: failureLabel, action: failureAction },
+          { action: successAction ? `Continue to step ${successAction.ordinal}: ${successAction.title}` : 'Continue to next step' },
+          { action: failureAction },
         ],
       };
     });
@@ -236,7 +234,10 @@ function renderEnterprise(output: ProcessOutput): EnterpriseSOP {
   if (decisionPoints.length > 0) {
     controls.push(`${decisionPoints.length} decision checkpoint(s) require verification before proceeding`);
   }
-  controls.push('Verify system confirmation at each submission step before continuing');
+  // No unconditional control assertion here — a control this organisation
+  // does not have (e.g. "verify system confirmation") must not be claimed
+  // when no such confirmation step was ever observed. Absent beats
+  // boilerplate. `controls` may legitimately be empty.
 
   // Risks
   const risks: string[] = [];
@@ -246,9 +247,8 @@ function renderEnterprise(output: ProcessOutput): EnterpriseSOP {
   for (const f of (sop.frictionSummary ?? []).filter(f => f.severity !== 'low')) {
     risks.push(f.label);
   }
-  if (risks.length === 0) {
-    risks.push('Standard operational risk — follow procedure steps in sequence to minimize errors');
-  }
+  // No generic fallback — `risks` may legitimately be empty when no
+  // commonIssues or non-low-severity friction was observed.
 
   return {
     templateType: 'enterprise',
@@ -329,7 +329,15 @@ function renderDecisionBased(output: ProcessOutput): DecisionSOP {
       if (errorStep) {
         const errorContext = errorStep.system ? ` in ${errorStep.system}` : '';
         branches.push({
-          condition: `${decision.decisionLabel ?? 'Validation fails'} — error at step ${decision.ordinal}`,
+          // Both halves of this condition are observed: `decisionLabel` is
+          // derived, and the error-at-ordinal clause is only reached because an
+          // `error_handling` step was actually found at ordinal + 1 (guard
+          // above). The former `?? 'Validation fails'` fallback was NOT
+          // observed — it invented a branch condition whenever the label was
+          // missing — so it is gone. Ref: SOP_BUILDER_REVIEW_001.md §2.
+          condition: decision.decisionLabel
+            ? `${decision.decisionLabel} — error at step ${decision.ordinal}`
+            : `Error at step ${decision.ordinal}`,
           actions: [
             {
               ordinal: 1,
@@ -365,15 +373,10 @@ function renderDecisionBased(output: ProcessOutput): DecisionSOP {
     });
   }
 
-  // Escalation rules
+  // Escalation rules — no org structure (supervisor, support team, "team
+  // policy") is asserted here; the recording never observed who receives an
+  // escalation. `escalationRules` may legitimately be empty.
   const escalationRules: string[] = [];
-  if (errorSteps.length >= 2) {
-    escalationRules.push('If the same error recurs after correction, escalate to a supervisor or system administrator');
-  }
-  if (output.processMap.systems.length > 1) {
-    escalationRules.push('If a cross-system handoff fails, contact the receiving system\'s support team');
-  }
-  escalationRules.push('If the workflow cannot be completed after following all exception paths, document the issue and escalate per team policy');
 
   // Exception handling
   const exceptionHandling: string[] = [];
