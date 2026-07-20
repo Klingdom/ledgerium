@@ -370,6 +370,7 @@ function makeSOPInstruction(sequence: number, instruction: string): SOPInstructi
     instruction,
     eventType: 'interaction.click',
     sourceEventId: `evt-sop-${sequence}`,
+    sourceRawEventId: `raw-sop-${sequence}`,
     isSensitive: false,
     redacted: false,
     instructionType: 'action',

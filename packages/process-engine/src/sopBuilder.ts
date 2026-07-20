@@ -202,6 +202,11 @@ export function buildSOP(input: ProcessEngineInput): SOP {
     engineVersion: PROCESS_ENGINE_VERSION,
     contentHash,
     approvalStatus: 'unapproved',
+    // Provenance backfill stamp per OVERLAY_ARCHITECTURE_DECISION.md §9 —
+    // must precede any overlay/authoring write path. See
+    // SOPContentOrigin JSDoc (types.ts) for why this is the backfill
+    // mechanism itself rather than something needing a separate migration.
+    contentOrigin: 'engine-derived',
     // New canonical fields
     trigger: inferTrigger(sessionJson.activityName, finalizedSteps, normalizedEvents),
     roles,
@@ -247,6 +252,12 @@ function buildInstructions(
       instruction,
       eventType: evt.event_type,
       sourceEventId: evt.event_id,
+      // Stable anchor per OVERLAY_ARCHITECTURE_DECISION.md §4.2 — carried
+      // from the raw bundle through normalization, unlike sourceEventId
+      // above (which is a fresh UUID minted per normalization pass). See
+      // SOPInstruction.sourceRawEventId JSDoc (types.ts) for the full
+      // stability argument.
+      sourceRawEventId: evt.normalization_meta.sourceEventId,
       ...(evt.page_context?.applicationLabel !== undefined && {
         system: evt.page_context.applicationLabel,
       }),

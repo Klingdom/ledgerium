@@ -22,6 +22,7 @@ function instruction(overrides?: Partial<SOPInstruction>): SOPInstruction {
     instruction: 'Click the Save button',
     eventType: 'interaction.click',
     sourceEventId: 'evt-1',
+    sourceRawEventId: 'raw-evt-1',
     isSensitive: false,
     redacted: false,
     ...overrides,

@@ -6,6 +6,26 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-07-20] - SOP overlay ADR §10 "smallest correct first step" (Mode 2 `directed`, `backend-engineer`)
+
+**Trigger:** CEO-directed implementation of `docs/features/sop-authoring/OVERLAY_ARCHITECTURE_DECISION.md` §10 — the three small, additive, no-authoring-machinery deliverables the ADR identifies as safe to ship ahead of any overlay write path.
+
+### Added
+
+- `SOPInstruction.sourceRawEventId` (`packages/process-engine/src/types.ts`) — the capture-time `raw_event_id`, sourced from `CanonicalEventInput.normalization_meta.sourceEventId` (confirmed non-optional at both the type level and the upload contract, `apps/web-app/src/lib/ingestion.ts:29-34`). Populated in `sopBuilder.ts`. `sourceEventId` (canonical `event_id`) is kept alongside it per ADR §4.2 — both fields now coexist, each documented with its own stability scope (R1 engine re-run vs. R2 re-normalization).
+- `SOP.contentOrigin` / `SOPContentOrigin` (closed union, `'engine-derived'`) — the provenance backfill stamp required by ADR §9 before any overlay write path can exist. Optional on the type by design: absence on documents stored before this field existed is itself the backfill evidence, because `WorkflowArtifact` is create-only (no `.update()`/`.upsert()` anywhere) and `buildSOP` has always been the sole writer of SOP content. No data migration was written — none is needed or safe (a post-hoc UPDATE would replace evidence with an assertion).
+- `packages/process-engine/src/anchorStability.test.ts` (40 tests) — the regression gate for the ADR §5 orphan taxonomy's central assumption: `sourceRawEventId` survives an engine re-run (R1) unchanged even when `PROCESS_ENGINE_VERSION` differs. Version bump is simulated via `vi.doMock('./types.js', ...)` + `vi.resetModules()` + dynamic re-import, run against all 10 real fixtures in `fixtures/workflows/`.
+
+### Changed
+
+- `PROCESS_ENGINE_VERSION` `1.4.0 → 1.5.0` per the versioning convention at `types.ts:47-57` — both new fields are changes to generated output.
+- Fixtures/tests updated for the new required `SOPInstruction.sourceRawEventId` field: `packages/process-engine/src/templates/sopValidator.test.ts`, `apps/web-app/src/lib/ask-this-process/__fixtures__/sampleSop.ts` (6 instruction literals), and the `makeSOPInstruction` helper in all 7 `packages/agent-intelligence/src/*.test.ts` files.
+
+### Notes
+
+- Explicitly NOT built (per ADR §10 "Do NOT build yet"): overlay tables, the fold, any write path, anchor re-binding, the approval workflow / `versionNumber`, materialized snapshots, cross-recording overlay inheritance, or any AI-authored overlay path. `SOPApprovalStatus` was NOT widened to include `'author-approved'` (ADR §12.2) — nothing can set it yet.
+- Validation: workspace `pnpm typecheck` clean across all 11 packages/apps; workspace `pnpm test` 177 → 178 test files / 3865 → 3905 tests, all passing.
+
 ## [2026-06-26] - Iteration 098 — SEO/AEO page engine (Phase 1 / Tranche 0) SHIP-READY (Mode 2 `directed`, CEO feature program; 9-agent review + coordinator build)
 
 **Trigger:** CEO-directed "Many Narrow Doors + Workflow Knowledge Graph" SEO/AEO page engine. 9 specialist agents reviewed the super prompt (artifacts `docs/meta/SEO_AEO_SUPERPROMPT_REVIEW_001.md` + `SEO_AEO_SUPERPROMPT_V2.md`), then Tranche 0 was built and instrumented. Coverage is a first-class KPI per CEO directive.

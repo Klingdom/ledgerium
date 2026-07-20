@@ -7,7 +7,19 @@
  *
  * No UI, browser, or framework dependencies.
  *
- * Schema version: 1.4.0
+ * Schema version: 1.5.0
+ * Changes from 1.4.0:
+ *  - SOPInstruction gained `sourceRawEventId` — the capture-time
+ *    `raw_event_id`, sourced from
+ *    `CanonicalEventInput.normalization_meta.sourceEventId`. `sourceEventId`
+ *    (the canonical `event_id`) is kept alongside it, unchanged. See
+ *    docs/features/sop-authoring/OVERLAY_ARCHITECTURE_DECISION.md §4.2 —
+ *    this is the stable anchor a future overlay/authoring system needs;
+ *    `sourceEventId` alone is not stable across re-normalization.
+ *  - SOP gained `contentOrigin` (closed union, currently always
+ *    `'engine-derived'` — see `SOPContentOrigin`), a provenance stamp
+ *    required before any overlay/authoring write path can safely exist.
+ *    See ADR §9.
  * Changes from 1.3.0:
  *  - SOP.version is no longer a hardcoded literal. It is now a deterministic
  *    content-identity composite `${engineVersion}+${contentHash.slice(0, 8)}`
@@ -60,8 +72,19 @@
  * hardcoded literal to a deterministic content-identity composite (see the
  * "Changes from 1.3.0" note above) — this is itself exactly the class of
  * meaning-changing edit this convention exists to catch.
+ *
+ * Bumped 1.4.0 → 1.5.0: `SOPInstruction` gained `sourceRawEventId` and `SOP`
+ * gained `contentOrigin` (see "Changes from 1.4.0" above) — both are changes
+ * to generated output per
+ * docs/features/sop-authoring/OVERLAY_ARCHITECTURE_DECISION.md §4.2. Note
+ * the interaction documented there: this bump changes `SOP.version` (which
+ * embeds `engineVersion`) for every document, while `contentHash` is
+ * unchanged, because the hashed field set (`contentHash.ts`) does not
+ * include instruction provenance or document-level provenance. That is
+ * correct, not a bug — see `anchorStability.test.ts` for the regression
+ * test that pins this behavior.
  */
-export const PROCESS_ENGINE_VERSION = '1.4.0' as const;
+export const PROCESS_ENGINE_VERSION = '1.5.0' as const;
 
 // ─── Grouping / boundary reasons (mirrors segmentation-engine) ───────────────
 
@@ -383,8 +406,50 @@ export interface SOPInstruction {
   instruction: string;
   /** The canonical event type this instruction was derived from. */
   eventType: string;
-  /** Source event ID for traceability back to observed evidence. */
+  /**
+   * Canonical event ID this instruction was derived from
+   * (`CanonicalEventInput.event_id`) — a UUID v4 minted fresh by the
+   * normalization engine each time a raw event is normalized
+   * (`docs/invariants.md:90-93`).
+   *
+   * Stable across an **engine re-run** over the same stored bundle
+   * (regeneration case R1 — see
+   * docs/features/sop-authoring/OVERLAY_ARCHITECTURE_DECISION.md §2.1),
+   * which today is the only regeneration the server can actually perform.
+   * NOT stable across **re-normalization** (R2) — a fresh normalize pass
+   * mints a new `event_id` for the same underlying capture, even though
+   * nothing observable changed.
+   *
+   * Kept alongside `sourceRawEventId` per ADR §4.2 rather than replaced by
+   * it: (a) it is the correct key for R1, the common case, and matching on
+   * both fields is a stronger signal than either alone; (b) it is already
+   * consumed by traceability surfaces (e.g. `ask-this-process` citations)
+   * and removing it would be an unnecessary breaking change; (c) a
+   * *disagreement* between the two (raw matches, canonical does not) is
+   * itself the signal that an R2 re-normalization occurred.
+   */
   sourceEventId: string;
+  /**
+   * Capture-time raw event ID this instruction was derived from —
+   * `raw_event_id`, assigned once at the moment of capture in the
+   * immutable raw bundle (`docs/invariants.md:89`), carried unchanged
+   * through normalization as
+   * `CanonicalEventInput.normalization_meta.sourceEventId`
+   * (`docs/invariants.md:112`; `types.ts:144-145` in this package — that
+   * field is non-optional, and the upload contract
+   * (`apps/web-app/src/lib/ingestion.ts:29-34`) requires it as a
+   * non-optional string, so it cannot be absent in a bundle the server has
+   * accepted).
+   *
+   * Stable across **both** an engine re-run (R1) **and** a re-normalization
+   * of the same raw capture (R2) — see
+   * docs/features/sop-authoring/OVERLAY_ARCHITECTURE_DECISION.md §1 Fact 3
+   * and §2.1. It is strictly dominant over `sourceEventId` as a stable
+   * anchor and is the field a future overlay/authoring system must bind
+   * edits to (ADR §4). Do not derive a "stability" claim from
+   * `sourceEventId` alone — see that field's own JSDoc.
+   */
+  sourceRawEventId: string;
   /** Application/system in which this event occurred. */
   system?: string;
   /** Whether this event involves sensitive data fields. */
@@ -448,6 +513,42 @@ export interface SOPStep {
  */
 export type SOPApprovalStatus = 'unapproved';
 
+/**
+ * Content-origin provenance stamp for a SOP document.
+ *
+ * Closed union with exactly one member today: this system has no
+ * overlay/authoring write path yet (see
+ * docs/features/sop-authoring/OVERLAY_ARCHITECTURE_DECISION.md §9), so
+ * every generated SOP is honestly `'engine-derived'`. This is the same
+ * discipline as `SOPApprovalStatus` — the type makes the absence of any
+ * other origin undeniable while this union has one member.
+ *
+ * `SOP.contentOrigin` is OPTIONAL, and that is deliberate, not an
+ * oversight — it is the backfill mechanism itself, not a gap needing one.
+ * `buildSOP` (reached solely via `processSession`,
+ * `sopBuilder.ts` / `processSession.ts`) is the ONLY writer of SOP content,
+ * and the persistence layer (`WorkflowArtifact`) is create-only — there is
+ * no `.update()` / `.upsert()` call anywhere that could have mutated a
+ * stored SOP after it was generated, and no `updatedAt` column recording
+ * one. That means the **absence** of `contentOrigin` on any stored document
+ * is itself proof the document predates this field, and therefore proof it
+ * is engine-derived — no separate batch backfill migration is needed, and
+ * per ADR §9, writing one now would in fact be worse: a post-hoc UPDATE is
+ * an *assertion* about old rows, while this field's introduction, with no
+ * mutation path having ever existed before it, is *evidence*. Do not later
+ * "fix" this by adding a migration that stamps old rows explicitly — that
+ * would replace evidence with an assertion for no benefit.
+ *
+ * This reasoning stops holding for any document touched by an
+ * overlay/authoring write path once one exists. Widen this union to the
+ * four-valued `observed` / `derived` / `authored` / `absent` model already
+ * sketched (`docs/meta/SOP_BUILDER_REVIEW_001.md` §5 line 118; ADR §9
+ * target shape) **before** that write path ships, not after — ADR §9:
+ * "stamp provenance ... before any overlay write path exists ... cheap now
+ * and impossible later."
+ */
+export type SOPContentOrigin = 'engine-derived';
+
 export interface SOP {
   sopId: string;
   title: string;
@@ -500,6 +601,13 @@ export interface SOP {
   contentHash: string;
   /** See `SOPApprovalStatus`. */
   approvalStatus: SOPApprovalStatus;
+  /**
+   * See `SOPContentOrigin`. Always `'engine-derived'` when set by this
+   * engine version. Optional — see `SOPContentOrigin` JSDoc for why its
+   * absence on documents stored before this field existed is itself the
+   * provenance evidence, not a gap.
+   */
+  contentOrigin?: SOPContentOrigin;
   /** When this SOP should be invoked — the triggering condition. */
   trigger?: string;
   /** Roles or actors involved in this procedure (inferred from behavior). */
