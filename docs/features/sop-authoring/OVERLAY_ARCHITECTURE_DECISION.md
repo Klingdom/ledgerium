@@ -296,7 +296,7 @@ These are product calls. Each has a technical default recorded so nothing is blo
 |---|---|---|---|
 | **OD-1** | On **O1** (engine output changed under a human edit), does the human text win by default, or is the engine's new text surfaced as primary? | This is a liability and document-quality judgement. Human text preserves intent; engine text preserves evidence-linkage. In a regulated context the answer may be neither — it may be "block until reviewed." | Human text renders, engine text shown adjacent, `needs-review` flag set. Nothing auto-discarded. |
 | **OD-2** | Does an **approved** SOP regenerate at all when the engine changes, or is it frozen until explicitly re-approved? | Goes to what "approved" means as a commitment. Freezing is safer and staler; regenerating is fresher and weakens the approval's meaning. | Approved versions freeze. Regeneration produces a new *unapproved* version alongside; the approved snapshot (§7) is untouched. |
-| **OD-3** | **Who may approve**, and may an author approve their own edit? | Governance/role model, with schema consequences that are cheaper to decide before the table exists than after. | Blocks `versionNumber` implementation. No default — this one genuinely must be answered. |
+| **OD-3** | ~~**Who may approve**, and may an author approve their own edit?~~ | ~~Governance/role model.~~ | **RESOLVED — CEO, 2026-07-20. See §12.** |
 | **OD-4** | May overlays transfer between recordings of the same process (**O5**, R3)? | Product feature with real value (re-record without losing edits) and real risk (edits asserted against evidence that never produced them). | Out of scope. Overlays are `sessionId`-scoped and do not transfer. |
 | **OD-5** | What does the product show when an overlay's **evidence is unrecoverable** (§2.1, B-4)? | An overlay whose provenance chain is broken is an unsourced assertion. Whether that renders, renders-with-warning, or suppresses is a truthfulness call the review's own §2 framing bears on directly. | Render with an explicit unverifiable-provenance marker. Never silently. |
 | **OD-6** | The overlap threshold **`T`** (§4.3). | Requires measurement that does not exist yet. Setting it now is a guess with a number attached. | Ship at `T = 1.0` (exact match only), measure real regenerations, then decide. |
@@ -310,3 +310,57 @@ The fork was real but narrow: the two agents disagreed about storage and agreed 
 The orphan problem looked unsolvable because both designs anchored on identifiers that do not survive regeneration; anchoring on `raw_event_id` — which is already in the data and needs one line in the engine to expose — turns "every edit orphans" into "essentially no edit orphans," and the residue decomposes into six individually decidable cases.
 
 The one genuinely urgent item is unrelated to the fork: every SOP in the system is currently provably machine-written, and that fact becomes unprovable the moment the first person edits one — so stamp provenance before authoring ships, not after.
+
+---
+
+## 12. OD-3 resolved — ownership, editing, and the copy-on-share model
+
+**CEO decision, 2026-07-20 (verbatim):** *"an author may edit. Other users with shared links can copy workflow to their library for editing."*
+
+### 12.1 What this settles
+
+**Single-owner editing.** The author of a workflow may edit their own SOP. Nobody else edits it in place.
+
+**Copy-on-share, not shared-edit.** A share-link recipient cannot mutate the original. They copy the workflow into their own library and edit their copy. The `WorkflowShare.permission` enum already carries an `editor` member (`schema.prisma:550-566`); under this model `editor` is **not** wired to in-place SOP mutation. Either leave it unused or repurpose it explicitly — do not let its existence imply a capability the model rejects.
+
+**Consequences that fall out, all favourable:**
+- No concurrent multi-user editing of one document. This retires the CRDT question permanently rather than deferring it (§1 rejected CRDT for v1; this rejects it structurally).
+- No merge-of-two-humans problem. The only merge is generated-vs-overlay, which §4 already solves.
+- The overlay log has exactly one author per document, so `authorId` is effectively constant per `sopId`. Keep the column — it is required for audit and costs nothing — but no reconciliation logic is needed.
+
+### 12.2 Approval — the part that was implied, stated explicitly
+
+In a single-owner model the only person who *can* approve is the author. So: **the author approves their own SOP.**
+
+This must be recorded honestly rather than quietly. It means **there is no separation of duties**, and separation of duties is precisely what ISO 9001 clause 7.5.2 requires — the SOP domain expert's framing was "author ≠ approver" (`SOP_BUILDER_REVIEW_001.md` §1, §3). A self-approved document does not satisfy that clause.
+
+That is very likely the **correct product decision** for the current buyer — self-serve, $49–$799, individual-to-small-team — and the domain expert was explicit that regulated ceremony should not be built without a named regulated customer (`SOP_BUILDER_REVIEW_001.md` §9 item 6). The decision is sound. What must not happen is the *status vocabulary* claiming more than the mechanism delivers.
+
+**Therefore the approval state is `author-approved`, not `approved`.** The `SOPApprovalStatus` union (shipped in step 2a, `packages/process-engine/src/types.ts`) widens to:
+
+```ts
+export type SOPApprovalStatus = 'unapproved' | 'author-approved';
+```
+
+Not `'approved'`. The label is the honest one, it will not have to be walked back if a reviewer-role model ships later, and it is consistent with the discipline this whole workstream is built on: a field must not assert a control that does not exist. When a second-party review model ships, `'approved'` becomes a distinct third member with a real approver — not a redefinition of this one.
+
+### 12.3 Copy provenance — new, and it needs a rule
+
+The copy-on-share model raises a question no prior proposal covered, because the model was not known when they were written.
+
+When user B copies user A's workflow, the copied SOP's steps carry `sourceRawEventId` anchors pointing into **A's** captured bundle. B has no access to that evidence. So B's copy is evidence-linked to evidence B does not hold and cannot regenerate from.
+
+Three options, and only one is honest:
+1. **Copy claims evidence-linkage silently** — the exact failure mode this entire workstream exists to eliminate. Rejected.
+2. **Copy strips anchors and becomes plain authored content** — honest, but discards the differentiator and makes the copy strictly less useful than the original for no gain.
+3. **Copy carries provenance, explicitly marked as inherited.** ✅
+
+**Rule:** a copied SOP retains its anchors and its evidence-linkage claim, and carries an explicit marker that the underlying evidence belongs to the original author and is not locally held. It is **not regenerable** in the copier's library — regeneration requires the source bundle, which is not transferred. Any UI asserting "evidence-linked" on a copy must render the inherited-provenance marker alongside it.
+
+**A's overlays travel with the copy, with A's attribution intact.** If A corrected step 4, B's copy shows that correction attributed to A, not silently absorbed as B's own. B's subsequent edits are attributed to B. The overlay log is append-only, so this is the natural behaviour rather than special handling.
+
+This interacts with **OD-5** (unrecoverable evidence) and with **B-4** in `SOP_BUILDER_REVIEW_001.md`: a copy is a *deliberate, known* instance of the unrecoverable-evidence case, so it should use the same marker vocabulary rather than inventing a second one.
+
+### 12.4 Still open
+
+`versionNumber` is unblocked. **OD-1, OD-2, OD-4, OD-5, OD-6 remain open**, each with the overridable default recorded in §11.
