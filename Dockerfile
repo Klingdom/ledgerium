@@ -109,6 +109,29 @@ COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY scripts/docker-start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
+# ── Backup/restore tooling (docs/runbooks/DATABASE_BACKUP_RESTORE.md) ────────
+# Baked into this same image (not a separate build) so the `backup` compose
+# service (see compose.hostinger.yaml / compose.hostinger-deploy.yaml) can
+# run these scripts on a schedule without depending on host-level cron
+# configuration — that dependency is exactly why these scripts existed in
+# the repo but were never actually running anywhere. `web` never invokes
+# any of this; only the `backup` service's command/entrypoint does.
+#
+#   sqlite  -> provides the `sqlite3` CLI  (db-backup.sh / db-restore.sh)
+#   tar     -> full GNU tar, not just the busybox applet — evidence-backup.sh
+#              / evidence-restore.sh rely on `-T` (files-from); see the
+#              runbook's "tar is a new prerequisite" note
+#   age     -> optional backup encryption (AGE_RECIPIENT / AGE_IDENTITY)
+#   aws-cli -> off-host S3-compatible upload/download. This is the dominant
+#              size cost of this layer (Python 3 + botocore's per-service
+#              JSON definitions) — see the PR/iteration notes for the
+#              measured delta. Accepted deliberately per the "same image,
+#              no second build" decision.
+RUN apk add --no-cache sqlite tar age aws-cli
+
+COPY scripts/db-backup.sh scripts/db-restore.sh scripts/evidence-backup.sh scripts/evidence-restore.sh scripts/backup-cron-entrypoint.sh /app/scripts/
+RUN chmod +x /app/scripts/db-backup.sh /app/scripts/db-restore.sh /app/scripts/evidence-backup.sh /app/scripts/evidence-restore.sh /app/scripts/backup-cron-entrypoint.sh
+
 # Create persistent data directory and set ownership.
 # RCA-1 fix: also chown the .next/ build output so the `nextjs` non-root
 # user can write the incremental cache at runtime. Without this, Next.js

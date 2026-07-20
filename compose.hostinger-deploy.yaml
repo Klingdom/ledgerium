@@ -16,6 +16,36 @@ services:
       UPLOAD_DIR: /app/data/uploads
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?NEXTAUTH_SECRET must be set}
       NEXTAUTH_URL: https://ledgerium.ai
+
+  # ── Off-host backup sidecar (docs/runbooks/DATABASE_BACKUP_RESTORE.md) ────
+  # See compose.hostinger.yaml for the full rationale comment (same-image
+  # sidecar running scripts/backup-cron-entrypoint.sh on an hourly cron
+  # schedule; AWS/AGE credentials live only here, never on `web`; runs as
+  # root — deliberate, see compose.hostinger.yaml).
+  backup:
+    image: ghcr.io/klingdom/ledgerium:latest
+    pull_policy: always
+    container_name: ledgerium-backup
+    restart: unless-stopped
+    user: root
+    command: ["/app/scripts/backup-cron-entrypoint.sh"]
+    volumes:
+      - ledgerium-data:/app/data
+    environment:
+      DATABASE_FILE: /app/data/ledgerium.db
+      UPLOAD_DIR: /app/data/uploads
+      # See compose.hostinger.yaml — redirected off /tmp so the
+      # incremental evidence marker survives container recreation.
+      BACKUP_TMP_DIR: /app/data/.backup-tmp
+      BACKUP_S3_URI: ${BACKUP_S3_URI:-}
+      UPLOADS_BACKUP_S3_URI: ${UPLOADS_BACKUP_S3_URI:-}
+      BACKUP_S3_ENDPOINT: ${BACKUP_S3_ENDPOINT:-}
+      AGE_RECIPIENT: ${AGE_RECIPIENT:-}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      BACKUP_RETAIN_LOCAL: ${BACKUP_RETAIN_LOCAL:-3}
+    healthcheck:
+      disable: true
 volumes:
   ledgerium-data:
     driver: local

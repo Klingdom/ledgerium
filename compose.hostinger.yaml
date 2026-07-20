@@ -57,6 +57,66 @@ services:
     networks:
       - proxy-net
 
+  # ── Off-host backup sidecar (docs/runbooks/DATABASE_BACKUP_RESTORE.md) ────
+  # Same image as `web`; overrides the command to run
+  # scripts/backup-cron-entrypoint.sh, which schedules scripts/db-backup.sh
+  # (this in turn always runs scripts/evidence-backup.sh first — see that
+  # script's header for why) hourly via cron, plus a monthly evidence
+  # full-rebaseline. This is a compose service — not a host crontab entry —
+  # specifically because a step depending on manual host configuration is
+  # what left backups undeployed before this change; see the runbook's
+  # "Why the old posture was unsafe".
+  #
+  # AWS/AGE credentials are set ONLY on this service, never on `web` — `web`
+  # never needs off-host storage or decryption access.
+  #
+  # Deliberately NOT on `proxy-net`: this service makes outbound-only calls
+  # to the S3-compatible endpoint and never needs to be reached by, or reach,
+  # the reverse proxy / umami / umami-db. It gets Compose's implicit default
+  # project network for normal internet egress instead, so it never shares a
+  # network with the reverse-proxy-facing services unless that's added later
+  # on purpose.
+  #
+  # Runs as root, overriding the image's default `nextjs` user: this is a
+  # deliberate, flagged trade-off — busybox crond's ownership/setuid model
+  # for its default spool dir is unambiguous as root, and a manual restore
+  # (`docker exec ledgerium-backup sh scripts/db-restore.sh ... CONFIRM`)
+  # needs to write safety-copy files under /app/data regardless of which
+  # user owns the existing files there. This container is not
+  # network-exposed and only ever executes the first-party scripts baked
+  # into this image at build time, so it does not carry the same blast-radius
+  # concern that motivates `web` running as non-root.
+  backup:
+    image: ghcr.io/klingdom/ledgerium:latest
+    pull_policy: always
+    container_name: ledgerium-backup
+    restart: unless-stopped
+    user: root
+    command: ["/app/scripts/backup-cron-entrypoint.sh"]
+    volumes:
+      - ledgerium-data:/app/data
+    environment:
+      - DATABASE_FILE=/app/data/ledgerium.db
+      - UPLOAD_DIR=/app/data/uploads
+      # Redirected onto the persistent volume (not /tmp) so
+      # evidence-backup.sh's incremental marker + locally-retained dumps
+      # survive this container being recreated on every image
+      # pull/redeploy. /tmp would otherwise silently force a full evidence
+      # re-archive every deploy, defeating the incremental design.
+      - BACKUP_TMP_DIR=/app/data/.backup-tmp
+      - BACKUP_S3_URI=${BACKUP_S3_URI:-}
+      - UPLOADS_BACKUP_S3_URI=${UPLOADS_BACKUP_S3_URI:-}
+      - BACKUP_S3_ENDPOINT=${BACKUP_S3_ENDPOINT:-}
+      - AGE_RECIPIENT=${AGE_RECIPIENT:-}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      - BACKUP_RETAIN_LOCAL=${BACKUP_RETAIN_LOCAL:-3}
+    # The image's HEALTHCHECK probes the Next.js server, which does not run
+    # in this container — disable it so `docker compose ps` doesn't show a
+    # permanently "(unhealthy)" sidecar that is actually working correctly.
+    healthcheck:
+      disable: true
+
   # ── Self-hosted Umami analytics (D-1 decision: self-hosted on Hostinger VPS)
   # Umami runs as its own sidecar on port 3001 (host) → 3000 (container).
   # It uses a dedicated Postgres instance (umami-db) on the same proxy-net.
