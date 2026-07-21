@@ -22,6 +22,13 @@ services:
   # sidecar running scripts/backup-cron-entrypoint.sh on an hourly cron
   # schedule; AWS/AGE credentials live only here, never on `web`; runs as
   # root — deliberate, see compose.hostinger.yaml).
+  #
+  # `ledgerium-backups` (/backups, THIS SERVICE ONLY — `web` does not mount
+  # it) is a dedicated volume for local backup scratch space, off the data
+  # volume so `docker volume rm ledgerium-data` can no longer take local-only
+  # backups down with it. See compose.hostinger.yaml's `backup` service
+  # comment + `volumes:` comment for what this does and does not protect
+  # against (real but partial — not a substitute for off-host storage).
   backup:
     image: ghcr.io/klingdom/ledgerium:latest
     pull_policy: always
@@ -31,12 +38,18 @@ services:
     command: ["/app/scripts/backup-cron-entrypoint.sh"]
     volumes:
       - ledgerium-data:/app/data
+      - ledgerium-backups:/backups
     environment:
       DATABASE_FILE: /app/data/ledgerium.db
       UPLOAD_DIR: /app/data/uploads
-      # See compose.hostinger.yaml — redirected off /tmp so the
-      # incremental evidence marker survives container recreation.
-      BACKUP_TMP_DIR: /app/data/.backup-tmp
+      # See compose.hostinger.yaml — on the dedicated ledgerium-backups
+      # volume, not /app/data (off the data volume) and not /tmp (so the
+      # incremental evidence marker survives container recreation).
+      BACKUP_TMP_DIR: /backups
+      # On the DATA volume (not /backups) — `web` mounts ledgerium-data and
+      # needs to read this; it does NOT mount ledgerium-backups. See
+      # compose.hostinger.yaml + docs/runbooks/DATABASE_BACKUP_RESTORE.md.
+      BACKUP_STATUS_FILE: /app/data/.backup-status.json
       BACKUP_S3_URI: ${BACKUP_S3_URI:-}
       UPLOADS_BACKUP_S3_URI: ${UPLOADS_BACKUP_S3_URI:-}
       BACKUP_S3_ENDPOINT: ${BACKUP_S3_ENDPOINT:-}
@@ -48,4 +61,9 @@ services:
       disable: true
 volumes:
   ledgerium-data:
+    driver: local
+  # See compose.hostinger.yaml `volumes:` comment for the full rationale
+  # (protects against ledgerium-data volume loss/corruption; does NOT
+  # protect against host/disk loss — that needs off-host storage).
+  ledgerium-backups:
     driver: local

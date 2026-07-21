@@ -129,8 +129,8 @@ RUN chmod +x /app/start.sh
 #              no second build" decision.
 RUN apk add --no-cache sqlite tar age aws-cli
 
-COPY scripts/db-backup.sh scripts/db-restore.sh scripts/evidence-backup.sh scripts/evidence-restore.sh scripts/backup-cron-entrypoint.sh /app/scripts/
-RUN chmod +x /app/scripts/db-backup.sh /app/scripts/db-restore.sh /app/scripts/evidence-backup.sh /app/scripts/evidence-restore.sh /app/scripts/backup-cron-entrypoint.sh
+COPY scripts/db-backup.sh scripts/db-restore.sh scripts/evidence-backup.sh scripts/evidence-restore.sh scripts/backup-cron-entrypoint.sh scripts/backup-status-write.sh /app/scripts/
+RUN chmod +x /app/scripts/db-backup.sh /app/scripts/db-restore.sh /app/scripts/evidence-backup.sh /app/scripts/evidence-restore.sh /app/scripts/backup-cron-entrypoint.sh /app/scripts/backup-status-write.sh
 
 # Create persistent data directory and set ownership.
 # RCA-1 fix: also chown the .next/ build output so the `nextjs` non-root

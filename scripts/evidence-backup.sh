@@ -44,6 +44,8 @@
 #   AGE_RECIPIENT                age public key; if set, archive is encrypted — shared with db-backup.sh
 #   BACKUP_RETAIN_LOCAL          keep N local archives in BACKUP_TMP_DIR (default: 3)
 #   UPLOADS_BACKUP_FORCE_FULL    set to 1 to force a full archive even if a marker exists (default: unset)
+#   BACKUP_STATUS_FILE           status JSON path (default: /app/data/.backup-status.json)
+#                                 — see scripts/backup-status-write.sh for the contract
 #
 # Usage:  sh scripts/evidence-backup.sh
 # Cron :  invoked by scripts/db-backup.sh (do not schedule this standalone
@@ -57,8 +59,37 @@ MARKER="${TMP_DIR}/.ledgerium-uploads-backup-marker"
 
 log() { echo "[evidence-backup] $*"; }
 
-[ -d "$SRC_DIR" ] || { log "FATAL: evidence dir not found at $SRC_DIR"; exit 1; }
-command -v tar >/dev/null 2>&1 || { log "FATAL: tar not installed"; exit 1; }
+# ── Status file wiring — see scripts/backup-status-write.sh for the JSON
+# contract. Uses an EXIT trap (same pattern already used by
+# scripts/evidence-restore.sh's cleanup trap) so a status entry is written on
+# every exit path — the early "nothing new to archive" success exit, the
+# FATAL early-exits, and the final `[ "$UPLOAD_OK" = "1" ] || exit 1` failure
+# exit — without altering any of the archive/encrypt/upload logic itself.
+STATUS_WRITER="$(dirname "$0")/backup-status-write.sh"
+ATTEMPT_ISO="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+STATUS_DURABLE=0
+STATUS_COUNT=""
+STATUS_ERROR=""
+note_error() { STATUS_ERROR="$1"; }
+write_backup_status() {
+  CODE=$?
+  if [ -f "$STATUS_WRITER" ]; then
+    if [ "$CODE" -eq 0 ]; then
+      sh "$STATUS_WRITER" evidence "$ATTEMPT_ISO" success "$STATUS_DURABLE" "" "$STATUS_COUNT" \
+        || log "WARNING: status file write failed (non-fatal — backup result above is unaffected)"
+    else
+      sh "$STATUS_WRITER" evidence "$ATTEMPT_ISO" failure 0 "${STATUS_ERROR:-command failed (exit $CODE) - see backup logs above}" "" \
+        || log "WARNING: status file write failed (non-fatal)"
+    fi
+  else
+    log "WARNING: $STATUS_WRITER not found — status file not updated this cycle"
+  fi
+  exit "$CODE"
+}
+trap write_backup_status EXIT
+
+[ -d "$SRC_DIR" ] || { log "FATAL: evidence dir not found at $SRC_DIR"; note_error "evidence dir not found at $SRC_DIR"; exit 1; }
+command -v tar >/dev/null 2>&1 || { log "FATAL: tar not installed"; note_error "tar not installed"; exit 1; }
 
 # 1) Decide full vs incremental. A marker file's mtime is the cutoff: we
 #    include every file strictly newer than it. No marker (or forced) = full.
@@ -86,6 +117,15 @@ if [ ! -s "$FILELIST" ]; then
   log "no new evidence bundles since last backup ($MODE scan) — nothing to archive"
   mv "$RUN_MARKER_TMP" "$MARKER"
   rm -f "$FILELIST"
+  # Genuine success with nothing new produced this cycle. durable reflects
+  # current config (off-host destination reachable in principle), recomputed
+  # fresh since it costs nothing; archiveCount is left as PRESERVE — a "0
+  # files this cycle" housekeeping run must not overwrite the real count from
+  # the last cycle that actually archived something.
+  if [ -n "${UPLOADS_BACKUP_S3_URI:-}" ] && command -v aws >/dev/null 2>&1; then
+    STATUS_DURABLE=1
+  fi
+  STATUS_COUNT="PRESERVE"
   log "done ($TS), marker advanced, 0 files"
   exit 0
 fi
@@ -105,10 +145,17 @@ rm -f "$FILELIST"
 LISTED_COUNT="$(tar -tf "$ARCHIVE" | wc -l | tr -d ' ')"
 if [ "$LISTED_COUNT" != "$FILE_COUNT" ]; then
   log "FATAL: archive listing ($LISTED_COUNT entries) does not match input file count ($FILE_COUNT); aborting"
+  note_error "archive listing ($LISTED_COUNT entries) does not match input file count ($FILE_COUNT)"
   rm -f "$ARCHIVE" "$RUN_MARKER_TMP"
   exit 1
 fi
 log "integrity check ok ($LISTED_COUNT entries, $(wc -c < "$ARCHIVE") bytes)"
+# This cycle's produced file count — reported to the status file as
+# archiveCount on success, regardless of what happens to it next (upload
+# success/failure below). If the subsequent upload fails, the overall run
+# fails and the writer preserves the OLD archiveCount instead (see
+# scripts/backup-status-write.sh: failure outcomes never apply this value).
+STATUS_COUNT="$FILE_COUNT"
 
 # 3) Optional encryption (age) — same key material as db-backup.sh. Evidence
 #    is captured workplace process data; it must not be weaker-protected
@@ -137,8 +184,10 @@ if [ -n "${UPLOADS_BACKUP_S3_URI:-}" ] && command -v aws >/dev/null 2>&1; then
   if aws s3 cp $EP "$UPLOAD" "${UPLOADS_BACKUP_S3_URI}/$(basename "$UPLOAD")"; then
     log "uploaded to ${UPLOADS_BACKUP_S3_URI}/$(basename "$UPLOAD")"
     UPLOAD_OK=1
+    STATUS_DURABLE=1
   else
     log "WARNING: upload FAILED — marker will NOT advance; this file set will be retried next run"
+    note_error "off-host upload failed to ${UPLOADS_BACKUP_S3_URI} (see logs above for aws CLI output)"
   fi
 else
   log "WARNING: UPLOADS_BACKUP_S3_URI/aws not configured — evidence backup is LOCAL ONLY (not durable)"

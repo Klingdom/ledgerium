@@ -86,6 +86,19 @@ services:
   # network-exposed and only ever executes the first-party scripts baked
   # into this image at build time, so it does not carry the same blast-radius
   # concern that motivates `web` running as non-root.
+  #
+  # `ledgerium-backups` (mounted at /backups, THIS SERVICE ONLY — `web` does
+  # not mount it) holds the scratch archives BACKUP_TMP_DIR writes before/
+  # instead of off-host upload, plus evidence-backup.sh's incremental
+  # marker. It used to be a subdirectory of ledgerium-data
+  # (/app/data/.backup-tmp) — i.e. co-located with the data it protects,
+  # which is the exact P0 this runbook exists to close (see "Why the old
+  # posture was unsafe"): `docker volume rm ledgerium-data` destroyed the
+  # data AND every local-only backup together. Moving BACKUP_TMP_DIR onto
+  # its own volume fixes that specific failure mode WITHOUT requiring the
+  # S3 credentials below to be configured — see the runbook for exactly
+  # what this does and does not protect against; it is a real but partial
+  # improvement, not a substitute for off-host storage.
   backup:
     image: ghcr.io/klingdom/ledgerium:latest
     pull_policy: always
@@ -95,15 +108,25 @@ services:
     command: ["/app/scripts/backup-cron-entrypoint.sh"]
     volumes:
       - ledgerium-data:/app/data
+      - ledgerium-backups:/backups
     environment:
       - DATABASE_FILE=/app/data/ledgerium.db
       - UPLOAD_DIR=/app/data/uploads
-      # Redirected onto the persistent volume (not /tmp) so
-      # evidence-backup.sh's incremental marker + locally-retained dumps
-      # survive this container being recreated on every image
-      # pull/redeploy. /tmp would otherwise silently force a full evidence
-      # re-archive every deploy, defeating the incremental design.
-      - BACKUP_TMP_DIR=/app/data/.backup-tmp
+      # On the dedicated ledgerium-backups volume (see the service comment
+      # above), not /app/data and not /tmp: off the data volume so a
+      # `docker volume rm ledgerium-data` cannot take local-only scratch
+      # copies down with it, and NOT /tmp so evidence-backup.sh's
+      # incremental marker + locally-retained dumps still survive this
+      # container being recreated on every image pull/redeploy (/tmp would
+      # silently force a full evidence re-archive every deploy, defeating
+      # the incremental design).
+      - BACKUP_TMP_DIR=/backups
+      # Read by scripts/db-backup.sh and scripts/evidence-backup.sh; written
+      # onto the DATA volume (not /backups) because `web` mounts
+      # ledgerium-data and needs to read it, but does NOT mount
+      # ledgerium-backups — see docs/runbooks/DATABASE_BACKUP_RESTORE.md
+      # "Status file (backup health tile)".
+      - BACKUP_STATUS_FILE=/app/data/.backup-status.json
       - BACKUP_S3_URI=${BACKUP_S3_URI:-}
       - UPLOADS_BACKUP_S3_URI=${UPLOADS_BACKUP_S3_URI:-}
       - BACKUP_S3_ENDPOINT=${BACKUP_S3_ENDPOINT:-}
@@ -169,6 +192,27 @@ services:
 
 volumes:
   ledgerium-data:
+    driver: local
+  # Dedicated volume for local-only backup scratch space (see the `backup`
+  # service comment above). Separate from ledgerium-data for the same reason
+  # umami-db-data is separate below: `docker volume rm ledgerium-data` must
+  # not take this down with it. Mounted on the `backup` service ONLY — `web`
+  # has no entry for it in its own `volumes:` list, so the internet-facing
+  # container has no path to these archives even if compromised.
+  #
+  # What this volume DOES protect against: `docker volume rm
+  # ledgerium-data`, application-level corruption of the data volume, or an
+  # accidental `rm -rf` inside it — a copy now survives on a separate volume
+  # even before any off-host (S3/R2/B2) credentials are configured.
+  #
+  # What this volume does NOT protect against: loss of the host itself, disk
+  # failure, or anything that takes the whole VPS down — both Docker volumes
+  # live on the same physical disk. That is what off-host storage
+  # (BACKUP_S3_URI / UPLOADS_BACKUP_S3_URI, see the runbook's "One-time
+  # setup") is for, and this volume is not a substitute for it — it is a
+  # real but partial improvement, safe to ship before those credentials
+  # exist, not a claim that this system has off-site backups.
+  ledgerium-backups:
     driver: local
   # Dedicated volume for Umami's Postgres data. Separate from ledgerium-data
   # so `docker volume rm ledgerium-data` does not affect analytics history.
