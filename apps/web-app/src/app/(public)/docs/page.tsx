@@ -3,9 +3,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Workflow Recorder Documentation — SOP Generator User Guide | Ledgerium',
+  title: 'Workflow Recorder Documentation — User Guide | Ledgerium',
   description:
-    'Complete guide to the Ledgerium AI workflow recorder and automated SOP generator. Learn how to record browser workflows, generate SOPs, process maps, and use analytics.',
+    'Complete guide to the Ledgerium AI workflow recorder and automated SOP generator. Learn to record workflows, generate SOPs and process maps, and use analytics.',
+  alternates: { canonical: '/docs' },
   openGraph: {
     title: 'Workflow Recorder Documentation — SOP Generator User Guide | Ledgerium',
     description:

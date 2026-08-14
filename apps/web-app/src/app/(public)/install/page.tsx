@@ -22,7 +22,8 @@ import {
 export const metadata: Metadata = {
   title: 'Install Chrome Extension Workflow Recorder — Ledgerium AI',
   description:
-    'Install the Ledgerium AI Chrome extension workflow recorder in 2 minutes. Record browser workflows automatically and generate SOPs, process maps, and process documentation instantly.',
+    'Install the Ledgerium AI Chrome extension workflow recorder in 2 minutes. Record browser workflows and generate SOPs and process maps instantly.',
+  alternates: { canonical: '/install' },
   openGraph: {
     title: 'Install Chrome Extension Workflow Recorder — Ledgerium AI',
     description:

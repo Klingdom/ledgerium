@@ -17,7 +17,12 @@ import {
 export const metadata: Metadata = {
   title: 'Scribe Alternative: Ledgerium vs Scribe Comparison | Ledgerium AI',
   description:
-    'Scribe alternative for teams who need deterministic process data, not AI-inferred maps. Compare Ledgerium vs Scribe (including Optimize): evidence-linked capture vs screenshots and AI process mining.',
+    'Scribe alternative for teams who need deterministic process data, not AI-inferred maps — evidence-linked capture vs. screenshots and AI process mining.',
+  // Reserved-slug hand-built page coexisting with the registry's programmatic
+  // /compare/[slug] route. `isReservedSlug()` (lib/seo/validate.ts) prevents any
+  // registry `compare` page from claiming slug "scribe", so this canonical is
+  // guaranteed self-referential and never collides with a registry-generated one.
+  alternates: { canonical: '/compare/scribe' },
   openGraph: {
     title: 'Scribe Alternative: Ledgerium vs Scribe Comparison | Ledgerium AI',
     description:

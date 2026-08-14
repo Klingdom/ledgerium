@@ -6,7 +6,8 @@ import { SITE_CONFIG } from '@/lib/config';
 export const metadata: Metadata = {
   title: 'Privacy Policy — Ledgerium AI Chrome Extension Workflow Recorder',
   description:
-    'Privacy policy for the Ledgerium AI workflow recorder Chrome extension. No screenshots, no keystroke logging. Learn exactly what data is collected and how it is protected.',
+    'Privacy policy for the Ledgerium AI workflow recorder Chrome extension. No screenshots, no keystroke logging — see exactly what data is collected and protected.',
+  alternates: { canonical: '/privacy' },
   openGraph: {
     title: 'Privacy Policy — Ledgerium AI Chrome Extension Workflow Recorder',
     description:

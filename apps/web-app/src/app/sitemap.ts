@@ -19,8 +19,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     // Compare
     { url: `${baseUrl}/compare/scribe`, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${baseUrl}/comparisons`, changeFrequency: 'monthly', priority: 0.7 },
 
     // Resources
+    { url: `${baseUrl}/methodology`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${baseUrl}/docs`, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${baseUrl}/blog`, changeFrequency: 'weekly', priority: 0.7 },
     {

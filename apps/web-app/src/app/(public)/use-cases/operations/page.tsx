@@ -21,9 +21,10 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Operations Process Documentation — SOP Tool for Ops Teams | Ledgerium',
+  title: 'Operations Process Documentation — SOP Tool | Ledgerium',
   description:
-    'Operations process documentation that captures real ERP and CRM workflows automatically. Generate SOPs for ops teams from browser recordings — no interviews or workshops.',
+    'Operations process documentation that captures real ERP and CRM workflows automatically. Generate SOPs for ops teams from browser recordings, no interviews.',
+  alternates: { canonical: '/use-cases/operations' },
   openGraph: {
     title: 'Operations Process Documentation — SOP Tool for Ops Teams | Ledgerium',
     description:

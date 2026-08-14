@@ -5,7 +5,8 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 export const metadata: Metadata = {
   title: 'Why Your SOPs Are Already Outdated — Ledgerium AI',
   description:
-    "Most process documentation is written from memory, not observation. Here's why that matters — and what to do about it.",
+    "Most process documentation is written from memory, not observation. Here's why that matters, and what you should do differently going forward.",
+  alternates: { canonical: '/blog/why-your-sops-are-already-outdated' },
 };
 
 export default function SopsOutdatedPost() {

@@ -17,9 +17,10 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Process Documentation for AI Automation & Workflow Data for AI Agents | Ledgerium',
+  title: 'Process Documentation for AI Automation & AI Agents | Ledgerium',
   description:
-    'Capture real workflow data for AI agents before you automate. Process documentation for AI automation that gives your agents ground truth — not assumed or written-from-memory SOPs.',
+    'Capture real workflow data for AI agents before you automate. Process documentation for AI automation that gives agents ground truth, not assumed SOPs.',
+  alternates: { canonical: '/use-cases/ai-implementation' },
   openGraph: {
     title: 'Process Documentation for AI Automation — Workflow Data for AI Agents | Ledgerium',
     description:

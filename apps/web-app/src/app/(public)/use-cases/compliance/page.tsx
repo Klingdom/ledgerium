@@ -14,9 +14,10 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Compliance Process Documentation — SOC 2 & ISO 27001 Evidence | Ledgerium',
+  title: 'Compliance Process Documentation — SOC 2 & ISO 27001 | Ledgerium',
   description:
-    'Compliance process documentation with traceable evidence. Generate SOC 2 audit evidence and ISO 27001 documentation automatically from real browser workflow recordings.',
+    'Compliance process documentation with traceable evidence. Generate SOC 2 audit evidence and ISO 27001 documentation from real browser workflow recordings.',
+  alternates: { canonical: '/use-cases/compliance' },
   openGraph: {
     title: 'Compliance Process Documentation — SOC 2 & ISO 27001 Evidence | Ledgerium',
     description:

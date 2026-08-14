@@ -3,9 +3,10 @@ import Link from 'next/link';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: "Screenshot Tools vs. Structured Capture: What's the Difference? — Ledgerium AI",
+  title: "Screenshot Tools vs. Structured Capture: What's the Difference?",
   description:
     'Scribe and Tango give you annotated screenshots. Structured capture gives you process data with timing and system context. Here is why that distinction matters.',
+  alternates: { canonical: '/blog/screenshot-tools-vs-structured-capture' },
   openGraph: {
     type: 'article',
     title: "Screenshot Tools vs. Structured Capture: What's the Difference?",

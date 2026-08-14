@@ -16,9 +16,10 @@ import {
 import { SITE_CONFIG } from '@/lib/config';
 
 export const metadata: Metadata = {
-  title: 'Privacy-Safe Workflow Recorder — Secure Process Documentation | Ledgerium',
+  title: 'Privacy-Safe Workflow Recorder — Secure Documentation | Ledgerium',
   description:
-    'Privacy-safe workflow recorder with no screenshots, no keystrokes, and no background recording. Secure process documentation built on a trust-first, data-minimization architecture.',
+    'Privacy-safe workflow recorder with no screenshots, no keystrokes, and no background recording — built on a trust-first, data-minimization architecture.',
+  alternates: { canonical: '/security' },
   openGraph: {
     title: 'Privacy-Safe Workflow Recorder — Secure Process Documentation | Ledgerium',
     description:

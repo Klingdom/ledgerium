@@ -7,9 +7,10 @@ import { ROICalculator } from './ROICalculator';
 import { TrackedLink } from '@/components/TrackedLink';
 
 export const metadata: Metadata = {
-  title: 'Record Once. Know Everything. — Process Intelligence Pricing | Ledgerium',
+  title: 'Process Intelligence Pricing — Ledgerium AI',
   description:
-    'Free plan available. One Chrome extension captures every workflow and turns it into AI-generated SOPs, process maps, variation analysis, and automation candidates. Plans from $49/mo.',
+    'Free plan available. One Chrome extension captures every workflow and turns it into AI-generated SOPs, process maps, and variation analysis. Plans from $49/mo.',
+  alternates: { canonical: '/pricing' },
   openGraph: {
     title: 'Record Once. Know Everything. — Process Intelligence Pricing | Ledgerium',
     description:

@@ -5,7 +5,8 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 export const metadata: Metadata = {
   title: 'Capture Before You Automate — Ledgerium AI',
   description:
-    'Teams are deploying AI agents into processes they have never measured. The observation layer is the missing foundation. Why you should capture before you automate.',
+    'Teams are deploying AI agents into processes they have never measured. The observation layer is the missing foundation before you automate anything.',
+  alternates: { canonical: '/blog/capture-before-you-automate' },
   openGraph: {
     type: 'article',
     title: 'Capture Before You Automate',

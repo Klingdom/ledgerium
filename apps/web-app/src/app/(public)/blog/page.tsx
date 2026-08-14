@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: 'Process Documentation & SOP Automation Blog — Ledgerium AI',
   description:
     'Insights on automated SOP generation, process documentation, workflow recording, and evidence-based operations from the Ledgerium AI team.',
+  alternates: { canonical: '/blog' },
   openGraph: {
     title: 'Process Documentation & SOP Automation Blog — Ledgerium AI',
     description:

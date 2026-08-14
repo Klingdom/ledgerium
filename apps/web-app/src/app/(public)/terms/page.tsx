@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: 'Terms of Service — Ledgerium AI Workflow Recorder & SOP Platform',
   description:
     'Terms of Service for the Ledgerium AI platform, workflow recorder Chrome extension, and automated SOP generator. Clear, fair terms for process documentation.',
+  alternates: { canonical: '/terms' },
   openGraph: {
     title: 'Terms of Service — Ledgerium AI Workflow Recorder & SOP Platform',
     description:

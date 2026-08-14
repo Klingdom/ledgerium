@@ -5,7 +5,8 @@ import { ArrowRight, Eye, Shield, Zap, Target, BookOpen, CheckCircle, Camera, Se
 export const metadata: Metadata = {
   title: 'About Ledgerium AI — Automated SOP Generator & Workflow Recorder',
   description:
-    'Ledgerium AI builds evidence-based process intelligence. We capture how work actually happens in the browser to generate accurate SOPs, process maps, and workflow documentation.',
+    'Ledgerium AI builds evidence-based process intelligence. We capture how work actually happens in the browser to generate accurate SOPs and process maps.',
+  alternates: { canonical: '/about' },
   openGraph: {
     title: 'About Ledgerium AI — Automated SOP Generator & Workflow Recorder',
     description:

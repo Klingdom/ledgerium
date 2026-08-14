@@ -17,6 +17,7 @@ export const metadata: Metadata = {
   title: 'Support — Ledgerium AI Workflow Recorder & SOP Generator',
   description:
     'Get help with the Ledgerium AI workflow recorder and automated SOP generator. Find user guides, troubleshooting steps, billing help, and contact options.',
+  alternates: { canonical: '/support' },
   openGraph: {
     title: 'Support — Ledgerium AI Workflow Recorder & SOP Generator',
     description:

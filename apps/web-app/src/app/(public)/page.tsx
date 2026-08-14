@@ -20,9 +20,10 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Ledgerium AI — Record Real Workflows. Get SOPs, Process Maps & AI Insights.',
+  title: 'Ledgerium AI — Record Real Workflows, Get SOPs & Process Maps',
   description:
-    'Record how work actually happens in the browser. Get structured SOPs and process maps, see which workflows are ready for AI, and turn expert work into training docs — in minutes, not weeks.',
+    'Record how work actually happens in the browser. Get structured SOPs and process maps, and see which workflows are ready for AI — in minutes, not weeks.',
+  alternates: { canonical: '/' },
   openGraph: {
     title: 'Ledgerium AI — Record Real Workflows. Get SOPs, Process Maps & AI Insights.',
     description:

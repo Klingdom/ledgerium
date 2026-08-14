@@ -3,9 +3,10 @@ import Link from 'next/link';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'What Is Process Intelligence? A Practical Definition — Ledgerium AI',
+  title: 'What Is Process Intelligence? A Practical Definition',
   description:
-    'Process intelligence turns observed work into a measurable, improvable model. A practical definition, how it differs from documentation and process mining, and where to start.',
+    'Process intelligence turns observed work into a measurable, improvable model. A practical definition and how it differs from documentation and process mining.',
+  alternates: { canonical: '/blog/what-is-process-intelligence' },
   openGraph: {
     type: 'article',
     title: 'What Is Process Intelligence? A Practical Definition',
