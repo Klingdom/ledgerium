@@ -96,7 +96,11 @@ export interface NormalizationResult {
 // Constants
 // ---------------------------------------------------------------------------
 
-export const NORMALIZATION_RULE_VERSION = '1.0.0' as const;
+// v1.1.0 (F-1 privacy fix): page_context.url is now populated with the
+// screened origin+routeTemplate value instead of the raw URL, and
+// deriveRouteTemplate() gained a compound-slug parameterization rule
+// (see url-normalizer.ts). See docs/invariants.md §6.
+export const NORMALIZATION_RULE_VERSION = '1.1.0' as const;
 
 export const RAW_TO_CANONICAL_TYPE: Record<string, string> = {
   // Navigation
@@ -231,8 +235,11 @@ function buildPageContext(
   const domain = extractDomain(normalizedUrl || rawUrl);
 
   let pathname = '';
+  let origin = '';
   try {
-    pathname = new URL(normalizedUrl || rawUrl).pathname;
+    const parsed = new URL(normalizedUrl || rawUrl);
+    pathname = parsed.pathname;
+    origin = parsed.origin;
   } catch {
     // best-effort
   }
@@ -240,8 +247,15 @@ function buildPageContext(
   const routeTemplate = deriveRouteTemplate(pathname);
   const applicationLabel = deriveApplicationLabel(domain);
 
+  // F-1 privacy fix: `url` previously carried the raw URL (including
+  // unscreened entity-bearing path slugs) verbatim, even though no
+  // consumer reads this field. It is now populated with origin + the
+  // already-screened routeTemplate, so it can never leak more than
+  // routeTemplate deliberately exposes.
+  const screenedUrl = origin !== '' ? `${origin}${routeTemplate}` : '';
+
   return {
-    url: rawUrl,
+    url: screenedUrl,
     urlNormalized: normalizedUrl,
     domain,
     routeTemplate,

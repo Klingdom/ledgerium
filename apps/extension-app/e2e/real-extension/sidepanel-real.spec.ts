@@ -47,6 +47,8 @@ import { test, expect, chromium } from '@playwright/test';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
+import http from 'http';
+import type { AddressInfo } from 'net';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -82,6 +84,113 @@ function extensionIdFromSwUrl(swUrl: string): string {
     );
   }
   return match[1];
+}
+
+// ─── Helper: local HTTP fixture server (real capture-pipeline validation) ─────
+//
+// Content scripts are declared in manifest.json with `"matches": ["<all_urls>"]`
+// (see manifest.json:15). `<all_urls>` expands to http(s)/file/ftp schemes — it
+// does NOT include `data:` URLs, and `file://` requires the
+// "Allow access to file URLs" extension toggle, which is OFF by default and
+// cannot be flipped from a fresh unpacked-extension profile in this harness.
+// A real local HTTP server is therefore the only reliable way to get a page
+// that Chrome will genuinely content-script-inject into, using only Node
+// built-ins (no new dependency).
+//
+// The <title> below is the EXACT canonical PII string already used by this
+// repo's own PII-screening unit tests (safe-page-title.test.ts:41,
+// live-steps.test.ts:152) — an email address embedded mid-string, which is
+// the case the unanchored EMAIL regex in free-text-screen.ts exists to catch.
+
+const FIXTURE_PAGE_TITLE = 'Inbox (3) – phil@mediafier.ai';
+
+const FIXTURE_HTML = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>${FIXTURE_PAGE_TITLE}</title>
+</head>
+<body>
+  <h1>Ledgerium real-extension capture fixture</h1>
+  <button id="test-action-button">Do the thing</button>
+  <input id="test-text-input" type="text" placeholder="type here" />
+</body>
+</html>`;
+
+/**
+ * Starts a minimal local HTTP server serving FIXTURE_HTML on an ephemeral
+ * port, reached via the `localhost` hostname. `deriveAppLabel()`
+ * (shared/utils.ts:47-48) special-cases `hostname === 'localhost'` to
+ * return the constant `'Local Dev'` — so if the PII-laden fixture title is
+ * correctly rejected, the safe fallback value is deterministic and
+ * assertable, not just "some non-PII string".
+ */
+function startFixtureServer(): Promise<{ url: string; close: () => Promise<void> }> {
+  return new Promise((resolve, reject) => {
+    const server = http.createServer((_req, res) => {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(FIXTURE_HTML);
+    });
+    server.on('error', reject);
+    server.listen(0, '127.0.0.1', () => {
+      const address = server.address() as AddressInfo | null;
+      if (!address) {
+        reject(new Error('Fixture HTTP server failed to bind to a port.'));
+        return;
+      }
+      resolve({
+        url: `http://localhost:${address.port}/`,
+        close: () => new Promise<void>(res2 => server.close(() => res2())),
+      });
+    });
+  });
+}
+
+// ─── Helper: read chrome.storage.local from the real background SW ────────────
+//
+// Session events are persisted under a session-scoped key by SessionStore
+// (background/session-store.ts). The exact key/shape (verified by reading
+// that file, not guessed):
+//   STORAGE_KEY_SESSION               = 'ledgerium_active_session'
+//     -> SessionMeta, including `sessionId`
+//   STORAGE_KEY_SESSION_EVENTS_PREFIX = 'ledgerium_active_session_events_'
+//     -> STORAGE_KEY_SESSION_EVENTS_PREFIX + sessionId ->
+//        { persistSchemaVersion, rawEvents, canonicalEvents, policyLog, liveSteps }
+// (see shared/constants.ts:13,31 and session-store.ts's PersistedSessionEvents
+// interface). The literals are duplicated here rather than imported from
+// src/shared/constants.ts to keep this harness self-contained and free of
+// any runtime import from production source — this file is test code only.
+
+const STORAGE_KEY_SESSION = 'ledgerium_active_session';
+const STORAGE_KEY_SESSION_EVENTS_PREFIX = 'ledgerium_active_session_events_';
+
+type LedgeriumExtensionContext = Awaited<ReturnType<typeof chromium.launchPersistentContext>>;
+type ServiceWorkerHandle = ReturnType<LedgeriumExtensionContext['serviceWorkers']>[number];
+
+/**
+ * Reads a single key out of chrome.storage.local by evaluating inside the
+ * REAL background service worker's execution context (not a mock). Returns
+ * `undefined` if the key is not present.
+ */
+async function readStorageValue<T>(sw: ServiceWorkerHandle, key: string): Promise<T | undefined> {
+  return sw.evaluate((storageKey: string) => {
+    return new Promise<unknown>(resolve => {
+      // `chrome` is a real global inside the extension service worker's own
+      // execution context (this callback runs there, not in this Node file).
+      // @ts-ignore -- e2e/** is intentionally outside tsconfig's `include`.
+      chrome.storage.local.get([storageKey], (result: Record<string, unknown>) => {
+        resolve(result[storageKey]);
+      });
+    });
+  }, key) as Promise<T | undefined>;
+}
+
+interface PersistedSessionMetaShape {
+  sessionId?: string;
+}
+
+interface PersistedSessionEventsShape {
+  rawEvents?: Array<Record<string, unknown>>;
 }
 
 // ─── Test 1: Extension loads and sidepanel mounts ─────────────────────────────
@@ -229,33 +338,48 @@ test('extension loads and sidepanel mounts with Ready badge (real chrome APIs)',
 // that the real background/sidepanel message protocol works end-to-end on
 // real Chrome APIs without any mocking.
 //
-// STABILITY NOTE:
-//   The real SW startup can be slow on Windows (up to 2-3 seconds for the
-//   service worker to become active after extension load).  The SW must also
-//   complete handleStart() which queries chrome.tabs and calls chrome.alarms —
-//   both are real Chrome APIs.  If this test is flaky on first run on your
-//   platform, see the .skip version below.
+// RE-ENABLED (iter following 070) — root cause of the original skip, verified:
 //
-// Skip rationale: On Windows with Playwright's bundled Chromium, the real SW
-// may not have stable chrome.tabs.query results in a freshly-launched context
-// (no real tabs may be active). handleStart() defensively handles this but the
-// timing can vary. Marking as skip-if-flaky on first try; re-enable after
-// verifying SW startup sequence on target platform.
+//   The ORIGINAL skip comment theorised that
+//   chrome.tabs.query({ active: true, lastFocusedWindow: true }) inside
+//   handleStart() (background/index.ts) could return an empty array on a
+//   freshly-launched context, adding "timing variance to the 'recording'
+//   state broadcast" and causing flakiness.
+//
+//   That theory does not hold up under inspection of handleStart()'s actual
+//   control flow: sm.transition('recording') + store.updateState('recording')
+//   + broadcastStateUpdate() (background/index.ts ~line 224-226) all run
+//   BEFORE the chrome.tabs.query() call (~line 232). The 'Recording' badge
+//   and "Recording Active" banner this test asserts on are driven entirely
+//   by that broadcast — they do not depend on the tab query's result at all.
+//   Confirmed empirically: this test, un-skipped with ZERO code changes,
+//   passed 4/4 consecutive runs (0 retries) prior to the fix below being
+//   applied.
+//
+//   The REAL defect in the original test was a design gap, not a flake: the
+//   test only ever opened ONE page — the sidepanel itself (a
+//   chrome-extension:// tab) — so a real content tab was NEVER the active
+//   tab when Start Recording was clicked. chrome.tabs.query({active:true})
+//   could only ever resolve to the sidepanel's own tab (or, if a default
+//   about:blank tab from launchPersistentContext happened to still be
+//   active, nothing capture-relevant). That meant chrome.scripting.
+//   executeScript() (injectIntoTab) and the START_SESSION tabs.sendMessage
+//   in handleStart() were being aimed at a tab that could never receive
+//   them — invisible to this test's assertions, but exactly the kind of gap
+//   that let iter-097/iter-099-class regressions ship with green tests.
+//
+//   FIX: open and focus a real HTTP page FIRST, then re-focus it (via
+//   bringToFront()) immediately before clicking Start Recording — so a real
+//   content tab is genuinely `tab.active === true` at the moment handleStart()
+//   runs its chrome.tabs.query(). Playwright can still interact with the
+//   (backgrounded) sidepanel page via CDP regardless of which tab is
+//   frontmost, so this does not require juggling focus mid-interaction.
+//
+//   This test still only validates STATE-MACHINE plumbing (badge / banner
+//   text), not that captured events actually reach storage — see the new
+//   real-capture-pipeline test below for that.
 
-test.skip('real start-session round-trip: sidepanel → SW → recording state (real chrome APIs)', async () => {
-  // NOTE: This test is skipped on first ship (iter 070) due to Windows platform
-  // variability in real SW startup timing with Playwright's bundled Chromium.
-  //
-  // To re-enable: remove the .skip() and verify on your target platform.
-  // The test logic below is complete and correct — it's a platform-stability
-  // gating decision, not a code defect.
-  //
-  // Flake suspicion: chrome.tabs.query({ active: true, lastFocusedWindow: true })
-  // in handleStart() (background/index.ts:193) may return an empty array in a
-  // freshly-launched launchPersistentContext where no real tab has focus.
-  // handleStart() handles this gracefully (no inject if no active tab) but the
-  // sequence adds timing variance to the 'recording' state broadcast.
-
+test('real start-session round-trip: sidepanel → SW → recording state (real chrome APIs)', async () => {
   if (!fs.existsSync(DIST_PATH)) {
     throw new Error(`Extension dist not found at: ${DIST_PATH}`);
   }
@@ -265,8 +389,11 @@ test.skip('real start-session round-trip: sidepanel → SW → recording state (
   );
 
   let context: Awaited<ReturnType<typeof chromium.launchPersistentContext>> | null = null;
+  let fixtureServer: Awaited<ReturnType<typeof startFixtureServer>> | null = null;
 
   try {
+    fixtureServer = await startFixtureServer();
+
     context = await chromium.launchPersistentContext(profileDir, {
       headless: false,
       args: [
@@ -290,10 +417,22 @@ test.skip('real start-session round-trip: sidepanel → SW → recording state (
       extensionId = extensionIdFromSwUrl(sw.url());
     }
 
+    // ── Open + focus a real content page FIRST (the fix) ─────────────────────
+    const contentPage = await context.newPage();
+    await contentPage.goto(fixtureServer.url, { waitUntil: 'domcontentloaded' });
+    await contentPage.waitForSelector('#test-action-button', { timeout: 10_000 });
+
     const sidepanelUrl = `chrome-extension://${extensionId}/${SIDEPANEL_RELATIVE}`;
     const page = await context.newPage();
     await page.goto(sidepanelUrl, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('#root > *', { timeout: REACT_MOUNT_TIMEOUT_MS });
+
+    // Opening the sidepanel as a new tab makes IT the active tab by default —
+    // re-focus the real content page so it is genuinely `tab.active === true`
+    // when Start Recording is clicked below. Interacting with `page` (the
+    // sidepanel) below still works even though it is not the frontmost tab:
+    // Playwright drives it directly over its own CDP session.
+    await contentPage.bringToFront();
 
     // Confirm idle state first.
     const badge = page.locator('header .badge');
@@ -310,20 +449,23 @@ test.skip('real start-session round-trip: sidepanel → SW → recording state (
     // The REAL background SW's handleStart() must:
     //   1. Transition SM: idle → arming
     //   2. Broadcast SESSION_STATE_UPDATED { state: 'arming' }
-    //   3. Query chrome.tabs for the active tab
-    //   4. Transition SM: arming → recording
-    //   5. Broadcast SESSION_STATE_UPDATED { state: 'recording' }
+    //   3. Transition SM: arming → recording
+    //   4. Broadcast SESSION_STATE_UPDATED { state: 'recording' }
+    //   5. Query chrome.tabs for the active tab (now: contentPage) and inject
     //
     // The sidepanel receives SESSION_STATE_UPDATED via its onMessage listener
     // and updates React state, transitioning to RecordingScreen.
     //
-    // Generous 20_000ms timeout because real SW startup + tab query can be slow.
+    // Generous 20_000ms timeout because real SW startup can be slow.
     await expect(badge).toContainText('Recording', { timeout: 20_000 });
     await expect(page.getByText('Recording Active')).toBeVisible({ timeout: 12_000 });
 
   } finally {
     if (context) {
       await context.close();
+    }
+    if (fixtureServer) {
+      await fixtureServer.close();
     }
     await new Promise<void>((resolve) => setTimeout(resolve, 500));
     try {
@@ -341,16 +483,16 @@ test.skip('real start-session round-trip: sidepanel → SW → recording state (
 //     contains the persisted session meta (ledgerium_active_session key)
 //   - This validates the real MV3 storage layer that the static harness mocks
 //
-// STABILITY NOTE:
-//   Requires test 2's flow (real start-session) to complete successfully.
-//   Marked .skip() on first ship — re-enable alongside test 2 once the
-//   real start-session flow is confirmed stable on the target platform.
+// RE-ENABLED (iter following 070) — same root-cause finding as test 2 above:
+//   this test's assertions are on SessionStore.initSession()'s write of
+//   `ledgerium_active_session` meta (activityName / sessionId), which happens
+//   even earlier in handleStart() than the 'recording' state broadcast — well
+//   before the chrome.tabs.query() call the original skip comment blamed.
+//   Trivially unblocked: verified 3/3 consecutive passes (0 retries) with
+//   ZERO code changes, by removing .skip() alone. Left as originally written
+//   (no fixture-page fix needed — this test does not exercise tab injection).
 
-test.skip('real chrome.storage persistence: session meta persisted after start (real chrome APIs)', async () => {
-  // NOTE: Skipped on first ship (iter 070) — depends on real start-session
-  // round-trip being stable (same flake-risk as test 2).
-  // Remove .skip() to enable after verifying test 2 on target platform.
-
+test('real chrome.storage persistence: session meta persisted after start (real chrome APIs)', async () => {
   if (!fs.existsSync(DIST_PATH)) {
     throw new Error(`Extension dist not found at: ${DIST_PATH}`);
   }
@@ -426,6 +568,242 @@ test.skip('real chrome.storage persistence: session meta persisted after start (
   } finally {
     if (context) {
       await context.close();
+    }
+    await new Promise<void>((resolve) => setTimeout(resolve, 500));
+    try {
+      fs.rmSync(profileDir, { recursive: true, force: true });
+    } catch {
+      // Non-fatal.
+    }
+  }
+});
+
+// ─── Test 4: Real capture pipeline — event reaches storage, PII is screened ───
+//
+// This is the test the harness was missing. Tests 1-3 validate sidepanel UI
+// state and message-bus plumbing, but NONE of them prove that a real user
+// interaction on a real page ever produces a captured event that reaches the
+// background — which is precisely the failure mode of the two prior
+// regressions this file's header documents (iter 097 content_scripts removal,
+// iter 099 pageTitle signature change). Both shipped with 3890/3890-class
+// green unit tests; neither would have been caught by tests 1-3 either, since
+// none of them ever open a real content page or dispatch a real DOM event.
+//
+// Validates, end-to-end, on real Chrome APIs with zero mocking:
+//   1. CAPTURE WORKS AT ALL — a real click + real typed input on a real HTTP
+//      page, while a session is recording, produces at least one raw event
+//      that reaches chrome.storage.local via the full
+//      content-script -> RAW_EVENT_CAPTURED -> background -> SessionStore
+//      pipeline. Zero captured events is a hard failure with a message that
+//      names the pipeline stage, not a silent pass.
+//   2. THE PAGE TITLE IS PII-SCREENED — this branch's own privacy fix routes
+//      15 call sites in capture.ts through getSafePageTitle() instead of
+//      raw document.title. This test's fixture page's real <title> contains
+//      the canonical PII case from this repo's own unit tests
+//      ('Inbox (3) – phil@mediafier.ai'). We assert that PII never appears in
+//      any captured event's page_title (flat field) or context.pageTitle
+//      (nested field — both are set independently in capture.ts) AND that the
+//      captured click event's page_title equals the exact deterministic
+//      fallback value ('Local Dev', per deriveAppLabel('localhost')) — i.e.
+//      not just "no PII leaked", but "the correct screened value was used".
+//
+// If this test's PII assertions ever fail, it means the privacy fix on this
+// branch has a real gap that no unit test caught, because unit tests exercise
+// getSafePageTitle() / screenPageTitle() in isolation with jsdom-mocked
+// document.title — they cannot prove the 15 call sites in capture.ts are
+// actually wired to it in a real browser, on a real event, over the real
+// message bus.
+//
+// ACTIVE-TAB FIX: same pattern as test 2 — the fixture page is opened first
+// and re-focused via bringToFront() immediately before Start Recording is
+// clicked, so it is genuinely the active tab when handleStart() queries
+// chrome.tabs and injects the content script.
+
+test('real capture pipeline: a real click + typed input reach storage as PII-screened events (real chrome APIs)', async () => {
+  if (!fs.existsSync(DIST_PATH)) {
+    throw new Error(`Extension dist not found at: ${DIST_PATH}`);
+  }
+
+  const profileDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), 'ledgerium-real-ext-')
+  );
+
+  let context: Awaited<ReturnType<typeof chromium.launchPersistentContext>> | null = null;
+  let fixtureServer: Awaited<ReturnType<typeof startFixtureServer>> | null = null;
+
+  try {
+    fixtureServer = await startFixtureServer();
+
+    context = await chromium.launchPersistentContext(profileDir, {
+      headless: false,
+      args: [
+        `--disable-extensions-except=${DIST_PATH}`,
+        `--load-extension=${DIST_PATH}`,
+        '--disable-infobars',
+        '--no-first-run',
+        '--no-default-browser-check',
+      ],
+    });
+
+    // ── Resolve the extension ID + get a handle on the real background SW ────
+    // We need the SW handle (not just its URL) later, to evaluate() inside
+    // its execution context and read chrome.storage.local directly.
+    let sw: ServiceWorkerHandle;
+    const existingSws = context.serviceWorkers();
+    if (existingSws.length > 0) {
+      sw = existingSws[0]!;
+    } else {
+      sw = await context.waitForEvent('serviceworker', { timeout: SW_STARTUP_TIMEOUT_MS });
+    }
+    const extensionId = extensionIdFromSwUrl(sw.url());
+
+    // ── Open + focus the real content page FIRST ──────────────────────────────
+    // No real page was ever opened at all in the pre-existing tests 2/3 — this
+    // is the fix (see file-header comment on test 2 for the verified diagnosis).
+    const contentPage = await context.newPage();
+    await contentPage.goto(fixtureServer.url, { waitUntil: 'domcontentloaded' });
+    await contentPage.waitForSelector('#test-action-button', { timeout: 10_000 });
+    // Sanity check on the fixture itself, independent of the extension: if
+    // this ever fails, the bug is in this test file, not the extension.
+    await expect(contentPage).toHaveTitle(FIXTURE_PAGE_TITLE);
+
+    // ── Open the sidepanel in a second tab ────────────────────────────────────
+    const sidepanelUrl = `chrome-extension://${extensionId}/${SIDEPANEL_RELATIVE}`;
+    const sidepanel = await context.newPage();
+    await sidepanel.goto(sidepanelUrl, { waitUntil: 'domcontentloaded' });
+    await sidepanel.waitForSelector('#root > *', { timeout: REACT_MOUNT_TIMEOUT_MS });
+
+    // Re-focus the real content page so it is `tab.active === true` when
+    // Start Recording is clicked below (opening the sidepanel as a new tab
+    // made IT active by default). Interacting with `sidepanel` below still
+    // works even though it is not the frontmost tab — Playwright drives it
+    // over its own CDP session regardless of tab-strip focus.
+    await contentPage.bringToFront();
+
+    const badge = sidepanel.locator('header .badge');
+    await expect(badge).toContainText('Ready', { timeout: 12_000 });
+
+    await sidepanel.locator('#activity-name').fill('real capture pipeline test');
+    const startBtn = sidepanel.getByRole('button', { name: 'Start Recording' });
+    await expect(startBtn).toBeEnabled();
+    await startBtn.click();
+
+    await expect(badge).toContainText('Recording', { timeout: 20_000 });
+
+    // ── Resolve the session id from real storage ──────────────────────────────
+    // SessionStore.initSession() writes this synchronously (before the
+    // 'recording' broadcast even fires), so it is available as soon as the
+    // badge shows 'Recording'.
+    const sessionMeta = await readStorageValue<PersistedSessionMetaShape>(sw, STORAGE_KEY_SESSION);
+    if (!sessionMeta?.sessionId) {
+      throw new Error(
+        'No active session meta found in chrome.storage.local after Start Recording. ' +
+        'SessionStore.initSession() never wrote ' + STORAGE_KEY_SESSION + ' — capture ' +
+        'cannot be validated because there is no session to attribute events to.'
+      );
+    }
+    const eventsKey = STORAGE_KEY_SESSION_EVENTS_PREFIX + sessionMeta.sessionId;
+
+    // ── Interact with the real page and poll storage for a captured event ────
+    //
+    // handleStart() injects the content script into the active tab and sends
+    // START_SESSION with a deliberate ~100ms delay after injection (see
+    // background/index.ts comment at that call site) to let the freshly
+    // injected module's onMessage listener register. Rather than hard-code
+    // that (or any other) magic number as a fixed sleep, we retry the click
+    // itself inside expect.poll() until a raw event appears in storage: if
+    // the very first click lands before capture is actually armed on the
+    // page, it is silently dropped by design (isCapturing() guard in
+    // capture.ts) and the next poll iteration clicks again. This is a
+    // waitFor-style assertion, not a fixed-duration sleep, and it fails fast
+    // (at the poll timeout) rather than masking a real break with a long wait.
+    let rawEvents: Array<Record<string, unknown>> = [];
+    await expect.poll(async () => {
+      await contentPage.locator('#test-action-button').click({ timeout: 2_000 }).catch(() => {});
+      const persisted = await readStorageValue<PersistedSessionEventsShape>(sw, eventsKey);
+      rawEvents = persisted?.rawEvents ?? [];
+      return rawEvents.length;
+    }, {
+      timeout: 15_000,
+      message:
+        'ZERO raw events reached chrome.storage.local after repeatedly clicking a real button ' +
+        'on a real page during an active recording session. This means the capture pipeline ' +
+        '(content script -> RAW_EVENT_CAPTURED message bus -> background -> SessionStore) is ' +
+        'broken end-to-end -- exactly the class of regression this test exists to catch ' +
+        '(see CLAUDE.md "Extension Reliability Invariant", known regressions: iter 097 ' +
+        'content_scripts removal, iter 099 pageTitle signature change).',
+    }).toBeGreaterThan(0);
+
+    // Also exercise the debounced text-input capture path (captureDebouncedInput
+    // in capture.ts, INPUT_DEBOUNCE_MS = 300ms) for a second, independent
+    // event type. Capture is confirmed armed at this point (the poll above
+    // already succeeded), so no retry-loop is needed here — just a poll for
+    // the event count to grow, which absorbs the debounce delay without a
+    // fixed sleep.
+    const rawEventCountBeforeInput = rawEvents.length;
+    await contentPage.locator('#test-text-input').fill('some typed text, not PII');
+    await expect.poll(async () => {
+      const persisted = await readStorageValue<PersistedSessionEventsShape>(sw, eventsKey);
+      rawEvents = persisted?.rawEvents ?? [];
+      return rawEvents.length;
+    }, {
+      timeout: 8_000,
+      message: 'Typed input into a real <input> did not produce a new captured raw event.',
+    }).toBeGreaterThan(rawEventCountBeforeInput);
+
+    // ── Assertion 1: capture actually happened ────────────────────────────────
+    expect(rawEvents.length, 'expected at least one captured raw event in storage').toBeGreaterThan(0);
+
+    // ── Assertion 2: PII screening held on EVERY captured event, on BOTH
+    //    fields that carry the page title (capture.ts sets both independently:
+    //    the flat `page_title` on click/nav/input handlers, and the nested
+    //    `context.pageTitle` on every event via buildContext()) ─────────────
+    for (const event of rawEvents) {
+      const flatTitle = event['page_title'];
+      const contextObj = event['context'] as Record<string, unknown> | undefined;
+      const nestedTitle = contextObj?.['pageTitle'];
+
+      const fieldsToCheck: Array<[string, unknown]> = [
+        ['page_title', flatTitle],
+        ['context.pageTitle', nestedTitle],
+      ];
+
+      for (const [fieldName, value] of fieldsToCheck) {
+        if (typeof value !== 'string') continue; // field not set on this event type — nothing to check
+        const eventType = String(event['event_type']);
+
+        expect(
+          value.includes('@'),
+          `PII LEAK on captured "${eventType}" event, field "${fieldName}" = "${value}": ` +
+          'contains "@" -- the real document.title PII was not screened out before the ' +
+          'RawEvent left the content script.'
+        ).toBe(false);
+
+        expect(
+          value.includes('phil@mediafier.ai'),
+          `PII LEAK on captured "${eventType}" event, field "${fieldName}" = "${value}": ` +
+          'contains the raw PII email address from document.title verbatim.'
+        ).toBe(false);
+      }
+    }
+
+    // ── Assertion 3: the CORRECT safe fallback was used, not just "no PII" ───
+    // extractDomain('http://localhost:PORT/').hostname === 'localhost', and
+    // deriveAppLabel('localhost') deterministically returns 'Local Dev'
+    // (shared/utils.ts:47-48). If PII screening incorrectly rejected a benign
+    // title, or accepted the real PII title, this assertion would fail even
+    // if assertion 2 above happened to pass by accident.
+    const clickEvent = rawEvents.find(e => e['event_type'] === 'click');
+    expect(clickEvent, 'expected a captured "click" raw event for the button interaction').toBeTruthy();
+    expect(clickEvent?.['page_title']).toBe('Local Dev');
+    expect((clickEvent?.['context'] as Record<string, unknown> | undefined)?.['pageTitle']).toBe('Local Dev');
+
+  } finally {
+    if (context) {
+      await context.close();
+    }
+    if (fixtureServer) {
+      await fixtureServer.close();
     }
     await new Promise<void>((resolve) => setTimeout(resolve, 500));
     try {

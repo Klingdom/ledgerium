@@ -19,6 +19,7 @@ import type {
 } from '../shared/types.js'
 import { inspectTarget, isSensitiveTarget } from './target-inspector.js'
 import { StateObserver } from './state-observer.js'
+import { getSafePageTitle } from './safe-page-title.js'
 
 // Keys that signal intent and are worth capturing (all others ignored)
 const INTENT_KEYS = new Set(['Enter', 'Escape', 'Tab'])
@@ -201,7 +202,7 @@ export class CaptureEngine {
   }
 
   private attachHistoryListeners(): void {
-    const onPopState = () => this.captureNavigation(location.href, document.title, true)
+    const onPopState = () => this.captureNavigation(location.href, getSafePageTitle(), true)
     window.addEventListener('popstate', onPopState)
     this.cleanupFns.push(() => window.removeEventListener('popstate', onPopState))
 
@@ -210,11 +211,11 @@ export class CaptureEngine {
 
     history.pushState = (...args) => {
       origPush(...args)
-      this.captureNavigation(location.href, document.title, true)
+      this.captureNavigation(location.href, getSafePageTitle(), true)
     }
     history.replaceState = (...args) => {
       origReplace(...args)
-      this.captureNavigation(location.href, document.title, true)
+      this.captureNavigation(location.href, getSafePageTitle(), true)
     }
     this.cleanupFns.push(() => {
       history.pushState = origPush
@@ -261,7 +262,7 @@ export class CaptureEngine {
       event_type: 'click',
       url: clickUrl,
       url_normalized: normalizeUrl(clickUrl),
-      page_title: document.title,
+      page_title: getSafePageTitle(),
       target_selector: inspector.selector,
       target_label: inspector.label,
       target_role: inspector.role,
@@ -283,7 +284,7 @@ export class CaptureEngine {
       event_type: 'dblclick',
       url: dblClickUrl,
       url_normalized: normalizeUrl(dblClickUrl),
-      page_title: document.title,
+      page_title: getSafePageTitle(),
       target_selector: inspector.selector,
       target_label: inspector.label,
       target_role: inspector.role,
@@ -305,7 +306,7 @@ export class CaptureEngine {
         event_type: 'input_changed',
         url: inputUrl,
         url_normalized: normalizeUrl(inputUrl),
-        page_title: document.title,
+        page_title: getSafePageTitle(),
         target_element_type: (el as HTMLInputElement).type ?? el.tagName.toLowerCase(),
         is_sensitive_target: true,
         privacy: { valueRedacted: true, redactionReason: 'Sensitive field detected' },
@@ -320,7 +321,7 @@ export class CaptureEngine {
       event_type: 'input_changed',
       url: inputUrl,
       url_normalized: normalizeUrl(inputUrl),
-      page_title: document.title,
+      page_title: getSafePageTitle(),
       target_selector: inspector.selector,
       target_label: inspector.label,
       target_role: inspector.role,
@@ -352,7 +353,7 @@ export class CaptureEngine {
       event_type: 'input_changed',
       url: ceUrl,
       url_normalized: normalizeUrl(ceUrl),
-      page_title: document.title,
+      page_title: getSafePageTitle(),
       target_selector: inspector.selector,
       target_label: inspector.label,
       target_role: inspector.role,
@@ -379,7 +380,7 @@ export class CaptureEngine {
       event_type: 'form_submitted',
       url: sanitizedUrl,
       url_normalized: normalizeUrl(url),
-      page_title: document.title,
+      page_title: getSafePageTitle(),
     })
   }
 
@@ -398,7 +399,7 @@ export class CaptureEngine {
       event_type: 'keyboard_intent',
       url: kbUrl,
       url_normalized: normalizeUrl(kbUrl),
-      page_title: document.title,
+      page_title: getSafePageTitle(),
       keyboard_key: e.key,
       // KEYBOARD_INTENT_MAP is keyed on INTENT_KEYS values — the guard above ensures this is always defined
       keyboard_intent: KEYBOARD_INTENT_MAP[e.key] as 'submit' | 'close' | 'navigate',
@@ -427,7 +428,7 @@ export class CaptureEngine {
       event_type: 'drag_started',
       url: dragUrl,
       url_normalized: normalizeUrl(dragUrl),
-      page_title: document.title,
+      page_title: getSafePageTitle(),
       drag_source_selector: inspector.selector,
       target_selector: inspector.selector,
       target_label: inspector.label,
@@ -453,7 +454,7 @@ export class CaptureEngine {
       event_type: 'drag_completed',
       url: dragEndUrl,
       url_normalized: normalizeUrl(dragEndUrl),
-      page_title: document.title,
+      page_title: getSafePageTitle(),
       drag_source_selector: this.dragSourceSelector,
       ...(dropInspector ? { drag_target_selector: dropInspector.selector } : {}),
     })
@@ -474,7 +475,7 @@ export class CaptureEngine {
       event_type: 'context_menu',
       url: menuUrl,
       url_normalized: normalizeUrl(menuUrl),
-      page_title: document.title,
+      page_title: getSafePageTitle(),
       target_selector: inspector.selector,
       target_label: inspector.label,
       target_role: inspector.role,
@@ -518,7 +519,7 @@ export class CaptureEngine {
         event_type: 'input_changed',
         url: inputUrl,
         url_normalized: normalizeUrl(inputUrl),
-        page_title: document.title,
+        page_title: getSafePageTitle(),
         target_selector: inspector.selector,
         target_label: inspector.label,
         target_role: inspector.role,
@@ -570,7 +571,7 @@ export class CaptureEngine {
     return {
       url,
       urlNormalized: normalizeUrl(url),
-      pageTitle: document.title,
+      pageTitle: getSafePageTitle(),
       application,
     }
   }

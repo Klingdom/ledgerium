@@ -412,7 +412,7 @@ this document.
 | Constant | Value | File |
 |---|---|---|
 | `SCHEMA_VERSION` | `'1.0.0'` | `packages/schema-events/src/raw-event.schema.ts`, `apps/extension-app/src/shared/constants.ts` |
-| `NORMALIZATION_RULE_VERSION` | `'1.0.0'` | `packages/normalization-engine/src/normalizer.ts` |
+| `NORMALIZATION_RULE_VERSION` | `'1.1.0'` | `packages/normalization-engine/src/normalizer.ts` |
 | `SEGMENTATION_RULE_VERSION` | `'1.0.0'` | `packages/segmentation-engine/src/rules.ts`, `apps/extension-app/src/shared/constants.ts` |
 | `RECORDER_VERSION` | `'0.1.0'` | `apps/extension-app/src/shared/constants.ts` |
 | `RENDERER_VERSION` | `'0.1.0'` | `apps/extension-app/src/shared/constants.ts` |
