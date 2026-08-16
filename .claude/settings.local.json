@@ -306,7 +306,11 @@
       "Bash(cd C:/Users/philk/ledgerium/docs/meta/SEO_AEO_EXPANSION_001)",
       "Bash(sed -n '1,80p' architecture.md)",
       "Bash(sed -n '1,60p' growth.md)",
-      "Bash(awk '/Received/{f=1} f{print} /^ +\\\\]/{if\\(f\\)exit}')"
+      "Bash(awk '/Received/{f=1} f{print} /^ +\\\\]/{if\\(f\\)exit}')",
+      "Bash(awk -F, '$2>0')",
+      "Bash(sort -t, -k3 -rn)",
+      "Bash(awk -F, '$5<12 && $5>0')",
+      "Bash(sort -t, -k5 -n)"
     ]
   }
 }
