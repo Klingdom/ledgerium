@@ -55,4 +55,47 @@ describe('sitemap ↔ filesystem route parity (Gate A)', () => {
     const b = JSON.stringify(generateSeoSitemapEntries());
     expect(a).toBe(b);
   });
+
+  /**
+   * Closes the residual gap recorded in commit 3ab0832.
+   *
+   * The checks above iterate `PARENT_HUB`, but the sitemap actually emits hub
+   * URLs from `HUB_TYPES` × `ROUTE_PREFIX` (sitemap.ts:38-46) — a different
+   * source. The two agree today, but nothing enforced it: a `HUB_TYPES` entry
+   * whose `ROUTE_PREFIX` had no route file, or that was missing from
+   * `PARENT_HUB` entirely, would still have slipped through and reproduced the
+   * original `/answers` 404.
+   *
+   * These two assert on the sitemap's ACTUAL OUTPUT, so they hold regardless of
+   * which internal array drifts. Hub entries are identified structurally by
+   * `changeFrequency: 'weekly'` (leaves are 'monthly', sitemap.ts:51).
+   */
+  const hubEntries = () =>
+    generateSeoSitemapEntries().filter((e) => e.changeFrequency === 'weekly');
+
+  it('every hub URL the sitemap actually emits resolves to a page.tsx on disk', () => {
+    const entries = hubEntries();
+    expect(entries.length, 'expected the sitemap to emit at least one hub URL').toBeGreaterThan(0);
+
+    for (const entry of entries) {
+      const pathname = new URL(entry.url).pathname;
+      const routeFile = resolve(PUBLIC_APP_DIR, `.${pathname}`, 'page.tsx');
+      expect(existsSync(routeFile), `sitemap emits ${pathname} → no route at ${routeFile}`).toBe(
+        true,
+      );
+    }
+  });
+
+  it('HUB_TYPES and PARENT_HUB agree — every emitted hub URL is a known PARENT_HUB path', () => {
+    const knownHubPaths = new Set(HUB_ENTRIES.map(([, hub]) => hub.path));
+
+    for (const entry of hubEntries()) {
+      const pathname = new URL(entry.url).pathname;
+      expect(
+        knownHubPaths.has(pathname),
+        `sitemap emits hub ${pathname}, which is not a PARENT_HUB path — ` +
+          `HUB_TYPES/ROUTE_PREFIX has drifted from PARENT_HUB`,
+      ).toBe(true);
+    }
+  });
 });
