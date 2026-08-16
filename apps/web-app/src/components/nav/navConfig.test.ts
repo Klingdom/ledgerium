@@ -14,7 +14,7 @@ const STATIC_ROUTES = new Set<string>([
   '/use-cases/operations', '/use-cases/compliance', '/use-cases/ai-implementation',
   '/use-cases/personas', '/use-cases/problems',
   '/departments', '/industries',
-  '/workflow-library', '/sop-templates', '/ai-opportunities', '/software',
+  '/workflow-library', '/sop-templates', '/ai-opportunities', '/answers', '/software',
   '/comparisons', '/blog', '/docs', '/methodology', '/about', '/security', '/support',
 ]);
 

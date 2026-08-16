@@ -12,6 +12,7 @@ import {
   RelatedPagesGrid,
   FinalCta,
   KeyTakeaways,
+  DemoNote,
 } from './Blocks';
 import { FaqBlock } from './FaqBlock';
 
@@ -45,6 +46,7 @@ export function PersonaPageView({ page }: { page: PersonaPage }) {
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
+      <DemoNote location="persona_demo" />
       <FinalCta
         heading="Document your team's real workflows"
         body="Record a workflow once and turn it into an SOP, a process map, and an improvement report, generated from how the work actually happens."

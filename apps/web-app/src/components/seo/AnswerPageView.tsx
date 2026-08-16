@@ -13,6 +13,7 @@ import {
   RelatedPagesGrid,
   FinalCta,
   KeyTakeaways,
+  DemoProof,
 } from './Blocks';
 import { FaqBlock } from './FaqBlock';
 
@@ -142,6 +143,7 @@ export function AnswerPageView({ page }: { page: AnswerPage }) {
       />
       <DataPointCallout text={page.originalDataPoint} />
       <KeyTakeaways items={page.keyTakeaways} />
+      <DemoProof location="answer_demo" />
 
       <ProseSection title={`Definition: ${page.term}`}>
         <p>{page.definition}</p>

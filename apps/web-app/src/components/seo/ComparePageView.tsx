@@ -13,6 +13,7 @@ import {
   RelatedPagesGrid,
   FinalCta,
   KeyTakeaways,
+  BeforeYouDecide,
 } from './Blocks';
 import { FaqBlock } from './FaqBlock';
 
@@ -77,6 +78,7 @@ export function ComparePageView({ page }: { page: ComparePage }) {
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
+      <BeforeYouDecide pricingLocation="compare_pricing" demoLocation="compare_demo" />
       <FinalCta
         heading="Try Ledgerium free, 5 workflows, no credit card"
         body="Record your first workflow and get a structured SOP, a process map, and an intelligence report from real work, not memory."

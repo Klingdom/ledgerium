@@ -13,6 +13,7 @@ import {
   RelatedPagesGrid,
   FinalCta,
   KeyTakeaways,
+  DemoProof,
 } from './Blocks';
 import { FaqBlock } from './FaqBlock';
 
@@ -24,6 +25,7 @@ export function ProblemPageView({ page }: { page: ProblemPage }) {
       <SeoHero eyebrow={page.eyebrow} h1={page.h1} shortAnswer={page.shortAnswer} ctaLabel="Generate an SOP from a real workflow" location="problem_hero" author={page.author} updatedAt={page.updatedAt} />
       <DataPointCallout text={page.originalDataPoint} />
       <KeyTakeaways items={page.keyTakeaways} />
+      <DemoProof location="problem_demo" />
 
       <BulletList title="How to tell you have this problem" items={page.diagnostic} />
 

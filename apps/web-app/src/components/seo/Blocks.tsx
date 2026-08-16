@@ -11,6 +11,8 @@ import { PARENT_HUB } from '@/content/registry';
 import type { SeoPage } from '@/content/types';
 
 const SIGNUP = '/signup';
+const DEMO = '/demo';
+const PRICING = '/pricing';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -139,6 +141,109 @@ export function KeyTakeaways({ items }: { items?: readonly string[] | undefined 
             </li>
           ))}
         </ul>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Low-friction proof for the informational, top-of-funnel page types (answer +
+ * problem — the ~30 pages a reader lands on before they know Ledgerium exists,
+ * per `searchIntent: 'informational'`). The interactive demo requires no
+ * signup and no extension install, so it is offered before any harder ask —
+ * placed between the key takeaways and the first prose section so a skeptical
+ * reader can verify the claim before being asked to sign up
+ * (SEO_AEO_EFFECTIVENESS_REVIEW_001 §6 fix #2).
+ */
+export function DemoProof({ location }: { location: string }) {
+  return (
+    <section className="py-8 bg-[var(--surface-primary)]">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6">
+        <div className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-elevated)] px-6 py-5 flex flex-col sm:flex-row sm:items-center gap-4">
+          <p className="flex-1 text-sm text-[var(--content-secondary)] leading-relaxed">
+            <span className="font-semibold text-[var(--content-primary)]">See it before you read on.</span>{' '}
+            The interactive process map below is the real product, built from a real recording — no login required.
+          </p>
+          <TrackedLink
+            href={DEMO}
+            event="cta_clicked"
+            properties={{ location, destination: DEMO }}
+            className="btn-secondary text-sm px-5 py-2.5 whitespace-nowrap flex-shrink-0"
+          >
+            Try the live demo
+          </TrackedLink>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Single-line demo nudge for page types that are not tool-comparison and not
+ * purely informational (workflow, sopTemplate, industry, persona, department,
+ * aiOpportunity). A lower-commitment option next to the harder "Start free"
+ * ask, without competing with it visually (SEO_AEO_EFFECTIVENESS_REVIEW_001
+ * §6 fix #2).
+ */
+export function DemoNote({ location }: { location: string }) {
+  return (
+    <section className="py-6 bg-[var(--surface-primary)]">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
+        <p className="text-sm text-[var(--content-tertiary)]">
+          Not ready to sign up?{' '}
+          <TrackedLink
+            href={DEMO}
+            event="cta_clicked"
+            properties={{ location, destination: DEMO }}
+            className="text-brand-500 hover:text-brand-400 underline underline-offset-2 font-medium"
+          >
+            Try the live demo
+          </TrackedLink>{' '}
+          — no login required.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Pricing + demo pairing for the bottom-funnel, tool-comparison page types
+ * (compare / alternatives / competitors / software — all `searchIntent:
+ * 'commercial'`). These pages sell the intelligence layer (bottleneck
+ * detection, automation scoring, variation analysis) rhetorically but never
+ * said which plan includes it or linked to pricing — closes the promise/offer
+ * gap from SEO_AEO_EFFECTIVENESS_REVIEW_001 §6 fix #4. Placed just before the
+ * final ask, alongside a lower-commitment demo link.
+ */
+export function BeforeYouDecide({ pricingLocation, demoLocation }: { pricingLocation: string; demoLocation: string }) {
+  return (
+    <section className="py-10 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 space-y-3">
+        <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+          Free includes SOPs and process maps for 5 workflows a month. The intelligence layer — bottleneck
+          detection, automation scoring, variation analysis — is on paid plans.{' '}
+          <TrackedLink
+            href={PRICING}
+            event="cta_clicked"
+            properties={{ location: pricingLocation, destination: PRICING }}
+            className="text-brand-500 hover:text-brand-400 underline underline-offset-2 font-medium"
+          >
+            See what&apos;s included on each plan
+          </TrackedLink>
+          .
+        </p>
+        <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+          Not ready to sign up?{' '}
+          <TrackedLink
+            href={DEMO}
+            event="cta_clicked"
+            properties={{ location: demoLocation, destination: DEMO }}
+            className="text-brand-500 hover:text-brand-400 underline underline-offset-2 font-medium"
+          >
+            Try the live demo
+          </TrackedLink>{' '}
+          — no login required.
+        </p>
       </div>
     </section>
   );

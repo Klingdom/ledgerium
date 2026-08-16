@@ -12,6 +12,7 @@ import {
   RelatedPagesGrid,
   FinalCta,
   KeyTakeaways,
+  DemoNote,
 } from './Blocks';
 import { FaqBlock } from './FaqBlock';
 
@@ -41,6 +42,7 @@ export function AiOpportunityPageView({ page }: { page: AiOpportunityPage }) {
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
+      <DemoNote location="ai_demo" />
       <FinalCta
         heading="Find where AI can actually help"
         body="Record a workflow once and Ledgerium scores where AI and automation fit, from the real steps, so you target the costly work with evidence."

@@ -12,6 +12,7 @@ import {
   RelatedPagesGrid,
   FinalCta,
   KeyTakeaways,
+  DemoNote,
 } from './Blocks';
 import { FaqBlock } from './FaqBlock';
 
@@ -40,6 +41,7 @@ export function IndustryPageView({ page }: { page: IndustryPage }) {
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
+      <DemoNote location="industry_demo" />
       <FinalCta
         heading="Document your industry's workflows"
         body="Record each process once and turn it into an SOP, a process map, and an improvement report that matches how your team actually works."

@@ -12,6 +12,7 @@ import {
   RelatedPagesGrid,
   FinalCta,
   KeyTakeaways,
+  BeforeYouDecide,
 } from './Blocks';
 import { FaqBlock } from './FaqBlock';
 
@@ -50,6 +51,7 @@ export function SoftwarePageView({ page }: { page: SoftwarePage }) {
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
+      <BeforeYouDecide pricingLocation="software_pricing" demoLocation="software_demo" />
       <FinalCta
         heading={`Document a ${page.vendor} workflow from real work`}
         body="Record the real process in your own account and generate an SOP, a process map, and an intelligence report that matches what your team actually sees."

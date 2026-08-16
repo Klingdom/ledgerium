@@ -13,6 +13,7 @@ import {
   RelatedPagesGrid,
   FinalCta,
   KeyTakeaways,
+  DemoNote,
 } from './Blocks';
 import { FaqBlock } from './FaqBlock';
 
@@ -72,6 +73,7 @@ export function WorkflowPageView({ page }: { page: WorkflowPage }) {
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
+      <DemoNote location="workflow_demo" />
       <FinalCta
         heading="Capture this workflow once"
         body="Record the real process and turn it into an SOP, a process map, and an AI opportunity report, generated from how the work actually happens."

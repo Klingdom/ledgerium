@@ -21,7 +21,7 @@ export type NavItemId =
   // solutions · footer
   | 'sol_compare'
   // resources · templates & guides
-  | 'res_workflow_library' | 'res_sop_templates' | 'res_ai_opportunities'
+  | 'res_workflow_library' | 'res_sop_templates' | 'res_ai_opportunities' | 'res_answers'
   // resources · software
   | 'res_sw_salesforce' | 'res_sw_netsuite' | 'res_sw_sap' | 'res_sw_servicenow' | 'res_sw_jira' | 'res_sw_all'
   // resources · learn
@@ -132,6 +132,7 @@ const RESOURCES: NavMenu = {
         { id: 'res_workflow_library', label: 'Workflow Library', href: '/workflow-library' },
         { id: 'res_sop_templates', label: 'SOP Templates', href: '/sop-templates' },
         { id: 'res_ai_opportunities', label: 'AI Opportunities', href: '/ai-opportunities', badge: 'New' },
+        { id: 'res_answers', label: 'Definitions & Answers', href: '/answers' },
       ],
     },
     {
@@ -180,7 +181,7 @@ export const TOP_NAV: readonly NavTopItem[] = [
 export const MENU_PREFIXES: Record<NavMenuId, readonly string[]> = {
   solutions: ['/use-cases/', '/departments/', '/industries/'],
   resources: [
-    '/workflow-library', '/sop-templates', '/ai-opportunities', '/software',
+    '/workflow-library', '/sop-templates', '/ai-opportunities', '/answers', '/software',
     '/blog', '/docs', '/methodology', '/about', '/security', '/support', '/comparisons',
   ],
 };

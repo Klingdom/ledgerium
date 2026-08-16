@@ -12,6 +12,7 @@ import {
   RelatedPagesGrid,
   FinalCta,
   KeyTakeaways,
+  BeforeYouDecide,
 } from './Blocks';
 import { FaqBlock } from './FaqBlock';
 
@@ -62,6 +63,7 @@ export function AlternativesPageView({ page }: { page: AlternativesPage }) {
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
+      <BeforeYouDecide pricingLocation="alternatives_pricing" demoLocation="alternatives_demo" />
       <FinalCta
         heading="See the structured-data difference for yourself"
         body="Record one workflow free and get an SOP, a process map, and an intelligence report, generated from real work rather than screenshots."

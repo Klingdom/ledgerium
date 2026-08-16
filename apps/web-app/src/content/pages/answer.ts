@@ -28,7 +28,7 @@ const whatIsProcessIntelligence: AnswerPage = {
   mechanismIntro:
     'Ledgerium produces process intelligence by recording the real browser workflow — every click, system, and handoff with its timing — and computing a process map, cycle-time metrics, and improvement opportunities from that evidence rather than from a memory-written description.',
   keyTakeaways: [
-    'Process intelligence describes how a process actually executes, reconstructed from recorded interaction events rather than from interviews or memory.',
+    'Ledgerium reconstructs process intelligence deterministically: the same recorded execution always produces the same map and metrics, because each step is computed from a timestamped event rather than estimated from memory.',
     'It is distinct from a static process map: intelligence carries timing, systems, variants, and exceptions, so it can be measured and compared over time.',
     'Process mining and task mining are two techniques that feed process intelligence — mining event logs from systems, and observing the desktop/browser work itself.',
     'The core payoff is a current-state, evidence-based baseline: where time is lost, where variants diverge, and where automation would actually help.',
@@ -92,12 +92,13 @@ const whatIsProcessMining: AnswerPage = {
   originalDataPoint:
     'Because Ledgerium records the browser session directly, a single recorded workflow captures steps across unrelated systems — a CRM, a spreadsheet, an email client — in one continuous event stream, something a log-based process-mining export from any one of those systems alone cannot do.',
   mechanismIntro:
-    'Ledgerium complements process mining by capturing the browser-level actions a person takes during a workflow, producing an event stream even when the underlying systems do not emit clean, minable logs.',
+    'Ledgerium complements process mining by capturing the browser-level actions a person takes during a workflow, producing a timestamped event stream — reproducible from the same recording — even when the underlying systems do not emit clean, minable logs.',
   keyTakeaways: [
     'Process mining works from event logs already stored in systems like ERPs, ticketing tools, and CRMs — it does not require watching anyone do the work directly.',
     'The output is a process map built from timestamps and event sequences, so it shows the process as it actually ran, including rework and exceptions.',
     'Process mining needs systems that log structured, timestamped events; work that lives outside those systems — spreadsheets, email, desktop apps — is invisible to it.',
     'It differs from task mining, which observes the screen-level actions a person takes rather than the events a system records.',
+    'Ledgerium fills the gap process mining leaves: it timestamps each browser click and system as its own event, so work with no system log can still be reconstructed deterministically from the recording.',
   ],
   honestLimitation:
     "Ledgerium's approach is closer to task mining than classical process mining: it observes real browser and application activity directly rather than depending on IT systems having complete, well-structured event logs to mine.",
@@ -157,12 +158,13 @@ const processMiningVsTaskMining: AnswerPage = {
   originalDataPoint:
     "Ledgerium's recordings work like task mining, not process mining: every workflow captures the exact element clicked and the system it occurred in for each step, a level of interface detail no system-log export used for process mining ever contains.",
   mechanismIntro:
-    'Ledgerium sits on the task-mining side of this comparison: it records the actual clicks, systems, and timing of a workflow as it happens, which is how it captures cross-application work that a log-based process-mining export would miss.',
+    'Ledgerium sits on the task-mining side of this comparison: it records the actual clicks, systems, and timing of a workflow as it happens and timestamps each one, which is how it captures cross-application work that a log-based process-mining export would miss.',
   keyTakeaways: [
     'Process mining works from system-generated event logs; task mining works from directly observed screen activity — they capture the process from two different vantage points.',
     'Process mining needs a system that already logs structured, case-identified events. Task mining needs nothing from the underlying systems — it watches the user instead.',
     'Task mining sees cross-application, manual, and ad hoc work that process mining cannot, because that work never produces a loggable event in any single system.',
     'The two techniques are complementary, not competing: mature process-intelligence programs often combine system logs with observed activity for a complete picture.',
+    'Ledgerium is a task-mining implementation that timestamps every click and system change directly, so the same recorded run reconstructs identically each time it is reprocessed — the reproducibility a case-ID event log gives process mining, without needing one.',
   ],
   honestLimitation:
     "Ledgerium's recordings function like task mining — capturing real browser and application activity directly — rather than mining existing system event logs, so it will not surface historical process data from before a workflow was recorded.",
@@ -233,12 +235,13 @@ const whatIsTaskMining: AnswerPage = {
   originalDataPoint:
     "Ledgerium's task-mining recordings capture the exact element clicked and the system it occurred in for every step, which is what lets a workflow's automation-opportunity score be computed from real repetition patterns rather than a self-reported estimate of how often a task repeats.",
   mechanismIntro:
-    "Ledgerium performs task mining by recording the actual clicks, page changes, and timing of a person's browser session as the work happens, then converting that raw activity into a structured, timestamped sequence of steps.",
+    "Ledgerium performs task mining by recording the actual clicks, page changes, and timing of a person's browser session as the work happens, then converting that raw activity into a structured, timestamped sequence of steps — the same session always converts into the same sequence.",
   keyTakeaways: [
     'Task mining observes the user directly — clicks, keystrokes, and application switches — rather than reading event logs a system already stores.',
     'Because it watches the work itself, task mining captures manual, cross-application, and ad hoc steps that process mining cannot see.',
     'Task mining needs nothing from the underlying systems to already log events — it works even when the systems involved keep no usable logs at all.',
     'The output is typically an ordered sequence of observed actions, which can be grouped into steps and combined with timing to show cycle time and variation.',
+    "Ledgerium's task-mining recordings are structured, not just captured: each click carries a timestamp and system tag, so the same session reprocesses into the same ordered sequence every time — a deterministic record, not a subjective transcript.",
   ],
   honestLimitation:
     'Ledgerium observes browser-based work. Actions performed in native desktop applications outside the browser, or entirely on paper, are outside what its recordings can directly capture.',
@@ -304,6 +307,7 @@ const processMapVsFlowchart: AnswerPage = {
     'A process map applies that same diagram style specifically to a business process, and typically adds context like which system each step runs in.',
     'A hand-drawn process map shows the intended flow; a process map built from recorded execution data shows the real flow, including rework and exceptions a diagram alone would not reveal.',
     'The two terms are often used loosely, but the practical difference that matters is whether the map reflects the process as designed or as it actually ran.',
+    'Ledgerium generates the process map deterministically from recorded events, not by hand: the same recorded run always produces the same map, with each box traceable back to the click and timestamp that produced it.',
   ],
   honestLimitation:
     'Ledgerium generates process maps from recorded browser activity, so the map reflects the digital, browser-based portion of a workflow; steps that happen outside the browser are not automatically included.',
@@ -380,6 +384,7 @@ const whatIsAnSop: AnswerPage = {
     'SOPs typically include the purpose, who performs the task, the exact steps, and common exceptions — enough detail that someone unfamiliar with the task could follow it.',
     'An SOP describes how a task should be done; it is different from a process map, which shows how a broader process actually runs across steps and systems.',
     'SOPs written from memory tend to drift out of date as the real process changes, unless someone keeps updating them to match reality.',
+    'Ledgerium generates the procedure section of an SOP directly from one recorded run of the task — the same recording always produces the same ordered steps, so the document reflects observed work rather than a written-from-memory guess.',
   ],
   honestLimitation:
     'This page defines what an SOP is. For editable SOP templates for specific tasks, and for how Ledgerium generates an SOP from a recorded workflow, see the SOP template library rather than this definitional page.',
@@ -444,6 +449,7 @@ const whatIsADocumentWorkflow: AnswerPage = {
     'Most document workflows involve handoffs between people and multiple systems: a drafting tool, an email inbox, an approval system, a storage location.',
     'The steps a document workflow is supposed to follow and the steps it actually follows in practice often diverge, especially around approvals and exceptions.',
     'Document workflows are common across departments — invoices, contracts, expense reports, and onboarding paperwork are all examples of a document moving through a defined path.',
+    "Ledgerium reconstructs a document workflow's real path from recorded events, not from a policy diagram: each handoff carries a timestamp, so the same recorded document run always maps to the same sequence of systems and wait times.",
   ],
   honestLimitation:
     'This page defines what a document workflow is. For the concrete steps involved in documenting one, see the how-to guide on documenting a business process rather than this definitional page.',
@@ -508,6 +514,7 @@ const whatIsCycleTime: AnswerPage = {
     'Cycle time is different from active work time: a process can have low active effort but a long cycle time if it spends most of its elapsed time waiting.',
     'Accurate cycle time needs a timestamp for when each step actually started and ended — estimates based on memory tend to understate wait time significantly.',
     'Breaking cycle time down by step usually reveals that a small number of steps or handoffs account for most of the total elapsed time.',
+    "Ledgerium computes cycle time from millisecond-level event timestamps, not a stopwatch estimate: the same recorded run always sums to the same total, and each step's share of it is traceable back to its own start and end event.",
   ],
   honestLimitation:
     'Ledgerium measures cycle time from the timestamps in a recorded workflow, so the figure reflects the runs that were actually recorded; it does not retroactively estimate cycle time for work that happened before recording began.',

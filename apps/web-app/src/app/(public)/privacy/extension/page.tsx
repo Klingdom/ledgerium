@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: 'Extension Privacy Policy — Ledgerium AI Recorder',
   description:
     'Privacy policy for the Ledgerium AI Recorder Chrome extension. No screenshots, no keystroke logging, no background recording. See exactly what data is collected and why.',
+  alternates: { canonical: '/privacy/extension' },
   openGraph: {
     title: 'Extension Privacy Policy — Ledgerium AI Recorder',
     description:

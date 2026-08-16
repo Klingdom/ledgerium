@@ -12,6 +12,7 @@ import {
   RelatedPagesGrid,
   FinalCta,
   KeyTakeaways,
+  BeforeYouDecide,
 } from './Blocks';
 import { FaqBlock } from './FaqBlock';
 
@@ -68,6 +69,7 @@ export function CompetitorsPageView({ page }: { page: CompetitorsPage }) {
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
+      <BeforeYouDecide pricingLocation="competitors_pricing" demoLocation="competitors_demo" />
       <FinalCta
         heading="Try the structured-capture approach"
         body="Record one workflow free and see what measurable process data looks like next to a screenshot guide."

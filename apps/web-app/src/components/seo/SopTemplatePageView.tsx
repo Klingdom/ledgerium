@@ -14,6 +14,7 @@ import {
   RelatedPagesGrid,
   FinalCta,
   KeyTakeaways,
+  DemoNote,
 } from './Blocks';
 import { FaqBlock } from './FaqBlock';
 
@@ -223,6 +224,7 @@ export function SopTemplatePageView({ page }: { page: SopTemplatePage }) {
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
+      <DemoNote location="sop_demo" />
       <FinalCta
         heading="Generate this SOP from real work"
         body="Record the process once and Ledgerium writes the SOP from the actual steps, so it matches how your team really works."
