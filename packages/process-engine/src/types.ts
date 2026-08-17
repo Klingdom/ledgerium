@@ -7,7 +7,42 @@
  *
  * No UI, browser, or framework dependencies.
  *
- * Schema version: 1.2.0
+ * Schema version: 1.5.0
+ * Changes from 1.4.0:
+ *  - SOPInstruction gained `sourceRawEventId` — the capture-time
+ *    `raw_event_id`, sourced from
+ *    `CanonicalEventInput.normalization_meta.sourceEventId`. `sourceEventId`
+ *    (the canonical `event_id`) is kept alongside it, unchanged. See
+ *    docs/features/sop-authoring/OVERLAY_ARCHITECTURE_DECISION.md §4.2 —
+ *    this is the stable anchor a future overlay/authoring system needs;
+ *    `sourceEventId` alone is not stable across re-normalization.
+ *  - SOP gained `contentOrigin` (closed union, currently always
+ *    `'engine-derived'` — see `SOPContentOrigin`), a provenance stamp
+ *    required before any overlay/authoring write path can safely exist.
+ *    See ADR §9.
+ * Changes from 1.3.0:
+ *  - SOP.version is no longer a hardcoded literal. It is now a deterministic
+ *    content-identity composite `${engineVersion}+${contentHash.slice(0, 8)}`
+ *    (see ./contentHash.ts). Two regenerations from identical evidence at the
+ *    same engine version now correctly produce an identical version, instead
+ *    of every SOP the system has ever produced carrying the same string.
+ *  - SOP gained `engineVersion` (the PROCESS_ENGINE_VERSION that generated
+ *    this content), `contentHash` (the full deterministic fingerprint), and
+ *    `approvalStatus` (closed union, currently always `'unapproved'` — there
+ *    is no approval workflow yet, so the document says so honestly instead
+ *    of implying one). `generatedAt` is unchanged in value (still sourced
+ *    from `sessionJson.startedAt`, never the wall clock) but is now
+ *    documented as an observation timestamp, not a publication/effective
+ *    date. See docs/meta/SOP_BUILDER_REVIEW_001.md B-1 and §7 step 2a.
+ * Changes from 1.2.0:
+ *  - SOP template renderers (sopTemplates.ts / renderHelpers.ts): removed
+ *    fabricated content from EnterpriseSOP.controls / .risks / .escalationRules,
+ *    OperatorSOP.commonMistakes, and EnterpriseSOPDecision.options[].condition
+ *    (now optional — omitted rather than invented). These fields no longer
+ *    fall back to boilerplate text asserting facts, controls, or org
+ *    structure that were never observed in the recording; they may now
+ *    legitimately be empty arrays / omit `condition`. See
+ *    docs/meta/SOP_BUILDER_REVIEW_001.md §2 and §7 step 1.
  * Changes from 1.1.0:
  *  - SOPInstruction: new type — event-level granularity within SOP steps
  *  - SOPStep: added instructions[] (event-level), detail now derived from instructions
@@ -18,7 +53,38 @@
 
 // ─── Engine version ───────────────────────────────────────────────────────────
 
-export const PROCESS_ENGINE_VERSION = '1.2.0' as const;
+/**
+ * Engine + generated-output schema version.
+ *
+ * Convention (established at 1.2.0 → 1.3.0, 2026-07-20): this constant MUST
+ * be bumped for ANY change to the semantics of generated SOP/process-map
+ * output — not just type/shape changes. That includes wording changes that
+ * alter what a rendered document asserts (e.g. removing fabricated content,
+ * changing a fallback string, adding/removing a template field's fallback
+ * behavior). Prior to 1.3.0 there was no such convention; wording-only
+ * changes landed without a version bump (see
+ * docs/meta/SOP_BUILDER_REVIEW_001.md B-1 for the audit finding this closes
+ * the gap for). Consumers (e.g. EnterpriseSOP.revisionMetadata.engineVersion)
+ * treat this value as the identity of "what this document claims," so a
+ * meaning-changing edit without a bump is itself a truthfulness defect.
+ *
+ * Bumped 1.3.0 → 1.4.0: `SOP.version` output semantics changed from a
+ * hardcoded literal to a deterministic content-identity composite (see the
+ * "Changes from 1.3.0" note above) — this is itself exactly the class of
+ * meaning-changing edit this convention exists to catch.
+ *
+ * Bumped 1.4.0 → 1.5.0: `SOPInstruction` gained `sourceRawEventId` and `SOP`
+ * gained `contentOrigin` (see "Changes from 1.4.0" above) — both are changes
+ * to generated output per
+ * docs/features/sop-authoring/OVERLAY_ARCHITECTURE_DECISION.md §4.2. Note
+ * the interaction documented there: this bump changes `SOP.version` (which
+ * embeds `engineVersion`) for every document, while `contentHash` is
+ * unchanged, because the hashed field set (`contentHash.ts`) does not
+ * include instruction provenance or document-level provenance. That is
+ * correct, not a bug — see `anchorStability.test.ts` for the regression
+ * test that pins this behavior.
+ */
+export const PROCESS_ENGINE_VERSION = '1.5.0' as const;
 
 // ─── Grouping / boundary reasons (mirrors segmentation-engine) ───────────────
 
@@ -340,8 +406,50 @@ export interface SOPInstruction {
   instruction: string;
   /** The canonical event type this instruction was derived from. */
   eventType: string;
-  /** Source event ID for traceability back to observed evidence. */
+  /**
+   * Canonical event ID this instruction was derived from
+   * (`CanonicalEventInput.event_id`) — a UUID v4 minted fresh by the
+   * normalization engine each time a raw event is normalized
+   * (`docs/invariants.md:90-93`).
+   *
+   * Stable across an **engine re-run** over the same stored bundle
+   * (regeneration case R1 — see
+   * docs/features/sop-authoring/OVERLAY_ARCHITECTURE_DECISION.md §2.1),
+   * which today is the only regeneration the server can actually perform.
+   * NOT stable across **re-normalization** (R2) — a fresh normalize pass
+   * mints a new `event_id` for the same underlying capture, even though
+   * nothing observable changed.
+   *
+   * Kept alongside `sourceRawEventId` per ADR §4.2 rather than replaced by
+   * it: (a) it is the correct key for R1, the common case, and matching on
+   * both fields is a stronger signal than either alone; (b) it is already
+   * consumed by traceability surfaces (e.g. `ask-this-process` citations)
+   * and removing it would be an unnecessary breaking change; (c) a
+   * *disagreement* between the two (raw matches, canonical does not) is
+   * itself the signal that an R2 re-normalization occurred.
+   */
   sourceEventId: string;
+  /**
+   * Capture-time raw event ID this instruction was derived from —
+   * `raw_event_id`, assigned once at the moment of capture in the
+   * immutable raw bundle (`docs/invariants.md:89`), carried unchanged
+   * through normalization as
+   * `CanonicalEventInput.normalization_meta.sourceEventId`
+   * (`docs/invariants.md:112`; `types.ts:144-145` in this package — that
+   * field is non-optional, and the upload contract
+   * (`apps/web-app/src/lib/ingestion.ts:29-34`) requires it as a
+   * non-optional string, so it cannot be absent in a bundle the server has
+   * accepted).
+   *
+   * Stable across **both** an engine re-run (R1) **and** a re-normalization
+   * of the same raw capture (R2) — see
+   * docs/features/sop-authoring/OVERLAY_ARCHITECTURE_DECISION.md §1 Fact 3
+   * and §2.1. It is strictly dominant over `sourceEventId` as a stable
+   * anchor and is the field a future overlay/authoring system must bind
+   * edits to (ADR §4). Do not derive a "stability" claim from
+   * `sourceEventId` alone — see that field's own JSDoc.
+   */
+  sourceRawEventId: string;
   /** Application/system in which this event occurred. */
   system?: string;
   /** Whether this event involves sensitive data fields. */
@@ -393,9 +501,69 @@ export interface SOPStep {
   decisionLabel?: string;
 }
 
+/**
+ * Document approval status.
+ *
+ * Closed union with exactly one member today: this system has no approval
+ * workflow yet (see docs/meta/SOP_BUILDER_REVIEW_001.md §7 step 2b, which is
+ * separately gated on an open product decision), so every generated SOP is
+ * honestly `'unapproved'`. The type makes that absence undeniable — nothing
+ * can silently default, infer, or fabricate a different value while this
+ * union has one member. Widen this union when an approval workflow ships.
+ */
+export type SOPApprovalStatus = 'unapproved';
+
+/**
+ * Content-origin provenance stamp for a SOP document.
+ *
+ * Closed union with exactly one member today: this system has no
+ * overlay/authoring write path yet (see
+ * docs/features/sop-authoring/OVERLAY_ARCHITECTURE_DECISION.md §9), so
+ * every generated SOP is honestly `'engine-derived'`. This is the same
+ * discipline as `SOPApprovalStatus` — the type makes the absence of any
+ * other origin undeniable while this union has one member.
+ *
+ * `SOP.contentOrigin` is OPTIONAL, and that is deliberate, not an
+ * oversight — it is the backfill mechanism itself, not a gap needing one.
+ * `buildSOP` (reached solely via `processSession`,
+ * `sopBuilder.ts` / `processSession.ts`) is the ONLY writer of SOP content,
+ * and the persistence layer (`WorkflowArtifact`) is create-only — there is
+ * no `.update()` / `.upsert()` call anywhere that could have mutated a
+ * stored SOP after it was generated, and no `updatedAt` column recording
+ * one. That means the **absence** of `contentOrigin` on any stored document
+ * is itself proof the document predates this field, and therefore proof it
+ * is engine-derived — no separate batch backfill migration is needed, and
+ * per ADR §9, writing one now would in fact be worse: a post-hoc UPDATE is
+ * an *assertion* about old rows, while this field's introduction, with no
+ * mutation path having ever existed before it, is *evidence*. Do not later
+ * "fix" this by adding a migration that stamps old rows explicitly — that
+ * would replace evidence with an assertion for no benefit.
+ *
+ * This reasoning stops holding for any document touched by an
+ * overlay/authoring write path once one exists. Widen this union to the
+ * four-valued `observed` / `derived` / `authored` / `absent` model already
+ * sketched (`docs/meta/SOP_BUILDER_REVIEW_001.md` §5 line 118; ADR §9
+ * target shape) **before** that write path ships, not after — ADR §9:
+ * "stamp provenance ... before any overlay write path exists ... cheap now
+ * and impossible later."
+ */
+export type SOPContentOrigin = 'engine-derived';
+
 export interface SOP {
   sopId: string;
   title: string;
+  /**
+   * Document content identity: `${engineVersion}+${contentHash.slice(0, 8)}`
+   * (see `computeSOPContentHash` in ./contentHash.ts).
+   *
+   * This is a CONTENT identity, not a controlled-document revision number.
+   * Two regenerations from identical evidence at the same engine version
+   * produce the identical `version` — that is the intended behavior, not a
+   * bug: it lets two copies be compared for content equality. It does NOT
+   * mean either copy has been reviewed or approved — see `approvalStatus`.
+   *
+   * Ref: docs/meta/SOP_BUILDER_REVIEW_001.md B-1.
+   */
   version: string;
   purpose: string;
   scope: string;
@@ -410,7 +578,36 @@ export interface SOP {
   completionCriteria: string[];
   steps: SOPStep[];
   notes: string[];
+  /**
+   * Timestamp of the OBSERVATION this SOP was generated from —
+   * `sessionJson.startedAt`, deliberately NOT the wall-clock time the
+   * document was built. Sourcing it from evidence rather than `Date.now()`
+   * is what keeps SOP generation deterministic (same input → byte-identical
+   * output); do not change the source of this value.
+   *
+   * This is NOT a publication date, an effective date, or an approval date.
+   * It does not indicate the document has been reviewed or is in force.
+   * Renderers MUST NOT present it as such — see `approvalStatus`.
+   */
   generatedAt: string;
+  /** Process engine version that generated this content (see `PROCESS_ENGINE_VERSION`). */
+  engineVersion: string;
+  /**
+   * Full deterministic content-identity fingerprint of this document (see
+   * `computeSOPContentHash` in ./contentHash.ts). `version` embeds the first
+   * 8 characters of this value; the full value is retained here for
+   * traceability.
+   */
+  contentHash: string;
+  /** See `SOPApprovalStatus`. */
+  approvalStatus: SOPApprovalStatus;
+  /**
+   * See `SOPContentOrigin`. Always `'engine-derived'` when set by this
+   * engine version. Optional — see `SOPContentOrigin` JSDoc for why its
+   * absence on documents stored before this field existed is itself the
+   * provenance evidence, not a gap.
+   */
+  contentOrigin?: SOPContentOrigin;
   /** When this SOP should be invoked — the triggering condition. */
   trigger?: string;
   /** Roles or actors involved in this procedure (inferred from behavior). */

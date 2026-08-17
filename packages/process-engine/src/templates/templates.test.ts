@@ -348,6 +348,8 @@ describe('Enterprise SOP Renderer', () => {
     expect(sop.controls.length).toBeGreaterThan(0);
     expect(sop.risks.length).toBeGreaterThan(0);
     expect(sop.revisionMetadata.engineVersion).toBeDefined();
+    // B-1: the document must not imply approval it does not have.
+    expect(sop.revisionMetadata.approvalStatus).toBe('unapproved');
   });
 
   it('includes decision points section', () => {
@@ -360,7 +362,7 @@ describe('Enterprise SOP Renderer', () => {
 });
 
 describe('Decision-Based SOP Renderer', () => {
-  it('renders with branches and escalation', () => {
+  it('renders with branches; escalation rules stay empty (no org structure observed)', () => {
     const output = processSession(complexWorkflow());
     const sop = renderSOP(output, 'decision_based');
 
@@ -368,7 +370,11 @@ describe('Decision-Based SOP Renderer', () => {
     if (sop.templateType !== 'decision_based') return;
     expect(sop.title).toBe('Process Invoice');
     expect(sop.branches.length).toBeGreaterThan(0);
-    expect(sop.escalationRules.length).toBeGreaterThan(0);
+    // iter-2026-07-20: escalationRules no longer invents org structure
+    // ("escalate to a supervisor", "contact support") that was never
+    // observed in the recording — it is honestly empty absent a real
+    // data source. See docs/meta/SOP_BUILDER_REVIEW_001.md §2.
+    expect(sop.escalationRules).toEqual([]);
     expect(sop.exceptionHandling.length).toBeGreaterThan(0);
     expect(sop.completionCriteria.length).toBeGreaterThan(0);
   });
@@ -444,13 +450,16 @@ describe('Markdown Export', () => {
     expect(md).toContain('Controls');
   });
 
-  it('renders decision-based SOP markdown', () => {
+  it('renders decision-based SOP markdown; omits the Escalation Rules heading when empty', () => {
     const output = processSession(complexWorkflow());
     const sop = renderSOP(output, 'decision_based');
     const md = renderSOPMarkdown(sop);
 
     expect(md).toContain('Decision Paths');
-    expect(md).toContain('Escalation Rules');
+    // iter-2026-07-20: escalationRules is honestly empty for this fixture
+    // (no org structure was observed), so the heading is omitted entirely
+    // rather than rendering an empty section.
+    expect(md).not.toContain('Escalation Rules');
     expect(md).toContain('Exception Handling');
   });
 });
@@ -607,19 +616,21 @@ describe('renderMetadataStrip helper', () => {
   it('produces the correct format with plural steps and systems', () => {
     const strip = renderMetadataStrip({
       version: '2.0',
+      approvalStatus: 'unapproved',
       stepCount: 12,
       systemCount: 3,
       averageConfidence: 0.87,
       generatedAt: '2026-04-17T14:32:47Z',
     });
     expect(strip).toBe(
-      '*Ledgerium SOP · v2.0 · 12 steps · 3 systems · 87% confidence · Generated 2026-04-17*',
+      '*Ledgerium SOP · v2.0 · Unapproved · 12 steps · 3 systems · 87% confidence · Generated 2026-04-17*',
     );
   });
 
   it('handles singular step and system correctly', () => {
     const strip = renderMetadataStrip({
       version: '1.0',
+      approvalStatus: 'unapproved',
       stepCount: 1,
       systemCount: 1,
       averageConfidence: 0.9,
@@ -634,6 +645,7 @@ describe('renderMetadataStrip helper', () => {
   it('rounds confidence to nearest integer', () => {
     const strip = renderMetadataStrip({
       version: '1.0',
+      approvalStatus: 'unapproved',
       stepCount: 5,
       systemCount: 2,
       averageConfidence: 0.876,
@@ -645,6 +657,7 @@ describe('renderMetadataStrip helper', () => {
   it('trims generatedAt to YYYY-MM-DD', () => {
     const strip = renderMetadataStrip({
       version: '1.0',
+      approvalStatus: 'unapproved',
       stepCount: 3,
       systemCount: 1,
       averageConfidence: 0.9,
@@ -652,6 +665,18 @@ describe('renderMetadataStrip helper', () => {
     });
     expect(strip).toContain('Generated 2026-04-17');
     expect(strip).not.toContain('T14');
+  });
+
+  it('states approval status explicitly alongside the version identity (B-1)', () => {
+    const strip = renderMetadataStrip({
+      version: '1.4.0+ab12cd34',
+      approvalStatus: 'unapproved',
+      stepCount: 4,
+      systemCount: 1,
+      averageConfidence: 0.9,
+      generatedAt: '2026-04-17T00:00:00Z',
+    });
+    expect(strip).toContain('v1.4.0+ab12cd34 · Unapproved ·');
   });
 });
 

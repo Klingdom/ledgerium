@@ -55,6 +55,13 @@ export const SAMPLE_SOP: SOP = {
   outputs: ['Saved opportunity'],
   completionCriteria: ['Opportunity visible in pipeline'],
   generatedAt: '2026-06-10T14:03:00.000Z',
+  // Fixed fixture values — this is a hand-built test fixture, not real
+  // engine output, so `version`/`engineVersion`/`contentHash` are not
+  // derived via computeSOPContentHash. `approvalStatus` is honest either
+  // way: this system has no approval workflow yet.
+  engineVersion: '1.0.0',
+  contentHash: 'fixture0deadbeef',
+  approvalStatus: 'unapproved',
   businessObjective: 'Ensure every qualified lead becomes a tracked opportunity.',
   steps: [
     step({
@@ -72,6 +79,7 @@ export const SAMPLE_SOP: SOP = {
           instruction: 'Click the Opportunities tab',
           eventType: 'interaction.click',
           sourceEventId: 'evt_001',
+          sourceRawEventId: 'raw_evt_001',
           system: 'Salesforce',
           isSensitive: false,
           redacted: false,
@@ -83,6 +91,7 @@ export const SAMPLE_SOP: SOP = {
           instruction: 'Wait for the list to load',
           eventType: 'navigation.open_page',
           sourceEventId: 'evt_002',
+          sourceRawEventId: 'raw_evt_002',
           system: 'Salesforce',
           isSensitive: false,
           redacted: false,
@@ -107,6 +116,7 @@ export const SAMPLE_SOP: SOP = {
           instruction: 'Select "New Business" record type',
           eventType: 'interaction.click',
           sourceEventId: 'evt_003',
+          sourceRawEventId: 'raw_evt_003',
           system: 'Salesforce',
           isSensitive: false,
           redacted: false,
@@ -138,6 +148,7 @@ export const SAMPLE_SOP: SOP = {
           instruction: 'Enter the opportunity name',
           eventType: 'interaction.input_change',
           sourceEventId: 'evt_004',
+          sourceRawEventId: 'raw_evt_004',
           system: 'Salesforce',
           isSensitive: false,
           redacted: false,
@@ -149,6 +160,7 @@ export const SAMPLE_SOP: SOP = {
           instruction: 'Click Save',
           eventType: 'interaction.click',
           sourceEventId: 'evt_005',
+          sourceRawEventId: 'raw_evt_005',
           system: 'Salesforce',
           isSensitive: false,
           redacted: false,
@@ -160,6 +172,7 @@ export const SAMPLE_SOP: SOP = {
           instruction: 'Confirm the opportunity appears in the pipeline',
           eventType: 'interaction.click',
           sourceEventId: 'evt_006',
+          sourceRawEventId: 'raw_evt_006',
           system: 'Salesforce',
           isSensitive: false,
           redacted: false,

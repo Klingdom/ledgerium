@@ -12,6 +12,7 @@ import type {
   ProcessMapNode,
   ProcessMapPhase,
   SOPStep,
+  SOPApprovalStatus,
 } from '../types.js';
 import {
   HIGH_CONFIDENCE_THRESHOLD,
@@ -261,10 +262,9 @@ export function stepCaution(step: SOPStep): string {
 export function deriveCommonMistakes(output: ProcessOutput): string[] {
   const mistakes: string[] = [];
 
-  const errorSteps = output.sop.steps.filter(s => s.category === 'error_handling');
-  if (errorSteps.length > 0) {
-    mistakes.push('Submitting forms before all required fields are complete');
-  }
+  // No specific cause is asserted from the mere existence of an error step —
+  // the recording shows THAT an error occurred, not WHY (missing fields,
+  // wrong value, stale data, etc. are all equally plausible and unobserved).
 
   const friction = output.sop.frictionSummary ?? [];
   for (const f of friction) {
@@ -279,9 +279,8 @@ export function deriveCommonMistakes(output: ProcessOutput): string[] {
     }
   }
 
-  if (mistakes.length === 0) {
-    mistakes.push('Skipping prerequisite data gathering before starting the workflow');
-  }
+  // No generic fallback — `mistakes` may legitimately be empty when no
+  // friction was observed.
 
   return [...new Set(mistakes)].slice(0, 5);
 }
@@ -320,17 +319,36 @@ export function deriveTips(output: ProcessOutput): string[] {
 // ─── Above-the-fold metadata and confidence helpers ──────────────────────────
 
 /**
+ * Human-readable label for a `SOPApprovalStatus`. A single-branch function
+ * today because the union has exactly one member — see `SOPApprovalStatus`
+ * in ../types.js. Kept as a function (not an inline literal) so future
+ * union members get a compile error here, not a silent fallback string.
+ */
+function approvalStatusLabel(status: SOPApprovalStatus): string {
+  switch (status) {
+    case 'unapproved':
+      return 'Unapproved';
+  }
+}
+
+/**
  * Renders the single-line italic metadata strip required above the fold in all
  * three SOP templates (Design System §7.2).
  *
  * Operator and Decision SOPs use this one-liner. Enterprise SOPs render the
  * full metadata table via `renderEnterpriseMetadataTable` instead.
  *
+ * A bare version number reads as a controlled document revision. This strip
+ * always states approval status explicitly alongside the version identity
+ * so a generated-but-unreviewed document cannot be mistaken for one that
+ * has been (see docs/meta/SOP_BUILDER_REVIEW_001.md B-1).
+ *
  * Example output:
- *   *Ledgerium SOP · v2.0 · 12 steps · 3 systems · 87% confidence · Generated 2026-04-17*
+ *   *Ledgerium SOP · v2.0 · Unapproved · 12 steps · 3 systems · 87% confidence · Generated 2026-04-17*
  */
 export function renderMetadataStrip(input: {
   version: string;
+  approvalStatus: SOPApprovalStatus;
   stepCount: number;
   systemCount: number;
   averageConfidence: number;
@@ -339,7 +357,8 @@ export function renderMetadataStrip(input: {
   const confPct = Math.round(input.averageConfidence * 100);
   const date = input.generatedAt.slice(0, 10); // YYYY-MM-DD
   return (
-    `*Ledgerium SOP · v${input.version} · ${input.stepCount} step${input.stepCount !== 1 ? 's' : ''} · ` +
+    `*Ledgerium SOP · v${input.version} · ${approvalStatusLabel(input.approvalStatus)} · ` +
+    `${input.stepCount} step${input.stepCount !== 1 ? 's' : ''} · ` +
     `${input.systemCount} system${input.systemCount !== 1 ? 's' : ''} · ` +
     `${confPct}% confidence · Generated ${date}*`
   );
@@ -349,10 +368,15 @@ export function renderMetadataStrip(input: {
  * Renders the full metadata table used by Enterprise SOPs (Design System §9.1).
  *
  * Returns a Markdown table string with SOP-level metadata fields.
+ *
+ * Includes an explicit **Status** row alongside **Version** — a version
+ * identity by itself reads as a controlled document revision, which this
+ * document is not (see docs/meta/SOP_BUILDER_REVIEW_001.md B-1).
  */
 export function renderEnterpriseMetadataTable(input: {
   sopId: string;
   version: string;
+  approvalStatus: SOPApprovalStatus;
   generatedAt: string;
   engineVersion: string;
   basedOn: string;
@@ -362,6 +386,7 @@ export function renderEnterpriseMetadataTable(input: {
   const rows: Array<[string, string]> = [
     ['**SOP ID**', `\`${input.sopId}\``],
     ['**Version**', input.version],
+    ['**Status**', approvalStatusLabel(input.approvalStatus)],
     ['**Generated**', input.generatedAt],
     ['**Engine**', `Ledgerium process-engine \`${input.engineVersion}\``],
     ['**Source session**', input.basedOn],

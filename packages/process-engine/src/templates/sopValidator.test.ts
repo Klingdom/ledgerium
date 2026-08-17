@@ -22,6 +22,7 @@ function instruction(overrides?: Partial<SOPInstruction>): SOPInstruction {
     instruction: 'Click the Save button',
     eventType: 'interaction.click',
     sourceEventId: 'evt-1',
+    sourceRawEventId: 'raw-evt-1',
     isSensitive: false,
     redacted: false,
     ...overrides,
@@ -77,6 +78,8 @@ function validRenderedSOP(overrides?: Partial<OperatorSOP>): OperatorSOP {
   ];
   return {
     templateType: 'operator_centric',
+    // Fixed fixture identity — shape only; the validator does not inspect it.
+    version: '1.4.0+testhash',
     taskTitle: 'Q2 invoice intake',
     whatThisIsFor: 'Turn a recorded workflow into a shareable SOP so the team has one source of truth.',
     whenToUseIt: 'When processing a new invoice in SAP.',
@@ -159,6 +162,9 @@ function validOutput(stepOverrides?: Partial<SOPStep>[]): ProcessOutput {
       steps,
       notes: [],
       generatedAt: '2026-01-01T00:00:00Z',
+      engineVersion: '1.0',
+      contentHash: 'testfixture0000',
+      approvalStatus: 'unapproved',
     },
   };
 }

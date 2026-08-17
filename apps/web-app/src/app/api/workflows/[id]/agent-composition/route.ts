@@ -4,6 +4,7 @@ import { db } from '@/db';
 import { checkFeatureAccess } from '@/lib/feature-gating';
 import { transformWorkflow } from '@ledgerium/agent-intelligence';
 import type { ProcessOutput } from '@ledgerium/process-engine';
+import { findLatestArtifact, LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
 
 /**
  * GET /api/workflows/[id]/agent-composition
@@ -49,7 +50,10 @@ export async function GET(
     include: {
       artifacts: {
         where: { artifactType: { in: ['process_output', 'agent_intelligence'] } },
-        select: { artifactType: true, contentJson: true },
+        // B-3: order deterministically; findLatestArtifact below re-derives
+        // this anyway, but ordering here keeps the two in agreement.
+        orderBy: LATEST_ARTIFACT_ORDER_BY,
+        select: { id: true, artifactType: true, contentJson: true, createdAt: true },
       },
     },
   });
@@ -58,11 +62,11 @@ export async function GET(
     return NextResponse.json({ error: 'Workflow not found' }, { status: 404 });
   }
 
-  // Return cached agent_intelligence artifact if available.
+  // Return cached agent_intelligence artifact if available. B-3: multiple
+  // rows of the same artifactType can exist — select the current one
+  // deterministically rather than taking whatever row is first in the array.
   // The stored artifact is expected to be an AgentComposition object.
-  const cachedArtifact = workflow.artifacts.find(
-    (a) => a.artifactType === 'agent_intelligence',
-  );
+  const cachedArtifact = findLatestArtifact(workflow.artifacts, 'agent_intelligence');
   if (cachedArtifact?.contentJson) {
     try {
       const cached = JSON.parse(cachedArtifact.contentJson) as Record<string, unknown>;
@@ -76,9 +80,7 @@ export async function GET(
   }
 
   // Compute on demand from process_output artifact
-  const processArtifact = workflow.artifacts.find(
-    (a) => a.artifactType === 'process_output',
-  );
+  const processArtifact = findLatestArtifact(workflow.artifacts, 'process_output');
   if (!processArtifact?.contentJson) {
     return NextResponse.json(
       { error: 'No process output available for agent composition' },

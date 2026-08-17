@@ -84,6 +84,10 @@ export function buildSOPViewModel(
     lowConfidenceStepCount: qi?.lowConfidenceStepCount ?? 0,
     isComplete: qi?.isComplete ?? true,
     version: rawSop.version ?? '1.0',
+    // Closed union with one member today (see SOPApprovalStatus) — fallback
+    // matches the only honest value, for the rare case rawSop predates this
+    // field.
+    approvalStatus: rawSop.approvalStatus ?? 'unapproved',
     sourceNote: `Derived from observed workflow behavior. ${rawSop.steps?.length ?? 0} steps, evidence-linked.`,
   };
 
@@ -378,13 +382,16 @@ function buildDecisions(rawSteps: any[]): SOPViewDecision[] {
         stepOrdinal: s.ordinal,
         stepId: safe(s.stepId, `step-${s.ordinal}`),
         question: s.decisionLabel,
+        // Branch CONDITIONS are deliberately omitted. They previously carried
+        // fabricated text — `${system} accepts` / `${system} returns error`,
+        // with 'Validation passes' / 'Validation fails' fallbacks — invented
+        // from the system name alone. Nothing in the recording establishes what
+        // the operator actually branched on, so no condition is emitted.
+        // The ACTIONS below are retained: they reference real step ordinals.
+        // Ref: docs/meta/SOP_BUILDER_REVIEW_001.md §2.
         options: [
-          {
-            condition: s.system ? `${s.system} accepts` : 'Validation passes',
-            action: 'Continue to next step',
-          },
+          { action: 'Continue to next step' },
           ...(isNextError ? [{
-            condition: s.system ? `${s.system} returns error` : 'Validation fails',
             action: `Resolve error (step ${nextStep.ordinal}), then retry`,
           }] : []),
         ],

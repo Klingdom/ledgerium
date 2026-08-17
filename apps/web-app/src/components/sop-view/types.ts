@@ -9,6 +9,7 @@ import type {
   SOP,
   SOPStep,
   SOPInstruction,
+  SOPApprovalStatus,
   FrictionIndicator,
   QualityIndicators,
   GroupingReason,
@@ -55,7 +56,14 @@ export interface SOPMetadata {
   errorStepCount: number;
   lowConfidenceStepCount: number;
   isComplete: boolean;
+  /**
+   * Content identity — `${engineVersion}+${contentHash.slice(0, 8)}`. NOT a
+   * controlled-document revision number; see `approvalStatus` for whether
+   * this document has been reviewed. Ref: docs/meta/SOP_BUILDER_REVIEW_001.md B-1.
+   */
   version: string;
+  /** See `SOPApprovalStatus` — currently always `'unapproved'`. */
+  approvalStatus: SOPApprovalStatus;
   sourceNote: string;
 }
 
@@ -209,7 +217,18 @@ export interface SOPViewDecision {
   stepOrdinal: number;
   stepId: string;
   question: string;
-  options: Array<{ condition: string; action: string }>;
+  /**
+   * `condition` is OPTIONAL and absent unless the branch condition was actually
+   * observed. It previously carried fabricated text ("{system} accepts",
+   * "Validation passes") invented from the system name alone — asserting what a
+   * system does when nothing of the kind was recorded.
+   *
+   * Renderers MUST NOT substitute a placeholder when it is absent: show the
+   * action alone. Absent beats boilerplate.
+   *
+   * Ref: docs/meta/SOP_BUILDER_REVIEW_001.md §2.
+   */
+  options: Array<{ condition?: string | undefined; action: string }>;
 }
 
 // ─── Common issue ────────────────────────────────────────────────────────────
@@ -276,7 +295,7 @@ export interface SOPViewModel {
 
 // ─── Re-exports ──────────────────────────────────────────────────────────────
 
-export type { SOP, SOPStep, SOPInstruction, FrictionIndicator, QualityIndicators, GroupingReason };
+export type { SOP, SOPStep, SOPInstruction, SOPApprovalStatus, FrictionIndicator, QualityIndicators, GroupingReason };
 export type { AlignmentPill };
 export type {
   AlignmentPillKind,

@@ -934,6 +934,7 @@ function makeSOPInstruction(sequence: number, instruction: string): SOPInstructi
     instruction,
     eventType: 'interaction.click',
     sourceEventId: `evt-sop-${sequence}`,
+    sourceRawEventId: `raw-sop-${sequence}`,
     isSensitive: false,
     redacted: false,
     instructionType: 'action',
@@ -1011,6 +1012,9 @@ function makeSOP(steps: SOPStep[]): SOP {
     steps,
     notes: [],
     generatedAt: '2024-01-15T09:00:00Z',
+    engineVersion: '1.0.0',
+    contentHash: 'testfixture0000',
+    approvalStatus: 'unapproved',
   };
 }
 

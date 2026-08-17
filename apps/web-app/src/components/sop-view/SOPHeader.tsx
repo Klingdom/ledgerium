@@ -27,6 +27,21 @@ export function SOPHeader({ metadata, alignment }: Props) {
             {metadata.version && (
               <span className="text-[9px] text-[var(--content-tertiary)]">v{metadata.version}</span>
             )}
+            {/* Honest document identity (SOP_BUILDER_REVIEW_001 B-1): a bare
+                version number reads as a controlled document revision. State
+                approval status explicitly, right alongside it, as a neutral
+                fact — not a warning — matching the AlignmentBadge
+                insufficient-data register below rather than an error state. */}
+            {metadata.approvalStatus === 'unapproved' && (
+              <span
+                className="text-[9px] font-medium text-[var(--content-secondary)] bg-[var(--surface-secondary)] border border-[var(--border-default)] rounded px-1 py-0.5"
+                role="status"
+                title="Unapproved — this document has not been through a review or approval workflow"
+                aria-label="Unapproved — this document has not been through a review or approval workflow"
+              >
+                Unapproved
+              </span>
+            )}
             {recordedDate && (
               <span className="text-[9px] text-[var(--content-tertiary)]">· Generated {recordedDate}</span>
             )}

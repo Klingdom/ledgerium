@@ -10,6 +10,7 @@ import {
 } from '@/lib/ask-this-process';
 import type { SopIntelligenceInput } from '@/components/sop-view/adapters/sopIntelligence';
 import type { SOP, ProcessMap } from '@ledgerium/process-engine';
+import { findLatestArtifact, LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
 
 /**
  * POST /api/workflows/[id]/ask — deterministic "Ask This Process" (Phase A).
@@ -69,12 +70,17 @@ function errorResponse(
   );
 }
 
-/** Find a process_output-family artifact's parsed contentJson by type, or null. */
+/**
+ * Find the current (most recently created) artifact's parsed contentJson by
+ * type, or null. B-3: multiple rows of the same artifactType can exist —
+ * `findLatestArtifact` selects deterministically rather than taking whatever
+ * row happens to be first in the fetched array.
+ */
 function parseArtifact<T>(
-  artifacts: Array<{ artifactType: string; contentJson: string | null }>,
+  artifacts: Array<{ id: string; artifactType: string; contentJson: string | null; createdAt: Date }>,
   artifactType: string,
 ): T | null {
-  const found = artifacts.find((a) => a.artifactType === artifactType);
+  const found = findLatestArtifact(artifacts, artifactType);
   if (!found?.contentJson) return null;
   try {
     return JSON.parse(found.contentJson) as T;
@@ -115,7 +121,9 @@ export async function POST(
   const workflow = await db.workflow.findFirst({
     where: { id: params.id, userId: session.user.id },
     include: {
-      artifacts: true,
+      // B-3: order deterministically; findLatestArtifact below re-derives
+      // this anyway, but ordering here keeps the two in agreement.
+      artifacts: { orderBy: LATEST_ARTIFACT_ORDER_BY },
       processDefinition: {
         select: { intelligenceJson: true, runCount: true },
       },
@@ -130,8 +138,10 @@ export async function POST(
   // the `ordinal` + `sourceEventId` citation primitives) — NOT the client view
   // model. The page reads `sop` + `process_map` artifacts; we mirror that exactly.
   const artifacts = workflow.artifacts as Array<{
+    id: string;
     artifactType: string;
     contentJson: string | null;
+    createdAt: Date;
   }>;
   const sop = parseArtifact<SOP>(artifacts, 'sop');
   const processMap = parseArtifact<ProcessMap>(artifacts, 'process_map');

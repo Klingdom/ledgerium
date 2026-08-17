@@ -20,6 +20,7 @@ export type {
   SOP,
   SOPStep,
   SOPInstruction,
+  SOPApprovalStatus,
   GroupingReason,
   BoundaryReason,
   CategoryConfig,
@@ -30,6 +31,12 @@ export type {
   QualityIndicators,
 } from './types.js';
 export { PROCESS_ENGINE_VERSION, CATEGORY_CONFIG } from './types.js';
+export {
+  computeContentHash,
+  serializeSOPContentForHash,
+  computeSOPContentHash,
+} from './contentHash.js';
+export type { SOPContentForHash } from './contentHash.js';
 export {
   analyzeStep,
   deriveOperationalDefinition,

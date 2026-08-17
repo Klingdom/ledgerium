@@ -8,6 +8,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { processSession } from './processSession.js';
+import { PROCESS_ENGINE_VERSION } from './types.js';
 import type { ProcessEngineInput, CanonicalEventInput, DerivedStepInput } from './types.js';
 
 // ─── Fixture helpers ─────────────────────────────────────────────────────────
@@ -505,8 +506,14 @@ describe('Output Quality: General Invariants', () => {
     describe(`[${name}]`, () => {
       const output = processSession(input());
 
-      it('SOP version is 2.0', () => {
-        expect(output.sop.version).toBe('2.0');
+      it('SOP version is the engine+contentHash identity composite (B-1)', () => {
+        expect(output.sop.version).toBe(
+          `${PROCESS_ENGINE_VERSION}+${output.sop.contentHash.slice(0, 8)}`,
+        );
+      });
+
+      it('SOP approvalStatus is honestly unapproved (B-1)', () => {
+        expect(output.sop.approvalStatus).toBe('unapproved');
       });
 
       it('all SOP steps have sourceStepId', () => {

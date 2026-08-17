@@ -11,6 +11,7 @@ import { transformWorkflow, analyzePortfolio } from '@ledgerium/agent-intelligen
 import type { TransformationResult, CrossWorkflowIntelligence } from '@ledgerium/agent-intelligence';
 import type { ProcessOutput } from '@ledgerium/process-engine';
 import { db } from '@/db';
+import { LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
 
 /**
  * Load the full ProcessOutput for a workflow from the DB.
@@ -22,6 +23,8 @@ async function loadProcessOutput(userId: string, workflowId: string): Promise<Pr
     include: {
       artifacts: {
         where: { artifactType: 'process_output' },
+        // B-3: deterministic — take the newest row if more than one exists.
+        orderBy: LATEST_ARTIFACT_ORDER_BY,
         select: { contentJson: true },
       },
     },
@@ -64,6 +67,8 @@ export async function analyzePortfolioAgentIntelligence(
     include: {
       artifacts: {
         where: { artifactType: 'process_output' },
+        // B-3: deterministic — take the newest row if more than one exists.
+        orderBy: LATEST_ARTIFACT_ORDER_BY,
         select: { contentJson: true },
       },
     },

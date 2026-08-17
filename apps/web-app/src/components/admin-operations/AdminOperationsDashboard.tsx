@@ -32,6 +32,7 @@ import { LeaderboardTable } from './LeaderboardTable.js';
 import { MemoryGauge } from './MemoryGauge.js';
 import { RefreshControl } from './RefreshControl.js';
 import { LoadingSkeleton } from './LoadingSkeleton.js';
+import { BackupStatusSection } from './BackupStatusSection.js';
 import { UserDetailDrawer } from './user-detail/UserDetailDrawer.js';
 import { SubscriptionPlanBar } from './SubscriptionPlanBar.js';
 import { SubscriptionStatusBar } from './SubscriptionStatusBar.js';
@@ -551,6 +552,16 @@ export function AdminOperationsDashboard() {
               </div>
             </div>
           </SectionCard>
+
+          {/* ── Section: Backup Status — full width. Self-fetching (own
+              GET /api/admin/backup-status), independent of the composite
+              query above — a filesystem read failure here must never
+              block the rest of the dashboard. See BackupStatusSection.tsx
+              header for why this section exists (SOP_BUILDER_REVIEW_001
+              B-4). ── */}
+          <div className="lg:col-span-2">
+            <BackupStatusSection />
+          </div>
 
           {/* ── Section 5: Memory and Process — full width ── */}
           <div className="lg:col-span-2">

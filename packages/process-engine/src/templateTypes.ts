@@ -13,6 +13,7 @@
 
 import type {
   FrictionIndicator,
+  SOPApprovalStatus,
 } from './types.js';
 
 // ─── Template type enums ─────────────────────────────────────────────────────
@@ -214,6 +215,16 @@ export interface SIPOCStage {
  */
 export interface OperatorSOP {
   templateType: 'operator_centric';
+  /**
+   * Content identity, sourced from `SOP.version` — `<engineVersion>+<hash8>`.
+   *
+   * Previously the Operator markdown renderer hardcoded `'1.0'`, so every
+   * Operator SOP ever produced carried an identical constant. That is the same
+   * defect as B-1 (docs/meta/SOP_BUILDER_REVIEW_001.md), not a separate one:
+   * fixing it only on the Enterprise template would have left two of the three
+   * templates still asserting a meaningless version.
+   */
+  version: string;
   taskTitle: string;
   whatThisIsFor: string;
   whenToUseIt: string;
@@ -279,6 +290,8 @@ export interface EnterpriseSOP {
     generatedAt: string;
     engineVersion: string;
     basedOn: string;
+    /** See `SOPApprovalStatus` — always `'unapproved'` until an approval workflow ships. */
+    approvalStatus: SOPApprovalStatus;
   };
 }
 
@@ -300,7 +313,13 @@ export interface EnterpriseSOPStep {
 export interface EnterpriseSOPDecision {
   atStepOrdinal: number;
   question: string;
-  options: Array<{ condition: string; action: string }>;
+  /**
+   * `condition` is omitted when the underlying success/failure criterion was
+   * never observed (e.g. no system-specific confirmation or error event was
+   * captured). Renderers MUST NOT invent a condition string when this field
+   * is absent — render the option using `action` alone.
+   */
+  options: Array<{ condition?: string | undefined; action: string }>;
 }
 
 /**
@@ -308,6 +327,8 @@ export interface EnterpriseSOPDecision {
  */
 export interface DecisionSOP {
   templateType: 'decision_based';
+  /** Content identity, sourced from `SOP.version`. See `OperatorSOP.version`. */
+  version: string;
   title: string;
   purpose: string;
   triggerCondition: string;
