@@ -21,3 +21,6 @@ prisma/test.db-*
 
 # Documentation screenshots (stored outside repo)
 apps/web-app/docs/screenshots/
+
+# Ad-hoc extension build archives (the served download lives in apps/web-app/public/)
+apps/extension-app/*.zip
