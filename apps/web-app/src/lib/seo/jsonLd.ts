@@ -2,21 +2,9 @@ import { SITE_CONFIG } from '@/lib/config';
 import { PARENT_HUB } from '@/content/registry';
 import type { SeoPage } from '@/content/types';
 import { pageUrl } from './url';
+import { SITE_ORGANIZATION_ID, SITE_WEBSITE_ID } from './organization';
 
 type JsonLdObject = Record<string, unknown>;
-
-function organization(): JsonLdObject {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'Ledgerium AI',
-    url: SITE_CONFIG.url,
-    description:
-      'Ledgerium AI records real browser workflows and turns them into SOPs, process maps, workflow intelligence reports, and AI opportunity reports.',
-    knowsAbout: ['process intelligence', 'workflow automation', 'SOP documentation', 'process mining'],
-    sameAs: ['https://www.linkedin.com/company/ledgerium'],
-  };
-}
 
 function breadcrumbs(page: SeoPage): JsonLdObject {
   const hub = PARENT_HUB[page.type];
@@ -39,7 +27,7 @@ function webPage(page: SeoPage): JsonLdObject {
     description: page.metaDescription,
     url: pageUrl(page),
     inLanguage: 'en',
-    isPartOf: { '@type': 'WebSite', '@id': `${SITE_CONFIG.url}/#website` },
+    isPartOf: { '@type': 'WebSite', '@id': SITE_WEBSITE_ID },
     datePublished: page.updatedAt,
     dateModified: page.updatedAt,
     // Entity anchoring for answer engines.
@@ -78,7 +66,10 @@ function article(page: SeoPage): JsonLdObject {
       name: page.author.name,
       ...(page.author.sameAs ? { sameAs: page.author.sameAs } : {}),
     },
-    publisher: { '@type': 'Organization', name: 'Ledgerium AI', url: SITE_CONFIG.url },
+    // References the canonical Organization node (app/layout.tsx via
+    // @/lib/seo/organization) by @id rather than restating it — see the
+    // 'Organization' no-op case in generateJsonLd() below for why.
+    publisher: { '@id': SITE_ORGANIZATION_ID },
   };
 }
 
@@ -91,7 +82,10 @@ function softwareApplication(page: SeoPage): JsonLdObject {
     operatingSystem: 'Chrome',
     description: page.shortAnswer,
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-    provider: { '@type': 'Organization', name: 'Ledgerium AI', url: SITE_CONFIG.url },
+    // References the canonical Organization node (app/layout.tsx via
+    // @/lib/seo/organization) by @id rather than restating it — see the
+    // 'Organization' no-op case in generateJsonLd() below for why.
+    provider: { '@id': SITE_ORGANIZATION_ID },
   };
 }
 
@@ -144,7 +138,14 @@ export function generateJsonLd(page: SeoPage): JsonLdObject[] {
   for (const t of page.jsonLd) {
     switch (t) {
       case 'Organization':
-        out.push(organization());
+        // No-op by design. The canonical Organization node is emitted
+        // exactly once, sitewide, by app/layout.tsx (@/lib/seo/organization)
+        // — it is already present on every page regardless of what a leaf
+        // page's own `jsonLd` array declares, so re-emitting it here would
+        // recreate the original defect (SEO_AEO_EFFECTIVENESS_REVIEW_001 §5
+        // P1-2: two Organization nodes on one page). Pages that need to
+        // POINT AT the entity (Article.publisher, SoftwareApplication.provider)
+        // reference it by `@id` — see `article()` / `softwareApplication()`.
         break;
       case 'BreadcrumbList':
         out.push(breadcrumbs(page));

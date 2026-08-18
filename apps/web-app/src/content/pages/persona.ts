@@ -83,7 +83,7 @@ const operationsManager: PersonaPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -168,7 +168,7 @@ const consultants: PersonaPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -254,7 +254,7 @@ const revopsManager: PersonaPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -339,7 +339,7 @@ const businessAnalyst: PersonaPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -425,7 +425,7 @@ const maIntegrationLead: PersonaPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -511,7 +511,7 @@ const processExcellenceLead: PersonaPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -597,7 +597,7 @@ const complianceTeams: PersonaPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -683,7 +683,7 @@ const hrTeams: PersonaPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -769,7 +769,7 @@ const customerSuccessTeams: PersonaPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -854,7 +854,7 @@ const trainingManagers: PersonaPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -940,7 +940,7 @@ const aiTransformationTeams: PersonaPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -1025,7 +1025,7 @@ const bpoOperations: PersonaPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -1115,7 +1115,7 @@ const itDirectors: PersonaPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-07-15',
   published: true,
 };
@@ -1201,7 +1201,7 @@ const sharedServicesLeaders: PersonaPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-07-15',
   published: true,
 };
@@ -1291,7 +1291,7 @@ const insuranceClaimsManagers: PersonaPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-07-15',
   published: true,
 };
@@ -1377,7 +1377,7 @@ const legalOperationsManagers: PersonaPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-07-15',
   published: true,
 };

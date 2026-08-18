@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { SITE_ORGANIZATION_ID } from '@/lib/seo/organization';
 
 export const metadata: Metadata = {
   title: 'How We Research This — Ledgerium Methodology',
@@ -23,13 +24,12 @@ const jsonLd = {
     'How Ledgerium grounds its claims, sources its original data points, makes comparisons, and what it does not claim.',
   url: 'https://ledgerium.ai/methodology',
   inLanguage: 'en',
-  publisher: {
-    '@type': 'Organization',
-    name: 'Ledgerium AI',
-    url: 'https://ledgerium.ai',
-    sameAs: ['https://www.linkedin.com/company/ledgerium'],
-    knowsAbout: ['process intelligence', 'workflow automation', 'SOP documentation', 'process mining'],
-  },
+  // Reference to the single canonical Organization node emitted sitewide in
+  // app/layout.tsx (@/lib/seo/organization), not a redeclaration. This used
+  // to restate the entity inline with its own drifted `knowsAbout` list and
+  // a `sameAs` LinkedIn URL that 404s — see @/lib/seo/organization for the
+  // verified replacement.
+  publisher: { '@id': SITE_ORGANIZATION_ID },
 };
 
 const SECTIONS: { h: string; body: string[] }[] = [

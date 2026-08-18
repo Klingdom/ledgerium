@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { SITE_ORGANIZATION_ID } from '@/lib/seo/organization';
 
 export const metadata: Metadata = {
   title: "Screenshot Tools vs. Structured Capture: What's the Difference?",
@@ -24,7 +25,9 @@ const jsonLd = {
   datePublished: '2026-06-26',
   dateModified: '2026-06-26',
   author: { '@type': 'Organization', name: 'Ledgerium Research Team' },
-  publisher: { '@type': 'Organization', name: 'Ledgerium AI' },
+  // Reference to the single canonical Organization node emitted sitewide in
+  // app/layout.tsx, not a redeclaration (SEO_AEO_EFFECTIVENESS_REVIEW_001 §5 P1-2).
+  publisher: { '@id': SITE_ORGANIZATION_ID },
   mainEntityOfPage: 'https://ledgerium.ai/blog/screenshot-tools-vs-structured-capture',
 };
 

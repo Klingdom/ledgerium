@@ -83,7 +83,7 @@ const accountsPayable: AiOpportunityPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -169,7 +169,7 @@ const hrOnboarding: AiOpportunityPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -255,7 +255,7 @@ const customerSupport: AiOpportunityPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -341,7 +341,7 @@ const salesOperations: AiOpportunityPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -427,7 +427,7 @@ const procurement: AiOpportunityPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -513,7 +513,7 @@ const financeOperations: AiOpportunityPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -599,7 +599,7 @@ const complianceWorkflows: AiOpportunityPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -685,7 +685,7 @@ const erpWorkflows: AiOpportunityPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-06-27',
   published: true,
 };

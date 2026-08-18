@@ -4,10 +4,12 @@ import './globals.css';
 import { AuthProvider } from '@/components/AuthProvider';
 import { PostHogProvider } from '@/components/PostHogProvider';
 import { UmamiAnalytics } from '@/components/UmamiAnalytics';
+import { SITE_CONFIG } from '@/lib/config';
+import { SITE_WEBSITE_NODE, SITE_ORGANIZATION_NODE } from '@/lib/seo/organization';
 
 const inter = Inter({ subsets: ['latin'] });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ledgerium.ai';
+const SITE_URL = SITE_CONFIG.url;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -36,28 +38,12 @@ export const metadata: Metadata = {
 };
 
 // Sitewide entity schema (WebSite + Organization) emitted once on every page.
+// The full node definitions live in `@/lib/seo/organization` — the single
+// source of truth every other JSON-LD block on the site references by `@id`
+// instead of restating (SEO_AEO_EFFECTIVENESS_REVIEW_001 §5 P1-2).
 const SITE_JSON_LD = {
   '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'WebSite',
-      '@id': `${SITE_URL}/#website`,
-      url: SITE_URL,
-      name: 'Ledgerium AI',
-      description: 'Evidence-based workflow intelligence: record real work, generate real documentation.',
-      publisher: { '@id': `${SITE_URL}/#organization` },
-    },
-    {
-      '@type': 'Organization',
-      '@id': `${SITE_URL}/#organization`,
-      name: 'Ledgerium AI',
-      url: SITE_URL,
-      description:
-        'Ledgerium AI records real browser workflows and turns them into SOPs, process maps, workflow intelligence reports, and AI opportunity reports.',
-      knowsAbout: ['process intelligence', 'workflow automation', 'SOP documentation', 'process mining', 'AI integration'],
-      sameAs: ['https://www.linkedin.com/company/ledgerium'],
-    },
-  ],
+  '@graph': [SITE_WEBSITE_NODE, SITE_ORGANIZATION_NODE],
 };
 
 export default function RootLayout({

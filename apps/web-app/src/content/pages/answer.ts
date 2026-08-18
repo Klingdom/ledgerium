@@ -69,7 +69,7 @@ const whatIsProcessIntelligence: AnswerPage = {
     { q: 'What do you actually get from process intelligence?', a: 'A current-state baseline: a process map computed from real work, cycle-time and wait-time metrics, the common variants and exceptions, and the steps where automation would genuinely help.' },
   ],
   jsonLd: ['Article', 'FAQPage', 'DefinedTerm', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-07-16',
   published: true,
 };
@@ -135,7 +135,7 @@ const whatIsProcessMining: AnswerPage = {
     { q: 'Is process mining the same as task mining?', a: 'No. Process mining works from system logs; task mining works from observed screen activity. See our process mining vs. task mining comparison for the full breakdown.' },
   ],
   jsonLd: ['Article', 'FAQPage', 'DefinedTerm', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-07-18',
   published: true,
 };
@@ -212,7 +212,7 @@ const processMiningVsTaskMining: AnswerPage = {
     { q: 'Which technique does Ledgerium use?', a: "Ledgerium's recordings work like task mining: they capture real browser and application activity directly as a workflow happens, rather than mining historical logs from existing systems." },
   ],
   jsonLd: ['Article', 'FAQPage', 'DefinedTerm', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-07-18',
   published: true,
 };
@@ -278,7 +278,7 @@ const whatIsTaskMining: AnswerPage = {
     { q: 'How is task mining different from process mining?', a: 'Task mining observes the user\'s real actions directly; process mining reconstructs the process from event logs a system already stores. See our full process mining vs. task mining comparison.' },
   ],
   jsonLd: ['Article', 'FAQPage', 'DefinedTerm', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-07-18',
   published: true,
 };
@@ -355,7 +355,7 @@ const processMapVsFlowchart: AnswerPage = {
     { q: 'Why does it matter whether a process map reflects real execution?', a: 'Because the gaps between the intended flow and the real flow — extra approval loops, exceptions, idle handoffs — are usually where time and money are actually lost, and only a map built from real data can show them.' },
   ],
   jsonLd: ['Article', 'FAQPage', 'DefinedTerm', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-07-18',
   published: true,
 };
@@ -420,7 +420,7 @@ const whatIsAnSop: AnswerPage = {
     { q: 'Where can I get an SOP template for a specific task?', a: 'See the SOP template library for editable, ready-to-use templates for common tasks like invoice approval, customer onboarding, and expense reporting.' },
   ],
   jsonLd: ['Article', 'FAQPage', 'DefinedTerm', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-07-18',
   published: true,
 };
@@ -485,7 +485,7 @@ const whatIsADocumentWorkflow: AnswerPage = {
     { q: 'Why do document workflows tend to run slower than expected?', a: 'Handoffs are the usual cause: a document waiting in someone\'s inbox, sitting in a queue for approval, or being routed to the wrong person are common sources of delay that are easy to miss until the real workflow is traced.' },
   ],
   jsonLd: ['Article', 'FAQPage', 'DefinedTerm', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-07-18',
   published: true,
 };
@@ -551,7 +551,7 @@ const whatIsCycleTime: AnswerPage = {
     { q: 'Do you need special tools to measure cycle time accurately?', a: 'You need a timestamp for when each step actually starts and ends. Manual estimates tend to understate cycle time because people notice active work far more easily than idle wait time.' },
   ],
   jsonLd: ['Article', 'FAQPage', 'DefinedTerm', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium'] },
+  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
   updatedAt: '2026-07-18',
   published: true,
 };
