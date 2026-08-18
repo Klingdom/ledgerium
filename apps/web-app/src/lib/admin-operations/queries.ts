@@ -20,7 +20,13 @@
 
 import { db } from '@/db';
 import { toPlanType } from '@/lib/plans';
-import { MONTHLY_PRICE_USD, MRR_BILLABLE_STATUSES, ENTERPRISE_PLAN } from './pricing.js';
+import {
+  MONTHLY_PRICE_USD,
+  ANNUAL_MONTHLY_EQUIVALENT_USD,
+  MRR_BILLABLE_STATUSES,
+  TEAM_MRR_BILLABLE_STATUSES,
+  ENTERPRISE_PLAN,
+} from './pricing.js';
 import type {
   UserVolumeSection,
   RecordingVolumeSection,
@@ -430,15 +436,47 @@ export async function getSystemHealth(): Promise<SystemHealthSection> {
  * current DB state, not windowed by the date range parameter.
  *
  * CORRECTNESS NOTE (R-5):
- *   We use a SINGLE compound groupBy({ by: ['plan','subscriptionStatus'] }).
+ *   We use a SINGLE compound groupBy({ by: ['plan','subscriptionStatus','billingInterval'] }).
  *   This gives joint distribution rows like:
- *     { plan: 'starter', subscriptionStatus: 'active', _count: { id: 5 } }
- *   Two separate marginal groupBys would give:
- *     { plan: 'starter', _count: N }  AND  { subscriptionStatus: 'active', _count: M }
- *   Marginals cannot reconstruct the billable intersection (plan=X AND status=active),
- *   so MRR would be incorrect.
+ *     { plan: 'starter', subscriptionStatus: 'active', billingInterval: 'monthly', _count: { id: 5 } }
+ *   Marginal (single-dimension) groupBys cannot reconstruct the billable
+ *   intersection (plan=X AND status=active AND interval=Y), so MRR would be
+ *   incorrect. billingInterval was added to the compound key (REVENUE_PLAN_20K
+ *   fix) for the same reason plan+status were compounded originally — an
+ *   annual subscriber and a monthly subscriber on the same plan+status must
+ *   contribute different dollar amounts, and a marginal groupBy loses that
+ *   distinction.
  *
- * MRR formula: Σ price[plan] × count(row where plan ∈ {starter,team,growth} AND status ∈ ['active'])
+ * AUTHORITATIVE MODEL NOTE — User vs Team double-source fix (REVENUE_PLAN_20K,
+ * docs/meta/REVENUE_PLAN_20K/analytics_analysis.md §1.2b):
+ *   The User table above is authoritative for MRR ONLY for the 'free' and
+ *   'starter' plans (solo-billed; never Team-linked). It is NOT authoritative
+ *   for 'team' or 'growth': checkout.session.completed writes User.plan for
+ *   the purchasing owner once, at checkout, purely so effective-plan lookups
+ *   have a sane value immediately — but every subsequent lifecycle event
+ *   (trial→paid conversion, upgrade, downgrade, renewal-driven status change)
+ *   is delivered via customer.subscription.updated, which — for team-linked
+ *   subscriptions — writes ONLY Team.plan / Team.subscriptionStatus and
+ *   `break`s before reaching the User-sync branch (see webhook/route.ts).
+ *   The owner's User row is therefore a write-once snapshot that drifts from
+ *   reality the moment the subscription's real lifecycle begins. Reading it
+ *   for MRR would either double-count (Team already counts the same
+ *   subscription) or silently miss every later state change.
+ *
+ *   We therefore EXCLUDE 'team'/'growth' User rows from the MRR fold below
+ *   entirely and read the `Team` table directly instead (second query) —
+ *   Team is the single, continuously-updated source of truth for team/growth
+ *   billing state. byPlan / byStatus (the raw User plan-distribution display,
+ *   NOT a dollar figure) are intentionally left untouched by this fix and
+ *   still reflect the User table verbatim — see the doc comment on
+ *   `paidUserCount` below for the corresponding scope note.
+ *
+ * MRR formula:
+ *   Σ over solo (starter, User-sourced) billable rows of monthlyEquivalentUsd(row)
+ *   + Σ over team-linked (team/growth, Team-sourced) billable accounts of monthlyEquivalentUsd(team)
+ * where monthlyEquivalentUsd() is MONTHLY_PRICE_USD[plan] for billingInterval
+ * !== 'annual', else ANNUAL_MONTHLY_EQUIVALENT_USD[plan] (REVENUE_PLAN_20K
+ * §1.2c — annual subscribers must not be counted at the full monthly price).
  *
  * No Date.now() in the fold — pure deterministic reduction over DB rows.
  * No PII — counts only. No Stripe ids or email addresses.
@@ -460,14 +498,28 @@ export async function getSubscriptionBreakdown(): Promise<SubscriptionBreakdownS
     'canceled',
   ];
 
-  // Billable plans for MRR (enterprise is excluded — separate count)
+  // Billable plans for MRR (enterprise is excluded — separate count, no fixed price)
   const MRR_PLANS = ['starter', 'team', 'growth'] as const;
 
-  // Single compound groupBy — gives joint (plan × subscriptionStatus) distribution
-  const jointRows = await db.user.groupBy({
-    by: ['plan', 'subscriptionStatus'],
-    _count: { id: true },
-  });
+  // Single compound groupBy — gives joint (plan × subscriptionStatus × billingInterval)
+  // distribution for individually-billed Users. Run in parallel with the
+  // Team-linked billing query below (independent reads, no shared state).
+  const [jointRows, teamRows] = await Promise.all([
+    db.user.groupBy({
+      by: ['plan', 'subscriptionStatus', 'billingInterval'],
+      _count: { id: true },
+    }),
+    // Team rows with a live Stripe subscription link — see AUTHORITATIVE
+    // MODEL NOTE above for why Team, not User, is read for team/growth MRR.
+    // `(db as any)` matches the existing cast convention for the Team model
+    // used throughout webhook/route.ts and team-billing.ts.
+    (db as any).team.findMany({
+      where: { stripeSubscriptionId: { not: null } },
+      select: { plan: true, subscriptionStatus: true, billingInterval: true },
+    }) as Promise<
+      Array<{ plan: string; subscriptionStatus: string; billingInterval: string | null }>
+    >,
+  ]);
 
   // Initialise zero-filled maps
   const byPlan = Object.fromEntries(
@@ -486,7 +538,17 @@ export async function getSubscriptionBreakdown(): Promise<SubscriptionBreakdownS
   let paidUserCount = 0;
   let totalUsersFromJoint = 0;
 
-  // Fold the joint distribution rows
+  /** MONTHLY_PRICE_USD for monthly billing, ANNUAL_MONTHLY_EQUIVALENT_USD for annual. */
+  function monthlyEquivalentUsd(
+    plan: 'starter' | 'team' | 'growth',
+    billingInterval: string | null | undefined,
+  ): number {
+    return billingInterval === 'annual'
+      ? ANNUAL_MONTHLY_EQUIVALENT_USD[plan]
+      : MONTHLY_PRICE_USD[plan];
+  }
+
+  // Fold the joint distribution rows (User — authoritative for free/starter only)
   for (const row of jointRows) {
     const count = row._count.id;
     totalUsersFromJoint += count;
@@ -506,27 +568,51 @@ export async function getSubscriptionBreakdown(): Promise<SubscriptionBreakdownS
       ? (rawStatus as NormalizedSubscriptionStatus)
       : 'none';
 
-    // Accumulate plan and status counts
+    // Accumulate plan and status counts — raw User distribution, unaffected
+    // by the team/growth MRR-sourcing fix (display-only, not a dollar figure).
     byPlan[normalizedPlan] = (byPlan[normalizedPlan] ?? 0) + count;
     byStatus[normalizedStatus] = (byStatus[normalizedStatus] ?? 0) + count;
 
-    // Enterprise count (shown separately; excluded from MRR)
+    // Enterprise count (shown separately; excluded from MRR — no fixed price)
     if (normalizedPlan === ENTERPRISE_PLAN) {
       enterpriseCount += count;
     }
 
-    // MRR contribution: plan ∈ MRR_PLANS AND status ∈ MRR_BILLABLE_STATUSES
-    const isBillablePlan = (MRR_PLANS as readonly string[]).includes(normalizedPlan);
+    // MRR contribution: User rows are billable ONLY for 'starter' — team/growth
+    // are read from the Team table below instead (see AUTHORITATIVE MODEL NOTE).
+    const isBillableSoloPlan = normalizedPlan === 'starter';
     const isBillableStatus = (MRR_BILLABLE_STATUSES as readonly string[]).includes(
       normalizedStatus,
     );
 
-    if (isBillablePlan && isBillableStatus) {
-      const plan = normalizedPlan as 'starter' | 'team' | 'growth';
-      byPlanUsd[plan] = (byPlanUsd[plan] ?? 0) + MONTHLY_PRICE_USD[plan] * count;
-      // paidUserCount = active non-free subscribers
+    if (isBillableSoloPlan && isBillableStatus) {
+      byPlanUsd.starter += monthlyEquivalentUsd('starter', row.billingInterval) * count;
+      // paidUserCount = active non-free solo subscribers (team/growth accounts
+      // are counted separately below, one per Stripe subscription).
       paidUserCount += count;
     }
+  }
+
+  // Fold Team-linked billing rows — authoritative for team/growth MRR.
+  // One paying ACCOUNT per Stripe subscription (not per seat) — matches the
+  // existing paidUserCount semantics of "how many distinct bills are being
+  // paid", not "how many people have access".
+  for (const team of teamRows) {
+    const normalizedTeamPlan = toPlanType(team.plan ?? 'free');
+    if (normalizedTeamPlan !== 'team' && normalizedTeamPlan !== 'growth') {
+      // Team rows can also be 'free' (never subscribed), 'starter' (not a
+      // real workspace-billing tier), or 'enterprise' (custom pricing, no
+      // fixed price to fold here) — none contribute to byPlanUsd.
+      continue;
+    }
+    const isBillableTeamStatus = (TEAM_MRR_BILLABLE_STATUSES as readonly string[]).includes(
+      team.subscriptionStatus ?? 'none',
+    );
+    if (!isBillableTeamStatus) continue;
+
+    const plan = normalizedTeamPlan as 'team' | 'growth';
+    byPlanUsd[plan] += monthlyEquivalentUsd(plan, team.billingInterval);
+    paidUserCount += 1;
   }
 
   const estimatedUsd = Object.values(byPlanUsd).reduce(

@@ -39,6 +39,11 @@ vi.mock('@/db', () => ({
     analyticsEvent: {
       groupBy: vi.fn(),
     },
+    // REVENUE_PLAN_20K fix: getSubscriptionBreakdown() reads Team directly
+    // for team/growth MRR (double-source fix) — see queries.ts.
+    team: {
+      findMany: vi.fn(),
+    },
     $queryRaw: vi.fn(),
   },
 }));
@@ -65,11 +70,15 @@ const mockDb = db as unknown as {
   upload: { count: ReturnType<typeof vi.fn>; findMany: ReturnType<typeof vi.fn>; groupBy: ReturnType<typeof vi.fn> };
   workflow: { count: ReturnType<typeof vi.fn>; findMany: ReturnType<typeof vi.fn> };
   analyticsEvent: { groupBy: ReturnType<typeof vi.fn> };
+  team: { findMany: ReturnType<typeof vi.fn> };
   $queryRaw: ReturnType<typeof vi.fn>;
 };
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // Default: no team has a live Stripe link. Tests exercising team/growth MRR
+  // override this per-test via mockDb.team.findMany.mockResolvedValue([...]).
+  mockDb.team.findMany.mockResolvedValue([]);
 });
 
 // ── truncateUserId ─────────────────────────────────────────────────────────────
@@ -488,12 +497,18 @@ describe('getSubscriptionBreakdown — edge cases (Iter C QA)', () => {
 
   // ── MRR correctness: mixed active plans compute correct dollar sum ────────────
 
-  it('MRR correctness: 2 active starter + 1 active team → estimatedUsd = (2×starter) + (1×team)', async () => {
+  it('MRR correctness: 2 active starter (User) + 1 active team (Team) → estimatedUsd = (2×starter) + (1×team), no double-count', async () => {
     const { MONTHLY_PRICE_USD } = await import('./pricing.js');
 
+    // The User row with plan='team' represents the purchasing owner's
+    // write-once checkout snapshot (REVENUE_PLAN_20K §1.2b) — it must NOT
+    // contribute to MRR a second time alongside the authoritative Team row.
     mockDb.user.groupBy.mockResolvedValue([
-      { plan: 'starter', subscriptionStatus: 'active', _count: { id: 2 } },
-      { plan: 'team',    subscriptionStatus: 'active', _count: { id: 1 } },
+      { plan: 'starter', subscriptionStatus: 'active', billingInterval: null, _count: { id: 2 } },
+      { plan: 'team',    subscriptionStatus: 'active', billingInterval: null, _count: { id: 1 } },
+    ]);
+    mockDb.team.findMany.mockResolvedValue([
+      { plan: 'team', subscriptionStatus: 'active', billingInterval: null },
     ]);
 
     const result = await getSubscriptionBreakdown();
@@ -501,11 +516,91 @@ describe('getSubscriptionBreakdown — edge cases (Iter C QA)', () => {
     const expected = 2 * MONTHLY_PRICE_USD.starter + 1 * MONTHLY_PRICE_USD.team;
     expect(result.mrr.estimatedUsd).toBe(expected);
     expect(result.mrr.byPlanUsd.starter).toBe(2 * MONTHLY_PRICE_USD.starter);
+    // Exactly ONE team contribution (from the Team row), not two.
     expect(result.mrr.byPlanUsd.team).toBe(1 * MONTHLY_PRICE_USD.team);
     expect(result.mrr.byPlanUsd.growth).toBe(0);
+    // paidUserCount = 2 solo starter (User) + 1 team account (Team) = 3
     expect(result.paidUserCount).toBe(3);
-    // freeToPaidConversionPct: 3 paid / 3 total * 100 = 100
+    // freeToPaidConversionPct: 3 paid / 3 total (User-sourced denominator) * 100 = 100
     expect(result.freeToPaidConversionPct).toBe(100);
+  });
+
+  // ── REVENUE_PLAN_20K regression locks ─────────────────────────────────────
+  //
+  // These three tests each fail against the pre-fix behavior and pass
+  // against the fix. See docs/meta/REVENUE_PLAN_20K/analytics_analysis.md §1.2.
+
+  it('REVENUE_PLAN_20K (§1.2b): a Team-tier subscription with NO corresponding paid User row still appears in MRR', async () => {
+    const { MONTHLY_PRICE_USD } = await import('./pricing.js');
+
+    // Simulates the realistic post-conversion state: the owner's User row was
+    // never a paid plan in this joint distribution at all (e.g. team was
+    // provisioned before the owner's own User.plan write, or the owner's
+    // User row genuinely stayed 'free' in this fixture) — only free users
+    // exist in the User table, yet a live Team subscription exists.
+    // PRE-FIX: getSubscriptionBreakdown() never queries db.team at all, so
+    // this Team-tier growth subscription is completely invisible to MRR —
+    // estimatedUsd would be 0. POST-FIX: it must be included.
+    mockDb.user.groupBy.mockResolvedValue([
+      { plan: 'free', subscriptionStatus: 'none', billingInterval: null, _count: { id: 10 } },
+    ]);
+    mockDb.team.findMany.mockResolvedValue([
+      { plan: 'growth', subscriptionStatus: 'active', billingInterval: null },
+    ]);
+
+    const result = await getSubscriptionBreakdown();
+
+    expect(result.mrr.byPlanUsd.growth).toBe(MONTHLY_PRICE_USD.growth);
+    expect(result.mrr.estimatedUsd).toBe(MONTHLY_PRICE_USD.growth);
+    expect(result.paidUserCount).toBe(1);
+  });
+
+  it('REVENUE_PLAN_20K (§1.2b): a Team.subscriptionStatus of "trialing" is excluded from MRR (mirrors User billable-status gate)', async () => {
+    mockDb.user.groupBy.mockResolvedValue([]);
+    mockDb.team.findMany.mockResolvedValue([
+      { plan: 'team', subscriptionStatus: 'trialing', billingInterval: null },
+    ]);
+
+    const result = await getSubscriptionBreakdown();
+
+    expect(result.mrr.byPlanUsd.team).toBe(0);
+    expect(result.mrr.estimatedUsd).toBe(0);
+    expect(result.paidUserCount).toBe(0);
+  });
+
+  it('REVENUE_PLAN_20K (§1.2c): an annual starter subscriber contributes the monthly-equivalent price, not the full monthly sticker price', async () => {
+    const { MONTHLY_PRICE_USD, ANNUAL_MONTHLY_EQUIVALENT_USD } = await import('./pricing.js');
+
+    // Sanity: the two constants must actually differ for this test to be meaningful.
+    expect(ANNUAL_MONTHLY_EQUIVALENT_USD.starter).toBeLessThan(MONTHLY_PRICE_USD.starter);
+
+    mockDb.user.groupBy.mockResolvedValue([
+      { plan: 'starter', subscriptionStatus: 'active', billingInterval: 'annual', _count: { id: 1 } },
+    ]);
+
+    const result = await getSubscriptionBreakdown();
+
+    // PRE-FIX: MONTHLY_PRICE_USD.starter is applied regardless of interval —
+    // this subscriber would be overstated at the full monthly sticker price
+    // (~20% overstatement at current pricing). POST-FIX: the annual
+    // monthly-equivalent price is applied instead.
+    expect(result.mrr.byPlanUsd.starter).toBe(ANNUAL_MONTHLY_EQUIVALENT_USD.starter);
+    expect(result.mrr.estimatedUsd).toBe(ANNUAL_MONTHLY_EQUIVALENT_USD.starter);
+    expect(result.mrr.estimatedUsd).not.toBe(MONTHLY_PRICE_USD.starter);
+  });
+
+  it('REVENUE_PLAN_20K (§1.2c): an annual growth Team subscription contributes the monthly-equivalent price', async () => {
+    const { MONTHLY_PRICE_USD, ANNUAL_MONTHLY_EQUIVALENT_USD } = await import('./pricing.js');
+
+    mockDb.user.groupBy.mockResolvedValue([]);
+    mockDb.team.findMany.mockResolvedValue([
+      { plan: 'growth', subscriptionStatus: 'active', billingInterval: 'annual' },
+    ]);
+
+    const result = await getSubscriptionBreakdown();
+
+    expect(result.mrr.byPlanUsd.growth).toBe(ANNUAL_MONTHLY_EQUIVALENT_USD.growth);
+    expect(result.mrr.byPlanUsd.growth).not.toBe(MONTHLY_PRICE_USD.growth);
   });
 
   // ── R-1 drift guard: MRR basis echoes MONTHLY_PRICE_USD ─────────────────────

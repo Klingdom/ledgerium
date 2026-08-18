@@ -11,13 +11,24 @@
 
 import { describe, it, expect } from 'vitest';
 import { PRICING_CONFIG } from '@/lib/config';
-import { MONTHLY_PRICE_USD, MRR_BILLABLE_STATUSES, ENTERPRISE_PLAN } from './pricing';
+import {
+  MONTHLY_PRICE_USD,
+  ANNUAL_MONTHLY_EQUIVALENT_USD,
+  MRR_BILLABLE_STATUSES,
+  TEAM_MRR_BILLABLE_STATUSES,
+  ENTERPRISE_PLAN,
+} from './pricing';
 
 // ── Helper ─────────────────────────────────────────────────────────────────────
 
 function configPriceFor(planId: string): number | null {
   const plan = PRICING_CONFIG.plans.find((p) => p.id === planId);
   return plan?.price ?? null;
+}
+
+function configAnnualPriceFor(planId: string): number | null {
+  const plan = PRICING_CONFIG.plans.find((p) => p.id === planId);
+  return plan?.annualPrice ?? null;
 }
 
 // ── Tests ──────────────────────────────────────────────────────────────────────
@@ -52,5 +63,36 @@ describe('admin-operations/pricing — R-1 drift guard', () => {
 
   it('ENTERPRISE_PLAN is the string "enterprise"', () => {
     expect(ENTERPRISE_PLAN).toBe('enterprise');
+  });
+
+  // ── REVENUE_PLAN_20K §1.2c: annual monthly-equivalent drift guard ───────────
+
+  it('ANNUAL_MONTHLY_EQUIVALENT_USD.starter equals PRICING_CONFIG starter annualPrice', () => {
+    expect(ANNUAL_MONTHLY_EQUIVALENT_USD.starter).toBe(configAnnualPriceFor('starter'));
+  });
+
+  it('ANNUAL_MONTHLY_EQUIVALENT_USD.team equals PRICING_CONFIG team annualPrice', () => {
+    expect(ANNUAL_MONTHLY_EQUIVALENT_USD.team).toBe(configAnnualPriceFor('team'));
+  });
+
+  it('ANNUAL_MONTHLY_EQUIVALENT_USD.growth equals PRICING_CONFIG growth annualPrice', () => {
+    expect(ANNUAL_MONTHLY_EQUIVALENT_USD.growth).toBe(configAnnualPriceFor('growth'));
+  });
+
+  it('every ANNUAL_MONTHLY_EQUIVALENT_USD value is strictly less than its MONTHLY_PRICE_USD counterpart', () => {
+    for (const plan of ['starter', 'team', 'growth'] as const) {
+      expect(
+        ANNUAL_MONTHLY_EQUIVALENT_USD[plan],
+        `${plan} annual monthly-equivalent must be less than the monthly price`,
+      ).toBeLessThan(MONTHLY_PRICE_USD[plan]);
+    }
+  });
+
+  it('TEAM_MRR_BILLABLE_STATUSES contains "active"', () => {
+    expect(TEAM_MRR_BILLABLE_STATUSES).toContain('active');
+  });
+
+  it('TEAM_MRR_BILLABLE_STATUSES is readonly and non-empty', () => {
+    expect(TEAM_MRR_BILLABLE_STATUSES.length).toBeGreaterThan(0);
   });
 });

@@ -59,11 +59,20 @@ vi.mock('@/lib/analytics-server', () => ({
 }));
 
 // stripe mock: all exports controlled per-test via vi.mocked()
-vi.mock('@/lib/stripe', () => ({
-  getStripe: vi.fn(),
-  planFromPriceId: vi.fn(),
-  getWebhookSecret: vi.fn(),
-}));
+// intervalFromStripeSubscription is deliberately kept as the REAL
+// implementation (via importOriginal) rather than mocked — it is a pure,
+// side-effect-free function that reads billing cadence directly off the
+// mock subscription objects tests already construct, so exercising the real
+// logic gives stronger coverage than re-stubbing it per test.
+vi.mock('@/lib/stripe', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/stripe')>();
+  return {
+    ...actual,
+    getStripe: vi.fn(),
+    planFromPriceId: vi.fn(),
+    getWebhookSecret: vi.fn(),
+  };
+});
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -165,6 +174,7 @@ describe('POST /api/billing/webhook', () => {
     };
 
     const stripeSubscription = {
+      status: 'active',
       items: { data: [{ price: { id: priceId } }] },
     };
 
@@ -195,6 +205,161 @@ describe('POST /api/billing/webhook', () => {
           subscriptionStatus: 'active',
           stripeSubscriptionId: subscriptionId,
         }),
+      }),
+    );
+  });
+
+  // ── 1b. REVENUE_PLAN_20K (§1.2a): checkout.session.completed — trialing subscription ──
+  //
+  // REGRESSION LOCK: fails against the pre-fix behavior (subscriptionStatus was
+  // hardcoded to 'active' unconditionally) and passes against the fix (status
+  // is read from the retrieved Stripe subscription). Every first-time
+  // subscriber's Stripe subscription begins in 'trialing' status for the full
+  // STRIPE_TRIAL_DAYS window (checkout/route.ts) — this is the default path
+  // for every new dollar of revenue, not a corner case.
+
+  it('REVENUE_PLAN_20K: checkout.session.completed — Stripe subscription in "trialing" status writes subscriptionStatus="trialing", NOT "active"', async () => {
+    const subscriptionId = 'sub_trial_001';
+    const priceId = 'price_starter_monthly_test';
+    const userId = 'user_trial_abc';
+    const customerId = 'cus_trial_test';
+
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_trial_test',
+      metadata: { userId },
+      subscription: subscriptionId,
+      customer: customerId,
+    };
+
+    const stripeSubscription = {
+      status: 'trialing',
+      items: { data: [{ price: { id: priceId } }] },
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue(stripeSubscription),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('starter');
+
+    const req = makeRequest('{}');
+    const res = await POST(req);
+
+    expect(res.status).toBe(200);
+    expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: userId },
+        data: expect.objectContaining({
+          plan: 'starter',
+          // THE FIX: must be 'trialing', not the pre-fix hardcoded 'active'.
+          // MRR_BILLABLE_STATUSES = ['active'] (admin-operations/pricing.ts)
+          // only excludes trials from MRR if this write is correct.
+          subscriptionStatus: 'trialing',
+        }),
+      }),
+    );
+    // Explicit negative assertion — this is exactly the bug being fixed.
+    expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ subscriptionStatus: 'active' }),
+      }),
+    );
+  });
+
+  // ── REVENUE_PLAN_20K (§1.2c): checkout.session.completed — billing interval ──
+
+  it('REVENUE_PLAN_20K: checkout.session.completed — annual price.recurring.interval="year" writes billingInterval="annual"', async () => {
+    const subscriptionId = 'sub_annual_001';
+    const priceId = 'price_starter_annual_test';
+    const userId = 'user_annual_abc';
+    const customerId = 'cus_annual_test';
+
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_annual_test',
+      metadata: { userId },
+      subscription: subscriptionId,
+      customer: customerId,
+    };
+
+    const stripeSubscription = {
+      status: 'active',
+      items: {
+        data: [{ price: { id: priceId, recurring: { interval: 'year' } } }],
+      },
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue(stripeSubscription),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('starter');
+
+    await POST(makeRequest('{}'));
+
+    expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: userId },
+        data: expect.objectContaining({ billingInterval: 'annual' }),
+      }),
+    );
+  });
+
+  it('REVENUE_PLAN_20K: checkout.session.completed — monthly price.recurring.interval="month" writes billingInterval="monthly"', async () => {
+    const subscriptionId = 'sub_monthly_001';
+    const priceId = 'price_starter_monthly_test';
+    const userId = 'user_monthly_abc';
+    const customerId = 'cus_monthly_test';
+
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_monthly_test',
+      metadata: { userId },
+      subscription: subscriptionId,
+      customer: customerId,
+    };
+
+    const stripeSubscription = {
+      status: 'active',
+      items: {
+        data: [{ price: { id: priceId, recurring: { interval: 'month' } } }],
+      },
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue(stripeSubscription),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('starter');
+
+    await POST(makeRequest('{}'));
+
+    expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: userId },
+        data: expect.objectContaining({ billingInterval: 'monthly' }),
       }),
     );
   });
@@ -1421,6 +1586,7 @@ describe('POST /api/billing/webhook', () => {
     };
 
     const stripeSubscription = {
+      status: 'active',
       items: { data: [{ price: { id: priceId } }] },
     };
 
@@ -1495,6 +1661,7 @@ describe('POST /api/billing/webhook', () => {
     };
 
     const stripeSubscription = {
+      status: 'active',
       items: { data: [{ price: { id: 'price_growth_monthly_test' } }] },
     };
 
@@ -1553,6 +1720,7 @@ describe('POST /api/billing/webhook', () => {
     };
 
     const stripeSubscription = {
+      status: 'active',
       items: { data: [{ price: { id: 'price_team_monthly_test' } }] },
     };
 
@@ -1600,6 +1768,7 @@ describe('POST /api/billing/webhook', () => {
     };
 
     const stripeSubscription = {
+      status: 'active',
       items: { data: [{ price: { id: 'price_starter_monthly_test' } }] },
     };
 
@@ -1670,6 +1839,7 @@ describe('POST /api/billing/webhook', () => {
     };
 
     const stripeSubscription = {
+      status: 'active',
       items: { data: [{ price: { id: 'price_enterprise_annual_test' } }] },
     };
 
@@ -1737,6 +1907,7 @@ describe('POST /api/billing/webhook', () => {
       },
       subscriptions: {
         retrieve: vi.fn().mockResolvedValue({
+          status: 'active',
           items: { data: [{ price: { id: 'price_team_monthly_test' } }] },
         }),
       },
@@ -1781,6 +1952,7 @@ describe('POST /api/billing/webhook', () => {
       },
       subscriptions: {
         retrieve: vi.fn().mockResolvedValue({
+          status: 'active',
           items: { data: [{ price: { id: 'price_growth_monthly_test' } }] },
         }),
       },
@@ -1826,6 +1998,7 @@ describe('POST /api/billing/webhook', () => {
       },
       subscriptions: {
         retrieve: vi.fn().mockResolvedValue({
+          status: 'active',
           items: { data: [{ price: { id: 'price_team_monthly_test' } }] },
         }),
       },
@@ -1871,6 +2044,7 @@ describe('POST /api/billing/webhook', () => {
       },
       subscriptions: {
         retrieve: vi.fn().mockResolvedValue({
+          status: 'active',
           items: { data: [{ price: { id: 'price_team_monthly_test' } }] },
         }),
       },
@@ -1909,6 +2083,7 @@ describe('POST /api/billing/webhook', () => {
       },
       subscriptions: {
         retrieve: vi.fn().mockResolvedValue({
+          status: 'active',
           items: { data: [{ price: { id: 'price_team_monthly_test' } }] },
         }),
       },
@@ -1955,6 +2130,7 @@ describe('POST /api/billing/webhook', () => {
       },
       subscriptions: {
         retrieve: vi.fn().mockResolvedValue({
+          status: 'active',
           items: { data: [{ price: { id: 'price_team_monthly_test' } }] },
         }),
       },
@@ -2007,6 +2183,7 @@ describe('POST /api/billing/webhook', () => {
       },
       subscriptions: {
         retrieve: vi.fn().mockResolvedValue({
+          status: 'active',
           items: { data: [{ price: { id: 'price_growth_monthly_test' } }] },
         }),
       },
@@ -2035,6 +2212,61 @@ describe('POST /api/billing/webhook', () => {
       expect.objectContaining({
         where: { id: userId },
         data: expect.objectContaining({ plan: 'growth', stripeCustomerId: customerId }),
+      }),
+    );
+  });
+
+  // ── 41b. REVENUE_PLAN_20K (§1.2a/b): new team is provisioned as 'trialing', NOT the schema default 'active' ──
+  //
+  // REGRESSION LOCK: before this fix, team.create() never wrote
+  // subscriptionStatus explicitly, so a brand-new team/growth trial silently
+  // took the Team schema's DB default of 'active' — reproducing the exact
+  // same trial-misclassification bug on the team-provisioning path that
+  // existed on the solo User path.
+
+  it('REVENUE_PLAN_20K: checkout.session.completed (team plan, new workspace) — Stripe "trialing" writes Team.subscriptionStatus="trialing"', async () => {
+    const userId = 'user_team_trial_041b';
+    const customerId = 'cus_team_trial_041b';
+    const subscriptionId = 'sub_team_trial_041b';
+
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_041b',
+      metadata: { userId },
+      subscription: subscriptionId,
+      customer: customerId,
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue({
+          status: 'trialing',
+          items: { data: [{ price: { id: 'price_team_monthly_test' } }] },
+        }),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('team');
+    vi.mocked(teamBillingLib.resolveTeamFromCustomer).mockResolvedValue(null);
+    vi.mocked(dbLib.db as any).team.findFirst.mockResolvedValue(null);
+    vi.mocked(dbLib.db.user.findUnique).mockResolvedValue({ name: 'Trial Owner', email: 'trial@example.com' } as any);
+    vi.mocked(dbLib.db as any).team.create.mockResolvedValue({ id: 'team_041b' });
+
+    await POST(makeRequest('{}'));
+
+    expect(vi.mocked(dbLib.db as any).team.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          plan: 'team',
+          // THE FIX: explicit 'trialing', not silently defaulted to 'active'
+          // by the Team schema's DB default.
+          subscriptionStatus: 'trialing',
+        }),
       }),
     );
   });

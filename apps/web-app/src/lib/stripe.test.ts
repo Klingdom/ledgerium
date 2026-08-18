@@ -96,3 +96,47 @@ describe('getWebhookSecret', () => {
     expect(getWebhookSecret()).toBe('whsec_test_secret_value');
   });
 });
+
+// ─── intervalFromStripeSubscription (REVENUE_PLAN_20K §1.2c) ────────────────
+
+describe('intervalFromStripeSubscription', () => {
+  it('returns "annual" when price.recurring.interval is "year"', async () => {
+    const { intervalFromStripeSubscription } = await import('./stripe.js');
+
+    const result = intervalFromStripeSubscription({
+      items: { data: [{ price: { recurring: { interval: 'year' } } }] },
+    } as any);
+
+    expect(result).toBe('annual');
+  });
+
+  it('returns "monthly" when price.recurring.interval is "month"', async () => {
+    const { intervalFromStripeSubscription } = await import('./stripe.js');
+
+    const result = intervalFromStripeSubscription({
+      items: { data: [{ price: { recurring: { interval: 'month' } } }] },
+    } as any);
+
+    expect(result).toBe('monthly');
+  });
+
+  it('defaults to "monthly" when recurring is missing (malformed/partial subscription object)', async () => {
+    const { intervalFromStripeSubscription } = await import('./stripe.js');
+
+    const result = intervalFromStripeSubscription({
+      items: { data: [{ price: {} }] },
+    } as any);
+
+    expect(result).toBe('monthly');
+  });
+
+  it('defaults to "monthly" when items.data is empty (never applies the annual discount to unknown cadence)', async () => {
+    const { intervalFromStripeSubscription } = await import('./stripe.js');
+
+    const result = intervalFromStripeSubscription({
+      items: { data: [] },
+    } as any);
+
+    expect(result).toBe('monthly');
+  });
+});

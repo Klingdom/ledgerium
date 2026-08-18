@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getStripe, getWebhookSecret, planFromPriceId } from '@/lib/stripe';
+import { getStripe, getWebhookSecret, planFromPriceId, intervalFromStripeSubscription } from '@/lib/stripe';
 import type { PlanType } from '@/lib/plans';
 import { PLAN_FEATURES } from '@/lib/plans';
 import { db } from '@/db';
@@ -12,6 +12,41 @@ import {
 import { softDeactivateExcessMembers } from '@/lib/workspace/seat-management';
 import { normalizeStripeStatus } from '@/lib/workspace/subscription-status';
 import type { NormalizedSubscriptionStatus } from '@/lib/workspace/subscription-status';
+
+/** Closed union for User.subscriptionStatus (distinct from Team's 5-value vocabulary). */
+type UserSubscriptionStatus = 'active' | 'past_due' | 'canceled' | 'trialing' | 'none';
+
+/**
+ * Map a raw Stripe subscription status to the vocabulary stored on
+ * User.subscriptionStatus: 'active' | 'past_due' | 'canceled' | 'trialing' | 'none'.
+ * Unmapped Stripe statuses (e.g. 'incomplete', 'unpaid') normalize to 'none' —
+ * fail-closed for revenue: an ambiguous status must never be recorded as
+ * billable. `MRR_BILLABLE_STATUSES = ['active']` in admin-operations/pricing.ts
+ * is the gate that keeps trials and every other non-active status out of MRR;
+ * that gate only works if the DB actually distinguishes them.
+ *
+ * REVENUE_PLAN_20K fix (docs/meta/REVENUE_PLAN_20K/analytics_analysis.md §1.2a):
+ * this is now called from BOTH checkout.session.completed AND
+ * customer.subscription.updated, so a subscription that begins in Stripe's
+ * 'trialing' state is persisted as 'trialing' from the FIRST webhook event
+ * onward, not just from whichever later event happens to fire. Previously
+ * checkout.session.completed hardcoded 'active' unconditionally, so every
+ * 14-day trial was counted as billed revenue for its entire duration.
+ */
+function mapStripeStatusToUserSubscriptionStatus(status: string): UserSubscriptionStatus {
+  switch (status) {
+    case 'active':
+      return 'active';
+    case 'past_due':
+      return 'past_due';
+    case 'canceled':
+      return 'canceled';
+    case 'trialing':
+      return 'trialing';
+    default:
+      return 'none';
+  }
+}
 
 /**
  * POST /api/billing/webhook
@@ -72,7 +107,17 @@ export async function POST(req: NextRequest) {
         // If resolution fails (Stripe API error or unmapped price ID) we re-throw
         // so the outer catch returns HTTP 500 and Stripe retries — silent under-
         // provisioning is worse than a retry (BUG-01 fix).
+        //
+        // REVENUE_PLAN_20K fix: we also read subscription.status and
+        // subscription.items[0].price.recurring.interval off the SAME retrieved
+        // object, rather than assuming 'active'/'monthly'. A first-time
+        // subscriber's Stripe subscription begins in 'trialing' status for the
+        // full STRIPE_TRIAL_DAYS window (checkout/route.ts); if we hardcode
+        // 'active' here, every trial is booked as billed MRR from second one.
         let plan: PlanType;
+        let subscriptionStatus: UserSubscriptionStatus;
+        let teamSubscriptionStatus: NormalizedSubscriptionStatus;
+        let billingInterval: ReturnType<typeof intervalFromStripeSubscription>;
         if (session.subscription) {
           const subscription = await getStripe().subscriptions.retrieve(
             session.subscription as string,
@@ -90,6 +135,9 @@ export async function POST(req: NextRequest) {
             );
           }
           plan = resolved;
+          subscriptionStatus = mapStripeStatusToUserSubscriptionStatus(subscription.status);
+          teamSubscriptionStatus = normalizeStripeStatus(subscription.status);
+          billingInterval = intervalFromStripeSubscription(subscription);
         } else {
           // No subscription object on the session — cannot resolve a paid plan.
           throw new Error(
@@ -113,12 +161,20 @@ export async function POST(req: NextRequest) {
             });
             if (unlinkedTeam) {
               // Link the existing workspace to Stripe IDs and stamp the plan.
+              // subscriptionStatus + billingInterval written here too (REVENUE_PLAN_20K
+              // fix) — Team is authoritative for team/growth billing state from this
+              // point forward (see Team.billingInterval schema doc comment); without
+              // this write a brand-new trial would fall back to the Team-row DB
+              // default subscriptionStatus='active', reproducing the exact same
+              // trial-misclassification bug on the team path.
               await (db as any).team.update({
                 where: { id: unlinkedTeam.id },
                 data: {
                   plan,
                   stripeCustomerId: customerId,
                   stripeSubscriptionId: session.subscription as string,
+                  subscriptionStatus: teamSubscriptionStatus,
+                  billingInterval,
                 },
               });
               console.log(
@@ -145,6 +201,12 @@ export async function POST(req: NextRequest) {
                     plan,
                     stripeCustomerId: customerId,
                     stripeSubscriptionId: session.subscription as string,
+                    // REVENUE_PLAN_20K fix: explicit, not the schema default
+                    // ('active') — a first-time team/growth trial must be
+                    // provisioned as 'trialing' from creation, not silently
+                    // defaulted to 'active' by the DB column default.
+                    subscriptionStatus: teamSubscriptionStatus,
+                    billingInterval,
                     createdBy: userId,
                   },
                 }),
@@ -170,13 +232,20 @@ export async function POST(req: NextRequest) {
           where: { id: userId },
           data: {
             plan,
-            subscriptionStatus: 'active',
+            // REVENUE_PLAN_20K fix: was unconditionally 'active'. Now reflects
+            // the actual Stripe subscription status — 'trialing' for the full
+            // trial window, 'active' only once genuinely billed. This is the
+            // write that MRR_BILLABLE_STATUSES = ['active'] (pricing.ts) was
+            // always meant to gate on; the gate was defeated because this
+            // field never actually recorded 'trialing'.
+            subscriptionStatus,
+            billingInterval,
             stripeSubscriptionId: session.subscription as string,
             stripeCustomerId: session.customer as string,
           },
         });
-        console.log(`[stripe] User ${userId} upgraded to ${plan}`);
-        trackServer('subscription_created', { userId, plan });
+        console.log(`[stripe] User ${userId} upgraded to ${plan} (${subscriptionStatus})`);
+        trackServer('subscription_created', { userId, plan, status: subscriptionStatus });
         break;
       }
 
@@ -184,12 +253,15 @@ export async function POST(req: NextRequest) {
         const subscription = event.data.object as Stripe.Subscription;
 
         const status = subscription.status;
-        const planStatus =
-          status === 'active' ? 'active' :
-          status === 'past_due' ? 'past_due' :
-          status === 'canceled' ? 'canceled' :
-          status === 'trialing' ? 'trialing' :
-          'none';
+        // Uses the same mapping helper as checkout.session.completed (REVENUE_PLAN_20K
+        // fix) so a subscription's User.subscriptionStatus vocabulary is derived
+        // identically at every write site — was previously an inline duplicate
+        // of this exact ternary; now a single source of truth.
+        const planStatus = mapStripeStatusToUserSubscriptionStatus(status);
+
+        // REVENUE_PLAN_20K fix (§1.2c): persist the actual billing cadence so
+        // annual subscribers are not counted at the full monthly sticker price.
+        const billingInterval = intervalFromStripeSubscription(subscription);
 
         // Resolve plan from the current price ID.
         // For active/past_due/trialing subscriptions, an unmapped price ID is a
@@ -233,6 +305,12 @@ export async function POST(req: NextRequest) {
                 stripeSubscriptionId: subscription.id,
                 // Sub-task 1 (iter 085): write normalized status alongside plan.
                 subscriptionStatus: normalizedStatus,
+                // REVENUE_PLAN_20K fix: Team is the authoritative billing-state
+                // row for team/growth from this point in the lifecycle onward
+                // (see Team.billingInterval schema doc comment) — trial→paid
+                // conversions, upgrades, downgrades, and renewals all arrive
+                // here, never through the User row again.
+                billingInterval,
               },
             });
 
@@ -305,6 +383,7 @@ export async function POST(req: NextRequest) {
           data: {
             plan,
             subscriptionStatus: planStatus,
+            billingInterval,
           },
         });
         console.log(`[stripe] User ${soloUser.id} subscription updated: ${status} → plan ${plan}`);

@@ -47,8 +47,14 @@ export type NormalizedSubscriptionStatus =
 /** Estimated Monthly Recurring Revenue breakdown. */
 export interface MrrEstimate {
   /**
-   * Σ price[plan] × count(plan ∈ {starter,team,growth} AND status ∈ billableStatuses).
-   * Enterprise excluded (separate count).
+   * Σ monthly-equivalent-price[plan] × count, for:
+   *   - starter: billable (status ∈ billableStatuses) User rows
+   *   - team/growth: billable (status === 'active') Team rows (Team is the
+   *     authoritative source for team/growth billing state — see the
+   *     AUTHORITATIVE MODEL NOTE in getSubscriptionBreakdown()'s doc comment)
+   * "Monthly-equivalent" means annual subscribers contribute their annual
+   * price ÷ 12 (ANNUAL_MONTHLY_EQUIVALENT_USD), not the full monthly sticker
+   * price. Enterprise excluded (separate count — no fixed price).
    */
   estimatedUsd: number;
   /** Per-plan USD contribution to MRR. */
@@ -64,15 +70,26 @@ export interface MrrEstimate {
 
 /** Subscription breakdown section returned by getSubscriptionBreakdown(). */
 export interface SubscriptionBreakdownSection {
-  /** User count per plan tier (zero-filled over closed union). */
+  /**
+   * User count per plan tier (zero-filled over closed union).
+   * Raw User-table distribution — NOT MRR-corrected. For 'team'/'growth' this
+   * reflects the (possibly stale) User.plan snapshot written once at
+   * checkout; it is display-only and is intentionally NOT the source used
+   * for MRR (see getSubscriptionBreakdown()'s AUTHORITATIVE MODEL NOTE).
+   */
   byPlan: Record<NormalizedPlan, number>;
   /** User count per subscription status (zero-filled over closed union). */
   byStatus: Record<NormalizedSubscriptionStatus, number>;
   /** MRR estimate. */
   mrr: MrrEstimate;
   /**
-   * Count of users whose plan is not 'free' AND subscriptionStatus is 'active'.
-   * Equals paying subscribers.
+   * Count of PAYING ACCOUNTS: solo users with plan ≠ free AND
+   * subscriptionStatus === 'active', PLUS team-linked workspaces with
+   * Team.subscriptionStatus === 'active' (one per Stripe subscription, not
+   * per seat). Team/growth accounts are counted here even though they are
+   * excluded from `byPlan.team` / `byPlan.growth`'s underlying MRR fold —
+   * this field answers "how many bills are being paid", `byPlan` answers
+   * "what does the User table currently say".
    */
   paidUserCount: number;
   /**

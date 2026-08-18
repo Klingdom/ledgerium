@@ -100,6 +100,34 @@ export function getPriceId(plan: PaidPlanType, interval: BillingInterval): strin
 }
 
 /**
+ * Derive our BillingInterval ('monthly' | 'annual') from a live Stripe
+ * subscription's actual `price.recurring.interval` ('day' | 'week' | 'month' | 'year').
+ *
+ * Reads directly off the Stripe subscription object — NOT inferred from our
+ * env-configured STRIPE_PRICES key naming (`{plan}_monthly` / `{plan}_annual`).
+ * Stripe's `recurring.interval` is the actual cadence Stripe bills on; our key
+ * naming is a local convention that could drift from what is actually
+ * configured for a given price in the Stripe Dashboard. This is the single
+ * source used both at checkout.session.completed (via subscriptions.retrieve)
+ * and at every subsequent customer.subscription.updated event, so a
+ * subscription's persisted billing interval always reflects Stripe's own
+ * billing state.
+ *
+ * Defaults to 'monthly' when `recurring.interval` is missing or not 'year' —
+ * this covers `'month'` explicitly, and degrades safely for malformed/partial
+ * subscription objects (e.g. incomplete test fixtures) by NOT inflating MRR:
+ * an unrecognized interval is treated as the (lower, correct-or-conservative)
+ * monthly price rather than silently applying the annual discount to an
+ * unknown cadence.
+ */
+export function intervalFromStripeSubscription(
+  subscription: Pick<Stripe.Subscription, 'items'>,
+): BillingInterval {
+  const recurringInterval = subscription.items?.data?.[0]?.price?.recurring?.interval;
+  return recurringInterval === 'year' ? 'annual' : 'monthly';
+}
+
+/**
  * Returns the Stripe webhook signing secret.
  * Throws at call time if STRIPE_WEBHOOK_SECRET is absent so the webhook handler
  * returns HTTP 500 (triggering Stripe retry) rather than silently accepting

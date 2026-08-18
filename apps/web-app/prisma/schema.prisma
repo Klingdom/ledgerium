@@ -14,6 +14,19 @@ model User {
   passwordHash         String   @map("password_hash")
   plan                 String   @default("free") // free, starter, team, growth, enterprise (legacy: pro maps to starter via toPlanType)
   subscriptionStatus   String   @default("none")     @map("subscription_status") // none (default until Stripe webhook sets trialing/active/past_due/canceled)
+
+  /// Billing cadence for the CURRENT subscription (REVENUE_PLAN_20K fix, 2026-08).
+  /// Nullable: 'monthly' | 'annual' | null (never subscribed, or plan is 'free').
+  /// Written from Stripe's own `price.recurring.interval` at checkout.session.completed
+  /// and every customer.subscription.updated — see stripe.ts intervalFromStripeSubscription().
+  /// Consumed by admin-operations/queries.ts getSubscriptionBreakdown() to normalize
+  /// annual subscribers to their monthly-equivalent MRR contribution instead of the
+  /// full monthly sticker price (previously a ~20% MRR overstatement per annual
+  /// subscriber — see docs/meta/REVENUE_PLAN_20K/analytics_analysis.md §1.2c).
+  /// AUTHORITATIVE ONLY for solo (non-team-linked) subscriptions — see the
+  /// Team.billingInterval doc comment for why team/growth subscriptions read
+  /// from Team, not User, once their lifecycle progresses past checkout.
+  billingInterval      String?  @map("billing_interval")
   stripeCustomerId     String?  @map("stripe_customer_id")
   stripeSubscriptionId String?  @map("stripe_subscription_id")
   uploadCount          Int      @default(0) @map("upload_count")
@@ -464,6 +477,29 @@ model Team {
   /// Consumed by TEAM-P03.7 webhook handlers + TEAM-P07 plan-change banner (future).
   /// All existing rows backfill with default 'active' at migration time.
   subscriptionStatus  String   @default("active") @map("subscription_status")
+
+  /// Billing cadence for the workspace's CURRENT subscription (REVENUE_PLAN_20K
+  /// fix, 2026-08). Nullable: 'monthly' | 'annual' | null (no Stripe link yet).
+  /// Written from Stripe's own `price.recurring.interval` — see stripe.ts
+  /// intervalFromStripeSubscription() — at checkout.session.completed
+  /// (team.create / team.update Stripe-link sites) and every
+  /// customer.subscription.updated Team-first write.
+  ///
+  /// AUTHORITATIVE MODEL NOTE (double-source fix): Team, not User, is the
+  /// source of truth for team/growth billing state — including plan,
+  /// subscriptionStatus, and billingInterval — for any workspace with a
+  /// non-null stripeSubscriptionId. The purchasing owner's User.plan /
+  /// User.subscriptionStatus row is written once at checkout for solo-user
+  /// convenience (effective-plan display, etc.) and is NEVER updated again
+  /// for team-linked subscriptions: customer.subscription.updated resolves
+  /// the Team first and `break`s before reaching the solo-subscriber User
+  /// path (see webhook/route.ts). Reading User for team/growth MRR would
+  /// therefore either double-count the owner's stale row or silently miss
+  /// every subsequent lifecycle change (trial→paid conversion, upgrade,
+  /// downgrade, renewal). getSubscriptionBreakdown() reads Team directly for
+  /// team/growth and excludes User rows with plan ∈ {team, growth} from the
+  /// MRR fold entirely.
+  billingInterval     String?  @map("billing_interval")
 
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
