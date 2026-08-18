@@ -84,6 +84,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Off-host backup sidecar env: see docs/runbooks/DATABASE_BACKUP_RESTORE.md.
+      # Those vars are consumed by the backup service in compose.hostinger.yaml,
+      # not by web. Until BACKUP_S3_URI and the AWS credentials are set, the
+      # sidecar still runs on schedule but logs LOCAL ONLY every cycle — it fails
+      # loudly rather than silently, but is not yet off-host durable.
+      #
+      # WARNING: keep the environment-variables block below to plain KEY=VALUE
+      # lines ONLY. The Hostinger action interpolates that value into a shell
+      # script where '#' is NOT treated as an inert comment, so backticks,
+      # ${...} and parentheses in prose there are evaluated and break the deploy.
+      # That is what failed run 32054072270 (2026-08-17) with:
+      #   syntax error near unexpected token '('
+      # Put explanatory prose HERE, as a YAML comment outside the block scalar.
       - name: Deploy to Hostinger
         uses: hostinger/deploy-on-vps@v2
         with:
@@ -128,14 +141,6 @@ jobs:
             DEMO_MODE_DISABLE_TEAMS=${{ vars.DEMO_MODE_DISABLE_TEAMS || 'true' }}
             UMAMI_APP_SECRET=${{ secrets.UMAMI_APP_SECRET }}
             UMAMI_DB_PASSWORD=${{ secrets.UMAMI_DB_PASSWORD }}
-            # ── Off-host backup sidecar (docs/runbooks/DATABASE_BACKUP_RESTORE.md)
-            # Consumed by the `backup` service in compose.hostinger.yaml via
-            # ${VAR} interpolation — NOT read by `web`. Bucket location/endpoint
-            # are non-secret config (vars); the actual credentials are secrets.
-            # Until BACKUP_S3_URI/AWS credentials are set, the sidecar still runs
-            # on schedule but every cycle logs "LOCAL ONLY (not durable)" per
-            # db-backup.sh/evidence-backup.sh's own checks — it does not fail
-            # silently, but it also is not yet providing off-host durability.
             BACKUP_S3_URI=${{ vars.BACKUP_S3_URI }}
             UPLOADS_BACKUP_S3_URI=${{ vars.UPLOADS_BACKUP_S3_URI }}
             BACKUP_S3_ENDPOINT=${{ vars.BACKUP_S3_ENDPOINT }}
