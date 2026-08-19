@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Users, Plus, ChevronRight, Crown, Shield, Eye, HelpCircle } from 'lucide-react';
 import { track } from '@/lib/analytics';
+import { mapCreateTeamError, type CreateTeamError } from './createTeamError';
 
 interface TeamSummary {
   id: string;
@@ -27,6 +28,17 @@ export default function TeamsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  /**
+   * P0-F: create-team failures used to be swallowed entirely — `handleCreate`
+   * had no `else` branch, so a rejected request just stopped the spinner and
+   * left the user staring at an unchanged form with no explanation.
+   *
+   * The API has always returned everything needed to do better:
+   * `code: 'plan_upgrade_required'` + `upgradeUrl` on the 403 plan gate
+   * (api/teams/route.ts), plus a 404 when DEMO_MODE_DISABLE_TEAMS is set.
+   * Only the frontend was missing.
+   */
+  const [createError, setCreateError] = useState<CreateTeamError | null>(null);
 
   useEffect(() => {
     loadTeams();
@@ -51,9 +63,19 @@ export default function TeamsPage() {
       body: JSON.stringify({ name: newName.trim() }),
     });
     if (res.ok) {
+      setCreateError(null);
       setNewName('');
       setShowCreate(false);
       await loadTeams();
+    } else {
+      // Read the API's own error payload rather than inventing a message.
+      const body = await res.json().catch(() => null);
+      const mapped = mapCreateTeamError(res.status, body);
+      setCreateError(mapped);
+
+      if (mapped.requiredPlan) {
+        track({ event: 'upgrade_prompt_viewed', location: 'teams_create', plan: mapped.requiredPlan });
+      }
     }
     setIsCreating(false);
   }
@@ -108,6 +130,28 @@ export default function TeamsPage() {
               Cancel
             </button>
           </div>
+
+          {/* P0-F: surface the failure the API already describes, instead of
+              silently doing nothing. The plan-gate case is a genuine upgrade
+              moment — it is the one place a free user actively asks for a
+              Team-tier capability. */}
+          {createError && (
+            <div
+              role="alert"
+              className="mt-ds-3 flex flex-wrap items-center gap-ds-2 rounded-lg border border-amber-500/30 bg-amber-950/20 px-ds-3 py-ds-2"
+            >
+              <p className="text-ds-sm text-amber-200">{createError.message}</p>
+              {createError.upgradeUrl && (
+                <Link
+                  href={createError.upgradeUrl}
+                  onClick={() => track({ event: 'upgrade_clicked', location: 'teams_create' })}
+                  className="text-ds-sm font-medium text-amber-100 underline underline-offset-2 hover:text-white"
+                >
+                  Compare plans →
+                </Link>
+              )}
+            </div>
+          )}
         </div>
       )}
 
