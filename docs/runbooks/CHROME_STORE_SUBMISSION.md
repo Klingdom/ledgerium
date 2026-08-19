@@ -124,9 +124,86 @@ Run this checklist in order before uploading the `.zip` to the Chrome Web Store 
   title `Extension Privacy Policy — Ledgerium AI Recorder`, permission disclosures present.
   _(A canonical tag was added to this page 2026-08-16; it had been shipping without one.)_
 
-- [ ] **BLOCKER-8: Chrome Store screenshots created (1–5 at 1280×800)**
-  No screenshots currently in repository. Create and upload before submission.
-  Recommended shots: idle state, active recording, step review screen, upload flow.
+- [x] **BLOCKER-8: Chrome Store screenshots created (1–5 at 1280×800) — CLOSED 2026-08-19**
+  4 screenshots at `docs/store-assets/chrome/`, verified 1280×800 by independently
+  reading each file's PNG `IHDR` chunk (not assumed from viewport settings):
+
+  | File | Dimensions | Size |
+  |---|---|---|
+  | `01-idle.png` | 1280×800 | ~36 KB |
+  | `02-active-recording.png` | 1280×800 | ~39 KB |
+  | `03-step-review.png` | 1280×800 | ~42 KB |
+  | `04-upload-flow.png` | 1280×800 | ~51 KB |
+
+  **These are real captures, not mockups.** Each screenshot loads the actual
+  unpacked `dist/` build via `chromium.launchPersistentContext()` +
+  `--load-extension` (the same real-extension pattern proven in
+  `e2e/real-extension/sidepanel-real.spec.ts`), drives a real recording
+  session — real background service worker, real content-script injection,
+  real message bus, real process engine — against a real local HTTP fixture
+  page (a small non-PII "Acme Internal Tools" expense-report demo form, no
+  network calls, no PII, no real third-party company referenced), and
+  screenshots the real sidepanel UI reacting to it. The activity name used
+  ("Submit expense report") is the product's own placeholder example text.
+
+  Chrome's native side panel is rendered by the browser's own UI chrome,
+  which Playwright/CDP cannot screenshot (screenshots are per-page only), so
+  there is no way to automate one screenshot showing a real webpage and the
+  real *docked* side panel simultaneously. Each image is instead two real,
+  unaltered screenshots of the *same live session at the same moment* — the
+  fixture page on the left, the real sidepanel on the right — placed
+  edge-to-edge at native resolution with no scaling, no added text, no
+  invented graphics, and no fake browser chrome. This is what a user
+  actually sees on screen when the side panel is open next to the page being
+  recorded; no pixel in either half is invented.
+
+  **States captured, and how each was reached:**
+  1. **Idle** — fresh sidepanel load, before starting a session.
+  2. **Active recording** — after clicking Start Recording, real click +
+     real typed input into the fixture form's Vendor and Amount fields,
+     captured through the real content-script → background pipeline; the
+     live step feed shows the real derived step.
+  3. **Step review** — after clicking Submit on the fixture form and then
+     Stop & Review; sidepanel `ProcessScreen`, Map tab, showing the real
+     process map derived from the session.
+  4. **Upload flow** — same session, sidepanel `ProcessScreen` Export tab
+     (Open in Ledgerium AI Website / Download Workflow Report / Export
+     JSON), in its real ready (pre-click) state.
+
+  **State NOT captured, stated plainly rather than faked:** a completed
+  ("Upload complete") progress bar. `background/uploader.ts` enforces
+  HTTPS-only for the sync URL (see BLOCKER-5), so driving a real completed
+  upload would require standing up a locally-trusted HTTPS endpoint inside
+  the capture script (self-signed cert + `--ignore-certificate-errors`).
+  That is achievable but was judged not worth the added moving parts for one
+  screenshot; screenshot 4 shows the real Export/upload screen instead.
+
+  **A real defect was found and avoided, not fixed:** the pre-existing
+  `scripts/capture-sidepanel-screenshots.ts` (unused — no output ever
+  committed) composites a static HTML sample into a hand-built fake browser
+  chrome with invented marketing copy and a fabricated address bar
+  (`app.hubspot.com · /contacts/482671`) that nothing ever navigated to —
+  none of its output pixels come from the running extension. It also sets
+  `deviceScaleFactor: 2` while clipping to 1280×800 CSS pixels, which
+  produces a **2560×1600** PNG, not the 1280×800 Chrome Web Store requires —
+  confirmed empirically while building the new script. That script was left
+  in place (out of scope to modify) but was not reused or repaired; the new
+  script below replaces it for Store-submission purposes.
+
+  **Regenerate when the UI changes:**
+  ```bash
+  pnpm --filter @ledgerium/extension-app build
+  pnpm --filter @ledgerium/extension-app capture:store-screenshots
+  # or, from apps/extension-app:
+  #   pnpm exec tsx scripts/capture-chrome-store-screenshots.ts
+  ```
+  Source: `apps/extension-app/scripts/capture-chrome-store-screenshots.ts`
+  (extensively commented — see its file header for the full rationale).
+  Real-extension service-worker startup is occasionally flaky (same
+  characteristic documented for `test:e2e:real`); just re-run on failure.
+  The script independently verifies every output file's actual on-disk PNG
+  dimensions from its `IHDR` chunk before declaring success — it does not
+  trust viewport/clip settings, per the `deviceScaleFactor` defect above.
 
 ---
 
