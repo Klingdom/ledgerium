@@ -8,7 +8,10 @@
  * Mocking strategy:
  *   - vi.mock('@/db') — spies on db.user.update / db.user.findFirst so no real DB is required.
  *   - vi.mock('@/lib/stripe') — controls getStripe() / planFromPriceId / getWebhookSecret.
- *   - vi.mock('@/lib/analytics-server') — no-op trackServer to avoid fire-and-forget DB writes.
+ *   - vi.mock('@/lib/analytics-server') — no-op trackServer to avoid fire-and-forget DB writes;
+ *     getFirstTouchVisitorId defaults to resolving null (REVENUE_PLAN_20K attribution fix,
+ *     docs/meta/REVENUE_PLAN_20K/analytics_analysis.md §2 — see the dedicated describe
+ *     block below for visitorId-threading coverage).
  *
  * No production code is modified by this file.
  */
@@ -56,6 +59,7 @@ vi.mock('@/lib/workspace/seat-management', () => ({
 
 vi.mock('@/lib/analytics-server', () => ({
   trackServer: vi.fn(),
+  getFirstTouchVisitorId: vi.fn().mockResolvedValue(null),
 }));
 
 // stripe mock: all exports controlled per-test via vi.mocked()
@@ -2848,6 +2852,185 @@ describe('POST /api/billing/webhook', () => {
       expect(res.status).toBe(200);
       // The victim user is NOT updated even though their userId is in metadata.
       expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+    });
+  });
+
+  // ── REVENUE_PLAN_20K attribution fix (2026-08) ───────────────────────────
+  // docs/meta/REVENUE_PLAN_20K/analytics_analysis.md §2 — trackServer() had
+  // NO visitorId parameter at all before this fix; billing/subscription
+  // events could never carry a visitor-level join key. These tests lock the
+  // threading of User.firstTouchVisitorId onto the money-side events.
+  //
+  // REGRESSION LOCK: fails against the pre-fix code (trackServer calls never
+  // included a `visitorId` property at all) and passes against the fix.
+
+  describe('REVENUE_PLAN_20K: visitorId threading onto billing events', () => {
+    it('checkout.session.completed: threads the purchasing user’s firstTouchVisitorId onto subscription_created', async () => {
+      const analyticsLib = await import('@/lib/analytics-server');
+      const userId = 'user_attrib_checkout';
+      const session: Partial<Stripe.Checkout.Session> = {
+        id: 'cs_attrib',
+        metadata: { userId },
+        subscription: 'sub_attrib',
+        customer: 'cus_attrib',
+      };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('checkout.session.completed', session)),
+        },
+        subscriptions: {
+          retrieve: vi.fn().mockResolvedValue({
+            status: 'active',
+            items: { data: [{ price: { id: 'price_starter_monthly_test' } }] },
+          }),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+      vi.mocked(stripeLib.planFromPriceId).mockReturnValue('starter');
+      // Prisma's update() returns the full updated row — this is where the
+      // route reads the purchaser's first-touch visitorId from (no extra query).
+      vi.mocked(dbLib.db.user.update).mockResolvedValueOnce({
+        id: userId,
+        firstTouchVisitorId: 'vid-checkout-attrib',
+      } as any);
+
+      await POST(makeRequest('{}'));
+
+      expect(vi.mocked(analyticsLib.trackServer)).toHaveBeenCalledWith(
+        'subscription_created',
+        expect.objectContaining({ userId, visitorId: 'vid-checkout-attrib' }),
+      );
+    });
+
+    it('checkout.session.completed: passes null (not throwing) when the purchaser never captured a visitorId', async () => {
+      const analyticsLib = await import('@/lib/analytics-server');
+      const userId = 'user_no_attrib';
+      const session: Partial<Stripe.Checkout.Session> = {
+        id: 'cs_no_attrib',
+        metadata: { userId },
+        subscription: 'sub_no_attrib',
+        customer: 'cus_no_attrib',
+      };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('checkout.session.completed', session)),
+        },
+        subscriptions: {
+          retrieve: vi.fn().mockResolvedValue({
+            status: 'active',
+            items: { data: [{ price: { id: 'price_starter_monthly_test' } }] },
+          }),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+      vi.mocked(stripeLib.planFromPriceId).mockReturnValue('starter');
+      vi.mocked(dbLib.db.user.update).mockResolvedValueOnce({
+        id: userId,
+        firstTouchVisitorId: null,
+      } as any);
+
+      const res = await POST(makeRequest('{}'));
+
+      expect(res.status).toBe(200);
+      expect(vi.mocked(analyticsLib.trackServer)).toHaveBeenCalledWith(
+        'subscription_created',
+        expect.objectContaining({ userId, visitorId: null }),
+      );
+    });
+
+    it('customer.subscription.updated (solo path): threads the already-fetched user’s firstTouchVisitorId', async () => {
+      const analyticsLib = await import('@/lib/analytics-server');
+      const userId = 'user_attrib_updated';
+      const subscription: Partial<Stripe.Subscription> = {
+        id: 'sub_attrib_updated',
+        status: 'active',
+        customer: 'cus_attrib_updated',
+        metadata: {},
+        items: { data: [{ price: { id: 'price_starter_monthly_test' } }] } as Stripe.Subscription['items'],
+      };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('customer.subscription.updated', subscription)),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+      vi.mocked(stripeLib.planFromPriceId).mockReturnValue('starter');
+      vi.mocked(teamBillingLib.resolveTeamFromCustomer).mockResolvedValueOnce(null);
+      vi.mocked(dbLib.db.user.findFirst).mockResolvedValueOnce({
+        id: userId,
+        firstTouchVisitorId: 'vid-updated-attrib',
+      } as any);
+
+      await POST(makeRequest('{}'));
+
+      expect(vi.mocked(analyticsLib.trackServer)).toHaveBeenCalledWith(
+        'subscription_updated',
+        expect.objectContaining({ userId, visitorId: 'vid-updated-attrib' }),
+      );
+    });
+
+    it('customer.subscription.trial_will_end: resolves visitorId via a dedicated lookup (no prior DB read in this handler)', async () => {
+      const analyticsLib = await import('@/lib/analytics-server');
+      const userId = 'user_attrib_trial';
+      const subscription: Partial<Stripe.Subscription> = {
+        id: 'sub_attrib_trial',
+        metadata: { userId },
+        trial_end: 1_700_000_000,
+        items: { data: [{ price: { id: 'price_starter_monthly_test' } }] } as Stripe.Subscription['items'],
+      };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('customer.subscription.trial_will_end', subscription)),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+      vi.mocked(stripeLib.planFromPriceId).mockReturnValue('starter');
+      vi.mocked(analyticsLib.getFirstTouchVisitorId).mockResolvedValueOnce('vid-trial-attrib');
+
+      await POST(makeRequest('{}'));
+
+      expect(vi.mocked(analyticsLib.getFirstTouchVisitorId)).toHaveBeenCalledWith(userId);
+      expect(vi.mocked(analyticsLib.trackServer)).toHaveBeenCalledWith(
+        'trial_will_end',
+        expect.objectContaining({ userId, visitorId: 'vid-trial-attrib' }),
+      );
+    });
+
+    it('team-scoped events (customer.subscription.updated, team path) do NOT fabricate a visitorId', async () => {
+      // ATTRIBUTION SCOPE NOTE (see the route's inline comment): team-scoped
+      // events only have teamId in scope, not an individual user — this is a
+      // documented, deliberate gap, not an oversight. Asserts no `visitorId`
+      // key is ever added to team-scoped trackServer payloads.
+      const analyticsLib = await import('@/lib/analytics-server');
+      const mockTeam = {
+        id: 'team_attrib_scope',
+        name: 'Scope Co',
+        plan: 'starter',
+        stripeCustomerId: 'cus_attrib_scope',
+        stripeSubscriptionId: null,
+        members: [],
+      };
+      const subscription: Partial<Stripe.Subscription> = {
+        id: 'sub_attrib_scope',
+        status: 'active',
+        customer: 'cus_attrib_scope',
+        metadata: {},
+        items: { data: [{ price: { id: 'price_team_monthly_test' } }] } as Stripe.Subscription['items'],
+      };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('customer.subscription.updated', subscription)),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+      vi.mocked(stripeLib.planFromPriceId).mockReturnValue('team');
+      vi.mocked(teamBillingLib.resolveTeamFromCustomer).mockResolvedValueOnce(mockTeam as any);
+
+      await POST(makeRequest('{}'));
+
+      const call = vi.mocked(analyticsLib.trackServer).mock.calls.find((c) => c[0] === 'subscription_updated');
+      expect(call).toBeDefined();
+      expect(call![1]).not.toHaveProperty('visitorId');
     });
   });
 });

@@ -3,7 +3,7 @@ import { getStripe, getWebhookSecret, planFromPriceId, intervalFromStripeSubscri
 import type { PlanType } from '@/lib/plans';
 import { PLAN_FEATURES } from '@/lib/plans';
 import { db } from '@/db';
-import { trackServer } from '@/lib/analytics-server';
+import { trackServer, getFirstTouchVisitorId } from '@/lib/analytics-server';
 import type Stripe from 'stripe';
 import {
   resolveTeamFromCustomer,
@@ -228,7 +228,14 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        await db.user.update({
+        // Captures the update's return value (Prisma returns the full updated
+        // row by default) so `firstTouchVisitorId` is available for
+        // `subscription_created` below without a second DB round-trip — this
+        // is THE signup→paid pivot event for the attribution join, and it
+        // fires identically for both solo and team/growth purchases since
+        // `userId` here is always the purchasing/owning user (REVENUE_PLAN_20K
+        // attribution fix, docs/meta/REVENUE_PLAN_20K/analytics_analysis.md §2).
+        const purchasingUser = await db.user.update({
           where: { id: userId },
           data: {
             plan,
@@ -245,7 +252,16 @@ export async function POST(req: NextRequest) {
           },
         });
         console.log(`[stripe] User ${userId} upgraded to ${plan} (${subscriptionStatus})`);
-        trackServer('subscription_created', { userId, plan, status: subscriptionStatus });
+        trackServer('subscription_created', {
+          userId,
+          plan,
+          status: subscriptionStatus,
+          // Optional chaining is defensive, not a real-world null case — a
+          // successful Prisma `update()` always resolves the full row or
+          // throws (never undefined). Guards test-double return shapes that
+          // don't model the real client's guarantee.
+          visitorId: purchasingUser?.firstTouchVisitorId ?? null,
+        });
         break;
       }
 
@@ -291,6 +307,20 @@ export async function POST(req: NextRequest) {
         // cascade a soft-deactivate if the new plan's maxSeats is lower than the
         // current active-member count. The solo-subscriber User.plan path is
         // preserved byte-identical below if no team is found.
+        //
+        // ATTRIBUTION SCOPE NOTE (REVENUE_PLAN_20K, docs/meta/REVENUE_PLAN_20K/
+        // analytics_analysis.md §2): the team-scoped events below (this
+        // `subscription_updated`, `workspace_downgraded`, and their
+        // counterparts in the `deleted`/`payment_*` cases further down) do
+        // NOT thread a `visitorId`. This is deliberate, not an oversight —
+        // this call site has only `team.id` in scope, not an individual
+        // user. Resolving "which visitor acquired this team" would require
+        // an additional lookup of the team owner (`Team.createdBy` →
+        // `User.firstTouchVisitorId`), which is a second join hop the
+        // analytics artifact's minimum-viable fix does not scope. The
+        // purchasing user's own first-touch source IS captured — see
+        // `subscription_created` above, which fires with the top-level
+        // `userId` for every purchase (solo or team) at checkout time.
         const customerId = subscription.customer as string;
         if (customerId) {
           const team = await resolveTeamFromCustomer(customerId);
@@ -387,7 +417,9 @@ export async function POST(req: NextRequest) {
           },
         });
         console.log(`[stripe] User ${soloUser.id} subscription updated: ${status} → plan ${plan}`);
-        trackServer('subscription_updated', { userId: soloUser.id, plan, status });
+        // `soloUser` was fetched with no `select` above, so the full row
+        // (including firstTouchVisitorId) is already in hand — no extra query.
+        trackServer('subscription_updated', { userId: soloUser.id, plan, status, visitorId: soloUser.firstTouchVisitorId });
         break;
       }
 
@@ -477,7 +509,8 @@ export async function POST(req: NextRequest) {
           },
         });
         console.log(`[stripe] User ${deletedSoloUser.id} subscription canceled — reverted to free`);
-        trackServer('subscription_canceled', { userId: deletedSoloUser.id });
+        // `deletedSoloUser` was fetched with no `select` above — full row in hand.
+        trackServer('subscription_canceled', { userId: deletedSoloUser.id, visitorId: deletedSoloUser.firstTouchVisitorId });
         break;
       }
 
@@ -523,7 +556,8 @@ export async function POST(req: NextRequest) {
           data: { subscriptionStatus: 'past_due' },
         });
         console.log(`[stripe] User ${user.id} payment failed — marked past_due`);
-        trackServer('payment_failed', { userId: user.id });
+        // `user` was fetched with no `select` above — full row in hand.
+        trackServer('payment_failed', { userId: user.id, visitorId: user.firstTouchVisitorId });
         break;
       }
 
@@ -589,12 +623,16 @@ export async function POST(req: NextRequest) {
         console.log(
           `[stripe] User ${succeededUser.id} payment succeeded — invoice ${invoice.id} ${invoice.amount_paid} ${invoice.currency}`,
         );
-        // No PII: only userId, amount, currency, invoiceId are emitted.
-        // Card numbers, customer email, customer name, and invoice line items are excluded.
+        // No PII: only userId, amount, currency, invoiceId, visitorId (an
+        // anonymous UUID — see AnalyticsEvent.visitorId doc comment) are
+        // emitted. Card numbers, customer email, customer name, and invoice
+        // line items are excluded. `succeededUser` was fetched with no
+        // `select` above — full row (incl. firstTouchVisitorId) in hand.
         trackServer('payment_succeeded', {
           userId: succeededUser.id,
           amount: invoice.amount_paid,
           currency: invoice.currency,
+          visitorId: succeededUser.firstTouchVisitorId,
           invoiceId: invoice.id,
         });
         break;
@@ -633,10 +671,15 @@ export async function POST(req: NextRequest) {
         console.log(
           `[stripe] User ${userId} trial will end at ${new Date((trialEnd ?? 0) * 1000).toISOString()}`,
         );
+        // No prior DB read in this handler (notification-only, no write) — a
+        // dedicated lookup is required to resolve visitorId. Cheap: single
+        // findUnique on the primary key, select-narrowed to one column.
+        const trialWillEndVisitorId = await getFirstTouchVisitorId(userId);
         trackServer('trial_will_end', {
           userId,
           trialEndAt: trialEnd,
           plan,
+          visitorId: trialWillEndVisitorId,
         });
         break;
       }

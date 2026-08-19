@@ -4,7 +4,7 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
-import { track, getFirstTouchUTM } from '@/lib/analytics';
+import { track, getFirstTouchUTM, getOrCreateVisitorId } from '@/lib/analytics';
 import { LogoMark } from '@/components/shared/LogoMark';
 
 export default function SignupPageClient() {
@@ -21,10 +21,19 @@ export default function SignupPageClient() {
     setIsLoading(true);
 
     // 1. Create account
+    // REVENUE_PLAN_20K attribution fix: thread the persistent anonymous
+    // visitorId through to the server so it can be stored as
+    // User.firstTouchVisitorId — the pivot point of the acquisition-
+    // attribution join (see docs/meta/REVENUE_PLAN_20K/analytics_analysis.md §2).
     const res = await fetch('/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name: name || undefined }),
+      body: JSON.stringify({
+        email,
+        password,
+        name: name || undefined,
+        visitorId: getOrCreateVisitorId() ?? undefined,
+      }),
     });
 
     if (!res.ok) {

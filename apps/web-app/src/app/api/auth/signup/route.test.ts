@@ -216,4 +216,81 @@ describe('POST /api/auth/signup', () => {
     expect(res.status).toBe(201);
     expect(vi.mocked(dbLib.db.user.create)).toHaveBeenCalledOnce();
   });
+
+  // ── REVENUE_PLAN_20K attribution fix (2026-08) ───────────────────────────
+  // docs/meta/REVENUE_PLAN_20K/analytics_analysis.md §2 — visitorId is the
+  // pivot point of the acquisition-attribution join. It must be persisted as
+  // User.firstTouchVisitorId exactly once, at signup, and threaded onto the
+  // server-side signup_completed analytics event.
+  //
+  // REGRESSION LOCK: this block fails against the pre-fix signupSchema
+  // (which has no `visitorId` field, so it is silently stripped by Zod
+  // .safeParse before reaching db.user.create) and passes against the fix.
+
+  describe('REVENUE_PLAN_20K: visitorId attribution', () => {
+    it('persists a client-supplied visitorId as User.firstTouchVisitorId', async () => {
+      const req = makeRequest({
+        email: 'attributed@example.com',
+        password: 'password123',
+        name: 'Attributed User',
+        visitorId: 'vid-1234-abcd-ef00',
+      });
+
+      const res = await POST(req);
+
+      expect(res.status).toBe(201);
+      expect(vi.mocked(dbLib.db.user.create)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            firstTouchVisitorId: 'vid-1234-abcd-ef00',
+          }),
+        }),
+      );
+    });
+
+    it('threads the visitorId onto the server-side signup_completed analytics event', async () => {
+      const analyticsLib = await import('@/lib/analytics-server');
+      const req = makeRequest({
+        email: 'attributed2@example.com',
+        password: 'password123',
+        visitorId: 'vid-attribution-join-test',
+      });
+
+      await POST(req);
+
+      expect(vi.mocked(analyticsLib.trackServer)).toHaveBeenCalledWith(
+        'signup_completed',
+        expect.objectContaining({ visitorId: 'vid-attribution-join-test' }),
+      );
+    });
+
+    it('stores null (not undefined, not a fabricated value) when the client sends no visitorId', async () => {
+      const req = makeRequest({
+        email: 'novisitor@example.com',
+        password: 'password123',
+      });
+
+      const res = await POST(req);
+
+      expect(res.status).toBe(201);
+      expect(vi.mocked(dbLib.db.user.create)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ firstTouchVisitorId: null }),
+        }),
+      );
+    });
+
+    it('rejects a signup body where visitorId is present but not a string (schema validation)', async () => {
+      const req = makeRequest({
+        email: 'badvisitor@example.com',
+        password: 'password123',
+        visitorId: 12345, // wrong type — must fail validation, not silently coerce
+      });
+
+      const res = await POST(req);
+
+      expect(res.status).toBe(400);
+      expect(vi.mocked(dbLib.db.user.create)).not.toHaveBeenCalled();
+    });
+  });
 });

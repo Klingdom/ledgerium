@@ -24,9 +24,14 @@ export async function POST(req: NextRequest) {
       // Pre-login events won't have a session
     }
 
-    // Persist events to database (batch insert)
+    // Persist events to database (batch insert).
+    // REVENUE_PLAN_20K attribution fix (2026-08 —
+    // docs/meta/REVENUE_PLAN_20K/analytics_analysis.md §2): `visitorId` is
+    // promoted to its own first-class indexed column instead of being left
+    // inside the `properties` JSON blob (filterProperties strips it below).
     const records = events.slice(0, 100).map((event: any) => ({
       userId: userId ?? event.userId ?? null,
+      visitorId: typeof event.visitorId === 'string' ? event.visitorId : null,
       eventName: event.event ?? 'unknown',
       properties: JSON.stringify(filterProperties(event)),
       url: event.url ?? null,
@@ -146,7 +151,10 @@ export async function GET(req: NextRequest) {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function filterProperties(event: any): Record<string, unknown> {
-  const { event: _name, timestamp: _ts, url: _url, source: _src, userId: _uid, ...rest } = event;
+  // visitorId is stripped here too — it is now stored in the first-class
+  // `AnalyticsEvent.visitorId` column (see the record-mapping above), not
+  // duplicated inside the properties JSON blob.
+  const { event: _name, timestamp: _ts, url: _url, source: _src, userId: _uid, visitorId: _vid, ...rest } = event;
   return rest;
 }
 

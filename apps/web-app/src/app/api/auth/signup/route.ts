@@ -12,6 +12,15 @@ const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   name: z.string().min(1, 'Name is required').optional(),
+  /**
+   * REVENUE_PLAN_20K attribution fix (2026-08 —
+   * docs/meta/REVENUE_PLAN_20K/analytics_analysis.md §2): the client's
+   * persistent anonymous visitorId (analytics.ts getOrCreateVisitorId()),
+   * captured once here at signup as User.firstTouchVisitorId. Optional —
+   * older clients or a blocked localStorage never send it, and that is an
+   * honest "unknown," not an error. Not PII: a random anonymous UUID.
+   */
+  visitorId: z.string().min(1).max(128).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -26,7 +35,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { password, name } = parsed.data;
+    const { password, name, visitorId } = parsed.data;
     // Root-cause fix: normalize email before both the duplicate-check lookup
     // and the create — storing raw casing let mixed-case signups become
     // unfindable by the (already-normalized) forgot-password lookup.
@@ -61,6 +70,10 @@ export async function POST(req: NextRequest) {
         passwordHash,
         plan: 'free',
         subscriptionStatus: 'none',
+        // REVENUE_PLAN_20K attribution fix — the pivot point of the
+        // acquisition-attribution join. Set exactly once, here, and never
+        // overwritten again. null (not fabricated) when the client sent none.
+        firstTouchVisitorId: visitorId ?? null,
       },
     });
 
@@ -71,7 +84,14 @@ export async function POST(req: NextRequest) {
     await ensureSampleVariants(user.id);
     await ensureAdditionalSampleWorkflows(user.id);
 
-    trackServer('signup_completed', { userId: user.id, email: user.email });
+    // No email in the analytics payload. `trackServer` strips only userId /
+    // timestamp / source before persisting `properties`, so anything else here
+    // is written to the AnalyticsEvent blob AND forwarded to PostHog. `userId`
+    // already identifies the user for every consumer of this event (the product
+    // analytics funnels only count occurrences), so the address added reach
+    // without adding meaning. Same PII-minimisation posture as the capture-layer
+    // page-title fix.
+    trackServer('signup_completed', { userId: user.id, visitorId: visitorId ?? undefined });
 
     return NextResponse.json({ id: user.id, email: user.email }, { status: 201 });
   } catch {
