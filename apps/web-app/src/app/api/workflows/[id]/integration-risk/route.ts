@@ -28,7 +28,7 @@ export async function GET(
   }
 
   // Gate: integration risk analysis is a Growth+ feature
-  const access = checkFeatureAccess(user, 'integrationRisk');
+  const access = await checkFeatureAccess(user, 'integrationRisk');
   if (!access.allowed) {
     return NextResponse.json(
       {

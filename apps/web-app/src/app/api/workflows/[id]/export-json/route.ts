@@ -33,7 +33,7 @@ export async function GET(
   // Gate: Starter+ only. requireFeature throws a NextResponse for free-tier users.
   // Catch it and return rather than letting it propagate as an unhandled rejection.
   try {
-    requireFeature(user, 'cleanExports');
+    await requireFeature(user, 'cleanExports');
   } catch (thrown: unknown) {
     if (thrown instanceof NextResponse) return thrown;
     throw thrown;

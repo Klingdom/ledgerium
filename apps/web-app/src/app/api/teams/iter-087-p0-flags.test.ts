@@ -62,7 +62,8 @@ const {
 
 vi.mock('@/lib/auth', () => ({ auth: mockAuth }));
 vi.mock('@/lib/analytics-server', () => ({ trackServer: mockTrackServer }));
-vi.mock('@/lib/feature-gating', () => ({ checkFeatureAccess: mockCheckFeatureAccess }));
+// POST /api/teams uses checkSoloFeatureAccess (solo-plan only) — see feature-gating.ts.
+vi.mock('@/lib/feature-gating', () => ({ checkSoloFeatureAccess: mockCheckFeatureAccess }));
 vi.mock('@/lib/workspace/seat-management', () => ({ countPendingInvites: mockCountPendingInvites }));
 
 vi.mock('@/db', () => ({

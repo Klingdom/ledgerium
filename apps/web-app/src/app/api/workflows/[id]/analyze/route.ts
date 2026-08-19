@@ -28,7 +28,7 @@ export async function POST(
   }
 
   // Gate: intelligenceLayer is a Team+ feature
-  const access = checkFeatureAccess(user, 'intelligenceLayer');
+  const access = await checkFeatureAccess(user, 'intelligenceLayer');
   if (!access.allowed) {
     return NextResponse.json(
       {

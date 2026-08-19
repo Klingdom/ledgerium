@@ -15,6 +15,10 @@ vi.mock('@/db', () => ({
   db: {
     user: { findUnique: vi.fn() },
     processDefinition: { findMany: vi.fn() },
+    // checkFeatureAccess is now workspace-aware (effectivePlanForUser) and
+    // queries active team memberships — default to none, matching solo-plan
+    // behavior for every test in this file that doesn't set up a team.
+    teamMember: { findMany: vi.fn().mockResolvedValue([]) },
   },
 }));
 

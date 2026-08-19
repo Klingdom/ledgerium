@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Gate: creating portfolios (shared library) is a Team+ feature
-  const access = checkFeatureAccess(user, 'sharedLibrary');
+  const access = await checkFeatureAccess(user, 'sharedLibrary');
   if (!access.allowed) {
     return NextResponse.json(
       {

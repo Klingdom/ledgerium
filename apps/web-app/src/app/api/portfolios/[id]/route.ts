@@ -55,7 +55,7 @@ export async function GET(
   }
 
   // Gate: portfolio access is a Team+ (sharedLibrary) feature
-  const access = checkFeatureAccess(user, 'sharedLibrary');
+  const access = await checkFeatureAccess(user, 'sharedLibrary');
   if (!access.allowed) {
     return NextResponse.json(
       {
@@ -119,7 +119,7 @@ export async function PATCH(
   }
 
   // Gate: portfolio management is a Team+ (sharedLibrary) feature
-  const patchAccess = checkFeatureAccess(user, 'sharedLibrary');
+  const patchAccess = await checkFeatureAccess(user, 'sharedLibrary');
   if (!patchAccess.allowed) {
     return NextResponse.json(
       {
@@ -228,7 +228,7 @@ export async function DELETE(
   }
 
   // Gate: portfolio management is a Team+ (sharedLibrary) feature
-  const deleteAccess = checkFeatureAccess(user, 'sharedLibrary');
+  const deleteAccess = await checkFeatureAccess(user, 'sharedLibrary');
   if (!deleteAccess.allowed) {
     return NextResponse.json(
       {

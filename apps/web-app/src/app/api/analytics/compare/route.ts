@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Gate: cross-workflow comparison is a Growth+ feature
-  const access = checkFeatureAccess(user, 'crossWorkflowComparison');
+  const access = await checkFeatureAccess(user, 'crossWorkflowComparison');
   if (!access.allowed) {
     return NextResponse.json(
       {

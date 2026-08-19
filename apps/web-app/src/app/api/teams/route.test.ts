@@ -33,7 +33,10 @@ vi.mock('@/db', () => ({
 }));
 
 vi.mock('@/lib/feature-gating', () => ({
-  checkFeatureAccess: vi.fn(),
+  // POST /api/teams uses checkSoloFeatureAccess (solo-plan only, NOT
+  // workspace-aware) — see feature-gating.ts doc for why teamWorkspace is
+  // deliberately excluded from the effective-plan gate.
+  checkSoloFeatureAccess: vi.fn(),
 }));
 
 vi.mock('@/lib/plans', () => ({
@@ -77,8 +80,8 @@ beforeEach(async () => {
     slug: 'acme-corp-deadbeef',
   });
 
-  const { checkFeatureAccess } = await import('@/lib/feature-gating');
-  vi.mocked(checkFeatureAccess).mockReturnValue({ allowed: true } as any);
+  const { checkSoloFeatureAccess } = await import('@/lib/feature-gating');
+  vi.mocked(checkSoloFeatureAccess).mockReturnValue({ allowed: true } as any);
 });
 
 // ── Tests ────────────────────────────────────────────────────────────────────
@@ -148,8 +151,8 @@ describe('POST /api/teams — plan stamping (TEAM-P03.6, Sub-task 2)', () => {
   });
 
   it('returns 403 when caller is on free plan (feature gate blocks workspace creation)', async () => {
-    const { checkFeatureAccess } = await import('@/lib/feature-gating');
-    vi.mocked(checkFeatureAccess).mockReturnValue({
+    const { checkSoloFeatureAccess } = await import('@/lib/feature-gating');
+    vi.mocked(checkSoloFeatureAccess).mockReturnValue({
       allowed: false,
       requiredPlan: 'team',
     } as any);

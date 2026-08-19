@@ -31,7 +31,7 @@ export async function GET(
   }
 
   // Gate: agent composition is a Growth+ feature
-  const access = checkFeatureAccess(user, 'agentComposition');
+  const access = await checkFeatureAccess(user, 'agentComposition');
   if (!access.allowed) {
     return NextResponse.json(
       {

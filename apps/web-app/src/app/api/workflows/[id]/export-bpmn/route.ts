@@ -28,7 +28,7 @@ export async function GET(
   }
 
   // Gate: BPMN export is a Growth+ (priorityExports) feature
-  const access = checkFeatureAccess(user, 'priorityExports');
+  const access = await checkFeatureAccess(user, 'priorityExports');
   if (!access.allowed) {
     return NextResponse.json(
       {

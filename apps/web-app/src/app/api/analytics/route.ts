@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
-  const intelligenceAccess = checkFeatureAccess(user, 'intelligenceLayer');
+  const intelligenceAccess = await checkFeatureAccess(user, 'intelligenceLayer');
   if (!intelligenceAccess.allowed) {
     return NextResponse.json(
       {

@@ -48,15 +48,8 @@ export interface FeatureAccessResult {
   requiredPlan?: PlanType | undefined;
 }
 
-/**
- * Check if a user has access to a specific feature.
- * Returns { allowed: true } or { allowed: false, requiredPlan }.
- */
-export function checkFeatureAccess(user: User, feature: FeatureKey): FeatureAccessResult {
-  if (isAdminUnlimited(user.email)) {
-    return { allowed: true };
-  }
-  const plan = toPlanType(user.plan);
+/** Pure, synchronous feature-map lookup against an already-resolved plan. No DB, no admin bypass. */
+function evaluateFeatureAccess(plan: PlanType, feature: FeatureKey): FeatureAccessResult {
   if (hasFeature(plan, feature)) {
     return { allowed: true };
   }
@@ -65,20 +58,67 @@ export function checkFeatureAccess(user: User, feature: FeatureKey): FeatureAcce
 }
 
 /**
+ * Check if a user has access to a specific feature, using the user's
+ * *effective* plan — their own solo plan, or the highest-ranking plan across
+ * any active team workspace they belong to, whichever is higher.
+ *
+ * This is async because resolving the effective plan may require a DB lookup
+ * of active workspace memberships (see `effectivePlanForUser`). Every call
+ * site must `await` this.
+ *
+ * Returns { allowed: true } or { allowed: false, requiredPlan }.
+ *
+ * @see checkSoloFeatureAccess for the (rare) case where workspace membership
+ *      must NOT be consulted — e.g. gating the *creation* of a new team.
+ */
+export async function checkFeatureAccess(user: User, feature: FeatureKey): Promise<FeatureAccessResult> {
+  if (isAdminUnlimited(user.email)) {
+    return { allowed: true };
+  }
+  const plan = await effectivePlanForUser(user);
+  return evaluateFeatureAccess(plan, feature);
+}
+
+/**
+ * Check feature access using ONLY the user's own solo `plan` column — ignores
+ * any team workspace membership entirely. Synchronous; no DB access.
+ *
+ * Use this (instead of `checkFeatureAccess`) for gates where a paid team
+ * membership should NOT confer access — most notably `teamWorkspace` at
+ * `POST /api/teams`: whether a user can *create* a new team is a function of
+ * their own subscription, not of a workspace they already happen to belong
+ * to. Making that gate effective-plan-aware would let a Free member of
+ * someone else's paid workspace spin up additional teams for free, which is
+ * a billing/policy question, not a plan-resolution bug — out of scope for
+ * `docs/meta/REVENUE_PLAN_20K/team_workspace_status.md` §6(a) item 2.
+ *
+ * Every other feature gate in the product SHOULD use `checkFeatureAccess`.
+ */
+export function checkSoloFeatureAccess(user: User, feature: FeatureKey): FeatureAccessResult {
+  if (isAdminUnlimited(user.email)) {
+    return { allowed: true };
+  }
+  return evaluateFeatureAccess(toPlanType(user.plan), feature);
+}
+
+/**
  * Gate an API route to require a specific feature.
- * Throws a NextResponse with 403 status if the user's plan does not include the feature.
+ * Throws a NextResponse with 403 status if the user's effective plan does not
+ * include the feature. Async — callers MUST `await` this (a plain `throw`
+ * inside an `async` function only surfaces as a promise rejection, not a
+ * synchronous exception).
  *
  * Usage:
  * ```typescript
  * export async function GET(req: NextRequest) {
  *   const user = await requireUser();
- *   requireFeature(user, 'advancedAnalytics');
- *   // ... only Growth+ users reach here
+ *   await requireFeature(user, 'advancedAnalytics');
+ *   // ... only Growth+ users (solo or via workspace) reach here
  * }
  * ```
  */
-export function requireFeature(user: User, feature: FeatureKey): void {
-  const result = checkFeatureAccess(user, feature);
+export async function requireFeature(user: User, feature: FeatureKey): Promise<void> {
+  const result = await checkFeatureAccess(user, feature);
   if (!result.allowed) {
     throw NextResponse.json(
       {
@@ -107,6 +147,11 @@ export interface RecordingLimitResult {
 /**
  * Check whether the user can upload more recordings this calendar month.
  *
+ * Uses the user's *effective* plan (own solo plan, or their highest-ranking
+ * active team workspace plan, whichever is higher) — a Free-tier member of a
+ * paid Team/Growth workspace gets that workspace's recording quota, not the
+ * Free-tier cap (`docs/meta/REVENUE_PLAN_20K/team_workspace_status.md` §3.1).
+ *
  * Counts uploads with uploadedAt >= the first day of the current UTC month.
  * This replaces the old hardcoded `plan === 'free' && uploadCount >= 5` check.
  */
@@ -115,7 +160,7 @@ export async function checkRecordingLimit(user: User): Promise<RecordingLimitRes
     return { allowed: true, used: 0, limit: Number.MAX_SAFE_INTEGER };
   }
 
-  const plan = toPlanType(user.plan);
+  const plan = await effectivePlanForUser(user);
   const config = getPlanConfig(plan);
   const limit = config.maxRecordingsPerMonth;
 
@@ -162,29 +207,9 @@ function serializeLimit(value: number): number | 'unlimited' {
   return value === Number.MAX_SAFE_INTEGER ? 'unlimited' : value;
 }
 
-/**
- * Build a feature flags response object for a user.
- *
- * The `recordings.used` field is set to 0 here — callers that need the live
- * monthly count should await checkRecordingLimit() separately and merge it in.
- */
-export function buildFeatureFlags(user: User): FeatureFlagsResponse {
-  if (isAdminUnlimited(user.email)) {
-    const enterpriseConfig = getPlanConfig('enterprise');
-    return {
-      plan: 'enterprise',
-      features: { ...enterpriseConfig.features } as Record<string, boolean>,
-      limits: {
-        recordings: { used: 0, max: 'unlimited' },
-        seats: { max: 'unlimited' },
-        recorders: { max: 'unlimited' },
-      },
-    };
-  }
-
-  const plan = toPlanType(user.plan);
+/** Build a FeatureFlagsResponse for an already-resolved plan. Pure, no DB. */
+function buildFeatureFlagsForPlan(plan: PlanType): FeatureFlagsResponse {
   const config = getPlanConfig(plan);
-
   return {
     plan,
     features: { ...config.features } as Record<string, boolean>,
@@ -199,38 +224,42 @@ export function buildFeatureFlags(user: User): FeatureFlagsResponse {
   };
 }
 
-// ── Effective-plan derivation (TEAM-P02 Part F) ──────────────────────────────
+/**
+ * Build a feature flags response object for a user, using the user's own
+ * solo `plan` field ONLY (does not consult team workspace membership).
+ *
+ * The `recordings.used` field is set to 0 here — callers that need the live
+ * monthly count should await checkRecordingLimit() separately and merge it in.
+ *
+ * @see buildFeatureFlagsWithUsage for the effective-plan-aware, workspace-aware
+ *      version consumed by `/api/account` (the surface a real user checks).
+ */
+export function buildFeatureFlags(user: User): FeatureFlagsResponse {
+  if (isAdminUnlimited(user.email)) {
+    return buildFeatureFlagsForPlan('enterprise');
+  }
+  return buildFeatureFlagsForPlan(toPlanType(user.plan));
+}
+
+// ── Effective-plan derivation (TEAM-P02 Part F; extended by TEAM_WORKSPACE_STATUS §6(a) item 2) ──
 
 /**
- * Derive the effective plan for a user by taking the maximum across:
- *   - The user's solo `plan` field (legacy individual subscriptions), AND
- *   - Every active workspace membership's team plan.
- *
+ * Fetch the PlanType of every ACTIVE team workspace a user belongs to.
  * "Active" membership means `TeamMember.status = 'active'`.
  *
- * Uses `PLAN_HIERARCHY.indexOf` for comparison so plan comparisons are
- * always consistent with the canonical hierarchy ordering.
+ * Isolated as its own request-scoped-memoized fetch (rather than inlined into
+ * `effectivePlanFor`/`effectivePlanForUser`) so that a single request touching
+ * multiple gates for the same user (e.g. a route that calls both
+ * `checkFeatureAccess` and `checkRecordingLimit`) issues at most ONE
+ * `teamMember.findMany` query for that user, not one per gate call — avoids
+ * N+1 amplification on the SQLite single-writer deployment target.
  *
- * @param userId - ID of the user whose effective plan to compute.
- * @returns The highest-ranking PlanType the user holds across all contexts.
- *
- * Request-scoped memoization via React cache() (iter 088 Sub-task 5 perf fix).
- * Same-request calls with the same userId return the cached value, eliminating
- * redundant DB round-trips when multiple Server Components check effective plan.
- * React cache() is a no-op outside a React render cycle (API routes), which is
- * acceptable — each API handler invocation is a single request anyway.
+ * React cache() is a no-op outside a React render cycle / under vitest (see
+ * `reactCache` doc above) — in those contexts each call re-queries. That is
+ * still correct, just not deduplicated; production API route handlers get
+ * the real memoization benefit.
  */
-export const effectivePlanFor = reactCache(async (userId: string): Promise<PlanType> => {
-  // Fetch the user's solo plan.
-  const user = await db.user.findUnique({
-    where: { id: userId },
-    select: { plan: true },
-  });
-
-  let bestPlan: PlanType = toPlanType(user?.plan ?? 'free');
-  let bestIdx = PLAN_HIERARCHY.indexOf(bestPlan);
-
-  // Fetch all active workspace memberships with their team plan.
+const fetchActiveWorkspacePlans = reactCache(async (userId: string): Promise<PlanType[]> => {
   const memberships = await (db as any).teamMember.findMany({
     where: {
       userId,
@@ -243,26 +272,87 @@ export const effectivePlanFor = reactCache(async (userId: string): Promise<PlanT
     },
   });
 
-  for (const membership of memberships) {
-    const workspacePlan = toPlanType(membership.team?.plan ?? 'free');
+  return memberships.map((m: any) => toPlanType(m.team?.plan ?? 'free'));
+});
+
+/** Return the higher-ranking of `soloPlan` and every plan in `workspacePlans`, per PLAN_HIERARCHY. */
+function highestPlan(soloPlan: PlanType, workspacePlans: readonly PlanType[]): PlanType {
+  let bestPlan = soloPlan;
+  let bestIdx = PLAN_HIERARCHY.indexOf(bestPlan);
+  for (const workspacePlan of workspacePlans) {
     const idx = PLAN_HIERARCHY.indexOf(workspacePlan);
     if (idx > bestIdx) {
       bestIdx = idx;
       bestPlan = workspacePlan;
     }
   }
-
   return bestPlan;
+}
+
+/**
+ * Derive the effective plan for a user ID by taking the maximum across:
+ *   - The user's solo `plan` field (legacy individual subscriptions), AND
+ *   - Every active workspace membership's team plan.
+ *
+ * Uses `PLAN_HIERARCHY.indexOf` for comparison so plan comparisons are
+ * always consistent with the canonical hierarchy ordering.
+ *
+ * @param userId - ID of the user whose effective plan to compute.
+ * @returns The highest-ranking PlanType the user holds across all contexts.
+ *
+ * Request-scoped memoization via React cache() (iter 088 Sub-task 5 perf fix).
+ * Same-request calls with the same userId return the cached value, eliminating
+ * redundant DB round-trips when multiple Server Components check effective plan.
+ *
+ * @see effectivePlanForUser — prefer this when the caller already has the
+ *      user row loaded (every `checkFeatureAccess`/`checkRecordingLimit` call
+ *      site does); it skips the redundant `db.user.findUnique` here.
+ */
+export const effectivePlanFor = reactCache(async (userId: string): Promise<PlanType> => {
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { plan: true },
+  });
+  const soloPlan = toPlanType(user?.plan ?? 'free');
+  const workspacePlans = await fetchActiveWorkspacePlans(userId);
+  return highestPlan(soloPlan, workspacePlans);
 });
+
+/**
+ * Like `effectivePlanFor`, but takes an already-loaded user row (only `id`
+ * and `plan` are read) instead of a bare `userId` — every gate call site in
+ * this file's consumers already has the full `User` row in hand, so this
+ * avoids a redundant `db.user.findUnique` per gate check. The active-workspace
+ * lookup is still request-scope-memoized via `fetchActiveWorkspacePlans`, so
+ * calling this multiple times for the same user within one request (e.g. a
+ * route that checks both a feature AND the recording limit) issues at most
+ * one `teamMember` query total.
+ */
+export async function effectivePlanForUser(user: Pick<User, 'id' | 'plan'>): Promise<PlanType> {
+  const soloPlan = toPlanType(user.plan);
+  const workspacePlans = await fetchActiveWorkspacePlans(user.id);
+  return highestPlan(soloPlan, workspacePlans);
+}
 
 // ── Feature flags with live usage ─────────────────────────────────────────────
 
 /**
  * Build a complete feature flags response with live recording count.
  * Use this for the /api/account endpoint.
+ *
+ * Uses the user's *effective* plan (workspace-aware — see `effectivePlanForUser`)
+ * for `plan`, `features`, and `limits.seats`/`limits.recorders`, so a Free-tier
+ * member of a paid Team/Growth workspace sees the plan they actually have
+ * access to, not their own dormant solo `plan` column
+ * (`docs/meta/REVENUE_PLAN_20K/team_workspace_status.md` §3.1).
+ *
+ * `limits.recordings.max` is threaded from `checkRecordingLimit`'s resolved
+ * `limit` (not re-derived from `flags.limits.recordings.max`) so the
+ * displayed cap always matches the cap actually enforced at upload time.
  */
 export async function buildFeatureFlagsWithUsage(user: User): Promise<FeatureFlagsResponse> {
-  const flags = buildFeatureFlags(user);
+  const plan = isAdminUnlimited(user.email) ? 'enterprise' : await effectivePlanForUser(user);
+  const flags = buildFeatureFlagsForPlan(plan);
   const limitCheck = await checkRecordingLimit(user);
 
   return {
@@ -271,7 +361,7 @@ export async function buildFeatureFlagsWithUsage(user: User): Promise<FeatureFla
       ...flags.limits,
       recordings: {
         used: limitCheck.used,
-        max: flags.limits.recordings.max,
+        max: serializeLimit(limitCheck.limit),
       },
     },
   };

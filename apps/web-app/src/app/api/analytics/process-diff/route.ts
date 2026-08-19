@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
     return errorResponse({ code: 'USER_NOT_FOUND', message: 'User not found.' }, 404);
   }
 
-  const access = checkFeatureAccess(user, 'intelligenceLayer');
+  const access = await checkFeatureAccess(user, 'intelligenceLayer');
   if (!access.allowed) {
     return NextResponse.json(
       {

@@ -23,7 +23,7 @@ export async function POST(
   }
 
   // Gate: portfolio workflow management is a Team+ (sharedLibrary) feature
-  const access = checkFeatureAccess(user, 'sharedLibrary');
+  const access = await checkFeatureAccess(user, 'sharedLibrary');
   if (!access.allowed) {
     return NextResponse.json(
       {
@@ -103,7 +103,7 @@ export async function DELETE(
   }
 
   // Gate: portfolio workflow management is a Team+ (sharedLibrary) feature
-  const deleteAccess = checkFeatureAccess(user, 'sharedLibrary');
+  const deleteAccess = await checkFeatureAccess(user, 'sharedLibrary');
   if (!deleteAccess.allowed) {
     return NextResponse.json(
       {

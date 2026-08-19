@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import crypto from 'crypto';
-import { checkFeatureAccess } from '@/lib/feature-gating';
+import { checkSoloFeatureAccess } from '@/lib/feature-gating';
 import { toPlanType } from '@/lib/plans';
 import { trackServer } from '@/lib/analytics-server';
 
@@ -77,9 +77,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
 
-  // Gate: creating teams is a Team+ (teamWorkspace) feature.
+  // Gate: creating teams is a Team+ (teamWorkspace) feature. Deliberately uses
+  // checkSoloFeatureAccess (NOT checkFeatureAccess) — creating a NEW team is
+  // gated on the caller's own subscription, not on a workspace they already
+  // belong to (see checkSoloFeatureAccess doc + team_workspace_status.md §6(a) item 2).
   // P0-F: include code:'plan_upgrade_required' so frontend can render upgrade CTA.
-  const access = checkFeatureAccess(user, 'teamWorkspace');
+  const access = checkSoloFeatureAccess(user, 'teamWorkspace');
   if (!access.allowed) {
     return NextResponse.json(
       {

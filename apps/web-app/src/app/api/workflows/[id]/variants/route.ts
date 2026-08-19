@@ -25,7 +25,7 @@ export async function POST(
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
 
-  const access = checkFeatureAccess(user, 'intelligenceLayer');
+  const access = await checkFeatureAccess(user, 'intelligenceLayer');
   if (!access.allowed) {
     return NextResponse.json(
       {
