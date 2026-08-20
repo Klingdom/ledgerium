@@ -40,6 +40,19 @@ vi.mock('@/db', () => ({
     analyticsEvent: {
       create: vi.fn().mockResolvedValue({}),
     },
+    // Billing hardening (2026-08) — P0-1 idempotency ledger. Default: every
+    // event.id is a fresh claim (create resolves) so existing tests are
+    // unaffected; the dedicated "idempotency" describe block below overrides
+    // this per-test to simulate a duplicate delivery (P2002) or a mid-
+    // processing failure (release via delete).
+    webhookEvent: {
+      create: vi.fn().mockResolvedValue({}),
+      delete: vi.fn().mockResolvedValue({}),
+    },
+    // P1-1 dispute ledger.
+    stripeDispute: {
+      upsert: vi.fn().mockResolvedValue({}),
+    },
     // P0-J (iter 087 / TEAM-P03.10): array-style $transaction used by checkout.session.completed
     // to atomically create team + owner membership. Promise.all resolves the array of Prisma promises.
     $transaction: vi.fn().mockImplementation((operations: Promise<unknown>[]) => Promise.all(operations)),
@@ -91,9 +104,32 @@ function makeRequest(body: string, sig: string | null = 'whsec_test_sig'): NextR
   });
 }
 
-/** Minimal Stripe event factory — only the fields the handler reads. */
-function makeEvent<T>(type: string, object: T): Stripe.Event {
-  return { id: 'evt_test', type, data: { object } } as unknown as Stripe.Event;
+/**
+ * Minimal Stripe event factory — only the fields the handler reads.
+ *
+ * `created` defaults to "now" (Unix seconds) so the out-of-order delivery
+ * guard (which compares this against User/Team.lastSubscriptionEventAt)
+ * never treats a default-constructed event as stale. Tests exercising the
+ * staleness guard itself pass an explicit `created` override.
+ *
+ * `id` defaults to a fresh value per call (not a shared 'evt_test' constant)
+ * so the idempotency claim (keyed on event.id) does not collide ACROSS
+ * unrelated tests — each test's default event.id is unique unless a test
+ * explicitly overrides it to exercise duplicate-delivery behavior.
+ */
+let evtCounter = 0;
+function makeEvent<T>(
+  type: string,
+  object: T,
+  opts: { id?: string; created?: number } = {},
+): Stripe.Event {
+  evtCounter += 1;
+  return {
+    id: opts.id ?? `evt_test_${evtCounter}`,
+    type,
+    created: opts.created ?? Math.floor(Date.now() / 1000),
+    data: { object },
+  } as unknown as Stripe.Event;
 }
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
@@ -614,7 +650,9 @@ describe('POST /api/billing/webhook', () => {
     expect(vi.mocked(dbLib.db as any).team.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: 'team_pay_001' },
-        data: { subscriptionStatus: 'active' },
+        // Billing hardening (2026-08): a successful charge also clears any
+        // outstanding SCA pendingInvoiceUrl.
+        data: { subscriptionStatus: 'active', pendingInvoiceUrl: null },
       }),
     );
     // User.update must NOT be called when team is found
@@ -665,7 +703,9 @@ describe('POST /api/billing/webhook', () => {
     expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: userId },
-        data: { subscriptionStatus: 'active' },
+        // Billing hardening (2026-08): a successful charge also clears any
+        // outstanding SCA pendingInvoiceUrl.
+        data: { subscriptionStatus: 'active', pendingInvoiceUrl: null },
       }),
     );
     // team.update must NOT be called when only user matches
@@ -3088,6 +3128,619 @@ describe('POST /api/billing/webhook', () => {
       const call = vi.mocked(analyticsLib.trackServer).mock.calls.find((c) => c[0] === 'subscription_updated');
       expect(call).toBeDefined();
       expect(call![1]).not.toHaveProperty('visitorId');
+    });
+  });
+
+  // ── Billing hardening (2026-08): P0-1 idempotency, P0-2 SCA, P1-1 disputes,
+  //    out-of-order delivery guard ─────────────────────────────────────────
+
+  describe('P0-1: webhook delivery idempotency', () => {
+    /**
+     * Simulates the real Prisma unique-constraint behavior: the FIRST
+     * `webhookEvent.create({ data: { id } })` for a given id succeeds; every
+     * subsequent call with the SAME id throws a P2002-shaped error, exactly
+     * as SQLite/Postgres would on a duplicate PRIMARY KEY insert. `release`
+     * (called from the route's catch-block) removes the id so a later retry
+     * after a released claim is treated as fresh.
+     */
+    function installClaimSimulator(): Set<string> {
+      const claimed = new Set<string>();
+      vi.mocked(dbLib.db.webhookEvent.create as unknown as (args: any) => Promise<any>).mockImplementation(
+        async (args: any) => {
+          const id = args.data.id;
+          if (claimed.has(id)) {
+            const err = Object.assign(new Error('Unique constraint failed on the fields: (`id`)'), {
+              code: 'P2002',
+            });
+            throw err;
+          }
+          claimed.add(id);
+          return { id, type: args.data.type, receivedAt: new Date() };
+        },
+      );
+      vi.mocked(dbLib.db.webhookEvent.delete as unknown as (args: any) => Promise<any>).mockImplementation(
+        async (args: any) => {
+          claimed.delete(args.where.id);
+          return { id: args.where.id, type: 'test', receivedAt: new Date() };
+        },
+      );
+      return claimed;
+    }
+
+    // ── THE most important test in this change ──────────────────────────
+    it('delivering the SAME event.id twice produces exactly ONE provisioning effect', async () => {
+      installClaimSimulator();
+
+      const subscriptionId = 'sub_idem_001';
+      const priceId = 'price_starter_monthly_test';
+      const userId = 'user_idem_001';
+      const customerId = 'cus_idem_001';
+      const duplicateEventId = 'evt_idem_duplicate_001';
+
+      const session: Partial<Stripe.Checkout.Session> = {
+        id: 'cs_idem_test',
+        metadata: { userId },
+        subscription: subscriptionId,
+        customer: customerId,
+      };
+      const stripeSubscription = {
+        status: 'active',
+        items: { data: [{ price: { id: priceId } }] },
+      };
+
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi
+            .fn()
+            .mockReturnValue(
+              makeEvent('checkout.session.completed', session, { id: duplicateEventId }),
+            ),
+        },
+        subscriptions: { retrieve: vi.fn().mockResolvedValue(stripeSubscription) },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+      vi.mocked(stripeLib.planFromPriceId).mockReturnValue('starter');
+
+      // ── First delivery ──────────────────────────────────────────────
+      const res1 = await POST(makeRequest('{}'));
+      expect(res1.status).toBe(200);
+      const body1 = await res1.json();
+      expect(body1.duplicate).toBeUndefined();
+
+      // ── Second delivery of the EXACT SAME event.id ──────────────────
+      const res2 = await POST(makeRequest('{}'));
+      expect(res2.status).toBe(200);
+      const body2 = await res2.json();
+      expect(body2.duplicate).toBe(true);
+
+      // The single most important assertion: provisioning ran exactly once.
+      expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: userId },
+          data: expect.objectContaining({ plan: 'starter' }),
+        }),
+      );
+
+      const analyticsLib = await import('@/lib/analytics-server');
+      const creationCalls = vi
+        .mocked(analyticsLib.trackServer)
+        .mock.calls.filter((c) => c[0] === 'subscription_created');
+      expect(creationCalls).toHaveLength(1);
+
+      // The claim ledger itself was written to twice (both attempts probed
+      // it) but only the first attempt actually claimed successfully.
+      expect(vi.mocked(dbLib.db.webhookEvent.create)).toHaveBeenCalledTimes(2);
+    });
+
+    it('a duplicate delivery never reaches the Stripe signature-verified switch at all', async () => {
+      // Belt-and-suspenders on the mechanism itself: prove the SECOND
+      // delivery does not even attempt subscriptions.retrieve (i.e.
+      // processing short-circuits before any provisioning side effect can
+      // fire), not merely that the end DB write happens to be idempotent.
+      installClaimSimulator();
+      const dupId = 'evt_idem_shortcircuit_001';
+      const session: Partial<Stripe.Checkout.Session> = {
+        id: 'cs_sc',
+        metadata: { userId: 'user_sc' },
+        subscription: 'sub_sc',
+        customer: 'cus_sc',
+      };
+      const retrieveMock = vi.fn().mockResolvedValue({
+        status: 'active',
+        items: { data: [{ price: { id: 'price_starter_monthly_test' } }] },
+      });
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi
+            .fn()
+            .mockReturnValue(makeEvent('checkout.session.completed', session, { id: dupId })),
+        },
+        subscriptions: { retrieve: retrieveMock },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+      vi.mocked(stripeLib.planFromPriceId).mockReturnValue('starter');
+
+      await POST(makeRequest('{}'));
+      expect(retrieveMock).toHaveBeenCalledTimes(1);
+
+      await POST(makeRequest('{}'));
+      // Still exactly 1 — the duplicate never reached the subscriptions.retrieve call.
+      expect(retrieveMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('a processing failure releases the claim so a subsequent retry of the SAME event.id is reprocessed (not treated as duplicate)', async () => {
+      installClaimSimulator();
+      const retryId = 'evt_idem_retry_001';
+
+      const subscription: Partial<Stripe.Subscription> = {
+        id: 'sub_retry_001',
+        status: 'active',
+        metadata: {},
+        items: { data: [{ price: { id: 'price_unknown_xyz' } }] } as Stripe.Subscription['items'],
+      };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi
+            .fn()
+            .mockReturnValue(
+              makeEvent('customer.subscription.updated', subscription, { id: retryId }),
+            ),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+      // First attempt: unmapped price ID → throws → 500 → claim released.
+      vi.mocked(stripeLib.planFromPriceId).mockReturnValueOnce(null);
+
+      const res1 = await POST(makeRequest('{}'));
+      expect(res1.status).toBe(500);
+      expect(vi.mocked(dbLib.db.webhookEvent.delete)).toHaveBeenCalledWith({ where: { id: retryId } });
+
+      // Retry of the SAME event.id after the operator fixes the price mapping —
+      // must be treated as a fresh attempt, NOT swallowed as a duplicate.
+      vi.mocked(stripeLib.planFromPriceId).mockReturnValueOnce('starter');
+      const res2 = await POST(makeRequest('{}'));
+      expect(res2.status).toBe(200);
+      const body2 = await res2.json();
+      expect(body2.duplicate).toBeUndefined();
+    });
+
+    it('an unexpected DB error during the idempotency claim itself returns 500 without processing', async () => {
+      vi.mocked(dbLib.db.webhookEvent.create).mockRejectedValueOnce(
+        new Error('SQLITE_BUSY: database is locked'),
+      );
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi
+            .fn()
+            .mockReturnValue(makeEvent('checkout.session.completed', { id: 'cs_x' })),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+      const res = await POST(makeRequest('{}'));
+      expect(res.status).toBe(500);
+      expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('P0-2: invoice.payment_action_required (SCA / 3-D Secure)', () => {
+    it('team path: writes pendingInvoiceUrl and emits payment_action_required analytics', async () => {
+      const subscriptionId = 'sub_sca_team_001';
+      const hostedUrl = 'https://invoice.stripe.com/i/acct_test/test_sca_team';
+      const invoice: Partial<Stripe.Invoice> = {
+        id: 'inv_sca_team_001',
+        subscription: subscriptionId,
+        hosted_invoice_url: hostedUrl,
+      };
+      const mockTeam = { id: 'team_sca_001', stripeSubscriptionId: subscriptionId };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('invoice.payment_action_required', invoice)),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+      vi.mocked(dbLib.db as any).team.findFirst.mockResolvedValue(mockTeam);
+
+      const analyticsLib = await import('@/lib/analytics-server');
+      const res = await POST(makeRequest('{}'));
+
+      expect(res.status).toBe(200);
+      expect(vi.mocked(dbLib.db as any).team.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'team_sca_001' },
+          data: { pendingInvoiceUrl: hostedUrl },
+        }),
+      );
+      expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+      expect(vi.mocked(analyticsLib.trackServer)).toHaveBeenCalledWith(
+        'payment_action_required',
+        expect.objectContaining({ entity: 'team', teamId: 'team_sca_001', invoiceId: 'inv_sca_team_001' }),
+      );
+    });
+
+    it('solo path: writes pendingInvoiceUrl on the user row', async () => {
+      const subscriptionId = 'sub_sca_solo_001';
+      const userId = 'user_sca_solo_001';
+      const hostedUrl = 'https://invoice.stripe.com/i/acct_test/test_sca_solo';
+      const invoice: Partial<Stripe.Invoice> = {
+        id: 'inv_sca_solo_001',
+        subscription: subscriptionId,
+        hosted_invoice_url: hostedUrl,
+      };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('invoice.payment_action_required', invoice)),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+      vi.mocked(dbLib.db.user.findFirst).mockResolvedValue({
+        id: userId,
+        stripeSubscriptionId: subscriptionId,
+        firstTouchVisitorId: 'vid-sca-001',
+      } as any);
+
+      const res = await POST(makeRequest('{}'));
+      expect(res.status).toBe(200);
+      expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: userId },
+          data: { pendingInvoiceUrl: hostedUrl },
+        }),
+      );
+    });
+
+    it('missing subscriptionId on the invoice — returns 200, no DB write', async () => {
+      const invoice: Partial<Stripe.Invoice> = { id: 'inv_sca_nosub' };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('invoice.payment_action_required', invoice)),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+      const res = await POST(makeRequest('{}'));
+      expect(res.status).toBe(200);
+      expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+      expect(vi.mocked(dbLib.db as any).team.update).not.toHaveBeenCalled();
+    });
+
+    it('neither team nor user found — returns 200 without throwing (Stripe must not retry forever)', async () => {
+      const invoice: Partial<Stripe.Invoice> = {
+        id: 'inv_sca_unknown',
+        subscription: 'sub_sca_unknown',
+        hosted_invoice_url: 'https://invoice.stripe.com/x',
+      };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('invoice.payment_action_required', invoice)),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+      // Both team.findFirst and user.findFirst default to null.
+
+      const res = await POST(makeRequest('{}'));
+      expect(res.status).toBe(200);
+    });
+
+    it('customer.subscription.deleted clears pendingInvoiceUrl on the solo user row', async () => {
+      const userId = 'user_sca_clear_001';
+      const subscription: Partial<Stripe.Subscription> = {
+        id: 'sub_sca_clear_001',
+        status: 'canceled',
+        metadata: { userId },
+        items: { data: [] } as unknown as Stripe.Subscription['items'],
+      };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('customer.subscription.deleted', subscription)),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+      const res = await POST(makeRequest('{}'));
+      expect(res.status).toBe(200);
+      expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ pendingInvoiceUrl: null }),
+        }),
+      );
+    });
+  });
+
+  describe('P1-1: charge.dispute.created / charge.dispute.closed', () => {
+    it('resolves the owning team via the charge customer and records the dispute — entitlement untouched', async () => {
+      const chargeId = 'ch_dispute_team_001';
+      const customerId = 'cus_dispute_team_001';
+      const dispute = {
+        id: 'dp_team_001',
+        charge: chargeId,
+        amount: 4900,
+        currency: 'usd',
+        reason: 'fraudulent',
+        status: 'needs_response',
+      };
+      const chargesRetrieve = vi.fn().mockResolvedValue({ id: chargeId, customer: customerId });
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('charge.dispute.created', dispute)),
+        },
+        charges: { retrieve: chargesRetrieve },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+      const mockTeam = { id: 'team_dispute_001', stripeCustomerId: customerId, members: [] };
+      vi.mocked(teamBillingLib.resolveTeamFromCustomer).mockResolvedValueOnce(mockTeam as any);
+
+      const analyticsLib = await import('@/lib/analytics-server');
+      const res = await POST(makeRequest('{}'));
+
+      expect(res.status).toBe(200);
+      expect(chargesRetrieve).toHaveBeenCalledWith(chargeId);
+      expect(vi.mocked(dbLib.db as any).stripeDispute.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'dp_team_001' },
+          create: expect.objectContaining({
+            id: 'dp_team_001',
+            chargeId,
+            teamId: 'team_dispute_001',
+            userId: null,
+            amount: 4900,
+            currency: 'usd',
+            reason: 'fraudulent',
+            status: 'needs_response',
+          }),
+        }),
+      );
+      // Entitlement must NOT be touched by a mere dispute claim.
+      expect(vi.mocked(dbLib.db as any).team.update).not.toHaveBeenCalled();
+      expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+      expect(vi.mocked(analyticsLib.trackServer)).toHaveBeenCalledWith(
+        'dispute_created',
+        expect.objectContaining({ disputeId: 'dp_team_001', teamId: 'team_dispute_001', chargeId }),
+      );
+    });
+
+    it('resolves the owning solo user when no team matches the customer', async () => {
+      const chargeId = 'ch_dispute_solo_001';
+      const customerId = 'cus_dispute_solo_001';
+      const userId = 'user_dispute_solo_001';
+      const dispute = {
+        id: 'dp_solo_001',
+        charge: chargeId,
+        amount: 8900,
+        currency: 'usd',
+        reason: 'duplicate',
+        status: 'needs_response',
+      };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('charge.dispute.created', dispute)),
+        },
+        charges: { retrieve: vi.fn().mockResolvedValue({ id: chargeId, customer: customerId }) },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+      vi.mocked(teamBillingLib.resolveTeamFromCustomer).mockResolvedValueOnce(null);
+      vi.mocked(dbLib.db.user.findFirst).mockResolvedValue({ id: userId } as any);
+
+      const res = await POST(makeRequest('{}'));
+      expect(res.status).toBe(200);
+      expect(vi.mocked(dbLib.db as any).stripeDispute.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          create: expect.objectContaining({ userId, teamId: null }),
+        }),
+      );
+    });
+
+    it('charge retrieval failure still records the dispute with owner unresolved (never dropped)', async () => {
+      const dispute = {
+        id: 'dp_unresolved_001',
+        charge: 'ch_unresolved_001',
+        amount: 1200,
+        currency: 'usd',
+        reason: 'general',
+        status: 'needs_response',
+      };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('charge.dispute.created', dispute)),
+        },
+        charges: { retrieve: vi.fn().mockRejectedValue(new Error('Stripe API error')) },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+      const res = await POST(makeRequest('{}'));
+      expect(res.status).toBe(200);
+      expect(vi.mocked(dbLib.db as any).stripeDispute.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          create: expect.objectContaining({ id: 'dp_unresolved_001', userId: null, teamId: null }),
+        }),
+      );
+    });
+
+    it('dispute analytics payload carries no PII', async () => {
+      const dispute = {
+        id: 'dp_pii_001',
+        charge: 'ch_pii_001',
+        amount: 4900,
+        currency: 'usd',
+        reason: 'fraudulent',
+        status: 'needs_response',
+      };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('charge.dispute.created', dispute)),
+        },
+        charges: { retrieve: vi.fn().mockRejectedValue(new Error('unresolved')) },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+      const analyticsLib = await import('@/lib/analytics-server');
+      await POST(makeRequest('{}'));
+
+      const call = vi.mocked(analyticsLib.trackServer).mock.calls.find((c) => c[0] === 'dispute_created');
+      expect(call).toBeDefined();
+      const payload = call![1] as Record<string, unknown>;
+      expect(payload).not.toHaveProperty('email');
+      expect(payload).not.toHaveProperty('customerEmail');
+      expect(payload).not.toHaveProperty('name');
+    });
+
+    it('charge.dispute.closed updates the dispute status only', async () => {
+      const dispute = {
+        id: 'dp_closed_001',
+        charge: 'ch_closed_001',
+        amount: 4900,
+        currency: 'usd',
+        reason: 'fraudulent',
+        status: 'won',
+      };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('charge.dispute.closed', dispute)),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+      const res = await POST(makeRequest('{}'));
+      expect(res.status).toBe(200);
+      expect(vi.mocked(dbLib.db as any).stripeDispute.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'dp_closed_001' },
+          update: { status: 'won' },
+        }),
+      );
+    });
+  });
+
+  describe('Out-of-order webhook delivery guard', () => {
+    const OLDER = 1_700_000_000; // Unix seconds
+    const NEWER = 1_700_000_500;
+
+    it('customer.subscription.updated (solo): a stale event older than the last-applied event is skipped', async () => {
+      const userId = 'user_stale_001';
+      const subscription: Partial<Stripe.Subscription> = {
+        id: 'sub_stale_001',
+        status: 'active',
+        metadata: {},
+        items: { data: [{ price: { id: 'price_starter_monthly_test' } }] } as Stripe.Subscription['items'],
+      };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi
+            .fn()
+            .mockReturnValue(
+              makeEvent('customer.subscription.updated', subscription, { created: OLDER }),
+            ),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+      vi.mocked(stripeLib.planFromPriceId).mockReturnValue('starter');
+      vi.mocked(dbLib.db.user.findFirst).mockResolvedValue({
+        id: userId,
+        lastSubscriptionEventAt: new Date(NEWER * 1000),
+      } as any);
+
+      const analyticsLib = await import('@/lib/analytics-server');
+      const res = await POST(makeRequest('{}'));
+
+      expect(res.status).toBe(200);
+      expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+      expect(vi.mocked(analyticsLib.trackServer)).toHaveBeenCalledWith(
+        'subscription_update_skipped_stale',
+        expect.objectContaining({ userId, eventId: expect.any(String) }),
+      );
+    });
+
+    it('customer.subscription.updated (solo): a newer event than the last-applied one IS applied', async () => {
+      const userId = 'user_fresh_001';
+      const subscription: Partial<Stripe.Subscription> = {
+        id: 'sub_fresh_001',
+        status: 'active',
+        metadata: {},
+        items: { data: [{ price: { id: 'price_starter_monthly_test' } }] } as Stripe.Subscription['items'],
+      };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi
+            .fn()
+            .mockReturnValue(
+              makeEvent('customer.subscription.updated', subscription, { created: NEWER }),
+            ),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+      vi.mocked(stripeLib.planFromPriceId).mockReturnValue('starter');
+      vi.mocked(dbLib.db.user.findFirst).mockResolvedValue({
+        id: userId,
+        lastSubscriptionEventAt: new Date(OLDER * 1000),
+      } as any);
+
+      const res = await POST(makeRequest('{}'));
+      expect(res.status).toBe(200);
+      expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledOnce();
+    });
+
+    it('customer.subscription.updated (team): a stale event is skipped and does not clobber newer Team state', async () => {
+      const subscription: Partial<Stripe.Subscription> = {
+        id: 'sub_stale_team_001',
+        status: 'active',
+        customer: 'cus_stale_team',
+        metadata: {},
+        items: { data: [{ price: { id: 'price_team_monthly_test' } }] } as Stripe.Subscription['items'],
+      };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi
+            .fn()
+            .mockReturnValue(
+              makeEvent('customer.subscription.updated', subscription, { created: OLDER }),
+            ),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+      vi.mocked(stripeLib.planFromPriceId).mockReturnValue('team');
+      const mockTeam = {
+        id: 'team_stale_001',
+        name: 'Stale Co',
+        plan: 'growth',
+        stripeCustomerId: 'cus_stale_team',
+        stripeSubscriptionId: 'sub_current',
+        lastSubscriptionEventAt: new Date(NEWER * 1000),
+        members: [],
+      };
+      vi.mocked(teamBillingLib.resolveTeamFromCustomer).mockResolvedValueOnce(mockTeam as any);
+
+      const res = await POST(makeRequest('{}'));
+      expect(res.status).toBe(200);
+      expect(vi.mocked(dbLib.db as any).team.update).not.toHaveBeenCalled();
+    });
+
+    it('customer.subscription.deleted (solo): a stale deletion event is skipped', async () => {
+      const userId = 'user_stale_del_001';
+      const subscription: Partial<Stripe.Subscription> = {
+        id: 'sub_stale_del_001',
+        status: 'canceled',
+        metadata: {},
+        items: { data: [] } as unknown as Stripe.Subscription['items'],
+      };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi
+            .fn()
+            .mockReturnValue(
+              makeEvent('customer.subscription.deleted', subscription, { created: OLDER }),
+            ),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+      vi.mocked(dbLib.db.user.findFirst).mockResolvedValue({
+        id: userId,
+        lastSubscriptionEventAt: new Date(NEWER * 1000),
+      } as any);
+
+      const res = await POST(makeRequest('{}'));
+      expect(res.status).toBe(200);
+      expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
     });
   });
 });

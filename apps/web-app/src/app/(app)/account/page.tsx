@@ -17,6 +17,7 @@ import {
   Activity,
   Settings,
   HelpCircle,
+  AlertTriangle,
 } from 'lucide-react';
 import { PRICING_CONFIG } from '@/lib/config';
 import { PLAN_HIERARCHY } from '@/lib/plans';
@@ -36,6 +37,14 @@ interface AccountData {
     subscriptionStatus: string;
     createdAt: string;
     hasStripeCustomer: boolean;
+    /**
+     * P0-2 (billing hardening, 2026-08): non-null IFF Stripe has an open
+     * invoice on this subscription requiring SCA/3-D Secure customer
+     * authentication. Points at the Stripe-hosted invoice page where the
+     * customer can complete the challenge. See webhook/route.ts
+     * invoice.payment_action_required for the write side.
+     */
+    pendingInvoiceUrl: string | null;
   };
   features: Record<string, boolean>;
   limits: {
@@ -481,6 +490,36 @@ export default function AccountPage() {
             </dd>
           </div>
         </dl>
+
+        {/* SCA / 3-D Secure action-required banner (P0-2, billing hardening 2026-08).
+            Non-null pendingInvoiceUrl means Stripe is blocked on customer
+            authentication for an open invoice — this is a hard next-step for
+            the customer, so it is surfaced above the plan grid, not buried in
+            the status pill (see AccountData.user.pendingInvoiceUrl doc comment). */}
+        {account?.user?.pendingInvoiceUrl && (
+          <div className="mb-ds-5 ds-callout ds-callout-warning" role="alert">
+            <div className="flex items-start gap-ds-2">
+              <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-ds-sm font-medium text-amber-900">
+                  Payment requires verification
+                </p>
+                <p className="mt-0.5 text-ds-xs text-amber-700">
+                  Your bank needs you to confirm this charge before it can complete. This
+                  usually takes under a minute.
+                </p>
+                <a
+                  href={account.user.pendingInvoiceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-ds-2 inline-block btn-primary text-xs"
+                >
+                  Complete payment
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Billing interval toggle — hidden for enterprise */}
         {!isEnterprise && (

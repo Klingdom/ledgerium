@@ -45,6 +45,12 @@ export async function GET() {
         subscriptionStatus: user.subscriptionStatus,
         createdAt: user.createdAt,
         hasStripeCustomer: !!user.stripeCustomerId,
+        // P0-2 (billing hardening, 2026-08): non-null IFF Stripe currently has
+        // an open invoice on this subscription requiring SCA/3-D Secure
+        // customer authentication. The account page surfaces this as a
+        // direct "complete payment" link — see webhook/route.ts
+        // invoice.payment_action_required for the write side.
+        pendingInvoiceUrl: user.pendingInvoiceUrl ?? null,
       },
       features: flags.features,
       limits: flags.limits,

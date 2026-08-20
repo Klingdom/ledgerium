@@ -79,7 +79,7 @@ export interface NotifyOwnerResult {
  */
 export async function resolveTeamFromCustomer(
   stripeCustomerId: string,
-): Promise<({ id: string; name: string; plan: string; stripeCustomerId: string | null; stripeSubscriptionId: string | null } & { members: Array<{ id: string; teamId: string; userId: string; role: string; joinedAt: Date; status: string; deactivatedAt: Date | null; reactivationDeadline: Date | null }> }) | null> {
+): Promise<({ id: string; name: string; plan: string; stripeCustomerId: string | null; stripeSubscriptionId: string | null; lastSubscriptionEventAt: Date | null } & { members: Array<{ id: string; teamId: string; userId: string; role: string; joinedAt: Date; status: string; deactivatedAt: Date | null; reactivationDeadline: Date | null }> }) | null> {
   return (db as any).team.findFirst({
     where: { stripeCustomerId },
     include: { members: true },

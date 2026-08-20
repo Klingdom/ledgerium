@@ -356,4 +356,82 @@ describe('POST /api/billing/checkout (iter 066 trial + tier matrix)', () => {
       expect(vi.mocked(effectivePlanFor)).toHaveBeenCalledWith(TEST_USER_ID);
     });
   });
+
+  // ── Billing hardening (2026-08): upgrade/downgrade/reactivation audit ─────
+  //
+  // Prior to this fix, the already_subscribed gate ONLY checked
+  // subscriptionStatus === 'active'. A mid-trial subscriber ('trialing') or
+  // a subscriber whose last renewal failed ('past_due') could therefore
+  // start a completely SEPARATE second Checkout Session for a different
+  // plan — Stripe would then actively bill TWO parallel subscriptions for
+  // the same customer. This block proves the fix and locks the correct
+  // counterpart behavior (cancellation + reactivation must NOT be blocked).
+
+  describe('open-subscription gate (billing hardening 2026-08)', () => {
+    it('blocks a mid-trial subscriber ("trialing") from starting a second parallel Checkout Session', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(
+        makeUser({ plan: 'starter', subscriptionStatus: 'trialing' }) as never,
+      );
+      vi.mocked(effectivePlanFor).mockResolvedValueOnce('starter');
+
+      const res = await POST(makeRequest({ plan: 'solo', interval: 'monthly' }));
+
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.code).toBe('already_subscribed');
+      expect(mockCheckoutCreate).not.toHaveBeenCalled();
+    });
+
+    it('blocks a past_due subscriber from starting a second parallel Checkout Session', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(
+        makeUser({ plan: 'starter', subscriptionStatus: 'past_due' }) as never,
+      );
+      vi.mocked(effectivePlanFor).mockResolvedValueOnce('starter');
+
+      const res = await POST(makeRequest({ plan: 'solo', interval: 'monthly' }));
+
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.code).toBe('already_subscribed');
+      expect(mockCheckoutCreate).not.toHaveBeenCalled();
+    });
+
+    it('allows reactivation after cancellation ("canceled" + cleared stripeSubscriptionId) — no trial re-granted', async () => {
+      // Mirrors the real post-webhook state after customer.subscription.deleted:
+      // plan reverts to 'free' at the DB layer for the already_subscribed check
+      // (effectivePlanFor reads the live plan), stripeSubscriptionId is
+      // cleared, status is 'canceled', but stripeCustomerId is PRESERVED
+      // (Stripe customer reuse — see webhook/route.ts customer.subscription.deleted).
+      vi.mocked(db.user.findUnique).mockResolvedValue(
+        makeUser({
+          plan: 'free',
+          subscriptionStatus: 'canceled',
+          stripeSubscriptionId: null,
+          stripeCustomerId: TEST_CUSTOMER_ID,
+        }) as never,
+      );
+      vi.mocked(effectivePlanFor).mockResolvedValueOnce('free');
+
+      const res = await POST(makeRequest({ plan: 'starter', interval: 'monthly' }));
+
+      expect(res.status).toBe(200);
+      expect(mockCheckoutCreate).toHaveBeenCalledOnce();
+      // Reuses the existing Stripe customer — no new customer created.
+      expect(mockCustomerCreate).not.toHaveBeenCalled();
+      // No second trial for a cancelled-then-resubscribed user.
+      const args = mockCheckoutCreate.mock.calls[0]![0];
+      expect(args.subscription_data?.trial_period_days).toBeUndefined();
+    });
+
+    it('allows a fresh (never-subscribed) user with subscriptionStatus="none" to proceed', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(
+        makeUser({ plan: 'free', subscriptionStatus: 'none' }) as never,
+      );
+      vi.mocked(effectivePlanFor).mockResolvedValueOnce('free');
+
+      const res = await POST(makeRequest({ plan: 'starter', interval: 'monthly' }));
+      expect(res.status).toBe(200);
+      expect(mockCheckoutCreate).toHaveBeenCalledOnce();
+    });
+  });
 });

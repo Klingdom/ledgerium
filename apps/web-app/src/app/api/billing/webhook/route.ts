@@ -58,7 +58,9 @@ function mapStripeStatusToUserSubscriptionStatus(status: string): UserSubscripti
  * - customer.subscription.deleted → revoke paid plan → free
  * - invoice.payment_failed → mark past_due
  * - invoice.payment_succeeded → confirm active status on every successful charge
+ * - invoice.payment_action_required → capture the SCA/3-D-Secure hosted invoice URL
  * - customer.subscription.trial_will_end → emit analytics notification (no DB write)
+ * - charge.dispute.created / charge.dispute.closed → record for admin visibility
  *
  * Provisioning vs notification semantics:
  *   PROVISIONING events (checkout.session.completed, customer.subscription.updated,
@@ -69,6 +71,24 @@ function mapStripeStatusToUserSubscriptionStatus(status: string): UserSubscripti
  *   NOTIFICATION events (customer.subscription.trial_will_end) are informational only.
  *   They emit analytics but do NOT write to the DB. Unmapped price IDs on notification
  *   events are soft warnings — emit analytics with plan: null and return 200.
+ *
+ * Idempotency (P0-1 — Stripe billing hardening, 2026-08):
+ *   Stripe explicitly does not guarantee exactly-once delivery. Every event is
+ *   claimed via a unique-constraint INSERT into WebhookEvent BEFORE any
+ *   provisioning runs; a duplicate delivery of the SAME event.id hits the
+ *   claim's uniqueness violation and is skipped without re-running side
+ *   effects. See the claim/release block below for the documented tradeoff.
+ *
+ * Out-of-order delivery (Stripe also does not guarantee delivery ORDER):
+ *   customer.subscription.updated and customer.subscription.deleted — the two
+ *   events that can overwrite plan/status based on a snapshot of subscription
+ *   state — compare the incoming Stripe event's own `created` timestamp
+ *   against User.lastSubscriptionEventAt / Team.lastSubscriptionEventAt and
+ *   skip the write if a newer event has already been applied. checkout.session.completed
+ *   (a one-time first-write per subscription) and the two invoice.* events
+ *   (each writes a single narrower field that self-corrects on the next
+ *   successful billing cycle) are NOT given this treatment — see the inline
+ *   comments at each of those sites for the specific reasoning.
  */
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -95,6 +115,46 @@ export async function POST(req: NextRequest) {
     console.error('Webhook signature verification failed:', err);
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
+
+  // ── Idempotency claim (P0-1) ────────────────────────────────────────────
+  // Claim this event.id via a unique-constraint INSERT before doing any
+  // provisioning work. If the insert fails with a unique-constraint
+  // violation, this exact event has already been recorded and we return 200
+  // without re-running side effects — Stripe stops retrying on 2xx.
+  //
+  // Documented tradeoff: if the process crashes AFTER this insert succeeds
+  // but BEFORE a response is returned, the claim row survives and a Stripe
+  // retry of that exact delivery is treated as a duplicate and silently
+  // skipped — this specific event would never be provisioned. We accept this
+  // over the alternative (claim AFTER processing completes), which reopens a
+  // race window where two near-simultaneous deliveries of the same event.id
+  // could both pass a "not yet claimed" check and both run provisioning —
+  // for billing, double-provisioning (two Team rows, two subscription_created
+  // analytics events, etc.) is a strictly worse failure mode than a rare
+  // dropped event, which for most subscription-lifecycle events also
+  // self-heals on the next successful invoice.payment_succeeded renewal.
+  // On any processing failure below, the claim row IS released (see the
+  // catch block) so a legitimate retry after a transient failure is NOT
+  // treated as a duplicate.
+  try {
+    await db.webhookEvent.create({ data: { id: event.id, type: event.type } });
+  } catch (err) {
+    if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'P2002') {
+      console.log(
+        `[stripe] Duplicate webhook event ${event.id} (${event.type}) — already processed, skipping.`,
+      );
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+    console.error('[stripe] Failed to record webhook event for idempotency:', err);
+    return NextResponse.json({ error: 'Webhook idempotency check failed' }, { status: 500 });
+  }
+
+  // Single upstream clock boundary for the out-of-order delivery guard below
+  // (iter 037 MDR-P03/P04 pattern) — derived from the event's OWN `created`
+  // timestamp (Stripe's authoritative "when did this happen" signal), not
+  // from Date.now() at receipt time, which would be meaningless for ordering
+  // retried/delayed deliveries.
+  const eventCreatedAt = new Date(event.created * 1000);
 
   try {
     switch (event.type) {
@@ -181,6 +241,8 @@ export async function POST(req: NextRequest) {
                   stripeSubscriptionId: session.subscription as string,
                   subscriptionStatus: teamSubscriptionStatus,
                   billingInterval,
+                  // Out-of-order guard baseline — see module doc comment.
+                  lastSubscriptionEventAt: eventCreatedAt,
                 },
               });
               console.log(
@@ -214,6 +276,8 @@ export async function POST(req: NextRequest) {
                     subscriptionStatus: teamSubscriptionStatus,
                     billingInterval,
                     createdBy: userId,
+                    // Out-of-order guard baseline — see module doc comment.
+                    lastSubscriptionEventAt: eventCreatedAt,
                   },
                 }),
                 (db as any).teamMember.create({
@@ -255,6 +319,8 @@ export async function POST(req: NextRequest) {
             billingInterval,
             stripeSubscriptionId: session.subscription as string,
             stripeCustomerId: session.customer as string,
+            // Out-of-order guard baseline — see module doc comment.
+            lastSubscriptionEventAt: eventCreatedAt,
           },
         });
         console.log(`[stripe] User ${userId} upgraded to ${plan} (${subscriptionStatus})`);
@@ -331,6 +397,28 @@ export async function POST(req: NextRequest) {
         if (customerId) {
           const team = await resolveTeamFromCustomer(customerId);
           if (team) {
+            // Out-of-order delivery guard — see module doc comment. A
+            // later-arriving webhook delivery whose Stripe event `created`
+            // timestamp is OLDER than the last event we already applied for
+            // this team is a stale/out-of-order retry — skip it rather than
+            // clobbering the newer state that a subsequent event already wrote.
+            if (
+              team.lastSubscriptionEventAt &&
+              team.lastSubscriptionEventAt.getTime() > eventCreatedAt.getTime()
+            ) {
+              console.warn(
+                `[stripe] customer.subscription.updated: stale event ${event.id} ` +
+                  `(created ${eventCreatedAt.toISOString()}) is older than the last-applied ` +
+                  `event (${team.lastSubscriptionEventAt.toISOString()}) for team ${team.id} — skipping`,
+              );
+              trackServer('subscription_update_skipped_stale', {
+                entity: 'team',
+                teamId: team.id,
+                eventId: event.id,
+              });
+              break;
+            }
+
             const previousPlan = team.plan as PlanType;
             const nowMs = Date.now();
 
@@ -347,6 +435,8 @@ export async function POST(req: NextRequest) {
                 // conversions, upgrades, downgrades, and renewals all arrive
                 // here, never through the User row again.
                 billingInterval,
+                // Out-of-order guard baseline — see module doc comment.
+                lastSubscriptionEventAt: eventCreatedAt,
               },
             });
 
@@ -414,12 +504,32 @@ export async function POST(req: NextRequest) {
           break;
         }
 
+        // Out-of-order delivery guard — see module doc comment (same
+        // reasoning as the team branch above).
+        if (
+          soloUser.lastSubscriptionEventAt &&
+          soloUser.lastSubscriptionEventAt.getTime() > eventCreatedAt.getTime()
+        ) {
+          console.warn(
+            `[stripe] customer.subscription.updated: stale event ${event.id} ` +
+              `(created ${eventCreatedAt.toISOString()}) is older than the last-applied ` +
+              `event (${soloUser.lastSubscriptionEventAt.toISOString()}) for user ${soloUser.id} — skipping`,
+          );
+          trackServer('subscription_update_skipped_stale', {
+            userId: soloUser.id,
+            eventId: event.id,
+          });
+          break;
+        }
+
         await db.user.update({
           where: { id: soloUser.id },
           data: {
             plan,
             subscriptionStatus: planStatus,
             billingInterval,
+            // Out-of-order guard baseline — see module doc comment.
+            lastSubscriptionEventAt: eventCreatedAt,
           },
         });
         console.log(`[stripe] User ${soloUser.id} subscription updated: ${status} → plan ${plan}`);
@@ -441,6 +551,27 @@ export async function POST(req: NextRequest) {
         if (deletedCustomerId) {
           const deletedTeam = await resolveTeamFromCustomer(deletedCustomerId);
           if (deletedTeam) {
+            // Out-of-order delivery guard — see module doc comment. Without
+            // this, a delayed/retried .deleted delivery could arrive AFTER a
+            // legitimate later .updated event (e.g. the owner resubscribed)
+            // and incorrectly revert an active workspace back to free.
+            if (
+              deletedTeam.lastSubscriptionEventAt &&
+              deletedTeam.lastSubscriptionEventAt.getTime() > eventCreatedAt.getTime()
+            ) {
+              console.warn(
+                `[stripe] customer.subscription.deleted: stale event ${event.id} ` +
+                  `(created ${eventCreatedAt.toISOString()}) is older than the last-applied ` +
+                  `event (${deletedTeam.lastSubscriptionEventAt.toISOString()}) for team ${deletedTeam.id} — skipping`,
+              );
+              trackServer('subscription_update_skipped_stale', {
+                entity: 'team',
+                teamId: deletedTeam.id,
+                eventId: event.id,
+              });
+              break;
+            }
+
             const previousPlanDeleted = deletedTeam.plan as PlanType;
             const nowMsDeleted = Date.now();
 
@@ -450,6 +581,10 @@ export async function POST(req: NextRequest) {
                 plan: 'free',
                 subscriptionStatus: 'canceled',
                 stripeSubscriptionId: null,
+                // A canceled subscription moots any outstanding SCA challenge.
+                pendingInvoiceUrl: null,
+                // Out-of-order guard baseline — see module doc comment.
+                lastSubscriptionEventAt: eventCreatedAt,
               },
             });
 
@@ -506,12 +641,33 @@ export async function POST(req: NextRequest) {
           break;
         }
 
+        // Out-of-order delivery guard — see module doc comment.
+        if (
+          deletedSoloUser.lastSubscriptionEventAt &&
+          deletedSoloUser.lastSubscriptionEventAt.getTime() > eventCreatedAt.getTime()
+        ) {
+          console.warn(
+            `[stripe] customer.subscription.deleted: stale event ${event.id} ` +
+              `(created ${eventCreatedAt.toISOString()}) is older than the last-applied ` +
+              `event (${deletedSoloUser.lastSubscriptionEventAt.toISOString()}) for user ${deletedSoloUser.id} — skipping`,
+          );
+          trackServer('subscription_update_skipped_stale', {
+            userId: deletedSoloUser.id,
+            eventId: event.id,
+          });
+          break;
+        }
+
         await db.user.update({
           where: { id: deletedSoloUser.id },
           data: {
             plan: 'free',
             subscriptionStatus: 'canceled',
             stripeSubscriptionId: null,
+            // A canceled subscription moots any outstanding SCA challenge.
+            pendingInvoiceUrl: null,
+            // Out-of-order guard baseline — see module doc comment.
+            lastSubscriptionEventAt: eventCreatedAt,
           },
         });
         console.log(`[stripe] User ${deletedSoloUser.id} subscription canceled — reverted to free`);
@@ -592,7 +748,8 @@ export async function POST(req: NextRequest) {
         if (succeededTeam) {
           await (db as any).team.update({
             where: { id: succeededTeam.id },
-            data: { subscriptionStatus: 'active' },
+            // A successful charge resolves any outstanding SCA challenge.
+            data: { subscriptionStatus: 'active', pendingInvoiceUrl: null },
           });
           console.log(
             `[stripe] Team ${succeededTeam.id} payment succeeded — invoice ${invoice.id} ${invoice.amount_paid} ${invoice.currency}`,
@@ -624,7 +781,8 @@ export async function POST(req: NextRequest) {
 
         await db.user.update({
           where: { id: succeededUser.id },
-          data: { subscriptionStatus: 'active' },
+          // A successful charge resolves any outstanding SCA challenge.
+          data: { subscriptionStatus: 'active', pendingInvoiceUrl: null },
         });
         console.log(
           `[stripe] User ${succeededUser.id} payment succeeded — invoice ${invoice.id} ${invoice.amount_paid} ${invoice.currency}`,
@@ -641,6 +799,192 @@ export async function POST(req: NextRequest) {
           visitorId: succeededUser.firstTouchVisitorId,
           invoiceId: invoice.id,
         });
+        break;
+      }
+
+      case 'invoice.payment_action_required': {
+        // P0-2 — SCA / 3-D Secure. Stripe sends this IN ADDITION TO
+        // invoice.payment_failed when an off-session charge attempt (almost
+        // always a renewal, since Stripe Checkout itself resolves SCA during
+        // the initial hosted checkout flow before checkout.session.completed
+        // ever fires) fails specifically because the card issuer requires
+        // customer re-authentication — common for EU cards under PSD2.
+        //
+        // invoice.payment_failed (handled above) already marks the account
+        // past_due; this handler's sole job is to capture the Stripe-hosted
+        // authentication link so the /account billing surface can show the
+        // customer a direct "complete payment" action instead of a dead-end
+        // past_due badge with no next step.
+        //
+        // Deliberately does NOT write subscriptionStatus — see the
+        // pendingInvoiceUrl schema doc comment (schema.prisma) for why
+        // SCA-required is modeled as a side-channel field, not a
+        // subscriptionStatus value.
+        const invoice = event.data.object as Stripe.Invoice;
+        const subscriptionId = invoice.subscription as string;
+        if (!subscriptionId) break;
+
+        const hostedInvoiceUrl = invoice.hosted_invoice_url ?? null;
+
+        const actionTeam = await (db as any).team.findFirst({
+          where: { stripeSubscriptionId: subscriptionId },
+        });
+
+        if (actionTeam) {
+          await (db as any).team.update({
+            where: { id: actionTeam.id },
+            data: { pendingInvoiceUrl: hostedInvoiceUrl },
+          });
+          console.log(
+            `[stripe] Team ${actionTeam.id} payment requires action — invoice ${invoice.id}`,
+          );
+          // No PII: only teamId and invoiceId are emitted (the hosted URL
+          // itself is not — it is a bearer-style link to the invoice and
+          // must not be logged to an analytics sink).
+          trackServer('payment_action_required', {
+            entity: 'team',
+            teamId: actionTeam.id,
+            invoiceId: invoice.id,
+          });
+          break;
+        }
+
+        const actionUser = await db.user.findFirst({
+          where: { stripeSubscriptionId: subscriptionId },
+        });
+        if (!actionUser) {
+          console.warn(
+            `[stripe] invoice.payment_action_required: no team or user found for subscription ${subscriptionId} — skipping DB update`,
+          );
+          break;
+        }
+
+        await db.user.update({
+          where: { id: actionUser.id },
+          data: { pendingInvoiceUrl: hostedInvoiceUrl },
+        });
+        console.log(
+          `[stripe] User ${actionUser.id} payment requires action — invoice ${invoice.id}`,
+        );
+        trackServer('payment_action_required', {
+          userId: actionUser.id,
+          invoiceId: invoice.id,
+          visitorId: actionUser.firstTouchVisitorId,
+        });
+        break;
+      }
+
+      case 'charge.dispute.created': {
+        // P1-1 — record for admin visibility. Disputes are rare, high-stakes,
+        // and require human judgment (submit evidence within Stripe's
+        // response window, or accept the loss). We deliberately do NOT touch
+        // plan/entitlement here: a dispute is a customer CLAIM, not an
+        // adjudicated outcome, and unilaterally revoking access on a mere
+        // claim (before Stripe/the card network rules on it) would be
+        // punitive to legitimate customers and would itself create an
+        // incentive for bad-faith "dispute to get free service" abuse if we
+        // did the opposite. Entitlement continues to be governed exclusively
+        // by the subscription-lifecycle events above.
+        const dispute = event.data.object as Stripe.Dispute;
+        const chargeId = typeof dispute.charge === 'string' ? dispute.charge : dispute.charge.id;
+
+        // Dispute webhook payloads are not expanded — `charge` is a bare ID.
+        // Retrieve the charge to resolve the owning customer for admin
+        // attribution; a failure here must not fail the whole webhook (the
+        // dispute is still recorded, with owner left unresolved).
+        let disputeCustomerId: string | null = null;
+        try {
+          const charge = await getStripe().charges.retrieve(chargeId);
+          disputeCustomerId =
+            (typeof charge.customer === 'string' ? charge.customer : charge.customer?.id) ?? null;
+        } catch (err) {
+          console.error(
+            `[stripe] charge.dispute.created: failed to retrieve charge ${chargeId} for customer resolution`,
+            err,
+          );
+        }
+
+        let disputeTeamId: string | null = null;
+        let disputeUserId: string | null = null;
+        if (disputeCustomerId) {
+          const disputeTeam = await resolveTeamFromCustomer(disputeCustomerId);
+          if (disputeTeam) {
+            disputeTeamId = disputeTeam.id;
+          } else {
+            const disputeUser = await db.user.findFirst({
+              where: { stripeCustomerId: disputeCustomerId },
+            });
+            disputeUserId = disputeUser?.id ?? null;
+          }
+        }
+
+        await (db as any).stripeDispute.upsert({
+          where: { id: dispute.id },
+          create: {
+            id: dispute.id,
+            chargeId,
+            userId: disputeUserId,
+            teamId: disputeTeamId,
+            amount: dispute.amount,
+            currency: dispute.currency,
+            reason: dispute.reason,
+            status: dispute.status,
+          },
+          update: {
+            amount: dispute.amount,
+            currency: dispute.currency,
+            reason: dispute.reason,
+            status: dispute.status,
+          },
+        });
+
+        console.warn(
+          `[stripe] Dispute ${dispute.id} created on charge ${chargeId} — reason=${dispute.reason} ` +
+            `amount=${dispute.amount} ${dispute.currency}` +
+            (disputeTeamId
+              ? ` team=${disputeTeamId}`
+              : disputeUserId
+                ? ` user=${disputeUserId}`
+                : ' (owner unresolved)'),
+        );
+        // No PII: chargeId/disputeId/teamId/userId are opaque IDs; reason and
+        // status are Stripe's fixed taxonomy strings, not free text.
+        trackServer('dispute_created', {
+          disputeId: dispute.id,
+          chargeId,
+          ...(disputeTeamId ? { teamId: disputeTeamId } : {}),
+          ...(disputeUserId ? { userId: disputeUserId } : {}),
+          amount: dispute.amount,
+          currency: dispute.currency,
+          reason: dispute.reason,
+        });
+        break;
+      }
+
+      case 'charge.dispute.closed': {
+        // Keeps the admin-visible dispute status current as Stripe resolves
+        // it (won / lost / warning_closed). Upsert is safe even if .closed
+        // somehow arrives without a prior .created row on file.
+        const dispute = event.data.object as Stripe.Dispute;
+        const chargeId = typeof dispute.charge === 'string' ? dispute.charge : dispute.charge.id;
+
+        await (db as any).stripeDispute.upsert({
+          where: { id: dispute.id },
+          create: {
+            id: dispute.id,
+            chargeId,
+            userId: null,
+            teamId: null,
+            amount: dispute.amount,
+            currency: dispute.currency,
+            reason: dispute.reason,
+            status: dispute.status,
+          },
+          update: { status: dispute.status },
+        });
+
+        console.log(`[stripe] Dispute ${dispute.id} closed — status=${dispute.status}`);
+        trackServer('dispute_closed', { disputeId: dispute.id, status: dispute.status });
         break;
       }
 
@@ -696,6 +1040,15 @@ export async function POST(req: NextRequest) {
     }
   } catch (err) {
     console.error(`[stripe] Webhook handler error for ${event.type}:`, err);
+    // Release the idempotency claim so Stripe's retry of this event is
+    // treated as a fresh attempt, not a duplicate — otherwise a transient
+    // processing failure would permanently swallow the event (see the claim
+    // block's doc comment above).
+    try {
+      await db.webhookEvent.delete({ where: { id: event.id } });
+    } catch (delErr) {
+      console.error(`[stripe] Failed to release idempotency claim for ${event.id}:`, delErr);
+    }
     return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 });
   }
 

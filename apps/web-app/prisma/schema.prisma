@@ -30,6 +30,29 @@ model User {
   stripeCustomerId     String?  @map("stripe_customer_id")
   stripeSubscriptionId String?  @map("stripe_subscription_id")
 
+  /// SCA/3-D Secure action-required signal (billing hardening, 2026-08).
+  /// Non-null IFF Stripe currently has an open invoice on this subscription
+  /// that requires the customer to complete card-issuer authentication
+  /// (`invoice.payment_action_required`). Holds the Stripe-hosted invoice URL
+  /// where the customer can complete the challenge — surfaced directly on the
+  /// /account billing surface. Cleared on `invoice.payment_succeeded` and
+  /// `customer.subscription.deleted`.
+  /// Deliberately NOT folded into `subscriptionStatus`: SCA-required is an
+  /// invoice-level condition, not one of Stripe's subscription.status values,
+  /// and overloading the closed status vocabulary would corrupt the
+  /// admin-operations status-breakdown / MRR fold. See billing/webhook/route.ts.
+  pendingInvoiceUrl       String?   @map("pending_invoice_url")
+
+  /// Out-of-order webhook delivery guard (billing hardening, 2026-08). Stripe
+  /// does not guarantee webhook events arrive in the order they occurred.
+  /// Stamped with the *Stripe event's own* `created` timestamp on every
+  /// `customer.subscription.updated` / `customer.subscription.deleted` write.
+  /// A later-arriving delivery whose event `created` timestamp is OLDER than
+  /// what is already stored here is treated as stale and skipped, rather than
+  /// applied — preventing an out-of-order retry from clobbering newer state.
+  /// See billing/webhook/route.ts.
+  lastSubscriptionEventAt DateTime? @map("last_subscription_event_at")
+
   /// Anonymous first-touch attribution join key (REVENUE_PLAN_20K attribution
   /// fix, 2026-08 — docs/meta/REVENUE_PLAN_20K/analytics_analysis.md §2).
   /// Set exactly ONCE, at account creation (see api/auth/signup/route.ts),
@@ -535,6 +558,17 @@ model Team {
   /// MRR fold entirely.
   billingInterval     String?  @map("billing_interval")
 
+  /// SCA/3-D Secure action-required signal — workspace-scoped counterpart to
+  /// User.pendingInvoiceUrl (billing hardening, 2026-08). Same semantics: the
+  /// Stripe-hosted invoice URL where the workspace owner can complete card
+  /// authentication, or null if no invoice is currently blocked on it.
+  pendingInvoiceUrl       String?   @map("pending_invoice_url")
+
+  /// Out-of-order webhook delivery guard — workspace-scoped counterpart to
+  /// User.lastSubscriptionEventAt (billing hardening, 2026-08). See that
+  /// field's doc comment and billing/webhook/route.ts for the full contract.
+  lastSubscriptionEventAt DateTime? @map("last_subscription_event_at")
+
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -869,5 +903,64 @@ model ProcessEvidenceReview {
   @@index([retentionUntilMs])
   @@index([workflowRunId, stepIndex])
   @@map("process_evidence_reviews")
+}
+
+// ─── Stripe billing hardening (2026-08) ─────────────────────────────────────
+//
+// CEO directive: "Get Stripe working across all possible monetized use cases."
+// See apps/web-app/src/app/api/billing/webhook/route.ts for the consumer of
+// both models below, and docs/runbooks/STRIPE_SETUP.md for operational notes.
+
+/**
+ * Webhook delivery idempotency ledger. Stripe explicitly does not guarantee
+ * every event is delivered exactly once — network retries, request timeouts,
+ * and manual redelivery from the Dashboard can all cause the SAME event.id
+ * to arrive at this endpoint more than once.
+ *
+ * `id` IS the Stripe event id (`evt_...`) — the column's own PRIMARY KEY
+ * uniqueness constraint is the atomic "claim" mechanism: the webhook handler
+ * attempts to INSERT a row before doing any provisioning work; a unique-
+ * constraint violation means this exact event has already been recorded and
+ * processing is skipped. See webhook/route.ts for the full claim/release
+ * contract, including the documented tradeoff on process-crash recovery.
+ */
+model WebhookEvent {
+  id         String   @id // Stripe event.id — natural key; uniqueness IS the dedup mechanism
+  type       String // Stripe event.type, for audit/debugging only
+  receivedAt DateTime @default(now()) @map("received_at")
+
+  @@index([type])
+  @@index([receivedAt])
+  @@map("webhook_events")
+}
+
+/**
+ * Durable, admin-visible record of Stripe chargeback disputes
+ * (`charge.dispute.created` / `charge.dispute.closed`).
+ *
+ * `userId` / `teamId` are both nullable and NOT foreign keys (polymorphic,
+ * matching the `GroupRelationship` pattern above) — a dispute is recorded
+ * even if the owning customer cannot be resolved (e.g. a Stripe API error
+ * during charge lookup), so the row is never silently dropped.
+ *
+ * Deliberately does NOT alter plan/entitlement — a dispute is a customer
+ * claim, not an adjudicated outcome; see webhook/route.ts for the reasoning.
+ */
+model StripeDispute {
+  id        String   @id // Stripe dispute.id — natural key
+  chargeId  String   @map("charge_id")
+  userId    String?  @map("user_id")
+  teamId    String?  @map("team_id")
+  amount    Int // disputed amount, in the currency's smallest unit (cents)
+  currency  String
+  reason    String // Stripe's fixed taxonomy string, e.g. "fraudulent", "duplicate"
+  status    String // Stripe's fixed taxonomy string, e.g. "needs_response", "won", "lost"
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([teamId])
+  @@index([status])
+  @@map("stripe_disputes")
 }
 

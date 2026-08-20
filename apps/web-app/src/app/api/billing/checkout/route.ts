@@ -115,12 +115,27 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // If user already has an active subscription at or above the requested plan,
-  // redirect to portal for plan management instead. Uses effectivePlanFor so
-  // workspace members on a paid team plan are also blocked from double-billing
-  // (TEAM-P03.9 Sub-task B-1 — fixes solo-plan-only toPlanType check).
+  // If the user already has an OPEN Stripe subscription — active, trialing,
+  // or past_due — block a second Checkout Session and redirect to the portal
+  // for plan management instead. Uses effectivePlanFor so workspace members
+  // on a paid team plan are also blocked from double-billing (TEAM-P03.9
+  // Sub-task B-1 — fixes solo-plan-only toPlanType check).
+  //
+  // Billing hardening (2026-08): previously this ONLY checked
+  // subscriptionStatus === 'active', which let a mid-trial subscriber
+  // ('trialing') start a completely separate second Checkout Session for a
+  // different plan — Stripe would then be actively billing TWO parallel
+  // subscriptions for the same customer (the original trial converts to a
+  // real charge when it ends; the new one starts immediately). 'past_due'
+  // is included for the same reason — the subscription is still open and
+  // Stripe is still attempting to collect on it; a plan switch belongs in
+  // the Billing Portal (which changes the SAME subscription), not a new one.
+  // 'canceled' and 'none' are intentionally NOT blocked — those represent no
+  // open subscription, so a fresh Checkout Session (including reactivation
+  // after cancellation) is exactly correct.
+  const OPEN_SUBSCRIPTION_STATUSES = new Set(['active', 'trialing', 'past_due']);
   const currentPlan = await effectivePlanFor(user.id);
-  if (currentPlan !== 'free' && user.subscriptionStatus === 'active') {
+  if (currentPlan !== 'free' && OPEN_SUBSCRIPTION_STATUSES.has(user.subscriptionStatus ?? '')) {
     return NextResponse.json(
       { error: 'You already have an active subscription. Manage it from your account.', code: 'already_subscribed', redirect: '/account' },
       { status: 400 },
