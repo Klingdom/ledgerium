@@ -10,7 +10,7 @@ import type { PaidPlanType, BillingInterval } from '@/lib/stripe';
 import type Stripe from 'stripe';
 
 /** Valid plan values for checkout (post CEO directive 2026-05-18 "Option B"). */
-const VALID_PLANS: PaidPlanType[] = ['starter', 'team', 'growth'];
+const VALID_PLANS: PaidPlanType[] = ['starter', 'solo', 'team', 'growth'];
 const VALID_INTERVALS: BillingInterval[] = ['monthly', 'annual'];
 
 /**
@@ -23,6 +23,11 @@ const VALID_INTERVALS: BillingInterval[] = ['monthly', 'annual'];
  * Checkout Session is created. Prevents charging customers for advertised
  * functionality that the data model does not yet support (5 / 15 seat counts
  * require Workspace + WorkspaceMember + WorkspaceInvite tables).
+ *
+ * `solo` is deliberately NOT in this set (REVENUE_PLAN_20K §6 Option B,
+ * docs/meta/REVENUE_PLAN_20K_001.md): it is a single-user tier with zero
+ * dependency on the team data layer this gate protects — `maxSeats: 1`,
+ * no `sharedLibrary`/`teamWorkspace` features. It is purchasable today.
  *
  * Reverts when TEAM-P01 through TEAM-P06 ship. Remove this set + the gate
  * block below at that time.

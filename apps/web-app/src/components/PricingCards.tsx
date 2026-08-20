@@ -53,7 +53,7 @@ export function PricingCards() {
       </div>
 
       {/* Cards grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 items-start">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-5 items-start">
         {PRICING_CONFIG.plans.map((plan) => {
           const displayPrice =
             isAnnual && plan.annualPrice != null ? plan.annualPrice : plan.price;
@@ -136,16 +136,19 @@ export function PricingCards() {
               )}
 
               {/*
-                CTA routing (post CEO directive 2026-05-18 "Option B"):
+                CTA routing (post CEO directive 2026-05-18 "Option B";
+                extended for Solo per REVENUE_PLAN_20K §6 Option B):
                   - Free + Enterprise: existing self-serve link (signup or mailto:sales)
-                  - Starter: existing Stripe Checkout flow via UpgradeButton (1-user solo plan ships today)
+                  - Starter + Solo: Stripe Checkout flow via UpgradeButton (both are
+                    1-user tiers with zero dependency on the team data layer, so both
+                    ship self-serve today — Solo is NOT routed to the waitlist)
                   - Team + Growth: waitlist mailto until multi-user invites land per TEAM-001 workspace build
                     (advertised seats: 5 users / 15 users; data model + invite flow under construction)
               */}
-              {plan.id === 'starter' ? (
+              {plan.id === 'starter' || plan.id === 'solo' ? (
                 <UpgradeButton
                   fallbackHref={plan.ctaHref}
-                  plan={'starter'}
+                  plan={plan.id}
                   interval={isAnnual ? 'annual' : 'monthly'}
                   className={`w-full text-center ${
                     plan.highlighted

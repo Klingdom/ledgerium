@@ -183,15 +183,17 @@ describe('POST /api/billing/checkout (iter 066 trial + tier matrix)', () => {
     });
   });
 
-  // ── Tier × interval matrix (6 combos: 3 paid tiers × 2 intervals) ──────────
+  // ── Tier × interval matrix (8 combos: 4 paid tiers × 2 intervals) ──────────
 
   describe('tier × interval matrix', () => {
     // Post CEO directive 2026-05-18 "Option B": Team and Growth are blocked from
     // self-serve Stripe Checkout until multi-user invite infrastructure ships
-    // via TEAM-001 workspace build. Only Starter creates Checkout Sessions;
+    // via TEAM-001 workspace build. Starter and Solo create Checkout Sessions;
     // Team and Growth return 402 with code='awaiting_workspace_build'.
+    // Solo (REVENUE_PLAN_20K §6 Option B) is purchasable — it is a single-user
+    // tier with zero dependency on the team data layer this gate protects.
     // Revert these test expectations when TEAM-P01..P06 ship.
-    const purchasableTiers = ['starter'] as const;
+    const purchasableTiers = ['starter', 'solo'] as const;
     const waitlistTiers = ['team', 'growth'] as const;
     const intervals = ['monthly', 'annual'] as const;
 
@@ -237,6 +239,28 @@ describe('POST /api/billing/checkout (iter 066 trial + tier matrix)', () => {
         });
       }
     }
+
+    // ── Explicit Solo-unlock assertion (REVENUE_PLAN_20K §6 Option B) ────────
+    // The matrix above already covers this via purchasableTiers/waitlistTiers,
+    // but this standalone pair makes the "checkout accepts solo, still
+    // rejects team/growth" requirement independently discoverable without
+    // tracing the loop.
+    it('accepts solo (200, real Checkout Session) while still rejecting team and growth (402)', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+
+      const soloRes = await POST(makeRequest({ plan: 'solo', interval: 'monthly' }));
+      expect(soloRes.status).toBe(200);
+      const soloBody = await soloRes.json();
+      expect(soloBody.url).toMatch(/checkout\.stripe\.com/);
+
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+      const teamRes = await POST(makeRequest({ plan: 'team', interval: 'monthly' }));
+      expect(teamRes.status).toBe(402);
+
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+      const growthRes = await POST(makeRequest({ plan: 'growth', interval: 'monthly' }));
+      expect(growthRes.status).toBe(402);
+    });
   });
 
   // ── Safeguards ────────────────────────────────────────────────────────────

@@ -4,7 +4,7 @@
  * SubscriptionPlanBar — horizontal segmented bar showing plan-tier distribution.
  *
  * Renders a single full-width bar divided into coloured segments, one per plan
- * tier (free, starter, team, growth, enterprise), proportional to user count.
+ * tier (free, starter, solo, team, growth, enterprise), proportional to user count.
  * Labels show count + percentage beneath each segment.
  *
  * Each segment is accessible via aria-label ("free: N users, X%").
@@ -20,12 +20,13 @@ import type { NormalizedPlan } from '@/lib/admin-operations/types.js';
 import { formatNumber, formatPercent } from './format-utils.js';
 
 // Plan display order (left → right: free → enterprise).
-const PLAN_ORDER: NormalizedPlan[] = ['free', 'starter', 'team', 'growth', 'enterprise'];
+const PLAN_ORDER: NormalizedPlan[] = ['free', 'starter', 'solo', 'team', 'growth', 'enterprise'];
 
 /** Display label for each plan tier. */
 const PLAN_LABELS: Record<NormalizedPlan, string> = {
   free: 'Free',
   starter: 'Starter',
+  solo: 'Solo',
   team: 'Team',
   growth: 'Growth',
   enterprise: 'Enterprise',
@@ -35,6 +36,7 @@ const PLAN_LABELS: Record<NormalizedPlan, string> = {
 const PLAN_COLORS: Record<NormalizedPlan, string> = {
   free: 'var(--content-tertiary, #6b7280)',
   starter: '#3b82f6',   // blue-500
+  solo: '#6366f1',      // indigo-500 — sits visually between starter (blue) and team (accent)
   team: 'var(--accent, #20f2a6)',
   growth: '#8b5cf6',   // violet-500
   enterprise: '#f59e0b', // amber-500

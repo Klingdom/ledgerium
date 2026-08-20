@@ -151,8 +151,14 @@ export async function POST(req: NextRequest) {
         // resolve it via resolveTeamFromCustomer().
         // The solo-subscriber User.plan update below runs unconditionally —
         // both paths execute so the User record stays in sync.
+        //
+        // `solo` is explicitly excluded here (REVENUE_PLAN_20K §6 Option B):
+        // it is a single-user tier — `plan !== 'starter'` alone would have
+        // silently provisioned a Team row for every Solo purchase, which is
+        // exactly the trap this tier was designed to avoid (Solo has zero
+        // dependency on the team data layer).
         const customerId = session.customer as string;
-        if (customerId && plan !== 'free' && plan !== 'starter') {
+        if (customerId && plan !== 'free' && plan !== 'starter' && plan !== 'solo') {
           const existingTeam = await resolveTeamFromCustomer(customerId);
           if (!existingTeam) {
             // Look for a workspace owned by this user that has no Stripe link yet.

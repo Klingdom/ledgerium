@@ -39,6 +39,10 @@ export const PRICING_CONFIG = {
    * Vocabulary refocus: users / workflows / outputs (NOT recorders / viewers / recordings).
    * Field additions: `bestFor` + `outcomeMicrocopy` (rendered on PricingCards).
    * Pricing unchanged: Free $0 / Starter $49 / Team $249 / Growth $799 / Enterprise Custom.
+   *
+   * Solo tier added (REVENUE_PLAN_20K §6 Option B, see docs/meta/REVENUE_PLAN_20K_001.md):
+   * $89/mo, additive between Starter and Team — see the `solo` plan entry
+   * below for the price-adjustment note.
    */
   plans: [
     {
@@ -89,6 +93,45 @@ export const PRICING_CONFIG = {
       limits: [
         'No bottleneck analysis',
         'No automation scoring',
+        'No team workspace',
+      ],
+    },
+    {
+      // ── Solo tier (REVENUE_PLAN_20K §6 Option B) ──────────────────────────
+      // Monetizes the intelligence-layer moat for a single user, with zero
+      // dependency on the team data layer (which is not honestly sellable
+      // today — see docs/meta/REVENUE_PLAN_20K_001.md §2).
+      //
+      // PRICE IS DELIBERATELY ADJUSTABLE HERE. $89/mo ($74/mo annual) is the
+      // midpoint of the $79-99 band proposed in
+      // docs/meta/REVENUE_PLAN_20K/market_analysis.md §6 item 3. If the CEO
+      // wants a different number, change `price` and `annualPrice` below —
+      // nothing else in the codebase hardcodes this figure. annualPrice
+      // follows the same ~17% discount as every other tier (compare 41/207/665
+      // against 49/249/799): 89 × 12 × 0.83 / 12 ≈ 74.
+      id: 'solo',
+      name: 'Solo',
+      price: 89,
+      annualPrice: 74,
+      interval: 'month',
+      seats: '1 user',
+      description: 'For solo power users',
+      bestFor: 'Solo operators who want the intelligence layer without a team',
+      outcomeMicrocopy: 'Unlimited workflow documentation plus the full intelligence layer — bottleneck analysis, automation scoring, variant detection — for one person.',
+      cta: 'Start Trial — Full intelligence included',
+      ctaHref: '/signup?plan=solo',
+      highlighted: false,
+      stripePriceId: process.env.STRIPE_SOLO_PRICE_ID ?? null,
+      features: [
+        'Unlimited workflow documentation',
+        'Full intelligence layer — bottleneck & friction analysis',
+        'Automation opportunity scoring',
+        'Variant & rework detection',
+        'Clean exports — JSON, Markdown, PDF',
+        'Personal workspace',
+      ],
+      limits: [
+        'No shared team library',
         'No team workspace',
       ],
     },

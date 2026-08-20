@@ -60,6 +60,7 @@ interface ApiKeyInfo {
 const planLabels: Record<string, string> = {
   free: 'Free',
   starter: 'Starter',
+  solo: 'Solo',
   team: 'Team',
   growth: 'Growth',
   enterprise: 'Enterprise',
@@ -99,7 +100,7 @@ interface PlanCardProps {
   billingInterval: BillingInterval;
   hasStripeCustomer: boolean;
   billingLoading: boolean;
-  onUpgrade: (plan: 'starter' | 'team' | 'growth', interval: BillingInterval) => void;
+  onUpgrade: (plan: 'starter' | 'solo' | 'team' | 'growth', interval: BillingInterval) => void;
   onManage: () => void;
 }
 
@@ -158,11 +159,14 @@ function PlanCard({
         Contact Sales
       </a>
     );
-  } else if (isHigherTier && (planId === 'starter' || planId === 'team' || planId === 'growth')) {
+  } else if (
+    isHigherTier &&
+    (planId === 'starter' || planId === 'solo' || planId === 'team' || planId === 'growth')
+  ) {
     // Upgrade path
     actionButton = (
       <button
-        onClick={() => onUpgrade(planId as 'starter' | 'team' | 'growth', billingInterval)}
+        onClick={() => onUpgrade(planId as 'starter' | 'solo' | 'team' | 'growth', billingInterval)}
         disabled={billingLoading}
         className={`w-full text-xs ${config.highlighted ? 'btn-primary' : 'btn-secondary'}`}
       >
@@ -346,7 +350,7 @@ export default function AccountPage() {
   }
 
   async function handleUpgrade(
-    plan: 'starter' | 'team' | 'growth',
+    plan: 'starter' | 'solo' | 'team' | 'growth',
     interval: BillingInterval,
   ) {
     setBillingLoading(true);
@@ -527,7 +531,7 @@ export default function AccountPage() {
         )}
 
         {/* Plan selector grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
           {PRICING_CONFIG.plans.map((plan) => (
             <PlanCard
               key={plan.id}

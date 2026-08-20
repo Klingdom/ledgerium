@@ -1801,6 +1801,63 @@ describe('POST /api/billing/webhook', () => {
     expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledOnce();
   });
 
+  // ── REVENUE_PLAN_20K §6 Option B: Solo tier ─────────────────────────────────
+  // Regression lock on the exact trap the task brief named: `plan !== 'starter'`
+  // alone would have silently provisioned a Team row for every Solo purchase.
+  // Solo is a single-user tier with zero dependency on the team data layer —
+  // it must be treated identically to Starter here, not identically to
+  // Team/Growth/Enterprise.
+
+  it("checkout.session.completed (solo plan) — no team creation attempted (solo is not team-gated)", async () => {
+    const userId = 'user_solo_001';
+    const customerId = 'cus_solo_001';
+
+    const session: Partial<Stripe.Checkout.Session> = {
+      id: 'cs_solo_001',
+      metadata: { userId },
+      subscription: 'sub_solo_001',
+      customer: customerId,
+    };
+
+    const stripeSubscription = {
+      status: 'active',
+      items: { data: [{ price: { id: 'price_solo_monthly_test' } }] },
+    };
+
+    const mockStripeClient = {
+      webhooks: {
+        constructEvent: vi.fn().mockReturnValue(
+          makeEvent('checkout.session.completed', session),
+        ),
+      },
+      subscriptions: {
+        retrieve: vi.fn().mockResolvedValue(stripeSubscription),
+      },
+    };
+
+    vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+    vi.mocked(stripeLib.planFromPriceId).mockReturnValue('solo');
+
+    const res = await POST(makeRequest('{}'));
+
+    expect(res.status).toBe(200);
+    // Solo plan → team-first block must NOT run (this is the exact trap:
+    // `plan !== 'starter'` alone would be true for 'solo' and would have
+    // provisioned a Team row for a single-user purchase).
+    expect(vi.mocked(teamBillingLib.resolveTeamFromCustomer)).not.toHaveBeenCalled();
+    expect(vi.mocked(dbLib.db as any).team.create).not.toHaveBeenCalled();
+    expect(vi.mocked(dbLib.db as any).team.update).not.toHaveBeenCalled();
+    expect(vi.mocked(dbLib.db as any).teamMember.create).not.toHaveBeenCalled();
+    // User.update still runs — the solo-subscriber path is unconditional.
+    expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledOnce();
+    expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: userId },
+        data: expect.objectContaining({ plan: 'solo' }),
+      }),
+    );
+  });
+
   // ── 33. no userId in metadata → entire checkout handler short-circuits ─────
 
   it('TEAM-P03.6: checkout.session.completed — no userId in metadata: handler breaks early, no DB writes', async () => {

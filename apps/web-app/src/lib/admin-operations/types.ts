@@ -29,6 +29,7 @@ export type IsoDateString = string;
 export type NormalizedPlan =
   | 'free'
   | 'starter'
+  | 'solo'
   | 'team'
   | 'growth'
   | 'enterprise';
@@ -48,7 +49,9 @@ export type NormalizedSubscriptionStatus =
 export interface MrrEstimate {
   /**
    * Σ monthly-equivalent-price[plan] × count, for:
-   *   - starter: billable (status ∈ billableStatuses) User rows
+   *   - starter/solo: billable (status ∈ billableStatuses) User rows (solo
+   *     added REVENUE_PLAN_20K §6 Option B — same single-user, User-table-
+   *     authoritative billing model as starter, never Team-linked)
    *   - team/growth: billable (status === 'active') Team rows (Team is the
    *     authoritative source for team/growth billing state — see the
    *     AUTHORITATIVE MODEL NOTE in getSubscriptionBreakdown()'s doc comment)
@@ -58,12 +61,12 @@ export interface MrrEstimate {
    */
   estimatedUsd: number;
   /** Per-plan USD contribution to MRR. */
-  byPlanUsd: Record<'starter' | 'team' | 'growth', number>;
+  byPlanUsd: Record<'starter' | 'solo' | 'team' | 'growth', number>;
   /** Number of enterprise users (excluded from MRR, shown separately). */
   enterpriseCount: number;
   /** Audit trail: prices and statuses used to compute the estimate. */
   basis: {
-    monthlyPriceUsd: Record<'starter' | 'team' | 'growth', number>;
+    monthlyPriceUsd: Record<'starter' | 'solo' | 'team' | 'growth', number>;
     billableStatuses: readonly string[];
   };
 }

@@ -75,8 +75,9 @@ function annualEquivalentFor(planId: string): number {
  * Derived from PRICING_CONFIG — never hardcoded.
  * Used exclusively for MRR estimation in getSubscriptionBreakdown().
  */
-export const MONTHLY_PRICE_USD: Readonly<Record<'starter' | 'team' | 'growth', number>> = {
+export const MONTHLY_PRICE_USD: Readonly<Record<'starter' | 'solo' | 'team' | 'growth', number>> = {
   starter: priceFor('starter'),
+  solo: priceFor('solo'),
   team: priceFor('team'),
   growth: priceFor('growth'),
 } as const;
@@ -90,8 +91,9 @@ export const MONTHLY_PRICE_USD: Readonly<Record<'starter' | 'team' | 'growth', n
  * contribution by the annual-discount percentage (~20% at current pricing) —
  * see docs/meta/REVENUE_PLAN_20K/analytics_analysis.md §1.2c.
  */
-export const ANNUAL_MONTHLY_EQUIVALENT_USD: Readonly<Record<'starter' | 'team' | 'growth', number>> = {
+export const ANNUAL_MONTHLY_EQUIVALENT_USD: Readonly<Record<'starter' | 'solo' | 'team' | 'growth', number>> = {
   starter: annualEquivalentFor('starter'),
+  solo: annualEquivalentFor('solo'),
   team: annualEquivalentFor('team'),
   growth: annualEquivalentFor('growth'),
 } as const;

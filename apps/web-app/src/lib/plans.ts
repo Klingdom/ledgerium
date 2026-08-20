@@ -9,7 +9,7 @@
  */
 
 /** All available plan types in the Ledgerium pricing model. */
-export type PlanType = 'free' | 'starter' | 'team' | 'growth' | 'enterprise';
+export type PlanType = 'free' | 'starter' | 'solo' | 'team' | 'growth' | 'enterprise';
 
 /** All gatable features in the system. */
 export type FeatureKey =
@@ -92,6 +92,40 @@ export const PLAN_FEATURES: Record<PlanType, PlanConfig> = {
       personalWorkspace: true,
     },
   },
+  /**
+   * Solo — single-user intelligence tier (REVENUE_PLAN_20K §6 Option B,
+   * shipped in lieu of the still-broken Team data layer — see
+   * docs/meta/REVENUE_PLAN_20K_001.md §2 and §6).
+   *
+   * Starter's feature set plus the single-user-scoped intelligence layer.
+   * Deliberately EXCLUDES `sharedLibrary` and `teamWorkspace` — those two
+   * features are exactly the ones that depend on the team data layer that
+   * does not work today (no `teamId` on Workflow/Portfolio, `WorkflowShare`
+   * unread by any read path, `effectivePlanFor()` gaps — see
+   * docs/meta/REVENUE_PLAN_20K/team_workspace_status.md §6). Shipping Solo
+   * with either of those flags set would recreate the exact "sold something
+   * that does not work" problem this tier exists to avoid.
+   *
+   * maxRecordingsPerMonth is unlimited: the tier's value proposition is the
+   * intelligence layer, not a recording quota, and capping recordings on a
+   * single-user analysis tier contradicts the product's own "record
+   * everything, find the patterns" premise.
+   */
+  solo: {
+    maxRecordingsPerMonth: Number.MAX_SAFE_INTEGER,
+    maxSeats: 1,
+    maxRecorders: 1,
+    features: {
+      ...NO_FEATURES,
+      cleanExports: true,
+      healthScores: true,
+      personalWorkspace: true,
+      intelligenceLayer: true,
+      bottleneckAnalysis: true,
+      automationScoring: true,
+      variantDetection: true,
+    },
+  },
   team: {
     maxRecordingsPerMonth: Number.MAX_SAFE_INTEGER,
     maxSeats: 5,
@@ -160,8 +194,16 @@ export const PLAN_FEATURES: Record<PlanType, PlanConfig> = {
   },
 };
 
-/** Plan tiers ordered from lowest to highest for hierarchy comparisons. */
-export const PLAN_HIERARCHY: PlanType[] = ['free', 'starter', 'team', 'growth', 'enterprise'];
+/**
+ * Plan tiers ordered from lowest to highest for hierarchy comparisons.
+ *
+ * `solo` sits strictly between `starter` and `team` — this ordering is
+ * load-bearing. `effectivePlanFor()` (feature-gating.ts) and every
+ * `isPlanAtLeast()` / `PLAN_HIERARCHY.indexOf()` comparison depend on it to
+ * resolve the correct "highest plan across solo + workspace memberships"
+ * and correct upgrade/downgrade direction on the account page.
+ */
+export const PLAN_HIERARCHY: PlanType[] = ['free', 'starter', 'solo', 'team', 'growth', 'enterprise'];
 
 /**
  * Safely coerce a raw database string to a PlanType.

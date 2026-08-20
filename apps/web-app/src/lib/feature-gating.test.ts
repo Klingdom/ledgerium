@@ -140,7 +140,11 @@ describe('checkFeatureAccess — workspace-aware', () => {
     const user = makeUser({ plan: 'free' });
     const result = await checkFeatureAccess(user, 'intelligenceLayer');
     expect(result.allowed).toBe(false);
-    expect(result.requiredPlan).toBe('team');
+    // REVENUE_PLAN_20K §6 Option B: 'solo' now sits below 'team' in
+    // PLAN_HIERARCHY and also has intelligenceLayer, so it is the new
+    // minimum plan minimumPlanForFeature() resolves to — was 'team' before
+    // the Solo tier existed.
+    expect(result.requiredPlan).toBe('solo');
   });
 
   it('THE FIX: free user who is an ACTIVE member of a Team-plan workspace gets Team-level access', async () => {

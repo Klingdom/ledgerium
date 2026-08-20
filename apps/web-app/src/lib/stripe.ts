@@ -39,6 +39,12 @@ export const PRO_PRICE_ID = process.env.STRIPE_PRO_PRICE_ID ?? '';
 export const STRIPE_PRICES = {
   starter_monthly: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID ?? '',
   starter_annual: process.env.STRIPE_STARTER_ANNUAL_PRICE_ID ?? '',
+  // Solo tier (REVENUE_PLAN_20K §6 Option B) — same empty-string-default
+  // pattern as every other tier so a missing price ID degrades to the
+  // existing "Billing not configured for this plan" 503 rather than
+  // throwing at startup.
+  solo_monthly: process.env.STRIPE_SOLO_MONTHLY_PRICE_ID ?? '',
+  solo_annual: process.env.STRIPE_SOLO_ANNUAL_PRICE_ID ?? '',
   team_monthly: process.env.STRIPE_TEAM_MONTHLY_PRICE_ID ?? '',
   team_annual: process.env.STRIPE_TEAM_ANNUAL_PRICE_ID ?? '',
   growth_monthly: process.env.STRIPE_GROWTH_MONTHLY_PRICE_ID ?? '',
@@ -49,7 +55,7 @@ export const STRIPE_PRICES = {
 export type BillingInterval = 'monthly' | 'annual';
 
 /** Valid paid plan types for checkout. */
-export type PaidPlanType = 'starter' | 'team' | 'growth';
+export type PaidPlanType = 'starter' | 'solo' | 'team' | 'growth';
 
 /**
  * Dynamic mapping from Stripe price ID → PlanType.

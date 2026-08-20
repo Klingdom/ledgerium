@@ -488,7 +488,7 @@ describe('getSubscriptionBreakdown — edge cases (Iter C QA)', () => {
     expect(result.mrr.enterpriseCount).toBe(0);
     // Zero-filled closed unions present
     expect(Object.keys(result.byPlan)).toEqual(
-      expect.arrayContaining(['free', 'starter', 'team', 'growth', 'enterprise']),
+      expect.arrayContaining(['free', 'starter', 'solo', 'team', 'growth', 'enterprise']),
     );
     expect(Object.keys(result.byStatus)).toEqual(
       expect.arrayContaining(['none', 'trialing', 'active', 'past_due', 'canceled']),
@@ -523,6 +523,62 @@ describe('getSubscriptionBreakdown — edge cases (Iter C QA)', () => {
     expect(result.paidUserCount).toBe(3);
     // freeToPaidConversionPct: 3 paid / 3 total (User-sourced denominator) * 100 = 100
     expect(result.freeToPaidConversionPct).toBe(100);
+  });
+
+  // ── REVENUE_PLAN_20K §6 Option B: Solo tier MRR correctness ────────────────
+  //
+  // Solo is User-table-authoritative for MRR, same as Starter (single-user,
+  // never Team-linked) — see the AUTHORITATIVE MODEL NOTE in queries.ts.
+
+  it('Solo MRR: active solo User rows contribute to byPlanUsd.solo, separately from starter', async () => {
+    const { MONTHLY_PRICE_USD } = await import('./pricing.js');
+
+    mockDb.user.groupBy.mockResolvedValue([
+      { plan: 'solo', subscriptionStatus: 'active', billingInterval: null, _count: { id: 3 } },
+      { plan: 'starter', subscriptionStatus: 'active', billingInterval: null, _count: { id: 2 } },
+    ]);
+    mockDb.team.findMany.mockResolvedValue([]);
+
+    const result = await getSubscriptionBreakdown();
+
+    expect(result.mrr.byPlanUsd.solo).toBe(3 * MONTHLY_PRICE_USD.solo);
+    expect(result.mrr.byPlanUsd.starter).toBe(2 * MONTHLY_PRICE_USD.starter);
+    expect(result.mrr.estimatedUsd).toBe(
+      3 * MONTHLY_PRICE_USD.solo + 2 * MONTHLY_PRICE_USD.starter,
+    );
+    expect(result.byPlan.solo).toBe(3);
+    // paidUserCount = 3 solo + 2 starter = 5
+    expect(result.paidUserCount).toBe(5);
+  });
+
+  it('Solo MRR: trialing solo subscribers are excluded from MRR (active-only gate)', async () => {
+    mockDb.user.groupBy.mockResolvedValue([
+      { plan: 'solo', subscriptionStatus: 'trialing', billingInterval: null, _count: { id: 4 } },
+    ]);
+    mockDb.team.findMany.mockResolvedValue([]);
+
+    const result = await getSubscriptionBreakdown();
+
+    expect(result.mrr.byPlanUsd.solo).toBe(0);
+    expect(result.mrr.estimatedUsd).toBe(0);
+    expect(result.paidUserCount).toBe(0);
+    expect(result.byStatus.trialing).toBe(4);
+    expect(result.byPlan.solo).toBe(4);
+  });
+
+  it('Solo MRR: an annual solo subscriber contributes the monthly-equivalent price, not the full monthly sticker price', async () => {
+    const { MONTHLY_PRICE_USD, ANNUAL_MONTHLY_EQUIVALENT_USD } = await import('./pricing.js');
+    expect(ANNUAL_MONTHLY_EQUIVALENT_USD.solo).toBeLessThan(MONTHLY_PRICE_USD.solo);
+
+    mockDb.user.groupBy.mockResolvedValue([
+      { plan: 'solo', subscriptionStatus: 'active', billingInterval: 'annual', _count: { id: 1 } },
+    ]);
+    mockDb.team.findMany.mockResolvedValue([]);
+
+    const result = await getSubscriptionBreakdown();
+
+    expect(result.mrr.byPlanUsd.solo).toBe(ANNUAL_MONTHLY_EQUIVALENT_USD.solo);
+    expect(result.mrr.byPlanUsd.solo).not.toBe(MONTHLY_PRICE_USD.solo);
   });
 
   // ── REVENUE_PLAN_20K regression locks ─────────────────────────────────────

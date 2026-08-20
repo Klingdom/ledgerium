@@ -1,8 +1,15 @@
-# Stripe Setup Runbook — 4-Tier Pricing + 14-Day Trial
+# Stripe Setup Runbook — 5-Tier Pricing + 14-Day Trial
 
 **Audience:** Ledgerium AI billing operator (you).  
-**Goal:** Create the 3 new paid products (Starter / Team / Growth) with monthly + annual prices, preserve the existing legacy Pro product, configure the webhook endpoint, and ship 14-day free trials.  
-**Time:** ~30 minutes in Test Mode, ~15 minutes to promote to Live Mode.
+**Goal:** Create the 4 new paid products (Starter / Solo / Team / Growth) with monthly + annual prices, preserve the existing legacy Pro product, configure the webhook endpoint, and ship 14-day free trials.  
+**Time:** ~35 minutes in Test Mode, ~20 minutes to promote to Live Mode.
+
+> **Solo tier added (REVENUE_PLAN_20K §6 Option B).** Solo is a $89/mo,
+> single-user tier that monetizes the intelligence layer without depending on
+> the (currently broken) team data layer — see `docs/meta/REVENUE_PLAN_20K_001.md`
+> for the full rationale. It is purchasable self-serve today, same as Starter.
+> If you only care about getting Solo live and the other tiers are already
+> configured, do just **Step 2b** and add the 2 new env vars from **Step 4**.
 
 > Before you start: do the entire setup in **Test Mode first** (top-right toggle in Stripe Dashboard reads "Test mode"). Test the full checkout flow with card `4242 4242 4242 4242`. Only after a successful end-to-end test in Test Mode, repeat the steps in Live Mode.
 
@@ -12,8 +19,8 @@
 
 Everything except the Stripe Dashboard configuration and production env vars:
 
-- ✅ `apps/web-app/src/lib/stripe.ts` — Stripe SDK + 6 price-ID env vars wired
-- ✅ `apps/web-app/src/lib/plans.ts` — Free / Starter / Team / Growth / Enterprise plan map
+- ✅ `apps/web-app/src/lib/stripe.ts` — Stripe SDK + 8 price-ID env vars wired (Solo added)
+- ✅ `apps/web-app/src/lib/plans.ts` — Free / Starter / Solo / Team / Growth / Enterprise plan map
 - ✅ `apps/web-app/src/app/api/billing/checkout/route.ts` — Checkout Session creation with 14-day trial for first-time subscribers (iter 066)
 - ✅ `apps/web-app/src/app/api/billing/webhook/route.ts` — 6-event webhook handler (4 required + `invoice.payment_succeeded` + `customer.subscription.trial_will_end` added in iter 068)
 - ✅ `apps/web-app/src/app/api/billing/portal/route.ts` — Billing Portal for subscription management
@@ -35,9 +42,9 @@ If you have zero active Pro subscribers and want a clean slate, you may **archiv
 
 ---
 
-## Step 2 — Create 3 new products with monthly + annual prices
+## Step 2 — Create 4 new products with monthly + annual prices
 
-For each of Starter, Team, Growth — do the following in Test Mode:
+For each of Starter, Solo, Team, Growth — do the following in Test Mode:
 
 ### 2a. Starter
 
@@ -55,7 +62,29 @@ For each of Starter, Team, Growth — do the following in Test Mode:
    - Billing period: `Yearly`
    - **Save the price ID** — this is your `STRIPE_STARTER_ANNUAL_PRICE_ID`
 
-### 2b. Team
+### 2b. Solo (added — REVENUE_PLAN_20K §6 Option B)
+
+Solo is a single-user tier that unlocks the full intelligence layer (bottleneck
+analysis, automation scoring, variant detection) without team features. It sits
+between Starter and Team, is self-serve like Starter, and ships with unlimited
+recordings (no monthly cap — see `apps/web-app/src/lib/plans.ts` for the
+rationale).
+
+1. Dashboard → **Products** → **+ Add product**
+2. **Name:** `Solo`
+3. **Description:** `For solo power users — unlimited recordings, full process intelligence (bottlenecks, variants, automation scoring), 1 seat, no team workspace, 14-day free trial.`
+4. Add monthly price: `$89.00 USD` / `Monthly` → save as `STRIPE_SOLO_MONTHLY_PRICE_ID`
+5. Add annual price: `$888.00 USD` / `Yearly` (= $74/mo equivalent, matching the ~17% discount pattern used by the other tiers) → save as `STRIPE_SOLO_ANNUAL_PRICE_ID`
+
+**The $89 price point is intentionally the easiest number in this runbook to
+change.** It's the midpoint of a $79–99 band from
+`docs/meta/REVENUE_PLAN_20K/market_analysis.md` §6 — if the CEO wants a
+different number, create the Stripe price at the new figure, update
+`price` / `annualPrice` on the `solo` entry in `apps/web-app/src/lib/config.ts`
+to match, and re-run `pnpm test` (the `admin-operations/pricing.test.ts`
+drift guard will fail loudly if the two ever disagree).
+
+### 2c. Team
 
 1. Dashboard → **Products** → **+ Add product**
 2. **Name:** `Team`
@@ -63,7 +92,7 @@ For each of Starter, Team, Growth — do the following in Test Mode:
 4. Add monthly price: `$249.00 USD` / `Monthly` → save as `STRIPE_TEAM_MONTHLY_PRICE_ID`
 5. Add annual price: `$2,490.00 USD` / `Yearly` → save as `STRIPE_TEAM_ANNUAL_PRICE_ID`
 
-### 2c. Growth
+### 2d. Growth
 
 1. Dashboard → **Products** → **+ Add product**
 2. **Name:** `Growth`
@@ -71,11 +100,11 @@ For each of Starter, Team, Growth — do the following in Test Mode:
 4. Add monthly price: `$799.00 USD` / `Monthly` → save as `STRIPE_GROWTH_MONTHLY_PRICE_ID`
 5. Add annual price: `$7,990.00 USD` / `Yearly` → save as `STRIPE_GROWTH_ANNUAL_PRICE_ID`
 
-You should now have **6 new price IDs** captured. Keep them somewhere safe — you'll paste them into environment variables in Step 4.
+You should now have **8 new price IDs** captured. Keep them somewhere safe — you'll paste them into environment variables in Step 4.
 
 ### Sanity check
 
-Your Products list should now show **at least 4 products**: Pro (legacy, untouched), Starter, Team, Growth. (Enterprise is "Contact Sales" — handled by you separately later, no Stripe product needed.)
+Your Products list should now show **at least 5 products**: Pro (legacy, untouched), Starter, Solo, Team, Growth. (Enterprise is "Contact Sales" — handled by you separately later, no Stripe product needed.)
 
 ---
 
@@ -114,9 +143,11 @@ In your hosting platform (Railway / Render / Vercel / etc.), set these **environ
 STRIPE_SECRET_KEY=sk_test_...           # Test Mode key (or sk_live_... for Live)
 STRIPE_WEBHOOK_SECRET=whsec_...         # From Step 3, the signing secret
 
-# Price IDs from Step 2 (all 6 required)
+# Price IDs from Step 2 (all 8 required)
 STRIPE_STARTER_MONTHLY_PRICE_ID=price_...
 STRIPE_STARTER_ANNUAL_PRICE_ID=price_...
+STRIPE_SOLO_MONTHLY_PRICE_ID=price_...
+STRIPE_SOLO_ANNUAL_PRICE_ID=price_...
 STRIPE_TEAM_MONTHLY_PRICE_ID=price_...
 STRIPE_TEAM_ANNUAL_PRICE_ID=price_...
 STRIPE_GROWTH_MONTHLY_PRICE_ID=price_...
@@ -129,9 +160,16 @@ STRIPE_PRO_PRICE_ID=price_...           # Your existing legacy price ID
 STRIPE_TRIAL_DAYS=14
 ```
 
+If you're deploying via the GitHub Actions workflow (`.github/workflows/deploy.yml`)
+rather than setting env vars directly on the host, add
+`STRIPE_SOLO_MONTHLY_PRICE_ID` and `STRIPE_SOLO_ANNUAL_PRICE_ID` as repository
+secrets (Settings → Secrets and variables → Actions → Secrets) — the workflow
+and `compose.hostinger.yaml` already reference them alongside the other tiers.
+
 Important notes:
-- **Test Mode and Live Mode have different price IDs.** When you eventually promote to Live, you'll repeat Step 2 in Live Mode and get a new set of 6 IDs — those are what go in production env vars.
+- **Test Mode and Live Mode have different price IDs.** When you eventually promote to Live, you'll repeat Step 2 in Live Mode and get a new set of 8 IDs — those are what go in production env vars.
 - **Test Mode keys start with `sk_test_` / `whsec_`. Live Mode keys start with `sk_live_` / `whsec_` (different signing secret per mode).**
+- **A missing Solo price ID degrades gracefully, not fatally.** If you skip Step 2b (or haven't deployed the env vars yet), `STRIPE_SOLO_MONTHLY_PRICE_ID` / `STRIPE_SOLO_ANNUAL_PRICE_ID` default to an empty string and `/api/billing/checkout` returns the same "Billing not configured for this plan" HTTP 503 that any other unconfigured tier returns — it does not throw at startup and does not block Starter/Team/Growth checkout.
 
 ---
 
@@ -184,10 +222,13 @@ To accelerate the trial-end:
 
 Repeat the checkout test for:
 - Starter monthly + annual
+- Solo monthly + annual
 - Team monthly + annual
 - Growth monthly + annual
 
-All 6 combinations should successfully create Checkout Sessions and activate trials.
+All 8 combinations should successfully create Checkout Sessions and activate trials.
+Solo, like Starter, must go straight to Stripe Checkout — it must NOT hit the
+Team/Growth waitlist gate (HTTP 402 `awaiting_workspace_build`).
 
 ### 5e. Test the billing portal
 
@@ -208,14 +249,23 @@ All 6 combinations should successfully create Checkout Sessions and activate tri
 When Test Mode passes the full flow:
 
 1. Toggle to **Live Mode** in Stripe Dashboard (top-right)
-2. **Repeat Step 2** entirely in Live Mode — you'll create a fresh set of 4 products with 6 prices. Stripe does **not** copy products from Test → Live.
+2. **Repeat Step 2** entirely in Live Mode — you'll create a fresh set of 5 products with 8 prices. Stripe does **not** copy products from Test → Live.
 3. **Repeat Step 3** in Live Mode — point the endpoint at `https://ledgerium.ai/api/billing/webhook` and capture the Live signing secret
-4. Update production environment variables (Railway/Render/Vercel) with:
+4. Update production environment variables (or GitHub Actions repository secrets, if deploying via `deploy.yml`) with:
    - `STRIPE_SECRET_KEY=sk_live_...`
    - `STRIPE_WEBHOOK_SECRET=whsec_...` (from Live Mode endpoint)
-   - 6 new `STRIPE_*_PRICE_ID` values from Live Mode
+   - 8 new `STRIPE_*_PRICE_ID` values from Live Mode (Starter × 2, Solo × 2, Team × 2, Growth × 2)
 5. Deploy the updated env vars
-6. Make a single $1 test purchase from a real card to verify the live path (cancel immediately after to avoid the charge)
+6. Make a single $1 test purchase from a real card to verify the live path (cancel immediately after to avoid the charge) — worth doing once for Solo specifically, since it's a new checkout path
+
+**Solo-specific live verification:** after a live Solo purchase, confirm in
+your database (or the admin operations dashboard) that the purchasing user's
+`plan` is `'solo'` and that **no `Team` row was created** for them. Solo is a
+single-user tier and must never provision team infrastructure — this is
+covered by an automated regression test
+(`apps/web-app/src/app/api/billing/webhook/route.test.ts`,
+"checkout.session.completed (solo plan) — no team creation attempted"), but a
+one-time live-mode spot check is good practice for a new checkout path.
 
 ---
 

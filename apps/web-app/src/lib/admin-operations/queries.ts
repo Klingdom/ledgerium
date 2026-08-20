@@ -449,8 +449,10 @@ export async function getSystemHealth(): Promise<SystemHealthSection> {
  *
  * AUTHORITATIVE MODEL NOTE — User vs Team double-source fix (REVENUE_PLAN_20K,
  * docs/meta/REVENUE_PLAN_20K/analytics_analysis.md §1.2b):
- *   The User table above is authoritative for MRR ONLY for the 'free' and
- *   'starter' plans (solo-billed; never Team-linked). It is NOT authoritative
+ *   The User table above is authoritative for MRR ONLY for the 'free',
+ *   'starter', and 'solo' plans (solo-billed; never Team-linked — 'solo'
+ *   added REVENUE_PLAN_20K §6 Option B, docs/meta/REVENUE_PLAN_20K_001.md,
+ *   same single-user billing model as 'starter'). It is NOT authoritative
  *   for 'team' or 'growth': checkout.session.completed writes User.plan for
  *   the purchasing owner once, at checkout, purely so effective-plan lookups
  *   have a sane value immediately — but every subsequent lifecycle event
@@ -472,7 +474,7 @@ export async function getSystemHealth(): Promise<SystemHealthSection> {
  *   `paidUserCount` below for the corresponding scope note.
  *
  * MRR formula:
- *   Σ over solo (starter, User-sourced) billable rows of monthlyEquivalentUsd(row)
+ *   Σ over solo-billed (starter/solo, User-sourced) billable rows of monthlyEquivalentUsd(row)
  *   + Σ over team-linked (team/growth, Team-sourced) billable accounts of monthlyEquivalentUsd(team)
  * where monthlyEquivalentUsd() is MONTHLY_PRICE_USD[plan] for billingInterval
  * !== 'annual', else ANNUAL_MONTHLY_EQUIVALENT_USD[plan] (REVENUE_PLAN_20K
@@ -486,6 +488,7 @@ export async function getSubscriptionBreakdown(): Promise<SubscriptionBreakdownS
   const KNOWN_PLANS: NormalizedPlan[] = [
     'free',
     'starter',
+    'solo',
     'team',
     'growth',
     'enterprise',
@@ -499,7 +502,7 @@ export async function getSubscriptionBreakdown(): Promise<SubscriptionBreakdownS
   ];
 
   // Billable plans for MRR (enterprise is excluded — separate count, no fixed price)
-  const MRR_PLANS = ['starter', 'team', 'growth'] as const;
+  const MRR_PLANS = ['starter', 'solo', 'team', 'growth'] as const;
 
   // Single compound groupBy — gives joint (plan × subscriptionStatus × billingInterval)
   // distribution for individually-billed Users. Run in parallel with the
@@ -532,7 +535,7 @@ export async function getSubscriptionBreakdown(): Promise<SubscriptionBreakdownS
 
   const byPlanUsd = Object.fromEntries(
     MRR_PLANS.map((p) => [p, 0]),
-  ) as Record<'starter' | 'team' | 'growth', number>;
+  ) as Record<'starter' | 'solo' | 'team' | 'growth', number>;
 
   let enterpriseCount = 0;
   let paidUserCount = 0;
@@ -540,7 +543,7 @@ export async function getSubscriptionBreakdown(): Promise<SubscriptionBreakdownS
 
   /** MONTHLY_PRICE_USD for monthly billing, ANNUAL_MONTHLY_EQUIVALENT_USD for annual. */
   function monthlyEquivalentUsd(
-    plan: 'starter' | 'team' | 'growth',
+    plan: 'starter' | 'solo' | 'team' | 'growth',
     billingInterval: string | null | undefined,
   ): number {
     return billingInterval === 'annual'
@@ -578,15 +581,18 @@ export async function getSubscriptionBreakdown(): Promise<SubscriptionBreakdownS
       enterpriseCount += count;
     }
 
-    // MRR contribution: User rows are billable ONLY for 'starter' — team/growth
-    // are read from the Team table below instead (see AUTHORITATIVE MODEL NOTE).
-    const isBillableSoloPlan = normalizedPlan === 'starter';
+    // MRR contribution: User rows are billable ONLY for 'starter'/'solo' —
+    // team/growth are read from the Team table below instead (see
+    // AUTHORITATIVE MODEL NOTE). The inline `plan === 'starter' || plan
+    // === 'solo'` check (rather than a separately-computed boolean) is
+    // deliberate — it narrows `normalizedPlan` to the byPlanUsd key type at
+    // the point of use, so TypeScript can verify the indexed write below.
     const isBillableStatus = (MRR_BILLABLE_STATUSES as readonly string[]).includes(
       normalizedStatus,
     );
 
-    if (isBillableSoloPlan && isBillableStatus) {
-      byPlanUsd.starter += monthlyEquivalentUsd('starter', row.billingInterval) * count;
+    if ((normalizedPlan === 'starter' || normalizedPlan === 'solo') && isBillableStatus) {
+      byPlanUsd[normalizedPlan] += monthlyEquivalentUsd(normalizedPlan, row.billingInterval) * count;
       // paidUserCount = active non-free solo subscribers (team/growth accounts
       // are counted separately below, one per Stripe subscription).
       paidUserCount += count;

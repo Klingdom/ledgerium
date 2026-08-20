@@ -9,7 +9,7 @@ interface Props {
   className?: string;
   children: React.ReactNode;
   fallbackHref: string;
-  plan?: 'starter' | 'team' | 'growth';
+  plan?: 'starter' | 'solo' | 'team' | 'growth';
   interval?: 'monthly' | 'annual';
 }
 

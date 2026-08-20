@@ -46,6 +46,19 @@ describe('admin-operations/pricing — R-1 drift guard', () => {
     expect(MONTHLY_PRICE_USD.growth).toBe(configPriceFor('growth'));
   });
 
+  // ── REVENUE_PLAN_20K §6 Option B: Solo tier ───────────────────────────────
+
+  it('MONTHLY_PRICE_USD.solo equals PRICING_CONFIG solo price', () => {
+    expect(MONTHLY_PRICE_USD.solo).toBe(configPriceFor('solo'));
+  });
+
+  it('MONTHLY_PRICE_USD.solo is 89 (the current REVENUE_PLAN_20K §6 figure)', () => {
+    // Not a hard business-logic requirement — this is a change-detection
+    // sentinel so a silent price edit shows up as a diff in a specific test
+    // rather than only in the (deliberately loose) drift-guard above.
+    expect(MONTHLY_PRICE_USD.solo).toBe(89);
+  });
+
   it('all MONTHLY_PRICE_USD values are positive integers', () => {
     for (const [plan, price] of Object.entries(MONTHLY_PRICE_USD)) {
       expect(price, `${plan} price must be a positive integer`).toBeGreaterThan(0);
@@ -79,8 +92,12 @@ describe('admin-operations/pricing — R-1 drift guard', () => {
     expect(ANNUAL_MONTHLY_EQUIVALENT_USD.growth).toBe(configAnnualPriceFor('growth'));
   });
 
+  it('ANNUAL_MONTHLY_EQUIVALENT_USD.solo equals PRICING_CONFIG solo annualPrice', () => {
+    expect(ANNUAL_MONTHLY_EQUIVALENT_USD.solo).toBe(configAnnualPriceFor('solo'));
+  });
+
   it('every ANNUAL_MONTHLY_EQUIVALENT_USD value is strictly less than its MONTHLY_PRICE_USD counterpart', () => {
-    for (const plan of ['starter', 'team', 'growth'] as const) {
+    for (const plan of ['starter', 'solo', 'team', 'growth'] as const) {
       expect(
         ANNUAL_MONTHLY_EQUIVALENT_USD[plan],
         `${plan} annual monthly-equivalent must be less than the monthly price`,

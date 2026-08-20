@@ -637,7 +637,7 @@ export function AdminOperationsDashboard() {
                     </p>
                     <SubscriptionPlanBar
                       byPlan={sub?.byPlan ?? {
-                        free: 0, starter: 0, team: 0, growth: 0, enterprise: 0,
+                        free: 0, starter: 0, solo: 0, team: 0, growth: 0, enterprise: 0,
                       }}
                     />
                   </div>
