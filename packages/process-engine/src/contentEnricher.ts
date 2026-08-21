@@ -713,6 +713,38 @@ export function cleanActivityName(name: string): string {
 }
 
 /**
+ * Matches a bare spreadsheet cell-coordinate token — 1-3 uppercase letters
+ * followed by 1-5 digits, and NOTHING else (anchored full-match). E.g. "A1",
+ * "BC7", "AAA12345".
+ *
+ * P0-c B2 (docs/meta/SOP_DETAIL_SPECIFICITY_REVIEW_001.md §4/§7). Anchoring
+ * is the deliberate fix for the parked `chore/process-engine-specificity-wip`
+ * branch's (commit e9f13bf) defect: that branch used the UNANCHORED
+ * `\b[A-Z]{1,3}\d{1,5}\b` and stripped ANY matching SUBSTRING out of ANY
+ * step title, which would silently mutilate real, meaningful titles —
+ * "Update Q4 forecast" -> "Update forecast", "Submit form W2" -> "Submit
+ * form", "Approve PO12345" -> "Approve". The UX rubric's ruling is
+ * "Coordinate-only labels (A16, B16) -> suppress from titles" — the
+ * operative word is ONLY. This constant (and the two call sites below that
+ * use it) only ever suppress a coordinate when it is the WHOLE token being
+ * evaluated — either the entire title (isCoordinateOnlyTitle) or a single
+ * extracted field name (the data_entry / fill_and_submit branches below) —
+ * never a substring inside an otherwise meaningful title.
+ */
+const CELL_COORDINATE_RE = /^[A-Z]{1,3}\d{1,5}$/;
+
+/**
+ * True when `text`, split on whitespace/commas, is composed entirely of
+ * bare cell-coordinate tokens (e.g. "A16", "A16, B16", "A16 B16 C16"). A
+ * title that mixes real words with a coordinate-shaped token (e.g. "Approve
+ * PO12345") does NOT qualify — see CELL_COORDINATE_RE doc above.
+ */
+function isCoordinateOnlyTitle(text: string): boolean {
+  const tokens = text.split(/[\s,]+/).filter(t => t.length > 0);
+  return tokens.length > 0 && tokens.every(t => CELL_COORDINATE_RE.test(t));
+}
+
+/**
  * Converts a raw step title into clean SOP instruction language with
  * business-meaningful context.
  *
@@ -736,6 +768,17 @@ export function cleanStepTitle(
     .replace(/^\s*[-–—]\s*/, '')
     .trim();
 
+  // P0-c B2: a title that is nothing but spreadsheet cell coordinates
+  // ("A16", "A16, B16") names zero business-meaningful information in
+  // imperative voice — treat it the same as an empty title so it falls
+  // through to the generic fallback below. Coordinates remain visible in
+  // step detail / instruction text; only the TITLE is affected, and only
+  // when the title is coordinates and NOTHING else (see
+  // isCoordinateOnlyTitle doc above).
+  if (isCoordinateOnlyTitle(cleaned)) {
+    cleaned = '';
+  }
+
   // If title became empty after cleaning, try to derive from events or use generic
   if (!cleaned) {
     cleaned = groupingReason === 'data_entry' ? 'data fields'
@@ -747,7 +790,12 @@ export function cleanStepTitle(
   if (/^(Navigate|Enter|Click|Submit|Select|Upload|Download|Attach|Verify|Review|Open|Save|Send|Complete|Fill)/.test(cleaned)) {
     // For data_entry with "Enter" prefix, try to add field specifics
     if (groupingReason === 'data_entry' && stepEvents && /^Enter\s/.test(cleaned)) {
-      const fields = extractFieldNames(stepEvents, 3);
+      // P0-c B2: exclude bare cell-coordinate field names from the title —
+      // naming only "A16" is as uninformative as naming nothing. If every
+      // extracted field is a coordinate, fall through to `return cleaned`
+      // below (the original, already-descriptive title) instead of
+      // fabricating a title out of coordinates alone.
+      const fields = extractFieldNames(stepEvents, 3).filter(f => !CELL_COORDINATE_RE.test(f));
       if (fields.length > 0) {
         return `Enter ${summarizeFields(fields)}`;
       }
@@ -757,7 +805,8 @@ export function cleanStepTitle(
 
   // For data_entry, derive title from actual field names when possible
   if (groupingReason === 'data_entry' && stepEvents) {
-    const fields = extractFieldNames(stepEvents, 3);
+    // P0-c B2: same coordinate exclusion as above.
+    const fields = extractFieldNames(stepEvents, 3).filter(f => !CELL_COORDINATE_RE.test(f));
     if (fields.length > 0) {
       return `Enter ${summarizeFields(fields)}`;
     }
@@ -778,7 +827,8 @@ export function cleanStepTitle(
       if (!cleaned.toLowerCase().startsWith('fill') && !cleaned.toLowerCase().startsWith('complete')) {
         // Try to include field context
         if (stepEvents) {
-          const fields = extractFieldNames(stepEvents, 3);
+          // P0-c B2: same coordinate exclusion as above.
+          const fields = extractFieldNames(stepEvents, 3).filter(f => !CELL_COORDINATE_RE.test(f));
           if (fields.length > 0) {
             cleaned = `Complete form with ${summarizeFields(fields)} and submit`;
             break;

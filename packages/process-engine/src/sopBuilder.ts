@@ -294,7 +294,12 @@ function deriveInstruction(
     // ── Human interaction events ────────────────────────────────────────────
 
     case 'interaction.click': {
-      if (label) return `Click "${label}"`;
+      // P0-c B3 (docs/meta/SOP_DETAIL_SPECIFICITY_REVIEW_001.md §4/§7):
+      // single-word labels get typographic curly quotes so a reader can tell
+      // an ambiguous/terse label apart from sentence punctuation; multi-word
+      // labels keep straight quotes. See quoteLabel() doc comment for why
+      // this is centralized rather than inlined.
+      if (label) return `Click ${quoteLabel(label)}`;
       // Never output raw HTML element types (div, span, svg, use, p, etc.)
       // Use semantic role only for meaningful ARIA roles
       const SEMANTIC_ROLES = new Set(['button', 'link', 'tab', 'menuitem', 'option', 'checkbox', 'radio', 'switch', 'combobox', 'listbox', 'textbox']);
@@ -302,8 +307,15 @@ function deriveInstruction(
       // Fallback: use page/section context instead of meaningless element type
       const pageLabel = page?.pageTitle ?? page?.applicationLabel;
       if (pageLabel) return `Click the target element on "${pageLabel}"`;
-      // Last resort — at least include the application name if available
-      if (page?.applicationLabel) return `Click the target element in ${page.applicationLabel}`;
+      // Last resort — at least include the application name if available.
+      // P0-c B1 (§4/§7): omit the redundant "the target element" phrase —
+      // the reader already knows this is a click; naming the app is the
+      // only new information this fallback can add. NOTE: this string is
+      // still a confirmed graded-fallback (zero object signal) and remains
+      // tracked in specificity.ts's VAGUE_INSTRUCTION_PREFIXES under its
+      // new text — see that file's module doc for why the rename alone
+      // must not be allowed to silently improve the SVR metric.
+      if (page?.applicationLabel) return `Click in ${page.applicationLabel}`;
       return 'Click the target element';
     }
 
@@ -551,6 +563,36 @@ function safeTargetLabel(evt: CanonicalEventInput): string | undefined {
   return undefined;
 }
 
+/**
+ * Wraps a label in quotation marks for instruction/action text. Single-word
+ * labels get typographic curly quotes ("Word") so a reader can distinguish
+ * an ambiguous/terse label from ordinary sentence punctuation; multi-word
+ * labels keep straight quotes ("Two Words") to match existing SOP
+ * presentation (docs/meta/SOP_DETAIL_SPECIFICITY_REVIEW_001.md §4 UX ruling).
+ *
+ * Harvested from the parked `chore/process-engine-specificity-wip` branch
+ * (commit e9f13bf), which introduced this same "single-word -> curly quotes"
+ * rule correctly at its B3 (click-label) call site but then re-implemented
+ * it — incorrectly — at its B4 (error-recovery-label) call site:
+ *
+ *   const oQ = recoveryLabel.includes(' ') ? '”' : '”';
+ *   const cQ = recoveryLabel.includes(' ') ? '”' : '”';
+ *
+ * Both ternary branches return the same CLOSING curly quote for BOTH the
+ * open- and close-quote variables, so every recovery label rendered as
+ * `”Retry”` regardless of word count, and the "multi-word -> straight
+ * quotes" branch was dead code (confirmed via `git diff
+ * main...chore/process-engine-specificity-wip`). Centralizing the logic
+ * here — one function, one place the quote characters are chosen — is what
+ * makes that class of copy-paste bug impossible to reintroduce.
+ */
+function quoteLabel(label: string): string {
+  const isSingleWord = !label.includes(' ');
+  const openQuote = isSingleWord ? '“' : '"';
+  const closeQuote = isSingleWord ? '”' : '"';
+  return `${openQuote}${label}${closeQuote}`;
+}
+
 // ─── Step-level action builder ────────────────────────────────────────────────
 
 function buildAction(
@@ -603,8 +645,19 @@ function buildAction(
     }
     case 'file_action':
       return 'Upload or attach the required file';
-    case 'error_handling':
+    case 'error_handling': {
+      // P0-c B4 (§4/§7): if the error step contains a labeled recovery
+      // click, surface that label so the reader knows which control to
+      // press instead of the generic "resolve the error" instruction.
+      const recoveryEvt = events.find(
+        e => e.event_type === 'interaction.click' && safeTargetLabel(e) !== undefined,
+      );
+      const recoveryLabel = recoveryEvt !== undefined ? safeTargetLabel(recoveryEvt) : undefined;
+      if (recoveryLabel !== undefined) {
+        return `Resolve error — click ${quoteLabel(recoveryLabel)} to continue`;
+      }
       return 'Resolve the error and continue';
+    }
     case 'annotation': {
       const text = events.find(e => e.event_type === 'session.annotation_added')?.annotation_text;
       return text ? `Note: ${text}` : title;

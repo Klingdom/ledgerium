@@ -387,6 +387,90 @@ describe('cleanStepTitle', () => {
   });
 });
 
+// ─── P0-c B2: coordinate-only title suppression ──────────────────────────────
+//
+// Harvested (and bug-fixed) from the parked `chore/process-engine-specificity-
+// wip` branch (commit e9f13bf), per docs/meta/SOP_DETAIL_SPECIFICITY_REVIEW_001
+// .md §4/§7. The parked branch stripped ANY substring matching
+// `\b[A-Z]{1,3}\d{1,5}\b` out of ANY title — the false-positive cases below
+// ("Update Q4 forecast", "Submit form W2", "Approve PO12345") are the exact
+// class of real, meaningful title that broke under that implementation.
+// This suite proves the narrower "coordinate-ONLY" rule leaves them intact
+// while still suppressing a title (or extracted field name) that is nothing
+// but a spreadsheet cell coordinate.
+
+describe('cleanStepTitle — P0-c B2: coordinate-only title suppression', () => {
+  it('replaces a bare single coordinate title with the generic data_entry fallback', () => {
+    expect(cleanStepTitle('A16', 'data_entry')).toBe('Enter data fields');
+  });
+
+  it('replaces a bare single coordinate title with the generic fallback for ' +
+     'a groupingReason with no imperative-verb switch case', () => {
+    expect(cleanStepTitle('A16', 'single_action')).toBe('action');
+  });
+
+  it('treats a comma-separated coordinate-only title the same way ("A16, B16")', () => {
+    expect(cleanStepTitle('A16, B16', 'data_entry')).toBe('Enter data fields');
+  });
+
+  it('treats a space-separated coordinate-only title the same way ("A16 B16 C16")', () => {
+    expect(cleanStepTitle('A16 B16 C16', 'data_entry')).toBe('Enter data fields');
+  });
+
+  // ── Named false-positive regression cases (the parked branch's defect) ──
+
+  it('does NOT touch "Update Q4 forecast" — "Q4" is part of a meaningful title, not a coordinate-only label', () => {
+    expect(cleanStepTitle('Update Q4 forecast', 'single_action')).toBe('Update Q4 forecast');
+  });
+
+  it('does NOT touch "Submit form W2" — "W2" is part of a meaningful title, not a coordinate-only label', () => {
+    expect(cleanStepTitle('Submit form W2', 'send_action')).toBe('Submit form W2');
+  });
+
+  it('does NOT touch "Approve PO12345" — "PO12345" is part of a meaningful title, not a coordinate-only label', () => {
+    expect(cleanStepTitle('Approve PO12345', 'single_action')).toBe('Approve PO12345');
+  });
+
+  // ── Field-derived titles (the realistic spreadsheet-cells.json path) ──
+
+  it('falls back to the original descriptive title when every extracted field name is a coordinate ' +
+     '(already-imperative "Enter ..." fast path)', () => {
+    const stepEvents = [
+      makeEvent({ event_id: 'evt-1', event_type: 'interaction.input_change', label: 'A16' }),
+    ];
+    const result = cleanStepTitle('Enter data in cells A16 in App', 'data_entry', stepEvents);
+    expect(result).toBe('Enter data in cells A16 in App');
+  });
+
+  it('drops only the coordinate field name from a mixed field list, keeping the real one ' +
+     '(already-imperative "Enter ..." fast path)', () => {
+    const stepEvents = [
+      makeEvent({ event_id: 'evt-1', event_type: 'interaction.input_change', label: 'A16' }),
+      makeEvent({ event_id: 'evt-2', event_type: 'interaction.input_change', label: 'Customer Name' }),
+    ];
+    const result = cleanStepTitle('Enter data', 'data_entry', stepEvents);
+    expect(result).toBe('Enter Customer Name');
+  });
+
+  it('falls back to the generic "Complete and submit {title}" for fill_and_submit when every ' +
+     'extracted field name is a coordinate', () => {
+    const stepEvents = [
+      makeEvent({ event_id: 'evt-1', event_type: 'interaction.input_change', label: 'A16' }),
+    ];
+    const result = cleanStepTitle('Order Form', 'fill_and_submit', stepEvents);
+    expect(result).toBe('Complete and submit Order Form');
+  });
+
+  it('drops only the coordinate field name from a mixed field list for fill_and_submit, keeping the real one', () => {
+    const stepEvents = [
+      makeEvent({ event_id: 'evt-1', event_type: 'interaction.input_change', label: 'A16' }),
+      makeEvent({ event_id: 'evt-2', event_type: 'interaction.input_change', label: 'Email' }),
+    ];
+    const result = cleanStepTitle('Order Form', 'fill_and_submit', stepEvents);
+    expect(result).toBe('Complete form with Email and submit');
+  });
+});
+
 // ─── Instruction type classification ─────────────────────────────────────────
 
 describe('classifyInstructionType', () => {

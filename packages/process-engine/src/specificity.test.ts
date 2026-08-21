@@ -79,7 +79,11 @@ describe('Group A: isVagueInstructionText — confirmed graded-fallback set', ()
 
   it('A3: exact prefix-derived strings from sopBuilder.ts patterns are caught', () => {
     expect(isVagueInstructionText('Click the target element on "Inbox"')).toBe(true);
-    expect(isVagueInstructionText('Click the target element in Gmail')).toBe(true);
+    // 'Click in {app}' (not 'Click the target element in {app}') is the
+    // current source text as of the P0-c B1 rename (2026-08-20) — see
+    // VAGUE_INSTRUCTION_PREFIXES's doc comment for why the rename alone
+    // does not exempt this fallback from being a confirmed vague match.
+    expect(isVagueInstructionText('Click in Gmail')).toBe(true);
     expect(isVagueInstructionText('Enter the required value on "Order Form"')).toBe(true);
     expect(isVagueInstructionText('Enter the required value in Salesforce')).toBe(true);
     expect(isVagueInstructionText('Submit the form on "Checkout"')).toBe(true);

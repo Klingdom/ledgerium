@@ -102,11 +102,19 @@
  * `Date.now()`, `Math.random()`, or I/O. Same input -> byte-identical
  * output, always.
  *
- * Source of the confirmed graded-fallback set: `sopBuilder.ts` lines 296-359
- * (`deriveInstruction`), re-verified against source on 2026-08-13 against
+ * Source of the confirmed graded-fallback set: `sopBuilder.ts`'s
+ * `deriveInstruction()`, re-verified against source on 2026-08-13 against
  * the claim in docs/meta/SOP_DETAIL_SPECIFICITY_REVIEW_001.md §5 ("9
  * patterns + 5 page-appended prefix variants") — independently re-derived
- * and confirmed to match exactly.
+ * and confirmed to match exactly. Re-verified again on 2026-08-20 after
+ * harvesting the P0-c render-layer fixes (§4/§7 B1/B3/B4) from the parked
+ * `chore/process-engine-specificity-wip` branch (commit e9f13bf) onto
+ * `deriveInstruction()` / `buildAction()` — only one entry in
+ * VAGUE_INSTRUCTION_PREFIXES needed updating (the B1 rename); see that
+ * constant's doc comment for why the rename still counts as a confirmed
+ * fallback under its new text. Exact line numbers are intentionally not
+ * cited here (they drift with every edit); the function name is the stable
+ * anchor.
  */
 
 import type { SOP, SOPStep, SOPInstruction } from './types.js';
@@ -140,8 +148,10 @@ export const SPECIFICITY_THRESHOLD = 0.5 as const;
  * Exact-match bottom-rung instruction strings — the literal text
  * `deriveInstruction()` returns when no object signal (label or meaningful
  * role) is available at all, for interaction/upload/download/drag/select/
- * keyboard event types. Verified against `sopBuilder.ts:296-359` line by
- * line on 2026-08-13.
+ * keyboard event types. Verified against `sopBuilder.ts::deriveInstruction`
+ * line by line on 2026-08-13; re-verified 2026-08-20 (P0-c harvest touched
+ * only the `Click ...` fallbacks — see VAGUE_INSTRUCTION_PREFIXES below —
+ * none of these exact-match strings changed).
  */
 export const VAGUE_INSTRUCTION_STRINGS: readonly string[] = [
   'Click the target element',
@@ -160,11 +170,25 @@ export const VAGUE_INSTRUCTION_STRINGS: readonly string[] = [
  * page title or application label is available but no object signal is.
  * These carry a dynamic suffix (`${pageLabel}` / `${page.applicationLabel}`)
  * so they cannot be exact-matched; they are matched by prefix instead.
- * Verified against `sopBuilder.ts:296-330` on 2026-08-13.
+ * Verified against `sopBuilder.ts:296-330` on 2026-08-13; re-verified on
+ * 2026-08-20 after harvesting the P0-c render-layer fixes from the parked
+ * `chore/process-engine-specificity-wip` branch.
+ *
+ * `'Click in '` (re-verification note, 2026-08-20): P0-c B1 renamed
+ * `deriveInstruction()`'s applicationLabel-only click fallback from
+ * `` `Click the target element in ${app}` `` to `` `Click in ${app}` `` —
+ * dropping the redundant "the target element" phrase. This is a WORDING
+ * change only: the fallback still asserts zero object signal (no label, no
+ * semantic role), so it must remain a confirmed graded-fallback under its
+ * new text, not silently drop out of this list. Letting a rename alone
+ * improve the SVR would fake an improvement — the reader still doesn't know
+ * WHAT to click, only that the app is named. This entry replaces (not
+ * supplements) the pre-B1 `'Click the target element in '` prefix, which
+ * `sopBuilder.ts` no longer emits.
  */
 export const VAGUE_INSTRUCTION_PREFIXES: readonly string[] = [
   'Click the target element on "',
-  'Click the target element in ',
+  'Click in ',
   'Enter the required value on "',
   'Enter the required value in ',
   'Submit the form on "',
