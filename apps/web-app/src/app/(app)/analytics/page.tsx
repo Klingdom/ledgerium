@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 import { formatDuration, formatDateRelative, formatConfidence } from '@/lib/format';
 import { track } from '@/lib/analytics';
+import { applyInsightDismissal, analyticsActionErrorMessage } from './insightActions';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -101,12 +102,29 @@ export default function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  /**
+   * Distinguishes "we could not load" from "you have nothing yet".
+   *
+   * Previously both collapsed into `data === null`, so a failed request
+   * rendered the same empty page as a brand-new account — telling the user
+   * they have no workflows when in fact we simply could not find out.
+   */
+  const [loadFailed, setLoadFailed] = useState(false);
+  /** Non-fatal failures of user-initiated actions, surfaced rather than swallowed. */
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     try {
       const res = await fetch('/api/analytics');
-      if (res.ok) setData(await res.json());
-    } catch { /* empty */ }
+      if (res.ok) {
+        setData(await res.json());
+        setLoadFailed(false);
+      } else {
+        setLoadFailed(true);
+      }
+    } catch {
+      setLoadFailed(true);
+    }
     setIsLoading(false);
   }, []);
 
@@ -117,29 +135,71 @@ export default function AnalyticsPage() {
 
   async function runAnalysis() {
     setIsAnalyzing(true);
+    setActionError(null);
     track({ event: 'analysis_run' });
     try {
       const res = await fetch('/api/analytics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
-      if (res.ok) await loadData();
-    } catch { /* empty */ }
+      if (res.ok) {
+        await loadData();
+      } else {
+        // Previously swallowed: the spinner stopped and nothing else changed,
+        // so a failed run was indistinguishable from a run that found nothing.
+        const body = await res.json().catch(() => null);
+        setActionError(analyticsActionErrorMessage('run_analysis', body?.error));
+      }
+    } catch {
+      setActionError('Analysis could not be completed — check your connection and try again.');
+    }
     setIsAnalyzing(false);
   }
 
   async function dismissInsight(id: string) {
-    await fetch(`/api/insights/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dismissed: true }),
-    });
-    setData((prev) => prev ? {
-      ...prev,
-      insights: prev.insights.filter((i) => i.id !== id),
-      totalInsights: prev.totalInsights - 1,
-    } : prev);
+    // Snapshot before the optimistic update so we can put it back.
+    //
+    // This previously did not check res.ok at all and removed the insight from
+    // the UI unconditionally. A failed PATCH left the insight visually gone but
+    // still `dismissed: false` in the database — so it silently returned on the
+    // next load, and the UI had lied about what happened.
+    const previous = data;
+    setActionError(null);
+    setData((prev) => (prev ? applyInsightDismissal(prev, id) : prev));
+
+    try {
+      const res = await fetch(`/api/insights/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dismissed: true }),
+      });
+      if (!res.ok) {
+        setData(previous);
+        setActionError(analyticsActionErrorMessage('dismiss_insight'));
+      }
+    } catch {
+      setData(previous);
+      setActionError(analyticsActionErrorMessage('dismiss_insight'));
+    }
   }
 
   if (isLoading) {
     return <div className="text-center text-ds-sm text-[var(--content-tertiary)] py-20">Loading intelligence...</div>;
+  }
+
+  // A failed load must not masquerade as an empty account. Telling someone with
+  // 40 workflows that they have none is worse than saying we could not load.
+  if (loadFailed && !data) {
+    return (
+      <div className="mx-auto max-w-ds-content py-20 text-center" role="alert">
+        <h1 className="text-ds-lg font-medium text-[var(--content-primary)]">
+          Could not load your process intelligence
+        </h1>
+        <p className="mt-ds-2 text-ds-sm text-[var(--content-secondary)]">
+          This is a loading problem, not a change to your data — your workflows are unaffected.
+        </p>
+        <button onClick={() => { setIsLoading(true); loadData(); }} className="btn-primary mt-ds-4">
+          Try again
+        </button>
+      </div>
+    );
   }
 
   const hasData = data && data.totalWorkflows > 0;
@@ -167,6 +227,23 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-ds-6">
+      {/* Failures of user-initiated actions — previously swallowed entirely. */}
+      {actionError && (
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-ds-3 rounded-lg border border-amber-500/30 bg-amber-950/20 px-ds-4 py-ds-3"
+        >
+          <p className="text-ds-sm text-amber-200">{actionError}</p>
+          <button
+            onClick={() => setActionError(null)}
+            aria-label="Dismiss message"
+            className="text-ds-sm text-amber-100 hover:text-white underline underline-offset-2"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
