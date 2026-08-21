@@ -14,6 +14,19 @@
 > near the bottom for the full list and what is code vs. what is your
 > Dashboard action.
 
+> **Monetization-shapes hardening (2026-08 — "get creative and setup stripe
+> for all monetized use cases; get the different online product sales
+> working").** The checkout layer previously only knew one shape:
+> `mode: 'subscription'`. It now supports **promotion codes** (on by
+> default, safe when unconfigured), **Stripe Tax** (off by default, opt-in,
+> degrades safely when unconfigured), and **one-time payments**
+> (`mode: 'payment'`) as a reusable capability with zero real SKUs turned on.
+> See **§ Promotion codes**, **§ Stripe Tax**, and **§ One-time payments**
+> below for what you need to configure for each, and **§ Candidate SKUs**
+> for engineering's reasoning on what to sell one-time — deliberately NOT a
+> decision, since naming/pricing a real SKU is a product call, not an
+> engineering one.
+
 > **Solo tier added (REVENUE_PLAN_20K §6 Option B).** Solo is a $89/mo,
 > single-user tier that monetizes the intelligence layer without depending on
 > the (currently broken) team data layer — see `docs/meta/REVENUE_PLAN_20K_001.md`
@@ -29,15 +42,16 @@
 
 Everything except the Stripe Dashboard configuration and production env vars:
 
-- ✅ `apps/web-app/src/lib/stripe.ts` — Stripe SDK + 8 price-ID env vars wired (Solo added)
+- ✅ `apps/web-app/src/lib/stripe.ts` — Stripe SDK + 8 price-ID env vars wired (Solo added); promotion-code + Stripe Tax flags; one-time SKU price map (2026-08 monetization-shapes)
 - ✅ `apps/web-app/src/lib/plans.ts` — Free / Starter / Solo / Team / Growth / Enterprise plan map
-- ✅ `apps/web-app/src/app/api/billing/checkout/route.ts` — Checkout Session creation with 14-day trial for first-time subscribers (iter 066); blocks a second parallel Checkout Session for any subscriber with an open (active/trialing/past_due) subscription (2026-08 hardening)
-- ✅ `apps/web-app/src/app/api/billing/webhook/route.ts` — **9-event** webhook handler with delivery idempotency and out-of-order delivery protection (2026-08 hardening — see § below)
+- ✅ `apps/web-app/src/app/api/billing/checkout/route.ts` — Checkout Session creation with 14-day trial for first-time subscribers (iter 066); blocks a second parallel Checkout Session for any subscriber with an open (active/trialing/past_due) subscription (2026-08 hardening); promotion codes + Stripe Tax wired onto every session; parameterized `mode: 'payment'` one-time-purchase path, independent of the subscription gates (2026-08 monetization-shapes)
+- ✅ `apps/web-app/src/app/api/billing/webhook/route.ts` — **9-event** webhook handler with delivery idempotency and out-of-order delivery protection (2026-08 hardening — see § below); `checkout.session.completed` now branches on `mode` to record one-time purchases without touching plan/entitlement (2026-08 monetization-shapes)
 - ✅ `apps/web-app/src/app/api/billing/portal/route.ts` — Billing Portal for subscription management
 - ✅ `apps/web-app/src/app/api/admin/disputes/route.ts` — admin-only list of recorded chargeback disputes (2026-08 hardening)
 - ✅ `apps/web-app/src/app/(app)/account/page.tsx` — Plan & Billing card, now including an SCA "Complete payment" banner when Stripe needs the customer to re-authenticate (2026-08 hardening)
 - ✅ `apps/web-app/src/app/(public)/pricing/page.tsx` — 5-column comparison table with $49/$249/$799 + 17% annual savings
 - ✅ Legacy `PRO_PRICE_ID` fallback — your existing Pro customers continue working without disruption
+- ✅ `one_time_purchases` table (Prisma model `OneTimePurchase`) — durable record of every completed one-time purchase, independent of `users`/`teams` billing state (2026-08 monetization-shapes)
 
 **NOT built in code — these are Dashboard-only settings you must configure
 yourself (Step 3b below):** the actual ability for a customer to switch
@@ -235,6 +249,17 @@ STRIPE_PRO_PRICE_ID=price_...           # Your existing legacy price ID
 
 # Optional: trial duration in days (defaults to 14 if unset)
 STRIPE_TRIAL_DAYS=14
+
+# Optional: monetization-shapes flags (2026-08) — both have safe shipped
+# defaults; only set these if you want to override them. See
+# § Promotion codes and § Stripe Tax below.
+STRIPE_ALLOW_PROMOTION_CODES=true
+STRIPE_AUTOMATIC_TAX_ENABLED=false
+
+# Optional: one-time-payment placeholder SKU price ID — leave unset unless
+# you specifically want to test the example placeholder. See
+# § One-time payments below for how to configure a real SKU.
+STRIPE_ONE_TIME_EXAMPLE_PRICE_ID=price_...
 ```
 
 If you're deploying via the GitHub Actions workflow (`.github/workflows/deploy.yml`)
@@ -387,35 +412,241 @@ Existing Pro customers continue paying at their current price until they cancel 
 
 ---
 
-## Stripe Tax — is it needed?
+## Promotion codes
 
-**Not required to ship, but recommended once you have customers outside a
-single tax jurisdiction.** Ledgerium's code does **not** compute or remit
-tax anywhere — `checkout/route.ts` creates a plain subscription Checkout
-Session with no `automatic_tax` block, and `Step 2`'s "Tax behavior:
-Inclusive" setting only controls whether the sticker price you enter already
-includes tax, not whether tax is calculated at all.
+**Code status: ON by default, no Dashboard step required to ship safely.**
+Every Checkout Session — subscription or one-time — now sets
+`allow_promotion_codes: true` unless you explicitly turn it off. This
+directly unblocks the growth motion named in
+`docs/meta/REVENUE_PLAN_20K/growth_analysis.md` §1: founder-led outbound
+discounts, launch offers, and **"a free, no-strings account for hands-on
+review"** for third-party roundup authors (the growth analysis's exact
+recommendation is to "offer a Team-tier trial explicitly for review
+purposes" — a promotion code is the mechanism that makes that concretely
+possible without hand-editing anyone's account). Before this pass there was
+no way to discount a Checkout Session at all.
 
-If you want Stripe to calculate and (optionally) remit sales tax / VAT per
-customer:
+**Why ON by default is safe (this was a deliberate choice, not an
+oversight):** `allow_promotion_codes: true` with **zero** promotion codes
+configured in the Dashboard just shows an inert "Add promotion code" field
+on the Checkout page — there is nothing to redeem, so nobody can self-
+discount by guessing. It requires no Dashboard setup to ship, and it does
+not change anyone's price until you create a code. Contrast with Stripe Tax
+below, which is NOT safe to default on.
 
-1. Dashboard → **Settings** → **Tax** → enable **Stripe Tax**
-2. Register your tax origin address and the jurisdictions you want Stripe to
-   monitor
-3. This is a Dashboard-only setting — Stripe automatically applies it to
-   Checkout Sessions once enabled; **no code change is required** on
-   Ledgerium's side for Stripe Tax to start calculating tax on new Checkout
-   Sessions.
-4. Decide who bears the tax registration/remittance obligation (Stripe Tax
-   calculates and can report, but registering to collect in a given
-   jurisdiction and actually remitting is a business/legal decision, not a
-   Stripe or Ledgerium technical one) — consult your accountant before
-   flipping this on for real revenue.
+**To actually create a usable code:**
 
-**Recommendation:** skip this for initial launch (Solo tier is new, revenue
-is not yet material, and most early customers will be domestic). Revisit
-once MRR crosses a threshold where manual tax handling becomes a real
-liability — this is a business decision, not a code blocker.
+1. Dashboard → **Products** → **Coupons** → **+ New**
+   - Set the discount (percentage or fixed amount), duration (once /
+     repeating / forever), and optionally restrict to specific
+     products/prices.
+2. Dashboard → **Products** → **Promotion codes** → **+ New**
+   - Attach it to the coupon you just created.
+   - Give it a human-typeable code (e.g. `LAUNCH20`, `REVIEWER100`).
+   - Optionally set a max-redemptions count, an expiration date, and a
+     first-time-customer-only restriction.
+3. Test in Test Mode: start a Checkout Session, click "Add promotion code,"
+   enter your test-mode code, confirm the discount applies.
+4. Repeat in Live Mode when ready — codes are per-mode, same as products
+   and prices.
+
+**Kill switch (optional):** set `STRIPE_ALLOW_PROMOTION_CODES=false` as an
+environment variable to remove the "Add promotion code" field from every
+Checkout Session entirely, without a code deploy — e.g. if you want a period
+with zero possible discounting regardless of what codes exist in the
+Dashboard. Unset (the default) means ON.
+
+**For the "free Team-tier review access" use case specifically:** Team
+checkout remains blocked server-side pending the workspace data-layer build
+(see the "What's already built" section and `docs/meta/REVENUE_PLAN_20K_001.md`
+§2) — a promotion code cannot bypass that gate, and should not; it only
+discounts a checkout that is otherwise allowed to happen. Until Team is
+self-serve, granting a reviewer free access is still a manual/admin-allowlist
+action, not a promotion-code one. Once Team ships self-serve, a 100%-off,
+single-use, expiring promotion code is the natural mechanism for this.
+
+---
+
+## Stripe Tax
+
+**Code status: OFF by default. Opt-in via `STRIPE_AUTOMATIC_TAX_ENABLED=true`.
+This MUST stay opt-in — do not flip it on without completing the Dashboard
+steps below first.**
+
+Unlike promotion codes, defaulting Stripe Tax to on is **not** safe:
+Stripe's `automatic_tax.enabled: true` makes Checkout attempt to calculate
+tax for every session, and if the Dashboard has no tax registration
+covering the customer's resolved jurisdiction, **Stripe rejects the
+Checkout Session outright** — a hard error at checkout-creation time, not a
+graceful "no tax charged." That is why this is a separate, explicit env
+flag rather than bundled into the promotion-codes default.
+
+Ledgerium sells B2B and internationally — EU/UK VAT is real exposure once
+there is material revenue outside a single domestic jurisdiction.
+
+**What the code does when the flag is on:**
+
+- Adds `automatic_tax: { enabled: true }` to every Checkout Session
+  (subscription and one-time alike).
+- Adds `billing_address_collection: 'required'` — Stripe Tax cannot
+  calculate anything without knowing the customer's jurisdiction, and this
+  is what actually prompts the customer for an address on the Checkout
+  page.
+- Adds `customer_update: { address: 'auto', name: 'auto' }` — Ledgerium
+  always creates/reuses a Stripe Customer object before creating the
+  session (see `getOrCreateStripeCustomer` in `checkout/route.ts`), and
+  without this field Checkout will NOT persist the collected address back
+  onto that Customer object, silently breaking tax calculation on every
+  subsequent renewal even though the first invoice looked correct. **This
+  is the exact silent-failure mode the task brief called out** — if you
+  ever modify this code, keep all three fields together.
+
+**Dashboard steps required before setting the env flag to `true`:**
+
+1. Dashboard → **Settings** → **Tax** → enable **Stripe Tax**.
+2. Register your tax origin address.
+3. Register (or let Stripe monitor and prompt you to register) the specific
+   jurisdictions you want to collect in — **this is the step that, if
+   skipped, causes the hard checkout-creation error described above.** Do
+   not enable the env flag until you have at least your home jurisdiction
+   registered.
+4. Decide who bears the tax registration/remittance obligation — Stripe Tax
+   calculates and can report, but the legal obligation to register and
+   remit in a given jurisdiction is a business/legal decision, not a
+   technical one. Consult your accountant before enabling this for real
+   revenue.
+5. Test in Test Mode first: set `STRIPE_AUTOMATIC_TAX_ENABLED=true` locally,
+   complete a Checkout Session, confirm an address prompt appears and a tax
+   line item shows on the resulting invoice for a jurisdiction you've
+   registered.
+6. Set the `STRIPE_AUTOMATIC_TAX_ENABLED` environment variable (or the
+   `STRIPE_AUTOMATIC_TAX_ENABLED` GitHub Actions repository **variable**,
+   not secret — it is a plain `true`/`false` toggle) to `true` in
+   production only once Test Mode confirms tax calculates correctly for at
+   least one real jurisdiction.
+
+**Recommendation (unchanged from the prior guidance):** skip enabling this
+for initial launch — revenue is not yet material and most early customers
+will be domestic. Revisit once MRR crosses a threshold where manual tax
+handling becomes a real liability. The difference from before is that the
+code path now exists and is a single env var away when you're ready — there
+is no code blocker anymore, only the Dashboard registration + business
+decision above.
+
+---
+
+## One-time payments
+
+**Code status: capability shipped, zero real SKUs turned on.** The checkout
+route now accepts `{ type: 'one_time', sku: '<key>', quantity?: number }` in
+addition to the existing subscription shape, and creates a
+`mode: 'payment'` Checkout Session — a single charge, not a recurring
+subscription. This is a general capability, not tied to any specific
+product: adding a **real** SKU later is a config change (one Stripe Price +
+one map entry + one env var), not a route rewrite.
+
+**What ships inert by default:** `apps/web-app/src/lib/stripe.ts` exports
+`ONE_TIME_PRICES`, currently containing exactly one entry —
+`example_onboarding_audit` — which is a **placeholder demonstrating the
+capability**, not a product decision. It resolves to `null`
+(`getOneTimePriceId('example_onboarding_audit')` → `null`) unless you
+explicitly set `STRIPE_ONE_TIME_EXAMPLE_PRICE_ID`, which nothing does by
+default. Requesting it unconfigured returns the same "Billing not
+configured" HTTP 503 every other unconfigured tier/SKU returns — it
+degrades safely, exactly like the subscription price IDs always have.
+
+**What a real one-time SKU requires (to actually sell something):**
+
+1. **A CEO product decision** on what the SKU is, what it costs, and what
+   it delivers — see § Candidate SKUs below for engineering's reasoning on
+   candidates, explicitly NOT a decision. Naming, pricing, and delivery
+   mechanics are product calls.
+2. Dashboard → **Products** → **+ Add product** → create it with
+   **Pricing model: One time** (not "Recurring" — this is the one place in
+   the whole setup where you pick the opposite of Steps 1-2 above).
+3. Save the price ID (`price_...`).
+4. Add ONE entry to `ONE_TIME_PRICES` in `apps/web-app/src/lib/stripe.ts`:
+   ```ts
+   export const ONE_TIME_PRICES: Record<string, string> = {
+     example_onboarding_audit: process.env.STRIPE_ONE_TIME_EXAMPLE_PRICE_ID ?? '',
+     your_real_sku_key: process.env.STRIPE_YOUR_REAL_SKU_PRICE_ID ?? '',
+   };
+   ```
+5. Set the corresponding env var (production + GitHub Actions repository
+   secret if deploying via `deploy.yml`).
+6. Wire a purchase CTA somewhere in the product that POSTs
+   `{ type: 'one_time', sku: 'your_real_sku_key' }` to
+   `/api/billing/checkout` — no such CTA exists yet anywhere in the UI; this
+   pass ships the backend capability only, per the task's explicit scope
+   boundary (build the capability, do not invent the product).
+7. Run `pnpm test` — the `admin-operations`-style drift-guard pattern used
+   elsewhere in this codebase does not currently cover `ONE_TIME_PRICES`
+   (there is no UI-side SKU list yet to drift against); if you add one,
+   consider adding a similar guard.
+
+**What the webhook does and does not handle (read this before enabling any
+non-card payment method):**
+
+- `checkout.session.completed` now branches on `session.mode`. For
+  `mode: 'payment'`, it upserts a row into `one_time_purchases` (keyed on
+  the Checkout Session id) recording the sku, Stripe payment intent id,
+  amount, currency, and `payment_status` — and does **not** touch
+  `User.plan`/`subscriptionStatus` or any team entitlement. A one-time
+  purchase grants a purchase record, not a plan change.
+- **NOT YET HANDLED:** `checkout.session.async_payment_succeeded` /
+  `.async_payment_failed`. These only fire for payment methods that settle
+  asynchronously (e.g. ACH/bank debits, some EU redirect methods) — every
+  price this codebase can create a payment-mode session for today assumes
+  card-only (synchronous) payment methods, where
+  `checkout.session.completed` firing with `payment_status: 'paid'` is a
+  sufficient completion signal. If you ever enable a delayed-settlement
+  payment method for a one-time SKU in the Dashboard, you must add handlers
+  for those two events before relying on the purchase record being
+  accurate — this is a deliberate, documented scope boundary (see the doc
+  comment at the top of `webhook/route.ts` and at the `mode: 'payment'`
+  branch), not a silent gap. Until then, a non-`'paid'` `payment_status` is
+  still recorded (honestly, not dropped) and logged with a warning, but no
+  completion analytics event fires and nothing else follows up on it.
+- Promotion codes and Stripe Tax (both described above) apply identically
+  to one-time sessions — the config surface is shared, not
+  subscription-only.
+
+---
+
+## Candidate SKUs (engineering reasoning, not a decision)
+
+This is **not** a product decision — it is engineering surfacing what the
+new capability makes cheap to ship, so the CEO can decide. Two candidates,
+both explicitly grounded in the customer's own recorded process data (not
+a generic asset), consistent with what already differentiates Ledgerium
+from a template library:
+
+1. **Onboarding / setup service** — a paid, one-time engagement where
+   Ledgerium (a human, or eventually a guided in-product flow) helps a new
+   customer get their first real workflows recorded and their process
+   library configured correctly. The deliverable is applying the product
+   to the customer's actual process, not a pre-made asset.
+2. **One-off process audit** — a paid, one-time deliverable built FROM a
+   customer's already-recorded workflow data (bottleneck analysis,
+   automation scoring, variant detection run against their real captured
+   evidence) — i.e. the exact intelligence-layer capability Solo/Team
+   already sell, packaged as a single deliverable instead of a
+   subscription, for a buyer not ready to commit to a recurring plan.
+
+**Explicitly flagged, per `docs/meta/REVENUE_PLAN_20K/pm_analysis.md` §6.3:**
+that review found that **template-pack SKUs — selling generic, pre-built
+SOP/process templates — directly contradict Ledgerium's own competitive
+differentiation.** The product's entire positioning is that it measures
+*your actual, observed process* rather than offering a generic template
+library (a category multiple competitors already occupy). The `pm_analysis.md`
+finding states plainly that template packs are "not-inferred, not-generic" —
+selling generic templates undermines the exact claim that makes Ledgerium
+different. **Engineering is not proposing template packs as a candidate SKU
+for this reason, and recommends the CEO not pursue them regardless of how
+cheap the one-time-payment capability makes them to ship.** Both candidates
+above were chosen specifically because they stay evidence-linked to the
+customer's own data rather than reintroducing a generic-asset SKU through
+the back door.
 
 ---
 
@@ -502,6 +733,26 @@ table's PRIMARY KEY uniqueness constraint. Run `pnpm prisma migrate status`
 (or check your deployment's migration log) to confirm
 `20260820000000_add_billing_hardening` applied.
 
+### "Billing not configured for this SKU" (HTTP 503) on a one-time purchase
+
+The checkout route returned this because `getOneTimePriceId(sku)` resolved
+to `null`. Causes:
+- The `sku` key isn't in `ONE_TIME_PRICES` (`apps/web-app/src/lib/stripe.ts`)
+  at all — check for a typo.
+- The key exists but its corresponding env var (e.g.
+  `STRIPE_ONE_TIME_EXAMPLE_PRICE_ID`) is unset or empty. This is the
+  **expected, shipped default** for the placeholder `example_onboarding_audit`
+  key — it is intentionally inert until you configure a real SKU. See
+  § One-time payments above.
+
+### Checkout Session creation fails outright (not a 503, an actual Stripe API error) after enabling Stripe Tax
+
+You set `STRIPE_AUTOMATIC_TAX_ENABLED=true` without completing the Dashboard
+registration steps in § Stripe Tax above. Stripe rejects sessions where it
+cannot resolve a tax jurisdiction it has no registration for. Fix: register
+at least your home jurisdiction in Dashboard → Settings → Tax, or set the
+env var back to `false`/unset until you have.
+
 ### A customer says their card was declined for "needs authentication" and nothing happened
 
 They hit the SCA/3-D-Secure path. Confirm `invoice.payment_action_required`
@@ -571,6 +822,57 @@ cases."* Full detail in the iteration's change log; summary here.
   place for it (Stripe computes proration server-side based on the
   Portal's configured behavior; duplicating that logic in application code
   would be redundant and could drift from what Stripe actually charges).
+
+---
+
+## What changed in the 2026-08 monetization-shapes hardening pass (for reference)
+
+CEO directive: *"Get creative and setup stripe for all monetized use cases.
+Get the different online product sales working."* Full detail in the
+iteration's change log; summary here.
+
+**Code changes:**
+
+| File | Change |
+|---|---|
+| `apps/web-app/src/lib/stripe.ts` | NEW `ALLOW_PROMOTION_CODES` (env `STRIPE_ALLOW_PROMOTION_CODES`, default true) + `AUTOMATIC_TAX_ENABLED` (env `STRIPE_AUTOMATIC_TAX_ENABLED`, default false) + `ONE_TIME_PRICES` map / `getOneTimePriceId()` (one placeholder SKU, inert by default) |
+| `apps/web-app/src/app/api/billing/checkout/route.ts` | `allow_promotion_codes` + `automatic_tax`/`billing_address_collection`/`customer_update` wired onto every session via a shared `buildSharedSessionParams()`; existing customer-resolution logic extracted into `getOrCreateStripeCustomer()`; NEW `type: 'one_time'` request shape creating a `mode: 'payment'` session via `createOneTimeCheckoutSession()`, fully independent of the subscription-only gates (workspace-build waitlist, already-subscribed, trial eligibility) |
+| `apps/web-app/src/app/api/billing/webhook/route.ts` | `checkout.session.completed` now branches on `session.mode`; the `mode: 'payment'` branch upserts `one_time_purchases` and emits `one_time_purchase_completed` analytics, touching no plan/entitlement field; `mode: 'subscription'` (and every session with `mode` omitted, matching every pre-existing test) is byte-identical to before |
+| `apps/web-app/prisma/schema.prisma` + `prisma/migrations/20260821000000_add_one_time_purchases/` | NEW additive migration: `one_time_purchases` table (natural-keyed on the Stripe Checkout Session id, same pattern as `webhook_events`/`stripe_disputes`) |
+| `.github/workflows/deploy.yml` + `compose.hostinger.yaml` | NEW env vars `STRIPE_ALLOW_PROMOTION_CODES` (default `true`), `STRIPE_AUTOMATIC_TAX_ENABLED` (default `false`), `STRIPE_ONE_TIME_EXAMPLE_PRICE_ID` (default unset/empty) |
+
+**Dashboard/operational changes required (yours, not code):**
+
+- Nothing required to ship promotion codes at all — the flag defaults ON
+  and is safe with zero Dashboard configuration. Create actual coupons /
+  promotion codes only when you want to run a real discount (§ Promotion
+  codes above).
+- Nothing required for one-time payments to remain safely inert. Creating a
+  real SKU requires a Dashboard product + price (§ One-time payments above)
+  and is explicitly a follow-up CEO decision, not done in this pass.
+- Stripe Tax requires Dashboard registration BEFORE you set
+  `STRIPE_AUTOMATIC_TAX_ENABLED=true` — see § Stripe Tax above. Recommended
+  to leave off until MRR is material, same guidance as before this pass,
+  now backed by real code instead of "not yet built."
+
+**Scoped out, with reasoning (not silently skipped):**
+
+- **No real one-time SKU is turned on.** The task brief explicitly drew this
+  boundary — build the capability, not the product. `example_onboarding_audit`
+  is a demonstration placeholder only.
+- **No purchase CTA/UI exists for one-time payments anywhere in the
+  product.** Backend-only capability; a future iteration wires a button
+  somewhere once a real SKU is decided.
+- **`checkout.session.async_payment_succeeded` / `.async_payment_failed` are
+  NOT subscribed or handled.** Every price this pass can create a
+  payment-mode session for assumes card-only (synchronous) settlement. See
+  § One-time payments above — this is the codebase's explicit "what's not
+  yet handled" boundary for delayed-settlement payment methods, not a
+  silent gap.
+- **No admin-visible UI for `one_time_purchases`** (parallel to the
+  existing disputes-table gap) — the table is built and the webhook writes
+  to it; a reporting surface is a natural, small follow-up once a real SKU
+  exists to report on.
 
 ---
 

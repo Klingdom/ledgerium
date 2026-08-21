@@ -45,6 +45,16 @@ services:
       - STRIPE_GROWTH_ANNUAL_PRICE_ID=${STRIPE_GROWTH_ANNUAL_PRICE_ID:-}
       - STRIPE_PRO_PRICE_ID=${STRIPE_PRO_PRICE_ID:-}
       - STRIPE_TRIAL_DAYS=${STRIPE_TRIAL_DAYS:-14}
+      # ── Monetization-shapes hardening (2026-08): promotion codes, Stripe Tax,
+      # one-time payments. Promotion codes default ON (safe — inert with zero
+      # Dashboard-configured codes); tax defaults OFF (opt-in — unconfigured
+      # tax registrations make Checkout error, not degrade). See
+      # docs/runbooks/STRIPE_SETUP.md § Promotion codes / § Stripe Tax.
+      - STRIPE_ALLOW_PROMOTION_CODES=${STRIPE_ALLOW_PROMOTION_CODES:-true}
+      - STRIPE_AUTOMATIC_TAX_ENABLED=${STRIPE_AUTOMATIC_TAX_ENABLED:-false}
+      # Placeholder one-time SKU — inert (empty) unless explicitly configured.
+      # See docs/runbooks/STRIPE_SETUP.md § One-time payments.
+      - STRIPE_ONE_TIME_EXAMPLE_PRICE_ID=${STRIPE_ONE_TIME_EXAMPLE_PRICE_ID:-}
       # ── Transactional email (password reset, team invites) ──────────────────
       # Host env set by the GitHub Actions deploy → interpolated here. Setting the
       # SMTP_PASSWORD secret (hello@ledgerium.ai mailbox) activates Hostinger SMTP.

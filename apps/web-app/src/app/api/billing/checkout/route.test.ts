@@ -1,7 +1,11 @@
 /**
- * Integration tests for POST /api/billing/checkout (iter 066).
+ * Integration tests for POST /api/billing/checkout (iter 066; extended 2026-08
+ * for the monetization-shapes hardening — promotion codes, Stripe Tax wiring,
+ * and one-time (`mode: 'payment'`) checkout).
  *
- * Covers the trial-eligibility decision and the tier × interval matrix.
+ * Covers the trial-eligibility decision, the tier × interval matrix, the
+ * default (production-representative) promotion-code + tax wiring on the
+ * subscription path, and the one-time payment path end-to-end.
  * Mock pattern intentionally mirrors apps/web-app/src/app/api/workflows/
  * route.test.ts to avoid Vitest worker-pollution issues observed when this
  * test used getter-based mocks (workflows test failed to resolve `@/lib/plans`
@@ -9,10 +13,18 @@
  * getters, no env-reactive closures.
  *
  * What this file does NOT test (covered elsewhere or by typecheck):
- *  - `STRIPE_TRIAL_DAYS` env-var parsing — trivial; covered by typecheck +
- *    manual verification via the runbook (docs/runbooks/STRIPE_SETUP.md §5b).
- *  - Stripe webhook handling — covered by webhook/route.test.ts.
+ *  - `STRIPE_TRIAL_DAYS` / `STRIPE_ALLOW_PROMOTION_CODES` /
+ *    `STRIPE_AUTOMATIC_TAX_ENABLED` env-var PARSING — covered by stripe.test.ts
+ *    (real module, no route involved, no mock-vs-env flakiness risk).
+ *  - Stripe webhook handling, including one-time purchase persistence —
+ *    covered by webhook/route.test.ts.
  *  - `planFromPriceId` resolution — covered by stripe.test.ts.
+ *  - Route-level behavior when ALLOW_PROMOTION_CODES=false /
+ *    AUTOMATIC_TAX_ENABLED=true (the non-default combination) — covered by
+ *    the sibling file route.tax-and-promo-toggle.test.ts, which uses its own
+ *    static mock with those values instead of dynamically re-importing this
+ *    module with different env (that approach was tried and produces
+ *    unreliable results — see that file's header comment).
  *
  * No production code is modified by this file.
  */
@@ -68,9 +80,30 @@ vi.mock('@/lib/stripe', () => ({
     if (plan === '__missing__') return null;
     return `price_${plan}_${interval}_test`;
   }),
+  // 2026-08 monetization-shapes hardening — one-time SKU price lookup.
+  // '__configured_sku__' resolves to a price like a real configured SKU;
+  // any other sku (including the real placeholder key
+  // 'example_onboarding_audit', which is inert by default in production)
+  // resolves to null, exercising the "not configured" 503 path.
+  getOneTimePriceId: vi.fn((sku: string) => {
+    if (sku === '__configured_sku__') return 'price_one_time_test_sku';
+    return null;
+  }),
   PRO_PRICE_ID: '',
   APP_URL: 'https://test.example',
   TRIAL_PERIOD_DAYS: 14,
+  // Defaults mirror the real module's defaults (promo codes ON, tax OFF) so
+  // this file's tests see production-representative behavior end-to-end.
+  // These are const exports, not vi.fn()s, so they cannot be toggled
+  // per-test with vi.mocked(...).mockReturnValueOnce — the OFF/ON toggle
+  // behavior (does route.ts correctly read+apply a *different* value of
+  // each flag) is instead covered by a sibling file with its own static
+  // mock: route.tax-and-promo-toggle.test.ts. Splitting this way avoids
+  // env-reactive/dynamic-reimport mocks in this file, which the header
+  // comment above already documents as a prior source of Vitest
+  // worker-pollution failures.
+  ALLOW_PROMOTION_CODES: true,
+  AUTOMATIC_TAX_ENABLED: false,
   planFromPriceId: vi.fn(() => null),
   getWebhookSecret: vi.fn(() => 'whsec_test'),
 }));
@@ -432,6 +465,159 @@ describe('POST /api/billing/checkout (iter 066 trial + tier matrix)', () => {
       const res = await POST(makeRequest({ plan: 'starter', interval: 'monthly' }));
       expect(res.status).toBe(200);
       expect(mockCheckoutCreate).toHaveBeenCalledOnce();
+    });
+  });
+
+  // ── Promotion codes + Stripe Tax defaults (2026-08 monetization-shapes hardening) ──
+  // This file's mock sets ALLOW_PROMOTION_CODES: true / AUTOMATIC_TAX_ENABLED:
+  // false, matching the REAL module's shipped defaults (see stripe.ts). These
+  // tests prove the route wires whatever @/lib/stripe exports onto the
+  // Checkout Session correctly under the production-default configuration.
+
+  describe('promotion codes + Stripe Tax — default configuration', () => {
+    it('subscription Checkout Sessions have promotion codes enabled by default', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+
+      const res = await POST(makeRequest({ plan: 'starter', interval: 'monthly' }));
+      expect(res.status).toBe(200);
+
+      const args = mockCheckoutCreate.mock.calls[0]![0];
+      expect(args.allow_promotion_codes).toBe(true);
+    });
+
+    it('automatic_tax is OFF by default and adds no tax/address fields — checkout still succeeds (unconfigured-tax degrades safely)', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+
+      const res = await POST(makeRequest({ plan: 'starter', interval: 'monthly' }));
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body.url).toMatch(/checkout\.stripe\.com/);
+
+      const args = mockCheckoutCreate.mock.calls[0]![0];
+      expect(args.automatic_tax).toBeUndefined();
+      expect(args.billing_address_collection).toBeUndefined();
+      expect(args.customer_update).toBeUndefined();
+    });
+  });
+
+  // ── One-time payments (mode: 'payment') — 2026-08 monetization-shapes hardening ──
+  // getOneTimePriceId (mocked above) resolves '__configured_sku__' to a price
+  // and everything else — including the real placeholder key
+  // 'example_onboarding_audit' — to null, exercising both the happy path and
+  // the "not configured" 503 default.
+
+  describe('one-time payments (type: "one_time", mode: "payment")', () => {
+    it('creates a mode:"payment" Checkout Session for a configured SKU, independent of the subscription path', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+
+      const res = await POST(makeRequest({ type: 'one_time', sku: '__configured_sku__' }));
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.url).toMatch(/checkout\.stripe\.com/);
+
+      const args = mockCheckoutCreate.mock.calls[0]![0];
+      expect(args.mode).toBe('payment');
+      expect(args.line_items[0].price).toBe('price_one_time_test_sku');
+      expect(args.line_items[0].quantity).toBe(1);
+      expect(args.subscription_data).toBeUndefined();
+      expect(args.metadata.userId).toBe(TEST_USER_ID);
+      expect(args.metadata.type).toBe('one_time');
+      expect(args.metadata.sku).toBe('__configured_sku__');
+      // Inherits the same default promotion-code wiring as subscriptions.
+      expect(args.allow_promotion_codes).toBe(true);
+    });
+
+    it('respects an explicit quantity', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+
+      await POST(makeRequest({ type: 'one_time', sku: '__configured_sku__', quantity: 3 }));
+      const args = mockCheckoutCreate.mock.calls[0]![0];
+      expect(args.line_items[0].quantity).toBe(3);
+    });
+
+    it('ignores a non-positive/non-integer quantity and falls back to 1', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+
+      await POST(makeRequest({ type: 'one_time', sku: '__configured_sku__', quantity: -1 }));
+      const args = mockCheckoutCreate.mock.calls[0]![0];
+      expect(args.line_items[0].quantity).toBe(1);
+    });
+
+    it('returns 503 "not configured" for the real placeholder SKU key (inert by default, matching production)', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+
+      const res = await POST(makeRequest({ type: 'one_time', sku: 'example_onboarding_audit' }));
+      expect(res.status).toBe(503);
+      const body = await res.json();
+      expect(body.sku).toBe('example_onboarding_audit');
+      expect(mockCheckoutCreate).not.toHaveBeenCalled();
+    });
+
+    it('returns 400 code="missing_sku" when sku is omitted', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+
+      const res = await POST(makeRequest({ type: 'one_time' }));
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.code).toBe('missing_sku');
+      expect(mockCheckoutCreate).not.toHaveBeenCalled();
+    });
+
+    it('reuses an existing Stripe customer rather than creating a new one', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(
+        makeUser({ stripeCustomerId: TEST_CUSTOMER_ID }) as never,
+      );
+
+      await POST(makeRequest({ type: 'one_time', sku: '__configured_sku__' }));
+
+      expect(mockCustomerCreate).not.toHaveBeenCalled();
+      const args = mockCheckoutCreate.mock.calls[0]![0];
+      expect(args.customer).toBe(TEST_CUSTOMER_ID);
+    });
+
+    it('bypasses the already-subscribed gate — an existing active subscriber can still buy a one-time SKU', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(
+        makeUser({ plan: 'starter', subscriptionStatus: 'active' }) as never,
+      );
+      vi.mocked(effectivePlanFor).mockResolvedValueOnce('starter');
+
+      const res = await POST(makeRequest({ type: 'one_time', sku: '__configured_sku__' }));
+      expect(res.status).toBe(200);
+      expect(mockCheckoutCreate).toHaveBeenCalledOnce();
+    });
+
+    it('bypasses the Team/Growth workspace-build waitlist gate — sku purchases are unrelated to plan tier', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+
+      // Same user, same request shape, but type: 'one_time' — must not hit
+      // the 402 awaiting_workspace_build path that a plan: 'team' request
+      // would (that gate only runs on the subscription branch).
+      const res = await POST(makeRequest({ type: 'one_time', sku: '__configured_sku__' }));
+      expect(res.status).toBe(200);
+    });
+
+    it('does not disturb the subscription checkout path — a subscription request in the same test run still creates mode: "subscription" with no one-time fields', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+
+      const res = await POST(makeRequest({ plan: 'starter', interval: 'monthly' }));
+      expect(res.status).toBe(200);
+
+      const args = mockCheckoutCreate.mock.calls[0]![0];
+      expect(args.mode).toBe('subscription');
+      expect(args.metadata.type).toBeUndefined();
+      expect(args.metadata.sku).toBeUndefined();
+      expect(args.subscription_data).toBeDefined();
+    });
+
+    it('defaults type to "subscription" when the body omits it entirely (backward compatibility)', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+
+      const res = await POST(makeRequest({}));
+      expect(res.status).toBe(200);
+
+      const args = mockCheckoutCreate.mock.calls[0]![0];
+      expect(args.mode).toBe('subscription');
     });
   });
 });

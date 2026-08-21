@@ -140,3 +140,125 @@ describe('intervalFromStripeSubscription', () => {
     expect(result).toBe('monthly');
   });
 });
+
+// ─── ALLOW_PROMOTION_CODES (2026-08 monetization-shapes hardening) ──────────
+
+describe('ALLOW_PROMOTION_CODES', () => {
+  afterEach(() => {
+    delete process.env.STRIPE_ALLOW_PROMOTION_CODES;
+    vi.resetModules();
+  });
+
+  it('defaults to true when STRIPE_ALLOW_PROMOTION_CODES is unset', async () => {
+    delete process.env.STRIPE_ALLOW_PROMOTION_CODES;
+    vi.resetModules();
+    const { ALLOW_PROMOTION_CODES } = await import('./stripe.js');
+
+    expect(ALLOW_PROMOTION_CODES).toBe(true);
+  });
+
+  it('is false when STRIPE_ALLOW_PROMOTION_CODES=false', async () => {
+    process.env.STRIPE_ALLOW_PROMOTION_CODES = 'false';
+    vi.resetModules();
+    const { ALLOW_PROMOTION_CODES } = await import('./stripe.js');
+
+    expect(ALLOW_PROMOTION_CODES).toBe(false);
+  });
+
+  it('is false when STRIPE_ALLOW_PROMOTION_CODES=0', async () => {
+    process.env.STRIPE_ALLOW_PROMOTION_CODES = '0';
+    vi.resetModules();
+    const { ALLOW_PROMOTION_CODES } = await import('./stripe.js');
+
+    expect(ALLOW_PROMOTION_CODES).toBe(false);
+  });
+
+  it('is true when STRIPE_ALLOW_PROMOTION_CODES=true', async () => {
+    process.env.STRIPE_ALLOW_PROMOTION_CODES = 'true';
+    vi.resetModules();
+    const { ALLOW_PROMOTION_CODES } = await import('./stripe.js');
+
+    expect(ALLOW_PROMOTION_CODES).toBe(true);
+  });
+
+  it('falls back to the default (true) for an unrecognized value rather than throwing', async () => {
+    process.env.STRIPE_ALLOW_PROMOTION_CODES = 'yes-please';
+    vi.resetModules();
+    const { ALLOW_PROMOTION_CODES } = await import('./stripe.js');
+
+    expect(ALLOW_PROMOTION_CODES).toBe(true);
+  });
+});
+
+// ─── AUTOMATIC_TAX_ENABLED (2026-08 monetization-shapes hardening) ──────────
+
+describe('AUTOMATIC_TAX_ENABLED', () => {
+  afterEach(() => {
+    delete process.env.STRIPE_AUTOMATIC_TAX_ENABLED;
+    vi.resetModules();
+  });
+
+  it('defaults to false when STRIPE_AUTOMATIC_TAX_ENABLED is unset — tax must be opt-in', async () => {
+    delete process.env.STRIPE_AUTOMATIC_TAX_ENABLED;
+    vi.resetModules();
+    const { AUTOMATIC_TAX_ENABLED } = await import('./stripe.js');
+
+    expect(AUTOMATIC_TAX_ENABLED).toBe(false);
+  });
+
+  it('is true when STRIPE_AUTOMATIC_TAX_ENABLED=true', async () => {
+    process.env.STRIPE_AUTOMATIC_TAX_ENABLED = 'true';
+    vi.resetModules();
+    const { AUTOMATIC_TAX_ENABLED } = await import('./stripe.js');
+
+    expect(AUTOMATIC_TAX_ENABLED).toBe(true);
+  });
+
+  it('is true when STRIPE_AUTOMATIC_TAX_ENABLED=1', async () => {
+    process.env.STRIPE_AUTOMATIC_TAX_ENABLED = '1';
+    vi.resetModules();
+    const { AUTOMATIC_TAX_ENABLED } = await import('./stripe.js');
+
+    expect(AUTOMATIC_TAX_ENABLED).toBe(true);
+  });
+
+  it('falls back to the default (false) for an unrecognized value rather than throwing', async () => {
+    process.env.STRIPE_AUTOMATIC_TAX_ENABLED = 'enable-it';
+    vi.resetModules();
+    const { AUTOMATIC_TAX_ENABLED } = await import('./stripe.js');
+
+    expect(AUTOMATIC_TAX_ENABLED).toBe(false);
+  });
+});
+
+// ─── ONE_TIME_PRICES / getOneTimePriceId (2026-08 monetization-shapes hardening) ──
+
+describe('getOneTimePriceId', () => {
+  afterEach(() => {
+    delete process.env.STRIPE_ONE_TIME_EXAMPLE_PRICE_ID;
+    vi.resetModules();
+  });
+
+  it('returns null for the placeholder example SKU when its price ID env var is unset (inert by default)', async () => {
+    delete process.env.STRIPE_ONE_TIME_EXAMPLE_PRICE_ID;
+    vi.resetModules();
+    const { getOneTimePriceId } = await import('./stripe.js');
+
+    expect(getOneTimePriceId('example_onboarding_audit')).toBeNull();
+  });
+
+  it('returns the configured price ID once STRIPE_ONE_TIME_EXAMPLE_PRICE_ID is set', async () => {
+    process.env.STRIPE_ONE_TIME_EXAMPLE_PRICE_ID = 'price_one_time_test_123';
+    vi.resetModules();
+    const { getOneTimePriceId } = await import('./stripe.js');
+
+    expect(getOneTimePriceId('example_onboarding_audit')).toBe('price_one_time_test_123');
+  });
+
+  it('returns null for a completely unknown SKU key', async () => {
+    vi.resetModules();
+    const { getOneTimePriceId } = await import('./stripe.js');
+
+    expect(getOneTimePriceId('not_a_real_sku')).toBeNull();
+  });
+});

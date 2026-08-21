@@ -53,6 +53,12 @@ vi.mock('@/db', () => ({
     stripeDispute: {
       upsert: vi.fn().mockResolvedValue({}),
     },
+    // 2026-08 monetization-shapes hardening — one-time (mode:'payment')
+    // purchase ledger. Default: every upsert resolves; individual tests
+    // assert on the call arguments rather than the return value.
+    oneTimePurchase: {
+      upsert: vi.fn().mockResolvedValue({}),
+    },
     // P0-J (iter 087 / TEAM-P03.10): array-style $transaction used by checkout.session.completed
     // to atomically create team + owner membership. Promise.all resolves the array of Prisma promises.
     $transaction: vi.fn().mockImplementation((operations: Promise<unknown>[]) => Promise.all(operations)),
@@ -3741,6 +3747,195 @@ describe('POST /api/billing/webhook', () => {
       const res = await POST(makeRequest('{}'));
       expect(res.status).toBe(200);
       expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+    });
+  });
+
+  // ── checkout.session.completed (mode: 'payment') — 2026-08 monetization-shapes hardening ──
+  //
+  // One-time (mode: 'payment') Checkout Sessions produce the SAME
+  // checkout.session.completed event type as subscriptions, but carry no
+  // `session.subscription` and grant no plan/entitlement. This block proves
+  // (a) the two branches are mutually exclusive — a payment-mode session
+  // never touches User.plan/subscriptionStatus, and a subscription-mode
+  // session (this file's dozens of other checkout.session.completed tests,
+  // none of which set `mode`) is completely unaffected by the new branch;
+  // (b) the purchase is persisted with the right fields; (c) a non-'paid'
+  // payment_status (async payment methods) is handled without throwing, per
+  // the documented NOT-YET-HANDLED scope boundary.
+
+  describe('checkout.session.completed (mode: "payment") — one-time purchases (2026-08)', () => {
+    function makePaymentSession(overrides: Partial<Stripe.Checkout.Session> = {}): Partial<Stripe.Checkout.Session> {
+      return {
+        id: 'cs_one_time_001',
+        mode: 'payment',
+        metadata: { userId: 'user_one_time_001', type: 'one_time', sku: 'example_onboarding_audit' },
+        payment_intent: 'pi_one_time_001',
+        payment_status: 'paid',
+        amount_total: 4900,
+        currency: 'usd',
+        ...overrides,
+      };
+    }
+
+    it('upserts a OneTimePurchase row and does NOT touch User.plan/subscriptionStatus', async () => {
+      const session = makePaymentSession();
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('checkout.session.completed', session)),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+      const res = await POST(makeRequest('{}'));
+
+      expect(res.status).toBe(200);
+      expect(vi.mocked((dbLib.db as any).oneTimePurchase.upsert)).toHaveBeenCalledOnce();
+      expect(vi.mocked((dbLib.db as any).oneTimePurchase.upsert)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'cs_one_time_001' },
+          create: expect.objectContaining({
+            id: 'cs_one_time_001',
+            userId: 'user_one_time_001',
+            sku: 'example_onboarding_audit',
+            stripePaymentIntentId: 'pi_one_time_001',
+            amountTotal: 4900,
+            currency: 'usd',
+            paymentStatus: 'paid',
+          }),
+        }),
+      );
+      // The defining property of this branch: no subscription-provisioning
+      // side effects at all.
+      expect(vi.mocked(dbLib.db.user.update)).not.toHaveBeenCalled();
+      expect(vi.mocked((dbLib.db as any).team.update)).not.toHaveBeenCalled();
+      expect(vi.mocked((dbLib.db as any).team.create)).not.toHaveBeenCalled();
+    });
+
+    it('emits one_time_purchase_completed analytics with no PII (opaque userId, internal sku key, Stripe amount/currency)', async () => {
+      const analyticsLib = await import('@/lib/analytics-server');
+      const session = makePaymentSession();
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('checkout.session.completed', session)),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+      await POST(makeRequest('{}'));
+
+      expect(vi.mocked(analyticsLib.trackServer)).toHaveBeenCalledWith(
+        'one_time_purchase_completed',
+        expect.objectContaining({
+          userId: 'user_one_time_001',
+          sku: 'example_onboarding_audit',
+          amount: 4900,
+          currency: 'usd',
+        }),
+      );
+      const [, payload] = vi.mocked(analyticsLib.trackServer).mock.calls.find(
+        ([event]) => event === 'one_time_purchase_completed',
+      )!;
+      expect(payload).not.toHaveProperty('email');
+      expect(payload).not.toHaveProperty('name');
+      expect(payload).not.toHaveProperty('stripePaymentIntentId');
+    });
+
+    it('does not throw and does not emit completion analytics when payment_status is not "paid" (async payment method — NOT YET HANDLED scope boundary)', async () => {
+      const analyticsLib = await import('@/lib/analytics-server');
+      const session = makePaymentSession({ payment_status: 'unpaid' });
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('checkout.session.completed', session)),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+      const res = await POST(makeRequest('{}'));
+
+      expect(res.status).toBe(200);
+      // Row is still persisted, honestly reflecting the non-'paid' status —
+      // not silently dropped.
+      expect(vi.mocked((dbLib.db as any).oneTimePurchase.upsert)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          create: expect.objectContaining({ paymentStatus: 'unpaid' }),
+        }),
+      );
+      expect(vi.mocked(analyticsLib.trackServer)).not.toHaveBeenCalledWith(
+        'one_time_purchase_completed',
+        expect.anything(),
+      );
+    });
+
+    it('breaks (returns without processing) when metadata.userId is absent, matching the subscription branch\'s existing guard', async () => {
+      const session = makePaymentSession({ metadata: {} });
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('checkout.session.completed', session)),
+        },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+      const res = await POST(makeRequest('{}'));
+
+      expect(res.status).toBe(200);
+      expect(vi.mocked((dbLib.db as any).oneTimePurchase.upsert)).not.toHaveBeenCalled();
+    });
+
+    it('does not invoke subscriptions.retrieve — the payment-mode branch never resolves a plan from a price ID', async () => {
+      const session = makePaymentSession();
+      const retrieveSpy = vi.fn();
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('checkout.session.completed', session)),
+        },
+        subscriptions: { retrieve: retrieveSpy },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+
+      const res = await POST(makeRequest('{}'));
+
+      expect(res.status).toBe(200);
+      expect(retrieveSpy).not.toHaveBeenCalled();
+    });
+
+    it('a session with mode: "subscription" (or mode omitted, matching every other test in this file) is unaffected — falls through to the existing subscription branch', async () => {
+      // This is the regression lock for "does not disturb the subscription
+      // path": every OTHER checkout.session.completed test in this file
+      // constructs a session with no `mode` field at all, and all of them
+      // pass — this test makes the guarantee explicit for `mode: 'subscription'` too.
+      const subscriptionId = 'sub_mode_regression_001';
+      const priceId = 'price_starter_monthly_test';
+      const userId = 'user_mode_regression_001';
+      const session: Partial<Stripe.Checkout.Session> = {
+        id: 'cs_mode_regression',
+        mode: 'subscription',
+        metadata: { userId },
+        subscription: subscriptionId,
+        customer: 'cus_mode_regression',
+      };
+      const stripeSubscription = {
+        status: 'active',
+        items: { data: [{ price: { id: priceId } }] },
+      };
+      const mockStripeClient = {
+        webhooks: {
+          constructEvent: vi.fn().mockReturnValue(makeEvent('checkout.session.completed', session)),
+        },
+        subscriptions: { retrieve: vi.fn().mockResolvedValue(stripeSubscription) },
+      };
+      vi.mocked(stripeLib.getStripe).mockReturnValue(mockStripeClient as unknown as Stripe);
+      vi.mocked(stripeLib.planFromPriceId).mockReturnValue('starter');
+
+      const res = await POST(makeRequest('{}'));
+
+      expect(res.status).toBe(200);
+      expect(vi.mocked(dbLib.db.user.update)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: userId },
+          data: expect.objectContaining({ plan: 'starter', subscriptionStatus: 'active' }),
+        }),
+      );
+      expect(vi.mocked((dbLib.db as any).oneTimePurchase.upsert)).not.toHaveBeenCalled();
     });
   });
 });

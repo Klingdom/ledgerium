@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
-import { getStripe, getPriceId, PRO_PRICE_ID, APP_URL, TRIAL_PERIOD_DAYS } from '@/lib/stripe';
+import {
+  getStripe,
+  getPriceId,
+  getOneTimePriceId,
+  PRO_PRICE_ID,
+  APP_URL,
+  TRIAL_PERIOD_DAYS,
+  ALLOW_PROMOTION_CODES,
+  AUTOMATIC_TAX_ENABLED,
+} from '@/lib/stripe';
 import { toPlanType } from '@/lib/plans';
 import { isAdminUnlimited } from '@/lib/admin-allowlist';
 import { effectivePlanFor } from '@/lib/feature-gating';
@@ -12,6 +21,25 @@ import type Stripe from 'stripe';
 /** Valid plan values for checkout (post CEO directive 2026-05-18 "Option B"). */
 const VALID_PLANS: PaidPlanType[] = ['starter', 'solo', 'team', 'growth'];
 const VALID_INTERVALS: BillingInterval[] = ['monthly', 'annual'];
+
+/**
+ * Checkout Session shapes this route can create (2026-08 monetization-shapes
+ * hardening — CEO directive "get Stripe working across all possible
+ * monetized use cases"). `type` defaults to `'subscription'` when the
+ * request body omits it, so every existing caller (pricing page, account
+ * page upgrade/downgrade flows) is unaffected — none of them have ever sent
+ * a `type` field.
+ */
+type CheckoutType = 'subscription' | 'one_time';
+const VALID_CHECKOUT_TYPES: CheckoutType[] = ['subscription', 'one_time'];
+
+/** Minimal shape this route needs from a User row to resolve/create a Stripe Customer. */
+interface CheckoutUser {
+  id: string;
+  email: string;
+  name: string | null;
+  stripeCustomerId: string | null;
+}
 
 /**
  * Plans temporarily blocked from self-serve Stripe Checkout per CEO directive
@@ -35,13 +63,145 @@ const VALID_INTERVALS: BillingInterval[] = ['monthly', 'annual'];
 const BLOCKED_PLANS_AWAITING_WORKSPACE_BUILD = new Set<PaidPlanType>(['team', 'growth']);
 
 /**
+ * Fields shared by EVERY Checkout Session this route creates, regardless of
+ * `mode`. Centralizing promotion-code + tax config here means the one-time
+ * payment path (below) and any future SKU automatically inherit both — see
+ * docs/runbooks/STRIPE_SETUP.md § Promotion codes and § Stripe Tax for the
+ * operator-facing side of each flag.
+ */
+function buildSharedSessionParams(): Partial<Stripe.Checkout.SessionCreateParams> {
+  const params: Partial<Stripe.Checkout.SessionCreateParams> = {};
+
+  if (ALLOW_PROMOTION_CODES) {
+    params.allow_promotion_codes = true;
+  }
+
+  // Stripe Tax: opt-in only (AUTOMATIC_TAX_ENABLED defaults false — see
+  // stripe.ts doc comment). automatic_tax needs to know the customer's
+  // jurisdiction to calculate anything; billing_address_collection:'required'
+  // is what actually collects an address, and customer_update:{address:'auto',
+  // name:'auto'} is what allows Checkout to persist it onto the Stripe
+  // Customer object (always present by the time this is called — see
+  // getOrCreateStripeCustomer below) so tax calculation can read it. Any one
+  // of these three missing is the documented silent-failure mode: tax looks
+  // "on" (automatic_tax.enabled true) but the session either errors at
+  // creation (no address to resolve a jurisdiction from) or calculates $0
+  // tax for everyone.
+  if (AUTOMATIC_TAX_ENABLED) {
+    params.automatic_tax = { enabled: true };
+    params.billing_address_collection = 'required';
+    params.customer_update = { address: 'auto', name: 'auto' };
+  }
+
+  return params;
+}
+
+/**
+ * Resolve the caller's Stripe Customer, creating one if this is their first
+ * checkout of ANY kind (subscription or one-time). Extracted so both
+ * checkout shapes share identical customer-resolution behavior — a user's
+ * Stripe Customer must be the same object whether they are buying a
+ * subscription or a one-time SKU, so Portal history / tax address / future
+ * purchases stay attached to one customer record.
+ */
+async function getOrCreateStripeCustomer(user: CheckoutUser): Promise<string> {
+  if (user.stripeCustomerId) return user.stripeCustomerId;
+
+  const customerParams: Record<string, unknown> = {
+    email: user.email,
+    metadata: { userId: user.id },
+  };
+  if (user.name) customerParams.name = user.name;
+  const customer = await getStripe().customers.create(customerParams as Stripe.CustomerCreateParams);
+
+  await db.user.update({
+    where: { id: user.id },
+    data: { stripeCustomerId: customer.id },
+  });
+
+  return customer.id;
+}
+
+/**
+ * One-time payment path (`mode: 'payment'`) — 2026-08 monetization-shapes
+ * hardening. Parameterized on `sku` rather than hardcoding a product: a real
+ * SKU is added by populating `ONE_TIME_PRICES` in stripe.ts (one map entry +
+ * one env var), not by touching this function. See stripe.ts
+ * `ONE_TIME_PRICES` doc comment and docs/runbooks/STRIPE_SETUP.md §
+ * One-time payments.
+ *
+ * Deliberately does NOT run the subscription-only gates above
+ * (BLOCKED_PLANS_AWAITING_WORKSPACE_BUILD, the already-open-subscription
+ * check, trial eligibility) — none of them are meaningful for a one-time
+ * purchase, and applying them would incorrectly block, e.g., an existing
+ * Team-waitlisted user from buying an unrelated one-off SKU.
+ */
+async function createOneTimeCheckoutSession(
+  user: CheckoutUser,
+  sku: string | null,
+  quantity: number,
+): Promise<NextResponse> {
+  if (!sku) {
+    return NextResponse.json(
+      { error: 'Missing required field: sku', code: 'missing_sku' },
+      { status: 400 },
+    );
+  }
+
+  const priceId = getOneTimePriceId(sku);
+  if (!priceId) {
+    return NextResponse.json(
+      { error: 'Billing not configured for this SKU', sku },
+      { status: 503 },
+    );
+  }
+
+  try {
+    const customerId = await getOrCreateStripeCustomer(user);
+
+    const checkoutSession = await getStripe().checkout.sessions.create({
+      customer: customerId,
+      mode: 'payment',
+      line_items: [
+        {
+          price: priceId,
+          quantity,
+        },
+      ],
+      success_url: `${APP_URL}/account?billing=success`,
+      cancel_url: `${APP_URL}/pricing?billing=canceled`,
+      metadata: {
+        userId: user.id,
+        type: 'one_time',
+        sku,
+      },
+      ...buildSharedSessionParams(),
+    });
+
+    trackServer('checkout_started', {
+      userId: user.id,
+      type: 'one_time',
+      sku,
+      quantity,
+    });
+    return NextResponse.json({ url: checkoutSession.url });
+  } catch (err) {
+    console.error('Stripe one-time checkout error:', err);
+    return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 });
+  }
+}
+
+/**
  * POST /api/billing/checkout
  *
- * Creates a Stripe Checkout Session for a paid subscription.
- * Accepts optional `plan` and `interval` in the request body.
- * Defaults to starter/monthly for backward compatibility.
+ * Creates a Stripe Checkout Session. Two shapes, selected by `type`:
+ *   - `'subscription'` (default, backward compatible): existing plan +
+ *     interval flow.
+ *   - `'one_time'`: a single-payment SKU purchase (`mode: 'payment'`) — see
+ *     createOneTimeCheckoutSession above.
  *
- * Body: { plan?: "starter" | "team" | "growth", interval?: "monthly" | "annual" }
+ * Body: { type?: "subscription" | "one_time", plan?: "starter" | "team" | "growth",
+ *          interval?: "monthly" | "annual", sku?: string, quantity?: number }
  */
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -63,20 +223,40 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Parse plan and interval from request body (with backward-compatible defaults).
+  // Parse type/plan/interval/sku/quantity from request body (with
+  // backward-compatible defaults — `type` defaults to 'subscription' so
+  // every pre-2026-08 caller is unaffected).
+  let requestedType: CheckoutType = 'subscription';
   let requestedPlan: PaidPlanType = 'starter';
   let requestedInterval: BillingInterval = 'monthly';
+  let requestedSku: string | null = null;
+  let requestedQuantity = 1;
 
   try {
     const body = await req.json().catch(() => ({}));
+    if (body.type && VALID_CHECKOUT_TYPES.includes(body.type)) {
+      requestedType = body.type;
+    }
     if (body.plan && VALID_PLANS.includes(body.plan)) {
       requestedPlan = body.plan;
     }
     if (body.interval && VALID_INTERVALS.includes(body.interval)) {
       requestedInterval = body.interval;
     }
+    if (typeof body.sku === 'string' && body.sku.trim() !== '') {
+      requestedSku = body.sku.trim();
+    }
+    if (typeof body.quantity === 'number' && Number.isInteger(body.quantity) && body.quantity > 0) {
+      requestedQuantity = body.quantity;
+    }
   } catch {
     // No body or invalid JSON — use defaults.
+  }
+
+  // One-time payment path — fully independent of everything below, which is
+  // subscription-only. See createOneTimeCheckoutSession doc comment.
+  if (requestedType === 'one_time') {
+    return createOneTimeCheckoutSession(user as CheckoutUser, requestedSku, requestedQuantity);
   }
 
   // Multi-user gate: reject Team and Growth purchases until Workspace build
@@ -144,22 +324,7 @@ export async function POST(req: NextRequest) {
 
   try {
     // Reuse existing Stripe customer or create a new one.
-    let customerId = user.stripeCustomerId;
-
-    if (!customerId) {
-      const customerParams: Record<string, unknown> = {
-        email: user.email,
-        metadata: { userId: user.id },
-      };
-      if (user.name) customerParams.name = user.name;
-      const customer = await getStripe().customers.create(customerParams as Stripe.CustomerCreateParams);
-      customerId = customer.id;
-
-      await db.user.update({
-        where: { id: user.id },
-        data: { stripeCustomerId: customerId },
-      });
-    }
+    const customerId = await getOrCreateStripeCustomer(user as CheckoutUser);
 
     // Trial eligibility: only first-time subscribers receive the 14-day free
     // trial. We define "first-time" as never having held a Stripe subscription
@@ -199,6 +364,7 @@ export async function POST(req: NextRequest) {
         trial: shouldApplyTrial ? String(TRIAL_PERIOD_DAYS) : 'none',
       },
       subscription_data: subscriptionData,
+      ...buildSharedSessionParams(),
     });
 
     trackServer('checkout_started', {

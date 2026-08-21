@@ -53,7 +53,8 @@ function mapStripeStatusToUserSubscriptionStatus(status: string): UserSubscripti
  * Handles Stripe webhook events to sync subscription state.
  *
  * Key events handled:
- * - checkout.session.completed → activate paid plan (resolved from price ID)
+ * - checkout.session.completed (mode: 'subscription') → activate paid plan (resolved from price ID)
+ * - checkout.session.completed (mode: 'payment') → record a one-time purchase (2026-08 — see below)
  * - customer.subscription.updated → sync status changes and plan tier
  * - customer.subscription.deleted → revoke paid plan → free
  * - invoice.payment_failed → mark past_due
@@ -61,6 +62,21 @@ function mapStripeStatusToUserSubscriptionStatus(status: string): UserSubscripti
  * - invoice.payment_action_required → capture the SCA/3-D-Secure hosted invoice URL
  * - customer.subscription.trial_will_end → emit analytics notification (no DB write)
  * - charge.dispute.created / charge.dispute.closed → record for admin visibility
+ *
+ * One-time payments (2026-08 monetization-shapes hardening):
+ *   checkout.session.completed fires for BOTH mode: 'subscription' and
+ *   mode: 'payment' sessions — the two are branched at the top of that case
+ *   below, and the `mode: 'payment'` branch does NOT touch User.plan or any
+ *   entitlement (a one-time purchase grants a purchase record, not a plan
+ *   change). NOT YET HANDLED: checkout.session.async_payment_succeeded /
+ *   .async_payment_failed, which only fire for delayed-settlement payment
+ *   methods (e.g. bank debits). Every price this codebase creates a payment-
+ *   mode Checkout Session for today uses card-only (synchronous) payment
+ *   methods, so checkout.session.completed with payment_status:'paid' is a
+ *   sufficient completion signal — this is a deliberate scope boundary, not
+ *   an oversight; see the inline comment at the mode:'payment' branch and
+ *   docs/runbooks/STRIPE_SETUP.md § One-time payments before enabling any
+ *   payment method that settles asynchronously.
  *
  * Provisioning vs notification semantics:
  *   PROVISIONING events (checkout.session.completed, customer.subscription.updated,
@@ -162,6 +178,72 @@ export async function POST(req: NextRequest) {
         const session = event.data.object as Stripe.Checkout.Session;
         const userId = session.metadata?.userId;
         if (!userId) break;
+
+        // ── One-time payment branch (2026-08 monetization-shapes hardening) ──
+        // A mode:'payment' Checkout Session has no `session.subscription` and
+        // grants no plan/entitlement — it records a purchase. Branching here,
+        // before any of the subscription-only logic below, keeps the two
+        // paths from ever interfering: nothing past this `if` block runs for
+        // a one-time purchase, and nothing in this block runs for a
+        // subscription purchase.
+        if (session.mode === 'payment') {
+          const sku = session.metadata?.sku ?? 'unknown';
+          const paymentIntentId =
+            typeof session.payment_intent === 'string'
+              ? session.payment_intent
+              : (session.payment_intent?.id ?? null);
+          const paymentStatus = session.payment_status ?? 'unknown';
+
+          // Upsert on the Checkout Session id (a Stripe natural key) as a
+          // second layer of duplicate-safety alongside the outer
+          // WebhookEvent idempotency claim — mirrors the StripeDispute
+          // upsert pattern above for the same reason (a .closed-style
+          // re-delivery must not create a second row).
+          await (db as any).oneTimePurchase.upsert({
+            where: { id: session.id },
+            create: {
+              id: session.id,
+              userId,
+              sku,
+              stripePaymentIntentId: paymentIntentId,
+              amountTotal: session.amount_total ?? 0,
+              currency: session.currency ?? 'usd',
+              paymentStatus,
+            },
+            update: {
+              paymentStatus,
+              stripePaymentIntentId: paymentIntentId,
+            },
+          });
+
+          if (paymentStatus === 'paid') {
+            console.log(
+              `[stripe] User ${userId} completed one-time purchase — sku=${sku} session=${session.id}`,
+            );
+            // No PII: userId is an opaque ID, sku is our own internal
+            // catalog key (not a Stripe object or free text), amount and
+            // currency are Stripe's own fixed-format fields.
+            trackServer('one_time_purchase_completed', {
+              userId,
+              sku,
+              amount: session.amount_total ?? 0,
+              currency: session.currency ?? 'usd',
+            });
+          } else {
+            // Async/delayed payment method (e.g. bank debit) — the session
+            // completed but the payment has not settled. NOT YET HANDLED:
+            // see the module doc comment above on
+            // checkout.session.async_payment_succeeded/.async_payment_failed.
+            // This is not a silent gap — the row above is persisted with its
+            // actual (non-'paid') status rather than assumed successful, and
+            // this warning is the explicit signal that follow-up handling is
+            // required if async payment methods are ever enabled for a SKU.
+            console.warn(
+              `[stripe] checkout.session.completed (mode: payment): session ${session.id} has payment_status=${paymentStatus} (not 'paid') — async payment settlement is not yet handled, see webhook/route.ts module doc comment`,
+            );
+          }
+          break;
+        }
 
         // Resolve plan from the subscription's price ID.
         // If resolution fails (Stripe API error or unmapped price ID) we re-throw

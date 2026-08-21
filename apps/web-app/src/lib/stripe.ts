@@ -173,3 +173,102 @@ export const TRIAL_PERIOD_DAYS: number = (() => {
   const parsed = parseInt(raw, 10);
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : 14;
 })();
+
+// ── 2026-08 monetization-shapes hardening ──────────────────────────────────
+// CEO directive: "Get creative and setup stripe for all monetized use
+// cases." The checkout layer previously only knew mode: 'subscription' with
+// no promotion-code support, no tax handling, and no one-time payment path.
+// The three constants/helpers below give the checkout route (and any future
+// checkout-creating code) a shared, config-driven surface for all three,
+// so adding capability later is an env var / map entry, not a rewrite.
+
+/**
+ * Parse a boolean-ish env var. Unset → `defaultValue`. Recognizes
+ * 'true'/'1' as true and 'false'/'0' as false (case-insensitive,
+ * whitespace-trimmed); anything else also falls back to `defaultValue`
+ * rather than throwing — same fail-safe posture as TRIAL_PERIOD_DAYS above.
+ */
+function parseBooleanEnv(raw: string | undefined, defaultValue: boolean): boolean {
+  if (raw === undefined) return defaultValue;
+  const normalized = raw.trim().toLowerCase();
+  if (normalized === 'true' || normalized === '1') return true;
+  if (normalized === 'false' || normalized === '0') return false;
+  return defaultValue;
+}
+
+/**
+ * Whether Checkout Sessions should show Stripe's built-in "Add promotion
+ * code" field (`allow_promotion_codes`). Configurable via
+ * `STRIPE_ALLOW_PROMOTION_CODES`; defaults to **ON**.
+ *
+ * Defaulting ON is deliberate, not an oversight — see
+ * docs/runbooks/STRIPE_SETUP.md § Promotion codes for the full reasoning.
+ * Short version: `allow_promotion_codes: true` with zero promotion codes
+ * configured in the Stripe Dashboard is inert (the field renders but there
+ * is nothing to redeem); it requires no Dashboard setup to ship safely, and
+ * the growth motion this unblocks (founder-led outbound, launch offers,
+ * "free Team-tier review access" for third-party reviewers — see
+ * docs/meta/REVENUE_PLAN_20K/growth_analysis.md §1) has no other way to
+ * discount a Checkout Session at all today. The env var exists purely as an
+ * operator-controlled kill switch, not because the default is risky.
+ */
+export const ALLOW_PROMOTION_CODES: boolean = parseBooleanEnv(
+  process.env.STRIPE_ALLOW_PROMOTION_CODES,
+  true,
+);
+
+/**
+ * Whether Checkout Sessions should request Stripe Tax
+ * (`automatic_tax.enabled`). Configurable via `STRIPE_AUTOMATIC_TAX_ENABLED`;
+ * defaults to **OFF**.
+ *
+ * MUST stay opt-in, unlike `ALLOW_PROMOTION_CODES` above — enabling
+ * automatic tax calculation without matching tax registrations configured
+ * in the Stripe Dashboard makes Stripe reject the Checkout Session outright
+ * (a hard checkout-creation error, not a graceful degrade), so this cannot
+ * default to on the way promotion codes safely can. See
+ * docs/runbooks/STRIPE_SETUP.md § Stripe Tax for what the Dashboard side of
+ * turning this on requires before flipping the flag, and for why
+ * `billing_address_collection` + `customer_update` (wired in
+ * checkout/route.ts alongside this flag) both have to be set correctly too.
+ */
+export const AUTOMATIC_TAX_ENABLED: boolean = parseBooleanEnv(
+  process.env.STRIPE_AUTOMATIC_TAX_ENABLED,
+  false,
+);
+
+/**
+ * One-time-payment SKU → Stripe Price ID map (`mode: 'payment'`, not
+ * `mode: 'subscription'`). Same empty-string-default degrade pattern as
+ * `STRIPE_PRICES` above: a missing/unset price ID resolves to `null` from
+ * `getOneTimePriceId()`, and the checkout route turns that into the same
+ * "Billing not configured" 503 every other unconfigured tier returns — it
+ * never throws at startup and never blocks the subscription checkout path.
+ *
+ * `example_onboarding_audit` is a PLACEHOLDER, not a real product decision.
+ * It exists only so the one-time-payment capability is concrete and
+ * testable end-to-end. It is INERT — `getOneTimePriceId('example_onboarding_audit')`
+ * returns `null` — unless `STRIPE_ONE_TIME_EXAMPLE_PRICE_ID` is explicitly
+ * set, which nothing in this codebase does by default. Naming, pricing, and
+ * whether to ever turn it on is a CEO product decision; see
+ * docs/runbooks/STRIPE_SETUP.md § One-time payments and § Candidate SKUs.
+ *
+ * Adding a REAL one-time SKU later is additive: create the Stripe Price,
+ * add one entry to this map (`your_sku_key: process.env.STRIPE_..._PRICE_ID ?? ''`),
+ * set the env var. The checkout route and webhook handler do not change.
+ */
+export const ONE_TIME_PRICES: Record<string, string> = {
+  example_onboarding_audit: process.env.STRIPE_ONE_TIME_EXAMPLE_PRICE_ID ?? '',
+};
+
+/**
+ * Look up the Stripe price ID for a one-time-payment SKU key. Returns
+ * `null` for an unknown key or a known key whose price ID is unconfigured —
+ * callers should treat both the same way (503 "not configured"), since a
+ * client can send any string here and the difference is not
+ * security-relevant.
+ */
+export function getOneTimePriceId(sku: string): string | null {
+  const priceId = ONE_TIME_PRICES[sku];
+  return priceId || null;
+}

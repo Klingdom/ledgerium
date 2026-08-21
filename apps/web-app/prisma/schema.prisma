@@ -964,3 +964,42 @@ model StripeDispute {
   @@map("stripe_disputes")
 }
 
+/**
+ * Durable record of a one-time (`mode: 'payment'`) Checkout Session
+ * completion — 2026-08 monetization-shapes hardening (CEO directive
+ * "get Stripe working across all possible monetized use cases").
+ *
+ * `id` IS the Stripe Checkout Session id (`cs_...`) — a natural key, same
+ * pattern as `WebhookEvent`/`StripeDispute` above, and a second layer of
+ * duplicate-safety alongside the outer `WebhookEvent` idempotency claim (the
+ * webhook handler upserts on this id).
+ *
+ * `sku` is Ledgerium's own internal catalog key (see `ONE_TIME_PRICES` in
+ * `lib/stripe.ts`), NOT a Stripe object id — it is what lets one table serve
+ * every one-time SKU without a schema change per product.
+ *
+ * `userId` is intentionally NOT a foreign key (matches the `StripeDispute`
+ * polymorphic-id pattern) so a purchase row is never blocked from being
+ * recorded by a FK constraint if the user lookup path ever changes.
+ *
+ * No plan/entitlement is derived from this table — a one-time purchase does
+ * not change `User.plan`. See webhook/route.ts `checkout.session.completed`
+ * (mode: 'payment' branch) for the write path and admin-operations queries
+ * for read-side reporting (if/when a real SKU makes that useful).
+ */
+model OneTimePurchase {
+  id                    String   @id // Stripe Checkout Session id (cs_...) — natural key
+  userId                String   @map("user_id")
+  sku                   String // Ledgerium-internal SKU key — see lib/stripe.ts ONE_TIME_PRICES
+  stripePaymentIntentId String?  @map("stripe_payment_intent_id")
+  amountTotal           Int      @map("amount_total") // smallest currency unit (cents)
+  currency              String
+  paymentStatus         String   @map("payment_status") // Stripe session.payment_status: 'paid' | 'unpaid' | 'no_payment_required' | ...
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([sku])
+  @@map("one_time_purchases")
+}
+
