@@ -1,0 +1,51 @@
+{
+  "fixtureName": "single-action-no-label",
+  "normalizedEvents": [
+    {
+      "event_id": "sa1",
+      "schema_version": "1.0.0",
+      "session_id": "test-session-golden",
+      "t_ms": 1000,
+      "t_wall": "2026-01-01T00:00:00Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.example.com/page",
+        "urlNormalized": "https://app.example.com/page",
+        "domain": "app.example.com",
+        "routeTemplate": "/page",
+        "pageTitle": "Page",
+        "applicationLabel": "App"
+      },
+      "normalization_meta": {
+        "sourceEventId": "sa1",
+        "sourceEventType": "interaction.click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "test-session-golden-step-1",
+      "session_id": "test-session-golden",
+      "ordinal": 1,
+      "title": "Click action in App",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.55,
+      "source_event_ids": [
+        "sa1"
+      ],
+      "start_t_ms": 1000,
+      "end_t_ms": 1000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "app.example.com",
+        "applicationLabel": "App",
+        "routeTemplate": "/page"
+      }
+    }
+  ]
+}

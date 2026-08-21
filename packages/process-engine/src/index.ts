@@ -44,6 +44,24 @@ export {
   formatDuration,
 } from './stepAnalyzer.js';
 export {
+  isVagueInstructionText,
+  computeInstructionSpecificity,
+  computeStepSpecificity,
+  computeSopVagueness,
+  VAGUE_INSTRUCTION_STRINGS,
+  VAGUE_INSTRUCTION_PREFIXES,
+  SPECIFICITY_TIER_LABELS,
+  LOW_CONFIDENCE_THRESHOLD,
+  SPECIFICITY_THRESHOLD,
+} from './specificity.js';
+export type {
+  SpecificityTier,
+  InstructionSpecificity,
+  StepSpecificity,
+  SopVagueness,
+  SpecificityStepContext,
+} from './specificity.js';
+export {
   inferBusinessObjective,
   inferTrigger,
   detectFriction,

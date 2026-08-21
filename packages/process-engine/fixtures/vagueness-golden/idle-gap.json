@@ -1,0 +1,105 @@
+{
+  "fixtureName": "idle-gap",
+  "normalizedEvents": [
+    {
+      "event_id": "ig1",
+      "schema_version": "1.0.0",
+      "session_id": "test-session-golden",
+      "t_ms": 1000,
+      "t_wall": "2026-01-01T00:00:00Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.example.com/page",
+        "urlNormalized": "https://app.example.com/page",
+        "domain": "app.example.com",
+        "routeTemplate": "/page",
+        "pageTitle": "Page",
+        "applicationLabel": "App"
+      },
+      "target_summary": {
+        "label": "First",
+        "selector": "#first",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "ig1",
+        "sourceEventType": "interaction.click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ig2",
+      "schema_version": "1.0.0",
+      "session_id": "test-session-golden",
+      "t_ms": 50000,
+      "t_wall": "2026-01-01T00:00:00Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.example.com/page",
+        "urlNormalized": "https://app.example.com/page",
+        "domain": "app.example.com",
+        "routeTemplate": "/page",
+        "pageTitle": "Page",
+        "applicationLabel": "App"
+      },
+      "target_summary": {
+        "label": "Second",
+        "selector": "#second",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "ig2",
+        "sourceEventType": "interaction.click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "test-session-golden-step-1",
+      "session_id": "test-session-golden",
+      "ordinal": 1,
+      "title": "Click First",
+      "status": "finalized",
+      "boundary_reason": "idle_gap",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "ig1"
+      ],
+      "start_t_ms": 1000,
+      "end_t_ms": 1000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "app.example.com",
+        "applicationLabel": "App",
+        "routeTemplate": "/page"
+      }
+    },
+    {
+      "step_id": "test-session-golden-step-2",
+      "session_id": "test-session-golden",
+      "ordinal": 2,
+      "title": "Click Second",
+      "status": "finalized",
+      "boundary_reason": "session_stop",
+      "grouping_reason": "single_action",
+      "confidence": 0.75,
+      "source_event_ids": [
+        "ig2"
+      ],
+      "start_t_ms": 50000,
+      "end_t_ms": 50000,
+      "duration_ms": 0,
+      "page_context": {
+        "domain": "app.example.com",
+        "applicationLabel": "App",
+        "routeTemplate": "/page"
+      }
+    }
+  ]
+}

@@ -130,19 +130,104 @@ Rationale: land the metric and the zero-risk display improvements first (fast, m
 
 ## 10. Execution Log
 
-**P0-b — SVR metric + measure-only gate — ✅ COMPLETE (2026-07-05, `qa-engineer`, directed).**
+> **⚠️ STATUS CORRECTION (2026-08-21, coordinator).** The **P0-b** and **P0-c**
+> entries below are marked "✅ COMPLETE" but **were never merged to `main`**.
+> They are struck through because that status label is wrong, not because the
+> work is missing.
+>
+> **An earlier draft of this note accused those entries of being fabricated.
+> That accusation was false and has been removed.** It was written after
+> checking only the working tree. The code is real and sits in commit
+> `e9f13bf` on branch `chore/process-engine-specificity-wip`, whose own commit
+> message states plainly:
+>
+> > *"PARKED — NOT MERGED TO MAIN. In-flight work, not validated as a unit."*
+>
+> That branch adds `specificity.ts` and `svrVaguePath` tests and additionally
+> modifies `sopBuilder.ts`, `sopValidator.ts` and `contentEnricher.ts` — i.e.
+> it contains the **P0-c render-layer fixes as well**, which the 2026-08-21
+> work below does *not*. The prior session was explicit and honest about
+> parking it; only the "COMPLETE" label in this log overstated where it had
+> landed.
+>
+> **Lesson recorded:** verifying against the working tree alone is not
+> verifying against the repository. `git log --all` and
+> `git branch -a --contains` are the check that distinguishes "never written"
+> from "written and parked" — and the difference between those two is an
+> accusation of dishonesty versus a piece of unmerged work.
+>
+> **Consequence to resolve:** there are now two independent `specificity.ts`
+> implementations — the parked one on the WIP branch and the validated one
+> shipped 2026-08-21 below. They must be reconciled rather than both carried.
+> The parked branch's P0-c render fixes remain unshipped and are still worth
+> harvesting.
+>
+> (**P0-a** below — the pageTitle PII redaction in
+> `apps/extension-app/src/content/safe-page-title.ts` — is on `main` and
+> merged; it is not implicated here.)
+
+~~**P0-b — SVR metric + measure-only gate — ✅ COMPLETE (2026-07-05, `qa-engineer`, directed).**~~ **[NOT MERGED — real code, parked on  (e9f13bf). See correction above.]**
 - Created `packages/process-engine/src/specificity.ts` (pure, deterministic): `VAGUE_INSTRUCTION_STRINGS` + `VAGUE_INSTRUCTION_PREFIXES` (source-cited), `isVagueInstruction`, `computeStepSpecificity` (audit-honesty IFF `vague === true IFF specificity < 0.50`), `computeSopVagueness` (SVR + divide-by-zero guard). `specificity.test.ts` +33 substantive tests.
 - `validateRenderedSOP` extended with optional `specificity` field (measure-only; all 6 rejection rules byte-identical — verified: sopValidator.test.ts 31/31 pass). Baseline script `scripts/svr-baseline.ts` added.
 - **Validation:** process-engine 478/478 pass (+33); workspace typecheck clean; `git status` scope = process-engine only, no capture-pipeline/normalization/segmentation/policy-engine files.
 - **Measured baseline SVR = 0.00% (0 / 219 instructions) over the 10 curated workflow fixtures.**
 - **LEARNING (honest limitation):** the curated fixtures are fully-labelled, so SVR is trivially 0 there — it cannot demonstrate the vagueness problem or a before/after improvement. **Follow-up (folded into P0-c):** add labelless/coordinate/error-recovery "vague-path" fixtures (mirroring the segmentation goldens `single-action-no-label`, `spreadsheet-cells`, `error-recovery`) that flow through the SOP render path and register non-zero SVR, so P0-c's reduction is provable. The metric itself is sound and sensitivity-tested at unit level.
 
-**P0-c — render-layer specificity for labelless/generic steps — ✅ COMPLETE (2026-07-05, `backend-engineer`, directed).**
+~~**P0-c — render-layer specificity for labelless/generic steps — ✅ COMPLETE (2026-07-05, `backend-engineer`, directed).**~~ **[NOT MERGED — real code, parked on `chore/process-engine-specificity-wip` (e9f13bf), which does modify `sopBuilder.ts`. Still unshipped on `main`, so the vague strings remain live there. See correction above.]**
 - Production changes (process-engine render layer only): `sopBuilder.ts` `deriveInstruction()` labelless-click ladder now emits **"Click in {applicationLabel}"** (UX §4 decision) instead of the vague-prefix "Click the target element in {app}"; `contentEnricher.ts` `cleanStepTitle()` strips bare spreadsheet cell refs from titles; single-word ambiguous labels quoted; error-recovery action surfaces the recovery target.
 - **Vague-path fixtures added** (`svrVaguePath.test.ts`, +24 tests) mirroring the segmentation goldens (labelless click, coordinate-only, error-recovery), flowing through the real `processSessionFull` render path — establishing a real non-zero pre-fix baseline and regression-locking the result.
 - **Measured outcome:** labelless-click fixture SVR **0.33 (1/3) → 0.00** — the "Click the target element in {app}" vague prefix is eliminated at the source. Title/quoting/error-recovery fixes improve reader-facing text but (honestly) do not move the instruction-based SVR; the suite documents each case's SVR impact explicitly (no metric-gaming; `specificity.ts` untouched).
 - **Validation:** process-engine 502/502 (+24); workspace 3586/3586; typecheck clean; `git status` scope = process-engine only — **zero** segmentation/normalization/policy-engine/extension files. Measure-only invariant preserved (sopValidator verdict unchanged).
 - **Honest limitation:** demonstrated reduction is on the new vague-path fixtures (proof-of-mechanism + regression lock); corpus SVR over the 10 curated workflow fixtures remains 0 because they were authored fully-labelled. Real-world corpus SVR will be observable once sessions with capture-failures flow through, and once the capture-pipeline items (P1-d/e/f) surface richer signals.
+
+---
+
+**P0-b — SVR metric + measure-only gate — ✅ SHIPPED TO `main` (2026-08-21, `backend-engineer`, directed; supersedes the parked, unmerged entry above).**
+
+CEO directive: implement the P0-b measurement gate on `main`, since the earlier attempt was parked on an unmerged branch and never shipped. Scope: `packages/process-engine/` only. No production SOP-generation code touched — this is an observable-only, measure-only change; a reader of the SOP sees no difference. No capture-pipeline / normalization-engine / segmentation-engine / policy-engine files touched (RC-1/RC-2/RC-3 remain explicitly out of scope, per CLAUDE.md's Extension Reliability Invariant).
+
+**Specificity rubric used (per the UX doc's §1 six-tier table, `docs/meta/SOP_SPECIFICITY_REVIEW/ux_analysis.md`):** a step detail is "specific enough" when it names ≥2 of 3 signals — **Object** (named element/field), **Location** (system/app context), **Result** (what changes). Deviations from the UX doc are documented explicitly in `specificity.ts`'s module doc (5 numbered decisions), most importantly:
+- **Structural signals, not string matching, as the primary measure.** `hasObject` reads the already-computed `SOPInstruction.targetLabel` field rather than regex-matching rendered text — this is the actual fix for RC-4 (the old `sopValidator.ts` banlist bans strings the system never emits and misses the ones it does; a structural signal tracks future `sopBuilder.ts` changes automatically).
+- **Six tiers collapsed to a binary gate via signal *count*, not rank** — the CEO directive's literal "≥2 of 3" is a count, so Tier 3 ("Located" — object only) and Tier 4 ("Generic" — location only) are both "not specific enough" here, even though the UX table ranks Tier 3 above Tier 4 by reader-experience quality. The full 6-tier label is preserved for diagnostics (`SPECIFICITY_TIER_LABELS`); only the binary gate is collapsed.
+- **A load-bearing override, discovered empirically while measuring the real baseline (see below):** `instruction.system` and `step.expectedOutcome` are populated by `sopBuilder.ts` almost unconditionally, independent of whether the instruction *text* is the bottom-rung vague fallback. Scoring Location/Result independently of a confirmed vague-text match let Signals 2+3 satisfy the ≥2-of-3 bar on their own — this measured **0% SVR across all 12 golden fixtures**, including the fixture purpose-built to have no label at all. A metric that never fires on its own designed worst case is not a measurement. Per the UX rubric's own Tier 6 definition ("HTML term / None / None"), a confirmed graded-fallback match now forces all three signals to `false` for that instruction, regardless of what the step's other fields independently carry. This is documented as decision #1 in the module and is the single most important design note in the file.
+
+**Reconciliation with `lowDataFlag`:** `lowDataFlag` (`packages/intent-inference/src/confidence-scorer.ts`) is an **orphan package** — verified zero other packages import `@ledgerium/intent-inference`; it is not wired into the pipeline that produces the `SOP` this module scores. There is nothing to literally build on. What is reused is its *pattern*: an audit-honesty IFF invariant tying a boolean flag to a confidence threshold, at the same 0.55 cutoff (`LOW_CONFIDENCE_THRESHOLD`), applied here to `SOPStep.confidence` (the field actually populated in this pipeline) rather than duplicating a parallel, disconnected threshold.
+
+**Files (all under `packages/process-engine/`, zero elsewhere):**
+- NEW `src/specificity.ts` (~300 LOC pure module): `VAGUE_INSTRUCTION_STRINGS` (9 exact bottom-rung strings) + `VAGUE_INSTRUCTION_PREFIXES` (5 dynamic-suffix prefixes) — both re-verified line-by-line against `sopBuilder.ts:296-359` on 2026-08-13, confirmed to match the review's own "9 patterns + 5 page-appended prefix variants" claim exactly; `isVagueInstructionText`; `computeInstructionSpecificity` (3-signal scorer + 6-tier classification + audit-honesty IFF `vague === true IFF specificity < 0.50`); `computeStepSpecificity` (per-step aggregation, own IFF, separate `lowConfidence` field); `computeSopVagueness` (SOP-wide SVR = vagueInstructionCount / totalInstructionCount, divide-by-zero guarded to 0, OR-combines structural vagueness with step-level low confidence per the review's §5 formula).
+- NEW `src/specificity.test.ts` (32 tests, Groups A–F): confirmed-string/prefix matching; exhaustive 3-signal/6-tier classification; step and SOP aggregation; the audit-honesty IFF invariant asserted directly (not just spot-checked); determinism (byte-identical JSON across repeated/independent calls, including a 25-iteration dedup-to-1 proof); and the task's named litmus tests (`'Click the target element'` and `'Enter the required value'` scored vague; a genuinely specific instruction is not).
+- MODIFIED `src/templates/sopValidator.ts`: `SOPValidation` extends both variants (`ok: true` and `ok: false`) with a `specificity: SopVagueness` field, computed once at the top of `validateRenderedSOP` and attached to every return path — including the 6 existing rejection paths, which fire byte-identically (same `reason`/`diagnostic`/`suggestion` for the same inputs; only the additive field is new). This is the actual "gate" from RC-4: the SVR is now visible everywhere the quality gate already runs, without changing what the gate accepts or rejects.
+- MODIFIED `src/templates/sopValidator.test.ts` + `src/processSessionFull.test.ts`: the two pre-existing `toEqual({ ok: true })` assertions were updated to `expect(result.ok).toBe(true)` (an additive-field change, not a behavior change) plus 3 new tests proving the field is present on both pass/fail paths and that a maximally-vague-instruction SOP still returns `ok: true` when the other 6 rules pass (the literal proof that this gate reports, it does not block).
+- MODIFIED `src/index.ts`: exported the new public surface.
+- NEW `fixtures/vagueness-golden/*.json` (12 files): real `(normalizedEvents, derivedSteps)` pairs, one per `packages/segmentation-engine/fixtures/golden/*.json` fixture, produced by **actually running** `@ledgerium/segmentation-engine`'s `segmentEvents()` over each golden fixture. Generated via a one-time throwaway test written directly in `packages/segmentation-engine/src/`, executed once, then deleted (`git status` on `packages/segmentation-engine/` is clean) — this is how process-engine gets a real, segmentation-engine-derived baseline **without taking a new package dependency** on `@ledgerium/segmentation-engine` (no dependency was added to `package.json`; the golden fixtures are static, version-controlled JSON with zero import coupling).
+- NEW `src/svrBaseline.test.ts`: runs the real `processSessionFull()` pipeline over all 12 fixtures (exactly what the review's §5 specifies — "running `processSessionFull` over the 12 golden fixture chains"), asserts sanity invariants (SVR ∈ [0,1] per fixture, no NaN), asserts determinism (two independent runs per fixture produce byte-identical `specificity`), prints a full per-fixture + aggregate report table, and locks the measured aggregate baseline as a regression assertion (see baseline below).
+
+**Measured baseline (2026-08-13) — 12 segmentation-engine golden fixtures, run through the real pipeline:**
+
+| Fixture | Steps | Instructions | Vague | SVR |
+|---|---|---|---|---|
+| action-button-rapid-repeat | 1 | 3 | 0 | 0.0% |
+| action-button-then-other | 2 | 3 | 0 | 0.0% |
+| annotation-mid-stream | 3 | 3 | 0 | 0.0% |
+| demo | 2 | 7 | 0 | 0.0% |
+| empty-session | — | — | — | SKIPPED (0 derived steps — nothing to score) |
+| error-recovery | 1 | 2 | 0 | 0.0% |
+| fill-and-submit | 1 | 3 | 0 | 0.0% |
+| idle-gap | 2 | 2 | 0 | 0.0% |
+| multi-domain-tabs | 2 | 2 | 0 | 0.0% |
+| **single-action-no-label** | 1 | 1 | **1** | **100.0%** |
+| spa-route-change | 1 | 2 | 0 | 0.0% |
+| spreadsheet-cells | 3 | 3 | 0 | 0.0% |
+| **TOTAL (11 scored)** | — | **31** | **1** | **3.2%** |
+
+**Honest read of this number:** 11 of the 12 golden fixtures are fully-labelled by design (they exist to test segmentation boundary behavior, not vagueness) and correctly score 0%. The 12th, `single-action-no-label` — purpose-built to have zero `target_summary` at all — is the only vague reading, at its designed worst case (1/1). This is a small, non-degenerate, honest baseline: the metric fires exactly once, exactly where the fixture corpus says it should, and does not fire on fixtures that were never designed to be vague. It is **not** a demonstration of the real-world vagueness problem described in §1–§3 of this review — that requires production session data (or fixtures deliberately modeling capture-quality degradation), which is out of scope here. What this baseline *does* prove: the metric discriminates correctly on the one fixture engineered to be vague, and does not false-positive on the other 11. Every later fix to RC-1/RC-2/RC-3 (all capture-pipeline-gated, none touched by this change) is now falsifiable against this number using real production SOPs once that data is available — that traceability is the actual deliverable of P0-b, independent of whether this particular 12-fixture corpus happens to be mostly labelled.
+
+**Validation:** `pnpm test` from repo root — before 209 files / 4385 tests, after 212 files / 4442 tests (+3 files, +57 tests: 32 in `specificity.test.ts` + 15 in `svrBaseline.test.ts` + 3 new measure-only assertions in `sopValidator.test.ts`; the remaining +7 tests / +1 file belong to unrelated concurrent work in this shared workspace, confirmed by isolated re-run). `pnpm typecheck` clean across all 11 packages, before and after. **Regression proof:** production `specificity.ts` was replaced with a stub that always reports maximally-specific / zero-vague (keeping the same exported shape so the workspace still compiles), tests kept unchanged — 19 of 47 tests in the two new test files failed, including the exact two litmus cases named in the directive (`'Click the target element'` and `'Enter the required value'` no longer scored vague). Restoring the real implementation returned all 47 to green with the identical baseline numbers above. `git status` confirms scope: `packages/process-engine/` only — zero files touched under `apps/extension-app/`, `packages/normalization-engine/`, `packages/segmentation-engine/`, or `packages/policy-engine/`.
+
+**Known follow-ups (not promoted to backlog by this measure-only change):**
+1. The metric will start doing more diagnostic work once real production SOPs (or capture-quality-degraded fixtures) are run through it — the current corpus is nearly all fully-labelled by design.
+2. Signal 3 (Result) is close to structurally universal today because `buildExpectedOutcome()` always returns a non-empty string; RC-5 (per-step purpose/outcome derive-or-null, already a separate P2 backlog item) would let this signal start doing real diagnostic work.
+3. No threshold is proposed for gating yet, per the directive ("report, do NOT block — initially"). If a future gate is proposed, the CEO should decide the threshold; this module only measures.
 
 ---
 
@@ -161,4 +246,4 @@ P0-a is code-complete (validation-pending). Items P1-d, P1-e, P1-f all modify ca
 2. **Real-extension harness** (`playwright.real-ext.config.ts`) is the validation gate of record — unit tests cannot certify capture-pipeline health.
 3. The remaining sequence is N≥6 → **MR-005 D-7 meta-coordinator Mode 4 pre-check** is due before the capture-pipeline block begins.
 
-Safe (non-capture) items P0-b and P0-c are complete. The sequence pauses here pending CEO go-ahead on the capture-pipeline block.
+**Status correction (2026-08-21):** P0-b is now shipped on `main` (see the entry above, superseding the parked branch version). **P0-c is still NOT on `main`** — it exists only on `chore/process-engine-specificity-wip` (e9f13bf), so `sopBuilder.ts` on `main` still emits the pre-P0-c vague-prefix strings, which is one reason the P0-b baseline measures 100% SVR on `single-action-no-label`. Harvesting P0-c from that branch is cheap, non-capture, zero-risk work. P0-c remains open, safe (non-capture), zero-risk work for a future iteration. The sequence pauses here pending CEO go-ahead on the capture-pipeline block (P1-d/e/f).

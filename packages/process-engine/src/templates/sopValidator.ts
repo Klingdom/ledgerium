@@ -13,6 +13,7 @@
 import type { RenderedSOP } from '../templateTypes.js';
 import type { ProcessOutput } from '../types.js';
 import { renderSOPMarkdown } from './markdownRenderer.js';
+import { computeSopVagueness, type SopVagueness } from '../specificity.js';
 
 // ─── Named constants ─────────────────────────────────────────────────────────
 
@@ -50,9 +51,17 @@ const PROSE_ONLY_PURPOSE_PREFIX = 'This SOP describes ';
 
 // ─── Result type ─────────────────────────────────────────────────────────────
 
+/**
+ * Measure-only Step Vagueness Rate (SVR), attached to every validation result
+ * regardless of pass/fail — see `specificity.ts` module doc and
+ * docs/meta/SOP_DETAIL_SPECIFICITY_REVIEW_001.md RC-4 / P0-b. This field is
+ * purely observational: it never changes `ok`, `reason`, `diagnostic`, or
+ * `suggestion`, and no rule below reads it. Nothing here blocks SOP
+ * generation for existing users.
+ */
 export type SOPValidation =
-  | { ok: true }
-  | { ok: false; reason: string; diagnostic: string; suggestion: string };
+  | { ok: true; specificity: SopVagueness }
+  | { ok: false; reason: string; diagnostic: string; suggestion: string; specificity: SopVagueness };
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
 
@@ -104,6 +113,11 @@ export function validateRenderedSOP(
 ): SOPValidation {
   const markdown = renderSOPMarkdown(rendered);
 
+  // Measured once, attached to every return path below (pass or fail) —
+  // this is a report-only signal (RC-4 / P0-b) and must never influence
+  // which rule fires or whether the SOP is accepted.
+  const specificity = computeSopVagueness(output.sop);
+
   // ── Rule 1: banned recorder artifacts ────────────────────────────────────
   for (const banned of BANNED_RECORDER_STRINGS) {
     if (markdown.includes(banned)) {
@@ -112,6 +126,7 @@ export function validateRenderedSOP(
         reason: 'banned_recorder_artifact',
         diagnostic: `Rendered SOP contains banned string "${banned}". Check label-resolution ladder in sopBuilder.ts.`,
         suggestion: `Investigate the source event — its target_summary.label or role was likely missing.`,
+        specificity,
       };
     }
   }
@@ -124,6 +139,7 @@ export function validateRenderedSOP(
       reason: 'too_few_steps',
       diagnostic: `SOP has ${stepCount} step(s); minimum is ${MIN_STEP_COUNT}.`,
       suggestion: `Re-record the workflow with more actions.`,
+      specificity,
     };
   }
 
@@ -135,6 +151,7 @@ export function validateRenderedSOP(
         reason: 'step_has_no_evidence',
         diagnostic: `Step ${step.ordinal} ("${step.title}") has no evidence events.`,
         suggestion: `Investigate segmentation — the step was created but no actionable events populated it.`,
+        specificity,
       };
     }
   }
@@ -147,6 +164,7 @@ export function validateRenderedSOP(
       reason: 'empty_expected_outcomes',
       diagnostic: `${emptyExpected} step(s) have no expected outcome.`,
       suggestion: `Review contentEnricher.ts expected-outcome generation.`,
+      specificity,
     };
   }
 
@@ -158,6 +176,7 @@ export function validateRenderedSOP(
       reason: 'generic_title',
       diagnostic: `SOP title "${title}" matches the generic-placeholder pattern.`,
       suggestion: `Give the SOP a specific, business-meaningful title describing the actual workflow.`,
+      specificity,
     };
   }
 
@@ -169,8 +188,9 @@ export function validateRenderedSOP(
       reason: 'prose_only_purpose',
       diagnostic: `SOP purpose begins with the boilerplate prefix "${PROSE_ONLY_PURPOSE_PREFIX}".`,
       suggestion: `Rewrite the purpose as a specific, business-meaningful statement (see QUALITY_RUBRIC.md §4.1 high example).`,
+      specificity,
     };
   }
 
-  return { ok: true };
+  return { ok: true, specificity };
 }

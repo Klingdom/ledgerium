@@ -176,7 +176,65 @@ function validOutput(stepOverrides?: Partial<SOPStep>[]): ProcessOutput {
 describe('validateRenderedSOP — passes valid SOP', () => {
   it('returns ok: true for a 3-step SOP with all rules satisfied', () => {
     const result = validateRenderedSOP(validRenderedSOP(), validOutput());
-    expect(result).toEqual({ ok: true });
+    expect(result.ok).toBe(true);
+    // `specificity` is additive, measure-only metadata (RC-4 / P0-b) — see
+    // the dedicated describe block below for its own coverage. Asserting
+    // only `ok` here (rather than deep-equaling the whole object) keeps this
+    // test focused on the 6 gating rules, which are unchanged.
+  });
+});
+
+// ─── Measure-only specificity field (RC-4 / P0-b) ────────────────────────────
+
+describe('validateRenderedSOP — specificity is measure-only (does not gate)', () => {
+  it('attaches a `specificity` object on the ok: true path', () => {
+    const result = validateRenderedSOP(validRenderedSOP(), validOutput());
+    expect(result.specificity).toBeDefined();
+    expect(typeof result.specificity.svr).toBe('number');
+    expect(result.specificity.svr).toBeGreaterThanOrEqual(0);
+    expect(result.specificity.svr).toBeLessThanOrEqual(1);
+  });
+
+  it('attaches a `specificity` object even when Rule 1 (banned_recorder_artifact) fails', () => {
+    const rendered = validRenderedSOP({
+      steps: [
+        operatorSOPStep({ number: 1, action: 'Click the div' }),
+        operatorSOPStep({ number: 2, action: 'Enter data' }),
+      ],
+    });
+    const result = validateRenderedSOP(rendered, validOutput());
+    expect(result.ok).toBe(false);
+    expect(result.specificity).toBeDefined();
+    expect(typeof result.specificity.svr).toBe('number');
+  });
+
+  it('a high-SVR SOP (all-vague instructions) still returns ok: true when the other 6 rules pass', () => {
+    // Proves the measure-only contract literally: a SOP whose instructions
+    // are the worst-case vague fallback strings still passes validation —
+    // the metric reports, it does not block.
+    const output = validOutput([
+      {
+        ordinal: 1,
+        stepId: 'step-1',
+        title: 'Do something',
+        instructions: [
+          {
+            sequence: 1,
+            instruction: 'Click the target element',
+            eventType: 'interaction.click',
+            sourceEventId: 'evt-1',
+            sourceRawEventId: 'raw-1',
+            isSensitive: false,
+            redacted: false,
+          },
+        ],
+      },
+      { ordinal: 2, stepId: 'step-2', title: 'Enter data' },
+      { ordinal: 3, stepId: 'step-3', title: 'Submit' },
+    ]);
+    const result = validateRenderedSOP(validRenderedSOP(), output);
+    expect(result.ok).toBe(true);
+    expect(result.specificity.svr).toBeGreaterThan(0);
   });
 });
 

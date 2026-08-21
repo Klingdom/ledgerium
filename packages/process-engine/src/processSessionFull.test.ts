@@ -267,7 +267,12 @@ describe('processSessionFull — result shape', () => {
 describe('processSessionFull — happy path', () => {
   it('returns sopValidation ok: true for a valid two-step session', () => {
     const { sopValidation } = processSessionFull(makeInput());
-    expect(sopValidation).toEqual({ ok: true });
+    // `specificity` is additive, measure-only metadata (RC-4 / P0-b —
+    // docs/meta/SOP_DETAIL_SPECIFICITY_REVIEW_001.md) attached to every
+    // SOPValidation result; asserting `ok` (rather than deep-equaling the
+    // whole object) keeps this test focused on the pass/fail gate contract.
+    expect(sopValidation.ok).toBe(true);
+    expect(sopValidation.specificity).toBeDefined();
   });
 
   it('artifacts.sop is the RenderedSOP that drove sopValidation', () => {

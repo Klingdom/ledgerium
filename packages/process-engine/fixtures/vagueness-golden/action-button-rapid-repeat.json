@@ -1,0 +1,114 @@
+{
+  "fixtureName": "action-button-rapid-repeat",
+  "normalizedEvents": [
+    {
+      "event_id": "ar1",
+      "schema_version": "1.0.0",
+      "session_id": "test-session-golden",
+      "t_ms": 1000,
+      "t_wall": "2026-01-01T00:00:00Z",
+      "event_type": "interaction.input_change",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.example.com/page",
+        "urlNormalized": "https://app.example.com/page",
+        "domain": "app.example.com",
+        "routeTemplate": "/page",
+        "pageTitle": "Page",
+        "applicationLabel": "App"
+      },
+      "target_summary": {
+        "label": "Body",
+        "selector": "#body",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "ar1",
+        "sourceEventType": "interaction.input_change",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ar2",
+      "schema_version": "1.0.0",
+      "session_id": "test-session-golden",
+      "t_ms": 2000,
+      "t_wall": "2026-01-01T00:00:00Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.example.com/page",
+        "urlNormalized": "https://app.example.com/page",
+        "domain": "app.example.com",
+        "routeTemplate": "/page",
+        "pageTitle": "Page",
+        "applicationLabel": "App"
+      },
+      "target_summary": {
+        "label": "Save",
+        "selector": "#save-btn",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "ar2",
+        "sourceEventType": "interaction.click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    },
+    {
+      "event_id": "ar3",
+      "schema_version": "1.0.0",
+      "session_id": "test-session-golden",
+      "t_ms": 2500,
+      "t_wall": "2026-01-01T00:00:00Z",
+      "event_type": "interaction.click",
+      "actor_type": "human",
+      "page_context": {
+        "url": "https://app.example.com/page",
+        "urlNormalized": "https://app.example.com/page",
+        "domain": "app.example.com",
+        "routeTemplate": "/page",
+        "pageTitle": "Page",
+        "applicationLabel": "App"
+      },
+      "target_summary": {
+        "label": "Save",
+        "selector": "#save-btn",
+        "isSensitive": false
+      },
+      "normalization_meta": {
+        "sourceEventId": "ar3",
+        "sourceEventType": "interaction.click",
+        "normalizationRuleVersion": "1.0.0",
+        "redactionApplied": false
+      }
+    }
+  ],
+  "derivedSteps": [
+    {
+      "step_id": "test-session-golden-step-1",
+      "session_id": "test-session-golden",
+      "ordinal": 1,
+      "title": "Click Save",
+      "status": "finalized",
+      "boundary_reason": "action_completed",
+      "grouping_reason": "repeated_click_dedup",
+      "confidence": 0.7,
+      "source_event_ids": [
+        "ar1",
+        "ar2",
+        "ar3"
+      ],
+      "start_t_ms": 1000,
+      "end_t_ms": 2500,
+      "duration_ms": 1500,
+      "page_context": {
+        "domain": "app.example.com",
+        "applicationLabel": "App",
+        "routeTemplate": "/page"
+      }
+    }
+  ]
+}
