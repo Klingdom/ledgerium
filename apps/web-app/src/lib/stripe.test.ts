@@ -262,3 +262,45 @@ describe('getOneTimePriceId', () => {
     expect(getOneTimePriceId('not_a_real_sku')).toBeNull();
   });
 });
+
+// ─── Service SKUs: guided_onboarding + process_audit (SKU_SPEC_001) ─────────
+
+describe('getOneTimePriceId — guided_onboarding / process_audit', () => {
+  afterEach(() => {
+    delete process.env.STRIPE_GUIDED_ONBOARDING_PRICE_ID;
+    delete process.env.STRIPE_PROCESS_AUDIT_PRICE_ID;
+    vi.resetModules();
+  });
+
+  it('returns null for guided_onboarding when its price ID env var is unset (inert until configured)', async () => {
+    delete process.env.STRIPE_GUIDED_ONBOARDING_PRICE_ID;
+    vi.resetModules();
+    const { getOneTimePriceId } = await import('./stripe.js');
+
+    expect(getOneTimePriceId('guided_onboarding')).toBeNull();
+  });
+
+  it('returns the configured price ID once STRIPE_GUIDED_ONBOARDING_PRICE_ID is set', async () => {
+    process.env.STRIPE_GUIDED_ONBOARDING_PRICE_ID = 'price_guided_onboarding_test';
+    vi.resetModules();
+    const { getOneTimePriceId } = await import('./stripe.js');
+
+    expect(getOneTimePriceId('guided_onboarding')).toBe('price_guided_onboarding_test');
+  });
+
+  it('returns null for process_audit when its price ID env var is unset (inert until configured)', async () => {
+    delete process.env.STRIPE_PROCESS_AUDIT_PRICE_ID;
+    vi.resetModules();
+    const { getOneTimePriceId } = await import('./stripe.js');
+
+    expect(getOneTimePriceId('process_audit')).toBeNull();
+  });
+
+  it('returns the configured price ID once STRIPE_PROCESS_AUDIT_PRICE_ID is set', async () => {
+    process.env.STRIPE_PROCESS_AUDIT_PRICE_ID = 'price_process_audit_test';
+    vi.resetModules();
+    const { getOneTimePriceId } = await import('./stripe.js');
+
+    expect(getOneTimePriceId('process_audit')).toBe('price_process_audit_test');
+  });
+});

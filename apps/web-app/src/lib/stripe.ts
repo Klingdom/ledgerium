@@ -14,6 +14,7 @@
 
 import Stripe from 'stripe';
 import type { PlanType } from './plans';
+import { GUIDED_ONBOARDING_SKU, PROCESS_AUDIT_SKU } from './service-skus';
 
 let _stripe: Stripe | null = null;
 
@@ -256,9 +257,21 @@ export const AUTOMATIC_TAX_ENABLED: boolean = parseBooleanEnv(
  * Adding a REAL one-time SKU later is additive: create the Stripe Price,
  * add one entry to this map (`your_sku_key: process.env.STRIPE_..._PRICE_ID ?? ''`),
  * set the env var. The checkout route and webhook handler do not change.
+ *
+ * `guided_onboarding` + `process_audit` (2026-08 service SKUs — SKU_SPEC_001)
+ * are the first two REAL entries. Both follow the identical inert-until-
+ * configured pattern as the placeholder above: unset the corresponding env
+ * var and `getOneTimePriceId()` returns `null`, and checkout 503s exactly
+ * like every unconfigured tier/SKU does — no code branch cares whether a SKU
+ * is "real" or "placeholder", only whether its price ID resolves. Display
+ * copy (name, price, deliverables) for both lives in `./service-skus.ts`,
+ * NOT here — this map is Stripe wiring only. See
+ * docs/runbooks/STRIPE_SETUP.md § Service SKUs for the Dashboard-side setup.
  */
 export const ONE_TIME_PRICES: Record<string, string> = {
   example_onboarding_audit: process.env.STRIPE_ONE_TIME_EXAMPLE_PRICE_ID ?? '',
+  [GUIDED_ONBOARDING_SKU]: process.env.STRIPE_GUIDED_ONBOARDING_PRICE_ID ?? '',
+  [PROCESS_AUDIT_SKU]: process.env.STRIPE_PROCESS_AUDIT_PRICE_ID ?? '',
 };
 
 /**

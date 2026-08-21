@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ExtensionInstallButton } from '@/components/ExtensionInstallButton';
+import { ServiceOfferCard } from '@/components/ServiceOfferCard';
+import { GUIDED_ONBOARDING_SKU } from '@/lib/service-skus';
 import {
   Download,
   Chrome,
@@ -284,6 +286,24 @@ export default function InstallPage() {
               .
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* Guided Onboarding — placed right after the sideload steps, because
+          this is exactly where the Developer-mode friction bites: someone
+          who just read 4 steps of "enable Developer mode, load unpacked"
+          may want a human to just do it with them instead. */}
+      <section className="py-16 bg-[var(--surface-primary)] border-t border-[var(--border-default)]">
+        <div className="mx-auto max-w-lg px-4 sm:px-6">
+          <ServiceOfferCard
+            sku={GUIDED_ONBOARDING_SKU}
+            eyebrow="Prefer not to do this alone?"
+            heading="Get a human to install it with you"
+            description="If the Developer-mode steps above feel like a lot, or you'd rather someone walk you through your first two real recordings, Guided Onboarding covers a verified install plus two workflows recorded together on your own systems."
+            location="install_guided_onboarding"
+            fallbackHref="/signup"
+            ctaLabel="Get Guided Onboarding"
+          />
         </div>
       </section>
 

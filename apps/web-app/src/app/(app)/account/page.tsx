@@ -23,6 +23,7 @@ import { PRICING_CONFIG } from '@/lib/config';
 import { PLAN_HIERARCHY } from '@/lib/plans';
 import type { PlanType } from '@/lib/plans';
 import { isAdminUnlimited } from '@/lib/admin-allowlist';
+import { ServicesCard } from '@/components/ServicesCard';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -619,6 +620,9 @@ export default function AccountPage() {
           </div>
         )}
       </div>
+
+      {/* Services — one-time SKUs (SKU_SPEC_001), separate from the subscription above */}
+      <ServicesCard />
 
       {/* Extension Sync */}
       <div className="card px-ds-5 py-ds-5">

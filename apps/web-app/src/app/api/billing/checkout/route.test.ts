@@ -66,6 +66,18 @@ vi.mock('@/lib/feature-gating', () => ({
   effectivePlanFor: vi.fn().mockResolvedValue('free'),
 }));
 
+// Process Audit hard qualification gate (SKU_SPEC_001 §2) — default eligible
+// so pre-existing one-time-payment tests using '__configured_sku__' (a
+// non-audit sku) are never affected by this mock; the audit-gate tests below
+// override it explicitly per-case.
+vi.mock('@/lib/audit-eligibility', () => ({
+  getAuditEligibility: vi.fn().mockResolvedValue({
+    eligible: true,
+    minRunsRequired: 5,
+    processes: [],
+  }),
+}));
+
 // Stripe lib — static factory, no getters. Each call to getPriceId returns a
 // deterministic test price ID derived from the (plan, interval) tuple.
 const mockCheckoutCreate = vi.fn();
@@ -82,11 +94,16 @@ vi.mock('@/lib/stripe', () => ({
   }),
   // 2026-08 monetization-shapes hardening — one-time SKU price lookup.
   // '__configured_sku__' resolves to a price like a real configured SKU;
-  // any other sku (including the real placeholder key
-  // 'example_onboarding_audit', which is inert by default in production)
-  // resolves to null, exercising the "not configured" 503 path.
+  // 'guided_onboarding' / 'process_audit' (2026-08 service SKUs) also
+  // resolve to configured prices here so the audit-eligibility-gate tests
+  // below can reach that logic without being short-circuited by the
+  // "not configured" 503 path; any OTHER sku (including the real
+  // placeholder key 'example_onboarding_audit', which is inert by default
+  // in production) resolves to null, exercising that 503 path.
   getOneTimePriceId: vi.fn((sku: string) => {
     if (sku === '__configured_sku__') return 'price_one_time_test_sku';
+    if (sku === 'guided_onboarding') return 'price_guided_onboarding_test';
+    if (sku === 'process_audit') return 'price_process_audit_test';
     return null;
   }),
   PRO_PRICE_ID: '',
@@ -115,6 +132,7 @@ import { db } from '@/db';
 import { auth } from '@/lib/auth';
 import { getPriceId } from '@/lib/stripe';
 import { effectivePlanFor } from '@/lib/feature-gating';
+import { getAuditEligibility } from '@/lib/audit-eligibility';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -618,6 +636,125 @@ describe('POST /api/billing/checkout (iter 066 trial + tier matrix)', () => {
 
       const args = mockCheckoutCreate.mock.calls[0]![0];
       expect(args.mode).toBe('subscription');
+    });
+  });
+
+  // ── Process Audit hard qualification gate (SKU_SPEC_001 §2) ────────────────
+  // THE single most important test group in this file per the task brief: a
+  // customer below the recorded-run threshold must not be able to initiate a
+  // Process Audit purchase — enforced server-side, not merely a UI disabled
+  // state. Guided Onboarding carries no such gate and must be unaffected.
+
+  describe('Process Audit purchase gate (sku: "process_audit")', () => {
+    it('BLOCKS checkout with 403 when the user has zero qualifying processes (0 recorded processes at all)', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+      vi.mocked(getAuditEligibility).mockResolvedValueOnce({
+        eligible: false,
+        minRunsRequired: 5,
+        processes: [],
+      });
+
+      const res = await POST(makeRequest({ type: 'one_time', sku: 'process_audit' }));
+
+      expect(res.status).toBe(403);
+      const body = await res.json();
+      expect(body.code).toBe('audit_not_eligible');
+      expect(body.minRunsRequired).toBe(5);
+      // Must not have created a Stripe Checkout Session — the gate blocks
+      // BEFORE any Stripe API call, not after.
+      expect(mockCheckoutCreate).not.toHaveBeenCalled();
+    });
+
+    it('BLOCKS checkout with 403 when every recorded process is below the 5-run threshold (e.g. 2 recordings)', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+      vi.mocked(getAuditEligibility).mockResolvedValueOnce({
+        eligible: false,
+        minRunsRequired: 5,
+        processes: [
+          { id: 'p1', canonicalName: 'Invoice Approval', runCount: 2, qualifies: false },
+        ],
+      });
+
+      const res = await POST(makeRequest({ type: 'one_time', sku: 'process_audit' }));
+
+      expect(res.status).toBe(403);
+      const body = await res.json();
+      expect(body.code).toBe('audit_not_eligible');
+      expect(mockCheckoutCreate).not.toHaveBeenCalled();
+    });
+
+    it('ALLOWS checkout when at least one process meets the 5-run threshold', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+      vi.mocked(getAuditEligibility).mockResolvedValueOnce({
+        eligible: true,
+        minRunsRequired: 5,
+        processes: [
+          { id: 'p1', canonicalName: 'Refund Processing', runCount: 5, qualifies: true },
+        ],
+      });
+
+      const res = await POST(makeRequest({ type: 'one_time', sku: 'process_audit' }));
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.url).toMatch(/checkout\.stripe\.com/);
+      expect(mockCheckoutCreate).toHaveBeenCalledOnce();
+      const args = mockCheckoutCreate.mock.calls[0]![0];
+      expect(args.metadata.sku).toBe('process_audit');
+    });
+
+    it('checks eligibility for the AUTHENTICATED user, not a client-suppliable id', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+      vi.mocked(getAuditEligibility).mockResolvedValueOnce({
+        eligible: true,
+        minRunsRequired: 5,
+        processes: [],
+      });
+
+      await POST(makeRequest({ type: 'one_time', sku: 'process_audit' }));
+
+      expect(getAuditEligibility).toHaveBeenCalledWith(TEST_USER_ID);
+    });
+
+    it('does NOT run the eligibility check for guided_onboarding — the gate is audit-specific', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+
+      const res = await POST(makeRequest({ type: 'one_time', sku: 'guided_onboarding' }));
+
+      expect(res.status).toBe(200);
+      expect(getAuditEligibility).not.toHaveBeenCalled();
+    });
+
+    it('does NOT run the eligibility check for an unrelated configured SKU', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+
+      const res = await POST(makeRequest({ type: 'one_time', sku: '__configured_sku__' }));
+
+      expect(res.status).toBe(200);
+      expect(getAuditEligibility).not.toHaveBeenCalled();
+    });
+
+    it('returns 503 "not configured" BEFORE checking eligibility when the Stripe Price is not yet set up', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+      // Real placeholder-style unconfigured key: getOneTimePriceId mock
+      // returns null for anything other than the three sentinel keys.
+      const res = await POST(makeRequest({ type: 'one_time', sku: 'process_audit_unconfigured' }));
+
+      expect(res.status).toBe(503);
+      expect(getAuditEligibility).not.toHaveBeenCalled();
+    });
+
+    it('a Free-plan user with a qualifying process can still buy the audit — no plan-tier restriction, only the run-count gate', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser({ plan: 'free' }) as never);
+      vi.mocked(effectivePlanFor).mockResolvedValueOnce('free');
+      vi.mocked(getAuditEligibility).mockResolvedValueOnce({
+        eligible: true,
+        minRunsRequired: 5,
+        processes: [{ id: 'p1', canonicalName: 'Weekly Report', runCount: 5, qualifies: true }],
+      });
+
+      const res = await POST(makeRequest({ type: 'one_time', sku: 'process_audit' }));
+      expect(res.status).toBe(200);
     });
   });
 });

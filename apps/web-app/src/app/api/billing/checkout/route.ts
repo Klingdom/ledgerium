@@ -15,6 +15,8 @@ import { toPlanType } from '@/lib/plans';
 import { isAdminUnlimited } from '@/lib/admin-allowlist';
 import { effectivePlanFor } from '@/lib/feature-gating';
 import { trackServer } from '@/lib/analytics-server';
+import { PROCESS_AUDIT_SKU } from '@/lib/service-skus';
+import { getAuditEligibility } from '@/lib/audit-eligibility';
 import type { PaidPlanType, BillingInterval } from '@/lib/stripe';
 import type Stripe from 'stripe';
 
@@ -156,6 +158,32 @@ async function createOneTimeCheckoutSession(
     );
   }
 
+  // ── Process Audit hard qualification gate (SKU_SPEC_001 §2) ────────────────
+  // Enforced HERE, server-side, not just as a UI disabled-state — a customer
+  // must not be able to buy an audit that cannot be meaningfully produced.
+  // Below MIN_RECORDED_RUNS_FOR_AUDIT runs of a given process, variance and
+  // variant figures are not statistically meaningful. Shares the exact same
+  // query as the eligibility the account page displays
+  // (getAuditEligibility / audit-eligibility.ts) so the UI and this
+  // enforcement can never disagree.
+  if (sku === PROCESS_AUDIT_SKU) {
+    const eligibility = await getAuditEligibility(user.id);
+    if (!eligibility.eligible) {
+      return NextResponse.json(
+        {
+          error:
+            `A Process Audit requires at least one recorded process with ` +
+            `${eligibility.minRunsRequired} or more runs — below that, variance ` +
+            `and variant analysis are not statistically meaningful. Record more ` +
+            `runs of the same process, then try again.`,
+          code: 'audit_not_eligible',
+          minRunsRequired: eligibility.minRunsRequired,
+        },
+        { status: 403 },
+      );
+    }
+  }
+
   try {
     const customerId = await getOrCreateStripeCustomer(user);
 
@@ -168,7 +196,13 @@ async function createOneTimeCheckoutSession(
           quantity,
         },
       ],
-      success_url: `${APP_URL}/account?billing=success`,
+      // Dedicated one-time-purchase confirmation page — NOT the subscription
+      // success_url below (that path is untouched). {CHECKOUT_SESSION_ID} is
+      // a literal Stripe Checkout template token, substituted server-side by
+      // Stripe itself; it is intentionally NOT JS-interpolated here (no `$`
+      // prefix). The success page fetches purchase details by session id —
+      // see /api/billing/one-time-purchase and account/purchase-success/page.tsx.
+      success_url: `${APP_URL}/account/purchase-success?session_id={CHECKOUT_SESSION_ID}&sku=${encodeURIComponent(sku)}`,
       cancel_url: `${APP_URL}/pricing?billing=canceled`,
       metadata: {
         userId: user.id,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatDuration, formatConfidence, formatDate, formatDateRelative, formatDateTime } from './format.js'
+import { formatDuration, formatConfidence, formatDate, formatDateRelative, formatDateTime, formatCurrency } from './format.js'
 
 // ─── formatDuration ───────────────────────────────────────────────────────────
 
@@ -165,5 +165,37 @@ describe('formatDateRelative', () => {
     expect(result).not.toMatch(/ago/)
     expect(result).not.toBe('just now')
     expect(result.length).toBeGreaterThan(0)
+  })
+})
+
+// ─── formatCurrency (service SKUs post-purchase confirmation) ─────────────────
+
+describe('formatCurrency', () => {
+  it('formats a whole-dollar amount from cents', () => {
+    expect(formatCurrency(29900, 'usd')).toBe('$299.00')
+  })
+
+  it('formats the Process Audit price ($1,500) from cents', () => {
+    expect(formatCurrency(150000, 'usd')).toBe('$1,500.00')
+  })
+
+  it('formats zero cents', () => {
+    expect(formatCurrency(0, 'usd')).toBe('$0.00')
+  })
+
+  it('handles cents that are not a whole dollar amount', () => {
+    expect(formatCurrency(2999, 'usd')).toBe('$29.99')
+  })
+
+  it('is case-insensitive on the currency code', () => {
+    expect(formatCurrency(1000, 'USD')).toBe(formatCurrency(1000, 'usd'))
+  })
+
+  it('falls back to a plain "<amount> <CURRENCY>" string rather than throwing for an unrecognized currency code', () => {
+    expect(formatCurrency(1000, 'not_a_currency')).toBe('10.00 NOT_A_CURRENCY')
+  })
+
+  it('is deterministic — same input yields the same string', () => {
+    expect(formatCurrency(150000, 'usd')).toBe(formatCurrency(150000, 'usd'))
   })
 })

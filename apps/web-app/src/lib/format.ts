@@ -69,3 +69,26 @@ export function formatConfidence(c: number | null | undefined): string {
   if (c === null || c === undefined) return '';
   return `${Math.round(c * 100)}%`;
 }
+
+/**
+ * Formats a smallest-currency-unit integer amount (e.g. Stripe's
+ * `amount_total` — cents for USD) as a localized currency string, e.g.
+ * `formatCurrency(29900, 'usd')` → "$299.00". Used on the one-time purchase
+ * confirmation page (account/purchase-success) to display what a customer
+ * was actually charged, straight from the persisted OneTimePurchase row.
+ *
+ * Falls back to a plain `"<amount> <CURRENCY>"` string for a currency code
+ * `Intl.NumberFormat` doesn't recognize, rather than throwing — this is
+ * display-only copy and must never crash the confirmation page over an
+ * unexpected currency.
+ */
+export function formatCurrency(amountMinorUnits: number, currency: string): string {
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency.toUpperCase(),
+    }).format(amountMinorUnits / 100);
+  } catch {
+    return `${(amountMinorUnits / 100).toFixed(2)} ${currency.toUpperCase()}`;
+  }
+}

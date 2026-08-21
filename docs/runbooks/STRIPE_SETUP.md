@@ -27,6 +27,14 @@
 > decision, since naming/pricing a real SKU is a product call, not an
 > engineering one.
 
+> **Service SKUs shipped (2026-08 — SKU_SPEC_001, CEO-directed).** The two
+> candidates from § Candidate SKUs below are now real, purchasable SKUs —
+> **Guided Onboarding ($299)** and **Process Audit ($1,500)**. Both are
+> inert (checkout 503s) until you create their Stripe Products and set two
+> env vars — see **§ Service SKUs — Guided Onboarding + Process Audit**
+> below. Prices are still coordinator proposals per SKU_SPEC_001, not final
+> CEO decisions — see that doc's "Decisions required from the CEO" section.
+
 > **Solo tier added (REVENUE_PLAN_20K §6 Option B).** Solo is a $89/mo,
 > single-user tier that monetizes the intelligence layer without depending on
 > the (currently broken) team data layer — see `docs/meta/REVENUE_PLAN_20K_001.md`
@@ -52,6 +60,15 @@ Everything except the Stripe Dashboard configuration and production env vars:
 - ✅ `apps/web-app/src/app/(public)/pricing/page.tsx` — 5-column comparison table with $49/$249/$799 + 17% annual savings
 - ✅ Legacy `PRO_PRICE_ID` fallback — your existing Pro customers continue working without disruption
 - ✅ `one_time_purchases` table (Prisma model `OneTimePurchase`) — durable record of every completed one-time purchase, independent of `users`/`teams` billing state (2026-08 monetization-shapes)
+- ✅ `apps/web-app/src/lib/service-skus.ts` — catalog + display copy for Guided Onboarding + Process Audit, and the Process Audit hard qualification gate constant (`MIN_RECORDED_RUNS_FOR_AUDIT = 5`, SKU_SPEC_001 §2)
+- ✅ `apps/web-app/src/lib/audit-eligibility.ts` — the single query used BOTH to display Process Audit eligibility in the UI and to enforce it server-side at checkout, so the two can never disagree
+- ✅ `apps/web-app/src/app/api/billing/checkout/route.ts` — `createOneTimeCheckoutSession` now returns **HTTP 403 `audit_not_eligible`** for `sku: 'process_audit'` when the purchasing user has zero processes with 5+ recorded runs — enforced, not just a disabled button (2026-08 service SKUs)
+- ✅ `apps/web-app/src/app/api/billing/sku-availability/route.ts` — public endpoint so purchase surfaces can show an honest "not yet available" state instead of a dead-end click
+- ✅ `apps/web-app/src/app/api/billing/audit-eligibility/route.ts` — authenticated endpoint returning the current user's per-process run counts and audit eligibility
+- ✅ `apps/web-app/src/app/api/billing/one-time-purchase/route.ts` — authenticated, ownership-scoped lookup of a single one-time purchase by Checkout Session id, used by the post-purchase confirmation page
+- ✅ `apps/web-app/src/app/(app)/account/purchase-success/page.tsx` — post-purchase confirmation page (one-time SKUs redirect here, NOT `/account?billing=success`, which remains the subscription success URL, untouched)
+- ✅ `apps/web-app/src/components/ServicesCard.tsx` — in-app "Services" section on `/account`, rendered for every signed-in user; Process Audit gates the purchase button on real recording counts
+- ✅ `apps/web-app/src/components/ServiceOfferCard.tsx` — public-facing Guided Onboarding offer, rendered on `/pricing` and `/install` with page-specific framing copy
 
 **NOT built in code — these are Dashboard-only settings you must configure
 yourself (Step 3b below):** the actual ability for a customer to switch
@@ -260,6 +277,12 @@ STRIPE_AUTOMATIC_TAX_ENABLED=false
 # you specifically want to test the example placeholder. See
 # § One-time payments below for how to configure a real SKU.
 STRIPE_ONE_TIME_EXAMPLE_PRICE_ID=price_...
+
+# Optional: real service SKUs (2026-08 — SKU_SPEC_001). Leave unset and
+# both remain safely unpurchasable — purchase surfaces show "Not yet
+# available" instead of a dead-end. See § Service SKUs below.
+STRIPE_GUIDED_ONBOARDING_PRICE_ID=price_...
+STRIPE_PROCESS_AUDIT_PRICE_ID=price_...
 ```
 
 If you're deploying via the GitHub Actions workflow (`.github/workflows/deploy.yml`)
@@ -613,6 +636,123 @@ non-card payment method):**
 
 ---
 
+## Service SKUs — Guided Onboarding + Process Audit
+
+**Code status: both real, purchasable SKUs. Inert until you create their
+Stripe Products and set two env vars (below).** These are the two
+candidates named in § Candidate SKUs, now built per CEO directive
+(SKU_SPEC_001, 2026-08-21) — full deliverable/scope-boundary detail lives at
+`docs/features/service-skus/SKU_SPEC_001.md`; this section is the
+operational Dashboard/env-var setup.
+
+### 1. Guided Onboarding — $299
+
+Paid activation: verified install, two workflows recorded with the customer
+on their real systems, first SOP/process map reviewed together, written
+recommendation of what to record next. No qualification gate — anyone can
+buy this, signed in or not (signed-out visitors are sent to `/signup`
+first).
+
+**Purchasable from:** `/pricing` (a dedicated offer card below the plan
+grid) and `/install` (right after the Developer-mode sideload steps — this
+is deliberately where the friction bites) and the account page's Services
+card.
+
+1. Dashboard → **Products** → **+ Add product**
+2. **Name:** `Guided Onboarding`
+3. **Description:** `Paid activation — a human gets your first two workflows recorded, on your real systems, plus your first SOP reviewed together.`
+4. **Pricing model:** `One time` — **not** "Recurring".
+5. **Price:** `$299.00 USD`
+6. Save the price ID (`price_...`) as `STRIPE_GUIDED_ONBOARDING_PRICE_ID`.
+
+### 2. Process Audit — $1,500
+
+Deterministic analysis of the customer's own recorded runs — cycle-time
+distribution, variance, ranked bottlenecks, variant analysis, recommended
+canonical path, standardization score, documentation drift, automation ROI.
+Up to 3 processes, minimum 5 recorded runs each, one revision, 10-business-
+day turnaround.
+
+**Hard qualification gate — enforced server-side, not just a disabled
+button:** `POST /api/billing/checkout { type: 'one_time', sku: 'process_audit' }`
+returns **HTTP 403, `code: 'audit_not_eligible'`** unless the purchasing
+user has at least one recorded process with 5+ runs
+(`MIN_RECORDED_RUNS_FOR_AUDIT` in `lib/service-skus.ts`). Below 5 runs,
+variance and variant figures are not statistically meaningful — selling an
+audit that cannot be meaningfully produced is a refund and a bad review, so
+this is enforced, not merely warned about. The same query
+(`getAuditEligibility`, `lib/audit-eligibility.ts`) backs both the
+enforcement AND the eligibility display, so the UI can never promise a
+purchase checkout would then reject.
+
+**Purchasable from:** the account page's Services card **only** — this is
+deliberate. The public `/pricing` and `/install` pages don't know a
+visitor's recording history, so advertising a data-gated SKU there would
+mean either lying about eligibility or adding friction to check it before
+the visitor has even signed up. The account page already has the
+authenticated context to show real per-process progress ("3 of 5 runs
+recorded for Invoice Approval") and gate the button honestly.
+
+1. Dashboard → **Products** → **+ Add product**
+2. **Name:** `Process Audit`
+3. **Description:** `Deterministic analysis of your own recorded runs — cycle time, variance, bottlenecks, variants, standardization, documentation drift, automation ROI. Up to 3 processes, 5+ runs each required.`
+4. **Pricing model:** `One time`
+5. **Price:** `$1,500.00 USD`
+6. Save the price ID (`price_...`) as `STRIPE_PROCESS_AUDIT_PRICE_ID`.
+
+### Env vars (add to Step 4's block, or set directly)
+
+```env
+STRIPE_GUIDED_ONBOARDING_PRICE_ID=price_...
+STRIPE_PROCESS_AUDIT_PRICE_ID=price_...
+```
+
+Same degrade pattern as every other price ID in this runbook: unset →
+`getOneTimePriceId()` returns `null` → checkout returns the standard
+"Billing not configured for this SKU" HTTP 503 → the purchase surfaces
+(`/pricing`, `/install`, the account Services card) check
+`GET /api/billing/sku-availability` on load and render an honest "Not yet
+available for purchase" state instead of a button that would dead-end.
+
+### Changing the prices
+
+Both prices are coordinator proposals (SKU_SPEC_001), not final CEO
+decisions, and are deliberately the easiest numbers in the codebase to
+change: `price` on the `guided_onboarding` / `process_audit` entries in
+`apps/web-app/src/lib/service-skus.ts`. That number is **display copy
+only** — changing it does not change what Stripe charges. To actually
+change the charge amount: create a new Stripe Price at the new figure
+(Stripe Prices are immutable once created — you cannot edit an existing
+one), update the `STRIPE_..._PRICE_ID` env var to the new Price id, and
+update `service-skus.ts` to match so the marketing copy and the actual
+charge agree.
+
+### Post-purchase experience
+
+Both SKUs redirect to a dedicated confirmation page —
+`/account/purchase-success?session_id={CHECKOUT_SESSION_ID}&sku=<key>` —
+**not** the generic `/account?billing=success` the subscription flow uses
+(that success URL is untouched). The page fetches the persisted
+`OneTimePurchase` row (`GET /api/billing/one-time-purchase`) and shows what
+the customer bought, the deliverable list, and the fulfilment timing from
+`service-skus.ts`. Because the webhook that writes the row runs
+asynchronously relative to the Checkout redirect, the page polls briefly
+(up to 5 attempts, 1.5s apart) before falling back to an honest "still
+processing, email us if this doesn't update" state — it never claims a
+purchase completed before the webhook has actually confirmed it.
+
+### Fulfilment
+
+Both SKUs are delivered by a human — there is no automated fulfilment path
+in code, matching SKU_SPEC_001's explicit design (Guided Onboarding's value
+is "someone competent watches them do it once"; Process Audit's value is
+traceable analysis plus a walkthrough). `docs/features/service-skus/
+SKU_SPEC_001.md` § "Decisions required from the CEO" still has an open
+question on who owns fulfilment operationally — resolve that before selling
+these for real.
+
+---
+
 ## Candidate SKUs (engineering reasoning, not a decision)
 
 This is **not** a product decision — it is engineering surfacing what the
@@ -744,6 +884,16 @@ to `null`. Causes:
   **expected, shipped default** for the placeholder `example_onboarding_audit`
   key — it is intentionally inert until you configure a real SKU. See
   § One-time payments above.
+
+### "audit_not_eligible" (HTTP 403) on a Process Audit purchase attempt
+
+Working as intended — the checkout route returned this because
+`getAuditEligibility(userId)` found zero of the user's processes with 5+
+recorded runs (`MIN_RECORDED_RUNS_FOR_AUDIT`, `lib/service-skus.ts`). This
+is the SKU_SPEC_001 §2 hard qualification gate, enforced server-side.
+Nothing to fix — direct the customer to record more runs of the same
+process (the account page's Services card shows their closest process and
+how many more runs it needs), or wait until they naturally qualify.
 
 ### Checkout Session creation fails outright (not a 503, an actual Stripe API error) after enabling Stripe Tax
 

@@ -5,6 +5,8 @@ import { ArrowRight, Check, HelpCircle } from 'lucide-react';
 import { PricingCards } from '@/components/PricingCards';
 import { ROICalculator } from './ROICalculator';
 import { TrackedLink } from '@/components/TrackedLink';
+import { ServiceOfferCard } from '@/components/ServiceOfferCard';
+import { GUIDED_ONBOARDING_SKU } from '@/lib/service-skus';
 
 export const metadata: Metadata = {
   title: 'Process Intelligence Pricing — Ledgerium AI',
@@ -202,6 +204,23 @@ export default function PricingPage() {
             All plans include the browser extension, deterministic processing,
             and privacy protections. Your data is never shared or used for training.
           </p>
+        </div>
+      </section>
+
+      {/* Guided Onboarding — a paid service, not a plan tier. Placed here (not
+          on a subscription card) because it complements any plan rather than
+          gating on one — see SKU_SPEC_001 for scope + pricing rationale. */}
+      <section className="py-14 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
+        <div className="mx-auto max-w-lg px-4 sm:px-6">
+          <ServiceOfferCard
+            sku={GUIDED_ONBOARDING_SKU}
+            eyebrow="Not a plan — a service"
+            heading="Want a human to set you up?"
+            description="Trials die between 'installed the extension' and 'recorded enough real work to see the value.' Guided Onboarding is paid activation — someone competent watches you record your first two workflows, on your real systems, once."
+            location="pricing_guided_onboarding"
+            fallbackHref="/signup"
+            ctaLabel="Get Guided Onboarding"
+          />
         </div>
       </section>
 
