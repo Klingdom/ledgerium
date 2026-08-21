@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { formatDuration, formatDateRelative, formatConfidence } from '@/lib/format';
 import { track } from '@/lib/analytics';
+import { dashboardActionError } from './actionFeedback';
 import { ExtensionInstallButton } from '@/components/ExtensionInstallButton';
 import { PLAN_FEATURES, toPlanType } from '@/lib/plans';
 import ProcessGroupsExplorer from '@/components/ProcessGroupsExplorer';
@@ -365,6 +366,11 @@ function DashboardPageContent() {
   const [processDefinitions, setProcessDefinitions] = useState<ProcessDefinition[]>([]);
   const [isLoadingProcessGroups, setIsLoadingProcessGroups] = useState(false);
   const [isRunningAnalysis, setIsRunningAnalysis] = useState(false);
+  /**
+   * Failures of user-initiated actions. Six handlers on this page previously
+   * swallowed them entirely — see actionFeedback.ts for what was wrong.
+   */
+  const [actionError, setActionError] = useState<string | null>(null);
 
   // Portfolio state
   const [portfolios, setPortfolios] = useState<PortfolioNode[]>([]);
@@ -453,14 +459,18 @@ function DashboardPageContent() {
 
   async function handleRunAnalysis() {
     setIsRunningAnalysis(true);
+    setActionError(null);
     track({ event: 'process_analysis_triggered' });
     try {
       const res = await fetch('/api/analytics', { method: 'POST' });
       if (res.ok) {
         await fetchProcessDefinitions();
+      } else {
+        const body = await res.json().catch(() => null);
+        setActionError(dashboardActionError('run_analysis', body?.error));
       }
     } catch {
-      // Silently fail
+      setActionError(dashboardActionError('run_analysis'));
     }
     setIsRunningAnalysis(false);
   }
@@ -523,22 +533,42 @@ function DashboardPageContent() {
       setShowNewTag(false);
       fetchTags();
       track({ event: 'tag_created', tagName: name });
+    } else {
+      const errBody = await res.json().catch(() => null);
+      setActionError(dashboardActionError('create_tag', errBody?.error));
     }
   }
 
   async function handleToggleTag(workflowId: string, tagId: string, hasTag: boolean) {
     const body = hasTag ? { removeTagId: tagId } : { addTagId: tagId };
-    await fetch(`/api/workflows/${workflowId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    fetchWorkflows();
-    fetchTags();
-    track(hasTag
-      ? { event: 'tag_removed', workflowId, tagId }
-      : { event: 'tag_assigned', workflowId, tagId },
-    );
+    setActionError(null);
+    try {
+      const res = await fetch(`/api/workflows/${workflowId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => null);
+        setActionError(dashboardActionError('toggle_tag', errBody?.error));
+        return;
+      }
+
+      fetchWorkflows();
+      fetchTags();
+
+      // Only record the event once the change actually persisted. This
+      // previously fired unconditionally — a failed PATCH still logged
+      // `tag_assigned`, putting an event in the product analytics for
+      // something that never happened.
+      track(hasTag
+        ? { event: 'tag_removed', workflowId, tagId }
+        : { event: 'tag_assigned', workflowId, tagId },
+      );
+    } catch {
+      setActionError(dashboardActionError('toggle_tag'));
+    }
   }
 
   // ── Portfolio assignment handlers ──────────────────────────────────────────
@@ -615,14 +645,18 @@ function DashboardPageContent() {
 
   async function handleLoadSample() {
     setLoadingSample(true);
+    setActionError(null);
     track({ event: 'sample_workflow_loaded' });
     try {
       const res = await fetch('/api/sample-workflow', { method: 'POST' });
       if (res.ok) {
         await fetchWorkflows();
+      } else {
+        const body = await res.json().catch(() => null);
+        setActionError(dashboardActionError('load_sample', body?.error));
       }
     } catch {
-      // Silently fail — sample endpoint may not exist yet
+      setActionError(dashboardActionError('load_sample'));
     }
     setLoadingSample(false);
   }
@@ -632,6 +666,7 @@ function DashboardPageContent() {
   async function handleLoadVariantsDemo() {
     if (loadingVariantsDemo) return;
     setLoadingVariantsDemo(true);
+    setActionError(null);
     track({ event: 'sample_workflow_loaded' });
     try {
       const res = await fetch('/api/sample-variants', { method: 'POST' });
@@ -642,9 +677,12 @@ function DashboardPageContent() {
           return;
         }
         await fetchWorkflows();
+      } else {
+        const body = await res.json().catch(() => null);
+        setActionError(dashboardActionError('load_variants_demo', body?.error));
       }
     } catch {
-      // non-fatal
+      setActionError(dashboardActionError('load_variants_demo'));
     }
     setLoadingVariantsDemo(false);
   }
@@ -759,6 +797,24 @@ function DashboardPageContent() {
   return (
     <div>
       <ExtensionStatusToast />
+
+      {/* Failures of user-initiated actions — previously swallowed entirely. */}
+      {actionError && (
+        <div
+          role="alert"
+          className="mb-ds-4 flex items-center justify-between gap-ds-3 rounded-lg border border-amber-500/30 bg-amber-950/20 px-ds-4 py-ds-3"
+        >
+          <p className="text-ds-sm text-amber-200">{actionError}</p>
+          <button
+            onClick={() => setActionError(null)}
+            aria-label="Dismiss message"
+            className="text-ds-sm text-amber-100 hover:text-white underline underline-offset-2 whitespace-nowrap"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* ═══════════════════════════════════════════════════════════════════
           COMMAND CENTER HEADER
           ═══════════════════════════════════════════════════════════════════ */}
