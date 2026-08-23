@@ -738,8 +738,15 @@ const CELL_COORDINATE_RE = /^[A-Z]{1,3}\d{1,5}$/;
  * bare cell-coordinate tokens (e.g. "A16", "A16, B16", "A16 B16 C16"). A
  * title that mixes real words with a coordinate-shaped token (e.g. "Approve
  * PO12345") does NOT qualify — see CELL_COORDINATE_RE doc above.
+ *
+ * Exported because `sopBuilder.buildAction()` has a sibling coordinate path
+ * for `data_entry` steps and needs the SAME predicate. A second copy of
+ * CELL_COORDINATE_RE in that file would be free to drift from this one, and
+ * a specificity rule that means two different things in two places is worse
+ * than not having it. Despite the name, it applies to any short label-ish
+ * string, not only titles.
  */
-function isCoordinateOnlyTitle(text: string): boolean {
+export function isCoordinateOnlyTitle(text: string): boolean {
   const tokens = text.split(/[\s,]+/).filter(t => t.length > 0);
   return tokens.length > 0 && tokens.every(t => CELL_COORDINATE_RE.test(t));
 }

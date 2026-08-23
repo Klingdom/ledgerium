@@ -290,3 +290,153 @@ describe('P0-c B4: error-recovery label surfaced in step.action', () => {
     expect(sop.steps[0]!.action).toBe('Resolve the error and continue');
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// B2 sibling path — buildAction()'s data_entry branch
+//
+// cleanStepTitle suppresses coordinate-only labels from step.title, but
+// buildAction collected field labels independently, so a spreadsheet step
+// rendered a clean title beside `action: "Enter A16"`. Same defect class,
+// different field. Surfaced by the P0-c harvest and fixed here.
+// ═══════════════════════════════════════════════════════════════════════════
+
+function buildDataEntrySop(fieldLabels: string[]): ReturnType<typeof buildSOP> {
+  const events: CanonicalEventInput[] = fieldLabels.map((label, i) => ({
+    event_id: `evt-${i + 1}`,
+    session_id: SESSION_ID,
+    t_ms: NOW_MS + i * 100,
+    t_wall: new Date(NOW_MS + i * 100).toISOString(),
+    event_type: 'interaction.input_change',
+    actor_type: 'human',
+    target_summary: { label, role: 'textbox' },
+    page_context: {
+      url: 'https://sheets.example.com/s/1',
+      urlNormalized: 'https://sheets.example.com/s/1',
+      domain: 'sheets.example.com',
+      routeTemplate: '/s/1',
+      pageTitle: 'Budget',
+      applicationLabel: 'Sheets',
+    },
+    normalization_meta: {
+      sourceEventId: `evt-${i + 1}`,
+      sourceEventType: 'interaction.input_change',
+      normalizationRuleVersion: '1.0.0',
+      redactionApplied: false,
+    },
+  })) as CanonicalEventInput[];
+
+  const derivedSteps: DerivedStepInput[] = [
+    {
+      step_id: `${SESSION_ID}-step-1`,
+      session_id: SESSION_ID,
+      ordinal: 1,
+      title: 'Enter budget figures',
+      status: 'finalized',
+      boundary_reason: 'session_stop',
+      grouping_reason: 'data_entry',
+      confidence: 0.8,
+      source_event_ids: events.map((e) => e.event_id),
+      start_t_ms: NOW_MS,
+      end_t_ms: NOW_MS + fieldLabels.length * 100,
+      duration_ms: fieldLabels.length * 100,
+      page_context: {
+        domain: 'sheets.example.com',
+        routeTemplate: '/s/1',
+        applicationLabel: 'Sheets',
+      },
+    },
+  ];
+
+  return buildSOP({ sessionJson: baseSessionJson(), normalizedEvents: events, derivedSteps });
+}
+
+describe('B2 sibling: buildAction data_entry does not surface bare coordinates', () => {
+  it('does NOT render "Enter A16" when every captured field label is a bare cell coordinate', () => {
+    const action = buildDataEntrySop(['A16', 'B16']).steps[0]!.action;
+    expect(action).not.toBe('Enter A16, B16');
+    expect(action).not.toMatch(/\bA16\b/);
+  });
+
+  it('falls back to the cleaned step title, which carries more meaning than a coordinate', () => {
+    expect(buildDataEntrySop(['A16', 'B16']).steps[0]!.action.length).toBeGreaterThan(0);
+  });
+
+  it('still uses real field names', () => {
+    expect(buildDataEntrySop(['Vendor', 'Amount']).steps[0]!.action).toBe('Enter Vendor, Amount');
+  });
+
+  it('keeps the real names and drops only the coordinates when they are mixed', () => {
+    const action = buildDataEntrySop(['Vendor', 'A16']).steps[0]!.action;
+    expect(action).toBe('Enter Vendor');
+  });
+
+  it('does not suppress coordinate-SHAPED tokens that are part of a real field name', () => {
+    // Same false-positive guard as B2's title fix: "Q4" and "PO12345" are
+    // meaningful, not spreadsheet cells.
+    expect(buildDataEntrySop(['Q4 Forecast', 'PO12345 Ref']).steps[0]!.action).toBe(
+      'Enter Q4 Forecast, PO12345 Ref',
+    );
+  });
+});
+
+describe('B3 third call site: send_action uses the shared quoteLabel helper', () => {
+  function buildSendActionSop(label: string): ReturnType<typeof buildSOP> {
+    const events: CanonicalEventInput[] = [
+      {
+        event_id: 'evt-1',
+        session_id: SESSION_ID,
+        t_ms: NOW_MS,
+        t_wall: new Date(NOW_MS).toISOString(),
+        event_type: 'interaction.click',
+        actor_type: 'human',
+        target_summary: { label, role: 'button' },
+        page_context: {
+          url: 'https://app.example.com/compose',
+          urlNormalized: 'https://app.example.com/compose',
+          domain: 'app.example.com',
+          routeTemplate: '/compose',
+          pageTitle: 'Compose',
+          applicationLabel: 'App',
+        },
+        normalization_meta: {
+          sourceEventId: 'evt-1',
+          sourceEventType: 'interaction.click',
+          normalizationRuleVersion: '1.0.0',
+          redactionApplied: false,
+        },
+      } as CanonicalEventInput,
+    ];
+
+    const derivedSteps: DerivedStepInput[] = [
+      {
+        step_id: `${SESSION_ID}-step-1`,
+        session_id: SESSION_ID,
+        ordinal: 1,
+        title: 'Send the message',
+        status: 'finalized',
+        boundary_reason: 'session_stop',
+        grouping_reason: 'send_action',
+        confidence: 0.9,
+        source_event_ids: ['evt-1'],
+        start_t_ms: NOW_MS,
+        end_t_ms: NOW_MS,
+        duration_ms: 0,
+        page_context: {
+          domain: 'app.example.com',
+          routeTemplate: '/compose',
+          applicationLabel: 'App',
+        },
+      },
+    ];
+
+    return buildSOP({ sessionJson: baseSessionJson(), normalizedEvents: events, derivedSteps });
+  }
+
+  it('uses typographic curly quotes for a single-word label, matching B3/B4', () => {
+    expect(buildSendActionSop('Send').steps[0]!.action).toBe('Click “Send”');
+  });
+
+  it('uses straight quotes for a multi-word label, matching B3/B4', () => {
+    expect(buildSendActionSop('Send Invoice').steps[0]!.action).toBe('Click "Send Invoice"');
+  });
+});

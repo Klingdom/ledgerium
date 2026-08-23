@@ -55,6 +55,7 @@ import {
   extractCommonIssues,
   inferRoles,
   cleanStepTitle,
+  isCoordinateOnlyTitle,
   classifyInstructionType,
   computeQualityIndicators,
   generatePurpose,
@@ -633,15 +634,29 @@ function buildAction(
         .map(e => safeTargetLabel(e) as string)
         .filter((l, i, arr) => arr.indexOf(l) === i)
         .slice(0, 5);
-      return deFields.length > 0
-        ? `Enter ${deFields.join(', ')}`
+
+      // P0-c B2 (sibling path): `cleanStepTitle` suppresses coordinate-only
+      // labels from the step TITLE, but this action path collected them
+      // independently — so a spreadsheet step rendered a clean title next to
+      // `action: "Enter A16"`. "Enter A16" tells a reader nothing about what
+      // was entered; the cleaned title is strictly more informative.
+      //
+      // Uses contentEnricher's predicate rather than a local copy: two
+      // definitions of "is a coordinate" would be free to drift apart.
+      const usableFields = deFields.filter(f => !isCoordinateOnlyTitle(f));
+
+      return usableFields.length > 0
+        ? `Enter ${usableFields.join(', ')}`
         : title;
     }
     case 'send_action': {
       const actionEvt = events.find(e =>
         e.event_type === 'interaction.click' && safeTargetLabel(e));
       const actionLbl = actionEvt !== undefined ? safeTargetLabel(actionEvt) : undefined;
-      return actionLbl ? `Click "${actionLbl}"` : title;
+      // Routed through quoteLabel() so this third call site cannot drift from
+      // the B3/B4 quoting convention — that drift is exactly what produced
+      // B4's inert-ternary bug on the parked branch.
+      return actionLbl ? `Click ${quoteLabel(actionLbl)}` : title;
     }
     case 'file_action':
       return 'Upload or attach the required file';
