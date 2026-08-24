@@ -1,14 +1,40 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Check } from 'lucide-react';
 import { PRICING_CONFIG } from '@/lib/config';
 import { UpgradeButton } from '@/components/UpgradeButton';
 import { track } from '@/lib/analytics';
+import { derivePlanAvailability, type PlanAvailabilityResponse } from '@/lib/plan-availability';
 
 export function PricingCards() {
   const [isAnnual, setIsAnnual] = useState(false);
+
+  // SUBSCRIPTION_READINESS_001 §G1: Solo shipped with a live $89 button and
+  // no backing Stripe price — checking /api/billing/sku-availability before
+  // rendering the buy button makes that class of bug structurally
+  // impossible. `null` (not yet resolved) is treated as "no live button
+  // yet" by derivePlanAvailability, same fail-closed posture as
+  // ServiceOfferCard uses for one-time SKUs.
+  const [planAvailability, setPlanAvailability] = useState<PlanAvailabilityResponse | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/billing/sku-availability')
+      .then((res) => res.json())
+      .then((json) => {
+        if (!cancelled) setPlanAvailability(json ?? {});
+      })
+      .catch(() => {
+        // Fail closed — if we can't confirm a plan is purchasable, treat it
+        // as not purchasable rather than risking a dead-end 503 click.
+        if (!cancelled) setPlanAvailability({});
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <>
@@ -57,6 +83,18 @@ export function PricingCards() {
         {PRICING_CONFIG.plans.map((plan) => {
           const displayPrice =
             isAnnual && plan.annualPrice != null ? plan.annualPrice : plan.price;
+
+          // Only starter/solo are self-serve Stripe Checkout tiers — team/
+          // growth route to a waitlist regardless of Stripe config (see
+          // BLOCKED_PLANS_AWAITING_WORKSPACE_BUILD in checkout/route.ts),
+          // and free/enterprise never render a Checkout button at all.
+          const availability =
+            plan.id === 'starter' || plan.id === 'solo'
+              ? derivePlanAvailability(planAvailability, plan.id, isAnnual ? 'annual' : 'monthly')
+              : null;
+          const ctaClassName = `w-full text-center ${
+            plan.highlighted ? 'btn-primary shadow-sm shadow-brand-600/20' : 'btn-secondary'
+          }`;
 
           return (
             <div
@@ -145,19 +183,33 @@ export function PricingCards() {
                   - Team + Growth: waitlist mailto until multi-user invites land per TEAM-001 workspace build
                     (advertised seats: 5 users / 15 users; data model + invite flow under construction)
               */}
-              {plan.id === 'starter' || plan.id === 'solo' ? (
+              {(plan.id === 'starter' || plan.id === 'solo') && availability === 'available' ? (
                 <UpgradeButton
                   fallbackHref={plan.ctaHref}
                   plan={plan.id}
                   interval={isAnnual ? 'annual' : 'monthly'}
-                  className={`w-full text-center ${
-                    plan.highlighted
-                      ? 'btn-primary shadow-sm shadow-brand-600/20'
-                      : 'btn-secondary'
-                  }`}
+                  className={ctaClassName}
                 >
                   {plan.cta}
                 </UpgradeButton>
+              ) : (plan.id === 'starter' || plan.id === 'solo') && availability === 'loading' ? (
+                // Not yet confirmed purchasable — never render a live button
+                // before the server has said so (SUBSCRIPTION_READINESS_001 §G1).
+                <div className={`${ctaClassName} opacity-50 cursor-default`} aria-hidden="true">
+                  &nbsp;
+                </div>
+              ) : plan.id === 'starter' || plan.id === 'solo' ? (
+                // availability === 'unavailable' — the honest state, not an
+                // error the customer caused.
+                <div>
+                  <button
+                    disabled
+                    className={`${ctaClassName} opacity-60 cursor-not-allowed`}
+                    aria-disabled="true"
+                  >
+                    Not available yet
+                  </button>
+                </div>
               ) : plan.id === 'team' || plan.id === 'growth' ? (
                 <a
                   href={`mailto:hello@ledgerium.ai?subject=${encodeURIComponent(
@@ -202,6 +254,12 @@ export function PricingCards() {
                 <p className="mt-2 mb-4 text-center text-ds-xs text-amber-400">
                   Multi-user invites launching Q3 2026
                 </p>
+              ) : availability === 'unavailable' ? (
+                <p className="mt-2 mb-4 text-center text-ds-xs text-[var(--content-tertiary)]">
+                  We&apos;re still setting up purchasing for this plan. Check back soon.
+                </p>
+              ) : availability === 'loading' ? (
+                <div className="mt-2 mb-4" />
               ) : plan.price !== null ? (
                 <p className="mt-2 mb-4 text-center text-ds-xs text-[var(--content-tertiary)]">
                   No credit card required

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { track } from '@/lib/analytics';
 import type { ServiceSkuKey } from '@/lib/service-skus';
+import { mapCheckoutError, type CheckoutErrorCode } from '@/lib/checkout-error';
 
 interface Props {
   className?: string;
@@ -19,10 +20,10 @@ interface Props {
   disabledReason?: string;
 }
 
-/** Shape returned by POST /api/billing/checkout on 4xx for the one_time path. */
+/** Shape returned by POST /api/billing/checkout on 4xx/5xx for the one_time path. */
 interface CheckoutErrorResponse {
   error: string;
-  code?: 'missing_sku' | 'audit_not_eligible' | 'admin_bypass';
+  code?: CheckoutErrorCode;
   minRunsRequired?: number;
 }
 
@@ -102,7 +103,11 @@ export function ServiceCheckoutButton({
       }
 
       if (data.error) {
-        setErrorMessage(data.error);
+        // SUBSCRIPTION_READINESS_001 §G2: never render `data.error` — some
+        // codes (sku_not_configured, checkout_session_failed, ...) carry
+        // internal diagnostic text server-side. Map the stable `code` to
+        // customer copy instead.
+        setErrorMessage(mapCheckoutError(res.status, data).message);
         setIsLoading(false);
         return;
       }

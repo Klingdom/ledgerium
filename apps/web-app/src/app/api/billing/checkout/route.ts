@@ -153,7 +153,7 @@ async function createOneTimeCheckoutSession(
   const priceId = getOneTimePriceId(sku);
   if (!priceId) {
     return NextResponse.json(
-      { error: 'Billing not configured for this SKU', sku },
+      { error: 'Billing not configured for this SKU', code: 'sku_not_configured', sku },
       { status: 503 },
     );
   }
@@ -221,7 +221,10 @@ async function createOneTimeCheckoutSession(
     return NextResponse.json({ url: checkoutSession.url });
   } catch (err) {
     console.error('Stripe one-time checkout error:', err);
-    return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to create checkout session', code: 'checkout_session_failed' },
+      { status: 500 },
+    );
   }
 }
 
@@ -240,12 +243,12 @@ async function createOneTimeCheckoutSession(
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized', code: 'unauthorized' }, { status: 401 });
   }
 
   const user = await db.user.findUnique({ where: { id: session.user.id } });
   if (!user) {
-    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    return NextResponse.json({ error: 'User not found', code: 'user_not_found' }, { status: 404 });
   }
 
   // Block allowlisted accounts — they have admin-granted unlimited access and
@@ -324,7 +327,12 @@ export async function POST(req: NextRequest) {
 
   if (!priceId) {
     return NextResponse.json(
-      { error: 'Billing not configured for this plan', plan: requestedPlan, interval: requestedInterval },
+      {
+        error: 'Billing not configured for this plan',
+        code: 'plan_not_configured',
+        plan: requestedPlan,
+        interval: requestedInterval,
+      },
       { status: 503 },
     );
   }
@@ -410,6 +418,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: checkoutSession.url });
   } catch (err) {
     console.error('Stripe checkout error:', err);
-    return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to create checkout session', code: 'checkout_session_failed' },
+      { status: 500 },
+    );
   }
 }

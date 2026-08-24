@@ -323,10 +323,27 @@ describe('POST /api/billing/checkout (iter 066 trial + tier matrix)', () => {
       expect(res.status).toBe(401);
     });
 
+    // SUBSCRIPTION_READINESS_001 §G2: every customer-reachable checkout
+    // error must carry a stable code — this is what previously-raw
+    // diagnostic strings get mapped from at the UI boundary.
+    it('returns code=unauthorized when unauthenticated (G2)', async () => {
+      setAuth(null);
+      const res = await POST(makeRequest({ plan: 'starter', interval: 'monthly' }));
+      const body = await res.json();
+      expect(body.code).toBe('unauthorized');
+    });
+
     it('returns 404 when user not found in DB', async () => {
       vi.mocked(db.user.findUnique).mockResolvedValue(null);
       const res = await POST(makeRequest({ plan: 'starter', interval: 'monthly' }));
       expect(res.status).toBe(404);
+    });
+
+    it('returns code=user_not_found when user not found in DB (G2)', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(null);
+      const res = await POST(makeRequest({ plan: 'starter', interval: 'monthly' }));
+      const body = await res.json();
+      expect(body.code).toBe('user_not_found');
     });
 
     it('returns 400 with code=already_subscribed for active paid users', async () => {
@@ -356,6 +373,25 @@ describe('POST /api/billing/checkout (iter 066 trial + tier matrix)', () => {
       // team/growth would short-circuit at the workspace-build gate before reaching getPriceId.
       const res = await POST(makeRequest({ plan: 'starter', interval: 'monthly' }));
       expect(res.status).toBe(503);
+    });
+
+    it('returns code=plan_not_configured when the requested tier price ID is unconfigured (G1/G2 — was the uncoded "Billing not configured for this plan" the Solo bug shipped)', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+      vi.mocked(getPriceId).mockReturnValueOnce(null);
+
+      const res = await POST(makeRequest({ plan: 'starter', interval: 'monthly' }));
+      const body = await res.json();
+      expect(body.code).toBe('plan_not_configured');
+    });
+
+    it('returns code=checkout_session_failed when Stripe Checkout Session creation throws (G2)', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+      mockCheckoutCreate.mockRejectedValueOnce(new Error('stripe down'));
+
+      const res = await POST(makeRequest({ plan: 'starter', interval: 'monthly' }));
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.code).toBe('checkout_session_failed');
     });
 
     it('defaults to starter monthly when body is empty', async () => {
@@ -570,6 +606,24 @@ describe('POST /api/billing/checkout (iter 066 trial + tier matrix)', () => {
       const body = await res.json();
       expect(body.sku).toBe('example_onboarding_audit');
       expect(mockCheckoutCreate).not.toHaveBeenCalled();
+    });
+
+    it('returns code=sku_not_configured for an unconfigured SKU (G1/G2 — was the uncoded "Billing not configured for this SKU")', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+
+      const res = await POST(makeRequest({ type: 'one_time', sku: 'example_onboarding_audit' }));
+      const body = await res.json();
+      expect(body.code).toBe('sku_not_configured');
+    });
+
+    it('returns code=checkout_session_failed when Stripe Checkout Session creation throws on the one-time path (G2)', async () => {
+      vi.mocked(db.user.findUnique).mockResolvedValue(makeUser() as never);
+      mockCheckoutCreate.mockRejectedValueOnce(new Error('stripe down'));
+
+      const res = await POST(makeRequest({ type: 'one_time', sku: '__configured_sku__' }));
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.code).toBe('checkout_session_failed');
     });
 
     it('returns 400 code="missing_sku" when sku is omitted', async () => {

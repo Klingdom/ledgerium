@@ -24,6 +24,8 @@ import { PLAN_HIERARCHY } from '@/lib/plans';
 import type { PlanType } from '@/lib/plans';
 import { isAdminUnlimited } from '@/lib/admin-allowlist';
 import { ServicesCard } from '@/components/ServicesCard';
+import { derivePlanAvailability, type PlanAvailabilityResponse } from '@/lib/plan-availability';
+import { mapCheckoutError } from '@/lib/checkout-error';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -112,6 +114,13 @@ interface PlanCardProps {
   billingLoading: boolean;
   onUpgrade: (plan: 'starter' | 'solo' | 'team' | 'growth', interval: BillingInterval) => void;
   onManage: () => void;
+  /**
+   * SUBSCRIPTION_READINESS_001 §G1: `null` while /api/billing/sku-availability
+   * has not resolved yet — never treated as "available" (see
+   * derivePlanAvailability). Only consulted for starter/solo; team/growth
+   * are gated by the waitlist, not by Stripe price configuration.
+   */
+  planAvailability: PlanAvailabilityResponse | null;
 }
 
 function PlanCard({
@@ -122,6 +131,7 @@ function PlanCard({
   billingLoading,
   onUpgrade,
   onManage,
+  planAvailability,
 }: PlanCardProps) {
   const config = PRICING_CONFIG.plans.find((p) => p.id === planId);
   if (!config) return null;
@@ -173,16 +183,45 @@ function PlanCard({
     isHigherTier &&
     (planId === 'starter' || planId === 'solo' || planId === 'team' || planId === 'growth')
   ) {
-    // Upgrade path
-    actionButton = (
-      <button
-        onClick={() => onUpgrade(planId as 'starter' | 'solo' | 'team' | 'growth', billingInterval)}
-        disabled={billingLoading}
-        className={`w-full text-xs ${config.highlighted ? 'btn-primary' : 'btn-secondary'}`}
-      >
-        {billingLoading ? 'Redirecting...' : `Upgrade to ${config.name}`}
-      </button>
-    );
+    // Upgrade path. SUBSCRIPTION_READINESS_001 §G1: starter/solo must not
+    // render a live upgrade button until the server has confirmed a Stripe
+    // price is actually configured for this plan + interval — team/growth
+    // are gated by the waitlist instead (checkout/route.ts blocks them
+    // regardless of Stripe config), so they always show the button and let
+    // the server return the (already customer-friendly) waitlist response.
+    const availability =
+      planId === 'starter' || planId === 'solo'
+        ? derivePlanAvailability(planAvailability, planId, billingInterval)
+        : 'available';
+
+    if (availability === 'unavailable') {
+      actionButton = (
+        <button
+          disabled
+          className="w-full btn-secondary text-xs opacity-60 cursor-not-allowed"
+          aria-disabled="true"
+          title="This plan isn't available for purchase yet."
+        >
+          Not available yet
+        </button>
+      );
+    } else if (availability === 'loading') {
+      actionButton = (
+        <div className="w-full btn-secondary text-xs opacity-50 cursor-default" aria-hidden="true">
+          &nbsp;
+        </div>
+      );
+    } else {
+      actionButton = (
+        <button
+          onClick={() => onUpgrade(planId as 'starter' | 'solo' | 'team' | 'growth', billingInterval)}
+          disabled={billingLoading}
+          className={`w-full text-xs ${config.highlighted ? 'btn-primary' : 'btn-secondary'}`}
+        >
+          {billingLoading ? 'Redirecting...' : `Upgrade to ${config.name}`}
+        </button>
+      );
+    }
   } else if (isLowerTier && planId === 'free') {
     // Cancel subscription → portal
     actionButton = (
@@ -304,6 +343,8 @@ export default function AccountPage() {
   const [billingLoading, setBillingLoading] = useState(false);
   const [billingError, setBillingError] = useState('');
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
+  // SUBSCRIPTION_READINESS_001 §G1 — see PlanCard's planAvailability doc comment.
+  const [planAvailability, setPlanAvailability] = useState<PlanAvailabilityResponse | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -321,6 +362,22 @@ export default function AccountPage() {
       }
     }
     load();
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/billing/sku-availability')
+      .then((res) => res.json())
+      .then((json) => {
+        if (!cancelled) setPlanAvailability(json ?? {});
+      })
+      .catch(() => {
+        // Fail closed — see PricingCards for the same posture.
+        if (!cancelled) setPlanAvailability({});
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function handleCreateKey() {
@@ -376,7 +433,10 @@ export default function AccountPage() {
         window.location.href = data.url;
         return;
       }
-      setBillingError(data.error ?? 'Could not start checkout');
+      // SUBSCRIPTION_READINESS_001 §G2: never render `data.error` — some
+      // codes (plan_not_configured, checkout_session_failed, ...) carry
+      // internal diagnostic text server-side.
+      setBillingError(mapCheckoutError(res.status, data).message);
     } catch {
       setBillingError('Failed to connect to billing service');
     }
@@ -582,6 +642,7 @@ export default function AccountPage() {
               billingLoading={billingLoading}
               onUpgrade={handleUpgrade}
               onManage={handleManageBilling}
+              planAvailability={planAvailability}
             />
           ))}
         </div>

@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { track } from '@/lib/analytics';
+import { mapCheckoutError, type CheckoutErrorCode } from '@/lib/checkout-error';
 
 interface Props {
   className?: string;
@@ -13,10 +14,10 @@ interface Props {
   interval?: 'monthly' | 'annual';
 }
 
-/** Shape returned by POST /api/billing/checkout on 4xx. */
+/** Shape returned by POST /api/billing/checkout on 4xx/5xx. */
 interface CheckoutErrorResponse {
   error: string;
-  code?: 'admin_bypass' | 'already_subscribed';
+  code?: CheckoutErrorCode;
   redirect?: string;
 }
 
@@ -63,22 +64,28 @@ export function UpgradeButton({ className, children, fallbackHref, plan, interva
       }
 
       if (data.error) {
-        const code = data.code ?? ('already_subscribed' as const);
-        // Track the blocked upgrade attempt for funnel analysis.
-        track({
-          event: 'upgrade_blocked',
-          code: data.code ?? 'already_subscribed',
-          location: plan ?? 'starter',
-        });
+        // SUBSCRIPTION_READINESS_001 §G2: never render `data.error` — some
+        // codes (plan_not_configured, checkout_session_failed, ...) carry
+        // internal diagnostic text server-side. Map the stable `code` to
+        // customer copy instead.
+        const mapped = mapCheckoutError(res.status, data);
 
-        setErrorMessage(data.error);
+        // Funnel analytics only for the two business-rule "blocked" states
+        // this event type was designed for — a configuration/outage failure
+        // (plan_not_configured, checkout_session_failed, ...) is a different
+        // category and would misrepresent the funnel if lumped in here.
+        if (data.code === 'admin_bypass' || data.code === 'already_subscribed') {
+          track({ event: 'upgrade_blocked', code: data.code, location: plan ?? 'starter' });
+        }
+
+        setErrorMessage(mapped.message);
         setIsLoading(false);
 
-        if (data.redirect) {
+        if (mapped.redirect) {
           // Show the error briefly, then navigate so the user understands why
           // they are being redirected.
           setTimeout(() => {
-            window.location.href = data.redirect!;
+            window.location.href = mapped.redirect!;
           }, 1500);
         }
         // No redirect → stay on page. User reads the inline error.
