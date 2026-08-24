@@ -22,7 +22,9 @@
     "seed:demo": "tsx scripts/seed-demo-account.ts",
     "calibrate:clustering": "tsx scripts/calibrate-clustering.ts",
     "attribution:first-touch": "tsx scripts/first-touch-attribution.ts",
-    "stripe:setup-solo": "tsx scripts/setup-stripe-solo.ts"
+    "stripe:setup-solo": "tsx scripts/setup-stripe-solo.ts",
+    "stripe:setup": "tsx scripts/setup-stripe.ts",
+    "stripe:verify": "tsx scripts/setup-stripe.ts --verify"
   },
   "dependencies": {
     "@ledgerium/agent-intelligence": "workspace:*",
