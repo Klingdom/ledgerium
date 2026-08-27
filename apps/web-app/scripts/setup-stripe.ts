@@ -60,15 +60,26 @@ import { execFileSync } from 'node:child_process';
 // by 12x, which is exactly the transposition this script exists to remove from
 // a manual process.
 const CATALOG = {
-  starter: { label: 'Starter', monthly: 4_900, annual: 49_200 },
-  solo: { label: 'Solo', monthly: 8_900, annual: 88_800 },
+  starter: {
+    label: 'Starter',
+    monthly: 4_900,
+    annual: 49_200,
+    name: 'Ledgerium AI — Starter',
+    description:
+      'Clean SOP and process-map exports with health scores, for a single user. 15 recordings per month.',
+  },
+  solo: {
+    label: 'Solo',
+    monthly: 8_900,
+    annual: 88_800,
+    name: 'Ledgerium AI — Solo',
+    description:
+      'Single-user plan with the full intelligence layer: bottleneck analysis, automation scoring and variant detection on unlimited recordings.',
+  },
 } as const;
 
 type PlanKey = keyof typeof CATALOG;
 
-const SOLO_PRODUCT_NAME = 'Ledgerium AI — Solo';
-const SOLO_PRODUCT_DESCRIPTION =
-  'Single-user plan with the full intelligence layer: bottleneck analysis, automation scoring and variant detection on unlimited recordings.';
 const CURRENCY = 'usd';
 
 // ── Args ─────────────────────────────────────────────────────────────────────
@@ -179,10 +190,21 @@ interface PlanPrices {
   annual: Stripe.Price | null;
 }
 
-async function ensureSolo(): Promise<PlanPrices> {
-  heading('1. Solo product and prices');
+/**
+ * Ensure a plan's product and both prices exist.
+ *
+ * Generalized from a Solo-only version. On a FRESH Stripe account — the
+ * "Ledgerium gets its own account" case — neither plan exists, and creating
+ * only Solo would leave Starter unsellable and portal switching skipped for
+ * having fewer than two products. Discovery still prefers the metadata marker,
+ * then falls back to matching the charged amount, so a plan created by hand in
+ * an existing account (Starter, 2026-05-17) is adopted rather than duplicated.
+ */
+async function ensurePlan(plan: PlanKey): Promise<PlanPrices> {
+  const spec = CATALOG[plan];
+  heading(`${plan === 'starter' ? '1a' : '1b'}. ${spec.label} product and prices`);
 
-  let product = await findProductByPlan('solo');
+  let product = (await findProductByPlan(plan)) ?? (await findProductByAmounts(plan));
 
   if (product) {
     console.log(`  product exists        ${product.id}`);
@@ -191,9 +213,9 @@ async function ensureSolo(): Promise<PlanPrices> {
     return { product: null, monthly: null, annual: null };
   } else {
     product = await stripe.products.create({
-      name: SOLO_PRODUCT_NAME,
-      description: SOLO_PRODUCT_DESCRIPTION,
-      metadata: { ledgerium_plan: 'solo' },
+      name: spec.name,
+      description: spec.description,
+      metadata: { ledgerium_plan: plan },
     });
     console.log(`  product CREATED       ${product.id}`);
   }
@@ -201,8 +223,8 @@ async function ensureSolo(): Promise<PlanPrices> {
   const out: PlanPrices = { product, monthly: null, annual: null };
 
   for (const [interval, amount, label] of [
-    ['month', CATALOG.solo.monthly, 'monthly'],
-    ['year', CATALOG.solo.annual, 'annual'],
+    ['month', spec.monthly, 'monthly'],
+    ['year', spec.annual, 'annual'],
   ] as const) {
     let price = await findPrice(product.id, interval);
     if (price) {
@@ -221,7 +243,7 @@ async function ensureSolo(): Promise<PlanPrices> {
         currency: CURRENCY,
         unit_amount: amount,
         recurring: { interval },
-        metadata: { ledgerium_plan: 'solo', ledgerium_interval: label },
+        metadata: { ledgerium_plan: plan, ledgerium_interval: label },
       });
       console.log(`  ${label.padEnd(8)} CREATED     ${price.id}  ${money(amount)}/${interval}`);
     }
@@ -234,42 +256,26 @@ async function ensureSolo(): Promise<PlanPrices> {
 
 // ── Step 2 — Billing Portal plan switching (audit G3) ────────────────────────
 
-async function ensurePortal(solo: PlanPrices): Promise<void> {
+async function ensurePortal(plans: Record<PlanKey, PlanPrices>): Promise<void> {
   heading('2. Billing Portal — plan switching (audit G3)');
-
-  const starterProduct =
-    (await findProductByPlan('starter')) ?? (await findProductByAmounts('starter'));
-
-  if (!starterProduct) {
-    console.log('  ⚠ Starter product not found — cannot offer Starter↔Solo switching.');
-    console.log('    Skipping portal configuration rather than writing a half-configured one.');
-    return;
-  }
-
-  const starterMonthly = await findPrice(starterProduct.id, 'month');
-  const starterAnnual = await findPrice(starterProduct.id, 'year');
 
   const products: Stripe.BillingPortal.ConfigurationUpdateParams.Features.SubscriptionUpdate.Product[] =
     [];
 
-  const starterPrices = [starterMonthly?.id, starterAnnual?.id].filter(Boolean) as string[];
-  if (starterPrices.length > 0) {
-    products.push({ product: starterProduct.id, prices: starterPrices });
+  for (const key of Object.keys(CATALOG) as PlanKey[]) {
+    const p = plans[key];
+    const priceIds = [p.monthly?.id, p.annual?.id].filter(Boolean) as string[];
+    console.log(
+      `  ${CATALOG[key].label.padEnd(8)} ${p.product?.id ?? '(not created)'} (${priceIds.length} price(s))`,
+    );
+    if (p.product && priceIds.length > 0) {
+      products.push({ product: p.product.id, prices: priceIds });
+    }
   }
-
-  const soloPrices = [solo.monthly?.id, solo.annual?.id].filter(Boolean) as string[];
-  if (solo.product && soloPrices.length > 0) {
-    products.push({ product: solo.product.id, prices: soloPrices });
-  }
-
-  console.log(`  starter product       ${starterProduct.id} (${starterPrices.length} price(s))`);
-  console.log(
-    `  solo product          ${solo.product?.id ?? '(not yet created)'} (${soloPrices.length} price(s))`,
-  );
 
   if (products.length < 2) {
-    console.log('  ⚠ Fewer than two switchable products — plan switching would be pointless.');
-    console.log('    Create the Solo prices first (step 1), then re-run.');
+    console.log('  ⚠ Fewer than two switchable products — plan switching would offer nothing.');
+    console.log('    Re-run with --apply so both plans exist, then this step can configure.');
     return;
   }
 
@@ -314,18 +320,23 @@ async function ensurePortal(solo: PlanPrices): Promise<void> {
 
 // ── Step 3 — GitHub secrets ──────────────────────────────────────────────────
 
-function pushSecrets(solo: PlanPrices): void {
+function pushSecrets(plans: Record<PlanKey, PlanPrices>): void {
   heading('3. GitHub Actions secrets');
 
-  if (!solo.monthly || !solo.annual) {
-    console.log('  skipped — Solo prices do not exist yet');
-    return;
+  // Emits BOTH plans. On a fresh account every price ID is new — including
+  // Starter's, whose existing secrets point at prices in the other account and
+  // would resolve to nothing here.
+  const pairs: Array<[string, string]> = [];
+  for (const key of Object.keys(CATALOG) as PlanKey[]) {
+    const p = plans[key];
+    if (p.monthly) pairs.push([`STRIPE_${key.toUpperCase()}_MONTHLY_PRICE_ID`, p.monthly.id]);
+    if (p.annual) pairs.push([`STRIPE_${key.toUpperCase()}_ANNUAL_PRICE_ID`, p.annual.id]);
   }
 
-  const pairs: Array<[string, string]> = [
-    ['STRIPE_SOLO_MONTHLY_PRICE_ID', solo.monthly.id],
-    ['STRIPE_SOLO_ANNUAL_PRICE_ID', solo.annual.id],
-  ];
+  if (pairs.length === 0) {
+    console.log('  skipped — no prices exist yet');
+    return;
+  }
 
   if (!SET_SECRETS) {
     console.log('  --set-secrets not passed. Run these yourself:\n');
@@ -342,14 +353,18 @@ function pushSecrets(solo: PlanPrices): void {
 
 // ── Step 4 — Verify ──────────────────────────────────────────────────────────
 
-async function verify(solo: PlanPrices): Promise<void> {
+async function verify(plans: Record<PlanKey, PlanPrices>): Promise<void> {
   heading('4. Readiness');
 
   const rows: Array<[string, boolean, string]> = [];
 
-  rows.push(['Solo product', solo.product !== null, solo.product?.id ?? 'missing']);
-  rows.push(['Solo monthly price', solo.monthly !== null, solo.monthly?.id ?? 'missing']);
-  rows.push(['Solo annual price', solo.annual !== null, solo.annual?.id ?? 'missing']);
+  for (const key of Object.keys(CATALOG) as PlanKey[]) {
+    const p = plans[key];
+    const label = CATALOG[key].label;
+    rows.push([`${label} product`, p.product !== null, p.product?.id ?? 'missing']);
+    rows.push([`${label} monthly price`, p.monthly !== null, p.monthly?.id ?? 'missing']);
+    rows.push([`${label} annual price`, p.annual !== null, p.annual?.id ?? 'missing']);
+  }
 
   const configs = await stripe.billingPortal.configurations.list({ limit: 10 });
   const def = configs.data.find((c) => c.is_default) ?? configs.data[0];
@@ -376,10 +391,14 @@ async function main(): Promise<void> {
   console.log(`  mode   : ${isLive ? 'LIVE' : 'test'}`);
   console.log(`  action : ${willWrite ? 'APPLY (will write)' : 'DRY RUN (no writes)'}`);
 
-  const solo = await ensureSolo();
-  await ensurePortal(solo);
-  pushSecrets(solo);
-  await verify(solo);
+  const plans = {
+    starter: await ensurePlan('starter'),
+    solo: await ensurePlan('solo'),
+  } satisfies Record<PlanKey, PlanPrices>;
+
+  await ensurePortal(plans);
+  pushSecrets(plans);
+  await verify(plans);
 
   if (!willWrite) {
     console.log('\nDry run complete. Re-run with --apply to make these changes.\n');
