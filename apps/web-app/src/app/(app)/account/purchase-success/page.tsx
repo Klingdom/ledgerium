@@ -4,6 +4,7 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle2, Clock, Mail } from 'lucide-react';
+import { billingIdentityReminder } from '@/lib/billing-identity';
 import { formatCurrency } from '@/lib/format';
 
 interface CatalogEntry {
@@ -204,6 +205,15 @@ function PurchaseSuccessContent() {
             <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-2 flex items-start gap-1.5">
               <Clock className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
               {catalog.fulfilment}
+            </p>
+          </div>
+          {/*
+            Stated at the moment the charge is freshest, so the name on the
+            statement is already familiar when it appears days later.
+          */}
+          <div className="pt-ds-3 border-t border-[var(--border-subtle)]">
+            <p className="text-ds-xs text-[var(--content-tertiary)]">
+              {billingIdentityReminder()}
             </p>
           </div>
           <div className="pt-ds-3 border-t border-[var(--border-subtle)] flex items-start gap-1.5">

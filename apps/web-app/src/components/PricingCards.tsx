@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Check } from 'lucide-react';
 import { PRICING_CONFIG } from '@/lib/config';
 import { UpgradeButton } from '@/components/UpgradeButton';
+import { billingIdentityNotice } from '@/lib/billing-identity';
 import { track } from '@/lib/analytics';
 import { derivePlanAvailability, type PlanAvailabilityResponse } from '@/lib/plan-availability';
 
@@ -296,6 +297,16 @@ export function PricingCards() {
           );
         })}
       </div>
+
+      {/*
+        Billing-identity disclosure. Stripe receipts and card statements carry
+        the account owner's business name, not "Ledgerium AI". Stating that
+        before purchase removes the "who charged me?" surprise that drives
+        chargebacks. Single line under the grid rather than repeated per card.
+      */}
+      <p className="mx-auto mt-ds-6 max-w-2xl text-center text-ds-xs text-[var(--content-tertiary)]">
+        {billingIdentityNotice()}
+      </p>
     </>
   );
 }

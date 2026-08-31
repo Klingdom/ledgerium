@@ -20,6 +20,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { PRICING_CONFIG } from '@/lib/config';
+import { billingIdentityReminder } from '@/lib/billing-identity';
 import { PLAN_HIERARCHY } from '@/lib/plans';
 import type { PlanType } from '@/lib/plans';
 import { isAdminUnlimited } from '@/lib/admin-allowlist';
@@ -514,6 +515,15 @@ export default function AccountPage() {
             <HelpCircle className="h-4 w-4" />
           </a>
         </div>
+
+        {/*
+          Billing-identity disclosure. The account page is where someone comes
+          when they are trying to reconcile a charge they do not recognise, so
+          it is the highest-value place to name the merchant explicitly.
+        */}
+        <p className="mb-ds-4 text-ds-xs text-[var(--content-tertiary)]">
+          {billingIdentityReminder()}
+        </p>
 
         {/* Current usage summary */}
         <dl className="space-y-ds-3 text-ds-sm mb-ds-5">
