@@ -63,7 +63,8 @@ Everything except the Stripe Dashboard configuration and production env vars:
 - ✅ `apps/web-app/src/lib/service-skus.ts` — catalog + display copy for Guided Onboarding + Process Audit, and the Process Audit hard qualification gate constant (`MIN_RECORDED_RUNS_FOR_AUDIT = 5`, SKU_SPEC_001 §2)
 - ✅ `apps/web-app/src/lib/audit-eligibility.ts` — the single query used BOTH to display Process Audit eligibility in the UI and to enforce it server-side at checkout, so the two can never disagree
 - ✅ `apps/web-app/src/app/api/billing/checkout/route.ts` — `createOneTimeCheckoutSession` now returns **HTTP 403 `audit_not_eligible`** for `sku: 'process_audit'` when the purchasing user has zero processes with 5+ recorded runs — enforced, not just a disabled button (2026-08 service SKUs)
-- ✅ `apps/web-app/src/app/api/billing/sku-availability/route.ts` — public endpoint so purchase surfaces can show an honest "not yet available" state instead of a dead-end click
+- ✅ `apps/web-app/src/app/api/billing/sku-availability/route.ts` — public endpoint so purchase surfaces can show an honest "not yet available" state instead of a dead-end click; extended (SUBSCRIPTION_READINESS_001 Phase 2) to also report `plans.{starter,solo}.{monthly,annual}` availability, so `PricingCards` and the account page's plan switcher can gate the subscription buy button the same way `ServiceOfferCard` already gates one-time SKUs
+- ✅ `apps/web-app/src/lib/checkout-error.ts` — maps every `POST /api/billing/checkout` failure `code` to customer-facing copy; `UpgradeButton`, `ServiceCheckoutButton`, and the account page's upgrade flow all use it instead of rendering the raw server `error` string (SUBSCRIPTION_READINESS_001 §G2)
 - ✅ `apps/web-app/src/app/api/billing/audit-eligibility/route.ts` — authenticated endpoint returning the current user's per-process run counts and audit eligibility
 - ✅ `apps/web-app/src/app/api/billing/one-time-purchase/route.ts` — authenticated, ownership-scoped lookup of a single one-time purchase by Checkout Session id, used by the post-purchase confirmation page
 - ✅ `apps/web-app/src/app/(app)/account/purchase-success/page.tsx` — post-purchase confirmation page (one-time SKUs redirect here, NOT `/account?billing=success`, which remains the subscription success URL, untouched)
@@ -283,6 +284,12 @@ STRIPE_ONE_TIME_EXAMPLE_PRICE_ID=price_...
 # available" instead of a dead-end. See § Service SKUs below.
 STRIPE_GUIDED_ONBOARDING_PRICE_ID=price_...
 STRIPE_PROCESS_AUDIT_PRICE_ID=price_...
+
+# Optional: the business name customers see on their card statement and
+# Stripe receipts. Defaults to "6S Success" — the business that owns the
+# Stripe account Ledgerium bills through. Only change this if the Stripe
+# account owner changes. See § Billing identity below.
+NEXT_PUBLIC_BILLING_MERCHANT_NAME=6S Success
 ```
 
 If you're deploying via the GitHub Actions workflow (`.github/workflows/deploy.yml`)
@@ -294,7 +301,7 @@ and `compose.hostinger.yaml` already reference them alongside the other tiers.
 Important notes:
 - **Test Mode and Live Mode have different price IDs.** When you eventually promote to Live, you'll repeat Step 2 in Live Mode and get a new set of 8 IDs — those are what go in production env vars.
 - **Test Mode keys start with `sk_test_` / `whsec_`. Live Mode keys start with `sk_live_` / `whsec_` (different signing secret per mode).**
-- **A missing Solo price ID degrades gracefully, not fatally.** If you skip Step 2b (or haven't deployed the env vars yet), `STRIPE_SOLO_MONTHLY_PRICE_ID` / `STRIPE_SOLO_ANNUAL_PRICE_ID` default to an empty string and `/api/billing/checkout` returns the same "Billing not configured for this plan" HTTP 503 that any other unconfigured tier returns — it does not throw at startup and does not block Starter/Team/Growth checkout.
+- **A missing Solo price ID degrades gracefully, not fatally.** If you skip Step 2b (or haven't deployed the env vars yet), `STRIPE_SOLO_MONTHLY_PRICE_ID` / `STRIPE_SOLO_ANNUAL_PRICE_ID` default to an empty string and `/api/billing/checkout` returns HTTP 503 with `code: 'plan_not_configured'` — it does not throw at startup and does not block Starter/Team/Growth checkout. **As of SUBSCRIPTION_READINESS_001 Phase 2, this 503 is no longer customer-reachable via the UI**: `/pricing` and the account page's plan switcher both call `GET /api/billing/sku-availability` (extended to cover `plans.{starter,solo}.{monthly,annual}`, mirroring `getPriceId` exactly) before rendering a buy button, and show an honest "Not available yet" state instead of a live button when a price ID is unconfigured. See § Subscription plan availability pre-check below.
 
 ---
 
@@ -787,6 +794,56 @@ cheap the one-time-payment capability makes them to ship.** Both candidates
 above were chosen specifically because they stay evidence-linked to the
 customer's own data rather than reintroducing a generic-asset SKU through
 the back door.
+
+---
+
+## Billing identity — why customers see "6S Success", not "Ledgerium AI"
+
+The Stripe account Ledgerium bills through is owned by **6S Success**. Stripe
+puts the *account owner's* business identity on receipts, invoices and the card
+statement — so a Ledgerium customer's statement reads `6S SUCCESS`, not
+`LEDGERIUM AI`.
+
+That is a deliberate, supported arrangement, not a misconfiguration. But an
+unrecognised name on a statement is one of the most common reasons a customer
+files a chargeback — not because anything is wrong, but because they no longer
+recognise the charge. Stripe charges a dispute fee whether or not you win, and
+a rising dispute rate risks the account itself.
+
+So the relationship is disclosed at the three moments it matters:
+
+| Surface | When | Copy source |
+|---|---|---|
+| `/pricing` (`PricingCards.tsx`) | Before purchase, while still deciding | `billingIdentityNotice()` |
+| `/account/purchase-success` | Immediately after a one-time purchase, while the charge is freshest | `billingIdentityReminder()` |
+| `/account` | Where someone goes when reconciling a charge they don't recognise | `billingIdentityReminder()` |
+
+All three read from **`apps/web-app/src/lib/billing-identity.ts`** — one module,
+so the three surfaces cannot drift apart or disagree.
+
+Two properties worth preserving if you edit that copy:
+
+1. **It names the merchant *and* connects it to Ledgerium in the same sentence.**
+   Naming 6S Success without explaining the relationship is worse than saying
+   nothing — it reads as an unrelated company on the statement. A test asserts
+   both halves are present.
+2. **The name is env-driven** (`NEXT_PUBLIC_BILLING_MERCHANT_NAME`, defaulting
+   to `6S Success`), because it's a property of whichever Stripe account is
+   configured — not a fact about Ledgerium.
+
+### If Ledgerium later moves to its own Stripe account
+
+Set `NEXT_PUBLIC_BILLING_MERCHANT_NAME` to the new business name and redeploy.
+All three surfaces update together. That single-variable change is the whole
+reason the copy is centralised rather than written out three times.
+
+### Also worth setting in the Stripe Dashboard
+
+Independent of the app copy, set **Settings → Business → Public business
+information → Statement descriptor** to something a Ledgerium customer will
+recognise (e.g. `6S LEDGERIUM` — Stripe allows 5–22 characters). The app copy
+sets the expectation; the statement descriptor is what actually prints on the
+card line. Doing both is what closes the gap.
 
 ---
 
