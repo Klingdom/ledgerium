@@ -18,6 +18,27 @@ import { GUIDED_ONBOARDING_SKU, PROCESS_AUDIT_SKU } from '@/lib/service-skus';
 const PURCHASABLE_SUBSCRIPTION_PLANS = ['starter', 'solo'] as const;
 
 /**
+ * MUST stay. This route reads `process.env.STRIPE_*` (via `getPriceId` /
+ * `getOneTimePriceId`, which resolve module-level constants) and takes no
+ * request input — so Next.js 14 considers it statically prerenderable and,
+ * without this line, evaluates it at BUILD time and serves the result as a
+ * frozen file from `.next/server/app/api/billing/sku-availability.body`.
+ *
+ * Our Docker image is built in CI, where the Stripe env vars are deliberately
+ * absent — they're injected at container runtime. So the build baked
+ * `{"starter":{"monthly":false,...}}` into a static response that no runtime
+ * configuration could ever change, and every purchase surface fail-closed on
+ * it. Starter had valid price IDs the whole time and still showed
+ * "Not available yet". This endpoint took the entire site's checkout offline.
+ *
+ * The env read is inherently request-time information: the same build must
+ * return different answers in staging and production. `force-dynamic` is what
+ * makes that true. Guarded by `scripts/assert-dynamic-api-routes.mjs`, which
+ * fails the build if any /api route is prerendered.
+ */
+export const dynamic = 'force-dynamic';
+
+/**
  * GET /api/billing/sku-availability
  *
  * Public, unauthenticated — returns whether each real service SKU (`data`)
