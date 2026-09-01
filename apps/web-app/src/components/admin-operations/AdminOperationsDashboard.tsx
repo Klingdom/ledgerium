@@ -180,6 +180,10 @@ export function AdminOperationsDashboard() {
   // ── Subscription breakdown state derivation ──────────────────────────────────
 
   const sub = data?.subscriptionBreakdown;
+  // Optional-chained rather than destructured: older cached API responses
+  // predate this field, and a dashboard that crashes on a missing warning
+  // banner would be worse than the blind spot it exists to close.
+  const billing = data?.billingMode;
   const hasStripeData = sub != null && sub.paidUserCount + sub.byStatus.trialing > 0;
   const hasPaidUsers = (sub?.paidUserCount ?? 0) > 0;
 
@@ -324,6 +328,51 @@ export function AdminOperationsDashboard() {
 
       {/* ── Main content ── */}
       <main className="mx-auto max-w-screen-xl px-6 py-6">
+        {/*
+          Billing configuration banner.
+
+          Deliberately above the KPI row rather than in a section further down.
+          Its whole purpose is to qualify the revenue numbers, so it has to be
+          read BEFORE them — a test-mode warning below the fold would be seen
+          only by someone already suspicious, and the failure mode here is that
+          nobody is suspicious because everything looks fine.
+
+          Renders only when something is actually wrong, so a correctly
+          configured production instance shows no banner at all.
+        */}
+        {billing != null && billing.warnings.length > 0 && (
+          <div
+            role="alert"
+            data-testid="billing-mode-banner"
+            className={`mb-6 rounded-lg border px-4 py-3 ${
+              billing.canCollectRealPayments
+                ? 'border-amber-500/30 bg-amber-500/10'
+                : 'border-red-500/30 bg-red-500/10'
+            }`}
+          >
+            <p
+              className={`text-[13px] font-semibold ${
+                billing.canCollectRealPayments ? 'text-amber-400' : 'text-red-400'
+              }`}
+            >
+              {billing.mode === 'test'
+                ? 'Stripe is in TEST mode — no real money is being collected'
+                : billing.mode === 'unconfigured'
+                  ? 'Stripe is not configured'
+                  : billing.mode === 'unrecognized'
+                    ? 'Stripe key is malformed'
+                    : 'Billing configuration is incomplete'}
+            </p>
+            <ul className="mt-1.5 space-y-1">
+              {billing.warnings.map((w) => (
+                <li key={w} className="text-[12px] leading-relaxed text-[var(--content-secondary)]">
+                  {w}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {status === 'error' && (
           <div
             role="alert"

@@ -1,3 +1,5 @@
+import type { BillingModeReport } from './billing-mode';
+
 /**
  * TypeScript interface for the Admin Operations Dashboard API response.
  *
@@ -258,6 +260,15 @@ export interface AdminOperationsResponse {
   memoryUsage: MemoryUsageSection;
   /** Section 6 — Subscription breakdown (Growth Intelligence Extension) */
   subscriptionBreakdown: SubscriptionBreakdownSection;
+  /**
+   * Section 7 — Billing configuration.
+   *
+   * Sits deliberately alongside `subscriptionBreakdown`, because MRR is
+   * uninterpretable without it: a test-mode key produces subscriptions and
+   * revenue figures that look real and are not. Contains no secrets — only a
+   * mode enum and booleans (see `billing-mode.ts` § SECRECY).
+   */
+  billingMode: BillingModeReport;
 }
 
 // ── API envelope ───────────────────────────────────────────────────────────────

@@ -24,6 +24,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { isAdminUnlimited } from '@/lib/admin-allowlist';
+import { deriveBillingMode } from '@/lib/admin-operations/billing-mode';
 import {
   getUserVolume,
   getRecordingVolume,
@@ -146,6 +147,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         systemHealth,
         memoryUsage,
         subscriptionBreakdown,
+        // Read at request time, never at module scope — the freeze that took
+        // /api/billing/sku-availability offline came from a module-scope env
+        // read in a route Next.js then prerendered.
+        billingMode: deriveBillingMode(process.env),
       },
       error: null,
       meta: {
