@@ -2,111 +2,159 @@
 
 Copy everything below the line into the 6S Success Claude session.
 
-**Do not paste the Stripe secret key back to the Ledgerium session or into any
-chat.** Price IDs are safe to share — they're public identifiers used in
-client-side checkout. The secret key is not, and Ledgerium's production already
-has its own copy in GitHub secrets.
+**Secret handling:** price IDs are public identifiers used in client-side
+checkout and safe to paste back. The **secret key** and **webhook signing
+secret** are not — see § Handing back secrets safely at the bottom for how to
+move those without putting them in a chat transcript or shell history.
 
 ---
 
-You own the Stripe account that Ledgerium AI bills through. I need you to
-create one missing product and verify a few account-level settings. Ledgerium's
-code is already written and deployed for this — the only gap is Stripe-side
+You own the Stripe account that Ledgerium AI bills through. Ledgerium's billing
+code is complete and deployed; the remaining gap is entirely Stripe-side
 configuration.
 
-**Please report back only: the two price IDs, the mode (test/live), and the
-answers to the verification questions. Never paste the secret key.**
+## Context you need before starting
 
-## 1. First, tell me which mode the account is operating in
+Ledgerium's production Stripe env vars were set on 2026-05-17 and have not
+changed since. A Ledgerium status doc dated 2026-05-28 records "Stripe Live mode
+not configured." So the working assumption is that **Ledgerium is currently
+wired to Test Mode** — meaning its checkout accepts only test cards and collects
+no real money.
 
-Check whether the API key Ledgerium uses is `sk_test_…` or `sk_live_…`.
+**Your first job is to confirm or refute that**, because it decides whether the
+rest of this is a small addition or a full Live Mode setup.
 
-This is the single most important answer. If Ledgerium's key is a **test** key,
-then even a "working" checkout accepts only test cards and takes **no real
-money**. I need to know this before anything else, because it changes whether
-the site is actually selling.
+## Step 1 — Confirm the mode (do this first)
 
-Also confirm: do the existing **Starter** product and prices exist in that same
-mode? Ledgerium has these price IDs configured already:
-`STRIPE_STARTER_MONTHLY_PRICE_ID`, `STRIPE_STARTER_ANNUAL_PRICE_ID`. Please
-confirm they resolve to a real, **active** price in the account, and tell me the
-amount each one charges. If they point at an archived or deleted price, say so —
-that's a different problem than the one I'm asking you to fix.
+Look at the API key Ledgerium uses. Does it start with `sk_test_` or `sk_live_`?
 
-## 2. Create the "Solo" product with two prices
+- **`sk_live_`** → the assumption was wrong. Skip to Step 2 (Solo only) and tell
+  me the doc was stale.
+- **`sk_test_`** → expected. Do Step 2 **and** Step 3.
 
-In the **same mode** as the key Ledgerium uses:
+Also confirm whether the existing Starter prices are **active** (not archived) and
+what they charge. Ledgerium has `STRIPE_STARTER_MONTHLY_PRICE_ID` and
+`STRIPE_STARTER_ANNUAL_PRICE_ID` configured, and its site currently reports
+Starter as purchasable — but a configured price ID is not proof the price still
+exists.
+
+## Step 2 — Create the "Solo" product
+
+Ledgerium has a Solo tier shipped in its UI with no backing Stripe price, so it
+correctly shows "Not available yet". Create it in **whichever mode you'll
+actually be selling from** (see Step 3 — if you're going Live, create it in Live
+Mode and don't bother with Test).
 
 - **Product name:** `Ledgerium Solo`
 - **Description:** `Single-user plan for solo operators and consultants.`
+- **Metadata:** `ledgerium_plan=solo` (so it's identifiable without relying on the name)
 
-Two recurring prices on that product, both USD:
+Two recurring USD prices on that product:
 
-| Price | Amount | Billing period | Notes |
+| Price | Amount | Period | Note |
 |---|---|---|---|
 | Monthly | **$89.00** (`8900` cents) | every 1 month | |
-| Annual | **$888.00** (`88800` cents) | every 1 year | This is the full yearly charge (works out to $74/mo). Do **not** enter 74. |
+| Annual | **$888.00** (`88800` cents) | every 1 year | Full yearly charge. Works out to $74/mo — **do not enter 74**. |
 
-Please add metadata `ledgerium_plan=solo` to the product, so it's identifiable
-later without relying on the name.
+Report the two price IDs (`price_1AbC…`).
 
-Then give me the two price IDs (they look like `price_1AbC…`).
+## Step 3 — Only if Step 1 said `sk_test_`: set up Live Mode
 
-## 3. Verify the Customer Portal allows plan switching
+Test Mode config does not carry over. Live Mode has **entirely different price
+IDs, a different API key, and a different webhook signing secret**. Everything
+below must be created with the dashboard's **Live mode** toggle on.
+
+**3a. Create all products and prices in Live Mode:**
+
+| Product | Monthly | Annual |
+|---|---|---|
+| `Ledgerium Starter` | $49.00 (`4900`) | $492.00 (`49200`) |
+| `Ledgerium Solo` | $89.00 (`8900`) | $888.00 (`88800`) |
+
+Add metadata `ledgerium_plan=starter` / `ledgerium_plan=solo` respectively.
+
+(Team and Growth are deliberately not sellable yet — Ledgerium blocks them in
+code pending a multi-user data layer, so they need no Live prices.)
+
+**3b. Create the Live webhook endpoint:**
+
+- URL: `https://ledgerium.ai/api/billing/webhook`
+- Events: `checkout.session.completed`, `customer.subscription.updated`,
+  `customer.subscription.deleted`, `invoice.payment_failed`,
+  `invoice.payment_succeeded`, `customer.subscription.trial_will_end`
+- Capture the **signing secret** (`whsec_…`) — this is a secret, see § below.
+
+**3c. Get the Live secret key** (`sk_live_…`) — also a secret.
+
+## Step 4 — Customer Portal (both modes)
 
 Settings → Billing → Customer portal. Confirm:
 
-- **Subscription update** is **enabled**
-- Both the Starter and Solo prices are listed as products customers may switch to
-- Proration behaviour is set (upgrades prorate immediately; downgrades at period end is fine)
+- **Subscription update** is enabled
+- Starter and Solo prices are both listed as switchable products
+- Proration set (upgrades immediate; downgrades at period end is fine)
 
-Without this, an existing subscriber cannot move between Starter and Solo at
-all — the button exists in Ledgerium's UI but Stripe refuses the change.
+Without this, an existing subscriber cannot move between Starter and Solo —
+Ledgerium shows the button, Stripe refuses the change.
 
-## 4. Set the statement descriptor
+## Step 5 — Statement descriptor
 
 Settings → Business → Public business information → **Statement descriptor**.
 
-Set it to something a *Ledgerium* customer will recognise, e.g. `6S LEDGERIUM`
-(Stripe allows 5–22 characters).
+Set to something a *Ledgerium* customer recognises, e.g. `6S LEDGERIUM`
+(5–22 chars).
 
-Context: Ledgerium customers currently see the 6S Success business name on their
-card statement, because 6S Success owns the account. Ledgerium's checkout and
-account pages now disclose this in writing, but the descriptor is what actually
-prints on the card line. An unrecognised name is a leading cause of chargebacks,
-and the dispute fee applies whether or not you win.
-
-## 5. Confirm the webhook endpoint is still live
-
-There should be an endpoint pointing at `https://ledgerium.ai/api/billing/webhook`.
-Please confirm it exists, is **enabled**, and tell me which events it's
-subscribed to. I do **not** need the signing secret — Ledgerium already has it.
+Ledgerium customers see the 6S Success name on their statement because 6S
+Success owns the account. Ledgerium's checkout and account pages now disclose
+this in writing, but the descriptor is what actually prints on the card line.
+An unrecognised charge is a leading cause of chargebacks, and the dispute fee
+applies whether or not you win.
 
 ---
 
-### What to send back
+## What to send back
 
-1. Mode: test or live
-2. Starter prices: active? what amounts?
+1. **Mode:** `sk_test_` or `sk_live_`
+2. **Starter prices:** active? amounts?
 3. `STRIPE_SOLO_MONTHLY_PRICE_ID` = `price_…`
 4. `STRIPE_SOLO_ANNUAL_PRICE_ID` = `price_…`
-5. Portal plan-switching: enabled y/n
-6. Statement descriptor: what you set it to
-7. Webhook endpoint: enabled y/n, event list
+5. *(If Live setup was done)* the Live `STRIPE_STARTER_MONTHLY_PRICE_ID` and
+   `STRIPE_STARTER_ANNUAL_PRICE_ID`
+6. Portal plan-switching: enabled y/n
+7. Statement descriptor: value set
+8. Webhook endpoint: enabled y/n, events subscribed
 
----
+## Handing back secrets safely
 
-## What I do with the answer (Ledgerium side)
+Do **not** paste `sk_live_…` or `whsec_…` into a chat window or a command with
+`--body`, which lands them in shell history.
 
-Add the two price IDs as GitHub repository secrets, which is a one-liner each:
+Phil should set them interactively from the Ledgerium repo — this reads from
+stdin and leaves no trace in history:
+
+```bash
+gh secret set STRIPE_SECRET_KEY        # paste when prompted, then Enter, Ctrl+D
+gh secret set STRIPE_WEBHOOK_SECRET    # same
+```
+
+Price IDs are not secret and can be set inline:
 
 ```bash
 gh secret set STRIPE_SOLO_MONTHLY_PRICE_ID --body "price_..."
 gh secret set STRIPE_SOLO_ANNUAL_PRICE_ID  --body "price_..."
+# only if Live Mode was set up in Step 3:
+gh secret set STRIPE_STARTER_MONTHLY_PRICE_ID --body "price_..."
+gh secret set STRIPE_STARTER_ANNUAL_PRICE_ID  --body "price_..."
 ```
 
-`deploy.yml` and `compose.hostinger.yaml` already reference both — no code
-change needed. Redeploy and Solo goes live.
+`deploy.yml` and `compose.hostinger.yaml` already reference every one of these —
+no Ledgerium code change is needed. Push any commit (or re-run the latest
+workflow) to redeploy, and the plans go live.
 
-If the answer to Q1 is "test mode", that becomes the priority over everything
-else here, and I'll come back with a separate migration plan for going live.
+**Verify after deploy** — this endpoint is public and needs no auth:
+
+```
+https://ledgerium.ai/api/billing/sku-availability
+```
+
+Both `starter` and `solo` should read `{"monthly":true,"annual":true}`.
