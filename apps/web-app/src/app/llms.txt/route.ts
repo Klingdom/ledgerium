@@ -33,7 +33,15 @@ export function GET(): Response {
     '',
     '## Key entry points',
     `- [Product overview](${base}/product): how recording produces SOPs, process maps, and intelligence`,
-    `- [Pricing](${base}/pricing): Free (5 workflows/mo), Starter $49, Team $249, Growth $799`,
+    // Lists ONLY what a visitor can actually buy today, and says so explicitly.
+    // This previously advertised Team $249 and Growth $799 — both of which
+    // refuse checkout (BLOCKED_PLANS_AWAITING_WORKSPACE_BUILD in
+    // api/billing/checkout/route.ts) and route to a waitlist — while omitting
+    // Solo $89, the flagship self-serve tier. An assistant reading this file
+    // would recommend two products nobody can purchase and never mention the
+    // one they can. Naming the waitlist status is more useful to an assistant
+    // than silence, because "not yet available" is itself an answer.
+    `- [Pricing](${base}/pricing): Free (5 workflows/mo), Starter $49/mo (15 workflows/mo), Solo $89/mo (unlimited workflows, full process-intelligence layer). Team and Growth tiers are announced but not yet purchasable — they are waitlist-only pending multi-user support.`,
     `- [Workflow library](${base}/workflow-library): how to document specific business workflows`,
     `- [SOP templates](${base}/sop-templates): editable SOP structures plus generation from real work`,
     `- [AI opportunities](${base}/ai-opportunities): where AI and automation help, by function`,
