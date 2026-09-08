@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Upload, CheckCircle, XCircle, FileJson, Loader2, Zap, Lock, HelpCircle } from 'lucide-react';
 import { track, trackActivation } from '@/lib/analytics';
+import { PRICING_CONFIG } from '@/lib/config';
 
 type UploadState = 'idle' | 'uploading' | 'success' | 'error' | 'upgrade_required';
 
@@ -38,12 +39,38 @@ export default function UploadPage() {
   useEffect(() => {
     fetch('/api/account').then(async res => {
       if (res.ok) {
-        const data = await res.json();
-        setAccount({ plan: data.plan, uploadCount: data.uploadCount });
+        // /api/account returns { data: { user: { plan }, limits: { recordings:
+        // { used, max } } } }. This previously read `data.plan` and
+        // `data.uploadCount`, neither of which exists on that envelope, so both
+        // were always undefined — silently, because res.json() is `any` and
+        // typecheck cannot see through it. The effect was that the usage
+        // counter and the at-limit lockout below never rendered for anyone.
+        // Shape mirrors hooks/useAccount.ts, which reads it correctly.
+        const json = await res.json();
+        const plan = json?.data?.user?.plan;
+        const used = json?.data?.limits?.recordings?.used;
+        if (typeof plan === 'string' && typeof used === 'number') {
+          setAccount({ plan, uploadCount: used });
+        }
       }
     });
     track({ event: 'page_viewed', path: '/upload' });
   }, []);
+
+  /**
+   * The plan this page's upgrade button actually buys.
+   *
+   * `handleUpgrade` POSTs to /api/billing/checkout with no body, and that route
+   * defaults to `starter` (route.ts:267). The copy here previously read
+   * "Upgrade to Pro — $29/mo": Pro is not a current plan, and the charge is
+   * $49. Advertising one price and charging another at the point of payment is
+   * not a cosmetic bug, so the label is derived from the same catalogue the
+   * checkout resolves against rather than restated by hand.
+   */
+  const CHECKOUT_PLAN = PRICING_CONFIG.plans.find((p) => p.id === 'starter');
+  const upgradeLabel = CHECKOUT_PLAN
+    ? `Upgrade to ${CHECKOUT_PLAN.name} — $${CHECKOUT_PLAN.price}/mo`
+    : 'Upgrade to continue';
 
   const FREE_LIMIT = 5;
   const isAtLimit = account?.plan === 'free' && (account?.uploadCount ?? 0) >= FREE_LIMIT;
@@ -151,7 +178,7 @@ export default function UploadPage() {
           {isAtLimit ? (
             <button onClick={handleUpgrade} disabled={billingLoading} className="btn-primary text-xs gap-1">
               <Zap className="h-3.5 w-3.5" />
-              {billingLoading ? 'Redirecting...' : 'Upgrade to Pro'}
+              {billingLoading ? 'Redirecting...' : upgradeLabel}
             </button>
           ) : uploadsRemaining !== null && uploadsRemaining <= 2 ? (
             <span className="text-ds-xs text-amber-600 font-medium">{uploadsRemaining} remaining</span>
@@ -174,11 +201,11 @@ export default function UploadPage() {
           </div>
           <h3 className="mt-ds-4 text-ds-lg font-semibold text-[var(--content-primary)]">Free plan limit reached</h3>
           <p className="mt-ds-2 text-ds-sm text-[var(--content-secondary)] max-w-sm">
-            You've used all {FREE_LIMIT} uploads on the free plan. Upgrade to Pro for unlimited workflow uploads, advanced templates, and more.
+            You've used all {FREE_LIMIT} uploads on the free plan. Upgrade for more workflow uploads, advanced templates, and more.
           </p>
           <button onClick={handleUpgrade} disabled={billingLoading} className="btn-primary mt-ds-4 gap-1.5">
             <Zap className="h-4 w-4" />
-            {billingLoading ? 'Redirecting to checkout...' : 'Upgrade to Pro — $29/mo'}
+            {billingLoading ? 'Redirecting to checkout...' : upgradeLabel}
           </button>
           <Link href="/pricing" className="mt-ds-2 text-ds-xs text-[var(--content-tertiary)] hover:text-[var(--content-secondary)]">
             See plan details
@@ -260,7 +287,7 @@ export default function UploadPage() {
                 <div className="mt-ds-3 flex gap-ds-2">
                   <button onClick={handleUpgrade} disabled={billingLoading} className="btn-primary text-xs gap-1">
                     <Zap className="h-3.5 w-3.5" />
-                    {billingLoading ? 'Redirecting...' : 'Upgrade to Pro — $29/mo'}
+                    {billingLoading ? 'Redirecting...' : upgradeLabel}
                   </button>
                   <Link href="/pricing" className="btn-secondary text-xs">See plan details</Link>
                 </div>
