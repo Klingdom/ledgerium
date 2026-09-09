@@ -266,7 +266,7 @@ export default function AboutPage() {
             <p className="text-sm font-semibold text-[var(--content-primary)]">Phil Kling</p>
             <p className="text-sm text-[var(--content-tertiary)]">Founder, Ledgerium AI</p>
             <a
-              href="https://www.linkedin.com/in/philkling"
+              href="https://www.linkedin.com/in/philipkling/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-brand-500 hover:text-brand-400 underline underline-offset-2"

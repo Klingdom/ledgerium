@@ -101,7 +101,7 @@ export const SITE_ORGANIZATION_LOGO_HEIGHT = 512;
  */
 export const SITE_AUTHOR = {
   name: 'Phil Kling',
-  sameAs: ['https://www.linkedin.com/in/philkling'],
+  sameAs: ['https://www.linkedin.com/in/philipkling/'],
 } as const;
 
 export const SITE_WEBSITE_NODE = {

@@ -186,7 +186,7 @@ describe('canonical Organization entity — single source of truth', () => {
 describe('canonical author identity — Phil Kling, not a fictional placeholder', () => {
   it('SITE_AUTHOR is the single canonical author fact, sourced by a person-scoped sameAs (not the company page)', () => {
     expect(SITE_AUTHOR.name).toBe('Phil Kling');
-    expect(SITE_AUTHOR.sameAs).toEqual(['https://www.linkedin.com/in/philkling']);
+    expect(SITE_AUTHOR.sameAs).toEqual(['https://www.linkedin.com/in/philipkling/']);
     expect(SITE_AUTHOR.sameAs).not.toContain(KNOWN_COMPANY_LINKEDIN_URL);
   });
 
@@ -195,7 +195,7 @@ describe('canonical author identity — Phil Kling, not a fictional placeholder'
     expect(SITE_FOUNDER_NODE['@id']).toBe(SITE_PERSON_ID);
     expect(SITE_PERSON_ID).toBe(`${SITE_CONFIG.url}/about#phil-kling`);
     expect(SITE_FOUNDER_NODE.name).toBe('Phil Kling');
-    expect(SITE_FOUNDER_NODE.sameAs).toEqual(['https://www.linkedin.com/in/philkling']);
+    expect(SITE_FOUNDER_NODE.sameAs).toEqual(['https://www.linkedin.com/in/philipkling/']);
     // The defect being fixed: a Person's sameAs must never be a company URL.
     expect(SITE_FOUNDER_NODE.sameAs).not.toContain(KNOWN_COMPANY_LINKEDIN_URL);
   });
@@ -210,7 +210,7 @@ describe('canonical author identity — Phil Kling, not a fictional placeholder'
     const text = readFileSync(aboutFile, 'utf8');
     expect(text).toContain('id="phil-kling"');
     expect(text).toContain('Phil Kling');
-    expect(text).toContain('https://www.linkedin.com/in/philkling');
+    expect(text).toContain('https://www.linkedin.com/in/philipkling/');
   });
 
   it('every page whose jsonLd includes Article references the canonical Person as author by @id, never restating a Person inline', () => {
