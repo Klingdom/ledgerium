@@ -142,12 +142,36 @@ export function extractLabel(el: Element): string {
     }
   }
 
-  // 9. Short visible text on the element itself (for divs/spans with short text acting as controls)
+  // 9. Short visible text on divs/spans — ONLY when the element is genuinely
+  //    acting as a control (an explicit interactive ARIA role, or a
+  //    non-negative tabindex making it keyboard-focusable). A plain layout
+  //    div/span with no such affordance is NOT a control: capturing its text
+  //    previously leaked arbitrary visible page content (customer names,
+  //    dollar amounts, reference numbers) that pattern-only safety heuristics
+  //    cannot catch. Elements that fail this check fall through cleanly to
+  //    rule 10 (ancestor aria-label / heading context).
   if ((tag === 'div' || tag === 'span') && !(el as HTMLElement).isContentEditable) {
-    const text = (el as HTMLElement).innerText?.trim()
-    if (text && text.length <= 40 && text.split(/\s+/).length <= 5) {
-      const safe = applySafetyHeuristics(text)
-      if (safe) return safe
+    const controlRole = el.getAttribute('role')
+    const isInteractiveRole =
+      controlRole === 'button' ||
+      controlRole === 'link' ||
+      controlRole === 'tab' ||
+      controlRole === 'menuitem' ||
+      controlRole === 'option' ||
+      controlRole === 'checkbox' ||
+      controlRole === 'radio' ||
+      controlRole === 'switch'
+
+    const tabIndexAttr = el.getAttribute('tabindex')
+    const tabIndexValue = tabIndexAttr !== null ? Number.parseInt(tabIndexAttr, 10) : NaN
+    const isFocusableControl = Number.isFinite(tabIndexValue) && tabIndexValue >= 0
+
+    if (isInteractiveRole || isFocusableControl) {
+      const text = (el as HTMLElement).innerText?.trim()
+      if (text && text.length <= 40 && text.split(/\s+/).length <= 5) {
+        const safe = applySafetyHeuristics(text)
+        if (safe) return safe
+      }
     }
   }
 

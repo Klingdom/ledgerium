@@ -6,6 +6,45 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-09] - Privacy claim correction and capture-surface narrowing (Mode 2 directed, CEO chose option C)
+
+**Trigger:** found while preparing a Chrome Web Store submission. The store's data-usage declaration is a binding representation, and the truthful answer contradicted the site.
+
+### The defect
+
+`apps/extension-app/src/content/label-extractor.ts` rule 9 read and transmitted the visible `innerText` of ANY clicked `div`/`span` up to 40 chars / 5 words. The rule's own comment said its intent was "divs/spans with short text **acting as controls**" - but the implementation applied to every div and span on the page. Pattern-only safety heuristics (email / URL / phone / SSN / card-shape) catch none of: personal names, street addresses, dollar amounts, short reference numbers, masked card last-4s.
+
+Meanwhile the site claimed in 13 places that Ledgerium "never captures screen content" and that there was "no risk of capturing sensitive data visible on screen."
+
+### Fixed - copy (commit 0da54d8)
+
+13 strings corrected across `security`, `methodology`, `compare/scribe`, `alternatives.ts` and `compare.ts`, including a comparative-advertising table row. Each now volunteers the real boundary rather than denying it. Two claims in the family were VERIFIED true and are kept, stated precisely: no screenshots or video ever; no keystrokes or field values ever (only a `value_present` boolean, including for non-sensitive field types).
+
+`privacyClaims.test.ts` locks it two ways - retired claims must stay absent, honest boundary phrasing must stay present.
+
+### Fixed - code (this commit)
+
+Rule 9 now requires a genuine control signal: an interactive ARIA role (`button`/`link`/`tab`/`menuitem`/`option`/`checkbox`/`radio`/`switch`) OR a non-negative `tabindex`. Elements failing both fall through cleanly to rule 10. This makes the code honor its own stated intent rather than redesigning it.
+
+Known regression surface, accepted: a `div onClick` with no role and no tabindex loses its label. Such an element is already a keyboard-accessibility defect; well-built component libraries attach both signals.
+
+### Validation
+
+- web-app: 2937 -> **2950 tests** across 169 -> 170 files.
+- extension-app: 350 -> **367 tests** across 18 files.
+- `pnpm typecheck` clean across all 11 packages/apps.
+- **Real-extension harness: 4/4 passed**, including `"real capture pipeline: a real click + typed input reach storage as PII-screened events"` - the content -> background -> store path. This is the validation gate of record per the Extension Reliability Invariant; unit tests alone cannot certify extension health.
+
+### NOT yet shipped
+
+Per the Extension Reliability Invariant clause 6, a human must load the built extension in a real Chrome profile and confirm: (1) a recording starts; (2) a div/span control with `role`/`tabindex` still yields a meaningful label; (3) plain layout text containing a name or amount produces NO label; (4) steps still appear end-to-end in the sidepanel. Both prior capture breaks (iter 097, iter 099) shipped with fully green suites.
+
+### Chrome Web Store status
+
+Submission remains BLOCKED pending the human capture verification above. Audit verdict was CONDITIONAL GO (`docs/meta/CHROME_STORE_SUBMISSION_READINESS_001.md`): `<all_urls>` should be KEPT - narrowing to `activeTab`/`optional_host_permissions` requires a fresh user gesture and would break cross-tab reinjection at `background/index.ts:462-509`. Remaining blockers: the 440x280 promo tile has never been rendered to PNG, and no Dashboard listing exists. Data disclosure must state "Website content: collected."
+
+---
+
 ## [2026-09-09] - Correct a false provenance claim on /methodology (Mode 3, honesty fix)
 
 **Trigger:** surfaced by `content-editor` while scoping Tier 1 item 2, verified by coordinator at `apps/web-app/src/app/(public)/methodology/page.tsx:46`.
