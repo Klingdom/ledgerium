@@ -32,7 +32,7 @@ const tango: ComparePage = {
     'Annotated screenshot guides carry no timing, so they cannot show where cycle time changed between two runs.',
     'Ledgerium records clicks, inputs, navigation, and millisecond timing as structured data that can be searched and diffed.',
     'A quick visual how-to fits Tango, while measuring cycle time and planning automation fits Ledgerium.',
-    'Ledgerium captures no screenshots and no keystrokes, avoiding the risk of recording visible on-screen data.',
+    'Ledgerium takes no screenshots and records no video or keystrokes; it reads only short visible labels (like a button\'s or field\'s text) to identify what was clicked, not full page content.',
   ],
   honestLimitation:
     'Ledgerium captures browser-based workflows through a Chrome extension. Work that happens in native desktop applications outside the browser is not captured.',
@@ -73,7 +73,7 @@ const tango: ComparePage = {
     },
     {
       q: 'Does Ledgerium take screenshots like Tango?',
-      a: 'No. Ledgerium never captures screenshots or screen content. It records structural browser interaction events. This is a deliberate privacy choice: no screenshots means no risk of capturing sensitive on-screen data.',
+      a: "No. Ledgerium never captures screenshots, video, or an image of your screen, and it never records keystrokes or field values — even for sensitive fields, only whether a value was entered. It does capture the short visible label of what you click or fill in, plus the page title and timing. That's a real privacy difference from screenshot tools, but visible label text — a name or number shown on the page — can be captured, so it isn't a zero-screen-content tool.",
     },
     {
       q: 'Can Ledgerium replace Tango for SOPs?',
@@ -356,11 +356,11 @@ const screenRecording: ComparePage = {
     'Screen recording is faster and richer for a quick visual explanation, carrying tone and on-screen detail a step list does not.',
     'Video is a flat artifact that cannot be searched, measured, or diffed without watching it end to end.',
     'Ledgerium records each step as structured data with millisecond timing, so a reader can jump to a step or diff two runs.',
-    'Ledgerium captures no screenshots and no screen content, avoiding the capture of sensitive on-screen data.',
+    'Ledgerium captures no screenshots and no video — but it does read short visible text labels (like a button\'s or field\'s name) on the page, not full page content.',
     'A quick show-and-tell fits screen recording, while searchable, measurable documentation fits workflow recording.',
   ],
   honestLimitation:
-    'Ledgerium captures browser-based workflows through a Chrome extension and records no screen content. Work in native desktop applications outside the browser is not captured, and a video can show visual detail that a structured step list does not.',
+    'Ledgerium captures browser-based workflows through a Chrome extension. It records short visible text labels of what you interact with, not a screenshot or video, so it is not literally screen-content-free — a name or number shown as label text on the page can be captured. Work in native desktop applications outside the browser is not captured, and a video can show visual detail a structured step list does not.',
   competitor: 'screen recording',
   whyItMatters:
     'Video and structured capture answer different questions. A screen recording is fast to make and easy to watch, but it is a flat artifact: nothing in it can be searched, measured, or compared. If you need documentation that supports improvement, audit, or automation planning, a video leaves you re-watching footage instead of reading data.',
@@ -369,7 +369,7 @@ const screenRecording: ComparePage = {
     { label: 'Searchable', competitor: false, ledgerium: true },
     { label: 'Per-step timing', competitor: false, ledgerium: 'Yes, millisecond precision' },
     { label: 'Diff two runs', competitor: false, ledgerium: true },
-    { label: 'Captures screen content', competitor: 'Yes, full video', ledgerium: 'No screenshots, no screen content' },
+    { label: 'Records screen video', competitor: 'Yes — full video', ledgerium: 'No — no screenshots or video; captures short visible text labels only' },
     { label: 'Update after a change', competitor: 'Re-shoot the video', ledgerium: 'Re-record' },
   ],
   competitorStrength:
@@ -383,7 +383,7 @@ const screenRecording: ComparePage = {
     'You need documentation you can search and measure',
     'You want to compare how a workflow changes over time',
     'You are preparing a process for audit or automation',
-    'You want a privacy model with no screenshots or screen content',
+    'You want a privacy model with no screenshots or video — only short visible labels',
   ],
   verifiedAsOf: 'June 2026',
   faqs: [
@@ -393,7 +393,7 @@ const screenRecording: ComparePage = {
     },
     {
       q: 'What does Ledgerium capture instead of video?',
-      a: 'It records the work as structured interaction steps, clicks, inputs, navigation, with per-step timing and system context, then generates an SOP and process map. It captures no screenshots and no screen content.',
+      a: 'It records the work as structured interaction steps, clicks, inputs, navigation, with per-step timing and system context, then generates an SOP and process map. It captures no screenshots and no video — only the short visible label of what you interact with, plus page titles and timing.',
     },
     {
       q: 'Can I search or measure a screen recording?',
@@ -401,7 +401,7 @@ const screenRecording: ComparePage = {
     },
     {
       q: 'Does Ledgerium record my screen?',
-      a: 'No. Ledgerium never captures screenshots or screen content. It records structural browser interaction events only, which is a deliberate privacy choice that avoids capturing sensitive on-screen data.',
+      a: 'No. Ledgerium never captures screenshots, video, or an image of your screen — and never records keystrokes or field values. It does capture the short visible label of what you click or fill in, along with page titles and timing, so it is not literally screen-content-free.',
     },
     {
       q: 'When should I still use screen recording?',

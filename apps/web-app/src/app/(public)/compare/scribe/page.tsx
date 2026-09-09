@@ -116,7 +116,7 @@ const COMPARE_FAQ = [
   },
   {
     q: 'Does Ledgerium take screenshots like Scribe?',
-    a: 'No. Ledgerium never captures screenshots or screen content. It records structural browser interaction events — what was clicked, where, and when — without storing any visual representation of the screen. This is a deliberate privacy design: no screenshots means no risk of capturing sensitive data visible on screen.',
+    a: "No. Ledgerium never captures screenshots, video, or any image of your screen, and it never records keystrokes or the value typed into a field — even for sensitive fields, only whether a value was entered. What it does capture is the short visible label of the element you interact with (a button's text, a field's name), plus the page title and timing. That's a real privacy difference from screenshot-based tools, but it isn't screen-content-free: if a name or number appears as visible label text on the page, that text can be captured.",
   },
   {
     q: 'Can Ledgerium replace Scribe for SOP generation?',

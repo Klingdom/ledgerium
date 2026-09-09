@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Privacy-Safe Workflow Recorder — Secure Process Documentation | Ledgerium',
     description:
-      'Ledgerium captures browser interaction structure — not screen content. No screenshots, no keystroke logging. Secure process documentation by design.',
+      'Ledgerium never takes screenshots or video. It captures visible element labels, page titles, and timing — never keystrokes or field values. Secure process documentation by design.',
   },
 };
 
@@ -32,7 +32,7 @@ const PRINCIPLES = [
     icon: Shield,
     title: 'Data Minimization',
     description:
-      'We capture only what is needed to reconstruct the workflow — structural interaction data, not screen content.',
+      'We capture only what is needed to reconstruct the workflow: clicks, page titles, timing, and the short visible label of what you interacted with — never a screenshot, video, keystroke, or field value.',
     details: [
       'No screenshots',
       'No video',

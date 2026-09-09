@@ -73,7 +73,7 @@ const scribe: AlternativesPage = {
     },
     {
       q: 'Does Ledgerium capture screenshots like Scribe?',
-      a: 'No. Ledgerium records structural browser interaction events and never captures screenshots or screen content, which is a deliberate privacy choice.',
+      a: 'No. Ledgerium never captures screenshots, video, or your screen — and never records keystrokes or field values. It does capture the short visible label of what you click or fill in, plus page titles and timing, which is a real but narrower privacy footprint than an image of your screen.',
     },
     {
       q: 'How should I choose between these alternatives?',

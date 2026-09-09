@@ -36,7 +36,7 @@ const SECTIONS: { h: string; body: string[] }[] = [
   {
     h: 'What "from real recordings" means',
     body: [
-      'Ledgerium captures structured browser interaction events: clicks, navigation, form interactions, and the timing of each step. It does not capture screenshots, screen content, or keystrokes.',
+      'Ledgerium captures structured browser interaction events: clicks, navigation, form interactions, and the timing of each step, plus the short visible label of each element (such as a button\'s text or a field\'s name) and the page title. It never captures screenshots, video, keystrokes, or the value typed into any field.',
       'Claims about how a process behaves come from this observed event data, not from surveys, interviews, or memory. That is the core idea behind everything on this site: documentation written from real work rather than recollection.',
     ],
   },
