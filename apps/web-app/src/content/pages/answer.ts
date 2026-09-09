@@ -442,7 +442,7 @@ const whatIsADocumentWorkflow: AnswerPage = {
   tags: ['answer', 'document-workflow', 'process', 'definition', 'glossary'],
   related: ['answer:what-is-an-sop', 'problem:how-to-document-a-business-process', 'answer:what-is-cycle-time'],
   originalDataPoint:
-    'In Ledgerium recordings of document-centric workflows, a significant share of total elapsed time is typically the document sitting untouched between handoffs — in an inbox or approval queue — rather than time spent actively working on it.',
+    'Recording a document-centric workflow separates the time the document spends sitting in an inbox or approval queue from the time someone is actively working on it. A template written from memory captures only the second, because the waiting is invisible to the person describing the process.',
   mechanismIntro:
     'Ledgerium reconstructs a document workflow by recording each step a person takes as a document moves through its path — where it is opened, edited, sent for approval, and filed — and turning that recording into an ordered map of the real flow.',
   keyTakeaways: [
@@ -507,7 +507,7 @@ const whatIsCycleTime: AnswerPage = {
   tags: ['answer', 'cycle-time', 'metrics', 'definition', 'glossary'],
   related: ['answer:what-is-process-intelligence', 'answer:process-map-vs-flowchart', 'answer:what-is-a-document-workflow'],
   originalDataPoint:
-    "Across Ledgerium recordings, breaking cycle time down step by step routinely shows that a small number of handoffs — not the number of steps — account for most of a process's total elapsed time.",
+    'Breaking cycle time down step by step distinguishes the handoffs where a process waits from the steps where work happens. Step count alone cannot show that difference, which is why a recorded run and a written procedure can describe the same process and disagree about where the time goes.',
   mechanismIntro:
     'Ledgerium computes cycle time by timestamping the start and end of every step in a recorded workflow run and summing the elapsed time across the full sequence, so the figure comes directly from real execution rather than a manual estimate.',
   keyTakeaways: [
