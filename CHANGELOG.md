@@ -6,6 +6,96 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-08] - SEO foundation: link-graph invariant, install path, named author (Mode 5 directed, N=3)
+
+**Trigger:** CEO-directed Tier 1 items 3-5 from `docs/meta/SEO_AEO_CONTENT_STRATEGY_001/SYNTHESIS.md`. Executed as three independent iterations. Same-Area (`web-app`) saturation acknowledged at sequence start.
+
+### Item 3 - internal link graph (`system-architect`)
+
+**Corrected measurement:** 58 pages had ZERO inbound contextual links, but **91 had fewer than 2**. The invariant required 149 new edges, not 116.
+
+- `src/lib/seo/related.ts` 77 -> 428 LOC. Rewritten as a graph builder. Root cause identified: `getRelatedPages` made a LOCAL decision about a GLOBAL property (inbound count), so no per-page fill limit could ever fix it.
+- Curated `related` edges are taken verbatim, in authored order, always ranked first. Nothing dropped or reordered. Deficient pages receive EXACTLY their shortfall - never more - so equity spreads by construction rather than pooling.
+- Key finding: `alternatives:scribe` and `alternatives:tango` have **byte-identical tags** - the registry's tags do not encode the vendor, so tag overlap cannot distinguish them. Solved with slug-identity affinity (+100), requiring no new registry field. This is why all 15 orphaned `alternatives` pages now resolve correctly.
+- IDF-weighted tag overlap replaces raw overlap (`documentation` appears on 47 pages and was pure noise). `localeCompare` removed in favour of `compareAscii` - locale-dependent ordering would have broken determinism.
+- **Result: 58 orphans -> 0; 91 sub-minimum -> 0**, across every one of the 12 types. Edges 491 -> 640.
+- `src/components/seo/Blocks.tsx`: `getRelatedPages(page, 3)` -> `getRelatedPages(page)`. Load-bearing - leaving the `3` would have truncated precisely the newly-assigned links and silently re-orphaned everything.
+- `related.test.ts` (new, 23 tests) enforces the invariant: `expect(orphans).toEqual([])` naming any regressed page, per-type worst-case floors, byte-identical graph across builds and across input orderings, and an explicit pin on `/competitors/soroco` - the one page with verified live organic visibility.
+
+### Item 4 - install path (`frontend-engineer`)
+
+- **No SEO page linked to `/install`.** All CTAs went to signup/demo/product/pricing, so visitors met an unannounced Developer-mode sideload ~8 steps later.
+- `HowLedgeriumCaptures` step 1 already SAID "Install the extension" as inert text with a Chrome icon; it is now a real link. Plus one peer line in `FinalCta`. Signup remains the only `btn-primary` - no competing CTA, no banner, no interstitial.
+- Label resolved through the existing `resolveInstallTarget()`, so it flips to "Add to Chrome" automatically when `chromeStoreUrl` stops being a placeholder. No hardcoded store URL; no copy change needed at launch.
+- New `seo_install_clicked { pageType, slug, placement }`. **Coordinator note:** this was initially challenged as a fork of the existing `extension_install_clicked`. It is not - the SEO event measures navigation intent from the content surface, the existing event measures the install action on `/install`. Together they form a two-stage funnel neither can measure alone. The challenge was withdrawn.
+
+### Item 5 - named author and entity graph (`backend-engineer`)
+
+- Retired `Ledgerium Research Team` (164 inline literals) in favour of a single canonical `SITE_AUTHOR` constant. The next identity change is one edit, not 164, and cannot drift.
+- **Fixed a wrong identity assertion made 164 times:** `article()` emitted a `Person` whose `sameAs` was a *company* LinkedIn page. Now emits `author: { '@id': SITE_PERSON_ID }`, matching the file's existing publisher-by-reference pattern.
+- New `SITE_FOUNDER_NODE` (Person, `@id` = `/about#phil-kling`, `worksFor` -> Organization) emitted in the sitewide `@graph`, plus `Organization.founder` -> the Person. The graph now resolves in both directions, and the `@id` points at a real anchor on `/about` rather than a ghost.
+- Beyond brief, correctly: three hand-built blog posts carried the same defect, and `/methodology` contained the visible sentence *"The author on each page is the Ledgerium Research Team."* All fixed under the zero-occurrences bar.
+- Byline now reads "By Phil Kling" on all 164 pages - a deliberate, CEO-approved visibility decision, not a side effect.
+- **No email published.** Supplied for identity confirmation only; a regression test asserts no email-shaped string appears in any emitted JSON-LD node.
+
+### Validation
+
+- `pnpm --filter @ledgerium/web-app test`: 2857 -> **2937 tests**, 167 -> **169 files**, all passing. Zero pre-existing assertions modified across all three items.
+- `pnpm typecheck`: clean across all 11 packages/apps.
+- Coordinator verified each claim against source rather than agent report: no `Blocks.tsx` clobber despite two agents editing it concurrently; `SITE_PERSON_ID` emitted (organization.ts:156) AND referenced (jsonLd.ts:72) so the `@id` resolves; `id="phil-kling"` present at about/page.tsx:265; zero live occurrences of the retired author string.
+
+### Determinism note
+
+During this sequence an unused `const _leak = new Date().getFullYear();` appeared in `lib/sop-export/markdown.ts`, violating the module's own determinism contract. **The source-scan gate (T3b) caught it and failed the build**, naming the file and the pattern - a violation that produces no output difference and would have passed any snapshot test. The line was removed; suite returned to green. Recorded because it is the first empirical proof that this class of gate works, and it is the enforcement shape the content re-entry gate should copy.
+
+### Not done
+
+- Tier 1 item 2 (publish real measured data) - blocked on CEO decision about which measurements and what sample.
+- No net-new content pages. Publishing remains gated; re-entry gate still FAIL on all three conditions.
+
+---
+
+## [2026-09-08] - Downloadable SOP templates, Phase 1 (Mode 2 `directed`, `system-architect` + `growth-strategist` adjacent, `backend-engineer` -> `frontend-engineer`)
+
+**Trigger:** CEO-directed Tier 1 item 1 from `docs/meta/SEO_AEO_CONTENT_STRATEGY_001/SYNTHESIS.md`. The 17 SOP template pages carried "(Editable)" in their metaTitle and delivered a read-only description grid: no download, copy, or export existed anywhere on the public site. The one page that ever reached a page-1 organic position was an SOP template promising a document it did not provide.
+
+**Why this action:** it is the only content change that serves all three constraints at once - off-page linkability (a free template is the one page class anyone links to), conversion (a real artifact to take away), and AEO (a citable object rather than an argument).
+
+### Added
+
+- `apps/web-app/src/lib/sop-export/` - pure, byte-deterministic renderer. `renderSopTemplateMarkdown(page)`, `renderSopExport(page, format)`, `sopExportFilename(...)`, `SopExportFormat` union (`'markdown'`; `'docx'` is additive in Phase 2). Derives only from existing registry fields - no new content authored, no registry schema change.
+- `apps/web-app/src/app/(public)/sop-templates/[slug]/download.md/route.ts` - `force-static` + `dynamicParams = false`, exactly 17 prerendered files, 404 otherwise. `Content-Disposition: attachment`, `X-Robots-Tag: noindex`. Deliberately NOT under `/api/` (disallowed by `robots.ts:11`).
+- `apps/web-app/src/components/seo/SopExportPanel.tsx` - `'use client'` boundary for download + copy-to-clipboard + post-download offer. Markdown is rendered at build time in the Server Component and passed as a prop; never regenerated in the browser, never re-fetched.
+- `seo_template_downloaded { slug, format, method: 'download' | 'copy' }` in the `AnalyticsEvent` union - the first per-template demand signal this content program has had, and a leading indicator that does not depend on ranking.
+- Download URLs added to `llms.txt` for `sopTemplate` pages only.
+
+### Changed
+
+- `SopTemplatePageView.tsx` (+39/-0, pure insertion) - "Get this SOP" section placed after `DataPointCallout` and before `KeyTakeaways`, near the top where it will be seen.
+
+### Decisions
+
+- **Ungated.** No email wall. Gated assets are not linked and not cited, and referring-domains > 0 is a named re-entry-gate criterion. Email capture is offered *after* the file is obtained, never before. Leads traded for authority, deliberately.
+- **Determinism enforced as an invariant.** `Date.now`, `new Date`, `Intl.*`, `toLocale*`, `.normalize()`, `localeCompare`, `os.EOL` are forbidden in the module and asserted by a source-level test. Dates come from `page.updatedAt`. LF-only, no BOM, one trailing newline.
+- **Kept out of the sitemap, put into `llms.txt`.** The `.md` is a near-duplicate of the page it feeds: linkable and fetchable, not indexable.
+
+### Fixed during review
+
+- Generator emitted `## Procedure` twice (once from `sopSections`, once for the worked example). Duplicate H2s break outline/TOC generation in Word and Notion. Renamed the skeleton block to `## Worked example - steps from a real recording`; the three assertions pinning the old string were repointed, which also strengthens the guarantee since `month-end-close-sop-template` uses "Close checklist" and has no `## Procedure` at all.
+
+### Validation
+
+- `pnpm --filter @ledgerium/web-app test`: 2790 -> **2857 tests**, 160 -> **167 test files**, all passing. Zero pre-existing assertions modified.
+- `pnpm typecheck`: clean across all 11 packages/apps.
+- Forbidden-API scan on `lib/sop-export/`: clean.
+
+### Not done (explicitly)
+
+- `.docx` export - Phase 2, gated on measured download conversion. Note recorded: a `.docx` is a ZIP whose entry mtimes silently break determinism unless zeroed.
+- No net-new content pages. Publishing remains gated; the re-entry gate is FAIL on all three conditions.
+
+---
+
 ## [2026-07-20] - SOP overlay ADR §10 "smallest correct first step" (Mode 2 `directed`, `backend-engineer`)
 
 **Trigger:** CEO-directed implementation of `docs/features/sop-authoring/OVERLAY_ARCHITECTURE_DECISION.md` §10 — the three small, additive, no-authoring-machinery deliverables the ADR identifies as safe to ship ahead of any overlay write path.

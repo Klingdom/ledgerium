@@ -47,12 +47,14 @@ export function SoftwarePageView({ page }: { page: SoftwarePage }) {
 
       <BulletList title="Common mistakes" items={page.commonMistakes} />
 
-      <HowLedgeriumCaptures introSentence={page.mechanismIntro} />
+      <HowLedgeriumCaptures pageType={page.type} slug={page.slug} introSentence={page.mechanismIntro} />
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
       <BeforeYouDecide pricingLocation="software_pricing" demoLocation="software_demo" />
       <FinalCta
+        pageType={page.type}
+        slug={page.slug}
         heading={`Document a ${page.vendor} workflow from real work`}
         body="Record the real process in your own account and generate an SOP, a process map, and an intelligence report that matches what your team actually sees."
         ctaLabel="Start free"

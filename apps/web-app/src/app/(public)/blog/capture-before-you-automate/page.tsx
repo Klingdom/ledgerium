@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { SITE_ORGANIZATION_ID } from '@/lib/seo/organization';
+import { SITE_ORGANIZATION_ID, SITE_PERSON_ID } from '@/lib/seo/organization';
 
 export const metadata: Metadata = {
   title: 'Capture Before You Automate — Ledgerium AI',
@@ -24,7 +24,7 @@ const jsonLd = {
     'Teams are deploying AI agents into processes they have never measured. The observation layer is the missing foundation. Why you should capture before you automate.',
   datePublished: '2026-06-24',
   dateModified: '2026-06-24',
-  author: { '@type': 'Organization', name: 'Ledgerium Research Team' },
+  author: { '@id': SITE_PERSON_ID },
   // Reference to the single canonical Organization node emitted sitewide in
   // app/layout.tsx, not a redeclaration (SEO_AEO_EFFECTIVENESS_REVIEW_001 §5 P1-2).
   publisher: { '@id': SITE_ORGANIZATION_ID },

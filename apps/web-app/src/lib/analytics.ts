@@ -585,6 +585,32 @@ export type AnalyticsEvent =
       slug: string;
       questionIndex: number;
     }
+  // Install-intent from a content page (SEO_AEO_CONTENT_STRATEGY_001 Tier 1
+  // item 4): distinguishes a reader clicking through to `/install` from the
+  // in-context mechanism explanation ('mechanism') vs. the end-of-page CTA
+  // row next to signup/demo ('footer_cta'). This is intent, not completion —
+  // the extension install itself is `extension_install_clicked`, fired on
+  // `/install` once the visitor has picked a method.
+  | {
+      event: 'seo_install_clicked';
+      pageType: string;
+      slug: string;
+      placement: 'mechanism' | 'footer_cta';
+    }
+  // SOP template Markdown export (Phase 1, sop_export_contract.md D1
+  // revision): fired on click of the download or copy-to-clipboard
+  // affordance on a `/sop-templates/[slug]` page. PII-free — no email, no
+  // account state. `method` distinguishes the file-download anchor from the
+  // copy-to-clipboard button; `format` is forward-compatible with the
+  // Phase-2 `.docx` export (`SopExportFormat` in lib/sop-export/types.ts).
+  // Type only in this iteration — emitted by a later component iteration
+  // (SopTemplatePageView.tsx / SopExportPanel.tsx are out of scope here).
+  | {
+      event: 'seo_template_downloaded';
+      slug: string;
+      format: string;
+      method: 'download' | 'copy';
+    }
 
   // ── Errors ────────────────────────────────────────────────────────────────
   | { event: 'upload_failed'; error: string }

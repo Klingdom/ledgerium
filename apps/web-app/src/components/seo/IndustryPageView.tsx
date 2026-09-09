@@ -37,12 +37,14 @@ export function IndustryPageView({ page }: { page: IndustryPage }) {
       <BulletList title="Compliance concerns" items={page.complianceConcerns} />
       <BulletList title="AI and automation opportunities" items={page.aiOpportunities} />
 
-      <HowLedgeriumCaptures introSentence={page.mechanismIntro} />
+      <HowLedgeriumCaptures pageType={page.type} slug={page.slug} introSentence={page.mechanismIntro} />
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
       <DemoNote location="industry_demo" />
       <FinalCta
+        pageType={page.type}
+        slug={page.slug}
         heading="Document your industry's workflows"
         body="Record each process once and turn it into an SOP, a process map, and an improvement report that matches how your team actually works."
         ctaLabel="Start free"

@@ -1,4 +1,5 @@
 import type { ComparePage } from '../types';
+import { SITE_AUTHOR } from '@/lib/seo/organization';
 
 /**
  * Comparison pages. Bottom-funnel, decision-stage.
@@ -84,7 +85,7 @@ const tango: ComparePage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -165,7 +166,7 @@ const manualSop: ComparePage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -246,7 +247,7 @@ const processMining: ComparePage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -327,7 +328,7 @@ const taskMining: ComparePage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -408,7 +409,7 @@ const screenRecording: ComparePage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -489,7 +490,7 @@ const processStreet: ComparePage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -571,7 +572,7 @@ const celonis: ComparePage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-07-15',
   published: true,
 };
@@ -653,7 +654,7 @@ const uipath: ComparePage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-07-15',
   published: true,
 };
@@ -734,7 +735,7 @@ const sapSignavio: ComparePage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-07-15',
   published: true,
 };
@@ -816,7 +817,7 @@ const zapier: ComparePage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-07-15',
   published: true,
 };

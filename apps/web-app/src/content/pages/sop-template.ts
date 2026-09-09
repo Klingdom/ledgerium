@@ -1,4 +1,5 @@
 import type { SopTemplatePage } from '../types';
+import { SITE_AUTHOR } from '@/lib/seo/organization';
 
 /** SOP template pages. Mid-funnel resource intent; pair with workflow pages. */
 
@@ -79,7 +80,7 @@ const invoiceApproval: SopTemplatePage = {
     },
   ],
   jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -161,7 +162,7 @@ const customerOnboarding: SopTemplatePage = {
     },
   ],
   jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -243,7 +244,7 @@ const expenseReport: SopTemplatePage = {
     },
   ],
   jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -325,7 +326,7 @@ const purchaseOrder: SopTemplatePage = {
     },
   ],
   jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -407,7 +408,7 @@ const monthEndClose: SopTemplatePage = {
     },
   ],
   jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -488,7 +489,7 @@ const employeeOnboarding: SopTemplatePage = {
     },
   ],
   jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -570,7 +571,7 @@ const vendorSetup: SopTemplatePage = {
     },
   ],
   jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -652,7 +653,7 @@ const contractReview: SopTemplatePage = {
     },
   ],
   jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -734,7 +735,7 @@ const ticketResolution: SopTemplatePage = {
     },
   ],
   jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -816,7 +817,7 @@ const travelRequest: SopTemplatePage = {
     },
   ],
   jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -898,7 +899,7 @@ const leadQualification: SopTemplatePage = {
     },
   ],
   jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -980,7 +981,7 @@ const passwordReset: SopTemplatePage = {
     },
   ],
   jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -1062,7 +1063,7 @@ const refundProcessing: SopTemplatePage = {
     },
   ],
   jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-07-15',
   published: true,
 };
@@ -1144,7 +1145,7 @@ const journalEntry: SopTemplatePage = {
     },
   ],
   jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-07-15',
   published: true,
 };
@@ -1226,7 +1227,7 @@ const systemAccessRequest: SopTemplatePage = {
     },
   ],
   jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-07-15',
   published: true,
 };
@@ -1308,7 +1309,7 @@ const salesOrderProcessing: SopTemplatePage = {
     },
   ],
   jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-07-15',
   published: true,
 };
@@ -1390,7 +1391,7 @@ const incidentManagement: SopTemplatePage = {
     },
   ],
   jsonLd: ['Article', 'HowTo', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-07-15',
   published: true,
 };

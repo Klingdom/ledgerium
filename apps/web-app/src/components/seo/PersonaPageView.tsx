@@ -42,12 +42,14 @@ export function PersonaPageView({ page }: { page: PersonaPage }) {
         <p>{page.howLedgeriumHelps}</p>
       </ProseSection>
 
-      <HowLedgeriumCaptures introSentence={page.mechanismIntro} />
+      <HowLedgeriumCaptures pageType={page.type} slug={page.slug} introSentence={page.mechanismIntro} />
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
       <DemoNote location="persona_demo" />
       <FinalCta
+        pageType={page.type}
+        slug={page.slug}
         heading="Document your team's real workflows"
         body="Record a workflow once and turn it into an SOP, a process map, and an improvement report, generated from how the work actually happens."
         ctaLabel="Start free"

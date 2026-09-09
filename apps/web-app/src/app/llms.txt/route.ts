@@ -58,6 +58,13 @@ export function GET(): Response {
       lines.push(`- [${p.h1}](${base}${ROUTE_PREFIX[type]}/${p.slug}): ${p.metaDescription}`);
       lines.push(`  ${p.shortAnswer}`);
       lines.push(`  From Ledgerium recordings: ${p.originalDataPoint}`);
+      // Phase 1 SOP template Markdown export (sop_export_contract.md §6.2):
+      // the .md download is noindex'd (kept out of the sitemap as a
+      // near-duplicate of this page), so this line is how it reaches
+      // assistants despite not being indexable. sopTemplate only.
+      if (p.type === 'sopTemplate') {
+        lines.push(`  Download (Markdown): ${base}${ROUTE_PREFIX[type]}/${p.slug}/download.md`);
+      }
     }
     lines.push('');
   }

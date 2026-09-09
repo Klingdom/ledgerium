@@ -261,6 +261,19 @@ export default function AboutPage() {
             AI and automation into processes they&apos;ve never actually measured. We build the
             observation layer &mdash; the foundation that makes everything else trustworthy.
           </p>
+
+          <div id="phil-kling" className="mt-6 pt-6 border-t border-[var(--border-subtle)]">
+            <p className="text-sm font-semibold text-[var(--content-primary)]">Phil Kling</p>
+            <p className="text-sm text-[var(--content-tertiary)]">Founder, Ledgerium AI</p>
+            <a
+              href="https://www.linkedin.com/in/philkling"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-brand-500 hover:text-brand-400 underline underline-offset-2"
+            >
+              LinkedIn profile
+            </a>
+          </div>
         </div>
 
         {/* Stats row */}

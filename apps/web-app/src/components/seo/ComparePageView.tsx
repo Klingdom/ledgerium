@@ -74,12 +74,14 @@ export function ComparePageView({ page }: { page: ComparePage }) {
         <p>{page.competitorStrength}</p>
       </ProseSection>
 
-      <HowLedgeriumCaptures introSentence={page.mechanismIntro} />
+      <HowLedgeriumCaptures pageType={page.type} slug={page.slug} introSentence={page.mechanismIntro} />
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
       <BeforeYouDecide pricingLocation="compare_pricing" demoLocation="compare_demo" />
       <FinalCta
+        pageType={page.type}
+        slug={page.slug}
         heading="Try Ledgerium free, 5 workflows, no credit card"
         body="Record your first workflow and get a structured SOP, a process map, and an intelligence report from real work, not memory."
         ctaLabel="Start free"

@@ -159,13 +159,15 @@ export function AnswerPageView({ page }: { page: AnswerPage }) {
 
       <MidCta location="answer_mid" />
 
-      <HowLedgeriumCaptures introSentence={page.mechanismIntro} />
+      <HowLedgeriumCaptures pageType={page.type} slug={page.slug} introSentence={page.mechanismIntro} />
       <HonestLimitation text={page.honestLimitation} />
       <RelatedTerms terms={page.relatedTerms} />
       <Sources sources={page.sources} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
       <FinalCta
+        pageType={page.type}
+        slug={page.slug}
         heading="See this in a real workflow recording"
         body="Record a workflow once and get a structured SOP, a process map, and an intelligence report generated from real work, not memory."
         ctaLabel="Start free"

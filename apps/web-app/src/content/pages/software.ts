@@ -1,4 +1,5 @@
 import type { SoftwarePage } from '../types';
+import { SITE_AUTHOR } from '@/lib/seo/organization';
 
 /**
  * Software pages. Editorial "how to document a workflow in <vendor>" frame.
@@ -79,7 +80,7 @@ const salesforce: SoftwarePage = {
     },
   ],
   jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -157,7 +158,7 @@ const netsuite: SoftwarePage = {
     },
   ],
   jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -235,7 +236,7 @@ const servicenow: SoftwarePage = {
     },
   ],
   jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -313,7 +314,7 @@ const jira: SoftwarePage = {
     },
   ],
   jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -391,7 +392,7 @@ const zendesk: SoftwarePage = {
     },
   ],
   jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -469,7 +470,7 @@ const sap: SoftwarePage = {
     },
   ],
   jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -547,7 +548,7 @@ const quickbooks: SoftwarePage = {
     },
   ],
   jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -625,7 +626,7 @@ const hubspot: SoftwarePage = {
     },
   ],
   jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -703,7 +704,7 @@ const workday: SoftwarePage = {
     },
   ],
   jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -785,7 +786,7 @@ const sharepoint: SoftwarePage = {
     },
   ],
   jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-26',
   published: true,
 };
@@ -863,7 +864,7 @@ const microsoftDynamics: SoftwarePage = {
     },
   ],
   jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-07-15',
   published: true,
 };
@@ -941,7 +942,7 @@ const coupa: SoftwarePage = {
     },
   ],
   jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-07-15',
   published: true,
 };
@@ -1019,7 +1020,7 @@ const docusign: SoftwarePage = {
     },
   ],
   jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-07-15',
   published: true,
 };
@@ -1101,7 +1102,7 @@ const box: SoftwarePage = {
     },
   ],
   jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-07-16',
   published: true,
 };
@@ -1179,7 +1180,7 @@ const billCom: SoftwarePage = {
     },
   ],
   jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-07-16',
   published: true,
 };
@@ -1257,7 +1258,7 @@ const sapConcur: SoftwarePage = {
     },
   ],
   jsonLd: ['Article', 'SoftwareApplication', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-07-16',
   published: true,
 };

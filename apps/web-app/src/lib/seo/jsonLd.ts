@@ -2,7 +2,7 @@ import { SITE_CONFIG } from '@/lib/config';
 import { PARENT_HUB } from '@/content/registry';
 import type { SeoPage } from '@/content/types';
 import { pageUrl } from './url';
-import { SITE_ORGANIZATION_ID, SITE_WEBSITE_ID } from './organization';
+import { SITE_ORGANIZATION_ID, SITE_WEBSITE_ID, SITE_PERSON_ID } from './organization';
 
 type JsonLdObject = Record<string, unknown>;
 
@@ -61,11 +61,15 @@ function article(page: SeoPage): JsonLdObject {
     url: pageUrl(page),
     datePublished: page.updatedAt,
     dateModified: page.updatedAt,
-    author: {
-      '@type': 'Person',
-      name: page.author.name,
-      ...(page.author.sameAs ? { sameAs: page.author.sameAs } : {}),
-    },
+    // References the canonical Person node (app/layout.tsx via
+    // @/lib/seo/organization) by @id rather than restating it — same
+    // by-reference convention as `publisher` below. Previously this
+    // restated `page.author` as an inline `Person` whose `sameAs` pointed at
+    // the COMPANY LinkedIn page, asserting (164 times) that a human
+    // resolves to a company. `page.author` itself is now sourced from the
+    // single `SITE_AUTHOR` constant, so this reference and that constant can
+    // never drift apart.
+    author: { '@id': SITE_PERSON_ID },
     // References the canonical Organization node (app/layout.tsx via
     // @/lib/seo/organization) by @id rather than restating it — see the
     // 'Organization' no-op case in generateJsonLd() below for why.

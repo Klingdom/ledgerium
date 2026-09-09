@@ -1,4 +1,5 @@
 import type { IndustryPage } from '../types';
+import { SITE_AUTHOR } from '@/lib/seo/organization';
 
 /** Industry pages. Mid-funnel; industry-specific documentation and compliance context. */
 
@@ -76,7 +77,7 @@ const manufacturing: IndustryPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -155,7 +156,7 @@ const healthcare: IndustryPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -234,7 +235,7 @@ const insurance: IndustryPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -313,7 +314,7 @@ const banking: IndustryPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -392,7 +393,7 @@ const saas: IndustryPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -471,7 +472,7 @@ const professionalServices: IndustryPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -550,7 +551,7 @@ const government: IndustryPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -629,7 +630,7 @@ const education: IndustryPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -708,7 +709,7 @@ const retail: IndustryPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-07-15',
   published: true,
 };

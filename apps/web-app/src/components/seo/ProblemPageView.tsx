@@ -57,11 +57,13 @@ export function ProblemPageView({ page }: { page: ProblemPage }) {
 
       <BulletList title="Common mistakes" items={page.commonMistakes} />
 
-      <HowLedgeriumCaptures introSentence={page.mechanismIntro} />
+      <HowLedgeriumCaptures pageType={page.type} slug={page.slug} introSentence={page.mechanismIntro} />
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
       <FinalCta
+        pageType={page.type}
+        slug={page.slug}
         heading="Document the real process, not the remembered one"
         body="Record a workflow once and generate an SOP, a process map, and an improvement report from how the work actually happens."
         ctaLabel="Start free"

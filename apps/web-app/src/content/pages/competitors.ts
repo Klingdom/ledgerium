@@ -1,4 +1,5 @@
 import type { CompetitorsPage } from '../types';
+import { SITE_AUTHOR } from '@/lib/seo/organization';
 
 /**
  * Competitors pages. "[subject] competitors" — landscape/market-research intent.
@@ -78,7 +79,7 @@ const scribe: CompetitorsPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-07-07',
   published: true,
 };
@@ -154,7 +155,7 @@ const tango: CompetitorsPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -230,7 +231,7 @@ const celonis: CompetitorsPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -306,7 +307,7 @@ const uipath: CompetitorsPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -382,7 +383,7 @@ const soroco: CompetitorsPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -458,7 +459,7 @@ const whatfix: CompetitorsPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -534,7 +535,7 @@ const walkme: CompetitorsPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -610,7 +611,7 @@ const kissflow: CompetitorsPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -686,7 +687,7 @@ const getguru: CompetitorsPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-27',
   published: true,
 };
@@ -762,7 +763,7 @@ const abbyy: CompetitorsPage = {
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
-  author: { name: 'Ledgerium Research Team', sameAs: ['https://www.linkedin.com/company/ledgerium-ai'] },
+  author: SITE_AUTHOR,
   updatedAt: '2026-06-27',
   published: true,
 };

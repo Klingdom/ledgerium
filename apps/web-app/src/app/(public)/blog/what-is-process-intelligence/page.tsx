@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { SITE_ORGANIZATION_ID } from '@/lib/seo/organization';
+import { SITE_ORGANIZATION_ID, SITE_PERSON_ID } from '@/lib/seo/organization';
 
 export const metadata: Metadata = {
   title: 'What Is Process Intelligence? A Practical Definition',
@@ -24,7 +24,7 @@ const jsonLd = {
     'Process intelligence turns observed work into a measurable, improvable model. A practical definition, how it differs from documentation and process mining, and where to start.',
   datePublished: '2026-06-28',
   dateModified: '2026-06-28',
-  author: { '@type': 'Organization', name: 'Ledgerium Research Team' },
+  author: { '@id': SITE_PERSON_ID },
   // Reference to the single canonical Organization node emitted sitewide in
   // app/layout.tsx, not a redeclaration (SEO_AEO_EFFECTIVENESS_REVIEW_001 §5 P1-2).
   publisher: { '@id': SITE_ORGANIZATION_ID },

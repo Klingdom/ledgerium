@@ -23,12 +23,16 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ALL_PAGES } from '@/content/registry';
+import { SITE_CONFIG } from '@/lib/config';
 import { generateJsonLd } from './jsonLd';
 import {
   SITE_ORGANIZATION_ID,
   SITE_WEBSITE_ID,
+  SITE_PERSON_ID,
   SITE_ORGANIZATION_NODE,
   SITE_WEBSITE_NODE,
+  SITE_FOUNDER_NODE,
+  SITE_AUTHOR,
   SITE_ORGANIZATION_KNOWS_ABOUT,
   SITE_ORGANIZATION_SAME_AS,
   SITE_ORGANIZATION_LOGO_PATH,
@@ -40,6 +44,21 @@ const PUBLIC_DIR = resolve(__dirname, '..', '..', '..', 'public');
 const ROOT_LAYOUT_FILE = resolve(__dirname, '..', '..', 'app', 'layout.tsx');
 
 const KNOWN_BROKEN_LINKEDIN_URL = 'https://www.linkedin.com/company/ledgerium';
+const KNOWN_COMPANY_LINKEDIN_URL = 'https://www.linkedin.com/company/ledgerium-ai';
+
+/** Any string that looks like an email address — used to assert none leaks into JSON-LD. */
+const EMAIL_PATTERN = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+
+function collectStrings(value: unknown, out: string[] = []): string[] {
+  if (typeof value === 'string') {
+    out.push(value);
+  } else if (Array.isArray(value)) {
+    for (const v of value) collectStrings(v, out);
+  } else if (value && typeof value === 'object') {
+    for (const v of Object.values(value)) collectStrings(v, out);
+  }
+  return out;
+}
 
 describe('canonical Organization entity — single source of truth', () => {
   it('the canonical Organization node carries the sitewide @id and non-empty entity signals', () => {
@@ -143,5 +162,113 @@ describe('canonical Organization entity — single source of truth', () => {
     const graphMatches = text.match(/@graph/g) ?? [];
     expect(graphMatches.length).toBe(1);
     expect(text).not.toMatch(/'@type':\s*'Organization'/);
+  });
+
+  it('the root layout also embeds SITE_FOUNDER_NODE in the sitewide @graph, alongside WebSite and Organization', () => {
+    const text = readFileSync(ROOT_LAYOUT_FILE, 'utf8');
+    expect(text).toContain('SITE_FOUNDER_NODE');
+    const graphMatches = text.match(/@graph/g) ?? [];
+    expect(graphMatches.length).toBe(1);
+  });
+});
+
+/**
+ * Regression lock for the canonical author identity.
+ *
+ * SEO_AEO_CONTENT_STRATEGY_001 SYNTHESIS.md Tier 1 item 5: all 164
+ * registry-driven pages carried a fictional "Research Team" author whose
+ * `sameAs` pointed at a COMPANY LinkedIn page — a Person node cannot
+ * resolve to an Organization's URL, and a collective-noun placeholder is
+ * not an entity any system can look up. This file locks the replacement:
+ * one real, resolvable Person, referenced by `@id` everywhere, with the
+ * Person <-> Organization relationship declared in both directions.
+ */
+describe('canonical author identity — Phil Kling, not a fictional placeholder', () => {
+  it('SITE_AUTHOR is the single canonical author fact, sourced by a person-scoped sameAs (not the company page)', () => {
+    expect(SITE_AUTHOR.name).toBe('Phil Kling');
+    expect(SITE_AUTHOR.sameAs).toEqual(['https://www.linkedin.com/in/philkling']);
+    expect(SITE_AUTHOR.sameAs).not.toContain(KNOWN_COMPANY_LINKEDIN_URL);
+  });
+
+  it('SITE_FOUNDER_NODE is a Person whose @id resolves to a real anchor on /about, not a dangling reference', () => {
+    expect(SITE_FOUNDER_NODE['@type']).toBe('Person');
+    expect(SITE_FOUNDER_NODE['@id']).toBe(SITE_PERSON_ID);
+    expect(SITE_PERSON_ID).toBe(`${SITE_CONFIG.url}/about#phil-kling`);
+    expect(SITE_FOUNDER_NODE.name).toBe('Phil Kling');
+    expect(SITE_FOUNDER_NODE.sameAs).toEqual(['https://www.linkedin.com/in/philkling']);
+    // The defect being fixed: a Person's sameAs must never be a company URL.
+    expect(SITE_FOUNDER_NODE.sameAs).not.toContain(KNOWN_COMPANY_LINKEDIN_URL);
+  });
+
+  it('the graph resolves in both directions: Organization.founder -> Person, Person.worksFor -> Organization', () => {
+    expect(SITE_ORGANIZATION_NODE.founder).toEqual({ '@id': SITE_PERSON_ID });
+    expect(SITE_FOUNDER_NODE.worksFor).toEqual({ '@id': SITE_ORGANIZATION_ID });
+  });
+
+  it('the anchor the Person @id points at actually exists as an element id on the /about page (the reference is not a ghost)', () => {
+    const aboutFile = resolve(__dirname, '..', '..', 'app', '(public)', 'about', 'page.tsx');
+    const text = readFileSync(aboutFile, 'utf8');
+    expect(text).toContain('id="phil-kling"');
+    expect(text).toContain('Phil Kling');
+    expect(text).toContain('https://www.linkedin.com/in/philkling');
+  });
+
+  it('every page whose jsonLd includes Article references the canonical Person as author by @id, never restating a Person inline', () => {
+    const pagesWithArticle = ALL_PAGES.filter((p) => p.jsonLd.includes('Article'));
+    expect(pagesWithArticle.length).toBeGreaterThan(0);
+
+    for (const page of pagesWithArticle) {
+      const objs = generateJsonLd(page);
+      const article = objs.find((o) => o['@type'] === 'Article');
+      expect(article, `page ${page.type}:${page.slug} declares Article in jsonLd but none was emitted`).toBeDefined();
+      expect(article!.author).toEqual({ '@id': SITE_PERSON_ID });
+    }
+  });
+
+  it('article() never emits an inline Person node — no "@type": "Person" anywhere in generated JSON-LD', () => {
+    for (const page of ALL_PAGES) {
+      const objs = generateJsonLd(page);
+      for (const obj of objs) {
+        expect(obj['@type']).not.toBe('Person');
+      }
+    }
+  });
+
+  it('every page.author resolves to the single canonical SITE_AUTHOR constant — no drift across the 164-page registry', () => {
+    for (const page of ALL_PAGES) {
+      const author = (page as { author?: { name: string; sameAs?: readonly string[] } }).author;
+      if (!author) continue;
+      expect(author.name, `page ${page.type}:${page.slug} author.name diverged from SITE_AUTHOR`).toBe(SITE_AUTHOR.name);
+      expect(author.sameAs, `page ${page.type}:${page.slug} author.sameAs diverged from SITE_AUTHOR`).toEqual([
+        ...SITE_AUTHOR.sameAs,
+      ]);
+    }
+  });
+
+  it('no emitted JSON-LD node for any page (including the sitewide graph nodes) contains an email address', () => {
+    for (const page of ALL_PAGES) {
+      const objs = generateJsonLd(page);
+      for (const obj of objs) {
+        const strings = collectStrings(obj);
+        for (const s of strings) {
+          expect(s, `found an email-shaped string in ${page.type}:${page.slug}: "${s}"`).not.toMatch(EMAIL_PATTERN);
+        }
+      }
+    }
+    for (const node of [SITE_WEBSITE_NODE, SITE_ORGANIZATION_NODE, SITE_FOUNDER_NODE]) {
+      const strings = collectStrings(node);
+      for (const s of strings) {
+        expect(s, `found an email-shaped string in sitewide node: "${s}"`).not.toMatch(EMAIL_PATTERN);
+      }
+    }
+  });
+
+  it('the fictional placeholder author name is fully retired from the content registry and the SEO layer', () => {
+    const jsonLdFile = resolve(__dirname, 'jsonLd.ts');
+    const orgFile = resolve(__dirname, 'organization.ts');
+    for (const file of [jsonLdFile, orgFile, ROOT_LAYOUT_FILE]) {
+      const text = readFileSync(file, 'utf8');
+      expect(text).not.toContain('Ledgerium Research Team');
+    }
   });
 });

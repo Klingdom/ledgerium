@@ -9,10 +9,26 @@ import { TrackedLink } from '@/components/TrackedLink';
 import { getRelatedPages } from '@/lib/seo/related';
 import { PARENT_HUB } from '@/content/registry';
 import type { SeoPage } from '@/content/types';
+import { resolveInstallTarget, type InstallMethod } from '@/lib/install';
 
 const SIGNUP = '/signup';
 const DEMO = '/demo';
 const PRICING = '/pricing';
+const INSTALL = '/install';
+
+/**
+ * Label for the two peer install-CTA placements this file adds (the
+ * mechanism block and the footer CTA row). Resolved from the SAME
+ * `resolveInstallTarget()` the `/install` page and `ExtensionInstallButton`
+ * use — never a hardcoded Chrome Web Store claim. While the store listing
+ * does not exist (`chromeStoreUrl` is a placeholder — see lib/config.ts),
+ * this reads "Install the extension"; it flips to "Add to Chrome"
+ * automatically, with no copy change needed, once the real listing goes live
+ * and `resolveInstallTarget` starts returning `web_store`.
+ */
+export function installLinkLabel(method: InstallMethod = resolveInstallTarget().method): string {
+  return method === 'web_store' ? 'Add to Chrome' : 'Install the extension';
+}
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -249,11 +265,20 @@ export function BeforeYouDecide({ pricingLocation, demoLocation }: { pricingLoca
   );
 }
 
-export function HowLedgeriumCaptures({ introSentence }: { introSentence?: string | undefined } = {}) {
+export function HowLedgeriumCaptures({
+  pageType,
+  slug,
+  introSentence,
+}: {
+  pageType: string;
+  slug: string;
+  introSentence?: string | undefined;
+}) {
+  const installLabel = installLinkLabel();
   const steps = [
-    { icon: Chrome, title: 'Install the extension', text: 'Add the Ledgerium recorder to Chrome. No screenshots and no keystrokes are ever captured.' },
-    { icon: Circle, title: 'Record the real workflow', text: 'Perform the process once. Ledgerium captures the structured steps, timing, and system context.' },
-    { icon: FileText, title: 'Get the output', text: 'Receive an SOP, a process map, and a workflow intelligence report generated from the real work.' },
+    { icon: Chrome, title: installLabel, text: 'Add the Ledgerium recorder to Chrome. No screenshots and no keystrokes are ever captured.', href: INSTALL },
+    { icon: Circle, title: 'Record the real workflow', text: 'Perform the process once. Ledgerium captures the structured steps, timing, and system context.', href: null },
+    { icon: FileText, title: 'Get the output', text: 'Receive an SOP, a process map, and a workflow intelligence report generated from the real work.', href: null },
   ];
   return (
     <section className="py-16 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
@@ -263,12 +288,26 @@ export function HowLedgeriumCaptures({ introSentence }: { introSentence?: string
           <p className="text-[15px] text-[#e2e8f0] leading-relaxed mb-8 max-w-3xl">{introSentence}</p>
         )}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          {steps.map(({ icon: Icon, title, text }, i) => (
+          {steps.map(({ icon: Icon, title, text, href }, i) => (
             <div key={title} className="card p-6 flex flex-col gap-3">
               <div className="w-9 h-9 rounded-lg bg-brand-900/20 border border-brand-700/25 flex items-center justify-center">
                 <Icon className="h-4 w-4 text-brand-600" />
               </div>
-              <h3 className="text-sm font-semibold text-[var(--content-primary)]">{`${i + 1}. ${title}`}</h3>
+              <h3 className="text-sm font-semibold text-[var(--content-primary)]">
+                {i + 1}.{' '}
+                {href ? (
+                  <TrackedLink
+                    href={href}
+                    event="seo_install_clicked"
+                    properties={{ pageType, slug, placement: 'mechanism' }}
+                    className="underline underline-offset-2 hover:text-brand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded-sm"
+                  >
+                    {title}
+                  </TrackedLink>
+                ) : (
+                  title
+                )}
+              </h3>
               <p className="text-sm text-[#e2e8f0] leading-relaxed">{text}</p>
             </div>
           ))}
@@ -343,7 +382,12 @@ export function MidCta({ location }: { location: string }) {
 }
 
 export function RelatedPagesGrid({ page }: { page: SeoPage }) {
-  const related = getRelatedPages(page, 3);
+  // No explicit limit: the resolver returns this page's full row from the link
+  // graph (curated `related` first, then any auto-assigned links that keep other
+  // pages above the >=2 inbound-link invariant — see lib/seo/related.ts).
+  // Truncating here would silently re-orphan the pages those links exist for.
+  // The row is capped at MAX_RELATED_LINKS (5), so the grid stays 1-2 rows.
+  const related = getRelatedPages(page);
   if (related.length === 0) return null;
   return (
     <section className="py-14 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
@@ -380,7 +424,21 @@ export function HonestLimitation({ text }: { text: string }) {
   );
 }
 
-export function FinalCta({ heading, body, ctaLabel, location }: { heading: string; body: string; ctaLabel: string; location: string }) {
+export function FinalCta({
+  heading,
+  body,
+  ctaLabel,
+  location,
+  pageType,
+  slug,
+}: {
+  heading: string;
+  body: string;
+  ctaLabel: string;
+  location: string;
+  pageType: string;
+  slug: string;
+}) {
   return (
     <section className="py-20 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
@@ -399,6 +457,18 @@ export function FinalCta({ heading, body, ctaLabel, location }: { heading: strin
           <Link href="/product" className="btn-secondary text-base px-7 py-3.5">See how it works</Link>
         </div>
         <p className="mt-5 text-xs text-[var(--content-tertiary)]">Free plan includes 5 documented workflows per month. No screenshots ever captured.</p>
+        <p className="mt-3 text-xs text-[var(--content-tertiary)]">
+          Or{' '}
+          <TrackedLink
+            href={INSTALL}
+            event="seo_install_clicked"
+            properties={{ pageType, slug, placement: 'footer_cta' }}
+            className="text-brand-500 hover:text-brand-400 underline underline-offset-2 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded-sm"
+          >
+            {installLinkLabel()}
+          </TrackedLink>{' '}
+          first.
+        </p>
       </div>
     </section>
   );

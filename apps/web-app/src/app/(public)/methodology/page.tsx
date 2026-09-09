@@ -70,7 +70,7 @@ const SECTIONS: { h: string; body: string[] }[] = [
   {
     h: 'How to cite this',
     body: [
-      'Attribute to Ledgerium AI, with the page URL and its updated date. The author on each page is the Ledgerium Research Team.',
+      'Attribute to Ledgerium AI, with the page URL and its updated date. The author on each page is Phil Kling.',
     ],
   },
 ];

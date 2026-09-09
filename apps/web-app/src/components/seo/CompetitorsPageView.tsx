@@ -65,12 +65,14 @@ export function CompetitorsPageView({ page }: { page: CompetitorsPage }) {
 
       <BulletList title="How to evaluate this space" items={page.evaluationCriteria} />
 
-      <HowLedgeriumCaptures introSentence={page.mechanismIntro} />
+      <HowLedgeriumCaptures pageType={page.type} slug={page.slug} introSentence={page.mechanismIntro} />
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
       <BeforeYouDecide pricingLocation="competitors_pricing" demoLocation="competitors_demo" />
       <FinalCta
+        pageType={page.type}
+        slug={page.slug}
         heading="Try the structured-capture approach"
         body="Record one workflow free and see what measurable process data looks like next to a screenshot guide."
         ctaLabel="Start free"

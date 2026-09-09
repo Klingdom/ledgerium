@@ -69,12 +69,14 @@ export function WorkflowPageView({ page }: { page: WorkflowPage }) {
       <BulletList title="Common mistakes" items={page.commonMistakes} />
       <BulletList title="AI and automation opportunities" items={page.aiOpportunities} />
 
-      <HowLedgeriumCaptures introSentence={page.mechanismIntro} />
+      <HowLedgeriumCaptures pageType={page.type} slug={page.slug} introSentence={page.mechanismIntro} />
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
       <DemoNote location="workflow_demo" />
       <FinalCta
+        pageType={page.type}
+        slug={page.slug}
         heading="Capture this workflow once"
         body="Record the real process and turn it into an SOP, a process map, and an AI opportunity report, generated from how the work actually happens."
         ctaLabel="Start free"

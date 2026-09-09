@@ -5,7 +5,7 @@ import { AuthProvider } from '@/components/AuthProvider';
 import { PostHogProvider } from '@/components/PostHogProvider';
 import { UmamiAnalytics } from '@/components/UmamiAnalytics';
 import { SITE_CONFIG } from '@/lib/config';
-import { SITE_WEBSITE_NODE, SITE_ORGANIZATION_NODE } from '@/lib/seo/organization';
+import { SITE_WEBSITE_NODE, SITE_ORGANIZATION_NODE, SITE_FOUNDER_NODE } from '@/lib/seo/organization';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -37,13 +37,16 @@ export const metadata: Metadata = {
     : {}),
 };
 
-// Sitewide entity schema (WebSite + Organization) emitted once on every page.
-// The full node definitions live in `@/lib/seo/organization` — the single
-// source of truth every other JSON-LD block on the site references by `@id`
-// instead of restating (SEO_AEO_EFFECTIVENESS_REVIEW_001 §5 P1-2).
+// Sitewide entity schema (WebSite + Organization + Person) emitted once on
+// every page. The full node definitions live in `@/lib/seo/organization` —
+// the single source of truth every other JSON-LD block on the site
+// references by `@id` instead of restating
+// (SEO_AEO_EFFECTIVENESS_REVIEW_001 §5 P1-2). `SITE_FOUNDER_NODE` must be
+// present here for its `@id` to resolve wherever `Article.author`
+// references it (`@/lib/seo/jsonLd.ts`'s `article()`).
 const SITE_JSON_LD = {
   '@context': 'https://schema.org',
-  '@graph': [SITE_WEBSITE_NODE, SITE_ORGANIZATION_NODE],
+  '@graph': [SITE_WEBSITE_NODE, SITE_ORGANIZATION_NODE, SITE_FOUNDER_NODE],
 };
 
 export default function RootLayout({

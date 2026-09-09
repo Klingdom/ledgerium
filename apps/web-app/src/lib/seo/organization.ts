@@ -12,12 +12,14 @@ import { SITE_CONFIG } from '@/lib/config';
  * fifth shape of the same entity.
  *
  * This file is now the single source of truth. `app/layout.tsx` embeds the
- * full node once, sitewide, via `SITE_WEBSITE_NODE` / `SITE_ORGANIZATION_NODE`.
- * Every other JSON-LD block that needs to say "this is published by /
- * provided by / about Ledgerium AI" references it by `@id`
- * (`SITE_ORGANIZATION_ID`) instead of restating it — the standard JSON-LD
- * node-reference convention, already used correctly elsewhere in this
- * codebase for `WebSite` (`jsonLd.ts`'s `webPage().isPartOf`).
+ * full node set once, sitewide, via `SITE_WEBSITE_NODE` /
+ * `SITE_ORGANIZATION_NODE` / `SITE_FOUNDER_NODE`. Every other JSON-LD block
+ * that needs to say "this is published by / provided by / about Ledgerium
+ * AI" or "written by [this person]" references the relevant node by `@id`
+ * (`SITE_ORGANIZATION_ID` / `SITE_PERSON_ID`) instead of restating it — the
+ * standard JSON-LD node-reference convention, already used correctly
+ * elsewhere in this codebase for `WebSite` (`jsonLd.ts`'s
+ * `webPage().isPartOf`).
  *
  * Deliberately depends on nothing but `@/lib/config` (which itself has zero
  * imports). `app/layout.tsx` is the ROOT layout and wraps every route in the
@@ -29,6 +31,7 @@ import { SITE_CONFIG } from '@/lib/config';
 
 export const SITE_WEBSITE_ID = `${SITE_CONFIG.url}/#website`;
 export const SITE_ORGANIZATION_ID = `${SITE_CONFIG.url}/#organization`;
+export const SITE_PERSON_ID = `${SITE_CONFIG.url}/about#phil-kling`;
 
 /**
  * Genuine expertise areas only — not keyword-stuffing. Reconciled from two
@@ -78,6 +81,29 @@ export const SITE_ORGANIZATION_LOGO_PATH = '/img/ledgerium_primary_logo.png';
 export const SITE_ORGANIZATION_LOGO_WIDTH = 1536;
 export const SITE_ORGANIZATION_LOGO_HEIGHT = 512;
 
+/**
+ * Canonical author identity — a single, resolvable human, not a fictional
+ * placeholder team name.
+ *
+ * Every one of the 164 registry-driven leaf pages previously carried its own
+ * inline `author: { name: '<placeholder team name>', sameAs: [...] }`
+ * literal, repeated 164 times, and that `sameAs` pointed at the COMPANY
+ * LinkedIn page — asserting, 164 times, that a Person's identity resolves to
+ * a company. A collective-noun placeholder is not an entity any system
+ * (Google's Knowledge Graph, an LLM doing entity resolution) can look up and
+ * confirm exists.
+ *
+ * This constant is the single place that fact is declared. Every content
+ * entry in `src/content/pages/*.ts` references it instead of restating it —
+ * the same by-reference discipline this file already uses for the
+ * Organization node — so the next identity change is one edit, not 164, and
+ * cannot drift between pages.
+ */
+export const SITE_AUTHOR = {
+  name: 'Phil Kling',
+  sameAs: ['https://www.linkedin.com/in/philkling'],
+} as const;
+
 export const SITE_WEBSITE_NODE = {
   '@type': 'WebSite',
   '@id': SITE_WEBSITE_ID,
@@ -107,4 +133,30 @@ export const SITE_ORGANIZATION_NODE = {
     'Ledgerium AI is workflow intelligence software. It records real browser-based work and turns it into SOPs, process maps, workflow intelligence reports, and AI opportunity reports.',
   knowsAbout: [...SITE_ORGANIZATION_KNOWS_ABOUT],
   sameAs: [...SITE_ORGANIZATION_SAME_AS],
+  // References the Person node below by @id (not restated inline) so the
+  // graph resolves in both directions: Organization -> founder and, via
+  // `SITE_FOUNDER_NODE.worksFor`, Person -> employer.
+  founder: { '@id': SITE_PERSON_ID },
+};
+
+/**
+ * The canonical Person entity this site's content is authored by.
+ *
+ * Replaces the fictional, unresolvable placeholder team byline that every
+ * Article node previously asserted (see `SITE_AUTHOR` above). A
+ * `Person` node needs an `@id` that actually resolves to a page where that
+ * person appears — `${SITE_CONFIG.url}/about#phil-kling` is the anchor on
+ * the /about page's Founder section (`app/(public)/about/page.tsx`), not a
+ * dangling reference. `sameAs` points at the individual's own LinkedIn
+ * profile, never the company page — conflating the two was the exact defect
+ * being fixed (a Person's identity cannot resolve to an Organization's URL).
+ */
+export const SITE_FOUNDER_NODE = {
+  '@type': 'Person',
+  '@id': SITE_PERSON_ID,
+  name: SITE_AUTHOR.name,
+  url: `${SITE_CONFIG.url}/about`,
+  jobTitle: 'Founder',
+  sameAs: [...SITE_AUTHOR.sameAs],
+  worksFor: { '@id': SITE_ORGANIZATION_ID },
 };

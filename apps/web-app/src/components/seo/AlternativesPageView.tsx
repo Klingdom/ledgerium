@@ -59,12 +59,14 @@ export function AlternativesPageView({ page }: { page: AlternativesPage }) {
 
       <BulletList title="How to choose" items={page.evaluationCriteria} />
 
-      <HowLedgeriumCaptures introSentence={page.mechanismIntro} />
+      <HowLedgeriumCaptures pageType={page.type} slug={page.slug} introSentence={page.mechanismIntro} />
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
       <BeforeYouDecide pricingLocation="alternatives_pricing" demoLocation="alternatives_demo" />
       <FinalCta
+        pageType={page.type}
+        slug={page.slug}
         heading="See the structured-data difference for yourself"
         body="Record one workflow free and get an SOP, a process map, and an intelligence report, generated from real work rather than screenshots."
         ctaLabel="Start free"

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowRight, BarChart3 } from 'lucide-react';
 import type { SopTemplatePage, WorkflowStep } from '@/content/types';
+import { renderSopTemplateMarkdown } from '@/lib/sop-export';
 import { SeoPageView } from './SeoPageView';
 import {
   Breadcrumbs,
@@ -17,6 +18,7 @@ import {
   DemoNote,
 } from './Blocks';
 import { FaqBlock } from './FaqBlock';
+import { SopExportPanel } from './SopExportPanel';
 
 /** Token-consistent ordinal-badge palette cycled across steps (execution-SOP style). */
 const STEP_BADGE = [
@@ -44,6 +46,37 @@ const SCORECARD = [
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
     <p className="text-[11px] font-semibold text-brand-500 uppercase tracking-widest mb-2">{children}</p>
+  );
+}
+
+/**
+ * "Get this SOP" — the page's primary utility, placed right after the hero's
+ * short answer and data-point callout so it is seen, not buried at the
+ * bottom. The section shell (heading + honest-limitation line, styled like
+ * `HonestLimitation` below) is server-rendered; only the download/copy
+ * controls and the post-download offer live in the `SopExportPanel` client
+ * component. `markdown` is rendered once here, server-side, and passed down
+ * as a plain string prop — see SopExportPanel.tsx for why it must not be
+ * regenerated or re-fetched in the browser.
+ */
+function SopDownloadSection({ slug, markdown }: { slug: string; markdown: string }) {
+  return (
+    <section className="py-10 bg-[var(--surface-primary)]">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6">
+        <Eyebrow>Template</Eyebrow>
+        <h2 className="text-xl font-bold text-[var(--content-primary)] mb-4">Get this SOP</h2>
+        <SopExportPanel slug={slug} markdown={markdown} />
+        <div className="mt-8 pt-6 border-t border-[var(--border-subtle)]">
+          <p className="text-xs font-semibold text-[var(--content-tertiary)] uppercase tracking-widest mb-2">
+            Worth knowing
+          </p>
+          <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
+            This is a blank starting structure — it doesn&apos;t know your roles, thresholds, or systems. A
+            recording fills those in from a real run instead of a guess.
+          </p>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -149,12 +182,18 @@ function SopReportPreview({ originalDataPoint, sectionCount }: { originalDataPoi
 }
 
 export function SopTemplatePageView({ page }: { page: SopTemplatePage }) {
+  // Rendered once, server-side, at build time (this component is a Server
+  // Component). Passed down as a plain string prop — never regenerated or
+  // re-fetched client-side. See SopExportPanel.tsx.
+  const markdown = renderSopTemplateMarkdown(page);
+
   return (
     <>
       <SeoPageView pageType={page.type} slug={page.slug} />
       <Breadcrumbs page={page} />
       <SeoHero eyebrow={page.eyebrow} h1={page.h1} shortAnswer={page.shortAnswer} ctaLabel="Generate the SOP from real work" location="sop_hero" author={page.author} updatedAt={page.updatedAt} />
       <DataPointCallout text={page.originalDataPoint} />
+      <SopDownloadSection slug={page.slug} markdown={markdown} />
       <KeyTakeaways items={page.keyTakeaways} />
 
       <ProseSection title="Who uses this SOP and when">
@@ -220,12 +259,14 @@ export function SopTemplatePageView({ page }: { page: SopTemplatePage }) {
         <p>{page.howLedgeriumGenerates}</p>
       </ProseSection>
 
-      <HowLedgeriumCaptures introSentence={page.mechanismIntro} />
+      <HowLedgeriumCaptures pageType={page.type} slug={page.slug} introSentence={page.mechanismIntro} />
       <HonestLimitation text={page.honestLimitation} />
       <FaqBlock faqs={page.faqs} pageType={page.type} slug={page.slug} />
       <RelatedPagesGrid page={page} />
       <DemoNote location="sop_demo" />
       <FinalCta
+        pageType={page.type}
+        slug={page.slug}
         heading="Generate this SOP from real work"
         body="Record the process once and Ledgerium writes the SOP from the actual steps, so it matches how your team really works."
         ctaLabel="Start free"
