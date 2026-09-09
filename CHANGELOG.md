@@ -6,6 +6,32 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-09] - Correct a false provenance claim on /methodology (Mode 3, honesty fix)
+
+**Trigger:** surfaced by `content-editor` while scoping Tier 1 item 2, verified by coordinator at `apps/web-app/src/app/(public)/methodology/page.tsx:46`.
+
+### Fixed
+
+The methodology page described each page's "From Ledgerium recordings" data point as *"behavioral observations derived from how real recorded workflows actually run."* That was false. All 164 `originalDataPoint` fields are claims about what the recording-based method surfaces relative to a hand-written template — not observations aggregated from real recordings — and there are zero customers, so no population of real runs exists to have observed.
+
+The page now says what is true: the data points describe what recording a real run surfaces that a template written from memory does not; they are claims about the method, not aggregated statistics from a population of customer recordings. Adds an explicit statement that Ledgerium does not publish measured benchmarks today, and a forward commitment that any published number will carry its sample size.
+
+**Why this ranked above publishing new evidence:** on a product positioned on evidence and traceability, an active false provenance claim on the page that explains provenance is more damaging than the absence of data. Removing a false claim is a correction, not a publication, so it is exempt from the content re-entry gate (which remains FAIL on all three conditions).
+
+D-4 clause 1 did not fire: 2 user-visible strings changed, below the 3-string threshold.
+
+### Validation
+
+- `pnpm --filter @ledgerium/web-app test`: 169 files / 2937 tests, all passing — unchanged.
+- `pnpm typecheck`: clean across all 11 packages/apps.
+
+### Related, not fixed here
+
+- `bundle-builder.ts` hashes export bundles with `JSON.stringify`, which is key-order dependent, while `canonicalHash.ts` states that approach cannot back a reproducibility claim. All 10 fixtures DO verify against their manifests as produced (coordinator-verified, 10/10 — an agent report of "5 of 10 failing" was incorrect and did not reproduce). The manifest therefore proves tamper-evidence, not canonical-content reproducibility. This must be resolved or the claim narrowed before any determinism/reproducibility artifact is published.
+- `docs/invariants.md` remains stale on `SEGMENTATION_RULE_VERSION` (says 1.0.0; source is 1.1.0).
+
+---
+
 ## [2026-09-08] - SEO foundation: link-graph invariant, install path, named author (Mode 5 directed, N=3)
 
 **Trigger:** CEO-directed Tier 1 items 3-5 from `docs/meta/SEO_AEO_CONTENT_STRATEGY_001/SYNTHESIS.md`. Executed as three independent iterations. Same-Area (`web-app`) saturation acknowledged at sequence start.

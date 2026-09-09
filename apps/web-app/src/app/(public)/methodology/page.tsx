@@ -43,8 +43,8 @@ const SECTIONS: { h: string; body: string[] }[] = [
   {
     h: 'How the data point on each page is sourced',
     body: [
-      'Each page carries one "From Ledgerium recordings" data point. These are behavioral observations derived from how real recorded workflows actually run: where time concentrates, which steps repeat, and what varies between runs.',
-      'They are observations about process behavior, not external benchmark statistics. We do not cite third-party industry numbers unless they are named and sourced.',
+      'Each page carries one "From Ledgerium recordings" data point. These describe what recording a real run surfaces that a template written from memory does not: where time concentrates, which steps repeat, and what varies between runs.',
+      'They are claims about the method, not aggregated statistics from a population of customer recordings. We do not publish measured benchmarks today, and we do not cite third-party industry numbers unless they are named and sourced. When we do publish numbers, they will carry their sample size.',
     ],
   },
   {
