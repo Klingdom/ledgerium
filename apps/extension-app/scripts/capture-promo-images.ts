@@ -27,7 +27,13 @@ const __dirname = dirname(__filename);
 
 const OUTPUT_DIR = 'C:\\Users\\philk\\Desktop\\ledgerium-chrome-store-assets';
 const SAMPLES_DIR = resolve(__dirname, '..', 'public', 'samples');
-const DEVICE_SCALE_FACTOR = 2;
+// MUST be 1. The Chrome Web Store validates promotional assets against EXACT
+// pixel dimensions (small tile 440x280, large 920x680, marquee 1400x560) and
+// rejects anything else. Playwright's `clip` is expressed in CSS pixels, so a
+// deviceScaleFactor of N emits an N-times-larger PNG: this was previously 2 and
+// produced 880x560 / 1840x1360 / 2800x1120, all of which the Store rejects.
+// There is no retina variant for promo tiles — do not raise this.
+const DEVICE_SCALE_FACTOR = 1;
 const FONT_PAINT_SETTLE_MS = 800;
 
 interface PromoSpec {
@@ -64,25 +70,6 @@ function out(filename: string): string {
   return resolve(OUTPUT_DIR, filename);
 }
 
-function buildWrapperHtml(fileUrl: string, width: number, height: number): string {
-  return `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<style>
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  html,body{width:${width}px;height:${height}px;overflow:hidden;background:#000}
-  iframe{
-    width:${width}px;height:${height}px;border:none;display:block;
-  }
-</style>
-</head>
-<body>
-  <iframe src="${fileUrl}" width="${width}" height="${height}" scrolling="no"></iframe>
-</body>
-</html>`;
-}
-
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
@@ -106,21 +93,21 @@ async function main(): Promise<void> {
         const htmlPath = resolve(SAMPLES_DIR, spec.sourceHtml);
         const fileUrl = pathToFileURL(htmlPath).href;
 
-        // Use setContent with a wrapper to avoid data: URL length limits
-        const wrapper = buildWrapperHtml(fileUrl, spec.width, spec.height);
-        await page.setContent(wrapper, { waitUntil: 'networkidle' });
+        // Navigate directly to the template. This previously used setContent()
+        // with an iframe wrapper, which silently produced BLANK BLACK images:
+        // setContent() yields an about:blank document, and Chromium blocks
+        // file:// iframes loaded from it, so the frame never rendered and the
+        // screenshot captured only the wrapper's background. Direct navigation
+        // has no data-URL length limit and no cross-origin restriction.
+        await page.goto(fileUrl, { waitUntil: 'networkidle' });
 
-        // Wait for fonts inside the iframe
+        // Templates load Inter from Google Fonts; wait for it before painting.
         try {
           await page.evaluate(async () => {
-            const iframe = document.querySelector('iframe') as HTMLIFrameElement | null;
-            if (iframe?.contentDocument) {
-              await (iframe.contentDocument as any).fonts?.ready;
-            }
             await document.fonts.ready;
           });
         } catch {
-          // acceptable — fonts may not expose ready in iframe context
+          // acceptable — proceed with fallback font rather than failing capture
         }
 
         // Paint settle
