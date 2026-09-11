@@ -320,6 +320,104 @@ async function ensurePortal(plans: Record<PlanKey, PlanPrices>): Promise<void> {
 
 // ── Step 3 — GitHub secrets ──────────────────────────────────────────────────
 
+// ── Step 2b — Webhook endpoint ───────────────────────────────────────────────
+
+/**
+ * Every event `api/billing/webhook/route.ts` implements a `case` for.
+ *
+ * Derived from the handler, not from memory. An endpoint subscribed to fewer
+ * events than the handler implements fails silently: Stripe simply never
+ * delivers them, and the corresponding handler is dead code that looks alive.
+ * The runbook and the 6S Success prompt both listed six, omitting the two
+ * dispute events and `invoice.payment_action_required` — so SCA-required
+ * payments and disputes would have gone unhandled in live mode.
+ *
+ * Keep in sync with the handler. `verify()` reports any drift.
+ */
+const WEBHOOK_EVENTS = [
+  'charge.dispute.closed',
+  'charge.dispute.created',
+  'checkout.session.completed',
+  'customer.subscription.deleted',
+  'customer.subscription.trial_will_end',
+  'customer.subscription.updated',
+  'invoice.payment_action_required',
+  'invoice.payment_failed',
+  'invoice.payment_succeeded',
+] as const;
+
+const WEBHOOK_URL = 'https://ledgerium.ai/api/billing/webhook';
+
+/**
+ * Ensure the webhook endpoint exists and covers every implemented event.
+ *
+ * Live and test mode keep entirely separate endpoints AND separate signing
+ * secrets, so a live cutover always needs a new endpoint here — this is not a
+ * step that carries over.
+ *
+ * Stripe returns the signing secret ONLY in the create response; it is never
+ * readable again. So the secret is pushed to GitHub in the same breath as
+ * creating the endpoint. If that push fails, the secret is printed once — and
+ * if it is lost, the only remedy is to delete the endpoint and recreate it.
+ */
+async function ensureWebhook(): Promise<void> {
+  heading('2b. Webhook endpoint');
+
+  const existing = await stripe.webhookEndpoints.list({ limit: 100 });
+  const match = existing.data.find((e) => e.url === WEBHOOK_URL);
+
+  if (match) {
+    const have = new Set(match.enabled_events);
+    const missing = WEBHOOK_EVENTS.filter((e) => !have.has(e) && !have.has('*'));
+    console.log(`  exists   ${match.id} (${match.status})`);
+    console.log(`  events   ${match.enabled_events.length} subscribed, ${missing.length} missing`);
+
+    if (missing.length === 0) {
+      console.log('  ✓ covers every event the handler implements');
+      return;
+    }
+    for (const e of missing) console.log(`    missing: ${e}`);
+
+    if (!willWrite) {
+      console.log('  would update the endpoint to add the missing events');
+      return;
+    }
+    await stripe.webhookEndpoints.update(match.id, {
+      enabled_events: [...WEBHOOK_EVENTS] as Stripe.WebhookEndpointUpdateParams.EnabledEvent[],
+    });
+    console.log('  ✓ updated — note the signing secret is UNCHANGED by an update');
+    return;
+  }
+
+  console.log(`  none found at ${WEBHOOK_URL}`);
+  if (!willWrite) {
+    console.log(`  would create an endpoint subscribed to ${WEBHOOK_EVENTS.length} events`);
+    return;
+  }
+
+  const created = await stripe.webhookEndpoints.create({
+    url: WEBHOOK_URL,
+    enabled_events: [...WEBHOOK_EVENTS] as Stripe.WebhookEndpointCreateParams.EnabledEvent[],
+    description: 'Ledgerium AI — subscription + dispute lifecycle',
+  });
+  console.log(`  ✓ created ${created.id} (${WEBHOOK_EVENTS.length} events)`);
+
+  const secret = created.secret;
+  if (!secret) {
+    console.log('  ⚠ Stripe returned no signing secret — set STRIPE_WEBHOOK_SECRET by hand.');
+    return;
+  }
+
+  if (SET_SECRETS && ghSecretSet('STRIPE_WEBHOOK_SECRET', secret)) {
+    console.log('  ✓ STRIPE_WEBHOOK_SECRET pushed to GitHub Actions');
+    return;
+  }
+
+  // Printed only because it is unrecoverable otherwise. Not logged elsewhere.
+  console.log('\n  Signing secret — shown ONCE, Stripe will not reveal it again:\n');
+  console.log(`    gh secret set STRIPE_WEBHOOK_SECRET --body "${secret}"\n`);
+}
+
 function pushSecrets(plans: Record<PlanKey, PlanPrices>): void {
   heading('3. GitHub Actions secrets');
 
@@ -397,6 +495,7 @@ async function main(): Promise<void> {
   } satisfies Record<PlanKey, PlanPrices>;
 
   await ensurePortal(plans);
+  await ensureWebhook();
   pushSecrets(plans);
   await verify(plans);
 

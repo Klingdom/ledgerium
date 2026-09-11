@@ -13,6 +13,33 @@ You own the Stripe account that Ledgerium AI bills through. Ledgerium's billing
 code is complete and deployed; the remaining gap is entirely Stripe-side
 configuration.
 
+## Fastest path — one command, no dashboard work
+
+Ledgerium ships a script that does all of the Stripe-side setup: creates both
+products with monthly and annual prices, configures the Customer Portal for
+plan switching, creates the webhook endpoint subscribed to all nine events the
+handler implements, captures the signing secret, and pushes every resulting ID
+to GitHub Actions secrets. It is idempotent, adopts anything that already
+exists rather than duplicating it, and refuses to touch a live account unless
+`--live` is passed explicitly.
+
+**All it needs is the live secret key.** If you can hand that to Phil, he runs
+this once from the Ledgerium repo and the whole job is done:
+
+```bash
+# Dry run first — writes nothing, prints exactly what it would do:
+STRIPE_SECRET_KEY=sk_live_... pnpm --filter @ledgerium/web-app stripe:setup -- --live
+
+# Then, to actually apply:
+STRIPE_SECRET_KEY=sk_live_... pnpm --filter @ledgerium/web-app stripe:setup -- --apply --live --set-secrets
+```
+
+That keeps the key in a terminal rather than a chat window, and means nobody
+has to transcribe eight price IDs by hand.
+
+**If you would rather not share the key**, everything below is the manual
+equivalent. Do the steps in order; they produce the same result.
+
 ## Context you need before starting
 
 Ledgerium's production Stripe env vars were set on 2026-05-17 and have not
@@ -79,9 +106,19 @@ code pending a multi-user data layer, so they need no Live prices.)
 **3b. Create the Live webhook endpoint:**
 
 - URL: `https://ledgerium.ai/api/billing/webhook`
-- Events: `checkout.session.completed`, `customer.subscription.updated`,
-  `customer.subscription.deleted`, `invoice.payment_failed`,
-  `invoice.payment_succeeded`, `customer.subscription.trial_will_end`
+- Events — **all nine**, which is what the handler implements. An earlier draft
+  of this document listed six; the three missing ones meant SCA-required
+  payments and both dispute paths would have gone unhandled in live mode,
+  silently, because Stripe simply never delivers an unsubscribed event:
+  - `checkout.session.completed`
+  - `customer.subscription.updated`
+  - `customer.subscription.deleted`
+  - `customer.subscription.trial_will_end`
+  - `invoice.payment_succeeded`
+  - `invoice.payment_failed`
+  - `invoice.payment_action_required`  ← SCA / 3-D Secure
+  - `charge.dispute.created`
+  - `charge.dispute.closed`
 - Capture the **signing secret** (`whsec_…`) — this is a secret, see § below.
 
 **3c. Get the Live secret key** (`sk_live_…`) — also a secret.
