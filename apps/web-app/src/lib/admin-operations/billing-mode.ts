@@ -76,7 +76,18 @@ function isSet(value: string | undefined): boolean {
  */
 export function classifyStripeKey(secretKey: string | undefined): StripeMode {
   if (!isSet(secretKey)) return 'unconfigured';
-  const key = secretKey!.trim();
+  // Strip one layer of surrounding quotes before matching. Secrets are
+  // routinely set via `gh secret set NAME --body "sk_live_..."` or pasted from
+  // a .env line, and either can carry the quotes through into the value. A
+  // quoted live key would otherwise classify as 'unrecognized' and raise a
+  // "key is malformed" alarm on an account that is working perfectly — a false
+  // alarm on this banner is worse than no banner, because it tells the operator
+  // they cannot take money when they can.
+  const key = secretKey!.trim().replace(/^(['"])([\s\S]*)\1$/, '$2').trim();
+  // Re-check after unwrapping: `""` is an empty value someone quoted, which is
+  // unset rather than malformed. Reporting "malformed key" there would send an
+  // operator hunting for a corrupted secret instead of a missing one.
+  if (key.length === 0) return 'unconfigured';
   // Restricted keys (rk_) carry the same live/test split as secret keys.
   if (key.startsWith('sk_live_') || key.startsWith('rk_live_')) return 'live';
   if (key.startsWith('sk_test_') || key.startsWith('rk_test_')) return 'test';

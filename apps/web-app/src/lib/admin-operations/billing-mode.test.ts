@@ -158,3 +158,26 @@ describe('deriveBillingMode — contract', () => {
     );
   });
 });
+
+describe('classifyStripeKey — values that arrive wrapped in quotes', () => {
+  it('sees through double quotes, as `gh secret set --body "..."` can leave them', () => {
+    // A false "malformed key" alarm on a live account is worse than no banner:
+    // it tells the operator they cannot take money when they can.
+    expect(classifyStripeKey('"' + FAKE_LIVE + '"')).toBe('live');
+    expect(classifyStripeKey('"' + FAKE_TEST + '"')).toBe('test');
+  });
+
+  it('sees through single quotes and surrounding whitespace', () => {
+    expect(classifyStripeKey("'" + FAKE_LIVE + "'")).toBe('live');
+    expect(classifyStripeKey('  "' + FAKE_LIVE + '"  ')).toBe('live');
+  });
+
+  it('still rejects a genuinely malformed value rather than guessing', () => {
+    expect(classifyStripeKey('"not-a-key"')).toBe('unrecognized');
+    expect(classifyStripeKey('""')).toBe('unconfigured');
+  });
+
+  it('strips only ONE layer, so a mismatched quote stays suspicious', () => {
+    expect(classifyStripeKey('"' + FAKE_LIVE)).toBe('unrecognized');
+  });
+});
