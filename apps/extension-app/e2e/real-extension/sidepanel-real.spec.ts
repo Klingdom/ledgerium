@@ -118,18 +118,23 @@ const FIXTURE_HTML = `<!DOCTYPE html>
 </html>`;
 
 /**
- * Starts a minimal local HTTP server serving FIXTURE_HTML on an ephemeral
- * port, reached via the `localhost` hostname. `deriveAppLabel()`
- * (shared/utils.ts:47-48) special-cases `hostname === 'localhost'` to
- * return the constant `'Local Dev'` — so if the PII-laden fixture title is
- * correctly rejected, the safe fallback value is deterministic and
- * assertable, not just "some non-PII string".
+ * Starts a minimal local HTTP server serving `html` (defaults to
+ * FIXTURE_HTML) on an ephemeral port, reached via the `localhost` hostname.
+ * `deriveAppLabel()` (shared/utils.ts:47-48) special-cases
+ * `hostname === 'localhost'` to return the constant `'Local Dev'` — so if the
+ * PII-laden fixture title is correctly rejected, the safe fallback value is
+ * deterministic and assertable, not just "some non-PII string".
+ *
+ * The optional `html` parameter lets additional tests (e.g. the rule-9
+ * privacy-boundary test below) serve their own fixture markup through this
+ * same real-HTTP-server mechanism without duplicating the server-bootstrap
+ * logic or building a parallel harness.
  */
-function startFixtureServer(): Promise<{ url: string; close: () => Promise<void> }> {
+function startFixtureServer(html: string = FIXTURE_HTML): Promise<{ url: string; close: () => Promise<void> }> {
   return new Promise((resolve, reject) => {
     const server = http.createServer((_req, res) => {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-      res.end(FIXTURE_HTML);
+      res.end(html);
     });
     server.on('error', reject);
     server.listen(0, '127.0.0.1', () => {
@@ -797,6 +802,246 @@ test('real capture pipeline: a real click + typed input reach storage as PII-scr
     expect(clickEvent, 'expected a captured "click" raw event for the button interaction').toBeTruthy();
     expect(clickEvent?.['page_title']).toBe('Local Dev');
     expect((clickEvent?.['context'] as Record<string, unknown> | undefined)?.['pageTitle']).toBe('Local Dev');
+
+  } finally {
+    if (context) {
+      await context.close();
+    }
+    if (fixtureServer) {
+      await fixtureServer.close();
+    }
+    await new Promise<void>((resolve) => setTimeout(resolve, 500));
+    try {
+      fs.rmSync(profileDir, { recursive: true, force: true });
+    } catch {
+      // Non-fatal.
+    }
+  }
+});
+
+// ─── Test 5: rule-9 privacy boundary — div/span control-detection gate ────────
+//
+// Regression test for commit 5df0e6a (label-extractor.ts rule 9 narrowing)
+// and the associated public-claim correction in commit 0da54d8. Before
+// 5df0e6a, rule 9 read the `innerText` of ANY clicked div/span (up to 40
+// chars) regardless of whether the element was actually acting as a control —
+// silently transmitting arbitrary visible page content (customer names,
+// dollar amounts, reference numbers) as `target_label` on captured click
+// events. The fix narrows rule 9 to fire ONLY when the element carries a
+// genuine interactive-control affordance: an explicit interactive ARIA role
+// (button/link/tab/menuitem/option/checkbox/radio/switch), or a
+// non-negative `tabindex` making it keyboard-focusable. Elements that fail
+// this check fall through to rule 10 (ancestor context) cleanly, without
+// ever reading their own text.
+//
+// `label-extractor.test.ts` already covers this boundary with 17 cases
+// against a jsdom-mocked DOM. Per CLAUDE.md's Extension Reliability
+// Invariant, unit tests CANNOT certify that the fix behaves identically in a
+// REAL Chrome content-script execution context, on a REAL click, over the
+// REAL RAW_EVENT_CAPTURED message bus, persisted into REAL chrome.storage —
+// exactly the class of gap that let two prior regressions (iter 097, iter
+// 099) ship with fully green unit suites. This test closes that gap for the
+// rule-9 privacy fix specifically.
+//
+// Validates, end-to-end, on real Chrome APIs with zero mocking:
+//   1. REGRESSION GUARD (did the fix over-correct?) — a genuine div-based
+//      control (`role="button"` + `tabindex="0"`, short text) still produces
+//      a captured click event whose `target_label` is exactly the control's
+//      text. If the narrowing had gone too far and started rejecting
+//      legitimate div/span controls, this assertion catches it.
+//   2. PRIVACY GUARD (did the fix actually close the leak?) — a plain layout
+//      div with NO role and NO tabindex, containing data that must never be
+//      captured (a full name, a dollar amount), produces NO captured event
+//      containing either string ANYWHERE in its serialized payload — not
+//      just the `target_label` field, but the full JSON-stringified event
+//      (selector, ancestor path, target object, everything). The point is
+//      that the string does not leave the page by any path, not merely that
+//      one specific field is clean.
+//   3. CAPTURE CONTINUITY (did the fix silently break capture?) — clicking
+//      the plain div still produces a captured interaction event. Rule 9
+//      declining to supply a label must not stop capture altogether. No
+//      assertion is made on the exact fallback label value (that is rule
+//      10's concern, not rule 9's).
+
+const RULE9_FIXTURE_PAGE_TITLE = 'Ledgerium rule-9 privacy fixture';
+
+/** Genuine control: interactive ARIA role + tabindex, short text — rule 9 SHOULD fire. */
+const RULE9_CONTROL_LABEL = 'Approve invoice';
+
+/** Plain layout content that must NEVER be captured — rule 9 must NOT fire. */
+const RULE9_PII_NAME = 'Jane Q. Smith';
+const RULE9_PII_AMOUNT = '$4,820.00';
+
+const RULE9_FIXTURE_HTML = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>${RULE9_FIXTURE_PAGE_TITLE}</title>
+</head>
+<body>
+  <div id="rule9-control" role="button" tabindex="0">${RULE9_CONTROL_LABEL}</div>
+  <div id="rule9-plain-name">${RULE9_PII_NAME}</div>
+  <div id="rule9-plain-amount">${RULE9_PII_AMOUNT}</div>
+</body>
+</html>`;
+
+test('rule-9 privacy boundary: div control label captured, plain div text never leaves the page (real chrome APIs)', async () => {
+  if (!fs.existsSync(DIST_PATH)) {
+    throw new Error(`Extension dist not found at: ${DIST_PATH}`);
+  }
+
+  const profileDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), 'ledgerium-real-ext-')
+  );
+
+  let context: Awaited<ReturnType<typeof chromium.launchPersistentContext>> | null = null;
+  let fixtureServer: Awaited<ReturnType<typeof startFixtureServer>> | null = null;
+
+  try {
+    fixtureServer = await startFixtureServer(RULE9_FIXTURE_HTML);
+
+    context = await chromium.launchPersistentContext(profileDir, {
+      headless: false,
+      args: [
+        `--disable-extensions-except=${DIST_PATH}`,
+        `--load-extension=${DIST_PATH}`,
+        '--disable-infobars',
+        '--no-first-run',
+        '--no-default-browser-check',
+      ],
+    });
+
+    // ── Resolve the extension ID + get a handle on the real background SW ────
+    let sw: ServiceWorkerHandle;
+    const existingSws = context.serviceWorkers();
+    if (existingSws.length > 0) {
+      sw = existingSws[0]!;
+    } else {
+      sw = await context.waitForEvent('serviceworker', { timeout: SW_STARTUP_TIMEOUT_MS });
+    }
+    const extensionId = extensionIdFromSwUrl(sw.url());
+
+    // ── Open + focus the real content page FIRST (same active-tab fix as
+    //    tests 2 and 4 — see file-header comment on test 2 for the verified
+    //    diagnosis of why this ordering matters for chrome.tabs.query()). ────
+    const contentPage = await context.newPage();
+    await contentPage.goto(fixtureServer.url, { waitUntil: 'domcontentloaded' });
+    await contentPage.waitForSelector('#rule9-control', { timeout: 10_000 });
+    await expect(contentPage).toHaveTitle(RULE9_FIXTURE_PAGE_TITLE);
+
+    // ── Open the sidepanel in a second tab ────────────────────────────────────
+    const sidepanelUrl = `chrome-extension://${extensionId}/${SIDEPANEL_RELATIVE}`;
+    const sidepanel = await context.newPage();
+    await sidepanel.goto(sidepanelUrl, { waitUntil: 'domcontentloaded' });
+    await sidepanel.waitForSelector('#root > *', { timeout: REACT_MOUNT_TIMEOUT_MS });
+
+    // Re-focus the real content page so it is `tab.active === true` when
+    // Start Recording is clicked below.
+    await contentPage.bringToFront();
+
+    const badge = sidepanel.locator('header .badge');
+    await expect(badge).toContainText('Ready', { timeout: 12_000 });
+
+    await sidepanel.locator('#activity-name').fill('rule-9 privacy boundary test');
+    const startBtn = sidepanel.getByRole('button', { name: 'Start Recording' });
+    await expect(startBtn).toBeEnabled();
+    await startBtn.click();
+
+    await expect(badge).toContainText('Recording', { timeout: 20_000 });
+
+    // ── Resolve the session id from real storage ──────────────────────────────
+    const sessionMeta = await readStorageValue<PersistedSessionMetaShape>(sw, STORAGE_KEY_SESSION);
+    if (!sessionMeta?.sessionId) {
+      throw new Error(
+        'No active session meta found in chrome.storage.local after Start Recording. ' +
+        'Cannot validate the rule-9 privacy boundary because there is no session to ' +
+        'attribute events to.'
+      );
+    }
+    const eventsKey = STORAGE_KEY_SESSION_EVENTS_PREFIX + sessionMeta.sessionId;
+
+    // ── Click the genuine control div, retrying until capture is armed and
+    //    the resulting event reaches storage (same poll-and-retry pattern as
+    //    test 4 — the content script's onMessage listener registers ~100ms
+    //    after injection, so the very first click can be dropped by design). ──
+    let rawEvents: Array<Record<string, unknown>> = [];
+    await expect.poll(async () => {
+      await contentPage.locator('#rule9-control').click({ timeout: 2_000 }).catch(() => {});
+      const persisted = await readStorageValue<PersistedSessionEventsShape>(sw, eventsKey);
+      rawEvents = persisted?.rawEvents ?? [];
+      return rawEvents.length;
+    }, {
+      timeout: 15_000,
+      message:
+        'ZERO raw events reached chrome.storage.local after repeatedly clicking a real ' +
+        'div[role="button"][tabindex="0"] control on a real page during an active recording ' +
+        'session. This means the capture pipeline is broken end-to-end for div-based controls ' +
+        '(rule 9 of label-extractor.ts).',
+    }).toBeGreaterThan(0);
+
+    // ── Capture is confirmed armed — click the two plain PII-bearing divs ────
+    // (no retry loop needed; mirrors test 4's debounced-input step).
+    const countAfterControl = rawEvents.length;
+    await contentPage.locator('#rule9-plain-name').click();
+    await contentPage.locator('#rule9-plain-amount').click();
+
+    await expect.poll(async () => {
+      const persisted = await readStorageValue<PersistedSessionEventsShape>(sw, eventsKey);
+      rawEvents = persisted?.rawEvents ?? [];
+      return rawEvents.length;
+    }, {
+      timeout: 10_000,
+      message:
+        'Clicking the plain (non-control) divs produced NO new captured events. Capture ' +
+        'continuity is broken: rule 9 correctly declining to supply a label must not stop ' +
+        'the interaction from being captured at all.',
+    }).toBeGreaterThanOrEqual(countAfterControl + 2);
+
+    // ── Assertion 1: regression guard — the genuine control's label survived
+    //    on a REAL click, over the REAL message bus, in REAL storage ─────────
+    const controlEvent = rawEvents.find(
+      (e) => e['event_type'] === 'click' && e['target_selector'] === '#rule9-control'
+    );
+    expect(
+      controlEvent,
+      'expected a captured click event for the div[role="button"][tabindex="0"] control'
+    ).toBeTruthy();
+    expect(controlEvent?.['target_label']).toBe(RULE9_CONTROL_LABEL);
+
+    // ── Assertion 2: privacy guard — PII never appears ANYWHERE in ANY
+    //    captured event's full serialized payload, not just target_label ────
+    for (const event of rawEvents) {
+      const serialized = JSON.stringify(event);
+      expect(
+        serialized.includes(RULE9_PII_NAME),
+        `PII LEAK: a captured event contains the plain div's full-name text ` +
+        `("${RULE9_PII_NAME}") somewhere in its serialized payload:\n${serialized}`
+      ).toBe(false);
+      expect(
+        serialized.includes(RULE9_PII_AMOUNT),
+        `PII LEAK: a captured event contains the plain div's dollar-amount text ` +
+        `("${RULE9_PII_AMOUNT}") somewhere in its serialized payload:\n${serialized}`
+      ).toBe(false);
+    }
+
+    // ── Assertion 3: capture continuity — the plain divs still produced
+    //    interaction events (no assertion on their exact label value) ────────
+    const nameClickEvent = rawEvents.find(
+      (e) => e['event_type'] === 'click' && e['target_selector'] === '#rule9-plain-name'
+    );
+    const amountClickEvent = rawEvents.find(
+      (e) => e['event_type'] === 'click' && e['target_selector'] === '#rule9-plain-amount'
+    );
+    expect(
+      nameClickEvent,
+      'expected a captured click event for the plain (non-control) name div — capture must ' +
+      'not silently stop just because rule 9 declined to supply a label'
+    ).toBeTruthy();
+    expect(
+      amountClickEvent,
+      'expected a captured click event for the plain (non-control) amount div — capture must ' +
+      'not silently stop just because rule 9 declined to supply a label'
+    ).toBeTruthy();
 
   } finally {
     if (context) {
