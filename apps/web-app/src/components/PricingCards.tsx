@@ -262,8 +262,23 @@ export function PricingCards() {
               ) : availability === 'loading' ? (
                 <div className="mt-2 mb-4" />
               ) : plan.price !== null ? (
+                /*
+                  This previously read "No credit card required" beneath the
+                  Starter and Solo buttons. Those buttons open Stripe Checkout,
+                  and `payment_method_collection` is never set — so Stripe's
+                  default 'always' applies and a card IS required. The page's
+                  own FAQ said the opposite, correctly, three lines further
+                  down: "You enter a card up front."
+
+                  The honest answer differs by path, which is why this now says
+                  which path it is talking about. Signing up grants the reverse
+                  trial with no card (see lib/reverse-trial.ts); subscribing
+                  here takes one immediately.
+                */
                 <p className="mt-2 mb-4 text-center text-ds-xs text-[var(--content-tertiary)]">
-                  No credit card required
+                  {plan.id === 'free'
+                    ? 'No credit card required'
+                    : 'Card required — or start free and try every paid feature for 14 days'}
                 </p>
               ) : (
                 <div className="mt-2 mb-4" />

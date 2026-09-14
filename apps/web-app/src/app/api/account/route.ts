@@ -1,4 +1,10 @@
 import { NextResponse } from 'next/server';
+import {
+  isReverseTrialActive,
+  hasReverseTrialLapsed,
+  reverseTrialDaysRemaining,
+  activeReverseTrialPlan,
+} from '@/lib/reverse-trial';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { buildFeatureFlagsWithUsage } from '@/lib/feature-gating';
@@ -54,6 +60,35 @@ export async function GET() {
       },
       features: flags.features,
       limits: flags.limits,
+      /*
+        Reverse-trial state (TRIAL_REVIEW_001). Surfaced so the UI can tell a
+        user they are on a trial and how long is left — previously nothing
+        anywhere in the product said so, and the window simply ended in
+        silence.
+
+        `daysRemaining` is computed here from the same clock as `isActive`, not
+        derived separately in the client. Two independent computations would be
+        free to disagree, and a countdown that contradicts the access a user
+        actually has is worse than showing no countdown at all.
+
+        `hasLapsed` is deliberately distinct from `!isActive`: someone who
+        never had a trial should be told nothing about one, while someone whose
+        trial ended should be told what changed.
+      */
+      reverseTrial: (() => {
+        const nowMs = Date.now();
+        const fields = {
+          reverseTrialPlan: user.reverseTrialPlan,
+          reverseTrialEndsAt: user.reverseTrialEndsAt,
+        };
+        return {
+          isActive: isReverseTrialActive(fields, nowMs),
+          hasLapsed: hasReverseTrialLapsed(fields, nowMs),
+          daysRemaining: reverseTrialDaysRemaining(fields, nowMs),
+          plan: activeReverseTrialPlan(fields, nowMs),
+          endsAt: user.reverseTrialEndsAt ?? null,
+        };
+      })(),
     },
   });
 }

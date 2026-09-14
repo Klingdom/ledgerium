@@ -30,6 +30,33 @@ model User {
   stripeCustomerId     String?  @map("stripe_customer_id")
   stripeSubscriptionId String?  @map("stripe_subscription_id")
 
+  /// Reverse trial (TRIAL_REVIEW_001, 2026-09): full paid features granted at
+  /// SIGNUP, rolling down to the permanent free tier when the window closes.
+  /// Replaces the card-up-front Stripe Checkout trial as the primary path —
+  /// that trial could only begin AFTER a user had already decided to upgrade,
+  /// making it a discount on a decision already made rather than a way to
+  /// experience the product.
+  ///
+  /// These four fields exist together because trial→paid conversion was
+  /// previously UNMEASURABLE: Stripe's trial dates were read into local
+  /// variables in the webhook handler and discarded, and `subscriptionStatus`
+  /// is a single mutable column overwritten on every event — so a trial that
+  /// never converted is indistinguishable from an 18-month customer who
+  /// churned. A redesign shipped without these would be unfalsifiable.
+  ///
+  /// `reverseTrialPlan` + `reverseTrialEndsAt` drive ENTITLEMENT (read by
+  /// lib/reverse-trial.ts, merged in effectivePlanForUser). The other two are
+  /// WRITE-ONCE outcome markers for cohort analysis and must never be
+  /// overwritten — that is the property that makes "what share of trials
+  /// convert?" answerable at all.
+  reverseTrialPlan        String?   @map("reverse_trial_plan")
+  reverseTrialStartedAt   DateTime? @map("reverse_trial_started_at")
+  reverseTrialEndsAt      DateTime? @map("reverse_trial_ends_at")
+  /// Stamped once, at the first payment by a user who had a reverse trial.
+  /// Never cleared, never rewritten — a later cancellation does not erase the
+  /// fact that this trial converted.
+  reverseTrialConvertedAt DateTime? @map("reverse_trial_converted_at")
+
   /// SCA/3-D Secure action-required signal (billing hardening, 2026-08).
   /// Non-null IFF Stripe currently has an open invoice on this subscription
   /// that requires the customer to complete card-issuer authentication

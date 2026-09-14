@@ -37,6 +37,7 @@ import {
   type PlanType,
 } from './plans';
 import { isAdminUnlimited } from './admin-allowlist';
+import { activeReverseTrialPlan } from './reverse-trial';
 import { db } from '@/db';
 
 // ─── Feature Access Checks ─────────────────────────────────────────────────
@@ -311,11 +312,22 @@ function highestPlan(soloPlan: PlanType, workspacePlans: readonly PlanType[]): P
 export const effectivePlanFor = reactCache(async (userId: string): Promise<PlanType> => {
   const user = await db.user.findUnique({
     where: { id: userId },
-    select: { plan: true },
+    select: {
+      plan: true,
+      // Reverse-trial grant participates in the same merge — see below.
+      reverseTrialPlan: true,
+      reverseTrialEndsAt: true,
+    },
   });
   const soloPlan = toPlanType(user?.plan ?? 'free');
   const workspacePlans = await fetchActiveWorkspacePlans(userId);
-  return highestPlan(soloPlan, workspacePlans);
+  const trialPlan = user
+    ? activeReverseTrialPlan(
+        { reverseTrialPlan: user.reverseTrialPlan, reverseTrialEndsAt: user.reverseTrialEndsAt },
+        Date.now(),
+      )
+    : null;
+  return highestPlan(soloPlan, [...workspacePlans, ...(trialPlan ? [trialPlan] : [])]);
 });
 
 /**
@@ -328,10 +340,30 @@ export const effectivePlanFor = reactCache(async (userId: string): Promise<PlanT
  * route that checks both a feature AND the recording limit) issues at most
  * one `teamMember` query total.
  */
-export async function effectivePlanForUser(user: Pick<User, 'id' | 'plan'>): Promise<PlanType> {
+export async function effectivePlanForUser(
+  user: Pick<User, 'id' | 'plan'> & Partial<Pick<User, 'reverseTrialPlan' | 'reverseTrialEndsAt'>>,
+): Promise<PlanType> {
   const soloPlan = toPlanType(user.plan);
   const workspacePlans = await fetchActiveWorkspacePlans(user.id);
-  return highestPlan(soloPlan, workspacePlans);
+
+  // Reverse trial (TRIAL_REVIEW_001) enters as one more candidate in the same
+  // highest-wins merge, rather than as a special case. Two consequences worth
+  // stating: a trial can never DOWNGRADE anyone — if they already hold a
+  // higher plan, the merge keeps it — and trial expiry needs no un-writing,
+  // because the grant was never persisted onto `plan` in the first place.
+  //
+  // Fields are optional on the parameter type so existing callers that select
+  // only { id, plan } keep compiling; an absent field simply grants nothing,
+  // which is the same fail-closed result as a user with no trial.
+  const trialPlan = activeReverseTrialPlan(
+    {
+      reverseTrialPlan: user.reverseTrialPlan ?? null,
+      reverseTrialEndsAt: user.reverseTrialEndsAt ?? null,
+    },
+    Date.now(),
+  );
+
+  return highestPlan(soloPlan, [...workspacePlans, ...(trialPlan ? [trialPlan] : [])]);
 }
 
 // ── Feature flags with live usage ─────────────────────────────────────────────
