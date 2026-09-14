@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-14 (loop 4) — Extension sidepanel: quota refusal no longer says "Try Again" (Mode 1, coordinator-direct + `growth-strategist` D-4 adjacent)
+
+- Trigger: CEO "continue". Selection driver: `top-score` constrained by MR-005 D-1 — four consecutive changes (reverse trial, trial chip, quota prompt, invariants doc) touched no extension surface; a fifth would trip reverse-portfolio drift. TRIAL_REVIEW_001 UX P0 #6. The analytics `userPlan` bug scored higher raw but is web-app (saturation penalty −2) and would have tripped D-1.
+- Defect: `ProcessScreen.openInWebsite` POSTs the bundle to `/api/sync`; on any non-401 failure it flashed "Sync Failed — Try Again" for 3 s. A free user at the monthly limit (server: 403 `UPGRADE_REQUIRED`) was told to retry something that cannot succeed.
+- Scope: sidepanel only. NOT touched: `background/uploader.ts` automatic upload (it also collapses 403 into "HTTP 403: …" → UploadBar "Upload failed"); that path is background surface under the Extension Reliability Invariant and is a separate follow-up. No manifest, content, or background changes. Server already returned `code: 'UPGRADE_REQUIRED'` on both routes (UX P0 #2 was already done).
+- Change: exported pure `classifySyncFailure(status, body)` — quota only on 403 WITH the code (a bare 403 is not guessed to be quota); malformed counts become null. Exported pure `quotaNotice(used, limit)`. New `'quota'` status that does not auto-clear, amber "Upload Limit Reached" button, and a notice with "See plans" → `<site>/pricing`.
+- Truthfulness checks: history is written at stop, before any upload (`background/index.ts:302`), so "kept" holds (cap 25, oldest evicted — pre-existing, not specific to this path). Growth review 3 KEEP / 1 POLISH: "the extension's History" names no real screen; the list is labelled "Recent Recordings" (`IdleScreen.tsx:237`) — applied and test-locked. Reset/Solo phrasing matches the web chip.
+- Validation: extension unit 367 → 378 (+11); extension typecheck clean; workspace `pnpm test` 4714/4714 across 231 files; production extension build OK; real-extension harness (gate of record) run on the pre-polish build and re-run on the final build — see commit for result. The harness does not reach the ProcessScreen sync path (no sync server fixture); coverage of the new behavior is unit-level, and the harness certifies no capture/sidepanel regression.
+- Human check still required before Store submission (Invariant rule 6): load the built extension, record, and confirm steps appear end to end.
+- Follow-ups: background auto-upload 403 handling; last-day trial notice; `/api/workflows` stats.userPlan uses raw plan.
+
+---
+
 ## 2026-09-14 (loop 3) — R-3: `docs/invariants.md` re-synced to source (Mode 1, `qa-engineer`)
 
 - Trigger: CEO "proceed". Selection driver: `saturation-rule` — the three prior changes (reverse trial, trial chip, quota prompt) were all web-app, so this loop had to leave that Area. Of the non-web candidates, R-3 won on the determinism/traceability bias: the doc is the compaction-recovery source of truth, and drift there is high-consequence. The extension quota-403 item was deferred (larger; needs real-extension validation).

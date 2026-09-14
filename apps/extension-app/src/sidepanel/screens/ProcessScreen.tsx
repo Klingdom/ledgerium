@@ -187,6 +187,61 @@ export function escapeHtml(value: unknown): string {
     .replace(/'/g, '&#39;')
 }
 
+// ─── openInWebsite failure classification ────────────────────────────────────
+//
+// The server answers a monthly-limit refusal with 403 + code 'UPGRADE_REQUIRED'
+// (apps/web-app/src/app/api/sync/route.ts). Previously every non-401 failure
+// collapsed into a 3-second "Sync Failed — Try Again", which told a user at
+// their plan limit to retry something that could not succeed. A 403 WITHOUT
+// that code is deliberately NOT treated as quota: guessing would show limit
+// messaging for an unrelated permission failure.
+
+export type SyncFailure =
+  | { kind: 'auth' }
+  | { kind: 'quota'; used: number | null; limit: number | null }
+  | { kind: 'error' }
+
+function asCount(value: unknown): number | null {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0 ? value : null
+}
+
+export function classifySyncFailure(status: number, body: unknown): SyncFailure {
+  if (status === 401) return { kind: 'auth' }
+  if (status === 403 && body !== null && typeof body === 'object') {
+    const b = body as Record<string, unknown>
+    if (b['code'] === 'UPGRADE_REQUIRED') {
+      return { kind: 'quota', used: asCount(b['used']), limit: asCount(b['limit']) }
+    }
+  }
+  return { kind: 'error' }
+}
+
+export interface QuotaNotice {
+  title: string
+  body: string
+  cta: string
+}
+
+/**
+ * Copy for a quota refusal. Every clause is checked against behaviour:
+ *  - the session is written to history at stop, before any upload is attempted
+ *    (background/index.ts handleStop → historyStore.addEntry), so it is kept;
+ *  - the server counts uploads per UTC calendar month (feature-gating.ts
+ *    getMonthlyUploadCount), so uploads resume on the 1st (UTC);
+ *  - Solo is the lowest self-serve tier with no monthly cap (web-app plans.ts;
+ *    asserted by apps/web-app/src/lib/quota-meter.test.ts).
+ */
+export function quotaNotice(used: number | null, limit: number | null): QuotaNotice {
+  const counts = used !== null && limit !== null ? ` (${used} of ${limit})` : ''
+  return {
+    title: `Monthly upload limit reached${counts}`,
+    // "Recent Recordings" is the on-screen label of the history list
+    // (IdleScreen.tsx) — name what the user can actually find.
+    body: 'This recording is kept in Recent Recordings. Uploads resume on the 1st (UTC), or Solo removes the monthly cap.',
+    cta: 'See plans',
+  }
+}
+
 // ─── openInWebsite security helpers ──────────────────────────────────────────
 //
 // Three pure / near-pure helpers extracted for testability.  Each corrects one
@@ -464,7 +519,10 @@ function ExportView({
   }, [])
 
   // ── Open in Ledgerium AI website ──────────────────────────────────────────
-  const [openWebStatus, setOpenWebStatus] = useState<'idle' | 'loading' | 'error'>('idle')
+  const [openWebStatus, setOpenWebStatus] = useState<'idle' | 'loading' | 'error' | 'quota'>('idle')
+  // Set only on a quota refusal; unlike 'error' it does not auto-clear, because
+  // retrying cannot succeed until the limit resets or the plan changes.
+  const [quotaInfo, setQuotaInfo] = useState<{ used: number | null; limit: number | null; baseUrl: string } | null>(null)
 
   const openInWebsite = useCallback(() => {
     if (!bundle) return
@@ -508,10 +566,22 @@ function ExportView({
 
         if (!response.ok) {
           const baseUrl = syncUrl.replace('/api/sync', '')
+          let body: unknown = null
+          try {
+            body = await response.json()
+          } catch {
+            body = null
+          }
+          const failure = classifySyncFailure(response.status, body)
           // If auth fails, redirect to login
-          if (response.status === 401) {
+          if (failure.kind === 'auth') {
             chrome.tabs.create({ url: `${baseUrl}/login` })
             setOpenWebStatus('idle')
+            return
+          }
+          if (failure.kind === 'quota') {
+            setQuotaInfo({ used: failure.used, limit: failure.limit, baseUrl })
+            setOpenWebStatus('quota')
             return
           }
           setOpenWebStatus('error')
@@ -582,15 +652,36 @@ function ExportView({
               ? 'text-gray-400 bg-gray-100 border border-gray-200 cursor-wait'
               : openWebStatus === 'error'
                 ? 'text-red-600 bg-red-50 border border-red-200'
-                : 'btn-primary'
+                : openWebStatus === 'quota'
+                  ? 'text-amber-800 bg-amber-50 border border-amber-200'
+                  : 'btn-primary'
           }`}
         >
           {openWebStatus === 'loading'
             ? 'Syncing…'
             : openWebStatus === 'error'
               ? 'Sync Failed — Try Again'
-              : 'Open in Ledgerium AI Website'}
+              : openWebStatus === 'quota'
+                ? 'Upload Limit Reached'
+                : 'Open in Ledgerium AI Website'}
         </button>
+
+        {openWebStatus === 'quota' && quotaInfo && (() => {
+          const notice = quotaNotice(quotaInfo.used, quotaInfo.limit)
+          return (
+            <div role="status" className="text-xs rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-amber-800">
+              <p className="font-medium">{notice.title}</p>
+              <p className="mt-0.5">{notice.body}</p>
+              <button
+                type="button"
+                onClick={() => chrome.tabs.create({ url: `${quotaInfo.baseUrl}/pricing` })}
+                className="mt-1 font-medium underline underline-offset-2"
+              >
+                {notice.cta}
+              </button>
+            </div>
+          )
+        })()}
 
         {/* Download Workflow Report */}
         <button

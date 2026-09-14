@@ -6,6 +6,21 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-14] - Extension: a monthly-limit refusal is explained instead of "Sync Failed — Try Again"
+
+**Why:** a free user at the limit clicked "Open in Ledgerium AI Website", the server refused with 403 `UPGRADE_REQUIRED`, and the sidepanel told them to try again — which could never work.
+
+### Fixed
+- The sidepanel now recognises that refusal (only when the server says so — a bare 403 is not assumed to be a quota issue) and shows: "Monthly upload limit reached (5 of 5). This recording is kept in Recent Recordings. Uploads resume on the 1st (UTC), or Solo removes the monthly cap." with a "See plans" link. The message stays until the user acts, rather than disappearing after 3 seconds.
+
+### Not changed
+- The background automatic upload still reports a limit refusal as a generic failure. It lives in protected background code and is a separate change.
+
+### Validation
+- Extension unit tests 367 → 378; workspace 4714; typecheck clean; production build OK; real-Chrome harness passed (see commit). Copy reviewed; "Recent Recordings" matches the label on screen.
+
+---
+
 ## [2026-09-14] - `docs/invariants.md` re-synced to source (risk R-3 closed)
 
 **Why:** this document is what an agent reads to recover after context loss. It had drifted across a dozen facts, so recovery would have restored wrong beliefs about versions, boundaries, and privacy handling.
