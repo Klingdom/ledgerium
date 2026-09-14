@@ -6,6 +6,28 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-14] - Reverse trial made visible: trial status chip in the app header
+
+**Why:** the reverse trial (bb0d5c9) grants Solo features at signup, but nothing in the product told the user. A trial that begins and ends in silence is worse than none — it creates an expectation and breaks it without explanation.
+
+### Added
+- `TrialStatusChip` in `AppShell` (every signed-in page). "Trial · N days left" — whole days only, neutral until 3 days remain, then amber. "Trial ended" after roll-down, stating that recordings and SOPs remain and paid features are paused.
+- Silent by design for: users who never had a trial, active or past_due subscribers, and while account data loads. Decision logic is a pure, tested module (`lib/trial-chip.ts`, 17 tests).
+
+### Fixed before ship
+- Copy review caught an overclaim: "every paid feature" → "the full Solo plan". The trial grants Solo; higher tiers have features Solo does not. Test-locked.
+
+### Ops
+- `ops-briefing.yml`: sends operator briefings through the ledgerium.ai mailbox. Body travels as a secret and recipient as a repo variable, because this repository is public.
+
+### Validation
+- Workspace tests 4672 → **4689**; typecheck clean; web-app production build succeeds.
+
+### Impact
+- Makes the reverse trial observable to the user, which is the precondition for any trial→paid conversion measurement (`reverse_trial_started_at` / `converted_at` already ship with bb0d5c9).
+
+---
+
 ## [2026-09-09] - Privacy claim correction and capture-surface narrowing (Mode 2 directed, CEO chose option C)
 
 **Trigger:** found while preparing a Chrome Web Store submission. The store's data-usage declaration is a binding representation, and the truthful answer contradicted the site.

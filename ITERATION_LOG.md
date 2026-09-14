@@ -4,6 +4,18 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-14 — Reverse-trial status chip (Mode 1 autonomous loop, `frontend-engineer` work-shape + `growth-strategist` D-4 adjacent)
+
+- Trigger: CEO directive "continue to manage and improve the site autonomously." System review found commit bb0d5c9 (reverse trial) committed but unpushed, with its own message stating the feature is "not user-visible" until a chip consumes `reverseTrial` from `/api/account`. The chip existed as uncommitted, unvalidated work.
+- Candidate Selection: `top-score` / completion of an in-flight program. TRIAL_REVIEW_001 `ux_designer.md` P0 #5 (global trial-days chip in `AppShell`); without it the reverse trial ends in silence — the exact defect the review was commissioned on. Scope discipline: chip only. Roll-down prompt (UsageQuotaMeter wiring), day-before notice, and extension quota-403 handling are NOT in this loop.
+- D-4 clause 1 FIRED (4 user-visible strings) → `growth-strategist` consult: 3 KEEP / 1 POLISH / 0 REWRITE. The POLISH was a factual correction: active-trial detail said "You have every paid feature", but the grant is `REVERSE_TRIAL_PLAN = 'solo'`, and Team/Growth/Enterprise include features Solo lacks. Replaced with "You have the full Solo plan until your trial ends." and locked with a test assertion (`/Solo plan/` present, `/every paid feature/` absent). Fifth instance this week of a claim string not bound to behaviour — caught pre-ship this time.
+- Files: NEW `apps/web-app/src/lib/trial-chip.ts` (pure decision), NEW `apps/web-app/src/lib/trial-chip.test.ts` (17 tests), NEW `apps/web-app/src/components/TrialStatusChip.tsx`; MODIFIED `AppShell.tsx` (+8, mount point). NEW `.github/workflows/ops-briefing.yml` (operator email; separate commit).
+- Validation: `pnpm test` **4689/4689** (4672 at bb0d5c9 + 17); `pnpm typecheck` clean; web-app production build (see commit). Extension surfaces untouched — Extension Reliability Invariant not engaged.
+- Deploy note: production applies schema via `prisma db push` after an automatic DB backup (`scripts/docker-start.sh`); the reverse-trial migration is four nullable columns, additive only.
+- Follow-ups (not promoted; tracked in TRIAL_REVIEW_001): roll-down moment has no upgrade prompt (UsageQuotaMeter still v1-only dead code, stale "Upgrade to Team" copy); no notice on the final trial day; extension cannot distinguish a quota-403.
+
+---
+
 ## Iteration 098 (Mode 2, `directed`, CEO-directed feature program, multi-agent review + coordinator-direct build, 2026-06-26)
 
 - Date: 2026-06-26

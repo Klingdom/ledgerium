@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { ExtensionInstallButton } from '@/components/ExtensionInstallButton';
 import { LogoFull } from '@/components/shared/LogoMark';
+import { TrialStatusChip } from '@/components/TrialStatusChip';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 
 const NAV_ITEMS = [
@@ -62,6 +63,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             })}
 
             <div className="ml-ds-2 flex items-center gap-ds-2 border-l border-[var(--border-default)] pl-ds-3">
+              {/*
+                Placed before the install button so trial status reads ahead of
+                a call to action rather than after one. Renders nothing at all
+                for users without a trial, for paying subscribers, and while
+                account data is still loading — see lib/trial-chip.ts.
+              */}
+              <TrialStatusChip />
               <ExtensionInstallButton
                 location="app_nav"
                 title="Download Chrome Extension"
