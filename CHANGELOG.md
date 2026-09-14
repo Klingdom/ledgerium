@@ -6,6 +6,22 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-14] - MR-020 meta-review (governance only, no product change)
+
+**Why:** there had been no meta-review since 2026-05-18, and none of the 125 commits since 2026-06-26 has an iteration-log entry.
+
+### Found
+- The meta-review cadence counts loops, and directed or unlogged work never advances it, so the rule stopped firing without anyone noticing.
+- There is no structural control on user-facing plan/price claims; 7 of them this week didn't match the product.
+- CLAUDE.md is 404 KB, 89% of it a stale status narrative that misleads recovery.
+
+### Proposed (not applied — CEO approval needed)
+- **C1:** trim § Current Phase.
+- **C2:** a calendar-aware cadence with expiring deferrals.
+- **C3:** test-bind plan and price copy to `plans.ts`.
+
+---
+
 ## [2026-09-14] - Extension: a monthly-limit refusal is explained instead of "Sync Failed — Try Again"
 
 **Why:** a free user at the limit clicked "Open in Ledgerium AI Website", the server refused with 403 `UPGRADE_REQUIRED`, and the sidepanel told them to try again — which could never work.

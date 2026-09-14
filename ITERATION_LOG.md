@@ -4,6 +4,32 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-14 — MR-020 meta-review (Mode 4, `meta-coordinator`, NON-counting)
+
+- Trigger: cadence overdue ~16 weeks. MR-019 was 2026-05-18, and MR-020 fell due ~2026-05-25, was deferred with no expiry, and never ran. Today's 4 loops sat on top of that gap.
+- Artifact: `docs/meta/MR_020_META_REVIEW.md`, 848 words, bounded to 2 pages on purpose (prior MRs ran ~700 lines).
+- Coordinator verification: it overstated two numbers, both now fixed in the artifact. Commits since 2026-06-26 with no iteration log: **125** (agent said ~190). CLAUDE.md is **404 KB**, of which § Current Phase is **~361 KB / 89%** (agent said 414 / 370). Findings unchanged.
+- Verdicts:
+  - Loops 1–2 (top-score): Effective.
+  - Loop 3 (saturation): Effective.
+  - Loop 4: Effective outcome, but the log cites the wrong rule — **correction:** D-1 is a meta-review trigger that needs a user ack; it does not force a pick. The loop-4 pick avoided tripping it.
+  - D-4 copy review: Effective. 2 of 3 fires caught factual defects.
+  - Loop 4 harness: Insufficient evidence. No `/api/sync` fixture, so the changed path was unit-tested only.
+  - Cadence rule: **Failing**, silently dead. Loop counting cannot see directed or unlogged work.
+  - Unbound user-facing claims: **Failing**. 7 instances, no structural control.
+  - Governance overhead: **Failing**. A stale "Active work: ITERATION 074" narrative loads into every session and misleads recovery.
+- Proposed, NOT applied (edit CLAUDE.md, CEO approval required):
+  - C1: cut § Current Phase to ≤25 lines and archive the text.
+  - C2: meta-review due at 3 loops OR 21 days with ≥10 commits; every deferral carries an expiry.
+  - C3: any user-visible price, plan, limit or trial copy must be test-bound to `plans.ts`.
+- Process gap acknowledged: today's follow-ups were written to logs but not to IMPROVEMENT_BACKLOG.md, so the debt ratio cannot be computed. Carry-forward.
+- Loop 6 endorsement:
+  - Top: (c) `/api/workflows` `stats.userPlan` → effective plan (`burn-down`). Every live trial signup is currently recorded as free.
+  - Alternate: (a) background uploader quota 403, with a harness 403 fixture in scope.
+- Counters: cadence reset to 0; product code untouched; tests unchanged at 4714.
+
+---
+
 ## 2026-09-14 (loop 4) — Extension sidepanel: quota refusal no longer says "Try Again" (Mode 1, coordinator-direct + `growth-strategist` D-4 adjacent)
 
 - Trigger: CEO "continue". Selection driver: `top-score` constrained by MR-005 D-1 — four consecutive changes (reverse trial, trial chip, quota prompt, invariants doc) touched no extension surface; a fifth would trip reverse-portfolio drift. TRIAL_REVIEW_001 UX P0 #6. The analytics `userPlan` bug scored higher raw but is web-app (saturation penalty −2) and would have tripped D-1.
