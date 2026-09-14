@@ -1,0 +1,68 @@
+name: Ops briefing email
+
+# Sends an operator briefing to the owner via the ledgerium.ai Hostinger
+# mailbox (the same SMTP_PASSWORD secret production uses).
+#
+# WHY IT IS SHAPED THIS WAY
+# This repository is PUBLIC. Workflow inputs and logs are world-readable, so
+# the briefing body must never travel as an input or be echoed. Instead:
+#   - the HTML body is staged as the secret BRIEFING_HTML (gh secret set),
+#   - the recipient lives in the repo variable BRIEFING_TO, not in this file,
+#   - there is no recipient input, so this cannot be used as an open relay.
+# The subject is the only public field — keep it generic.
+#
+# Usage:
+#   gh secret set BRIEFING_HTML < briefing.html
+#   gh workflow run ops-briefing.yml -f subject="Ledgerium briefing — YYYY-MM-DD"
+#   gh secret delete BRIEFING_HTML   # after the run succeeds
+
+on:
+  workflow_dispatch:
+    inputs:
+      subject:
+        description: 'Email subject (public — keep generic)'
+        required: true
+        type: string
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send briefing over SMTP
+        env:
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          BRIEFING_HTML: ${{ secrets.BRIEFING_HTML }}
+          BRIEFING_TO: ${{ vars.BRIEFING_TO }}
+          SMTP_HOST: ${{ vars.SMTP_HOST || 'smtp.hostinger.com' }}
+          SMTP_USER: ${{ vars.SMTP_USER || 'hello@ledgerium.ai' }}
+          SUBJECT: ${{ inputs.subject }}
+        run: |
+          set -euo pipefail
+          for v in SMTP_PASSWORD BRIEFING_HTML BRIEFING_TO; do
+            if [ -z "${!v:-}" ]; then echo "::error::$v is not configured"; exit 1; fi
+          done
+
+          # Credentials via netrc, not argv, so they never appear in a process list.
+          umask 077
+          printf 'machine %s login %s password %s\n' "$SMTP_HOST" "$SMTP_USER" "$SMTP_PASSWORD" > "$RUNNER_TEMP/netrc"
+
+          {
+            printf 'From: Ledgerium AI <%s>\r\n' "$SMTP_USER"
+            printf 'To: %s\r\n' "$BRIEFING_TO"
+            printf 'Subject: %s\r\n' "$SUBJECT"
+            printf 'Date: %s\r\n' "$(date -R)"
+            printf 'MIME-Version: 1.0\r\n'
+            printf 'Content-Type: text/html; charset=UTF-8\r\n'
+            printf '\r\n'
+            printf '%s\r\n' "$BRIEFING_HTML"
+          } > "$RUNNER_TEMP/mail.eml"
+
+          curl --silent --show-error --fail --ssl-reqd \
+            --url "smtps://$SMTP_HOST:465" \
+            --netrc-file "$RUNNER_TEMP/netrc" \
+            --mail-from "$SMTP_USER" \
+            --mail-rcpt "$BRIEFING_TO" \
+            --upload-file "$RUNNER_TEMP/mail.eml"
+
+          rm -f "$RUNNER_TEMP/netrc" "$RUNNER_TEMP/mail.eml"
+          echo "Briefing sent."
