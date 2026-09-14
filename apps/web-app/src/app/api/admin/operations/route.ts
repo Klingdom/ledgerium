@@ -25,6 +25,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { isAdminUnlimited } from '@/lib/admin-allowlist';
 import { deriveBillingMode } from '@/lib/admin-operations/billing-mode';
+import { checkWebhookCoverage } from '@/lib/admin-operations/webhook-coverage';
 import {
   getUserVolume,
   getRecordingVolume,
@@ -104,12 +105,17 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       workflowProcessing,
       systemHealth,
       subscriptionBreakdown,
+      // In the parallel batch, not awaited separately: this is a network call
+      // to Stripe and the endpoint has a ≤2000ms target (AC-7). It resolves
+      // rather than rejects on failure, so it cannot break Promise.all.
+      webhookCoverage,
     ] = await Promise.all([
       getUserVolume(startDate, endDate),
       getRecordingVolume(startDate, endDate),
       getWorkflowVolume(startDate, endDate),
       getSystemHealth(),
       getSubscriptionBreakdown(),
+      checkWebhookCoverage(),
     ]);
 
     // Memory is synchronous — no async needed
@@ -150,7 +156,17 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         // Read at request time, never at module scope — the freeze that took
         // /api/billing/sku-availability offline came from a module-scope env
         // read in a route Next.js then prerendered.
-        billingMode: deriveBillingMode(process.env),
+        // Merged rather than reported separately: an operator asking "can we
+        // take money?" needs one answer, and a webhook gap is as disqualifying
+        // as a test-mode key — payment succeeds, provisioning never happens.
+        billingMode: (() => {
+          const base = deriveBillingMode(process.env);
+          return {
+            ...base,
+            webhookCoverage,
+            warnings: [...base.warnings, ...webhookCoverage.warnings],
+          };
+        })(),
       },
       error: null,
       meta: {

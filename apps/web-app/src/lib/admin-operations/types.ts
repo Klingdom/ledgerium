@@ -1,4 +1,5 @@
 import type { BillingModeReport } from './billing-mode';
+import type { WebhookCoverageReport } from './webhook-coverage';
 
 /**
  * TypeScript interface for the Admin Operations Dashboard API response.
@@ -268,7 +269,7 @@ export interface AdminOperationsResponse {
    * revenue figures that look real and are not. Contains no secrets — only a
    * mode enum and booleans (see `billing-mode.ts` § SECRECY).
    */
-  billingMode: BillingModeReport;
+  billingMode: BillingModeReport & { webhookCoverage: WebhookCoverageReport };
 }
 
 // ── API envelope ───────────────────────────────────────────────────────────────
