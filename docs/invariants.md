@@ -1,6 +1,7 @@
 # Ledgerium AI — Codebase Invariants
 
 **Last updated:** 2026-03-24
+**Re-synced to source 2026-09-14; values verified against the invariants.test.ts pins.**
 **Authoritative source:** This file is the canonical reference for all
 behavioral invariants. After a context compaction event, re-read this file
 before writing or reviewing any code.
@@ -119,20 +120,38 @@ This field is never omitted, never null.
 
 ### 2.5 Raw-to-Canonical Type Mapping
 
-The following mapping is fixed. Adding, removing, or changing a mapping
-requires a deliberate schema migration:
+The following mapping is fixed (28 entries). Adding, removing, or changing a
+mapping requires a deliberate schema migration:
 
 ```
+// Navigation
 tab_activated      → navigation.tab_activated
 url_changed        → navigation.open_page
 page_loaded        → navigation.open_page
 spa_route_changed  → navigation.route_change
+// Interaction
 click              → interaction.click
 dblclick           → interaction.click
 input_changed      → interaction.input_change
 form_submitted     → interaction.submit
 element_focused    → interaction.input_change
 element_blurred    → interaction.input_change
+keyboard_intent    → interaction.keyboard_shortcut
+drag_started       → interaction.drag_started
+drag_completed     → interaction.drag_completed
+// System — window / visibility
+window_blurred     → system.window_blurred
+window_focused     → system.window_focused
+visibility_changed → system.visibility_changed
+// System — UI state changes
+modal_opened       → system.modal_opened
+modal_closed       → system.modal_closed
+toast_shown        → system.toast_shown
+loading_started    → system.loading_started
+loading_finished   → system.loading_finished
+error_displayed    → system.error_displayed
+status_changed     → system.status_changed
+// Session lifecycle
 session_start      → session.started
 session_pause      → session.paused
 session_resume     → session.resumed
@@ -169,7 +188,8 @@ These values are fixed. They must not be recalculated, tuned, or
 | `IDLE_GAP_MS` | `45_000` ms | `packages/segmentation-engine/src/rules.ts`, `apps/extension-app/src/shared/constants.ts` |
 | `CLICK_NAV_WINDOW_MS` | `2_500` ms | same files |
 | `RAPID_CLICK_DEDUP_MS` | `1_000` ms | same files |
-| `SEGMENTATION_RULE_VERSION` | `'1.0.0'` | `packages/segmentation-engine/src/rules.ts`, `apps/extension-app/src/shared/constants.ts` |
+| `TARGET_CHANGE_GAP_MS` | `2_000` ms | `packages/segmentation-engine/src/rules.ts` (drives the `target_changed` boundary; not re-exported from `apps/extension-app/src/shared/constants.ts`) |
+| `SEGMENTATION_RULE_VERSION` | `'1.1.0'` | `packages/segmentation-engine/src/rules.ts`, `apps/extension-app/src/shared/constants.ts` |
 
 ### 3.2 Step ID Format
 
@@ -191,26 +211,48 @@ break determinism. It exists for optional use in non-deterministic contexts.
 
 ### 3.3 source_event_ids Filtering
 
-`system.*` and `derived.*` events are **excluded** from step construction.
-Only events that do not match those prefixes are accumulated into steps.
-The filter is applied before the main segmentation loop in both the batch
-segmenter (`isSystemOrDerived` helper) and the bundle builder's
-`buildDerivedSteps` function.
+`system.*` and `derived.*` events are **excluded** from step construction,
+with one exception: `system.error_displayed` is deliberately let through so
+the `error_handling` grouping rule (§3.4) can detect error→recovery
+sequences. Only events that do not match those prefixes (or that are
+`system.error_displayed`) are accumulated into steps. The filter is applied
+before the main segmentation loop in both the batch segmenter
+(`isSystemOrDerived` helper in `batch-segmenter.ts`) and the bundle
+builder's `buildDerivedSteps` function.
 
 ### 3.4 Grouping Reason Classification
 
-Evaluation order for `classifyGroupingReason` is strict — more specific
+`classifyGroupingReason` (`packages/segmentation-engine/src/grouping.ts`) is
+the single source of truth for grouping classification, consumed by both the
+batch and streaming segmenters. Evaluation order is strict — more specific
 patterns are checked first. Do not reorder:
 
+0. Empty accumulator (`events.length === 0`) → `single_action` (guard case;
+   not reachable in practice since `buildStep` returns `null` for empty
+   accumulators before classification would matter).
 1. `annotation`: single event of type `session.annotation_added`.
-2. `fill_and_submit`: accumulator contains `interaction.submit` AND at
+2. `error_handling`: accumulator contains a `system.error_displayed` event
+   AND at least one human-driven event (`interaction.*` or `navigation.*`
+   prefix).
+3. `fill_and_submit`: accumulator contains `interaction.submit` AND at
    least one `interaction.input_change`.
-3. `click_then_navigate`: a `interaction.click` followed within
-   `CLICK_NAV_WINDOW_MS` by `navigation.route_change` or
+4. `click_then_navigate`: an `interaction.click` followed — at any later
+   position in the accumulator, not just the immediately next event —
+   within `CLICK_NAV_WINDOW_MS` by `navigation.route_change` or
    `navigation.open_page`.
-4. `repeated_click_dedup`: two or more `interaction.click` events on the
-   **same selector** within `RAPID_CLICK_DEDUP_MS` of each other.
-5. `single_action`: default fallback.
+5. `repeated_click_dedup`: two or more `interaction.click` events on the
+   **same `target_summary.selector`** within `RAPID_CLICK_DEDUP_MS` of each
+   other. Checked before `send_action` so a rapid accidental double-click on
+   an action button (e.g. "Save") is classified as dedup, not two separate
+   send actions.
+6. `send_action`: a click event whose `target_summary.label` matches one of
+   the `ACTION_BUTTON_PATTERNS` word-boundary regexes (Send, Submit, Save,
+   Delete, Confirm, Approve, Reject, Cancel, Close, Done, Finish, Publish,
+   Archive, Remove, Create, Update — `rules.ts`).
+7. `file_action`: any event whose `target_summary.elementType === 'file'`.
+8. `data_entry`: `interaction.input_change` or `interaction.keyboard_shortcut`
+   events make up **≥ 50%** of the accumulator.
+9. `single_action`: default fallback.
 
 ### 3.5 Confidence Scores
 
@@ -222,29 +264,58 @@ without a new rule version:
 |---|---|
 | `annotation` | `1.0` |
 | `fill_and_submit` | `0.9` |
+| `send_action` | `0.9` |
 | `click_then_navigate` | `0.85` |
+| `file_action` | `0.85` |
 | `error_handling` | `0.8` |
+| `data_entry` | `0.8` |
 | `repeated_click_dedup` | `0.7` |
 | `single_action` with a concrete target label | `0.75` |
 | `single_action` without any target label | `0.55` |
 
-"Concrete target label" is defined as: `events[0].target_summary.label` is
-not `undefined`.
+This covers all 9 `GroupingReason` members. `calculateConfidence` in
+`packages/segmentation-engine/src/rules.ts` is the source of truth; pinned
+by `packages/segmentation-engine/src/invariants.test.ts` Group B.
+
+"Concrete target label" is defined as: **any** event in the accumulator
+(not just the first) has a truthy `target_summary.label` after `.trim()`
+(`events.some((e) => e.target_summary?.label?.trim())` in `rules.ts`) —
+an empty or whitespace-only label does not count as concrete.
 
 ### 3.6 Boundary Reasons
 
-Valid `BoundaryReason` values (from `packages/segmentation-engine/src/types.ts`):
+Valid `BoundaryReason` values (10 members, from
+`packages/segmentation-engine/src/types.ts`; boundary logic lives in
+`batch-segmenter.ts` / `streaming-segmenter.ts`):
 - `form_submitted` — triggered immediately after `interaction.submit` is
   added to the accumulator.
-- `navigation_changed` — triggered when a navigation event carries a
-  `page_context.domain` different from the most recently seen navigation
-  domain, with a non-empty accumulator.
+- `navigation_changed` — triggered when **any** event (not only navigation
+  events — this also catches multi-tab workflows where a tab switch
+  produces click/input events on a different domain) carries a
+  `page_context.domain` different from the most recently seen domain, with
+  a non-empty accumulator.
+- `route_changed` — triggered when a `navigation.route_change` event's
+  `page_context.routeTemplate` differs from the last-seen route template
+  (same domain, SPA navigation), guarded so the very first route seen in a
+  session never fires a boundary. The route-change event itself is
+  consumed as the transition signal and is not accumulated into either
+  step.
+- `target_changed` — triggered on interaction events only, when the gap
+  since the previous event is `>= TARGET_CHANGE_GAP_MS` (2,000 ms) AND the
+  interaction target (selector, or selector+label composite via
+  `interactionTargetKey`) differs from the previous event's target.
+- `action_completed` — triggered when a click matches an
+  `ACTION_BUTTON_PATTERNS` entry (Send/Submit/Save/etc.), finalized
+  **after** the click is added to the accumulator, unless the immediately
+  following event is a rapid repeat click on the same target within
+  `RAPID_CLICK_DEDUP_MS` (rapid-click dedup takes priority over action
+  completion).
 - `app_context_changed` — (reserved; not yet triggered by any rule).
 - `idle_gap` — triggered when the gap between consecutive events exceeds
   `IDLE_GAP_MS`.
 - `user_annotation` — triggered before and after a
-  `session.annotation_added` event: the previous accumulator is flushed,
-  then the annotation forms its own single-event step.
+  `session.annotation_added` event: the previous accumulator is flushed
+  (only if non-empty), then the annotation forms its own single-event step.
 - `session_stop` — triggered when `session.stopped` is encountered, and
   at end-of-loop to flush remaining accumulated events.
 - `explicit_boundary` — (reserved; not yet triggered by any rule).
@@ -371,23 +442,35 @@ is detected during normalization:
 
 ### 5.4 Sensitive Target Detection
 
-A target is classified as sensitive if any of the following is true:
+A target is classified as sensitive (at the normalization layer,
+`isSensitiveTarget()` in `normalizer.ts`) if any of the following is true:
 - `is_sensitive_target === true` on the raw event.
 - `target_element_type` is `'password'`.
-- `target_selector` matches: `/password|passwd|secret/i` (inline check in
-  normalizer) or any pattern in `SENSITIVE_SELECTOR_PATTERNS` (policy
-  engine).
-- `classifySensitivity()` returns `isSensitive: true` based on combined
-  selector + label text matching patterns for: password/secret/token/api_key,
-  credit card, SSN/government ID.
+- `target_selector` matches `SENSITIVE_SELECTOR_RE` (inline, module-private
+  in `normalizer.ts`): `/password|passwd|secret|token|api[_-]?key|credit|cvv|ssn/i`.
+
+Separately, `classifySensitivity()` (`@ledgerium/policy-engine`,
+`sensitivity.ts`) is used by both `applyPolicy()` (policy engine) and the
+capture-layer `isSensitiveTarget()` (§5.5); it returns `isSensitive: true`
+based on the combined selector + label text matching
+`SENSITIVE_SELECTOR_PATTERNS`: password/passwd/secret/token/api\[_-\]?key,
+credit-card/card-number/cvv, ssn/social-security/tax-id.
 
 ### 5.5 Sensitive Input Types (Capture Layer)
 
 The content script `CaptureEngine` never captures values from:
-- `type="password"` or `type="hidden"` inputs (blocked at capture; emits
-  `input_changed` with `is_sensitive_target: true`, no label, no selector).
-- Any element whose `data-testid`, `name`, `id`, or `aria-label` matches
-  `/password|passwd|secret|token|api[_-]?key|credit|cvv|ssn/i`.
+- `type="password"` or `type="hidden"` inputs, or inputs whose
+  `autocomplete` attribute contains `"password"` (DOM-type fast path in
+  `isSensitiveTarget()`, `target-inspector.ts`; blocked at capture — emits
+  `input_changed` with `is_sensitive_target: true`, no label, no selector,
+  `privacy.valueRedacted: true`).
+- Any element whose combined `id` + `name` + `data-testid` (as selector)
+  and `aria-label` (as label) is classified sensitive by
+  `classifySensitivity()` (`@ledgerium/policy-engine`) — see §5.4 for the
+  pattern list.
+
+Clicked elements classified sensitive are skipped entirely at capture (no
+raw event of any kind is emitted for the click).
 
 Sensitive elements are never passed the `target_label` or `target_selector`
 fields in the raw event — these are omitted at the capture layer, not just
@@ -413,8 +496,8 @@ this document.
 |---|---|---|
 | `SCHEMA_VERSION` | `'1.0.0'` | `packages/schema-events/src/raw-event.schema.ts`, `apps/extension-app/src/shared/constants.ts` |
 | `NORMALIZATION_RULE_VERSION` | `'1.1.0'` | `packages/normalization-engine/src/normalizer.ts` |
-| `SEGMENTATION_RULE_VERSION` | `'1.0.0'` | `packages/segmentation-engine/src/rules.ts`, `apps/extension-app/src/shared/constants.ts` |
-| `RECORDER_VERSION` | `'0.1.0'` | `apps/extension-app/src/shared/constants.ts` |
+| `SEGMENTATION_RULE_VERSION` | `'1.1.0'` | `packages/segmentation-engine/src/rules.ts`, `apps/extension-app/src/shared/constants.ts` |
+| `RECORDER_VERSION` | `'2.0.0'` | `apps/extension-app/src/shared/constants.ts` |
 | `RENDERER_VERSION` | `'0.1.0'` | `apps/extension-app/src/shared/constants.ts` |
 
 The `CanonicalEventSchema` uses `z.literal('1.0.0')` for `schema_version`,
@@ -510,6 +593,17 @@ STORAGE_KEY_SESSION  = 'ledgerium_active_session'   // chrome.storage.local
 STORAGE_KEY_SETTINGS = 'ledgerium_settings'          // chrome.storage.sync
 ```
 
-Session metadata is persisted to `chrome.storage.local` on every state
-change and on session init. Raw events, canonical events, and policy log
-entries are held in memory only — they are not persisted to storage.
+Session metadata is persisted to `chrome.storage.local` under
+`STORAGE_KEY_SESSION` on every state change and on session init.
+
+Raw events, canonical events, policy log entries, and live steps are also
+persisted — debounced (`PERSIST_DEBOUNCE_MS` = `500` ms) to
+`chrome.storage.local` under `STORAGE_KEY_SESSION_EVENTS_PREFIX + sessionId`
+(`'ledgerium_active_session_events_'` + sessionId), as a `PersistedSessionEvents`
+payload (`{ persistSchemaVersion, rawEvents, canonicalEvents, policyLog,
+liveSteps }`, `PERSIST_SCHEMA_VERSION` = `1`). This enables service-worker
+restart recovery (see `apps/extension-app/src/background/session-store.ts`).
+On a `chrome.storage.local` quota error, the store sets
+`meta.persistenceTruncated = true` and stops further event writes for that
+session (append-stop only — earlier persisted events are never deleted to
+make room).

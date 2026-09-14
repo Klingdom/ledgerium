@@ -4,6 +4,18 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-14 (loop 3) — R-3: `docs/invariants.md` re-synced to source (Mode 1, `qa-engineer`)
+
+- Trigger: CEO "proceed". Selection driver: `saturation-rule` — the three prior changes (reverse trial, trial chip, quota prompt) were all web-app, so this loop had to leave that Area. Of the non-web candidates, R-3 won on the determinism/traceability bias: the doc is the compaction-recovery source of truth, and drift there is high-consequence. The extension quota-403 item was deferred (larger; needs real-extension validation).
+- Agent diversity: `qa-engineer` implementing; prior two loops were coordinator-direct frontend work-shape.
+- Constraint: doc follows source; zero source, type, or test edits.
+- Corrections (all cited to source file:line in the agent report): `SEGMENTATION_RULE_VERSION` 1.0.0→1.1.0; `RECORDER_VERSION` 0.1.0→2.0.0; `TARGET_CHANGE_GAP_MS` (2,000 ms) added; raw→canonical mapping 15→28 entries; `BoundaryReason` 7→10 and `navigation_changed` semantics; `GroupingReason` precedence 5→9 steps and confidence table 6→9 rows; "concrete label" definition; `system.error_displayed` segmentation exception; sensitive-selector regex (adds token/api_key/credit/cvv/ssn); capture-layer sensitivity now delegates to policy-engine; §7.6 "events never persisted" was false — events persist debounced to `chrome.storage.local` since iter 010.
+- Coordinator verification (independent of agent): grep-confirmed segmentation 1.1.0, recorder 2.0.0, TARGET_CHANGE_GAP_MS, SENSITIVE_SELECTOR_RE, 10-member BoundaryReason, and a 28-entry mapping that matches the pin test's `toBe(28)`. The "27" recorded in iter-051 governance notes was itself stale.
+- Validation: `pnpm test` 4703/4703 across 230 files; only `docs/invariants.md` changed (+133/−39).
+- Also this session: operator briefing emailed via `ops-briefing.yml` (run 34900628918, success); staging secret deleted after send. Deploy run 34900087879 (cd6ac77) success; extension E2E success.
+
+---
+
 ## 2026-09-14 (loop 2) — Recording-quota prompt reaches the live app (Mode 1, `frontend-engineer` work-shape + `growth-strategist` D-4 adjacent)
 
 - Trigger: CEO "continue". Next item from the prior loop's follow-ups and SYSTEM_HEALTH 2026-09-14 gap (1): at reverse-trial roll-down a user drops to free (5/month) with no quota signal anywhere reachable — `UsageQuotaMeter` rendered only in the dead v1 dashboard branch, and said "Upgrade to Team for unlimited" (Team is not self-serve).

@@ -6,6 +6,21 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-14] - `docs/invariants.md` re-synced to source (risk R-3 closed)
+
+**Why:** this document is what an agent reads to recover after context loss. It had drifted across a dozen facts, so recovery would have restored wrong beliefs about versions, boundaries, and privacy handling.
+
+### Fixed (documentation only — no constants changed)
+- Versions: segmentation rule 1.1.0, recorder 2.0.0.
+- Segmentation: 10 boundary reasons, 9 grouping reasons with full confidence table and precedence, missing `TARGET_CHANGE_GAP_MS`, `system.error_displayed` exception.
+- Normalization: full 28-entry raw→canonical mapping; actual sensitive-selector regex.
+- Privacy/persistence: capture-layer sensitivity delegates to policy-engine; the claim that session events are never persisted was false — they persist to `chrome.storage.local`.
+
+### Validation
+- Every change cited to source file:line; key values independently re-verified by the coordinator against source and the iter-051 pin tests. Workspace tests 4703/4703.
+
+---
+
 ## [2026-09-14] - Recording-limit prompt on the live dashboard, with truthful upgrade copy
 
 **Why:** after the reverse trial rolls down to free (5 recordings/month), nothing in the reachable app showed usage or the limit. The only quota prompt lived in the retired v1 dashboard and pointed at Team, which cannot be bought self-serve.

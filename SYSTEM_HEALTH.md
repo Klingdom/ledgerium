@@ -6,7 +6,9 @@
 - **Stripe webhook coverage check** (6da1b83) now verifies in production that the live endpoint subscribes to all 9 handled events; result shows in the admin billing panel — **not yet read by a human**.
 - **Roll-down quota prompt shipped (loop 2):** live dashboard header now shows recording usage and a truthful "Solo removes the monthly cap" prompt from 80%.
 - **Open gaps in the trial loop (next up):** (2) no final-day notice; (3) extension shows nothing on a quota 403; (4) `/api/workflows` `stats.userPlan` reports raw plan, so analytics count trial users as free.
-- Risks R-2 (canonical hash) and R-3 (stale `docs/invariants.md`) below remain OPEN. CEO decision queue below unchanged.
+- **Deployed:** reverse trial + trial chip + quota prompt live (deploy run 34900087879 success; extension E2E success). Live HTTP health not checked from the dev machine (curl blocked by project policy).
+- **R-3 RESOLVED (loop 3):** `docs/invariants.md` re-synced to source; 12 drift sites corrected, including a false "events never persisted" claim.
+- R-2 (canonical hash) below remains OPEN. CEO decision queue below unchanged.
 
 ## Current state as of 2026-09-09 (SEO/AEO content program)
 
