@@ -28,6 +28,7 @@
 
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 import type { InsightChip } from '@/lib/workflow-metrics.js';
+import { RecordingQuotaChip } from './RecordingQuotaChip';
 
 export type TimeRange = '7d' | '30d' | '90d' | 'all';
 
@@ -159,6 +160,10 @@ export default function CommandHeader({
 
       {/* Right: time range selector + portfolio score */}
       <div className="flex items-center gap-ds-4 flex-shrink-0">
+        {/* Monthly recording usage — renders nothing on unlimited plans
+            (including active reverse trials). See lib/quota-meter.ts. */}
+        <RecordingQuotaChip />
+
         {/* Time range: native <select> for accessibility */}
         <label className="flex items-center gap-ds-2">
           <span className="text-[12px] font-medium text-[var(--content-secondary)] sr-only">

@@ -6,6 +6,22 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-14] - Recording-limit prompt on the live dashboard, with truthful upgrade copy
+
+**Why:** after the reverse trial rolls down to free (5 recordings/month), nothing in the reachable app showed usage or the limit. The only quota prompt lived in the retired v1 dashboard and pointed at Team, which cannot be bought self-serve.
+
+### Added
+- `RecordingQuotaChip` in the dashboard header: "N / M recordings", neutral below 80%, amber from 80% with "Solo removes the monthly cap", red at the limit. Hidden on unlimited plans, including during an active trial.
+
+### Fixed
+- Upgrade copy named a non-purchasable plan. It now names Solo — the lowest uncapped tier — and a test fails if plan limits change underneath the claim. (A proposed "Starter removes the cap" was rejected: Starter is capped at 15.)
+- The legacy meter and the new chip share one tested decision module; the old test that mirrored component logic by hand is gone.
+
+### Validation
+- Workspace tests **4703** across 230 files; typecheck clean; brand-voice review 5/5 KEEP with the upload-only gating verified in code.
+
+---
+
 ## [2026-09-14] - Reverse trial made visible: trial status chip in the app header
 
 **Why:** the reverse trial (bb0d5c9) grants Solo features at signup, but nothing in the product told the user. A trial that begins and ends in silence is worse than none — it creates an expectation and breaks it without explanation.

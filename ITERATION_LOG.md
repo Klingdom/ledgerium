@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-14 (loop 2) — Recording-quota prompt reaches the live app (Mode 1, `frontend-engineer` work-shape + `growth-strategist` D-4 adjacent)
+
+- Trigger: CEO "continue". Next item from the prior loop's follow-ups and SYSTEM_HEALTH 2026-09-14 gap (1): at reverse-trial roll-down a user drops to free (5/month) with no quota signal anywhere reachable — `UsageQuotaMeter` rendered only in the dead v1 dashboard branch, and said "Upgrade to Team for unlimited" (Team is not self-serve).
+- Candidate Selection: `top-score` — TRIAL_REVIEW_001 growth ranked #2 (highest impact÷effort) / UX P0 #7+#8. Scope discipline: quota prompt only. Final-day notice and extension quota-403 handling remain separate items.
+- Evidence-based deviation from the review: its proposed copy "Starter removes the monthly cap" is false (`plans.ts` starter = 15/month). Solo is the lowest uncapped tier; the copy names Solo and a test binds that claim to `PLAN_HIERARCHY` + `getPlanConfig`.
+- Design: no change to `/api/workflows` — `/api/account` already returns `limits.recordings {used, max}` from the effective plan, so the chip self-fetches (same pattern as `TrialStatusChip`) and hides automatically during an active trial. Legacy meter now consumes the shared helper; its mirror-logic test (flagged as drift risk at iter 048) is replaced by tests of the real implementation.
+- Files: NEW `lib/quota-meter.ts` + `lib/quota-meter.test.ts` (14 tests); NEW `components/dashboard-v2/RecordingQuotaChip.tsx` (emits `upgrade_clicked` location `dashboard_v2_quota_chip`); MODIFIED `CommandHeader.tsx` (mount), `UsageQuotaMeter.tsx` (consumes helper); DELETED `UsageQuotaMeter.test.tsx` (mirror).
+- D-4 clause 1 FIRED (5 strings) → `growth-strategist`: 5 KEEP / 0 POLISH / 0 REWRITE. Verified "New uploads resume" is exact — `checkRecordingLimit` gates only `upload` and `sync` routes; recording in the extension is not blocked; existing workflows untouched.
+- Validation: `pnpm test` **4703/4703** across 230 files; `pnpm typecheck` clean across 11 packages/apps; CommandHeader 31/31; web-app production build (see commit). No extension surfaces touched.
+- Scope-adjacent (not promoted): `/api/workflows` `stats.userPlan` uses raw `plan`, not `effectivePlanForUser`, so analytics segment trial users as free; `/api/account` is now fetched by two chrome components per dashboard load (cheap, dedupe later if needed).
+
+---
+
 ## 2026-09-14 — Reverse-trial status chip (Mode 1 autonomous loop, `frontend-engineer` work-shape + `growth-strategist` D-4 adjacent)
 
 - Trigger: CEO directive "continue to manage and improve the site autonomously." System review found commit bb0d5c9 (reverse trial) committed but unpushed, with its own message stating the feature is "not user-visible" until a chip consumes `reverseTrial` from `/api/account`. The chip existed as uncommitted, unvalidated work.
