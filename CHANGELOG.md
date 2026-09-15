@@ -6,6 +6,25 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-15] - Growth and Enterprise users can use Team presets on the dashboard
+
+**Why:** the preset rail decided plan access with its own rule, which only recognised Team and Starter. Growth and Enterprise users — who pay for more than Team — saw Team presets disabled with an upgrade prompt.
+
+### Fixed
+- The rail now uses the same rule as the preset catalog, in one exported function. A test checks that the two agree for every plan and every preset. The old tests only checked a copy of the logic, so they could not have caught this.
+
+### Not changed
+- Solo, Starter and Free still see Team presets locked, which is correct. No wording changed.
+
+### Also recorded (no code)
+- Row 187, the last-day trial banner, was closed as redundant: the trial chip already covers the countdown.
+- Row 191 raised for a CEO decision: users on the reverse trial can start a second, card-based Stripe trial that later charges without an in-app warning.
+
+### Validation
+- Workspace tests **4727**; typecheck clean. Reinstating the old rule fails the new agreement tests.
+
+---
+
 ## [2026-09-14] - Trial and workspace users now get the features their plan includes on workflow pages
 
 **Why:** the reverse trial grants Solo without changing the stored `plan` column, and three workflow routes read that column directly. Users inside a live trial were promised Solo and still saw locked health scores and watermarked exports, and analytics recorded them as free. Members of paid workspaces were affected the same way.

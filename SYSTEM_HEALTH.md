@@ -4,7 +4,13 @@
 
 - **MR-020 governance findings (awaiting CEO):** three control rules are failing. (i) Meta-review cadence has been silently dead since May; 125 commits have no iteration log. (ii) User-facing plan and price claims have no test binding, with 7 defects so far. (iii) CLAUDE.md § Current Phase is 361 KB of stale narrative loaded into every session. Proposed fixes C1–C3 are in `docs/meta/MR_020_META_REVIEW.md`, not applied.
 - **Trial entitlement defect FIXED (loop 6, not yet deployed):** three workflow routes gated on the raw `plan` column, so trial users saw locked health scores, got watermarked exports, and were counted as free in analytics. They now use the effective plan. Analytics events recorded before deploy remain mislabelled.
-- **Open follow-ups now tracked in IMPROVEMENT_BACKLOG rows 186–190** (previously only in logs): background uploader quota 403 · last-day trial notice · preset tier normalization for Growth/Enterprise · duplicate `/api/account` fetch · MR-020 C1–C3 awaiting CEO.
+- **Open follow-ups tracked in IMPROVEMENT_BACKLOG:**
+  - #186 background uploader quota 403
+  - #189 duplicate `/api/account` fetch
+  - #190 MR-020 C1–C3 (awaiting CEO)
+  - #191 Stripe card trial stacks on the reverse trial and charges with no in-app warning (awaiting CEO pricing decision)
+  - Closed 2026-09-15: #187 (redundant with the trial chip), #188 (preset rail now uses the canonical plan rule).
+- **Deploy gap (2026-09-15):** `main` is ahead of origin. The trial-entitlement fix (9b0fb72) is not in production until pushed; trial users there still get locked health scores and watermarked exports.
 
 - **Reverse trial live-ready:** signup grant (bb0d5c9) + in-app status chip (this date). Trial is now visible on every app page.
 - **Stripe webhook coverage check** (6da1b83) now verifies in production that the live endpoint subscribes to all 9 handled events; result shows in the admin billing panel — **not yet read by a human**.

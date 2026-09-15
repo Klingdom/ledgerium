@@ -487,14 +487,45 @@ export function listPresetIds(): readonly PresetId[] {
 }
 
 /**
+ * Whether a preset is unlocked (plan-gate-wise) for a given plan tier.
+ *
+ * This is the single source of truth for "is this preset's plan gate
+ * satisfied by this plan" — both `getAvailablePresets` (server/list context)
+ * and `PresetChipRail` (client chip-disabled-state context) MUST call this
+ * function rather than re-deriving the rule, so the two surfaces cannot
+ * diverge (closes row #188 — `PresetChipRail` previously hand-rolled a
+ * narrower 'free' | 'starter' | 'team' normalizer that silently treated
+ * 'solo' / 'growth' / 'enterprise' as 'free').
+ *
+ * Rules:
+ *  - `planTierGate === null` → unlocked for every plan.
+ *  - `planTierGate === <tier>` → unlocked when `planTier` is at or above
+ *    `<tier>` in `PLAN_HIERARCHY` ('free' < 'starter' < 'solo' < 'team' <
+ *    'growth' < 'enterprise'). This intentionally does NOT consult
+ *    `preset.availability` — pending-availability presets are filtered by
+ *    the caller (see `getAvailablePresets` / `PresetChipRail`'s `isPending`
+ *    check) independently of the plan gate.
+ *
+ * Determinism: same `(preset, planTier)` → byte-identical result.
+ */
+export function isPresetUnlockedForPlan(
+  preset: PresetDefinition,
+  planTier: PlanType,
+): boolean {
+  if (preset.planTierGate === null) return true;
+  const tierIndex = PLAN_HIERARCHY.indexOf(planTier);
+  const gateIndex = PLAN_HIERARCHY.indexOf(preset.planTierGate);
+  return tierIndex >= gateIndex;
+}
+
+/**
  * Return presets that are actionable for the given plan tier.
  *
  * Rules:
  *  - `availability !== 'available'` → always excluded (pending presets are
  *    never actionable regardless of plan tier).
- *  - `planTierGate === null` → included for all tiers.
- *  - `planTierGate === 'team'` → included only when `planTier === 'team'`.
- *  - `planTierGate === 'starter'` → included for 'starter' and 'team'.
+ *  - Plan-gate rule delegates to `isPresetUnlockedForPlan` (single source of
+ *    truth shared with `PresetChipRail`).
  *
  * Returns presets in catalog order.
  * Determinism: same `planTier` → byte-identical result.
@@ -502,18 +533,9 @@ export function listPresetIds(): readonly PresetId[] {
 export function getAvailablePresets(
   planTier: PlanType,
 ): readonly PresetDefinition[] {
-  // Use the canonical PLAN_HIERARCHY ordering from plans.ts so higher-tier
-  // plans ('growth', 'enterprise') inherit all team-tier presets cleanly.
-  const tierIndex = PLAN_HIERARCHY.indexOf(planTier);
-  const starterIndex = PLAN_HIERARCHY.indexOf('starter');
-  const teamIndex = PLAN_HIERARCHY.indexOf('team');
-  return WORKFLOW_DASHBOARD_PRESETS.filter((p) => {
-    if (p.availability !== 'available') return false;
-    if (p.planTierGate === null) return true;
-    if (p.planTierGate === 'starter') return tierIndex >= starterIndex;
-    if (p.planTierGate === 'team') return tierIndex >= teamIndex;
-    return false;
-  });
+  return WORKFLOW_DASHBOARD_PRESETS.filter(
+    (p) => p.availability === 'available' && isPresetUnlockedForPlan(p, planTier),
+  );
 }
 
 // ── Compile-time exhaustiveness lock (D-4 clause 2 architect §4 revision) ────

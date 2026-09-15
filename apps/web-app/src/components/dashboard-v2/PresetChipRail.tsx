@@ -6,7 +6,8 @@
  *
  * Renders 10 preset chips:
  *  - 5 canonical presets (all plan tiers, always enabled)
- *  - 2 Team-plan-gated presets (disabled for Free/Starter, upgrade-CTA on click)
+ *  - 2 Team-plan-gated presets (disabled below the Team tier — i.e. for Free,
+ *    Starter, and Solo — upgrade-CTA on click; see `isPresetUnlockedForPlan`)
  *  - 3 AI presets (always disabled; "Available after Path C R+1" tooltip)
  *
  * Active state: when `currentPreferences` matches a preset's column config,
@@ -45,10 +46,12 @@ import {
 } from 'lucide-react';
 import {
   WORKFLOW_DASHBOARD_PRESETS,
+  isPresetUnlockedForPlan,
   type PresetDefinition,
   type PresetId,
 } from '@/lib/dashboard-columns/presets.js';
 import type { UserDashboardPreference } from '@/lib/dashboard-columns/index.js';
+import { toPlanType, type PlanType } from '@/lib/plans.js';
 
 // ── Icon map ──────────────────────────────────────────────────────────────────
 
@@ -115,12 +118,28 @@ function detectActivePreset(
   return null;
 }
 
-// ── Plan tier normalizer ───────────────────────────────────────────────────────
+// ── Plan-gate resolution (row #188) ───────────────────────────────────────────
 
-function normalizePlanTier(userPlan: string | undefined): 'free' | 'starter' | 'team' {
-  if (userPlan === 'team') return 'team';
-  if (userPlan === 'starter') return 'starter';
-  return 'free';
+/**
+ * Resolve whether a preset chip should render disabled for a raw `userPlan`
+ * string as received via props (the effective plan string returned by
+ * `/api/workflows` — see `route.ts` `effectivePlanFor`).
+ *
+ * This is the ONLY plan-gating logic in this file: it converts the raw string
+ * via the real `toPlanType` (unknown/undefined → 'free', the most-locked
+ * tier) and defers the actual gate decision to the shared
+ * `isPresetUnlockedForPlan` helper from `presets.ts` — the same function
+ * `getAvailablePresets` uses. The two call sites cannot diverge.
+ *
+ * Exported (rather than inlined in the render loop) so it is the exact code
+ * path exercised by both production render and `PresetChipRail.test.ts`
+ * without requiring jsdom.
+ */
+export function isChipDisabledByPlan(
+  preset: PresetDefinition,
+  userPlan: string | undefined,
+): boolean {
+  return !isPresetUnlockedForPlan(preset, toPlanType(userPlan ?? ''));
 }
 
 // ── Single chip ───────────────────────────────────────────────────────────────
@@ -129,7 +148,7 @@ interface PresetChipProps {
   preset: PresetDefinition;
   isActive: boolean;
   isDisabledByPlan: boolean;
-  planTier: 'free' | 'starter' | 'team';
+  planTier: PlanType;
   onApply: (preset: PresetDefinition) => void;
 }
 
@@ -235,7 +254,10 @@ export default function PresetChipRail({
   onApplyPreset,
   userPlan,
 }: PresetChipRailProps) {
-  const planTier = normalizePlanTier(userPlan);
+  // toPlanType defaults unknown/undefined strings to 'free', which is the
+  // conservative (most-locked) plan tier for gated-preset purposes. Kept
+  // here only for the `planTier` display prop passed to PresetChip.
+  const planTier = toPlanType(userPlan ?? '');
   const activePresetId = detectActivePreset(currentPreferences);
 
   return (
@@ -252,8 +274,7 @@ export default function PresetChipRail({
       "
     >
       {WORKFLOW_DASHBOARD_PRESETS.map((preset) => {
-        const isDisabledByPlan =
-          preset.planTierGate === 'team' && planTier !== 'team';
+        const isDisabledByPlan = isChipDisabledByPlan(preset, userPlan);
 
         return (
           <PresetChip

@@ -4,6 +4,32 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-15 (loop 7) — Preset rail uses the canonical plan rule (Mode 1, `frontend-engineer`)
+
+- **Trigger:** CEO "continue".
+- **Candidate Selection:** `burn-down`, chosen over the pre-listed top item after evidence changed the ranking.
+  - **Row 187 (last-day trial notice) closed as redundant before build.** The UX day-13/14 banners in TRIAL_REVIEW_001 were designed to warn before a Stripe **card** charge; the reverse trial charges nothing, and `TrialStatusChip` already counts down with amber at ≤3 days. The review's roll-down copy (growth §4.D, "existing analysis isn't deleted") would also be false: free has zero paid features, so health scores lock on existing workflows.
+  - That investigation surfaced **row 191** (awaiting CEO): checkout still grants a 14-day Stripe card trial to anyone who has never held a Stripe subscription, which includes every reverse-trial user, so trials stack. `subscription.trial_end` is discarded in the webhook, so no pre-charge warning is possible today.
+  - Remaining: #188 (web, 10−2 = 8) and #186 (extension, 8). Tie broken on lower effort/risk and the single-source-of-truth bias.
+  - D-1: 1 non-extension iteration since loop 4; clear.
+- **Source verification (MR-013 rule) before delegation:** the row's claim was confirmed at `PresetChipRail.tsx:120-124` / `:255-256` against `presets.ts:502-517`.
+- **Agent diversity:** `frontend-engineer` implementing. Loops 1, 2, 4 and 6 were coordinator-direct, which MR-020 did not flag, but delegation is the stated norm.
+- **Defect:** `normalizePlanTier` recognised only `team`/`starter`, so Growth and Enterprise users (now that `stats.userPlan` is the effective plan since 9b0fb72) saw Team presets disabled with an upgrade prompt. `presets.ts getAvailablePresets` already used `PLAN_HIERARCHY` correctly: two rules for one decision. The rail's tests exercised a hand-copied mirror of the logic, so they could not detect the drift.
+- **Change:**
+  - New exported `isPresetUnlockedForPlan(preset, plan)` in `presets.ts`; `getAvailablePresets` delegates to it (its 26 existing tests unchanged).
+  - Rail calls `isChipDisabledByPlan(preset, userPlan)` = `!isPresetUnlockedForPlan(preset, toPlanType(userPlan ?? ''))`.
+  - `normalizePlanTier` removed. Mirror tests replaced with tests of the real exports, plus an agreement test across every plan × preset.
+- **Behaviour (Team-gated presets):** free/starter/solo stay locked; team unlocked; growth and enterprise go locked → **unlocked**.
+- **Validation:**
+  - Agent and coordinator each ran workspace `pnpm test` from the root: **4727/4727** across 231 files (+10).
+  - `pnpm typecheck` clean.
+  - **Mutation check** (agent): reinstating the old normaliser fails I1 (rail/getAvailablePresets agreement) and I2 (Growth/Enterprise regression); restored green.
+  - **Coordinator:** `git status` shows only the 3 scoped files; the diff scan found no user-visible string added or removed. D-4 clause 1 did not fire.
+  - web-app production build: see commit.
+- **Follow-ups:** none new. Open: #186 background uploader 403; #189 duplicate `/api/account` fetch; #190 MR-020 C1–C3 and #191 trial stacking, both awaiting CEO.
+
+---
+
 ## 2026-09-14 (loop 6) — Workflow routes honour the reverse-trial and workspace plan (Mode 1, coordinator-direct ≈ `backend-engineer` work-shape)
 
 - **Trigger:** CEO "continue".
