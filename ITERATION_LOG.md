@@ -4,6 +4,42 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-15 — MR-021 meta-review (Mode 4, `meta-coordinator`, NON-counting)
+
+- **Trigger:** standard cadence — MR-020 followed by loops 6, 7, 8.
+- **Artifact:** `docs/meta/MR_021_META_REVIEW.md` (888 words, bounded).
+- **Coordinator verification of MR-021 claims (all confirmed):**
+  - No PNG of any name is 440×280. A disk scan including gitignored paths found no promo, tile or marquee PNG at all; `capture-promo-images.ts` has not been run since its 3c7c67b fix.
+  - MR-019 §8 queued DV2 + WDC-002 cold-pool triage for MR-020 as "cannot defer further"; MR-020 did not perform it.
+  - The loop-6 log cites "loop 5 (docs)": wrong.
+- **Verdicts:**
+
+  | Item | Verdict | Note |
+  |---|---|---|
+  | Loop-6 endorsement | Effective | |
+  | Loop-6 scope-expansion log | Partially conforming | Guardrail 7 is Mode 5-only; its (a)/(d) specialist-evidence criteria were not met, though code evidence sufficed |
+  | Harness 403 fixture | Effective, coverage caveat | CI runs only the static harness |
+  | #187 pre-build closure | Effective — encourage | |
+  | Coordinator re-verification | Effective, slightly over-spent | Loop 8 ran the harness 4×; 1 coordinator run on a fresh build suffices after an agent's 2 |
+  | Debt ratio | 0.57 (4 of 7) | 0.50 counting built fixes only; indicative, window under 10 loops |
+  | Silence-as-accept for C1–C3 | Does NOT apply — coordinator position upheld | Prior uses declared the window at proposal; MR-020 asked for explicit approval |
+  | Pipeline + cold pools | **Failing** | Only #189 selectable. MR-006 Change D triage mandatory and overdue across DV2 / WDC-002 / MDR / WDC / PIB plus never-triaged PRICING-001 / SOPPM-001 / TEAM-001 / PATHE-001 (~240 items, ~30–40 iterations old). Chrome blocker B-1 was never in the backlog. |
+
+- **Proposed, NOT applied (edit CLAUDE.md, CEO approval):**
+  - **P-1:** pool-level `archive-stale` verdict for audit artifacts unmodified >90 days whose surface has changed.
+  - **P-2:** (a) refill step when no unblocked row scores ≥8; (b) log `closed-redundant` separately and report both debt ratios.
+- **Correction to loop 6 entry:** "Surfaces not touched by loop 5 (docs)" should read "loop 3 (docs)". Loop 5 was the MR-020 governance review. The guardrail-7(e) conclusion is unaffected.
+- **Backlog:**
+  - Row **192** (Chrome B-1 small promo tile, `Birth iter: audit-intake`, CHROME_STORE_SUBMISSION_READINESS_001 §6) promoted per MR-021.
+  - Row **193** (P-1/P-2) awaiting CEO.
+- **Loop 9 endorsement:**
+  - Top: #192 B-1 (`top-score`; no CEO decision for the asset; verify PNG dimensions from the IHDR chunk; `growth-strategist` if ≥3 strings change).
+  - Alternate: #189.
+  - Cold-pool triage deferred pending a P-1 ruling.
+- **Counters:** cadence reset to 0; product code untouched.
+
+---
+
 ## 2026-09-15 (loop 8) — Extension automatic upload explains a monthly-limit refusal (Mode 1, `backend-engineer`)
 
 - Trigger: CEO "continue". Candidate Selection: `burn-down`. Remaining selectable rows: #186 (extension, 8) and #189 (web perf, 6−2=4); #190 and #191 await CEO. Agent rotation off `frontend-engineer`.

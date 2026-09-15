@@ -5,7 +5,15 @@
 - **MR-020 governance findings (awaiting CEO):** three control rules are failing. (i) Meta-review cadence has been silently dead since May; 125 commits have no iteration log. (ii) User-facing plan and price claims have no test binding, with 7 defects so far. (iii) CLAUDE.md § Current Phase is 361 KB of stale narrative loaded into every session. Proposed fixes C1–C3 are in `docs/meta/MR_020_META_REVIEW.md`, not applied.
 - **Trial entitlement defect FIXED (loop 6, not yet deployed):** three workflow routes gated on the raw `plan` column, so trial users saw locked health scores, got watermarked exports, and were counted as free in analytics. They now use the effective plan. Analytics events recorded before deploy remain mislabelled.
 - **Extension quota refusal handled on both upload paths (loop 8, not yet deployed):** the manual button (loop 4) and now the automatic upload after recording. The real-Chrome harness now includes a quota-refusal test (6 tests).
-- **MR-021 due at the next slot** (3 loops since MR-020).
+- **MR-021 done (2026-09-15).** Governance findings:
+  - **Pipeline dry:** only #189 is unblocked.
+  - **Cold-pool triage overdue:** MR-006 Change D triage is mandatory for DV2, WDC-002, MDR, WDC and PIB (last triaged May), and PRICING-001, SOPPM-001, TEAM-001 and PATHE-001 were never triaged (~240 items). Deferred pending a CEO ruling on P-1, pool-level archive-stale.
+  - **Chrome Web Store blocker B-1 (row 192):** the required 440×280 small promo tile PNG does not exist. It is the last non-human blocker for submission and is selectable next.
+- **Awaiting CEO:**
+  - #190 MR-020 C1–C3;
+  - #191 stacked Stripe card trial;
+  - #193 MR-021 P-1/P-2;
+  - one human Chrome recording before Store submission.
 - **Open follow-ups tracked in IMPROVEMENT_BACKLOG:**
   - #189 duplicate `/api/account` fetch
   - #190 MR-020 C1–C3 (awaiting CEO)

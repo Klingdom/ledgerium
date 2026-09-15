@@ -6,6 +6,23 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-15] - MR-021 meta-review (governance only, no product change)
+
+### Found
+- The backlog has run dry of unblocked work (only #189 remains).
+- Mandatory cold-pool triage (MR-006 Change D) is overdue across every audit pool. MR-019 queued it and MR-020 skipped it.
+- The one remaining engineering blocker for Chrome Web Store submission — the required 440×280 promo tile — was never in the backlog. Verified: no such PNG exists anywhere on disk.
+
+### Decided
+- The silence-as-accept convention does not apply to MR-020's C1–C3, because approval was explicitly requested. Nothing applied.
+
+### Recorded
+- Backlog row 192 promotes the promo tile.
+- Row 193 holds new proposals P-1 (archive stale audit pools wholesale) and P-2 (refill the backlog when it runs dry; count redundant closures separately), awaiting CEO.
+- Loop 6's log misnamed a prior loop; corrected in the MR-021 entry.
+
+---
+
 ## [2026-09-15] - Extension: the automatic upload after recording explains a monthly-limit refusal
 
 **Why:** when a free user at their monthly limit finished recording, the automatic upload was refused, but the sidepanel only said "Upload failed". Loop 4 fixed the manual "Open in website" button but not this path.
