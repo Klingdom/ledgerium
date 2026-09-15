@@ -3,7 +3,8 @@ import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import type { Prisma } from '@prisma/client';
 import { computeHealthScore } from '@/lib/health-scores';
-import { toPlanType, hasFeature } from '@/lib/plans';
+import { hasFeature } from '@/lib/plans';
+import { effectivePlanFor } from '@/lib/feature-gating';
 import {
   computeWorkflowMetrics,
   computePortfolioHealthScore,
@@ -301,12 +302,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Resolve plan for feature gating (health scores are Starter+)
-  const userRecord = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { plan: true },
-  });
-  const userPlan = toPlanType(userRecord?.plan ?? 'free');
+  // Resolve the EFFECTIVE plan for feature gating (health scores are Starter+).
+  // Reading the raw `plan` column ignored the reverse-trial grant and paid
+  // workspace membership, so a trial user was shown locked health scores for a
+  // plan they had, and analytics (stats.userPlan) segmented them as free.
+  const userPlan = await effectivePlanFor(session.user.id);
   const canSeeHealthScores = hasFeature(userPlan, 'healthScores');
 
   const params = req.nextUrl.searchParams;

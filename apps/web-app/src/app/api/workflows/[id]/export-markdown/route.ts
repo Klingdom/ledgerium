@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { renderProcessMapMarkdown, renderSOPMarkdown } from '@ledgerium/process-engine';
-import { toPlanType, hasFeature } from '@/lib/plans';
+import { hasFeature } from '@/lib/plans';
+import { effectivePlanFor } from '@/lib/feature-gating';
 import { LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
 
 const FREE_PLAN_WATERMARK_PREPEND =
@@ -25,12 +26,10 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Resolve the user's plan for export watermarking
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { plan: true },
-  });
-  const plan = toPlanType(user?.plan ?? 'free');
+  // Effective plan for export watermarking (reverse trial + workspace). The raw
+  // `plan` column watermarked exports for trial users whose Solo grant
+  // includes cleanExports.
+  const plan = await effectivePlanFor(session.user.id);
   const isCleanExport = hasFeature(plan, 'cleanExports');
 
   const artifactType = req.nextUrl.searchParams.get('artifactType');

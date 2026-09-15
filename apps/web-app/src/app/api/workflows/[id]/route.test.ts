@@ -73,6 +73,7 @@ function pushArtifact(row: {
 }
 
 vi.mock('@/lib/auth', () => ({ auth: vi.fn() }));
+vi.mock('@/lib/feature-gating', () => ({ effectivePlanFor: vi.fn(async () => 'free') }));
 
 vi.mock('@/lib/plans', () => ({
   toPlanType: vi.fn(() => 'free'),
@@ -196,6 +197,22 @@ beforeEach(async () => {
 });
 
 // ── Tests ────────────────────────────────────────────────────────────────────
+
+describe('GET /api/workflows/[id] — plan resolution', () => {
+  it('gates health scores on the EFFECTIVE plan, not the raw plan column', async () => {
+    // Raw plan column is 'free' (beforeEach); a reverse-trial user's effective
+    // plan is 'solo'. The gate must be asked about 'solo'.
+    const { effectivePlanFor } = await import('@/lib/feature-gating');
+    vi.mocked(effectivePlanFor).mockResolvedValueOnce('solo');
+    const { hasFeature } = await import('@/lib/plans');
+
+    await callGET('wf-1');
+
+    expect(vi.mocked(effectivePlanFor)).toHaveBeenCalledWith('user-1');
+    expect(vi.mocked(hasFeature)).toHaveBeenCalledWith('solo', 'healthScores');
+    expect(mockUserFindUnique).not.toHaveBeenCalled();
+  });
+});
 
 describe('GET /api/workflows/[id] — B-3 idempotent template backfill', () => {
   it('writes templates exactly once when two invocations both observe a stale "no templates" snapshot', async () => {

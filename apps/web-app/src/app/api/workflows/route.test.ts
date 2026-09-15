@@ -27,6 +27,10 @@ vi.mock('@/lib/plans', () => ({
   hasFeature: vi.fn(),
 }));
 
+vi.mock('@/lib/feature-gating', () => ({
+  effectivePlanFor: vi.fn(async () => 'free'),
+}));
+
 vi.mock('@/lib/health-scores', () => ({
   computeHealthScore: vi.fn().mockReturnValue({
     overall: 75,
@@ -195,6 +199,24 @@ describe('GET /api/workflows — metricsV2 integration', () => {
     for (const workflow of body.workflows) {
       expect(workflow.metricsV2.healthScore.isGated).toBe(true);
     }
+  });
+
+  it('gates on the EFFECTIVE plan (reverse trial / workspace), not the raw plan column', async () => {
+    // The db mock's raw plan is 'free'; the effective plan is 'solo' (as for a
+    // user inside a reverse trial). Gating and analytics must both see 'solo'.
+    const { effectivePlanFor } = await import('@/lib/feature-gating');
+    vi.mocked(effectivePlanFor).mockResolvedValueOnce('solo');
+    const { hasFeature } = await import('@/lib/plans');
+    vi.mocked(hasFeature).mockReturnValue(true);
+
+    const { GET } = await import('./route');
+    const response = await GET(makeGetRequest());
+    const body = await response.json() as { stats: { userPlan?: string } };
+
+    expect(vi.mocked(effectivePlanFor)).toHaveBeenCalledWith('user-1');
+    expect(vi.mocked(hasFeature)).toHaveBeenCalledWith('solo', 'healthScores');
+    expect(vi.mocked(hasFeature)).not.toHaveBeenCalledWith('free', 'healthScores');
+    expect(body.stats.userPlan).toBe('solo');
   });
 
   it('starter+ user: metricsV2.healthScore.isGated === false', async () => {

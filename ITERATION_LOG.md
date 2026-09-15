@@ -4,6 +4,41 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-14 (loop 6) — Workflow routes honour the reverse-trial and workspace plan (Mode 1, coordinator-direct ≈ `backend-engineer` work-shape)
+
+- **Trigger:** CEO "continue".
+- **Candidate Selection:** `burn-down` per the MR-020 endorsement (loop-4 follow-up). It scored highest even after the −2 web-app saturation penalty. Area sequence was web, web, docs, extension, so no saturation block; D-1 clear.
+- **scope-expansion: approved.**
+  - The row as endorsed said "analytics counts trial users as free". Code evidence showed the same raw-plan read also **gates features**.
+  - One outcome ("plan gates in workflow routes use the effective plan"), same Area.
+  - Surfaces not touched by loop 5 (docs) or loop 4 (extension).
+- **Defect:** three routes resolved the plan from the raw `user.plan` column. Because the reverse-trial grant is deliberately never written to `plan`, and `effectivePlanFor` merges trial + workspace plans at read time, users inside a live trial got:
+  - (1) locked health scores on `/api/workflows` (Solo includes `healthScores`);
+  - (2) locked health score on `/api/workflows/[id]`;
+  - (3) watermarked markdown exports (Solo includes `cleanExports`);
+  - (4) `stats.userPlan = 'free'` → every analytics event from the first trial cohort segmented as free.
+  - Paid workspace members were affected the same way.
+- **Fix:** all three routes call `effectivePlanFor(session.user.id)`, which is request-cached and already used by `/api/billing/checkout` and `/api/analytics/engagement`. Net code change: three `db.user.findUnique` + `toPlanType` blocks replaced.
+- **Deliberately unchanged:**
+  - `checkSoloFeatureAccess` (team creation must be the user's own subscription, documented at `feature-gating.ts:88-97`).
+  - `buildFeatureFlags` (zero callers).
+  - Admin/team routes that read `team.plan`.
+- **Validation:**
+  - Targeted route tests 54/54 (+3: one per route asserting the gate receives the effective plan).
+  - **Mutation check:** fix temporarily reverted via `git stash`; exactly the 3 new tests failed, 51 passed; fix restored byte-identical (diff hash matched).
+  - Workspace `pnpm test` **4717/4717** across 231 files.
+  - `pnpm typecheck` clean.
+  - web-app production build OK; dynamic-route gate green.
+- **Validation process note:** a first "full suite" run reported 173 files / 3007 tests because it executed the web-app package script rather than the workspace root. It was caught by comparing against the earlier 4714 and re-run with `pnpm -C <root> test`. Not a regression.
+- **Artifacts:** IMPROVEMENT_BACKLOG rows **185 (closed)** and **186–190** added, closing the MR-020 finding that today's follow-ups were only in logs.
+- **Follow-ups:**
+  - #188 `PresetChipRail.normalizePlanTier` recognises only team/starter, so Growth/Enterprise users see team presets disabled — observed during this loop, not fixed.
+  - #186 background uploader quota 403.
+  - #187 last-day trial notice.
+- **Human-visible effect after deploy:** a user inside the reverse trial should now see health scores on the dashboard and get unwatermarked markdown exports.
+
+---
+
 ## 2026-09-14 — MR-020 meta-review (Mode 4, `meta-coordinator`, NON-counting)
 
 - Trigger: cadence overdue ~16 weeks. MR-019 was 2026-05-18, and MR-020 fell due ~2026-05-25, was deferred with no expiry, and never ran. Today's 4 loops sat on top of that gap.

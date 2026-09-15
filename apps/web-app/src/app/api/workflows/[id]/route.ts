@@ -5,7 +5,8 @@ import crypto from 'crypto';
 import { z } from 'zod';
 import { renderAllTemplates } from '@/lib/ingestion';
 import { computeHealthScore } from '@/lib/health-scores';
-import { toPlanType, hasFeature } from '@/lib/plans';
+import { hasFeature } from '@/lib/plans';
+import { effectivePlanFor } from '@/lib/feature-gating';
 import { extractSopIntelligence } from '@/lib/sopIntelligenceExtract';
 import { findLatestArtifact, LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
 import { PROCESS_ENGINE_VERSION } from '@ledgerium/process-engine';
@@ -31,12 +32,9 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Resolve plan for feature gating (health scores are Starter+)
-  const userRecord = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { plan: true },
-  });
-  const userPlan = toPlanType(userRecord?.plan ?? 'free');
+  // Effective plan (reverse trial + workspace), not the raw `plan` column —
+  // see the matching comment in ../route.ts.
+  const userPlan = await effectivePlanFor(session.user.id);
   const canSeeHealthScores = hasFeature(userPlan, 'healthScores');
 
   const workflow = await db.workflow.findFirst({

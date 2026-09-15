@@ -6,6 +6,20 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-14] - Trial and workspace users now get the features their plan includes on workflow pages
+
+**Why:** the reverse trial grants Solo without changing the stored `plan` column, and three workflow routes read that column directly. Users inside a live trial were promised Solo and still saw locked health scores and watermarked exports, and analytics recorded them as free. Members of paid workspaces were affected the same way.
+
+### Fixed
+- `/api/workflows`, `/api/workflows/[id]` and `/api/workflows/[id]/export-markdown` resolve the effective plan (trial + workspace merge), matching `/api/account`, checkout and engagement analytics.
+- `stats.userPlan` now reports the effective plan, so trial-cohort analytics are segmented correctly from here on. Events already recorded for trial users before deploy remain labelled free.
+
+### Validation
+- 3 new route tests. Reverting the fix makes exactly those 3 fail.
+- Workspace tests **4717**; typecheck clean; production build succeeds.
+
+---
+
 ## [2026-09-14] - MR-020 meta-review (governance only, no product change)
 
 **Why:** there had been no meta-review since 2026-05-18, and none of the 125 commits since 2026-06-26 has an iteration-log entry.

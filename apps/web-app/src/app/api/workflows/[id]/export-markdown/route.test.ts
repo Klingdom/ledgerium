@@ -72,6 +72,7 @@ const mockArtifactFindFirst = vi.hoisted(() =>
 );
 
 vi.mock('@/lib/auth', () => ({ auth: vi.fn() }));
+vi.mock('@/lib/feature-gating', () => ({ effectivePlanFor: vi.fn(async () => 'starter') }));
 
 vi.mock('@/lib/plans', () => ({
   toPlanType: vi.fn(() => 'starter'),
@@ -131,6 +132,25 @@ beforeEach(async () => {
 });
 
 // ── Tests ────────────────────────────────────────────────────────────────────
+
+describe('GET /api/workflows/[id]/export-markdown — plan resolution', () => {
+  it('decides watermarking from the EFFECTIVE plan, not the raw plan column', async () => {
+    // A reverse-trial user: raw plan 'free', effective plan 'solo' (Solo
+    // includes cleanExports). The watermark decision must use 'solo'.
+    mockUserFindUnique.mockResolvedValue({ plan: 'free' });
+    const { effectivePlanFor } = await import('@/lib/feature-gating');
+    vi.mocked(effectivePlanFor).mockResolvedValueOnce('solo');
+    const { hasFeature } = await import('@/lib/plans');
+    fixtureArtifacts.push(row('r-1', '2026-01-01T00:00:00.000Z', 'trial-export'));
+
+    const res = await callGET('wf-1', 'template_sop_enterprise');
+
+    expect(res.status).toBe(200);
+    expect(vi.mocked(effectivePlanFor)).toHaveBeenCalledWith('user-1');
+    expect(vi.mocked(hasFeature)).toHaveBeenCalledWith('solo', 'cleanExports');
+    expect(vi.mocked(hasFeature)).not.toHaveBeenCalledWith('free', 'cleanExports');
+  });
+});
 
 describe('GET /api/workflows/[id]/export-markdown — B-3 deterministic read', () => {
   it('picks the newest row by createdAt when duplicate template rows exist', async () => {
