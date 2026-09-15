@@ -6,6 +6,21 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-15] - Extension: the automatic upload after recording explains a monthly-limit refusal
+
+**Why:** when a free user at their monthly limit finished recording, the automatic upload was refused, but the sidepanel only said "Upload failed". Loop 4 fixed the manual "Open in website" button but not this path.
+
+### Fixed
+- The automatic upload now recognises the server's limit refusal. It shows the same notice as the manual path — "Monthly upload limit reached (5 of 5). This recording is kept in Recent Recordings. Uploads resume on the 1st (UTC), or Solo removes the monthly cap." — with "See plans". No new wording.
+
+### Added
+- A real-Chrome test that runs a local HTTPS server refusing the upload at the limit, records a real session, and checks that the notice appears. This covers the gap MR-020 flagged: the harness previously could not reach the upload path.
+
+### Validation
+- Workspace tests **4734**; typecheck clean; real-Chrome harness 6/6, run twice by the engineer and twice independently on a fresh production build. Protected capture files untouched.
+
+---
+
 ## [2026-09-15] - Growth and Enterprise users can use Team presets on the dashboard
 
 **Why:** the preset rail decided plan access with its own rule, which only recognised Team and Starter. Growth and Enterprise users — who pay for more than Team — saw Team presets disabled with an upgrade prompt.

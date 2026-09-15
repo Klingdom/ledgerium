@@ -48,6 +48,8 @@ import path from 'path';
 import fs from 'fs';
 import os from 'os';
 import http from 'http';
+import https from 'https';
+import { execFileSync } from 'child_process';
 import type { AddressInfo } from 'net';
 import { fileURLToPath } from 'url';
 
@@ -1049,6 +1051,234 @@ test('rule-9 privacy boundary: div control label captured, plain div text never 
     }
     if (fixtureServer) {
       await fixtureServer.close();
+    }
+    await new Promise<void>((resolve) => setTimeout(resolve, 500));
+    try {
+      fs.rmSync(profileDir, { recursive: true, force: true });
+    } catch {
+      // Non-fatal.
+    }
+  }
+});
+
+// ─── Test 6: quota refusal on the automatic post-recording upload (row #186) ──
+//
+// Regression test for row #186: the automatic upload that runs at the end of
+// every recording (background/index.ts handleStop -> uploader.ts uploadBundle)
+// previously collapsed a monthly-quota refusal (403 + code 'UPGRADE_REQUIRED',
+// exact shape from apps/web-app/src/app/api/sync/route.ts) into the same
+// generic "Upload failed" the sidepanel shows for any other failure. The fix
+// threads the shared classifySyncFailure() result through the UPLOAD_PROGRESS
+// broadcast so the sidepanel can show the same quota notice the manual "Open
+// in Ledgerium AI Website" path already showed.
+//
+// uploadBundle() enforces HTTPS (background/uploader.ts:25) before it will
+// even call fetch(), so the plain-HTTP startFixtureServer() used by tests
+// 2/4/5 above cannot serve as the sync endpoint here. This test stands up a
+// throwaway local HTTPS server instead, using a self-signed certificate
+// generated at run time via the `openssl` CLI (test-only; never bundled into
+// the extension) and launches Chromium with `--ignore-certificate-errors` so
+// the real background service worker's real fetch() accepts it. This is a
+// REAL TLS handshake and a REAL HTTP 403 response — nothing about the sync
+// request/response is mocked.
+//
+// The sync URL is configured the way a real user would: through the
+// sidepanel's own "Sync Settings" panel (IdleScreen.tsx SyncSettings), which
+// sends the real SETTINGS_UPDATED message over the real chrome.runtime
+// message bus to the real background service worker.
+
+/** Generates a throwaway self-signed cert+key pair via the `openssl` CLI. */
+function generateSelfSignedCert(dir: string): { certPath: string; keyPath: string } {
+  const keyPath = path.join(dir, 'key.pem');
+  const certPath = path.join(dir, 'cert.pem');
+  try {
+    execFileSync('openssl', [
+      'req', '-x509', '-newkey', 'rsa:2048',
+      '-keyout', keyPath,
+      '-out', certPath,
+      '-days', '1',
+      '-nodes',
+      '-subj', '/CN=localhost',
+    ], { stdio: 'pipe' });
+  } catch (err) {
+    throw new Error(
+      'The `openssl` CLI is required to generate a throwaway self-signed certificate for the ' +
+      'row #186 HTTPS quota-refusal test (uploadBundle enforces HTTPS, so a plain-HTTP stub ' +
+      'cannot be used as the sync endpoint). Install openssl and ensure it is on PATH. ' +
+      `Original error: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+  return { certPath, keyPath };
+}
+
+/**
+ * Starts a local HTTPS server that always answers POST with 403
+ * `{ error: 'Recording limit reached', code: 'UPGRADE_REQUIRED', used, limit }`
+ * — the exact shape apps/web-app/src/app/api/sync/route.ts returns on the
+ * monthly-quota-refusal path. Requires Chromium to be launched with
+ * `--ignore-certificate-errors` (the cert is self-signed and not in any
+ * trust store).
+ */
+function startHttpsQuotaStubServer(
+  used: number,
+  limit: number,
+): Promise<{ url: string; close: () => Promise<void> }> {
+  return new Promise((resolve, reject) => {
+    const certDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ledgerium-https-stub-'));
+    let certPath: string;
+    let keyPath: string;
+    try {
+      ({ certPath, keyPath } = generateSelfSignedCert(certDir));
+    } catch (err) {
+      reject(err);
+      return;
+    }
+
+    const server = https.createServer(
+      { cert: fs.readFileSync(certPath), key: fs.readFileSync(keyPath) },
+      (req, res) => {
+        // Drain the request body (the extension POSTs the full session bundle) —
+        // the stub does not need to inspect it, it always refuses with quota.
+        req.on('data', () => {});
+        req.on('end', () => {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Recording limit reached', code: 'UPGRADE_REQUIRED', used, limit }));
+        });
+      },
+    );
+    server.on('error', reject);
+    server.listen(0, '127.0.0.1', () => {
+      const address = server.address() as AddressInfo | null;
+      if (!address) {
+        reject(new Error('HTTPS quota-stub server failed to bind to a port.'));
+        return;
+      }
+      resolve({
+        url: `https://localhost:${address.port}/api/sync`,
+        close: () =>
+          new Promise<void>((res2) => {
+            server.close(() => {
+              try {
+                fs.rmSync(certDir, { recursive: true, force: true });
+              } catch {
+                // Non-fatal: temp cert dir cleanup failure does not fail the test.
+              }
+              res2();
+            });
+          }),
+      });
+    });
+  });
+}
+
+test('automatic upload quota refusal shows the quota notice, not "Upload failed" (real chrome APIs)', async () => {
+  if (!fs.existsSync(DIST_PATH)) {
+    throw new Error(`Extension dist not found at: ${DIST_PATH}`);
+  }
+
+  const profileDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), 'ledgerium-real-ext-')
+  );
+
+  let context: Awaited<ReturnType<typeof chromium.launchPersistentContext>> | null = null;
+  let fixtureServer: Awaited<ReturnType<typeof startFixtureServer>> | null = null;
+  let quotaStub: Awaited<ReturnType<typeof startHttpsQuotaStubServer>> | null = null;
+
+  try {
+    // The sync endpoint the sidepanel will be configured to use — always
+    // refuses with 403 UPGRADE_REQUIRED, used:5 of limit:5.
+    quotaStub = await startHttpsQuotaStubServer(5, 5);
+
+    // A real content page, same as tests 2/4/5, so a genuine active tab
+    // exists when Start Recording is clicked (see file-header comment on
+    // test 2 for why this ordering matters).
+    fixtureServer = await startFixtureServer();
+
+    context = await chromium.launchPersistentContext(profileDir, {
+      headless: false,
+      args: [
+        `--disable-extensions-except=${DIST_PATH}`,
+        `--load-extension=${DIST_PATH}`,
+        '--disable-infobars',
+        '--no-first-run',
+        '--no-default-browser-check',
+        // Test-only: the sync stub's certificate is self-signed. This does
+        // NOT weaken anything in the extension itself — uploadBundle's
+        // HTTPS-scheme guard (background/uploader.ts:25) is untouched and
+        // still enforced; this flag only tells Chromium's TLS stack to
+        // accept a cert that isn't in a trust store.
+        '--ignore-certificate-errors',
+      ],
+    });
+
+    const existingSws = context.serviceWorkers();
+    let extensionId: string;
+    if (existingSws.length > 0) {
+      extensionId = extensionIdFromSwUrl(existingSws[0]!.url());
+    } else {
+      const sw = await context.waitForEvent('serviceworker', { timeout: SW_STARTUP_TIMEOUT_MS });
+      extensionId = extensionIdFromSwUrl(sw.url());
+    }
+
+    const contentPage = await context.newPage();
+    await contentPage.goto(fixtureServer.url, { waitUntil: 'domcontentloaded' });
+    await contentPage.waitForSelector('#test-action-button', { timeout: 10_000 });
+
+    const sidepanelUrl = `chrome-extension://${extensionId}/${SIDEPANEL_RELATIVE}`;
+    const sidepanel = await context.newPage();
+    await sidepanel.goto(sidepanelUrl, { waitUntil: 'domcontentloaded' });
+    await sidepanel.waitForSelector('#root > *', { timeout: REACT_MOUNT_TIMEOUT_MS });
+
+    await contentPage.bringToFront();
+
+    const badge = sidepanel.locator('header .badge');
+    await expect(badge).toContainText('Ready', { timeout: 12_000 });
+
+    // ── Configure the sync URL the way a real user would: through the
+    //    sidepanel's own Sync Settings panel (IdleScreen.tsx), not by
+    //    writing to chrome.storage directly. ──────────────────────────────
+    await sidepanel.getByRole('button', { name: 'Sync Settings' }).click();
+    await sidepanel.getByPlaceholder('https://ledgerium.ai/api/sync').fill(quotaStub.url);
+    await sidepanel.getByRole('button', { name: 'Save' }).click();
+    // SyncSettings flips its Save button to "Saved" synchronously on click
+    // (before the background round-trip even matters) — waiting for it is a
+    // real UI signal that the click was registered, not a fixed sleep.
+    await expect(sidepanel.getByRole('button', { name: 'Saved' })).toBeVisible({ timeout: 5_000 });
+
+    // ── Start and stop a real recording. No captured interaction is needed
+    //    for this test — only that a session with an uploadUrl completes. ──
+    await sidepanel.locator('#activity-name').fill('row 186 quota refusal test');
+    const startBtn = sidepanel.getByRole('button', { name: 'Start Recording' });
+    await expect(startBtn).toBeEnabled();
+    await startBtn.click();
+
+    await expect(badge).toContainText('Recording', { timeout: 20_000 });
+
+    await sidepanel.getByRole('button', { name: 'Stop & Review' }).click();
+    await expect(sidepanel.getByText('Session complete')).toBeVisible({ timeout: 20_000 });
+
+    // ── The real background SW now calls the real uploadBundle() against
+    //    the real HTTPS stub, gets a real 403 UPGRADE_REQUIRED, classifies
+    //    it, and broadcasts UPLOAD_PROGRESS { status: 'failed', failure }.
+    //    Generous timeout: a real TLS handshake + HTTP round-trip to
+    //    localhost, plus buildBundle()/buildWorkflowReport() first. ────────
+    await expect(sidepanel.getByText('Upload Limit Reached', { exact: true })).toBeVisible({ timeout: 20_000 });
+    await expect(sidepanel.getByText('Monthly upload limit reached (5 of 5)')).toBeVisible();
+    await expect(sidepanel.getByText('This recording is kept in Recent Recordings.', { exact: false })).toBeVisible();
+    await expect(sidepanel.getByRole('button', { name: 'See plans' })).toBeVisible();
+
+    // The generic label this failure previously always showed must be gone.
+    await expect(sidepanel.getByText('Upload failed', { exact: true })).toHaveCount(0);
+
+  } finally {
+    if (context) {
+      await context.close();
+    }
+    if (fixtureServer) {
+      await fixtureServer.close();
+    }
+    if (quotaStub) {
+      await quotaStub.close();
     }
     await new Promise<void>((resolve) => setTimeout(resolve, 500));
     try {

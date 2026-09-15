@@ -4,6 +4,28 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-15 (loop 8) — Extension automatic upload explains a monthly-limit refusal (Mode 1, `backend-engineer`)
+
+- Trigger: CEO "continue". Candidate Selection: `burn-down`. Remaining selectable rows: #186 (extension, 8) and #189 (web perf, 6−2=4); #190 and #191 await CEO. Agent rotation off `frontend-engineer`.
+- Source verification before delegation: `uploader.ts:45-51` collapsed every non-OK response into `HTTP <status>: <detail>`; `index.ts` broadcast it; `useRecorderState` read only `status`, so the sidepanel said "Upload failed" for a quota refusal. Uploader enforces HTTPS, so the plain-http harness fixture server could not act as the sync endpoint — noted in the brief.
+- Change (one outcome: automatic upload reports a quota refusal the way the manual path does since loop 4):
+  - `classifySyncFailure`/`quotaNotice` moved verbatim to NEW `src/shared/sync-failure.ts` so the background does not import from `sidepanel/`; re-exported from `ProcessScreen.tsx` (loop-4 tests unchanged).
+  - `uploader.ts`: body parsed once; returns additive `failure?: SyncFailure`; `error` string kept.
+  - `index.ts`: one additive `failure` key in the existing UPLOAD_PROGRESS payload inside `handleStop` — nothing else.
+  - `useRecorderState`: `uploadQuota` stored on quota failure, cleared wherever `uploadStatus` clears. `App.tsx` threads it. `UploadBar` shows the existing "Upload Limit Reached" label + the reviewed notice + "See plans" instead of "Upload failed".
+- Extension Reliability Invariant: forbidden-list surfaces verified untouched by coordinator (`git diff --name-only` on manifest, `src/content`, `injection-manager.ts`, and the three engine packages: empty). No new user-visible strings (coordinator diff scan: only moved/reused literals).
+- Real-extension harness 403 fixture (MR-020 item 3 closed): test 6 generates a throwaway self-signed cert via `openssl` into a temp dir (deleted in `finally`), serves 403 `UPGRADE_REQUIRED` {used:5, limit:5} over HTTPS, launches that test's Chromium with `--ignore-certificate-errors`, sets the sync URL through the real Sync Settings UI, records, stops, and asserts the quota notice. HTTPS guard in `uploadBundle` unchanged. CI (`e2e-extension.yml`) runs only the static harness, so the `openssl` dependency does not reach CI.
+- Validation:
+  - Workspace `pnpm test` from root **4734/4734** across 231 files (+7 uploader tests; 4 existing uploader assertions extended for the additive field) — agent and coordinator both.
+  - `pnpm typecheck` clean.
+  - **Real-extension harness 6/6 twice by the agent AND 6/6 twice by the coordinator on a fresh production build** (23.3 s, 21.3 s).
+  - Mutation check (agent): removing the classification fails 9 unit tests and the real-extension quota test; restored green.
+- Human check still required before Chrome Web Store submission (Invariant rule 6): load the built extension, record a session, confirm steps appear end to end. Real-extension tests have passed across loops 4 and 8, but no human run has been logged this week.
+- Follow-ups: none new. Open: #189 duplicate `/api/account` fetch; #190 and #191 await CEO.
+- Cadence: MR-020 followed by loops 6, 7, 8 → **MR-021 is due at the next slot** (standard 3-loop cadence).
+
+---
+
 ## 2026-09-15 (loop 7) — Preset rail uses the canonical plan rule (Mode 1, `frontend-engineer`)
 
 - **Trigger:** CEO "continue".

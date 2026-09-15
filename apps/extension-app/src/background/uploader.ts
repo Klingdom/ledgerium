@@ -1,8 +1,18 @@
 import type { SessionBundle } from '../shared/types.js'
+import { classifySyncFailure } from '../shared/sync-failure.js'
+import type { SyncFailure } from '../shared/sync-failure.js'
 
 export interface UploadResult {
   success: boolean
   error?: string
+  /**
+   * Structured classification of a non-OK response (row #186), additive
+   * alongside `error` for back-compat. Populated on every non-OK HTTP
+   * response; absent on success and on network/timeout failures (there is
+   * no HTTP status to classify in those cases). Consumers that only care
+   * about the quota refusal should check `failure?.kind === 'quota'`.
+   */
+  failure?: SyncFailure
 }
 
 export async function uploadBundle(
@@ -44,11 +54,18 @@ export async function uploadBundle(
 
     if (!response.ok) {
       let detail = response.statusText
+      let parsedBody: unknown = null
       try {
-        const errBody = await response.json()
-        if (typeof errBody.error === 'string') detail = errBody.error.slice(0, 200)
+        parsedBody = await response.json()
+        if (parsedBody !== null && typeof parsedBody === 'object' && typeof (parsedBody as Record<string, unknown>).error === 'string') {
+          detail = ((parsedBody as Record<string, unknown>).error as string).slice(0, 200)
+        }
       } catch { /* ignore parse failure */ }
-      return { success: false, error: `HTTP ${response.status}: ${detail}` }
+      // Classify once, from the same parsed body, so the sidepanel can tell a
+      // monthly-quota refusal (403 + code UPGRADE_REQUIRED) apart from every
+      // other failure instead of collapsing all of them into "Upload failed".
+      const failure = classifySyncFailure(response.status, parsedBody)
+      return { success: false, error: `HTTP ${response.status}: ${detail}`, failure }
     }
 
     onProgress(100)

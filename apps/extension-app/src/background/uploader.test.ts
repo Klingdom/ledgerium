@@ -188,7 +188,7 @@ describe('uploadBundle', () => {
 
       const result = await uploadBundle(makeBundle(), 'https://example.com/upload', onProgress)
 
-      expect(result).toEqual({ success: false, error: 'HTTP 401: Invalid API key' })
+      expect(result).toEqual({ success: false, error: 'HTTP 401: Invalid API key', failure: { kind: 'auth' } })
     })
 
     it('returns a formatted error for a 5xx response with a JSON error body', async () => {
@@ -197,7 +197,7 @@ describe('uploadBundle', () => {
 
       const result = await uploadBundle(makeBundle(), 'https://example.com/upload', onProgress)
 
-      expect(result).toEqual({ success: false, error: 'HTTP 500: Internal server error' })
+      expect(result).toEqual({ success: false, error: 'HTTP 500: Internal server error', failure: { kind: 'error' } })
     })
 
     it('does NOT distinguish between 4xx and 5xx — both use identical generic formatting', async () => {
@@ -228,7 +228,7 @@ describe('uploadBundle', () => {
 
       const result = await uploadBundle(makeBundle(), 'https://example.com/upload', onProgress)
 
-      expect(result).toEqual({ success: false, error: 'HTTP 502: Bad Gateway' })
+      expect(result).toEqual({ success: false, error: 'HTTP 502: Bad Gateway', failure: { kind: 'error' } })
     })
 
     it('falls back to statusText when the JSON body has no string `error` field', async () => {
@@ -237,7 +237,7 @@ describe('uploadBundle', () => {
 
       const result = await uploadBundle(makeBundle(), 'https://example.com/upload', onProgress)
 
-      expect(result).toEqual({ success: false, error: 'HTTP 400: Status 400' })
+      expect(result).toEqual({ success: false, error: 'HTTP 400: Status 400', failure: { kind: 'error' } })
     })
 
     it('truncates an overly long JSON error message to 200 characters', async () => {
@@ -260,6 +260,91 @@ describe('uploadBundle', () => {
       await uploadBundle(makeBundle(), 'https://example.com/upload', onProgress)
 
       expect(onProgress.mock.calls.map((call) => call[0])).toEqual([10, 40, 90])
+    })
+  })
+
+  // ---------------------------------------------------------------------------
+  // Failure classification (row #186) — every non-OK response is classified
+  // via the shared classifySyncFailure() so the sidepanel can tell a monthly
+  // quota refusal apart from every other failure instead of collapsing all
+  // of them into "Upload failed". Exact shape returned by
+  // apps/web-app/src/app/api/sync/route.ts on the quota-refusal path.
+  // ---------------------------------------------------------------------------
+
+  describe('failure classification (row #186)', () => {
+    it('403 with code UPGRADE_REQUIRED classifies as quota, carrying the counts', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(
+        makeJsonResponse(403, false, { error: 'Recording limit reached', code: 'UPGRADE_REQUIRED', used: 5, limit: 5 }),
+      )
+      vi.stubGlobal('fetch', fetchMock)
+
+      const result = await uploadBundle(makeBundle(), 'https://example.com/upload', onProgress)
+
+      expect(result.failure).toEqual({ kind: 'quota', used: 5, limit: 5 })
+      expect(result.error).toBe('HTTP 403: Recording limit reached')
+    })
+
+    it('bare 403 (no UPGRADE_REQUIRED code) is NOT classified as quota', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(makeJsonResponse(403, false, { error: 'Forbidden' }))
+      vi.stubGlobal('fetch', fetchMock)
+
+      const result = await uploadBundle(makeBundle(), 'https://example.com/upload', onProgress)
+
+      expect(result.failure).toEqual({ kind: 'error' })
+    })
+
+    it('500 is NOT classified as quota, even carrying the UPGRADE_REQUIRED code', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(
+        makeJsonResponse(500, false, { error: 'boom', code: 'UPGRADE_REQUIRED', used: 5, limit: 5 }),
+      )
+      vi.stubGlobal('fetch', fetchMock)
+
+      const result = await uploadBundle(makeBundle(), 'https://example.com/upload', onProgress)
+
+      expect(result.failure).toEqual({ kind: 'error' })
+    })
+
+    it('401 classifies as auth regardless of body', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(makeJsonResponse(401, false, { code: 'UPGRADE_REQUIRED' }))
+      vi.stubGlobal('fetch', fetchMock)
+
+      const result = await uploadBundle(makeBundle(), 'https://example.com/upload', onProgress)
+
+      expect(result.failure).toEqual({ kind: 'auth' })
+    })
+
+    it('success does not include a failure field', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(makeJsonResponse(200, true, {}))
+      vi.stubGlobal('fetch', fetchMock)
+
+      const result = await uploadBundle(makeBundle(), 'https://example.com/upload', onProgress)
+
+      expect(result).toEqual({ success: true })
+      expect('failure' in result).toBe(false)
+    })
+
+    it('the HTTPS-guard rejection does not include a failure field', async () => {
+      const fetchMock = vi.fn()
+      vi.stubGlobal('fetch', fetchMock)
+
+      const result = await uploadBundle(makeBundle(), 'http://example.com/upload', onProgress)
+
+      expect(result).toEqual({ success: false, error: 'Upload URL must use HTTPS' })
+      expect('failure' in result).toBe(false)
+    })
+
+    it('MUTATION CHECK anchor: quota is derived strictly from status+code, not guessed from the message', async () => {
+      // If the classifier (or its call site) ever regresses to ignoring the
+      // `code` field — e.g. treating any 403 as quota — this is the assertion
+      // that must fail. See VALIDATION mutation-check step in the row #186
+      // implementation report.
+      const fetchMock = vi.fn().mockResolvedValue(makeJsonResponse(403, false, { error: 'Recording limit reached' }))
+      vi.stubGlobal('fetch', fetchMock)
+
+      const result = await uploadBundle(makeBundle(), 'https://example.com/upload', onProgress)
+
+      expect(result.failure).not.toEqual({ kind: 'quota', used: null, limit: null })
+      expect(result.failure).toEqual({ kind: 'error' })
     })
   })
 

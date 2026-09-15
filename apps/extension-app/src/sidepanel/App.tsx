@@ -80,6 +80,7 @@ export function App() {
             steps={recorder.steps}
             uploadProgress={recorder.uploadProgress}
             uploadStatus={recorder.uploadStatus}
+            uploadQuota={recorder.uploadQuota}
             onDiscard={recorder.discardSession}
           />
         )

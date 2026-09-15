@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { MSG } from '../../shared/types.js'
 import type { RecorderState, SessionMeta, LiveStep } from '../../shared/types.js'
+import type { SyncFailure } from '../../shared/sync-failure.js'
 
 interface RecorderData {
   state: RecorderState
@@ -9,6 +10,14 @@ interface RecorderData {
   rawEventCount: number
   uploadProgress: number | null
   uploadStatus: 'uploading' | 'complete' | 'failed' | null
+  /**
+   * Populated only when uploadStatus === 'failed' AND the background's
+   * UPLOAD_PROGRESS broadcast carried a `failure` of kind 'quota' (row #186)
+   * — i.e. the automatic post-recording upload was refused because the
+   * account hit its monthly recording limit. null for every other failure
+   * (auth / generic error) so the UI falls back to the generic message.
+   */
+  uploadQuota: { used: number | null; limit: number | null } | null
   error: string | null
 }
 
@@ -42,6 +51,7 @@ export function useRecorderState() {
     rawEventCount: 0,
     uploadProgress: null,
     uploadStatus: null,
+    uploadQuota: null,
     error: null,
   })
 
@@ -116,6 +126,7 @@ export function useRecorderState() {
                 rawEventCount: 0,
                 uploadProgress: null,
                 uploadStatus: null,
+                uploadQuota: null,
               } : {}),
             }
           })
@@ -163,13 +174,20 @@ export function useRecorderState() {
           break
         }
 
-        case MSG.UPLOAD_PROGRESS:
+        case MSG.UPLOAD_PROGRESS: {
+          // failure is only present on the final (100%) broadcast of a
+          // non-success upload (see background/index.ts handleStop). Any
+          // in-progress broadcast (no failure field) clears a stale quota
+          // notice from a prior session's failed upload.
+          const failure = message.payload['failure'] as SyncFailure | undefined
           setData(prev => ({
             ...prev,
             uploadProgress: message.payload['percent'] as number,
             uploadStatus: message.payload['status'] as 'uploading' | 'complete' | 'failed',
+            uploadQuota: failure?.kind === 'quota' ? { used: failure.used, limit: failure.limit } : null,
           }))
           break
+        }
       }
     }
 
@@ -187,6 +205,7 @@ export function useRecorderState() {
       rawEventCount: 0,
       uploadProgress: null,
       uploadStatus: null,
+      uploadQuota: null,
       error: null,
     }))
     chrome.runtime.sendMessage({
@@ -220,6 +239,7 @@ export function useRecorderState() {
       rawEventCount: 0,
       uploadProgress: null,
       uploadStatus: null,
+      uploadQuota: null,
       error: null,
     }))
     chrome.runtime.sendMessage({ type: MSG.DISCARD_SESSION, payload: {} })

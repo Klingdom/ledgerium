@@ -323,6 +323,9 @@ async function handleStop(): Promise<void> {
           percent: 100,
           status: result.success ? 'complete' : 'failed',
           ...(result.error ? { error: result.error } : {}),
+          // Row #186: structured failure classification (e.g. quota refusal)
+          // additive alongside the existing error string.
+          ...(result.failure ? { failure: result.failure } : {}),
         },
       })
     }

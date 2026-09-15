@@ -10,22 +10,50 @@ import { ControlBar } from '../components/ControlBar.js'
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
+/** Shape stored by useRecorderState when an automatic upload fails on quota. */
+export type UploadQuota = { used: number | null; limit: number | null } | null
+
 interface ProcessScreenProps {
   meta: SessionMeta | null
   steps: LiveStep[]
   uploadProgress: number | null
   uploadStatus: 'uploading' | 'complete' | 'failed' | null
+  uploadQuota: UploadQuota
   onDiscard: () => void
 }
 
 // ─── Upload status bar ────────────────────────────────────────────────────────
+//
+// Row #186: the automatic post-recording upload previously collapsed every
+// failure (including a monthly-quota refusal) into a generic "Upload failed"
+// label. When the failure is a quota refusal, show the same notice + "See
+// plans" affordance the manual "Open in Ledgerium AI Website" path already
+// shows (openWebStatus === 'quota' below) instead of the generic label.
 
-function UploadBar({ progress, status }: { progress: number | null; status: ProcessScreenProps['uploadStatus'] }) {
+function UploadBar({
+  progress,
+  status,
+  quota,
+  uploadUrl,
+}: {
+  progress: number | null
+  status: ProcessScreenProps['uploadStatus']
+  quota: UploadQuota
+  uploadUrl?: string | undefined
+}) {
   if (!status) return null
   const pct = progress ?? 0
+  const isQuotaFailure = status === 'failed' && quota !== null
   // In-flight uploads use brand emerald (was bg-blue-500); CEO directive 2026-05-28.
-  const barColor = status === 'complete' ? 'bg-emerald-500' : status === 'failed' ? 'bg-red-500' : 'bg-emerald-400'
-  const label = status === 'complete' ? 'Upload complete' : status === 'failed' ? 'Upload failed' : `Uploading… ${pct}%`
+  const barColor = isQuotaFailure
+    ? 'bg-amber-500'
+    : status === 'complete' ? 'bg-emerald-500' : status === 'failed' ? 'bg-red-500' : 'bg-emerald-400'
+  // 'Upload Limit Reached' is the existing label already used by the manual
+  // upload path's button in this same failure state (see ExportView below) —
+  // reused verbatim, not a new string.
+  const label = isQuotaFailure
+    ? 'Upload Limit Reached'
+    : status === 'complete' ? 'Upload complete' : status === 'failed' ? 'Upload failed' : `Uploading… ${pct}%`
   return (
     <div className="px-3 py-2 border-b border-gray-200 flex-none">
       <div className="flex justify-between text-xs text-gray-500 mb-1">
@@ -38,6 +66,25 @@ function UploadBar({ progress, status }: { progress: number | null; status: Proc
           style={{ width: `${status === 'complete' ? 100 : pct}%` }}
         />
       </div>
+      {isQuotaFailure && (() => {
+        // Same notice + link behaviour as the manual openInWebsite quota
+        // block below (ExportView) — reused verbatim, not new copy.
+        const notice = quotaNotice(quota.used, quota.limit)
+        const baseUrl = (uploadUrl ?? '').replace('/api/sync', '') || 'https://ledgerium.ai'
+        return (
+          <div role="status" className="mt-2 text-xs rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-amber-800">
+            <p className="font-medium">{notice.title}</p>
+            <p className="mt-0.5">{notice.body}</p>
+            <button
+              type="button"
+              onClick={() => chrome.tabs.create({ url: `${baseUrl}/pricing` })}
+              className="mt-1 font-medium underline underline-offset-2"
+            >
+              {notice.cta}
+            </button>
+          </div>
+        )
+      })()}
     </div>
   )
 }
@@ -189,58 +236,17 @@ export function escapeHtml(value: unknown): string {
 
 // ─── openInWebsite failure classification ────────────────────────────────────
 //
-// The server answers a monthly-limit refusal with 403 + code 'UPGRADE_REQUIRED'
-// (apps/web-app/src/app/api/sync/route.ts). Previously every non-401 failure
-// collapsed into a 3-second "Sync Failed — Try Again", which told a user at
-// their plan limit to retry something that could not succeed. A 403 WITHOUT
-// that code is deliberately NOT treated as quota: guessing would show limit
-// messaging for an unrelated permission failure.
+// classifySyncFailure / quotaNotice / SyncFailure / QuotaNotice now live in
+// src/shared/sync-failure.ts (row #186) so background/uploader.ts — which
+// must not import from src/sidepanel/ — can reuse the exact same
+// classification for the automatic post-recording upload. Re-exported here
+// so existing imports (including ProcessScreen-quota.test.ts) keep working
+// unchanged.
 
-export type SyncFailure =
-  | { kind: 'auth' }
-  | { kind: 'quota'; used: number | null; limit: number | null }
-  | { kind: 'error' }
-
-function asCount(value: unknown): number | null {
-  return typeof value === 'number' && Number.isInteger(value) && value >= 0 ? value : null
-}
-
-export function classifySyncFailure(status: number, body: unknown): SyncFailure {
-  if (status === 401) return { kind: 'auth' }
-  if (status === 403 && body !== null && typeof body === 'object') {
-    const b = body as Record<string, unknown>
-    if (b['code'] === 'UPGRADE_REQUIRED') {
-      return { kind: 'quota', used: asCount(b['used']), limit: asCount(b['limit']) }
-    }
-  }
-  return { kind: 'error' }
-}
-
-export interface QuotaNotice {
-  title: string
-  body: string
-  cta: string
-}
-
-/**
- * Copy for a quota refusal. Every clause is checked against behaviour:
- *  - the session is written to history at stop, before any upload is attempted
- *    (background/index.ts handleStop → historyStore.addEntry), so it is kept;
- *  - the server counts uploads per UTC calendar month (feature-gating.ts
- *    getMonthlyUploadCount), so uploads resume on the 1st (UTC);
- *  - Solo is the lowest self-serve tier with no monthly cap (web-app plans.ts;
- *    asserted by apps/web-app/src/lib/quota-meter.test.ts).
- */
-export function quotaNotice(used: number | null, limit: number | null): QuotaNotice {
-  const counts = used !== null && limit !== null ? ` (${used} of ${limit})` : ''
-  return {
-    title: `Monthly upload limit reached${counts}`,
-    // "Recent Recordings" is the on-screen label of the history list
-    // (IdleScreen.tsx) — name what the user can actually find.
-    body: 'This recording is kept in Recent Recordings. Uploads resume on the 1st (UTC), or Solo removes the monthly cap.',
-    cta: 'See plans',
-  }
-}
+import { classifySyncFailure, quotaNotice } from '../../shared/sync-failure.js'
+import type { SyncFailure, QuotaNotice } from '../../shared/sync-failure.js'
+export { classifySyncFailure, quotaNotice }
+export type { SyncFailure, QuotaNotice }
 
 // ─── openInWebsite security helpers ──────────────────────────────────────────
 //
@@ -728,7 +734,7 @@ function ExportView({
 
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
-export function ProcessScreen({ meta, steps, uploadProgress, uploadStatus, onDiscard }: ProcessScreenProps) {
+export function ProcessScreen({ meta, steps, uploadProgress, uploadStatus, uploadQuota, onDiscard }: ProcessScreenProps) {
   const [tab, setTab] = useState<Tab>('map')
   const [bundle, setBundle] = useState<SessionBundle | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -863,7 +869,7 @@ export function ProcessScreen({ meta, steps, uploadProgress, uploadStatus, onDis
       </div>
 
       {/* Upload status */}
-      <UploadBar progress={uploadProgress} status={uploadStatus} />
+      <UploadBar progress={uploadProgress} status={uploadStatus} quota={uploadQuota} uploadUrl={meta?.uploadUrl} />
 
       {/* Tabs */}
       <div className="flex border-b border-gray-200 bg-white flex-none">
