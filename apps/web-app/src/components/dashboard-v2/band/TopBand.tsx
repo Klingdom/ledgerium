@@ -44,11 +44,16 @@ import SignalFactsRow from './SignalFactsRow.js';
  * The portfolio health period-over-period delta — the ONLY tile/widget with a
  * real prior-period value (ANALYTICS_DASHBOARD_REVIEW §6). Surfaced beneath the
  * HealthGauge after the Avg Health KPI tile was removed (item #2). Honest: a
- * null delta renders "— vs last 30d" (no fabricated change).
+ * null delta renders "No prior data" (no fabricated change).
  */
 function HealthDelta({ delta }: { delta: number | null }) {
   if (delta === null || delta === 0) {
-    const label = delta === 0 ? '= 0 vs last 30d' : '— vs last 30d';
+    // Row #197: this was a THIRD copy of the delta label and still returned
+    // '— vs last 30d' after CommandHeader was corrected, so the same null state
+    // read differently on two surfaces. An em-dash where a number belongs
+    // cannot be distinguished from zero or from a broken value; null here means
+    // the prior period had insufficient data.
+    const label = delta === 0 ? '= 0 vs last 30d' : 'No prior data';
     return (
       <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-[var(--content-secondary)]">
         <Minus size={10} aria-hidden="true" />

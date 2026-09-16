@@ -6,6 +6,25 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-16] - Four dashboard labels now say what they mean
+
+**Why:** each was flagged in April and still live. One was outright false: a row showing "n=0 — no runs" claimed a measured zero when the run count was actually unknown.
+
+### Changed
+- "n=0 — no runs" → "no runs yet".
+- "— vs last 30d" → "No prior data" — a dash where a number belongs cannot be told apart from zero or from a fault.
+- The "High Variation" filter → "Inconsistent", which is what the underlying measure means in plain language.
+- The locked health-score tooltip now reads "See score by dimension" instead of "Upgrade to see breakdown", stating what you would get rather than naming the feature.
+
+### Found while checking
+- Two of these labels existed in more than one place. The filter name had a second copy on the active-filter chip, and the comparison label had a third copy on another dashboard band that still showed the old dash. Both corrected, so the same state no longer reads differently in two places.
+- The same wording survives on the analytics page, the retired dashboard and the public docs. Left alone deliberately and recorded as row 204 rather than widened without review.
+
+### Validation
+- Full suite 4734 passing, typecheck clean, dashboard end-to-end gate 22/22.
+
+---
+
 ## [2026-09-16] - The dashboard's "New portfolio" button now works
 
 **Why:** clicking it did nothing at all — no dialog, no error, no feedback. The dialog it should have opened already existed, wired only into the retired old dashboard.

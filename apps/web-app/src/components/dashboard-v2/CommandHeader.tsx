@@ -103,7 +103,12 @@ export default function CommandHeader({
 
   // Build delta label text and aria description
   const deltaLabel: string = (() => {
-    if (portfolioHealthScoreDelta === null) return '— vs last 30d';
+    // Row #197: was '— vs last 30d', an em-dash where a number belongs — the
+    // user could not tell whether the comparison was zero, unavailable or
+    // broken. This branch means the prior period had insufficient data
+    // (DashboardV2Shell.tsx:94), which is what the aria fragment below already
+    // says; the visible text now matches it.
+    if (portfolioHealthScoreDelta === null) return 'No prior data';
     if (portfolioHealthScoreDelta === 0) return '= 0 vs last 30d';
     const sign = portfolioHealthScoreDelta > 0 ? '+' : '';
     return `${sign}${portfolioHealthScoreDelta} vs last 30d`;

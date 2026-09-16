@@ -239,7 +239,7 @@ test('axe: zero critical/serious violations on sparse state (1 workflow)', async
 test('axe: zero critical/serious violations on gated tooltip state (free-tier user)', async ({ page }) => {
   // Free-tier user: metricsV2.healthScore.isGated = true. Clicking the row's
   // health score cell exposes the upgrade-CTA tooltip (HealthTooltip renders
-  // lock icon + "Upgrade to see breakdown" when isGated is true).
+  // lock icon + "See score by dimension" when isGated is true, row #197).
   //
   // Trigger approach: the health score cell is a <td onClick> containing a
   // <div aria-label="Health score: 72, ...">. There is no <button> — the click

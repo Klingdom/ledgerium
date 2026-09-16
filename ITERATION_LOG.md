@@ -4,6 +4,27 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-16 (loop 17) — Four misleading dashboard strings, and the copies hiding behind them (Mode 1, coordinator-direct + `growth-strategist`)
+
+- **Trigger:** CEO autonomous-run directive. **Selection:** #197 (score 9), the strongest unblocked item.
+- **D-4 clause 1 fired** (4 user-visible strings) → `growth-strategist` consult; every replacement evidence-cited and same-or-shorter than the original, since these are dense table/header/dropdown surfaces.
+- **Changes, with the evidence behind each:**
+  - `n=0 — no runs` → **`no runs yet`**. `computeRuns()` returns `null` when the run count is unconfirmed, so the old copy asserted a *measured zero* that was never measured — false twice over, beside a sibling branch that renders `n={runs}` for genuinely low counts.
+  - `— vs last 30d` → **`No prior data`**. This branch means the prior period had insufficient data (`DashboardV2Shell.tsx:94`); the aria fragment already said so, so the visible text now matches the accessible text at identical length.
+  - `High Variation` → **`Inconsistent`**. The predicate is `variationScore > 0.7` (`route.ts:134`), feeding the Consistency dimension; the new label is user language and matches the single-adjective parallelism of Healthy / Stale.
+  - `Upgrade to see breakdown` → **`See score by dimension`**. The unlocked tooltip literally renders four scored dimensions; "Upgrade" was redundant beside the "Compare plans →" link directly below it.
+- **The sweep found two more copies of the same decisions — the real yield of this loop:**
+  - `activeFilters.ts:81` held a second copy of the filter label, so my first edit left the dropdown saying "Inconsistent" while the chip still said "High Variation".
+  - **`TopBand.tsx:47,51` held a third copy of the delta label** and still returned `— vs last 30d` after `CommandHeader` was corrected — the same null state reading differently on two surfaces. Both fixed here.
+- **Test mirrors updated** (the drift pattern this repo keeps producing): `WorkflowRow.test.tsx`, `CommandHeader.test.ts`, `activeFilters.test.ts`, plus 4 references in `v2-plan-gating.spec.ts` and a comment in `v2-a11y.spec.ts`. Two mirrors gained negative assertions (`not.toMatch(/n=0/)`, `not.toMatch(/^—/)`) so the old copy cannot quietly return.
+- **Scope held:** "High Variation" also survives on the analytics page, the retired v1 dashboard and the public docs. Left alone and recorded as **#204** rather than widening this loop silently.
+- **Two process failures of mine, recorded rather than buried:**
+  1. My first residual-string sweep reported "0 residual references" and was **worthless** — it used relative paths after the shell's cwd had moved and sent stderr to `/dev/null`, so directory-not-found errors were hidden. The corrected sweep is what found `TopBand`. A verification step that cannot fail proves nothing.
+  2. A backgrounded gate run silently never executed (`error: unknown command 'test'` — wrong working directory). I caught it only because the output had no tally. Re-run in the foreground with an absolute path.
+- **Validation:** workspace `pnpm test` **4734/4734**; `pnpm typecheck` clean across all 11 packages/apps; dashboard E2E gate **22/22** on the authoritative post-TopBand run.
+
+---
+
 ## 2026-09-16 (loop 16) — The create-portfolio button does something (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO autonomous-run directive. **Selection:** #196 (score 10), from the loop-10 DV2 triage. Area pivots to web-app/dashboard product work.

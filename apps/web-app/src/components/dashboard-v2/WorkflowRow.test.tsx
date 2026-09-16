@@ -447,11 +447,15 @@ describe('variation badge (iter-024 §4.1 item d)', () => {
 /**
  * Mirrors the run-count qualifier rendering logic from WorkflowRow.
  * Qualifier shown when runs !== null && runs < 10.
- * Null runs → "n=0 — no runs".
+ * Null runs → "no runs yet" (row #197; was "n=0 — no runs", which asserted a
+ * measured zero for a value that is actually unknown).
  */
 function buildRunCountQualifier(runs: number | null): string | null {
   if (runs !== null && runs < 10) return `n=${runs}`;
-  if (runs === null) return 'n=0 — no runs';
+  // Row #197: was 'n=0 — no runs'. computeRuns() returns null when the run
+  // count is unconfirmed, so the old string asserted a measured zero that was
+  // never measured.
+  if (runs === null) return 'no runs yet';
   return null; // runs >= 10: no qualifier
 }
 
@@ -468,8 +472,10 @@ describe('run-count qualifier (iter-024 §4.1 item f)', () => {
     expect(buildRunCountQualifier(11)).toBeNull();
   });
 
-  it('runs=null renders honest null state "n=0 — no runs"', () => {
-    expect(buildRunCountQualifier(null)).toBe('n=0 — no runs');
+  it('runs=null renders honest null state "no runs yet"', () => {
+    expect(buildRunCountQualifier(null)).toBe('no runs yet');
+    // The old copy claimed a measured zero; guard against it returning.
+    expect(buildRunCountQualifier(null)).not.toMatch(/n=0/);
   });
 
   it('runs=9 (boundary) renders qualifier n=9', () => {

@@ -49,7 +49,11 @@ const OPPORTUNITY_OPTIONS: { value: OpportunityTag; label: string }[] = [
 const HEALTH_STATUS_OPTIONS: { value: HealthStatusFilter; label: string }[] = [
   { value: 'healthy', label: 'Healthy' },
   { value: 'needs_review', label: 'Needs Review' },
-  { value: 'high_variation', label: 'High Variation' },
+  // Row #197: 'High Variation' was the engine's own term. The predicate is
+  // variationScore > 0.7 (route.ts:134), which feeds the Consistency dimension
+  // — 'Inconsistent' states that in user language and matches the
+  // single-adjective parallelism of Healthy / Stale.
+  { value: 'high_variation', label: 'Inconsistent' },
   { value: 'stale', label: 'Stale' },
 ];
 

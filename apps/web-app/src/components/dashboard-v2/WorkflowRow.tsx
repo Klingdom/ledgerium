@@ -331,7 +331,11 @@ function HealthTooltip({ metricsV2, onDismiss, triggerRef, id }: HealthTooltipPr
       >
         <div className="flex items-center gap-ds-2 text-[var(--content-secondary)]">
           <Lock size={12} aria-hidden="true" />
-          <span>Upgrade to see breakdown</span>
+          {/* Row #197: named the feature, not the value. The unlocked tooltip
+              renders four scored dimensions under "Score breakdown", so this
+              states the actual payoff. "Upgrade" is dropped because the
+              "Compare plans →" link directly below carries that action. */}
+          <span>See score by dimension</span>
         </div>
         <a
           href="/pricing"
@@ -1291,7 +1295,7 @@ export default function WorkflowRow({
           )}
           {runs === null && (
             <span className="text-[10px] text-[var(--content-secondary)]" aria-hidden="true">
-              n=0 — no runs
+              no runs yet
             </span>
           )}
         </button>

@@ -78,7 +78,10 @@ const OPPORTUNITY_LABEL: Record<OpportunityTag, string> = {
 const HEALTH_STATUS_LABEL: Record<HealthStatusFilter, string> = {
   healthy: 'Healthy',
   needs_review: 'Needs Review',
-  high_variation: 'High Variation',
+  // Row #197: kept in step with WorkflowListFilterBar's option label — these
+  // are two copies of the same user-facing name, and letting them drift would
+  // show "Inconsistent" in the dropdown and "High Variation" on the chip.
+  high_variation: 'Inconsistent',
   stale: 'Stale',
 };
 

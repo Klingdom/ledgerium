@@ -5,7 +5,7 @@
  *
  * PRD §12 / D8 policy:
  *  - Free tier: Health Score integer visible (ungated). Breakdown tooltip is
- *    gated — shows lock icon + "Upgrade to see breakdown" + a plans link.
+ *    gated — shows lock icon + "See score by dimension" + a plans link.
  *  - Starter+ (growth plan): breakdown tooltip shows Speed / Consistency /
  *    Data Quality / Standardization dimensions.
  *
@@ -108,7 +108,13 @@ test('Free user: health score breakdown tooltip shows upgrade CTA, not dimension
   await healthScoreBtn.click();
 
   // Gated tooltip: must show upgrade copy, must NOT show breakdown dimensions
-  await expect(page.getByText(/upgrade to see breakdown/i)).toBeVisible();
+  // Row #197: lead line renamed from "Upgrade to see breakdown" to
+  // "See score by dimension" — states the payoff rather than the feature name.
+  await expect(page.getByText(/see score by dimension/i)).toBeVisible();
+  // Row #197: the gated tooltip's lead line changed from "Upgrade to see
+  // breakdown" (which named the feature) to "See score by dimension" (which
+  // names what the user would actually get). The upgrade action is carried by
+  // the plans link below it.
   // Row #195 finding: the gated tooltip's plans link reads "Compare plans →"
   // (changed from "View plans →" at iter-064 / row #104 WDC2-P05 — see
   // WorkflowRow.tsx HealthTooltip — this spec pre-dates that copy change and
@@ -121,8 +127,8 @@ test('Free user: health score breakdown tooltip shows upgrade CTA, not dimension
   await expect(page.getByText(/^Data Quality$/)).not.toBeVisible();
   await expect(page.getByText(/^Standardization$/)).not.toBeVisible();
 
-  // The lock icon is aria-hidden but its sibling text is "Upgrade to see breakdown"
-  const lockContainer = page.getByText(/upgrade to see breakdown/i).locator('..');
+  // The lock icon is aria-hidden but its sibling text is "See score by dimension" (row #197)
+  const lockContainer = page.getByText(/see score by dimension/i).locator('..');
   await expect(lockContainer).toBeVisible();
 
   await context.close();
@@ -177,7 +183,8 @@ test('Starter+ user: health score breakdown tooltip shows all 4 dimensions', asy
   await expect(page.getByText('Standardization')).toBeVisible();
 
   // Upgrade copy must NOT appear for a Starter+ user
-  await expect(page.getByText(/upgrade to see breakdown/i)).not.toBeVisible();
+  // A paid user must NOT see the gated lead line (row #197 renamed it).
+  await expect(page.getByText(/see score by dimension/i)).not.toBeVisible();
 });
 
 // ── Plan gating structural assertion (no rows needed) ─────────────────────────

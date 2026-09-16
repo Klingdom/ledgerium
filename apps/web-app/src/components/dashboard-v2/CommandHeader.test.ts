@@ -28,7 +28,8 @@ function healthBand(score: number): { label: 'poor' | 'fair' | 'good'; colorClas
 // ── Mirrors CommandHeader.tsx delta label derivation ─────────────────────────
 
 function buildDeltaLabel(delta: number | null): string {
-  if (delta === null) return '— vs last 30d';
+  // Row #197: was '— vs last 30d' — an em-dash where a number belongs.
+  if (delta === null) return 'No prior data';
   if (delta === 0) return '= 0 vs last 30d';
   const sign = delta > 0 ? '+' : '';
   return `${sign}${delta} vs last 30d`;
@@ -71,8 +72,10 @@ describe('CommandHeader healthBand (iter-024 60/80 thresholds)', () => {
 // ── Tests: delta label rendering (iter-024 §4.1 item a) ─────────────────────
 
 describe('CommandHeader delta label (iter-024 §4.1 item a)', () => {
-  it('null delta renders "— vs last 30d"', () => {
-    expect(buildDeltaLabel(null)).toBe('— vs last 30d');
+  it('null delta renders "No prior data"', () => {
+    expect(buildDeltaLabel(null)).toBe('No prior data');
+    // Must state the reason, not render a dash the user cannot interpret.
+    expect(buildDeltaLabel(null)).not.toMatch(/^—/);
   });
 
   it('delta=0 renders "= 0 vs last 30d"', () => {
