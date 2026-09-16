@@ -4,6 +4,18 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-16 (loop 16) — The create-portfolio button does something (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO autonomous-run directive. **Selection:** #196 (score 10), from the loop-10 DV2 triage. Area pivots to web-app/dashboard product work.
+- **Defect:** `DashboardV2Shell.tsx` passed an **empty function** to the sidebar's `onCreatePortfolio`, so clicking "New portfolio" produced nothing — no dialog, no error, no feedback. Its deferral comment pointed at row #50, which is closed and covered an unrelated "(all-time)" label. `CreatePortfolioDialog` already existed, wired only in the retired v1 page.
+- **Scope decision:** wiring alone would have *relocated* the silent failure. `POST /api/portfolios` gates on `sharedLibrary` (Team+) and answers 403 with `{ error, requiredPlan, upgradeUrl }`; the dialog rendered the error text but dropped `upgradeUrl`, so a Free/Solo user would read "Feature not available on your plan" with nowhere to go. One outcome: **the affordance behaves honestly end to end** — click opens the dialog, success refreshes the sidebar, and the plan gate explains itself with a link.
+- **Changes:** shell — `showCreatePortfolio` state, dialog import, conditional render wired to the existing portfolios re-fetch; dialog — capture `upgradeUrl` on non-OK and render "Compare plans →" beside the error (matching the gated-tooltip pattern the E2E suite already asserts elsewhere).
+- **Caught before commit:** typecheck flagged `TS2741 — Property 'portfolios' is missing`. The dialog requires the same `PortfolioNode[]` the shell already holds; the v1 page passes it identically. Fixed and re-verified. This is exactly why typecheck runs before the gate.
+- **Self-inflicted delay, recorded:** I launched the E2E gate, then launched it again after the fix while the first run still held `prisma/test.db`, producing `EBUSY`. Waited for the stale run to release the lock and re-ran cleanly. Two Playwright runs cannot share the test database — the same collision I avoid when delegating, and I caused it myself here.
+- **Validation:** `pnpm typecheck` clean across all 11 packages/apps; workspace `pnpm test` **4734/4734**; dashboard E2E gate **22/22** on the authoritative post-fix run (the pre-fix background run also passed 22/22, but is not the record).
+
+---
+
 ## 2026-09-16 (loop 15) — Untrack the committed Playwright session token (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO "work autonomously through the next 4 hours". **Selection:** #201 (score 11), taken opportunistically while loop 14's copy consult ran — small, isolated, different Area.

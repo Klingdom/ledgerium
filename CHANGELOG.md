@@ -6,6 +6,19 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-16] - The dashboard's "New portfolio" button now works
+
+**Why:** clicking it did nothing at all — no dialog, no error, no feedback. The dialog it should have opened already existed, wired only into the retired old dashboard.
+
+### Fixed
+- The button now opens the create-portfolio dialog, and the sidebar refreshes when one is created.
+- Creating a portfolio needs a Team plan. Previously that would have surfaced as a flat "Feature not available on your plan"; it now comes with a link to compare plans, so the answer is actionable rather than a dead end.
+
+### Validation
+- Typecheck caught a missing required prop before this shipped. Full suite 4734 passing, dashboard end-to-end gate 22/22.
+
+---
+
 ## [2026-09-16] - Every Store asset now claims only what a free install delivers
 
 **Why:** the two optional promo tiles still said "Understand everything", advertised health scoring and variant detection — both paid features — and used "Instant" twice as an unmeasured speed claim.

@@ -50,6 +50,7 @@ import { hasActiveFilters } from './WorkflowListFilterBar.js';
 import type { WorkflowRowData } from './WorkflowRow.js';
 import type { InsightChip } from '@/lib/workflow-metrics.js';
 import PortfolioSidebar, { type PortfolioNode } from '@/components/PortfolioSidebar.js';
+import CreatePortfolioDialog from '@/components/CreatePortfolioDialog.js';
 import ColumnPicker, { type SaveStatus } from './ColumnPicker.js';
 import UnifiedToolbar from './UnifiedToolbar.js';
 import ActiveFiltersBar from './ActiveFiltersBar.js';
@@ -200,6 +201,8 @@ export default function DashboardV2Shell() {
   const [portfolioSidebarOpen, setPortfolioSidebarOpen] = useState(false);
   const [portfolios, setPortfolios] = useState<PortfolioNode[]>([]);
   const [activePortfolioId, setActivePortfolioId] = useState<string | null>(null);
+  /** Row #196: drives CreatePortfolioDialog, which the sidebar's "New portfolio" button had no way to open. */
+  const [showCreatePortfolio, setShowCreatePortfolio] = useState(false);
 
   // Enforce minimum skeleton display time
   const loadStartRef = useRef<number>(Date.now());
@@ -1173,10 +1176,12 @@ export default function DashboardV2Shell() {
               portfolios={portfolios}
               activePortfolioId={activePortfolioId}
               onSelectPortfolio={setActivePortfolioId}
-              onCreatePortfolio={() => {
-                // Full portfolio creation requires CreatePortfolioDialog — deferred to
-                // follow-up: D5 portfolio API support (#50)
-              }}
+              // Row #196: this was an empty handler, so the sidebar's "New
+              // portfolio" button did nothing at all — no dialog, no error, no
+              // feedback. The deferral comment pointed at row #50, which is
+              // closed and covered something unrelated. CreatePortfolioDialog
+              // already existed and was wired only in the retired v1 page.
+              onCreatePortfolio={() => setShowCreatePortfolio(true)}
               onRefresh={() => {
                 // Re-fetch portfolios on change
                 fetch('/api/portfolios')
@@ -1190,6 +1195,28 @@ export default function DashboardV2Shell() {
               onToggleCollapsed={() => setPortfolioSidebarOpen(false)}
             />
           </aside>
+        )}
+
+        {/* Row #196: the dialog the sidebar's create button now opens. It posts
+            to /api/portfolios itself and renders the server's error — including
+            the Team+ plan gate, which it surfaces with an upgrade link — so the
+            shell only has to own open/closed state and refresh on success. */}
+        {showCreatePortfolio && (
+          <CreatePortfolioDialog
+            // Feeds the dialog's parent-portfolio selector (flattenPortfolios).
+            // Same PortfolioNode[] the sidebar renders — the dialog imports the
+            // type from PortfolioSidebar, and the v1 page passes it identically.
+            portfolios={portfolios}
+            onCreated={() => {
+              fetch('/api/portfolios')
+                .then((r) => r.json())
+                .then((data: { portfolios?: PortfolioNode[] }) => {
+                  setPortfolios(data.portfolios ?? []);
+                })
+                .catch(() => undefined);
+            }}
+            onClose={() => setShowCreatePortfolio(false)}
+          />
         )}
 
         {/* Section 3: Workflow Intelligence List — aria-live for filter announcements */}

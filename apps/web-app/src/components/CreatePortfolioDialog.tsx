@@ -81,6 +81,8 @@ export default function CreatePortfolioDialog({
   const [parentId, setParentId] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Set only when the failure is the plan gate, so the error offers a way forward. */
+  const [upgradeUrl, setUpgradeUrl] = useState<string | null>(null);
 
   const flatPortfolios = flattenPortfolios(portfolios);
 
@@ -113,7 +115,12 @@ export default function CreatePortfolioDialog({
         onClose();
       } else {
         const data = await res.json().catch(() => ({}));
-        setError((data as { error?: string }).error ?? 'Failed to create portfolio. Please try again.');
+        const payload = data as { error?: string; upgradeUrl?: string };
+        setError(payload.error ?? 'Failed to create portfolio. Please try again.');
+        // Row #196: creating a portfolio is gated to Team+ (`sharedLibrary`);
+        // the API answers 403 with an upgradeUrl. Without surfacing it the user
+        // reads "Feature not available on your plan" and has nowhere to go.
+        setUpgradeUrl(typeof payload.upgradeUrl === 'string' ? payload.upgradeUrl : null);
       }
     } catch {
       setError('Network error. Could not create portfolio. Please try again.');
@@ -252,6 +259,14 @@ export default function CreatePortfolioDialog({
             {error && (
               <p className="text-ds-xs text-red-600 bg-red-50 border border-red-200 rounded-ds-sm px-3 py-2">
                 {error}
+                {upgradeUrl && (
+                  <>
+                    {' '}
+                    <a href={upgradeUrl} className="font-medium underline underline-offset-2">
+                      Compare plans →
+                    </a>
+                  </>
+                )}
               </p>
             )}
 
