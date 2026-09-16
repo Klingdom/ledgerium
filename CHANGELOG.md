@@ -6,6 +6,21 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-16] - The dashboard end-to-end specs are now fully green
+
+**Why:** three tests in those specs had been failing against untouched code, so the suite could not be used as a gate. Each asserted behaviour the product had deliberately moved away from.
+
+### Fixed (test-only)
+- The time-range test expected "Last 30 days"; the dashboard deliberately defaults to "All time" since iter-067, because a process library should open on the whole history rather than a rolling window.
+- Two sorting tests looked for the sort state on the button instead of the column header that carries it, and expected a health-score default sort that was never the default.
+
+### Result
+- Both dashboard specs pass 22/22. Workspace tests unchanged at 4734, typecheck clean, no product code touched.
+- Row 200 drops from 45 stale failures to ~42, all outside these specs.
+- This makes a CI gate worth adding: it would run green today and fail only on a genuine regression.
+
+---
+
 ## [2026-09-16] - The dashboard's dark end-to-end tests now actually run
 
 **Why:** 8 tests covering row navigation, sorting, filtering, keyboard access and the whole free-tier gating path had been skipped since April for want of test data — while the plan-gating code underneath them was rewritten twice this week.

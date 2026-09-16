@@ -62,14 +62,19 @@ test('Command Header renders with "Workflows" title', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Workflows', level: 1 })).toBeVisible();
 });
 
-test('Command Header renders time range selector with default "Last 30 days"', async ({ page }) => {
+test('Command Header renders time range selector defaulting to "All time"', async ({ page }) => {
   await page.goto(V2_URL, { waitUntil: 'networkidle' });
 
   const selector = page.getByRole('combobox', { name: 'Time range' });
   await expect(selector).toBeVisible();
 
-  // Default value per D7 / PRD §5.1
-  await expect(selector).toHaveValue('30d');
+  // Row #200 triage: this asserted '30d' (the original D7 / PRD §5.1 default)
+  // and had been failing unnoticed since iter-067, which deliberately changed
+  // the default to 'all' per CEO Signal 1 / WDC2-P03 — see the comment at
+  // DashboardV2Shell.tsx:228 and the state at :232. A process-intelligence
+  // library should open on the whole event log, not a rolling window. Stale
+  // test, not a regression.
+  await expect(selector).toHaveValue('all');
 });
 
 test('Command Header time range selector changes value', async ({ page }) => {
@@ -241,34 +246,45 @@ test('sorting by Health Score asc then desc changes row order', async ({ page })
   expect(scoreBefore).not.toBeNull();
 });
 
-// Sort headers aria-sort attribute can be validated without rows
-test('Health Score sort header has correct aria-sort attribute (default ascending)', async ({ page }) => {
+// Sort headers aria-sort attribute can be validated without rows.
+//
+// Row #200 triage — both tests below were asserting against the wrong element
+// AND the wrong default, and had been failing unnoticed:
+//   1. `aria-sort` belongs on the `<th scope="col">` (the columnheader), not on
+//      the nested sort `<button>`. WorkflowList.tsx says so at :362 and
+//      :382-383, and applies `aria-sort={sortAriaValue(...)}` to the `<th>`.
+//   2. The default sort is `date_recorded` desc (DashboardV2Shell.tsx:265,
+//      Batch A P0 item 3), not health_score asc — so an unselected Health Score
+//      header starts at `none`, and its first click sorts ascending.
+// Both are stale tests, not product regressions.
+test('Health Score column header starts unsorted (aria-sort="none")', async ({ page }) => {
   await page.goto(V2_URL, { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
 
-  const table = page.getByRole('table', { name: 'Workflows' });
-  const healthScoreBtn = table
+  const healthScoreColumnHeader = page
+    .getByRole('table', { name: 'Workflows' })
     .locator('thead')
-    .getByRole('button', { name: /health score/i });
+    .getByRole('columnheader', { name: /health score/i });
 
-  // Default sort is health_score asc per PRD §5.3
-  await expect(healthScoreBtn).toHaveAttribute('aria-sort', 'ascending');
+  await expect(healthScoreColumnHeader).toHaveAttribute('aria-sort', 'none');
 });
 
-test('clicking Health Score sort header toggles aria-sort to descending', async ({ page }) => {
+test('clicking Health Score sort header toggles aria-sort ascending then descending', async ({ page }) => {
   await page.goto(V2_URL, { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
 
-  const table = page.getByRole('table', { name: 'Workflows' });
-  const healthScoreBtn = table
+  const healthScoreColumnHeader = page
+    .getByRole('table', { name: 'Workflows' })
     .locator('thead')
-    .getByRole('button', { name: /health score/i });
+    .getByRole('columnheader', { name: /health score/i });
+  const healthScoreBtn = healthScoreColumnHeader.getByRole('button', { name: /health score/i });
+
+  // Switching to a new sort field always starts ascending (WorkflowList.handleSort).
+  await healthScoreBtn.click();
+  await expect(healthScoreColumnHeader).toHaveAttribute('aria-sort', 'ascending');
 
   await healthScoreBtn.click();
-  await expect(healthScoreBtn).toHaveAttribute('aria-sort', 'descending');
-
-  await healthScoreBtn.click();
-  await expect(healthScoreBtn).toHaveAttribute('aria-sort', 'ascending');
+  await expect(healthScoreColumnHeader).toHaveAttribute('aria-sort', 'descending');
 });
 
 // ── Filter by tag ─────────────────────────────────────────────────────────────

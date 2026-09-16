@@ -4,6 +4,21 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-16 (loop 12) — First slice of #200: the dashboard specs are fully green (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO "continue". **Candidate Selection:** `top-score` was #199 (CI enforcement, score 9) — **deliberately deferred one loop**. Wiring CI while 45 of 229 tests fail against pristine code would have produced a permanently red gate, which trains everyone to ignore it. The 3 failures inside the dashboard specs had to clear first, so this loop took the first slice of #200 instead. Sequencing decision, not a scope change.
+- **Fixes (one file, `e2e/app/dashboard/v2-happy-path.spec.ts`; zero product code):**
+  - Time-range default: asserted `'30d'`, product is `'all'` — changed deliberately at iter-067 (CEO Signal 1 / WDC2-P03; see `DashboardV2Shell.tsx:228` comment and `:232` state). Test updated to `'all'` with the decision cited inline.
+  - Two `aria-sort` tests: wrong element **and** wrong default. `aria-sort` belongs on the `<th scope="col">`, which `WorkflowList.tsx:362,382-383` states explicitly; and the default sort is `date_recorded` desc (`DashboardV2Shell.tsx:265`), not health-score ascending. Rewritten to assert `none` on an untouched header, then `ascending` on first click and `descending` on second, matching `WorkflowList.handleSort`.
+  - All three were **stale tests, not product regressions** — each verified against the product decision that superseded it.
+- **Validation:**
+  - Two dashboard specs: **22/22 passed** (was 19 passed / 3 failed at loop 11 close).
+  - Workspace `pnpm test` **4734/4734** unchanged; `typecheck` 0 errors; `git diff --name-only` = exactly one spec file, no `src/` touched.
+- **Effect on #200:** 3 of 45 cleared; ~42 remain, all outside the dashboard specs (`v2-states` 8/11, `v2-a11y` 9/13, `public/*`, `api/*`).
+- **Unblocks #199:** a CI gate over the two dashboard specs is now honest — it would run green today and fail only on a real regression. That is the recommended next loop, gating the green subset and widening it as #200 is triaged, rather than gating the whole suite.
+
+---
+
 ## 2026-09-16 (loop 11) — The dark dashboard E2E tests now run (Mode 1, `qa-engineer`)
 
 - **Trigger:** CEO "continue". **Candidate Selection:** `top-score` — row #195 (score 10), promoted by the loop-10 triage. Plan gating had been rewritten twice this week (9b0fb72 effective-plan, 60ccfb3 presets) with zero end-to-end coverage.
