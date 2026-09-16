@@ -4,6 +4,26 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-16 (loop 11) — The dark dashboard E2E tests now run (Mode 1, `qa-engineer`)
+
+- **Trigger:** CEO "continue". **Candidate Selection:** `top-score` — row #195 (score 10), promoted by the loop-10 triage. Plan gating had been rewritten twice this week (9b0fb72 effective-plan, 60ccfb3 presets) with zero end-to-end coverage.
+- **Work (test infrastructure only; zero `src/` changes):**
+  - `e2e/seed-test-db.js` +157: adds `free@ledgerium.test` (plan `free`, deliberately NO reverse-trial fields — an active trial grants Solo and would defeat the gating tests) and 5 workflows per user, one per opportunity tag. Health scores 95 / 83 / 55 / 50 / 10 are derived from fixed `confidence` / `stepCount` / `durationMs` inputs with `processDefinition` left null, so no wall-clock dependency.
+  - New `e2e/free-auth.setup.ts` + `playwright.config.ts` wiring (a `free-auth-setup` project; both setups are dependencies of `authenticated`). Note: the testMatch regexes needed anchoring, since a naive `/auth\.setup\.ts/` also matches `free-auth.setup.ts`.
+  - All **8** previously-skipped tests un-skipped; unreachable in-test guards removed so a test cannot silently pass on an empty page.
+- **Coordinator correction to my own loop-10 record:** I had written "13 skipped tests". The true count is **8** test-level skips; 13 was raw string occurrences including 4 conditional guards and a docblock line. Corrected here and in `IMPROVEMENT_BACKLOG` #195, `CHANGELOG` and `SYSTEM_HEALTH`. The agent's original figure was correct and my correction of it was not.
+- **Validation:**
+  - Agent: full suite twice, byte-identical results — 229 tests, 184 passed, **45 failed**, 0 skipped; all 8 targets pass.
+  - Coordinator independent run of the two dashboard specs: **19 passed / 3 failed** of 22 listed (20 spec tests + 2 auth-setup projects). The 3 failures are pre-existing and proven so two ways: the diff contains no line mentioning them, and all three exist unchanged in `HEAD`.
+  - Diff review: assertions **strengthened**, not softened — 38 added vs 30 removed `expect(`s, positional `td.nth(N)` locators replaced with `button[aria-label^="Health score:"]` and `tr[id^="wf-row-"]`, no leftover conditional skips.
+  - Workspace `pnpm test` 4734/4734 and `typecheck` clean (no product code touched).
+- **Defects the un-skipping surfaced (documented in-test, not silently patched):** stale `tr[tabindex="0"]` locator; positional health-score column index broken by D+4 dynamic columns; opportunity filter now behind a "Toggle filters" panel; gated tooltip copy is "Compare plans →" (iter-064), not "View plans →"; first sort click goes ascending under the `date_recorded`-desc default.
+- **Incidental fix:** `apps/web-app/.gitignore` now ignores `prisma/test.db` — the root `.gitignore` entry is rooted at the repo root and did **not** match, so the seeded DB would have been committed.
+- **New rows:** #199 (no CI runs this suite), #200 (45 pre-existing failures), #201 (a committed, expired Playwright session-token file).
+- **Honest limit:** these tests still run only on demand. Until #199 lands, nothing stops a push from breaking them again — which is exactly how they rotted.
+
+---
+
 ## 2026-09-16 (loop 10) — DV2 cold-pool staleness triage (Mode 1, `qa-engineer`)
 
 - **Trigger:** CEO "keep improving". **Candidate Selection:** `top-score` among unblocked work, but really a mandated-overdue rule: MR-006 Change D staleness triage. MR-019 queued this pool as "cannot defer further", MR-020 skipped it, MR-021 rated the pipeline **Failing** with only low-value rows selectable. The triage does **not** depend on the pending P-1 ruling — P-1 would only permit wholesale archiving instead of item-by-item verification.
@@ -14,7 +34,7 @@ This file records each bounded improvement loop.
 - **Promoted as rows #195–#198** (5 items merged to 4 rows; the two copy items share one row so a single growth consult covers all four strings).
 - **Coordinator corrections to the agent's report (spot-check of every promote):**
   - R13: the agent cited `PortfolioSidebar.tsx:328,383`; that path does not exist under `dashboard-v2/`. The defect is real at `DashboardV2Shell.tsx:1176-1179` (empty handler); the sidebar is the shared `src/components/PortfolioSidebar.tsx`; `CreatePortfolioDialog` is wired only in the retired v1 page. The code comment defers to "#50", which is closed and unrelated — a stale pointer worth noting in the row.
-  - R05: the agent said "8 dead tests waiting on `seedDashboardV2Dev()`". Actual: **13** skips (4 + 9), and the blockers are seeded workflows and a missing free-tier user; the named fixture is one candidate fix, not the requirement.
+  - R05: the agent said "8 dead tests waiting on `seedDashboardV2Dev()`". I recorded **13**, which was WRONG and is corrected at loop 11: the true count is **8 test-level skips** (4 happy-path + 4 plan-gating). 13 counted raw `test.skip` string occurrences, which include 4 in-test conditional guards and a docblock mention. The agent's figure was right; only its "waiting on `seedDashboardV2Dev()`" framing needed correcting — the blockers are seeded workflows and a missing free-tier user.
   - R14/R08/R15 and both `shipped` claims verified exactly as reported.
 - **Validation:** `pnpm test` 4734/4734 across 231 files and `pnpm typecheck` clean — run to prove no code changed; `git status` showed only the artifact modified.
 - **Evidence for the pending P-1 ruling:** of 16 items, 4 (25%) were already fixed or duplicated open rows — noise that cost real verification time — while 5 were still-live defects, including an entire dark plan-gating E2E suite. A blanket `archive-stale` would have discarded those five. Recommend CEO weigh this before approving P-1 as written.

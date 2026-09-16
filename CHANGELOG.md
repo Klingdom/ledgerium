@@ -6,6 +6,26 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-16] - The dashboard's dark end-to-end tests now actually run
+
+**Why:** 8 tests covering row navigation, sorting, filtering, keyboard access and the whole free-tier gating path had been skipped since April for want of test data — while the plan-gating code underneath them was rewritten twice this week.
+
+### Fixed
+- The test database now seeds a free-tier user and five workflows per user, one per opportunity tag, with deterministic health scores (95/83/55/50/10) that don't drift with the clock.
+- Added a second sign-in setup so free-tier tests run as a real free user.
+- All 8 tests are un-skipped and passing, with stronger assertions than before: locators that survive column reordering, and no guard that lets a test pass on an empty page.
+
+### Found while doing it
+- 45 of 229 tests in this suite fail against untouched code, because nothing runs them and the UI moved underneath: rows lost a focus attribute, columns became dynamic, filters moved behind a panel, and link text changed. Now row 200, to be triaged one by one rather than bulk-updated.
+- No CI job runs this suite at all (row 199), which is why it rotted.
+- An expired Playwright session-token file is committed to the repo (row 201).
+- The seeded test database was not covered by `.gitignore` from the web app's directory; fixed here.
+
+### Honest limit
+- These tests still only run when someone asks. Until row 199 lands, nothing prevents the next push from breaking them again.
+
+---
+
 ## [2026-09-16] - Cleared the oldest pile of stale review findings (dashboard v2)
 
 **Why:** this April review's findings had gone unchecked for five months and ~240 commits. Two earlier reviews said the cleanup could not wait; it was skipped anyway, and the backlog ran dry in the meantime.
@@ -14,7 +34,7 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 - **2 were already fixed** months ago by work nobody connected back to them.
 - **2 were duplicates** of backlog rows that are still open.
 - **7 stay parked** — real but not worth doing now.
-- **5 are still-live defects**, now backlog rows 195–198. The most serious: 13 dashboard end-to-end tests never run, including the entire plan-gating suite, because the test data has no workflows and no free-tier user. Plan gating was rewritten twice this week with no such coverage.
+- **5 are still-live defects**, now backlog rows 195–198. The most serious: 8 dashboard end-to-end tests never run, including the entire plan-gating suite, because the test data has no workflows and no free-tier user. Plan gating was rewritten twice this week with no such coverage. (First recorded as 13; corrected to 8 at loop 11 — the larger figure counted conditional guards inside tests as well as skipped tests.)
 - Also promoted: a create-portfolio button that silently does nothing on the live dashboard, four misleading labels, and filters that can't be shared by link.
 
 ### Note for the pending decision

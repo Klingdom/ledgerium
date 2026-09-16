@@ -24,3 +24,10 @@ prisma/smoke.db-journal
 # misc
 *.tsbuildinfo
 next-env.d.ts
+
+# Playwright E2E test database (recreated by e2e/global-setup.ts on every run).
+# The root .gitignore entry is rooted at the repo root, so it does NOT match
+# apps/web-app/prisma/test.db — without these two lines the seeded DB gets
+# committed (caught while un-skipping the dashboard suite, row #195).
+prisma/test.db
+prisma/test.db-*

@@ -17,13 +17,26 @@
  * filter, run-count qualifier, action-leading copy). Unit tests belong to frontend-engineer.
  *
  * Auth: authenticated project (storageState: .auth/user.json, plan: 'growth').
- * The seed user has no workflows — the empty state is a valid success path.
+ * The seed user (e2e@ledgerium.test) has 5 seeded workflows (row #195,
+ * see e2e/seed-test-db.js) — one per OpportunityTag, with distinct
+ * healthScore.overall values, so row-click / sort / filter / kebab tests
+ * below exercise real rows rather than an empty state.
  * State-machine and plan-gating scenarios live in their own spec files.
  */
 
 import { test, expect } from '@playwright/test';
 
 const V2_URL = '/dashboard?v2=1';
+
+/**
+ * Row #195: the `<tr>` for a workflow row is no longer keyboard-focusable in
+ * its own right (atglance-review #18 removed `tabIndex={0}` — keyboard
+ * navigation now flows through the per-cell buttons). The stable identifier
+ * is the `id="wf-row-<workflowId>"` attribute WorkflowRow always sets, so
+ * every locator below selects data rows via that prefix instead of the
+ * stale `tr[tabindex="0"]` selector.
+ */
+const DATA_ROW_SELECTOR = 'tbody tr[id^="wf-row-"]';
 
 // ── Follow-up #47 — Suspense regression ─────────────────────────────────────
 // Assert no hydration or client-side JS errors on initial load with search params.
@@ -153,67 +166,80 @@ test('Workflow List renders a recognisable state: empty, error, sparse, or ready
 
 // ── Row navigation ────────────────────────────────────────────────────────────
 
-test.skip(
-  'clicking first workflow row navigates to /workflows/[id]',
-  // SKIP REASON: The seed user (e2e@ledgerium.test) has no seeded workflows.
-  // The row click path cannot be exercised until seedDashboardV2Dev() fixtures
-  // are merged (iter 022 companion work per PRD §11).
-  // FOLLOW-UP: coordinator to track "seed v2 dev fixtures" as a prerequisite
-  // for un-skipping this test. See follow-up logged at end of this file.
-  async ({ page }) => {
-    await page.goto(V2_URL, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(800);
+test('clicking first workflow row navigates to /workflows/[id]', async ({ page }) => {
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(800);
 
-    const table = page.getByRole('table', { name: 'Workflows' });
-    const firstRow = table.locator('tbody tr[tabindex="0"]').first();
-    await firstRow.waitFor({ state: 'visible', timeout: 10_000 });
+  const table = page.getByRole('table', { name: 'Workflows' });
+  const firstRow = table.locator(DATA_ROW_SELECTOR).first();
+  await firstRow.waitFor({ state: 'visible', timeout: 10_000 });
 
-    await firstRow.click();
+  await firstRow.click();
 
-    await page.waitForURL(/\/workflows\/[^/]+/, { timeout: 10_000 });
-    await expect(page).toHaveURL(/\/workflows\/[^/]+/);
-  },
-);
+  await page.waitForURL(/\/workflows\/[^/]+/, { timeout: 10_000 });
+  await expect(page).toHaveURL(/\/workflows\/[^/]+/);
+});
 
 // ── Sort ─────────────────────────────────────────────────────────────────────
 
-test.skip(
-  'sorting by Health Score asc then desc changes row order',
-  // SKIP REASON: No workflow rows available in seed — sort order cannot be observed.
-  // Un-skip after seedDashboardV2Dev() fixtures are merged.
-  async ({ page }) => {
-    await page.goto(V2_URL, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(800);
+test('sorting by Health Score asc then desc changes row order', async ({ page }) => {
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(800);
 
-    const table = page.getByRole('table', { name: 'Workflows' });
-    const healthScoreHeader = table
-      .locator('thead')
-      .getByRole('button', { name: /health score/i });
+  const table = page.getByRole('table', { name: 'Workflows' });
+  // Row #195 finding: `aria-sort` lives on the `<th scope="col">` (the
+  // columnheader), NOT on the nested `<SortButton>` — WorkflowList.tsx sets
+  // `aria-sort={sortAriaValue(...)}` on the `<th>` and renders the button as
+  // a child. Click the button to trigger the sort; assert `aria-sort` on the
+  // columnheader.
+  const healthScoreColumnHeader = table
+    .locator('thead')
+    .getByRole('columnheader', { name: /health score/i });
+  const healthScoreHeader = healthScoreColumnHeader.getByRole('button', { name: /health score/i });
 
-    // Default is asc (worst first) — collect first-row score
-    const getFirstScore = async () => {
-      const firstCell = table.locator('tbody tr[tabindex="0"]').first()
-        .locator('td').nth(3); // 4th column = Health Score
-      return firstCell.textContent();
-    };
+  // The health-score value lives in the button's own aria-label
+  // ("Health score: N, <band>[, ...]. Show breakdown."), not in generic cell
+  // text — reading it directly is robust to column-order changes (row #195
+  // finding: dynamic columns (D+4 picker) now sit between the title and the
+  // health-score cell, so a positional `td.nth(N)` locator is not stable).
+  const getFirstScore = async () => {
+    const firstRowScoreBtn = table
+      .locator(DATA_ROW_SELECTOR)
+      .first()
+      .locator('button[aria-label^="Health score:"]');
+    const label = await firstRowScoreBtn.getAttribute('aria-label');
+    const match = label?.match(/Health score: (\d+)/);
+    return match ? match[1] : null;
+  };
 
-    const scoreBefore = await getFirstScore();
+  // Default sort is date_recorded desc (Batch A P0 item 3) — the Health
+  // Score header starts unselected (aria-sort="none"). The first click on an
+  // unselected sortable header activates it ascending (see
+  // WorkflowList.handleSort: a field switch always starts at 'asc').
+  const scoreBefore = await getFirstScore();
 
-    // Click to toggle to desc
-    await healthScoreHeader.click();
-    await expect(healthScoreHeader).toHaveAttribute('aria-sort', 'descending');
-    const scoreAfterDesc = await getFirstScore();
+  await healthScoreHeader.click();
+  await expect(healthScoreColumnHeader).toHaveAttribute('aria-sort', 'ascending');
+  const scoreAfterAsc = await getFirstScore();
 
-    // Click back to asc
-    await healthScoreHeader.click();
-    await expect(healthScoreHeader).toHaveAttribute('aria-sort', 'ascending');
-    const scoreAfterAsc = await getFirstScore();
+  await healthScoreHeader.click();
+  await expect(healthScoreColumnHeader).toHaveAttribute('aria-sort', 'descending');
+  const scoreAfterDesc = await getFirstScore();
 
-    // Scores should change between asc and desc (assuming >1 workflow with different scores)
-    expect(scoreBefore).not.toBe(scoreAfterDesc);
-    expect(scoreAfterAsc).toBe(scoreBefore);
-  },
-);
+  await healthScoreHeader.click();
+  await expect(healthScoreColumnHeader).toHaveAttribute('aria-sort', 'ascending');
+  const scoreAfterAscAgain = await getFirstScore();
+
+  // Seeded fixtures have 5 distinct healthScore.overall values (10/50/55/83/95)
+  // — asc vs desc must show different top rows, and the round trip back to
+  // asc must reproduce the original top row.
+  expect(scoreAfterAsc).not.toBe(scoreAfterDesc);
+  expect(scoreAfterAscAgain).toBe(scoreAfterAsc);
+  // scoreBefore reflects the default date_recorded-desc order, which is not
+  // guaranteed to differ from the asc health-score order — no assertion on
+  // scoreBefore beyond confirming a row was present to read from.
+  expect(scoreBefore).not.toBeNull();
+});
 
 // Sort headers aria-sort attribute can be validated without rows
 test('Health Score sort header has correct aria-sort attribute (default ascending)', async ({ page }) => {
@@ -247,81 +273,89 @@ test('clicking Health Score sort header toggles aria-sort to descending', async 
 
 // ── Filter by tag ─────────────────────────────────────────────────────────────
 
-test.skip(
-  'filter by opportunity tag shows filtered subset',
-  // SKIP REASON: No workflow rows in seed — filter behaviour requires rows with
-  // varied opportunityTags. Un-skip after seedDashboardV2Dev() fixtures merged.
-  async ({ page }) => {
-    await page.goto(V2_URL, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(800);
+test('filter by opportunity tag shows filtered subset', async ({ page }) => {
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(800);
 
-    // Select "Monitor" from the opportunity filter
-    const opportunityFilter = page.getByRole('combobox', { name: /filter by opportunity/i });
-    await opportunityFilter.selectOption('monitor');
+  // Row #195 finding: WorkflowListFilterBar (with the opportunity combobox)
+  // no longer renders inline in the list — Batch C item 13 moved it into a
+  // collapsible panel behind the toolbar's "Toggle filters" button
+  // (UnifiedToolbar.tsx). The panel must be opened before the combobox
+  // exists in the DOM.
+  await page.getByRole('button', { name: /toggle filters/i }).click();
 
-    // Active filter chip should appear for "Monitor"
-    await expect(page.getByText('Monitor').first()).toBeVisible();
+  // Select "Monitor" from the opportunity filter
+  const opportunityFilter = page.getByRole('combobox', { name: /filter by opportunity/i });
+  await opportunityFilter.selectOption('monitor');
 
-    // Table should now show only rows with Monitor tag OR no-results state
-    const table = page.getByRole('table', { name: 'Workflows' });
-    const rows = table.locator('tbody tr[tabindex="0"]');
-    const noResults = page.getByText(/no workflows match your filters/i);
+  // Active filter chip should appear for "Monitor"
+  await expect(page.getByText('Monitor').first()).toBeVisible();
 
-    const hasRows = (await rows.count()) > 0;
-    const hasNoResults = await noResults.isVisible();
-    expect(hasRows || hasNoResults).toBe(true);
+  // Table should now show only rows with Monitor tag OR no-results state.
+  // Seeded fixtures have exactly one 'monitor'-tagged row (row #195).
+  const table = page.getByRole('table', { name: 'Workflows' });
+  const rows = table.locator('tbody tr[id^="wf-row-"]');
+  const noResults = page.getByText(/no workflows match your filters/i);
 
-    // Clear filter
-    const clearBtn = page.getByRole('button', { name: /clear all/i });
-    if (await clearBtn.isVisible()) {
-      await clearBtn.click();
-      await expect(opportunityFilter).toHaveValue('');
-    }
-  },
-);
+  const hasRows = (await rows.count()) > 0;
+  const hasNoResults = await noResults.isVisible();
+  expect(hasRows || hasNoResults).toBe(true);
+  if (hasRows) {
+    await expect(rows).toHaveCount(1);
+    // Scope to the opportunity chip's aria-label rather than getByText('Monitor')
+    // — the row title text can legitimately contain the word "Monitor" too,
+    // which would make a plain text locator ambiguous (strict-mode violation).
+    await expect(rows.first().locator('[aria-label="Opportunity: Monitor"]')).toBeVisible();
+  }
+
+  // Clear filter — the visible "Clear all" lives in ActiveFiltersBar (the
+  // filter panel's own internal "Clear all" renders a second, duplicate
+  // button by name while the panel is open — scope to the named region to
+  // keep this locator unambiguous).
+  const clearBtn = page
+    .getByRole('region', { name: 'Active filters' })
+    .getByRole('button', { name: /clear all/i });
+  if (await clearBtn.isVisible()) {
+    await clearBtn.click();
+    await expect(opportunityFilter).toHaveValue('');
+  }
+});
 
 // ── Kebab menu keyboard accessibility ─────────────────────────────────────────
 
-test.skip(
-  'kebab menu opens with keyboard Enter, closes with Escape, returns focus to trigger',
-  // SKIP REASON: Kebab button is only visible on row hover. With no workflow rows
-  // in seed, the kebab cannot be exercised. Un-skip after seedDashboardV2Dev() merged.
-  async ({ page }) => {
-    await page.goto(V2_URL, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(800);
+test('kebab menu opens with keyboard Enter, closes with Escape, returns focus to trigger', async ({ page }) => {
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(800);
 
-    const table = page.getByRole('table', { name: 'Workflows' });
-    const firstRow = table.locator('tbody tr[tabindex="0"]').first();
-    await firstRow.waitFor({ state: 'visible' });
+  const table = page.getByRole('table', { name: 'Workflows' });
+  const firstRow = table.locator(DATA_ROW_SELECTOR).first();
+  await firstRow.waitFor({ state: 'visible' });
 
-    // Hover to reveal kebab button
-    await firstRow.hover();
+  // Hover to reveal kebab button
+  await firstRow.hover();
 
-    const kebabBtn = firstRow.getByRole('button', { name: /^Actions for/i });
-    await expect(kebabBtn).toBeVisible();
+  const kebabBtn = firstRow.getByRole('button', { name: /^Actions for/i });
+  await expect(kebabBtn).toBeVisible();
 
-    // Keyboard: focus the button and press Enter to open
-    await kebabBtn.focus();
-    await page.keyboard.press('Enter');
+  // Keyboard: focus the button and press Enter to open
+  await kebabBtn.focus();
+  await page.keyboard.press('Enter');
 
-    const menu = page.getByRole('menu');
-    await expect(menu).toBeVisible();
+  const menu = page.getByRole('menu');
+  await expect(menu).toBeVisible();
 
-    // Menu items: Edit name, Archive, Copy link
-    await expect(menu.getByRole('menuitem', { name: /edit name/i })).toBeVisible();
-    await expect(menu.getByRole('menuitem', { name: /archive/i })).toBeVisible();
-    await expect(menu.getByRole('menuitem', { name: /copy link/i })).toBeVisible();
+  // Menu items: Edit name, Archive, Copy link
+  await expect(menu.getByRole('menuitem', { name: /edit name/i })).toBeVisible();
+  await expect(menu.getByRole('menuitem', { name: /archive/i })).toBeVisible();
+  await expect(menu.getByRole('menuitem', { name: /copy link/i })).toBeVisible();
 
-    // Escape closes menu and focus returns to trigger
-    await page.keyboard.press('Escape');
-    await expect(menu).not.toBeVisible();
+  // Escape closes menu and focus returns to trigger (MDR-P08 centralized
+  // Escape dispatch — closed iter-041 — restores focus to the kebab button).
+  await page.keyboard.press('Escape');
+  await expect(menu).not.toBeVisible();
 
-    // Focus should return to the kebab button or the row
-    // (WCAG 2.1 SC 3.2.2 — closing a menu must not discard focus)
-    // Note: current WorkflowRow implementation closes via click-outside handler,
-    // not a keydown Escape on the menu. Focus return is not explicitly implemented.
-    // This assertion captures the desired behavior; if it fails, log as a defect.
-    const focusedElement = await page.evaluate(() => document.activeElement?.getAttribute('aria-label'));
-    expect(focusedElement).toMatch(/Actions for/i);
-  },
-);
+  // Focus should return to the kebab button or the row
+  // (WCAG 2.1 SC 3.2.2 — closing a menu must not discard focus)
+  const focusedElement = await page.evaluate(() => document.activeElement?.getAttribute('aria-label'));
+  expect(focusedElement).toMatch(/Actions for/i);
+});

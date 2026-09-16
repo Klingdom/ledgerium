@@ -35,10 +35,23 @@ export default defineConfig({
   globalTeardown: './e2e/global-teardown.ts',
 
   projects: [
-    /* Auth setup — runs first, produces storageState for other projects */
+    /* Auth setup — runs first, produces storageState for other projects.
+       Anchored at a path-separator-or-start boundary + end-of-string so it
+       matches ONLY .../auth.setup.ts and not .../free-auth.setup.ts (which
+       contains "auth.setup.ts" as a substring — a bare `^...$` anchor does
+       NOT work here because Playwright matches testMatch against the
+       testDir-relative path, e.g. "e2e/auth.setup.ts" on some platforms, not
+       the bare filename). */
     {
       name: 'auth-setup',
-      testMatch: /auth\.setup\.ts/,
+      testMatch: /(^|[\\/])auth\.setup\.ts$/,
+    },
+
+    /* Free-tier auth setup — produces e2e/.auth/free-user.json for
+       plan-gating tests (row #195). */
+    {
+      name: 'free-auth-setup',
+      testMatch: /(^|[\\/])free-auth\.setup\.ts$/,
     },
 
     /* Public pages — no auth required */
@@ -48,11 +61,14 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
 
-    /* Authenticated pages — depends on auth setup */
+    /* Authenticated pages — depends on both auth setups so every spec file
+       (including plan-gating tests, which open their own free-tier
+       browser.newContext({ storageState: './e2e/.auth/free-user.json' }))
+       can rely on both storageState files already existing. */
     {
       name: 'authenticated',
       testMatch: /app\/.+\.spec\.ts/,
-      dependencies: ['auth-setup'],
+      dependencies: ['auth-setup', 'free-auth-setup'],
       use: {
         ...devices['Desktop Chrome'],
         storageState: './e2e/.auth/user.json',
