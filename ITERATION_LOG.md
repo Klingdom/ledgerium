@@ -4,6 +4,33 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-16 — MR-022 meta-review (Mode 4, `meta-coordinator`, NON-counting)
+
+- **Trigger:** cadence overdue — MR-021 closed at loop 8; loops 9–13 ran since (5 counted against a 2–3 loop cadence).
+- **Artifact:** `docs/meta/MR_022_META_REVIEW.md` (1194 words vs a ~900 target; overage is file:line evidence, still ≤2 pages).
+- **Coordinator verification — all claims checked, all confirmed:**
+  - Debt ratio **7 closed / 17 created = 0.41** across rows 185–201 — recounted independently, matches (closed: 185, 186, 187, 188, 192, 195, 199).
+  - "No saturation check logged in loops 11–13" — confirmed by grep: those three entries contain **zero** mentions of saturation or Area. That is my omission, not the reviewer's inference.
+  - Stalled decisions are ~6 loops but only **2 calendar days** old (MR-020 committed 09-14, MR-021 09-15, today 09-16). The "days of delay" framing I had been using overstated it.
+  - Exactly one file created; no product code, logs, backlog or CLAUDE.md touched.
+- **Verdicts:**
+
+  | Item | Verdict |
+  |---|---|
+  | Area saturation (loops 11–13) | **Not-applied, outcome defensible** — no literal breach (`web-app/qa`, `web-app/qa`, `ci/qa`), but no check was logged and the −2 "3 of last 5" penalty was arguably due at loop 13, which would have dropped #199 from 9 to 7. Chain was genuine; **loop 14 is the pivot.** |
+  | Loop-12 sequencing (deferring #199) | Effective — deferral logged, #199 shipped one loop later, no closure claimed |
+  | Loop-13 partial gate | Effective, **but the widening rule will rot** — it exists only as prose inside a now-closed row |
+  | Self-correction (13 → 8) | Effective — propagated to 4 records, credited the agent; habit does not recur |
+  | Follow-Up Debt ratio | **Failing at 0.41** (0.47 ex-governance, 0.40 built-only) — but the fall from 0.57 is the refill MR-021 itself demanded |
+  | CEO-decision stall | Effective — keep asking, never assume consent |
+
+- **P-1 ruled: do NOT approve as written.** Loop 10 is decisive — blanket `archive-stale` would have discarded the dark plan-gating suite, the highest-yield find of loops 9–13. Re-scope to *pacing* (one pool per cycle), not bulk discard.
+- **New proposals (not applied):** **P-3** declare dependency chains explicitly in Candidate Selection (so a sequenced chain is visible rather than looking like drift); **P-4** a consolidated CEO decision queue that prices cost-of-delay.
+- **Loop 14 endorsement:** top **#194** (optional promo-tile copy — the only candidate clearing both the QA pivot and D-1 extension-surface drift); alternate **#196** (create-portfolio silent no-op). Neither is CEO-gated.
+- **Action taken on the widening-rule rot risk:** the gate's widening trigger is restated in row #200 (open) rather than living only in closed row #199 — see backlog.
+
+---
+
 ## 2026-09-16 (loop 13) — The dashboard E2E suite is now enforced in CI (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO "i pushed" under the standing "keep improving" directive. **Candidate Selection:** `top-score` — #199 (score 9), unblocked by loop 12 making the dashboard specs green. This closes the root cause behind #195 and #200: nothing ran this suite, so it rotted silently while the UI moved.

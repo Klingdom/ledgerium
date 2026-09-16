@@ -6,6 +6,22 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-16] - MR-022 meta-review (governance only, no product change)
+
+### Found
+- **A gap in my own record-keeping:** the last three loops logged no check against the rule that stops work clustering in one area. No rule was actually breached — the three were a deliberate chain, each unblocking the next — but the check should have been written down, and the next loop now pivots away from testing work.
+- **The backlog's close-to-create ratio fell to 0.41**, below target. That drop is by design: the previous review demanded a refill, and the refill created the rows now counted against it.
+- **A rule I wrote was already at risk of rotting.** The instruction to widen the CI gate as tests turn green lived only inside a closed backlog row, where nobody would look. Moved into the open row it belongs to, and tied to the commit that turns each file green.
+
+### Ruled
+- **The "archive a whole stale pool at once" proposal should not be approved as written.** The evidence is from two loops ago: a quarter of that pool was noise, but blanket archiving would have thrown away the dark plan-gating tests — the most valuable find of the week. Re-scope it to pacing: one pool per cycle.
+- Two new proposals recorded for you, not applied: declaring dependency chains when selecting work, and a single decision queue that states the cost of delay rather than re-listing the same items each turn.
+
+### Corrected
+- My "days of delay" framing on the open decisions overstated it: they are about six loops old but only two calendar days old.
+
+---
+
 ## [2026-09-16] - The dashboard tests now guard every push
 
 **Why:** nothing in CI ran the web app's end-to-end tests. That is why 8 of them sat skipped since April and 45 drifted into failure unnoticed while the interface changed around them.
