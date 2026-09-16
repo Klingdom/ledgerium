@@ -4,6 +4,24 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-16 (loop 10) — DV2 cold-pool staleness triage (Mode 1, `qa-engineer`)
+
+- **Trigger:** CEO "keep improving". **Candidate Selection:** `top-score` among unblocked work, but really a mandated-overdue rule: MR-006 Change D staleness triage. MR-019 queued this pool as "cannot defer further", MR-020 skipped it, MR-021 rated the pipeline **Failing** with only low-value rows selectable. The triage does **not** depend on the pending P-1 ruling — P-1 would only permit wholesale archiving instead of item-by-item verification.
+- **Scope:** ONE pool — `docs/meta/DASHBOARD_V2_REVIEW_001.md`, untouched since 2026-04-30 (~240 commits). Every still-open item re-verified against CURRENT source, not the artifact's prose. Artifact edited; no source touched.
+- **Outcome (16 open → ):** 2 `shipped` · 7 `keep-cold` · 5 `promote` · 2 `delete`.
+  - **Shipped but never closed:** R12 snapshot-table ADR (shipped iter 055 as row #86) and R04 axe ratchet (shipped iter 046 as row #80, `maxModerate` confirmed at `v2-a11y.spec.ts:70-80`). Both sat in the pool for months after the work landed.
+  - **Deleted as duplicates:** R10 (= live row #85, still open) and R24 (= live row #43, still open) — both confirmed open by the coordinator.
+- **Promoted as rows #195–#198** (5 items merged to 4 rows; the two copy items share one row so a single growth consult covers all four strings).
+- **Coordinator corrections to the agent's report (spot-check of every promote):**
+  - R13: the agent cited `PortfolioSidebar.tsx:328,383`; that path does not exist under `dashboard-v2/`. The defect is real at `DashboardV2Shell.tsx:1176-1179` (empty handler); the sidebar is the shared `src/components/PortfolioSidebar.tsx`; `CreatePortfolioDialog` is wired only in the retired v1 page. The code comment defers to "#50", which is closed and unrelated — a stale pointer worth noting in the row.
+  - R05: the agent said "8 dead tests waiting on `seedDashboardV2Dev()`". Actual: **13** skips (4 + 9), and the blockers are seeded workflows and a missing free-tier user; the named fixture is one candidate fix, not the requirement.
+  - R14/R08/R15 and both `shipped` claims verified exactly as reported.
+- **Validation:** `pnpm test` 4734/4734 across 231 files and `pnpm typecheck` clean — run to prove no code changed; `git status` showed only the artifact modified.
+- **Evidence for the pending P-1 ruling:** of 16 items, 4 (25%) were already fixed or duplicated open rows — noise that cost real verification time — while 5 were still-live defects, including an entire dark plan-gating E2E suite. A blanket `archive-stale` would have discarded those five. Recommend CEO weigh this before approving P-1 as written.
+- **Follow-ups:** the remaining pools (WDC-002, MDR, WDC, PIB, PRICING-001, SOPPM-001, TEAM-001, PATHE-001) are still overdue.
+
+---
+
 ## 2026-09-16 (loop 9) — Chrome Store blocker B-1: the required promo tile now exists (Mode 1, coordinator-direct + `growth-strategist` claim review)
 
 - **Trigger:** CEO "proceed". **Candidate Selection:** `top-score` — row #192 (score 12), promoted at MR-021 from `CHROME_STORE_SUBMISSION_READINESS_001.md` §6. It was the last engineering blocker for Store submission; everything else open needs a CEO decision. Area: extension/store assets (D-1 clear).

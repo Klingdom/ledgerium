@@ -6,6 +6,25 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-16] - Cleared the oldest pile of stale review findings (dashboard v2)
+
+**Why:** this April review's findings had gone unchecked for five months and ~240 commits. Two earlier reviews said the cleanup could not wait; it was skipped anyway, and the backlog ran dry in the meantime.
+
+### Result (16 open findings)
+- **2 were already fixed** months ago by work nobody connected back to them.
+- **2 were duplicates** of backlog rows that are still open.
+- **7 stay parked** — real but not worth doing now.
+- **5 are still-live defects**, now backlog rows 195–198. The most serious: 13 dashboard end-to-end tests never run, including the entire plan-gating suite, because the test data has no workflows and no free-tier user. Plan gating was rewritten twice this week with no such coverage.
+- Also promoted: a create-portfolio button that silently does nothing on the live dashboard, four misleading labels, and filters that can't be shared by link.
+
+### Note for the pending decision
+- A quarter of the pool was noise, but a blanket "archive it all" rule would have thrown away five real defects. Worth weighing before approving that proposal.
+
+### Validation
+- No code changed: tests unchanged at 4734, typecheck clean. Every promoted item was re-verified against current code, and three of the agent's claims were corrected.
+
+---
+
 ## [2026-09-16] - The Chrome Web Store promo tile finally exists (blocker B-1)
 
 **Why:** the Store requires a 440×280 tile, and the listing could not be completed without one. Three audits reported it missing.
