@@ -4,6 +4,21 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-16 (loop 13) — The dashboard E2E suite is now enforced in CI (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO "i pushed" under the standing "keep improving" directive. **Candidate Selection:** `top-score` — #199 (score 9), unblocked by loop 12 making the dashboard specs green. This closes the root cause behind #195 and #200: nothing ran this suite, so it rotted silently while the UI moved.
+- **Design decision — gate the green subset, not the suite:** the job runs `v2-happy-path` + `v2-plan-gating` (22 tests) only. With ~42 stale failures still open under #200, a whole-suite gate would be red from its first run, and a permanently red gate is worse than none — people learn to ignore it, which also hides real regressions. The spec list widens as #200 is triaged, each file added only once it is green, never hopefully.
+- **Workflow** `.github/workflows/e2e-web-app.yml`: push + PR to main, concurrency-cancelling, 20-min timeout (the webServer runs `next dev`, so the first request compiles), pnpm 9 / Node 20 matching `e2e-extension.yml`, `prisma generate` before the run (global-setup calls `prisma db push --skip-generate`), cached chromium only (every project uses `devices['Desktop Chrome']`), and a report artifact on failure.
+- **No secrets required:** `playwright.config.ts`'s webServer supplies its own test `NEXTAUTH_SECRET` and points `DATABASE_URL` at a throwaway SQLite file that `e2e/global-setup.ts` recreates and seeds each run. Nothing touches production.
+- **Validation (and its honest limit):**
+  - The job's exact command sequence run locally: `prisma generate` clean, then the scoped gate **22/22 passed**.
+  - Structural check of the YAML: no tabs, LF endings, required keys present, 9 steps each carrying `uses`/`run`.
+  - **A workflow cannot be truly executed until it is on GitHub.** This is verified-locally, not CI-proven; its first real run happens on the next push. If it fails there, the fix belongs to this row.
+  - Prior push (`1f0c531`) confirmed green: deploy run 35134407569 and extension E2E 35134407510 both succeeded.
+- **Follow-ups:** #200 (~42 stale failures across `v2-states`, `v2-a11y`, `public/*`, `api/*`) — each triaged file that turns green should be appended to the gate's spec list. #201 (committed expired session-token file) still open.
+
+---
+
 ## 2026-09-16 (loop 12) — First slice of #200: the dashboard specs are fully green (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO "continue". **Candidate Selection:** `top-score` was #199 (CI enforcement, score 9) — **deliberately deferred one loop**. Wiring CI while 45 of 229 tests fail against pristine code would have produced a permanently red gate, which trains everyone to ignore it. The 3 failures inside the dashboard specs had to clear first, so this loop took the first slice of #200 instead. Sequencing decision, not a scope change.

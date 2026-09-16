@@ -6,6 +6,21 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-16] - The dashboard tests now guard every push
+
+**Why:** nothing in CI ran the web app's end-to-end tests. That is why 8 of them sat skipped since April and 45 drifted into failure unnoticed while the interface changed around them.
+
+### Added
+- A CI job that runs the dashboard tests on every push and pull request to main, and uploads a report when they fail. It needs no secrets: the tests start their own server against a throwaway database that is rebuilt each run.
+
+### Deliberately limited
+- It gates the 22 tests that pass today, not the whole suite. About 42 tests still fail against untouched code, so a full gate would be red from its first run — and a gate that is always red is one everybody ignores, which hides real breakage. The list grows as those failures are triaged, one file at a time, each only after it is green.
+
+### Validation, and its limit
+- The job's exact commands were run here: 22/22 passing. A workflow can only truly execute once it is on GitHub, so its first real run is on the next push.
+
+---
+
 ## [2026-09-16] - The dashboard end-to-end specs are now fully green
 
 **Why:** three tests in those specs had been failing against untouched code, so the suite could not be used as a gate. Each asserted behaviour the product had deliberately moved away from.

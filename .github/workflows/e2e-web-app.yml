@@ -1,0 +1,94 @@
+name: E2E — Web App (dashboard gate)
+
+# WHY THIS EXISTS (backlog #199)
+#
+# Nothing ran apps/web-app/e2e until now: e2e-extension.yml covers only the
+# extension, and deploy.yml's quality gate runs typecheck + vitest. The suite
+# rotted unobserved — 45 of 229 tests were failing against untouched code
+# (#200), and 8 dashboard tests sat skipped since April (#195) while the plan
+# gating beneath them was rewritten twice.
+#
+# WHY ONLY TWO SPEC FILES
+#
+# This gate runs the subset that is green TODAY: v2-happy-path and
+# v2-plan-gating (22 tests, verified 22/22 locally at loop 12). Gating the
+# whole suite would be red on arrival, and a permanently red gate is one
+# everybody learns to ignore — worse than no gate, because it also hides real
+# regressions. Widen the `spec` list below as #200 is triaged file by file;
+# every addition must be green before it is added, never added hopefully.
+#
+# NO SECRETS REQUIRED
+#
+# playwright.config.ts's webServer supplies its own test NEXTAUTH_SECRET and
+# points DATABASE_URL at a throwaway SQLite file; e2e/global-setup.ts recreates
+# and seeds that database on every run. Nothing here touches production.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: e2e-web-app-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Playwright E2E (web-app dashboard)
+    runs-on: ubuntu-latest
+    # The webServer starts `next dev` and the first request compiles the route;
+    # 20 min leaves headroom for a cold compile without hanging a stuck job.
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # global-setup.ts runs `prisma db push --skip-generate`, so the client
+      # must already be generated — same step deploy.yml's quality gate runs.
+      - name: Generate Prisma client
+        run: pnpm --filter @ledgerium/web-app exec prisma generate
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
+
+      # Chromium only: every project in playwright.config.ts uses
+      # devices['Desktop Chrome'].
+      - name: Install Playwright Chromium browser
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm --filter @ledgerium/web-app exec playwright install chromium --with-deps
+
+      - name: Run dashboard E2E gate
+        run: >-
+          pnpm --filter @ledgerium/web-app test:e2e
+          e2e/app/dashboard/v2-happy-path.spec.ts
+          e2e/app/dashboard/v2-plan-gating.spec.ts
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-web-app
+          path: apps/web-app/playwright-report/
+          retention-days: 7
