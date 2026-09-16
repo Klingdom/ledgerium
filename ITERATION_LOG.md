@@ -4,6 +4,31 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-16 (loop 15) — Untrack the committed Playwright session token (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO "work autonomously through the next 4 hours". **Selection:** #201 (score 11), taken opportunistically while loop 14's copy consult ran — small, isolated, different Area.
+- **Change:** `git rm --cached apps/web-app/e2e/.auth/chrome-store-user.json`. The file stays on disk for local use, `.gitkeep` preserves the directory, and `apps/web-app/.gitignore:15` (`e2e/.auth/`) keeps it untracked from now on — it had been force-added past that ignore.
+- **Commit-hygiene note (coordinator error, disclosed):** this deletion was staged by `git rm --cached` before loop 14's commit ran, so it was swept into commit `0401436` ("feat(store): the optional promo tiles…") rather than landing in its own commit; the follow-up commit then aborted with "no changes added". The commit message was amended to disclose the deletion. Loops 14 and 15 therefore **share one commit** — a staging mistake on my part, not a scope change. Lesson: `git rm --cached` stages immediately; stage-and-commit each loop in one step rather than leaving an index dirty across loops.
+- **Safety check before untracking:** the only consumer is `scripts/capture-chrome-store-screenshots.ts`. Its `ensureAuth()` checks `existsSync(AUTH_STATE_PATH)`, and when absent logs in as the demo user and writes the file via `context.storageState({ path })`. Regeneration is automatic; nothing breaks.
+- **Risk context:** 3 auth.js cookies including a real `authjs.session-token`, but scoped to `localhost` and expired ~2026-06-04. The defect was the committed-credential pattern, not this token.
+- **Observation → row #203:** the same script hardcodes `DEMO_PASSWORD = 'Demo2026!Workspace'`, which is also the documented default in `seed-demo-account.ts`, the runbook and CHANGELOG. Deliberate and env-overridable, but it means any environment seeded with defaults has a publicly known login. Recorded, not fixed here.
+
+---
+
+## 2026-09-16 (loop 14) — Optional promo tiles no longer promise gated features (Mode 1, coordinator-direct + `growth-strategist`)
+
+- **Trigger:** CEO autonomous-run directive. **Selection:** #194 (score 10) — MR-022's endorsement, chosen because it pivots off the QA/testing cluster of loops 11–13 and touches the extension surface (D-1).
+- **Defect:** the optional large and marquee tiles still carried claims the free product does not deliver. Verified against `plans.ts`: the free tier is `...NO_FEATURES`, `healthScores` starts at Starter (`:91`), and `intelligenceLayer` / `automationScoring` / `variantDetection` at Solo (`:123-126`).
+- **Corrections (D-4 clause 1 fired — `growth-strategist` consult, every replacement evidence-cited):**
+  - Large tile: "Understand everything." → "Document automatically." (matching the shipped small tile); "structured process intelligence" → "a documented, measurable process"; "Instant SOP generation" → "Automatic SOP generation"; "Cycle time intelligence / …health scoring" → "Cycle time tracking / Step-level timing and variance across every run."; "Process maps & variants / …variant detection" → "Process maps / Visual flow diagrams from every recorded run."
+  - Marquee: "becomes intelligence." → "becomes a working SOP."; the "ready the moment you stop recording" + `Instant` tag → "generate automatically when you stop recording" + `Automatic`; "Cycle time & health scoring / …surface automation opportunities" → "Cycle time tracking / Measure step duration and variance across your entire workflow library." + `Included`.
+  - "Free to install", "No code required" and the ungated capture card were verified true and KEPT.
+- **Both tiles rendered and committed** (`PROMO_ONLY=large,marquee`), so the listing now has all three assets.
+- **Validation:** pixel-decoded, not trusted from the viewport — large **920×680**, marquee **1400×560**, both non-interlaced and non-blank (445 / 438 distinct sampled colours). Both viewed: copy legible, no overflow or bad wrapping despite two lengthened strings.
+- **Net effect:** every Chrome Web Store asset now claims only what a free installer actually receives. Three unmeasured speed/superlative claims ("Instant" ×2, "intelligence" framing) removed — the same defect class as the "~30s" stat deleted in 11d0f6d.
+
+---
+
 ## 2026-09-16 — MR-022 meta-review (Mode 4, `meta-coordinator`, NON-counting)
 
 - **Trigger:** cadence overdue — MR-021 closed at loop 8; loops 9–13 ran since (5 counted against a 2–3 loop cadence).

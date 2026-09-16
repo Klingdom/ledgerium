@@ -6,6 +6,31 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-16] - Every Store asset now claims only what a free install delivers
+
+**Why:** the two optional promo tiles still said "Understand everything", advertised health scoring and variant detection — both paid features — and used "Instant" twice as an unmeasured speed claim.
+
+### Fixed
+- Headlines now read "Document automatically." and "becomes a working SOP.", matching the tile already shipped.
+- Feature cards renamed to what a free installer actually gets: "Cycle time tracking" (timing and variance, not health scoring) and "Process maps" (diagrams, not variant detection).
+- "Instant SOP generation" became "Automatic SOP generation"; the "Instant" badge became "Automatic".
+- "Free to install" and "No code required" were checked and kept — both true.
+
+### Result
+- All three Store images now exist and are honest. Each was pixel-checked at its exact required size and viewed to confirm the new wording fits.
+
+## [2026-09-16] - Removed a committed login session from the repository
+
+**Why:** a Playwright session file with real cookies had been force-added past the rule that ignores it. The token was limited to a local address and expired in June, so the risk was the habit rather than this file.
+
+### Fixed
+- The file is no longer tracked. It stays on disk locally, and the screenshot script that uses it already logs in and recreates it when missing, so nothing breaks.
+
+### Noted, not changed
+- That same script carries the documented default demo password. It is deliberate and overridable, but any environment seeded with defaults has a publicly known login. Recorded as row 203.
+
+---
+
 ## [2026-09-16] - MR-022 meta-review (governance only, no product change)
 
 ### Found

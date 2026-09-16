@@ -135,7 +135,10 @@ html,body{
         <div class="brand-tagline">Workflow to SOP</div>
       </div>
     </div>
-    <div class="headline">Every process<br>you run becomes<br><span>intelligence.</span></div>
+    <!-- Row #194: "becomes intelligence" promised the gated intelligence
+         layer (plans.ts:123, Solo+). The free tier is NO_FEATURES
+         (plans.ts:76-83) — recording, SOPs, maps and cycle time only. -->
+    <div class="headline">Every process<br>you run becomes<br><span>a working SOP.</span></div>
     <div class="sub">Record any digital workflow once. Ledgerium builds your SOP, maps the process, and measures cycle time — automatically.</div>
     <div class="pill">
       <span class="pill-dot"></span>
@@ -164,8 +167,11 @@ html,body{
       </div>
       <div class="feat-body">
         <div class="feat-title">Auto-generated SOPs &amp; process maps</div>
-        <div class="feat-desc">Clean documentation and visual flow diagrams are ready the moment you stop recording. No manual work.</div>
-        <div class="feat-tag">Instant</div>
+        <!-- "ready the moment you stop" / "Instant" are unmeasured speed
+             claims; generation is an async pipeline with no measured latency,
+             same class as the "~30s" stat removed in 11d0f6d. -->
+        <div class="feat-desc">Clean documentation and visual flow diagrams generate automatically when you stop recording.</div>
+        <div class="feat-tag">Automatic</div>
       </div>
     </div>
 
@@ -174,9 +180,12 @@ html,body{
         <svg viewBox="0 0 18 18" fill="none"><path d="M2 14 L5.5 8.5 L9 11 L12.5 5.5 L16 8" stroke="#8b5cf6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="feat-body">
-        <div class="feat-title">Cycle time &amp; health scoring</div>
-        <div class="feat-desc">Measure step duration, detect variance, surface automation opportunities across your workflow library.</div>
-        <div class="feat-tag">Intelligence</div>
+        <!-- health scoring (plans.ts:91, Starter+) and automation scoring
+             (plans.ts:125, Solo+) are both gated; duration and variance are
+             not. Claim only what a free installer actually gets. -->
+        <div class="feat-title">Cycle time tracking</div>
+        <div class="feat-desc">Measure step duration and variance across your entire workflow library.</div>
+        <div class="feat-tag">Included</div>
       </div>
     </div>
   </div>

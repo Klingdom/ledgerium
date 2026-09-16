@@ -170,8 +170,15 @@ html,body{
       </div>
     </div>
 
-    <div class="headline">Record once.<br><span>Understand everything.</span></div>
-    <div class="sub">Turn any digital workflow into<br>structured process intelligence.</div>
+    <!--
+      Row #194: "Understand everything." and "process intelligence" both
+      promised the gated intelligence layer (plans.ts:123 — Solo+). The free
+      tier is NO_FEATURES (plans.ts:76-83), so a free installer gets recording,
+      SOPs, maps and cycle-time only. Wording now matches the shipped 440x280
+      tile and stays true after the reverse trial rolls down.
+    -->
+    <div class="headline">Record once.<br><span>Document automatically.</span></div>
+    <div class="sub">Turn any digital workflow into<br>a documented, measurable process.</div>
 
     <div class="features">
       <div class="feature">
@@ -188,7 +195,10 @@ html,body{
           <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="4" width="12" height="8" rx="2" stroke="#059669" stroke-width="1.5"/><path d="M5 8h6M5 10.5h4" stroke="#059669" stroke-width="1.5" stroke-linecap="round"/></svg>
         </div>
         <div class="feat-text">
-          <div class="feat-title">Instant SOP generation</div>
+          <!-- "Instant" was an unmeasured speed claim (row #194) — the
+               process-engine pipeline has no measured latency, same class as
+               the "~30s" stat removed from the marquee in 11d0f6d. -->
+          <div class="feat-title">Automatic SOP generation</div>
           <div class="feat-desc">Clean, shareable SOPs from every recorded session</div>
         </div>
       </div>
@@ -197,8 +207,10 @@ html,body{
           <svg viewBox="0 0 16 16" fill="none"><path d="M2 12 L5 8 L8 10 L11 5 L14 7" stroke="#8b5cf6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div class="feat-text">
-          <div class="feat-title">Cycle time intelligence</div>
-          <div class="feat-desc">Step-level timing, variance, and health scoring</div>
+          <!-- health scoring is gated to Starter+ (plans.ts:91); timing and
+               variance are ungated, so only those are claimed here. -->
+          <div class="feat-title">Cycle time tracking</div>
+          <div class="feat-desc">Step-level timing and variance across every run.</div>
         </div>
       </div>
       <div class="feature">
@@ -206,8 +218,10 @@ html,body{
           <svg viewBox="0 0 16 16" fill="none"><circle cx="5" cy="8" r="2" stroke="#3b82f6" stroke-width="1.5"/><circle cx="11" cy="4" r="2" stroke="#3b82f6" stroke-width="1.5"/><circle cx="11" cy="12" r="2" stroke="#3b82f6" stroke-width="1.5"/><path d="M7 7.5 L9.3 5.2M7 8.5 L9.3 10.8" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/></svg>
         </div>
         <div class="feat-text">
-          <div class="feat-title">Process maps &amp; variants</div>
-          <div class="feat-desc">Visual flow diagrams with variant detection</div>
+          <!-- variant detection is gated to Solo+ (plans.ts:126); the maps
+               themselves are ungated. -->
+          <div class="feat-title">Process maps</div>
+          <div class="feat-desc">Visual flow diagrams from every recorded run.</div>
         </div>
       </div>
     </div>
