@@ -25,7 +25,14 @@ const __dirname = dirname(__filename);
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
-const OUTPUT_DIR = 'C:\\Users\\philk\\Desktop\\ledgerium-chrome-store-assets';
+// Write into the repo next to the store screenshots, so the listing assets are
+// tracked and reproducible. Previously this pointed at a developer's Desktop,
+// which is why the required small tile was never committed (blocker B-1 in
+// docs/meta/CHROME_STORE_SUBMISSION_READINESS_001.md §6): running the script
+// left the PNG outside the repo. Override with PROMO_OUTPUT_DIR if needed.
+const OUTPUT_DIR =
+  process.env.PROMO_OUTPUT_DIR ??
+  resolve(__dirname, '..', '..', '..', 'docs', 'store-assets', 'chrome');
 const SAMPLES_DIR = resolve(__dirname, '..', 'public', 'samples');
 // MUST be 1. The Chrome Web Store validates promotional assets against EXACT
 // pixel dimensions (small tile 440x280, large 920x680, marquee 1400x560) and
@@ -72,13 +79,34 @@ function out(filename: string): string {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
+/**
+ * Render a subset, e.g. PROMO_ONLY=small. Only the 440x280 small tile is a
+ * required Store asset; the large and marquee tiles are optional and their
+ * copy has not been claim-reviewed (the large tile still says "Understand
+ * everything" and advertises plan-gated health scoring / variant detection to
+ * a free installer — see backlog #194). Rendering them is therefore opt-in,
+ * so an unreviewed asset cannot reach the listing by accident.
+ */
+function selectedPromos(): PromoSpec[] {
+  const only = process.env.PROMO_ONLY;
+  if (!only) return PROMOS;
+  const wanted = only.split(',').map((s) => s.trim()).filter(Boolean);
+  const selected = PROMOS.filter((p) => wanted.some((w) => p.outputPng.includes(w)));
+  if (selected.length === 0) {
+    throw new Error(
+      `PROMO_ONLY="${only}" matched no promo spec. Known: ${PROMOS.map((p) => p.outputPng).join(', ')}`,
+    );
+  }
+  return selected;
+}
+
 async function main(): Promise<void> {
   mkdirSync(OUTPUT_DIR, { recursive: true });
 
   const browser = await chromium.launch({ headless: true, args: ['--disable-gpu'] });
 
   try {
-    for (const spec of PROMOS) {
+    for (const spec of selectedPromos()) {
       console.log(`\n[promo] ${spec.outputPng} (${spec.width}×${spec.height})...`);
 
       const context = await browser.newContext({

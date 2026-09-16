@@ -8,7 +8,7 @@
 - **MR-021 done (2026-09-15).** Governance findings:
   - **Pipeline dry:** only #189 is unblocked.
   - **Cold-pool triage overdue:** MR-006 Change D triage is mandatory for DV2, WDC-002, MDR, WDC and PIB (last triaged May), and PRICING-001, SOPPM-001, TEAM-001 and PATHE-001 were never triaged (~240 items). Deferred pending a CEO ruling on P-1, pool-level archive-stale.
-  - **Chrome Web Store blocker B-1 (row 192):** the required 440×280 small promo tile PNG does not exist. It is the last non-human blocker for submission and is selectable next.
+  - **Chrome Web Store blocker B-1 (row 192): CLOSED 2026-09-16.** `docs/store-assets/chrome/promo-small-440x280.png` exists and was pixel-verified at exactly 440×280, non-blank. Root cause was an output path outside the repo, not a broken generator. **All remaining submission steps are human:** one real Chrome recording (Invariant rule 6) and the Dashboard upload. Optional larger tiles are held back pending a copy fix (row 194).
 - **Awaiting CEO:**
   - #190 MR-020 C1–C3;
   - #191 stacked Stripe card trial;

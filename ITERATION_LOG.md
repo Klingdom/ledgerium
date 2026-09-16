@@ -4,6 +4,24 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-16 (loop 9) — Chrome Store blocker B-1: the required promo tile now exists (Mode 1, coordinator-direct + `growth-strategist` claim review)
+
+- **Trigger:** CEO "proceed". **Candidate Selection:** `top-score` — row #192 (score 12), promoted at MR-021 from `CHROME_STORE_SUBMISSION_READINESS_001.md` §6. It was the last engineering blocker for Store submission; everything else open needs a CEO decision. Area: extension/store assets (D-1 clear).
+- **Root cause of B-1 (new finding):** the generator was not broken — `capture-promo-images.ts` wrote to a hardcoded `C:\Users\philk\Desktop\...` path. Running it produced the tile *outside the repo*, so it was never tracked and every later audit correctly reported "no PNG exists". Fixed: output defaults to `docs/store-assets/chrome/` (override with `PROMO_OUTPUT_DIR`), and `capture:promo` was added to package.json so the step is runnable rather than folkloric.
+- **Claim review before rendering (D-4 clause 1):** `growth-strategist` verified all four tile strings against source. 3 KEEP / 1 POLISH:
+  - KEEP "Free to install" (free tier costs nothing, signup touches no Stripe), "SOPs · Process maps · Cycle time intelligence" (all three are engine outputs and none is a gated `FeatureKey`), "Ledgerium Recorder / Workflow to SOP" (matches `manifest.json`).
+  - **POLISH "Record once. Understand everything." → "Record once. Document automatically."** Coordinator-verified: free tier is `...NO_FEATURES`, so after roll-down a free installer keeps recording and SOPs but loses health scores, bottleneck flags, automation scoring and variant detection. The original claim would have failed on day 15 — same class as the "~30s" removed in 11d0f6d. One string, on an asset that had never shipped.
+- **Scope discipline:** the OPTIONAL large tile still carries "Understand everything.", plus plan-gated "health scoring" / "variant detection" and an unmeasured "Instant SOP generation". Not fixed here (a separate copy job); instead rendering is now opt-in via `PROMO_ONLY`, so an unreviewed asset cannot reach the listing by accident. Logged as row **#194**. Marquee reviewed clean.
+- **Validation:**
+  - `PROMO_ONLY=small pnpm capture:promo` → `docs/store-assets/chrome/promo-small-440x280.png` (105,799 bytes).
+  - Independent pixel decode (not the viewport setting): **440×280 exactly**, non-interlaced, **434 distinct sampled colours** — covering both documented failure modes of this script family (the doubled `deviceScaleFactor` output and the solid-black blank render).
+  - Coordinator viewed the image: legible, correct tagline, no clipping.
+  - `pnpm --filter @ledgerium/extension-app typecheck` clean. No product code touched; workspace tests unaffected.
+- **Store status after this loop:** the remaining submission steps are human — a real Chrome recording (Invariant rule 6) and the Dashboard upload itself.
+- **Follow-ups:** #194 (optional tiles' copy). Open and CEO-blocked: #190, #191, #193.
+
+---
+
 ## 2026-09-15 — MR-021 meta-review (Mode 4, `meta-coordinator`, NON-counting)
 
 - **Trigger:** standard cadence — MR-020 followed by loops 6, 7, 8.

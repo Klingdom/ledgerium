@@ -6,6 +6,24 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-16] - The Chrome Web Store promo tile finally exists (blocker B-1)
+
+**Why:** the Store requires a 440×280 tile, and the listing could not be completed without one. Three audits reported it missing.
+
+### Root cause
+- The generator wasn't broken: it saved to a developer's Desktop, outside the repo, so the file was never tracked. Output now goes to `docs/store-assets/chrome/`, and `pnpm capture:promo` makes the step runnable.
+
+### Fixed before shipping
+- The tile said "Record once. Understand everything." The free tier has no paid features, so after the trial ends that promise breaks. It now reads "Record once. Document automatically.", which matches what every tier delivers. The other three strings were verified true.
+
+### Guard added
+- The optional larger tiles still carry claims the free product doesn't deliver, so rendering them is now opt-in and tracked as row 194. They cannot reach the listing unreviewed.
+
+### Validation
+- The PNG's pixels were decoded, not trusted: exactly 440×280, not blank, not interlaced — the two ways this script has failed before. Typecheck clean; no product code touched.
+
+---
+
 ## [2026-09-15] - MR-021 meta-review (governance only, no product change)
 
 ### Found

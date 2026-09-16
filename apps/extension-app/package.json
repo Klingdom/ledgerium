@@ -10,7 +10,8 @@
     "test": "vitest run --passWithNoTests",
     "test:e2e": "playwright test",
     "test:e2e:real": "playwright test --config=playwright.real-ext.config.ts",
-    "capture:store-screenshots": "tsx scripts/capture-chrome-store-screenshots.ts"
+    "capture:store-screenshots": "tsx scripts/capture-chrome-store-screenshots.ts",
+    "capture:promo": "tsx scripts/capture-promo-images.ts"
   },
   "dependencies": {
     "@ledgerium/normalization-engine": "workspace:*",
