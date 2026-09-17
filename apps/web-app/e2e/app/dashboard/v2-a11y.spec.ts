@@ -330,7 +330,15 @@ test('table has correct semantic structure: thead, tbody, th[scope=col] headers'
     void route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ workflows: [], stats: { portfolioHealthScore: 0, insightChips: [], topInsights: [] } }),
+      // Row #200 (loop 19): this seeded an EMPTY library, so the shell rendered
+      // FirstRunTutorial instead of the toolbar + list and the table never
+      // existed — the test was asserting table semantics on a page that has no
+      // table. Seed rows so the table actually renders.
+      body: JSON.stringify({
+        // This spec's makeWorkflow takes positional args: (id, title, healthScore, opportunityTag).
+        workflows: [makeWorkflow('wf-1', 'Semantic Table Workflow', 70, 'monitor')],
+        stats: { portfolioHealthScore: 70, insightChips: [], topInsights: [] },
+      }),
     });
   });
 
@@ -378,8 +386,12 @@ test('portfolio health score has non-color semantic: aria-label includes "poor/f
 
   const ariaLabel = await scoreContainer.getAttribute('aria-label');
   expect(ariaLabel).toBeTruthy();
-  // Should match pattern "Portfolio health: [N], [poor|fair|good]"
-  expect(ariaLabel).toMatch(/portfolio health:\s*\d+,\s*(poor|fair|good)/i);
+  // Row #200 (loop 19): this required a DIGIT plus poor/fair/good, so it could
+  // never pass. The header deliberately renders a verdict word and no number —
+  // the score appears once, in the HealthGauge (iter-024 "kill the triple-88") —
+  // and the band vocabulary is Good / Fair / Needs attention. The PRD §10 intent
+  // (band conveyed non-visually, not by colour alone) is still asserted here.
+  expect(ariaLabel).toMatch(/portfolio health:\s*(good|fair|needs attention)/i);
 });
 
 test('time range selector is keyboard-accessible native <select>', async ({ page }) => {
@@ -407,9 +419,14 @@ test('insight chip has correct ARIA: role=button, aria-pressed, aria-label with 
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        workflows: [],
+        // Row #200 (loop 19): this seeded an EMPTY library, so the shell took the
+        // `isFirstRun` branch and rendered FirstRunTutorial INSTEAD of the toolbar,
+        // list and InsightsStrip — the chip under test never mounted, and the
+        // "Process insights" region was never found. Seed a workflow so the strip
+        // renders. (makeWorkflow here is positional: id, title, healthScore, tag.)
+        workflows: [makeWorkflow('wf-chip', 'Chip Fixture Workflow', 55, 'monitor')],
         stats: {
-          portfolioHealthScore: 0,
+          portfolioHealthScore: 55,
           insightChips: [
             {
               id: 'chip-test',

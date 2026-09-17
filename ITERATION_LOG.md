@@ -4,6 +4,21 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-17 (loop 19) — `v2-a11y`: two real accessibility defects, three tests left red on purpose (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO autonomous-run directive. **Selection:** #200's next-largest cluster. **This slice broke the pattern of loops 12 and 18** — those were entirely stale tests; here axe was reporting genuine WCAG failures, so I treated the failures as suspects, not assumptions.
+- **Two real defects fixed:**
+  - **`landmark-unique` (moderate, 3 states).** The shell mounts `PortfolioTimestudyBand` **twice** — a "top" and "bottom" band bookending the list (`DashboardV2Shell.tsx:1262,1297`, both gated on `allWorkflows.length > 0`, so they co-render) — and both emitted `aria-label="Portfolio timestudy summary"`. Two landmarks, same role, same accessible name. Fixed by deriving the label from the `position` prop the component already receives. A screen-reader user now gets two distinguishable landmarks instead of a duplicate.
+  - **`color-contrast` (serious, error state).** `LensSwitcher`'s caption aside used `--content-tertiary` — `#64748B` on `#0D1117` in the **default dark theme** (`layout.tsx:58`), ≈4.4:1 against the 4.5:1 AA floor. Promoted that span to `--content-secondary` (≈7:1), matching the sibling text in the same paragraph.
+- **Three stale items fixed:** two fixtures seeded `workflows: []` and therefore hit the `isFirstRun` → `FirstRunTutorial` swap, so the table and the insights strip never mounted; and the health-band regex required a digit plus the retired "poor/fair/good" vocabulary when the header renders a verdict word only (Good / Fair / Needs attention, iter-024).
+- **Three tests deliberately left RED.** The remaining `color-contrast` failures span **~11 nodes** — `SignalFactsRow`, `OpportunityBar`, both timestudy bands, plus the red verdict word — i.e. the `--content-tertiary` token itself, used as text in **773 places** app-wide. That is a design decision with global visual consequences, recorded as **#205** (token) and **#206** (verdict word), not something to take autonomously. I did **not** raise the axe ratchet baselines to manufacture green; the helper's own message says to fix the violation or justify a raise in review, and faking it would destroy the ratchet's purpose.
+- **Consequently `v2-a11y` is NOT added to the CI gate** — my widening rule says a spec joins only when green, never hopefully.
+- **Method note:** the failure summary omitted axe's node targets, so I ran a throwaway probe spec to dump rule ids, targets and HTML, then deleted it. That is what identified both defects precisely; guessing from the summary line would have produced the wrong fix.
+- **Two self-inflicted errors, recorded:** my first probe fixture used object-args while this spec's `makeWorkflow` is positional `(id, title, healthScore, opportunityTag)` — the probe rendered nothing; and I later repeated the same mistake in a real fixture edit, caught by typecheck before any test run.
+- **Validation:** `v2-a11y` **7 failed → 3 failed / 11 passed**; `pnpm typecheck` clean across all 11 packages/apps; workspace `pnpm test` **4734/4734** (the `aria-label` and colour changes broke no unit test).
+
+---
+
 ## 2026-09-16 (loop 18) — `v2-states` triaged to green and added to the CI gate (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO autonomous-run directive. **Selection:** #200's largest cluster (8 of 11 failing). Area is QA again — MR-022 said loop 14 was the pivot, and loops 14–17 were store-assets, security, dashboard and copy, so returning here is within the rolling window rather than a fourth consecutive QA loop.

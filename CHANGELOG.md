@@ -6,6 +6,25 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-17] - Two real accessibility defects fixed on the dashboard
+
+**Why:** unlike the previous rounds of dead tests, these failures were genuine. The accessibility checker was reporting actual problems, not outdated expectations.
+
+### Fixed
+- **Duplicate landmark.** The portfolio timestudy summary renders twice, above and below the list, and both copies announced themselves with the same name — so screen-reader users navigating by landmark saw two identical entries. Each now says whether it is the top or bottom band.
+- **Text too faint to read.** A caption on the dashboard used the tertiary grey, which falls just under the accessibility minimum for contrast on the dark theme the app ships with. It now uses the same colour as the sentence it sits in.
+
+### Also fixed
+- Three tests that could never have passed: two set up an empty library, so the page they were inspecting was replaced by the first-run tutorial, and one demanded a score number the header deliberately stopped showing.
+
+### Left failing on purpose
+- Three checks still fail, on about eleven pieces of faint text across the summary bands and the health verdict. That is one colour decision affecting 773 places in the app, so it needs a design call rather than a quiet change — recorded as rows 205 and 206. I did not silence the checks to make the suite look green.
+
+### Validation
+- 7 failing → 3; typecheck clean; full suite 4734 passing. This spec is deliberately not added to the CI gate until it is genuinely green.
+
+---
+
 ## [2026-09-16] - Eight more dead dashboard tests brought back, and now guarded
 
 **Why:** these tests covered the dashboard's error, empty, sparse, no-results and sorting states, and every one had been failing against untouched code because nothing ran them while the interface moved.

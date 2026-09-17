@@ -97,7 +97,13 @@ export default function PortfolioTimestudyBand({
   // scope line — never zero-filled tiles that look like real measurements.
   if (workflowCount === 0) {
     return (
-      <section aria-label="Portfolio timestudy summary" className={`${edgeClass} my-ds-3`}>
+      // Row #200 (loop 19): this band renders TWICE — the shell mounts a "top"
+      // and a "bottom" copy bookending the list whenever any workflow exists
+      // (DashboardV2Shell.tsx:1262 and :1297). Both emitted the identical
+      // aria-label, so two landmarks shared a role AND an accessible name,
+      // which axe flags as `landmark-unique`. The label is now derived from the
+      // position prop the component already receives.
+      <section aria-label={`Portfolio timestudy summary (${position})`} className={`${edgeClass} my-ds-3`}>
         <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--content-tertiary)]">
           Portfolio Timestudy
         </p>
@@ -109,7 +115,9 @@ export default function PortfolioTimestudyBand({
   }
 
   return (
-    <section aria-label="Portfolio timestudy summary" className={`${edgeClass} my-ds-3`}>
+    // Row #200 (loop 19): distinct accessible name per position — see the
+    // comment on the empty-scope branch above.
+    <section aria-label={`Portfolio timestudy summary (${position})`} className={`${edgeClass} my-ds-3`}>
       <p className="mb-ds-2 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
         <span className="text-[11px] font-semibold uppercase tracking-widest text-[var(--content-tertiary)]">
           Portfolio Timestudy

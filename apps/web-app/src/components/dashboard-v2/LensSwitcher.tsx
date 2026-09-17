@@ -139,7 +139,14 @@ export default function LensSwitcher({ activeLens, onLensChange }: LensSwitcherP
       {/* Caption: honest active-lens description + non-destructive framing. */}
       <p className="px-ds-1 text-[12px] leading-[1.4] text-[var(--content-secondary)]">
         {activeDescription}{' '}
-        <span className="text-[var(--content-tertiary)]">
+        {/* Row #200 (loop 19): this was --content-tertiary, which in the default
+            dark theme is #64748B on #0D1117 — about 4.4:1, under the WCAG 2 AA
+            4.5:1 minimum, and axe flagged it SERIOUS on the error state. Promoted
+            to --content-secondary (#94A3B8, ~7:1), which is what the rest of this
+            same paragraph already uses. The wider question — tertiary fails AA
+            anywhere it carries real text, 773 usages app-wide — is row #205, not
+            something to change globally inside this loop. */}
+        <span className="text-[var(--content-secondary)]">
           · Two views — switch anytime.
         </span>
       </p>
