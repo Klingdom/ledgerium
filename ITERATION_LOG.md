@@ -4,6 +4,26 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-16 (loop 18) — `v2-states` triaged to green and added to the CI gate (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO autonomous-run directive. **Selection:** #200's largest cluster (8 of 11 failing). Area is QA again — MR-022 said loop 14 was the pivot, and loops 14–17 were store-assets, security, dashboard and copy, so returning here is within the rolling window rather than a fourth consecutive QA loop.
+- **All 8 diagnosed one by one against the current source — every one a stale test, none a product regression:**
+  - `:84` / `:98` error copy → "Could not load workflows — check your connection and retry." (the old sentence never shipped).
+  - `:132` empty state → the shell short-circuits to `FirstRunTutorial` (`isFirstRun`), so `WorkflowList`'s empty branch never paints; re-pointed at "No workflows yet…" + "Install the extension to start →".
+  - `:192` default sort → asserted health-score ascending; the real default is `date_recorded` desc, so the "worst first" premise was false. Re-scoped to assert the row set rather than a health ranking the default does not guarantee.
+  - `:224` sort toggle → `aria-sort` lives on the `<th>`, not the button, **and** a new sort field starts ascending, so descending needs a second click (same correction as loop 12's happy-path fix).
+  - `:256` sparse → notice rewritten to lead with the reward ("Open your first workflow to see its process map…").
+  - `:292` no-results → the opportunity filter now lives behind `UnifiedToolbar`'s "Toggle filters"; the panel must be opened before `selectOption`. Copy assertions were already correct.
+  - `:364` header mean → asserted the score `80` in the header aria-label, contradicting iter-024's deliberate "verdict word here, number only in the gauge" decision.
+- **One genuine fixture bug (not a copy drift):** the retry test keyed its route mock on `callCount === 1`, assuming exactly one request before the retry click. The mount effect can fire more than once under `next dev` (StrictMode), so the extra request consumed the success branch *during initial load* — `isError` cleared, `listState` became `'empty'`, and the shell swapped in `FirstRunTutorial`, removing the error text and the button the test waited for. Now gated on an explicit `retryClicked` flag, so the fixture no longer depends on fetch counts.
+- **Two vacuous assertions found and fixed:** the ready-state test asserted retired copy was *not* visible — true forever, so it could never fail. Re-pointed at the strings the component actually renders.
+- **Gate widened in the same commit, per my own rule:** `e2e-web-app.yml` now runs `v2-happy-path` + `v2-plan-gating` + `v2-states`.
+- **Validation:** `v2-states` **12/12**; **widened gate 32 passed as a single invocation** (the specs share a seeded DB and auth state, so passing individually is not the same as passing together); workspace `pnpm test` **4734/4734**; `pnpm typecheck` clean across all 11 packages/apps.
+- **Process note (mine, repeated):** I twice ran greps with repo-relative paths after the shell's cwd had moved, once with stderr silenced — the first residual sweep reported "0 references" and was worthless. Absolute paths and visible stderr from here.
+- **#200 now ~34 remaining** (was 45; 3 cleared at loop 12, 8 here): `v2-a11y` 9/13, `public/nav`, `public/pricing`, `api/*`.
+
+---
+
 ## 2026-09-16 (loop 17) — Four misleading dashboard strings, and the copies hiding behind them (Mode 1, coordinator-direct + `growth-strategist`)
 
 - **Trigger:** CEO autonomous-run directive. **Selection:** #197 (score 9), the strongest unblocked item.

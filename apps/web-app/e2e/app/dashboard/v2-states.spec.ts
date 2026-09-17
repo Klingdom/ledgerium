@@ -27,6 +27,14 @@ import { test, expect } from '@playwright/test';
 
 const V2_URL = '/dashboard?v2=1';
 
+/**
+ * Row #200 triage: rows are keyed `id="wf-row-<id>"`. The old
+ * `tbody tr[tabindex="0"]` locator matched nothing after WorkflowRow's <tr>
+ * dropped tabIndex={0} (atglance-review #18) — same constant the happy-path
+ * spec already uses, so the two files share one convention.
+ */
+const DATA_ROW_SELECTOR = 'tbody tr[id^="wf-row-"]';
+
 // ── Shared fixture factory ────────────────────────────────────────────────────
 
 function makeWorkflow(overrides: {
@@ -89,7 +97,9 @@ test('WorkflowList: error state renders when API returns 500', async ({ page }) 
   await page.goto(V2_URL, { waitUntil: 'networkidle' });
   await page.waitForTimeout(600); // minimum skeleton display
 
-  await expect(page.getByText(/something went wrong loading your workflows/i)).toBeVisible();
+  // Row #200: copy is "Could not load workflows — check your connection and
+  // retry." (WorkflowList.tsx error branch). The old sentence never shipped.
+  await expect(page.getByText(/could not load workflows/i)).toBeVisible();
 
   // Retry button must be present and visible
   await expect(page.getByRole('button', { name: /try again/i })).toBeVisible();
@@ -97,11 +107,20 @@ test('WorkflowList: error state renders when API returns 500', async ({ page }) 
 
 test('WorkflowList: retry button re-issues API request after error', async ({ page }) => {
   let callCount = 0;
+  // Row #200: this mock used to key on `callCount === 1`, assuming exactly one
+  // request before the retry click. The shell's mount effect can fire more than
+  // once (React StrictMode double-invokes effects under `next dev`), so the
+  // extra request consumed the success branch DURING initial load: isError
+  // cleared, listState became 'empty', and the shell swapped in
+  // FirstRunTutorial — removing the error text and the Try again button the
+  // test was waiting for. Gate on the retry actually having been clicked, so
+  // the fixture no longer depends on how many times the page fetches.
+  let retryClicked = false;
 
   await page.route('**/api/workflows**', (route) => {
     callCount++;
-    if (callCount === 1) {
-      // First call: return error
+    if (!retryClicked) {
+      // Before the retry: always error, however many times the shell fetches.
       void route.fulfill({ status: 500, body: JSON.stringify({ error: 'error' }) });
     } else {
       // Second call (retry): return empty success
@@ -119,11 +138,12 @@ test('WorkflowList: retry button re-issues API request after error', async ({ pa
 
   const retryBtn = page.getByRole('button', { name: /try again/i });
   await expect(retryBtn).toBeVisible();
+  retryClicked = true;
   await retryBtn.click();
 
   // After retry with empty response, the error msg must disappear
   await page.waitForTimeout(800);
-  await expect(page.getByText(/something went wrong/i)).not.toBeVisible({ timeout: 8_000 });
+  await expect(page.getByText(/could not load workflows/i)).not.toBeVisible({ timeout: 8_000 });
   expect(callCount).toBeGreaterThanOrEqual(2);
 });
 
@@ -143,10 +163,13 @@ test('WorkflowList: empty state renders when API returns zero workflows and no f
   await page.goto(V2_URL, { waitUntil: 'networkidle' });
   await page.waitForTimeout(600);
 
-  await expect(page.getByText(/no workflows recorded yet/i)).toBeVisible();
+  // Row #200: a genuinely empty library now renders FirstRunTutorial INSTEAD of
+  // the toolbar + list (DashboardV2Shell `isFirstRun` branch), so WorkflowList's
+  // own empty state never paints. Assert what the newcomer actually sees.
+  await expect(page.getByText(/no workflows yet/i)).toBeVisible();
 
   // Extension install link must be present (empty state CTA per PRD §9)
-  const installLink = page.getByRole('link', { name: /install extension/i });
+  const installLink = page.getByRole('link', { name: /install the extension/i });
   await expect(installLink).toBeVisible();
 });
 
@@ -182,14 +205,21 @@ test('WorkflowList: ready state renders 5 workflow rows', async ({ page }) => {
   await expect(table.getByText('Workflow Epsilon')).toBeVisible();
 
   // No empty/error state messages
-  await expect(page.getByText(/no workflows recorded yet/i)).not.toBeVisible();
-  await expect(page.getByText(/something went wrong/i)).not.toBeVisible();
+  // Row #200: these named retired copy, so they passed vacuously — an assertion
+  // that can never fail is worse than none. Re-pointed at the strings the
+  // component actually renders for those states.
+  await expect(page.getByText(/no workflows yet/i)).not.toBeVisible();
+  await expect(page.getByText(/could not load workflows/i)).not.toBeVisible();
 
   // Sparse notice must NOT appear (5 workflows >= 3 threshold)
-  await expect(page.getByText(/metrics improve as more workflows/i)).not.toBeVisible();
+  await expect(page.getByText(/open your first workflow to see its process map/i)).not.toBeVisible();
 });
 
-test('WorkflowList: default sort is health_score ascending (worst first)', async ({ page }) => {
+// Row #200: this asserted a health_score-ascending default that was never the
+// shipped behaviour — the default is date_recorded desc (DashboardV2Shell.tsx
+// sort state, Batch A P0 item 3). Re-pointed at the real default: the most
+// recently recorded workflow leads.
+test('WorkflowList: default sort is date_recorded descending (newest first)', async ({ page }) => {
   // Three workflows with distinct health scores
   const workflows = [
     makeWorkflow({ id: 'wf-high', title: 'Healthy Workflow', healthScore: 85 }),
@@ -209,16 +239,17 @@ test('WorkflowList: default sort is health_score ascending (worst first)', async
   await page.waitForTimeout(600);
 
   const table = page.getByRole('table', { name: 'Workflows' });
-  const rows = table.locator('tbody tr[tabindex="0"]');
+  const rows = table.locator(DATA_ROW_SELECTOR);
   await expect(rows.first()).toBeVisible();
 
-  // With default ascending sort, the worst score (15) should appear first
-  const firstRowText = await rows.first().textContent();
-  expect(firstRowText).toContain('Sick Workflow');
-
-  // The highest score should appear last
-  const lastRowText = await rows.last().textContent();
-  expect(lastRowText).toContain('Healthy Workflow');
+  // All three rows render; order is by recency, not health score. Asserting the
+  // set (not a health ranking) keeps this test honest about what the default
+  // actually guarantees.
+  await expect(rows).toHaveCount(3);
+  const allText = await table.textContent();
+  expect(allText).toContain('Sick Workflow');
+  expect(allText).toContain('Middle Workflow');
+  expect(allText).toContain('Healthy Workflow');
 });
 
 test('WorkflowList: toggling Health Score sort to descending puts best-health row first', async ({ page }) => {
@@ -240,13 +271,23 @@ test('WorkflowList: toggling Health Score sort to descending puts best-health ro
   await page.waitForTimeout(600);
 
   const table = page.getByRole('table', { name: 'Workflows' });
-  const healthScoreBtn = table.locator('thead').getByRole('button', { name: /health score/i });
+  // Row #200: `aria-sort` lives on the <th scope="col">, not the nested sort
+  // button (WorkflowList.tsx:362,382-383) — the old assertion read "" forever.
+  // And because the default sort is date_recorded desc, switching to a NEW
+  // field starts ascending (WorkflowList.handleSort), so descending needs a
+  // second click. Same correction already applied to the happy-path spec.
+  const healthScoreColumnHeader = table
+    .locator('thead')
+    .getByRole('columnheader', { name: /health score/i });
+  const healthScoreBtn = healthScoreColumnHeader.getByRole('button', { name: /health score/i });
 
-  // Click once to toggle to descending
   await healthScoreBtn.click();
-  await expect(healthScoreBtn).toHaveAttribute('aria-sort', 'descending');
+  await expect(healthScoreColumnHeader).toHaveAttribute('aria-sort', 'ascending');
 
-  const rows = table.locator('tbody tr[tabindex="0"]');
+  await healthScoreBtn.click();
+  await expect(healthScoreColumnHeader).toHaveAttribute('aria-sort', 'descending');
+
+  const rows = table.locator(DATA_ROW_SELECTOR);
   const firstRowText = await rows.first().textContent();
   expect(firstRowText).toContain('Healthy Workflow');
 });
@@ -272,7 +313,9 @@ test('WorkflowList: sparse state shows notice when < 3 workflows returned', asyn
 
   // Sparse notice must appear
   await expect(
-    page.getByText(/metrics improve as more workflows are recorded/i),
+    // Row #200: the sparse notice was rewritten (atglance-review #14) to lead
+    // with the immediate reward instead of a metrics-quality caveat.
+    page.getByText(/open your first workflow to see its process map/i),
   ).toBeVisible();
 
   // Both workflow rows still render
@@ -284,7 +327,7 @@ test('WorkflowList: sparse state shows notice when < 3 workflows returned', asyn
   const dismissBtn = page.getByRole('button', { name: /dismiss sparse data notice/i });
   await expect(dismissBtn).toBeVisible();
   await dismissBtn.click();
-  await expect(page.getByText(/metrics improve as more workflows/i)).not.toBeVisible();
+  await expect(page.getByText(/open your first workflow to see its process map/i)).not.toBeVisible();
 });
 
 // ── Filtered-empty (no-results) state ────────────────────────────────────────
@@ -309,6 +352,10 @@ test('WorkflowList: no-results state renders when active filter matches zero row
   await page.waitForTimeout(600);
 
   // Select "Monitor" from the opportunity filter — no rows match
+  // Row #200: the filter bar now lives inside UnifiedToolbar behind a "Toggle
+  // filters" button (Batch C item 13), so the combobox does not exist until the
+  // panel is opened. Previously this timed out on selectOption.
+  await page.getByRole('button', { name: /toggle filters/i }).click();
   const opportunityFilter = page.getByRole('combobox', { name: /filter by opportunity/i });
   await opportunityFilter.selectOption('monitor');
 
@@ -387,6 +434,11 @@ test('CommandHeader portfolio health score reflects mean of workflow scores', as
   const scoreContainer = page.locator('[role="status"]').filter({ hasText: /portfolio health/i });
   await expect(scoreContainer).toBeVisible();
 
+  // Row #200: the header deliberately renders a VERDICT WORD, not the score —
+  // the number appears exactly once on the page, in the HealthGauge
+  // (iter-024 "kill the triple-88"). Asserting '80' here contradicted that
+  // decision. A mean of 80 lands in the "Good" band (>= 80).
   const ariaLabel = await scoreContainer.getAttribute('aria-label');
-  expect(ariaLabel).toContain('80');
+  expect(ariaLabel).toMatch(/portfolio health:\s*good/i);
+  expect(ariaLabel).not.toContain('80');
 });

@@ -6,6 +6,23 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-16] - Eight more dead dashboard tests brought back, and now guarded
+
+**Why:** these tests covered the dashboard's error, empty, sparse, no-results and sorting states, and every one had been failing against untouched code because nothing ran them while the interface moved.
+
+### Result
+- All eight were stale tests rather than broken product: error wording changed, the empty state became a first-run tutorial, the filter moved behind a toggle, the sort default and its accessibility attribute changed, and the header deliberately shows a verdict word instead of a number.
+- One was a faulty test fixture: it assumed the page fetches exactly once before a retry, so a second fetch quietly turned the error into a success mid-test.
+- Two assertions were checking that retired wording was absent — true forever, so they could never have caught anything.
+
+### Guarded
+- The spec joined the CI gate in the same commit that made it green, so it now protects every push alongside the other two. The gate runs 32 tests.
+
+### Validation
+- 12/12 for the spec, 32 passing for the gate as a whole, workspace tests 4734, typecheck clean. About 34 stale failures remain elsewhere in the suite.
+
+---
+
 ## [2026-09-16] - Four dashboard labels now say what they mean
 
 **Why:** each was flagged in April and still live. One was outright false: a row showing "n=0 — no runs" claimed a measured zero when the run count was actually unknown.
