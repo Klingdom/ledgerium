@@ -6,6 +6,22 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-17] - The extension's real-browser test now runs automatically
+
+**Why:** the rule book calls the real-Chrome test the gate that must pass before any extension change ships, because twice before a change passed every other check and still broke recording. That gate was never wired into CI — it only ran when someone remembered to run it by hand.
+
+### Added
+- A blocking CI job that builds the extension and runs the real-Chrome test suite on every push and pull request to main, with a virtual display (the test must run a visible browser to load the extension).
+- It cannot be skipped or downgraded quietly: it is not marked "allowed to fail", and the comment above it explains why, naming the two past breakages.
+
+### Checked first
+- The real test suite passes today: 6 of 6 in a real Chrome session. No extension code has changed since 15 September, so that is a clean baseline.
+
+### Honest limitation
+- This job has never run on GitHub's own machines. It passed locally on Windows, which uses a different setup from the Linux runners. Its first run in CI is its real verification.
+
+---
+
 ## [2026-09-17] - One name for workflows whose runs vary a lot
 
 **Why:** the dashboard called the same signal "Inconsistent" in the health filter, "High variation" on row badges, "high execution variance" in the insight chip and "High-Variance Workflows" on a summary tile. Four names for one measurement made it look like four different things.

@@ -4,6 +4,22 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-17 (loop 24) — The extension's real-Chrome gate now runs in CI (Mode 1, `devops-engineer`)
+
+- **Trigger:** CEO "continue".
+- **Candidate Selection:** **not** an inferred drift ack. MR-024 ruled that inferring `reverse-portfolio-drift: user-ack` from "continue" is not consent, and I had already applied that to myself. So instead of re-using the inference, I selected work that needs no ack: the extension surface, which is where the drift is. No backlog row existed — the shipping product with an Extension Reliability Invariant had **zero** open rows — so this loop created and closed **#213**.
+- **Evidence first.** Ran the real-Chrome harness locally before deciding anything: **6/6 passed in 29s** (`pnpm test:e2e:real`). Confirmed with `git log` that no extension or engine source has changed since **7436b3e (loop 8, 2026-09-15)**, so that pass is a clean baseline, not a rescue.
+- **The defect found:** `CLAUDE.md` calls the real-Chrome harness "the validation gate of record", but `.github/workflows/e2e-extension.yml` ran only `test:e2e` — the **static** harness with `chrome.*` mocked. The gate that exists specifically because unit tests and static E2E did NOT catch the iter-097 and iter-099 capture breaks was itself never enforced by CI; it ran only when someone remembered.
+- **Change (delegated to `devops-engineer` per the rubric — infrastructure wiring; 1 file, +85/−0):** new blocking `real-extension` job in the same workflow, mirroring the static job's setup, plus an explicit `xvfb` install (the harness needs `headless: false` for MV3 loading, so a Linux runner needs a virtual display), `xvfb-run -a pnpm --filter extension-app test:e2e:real`, and a failure-only report upload under a separate artifact name.
+- **Coordinator verification of the delegate's work:** `git diff --stat` = 1 file; YAML parses (`yaml.safe_load`) with jobs `e2e` + `real-extension`; `grep continue-on-error` returns **one** hit and it is inside the comment forbidding it, not a key; Build-extension step present (the harness reads `dist/`); action and Node/pnpm versions match the existing job; artifact name distinct so it cannot collide.
+- **Honest limitation, not smoothed over:** this job has never executed on a GitHub runner. It passed locally on Windows with native headed Chrome — a different path from Linux + `xvfb-run`. Its first CI run IS its verification. Same posture as loop 13, which added the web gate the same way. If it fails on environment grounds, the fix is the display setup, not the harness.
+- **D-1 drift, stated precisely:** this does **not** literally clear the counter. The rule counts touches to `apps/extension-app/`, `segmentation-engine`, `normalization-engine`, `policy-engine`; a workflow file is none of those. In substance it is extension work, and it makes the extension's own gate enforceable — but by the letter, extension **source** still has not been touched since loop 8. I am recording it as uncleared rather than claiming credit.
+- **Validation:** real harness **6/6** locally; YAML parsed; no product code, tests or configs touched (`e2e-extension.yml` only), so workspace **4742** and web-app **3030** are unchanged by construction and were not re-run.
+- **Follow-ups:** 1 created and closed (#213). `density-response`: not applicable.
+- **Meta-review cadence:** 1 loop since MR-024.
+
+---
+
 ## 2026-09-17 — MR-024 meta-review (Mode 4, `meta-coordinator`, NON-counting)
 
 - **Trigger:** base cadence — loops 21, 22, 23 since MR-023. First on-time meta-review in three cycles.

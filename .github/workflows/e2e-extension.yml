@@ -60,3 +60,88 @@ jobs:
           name: playwright-report
           path: apps/extension-app/playwright-report/
           retention-days: 7
+
+  # --------------------------------------------------------------------------
+  # real-extension: the validation gate of record for the capture pipeline.
+  #
+  # CLAUDE.md § Extension Reliability Invariant designates
+  # playwright.real-ext.config.ts + e2e/real-extension/sidepanel-real.spec.ts
+  # as the gate that MUST pass before any extension change ships. The job
+  # above only runs the STATIC harness (chrome.* mocked) — it has repeatedly
+  # failed to catch real capture-pipeline breaks:
+  #   - iter 097: content_scripts removal from manifest.json (recommended by
+  #     a Chrome Web Store reviewer as "redundant") broke capture entirely.
+  #     Unit tests, static E2E, and typecheck all passed.
+  #   - iter 099: a pageTitle plumbing change (eventById Map + toLiveStep
+  #     2nd-param signature) broke capture in a real session immediately
+  #     after unit tests — including the I1 convergence invariant — passed.
+  # Only real-Chrome testing (chromium.launchPersistentContext + a real
+  # unpacked MV3 load) catches these. This job runs that harness on every
+  # push/PR to main so the gate is enforced automatically instead of relying
+  # on someone remembering to run `test:e2e:real` by hand.
+  #
+  # This job is deliberately NOT continue-on-error and does NOT run headless.
+  # headless: false is required for MV3 extension loading (see config file
+  # header). Do not "optimise" this job by weakening it to headless or making
+  # it non-blocking — that defeats its entire purpose. The config file's own
+  # comment says "NOT CI-on-every-PR"; that guidance predates the Extension
+  # Reliability Invariant being written into CLAUDE.md and is superseded by
+  # it — the Invariant explicitly requires this harness to gate every change.
+  # --------------------------------------------------------------------------
+  real-extension:
+    name: Playwright Real-Extension E2E (extension-app)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright Chromium browser
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm --filter extension-app exec playwright install chromium --with-deps
+
+      # `playwright install --with-deps` installs the shared libraries the
+      # browser binary needs; it does not reliably guarantee the `xvfb-run`
+      # wrapper script is present. This harness launches with headless: false
+      # (required for MV3 extension loading), so a virtual display is
+      # mandatory on a Linux runner. Installed explicitly here rather than
+      # assumed, since it is uncertain whether `--with-deps` or the
+      # ubuntu-latest base image already provides it.
+      - name: Install xvfb
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+
+      - name: Build extension
+        run: pnpm --filter extension-app build
+
+      - name: Run real-extension E2E tests
+        run: xvfb-run -a pnpm --filter extension-app test:e2e:real
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-real-extension
+          path: apps/extension-app/playwright-report/
+          retention-days: 7
