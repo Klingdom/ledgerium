@@ -237,6 +237,9 @@ describe('applyFilters', () => {
       metricsV2: {
         ...makeWorkflow().metricsV2,
         variationScore: 0.85,
+        // Row #209: label must match the score (engine sets 'high' at >= 0.67);
+        // the helper default 'low' with 0.85 was a state the engine never emits.
+        variationLabel: 'high',
       },
     }),
   ];

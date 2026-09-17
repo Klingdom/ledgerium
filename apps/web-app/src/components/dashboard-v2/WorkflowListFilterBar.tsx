@@ -11,7 +11,7 @@
  *  - Active-filter chip display with individual clear buttons
  *
  * "Needs attention" filter definition (PRD §D-E5, v1):
- *   health < 60 OR variationLabel === 'high'
+ *   health < 60 OR isHighVariation() (row #209)
  *   Note: delta ≤ −10 per PRD confirmed definition is excluded from v1 —
  *   per-workflow delta is not available in MVP. Tracked as a follow-up.
  *
@@ -49,8 +49,10 @@ const OPPORTUNITY_OPTIONS: { value: OpportunityTag; label: string }[] = [
 const HEALTH_STATUS_OPTIONS: { value: HealthStatusFilter; label: string }[] = [
   { value: 'healthy', label: 'Healthy' },
   { value: 'needs_review', label: 'Needs Review' },
-  // Row #197: 'High Variation' was the engine's own term. The predicate is
-  // variationScore > 0.7 (route.ts:134), which feeds the Consistency dimension
+  // Row #197: 'High Variation' was the engine's own term. Row #209: the client
+  // predicate is isHighVariation() (variationLabel 'high', i.e. score >= 0.67, and
+  // runs >= 2) — it no longer mirrors the server's route.ts `> 0.7` status. It
+  // feeds the Consistency dimension
   // — 'Inconsistent' states that in user language and matches the
   // single-adjective parallelism of Healthy / Stale.
   { value: 'high_variation', label: 'Inconsistent' },

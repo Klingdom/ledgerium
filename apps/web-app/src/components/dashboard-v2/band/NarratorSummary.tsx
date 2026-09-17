@@ -27,7 +27,7 @@ export interface NarratorInput {
   totalWorkflows: number;
   /** Avg portfolio health 0–100, or null when unavailable. */
   avgHealthScore: number | null;
-  /** Count of workflows with variationLabel === 'high'. */
+  /** Count of workflows where isHighVariation() is true (row #209). */
   highVariationCount: number;
   opportunityCounts: OpportunityCounts;
 }

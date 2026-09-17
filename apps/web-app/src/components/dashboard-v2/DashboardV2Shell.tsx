@@ -40,6 +40,7 @@ import type {
   ActivityWeekBucket,
 } from '@/lib/dashboard-band-stats.js';
 import type { OpportunityTag } from '@/lib/workflow-metrics.js';
+import { isHighVariation } from '@/lib/workflow-metrics.js';
 import WorkflowList, {
   type WorkflowListState,
   type SortState,
@@ -817,7 +818,7 @@ export default function DashboardV2Shell() {
   // highVariationCount drives the narrator; cycleTimeSampleCount is the honest
   // denominator for the median-cycle-time tile ("across N workflows").
   const highVariationCount = useMemo(
-    () => allWorkflows.filter((w) => w.metricsV2.variationLabel === 'high').length,
+    () => allWorkflows.filter((w) => isHighVariation(w.metricsV2)).length,
     [allWorkflows],
   );
   const cycleTimeSampleCount = useMemo(

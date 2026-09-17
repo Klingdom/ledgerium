@@ -6,6 +6,23 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-17] - The dashboard now agrees with itself about which workflows vary too much
+
+**Why:** the dashboard flagged "high variation" in six places using four slightly different rules. A workflow could carry the badge and match the filter yet be missing from the insight chip, and a workflow with a single run was counted as highly variable in the summary sentence even though one run cannot vary.
+
+### Changed
+- One shared rule now decides "high variation" everywhere on the workflows dashboard: the row badge, the summary sentence, the insight chip and its filter, the "Inconsistent" filter and "Needs attention". The rule is a variation score of 0.67 or more **and** at least two runs.
+- Visible effect: workflows scoring between 0.67 and 0.70 now appear in the insight chip, and workflows with only one run are no longer counted as highly variable anywhere.
+
+### Not changed yet
+- The "needs review" count in the summary tiles still comes from the server's older rule. Recorded as row 211, to be settled with the old dashboard's retirement.
+- The wording ("Inconsistent" in the filter, "High variation" elsewhere) is still a separate decision, row 208. The rules had to agree before the names could.
+
+### Validation
+- 13 new tests, including checks that every filter and the chip select the same workflows. 4,742 workspace tests and 3,030 web-app tests passing; typecheck clean; CI browser tests 40/40.
+
+---
+
 ## [2026-09-17] - The analytics page no longer overstates process variation
 
 **Why:** the analytics page labelled a simple count, process families with three or more variants, as "High Variation", and headed a card "Highest Variation" even though the list was never ranked by variation.

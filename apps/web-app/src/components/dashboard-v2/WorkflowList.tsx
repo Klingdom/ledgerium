@@ -39,6 +39,7 @@ import WorkflowListFilterBar, {
   hasActiveFilters,
 } from './WorkflowListFilterBar.js';
 import type { OpportunityTag } from '@/lib/workflow-metrics.js';
+import { isHighVariation } from '@/lib/workflow-metrics.js';
 // EXTENSION_CONFIG.chromeStoreUrl was the empty-state CTA target (Batch A: replaced with /install)
 import type { TimeRange } from './CommandHeader.js';
 import {
@@ -253,13 +254,13 @@ export function applyFilters(
   }
 
   // "Needs attention" filter (iter-024 §4.1 item e):
-  // health < 60 OR variationLabel === 'high'
+  // health < 60 OR isHighVariation (row #209: now run-gated like the badge)
   // Note: delta ≤ −10 excluded from v1 (per-workflow delta not in MVP).
   if (filters.needsAttention) {
     result = result.filter(
       (w) =>
         w.metricsV2.healthScore.overall < 60 ||
-        w.metricsV2.variationLabel === 'high',
+        isHighVariation(w.metricsV2),
     );
   }
 
@@ -285,7 +286,7 @@ export function applyFilters(
       const variation = w.metricsV2.variationScore;
       if (h === 'healthy') return score >= 70;
       if (h === 'needs_review') return score < 40;
-      if (h === 'high_variation') return variation > 0.67;
+      if (h === 'high_variation') return isHighVariation(w.metricsV2);
       // 'stale': no isStale field on WorkflowRowData — approximate by age.
       // Uses injected nowMs so repeated calls with the same reference yield
       // identical results regardless of wall-clock drift.
@@ -300,7 +301,7 @@ export function applyFilters(
   // Insight chip filter key
   if (insightFilterKey !== null) {
     if (insightFilterKey === 'variationScore_gt_0.7') {
-      result = result.filter((w) => w.metricsV2.variationScore > 0.7);
+      result = result.filter((w) => isHighVariation(w.metricsV2));
     } else if (insightFilterKey === 'opportunityTag_automate') {
       result = result.filter((w) => w.metricsV2.opportunityTag === 'automate');
     } else if (insightFilterKey === 'opportunityTag_monitor') {

@@ -95,7 +95,7 @@ export interface TopBandData {
   avgHealthScore: number | null;
   /** Period-over-period health delta; surfaced near the gauge as the one true delta. */
   avgHealthScoreDelta: number | null;
-  /** Count of workflows with `variationLabel === 'high'` (numerator for #4). */
+  /** Count of workflows where `isHighVariation()` is true (numerator for #4). */
   highVariationCount: number;
   /**
    * SIGNALS #4: count of MULTI-RUN workflows (runs ≥ 2) — the honest denominator

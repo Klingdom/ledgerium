@@ -205,7 +205,7 @@ export function computeTotalRuns(runsValues: ReadonlyArray<number | null>): numb
  * `available` is true ONLY when there is at least one multi-run workflow to form
  * an honest denominator. When false the tile must render a "—"/"needs ≥2 runs"
  * state — never a fabricated 0 against a zero denominator. `count` is the raw
- * `highVariationCount` (workflows with `variationLabel === 'high'`); it is clamped
+ * `highVariationCount` (workflows where `isHighVariation()` is true — row #209); it is clamped
  * to never exceed the multi-run denominator so the tile can never claim "5 of 3".
  */
 export interface HighVarianceTileState {

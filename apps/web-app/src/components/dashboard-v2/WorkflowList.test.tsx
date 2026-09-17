@@ -23,6 +23,7 @@ import {
   isNumericColumn,
   columnAlignClass,
 } from './WorkflowList.js';
+import { isHighVariation, computeInsightChips } from '@/lib/workflow-metrics.js';
 import type { ColumnDataType } from '@/lib/dashboard-columns/index.js';
 import { hasActiveFilters } from './WorkflowListFilterBar.js';
 import type { WorkflowRowData } from './WorkflowRow.js';
@@ -57,7 +58,13 @@ function makeWorkflow(id: string, overrides: {
       runs: overrides.runs !== undefined ? overrides.runs : 3,
       avgTimeMs: overrides.avgTimeMs !== undefined ? overrides.avgTimeMs : 60_000,
       variationScore: overrides.variationScore ?? 0.3,
-      variationLabel: 'low',
+      // Row #209: derived from the score with the engine's own cut-offs
+      // (workflow-metrics.ts VARIATION_HIGH/MEDIUM_THRESHOLD). A hardcoded 'low'
+      // let fixtures claim variationScore 0.85 with a 'low' label — impossible
+      // in production, and it hid that filters disagreed on the threshold.
+      variationLabel: (overrides.variationScore ?? 0.3) >= 0.67
+        ? 'high'
+        : (overrides.variationScore ?? 0.3) >= 0.34 ? 'medium' : 'low',
       bottleneckLabel: null,
       healthScore: {
         overall: overrides.healthOverall ?? 65,
@@ -769,5 +776,54 @@ describe('atglance-review #15: sticky header + numeric right-align (source)', ()
 
   it('passes isDuplicateTitle to each WorkflowRow (collision-gated disambiguator)', () => {
     expect(src).toMatch(/isDuplicateTitle=\{duplicateTitleKeys\.has\(titleCollisionKey\(workflow\.title\)\)\}/);
+  });
+});
+
+// ── Row #209 (loop 22): one "high variation" rule across every client surface ──
+//
+// Before loop 22 the same idea was tested four ways: >= 0.67 (row badge,
+// narrator), > 0.67 (health-status filter), > 0.7 (insight chip + its filter),
+// with and without a runs >= 2 gate. These tests pin that the filters and the
+// chip count now select exactly the workflows isHighVariation() selects.
+describe('Row #209: isHighVariation agreement across surfaces', () => {
+  const nowMs = Date.parse('2026-09-17T00:00:00Z');
+  const workflows = [
+    makeWorkflow('score-068-runs-3', { variationScore: 0.68, runs: 3 }),   // was missed by the chip (> 0.7)
+    makeWorkflow('score-0669-runs-3', { variationScore: 0.669, runs: 3 }), // just under the engine cut
+    makeWorkflow('score-085-runs-1', { variationScore: 0.85, runs: 1 }),   // single run: no verdict
+    makeWorkflow('score-085-runs-null', { variationScore: 0.85, runs: null }),
+    makeWorkflow('score-085-runs-2', { variationScore: 0.85, runs: 2 }),
+    makeWorkflow('score-02-runs-5', { variationScore: 0.2, runs: 5, healthOverall: 90 }),
+  ];
+  const expectedIds = workflows
+    .filter((w) => isHighVariation(w.metricsV2))
+    .map((w) => w.id)
+    .sort();
+
+  it('the canonical set is exactly the >= 0.67, runs >= 2 workflows', () => {
+    expect(expectedIds).toEqual(['score-068-runs-3', 'score-085-runs-2']);
+  });
+
+  it('health-status "Inconsistent" filter selects the canonical set', () => {
+    const r = applyFilters(workflows, { ...emptyFilters, healthStatus: 'high_variation' }, null, nowMs);
+    expect(r.map((w) => w.id).sort()).toEqual(expectedIds);
+  });
+
+  it('insight-chip filter selects the canonical set (legacy key name kept for analytics)', () => {
+    const r = applyFilters(workflows, emptyFilters, 'variationScore_gt_0.7', nowMs);
+    expect(r.map((w) => w.id).sort()).toEqual(expectedIds);
+  });
+
+  it('insight-chip count equals the canonical set size', () => {
+    const chips = computeInsightChips(workflows.map((w) => w.metricsV2), []);
+    const chip = chips.find((c) => c.filterKey === 'variationScore_gt_0.7');
+    expect(chip?.count).toBe(expectedIds.length);
+  });
+
+  it('"Needs attention" includes a high-variation row only when it passes the run gate', () => {
+    // All health scores here are >= 60 (default 65, one at 90), so only the
+    // variation arm of the "needs attention" OR can select a row.
+    const r = applyFilters(workflows, { ...emptyFilters, needsAttention: true }, null, nowMs);
+    expect(r.map((w) => w.id).sort()).toEqual(expectedIds);
   });
 });

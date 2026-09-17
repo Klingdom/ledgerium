@@ -12,6 +12,8 @@ import {
   computePortfolioHealthScorePrior,
   computeInsightChips,
   PORTFOLIO_PRIOR_MIN_WORKFLOWS,
+  isHighVariation,
+  HIGH_VARIATION_MIN_RUNS,
 } from './workflow-metrics.js';
 import type { WorkflowMetricsInput, WorkflowMetricsOutput } from './workflow-metrics.js';
 import {
@@ -991,5 +993,55 @@ describe('MDR-P02: high-variance chip uses computed-signal language only', () =>
     expect(varianceChip!.label).toBe(
       '3 workflows show high execution variance → investigate consistency',
     );
+  });
+});
+
+// ── Row #209 (loop 22): isHighVariation — the single "high variation" rule ─────
+describe('isHighVariation', () => {
+  it('uses the engine label: 0.68 is high, 0.66 is medium', () => {
+    // Not asserted AT 0.67: score = 1 - stabilityScore, and 1 - 0.33 is
+    // 0.6699999999999999 in IEEE-754, so a stability of exactly 0.33 classifies
+    // as 'medium'. Pre-existing engine behaviour, recorded in the loop-22 log,
+    // deliberately not changed here.
+    expect(computeVariation({ ...FIXTURE_AUTOMATE, processDefinition: { ...FIXTURE_AUTOMATE.processDefinition!, stabilityScore: 0.32 } }).label).toBe('high');
+    expect(computeVariation({ ...FIXTURE_AUTOMATE, processDefinition: { ...FIXTURE_AUTOMATE.processDefinition!, stabilityScore: 0.34 } }).label).toBe('medium');
+  });
+
+  it('is true for a high label with runs at the minimum', () => {
+    expect(HIGH_VARIATION_MIN_RUNS).toBe(2);
+    expect(isHighVariation({ variationLabel: 'high', runs: 2 })).toBe(true);
+  });
+
+  it('is false for a single run — variation is undefined without a second run', () => {
+    expect(isHighVariation({ variationLabel: 'high', runs: 1 })).toBe(false);
+  });
+
+  it('is false when the run count is unconfirmed (null)', () => {
+    expect(isHighVariation({ variationLabel: 'high', runs: null })).toBe(false);
+  });
+
+  it('is false for medium and low labels regardless of runs', () => {
+    expect(isHighVariation({ variationLabel: 'medium', runs: 50 })).toBe(false);
+    expect(isHighVariation({ variationLabel: 'low', runs: 50 })).toBe(false);
+  });
+
+  it('agrees with computeWorkflowMetrics output end to end', () => {
+    const out = computeWorkflowMetrics(FIXTURE_AUTOMATE); // score 0.8, 7 runs
+    expect(isHighVariation(out)).toBe(out.variationLabel === 'high' && out.runs !== null && out.runs >= 2);
+    expect(isHighVariation(out)).toBe(true);
+  });
+
+  it('drives the insight chip: a 0.68-score multi-run workflow now counts (was excluded by > 0.7)', () => {
+    const base = computeWorkflowMetrics(FIXTURE_AUTOMATE);
+    const at068 = { ...base, variationScore: 0.68, variationLabel: 'high' as const, runs: 3 };
+    const chips = computeInsightChips([at068, at068], []);
+    expect(chips.find((c) => c.filterKey === 'variationScore_gt_0.7')?.count).toBe(2);
+  });
+
+  it('drives the insight chip: single-run high scores no longer count', () => {
+    const base = computeWorkflowMetrics(FIXTURE_AUTOMATE);
+    const singleRun = { ...base, variationScore: 0.9, variationLabel: 'high' as const, runs: 1 };
+    const chips = computeInsightChips([singleRun, singleRun], []);
+    expect(chips.find((c) => c.filterKey === 'variationScore_gt_0.7')).toBeUndefined();
   });
 });

@@ -49,6 +49,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { WorkflowMetricsOutput, OpportunityTag } from '@/lib/workflow-metrics.js';
+import { isHighVariation } from '@/lib/workflow-metrics.js';
 import { formatDate, formatDateRelative, formatDateTime } from '@/lib/format.js';
 import type { TimeRange } from './CommandHeader.js';
 import {
@@ -927,8 +928,7 @@ export default function WorkflowRow({
   //  - Bottleneck chip: shown ONLY when the engine produced a bottleneckLabel
   //    (derived from observed bottleneck/delay insights). Omitted entirely when
   //    absent — never a placeholder.
-  const showHighVariation =
-    metricsV2.variationLabel === 'high' && runs !== null && runs >= 2;
+  const showHighVariation = isHighVariation(metricsV2);
   const bottleneckLabel =
     typeof metricsV2.bottleneckLabel === 'string' && metricsV2.bottleneckLabel.trim().length > 0
       ? metricsV2.bottleneckLabel.trim()

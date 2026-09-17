@@ -72,6 +72,12 @@ const MONITOR_MIN_DATA_QUALITY = 8;
 const VARIATION_HIGH_THRESHOLD = 0.67;
 /** Variation score threshold for 'medium' label. */
 const VARIATION_MEDIUM_THRESHOLD = 0.34;
+/**
+ * Minimum confirmed run count for a variation verdict. With one run there is
+ * nothing to vary against: the score is a stand-in (1 − confidence, or the
+ * default), so no "high variation" claim is made below this count.
+ */
+export const HIGH_VARIATION_MIN_RUNS = 2;
 
 /** Bottleneck label max character length. */
 const BOTTLENECK_LABEL_MAX_CHARS = 30;
@@ -288,6 +294,28 @@ export function computeAvgTimeMs(input: WorkflowMetricsInput): number | null {
  *
  * Labels: >= 0.67 → high, >= 0.34 → medium, < 0.34 → low
  */
+/**
+ * The ONE definition of "high variation" on the v2 dashboard (row #209, loop 22).
+ *
+ * Before this, the same idea was tested four ways: `>= 0.67` (row badge, narrator),
+ * `> 0.67` (health-status filter), `> 0.7` (insight chip + its filter), with and
+ * without a run-count gate — so a workflow scoring 0.68 had a badge and matched the
+ * filter but was left out of the chip. Every client surface now calls this.
+ *
+ * Deliberately NOT used by the server's `computeHealthStatus` (`api/workflows/route.ts`),
+ * which is a separate API-level status with locked 0.70/0.701 boundary tests; aligning
+ * it is a public-contract change tracked separately.
+ */
+export function isHighVariation(
+  metrics: Pick<WorkflowMetricsOutput, 'variationLabel' | 'runs'>,
+): boolean {
+  return (
+    metrics.variationLabel === 'high' &&
+    metrics.runs !== null &&
+    metrics.runs >= HIGH_VARIATION_MIN_RUNS
+  );
+}
+
 export function computeVariation(input: WorkflowMetricsInput): { score: number; label: 'low' | 'medium' | 'high' } {
   let score: number;
 
@@ -630,7 +658,7 @@ export function computePortfolioHealthScorePrior(
  * Each chip fires only when its condition is met.
  *
  * Chip rules:
- * - High variance (warning):      >= 2 workflows with variationScore > 0.7
+ * - High variance (warning):      >= 2 workflows where isHighVariation() is true
  * - Bottleneck insight (varies):  a critical/warning ProcessInsight of type 'bottleneck' or 'delay'
  * - Automation candidates (info): >= 2 workflows tagged 'automate'
  * - Needs review (warning):       >= 2 workflows tagged 'monitor'
@@ -646,12 +674,14 @@ export function computeInsightChips(
   const chips: InsightChip[] = [];
 
   // Chip 1: High variance — action-leading copy (iter-024 §4.1 item b)
-  const highVarianceCount = workflows.filter((w) => w.variationScore > 0.7).length;
+  const highVarianceCount = workflows.filter((w) => isHighVariation(w)).length;
   if (highVarianceCount >= 2) {
     chips.push({
       id: 'variance_high',
       severity: 'warning',
       label: `${highVarianceCount} workflows show high execution variance → investigate consistency`,
+      // Legacy key name: kept verbatim so `insight_chip_clicked.filterKey` analytics
+      // stay continuous. The rule is isHighVariation(), not `> 0.7` (row #209).
       filterKey: 'variationScore_gt_0.7',
       count: highVarianceCount,
     });
