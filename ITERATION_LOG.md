@@ -4,6 +4,25 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-17 (loop 20) — `public/nav` + `public/pricing`: six stale tests cleared, one contrast check left red, pricing joins the gate (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO autonomous-run directive. **Selection:** `top-score` within row #200 — next remaining cluster after loop 19. Started in the previous session (spec edits left uncommitted) and closed in this one.
+- **Area-saturation check (logged per MR-022):** loops 18, 19, 20 are all `web-app / qa` → **3 consecutive; the rule now binds — loop 21 MUST select a different Area**, and the same fact is an early trigger for a meta-review. Loop 20 itself did not breach the rule (it was the third, not the fourth), but the −2 "3 of last 5" penalty applied to this pick; #200 at 8 − 2 = 6 would not have won a fresh ranking. Continuing it was a completion call on half-finished uncommitted work, not a score call — recorded as such.
+- **Before-count measured, not estimated:** ran the committed (`HEAD`) versions of both specs → **7 failed / 13 passed**; with the fixes → **1 failed / 19 passed**. The fixed files were copied aside and restored after the measurement (diff re-checked).
+- **All 6 cleared failures were stale tests, not product defects:**
+  - 3× strict-mode conflicts — the public layout renders `PublicNav` and a footer repeating the same destinations. Scoped to `nav[aria-label="Primary"]` (desktop) or `#mobile-nav-drawer` (mobile test that opens the drawer).
+  - Outside-click test clicked the page `<h1>`, which lies under the full-width Solutions panel. Now clicks a viewport point below the panel's bounding box.
+  - `getByText('$0')` also matched the plan-comparison table → scoped to tier-card prices. Prices themselves verified correct.
+  - Free-tier CTA asserted "Get Started Free", which never shipped; the real CTA is "Map Your First Workflow Free".
+- **The remaining red test is a real defect, left red on purpose.** Re-dumped axe node targets: **5 `color-contrast` nodes** — 4 Solutions-panel `<h3>` headings on `--content-tertiary` at **3.4:1** (on `--surface-elevated`), plus the **"Start free" CTA: white on `#059669` = 3.76:1**. The second is a *new, separate* root cause: `.btn-primary` itself, used 90× across 48 files → **new row #207**. Both are brand/palette decisions, not changed autonomously; axe baselines not raised.
+- **Correction of my own uncommitted note:** the in-progress edit to row #205 claimed "40 nodes" (and had already corrected an earlier "198 violations"). Both were misreadings of jest diff output. Recounted from the node list: 5. Row #205 amended.
+- **Gate widened in the same commit:** `public/pricing.spec.ts` (4/4) added to `e2e-web-app.yml`. `public/nav` stays out (1 red).
+- **Validation:** widened gate as a **single invocation: 40 passed** (34 dashboard + 2 auth setup + 4 pricing — reconciled with `--list`; loop 18 logged "32" for the dashboard portion, which does not reconcile with today's 34 listed dashboard tests — discrepancy recorded, cause not investigated); `pnpm typecheck` clean across all packages/apps (0 errors); workspace `pnpm test` **4734/4734** (231 files).
+- **Follow-ups:** 1 created (#207), 0 closed (#200 remains open, ~24 left). `density-response`: not applicable (<3).
+- **Meta-review cadence:** MR-022 closed after loop 13; loops 14–20 = **7 counted loops** against a 2–3 loop cadence, plus the same-Area early trigger above. **MR-023 is due before loop 21.**
+
+---
+
 ## 2026-09-17 (loop 19) — `v2-a11y`: two real accessibility defects, three tests left red on purpose (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO autonomous-run directive. **Selection:** #200's next-largest cluster. **This slice broke the pattern of loops 12 and 18** — those were entirely stale tests; here axe was reporting genuine WCAG failures, so I treated the failures as suspects, not assumptions.

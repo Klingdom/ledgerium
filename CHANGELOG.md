@@ -6,6 +6,24 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-17] - Public site tests brought back; the main signup button found below contrast minimum
+
+**Why:** six tests for the public navigation and pricing page had been failing against untouched code, so nothing was checking those pages.
+
+### Fixed
+- Six tests that could not pass: three matched links that appear in both the navigation and the footer, one clicked a heading hidden under the open menu, one matched a price that also appears in the comparison table, and one looked for a "Get Started Free" button that never existed.
+
+### Added to CI
+- The pricing page tests now run on every push, alongside the dashboard tests.
+
+### Found, not changed
+- **The main "Start free" button is below the contrast minimum** — white text on the brand green is 3.76:1 against a 4.5:1 minimum, and the same button style is used 90 times across the app. The menu's section headings also fall short. Both are brand-colour decisions, recorded as rows 205 and 207 for a design call. The check stays failing on purpose.
+
+### Validation
+- Before 7 failing → after 1 (the contrast check). Widened CI gate 40/40 in one run; typecheck clean; full suite 4734 passing.
+
+---
+
 ## [2026-09-17] - Two real accessibility defects fixed on the dashboard
 
 **Why:** unlike the previous rounds of dead tests, these failures were genuine. The accessibility checker was reporting actual problems, not outdated expectations.

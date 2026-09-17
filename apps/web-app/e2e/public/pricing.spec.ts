@@ -15,16 +15,24 @@ test.describe('Pricing page', () => {
   test('shows pricing amounts', async ({ page }) => {
     await page.goto('/pricing');
 
-    // Check key prices are displayed
-    await expect(page.getByText('$0')).toBeVisible();
-    await expect(page.getByText('$49')).toBeVisible();
+    // Row #200 (loop 20): `getByText('$0')` is a substring match that also hits
+    // the plan-comparison table further down the page, so this failed on a
+    // strict-mode conflict rather than a wrong price. The prices themselves are
+    // correct (config.ts: Free 0, Starter 49). Scope to the tier cards' price
+    // element, which is the thing this test is actually about.
+    const tierPrice = page.locator('span.text-3xl.font-bold');
+    await expect(tierPrice.filter({ hasText: '$0' }).first()).toBeVisible();
+    await expect(tierPrice.filter({ hasText: '$49' }).first()).toBeVisible();
   });
 
   test('has CTA buttons for each tier', async ({ page }) => {
     await page.goto('/pricing');
 
-    // The Free tier should have "Get Started Free" CTA
-    await expect(page.getByRole('link', { name: /get started free/i })).toBeVisible();
+    // Row #200 (loop 20): the Free tier's CTA is "Map Your First Workflow Free"
+    // (config.ts:58) — "Get Started Free" never shipped, so this could not pass.
+    await expect(
+      page.getByRole('link', { name: /map your first workflow free/i }).first(),
+    ).toBeVisible();
   });
 
   test('shows trust signals', async ({ page }) => {

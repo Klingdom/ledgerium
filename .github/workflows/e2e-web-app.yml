@@ -83,11 +83,14 @@ jobs:
         # Widened at loop 18: v2-states joined after its 8 stale failures were
         # triaged to green (row #200). Per the widening rule, a spec is added in
         # the SAME commit that turns it green — never added hopefully.
+        # Loop 20: public/pricing joined (4/4 after its 2 stale failures were
+        # fixed). public/nav did NOT — its axe test stays red on rows #205/#207.
         run: >-
           pnpm --filter @ledgerium/web-app test:e2e
           e2e/app/dashboard/v2-happy-path.spec.ts
           e2e/app/dashboard/v2-plan-gating.spec.ts
           e2e/app/dashboard/v2-states.spec.ts
+          e2e/public/pricing.spec.ts
 
       - name: Upload Playwright report on failure
         if: failure()

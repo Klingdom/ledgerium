@@ -9,6 +9,11 @@ import AxeBuilder from '@axe-core/playwright';
  * Runs against the public site (no auth). Default viewport = desktop.
  */
 
+// Row #200 (loop 20): the public layout renders PublicNav AND Footer, and the
+// footer repeats the same destinations — so unscoped getByRole('link', …)
+// matched two elements and failed on strict mode. These are duplicate links by
+// design, not a double-rendered nav, so the fix is to scope to the primary nav.
+const NAV = 'nav[aria-label="Primary"]';
 const SOLUTIONS = 'button[aria-controls="nav-panel-solutions"]';
 const RESOURCES = 'button[aria-controls="nav-panel-resources"]';
 const SOL_PANEL = '#nav-panel-solutions';
@@ -22,8 +27,8 @@ test.describe('PublicNav — structure & interaction (Iteration B)', () => {
   test('renders the 4-item bar + CTAs', async ({ page }) => {
     await expect(page.locator(SOLUTIONS)).toBeVisible();
     await expect(page.locator(RESOURCES)).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Product', exact: true })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Pricing', exact: true })).toBeVisible();
+    await expect(page.locator(NAV).getByRole('link', { name: 'Product', exact: true })).toBeVisible();
+    await expect(page.locator(NAV).getByRole('link', { name: 'Pricing', exact: true })).toBeVisible();
     // Primary CTA exists in either auth state (logged-out: Start free; logged-in: Go to app).
     await expect(page.getByRole('link', { name: /start free|go to app/i }).first()).toBeVisible();
   });
@@ -58,7 +63,18 @@ test.describe('PublicNav — structure & interaction (Iteration B)', () => {
   test('outside click closes the panel', async ({ page }) => {
     await page.locator(SOLUTIONS).click();
     await expect(page.locator(SOL_PANEL)).toBeVisible();
-    await page.locator('h1').first().click();
+    // Row #200 (loop 20): this clicked the page <h1>, but the Solutions panel is
+    // `absolute left-0 right-0 top-14` with py-7 inside a sticky z-40 header —
+    // a full-width sheet sitting OVER the top of <main> — so the click landed on
+    // the panel itself and timed out.
+    //
+    // A `locator('footer')` attempt also failed: it resolves to a small inner
+    // <footer class="text-center pt-3 pb-2"> that never becomes stable. Click a
+    // raw viewport coordinate well below the panel instead — that is what
+    // "outside click" means here, and it depends on no element's visibility.
+    const panelBox = await page.locator(SOL_PANEL).boundingBox();
+    const belowPanelY = (panelBox?.y ?? 56) + (panelBox?.height ?? 200) + 80;
+    await page.mouse.click(40, belowPanelY);
     await expect(page.locator(SOL_PANEL)).toBeHidden();
   });
 
@@ -96,7 +112,7 @@ test.describe('PublicNav — aria-current prefix match', () => {
 
   test('/pricing highlights Pricing, not Solutions', async ({ page }) => {
     await page.goto('/pricing', { waitUntil: 'networkidle' });
-    await expect(page.getByRole('link', { name: 'Pricing', exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(page.locator(NAV).getByRole('link', { name: 'Pricing', exact: true })).toHaveAttribute('aria-current', 'page');
     await expect(page.locator(SOLUTIONS)).not.toHaveAttribute('aria-current', 'page');
   });
 });
@@ -129,9 +145,14 @@ test.describe('PublicNav — mobile (Iteration C, 375x667)', () => {
     await page.goto('/product', { waitUntil: 'networkidle' });
     await page.getByLabel('Toggle menu').click();
     await page.getByRole('button', { name: 'Solutions' }).click();
-    await expect(page.getByRole('link', { name: 'Operations teams' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'View all roles' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Business Analysts' })).toHaveCount(0);
+    // Row #200 (loop 20): scoped to the MOBILE drawer (`#mobile-nav-drawer`),
+    // not the desktop `nav[aria-label="Primary"]` — this test opens the drawer,
+    // and the footer repeats these destinations, which is what caused the
+    // strict-mode conflict on "Operations teams".
+    const drawer = page.locator('#mobile-nav-drawer');
+    await expect(drawer.getByRole('link', { name: 'Operations teams' })).toBeVisible();
+    await expect(drawer.getByRole('link', { name: 'View all roles' })).toBeVisible();
+    await expect(drawer.getByRole('link', { name: 'Business Analysts' })).toHaveCount(0);
   });
 
   test('pinned CTA stays in viewport with all accordions expanded', async ({ page }) => {
