@@ -1451,7 +1451,7 @@ export default function DocsPage() {
                     ['Variants', 'Count of alternative execution paths'],
                     ['Avg Stability', 'Portfolio-wide consistency score'],
                     ['Active Signals', 'Number of active intelligence findings'],
-                    ['High Variation', 'Families with concerning inconsistency'],
+                    ['3+ Variants', 'Process families with 3 or more variants'],
                   ].map(([kpi, desc]) => (
                     <tr key={kpi}>
                       <TD><strong className="text-[var(--content-primary)]">{kpi}</strong></TD>

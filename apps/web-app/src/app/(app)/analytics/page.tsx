@@ -355,7 +355,7 @@ export default function AnalyticsPage() {
             />
             <KPICard
               icon={Zap}
-              label="High Variation"
+              label="3+ Variants"
               value={highVariation.length}
               valueColor={highVariation.length > 0 ? 'text-amber-600' : 'text-emerald-600'}
             />
@@ -481,10 +481,11 @@ export default function AnalyticsPage() {
                   </div>
                 )}
 
-                {/* Most variants */}
+                {/* Row #204 (loop 21): families with >=3 variants, in the API's runCount-desc
+                    order — not ranked by variation, so no superlative in the header. */}
                 {highVariation.length > 0 && (
                   <div className="card px-ds-4 py-ds-3">
-                    <p className="text-ds-xs font-medium text-amber-600 uppercase tracking-wide mb-ds-2">Highest Variation</p>
+                    <p className="text-ds-xs font-medium text-amber-600 uppercase tracking-wide mb-ds-2">Multi-Variant Processes</p>
                     <div className="space-y-ds-1.5">
                       {highVariation.slice(0, 3).map((d) => (
                         <Link key={d.id} href={`/analytics/process/${d.id}`} className="flex items-center justify-between hover:bg-[var(--surface-secondary)] rounded px-1 -mx-1 py-0.5 transition-colors">

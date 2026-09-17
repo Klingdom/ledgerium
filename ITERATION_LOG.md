@@ -4,6 +4,27 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-17 (loop 21) — Analytics and docs stop calling a variant count "High Variation" (Mode 1, coordinator-direct + `growth-strategist`)
+
+- **Trigger:** CEO "continue" after MR-023 asked for a drift acknowledgement.
+- **Candidate Selection:** `top-score` — #204 (9), MR-023's endorsed pick. Area `web-app / copy`, pivoting off the 3-consecutive `web-app / qa` run (loops 18–20) as the saturation rule required.
+  - `reverse-portfolio-drift: user-ack; rationale: CEO replied "continue" to MR-023's explicit request for this acknowledgement; no unblocked extension-surface row exists to clear D-1 instead.` Recorded as an interpretation of "continue", not a literal ack; it does **not** cover the other pending decisions (push/deploy, palette #205–#207, P-5 hook).
+  - **#203 re-check before choosing:** MR-023 said #203 jumps to the top if production was seeded with the default password. Not checkable from the dev machine, but new evidence was recorded: the runbook tells operators to seed **production**, and the demo account is **Team plan**. Re-scored 8 → 9; ties #204, which kept the pick as the endorsed item. #203 is the leading loop-22 candidate.
+- **Evidence gathered before the consult, which changed the answer:**
+  - The analytics KPI counts families with `variantCount >= 3` (`analytics/page.tsx:216`), **not** the dashboard's `variationScore > 0.7`. The obvious fix (rename to "Inconsistent", matching #197) would have given two different measures one name.
+  - The "Highest Variation" card lists `highVariation.slice(0, 3)` from definitions ordered `runCount desc` (`api/analytics/route.ts:64,115`): the most-run families with 3+ variants, never a ranking. The header was a false superlative.
+- **D-4 clause 1 fired** (4 strings) → `growth-strategist` consult, read-only, every replacement evidence-cited. Coordinator verified the cited sibling headers ("Slowest Processes" :457, "Fastest Processes" :472) before applying.
+  - `High Variation` → `3+ Variants` (analytics KPI and docs table, kept identical)
+  - `Highest Variation` → `Multi-Variant Processes` (longer, because every shorter option was inaccurate)
+  - `Families with concerning inconsistency` → `Process families with 3 or more variants`
+- **Scope held:** retired v1 dashboard (`?v2=0` only) left untouched; the consult concurred. The sweep found the v2 dashboard itself still says "High variation" in three sentence-case places (insight chip, row badge, narrator) against "Inconsistent" in the filter; #197's sweep had searched only capitalised `High Variation`. Recorded as **#208**, not fixed here.
+- **Validation:** residual sweep on the analytics and docs directories returned no matches with stderr visible; no unit or E2E test references the changed strings; `pnpm typecheck` 0 errors; workspace `pnpm test` **4734/4734**. No rendered-page check run: the change is four string literals and one JSX comment, which typecheck parses.
+- **Process error (mine):** the first artifact-update command failed to parse (a quoting error in one long shell command). Verified with `git status` that nothing had been partially applied, then re-ran from a script file.
+- **Follow-ups:** 1 created (#208), 1 closed (#204). `density-response`: not applicable.
+- **Meta-review cadence:** 1 loop since MR-023.
+
+---
+
 ## 2026-09-17 — MR-023 meta-review (Mode 4, `meta-coordinator`, NON-counting)
 
 - **Trigger:** cadence (7 loops since MR-022, 2nd overdue in a row) + same-Area early trigger (loops 18–20 `web-app / qa`).

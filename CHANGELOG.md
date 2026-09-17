@@ -6,6 +6,24 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-17] - The analytics page no longer overstates process variation
+
+**Why:** the analytics page labelled a simple count, process families with three or more variants, as "High Variation", and headed a card "Highest Variation" even though the list was never ranked by variation.
+
+### Changed
+- Analytics KPI "High Variation" → **"3+ Variants"**, matching what it counts.
+- Analytics card "Highest Variation" → **"Multi-Variant Processes"**. It shows the most-used processes that have three or more variants, not the most variable ones.
+- Docs: the same KPI is renamed to match, and "Families with concerning inconsistency" now reads "Process families with 3 or more variants". Nothing in the product defines three variants as concerning.
+
+### Deliberately not changed
+- These were not renamed "Inconsistent" to match the dashboard. The dashboard uses that word for a different measure, and one word should not name two measures.
+- The dashboard still says "High variation" in three places where its filter says "Inconsistent". Recorded as row 208 for a separate copy decision.
+
+### Validation
+- Typecheck clean; full suite 4734 passing; no test referenced the old wording.
+
+---
+
 ## [2026-09-17] - Public site tests brought back; the main signup button found below contrast minimum
 
 **Why:** six tests for the public navigation and pricing page had been failing against untouched code, so nothing was checking those pages.
