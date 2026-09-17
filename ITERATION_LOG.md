@@ -4,6 +4,23 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-17 — MR-024 meta-review (Mode 4, `meta-coordinator`, NON-counting)
+
+- **Trigger:** base cadence — loops 21, 22, 23 since MR-023. First on-time meta-review in three cycles.
+- **Artifact:** `docs/meta/MR_024_META_REVIEW.md` (1391 words, ~5% over target).
+- **Verdicts:** cadence **Effective but by memory, not by rule** (P-5 still recommended; all 3 loops ran inside ~26 minutes, so C2's "21 days" arm could never fire); inferred-ack chain **Failing**; #209 split **Effective** but the row-filing pattern **Failing**; copy churn **Failing**; debt ratio **Effective at 0.52** (14/27 over rows 185–211, up from 0.48); blocked pile **Failing at 8 rows** (+P-5 = 9); deploy **Failing, partly recovered**.
+- **Three findings verified by the coordinator before acceptance, all confirmed, all correcting my own records:**
+  1. **Extension drift is far worse than logged.** MR-023 credited loop 14 as an extension touch; `git show 0401436` shows it changed only `extension-app/public/samples/promo-*.html` — static marketing markup, no extension behaviour. Last behavioural extension commit is **7436b3e (loop 8)**. The D-1 counter should have been reading ~15 loops, not 9, through loops 21–23.
+  2. **Row #202 is blocked and I had been omitting it** from every "waiting on you" list (MR-022's P-3/P-4 governance proposals). SYSTEM_HEALTH omits it too.
+  3. **#210 is wider than I filed it.** The `authenticated` project's regex matches every spec under `apps/web-app/`: `--list` on `e2e/api/health.spec.ts` returns `[api]` **and** `[authenticated]`. The API specs double-run as well. Row widened.
+- **Ack chain — coordinator ruling, adopted now:** loops 21, 22 and 23 each logged `reverse-portfolio-drift: user-ack` inferred from the CEO replying "continue" to a report that disclosed the inference. MR-024 calls this manufacturing consent, and with finding 1 the drift it waved through is ~15 loops of no extension work on a shipping product under an Extension Reliability Invariant. **I am applying P-6 to myself immediately: no further inferred acks. Loop 24 does not start until the CEO either gives an explicit ack or names the item.** This is a self-imposed stop, stricter than the written rule; it is not a rule change.
+- **Open question for the CEO, raised by MR-024:** the Area for the saturation penalty is read fine-grained (`web-app/qa`, `web-app/copy`, `web-app/dashboard`). Under a coarse `web-app` reading, loops 18–23 are six consecutive same-Area loops and the −2 would fire on nearly everything. Which reading governs?
+- **Loop 24 endorsement (blocked pending the ack):** #210 (11) > #203 (9) > #200 (8). All three are non-extension.
+- **Validation:** Mode 4, no product code. One file created. Workspace and web-app test state unchanged from loop 23 (4742 / 3030); nothing executed that could change it.
+- **Follow-ups:** 1 created (#212: P-5/P-6/P-7). #210 widened.
+
+---
+
 ## 2026-09-17 (loop 23) — One name for the variation signal: "High Variation" (Mode 1, coordinator-direct + `growth-strategist`)
 
 - **Trigger:** CEO "continue".
