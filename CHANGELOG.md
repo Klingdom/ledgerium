@@ -6,6 +6,23 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-17] - One name for workflows whose runs vary a lot
+
+**Why:** the dashboard called the same signal "Inconsistent" in the health filter, "High variation" on row badges, "high execution variance" in the insight chip and "High-Variance Workflows" on a summary tile. Four names for one measurement made it look like four different things.
+
+### Changed
+- The health filter option now reads **High Variation** instead of "Inconsistent", matching the row badge, the summary sentence and the filter chip you get from the insight chip.
+- The insight chip now reads "N workflows show high variation → consider standardizing".
+- The summary tile now reads **High-Variation Workflows**.
+
+### Note
+- This reverses a rename made on 16 September, which had looked at the filter label alone. With every surface in view, the name that says what is measured won out over the ambiguous "Inconsistent".
+
+### Validation
+- Tests updated alongside the copy, including checks that the old names cannot return; 3,030 web-app and 4,742 workspace tests passing; typecheck clean.
+
+---
+
 ## [2026-09-17] - The dashboard now agrees with itself about which workflows vary too much
 
 **Why:** the dashboard flagged "high variation" in six places using four slightly different rules. A workflow could carry the badge and match the filter yet be missing from the insight chip, and a workflow with a single run was counted as highly variable in the summary sentence even though one run cannot vary.

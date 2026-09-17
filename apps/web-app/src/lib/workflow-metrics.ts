@@ -679,7 +679,9 @@ export function computeInsightChips(
     chips.push({
       id: 'variance_high',
       severity: 'warning',
-      label: `${highVarianceCount} workflows show high execution variance → investigate consistency`,
+      // Row #208 (loop 23): one name for the signal; action matches the narrator
+      // ("consider standardizing") and the 'standardize' opportunity tag.
+      label: `${highVarianceCount} workflows show high variation → consider standardizing`,
       // Legacy key name: kept verbatim so `insight_chip_clicked.filterKey` analytics
       // stay continuous. The rule is isHighVariation(), not `> 0.7` (row #209).
       filterKey: 'variationScore_gt_0.7',

@@ -102,7 +102,9 @@ describe('activeFilters: each source maps into the unified model', () => {
       filters: { ...emptyFilters, healthStatus: 'high_variation' },
     });
     expect(chips).toHaveLength(1);
-    expect(chips[0]!.label).toBe('Health: Inconsistent');
+    expect(chips[0]!.label).toBe('Health: High Variation');
+    // Row #208: both routes to the same filter now name it the same way.
+    expect(chips[0]!.label).not.toMatch(/Inconsistent/);
     expect(chips[0]!.source).toBe('healthStatus');
   });
 

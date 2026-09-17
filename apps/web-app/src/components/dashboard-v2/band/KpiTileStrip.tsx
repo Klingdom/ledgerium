@@ -229,7 +229,7 @@ export default function KpiTileStrip({ data, activeOpportunity, onFilter }: KpiT
           fabricated 0. No DPMO/sigma/CV. */}
       <TileShell
         tileId="high_variance"
-        label="High-Variance Workflows"
+        label="High-Variation Workflows"
         value={highVariance.available ? String(highVariance.count) : '—'}
         trackValue={highVariance.available ? highVariance.count : null}
         provenance="Workflows with high run-to-run variation — a consistency proxy, not a defect rate. Counted only across multi-run workflows (variation needs ≥2 runs). The standardize signal."

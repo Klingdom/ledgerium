@@ -49,13 +49,13 @@ const OPPORTUNITY_OPTIONS: { value: OpportunityTag; label: string }[] = [
 const HEALTH_STATUS_OPTIONS: { value: HealthStatusFilter; label: string }[] = [
   { value: 'healthy', label: 'Healthy' },
   { value: 'needs_review', label: 'Needs Review' },
-  // Row #197: 'High Variation' was the engine's own term. Row #209: the client
-  // predicate is isHighVariation() (variationLabel 'high', i.e. score >= 0.67, and
-  // runs >= 2) — it no longer mirrors the server's route.ts `> 0.7` status. It
-  // feeds the Consistency dimension
-  // — 'Inconsistent' states that in user language and matches the
-  // single-adjective parallelism of Healthy / Stale.
-  { value: 'high_variation', label: 'Inconsistent' },
+  // Predicate (row #209): isHighVariation() — variationLabel 'high' (score >= 0.67)
+  // and runs >= 2. It no longer mirrors the server's route.ts `> 0.7` status (#211).
+  // Label history: row #197 renamed 'High Variation' → 'Inconsistent'; row #208
+  // (loop 23) renamed it back, because one signal then had four names. 'High
+  // Variation' says what is measured (run-to-run variation) and matches the row
+  // badge, insight chip, narrator and KPI tile. Title Case like its siblings.
+  { value: 'high_variation', label: 'High Variation' },
   { value: 'stale', label: 'Stale' },
 ];
 

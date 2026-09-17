@@ -4,6 +4,23 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-17 (loop 23) — One name for the variation signal: "High Variation" (Mode 1, coordinator-direct + `growth-strategist`)
+
+- **Trigger:** CEO "continue".
+- **Candidate Selection:** `top-score` — #208 (10). Saturation check (window loops 18–22): `web-app / qa` was 3 of the last 5, so #210 took the −2 penalty (11 → 9); `web-app / copy` was 1 of 5, no penalty. `reverse-portfolio-drift: user-ack; rationale: CEO "continue", same inference as loops 21–22, still no unblocked extension-surface row.`
+- **Scope found wider than the row:** the row named two names; the sweep found **four** across 8 strings, including a KPI tile ("High-Variance Workflows") and the insight chip ("high execution variance"). Confirmed before the consult that the tile uses the same `isHighVariation()` count (`buildHighVarianceTileState` ← `highVariationCount`), so all eight really are one signal.
+- **D-4 clause 1 fired** → `growth-strategist` consult: canonical term **High Variation**. It names what is measured and is already the majority form; "Inconsistent" is ambiguous (unreliable? buggy?).
+- **This reverses row #197 (loop 17), which chose "Inconsistent"** from a view of one string. Recorded as a reversal, not a silent flip: the loop-17 consult never saw the other seven strings.
+- **Coordinator correction to the consult:** it described the badge and insight-filter chip as reading "High Variation" (KEEP). The code reads "High variation", sentence case. Casing was set per surface from its siblings, not from the consult table: `HEALTH_STATUS_LABEL`/dropdown are Title Case ("Needs Review"), `INSIGHT_FILTER_LABEL` and badges are sentence case ("Needs review", "Stale").
+- **Changes:** dropdown + filter chip `Inconsistent` → `High Variation`; insight chip → `{n} workflows show high variation → consider standardizing`; KPI tile → `High-Variation Workflows`. Badge, insight-filter chip and narrator unchanged. Contradictory comment above the dropdown rewritten as a label history.
+- **Test mirrors updated in the same change:** `activeFilters.test.ts` (plus a negative assertion that "Inconsistent" cannot return), 3 assertions in `workflow-metrics.test.ts` (plus `not.toMatch(/variance/)` on the chip), one test name in `WorkflowList.test.tsx`, and the mocked chip label in `v2-a11y.spec.ts`.
+- **Left alone, noted:** internal comments and test names still say "High-Variance" (not user-visible); the detail report's "reduce execution variance" (`detail/reportEvidence.ts:469`) is a different surface and a recommendation sentence, not this label.
+- **Validation:** `pnpm typecheck` 0 errors; web-app package **3030/3030** and workspace **4742/4742** (counts unchanged: assertions modified, none added); CI E2E gate **40/40** (list reporter, raw tail read).
+- **Follow-ups:** 0 created, 1 closed (#208). `density-response`: not applicable.
+- **Meta-review cadence:** 3 loops since MR-023 (21, 22, 23) — **MR-024 is due before loop 24.**
+
+---
+
 ## 2026-09-17 (loop 22) — One "high variation" rule across the dashboard (Mode 1, `system-architect` ruling + coordinator implementation)
 
 - **Trigger:** CEO "continue".

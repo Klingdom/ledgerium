@@ -804,7 +804,7 @@ describe('Row #209: isHighVariation agreement across surfaces', () => {
     expect(expectedIds).toEqual(['score-068-runs-3', 'score-085-runs-2']);
   });
 
-  it('health-status "Inconsistent" filter selects the canonical set', () => {
+  it('health-status "High Variation" filter selects the canonical set', () => {
     const r = applyFilters(workflows, { ...emptyFilters, healthStatus: 'high_variation' }, null, nowMs);
     expect(r.map((w) => w.id).sort()).toEqual(expectedIds);
   });

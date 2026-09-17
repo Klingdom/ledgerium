@@ -431,7 +431,7 @@ test('insight chip has correct ARIA: role=button, aria-pressed, aria-label with 
             {
               id: 'chip-test',
               severity: 'warning',
-              label: '2 workflows show high execution variance',
+              label: '2 workflows show high variation → consider standardizing',
               filterKey: 'variationScore_gt_0.7',
               count: 2,
             },

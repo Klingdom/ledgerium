@@ -744,7 +744,7 @@ describe('computeInsightChips', () => {
     const varianceChip = chips.find((c) => c.filterKey === 'variationScore_gt_0.7');
     expect(varianceChip).toBeDefined();
     expect(varianceChip!.label).toContain('→');
-    expect(varianceChip!.label).toMatch(/high execution variance/i);
+    expect(varianceChip!.label).toMatch(/high variation/i);
   });
 
   it('automation chip label is action-leading (contains →)', () => {
@@ -976,7 +976,8 @@ describe('MDR-P02: high-variance chip uses computed-signal language only', () =>
     const chips = computeInsightChips([output1, output2], []);
     const varianceChip = chips.find((c) => c.filterKey === 'variationScore_gt_0.7');
     expect(varianceChip).toBeDefined();
-    expect(varianceChip!.label).toContain('high execution variance');
+    expect(varianceChip!.label).toContain('high variation');
+    expect(varianceChip!.label).not.toMatch(/variance/i); // row #208: one term, not two
     expect(varianceChip!.label).not.toMatch(/SLA/i);
     expect(varianceChip!.label).not.toMatch(/onboarding/i);
   });
@@ -991,7 +992,7 @@ describe('MDR-P02: high-variance chip uses computed-signal language only', () =>
     const varianceChip = chips.find((c) => c.filterKey === 'variationScore_gt_0.7');
     expect(varianceChip).toBeDefined();
     expect(varianceChip!.label).toBe(
-      '3 workflows show high execution variance → investigate consistency',
+      '3 workflows show high variation → consider standardizing',
     );
   });
 });

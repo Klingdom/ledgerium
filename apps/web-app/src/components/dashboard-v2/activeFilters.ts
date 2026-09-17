@@ -80,8 +80,9 @@ const HEALTH_STATUS_LABEL: Record<HealthStatusFilter, string> = {
   needs_review: 'Needs Review',
   // Row #197: kept in step with WorkflowListFilterBar's option label — these
   // are two copies of the same user-facing name, and letting them drift would
-  // show "Inconsistent" in the dropdown and "High Variation" on the chip.
-  high_variation: 'Inconsistent',
+  // show one name in the dropdown and another on the chip. Row #208: now
+  // 'High Variation' everywhere (Title Case here, matching 'Needs Review').
+  high_variation: 'High Variation',
   stale: 'Stale',
 };
 
