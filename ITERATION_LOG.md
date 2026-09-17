@@ -4,9 +4,20 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-17 — MR-023 meta-review (Mode 4, `meta-coordinator`, NON-counting)
+
+- **Trigger:** cadence (7 loops since MR-022, 2nd overdue in a row) + same-Area early trigger (loops 18–20 `web-app / qa`).
+- **Artifact:** `docs/meta/MR_023_META_REVIEW.md` (1325 words; over the ~1200 target).
+- **Verdicts:** saturation Effective (but loop 20 mislabelled `top-score`, and **D-1 not applied** — 6 non-extension loops, no user-ack); cadence **Failing** (prose-only, no enforcement); debt ratio **0.48** over rows 185–207, recovering; CEO-gated "left red" pile **Failing trend** (4 → 7 rows); pipeline thin (4 unblocked rows); unpushed delta **Failing** (8 commits; the E2E gate has never run on GitHub and `deploy.yml` does not depend on it).
+- **Coordinator verification before accepting:** recomputed tertiary contrast by hand (3.98:1 — the reviewer is right, the recorded 4.4:1 was wrong); confirmed rows #194/#201 had their trailing cells swapped (#194 carried the session-token row's Area/score/Birth and vice versa); confirmed 6 struck-through rows (192, 194, 196, 197, 199, 201) still read `open`; confirmed `deploy.yml`'s `build-and-push` needs only `quality-gate` (typecheck + unit tests). All four corrected in the backlog in this commit; the loop-20 selection label corrected above.
+- **Proposed, NOT applied:** P-5 — a `PreToolUse` hook blocking `git commit` once ≥4 loops sit above the last meta-review. It edits `.claude/settings.json`, so it needs CEO approval; a subagent recommendation is not that approval.
+- **Loop 21 endorsement:** #204 (copy, 9) > #203 (security, 8) > #198 (7). **All three require a `reverse-portfolio-drift: user-ack`** that only the CEO can give; no unblocked extension-surface row exists to clear D-1 instead. **Loop 21 is therefore held pending CEO input.**
+
+---
+
 ## 2026-09-17 (loop 20) — `public/nav` + `public/pricing`: six stale tests cleared, one contrast check left red, pricing joins the gate (Mode 1, coordinator-direct)
 
-- **Trigger:** CEO autonomous-run directive. **Selection:** `top-score` within row #200 — next remaining cluster after loop 19. Started in the previous session (spec edits left uncommitted) and closed in this one.
+- **Trigger:** CEO autonomous-run directive. **Selection:** logged as `top-score`, **corrected at MR-023: it was not** — with the −2 saturation penalty #200 scored 6 and would not have won. It was a completion call on uncommitted work, which none of the five defined selection rules covers. **D-1 also missed:** loops 15–20 touched no extension surface (6 consecutive, threshold 5) and no `reverse-portfolio-drift: user-ack` was logged. Started in the previous session (spec edits left uncommitted) and closed in this one.
 - **Area-saturation check (logged per MR-022):** loops 18, 19, 20 are all `web-app / qa` → **3 consecutive; the rule now binds — loop 21 MUST select a different Area**, and the same fact is an early trigger for a meta-review. Loop 20 itself did not breach the rule (it was the third, not the fourth), but the −2 "3 of last 5" penalty applied to this pick; #200 at 8 − 2 = 6 would not have won a fresh ranking. Continuing it was a completion call on half-finished uncommitted work, not a score call — recorded as such.
 - **Before-count measured, not estimated:** ran the committed (`HEAD`) versions of both specs → **7 failed / 13 passed**; with the fixes → **1 failed / 19 passed**. The fixed files were copied aside and restored after the measurement (diff re-checked).
 - **All 6 cleared failures were stale tests, not product defects:**
