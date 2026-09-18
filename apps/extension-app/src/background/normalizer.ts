@@ -1,4 +1,5 @@
 import type { RawEvent, CanonicalEvent, PolicyLogEntry } from '../shared/types.js'
+import { screenAnnotationText } from '../content/free-text-screen.js'
 import { generateId, normalizeUrl, extractDomain, deriveRouteTemplate, deriveAppLabel } from '../shared/utils.js'
 import { SCHEMA_VERSION } from '../shared/constants.js'
 import { RAW_TO_CANONICAL_TYPE as BASE_TYPE_MAP, NORMALIZATION_RULE_VERSION } from '@ledgerium/normalization-engine'
@@ -171,6 +172,12 @@ export function normalizeRawEvent(raw: RawEvent, blockedDomains: string[], allow
     isSensitive: false,
   } : undefined
 
+  // Row #215: user-authored notes were the one free-text field that never met
+  // a PII screen — page titles and state-change text both do. Screened with
+  // the annotation-shaped guard (PII patterns only, no truncation/word cap).
+  const screenedAnnotation = raw.annotation_text ? screenAnnotationText(raw.annotation_text) : null
+  const annotationRedacted = Boolean(raw.annotation_text) && screenedAnnotation === null
+
   const canonical: CanonicalEvent = {
     event_id: eventId,
     schema_version: SCHEMA_VERSION,
@@ -185,10 +192,23 @@ export function normalizeRawEvent(raw: RawEvent, blockedDomains: string[], allow
       sourceEventId: raw.raw_event_id,
       sourceEventType: raw.event_type,
       normalizationRuleVersion: NORMALIZATION_RULE_VERSION,
-      redactionApplied: false,
+      redactionApplied: annotationRedacted,
+      ...(annotationRedacted ? { redactionReason: 'Annotation text — PII detected' } : {}),
     },
-    ...(raw.annotation_text ? { annotation_text: raw.annotation_text } : {}),
+    ...(screenedAnnotation !== null ? { annotation_text: screenedAnnotation } : {}),
   }
 
-  return { canonical, policyEntry: null }
+  // The drop is logged, not silent: an annotation vanishing from a session
+  // with no record would look like data loss.
+  const annotationPolicyEntry: PolicyLogEntry | null = annotationRedacted
+    ? {
+        sessionId,
+        eventId,
+        t_ms: raw.t_ms,
+        outcome: 'redact',
+        reason: 'Annotation text — PII detected, note excluded',
+      }
+    : null
+
+  return { canonical, policyEntry: annotationPolicyEntry }
 }

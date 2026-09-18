@@ -29,7 +29,7 @@
  * Ref: F-0 / F-2, docs/meta/FUNNEL_AND_SOP_REVIEW_001.md §2.
  */
 
-import { applySafetyHeuristics } from './label-extractor.js'
+import { applySafetyHeuristics, containsPii } from './label-extractor.js'
 
 /** Unanchored email — catches addresses embedded anywhere in a longer string. */
 const EMBEDDED_EMAIL_RE = /[^\s@]+@[^\s@]+\.[^\s@]+/
@@ -58,4 +58,29 @@ export function screenFreeText(raw: string): string | null {
   if (EMBEDDED_EMAIL_RE.test(raw)) return null
   if (EMBEDDED_URL_RE.test(raw)) return null
   return applySafetyHeuristics(raw)
+}
+
+/**
+ * Screen a user-authored annotation for PII.
+ *
+ * Deliberately NOT `screenFreeText`. That guard is label-shaped: it rejects any
+ * text of 12+ words and truncates to 80 characters, which is right for an
+ * element label scraped off a page and wrong for a note a person chose to
+ * write — a legitimate two-sentence annotation would be dropped entirely, and
+ * an 81-character one silently cut. Notes are meant to be read back.
+ *
+ * So this applies the PII patterns only:
+ *  - `null`   — PII detected; the caller omits the annotation and logs a
+ *               redaction, so the drop is traceable rather than silent
+ *  - `string` — the note, trimmed, otherwise untouched at full length
+ *
+ * Pure. No DOM access. Deterministic.
+ */
+export function screenAnnotationText(raw: string): string | null {
+  const text = raw.trim()
+  if (!text) return null
+  if (EMBEDDED_EMAIL_RE.test(text)) return null
+  if (EMBEDDED_URL_RE.test(text)) return null
+  if (containsPii(text)) return null
+  return text
 }

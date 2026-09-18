@@ -176,3 +176,62 @@ describe('normalizeRawEvent — F-1 privacy fix', () => {
     })
   })
 })
+
+// ── Row #215 (loop 28): user-authored annotations meet the PII screen ─────────
+//
+// Page titles and state-change text were screened; annotation_text was not, so
+// a note containing an SSN uploaded verbatim. These also pin the thing the
+// obvious fix would have broken: reusing the label-shaped screen would drop any
+// note of 12+ words and truncate at 80 chars.
+describe('normalizeRawEvent — annotation_text screening', () => {
+  it('keeps a clean annotation verbatim', () => {
+    const { canonical } = normalizeRawEvent(makeRaw({ annotation_text: 'Approved by finance' }), [])
+    expect(canonical?.annotation_text).toBe('Approved by finance')
+    expect(canonical?.normalization_meta.redactionApplied).toBe(false)
+  })
+
+  it('keeps a LONG clean annotation at full length — no truncation, no word cap', () => {
+    const note =
+      'This step waits on the finance team to approve the invoice batch before the run can continue, which is usually the slowest part of the whole process and the reason cycle time varies.'
+    expect(note.length).toBeGreaterThan(80)
+    expect(note.split(/\s+/).length).toBeGreaterThan(12)
+    const { canonical } = normalizeRawEvent(makeRaw({ annotation_text: note }), [])
+    expect(canonical?.annotation_text).toBe(note)
+  })
+
+  it('drops an annotation containing an SSN, and says so', () => {
+    const { canonical, policyEntry } = normalizeRawEvent(
+      makeRaw({ annotation_text: 'customer SSN 123-45-6789' }),
+      [],
+    )
+    expect(canonical?.annotation_text).toBeUndefined()
+    expect(canonical?.normalization_meta.redactionApplied).toBe(true)
+    expect(canonical?.normalization_meta.redactionReason).toMatch(/Annotation/)
+    expect(policyEntry?.outcome).toBe('redact')
+  })
+
+  it('drops annotations containing an email, a URL, a card number or a phone number', () => {
+    for (const text of [
+      'ping bob@example.com about this',
+      'see https://internal.example.com/doc',
+      'card 4111 1111 1111 1111 on file',
+      'call 555-867-5309 first',
+    ]) {
+      const { canonical } = normalizeRawEvent(makeRaw({ annotation_text: text }), [])
+      expect(canonical?.annotation_text, text).toBeUndefined()
+    }
+  })
+
+  it('emits no policy entry and no redaction flag when there is no annotation', () => {
+    const { canonical, policyEntry } = normalizeRawEvent(makeRaw(), [])
+    expect(canonical?.annotation_text).toBeUndefined()
+    expect(canonical?.normalization_meta.redactionApplied).toBe(false)
+    expect(policyEntry).toBeNull()
+  })
+
+  it('is deterministic for the same input', () => {
+    const a = normalizeRawEvent(makeRaw({ raw_event_id: 'fixed', annotation_text: 'Approved by finance' }), [])
+    const b = normalizeRawEvent(makeRaw({ raw_event_id: 'fixed', annotation_text: 'Approved by finance' }), [])
+    expect(a.canonical?.annotation_text).toBe(b.canonical?.annotation_text)
+  })
+})

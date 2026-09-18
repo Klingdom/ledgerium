@@ -6,6 +6,21 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-18] - Notes you type during a recording are now checked for personal data
+
+**Why:** the extension screened page titles and on-screen status text for personal data before uploading them, but not the notes a user types themselves. A note containing something like a social security number was uploaded word for word.
+
+### Fixed
+- Annotations are now checked for emails, web addresses, long digit runs, phone numbers, social security numbers and card numbers. If one is found the note is left out, and the recording's policy log records that it was removed — so it is visible rather than silently missing.
+
+### Deliberately careful
+- The existing checker could not be reused as-is: it was built for short on-screen labels and throws away anything longer than twelve words or eighty characters. That would have quietly destroyed ordinary notes. Notes now get a check that looks for personal data without shortening them, and a test pins that a long, legitimate note survives intact.
+
+### Verified
+- The extension was rebuilt and tested in a real Chrome session (6 of 6, including the recording-pipeline and privacy-boundary tests), because unit tests alone cannot prove the recorder still works.
+
+---
+
 ## [2026-09-18] - Tests stopped running twice
 
 **Why:** the browser tests were grouped by a rule that matched any path containing "app", and every file in this project sits under "web-app". So the logged-in group quietly collected the public pages, the API tests and a set of production-only tests as well — running most of the suite a second time.

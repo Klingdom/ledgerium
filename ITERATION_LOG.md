@@ -4,6 +4,22 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-18 (loop 28) — Notes stop leaking: annotations now meet the PII screen (Mode 1, coordinator + 2 audit agents)
+
+- **Trigger:** CEO "figure it out". **Candidate Selection:** `directed` — honouring loop 27's self-imposed bound that the next loop be **extension source work**. No extension rows existed, so rather than invent work I commissioned two read-only audits (`chrome-web-store-expert`, `extension-privacy-auditor`) and implemented the strongest finding. Area `extension / privacy`. **D-1 drift CLEARED** — first behavioural change to `apps/extension-app/src/` since loop 8.
+- **The defect (verified myself at `background/normalizer.ts:190` before acting):** `annotation_text` — the one free-text field a user types deliberately — was passed through unscreened, while page titles (`safe-page-title.ts`) and state-change text (`state-observer.ts`) both call `screenFreeText`. A note reading "customer SSN 123-45-6789" was uploaded verbatim.
+- **The obvious fix would have been wrong.** Reusing `screenFreeText` looked right and is what the audit suggested. Reading it first showed it is **label-shaped**: `applySafetyHeuristics` rejects any text of 12+ words and truncates at 80 characters — correct for an element label scraped off a page, destructive for a note a person wrote to be read back. A legitimate two-sentence annotation would have vanished with no trace.
+- **What shipped:** `screenAnnotationText()` applies the PII patterns only (email, URL, long digit runs, phone, SSN, card) with no truncation and no word cap. On a hit the note is omitted, `redactionApplied` is set with a reason, and a `policyLog` entry is emitted — a note disappearing with no record would look like data loss. `containsPii()` extracted in `label-extractor.ts` so the two policies share **one** copy of the patterns instead of drifting.
+- **Extension Reliability Invariant honoured:** the change is under `src/background/`, so unit tests alone cannot certify it. Built the extension and ran the **real-Chrome harness: 6/6**, including the capture-pipeline and rule-9 privacy tests. Extension unit suite **391/391**.
+- **My own error, caught by typecheck not by tests:** my new tests passed `'session-test'` as the second argument to `normalizeRawEvent`, whose second parameter is `blockedDomains: string[]`. Vitest was happy — the fixture has no URL, so the bad value was never dereferenced. **Seven workspace typecheck errors caught it.** The tests passed for the wrong reason; fixed to `[]`. This is the second time this week the workspace-level check caught what a package-level green run hid.
+- **Three findings deliberately NOT bundled in** (`density-response: scope-guard-adjacent`, anchors per row): **#216** shadow-DOM `e.target` vs `composedPath()` — a real screening bypass, but the fix changes which element every event is attributed to, so it is a capture-semantics decision needing CEO awareness under the Invariant, not a screening tweak; **#217** the retired "screen content" claim survives on `support/page.tsx`, which is not in the guard test's file list — different surface (web-app copy) and the same one-decision-many-files pattern as #197/#204/#208; **#218** `SENSITIVE_INPUT_TYPES` is declared but never consulted — deciding between wiring it in (more redaction events, a behaviour change) and deleting it is its own call.
+- **Store audit result (no action needed):** permissions are minimal and justified; `<all_urls>` is **required** for multi-site capture and must not be narrowed (matches the Invariant's forbidden list and the iter-097 incident); no remote code; all three promo PNGs verified at exact pixel dimensions. What remains is human: creating the Dashboard listing (`config.ts:16` still holds a placeholder URL) and one real Chrome recording.
+- **Validation:** extension build clean; extension unit **391/391**; **real-extension harness 6/6**; workspace `pnpm test` **4742 → 4748**; workspace `pnpm typecheck` **0 errors** (after the fix above).
+- **Follow-ups:** 3 created (#216, #217, #218), 1 created-and-closed (#215).
+- **Meta-review cadence:** 2 loops since MR-025.
+
+---
+
 ## 2026-09-18 (loop 27) — Every spec stopped running twice (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO "figure it out" (second delegation). **Candidate Selection:** `top-score` — #210 (11), MR-025's endorsement. Area `web-app/qa`; no saturation penalty (recent Areas: extension/qa, web-app/a11y, security).

@@ -54,15 +54,29 @@ const PHONE_RE = /(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/
 const SSN_RE = /\d{3}-\d{2}-\d{4}/
 const CC_RE = /\b(?:\d{4}[-\s]?){3}\d{4}\b/
 
+/**
+ * True when the text matches any PII pattern this module screens for.
+ *
+ * Extracted from `applySafetyHeuristics` so the annotation screen can reuse
+ * the SAME patterns without inheriting the label-shaped length and word-count
+ * rules. One copy of the patterns, two policies on top of it.
+ *
+ * Pure. No DOM access.
+ */
+export function containsPii(text: string): boolean {
+  if (EMAIL_RE.test(text)) return true
+  if (URL_RE.test(text)) return true
+  if (LONG_DIGITS_RE.test(text.replace(/[\s\-]/g, ''))) return true
+  if (PHONE_RE.test(text)) return true
+  if (SSN_RE.test(text)) return true
+  if (CC_RE.test(text)) return true
+  return false
+}
+
 export function applySafetyHeuristics(raw: string): string | null {
   const text = raw.trim()
   if (!text) return null
-  if (EMAIL_RE.test(text)) return null
-  if (URL_RE.test(text)) return null
-  if (LONG_DIGITS_RE.test(text.replace(/[\s\-]/g, ''))) return null
-  if (PHONE_RE.test(text)) return null
-  if (SSN_RE.test(text)) return null
-  if (CC_RE.test(text)) return null
+  if (containsPii(text)) return null
   if (text.split(/\s+/).length >= MAX_LABEL_WORDS) return null
   return text.slice(0, MAX_LABEL_CHARS)
 }
