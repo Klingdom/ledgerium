@@ -53,15 +53,39 @@ on any error.
 
 ## Environment Variables
 
-All variables are optional. Default values match the demo account credentials
-used in product walkthroughs.
+All variables are optional **except against a non-local database** — see the
+safety guard below.
 
 | Variable | Default | Purpose |
 |---|---|---|
 | `DEMO_EMAIL` | `demo@ledgerium.ai` | Login email for the demo user |
-| `DEMO_PASSWORD` | `Demo2026!Workspace` | Login password for the demo user |
+| `DEMO_PASSWORD` | `Demo2026!Workspace` | Login password for the demo user. **Required (any private value) when `DATABASE_URL` is not local.** |
 | `DEMO_WORKSPACE_NAME` | `Acme Operations` | Display name of the demo team workspace |
 | `DATABASE_URL` | _(from `.env`)_ | Prisma connection string — must be set |
+
+### Safety guard (row #203)
+
+The default password above is published — it is in this runbook, the seed
+script, its test and CHANGELOG — and the demo account is created with
+`plan: 'team'`. Seeding a shared or production database with it therefore
+creates a publicly known login for a paid-tier account.
+
+The script refuses to run in that combination. `assertDemoCredentialsSafe()`
+throws **before any database work** (so a refusal cannot half-delete demo
+data) when the password is the default AND `DATABASE_URL` is not local.
+Local means a `file:` SQLite database, or a host of `localhost`, `127.0.0.1`
+or `[::1]`. A missing or unparseable `DATABASE_URL` counts as NOT local — it
+fails closed.
+
+To seed a remote demo environment, set a private password:
+
+```bash
+DEMO_PASSWORD='<something private>' pnpm --filter @ledgerium/web-app seed:demo
+```
+
+If you seeded a remote environment with the default before this guard existed,
+re-run with a private password — the script is idempotent and replaces the
+demo user's credentials.
 
 To override for a specific run:
 

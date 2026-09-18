@@ -30,7 +30,10 @@ const BASE_URL = 'http://localhost:3000';
 const OUTPUT_DIR = 'C:\\Users\\philk\\Desktop\\ledgerium-chrome-store-assets';
 const VIEWPORT = { width: 1280, height: 800 };
 const DEMO_EMAIL = 'demo@ledgerium.ai';
-const DEMO_PASSWORD = 'Demo2026!Workspace';
+// Row #203: honours DEMO_PASSWORD so a machine seeded with a private password
+// can still capture. The default matches the seed script's default and is only
+// usable against a local dev server (BASE_URL above is localhost).
+const DEMO_PASSWORD = process.env.DEMO_PASSWORD ?? 'Demo2026!Workspace';
 
 // Auth state cached between pages in same context
 const AUTH_STATE_PATH = resolve(__dirname, '../e2e/.auth/chrome-store-user.json');

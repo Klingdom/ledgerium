@@ -6,6 +6,23 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-17] - The demo account's published password can no longer be used on a live database
+
+**Why:** the demo login's password is written in the repo, the runbook and the changelog, and the seed script creates that account on the paid Team plan. The runbook also tells people to point the script at production for demos. Together that could hand out a publicly known login.
+
+### Added
+- The seed script now refuses to run when the password is the published default and the database is not a local one. It checks before touching any data, so a refusal cannot leave the demo half-deleted, and the message says exactly what to do: set a private password.
+- A missing or unreadable database address counts as "not local", so the unsafe case fails safely.
+- The screenshot tool now reads the same password setting instead of having it written in, so a machine set up privately still works.
+
+### If you already seeded a live environment with the default
+- Re-run the script with a private password. It replaces the demo account's credentials.
+
+### Note
+- A test caught a genuine bug in the new check: an IPv6 loopback address was being read as a remote host, which would have blocked a legitimate local run.
+
+---
+
 ## [2026-09-17] - Text and buttons now meet the accessibility contrast standard
 
 **Why:** three known contrast failures had been left visible on purpose, waiting on a colour decision: the faint grey used for secondary text in 773 places, the red "poor" health verdict, and the main green "Start free" button.

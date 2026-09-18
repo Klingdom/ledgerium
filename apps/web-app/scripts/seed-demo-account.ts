@@ -40,9 +40,61 @@ const BCRYPT_COST = 12;
 
 // ─── Environment ──────────────────────────────────────────────────────────────
 
+/**
+ * The published default password (row #203). It appears in this file, the
+ * runbook, CHANGELOG and the screenshot script, so it is public knowledge:
+ * anyone who has seen the repo can log in as the demo user wherever it is in
+ * force. The demo account is NOT trivial — `createDemoUser` gives it
+ * `plan: 'team'`.
+ */
+export const DEFAULT_DEMO_PASSWORD = 'Demo2026!Workspace';
+
 export const DEMO_EMAIL = process.env.DEMO_EMAIL ?? 'demo@ledgerium.ai';
-export const DEMO_PASSWORD = process.env.DEMO_PASSWORD ?? 'Demo2026!Workspace';
+export const DEMO_PASSWORD = process.env.DEMO_PASSWORD ?? DEFAULT_DEMO_PASSWORD;
 export const DEMO_WORKSPACE_NAME = process.env.DEMO_WORKSPACE_NAME ?? 'Acme Operations';
+
+/**
+ * True when the connection string points at a local development database.
+ * Pure and total: anything unparseable is treated as NOT local, so a
+ * malformed URL fails closed rather than open.
+ */
+export function isLocalDatabaseUrl(databaseUrl: string | undefined): boolean {
+  if (databaseUrl === undefined || databaseUrl.trim() === '') return false;
+  const url = databaseUrl.trim();
+  // SQLite file databases are local by construction.
+  if (url.startsWith('file:')) return true;
+  // The host alternative must try the bracketed IPv6 form FIRST: `[^:/?#]+`
+  // stops at the first colon, so `@[::1]:5432` would otherwise capture a bare
+  // "[" and read as remote. Caught by the loopback test.
+  const hostMatch = /^[a-z+]+:\/\/(?:[^@/]*@)?(\[[^\]]+\]|[^:/?#]+)/i.exec(url);
+  if (hostMatch === null) return false;
+  const host = (hostMatch[1] ?? '').toLowerCase();
+  return host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === '[::1]';
+}
+
+/**
+ * Row #203: refuse to seed a NON-LOCAL database with the published default
+ * password. The runbook explicitly tells operators to point this script at
+ * production for demos (`DEMO_ACCOUNT_SEED.md`), and the password is public,
+ * so the two together hand out a Team-plan login. Setting DEMO_PASSWORD to
+ * anything else is all that is required to proceed.
+ *
+ * Throws rather than warns: a warning printed above a successful seed is a
+ * warning nobody reads.
+ */
+export function assertDemoCredentialsSafe(
+  password: string,
+  databaseUrl: string | undefined,
+): void {
+  if (password !== DEFAULT_DEMO_PASSWORD) return;
+  if (isLocalDatabaseUrl(databaseUrl)) return;
+  throw new Error(
+    'Refusing to seed: DEMO_PASSWORD is the published default and DATABASE_URL is not local.\n' +
+      'The default password is documented in the repo, so seeding a shared or production\n' +
+      'database with it creates a publicly known login for a Team-plan account.\n' +
+      'Set DEMO_PASSWORD to something private and re-run.',
+  );
+}
 
 // ─── Pure helper: intelligenceJson builder ────────────────────────────────────
 
@@ -603,6 +655,10 @@ async function main(): Promise<void> {
   const prisma = new PrismaClient();
 
   try {
+    // Row #203: checked BEFORE any database work, so a refusal cannot leave
+    // the demo data half-deleted.
+    assertDemoCredentialsSafe(DEMO_PASSWORD, process.env.DATABASE_URL);
+
     console.log('=== Ledgerium Demo Account Seed ===');
     console.log(`Email:     ${DEMO_EMAIL}`);
     console.log(`Workspace: ${DEMO_WORKSPACE_NAME}`);

@@ -4,6 +4,21 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-17 (loop 26) — The published demo password can no longer reach a remote database (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO "continue" (after "figure it out"). **Candidate Selection:** `top-score` — #203 (9). Area `security`, which also rotates off `web-app/a11y`. Chain declared per P-3: loop 25 handled the decisions I could make; #203 was the one I could not, so this loop implements the fix that holds under **either** answer.
+- **The undecidable fact, handled honestly:** whether production was ever seeded with the default is not readable from here. Rather than guess, the guard makes the dangerous combination impossible going forward, and the runbook tells anyone who already did it what to do (re-run with a private password; the script is idempotent).
+- **Change:** `assertDemoCredentialsSafe(password, databaseUrl)` throws when the password is the published default AND the database is not local; `isLocalDatabaseUrl()` accepts `file:` SQLite and `localhost` / `127.0.0.1` / `[::1]`. Called **before** `deleteDemoData`, so a refusal cannot leave demo data half-deleted. Missing or unparseable `DATABASE_URL` **fails closed**. The error names the remedy.
+- **Why throw, not warn:** a warning printed above a successful seed is a warning nobody reads.
+- **A test caught a real bug in my own guard.** `[^:/?#]+` stops at the first colon, so `postgresql://u:p@[::1]:5432/db` captured a bare `[` and classified loopback as **remote** — the guard would have refused a legitimate local seed. The bracketed-IPv6 alternative now comes first, with a comment saying why. This is exactly the case I added the test for, and it failed on the first run.
+- **Also:** `capture-chrome-store-screenshots.ts` stopped hardcoding the password and now reads `DEMO_PASSWORD`, so a machine seeded privately can still capture screenshots.
+- **Verified end to end, not just by unit test:** default password + remote URL → process exits with "Refusing to seed…"; private password + same URL → proceeds past the guard into Prisma (which then fails to reach the bogus host, as expected). Both observed directly.
+- **Validation:** seed-account suite **39 → 49** (+10 new); `pnpm typecheck` 0 errors; web-app **3030 → 3040**; workspace **4742 unchanged** — the root run does not collect `apps/web-app/scripts/`, so this file only runs under the web-app package. (I first wrote +11 / 3041 / 4753 from arithmetic rather than from the runs; corrected against the actual output before commit.)
+- **Follow-ups:** 0 created, 1 closed (#203). `density-response`: not applicable.
+- **Meta-review cadence:** 3 loops since MR-024 — **MR-025 due before loop 27.**
+
+---
+
 ## 2026-09-17 (loop 25) — The colour decisions, made: contrast fixed on both themes (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO "figure it out" — explicit delegation of the open decisions.

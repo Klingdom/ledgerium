@@ -15,6 +15,9 @@ import {
   REFERENCE_TIMESTAMP_MS,
   DEMO_EMAIL,
   DEMO_PASSWORD,
+  DEFAULT_DEMO_PASSWORD,
+  isLocalDatabaseUrl,
+  assertDemoCredentialsSafe,
   DEMO_WORKSPACE_NAME,
   buildIntelligenceJson,
   buildSopContent,
@@ -611,5 +614,65 @@ describe('createDemoWorkflow', () => {
     // REFERENCE_TIMESTAMP_MS - createdDaysAgo * DAY_MS
     expect(dateSpy).not.toHaveBeenCalled();
     dateSpy.mockRestore();
+  });
+});
+
+// ── Row #203 (loop 26): the published default password cannot reach a remote DB ──
+describe('isLocalDatabaseUrl', () => {
+  it('treats SQLite file databases as local', () => {
+    expect(isLocalDatabaseUrl('file:./dev.db')).toBe(true);
+    expect(isLocalDatabaseUrl('file:../prisma/data/ledgerium.db')).toBe(true);
+  });
+
+  it('treats localhost / loopback Postgres as local', () => {
+    expect(isLocalDatabaseUrl('postgresql://user:pw@localhost:5432/ledgerium')).toBe(true);
+    expect(isLocalDatabaseUrl('postgresql://user:pw@127.0.0.1:5432/ledgerium')).toBe(true);
+    expect(isLocalDatabaseUrl('postgresql://user:pw@[::1]:5432/ledgerium')).toBe(true);
+  });
+
+  it('treats a remote host as NOT local', () => {
+    expect(isLocalDatabaseUrl('postgresql://user:pw@db.ledgerium.ai:5432/ledgerium')).toBe(false);
+    expect(isLocalDatabaseUrl('postgresql://user:pw@10.0.0.5:5432/ledgerium')).toBe(false);
+  });
+
+  it('is not fooled by a remote host that merely contains "localhost"', () => {
+    expect(isLocalDatabaseUrl('postgresql://user:pw@localhost.evil.example:5432/db')).toBe(false);
+    expect(isLocalDatabaseUrl('postgresql://user:pw@notlocalhost:5432/db')).toBe(false);
+  });
+
+  it('fails closed on missing or unparseable values', () => {
+    expect(isLocalDatabaseUrl(undefined)).toBe(false);
+    expect(isLocalDatabaseUrl('')).toBe(false);
+    expect(isLocalDatabaseUrl('   ')).toBe(false);
+    expect(isLocalDatabaseUrl('not a url')).toBe(false);
+  });
+});
+
+describe('assertDemoCredentialsSafe', () => {
+  it('throws when the default password meets a remote database', () => {
+    expect(() =>
+      assertDemoCredentialsSafe(DEFAULT_DEMO_PASSWORD, 'postgresql://u:p@db.ledgerium.ai:5432/l'),
+    ).toThrow(/Refusing to seed/);
+  });
+
+  it('throws when DATABASE_URL is missing entirely (fails closed)', () => {
+    expect(() => assertDemoCredentialsSafe(DEFAULT_DEMO_PASSWORD, undefined)).toThrow(/Refusing to seed/);
+  });
+
+  it('allows the default password against a local database', () => {
+    expect(() => assertDemoCredentialsSafe(DEFAULT_DEMO_PASSWORD, 'file:./dev.db')).not.toThrow();
+    expect(() =>
+      assertDemoCredentialsSafe(DEFAULT_DEMO_PASSWORD, 'postgresql://u:p@localhost:5432/l'),
+    ).not.toThrow();
+  });
+
+  it('allows a private password against a remote database', () => {
+    expect(() =>
+      assertDemoCredentialsSafe('a-private-one', 'postgresql://u:p@db.ledgerium.ai:5432/l'),
+    ).not.toThrow();
+  });
+
+  it('names the remedy in the error, not just the problem', () => {
+    expect(() => assertDemoCredentialsSafe(DEFAULT_DEMO_PASSWORD, undefined)).toThrow(/Set DEMO_PASSWORD/);
   });
 });
