@@ -60,12 +60,12 @@ interface CommandHeaderProps {
  */
 function healthBand(score: number): { label: 'poor' | 'fair' | 'good'; colorClass: string; railClass: string } {
   if (score < 60) {
-    return { label: 'poor', colorClass: 'text-red-600', railClass: 'bg-red-500' };
+    return { label: 'poor', colorClass: 'text-[var(--status-danger)]', railClass: 'bg-red-500' };
   }
   if (score < 80) {
-    return { label: 'fair', colorClass: 'text-amber-600', railClass: 'bg-amber-500' };
+    return { label: 'fair', colorClass: 'text-[var(--status-warning)]', railClass: 'bg-amber-500' };
   }
-  return { label: 'good', colorClass: 'text-green-600', railClass: 'bg-green-500' };
+  return { label: 'good', colorClass: 'text-[var(--status-success)]', railClass: 'bg-green-500' };
 }
 
 /**

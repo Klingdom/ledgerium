@@ -4,6 +4,28 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-17 (loop 25) — The colour decisions, made: contrast fixed on both themes (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO "figure it out" — explicit delegation of the open decisions.
+- **Candidate Selection:** `directed` (decision delegated). Chain declared per P-3: #205 + #206 + #207 are one decision family (colour tokens meet AA), and they were the single largest thing blocking CI coverage — three a11y tests were red by design and two suites could not join the gate.
+- **What I decided, and did:**
+  - **#205 token.** Dark `--content-tertiary` `#64748B` → `#7C8CA1`; light `#94A3B8` → `#475569`. Contrast computed from WCAG relative luminance, not eyeballed: dark 3.98 → **5.52:1** on `--surface-primary` and 3.40 → **4.72:1** on `--surface-elevated`; light **2.45 → 7.24:1**. The light theme was the worse of the two and had never been measured. Both new values stay below `--content-secondary`, so hierarchy survives. Two lines, no audit of 773 call sites.
+  - **#206 verdict word.** Added per-theme `--status-danger/-warning/-success`, because the naive fix is wrong: `#F87171` is 6.84:1 on dark but **2.77:1** on light, and `#DC2626` is the reverse. `healthBand()` returns `text-[var(--status-*)]`. Amber and green already passed but moved too, so the three bands remain one decision. Print block gets light values.
+  - **#207 primary button.** `.btn-primary` `bg-brand-600` (3.76:1) → `bg-brand-700` (**5.48:1**), hover `brand-700` → `brand-800`. One rule, all 90 usages across 48 files.
+- **Verified by axe, not by assertion:** `v2-a11y` **3 red → 14/14 green**; `public/nav` axe green. **Both suites joined the CI gate in this commit** per the widening rule — the gate goes 40 → **84 tests**, run as a single invocation.
+- **Decisions the CEO delegated, recorded rather than left hanging:**
+  - **Area definition (was an open question):** fine-grained (`web-app/qa` vs `web-app/copy`) is primary, since that is what the backlog's Area column holds; plus a coarse backstop — 6 consecutive loops inside `web-app` at any granularity forces a different top-level surface. Loops 18–23 would have tripped it.
+  - **#202 P-3/P-4:** adopted as practice (chain declaration; the consolidated priced decision queue). No CLAUDE.md edit — they are behaviours, not enforced rules.
+  - **#212 P-6/P-7:** adopted (P-6 self-applied since MR-024; P-7 standing).
+  - **#203:** cannot be decided by me — it turns on a fact about production I cannot read. The fix that is right either way (refuse the default password unless `DATABASE_URL` is local) is scheduled next.
+  - **Deploy gate (D):** decided — wire `deploy.yml` to depend on the E2E gates, but **only after the new `real-extension` job has one green CI run**. Gating on a job that has never executed on a runner would be exactly the "add it hopefully" mistake.
+- **Two things I did NOT self-approve, on a general instruction:** editing `.claude/settings.json` for the P-5 commit hook (rewiring my own controls), and pushing to production (the CEO has pushed by hand each time). Both stated, neither done.
+- **Validation:** `pnpm typecheck` 0 errors; web-app **3030/3030**; workspace **4742/4742**; `v2-a11y` + `public/nav` **46/46**; widened gate **84/84 as one invocation**.
+- **Follow-ups:** 0 created; 3 closed (#205, #206, #207) + #202 adopted + #212 partially (P-5 still open).
+- **Meta-review cadence:** 2 loops since MR-024.
+
+---
+
 ## 2026-09-17 (loop 24) — The extension's real-Chrome gate now runs in CI (Mode 1, `devops-engineer`)
 
 - **Trigger:** CEO "continue".

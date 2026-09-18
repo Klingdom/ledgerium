@@ -6,6 +6,20 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-17] - Text and buttons now meet the accessibility contrast standard
+
+**Why:** three known contrast failures had been left visible on purpose, waiting on a colour decision: the faint grey used for secondary text in 773 places, the red "poor" health verdict, and the main green "Start free" button.
+
+### Changed
+- **Faint grey text** is now readable on both themes. It measured 3.98:1 on the dark theme and 2.45:1 on the light one, against a 4.5:1 minimum; it is now 5.5:1 and 7.2:1. The light theme was the worse of the two and had never been measured.
+- **The main button** (used 90 times, including "Start free") went from 3.76:1 to 5.5:1 by darkening the brand green one step. Its hover shade moved down one step too, so hovering still looks different.
+- **The health verdict word** now uses colours chosen per theme. A red that is readable on the dark background fails on the light one, so a single colour could not have worked.
+
+### Result
+- The dashboard accessibility suite is fully green for the first time (14 of 14), and both it and the public navigation tests now run in CI on every push. The automated gate grew from 40 to 84 tests.
+
+---
+
 ## [2026-09-17] - The extension's real-browser test now runs automatically
 
 **Why:** the rule book calls the real-Chrome test the gate that must pass before any extension change ships, because twice before a change passed every other check and still broke recording. That gate was never wired into CI — it only ran when someone remembered to run it by hand.

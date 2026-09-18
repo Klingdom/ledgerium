@@ -17,12 +17,12 @@ import { healthVerdictWord } from './CommandHeader.js';
 
 function healthBand(score: number): { label: 'poor' | 'fair' | 'good'; colorClass: string } {
   if (score < 60) {
-    return { label: 'poor', colorClass: 'text-red-600' };
+    return { label: 'poor', colorClass: 'text-[var(--status-danger)]' };
   }
   if (score < 80) {
-    return { label: 'fair', colorClass: 'text-amber-600' };
+    return { label: 'fair', colorClass: 'text-[var(--status-warning)]' };
   }
-  return { label: 'good', colorClass: 'text-green-600' };
+  return { label: 'good', colorClass: 'text-[var(--status-success)]' };
 }
 
 // ── Mirrors CommandHeader.tsx delta label derivation ─────────────────────────
@@ -53,19 +53,19 @@ describe('CommandHeader healthBand (iter-024 60/80 thresholds)', () => {
   it('score < 60 → poor / red', () => {
     expect(healthBand(0).label).toBe('poor');
     expect(healthBand(59).label).toBe('poor');
-    expect(healthBand(0).colorClass).toBe('text-red-600');
+    expect(healthBand(0).colorClass).toBe('text-[var(--status-danger)]');
   });
 
   it('score 60–79 → fair / amber', () => {
     expect(healthBand(60).label).toBe('fair');
     expect(healthBand(79).label).toBe('fair');
-    expect(healthBand(60).colorClass).toBe('text-amber-600');
+    expect(healthBand(60).colorClass).toBe('text-[var(--status-warning)]');
   });
 
   it('score >= 80 → good / green', () => {
     expect(healthBand(80).label).toBe('good');
     expect(healthBand(100).label).toBe('good');
-    expect(healthBand(80).colorClass).toBe('text-green-600');
+    expect(healthBand(80).colorClass).toBe('text-[var(--status-success)]');
   });
 });
 

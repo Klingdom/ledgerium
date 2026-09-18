@@ -10,7 +10,19 @@
   /* Content */
   --content-primary: #E2E8F0;
   --content-secondary: #94A3B8;
-  --content-tertiary: #64748B;
+  /* Row #205: was #64748B = 3.98:1 on --surface-primary and 3.40:1 on
+     --surface-elevated — both under the 4.5:1 AA floor for normal text, in
+     the DEFAULT theme, across 773 usages. #7C8CA1 measures 5.52:1 on
+     --surface-primary and 4.72:1 on --surface-elevated, and stays visibly
+     below --content-secondary so the hierarchy survives. */
+  --content-tertiary: #7C8CA1;
+
+  /* Status colours (row #206). Per-theme because a red that passes on a dark
+     surface fails on a light one: #F87171 is 6.84:1 here but 2.77:1 on the
+     light surface, and #DC2626 is the reverse (3.92:1 here, 4.61:1 there). */
+  --status-danger: #F87171;   /* 6.84:1 on --surface-primary */
+  --status-warning: #FBBF24;  /* 11.3:1 */
+  --status-success: #4ADE80;  /* 10.9:1 */
 
   /* Borders */
   --border-default: rgba(255, 255, 255, 0.10);
@@ -30,7 +42,14 @@
   /* Content */
   --content-primary: #0F172A;
   --content-secondary: #64748B;
-  --content-tertiary: #94A3B8;
+  /* Row #205: was #94A3B8 = 2.45:1 on #F8FAFC — the worst of the two themes.
+     #475569 measures 7.24:1 and stays distinct from --content-secondary. */
+  --content-tertiary: #475569;
+
+  /* Row #206 — light-theme status colours (see :root for why per-theme). */
+  --status-danger: #DC2626;   /* 4.61:1 on --surface-primary */
+  --status-warning: #B45309;  /* 4.79:1 */
+  --status-success: #15803D;  /* 4.79:1 */
 
   /* Borders */
   --border-default: #E2E8F0;
@@ -62,8 +81,12 @@
 
   /* ── Buttons ──────────────────────────────────────────────────────────── */
 
+  /* Row #207: white on bg-brand-600 (#059669) is 3.76:1 — under the 4.5:1 AA
+     floor for 14px text, on the primary call to action in 90 places. brand-700
+     (#047857) measures 5.48:1; hover moves down one step to keep the hover
+     state distinguishable. */
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-ds-md bg-brand-600 px-4 py-2.5 text-ds-sm font-medium text-white transition-all hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center rounded-ds-md bg-brand-700 px-4 py-2.5 text-ds-sm font-medium text-white transition-all hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-secondary {
     @apply inline-flex items-center justify-center rounded-ds-md border px-4 py-2.5 text-ds-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
@@ -423,6 +446,9 @@
       --content-primary: #111827 !important;
       --content-secondary: #374151 !important;
       --content-tertiary: #6b7280 !important;
+      --status-danger: #DC2626 !important;
+      --status-warning: #B45309 !important;
+      --status-success: #15803D !important;
       --border-default: #e2e8f0 !important;
       --border-subtle: #f1f5f9 !important;
       background: #ffffff !important;
