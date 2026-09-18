@@ -6,6 +6,23 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-18] - Tests stopped running twice
+
+**Why:** the browser tests were grouped by a rule that matched any path containing "app", and every file in this project sits under "web-app". So the logged-in group quietly collected the public pages, the API tests and a set of production-only tests as well — running most of the suite a second time.
+
+### Fixed
+- Test groups are now anchored to their actual folders. The suite lists 148 tests instead of 229, with no loss of coverage: the missing 81 were duplicates and tests that belong to a different setup.
+- The automated CI gate went from 84 to 64 tests, covering exactly the same ground.
+
+### Why it mattered
+- A public page test passing *while logged in* says nothing about how that page behaves for a logged-out visitor.
+- Every test count reported this week was inflated by the duplicates.
+
+### Noted
+- One login setup step failed and passed on retry during verification. Recorded for diagnosis rather than guessed at.
+
+---
+
 ## [2026-09-17] - The demo account's published password can no longer be used on a live database
 
 **Why:** the demo login's password is written in the repo, the runbook and the changelog, and the seed script creates that account on the paid Team plan. The runbook also tells people to point the script at production for demos. Together that could hand out a publicly known login.

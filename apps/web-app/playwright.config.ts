@@ -57,7 +57,13 @@ export default defineConfig({
     /* Public pages — no auth required */
     {
       name: 'public',
-      testMatch: /public\/.+\.spec\.ts/,
+      // Row #210: anchored on the e2e/ subdirectory. The old /public\/.+/ shape
+      // matched a path SUBSTRING, and every path here contains 'web-app/', so the
+      // three projects overlapped: `authenticated` collected 171 of the 229 listed
+      // tests — all the public and api specs too, each run a second time with a
+      // session. A public-page test passing while logged in is not evidence about
+      // the logged-out page.
+      testMatch: /e2e[\/]public[\/].+\.spec\.ts$/,
       use: { ...devices['Desktop Chrome'] },
     },
 
@@ -67,7 +73,11 @@ export default defineConfig({
        can rely on both storageState files already existing. */
     {
       name: 'authenticated',
-      testMatch: /app\/.+\.spec\.ts/,
+      // Row #210: was /app\/.+/, which matched 'web-app/' in every path — it swept
+      // in public/, api/ AND e2e/smoke/ (the smoke specs have their OWN config,
+      // playwright.smoke.config.ts, needing a production build and a separate DB;
+      // they were never meant to run here).
+      testMatch: /e2e[\/]app[\/].+\.spec\.ts$/,
       dependencies: ['auth-setup', 'free-auth-setup'],
       use: {
         ...devices['Desktop Chrome'],
@@ -78,7 +88,8 @@ export default defineConfig({
     /* API tests */
     {
       name: 'api',
-      testMatch: /api\/.+\.spec\.ts/,
+      // Row #210: anchored like the others.
+      testMatch: /e2e[\/]api[\/].+\.spec\.ts$/,
       dependencies: ['auth-setup'],
       use: {
         storageState: './e2e/.auth/user.json',

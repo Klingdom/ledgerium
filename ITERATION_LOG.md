@@ -4,6 +4,23 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-18 (loop 27) — Every spec stopped running twice (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO "figure it out" (second delegation). **Candidate Selection:** `top-score` — #210 (11), MR-025's endorsement. Area `web-app/qa`; no saturation penalty (recent Areas: extension/qa, web-app/a11y, security).
+- **D-1 drift — decided, not inferred.** The counter is ~18 loops with no behavioural extension change. I did **not** manufacture another ack from "continue": under the explicit "figure it out" delegation I am recording this as a **coordinator decision** — one more non-extension loop, taken because #210 was corrupting the evidence every other loop relies on (test counts). **Bound, self-imposed: the next loop is extension source work, or I stop and ask.**
+- **The fix:** all three project patterns anchored on the `e2e/` subdirectory. The old `/app\/.+\.spec\.ts/` shape matched a path substring, and every path here contains `web-app/`, so the projects overlapped.
+- **Measured, before and after, with `--list`:** total **229 → 148** unique tests; `authenticated` **171 → 90**; files 30 → 25. CI gate **84 → 64** (42 authenticated + 20 public + 2 setup) with **identical coverage** — 20 duplicate executions removed.
+- **A third victim found while fixing it:** `e2e/smoke/` was also being swept in. Those specs have their own `playwright.smoke.config.ts` requiring a production build and a separate database; they were never meant to run under the default config. They now do not, which is correct — they still run via their own config.
+- **Why this mattered beyond CI minutes:** a public-page test passing *while logged in* is not evidence about the logged-out page, and the duplicate counts made every gate tally I have reported this week wrong (loop 20's reconciliation, corrected at loop 22, was the first symptom).
+- **New row #214:** `free-auth.setup.ts` went flaky during the verification run (1 flaky, passed on retry). A setup step gates every spec depending on it. Not diagnosed — no trace captured — so the row says to re-run with `--retries=0` and a trace next time rather than guessing now.
+- **Validation:** gate **63 passed + 1 flaky = 64** as a single invocation; `--list` counts recorded above; config-only change, so unit suites are untouched by construction and were not re-run.
+- **MR-025 verified before acting on it (3 claims, all confirmed):** `Bash(git push *)` is in the settings **deny** list — so "I left pushing to you" was never my judgement call, it is a restriction the CEO installed, and I have corrected that in the record; `.claude/hooks/` holds 7 scripts and settings.json references **none** of them (so an unwired P-5 script really would be theatre); `--content-tertiary` appears **828 times across 132 files** (the long-quoted "773" was stale, and my own loop-25 note repeated it).
+- **P-5 decision:** still not self-approved — it edits `.claude/settings.json`, my own control surface, and MR-025 shows an unwired script would be dead weight. The honest third option is a **CI cadence check** (fails a build when ≥4 loops sit above the last meta-review), which is real enforcement, lives in git history, and touches nothing of mine. Filed as the next governance item rather than smuggled into this loop.
+- **Follow-ups:** 1 created (#214), 1 closed (#210). `density-response`: not applicable.
+- **Meta-review cadence:** 1 loop since MR-025.
+
+---
+
 ## 2026-09-17 (loop 26) — The published demo password can no longer reach a remote database (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO "continue" (after "figure it out"). **Candidate Selection:** `top-score` — #203 (9). Area `security`, which also rotates off `web-app/a11y`. Chain declared per P-3: loop 25 handled the decisions I could make; #203 was the one I could not, so this loop implements the fix that holds under **either** answer.
