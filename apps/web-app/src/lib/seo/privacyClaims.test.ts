@@ -35,6 +35,9 @@ const CORRECTED_FILES = [
   resolve(__dirname, '..', '..', 'app', '(public)', 'compare', 'scribe', 'page.tsx'),
   resolve(__dirname, '..', '..', 'content', 'pages', 'alternatives.ts'),
   resolve(__dirname, '..', '..', 'content', 'pages', 'compare.ts'),
+  // Row #217 (loop 28-29): the product page carried the same retired phrasing in
+  // its comparison table and was NOT in this list, so the lock could not see it.
+  resolve(__dirname, '..', '..', 'app', '(public)', 'product', 'page.tsx'),
 ];
 
 // The retired absolute-negation phrase — "screen content" with a space,
@@ -72,5 +75,13 @@ describe('privacy claim correction — screen-content overclaim retired', () => 
     const text = readFileSync(file, 'utf8');
     expect(text).toContain("label: 'Records screen video'");
     expect(text).not.toContain("label: 'Captures screen content'");
+  });
+
+  it('the product-page privacy row names the concrete capability and volunteers the label boundary (row #217)', () => {
+    const file = resolve(__dirname, '..', '..', 'app', '(public)', 'product', 'page.tsx');
+    const text = readFileSync(file, 'utf8');
+    expect(text).toContain("screenshot: 'Records full screen video'");
+    expect(text).toContain('captures short visible text labels');
+    expect(text).not.toContain("'Captures screen content'");
   });
 });

@@ -185,8 +185,14 @@ const COMPARISON_ROWS = [
   },
   {
     dimension: 'Privacy',
-    ledgerium: 'No screenshots, no keystrokes',
-    screenshot: 'Captures screen content',
+    // Row #217: the competitor cell used the absolute phrasing retired from
+    // compare.ts (see privacyClaims.test.ts), which now names the concrete
+    // capability instead. The Ledgerium cell also volunteers the boundary
+    // rather than stopping at the two things it does not do: short visible
+    // labels ARE captured (label-extractor.ts rules 7-9). NB: the lock scans
+    // raw file text, so do not quote the retired phrase here — it would trip.
+    ledgerium: 'No screenshots or video; captures short visible text labels',
+    screenshot: 'Records full screen video',
     mining: 'Requires system API access',
     manual: 'Depends on what is documented',
   },

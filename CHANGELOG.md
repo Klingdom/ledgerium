@@ -6,6 +6,20 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-18] - A comparison table stops overstating, on the one page that was missed
+
+**Why:** the product page's comparison table described screen-recording tools as capturing "screen content" — wording retired everywhere else for being an absolute claim — and stated Ledgerium's privacy as two things it does not do, without mentioning the one thing it does.
+
+### Changed
+- The competitor column now names the concrete capability: records full screen video.
+- The Ledgerium column now reads "No screenshots or video; captures short visible text labels", which volunteers the boundary instead of implying nothing on screen is read.
+- The automated check that was already guarding this wording on other pages now covers the product page too. It had a gap, which is why this survived.
+
+### Note
+- The row that prompted this was filed inaccurately: the support page it named was already correct. A full scan found the single real instance elsewhere. The claim on the support page was left alone.
+
+---
+
 ## [2026-09-18] - Notes you type during a recording are now checked for personal data
 
 **Why:** the extension screened page titles and on-screen status text for personal data before uploading them, but not the notes a user types themselves. A note containing something like a social security number was uploaded word for word.

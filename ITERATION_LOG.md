@@ -4,6 +4,20 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-18 (loop 29) — A comparison row stops overclaiming, and the lock that missed it now covers it (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO "keep going". **Candidate Selection:** `top-score` — #217 (12). Area `web-app / copy`; recent Areas were qa and extension/privacy, so no saturation.
+- **I filed this row wrong, and checking it first is what saved the loop.** #217 claimed the retired "screen content" overclaim survived on `support/page.tsx`. It does not: that page says "screenshots, screen **recordings**, keystrokes, or typed content", which is accurate. I had filed it from a grep line that wrapped between "screen" and "recordings", plus an audit assertion I had not yet verified against the file. Had I implemented the row as written I would have "fixed" correct copy.
+- **What the literal scan actually found:** exactly **one** live instance across every `.ts`/`.tsx` in `apps/web-app/src` — `product/page.tsx:189` — and it is a **competitor** cell describing screen recorders, not a claim about Ledgerium.
+- **The real defect, which is still real:** the identical comparison row was corrected in `content/pages/compare.ts` to name the concrete capability ("Records screen video") and locked by `privacyClaims.test.ts`; the product page kept the old phrasing and **was not in the lock's `CORRECTED_FILES` list**, so the guard could not see it. Same one-decision-many-files pattern as #197 / #204 / #208 — but this time the guard existed and simply had a hole.
+- **Changes:** competitor cell → `Records full screen video`; Ledgerium cell `No screenshots, no keystrokes` → `No screenshots or video; captures short visible text labels` (volunteering the boundary rather than stopping at two negatives, matching the compare.ts precedent); `product/page.tsx` added to `CORRECTED_FILES`; a row-specific assertion added. D-4 clause 1 did **not** fire — 2 user-visible strings, under the 3 threshold — and both mirror wording already approved in an earlier consult.
+- **The lock caught my own comment.** My first edit quoted the retired phrase inside an explanatory code comment; `privacyClaims.test.ts` scans raw file text, so it failed immediately. Reworded, and left a note in the comment so the next person does not repeat it. The guard working against me is the guard working.
+- **Validation:** `privacyClaims.test.ts` **16/16** (14 → 16); web-app **3040 → 3043**; `pnpm typecheck` 0 errors.
+- **Follow-ups:** 0 created, 1 closed (#217, scope-corrected).
+- **Meta-review cadence:** 3 loops since MR-025 (27, 28, 29) — **MR-026 due before loop 30.**
+
+---
+
 ## 2026-09-18 (loop 28) — Notes stop leaking: annotations now meet the PII screen (Mode 1, coordinator + 2 audit agents)
 
 - **Trigger:** CEO "figure it out". **Candidate Selection:** `directed` — honouring loop 27's self-imposed bound that the next loop be **extension source work**. No extension rows existed, so rather than invent work I commissioned two read-only audits (`chrome-web-store-expert`, `extension-privacy-auditor`) and implemented the strongest finding. Area `extension / privacy`. **D-1 drift CLEARED** — first behavioural change to `apps/extension-app/src/` since loop 8.
