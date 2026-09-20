@@ -4,6 +4,24 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-20 (loop 31) — A sensitivity list that documented an intent the code did not implement (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO "keep going autonomously". **Candidate Selection:** `top-score` — #218 (9 as filed; re-scored 12 on inspection, see below). Area `extension / privacy`, which also keeps extension work in supply per P-13. D-1 = 0.
+- **P-11 applied — I opened the file before deciding, and it changed the answer.** The row offered a binary: wire the constant in, or delete it. Reading `sensitivity.ts:13-20` and every consumer showed a third, better option, and two facts the row did not contain:
+  - `SENSITIVE_INPUT_TYPES` is imported by **nothing but its own test** — `rules.ts` imports only `SENSITIVE_SELECTOR_PATTERNS`.
+  - `ssn` and `credit-card` are **not HTML input `type` values**, so as members of an input-type set they could never match anything. They were never a missing screen; they were a category error.
+  - The extension already patches the gap locally: `content/target-inspector.ts:25-28` handles `hidden` itself, with the comment *"hidden is not caught by classifySensitivity at all"*.
+- **Resolution — make it true and used, not deleted:** `classifySensitivity` now consults the set, so the list and the behaviour cannot drift. `email`/`tel` removed (the classifier deliberately returns `isSensitive: false, class 'pii'`; listing them implied a screen that did not exist). `ssn`/`credit-card` removed (covered by the selector/label patterns, where they belong — pinned by tests). `hidden` kept and now honoured in the shared classifier, classed `custom`.
+- **The old tests passed while implying something false.** Four assertions of the form "email is in the set" — true, and meaningless, because nothing consulted the set and email inputs were classified NOT sensitive. Replaced with six behavioural tests, including a drift lock that classifies **every** member of the set and asserts each is actually sensitive.
+- **Behaviour change, stated plainly:** `classifySensitivity('hidden')` now returns sensitive where it previously returned not-sensitive. The extension is unaffected (it already treated hidden as sensitive at the call site); `rules.ts` will now redact hidden-input events it previously let through. Values were never captured either way — this affects selector/label retention on a rarely-interacted element type.
+- **Test-count measured, not derived.** Burned twice this week on arithmetic, so I stashed the change and ran the file both ways: **36 → 38**. That reconciles the workspace total exactly (4748 + 3 from loop 29 + 2 here = 4753).
+- **Validated per the Extension Reliability Invariant** — policy-engine feeds the recorder, so unit tests alone cannot certify it: extension rebuilt, **real-Chrome harness 6/6** (including the capture-pipeline and rule-9 privacy tests), extension unit suite **391/391**.
+- **Validation:** workspace `pnpm test` **4748 → 4753**; `pnpm typecheck` 0 errors; policy-engine file 36 → 38.
+- **Follow-ups:** 0 created, 1 closed (#218).
+- **Meta-review cadence:** 2 loops since MR-026.
+
+---
+
 ## 2026-09-20 (loop 30) — Deploy now waits for the end-to-end gates (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO "keep going autonomously". **Candidate Selection:** `top-score` — deploy gating (11), MR-026's endorsement. Area `ci`; recent Areas extension/privacy and web-app/copy, so no saturation. D-1 = 1 loop since the extension change; no ack needed.

@@ -205,21 +205,48 @@ describe('classifySensitivity', () => {
   });
 });
 
-describe('SENSITIVE_INPUT_TYPES', () => {
-  it('contains "password"', () => {
-    expect(SENSITIVE_INPUT_TYPES.has('password')).toBe(true);
+describe('SENSITIVE_INPUT_TYPES (row #218 — the set and the behaviour agree)', () => {
+  // These replace four membership assertions that asserted nothing about
+  // behaviour: the set was consulted by no production code, so "email is in the
+  // set" was true while email inputs were classified NOT sensitive.
+
+  it('every member is actually classified sensitive — drift lock', () => {
+    for (const type of SENSITIVE_INPUT_TYPES) {
+      expect(classifySensitivity(type).isSensitive, type).toBe(true);
+    }
   });
 
-  it('contains "email"', () => {
-    expect(SENSITIVE_INPUT_TYPES.has('email')).toBe(true);
+  it('classifies hidden inputs as sensitive (was handled only at one call site)', () => {
+    const result = classifySensitivity('hidden');
+    expect(result.isSensitive).toBe(true);
+    expect(result.sensitivityClass).toBe('custom');
   });
 
-  it('contains "tel"', () => {
-    expect(SENSITIVE_INPUT_TYPES.has('tel')).toBe(true);
+  it('keeps password as its own class, ahead of the generic set check', () => {
+    expect(classifySensitivity('password')).toEqual({
+      isSensitive: true,
+      sensitivityClass: 'password',
+    });
   });
 
-  it('does not contain "text"', () => {
+  it('does NOT list email or tel — they are pii but deliberately not blocking', () => {
+    expect(SENSITIVE_INPUT_TYPES.has('email')).toBe(false);
+    expect(SENSITIVE_INPUT_TYPES.has('tel')).toBe(false);
+    for (const type of ['email', 'tel']) {
+      expect(classifySensitivity(type)).toEqual({ isSensitive: false, sensitivityClass: 'pii' });
+    }
+  });
+
+  it('does NOT list ssn or credit-card — not HTML input types; caught by pattern instead', () => {
+    expect(SENSITIVE_INPUT_TYPES.has('ssn')).toBe(false);
+    expect(SENSITIVE_INPUT_TYPES.has('credit-card')).toBe(false);
+    expect(classifySensitivity('text', 'input.ssn').isSensitive).toBe(true);
+    expect(classifySensitivity('text', 'input.credit-card').isSensitive).toBe(true);
+  });
+
+  it('leaves ordinary text inputs alone', () => {
     expect(SENSITIVE_INPUT_TYPES.has('text')).toBe(false);
+    expect(classifySensitivity('text').isSensitive).toBe(false);
   });
 });
 

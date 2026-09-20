@@ -6,6 +6,24 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-20] - A privacy list that promised more than the code delivered
+
+**Why:** a list of "sensitive input types" named email and phone fields, but nothing in the product ever read that list. Anyone reading it — including an auditor — would reasonably believe those fields got special treatment. They did not.
+
+### Fixed
+- The list is now actually consulted by the code that decides what to redact, and a test checks every entry really is treated as sensitive, so the two cannot drift apart again.
+- Email and phone were removed from it. The product deliberately does not redact those (the typed value is never captured either way), so listing them claimed a protection that did not exist.
+- "SSN" and "credit card" were removed as well: they are not real input types, so they could never have matched there. Those cases are caught by the separate name-pattern check, which is tested.
+- Hidden fields — which often carry tokens and record keys — are now treated as sensitive by the shared check, not just by one caller that had patched around the gap locally.
+
+### Note
+- The tests that existed passed while implying something untrue: they checked that email was *in the list*, never that an email field was treated as sensitive. They are now behavioural.
+
+### Verified
+- Rebuilt the extension and ran it in a real Chrome session (6 of 6), since this code feeds the recorder.
+
+---
+
 ## [2026-09-20] - A failing browser test can now stop a release
 
 **Why:** deploying only waited for typecheck and unit tests. Both browser-test suites could be failing and the release would still go out — including the real-Chrome test that exists because unit tests twice failed to notice the recorder was broken.
