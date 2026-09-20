@@ -1,8 +1,19 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('API: Feature gating', () => {
-  test('POST /api/analytics returns 403 for free tier (requires intelligenceLayer)', async ({ request }) => {
-    const response = await request.post('/api/analytics', {
+/**
+ * Row #200 (loop 33): these ran under the `api` project's storageState — the
+ * GROWTH-plan user (`seed-test-db.js:155`) — so "free tier is blocked" was
+ * being asserted against an identity that is not on the free tier. POST
+ * /api/teams answered 200 (correctly, for growth) and the test read that as a
+ * gating failure. They now use the free-plan identity produced by the
+ * `free-auth-setup` project, the same fixture v2-plan-gating.spec.ts uses.
+ */
+const FREE_STATE = './e2e/.auth/free-user.json';
+
+test.describe('API: Feature gating (free-plan identity)', () => {
+  test('POST /api/analytics returns 403 for free tier (requires intelligenceLayer)', async ({ browser }) => {
+    const context = await browser.newContext({ storageState: FREE_STATE });
+    const response = await context.request.post('/api/analytics', {
       data: {},
     });
 
@@ -12,8 +23,9 @@ test.describe('API: Feature gating', () => {
     expect(body.error).toMatch(/requires|upgrade|plan/i);
   });
 
-  test('POST /api/teams returns 403 for free tier (requires teamWorkspace)', async ({ request }) => {
-    const response = await request.post('/api/teams', {
+  test('POST /api/teams returns 403 for free tier (requires teamWorkspace)', async ({ browser }) => {
+    const context = await browser.newContext({ storageState: FREE_STATE });
+    const response = await context.request.post('/api/teams', {
       data: { name: 'Test Team' },
     });
 

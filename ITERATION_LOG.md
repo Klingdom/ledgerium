@@ -4,6 +4,23 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-20 (loop 33) — The E2E suite is green, and the gate stops being a list (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO "keep going autonomously". **Candidate Selection:** `top-score` — #200 (9 per MR-027). Area `web-app / qa`; coarse backstop 1/6; D-1 = 2.
+- **Measured before selecting, and it changed the plan.** MR-027 endorsed "the #200 public cluster". The public project is **already 43/43 green** — that cluster closed at loop 20 and nobody had re-measured. The real remainder was `api/*`: **6 failures**.
+- **All six diagnosed individually. None was a product bug; all were the tests lying about who they were:**
+  - `account.spec` asserted `plan === 'free'` plus free-tier entitlements. The seed creates this identity on **growth** (`seed-test-db.js:155`) so plan-gating specs have an ungated user. The assertions had been failing since that seed landed.
+  - `feature-gating.spec` asserted "free tier is blocked" **while authenticated as the growth user**. `POST /api/teams` answered 200 — correct for growth — and the test called it a gating failure. Both tests now use the free identity from `free-auth-setup`, the same fixture `v2-plan-gating` uses.
+  - Three billing tests expected 400/401 and got `503 plan_not_configured`: with no price id in the test env the route short-circuits **before** the branches under test. The webServer now supplies a dummy price id, so `already_subscribed` is exercised for real rather than asserted against an unconfigured environment.
+- **The 401 test was never unauthenticated.** I suspected the route checked billing config before auth — a real defect if true. It does not (`checkout/route.ts:244-246` is the auth check). A throwaway probe showed the "fresh" `browser.newContext()` still carrying `authjs.session-token`, so the request was authenticated and the 401 path had never run. Fixed with an explicit empty `storageState`. **My first hypothesis was wrong and the probe is what said so** — the same method as loop 19.
+- **Result: the whole suite is 150/150 green in a single invocation** (9.6 min, retries=1 locally).
+- **So the gate's spec list is deleted.** It runs `pnpm --filter @ledgerium/web-app test:e2e` — everything. The list existed because the suite was red; naming a subset now would *exclude* working coverage. `e2e/smoke/` stays out (own config, needs a production build). Timeout raised 20 → 30 min, since CI is slower and retries twice. A comment says: if it goes flaky, fix or quarantine the spec — do not silently narrow this back to a list.
+- **Validation:** api project 14/14; public 43/43; **full suite 150/150**; workflow YAML re-parsed after the edit.
+- **Follow-ups:** 0 created, 1 closed (#200 — open since loop 11).
+- **Meta-review cadence:** 1 loop since MR-027.
+
+---
+
 ## 2026-09-20 (loop 32) — Somebody finally looked at the product (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO "keep going autonomously". **Candidate Selection:** `top-score` — #220's remaining piece, P-9′ (10). Area `governance`/`web-app qa`; D-1 = 1.

@@ -111,6 +111,13 @@ export default defineConfig({
       // Disable PostHog in tests
       NEXT_PUBLIC_POSTHOG_KEY: '',
       NEXT_PUBLIC_POSTHOG_HOST: '',
+      // Row #200 (loop 33): without a price id the checkout route returns 503
+      // `plan_not_configured` BEFORE reaching the branches the API specs are
+      // about (already_subscribed / unauthorized), so those tests were
+      // asserting against an unconfigured-environment artefact. A dummy id is
+      // enough: the seeded user has an active subscription, so the route
+      // answers 400 already_subscribed before any call to Stripe.
+      STRIPE_STARTER_MONTHLY_PRICE_ID: 'price_e2e_dummy_starter_monthly',
     },
   },
 });

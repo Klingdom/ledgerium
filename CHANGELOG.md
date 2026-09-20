@@ -6,6 +6,21 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-20] - Every browser test passes, and CI now runs all of them
+
+**Why:** this suite had 45 failures against untouched code when the clean-up started. The automated gate could only run a named subset, because everything else was red.
+
+### Fixed
+- The last six failures, all in the API tests, and none of them a product bug. They were tests claiming to be someone they were not: three asserted "free tier is blocked" while signed in as a paid test user, and three expected billing errors that never arrived because the test environment had no price configured. One "signed out" test was never signed out at all — its browser session still carried a login cookie, so the check it existed for had never run once.
+
+### Changed
+- The CI gate no longer names which tests to run. It runs all 150, because they all pass. Naming a subset would now leave working coverage out.
+
+### Note
+- I expected the billing failure to be a real ordering bug in the code. It was not — the code checks who you are first. A quick probe disproved my theory before I "fixed" something that was already correct.
+
+---
+
 ## [2026-09-20] - The product is now photographed on every push
 
 **Why:** a week ago the app's text and button colours were changed in 828 places and checked entirely by automated tools. Nobody had looked at a single page. There was no way to.

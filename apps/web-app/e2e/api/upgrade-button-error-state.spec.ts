@@ -47,7 +47,15 @@ test.describe('API: Billing checkout — error response shape', () => {
     expect(typeof body.error).toBe('string');
     // If a code is present it must be a known value.
     if (body.code !== undefined) {
-      expect(['admin_bypass', 'already_subscribed']).toContain(body.code);
+      // Row #200 (loop 33): `plan_not_configured` / `sku_not_configured` are
+      // documented responses of this route when a price id is unset, so they
+      // belong in the known-code set rather than failing the contract check.
+      expect([
+        'admin_bypass',
+        'already_subscribed',
+        'plan_not_configured',
+        'sku_not_configured',
+      ]).toContain(body.code);
     }
   });
 
@@ -58,7 +66,11 @@ test.describe('API: Billing checkout — error response shape', () => {
     //
     // Admin-bypass full E2E coverage (second test identity) is still deferred
     // — tracked as follow-up (Birth iter: 017).
-    const context = await browser.newContext(); // no storageState → no session
+    // Row #200 (loop 33): `browser.newContext()` alone is NOT anonymous here —
+    // a probe showed the context still carrying `authjs.session-token`, so this
+    // test was authenticated and never exercised the 401 path at all. An
+    // explicitly empty storageState is what makes it anonymous.
+    const context = await browser.newContext({ storageState: { cookies: [], origins: [] } });
     const request = context.request;
 
     const response = await request.post('/api/billing/checkout', {
