@@ -4,6 +4,24 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-20 (loop 30) — Deploy now waits for the end-to-end gates (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO "keep going autonomously". **Candidate Selection:** `top-score` — deploy gating (11), MR-026's endorsement. Area `ci`; recent Areas extension/privacy and web-app/copy, so no saturation. D-1 = 1 loop since the extension change; no ack needed.
+- **The gap:** `deploy.yml`'s `build-and-push` needed only `quality-gate` (typecheck + vitest). Both E2E workflows could be red and a release would still ship — including the real-Chrome gate that exists *because* unit tests missed the iter-097 and iter-099 capture breaks. Decided at loop 25, deliberately sequenced behind proof that the new extension job works on a runner; it passed on 2026-09-18 (6 tests, 21.3s, run 35353704615), so the precondition was met.
+- **Design, and the two alternatives I rejected:**
+  - **Copying the spec list into `deploy.yml`** — rejected. That is literally the one-decision-many-files defect behind #197, #204, #208 and #217. The list gets exactly one home.
+  - **`workflow_run`** (MR-026's suggestion) — rejected. It gates on a *separate* run completing and needs commit-matching logic to know which commit passed. A `workflow_call` gates on **this** commit, inside this run, with a blocking result.
+  - **Chosen:** both E2E workflows gain `workflow_call`; `deploy.yml` calls them as jobs; `build-and-push` needs `[quality-gate, e2e-web-app, e2e-extension]`.
+- **Removed the `push: main` trigger from both E2E workflows.** Otherwise every push would run them twice — once standalone, once via deploy — which is the #210 duplicate-run defect I fixed three loops ago. `pull_request` is kept, so PRs still get both gates.
+- **Verified structurally:** YAML parses; `deploy` has 5 jobs; `build-and-push.needs` is the three-job list; both called workflows expose `workflow_call` and no longer carry `push`. Confirmed neither E2E workflow uses repository secrets (all `secrets.*` references are in `deploy.yml`), so no `secrets: inherit` is required.
+- **Honest limitation:** I cannot run GitHub Actions, so **the first push is this change's verification** — same posture as loop 24's extension job, which passed. What to watch: the two called jobs appearing inside the deploy run, and `build-and-push` waiting on them. If branch protection was configured to require the old push-triggered check names, those status checks will no longer appear on main and may need updating in repo settings — I cannot read that configuration from here.
+- **MR-026 proposals:** P-11 (a row needs file:line + the text as it appears + confirmation I opened the file), P-12 (keep verifying subagent locators/numbers, stop re-deriving their reasoning), P-13 (always keep ≥1 open extension row) **adopted as practice**; P-9′ (attach a rendered PNG to visual changes) left open because `toHaveScreenshot` appears **0 times** repo-wide — it needs building first. Filed as #220. This loop's own row (#219) was filed retroactively under P-11, since deploy gating had been a decision with no row.
+- **Validation:** workflow YAML parsed and job graph asserted; no product code touched, so test suites are unchanged by construction and were not re-run.
+- **Follow-ups:** 1 created (#220), 1 created-and-closed (#219).
+- **Meta-review cadence:** 1 loop since MR-026.
+
+---
+
 ## 2026-09-18 (loop 29) — A comparison row stops overclaiming, and the lock that missed it now covers it (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO "keep going". **Candidate Selection:** `top-score` — #217 (12). Area `web-app / copy`; recent Areas were qa and extension/privacy, so no saturation.

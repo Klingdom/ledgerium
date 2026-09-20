@@ -1,12 +1,16 @@
 name: E2E — Extension App
 
+# Triggers (loop 30): pull_request runs this standalone, so a PR still gets the
+# gate. The push-to-main trigger was REMOVED and replaced by workflow_call:
+# deploy.yml now calls this workflow and blocks build-and-push on its result.
+# Keeping both would run it twice per push — the duplicate-run defect fixed in
+# row #210 — and gating on a separate run of the same commit is weaker than
+# calling it directly.
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
+  workflow_call:
 
 concurrency:
   group: e2e-extension-${{ github.ref }}

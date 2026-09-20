@@ -43,8 +43,26 @@ jobs:
       - name: Run tests
         run: pnpm test
 
+  # Loop 30: deploy waits for the end-to-end gates, not just typecheck + vitest.
+  #
+  # Both are CALLED here rather than copied in, so the spec list has exactly one
+  # home (copying it would recreate the one-decision-many-files defect that rows
+  # #197/#204/#208/#217 all came from). They are called rather than watched via
+  # workflow_run so the gate runs against THIS commit, in this run, with a
+  # blocking result — workflow_run would gate on a separate run and still need
+  # commit-matching logic.
+  #
+  # Precondition for turning this on (set at loop 25): the real-extension job
+  # had to prove itself on a real runner first. It did on 2026-09-18 — 6 tests,
+  # 21.3s, run 35353704615.
+  e2e-web-app:
+    uses: ./.github/workflows/e2e-web-app.yml
+
+  e2e-extension:
+    uses: ./.github/workflows/e2e-extension.yml
+
   build-and-push:
-    needs: quality-gate
+    needs: [quality-gate, e2e-web-app, e2e-extension]
     runs-on: ubuntu-latest
     permissions:
       contents: read

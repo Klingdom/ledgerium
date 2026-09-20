@@ -6,6 +6,23 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-20] - A failing browser test can now stop a release
+
+**Why:** deploying only waited for typecheck and unit tests. Both browser-test suites could be failing and the release would still go out — including the real-Chrome test that exists because unit tests twice failed to notice the recorder was broken.
+
+### Changed
+- Deploying now waits for the dashboard tests and the extension's real-Chrome tests as well. If either fails, nothing is built or shipped.
+- The two suites are called by the deploy process rather than copied into it, so the list of what runs has one home and cannot drift.
+- They no longer also run separately on every push, which would have run everything twice. Pull requests still get both.
+
+### Sequencing
+- This was decided five loops ago and deliberately held back until the extension's real-Chrome job had proved itself on a real CI machine. It did, on 18 September.
+
+### Honest limitation
+- Nobody can run GitHub's CI locally, so the first push is this change's real test.
+
+---
+
 ## [2026-09-18] - A comparison table stops overstating, on the one page that was missed
 
 **Why:** the product page's comparison table described screen-recording tools as capturing "screen content" — wording retired everywhere else for being an absolute claim — and stated Ledgerium's privacy as two things it does not do, without mentioning the one thing it does.
