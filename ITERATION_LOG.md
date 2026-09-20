@@ -4,6 +4,22 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-20 (loop 32) — Somebody finally looked at the product (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO "keep going autonomously". **Candidate Selection:** `top-score` — #220's remaining piece, P-9′ (10). Area `governance`/`web-app qa`; D-1 = 1.
+- **The gap, flagged by two meta-reviews running:** loop 25 changed `--content-tertiary` and `.btn-primary` — colours used **828 times across 132 files** — and validated it with axe, unit tests and E2E. All automated. Nothing in this repo had ever rendered a page and produced an artefact anyone could look at, and `toHaveScreenshot` appears **0 times** repo-wide.
+- **Built:** `visual-evidence.spec.ts` renders the populated dashboard in **both themes**, writes PNGs to `test-results/visual/`, and is in the CI gate with an `if: always()` artifact upload (`if-no-files-found: error`, so a silent no-op fails).
+- **Deliberately NOT pixel-diffing.** `toHaveScreenshot` baselines are platform-specific; one captured on this Windows machine would disagree with the Linux runner on font rendering alone. A pixel gate would be red on arrival, and a permanently red gate is one everybody learns to ignore — the same reasoning that kept the E2E gate at two spec files originally. **Evidence, not assertion.**
+- **My first version was silently wrong, and my own weak check passed it.** I set `.light` on `<html>` directly; `useTheme`'s mount effect reads `localStorage` and re-applies its value, overwriting it. Both PNGs came out **byte-identical at 263,233 bytes** and the size assertion happily passed. I noticed only because I opened the images. Fixed two ways: drive the app's real mechanism (`localStorage['ledgerium-theme']`), and **assert the applied `<html>` class before capturing** so the artefact cannot be mislabelled again.
+- **What the screenshots actually show:** the dashboard renders correctly in both themes; loop 23's "High variation" naming, the narrator line and the badge set are all present and legible; loop 25's contrast fix holds up visually on the light theme — the case that measured **2.45:1** before it and that nobody had ever seen.
+- **Three apparent defects investigated and dismissed — this is why you check before filing.** "MEDIAN CYCLE TIME —" beside "AVG CYCLE TIME 4m"; "AUTOMATION CANDIDATES 0 of 5" beside a row tagged Automate; "NEEDS REVIEW 0" beside three "Needs review" badges. All three read from server-computed `stats.*` (`DashboardV2Shell.tsx:353,356`, `:1125-1138`) which my mock omitted — **fixture artefacts, not product defects.** Filing them would have produced three false rows of exactly the kind MR-026 P-11 exists to stop.
+- **Observation, NOT filed as a row (no verified divergence):** the KPI strip reads server `stats.*` while the timestudy band computes the same class of figure client-side from rows (`dashboard-band-stats.ts:368`). That dual-source shape is what produced MDR-P05. With mocked data I cannot demonstrate real divergence, and P-11 forbids a row without evidence — recorded here instead.
+- **Validation:** widened gate **66 passed** as a single invocation (was 64; +2); both PNGs inspected directly; light/dark now differ in size (263,233 vs 258,758) and the class assertion passes.
+- **Follow-ups:** 0 created, 1 closed (#220).
+- **Meta-review cadence:** 3 loops since MR-026 (30, 31, 32) — **MR-027 due before loop 33.**
+
+---
+
 ## 2026-09-20 (loop 31) — A sensitivity list that documented an intent the code did not implement (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO "keep going autonomously". **Candidate Selection:** `top-score` — #218 (9 as filed; re-scored 12 on inspection, see below). Area `extension / privacy`, which also keeps extension work in supply per P-13. D-1 = 0.

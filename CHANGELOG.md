@@ -6,6 +6,22 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-20] - The product is now photographed on every push
+
+**Why:** a week ago the app's text and button colours were changed in 828 places and checked entirely by automated tools. Nobody had looked at a single page. There was no way to.
+
+### Added
+- A test that renders the dashboard in both the dark and light themes and saves pictures of it. They are attached to every CI run, so any change to how the product looks now has something to point at.
+- It is not a pixel-comparison gate. Those depend on the exact machine that took the reference picture, so it would fail constantly on CI for reasons that have nothing to do with the product — and a check that always fails is one people stop reading.
+
+### What the pictures showed
+- Both themes render correctly, and last week's contrast fix holds up — including on the light theme, which was the worse of the two and had never been seen by anyone.
+
+### Caught by looking
+- The first version of this test was quietly broken: the "light" picture was an identical copy of the dark one, because the app overwrites the theme on load. The file-size check passed it. It now switches the theme the way the app itself does, and checks the theme really applied before taking the picture.
+
+---
+
 ## [2026-09-20] - A privacy list that promised more than the code delivered
 
 **Why:** a list of "sensitive input types" named email and phone fields, but nothing in the product ever read that list. Anyone reading it — including an auditor — would reasonably believe those fields got special treatment. They did not.

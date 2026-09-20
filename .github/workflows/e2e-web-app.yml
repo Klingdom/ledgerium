@@ -97,8 +97,21 @@ jobs:
           e2e/app/dashboard/v2-plan-gating.spec.ts
           e2e/app/dashboard/v2-states.spec.ts
           e2e/app/dashboard/v2-a11y.spec.ts
+          e2e/app/dashboard/visual-evidence.spec.ts
           e2e/public/pricing.spec.ts
           e2e/public/nav.spec.ts
+
+      # Row #220 / MR-026 P-9'. Rendered PNGs of the dashboard in both themes,
+      # uploaded on every run (not only failures) so any change that alters what
+      # the product looks like has an artefact to point at. Loop 25 changed
+      # colours used in 828 places and nobody had ever looked at a page.
+      - name: Upload visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-evidence
+          path: apps/web-app/test-results/visual/
+          if-no-files-found: error
 
       - name: Upload Playwright report on failure
         if: failure()
