@@ -65,7 +65,7 @@ export default function ProcessIntelligencePost() {
 
       {/* Post body */}
       <article className="py-14 bg-[var(--surface-primary)]">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 space-y-6 text-[15px] text-[#e2e8f0] leading-relaxed">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 space-y-6 text-[15px] text-[var(--content-primary)] leading-relaxed">
 
           <p>
             Process intelligence is the practice of turning how work actually happens into a
@@ -207,7 +207,7 @@ export default function ProcessIntelligencePost() {
           <h2 className="text-2xl font-bold text-[var(--content-primary)]">
             See process intelligence on one of your workflows
           </h2>
-          <p className="mt-3 text-[#e2e8f0]">
+          <p className="mt-3 text-[var(--content-primary)]">
             Record a workflow once and get an SOP, a process map, and a measured baseline.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">

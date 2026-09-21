@@ -1132,7 +1132,7 @@ function InsightsFeedSection({
             }}
             className={`rounded-full px-3 py-1 text-[11px] font-medium transition-colors ${
               activeCategory === cat.key
-                ? 'bg-brand-600 text-white'
+                ? 'bg-brand-700 text-white'
                 : 'bg-[var(--surface-secondary)] text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
             }`}
           >
@@ -2854,7 +2854,7 @@ function RightRailNavigator({
                     }}
                     className={`block border-l-2 pl-5 py-0.5 text-[11px] transition-colors ${
                       isActive
-                        ? 'border-brand-500 text-brand-600 font-semibold'
+                        ? 'border-brand-500 text-[var(--brand-text)] font-semibold'
                         : 'border-transparent text-[var(--content-tertiary)] hover:text-[var(--content-secondary)]'
                     }`}
                   >

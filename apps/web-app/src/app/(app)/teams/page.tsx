@@ -183,7 +183,7 @@ export default function TeamsPage() {
                 className="card flex items-center gap-ds-4 px-ds-5 py-ds-4 hover:border-[var(--border-default)] transition-colors"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-ds-lg bg-brand-50">
-                  <Users className="h-5 w-5 text-brand-600" />
+                  <Users className="h-5 w-5 text-[var(--brand-text)]" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-ds-sm font-medium text-[var(--content-primary)]">{team.name}</p>

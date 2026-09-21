@@ -977,10 +977,10 @@ function DashboardPageContent() {
         <div className="card px-ds-5 py-ds-4 mb-ds-6">
           <div className="flex items-center justify-between mb-ds-3">
             <div className="flex items-center gap-ds-2">
-              <GitBranch className="h-4 w-4 text-brand-600" />
+              <GitBranch className="h-4 w-4 text-[var(--brand-text)]" />
               <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">Process Families</h3>
             </div>
-            <button onClick={() => { setViewMode('process_groups'); }} className="text-ds-xs text-brand-600 hover:text-brand-700 font-medium">
+            <button onClick={() => { setViewMode('process_groups'); }} className="text-ds-xs text-[var(--brand-text)] hover:text-brand-700 font-medium">
               View all &rarr;
             </button>
           </div>
@@ -1423,7 +1423,7 @@ function IntelligenceList({
         </div>
         <button
           onClick={onViewAll}
-          className="text-ds-xs text-brand-600 hover:text-brand-700 font-medium flex items-center gap-0.5"
+          className="text-ds-xs text-[var(--brand-text)] hover:text-brand-700 font-medium flex items-center gap-0.5"
         >
           View all
           <ChevronRight className="h-3 w-3" />
@@ -1557,7 +1557,7 @@ function WorkflowRow({
             <div className="flex items-center gap-ds-1 min-w-0">
               <Link
                 href={`/workflows/${w.id}`}
-                className="text-ds-sm font-medium text-[var(--content-primary)] hover:text-brand-600 truncate"
+                className="text-ds-sm font-medium text-[var(--content-primary)] hover:text-[var(--brand-text)] truncate"
               >
                 {w.title}
               </Link>
@@ -1795,7 +1795,7 @@ function WorkflowRow({
             ) : (
               <Link
                 href={`/workflows/${w.id}`}
-                className="text-ds-sm font-medium text-[var(--content-primary)] hover:text-brand-600 block mb-1"
+                className="text-ds-sm font-medium text-[var(--content-primary)] hover:text-[var(--brand-text)] block mb-1"
               >
                 {w.title}
               </Link>
@@ -2300,7 +2300,7 @@ function ProcessGroupCard({ definition: def }: { definition: ProcessDefinition }
         {/* Top row: name + badges */}
         <div className="flex items-start justify-between gap-ds-4 mb-ds-3">
           <div className="min-w-0 flex-1">
-            <h3 className="text-ds-sm font-semibold text-[var(--content-primary)] group-hover:text-brand-600 transition-colors truncate">
+            <h3 className="text-ds-sm font-semibold text-[var(--content-primary)] group-hover:text-[var(--brand-text)] transition-colors truncate">
               {def.canonicalName}
             </h3>
             {def.description && (

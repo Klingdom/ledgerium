@@ -168,7 +168,7 @@ export function ReportTab({ report }: Props) {
             <div className="space-y-ds-2">
               {sop.steps.map((step: any) => (
                 <div key={step.ordinal} className="flex gap-ds-2 text-ds-sm">
-                  <span className="text-brand-600 font-semibold flex-shrink-0 tabular-nums w-5 text-right">
+                  <span className="text-[var(--brand-text)] font-semibold flex-shrink-0 tabular-nums w-5 text-right">
                     {step.ordinal}.
                   </span>
                   <span className="text-[var(--content-primary)]">{step.action ?? step.text ?? step.title}</span>

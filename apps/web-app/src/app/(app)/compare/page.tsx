@@ -285,7 +285,7 @@ export default function ComparePage() {
         <Link
           href="/compare/diff"
           onClick={() => track({ event: 'cta_clicked', location: 'compare_page', destination: '/compare/diff' })}
-          className="mt-ds-2 inline-flex items-center gap-1.5 text-ds-sm font-medium text-brand-600 hover:text-brand-500"
+          className="mt-ds-2 inline-flex items-center gap-1.5 text-ds-sm font-medium text-[var(--brand-text)] hover:text-[var(--brand-text-hover)]"
         >
           <GitCompare className="h-4 w-4" aria-hidden />
           Compare process steps across 2–6 workflows →
@@ -323,7 +323,7 @@ export default function ComparePage() {
                   type="button"
                   onClick={saveBaseline}
                   disabled={savingBaseline}
-                  className="self-start text-[11px] font-medium text-brand-600 hover:text-brand-500 disabled:opacity-50"
+                  className="self-start text-[11px] font-medium text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] disabled:opacity-50"
                   title="Freeze this workflow's current metrics as a reusable baseline"
                 >
                   {savingBaseline ? 'Saving…' : '★ Save as baseline'}

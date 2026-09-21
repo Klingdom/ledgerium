@@ -188,7 +188,7 @@ export default function UploadPage() {
 
       {account?.plan === 'pro' && (
         <div className="card px-ds-5 py-ds-3 mb-ds-4 flex items-center gap-ds-2 text-ds-sm text-[var(--content-secondary)]">
-          <Zap className="h-4 w-4 text-brand-600" />
+          <Zap className="h-4 w-4 text-[var(--brand-text)]" />
           <span>Pro plan — <strong className="text-[var(--content-primary)]">unlimited uploads</strong></span>
         </div>
       )}
@@ -240,7 +240,7 @@ export default function UploadPage() {
               <p className="mt-ds-1 text-ds-xs text-[var(--content-tertiary)]">or click to browse — accepts Ledgerium recorder .json files</p>
               <p className="text-ds-xs text-[var(--content-tertiary)] mt-2">
                 Your workflow data is processed locally and never shared.{' '}
-                <a href="/security" className="underline hover:text-brand-600">Learn more</a>
+                <a href="/security" className="underline hover:text-[var(--brand-text)]">Learn more</a>
               </p>
             </>
           )}

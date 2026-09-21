@@ -58,13 +58,13 @@ export default function ComparisonsHubPage() {
             <ArrowLeft className="h-3.5 w-3.5" />
             Back to product
           </Link>
-          <span className="inline-block text-xs font-semibold text-brand-600 uppercase tracking-widest border border-brand-700/40 rounded-full px-4 py-1.5 mb-6 bg-brand-900/20">
+          <span className="inline-block text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest border border-brand-700/40 rounded-full px-4 py-1.5 mb-6 bg-brand-900/20">
             Compare
           </span>
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)] leading-tight">
             Compare Ledgerium to other tools
           </h1>
-          <p className="mt-5 text-lg text-[#e2e8f0] leading-relaxed max-w-2xl">
+          <p className="mt-5 text-lg text-[var(--content-primary)] leading-relaxed max-w-2xl">
             How Ledgerium stacks up against screenshot tools, process mining, task mining, and manual
             documentation. Every comparison is honest, dated, and concedes where the other tool is the
             better fit.
@@ -85,7 +85,7 @@ export default function ComparisonsHubPage() {
                 <h3 className="text-base font-semibold text-[var(--content-primary)] group-hover:text-brand-400 transition-colors">
                   {c.title}
                 </h3>
-                <p className="mt-2 text-sm text-[#e2e8f0] leading-relaxed line-clamp-3">{c.blurb}</p>
+                <p className="mt-2 text-sm text-[var(--content-primary)] leading-relaxed line-clamp-3">{c.blurb}</p>
                 <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-brand-500">
                   Read comparison
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -99,7 +99,7 @@ export default function ComparisonsHubPage() {
       <section className="py-12 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <h2 className="text-xl font-bold text-[var(--content-primary)] mb-3">Looking for alternatives?</h2>
-          <p className="text-[#e2e8f0] mb-6 max-w-2xl">
+          <p className="text-[var(--content-primary)] mb-6 max-w-2xl">
             Switching from a specific tool, or mapping the wider landscape? Start with these roundups.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
@@ -118,7 +118,7 @@ export default function ComparisonsHubPage() {
       <section className="py-20 bg-[var(--surface-primary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
           <h2 className="text-2xl font-bold text-[var(--content-primary)]">See it on your own workflow</h2>
-          <p className="mt-3 text-[#e2e8f0]">Record one workflow free and compare the output yourself.</p>
+          <p className="mt-3 text-[var(--content-primary)]">Record one workflow free and compare the output yourself.</p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/signup" className="btn-primary gap-2 shadow-sm shadow-brand-600/20">
               Get started free

@@ -2139,7 +2139,7 @@ export default function DocsPage() {
               </p>
               <Link
                 href="/signup"
-                className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 transition-colors"
+                className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-800 transition-colors"
               >
                 Get started free
               </Link>

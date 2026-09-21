@@ -121,10 +121,10 @@ export default function AiImplementationPage() {
             <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-[var(--content-primary)] leading-[1.1] tracking-tight">
               You&rsquo;re automating processes{' '}
               <br className="hidden sm:block" />
-              <span className="text-brand-600">you&rsquo;ve never measured.</span>
+              <span className="text-[var(--brand-text)]">you&rsquo;ve never measured.</span>
             </h1>
 
-            <p className="mt-6 text-lg sm:text-xl text-[#e2e8f0] leading-relaxed max-w-2xl mx-auto">
+            <p className="mt-6 text-lg sm:text-xl text-[var(--content-primary)] leading-relaxed max-w-2xl mx-auto">
               Ledgerium captures the real process first &mdash; so your agents
               execute accurately, not aspirationally.
             </p>
@@ -153,7 +153,7 @@ export default function AiImplementationPage() {
       <section className="py-24 bg-[var(--surface-elevated)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-14">
-            <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+            <p className="text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest mb-3">
               The problem
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
@@ -165,13 +165,13 @@ export default function AiImplementationPage() {
             {PROBLEMS.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="card p-7 flex flex-col gap-4">
                 <div className="w-10 h-10 rounded-lg bg-brand-900/20 border border-brand-700/25 flex items-center justify-center flex-shrink-0">
-                  <Icon className="h-5 w-5 text-brand-600" />
+                  <Icon className="h-5 w-5 text-[var(--brand-text)]" />
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-2">
                     {title}
                   </h3>
-                  <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
+                  <p className="text-sm text-[var(--content-primary)] leading-relaxed">{desc}</p>
                 </div>
               </div>
             ))}
@@ -183,7 +183,7 @@ export default function AiImplementationPage() {
       <section className="py-24 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-14">
-            <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+            <p className="text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest mb-3">
               How it works
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
@@ -195,12 +195,12 @@ export default function AiImplementationPage() {
             {FEATURES.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="text-center">
                 <div className="mx-auto w-14 h-14 rounded-2xl bg-brand-900/15 border border-brand-700/30 flex items-center justify-center mb-5">
-                  <Icon className="h-6 w-6 text-brand-600" />
+                  <Icon className="h-6 w-6 text-[var(--brand-text)]" />
                 </div>
                 <h3 className="text-lg font-semibold text-[var(--content-primary)] mb-3">
                   {title}
                 </h3>
-                <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
+                <p className="text-sm text-[var(--content-primary)] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -211,7 +211,7 @@ export default function AiImplementationPage() {
       <section className="py-24 bg-[var(--surface-elevated)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-14">
-            <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+            <p className="text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest mb-3">
               What you get
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
@@ -226,13 +226,13 @@ export default function AiImplementationPage() {
                 className="flex gap-4 p-5 rounded-xl border border-transparent hover:border-[var(--border-default)] hover:bg-[var(--surface-secondary)] transition-all"
               >
                 <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-brand-900/15 flex items-center justify-center">
-                  <Icon className="h-4 w-4 text-brand-600" />
+                  <Icon className="h-4 w-4 text-[var(--brand-text)]" />
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-1">
                     {title}
                   </h3>
-                  <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
+                  <p className="text-sm text-[var(--content-primary)] leading-relaxed">{desc}</p>
                 </div>
               </div>
             ))}
@@ -248,7 +248,7 @@ export default function AiImplementationPage() {
             <br />
             before you automate it
           </h2>
-          <p className="mt-5 text-[#e2e8f0] leading-relaxed max-w-xl mx-auto">
+          <p className="mt-5 text-[var(--content-primary)] leading-relaxed max-w-xl mx-auto">
             Give your AI agents ground truth, not workshop notes. Record actual human
             execution, generate structured blueprints, and measure the delta after
             automation ships.

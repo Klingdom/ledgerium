@@ -50,7 +50,7 @@ export function FaqBlock({
                     onClick={() => toggle(i)}
                     aria-expanded={isOpen}
                     aria-controls={panelId}
-                    className="w-full flex items-center justify-between gap-4 text-left px-6 py-4 text-base font-semibold text-[var(--content-primary)] hover:text-brand-500 transition-colors"
+                    className="w-full flex items-center justify-between gap-4 text-left px-6 py-4 text-base font-semibold text-[var(--content-primary)] hover:text-[var(--brand-text-hover)] transition-colors"
                   >
                     <span>{q}</span>
                     <ChevronDown
@@ -59,7 +59,7 @@ export function FaqBlock({
                     />
                   </button>
                 </dt>
-                <dd id={panelId} hidden={!isOpen} className="px-6 pb-5 text-sm text-[#e2e8f0] leading-relaxed">
+                <dd id={panelId} hidden={!isOpen} className="px-6 pb-5 text-sm text-[var(--content-primary)] leading-relaxed">
                   {a}
                 </dd>
               </div>

@@ -74,7 +74,7 @@ export function ServiceOfferCard({
           ${catalog.price}
         </span>
       </div>
-      <p className="text-sm text-[#e2e8f0] leading-relaxed mb-4">{description}</p>
+      <p className="text-sm text-[var(--content-primary)] leading-relaxed mb-4">{description}</p>
 
       <ul className="space-y-2 mb-4">
         {catalog.whatYouGet.slice(0, 4).map((item) => (

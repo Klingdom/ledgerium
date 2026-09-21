@@ -264,7 +264,7 @@ function PlanCard({
         <div className="flex items-center justify-between mb-1">
           <h3 className="text-ds-sm font-bold text-[var(--content-primary)]">{config.name}</h3>
           {isCurrentPlan && (
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-brand-600 bg-brand-900/15 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-[var(--brand-text)] bg-brand-900/15 px-2 py-0.5 rounded-full">
               Active
             </span>
           )}
@@ -679,7 +679,7 @@ export default function AccountPage() {
         {currentPlan === 'free' && (
           <div className="mt-ds-4 ds-callout ds-callout-info">
             <div className="flex items-start gap-ds-2">
-              <Zap className="h-4 w-4 text-brand-600 mt-0.5" />
+              <Zap className="h-4 w-4 text-[var(--brand-text)] mt-0.5" />
               <div>
                 <p className="text-ds-sm font-medium text-brand-900">Ready to upgrade?</p>
                 <p className="mt-0.5 text-ds-xs text-brand-700">
@@ -742,14 +742,14 @@ export default function AccountPage() {
               <p className="ds-section-label mb-ds-1">Extension Settings</p>
               <p className="text-ds-xs text-[var(--content-primary)]">
                 <strong>Sync URL:</strong>{' '}
-                <code className="text-brand-600">
+                <code className="text-[var(--brand-text)]">
                   {typeof window !== 'undefined'
                     ? `${window.location.origin}/api/sync`
                     : '/api/sync'}
                 </code>
               </p>
               <p className="text-ds-xs text-[var(--content-primary)] mt-0.5">
-                <strong>API Key:</strong> <code className="text-brand-600">{newKey}</code>
+                <strong>API Key:</strong> <code className="text-[var(--brand-text)]">{newKey}</code>
               </p>
             </div>
             <button
@@ -800,7 +800,7 @@ export default function AccountPage() {
       {isAdminUnlimited(session?.user?.email) && (
         <div className="card px-ds-5 py-ds-5 border-brand-200 bg-brand-50/30">
           <div className="flex items-center gap-ds-3 mb-ds-4">
-            <Settings className="h-5 w-5 text-brand-600" />
+            <Settings className="h-5 w-5 text-[var(--brand-text)]" />
             <h2 className="text-ds-base font-semibold text-[var(--content-primary)]">Admin</h2>
           </div>
           <div className="space-y-ds-2">
@@ -810,7 +810,7 @@ export default function AccountPage() {
               className="flex items-center gap-ds-3 rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-elevated)] px-ds-4 py-ds-3 hover:border-brand-200 transition-colors"
               aria-label="Operations Dashboard"
             >
-              <Activity className="h-4 w-4 text-brand-600" />
+              <Activity className="h-4 w-4 text-[var(--brand-text)]" />
               <div>
                 <p className="text-ds-sm font-medium text-[var(--content-primary)]">
                   Operations Dashboard
@@ -824,7 +824,7 @@ export default function AccountPage() {
               href="/analytics/product"
               className="flex items-center gap-ds-3 rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-elevated)] px-ds-4 py-ds-3 hover:border-brand-200 transition-colors"
             >
-              <BarChart3 className="h-4 w-4 text-brand-600" />
+              <BarChart3 className="h-4 w-4 text-[var(--brand-text)]" />
               <div>
                 <p className="text-ds-sm font-medium text-[var(--content-primary)]">
                   Product Analytics

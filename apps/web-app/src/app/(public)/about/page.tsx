@@ -20,7 +20,7 @@ export default function AboutPage() {
       {/* Hero */}
       <section className="pt-20 pb-16 bg-gradient-to-b from-brand-900/20 to-[var(--surface-primary)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <p className="text-sm font-semibold text-brand-600 uppercase tracking-wide mb-4">
+          <p className="text-sm font-semibold text-[var(--brand-text)] uppercase tracking-wide mb-4">
             Why Ledgerium exists
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)] leading-tight">
@@ -28,7 +28,7 @@ export default function AboutPage() {
             <br className="hidden sm:block" />
             We think it should be evidence-based.
           </h1>
-          <p className="mt-6 text-lg text-[#e2e8f0] leading-relaxed">
+          <p className="mt-6 text-lg text-[var(--content-primary)] leading-relaxed">
             SOPs written from memory. Process maps drawn in workshops. Training
             docs that describe the ideal, not the reality. Every organization has
             this problem. Most don&apos;t know how big the gap is.
@@ -42,7 +42,7 @@ export default function AboutPage() {
           <h2 className="text-xl font-bold text-[var(--content-primary)] mb-8">
             The documentation gap
           </h2>
-          <div className="space-y-5 text-[15px] text-[#e2e8f0] leading-relaxed">
+          <div className="space-y-5 text-[15px] text-[var(--content-primary)] leading-relaxed">
             <p>
               Every organization runs on workflows — onboarding customers,
               processing claims, configuring systems, closing sales. These
@@ -115,9 +115,9 @@ export default function AboutPage() {
               },
             ].map(({ icon: Icon, title, desc, takeaway }) => (
               <div key={title} className="card p-6">
-                <Icon className="h-5 w-5 text-brand-600 mb-3" />
+                <Icon className="h-5 w-5 text-[var(--brand-text)] mb-3" />
                 <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-2">{title}</h3>
-                <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
+                <p className="text-sm text-[var(--content-primary)] leading-relaxed">{desc}</p>
                 {takeaway && (
                   <p className="mt-1.5 text-xs text-brand-400 leading-relaxed">{takeaway}</p>
                 )}
@@ -133,7 +133,7 @@ export default function AboutPage() {
           <h2 className="text-xl font-bold text-[var(--content-primary)] mb-8">
             What makes Ledgerium different
           </h2>
-          <div className="space-y-5 text-[15px] text-[#e2e8f0] leading-relaxed">
+          <div className="space-y-5 text-[15px] text-[var(--content-primary)] leading-relaxed">
             <p>
               Most process documentation tools ask you to describe your
               workflows manually — flowchart builders, form-based SOP editors,
@@ -157,7 +157,7 @@ export default function AboutPage() {
             </p>
           </div>
           <div className="mt-6">
-            <Link href="/product" className="text-sm text-brand-600 hover:text-brand-500 font-medium inline-flex items-center gap-1.5">
+            <Link href="/product" className="text-sm text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] font-medium inline-flex items-center gap-1.5">
               See the full walkthrough
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
@@ -172,7 +172,7 @@ export default function AboutPage() {
             <h2 className="text-xl font-bold text-[var(--content-primary)]">
               How we compare
             </h2>
-            <p className="mt-3 text-[#e2e8f0]">
+            <p className="mt-3 text-[var(--content-primary)]">
               We&apos;re not another documentation tool. Here&apos;s specifically how we differ.
             </p>
           </div>
@@ -181,7 +181,7 @@ export default function AboutPage() {
             {/* vs. Screen Recorders */}
             <div className="card p-7 flex flex-col gap-4">
               <div className="flex items-center gap-2.5">
-                <Camera className="h-4 w-4 text-brand-600 flex-shrink-0" />
+                <Camera className="h-4 w-4 text-[var(--brand-text)] flex-shrink-0" />
                 <span className="inline-block text-[11px] font-bold text-[var(--content-tertiary)] uppercase tracking-widest border border-[var(--border-subtle)] rounded-full px-3 py-1">
                   vs. Screen Recorders
                 </span>
@@ -204,7 +204,7 @@ export default function AboutPage() {
             {/* vs. Process Mining */}
             <div className="card p-7 flex flex-col gap-4">
               <div className="flex items-center gap-2.5">
-                <Server className="h-4 w-4 text-brand-600 flex-shrink-0" />
+                <Server className="h-4 w-4 text-[var(--brand-text)] flex-shrink-0" />
                 <span className="inline-block text-[11px] font-bold text-[var(--content-tertiary)] uppercase tracking-widest border border-[var(--border-subtle)] rounded-full px-3 py-1">
                   vs. Process Mining
                 </span>
@@ -227,7 +227,7 @@ export default function AboutPage() {
             {/* vs. Documentation Tools */}
             <div className="card p-7 flex flex-col gap-4">
               <div className="flex items-center gap-2.5">
-                <FileText className="h-4 w-4 text-brand-600 flex-shrink-0" />
+                <FileText className="h-4 w-4 text-[var(--brand-text)] flex-shrink-0" />
                 <span className="inline-block text-[11px] font-bold text-[var(--content-tertiary)] uppercase tracking-widest border border-[var(--border-subtle)] rounded-full px-3 py-1">
                   vs. Documentation Tools
                 </span>
@@ -256,7 +256,7 @@ export default function AboutPage() {
           <h2 className="text-xl font-bold text-[var(--content-primary)] mb-5">
             Built by process people
           </h2>
-          <p className="text-[15px] text-[#e2e8f0] leading-relaxed">
+          <p className="text-[15px] text-[var(--content-primary)] leading-relaxed">
             Ledgerium AI was founded in 2025 with a simple observation: organizations are deploying
             AI and automation into processes they&apos;ve never actually measured. We build the
             observation layer &mdash; the foundation that makes everything else trustworthy.
@@ -299,7 +299,7 @@ export default function AboutPage() {
           <h2 className="text-2xl font-bold text-[var(--content-primary)]">
             See what your real workflows look like
           </h2>
-          <p className="mt-3 text-[#e2e8f0]">
+          <p className="mt-3 text-[var(--content-primary)]">
             Record your first workflow. See the structured output in under 5 minutes.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">

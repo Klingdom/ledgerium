@@ -84,9 +84,9 @@ export default function HomePage() {
             <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-[var(--content-primary)] leading-[1.1] tracking-tight">
               Your SOP says 5 steps.{' '}
               <br className="hidden sm:block" />
-              <span className="text-brand-600">Your team takes 17.</span>
+              <span className="text-[var(--brand-text)]">Your team takes 17.</span>
             </h1>
-            <p className="mt-6 text-lg sm:text-xl text-[#e2e8f0] leading-relaxed max-w-2xl mx-auto">
+            <p className="mt-6 text-lg sm:text-xl text-[var(--content-primary)] leading-relaxed max-w-2xl mx-auto">
               Record real workflows in the browser. Get structured SOPs and
               process maps, see which workflows are ready for AI, and turn expert
               work into training docs — automatically.
@@ -144,7 +144,7 @@ export default function HomePage() {
                 href="/demo"
                 event="cta_clicked"
                 properties={{ location: 'homepage_hero_caption', destination: '/demo' }}
-                className="text-brand-600 hover:text-brand-700 font-medium"
+                className="text-[var(--brand-text)] hover:text-brand-700 font-medium"
               >
                 Walk through the product &rarr;
               </TrackedLink>
@@ -166,7 +166,7 @@ export default function HomePage() {
               { icon: CheckCircle, label: 'Measured, not estimated' },
             ].map(({ icon: Icon, label }) => (
               <div key={label} className="flex items-center justify-center gap-2.5 text-[var(--content-secondary)]">
-                <Icon className="h-4 w-4 flex-shrink-0 text-brand-600" />
+                <Icon className="h-4 w-4 flex-shrink-0 text-[var(--brand-text)]" />
                 <span className="text-sm font-medium text-center sm:whitespace-nowrap">{label}</span>
               </div>
             ))}
@@ -178,7 +178,7 @@ export default function HomePage() {
       <section className="border-b border-[var(--border-default)] bg-[var(--surface-secondary)] py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-12">
-            <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+            <p className="text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest mb-3">
               Why record your workflows
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
@@ -189,13 +189,13 @@ export default function HomePage() {
             {VALUE_PROPS.map(({ icon: Icon, eyebrow, title, desc }) => (
               <div key={title} className="card p-7 flex flex-col gap-3 h-full">
                 <div className="w-11 h-11 rounded-xl bg-brand-900/15 border border-brand-700/30 flex items-center justify-center">
-                  <Icon className="h-5 w-5 text-brand-600" />
+                  <Icon className="h-5 w-5 text-[var(--brand-text)]" />
                 </div>
-                <p className="text-[11px] font-bold text-brand-600 uppercase tracking-widest">
+                <p className="text-[11px] font-bold text-[var(--brand-text)] uppercase tracking-widest">
                   {eyebrow}
                 </p>
                 <h3 className="text-lg font-semibold text-[var(--content-primary)] -mt-1">{title}</h3>
-                <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
+                <p className="text-sm text-[var(--content-primary)] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -205,7 +205,7 @@ export default function HomePage() {
       {/* ── How it works ──────────────────────────────────────────────────── */}
       <section className="border-b border-[var(--border-default)] bg-[var(--surface-elevated)] py-20">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <p className="text-center text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+          <p className="text-center text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest mb-3">
             How it works
           </p>
           <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-14">
@@ -234,13 +234,13 @@ export default function HomePage() {
             ].map(({ step, icon: Icon, title, desc }) => (
               <div key={step} className="text-center">
                 <div className="mx-auto w-14 h-14 rounded-2xl bg-brand-900/15 border border-brand-700/30 flex items-center justify-center mb-5">
-                  <Icon className="h-6 w-6 text-brand-600" />
+                  <Icon className="h-6 w-6 text-[var(--brand-text)]" />
                 </div>
-                <p className="text-[11px] font-bold text-brand-600 uppercase tracking-widest mb-2">
+                <p className="text-[11px] font-bold text-[var(--brand-text)] uppercase tracking-widest mb-2">
                   Step {step}
                 </p>
                 <h3 className="text-lg font-semibold text-[var(--content-primary)] mb-3">{title}</h3>
-                <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
+                <p className="text-sm text-[var(--content-primary)] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -250,16 +250,16 @@ export default function HomePage() {
       {/* ── Try the demo (live dashboard, moved below context) ─────────────── */}
       <section className="border-b border-[var(--border-default)] bg-[var(--surface-secondary)] py-20">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <p className="text-center text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+          <p className="text-center text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest mb-3">
             Try it without signing up
           </p>
           <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-3">
             The workflow library you get after your first recording
           </h2>
-          <p className="text-center text-[#e2e8f0] leading-relaxed mb-6 max-w-2xl mx-auto">
+          <p className="text-center text-[var(--content-primary)] leading-relaxed mb-6 max-w-2xl mx-auto">
             Real sample workflows with evidence-linked metrics. Every cycle time, run count, and AI-readiness score is measured from an actual recording.
           </p>
-          <div className="text-xs font-medium text-brand-600 mb-8 flex items-center justify-center gap-1.5">
+          <div className="text-xs font-medium text-[var(--brand-text)] mb-8 flex items-center justify-center gap-1.5">
             <MousePointer2 className="h-3.5 w-3.5" />
             Click any workflow row to open its SOP, process map, and report.
           </div>
@@ -271,7 +271,7 @@ export default function HomePage() {
               href="/demo"
               event="cta_clicked"
               properties={{ location: 'homepage_demo_footer', destination: '/demo' }}
-              className="text-brand-600 hover:text-brand-700 font-medium"
+              className="text-[var(--brand-text)] hover:text-brand-700 font-medium"
             >
               See all four views &rarr;
             </TrackedLink>
@@ -285,20 +285,20 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left: text */}
             <div>
-              <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+              <p className="text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest mb-3">
                 Real output
               </p>
               <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-5">
                 See what a generated SOP looks like
               </h2>
-              <p className="text-[#e2e8f0] leading-relaxed mb-6">
+              <p className="text-[var(--content-primary)] leading-relaxed mb-6">
                 This SOP was generated automatically from a real browser recording — every instruction traces back to an observed event. Nothing was written by hand, nothing was rewritten by AI.
               </p>
               <TrackedLink
                 href="/demo"
                 event="cta_clicked"
                 properties={{ location: 'homepage_sop_example', destination: '/demo' }}
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:text-brand-500 transition-colors"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] transition-colors"
               >
                 Walk through all four views
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -348,7 +348,7 @@ export default function HomePage() {
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
               Every recording produces real output
             </h2>
-            <p className="mt-4 text-[#e2e8f0]">
+            <p className="mt-4 text-[var(--content-primary)]">
               Not another video file to watch. Structured, searchable, reusable
               workflow intelligence.
             </p>
@@ -365,11 +365,11 @@ export default function HomePage() {
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="flex gap-4 p-5 rounded-xl border border-transparent hover:border-[var(--border-default)] hover:bg-[var(--surface-elevated)] transition-all">
                 <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-brand-900/15 flex items-center justify-center">
-                  <Icon className="h-4 w-4 text-brand-600" />
+                  <Icon className="h-4 w-4 text-[var(--brand-text)]" />
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-1">{title}</h3>
-                  <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
+                  <p className="text-sm text-[var(--content-primary)] leading-relaxed">{desc}</p>
                 </div>
               </div>
             ))}
@@ -381,13 +381,13 @@ export default function HomePage() {
       <section className="py-24 bg-[var(--surface-elevated)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-14">
-            <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+            <p className="text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest mb-3">
               Competitive positioning
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
               Built different
             </h2>
-            <p className="mt-4 text-[#e2e8f0] leading-relaxed">
+            <p className="mt-4 text-[var(--content-primary)] leading-relaxed">
               Ledgerium isn&apos;t another documentation tool. Here&apos;s how we compare.
             </p>
           </div>
@@ -456,7 +456,7 @@ export default function HomePage() {
           <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-4">
             Built for teams that run on browser-based work
           </h2>
-          <p className="text-center text-[#e2e8f0] mb-12 max-w-2xl mx-auto">
+          <p className="text-center text-[var(--content-primary)] mb-12 max-w-2xl mx-auto">
             If your team works in browser-based tools — ERP, CRM, ticketing, HR systems — Ledgerium records what actually happens and turns it into documentation, AI-readiness insight, and training material.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -467,9 +467,9 @@ export default function HomePage() {
               { icon: Shield, title: 'Compliance & Audit', desc: 'Every step traces to observed evidence. Generate audit-ready process documentation with full traceability.' },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="card p-6 hover:shadow-md transition-shadow">
-                <Icon className="h-5 w-5 text-brand-600 mb-3" />
+                <Icon className="h-5 w-5 text-[var(--brand-text)] mb-3" />
                 <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-1.5">{title}</h3>
-                <p className="text-xs text-[#e2e8f0] leading-relaxed">{desc}</p>
+                <p className="text-xs text-[var(--content-primary)] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -503,7 +503,7 @@ export default function HomePage() {
             <br />
             Start recording what actually happens.
           </h2>
-          <p className="mt-5 text-[#e2e8f0] leading-relaxed">
+          <p className="mt-5 text-[var(--content-primary)] leading-relaxed">
             Install the extension, record a workflow, and get a SOP, process map,
             and AI-readiness report in under 5 minutes. Free to start.
           </p>

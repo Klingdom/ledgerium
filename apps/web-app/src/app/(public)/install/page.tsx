@@ -40,12 +40,12 @@ export default function InstallPage() {
       <section className="pt-20 pb-16 bg-gradient-to-b from-brand-900/20 to-[var(--surface-primary)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
           <div className="mx-auto w-16 h-16 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center mb-6">
-            <Chrome className="h-7 w-7 text-brand-600" />
+            <Chrome className="h-7 w-7 text-[var(--brand-text)]" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)]">
             Add Ledgerium to Chrome
           </h1>
-          <p className="mt-4 text-lg text-[#e2e8f0] leading-relaxed max-w-xl mx-auto">
+          <p className="mt-4 text-lg text-[var(--content-primary)] leading-relaxed max-w-xl mx-auto">
             The browser extension captures your workflow. The web app turns it into
             SOPs, process maps, and a searchable library.
           </p>
@@ -80,7 +80,7 @@ export default function InstallPage() {
             <h2 className="text-2xl font-bold text-[var(--content-primary)]">
               Installation — 4 steps, under 2 minutes
             </h2>
-            <p className="mt-3 text-[#e2e8f0] text-sm max-w-xl mx-auto">
+            <p className="mt-3 text-[var(--content-primary)] text-sm max-w-xl mx-auto">
               Ledgerium AI is installed as a developer extension (sideload). This is a standard Chrome
               feature — all steps happen inside the browser you already have.
             </p>
@@ -90,7 +90,7 @@ export default function InstallPage() {
             {/* Step 1 */}
             <li className="flex gap-6">
               <div className="flex flex-col items-center flex-shrink-0">
-                <div className="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center text-base font-bold z-10">
+                <div className="w-10 h-10 rounded-full bg-brand-700 text-white flex items-center justify-center text-base font-bold z-10">
                   1
                 </div>
                 <div className="w-0.5 flex-1 bg-brand-600/30 mt-2 mb-2" />
@@ -103,7 +103,7 @@ export default function InstallPage() {
                       Download the extension
                     </h3>
                   </div>
-                  <ul className="space-y-2 text-sm text-[#e2e8f0] leading-relaxed list-none">
+                  <ul className="space-y-2 text-sm text-[var(--content-primary)] leading-relaxed list-none">
                     <li>Click the download button above (or use the button at the bottom of this page).</li>
                     <li>
                       A file named{' '}
@@ -116,7 +116,7 @@ export default function InstallPage() {
                   </ul>
                   <div className="mt-4 flex gap-3 rounded-lg border-l-4 border-brand-500 bg-brand-900/20 px-4 py-3">
                     <Info className="h-4 w-4 text-brand-400 mt-0.5 flex-shrink-0" />
-                    <p className="text-xs text-[#e2e8f0] leading-relaxed">
+                    <p className="text-xs text-[var(--content-primary)] leading-relaxed">
                       Keep the downloaded file — you may need it again if you switch computers or
                       reinstall Chrome.
                     </p>
@@ -128,7 +128,7 @@ export default function InstallPage() {
             {/* Step 2 */}
             <li className="flex gap-6">
               <div className="flex flex-col items-center flex-shrink-0">
-                <div className="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center text-base font-bold z-10">
+                <div className="w-10 h-10 rounded-full bg-brand-700 text-white flex items-center justify-center text-base font-bold z-10">
                   2
                 </div>
                 <div className="w-0.5 flex-1 bg-brand-600/30 mt-2 mb-2" />
@@ -141,7 +141,7 @@ export default function InstallPage() {
                       Unzip the file and open Chrome Extensions
                     </h3>
                   </div>
-                  <ul className="space-y-2 text-sm text-[#e2e8f0] leading-relaxed list-none">
+                  <ul className="space-y-2 text-sm text-[var(--content-primary)] leading-relaxed list-none">
                     <li>
                       Right-click the{' '}
                       <code className="bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded text-sm font-mono text-cyan-300">
@@ -161,7 +161,7 @@ export default function InstallPage() {
                   </ul>
                   <div className="mt-4 flex gap-3 rounded-lg border-l-4 border-amber-500 bg-amber-900/20 px-4 py-3">
                     <Info className="h-4 w-4 text-amber-400 mt-0.5 flex-shrink-0" />
-                    <p className="text-xs text-[#e2e8f0] leading-relaxed">
+                    <p className="text-xs text-[var(--content-primary)] leading-relaxed">
                       <strong className="text-amber-300">Important:</strong> Extract to a permanent location
                       such as{' '}
                       <code className="bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded font-mono text-cyan-300">
@@ -178,7 +178,7 @@ export default function InstallPage() {
             {/* Step 3 */}
             <li className="flex gap-6">
               <div className="flex flex-col items-center flex-shrink-0">
-                <div className="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center text-base font-bold z-10">
+                <div className="w-10 h-10 rounded-full bg-brand-700 text-white flex items-center justify-center text-base font-bold z-10">
                   3
                 </div>
                 <div className="w-0.5 flex-1 bg-brand-600/30 mt-2 mb-2" />
@@ -191,7 +191,7 @@ export default function InstallPage() {
                       Enable Developer Mode
                     </h3>
                   </div>
-                  <ul className="space-y-2 text-sm text-[#e2e8f0] leading-relaxed list-none">
+                  <ul className="space-y-2 text-sm text-[var(--content-primary)] leading-relaxed list-none">
                     <li>
                       On the{' '}
                       <code className="bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded text-sm font-mono text-cyan-300">
@@ -211,7 +211,7 @@ export default function InstallPage() {
                   </ul>
                   <div className="mt-4 flex gap-3 rounded-lg border-l-4 border-emerald-500 bg-emerald-900/20 px-4 py-3">
                     <CheckCircle className="h-4 w-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                    <p className="text-xs text-[#e2e8f0] leading-relaxed">
+                    <p className="text-xs text-[var(--content-primary)] leading-relaxed">
                       <strong className="text-emerald-300">This is safe.</strong> Developer mode is a standard
                       Chrome setting used by developers and IT teams everywhere. It does not reduce your
                       browser&apos;s security — it simply allows loading extensions from your local computer
@@ -225,7 +225,7 @@ export default function InstallPage() {
             {/* Step 4 — no connector after last item */}
             <li className="flex gap-6">
               <div className="flex flex-col items-center flex-shrink-0">
-                <div className="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center text-base font-bold z-10">
+                <div className="w-10 h-10 rounded-full bg-brand-700 text-white flex items-center justify-center text-base font-bold z-10">
                   4
                 </div>
               </div>
@@ -237,7 +237,7 @@ export default function InstallPage() {
                       Load the extension and pin it
                     </h3>
                   </div>
-                  <ul className="space-y-2 text-sm text-[#e2e8f0] leading-relaxed list-none">
+                  <ul className="space-y-2 text-sm text-[var(--content-primary)] leading-relaxed list-none">
                     <li>
                       Click <strong className="text-[var(--content-primary)]">Load unpacked</strong> (the button
                       that appeared in Step 3).
@@ -262,7 +262,7 @@ export default function InstallPage() {
                   </ul>
                   <div className="mt-4 flex gap-3 rounded-lg border-l-4 border-brand-500 bg-brand-900/20 px-4 py-3">
                     <CheckCircle className="h-4 w-4 text-brand-400 mt-0.5 flex-shrink-0" />
-                    <p className="text-xs text-[#e2e8f0] leading-relaxed">
+                    <p className="text-xs text-[var(--content-primary)] leading-relaxed">
                       <strong className="text-brand-300">Done.</strong> Click the Ledgerium AI icon in your
                       toolbar to open the sidebar. Sign in or create a free account to start recording.
                     </p>
@@ -275,7 +275,7 @@ export default function InstallPage() {
           {/* User Guide link */}
           <div className="mt-10 flex items-start gap-3 rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] px-5 py-4">
             <BookOpen className="h-5 w-5 text-brand-400 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-[#e2e8f0] leading-relaxed">
+            <p className="text-sm text-[var(--content-primary)] leading-relaxed">
               For a complete walkthrough with screenshots, see the Extension section in our{' '}
               <Link
                 href="/docs#getting-started"
@@ -338,9 +338,9 @@ export default function InstallPage() {
                 <div className="mx-auto w-10 h-10 rounded-full bg-brand-600/20 border border-brand-600/40 text-brand-400 flex items-center justify-center text-sm font-bold mb-4">
                   {step}
                 </div>
-                <Icon className="h-5 w-5 text-brand-600 mx-auto mb-2" />
+                <Icon className="h-5 w-5 text-[var(--brand-text)] mx-auto mb-2" />
                 <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-1.5">{title}</h3>
-                <p className="text-xs text-[#e2e8f0] leading-relaxed">{desc}</p>
+                <p className="text-xs text-[var(--content-primary)] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -357,7 +357,7 @@ export default function InstallPage() {
             {/* What it captures */}
             <div className="card p-6">
               <div className="flex items-center gap-2 mb-4">
-                <Eye className="h-5 w-5 text-brand-600" />
+                <Eye className="h-5 w-5 text-[var(--brand-text)]" />
                 <h3 className="text-sm font-bold text-[var(--content-primary)]">Captured</h3>
               </div>
               <ul className="space-y-3">
@@ -369,7 +369,7 @@ export default function InstallPage() {
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
                     <CheckCircle className="h-4 w-4 text-brand-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-[#e2e8f0] leading-relaxed">{item}</span>
+                    <span className="text-sm text-[var(--content-primary)] leading-relaxed">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -390,7 +390,7 @@ export default function InstallPage() {
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
                     <Shield className="h-4 w-4 text-[var(--content-tertiary)] mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-[#e2e8f0] leading-relaxed">{item}</span>
+                    <span className="text-sm text-[var(--content-primary)] leading-relaxed">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -411,14 +411,14 @@ export default function InstallPage() {
           </h2>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div className="card p-4">
-              <Chrome className="h-6 w-6 text-brand-600 mx-auto mb-2" />
+              <Chrome className="h-6 w-6 text-[var(--brand-text)] mx-auto mb-2" />
               <p className="text-sm font-medium text-[var(--content-primary)]">Chrome</p>
               <p className="text-[11px] text-green-600 font-medium">Fully supported</p>
             </div>
             <div className="card p-4">
               <Chrome className="h-6 w-6 text-[var(--content-tertiary)] mx-auto mb-2" />
               <p className="text-sm font-medium text-[var(--content-primary)]">Edge / Brave</p>
-              <p className="text-[11px] text-[#e2e8f0]">Compatible</p>
+              <p className="text-[11px] text-[var(--content-primary)]">Compatible</p>
             </div>
             <div className="card p-4">
               <Chrome className="h-6 w-6 text-[var(--content-tertiary)] mx-auto mb-2" />
@@ -461,7 +461,7 @@ export default function InstallPage() {
             ].map(({ q, a }) => (
               <div key={q}>
                 <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-1.5">{q}</h3>
-                <p className="text-sm text-[#e2e8f0] leading-relaxed">{a}</p>
+                <p className="text-sm text-[var(--content-primary)] leading-relaxed">{a}</p>
               </div>
             ))}
           </div>
@@ -474,7 +474,7 @@ export default function InstallPage() {
           <h2 className="text-2xl font-bold text-[var(--content-primary)]">
             Ready to see your real workflows?
           </h2>
-          <p className="mt-3 text-[#e2e8f0]">
+          <p className="mt-3 text-[var(--content-primary)]">
             Download the extension and follow the 4 steps above — up and running in under 2 minutes.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">

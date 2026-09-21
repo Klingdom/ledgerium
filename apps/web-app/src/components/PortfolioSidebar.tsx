@@ -190,7 +190,7 @@ function PortfolioTreeNode({
         />
         <PortfolioTypeIcon
           type={node.type}
-          className={`flex-shrink-0 h-3.5 w-3.5 ${isActive ? 'text-brand-600' : 'text-[var(--content-tertiary)]'}`}
+          className={`flex-shrink-0 h-3.5 w-3.5 ${isActive ? 'text-[var(--brand-text)]' : 'text-[var(--content-tertiary)]'}`}
         />
 
         {/* Name or rename input */}
@@ -352,7 +352,7 @@ export default function PortfolioSidebar({
               : 'text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
           }`}
         >
-          <Layers className={`h-3.5 w-3.5 flex-shrink-0 ${activePortfolioId === null ? 'text-brand-600' : 'text-[var(--content-tertiary)]'}`} />
+          <Layers className={`h-3.5 w-3.5 flex-shrink-0 ${activePortfolioId === null ? 'text-[var(--brand-text)]' : 'text-[var(--content-tertiary)]'}`} />
           <span className="flex-1 text-left">All Workflows</span>
         </button>
 
@@ -365,7 +365,7 @@ export default function PortfolioSidebar({
               : 'text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
           }`}
         >
-          <FolderOpen className={`h-3.5 w-3.5 flex-shrink-0 ${activePortfolioId === 'uncategorized' ? 'text-brand-600' : 'text-[var(--content-tertiary)]'}`} />
+          <FolderOpen className={`h-3.5 w-3.5 flex-shrink-0 ${activePortfolioId === 'uncategorized' ? 'text-[var(--brand-text)]' : 'text-[var(--content-tertiary)]'}`} />
           <span className="flex-1 text-left">Uncategorized</span>
         </button>
       </div>
@@ -381,7 +381,7 @@ export default function PortfolioSidebar({
           <p className="text-[11px] text-[var(--content-tertiary)]">No portfolios yet.</p>
           <button
             onClick={onCreatePortfolio}
-            className="mt-1.5 text-[11px] text-brand-600 hover:text-brand-700 font-medium"
+            className="mt-1.5 text-[11px] text-[var(--brand-text)] hover:text-brand-700 font-medium"
           >
             Create one &rarr;
           </button>

@@ -166,12 +166,12 @@ export default function SupportPage() {
       <section className="pt-20 pb-16 bg-gradient-to-b from-brand-900/20 to-[var(--surface-primary)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
           <div className="mx-auto w-16 h-16 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center mb-6">
-            <HelpCircle className="h-7 w-7 text-brand-600" />
+            <HelpCircle className="h-7 w-7 text-[var(--brand-text)]" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)]">
             How can we help?
           </h1>
-          <p className="mt-4 text-lg text-[#e2e8f0] leading-relaxed max-w-xl mx-auto">
+          <p className="mt-4 text-lg text-[var(--content-primary)] leading-relaxed max-w-xl mx-auto">
             Find answers, documentation, and contact options.
           </p>
         </div>
@@ -200,7 +200,7 @@ export default function SupportPage() {
                   <p className="text-sm font-semibold text-[var(--content-primary)] mb-1">
                     {title}
                   </p>
-                  <p className="text-xs text-[#e2e8f0] leading-relaxed">{description}</p>
+                  <p className="text-xs text-[var(--content-primary)] leading-relaxed">{description}</p>
                 </div>
               </Link>
             ))}
@@ -223,7 +223,7 @@ export default function SupportPage() {
                 <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-1.5">
                   {q}
                 </h3>
-                <p className="text-sm text-[#e2e8f0] leading-relaxed">{a}</p>
+                <p className="text-sm text-[var(--content-primary)] leading-relaxed">{a}</p>
               </div>
             ))}
           </div>
@@ -251,10 +251,10 @@ export default function SupportPage() {
                 >
                   {SITE_CONFIG.supportEmail}
                 </a>
-                <p className="mt-3 text-sm text-[#e2e8f0] leading-relaxed">
+                <p className="mt-3 text-sm text-[var(--content-primary)] leading-relaxed">
                   We typically respond within 24 hours on business days.
                 </p>
-                <p className="mt-4 text-sm text-[#e2e8f0] leading-relaxed">
+                <p className="mt-4 text-sm text-[var(--content-primary)] leading-relaxed">
                   Evaluating Ledgerium for your organization?{' '}
                   <Link
                     href="/security"

@@ -45,7 +45,7 @@ export function ProblemPageView({ page }: { page: ProblemPage }) {
                 <span className="flex-shrink-0 w-7 h-7 rounded-full bg-brand-900/20 border border-brand-700/30 text-brand-500 text-sm font-semibold flex items-center justify-center">{i + 1}</span>
                 <div>
                   <p className="text-sm font-semibold text-[var(--content-primary)]">{s.title}</p>
-                  <p className="text-sm text-[#e2e8f0] leading-relaxed">{s.detail}</p>
+                  <p className="text-sm text-[var(--content-primary)] leading-relaxed">{s.detail}</p>
                 </div>
               </li>
             ))}

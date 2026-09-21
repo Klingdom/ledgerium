@@ -65,7 +65,7 @@ export default function CaptureBeforeAutomatePost() {
 
       {/* Post body */}
       <article className="py-14 bg-[var(--surface-primary)]">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 space-y-6 text-[15px] text-[#e2e8f0] leading-relaxed">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 space-y-6 text-[15px] text-[var(--content-primary)] leading-relaxed">
 
           <p>
             A pattern is repeating across operations teams. Leadership decides this is the year
@@ -194,7 +194,7 @@ export default function CaptureBeforeAutomatePost() {
           <h2 className="text-2xl font-bold text-[var(--content-primary)]">
             Find where AI can actually help
           </h2>
-          <p className="mt-3 text-[#e2e8f0]">
+          <p className="mt-3 text-[var(--content-primary)]">
             Record a workflow free and see which steps are worth automating, with evidence.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">

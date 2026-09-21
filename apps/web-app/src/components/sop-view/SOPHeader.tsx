@@ -21,7 +21,7 @@ export function SOPHeader({ metadata, alignment }: Props) {
       <div className="flex items-start justify-between gap-4 mb-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-brand-600 bg-brand-50 border border-brand-200 px-1.5 py-0.5 rounded">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--brand-text)] bg-brand-50 border border-brand-200 px-1.5 py-0.5 rounded">
               SOP
             </span>
             {metadata.version && (

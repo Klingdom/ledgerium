@@ -50,7 +50,7 @@ export function Footer() {
         {/* Brand */}
         <div className="mb-10 max-w-sm">
           <LogoFull size={20} />
-          <p className="mt-3 text-sm text-[#e2e8f0] leading-relaxed">
+          <p className="mt-3 text-sm text-[var(--content-primary)] leading-relaxed">
             Evidence-based workflow intelligence. Record real work, generate real documentation.
           </p>
         </div>
@@ -69,7 +69,7 @@ export function Footer() {
                       href={href}
                       event="cta_clicked"
                       properties={{ location: 'footer_nav', destination: href }}
-                      className="text-sm text-[#e2e8f0] hover:text-[var(--content-primary)] transition-colors"
+                      className="text-sm text-[var(--content-primary)] hover:text-[var(--content-primary)] transition-colors"
                     >
                       {label}
                     </TrackedLink>

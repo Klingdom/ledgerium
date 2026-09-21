@@ -30,7 +30,7 @@ export default function TermsPage() {
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)]">
             Ledgerium AI — Terms of Service
           </h1>
-          <p className="mt-4 text-sm text-[#e2e8f0]">
+          <p className="mt-4 text-sm text-[var(--content-primary)]">
             Effective Date: April 14, 2026
           </p>
         </div>
@@ -274,7 +274,7 @@ function PolicySection({
       <h3 className="text-lg font-bold text-[var(--content-primary)] mb-3 flex items-baseline gap-2">
         <span className="text-brand-400">{number}.</span> {title}
       </h3>
-      <div className="text-sm text-[#e2e8f0] leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_h4]:text-sm [&_h4]:font-semibold [&_h4]:text-[var(--content-primary)] [&_h4]:mt-4 [&_h4]:mb-2 [&_a]:text-brand-400 [&_a:hover]:text-brand-300 [&_strong]:text-[var(--content-primary)]">
+      <div className="text-sm text-[var(--content-primary)] leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_h4]:text-sm [&_h4]:font-semibold [&_h4]:text-[var(--content-primary)] [&_h4]:mt-4 [&_h4]:mb-2 [&_a]:text-brand-400 [&_a:hover]:text-brand-300 [&_strong]:text-[var(--content-primary)]">
         {children}
       </div>
     </div>

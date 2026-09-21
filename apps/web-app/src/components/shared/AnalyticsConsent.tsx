@@ -71,7 +71,7 @@ export function AnalyticsConsent(): JSX.Element | null {
 
             <button
               onClick={() => accept('full')}
-              className="rounded-ds-md bg-brand-600 px-ds-3 py-1.5 text-ds-sm font-semibold text-white hover:bg-brand-700 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+              className="rounded-ds-md bg-brand-700 px-ds-3 py-1.5 text-ds-sm font-semibold text-white hover:bg-brand-800 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
             >
               Accept
             </button>

@@ -107,14 +107,14 @@ export function PricingCards() {
               }`}
             >
               {plan.highlighted && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-600 px-4 py-1 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-700 px-4 py-1 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm">
                   Most Popular
                 </span>
               )}
 
               <div className="mb-4">
                 <h3 className="text-lg font-bold text-[var(--content-primary)]">{plan.name}</h3>
-                <p className="text-xs text-[#e2e8f0] mt-1 leading-relaxed">{plan.description}</p>
+                <p className="text-xs text-[var(--content-primary)] mt-1 leading-relaxed">{plan.description}</p>
               </div>
 
               {/* Best For row (PRICING-P02 / CEO Rec #8) */}
@@ -162,7 +162,7 @@ export function PricingCards() {
               )}
 
               {plan.seats && (
-                <p className="text-xs font-semibold text-brand-600 mb-3">{plan.seats}</p>
+                <p className="text-xs font-semibold text-[var(--brand-text)] mb-3">{plan.seats}</p>
               )}
 
               {!plan.seats && <div className="mb-3" />}
@@ -289,7 +289,7 @@ export function PricingCards() {
                   <li key={feature} className="flex items-start gap-2">
                     <Check
                       className={`h-3.5 w-3.5 mt-0.5 flex-shrink-0 ${
-                        plan.highlighted ? 'text-brand-600' : 'text-[var(--content-tertiary)]'
+                        plan.highlighted ? 'text-[var(--brand-text)]' : 'text-[var(--content-tertiary)]'
                       }`}
                     />
                     <span className="text-xs text-[var(--content-primary)] leading-relaxed">

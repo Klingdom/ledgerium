@@ -198,16 +198,16 @@ export default function CompareScribePage() {
       <section className="relative overflow-hidden">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 pt-20 pb-16 sm:pt-28 sm:pb-20 text-center">
           {/* Badge */}
-          <span className="inline-block text-xs font-semibold text-brand-600 uppercase tracking-widest border border-brand-700/40 rounded-full px-4 py-1.5 mb-6 bg-brand-900/20">
+          <span className="inline-block text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest border border-brand-700/40 rounded-full px-4 py-1.5 mb-6 bg-brand-900/20">
             Comparison
           </span>
 
           <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-[var(--content-primary)] leading-[1.1] tracking-tight">
             Ledgerium vs. Scribe:{' '}
-            <span className="text-brand-600">What&apos;s actually different?</span>
+            <span className="text-[var(--brand-text)]">What&apos;s actually different?</span>
           </h1>
 
-          <p className="mt-6 text-lg text-[#e2e8f0] leading-relaxed max-w-2xl mx-auto">
+          <p className="mt-6 text-lg text-[var(--content-primary)] leading-relaxed max-w-2xl mx-auto">
             This is not a feature checklist. It&apos;s a structural comparison. Scribe and
             Ledgerium solve different problems at a different level — and understanding
             that difference will tell you which one belongs in your workflow.
@@ -224,7 +224,7 @@ export default function CompareScribePage() {
             <h2 className="text-2xl font-bold text-[var(--content-primary)]">
               The core difference
             </h2>
-            <p className="mt-3 text-[#e2e8f0] max-w-xl mx-auto">
+            <p className="mt-3 text-[var(--content-primary)] max-w-xl mx-auto">
               Both tools watch you work. What they record — and what they produce — is
               fundamentally different.
             </p>
@@ -283,14 +283,14 @@ export default function CompareScribePage() {
                   'System context: app, domain, URL at every point',
                   'Confidence scores per observed interaction',
                 ].map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-[#e2e8f0] leading-relaxed">
+                  <li key={item} className="flex items-start gap-2.5 text-sm text-[var(--content-primary)] leading-relaxed">
                     <Check className="mt-0.5 flex-shrink-0 h-4 w-4 text-brand-500" />
                     {item}
                   </li>
                 ))}
               </ul>
               <div className="pt-4 border-t border-brand-800/40">
-                <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest mb-1">
+                <p className="text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest mb-1">
                   Output
                 </p>
                 <p className="text-sm text-[var(--content-primary)] font-medium">
@@ -323,7 +323,7 @@ export default function CompareScribePage() {
                   {/* Ledgerium column — highlighted */}
                   <th className="px-5 py-4 text-center w-[200px] bg-brand-900/10 border-x border-brand-800/30">
                     <span className="inline-flex flex-col items-center gap-1">
-                      <span className="text-xs font-bold text-white uppercase tracking-wider bg-brand-600 rounded-full px-3 py-0.5">
+                      <span className="text-xs font-bold text-white uppercase tracking-wider bg-brand-700 rounded-full px-3 py-0.5">
                         This product
                       </span>
                       <span className="font-semibold text-brand-400">Ledgerium</span>
@@ -378,7 +378,7 @@ export default function CompareScribePage() {
                   When to use Scribe
                 </h2>
               </div>
-              <p className="text-[15px] text-[#e2e8f0] leading-relaxed">
+              <p className="text-[15px] text-[var(--content-primary)] leading-relaxed">
                 Scribe&apos;s core product is a good fit if you need quick visual
                 walkthroughs for showing someone where to click. It&apos;s fast,
                 familiar, and well-established. If your goal is to produce a
@@ -411,7 +411,7 @@ export default function CompareScribePage() {
                   When to use Ledgerium
                 </h2>
               </div>
-              <p className="text-[15px] text-[#e2e8f0] leading-relaxed">
+              <p className="text-[15px] text-[var(--content-primary)] leading-relaxed">
                 Ledgerium is the right choice when you need structured process
                 data — when you want to compare how a workflow changes over time,
                 detect bottlenecks, measure performance, prepare for automation, or
@@ -424,7 +424,7 @@ export default function CompareScribePage() {
                   'Prepare structured evidence for automation or compliance',
                   'Generate documentation without writing anything',
                 ].map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-[#e2e8f0] leading-relaxed">
+                  <li key={item} className="flex items-start gap-2.5 text-sm text-[var(--content-primary)] leading-relaxed">
                     <Check className="mt-0.5 flex-shrink-0 h-4 w-4 text-brand-500" />
                     {item}
                   </li>
@@ -479,10 +479,10 @@ export default function CompareScribePage() {
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="card p-6 flex flex-col gap-3">
                 <div className="w-9 h-9 rounded-lg bg-brand-900/20 border border-brand-700/25 flex items-center justify-center flex-shrink-0">
-                  <Icon className="h-4 w-4 text-brand-600" />
+                  <Icon className="h-4 w-4 text-[var(--brand-text)]" />
                 </div>
                 <h3 className="text-sm font-semibold text-[var(--content-primary)]">{title}</h3>
-                <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
+                <p className="text-sm text-[var(--content-primary)] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -499,7 +499,7 @@ export default function CompareScribePage() {
             {COMPARE_FAQ.map(({ q, a }) => (
               <div key={q} className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-elevated)] p-6">
                 <dt className="text-base font-semibold text-[var(--content-primary)] mb-3">{q}</dt>
-                <dd className="text-sm text-[#e2e8f0] leading-relaxed">{a}</dd>
+                <dd className="text-sm text-[var(--content-primary)] leading-relaxed">{a}</dd>
               </div>
             ))}
           </dl>
@@ -512,7 +512,7 @@ export default function CompareScribePage() {
           <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
             Try Ledgerium free — 5 recordings, no credit card
           </h2>
-          <p className="mt-5 text-[#e2e8f0] leading-relaxed max-w-xl mx-auto">
+          <p className="mt-5 text-[var(--content-primary)] leading-relaxed max-w-xl mx-auto">
             Record your first workflow in under 5 minutes. Get structured process
             data, an auto-generated SOP, and a process map — from direct observation,
             not memory.
@@ -531,7 +531,7 @@ export default function CompareScribePage() {
           </div>
           <p className="mt-5 text-xs text-[var(--content-tertiary)]">
             Free plan includes 5 recordings per month · No screenshots ever captured ·{' '}
-            <Link href="/privacy" className="underline hover:text-brand-500">
+            <Link href="/privacy" className="underline hover:text-[var(--brand-text-hover)]">
               Privacy details
             </Link>
           </p>

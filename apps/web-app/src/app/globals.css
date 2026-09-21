@@ -20,6 +20,14 @@
   /* Status colours (row #206). Per-theme because a red that passes on a dark
      surface fails on a light one: #F87171 is 6.84:1 here but 2.77:1 on the
      light surface, and #DC2626 is the reverse (3.92:1 here, 4.61:1 there). */
+  /* Brand green AS TEXT (row #222). bg-brand-600 #059669 measures 4.29:1 on
+     --surface-elevated — under the 4.5:1 floor — which is why axe flagged it on
+     cards but not on the page background (5.02:1 there). brand-400 #34D399 is
+     8.4:1 on elevated and 9.9:1 on primary. Distinct from row #207, which fixed
+     white text ON the brand green; this is the green used as the text itself. */
+  --brand-text: #34D399;
+  --brand-text-hover: #6EE7B7;
+
   --status-danger: #F87171;   /* 6.84:1 on --surface-primary */
   --status-warning: #FBBF24;  /* 11.3:1 */
   --status-success: #4ADE80;  /* 10.9:1 */
@@ -47,6 +55,12 @@
   --content-tertiary: #475569;
 
   /* Row #206 — light-theme status colours (see :root for why per-theme). */
+  /* Row #222 — light theme. #059669 as text is ~3.1:1 on these near-white
+     surfaces (77-83 axe nodes per public page). brand-700 #047857 measures
+     5.2:1 on --surface-primary and 5.5:1 on white cards. */
+  --brand-text: #047857;
+  --brand-text-hover: #065F46;
+
   --status-danger: #DC2626;   /* 4.61:1 on --surface-primary */
   --status-warning: #B45309;  /* 4.79:1 */
   --status-success: #15803D;  /* 4.79:1 */
@@ -446,6 +460,8 @@
       --content-primary: #111827 !important;
       --content-secondary: #374151 !important;
       --content-tertiary: #6b7280 !important;
+      --brand-text: #047857 !important;
+      --brand-text-hover: #065F46 !important;
       --status-danger: #DC2626 !important;
       --status-warning: #B45309 !important;
       --status-success: #15803D !important;

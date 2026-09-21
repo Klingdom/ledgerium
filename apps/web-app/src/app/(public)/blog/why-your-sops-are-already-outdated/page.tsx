@@ -45,7 +45,7 @@ export default function SopsOutdatedPost() {
 
       {/* Post body */}
       <article className="py-14 bg-[var(--surface-primary)]">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 space-y-6 text-[15px] text-[#e2e8f0] leading-relaxed">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 space-y-6 text-[15px] text-[var(--content-primary)] leading-relaxed">
 
           <p>
             Standard operating procedures are supposed to be the organization&apos;s memory.
@@ -205,7 +205,7 @@ export default function SopsOutdatedPost() {
           <h2 className="text-2xl font-bold text-[var(--content-primary)]">
             Ready to see what your real workflows look like?
           </h2>
-          <p className="mt-3 text-[#e2e8f0]">
+          <p className="mt-3 text-[var(--content-primary)]">
             Record your first workflow. See the structured output in under 5 minutes.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">

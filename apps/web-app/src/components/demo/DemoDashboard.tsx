@@ -213,7 +213,7 @@ function WorkflowDetail({ w, onBack }: { w: DemoWorkflow; onBack: () => void }) 
             type="button"
             onClick={() => setTab(key)}
             className={`inline-flex items-center gap-1.5 text-[11px] font-medium rounded-lg px-3 py-1.5 transition-colors ${
-              tab === key ? 'bg-brand-600 text-white' : 'text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
+              tab === key ? 'bg-brand-700 text-white' : 'text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
             }`}
           >
             <Icon className="h-3.5 w-3.5" />
@@ -349,7 +349,7 @@ export default function DemoDashboard() {
                   onClick={() => setFilter(key)}
                   className={`text-[11px] font-medium rounded-full border px-3 py-1.5 transition-colors ${
                     isActive
-                      ? 'bg-brand-600 border-brand-600 text-white'
+                      ? 'bg-brand-700 border-brand-600 text-white'
                       : 'bg-[var(--surface-secondary)] border-[var(--border-subtle)] text-[var(--content-secondary)] hover:text-[var(--content-primary)] hover:border-[var(--border-default)]'
                   }`}
                 >

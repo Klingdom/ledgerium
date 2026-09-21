@@ -45,15 +45,15 @@ export function HubIndex({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }} />
       <nav aria-label="Breadcrumb" className="mx-auto max-w-5xl px-4 sm:px-6 pt-8">
         <ol className="flex items-center gap-2 text-xs text-[var(--content-tertiary)]">
-          <li><Link href="/" className="hover:text-brand-500">Home</Link></li>
+          <li><Link href="/" className="hover:text-[var(--brand-text-hover)]">Home</Link></li>
           <li aria-hidden>/</li>
           <li className="text-[var(--content-secondary)]">{title}</li>
         </ol>
       </nav>
       <section className="mx-auto max-w-3xl px-4 sm:px-6 pt-8 pb-10">
-        <span className="inline-block text-xs font-semibold text-brand-600 uppercase tracking-widest border border-brand-700/40 rounded-full px-4 py-1.5 mb-6 bg-brand-900/20">{eyebrow}</span>
+        <span className="inline-block text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest border border-brand-700/40 rounded-full px-4 py-1.5 mb-6 bg-brand-900/20">{eyebrow}</span>
         <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)] tracking-tight">{title}</h1>
-        <p className="mt-5 text-lg text-[#e2e8f0] leading-relaxed">{intro}</p>
+        <p className="mt-5 text-lg text-[var(--content-primary)] leading-relaxed">{intro}</p>
       </section>
       <section className="pb-20">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -63,7 +63,7 @@ export function HubIndex({
               href={`${ROUTE_PREFIX[p.type]}/${p.slug}`}
               className="card p-6 flex flex-col gap-2 hover:border-brand-700/40 transition-colors"
             >
-              <span className="text-xs font-semibold text-brand-600 uppercase tracking-widest">{p.eyebrow}</span>
+              <span className="text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest">{p.eyebrow}</span>
               <span className="text-base font-semibold text-[var(--content-primary)] leading-snug">{p.h1}</span>
               <span className="text-sm text-[var(--content-tertiary)] leading-relaxed">{p.metaDescription}</span>
             </Link>

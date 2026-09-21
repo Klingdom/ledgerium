@@ -751,7 +751,7 @@ function MetricCard({ icon: Icon, label, value }: { icon: React.ElementType; lab
   return (
     <div className="card px-ds-5 py-ds-4">
       <div className="flex items-center gap-ds-2 mb-ds-1">
-        <Icon className="h-4 w-4 text-brand-600" />
+        <Icon className="h-4 w-4 text-[var(--brand-text)]" />
         <p className="ds-metric-label">{label}</p>
       </div>
       <p className="ds-metric-value">{value}</p>

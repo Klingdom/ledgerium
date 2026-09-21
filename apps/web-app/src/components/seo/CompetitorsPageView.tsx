@@ -47,7 +47,7 @@ export function CompetitorsPageView({ page }: { page: CompetitorsPage }) {
                 {page.segments.map((s, i) => (
                   <tr key={s.segment} className={`border-b border-[var(--border-default)] last:border-0 ${i % 2 === 0 ? 'bg-[var(--surface-primary)]' : 'bg-[var(--surface-secondary)]'}`}>
                     <td className="px-5 py-3.5 font-medium text-[var(--content-primary)]">{s.segment}</td>
-                    <td className="px-5 py-3.5 text-[#e2e8f0]">{s.players}</td>
+                    <td className="px-5 py-3.5 text-[var(--content-primary)]">{s.players}</td>
                     <td className="px-5 py-3.5 text-[var(--content-secondary)]">{s.fitFor}</td>
                   </tr>
                 ))}

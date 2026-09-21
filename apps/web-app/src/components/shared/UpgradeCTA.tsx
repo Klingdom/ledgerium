@@ -64,7 +64,7 @@ export function UpgradeCTA({
         <span>{defaultTitle}</span>
         <Link
           href="/pricing"
-          className="font-medium text-brand-600 hover:text-brand-700 underline underline-offset-2"
+          className="font-medium text-[var(--brand-text)] hover:text-brand-700 underline underline-offset-2"
         >
           Upgrade
         </Link>
@@ -90,7 +90,7 @@ export function UpgradeCTA({
 
       <Link
         href="/pricing"
-        className="mt-5 inline-flex items-center justify-center rounded-ds-md bg-brand-600 px-ds-4 py-ds-2 text-ds-sm font-semibold text-white shadow-sm hover:bg-brand-700 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+        className="mt-5 inline-flex items-center justify-center rounded-ds-md bg-brand-700 px-ds-4 py-ds-2 text-ds-sm font-semibold text-white shadow-sm hover:bg-brand-800 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
       >
         {buttonLabel}
       </Link>

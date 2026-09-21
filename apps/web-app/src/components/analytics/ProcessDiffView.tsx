@@ -458,7 +458,7 @@ function LensButton({ active, onClick, children }: { active: boolean; onClick: (
       aria-pressed={active}
       className={`rounded-[5px] px-3 py-1.5 text-ds-xs font-medium transition-colors ${
         active
-          ? 'bg-brand-600 text-white'
+          ? 'bg-brand-700 text-white'
           : 'text-[var(--content-secondary)] hover:text-[var(--content-primary)]'
       }`}
     >

@@ -102,17 +102,17 @@ export default function OperationsUseCasePage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 pt-20 pb-24 sm:pt-28 sm:pb-32">
           <div className="max-w-3xl mx-auto text-center">
             {/* Badge */}
-            <span className="inline-block text-xs font-semibold text-brand-600 uppercase tracking-widest border border-brand-700/40 rounded-full px-4 py-1.5 mb-6 bg-brand-900/20">
+            <span className="inline-block text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest border border-brand-700/40 rounded-full px-4 py-1.5 mb-6 bg-brand-900/20">
               For Operations Teams
             </span>
 
             <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-bold text-[var(--content-primary)] leading-[1.1] tracking-tight">
               Your ERP workflows are undocumented.{' '}
-              <span className="text-brand-600">Your SOPs are outdated.</span>{' '}
+              <span className="text-[var(--brand-text)]">Your SOPs are outdated.</span>{' '}
               Your new hires are stuck.
             </h1>
 
-            <p className="mt-6 text-lg sm:text-xl text-[#e2e8f0] leading-relaxed max-w-2xl mx-auto">
+            <p className="mt-6 text-lg sm:text-xl text-[var(--content-primary)] leading-relaxed max-w-2xl mx-auto">
               Ledgerium records what your team actually does in the browser — and generates the
               documentation automatically.
             </p>
@@ -154,13 +154,13 @@ export default function OperationsUseCasePage() {
             {PAIN_POINTS.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="card p-7 flex flex-col gap-4">
                 <div className="w-10 h-10 rounded-lg bg-brand-900/20 border border-brand-700/25 flex items-center justify-center flex-shrink-0">
-                  <Icon className="h-5 w-5 text-brand-600" />
+                  <Icon className="h-5 w-5 text-[var(--brand-text)]" />
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-2">
                     {title}
                   </h3>
-                  <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
+                  <p className="text-sm text-[var(--content-primary)] leading-relaxed">{desc}</p>
                 </div>
               </div>
             ))}
@@ -172,7 +172,7 @@ export default function OperationsUseCasePage() {
       <section className="py-24 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="text-center mb-16">
-            <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+            <p className="text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest mb-3">
               How it works
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
@@ -188,7 +188,7 @@ export default function OperationsUseCasePage() {
               const iconBlock = (
                 <div className="flex items-center justify-center">
                   <div className="w-24 h-24 rounded-3xl bg-brand-900/20 border border-brand-700/30 flex items-center justify-center shadow-lg shadow-brand-900/20">
-                    <Icon className="h-10 w-10 text-brand-600" />
+                    <Icon className="h-10 w-10 text-[var(--brand-text)]" />
                   </div>
                 </div>
               );
@@ -196,7 +196,7 @@ export default function OperationsUseCasePage() {
               const textBlock = (
                 <div className="flex flex-col justify-center">
                   <h3 className="text-xl font-bold text-[var(--content-primary)] mb-3">{title}</h3>
-                  <p className="text-[#e2e8f0] leading-relaxed">{desc}</p>
+                  <p className="text-[var(--content-primary)] leading-relaxed">{desc}</p>
                 </div>
               );
 
@@ -239,7 +239,7 @@ export default function OperationsUseCasePage() {
                 className="flex items-center gap-4 p-5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-secondary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-elevated)] transition-all"
               >
                 <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-brand-900/20 border border-brand-700/25 flex items-center justify-center">
-                  <Icon className="h-4 w-4 text-brand-600" />
+                  <Icon className="h-4 w-4 text-[var(--brand-text)]" />
                 </div>
                 <p className="text-sm font-medium text-[var(--content-primary)] leading-snug">
                   {label}
@@ -259,7 +259,7 @@ export default function OperationsUseCasePage() {
                 key={label}
                 className="flex items-center justify-center gap-2.5 text-[var(--content-secondary)]"
               >
-                <Icon className="h-4 w-4 flex-shrink-0 text-brand-600" />
+                <Icon className="h-4 w-4 flex-shrink-0 text-[var(--brand-text)]" />
                 <span className="text-sm font-medium whitespace-nowrap">{label}</span>
               </div>
             ))}
@@ -273,7 +273,7 @@ export default function OperationsUseCasePage() {
           <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
             Start documenting what actually happens
           </h2>
-          <p className="mt-5 text-[#e2e8f0] leading-relaxed max-w-xl mx-auto">
+          <p className="mt-5 text-[var(--content-primary)] leading-relaxed max-w-xl mx-auto">
             Install the extension, record a workflow, and get structured output in under 5 minutes.
             Free to start — no IT involvement required.
           </p>

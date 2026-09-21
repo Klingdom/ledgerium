@@ -170,7 +170,7 @@ export default function DemoAnnotations({ annotations, children }: DemoAnnotatio
                 <div className="px-4 py-3">
                   <div className="flex items-start gap-2 mb-1.5">
                     <span
-                      className="shrink-0 w-5 h-5 rounded-full bg-brand-600 text-white text-[10px] font-bold flex items-center justify-center mt-0.5"
+                      className="shrink-0 w-5 h-5 rounded-full bg-brand-700 text-white text-[10px] font-bold flex items-center justify-center mt-0.5"
                     >
                       {ann.number}
                     </span>

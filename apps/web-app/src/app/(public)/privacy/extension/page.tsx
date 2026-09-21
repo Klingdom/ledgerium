@@ -22,20 +22,20 @@ export default function ExtensionPrivacyPage() {
       <section className="pt-20 pb-12 bg-gradient-to-b from-brand-900/20 to-[var(--surface-primary)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <div className="flex items-center gap-3 mb-4">
-            <Shield className="h-6 w-6 text-brand-600" />
-            <p className="text-sm font-semibold text-brand-600 uppercase tracking-wide">
+            <Shield className="h-6 w-6 text-[var(--brand-text)]" />
+            <p className="text-sm font-semibold text-[var(--brand-text)] uppercase tracking-wide">
               Extension Privacy Policy
             </p>
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)]">
             Ledgerium AI Recorder — Extension Privacy Policy
           </h1>
-          <p className="mt-4 text-sm text-[#e2e8f0]">
+          <p className="mt-4 text-sm text-[var(--content-primary)]">
             Effective Date: June 18, 2026
           </p>
           <p className="mt-2 text-xs text-[var(--content-tertiary)]">
             This policy applies specifically to the Ledgerium AI Recorder Chrome extension.{' '}
-            <Link href="/privacy" className="text-brand-600 hover:text-brand-700 underline">
+            <Link href="/privacy" className="text-[var(--brand-text)] hover:text-brand-700 underline">
               View the general Ledgerium AI Privacy Policy →
             </Link>
           </p>
@@ -47,7 +47,7 @@ export default function ExtensionPrivacyPage() {
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <div className="rounded-xl bg-brand-900/15 border border-brand-700/30 p-6">
             <div className="flex items-center gap-2 mb-3">
-              <Eye className="h-5 w-5 text-brand-600" />
+              <Eye className="h-5 w-5 text-[var(--brand-text)]" />
               <h2 className="text-sm font-bold text-[var(--content-primary)]">Our Trust Commitments</h2>
             </div>
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -202,7 +202,7 @@ export default function ExtensionPrivacyPage() {
                   { icon: Lock, text: 'Uninstall the Extension to remove all local data' },
                 ].map(({ icon: Icon, text }) => (
                   <div key={text} className="flex items-start gap-2 rounded-lg bg-[var(--surface-secondary)] p-3">
-                    <Icon className="h-4 w-4 text-brand-600 mt-0.5 flex-shrink-0" />
+                    <Icon className="h-4 w-4 text-[var(--brand-text)] mt-0.5 flex-shrink-0" />
                     <span className="text-sm">{text}</span>
                   </div>
                 ))}
@@ -210,7 +210,7 @@ export default function ExtensionPrivacyPage() {
               <p className="mt-4">
                 To delete data stored in the Ledgerium AI platform, log into your account and use the workflow
                 management tools, or contact us at{' '}
-                <a href={`mailto:${SITE_CONFIG.supportEmail}`} className="text-brand-600 hover:text-brand-700 underline">
+                <a href={`mailto:${SITE_CONFIG.supportEmail}`} className="text-[var(--brand-text)] hover:text-brand-700 underline">
                   {SITE_CONFIG.supportEmail}
                 </a>.
               </p>
@@ -261,14 +261,14 @@ export default function ExtensionPrivacyPage() {
                   Email:{' '}
                   <a
                     href={`mailto:${SITE_CONFIG.supportEmail}`}
-                    className="text-brand-600 hover:text-brand-700 underline"
+                    className="text-[var(--brand-text)] hover:text-brand-700 underline"
                   >
                     {SITE_CONFIG.supportEmail}
                   </a>
                 </li>
                 <li>
                   Website:{' '}
-                  <Link href="/" className="text-brand-600 hover:text-brand-700 underline">
+                  <Link href="/" className="text-[var(--brand-text)] hover:text-brand-700 underline">
                     ledgerium.ai
                   </Link>
                 </li>
@@ -312,9 +312,9 @@ function PolicySection({
   return (
     <div>
       <h3 className="text-lg font-bold text-[var(--content-primary)] mb-3 flex items-baseline gap-2">
-        <span className="text-brand-600">{number}.</span> {title}
+        <span className="text-[var(--brand-text)]">{number}.</span> {title}
       </h3>
-      <div className="text-sm text-[#e2e8f0] leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_h4]:text-sm [&_h4]:font-semibold [&_h4]:text-[var(--content-primary)] [&_h4]:mt-4 [&_h4]:mb-2 [&_a]:text-brand-600 [&_a:hover]:text-brand-700 [&_strong]:text-[var(--content-primary)] [&_code]:font-mono [&_code]:text-xs [&_code]:bg-[var(--surface-secondary)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded">
+      <div className="text-sm text-[var(--content-primary)] leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_h4]:text-sm [&_h4]:font-semibold [&_h4]:text-[var(--content-primary)] [&_h4]:mt-4 [&_h4]:mb-2 [&_a]:text-[var(--brand-text)] [&_a:hover]:text-brand-700 [&_strong]:text-[var(--content-primary)] [&_code]:font-mono [&_code]:text-xs [&_code]:bg-[var(--surface-secondary)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded">
         {children}
       </div>
     </div>

@@ -143,7 +143,7 @@ export default function OnboardingChecklist({
                     {step.title}
                   </p>
                   {!completed && (
-                    <p className="mt-0.5 text-ds-xs text-[#e2e8f0]/60">
+                    <p className="mt-0.5 text-ds-xs text-[var(--content-primary)]/60">
                       {step.description}
                     </p>
                   )}

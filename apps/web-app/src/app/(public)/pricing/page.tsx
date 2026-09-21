@@ -142,32 +142,32 @@ export default function PricingPage() {
           <h1 className="text-4xl sm:text-5xl font-bold text-[var(--content-primary)] tracking-tight leading-[1.1]">
             Record Once. Know Everything.
           </h1>
-          <p className="mt-5 text-base sm:text-lg text-[#e2e8f0] leading-relaxed">
+          <p className="mt-5 text-base sm:text-lg text-[var(--content-primary)] leading-relaxed">
             One Chrome extension. Every time you work a process, Ledgerium captures it and turns it into:
           </p>
           {/* 4-bullet output grid (UX §A spec) */}
           <ul className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-left max-w-xl mx-auto">
             <li className="flex items-start gap-2">
               <Check className="h-4 w-4 text-brand-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
-              <span className="text-sm text-[#e2e8f0] leading-snug">
+              <span className="text-sm text-[var(--content-primary)] leading-snug">
                 An AI-generated SOP — ready to share or train from
               </span>
             </li>
             <li className="flex items-start gap-2">
               <Check className="h-4 w-4 text-brand-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
-              <span className="text-sm text-[#e2e8f0] leading-snug">
+              <span className="text-sm text-[var(--content-primary)] leading-snug">
                 A visual process map — built from real behavior, not assumptions
               </span>
             </li>
             <li className="flex items-start gap-2">
               <Check className="h-4 w-4 text-brand-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
-              <span className="text-sm text-[#e2e8f0] leading-snug">
+              <span className="text-sm text-[var(--content-primary)] leading-snug">
                 Variation analysis — see how your team's process differs run to run
               </span>
             </li>
             <li className="flex items-start gap-2">
               <Check className="h-4 w-4 text-brand-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
-              <span className="text-sm text-[#e2e8f0] leading-snug">
+              <span className="text-sm text-[var(--content-primary)] leading-snug">
                 Automation candidates — ranked by opportunity score, backed by evidence
               </span>
             </li>
@@ -265,7 +265,7 @@ export default function PricingPage() {
                   {/* Team column — highlighted */}
                   <th className="px-4 py-4 text-center bg-brand-900/10 border-x border-brand-800/30">
                     <span className="inline-flex flex-col items-center gap-1">
-                      <span className="text-xs font-bold text-white uppercase tracking-wider bg-brand-600 rounded-full px-3 py-0.5">
+                      <span className="text-xs font-bold text-white uppercase tracking-wider bg-brand-700 rounded-full px-3 py-0.5">
                         Most Popular
                       </span>
                       <span className="font-semibold text-brand-400">Team</span>
@@ -343,7 +343,7 @@ export default function PricingPage() {
             {FAQ.map(({ q, a }) => (
               <div key={q}>
                 <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-1.5">{q}</h3>
-                <p className="text-sm text-[#e2e8f0] leading-relaxed">{a}</p>
+                <p className="text-sm text-[var(--content-primary)] leading-relaxed">{a}</p>
               </div>
             ))}
           </div>
@@ -383,9 +383,9 @@ export default function PricingPage() {
               <ArrowRight className="h-4 w-4" />
             </TrackedLink>
           </div>
-          <p className="mt-3 text-ds-xs text-[#e2e8f0]">
+          <p className="mt-3 text-ds-xs text-[var(--content-primary)]">
             No credit card required · Data never used for training ·{' '}
-            <a href="/privacy" className="underline hover:text-brand-600">
+            <a href="/privacy" className="underline hover:text-[var(--brand-text)]">
               Privacy &amp; security details
             </a>
           </p>

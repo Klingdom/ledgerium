@@ -76,7 +76,7 @@ export default function DemoPage() {
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)]">
             Record a workflow. Get an SOP instantly.
           </h1>
-          <p className="mt-4 text-lg text-[#e2e8f0] leading-relaxed">
+          <p className="mt-4 text-lg text-[var(--content-primary)] leading-relaxed">
             See how ops teams use Ledgerium to turn real browser workflows
             into structured SOPs and process maps — in under 5 minutes.
           </p>
@@ -92,12 +92,12 @@ export default function DemoPage() {
                 {/* Text — 3 cols */}
                 <div className={`md:col-span-3 ${step % 2 === 0 ? 'md:order-2' : ''}`}>
                   <div className="flex items-center gap-3 mb-4">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-600 text-white text-sm font-bold shadow-sm shadow-brand-600/20">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-700 text-white text-sm font-bold shadow-sm shadow-brand-600/20">
                       {step}
                     </span>
                     <h3 className="text-lg font-bold text-[var(--content-primary)]">{title}</h3>
                   </div>
-                  <p className="text-sm text-[#e2e8f0] leading-relaxed mb-3">
+                  <p className="text-sm text-[var(--content-primary)] leading-relaxed mb-3">
                     {what}
                   </p>
                   <div className="flex items-start gap-2">
@@ -130,13 +130,13 @@ export default function DemoPage() {
       {/* Live interactive process map — the real product component, no login */}
       <section className="py-16 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <p className="text-center text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+          <p className="text-center text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest mb-3">
             Try it live — no login required
           </p>
           <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-3">
             A real process map, built from a real recording
           </h2>
-          <p className="text-center text-[#e2e8f0] leading-relaxed mb-8 max-w-2xl mx-auto">
+          <p className="text-center text-[var(--content-primary)] leading-relaxed mb-8 max-w-2xl mx-auto">
             This is the actual Ledgerium process map — a sample &ldquo;Submit expense report&rdquo; workflow
             recorded 47 times. Edge thickness is how often each path was taken. Switch to{' '}
             <span className="text-brand-400 font-medium">Performance</span> mode to see where the time goes,
@@ -163,7 +163,7 @@ export default function DemoPage() {
               { icon: CheckCircle, label: 'Workflow Report', sub: 'Ready to export' },
             ].map(({ icon: Icon, label, sub }) => (
               <div key={label} className="card p-5 text-center">
-                <Icon className="h-5 w-5 text-brand-600 mx-auto mb-2" />
+                <Icon className="h-5 w-5 text-[var(--brand-text)] mx-auto mb-2" />
                 <p className="text-sm font-semibold text-[var(--content-primary)]">{label}</p>
                 <p className="text-[11px] text-[var(--content-tertiary)] mt-0.5">{sub}</p>
               </div>
@@ -176,11 +176,11 @@ export default function DemoPage() {
       <section className="py-12 bg-[var(--surface-elevated)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <div className="rounded-xl border border-brand-700/30 bg-brand-900/15 p-8 text-center">
-            <LayoutDashboard className="h-8 w-8 text-brand-600 mx-auto mb-3" />
+            <LayoutDashboard className="h-8 w-8 text-[var(--brand-text)] mx-auto mb-3" />
             <h3 className="text-lg font-bold text-[var(--content-primary)] mb-2">
               Explore a sample workflow yourself
             </h3>
-            <p className="text-sm text-[#e2e8f0] mb-5 max-w-lg mx-auto">
+            <p className="text-sm text-[var(--content-primary)] mb-5 max-w-lg mx-auto">
               Create a free account and open a sample workflow instantly — its SOP, process map,
               and report are all derived from a real recording. No extension install required to look around.
             </p>
@@ -199,7 +199,7 @@ export default function DemoPage() {
           <h2 className="text-2xl font-bold text-[var(--content-primary)]">
             Get your first SOP in 60 seconds
           </h2>
-          <p className="mt-3 text-[#e2e8f0]">
+          <p className="mt-3 text-[var(--content-primary)]">
             Sign up free, and explore a sample workflow SOP immediately —
             no extension install required. When you&apos;re ready, record your own.
           </p>

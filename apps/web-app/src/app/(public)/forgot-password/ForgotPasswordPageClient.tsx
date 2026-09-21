@@ -44,7 +44,7 @@ export default function ForgotPasswordPageClient() {
             <LogoMark size={40} />
             <h1 className="text-2xl font-bold text-[var(--content-primary)]">Reset your password</h1>
           </div>
-          <p className="mt-1 text-sm text-[#e2e8f0]">
+          <p className="mt-1 text-sm text-[var(--content-primary)]">
             Enter your email and we'll send you a reset link.
           </p>
         </div>
@@ -65,7 +65,7 @@ export default function ForgotPasswordPageClient() {
               <button
                 type="button"
                 onClick={() => { setSubmitted(false); setEmail(''); }}
-                className="text-brand-600 hover:text-brand-500 underline"
+                className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline"
               >
                 try again
               </button>
@@ -102,8 +102,8 @@ export default function ForgotPasswordPageClient() {
           </form>
         )}
 
-        <p className="mt-4 text-center text-sm text-[#e2e8f0]">
-          <Link href="/login" className="font-medium text-brand-600 hover:text-brand-500">
+        <p className="mt-4 text-center text-sm text-[var(--content-primary)]">
+          <Link href="/login" className="font-medium text-[var(--brand-text)] hover:text-[var(--brand-text-hover)]">
             Back to sign in
           </Link>
         </p>

@@ -272,10 +272,10 @@ export default function ProductPage() {
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl font-bold text-[var(--content-primary)] leading-[1.1] tracking-tight">
               From recording to{' '}
-              <span className="text-brand-600">process intelligence</span>
+              <span className="text-[var(--brand-text)]">process intelligence</span>
               {' '}in minutes
             </h1>
-            <p className="mt-6 text-lg text-[#e2e8f0] leading-relaxed max-w-2xl mx-auto">
+            <p className="mt-6 text-lg text-[var(--content-primary)] leading-relaxed max-w-2xl mx-auto">
               Capture real browser workflows. Get structured SOPs, interactive process maps,
               health scores, and AI-powered analysis — deterministically.
             </p>
@@ -304,13 +304,13 @@ export default function ProductPage() {
       {/* ── Annotated Dashboard Header — Container 1 ─────────────────── */}
       <section className="py-20 bg-[var(--surface-primary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <p className="text-center text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+          <p className="text-center text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest mb-3">
             Live demo — no signup
           </p>
           <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-3">
             The workflow library dashboard
           </h2>
-          <p className="text-center text-[#e2e8f0] leading-relaxed mb-8 max-w-2xl mx-auto">
+          <p className="text-center text-[var(--content-primary)] leading-relaxed mb-8 max-w-2xl mx-auto">
             The dashboard aggregates every recorded workflow into a portfolio baseline.
             Click any numbered marker to learn what each surface measures.
           </p>
@@ -321,13 +321,13 @@ export default function ProductPage() {
       {/* ── Annotated Workflow Views — Container 2 ───────────────────── */}
       <section className="py-20 bg-[var(--surface-primary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <p className="text-center text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+          <p className="text-center text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest mb-3">
             Drill into any workflow
           </p>
           <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-3">
             Process map, SOP, and variants — in one place
           </h2>
-          <p className="text-center text-[#e2e8f0] leading-relaxed mb-8 max-w-2xl mx-auto">
+          <p className="text-center text-[var(--content-primary)] leading-relaxed mb-8 max-w-2xl mx-auto">
             Click any numbered marker to learn what each view surfaces. Switch between
             the process map and the generated SOP.
           </p>
@@ -341,7 +341,7 @@ export default function ProductPage() {
           <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-4">
             The report
           </h2>
-          <p className="text-center text-[#e2e8f0] leading-relaxed mb-8 max-w-2xl mx-auto">
+          <p className="text-center text-[var(--content-primary)] leading-relaxed mb-8 max-w-2xl mx-auto">
             Every recorded workflow produces a full quantitative report — scorecard,
             timestudy, bottlenecks, automation, ROI, and more. Scroll inside it, and
             click any numbered marker to learn what a section surfaces.
@@ -356,7 +356,7 @@ export default function ProductPage() {
           <h2 className="text-center text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-4">
             How it works
           </h2>
-          <p className="text-center text-[#e2e8f0] mb-20 max-w-xl mx-auto">
+          <p className="text-center text-[var(--content-primary)] mb-20 max-w-xl mx-auto">
             Four steps from browser recording to actionable process intelligence.
           </p>
 
@@ -368,13 +368,13 @@ export default function ProductPage() {
               const textBlock = (
                 <div className="flex flex-col justify-center">
                   <div className="flex items-center gap-3 mb-4">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600 text-white font-bold shadow-sm shadow-brand-600/20 flex-shrink-0">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-700 text-white font-bold shadow-sm shadow-brand-600/20 flex-shrink-0">
                       <Icon className="h-5 w-5" />
                     </span>
                     <span className="text-xs font-semibold text-brand-500 uppercase tracking-wider">Step {step}</span>
                   </div>
                   <h3 className="text-2xl font-bold text-[var(--content-primary)] mb-4">{title}</h3>
-                  <p className="text-[#e2e8f0] leading-relaxed mb-4">{what}</p>
+                  <p className="text-[var(--content-primary)] leading-relaxed mb-4">{what}</p>
                   <div className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-brand-500 mt-1 flex-shrink-0" />
                     <p className="text-sm text-brand-400 leading-relaxed">{result}</p>
@@ -441,7 +441,7 @@ export default function ProductPage() {
                 </div>
                 {/* Card text */}
                 <div className="p-4 text-center">
-                  <Icon className="h-5 w-5 text-brand-600 mx-auto mb-2" />
+                  <Icon className="h-5 w-5 text-[var(--brand-text)] mx-auto mb-2" />
                   <p className="text-sm font-semibold text-[var(--content-primary)]">{label}</p>
                   <p className="text-[11px] text-[var(--content-tertiary)] mt-0.5">{sub}</p>
                 </div>
@@ -459,7 +459,7 @@ export default function ProductPage() {
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-4">
               Your library gets smarter with every recording
             </h2>
-            <p className="text-[#e2e8f0] max-w-2xl mx-auto">
+            <p className="text-[var(--content-primary)] max-w-2xl mx-auto">
               Individual recordings produce documentation. A growing library unlocks
               process intelligence — a portfolio timestudy baseline, health scores,
               bottleneck detection, variant analysis, and automation opportunity scoring.
@@ -529,7 +529,7 @@ export default function ProductPage() {
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-4">
               Built different
             </h2>
-            <p className="text-[#e2e8f0] max-w-2xl mx-auto">
+            <p className="text-[var(--content-primary)] max-w-2xl mx-auto">
               Ledgerium isn&apos;t another screen recorder or documentation tool.
               It captures the <em>structure</em> of your work — not screenshots, not video, not what you remember.
             </p>
@@ -593,7 +593,7 @@ export default function ProductPage() {
               { icon: Layers, label: 'Evidence-linked', sub: 'Every step traces to source' },
             ].map(({ icon: Icon, label, sub }) => (
               <div key={label} className="flex flex-col items-center gap-1.5">
-                <Icon className="h-5 w-5 text-brand-600" />
+                <Icon className="h-5 w-5 text-[var(--brand-text)]" />
                 <p className="text-sm font-semibold text-[var(--content-primary)]">{label}</p>
                 <p className="text-[11px] text-[var(--content-tertiary)]">{sub}</p>
               </div>
@@ -608,7 +608,7 @@ export default function ProductPage() {
           <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
             Get your first SOP in 60 seconds
           </h2>
-          <p className="mt-4 text-[#e2e8f0] max-w-lg mx-auto">
+          <p className="mt-4 text-[var(--content-primary)] max-w-lg mx-auto">
             Sign up free and explore a sample workflow immediately —
             no extension install required. When you&apos;re ready, record your own.
           </p>

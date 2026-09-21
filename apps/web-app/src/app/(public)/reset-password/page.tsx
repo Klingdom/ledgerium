@@ -64,7 +64,7 @@ function ResetPasswordForm() {
             <LogoMark size={40} />
             <h1 className="text-2xl font-bold text-[var(--content-primary)]">Set new password</h1>
           </div>
-          <p className="mt-1 text-sm text-[#e2e8f0]">
+          <p className="mt-1 text-sm text-[var(--content-primary)]">
             Choose a strong password for your account.
           </p>
         </div>
@@ -148,8 +148,8 @@ function ResetPasswordForm() {
           </form>
         )}
 
-        <p className="mt-4 text-center text-sm text-[#e2e8f0]">
-          <Link href="/login" className="font-medium text-brand-600 hover:text-brand-500">
+        <p className="mt-4 text-center text-sm text-[var(--content-primary)]">
+          <Link href="/login" className="font-medium text-[var(--brand-text)] hover:text-[var(--brand-text-hover)]">
             Back to sign in
           </Link>
         </p>

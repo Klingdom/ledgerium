@@ -440,7 +440,7 @@ function ContextHeader({
     <div className="flex items-start justify-between gap-ds-4">
       <div>
         <div className="flex items-center gap-ds-2">
-          <Boxes className="h-5 w-5 text-brand-600" />
+          <Boxes className="h-5 w-5 text-[var(--brand-text)]" />
           <h2 className="text-ds-lg font-semibold text-[var(--content-primary)]">Process Groups</h2>
         </div>
         <p className="text-ds-xs text-[var(--content-secondary)] mt-1">
@@ -482,7 +482,7 @@ function KpiStrip({ kpis }: { kpis: KpiData }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-ds-2">
       <KpiCard icon={CheckCircle2} label="Verified Groups" value={kpis.verifiedGroups} color="text-emerald-600" />
-      <KpiCard icon={Layers} label="Process Families" value={kpis.totalFamilies} color="text-brand-600" />
+      <KpiCard icon={Layers} label="Process Families" value={kpis.totalFamilies} color="text-[var(--brand-text)]" />
       <KpiCard icon={GitBranch} label="Variants" value={kpis.totalVariants} color="text-violet-600" />
       <KpiCard icon={Puzzle} label="Shared Components" value={kpis.sharedComponents} color="text-cyan-600" />
       <KpiCard
@@ -641,7 +641,7 @@ function FamilyCard({
         {/* Family name + subtitle */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-ds-2">
-            <Layers className="h-4 w-4 text-brand-600 flex-shrink-0" />
+            <Layers className="h-4 w-4 text-[var(--brand-text)] flex-shrink-0" />
             <h3 className="text-ds-sm font-semibold text-[var(--content-primary)] truncate">{family.name}</h3>
             <span className={`ds-tag text-[10px] ${bandInfo.className}`}>
               {bandInfo.label}
@@ -758,7 +758,7 @@ function GroupRow({
       </div>
 
       {/* Arrow */}
-      <ChevronRight className={`h-3.5 w-3.5 flex-shrink-0 ${isSelected ? 'text-brand-600' : 'text-[var(--content-tertiary)]'}`} />
+      <ChevronRight className={`h-3.5 w-3.5 flex-shrink-0 ${isSelected ? 'text-[var(--brand-text)]' : 'text-[var(--content-tertiary)]'}`} />
     </button>
   );
 }
@@ -814,7 +814,7 @@ function GroupDetailPanel({
             onClick={() => setActiveTab(tab)}
             className={`flex-1 px-ds-3 py-ds-2 text-[10px] font-medium transition-colors border-b-2 ${
               activeTab === tab
-                ? 'text-brand-600 border-brand-600'
+                ? 'text-[var(--brand-text)] border-brand-600'
                 : 'text-[var(--content-tertiary)] border-transparent hover:text-[var(--content-secondary)]'
             }`}
           >
@@ -848,7 +848,7 @@ function GroupDetailPanel({
       <div className="px-ds-4 py-ds-2.5 border-t border-[var(--border-subtle)] bg-[var(--surface-secondary)]">
         <Link
           href={`/analytics/process/${group.id}`}
-          className="text-ds-xs text-brand-600 hover:text-brand-700 flex items-center gap-1"
+          className="text-ds-xs text-[var(--brand-text)] hover:text-brand-700 flex items-center gap-1"
         >
           View full analysis <ArrowRight className="h-3 w-3" />
         </Link>
@@ -971,7 +971,7 @@ function OverviewTab({
                 className="flex items-center gap-ds-2 px-ds-2 py-1 rounded hover:bg-[var(--surface-secondary)] transition-colors group"
               >
                 <span className="w-1 h-1 rounded-full bg-[var(--content-tertiary)]" />
-                <span className="text-[10px] text-[var(--content-primary)] truncate flex-1 group-hover:text-brand-600">{w.title}</span>
+                <span className="text-[10px] text-[var(--content-primary)] truncate flex-1 group-hover:text-[var(--brand-text)]">{w.title}</span>
                 <span className="text-[9px] text-[var(--content-tertiary)]">{formatDuration(w.durationMs)}</span>
               </Link>
             ))}

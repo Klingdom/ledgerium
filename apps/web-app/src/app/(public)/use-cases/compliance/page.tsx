@@ -113,12 +113,12 @@ export default function CompliancePage() {
             <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-[var(--content-primary)] leading-[1.1] tracking-tight">
               Your audit documentation says{' '}
               <br className="hidden sm:block" />
-              <span className="text-brand-600">the process works.</span>
+              <span className="text-[var(--brand-text)]">the process works.</span>
               <br className="hidden sm:block" />
               But has anyone actually verified it?
             </h1>
 
-            <p className="mt-6 text-lg sm:text-xl text-[#e2e8f0] leading-relaxed max-w-2xl mx-auto">
+            <p className="mt-6 text-lg sm:text-xl text-[var(--content-primary)] leading-relaxed max-w-2xl mx-auto">
               Ledgerium captures real process execution and generates
               evidence-linked documentation &mdash; every step traceable to
               source events. Built for SOC 2, ISO 27001, and audit-driven compliance programs.
@@ -148,7 +148,7 @@ export default function CompliancePage() {
       <section className="py-24 bg-[var(--surface-elevated)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-14">
-            <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+            <p className="text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest mb-3">
               The problem
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
@@ -165,7 +165,7 @@ export default function CompliancePage() {
                 <h3 className="text-base font-semibold text-[var(--content-primary)]">
                   {title}
                 </h3>
-                <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
+                <p className="text-sm text-[var(--content-primary)] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -176,7 +176,7 @@ export default function CompliancePage() {
       <section className="py-24 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-14">
-            <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+            <p className="text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest mb-3">
               How it works
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
@@ -188,12 +188,12 @@ export default function CompliancePage() {
             {FEATURES.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="text-center">
                 <div className="mx-auto w-14 h-14 rounded-2xl bg-brand-900/15 border border-brand-700/30 flex items-center justify-center mb-5">
-                  <Icon className="h-6 w-6 text-brand-600" />
+                  <Icon className="h-6 w-6 text-[var(--brand-text)]" />
                 </div>
                 <h3 className="text-lg font-semibold text-[var(--content-primary)] mb-3">
                   {title}
                 </h3>
-                <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
+                <p className="text-sm text-[var(--content-primary)] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -204,13 +204,13 @@ export default function CompliancePage() {
       <section className="py-24 bg-[var(--surface-elevated)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center mb-14">
-            <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest mb-3">
+            <p className="text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest mb-3">
               Compliance-ready
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">
               Built for regulated environments
             </h2>
-            <p className="mt-4 text-[#e2e8f0] leading-relaxed">
+            <p className="mt-4 text-[var(--content-primary)] leading-relaxed">
               Designed to support SOC 2 control evidence, ISO 27001 process documentation,
               and FDA 21 CFR Part 11 traceability requirements.
             </p>
@@ -223,13 +223,13 @@ export default function CompliancePage() {
                 className="flex gap-4 p-5 rounded-xl border border-transparent hover:border-[var(--border-default)] hover:bg-[var(--surface-secondary)] transition-all"
               >
                 <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-brand-900/15 flex items-center justify-center">
-                  <Icon className="h-4 w-4 text-brand-600" />
+                  <Icon className="h-4 w-4 text-[var(--brand-text)]" />
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-1">
                     {title}
                   </h3>
-                  <p className="text-sm text-[#e2e8f0] leading-relaxed">{desc}</p>
+                  <p className="text-sm text-[var(--content-primary)] leading-relaxed">{desc}</p>
                 </div>
               </div>
             ))}
@@ -245,7 +245,7 @@ export default function CompliancePage() {
             <br />
             process documentation
           </h2>
-          <p className="mt-5 text-[#e2e8f0] leading-relaxed">
+          <p className="mt-5 text-[var(--content-primary)] leading-relaxed">
             Record real workflow execution. Get audit-ready SOPs with full
             evidence traceability &mdash; in minutes, not months. Free to start.
           </p>

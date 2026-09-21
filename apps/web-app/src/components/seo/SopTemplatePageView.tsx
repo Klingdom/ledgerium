@@ -97,7 +97,7 @@ function ExecutionStep({ step, index }: { step: WorkflowStep; index: number }) {
             </span>
           )}
         </div>
-        <p className="text-sm text-[#e2e8f0] leading-relaxed mt-1">{step.detail}</p>
+        <p className="text-sm text-[var(--content-primary)] leading-relaxed mt-1">{step.detail}</p>
       </div>
     </li>
   );
@@ -210,7 +210,7 @@ export function SopTemplatePageView({ page }: { page: SopTemplatePage }) {
             {page.sopSections.map((s) => (
               <div key={s.heading} className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-elevated)] p-5">
                 <dt className="text-sm font-semibold text-[var(--content-primary)] mb-1.5">{s.heading}</dt>
-                <dd className="text-sm text-[#e2e8f0] leading-relaxed">{s.detail}</dd>
+                <dd className="text-sm text-[var(--content-primary)] leading-relaxed">{s.detail}</dd>
               </div>
             ))}
           </dl>

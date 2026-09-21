@@ -299,7 +299,7 @@ export default function AnalyticsPage() {
           >
             <div className="flex items-center gap-ds-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-ds-md bg-brand-50">
-                <Clock className="h-4.5 w-4.5 text-brand-600" />
+                <Clock className="h-4.5 w-4.5 text-[var(--brand-text)]" />
               </div>
               <div>
                 <h2 className="text-ds-sm font-semibold text-[var(--content-primary)]">Where your time goes</h2>
@@ -321,7 +321,7 @@ export default function AnalyticsPage() {
           >
             <div className="flex items-center gap-ds-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-ds-md bg-brand-50">
-                <GitCompare className="h-4.5 w-4.5 text-brand-600" />
+                <GitCompare className="h-4.5 w-4.5 text-[var(--brand-text)]" />
               </div>
               <div>
                 <h2 className="text-ds-sm font-semibold text-[var(--content-primary)]">Compare process steps</h2>
@@ -571,7 +571,7 @@ export default function AnalyticsPage() {
                     {definitions.map((def) => (
                       <tr key={def.id} className="border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--surface-secondary)] transition-colors">
                         <td className="py-ds-2 px-ds-4">
-                          <Link href={`/analytics/process/${def.id}`} className="text-[var(--content-primary)] font-medium hover:text-brand-600">{def.canonicalName}</Link>
+                          <Link href={`/analytics/process/${def.id}`} className="text-[var(--content-primary)] font-medium hover:text-[var(--brand-text)]">{def.canonicalName}</Link>
                         </td>
                         <td className="py-ds-2 px-ds-4 text-right text-[var(--content-secondary)] tabular-nums">{def.runCount}</td>
                         <td className="py-ds-2 px-ds-4 text-right tabular-nums">
@@ -670,7 +670,7 @@ function KPICard({
   return (
     <div className="card px-ds-4 py-ds-3">
       <div className="flex items-center gap-1.5 mb-1">
-        <Icon className="h-3.5 w-3.5 text-brand-600" />
+        <Icon className="h-3.5 w-3.5 text-[var(--brand-text)]" />
         <p className="text-[10px] font-medium text-[var(--content-tertiary)] uppercase tracking-wide">{label}</p>
       </div>
       <p className={`text-ds-lg font-bold tabular-nums ${valueColor ?? 'text-[var(--content-primary)]'}`}>{value}</p>

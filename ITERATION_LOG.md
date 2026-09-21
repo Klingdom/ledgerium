@@ -4,6 +4,24 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-21 (loop 35) — The brand green meets AA, and the public pages finally have a gate (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO "keep going autonomously". **Candidate Selection:** `top-score` — #222 (10). Area `web-app / a11y`; D-1 = 3.
+- **Measured the dark failures before fixing, and it changed the fix.** I had the light-theme cause (brand green as text) but not the dark one, and brand-600 on the page background computes to 5.02:1 — passing. A probe showed the dark failures are on **elevated surfaces**: `#059669` on `#1C2128` is **4.29:1**. Had I only handled light, dark would have stayed broken.
+- **A third thing the probe found:** `bg-brand-600 text-white` on **20 raw elements** (badges, inline buttons) still at 3.76:1. Row #207 fixed the `.btn-primary` *class*; these never used it. Fixed here by darkening those specific lines only — matched on lines carrying both `bg-brand-600` and `text-white`, not blanket.
+- **Shipped:** per-theme `--brand-text` / `--brand-text-hover` (dark `#34D399`; light `#047857`), replacing **156** `text-brand-600` + **16** `hover:text-brand-500` across 51 files, plus the 20 background fixes.
+- **`scope-expansion: approved`** — evidence: the verification probe after the brand fix still showed 60/72 light nodes, cause `text-[#e2e8f0]`, the dark theme's `--content-primary` **hardcoded 153 times across 40 files** (134 on public pages). Same root shape (a colour that is not theme-aware), same Area, one outcome (the public surface meets AA), and it was the thing blocking the gate. Replaced with the token.
+- **Result, measured not asserted:** dark **11/10 → 0/0** serious nodes; light **77/83 → 11/26**.
+- **Stopped the sweep there, deliberately.** The remaining light nodes are `text-brand-400` (138 uses), `text-brand-500` (89) and friends — dark-palette classes on white. Some may be correct on deliberately dark surfaces, so it needs a per-class judgement, not a third blanket replace in one loop. Filed as **#223**.
+- **New `e2e/public/a11y.spec.ts` — full-page axe, dark theme only.** Dark is the shipped default and is now clean. Light stays ungated until #223 lands, because loop 33 made the gate run the whole suite and loop 30 made deploy depend on it: a red spec here blocks every release. The spec says so, and says not to "fix" a future failure by narrowing the scan.
+- **Verified by eye, not only by count:** the light landing PNG shows body copy that was previously washed out now readable.
+- **#214 DIAGNOSED — and it is not what the row said.** It reproduced during validation; this time I copied the artefact aside **before** any other run (loop 34's lesson) and read it. Not a slow-compile timeout: the screenshot shows **"Invalid email or password"** for `free@ledgerium.test`. The login is rejected. Credentials match the seed, so my hypothesis is `reuseExistingServer` leaving a dev server bound to a `test.db` that `global-setup` has since recreated — which would explain local-only, intermittent behaviour. **Recorded as an unproven hypothesis, to be proven or killed before any change.**
+- **Validation:** full suite **156 passed** (154 + 2 new a11y gates); web-app unit **3043/3043**; `pnpm typecheck` clean; axe re-measured on 4 page/theme combinations.
+- **Follow-ups:** 1 created (#223), 1 closed (#222), #214 advanced from "undiagnosed" to a named hypothesis.
+- **Meta-review cadence:** 3 loops since MR-027 — **MR-028 due before loop 36.**
+
+---
+
 ## 2026-09-21 (loop 34) — Looking at the public pages, and finding the brand green fails as text (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO "keep going autonomously". **Candidate Selection:** `top-score` — #221 (13), filed retroactively under P-11 before implementing. It exists because MR-027 caught me overstating loop 32: I said the contrast work was "verified visually" when the dashboard holds **31 of 828** tertiary sites and **0 of 91** primary buttons. The button was the most visible thing loop 25 changed and nobody had seen it.

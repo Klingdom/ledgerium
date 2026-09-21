@@ -6,6 +6,24 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-21] - The brand green is now readable as text, and the public pages have an accessibility check
+
+**Why:** the brand green failed the contrast minimum when used as text — badly on the light theme, and on the dark theme wherever it sat on a card rather than the page background. Nothing had ever checked these pages.
+
+### Fixed
+- The brand green used as text now has a per-theme colour: a lighter green on dark, a darker one on light. This replaced 156 uses across 51 files.
+- Twenty badges and inline buttons with white text on the brand green were also below the minimum. The earlier button fix only covered the shared button style; these never used it.
+- Body text on public pages had the dark theme's colour written directly into the components, 153 times, which made it nearly invisible on the light theme. It now follows the theme.
+
+### Result
+- Dark theme: from 11 and 10 problem spots on the landing and pricing pages to **none**.
+- Light theme: from 77 and 83 down to 11 and 26. The rest are other hardcoded dark-theme colours, recorded as row 223.
+
+### Added
+- An accessibility check covering the whole landing and pricing pages, on the dark theme — the one people actually see by default. The light theme joins it when the remaining colours are fixed; adding it while failing would block every release.
+
+---
+
 ## [2026-09-21] - Photographing the public pages turned up a contrast problem nobody had checked
 
 **Why:** last week's contrast work was reported as "verified by looking". It was not — the pictures only covered the dashboard, which contains none of the app's 91 primary buttons. The signup button, the most visible thing that changed, had never been seen.

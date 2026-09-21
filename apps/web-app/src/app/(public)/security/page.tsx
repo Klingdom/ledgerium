@@ -161,7 +161,7 @@ export default function SecurityPage() {
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)] leading-tight">
             Security &amp; Privacy
           </h1>
-          <p className="mt-5 text-lg text-[#e2e8f0] leading-relaxed max-w-2xl mx-auto">
+          <p className="mt-5 text-lg text-[var(--content-primary)] leading-relaxed max-w-2xl mx-auto">
             Ledgerium AI is built with a trust-first architecture. No screenshots, no keystrokes,
             no background recording. You control what gets captured, and every output traces to
             source evidence.
@@ -187,7 +187,7 @@ export default function SecurityPage() {
                   </div>
                   <h3 className="text-base font-semibold text-[var(--content-primary)]">{title}</h3>
                 </div>
-                <p className="text-sm text-[#e2e8f0] leading-relaxed mb-4">{description}</p>
+                <p className="text-sm text-[var(--content-primary)] leading-relaxed mb-4">{description}</p>
                 <ul className="space-y-1.5">
                   {details.map((detail) => (
                     <li key={detail} className="flex items-center gap-2">
@@ -219,7 +219,7 @@ export default function SecurityPage() {
                 {CAPTURED_ITEMS.map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
                     <CheckCircle className="h-4 w-4 text-brand-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-[#e2e8f0] leading-relaxed">{item}</span>
+                    <span className="text-sm text-[var(--content-primary)] leading-relaxed">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -235,7 +235,7 @@ export default function SecurityPage() {
                 {NOT_CAPTURED_ITEMS.map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
                     <XCircle className="h-4 w-4 text-[var(--content-tertiary)] mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-[#e2e8f0] leading-relaxed">{item}</span>
+                    <span className="text-sm text-[var(--content-primary)] leading-relaxed">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -251,7 +251,7 @@ export default function SecurityPage() {
             <h2 className="text-xl font-bold text-[var(--content-primary)] mb-4">
               Built for regulated environments
             </h2>
-            <p className="text-[#e2e8f0] leading-relaxed">
+            <p className="text-[var(--content-primary)] leading-relaxed">
               Ledgerium&apos;s architecture supports common compliance frameworks. All outputs are
               deterministic and traceable, making them suitable for audit and documentation purposes.
             </p>
@@ -272,7 +272,7 @@ export default function SecurityPage() {
                   {details.map((detail) => (
                     <li key={detail} className="flex items-center gap-2">
                       <CheckCircle className="h-3.5 w-3.5 text-brand-500 flex-shrink-0" />
-                      <span className="text-xs text-[#e2e8f0]">{detail}</span>
+                      <span className="text-xs text-[var(--content-primary)]">{detail}</span>
                     </li>
                   ))}
                 </ul>
@@ -312,7 +312,7 @@ export default function SecurityPage() {
           <h2 className="text-2xl font-bold text-[var(--content-primary)]">
             Ready to evaluate Ledgerium for your organization?
           </h2>
-          <p className="mt-3 text-[#e2e8f0]">
+          <p className="mt-3 text-[var(--content-primary)]">
             Talk to us about your compliance requirements, deployment preferences, or enterprise needs.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">

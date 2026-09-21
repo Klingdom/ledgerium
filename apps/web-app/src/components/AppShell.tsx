@@ -73,7 +73,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <ExtensionInstallButton
                 location="app_nav"
                 title="Download Chrome Extension"
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-ds-md px-ds-3 py-ds-2 text-ds-sm font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 transition-colors"
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-ds-md px-ds-3 py-ds-2 text-ds-sm font-medium text-[var(--brand-text)] bg-brand-50 hover:bg-brand-100 transition-colors"
               >
                 <Download className="h-3.5 w-3.5" />
                 <span className="hidden lg:inline">Get Extension</span>

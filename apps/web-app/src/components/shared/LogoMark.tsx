@@ -51,7 +51,7 @@ export function LogoFull({ size = 24, className }: LogoFullProps) {
     <div className={`inline-flex items-center gap-2 ${className ?? ''}`}>
       <LogoMark size={size} />
       <span className="font-semibold text-[var(--content-primary)]" style={{ fontSize: size * 0.75 }}>
-        Ledgerium <span className="text-brand-600">AI</span>
+        Ledgerium <span className="text-[var(--brand-text)]">AI</span>
       </span>
     </div>
   );

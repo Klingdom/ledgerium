@@ -154,7 +154,7 @@ export default function RealProductDemo() {
               <button
                 type="button"
                 onClick={handleBack}
-                className="inline-flex items-center gap-1.5 text-[11px] font-medium text-brand-500 hover:text-brand-600 mb-2 transition-colors"
+                className="inline-flex items-center gap-1.5 text-[11px] font-medium text-brand-500 hover:text-[var(--brand-text)] mb-2 transition-colors"
               >
                 {/* Left arrow */}
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="shrink-0" aria-hidden="true">
@@ -204,7 +204,7 @@ export default function RealProductDemo() {
                   onClick={() => setActiveTab('sop')}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium transition-colors ${
                     activeTab === 'sop'
-                      ? 'bg-brand-600 text-white'
+                      ? 'bg-brand-700 text-white'
                       : 'text-[var(--content-secondary)] hover:text-[var(--content-primary)] hover:bg-[var(--surface-secondary)]'
                   }`}
                 >
@@ -219,7 +219,7 @@ export default function RealProductDemo() {
                   onClick={() => setActiveTab('map')}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium transition-colors ${
                     activeTab === 'map'
-                      ? 'bg-brand-600 text-white'
+                      ? 'bg-brand-700 text-white'
                       : 'text-[var(--content-secondary)] hover:text-[var(--content-primary)] hover:bg-[var(--surface-secondary)]'
                   }`}
                 >

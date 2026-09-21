@@ -336,7 +336,7 @@ function MetricCard({
   return (
     <div className="card px-ds-5 py-ds-4">
       <div className="flex items-center gap-ds-2 mb-ds-1">
-        <Icon className="h-4 w-4 text-brand-600" />
+        <Icon className="h-4 w-4 text-[var(--brand-text)]" />
         <p className="ds-metric-label">{label}</p>
       </div>
       <p className="ds-metric-value">{value}</p>
@@ -824,7 +824,7 @@ export default function ProcessGroupDetailPage() {
               <div className="flex items-center justify-between mb-ds-4">
                 <div className="flex items-center gap-ds-3">
                   <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-brand-50">
-                    <Shield className="h-6 w-6 text-brand-600" />
+                    <Shield className="h-6 w-6 text-[var(--brand-text)]" />
                   </div>
                   <div>
                     <p className="ds-metric-value">{standardization.score}<span className="text-ds-sm text-[var(--content-tertiary)]">/100</span></p>
@@ -869,7 +869,7 @@ export default function ProcessGroupDetailPage() {
             <div className="card px-ds-5 py-ds-4">
               <div className="flex items-center gap-ds-3 mb-ds-4">
                 <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-brand-50">
-                  <FileText className="h-6 w-6 text-brand-600" />
+                  <FileText className="h-6 w-6 text-[var(--brand-text)]" />
                 </div>
                 <div>
                   <p className="ds-metric-value">{pct(sopAlignment.alignmentScore)}</p>
@@ -971,7 +971,7 @@ export default function ProcessGroupDetailPage() {
                       <div className="flex items-center gap-ds-2 mb-ds-1">
                         <Link
                           href={`/workflows/${outlier.runId}`}
-                          className="text-ds-sm font-medium text-brand-600 hover:text-brand-700"
+                          className="text-ds-sm font-medium text-[var(--brand-text)] hover:text-brand-700"
                         >
                           {outlier.runId}
                         </Link>
@@ -1043,7 +1043,7 @@ export default function ProcessGroupDetailPage() {
             <SectionHeader>What-If Simulator</SectionHeader>
             <div className="card px-ds-5 py-ds-4">
               <div className="flex items-center gap-ds-2 mb-ds-4">
-                <Sliders className="h-4 w-4 text-brand-600" />
+                <Sliders className="h-4 w-4 text-[var(--brand-text)]" />
                 <p className="text-ds-sm text-[var(--content-secondary)]">
                   Select steps to remove or automate to see the estimated impact on process duration.
                 </p>
@@ -1117,7 +1117,7 @@ export default function ProcessGroupDetailPage() {
               {whatIfResult && (
                 <div className="mt-ds-4 p-ds-4 rounded-lg bg-brand-50/50 border border-brand-100">
                   <div className="flex items-center gap-ds-2 mb-ds-3">
-                    <Zap className="h-4 w-4 text-brand-600" />
+                    <Zap className="h-4 w-4 text-[var(--brand-text)]" />
                     <p className="text-ds-sm font-semibold text-[var(--content-primary)]">Estimated Impact</p>
                     <span className={`ds-tag text-[10px] ${
                       whatIfResult.confidence === 'high' ? 'bg-green-100 text-green-700' :
@@ -1304,7 +1304,7 @@ export default function ProcessGroupDetailPage() {
                       </div>
                       <Link
                         href="/analytics"
-                        className="flex items-center gap-0.5 text-ds-xs text-brand-600 hover:text-brand-700 flex-shrink-0"
+                        className="flex items-center gap-0.5 text-ds-xs text-[var(--brand-text)] hover:text-brand-700 flex-shrink-0"
                       >
                         Details
                         <ChevronRight className="h-3.5 w-3.5" />
@@ -1340,7 +1340,7 @@ export default function ProcessGroupDetailPage() {
                       <td className="px-ds-5 py-ds-3">
                         <Link
                           href={`/workflows/${wf.id}`}
-                          className="text-brand-600 hover:text-brand-700 font-medium"
+                          className="text-[var(--brand-text)] hover:text-brand-700 font-medium"
                         >
                           {wf.title}
                         </Link>
@@ -1453,7 +1453,7 @@ function VariantCard({
                   <Link
                     key={wf.id}
                     href={`/workflows/${wf.id}`}
-                    className="text-ds-xs text-brand-600 hover:text-brand-700 underline-offset-2 hover:underline"
+                    className="text-ds-xs text-[var(--brand-text)] hover:text-brand-700 underline-offset-2 hover:underline"
                   >
                     {wf.title}
                   </Link>

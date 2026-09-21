@@ -430,7 +430,7 @@ export default function WorkflowDetailPage() {
                 onClick={() => handleTabChange(tabId)}
                 className={`flex items-center gap-1.5 border-b-2 pb-ds-3 pt-ds-1 text-ds-sm font-medium transition-colors whitespace-nowrap ${
                   activeTab === tabId
-                    ? 'border-brand-600 text-brand-600'
+                    ? 'border-brand-600 text-[var(--brand-text)]'
                     : 'border-transparent text-[var(--content-secondary)] hover:text-[var(--content-primary)]'
                 }`}
               >

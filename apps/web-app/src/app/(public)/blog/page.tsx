@@ -83,7 +83,7 @@ export default function BlogIndexPage() {
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)] leading-tight">
             Insights on workflow intelligence
           </h1>
-          <p className="mt-4 text-lg text-[#e2e8f0] leading-relaxed">
+          <p className="mt-4 text-lg text-[var(--content-primary)] leading-relaxed">
             Process documentation, automation readiness, and evidence-based operations.
           </p>
         </div>

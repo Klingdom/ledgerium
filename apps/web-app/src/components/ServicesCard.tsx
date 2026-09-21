@@ -158,7 +158,7 @@ export function ServicesCard() {
                 </button>
                 <Link
                   href="/dashboard"
-                  className="mt-ds-2 inline-block text-ds-xs text-brand-600 hover:text-brand-700"
+                  className="mt-ds-2 inline-block text-ds-xs text-[var(--brand-text)] hover:text-brand-700"
                 >
                   Go record more workflows →
                 </Link>

@@ -224,7 +224,7 @@ export default function RecommendationCenterPage() {
         {(filterType || filterImpact || filterConfidence) && (
           <button
             onClick={() => { setFilterType(''); setFilterImpact(''); setFilterConfidence(''); }}
-            className="text-ds-xs text-brand-600 hover:text-brand-700 font-medium"
+            className="text-ds-xs text-[var(--brand-text)] hover:text-brand-700 font-medium"
           >
             Clear filters
           </button>
@@ -258,7 +258,7 @@ export default function RecommendationCenterPage() {
                     {/* Process name */}
                     <Link
                       href={`/analytics/process/${rec.processId}`}
-                      className="inline-flex items-center gap-1 text-ds-xs text-brand-600 hover:text-brand-700 font-medium mb-ds-2"
+                      className="inline-flex items-center gap-1 text-ds-xs text-[var(--brand-text)] hover:text-brand-700 font-medium mb-ds-2"
                     >
                       {rec.processName}
                       <ArrowRight className="h-3 w-3" />

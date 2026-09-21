@@ -82,13 +82,13 @@ export default function MethodologyPage() {
 
       <section className="pt-16 pb-10 bg-gradient-to-b from-brand-900/20 to-[var(--surface-primary)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <span className="inline-block text-xs font-semibold text-brand-600 uppercase tracking-widest border border-brand-700/40 rounded-full px-4 py-1.5 mb-6 bg-brand-900/20">
+          <span className="inline-block text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest border border-brand-700/40 rounded-full px-4 py-1.5 mb-6 bg-brand-900/20">
             Methodology
           </span>
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)] leading-tight">
             How we research this
           </h1>
-          <p className="mt-5 text-lg text-[#e2e8f0] leading-relaxed">
+          <p className="mt-5 text-lg text-[var(--content-primary)] leading-relaxed">
             Everything on this site is meant to be documented from real work, not from memory. This page explains
             exactly how Ledgerium grounds its claims, sources the data points on each page, and makes honest
             comparisons.
@@ -101,7 +101,7 @@ export default function MethodologyPage() {
           {SECTIONS.map((s) => (
             <section key={s.h}>
               <h2 className="text-xl font-bold text-[var(--content-primary)] mb-3">{s.h}</h2>
-              <div className="space-y-4 text-[15px] text-[#e2e8f0] leading-relaxed">
+              <div className="space-y-4 text-[15px] text-[var(--content-primary)] leading-relaxed">
                 {s.body.map((p, i) => (
                   <p key={i}>{p}</p>
                 ))}
@@ -114,7 +114,7 @@ export default function MethodologyPage() {
       <section className="py-20 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
           <h2 className="text-2xl font-bold text-[var(--content-primary)]">See it on your own workflow</h2>
-          <p className="mt-3 text-[#e2e8f0]">Record one workflow and get an SOP, a process map, and a measured baseline.</p>
+          <p className="mt-3 text-[var(--content-primary)]">Record one workflow and get an SOP, a process map, and a measured baseline.</p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/signup" className="btn-primary gap-2 shadow-sm shadow-brand-600/20">
               Get started free

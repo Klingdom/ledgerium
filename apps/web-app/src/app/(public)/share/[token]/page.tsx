@@ -47,7 +47,7 @@ export default function SharedWorkflowPage() {
       <div className="mx-auto max-w-ds-content py-ds-12 text-center">
         <Layers className="mx-auto h-10 w-10 text-[var(--content-tertiary)]" />
         <h2 className="mt-ds-4 text-ds-lg font-semibold text-[var(--content-primary)]">Workflow not found</h2>
-        <p className="mt-ds-2 text-ds-sm text-[#e2e8f0]">{error ?? 'This link may have expired or been revoked.'}</p>
+        <p className="mt-ds-2 text-ds-sm text-[var(--content-primary)]">{error ?? 'This link may have expired or been revoked.'}</p>
         <Link href="/product" className="btn-primary mt-ds-6 inline-flex">
           See how Ledgerium AI works
         </Link>
@@ -65,7 +65,7 @@ export default function SharedWorkflowPage() {
           <span className="ds-tag ds-tag-brand">Shared Workflow</span>
         </div>
         <h1 className="ds-header-title">{workflow.title}</h1>
-        <div className="mt-ds-2 flex flex-wrap items-center gap-ds-3 text-ds-xs text-[#e2e8f0]">
+        <div className="mt-ds-2 flex flex-wrap items-center gap-ds-3 text-ds-xs text-[var(--content-primary)]">
           {workflow.stepCount && (
             <span className="flex items-center gap-1">
               <Layers className="h-3.5 w-3.5" />
@@ -100,7 +100,7 @@ export default function SharedWorkflowPage() {
           <button
             onClick={() => setActiveTab('sop')}
             className={`border-b-2 pb-ds-3 pt-ds-1 text-ds-sm font-medium transition-colors ${
-              activeTab === 'sop' ? 'border-brand-600 text-brand-600' : 'border-transparent text-[var(--content-secondary)] hover:text-[var(--content-primary)]'
+              activeTab === 'sop' ? 'border-brand-600 text-[var(--brand-text)]' : 'border-transparent text-[var(--content-secondary)] hover:text-[var(--content-primary)]'
             }`}
           >
             SOP
@@ -108,7 +108,7 @@ export default function SharedWorkflowPage() {
           <button
             onClick={() => setActiveTab('report')}
             className={`border-b-2 pb-ds-3 pt-ds-1 text-ds-sm font-medium transition-colors ${
-              activeTab === 'report' ? 'border-brand-600 text-brand-600' : 'border-transparent text-[var(--content-secondary)] hover:text-[var(--content-primary)]'
+              activeTab === 'report' ? 'border-brand-600 text-[var(--brand-text)]' : 'border-transparent text-[var(--content-secondary)] hover:text-[var(--content-primary)]'
             }`}
           >
             Report
@@ -122,7 +122,7 @@ export default function SharedWorkflowPage() {
       {/* CTA footer */}
       <div className="mt-ds-8 card px-ds-6 py-ds-5 text-center bg-[var(--surface-secondary)] border border-[var(--border-default)]">
         <p className="text-ds-base font-medium text-[var(--content-primary)]">This SOP was generated automatically from a recorded workflow.</p>
-        <p className="mt-ds-1 text-ds-sm text-[#e2e8f0]">
+        <p className="mt-ds-1 text-ds-sm text-[var(--content-primary)]">
           Record your own workflows and get structured documentation in minutes — free to start.
         </p>
         <Link

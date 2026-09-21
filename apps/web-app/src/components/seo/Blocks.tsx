@@ -47,11 +47,11 @@ export function Breadcrumbs({ page }: { page: SeoPage }) {
   return (
     <nav aria-label="Breadcrumb" className="mx-auto max-w-5xl px-4 sm:px-6 pt-8">
       <ol className="flex flex-wrap items-center gap-2 text-xs text-[var(--content-tertiary)]">
-        <li><Link href="/" className="hover:text-brand-500">Home</Link></li>
+        <li><Link href="/" className="hover:text-[var(--brand-text-hover)]">Home</Link></li>
         {hub && (
           <>
             <li aria-hidden>/</li>
-            <li><Link href={hub.path} className="hover:text-brand-500">{hub.label}</Link></li>
+            <li><Link href={hub.path} className="hover:text-[var(--brand-text-hover)]">{hub.label}</Link></li>
           </>
         )}
         <li aria-hidden>/</li>
@@ -81,7 +81,7 @@ export function SeoHero({
   return (
     <section className="relative overflow-hidden">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 pt-10 pb-12 sm:pt-14">
-        <span className="inline-block text-xs font-semibold text-brand-600 uppercase tracking-widest border border-brand-700/40 rounded-full px-4 py-1.5 mb-6 bg-brand-900/20">
+        <span className="inline-block text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest border border-brand-700/40 rounded-full px-4 py-1.5 mb-6 bg-brand-900/20">
           {eyebrow}
         </span>
         <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)] leading-[1.1] tracking-tight">
@@ -100,7 +100,7 @@ export function SeoHero({
           </p>
         )}
         {/* AEO direct answer — first, before any selling */}
-        <p className="seo-answer mt-6 text-lg text-[#e2e8f0] leading-relaxed">{shortAnswer}</p>
+        <p className="seo-answer mt-6 text-lg text-[var(--content-primary)] leading-relaxed">{shortAnswer}</p>
         <div className="mt-8 flex flex-col sm:flex-row gap-3">
           <TrackedLink
             href={SIGNUP}
@@ -285,13 +285,13 @@ export function HowLedgeriumCaptures({
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
         <h2 className="text-xl font-bold text-[var(--content-primary)] mb-4">How Ledgerium captures this</h2>
         {introSentence && (
-          <p className="text-[15px] text-[#e2e8f0] leading-relaxed mb-8 max-w-3xl">{introSentence}</p>
+          <p className="text-[15px] text-[var(--content-primary)] leading-relaxed mb-8 max-w-3xl">{introSentence}</p>
         )}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           {steps.map(({ icon: Icon, title, text, href }, i) => (
             <div key={title} className="card p-6 flex flex-col gap-3">
               <div className="w-9 h-9 rounded-lg bg-brand-900/20 border border-brand-700/25 flex items-center justify-center">
-                <Icon className="h-4 w-4 text-brand-600" />
+                <Icon className="h-4 w-4 text-[var(--brand-text)]" />
               </div>
               <h3 className="text-sm font-semibold text-[var(--content-primary)]">
                 {i + 1}.{' '}
@@ -300,7 +300,7 @@ export function HowLedgeriumCaptures({
                     href={href}
                     event="seo_install_clicked"
                     properties={{ pageType, slug, placement: 'mechanism' }}
-                    className="underline underline-offset-2 hover:text-brand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded-sm"
+                    className="underline underline-offset-2 hover:text-[var(--brand-text-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded-sm"
                   >
                     {title}
                   </TrackedLink>
@@ -308,7 +308,7 @@ export function HowLedgeriumCaptures({
                   title
                 )}
               </h3>
-              <p className="text-sm text-[#e2e8f0] leading-relaxed">{text}</p>
+              <p className="text-sm text-[var(--content-primary)] leading-relaxed">{text}</p>
             </div>
           ))}
         </div>
@@ -322,7 +322,7 @@ export function ProseSection({ title, children }: { title: string; children: Rea
     <section className="py-12 bg-[var(--surface-secondary)] border-t border-[var(--border-default)]">
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
         <h2 className="text-xl font-bold text-[var(--content-primary)] mb-5">{title}</h2>
-        <div className="text-[15px] text-[#e2e8f0] leading-relaxed space-y-4">{children}</div>
+        <div className="text-[15px] text-[var(--content-primary)] leading-relaxed space-y-4">{children}</div>
       </div>
     </section>
   );
@@ -337,7 +337,7 @@ export function OldWayLedgeriumWay({ oldWay, ledgeriumWay }: { oldWay: string; l
           <p className="text-sm text-[var(--content-secondary)] leading-relaxed">{oldWay}</p>
         </div>
         <div className="rounded-xl border border-brand-700/40 bg-brand-900/10 p-7">
-          <p className="text-xs font-semibold text-brand-600 uppercase tracking-widest mb-2">With Ledgerium</p>
+          <p className="text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest mb-2">With Ledgerium</p>
           <p className="text-sm text-[var(--content-primary)] leading-relaxed">{ledgeriumWay}</p>
         </div>
       </div>
@@ -352,7 +352,7 @@ export function BulletList({ title, items }: { title: string; items: readonly st
         <h2 className="text-xl font-bold text-[var(--content-primary)] mb-5">{title}</h2>
         <ul className="space-y-2.5">
           {items.map((item) => (
-            <li key={item} className="flex items-start gap-2.5 text-sm text-[#e2e8f0] leading-relaxed">
+            <li key={item} className="flex items-start gap-2.5 text-sm text-[var(--content-primary)] leading-relaxed">
               <span className="mt-1.5 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-brand-600" />
               {item}
             </li>
@@ -402,7 +402,7 @@ export function RelatedPagesGrid({ page }: { page: SeoPage }) {
               properties={{ fromType: page.type, fromSlug: page.slug, toType: r.type, toSlug: r.path.split('/').pop(), linkRank: i + 1 }}
               className="card p-5 flex flex-col gap-2 hover:border-brand-700/40 transition-colors"
             >
-              <span className="text-xs font-semibold text-brand-600 uppercase tracking-widest">{r.eyebrow}</span>
+              <span className="text-xs font-semibold text-[var(--brand-text)] uppercase tracking-widest">{r.eyebrow}</span>
               <span className="text-sm font-semibold text-[var(--content-primary)] leading-snug">{r.title}</span>
               <span className="text-xs text-[var(--content-tertiary)]">{r.why}</span>
             </TrackedLink>
@@ -443,7 +443,7 @@ export function FinalCta({
     <section className="py-20 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)]">{heading}</h2>
-        <p className="mt-5 text-[#e2e8f0] leading-relaxed max-w-xl mx-auto">{body}</p>
+        <p className="mt-5 text-[var(--content-primary)] leading-relaxed max-w-xl mx-auto">{body}</p>
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
           <TrackedLink
             href={SIGNUP}

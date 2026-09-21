@@ -238,7 +238,7 @@ function TimeSinkRow({ row }: { row: TimeSinkEntryDisplay }) {
             <span className="text-ds-xs font-mono text-[var(--content-tertiary)] w-5 flex-shrink-0">#{row.rank}</span>
             <Link
               href={`/workflows/${row.workflowId}`}
-              className="text-ds-sm font-medium text-[var(--content-primary)] hover:text-brand-600 truncate"
+              className="text-ds-sm font-medium text-[var(--content-primary)] hover:text-[var(--brand-text)] truncate"
             >
               {row.title}
             </Link>

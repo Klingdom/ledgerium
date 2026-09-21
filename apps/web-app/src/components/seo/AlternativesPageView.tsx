@@ -41,7 +41,7 @@ export function AlternativesPageView({ page }: { page: AlternativesPage }) {
                   <span className="text-base font-semibold text-[var(--content-primary)]">{o.name}</span>
                   <span className="text-xs text-brand-500 font-medium">Best for: {o.bestFor}</span>
                 </div>
-                <p className="text-sm text-[#e2e8f0] leading-relaxed">{o.note}</p>
+                <p className="text-sm text-[var(--content-primary)] leading-relaxed">{o.note}</p>
               </li>
             ))}
           </ul>
