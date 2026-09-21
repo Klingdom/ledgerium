@@ -4,6 +4,22 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-21 (loop 34) — Looking at the public pages, and finding the brand green fails as text (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO "keep going autonomously". **Candidate Selection:** `top-score` — #221 (13), filed retroactively under P-11 before implementing. It exists because MR-027 caught me overstating loop 32: I said the contrast work was "verified visually" when the dashboard holds **31 of 828** tertiary sites and **0 of 91** primary buttons. The button was the most visible thing loop 25 changed and nobody had seen it.
+- **Built:** `e2e/public/visual-evidence.spec.ts` — landing + pricing, both themes, 4 PNGs. Two assertions make the artefact honest: the theme actually applied (loop 32's lesson), and **the primary CTA is present on the captured page**, so a screenshot cannot "cover" the button by omitting it.
+- **Then I looked at the PNGs, and that raised a question the spec could not answer:** body text on the light landing page looked faint at full-page zoom. Checking coverage showed why nobody knew — the only public axe scan is `nav.spec.ts:125`, scoped to `.include('header')`. **The page bodies have never been scanned.**
+- **A throwaway probe measured it** (then deleted): serious `color-contrast` nodes — landing **11 dark / 77 light**, pricing **10 dark / 83 light**.
+- **Root cause identified, not guessed:** a second probe dumped the failing nodes. They are `text-brand-600` — the brand green used **as text**, e.g. `<span class="text-brand-600">AI</span>`. **This is a different defect from #207**, which fixed white text *on* brand green. Loop 25 fixed the button; green-as-text on near-white was never in scope and nobody had looked. `text-brand-600` appears **156 times across 45 files**.
+- **Filed as #222, not fixed here.** It needs the same theme-aware treatment as #206 (`brand-700` ≈ 5.2:1 on light, `brand-400` ≈ 9.9:1 on dark) — one colour cannot serve both themes — and it is a brand-palette decision across 156 sites, not a same-loop tweak.
+- **Deliberately did NOT add a full-page public axe gate while it is red.** Loop 33 made the CI gate run the whole suite, so a red spec now blocks every push. The gate goes in with the fix. My first probe regex for colour pairs also returned empty and I used the raw node HTML instead rather than reporting a hollow result.
+- **Validation:** 4 new public specs pass; full suite **150 → 154**; both light-theme PNGs inspected directly.
+- **#214 reproduced, and I could not diagnose it.** The first full-suite run at `--retries=0` failed in `free-auth.setup.ts` (1 failed / 61 passed — a setup failure takes the rest of the run with it). In isolation it passes but takes **11.7s**; a second full run passed **154/154**. Intermittent and timing-shaped. **I lost the evidence**: the isolated re-run cleaned `test-results/` before I opened the failure screenshot. Row #214 updated with that lesson — copy the artefact aside first — and with why it now matters more: the gate runs everything and deploy depends on it, so this flake can block a release.
+- **Follow-ups:** 1 created (#222), 1 created-and-closed (#221).
+- **Meta-review cadence:** 2 loops since MR-027.
+
+---
+
 ## 2026-09-20 (loop 33) — The E2E suite is green, and the gate stops being a list (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO "keep going autonomously". **Candidate Selection:** `top-score` — #200 (9 per MR-027). Area `web-app / qa`; coarse backstop 1/6; D-1 = 2.

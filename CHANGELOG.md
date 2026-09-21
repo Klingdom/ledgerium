@@ -6,6 +6,22 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-21] - Photographing the public pages turned up a contrast problem nobody had checked
+
+**Why:** last week's contrast work was reported as "verified by looking". It was not — the pictures only covered the dashboard, which contains none of the app's 91 primary buttons. The signup button, the most visible thing that changed, had never been seen.
+
+### Added
+- Pictures of the landing and pricing pages in both themes on every CI run. Each one checks the theme really applied and that the signup button is actually on the page, so a screenshot cannot "cover" the button by leaving it out.
+
+### Found, not yet fixed
+- **The brand green fails the contrast minimum when used as text**, badly on the light theme: 77 and 83 problem spots on the landing and pricing pages, and 10-11 on the dark theme. Nothing had ever checked these pages — the only accessibility scan on the public site looks at the navigation bar alone.
+- This is a different problem from last week's button fix, which was white text *on* green. This is green text on near-white. It appears 156 times across 45 files and needs a per-theme colour, so it is recorded as row 222 rather than patched here.
+
+### Deliberately not done
+- No accessibility gate was added for these pages yet. CI now runs the whole suite, so adding a failing check would block every push. It goes in with the fix.
+
+---
+
 ## [2026-09-20] - Every browser test passes, and CI now runs all of them
 
 **Why:** this suite had 45 failures against untouched code when the clean-up started. The automated gate could only run a named subset, because everything else was red.
