@@ -4,6 +4,21 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-22 (loop 38) — Two WCAG risks measured, ruled not-violations, and locked (Mode 1, `a11y-architect` ruling + coordinator)
+
+- **Trigger:** CEO "keep going autonomously". **Candidate Selection:** `top-score` — the #223 sub-items (8). Area `web-app / a11y`. **D-1 still tripped and still uncleared** — the only open extension row (#216) remains blocked on a CEO decision.
+- **Measured before asking anyone.** Rail fill colours vs a white surface: `bg-red-500` **3.76:1**, `bg-amber-500` **2.15:1**, `bg-green-500` **2.28:1** — amber and green below the 3:1 non-text floor. Against the dark surface all three pass (4.30 / 7.53 / 7.10). So on the numbers alone this looked like a light-theme defect.
+- **The numbers were not the question.** 1.4.11 only applies to a graphic *required to understand content*. `a11y-architect` ruled **both sub-items not violations**: the verdict WORD sits beside the rail as visible text, and the wrapper's `aria-label` carries the same string for assistive tech, so the rail is decorative in both consumption paths. 1.4.1 likewise — row badges are typed `'Healthy' | 'At risk' | 'Needs review'`, so text is always present, and their pills carry their own background rather than depending on the page theme.
+- **It corrected one of my inputs:** I said only the rail was `aria-hidden`; the verdict word is too, with the accessible name on the wrapping element. I re-read the file and confirmed. That is the "hide the visual duplicate, expose one semantic string" pattern, not an oversight.
+- **So: no repaint. Pin the reasoning instead.** Three lock tests assert, per band (30/70/90), that the accessible name contains the verdict, that the verdict is *visible* text, and that the rail keeps `aria-hidden`. If someone deletes the word or exposes the rail, the exemption evaporates and these fail immediately — rather than the defect surfacing at the next audit.
+- **Placed where they can actually run.** The architect proposed jsdom/RTL tests; **web-app has neither** — its unit tests are pure logic and source-text assertions. The locks needed a real DOM, so they live in `v2-a11y.spec.ts`. Adapting the recommendation to the stack was mine, not its error.
+- **Mutation-tested, because a passing test proves nothing on its own.** Removing the verdict word from `CommandHeader.tsx` made all 3 fail; restoring left the file byte-identical (`git diff --stat` empty). This repo has produced several tests that passed while implying something false — I am not adding another.
+- **Validation:** `v2-a11y` **14 → 17** tests, all passing; mutation confirmed the locks bite; full suite green; no production code changed this loop.
+- **Follow-ups:** 0 created; #223's two WCAG sub-items closed as verified-not-violated. The row stays open for the in-app hardcoded classes.
+- **Meta-review cadence:** 3 loops since MR-028 — **MR-029 due before loop 39.**
+
+---
+
 ## 2026-09-22 (loop 37) — The flaky gate, explained and stopped (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO "continue". **Candidate Selection:** **re-scored, and I am saying so rather than claiming `top-score`.** #214 was filed at 6 as "a setup flake". Since then loop 30 made deploy depend on this suite and loop 33 made the gate run all of it, so a flake here can block a release: impact 2 → 4, confidence → 4 (three reproductions plus a testable hypothesis) = **11**, above #223's 8. MR-028 ranked #223 first on the old score.

@@ -6,6 +6,19 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-22] - Two accessibility questions answered, and the answer pinned
+
+**Why:** the coloured bar showing portfolio health uses shades that fall below the contrast minimum for non-text elements on a light background. That looked like a defect worth fixing.
+
+### Outcome: not a defect, and now guarded
+- The bar is decorative. The verdict word ("Good", "Fair", "Needs attention") sits right beside it as readable text, and screen readers get the same wording. Colour is never the only signal — the same is true of the row badges, which always carry text.
+- So nothing was repainted. Instead, three tests now pin the reason: for each health band they check the wording is announced, the wording is visible on screen, and the coloured bar stays hidden from screen readers. If someone removes the wording later, the colour becomes the only signal — and these fail immediately instead of the problem surfacing at some future audit.
+
+### Checked properly
+- The tests were verified by deliberately breaking the thing they protect: removing the verdict word makes all three fail. A test that cannot fail is worth nothing.
+
+---
+
 ## [2026-09-22] - The intermittent test failure is explained and stopped
 
 **Why:** the login step of the browser test suite failed roughly three runs in eight, always with "Invalid email or password", and never with any clue why. Now that a release waits on this suite, that flake could block a deploy.

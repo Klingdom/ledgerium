@@ -539,3 +539,61 @@ test('sort header columns have aria-sort attribute', async ({ page }) => {
   await expect(nameTh).toHaveAttribute('aria-sort', 'none');
   await expect(thead.getByRole('button', { name: /^workflow$/i })).toBeVisible();
 });
+
+// ── Row #223 (loop 38): lock the 1.4.11 / 1.4.1 exemption ────────────────────
+//
+// The portfolio-health rail uses bg-amber-500 / bg-green-500, which measure
+// 2.15:1 and 2.28:1 against a white surface — below the 3:1 floor for non-text
+// contrast. That is NOT a violation today, and these tests pin exactly why:
+// the rail is decorative because the verdict WORD carries the same status as
+// visible text, and the accessible name carries it for assistive tech.
+//
+// If someone later removes the word, or strips aria-hidden from the rail so it
+// becomes the sole carrier, the exemption evaporates and 1.4.11 starts to bite.
+// These fail at that moment rather than at the next audit.
+//
+// (a11y-architect proposed these as jsdom/RTL tests; web-app has neither -
+// its unit tests are pure logic and source-text assertions - so they live here,
+// against a real DOM, which is what the assertions actually need.)
+for (const band of [
+  { score: 30, word: /needs attention/i },
+  { score: 70, word: /fair/i },
+  { score: 90, word: /good/i },
+]) {
+  test(`1.4.1/1.4.11 lock: health status has a non-colour carrier at score ${band.score}`, async ({ page }) => {
+    await page.route('**/api/workflows**', (route) => {
+      void route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          workflows: [makeWorkflow('wf-001', 'Alpha Workflow', band.score, 'healthy')],
+          stats: { portfolioHealthScore: band.score, insightChips: [], topInsights: [] },
+        }),
+      });
+    });
+
+    await page.goto(V2_URL, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(700);
+
+    const status = page.getByRole('status').filter({ hasText: /./ }).first();
+
+    // 1. Assistive tech gets the verdict lexically, not by colour.
+    const label = await page
+      .locator('[aria-label^="Portfolio health:"]')
+      .first()
+      .getAttribute('aria-label');
+    expect(label, 'no "Portfolio health:" accessible name found').toBeTruthy();
+    expect(label!).toMatch(band.word);
+
+    // 2. A SIGHTED user gets it as visible text too - not colour alone (1.4.1).
+    const container = page.locator('[aria-label^="Portfolio health:"]').first();
+    await expect(container).toContainText(band.word);
+
+    // 3. The coloured rail stays hidden from the AT tree, which is what keeps it
+    //    decorative and therefore exempt from the 3:1 non-text floor (1.4.11).
+    const rail = container.locator('div[aria-hidden="true"]').first();
+    await expect(rail).toHaveAttribute('aria-hidden', 'true');
+
+    void status;
+  });
+}
