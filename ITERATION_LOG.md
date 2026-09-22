@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-22 — MR-028 meta-review (Mode 4, `meta-coordinator`, NON-counting)
+
+- **Trigger:** base cadence — loops 33, 34, 35 since MR-027. Brief asked for ~700 words to test MR-027's "cadence is thinning" verdict; it returned 1077 (vs MR-027's 1515), declining to cut further without dropping a finding.
+- **Verdicts:** loop 35's numbers **accurate — all exact** (156/16/20/153, 51 and 40 files, 134 public re-derived at `c892f34`; contrast recomputed independently at 5.48:1 light / 8.43:1 dark / 4.30:1 diagnostic); scope expansion **right line, wrong axis**; the 33→35 arc **healthy but loop 34 self-authored its own top score**; debt ratio **0.74** (29/39, up from 0.72); cadence **earned — decline P-15, hold at 3**.
+- **Three findings no single loop surfaced**, which is the cadence's justification: (1) the unpushed backlog grew 6 → 9 commits and 2d4h → 4d and **not one of loops 33-35 mentioned it**; (2) **D-1 is 4, not 3** — verified per commit, so loop 36 on a web-app surface trips N=5, and #216 being CEO-blocked means no available pick can clear it; (3) a stale count on #223.
+- **The stale count, resolved rather than just noted:** #223 cited `text-brand-500` at 89; it is **73**. Both were right when taken — 89 predates loop 35, which converted the 16 `hover:text-brand-500` uses (89 − 16 = 73). Re-measured at MR-028 and again at loop 36 entry; row corrected.
+- **Criticism accepted:** loop 34 filed #221 at score 13 and then selected it as "top-score". Filing a row and immediately picking it is self-authored priority, even when the row is real. The rule stands (P-11 requires the row first), but the selection claim should have said `directed — self-filed`, not `top-score`.
+- **P-15 declined.** MR-027 proposed widening the interval to 4 loops on a 3-2-1 novel-proposal trend; MR-028 shows that trend was noise and that its own trip-wire fires immediately. CLAUDE.md's 2-3 loop rule stands, and I have not edited it.
+- **Validation:** Mode 4, no product code. One file created (`docs/meta/MR_028_META_REVIEW.md`). Test state unchanged from loop 35 (156 E2E / 3043 unit) — nothing run that could change it.
+- **Follow-ups:** 0 created; #223 corrected.
+
+---
+
 ## 2026-09-21 (loop 35) — The brand green meets AA, and the public pages finally have a gate (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO "keep going autonomously". **Candidate Selection:** `top-score` — #222 (10). Area `web-app / a11y`; D-1 = 3.
