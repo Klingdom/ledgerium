@@ -6,6 +6,21 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-22] - The intermittent test failure is explained and stopped
+
+**Why:** the login step of the browser test suite failed roughly three runs in eight, always with "Invalid email or password", and never with any clue why. Now that a release waits on this suite, that flake could block a deploy.
+
+### Cause
+- The test run deletes and rebuilds its database. If a server from another test run is still running, the tests happily reuse it — and that server is still holding the deleted database, so every login fails.
+
+### Fixed
+- The test run now checks first and stops immediately with an explanation naming the cause and the fix, instead of failing later with a misleading login error. On CI, where every run starts clean, the check is skipped.
+
+### Note
+- My previous explanation was wrong. I had concluded it was a timing race inside a single run; a probe disproved that, and the earlier explanation turned out to be the right one. Proven both ways: with a stray server running the suite now stops with the clear message, and without one nothing changes.
+
+---
+
 ## [2026-09-22] - The public pages stop using dark-theme colours on a light background
 
 **Why:** 157 places on the marketing pages named a specific dark-theme colour directly instead of following the theme. On the light theme they came out too pale to read.

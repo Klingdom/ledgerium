@@ -4,6 +4,22 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-22 (loop 37) — The flaky gate, explained and stopped (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO "continue". **Candidate Selection:** **re-scored, and I am saying so rather than claiming `top-score`.** #214 was filed at 6 as "a setup flake". Since then loop 30 made deploy depend on this suite and loop 33 made the gate run all of it, so a flake here can block a release: impact 2 → 4, confidence → 4 (three reproductions plus a testable hypothesis) = **11**, above #223's 8. MR-028 ranked #223 first on the old score.
+- **I disproved my own loop-36 explanation before building anything.** Loop 36 refined this to "a race inside a single run" — `global-setup` unlinking `prisma/test.db` while Playwright's own webServer boots. I put a probe inside `globalSetup` and it reported **no server responding** in a normal run: global setup runs first, the webServer boots after. **There is no single-run race.** The loop-35 reading was the correct one.
+- **What actually happens:** `playwright.config.ts` sets `reuseExistingServer: !process.env.CI`, so locally a server left over from another invocation is reused — and it still holds a handle on the `test.db` that global setup just deleted. Every auth query then reads a database with no seeded rows, and the symptom is "Invalid email or password". That matches this session precisely: every reproduction followed overlapping Playwright runs, which I had been starting while earlier ones were still finishing.
+- **Fix — fail fast rather than fail weirdly.** `global-setup.ts` now checks port 3098 before deleting anything and throws with a message that names the cause, the backlog row and the remedy. Skipped on CI, which starts from a clean checkout and disables reuse anyway.
+- **Proven in both directions, not just the happy one:** with a dev server deliberately started on 3098, the suite now stops immediately with that error (previously: a mystery login failure three runs in eight). With nothing listening, runs are unaffected — health spec green, full suite green.
+- **Deliberately not done:** making the seed idempotent (`deleteMany` first) and dropping the unlink entirely. That is the deeper fix, but it changes seed semantics for every spec, and the guard removes the corruption today. Recorded rather than silently skipped.
+- **A process note on my own tooling:** my first attempt to write the guard produced unterminated string literals — escape sequences were collapsed before Python parsed them, turning `\n` into real newlines inside a TS string. Typecheck caught it immediately; I restored from a backup taken before the edit and rewrote via a script file. The backup is why this cost minutes rather than a reconstruction.
+- **D-1 remains tripped and uncleared** — this is web-app work, and the only open extension row (#216) is still blocked on a CEO decision.
+- **Validation:** guard verified firing and not-firing; `pnpm typecheck` clean; full E2E suite green with the guard in place.
+- **Follow-ups:** 0 created, 1 closed (#214).
+- **Meta-review cadence:** 2 loops since MR-028.
+
+---
+
 ## 2026-09-22 (loop 36) — The public surface stops hardcoding dark-theme colours (Mode 1, `a11y-architect` ruling + coordinator)
 
 - **Trigger:** CEO "continue". **Candidate Selection:** `top-score` — #223 (8), MR-028's endorsement. Area `web-app / a11y`.
