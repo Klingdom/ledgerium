@@ -47,7 +47,7 @@ export default function CaptureBeforeAutomatePost() {
             Back to blog
           </Link>
 
-          <span className="inline-block text-[11px] font-semibold uppercase tracking-widest border rounded-full px-2.5 py-0.5 mb-4 bg-amber-500/10 text-amber-400 border-amber-500/20">
+          <span className="inline-block text-[11px] font-semibold uppercase tracking-widest border rounded-full px-2.5 py-0.5 mb-4 bg-amber-500/10 text-[var(--status-warning)] border-amber-500/20">
             AI &amp; Automation
           </span>
 
@@ -170,11 +170,11 @@ export default function CaptureBeforeAutomatePost() {
             so the decision is grounded in observed work rather than opinion. Re-recording after
             a change measures the result against the baseline. You can read more about finding
             candidates on the{' '}
-            <Link href="/ai-opportunities/accounts-payable" className="text-brand-400 hover:text-brand-300 underline underline-offset-2 transition-colors">
+            <Link href="/ai-opportunities/accounts-payable" className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors">
               AI opportunities pages
             </Link>{' '}
             or the guide on{' '}
-            <Link href="/use-cases/problems/how-to-identify-ai-automation-opportunities" className="text-brand-400 hover:text-brand-300 underline underline-offset-2 transition-colors">
+            <Link href="/use-cases/problems/how-to-identify-ai-automation-opportunities" className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors">
               how to identify AI automation opportunities
             </Link>
             .

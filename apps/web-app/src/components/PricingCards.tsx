@@ -73,7 +73,7 @@ export function PricingCards() {
           Annual
         </span>
         {isAnnual && (
-          <span className="text-xs font-medium text-brand-500 bg-brand-900/20 px-2 py-0.5 rounded-full">
+          <span className="text-xs font-medium text-[var(--brand-text)] bg-brand-900/20 px-2 py-0.5 rounded-full">
             Save ~17%
           </span>
         )}
@@ -169,7 +169,7 @@ export function PricingCards() {
 
               {/* Outcome microcopy (PRICING-P02 / CEO Rec #5) */}
               {plan.outcomeMicrocopy && (
-                <p className="text-xs text-brand-400 mb-4 leading-snug">
+                <p className="text-xs text-[var(--brand-text)] mb-4 leading-snug">
                   {plan.outcomeMicrocopy}
                 </p>
               )}
@@ -252,7 +252,7 @@ export function PricingCards() {
               )}
 
               {plan.id === 'team' || plan.id === 'growth' ? (
-                <p className="mt-2 mb-4 text-center text-ds-xs text-amber-400">
+                <p className="mt-2 mb-4 text-center text-ds-xs text-[var(--status-warning)]">
                   Multi-user invites launching Q3 2026
                 </p>
               ) : availability === 'unavailable' ? (

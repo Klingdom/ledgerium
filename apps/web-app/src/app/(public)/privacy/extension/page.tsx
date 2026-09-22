@@ -60,7 +60,7 @@ export default function ExtensionPrivacyPage() {
                 'Incognito windows are not accessible to this extension',
               ].map((item) => (
                 <li key={item} className="flex items-center gap-2 text-sm text-[var(--content-primary)]">
-                  <Shield className="h-3.5 w-3.5 text-brand-400 flex-shrink-0" />
+                  <Shield className="h-3.5 w-3.5 text-[var(--brand-text)] flex-shrink-0" />
                   {item}
                 </li>
               ))}
@@ -325,8 +325,8 @@ function PermissionRow({ permission, reason }: { permission: string; reason: str
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-2">
-        <Lock className="h-3.5 w-3.5 text-brand-400 flex-shrink-0" />
-        <code className="text-xs font-mono text-brand-400">{permission}</code>
+        <Lock className="h-3.5 w-3.5 text-[var(--brand-text)] flex-shrink-0" />
+        <code className="text-xs font-mono text-[var(--brand-text)]">{permission}</code>
       </div>
       <p className="text-xs text-[var(--content-secondary)] pl-5">{reason}</p>
     </div>

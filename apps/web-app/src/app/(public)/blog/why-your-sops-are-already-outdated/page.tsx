@@ -25,7 +25,7 @@ export default function SopsOutdatedPost() {
           </Link>
 
           {/* Category badge */}
-          <span className="inline-block text-[11px] font-semibold uppercase tracking-widest border rounded-full px-2.5 py-0.5 mb-4 bg-brand-600/10 text-brand-400 border-brand-600/20">
+          <span className="inline-block text-[11px] font-semibold uppercase tracking-widest border rounded-full px-2.5 py-0.5 mb-4 bg-brand-600/10 text-[var(--brand-text)] border-brand-600/20">
             Process Intelligence
           </span>
 
@@ -166,7 +166,7 @@ export default function SopsOutdatedPost() {
 
           <p>
             You can learn more about how the capture and processing pipeline works on the{' '}
-            <Link href="/product" className="text-brand-400 hover:text-brand-300 underline underline-offset-2 transition-colors">
+            <Link href="/product" className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors">
               product page
             </Link>
             .

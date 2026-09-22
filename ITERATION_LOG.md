@@ -4,6 +4,25 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-22 (loop 36) — The public surface stops hardcoding dark-theme colours (Mode 1, `a11y-architect` ruling + coordinator)
+
+- **Trigger:** CEO "continue". **Candidate Selection:** `top-score` — #223 (8), MR-028's endorsement. Area `web-app / a11y`.
+- **D-1 TRIPPED at N=5 and I am not papering over it.** Loops 32-35 plus this one are five consecutive non-extension iterations. I did not manufacture an acknowledgement from "continue" — MR-024 settled that inferring consent from a continuation is not consent. The honest position: **the only open extension row is #216, which is blocked on a CEO decision**, so no available pick could have cleared this. I chose not to invent extension work to reset a counter. It is flagged, not cleared.
+- **First real use of the imported `a11y-architect`** (the ECC import landed this session; agents register at session start, so it became dispatchable only now). Its ruling shaped the work rather than decorating it:
+  - Keep the CSS-variable pattern, because a literal Tailwind colour class is a hidden per-theme decision that only one theme ever validates.
+  - **A mechanical exception test**, which is what I actually needed: walk to the nearest ancestor `bg-*`; literal dark values (`bg-slate-900`, `bg-black`, `bg-[#0…]`) mean a fixed-dark surface — leave alone; a theme token or no background at all means theme-following — must change.
+  - Split the sweep rather than one pass over 200+ sites.
+- **The test resolved the ambiguity completely here:** there are **zero** literal-dark backgrounds anywhere under `app/(public)/`. So all 157 sites in scope were theme-following, and the "is this deliberately dark?" judgement never arose. That is why this pass was safe to do mechanically.
+- **I did not follow the architect's ordering, and measured why.** It put status colours first (smallest, highest confidence). Axe's own node list says the failures are dominated by `text-brand-400` — 17 of 26 on `/pricing` — while status colours account for 6. Confidence-ordering would have fixed the smaller half first, so I took brand + status together, bounded to the public surface, where the gate needs to go green.
+- **Changes:** 29 files — `text-brand-400` ×106 and `text-brand-500` ×38 → `--brand-text`; `text-amber-400` ×7 + `text-amber-200` ×1 → `--status-warning`; `text-red-400` ×5 → `--status-danger`.
+- **Measured, not asserted:** light landing **11 → 5**, pricing **26 → 11**; dark **stays 0/0** and remains gated. Cumulative across loops 34-36: **77 → 5** and **83 → 11**.
+- **Row #223 stays open** for the in-app sites outside `app/(public)/`, and carries two flags the architect raised that axe's text rule cannot see: **1.4.11** non-text contrast (status colours on badges, gauge and chart fills need 3:1; the token comments document text ratios only) and **1.4.1** use of colour alone. Both recorded as unverified rather than assumed fine.
+- **Validation:** web-app unit **3043/3043**; `pnpm typecheck` clean; axe re-measured on 4 page/theme combinations; full E2E suite run.
+- **Follow-ups:** 0 created; #223 advanced, not closed.
+- **Meta-review cadence:** 1 loop since MR-028.
+
+---
+
 ## 2026-09-22 — MR-028 meta-review (Mode 4, `meta-coordinator`, NON-counting)
 
 - **Trigger:** base cadence — loops 33, 34, 35 since MR-027. Brief asked for ~700 words to test MR-027's "cadence is thinning" verdict; it returned 1077 (vs MR-027's 1515), declining to cut further without dropping a finding.

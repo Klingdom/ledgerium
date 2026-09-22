@@ -53,7 +53,7 @@ export default function InstallPage() {
             Already installed?{' '}
             <Link
               href="/login"
-              className="text-brand-400 hover:text-brand-300 underline underline-offset-2 transition-colors"
+              className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors"
             >
               Sign in to your account &rarr;
             </Link>
@@ -98,7 +98,7 @@ export default function InstallPage() {
               <div className="flex-1 pb-8">
                 <div className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] p-6">
                   <div className="flex items-center gap-3 mb-3">
-                    <Download className="h-5 w-5 text-brand-500 flex-shrink-0" />
+                    <Download className="h-5 w-5 text-[var(--brand-text)] flex-shrink-0" />
                     <h3 className="text-base font-semibold text-[var(--content-primary)]">
                       Download the extension
                     </h3>
@@ -115,7 +115,7 @@ export default function InstallPage() {
                     <li>Wait for the download to finish before continuing.</li>
                   </ul>
                   <div className="mt-4 flex gap-3 rounded-lg border-l-4 border-brand-500 bg-brand-900/20 px-4 py-3">
-                    <Info className="h-4 w-4 text-brand-400 mt-0.5 flex-shrink-0" />
+                    <Info className="h-4 w-4 text-[var(--brand-text)] mt-0.5 flex-shrink-0" />
                     <p className="text-xs text-[var(--content-primary)] leading-relaxed">
                       Keep the downloaded file — you may need it again if you switch computers or
                       reinstall Chrome.
@@ -136,7 +136,7 @@ export default function InstallPage() {
               <div className="flex-1 pb-8">
                 <div className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] p-6">
                   <div className="flex items-center gap-3 mb-3">
-                    <FolderOpen className="h-5 w-5 text-brand-500 flex-shrink-0" />
+                    <FolderOpen className="h-5 w-5 text-[var(--brand-text)] flex-shrink-0" />
                     <h3 className="text-base font-semibold text-[var(--content-primary)]">
                       Unzip the file and open Chrome Extensions
                     </h3>
@@ -160,7 +160,7 @@ export default function InstallPage() {
                     </li>
                   </ul>
                   <div className="mt-4 flex gap-3 rounded-lg border-l-4 border-amber-500 bg-amber-900/20 px-4 py-3">
-                    <Info className="h-4 w-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                    <Info className="h-4 w-4 text-[var(--status-warning)] mt-0.5 flex-shrink-0" />
                     <p className="text-xs text-[var(--content-primary)] leading-relaxed">
                       <strong className="text-amber-300">Important:</strong> Extract to a permanent location
                       such as{' '}
@@ -186,7 +186,7 @@ export default function InstallPage() {
               <div className="flex-1 pb-8">
                 <div className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] p-6">
                   <div className="flex items-center gap-3 mb-3">
-                    <ToggleRight className="h-5 w-5 text-brand-500 flex-shrink-0" />
+                    <ToggleRight className="h-5 w-5 text-[var(--brand-text)] flex-shrink-0" />
                     <h3 className="text-base font-semibold text-[var(--content-primary)]">
                       Enable Developer Mode
                     </h3>
@@ -232,7 +232,7 @@ export default function InstallPage() {
               <div className="flex-1">
                 <div className="rounded-xl border border-brand-600/40 bg-[var(--surface-secondary)] p-6 ring-1 ring-brand-600/20">
                   <div className="flex items-center gap-3 mb-3">
-                    <Chrome className="h-5 w-5 text-brand-500 flex-shrink-0" />
+                    <Chrome className="h-5 w-5 text-[var(--brand-text)] flex-shrink-0" />
                     <h3 className="text-base font-semibold text-[var(--content-primary)]">
                       Load the extension and pin it
                     </h3>
@@ -261,7 +261,7 @@ export default function InstallPage() {
                     </li>
                   </ul>
                   <div className="mt-4 flex gap-3 rounded-lg border-l-4 border-brand-500 bg-brand-900/20 px-4 py-3">
-                    <CheckCircle className="h-4 w-4 text-brand-400 mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="h-4 w-4 text-[var(--brand-text)] mt-0.5 flex-shrink-0" />
                     <p className="text-xs text-[var(--content-primary)] leading-relaxed">
                       <strong className="text-brand-300">Done.</strong> Click the Ledgerium AI icon in your
                       toolbar to open the sidebar. Sign in or create a free account to start recording.
@@ -274,12 +274,12 @@ export default function InstallPage() {
 
           {/* User Guide link */}
           <div className="mt-10 flex items-start gap-3 rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] px-5 py-4">
-            <BookOpen className="h-5 w-5 text-brand-400 flex-shrink-0 mt-0.5" />
+            <BookOpen className="h-5 w-5 text-[var(--brand-text)] flex-shrink-0 mt-0.5" />
             <p className="text-sm text-[var(--content-primary)] leading-relaxed">
               For a complete walkthrough with screenshots, see the Extension section in our{' '}
               <Link
                 href="/docs#getting-started"
-                className="text-brand-400 hover:text-brand-300 underline underline-offset-2 transition-colors"
+                className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors"
               >
                 User Guide
               </Link>
@@ -335,7 +335,7 @@ export default function InstallPage() {
               },
             ].map(({ step, icon: Icon, title, desc }) => (
               <div key={step} className="text-center">
-                <div className="mx-auto w-10 h-10 rounded-full bg-brand-600/20 border border-brand-600/40 text-brand-400 flex items-center justify-center text-sm font-bold mb-4">
+                <div className="mx-auto w-10 h-10 rounded-full bg-brand-600/20 border border-brand-600/40 text-[var(--brand-text)] flex items-center justify-center text-sm font-bold mb-4">
                   {step}
                 </div>
                 <Icon className="h-5 w-5 text-[var(--brand-text)] mx-auto mb-2" />
@@ -368,7 +368,7 @@ export default function InstallPage() {
                   'System feedback — toasts, modals, errors, status changes',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <CheckCircle className="h-4 w-4 text-brand-500 mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="h-4 w-4 text-[var(--brand-text)] mt-0.5 flex-shrink-0" />
                     <span className="text-sm text-[var(--content-primary)] leading-relaxed">{item}</span>
                   </li>
                 ))}
@@ -494,7 +494,7 @@ export default function InstallPage() {
             Already installed?{' '}
             <Link
               href="/login"
-              className="text-brand-400 hover:text-brand-300 underline underline-offset-2 transition-colors"
+              className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors"
             >
               Sign in to your account &rarr;
             </Link>

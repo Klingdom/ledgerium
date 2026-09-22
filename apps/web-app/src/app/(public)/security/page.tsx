@@ -143,7 +143,7 @@ function AvailabilityBadge({ status }: { status: FeatureAvailability }) {
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-amber-900/30 border border-amber-700/40 px-2.5 py-0.5 text-[11px] font-medium text-amber-400">
+    <span className="inline-flex items-center gap-1 rounded-full bg-amber-900/30 border border-amber-700/40 px-2.5 py-0.5 text-[11px] font-medium text-[var(--status-warning)]">
       Coming soon
     </span>
   );
@@ -155,7 +155,7 @@ export default function SecurityPage() {
       {/* Hero */}
       <section className="pt-20 pb-16 bg-gradient-to-b from-brand-900/20 to-[var(--surface-primary)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
-          <span className="inline-block rounded-full border border-brand-600/40 bg-brand-900/30 px-3 py-1 text-xs font-semibold text-brand-400 uppercase tracking-wide mb-6">
+          <span className="inline-block rounded-full border border-brand-600/40 bg-brand-900/30 px-3 py-1 text-xs font-semibold text-[var(--brand-text)] uppercase tracking-wide mb-6">
             Trust Architecture
           </span>
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)] leading-tight">
@@ -183,7 +183,7 @@ export default function SecurityPage() {
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-9 h-9 rounded-lg bg-brand-600/20 border border-brand-600/30 flex items-center justify-center flex-shrink-0">
-                    <Icon className="h-4 w-4 text-brand-400" />
+                    <Icon className="h-4 w-4 text-[var(--brand-text)]" />
                   </div>
                   <h3 className="text-base font-semibold text-[var(--content-primary)]">{title}</h3>
                 </div>
@@ -212,13 +212,13 @@ export default function SecurityPage() {
             {/* Captured */}
             <div className="card p-6">
               <div className="flex items-center gap-2 mb-5">
-                <CheckCircle className="h-5 w-5 text-brand-500" />
+                <CheckCircle className="h-5 w-5 text-[var(--brand-text)]" />
                 <h3 className="text-sm font-bold text-[var(--content-primary)]">What we capture</h3>
               </div>
               <ul className="space-y-3">
                 {CAPTURED_ITEMS.map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <CheckCircle className="h-4 w-4 text-brand-500 mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="h-4 w-4 text-[var(--brand-text)] mt-0.5 flex-shrink-0" />
                     <span className="text-sm text-[var(--content-primary)] leading-relaxed">{item}</span>
                   </li>
                 ))}
@@ -264,14 +264,14 @@ export default function SecurityPage() {
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-9 h-9 rounded-lg bg-brand-600/20 border border-brand-600/30 flex items-center justify-center flex-shrink-0">
-                    <Icon className="h-4 w-4 text-brand-400" />
+                    <Icon className="h-4 w-4 text-[var(--brand-text)]" />
                   </div>
                   <h3 className="text-sm font-semibold text-[var(--content-primary)]">{title}</h3>
                 </div>
                 <ul className="space-y-2">
                   {details.map((detail) => (
                     <li key={detail} className="flex items-center gap-2">
-                      <CheckCircle className="h-3.5 w-3.5 text-brand-500 flex-shrink-0" />
+                      <CheckCircle className="h-3.5 w-3.5 text-[var(--brand-text)] flex-shrink-0" />
                       <span className="text-xs text-[var(--content-primary)]">{detail}</span>
                     </li>
                   ))}
@@ -293,7 +293,7 @@ export default function SecurityPage() {
               <div key={label} className="flex items-center justify-between py-4">
                 <div className="flex items-center gap-3">
                   {status === 'available' ? (
-                    <Users className="h-4 w-4 text-brand-400 flex-shrink-0" />
+                    <Users className="h-4 w-4 text-[var(--brand-text)] flex-shrink-0" />
                   ) : (
                     <Clock className="h-4 w-4 text-[var(--content-tertiary)] flex-shrink-0" />
                   )}

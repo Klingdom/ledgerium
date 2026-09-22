@@ -151,11 +151,11 @@ export default function ScreenshotVsStructuredPost() {
             SOP, a process map, and an intelligence report from that data. The SOP reads like a
             guide, but underneath it is process data you can diff, measure, and use to plan
             automation. If you want the head-to-head detail, see{' '}
-            <Link href="/compare/scribe" className="text-brand-400 hover:text-brand-300 underline underline-offset-2 transition-colors">
+            <Link href="/compare/scribe" className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors">
               Ledgerium vs. Scribe
             </Link>{' '}
             or the{' '}
-            <Link href="/alternatives/tango" className="text-brand-400 hover:text-brand-300 underline underline-offset-2 transition-colors">
+            <Link href="/alternatives/tango" className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors">
               Tango alternatives
             </Link>{' '}
             roundup.

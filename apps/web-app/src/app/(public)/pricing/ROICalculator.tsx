@@ -37,7 +37,7 @@ function SliderInput({
         <label className="text-sm font-medium text-[var(--content-secondary)]">
           {label}
         </label>
-        <span className="text-sm font-semibold tabular-nums text-brand-400 min-w-[4rem] text-right">
+        <span className="text-sm font-semibold tabular-nums text-[var(--brand-text)] min-w-[4rem] text-right">
           {displayValue}
         </span>
       </div>
@@ -102,7 +102,7 @@ function ResultCard({ label, value, sub, highlight }: ResultCardProps) {
       </span>
       <span
         className={`text-2xl sm:text-3xl font-bold tabular-nums ${
-          highlight ? 'text-brand-400' : 'text-[var(--content-primary)]'
+          highlight ? 'text-[var(--brand-text)]' : 'text-[var(--content-primary)]'
         }`}
       >
         {value}

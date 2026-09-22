@@ -101,8 +101,8 @@ export default function DemoPage() {
                     {what}
                   </p>
                   <div className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-brand-500 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-brand-400 leading-relaxed">
+                    <CheckCircle className="h-4 w-4 text-[var(--brand-text)] mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-[var(--brand-text)] leading-relaxed">
                       {result}
                     </p>
                   </div>
@@ -139,7 +139,7 @@ export default function DemoPage() {
           <p className="text-center text-[var(--content-primary)] leading-relaxed mb-8 max-w-2xl mx-auto">
             This is the actual Ledgerium process map — a sample &ldquo;Submit expense report&rdquo; workflow
             recorded 47 times. Edge thickness is how often each path was taken. Switch to{' '}
-            <span className="text-brand-400 font-medium">Performance</span> mode to see where the time goes,
+            <span className="text-[var(--brand-text)] font-medium">Performance</span> mode to see where the time goes,
             and drag the coverage slider to focus on the dominant path. Nothing here is drawn — it is measured.
           </p>
           <DemoProcessMap />

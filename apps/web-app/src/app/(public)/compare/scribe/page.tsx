@@ -146,7 +146,7 @@ function ComparisonCell({
       <span
         className={
           variant === 'ledgerium'
-            ? 'text-brand-400 font-semibold text-base leading-none'
+            ? 'text-[var(--brand-text)] font-semibold text-base leading-none'
             : 'text-[var(--content-secondary)] font-semibold text-base leading-none'
         }
       >
@@ -270,9 +270,9 @@ export default function CompareScribePage() {
             <div className="rounded-xl border border-brand-700/40 bg-brand-900/10 p-8 flex flex-col gap-5 shadow-lg shadow-brand-900/20">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-brand-900/20 border border-brand-700/30 flex items-center justify-center flex-shrink-0">
-                  <Database className="h-5 w-5 text-brand-500" />
+                  <Database className="h-5 w-5 text-[var(--brand-text)]" />
                 </div>
-                <h3 className="text-base font-bold text-brand-400">
+                <h3 className="text-base font-bold text-[var(--brand-text)]">
                   Ledgerium captures
                 </h3>
               </div>
@@ -284,7 +284,7 @@ export default function CompareScribePage() {
                   'Confidence scores per observed interaction',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5 text-sm text-[var(--content-primary)] leading-relaxed">
-                    <Check className="mt-0.5 flex-shrink-0 h-4 w-4 text-brand-500" />
+                    <Check className="mt-0.5 flex-shrink-0 h-4 w-4 text-[var(--brand-text)]" />
                     {item}
                   </li>
                 ))}
@@ -326,7 +326,7 @@ export default function CompareScribePage() {
                       <span className="text-xs font-bold text-white uppercase tracking-wider bg-brand-700 rounded-full px-3 py-0.5">
                         This product
                       </span>
-                      <span className="font-semibold text-brand-400">Ledgerium</span>
+                      <span className="font-semibold text-[var(--brand-text)]">Ledgerium</span>
                     </span>
                   </th>
                 </tr>
@@ -405,7 +405,7 @@ export default function CompareScribePage() {
             <div className="rounded-xl border border-brand-700/30 bg-brand-900/10 p-7">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-9 h-9 rounded-lg bg-brand-900/20 border border-brand-700/30 flex items-center justify-center flex-shrink-0">
-                  <Layers className="h-4 w-4 text-brand-500" />
+                  <Layers className="h-4 w-4 text-[var(--brand-text)]" />
                 </div>
                 <h2 className="text-lg font-bold text-[var(--content-primary)]">
                   When to use Ledgerium
@@ -425,7 +425,7 @@ export default function CompareScribePage() {
                   'Generate documentation without writing anything',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5 text-sm text-[var(--content-primary)] leading-relaxed">
-                    <Check className="mt-0.5 flex-shrink-0 h-4 w-4 text-brand-500" />
+                    <Check className="mt-0.5 flex-shrink-0 h-4 w-4 text-[var(--brand-text)]" />
                     {item}
                   </li>
                 ))}

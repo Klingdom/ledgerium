@@ -6,6 +6,23 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-22] - The public pages stop using dark-theme colours on a light background
+
+**Why:** 157 places on the marketing pages named a specific dark-theme colour directly instead of following the theme. On the light theme they came out too pale to read.
+
+### Changed
+- Those 157 uses across 29 files now follow the theme: brand green text, plus the warning and danger colours.
+
+### Result
+- Light theme: the landing page goes from 11 hard-to-read spots to 5, and pricing from 26 to 11. Counting from where this started two days ago: 77 to 5, and 83 to 11.
+- Dark theme stays at zero and is still checked automatically on every push.
+
+### Still open
+- The same pattern exists inside the app, beyond the marketing pages. Recorded as row 223.
+- Two things the automated check cannot see were flagged for later: whether status colours used on badges and the health gauge meet the separate minimum for non-text elements, and whether any status is signalled by colour alone.
+
+---
+
 ## [2026-09-21] - The brand green is now readable as text, and the public pages have an accessibility check
 
 **Why:** the brand green failed the contrast minimum when used as text — badly on the light theme, and on the dark theme wherever it sat on a card rather than the page background. Nothing had ever checked these pages.

@@ -52,7 +52,7 @@ export default function PrivacyPage() {
                 'Your workflows remain under your control',
               ].map((item) => (
                 <li key={item} className="flex items-center gap-2 text-sm text-[var(--content-primary)]">
-                  <Shield className="h-3.5 w-3.5 text-brand-400 flex-shrink-0" />
+                  <Shield className="h-3.5 w-3.5 text-[var(--brand-text)] flex-shrink-0" />
                   {item}
                 </li>
               ))}
@@ -95,7 +95,7 @@ export default function PrivacyPage() {
                 <li>Generate workflow outputs (SOPs, process maps)</li>
                 <li>Provide process intelligence and analytics</li>
               </ul>
-              <p className="text-brand-400 font-medium">
+              <p className="text-[var(--brand-text)] font-medium">
                 Recording only occurs while a session is actively running.
               </p>
 

@@ -82,11 +82,11 @@ export default function ComparisonsHubPage() {
                 href={c.href}
                 className="card p-6 hover:border-brand-700/40 transition-colors group"
               >
-                <h3 className="text-base font-semibold text-[var(--content-primary)] group-hover:text-brand-400 transition-colors">
+                <h3 className="text-base font-semibold text-[var(--content-primary)] group-hover:text-[var(--brand-text)] transition-colors">
                   {c.title}
                 </h3>
                 <p className="mt-2 text-sm text-[var(--content-primary)] leading-relaxed line-clamp-3">{c.blurb}</p>
-                <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-brand-500">
+                <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[var(--brand-text)]">
                   Read comparison
                   <ArrowRight className="h-3.5 w-3.5" />
                 </span>

@@ -71,7 +71,7 @@ function ResetPasswordForm() {
 
         {isMissingParams ? (
           <div className="card p-6 space-y-4 text-center">
-            <div className="rounded-lg bg-red-900/20 border border-red-700/40 p-3 text-sm text-red-400">
+            <div className="rounded-lg bg-red-900/20 border border-red-700/40 p-3 text-sm text-[var(--status-danger)]">
               This reset link is invalid or incomplete.
             </div>
             <Link href="/forgot-password" className="btn-primary w-full block text-center">
@@ -81,7 +81,7 @@ function ResetPasswordForm() {
         ) : success ? (
           <div className="card p-6 space-y-4 text-center">
             <div className="flex justify-center mb-2">
-              <svg className="h-10 w-10 text-brand-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <svg className="h-10 w-10 text-[var(--brand-text)]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
@@ -96,7 +96,7 @@ function ResetPasswordForm() {
         ) : (
           <form onSubmit={handleSubmit} className="card p-6 space-y-4">
             {error && (
-              <div className="rounded-lg bg-red-900/20 border border-red-700/40 p-3 text-sm text-red-400">
+              <div className="rounded-lg bg-red-900/20 border border-red-700/40 p-3 text-sm text-[var(--status-danger)]">
                 {error}
                 {error.toLowerCase().includes('expired') || error.toLowerCase().includes('invalid') ? (
                   <span>

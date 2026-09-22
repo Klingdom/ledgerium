@@ -122,7 +122,7 @@ export default function InstallExtensionPage() {
                   'System feedback — toasts, modals, errors, status changes',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <CheckCircle className="h-4 w-4 text-brand-500 mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="h-4 w-4 text-[var(--brand-text)] mt-0.5 flex-shrink-0" />
                     <span className="text-sm text-[var(--content-primary)] leading-relaxed">{item}</span>
                   </li>
                 ))}

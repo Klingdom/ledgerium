@@ -371,13 +371,13 @@ export default function ProductPage() {
                     <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-700 text-white font-bold shadow-sm shadow-brand-600/20 flex-shrink-0">
                       <Icon className="h-5 w-5" />
                     </span>
-                    <span className="text-xs font-semibold text-brand-500 uppercase tracking-wider">Step {step}</span>
+                    <span className="text-xs font-semibold text-[var(--brand-text)] uppercase tracking-wider">Step {step}</span>
                   </div>
                   <h3 className="text-2xl font-bold text-[var(--content-primary)] mb-4">{title}</h3>
                   <p className="text-[var(--content-primary)] leading-relaxed mb-4">{what}</p>
                   <div className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-brand-500 mt-1 flex-shrink-0" />
-                    <p className="text-sm text-brand-400 leading-relaxed">{result}</p>
+                    <CheckCircle className="h-4 w-4 text-[var(--brand-text)] mt-1 flex-shrink-0" />
+                    <p className="text-sm text-[var(--brand-text)] leading-relaxed">{result}</p>
                   </div>
                 </div>
               );
@@ -455,7 +455,7 @@ export default function ProductPage() {
       <section className="py-20 bg-[var(--surface-elevated)] border-t border-[var(--border-subtle)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="text-center mb-12">
-            <p className="text-xs font-semibold text-brand-500 uppercase tracking-wider mb-2">Intelligence Layer</p>
+            <p className="text-xs font-semibold text-[var(--brand-text)] uppercase tracking-wider mb-2">Intelligence Layer</p>
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--content-primary)] mb-4">
               Your library gets smarter with every recording
             </h2>
@@ -502,7 +502,7 @@ export default function ProductPage() {
               <div key={title} className="card p-6 hover:border-[rgba(255,255,255,0.12)] transition-colors">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-900/30">
-                    <Icon className="h-4.5 w-4.5 text-brand-500" />
+                    <Icon className="h-4.5 w-4.5 text-[var(--brand-text)]" />
                   </div>
                   <h3 className="text-sm font-semibold text-[var(--content-primary)]">{title}</h3>
                 </div>
@@ -514,7 +514,7 @@ export default function ProductPage() {
           <div className="mt-12 text-center">
             <p className="text-sm text-[var(--content-tertiary)]">
               Intelligence features available on{' '}
-              <Link href="/pricing" className="text-brand-500 hover:text-brand-400 font-medium">
+              <Link href="/pricing" className="text-[var(--brand-text)] hover:text-[var(--brand-text)] font-medium">
                 Team and Growth plans
               </Link>
             </p>
@@ -542,7 +542,7 @@ export default function ProductPage() {
                   <th className="text-left px-4 py-3 text-[var(--content-tertiary)] font-medium text-xs uppercase tracking-wider border-b border-[var(--border-default)]">
                     Dimension
                   </th>
-                  <th className="text-left px-4 py-3 text-brand-400 font-semibold text-xs uppercase tracking-wider border-b border-[var(--border-default)] bg-brand-900/10">
+                  <th className="text-left px-4 py-3 text-[var(--brand-text)] font-semibold text-xs uppercase tracking-wider border-b border-[var(--border-default)] bg-brand-900/10">
                     Ledgerium AI
                   </th>
                   <th className="text-left px-4 py-3 text-[var(--content-tertiary)] font-medium text-xs uppercase tracking-wider border-b border-[var(--border-default)]">
@@ -562,7 +562,7 @@ export default function ProductPage() {
                     <td className="px-4 py-3 text-[var(--content-primary)] font-medium border-b border-[var(--border-subtle)] whitespace-nowrap">
                       {dimension}
                     </td>
-                    <td className="px-4 py-3 text-brand-400 border-b border-[var(--border-subtle)] bg-brand-900/5">
+                    <td className="px-4 py-3 text-[var(--brand-text)] border-b border-[var(--border-subtle)] bg-brand-900/5">
                       {ledgerium}
                     </td>
                     <td className="px-4 py-3 text-[var(--content-secondary)] border-b border-[var(--border-subtle)]">

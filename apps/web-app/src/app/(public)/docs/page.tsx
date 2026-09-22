@@ -58,7 +58,7 @@ function Screenshot({ src, alt, caption }: { src: string; alt: string; caption: 
 function Tip({ children }: { children: React.ReactNode }) {
   return (
     <div className="my-4 rounded-md border-l-[3px] border-brand-400 bg-brand-900/10 px-4 py-3 text-sm text-brand-300 leading-relaxed">
-      <span className="font-bold text-brand-400">Tip&nbsp;&nbsp;</span>
+      <span className="font-bold text-[var(--brand-text)]">Tip&nbsp;&nbsp;</span>
       {children}
     </div>
   );
@@ -76,7 +76,7 @@ function Note({ children }: { children: React.ReactNode }) {
 function Warning({ children }: { children: React.ReactNode }) {
   return (
     <div className="my-4 rounded-md border-l-[3px] border-amber-400 bg-amber-900/10 px-4 py-3 text-sm text-amber-300 leading-relaxed">
-      <span className="font-bold text-amber-400">Important&nbsp;&nbsp;</span>
+      <span className="font-bold text-[var(--status-warning)]">Important&nbsp;&nbsp;</span>
       {children}
     </div>
   );
@@ -96,7 +96,7 @@ function StepList({ steps }: { steps: React.ReactNode[] }) {
     <ol className="my-4 ml-0 list-none space-y-3">
       {steps.map((step: React.ReactNode, i: number) => (
         <li key={i} className="relative pl-11 text-[var(--content-primary)] leading-relaxed">
-          <span className="absolute left-0 top-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-brand-900/20 text-xs font-bold text-brand-400">
+          <span className="absolute left-0 top-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-brand-900/20 text-xs font-bold text-[var(--brand-text)]">
             {i + 1}
           </span>
           {step}
@@ -148,7 +148,7 @@ function P({ children }: { children: React.ReactNode }) {
 
 function UL({ children }: { children: React.ReactNode }) {
   return (
-    <ul className="mb-4 ml-6 list-disc space-y-1.5 text-[var(--content-primary)] leading-relaxed [&>li::marker]:text-brand-400">
+    <ul className="mb-4 ml-6 list-disc space-y-1.5 text-[var(--content-primary)] leading-relaxed [&>li::marker]:text-[var(--brand-text)]">
       {children}
     </ul>
   );
@@ -192,9 +192,9 @@ function MobileTOC() {
             <li key={id}>
               <a
                 href={`#${id}`}
-                className="flex items-center gap-2 rounded px-2 py-1.5 text-sm text-[var(--content-secondary)] hover:text-brand-400 transition-colors"
+                className="flex items-center gap-2 rounded px-2 py-1.5 text-sm text-[var(--content-secondary)] hover:text-[var(--brand-text)] transition-colors"
               >
-                <span className="text-brand-400 font-semibold w-5 text-right shrink-0">
+                <span className="text-[var(--brand-text)] font-semibold w-5 text-right shrink-0">
                   {i + 1}.
                 </span>
                 {label}
@@ -223,9 +223,9 @@ function Sidebar() {
               <li key={id}>
                 <a
                   href={`#${id}`}
-                  className="flex items-center gap-2 rounded px-2 py-1.5 text-sm font-medium text-[var(--content-secondary)] hover:text-brand-400 hover:bg-[var(--surface-secondary)] transition-colors"
+                  className="flex items-center gap-2 rounded px-2 py-1.5 text-sm font-medium text-[var(--content-secondary)] hover:text-[var(--brand-text)] hover:bg-[var(--surface-secondary)] transition-colors"
                 >
-                  <span className="text-brand-400 font-semibold w-5 text-right shrink-0 text-xs">
+                  <span className="text-[var(--brand-text)] font-semibold w-5 text-right shrink-0 text-xs">
                     {i + 1}.
                   </span>
                   <span className="leading-tight">{label}</span>
@@ -248,7 +248,7 @@ export default function DocsPage() {
       {/* Page header */}
       <div className="border-b border-[var(--border-default)] bg-[var(--surface-elevated)]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10">
-          <p className="text-sm text-brand-400 font-medium mb-2">User Guide</p>
+          <p className="text-sm text-[var(--brand-text)] font-medium mb-2">User Guide</p>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--content-primary)] mb-3">
             Ledgerium AI Documentation
           </h1>
@@ -263,25 +263,25 @@ export default function DocsPage() {
           <div className="mt-5 flex flex-wrap gap-2">
             <a
               href="#quick-start"
-              className="inline-flex items-center rounded-full border border-brand-500/40 bg-brand-900/20 px-3 py-1 text-xs font-medium text-brand-400 hover:bg-brand-900/40 transition-colors"
+              className="inline-flex items-center rounded-full border border-brand-500/40 bg-brand-900/20 px-3 py-1 text-xs font-medium text-[var(--brand-text)] hover:bg-brand-900/40 transition-colors"
             >
               Quick Start
             </a>
             <a
               href="#visual-overview"
-              className="inline-flex items-center rounded-full border border-[var(--border-default)] bg-[var(--surface-secondary)] px-3 py-1 text-xs font-medium text-[var(--content-secondary)] hover:text-brand-400 hover:border-brand-500/40 transition-colors"
+              className="inline-flex items-center rounded-full border border-[var(--border-default)] bg-[var(--surface-secondary)] px-3 py-1 text-xs font-medium text-[var(--content-secondary)] hover:text-[var(--brand-text)] hover:border-brand-500/40 transition-colors"
             >
               Extension
             </a>
             <a
               href="#web-app-overview"
-              className="inline-flex items-center rounded-full border border-[var(--border-default)] bg-[var(--surface-secondary)] px-3 py-1 text-xs font-medium text-[var(--content-secondary)] hover:text-brand-400 hover:border-brand-500/40 transition-colors"
+              className="inline-flex items-center rounded-full border border-[var(--border-default)] bg-[var(--surface-secondary)] px-3 py-1 text-xs font-medium text-[var(--content-secondary)] hover:text-[var(--brand-text)] hover:border-brand-500/40 transition-colors"
             >
               Web App
             </a>
             <a
               href="#getting-started"
-              className="inline-flex items-center rounded-full border border-[var(--border-default)] bg-[var(--surface-secondary)] px-3 py-1 text-xs font-medium text-[var(--content-secondary)] hover:text-brand-400 hover:border-brand-500/40 transition-colors"
+              className="inline-flex items-center rounded-full border border-[var(--border-default)] bg-[var(--surface-secondary)] px-3 py-1 text-xs font-medium text-[var(--content-secondary)] hover:text-[var(--brand-text)] hover:border-brand-500/40 transition-colors"
             >
               Full Reference
             </a>
@@ -293,7 +293,7 @@ export default function DocsPage() {
       <section id="quick-start" className="scroll-mt-20 bg-[var(--surface-elevated)] border-b border-[var(--border-default)]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-14">
           <div className="mb-10 text-center">
-            <p className="text-xs font-semibold uppercase tracking-wider text-brand-400 mb-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-text)] mb-2">
               Get up and running
             </p>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--content-primary)] mb-3">
@@ -308,7 +308,7 @@ export default function DocsPage() {
             {/* Step 1 */}
             <div className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] p-6">
               <div className="flex items-center gap-3 mb-4">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-900/30 text-sm font-bold text-brand-400 border border-brand-500/30">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-900/30 text-sm font-bold text-[var(--brand-text)] border border-brand-500/30">
                   1
                 </span>
                 <h3 className="text-base font-bold text-[var(--content-primary)]">Create Account</h3>
@@ -318,7 +318,7 @@ export default function DocsPage() {
               </p>
               <a
                 href="https://ledgerium.ai/signup"
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-400 hover:text-brand-300 transition-colors"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--brand-text)] hover:text-brand-300 transition-colors"
               >
                 ledgerium.ai/signup
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -330,7 +330,7 @@ export default function DocsPage() {
             {/* Step 2 */}
             <div className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] p-6">
               <div className="flex items-center gap-3 mb-4">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-900/30 text-sm font-bold text-brand-400 border border-brand-500/30">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-900/30 text-sm font-bold text-[var(--brand-text)] border border-brand-500/30">
                   2
                 </span>
                 <h3 className="text-base font-bold text-[var(--content-primary)]">Install Extension</h3>
@@ -340,7 +340,7 @@ export default function DocsPage() {
               </p>
               <a
                 href="/install"
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-400 hover:text-brand-300 transition-colors"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--brand-text)] hover:text-brand-300 transition-colors"
               >
                 Installation guide
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -352,7 +352,7 @@ export default function DocsPage() {
             {/* Step 3 */}
             <div className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] p-6">
               <div className="flex items-center gap-3 mb-4">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-900/30 text-sm font-bold text-brand-400 border border-brand-500/30">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-900/30 text-sm font-bold text-[var(--brand-text)] border border-brand-500/30">
                   3
                 </span>
                 <h3 className="text-base font-bold text-[var(--content-primary)]">Record a Workflow</h3>
@@ -362,7 +362,7 @@ export default function DocsPage() {
               </p>
               <a
                 href="#getting-started"
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-400 hover:text-brand-300 transition-colors"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--brand-text)] hover:text-brand-300 transition-colors"
               >
                 Detailed guide
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -378,7 +378,7 @@ export default function DocsPage() {
       <section id="visual-overview" className="scroll-mt-20 bg-[var(--surface-primary)] border-b border-[var(--border-default)]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-14">
           <div className="mb-10 text-center">
-            <p className="text-xs font-semibold uppercase tracking-wider text-brand-400 mb-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-text)] mb-2">
               Platform overview
             </p>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--content-primary)] mb-3">
@@ -393,14 +393,14 @@ export default function DocsPage() {
           <div className="mb-14">
             <div className="flex items-center gap-3 mb-6">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-900/30 border border-brand-500/30">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-brand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[var(--brand-text)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
                   <line x1="8" y1="21" x2="16" y2="21"/>
                   <line x1="12" y1="17" x2="12" y2="21"/>
                 </svg>
               </span>
               <h3 className="text-xl font-bold text-[var(--content-primary)]">Browser Extension</h3>
-              <span className="ml-1 rounded-full bg-brand-900/20 border border-brand-500/30 px-2.5 py-0.5 text-xs font-semibold text-brand-400">
+              <span className="ml-1 rounded-full bg-brand-900/20 border border-brand-500/30 px-2.5 py-0.5 text-xs font-semibold text-[var(--brand-text)]">
                 Chrome
               </span>
             </div>
@@ -631,7 +631,7 @@ export default function DocsPage() {
           <div className="mt-12 flex flex-wrap justify-center gap-3 pt-8 border-t border-[var(--border-default)]">
             <a
               href="#getting-started"
-              className="inline-flex items-center gap-2 rounded-lg border border-brand-500/40 bg-brand-900/20 px-4 py-2 text-sm font-semibold text-brand-400 hover:bg-brand-900/40 transition-colors"
+              className="inline-flex items-center gap-2 rounded-lg border border-brand-500/40 bg-brand-900/20 px-4 py-2 text-sm font-semibold text-[var(--brand-text)] hover:bg-brand-900/40 transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
@@ -675,7 +675,7 @@ export default function DocsPage() {
               <P>Ledgerium AI is free to start — no credit card required.</P>
               <StepList
                 steps={[
-                  <>Go to <a href="https://ledgerium.ai/signup" className="text-brand-400 hover:underline">ledgerium.ai/signup</a>.</>,
+                  <>Go to <a href="https://ledgerium.ai/signup" className="text-[var(--brand-text)] hover:underline">ledgerium.ai/signup</a>.</>,
                   <>Enter your name (optional), email address, and a password (minimum 8 characters).</>,
                   <>Click <strong className="text-[var(--content-primary)]">Create Account</strong>.</>,
                   <>You are signed in and taken to your dashboard.</>,
@@ -703,7 +703,7 @@ export default function DocsPage() {
               <H4>Step 1 — Download the extension</H4>
               <StepList
                 steps={[
-                  <>From the footer or product page, click <strong className="text-[var(--content-primary)]">Get Extension</strong>, or go to <a href="https://ledgerium.ai/install" className="text-brand-400 hover:underline">ledgerium.ai/install</a>.</>,
+                  <>From the footer or product page, click <strong className="text-[var(--content-primary)]">Get Extension</strong>, or go to <a href="https://ledgerium.ai/install" className="text-[var(--brand-text)] hover:underline">ledgerium.ai/install</a>.</>,
                   <>Click <strong className="text-[var(--content-primary)]">Install Chrome Extension</strong>.</>,
                   <>A <Code>.zip</Code> file downloads to your computer.</>,
                 ]}
@@ -1878,7 +1878,7 @@ export default function DocsPage() {
                 retention. Contact{' '}
                 <a
                   href="mailto:hello@ledgerium.ai?subject=Ledgerium%20Enterprise"
-                  className="text-brand-400 hover:underline"
+                  className="text-[var(--brand-text)] hover:underline"
                 >
                   hello@ledgerium.ai
                 </a>
@@ -2104,7 +2104,7 @@ export default function DocsPage() {
                 sensitive personal content. Compliance readiness depends on your deployment
                 context and governance policies. If you operate in a regulated environment,
                 contact{' '}
-                <a href="mailto:hello@ledgerium.ai" className="text-brand-400 hover:underline">
+                <a href="mailto:hello@ledgerium.ai" className="text-[var(--brand-text)] hover:underline">
                   hello@ledgerium.ai
                 </a>{' '}
                 before deploying.
@@ -2113,7 +2113,7 @@ export default function DocsPage() {
               <H3>Forgot password</H3>
               <P>
                 Contact support at{' '}
-                <a href="mailto:hello@ledgerium.ai" className="text-brand-400 hover:underline">
+                <a href="mailto:hello@ledgerium.ai" className="text-[var(--brand-text)] hover:underline">
                   hello@ledgerium.ai
                 </a>{' '}
                 to reset your password.
@@ -2122,7 +2122,7 @@ export default function DocsPage() {
               <H3>How do I contact support?</H3>
               <P>
                 Email{' '}
-                <a href="mailto:hello@ledgerium.ai" className="text-brand-400 hover:underline">
+                <a href="mailto:hello@ledgerium.ai" className="text-[var(--brand-text)] hover:underline">
                   hello@ledgerium.ai
                 </a>{' '}
                 with your account email and a description of what you were trying to do.
@@ -2133,7 +2133,7 @@ export default function DocsPage() {
             <div className="border-t border-[var(--border-default)] pt-10 text-center">
               <p className="text-[var(--content-secondary)] mb-4">
                 Still have questions?{' '}
-                <a href="mailto:hello@ledgerium.ai" className="text-brand-400 hover:underline">
+                <a href="mailto:hello@ledgerium.ai" className="text-[var(--brand-text)] hover:underline">
                   hello@ledgerium.ai
                 </a>
               </p>

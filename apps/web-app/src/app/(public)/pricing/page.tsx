@@ -101,13 +101,13 @@ type CellValue = boolean | string;
 function ComparisonCell({ value }: { value: CellValue }) {
   if (value === 'coming-soon') {
     return (
-      <span className="inline-block text-amber-400 bg-amber-900/20 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap">
+      <span className="inline-block text-[var(--status-warning)] bg-amber-900/20 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap">
         Coming soon
       </span>
     );
   }
   if (value === true) {
-    return <Check className="h-4 w-4 mx-auto text-brand-400" aria-label="Included" />;
+    return <Check className="h-4 w-4 mx-auto text-[var(--brand-text)]" aria-label="Included" />;
   }
   if (value === false) {
     return <span className="text-[var(--content-tertiary)]">—</span>;
@@ -148,25 +148,25 @@ export default function PricingPage() {
           {/* 4-bullet output grid (UX §A spec) */}
           <ul className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-left max-w-xl mx-auto">
             <li className="flex items-start gap-2">
-              <Check className="h-4 w-4 text-brand-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <Check className="h-4 w-4 text-[var(--brand-text)] mt-0.5 flex-shrink-0" aria-hidden="true" />
               <span className="text-sm text-[var(--content-primary)] leading-snug">
                 An AI-generated SOP — ready to share or train from
               </span>
             </li>
             <li className="flex items-start gap-2">
-              <Check className="h-4 w-4 text-brand-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <Check className="h-4 w-4 text-[var(--brand-text)] mt-0.5 flex-shrink-0" aria-hidden="true" />
               <span className="text-sm text-[var(--content-primary)] leading-snug">
                 A visual process map — built from real behavior, not assumptions
               </span>
             </li>
             <li className="flex items-start gap-2">
-              <Check className="h-4 w-4 text-brand-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <Check className="h-4 w-4 text-[var(--brand-text)] mt-0.5 flex-shrink-0" aria-hidden="true" />
               <span className="text-sm text-[var(--content-primary)] leading-snug">
                 Variation analysis — see how your team's process differs run to run
               </span>
             </li>
             <li className="flex items-start gap-2">
-              <Check className="h-4 w-4 text-brand-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <Check className="h-4 w-4 text-[var(--brand-text)] mt-0.5 flex-shrink-0" aria-hidden="true" />
               <span className="text-sm text-[var(--content-primary)] leading-snug">
                 Automation candidates — ranked by opportunity score, backed by evidence
               </span>
@@ -189,7 +189,7 @@ export default function PricingPage() {
             rather than charging customers for unfulfilled seat counts.
           */}
           <div className="mx-auto max-w-3xl mb-8 rounded-xl border border-amber-500/30 bg-amber-950/20 px-5 py-3 text-center">
-            <p className="text-sm text-amber-200">
+            <p className="text-sm text-[var(--status-warning)]">
               <span className="font-semibold">Heads up:</span>{' '}
               Multi-user invites are launching Q3 2026. Free and Starter plans are{' '}
               <span className="font-semibold">fully self-serve today</span>.
@@ -268,7 +268,7 @@ export default function PricingPage() {
                       <span className="text-xs font-bold text-white uppercase tracking-wider bg-brand-700 rounded-full px-3 py-0.5">
                         Most Popular
                       </span>
-                      <span className="font-semibold text-brand-400">Team</span>
+                      <span className="font-semibold text-[var(--brand-text)]">Team</span>
                     </span>
                   </th>
                   {['Growth', 'Enterprise'].map((col) => (
@@ -285,7 +285,7 @@ export default function PricingPage() {
                     <Fragment key={row.label}>
                       {hasCategory && (
                         <tr key={`cat-${row.label}`} className="bg-brand-900/20 border-t-2 border-brand-800/40">
-                          <td colSpan={6} className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-brand-400 sticky left-0 bg-brand-900/20 z-10">
+                          <td colSpan={6} className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-text)] sticky left-0 bg-brand-900/20 z-10">
                             {row.category}
                           </td>
                         </tr>
@@ -358,7 +358,7 @@ export default function PricingPage() {
           </p>
           <Link
             href="/demo"
-            className="inline-flex items-center gap-1.5 mt-3 text-sm font-semibold text-brand-400 hover:text-brand-300 transition-colors"
+            className="inline-flex items-center gap-1.5 mt-3 text-sm font-semibold text-[var(--brand-text)] hover:text-brand-300 transition-colors"
           >
             Explore the interactive demo
             <ArrowRight className="h-4 w-4" />

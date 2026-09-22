@@ -52,7 +52,7 @@ export default function ForgotPasswordPageClient() {
         {submitted ? (
           <div className="card p-6 space-y-4 text-center">
             <div className="flex justify-center mb-2">
-              <svg className="h-10 w-10 text-brand-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <svg className="h-10 w-10 text-[var(--brand-text)]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
               </svg>
             </div>
@@ -75,7 +75,7 @@ export default function ForgotPasswordPageClient() {
         ) : (
           <form onSubmit={handleSubmit} className="card p-6 space-y-4">
             {error && (
-              <div className="rounded-lg bg-red-900/20 border border-red-700/40 p-3 text-sm text-red-400">
+              <div className="rounded-lg bg-red-900/20 border border-red-700/40 p-3 text-sm text-[var(--status-danger)]">
                 {error}
               </div>
             )}

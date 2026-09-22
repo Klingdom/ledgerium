@@ -22,8 +22,8 @@ export default function TermsPage() {
       <section className="pt-20 pb-12 bg-gradient-to-b from-brand-900/20 to-[var(--surface-primary)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <div className="flex items-center gap-3 mb-4">
-            <FileText className="h-6 w-6 text-brand-400" />
-            <p className="text-sm font-semibold text-brand-400 uppercase tracking-wide">
+            <FileText className="h-6 w-6 text-[var(--brand-text)]" />
+            <p className="text-sm font-semibold text-[var(--brand-text)] uppercase tracking-wide">
               Terms of Service
             </p>
           </div>
@@ -41,7 +41,7 @@ export default function TermsPage() {
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <div className="rounded-xl bg-brand-900/15 border border-brand-700/30 p-6">
             <div className="flex items-center gap-2 mb-3">
-              <FileText className="h-5 w-5 text-brand-400" />
+              <FileText className="h-5 w-5 text-[var(--brand-text)]" />
               <h2 className="text-sm font-bold text-[var(--content-primary)]">Our Commitment to Clear, Fair Terms</h2>
             </div>
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -52,7 +52,7 @@ export default function TermsPage() {
                 'You can export or delete your data any time',
               ].map((item) => (
                 <li key={item} className="flex items-center gap-2 text-sm text-[var(--content-primary)]">
-                  <FileText className="h-3.5 w-3.5 text-brand-400 flex-shrink-0" />
+                  <FileText className="h-3.5 w-3.5 text-[var(--brand-text)] flex-shrink-0" />
                   {item}
                 </li>
               ))}
@@ -142,7 +142,7 @@ export default function TermsPage() {
 
             {/* 6. Data & Privacy */}
             <PolicySection number="6" title="Data &amp; Privacy">
-              <p>Your data is governed by our <Link href="/privacy" className="text-brand-400 hover:text-brand-300 underline">Privacy Policy</Link>, which is incorporated into these Terms by reference.</p>
+              <p>Your data is governed by our <Link href="/privacy" className="text-[var(--brand-text)] hover:text-brand-300 underline">Privacy Policy</Link>, which is incorporated into these Terms by reference.</p>
               <ul>
                 <li>We do not sell your data to third parties.</li>
                 <li>We do not use your workflow data to train AI models.</li>
@@ -272,9 +272,9 @@ function PolicySection({
   return (
     <div>
       <h3 className="text-lg font-bold text-[var(--content-primary)] mb-3 flex items-baseline gap-2">
-        <span className="text-brand-400">{number}.</span> {title}
+        <span className="text-[var(--brand-text)]">{number}.</span> {title}
       </h3>
-      <div className="text-sm text-[var(--content-primary)] leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_h4]:text-sm [&_h4]:font-semibold [&_h4]:text-[var(--content-primary)] [&_h4]:mt-4 [&_h4]:mb-2 [&_a]:text-brand-400 [&_a:hover]:text-brand-300 [&_strong]:text-[var(--content-primary)]">
+      <div className="text-sm text-[var(--content-primary)] leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_h4]:text-sm [&_h4]:font-semibold [&_h4]:text-[var(--content-primary)] [&_h4]:mt-4 [&_h4]:mb-2 [&_a]:text-[var(--brand-text)] [&_a:hover]:text-brand-300 [&_strong]:text-[var(--content-primary)]">
         {children}
       </div>
     </div>

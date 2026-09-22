@@ -119,7 +119,7 @@ export default function AboutPage() {
                 <h3 className="text-sm font-semibold text-[var(--content-primary)] mb-2">{title}</h3>
                 <p className="text-sm text-[var(--content-primary)] leading-relaxed">{desc}</p>
                 {takeaway && (
-                  <p className="mt-1.5 text-xs text-brand-400 leading-relaxed">{takeaway}</p>
+                  <p className="mt-1.5 text-xs text-[var(--brand-text)] leading-relaxed">{takeaway}</p>
                 )}
               </div>
             ))}
@@ -192,11 +192,11 @@ export default function AboutPage() {
                   Annotated screenshots and visual walkthroughs
                 </p>
                 <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
-                  <span className="font-semibold text-brand-500">We capture:</span>{' '}
+                  <span className="font-semibold text-[var(--brand-text)]">We capture:</span>{' '}
                   Structured interaction data with timing, confidence scores, and evidence traces
                 </p>
               </div>
-              <p className="text-sm font-semibold text-brand-400 leading-snug border-t border-[var(--border-subtle)] pt-4 mt-auto">
+              <p className="text-sm font-semibold text-[var(--brand-text)] leading-snug border-t border-[var(--border-subtle)] pt-4 mt-auto">
                 &ldquo;Scribe shows what the screen looks like. Ledgerium captures what the workflow actually is.&rdquo;
               </p>
             </div>
@@ -215,11 +215,11 @@ export default function AboutPage() {
                   Event logs from enterprise systems (SAP, Salesforce)
                 </p>
                 <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
-                  <span className="font-semibold text-brand-500">We capture:</span>{' '}
+                  <span className="font-semibold text-[var(--brand-text)]">We capture:</span>{' '}
                   Real human activity from the browser &mdash; no IT integration required
                 </p>
               </div>
-              <p className="text-sm font-semibold text-brand-400 leading-snug border-t border-[var(--border-subtle)] pt-4 mt-auto">
+              <p className="text-sm font-semibold text-[var(--brand-text)] leading-snug border-t border-[var(--border-subtle)] pt-4 mt-auto">
                 &ldquo;Process mining tells you what your system recorded. Ledgerium tells you what your people actually did.&rdquo;
               </p>
             </div>
@@ -238,11 +238,11 @@ export default function AboutPage() {
                   Humans to write and maintain process documentation
                 </p>
                 <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
-                  <span className="font-semibold text-brand-500">We generate:</span>{' '}
+                  <span className="font-semibold text-[var(--brand-text)]">We generate:</span>{' '}
                   Documentation from direct observation of real workflows
                 </p>
               </div>
-              <p className="text-sm font-semibold text-brand-400 leading-snug border-t border-[var(--border-subtle)] pt-4 mt-auto">
+              <p className="text-sm font-semibold text-[var(--brand-text)] leading-snug border-t border-[var(--border-subtle)] pt-4 mt-auto">
                 &ldquo;Notion is where your SOPs go to become outdated. Ledgerium is where they stay current.&rdquo;
               </p>
             </div>
@@ -269,7 +269,7 @@ export default function AboutPage() {
               href="https://www.linkedin.com/in/philipkling/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-brand-500 hover:text-brand-400 underline underline-offset-2"
+              className="text-sm text-[var(--brand-text)] hover:text-[var(--brand-text)] underline underline-offset-2"
             >
               LinkedIn profile
             </a>

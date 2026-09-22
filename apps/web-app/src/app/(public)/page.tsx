@@ -403,10 +403,10 @@ export default function HomePage() {
                   <span className="font-semibold text-[var(--content-tertiary)]">They</span> capture annotated screenshots.
                 </p>
                 <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
-                  <span className="font-semibold text-brand-500">We</span> capture structured process data with timing, confidence scores, and evidence traces.
+                  <span className="font-semibold text-[var(--brand-text)]">We</span> capture structured process data with timing, confidence scores, and evidence traces.
                 </p>
               </div>
-              <p className="text-sm font-semibold text-brand-500 leading-snug border-t border-[var(--border-subtle)] pt-4 mt-auto">
+              <p className="text-sm font-semibold text-[var(--brand-text)] leading-snug border-t border-[var(--border-subtle)] pt-4 mt-auto">
                 &ldquo;You can&apos;t diff two screenshot SOPs. You can diff two Ledgerium recordings.&rdquo;
               </p>
             </div>
@@ -421,10 +421,10 @@ export default function HomePage() {
                   <span className="font-semibold text-[var(--content-tertiary)]">They</span> analyze system event logs from enterprise software.
                 </p>
                 <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
-                  <span className="font-semibold text-brand-500">We</span> capture from the browser — no IT integration, no API access, no 6-month implementation.
+                  <span className="font-semibold text-[var(--brand-text)]">We</span> capture from the browser — no IT integration, no API access, no 6-month implementation.
                 </p>
               </div>
-              <p className="text-sm font-semibold text-brand-500 leading-snug border-t border-[var(--border-subtle)] pt-4 mt-auto">
+              <p className="text-sm font-semibold text-[var(--brand-text)] leading-snug border-t border-[var(--border-subtle)] pt-4 mt-auto">
                 &ldquo;Process mining costs $200K and takes 6 months. Ledgerium gives you a process map in 5 minutes.&rdquo;
               </p>
             </div>
@@ -439,10 +439,10 @@ export default function HomePage() {
                   <span className="font-semibold text-[var(--content-tertiary)]">They</span> require humans to write and maintain SOPs.
                 </p>
                 <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
-                  <span className="font-semibold text-brand-500">We</span> generate documentation from observation — recorded from what people actually do.
+                  <span className="font-semibold text-[var(--brand-text)]">We</span> generate documentation from observation — recorded from what people actually do.
                 </p>
               </div>
-              <p className="text-sm font-semibold text-brand-500 leading-snug border-t border-[var(--border-subtle)] pt-4 mt-auto">
+              <p className="text-sm font-semibold text-[var(--brand-text)] leading-snug border-t border-[var(--border-subtle)] pt-4 mt-auto">
                 &ldquo;Notion is where SOPs go to become outdated. Ledgerium is where they stay current.&rdquo;
               </p>
             </div>

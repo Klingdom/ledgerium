@@ -113,7 +113,7 @@ export default function AiImplementationPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 pt-20 pb-24 sm:pt-28 sm:pb-32">
           <div className="max-w-3xl mx-auto text-center">
             {/* Badge */}
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-700/40 bg-brand-900/20 px-3 py-1 text-xs font-semibold text-brand-400 mb-6">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-700/40 bg-brand-900/20 px-3 py-1 text-xs font-semibold text-[var(--brand-text)] mb-6">
               <Bot className="h-3.5 w-3.5" />
               For AI &amp; Automation Teams
             </span>

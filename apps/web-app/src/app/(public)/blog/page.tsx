@@ -58,9 +58,9 @@ const POSTS = [
 ];
 
 const CATEGORY_STYLES: Record<string, string> = {
-  'Process Intelligence': 'bg-brand-600/10 text-brand-400 border-brand-600/20',
+  'Process Intelligence': 'bg-brand-600/10 text-[var(--brand-text)] border-brand-600/20',
   'Competitive':          'bg-violet-500/10 text-violet-400 border-violet-500/20',
-  'AI & Automation':      'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  'AI & Automation':      'bg-amber-500/10 text-[var(--status-warning)] border-amber-500/20',
 };
 
 function formatDate(dateStr: string): string {
@@ -77,7 +77,7 @@ export default function BlogIndexPage() {
       {/* Hero */}
       <section className="pt-20 pb-16 bg-gradient-to-b from-brand-900/20 to-[var(--surface-primary)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <span className="inline-block text-xs font-bold text-brand-400 uppercase tracking-widest border border-brand-600/30 rounded-full px-3 py-1 mb-5">
+          <span className="inline-block text-xs font-bold text-[var(--brand-text)] uppercase tracking-widest border border-brand-600/30 rounded-full px-3 py-1 mb-5">
             Blog
           </span>
           <h1 className="text-3xl sm:text-4xl font-bold text-[var(--content-primary)] leading-tight">
@@ -108,7 +108,7 @@ export default function BlogIndexPage() {
                   </span>
 
                   {/* Title */}
-                  <h2 className="text-lg font-semibold text-[var(--content-primary)] leading-snug mb-2 group-hover:text-brand-400 transition-colors">
+                  <h2 className="text-lg font-semibold text-[var(--content-primary)] leading-snug mb-2 group-hover:text-[var(--brand-text)] transition-colors">
                     {post.title}
                   </h2>
 
@@ -125,7 +125,7 @@ export default function BlogIndexPage() {
                     {post.hasPage && (
                       <>
                         <span aria-hidden="true">&middot;</span>
-                        <span className="text-brand-400 inline-flex items-center gap-1">
+                        <span className="text-[var(--brand-text)] inline-flex items-center gap-1">
                           Read post
                           <ArrowRight className="h-3 w-3" />
                         </span>

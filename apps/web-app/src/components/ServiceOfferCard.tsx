@@ -65,7 +65,7 @@ export function ServiceOfferCard({
 
   return (
     <div className={`card px-6 py-6 ${className ?? ''}`}>
-      <p className="text-[10px] font-bold uppercase tracking-wider text-brand-500 mb-2">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--brand-text)] mb-2">
         {eyebrow}
       </p>
       <div className="flex items-baseline justify-between gap-3 mb-2">
@@ -79,7 +79,7 @@ export function ServiceOfferCard({
       <ul className="space-y-2 mb-4">
         {catalog.whatYouGet.slice(0, 4).map((item) => (
           <li key={item} className="flex items-start gap-2">
-            <Check className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-brand-400" />
+            <Check className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-[var(--brand-text)]" />
             <span className="text-xs text-[var(--content-primary)] leading-relaxed">{item}</span>
           </li>
         ))}
@@ -103,7 +103,7 @@ export function ServiceOfferCard({
           </button>
           <p className="mt-2 text-xs text-[var(--content-tertiary)]">
             We&apos;re still setting up purchasing for this. Email{' '}
-            <a href="mailto:hello@ledgerium.ai" className="underline hover:text-brand-400">
+            <a href="mailto:hello@ledgerium.ai" className="underline hover:text-[var(--brand-text)]">
               hello@ledgerium.ai
             </a>{' '}
             if you want it sooner.
