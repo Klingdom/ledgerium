@@ -6,6 +6,19 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-23] - Product screenshots no longer show a cookie prompt
+
+**Why:** every published screenshot of the product had the analytics consent banner sitting across it, covering a row of the interface. The docs were advertising a consent prompt instead of the product.
+
+### Fixed
+- The screenshot tooling now records a consent choice before loading the page, so the banner never appears in a capture. It records the "essential only" choice deliberately: the banner goes away without analytics being switched on while screenshots are taken.
+- Checked by looking at the result, not by the test going green: the banner is gone and the row of filter shortcuts it was hiding is visible again.
+
+### Noted, not changed
+- These images are generated from a freshly seeded database, so the numbers in them differ run to run. That makes every regeneration look like a change even when the interface did not change. Recorded for later; it costs nothing today.
+
+---
+
 ## [2026-09-22] - Two accessibility questions answered, and the answer pinned
 
 **Why:** the coloured bar showing portfolio health uses shades that fall below the contrast minimum for non-text elements on a light background. That looked like a defect worth fixing.

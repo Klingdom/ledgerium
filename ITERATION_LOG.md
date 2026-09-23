@@ -4,6 +4,21 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-23 (loop 39) — The published screenshots stop advertising a consent prompt (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO "continue". **Candidate Selection:** `directed — self-filed` (#224, score 9). MR-029 endorsed it AND required this label, because I filed the row myself at loop 38. Same criticism it made of loop 34, and it is right: filing a row and then picking it is self-authored priority, whatever the score says.
+- **Fix:** the banner decides from `localStorage` (`AnalyticsConsent.tsx:5`, `'full' | 'essential'`), so the three capture specs now set one in `addInitScript` before navigation. I used **`'essential'`** on purpose: it dismisses the banner **without** turning analytics on during captures — `'full'` would have worked too and would have been the wrong signal to record.
+- **Verified by looking, not by the test passing:** regenerated and opened `dashboard-list.png`. The banner is gone and the preset-chip rail it had been covering — Automation Candidates, Needs Attention, Standardize, and the rest — is visible again.
+- **Observation, recorded not filed:** these screenshots are generated from a freshly-seeded database, so counts differ between runs (30 workflows one day, 21 the next). Every regeneration therefore produces a real image diff even when nothing about the UI changed. Not a defect today, but it makes screenshot churn uninformative, and a fixed seed would fix it. Left as an observation because it is not costing anything yet.
+- **MR-029 landed alongside this loop and found one thing no loop had:** commit `e8c1047` shipped 12 published screenshots and filed #224 one minute after loop 38 closed, while that entry says "0 created". The work was disclosed in the commit message but not in the loop's own accounting. Recorded here rather than argued with.
+- **Separate correction committed before this loop** (`61477ec`): the ECC import README claimed "26 agents, zero collisions". True at import; user scope has since grown to 53 and **25 names now exist in both scopes** (24 byte-identical). **`product-manager` is the exception** — the project's 134-line version shadows a 941-line one at user scope. **MR-029 attributed that to my rename; it predates it**: agents register by the frontmatter `name:`, not the filename, proven by `product-manager` appearing in the session agent list while the file was still misspelled `product-manger.md`. Keeping the project version is deliberate — it is the one written for this repo's artifact flow.
+- **D-1 still tripped (7 loops)** and MR-029 rules the rule now inert: it fires every loop and changes nothing, because the only open extension row is CEO-blocked. Flagging continues; replacing the rule is a CEO decision.
+- **Validation:** typecheck clean; capture specs regenerate cleanly; full suite run; screenshot inspected directly.
+- **Follow-ups:** 0 created, 1 closed (#224).
+- **Meta-review cadence:** 1 loop since MR-029.
+
+---
+
 ## 2026-09-22 (loop 38) — Two WCAG risks measured, ruled not-violations, and locked (Mode 1, `a11y-architect` ruling + coordinator)
 
 - **Trigger:** CEO "keep going autonomously". **Candidate Selection:** `top-score` — the #223 sub-items (8). Area `web-app / a11y`. **D-1 still tripped and still uncleared** — the only open extension row (#216) remains blocked on a CEO decision.

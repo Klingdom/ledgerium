@@ -18,6 +18,18 @@ import { test, expect } from '@playwright/test';
 import path from 'path';
 import fs from 'fs';
 
+// Row #224: published screenshots were showing the analytics consent banner
+// overlaying the UI - it covered the preset-chip rail in dashboard-list.png, so
+// every image advertised a consent prompt and hid a product row. The banner
+// reads its decision from localStorage (`AnalyticsConsent.tsx:5`), so recording
+// one before the page loads suppresses it. 'essential' is used deliberately:
+// it dismisses the banner WITHOUT enabling analytics during captures.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('ledgerium_analytics_consent', 'essential');
+  });
+});
+
 const SHOT_DIR = path.join(__dirname, '../../public/docs/screenshots');
 const VIEWPORT = { width: 1440, height: 900 };
 
