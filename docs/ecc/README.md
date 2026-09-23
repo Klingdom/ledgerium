@@ -21,7 +21,7 @@ E2E and verification (#200/#214), extension privacy, CI, and the autonomous loop
 
 | Destination | Count | Notes |
 |---|---|---|
-| `.claude/agents/` | 26 | zero name collisions with the 25 existing project agents, or with the 26 at user scope |
+| `.claude/agents/` | 26 | see the correction below — the "zero collisions" claim did not survive |
 | `.claude/skills/` | 39 | first skills in this repo — the directory did not exist |
 | `.claude/commands/` | 3 | `add-language-rules`, `database-migration`, `feature-development` |
 | `docs/ecc/` | 9 | reference docs, this file aside |
@@ -45,6 +45,29 @@ iteration-log entry for 2026-09-22.
   ~800 files mirroring the English originals.
 - **`tradingagents/`, `examples/`, `tests/`, `src/`** — upstream's own product
   code, not configuration for this one.
+
+## Correction (2026-09-23, MR-029)
+
+The table above was accurate when written and is not any more. Two things:
+
+1. **"Zero name collisions" is now false.** It was true against the user scope as
+   it stood at import time (26 agents). User scope now holds **53**, and **25
+   names exist in both scopes**. Project wins, so the project copy is what runs.
+   **24 of those 25 are byte-identical** — harmless today, but two copies of the
+   same file is a drift risk, and only one of them is version-controlled.
+2. **`product-manager` differs and is shadowed**: the project's 134-line version
+   (tailored to this repo's PRD/acceptance-criteria workflow) wins over a
+   941-line one at user scope.
+
+   **This shadowing predates the import.** Agents register by the `name:` in
+   frontmatter, not the filename — proven by `product-manager` appearing in the
+   session's agent list while the project file was still misspelled
+   `product-manger.md`. Renaming that file at import time fixed the typo; it did
+   not create the shadowing, and it did not change which definition runs.
+
+   Keeping the project version is deliberate: it is the one written for this
+   repo's artifact flow. Recorded here so nobody wonders why the longer
+   definition appears unused.
 
 ## Trust posture
 
