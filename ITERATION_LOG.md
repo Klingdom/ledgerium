@@ -4,6 +4,21 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-23 (loop 40) — A filtered dashboard is finally a link you can send (Mode 1, `frontend-engineer`)
+
+- **Trigger:** CEO "continue". **Candidate Selection:** `top-score` — #198 (7), MR-029's endorsement. Area `web-app / dashboard`, which also avoids the −2 the a11y arc had accrued. **This row had been passed over five times**; it kept losing to whatever the previous loop had just filed, which is exactly the self-authored-priority pattern MR-029 flagged.
+- **Delegated implementation** to `frontend-engineer` with a precise scope (four fields in, four explicitly out), because this is UI state wiring and I have been running coordinator-direct for most of the week.
+- **Shipped:** `urlState.ts` — pure parse/serialise, no React or DOM — plus 35 unit tests, and ~84 lines of wiring in the shell. `timeRange`, the four filter fields, the debounced `searchQuery` and `sort` round-trip through the query string. Defaults are omitted so a pristine dashboard keeps a clean URL; unknown values fall back rather than throw; `history.replaceState` (never `pushState`) avoids history spam; `popstate` re-applies on back/forward.
+- **I verified the report rather than trusting it, and two of my checks looked like contradictions.** My grep found `useSearchParams` and `pushState` present, which the report said were absent. Both turned out to be in comments explaining why they are NOT used. My grep was too blunt; the report was accurate.
+- **The gap that mattered: 35 unit tests prove the parser, not the wiring.** A perfectly correct parser that nothing calls passes all 35. So I added `v2-url-state.spec.ts` — four browser tests: a filtered URL actually filters the list; a pristine dashboard invents no params; a hostile URL (`?timeRange=banana&opportunity=%3Bdrop`) renders normally; a filtered view survives reload; and **the true round-trip** — change a filter in the UI, capture the address bar, open it in a fresh page, and get the same filtered view. That last one is the only test that proves the feature's actual claim.
+- **Non-vacuous by construction:** each filtering assertion pairs "the matching row is visible" with "the non-matching rows are absent", so a blank or errored page fails rather than passes.
+- **Honest limitation the delegate surfaced and I kept:** the precedence chain is URL → saved preference → default, but tier 2 collapses into tier 3 today, because these four fields have no persisted store (unlike columns and saved views, which do and are out of scope). Documented in the module header so whoever adds persistence knows where to plug in.
+- **Validation:** web-app unit **3043 → 3078** (+35); `pnpm typecheck` 0 errors across the workspace; new browser tests 4/4; full E2E suite run.
+- **Follow-ups:** 0 created, 1 closed (#198).
+- **Meta-review cadence:** 2 loops since MR-029.
+
+---
+
 ## 2026-09-23 (loop 39) — The published screenshots stop advertising a consent prompt (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO "continue". **Candidate Selection:** `directed — self-filed` (#224, score 9). MR-029 endorsed it AND required this label, because I filed the row myself at loop 38. Same criticism it made of loop 34, and it is right: filing a row and then picking it is self-authored priority, whatever the score says.

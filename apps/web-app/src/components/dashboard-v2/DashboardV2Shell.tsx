@@ -85,6 +85,15 @@ import {
   type PresetId,
 } from '@/lib/dashboard-columns/presets.js';
 import type { FilterSet } from '@/lib/dashboard-columns/filters.js';
+import {
+  parseDashboardUrlState,
+  serializeDashboardUrlState,
+  DEFAULT_TIME_RANGE,
+  DEFAULT_FILTERS,
+  DEFAULT_SEARCH_QUERY,
+  DEFAULT_SORT,
+  type ParsedDashboardUrlState,
+} from './urlState.js';
 
 // ── API response types ────────────────────────────────────────────────────────
 
@@ -233,13 +242,14 @@ export default function DashboardV2Shell() {
   // 8-of-8 agent convergence in WORKFLOWS_DASHBOARD_REVIEW_002: process
   // intelligence defaults to full event-log view (Celonis / UiPath / Apromore
   // pattern), not rolling-window (Datadog / Mixpanel operational-monitoring).
-  const [timeRange, setTimeRange] = useState<TimeRange>('all');
-  const [filters, setFilters] = useState<FilterState>({
-    systems: [],
-    opportunity: null,
-    healthStatus: null,
-    needsAttention: false,
-  });
+  // Row #198: initial values now come from urlState.ts's DEFAULT_* constants
+  // (single source of truth shared with the URL serializer's "omit defaults"
+  // logic) instead of separately-hand-written literals here. The URL→state
+  // reconciliation effect below overrides these with any valid URL params
+  // present at mount — see the "URL state sync" block near the bottom of this
+  // component for the full precedence contract.
+  const [timeRange, setTimeRange] = useState<TimeRange>(DEFAULT_TIME_RANGE);
+  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [insightFilterKey, setInsightFilterKey] = useState<string | null>(null);
 
   // atglance-review #10/#11: the active preset's ROW filters flow through the
@@ -259,14 +269,14 @@ export default function DashboardV2Shell() {
   // item 15: global search. `searchInput` is the raw controlled-input value;
   // `searchQuery` is the debounced value actually applied to the list (200ms,
   // matching the existing search debounce convention).
-  const [searchInput, setSearchInput] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState(DEFAULT_SEARCH_QUERY);
+  const [searchQuery, setSearchQuery] = useState(DEFAULT_SEARCH_QUERY);
 
   // item 13: sort lifted to the shell so the toolbar Sort control and the
   // WorkflowList column headers share a single source of truth.  Default is
   // date_recorded desc (Batch A P0 item 3), identical to WorkflowList's prior
   // internal default.
-  const [sort, setSort] = useState<SortState>({ field: 'date_recorded', dir: 'desc' });
+  const [sort, setSort] = useState<SortState>(DEFAULT_SORT);
 
   // item 13: filter panel open/closed (the WorkflowListFilterBar now lives in
   // an expandable panel inside the toolbar).
@@ -1037,6 +1047,70 @@ export default function DashboardV2Shell() {
       }
     };
   }, []);
+
+  // ── URL state sync (row #198) ─────────────────────────────────────────────
+  //
+  // Syncs exactly 4 fields to the URL — timeRange, filters, searchQuery, sort —
+  // via the pure helpers in urlState.ts. Everything else (activePresetId,
+  // presetFilters, insightFilterKey, visibleColumns, portfolio sidebar state,
+  // highlightWorkflowId) is explicitly out of scope and stays untouched.
+  //
+  // Precedence (see urlState.ts header for the full contract): for each of the
+  // 4 fields, a valid URL value wins; otherwise the field falls back to its
+  // hard default (these 4 fields have no other persisted store today — unlike
+  // visibleColumns/savedViews, which persist server-side and are out of scope
+  // here). `parseDashboardUrlState` only returns fields actually present (and
+  // valid) in the query string, so a URL that OMITS a field never clobbers
+  // whatever that field already resolved to.
+  //
+  // `urlHydrated` gates the write-effect below so it never fires with the
+  // pre-hydration default values before the mount-time read has had a chance
+  // to apply any incoming URL params — without this gate, the effect ordering
+  // within the same commit would briefly clobber an incoming `?timeRange=7d`
+  // with a blank query string before the parsed value took effect.
+  const [urlHydrated, setUrlHydrated] = useState(false);
+
+  const applyParsedUrlState = useCallback((parsed: ParsedDashboardUrlState) => {
+    setTimeRange(parsed.timeRange ?? DEFAULT_TIME_RANGE);
+    setFilters({
+      systems: parsed.filters?.systems ?? DEFAULT_FILTERS.systems,
+      opportunity: parsed.filters?.opportunity ?? DEFAULT_FILTERS.opportunity,
+      healthStatus: parsed.filters?.healthStatus ?? DEFAULT_FILTERS.healthStatus,
+      needsAttention: parsed.filters?.needsAttention ?? DEFAULT_FILTERS.needsAttention,
+    });
+    const q = parsed.searchQuery ?? DEFAULT_SEARCH_QUERY;
+    setSearchInput(q);
+    setSearchQuery(q);
+    setSort(parsed.sort ?? DEFAULT_SORT);
+  }, []);
+
+  // Read the URL once on mount (App Router client component — reading
+  // `window.location.search` directly instead of `useSearchParams()` avoids
+  // forcing a Suspense boundary + the extra re-render churn it brings), and
+  // re-read + re-apply on `popstate` (browser back/forward, or returning to
+  // this route via another part of the app that uses pushState).
+  useEffect(() => {
+    applyParsedUrlState(parseDashboardUrlState(window.location.search));
+    setUrlHydrated(true);
+
+    function handlePopState() {
+      applyParsedUrlState(parseDashboardUrlState(window.location.search));
+    }
+    window.addEventListener('popstate', handlePopState);
+    return () => { window.removeEventListener('popstate', handlePopState); };
+  }, [applyParsedUrlState]);
+
+  // Write the current state back to the URL whenever any of the 4 synced
+  // fields change. Uses `history.replaceState` (never `pushState`/`router.push`)
+  // so filtering/sorting/searching never spams browser history — only an
+  // actual navigation should create a new history entry. Reacts to the
+  // already-debounced `searchQuery`, not the raw per-keystroke `searchInput`.
+  useEffect(() => {
+    if (!urlHydrated) return;
+    const qs = serializeDashboardUrlState({ timeRange, filters, searchQuery, sort });
+    const next = `${window.location.pathname}${qs}${window.location.hash}`;
+    window.history.replaceState(window.history.state, '', next);
+  }, [urlHydrated, timeRange, filters, searchQuery, sort]);
 
   // Derive UI state
   function deriveState(): WorkflowListState {

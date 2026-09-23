@@ -6,6 +6,24 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-23] - A filtered dashboard is now a link you can send someone
+
+**Why:** filters lived only in the page's memory. Filter the list down to what matters, and there was no way to share that view, bookmark it, or even reload without losing it.
+
+### Added
+- The time range, filters, search text and sort order now appear in the address bar, so a filtered view can be shared, bookmarked and reloaded.
+- A clean dashboard keeps a clean link — nothing is added until you actually change something.
+- A link with nonsense in it falls back to the defaults instead of breaking the page.
+- Back and forward work as expected.
+
+### How it was checked
+- 35 tests cover the link format itself, but those cannot tell you the page is actually wired to it. Four browser tests do: a filtered link really filters the list, a clean dashboard adds nothing, a hostile link still renders, and — the one that matters — changing a filter, copying the address, and opening it fresh reproduces the same view.
+
+### Known limitation
+- Filters are not remembered per user between visits; the link is the only memory. Where that would plug in is documented in the code.
+
+---
+
 ## [2026-09-23] - Product screenshots no longer show a cookie prompt
 
 **Why:** every published screenshot of the product had the analytics consent banner sitting across it, covering a row of the interface. The docs were advertising a consent prompt instead of the product.
