@@ -6,6 +6,21 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-24] - A review of how I have been working, and three things I got wrong
+
+**Why:** every third round of work, the process itself gets audited. This one found three of my own errors.
+
+### Corrected
+- I claimed the last piece of work was the highest-priority item available. **It was not** — two items ranked considerably higher and were not blocked by anything. My ranking tool only read a fraction of the list, I noticed that at the time, and used its answer regardless. The work itself was worth doing; the justification was wrong, and that is what gets recorded.
+- A change shipped three minutes after I closed that round and was written down nowhere. It mattered: without it, the security setting described in the previous entry would have done **nothing** when switched on.
+- A decision about an accessibility rule had been recorded without naming the rule it relied on, and had survived three reviews that way. It now quotes the actual standard.
+- I had twice said an earlier review contained two wrong file references. The review was right; **I was the one repeating a wrong path**, in the status file. Fixed.
+
+### Not changed, deliberately
+- No new process rules were added. The recurring bookkeeping problem is caused by editing the work list with ad-hoc scripts, and the answer to that is an automated check, not more policy.
+
+---
+
 ## [2026-09-24] - Groundwork so login rate limits can stop being bypassable
 
 **Why:** the limits protecting login, signup and password reset identify a caller using a value the caller can simply set. Six different places in the code worked this out, each slightly differently.

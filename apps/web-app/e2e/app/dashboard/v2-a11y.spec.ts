@@ -552,6 +552,26 @@ test('sort header columns have aria-sort attribute', async ({ page }) => {
 // becomes the sole carrier, the exemption evaporates and 1.4.11 starts to bite.
 // These fail at that moment rather than at the next audit.
 //
+// Sources for the exemption (added loop 45 — MR-029 flagged this ruling as
+// uncited, and it survived MR-030 and MR-031 that way):
+//
+//   SC 1.4.11 Non-text Contrast scopes the 3:1 floor to "Graphical Objects:
+//   Parts of graphics required to understand the content, except when a
+//   particular presentation of graphics is essential to the information being
+//   conveyed." The rail is not required to understand the content — the verdict
+//   word states the same status in text — so it falls outside that scope.
+//   https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html
+//
+//   SC 1.4.1 Use of Color requires that "Color is not used as the only visual
+//   means of conveying information, indicating an action, prompting a response,
+//   or distinguishing a visual element." The word is the non-colour carrier,
+//   which is precisely what the assertions below pin.
+//   https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html
+//
+// Both are Understanding documents, not the normative text; the quoted clauses
+// are from the success criteria themselves. If you are auditing this, read the
+// SC, not this comment.
+//
 // (a11y-architect proposed these as jsdom/RTL tests; web-app has neither -
 // its unit tests are pure logic and source-text assertions - so they live here,
 // against a real DOM, which is what the assertions actually need.)
