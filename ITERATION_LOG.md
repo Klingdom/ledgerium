@@ -4,6 +4,23 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-24 (loop 42) — Extension installs become countable (Mode 1, `backend-engineer` + `security-reviewer`)
+
+- **Trigger:** CEO "go ahead". **Candidate Selection:** MR-030's endorsement — #148 (13), taken ahead of two higher-scoring rows because it is extension-surface and **clears D-1 with work rather than an acknowledgement**, after seven loops of that flag firing correctly while I wrongly called it unclearable.
+- **What it answers:** "how many extension installs do we have?" — previously unanswerable, because the Chrome Web Store publishes no install-count API. Three events now make install count, DAU and install→sign-in conversion derivable by SQL.
+- **The row contradicted itself** — `extension_active` in prose, `extension_session_active` in its own metric formula. Picked the latter, used it everywhere, documented the discrepancy in code rather than silently choosing.
+- **Deviation I checked before accepting:** the implementer added a second alarm rather than reusing `ledgerium-keepalive`. I verified the reasoning at `index.ts:84,89,93` — that alarm is created and cleared around *recording state* and fires every 24s, so reusing it would mean installs that are idle on a given day never report, structurally breaking the DAU metric this row exists to produce. Correct call; uses the already-granted `alarms` permission.
+- **Reliability Invariant satisfied, by me not by the delegate** (it ran unit tests only): manifest diff **empty**; zero changes to `capture.ts`, `normalizer.ts` or `target-inspector.ts`; extension build clean; **403 unit tests**; and the **real-Chrome harness 6/6**, including the capture-pipeline and rule-9 privacy tests. Recording is demonstrably unaffected.
+- **Security review of the public endpoint — no blocking findings.** The design that worried me most was sending a raw API key to an unauthenticated route. The reviewer's verdict, which I accept: it mirrors `/api/sync` exactly (same `hashKey()`, same `findUnique`), the raw key never reaches logging or storage, and the silent-200 is genuinely silent — no validity oracle.
+- **Two findings filed rather than waved through:**
+  - **#225** — `x-forwarded-for.split(',')[0]` is spoofable and is used at **five** call sites, including **signup, password reset and login**. **Pre-existing** (4 of 5 predate this loop) and far more consequential for auth than for telemetry. Found only because a new public endpoint got a security pass.
+  - **#226** — install counts are inflatable by anyone (unauthenticated by necessity), and the install↔account link may not be disclosed in the privacy policy.
+- **Validation:** extension build + **403/403** + **real harness 6/6**; web-app **3078 → 3093**; workspace typecheck 0 errors.
+- **Follow-ups:** 2 created (#225, #226), 1 closed (#148). **D-1 CLEARED** — first behavioural extension change since loop 31.
+- **Meta-review cadence:** 1 loop since MR-030.
+
+---
+
 ## 2026-09-24 — MR-030 meta-review (Mode 4, `meta-coordinator`, NON-counting)
 
 - **Trigger:** base cadence (loops 39-41) plus loop 41's systemic finding. I directed this review to DO the staleness sweep rather than comment on it.

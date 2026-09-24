@@ -49,3 +49,32 @@ export const PERSIST_SCHEMA_VERSION = 1 as const
  * chrome.runtime.onSuspend.
  */
 export const PERSIST_DEBOUNCE_MS = 500 as const
+
+// ─── Extension telemetry (ADMIN-P02, backlog row #148) ────────────────────────
+// See background/telemetry.ts for the module that owns these keys/values.
+
+/** Persisted per-install identifier, generated once via crypto.randomUUID(). */
+export const STORAGE_KEY_INSTALL_ID = 'ledgerium_install_id' as const
+
+/** Last UTC calendar date (YYYY-MM-DD) an `extension_session_active` ping fired. */
+export const STORAGE_KEY_LAST_ACTIVE_PING_DATE = 'ledgerium_last_active_ping_date' as const
+
+/** Set true the first (and only) time `extension_signin_linked` is sent for this install. */
+export const STORAGE_KEY_SIGNIN_LINKED_SENT = 'ledgerium_signin_linked_sent' as const
+
+/**
+ * Dedicated telemetry alarm — deliberately NOT the existing 'ledgerium-keepalive'
+ * alarm, which is scoped to active recording sessions (fires every ~24s and is
+ * cleared via chrome.alarms.clear() whenever the recorder is not 'recording' /
+ * 'paused'). Re-using it would mean installs that are not actively recording on
+ * a given day — the majority of installed-but-idle usage — would never emit a
+ * daily ping, structurally breaking the DAU metric. See telemetry.ts.
+ */
+export const TELEMETRY_ALARM_NAME = 'ledgerium-telemetry-daily' as const
+
+/** 24 hours. Chrome de-dupes alarms by name, so re-creating this on every
+ *  service-worker start is idempotent and harmless. */
+export const TELEMETRY_ALARM_PERIOD_MINUTES = 1440 as const
+
+/** Public (unauthenticated) ingest route — installs fire before sign-in. */
+export const TELEMETRY_ENDPOINT = 'https://ledgerium.ai/api/analytics/extension' as const

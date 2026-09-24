@@ -612,6 +612,44 @@ export type AnalyticsEvent =
       method: 'download' | 'copy';
     }
 
+  // ── Extension telemetry (ADMIN-P02, backlog row #148) ─────────────────────
+  // Answers "how many extension installs do we have?" — unobservable via the
+  // Chrome Web Store, which exposes no public install-count API. Emitted by
+  // apps/extension-app/src/background/telemetry.ts and ingested via the
+  // PUBLIC (unauthenticated) POST /api/analytics/extension route — installs
+  // fire before the user has ever signed in to the web app. PII-free: no
+  // user content, no URLs, no page titles, no DOM fingerprints, and `browser`
+  // is a UA-family label only, never the raw User-Agent string.
+  //
+  // NAMING NOTE: the source backlog row (#148 / ADMIN-P02) is internally
+  // inconsistent — its prose names the daily-ping event `extension_active`
+  // but its own metric-derivation formula references
+  // `extension_session_active`. This codebase uses `extension_session_active`
+  // everywhere (both here and in telemetry.ts), matching the row's formula.
+  | {
+      event: 'extension_installed';
+      installType: 'install' | 'update' | 'chrome_update' | 'shared_module_update';
+      extensionVersion: string;
+      browser: 'chrome' | 'edge' | 'other';
+    }
+  | {
+      event: 'extension_session_active';
+      extensionVersion: string;
+      /** Persistent per-install id (crypto.randomUUID, generated client-side once). Not a userId. */
+      installId: string;
+    }
+  | {
+      // Recorded shape (post server-side resolution) — the wire request the
+      // extension sends carries `apiKey`, NOT `userId` (the extension cannot
+      // learn its own userId). The ingest route resolves apiKey -> userId via
+      // the same hash-and-lookup apps/web-app/src/app/api/sync/route.ts
+      // already performs, and this is the shape actually persisted /
+      // forwarded to PostHog via trackServer().
+      event: 'extension_signin_linked';
+      installId: string;
+      userId: string;
+    }
+
   // ── Errors ────────────────────────────────────────────────────────────────
   | { event: 'upload_failed'; error: string }
   | { event: 'api_error'; endpoint: string; status: number }

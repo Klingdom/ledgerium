@@ -6,6 +6,25 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-24] - You can now find out how many people installed the extension
+
+**Why:** the Chrome Web Store gives no way to read your install count programmatically, so the question "how many installs do we have?" had no answer at all.
+
+### Added
+- The extension now reports three things: that it was installed, that it was active today, and that it has been paired with an account. From those, install count, daily active users, and install-to-signup conversion all follow.
+- Nothing about what anyone records is included — no page content, no addresses, not even the full browser identification string. Just a random install identifier, the extension version, and whether the browser is Chrome or Edge.
+
+### Care taken
+- The recorder was rebuilt and run in a real Chrome session (6 of 6 checks, including the recording pipeline and the privacy boundary) because unit tests cannot prove the recorder still works.
+- The extension's permissions were not touched.
+- A separate security review of the new public endpoint found nothing blocking.
+
+### Found while reviewing, not caused by it
+- The way the app identifies a caller's IP address for rate limiting can be faked, and the same pattern is used on **signup, password reset and login**. That predates this work and matters more there than here; recorded for a focused fix.
+- Install numbers can be inflated by anyone, since the endpoint cannot require a login (installs happen before sign-in). Recorded, with the cheapest fix noted.
+
+---
+
 ## [2026-09-24] - Nine more finished items were still sitting on the work queue
 
 **Why:** yesterday's check found the top item had already been built. This swept the rest.

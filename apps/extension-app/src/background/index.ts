@@ -9,6 +9,7 @@ import { LiveStepBuilder } from './live-steps.js'
 import { buildWorkflowReport } from './workflow-report-builder.js'
 import type { WorkflowReport } from './workflow-report-builder.js'
 import { nowIso } from '../shared/utils.js'
+import { initTelemetryAlarm, recordInstall, recordSignInLinked, checkAndEmitDailyPing, isTelemetryAlarm } from './telemetry.js'
 import { STORAGE_KEY_SETTINGS, STORAGE_KEY_APIKEY } from '../shared/constants.js'
 import { MSG } from '../shared/types.js'
 import type { ExtensionSettings, RawEvent, SessionBundle } from '../shared/types.js'
@@ -69,6 +70,14 @@ function loadSettings(): void {
 // during an active recording session.
 
 chrome.alarms.onAlarm.addListener((alarm) => {
+  // ADMIN-P02 (row #148): dedicated daily telemetry alarm — deliberately NOT
+  // the keepalive alarm below, which is scoped to active recording sessions
+  // only. See background/telemetry.ts and shared/constants.ts for rationale.
+  if (isTelemetryAlarm(alarm.name)) {
+    void checkAndEmitDailyPing()
+    return
+  }
+
   if (alarm.name !== 'ledgerium-keepalive') return
   // Cancel keepalive when not recording — no need to stay alive
   if (sm.state !== 'recording' && sm.state !== 'paused') {
@@ -450,6 +459,10 @@ chrome.runtime.onMessage.addListener((message: { type: string; payload: Record<s
       if (newApiKey !== undefined) {
         apiKey = newApiKey
         chrome.storage.local.set({ [STORAGE_KEY_APIKEY]: newApiKey })
+        // ADMIN-P02 (row #148): pairing an API key is the closest client-side
+        // signal to "first authenticated sign-in" available to the extension
+        // (it has no other way to learn it is associated with an account).
+        recordSignInLinked(newApiKey)
       }
       break
     }
@@ -523,9 +536,13 @@ chrome.runtime.onSuspend.addListener(() => {
 
 // ─── Initialisation ───────────────────────────────────────────────────────────
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener((details) => {
   loadSettings()
   chrome.sidePanel.setOptions({ enabled: true }).catch(() => { /* ignore */ })
+  // ADMIN-P02 (row #148): was previously silent. Fire-and-forget; cannot
+  // throw and cannot delay/affect the rest of this listener (see telemetry.ts).
+  initTelemetryAlarm()
+  recordInstall(details)
 })
 
 chrome.action.onClicked.addListener(tab => {
@@ -535,6 +552,13 @@ chrome.action.onClicked.addListener(tab => {
 })
 
 loadSettings()
+
+// Re-assert the telemetry alarm on every service-worker start (not just on
+// install/update) — chrome.alarms persist across SW restarts, but this
+// idempotent call is cheap insurance against the alarm having been cleared
+// externally. See telemetry.ts for why this is a dedicated alarm rather than
+// the recording-scoped keepalive alarm above.
+initTelemetryAlarm()
 
 // Restore any recording session that was in progress when the SW was last killed
 void restoreStateIfNeeded()
