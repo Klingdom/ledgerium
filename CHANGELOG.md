@@ -13,6 +13,8 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 ### Fixed
 - When the observation date is unknown, it is now **left out** rather than invented. A document that does not know when it was recorded says nothing, instead of claiming it was recorded today.
 
+**One clarification, added after a further check:** documents saved today always carry their observation date, so this was not affecting fresh exports. It could affect documents saved before that date was recorded. The exporter no longer makes one up either way.
+
 ### Not done, and why
 - The top-ranked item on the queue was to print *"Based on 47 runs"* and *"observed in 47 of 47 runs"* on procedure documents. **That was checked and cannot be done honestly:** these documents are built from **one** recording, and no count of runs exists anywhere in that code. Printing those numbers would have been inventing evidence — the exact thing this product is meant to prevent. The item has been rewritten to say so, along with what *can* truthfully be shown from a single recording.
 - One related discovery worth your attention: the "Confidence: 82%" already shown on these documents measures **how clearly the system read that one recording** — not what fraction of runs agreed. Sitting unlabelled, it invites the wrong reading. A rename is proposed but not applied.
