@@ -6,6 +6,20 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-24] - The top item on the work queue had already been done
+
+**Why:** before starting the highest-priority item, I check it against the code. It turned out to be finished — and so did parts of two others.
+
+### Corrected
+- The top-ranked item claimed three changes to the dashboard. All three were already in the product and had been for some time; it was marked done in the running narrative but never struck off the list. Anything following "do the highest-priority item" would have redone finished work.
+- Two further items were written larger than reality: most of one's tests already exist, and the other's page already exists — only its social-sharing metadata is missing. Both were narrowed in place rather than left overstated.
+- Eleven other high-priority items were checked and confirmed genuinely outstanding, so the head of the queue can now be trusted.
+
+### Honest limit
+- Only the top 14 of 117 open items were checked — the ones a priority rule would actually reach. The rest, many carried over from old reviews, have not been verified and may contain more of these.
+
+---
+
 ## [2026-09-23] - A filtered dashboard is now a link you can send someone
 
 **Why:** filters lived only in the page's memory. Filter the list down to what matters, and there was no way to share that view, bookmark it, or even reload without losing it.

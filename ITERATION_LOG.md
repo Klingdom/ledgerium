@@ -4,6 +4,22 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-24 (loop 41) — The top of the queue was lying (Mode 1, coordinator-direct)
+
+- **Trigger:** CEO "continue". **Candidate Selection:** intended `top-score`. Applying P-11 (verify the row against the file before selecting) to the highest-scoring row **disqualified it**, and checking its neighbours turned this into a backlog-integrity pass. That is the loop.
+- **#102 sat at the top of the open queue at score 16 with all three of its parts already shipped.** Verified individually rather than inferred: the default time range is `'all'` (`DashboardV2Shell.tsx:251` → `urlState.ts:48`); `cycle_time_mean_ms` carries `defaultVisible: true` (`registry.ts:254-264`); and `analytics.ts:268` declares the `time_range` property. It was closed in the iteration narrative long ago and never struck here. **Any loop obeying "pick the top score" would have re-done finished work** — and I nearly did.
+- **Two more were filed wider than reality:**
+  - **#176** — 3 of its 4 named test targets already exist (`admin/bootstrap`, `admin/alerts` ×2, `admin/cleanup-events` route tests). Only cron has none. Re-scoped in place.
+  - **#107** — the public share route already exists (`app/(public)/share/[token]/page.tsx`); what is missing is `generateMetadata`/`openGraph`/"Made with Ledgerium". So it is an Open-Graph-and-growth-loop row, not a build-the-route row, and smaller than its 16 implies.
+- **Eleven others verified genuinely open, with evidence**, so the next loop can trust the top of the queue: #108 (no SOP confidence badge), #95 (`chipsRenderedCount` absent from analytics), #171 (no `referenceNowMs` in admin `queries.ts`), #93 (the `onKeyDown` in `WorkflowRow` is on the rename input, not the health-score cell), #168 (no high-intent surface), #121/#122 (no `packages/decision-engine`), #101 (registry still has 21 `pending-path-c-r1` entries; the 8 columns have not flipped), plus #137/#138/#112.
+- **The systemic finding, which is bigger than the three rows:** rows get closed in the iteration narrative without being struck in `IMPROVEMENT_BACKLOG.md`. I audited only the **top 14 of 117 open rows** — the ones a scoring rule would actually reach. The remaining ~103, many promoted from audit intakes months ago, have not been checked and may contain more of these. That deserves its own pass; I am not claiming the backlog is clean, only that its head is.
+- **Scope discipline:** I struck exactly one row and annotated two. I did not re-score anything to suit a narrative, and I did not touch rows I had not verified.
+- **Validation:** every claim above is a file:line check, not a memory. No product code touched, so no test run was needed and none is claimed; open rows 118 → 117.
+- **Follow-ups:** 0 created; 1 struck (#102), 2 re-scoped (#107, #176).
+- **Meta-review cadence:** 3 loops since MR-029 — **MR-030 due before loop 42**, and the backlog-staleness sweep is the obvious agenda item for it.
+
+---
+
 ## 2026-09-23 (loop 40) — A filtered dashboard is finally a link you can send (Mode 1, `frontend-engineer`)
 
 - **Trigger:** CEO "continue". **Candidate Selection:** `top-score` — #198 (7), MR-029's endorsement. Area `web-app / dashboard`, which also avoids the −2 the a11y arc had accrued. **This row had been passed over five times**; it kept losing to whatever the previous loop had just filed, which is exactly the self-authored-priority pattern MR-029 flagged.
