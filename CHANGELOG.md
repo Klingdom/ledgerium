@@ -6,6 +6,19 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-24] - A procedure document can no longer make up the date it was observed
+
+**Why:** if a stored document was missing the date its recording happened, the exporter quietly filled in **today** — and printed it as the date the work was observed. Export the same document twice on different days and you got two different "evidence" dates. The export code had a note right above it promising the opposite.
+
+### Fixed
+- When the observation date is unknown, it is now **left out** rather than invented. A document that does not know when it was recorded says nothing, instead of claiming it was recorded today.
+
+### Not done, and why
+- The top-ranked item on the queue was to print *"Based on 47 runs"* and *"observed in 47 of 47 runs"* on procedure documents. **That was checked and cannot be done honestly:** these documents are built from **one** recording, and no count of runs exists anywhere in that code. Printing those numbers would have been inventing evidence — the exact thing this product is meant to prevent. The item has been rewritten to say so, along with what *can* truthfully be shown from a single recording.
+- One related discovery worth your attention: the "Confidence: 82%" already shown on these documents measures **how clearly the system read that one recording** — not what fraction of runs agreed. Sitting unlabelled, it invites the wrong reading. A rename is proposed but not applied.
+
+---
+
 ## [2026-09-24] - You can now find out how many people installed the extension
 
 **Why:** the Chrome Web Store gives no way to read your install count programmatically, so the question "how many installs do we have?" had no answer at all.

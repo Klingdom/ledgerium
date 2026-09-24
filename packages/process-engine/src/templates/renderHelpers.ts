@@ -352,16 +352,32 @@ export function renderMetadataStrip(input: {
   stepCount: number;
   systemCount: number;
   averageConfidence: number;
-  generatedAt: string;
+  /**
+   * Observation date, sourced from `sessionJson.startedAt` — the date the
+   * recording happened, NOT a publication date.
+   *
+   * Optional on purpose. Callers previously passed
+   * `sop.generatedAt ?? new Date().toISOString()`, so a SOP with no session
+   * date printed TODAY and the strip read "Generated 2026-09-24" as though
+   * that were the evidence date. That is a fabricated evidence claim, and it
+   * also made the renderer non-deterministic: two renders of identical input
+   * produced different bytes. When it is absent the segment is omitted.
+   */
+  generatedAt?: string;
 }): string {
   const confPct = Math.round(input.averageConfidence * 100);
-  const date = input.generatedAt.slice(0, 10); // YYYY-MM-DD
-  return (
-    `*Ledgerium SOP · v${input.version} · ${approvalStatusLabel(input.approvalStatus)} · ` +
-    `${input.stepCount} step${input.stepCount !== 1 ? 's' : ''} · ` +
-    `${input.systemCount} system${input.systemCount !== 1 ? 's' : ''} · ` +
-    `${confPct}% confidence · Generated ${date}*`
-  );
+  const segments = [
+    `*Ledgerium SOP · v${input.version} · ${approvalStatusLabel(input.approvalStatus)}`,
+    `${input.stepCount} step${input.stepCount !== 1 ? 's' : ''}`,
+    `${input.systemCount} system${input.systemCount !== 1 ? 's' : ''}`,
+    `${confPct}% confidence`,
+  ];
+  if (input.generatedAt !== undefined && input.generatedAt !== '') {
+    // Wording left as-is this loop: the defect is the fabricated date, not the
+    // label. A copy consult on evidence wording is in flight (row #108 re-scope).
+    segments.push(`Generated ${input.generatedAt.slice(0, 10)}`); // YYYY-MM-DD
+  }
+  return `${segments.join(' · ')}*`;
 }
 
 /**

@@ -1364,3 +1364,39 @@ describe('Gap #6: Confidence glyph uses shared thresholds (no duplicated constan
     expect(md).toContain('review manually');
   });
 });
+
+// ── Row #110 (loop 43): the document never fabricates its own evidence date ───
+//
+// Both call sites previously passed `sop.generatedAt ?? new Date().toISOString()`,
+// so a SOP with no session date printed TODAY and the strip read as though that
+// were the observation date. Two defects in one line: a fabricated evidence
+// claim, and a non-deterministic renderer.
+describe('metadata strip — no wall-clock fallback', () => {
+  const base = {
+    version: '1.0.0+abc12345',
+    approvalStatus: 'unapproved' as const,
+    stepCount: 3,
+    systemCount: 2,
+    averageConfidence: 0.82,
+  };
+
+  it('omits the date entirely when the session date is unknown', () => {
+    const strip = renderMetadataStrip(base);
+    expect(strip).not.toMatch(/Generated/);
+    // Nothing date-shaped may appear at all.
+    expect(strip).not.toMatch(/\d{4}-\d{2}-\d{2}/);
+  });
+
+  it('renders the observation date when it IS known', () => {
+    const strip = renderMetadataStrip({ ...base, generatedAt: '2026-03-14T09:30:00.000Z' });
+    expect(strip).toContain('Generated 2026-03-14');
+  });
+
+  it('is deterministic with no date — two calls are byte-identical', () => {
+    expect(renderMetadataStrip(base)).toBe(renderMetadataStrip(base));
+  });
+
+  it('treats an empty string as unknown rather than printing a truncated date', () => {
+    expect(renderMetadataStrip({ ...base, generatedAt: '' })).not.toMatch(/Generated/);
+  });
+});

@@ -310,7 +310,10 @@ function renderOperatorMarkdown(sop: OperatorSOP): string {
     stepCount: sop.steps.length,
     systemCount: sop.systemsNeeded.length || 1,
     averageConfidence: sop.averageConfidence ?? 1,
-    generatedAt: sop.generatedAt ?? new Date().toISOString(),
+    // Row #110: no wall-clock fallback. A missing session date means the date
+    // is unknown, and the strip omits it — inventing `new Date()` here both
+    // fabricated an evidence date and broke render determinism.
+    ...(sop.generatedAt !== undefined ? { generatedAt: sop.generatedAt } : {}),
   });
   lines.push(metaStrip);
   lines.push('');
@@ -593,7 +596,10 @@ function renderDecisionMarkdown(sop: DecisionSOP): string {
     stepCount: sop.branches.length,
     systemCount: 1,
     averageConfidence: sop.averageConfidence ?? 1,
-    generatedAt: sop.generatedAt ?? new Date().toISOString(),
+    // Row #110: no wall-clock fallback. A missing session date means the date
+    // is unknown, and the strip omits it — inventing `new Date()` here both
+    // fabricated an evidence date and broke render determinism.
+    ...(sop.generatedAt !== undefined ? { generatedAt: sop.generatedAt } : {}),
   });
   // Annotate strip with "paths" context for decision SOPs
   lines.push(metaStrip.replace(
