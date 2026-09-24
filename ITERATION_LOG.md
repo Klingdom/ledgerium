@@ -4,6 +4,20 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-24 (loop 44) — Six copies of a spoofable IP lookup become one tested policy (Mode 1, `backend-engineer`)
+
+- **Candidate Selection:** `top-score` among genuinely-open rows — #225 (9). #212 outranks it at 11 but edits `CLAUDE.md`, which is the CEO's to change, not mine.
+- **Worse than I filed it.** I wrote "five call sites"; there are **six**. `invites/accept/route.ts:73` had its own `getIp()` with a `split(',')[0]!` non-null assertion. Three of the six — **login, signup, password reset** — key `checkAuthRateLimit` on the value, so those limits are bypassable by rotating a header.
+- **The interesting part is what I deliberately did NOT ship.** The obvious fix is to take the last XFF entry. I checked whether that is safe here and it is not knowable: `compose.hostinger.yaml` shows the reverse proxy is **external and Hostinger-provisioned** — *"depending on which proxy Hostinger provisions"*. If the real hop count is higher than assumed, every request resolves to the proxy's own address, **every user collapses into one rate-limit bucket, and nobody can log in**. An availability outage is a worse outcome than the spoofability it would fix, and I cannot observe the production edge from here.
+- **So the loop converts an invisible six-way inconsistency into one explicit, tested, configurable policy that changes nothing until someone decides.** `TRUSTED_PROXY_HOPS` unset → `0` → first entry, byte-identical to today. Setting it to the real hop count is then a deploy-env change with no code edit.
+- **Verified the delegate's report rather than accepting it.** Its "27 test cases" did not match its own "+24 tests" — the file has **24** `it()` blocks and the suite moved **3093 → 3117**, so +24 is right and 27 was loose. Scope is exactly the 6 sites + 2 new files (`git status`). Every removed line is IP derivation — **zero** `checkAuthRateLimit` / `AUTH_RATE_LIMITS` lines appear in the diff, so no threshold, window or key string moved. The signup comment was extended, not gutted. Index guard (`entries.length > 0`) makes the casts safe under `noUncheckedIndexedAccess`; hop arithmetic spot-checked (`["spoofed","real"]`, hops=1 → `"real"`).
+- **Two accepted behaviour deltas, both named up front in the brief:** the five non-`invites` sites gain the `x-real-ip` fallback (consulted only when XFF is absent — additive, never overrides); `invites` loses its bespoke helper. Existing signup / forgot-password / bootstrap / invites tests pass **unmodified**, which is the evidence that the default path is unchanged.
+- **Validation:** web-app **3093 → 3117** (177 files), all passing; workspace typecheck **0 errors** across 11 packages.
+- **Follow-ups:** 0 created. #225 stays open as **centralized, awaiting one infra fact**; #226 untouched.
+- **Meta-review cadence:** 3 loops since MR-030 — **MR-031 due next.**
+
+---
+
 ## 2026-09-24 (loop 43) — A document can no longer invent its own evidence date (Mode 1, coordinator + `growth-strategist` consult)
 
 - **Candidate Selection:** `top-score` — #108 (16), the highest-scoring open row. **P-11 stopped it before a line was written, and that is the substance of this loop.**

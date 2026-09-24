@@ -3,6 +3,7 @@ import Credentials from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
 import { findUserByEmailForLogin } from '@/lib/auth-user-lookup';
 import { checkAuthRateLimit, AUTH_RATE_LIMITS } from '@/lib/rate-limit/auth-buckets';
+import { getClientIp } from '@/lib/client-ip';
 
 const nextAuth = NextAuth({
   trustHost: true,
@@ -26,8 +27,9 @@ const nextAuth = NextAuth({
         // `request` typing/availability can vary across NextAuth call sites
         // (e.g. some internal invocations), so every access is optional-
         // chained and falls back to 'unknown' — this must never crash login.
-        const ip =
-          request?.headers?.get?.('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+        // See client-ip.ts for why the default behavior (first XFF entry) is
+        // unchanged and how to make it un-spoofable (backlog row #225).
+        const ip = getClientIp(request);
         const rl = checkAuthRateLimit(`login:${ip}`, Date.now(), AUTH_RATE_LIMITS.login);
         if (!rl.allowed) return null;
 

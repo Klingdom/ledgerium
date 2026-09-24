@@ -4,6 +4,7 @@ import { db } from '@/db';
 import { hashKey } from '@/lib/api-keys';
 import { trackServer } from '@/lib/analytics-server';
 import { checkExtensionTelemetryRateLimit } from '@/lib/rate-limit/extension-telemetry-buckets';
+import { getClientIp } from '@/lib/client-ip';
 
 /**
  * POST /api/analytics/extension — ADMIN-P02 (backlog row #148)
@@ -91,14 +92,6 @@ const extensionEventSchema = z.discriminatedUnion('event', [
 ]);
 
 export type ExtensionTelemetryEvent = z.infer<typeof extensionEventSchema>;
-
-function getClientIp(req: NextRequest): string {
-  return (
-    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    req.headers.get('x-real-ip') ??
-    'unknown'
-  );
-}
 
 export async function POST(req: NextRequest) {
   // ── Rate limit (defense-in-depth; see doc comment above) ──────────────────

@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import crypto from 'crypto';
 import { trackServer } from '@/lib/analytics-server';
+import { getClientIp } from '@/lib/client-ip';
 
 /**
  * POST /api/invites/accept — accept a workspace invite
@@ -70,12 +71,6 @@ const RATE_LIMIT_WINDOW_MS = 60_000;   // 1-minute sliding window
 const RATE_LIMIT_MAX = 10;             // max requests per window
 const LOCKOUT_STREAK = 5;             // consecutive 404s that trigger lockout
 const LOCKOUT_DURATION_MS = 60 * 60_000; // 1-hour lockout
-
-function getIp(req: NextRequest): string {
-  const forwarded = req.headers.get('x-forwarded-for');
-  if (forwarded) return forwarded.split(',')[0]!.trim();
-  return req.headers.get('x-real-ip') ?? 'unknown';
-}
 
 /**
  * Check rate limit for the given IP.
@@ -157,7 +152,10 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Rate limiting ───────────────────────────────────────────────────────────
-  const ip = getIp(req);
+  // row #225: was a local getIp() helper; now the shared client-ip.ts helper
+  // used by every other IP-derivation call site (this route's x-real-ip
+  // fallback and first-XFF-entry default are both unchanged by the move).
+  const ip = getClientIp(req);
   const nowMs = Date.now();
 
   if (checkRateLimit(ip, nowMs)) {

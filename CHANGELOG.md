@@ -6,6 +6,20 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-24] - Groundwork so login rate limits can stop being bypassable
+
+**Why:** the limits protecting login, signup and password reset identify a caller using a value the caller can simply set. Six different places in the code worked this out, each slightly differently.
+
+### Changed
+- All six now use one shared, tested piece of code instead of six near-copies. **Nothing behaves differently yet** — that is deliberate.
+
+### What I need from you before it can actually be fixed
+- The real fix is to trust the address our own server saw rather than the one the caller claims. Doing that requires knowing how many machines sit in front of the app — and the deployment config says that proxy is provided by the host, so the code cannot tell.
+- **Guessing is dangerous in a specific way:** guess too high and every visitor looks like the same person, so one person's failed logins would lock out everybody. That outage would be worse than the problem it fixes.
+- So the behaviour is now controlled by a single setting. Once you confirm what sits in front of the app, switching it on is a one-line configuration change with no code edit and no deploy risk.
+
+---
+
 ## [2026-09-24] - A procedure document can no longer make up the date it was observed
 
 **Why:** if a stored document was missing the date its recording happened, the exporter quietly filled in **today** — and printed it as the date the work was observed. Export the same document twice on different days and you got two different "evidence" dates. The export code had a note right above it promising the opposite.

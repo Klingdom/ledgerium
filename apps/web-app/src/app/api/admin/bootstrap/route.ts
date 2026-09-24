@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { trackServer } from '@/lib/analytics-server';
 import { checkBootstrapRateLimit } from '@/lib/rate-limit/bootstrap-buckets';
+import { getClientIp } from '@/lib/client-ip';
 
 /**
  * POST /api/admin/bootstrap
@@ -58,10 +59,10 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Guard 3: Per-IP rate limit ─────────────────────────────────────────────
-  const ip =
-    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    req.headers.get('x-real-ip') ??
-    'unknown';
+  // See client-ip.ts for why the default (first XFF entry) is unchanged and
+  // how to make it un-spoofable once the reverse proxy's trusted-hop count is
+  // confirmed (row #225).
+  const ip = getClientIp(req);
   const nowMs = Date.now();
   const rl = checkBootstrapRateLimit(ip, nowMs);
   if (!rl.allowed) {

@@ -8,6 +8,7 @@ import { ensureSampleWorkflow, ensureAdditionalSampleWorkflows } from '@/lib/sam
 import { ensureSampleVariants } from '@/lib/sample-variants';
 import { normalizeEmail } from '@/lib/email-normalize';
 import { checkAuthRateLimit, AUTH_RATE_LIMITS } from '@/lib/rate-limit/auth-buckets';
+import { getClientIp } from '@/lib/client-ip';
 
 const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -44,8 +45,10 @@ export async function POST(req: NextRequest) {
 
     // Abuse protection: 10 requests per IP per hour, checked before creating
     // the user (and before the duplicate-check lookup, which would otherwise
-    // remain an unthrottled probe surface).
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+    // remain an unthrottled probe surface). See client-ip.ts for why the
+    // default (first XFF entry) is unchanged and how to make it un-spoofable
+    // once the reverse proxy's trusted-hop count is confirmed (row #225).
+    const ip = getClientIp(req);
     const rl = checkAuthRateLimit(`signup:${ip}`, Date.now(), AUTH_RATE_LIMITS.signup);
     if (!rl.allowed) {
       return NextResponse.json(
