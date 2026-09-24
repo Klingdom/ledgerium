@@ -144,6 +144,7 @@ jobs:
             NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL || 'https://ledgerium.ai' }}
             DATA_DIR=/app/data
             UPLOAD_DIR=/app/data/uploads
+            TRUSTED_PROXY_HOPS=${{ vars.TRUSTED_PROXY_HOPS || '0' }}
             STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
             STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
             STRIPE_STARTER_MONTHLY_PRICE_ID=${{ secrets.STRIPE_STARTER_MONTHLY_PRICE_ID }}
