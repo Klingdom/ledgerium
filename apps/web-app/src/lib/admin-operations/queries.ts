@@ -125,8 +125,18 @@ const ERROR_EVENT_NAMES = ['upload_failed', 'api_error', 'client_error'] as cons
 export async function getUserVolume(
   startDate: Date,
   endDate: Date,
+  /**
+   * Single upstream clock boundary, supplied by the route handler (iter-037
+   * pattern). Read separately here, this function returned a different MAU
+   * window than the rest of the same response if the request straddled a
+   * millisecond boundary, and could not be tested without faking timers.
+   *
+   * Note the 30-day MAU window is deliberately NOT derived from `startDate`:
+   * it is fixed at 30 days regardless of the range the caller asked for.
+   */
+  referenceNowMs: number,
 ): Promise<UserVolumeSection> {
-  const now = new Date();
+  const now = new Date(referenceNowMs);
   const mau30dStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
   const [
@@ -370,8 +380,11 @@ export async function getWorkflowVolume(
  *   - errorEvents24h: analytics events with error-class names in last 24 hours
  *   - errorEvents24hTotal: total count
  */
-export async function getSystemHealth(): Promise<SystemHealthSection> {
-  const now = new Date();
+export async function getSystemHealth(
+  /** Single upstream clock boundary — see `getUserVolume`. */
+  referenceNowMs: number,
+): Promise<SystemHealthSection> {
+  const now = new Date(referenceNowMs);
   const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
   const [dbSize, errorEventsRaw] = await Promise.all([

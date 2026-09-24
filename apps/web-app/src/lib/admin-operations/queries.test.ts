@@ -18,6 +18,13 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+/**
+ * Row #171: a fixed instant standing in for the route handler's single clock
+ * boundary. Wall-clock-independent, so these assertions do not drift.
+ * 2026-03-14T12:00:00.000Z.
+ */
+const FIXED_NOW_MS = 1_773_489_600_000;
+
 // ── Module mocks ──────────────────────────────────────────────────────────────
 
 vi.mock('@/db', () => ({
@@ -233,7 +240,7 @@ describe('getUserVolume', () => {
       { userId: 'user-a' }, // duplicate — should be counted once via Set
     ]);
 
-    const result = await getUserVolume(start, end);
+    const result = await getUserVolume(start, end, FIXED_NOW_MS);
 
     expect(result.totalUsers).toBe(150);
     expect(result.mau30d).toBe(42);
@@ -316,7 +323,7 @@ describe('getSystemHealth', () => {
       { eventName: 'upload_failed', _count: { id: 3 } },
     ]);
 
-    const result = await getSystemHealth();
+    const result = await getSystemHealth(FIXED_NOW_MS);
 
     expect(result.dbSize.available).toBe(true);
     if (result.dbSize.available) {
@@ -331,7 +338,7 @@ describe('getSystemHealth', () => {
     mockDb.$queryRaw.mockRejectedValue(new Error('near "pg_total_relation_size": syntax error'));
     mockDb.analyticsEvent.groupBy.mockResolvedValue([]);
 
-    const result = await getSystemHealth();
+    const result = await getSystemHealth(FIXED_NOW_MS);
 
     expect(result.dbSize.available).toBe(false);
     if (!result.dbSize.available) {
@@ -667,5 +674,98 @@ describe('getSubscriptionBreakdown — edge cases (Iter C QA)', () => {
     const result = await getSubscriptionBreakdown();
 
     expect(result.mrr.basis.billableStatuses).toContain('active');
+  });
+});
+
+// ── Row #171: single upstream clock boundary ─────────────────────────────────
+//
+// Both functions used to call `new Date()` internally, so the windows they
+// queried depended on when each one happened to execute rather than on the
+// instant the request began, and could not be asserted without faking timers.
+// These pin the injected boundary by inspecting the window actually handed to
+// Prisma.
+
+describe('row #171: queries derive their windows from the injected clock', () => {
+  it('getUserVolume derives the 30-day MAU window from referenceNowMs', async () => {
+    mockDb.user.count.mockResolvedValue(0);
+    mockDb.user.findMany.mockResolvedValue([]);
+    mockDb.upload.groupBy.mockResolvedValue([]);
+    mockDb.workflow.findMany.mockResolvedValue([]);
+
+    const start = new Date(FIXED_NOW_MS - 7 * 24 * 60 * 60 * 1000);
+    const end = new Date(FIXED_NOW_MS);
+    await getUserVolume(start, end, FIXED_NOW_MS);
+
+    // Second user.count call is the MAU probe.
+    const mauCall = mockDb.user.count.mock.calls[1]?.[0] as
+      | { where?: { updatedAt?: { gte?: Date } } }
+      | undefined;
+    expect(mauCall?.where?.updatedAt?.gte?.getTime()).toBe(
+      FIXED_NOW_MS - 30 * 24 * 60 * 60 * 1000,
+    );
+  });
+
+  it('getSystemHealth derives the 24-hour error window from referenceNowMs', async () => {
+    mockDb.$queryRaw.mockResolvedValue([]);
+    mockDb.analyticsEvent.groupBy.mockResolvedValue([]);
+
+    await getSystemHealth(FIXED_NOW_MS);
+
+    const call = mockDb.analyticsEvent.groupBy.mock.calls[0]?.[0] as
+      | { where?: { createdAt?: { gte?: Date } } }
+      | undefined;
+    expect(call?.where?.createdAt?.gte?.getTime()).toBe(
+      FIXED_NOW_MS - 24 * 60 * 60 * 1000,
+    );
+  });
+
+  it('advancing referenceNowMs moves the window by exactly that much', async () => {
+    mockDb.$queryRaw.mockResolvedValue([]);
+    mockDb.analyticsEvent.groupBy.mockResolvedValue([]);
+
+    await getSystemHealth(FIXED_NOW_MS);
+    await getSystemHealth(FIXED_NOW_MS + 3_600_000);
+
+    const first = mockDb.analyticsEvent.groupBy.mock.calls[0]?.[0] as
+      | { where?: { createdAt?: { gte?: Date } } }
+      | undefined;
+    const second = mockDb.analyticsEvent.groupBy.mock.calls[1]?.[0] as
+      | { where?: { createdAt?: { gte?: Date } } }
+      | undefined;
+    const delta =
+      (second?.where?.createdAt?.gte?.getTime() ?? 0) -
+      (first?.where?.createdAt?.gte?.getTime() ?? 0);
+    expect(delta).toBe(3_600_000);
+  });
+
+  it('repeated calls with the same referenceNowMs query an identical window', async () => {
+    mockDb.$queryRaw.mockResolvedValue([]);
+    mockDb.analyticsEvent.groupBy.mockResolvedValue([]);
+
+    await getSystemHealth(FIXED_NOW_MS);
+    await getSystemHealth(FIXED_NOW_MS);
+
+    const windows = mockDb.analyticsEvent.groupBy.mock.calls.map((c) => {
+      const arg = c[0] as { where?: { createdAt?: { gte?: Date } } } | undefined;
+      return arg?.where?.createdAt?.gte?.getTime();
+    });
+    expect(new Set(windows).size).toBe(1);
+  });
+
+  it('no query function reads the clock itself', async () => {
+    // fileURLToPath rather than `.pathname`: on Windows the latter yields
+    // "/C:/..." which fs cannot open, and a regex to strip it would be a
+    // platform-specific guess that passes here and fails in Linux CI.
+    const { readFileSync } = await import('node:fs');
+    const { fileURLToPath } = await import('node:url');
+    const source = readFileSync(
+      fileURLToPath(new URL('./queries.ts', import.meta.url)),
+      'utf-8',
+    );
+    const stripped = source
+      .replace(/\/\*\*[\s\S]*?\*\//g, '')
+      .replace(/\/\/[^\n]*/g, '');
+    expect(stripped).not.toMatch(/new Date\(\)/);
+    expect(stripped).not.toMatch(/Date\.now\(\)/);
   });
 });

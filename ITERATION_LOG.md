@@ -4,6 +4,21 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-24 (loop 45) — One clock per admin request (Mode 1, coordinator)
+
+- **Candidate Selection: `directed` — MR-031-endorsed. NOT `top-score`, and I checked this time.** #171 scores 15; **#107 scores 16 and is open**, so `top-score` would have been false for the second loop running. #107 is excluded on grounds I verified rather than assumed: MR-030 §272 flags its 16 as stale after loop 41's re-scope. This is the S-1 lesson applied — the label is what the control plane reads, so it gets verified before it is written.
+- **The row's own details were stale; the fix is what it claimed.** It cited three `Date.now()` reads at `:118-119,325`. There are **two**, they are `new Date()`, and they sit at **`:129`** (`getUserVolume`) and **`:374`** (`getSystemHealth`). The function names were right. Corrected on the row rather than quietly built around.
+- **The fix:** both take `referenceNowMs: number` from the route handler's existing boundary at `route.ts:96` — which already computed `now` and already passed `startDate`/`endDate` to three sibling queries, while these two re-read the clock anyway. Every window in a response now derives from one instant.
+- **One thing preserved deliberately:** `getUserVolume`'s MAU window is fixed at **30 days regardless of the range requested**, so it must NOT be derived from `startDate`. Threading the boundary keeps that semantic intact while making it testable; deriving it from the range would have silently changed what the number means.
+- **+5 tests that assert the window actually handed to Prisma**, not just the return shape: the 30-day MAU boundary, the 24-hour error boundary, that advancing the clock moves the window by exactly that much, that repeated calls query an identical window, and a drift guard reading the module source that fails if `new Date()` or `Date.now()` returns to it.
+- **Caught in my own test before it could reach CI:** the drift guard first read the source via `new URL(...).pathname` with a regex to strip the Windows drive prefix. That passes here and is a platform-specific guess; replaced with `fileURLToPath`. A test that passes locally and fails in Linux CI is worse than no test.
+- **Found while verifying the ranking, recorded not acted on:** **#107's proposed Open Graph copy contains *"recorded from [M] sessions"*** — the identical fabrication that stopped #108 at loop 43. It is annotated on the row now, because that copy would sit on a public shareable page, which is the worst possible place for an invented evidence claim.
+- **Validation:** web-app **3117 → 3122** (+5, 177 files); the two affected suites 77/77; workspace typecheck **0 errors**. No route contract, response shape, or query semantics changed.
+- **Follow-ups:** 0 created; #171 closed. Also closed this loop: **MR-031 strike S-3**, the uncited WCAG ruling, now quoting the SC text it rests on.
+- **Meta-review cadence:** 1 loop since MR-031.
+
+---
+
 ## 2026-09-24 — MR-031 meta-review (Mode 4, `meta-coordinator`, NON-counting)
 
 - **Trigger:** base cadence — loops 42, 43, 44. Artifact `docs/meta/MR_031_META_REVIEW.md` (556 lines, 15 sections). Zero product code.

@@ -110,10 +110,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       // rather than rejects on failure, so it cannot break Promise.all.
       webhookCoverage,
     ] = await Promise.all([
-      getUserVolume(startDate, endDate),
+      // `now` above is the single clock boundary for this request: every
+      // window in the response is derived from the same instant (iter-037).
+      getUserVolume(startDate, endDate, now.getTime()),
       getRecordingVolume(startDate, endDate),
       getWorkflowVolume(startDate, endDate),
-      getSystemHealth(),
+      getSystemHealth(now.getTime()),
       getSubscriptionBreakdown(),
       checkWebhookCoverage(),
     ]);

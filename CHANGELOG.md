@@ -6,6 +6,19 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-24] - The admin dashboard now reads the clock once per request
+
+**Why:** two of the numbers on that page each looked up the current time separately, so a single page could describe windows that started at slightly different moments — and neither could be tested without faking the system clock.
+
+### Fixed
+- Both now take the timestamp from the one place the request already establishes it. Same numbers, but reproducible, and now covered by tests that check the actual date range queried rather than just the shape of the answer.
+- The "active users in the last 30 days" figure deliberately stays a 30-day window whatever range you have selected. That was easy to break while making this change, so it is now pinned by a test.
+
+### Caught before it shipped
+- An item still queued asks for shared procedure pages to advertise "recorded from N sessions". **That number does not exist** — these documents are built from a single recording, as established yesterday. Flagged on the item so nobody builds it; it would have put an invented claim on a public page.
+
+---
+
 ## [2026-09-24] - A review of how I have been working, and three things I got wrong
 
 **Why:** every third round of work, the process itself gets audited. This one found three of my own errors.
