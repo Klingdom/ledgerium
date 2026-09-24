@@ -6,6 +6,19 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-24] - Nine more finished items were still sitting on the work queue
+
+**Why:** yesterday's check found the top item had already been built. This swept the rest.
+
+### Corrected
+- 69 outstanding items were checked against the code. **Nine were already built** and had never been struck off — five of them ranked above everything shipped this week. Eighteen more were written larger than what remains to do.
+- Every one was re-checked by hand before being struck. Two had the wrong file named in the evidence: the work exists, but somewhere else. Right conclusion, wrong reference — worth catching, since acting on unverified "already done" claims is how the list drifted in the first place.
+
+### A correction to something I have been telling you
+- For several days I said the "you haven't touched the extension recently" warning could not be cleared, because the only extension item was waiting on your decision. **That was wrong.** There is an unblocked extension item — telemetry so extension installs are actually observable. The warning has been correct all week; I simply had not looked properly. It is next.
+
+---
+
 ## [2026-09-24] - The top item on the work queue had already been done
 
 **Why:** before starting the highest-priority item, I check it against the code. It turned out to be finished — and so did parts of two others.

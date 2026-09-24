@@ -4,6 +4,22 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-24 — MR-030 meta-review (Mode 4, `meta-coordinator`, NON-counting)
+
+- **Trigger:** base cadence (loops 39-41) plus loop 41's systemic finding. I directed this review to DO the staleness sweep rather than comment on it.
+- **Swept 69 open rows scoring ≥10** (all bar the 14 I checked at loop 41): **9 SHIPPED · 18 PARTIAL · 42 OPEN.** My loop-41 sample was 12% of the backlog and held 1 phantom; the remaining 88% held **9 more**, five of them scoring ≥12.
+- **I verified all 9 strikes myself before applying any of them** — acting on an unverified "already shipped" verdict is precisely how this mess formed. All 9 confirmed. **Two citations were wrong:** #172 and #173 pointed at `api/admin/operations/queries.ts`, which does not exist; the code is real but lives at `lib/admin-operations/queries.ts` (`byPlan:528`, `activationRatePct:191`). Struck with corrected paths — right verdict, wrong evidence, and the difference matters.
+- **Struck (9):** #4, #6, #72, #74, #87, #97, #147, #172, #173. Open rows **117 → 108**.
+- **A correction to my own repeated claim, which is the most important thing here.** I have said for several loops that D-1 could not be cleared because "the only open extension row (#216) is CEO-blocked", and MR-029 accepted that and declared the rule inert. **It is false.** **#148** (extension telemetry — 3 analytics events, an extension background script, a public ingest route) is extension-surface, genuinely open, and **not blocked by anyone**. I verified it is unshipped: no `extension_installed`/`extension_uninstalled` events anywhere, no `api/extension` route.
+  **So D-1 has been right for seven loops and I was wrong about why it kept firing.** The rule was not crying wolf; I had simply not looked for work that would satisfy it. A rule I called inert was accurately reporting a real gap the whole time. MR-029's "inert" verdict is withdrawn, and the recommendation to replace the rule with it.
+- **This also re-frames loop 41.** That loop was not backlog-gardening in place of product work — the sweep it triggered removed 9 phantom rows, two of which outranked everything I have shipped this week, and surfaced the extension row that resolves a seven-loop-old flag.
+- **Debt ratio** rows 185-224: **0.80** (32/40), up from 0.75 — but as MR-030 notes, that window measures recent self-filed throughput, not the legacy rows this sweep was actually about.
+- **Not applied, flagged as CEO decisions:** the 18 PARTIAL re-scopes; MR-030's proposed write-path rule (a loop cannot close while its own log names an unstruck row — that edits CLAUDE.md, which I do not touch); #191 stacking, now confirmed at `checkout/route.ts:376-387`; #212 P-5, verified still unapplied.
+- **Loop 42 endorsement: #148** (13) — extension surface, genuinely open, unblocked, and it clears D-1 honestly rather than by acknowledgement. Score-ordered head is #108 (16) and #95 (15); I am taking the extension row first because seven loops of a correctly-firing signal outrank three points.
+- **Validation:** governance only; no product code touched; every strike verified against the file before applying.
+
+---
+
 ## 2026-09-24 (loop 41) — The top of the queue was lying (Mode 1, coordinator-direct)
 
 - **Trigger:** CEO "continue". **Candidate Selection:** intended `top-score`. Applying P-11 (verify the row against the file before selecting) to the highest-scoring row **disqualified it**, and checking its neighbours turned this into a backlog-integrity pass. That is the loop.
