@@ -304,6 +304,39 @@ All listed non-goals (team metrics, cost layers, simulation, alerting) remain co
 
 If all three satisfy, soak window converts to retirement. Failure of any criterion blocks retirement pending remediation iteration.
 
+> **⚠ Criterion 3 needs a CEO ruling on its denominator before the soak can be
+> scored (raised loop 46, row #95).**
+>
+> As written, the denominator is *sessions that viewed the dashboard*. That
+> includes sessions where **no chip was on screen** — chips are computed from
+> the library and most thresholds need 2+ qualifying workflows, so a small or
+> healthy library renders none. Those sessions can never produce a click, so
+> they drag the rate down for reasons that have nothing to do with whether the
+> chips work. That is why the rate was not meaningfully evaluable.
+>
+> `dashboard_v2_viewed.chipsRenderedCount` shipped in loop 46 and makes the
+> alternative computable:
+>
+> ```
+> chip-click rate = sessions with insight_chip_clicked
+>                 / sessions with dashboard_v2_viewed AND chipsRenderedCount > 0
+> ```
+>
+> **This is deliberately NOT applied yet, because it is not a neutral
+> clarification.** Excluding zero-chip sessions shrinks the denominator, so the
+> measured rate goes UP and the existing 10% bar becomes easier to clear. That
+> is a change to a launch gate, which is the CEO's to make, not the
+> coordinator's. Three options:
+>
+> - **(a)** Keep the current definition. Honest, but the gate partly measures
+>   chip *supply* rather than chip *usefulness*.
+> - **(b)** Adopt the denominator above and keep 10%. Measures the right thing;
+>   a lower bar in practice.
+> - **(c)** Adopt the denominator above and raise the threshold, since it is now
+>   measured against a population that could actually click.
+>
+> Criteria 1 and 2 are unaffected.
+
 ---
 
 ## §17 Rollout Integrity and Governance Notes (REVISED)

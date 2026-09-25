@@ -417,6 +417,11 @@ export default function DashboardV2Shell() {
       // atglance-review #20: the active lens at load (read via ref so this
       // fire-once effect captures the hydrated lens without adding a dep).
       lens: activeLensRef.current,
+      // Row #95: chip-click rate denominator. Equals the rendered count here —
+      // dismissals cannot have happened yet on a fire-once-per-mount event,
+      // and the states that suppress the strip also yield zero chips. See the
+      // field's doc comment in analytics.ts.
+      chipsRenderedCount: insightChips.length,
     });
   // Intentional: this effect is a "fire once on first data load" pattern.
   // allWorkflows.length is the trigger signal — other deps are snapshot values at emission time.

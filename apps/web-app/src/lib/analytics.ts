@@ -269,6 +269,29 @@ export type AnalyticsEvent =
       /** atglance-review #20: the active lens at load. Without it every
        *  downstream event is un-segmentable by lens (Library vs LSS). */
       lens: 'library' | 'lss';
+      /**
+       * Row #95 (PIB-P09): the denominator for chip-click rate.
+       *
+       * Without it, "chip-click rate" divides clicks by *views*, but different
+       * users see different numbers of chips — so the rate moves when chip
+       * supply changes rather than when engagement does, and the `>= 10%`
+       * external-launch criterion is not evaluable. Divide by the sum of this
+       * field instead, and exclude views where it is 0.
+       *
+       * It is the count RENDERED, which at emit time equals the count in
+       * state. Verified, because the difference is the whole point of the
+       * field: `InsightsStrip` hides dismissed chips, but `dismissedIds` is
+       * component state initialised empty on mount and this event fires once
+       * per mount, so no dismissal can have happened yet. The strip is also
+       * suppressed in the first-run and error states — in both, chips are
+       * necessarily empty (every chip is derived from workflows via `>= 2`
+       * style thresholds, and the error path never populates them), so this
+       * reads 0 and agrees with the screen.
+       *
+       * Chips dismissed LATER in the session are not reflected; this is a
+       * per-view denominator, not a live count.
+       */
+      chipsRenderedCount: number;
     }
   | {
       event: 'workflow_row_clicked';

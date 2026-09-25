@@ -6,6 +6,19 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-24] - We can now tell whether the dashboard's insight chips are actually used
+
+**Why:** one of the three conditions for retiring the old dashboard is that at least 10% of people click an insight chip. That number could not be trusted, because it counted everyone who opened the dashboard — including people who were never shown a chip at all, and so could never have clicked one.
+
+### Added
+- Each dashboard view now records **how many chips were on screen**. That makes it possible to measure clicks against people who actually saw chips.
+- Checked carefully, because the number is only useful if it is honest: chips can be dismissed, and the strip is hidden entirely for brand-new and errored accounts. In every one of those cases the recorded count matches what was really on screen, and there are now tests holding that true.
+
+### A decision for you
+- The published condition still divides by "everyone who opened the dashboard". Switching it to "everyone who was shown a chip" measures the right thing — but it also makes the 10% target **easier to pass**, so it changes the bar you set. I have written the options next to the criterion and left it to you rather than quietly redefining a launch condition.
+
+---
+
 ## [2026-09-24] - The admin dashboard now reads the clock once per request
 
 **Why:** two of the numbers on that page each looked up the current time separately, so a single page could describe windows that started at slightly different moments — and neither could be tested without faking the system clock.

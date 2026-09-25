@@ -4,6 +4,21 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-24 (loop 46) — A denominator for the chip-click rate (Mode 1, coordinator)
+
+- **Candidate Selection: `top-score` among rows whose score is valid — #95 (15).** #107 scores 16 and is open but MR-030 §272 flags its 16 as stale post-re-scope, so it is not a valid `top-score` pick until re-scored; #171 (the other 15) closed last loop. Stating the exclusion explicitly because MR-031 struck loop 44 for asserting `top-score` without checking.
+- **The row was accurate.** `chipsRenderedCount` returned zero hits anywhere in the repo, and `dashboard_v2_viewed` is declared at `analytics.ts:262` without it. Buildable as written — unlike the last two top-scoring rows I picked up.
+- **The verification that mattered was whether the field can be truthful.** It claims a count of chips *rendered*, and `InsightsStrip` renders `chips.filter(c => !dismissedIds.has(c.id))`, so state-count and screen-count are not the same thing in general. They are equal **at emit time**, and I checked why rather than assuming: `dismissedIds` is component state initialised empty on mount, and this event fires once per mount, so no dismissal can have happened yet.
+- **Two further suppressions I found by reading the render gate, not the row.** The strip is also hidden when `isFirstRun` or `isError` — so a naive `insightChips.length` could have overstated. It does not, because in both states the array is necessarily empty: every chip derives from workflows through `>= 2`-style thresholds, and the error path never populates chips. That premise is load-bearing for the field's correctness, so it is pinned by a test asserting `computeInsightChips([], [])` returns `[]` rather than left in a comment.
+- **+5 tests in the existing `dashboard-instrumentation.test.ts` convention** (node, no jsdom): type acceptance; a `@ts-expect-error` proving the field is **mandatory**, so a future edit cannot silently drop it and restore the unstable denominator; a source assertion that the emit is wired to the rendered array; a no-content posture check; and the zero-workflows premise. The existing lens test failed to compile until updated — the type system doing its job.
+- **Shipping the field does not by itself make the criterion evaluable, and I checked instead of assuming it did.** `PRD_METRICS_ENGINE_REVISED.md` §16 criterion 3 divides by *sessions with `dashboard_v2_viewed`* — which includes sessions where no chip was on screen and no click was possible. Left unchanged, the new field would have been inert, exactly like `TRUSTED_PROXY_HOPS` was at loop 44 until `074140a`.
+- **I annotated that criterion rather than fixing it, deliberately.** Excluding zero-chip sessions shrinks the denominator, so the measured rate rises and the existing 10% bar gets easier to clear. That is a change to a launch gate, which is the CEO's call. Three options are written out at the criterion; criteria 1 and 2 are unaffected.
+- **Validation:** web-app **3122 → 3127** (+5, 177 files); workspace typecheck **0 errors** — which also confirms no other construction site of this event exists, since the new field is required.
+- **Follow-ups:** 0 created; #95 closed. One CEO decision added (criterion-3 denominator).
+- **Meta-review cadence:** 2 loops since MR-031.
+
+---
+
 ## 2026-09-24 (loop 45) — One clock per admin request (Mode 1, coordinator)
 
 - **Candidate Selection: `directed` — MR-031-endorsed. NOT `top-score`, and I checked this time.** #171 scores 15; **#107 scores 16 and is open**, so `top-score` would have been false for the second loop running. #107 is excluded on grounds I verified rather than assumed: MR-030 §272 flags its 16 as stale after loop 41's re-scope. This is the S-1 lesson applied — the label is what the control plane reads, so it gets verified before it is written.

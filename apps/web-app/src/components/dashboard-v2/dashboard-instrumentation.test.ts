@@ -33,6 +33,7 @@ describe('atglance-review #20: analytics taxonomy accepts the new/enriched event
       portfolioFilterActive: false,
       time_range: 'all',
       lens: 'lss',
+      chipsRenderedCount: 3,
     };
     expect(ev.event).toBe('dashboard_v2_viewed');
     expect((ev as { lens: string }).lens).toBe('lss');
@@ -127,5 +128,74 @@ describe('atglance-review #20: PostHog no-content posture', () => {
     const picker: AnalyticsEvent = { event: 'dashboard_column_picker_opened', visibleColumnCount: 6 };
     expect(Object.keys(pareto)).not.toContain('title');
     expect(Object.keys(picker)).not.toContain('title');
+  });
+});
+
+// ── Row #95 (PIB-P09): chip-click rate denominator ───────────────────────────
+//
+// `chip-click rate >= 10%` is one of the three external-launch criteria in the
+// #57 retirement rule. Dividing clicks by VIEWS makes that rate move when chip
+// supply changes rather than when engagement does, so the criterion was not
+// evaluable. `chipsRenderedCount` supplies a stable per-view denominator.
+
+describe('row #95: chip-click rate denominator', () => {
+  it('dashboard_v2_viewed carries chipsRenderedCount', () => {
+    const ev: AnalyticsEvent = {
+      event: 'dashboard_v2_viewed',
+      workflowCount: 16,
+      hasActiveFilters: false,
+      portfolioFilterActive: false,
+      time_range: 'all',
+      lens: 'library',
+      chipsRenderedCount: 5,
+    };
+    expect((ev as { chipsRenderedCount: number }).chipsRenderedCount).toBe(5);
+  });
+
+  it('the field is required — an emission that omits it does not type-check', () => {
+    // @ts-expect-error chipsRenderedCount is mandatory; dropping it must fail
+    // the build rather than silently reintroducing an unstable denominator.
+    const ev: AnalyticsEvent = {
+      event: 'dashboard_v2_viewed',
+      workflowCount: 1,
+      hasActiveFilters: false,
+      portfolioFilterActive: false,
+      time_range: 'all',
+      lens: 'library',
+    };
+    expect(ev.event).toBe('dashboard_v2_viewed');
+  });
+
+  it('the emission is wired to the chip array actually rendered', () => {
+    const shell = read('./DashboardV2Shell.tsx');
+    expect(shell).toMatch(
+      /event: 'dashboard_v2_viewed'[\s\S]*?chipsRenderedCount: insightChips\.length/,
+    );
+  });
+
+  it('carries a count, never chip labels — PostHog no-content posture', () => {
+    const ev: AnalyticsEvent = {
+      event: 'dashboard_v2_viewed',
+      workflowCount: 2,
+      hasActiveFilters: false,
+      portfolioFilterActive: false,
+      time_range: 'all',
+      lens: 'library',
+      chipsRenderedCount: 2,
+    };
+    expect(typeof (ev as { chipsRenderedCount: number }).chipsRenderedCount).toBe('number');
+    expect(JSON.stringify(ev)).not.toMatch(/label|→/);
+  });
+});
+
+// The doc comment on `chipsRenderedCount` claims the count in state equals the
+// count on screen at emit time, because the states that suppress the strip
+// (first-run, error) also yield zero chips. That premise is load-bearing, so
+// it is pinned here rather than asserted in prose alone.
+
+describe('row #95: zero workflows yields zero chips, so the count agrees with the screen', () => {
+  it('computeInsightChips returns no chips for an empty library', async () => {
+    const { computeInsightChips } = await import('../../lib/workflow-metrics.js');
+    expect(computeInsightChips([], [])).toEqual([]);
   });
 });
