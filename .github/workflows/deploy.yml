@@ -43,6 +43,13 @@ jobs:
       - name: Run tests
         run: pnpm test
 
+      # Row #212-adjacent / MR-031 section 3.1. The backlog is edited by ad-hoc
+      # scripts and has been silently corrupted three times — closed rows left
+      # ranking as open, struck rows still reading open, and cells overwritten
+      # by position. Node only, no deps, runs in well under a second.
+      - name: Validate backlog integrity
+        run: node scripts/validate-backlog.mjs
+
   # Loop 30: deploy waits for the end-to-end gates, not just typecheck + vitest.
   #
   # Both are CALLED here rather than copied in, so the spec list has exactly one

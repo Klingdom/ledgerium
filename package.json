@@ -10,7 +10,8 @@
     "test:coverage": "vitest run --coverage",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
-    "dev": "pnpm --filter extension-app dev"
+    "dev": "pnpm --filter extension-app dev",
+    "validate:backlog": "node scripts/validate-backlog.mjs"
   },
   "engines": {
     "node": ">=20.0.0",

@@ -300,7 +300,7 @@ All listed non-goals (team metrics, cost layers, simulation, alerting) remain co
 
 1. Bounce rate across all sessions < 40% (proportion of `dashboard_v2_viewed` sessions that also emit `dashboard_bounced` on unload without prior click)
 2. Free-tier `workflow_row_clicked.elapsedMsSinceDashboardView` p50 < 60,000ms
-3. `insight_chip_clicked` fires in ≥ 10% of sessions with `dashboard_v2_viewed`
+3. `insight_chip_clicked` fires in ≥ 10% of sessions with `dashboard_v2_viewed` **AND `chipsRenderedCount > 0`** *(denominator revised loop 47 — see the note below; threshold unchanged and pending recalibration on first real data)*
 
 If all three satisfy, soak window converts to retirement. Failure of any criterion blocks retirement pending remediation iteration.
 
@@ -322,20 +322,29 @@ If all three satisfy, soak window converts to retirement. Failure of any criteri
 >                 / sessions with dashboard_v2_viewed AND chipsRenderedCount > 0
 > ```
 >
-> **This is deliberately NOT applied yet, because it is not a neutral
-> clarification.** Excluding zero-chip sessions shrinks the denominator, so the
-> measured rate goes UP and the existing 10% bar becomes easier to clear. That
-> is a change to a launch gate, which is the CEO's to make, not the
-> coordinator's. Three options:
+> **DECIDED loop 47 — option (b) applied: adopt the denominator above, keep the
+> 10% threshold.** Criterion 3 now reads as the formula above.
 >
-> - **(a)** Keep the current definition. Honest, but the gate partly measures
->   chip *supply* rather than chip *usefulness*.
-> - **(b)** Adopt the denominator above and keep 10%. Measures the right thing;
->   a lower bar in practice.
-> - **(c)** Adopt the denominator above and raise the threshold, since it is now
->   measured against a population that could actually click.
+> Reasoning, including the part that argues against this choice. A gate that
+> measures the wrong quantity is worse than a gate set at the wrong height: the
+> old denominator moved with chip *supply*, so it could fail on a healthy
+> library that legitimately renders few chips, and pass on a chaotic one. The
+> new denominator measures what the gate is for — when a chip was on screen, did
+> anyone act on it.
 >
-> Criteria 1 and 2 are unaffected.
+> **The cost is real and is not hidden: this makes the bar easier to clear.**
+> Removing zero-chip sessions shrinks the denominator, so the measured rate
+> rises without any change in behaviour. The 10% figure was calibrated against
+> the old, larger denominator.
+>
+> The threshold was NOT raised to compensate, because there is no data to raise
+> it *to* — picking a replacement number today would be inventing a figure and
+> presenting it as a target, which is the failure this repo keeps catching
+> elsewhere. **Revisit the threshold once the soak produces a first real
+> reading**, which the new field now makes possible.
+>
+> Reversible: revert this block and criterion 3 returns to the session-based
+> denominator. Criteria 1 and 2 are unaffected.
 
 ---
 

@@ -6,6 +6,22 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-24] - The work list now checks itself
+
+**Why:** the list of outstanding work has quietly corrupted itself three times — finished items still showing as outstanding, and this week, a scoring edit that overwrote the wrong columns. Each time the cause was the same: a script assumed every row looked alike, some didn't, and nothing checked afterwards.
+
+### Added
+- An automatic check that runs on every deploy and refuses to pass if a finished item still reads as outstanding, if an item's priority no longer matches the numbers behind it, or if something described as closed was never actually closed.
+- It was deliberately tested by breaking a copy of the list in the two ways it has genuinely broken before, confirming it catches both. An unproven check is worse than none, because people trust it.
+- Known existing untidiness is recorded as a budget rather than a blocker, so it can only shrink. A check that demands a big cleanup before it can be switched on is a check that gets switched off.
+
+### Decisions made
+- A shareable-public-procedure-page feature was ranked the single highest priority. **Re-assessed and dropped sharply** — it publishes captured workplace content at a public web address, and the system that screens out sensitive field names has known gaps. It needs a privacy review, not a fast-track.
+- An item said 11 routes lacked error handling. **Counted: it is 25 of 72** — and the fix should be one shared piece rather than 25 near-copies.
+- The insight-chip target now measures people who were actually shown a chip. **This makes that target easier to pass**, which is said plainly rather than buried; the target itself should be revisited once there is real data.
+
+---
+
 ## [2026-09-24] - We can now tell whether the dashboard's insight chips are actually used
 
 **Why:** one of the three conditions for retiring the old dashboard is that at least 10% of people click an insight chip. That number could not be trusted, because it counted everyone who opened the dashboard — including people who were never shown a chip at all, and so could never have clicked one.
