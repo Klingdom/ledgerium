@@ -40,6 +40,8 @@ import type {
 } from './types.js';
 import { PROCESS_ENGINE_VERSION } from './types.js';
 import { computeSOPContentHash } from './contentHash.js';
+import { classifyEntryKind } from './entryKind.js';
+import { phraseInputStepTerse } from './stepPhrasing.js';
 import {
   analyzeStep,
   formatDuration,
@@ -324,6 +326,17 @@ function deriveInstruction(
       if (label && (isSensitive || redacted)) {
         return `Enter value in "${label}" (sensitive — do not share or display in plain text)`;
       }
+      // Loop 49: describe the control type the recorder already captured.
+      // Deliberately AFTER the sensitive branch, so a password field — which
+      // `classifySensitivity` forces sensitive at highest priority
+      // (`sensitivity.ts:65`) — can never reach this and acquire a wording path
+      // of its own. `text`/`textarea`/`search`/unknown return undefined and
+      // keep the existing string.
+      const kindPhrase = phraseInputStepTerse(
+        classifyEntryKind(evt.target_summary?.elementType),
+        label,
+      );
+      if (kindPhrase !== undefined) return kindPhrase;
       if (label) return `Enter value in "${label}"`;
       // Don't use raw element types as field names
       const INPUT_ROLES = new Set(['textbox', 'combobox', 'spinbutton', 'searchbox', 'input']);

@@ -12,6 +12,8 @@ import type {
   StepDefinition,
 } from './types.js';
 import { CATEGORY_CONFIG } from './types.js';
+import { classifyEntryKind } from './entryKind.js';
+import { phraseInputStepNarrative } from './stepPhrasing.js';
 
 // ─── Duration formatting ──────────────────────────────────────────────────────
 
@@ -430,6 +432,16 @@ export function deriveOperationalDefinition(
         return `Click ${label !== undefined ? `"${label}"` : 'the target element'} in ${appLabel}.`;
       }
       if (first.event_type === 'interaction.input_change') {
+        // Loop 49: the control type was already captured and thrown away here,
+        // so every typed step read the same whether it was a date picker, a
+        // dropdown or a free-text box. `password` and unrecognised types return
+        // undefined and fall through to the wording below, unchanged.
+        const kindPhrase = phraseInputStepNarrative(
+          classifyEntryKind(first.target_summary?.elementType),
+          label,
+          appLabel,
+        );
+        if (kindPhrase !== undefined) return kindPhrase;
         return label !== undefined
           ? `Enter data in the "${label}" field in ${appLabel}.`
           : `Enter the required data in ${appLabel}.`;

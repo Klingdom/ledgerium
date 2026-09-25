@@ -6,6 +6,24 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-25] - Procedure steps now say what kind of field it was
+
+**Why:** you asked for more precise information from recordings — field names, and a general description of what was entered. It turned out the recorder has always known the *kind* of each field, and the document generator was throwing that away. Every typed step read the same: "Enter data in the Due field" — whether that was a date picker, a dropdown, or a free-text box.
+
+### Changed
+- A step now reads **"Enter a date in the Due field"**, **"Select an option in the Shipping method field"**, **"Attach a file"**, and so on.
+- Nothing new is recorded to do this. **What anyone types is still never captured** — the wording describes the kind of box, never its contents, and there are tests that fail if any phrase starts implying otherwise.
+
+### Deliberately left alone
+- Plain text boxes read exactly as before. Saying "enter text in the Notes field" tells a reader nothing they hadn't already assumed, and padding instructions with filler makes them worse, not better.
+- Password fields are untouched and keep their existing sensitive handling — verified, not assumed.
+- **No format hints** like "(DD/MM/YYYY)". The recorder doesn't capture what format a field wants, so saying so would be inventing a fact. That's a later step, once we actually capture it.
+
+### Worth knowing
+- Tick-boxes and option buttons were previously described wrongly — "Enter value in Standard Shipping", when nothing is typed at all. They now read "Select" and "Check or uncheck".
+
+---
+
 ## [2026-09-24] - Undoing a change I should not have made, and fixing what I broke
 
 **Why:** an independent review of my own work found five faults. All five were checked and all five were real.
