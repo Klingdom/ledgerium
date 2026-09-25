@@ -11,15 +11,25 @@
  *     because a closure script appended cells instead of replacing them.
  *   - Loop 47: re-scoring two rows by cell position corrupted one of them,
  *     overwriting its score and birth-iter cells, because different rows have
- *     different cell counts. Caught by hand, seconds after doing it.
+ *     different cell counts. One of the two was caught by hand; the other —
+ *     #107 — shipped to HEAD in the same commit as this validator, which
+ *     reported the file clean. See docs/meta/MR_032_META_REVIEW.md §1 / §3.
  *
  * Each failure had the same shape: a script assumed a row layout, the
  * assumption was wrong for some rows, and nothing checked afterwards. This
- * checks afterwards.
+ * checks afterwards — but "checks afterwards" is not the same as "catches
+ * everything afterwards." In particular: V4 below can only see a row that
+ * ITERATION_LOG.md actually names as closed. The MR-030 mechanism — work
+ * shipped by some loop that never mentioned the row number at all — leaves
+ * nothing in the log to parse, and no check in this file can detect it. That
+ * class is only caught by periodic auditing of the pool against the shipped
+ * code, not by this script.
  *
- * Specified in docs/meta/MR_031_META_REVIEW.md section 3.1. Deliberately NOT a
- * vitest test: vitest.config.ts only includes packages/&#42;/src and apps/&#42;/src, so a
- * root-level test file would silently never run.
+ * Specified in docs/meta/MR_031_META_REVIEW.md section 3.1; the V3 and V1
+ * gaps described above were closed per docs/meta/MR_032_META_REVIEW.md §3.
+ * Deliberately NOT a vitest test: vitest.config.ts only includes
+ * packages/&#42;/src and apps/&#42;/src, so a root-level test file would
+ * silently never run.
  *
  * Usage:  node scripts/validate-backlog.mjs [--ratchet]
  *   exit 0 = clean, exit 1 = violations found.
@@ -43,13 +53,19 @@ const MALFORMED_ROW_BUDGET = 19;
 
 /**
  * V3 ratchets. The backlog spans several eras of row format: older rows record
- * the score as a bare number rather than `**N**`, and a number of rows have an
- * arithmetic mismatch between their dimensions and their recorded score that
- * predates this script. Both are budgets, not assertions — they fail only if
- * the count GROWS, which is what catches a fresh corruption without demanding a
- * 90-row cleanup first. Lower these as rows are fixed; never raise them.
+ * the score as a bare number, or as a struck-through `~~**N**~~` rather than a
+ * plain `**N**`, and a number of rows have an arithmetic mismatch between their
+ * dimensions and their recorded score that predates this script. Both are
+ * budgets, not assertions — they fail only if the count GROWS, which is what
+ * catches a fresh corruption without demanding a 90-row cleanup first. Lower
+ * these as rows are fixed; never raise them.
+ *
+ * These budgets do not cover V3a below: a canonical row whose score cell is
+ * not at the fixed column it belongs at is reported directly, with no budget,
+ * because there is no legitimate row shape that produces it — it is exactly
+ * the cell-displacement corruption that shipped as row #107.
  */
-const LEGACY_SCORELESS_BUDGET = 62;
+const LEGACY_SCORELESS_BUDGET = 58;
 const SCORE_MISMATCH_BUDGET = 13;
 
 /** The historical table at the end has different columns and is not parsed. */
@@ -60,6 +76,8 @@ const ROW_RE = /^\|\s*(~~)?\s*(\d+)\s*(~~)?\s*\|/;
 /** Exact-match only. A substring test matches "sidebar is open". */
 const OPEN_STATUS_RE = /^\*{0,2}\s*(open|new|proposed)\s*\*{0,2}$/i;
 const CANONICAL_CELL_COUNT = 15; // '' + 13 cells + ''
+/** Index of each canonical column within the 15-cell split (see above). */
+const COL = { I: 5, A: 6, L: 7, C: 8, E: 9, R: 10, SCORE: 11, BIRTH_ITER: 12 };
 
 function parseRows(fullText) {
   const cut = fullText.indexOf(END_MARKER);
@@ -100,18 +118,56 @@ for (const r of rows) {
   }
 }
 
-// ── V3: exactly one score cell, and it equals I+A+L+C-E-R ────────────────────
-// This is the check that would have caught the loop-47 corruption: rewriting
-// cells by position put the score in the birth-iter column, leaving a row whose
-// arithmetic no longer added up.
+// ── V1a: an unstruck row must not have a struck-through description ─────────
+// Mirror image of V1. Row #62 (and, live on this file, #69) has its
+// description wrapped in `~~...~~` — the row's own text was struck when the
+// work shipped — but the ID cell was never struck, so a sweep of the ID
+// column ranks it as open forever, and its status cell carries whatever the
+// closing edit happened to leave there rather than a clean verdict. A
+// keyword scan of status/description prose for "closed"/"done"/"shipped" was
+// tried and rejected: on the current file it flags 14 rows that are
+// legitimately open and merely narrate a *different* row's closure, or their
+// own partial completion (e.g. "partially done ... 2/3 leaks closed"). The
+// struck-description signal has none of those false positives here, because
+// prose incidentally contains those words far more often than it incidentally
+// opens with a literal `~~`.
+const STRUCK_DESC_RE = /^~~/;
+for (const r of rows) {
+  if (r.struck) continue;
+  const desc = (r.cells[2] ?? '').trim();
+  if (STRUCK_DESC_RE.test(desc)) {
+    violations.push(
+      `V1a line ${r.lineNo}  #${r.id} is not struck but its description cell begins struck-through ` +
+        `("${desc.slice(0, 60)}..."). A sweep of the ID column would count finished work as outstanding.`,
+    );
+  }
+}
+
+// ── V3 / V3a: score-cell placement and arithmetic ────────────────────────────
+// V3a anchors by absolute column, not by wherever a `**N**`-shaped cell is
+// found. The pre-V3a check searched the whole row for that shape and then
+// read "dimensions" *relative to* whatever position it found — `slice(s-6,
+// s)`. Loop 47's corruption left the bold cell at index 12 (the birth-iter
+// column) instead of the canonical index 11, so the scan found it there,
+// sliced dimensions from indices 6-11 (reading a 7th, displaced cell as one
+// of the six real dimensions), and the resulting arithmetic happened to add
+// up: the check validated the corruption against itself, and #107 shipped.
+//
+// Anchoring to the fixed column instead means: for any row with the
+// canonical 15-cell count, the score MUST be at index 11 (COL.SCORE) — a
+// `**N**` cell found anywhere else on such a row is reported directly, no
+// budget, because that is exactly the displacement shape. Rows with a
+// different cell count are V2's problem, not V3a's, and fall back to the
+// pre-V3a relative scan so existing detections on that shape are not lost.
 const scoreless = [];
 const mismatched = [];
 for (const r of rows) {
   const scoreIdx = r.cells
     .map((c, i) => (/^\s*\*\*\d{1,2}\*\*\s*$/.test(c) ? i : -1))
     .filter((i) => i !== -1);
+
   if (scoreIdx.length === 0) {
-    scoreless.push(`#${r.id}`); // legacy era: bare number, not **N**
+    scoreless.push(`#${r.id}`); // legacy era: bare number, or `~~**N**~~`, not `**N**`
     continue;
   }
   if (scoreIdx.length > 1) {
@@ -121,9 +177,34 @@ for (const r of rows) {
     );
     continue;
   }
+
+  const isCanonical = r.cells.length === CANONICAL_CELL_COUNT;
+
+  if (isCanonical && scoreIdx[0] !== COL.SCORE) {
+    violations.push(
+      `V3a line ${r.lineNo}  #${r.id} has its score cell at index ${scoreIdx[0]}, not the canonical ` +
+        `index ${COL.SCORE}. The row still has ${CANONICAL_CELL_COUNT} cells, so V2 does not see this, ` +
+        `but a cell has been displaced by position — the #107 shape.`,
+    );
+    continue;
+  }
+
   const s = scoreIdx[0];
-  const dims = r.cells.slice(s - 6, s).map((c) => c.trim());
-  if (dims.length !== 6 || !dims.every((d) => /^\d$/.test(d))) continue; // legacy shape
+  const dims = (isCanonical ? r.cells.slice(COL.I, COL.SCORE) : r.cells.slice(s - 6, s)).map((c) =>
+    c.trim(),
+  );
+  if (dims.length !== 6 || !dims.every((d) => /^\d$/.test(d))) continue; // legacy / struck shape
+
+  if (isCanonical) {
+    const birthIter = r.cells[COL.BIRTH_ITER].trim();
+    if (birthIter === '') {
+      violations.push(
+        `V3a line ${r.lineNo}  #${r.id} has clean dimension and score cells but an empty birth-iter ` +
+          `cell (index ${COL.BIRTH_ITER}).`,
+      );
+    }
+  }
+
   const [I, A, L, C, E, R] = dims.map(Number);
   const expected = I + A + L + C - E - R;
   const actual = Number(r.cells[s].replace(/[^\d]/g, ''));
@@ -147,7 +228,16 @@ if (mismatched.length > SCORE_MISMATCH_BUDGET) {
 }
 
 // ── V4: a row named as closed in ITERATION_LOG.md must be struck ─────────────
-// This is the MR-030 mechanism: closed in the narrative, never struck here.
+// This is the loop-41 mechanism: a row IS named as closed in the narrative
+// (e.g. "#102 is CLOSED"), using the word this regex looks for, but the
+// strike never landed on it here. It is NOT the MR-030 mechanism: MR-030's
+// nine rows were found by auditing shipped code against row text, and the
+// log never named any of them as closed — there was nothing for a log parser
+// to find. Tested directly against the log as it stood before MR-030 struck
+// those nine rows: this regex matches 0 of the 9. A row closed silently,
+// with no mention in ITERATION_LOG.md at all, is invisible to this check and
+// to every other check in this file — that class can only be caught by
+// periodically auditing the open pool against the code, not by parsing logs.
 const log = readFileSync(ITERATION_LOG, 'utf8');
 const struckIds = new Set(rows.filter((r) => r.struck).map((r) => r.id));
 const knownIds = new Set(rows.map((r) => r.id));

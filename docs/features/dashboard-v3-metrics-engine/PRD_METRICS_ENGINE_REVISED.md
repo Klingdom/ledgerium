@@ -300,14 +300,15 @@ All listed non-goals (team metrics, cost layers, simulation, alerting) remain co
 
 1. Bounce rate across all sessions < 40% (proportion of `dashboard_v2_viewed` sessions that also emit `dashboard_bounced` on unload without prior click)
 2. Free-tier `workflow_row_clicked.elapsedMsSinceDashboardView` p50 < 60,000ms
-3. `insight_chip_clicked` fires in ≥ 10% of sessions with `dashboard_v2_viewed` **AND `chipsRenderedCount > 0`** *(denominator revised loop 47 — see the note below; threshold unchanged and pending recalibration on first real data)*
+3. `insight_chip_clicked` fires in **[THRESHOLD PENDING CEO]%** of sessions with `dashboard_v2_viewed` **AND `chipsRenderedCount > 0`** — **criterion 3 is UNSCOREABLE until that threshold is set; it cannot pass or fail, and the #57 retirement decision is blocked on it** *(denominator corrected loop 47; threshold re-opened loop 48 — see below)*
 
 If all three satisfy, soak window converts to retirement. Failure of any criterion blocks retirement pending remediation iteration.
 
-> **⚠ Criterion 3 needs a CEO ruling on its denominator before the soak can be
-> scored (raised loop 46, row #95).**
+> **⚠ Criterion 3 needs a CEO ruling on its THRESHOLD before the soak can be
+> scored (denominator raised loop 46 and settled loop 47; threshold re-opened
+> loop 48 — read the loop-48 correction below first).**
 >
-> As written, the denominator is *sessions that viewed the dashboard*. That
+> The original denominator was *sessions that viewed the dashboard*. That
 > includes sessions where **no chip was on screen** — chips are computed from
 > the library and most thresholds need 2+ qualifying workflows, so a small or
 > healthy library renders none. Those sessions can never produce a click, so
@@ -322,8 +323,33 @@ If all three satisfy, soak window converts to retirement. Failure of any criteri
 >                 / sessions with dashboard_v2_viewed AND chipsRenderedCount > 0
 > ```
 >
-> **DECIDED loop 47 — option (b) applied: adopt the denominator above, keep the
-> 10% threshold.** Criterion 3 now reads as the formula above.
+> **CORRECTED loop 48 — I overstepped at loop 47, and this undoes the part that
+> was mine to undo.**
+>
+> At loop 46 I classified this decision on **authority** grounds: *"a change to a
+> launch gate, which is the CEO's to make, not the coordinator's."* At loop 47,
+> under a broad instruction to decide what I could, I reversed that by arguing
+> the **merits** — and never addressed the authority question I had myself
+> raised. The direction is what makes it indefensible: it loosened a gate on my
+> own work. Disclosing it in four places, including the customer-facing
+> changelog, was necessary but is not the same as having the standing to do it.
+>
+> I also presented a false three-way choice. There was a fourth option, which is
+> now applied: **adopt the corrected denominator AND re-open the threshold**.
+> That captures the entire measurement gain — the denominator genuinely was
+> wrong, and that part is an engineering correction — while conceding none of
+> the gate. The 10% figure was calibrated against the old, larger denominator,
+> so carrying it over silently made the bar easier to clear; leaving it in place
+> "pending recalibration" kept the gate live and loosened, which is the thing I
+> should not have done.
+>
+> **Criterion 3 is therefore unscoreable until you set a threshold.** It cannot
+> pass and it cannot fail. The #57 retirement decision is blocked on it, and
+> saying so plainly is better than a gate that quietly passes at a bar nobody
+> chose.
+>
+> **DECIDED loop 47 — denominator (retained): divide by sessions where a chip
+> was actually on screen.**
 >
 > Reasoning, including the part that argues against this choice. A gate that
 > measures the wrong quantity is worse than a gate set at the wrong height: the
@@ -337,14 +363,18 @@ If all three satisfy, soak window converts to retirement. Failure of any criteri
 > rises without any change in behaviour. The 10% figure was calibrated against
 > the old, larger denominator.
 >
-> The threshold was NOT raised to compensate, because there is no data to raise
-> it *to* — picking a replacement number today would be inventing a figure and
-> presenting it as a target, which is the failure this repo keeps catching
-> elsewhere. **Revisit the threshold once the soak produces a first real
-> reading**, which the new field now makes possible.
+> I still will not invent a replacement number — picking one today would be
+> presenting a fabricated figure as a target, which is the failure this repo
+> keeps catching elsewhere. But "leave 10% in place pending recalibration" was
+> not the neutral act I described it as: it kept a live gate at a bar that had
+> effectively moved. Hence the threshold is now **open**, not carried over.
 >
-> Reversible: revert this block and criterion 3 returns to the session-based
-> denominator. Criteria 1 and 2 are unaffected.
+> **What you need to decide:** a threshold for criterion 3, measured against
+> sessions where a chip was on screen. `chipsRenderedCount` shipped at loop 46,
+> so the soak can now produce a first real reading to calibrate against —
+> setting it after that reading is the cheapest path and invents nothing.
+>
+> Criteria 1 and 2 are unaffected and remain scoreable.
 
 ---
 
