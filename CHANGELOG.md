@@ -6,6 +6,23 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-26] - Workflow cards can now show how consistent a process is
+
+**Why:** you asked for average time, standard deviation, and similar figures on workflow cards. Average and median were already there. Spread was not.
+
+### Added
+- Two new optional columns: **how much run times vary** (standard deviation) and **how variable the process is relative to its own average** (coefficient of variation). Both are available in the column picker; neither is on by default.
+- Nothing new is being calculated. The system has always worked these out — they simply never made it to the screen.
+
+### Care taken
+- **Both stay blank until a workflow has at least five runs.** A spread figure calculated from three runs looks authoritative and means very little; showing it would be worse than showing nothing.
+- If a workflow was analysed before these figures were recorded, the cell shows "—" rather than a zero or a guess.
+
+### Honest limitation
+- I could confirm that everything analysed from now on includes these figures, but **not** how many previously-analysed workflows already have them. Those will show "—" until they are re-analysed. I tried to measure it against the local database and could not, so I am flagging it rather than implying it is fine.
+
+---
+
 ## [2026-09-25] - Procedure steps now say what kind of field it was
 
 **Why:** you asked for more precise information from recordings — field names, and a general description of what was entered. It turned out the recorder has always known the *kind* of each field, and the document generator was throwing that away. Every typed step read the same: "Enter data in the Due field" — whether that was a date picker, a dropdown, or a free-text box.

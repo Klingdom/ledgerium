@@ -43,6 +43,22 @@ const VALID_INTELLIGENCE = {
 };
 
 /**
+ * Row #101 (WDC2-P02) residual: the standard shape returned by
+ * `toMetricsInput`/`parseIntelligenceJson` once the two new
+ * `durationVariance`-sourced fields are included. Kept as a single source of
+ * truth for the "full payload" expected shape so each test below only needs
+ * to spell out the fields it's actually varying.
+ */
+const FULL_PARSED_INTELLIGENCE = {
+  sequenceStability: 0.83,
+  stepCountVarianceStdDev: 1.42,
+  standardPathFrequency: 0.67,
+  variantCount: 3,
+  cycleTimeStdDevMs: 9100,
+  cycleTimeCoefficientOfVariation: 0.21,
+};
+
+/**
  * Build a minimal Prisma-shaped workflow row carrying the supplied
  * `intelligenceJson` value. All other fields are fixed.
  */
@@ -83,6 +99,49 @@ describe('toMetricsInput: WDC-R03 intelligenceJson parsing (iter-049)', () => {
       stepCountVarianceStdDev: 1.42,
       standardPathFrequency: 0.67,
       variantCount: 3,
+      cycleTimeStdDevMs: 9100,
+      cycleTimeCoefficientOfVariation: 0.21,
+    });
+  });
+
+  it('valid JSON with a full payload → both durationVariance fields (row #101 residual) parse correctly', () => {
+    const result = toMetricsInput(makeWorkflow(JSON.stringify(VALID_INTELLIGENCE)), []);
+    expect(result.intelligence).toEqual(FULL_PARSED_INTELLIGENCE);
+  });
+
+  it('valid JSON with durationVariance absent (older stored rows) → cycleTime* fields fall through to null, no throw', () => {
+    // Realistic case: rows persisted before durationVariance was added to
+    // VarianceReport. The adapter must tolerate the missing key entirely,
+    // not just a null value at the key.
+    const { durationVariance: _omit, ...varianceWithoutDurationVariance } = VALID_INTELLIGENCE.variance;
+    const blob = { ...VALID_INTELLIGENCE, variance: varianceWithoutDurationVariance };
+    const result = toMetricsInput(makeWorkflow(JSON.stringify(blob)), []);
+    expect(result.intelligence).toEqual({
+      sequenceStability: 0.83,
+      stepCountVarianceStdDev: 1.42,
+      standardPathFrequency: 0.67,
+      variantCount: 3,
+      cycleTimeStdDevMs: null,
+      cycleTimeCoefficientOfVariation: null,
+    });
+  });
+
+  it('valid JSON with durationVariance present but values null → cycleTime* fields are null, no throw', () => {
+    const blob = {
+      ...VALID_INTELLIGENCE,
+      variance: {
+        ...VALID_INTELLIGENCE.variance,
+        durationVariance: { stdDevMs: null, coefficientOfVariation: null, isHighVariance: false },
+      },
+    };
+    const result = toMetricsInput(makeWorkflow(JSON.stringify(blob)), []);
+    expect(result.intelligence).toEqual({
+      sequenceStability: 0.83,
+      stepCountVarianceStdDev: 1.42,
+      standardPathFrequency: 0.67,
+      variantCount: 3,
+      cycleTimeStdDevMs: null,
+      cycleTimeCoefficientOfVariation: null,
     });
   });
 
@@ -103,6 +162,8 @@ describe('toMetricsInput: WDC-R03 intelligenceJson parsing (iter-049)', () => {
       stepCountVarianceStdDev: null,
       standardPathFrequency: null,
       variantCount: null,
+      cycleTimeStdDevMs: null,
+      cycleTimeCoefficientOfVariation: null,
     });
   });
 
@@ -115,12 +176,7 @@ describe('toMetricsInput: WDC-R03 intelligenceJson parsing (iter-049)', () => {
       anotherUnknownTopLevelKey: 'anything',
     };
     const result = toMetricsInput(makeWorkflow(JSON.stringify(blob)), []);
-    expect(result.intelligence).toEqual({
-      sequenceStability: 0.83,
-      stepCountVarianceStdDev: 1.42,
-      standardPathFrequency: 0.67,
-      variantCount: 3,
-    });
+    expect(result.intelligence).toEqual(FULL_PARSED_INTELLIGENCE);
   });
 
   it('valid JSON with variants.standardPath === null → standardPathFrequency falls through to null', () => {
@@ -137,6 +193,8 @@ describe('toMetricsInput: WDC-R03 intelligenceJson parsing (iter-049)', () => {
       stepCountVarianceStdDev: 0.9,
       standardPathFrequency: null,
       variantCount: 0,
+      cycleTimeStdDevMs: null,
+      cycleTimeCoefficientOfVariation: null,
     });
   });
 

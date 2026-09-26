@@ -17,6 +17,15 @@
  * this is a contract-prep iteration. Future Path D iterations will wire the
  * Layer 3 fields onto the dashboard without further adapter changes.
  *
+ * Row #101 (WDC2-P02) residual: also parses `variance.durationVariance`
+ * (`VarianceReport.durationVariance` per
+ * packages/intelligence-engine/src/types.ts:200-204) — `stdDevMs` and
+ * `coefficientOfVariation` — surfacing the two genuinely-missing statistical
+ * columns (`cycle_time_stddev_ms`, `cycle_time_coefficient_of_variation`).
+ * These ARE consumed by computeWorkflowMetrics (unlike the iter-049 fields
+ * above, which remain contract-prep-only pass-throughs at the time of this
+ * change).
+ *
  * Failure modes (all return intelligence = null, never throw):
  *   - intelligenceJson is null              → null
  *   - intelligenceJson is the empty string  → null
@@ -41,10 +50,12 @@ import type { WorkflowMetricsInput } from './workflow-metrics';
 // automationROI keys alongside the engine output).
 //
 // Field paths trace 1:1 to packages/intelligence-engine/src/types.ts:
-//   - variance.sequenceStability        ← VarianceReport
-//   - variance.stepCountVariance.stdDev ← VarianceReport.stepCountVariance
-//   - variants.standardPath.frequency   ← VariantSet.standardPath (nullable)
-//   - variants.variantCount             ← VariantSet
+//   - variance.sequenceStability                       ← VarianceReport
+//   - variance.stepCountVariance.stdDev                ← VarianceReport.stepCountVariance
+//   - variance.durationVariance.stdDevMs               ← VarianceReport.durationVariance
+//   - variance.durationVariance.coefficientOfVariation ← VarianceReport.durationVariance
+//   - variants.standardPath.frequency                  ← VariantSet.standardPath (nullable)
+//   - variants.variantCount                            ← VariantSet
 const IntelligenceJsonSchema = z.object({
   variance: z
     .object({
@@ -52,6 +63,12 @@ const IntelligenceJsonSchema = z.object({
       stepCountVariance: z
         .object({
           stdDev: z.number().nullable().optional(),
+        })
+        .optional(),
+      durationVariance: z
+        .object({
+          stdDevMs: z.number().nullable().optional(),
+          coefficientOfVariation: z.number().nullable().optional(),
         })
         .optional(),
     })
@@ -100,6 +117,8 @@ export function parseIntelligenceJson(raw: string | null): ParsedIntelligence | 
     stepCountVarianceStdDev: data.variance?.stepCountVariance?.stdDev ?? null,
     standardPathFrequency: data.variants?.standardPath?.frequency ?? null,
     variantCount: data.variants?.variantCount ?? null,
+    cycleTimeStdDevMs: data.variance?.durationVariance?.stdDevMs ?? null,
+    cycleTimeCoefficientOfVariation: data.variance?.durationVariance?.coefficientOfVariation ?? null,
   };
 }
 

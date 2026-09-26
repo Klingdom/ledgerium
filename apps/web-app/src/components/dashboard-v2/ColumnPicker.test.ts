@@ -68,12 +68,14 @@ function allGroupedColumns(
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('ColumnPicker: column grouping (iter-061)', () => {
-  it('total columns across all groups equals registry size (40)', () => {
+  it('total columns across all groups equals registry size (42)', () => {
     // Batch A (2026-06-12): date_recorded added → 39 total.
     // WDC2-P02 (iter-075): ai_opportunity_score added as 40th entry.
+    // Row #101 (WDC2-P02) residual: cycle_time_stddev_ms +
+    // cycle_time_coefficient_of_variation added → 42 total.
     const grouped = buildGroupedColumns(new Set<ColumnKey>());
     const total = GROUP_ORDER.reduce((sum, g) => sum + grouped[g].length, 0);
-    expect(total).toBe(40);
+    expect(total).toBe(42);
   });
 
   it('every registered column appears in exactly one group', () => {
@@ -86,7 +88,7 @@ describe('ColumnPicker: column grouping (iter-061)', () => {
         seen.add(col.key);
       }
     }
-    expect(seen.size).toBe(40); // WDC2-P02 (iter-075): ai_opportunity_score added as 40th entry
+    expect(seen.size).toBe(42); // Row #101 (WDC2-P02) residual: 2 more columns added → 42 total
   });
 
   it('all 7 canonical groups are present', () => {

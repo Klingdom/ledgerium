@@ -45,6 +45,9 @@ export {
   accessPathSimilarityAvg,
   accessCycleTimeMedianMs,
   accessAiOpportunityScore,
+  // Row #101 (WDC2-P02) residual — genuinely-missing statistical columns:
+  accessCycleTimeStdDevMs,
+  accessCycleTimeCoefficientOfVariation,
   AVAILABLE_ACCESSORS,
 } from './accessors.js';
 

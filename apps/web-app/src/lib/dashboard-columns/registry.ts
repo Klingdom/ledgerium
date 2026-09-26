@@ -53,12 +53,18 @@ import {
   accessPathSimilarityAvg,
   accessCycleTimeMedianMs,
   accessAiOpportunityScore,
+  // Row #101 (WDC2-P02) residual — genuinely-missing statistical columns:
+  accessCycleTimeStdDevMs,
+  accessCycleTimeCoefficientOfVariation,
 } from './accessors.js';
 import type { WorkflowDashboardColumn } from './types.js';
 
 /**
- * The full registry — frozen at module load. 40 entries: 7 display columns +
- * 32 Tier A architecture metrics + 1 AI/opportunity signal (ai_opportunity_score).
+ * The full registry — frozen at module load. 42 entries: 7 display columns +
+ * 32 Tier A architecture metrics + 1 AI/opportunity signal (ai_opportunity_score)
+ * + 2 row #101 (WDC2-P02) residual statistical columns (cycle_time_stddev_ms,
+ * cycle_time_coefficient_of_variation) not enumerated in the original Tier A
+ * architecture list.
  *
  * Default-pack rationale (`defaultVisible: true` ⇔ shipped today):
  *   workflow_title · systems · opportunity_tag · health_score · last_run_at ·
@@ -280,6 +286,41 @@ export const WORKFLOW_DASHBOARD_COLUMNS: ReadonlyArray<WorkflowDashboardColumn> 
       availability: 'available',
       accessor: accessCycleTimeMedianMs,
       minRunsRequired: 2,
+    },
+    {
+      // Row #101 (WDC2-P02) residual: one of the two genuinely-missing
+      // statistical columns from the original audit finding. Source:
+      // intelligenceJson.variance.durationVariance.stdDevMs
+      // (VarianceReport.durationVariance per intelligence-engine/src/types.ts).
+      key: 'cycle_time_stddev_ms',
+      label: 'Cycle Time Std Dev',
+      description: 'Spread of run durations, in ms. Requires ≥5 runs.',
+      dataType: 'duration',
+      sortable: true,
+      filterable: true,
+      defaultVisible: false,
+      defaultGroup: 'flow',
+      planTierGate: null,
+      availability: 'available',
+      accessor: accessCycleTimeStdDevMs,
+      minRunsRequired: 5,
+    },
+    {
+      // Row #101 (WDC2-P02) residual: the second genuinely-missing statistical
+      // column from the original audit finding. Source:
+      // intelligenceJson.variance.durationVariance.coefficientOfVariation.
+      key: 'cycle_time_coefficient_of_variation',
+      label: 'Cycle Time CV',
+      description: 'Std dev / mean of run duration. Requires ≥5 runs.',
+      dataType: 'number',
+      sortable: true,
+      filterable: true,
+      defaultVisible: false,
+      defaultGroup: 'flow',
+      planTierGate: null,
+      availability: 'available',
+      accessor: accessCycleTimeCoefficientOfVariation,
+      minRunsRequired: 5,
     },
     {
       key: 'cycle_time_p95_ms',

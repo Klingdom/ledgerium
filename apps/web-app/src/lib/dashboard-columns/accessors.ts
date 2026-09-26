@@ -180,6 +180,11 @@ export const accessDateRecorded: ColumnAccessor<string> = (ctx) => {
 // `WorkflowMetricsInput.intelligence` and `.processDefinition.medianDurationMs`
 // by `computeWorkflowMetrics` (workflow-metrics.ts, iter-075).
 //
+// Row #101 residual (this change): 2 additional accessors — `cycle_time_stddev_ms`
+// and `cycle_time_coefficient_of_variation` — surface the two statistical
+// columns the original row description named that were never wired, backed by
+// `variance.durationVariance` on the same `intelligenceJson` blob.
+//
 // All Wave A accessors are LIFETIME accessors: they return byte-identical
 // values regardless of `referenceNowMs` or `activeTimeRange` because the
 // underlying intelligence data is computed over the full case set (not
@@ -196,7 +201,9 @@ export const accessDateRecorded: ColumnAccessor<string> = (ctx) => {
 
 const MIN_RUNS_MEAN_MEDIAN = 2;   // cycle_time_median_ms
 const MIN_RUNS_STAT = 5;           // variant_count, top_variant_share_pct,
-                                   // path_length_stddev, path_similarity_avg
+                                   // path_length_stddev, path_similarity_avg,
+                                   // cycle_time_stddev_ms (row #101 residual),
+                                   // cycle_time_coefficient_of_variation (row #101 residual)
 
 /**
  * `variant_count` accessor — distinct path variants in the process group.
@@ -264,6 +271,39 @@ export const accessCycleTimeMedianMs: ColumnAccessor<number> = (ctx) => {
 };
 
 /**
+ * `cycle_time_stddev_ms` accessor — std-dev of run duration, in milliseconds.
+ * Source: `metricsV2.cycleTimeStdDevMs` ← `intelligenceJson.variance.durationVariance.stdDevMs`.
+ * Returns null below N≥5 (statistically unreliable population).
+ *
+ * Row #101 (WDC2-P02) residual: one of the two genuinely-missing statistical
+ * columns from the original audit finding.
+ */
+export const accessCycleTimeStdDevMs: ColumnAccessor<number> = (ctx) => {
+  const runs = ctx.metricsV2.runs;
+  if (runs === null || runs < MIN_RUNS_STAT) return null;
+  const val = ctx.metricsV2.cycleTimeStdDevMs;
+  if (val == null) return null;
+  return val;
+};
+
+/**
+ * `cycle_time_coefficient_of_variation` accessor — CV (stdDev / mean) of run duration.
+ * Source: `metricsV2.cycleTimeCoefficientOfVariation` ←
+ * `intelligenceJson.variance.durationVariance.coefficientOfVariation`.
+ * Returns null below N≥5 (statistically unreliable population).
+ *
+ * Row #101 (WDC2-P02) residual: the second of the two genuinely-missing
+ * statistical columns from the original audit finding.
+ */
+export const accessCycleTimeCoefficientOfVariation: ColumnAccessor<number> = (ctx) => {
+  const runs = ctx.metricsV2.runs;
+  if (runs === null || runs < MIN_RUNS_STAT) return null;
+  const val = ctx.metricsV2.cycleTimeCoefficientOfVariation;
+  if (val == null) return null;
+  return val;
+};
+
+/**
  * `ai_opportunity_score` accessor — 0–100 AI automation opportunity score.
  * Source: `metricsV2.aiOpportunityScore` (already computed by the engine;
  * this column makes the raw score visible alongside the opportunity_tag enum).
@@ -303,6 +343,9 @@ export const AVAILABLE_ACCESSORS: Record<string, ColumnAccessor> = Object.freeze
   path_similarity_avg: accessPathSimilarityAvg as ColumnAccessor,
   cycle_time_median_ms: accessCycleTimeMedianMs as ColumnAccessor,
   ai_opportunity_score: accessAiOpportunityScore as ColumnAccessor,
+  // Row #101 (WDC2-P02) residual — genuinely-missing statistical columns:
+  cycle_time_stddev_ms: accessCycleTimeStdDevMs as ColumnAccessor,
+  cycle_time_coefficient_of_variation: accessCycleTimeCoefficientOfVariation as ColumnAccessor,
 });
 
 /**

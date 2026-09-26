@@ -91,6 +91,8 @@ export type ColumnKey =
   | 'cycle_time_mean_ms'
   | 'cycle_time_median_ms'
   | 'cycle_time_p95_ms'
+  | 'cycle_time_stddev_ms'
+  | 'cycle_time_coefficient_of_variation'
   // ── Layer 2: Step performance (6 Tier A) ────────────────────────────────────
   | 'avg_step_duration_ms'
   | 'median_step_duration_ms'

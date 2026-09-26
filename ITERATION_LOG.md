@@ -4,6 +4,21 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-26 (loop 50) — Standard deviation reaches the dashboard (Mode 1, `backend-engineer`)
+
+- **Candidate Selection: `directed` — the verified residual of #101.** Not its stated scope: loop 48 established that ~75% of the row was already shipped, including the column it called "entirely missing". Only the two Wave B statistics were genuinely absent, and that is exactly what shipped.
+- **Answers a CEO line directly** — WDC-002: *"Workflow cards should also calculate average time, standard deviation, etc. when available."* Standard deviation and coefficient of variation are now available columns.
+- **Nothing here computes a statistic.** `analyzeVariance` has always produced `durationVariance.{stdDevMs, coefficientOfVariation}` — verified at `varianceAnalyzer.ts:39` (empty case) and `:133` (computed case), both unconditional — and the adapter simply never read them. Same shape as loop 49: the value already existed and the consumer discarded it.
+- **Both gate at N≥5.** A standard deviation over four runs is not a number anyone should act on, and the registry already had `MIN_RUNS_STAT` for precisely this class.
+- **Five-layer chain, all additive:** adapter Zod schema → `WorkflowMetricsInput.intelligence` → `WorkflowMetricsOutput` → `ColumnKey` union → accessors + registry. Verified by diff that the six already-available Wave A columns, their accessors and their tests are untouched; the only `-` line in `accessors.ts` is a comment reflow.
+- **The delegate surfaced the right open question and I could only half-close it.** It flagged that it had not verified what fraction of *stored* `intelligenceJson` blobs actually contain `durationVariance` — older rows may predate the field, in which case these columns are honest-but-often-null. What I could verify statically: the current engine writes it unconditionally on every path, so anything computed today carries it. What I could NOT verify: the stored-row distribution. I tried three times to query the local `test.db` — `better-sqlite3` is not a dependency and the Prisma client would not connect to that file — and stopped rather than burn the loop on it. **Stated as a measured gap, not waved away:** absent `durationVariance` degrades to `null` and renders "—", with an explicit test for that case, so the failure mode is a blank cell rather than a wrong number.
+- **Three test files outside the brief needed count bumps** — `ColumnPicker.test.ts` (40 → 42 columns), `filters.test.ts` (17 → 19 filterable) and the registry's own catalog-size assertions. Those hardcoded counts are the registry's drift-protection working as designed, not collateral damage.
+- **Validation:** web-app **3127 → 3140** (+13, measured by the delegate via `git stash` and re-verified by me); workspace typecheck **0 errors** across 11 packages; backlog validator clean.
+- **Follow-ups:** 0 created; **#101 closed**. One observation recorded not promoted: the stored-row `durationVariance` distribution is unmeasured and would need a live query.
+- **Meta-review cadence:** 3 loops since MR-032 — **MR-033 due next.**
+
+---
+
 ## 2026-09-25 (loop 49) — SOP steps say what kind of field it was (Mode 1, coordinator + `growth-strategist`)
 
 - **Candidate Selection: `directed` — field-capture Phase 1**, from the CEO directive *"get more precise information during workflow recordings ... identify field names and entering info should be generalized."* Approved on my own authority because it needs **no new capture, no privacy change and no schema change** — `FIELD_CAPTURE_REVIEW_001.md` §4 makes the public-claim update a Phase 2-4 requirement only. Nothing here is a decision reserved to the CEO.

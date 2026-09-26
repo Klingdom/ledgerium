@@ -160,12 +160,20 @@ export interface WorkflowMetricsInput {
    *                              following the dominant variant)
    * - variantCount             ← variants.variantCount (count of distinct
    *                              execution paths observed)
+   * - cycleTimeStdDevMs                ← variance.durationVariance.stdDevMs
+   *                                      (row #101 / WDC2-P02 residual — std
+   *                                      dev of run duration, in ms)
+   * - cycleTimeCoefficientOfVariation  ← variance.durationVariance.coefficientOfVariation
+   *                                      (row #101 / WDC2-P02 residual —
+   *                                      stdDev / mean run duration)
    */
   intelligence?: {
     sequenceStability: number | null;
     stepCountVarianceStdDev: number | null;
     standardPathFrequency: number | null;
     variantCount: number | null;
+    cycleTimeStdDevMs: number | null;
+    cycleTimeCoefficientOfVariation: number | null;
   } | null;
 }
 
@@ -196,6 +204,16 @@ export interface WorkflowMetricsOutput {
   stepCountVarianceStdDev?: number | null;
   /** Frequency (0–1) of the most-common variant.  Source: intelligenceJson.standardPathFrequency. */
   standardPathFrequency?: number | null;
+  /**
+   * Std-dev of run duration in milliseconds (row #101 / WDC2-P02 residual).
+   * Source: intelligenceJson.variance.durationVariance.stdDevMs.
+   */
+  cycleTimeStdDevMs?: number | null;
+  /**
+   * Coefficient of variation (stdDev / mean) of run duration (row #101 / WDC2-P02
+   * residual). Source: intelligenceJson.variance.durationVariance.coefficientOfVariation.
+   */
+  cycleTimeCoefficientOfVariation?: number | null;
 }
 
 export interface HealthScoreV2 {
@@ -586,6 +604,9 @@ export function computeWorkflowMetrics(input: WorkflowMetricsInput): WorkflowMet
     sequenceStability: input.intelligence?.sequenceStability ?? null,
     stepCountVarianceStdDev: input.intelligence?.stepCountVarianceStdDev ?? null,
     standardPathFrequency: input.intelligence?.standardPathFrequency ?? null,
+    // Row #101 (WDC2-P02) residual pass-through:
+    cycleTimeStdDevMs: input.intelligence?.cycleTimeStdDevMs ?? null,
+    cycleTimeCoefficientOfVariation: input.intelligence?.cycleTimeCoefficientOfVariation ?? null,
   };
 }
 

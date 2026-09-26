@@ -113,13 +113,15 @@ describe('OperatorsByDataType — invariants (Group A)', () => {
 // ── Group B: getFilterableColumns ─────────────────────────────────────────────
 
 describe('getFilterableColumns (Group B)', () => {
-  it('B1: returns exactly 17 entries today (available + filterable)', () => {
+  it('B1: returns exactly 19 entries today (available + filterable)', () => {
     // Per ASK-3 verdict (MR-014): filter coverage = available entries.
     // Batch A (2026-06-12): date_recorded added as 11th available+filterable column.
     // WDC2-P02 (iter-075): 6 Wave A statistical columns flipped to available
     // (cycle_time_median_ms, variant_count, top_variant_share_pct,
     //  path_length_stddev, path_similarity_avg, ai_opportunity_score) → 17 total.
-    expect(getFilterableColumns().length).toBe(17);
+    // Row #101 (WDC2-P02) residual: cycle_time_stddev_ms +
+    // cycle_time_coefficient_of_variation added (both filterable) → 19 total.
+    expect(getFilterableColumns().length).toBe(19);
   });
 
   it('B2: every returned entry has availability === "available" AND filterable === true', () => {

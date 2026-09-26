@@ -38,6 +38,9 @@ import {
   accessPathSimilarityAvg,
   accessCycleTimeMedianMs,
   accessAiOpportunityScore,
+  // Row #101 (WDC2-P02) residual — genuinely-missing statistical columns:
+  accessCycleTimeStdDevMs,
+  accessCycleTimeCoefficientOfVariation,
 } from './index.js';
 import type { ColumnAccessorContext, ColumnKey, TimeRange } from './types.js';
 import type { WorkflowMetricsOutput } from '../workflow-metrics.js';
@@ -88,10 +91,12 @@ function makeContext(overrides: Partial<ColumnAccessorContext> = {}): ColumnAcce
 // ── Group A: Catalog completeness ─────────────────────────────────────────────
 
 describe('WORKFLOW_DASHBOARD_COLUMNS — catalog completeness (Group A)', () => {
-  it('A1: catalog enumerates exactly 40 columns (7 display + 32 Tier A + ai_opportunity_score)', () => {
+  it('A1: catalog enumerates exactly 42 columns (7 display + 32 Tier A + ai_opportunity_score + 2 row #101 residual)', () => {
     // WDC2-P02 (iter-075): ai_opportunity_score added as 40th entry.
     // Batch A (2026-06-12): date_recorded added as 7th display column.
-    expect(WORKFLOW_DASHBOARD_COLUMNS.length).toBe(40);
+    // Row #101 (WDC2-P02) residual: cycle_time_stddev_ms +
+    // cycle_time_coefficient_of_variation added as 41st/42nd entries.
+    expect(WORKFLOW_DASHBOARD_COLUMNS.length).toBe(42);
   });
 
   it('A2: every ColumnKey is unique across the catalog', () => {
@@ -449,15 +454,18 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — determinism + helpers (Group E)', () =>
     expect(getColumnByKey('not_a_real_column_key')).toBeUndefined();
   });
 
-  it('E3: listColumnKeys() returns all 40 keys', () => {
+  it('E3: listColumnKeys() returns all 42 keys', () => {
     // WDC2-P02 (iter-075): ai_opportunity_score added → 40 total.
+    // Row #101 (WDC2-P02) residual: 2 more added → 42 total.
     const keys = listColumnKeys();
-    expect(keys.length).toBe(40);
+    expect(keys.length).toBe(42);
     expect(keys).toContain('workflow_title');
     expect(keys).toContain('date_recorded');
     expect(keys).toContain('cycle_time_ms');
     expect(keys).toContain('max_wait_step_id');
     expect(keys).toContain('ai_opportunity_score');
+    expect(keys).toContain('cycle_time_stddev_ms');
+    expect(keys).toContain('cycle_time_coefficient_of_variation');
   });
 
   it('E4: accessor calls are deterministic — same context → identical output across repeats', () => {
@@ -850,6 +858,133 @@ describe('Wave A statistical columns — WDC2-P02 (Group H, iter-075)', () => {
       expect(accessor({ ...baseCtx, referenceNowMs: 1_800_000_000_000 })).toEqual(reference);
       expect(accessor({ ...baseCtx, referenceNowMs: 0 })).toEqual(reference);
       // Different time ranges must not change the output:
+      for (const range of ranges) {
+        expect(accessor({ ...baseCtx, activeTimeRange: range })).toEqual(reference);
+      }
+    }
+  });
+});
+
+// ── Group I: row #101 (WDC2-P02) residual — cycle_time_stddev_ms +
+//            cycle_time_coefficient_of_variation ────────────────────────────
+//
+// Row #101 originally claimed 8 statistical columns were missing or
+// mis-classified. Six were already shipped (Group H above). These 2 were
+// genuinely absent: `cycle_time_stddev_ms` and
+// `cycle_time_coefficient_of_variation`, both sourced from
+// `intelligenceJson.variance.durationVariance` (VarianceReport.durationVariance
+// per packages/intelligence-engine/src/types.ts:200-204). Both gate at N≥5
+// (MIN_RUNS_STAT), same threshold family as the other Wave A std-dev columns.
+
+describe('Row #101 (WDC2-P02) residual — cycle_time_stddev_ms + cycle_time_coefficient_of_variation (Group I)', () => {
+  it('I1: both columns have availability="available" and non-null accessor (IFF invariant)', () => {
+    const keys = ['cycle_time_stddev_ms', 'cycle_time_coefficient_of_variation'] as const;
+    for (const key of keys) {
+      const col = getColumnByKey(key);
+      expect(col, `column '${key}' must be in registry`).toBeDefined();
+      expect(col!.availability, `column '${key}' must be available`).toBe('available');
+      expect(col!.accessor, `column '${key}' must have non-null accessor`).not.toBeNull();
+    }
+  });
+
+  it('I2: minRunsRequired is 5 on both column definitions, matching accessor enforcement', () => {
+    expect(getColumnByKey('cycle_time_stddev_ms')!.minRunsRequired).toBe(5);
+    expect(getColumnByKey('cycle_time_coefficient_of_variation')!.minRunsRequired).toBe(5);
+  });
+
+  it('I3: label ≤ 24 chars and description ≤ 80 chars for both columns', () => {
+    for (const key of ['cycle_time_stddev_ms', 'cycle_time_coefficient_of_variation'] as const) {
+      const col = getColumnByKey(key)!;
+      expect(col.label.length, `${key} label length`).toBeGreaterThan(0);
+      expect(col.label.length, `${key} label length`).toBeLessThanOrEqual(24);
+      expect(col.description.length, `${key} description length`).toBeGreaterThan(0);
+      expect(col.description.length, `${key} description length`).toBeLessThanOrEqual(80);
+    }
+  });
+
+  it('I4: both accessors return null when runs is null (unprocessed workflow)', () => {
+    const ctx = makeContext({
+      metricsV2: makeMetricsV2({
+        runs: null,
+        cycleTimeStdDevMs: 9100,
+        cycleTimeCoefficientOfVariation: 0.21,
+      }),
+    });
+    expect(accessCycleTimeStdDevMs(ctx)).toBeNull();
+    expect(accessCycleTimeCoefficientOfVariation(ctx)).toBeNull();
+  });
+
+  it('I5: both accessors return null when runs < 5 (below threshold)', () => {
+    const ctx = makeContext({
+      metricsV2: makeMetricsV2({
+        runs: 4,
+        cycleTimeStdDevMs: 9100,
+        cycleTimeCoefficientOfVariation: 0.21,
+      }),
+    });
+    expect(accessCycleTimeStdDevMs(ctx)).toBeNull();
+    expect(accessCycleTimeCoefficientOfVariation(ctx)).toBeNull();
+  });
+
+  it('I6: both accessors return the correct value when runs is 5 (threshold met exactly)', () => {
+    const ctx = makeContext({
+      metricsV2: makeMetricsV2({
+        runs: 5,
+        cycleTimeStdDevMs: 9100,
+        cycleTimeCoefficientOfVariation: 0.21,
+      }),
+    });
+    expect(accessCycleTimeStdDevMs(ctx)).toBe(9100);
+    expect(accessCycleTimeCoefficientOfVariation(ctx)).toBeCloseTo(0.21, 5);
+  });
+
+  it('I7: both accessors return null when the underlying value is null, even at high N', () => {
+    const ctx = makeContext({
+      metricsV2: makeMetricsV2({
+        runs: 100,
+        cycleTimeStdDevMs: null,
+        cycleTimeCoefficientOfVariation: null,
+      }),
+    });
+    expect(accessCycleTimeStdDevMs(ctx)).toBeNull();
+    expect(accessCycleTimeCoefficientOfVariation(ctx)).toBeNull();
+  });
+
+  it('I8: both accessors are deterministic — same context produces identical output across 3 calls', () => {
+    const ctx = makeContext({
+      metricsV2: makeMetricsV2({
+        runs: 10,
+        cycleTimeStdDevMs: 9100,
+        cycleTimeCoefficientOfVariation: 0.21,
+      }),
+    });
+    for (const accessor of [accessCycleTimeStdDevMs, accessCycleTimeCoefficientOfVariation]) {
+      const r1 = accessor(ctx);
+      const r2 = accessor(ctx);
+      const r3 = accessor(ctx);
+      expect(r1).toEqual(r2);
+      expect(r2).toEqual(r3);
+    }
+  });
+
+  it('I9: both column keys are present in AVAILABLE_ACCESSORS', () => {
+    expect(AVAILABLE_ACCESSORS['cycle_time_stddev_ms']).toBeDefined();
+    expect(AVAILABLE_ACCESSORS['cycle_time_coefficient_of_variation']).toBeDefined();
+  });
+
+  it('I10: both accessors are lifetime — output unchanged across referenceNowMs and activeTimeRange values', () => {
+    const baseCtx = makeContext({
+      metricsV2: makeMetricsV2({
+        runs: 10,
+        cycleTimeStdDevMs: 9100,
+        cycleTimeCoefficientOfVariation: 0.21,
+      }),
+    });
+    const ranges: TimeRange[] = ['7d', '30d', '90d', 'all'];
+    for (const accessor of [accessCycleTimeStdDevMs, accessCycleTimeCoefficientOfVariation]) {
+      const reference = accessor({ ...baseCtx, referenceNowMs: 1_700_000_000_000, activeTimeRange: 'all' });
+      expect(accessor({ ...baseCtx, referenceNowMs: 1_800_000_000_000 })).toEqual(reference);
+      expect(accessor({ ...baseCtx, referenceNowMs: 0 })).toEqual(reference);
       for (const range of ranges) {
         expect(accessor({ ...baseCtx, activeTimeRange: range })).toEqual(reference);
       }
