@@ -33,6 +33,8 @@
  * of the app) rather than a code change across six call sites.
  */
 
+import { recordForwardedForShape } from './proxy-observation.js';
+
 /**
  * Minimal shape this module needs from a request — deliberately looser than
  * `NextRequest` so it works against NextAuth's `request` parameter (which can
@@ -50,7 +52,13 @@ export interface ClientIpRequestLike {
  * Absent, blank, non-numeric, or negative → 0 (today's behavior: trust
  * nothing, take the first XFF entry).
  */
-function getTrustedProxyHops(): number {
+/**
+ * Exported so `proxy-observation.ts` can report the SAME number this module
+ * acts on. A second copy of this parser drifted immediately when written:
+ * `parseInt('1.5')` is 1, `Number('1.5')` is not an integer and yields 0.
+ * One parser, one answer.
+ */
+export function getTrustedProxyHops(): number {
   const raw = process.env.TRUSTED_PROXY_HOPS;
   if (raw === undefined) return 0;
 
@@ -95,6 +103,16 @@ function parseForwardedForEntries(rawHeader: string): string[] {
 export function getClientIp(req: ClientIpRequestLike | null | undefined): string {
   const xffRaw = req?.headers?.get?.('x-forwarded-for');
   const entries = xffRaw ? parseForwardedForEntries(xffRaw) : [];
+
+  // Record the SHAPE only — how many entries, never which. This is what makes
+  // the trusted-hop count measurable instead of guessed; see
+  // `proxy-observation.ts`. It must never affect the value returned below, and
+  // must never throw: this function is on the login path.
+  try {
+    recordForwardedForShape(entries.length);
+  } catch {
+    /* observation is diagnostic; never let it break address derivation */
+  }
 
   if (entries.length > 0) {
     const hops = getTrustedProxyHops();

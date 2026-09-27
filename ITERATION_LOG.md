@@ -4,6 +4,22 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-27 (loop 53) — Making the blocking fact measurable (Mode 1, coordinator)
+
+- **Candidate Selection: `directed` — #225 support.** Not the top score. Chosen because #225 is the highest-value blocked item in the pool, MR-032 and MR-033 both said so, and it has been blocked for three loops on **one fact about infrastructure**. Rather than ask again, I made the app measure it.
+- **`reverse-portfolio-drift: user-ack` — D-1 at 10.** Still no unblocked extension row; #216's status now carries its blocker in the field.
+- **I rejected #8 after verifying it.** It was the obvious next pick at score 9, but its premise is weaker than written: the row assumes a `{data, error, meta}` envelope, and the codebase convention is `{ error }` — **207 occurrences**. Next.js already returns a 500 on an uncaught throw, so a wrapper buys consistent JSON bodies and tagged logging, not leak prevention. Worth doing, not worth a loop ahead of a live auth bypass.
+- **What shipped:** `lib/proxy-observation.ts` counts how many entries each inbound `x-forwarded-for` carried, and `data.proxyChain` on `/api/admin/operations` reports the distribution, the minimum, whether the sample is trustworthy, a suggested value, **and what is configured right now** — so the gap between evidence and configuration is visible in one place rather than inferred.
+- **The inference is stated with its limit, not asserted.** Proxies append and never remove, so no caller can produce a chain **shorter** than the true hop count — the minimum is safe from below, which is the direction that matters, because guessing high is the outage. If literally every request carried a spoofed header the minimum would overstate; `honestSampleLikely` exists so that judgement is visible rather than buried.
+- **Privacy is structural, not promised.** No address is stored, logged or returned — the recording function takes a **number**, and a test with `@ts-expect-error` asserts an address cannot be passed. Another test asserts the serialized section contains no string values at all, so an IP could not appear even by accident.
+- **A test caught me committing the exact defect I closed last loop.** I wrote a second copy of the trusted-hop parser, and the two disagreed immediately: `parseInt('1.5')` is 1, `Number('1.5')` is not an integer and yields 0. One loop after shipping a single-source-of-truth fix for a duplicated `stdDev`, I duplicated a parser. Deleted; `getTrustedProxyHops` is now exported from `client-ip.ts` and there is one parser with one answer.
+- **And I made the same naive-guard mistake twice in one loop.** Both times I checked `if 'proxy-observation' not in source` before inserting an import — and both times the string matched a **doc comment I had just written**, so the import was silently skipped. The first cost a re-run; the second produced the loop's only typecheck failure. A substring is not an import.
+- **Validation:** web-app **3153 → 3167** (+14); workspace **4954**; typecheck **0** across 11 packages; admin operations route 35/35 unchanged; validator clean.
+- **Follow-ups:** 0 created. #225 stays open — the variable is the CEO's to set — but the work left is reading a number from an admin page, not investigating a host's proxy.
+- **Meta-review cadence:** 3 loops since MR-033 — MR-034 due next.
+
+---
+
 ## 2026-09-27 (loop 52) — One source of truth for duration statistics (Mode 1, `backend-engineer`)
 
 - **Candidate Selection: `directed` — #227 (13)**, the row I filed at loop 51 from auditing my own "the value already existed and the consumer discarded it" question. Taken to completion in one loop because its three parts are one outcome: duration statistics get a single source, and everything already computed becomes reachable.

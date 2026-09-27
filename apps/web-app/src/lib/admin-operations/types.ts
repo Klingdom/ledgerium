@@ -1,5 +1,6 @@
 import type { BillingModeReport } from './billing-mode';
 import type { WebhookCoverageReport } from './webhook-coverage';
+import type { ProxyChainSection } from '../proxy-observation.js';
 
 /**
  * TypeScript interface for the Admin Operations Dashboard API response.
@@ -270,6 +271,19 @@ export interface AdminOperationsResponse {
    * mode enum and booleans (see `billing-mode.ts` § SECRECY).
    */
   billingMode: BillingModeReport & { webhookCoverage: WebhookCoverageReport };
+  /**
+   * Section 8 — observed `x-forwarded-for` shape.
+   *
+   * Exists to answer one question that blocks a real security fix: how many
+   * reverse proxies sit in front of this app. The auth rate limits currently
+   * key on the first XFF entry, which the caller controls, and the correct fix
+   * needs a hop count that cannot be read from this repository because the
+   * proxy is provisioned by the host. This measures it from live traffic.
+   *
+   * Counts only — no address is stored or returned. See
+   * `lib/proxy-observation.ts` for how to read `minEntryCount`.
+   */
+  proxyChain: ProxyChainSection;
 }
 
 // ── API envelope ───────────────────────────────────────────────────────────────

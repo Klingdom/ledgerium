@@ -6,6 +6,23 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-27] - The app now measures the one thing blocking a security fix
+
+**Why:** the limits protecting login, signup and password reset can be bypassed by sending a header. The fix needs one number — how many proxies sit in front of the app — and that number cannot be read from the code, because the proxy is provided by the host. It has been waiting on that for three rounds of work. So the app now works it out from real traffic.
+
+### Added
+- The admin operations page now reports what inbound requests actually look like, and **tells you the value to use**, alongside what is currently configured, so the gap is visible at a glance.
+- **No addresses are recorded** — only how many entries each header carried. That is enforced by the code's shape, not by a promise: the function physically takes a number, and a test fails if that ever changes.
+
+### What you need to do
+- Open the admin operations page and read `proxyChain.suggestedTrustedProxyHops`. If it shows a number, set `TRUSTED_PROXY_HOPS` to it and redeploy — no code change. If it shows nothing yet, there is not enough traffic; check again later.
+- Full instructions, including how to undo it instantly, are in `docs/runbooks/TRUSTED_PROXY_HOPS.md`.
+
+### Why it was not simply fixed
+- Guessing too high would make every visitor look like the same person, so one person's failed logins would lock out everyone. That outage would be worse than the problem. Measuring removes the guess.
+
+---
+
 ## [2026-09-27] - Three more figures reach the workflow columns, and a statistic stops being calculated twice
 
 **Why:** while checking yesterday's work I found the same standard deviation being worked out in two different places, and three other figures being calculated on every analysis and then shown nowhere.

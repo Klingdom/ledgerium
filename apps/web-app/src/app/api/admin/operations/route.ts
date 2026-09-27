@@ -26,6 +26,7 @@ import { auth } from '@/lib/auth';
 import { isAdminUnlimited } from '@/lib/admin-allowlist';
 import { deriveBillingMode } from '@/lib/admin-operations/billing-mode';
 import { checkWebhookCoverage } from '@/lib/admin-operations/webhook-coverage';
+import { getProxyChainObservations } from '@/lib/proxy-observation';
 import {
   getUserVolume,
   getRecordingVolume,
@@ -123,6 +124,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Memory is synchronous — no async needed
     const memoryUsage = getMemoryUsage();
 
+    // Row #225 support: in-process counters, no I/O. Reports how many
+    // x-forwarded-for entries inbound requests carry, which is the one
+    // fact needed to set TRUSTED_PROXY_HOPS safely.
+    const proxyChain = getProxyChainObservations();
+
     const queryDurationMs = Date.now() - startMs;
 
     // ── Assemble KPI tiles ─────────────────────────────────────────────────────
@@ -169,6 +175,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             warnings: [...base.warnings, ...webhookCoverage.warnings],
           };
         })(),
+        proxyChain,
       },
       error: null,
       meta: {
