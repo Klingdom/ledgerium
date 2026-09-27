@@ -6,6 +6,24 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-27] - The last place the engine looked at the clock
+
+**Why:** analysing the same recording twice could produce two slightly different results, purely because the code read the current time while working. Two of the three places doing that were fixed earlier in the week. This is the third.
+
+### Fixed
+- The workflow interpreter no longer reads the clock itself; the time is handed to it once per request. **Analysing identical evidence twice now produces identical output, byte for byte.**
+- There is now an automatic check that fails the build if any file in that engine starts reading the clock again, so this cannot quietly come back.
+
+### Work list corrections
+- **Three more items were already done** and had never been struck off — including one ranked near the top, which was built back in May, and which a check in this same list had wrongly certified as "still open, with evidence" four months later.
+- Two more had figures that were badly out of date: one claimed three settings were missing that are plainly present, another counted 364 problems where there are now 67.
+- One genuinely blocked item was recorded as simply "open", so it looked available to anything scanning the list. It now says what it is waiting on.
+
+### Found while checking my own work
+- The same statistic is calculated in two different places from the same data. Nothing is wrong today, but that is precisely how an earlier bug started, where two parts of the system quietly disagreed. Recorded with the evidence.
+
+---
+
 ## [2026-09-26] - Workflow cards can now show how consistent a process is
 
 **Why:** you asked for average time, standard deviation, and similar figures on workflow cards. Average and median were already there. Spread was not.

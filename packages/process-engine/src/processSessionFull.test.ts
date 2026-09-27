@@ -15,6 +15,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { processSessionFull } from './processSessionFull.js';
+import { interpretWorkflow } from './workflowInterpreter.js';
 import type { ProcessEngineInput } from './types.js';
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
@@ -384,5 +385,67 @@ describe('processSessionFull — override forwarding', () => {
   it('overrides are forwarded: explicit sop template type appears in artifacts.selection', () => {
     const { artifacts } = processSessionFull(makeInput(), { sop: 'enterprise' });
     expect(artifacts.selection.sop.template).toBe('enterprise');
+  });
+});
+
+// ── Row #110 (loop 51): interpretWorkflow reads no clock of its own ──────────
+//
+// This was the third and last wall-clock leak in process-engine; loops 43 and
+// 45 closed the other two. Reading `new Date()` inside the engine meant two
+// interpretations of byte-identical evidence differed, and nothing could
+// assert on `computedAt` without faking timers.
+//
+// `computedAt` genuinely IS a wall-clock fact, unlike `generatedAt` at loop 43
+// (an observation date, now omitted when unknown), so it is injected rather
+// than dropped.
+
+describe('row #110: interpretWorkflow derives computedAt from the injected clock', () => {
+  const FIXED_NOW_MS = 1_773_489_600_000; // 2026-03-14T12:00:00.000Z
+
+  it('uses the supplied instant, not the wall clock', () => {
+    const { output } = processSessionFull(makeInput());
+    const result = interpretWorkflow(output, FIXED_NOW_MS);
+    expect(result.computedAt).toBe(new Date(FIXED_NOW_MS).toISOString());
+  });
+
+  it('is byte-identical across repeated runs of identical evidence', () => {
+    const { output } = processSessionFull(makeInput());
+    const runs = Array.from({ length: 5 }, () =>
+      JSON.stringify(interpretWorkflow(output, FIXED_NOW_MS)),
+    );
+    expect(new Set(runs).size).toBe(1);
+  });
+
+  it('advancing the clock moves computedAt by exactly that much', () => {
+    const { output } = processSessionFull(makeInput());
+    const a = interpretWorkflow(output, FIXED_NOW_MS).computedAt;
+    const b = interpretWorkflow(output, FIXED_NOW_MS + 3_600_000).computedAt;
+    expect(Date.parse(b) - Date.parse(a)).toBe(3_600_000);
+  });
+
+  it('changes nothing else when only the clock changes', () => {
+    const { output } = processSessionFull(makeInput());
+    const a = interpretWorkflow(output, FIXED_NOW_MS);
+    const b = interpretWorkflow(output, FIXED_NOW_MS + 86_400_000);
+    const strip = (r: typeof a) => JSON.stringify({ ...r, computedAt: null });
+    expect(strip(a)).toBe(strip(b));
+  });
+
+  it('no module in this package reads the wall clock', async () => {
+    // Drift guard. The same shape as the admin-queries guard at loop 45: if a
+    // `new Date()` or `Date.now()` returns to any source file here, this fails
+    // rather than the next determinism audit finding it months later.
+    const { readdirSync, readFileSync } = await import('node:fs');
+    const { fileURLToPath } = await import('node:url');
+    const dir = fileURLToPath(new URL('.', import.meta.url));
+    const offenders: string[] = [];
+    for (const f of readdirSync(dir)) {
+      if (!f.endsWith('.ts') || f.endsWith('.test.ts')) continue;
+      const src = readFileSync(`${dir}${f}`, 'utf-8')
+        .replace(/\/\*\*[\s\S]*?\*\//g, '')
+        .replace(/\/\/[^\n]*/g, '');
+      if (/new Date\(\)|Date\.now\(\)/.test(src)) offenders.push(f);
+    }
+    expect(offenders).toEqual([]);
   });
 });

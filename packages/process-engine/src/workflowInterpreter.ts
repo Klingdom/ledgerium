@@ -115,7 +115,16 @@ export interface WorkflowInterpretation {
 
 // ─── Main interpreter ───────────────────────────────────────────────────────
 
-export function interpretWorkflow(output: ProcessOutput): WorkflowInterpretation {
+export function interpretWorkflow(
+  output: ProcessOutput,
+  /**
+   * Single upstream clock boundary, supplied by the caller (iter-037 pattern,
+   * as applied at loops 43 and 45). Mandatory rather than defaulted: there is
+   * exactly one call site, and a default would quietly re-admit the
+   * non-determinism this parameter exists to remove.
+   */
+  referenceNowMs: number,
+): WorkflowInterpretation {
   const { processRun, processDefinition, processMap, sop } = output;
   const steps = processDefinition.stepDefinitions;
   const systems = processRun.systemsUsed;
@@ -158,7 +167,13 @@ export function interpretWorkflow(output: ProcessOutput): WorkflowInterpretation
     systemCount: systems.length,
     systems,
     durationMs: processRun.durationMs ?? null,
-    computedAt: new Date().toISOString(),
+    // Row #110 (loop 51): the third and last determinism leak in this package.
+    // Read from the wall clock here, two interpretations of byte-identical
+    // evidence differed, and nothing could assert on this field without faking
+    // timers. `computedAt` genuinely IS a wall-clock fact — unlike `generatedAt`
+    // at loop 43, which is an observation date and is now omitted when unknown —
+    // so it is injected from the caller's single boundary rather than dropped.
+    computedAt: new Date(referenceNowMs).toISOString(),
   };
 }
 

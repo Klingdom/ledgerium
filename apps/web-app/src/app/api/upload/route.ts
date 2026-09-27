@@ -156,7 +156,10 @@ export async function POST(req: NextRequest) {
 
     let interpretation;
     try {
-      interpretation = interpretWorkflow(processOutput);
+      // Row #110: one clock reading for this request. The engine no longer
+      // reads the wall clock itself, so two interpretations of identical
+      // evidence are now byte-identical.
+      interpretation = interpretWorkflow(processOutput, Date.now());
     } catch (err) {
       console.error('Workflow interpretation failed (non-blocking):', err);
       interpretation = null;
