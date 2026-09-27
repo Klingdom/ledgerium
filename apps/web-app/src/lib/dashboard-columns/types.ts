@@ -90,7 +90,10 @@ export type ColumnKey =
   | 'completion_rate_per_day'
   | 'cycle_time_mean_ms'
   | 'cycle_time_median_ms'
+  | 'cycle_time_p90_ms'
   | 'cycle_time_p95_ms'
+  | 'cycle_time_min_ms'
+  | 'cycle_time_max_ms'
   | 'cycle_time_stddev_ms'
   | 'cycle_time_coefficient_of_variation'
   // ── Layer 2: Step performance (6 Tier A) ────────────────────────────────────

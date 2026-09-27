@@ -156,6 +156,14 @@ export interface StepPositionTimestudy {
 /**
  * Timestudy analysis covering total process duration and per-step durations.
  * Satisfies intelligence spec §15.2.2 and task requirement for timestudy features.
+ *
+ * Row #227: `totalDuration` intentionally has no `stdDevMs` field. Standard
+ * deviation of total run duration has a single source of truth at
+ * `VarianceReport.durationVariance.stdDevMs` (produced by `analyzeVariance()`
+ * from the same `durations` array). Before row #227, both analyzers computed
+ * `stdDev(durations)` independently from byte-identical inputs — two sources
+ * of truth for one number. Consumers needing total-duration std-dev must read
+ * `variance.durationVariance.stdDevMs`.
  */
 export interface TimestudyResult {
   ruleVersion: string;
@@ -167,7 +175,6 @@ export interface TimestudyResult {
     p90Ms: number | null;
     minMs: number | null;
     maxMs: number | null;
-    stdDevMs: number | null;
   };
   stepPositionTimestudies: StepPositionTimestudy[];
   evidenceRunIds: string[];

@@ -41,6 +41,10 @@ import {
   // Row #101 (WDC2-P02) residual — genuinely-missing statistical columns:
   accessCycleTimeStdDevMs,
   accessCycleTimeCoefficientOfVariation,
+  // Row #227 — totalDuration statistics reach a column:
+  accessCycleTimeP90Ms,
+  accessCycleTimeMinMs,
+  accessCycleTimeMaxMs,
 } from './index.js';
 import type { ColumnAccessorContext, ColumnKey, TimeRange } from './types.js';
 import type { WorkflowMetricsOutput } from '../workflow-metrics.js';
@@ -91,12 +95,14 @@ function makeContext(overrides: Partial<ColumnAccessorContext> = {}): ColumnAcce
 // ── Group A: Catalog completeness ─────────────────────────────────────────────
 
 describe('WORKFLOW_DASHBOARD_COLUMNS — catalog completeness (Group A)', () => {
-  it('A1: catalog enumerates exactly 42 columns (7 display + 32 Tier A + ai_opportunity_score + 2 row #101 residual)', () => {
+  it('A1: catalog enumerates exactly 45 columns (7 display + 32 Tier A + ai_opportunity_score + 2 row #101 residual + 3 row #227 residual)', () => {
     // WDC2-P02 (iter-075): ai_opportunity_score added as 40th entry.
     // Batch A (2026-06-12): date_recorded added as 7th display column.
     // Row #101 (WDC2-P02) residual: cycle_time_stddev_ms +
     // cycle_time_coefficient_of_variation added as 41st/42nd entries.
-    expect(WORKFLOW_DASHBOARD_COLUMNS.length).toBe(42);
+    // Row #227 residual: cycle_time_p90_ms, cycle_time_min_ms,
+    // cycle_time_max_ms added as 43rd/44th/45th entries.
+    expect(WORKFLOW_DASHBOARD_COLUMNS.length).toBe(45);
   });
 
   it('A2: every ColumnKey is unique across the catalog', () => {
@@ -454,11 +460,12 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — determinism + helpers (Group E)', () =>
     expect(getColumnByKey('not_a_real_column_key')).toBeUndefined();
   });
 
-  it('E3: listColumnKeys() returns all 42 keys', () => {
+  it('E3: listColumnKeys() returns all 45 keys', () => {
     // WDC2-P02 (iter-075): ai_opportunity_score added → 40 total.
     // Row #101 (WDC2-P02) residual: 2 more added → 42 total.
+    // Row #227 residual: 3 more added → 45 total.
     const keys = listColumnKeys();
-    expect(keys.length).toBe(42);
+    expect(keys.length).toBe(45);
     expect(keys).toContain('workflow_title');
     expect(keys).toContain('date_recorded');
     expect(keys).toContain('cycle_time_ms');
@@ -466,6 +473,9 @@ describe('WORKFLOW_DASHBOARD_COLUMNS — determinism + helpers (Group E)', () =>
     expect(keys).toContain('ai_opportunity_score');
     expect(keys).toContain('cycle_time_stddev_ms');
     expect(keys).toContain('cycle_time_coefficient_of_variation');
+    expect(keys).toContain('cycle_time_p90_ms');
+    expect(keys).toContain('cycle_time_min_ms');
+    expect(keys).toContain('cycle_time_max_ms');
   });
 
   it('E4: accessor calls are deterministic — same context → identical output across repeats', () => {
@@ -989,5 +999,164 @@ describe('Row #101 (WDC2-P02) residual — cycle_time_stddev_ms + cycle_time_coe
         expect(accessor({ ...baseCtx, activeTimeRange: range })).toEqual(reference);
       }
     }
+  });
+});
+
+// ── Group J: row #227 — totalDuration statistics reach a column
+//            (cycle_time_p90_ms, cycle_time_min_ms, cycle_time_max_ms) ───────
+//
+// The engine has always computed `timestudy.totalDuration.{p90Ms,minMs,maxMs}`
+// and stored them in intelligenceJson, but no registry column ever surfaced
+// them. p90 gates at N≥5 (MIN_RUNS_STAT, same family as cycle_time_stddev_ms /
+// cycle_time_coefficient_of_variation); min and max gate at N≥2
+// (MIN_RUNS_MEAN_MEDIAN, same family as cycle_time_median_ms) — a minimum and
+// a maximum are meaningful as soon as there are two runs.
+//
+// Row #227 also removed `totalDuration.stdDevMs` from the engine's output
+// (duplicate of `variance.durationVariance.stdDevMs`); that removal is
+// verified in packages/intelligence-engine, not here — this group covers only
+// the three newly-surfaced columns.
+
+describe('Row #227 — cycle_time_p90_ms / cycle_time_min_ms / cycle_time_max_ms (Group J)', () => {
+  it('J1: all 3 columns have availability="available" and non-null accessor (IFF invariant)', () => {
+    const keys = ['cycle_time_p90_ms', 'cycle_time_min_ms', 'cycle_time_max_ms'] as const;
+    for (const key of keys) {
+      const col = getColumnByKey(key);
+      expect(col, `column '${key}' must be in registry`).toBeDefined();
+      expect(col!.availability, `column '${key}' must be available`).toBe('available');
+      expect(col!.accessor, `column '${key}' must have non-null accessor`).not.toBeNull();
+    }
+  });
+
+  it('J2: minRunsRequired is 5 for p90 and 2 for min/max, matching accessor enforcement', () => {
+    expect(getColumnByKey('cycle_time_p90_ms')!.minRunsRequired).toBe(5);
+    expect(getColumnByKey('cycle_time_min_ms')!.minRunsRequired).toBe(2);
+    expect(getColumnByKey('cycle_time_max_ms')!.minRunsRequired).toBe(2);
+  });
+
+  it('J3: label ≤ 24 chars and description ≤ 80 chars for all 3 columns', () => {
+    for (const key of ['cycle_time_p90_ms', 'cycle_time_min_ms', 'cycle_time_max_ms'] as const) {
+      const col = getColumnByKey(key)!;
+      expect(col.label.length, `${key} label length`).toBeGreaterThan(0);
+      expect(col.label.length, `${key} label length`).toBeLessThanOrEqual(24);
+      expect(col.description.length, `${key} description length`).toBeGreaterThan(0);
+      expect(col.description.length, `${key} description length`).toBeLessThanOrEqual(80);
+    }
+  });
+
+  it('J4: all 3 accessors return null when runs is null (unprocessed workflow)', () => {
+    const ctx = makeContext({
+      metricsV2: makeMetricsV2({
+        runs: null,
+        cycleTimeP90Ms: 42_000,
+        cycleTimeMinMs: 5_000,
+        cycleTimeMaxMs: 90_000,
+      }),
+    });
+    expect(accessCycleTimeP90Ms(ctx)).toBeNull();
+    expect(accessCycleTimeMinMs(ctx)).toBeNull();
+    expect(accessCycleTimeMaxMs(ctx)).toBeNull();
+  });
+
+  it('J5: cycle_time_p90_ms returns null below N≥5 and the correct value at N≥5', () => {
+    const below = makeContext({ metricsV2: makeMetricsV2({ runs: 4, cycleTimeP90Ms: 42_000 }) });
+    expect(accessCycleTimeP90Ms(below)).toBeNull();
+
+    const atThreshold = makeContext({ metricsV2: makeMetricsV2({ runs: 5, cycleTimeP90Ms: 42_000 }) });
+    expect(accessCycleTimeP90Ms(atThreshold)).toBe(42_000);
+  });
+
+  it('J6: cycle_time_min_ms and cycle_time_max_ms return null below N≥2 and the correct value at N≥2', () => {
+    const below = makeContext({
+      metricsV2: makeMetricsV2({ runs: 1, cycleTimeMinMs: 5_000, cycleTimeMaxMs: 90_000 }),
+    });
+    expect(accessCycleTimeMinMs(below)).toBeNull();
+    expect(accessCycleTimeMaxMs(below)).toBeNull();
+
+    const atThreshold = makeContext({
+      metricsV2: makeMetricsV2({ runs: 2, cycleTimeMinMs: 5_000, cycleTimeMaxMs: 90_000 }),
+    });
+    expect(accessCycleTimeMinMs(atThreshold)).toBe(5_000);
+    expect(accessCycleTimeMaxMs(atThreshold)).toBe(90_000);
+  });
+
+  it('J7: all 3 accessors return null when the underlying value is null, even at high N', () => {
+    const ctx = makeContext({
+      metricsV2: makeMetricsV2({
+        runs: 100,
+        cycleTimeP90Ms: null,
+        cycleTimeMinMs: null,
+        cycleTimeMaxMs: null,
+      }),
+    });
+    expect(accessCycleTimeP90Ms(ctx)).toBeNull();
+    expect(accessCycleTimeMinMs(ctx)).toBeNull();
+    expect(accessCycleTimeMaxMs(ctx)).toBeNull();
+  });
+
+  it('J8: all 3 accessors are deterministic — same context produces identical output across 3 calls', () => {
+    const ctx = makeContext({
+      metricsV2: makeMetricsV2({
+        runs: 10,
+        cycleTimeP90Ms: 42_000,
+        cycleTimeMinMs: 5_000,
+        cycleTimeMaxMs: 90_000,
+      }),
+    });
+    for (const accessor of [accessCycleTimeP90Ms, accessCycleTimeMinMs, accessCycleTimeMaxMs]) {
+      const r1 = accessor(ctx);
+      const r2 = accessor(ctx);
+      const r3 = accessor(ctx);
+      expect(r1).toEqual(r2);
+      expect(r2).toEqual(r3);
+    }
+  });
+
+  it('J9: all 3 column keys are present in AVAILABLE_ACCESSORS', () => {
+    expect(AVAILABLE_ACCESSORS['cycle_time_p90_ms']).toBeDefined();
+    expect(AVAILABLE_ACCESSORS['cycle_time_min_ms']).toBeDefined();
+    expect(AVAILABLE_ACCESSORS['cycle_time_max_ms']).toBeDefined();
+  });
+
+  it('J10: all 3 accessors are lifetime — output unchanged across referenceNowMs and activeTimeRange values', () => {
+    const baseCtx = makeContext({
+      metricsV2: makeMetricsV2({
+        runs: 10,
+        cycleTimeP90Ms: 42_000,
+        cycleTimeMinMs: 5_000,
+        cycleTimeMaxMs: 90_000,
+      }),
+    });
+    const ranges: TimeRange[] = ['7d', '30d', '90d', 'all'];
+    for (const accessor of [accessCycleTimeP90Ms, accessCycleTimeMinMs, accessCycleTimeMaxMs]) {
+      const reference = accessor({ ...baseCtx, referenceNowMs: 1_700_000_000_000, activeTimeRange: 'all' });
+      expect(accessor({ ...baseCtx, referenceNowMs: 1_800_000_000_000 })).toEqual(reference);
+      expect(accessor({ ...baseCtx, referenceNowMs: 0 })).toEqual(reference);
+      for (const range of ranges) {
+        expect(accessor({ ...baseCtx, activeTimeRange: range })).toEqual(reference);
+      }
+    }
+  });
+
+  it('J11: cycle_time_p95_ms stays pending — description names p90 as the available alternative', () => {
+    // Row #227: the registry column originally asked for p95, a statistic the
+    // engine never computed. This lock ensures the honesty-fix (description
+    // update) isn't silently reverted to a claim the engine can't back.
+    const col = getColumnByKey('cycle_time_p95_ms')!;
+    expect(col.availability).toBe('pending-path-c-r1');
+    expect(col.accessor).toBeNull();
+    // Case-insensitive: the description is rendered to users at
+    // ColumnPicker.tsx:825, so it says "P90 Cycle Time" — the column's
+    // label — not the raw key. What must hold is that it points the reader
+    // at the statistic that IS available, not the exact casing.
+    expect(col.description.toLowerCase()).toContain('p90');
+    // And it must not leak internal vocabulary onto a customer surface.
+    expect(col.description).not.toMatch(/engine|cycle_time_|_ms/i);
+    // The column already identifies itself as P95 in its LABEL, so the
+    // description need not repeat it; requiring that forced the copy to
+    // say P95 twice on one row. The honesty property being locked is that
+    // the description states it is unavailable and names what is.
+    expect(col.description.toLowerCase()).toMatch(/not yet available|unavailable/);
+    expect(col.label.toLowerCase()).toContain('p95');
   });
 });

@@ -166,6 +166,15 @@ export interface WorkflowMetricsInput {
    * - cycleTimeCoefficientOfVariation  ← variance.durationVariance.coefficientOfVariation
    *                                      (row #101 / WDC2-P02 residual —
    *                                      stdDev / mean run duration)
+   * - cycleTimeP90Ms                   ← timestudy.totalDuration.p90Ms
+   *                                      (row #227 — 90th-percentile run
+   *                                      duration, in ms)
+   * - cycleTimeMinMs                   ← timestudy.totalDuration.minMs
+   *                                      (row #227 — shortest observed run
+   *                                      duration, in ms)
+   * - cycleTimeMaxMs                   ← timestudy.totalDuration.maxMs
+   *                                      (row #227 — longest observed run
+   *                                      duration, in ms)
    */
   intelligence?: {
     sequenceStability: number | null;
@@ -174,6 +183,9 @@ export interface WorkflowMetricsInput {
     variantCount: number | null;
     cycleTimeStdDevMs: number | null;
     cycleTimeCoefficientOfVariation: number | null;
+    cycleTimeP90Ms: number | null;
+    cycleTimeMinMs: number | null;
+    cycleTimeMaxMs: number | null;
   } | null;
 }
 
@@ -214,6 +226,21 @@ export interface WorkflowMetricsOutput {
    * residual). Source: intelligenceJson.variance.durationVariance.coefficientOfVariation.
    */
   cycleTimeCoefficientOfVariation?: number | null;
+  /**
+   * 90th-percentile run duration in milliseconds (row #227).
+   * Source: intelligenceJson.timestudy.totalDuration.p90Ms.
+   */
+  cycleTimeP90Ms?: number | null;
+  /**
+   * Shortest observed run duration in milliseconds (row #227).
+   * Source: intelligenceJson.timestudy.totalDuration.minMs.
+   */
+  cycleTimeMinMs?: number | null;
+  /**
+   * Longest observed run duration in milliseconds (row #227).
+   * Source: intelligenceJson.timestudy.totalDuration.maxMs.
+   */
+  cycleTimeMaxMs?: number | null;
 }
 
 export interface HealthScoreV2 {
@@ -607,6 +634,10 @@ export function computeWorkflowMetrics(input: WorkflowMetricsInput): WorkflowMet
     // Row #101 (WDC2-P02) residual pass-through:
     cycleTimeStdDevMs: input.intelligence?.cycleTimeStdDevMs ?? null,
     cycleTimeCoefficientOfVariation: input.intelligence?.cycleTimeCoefficientOfVariation ?? null,
+    // Row #227 pass-through:
+    cycleTimeP90Ms: input.intelligence?.cycleTimeP90Ms ?? null,
+    cycleTimeMinMs: input.intelligence?.cycleTimeMinMs ?? null,
+    cycleTimeMaxMs: input.intelligence?.cycleTimeMaxMs ?? null,
   };
 }
 

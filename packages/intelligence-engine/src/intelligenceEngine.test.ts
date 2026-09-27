@@ -295,7 +295,10 @@ describe('analyzeTimestudy', () => {
     expect(ts.totalDuration.medianMs).toBe(6000);
     expect(ts.totalDuration.minMs).toBe(5000);
     expect(ts.totalDuration.maxMs).toBe(8000);
-    expect(ts.totalDuration.stdDevMs).toBeGreaterThan(0);
+    // Row #227: stdDevMs moved off totalDuration — single source of truth is
+    // now VarianceReport.durationVariance.stdDevMs.
+    const variance = analyzeVariance([BUNDLE_A, BUNDLE_B, BUNDLE_C], opts, null);
+    expect(variance.durationVariance.stdDevMs).toBeGreaterThan(0);
   });
 
   it('computes per-step-position statistics', () => {
@@ -340,7 +343,10 @@ describe('analyzeTimestudy', () => {
     const ts = analyzeTimestudy([BUNDLE_A], opts);
     expect(ts.runCount).toBe(1);
     expect(ts.stepPositionTimestudies).toHaveLength(2);
-    expect(ts.totalDuration.stdDevMs).toBeNull(); // need >= 2 for stdDev
+    // Row #227: stdDevMs moved off totalDuration — single source of truth is
+    // now VarianceReport.durationVariance.stdDevMs.
+    const variance = analyzeVariance([BUNDLE_A], opts, null);
+    expect(variance.durationVariance.stdDevMs).toBeNull(); // need >= 2 for stdDev
   });
 
   it('handles empty input', () => {

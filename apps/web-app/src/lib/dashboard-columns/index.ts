@@ -48,6 +48,10 @@ export {
   // Row #101 (WDC2-P02) residual — genuinely-missing statistical columns:
   accessCycleTimeStdDevMs,
   accessCycleTimeCoefficientOfVariation,
+  // Row #227 — totalDuration statistics reach a column:
+  accessCycleTimeP90Ms,
+  accessCycleTimeMinMs,
+  accessCycleTimeMaxMs,
   AVAILABLE_ACCESSORS,
 } from './accessors.js';
 

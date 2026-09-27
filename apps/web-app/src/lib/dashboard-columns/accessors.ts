@@ -199,11 +199,13 @@ export const accessDateRecorded: ColumnAccessor<string> = (ctx) => {
 //   N ≥ 2  — median / mean (need at least two data points)
 //   N ≥ 5  — std-dev / similarity / variant-frequency (stable population)
 
-const MIN_RUNS_MEAN_MEDIAN = 2;   // cycle_time_median_ms
+const MIN_RUNS_MEAN_MEDIAN = 2;   // cycle_time_median_ms, cycle_time_min_ms (row #227),
+                                   // cycle_time_max_ms (row #227)
 const MIN_RUNS_STAT = 5;           // variant_count, top_variant_share_pct,
                                    // path_length_stddev, path_similarity_avg,
                                    // cycle_time_stddev_ms (row #101 residual),
-                                   // cycle_time_coefficient_of_variation (row #101 residual)
+                                   // cycle_time_coefficient_of_variation (row #101 residual),
+                                   // cycle_time_p90_ms (row #227)
 
 /**
  * `variant_count` accessor — distinct path variants in the process group.
@@ -303,6 +305,55 @@ export const accessCycleTimeCoefficientOfVariation: ColumnAccessor<number> = (ct
   return val;
 };
 
+// ── Row #227 accessors — totalDuration statistics reach a column ─────────────
+//
+// The engine has always computed `timestudy.totalDuration.{p90Ms,minMs,maxMs}`
+// and stored them in intelligenceJson; no registry column ever surfaced them.
+// p90 gates at N≥5 (MIN_RUNS_STAT, same family as the other percentile/std-dev
+// statistics); min and max gate at N≥2 (MIN_RUNS_MEAN_MEDIAN) — a minimum and
+// a maximum are meaningful as soon as there are two runs, unlike a percentile.
+
+/**
+ * `cycle_time_p90_ms` accessor — 90th-percentile run duration, in ms.
+ * Source: `metricsV2.cycleTimeP90Ms` ← `intelligenceJson.timestudy.totalDuration.p90Ms`.
+ * Returns null below N≥5 (statistically unreliable population).
+ */
+export const accessCycleTimeP90Ms: ColumnAccessor<number> = (ctx) => {
+  const runs = ctx.metricsV2.runs;
+  if (runs === null || runs < MIN_RUNS_STAT) return null;
+  const val = ctx.metricsV2.cycleTimeP90Ms;
+  if (val == null) return null;
+  return val;
+};
+
+/**
+ * `cycle_time_min_ms` accessor — shortest observed run duration, in ms.
+ * Source: `metricsV2.cycleTimeMinMs` ← `intelligenceJson.timestudy.totalDuration.minMs`.
+ * Returns null below N≥2 (a minimum needs at least two data points to be a
+ * meaningful "shortest of the observed runs" statement).
+ */
+export const accessCycleTimeMinMs: ColumnAccessor<number> = (ctx) => {
+  const runs = ctx.metricsV2.runs;
+  if (runs === null || runs < MIN_RUNS_MEAN_MEDIAN) return null;
+  const val = ctx.metricsV2.cycleTimeMinMs;
+  if (val == null) return null;
+  return val;
+};
+
+/**
+ * `cycle_time_max_ms` accessor — longest observed run duration, in ms.
+ * Source: `metricsV2.cycleTimeMaxMs` ← `intelligenceJson.timestudy.totalDuration.maxMs`.
+ * Returns null below N≥2 (a maximum needs at least two data points to be a
+ * meaningful "longest of the observed runs" statement).
+ */
+export const accessCycleTimeMaxMs: ColumnAccessor<number> = (ctx) => {
+  const runs = ctx.metricsV2.runs;
+  if (runs === null || runs < MIN_RUNS_MEAN_MEDIAN) return null;
+  const val = ctx.metricsV2.cycleTimeMaxMs;
+  if (val == null) return null;
+  return val;
+};
+
 /**
  * `ai_opportunity_score` accessor — 0–100 AI automation opportunity score.
  * Source: `metricsV2.aiOpportunityScore` (already computed by the engine;
@@ -346,6 +397,10 @@ export const AVAILABLE_ACCESSORS: Record<string, ColumnAccessor> = Object.freeze
   // Row #101 (WDC2-P02) residual — genuinely-missing statistical columns:
   cycle_time_stddev_ms: accessCycleTimeStdDevMs as ColumnAccessor,
   cycle_time_coefficient_of_variation: accessCycleTimeCoefficientOfVariation as ColumnAccessor,
+  // Row #227 — totalDuration statistics reach a column:
+  cycle_time_p90_ms: accessCycleTimeP90Ms as ColumnAccessor,
+  cycle_time_min_ms: accessCycleTimeMinMs as ColumnAccessor,
+  cycle_time_max_ms: accessCycleTimeMaxMs as ColumnAccessor,
 });
 
 /**

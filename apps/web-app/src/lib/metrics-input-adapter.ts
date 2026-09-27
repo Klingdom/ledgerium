@@ -26,6 +26,15 @@
  * above, which remain contract-prep-only pass-throughs at the time of this
  * change).
  *
+ * Row #227: also parses `timestudy.totalDuration.{p90Ms,minMs,maxMs}`
+ * (`TimestudyResult.totalDuration` per
+ * packages/intelligence-engine/src/types.ts:160-173) — three statistics the
+ * engine has always computed and stored in intelligenceJson but that no
+ * dashboard column ever surfaced. Note: `totalDuration.stdDevMs` was removed
+ * from the engine's output at row #227 (duplicate of
+ * `variance.durationVariance.stdDevMs`, already parsed above) — it is
+ * intentionally absent from this schema.
+ *
  * Failure modes (all return intelligence = null, never throw):
  *   - intelligenceJson is null              → null
  *   - intelligenceJson is the empty string  → null
@@ -56,6 +65,9 @@ import type { WorkflowMetricsInput } from './workflow-metrics';
 //   - variance.durationVariance.coefficientOfVariation ← VarianceReport.durationVariance
 //   - variants.standardPath.frequency                  ← VariantSet.standardPath (nullable)
 //   - variants.variantCount                            ← VariantSet
+//   - timestudy.totalDuration.p90Ms                    ← TimestudyResult.totalDuration (row #227)
+//   - timestudy.totalDuration.minMs                    ← TimestudyResult.totalDuration (row #227)
+//   - timestudy.totalDuration.maxMs                    ← TimestudyResult.totalDuration (row #227)
 const IntelligenceJsonSchema = z.object({
   variance: z
     .object({
@@ -81,6 +93,23 @@ const IntelligenceJsonSchema = z.object({
           frequency: z.number().nullable().optional(),
         })
         .nullable()
+        .optional(),
+    })
+    .optional(),
+  // Row #227: engine has always computed these on totalDuration; no dashboard
+  // column ever surfaced them. `.optional()` on `timestudy` handles rows
+  // persisted before this field existed on the blob (never throws, per
+  // contract). `totalDuration.stdDevMs` is intentionally NOT parsed here — it
+  // was removed from the engine's output at row #227 as a duplicate of
+  // `variance.durationVariance.stdDevMs`, already parsed above.
+  timestudy: z
+    .object({
+      totalDuration: z
+        .object({
+          p90Ms: z.number().nullable().optional(),
+          minMs: z.number().nullable().optional(),
+          maxMs: z.number().nullable().optional(),
+        })
         .optional(),
     })
     .optional(),
@@ -119,6 +148,10 @@ export function parseIntelligenceJson(raw: string | null): ParsedIntelligence | 
     variantCount: data.variants?.variantCount ?? null,
     cycleTimeStdDevMs: data.variance?.durationVariance?.stdDevMs ?? null,
     cycleTimeCoefficientOfVariation: data.variance?.durationVariance?.coefficientOfVariation ?? null,
+    // Row #227: totalDuration statistics the engine has always computed.
+    cycleTimeP90Ms: data.timestudy?.totalDuration?.p90Ms ?? null,
+    cycleTimeMinMs: data.timestudy?.totalDuration?.minMs ?? null,
+    cycleTimeMaxMs: data.timestudy?.totalDuration?.maxMs ?? null,
   };
 }
 

@@ -37,17 +37,26 @@ const VALID_INTELLIGENCE = {
     variantCount: 3,
     standardPath: { frequency: 0.67 },
   },
+  // Row #227: totalDuration statistics the engine has always computed. Note:
+  // no `stdDevMs` key here — that field was removed from the engine's
+  // TimestudyResult.totalDuration output at row #227 (duplicate of
+  // variance.durationVariance.stdDevMs above); the adapter schema does not
+  // parse it from this path.
+  timestudy: {
+    totalDuration: { meanMs: 118_000, medianMs: 115_000, p90Ms: 142_000, minMs: 95_000, maxMs: 150_000 },
+  },
   // Extended fields produced by intelligence.ts — must be tolerated.
   standardization: { score: 0.5 },
   recommendations: [],
 };
 
 /**
- * Row #101 (WDC2-P02) residual: the standard shape returned by
- * `toMetricsInput`/`parseIntelligenceJson` once the two new
- * `durationVariance`-sourced fields are included. Kept as a single source of
- * truth for the "full payload" expected shape so each test below only needs
- * to spell out the fields it's actually varying.
+ * Row #101 (WDC2-P02) residual + row #227: the standard shape returned by
+ * `toMetricsInput`/`parseIntelligenceJson` once the durationVariance-sourced
+ * fields (row #101) and the totalDuration-sourced fields (row #227) are
+ * included. Kept as a single source of truth for the "full payload" expected
+ * shape so each test below only needs to spell out the fields it's actually
+ * varying.
  */
 const FULL_PARSED_INTELLIGENCE = {
   sequenceStability: 0.83,
@@ -56,6 +65,9 @@ const FULL_PARSED_INTELLIGENCE = {
   variantCount: 3,
   cycleTimeStdDevMs: 9100,
   cycleTimeCoefficientOfVariation: 0.21,
+  cycleTimeP90Ms: 142_000,
+  cycleTimeMinMs: 95_000,
+  cycleTimeMaxMs: 150_000,
 };
 
 /**
@@ -101,15 +113,18 @@ describe('toMetricsInput: WDC-R03 intelligenceJson parsing (iter-049)', () => {
       variantCount: 3,
       cycleTimeStdDevMs: 9100,
       cycleTimeCoefficientOfVariation: 0.21,
+      cycleTimeP90Ms: 142_000,
+      cycleTimeMinMs: 95_000,
+      cycleTimeMaxMs: 150_000,
     });
   });
 
-  it('valid JSON with a full payload → both durationVariance fields (row #101 residual) parse correctly', () => {
+  it('valid JSON with a full payload → both durationVariance fields (row #101 residual) and all 3 totalDuration fields (row #227) parse correctly', () => {
     const result = toMetricsInput(makeWorkflow(JSON.stringify(VALID_INTELLIGENCE)), []);
     expect(result.intelligence).toEqual(FULL_PARSED_INTELLIGENCE);
   });
 
-  it('valid JSON with durationVariance absent (older stored rows) → cycleTime* fields fall through to null, no throw', () => {
+  it('valid JSON with durationVariance absent (older stored rows) → cycleTimeStdDev*/CoV fall through to null, timestudy-sourced fields unaffected, no throw', () => {
     // Realistic case: rows persisted before durationVariance was added to
     // VarianceReport. The adapter must tolerate the missing key entirely,
     // not just a null value at the key.
@@ -123,10 +138,13 @@ describe('toMetricsInput: WDC-R03 intelligenceJson parsing (iter-049)', () => {
       variantCount: 3,
       cycleTimeStdDevMs: null,
       cycleTimeCoefficientOfVariation: null,
+      cycleTimeP90Ms: 142_000,
+      cycleTimeMinMs: 95_000,
+      cycleTimeMaxMs: 150_000,
     });
   });
 
-  it('valid JSON with durationVariance present but values null → cycleTime* fields are null, no throw', () => {
+  it('valid JSON with durationVariance present but values null → cycleTimeStdDev*/CoV are null, timestudy-sourced fields unaffected, no throw', () => {
     const blob = {
       ...VALID_INTELLIGENCE,
       variance: {
@@ -142,6 +160,49 @@ describe('toMetricsInput: WDC-R03 intelligenceJson parsing (iter-049)', () => {
       variantCount: 3,
       cycleTimeStdDevMs: null,
       cycleTimeCoefficientOfVariation: null,
+      cycleTimeP90Ms: 142_000,
+      cycleTimeMinMs: 95_000,
+      cycleTimeMaxMs: 150_000,
+    });
+  });
+
+  it('valid JSON with timestudy absent entirely (older stored rows) → cycleTimeP90Ms/Min/Max fall through to null, no throw (row #227)', () => {
+    // Realistic case: rows persisted before timestudy was cached on the
+    // intelligenceJson blob at all. The adapter must tolerate the missing
+    // top-level key entirely, not just a null value at the key.
+    const { timestudy: _omitTimestudy, ...blobWithoutTimestudy } = VALID_INTELLIGENCE;
+    const result = toMetricsInput(makeWorkflow(JSON.stringify(blobWithoutTimestudy)), []);
+    expect(result.intelligence).toEqual({
+      sequenceStability: 0.83,
+      stepCountVarianceStdDev: 1.42,
+      standardPathFrequency: 0.67,
+      variantCount: 3,
+      cycleTimeStdDevMs: 9100,
+      cycleTimeCoefficientOfVariation: 0.21,
+      cycleTimeP90Ms: null,
+      cycleTimeMinMs: null,
+      cycleTimeMaxMs: null,
+    });
+  });
+
+  it('valid JSON with timestudy.totalDuration present but p90Ms/minMs/maxMs null → those fields are null, no throw (row #227)', () => {
+    const blob = {
+      ...VALID_INTELLIGENCE,
+      timestudy: {
+        totalDuration: { meanMs: 118_000, medianMs: 115_000, p90Ms: null, minMs: null, maxMs: null },
+      },
+    };
+    const result = toMetricsInput(makeWorkflow(JSON.stringify(blob)), []);
+    expect(result.intelligence).toEqual({
+      sequenceStability: 0.83,
+      stepCountVarianceStdDev: 1.42,
+      standardPathFrequency: 0.67,
+      variantCount: 3,
+      cycleTimeStdDevMs: 9100,
+      cycleTimeCoefficientOfVariation: 0.21,
+      cycleTimeP90Ms: null,
+      cycleTimeMinMs: null,
+      cycleTimeMaxMs: null,
     });
   });
 
@@ -150,7 +211,7 @@ describe('toMetricsInput: WDC-R03 intelligenceJson parsing (iter-049)', () => {
     expect(result.intelligence).toBeNull();
   });
 
-  it('valid JSON missing variance/variants entirely → all 4 fields null but intelligence is non-null object', () => {
+  it('valid JSON missing variance/variants/timestudy entirely → all fields null but intelligence is non-null object', () => {
     // An empty object is still a valid PortfolioIntelligence-shaped slice
     // for our schema (every consumed key is .optional()). Adapter returns a
     // typed object with all-null fields rather than null itself — this lets
@@ -164,6 +225,9 @@ describe('toMetricsInput: WDC-R03 intelligenceJson parsing (iter-049)', () => {
       variantCount: null,
       cycleTimeStdDevMs: null,
       cycleTimeCoefficientOfVariation: null,
+      cycleTimeP90Ms: null,
+      cycleTimeMinMs: null,
+      cycleTimeMaxMs: null,
     });
   });
 
@@ -195,6 +259,9 @@ describe('toMetricsInput: WDC-R03 intelligenceJson parsing (iter-049)', () => {
       variantCount: 0,
       cycleTimeStdDevMs: null,
       cycleTimeCoefficientOfVariation: null,
+      cycleTimeP90Ms: null,
+      cycleTimeMinMs: null,
+      cycleTimeMaxMs: null,
     });
   });
 

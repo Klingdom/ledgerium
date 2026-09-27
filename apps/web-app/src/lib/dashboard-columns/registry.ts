@@ -56,15 +56,20 @@ import {
   // Row #101 (WDC2-P02) residual — genuinely-missing statistical columns:
   accessCycleTimeStdDevMs,
   accessCycleTimeCoefficientOfVariation,
+  // Row #227 — totalDuration statistics reach a column:
+  accessCycleTimeP90Ms,
+  accessCycleTimeMinMs,
+  accessCycleTimeMaxMs,
 } from './accessors.js';
 import type { WorkflowDashboardColumn } from './types.js';
 
 /**
- * The full registry — frozen at module load. 42 entries: 7 display columns +
+ * The full registry — frozen at module load. 45 entries: 7 display columns +
  * 32 Tier A architecture metrics + 1 AI/opportunity signal (ai_opportunity_score)
  * + 2 row #101 (WDC2-P02) residual statistical columns (cycle_time_stddev_ms,
- * cycle_time_coefficient_of_variation) not enumerated in the original Tier A
- * architecture list.
+ * cycle_time_coefficient_of_variation) + 3 row #227 residual statistical
+ * columns (cycle_time_p90_ms, cycle_time_min_ms, cycle_time_max_ms) — none of
+ * the latter 5 are enumerated in the original Tier A architecture list.
  *
  * Default-pack rationale (`defaultVisible: true` ⇔ shipped today):
  *   workflow_title · systems · opportunity_tag · health_score · last_run_at ·
@@ -323,9 +328,70 @@ export const WORKFLOW_DASHBOARD_COLUMNS: ReadonlyArray<WorkflowDashboardColumn> 
       minRunsRequired: 5,
     },
     {
+      // Row #227: the engine computes p90 (percentile(durations, 90) in
+      // timestudyAnalyzer.ts), not p95 — there is no p95 anywhere in the
+      // pipeline. This entry stays pending rather than being satisfied by a
+      // substitution: computing p95 would require an engine change plus
+      // re-analysis of every existing ProcessDefinition (the stored
+      // intelligenceJson blobs only carry p90). See cycle_time_p90_ms below
+      // for the statistic that IS available today.
+      key: 'cycle_time_p90_ms',
+      label: 'P90 Cycle Time',
+      description: '90th-percentile run duration, in ms. Requires ≥5 runs.',
+      dataType: 'duration',
+      sortable: true,
+      filterable: true,
+      defaultVisible: false,
+      defaultGroup: 'flow',
+      planTierGate: null,
+      availability: 'available',
+      accessor: accessCycleTimeP90Ms,
+      minRunsRequired: 5,
+    },
+    {
+      key: 'cycle_time_min_ms',
+      label: 'Min Cycle Time',
+      description: 'Shortest observed run duration, in ms. Requires ≥2 runs.',
+      dataType: 'duration',
+      sortable: true,
+      filterable: true,
+      defaultVisible: false,
+      defaultGroup: 'flow',
+      planTierGate: null,
+      availability: 'available',
+      accessor: accessCycleTimeMinMs,
+      minRunsRequired: 2,
+    },
+    {
+      key: 'cycle_time_max_ms',
+      label: 'Max Cycle Time',
+      description: 'Longest observed run duration, in ms. Requires ≥2 runs.',
+      dataType: 'duration',
+      sortable: true,
+      filterable: true,
+      defaultVisible: false,
+      defaultGroup: 'flow',
+      planTierGate: null,
+      availability: 'available',
+      accessor: accessCycleTimeMaxMs,
+      minRunsRequired: 2,
+    },
+    {
+      // Row #227: the registry asked for p95 while the engine only ever
+      // produced p90 (`percentile(durations, 90)` in timestudyAnalyzer.ts).
+      // We do NOT compute p95 here — that would change the stored payload
+      // shape and leave this column null for every already-analyzed
+      // ProcessDefinition. cycle_time_p90_ms (above) is the statistic that is
+      // actually available today; p95 remains pending an engine change plus
+      // re-analysis of existing data.
       key: 'cycle_time_p95_ms',
       label: 'P95 Cycle Time',
-      description: 'Ninety-fifth-percentile run duration across the time window.',
+      // Coordinator, loop 52: the description is rendered to users at
+      // `ColumnPicker.tsx:825`. The first draft read "Engine computes p90, not
+      // p95. Use cycle_time_p90_ms; p95 needs engine work." — internal jargon
+      // and a raw column key on a customer surface. The engineering reason
+      // lives in the comment above; the description says what a user needs.
+      description: '95th-percentile run duration. Not yet available — see P90 Cycle Time.',
       dataType: 'duration',
       sortable: true,
       filterable: true,

@@ -9,7 +9,7 @@
  *  - Pending columns (availability !== 'available') are disabled regardless of visibleSet.
  *  - Available non-locked columns respect the visibleSet.
  *  - All 7 groups contain their expected columns from the registry.
- *  - Total rendered columns across all groups equals the registry size (38).
+ *  - Total rendered columns across all groups equals the registry size (45).
  *
  * @see apps/web-app/src/components/dashboard-v2/ColumnPicker.tsx
  * @see apps/web-app/src/lib/dashboard-columns/registry.ts
@@ -68,14 +68,16 @@ function allGroupedColumns(
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('ColumnPicker: column grouping (iter-061)', () => {
-  it('total columns across all groups equals registry size (42)', () => {
+  it('total columns across all groups equals registry size (45)', () => {
     // Batch A (2026-06-12): date_recorded added → 39 total.
     // WDC2-P02 (iter-075): ai_opportunity_score added as 40th entry.
     // Row #101 (WDC2-P02) residual: cycle_time_stddev_ms +
     // cycle_time_coefficient_of_variation added → 42 total.
+    // Row #227: cycle_time_p90_ms + cycle_time_min_ms + cycle_time_max_ms
+    // added → 45 total.
     const grouped = buildGroupedColumns(new Set<ColumnKey>());
     const total = GROUP_ORDER.reduce((sum, g) => sum + grouped[g].length, 0);
-    expect(total).toBe(42);
+    expect(total).toBe(45);
   });
 
   it('every registered column appears in exactly one group', () => {
@@ -88,7 +90,7 @@ describe('ColumnPicker: column grouping (iter-061)', () => {
         seen.add(col.key);
       }
     }
-    expect(seen.size).toBe(42); // Row #101 (WDC2-P02) residual: 2 more columns added → 42 total
+    expect(seen.size).toBe(45); // Row #227: 3 more columns added → 45 total
   });
 
   it('all 7 canonical groups are present', () => {

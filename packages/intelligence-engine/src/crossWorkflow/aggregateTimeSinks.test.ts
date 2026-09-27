@@ -64,7 +64,6 @@ function timestudyResult(positions: StepPositionTimestudy[]): TimestudyResult {
       p90Ms: 25000,
       minMs: 15000,
       maxMs: 30000,
-      stdDevMs: 3000,
     },
     stepPositionTimestudies: positions,
     evidenceRunIds: ['run-a', 'run-b'],

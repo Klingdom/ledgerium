@@ -101,13 +101,15 @@ export function analyzeTimestudy(
     ruleVersion: options.ruleVersion,
     runCount: bundles.length,
     computedAt: now,
+    // Row #227: no stdDevMs here — single source of truth is
+    // VarianceReport.durationVariance.stdDevMs (analyzeVariance() computes it
+    // from the same `durations` array built above).
     totalDuration: {
       meanMs: mean(durations),
       medianMs: median(durations),
       p90Ms: percentile(durations, 90),
       minMs: durations.length > 0 ? Math.min(...durations) : null,
       maxMs: durations.length > 0 ? Math.max(...durations) : null,
-      stdDevMs: stdDev(durations),
     },
     stepPositionTimestudies,
     evidenceRunIds: allRunIds,

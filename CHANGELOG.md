@@ -6,6 +6,23 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-27] - Three more figures reach the workflow columns, and a statistic stops being calculated twice
+
+**Why:** while checking yesterday's work I found the same standard deviation being worked out in two different places, and three other figures being calculated on every analysis and then shown nowhere.
+
+### Added
+- **Slowest-typical run (90th percentile), shortest run, and longest run** are now available as workflow columns. All three were already being calculated and stored — they simply never reached the screen.
+- Shortest and longest appear once a workflow has two runs. The percentile needs five, because a percentile from three runs is not meaningful.
+
+### Fixed
+- The same standard deviation was being calculated in two separate places from identical data. They could not disagree yet — but that is exactly how an earlier bug began, where two parts of the system quietly drifted apart. There is now one.
+
+### Honesty
+- One column was asking for a "95th percentile" figure **the system has never calculated**. Rather than quietly inventing it, that column now says plainly that it is not yet available and points at the one that is.
+- A draft of that message read "p95 needs engine work" and named an internal code identifier — on a screen customers actually read. Rewritten in plain language.
+
+---
+
 ## [2026-09-27] - The last place the engine looked at the clock
 
 **Why:** analysing the same recording twice could produce two slightly different results, purely because the code read the current time while working. Two of the three places doing that were fixed earlier in the week. This is the third.
