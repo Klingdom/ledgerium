@@ -83,6 +83,21 @@ not.
 **No IP address is recorded, logged or returned by any of this** — only how many
 entries each header carried. A count cannot be reversed into an address.
 
+### Two limits worth knowing before you act on the number
+
+**The counts are per-process and reset on deploy.** If the app ever runs more
+than one worker, the page shows one worker's share of traffic. That does not
+change the *shape* of the distribution, so the suggested value stays right, but
+`totalRequests` will read lower than your real traffic.
+
+**Some proxies replace the header instead of appending to it** — nginx with
+`$remote_addr`, Traefik without `trustedIPs`, Envoy with `skip_xff_append`,
+Caddy with `header_up`. If the outermost one does this, everything above still
+holds. If an *inner* one does, the client address is discarded before it reaches
+us and **no setting recovers it**; the tell is a dominant shape stuck at 1 when
+the deployment clearly has more hops than that. In that case the fix is proxy
+configuration, not this variable.
+
 ## Apply it
 
 1. Set the repository variable `TRUSTED_PROXY_HOPS` to the suggested value.

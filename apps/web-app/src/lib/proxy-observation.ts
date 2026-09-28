@@ -26,6 +26,14 @@
  * real client at index 0. `getClientIp` selects `entries[len - hops]`, so the
  * correct setting is **hops = D**, i.e. the entry count honest traffic carries.
  *
+ * **Appending is a convention, not a guarantee.** nginx with `$remote_addr`,
+ * Traefik without `trustedIPs`, Envoy with `skip_xff_append` and Caddy with
+ * `header_up` all REPLACE instead. A replacing OUTERMOST proxy is harmless
+ * here — it simply yields a one-entry header. A replacing INNER proxy discards
+ * the client address altogether, and no value of `TRUSTED_PROXY_HOPS` recovers
+ * it; the tell is a dominant shape stuck at 1 while the deployment plainly has
+ * more hops than that.
+ *
  * ## Which way is dangerous — corrected at loop 54
  *
  * An earlier version of this file claimed the minimum was "safe from below"
@@ -81,8 +89,9 @@ export interface ProxyChainSection {
    */
   readonly shapesAgree: boolean;
   /**
-   * Whether the minimum was observed on enough requests to act on. False means
-   * "keep collecting", not "the number is wrong".
+   * Whether the dominant shape was observed on enough requests to act on, AND
+   * dominates clearly enough. False means "keep collecting" or "traffic is
+   * arriving by more than one route", not "the number is wrong".
    */
   readonly honestSampleLikely: boolean;
   /**
@@ -101,8 +110,8 @@ export interface ProxyChainSection {
 const MAX_TRACKED_ENTRY_COUNT = 16;
 
 /**
- * How many requests must share the minimum before it is worth acting on. Low
- * on purpose: the goal is to replace a guess with evidence, not to reach
+ * How many requests must share the dominant shape before it is worth acting on.
+ * Low on purpose: the goal is to replace a guess with evidence, not to reach
  * statistical significance.
  */
 const HONEST_SAMPLE_THRESHOLD = 20;
@@ -114,6 +123,16 @@ const HONEST_SAMPLE_THRESHOLD = 20;
  */
 const DOMINANT_SHARE_THRESHOLD = 0.9;
 
+/**
+ * Per-process, in-memory, and deliberately not persisted.
+ *
+ * Consequence worth knowing before acting on the numbers: if the app ever runs
+ * more than one worker or replica, `/api/admin/operations` reports the slice
+ * belonging to whichever process served that request, not the whole fleet. The
+ * SHAPE of the distribution is what matters and does not change between
+ * workers, so the suggested value stays correct — but `totalRequests` will read
+ * low, and a redeploy resets everything to zero.
+ */
 const counts = new Map<number, number>();
 
 /**

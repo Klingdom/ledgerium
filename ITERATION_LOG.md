@@ -4,6 +4,21 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-28 (loop 55) — MR-034 applied, including a defect inside my own correction (Mode 1, coordinator)
+
+- **MR-034 reached the loop-54 conclusion independently** from the pre-correction files, and said so rather than claiming the find. Its verdict on the inference: **not sound, and wrong in the outage direction** — matching what I derived. It also supplied two limits I had not considered.
+- **S-2 accepted, and it is the uncomfortable one: my correcting commit left the old rule in two JSDoc comments** in the very file it was correcting. `proxy-observation.ts:84` and `:104` still said "the minimum" while the code gated on the dominant shape. Same class of defect as the one being fixed, one commit later. Fixed. The four remaining mentions of "minimum" are deliberate historical notes and one explicit contrast.
+- **Two limits I overstated, now stated honestly.** (a) *"Proxies append and never remove"* is a **convention, not an invariant** — nginx with `$remote_addr`, Traefik without `trustedIPs`, Envoy with `skip_xff_append` and Caddy with `header_up` all replace instead; a replacing **inner** proxy destroys the client address and no setting recovers it. (b) The counters are **per-process**: with more than one worker the admin page shows one worker's slice. Neither changes the suggested value — the distribution's shape is what matters — but both were unstated, and a reader would reasonably have assumed otherwise.
+- **The residual MR-034 found and I am not acting on, deliberately:** the 90% dominance gate raises the cost of poisoning the estimate from one request to roughly nine times honest volume. That buys an attacker a denial of service, not a bypass, and the runbook's login check catches it immediately. The structural answer — whether port 3000 needs publishing at all — is a CEO call, not mine.
+- **Four backlog rows re-scoped after I verified MR-034's findings myself.** **#150** is stale three ways: its cited path `api/admin/operations/queries.ts` **does not exist**, the real file exports **11** functions not "5", and `getSubscriptionBreakdown()` already returns `byPlan`/`byStatus`/`mrr` over exactly the statuses it names. **#90**'s headline decision is **already made** — `RESEARCH_PROCESS_MINING_STANDARDS.md` §1 is literally headed "(decision)" and rules XES **ADOPT**, OCEL 2.0 **CONSIDER**. **#177** names six test files, two exist. **#168** flagged for possible overlap with #113/#125.
+- **A blind spot worth more than the four rows: eight open rows have a score cell no parser can read**, because a stray `|` in their prose splits the cells. **#110 reads as 2 against its true 13** — the row a previous meta-review endorsed at "score 13". Not corruption, and the count is stable across three commits, but any automated ranking silently mis-sorts them, and several sit in the band where selection happens. All eight annotated.
+- **MR-034's headline, which I accept:** the constraint on this system is no longer pool hygiene or edit discipline — it is **decision latency**. Four CEO decisions are outstanding, the oldest (criterion-3 threshold) has been unscoreable for six loops, and #216 is the only lever that can clear a drift flag now at 11.
+- **Validation:** web-app **3169** unchanged (comment and annotation changes only); typecheck **0**; validator clean at 220 rows / 119 struck.
+- **Follow-ups:** 0 created; 4 rows re-scoped, 8 annotated.
+- **Next:** MR-034 endorses **#92** (13) — a React error boundary on the dashboard shell, verified open and unblocked.
+
+---
+
 ## 2026-09-28 (loop 54) — I had the dangerous direction backwards (Mode 1, coordinator)
 
 - **Candidate Selection: `directed` — correcting loop 53.** I put the soundness of yesterday's inference to MR-034 as its first question, then attacked it myself rather than waiting. The answer is that **I got it wrong**, in the direction that matters.
