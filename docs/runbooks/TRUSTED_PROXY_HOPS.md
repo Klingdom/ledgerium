@@ -18,15 +18,21 @@ That number cannot be read from this repository. `compose.hostinger.yaml` joins
 an *external* `proxy-net` and its own comments say the proxy depends "on which
 proxy Hostinger provisions". So rather than guess, the app measures it.
 
-## Why guessing is not an option
+## Why guessing is not an option — and which way is dangerous
 
-Guess **too low** and nothing improves — the limits stay bypassable.
+**Corrected at loop 54.** The first version of this runbook said guessing *too
+high* causes an outage. That is backwards, and the arithmetic settles it. With
+`D` proxies in front, an honest request arrives carrying `D` entries with the
+real client first, and the code selects `entries[length - hops]`:
 
-Guess **too high** and every request resolves to the proxy's own address. All
-users collapse into a single rate-limit bucket, and one person's failed logins
-lock out everybody. That is an outage, and it is strictly worse than the bug it
-would be trying to fix. This is why the default has been left at today's
-behaviour through several iterations rather than "just fixed".
+| Setting | Result |
+|---|---|
+| `hops = D` | Selects the client. **Correct.** |
+| `hops < D` | Selects a **proxy's** address. Every user behind that proxy becomes the same caller, so one person's failed logins lock out everybody. **This is the outage.** |
+| `hops > D` | Clamps to the first entry — the client for honest traffic, the forged value for a spoofed header. Still bypassable; **no outage.** |
+
+So the dangerous mistake is setting it **too low**, and if you are ever unsure
+between two values, the higher one fails safe.
 
 ## Read the measurement
 
@@ -41,36 +47,41 @@ Look at `data.proxyChain`:
 ```jsonc
 {
   "observations": [
-    { "entryCount": 0, "requests": 12 },   // no XFF header at all
-    { "entryCount": 1, "requests": 3814 }, // ← the minimum with a header
-    { "entryCount": 2, "requests": 27 }    // callers sending their own XFF
+    { "entryCount": 0, "requests": 12 },   // no header — health checks, internal calls
+    { "entryCount": 2, "requests": 3814 }, // ← the shape the bulk of traffic carries
+    { "entryCount": 3, "requests": 27 }    // callers sending their own header
   ],
   "totalRequests": 3853,
-  "minEntryCount": 1,
+  "dominantEntryCount": 2,
+  "dominantShare": 0.993,
+  "shapesAgree": true,
   "honestSampleLikely": true,
-  "suggestedTrustedProxyHops": 1,
+  "suggestedTrustedProxyHops": 2,
   "configuredTrustedProxyHops": 0   // ← what is live right now
 }
 ```
 
-**If `suggestedTrustedProxyHops` is a number, that is your answer.** If it is
-`null`, the minimum has not been seen on enough requests yet — leave it and
-check again after more traffic.
+**If `suggestedTrustedProxyHops` is a number, that is your answer.**
 
-### Why the minimum is the right number
+If it is `null`, one of two things is true and the other fields say which:
 
-A caller that sends no `x-forwarded-for` produces a header written entirely by
-our own infrastructure, so its length equals the number of proxies that appended
-to it. A caller that spoofs the header makes the chain *longer*. Proxies append
-and never remove, so **no caller can produce a chain shorter than the true hop
-count** — the minimum is safe from below, which is the direction that matters.
+- `honestSampleLikely: false` — not enough traffic yet. Check again later.
+- `shapesAgree: false` — requests are arriving by **more than one route**, and
+  no single hop count describes them all. Do not pick one. The container port is
+  published in `compose.hostinger.yaml`, so this usually means something is
+  reaching the app without going through the proxy; find that path first.
 
-The honest limit: if literally every request carried a spoofed header, the
-minimum would overstate. `honestSampleLikely` exists so that judgement is
-visible rather than assumed.
+### Why the dominant shape and not the smallest
+
+The estimate deliberately uses the shape most traffic carries, not the smallest
+one seen. A single request that skipped part of the chain — reaching the
+published container port directly, say — carries a shorter header, and letting
+that set the value would push the setting **below** `D`, which is the lockout
+case above. The mode is unmoved by a handful of such requests; the minimum is
+not.
 
 **No IP address is recorded, logged or returned by any of this** — only how many
-entries each header had. A count cannot be reversed into an address.
+entries each header carried. A count cannot be reversed into an address.
 
 ## Apply it
 

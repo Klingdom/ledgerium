@@ -16,13 +16,22 @@
  * the number of trusted reverse proxies in front of this app. But this app's
  * reverse proxy is EXTERNAL and provisioned by the hosting platform
  * (see compose.hostinger.yaml) — the number of trusted hops is NOT knowable
- * from this repository. Guessing wrong in the "last entry" direction is worse
- * than the current bug: if the real hop count is 0 (no proxy appends, or the
- * proxy forwards XFF verbatim) but we assumed 1, every distinct user would
- * resolve to the value the proxy happens to put last — potentially the same
- * value for every request — collapsing all users into one rate-limit bucket
- * and throttling every login/signup for everyone. That is an availability
- * outage, strictly worse than today's spoofable-but-functional limiter.
+ * from this repository.
+ *
+ * WHICH DIRECTION IS DANGEROUS (derived at loop 54; an earlier version of this
+ * comment had it backwards). With D appending proxies, an honest request
+ * carries D entries with the client at index 0, and we select
+ * `entries[length - hops]`:
+ *
+ *   hops = D  → the client. Correct.
+ *   hops < D  → a PROXY's address. Every user behind it becomes one caller,
+ *               so one person's failed logins throttle everybody. The outage.
+ *   hops > D  → index clamps to 0: the client for honest traffic, the forged
+ *               value for a spoofed header. Bypassable, but no outage.
+ *
+ * So UNDER-setting is the availability risk and over-setting merely leaves
+ * today's bug in place. `proxy-observation.ts` measures D from live traffic
+ * using the dominant header shape, which is why it must not use the minimum.
  *
  * THE FIX SHIPPED HERE: behavior is UNCHANGED by default (`TRUSTED_PROXY_HOPS`
  * unset/blank/invalid → 0 trusted hops → first entry, exactly like every call

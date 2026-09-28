@@ -30,7 +30,9 @@ describe('recording observations', () => {
     const s = getProxyChainObservations();
     expect(s.observations).toEqual([]);
     expect(s.totalRequests).toBe(0);
-    expect(s.minEntryCount).toBeNull();
+    expect(s.dominantEntryCount).toBeNull();
+    expect(s.dominantShare).toBe(0);
+    expect(s.shapesAgree).toBe(false);
     expect(s.suggestedTrustedProxyHops).toBeNull();
   });
 
@@ -60,38 +62,67 @@ describe('recording observations', () => {
 });
 
 describe('inferring the trusted-hop count', () => {
-  it('excludes header-absent requests from the minimum', () => {
-    // entryCount 0 means no x-forwarded-for at all, which says nothing about
-    // proxy depth — counting it would suggest 0 trusted hops forever.
+  // Corrected at loop 54. The original used the MINIMUM observed length on the
+  // reasoning that "proxies append and never remove, so the minimum is safe
+  // from below". The arithmetic in getClientIp says the opposite matters:
+  //   hops = D  -> selects the client (correct)
+  //   hops < D  -> selects a proxy address; ALL users collapse into one
+  //                rate-limit bucket and logins lock out. This is the outage.
+  //   hops > D  -> clamps to index 0; spoofable, but no outage.
+  // So under-reporting is the dangerous direction, and the minimum
+  // under-reports the moment any request skips part of the chain.
+
+  it('excludes header-absent requests, which say nothing about depth', () => {
     for (let i = 0; i < 50; i++) recordForwardedForShape(0);
     for (let i = 0; i < 30; i++) recordForwardedForShape(2);
     const s = getProxyChainObservations();
-    expect(s.minEntryCount).toBe(2);
+    expect(s.dominantEntryCount).toBe(2);
     expect(s.suggestedTrustedProxyHops).toBe(2);
   });
 
-  it('withholds a suggestion until the minimum is seen often enough', () => {
-    recordForwardedForShape(1); // a single sighting proves nothing
-    for (let i = 0; i < 40; i++) recordForwardedForShape(3);
+  it('is NOT dragged down by a few requests that skipped the proxy', () => {
+    // The container port is published in compose.hostinger.yaml, so a request
+    // can reach the app directly carrying its own one-entry header. Under the
+    // old minimum-based rule this suggested 1 against a true depth of 2 —
+    // precisely the setting that locks every user out.
+    for (let i = 0; i < 500; i++) recordForwardedForShape(2);
+    for (let i = 0; i < 3; i++) recordForwardedForShape(1);
     const s = getProxyChainObservations();
-    expect(s.minEntryCount).toBe(1);
+    expect(s.dominantEntryCount).toBe(2);
+    expect(s.suggestedTrustedProxyHops).toBe(2);
+  });
+
+  it('withholds a suggestion when no single shape dominates', () => {
+    // A split distribution means traffic is arriving by more than one route.
+    // Guessing which is authoritative is the mistake; say "keep collecting".
+    for (let i = 0; i < 100; i++) recordForwardedForShape(1);
+    for (let i = 0; i < 90; i++) recordForwardedForShape(2);
+    const s = getProxyChainObservations();
+    expect(s.shapesAgree).toBe(false);
+    expect(s.suggestedTrustedProxyHops).toBeNull();
+    expect(s.dominantEntryCount).toBe(1); // still reported, just not suggested
+  });
+
+  it('withholds a suggestion until the volume is there', () => {
+    for (let i = 0; i < 5; i++) recordForwardedForShape(1);
+    const s = getProxyChainObservations();
+    expect(s.shapesAgree).toBe(true);
     expect(s.honestSampleLikely).toBe(false);
     expect(s.suggestedTrustedProxyHops).toBeNull();
   });
 
-  it('suggests the minimum once it is well attested', () => {
-    for (let i = 0; i < 25; i++) recordForwardedForShape(1);
+  it('suggests the dominant shape once volume and agreement both hold', () => {
+    for (let i = 0; i < 200; i++) recordForwardedForShape(1);
     for (let i = 0; i < 5; i++) recordForwardedForShape(4); // spoofed, inflated
     const s = getProxyChainObservations();
     expect(s.honestSampleLikely).toBe(true);
+    expect(s.dominantShare).toBeGreaterThan(0.9);
     expect(s.suggestedTrustedProxyHops).toBe(1);
   });
 
-  it('a spoofing caller inflates lengths but cannot lower the minimum', () => {
-    // Proxies append and never remove, so no caller can produce a chain
-    // SHORTER than the number of hops. That is what makes the minimum safe.
-    for (let i = 0; i < 25; i++) recordForwardedForShape(2);
-    for (const n of [3, 7, 12, 16]) recordForwardedForShape(n);
+  it('spoofed long chains cannot pull the suggestion upward either', () => {
+    for (let i = 0; i < 300; i++) recordForwardedForShape(2);
+    for (const n of [6, 9, 16]) recordForwardedForShape(n);
     expect(getProxyChainObservations().suggestedTrustedProxyHops).toBe(2);
   });
 });

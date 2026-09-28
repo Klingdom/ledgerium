@@ -8,8 +8,10 @@
  * bypassable by rotating a header. The fix is to count from the right instead,
  * which requires knowing how many hops to trust. `compose.hostinger.yaml` shows
  * the reverse proxy is external and provisioned by the host, so that number is
- * not knowable from this repository, and guessing high would collapse every
- * user into one rate-limit bucket and lock everybody out of login.
+ * not knowable from this repository — and guessing it too LOW collapses every
+ * user behind that proxy into one rate-limit bucket and locks everybody out of
+ * login (see the direction table below; an earlier version of this comment had
+ * that backwards).
  *
  * So: measure it. This records how many comma-separated entries each inbound
  * header carried, and nothing else.
@@ -19,17 +21,37 @@
  *
  * ## Reading the result
  *
- * A client that sends no `x-forwarded-for` of its own produces a header written
- * entirely by our own infrastructure, so its length equals the number of proxies
- * that appended to it. A client that spoofs the header inflates the length.
- * Proxies append, they do not remove — so:
+ * With D appending proxies in front, an honest request (one that sends no
+ * `x-forwarded-for` of its own) arrives carrying exactly D entries, with the
+ * real client at index 0. `getClientIp` selects `entries[len - hops]`, so the
+ * correct setting is **hops = D**, i.e. the entry count honest traffic carries.
  *
- *   **the MINIMUM observed length is a lower bound on the number of trusted
- *   hops**, and with any honest traffic at all it is the exact number.
+ * ## Which way is dangerous — corrected at loop 54
  *
- * That is an inference, not a proof: if literally every request carried a
- * spoofed header, the minimum would overstate. `honestSampleLikely` flags
- * whether the minimum was seen often enough to rely on.
+ * An earlier version of this file claimed the minimum was "safe from below"
+ * because guessing HIGH causes an outage. **That is backwards**, and the
+ * arithmetic is worth stating rather than asserting:
+ *
+ *   hops = D  → selects the client. Correct.
+ *   hops < D  → selects a PROXY's address. Every user behind that proxy
+ *               resolves to the same value, collapsing them into one
+ *               rate-limit bucket: one person's failed logins lock out
+ *               everybody. **This is the outage.**
+ *   hops > D  → index goes negative and clamps to 0, which is the client for
+ *               honest traffic and the spoofed entry for a forged header.
+ *               Reintroduces spoofability; does NOT cause an outage.
+ *
+ * So the dangerous direction is UNDER-setting, and any estimator here must not
+ * under-report. The minimum does exactly that when some traffic reaches the app
+ * without traversing the full proxy chain — the container port is published in
+ * `compose.hostinger.yaml`, so direct-to-container requests are possible, and a
+ * single such request carrying a one-entry header would drag a minimum-based
+ * estimate below D and produce the lockout.
+ *
+ * Therefore this reports the **mode** — the entry count the bulk of traffic
+ * carries — and withholds a suggestion entirely when no single shape dominates,
+ * because a split distribution is exactly the signal that something is reaching
+ * the app by more than one path.
  */
 
 import { getTrustedProxyHops } from './client-ip.js';
@@ -46,10 +68,18 @@ export interface ProxyChainSection {
   readonly observations: readonly ProxyChainObservation[];
   readonly totalRequests: number;
   /**
-   * Lowest non-zero entry count seen, or null if no request has carried the
-   * header. This is the lower bound on trusted hops described above.
+   * The entry count carried by the LARGEST share of header-bearing requests,
+   * or null if none have arrived. This — not the minimum — is the estimate of
+   * proxy depth; see the correction note above for why.
    */
-  readonly minEntryCount: number | null;
+  readonly dominantEntryCount: number | null;
+  /** Fraction of header-bearing requests carrying `dominantEntryCount`, 0–1. */
+  readonly dominantShare: number;
+  /**
+   * Whether one shape clearly dominates. False means requests are arriving by
+   * more than one path, and no single hop count describes them all.
+   */
+  readonly shapesAgree: boolean;
   /**
    * Whether the minimum was observed on enough requests to act on. False means
    * "keep collecting", not "the number is wrong".
@@ -77,6 +107,13 @@ const MAX_TRACKED_ENTRY_COUNT = 16;
  */
 const HONEST_SAMPLE_THRESHOLD = 20;
 
+/**
+ * How dominant the leading shape must be before it is worth acting on. A split
+ * distribution means traffic is reaching the app by more than one route, and
+ * the wrong choice between them is the lockout described above.
+ */
+const DOMINANT_SHARE_THRESHOLD = 0.9;
+
 const counts = new Map<number, number>();
 
 /**
@@ -102,20 +139,38 @@ export function getProxyChainObservations(): ProxyChainSection {
 
   const totalRequests = observations.reduce((sum, o) => sum + o.requests, 0);
 
-  // Entry count 0 means the header was absent entirely, which says nothing
-  // about proxy depth, so it is excluded from the minimum.
+  // Entry count 0 means no header at all — a health check, an internal call, or
+  // a direct hit on the published container port. It says nothing about proxy
+  // depth and must not influence the estimate.
   const withHeader = observations.filter((o) => o.entryCount > 0);
-  const minObservation = withHeader[0] ?? null;
-  const minEntryCount = minObservation?.entryCount ?? null;
-  const honestSampleLikely =
-    minObservation !== null && minObservation.requests >= HONEST_SAMPLE_THRESHOLD;
+  const headerRequests = withHeader.reduce((sum, o) => sum + o.requests, 0);
+
+  const dominant = withHeader.reduce<ProxyChainObservation | null>(
+    (best, o) => (best === null || o.requests > best.requests ? o : best),
+    null,
+  );
+
+  const dominantShare = dominant !== null && headerRequests > 0
+    ? dominant.requests / headerRequests
+    : 0;
+
+  // Two independent conditions, both required. Volume alone is not enough: a
+  // split distribution means requests are arriving by more than one path, and
+  // guessing which is authoritative is precisely the mistake that locks users
+  // out. Better to report "keep collecting" than to suggest a number that
+  // might be low.
+  const enoughVolume = dominant !== null && dominant.requests >= HONEST_SAMPLE_THRESHOLD;
+  const shapesAgree = dominantShare >= DOMINANT_SHARE_THRESHOLD;
+  const confident = enoughVolume && shapesAgree;
 
   return {
     observations,
     totalRequests,
-    minEntryCount,
-    honestSampleLikely,
-    suggestedTrustedProxyHops: honestSampleLikely ? minEntryCount : null,
+    dominantEntryCount: dominant?.entryCount ?? null,
+    dominantShare,
+    shapesAgree,
+    honestSampleLikely: confident,
+    suggestedTrustedProxyHops: confident ? (dominant?.entryCount ?? null) : null,
     configuredTrustedProxyHops: getTrustedProxyHops(),
   };
 }

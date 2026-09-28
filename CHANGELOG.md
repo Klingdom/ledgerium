@@ -6,6 +6,20 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-28] - Correcting yesterday's advice, which pointed at the wrong setting
+
+**Why:** yesterday I shipped a measurement to tell you what to set a security value to, and wrote that setting it too *high* would lock everyone out. **That was backwards.** Setting it too *low* is what locks everyone out — so the instructions were steering toward the risky end.
+
+### Fixed
+- The suggested value now comes from what the **bulk** of traffic looks like, not the smallest example seen. A single request arriving by an unusual route would have pulled the old suggestion too low — straight into the failure it was meant to avoid.
+- If traffic arrives by more than one route, it now says so and **offers no suggestion at all**, rather than guessing between them.
+- The corrected explanation is in all three places that had it wrong, each noting plainly that the earlier version was mistaken.
+
+### Not changed
+- How the app actually identifies callers is untouched, and the setting is still off by default. This was wrong *guidance*, not wrong behaviour — but guidance you were being asked to act on.
+
+---
+
 ## [2026-09-27] - The app now measures the one thing blocking a security fix
 
 **Why:** the limits protecting login, signup and password reset can be bypassed by sending a header. The fix needs one number — how many proxies sit in front of the app — and that number cannot be read from the code, because the proxy is provided by the host. It has been waiting on that for three rounds of work. So the app now works it out from real traffic.

@@ -4,6 +4,25 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-28 (loop 54) — I had the dangerous direction backwards (Mode 1, coordinator)
+
+- **Candidate Selection: `directed` — correcting loop 53.** I put the soundness of yesterday's inference to MR-034 as its first question, then attacked it myself rather than waiting. The answer is that **I got it wrong**, in the direction that matters.
+- **What I claimed yesterday:** that guessing `TRUSTED_PROXY_HOPS` too HIGH collapses every user into one rate-limit bucket, so the minimum observed header length is "safe from below". That reasoning went into the module doc, the runbook and the commit message. **It is backwards.**
+- **What the arithmetic actually says.** `getClientIp` selects `entries[length − hops]`. With D appending proxies, an honest request carries D entries with the client at index 0. I derived the full table rather than reasoning in prose:
+  - `hops = D` → the client. Correct.
+  - `hops < D` → a **proxy's** address. Every user behind it becomes the same caller, so one person's failed logins throttle everybody. **This is the outage.**
+  - `hops > D` → the index goes negative and clamps to 0 — the client for honest traffic, the forged value for a spoofed header. Bypassable, **no outage**.
+- **So under-setting is the availability risk, and the minimum is exactly the estimator that under-reports.** The container port is published in `compose.hostinger.yaml`, so a request can reach the app without traversing the proxy and carry a shorter header. **One such request would have dragged yesterday's suggestion below D and produced the lockout I claimed to be preventing.**
+- **Fixed:** the estimator now reports the **dominant** shape — what the bulk of traffic carries — and **withholds a suggestion entirely when no single shape dominates**, because a split distribution is the signal that traffic is arriving by more than one path and no single hop count describes them all. Two independent gates now apply: enough volume, and ≥90% agreement.
+- **The corrected direction is now stated in all three places that had it wrong** — `proxy-observation.ts`, `client-ip.ts` and the runbook — each saying plainly that an earlier version had it backwards, rather than being quietly edited to look as though it always read that way.
+- **A test now encodes the specific failure I nearly shipped:** 500 requests at depth 2 plus 3 that skipped the proxy still suggests 2. Under yesterday's rule it suggested 1.
+- **What this says about the loop-53 process.** I verified that the *measurement* was privacy-safe and that the *plumbing* worked, and I did not verify the *inference*. Handing the question to the meta-review was right; waiting for its answer would not have been — the flaw was in shipped code, and the runbook was actively instructing the CEO toward the unsafe value.
+- **Validation:** web-app **3167 → 3169**; workspace **4956**; typecheck **0** across 11 packages; validator clean. **No behaviour change to `getClientIp`** — the selection logic is untouched and the default remains 0.
+- **Follow-ups:** 0 created. #225 unchanged in status: still awaiting the value, but the guidance for choosing it is no longer wrong.
+- **Meta-review:** MR-034 was in flight during this loop; its verdict on the same question lands separately and will be recorded against this correction.
+
+---
+
 ## 2026-09-27 (loop 53) — Making the blocking fact measurable (Mode 1, coordinator)
 
 - **Candidate Selection: `directed` — #225 support.** Not the top score. Chosen because #225 is the highest-value blocked item in the pool, MR-032 and MR-033 both said so, and it has been blocked for three loops on **one fact about infrastructure**. Rather than ask again, I made the app measure it.
