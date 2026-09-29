@@ -25,7 +25,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { assertAxeCompliance } from '../../helpers/axe.js';
 
 const V2_URL = '/dashboard?v2=1';
 
@@ -61,69 +61,8 @@ function makeWorkflow(id: string, title: string, healthScore: number, opportunit
 }
 
 // ── Helper ────────────────────────────────────────────────────────────────────
-
-/**
- * Runs axe against the current page and asserts:
- * - Zero critical violations (throws to fail the test)
- * - Zero serious violations (throws to fail the test)
- * - Logs moderate violations to the test output (developer ergonomics)
- * - HARD assertion: moderate.length <= maxModerate (ratchet baseline, DV2-R04)
- *
- * @param maxModerate - Maximum permitted moderate violations. Default 0. Pass an
- *   explicit value at the call site to make the ratchet baseline reader-visible.
- *   If you need to raise the baseline, change the call-site value and add a
- *   code-review comment explaining the intentional deviation.
- */
-async function assertAxeCompliance(
-  page: import('@playwright/test').Page,
-  label: string,
-  maxModerate: number = 0,
-): Promise<void> {
-  const results = await new AxeBuilder({ page })
-    .include('main') // scope to the <main> content area; excludes AppShell nav (pre-existing contrast issues tracked separately)
-    .analyze();
-
-  const critical = results.violations.filter((v) => v.impact === 'critical');
-  const serious = results.violations.filter((v) => v.impact === 'serious');
-  const moderate = results.violations.filter((v) => v.impact === 'moderate');
-
-  // Log moderate violations as warnings (non-blocking for this iteration)
-  if (moderate.length > 0) {
-    const moderateReport = moderate
-      .map((v) => `  [moderate] ${v.id}: ${v.description} (${v.nodes.length} node(s))`)
-      .join('\n');
-    console.warn(
-      `\n[axe][${label}] ${moderate.length} MODERATE violation(s) — tracked, not blocking:\n${moderateReport}\n`,
-    );
-  }
-
-  // Moderate ratchet — HARD assertion (DV2-R04, iter-046).
-  // Prevents silent moderate-violation accumulation across states.
-  // To raise the baseline: pass a higher maxModerate at the call site with a comment.
-  expect(
-    moderate.length,
-    `[axe][${label}] moderate violation count ${moderate.length} exceeds ratchet baseline ${maxModerate}. Either fix the new violation OR (if intentional) raise the baseline at the call site with a code-review note.`,
-  ).toBeLessThanOrEqual(maxModerate);
-
-  // Critical violations — FAIL
-  if (critical.length > 0) {
-    const report = critical
-      .map((v) => `[${v.impact}] ${v.id}: ${v.description}\n  Help: ${v.helpUrl}\n  Nodes: ${v.nodes.map((n) => n.target.join(', ')).join(' | ')}`)
-      .join('\n\n');
-    expect.soft(critical.length, `[axe][${label}] CRITICAL violations:\n\n${report}`).toBe(0);
-  }
-
-  // Serious violations — FAIL
-  if (serious.length > 0) {
-    const report = serious
-      .map((v) => `[${v.impact}] ${v.id}: ${v.description}\n  Help: ${v.helpUrl}\n  Nodes: ${v.nodes.map((n) => n.target.join(', ')).join(' | ')}`)
-      .join('\n\n');
-    expect.soft(serious.length, `[axe][${label}] SERIOUS violations:\n\n${report}`).toBe(0);
-  }
-
-  // Hard fail if any soft assertions accumulated
-  expect(critical.length + serious.length, `[axe][${label}] ${critical.length} critical + ${serious.length} serious violation(s) — see above`).toBe(0);
-}
+// Extracted to e2e/helpers/axe.ts at loop 57 so the SOP a11y spec shares this
+// exact ratchet rather than copying it. Behaviour is unchanged.
 
 // ── Test: empty state ─────────────────────────────────────────────────────────
 

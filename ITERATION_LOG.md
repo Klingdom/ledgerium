@@ -4,6 +4,22 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-29 (loop 57) — The ratchet settles what the row asserted (Mode 1, coordinator)
+
+- **Candidate Selection: `directed` — #109 (13)**, MR-034's alternative. **P-11 changed what got built.** The row named two "HARD WCAG 2.1 AA violations"; I checked both before touching code and **neither survived**.
+- **Claim 1 is a permitted pattern, not a violation.** `role="checkbox"` on a `<button>` at `SOPExecutionMode.tsx:566` is real — but **ARIA-in-HTML explicitly permits the checkbox role on a button element**, and here it is paired with `aria-checked` and an accessible name. Restructuring it to an `<input type="checkbox">` would have been churn justified by a false premise.
+- **Claim 2 does not exist.** `role="listitem"` on a `<button>` in `AskThisProcessPanel` — that component declares **one** role in total, `role="alert"`. The only `role="listitem"` occurrences in the codebase are `<div>`s in `ColumnPicker.tsx`, which does declare `role="list"` ancestors, so they are not orphaned either.
+- **So I shipped the row's most valuable ask instead, and let axe decide rather than arguing.** `e2e/app/sop/sop-a11y.spec.ts` ratchets all three SOP modes — Execution, Flow View, Analysis — plus the criteria-checked state, which is precisely where a contrast or naming fault would surface if the checkbox pattern were wrong. **Run locally against the real app: 4/4 pass, zero critical or serious violations.** Had either claim been true, these fail and name the rule and the node.
+- **The SOP surface had no a11y ratchet at all** — the dashboard has had one since iter 022, while the artefact this product actually hands to an operator had none.
+- **Extracted the axe helper rather than copying it.** `assertAxeCompliance` lived privately inside `v2-a11y.spec.ts` and the new spec needed it. A duplicated ratchet is worse than no ratchet: the copies drift and the un-updated one keeps looking like it enforces something. This codebase has paid for that twice in a fortnight — a duplicated standard deviation and a duplicated hop parser. It now lives in `e2e/helpers/axe.ts`; `v2-a11y.spec.ts` imports it and still passes **17/17**.
+- **I ran the specs rather than shipping them unrun.** The deploy gate executes these, so an unrunnable spec blocks a deploy for reasons unrelated to the change. Both suites executed locally against a real Next server and real auth.
+- **Doing that surfaced something I would not otherwise have seen: the auth setup failed twice in one session** — once retried-flaky, once a hard failure of **both** setups leaving **15 tests unrun**. **#214 was struck as fixed at loop 37**, and this is a different symptom: loop 37 guarded against a server already listening on 3098; this times out at `waitForURL('**/dashboard**')` after 60s — a login that never completes, not a port conflict. Filed as **#228** with the reproduction, rather than dismissed as local noise: these setups gate the entire authenticated project in CI.
+- **Validation:** SOP spec **4/4** locally; dashboard a11y **17/17** after the refactor; workspace typecheck **0** across 11 packages; validator clean at 221 rows.
+- **Follow-ups:** 1 created (#228); **#109 closed**.
+- **Meta-review cadence:** 2 loops since MR-034.
+
+---
+
 ## 2026-09-29 (loop 56) — One bad row costs that row, not the dashboard (Mode 1, coordinator)
 
 - **Candidate Selection: `top-score` among verified-open rows — #92 (13)**, MR-034's endorsement, re-verified by me before building: `ErrorBoundary` existed at exactly two places in the codebase, both under `components/demo/`, and neither was reusable.

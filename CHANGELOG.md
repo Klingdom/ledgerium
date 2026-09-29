@@ -6,6 +6,22 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-29] - The procedure pages now have an accessibility safety net
+
+**Why:** the dashboard has had an automated accessibility check since May. The procedure documents — the thing this product actually hands to someone to follow — had none.
+
+### Added
+- An automated check now scans all three views of a procedure document (step-by-step, flow, and analysis), and also the state after someone ticks off completion criteria. It fails the build on any serious accessibility problem.
+- It runs against the real application, and it passes.
+
+### An item that turned out to be wrong
+- The task said two specific accessibility rules were being broken. **Neither was.** One described a pattern that is explicitly permitted by the accessibility standard; the other pointed at code that does not exist. Rather than "fix" either on a false premise, the check above was built — which settles the question with evidence instead of argument, and would have failed loudly if the claims had been right.
+
+### Found while running the tests
+- The automated login step that gates the whole test suite failed twice in one sitting. A related problem was marked fixed in June, but this is a different failure. Recorded with reproduction steps, because when it happens in the pipeline it blocks a deployment for reasons unrelated to what is being deployed.
+
+---
+
 ## [2026-09-29] - One broken workflow no longer hides all the others
 
 **Why:** if a single workflow failed to draw — malformed data, an unexpected value — the **entire dashboard** went to an error page. Forty working workflows, invisible because of one.
