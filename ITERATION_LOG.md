@@ -4,6 +4,25 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-29 (loop 56) — One bad row costs that row, not the dashboard (Mode 1, coordinator)
+
+- **Candidate Selection: `top-score` among verified-open rows — #92 (13)**, MR-034's endorsement, re-verified by me before building: `ErrorBoundary` existed at exactly two places in the codebase, both under `components/demo/`, and neither was reusable.
+- **`reverse-portfolio-drift: user-ack` — D-1 at 11.** Unchanged and unchangeable: #216 remains the only extension row and it is CEO-blocked.
+- **The failure this removes:** `DashboardV2Shell` had no boundary, so an uncaught exception anywhere beneath it took the entire dashboard route to the Next.js 500 page. A user with forty working workflows and one malformed one saw **nothing at all**.
+- **Two placements, and the second is the one that matters.** The shell boundary wraps the component **from outside its own render** — a boundary cannot catch an error thrown by itself, so wrapping from within the return would have caught nothing. The row boundary sits **inside the map**, so one bad row costs that row. Wrapping the list instead would have been the easy mistake and would have defeated the entire point.
+- **The row fallback has to be a `<tr>`.** Rows live in a table; a `<div>` fallback would break the table in a second and stranger way than the original error. It renders a single cell spanning `totalColCount` with a retry, so the user sees a list with one gap rather than a blank page.
+- **The reporting decision is where the real judgement went.** `componentDidCatch` emits the surface and the error's **constructor name** — never the message, never the stack. That is not squeamishness: messages in this codebase interpolate the thing that broke, and the thing that broke is a workflow title, a step label, or a field name captured from a user's screen. **A crash report is the obvious path by which recorded content reaches analytics**, and the PostHog posture here is no-content. Full detail goes to the server log, which is not a third party.
+- **The cost of that choice, stated rather than hidden:** an error name alone will rarely diagnose a specific failure. It answers "is this happening, where, how often", which is what a boundary is for. Anything more belongs in a server-side reporter.
+- **Enforced three ways rather than promised.** A pure `describeBoundaryError` rejects a `name` containing whitespace or longer than 40 characters — a message wearing a name — and refuses to coerce a thrown string, which is how `throw 'Workflow "Payroll" exploded'` would otherwise become the payload. A `@ts-expect-error` proves a `message` field cannot attach to the event. A source assertion proves `.message` appears nowhere in the module.
+- **I did not take the row's Sentry suggestion.** No Sentry is installed; adding a dependency and an error-reporting vendor is a decision, not an implementation detail, and it was not what this row was scored for.
+- **A test of mine failed for an instructive reason.** I asserted the boundary "never passes the error to `track()`" with a negative regex — which matched the **event name**, `ui_error_boundary_triggered`, because it contains "error". A negative pattern that a legitimate identifier can trip proves nothing; replaced with a positive assertion on the exact call.
+- **Testing limits, stated:** web-app has no jsdom and no React Testing Library, so render behaviour is not exercised here. The reporting decision was extracted into a pure function precisely so it could be attacked directly, and wiring is asserted at source level — the convention `dashboard-instrumentation.test.ts` already uses. Adding RTL to web-app is real infrastructure work and was not folded into this loop.
+- **Validation:** web-app **3169 → 3188** (+19); workspace **4975**; typecheck **0** across 11 packages; **`pnpm build` clean** including the dynamic-API-route assertion; validator clean.
+- **Follow-ups:** 0 created; **#92 closed**.
+- **Meta-review cadence:** 1 loop since MR-034.
+
+---
+
 ## 2026-09-28 (loop 55) — MR-034 applied, including a defect inside my own correction (Mode 1, coordinator)
 
 - **MR-034 reached the loop-54 conclusion independently** from the pre-correction files, and said so rather than claiming the find. Its verdict on the inference: **not sound, and wrong in the outage direction** — matching what I derived. It also supplied two limits I had not considered.

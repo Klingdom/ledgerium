@@ -60,6 +60,7 @@ const LOCKED_COLUMN_KEYS = new Set<ColumnKey>(['workflow_title', 'health_score']
 // circular import; re-exported here for ergonomic colocated import + tests.
 export { isNumericColumn, columnAlignClass } from './columnAlign.js';
 import { columnAlignClass } from './columnAlign.js';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 // ── UI state machine ──────────────────────────────────────────────────────────
 
@@ -908,8 +909,32 @@ export default function WorkflowList({
             {/* Sparse + Ready states: render rows */}
             {(state === 'sparse' || state === 'ready') &&
               sortedWorkflows.map((workflow) => (
-                <WorkflowRow
+                // Row #92: one bad row costs that row, not the list. Without
+                // this, a single malformed workflow took the whole dashboard
+                // route to the 500 page — forty working workflows made
+                // invisible by one. The fallback must be a <tr>, or the table
+                // breaks in a second and stranger way than the error did.
+                <ErrorBoundary
                   key={workflow.id}
+                  surface="workflow_row"
+                  fallback={(retry) => (
+                    <tr className="border-b border-[var(--border-subtle)]">
+                      <td colSpan={totalColCount} className="px-ds-4 py-ds-3">
+                        <div className="flex items-center gap-ds-3 text-ds-sm text-[var(--content-tertiary)]">
+                          <span>This workflow could not be displayed.</span>
+                          <button
+                            type="button"
+                            onClick={retry}
+                            className="underline underline-offset-2 hover:text-[var(--content-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded"
+                          >
+                            Try again
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                >
+                <WorkflowRow
                   workflow={workflow}
                   timeRange={timeRange}
                   density={density}
@@ -924,6 +949,7 @@ export default function WorkflowList({
                   {...(onWorkflowRename ? { onRename: onWorkflowRename } : {})}
                   {...(onWorkflowArchive ? { onArchive: onWorkflowArchive } : {})}
                 />
+                </ErrorBoundary>
               ))}
 
             {/* Filtered to zero within sparse/ready — inline no-results */}

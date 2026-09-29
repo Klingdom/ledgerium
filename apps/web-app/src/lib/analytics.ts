@@ -294,6 +294,21 @@ export type AnalyticsEvent =
       chipsRenderedCount: number;
     }
   | {
+      /**
+       * Row #92: a React error boundary degraded a surface instead of the route.
+       *
+       * Carries the surface and the error's CONSTRUCTOR NAME only — never the
+       * message or stack. Messages here interpolate what broke, and what broke
+       * is a workflow title, a step label, or a field name captured from a
+       * user's screen. A crash report is the obvious path for recorded content
+       * to leak into analytics; this closes it. Full detail goes to the server
+       * log instead.
+       */
+      event: 'ui_error_boundary_triggered';
+      surface: 'dashboard_shell' | 'workflow_row';
+      errorName: string;
+    }
+  | {
       event: 'workflow_row_clicked';
       workflowId: string;
       elapsedMsSinceDashboardView: number;

@@ -6,6 +6,21 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-29] - One broken workflow no longer hides all the others
+
+**Why:** if a single workflow failed to draw — malformed data, an unexpected value — the **entire dashboard** went to an error page. Forty working workflows, invisible because of one.
+
+### Fixed
+- A failure in one row now costs **that row**. You see the list with one gap in it, plus a "Try again" on the row itself.
+- A failure in the surrounding page no longer blanks everything either; it shows what happened and offers a retry, and says plainly that your workflows are safe because it is a display problem, not a data one.
+
+### A deliberate choice about what gets reported
+- When something breaks, the system records **where** it broke and **what kind** of error it was — never the error's text.
+- That is because error text in this product tends to quote the thing that broke, and the thing that broke is usually a workflow name, a step label, or a field name captured from someone's screen. A crash report is the easiest way for recorded content to end up somewhere it should not be, so it is closed off deliberately, and there are tests that fail if it reopens.
+- The trade-off is real and worth saying: an error type alone will not always explain a specific failure. It does answer "is this happening, where, and how often", which is what this is for. Detailed diagnosis stays on the server.
+
+---
+
 ## [2026-09-28] - Correcting yesterday's advice, which pointed at the wrong setting
 
 **Why:** yesterday I shipped a measurement to tell you what to set a security value to, and wrote that setting it too *high* would lock everyone out. **That was backwards.** Setting it too *low* is what locks everyone out — so the instructions were steering toward the risky end.

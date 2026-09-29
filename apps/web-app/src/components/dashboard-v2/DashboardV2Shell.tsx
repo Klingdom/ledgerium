@@ -85,6 +85,7 @@ import {
   type PresetId,
 } from '@/lib/dashboard-columns/presets.js';
 import type { FilterSet } from '@/lib/dashboard-columns/filters.js';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import {
   parseDashboardUrlState,
   serializeDashboardUrlState,
@@ -186,7 +187,7 @@ function extractSystems(workflows: WorkflowRowData[]): string[] {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function DashboardV2Shell() {
+function DashboardV2ShellInner() {
   // ── Data state ──────────────────────────────────────────────────────────────
   const [allWorkflows, setAllWorkflows] = useState<WorkflowRowData[]>([]);
   const [portfolioHealthScore, setPortfolioHealthScore] = useState<number | null>(null);
@@ -1399,5 +1400,45 @@ export default function DashboardV2Shell() {
         onApplySavedView={handleApplySavedView}
       />
     </div>
+  );
+}
+
+/**
+ * Row #92: the dashboard degrades instead of taking the route down.
+ *
+ * The boundary wraps the shell from OUTSIDE rather than living inside its
+ * render, because a boundary cannot catch an error thrown by itself. Rows carry
+ * their own boundary in `WorkflowList`, so this one only sees failures in the
+ * surrounding chrome — header, band, filters — which is the point: a broken
+ * header should not hide a working list.
+ */
+export default function DashboardV2Shell() {
+  return (
+    <ErrorBoundary
+      surface="dashboard_shell"
+      fallback={(retry) => (
+        <div
+          role="region"
+          aria-label="Workflow intelligence dashboard"
+          className="flex flex-col items-start gap-ds-3 p-ds-6"
+        >
+          <h2 className="text-ds-lg font-semibold text-[var(--content-primary)]">
+            The dashboard could not be displayed
+          </h2>
+          <p className="text-ds-sm text-[var(--content-secondary)]">
+            Your workflows are safe — this is a display problem, not a data one.
+          </p>
+          <button
+            type="button"
+            onClick={retry}
+            className="btn-primary"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+    >
+      <DashboardV2ShellInner />
+    </ErrorBoundary>
   );
 }
