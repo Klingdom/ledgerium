@@ -4,6 +4,23 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-29 (loop 58) — Diagnosing the deploy-blocking flake, and rejecting my own fix (Mode 3 debugging, coordinator)
+
+- **Candidate Selection: `directed` — #228 (9), which I filed last loop.** MR-034 flagged file-then-immediately-work as hazardous as a pattern, and this is the second instance. Taken anyway, with the reason stated rather than hidden: it gates the entire authenticated project in CI, so when it fires it blocks a deploy for reasons unrelated to the change being deployed, and I had a live reproduction in hand that would not survive the week.
+- **`reverse-portfolio-drift: user-ack` — D-1 at 12.**
+- **I disproved my own leading hypothesis, which was the most useful hour of the loop.** The login limiter is 10 per 15 minutes keyed by IP, and every local test login derives `'unknown'`, so a shared exhausted bucket explained the symptom beautifully. It is wrong: `auth-buckets.ts:53` returns `{ allowed: true }` outright when `NODE_ENV === 'test'`, and the Playwright webServer sets exactly that. My vitest proof of the mechanism **failed**, which is how the hypothesis died — had I reasoned in prose instead of writing the proof, I would have "fixed" a limiter that was never involved.
+- **The real defect is precise and is the same error class as loop 54.** `global-setup.ts:39` treats a 2-second HTTP-probe **timeout** as *"nothing is listening"* before deleting `prisma/test.db`. A server that IS listening but busy — exactly the back-to-back case the guard exists to catch — cannot answer `/api/health` in 2s. The probe concludes "no server", deletes the database, and strands the very server it was checking for. The resulting login failure is **silent and indistinguishable from a wrong password**, because `auth.ts:34` returns `null` on both, which is why it surfaces as a 60-second timeout rather than an error. **An ambiguous signal resolved toward the dangerous interpretation** — identical in shape to the proxy-hops direction I corrected four loops ago.
+- **I built a fix, proved it worked, and rejected it.** Replacing the HTTP probe with a TCP connect is demonstrably better at the thing it was meant to do: against a socket that accepts connections but never answers HTTP, the old probe returns `false` and would delete the database, while the TCP check returns `true` and refuses. **But it false-positives against Playwright's own webServer**, which is already bound to 3098 by the time `globalSetup` runs — so it blocked every legitimate local run. Reverted. **The old probe's leniency is accidentally load-bearing**, and no port-level check can fix this, because "is the port open" cannot distinguish our server from a foreign one.
+- **Shipping nothing was the right outcome.** A guard that blocks every local e2e run is far worse than the intermittent flake it targets. Recording a correct diagnosis with a rejected fix is a better loop than shipping a confident wrong one — and I would rather say that plainly than manufacture a code change to look productive.
+- **The correct fix, specified for whoever takes it next:** stop deleting the file. Reset the data **in place**, preserving the inode, so a server still holding the handle keeps serving that file and simply sees fresh data. That removes the entire failure class instead of guarding against it, and requires no ability to tell our server from anyone else's.
+- **Corroboration gathered:** a genuinely stranded server **was** found bound to 3098 after back-to-back runs; the flake reproduced again after the revert (`1 flaky`); a cold isolated run passes 2/2, which is exactly why this never shows up in isolation.
+- **A process failure of my own, worth recording:** I lost the original failure artefacts because the passing reruns wiped `test-results/` before I read them — the precise mistake I recorded at loop 34 and wrote a rule about. I reconstructed the diagnosis from source instead, but it cost an hour and a disproved hypothesis.
+- **Validation:** no product code shipped; `global-setup.ts` reverted to its committed state and verified by re-running the auth setups; workspace typecheck **0**; validator clean.
+- **Follow-ups:** 0 created; #228 updated with the full diagnosis, the rejected fix, and the specified correct one.
+- **Meta-review cadence:** 3 loops since MR-034 — MR-035 due next.
+
+---
+
 ## 2026-09-29 (loop 57) — The ratchet settles what the row asserted (Mode 1, coordinator)
 
 - **Candidate Selection: `directed` — #109 (13)**, MR-034's alternative. **P-11 changed what got built.** The row named two "HARD WCAG 2.1 AA violations"; I checked both before touching code and **neither survived**.
