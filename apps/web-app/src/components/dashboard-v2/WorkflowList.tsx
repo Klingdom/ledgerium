@@ -391,7 +391,7 @@ function SortButton({ field, label, currentSort, onSort }: SortButtonProps) {
       className={`
         inline-flex items-center gap-ds-1 text-[12px] font-medium
         transition-colors duration-150
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded
         ${isActive ? 'text-[var(--content-primary)]' : 'text-[var(--content-secondary)] hover:text-[var(--content-primary)]'}
       `}
     >
@@ -640,7 +640,7 @@ export default function WorkflowList({
               className={`
                 flex items-center gap-ds-1 px-ds-3 py-ds-3 border-b border-r border-[var(--border-subtle)]
                 text-[12px] font-medium transition-colors duration-150
-                focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
                 ${
                   portfolioSidebarOpen
                     ? 'bg-[var(--surface-secondary)] text-[var(--content-primary)]'
@@ -684,7 +684,7 @@ export default function WorkflowList({
             <button
               type="button"
               onClick={() => setSparseNoticeDismissed(true)}
-              className="flex-shrink-0 text-[12px] font-medium text-amber-700 hover:text-amber-900 transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded"
+              className="flex-shrink-0 text-[12px] font-medium text-amber-700 hover:text-amber-900 transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded"
               aria-label="Dismiss sparse data notice"
             >
               Dismiss
@@ -839,7 +839,7 @@ export default function WorkflowList({
                     <button
                       type="button"
                       onClick={onRetry}
-                      className="inline-flex items-center gap-ds-2 px-ds-4 py-ds-2 rounded-ds-sm bg-[var(--content-primary)] text-[var(--surface-primary)] text-[14px] font-medium transition-colors duration-150 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                      className="inline-flex items-center gap-ds-2 px-ds-4 py-ds-2 rounded-ds-sm bg-[var(--content-primary)] text-[var(--surface-primary)] text-[14px] font-medium transition-colors duration-150 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
                     >
                       <RefreshCw size={14} aria-hidden="true" />
                       Try again
@@ -868,7 +868,7 @@ export default function WorkflowList({
                       onClick={() =>
                         track({ event: 'dashboard_empty_state_cta_clicked', cta: 'install' })
                       }
-                      className="inline-flex items-center gap-ds-2 px-ds-4 py-ds-2 rounded-ds-sm border border-[var(--border-default)] text-[14px] font-medium text-[var(--content-primary)] transition-colors duration-150 hover:bg-[var(--surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                      className="inline-flex items-center gap-ds-2 px-ds-4 py-ds-2 rounded-ds-sm border border-[var(--border-default)] text-[14px] font-medium text-[var(--content-primary)] transition-colors duration-150 hover:bg-[var(--surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
                     >
                       Install extension to start →
                     </Link>
@@ -877,7 +877,7 @@ export default function WorkflowList({
                       onClick={() =>
                         track({ event: 'dashboard_empty_state_cta_clicked', cta: 'upload' })
                       }
-                      className="inline-flex items-center gap-ds-2 px-ds-4 py-ds-2 rounded-ds-sm text-[14px] font-medium text-[var(--content-secondary)] transition-colors duration-150 hover:text-[var(--content-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded"
+                      className="inline-flex items-center gap-ds-2 px-ds-4 py-ds-2 rounded-ds-sm text-[14px] font-medium text-[var(--content-secondary)] transition-colors duration-150 hover:text-[var(--content-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded"
                     >
                       Upload a recording →
                     </Link>
@@ -897,7 +897,7 @@ export default function WorkflowList({
                     <button
                       type="button"
                       onClick={clearAllFilters}
-                      className="inline-flex items-center gap-ds-2 px-ds-4 py-ds-2 rounded-ds-sm border border-[var(--border-default)] text-[14px] font-medium text-[var(--content-primary)] transition-colors duration-150 hover:bg-[var(--surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                      className="inline-flex items-center gap-ds-2 px-ds-4 py-ds-2 rounded-ds-sm border border-[var(--border-default)] text-[14px] font-medium text-[var(--content-primary)] transition-colors duration-150 hover:bg-[var(--surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
                     >
                       Clear filters
                     </button>
@@ -925,7 +925,7 @@ export default function WorkflowList({
                           <button
                             type="button"
                             onClick={retry}
-                            className="underline underline-offset-2 hover:text-[var(--content-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded"
+                            className="underline underline-offset-2 hover:text-[var(--content-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded"
                           >
                             Try again
                           </button>
@@ -965,7 +965,7 @@ export default function WorkflowList({
                       <button
                         type="button"
                         onClick={clearAllFilters}
-                        className="text-[14px] font-medium text-[var(--content-primary)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded"
+                        className="text-[14px] font-medium text-[var(--content-primary)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded"
                       >
                         Clear filters
                       </button>

@@ -4,6 +4,23 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-30 (loop 64) — The focus ring nobody could see, and the reason nobody could see it (Mode 1, coordinator)
+
+- **Candidate Selection: `top-score` — #230** (12), filed last loop when `a11y-architect` suggested I check the house focus ring in light theme and it turned out to measure 2.18:1.
+- **`reverse-portfolio-drift: user-ack` — D-1 unchanged; #216 remains the only extension row and is still CEO-blocked.**
+- **The row's own count was wrong, and low.** It said 53 green-500 plus 4 emerald-500. Enumerating *every* focus-ring literal found **68 failing usages across 7 colours**. The worst was `focus-visible:ring-[var(--accent,#20f2a6)]` at **1.40:1** — a focus indicator that is, in light mode, essentially not there.
+- **The biggest miss was structural, not numerical.** `.btn-primary`, `.btn-secondary` and `.input-field` carry their ring in `@layer components` via `@apply`, not in a className, so no grep for `ring-` in `.tsx` would ever have found them. `.btn-primary` alone is used in roughly ninety places. Searching for the shape of a defect only finds it where you already expect it to live.
+- **Fixed with one per-theme `--focus-ring` token** rather than a new literal. Dark keeps `#22C55E`, so the default theme is byte-identical visually and the risk of the 70-site sweep is confined to a theme that was already broken. Light is `#15803D`, 4.79:1.
+- **Four colours were measured and deliberately left alone** — red-500 3.60, brand-600 3.60, blue-500 3.52, the `#16a34a` accent fallback 3.15. They pass. Rewriting them would have been tidying, and red-on-destructive is a deliberate signal, not an accident.
+- **Verified in the compiled CSS, not just the build exit code.** `@apply` with an arbitrary `var()` is the kind of thing that can silently emit nothing; my first grep found zero matches and I nearly believed it, then noticed I was searching the wrong chunk. Five `--tw-ring-color:var(--focus-ring)` rules and all three token definitions are in the main stylesheet.
+- **The structural half is the point of this loop.** `e2e/helpers/theme.ts` seeds the preference before first render, and light-theme axe coverage is now live on the SOP surface. It asserts the theme actually applied — without that, a scan that silently ran against dark would pass, which is the exact shape of the loop-57 failure this codebase has already paid for once.
+- **Probing the dashboard in light found a separate real failure**, so light coverage there is deliberately absent rather than shipped red or shipped with the bar lowered. Filed as **#232** with the measurements: `text-green-400` / `text-red-400` health figures, 20 usages. `WorkflowRow.tsx:263` has a comment computing 6.1:1 — correctly, for the dark theme only. The blind spot was written down in the source the whole time.
+- **Validation:** a11y specs **23/23** (dashboard 15 + SOP 8, including 2 new light-theme scans); web-app **3195**; typecheck **0** across 11 packages; production build clean; validator clean at 225 rows.
+- **Follow-ups:** 1 created (#232), 1 closed (#230).
+- **Meta-review cadence:** 4 loops since MR-035 — **MR-036 is due**.
+
+---
+
 ## 2026-09-30 (loop 63) — Fixing what the new ratchet found, including the two bands it could not see (Mode 1, coordinator + `a11y-architect`)
 
 - **Candidate Selection: `directed` — #229**, filed last loop by the rebuilt SOP ratchet. Fixing what a test you just wrote found is the completion of that work, not a new piece of it.

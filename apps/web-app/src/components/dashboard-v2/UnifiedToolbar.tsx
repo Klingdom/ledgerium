@@ -138,7 +138,7 @@ export default function UnifiedToolbar({
           className={`
             inline-flex items-center gap-ds-1 px-ds-3 py-ds-1.5 rounded-ds-sm border
             text-[13px] font-medium transition-colors duration-150
-            focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
             ${
               portfolioSidebarOpen
                 ? 'bg-[var(--surface-secondary)] text-[var(--content-primary)] border-[var(--border-default)]'
@@ -172,7 +172,7 @@ export default function UnifiedToolbar({
               bg-transparent border border-[var(--border-default)]
               placeholder:text-[var(--content-tertiary)]
               transition-colors duration-150
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
             "
           />
           {searchQuery !== '' && (
@@ -180,7 +180,7 @@ export default function UnifiedToolbar({
               type="button"
               onClick={() => onSearchChange('')}
               aria-label="Clear search"
-              className="absolute right-ds-2 top-1/2 -translate-y-1/2 rounded text-[var(--content-tertiary)] hover:text-[var(--content-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+              className="absolute right-ds-2 top-1/2 -translate-y-1/2 rounded text-[var(--content-tertiary)] hover:text-[var(--content-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
             >
               <X size={12} aria-hidden="true" />
             </button>
@@ -194,7 +194,7 @@ export default function UnifiedToolbar({
           className={`
             inline-flex items-center gap-ds-1 px-ds-3 py-ds-1.5 rounded-ds-sm border
             text-[13px] font-medium transition-colors duration-150
-            focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
             ${
               isFilterPanelOpen || activeFilterCount > 0
                 ? 'bg-[var(--surface-secondary)] text-[var(--content-primary)] border-[var(--border-default)]'
@@ -227,7 +227,7 @@ export default function UnifiedToolbar({
               text-[13px] font-medium text-[var(--content-primary)]
               bg-transparent border border-[var(--border-default)] rounded-ds-sm
               px-ds-2 py-ds-1.5
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 cursor-pointer
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] cursor-pointer
             "
           >
             {SORT_OPTIONS.map((opt) => (
@@ -258,7 +258,7 @@ export default function UnifiedToolbar({
               text-[13px] font-medium text-[var(--content-primary)]
               bg-transparent border border-[var(--border-default)] rounded-ds-sm
               px-ds-2 py-ds-1.5
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 cursor-pointer
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] cursor-pointer
             "
           >
             {DENSITY_OPTIONS.map((opt) => (
@@ -280,7 +280,7 @@ export default function UnifiedToolbar({
             border-[var(--border-default)]
             transition-colors duration-150
             hover:bg-[var(--surface-secondary)] hover:text-[var(--content-primary)]
-            focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
           "
           aria-label="Customize columns"
           aria-expanded={isColumnsOpen}

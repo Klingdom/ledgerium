@@ -77,7 +77,7 @@ export function ExtensionStatusToast() {
       <span className="text-sm font-medium">Extension connected. Ready to record.</span>
       <button
         onClick={() => setVisible(false)}
-        className="ml-1 rounded p-0.5 hover:bg-emerald-800/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+        className="ml-1 rounded p-0.5 hover:bg-emerald-800/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
         aria-label="Dismiss notification"
       >
         <X className="h-4 w-4" aria-hidden="true" />

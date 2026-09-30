@@ -6,6 +6,23 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - The keyboard focus outline is now visible in light mode
+
+**Why:** the outline that shows which element your keyboard is on was nearly invisible in light mode — on 68 controls. It looked fine in dark mode, which is the default and, it turns out, the only mode anything ever checked.
+
+### Fixed
+- **The focus outline now has a colour chosen for each mode.** Dark mode is unchanged. Light mode gets a darker green that can actually be seen. This affects buttons, form fields, menus, filters and links across the dashboard, the procedure pages and the public site.
+- The worst case was an outline measuring 1.4 against a required 3 — for practical purposes, no outline at all. Anyone navigating by keyboard in light mode could not tell where they were.
+- Four outline colours were measured and left alone because they already passed. Changing things that work is how working things break.
+
+### New
+- **Accessibility checks now run in light mode**, starting with the procedure pages. Until today every automated check ran in dark mode only, which is why this went unnoticed for so long. The new check also confirms light mode really switched on before it looks — otherwise it would quietly re-check dark mode and report success.
+
+### Found and recorded, not fixed here
+- The dashboard's health figures use colours meant for dark backgrounds, and fail in light mode. Light-mode checking of the dashboard is therefore deliberately held back rather than switched on and reported as failing, or switched on with the standard lowered to let it through. It arrives with its fix.
+
+---
+
 ## [2026-09-30] - Procedure pages: unreadable figures fixed, and the flow diagram now works with a keyboard
 
 **Why:** the accessibility check rebuilt yesterday reported three real problems. Fixing them turned up two more that no automated check could have found.

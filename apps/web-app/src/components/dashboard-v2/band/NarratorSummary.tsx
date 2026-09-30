@@ -170,7 +170,7 @@ export default function NarratorSummary({
               }
             }}
             aria-pressed={isActive}
-            className={`rounded underline decoration-dotted underline-offset-2 transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 ${
+            className={`rounded underline decoration-dotted underline-offset-2 transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] ${
               isActive
                 ? 'text-[var(--content-primary)] font-medium'
                 : 'text-[var(--content-secondary)] hover:text-[var(--content-primary)]'

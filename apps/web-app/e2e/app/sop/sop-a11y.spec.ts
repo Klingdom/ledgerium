@@ -24,6 +24,7 @@
 
 import { test, expect, type Page } from '@playwright/test';
 import { assertAxeCompliance } from '../../helpers/axe.js';
+import { forceTheme, expectThemeApplied } from '../../helpers/theme.js';
 
 /** Seeded in `e2e/seed-test-db.js`, owned by the growth-plan test user. */
 const WORKFLOW_ID = 'e2e-wf-growth-automate';
@@ -102,4 +103,40 @@ test('the Flow View process strip is reachable and scrollable by keyboard', asyn
 
   await strip.focus();
   await expect(strip).toBeFocused();
+});
+
+/**
+ * Light theme (row #230).
+ *
+ * Every axe ratchet in this repo ran against the dark theme, because dark is
+ * the default and nothing ever set otherwise. That is half the product going
+ * unchecked, and it hid a focus indicator at 2.18:1 on 68 elements for as long
+ * as the light theme has existed — the colours were fine in dark, so no scan
+ * had reason to complain.
+ *
+ * Only the SOP surface is covered in light for now. The dashboard is NOT, and
+ * that is a measured decision rather than an oversight: probing it found a real
+ * `color-contrast` failure on `text-green-400` / `text-red-400` health figures,
+ * which is a different defect from the ring with a different fix, and is filed
+ * as row #232. Adding a dashboard light test now would either ship red or need
+ * the bar lowered to accommodate it. It goes in with its fix.
+ */
+test('axe: zero critical/serious violations — Execution SOP mode, LIGHT theme', async ({ page }) => {
+  await forceTheme(page, 'light');
+  await openSop(page);
+  // Prove the theme actually applied. Without this the scan would silently run
+  // against dark and pass — a green tick for a check that never happened, which
+  // is the exact failure this whole spec was rewritten to stop.
+  await expectThemeApplied(page, 'light');
+  await expect(page.getByText(/invoice approval/i).first()).toBeVisible();
+  await assertAxeCompliance(page, 'sop-execution-light', 0);
+});
+
+test('axe: zero critical/serious violations — Analysis mode, LIGHT theme', async ({ page }) => {
+  await forceTheme(page, 'light');
+  await openSop(page);
+  await expectThemeApplied(page, 'light');
+  await switchMode(page, /analysis/i);
+  await expect(page.getByText(/intelligence layer/i).first()).toBeVisible();
+  await assertAxeCompliance(page, 'sop-analysis-light', 0);
 });

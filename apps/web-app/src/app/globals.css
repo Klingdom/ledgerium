@@ -36,6 +36,14 @@
      in this theme, i.e. a fail as text. #60A5FA is 6.37:1 at worst here. */
   --status-info: #60A5FA;     /* 6.37:1 on --surface-elevated */
 
+  /* Focus indicator (row #230). SC 1.4.11 wants >= 3:1 against adjacent
+     colours. The house literal was ring-green-500 #22C55E on 52 elements: 7.10:1
+     here, but 2.18:1 on the light theme's surfaces — a focus ring a sighted
+     keyboard user in light mode can barely see. It survived because no axe
+     ratchet in this repo exercises .light at all.
+     Dark keeps #22C55E, so the default theme is visually unchanged. */
+  --focus-ring: #22C55E;      /* 7.10:1 on --surface-primary */
+
   /* Borders */
   --border-default: rgba(255, 255, 255, 0.10);
   --border-subtle: rgba(255, 255, 255, 0.06);
@@ -69,6 +77,7 @@
   --status-warning: #B45309;  /* 4.79:1 */
   --status-success: #15803D;  /* 4.79:1 */
   --status-info: #1D4ED8;     /* 6.41:1 — row #229, see :root */
+  --focus-ring: #15803D;      /* 4.79:1 — row #230, see :root */
 
   /* Borders */
   --border-default: #E2E8F0;
@@ -105,10 +114,10 @@
      (#047857) measures 5.48:1; hover moves down one step to keep the hover
      state distinguishable. */
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-ds-md bg-brand-700 px-4 py-2.5 text-ds-sm font-medium text-white transition-all hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center rounded-ds-md bg-brand-700 px-4 py-2.5 text-ds-sm font-medium text-white transition-all hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-ds-md border px-4 py-2.5 text-ds-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center rounded-ds-md border px-4 py-2.5 text-ds-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
     border-color: var(--border-default);
     background-color: var(--surface-elevated);
     color: var(--content-primary);
@@ -124,7 +133,7 @@
   /* ── Form inputs ──────────────────────────────────────────────────────── */
 
   .input-field {
-    @apply block w-full rounded-ds-md border px-3.5 py-2.5 text-ds-base focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500;
+    @apply block w-full rounded-ds-md border px-3.5 py-2.5 text-ds-base focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-[var(--focus-ring)];
     border-color: var(--border-default);
     background-color: var(--surface-elevated);
     color: var(--content-primary);
@@ -473,6 +482,7 @@
       /* Must be reset like the rest: the dark-theme #60A5FA is ~2.0:1 on white,
          so a SOP printed from dark mode would lose its confidence figures. */
       --status-info: #1D4ED8 !important;
+      --focus-ring: #15803D !important;
       --border-default: #e2e8f0 !important;
       --border-subtle: #f1f5f9 !important;
       background: #ffffff !important;

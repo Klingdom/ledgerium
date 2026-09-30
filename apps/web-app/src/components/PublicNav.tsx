@@ -264,7 +264,7 @@ export function PublicNav() {
           ref={hamburgerRef}
           type="button"
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden rounded-lg p-2 text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+          className="md:hidden rounded-lg p-2 text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
           aria-label="Toggle menu"
           aria-expanded={mobileOpen}
           aria-controls="mobile-nav-drawer"
@@ -347,7 +347,7 @@ function navLinkClass(active: boolean): string {
     active
       ? 'text-brand-400 bg-brand-900/30'
       : 'text-[var(--content-secondary)] hover:text-[var(--content-primary)] hover:bg-[var(--surface-secondary)]'
-  } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500`;
+  } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]`;
 }
 
 function mobileRowClass(active: boolean): string {
@@ -361,7 +361,7 @@ function PanelLink({ leaf, onClick }: { leaf: NavLeaf; onClick: () => void }) {
     <Link
       href={leaf.href}
       onClick={onClick}
-      className="group inline-flex items-center gap-2 text-sm text-[var(--content-secondary)] hover:text-[var(--content-primary)] rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+      className="group inline-flex items-center gap-2 text-sm text-[var(--content-secondary)] hover:text-[var(--content-primary)] rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
     >
       {leaf.label}
       {leaf.badge && (

@@ -198,7 +198,7 @@ function PresetChip({
     'rounded-full text-[12px] font-medium',
     'select-none scroll-snap-align-start flex-shrink-0',
     'transition-colors duration-150',
-    'focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-1',
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-1',
     // State
     isActive
       ? 'bg-green-600 text-white border border-green-600'

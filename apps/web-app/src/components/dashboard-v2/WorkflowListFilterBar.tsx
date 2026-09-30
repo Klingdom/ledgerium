@@ -167,7 +167,7 @@ export default function WorkflowListFilterBar({
                 className={`
                   px-ds-2 py-0.5 rounded-ds-sm border text-[12px] font-medium
                   transition-colors duration-150
-                  focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
                   ${
                     isSelected
                       ? 'bg-[var(--content-primary)] text-[var(--surface-primary)] border-[var(--content-primary)]'
@@ -188,7 +188,7 @@ export default function WorkflowListFilterBar({
         onChange={(e) =>
           setOpportunity(e.target.value === '' ? null : (e.target.value as OpportunityTag))
         }
-        className="text-[12px] font-medium text-[var(--content-secondary)] bg-transparent border border-[var(--border-default)] rounded-ds-sm px-ds-2 py-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 cursor-pointer"
+        className="text-[12px] font-medium text-[var(--content-secondary)] bg-transparent border border-[var(--border-default)] rounded-ds-sm px-ds-2 py-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] cursor-pointer"
         aria-label="Filter by opportunity"
       >
         <option value="">Opportunity</option>
@@ -207,7 +207,7 @@ export default function WorkflowListFilterBar({
             e.target.value === '' ? null : (e.target.value as HealthStatusFilter),
           )
         }
-        className="text-[12px] font-medium text-[var(--content-secondary)] bg-transparent border border-[var(--border-default)] rounded-ds-sm px-ds-2 py-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 cursor-pointer"
+        className="text-[12px] font-medium text-[var(--content-secondary)] bg-transparent border border-[var(--border-default)] rounded-ds-sm px-ds-2 py-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] cursor-pointer"
         aria-label="Filter by health status"
       >
         <option value="">Health Status</option>
@@ -230,7 +230,7 @@ export default function WorkflowListFilterBar({
               <button
                 type="button"
                 onClick={() => toggleSystem(system)}
-                className="ml-0.5 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                className="ml-0.5 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
                 aria-label={`Remove ${system} filter`}
               >
                 <X size={10} aria-hidden="true" />
@@ -244,7 +244,7 @@ export default function WorkflowListFilterBar({
               <button
                 type="button"
                 onClick={() => setOpportunity(null)}
-                className="ml-0.5 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                className="ml-0.5 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
                 aria-label="Remove opportunity filter"
               >
                 <X size={10} aria-hidden="true" />
@@ -258,7 +258,7 @@ export default function WorkflowListFilterBar({
               <button
                 type="button"
                 onClick={() => setHealthStatus(null)}
-                className="ml-0.5 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                className="ml-0.5 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
                 aria-label="Remove health status filter"
               >
                 <X size={10} aria-hidden="true" />
@@ -269,7 +269,7 @@ export default function WorkflowListFilterBar({
           <button
             type="button"
             onClick={clearAll}
-            className="text-[12px] font-medium text-[var(--content-secondary)] hover:text-[var(--content-primary)] transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded px-ds-1"
+            className="text-[12px] font-medium text-[var(--content-secondary)] hover:text-[var(--content-primary)] transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded px-ds-1"
           >
             Clear all
           </button>

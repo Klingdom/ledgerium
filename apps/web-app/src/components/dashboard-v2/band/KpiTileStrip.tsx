@@ -139,7 +139,7 @@ function TileShell({
           onActivate();
         }}
         aria-pressed={isActive ?? false}
-        className={`${baseClass} bg-[var(--surface-primary)] transition-colors duration-150 hover:bg-[var(--surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 ${
+        className={`${baseClass} bg-[var(--surface-primary)] transition-colors duration-150 hover:bg-[var(--surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] ${
           isActive
             ? 'border-green-600 ring-1 ring-green-600'
             : 'border-[var(--border-subtle)]'

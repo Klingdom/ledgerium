@@ -118,7 +118,7 @@ export default function OpportunityBar({
                     });
                     onSegmentClick(seg.tag);
                   }}
-                  className="h-full cursor-pointer transition-opacity duration-150 hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                  className="h-full cursor-pointer transition-opacity duration-150 hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
                   style={{
                     width: `${seg.pct}%`,
                     backgroundColor: OPPORTUNITY_COLOR[seg.tag],

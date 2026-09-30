@@ -118,7 +118,7 @@ export default function FirstRunTutorial() {
           onClick={() =>
             track({ event: 'dashboard_empty_state_cta_clicked', cta: 'install' })
           }
-          className="inline-flex items-center gap-ds-2 px-ds-5 py-ds-2 rounded-ds-sm bg-[var(--content-primary)] text-[var(--surface-primary)] text-[14px] font-medium transition-opacity duration-150 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+          className="inline-flex items-center gap-ds-2 px-ds-5 py-ds-2 rounded-ds-sm bg-[var(--content-primary)] text-[var(--surface-primary)] text-[14px] font-medium transition-opacity duration-150 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
         >
           {FIRST_RUN_PRIMARY_CTA}
         </Link>
@@ -130,7 +130,7 @@ export default function FirstRunTutorial() {
             onClick={() =>
               track({ event: 'dashboard_empty_state_cta_clicked', cta: 'upload' })
             }
-            className="font-medium text-[var(--content-primary)] underline underline-offset-2 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded"
+            className="font-medium text-[var(--content-primary)] underline underline-offset-2 hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded"
           >
             {FIRST_RUN_SECONDARY_CTA}
           </Link>

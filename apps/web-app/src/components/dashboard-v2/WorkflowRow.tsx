@@ -340,7 +340,7 @@ function HealthTooltip({ metricsV2, onDismiss, triggerRef, id }: HealthTooltipPr
         </div>
         <a
           href="/pricing"
-          className="mt-ds-2 block text-[12px] font-medium text-green-600 hover:text-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded"
+          className="mt-ds-2 block text-[12px] font-medium text-green-600 hover:text-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded"
           onClick={() => {
             // PRD §4 metric #6: upgrade CTA from gated health state
             track({ event: 'upgrade_clicked', location: 'dashboard_v2_health_gate' });
@@ -572,7 +572,7 @@ function InlineEdit({ currentTitle, workflowId, onCommit, onCancel }: InlineEdit
         value={value}
         disabled={isBusy}
         aria-label="Rename workflow"
-        className="text-[14px] font-medium text-[var(--content-primary)] bg-[var(--surface-secondary)] border border-[var(--border-default)] rounded px-1 py-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 disabled:opacity-50 w-full"
+        className="text-[14px] font-medium text-[var(--content-primary)] bg-[var(--surface-secondary)] border border-[var(--border-default)] rounded px-1 py-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:opacity-50 w-full"
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
@@ -665,7 +665,7 @@ function InlineArchiveConfirm({
           type="button"
           disabled={isBusy}
           aria-label="Cancel — do not archive"
-          className="px-ds-2 py-0.5 rounded text-[12px] font-medium text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 disabled:opacity-50 transition-colors duration-150"
+          className="px-ds-2 py-0.5 rounded text-[12px] font-medium text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:opacity-50 transition-colors duration-150"
           onClick={() => {
             onCancel();
             triggerRef.current?.focus();
@@ -1041,7 +1041,7 @@ export default function WorkflowRow({
             <button
               type="button"
               onClick={handleTitleActivate}
-              className="text-left text-[14px] font-medium text-[var(--content-primary)] truncate bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded"
+              className="text-left text-[14px] font-medium text-[var(--content-primary)] truncate bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded"
               aria-label={`Open workflow: ${displayTitle}`}
             >
               {displayTitle}
@@ -1232,7 +1232,7 @@ export default function WorkflowRow({
             e.stopPropagation();
             setShowTooltip((prev) => !prev);
           }}
-          className="flex flex-col items-end gap-0.5 cursor-pointer w-full bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded"
+          className="flex flex-col items-end gap-0.5 cursor-pointer w-full bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded"
           aria-label={
             runs !== null && runs < 10
               ? `Health score: ${healthScore.overall}, ${band.label}, based on ${runs} run${runs !== 1 ? 's' : ''} — low confidence. Show breakdown.`
@@ -1319,7 +1319,7 @@ export default function WorkflowRow({
           <button
             ref={kebabTriggerRef}
             type="button"
-            className="p-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 text-[var(--content-tertiary)] hover:text-[var(--content-primary)] transition-colors duration-150 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
+            className="p-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] text-[var(--content-tertiary)] hover:text-[var(--content-primary)] transition-colors duration-150 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
             aria-label={`Actions for ${displayTitle}`}
             aria-haspopup="menu"
             aria-expanded={showKebab}

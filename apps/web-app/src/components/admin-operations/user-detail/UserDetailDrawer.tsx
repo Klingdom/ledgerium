@@ -225,7 +225,7 @@ export function UserDetailDrawer({ selectedUserId, onClose }: UserDetailDrawerPr
             type="button"
             onClick={handleClose}
             aria-label="Close user detail"
-            className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent,#20f2a6)]"
+            className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
             data-testid="drawer-close-button"
           >
             <svg

@@ -177,7 +177,7 @@ export default function CommandHeader({
           <select
             value={timeRange}
             onChange={(e) => onTimeRangeChange(e.target.value as TimeRange)}
-            className="text-[12px] font-medium text-[var(--content-secondary)] bg-transparent border border-[var(--border-default)] rounded-ds-sm px-ds-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 cursor-pointer"
+            className="text-[12px] font-medium text-[var(--content-secondary)] bg-transparent border border-[var(--border-default)] rounded-ds-sm px-ds-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] cursor-pointer"
             aria-label="Time range"
           >
             {TIME_RANGE_OPTIONS.map((opt) => (

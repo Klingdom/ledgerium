@@ -265,7 +265,7 @@ export default function LssParetoPanel({ workflows, onSelectWorkflow }: LssParet
                 <button
                   type="button"
                   onClick={() => onSelectWorkflow(b.id)}
-                  className="flex w-full items-center justify-between gap-ds-2 text-[12px] text-left rounded px-ds-1 -mx-ds-1 transition-colors duration-150 hover:bg-[var(--surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                  className="flex w-full items-center justify-between gap-ds-2 text-[12px] text-left rounded px-ds-1 -mx-ds-1 transition-colors duration-150 hover:bg-[var(--surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
                   aria-label={`Go to ${b.title} in the list`}
                   title="Scroll to this workflow in the list"
                 >

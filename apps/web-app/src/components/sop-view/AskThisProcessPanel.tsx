@@ -132,7 +132,7 @@ function renderAnswerWithCitations(
           onClick={() => stepId && onJumpToStep?.(stepId)}
           disabled={!stepId}
           aria-label={`Jump to step ${ordinal}`}
-          className="inline-flex items-center align-baseline mx-0.5 px-1 py-0 rounded text-[9px] font-bold tabular-nums text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:opacity-50 disabled:cursor-default transition-colors"
+          className="inline-flex items-center align-baseline mx-0.5 px-1 py-0 rounded text-[9px] font-bold tabular-nums text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:opacity-50 disabled:cursor-default transition-colors"
         >
           S{ordinal}
         </button>,
@@ -374,7 +374,7 @@ export function AskThisProcessPanel({ viewModel, workflowId, onJumpToStep }: Pro
                 data-testid="ask-suggestion"
                 onClick={() => void submitQuestion(s)}
                 disabled={isLoading || !workflowId}
-                className="flex items-center gap-2 text-left text-[10px] text-[var(--content-secondary)] bg-[var(--surface-secondary)] hover:bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-lg px-2.5 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 text-left text-[10px] text-[var(--content-secondary)] bg-[var(--surface-secondary)] hover:bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-lg px-2.5 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:opacity-50 transition-colors"
               >
                 <Sparkles className="h-3 w-3 text-emerald-400 flex-shrink-0" aria-hidden="true" />
                 {s}
@@ -403,14 +403,14 @@ export function AskThisProcessPanel({ viewModel, workflowId, onJumpToStep }: Pro
             maxLength={500}
             disabled={isLoading || !workflowId}
             placeholder="Ask about steps, systems, decisions…"
-            className="flex-1 min-w-0 text-[11px] text-[var(--content-primary)] bg-[var(--surface-elevated)] border border-[var(--border-default)] rounded-lg px-2.5 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:opacity-60"
+            className="flex-1 min-w-0 text-[11px] text-[var(--content-primary)] bg-[var(--surface-elevated)] border border-[var(--border-default)] rounded-lg px-2.5 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:opacity-60"
           />
           <button
             type="submit"
             data-testid="ask-submit"
             disabled={isLoading || !workflowId || question.trim().length === 0}
             aria-label="Send question"
-            className="flex-shrink-0 w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="flex-shrink-0 w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <Send className="h-3.5 w-3.5" aria-hidden="true" />
           </button>

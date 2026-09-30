@@ -197,7 +197,7 @@ export default function RecommendationCenterPage() {
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
-          className="rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-elevated)] px-ds-3 py-ds-2 text-ds-sm text-[var(--content-primary)] focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+          className="rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-elevated)] px-ds-3 py-ds-2 text-ds-sm text-[var(--content-primary)] focus:border-brand-500 focus:ring-1 focus:ring-[var(--focus-ring)]"
         >
           {TYPE_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -206,7 +206,7 @@ export default function RecommendationCenterPage() {
         <select
           value={filterImpact}
           onChange={(e) => setFilterImpact(e.target.value)}
-          className="rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-elevated)] px-ds-3 py-ds-2 text-ds-sm text-[var(--content-primary)] focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+          className="rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-elevated)] px-ds-3 py-ds-2 text-ds-sm text-[var(--content-primary)] focus:border-brand-500 focus:ring-1 focus:ring-[var(--focus-ring)]"
         >
           {IMPACT_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -215,7 +215,7 @@ export default function RecommendationCenterPage() {
         <select
           value={filterConfidence}
           onChange={(e) => setFilterConfidence(e.target.value)}
-          className="rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-elevated)] px-ds-3 py-ds-2 text-ds-sm text-[var(--content-primary)] focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+          className="rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-elevated)] px-ds-3 py-ds-2 text-ds-sm text-[var(--content-primary)] focus:border-brand-500 focus:ring-1 focus:ring-[var(--focus-ring)]"
         >
           {CONFIDENCE_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>

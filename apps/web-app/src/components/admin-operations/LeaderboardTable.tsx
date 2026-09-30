@@ -88,7 +88,7 @@ export function LeaderboardTable({
                   <button
                     type="button"
                     onClick={() => onRowClick(row.userId)}
-                    className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent,#20f2a6)] rounded"
+                    className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded"
                     aria-label={`View details for user ${row.userId}`}
                     data-testid="leaderboard-row-button"
                   >

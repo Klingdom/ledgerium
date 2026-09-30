@@ -63,7 +63,7 @@ export default function ActiveFiltersBar({
           <button
             type="button"
             onClick={() => onClearChip(chip)}
-            className="ml-0.5 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 hover:text-[var(--content-secondary)] transition-colors duration-150"
+            className="ml-0.5 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] hover:text-[var(--content-secondary)] transition-colors duration-150"
             aria-label={`Remove filter: ${chip.label}`}
           >
             <X size={11} aria-hidden="true" />
@@ -74,7 +74,7 @@ export default function ActiveFiltersBar({
       <button
         type="button"
         onClick={onClearAll}
-        className="ml-ds-1 text-[12px] font-medium text-[var(--content-secondary)] hover:text-[var(--content-primary)] underline underline-offset-2 transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded px-ds-1"
+        className="ml-ds-1 text-[12px] font-medium text-[var(--content-secondary)] hover:text-[var(--content-primary)] underline underline-offset-2 transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded px-ds-1"
       >
         Clear all
       </button>

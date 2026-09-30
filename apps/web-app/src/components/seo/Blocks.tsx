@@ -300,7 +300,7 @@ export function HowLedgeriumCaptures({
                     href={href}
                     event="seo_install_clicked"
                     properties={{ pageType, slug, placement: 'mechanism' }}
-                    className="underline underline-offset-2 hover:text-[var(--brand-text-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded-sm"
+                    className="underline underline-offset-2 hover:text-[var(--brand-text-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded-sm"
                   >
                     {title}
                   </TrackedLink>
@@ -463,7 +463,7 @@ export function FinalCta({
             href={INSTALL}
             event="seo_install_clicked"
             properties={{ pageType, slug, placement: 'footer_cta' }}
-            className="text-brand-500 hover:text-brand-400 underline underline-offset-2 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded-sm"
+            className="text-brand-500 hover:text-brand-400 underline underline-offset-2 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded-sm"
           >
             {installLinkLabel()}
           </TrackedLink>{' '}

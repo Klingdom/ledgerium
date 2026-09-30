@@ -284,7 +284,7 @@ function TabButton({ id, controls, active, onClick, children }: TabButtonProps) 
       aria-controls={controls}
       onClick={onClick}
       className={[
-        'relative px-4 py-3 text-[13px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-1',
+        'relative px-4 py-3 text-[13px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-1',
         active
           ? 'text-[var(--content-primary)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-brand-500'
           : 'text-[var(--content-secondary)] hover:text-[var(--content-primary)]',

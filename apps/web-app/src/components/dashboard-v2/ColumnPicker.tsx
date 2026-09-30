@@ -265,7 +265,7 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
           className="
             px-ds-2 py-0.5 rounded text-[11px] font-medium
             text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]
-            focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
             transition-colors duration-150
           "
           onClick={() => setIsConfirmingDelete(false)}
@@ -295,7 +295,7 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
             bg-[var(--surface-secondary)]
             border border-green-500
             rounded px-ds-1.5 py-0.5
-            focus:outline-none focus-visible:ring-1 focus-visible:ring-green-500
+            focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--focus-ring)]
           "
           onChange={(e) => setRenameValue(e.target.value)}
           onKeyDown={handleRenameKeyDown}
@@ -307,7 +307,7 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
           className="
             w-6 h-6 flex-shrink-0 flex items-center justify-center rounded
             text-green-600 hover:bg-[var(--surface-secondary)]
-            focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
           "
           onClick={commitRename}
         >
@@ -335,7 +335,7 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
         className="
           flex-1 min-w-0 text-left text-[12px] text-[var(--content-primary)]
           truncate cursor-pointer
-          focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:rounded
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:rounded
         "
         onClick={() => onApply(view)}
       >
@@ -349,7 +349,7 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
           w-6 h-6 flex-shrink-0 flex items-center justify-center rounded
           text-[var(--content-secondary)] opacity-0 group-hover:opacity-100
           hover:bg-[var(--surface-tertiary,var(--surface-secondary))]
-          focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500
+          focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
           transition-opacity duration-100
         "
         onClick={() => {
@@ -474,7 +474,7 @@ function SavedViewsSection({
               inline-flex items-center gap-0.5
               text-[11px] font-medium text-green-600
               hover:text-green-700
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:rounded
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:rounded
               transition-colors duration-150
             "
           >
@@ -499,7 +499,7 @@ function SavedViewsSection({
               bg-[var(--surface-secondary)]
               border border-[var(--border-default)]
               rounded px-ds-2 py-ds-1
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
               placeholder:text-[var(--content-disabled,#9ca3af)]
             "
             onChange={(e) => setSaveName(e.target.value)}
@@ -513,7 +513,7 @@ function SavedViewsSection({
               px-ds-2 py-ds-1 rounded text-[11px] font-medium
               bg-green-600 text-white
               hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
               transition-colors duration-150
             "
             onClick={handleSave}
@@ -526,7 +526,7 @@ function SavedViewsSection({
             className="
               px-ds-2 py-ds-1 rounded text-[11px] font-medium
               text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
               transition-colors duration-150
             "
             onClick={() => { setSaveName(''); setIsSaveFormOpen(false); }}
@@ -696,7 +696,7 @@ export default function ColumnPicker({
               flex items-center justify-center w-7 h-7 rounded
               text-[var(--content-secondary)] hover:text-[var(--content-primary)]
               transition-colors duration-150
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
             "
             aria-label="Close column picker"
           >
@@ -778,7 +778,7 @@ export default function ColumnPicker({
                             }}
                             className="
                               w-4 h-4 rounded border-[var(--border-default)]
-                              text-green-600 focus:ring-green-500 focus:ring-2
+                              text-green-600 focus:ring-[var(--focus-ring)] focus:ring-2
                               disabled:opacity-50 disabled:cursor-not-allowed
                               cursor-pointer
                             "

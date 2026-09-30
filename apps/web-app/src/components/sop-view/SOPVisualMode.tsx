@@ -184,18 +184,18 @@ function ProcessFlowMap({
             non-focusable div — so this is a semantic-honesty choice, not a
             trade of detail for compliance.
 
-            The ring uses --brand-text rather than the house
-            `ring-emerald-500`, because that house colour measures 2.42:1 on the
-            light theme's surface, under the 3:1 SC 1.4.11 floor for focus
-            indicators. --brand-text is per-theme: 8.42:1 dark, 5.24:1 light.
-            The wider sweep of that defect is row #230.
+            The ring uses --focus-ring, the per-theme token row #230 introduced
+            after finding that the house literals measure as low as 1.40:1 on
+            the light theme's surfaces, under the 3:1 SC 1.4.11 floor, across 68
+            elements. This element was the first to use a token instead of a
+            literal; the rest followed at loop 64.
 
             Still NOT fixed here, deliberately: the per-dot label is
             `group-hover:` only and never fires on focus (SC 1.4.13), and the
             hardcoded light-grey scrollbar below is invisible on the dark
             default theme. Both are row #231 — separate outcomes. */}
         <div
-          className="flex items-center gap-0 overflow-x-auto pb-2 scroll-smooth rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-text)]"
+          className="flex items-center gap-0 overflow-x-auto pb-2 scroll-smooth rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
           role="group"
           tabIndex={0}
           aria-label={`Process flow: ${dna.totalSteps} steps across ${dna.systemCount} systems`}
