@@ -27,7 +27,7 @@ interface KpiTileProps {
 
 export function KpiTile({ label, value, unit, delta, accent = false, sublabel }: KpiTileProps) {
   const valueColorClass = accent
-    ? 'text-[var(--accent)]'
+    ? 'text-[var(--brand-text)]'  // row #239: --accent is 1.40:1 in light theme
     : 'text-[var(--content-primary)]';
 
   return (

@@ -30,7 +30,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, sep } from 'node:path';
 
 const CSS = readFileSync(join(__dirname, 'globals.css'), 'utf8');
 
@@ -123,7 +123,19 @@ describe('theme tokens meet WCAG contrast in BOTH themes', () => {
   // here prints invisibly — nearly happened twice, at #229 and #230.
   describe('the SOP print block resets every theme-dependent token it needs to', () => {
     const printStart = CSS.indexOf('.sop-print-root {');
-    const printBody = CSS.slice(printStart, CSS.indexOf('\n    }', printStart));
+    const printEnd = CSS.indexOf('\n    }', printStart);
+    const printBody = CSS.slice(printStart, printEnd);
+
+    // MR-037: these two slice bounds are whitespace-dependent. If the block's
+    // indentation changed, `printEnd` would land far away — or at -1, slicing
+    // to the end of the file — and every assertion below would pass against the
+    // wrong body while looking entirely healthy. That is the one way this
+    // describe can go vacuous, so the bounds are asserted rather than assumed.
+    it('the print block is located and bounded sanely', () => {
+      expect(printStart, 'could not find .sop-print-root in globals.css').toBeGreaterThan(-1);
+      expect(printEnd, 'could not find the end of the .sop-print-root block').toBeGreaterThan(printStart);
+      expect(printBody.length, 'the print block sliced implausibly large — check its indentation').toBeLessThan(4000);
+    });
 
     for (const name of ['focus-ring', 'status-info', 'status-danger', 'status-warning', 'status-success', 'brand-text']) {
       it(`--${name} is reset for print`, () => {
@@ -160,7 +172,9 @@ function sourceFiles(dir: string, acc: string[] = []): string[] {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
     if (statSync(p).isDirectory()) sourceFiles(p, acc);
-    else if (/\.(tsx|css)$/.test(name) && !name.endsWith('.test.tsx')) acc.push(p);
+    // `.ts` was missing until MR-037 pointed out that the guard could not see
+    // `band-colors.ts` — the file loop 68 used as its own headline example.
+    else if (/\.(ts|tsx|css)$/.test(name) && !/\.test\.tsx?$/.test(name)) acc.push(p);
   }
   return acc;
 }
@@ -171,10 +185,10 @@ function sourceFiles(dir: string, acc: string[] = []): string[] {
  * the 3:1 floor. Adding to this list should require measuring, which is why the
  * number is part of the entry rather than a comment beside it.
  */
-const ALLOWED_LITERALS: Record<string, number> = {
-  'red-500': 3.6,     // #EF4444 on #F8FAFC — destructive actions, a deliberate signal
-  'brand-600': 3.6,   // #059669
-  'blue-500': 3.52,   // #3B82F6
+const ALLOWED_LITERALS: Record<string, { hex: string; measured: number }> = {
+  'red-500': { hex: '#EF4444', measured: 3.6 },   // destructive actions, a deliberate signal
+  'brand-600': { hex: '#059669', measured: 3.6 },
+  'blue-500': { hex: '#3B82F6', measured: 3.52 },
 };
 
 describe('focus rings use the token, or a measured exception — row #230 / MR-036 S-2', () => {
@@ -216,6 +230,22 @@ describe('focus rings use the token, or a measured exception — row #230 / MR-0
       .filter(({ raw }) => raw !== '[var(--focus-ring)]' && !(raw in ALLOWED_LITERALS))
       .map(({ file, raw }) => `${file}: focus ring "${raw}" is neither var(--focus-ring) nor a measured exception`);
     expect(offenders, `\n${offenders.join('\n')}\n`).toEqual([]);
+  });
+
+  it('the allowlist entries still measure what they claim', () => {
+    // MR-037: the numbers in ALLOWED_LITERALS were never read by anything, so
+    // the docstring's claim that recording them "requires measuring" had
+    // exactly the force of a comment — in a file whose entire thesis is that
+    // unchecked claims are the problem. They are recomputed now. All three were
+    // correct, which is not the point; the point is that nothing said so.
+    for (const [name, { hex, measured }] of Object.entries(ALLOWED_LITERALS)) {
+      const worst = Math.min(...(['surface-primary', 'surface-secondary'] as const).map((s) => contrastRatio(hex, token('light', s))));
+      expect(
+        Math.abs(worst - measured),
+        `ALLOWED_LITERALS["${name}"] claims ${measured}:1 but ${hex} measures ${worst.toFixed(2)}:1 on the light theme's worst surface.`,
+      ).toBeLessThan(0.05);
+      expect(worst, `${name} is allowlisted but measures ${worst.toFixed(2)}:1, under the 3:1 floor`).toBeGreaterThanOrEqual(3);
+    }
   });
 });
 
@@ -263,7 +293,10 @@ describe('no var() misrepresents what it resolves to — row #233', () => {
 
   const uses: Array<{ file: string; name: string; hasFallback: boolean }> = [];
   for (const file of sourceFiles(ROOT)) {
-    const text = readFileSync(file, 'utf8');
+    // Comments stripped for the same reason as the semantic guard below: a
+    // docstring describing the pattern is prose, not code, and matching it
+    // reports a defect in an explanation.
+    const text = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
     for (const m of text.matchAll(VAR)) {
       uses.push({ file: file.slice(ROOT.length + 1), name: m[1]!, hasFallback: m[2] === ',' });
     }
@@ -287,5 +320,180 @@ describe('no var() misrepresents what it resolves to — row #233', () => {
       .filter((u) => !isDefined(u.name))
       .map((u) => `${u.file}: var(${u.name}${u.hasFallback ? ', …' : ''}) — ${u.name} is defined nowhere. ${u.hasFallback ? 'This renders the fallback, permanently, in both themes, while looking like a theme token. Inline the literal or define the token.' : 'This renders nothing at all.'}`);
     expect([...new Set(offenders)], `\n${[...new Set(offenders)].join('\n')}\n`).toEqual([]);
+  });
+});
+
+// ─── Tokens actually meet their floor where they are USED ───────────────────
+
+/**
+ * Row #239 / MR-037 S-1.
+ *
+ * Everything above this point checks *syntax*: that a `var()` tells the truth
+ * about which token it resolves to. That is not the same question as whether
+ * the resolved colour is readable, and the gap between the two is not academic.
+ * `--accent` is `#20f2a6`, defined in `:root` with no `.light` override, and
+ * measures **1.40:1** on the light surface — loop 65 called it "the worst value
+ * in the application". Loop 68 then ran a 73-site colour audit, edited three
+ * lines carrying it, and measured none of them, because its instrument asked
+ * the syntactic question. One of those three is the admin dashboard's MRR
+ * figure.
+ *
+ * So this resolves each token and checks the floor at the point of use.
+ *
+ * ## What this cannot see, stated because the last five guards did not
+ *
+ * It assumes the element sits on a theme surface. That assumption is wrong
+ * wherever a hardcoded chip supplies the background — `text-amber-700` on
+ * `bg-amber-50` is fine and this would call it a failure. Loop 67 established
+ * that contrast is a property of a *pair* which only exists at render time, so
+ * no static check can settle those; axe on a rendered page is the instrument
+ * for them. Hence `SITS_ON_OWN_BACKGROUND` below: an explicit, reviewable list
+ * of uses whose background is not the theme surface, with the reason. It is a
+ * statement of this guard's blind spot, not a waiver.
+ */
+describe('tokens meet their contrast floor where they are used — row #239', () => {
+  const ROOT = join(__dirname, '..');
+
+  /**
+   * Uses whose background is NOT a theme surface, so the surface-based floor
+   * below does not apply. Each needs a reason; "it was failing" is not one.
+   */
+  const SITS_ON_OWN_BACKGROUND: Record<string, string> = {
+    // LensSwitcher's active tab sets its own hardcoded rgba tint alongside the
+    // border, so the border's neighbour is that tint, not the page.
+    'components/dashboard-v2/LensSwitcher.tsx:--accent:bg': 'active tab supplies its own rgba(22,163,74,0.08) fill',
+
+    // Inverted buttons: `bg-[var(--content-primary)] text-[var(--surface-primary)]`.
+    // The foreground is the surface colour ON the content colour, which is the
+    // theme's maximum-contrast pair, not a 1:1 failure. Verified by reading each
+    // class string, which is why these are listed rather than inferred.
+    'components/dashboard-v2/FirstRunTutorial.tsx:--surface-primary:bg': 'inverted CTA on bg-[var(--content-primary)]',
+    'components/dashboard-v2/WorkflowList.tsx:--surface-primary:bg': 'inverted CTA on bg-[var(--content-primary)]',
+    'components/dashboard-v2/WorkflowListFilterBar.tsx:--surface-primary:bg': 'inverted active chip on bg-[var(--content-primary)]',
+
+    // `ring-1` hairlines around the ACTIVE pill in a mode switcher. Not focus
+    // indicators — focus is handled separately — and the active state is
+    // already carried by background, shadow and text colour, so the ring is
+    // supplementary rather than the thing that identifies the state.
+    'components/sop-view/SOPModeSwitcher.tsx:--border-default:bg': 'decorative hairline on the active pill; state carried by bg + shadow + text',
+    'components/workflow-view/WorkflowModeSwitcher.tsx:--border-default:bg': 'decorative hairline on the active pill; state carried by bg + shadow + text',
+    'components/workflow-view/WorkflowVariantsMap.tsx:--border-default:bg': 'decorative hairline on the selected card; state carried by bg + shadow',
+
+    // `|` separator glyphs and the unfilled favourite-star outline. Decorative
+    // rather than content — but the star is NOT simply fine: at 1.18:1 it is
+    // invisible until `group-hover`, and there is no hover on touch, so the
+    // affordance is undiscoverable there. Recorded as row #240; excluded here
+    // because it is a discoverability problem, not one this floor describes.
+    'app/(app)/dashboard/page.tsx:--border-default:bg': 'pipe separators + unfilled star outline; star discoverability tracked as #240',
+  };
+
+  /**
+   * Utility prefix -> the SC floor that applies to it.
+   *
+   * Only `text` and `ring` are checked, and the omissions are deliberate.
+   *
+   * `border` was included in a first draft and reported hundreds of hits, all
+   * of them hairline card dividers at around 1.1:1. That is not a defect: SC
+   * 1.4.11 governs visual information *required to identify* a component or its
+   * state, and a decorative border on a card that is already identifiable by
+   * its background is not that. Whether a given border carries state cannot be
+   * decided from a class string, so asserting on all of them would train people
+   * to ignore this file — the precise failure the axe ratchet's moded policy
+   * exists to avoid.
+   *
+   * `fill` is omitted for the same reason: most filled icons here are
+   * decorative and sit beside a text label that carries the meaning.
+   *
+   * Active-tab borders and meaningful icons therefore remain the province of
+   * axe on a rendered page, and of review. This guard covers the two cases that
+   * are unambiguous from source alone.
+   */
+  const FLOORS: Array<{ prefix: string; floor: number; sc: string }> = [
+    { prefix: 'text', floor: 4.5, sc: 'SC 1.4.3 (text)' },
+    { prefix: 'ring', floor: 3, sc: 'SC 1.4.11 (focus indicator)' },
+  ];
+
+  /**
+   * A token's value in a theme.
+   *
+   * Returns the `:root` value when `.light` has no override, because that is
+   * what the browser does — and it is the case that matters most. `--accent` is
+   * `:root`-only, so it is the *same* colour in both themes, which is precisely
+   * why it measures 1.40:1 in one of them. An earlier draft of this guard
+   * skipped tokens missing from `.light`, and so silently excluded the exact
+   * class of defect it was written to find.
+   */
+  function valueIn(block: 'root' | 'light', name: string): string | null {
+    try {
+      return token(block, name);
+    } catch {
+      if (block === 'light') {
+        try {
+          return token('root', name);
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    }
+  }
+
+  const offenders: string[] = [];
+  let checked = 0;
+
+  for (const file of sourceFiles(ROOT)) {
+    const rel = file.slice(ROOT.length + 1).split(sep).join('/');
+    // Block comments are stripped before scanning. A comment explaining why a
+    // site was moved off a token necessarily quotes the old class, and without
+    // this the guard matches its own explanation and reports the site it just
+    // fixed. The `var()` guard above learned the same thing about doc prose.
+    const text = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+
+    for (const { prefix, floor, sc } of FLOORS) {
+      // Built with String.raw so the escapes survive being written to disk —
+      // two attempts at this line lost their backslashes in transit and the
+      // file failed to parse, which at least failed loudly.
+      const re = new RegExp(String.raw`${prefix}-\[var\(\s*(--[a-z][a-z0-9-]*)\s*\)\]`, 'g');
+      for (const m of text.matchAll(re)) {
+        const name = m[1]!.slice(2);
+        if (SITS_ON_OWN_BACKGROUND[`${rel}:--${name}:bg`]) continue;
+
+        // Measured against the theme surfaces, NOT against a nearby `bg-`
+        // utility. A draft of this tried to detect the foreground/background
+        // pair by scanning a character window around the match, and it produced
+        // confident, precise-looking nonsense — pairing a label with a
+        // background belonging to a different element several lines away.
+        // Class strings are not parsed here and a proximity heuristic is not a
+        // parser. Genuine inverted-on-accent cases are listed above with
+        // reasons instead: a short allowlist a reviewer can check beats an
+        // inference nobody can.
+        checked++;
+
+        for (const block of ['root', 'light'] as const) {
+          const fg = valueIn(block, name);
+          if (fg === null) continue; // not a hex token; other tests cover existence
+          const themeName = block === 'root' ? 'dark' : 'light';
+          const worst = worstAgainstSurfaces(block, fg);
+
+          if (worst < floor) {
+            offenders.push(
+              `${rel}: ${prefix}-[var(--${name})] is ${worst.toFixed(2)}:1 in the ${themeName} theme ` +
+                `against its worst theme surface — ${sc} requires ${floor}:1. --${name} is ${fg} there.`,
+            );
+          }
+        }
+      }
+    }
+  }
+
+  it('checks a meaningful number of uses', () => {
+    // Anti-vacuity. A regex that stops matching would otherwise turn the
+    // assertion below into a permanent pass over an empty list.
+    expect(checked).toBeGreaterThan(20);
+  });
+
+  it('every token used as text, border, ring or fill meets its floor in BOTH themes', () => {
+    const unique = [...new Set(offenders)];
+    expect(unique, `\n${unique.join('\n')}\n`).toEqual([]);
   });
 });

@@ -1,9 +1,22 @@
 /**
  * band-colors — single source of truth for the Batch B band's semantic colors.
  *
- * Every color is expressed as a CSS `var(--token, #hexFallback)` so it resolves
- * to the design-system token when defined and to a sensible literal fallback
- * otherwise (matching the admin-operations `var(--accent, #20f2a6)` convention).
+ * Colors come in two kinds, and the difference is deliberate rather than
+ * accidental (row #233, corrected at row #239).
+ *
+ * The neutral chrome below resolves to real theme tokens, so it follows the
+ * light/dark theme like everything else.
+ *
+ * The opportunity-tag colors are plain literals. They used to be written as
+ * `var(--opp-automate, #2563eb)` and so on, which read as though they
+ * participated in theming — but those tokens were never defined anywhere, so
+ * the fallback was always what rendered. This docstring used to describe that
+ * arrangement as a mechanism ("resolves to the design-system token when
+ * defined"), which made an aspiration look like a feature for as long as
+ * anyone read it. They are written plainly now so the debt is visible; row
+ * #237 covers deciding what they should actually be, which is a palette
+ * question rather than five independent ones.
+ *
  * Centralizing here keeps the band palette consistent across the gauge, the
  * opportunity bar, and the trend chart, and keeps raw palette literals out of
  * the component JSX.

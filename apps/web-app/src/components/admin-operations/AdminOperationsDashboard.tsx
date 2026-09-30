@@ -722,7 +722,12 @@ export function AdminOperationsDashboard() {
                             (Est.)
                           </span>
                         </p>
-                        <p className="text-[20px] font-semibold tabular-nums text-[var(--accent)]" data-testid="mrr-spotlight">
+                        {/* Row #239. This figure was on --accent, which is #20f2a6,
+                            defined in :root only with no .light override — so it
+                            measured 1.40:1 in the light theme, on the MRR number.
+                            --brand-text is per-theme (8.42 dark / 5.24 light) and is
+                            already asserted by theme-contrast.test.ts. */}
+                        <p className="text-[20px] font-semibold tabular-nums text-[var(--brand-text)]" data-testid="mrr-spotlight">
                           {formatCurrency(sub?.mrr.estimatedUsd)}
                         </p>
                         {(sub?.mrr.enterpriseCount ?? 0) > 0 && (

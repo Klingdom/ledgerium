@@ -114,12 +114,16 @@ test('the Flow View process strip is reachable and scrollable by keyboard', asyn
  * as the light theme has existed — the colours were fine in dark, so no scan
  * had reason to complain.
  *
- * Only the SOP surface is covered in light for now. The dashboard is NOT, and
- * that is a measured decision rather than an oversight: probing it found a real
- * `color-contrast` failure on `text-green-400` / `text-red-400` health figures,
- * which is a different defect from the ring with a different fix, and is filed
- * as row #232. Adding a dashboard light test now would either ship red or need
- * the bar lowered to accommodate it. It goes in with its fix.
+ * This note used to record a hold: the dashboard had no light-theme scan,
+ * because probing it found a real `color-contrast` failure and shipping the
+ * test red would have blocked the deploy gate for every unrelated change. That
+ * hold discharged at loop 67 — row #232 was fixed and the dashboard light test
+ * lives in `v2-a11y.spec.ts`. The record is amended here rather than left
+ * standing, because a hold notice that outlives its hold is a false statement
+ * about coverage sitting in the file a reader checks first.
+ *
+ * Still uncovered in light, and recorded so the gap is not mistaken for
+ * completeness: the admin, demo and public marketing surfaces. Row #236.
  */
 test('axe: zero critical/serious violations — Execution SOP mode, LIGHT theme', async ({ page }) => {
   await forceTheme(page, 'light');

@@ -6,6 +6,28 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - The colour check was asking the wrong question
+
+**Why:** a review found that last loop's colour audit checked whether the code *named* the right colour, not whether that colour could be *read*. Those are different questions, and the difference was hiding a real problem.
+
+### Fixed
+- **The admin dashboard's monthly-revenue figure was nearly unreadable in light mode** — a bright mint on white, at about a fifth of the required contrast. It has been that colour for some time; last loop's audit edited the line and never measured it. A second figure on the same dashboard had the same problem. Both fixed.
+- The colour underneath them is defined only for dark mode, so it was the same bright mint in both — which is why it failed.
+
+### Improved
+- **The check now measures the colour that actually renders, in both modes, wherever it is used as text or as a focus outline.** Previously it only verified that the code named the right thing.
+- It took three wrong versions to get there, and each failure is written into the file: it was silently skipping exactly the kind of colour it was built to catch; it briefly demanded high contrast of every decorative hairline; and an attempt to guess which background a piece of text sits on produced confident, precise-looking nonsense.
+- The check also could not see one category of file — the very file used as last loop's headline example. It can now.
+
+### Corrected
+- Last loop claimed every one of its 73 changes was invisible to the eye. That was true of 71 of them; two were deliberate visual fixes described in the same entry. Correcting the record.
+- A note saying the dashboard had no light-mode check was still in the codebase four loops after it was checked. Removed, and the convention now requires such notes to be retired with the work.
+
+### Found
+- The "add to favourites" star is nearly invisible until you hover over the row — and on a touch screen there is no hover, so it may never appear at all.
+
+---
+
 ## [2026-09-30] - Colours that claimed to be one thing and displayed another
 
 **Why:** the code names a colour and, beside it, a "fallback" to use if that colour is undefined. In 73 places the two disagreed, and the one written down was not the one on screen.
