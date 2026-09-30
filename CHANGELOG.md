@@ -6,6 +6,20 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-29] - The test suite stops sabotaging itself
+
+**Why:** the automated test run deleted its own database before each run. If a test server from a previous run was still alive, it carried on using the deleted file — so every login failed, silently, and the whole suite stopped with a timeout that pointed at nothing. It blocked deployments for reasons unconnected to whatever was being deployed.
+
+### Fixed
+- The database file is no longer deleted. Its contents are cleared instead, so a server still using it simply sees fresh data.
+- **Verified against the exact sequence that used to fail:** three runs back to back, all clean, no retries. That sequence previously produced one retry and then a total failure that left fifteen tests unrun.
+- A second hazard went with it: the old code also deleted SQLite's side files, which is a documented way to corrupt a database if anything is still connected.
+
+### Also
+- The seeding script can now be re-run by hand without deleting anything first.
+
+---
+
 ## [2026-09-29] - The procedure pages now have an accessibility safety net
 
 **Why:** the dashboard has had an automated accessibility check since May. The procedure documents — the thing this product actually hands to someone to follow — had none.

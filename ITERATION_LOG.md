@@ -4,6 +4,24 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-29 (loop 59) — Removing the failure class instead of guarding it (Mode 1, coordinator)
+
+- **Candidate Selection: `directed` — #228**, implementing the fix loop 58 specified and deliberately did not build. Loop 58 shipped a diagnosis and no code because the fix it had in hand was wrong; this loop builds the one that is right.
+- **`reverse-portfolio-drift: user-ack` — D-1 at 13.**
+- **The file is no longer deleted.** That single change removes the whole class. `global-setup.ts` used to `fs.unlinkSync` `prisma/test.db` before seeding, and because Playwright reuses an existing server locally, that could strand a live server holding the old inode: it kept serving a deleted file, every login failed **silently** — `auth.ts` returns `null` for a wrong password and for this alike — and the only visible symptom was a 60-second timeout that took the entire authenticated project down with it.
+- **The seed now clears in place.** Every table is emptied, enumerated from `sqlite_master` rather than hard-coded, so a new Prisma model cannot silently escape the reset and break the next `create()` with a unique-constraint error. `prisma db push` already reconciled the schema in the same file, so nothing else was needed.
+- **The guard went with the deletion that motivated it.** Its entire rationale was "we are about to delete the database"; with no deletion there is nothing to guard, and loop 58 established that no port check could have worked anyway, because Playwright's own webServer is bound by the time `globalSetup` runs.
+- **Deleting the `-wal` and `-shm` sidecars is gone too, and that is a quiet second win** — removing those from under a live connection is a documented way to corrupt a SQLite database, so the old code had a corruption hazard sitting next to the stranding one.
+- **Proven rather than asserted, against the exact sequence that used to fail:** three consecutive back-to-back runs, **2/2 each, zero flaky**. That same sequence previously produced one flake and then a hard failure of **both** setups leaving 15 tests unrun. Runs 2 and 3 completed in 43s and 40s against a reused server — the case that was most dangerous before is now the fastest.
+- **Then 21/21** across the dashboard and SOP accessibility suites, confirming the clear-and-reseed path produces correct data rather than merely starting cleanly.
+- **A side benefit worth having:** the seed script is now idempotent, so it can be re-run by hand against an existing database instead of requiring a delete first.
+- **On the two-loop shape of this:** loop 58 found the cause, built a fix, proved it worked in isolation, then rejected it because it broke the normal path. That felt like a wasted loop at the time. It was not — this loop was ten minutes of implementation on top of a diagnosis that had already eliminated the wrong answer twice.
+- **Validation:** 3x back-to-back auth setups **2/2, zero flaky**; **21/21** a11y suites; workspace **4975**; typecheck **0** across 11 packages; validator clean at 221 rows.
+- **Follow-ups:** 0 created; **#228 closed**.
+- **Meta-review cadence:** 4 loops since MR-034 — **MR-035 overdue.**
+
+---
+
 ## 2026-09-29 (loop 58) — Diagnosing the deploy-blocking flake, and rejecting my own fix (Mode 3 debugging, coordinator)
 
 - **Candidate Selection: `directed` — #228 (9), which I filed last loop.** MR-034 flagged file-then-immediately-work as hazardous as a pattern, and this is the second instance. Taken anyway, with the reason stated rather than hidden: it gates the entire authenticated project in CI, so when it fires it blocks a deploy for reasons unrelated to the change being deployed, and I had a live reproduction in hand that would not survive the week.

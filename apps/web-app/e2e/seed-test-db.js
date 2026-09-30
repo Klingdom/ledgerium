@@ -136,12 +136,60 @@ function workflowFixtures(userId, idPrefix) {
   ];
 }
 
+/**
+ * Delete every row from every application table, preserving the file itself.
+ *
+ * Enumerated from sqlite_master rather than hard-coded, so a new model does not
+ * silently escape the reset and leave rows that break the next `create()`.
+ * Prisma's own bookkeeping tables and SQLite internals are excluded.
+ *
+ * Foreign keys are disabled for the duration: deleting in dependency order
+ * would mean maintaining that order by hand forever, which is the same
+ * maintenance burden the sqlite_master enumeration exists to avoid.
+ */
+async function clearAllTables(db) {
+  const rows = await db.$queryRawUnsafe(
+    "SELECT name FROM sqlite_master WHERE type='table' " +
+      "AND name NOT LIKE '_prisma%' AND name NOT LIKE 'sqlite_%'",
+  );
+
+  await db.$executeRawUnsafe('PRAGMA foreign_keys = OFF');
+  try {
+    for (const { name } of rows) {
+      // Identifier comes from sqlite_master, not from user input; quoted
+      // anyway so a table name needing escaping cannot break the statement.
+      await db.$executeRawUnsafe(`DELETE FROM "${name}"`);
+    }
+  } finally {
+    await db.$executeRawUnsafe('PRAGMA foreign_keys = ON');
+  }
+
+  console.log(`[e2e] Cleared ${rows.length} table(s) in place (file preserved)`);
+}
+
 async function seed() {
   const db = new PrismaClient({
     datasources: { db: { url: dbUrl } },
   });
 
   try {
+    // Row #228 (loop 59): clear IN PLACE rather than having the caller delete
+    // the database file.
+    //
+    // global-setup.ts used to `fs.unlinkSync` prisma/test.db before seeding.
+    // Locally Playwright reuses an existing server, so that deletion could
+    // strand a live server holding the old file: it kept serving a deleted
+    // inode, every login failed with "Invalid email or password", and the
+    // symptom surfaced only as a 60-second `waitForURL` timeout. A guard tried
+    // to detect the stranded server and could not — see the loop-58 diagnosis
+    // on row #228 for why no port check can distinguish our own webServer from
+    // a foreign one.
+    //
+    // Resetting the CONTENTS keeps the inode, so a server still holding the
+    // handle simply sees fresh data. That removes the failure class instead of
+    // guarding against it, and it makes this script re-runnable by hand.
+    await clearAllTables(db);
+
     const passwordHash = await hash('TestPass123!', 12);
 
     // Create primary test user (growth plan — Starter+ equivalent; health
