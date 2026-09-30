@@ -379,12 +379,28 @@ describe('tokens meet their contrast floor where they are used — row #239', ()
     'components/workflow-view/WorkflowModeSwitcher.tsx:--border-default:bg': 'decorative hairline on the active pill; state carried by bg + shadow + text',
     'components/workflow-view/WorkflowVariantsMap.tsx:--border-default:bg': 'decorative hairline on the selected card; state carried by bg + shadow',
 
-    // `|` separator glyphs and the unfilled favourite-star outline. Decorative
-    // rather than content — but the star is NOT simply fine: at 1.18:1 it is
-    // invisible until `group-hover`, and there is no hover on touch, so the
-    // affordance is undiscoverable there. Recorded as row #240; excluded here
-    // because it is a discoverability problem, not one this floor describes.
-    'app/(app)/dashboard/page.tsx:--border-default:bg': 'pipe separators + unfilled star outline; star discoverability tracked as #240',
+    // Two `|` separator glyphs. Genuinely decorative: they divide metadata and
+    // carry no information a reader needs.
+    //
+    // This entry used to also cover the unfilled favourite star, which was NOT
+    // decorative — row #240, fixed at loop 74. That is the argument for the
+    // count below.
+    'app/(app)/dashboard/page.tsx:--border-default:bg': 'two | separator glyphs between metadata fields',
+  };
+
+  /**
+   * How many exempt uses each allowlist entry covers.
+   *
+   * Without this the exemption is file-wide, so a *new* misuse of the same
+   * token in the same file inherits someone else's reason and is never
+   * reported. That is not hypothetical: this file's entry legitimately covered
+   * two decorative separators while also silently covering a favourite-star
+   * affordance sitting at 1.18:1 on mobile with no hover to reveal it.
+   *
+   * An allowlist that grows silently is not an allowlist.
+   */
+  const ALLOWED_OCCURRENCES: Record<string, number> = {
+    'app/(app)/dashboard/page.tsx:--border-default:bg': 2,
   };
 
   /**
@@ -439,6 +455,7 @@ describe('tokens meet their contrast floor where they are used — row #239', ()
   }
 
   const offenders: string[] = [];
+  const exemptSeen = new Map<string, number>();
   let checked = 0;
 
   for (const file of sourceFiles(ROOT)) {
@@ -456,7 +473,11 @@ describe('tokens meet their contrast floor where they are used — row #239', ()
       const re = new RegExp(String.raw`${prefix}-\[var\(\s*(--[a-z][a-z0-9-]*)\s*\)\]`, 'g');
       for (const m of text.matchAll(re)) {
         const name = m[1]!.slice(2);
-        if (SITS_ON_OWN_BACKGROUND[`${rel}:--${name}:bg`]) continue;
+        const exemption = `${rel}:--${name}:bg`;
+        if (SITS_ON_OWN_BACKGROUND[exemption]) {
+          exemptSeen.set(exemption, (exemptSeen.get(exemption) ?? 0) + 1);
+          continue;
+        }
 
         // Measured against the theme surfaces, NOT against a nearby `bg-`
         // utility. A draft of this tried to detect the foreground/background
@@ -490,6 +511,22 @@ describe('tokens meet their contrast floor where they are used — row #239', ()
     // Anti-vacuity. A regex that stops matching would otherwise turn the
     // assertion below into a permanent pass over an empty list.
     expect(checked).toBeGreaterThan(20);
+  });
+
+  it('no allowlist entry has quietly grown to cover more than it was granted', () => {
+    const drift: string[] = [];
+    for (const [key, declared] of Object.entries(ALLOWED_OCCURRENCES)) {
+      const actual = exemptSeen.get(key) ?? 0;
+      if (actual !== declared) {
+        drift.push(
+          `${key}: allowlisted for ${declared} use(s), found ${actual}. ` +
+            (actual > declared
+              ? 'A new use has inherited an exemption written for something else. Judge it on its own terms.'
+              : 'A use has gone; reduce the count so the exemption cannot silently re-expand.'),
+        );
+      }
+    }
+    expect(drift, drift.join('; ')).toEqual([]);
   });
 
   it('every token used as text, border, ring or fill meets its floor in BOTH themes', () => {

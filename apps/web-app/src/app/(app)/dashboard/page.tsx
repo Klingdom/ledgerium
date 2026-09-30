@@ -1520,7 +1520,12 @@ function WorkflowRow({
             className={`h-4 w-4 ${
               w.isFavorite
                 ? 'fill-[var(--status-warning)] text-[var(--status-warning)]'
-                : 'text-[var(--border-default)] group-hover:text-[var(--content-tertiary)]'
+                // Row #240. Was --border-default (1.18:1) revealed on hover.
+                // --content-tertiary is 7.24:1 light / 5.52:1 dark, matching
+                // workflows/[id]/page.tsx, which already had it right. Hover
+                // now emphasises something visible rather than being the thing
+                // that makes it exist.
+                : 'text-[var(--content-tertiary)] group-hover:text-[var(--content-secondary)]'
             }`}
           />
         </button>
@@ -1765,7 +1770,11 @@ function WorkflowRow({
               className={`h-4 w-4 ${
                 w.isFavorite
                   ? 'fill-[var(--status-warning)] text-[var(--status-warning)]'
-                  : 'text-[var(--border-default)]'
+                  // Row #240, and this was the worse of the two: no hover
+                  // reveal at all, in the mobile/tablet layout — i.e. on the
+                  // devices that have no hover to reveal it with. The star was
+                  // simply never visible there.
+                  : 'text-[var(--content-tertiary)]'
               }`}
             />
           </button>

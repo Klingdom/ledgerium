@@ -4,6 +4,21 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-30 (loop 74) — The star nobody on a phone could see (Mode 1, coordinator)
+
+- **Controls:** Area — `web-app / ux`, **pivoted as required** after three consecutive analytics loops tripped saturation. Agent — coordinator, 2 consecutive. Extension — `871e29a`, 31 loops; #216 fourth ask, still CEO-blocked.
+- **Candidate Selection: `top-score` — #240** (11).
+- **The defect was worse than filed, and the worst case was mobile.** `dashboard/page.tsx` renders `WorkflowRow` twice. Desktop revealed the unfilled favourite star on hover — invisible at rest, but reachable with a mouse. **The mobile/tablet layout had no hover reveal at all**, just `--border-default` at **1.18:1**. So the affordance was invisible on precisely the devices that have no hover to reveal it with. Not an edge case: the entire touch experience.
+- **The correct version already existed.** `workflows/[id]/page.tsx:338` uses `--content-tertiary` unconditionally — 7.24:1 light, 5.52:1 dark, per-theme, already covered by the contrast guard. A consistency fix against a known-good reference rather than a design question, which is why it was cheap.
+- **The durable half of the fix is the allowlist, not the colour.** My contrast guard exempted this file's `--border-default` uses with the reason "two decorative separator glyphs" — and because the exemption is keyed by file and token, it was silently extending that reason to the star. **An allowlist keyed by file grants a reason written for one thing to everything that follows it.**
+- **So exemptions are now counted.** Each declares how many uses it covers; a third fails with *"a new use has inherited an exemption written for something else. Judge it on its own terms."* Sabotage-verified. Same class as every strike the last three reviews landed, mirrored: coverage *broader* than its justification rather than narrower than the defect.
+- **I broke the backlog table while writing this up, and both guards held.** My closure note contained a literal pipe inside backticks, which split the row into 16 cells. My closing script's own cell-count assertion failed before committing, and re-breaking it deliberately confirmed `validate-backlog.mjs` also catches it — V2 reports 20 rows over a budget of 19 and prints *"Escape literal | in prose"*. That is the loop-47 corruption class, caught twice over by guards built after it.
+- **Validation:** web-app **3272 → 3273**; **all 63 dashboard e2e specs green**, including both visual-evidence captures and the full a11y family; typecheck **0** across 11 packages; validator clean at 237 rows.
+- **Follow-ups:** 0 created, 1 closed (#240).
+- **Meta-review cadence:** 2 loops since MR-038.
+
+---
+
 ## 2026-09-30 (loop 73) — The bounce that was never emitted, plus MR-038's other four strikes (Mode 1, coordinator)
 
 - **Controls:** Area — `web-app / analytics`, 3 consecutive; **saturation trips at 3, so loop 74 must pivot.** Agent — coordinator, 1 after loop 72's `frontend-engineer` rotation. Extension — `871e29a`, 2026-09-24, 30 loops; #216 fourth ask, still CEO-blocked.

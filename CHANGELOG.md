@@ -6,6 +6,19 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - The "add to favourites" star was invisible on phones
+
+**Why:** the outline star shown on workflows you have not favourited was drawn in a colour barely distinguishable from the background.
+
+### Fixed
+- On desktop it appeared when you hovered over a row. **On phones and tablets there was no hover version at all**, so it never appeared — the feature was present and unfindable on exactly the devices that cannot reveal it.
+- It now uses the same colour the workflow detail page already used, which is readable in both light and dark mode. Hovering still emphasises it on desktop; it is simply no longer the only way to know it is there.
+
+### Behind the scenes
+- The automated contrast check had an exemption for this file, written for two decorative divider characters — and it was quietly covering the star too, because the exemption applied to the whole file rather than to the specific things it was granted for. Exemptions now state how many places they cover, so a new one cannot inherit someone else's reasoning.
+
+---
+
 ## [2026-09-30] - Bounces from phones were never being recorded at all
 
 **Why:** the bounce measurement used a browser signal that mobile browsers routinely never send — the same signal we spent the previous change replacing everywhere else, and then left in place here.
