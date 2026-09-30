@@ -6,6 +6,24 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - The accessibility check for procedure pages now works, and found real problems
+
+**Why:** yesterday I withdrew a check that reported success while never actually looking at a procedure page. This rebuilds it properly.
+
+### Fixed
+- The check now opens a **real** procedure document — seeded with genuine content — rather than a stand-in that never loaded. It proves the page is actually on screen before it inspects anything.
+- Two real problems it found straight away are already fixed: warning text that was too faint to read against its background, and a heading label that became almost invisible in dark mode because it used a colour meant for dark backgrounds on a fixed light chip.
+
+### Found, recorded, not yet fixed
+- A scrollable area in one view **cannot be reached with a keyboard at all**.
+- Two more faint-text problems in another view, one on text rendered at nine pixels.
+- Those three are recorded with exact locations. The tests covering them are deliberately held back rather than shipped failing — a failing check blocks every unrelated deployment — and rather than shipped with the bar lowered to accommodate them, which is how a standard quietly stops meaning anything.
+
+### Honest scope
+- This covers **one** of the three views, and that is stated rather than rounded up. The task stays open until the other two are genuinely covered — closing it early is the exact mistake being corrected here.
+
+---
+
 ## [2026-09-30] - Withdrawing an accessibility claim I made on Monday
 
 **Why:** on Monday I reported that a new automated check confirmed all three views of a procedure document were free of serious accessibility problems. **That was wrong.** The check never opened the procedure view at all — it looked at a different tab and reported success four times over.

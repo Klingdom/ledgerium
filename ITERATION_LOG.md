@@ -4,6 +4,23 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-30 (loop 62) — Rebuilding the spec I withdrew, and what it immediately found (Mode 1, coordinator)
+
+- **Candidate Selection: `directed` — #109**, re-opened last loop after I withdrew the claim it rested on. Finishing it properly was the honest completion, not moving on.
+- **`reverse-portfolio-drift: user-ack` — D-1 unchanged; #216 still the only extension row and still CEO-blocked.**
+- **The spec now mocks nothing.** The previous version intercepted `/api/workflows/:id`, and the detail page **redirects to `/dashboard` when the fetch is not ok** — so a fixture that did not match sent every test to the wrong page while still reporting green. This one navigates to a **seeded workflow carrying a real SOP artifact**, clicks the real tab, and asserts the SOP mounted before scanning. I added that artifact to the seed rather than keep guessing at an envelope.
+- **Every transition is proved rather than slept through** — `toHaveURL` before anything else, so a redirect names itself instead of presenting as a missing button; the switcher asserted visible before any scan; `aria-pressed` awaited instead of a fixed timeout.
+- **It found four real violations within minutes, all of which the old spec's green ticks had concealed.** Two are fixed here: `text-amber-600` on `bg-amber-50` measured **3.07:1** against a 4.5 requirement — now amber-700 at 4.84:1 — and `SOPHeader` placed the **theme-dependent** `--brand-text` on a **hardcoded light** `bg-brand-50` chip, which in dark theme resolves to `#34D399` for **1.82:1**. That second one is row #223's class exactly: a theme token on a fixed background.
+- **Two more are filed as #229 rather than rushed:** a `scrollable-region-focusable` failure in Flow View — a scrollable region with no keyboard route into it, so a keyboard-only user cannot reach its content — and two contrast failures in Analysis, one of them on a **9px** figure.
+- **The three tests covering those states are omitted, and the omission is the decision I want on record.** Shipping them red blocks the deploy gate for every unrelated change. Shipping them with a raised ratchet baseline would be worse: a baseline that tolerates serious violations is precisely how a zero-tolerance policy becomes decorative. They return with their fixes, in one commit, so coverage and a clean result arrive together.
+- **What landed is smaller than loop 57 claimed and is actually true:** one mode genuinely scanned, against a real SOP, passing. Loop 57 claimed four passing across three modes while scanning none.
+- **The contrast numbers were computed, not eyeballed** — relative luminance per WCAG, the same method as loops 25 and 35 — because "looks fine" is how 3.07:1 shipped in the first place.
+- **Validation:** SOP spec **3/3** including auth setup; web-app **3195**; typecheck **0** across 11 packages; validator clean at 222 rows.
+- **Follow-ups:** 1 created (#229). **#109 remains open** — deliberately: its ratchet is only one-third delivered, and closing it on partial coverage is the exact mistake loop 57 made.
+- **Meta-review cadence:** 2 loops since MR-035.
+
+---
+
 ## 2026-09-30 (loop 61) — MR-035 applied, and a spec of mine that tested nothing (Mode 1, coordinator)
 
 - **Candidate Selection: `directed` — correcting my own shipped work per MR-035.** Not a new row: two of the four strikes were defects I shipped, and one of them turned out to be materially worse than the review could see from reading.

@@ -130,7 +130,7 @@ function OverviewHeader({ viewModel }: { viewModel: SOPViewModel }) {
           </span>
         )}
         {m.frictionCount > 0 && (
-          <span className="flex items-center gap-1 text-amber-600">
+          <span className="flex items-center gap-1 text-amber-700">
             <AlertTriangle className="h-3 w-3" />
             {m.frictionCount} friction point{m.frictionCount !== 1 ? 's' : ''}
           </span>
@@ -304,7 +304,7 @@ function PhaseSection({
           <span className="text-[10px] text-[var(--content-tertiary)] ml-2">{phase.stepCount} step{phase.stepCount !== 1 ? 's' : ''}</span>
         </div>
         {phase.hasFriction && (
-          <span className="text-[8px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
+          <span className="text-[8px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
             Friction
           </span>
         )}
@@ -506,7 +506,7 @@ function BottlenecksSection({ steps }: { steps: SOPViewStep[] }) {
               </div>
             </div>
             <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded flex-shrink-0 ${
-              step.hasHighFriction ? 'text-red-600 bg-red-50 border border-red-200' : 'text-amber-600 bg-amber-50 border border-amber-200'
+              step.hasHighFriction ? 'text-red-600 bg-red-50 border border-red-200' : 'text-amber-700 bg-amber-50 border border-amber-200'
             }`}>
               {step.hasHighFriction ? 'High' : 'Medium'}
             </span>
@@ -548,7 +548,7 @@ function AutomationSection({ recommendations }: { recommendations: SOPRecommenda
                   <p className="text-ds-xs font-semibold text-[var(--content-primary)]">{rec.title}</p>
                   <span className={`text-[8px] font-bold uppercase tracking-wider px-1 py-0.5 rounded ${
                     rec.impact === 'high' ? 'text-red-600 bg-red-50' :
-                    rec.impact === 'medium' ? 'text-amber-600 bg-amber-50' :
+                    rec.impact === 'medium' ? 'text-amber-700 bg-amber-50' :
                     'text-[var(--content-secondary)] bg-[var(--surface-secondary)]'
                   }`}>{rec.impact}</span>
                 </div>

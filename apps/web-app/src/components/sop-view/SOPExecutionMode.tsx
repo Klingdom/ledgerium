@@ -387,7 +387,7 @@ function ExecutionStepCard({
           {decision && (
             <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
               <div className="flex items-center gap-1.5 mb-2">
-                <GitBranch className="h-3.5 w-3.5 text-amber-600" />
+                <GitBranch className="h-3.5 w-3.5 text-amber-700" />
                 <span className="text-[10px] font-semibold text-amber-800">Decision</span>
               </div>
               <p className="text-ds-xs text-amber-900 font-medium mb-2">{decision.question}</p>
@@ -398,13 +398,13 @@ function ExecutionStepCard({
                         condition was actually observed. Absent beats
                         boilerplate — see SOPViewDecision in types.ts. */}
                     {opt.condition ? (
-                      <span className="font-bold text-amber-600 mt-px">If:</span>
+                      <span className="font-bold text-amber-700 mt-px">If:</span>
                     ) : null}
                     <div>
                       {opt.condition ? (
                         <>
                           <span className="text-amber-800">{opt.condition}</span>
-                          <span className="text-amber-600 mx-1.5">→</span>
+                          <span className="text-amber-700 mx-1.5">→</span>
                         </>
                       ) : null}
                       <span className="text-amber-700 font-medium">{opt.action}</span>
@@ -486,7 +486,7 @@ function DecisionSummaryCard({ decision }: { decision: SOPViewDecision }) {
   return (
     <div className="bg-amber-50/50 border border-amber-200 rounded-xl px-4 py-3">
       <div className="flex items-center gap-2 mb-1.5">
-        <GitBranch className="h-3.5 w-3.5 text-amber-600" />
+        <GitBranch className="h-3.5 w-3.5 text-amber-700" />
         <span className="text-[10px] font-semibold text-amber-800">At Step {decision.stepOrdinal}</span>
       </div>
       <p className="text-ds-xs text-amber-900 font-medium mb-2">{decision.question}</p>
@@ -664,7 +664,7 @@ function InsightsSection({
                   <span className="text-ds-xs font-semibold text-[var(--content-primary)]">{rec.title}</span>
                   <span className={`text-[8px] font-bold uppercase tracking-wider px-1 py-0.5 rounded ${
                     rec.impact === 'high' ? 'text-red-600 bg-red-50' :
-                    rec.impact === 'medium' ? 'text-amber-600 bg-amber-50' :
+                    rec.impact === 'medium' ? 'text-amber-700 bg-amber-50' :
                     'text-[var(--content-secondary)] bg-[var(--surface-secondary)]'
                   }`}>{rec.impact}</span>
                 </div>

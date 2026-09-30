@@ -256,6 +256,78 @@ async function seed() {
       await db.workflow.create({ data: wf });
     }
 
+    // A real SOP artifact on the first growth workflow (row #109, loop 62).
+    //
+    // The a11y spec for the SOP surface previously mocked the detail endpoint
+    // and never rendered a SOP at all — the page redirects to /dashboard on a
+    // non-ok response, so a fixture that did not match sent every test to the
+    // wrong page while still reporting green. Seeding a genuine artifact
+    // removes the guesswork: the spec navigates to a real workflow and
+    // exercises the real load path, with no route interception.
+    //
+    // Shape mirrors what buildSOP emits and what SOPPageShell consumes.
+    await db.workflowArtifact.create({
+      data: {
+        workflowId: `${'e2e-wf-growth'}-automate`,
+        artifactType: 'sop',
+        schemaVersion: '2.0',
+        contentJson: JSON.stringify({
+          sopId: 'e2e-wf-growth-automate-sop',
+          title: 'Invoice Approval',
+          version: '2.0',
+          purpose: 'Approve a supplier invoice and record the approval decision.',
+          scope: 'Applies to accounts-payable operators handling supplier invoices.',
+          systems: ['NetSuite', 'Outlook'],
+          prerequisites: ['Access to NetSuite', 'Approval authority up to 5,000'],
+          estimatedTime: '2m 30s',
+          steps: [
+            {
+              ordinal: 1,
+              stepId: 'step-1',
+              title: 'Open the invoice queue',
+              category: 'click_then_navigate',
+              action: 'Navigate to the invoice queue in NetSuite.',
+              instructions: [{ instruction: 'Click "Invoices" in the left navigation.' }],
+              detail: 'Click "Invoices" in the left navigation.',
+              system: 'NetSuite',
+              inputs: ['Access to NetSuite'],
+              expectedOutcome: 'The invoice queue is displayed.',
+              warnings: [],
+              durationLabel: '4s',
+              confidence: 0.91,
+              sourceStepId: 'step-1',
+            },
+            {
+              ordinal: 2,
+              stepId: 'step-2',
+              title: 'Enter the due date',
+              category: 'data_entry',
+              action: 'Enter a date in the "Due" field in NetSuite.',
+              instructions: [{ instruction: 'Enter a date in the "Due" field.' }],
+              detail: 'Enter a date in the "Due" field.',
+              system: 'NetSuite',
+              inputs: ['Due date'],
+              expectedOutcome: 'The due date is recorded.',
+              warnings: ['Contains sensitive data fields — do not expose values in screenshots.'],
+              durationLabel: '11s',
+              confidence: 0.78,
+              sourceStepId: 'step-2',
+            },
+          ],
+          completionCriteria: [
+            'The invoice shows status Approved.',
+            'The approval is recorded against the correct period.',
+          ],
+          commonIssues: [],
+          notes: [],
+          averageConfidence: 0.84,
+          approvalStatus: 'unapproved',
+          generatedAt: '2026-03-14T12:00:00.000Z',
+          engineVersion: '2.0.0',
+        }),
+      },
+    });
+
     console.log('[e2e] Test database seeded successfully');
   } finally {
     await db.$disconnect();

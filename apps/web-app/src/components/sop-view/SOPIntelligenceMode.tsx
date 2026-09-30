@@ -326,7 +326,7 @@ function RealVsExpectedSection({ viewModel }: { viewModel: SOPViewModel }) {
             <div className="flex justify-end">
               {row.status === 'match' && <span className="text-[8px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">OK</span>}
               {row.status === 'deviation' && <span className="text-[8px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">DEVIATION</span>}
-              {row.status === 'warning' && <span className="text-[8px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">REVIEW</span>}
+              {row.status === 'warning' && <span className="text-[8px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">REVIEW</span>}
             </div>
           </div>
         ))}
@@ -436,7 +436,7 @@ function OptimizationSection({ recommendations }: { recommendations: SOPRecommen
                     <span className="text-ds-xs font-semibold text-[var(--content-primary)]">{rec.title}</span>
                     <span className={`text-[8px] font-bold uppercase tracking-wider px-1 py-0.5 rounded ${
                       rec.impact === 'high' ? 'text-red-600 bg-red-50' :
-                      rec.impact === 'medium' ? 'text-amber-600 bg-amber-50' : 'text-[var(--content-secondary)] bg-[var(--surface-secondary)]'
+                      rec.impact === 'medium' ? 'text-amber-700 bg-amber-50' : 'text-[var(--content-secondary)] bg-[var(--surface-secondary)]'
                     }`}>{rec.impact} impact</span>
                   </div>
                   <p className="text-[10px] text-[var(--content-secondary)] leading-relaxed">{rec.detail}</p>
