@@ -19,6 +19,12 @@
  */
 
 import { captureEvent as posthogCapture, identifyUser as posthogIdentify, isPostHogEnabled } from './posthog';
+import {
+  drain,
+  shouldScheduleFlush,
+  shouldDeliverOnVisibility,
+  FLUSH_DEBOUNCE_MS,
+} from './analytics-delivery';
 import type { NavItemId } from '@/components/nav/navConfig';
 
 // ─── Event taxonomy ──────────────────────────────────────────────────────────
@@ -903,7 +909,7 @@ export function track(payload: AnalyticsEvent): void {
     if (buffer.length > 500) buffer.splice(0, buffer.length - 500);
 
     // Flush to backend if endpoint is configured
-    if (buffer.length >= 10) {
+    if (shouldScheduleFlush(buffer.length)) {
       flushEvents();
     }
   }
@@ -925,35 +931,83 @@ export function identifyAnalyticsUser(userId: string, properties?: Record<string
  */
 let flushTimeout: ReturnType<typeof setTimeout> | null = null;
 
+const ANALYTICS_ENDPOINT = '/api/analytics/events';
+
+/**
+ * Deliver whatever is buffered, and empty the buffer.
+ *
+ * Row #241. Everything goes through here so that no path can read the buffer
+ * and forget to clear it — which is exactly what the old unload handler did.
+ * That was survivable while unload was the only lifecycle trigger, because the
+ * page was about to be destroyed. It stops being survivable the moment
+ * `visibilitychange` is added, since that fires on every tab switch: without
+ * draining, a user who switches away five times would send the same events six
+ * times. Swapping lost events for duplicated events is not a fix.
+ *
+ * @param useBeacon `sendBeacon` for page-lifecycle deliveries, which must
+ *   survive the page going away; `fetch` for the routine batch flush.
+ */
+function deliverBufferedEvents(useBeacon: boolean): void {
+  if (!IS_BROWSER) return;
+  const buffer: EnrichedEvent[] = (window as any).__ledgerium_events ?? [];
+  const events = drain(buffer);
+  if (events.length === 0) return;
+
+  const body = JSON.stringify({ events });
+
+  if (useBeacon && typeof navigator.sendBeacon === 'function') {
+    const ok = navigator.sendBeacon(ANALYTICS_ENDPOINT, new Blob([body], { type: 'application/json' }));
+    // If the beacon is refused — the browser caps queued bytes — put the events
+    // back rather than dropping them silently. Losing data while handling a
+    // row about losing data would be a poor outcome.
+    if (!ok) buffer.unshift(...events);
+    return;
+  }
+
+  fetch(ANALYTICS_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body,
+  }).catch(() => {
+    // Silently fail — analytics should never break the app.
+  });
+}
+
 function flushEvents(): void {
   if (flushTimeout) return; // Already scheduled
   flushTimeout = setTimeout(() => {
     flushTimeout = null;
-    if (!IS_BROWSER) return;
-    const buffer: EnrichedEvent[] = (window as any).__ledgerium_events ?? [];
-    if (buffer.length === 0) return;
-
-    const events = buffer.splice(0, buffer.length);
-    // Fire-and-forget POST to analytics endpoint
-    fetch('/api/analytics/events', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ events }),
-    }).catch(() => {
-      // Silently fail — analytics should never break the app
-    });
-  }, 2000); // 2-second debounce
+    deliverBufferedEvents(false);
+  }, FLUSH_DEBOUNCE_MS);
 }
 
-// Flush on page unload
 if (IS_BROWSER) {
+  /*
+    Row #241. `visibilitychange` → hidden is the last event a page is
+    guaranteed to see. `beforeunload` is not: iOS Safari and Chrome on Android
+    routinely discard a page without firing it, so every session shorter than
+    the ten-event batch threshold was at risk of being dropped — and short
+    sessions correlate with bouncing, which is the behaviour the funnel exists
+    to measure. The loss was biased, not random.
+
+    Both listeners are kept. `beforeunload` still fires first on desktop, and
+    with draining in place a second delivery attempt is a no-op rather than a
+    duplicate.
+  */
+  // `IS_BROWSER` only tests for `window`. The unit suite stubs a window
+  // without a document, so this is guarded separately rather than assuming the
+  // two travel together — twelve tests failed at import time on that
+  // assumption before the guard was added.
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => {
+      if (shouldDeliverOnVisibility(document.visibilityState)) {
+        deliverBufferedEvents(true);
+      }
+    });
+  }
+
   window.addEventListener('beforeunload', () => {
-    const buffer: EnrichedEvent[] = (window as any).__ledgerium_events ?? [];
-    if (buffer.length > 0) {
-      // Use sendBeacon for reliable delivery on page exit
-      const blob = new Blob([JSON.stringify({ events: buffer })], { type: 'application/json' });
-      navigator.sendBeacon('/api/analytics/events', blob);
-    }
+    deliverBufferedEvents(true);
   });
 }
 

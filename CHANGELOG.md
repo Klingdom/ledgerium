@@ -6,6 +6,23 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - Short visits were vanishing from the analytics, and they are the ones that matter
+
+**Why:** usage data was only sent once ten events had piled up. Anything less relied on a browser signal that phones frequently never send.
+
+### Fixed
+- **Data is now sent whenever the page is hidden** — switching tabs, switching apps, locking the screen — which is the last moment a browser reliably lets a page do anything. Previously a short visit could end without any of it being recorded.
+- **This mattered more than a random data loss would.** Short visits are not a random sample: they are disproportionately people who arrived and left. Losing them makes engagement and conversion look better than they are, which is the second time in a fortnight a measurement gap has been found leaning in the flattering direction.
+
+### Care taken
+- The obvious fix would have introduced the opposite problem. The old code read the pending data without clearing it, which was harmless only because the page was about to close — but sending on every tab switch would then have re-sent everything each time. Every send now clears what it sent, so switching away and back records each event exactly once.
+- If the browser refuses a send because too much is already queued, the data goes back in the queue rather than being discarded. Losing data while fixing data loss would be an odd result.
+
+### Verified
+- In a real browser, by hiding and re-showing the page and checking exactly what was sent each time — and by deliberately breaking the fix to confirm the check notices.
+
+---
+
 ## [2026-09-30] - The upgrade funnel was counting clicks without counting the prompts
 
 **Why:** the report that tracks how many people see an upgrade prompt and then act on it was counting the actions from four places in the product and the prompts from one.

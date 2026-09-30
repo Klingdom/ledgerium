@@ -4,6 +4,23 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-30 (loop 71) — Short sessions were being dropped, and they are the ones that matter (Mode 1, coordinator)
+
+- **Controls:** Area — `web-app / analytics`, 2 consecutive; not saturated. Agent — coordinator, 4 consecutive, which crosses the 4+ threshold. Stated plainly rather than excused: this was a small, semantics-heavy change in a file I had just been reading, and delegating it would have cost more context than it bought — but the next loop must rotate regardless, and MR-038 should treat a fourth consecutive as a fact about me rather than about the work. Extension — `871e29a`, 28 loops; #216 still CEO-blocked.
+- **Candidate Selection: `top-score` — #241** (11). Filed one loop earlier from what #238's verification turned up.
+- **The defect:** events buffer client-side and only POST once **ten** have accumulated; anything below that relied on `beforeunload`, which iOS Safari and Chrome on Android routinely never fire. A dashboard visit produces two or three events. So an unknown share of short sessions was being dropped — and **short sessions are not a random sample**, they correlate with bouncing, which is precisely the behaviour the funnel exists to measure. Biased loss, in the flattering direction, for the second time in a fortnight.
+- **A second defect surfaced in the reading and had to be fixed first.** The old unload handler read the buffer **without clearing it**. Survivable only because the page was about to be destroyed — and it stops being survivable the instant a visibility trigger exists, because that fires on every tab switch, app switch and screen lock. Without draining, a user who switched away five times would have sent the same events six times. **Trading lost events for duplicated events is not a fix**, and it is the same failure with the sign flipped: both bias every number computed from this data and neither announces itself.
+- **So every delivery path now goes through one `drain`-and-send function**, which makes read-without-clear structurally impossible rather than merely discouraged. `beforeunload` is kept as a desktop fallback; with draining in place a second attempt is a no-op instead of a duplicate.
+- **Handled the refusal case too:** `sendBeacon` returns false when the browser's queued-byte cap is hit. Those events go back in the buffer rather than vanishing — losing data while fixing data loss would be a poor outcome.
+- **Twelve unrelated tests failed at import**, because `IS_BROWSER` only tests for `window` and the unit suite stubs a window with no document. Guarded separately rather than assuming the two travel together. Worth recording as a small lesson about environment predicates: `typeof window !== 'undefined'` is not a synonym for "the DOM exists".
+- **Verified in a browser, not just in principle.** The unit tests prove the rule; they cannot prove the listener is attached or that a tab switch does not re-send, and the wiring is exactly where this defect lived. The e2e stubs `sendBeacon` — Playwright cannot reliably intercept beacons — and drives real `visibilitychange` transitions: hide delivers once, returning delivers nothing, hiding again with an empty buffer delivers nothing. Sabotage-verified.
+- **Batch threshold deliberately left at 10.** The lifecycle path is now reliable, so lowering it would add request volume for no correctness gain. That is a decision, not an omission.
+- **Validation:** web-app **3250 → 3259** (+9); delivery e2e **2/2**, sabotage-verified; typecheck **0** across 11 packages; validator clean at 234 rows.
+- **Follow-ups:** 0 created, 1 closed (#241). First loop in seven to close a row without opening one.
+- **Meta-review cadence:** 2 loops since MR-037.
+
+---
+
 ## 2026-09-30 (loop 70) — The funnel counted clicks it never counted prompts for (Mode 1, coordinator)
 
 - **Controls:** Area — `web-app / analytics`, pivoted off a11y after loops 67-69. Agent — coordinator, 3 consecutive; MR-037 judged the delegation control under-used rather than gamed, and this was a measurement-semantics pick rather than a sweep, but the streak is noted and the next sweep-shaped loop should delegate. Extension — `871e29a`, 2026-09-24, 27 loops; #216 still CEO-blocked.
