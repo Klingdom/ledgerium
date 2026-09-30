@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { quotaMeterState, type RecordingMax } from '@/lib/quota-meter';
+import { quotaMeterState, UNCAPPED_PLAN_ID, type RecordingMax } from '@/lib/quota-meter';
 import { track } from '@/lib/analytics.js';
 import { useAccount } from '@/hooks/useAccount';
 import { useUpgradePromptViewed } from '@/hooks/useUpgradePromptViewed';
@@ -34,9 +34,14 @@ export function RecordingQuotaChip() {
   // Row #238. This surface has always recorded the click and never the view,
   // so it contributed to the funnel's numerator and not its denominator.
   // `state.cta` is the CTA actually being rendered below, so it is the honest
-  // condition for "a prompt was shown". Team is the plan that lifts the
-  // recording cap (plans.ts: free 5, starter 15, team unlimited).
-  useUpgradePromptViewed(state.cta ? { location: 'dashboard_v2_quota_chip', plan: 'team' } : null);
+  // condition for "a prompt was shown".
+  //
+  // The plan comes from the same constant as the CTA copy (row #242). Loop 70
+  // wrote 'team' here while the CTA said "Solo", which would have attributed
+  // every prompt from this surface to a plan it never names.
+  useUpgradePromptViewed(
+    state.cta ? { location: 'dashboard_v2_quota_chip', plan: UNCAPPED_PLAN_ID } : null,
+  );
 
   if (!state.show) return null;
 

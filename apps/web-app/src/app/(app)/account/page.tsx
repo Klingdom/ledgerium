@@ -324,7 +324,10 @@ export default function AccountPage() {
   // stale 30s-cached response would be the one place that actively shows
   // them the wrong plan. `/api/keys` is unrelated to useAccount and keeps
   // its own fetch below.
-  const { account, refetch: refetchAccount } = useAccount();
+  // alwaysFresh: this page is where a user lands after a plan change, so it
+  // must never serve a cached plan. One request, not a load-then-bust pair
+  // (MR-038 S-3).
+  const { account } = useAccount({ alwaysFresh: true });
   const [apiKeys, setApiKeys] = useState<ApiKeyInfo[]>([]);
   const [newKey, setNewKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -335,9 +338,6 @@ export default function AccountPage() {
   // SUBSCRIPTION_READINESS_001 §G1 — see PlanCard's planAvailability doc comment.
   const [planAvailability, setPlanAvailability] = useState<PlanAvailabilityResponse | null>(null);
 
-  useEffect(() => {
-    refetchAccount();
-  }, [refetchAccount]);
 
   useEffect(() => {
     async function loadKeys() {

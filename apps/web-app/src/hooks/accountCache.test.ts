@@ -219,3 +219,39 @@ describe('the stale-quota trap — row #234', () => {
     });
   });
 });
+
+describe('clear() invalidates work already in flight — MR-038 S-4', () => {
+  it('a response that resolves after clear() does not overwrite a newer one', async () => {
+    // Dropping only the in-flight slot leaves the old request running, and its
+    // .then would still write the stale response into the cache AND re-stamp
+    // it fresh for a full TTL — after the newer one had landed. Harmless while
+    // refetch() is only ever a duplicate of the same request; actively wrong
+    // the moment it follows a mutation, which is what useAccount advertises it
+    // for. Found before it had a live trigger.
+    const c = clock();
+    const slow = deferred<string>();
+    const cache = new SharedRequestCache<string>(CACHE_TTL_MS, c.now);
+
+    const first = cache.get(() => slow.promise);
+
+    cache.clear();
+    await cache.get(async () => 'fresh');
+    expect(cache.peek()).toBe('fresh');
+
+    // The stale response lands last, and must be ignored by the cache.
+    slow.resolve('stale');
+    await first;
+    expect(cache.peek(), 'a pre-clear() response overwrote a post-clear() one').toBe('fresh');
+  });
+
+  it('still returns the value to the caller that asked for it', async () => {
+    // Discarding it from the cache is right; discarding it from the awaiting
+    // caller would turn a staleness fix into a hang.
+    const d = deferred<string>();
+    const cache = new SharedRequestCache<string>();
+    const pending = cache.get(() => d.promise);
+    cache.clear();
+    d.resolve('v1');
+    await expect(pending).resolves.toBe('v1');
+  });
+});

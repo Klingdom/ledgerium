@@ -38,3 +38,30 @@ test('the dashboard issues exactly one /api/account request', async ({ page }) =
       'fetch directly instead of using useAccount.',
   ).toBe(1);
 });
+
+/**
+ * MR-038 S-3. The spec above visits `/dashboard`, but loop 72's change was to
+ * `/account` and `/upload` — so the claim "two requests to one" was made about
+ * two pages this file never loads, and was wrong for both: `useAccount`'s own
+ * mount effect ran alongside the page's added `refetch()`, giving two requests
+ * on a cold cache. A test whose title names its surface, sitting next to a
+ * claim about different surfaces, is the whole failure in miniature.
+ */
+for (const path of ['/account', '/upload']) {
+  test(`${path} issues exactly one /api/account request`, async ({ page }) => {
+    const requests: string[] = [];
+    page.on('request', (req) => {
+      if (new URL(req.url()).pathname === '/api/account') requests.push(req.url());
+    });
+
+    await page.goto(path, { waitUntil: 'networkidle' });
+    await expect(page.getByRole('main')).toBeVisible();
+
+    expect(
+      requests.length,
+      `expected exactly 1 request to /api/account on ${path}, saw ${requests.length}. ` +
+        'These pages are alwaysFresh: they must bust the cache on mount rather than ' +
+        'load from it and then bust, which is two requests wearing one intention.',
+    ).toBe(1);
+  });
+}

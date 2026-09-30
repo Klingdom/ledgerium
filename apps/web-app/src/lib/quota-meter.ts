@@ -47,10 +47,32 @@ export interface QuotaMeterState {
 }
 
 /** Percent of the monthly limit at which the upgrade prompt appears. */
+import { PLAN_HIERARCHY, getPlanConfig, type PlanType } from './plans';
+
 export const QUOTA_WARNING_PCT = 80;
 
-/** Lowest self-serve plan with no monthly recording cap. Test-bound to plans.ts. */
-export const UNCAPPED_PLAN_LABEL = 'Solo';
+/**
+ * The lowest self-serve plan with no monthly recording cap.
+ *
+ * Derived from `plans.ts` rather than written down, because writing it down is
+ * how loop 70 got it wrong. That loop emitted `plan: 'team'` on the analytics
+ * event this component fires, while this very file's CTA said "Solo" — and
+ * claimed the value had been "verified, not assumed". The verification was a
+ * scan of `plans.ts` that answered *which plans are uncapped* (four of them)
+ * rather than *which plan this surface names* (one), and the scan's own regex
+ * silently skipped the `solo` block entirely.
+ *
+ * Copy and analytics now resolve from the same expression, so they cannot
+ * disagree again: if the plan tiers change, both move together or the test
+ * below fails.
+ */
+export const UNCAPPED_PLAN_ID: PlanType =
+  PLAN_HIERARCHY.find((p) => getPlanConfig(p).maxRecordingsPerMonth === Number.MAX_SAFE_INTEGER)
+  ?? 'team';
+
+/** Display form of {@link UNCAPPED_PLAN_ID}, for user-facing copy. */
+export const UNCAPPED_PLAN_LABEL =
+  UNCAPPED_PLAN_ID.charAt(0).toUpperCase() + UNCAPPED_PLAN_ID.slice(1);
 
 const CTA = `${UNCAPPED_PLAN_LABEL} removes the monthly cap`;
 const RESET = 'The count resets on the 1st (UTC).';

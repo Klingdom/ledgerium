@@ -34,7 +34,10 @@ export default function UploadPage() {
   // the usage counter + at-limit lockout below never rendered for anyone.
   // Now shared with TrialStatusChip / RecordingQuotaChip via useAccount, and
   // typed against the same AccountData the route actually returns.
-  const { account, refetch: refetchAccount } = useAccount();
+  // alwaysFresh: this page shows a quota that changes as a direct result of
+  // the user's own action, so a cached figure can under-report and leave the
+  // at-limit lockout disengaged (row #234).
+  const { account } = useAccount({ alwaysFresh: true });
   // `limits.recordings.used` comes from the shared cache and does not update
   // itself after a successful upload (no live subscription across hook
   // instances — see useAccount.ts). This delta preserves the previous
@@ -42,22 +45,6 @@ export default function UploadPage() {
   const [uploadDelta, setUploadDelta] = useState(0);
   const [billingLoading, setBillingLoading] = useState(false);
 
-  /*
-    Refetch on mount, for the same reason /account does (row #234).
-
-    The delta above is correct within a single mount and wrong across two. The
-    shared cache holds for 30s, so: upload a file, navigate away, come back
-    inside that window — `used` is still the pre-upload figure and the delta
-    has reset to 0. A user at 5 of 5 would be shown 4 of 5 and `isAtLimit`
-    would be false, on the page whose job is to say they have run out.
-
-    Before this row the page fetched fresh on every mount and had no such gap.
-    Routing it through a cache without this would have traded an untyped-parse
-    defect for a stale-quota one.
-  */
-  useEffect(() => {
-    refetchAccount();
-  }, [refetchAccount]);
 
   useEffect(() => {
     track({ event: 'page_viewed', path: '/upload' });

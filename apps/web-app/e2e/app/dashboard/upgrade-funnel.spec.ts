@@ -28,6 +28,7 @@
  */
 
 import { test, expect, type Page } from '@playwright/test';
+import { UNCAPPED_PLAN_ID } from '../../../src/lib/quota-meter';
 
 const V2_URL = '/dashboard?v2=1';
 
@@ -91,7 +92,10 @@ test('a quota-limited dashboard records the prompt being shown, not only clicked
   // The location must match this surface's upgrade_clicked exactly, or the two
   // stages stop describing the same thing and the fix undoes itself quietly.
   expect(views[0]!.location).toBe('dashboard_v2_quota_chip');
-  expect(views[0]!.plan).toBe('team');
+  // Bound to the same constant the CTA copy uses, not a literal. Loop 70
+  // pinned 'team' here while the chip's copy named Solo, so the test
+  // cheerfully protected the wrong value.
+  expect(views[0]!.plan).toBe(UNCAPPED_PLAN_ID);
 });
 
 test('the prompt is recorded once, not once per render', async ({ page }) => {

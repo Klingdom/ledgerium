@@ -105,14 +105,32 @@ async function fetchAccount(): Promise<AccountData> {
  * Call `refetch()` to bust the cache immediately — after a plan change, say,
  * where waiting out the TTL would show the user their old plan.
  */
-export function useAccount(): UseAccountReturn {
+export function useAccount(options?: { alwaysFresh?: boolean }): UseAccountReturn {
+  const alwaysFresh = options?.alwaysFresh ?? false;
   const cached = accountCache.peek();
   const [account, setAccount] = useState<AccountData | null>(cached);
   const [loading, setLoading] = useState<boolean>(cached === null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback((bust = false) => {
-    if (bust) accountCache.clear();
+    if (bust) {
+      // Ignore any cached value, but join a request already in flight rather
+      // than clearing it — clearing is per-caller and multiplies requests
+      // across components (MR-038 S-3, measured at 3 on /account).
+      setLoading(accountCache.peek() === null);
+      setError(null);
+      accountCache
+        .refresh(fetchAccount)
+        .then((data) => {
+          setAccount(data);
+          setLoading(false);
+        })
+        .catch((err: unknown) => {
+          setError(err instanceof Error ? err.message : 'Unknown error');
+          setLoading(false);
+        });
+      return;
+    }
 
     const fresh = accountCache.peek();
     if (fresh !== null) {
@@ -137,9 +155,14 @@ export function useAccount(): UseAccountReturn {
       });
   }, []);
 
+  // `alwaysFresh` pages bust on mount instead of loading and then busting.
+  // MR-038 S-3: /account added its own `refetch()` effect on top of this one,
+  // so a cold cache issued TWO requests while the entry and CHANGELOG both
+  // claimed the change took it from two to one. It did not; it took two to
+  // two. One flag, one request.
   useEffect(() => {
-    load(false);
-  }, [load]);
+    load(alwaysFresh);
+  }, [load, alwaysFresh]);
 
   const refetch = useCallback(() => {
     load(true);

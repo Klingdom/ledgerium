@@ -4,7 +4,7 @@
  * ## Why this is a module rather than closure state inside the hook
  *
  * It was closure state, and it was untested, because `apps/web-app` runs vitest
- * with `environment: 'node'` and has no React renderer: 181 test files, zero of
+ * with `environment: 'node'` and has no React renderer: 184 test files, zero of
  * them rendering a component. Testing the hook directly would have meant adding
  * `@testing-library/react` and a jsdom environment — a real dependency decision
  * that should be taken on its own merits, not smuggled in as a side effect of a
@@ -66,6 +66,9 @@ interface CacheState<T> {
 export class SharedRequestCache<T> {
   private state: CacheState<T> = { value: null, storedAtMs: 0, inFlight: null };
 
+  /** Bumped by `clear()`; a resolving fetch from an older generation is discarded. */
+  private generation = 0;
+
   constructor(
     private readonly ttlMs: number = CACHE_TTL_MS,
     private readonly now: () => number = Date.now,
@@ -99,23 +102,59 @@ export class SharedRequestCache<T> {
     this.state.value = null;
 
     if (this.state.inFlight === null) {
+      const generation = this.generation;
       this.state.inFlight = fetcher()
         .then((value) => {
-          this.state.value = value;
-          this.state.storedAtMs = this.now();
-          this.state.inFlight = null;
+          // A `clear()` while this was in flight means someone knows the world
+          // changed. Returning the value to this caller is right; writing it
+          // into the cache is not.
+          if (generation === this.generation) {
+            this.state.value = value;
+            this.state.storedAtMs = this.now();
+            this.state.inFlight = null;
+          }
           return value;
         })
         .catch((err: unknown) => {
-          this.state.inFlight = null;
+          if (generation === this.generation) this.state.inFlight = null;
           throw err;
         });
     }
     return this.state.inFlight;
   }
 
-  /** Drop everything. Used by `refetch()` and by tests between cases. */
+  /**
+   * Fetch regardless of what is cached, but share a request already in flight.
+   *
+   * This is what a page meaning "always fresh" actually wants, and it is not
+   * the same as `clear()` then `get()`. Clearing is per-caller: two components
+   * that both want freshness clear each other's work and start two requests,
+   * and React's development double-invocation makes that three. `/account`
+   * measured exactly three.
+   *
+   * Joining the in-flight request instead is correct rather than merely
+   * cheaper — a response that is still arriving is by definition not stale, so
+   * there is nothing to be fresher than.
+   */
+  refresh(fetcher: () => Promise<T>): Promise<T> {
+    if (this.state.inFlight !== null) return this.state.inFlight;
+    this.state.value = null;
+    return this.get(fetcher);
+  }
+
+  /**
+   * Drop everything, including any request already in flight.
+   *
+   * The generation counter is the point. Dropping only the `inFlight` slot
+   * leaves the old request running, and its `.then` would still write the
+   * stale response into the cache — and re-stamp it fresh for a full TTL —
+   * after the newer one had already landed. Harmless while `refetch()` is only
+   * ever a duplicate of the same request, and actively wrong the moment it
+   * follows a mutation, which is exactly what `useAccount`'s docstring
+   * advertises it for. Found by MR-038 before it had a live trigger.
+   */
   clear(): void {
+    this.generation++;
     this.state = { value: null, storedAtMs: 0, inFlight: null };
   }
 }

@@ -873,9 +873,16 @@ export function track(payload: AnalyticsEvent): void {
     // measurement elsewhere.
     //
     // Deliberately NOT the fix the row prescribed (queue events until the plan
-    // resolves, drain on set). `dashboard_bounced` fires from `beforeunload`
-    // via `sendBeacon`; anything still sitting in a queue at that moment is
-    // never sent, so queuing would trade a visible gap for lost events.
+    // resolves, drain on set). Anything still sitting in a queue when the page
+    // goes away is never sent, so queuing would trade a visible gap for lost
+    // events.
+    //
+    // MR-038 S-5: this argument used to rest on "`dashboard_bounced` fires
+    // from `beforeunload`". Loop 71 moved delivery to `visibilitychange`, and
+    // row #242 is about the emitter still being on `beforeunload` — so that
+    // premise was stale and is removed. The conclusion stands on the general
+    // point about queues and page teardown, which is why the comment survives
+    // rather than the reasoning being quietly left wrong.
     const userPlan: unknown = (window as any).__ledgerium_userPlan;
     base.userPlan = userPlan != null ? userPlan : 'unknown';
     // SEO attribution unblock: enrich every event with the persistent
