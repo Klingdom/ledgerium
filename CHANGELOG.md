@@ -6,6 +6,20 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - Analytics stops quietly dropping events from plan breakdowns
+
+**Why:** when the system did not yet know which plan a customer was on, it left that detail off the event entirely. Those events then disappeared from any per-plan analysis rather than showing up as unknown — so a report could look complete while silently missing an unknown share of its input.
+
+### Fixed
+- Every event now carries a plan, using **"unknown"** when it genuinely is not known yet. The gap shows up as its own bucket instead of vanishing.
+
+### Found while checking
+- The task described this as a brief timing glitch. It is not: the plan was only ever recorded on the **dashboard**, so events from every other page carried none at all.
+- The fix the task proposed — holding events back until the plan is known — would have **lost data**. One of these events is sent precisely when someone closes the tab, and anything held back at that moment never sends.
+- Making the plan known everywhere is the remaining half. It needs a real decision, because both routes have a cost, and it belongs with an existing item about the same endpoint being fetched twice already.
+
+---
+
 ## [2026-09-29] - The test suite stops sabotaging itself
 
 **Why:** the automated test run deleted its own database before each run. If a test server from a previous run was still alive, it carried on using the deleted file — so every login failed, silently, and the whole suite stopped with a timeout that pointed at nothing. It blocked deployments for reasons unconnected to whatever was being deployed.

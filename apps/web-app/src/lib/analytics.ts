@@ -847,8 +847,31 @@ export function track(payload: AnalyticsEvent): void {
   if (IS_BROWSER) {
     base.url = window.location.pathname;
     // MDR-P09 (b): enrich every event with userPlan when available.
+    //
+    // Row #94 (loop 60): when the plan is not known this now emits the literal
+    // 'unknown' rather than omitting the property.
+    //
+    // The row described the problem as events carrying `userPlan: undefined`
+    // and "contaminating" plan-tier analysis. That was not what happened —
+    // the property was omitted entirely, so those events were silently
+    // EXCLUDED from any plan breakdown rather than mis-attributed. Quieter,
+    // and worse: an analysis that drops an unknown share of its input looks
+    // complete.
+    //
+    // How large that share is: `setUserPlanForAnalytics` has exactly one
+    // caller, inside the dashboard's own fetch. Every event on every other
+    // authenticated page — SOP view, upload, settings — therefore had no plan
+    // at all, and so did dashboard events fired before that fetch resolved.
+    // An explicit 'unknown' bucket makes that visible in the breakdown instead
+    // of invisible, which is the whole argument this product makes about
+    // measurement elsewhere.
+    //
+    // Deliberately NOT the fix the row prescribed (queue events until the plan
+    // resolves, drain on set). `dashboard_bounced` fires from `beforeunload`
+    // via `sendBeacon`; anything still sitting in a queue at that moment is
+    // never sent, so queuing would trade a visible gap for lost events.
     const userPlan: unknown = (window as any).__ledgerium_userPlan;
-    if (userPlan != null) base.userPlan = userPlan;
+    base.userPlan = userPlan != null ? userPlan : 'unknown';
     // SEO attribution unblock: enrich every event with the persistent
     // anonymous visitorId, mirroring the userPlan enrichment pattern above.
     const visitorId = getOrCreateVisitorId();

@@ -4,6 +4,23 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-30 (loop 60) — Making a measurement gap visible instead of invisible (Mode 1, coordinator)
+
+- **Candidate Selection: `top-score` among verified-open rows — #94 (13).** #108 (16) is blocked on cross-run aggregation, #168 carries an unresolved overlap flag, and the 14s are multi-iteration roadmap rows. Stated because MR-031 struck me once for asserting `top-score` without checking.
+- **`reverse-portfolio-drift: user-ack` — D-1 at 14.**
+- **P-11 changed the work three ways, and the third is the important one.**
+  - **The stated harm was wrong.** The row says events emit `userPlan: undefined` and contaminate plan-tier analysis. `analytics.ts:851` read `if (userPlan != null) base.userPlan = userPlan` — the property was **omitted**, so those events were silently **excluded** from any breakdown rather than mis-attributed. That is quieter and worse: an analysis that drops an unknown share of its input still looks complete.
+  - **It is not a race.** `setUserPlanForAnalytics` has **exactly one caller**, inside the dashboard's own fetch. Every event on every other authenticated page — SOP view, upload, settings — carried no plan at all. The race the row describes is a rounding error next to the permanent absence it missed.
+  - **The prescribed fix would have lost events.** Queue-until-plan-set then drain, as written, collides with `dashboard_bounced`, which fires from `beforeunload` via `sendBeacon`. Anything still queued at that moment is never sent — trading a visible gap for missing data, on the one event whose whole purpose is to be recorded at the moment the user leaves.
+- **What shipped is the honest half:** the plan is now **always present**, emitting the literal `'unknown'` when unresolved. The gap becomes a bucket in the breakdown rather than vanishing from it. That is the same argument I made for leaving criterion-3 unscoreable rather than quietly passing — a visible gap beats an invisible one — and it is two lines rather than forty.
+- **What I did not ship, and why it is recorded rather than attempted:** making the plan known globally needs either the plan in the NextAuth session (no extra fetch, but it touches the login path for every user and goes stale after an upgrade) or a fetch in `AppShell` (fresh, but `/api/account` is **already** fetched twice per dashboard load per row #189, and adding a third is the wrong direction). That is a decision with a real trade-off and it belongs with #189, not smuggled into an analytics loop.
+- **Tests pin the shape, not just the value:** that the assignment is unconditional, that the old conditional form cannot return, that `''` is preserved rather than folded into `'unknown'` — an empty string is a value someone set, and coercing it would hide a real upstream bug in the same bucket as "not yet known" — and that no event queue has appeared, which would mean the rejected fix had crept back in.
+- **Validation:** web-app **3188 → 3195** (+7); typecheck **0** across 11 packages.
+- **Follow-ups:** 0 created; #94 re-scoped with the verified findings and the two options for its remaining half.
+- **Meta-review:** MR-035 ran concurrently with this loop; its verdict lands separately.
+
+---
+
 ## 2026-09-29 (loop 59) — Removing the failure class instead of guarding it (Mode 1, coordinator)
 
 - **Candidate Selection: `directed` — #228**, implementing the fix loop 58 specified and deliberately did not build. Loop 58 shipped a diagnosis and no code because the fix it had in hand was wrong; this loop builds the one that is right.
