@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Upload, CheckCircle, XCircle, FileJson, Loader2, Zap, Lock, HelpCircle } from 'lucide-react';
 import { track, trackActivation } from '@/lib/analytics';
 import { PRICING_CONFIG } from '@/lib/config';
+import { useAccount } from '@/hooks/useAccount';
 
 type UploadState = 'idle' | 'uploading' | 'success' | 'error' | 'upgrade_required';
 
@@ -22,38 +23,43 @@ interface UploadResult {
   limit?: number;
 }
 
-interface AccountInfo {
-  plan: string;
-  uploadCount: number;
-}
-
 export default function UploadPage() {
   const router = useRouter();
   const [state, setState] = useState<UploadState>('idle');
   const [result, setResult] = useState<UploadResult | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [account, setAccount] = useState<AccountInfo | null>(null);
+  // Row #234: was a self-issued fetch('/api/account'), typed `any` — this
+  // page previously read `data.plan` and `data.uploadCount`, neither of which
+  // exists on the /api/account envelope, so both were always undefined and
+  // the usage counter + at-limit lockout below never rendered for anyone.
+  // Now shared with TrialStatusChip / RecordingQuotaChip via useAccount, and
+  // typed against the same AccountData the route actually returns.
+  const { account, refetch: refetchAccount } = useAccount();
+  // `limits.recordings.used` comes from the shared cache and does not update
+  // itself after a successful upload (no live subscription across hook
+  // instances — see useAccount.ts). This delta preserves the previous
+  // instant-local-increment behaviour without mutating shared account state.
+  const [uploadDelta, setUploadDelta] = useState(0);
   const [billingLoading, setBillingLoading] = useState(false);
 
-  // Load account info for limit display
+  /*
+    Refetch on mount, for the same reason /account does (row #234).
+
+    The delta above is correct within a single mount and wrong across two. The
+    shared cache holds for 30s, so: upload a file, navigate away, come back
+    inside that window — `used` is still the pre-upload figure and the delta
+    has reset to 0. A user at 5 of 5 would be shown 4 of 5 and `isAtLimit`
+    would be false, on the page whose job is to say they have run out.
+
+    Before this row the page fetched fresh on every mount and had no such gap.
+    Routing it through a cache without this would have traded an untyped-parse
+    defect for a stale-quota one.
+  */
   useEffect(() => {
-    fetch('/api/account').then(async res => {
-      if (res.ok) {
-        // /api/account returns { data: { user: { plan }, limits: { recordings:
-        // { used, max } } } }. This previously read `data.plan` and
-        // `data.uploadCount`, neither of which exists on that envelope, so both
-        // were always undefined — silently, because res.json() is `any` and
-        // typecheck cannot see through it. The effect was that the usage
-        // counter and the at-limit lockout below never rendered for anyone.
-        // Shape mirrors hooks/useAccount.ts, which reads it correctly.
-        const json = await res.json();
-        const plan = json?.data?.user?.plan;
-        const used = json?.data?.limits?.recordings?.used;
-        if (typeof plan === 'string' && typeof used === 'number') {
-          setAccount({ plan, uploadCount: used });
-        }
-      }
-    });
+    refetchAccount();
+  }, [refetchAccount]);
+
+  useEffect(() => {
     track({ event: 'page_viewed', path: '/upload' });
   }, []);
 
@@ -73,8 +79,10 @@ export default function UploadPage() {
     : 'Upgrade to continue';
 
   const FREE_LIMIT = 5;
-  const isAtLimit = account?.plan === 'free' && (account?.uploadCount ?? 0) >= FREE_LIMIT;
-  const uploadsRemaining = account?.plan === 'free' ? Math.max(0, FREE_LIMIT - (account?.uploadCount ?? 0)) : null;
+  const currentPlan = account?.user.plan;
+  const uploadCount = (account?.limits.recordings.used ?? 0) + uploadDelta;
+  const isAtLimit = currentPlan === 'free' && uploadCount >= FREE_LIMIT;
+  const uploadsRemaining = currentPlan === 'free' ? Math.max(0, FREE_LIMIT - uploadCount) : null;
 
   const handleUpload = useCallback(async (file: File) => {
     setState('uploading');
@@ -95,7 +103,7 @@ export default function UploadPage() {
         setState('success');
         setResult(data);
         // Update local count
-        if (account) setAccount({ ...account, uploadCount: account.uploadCount + 1 });
+        if (account) setUploadDelta((d) => d + 1);
         track({ event: 'workflow_uploaded', stepCount: data.stepCount ?? 0, systemCount: data.toolsUsed?.length ?? 0 });
         trackActivation('first_workflow', { stepCount: data.stepCount ?? 0, systemCount: data.toolsUsed?.length ?? 0 });
       } else if (data.code === 'UPGRADE_REQUIRED') {
@@ -158,12 +166,12 @@ export default function UploadPage() {
       </div>
 
       {/* Usage counter for free users */}
-      {account && account.plan === 'free' && (
+      {account && currentPlan === 'free' && (
         <div className={`card px-ds-5 py-ds-3 mb-ds-4 flex items-center justify-between ${isAtLimit ? 'border-amber-200 bg-amber-50/50' : ''}`}>
           <div className="flex items-center gap-ds-3">
             <div className="flex items-center gap-ds-2">
               <span className="text-ds-sm text-[var(--content-secondary)]">
-                Uploads: <strong className="text-[var(--content-primary)] tabular-nums">{account.uploadCount}</strong>
+                Uploads: <strong className="text-[var(--content-primary)] tabular-nums">{uploadCount}</strong>
                 <span className="text-[var(--content-tertiary)]"> / {FREE_LIMIT}</span>
               </span>
             </div>
@@ -171,7 +179,7 @@ export default function UploadPage() {
             <div className="h-1.5 w-24 rounded-full bg-[var(--surface-secondary)] overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${isAtLimit ? 'bg-amber-500' : 'bg-brand-500'}`}
-                style={{ width: `${Math.min(100, (account.uploadCount / FREE_LIMIT) * 100)}%` }}
+                style={{ width: `${Math.min(100, (uploadCount / FREE_LIMIT) * 100)}%` }}
               />
             </div>
           </div>
@@ -186,7 +194,7 @@ export default function UploadPage() {
         </div>
       )}
 
-      {account?.plan === 'pro' && (
+      {currentPlan === 'pro' && (
         <div className="card px-ds-5 py-ds-3 mb-ds-4 flex items-center gap-ds-2 text-ds-sm text-[var(--content-secondary)]">
           <Zap className="h-4 w-4 text-[var(--brand-text)]" />
           <span>Pro plan — <strong className="text-[var(--content-primary)]">unlimited uploads</strong></span>

@@ -6,6 +6,19 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - Account data is now read the same way everywhere
+
+**Why:** two pages still read your account details without any type checking, which is the mechanism that once caused a usage counter and an upload limit to never appear for anyone.
+
+### Fixed
+- The upload page and the account page now read account details through the same checked path as the rest of the app. Each also makes one request instead of two.
+- **The account page always fetches fresh.** It is where you land after changing plan, and it must never show you the old one.
+
+### Caught before release
+- Routing the upload page through a shared short-lived cache introduced a new problem: upload a file, navigate away, return within thirty seconds, and it would show your pre-upload count — so someone who had used all five uploads would be shown four, and the limit notice would not appear. That was my error in how I scoped the work, not in how it was done. Fixed, and written into the test suite as a named trap rather than a comment, because the caching itself is correct — it is simply the wrong default for a number that changes as a result of what you just did.
+
+---
+
 ## [2026-09-30] - Short visits were vanishing from the analytics, and they are the ones that matter
 
 **Why:** usage data was only sent once ten events had piled up. Anything less relied on a browser signal that phones frequently never send.

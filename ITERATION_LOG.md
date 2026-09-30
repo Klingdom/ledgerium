@@ -4,6 +4,22 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-30 (loop 72) — The last untyped readers, and a regression my own brief caused (Mode 1, `frontend-engineer`)
+
+- **Controls:** Area — `web-app / correctness`, pivoted off analytics. Agent — **`frontend-engineer`, rotation taken as required** after the coordinator crossed 4 consecutive at loop 71. Extension — `871e29a`, 29 loops; #216 still CEO-blocked.
+- **Candidate Selection: `top-score` — #234** (11).
+- **Zero client code now parses `/api/account` untyped.** Both remaining raw call sites moved to `useAccount`. The agent found **no field mismatches**, which was the thing I most wanted to know: every read on both pages already matched the route's actual shape. So the `any` had stopped hiding anything *today*, while leaving fully in place the mechanism that once hid a shipped feature — `/upload` read `data.plan` and `data.uploadCount`, neither of which exists on that envelope, so the usage counter and at-limit lockout never rendered for anyone.
+- **`/account` refetches on mount**, so someone landing there after a plan change is never shown the old plan. Net two requests to one, since it now shares with `TrialStatusChip`.
+- **A regression was introduced, and my brief caused it.** I wrote *"`/upload`: move to `useAccount` directly. No constraints."* It has exactly the same constraint as `/account` and I did not see it. The page displays a quota that changes as a direct result of the user's own action, so a 30s shared cache means: upload a file, navigate away, come back inside the window — `used` is the pre-upload figure and the local delta has reset to zero. **A user at 5 of 5 would be shown 4 of 5, with `isAtLimit` false, on the page whose entire job is to tell them they have run out.**
+- **The agent's reasoning was sound and its scope was mine.** It justified the optimistic delta by checking that `useAccount` has no cross-instance subscription, which is true and makes the delta correct *within a single mount*. The gap is across mounts, and it is not visible from the brief it was given. Delegation moved the work; it did not move the responsibility for scoping it.
+- **Caught by reading the report against the code rather than accepting it.** The claim I checked — "no live subscription across hook instances" — was the one that, if true, implied the staleness window. It was true.
+- **Fixed by refetching on mount, and pinned by a test that states the trap outright.** The cache is behaving correctly; the lesson is that **correct caching is the wrong default for a self-invalidating figure**, and a comment would not have stopped the next caller. The test asserts the stale read explicitly so the trap is legible rather than inferred.
+- **Validation:** web-app **3259 → 3260**; account-fetch + funnel + delivery e2e **7/7**; typecheck **0** across 11 packages; validator clean at 234 rows.
+- **Follow-ups:** 0 created, 1 closed (#234). Second consecutive loop closing without opening.
+- **Meta-review cadence:** 3 loops since MR-037 — **MR-038 is due.**
+
+---
+
 ## 2026-09-30 (loop 71) — Short sessions were being dropped, and they are the ones that matter (Mode 1, coordinator)
 
 - **Controls:** Area — `web-app / analytics`, 2 consecutive; not saturated. Agent — coordinator, 4 consecutive, which crosses the 4+ threshold. Stated plainly rather than excused: this was a small, semantics-heavy change in a file I had just been reading, and delegating it would have cost more context than it bought — but the next loop must rotate regardless, and MR-038 should treat a fourth consecutive as a fact about me rather than about the work. Extension — `871e29a`, 28 loops; #216 still CEO-blocked.

@@ -183,3 +183,39 @@ describe('SharedRequestCache', () => {
     expect(CACHE_TTL_MS).toBe(30_000);
   });
 });
+
+describe('the stale-quota trap — row #234', () => {
+  it('a remount inside the TTL serves the OLD value, which is why quota pages must refetch', () => {
+    // Recorded as a test rather than a comment because it is a live trap that
+    // was walked into once: /upload shows a quota that changes as a direct
+    // result of the user's own action. Routing it through this cache without
+    // a refetch meant "upload a file, navigate away, come back within 30s"
+    // showed the pre-upload count, and the at-limit lockout did not engage
+    // for a user who had actually run out.
+    //
+    // The cache is behaving correctly here. The point is that correct caching
+    // is the wrong default for a self-invalidating figure, and the assertion
+    // below is what makes that concrete for the next caller.
+    const c = clock();
+    let used = 4;
+    const fetcher = vi.fn(async () => ({ used }));
+    const cache = new SharedRequestCache<{ used: number }>(CACHE_TTL_MS, c.now);
+
+    return cache.get(fetcher).then(async (first) => {
+      expect(first.used).toBe(4);
+
+      used = 5; // the upload happened server-side
+      c.advance(1_000); // well inside the TTL
+
+      const second = await cache.get(fetcher);
+      expect(second.used, 'the cache served the pre-upload figure, as designed').toBe(4);
+      expect(fetcher).toHaveBeenCalledTimes(1);
+
+      // clear() is what refetch() does, and it is the escape hatch a
+      // quota-displaying page must use on mount.
+      cache.clear();
+      const third = await cache.get(fetcher);
+      expect(third.used, 'after clear(), the page sees the truth').toBe(5);
+    });
+  });
+});

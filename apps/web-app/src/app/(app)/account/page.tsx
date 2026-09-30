@@ -27,36 +27,17 @@ import { isAdminUnlimited } from '@/lib/admin-allowlist';
 import { ServicesCard } from '@/components/ServicesCard';
 import { derivePlanAvailability, type PlanAvailabilityResponse } from '@/lib/plan-availability';
 import { mapCheckoutError } from '@/lib/checkout-error';
+import { useAccount } from '@/hooks/useAccount';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-
-interface AccountData {
-  user: {
-    id: string;
-    email: string;
-    name: string | null;
-    plan: string;
-    subscriptionStatus: string;
-    createdAt: string;
-    hasStripeCustomer: boolean;
-    /**
-     * P0-2 (billing hardening, 2026-08): non-null IFF Stripe has an open
-     * invoice on this subscription requiring SCA/3-D Secure customer
-     * authentication. Points at the Stripe-hosted invoice page where the
-     * customer can complete the challenge. See webhook/route.ts
-     * invoice.payment_action_required for the write side.
-     */
-    pendingInvoiceUrl: string | null;
-  };
-  features: Record<string, boolean>;
-  limits: {
-    recordings: { used: number; max: number | 'unlimited' };
-    seats: { max: number | 'unlimited' };
-    recorders: { max: number | 'unlimited' };
-  };
-}
+//
+// The account shape itself (AccountData) is no longer declared here — this
+// page shares hooks/useAccount.ts with TrialStatusChip / RecordingQuotaChip
+// (row #234), which types the same /api/account envelope this local
+// interface used to restate by hand. See useAccount.ts's AccountData /
+// AccountUser / AccountLimits for the source of truth.
 
 interface ApiKeyInfo {
   id: string;
@@ -336,7 +317,14 @@ function PlanCard({
 
 export default function AccountPage() {
   const { data: session } = useSession();
-  const [account, setAccount] = useState<AccountData | null>(null);
+  // Row #234: was a self-issued fetch('/api/account') parsed as `any` and
+  // stored in local state. Now shared with TrialStatusChip /
+  // RecordingQuotaChip via useAccount. `refetch()` busts the cache on mount
+  // — this is the page a user lands on right after changing plan, and a
+  // stale 30s-cached response would be the one place that actively shows
+  // them the wrong plan. `/api/keys` is unrelated to useAccount and keeps
+  // its own fetch below.
+  const { account, refetch: refetchAccount } = useAccount();
   const [apiKeys, setApiKeys] = useState<ApiKeyInfo[]>([]);
   const [newKey, setNewKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -348,21 +336,18 @@ export default function AccountPage() {
   const [planAvailability, setPlanAvailability] = useState<PlanAvailabilityResponse | null>(null);
 
   useEffect(() => {
-    async function load() {
-      const [accountRes, keysRes] = await Promise.all([
-        fetch('/api/account'),
-        fetch('/api/keys'),
-      ]);
-      if (accountRes.ok) {
-        const json = await accountRes.json();
-        setAccount(json.data);
-      }
+    refetchAccount();
+  }, [refetchAccount]);
+
+  useEffect(() => {
+    async function loadKeys() {
+      const keysRes = await fetch('/api/keys');
       if (keysRes.ok) {
         const data = await keysRes.json();
         setApiKeys(data.keys);
       }
     }
-    load();
+    loadKeys();
   }, []);
 
   useEffect(() => {
