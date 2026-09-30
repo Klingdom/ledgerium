@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { quotaMeterState, type RecordingMax } from '@/lib/quota-meter';
 import { track } from '@/lib/analytics.js';
+import { useAccount } from '@/hooks/useAccount';
 
 /**
  * Monthly recording usage in the live dashboard header.
@@ -18,26 +18,15 @@ import { track } from '@/lib/analytics.js';
  * Fetch failure is silent: header chrome must never break the dashboard.
  */
 export function RecordingQuotaChip() {
-  const [used, setUsed] = useState<number | null>(null);
-  const [max, setMax] = useState<RecordingMax | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/account')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((json) => {
-        const rec = json?.data?.limits?.recordings;
-        if (cancelled || !rec) return;
-        setUsed(rec.used ?? null);
-        setMax(rec.max ?? null);
-      })
-      .catch(() => {
-        // Intentionally silent — see doc comment.
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  // Row #189: was a self-issued fetch('/api/account'). It now shares the
+  // request with TrialStatusChip in AppShell, which mounts in the same tick on
+  // the dashboard — two identical requests for one page load. Failure stays
+  // silent: `account` is null on error, quotaMeterState renders nothing, and
+  // header chrome must never break the dashboard.
+  const { account } = useAccount();
+  const rec = account?.limits?.recordings;
+  const used: number | null = rec?.used ?? null;
+  const max: RecordingMax | null = rec?.max ?? null;
 
   const state = quotaMeterState(used, max);
   if (!state.show) return null;

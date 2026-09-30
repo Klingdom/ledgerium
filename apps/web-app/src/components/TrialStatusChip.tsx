@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { trialChipState, type TrialState } from '@/lib/trial-chip';
+import { useAccount } from '@/hooks/useAccount';
 
 /**
  * Trial status in the app chrome.
@@ -23,25 +23,12 @@ import { trialChipState, type TrialState } from '@/lib/trial-chip';
  * failed fetch simply renders nothing.
  */
 export function TrialStatusChip() {
-  const [trial, setTrial] = useState<TrialState | null>(null);
-  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/account')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((json) => {
-        if (cancelled || !json?.data) return;
-        setTrial(json.data.reverseTrial ?? null);
-        setSubscriptionStatus(json.data.user?.subscriptionStatus ?? null);
-      })
-      .catch(() => {
-        // Intentionally silent — see doc comment.
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  // Row #189: was a self-issued fetch('/api/account'), shared now with
+  // RecordingQuotaChip. Failure stays silent — `account` is null on error and
+  // trialChipState renders nothing, which is what a chrome ornament should do.
+  const { account } = useAccount();
+  const trial: TrialState | null = account?.reverseTrial ?? null;
+  const subscriptionStatus: string | null = account?.user?.subscriptionStatus ?? null;
 
   const state = trialChipState(trial, subscriptionStatus);
   if (!state.show) return null;

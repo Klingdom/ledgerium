@@ -6,6 +6,24 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - The dashboard now asks for your account details once, not twice
+
+**Why:** two pieces of the header each fetched the same account information separately on every dashboard load.
+
+### Fixed
+- **One request instead of two.** The trial badge and the recording-usage counter now share a single lookup. Verified by counting the actual requests a real browser makes, not by reasoning about the code — the old version would have passed a simpler check while still making two.
+- The shared lookup keeps its answer for thirty seconds, so rapid navigation does not re-ask, but it does not hold on to it indefinitely. That matters for the usage counter: left unbounded, it would have shown your page-load number for the rest of the session. It is worth being plain that this bounds staleness rather than removing it — recordings finish in the background, so the figure can be out of date moments after any check.
+- **A type mismatch came to light and is fixed.** The trial information was being read without any type checking at all, which let two parts of the code disagree about whether a value could be missing.
+
+### Behind the scenes
+- The shared-lookup logic had never been tested, despite carrying a comment claiming it worked. It does, and there are now twelve tests saying so — including one confirming that breaking it is actually detected.
+
+### Recorded, not changed
+- Two other pages still fetch the same information separately, and both read it without type checking. One of them carries a note about a past bug where that meant a usage counter and a limit warning never appeared for anyone. Moving them needs a decision first: the account page is where you land after changing plan, and it must not show you the old one.
+- A plan-gating component appears to be used nowhere at all. Before removing it, we need to establish how plan restrictions are actually applied today.
+
+---
+
 ## [2026-09-30] - Correcting yesterday's claim about the focus outline check
 
 **Why:** I said the new light-mode accessibility check would catch the focus-outline problem if it came back. A review disputed it, and the review was right.
