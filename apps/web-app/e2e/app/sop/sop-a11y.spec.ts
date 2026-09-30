@@ -66,17 +66,40 @@ test('axe: zero critical/serious violations — Execution SOP mode', async ({ pa
 });
 
 /**
- * Flow View, Analysis and the ticked-criteria state are NOT covered here yet,
- * and that is deliberate rather than an oversight.
- *
- * Running them found real, serious violations — a keyboard-inaccessible
- * scrollable region in Flow View (`scrollable-region-focusable`) and two
- * contrast failures in Analysis (`div[title="91% confidence"] > .text-[9px]`
- * and `.text-violet-500`). Row #229 carries the details.
- *
- * They are omitted rather than shipped red, because a failing spec blocks the
- * deploy gate for every unrelated change; and rather than shipped with a raised
- * ratchet baseline, because a baseline that tolerates serious violations is how
- * a zero-tolerance policy quietly becomes decorative. They come back with their
- * fixes, in one commit, so the coverage and the clean result arrive together.
+ * The three tests below were written at loop 62 and held back rather than
+ * shipped, because they were red: they had found a keyboard-inaccessible
+ * scrollable region in Flow View and two contrast failures in Analysis. Row
+ * #229 fixed those, so they land here now — coverage and a clean result in the
+ * same commit, which was the point of holding them.
  */
+
+test('axe: zero critical/serious violations — Flow View mode', async ({ page }) => {
+  await openSop(page);
+  await switchMode(page, /flow view/i);
+  // The flow strip is the thing this mode exists for. If it is absent the scan
+  // would pass on an empty panel, which is the failure mode of the first spec.
+  await expect(page.getByRole('group', { name: /process flow/i })).toBeVisible();
+  await assertAxeCompliance(page, 'sop-flow-view', 0);
+});
+
+test('axe: zero critical/serious violations — Analysis mode', async ({ page }) => {
+  await openSop(page);
+  await switchMode(page, /analysis/i);
+  await expect(page.getByText(/intelligence layer/i).first()).toBeVisible();
+  await assertAxeCompliance(page, 'sop-analysis', 0);
+});
+
+test('the Flow View process strip is reachable and scrollable by keyboard', async ({ page }) => {
+  await openSop(page);
+  await switchMode(page, /flow view/i);
+
+  // Row #229 was a `scrollable-region-focusable` failure: the strip scrolled
+  // but had no tab stop, so off-screen steps were unreachable without a mouse.
+  // axe checks for the tab stop; this checks the tab stop is the right element
+  // and actually does something, which axe cannot tell you.
+  const strip = page.getByRole('group', { name: /process flow/i });
+  await expect(strip).toHaveAttribute('tabindex', '0');
+
+  await strip.focus();
+  await expect(strip).toBeFocused();
+});

@@ -19,6 +19,7 @@ import {
   Play, Square, Shield,
 } from 'lucide-react';
 import type { SOPViewModel, SOPViewStep, SOPViewPhase, SOPWorkflowDNA, SOPRecommendation } from './types';
+import { confidenceColor } from './confidenceColor';
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 
@@ -171,9 +172,32 @@ function ProcessFlowMap({
         {/* Flow strip: Start → [step dots grouped by phase] → End */}
         {/* Gradient fade hints for horizontal scroll on narrow screens */}
         <div className="relative">
+        {/* Row #229. This strip scrolls horizontally, so it needs to be a tab
+            stop: without one, a keyboard-only user cannot reach the steps that
+            are off-screen at all (axe `scrollable-region-focusable`, SC 2.1.1).
+
+            role was "img". Changed to "group" on SC 1.3.1 grounds: the subtree
+            is a real element per real step, not a rasterised picture, and "img"
+            claims more than the markup supports. It makes no practical
+            difference to what assistive tech announces today — the per-dot
+            `title` text was never reachable either way, being on a
+            non-focusable div — so this is a semantic-honesty choice, not a
+            trade of detail for compliance.
+
+            The ring uses --brand-text rather than the house
+            `ring-emerald-500`, because that house colour measures 2.42:1 on the
+            light theme's surface, under the 3:1 SC 1.4.11 floor for focus
+            indicators. --brand-text is per-theme: 8.42:1 dark, 5.24:1 light.
+            The wider sweep of that defect is row #230.
+
+            Still NOT fixed here, deliberately: the per-dot label is
+            `group-hover:` only and never fires on focus (SC 1.4.13), and the
+            hardcoded light-grey scrollbar below is invisible on the dark
+            default theme. Both are row #231 — separate outcomes. */}
         <div
-          className="flex items-center gap-0 overflow-x-auto pb-2 scroll-smooth"
-          role="img"
+          className="flex items-center gap-0 overflow-x-auto pb-2 scroll-smooth rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-text)]"
+          role="group"
+          tabIndex={0}
           aria-label={`Process flow: ${dna.totalSteps} steps across ${dna.systemCount} systems`}
           style={{ scrollbarWidth: 'thin', scrollbarColor: '#e2e8f0 transparent' }}
         >
@@ -602,7 +626,7 @@ function SectionLabel({ icon: Icon, label, count }: { icon: React.ElementType; l
 }
 
 function ConfidenceDot({ value }: { value: number }) {
-  const color = value >= 0.85 ? '#059669' : value >= 0.7 ? '#2563eb' : '#d97706';
+  const color = confidenceColor(value);
   return (
     <span
       className="w-1.5 h-1.5 rounded-full flex-shrink-0"

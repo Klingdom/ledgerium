@@ -4,6 +4,24 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-30 (loop 63) — Fixing what the new ratchet found, including the two bands it could not see (Mode 1, coordinator + `a11y-architect`)
+
+- **Candidate Selection: `directed` — #229**, filed last loop by the rebuilt SOP ratchet. Fixing what a test you just wrote found is the completion of that work, not a new piece of it.
+- **`reverse-portfolio-drift: user-ack` — D-1 unchanged; #216 remains the only extension row and is still CEO-blocked.**
+- **The scan found one band; the arithmetic found three.** The confidence colour was the literal `value >= 0.85 ? '#059669' : value >= 0.7 ? '#2563eb' : '#d97706'`, written out in **five** files. Measured as text against `--surface-elevated`, **every band fails in at least one theme** — green 4.29 dark / 3.77 light, blue 3.13 dark, amber 3.19 light, against a 4.5 floor. axe reported only the green, because the seeded SOP happened to carry a single confidence value. Fixing the band the fixture rendered would have left two live failures that no ratchet could ever surface.
+- **So the fix is one source of truth, not one patched call site** — a `confidenceColor.ts` returning `var()` references over the existing per-theme status tokens, deliberately returning `var()` rather than hex so it cannot be captured at module scope and frozen to one theme. Worst case is now 4.79:1 light, 6.37:1 dark, in every band.
+- **`--status-info` is new and had to go in three places, not two.** The SOP print block resets these tokens to light values so a dark-mode user does not print dark-on-dark; a token missing from it would have printed light-blue figures on white at roughly 2:1. That block exists because of an earlier bug of exactly this shape.
+- **I asked `a11y-architect` about the scroll region and it corrected me.** I had assumed `role="img"` was suppressing per-step detail that keyboard users would otherwise reach. It is not: that detail lives in `title` attributes on non-focusable divs and hover-only labels, so it was never reachable. The role question was therefore about semantic honesty, not a trade-off — and on that reading `role="group"` is right (SC 1.3.1), because the subtree is a real element per real step, not a picture. Adopted, with `tabIndex={0}`.
+- **Its one caveat turned out to be a defect, and a large one.** It suggested I check the house focus ring in light theme. `ring-green-500` measures **2.18:1** there against the 3:1 floor — on **53 elements**. It passes on the dark default, which is why no ratchet has ever seen it: none of them exercise `.light` at all. Filed as **#230**; this loop used `var(--brand-text)` for the one element it touched rather than propagate the bad literal.
+- **Two things were deliberately not folded in** (**#231**): the hover-only per-step detail, which is the real remaining gap in that component, and a hardcoded light-grey scrollbar on a dark-default theme. Both are separate outcomes.
+- **The three tests loop 62 held back are now shipped green**, which is what holding them was for — coverage and a clean result in one commit rather than a ratchet quietly raised to accommodate a failure.
+- **#109 closes at a genuine 3-of-3.** Loop 62 left it open at one mode rather than round up. That was the right call and this is the payoff.
+- **Validation:** SOP spec **6/6**; web-app **3195**; typecheck **0** across 11 packages; validator clean at 224 rows.
+- **Follow-ups:** 2 created (#230, #231), 2 closed (#229, #109). Net zero, and the two created are both real findings rather than deferred work.
+- **Meta-review cadence:** 3 loops since MR-035.
+
+---
+
 ## 2026-09-30 (loop 62) — Rebuilding the spec I withdrew, and what it immediately found (Mode 1, coordinator)
 
 - **Candidate Selection: `directed` — #109**, re-opened last loop after I withdrew the claim it rested on. Finishing it properly was the honest completion, not moving on.

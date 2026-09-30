@@ -6,6 +6,25 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - Procedure pages: unreadable figures fixed, and the flow diagram now works with a keyboard
+
+**Why:** the accessibility check rebuilt yesterday reported three real problems. Fixing them turned up two more that no automated check could have found.
+
+### Fixed
+- **Confidence percentages were too faint to read.** The colour used for them was set once per level — high, medium, low — and written out in five separate places, each time as a fixed colour that ignored whether the app was in light or dark mode. Every one of the three levels was unreadable in one mode or the other; the automated check only caught one of them, because the test page happened to show a single value. All three are fixed, and the colour now comes from one place that follows the current theme.
+- **The process flow diagram could not be reached with a keyboard.** It scrolls sideways, and there was no way to scroll it without a mouse — any step off the right-hand edge was simply unavailable. It is now reachable by tabbing, with a visible outline when focused.
+- **A "Coming soon" label** was too faint against its background.
+- Printing a procedure from dark mode will not lose the confidence figures.
+
+### Found and recorded, not fixed here
+- **The focus outline used across the app is too faint in light mode** — on 53 elements. It is fine in dark mode, which is the default and the only one our automated checks look at, so this has gone unnoticed. Recorded, along with the more useful underlying point: nothing currently checks light mode at all.
+- **Per-step detail in the flow diagram only appears on hover**, so keyboard and screen-reader users still do not get it. Making the diagram reachable did not change that, and it is recorded as its own piece of work rather than half-done here.
+
+### Now genuinely finished
+- The accessibility check covers all three procedure views, and passes. Yesterday it covered one, and that was stated plainly rather than rounded up.
+
+---
+
 ## [2026-09-30] - The accessibility check for procedure pages now works, and found real problems
 
 **Why:** yesterday I withdrew a check that reported success while never actually looking at a procedure page. This rebuilds it properly.

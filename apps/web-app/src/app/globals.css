@@ -31,6 +31,10 @@
   --status-danger: #F87171;   /* 6.84:1 on --surface-primary */
   --status-warning: #FBBF24;  /* 11.3:1 */
   --status-success: #4ADE80;  /* 10.9:1 */
+  /* Row #229. The neutral/informational band, added for the SOP confidence
+     scale, which previously hardcoded #2563eb — 3.13:1 on --surface-elevated
+     in this theme, i.e. a fail as text. #60A5FA is 6.37:1 at worst here. */
+  --status-info: #60A5FA;     /* 6.37:1 on --surface-elevated */
 
   /* Borders */
   --border-default: rgba(255, 255, 255, 0.10);
@@ -64,6 +68,7 @@
   --status-danger: #DC2626;   /* 4.61:1 on --surface-primary */
   --status-warning: #B45309;  /* 4.79:1 */
   --status-success: #15803D;  /* 4.79:1 */
+  --status-info: #1D4ED8;     /* 6.41:1 — row #229, see :root */
 
   /* Borders */
   --border-default: #E2E8F0;
@@ -465,6 +470,9 @@
       --status-danger: #DC2626 !important;
       --status-warning: #B45309 !important;
       --status-success: #15803D !important;
+      /* Must be reset like the rest: the dark-theme #60A5FA is ~2.0:1 on white,
+         so a SOP printed from dark mode would lose its confidence figures. */
+      --status-info: #1D4ED8 !important;
       --border-default: #e2e8f0 !important;
       --border-subtle: #f1f5f9 !important;
       background: #ffffff !important;

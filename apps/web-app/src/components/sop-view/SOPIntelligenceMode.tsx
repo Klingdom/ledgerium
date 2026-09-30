@@ -21,6 +21,7 @@ import {
   Sparkles, ChevronRight, Info,
 } from 'lucide-react';
 import type { SOPViewModel, SOPViewStep, SOPRecommendation, SOPViewInsight } from './types';
+import { confidenceColorFromPercent } from './confidenceColor';
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 
@@ -355,7 +356,7 @@ function IntelligenceLayerSection({ viewModel }: { viewModel: SOPViewModel }) {
       label: 'SOP Clarity',
       value: clarityScore !== null ? `${clarityScore}%` : '—',
       detail: clarityScore !== null ? (clarityScore >= 85 ? 'Well-defined steps' : clarityScore >= 70 ? 'Mostly clear' : 'Needs review') : 'Not scored',
-      color: clarityScore !== null ? (clarityScore >= 85 ? '#059669' : clarityScore >= 70 ? '#2563eb' : '#d97706') : '#64748b',
+      color: clarityScore !== null ? confidenceColorFromPercent(clarityScore) : 'var(--content-tertiary)',
       icon: Target,
     },
     {
@@ -529,7 +530,7 @@ function AskThisProcessPanel({ viewModel }: { viewModel: SOPViewModel }) {
           </div>
           <div>
             <span className="text-ds-xs font-semibold text-[var(--content-primary)]">Ask This Process</span>
-            <span className="text-[8px] font-medium text-violet-500 bg-violet-50 px-1.5 py-0.5 rounded ml-2">Coming soon</span>
+            <span className="text-[8px] font-medium text-violet-700 bg-violet-50 px-1.5 py-0.5 rounded ml-2">Coming soon</span>
           </div>
         </div>
       </div>
@@ -579,7 +580,7 @@ function SectionLabel({ icon: Icon, label, count }: { icon: React.ElementType; l
 
 function ConfidenceBar({ value }: { value: number }) {
   const pct = Math.round(value * 100);
-  const color = pct >= 85 ? '#059669' : pct >= 70 ? '#2563eb' : '#d97706';
+  const color = confidenceColorFromPercent(pct);
   return (
     <div className="flex items-center gap-1 flex-shrink-0" title={`${pct}% confidence`} aria-label={`Confidence: ${pct}%`}>
       <div className="w-8 h-1 bg-[var(--surface-secondary)] rounded-full overflow-hidden">

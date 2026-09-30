@@ -24,6 +24,7 @@ import { useSOPViewModel } from './hooks/useSOPViewModel';
 import { track } from '@/lib/analytics';
 import { formatDate } from '@/lib/format';
 import type { SOPViewMode, SOPViewStep, SOPViewModel, SopIntelligenceInput, StepPageContextMap } from './types';
+import { confidenceColor } from './confidenceColor';
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 
@@ -531,7 +532,7 @@ function SOPStepCardCompact({
           {/* Confidence dot */}
           <span
             className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-            style={{ background: step.confidence >= 0.85 ? '#059669' : step.confidence >= 0.7 ? '#2563eb' : '#d97706' }}
+            style={{ background: confidenceColor(step.confidence) }}
             title={`${Math.round(step.confidence * 100)}% confidence`}
             aria-label={`Confidence: ${Math.round(step.confidence * 100)}%`}
           />

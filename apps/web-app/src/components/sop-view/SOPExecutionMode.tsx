@@ -21,6 +21,7 @@ import {
   ArrowRight, BarChart3, Eye,
 } from 'lucide-react';
 import type { SOPViewModel, SOPViewStep, SOPViewDecision, SOPViewInsight, SOPRecommendation } from './types';
+import { confidenceColor } from './confidenceColor';
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 
@@ -739,7 +740,7 @@ function SectionLabel({
 }
 
 function ConfidenceDot({ value }: { value: number }) {
-  const color = value >= 0.85 ? '#059669' : value >= 0.7 ? '#2563eb' : '#d97706';
+  const color = confidenceColor(value);
   return (
     <span
       className="w-1.5 h-1.5 rounded-full flex-shrink-0"
