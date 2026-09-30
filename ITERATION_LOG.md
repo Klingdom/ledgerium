@@ -4,6 +4,25 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-30 (loop 65) — MR-036 correction: the ratchet I shipped did not guard the fix I shipped it for (Mode 3, non-counting)
+
+- **Controls (new per-MR-036 §5 — derived each loop rather than asserted):** Area — last three counted loops all `web-app / a11y`, **saturation has tripped**; next counted loop must pivot. Agent — coordinator-primary for **12 consecutive** loops against a 4+ threshold, though loops 63 and 65 both used specialist consults. Extension — last touched `871e29a`, **22 loops** ago; the only lever is #216, CEO-blocked since loop 29. Stated as facts rather than a counter I have stopped incrementing.
+- **MR-036 landed four strikes. I verified the two that were checkable, and both held.**
+- **S-1 — the light-theme axe coverage does not guard the focus ring.** I claimed at loop 64 that it did. It does not: **axe-core has no focus-indicator contrast rule**, because SC 1.4.11 focus appearance is a manual-review item. I tested it the only way worth trusting — reverted `--focus-ring` in the light theme to the broken 2.18:1 value and ran the suite. **All 8 SOP tests passed.** The claim in loop 64's entry and changelog was wrong and is corrected in row #230.
+- **The real guard now exists:** `src/app/theme-contrast.test.ts` parses `globals.css` and computes WCAG luminance against every surface in both themes. It covers `--focus-ring` at 3:1, five text tokens at 4.5:1, and asserts the SOP print block resets each — the omission that nearly shipped twice. It **parses the stylesheet rather than restating the hex values**, because a test that hardcodes the colours it checks passes forever and proves nothing. Verified by sabotage: reverting the token fails it with the exact ratio named.
+- **S-2 — one ring was left live at 1.40:1, and it is my own named failure mode recurring inside the loop that named it.** `LensSwitcher.tsx:125` read `ring-[var(--accent,#16a34a)]`. I measured the **fallback** at 3.15 and excluded it. But `--accent` **is** defined — `globals.css:52`, `#20f2a6`, `:root` only — so the fallback was dead code and the ring rendered the worst value in the application. A fallback is what the author believed; the definition is what the browser uses. Fixed, and now guarded by a check that resolves `var()` against the stylesheet.
+- **S-3 — the D-1 ack was ritual, and MR-036 priced it.** Four loops logged it four times; Area and agent-rotation were logged zero times, and both had tripped. The control I wrote down every loop was the one that could not move. Replaced with the derived three-control line above.
+- **S-4 — my corrected count was itself slightly wrong**, mixing className sites with `@layer components` rules. 68 + 3 = the 70 replaced. Corrected in #230.
+- **Flow View had no light scan and nothing recorded why** — MR-036 was right that an unexplained gap is indistinguishable from an oversight. Added; it passes. So the gap was coverage, not a defect, which is exactly what should have been established at the time rather than assumed either way.
+- **Filed #233** — `--accent` is used with a fallback 21 times and the fallbacks disagree with each other (9 say `#20f2a6`, 6 say `#16a34a`); `--accent-subtle` is used with a live fallback and **never defined at all**, which is worse because it looks like a token and is not.
+- **On MR-036's "no rule" verdict: accepted.** Its argument is the decisive one — loop 64 *did* re-derive the count, and still shipped S-2, because what went un-re-derived was the resolved *value*, not the count. A rule mandating re-derivation would not have caught the one instance that escaped. The practice worth keeping is the one loop 64 used once and failed to generalise: **measure at the layer that renders, not the layer that authors**. That is why the new guard parses CSS and resolves `var()`.
+- **On Q2: MR-036 is right that I over-argued a won case.** I said "(a) without (b) is unverifiable"; (a) was verified arithmetically in the loop, and per S-1 (b) does not guard (a) at all. The sound argument was already in row #230's own text, which scoped both halves. I reached for a worse reason than the one available.
+- **Validation:** web-app **3195 → 3216** (+21, the new guard); SOP a11y **9/9** including the added Flow View light scan; typecheck **0** across 11 packages; validator clean at 226 rows. Both new guards verified by sabotage, not just by passing.
+- **Follow-ups:** 1 created (#233), 0 closed. Mode 3 correction — does not count toward cadence.
+- **Next counted loop must pivot Area.** MR-036 endorses **#189** (`web-app / perf`), noting the fix is already written and unused at `hooks/useAccount.ts:33-36` and that the row understates it at two call sites when there are five.
+
+---
+
 ## 2026-09-30 (loop 64) — The focus ring nobody could see, and the reason nobody could see it (Mode 1, coordinator)
 
 - **Candidate Selection: `top-score` — #230** (12), filed last loop when `a11y-architect` suggested I check the house focus ring in light theme and it turned out to measure 2.18:1.

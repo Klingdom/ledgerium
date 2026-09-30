@@ -140,3 +140,17 @@ test('axe: zero critical/serious violations — Analysis mode, LIGHT theme', asy
   await expect(page.getByText(/intelligence layer/i).first()).toBeVisible();
   await assertAxeCompliance(page, 'sop-analysis-light', 0);
 });
+
+test('axe: zero critical/serious violations — Flow View mode, LIGHT theme', async ({ page }) => {
+  // Added after MR-036 pointed out that loop 64 scanned two of the three modes
+  // in light and recorded nothing about the third, while the entry read as
+  // surface-wide. An unexplained gap in coverage is indistinguishable from an
+  // oversight, which is the failure mode the hold-it-back convention exists to
+  // avoid — so either this passes, or its absence gets a reason and a row.
+  await forceTheme(page, 'light');
+  await openSop(page);
+  await expectThemeApplied(page, 'light');
+  await switchMode(page, /flow view/i);
+  await expect(page.getByRole('group', { name: /process flow/i })).toBeVisible();
+  await assertAxeCompliance(page, 'sop-flow-view-light', 0);
+});

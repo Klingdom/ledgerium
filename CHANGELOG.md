@@ -6,6 +6,21 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - Correcting yesterday's claim about the focus outline check
+
+**Why:** I said the new light-mode accessibility check would catch the focus-outline problem if it came back. A review disputed it, and the review was right.
+
+### Corrected
+- **The automated accessibility tool has no check for focus-outline visibility at all** — it is a manual-review item in the standard. I confirmed this by deliberately reintroducing the fault: every test still passed. So yesterday's fix was real, but nothing was watching it.
+- **There is now a check that does watch it.** It reads the actual stylesheet and does the contrast arithmetic for both modes, so if anyone changes those colours to something unreadable, the build says so and names the number. Confirmed by breaking it on purpose and watching it fail.
+- **One control was missed in yesterday's sweep**, and it was the worst one in the application — an outline effectively invisible in light mode. It was missed because the code named a colour to fall back on, that fallback was measured, and the fallback was never actually used. Fixed, and the new check now catches that specific trap.
+- The flow-diagram view had no light-mode check and no note saying why. Added; it passes.
+
+### Recorded
+- A colour used in 21 places names two different fallback values in different files, and a related one is never defined at all. None of it is currently checked.
+
+---
+
 ## [2026-09-30] - The keyboard focus outline is now visible in light mode
 
 **Why:** the outline that shows which element your keyboard is on was nearly invisible in light mode — on 68 controls. It looked fine in dark mode, which is the default and, it turns out, the only mode anything ever checked.

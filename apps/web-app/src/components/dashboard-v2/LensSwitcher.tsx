@@ -122,7 +122,7 @@ export default function LensSwitcher({ activeLens, onLensChange }: LensSwitcherP
               onKeyDown={(e) => handleKeyDown(e, index)}
               className={[
                 'relative px-ds-3 py-ds-2 text-[13px] -mb-px border-b-2 transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent,#16a34a)] rounded-t-ds-sm',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded-t-ds-sm',
                 // Active lens is visually PRIMARY: brand underline + a subtle
                 // accent-tinted pill + semibold weight (atglance-review item #8).
                 isActive
