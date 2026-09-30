@@ -4,6 +4,25 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-30 (loop 70) — The funnel counted clicks it never counted prompts for (Mode 1, coordinator)
+
+- **Controls:** Area — `web-app / analytics`, pivoted off a11y after loops 67-69. Agent — coordinator, 3 consecutive; MR-037 judged the delegation control under-used rather than gamed, and this was a measurement-semantics pick rather than a sweep, but the streak is noted and the next sweep-shaped loop should delegate. Extension — `871e29a`, 2026-09-24, 27 loops; #216 still CEO-blocked.
+- **Candidate Selection: `top-score` — #238** (14), endorsed by MR-037 as the only open row producing a wrong number the business acts on.
+- **The defect:** the conversion funnel is `plan_limit_hit → upgrade_prompt_viewed → upgrade_clicked → checkout_started → subscription_created`. `upgrade_clicked` fired from four surfaces; `upgrade_prompt_viewed` from **one**. So three quarters of the prompts the product shows were never counted as shown, while every click on them was. **The error flatters** — a denominator missing most of its impressions makes prompt-to-click look far better than it is, and an inflated conversion rate is the kind of number nobody interrogates.
+- **Settled MR-037's open question first: emit the event, do not adopt the component.** `UpgradeCTA` does the right thing and is rendered nowhere (#235), so adopting it would change markup and copy on three live conversion surfaces. This row is a measurement defect; the fix should fix the measurement and leave presentation to a decision that wants growth input.
+- **Instrumented two surfaces, deliberately not three.** The pricing page's own buttons are left alone: the funnel stage means *the product interrupted someone with an upgrade prompt*, and a page the user chose to visit is a destination, not an interruption. That leaves `upgrade_clicked` from `upgrade_button` without a matching view — correct rather than an oversight, and the row now records that the two stages should be compared per `location` rather than in aggregate.
+- **Plan values verified, not assumed.** `team` lifts the recording cap and `starter` sets `healthScores: true` — read from `plans.ts`, after a first regex reported `healthScores: true` for the free tier, which would have meant the gated tooltip could never render.
+- **The counting rule is a module because the risk runs both ways.** Fixing an undercount by firing per-render would inflate the same denominator: the identical error reversed, and no easier to spot in a dashboard. `lib/upgrade-prompt.ts` fires once per prompt instance and again only after the prompt genuinely disappears and returns — a user who crosses the quota threshold, drops under it and crosses again has been prompted twice, and retaining the old identity through the gap would undercount exactly the repeat-exposure case the funnel is for. 15 tests.
+- **The e2e test was wrong twice before it was right, both times mine.** I asserted a POST to `/api/analytics/events` and saw nothing — first because `flushEvents` debounces 2s and I waited 900ms, then because **it only flushes at ten buffered events at all**, and a dashboard load produces two. Reading `window.__ledgerium_events` showed the event had been firing correctly the whole time. Had I trusted the first red run, I would have "fixed" working code.
+- **So the test reads the buffer, and says why.** What this row changes is whether the event is *produced*; batching is pre-existing and unchanged. Sabotage-verified: removing the wiring fails it with the funnel explanation attached.
+- **#241 filed from what that investigation turned up:** sub-batch delivery relies on `beforeunload`, which mobile browsers frequently never fire. **Short sessions are not a random sample** — they correlate with bouncing, which is what the funnel is for. Second defect in a fortnight where an analytics gap biased a number in a flattering direction.
+- **Adjacent fix, one line:** the gated health CTA was `text-green-600` = **3.15:1** in light — the defect loop 67 fixed elsewhere, latent because no fixture renders the gated branch. Fixing only the sites a fixture happens to reach is the error these last six loops have been about.
+- **Validation:** web-app **3235 → 3250** (+15); funnel e2e **2/2**, sabotage-verified; typecheck **0** across 11 packages; validator clean at 234 rows.
+- **Follow-ups:** 1 created (#241), 1 closed (#238).
+- **Meta-review cadence:** 1 loop since MR-037.
+
+---
+
 ## 2026-09-30 (loop 69) — MR-037 correction: the detector asked the wrong question (Mode 3, non-counting)
 
 - **Controls:** Area — `web-app / a11y`, 1 of a fresh window. Agent — coordinator, 2 consecutive; MR-037's point that loop 68's 73-site colour sweep was a specialist shape and got no delegation is accepted, and its evidence is this correction. Extension — `871e29a`, **2026-09-24**, 26 loops; #216 still the only lever and still CEO-blocked.

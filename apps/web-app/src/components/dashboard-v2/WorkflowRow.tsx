@@ -31,6 +31,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { track } from '@/lib/analytics.js';
+import { useUpgradePromptViewed } from '@/hooks/useUpgradePromptViewed.js';
 import {
   Zap,
   GitBranch,
@@ -311,6 +312,17 @@ function HealthTooltip({ metricsV2, onDismiss, triggerRef, id }: HealthTooltipPr
   const { healthScore, opportunityTag, aiOpportunityScore } = metricsV2;
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Row #238. The gated branch below renders a "Compare plans" CTA that has
+  // always recorded its click and never its view, so this surface fed the
+  // funnel's numerator without feeding its denominator. The tooltip is only
+  // mounted while it is open, so mounting in the gated state IS the prompt
+  // being shown. Starter is the plan that unlocks health scores (plans.ts:
+  // free inherits NO_FEATURES; starter sets healthScores: true).
+  // Called before the early return, because hooks cannot be conditional.
+  useUpgradePromptViewed(
+    healthScore.isGated ? { location: 'dashboard_v2_health_gate', plan: 'starter' } : null,
+  );
+
   // DV2-R03: blur-outside dismiss — fires when focus leaves the tooltip region
   // NOTE: Escape handling is centralized in WorkflowRow via useEscapeDispatch (MDR-P08)
   function handleBlur(e: React.FocusEvent<HTMLDivElement>) {
@@ -340,7 +352,7 @@ function HealthTooltip({ metricsV2, onDismiss, triggerRef, id }: HealthTooltipPr
         </div>
         <a
           href="/pricing"
-          className="mt-ds-2 block text-[12px] font-medium text-green-600 hover:text-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded"
+          className="mt-ds-2 block text-[12px] font-medium text-[var(--status-success)] hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded"
           onClick={() => {
             // PRD §4 metric #6: upgrade CTA from gated health state
             track({ event: 'upgrade_clicked', location: 'dashboard_v2_health_gate' });

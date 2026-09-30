@@ -6,6 +6,26 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - The upgrade funnel was counting clicks without counting the prompts
+
+**Why:** the report that tracks how many people see an upgrade prompt and then act on it was counting the actions from four places in the product and the prompts from one.
+
+### Fixed
+- **Three quarters of upgrade prompts were shown without being recorded as shown**, while every click on them was recorded. That makes the click-through rate look far better than it is — and an unrealistically good number is the kind nobody questions. **Worth re-checking any conversion figure from that report**: if it showed prompt-to-click above 100%, this is why.
+- Two in-product prompts now record being shown: the recording-quota notice and the locked health-score panel. Each records the same location name its click already used, so the two line up.
+- The pricing page's own buttons are deliberately not counted as prompts. That stage means "the product interrupted you with an offer", and a page you chose to visit is not an interruption. The report should compare the two stages per location rather than in total.
+
+### Care taken
+- The obvious way to fix an undercount is to create an overcount — recording the prompt every time the screen redraws. It records once per prompt, and again only if the prompt genuinely goes away and comes back, since that is a second occasion.
+
+### Also
+- The "compare plans" link inside the locked panel was too faint to read in light mode. Fixed.
+
+### Found while testing
+- Events are sent in batches of ten, with anything left over relying on a browser signal that phones frequently never send. Short visits are therefore likely being dropped — and short visits are not a random sample, since they are the people who left. Recorded.
+
+---
+
 ## [2026-09-30] - The colour check was asking the wrong question
 
 **Why:** a review found that last loop's colour audit checked whether the code *named* the right colour, not whether that colour could be *read*. Those are different questions, and the difference was hiding a real problem.
