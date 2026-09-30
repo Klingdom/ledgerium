@@ -4,6 +4,24 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-30 (loop 73) — The bounce that was never emitted, plus MR-038's other four strikes (Mode 1, coordinator)
+
+- **Controls:** Area — `web-app / analytics`, 3 consecutive; **saturation trips at 3, so loop 74 must pivot.** Agent — coordinator, 1 after loop 72's `frontend-engineer` rotation. Extension — `871e29a`, 2026-09-24, 30 loops; #216 fourth ask, still CEO-blocked.
+- **Candidate Selection: `top-score` — #242** (14), filed this loop from MR-038 and fixed in the same loop per its own recommendation to file before fixing.
+- **I asked MR-038 whether a third flattering-direction analytics defect existed. It found one, and it is the worst.** `dashboard_bounced` was emitted from `beforeunload` — the trigger loop 71 spent an entire loop documenting as unreliable on mobile, in a module docstring one file away. **Loop 71 fixed transport and left emission on the trigger it had just condemned**, so on mobile the event was never produced and the new delivery path had nothing to deliver.
+- **The bias is the flattering one at maximum leverage.** A bounce not emitted is a bounce that did not happen, and the population whose page teardown skips `beforeunload` is disproportionately the population that bounced. **It is criterion 1 of the #57 retirement rule**, so two of that decision's three criteria were unsound — criterion 3 visibly, this one invisibly.
+- **`visibilitychange` was the tempting wrong answer.** Row #241 used it correctly for delivery, and reaching for it again would have counted every tab switch as leaving — an overcount replacing an undercount. `pagehide` means navigating away, including into bfcache, and is reliable on mobile. The distinction is the reason this needed thought rather than a find-and-replace from the previous loop.
+- **Nine green tests sat directly over this defect and were structurally blind to it.** `DashboardV2Shell.test.tsx` defined its own `shouldEmitBounce` and `computeBounceElapsedMs` under a docstring reading *"Logic mirrors DashboardV2Shell's handleBeforeUnload"*. The copies reproduced the predicate faithfully and said nothing about the trigger. **The predicate was never wrong.** They now import `lib/bounce.ts`, and the trigger is exported from it precisely so the thing that was wrong is part of the tested surface — with three assertions pinning it *and the reasoning*, including that it is neither `beforeunload` nor `visibilitychange`.
+- **This is the pattern I criticised at loop 48 and then let stand.** MR-038 identified it as the decisive evidence that extract-and-test works: where it was not applied, nine tests protected a copy while the original was broken.
+- **Verified in a browser, which is the only place a page-lifecycle event is real.** Leaving without interacting produces exactly one bounce; leaving after a click produces none. Sabotage-verified by reverting the trigger.
+- **The second browser test failed first, for the wrong reason, and that is recorded in the file.** I clicked `main` at its corner — padding on an ancestor of the shell root the capture listener is attached to — so no click registered and the test reported a bounce the product would also have reported. Right answer, wrong reason, which is the shape of a test that passes for no good reason later.
+- **MR-038's other four strikes were fixed in the preceding correction commit**, including the one that stings: I recorded prompts against `plan: 'team'` while the same component's copy says "Solo removes the monthly cap", with a passing test in the adjacent file titled *"never names Team (not self-serve)"*. My loop-70 claim of "verified, not assumed" rested on a scan whose regex silently skipped the `solo` plan block. Fifth instance of the class, in my verification step.
+- **Validation:** web-app **3262 → 3272** (+10, net of nine mirrored tests now running against the real module); bounce e2e **2/2**, sabotage-verified; typecheck **0** across 11 packages; validator clean at 237 rows.
+- **Follow-ups:** 3 created (#242 closed same loop, #243, #244), 1 closed. Both new rows are MR-038 findings, not deferred work.
+- **Meta-review cadence:** 1 loop since MR-038.
+
+---
+
 ## 2026-09-30 (loop 72) — The last untyped readers, and a regression my own brief caused (Mode 1, `frontend-engineer`)
 
 - **Controls:** Area — `web-app / correctness`, pivoted off analytics. Agent — **`frontend-engineer`, rotation taken as required** after the coordinator crossed 4 consecutive at loop 71. Extension — `871e29a`, 29 loops; #216 still CEO-blocked.

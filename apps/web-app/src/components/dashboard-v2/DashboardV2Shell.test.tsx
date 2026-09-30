@@ -424,31 +424,26 @@ describe('iter-030: dashboard_v2_viewed event shape', () => {
 
 // ── MDR-P09: bounce detection predicate (iter-038 / PRD §4 metric #2) ────────
 
-/**
- * shouldEmitBounce extracts the pure decision logic from the beforeunload
- * handler so it can be unit-tested without JSDOM beforeunload complexities.
- *
- * Logic mirrors DashboardV2Shell's handleBeforeUnload:
- *   - viewFired must be true (dashboard_v2_viewed was emitted this mount)
- *   - clickCount must be 0 (user never interacted)
- */
+/*
+  Row #242. These were local copies, under a docstring that said "Logic
+  mirrors DashboardV2Shell's handleBeforeUnload" — and that is exactly how
+  nine tests stayed green over a live defect. The copies reproduced the
+  predicate faithfully and said nothing about the trigger, so when the
+  component registered on `beforeunload` (never fired by mobile Safari or
+  Chrome on Android) the bounce event was simply never produced, and nothing
+  here could tell.
+
+  They now import the real module. The trigger is part of it, so it is part of
+  what these tests cover.
+*/
+import { shouldEmitBounce as realShouldEmitBounce, bounceElapsedMs } from '@/lib/bounce';
+
+/** Adapter to the previous call shape, so the cases below read unchanged. */
 function shouldEmitBounce(viewFired: boolean, clickCount: number): boolean {
-  if (!viewFired) return false;
-  if (clickCount > 0) return false;
-  return true;
+  return realShouldEmitBounce({ viewFired, clickCount });
 }
 
-/**
- * computeBounceElapsedMs mirrors the elapsedMsSinceDashboardView derivation
- * in handleBeforeUnload.
- */
-function computeBounceElapsedMs(
-  dashboardViewPerfTimestampMs: number,
-  nowPerfMs: number,
-): number {
-  if (dashboardViewPerfTimestampMs <= 0) return 0;
-  return Math.max(0, Math.round(nowPerfMs - dashboardViewPerfTimestampMs));
-}
+const computeBounceElapsedMs = bounceElapsedMs;
 
 describe('MDR-P09: bounce detection predicate (shouldEmitBounce)', () => {
   it('emits bounce when view fired and zero clicks', () => {

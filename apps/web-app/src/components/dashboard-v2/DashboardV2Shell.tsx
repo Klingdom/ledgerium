@@ -29,6 +29,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { track, setUserPlanForAnalytics } from '@/lib/analytics.js';
+import { BOUNCE_TRIGGER, shouldEmitBounce, bounceElapsedMs } from '@/lib/bounce.js';
 import CommandHeader, { type TimeRange } from './CommandHeader.js';
 import InsightsStrip from './InsightsStrip.js';
 import TopBand from './band/TopBand.js';
@@ -723,23 +724,31 @@ function DashboardV2ShellInner() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboardViewPerfTimestampMs]);
 
-  // MDR-P09 (a): beforeunload bounce emission.  Fires dashboard_bounced when
-  // the user exits without any tracked click interaction.
+  /*
+    MDR-P09 (a) / row #242: bounce emission.
+
+    Was `beforeunload`, which iOS Safari and Chrome on Android routinely never
+    fire — so on mobile the event was never produced at all, and the loss was
+    biased in the flattering direction, because the population whose teardown
+    skips that event is the population that bounced. `BOUNCE_TRIGGER` and the
+    predicate live in `lib/bounce.ts`; see there for why `pagehide` rather than
+    `visibilitychange`, which fires on a mere tab switch.
+  */
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (!dashboardViewFiredRef.current) return; // view never fired — not a bounce
-      if (clickCountSinceViewRef.current > 0) return; // user engaged — not a bounce
-      const elapsedMsSinceDashboardView = dashboardViewPerfTimestampMs > 0
-        ? Math.max(0, Math.round(performance.now() - dashboardViewPerfTimestampMs))
-        : 0;
+    const handlePageHide = () => {
+      if (!shouldEmitBounce({
+        viewFired: dashboardViewFiredRef.current,
+        clickCount: clickCountSinceViewRef.current,
+      })) return;
+
       track({
         event: 'dashboard_bounced',
         workflowCount: allWorkflows.length,
-        elapsedMsSinceDashboardView,
+        elapsedMsSinceDashboardView: bounceElapsedMs(dashboardViewPerfTimestampMs, performance.now()),
       });
     };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => { window.removeEventListener('beforeunload', handleBeforeUnload); };
+    window.addEventListener(BOUNCE_TRIGGER, handlePageHide);
+    return () => { window.removeEventListener(BOUNCE_TRIGGER, handlePageHide); };
   // allWorkflows.length and dashboardViewPerfTimestampMs are snapshot values read
   // inside the handler — they must be in deps so the closure captures latest values.
   }, [allWorkflows.length, dashboardViewPerfTimestampMs]);

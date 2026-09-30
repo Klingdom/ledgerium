@@ -6,6 +6,23 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - Bounces from phones were never being recorded at all
+
+**Why:** the bounce measurement used a browser signal that mobile browsers routinely never send — the same signal we spent the previous change replacing everywhere else, and then left in place here.
+
+### Fixed
+- **On phones, a visitor who arrived and left without interacting was never counted as having bounced.** Not delayed or delivered late — never produced. So the bounce rate has been reading better than reality, and in the direction that flatters: the people whose browsers skip that signal are disproportionately the people who bounced.
+- **This affects a decision you are waiting to make.** Bounce rate is one of three criteria for retiring the old dashboard. Two of those three were unsound — one you already knew about, and this one silently.
+- Now uses the signal that means *leaving*, which phones do send. Deliberately not the one used for sending data in the previous change: that also fires when you switch tabs, and glancing at another tab is not leaving. Using it here would have replaced an undercount with an overcount.
+
+### Why it went unnoticed
+- Nine tests covered this and all nine passed. They were written against a *copy* of the logic kept in the test file, and the copy reproduced the decision correctly while saying nothing about when it runs. The decision was never wrong. The tests now use the real code, and the trigger is part of what they check.
+
+### Verified
+- In a real browser: leaving without touching anything records exactly one bounce; leaving after clicking records none. Then deliberately reverted the fix to confirm the check notices.
+
+---
+
 ## [2026-09-30] - Account data is now read the same way everywhere
 
 **Why:** two pages still read your account details without any type checking, which is the mechanism that once caused a usage counter and an upload limit to never appear for anyone.
