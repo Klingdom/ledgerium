@@ -2044,11 +2044,11 @@ function TimestudySection({ intelligence }: { intelligence: IntelligenceData | n
 // ── R-C Section: Cycle-Time Distribution (deterministic SVG box/range plot) ───
 
 const DISTRIBUTION_MARKER_COLORS: Record<string, string> = {
-  min: 'var(--content-tertiary, #6b7280)',
-  median: 'var(--accent, #16a34a)',
-  mean: 'var(--content-secondary, #4b5563)',
-  p90: 'var(--severity-warning, #d97706)',
-  max: 'var(--content-tertiary, #6b7280)',
+  min: 'var(--content-tertiary)',
+  median: 'var(--accent)',
+  mean: 'var(--content-secondary)',
+  p90: '#d97706',
+  max: 'var(--content-tertiary)',
 };
 
 /**
@@ -2085,7 +2085,7 @@ function CycleTimeDistributionSection({ figures }: { figures: LeadFigures }) {
             <div className="absolute left-0 right-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-[var(--surface-secondary)]" />
             {/* Filled span from min to max (the observed envelope) */}
             <div className="absolute left-0 right-0 top-1/2 h-2 -translate-y-1/2 overflow-hidden rounded-full">
-              <div className="report-gradient-track h-full w-full bg-gradient-to-r from-[var(--surface-secondary)] via-brand-200 to-[var(--severity-warning,#d97706)]/40" />
+              <div className="report-gradient-track h-full w-full bg-gradient-to-r from-[var(--surface-secondary)] via-brand-200 to-[#d97706]/40" />
             </div>
             {/* Markers */}
             {dist.markers.map((m) => (
@@ -2122,10 +2122,10 @@ function CycleTimeDistributionSection({ figures }: { figures: LeadFigures }) {
 // ── R-C Section: Consistency Gauge (reuses the HealthGauge SVG arc pattern) ────
 
 const CONSISTENCY_BAND_COLOR: Record<ConsistencyBand, string> = {
-  'Highly consistent': 'var(--accent, #16a34a)',
-  'Mostly consistent': 'var(--accent, #16a34a)',
-  'Moderate variance': 'var(--severity-warning, #d97706)',
-  'High variance': 'var(--severity-danger, #dc2626)',
+  'Highly consistent': 'var(--accent)',
+  'Mostly consistent': 'var(--accent)',
+  'Moderate variance': '#d97706',
+  'High variance': '#dc2626',
 };
 
 /**
@@ -2181,7 +2181,7 @@ function ConsistencyGaugeSection({ figures }: { figures: LeadFigures }) {
             <path
               d={path}
               fill="none"
-              stroke="var(--border-subtle, #e5e7eb)"
+              stroke="var(--border-subtle)"
               strokeWidth={strokeWidth}
               strokeLinecap="round"
             />

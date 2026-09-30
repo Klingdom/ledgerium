@@ -14,14 +14,14 @@
 import type { OpportunityTag } from '@/lib/workflow-metrics.js';
 
 /** Accent (brand mint/green) — the primary positive/series color. */
-export const ACCENT = 'var(--accent, #16a34a)';
+export const ACCENT = 'var(--accent)';
 
 /** Neutral surface + content tokens re-exported for chart axis/grid colors. */
-export const GRID_COLOR = 'var(--border-subtle, #e5e7eb)';
-export const AXIS_TEXT = 'var(--content-tertiary, #6b7280)';
-export const TOOLTIP_BG = 'var(--surface-elevated, #ffffff)';
-export const TOOLTIP_BORDER = 'var(--border-default, #d1d5db)';
-export const TOOLTIP_TEXT = 'var(--content-primary, #111827)';
+export const GRID_COLOR = 'var(--border-subtle)';
+export const AXIS_TEXT = 'var(--content-tertiary)';
+export const TOOLTIP_BG = 'var(--surface-elevated)';
+export const TOOLTIP_BORDER = 'var(--border-default)';
+export const TOOLTIP_TEXT = 'var(--content-primary)';
 
 /**
  * Opportunity-tag colors, ordered by action priority (highest action value
@@ -36,11 +36,11 @@ export const OPPORTUNITY_ORDER: ReadonlyArray<OpportunityTag> = [
 ];
 
 export const OPPORTUNITY_COLOR: Record<OpportunityTag, string> = {
-  automate: 'var(--opp-automate, #2563eb)',     // blue — ready AI candidate
-  standardize: 'var(--opp-standardize, #d97706)', // amber
-  optimize: 'var(--opp-optimize, #ea580c)',      // orange
-  monitor: 'var(--opp-monitor, #dc2626)',        // red — needs remediation
-  healthy: 'var(--opp-healthy, #16a34a)',        // green — resolved
+  automate: '#2563eb',     // blue — ready AI candidate
+  standardize: '#d97706', // amber
+  optimize: '#ea580c',      // orange
+  monitor: '#dc2626',        // red — needs remediation
+  healthy: '#16a34a',        // green — resolved
 };
 
 export const OPPORTUNITY_LABEL: Record<OpportunityTag, string> = {
@@ -53,7 +53,7 @@ export const OPPORTUNITY_LABEL: Record<OpportunityTag, string> = {
 
 /** Health-band colors (60/80 thresholds shared with CommandHeader). */
 export const HEALTH_BAND_COLOR = {
-  poor: 'var(--severity-danger, #dc2626)',
-  fair: 'var(--severity-warning, #d97706)',
-  good: 'var(--accent, #16a34a)',
+  poor: '#dc2626',
+  fair: '#d97706',
+  good: 'var(--accent)',
 } as const;

@@ -126,7 +126,7 @@ export default function LensSwitcher({ activeLens, onLensChange }: LensSwitcherP
                 // Active lens is visually PRIMARY: brand underline + a subtle
                 // accent-tinted pill + semibold weight (atglance-review item #8).
                 isActive
-                  ? 'border-[var(--accent,#16a34a)] bg-[var(--accent-subtle,rgba(22,163,74,0.08))] text-[var(--content-primary)] font-semibold'
+                  ? 'border-[var(--accent)] bg-[rgba(22,163,74,0.08)] text-[var(--content-primary)] font-semibold'
                   : 'border-transparent text-[var(--content-secondary)] font-normal hover:text-[var(--content-primary)]',
               ].join(' ')}
             >

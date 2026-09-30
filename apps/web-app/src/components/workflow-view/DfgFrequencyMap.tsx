@@ -215,15 +215,15 @@ const DfgNodeComponent = memo(function DfgNodeComponent({
       };
     }
     return {
-      background: 'var(--surface-primary, #fff)',
-      border: selected ? '2px solid #6366f1' : '1px solid var(--border-subtle, #e5e7eb)',
+      background: 'var(--surface-primary)',
+      border: selected ? '2px solid #6366f1' : '1px solid var(--border-subtle)',
       borderRadius: 6,
       padding: '6px 10px',
       minWidth: 120,
       maxWidth: 200,
       fontSize: 11,
       fontWeight: 500,
-      color: 'var(--content-primary, #111827)',
+      color: 'var(--content-primary)',
       boxShadow: selected ? '0 0 0 2px rgba(99,102,241,0.3)' : '0 1px 3px rgba(0,0,0,0.06)',
       opacity: 1 - (1 - weight) * 0.3, // subtle dimming for low-frequency nodes
       position: 'relative' as const,
@@ -381,7 +381,7 @@ function DfgLegendBar() {
             <svg width="24" height="10" aria-hidden="true">
               <line x1="0" y1="5" x2="24" y2="5" stroke={EDGE_COLOR} strokeWidth={sw} />
             </svg>
-            <span style={{ fontSize: 9, color: 'var(--content-secondary, #6b7280)' }}>
+            <span style={{ fontSize: 9, color: 'var(--content-secondary)' }}>
               {['Rare', 'Common', 'Dominant'][i]}
             </span>
           </span>
@@ -408,14 +408,14 @@ function DfgLegendBar() {
         >
           47
         </span>
-        <span style={{ fontSize: 9, color: 'var(--content-secondary, #6b7280)' }}>= visit count</span>
+        <span style={{ fontSize: 9, color: 'var(--content-secondary)' }}>= visit count</span>
       </span>
 
       {/* Honesty note (UX_SPEC.md §5) */}
       <span
         style={{
           fontSize: 9,
-          color: 'var(--content-tertiary, #9ca3af)',
+          color: 'var(--content-tertiary)',
           fontStyle: 'italic',
           marginLeft: 'auto',
         }}
@@ -445,7 +445,7 @@ function ModeToggleBar({ mode, onChange }: ModeToggleBarProps) {
         flexShrink: 0,
       }}
     >
-      <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--content-secondary, #6b7280)' }}>
+      <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--content-secondary)' }}>
         View
       </span>
       <div
@@ -468,7 +468,7 @@ function ModeToggleBar({ mode, onChange }: ModeToggleBarProps) {
                 cursor: 'pointer',
                 border: 'none',
                 background: active ? '#6366f1' : '#fff',
-                color: active ? '#fff' : 'var(--content-secondary, #6b7280)',
+                color: active ? '#fff' : 'var(--content-secondary)',
               }}
             >
               {m === 'frequency' ? 'Frequency' : 'Performance'}
@@ -495,7 +495,7 @@ function PerfSwatch({ color, label }: { color: string; label: string }) {
         }}
         aria-hidden="true"
       />
-      <span style={{ fontSize: 9, color: 'var(--content-secondary, #6b7280)' }}>{label}</span>
+      <span style={{ fontSize: 9, color: 'var(--content-secondary)' }}>{label}</span>
     </span>
   );
 }
@@ -523,7 +523,7 @@ function DfgPerformanceLegendBar({ scale }: { scale: PerfScale | null }) {
           <PerfSwatch color={PERF_NEUTRAL_COLOR} label="No timing data" />
         </div>
       ) : (
-        <span style={{ fontSize: 9, color: 'var(--content-secondary, #6b7280)' }}>
+        <span style={{ fontSize: 9, color: 'var(--content-secondary)' }}>
           No timing data available for performance view
         </span>
       )}
@@ -532,7 +532,7 @@ function DfgPerformanceLegendBar({ scale }: { scale: PerfScale | null }) {
       <span
         style={{
           fontSize: 9,
-          color: 'var(--content-tertiary, #9ca3af)',
+          color: 'var(--content-tertiary)',
           fontStyle: 'italic',
           marginLeft: 'auto',
         }}
@@ -647,7 +647,7 @@ function DfgCanvas({ nodes, edges }: CanvasProps) {
       elementsSelectable={false}
       proOptions={{ hideAttribution: true }}
     >
-      <Background color="var(--border-subtle, #f3f4f6)" gap={24} size={1} />
+      <Background color="var(--border-subtle)" gap={24} size={1} />
     </ReactFlow>
   );
 }
@@ -858,7 +858,7 @@ export function DfgFrequencyMap({
             <p
               style={{
                 fontSize: 11,
-                color: 'var(--content-tertiary, #9ca3af)',
+                color: 'var(--content-tertiary)',
                 textAlign: 'center',
                 maxWidth: 300,
               }}

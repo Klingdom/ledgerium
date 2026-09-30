@@ -4,6 +4,24 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-30 (loop 68) — Colours that lied about what they were (Mode 1, coordinator)
+
+- **Controls:** Area — `web-app / design-system`, 1 of a fresh window; not saturated. Agent — coordinator, 1 consecutive after loop 67 rotated to `frontend-engineer`; streak broken and stays broken. Extension — `871e29a`, 25 loops; #216 remains the only lever and is still CEO-blocked.
+- **Candidate Selection: `top-score` — #233** (13). Continuous with the loop-65 finding that a focus ring shipped at 1.40:1 because I measured a fallback that never renders.
+- **Wrote the guard first, then let it define the scope.** The row named `--accent` (21 sites) and `--accent-subtle`. The guard found **73 sites across 18 files**. That is the fourth loop running where the stated scope was low, and the first where I found out by building the detector before touching anything rather than by grepping and hoping.
+- **Two distinct defects, and the second is the worse one.** **58 dead fallbacks** — a defined token written with a fallback that can never apply. The disagreements are the tell: `--content-primary` carried three fallbacks including `#111827` and `#f1f5f9`, which are *opposite themes*; `--border-default` carried four; `--surface-primary` and `--surface-elevated` each carried one light and one dark. Every one is a colour the file asserts and does not use.
+- **15 phantom tokens** — `var(--X, literal)` where `--X` is defined nowhere, so the literal renders permanently while looking like a participating theme token. All five `--opp-*`, both `--severity-*`, `--content-disabled`, `--accent-subtle`. **`band-colors.ts` states the intent in its own docstring** — *"resolves to the design-system token when defined and to a sensible literal fallback otherwise"* — and the tokens were never defined, so that palette has always been its fallbacks. The file has been documenting an aspiration as though it were a mechanism.
+- **A live visual bug fell out of it.** `AnalyticsConsent.tsx:67` had `hover:bg-[var(--surface-tertiary)]` with **no fallback** on an undefined variable — an invalid property, so that button has had no hover state at all. `ColumnPicker:351` nested a fallback to `--surface-secondary`, which is its own base colour, so its hover was invisible too. Both now use `--surface-elevated`.
+- **Every rewrite is provably zero-pixel, which is what made a 73-site sweep safe.** Dropping a dead fallback changes nothing because the token already won; inlining a phantom changes nothing because the fallback was already what rendered. The proof is in the semantics, not in my hoping.
+- **I did not define the missing tokens, deliberately.** Choosing per-theme values for `--opp-automate` and friends is a design decision with real colours in it. Inlining makes the debt legible; inventing values would have made it invisible again in a more convincing disguise. Filed as **#237**, with the sharpest case stated: `--content-disabled` #9ca3af is **2.05:1 on the light surface**.
+- **My own regex was wrong and the failure output caught it**, not me. It matched `var(--surface-*)` inside a doc comment and reported three phantom tokens that were never code. Anchored the name to a following `,` or `)` and skipped block comments.
+- **Three unit tests asserted the exact class string including a fallback** and had to be updated. Worth noting they are the mirror-style assertions I have criticised before — they pinned an implementation detail rather than a behaviour, and the behaviour here did not change at all.
+- **Validation:** web-app **3228 → 3231**; a11y + account e2e **26/26** — the browser check matters more than usual for a sweep this wide; typecheck **0** across 11 packages; validator clean at 230 rows. Guard sabotage-verified in both directions.
+- **Follow-ups:** 1 created (#237), 1 closed (#233).
+- **Meta-review cadence:** 3 loops since MR-036 — **MR-037 is due.**
+
+---
+
 ## 2026-09-30 (loop 67) — The held test comes back, and finds a colour family nobody had listed (Mode 1, coordinator + `frontend-engineer`)
 
 - **Controls:** Area — `web-app / a11y`, 1 of a fresh window after loop 66 pivoted off it; not saturated. Agent — **`frontend-engineer` PRIMARY, breaking a 13-loop coordinator streak** that MR-036 named as the longest-standing control breach. Extension — `871e29a`, 24 loops; #216 still the only lever, still CEO-blocked.

@@ -207,7 +207,7 @@ export default function DemoAnnotatedDashboardHeader() {
             className="pointer-events-none absolute bottom-0 left-0 right-0 h-12"
             style={{
               background:
-                'linear-gradient(to bottom, transparent, var(--surface-primary, #0d1117))',
+                'linear-gradient(to bottom, transparent, var(--surface-primary))',
             }}
           />
         </div>

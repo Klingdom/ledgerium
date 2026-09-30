@@ -113,8 +113,8 @@ export function TimeSeriesChart({
   ariaLabel,
   yLabel: _yLabel,
   height = 180,
-  fillColor = 'var(--accent, #20f2a6)',
-  strokeColor = 'var(--accent, #20f2a6)',
+  fillColor = 'var(--accent)',
+  strokeColor = 'var(--accent)',
   seriesB,
   seriesALabel,
 }: TimeSeriesChartProps) {
@@ -160,31 +160,31 @@ export function TimeSeriesChart({
           </defs>
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="var(--border-default, #2a2a2a)"
+            stroke="var(--border-default)"
             vertical={false}
           />
           <XAxis
             dataKey="date"
             tickFormatter={formatTick}
-            tick={{ fontSize: 11, fill: 'var(--content-tertiary, #6b7280)' }}
+            tick={{ fontSize: 11, fill: 'var(--content-tertiary)' }}
             axisLine={false}
             tickLine={false}
             interval="preserveStartEnd"
           />
           <YAxis
             tickFormatter={(v: number) => formatNumber(v, { compact: true })}
-            tick={{ fontSize: 11, fill: 'var(--content-tertiary, #6b7280)' }}
+            tick={{ fontSize: 11, fill: 'var(--content-tertiary)' }}
             axisLine={false}
             tickLine={false}
             width={40}
           />
           <Tooltip
             contentStyle={{
-              background: 'var(--surface-elevated, #1a1a1a)',
-              border: '1px solid var(--border-default, #2a2a2a)',
+              background: 'var(--surface-elevated)',
+              border: '1px solid var(--border-default)',
               borderRadius: '8px',
               fontSize: 12,
-              color: 'var(--content-primary, #f0f0f0)',
+              color: 'var(--content-primary)',
             }}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             formatter={(value: any, name: any) => {

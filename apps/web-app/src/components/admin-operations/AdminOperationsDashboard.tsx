@@ -211,7 +211,7 @@ export function AdminOperationsDashboard() {
                     onClick={() => handleRangeChange(r)}
                     className={`px-3 py-1.5 text-[12px] transition-colors ${
                       range === r
-                        ? 'bg-[var(--accent,#20f2a6)] font-semibold text-black'
+                        ? 'bg-[var(--accent)] font-semibold text-black'
                         : 'bg-[var(--surface-elevated)] text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
                     }`}
                     aria-pressed={range === r}
@@ -722,7 +722,7 @@ export function AdminOperationsDashboard() {
                             (Est.)
                           </span>
                         </p>
-                        <p className="text-[20px] font-semibold tabular-nums text-[var(--accent,#20f2a6)]" data-testid="mrr-spotlight">
+                        <p className="text-[20px] font-semibold tabular-nums text-[var(--accent)]" data-testid="mrr-spotlight">
                           {formatCurrency(sub?.mrr.estimatedUsd)}
                         </p>
                         {(sub?.mrr.enterpriseCount ?? 0) > 0 && (

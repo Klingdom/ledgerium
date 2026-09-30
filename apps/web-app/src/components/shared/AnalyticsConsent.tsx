@@ -64,7 +64,7 @@ export function AnalyticsConsent(): JSX.Element | null {
           <div className="flex items-center gap-ds-2 flex-shrink-0">
             <button
               onClick={() => accept('essential')}
-              className="rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-secondary)] px-ds-3 py-1.5 text-ds-sm font-medium text-[var(--content-secondary)] hover:bg-[var(--surface-tertiary)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+              className="rounded-ds-md border border-[var(--border-default)] bg-[var(--surface-secondary)] px-ds-3 py-1.5 text-ds-sm font-medium text-[var(--content-secondary)] hover:bg-[var(--surface-elevated)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
             >
               Essential Only
             </button>

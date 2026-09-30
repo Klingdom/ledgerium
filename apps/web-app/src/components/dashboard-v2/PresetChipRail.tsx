@@ -203,9 +203,9 @@ function PresetChip({
     isActive
       ? 'bg-green-600 text-white border border-green-600'
       : isPending
-        ? 'border border-[var(--border-subtle)] text-[var(--content-disabled,#9ca3af)] cursor-not-allowed opacity-60'
+        ? 'border border-[var(--border-subtle)] text-[#9ca3af] cursor-not-allowed opacity-60'
         : isDisabledByPlan
-          ? 'border border-[var(--border-subtle)] text-[var(--content-disabled,#9ca3af)] cursor-not-allowed opacity-70'
+          ? 'border border-[var(--border-subtle)] text-[#9ca3af] cursor-not-allowed opacity-70'
           : 'border border-[var(--border-default)] text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--content-primary)] hover:border-[var(--border-default)] cursor-pointer',
   ]
     .filter(Boolean)

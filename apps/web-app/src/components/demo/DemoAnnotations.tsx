@@ -155,9 +155,9 @@ export default function DemoAnnotations({ annotations, children }: DemoAnnotatio
                 onClick={e => e.stopPropagation()}
                 className={[
                   'absolute z-40 w-64 max-w-[calc(100vw-2rem)]',
-                  'bg-[var(--surface-elevated,#1e293b)] border border-[var(--border-default,#334155)]',
+                  'bg-[var(--surface-elevated)] border border-[var(--border-default)]',
                   'rounded-xl shadow-2xl shadow-black/40',
-                  'text-[var(--content-primary,#f1f5f9)]',
+                  'text-[var(--content-primary)]',
                   'sm:w-64',
                   // Full-width below 640px is handled by max-w-[...] + positioning
                 ].join(' ')}
@@ -174,11 +174,11 @@ export default function DemoAnnotations({ annotations, children }: DemoAnnotatio
                     >
                       {ann.number}
                     </span>
-                    <p className="text-[13px] font-semibold leading-snug text-[var(--content-primary,#f1f5f9)]">
+                    <p className="text-[13px] font-semibold leading-snug text-[var(--content-primary)]">
                       {ann.title}
                     </p>
                   </div>
-                  <p className="text-[12px] leading-relaxed text-[var(--content-secondary,#94a3b8)] pl-7">
+                  <p className="text-[12px] leading-relaxed text-[var(--content-secondary)] pl-7">
                     {ann.body}
                   </p>
                 </div>
@@ -210,7 +210,7 @@ function getPopoverStyle(side: NonNullable<DemoAnnotation['popoverSide']>): Reac
 
 function PopoverArrow({ side }: { side: NonNullable<DemoAnnotation['popoverSide']> }) {
   const base =
-    'absolute w-2 h-2 bg-[var(--surface-elevated,#1e293b)] border-[var(--border-default,#334155)]';
+    'absolute w-2 h-2 bg-[var(--surface-elevated)] border-[var(--border-default)]';
 
   switch (side) {
     case 'bottom':

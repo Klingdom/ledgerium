@@ -218,3 +218,74 @@ describe('focus rings use the token, or a measured exception — row #230 / MR-0
     expect(offenders, `\n${offenders.join('\n')}\n`).toEqual([]);
   });
 });
+
+// ─── No var() anywhere lies about what it resolves to ────────────────────────
+
+/**
+ * Row #233. The focus-ring guard above catches this for one property; this
+ * catches it everywhere, because the same trap bit twice in three loops.
+ *
+ * Two distinct defects, both of which make a colour read as one thing and
+ * render as another:
+ *
+ * **A dead fallback.** `var(--accent, #16a34a)` where `--accent` *is* defined,
+ * as `#20f2a6`. The fallback never applies, so the literal beside it is
+ * decoration — and worse than decoration, because loop 64 measured one of these
+ * fallbacks, concluded the colour passed, and shipped a focus ring at 1.40:1.
+ * Every one of these is a lie waiting to mislead the next person who measures
+ * by reading.
+ *
+ * **A phantom token.** `var(--opp-automate, #2563eb)` where `--opp-automate` is
+ * defined nowhere. This *works*, which is what makes it worse: it looks like a
+ * design-system token participating in theming, and it is a hardcoded literal
+ * that can never change per theme. `band-colors.ts` states the intent in a
+ * docstring — "resolves to the design-system token when defined and to a
+ * sensible literal fallback otherwise" — and the tokens were never defined, so
+ * the entire palette has always been the fallbacks.
+ *
+ * Both are fixed by making the code say what it does: drop the dead fallback,
+ * or inline the literal. Neither changes a rendered pixel.
+ */
+describe('no var() misrepresents what it resolves to — row #233', () => {
+  const ROOT = join(__dirname, '..');
+  // `var(--name` optionally followed by `, fallback`. Nested var() fallbacks are
+  // matched loosely on purpose; the assertions only need the name and whether a
+  // fallback is present.
+  // The name must be followed by `,` or `)`. Without that anchor this also
+  // matched prose in a doc comment — `var(--surface-*)` — and reported three
+  // phantom tokens that were never code. Caught by reading the failure output
+  // rather than by trusting the count, which is the whole habit here.
+  const VAR = /var\(\s*(--[a-z][a-z0-9-]*)\s*(?:(,)|\))/g;
+
+  function isDefined(name: string): boolean {
+    return new RegExp(`\\${name}\\s*:`).test(CSS);
+  }
+
+  const uses: Array<{ file: string; name: string; hasFallback: boolean }> = [];
+  for (const file of sourceFiles(ROOT)) {
+    const text = readFileSync(file, 'utf8');
+    for (const m of text.matchAll(VAR)) {
+      uses.push({ file: file.slice(ROOT.length + 1), name: m[1]!, hasFallback: m[2] === ',' });
+    }
+  }
+
+  it('finds var() uses at all', () => {
+    // Guards against the regex silently matching nothing and turning every
+    // assertion below into a vacuous pass.
+    expect(uses.length).toBeGreaterThan(50);
+  });
+
+  it('no defined token is used with a fallback (the fallback is dead code)', () => {
+    const offenders = uses
+      .filter((u) => u.hasFallback && isDefined(u.name))
+      .map((u) => `${u.file}: var(${u.name}, …) — ${u.name} IS defined in globals.css, so the fallback never applies. Drop it; it only misleads anyone who measures by reading.`);
+    expect([...new Set(offenders)], `\n${[...new Set(offenders)].join('\n')}\n`).toEqual([]);
+  });
+
+  it('no undefined token is used at all (a fallback makes a literal look like a token)', () => {
+    const offenders = uses
+      .filter((u) => !isDefined(u.name))
+      .map((u) => `${u.file}: var(${u.name}${u.hasFallback ? ', …' : ''}) — ${u.name} is defined nowhere. ${u.hasFallback ? 'This renders the fallback, permanently, in both themes, while looking like a theme token. Inline the literal or define the token.' : 'This renders nothing at all.'}`);
+    expect([...new Set(offenders)], `\n${[...new Set(offenders)].join('\n')}\n`).toEqual([]);
+  });
+});

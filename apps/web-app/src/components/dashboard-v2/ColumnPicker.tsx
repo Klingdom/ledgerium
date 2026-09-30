@@ -348,7 +348,7 @@ function SavedViewRow({ view, onApply, onRename, onDelete }: SavedViewRowProps) 
         className="
           w-6 h-6 flex-shrink-0 flex items-center justify-center rounded
           text-[var(--content-secondary)] opacity-0 group-hover:opacity-100
-          hover:bg-[var(--surface-tertiary,var(--surface-secondary))]
+          hover:bg-[var(--surface-elevated)]
           focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
           transition-opacity duration-100
         "
@@ -500,7 +500,7 @@ function SavedViewsSection({
               border border-[var(--border-default)]
               rounded px-ds-2 py-ds-1
               focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]
-              placeholder:text-[var(--content-disabled,#9ca3af)]
+              placeholder:text-[#9ca3af]
             "
             onChange={(e) => setSaveName(e.target.value)}
             onKeyDown={handleSaveKeyDown}

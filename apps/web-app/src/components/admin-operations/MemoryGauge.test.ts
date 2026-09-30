@@ -13,11 +13,11 @@ import { deriveMemoryBarColor } from './MemoryGauge.js';
 
 describe('deriveMemoryBarColor', () => {
   it('returns accent green at 0%', () => {
-    expect(deriveMemoryBarColor(0)).toBe('bg-[var(--accent,#20f2a6)]');
+    expect(deriveMemoryBarColor(0)).toBe('bg-[var(--accent)]');
   });
 
   it('returns accent green at exactly 60%', () => {
-    expect(deriveMemoryBarColor(60)).toBe('bg-[var(--accent,#20f2a6)]');
+    expect(deriveMemoryBarColor(60)).toBe('bg-[var(--accent)]');
   });
 
   it('returns amber at 61%', () => {
@@ -37,7 +37,7 @@ describe('deriveMemoryBarColor', () => {
   });
 
   it('returns green at 50%', () => {
-    expect(deriveMemoryBarColor(50)).toBe('bg-[var(--accent,#20f2a6)]');
+    expect(deriveMemoryBarColor(50)).toBe('bg-[var(--accent)]');
   });
 
   it('returns amber at 70%', () => {

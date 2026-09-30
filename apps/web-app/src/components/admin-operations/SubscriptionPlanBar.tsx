@@ -34,10 +34,10 @@ const PLAN_LABELS: Record<NormalizedPlan, string> = {
 
 /** Fill colour for each plan tier segment. */
 const PLAN_COLORS: Record<NormalizedPlan, string> = {
-  free: 'var(--content-tertiary, #6b7280)',
+  free: 'var(--content-tertiary)',
   starter: '#3b82f6',   // blue-500
   solo: '#6366f1',      // indigo-500 — sits visually between starter (blue) and team (accent)
-  team: 'var(--accent, #20f2a6)',
+  team: 'var(--accent)',
   growth: '#8b5cf6',   // violet-500
   enterprise: '#f59e0b', // amber-500
 };

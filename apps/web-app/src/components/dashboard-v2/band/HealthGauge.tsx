@@ -89,7 +89,7 @@ export default function HealthGauge({ score, size = 96 }: HealthGaugeProps) {
         <path
           d={path}
           fill="none"
-          stroke="var(--border-subtle, #e5e7eb)"
+          stroke="var(--border-subtle)"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
         />

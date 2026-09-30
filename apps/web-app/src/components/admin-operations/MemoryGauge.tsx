@@ -30,7 +30,7 @@ interface MemoryGaugeProps {
 function barColor(pct: number): string {
   if (pct > 80) return 'bg-red-500';
   if (pct > 60) return 'bg-amber-500';
-  return 'bg-[var(--accent,#20f2a6)]';
+  return 'bg-[var(--accent)]';
 }
 
 export function MemoryGauge({

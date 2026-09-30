@@ -34,9 +34,9 @@ import {
 } from '@/lib/dashboard-lenses/pareto.js';
 import { ACCENT, GRID_COLOR } from './band/band-colors.js';
 
-const VITAL_FEW_COLOR = 'var(--accent, #16a34a)';
-const TAIL_COLOR = 'var(--border-default, #9ca3af)';
-const CUMULATIVE_COLOR = 'var(--severity-warning, #d97706)';
+const VITAL_FEW_COLOR = 'var(--accent)';
+const TAIL_COLOR = 'var(--border-default)';
+const CUMULATIVE_COLOR = '#d97706';
 
 export interface LssParetoPanelProps {
   /** Candidate workflows (shell maps WorkflowRowData → ParetoWorkflowInput). */

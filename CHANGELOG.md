@@ -6,6 +6,21 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - Colours that claimed to be one thing and displayed another
+
+**Why:** the code names a colour and, beside it, a "fallback" to use if that colour is undefined. In 73 places the two disagreed, and the one written down was not the one on screen.
+
+### Fixed
+- **58 cases where the fallback could never apply.** The named colour was always defined, so the fallback beside it was decoration — and misleading decoration: three weeks ago a control shipped nearly invisible because a fallback was measured instead of the colour that actually renders. Some files listed a light-mode fallback next to a dark-mode colour, or four different fallbacks for the same thing.
+- **15 cases the other way round** — a colour that looked like part of the theme system but was never defined anywhere, so a fixed value was always being used. One file's own documentation describes these as resolving to theme colours "when defined". They were never defined.
+- **A button with no hover effect at all.** The cookie-consent dismiss button pointed at a colour that does not exist, with nothing to fall back on, so hovering did nothing. A dashboard menu had the same problem in a subtler form — its hover colour resolved to the colour it already was.
+
+### Worth saying plainly
+- **None of this changes how anything looks.** Removing a fallback that never applied, or writing out a value that was already being used, leaves the screen identical. That is what made it safe to change 73 places at once.
+- The 15 fixed values are now written openly instead of disguised as theme colours. They still need real decisions — one of them renders disabled text that is too faint to read in light mode — and that is recorded rather than quietly patched.
+
+---
+
 ## [2026-09-30] - Status colours now work in both light and dark mode
 
 **Why:** colours chosen against the dark background were being used as text and icons throughout, and several were close to unreadable in light mode.

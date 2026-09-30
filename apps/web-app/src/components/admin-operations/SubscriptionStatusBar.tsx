@@ -45,11 +45,11 @@ const IS_WARNING_STATUS: Record<NormalizedSubscriptionStatus, boolean> = {
 
 /** Segment fill colour for each status. */
 const STATUS_COLORS: Record<NormalizedSubscriptionStatus, string> = {
-  active: 'var(--accent, #20f2a6)',
+  active: 'var(--accent)',
   trialing: '#3b82f6',          // blue-500
   past_due: '#f59e0b',          // amber-500 (warning)
   canceled: '#d97706',          // amber-600 (warning, darker for differentiation)
-  none: 'var(--content-tertiary, #6b7280)',
+  none: 'var(--content-tertiary)',
 };
 
 interface SubscriptionStatusBarProps {

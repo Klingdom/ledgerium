@@ -111,7 +111,7 @@ export function RefreshControl({
               onClick={() => handleIntervalChange(opt)}
               className={`px-2.5 py-1 text-[11px] transition-colors ${
                 interval === opt
-                  ? 'bg-[var(--accent,#20f2a6)] font-semibold text-black'
+                  ? 'bg-[var(--accent)] font-semibold text-black'
                   : 'bg-[var(--surface-elevated)] text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
               }`}
               aria-pressed={interval === opt}

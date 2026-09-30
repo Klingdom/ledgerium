@@ -227,7 +227,7 @@ export default function DemoAnnotatedWorkflowViews() {
                 className="pointer-events-none absolute bottom-0 left-0 right-0 h-16"
                 style={{
                   background:
-                    'linear-gradient(to bottom, transparent, var(--surface-primary, #0d1117))',
+                    'linear-gradient(to bottom, transparent, var(--surface-primary))',
                 }}
               />
             </div>
@@ -249,7 +249,7 @@ export default function DemoAnnotatedWorkflowViews() {
                 className="pointer-events-none absolute bottom-0 left-0 right-0 h-16"
                 style={{
                   background:
-                    'linear-gradient(to bottom, transparent, var(--surface-primary, #0d1117))',
+                    'linear-gradient(to bottom, transparent, var(--surface-primary))',
                 }}
               />
             </div>
