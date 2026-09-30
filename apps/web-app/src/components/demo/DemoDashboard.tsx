@@ -141,9 +141,9 @@ function slowestIndex(w: DemoWorkflow): number {
 }
 function healthClasses(score: number): { text: string; rail: string } {
   // Match the real product's bands (WorkflowRow healthBand: <60 poor, <80 fair).
-  if (score < 60) return { text: 'text-red-400', rail: 'bg-red-500' };
-  if (score < 80) return { text: 'text-amber-400', rail: 'bg-amber-500' };
-  return { text: 'text-green-400', rail: 'bg-green-500' };
+  if (score < 60) return { text: 'text-[var(--status-danger)]', rail: 'bg-red-500' };
+  if (score < 80) return { text: 'text-[var(--status-warning)]', rail: 'bg-amber-500' };
+  return { text: 'text-[var(--status-success)]', rail: 'bg-green-500' };
 }
 function slug(title: string): string {
   return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -235,7 +235,7 @@ function WorkflowDetail({ w, onBack }: { w: DemoWorkflow; onBack: () => void }) 
                   <p className="text-sm text-[var(--content-primary)]">{s.title}</p>
                   <p className="text-[10px] text-[var(--content-tertiary)] mt-0.5">{s.system}</p>
                 </div>
-                <span className={`text-xs tabular-nums ${i === slow ? 'text-amber-400 font-medium' : 'text-[var(--content-tertiary)]'}`}>
+                <span className={`text-xs tabular-nums ${i === slow ? 'text-[var(--status-warning)] font-medium' : 'text-[var(--content-tertiary)]'}`}>
                   {formatDuration(s.durationMs)}
                 </span>
               </li>
@@ -279,7 +279,7 @@ function FlowPill({ label, sub, terminal, slow }: { label: string; sub?: string;
       }`}
     >
       <span className="text-[11px] font-medium text-[var(--content-primary)] leading-tight line-clamp-2">{label}</span>
-      {sub && <span className={`text-[10px] mt-1 tabular-nums ${slow ? 'text-amber-400' : 'text-[var(--content-tertiary)]'}`}>{sub}</span>}
+      {sub && <span className={`text-[10px] mt-1 tabular-nums ${slow ? 'text-[var(--status-warning)]' : 'text-[var(--content-tertiary)]'}`}>{sub}</span>}
     </div>
   );
 }

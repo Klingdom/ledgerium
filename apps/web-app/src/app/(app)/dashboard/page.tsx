@@ -1519,7 +1519,7 @@ function WorkflowRow({
           <Star
             className={`h-4 w-4 ${
               w.isFavorite
-                ? 'fill-amber-400 text-amber-400'
+                ? 'fill-[var(--status-warning)] text-[var(--status-warning)]'
                 : 'text-[var(--border-default)] group-hover:text-[var(--content-tertiary)]'
             }`}
           />
@@ -1764,7 +1764,7 @@ function WorkflowRow({
             <Star
               className={`h-4 w-4 ${
                 w.isFavorite
-                  ? 'fill-amber-400 text-amber-400'
+                  ? 'fill-[var(--status-warning)] text-[var(--status-warning)]'
                   : 'text-[var(--border-default)]'
               }`}
             />

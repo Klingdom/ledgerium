@@ -260,15 +260,15 @@ function healthBand(score: number): {
   pipClass: string;
 } {
   if (score < 60) {
-    // text-red-400 (#f87171) ≈ 6.1:1 on dark surface (#0D1117) — WCAG AA compliant
-    return { label: 'poor', railClass: 'bg-red-500', textClass: 'text-red-400', pipClass: 'bg-red-500' };
+    // --status-danger passes AA in both themes: dark #F87171 6.84:1, light #DC2626 4.61:1 on --surface-primary
+    return { label: 'poor', railClass: 'bg-red-500', textClass: 'text-[var(--status-danger)]', pipClass: 'bg-red-500' };
   }
   if (score < 80) {
-    // text-amber-400 (#fbbf24) ≈ 9.3:1 on dark surface — WCAG AA compliant
-    return { label: 'fair', railClass: 'bg-amber-500', textClass: 'text-amber-400', pipClass: 'bg-amber-500' };
+    // --status-warning passes AA in both themes: dark #FBBF24 11.3:1, light #B45309 4.79:1 on --surface-primary
+    return { label: 'fair', railClass: 'bg-amber-500', textClass: 'text-[var(--status-warning)]', pipClass: 'bg-amber-500' };
   }
-  // text-green-400 (#34d399) ≈ 7.1:1 on dark surface — WCAG AA compliant
-  return { label: 'good', railClass: 'bg-green-500', textClass: 'text-green-400', pipClass: 'bg-green-500' };
+  // --status-success passes AA in both themes: dark #4ADE80 10.9:1, light #15803D 4.79:1 on --surface-primary
+  return { label: 'good', railClass: 'bg-green-500', textClass: 'text-[var(--status-success)]', pipClass: 'bg-green-500' };
 }
 
 // ── Health pill (Batch C item 17) ─────────────────────────────────────────────

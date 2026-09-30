@@ -309,7 +309,7 @@ function ExecutionStepCard({
           {/* Confidence dot */}
           <ConfidenceDot value={step.confidence} />
           {/* Friction indicator */}
-          {step.hasHighFriction && <AlertTriangle className="h-3 w-3 text-red-400" />}
+          {step.hasHighFriction && <AlertTriangle className="h-3 w-3 text-[var(--status-danger)]" />}
           {/* Expand chevron */}
           <ChevronRight className={`h-3.5 w-3.5 text-[var(--content-tertiary)] transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
         </div>
@@ -494,7 +494,7 @@ function DecisionSummaryCard({ decision }: { decision: SOPViewDecision }) {
       <div className="space-y-1">
         {decision.options.map((opt, i) => (
           <div key={i} className="flex items-start gap-2 text-[10px] text-amber-700">
-            <ArrowRight className="h-3 w-3 mt-0.5 flex-shrink-0 text-amber-400" />
+            <ArrowRight className="h-3 w-3 mt-0.5 flex-shrink-0 text-[var(--status-warning)]" />
             {/* Condition shown only when observed — see types.ts. */}
             <span>{opt.condition ? <><strong>{opt.condition}</strong> → </> : null}{opt.action}</span>
           </div>

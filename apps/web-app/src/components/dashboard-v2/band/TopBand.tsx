@@ -65,8 +65,18 @@ function HealthDelta({ delta }: { delta: number | null }) {
   const Icon = up ? ArrowUp : ArrowDown;
   return (
     <span
+      /* Row #232. Was text-green-600 / text-red-600, which sit directly on the
+         theme surface (no background class) and fail in opposite themes:
+         #16a34a is 3.15:1 on the light surface, #dc2626 is 3.35:1 on the dark
+         one, against a 4.5:1 floor. The per-theme status tokens are 4.79/9.29
+         and 4.62/5.85.
+
+         This went unseen because no fixture had ever rendered a delta — the
+         field is absent from every existing dashboard fixture — so the dark
+         failure was live in the DEFAULT theme with a full axe ratchet in place
+         and nothing to trip it. */
       className={`inline-flex items-center gap-0.5 text-[11px] font-medium ${
-        up ? 'text-green-600' : 'text-red-600'
+        up ? 'text-[var(--status-success)]' : 'text-[var(--status-danger)]'
       }`}
     >
       <Icon size={10} aria-hidden="true" />

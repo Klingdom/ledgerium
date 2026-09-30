@@ -380,7 +380,7 @@ function VisualStepCard({
               <GitBranch className="h-3 w-3 text-amber-500 flex-shrink-0" />
             )}
             {step.hasHighFriction && (
-              <AlertTriangle className="h-3 w-3 text-red-400 flex-shrink-0" />
+              <AlertTriangle className="h-3 w-3 text-[var(--status-danger)] flex-shrink-0" />
             )}
           </div>
         </div>

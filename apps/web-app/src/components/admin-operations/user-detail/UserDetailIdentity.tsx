@@ -45,10 +45,10 @@ export function statusColorClass(status: string): string {
     return 'bg-emerald-500/15 text-emerald-400';
   }
   if (status === 'past_due' || status === 'unpaid' || status === 'incomplete') {
-    return 'bg-amber-500/15 text-amber-400';
+    return 'bg-amber-500/15 text-[var(--status-warning)]';
   }
   if (status === 'canceled' || status === 'incomplete_expired') {
-    return 'bg-red-500/15 text-red-400';
+    return 'bg-red-500/15 text-[var(--status-danger)]';
   }
   return 'bg-[var(--surface-secondary)] text-[var(--content-secondary)]';
 }

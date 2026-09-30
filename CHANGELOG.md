@@ -6,6 +6,24 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - Status colours now work in both light and dark mode
+
+**Why:** colours chosen against the dark background were being used as text and icons throughout, and several were close to unreadable in light mode.
+
+### Fixed
+- **Around thirty-six places** — health scores, status badges, warning icons, favourite stars — now use colours defined separately for each mode instead of one colour picked for dark backgrounds.
+- **The dashboard's "up/down versus last period" indicator was broken in both modes, in opposite directions:** the "up" colour was too faint in light mode, the "down" colour too faint in dark mode. The dark one had been live in the default mode all along. It was never caught because no test had ever produced a dashboard with a change figure on it, so the indicator simply never appeared during checks.
+- **The light-mode dashboard check held back three days ago now ships, and passes.** That was the point of holding it: a check withheld because it was failing is only honest if it comes back once the failure is fixed.
+
+### Still short of the standard, and recorded
+- Badges that put coloured text on a faint coloured background improved a great deal — one went from effectively invisible to clearly legible — but several still fall short in light mode, because the background tint itself was chosen for dark mode. Fixing that means changing backgrounds, which was deliberately excluded here. Recorded with measurements.
+- Two independent calculations of those badges disagreed, because a badge sitting on a white card and the same badge on the page background give different answers, and one case lands on either side of the threshold depending which it is. Establishing that comes first.
+
+### Noted
+- Favourite stars now borrow the "warning" colour. Right for legibility, wrong in meaning — recorded so nobody adjusting warning colours is surprised to find they have recoloured favourites.
+
+---
+
 ## [2026-09-30] - The dashboard now asks for your account details once, not twice
 
 **Why:** two pieces of the header each fetched the same account information separately on every dashboard load.

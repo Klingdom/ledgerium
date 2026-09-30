@@ -123,11 +123,13 @@ export default function CommandHeader({
 
   const deltaColorClass: string = (() => {
     // Use --content-secondary (not tertiary) so the delta label meets WCAG AA contrast
-    // on dark backgrounds. Positive/negative arrows use lighter tone variants for the
-    // same reason: green-400 (#34d399) ≈ 7:1 / red-400 (#f87171) ≈ 6:1 on #0D1117.
+    // on dark backgrounds. Positive/negative arrows use the per-theme status tokens,
+    // which pass AA in both themes: --status-success dark #4ADE80 10.9:1 / light #15803D
+    // 4.79:1; --status-danger dark #F87171 6.84:1 / light #DC2626 4.61:1 (all vs
+    // --surface-primary). The former hardcoded green-400/red-400 passed only in dark.
     if (portfolioHealthScoreDelta === null || portfolioHealthScoreDelta === 0)
       return 'text-[var(--content-secondary)]';
-    return portfolioHealthScoreDelta > 0 ? 'text-green-400' : 'text-red-400';
+    return portfolioHealthScoreDelta > 0 ? 'text-[var(--status-success)]' : 'text-[var(--status-danger)]';
   })();
 
   const DeltaIcon = portfolioHealthScoreDelta === null || portfolioHealthScoreDelta === 0

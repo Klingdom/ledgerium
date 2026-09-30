@@ -335,7 +335,7 @@ export default function WorkflowDetailPage() {
                 className="rounded-ds-sm p-1 hover:bg-[var(--surface-secondary)] transition-colors"
                 title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
               >
-                <Star className={`h-5 w-5 ${isFavorite ? 'fill-amber-400 text-amber-400' : 'text-[var(--content-tertiary)]'}`} />
+                <Star className={`h-5 w-5 ${isFavorite ? 'fill-[var(--status-warning)] text-[var(--status-warning)]' : 'text-[var(--content-tertiary)]'}`} />
               </button>
             </div>
             <div className="mt-ds-2 flex flex-wrap items-center gap-ds-3 text-ds-xs text-[var(--content-secondary)]">

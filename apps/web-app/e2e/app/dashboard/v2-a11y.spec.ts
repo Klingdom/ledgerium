@@ -26,6 +26,7 @@
 
 import { test, expect } from '@playwright/test';
 import { assertAxeCompliance } from '../../helpers/axe.js';
+import { forceTheme, expectThemeApplied } from '../../helpers/theme.js';
 
 const V2_URL = '/dashboard?v2=1';
 
@@ -556,3 +557,57 @@ for (const band of [
     void status;
   });
 }
+
+// ── Light theme (row #232, held back at loop 64) ──────────────────────────────
+
+/**
+ * Loop 64 ran the first light-theme axe probe this repo has ever had, found a
+ * real `color-contrast` failure on the dashboard's health figures, and did NOT
+ * ship this test — because shipping it red blocks the deploy gate for every
+ * unrelated change, and shipping it with the ratchet raised is how a
+ * zero-tolerance policy quietly becomes decorative.
+ *
+ * It was filed as row #232 with measurements and comes back here with the fix,
+ * which is the only thing that makes "held back" mean something other than
+ * "quietly never written".
+ *
+ * The fixture spans all three health bands on purpose. The original probe only
+ * rendered some of them, and the whole lesson of #229 and #230 is that a
+ * fixture which exercises one branch reports on one branch.
+ */
+test('axe: zero critical/serious violations on the populated dashboard, LIGHT theme', async ({ page }) => {
+  await forceTheme(page, 'light');
+
+  await page.route('**/api/workflows**', (route) => {
+    void route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        workflows: [
+          makeWorkflow('wf-poor', 'Poor Workflow', 30, 'monitor'),   // red band
+          makeWorkflow('wf-fair', 'Fair Workflow', 70, 'optimize'),  // amber band
+          makeWorkflow('wf-good', 'Good Workflow', 90, 'healthy'),   // green band
+        ],
+        stats: {
+          portfolioHealthScore: 63,
+          portfolioHealthScoreDelta: 4,  // renders CommandHeader's delta colour
+          insightChips: [],
+          topInsights: [],
+        },
+      }),
+    });
+  });
+
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await expectThemeApplied(page, 'light');
+  await page.waitForTimeout(700);
+
+  // Prove the rows actually rendered. A dashboard that failed to load would
+  // scan an empty table and pass, reporting a green tick for a check that never
+  // examined the colours under test.
+  await expect(page.getByText('Poor Workflow')).toBeVisible();
+  await expect(page.getByText('Fair Workflow')).toBeVisible();
+  await expect(page.getByText('Good Workflow')).toBeVisible();
+
+  await assertAxeCompliance(page, 'dashboard-populated-light', 0);
+});

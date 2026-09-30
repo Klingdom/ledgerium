@@ -175,7 +175,7 @@ export default function DemoAnnotatedDashboardHeader() {
             </div>
           </div>
           {/* Sample data badge */}
-          <span className="shrink-0 rounded-full bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-medium text-amber-400 border border-amber-500/25">
+          <span className="shrink-0 rounded-full bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-medium text-[var(--status-warning)] border border-amber-500/25">
             Sample data
           </span>
         </div>

@@ -211,7 +211,7 @@ export default function ProcessGroupsExplorer({
   if (error) {
     return (
       <div className="card p-12 text-center">
-        <AlertTriangle className="mx-auto h-10 w-10 text-red-400" />
+        <AlertTriangle className="mx-auto h-10 w-10 text-[var(--status-danger)]" />
         <h3 className="mt-3 text-ds-sm font-medium text-[var(--content-primary)]">Analysis Error</h3>
         <p className="mt-1 text-ds-sm text-[var(--content-secondary)] max-w-md mx-auto">{error}</p>
         <button onClick={onRunAnalysis} disabled={isRunningAnalysis} className="btn-secondary mt-4 gap-1.5">

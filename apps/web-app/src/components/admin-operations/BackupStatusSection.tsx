@@ -67,8 +67,8 @@ export interface StateBadgeMeta {
   toneClass: string;
 }
 
-const RED_TONE = 'text-red-400 bg-red-500/10 border-red-500/30';
-const AMBER_TONE = 'text-amber-400 bg-amber-500/10 border-amber-500/30';
+const RED_TONE = 'text-[var(--status-danger)] bg-red-500/10 border-red-500/30';
+const AMBER_TONE = 'text-[var(--status-warning)] bg-amber-500/10 border-amber-500/30';
 // "local-only" gets its own hue, distinct from both the amber "stale"
 // warning and the neutral "unknown" disclosure — it is a specific,
 // known, actionable incompleteness, not degradation and not an unknown.
@@ -231,7 +231,7 @@ function ArtifactRow({
         <span>{detail}</span>
       </div>
       {derived.lastError && (
-        <p className="text-[11px] text-red-400" role="alert">
+        <p className="text-[11px] text-[var(--status-danger)]" role="alert">
           {derived.lastError}
         </p>
       )}
