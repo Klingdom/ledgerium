@@ -242,7 +242,14 @@ const log = readFileSync(ITERATION_LOG, 'utf8');
 const struckIds = new Set(rows.filter((r) => r.struck).map((r) => r.id));
 const knownIds = new Set(rows.map((r) => r.id));
 const claimedClosed = new Set();
-for (const m of log.matchAll(/(?:row\s+)?#(\d+)\s+(?:is\s+)?(?:CLOSED|closed)\b/g)) {
+// Strikethrough is this repo's convention for a RETRACTED statement, so a
+// closure claim inside ~~...~~ is one being withdrawn, not made. Scanning the
+// raw text treated a correction as the assertion it corrects: when loop 61
+// re-opened #109 and struck the old wording, this fired on the retraction
+// itself, and the only way to silence it would have been to reword the
+// correction — the wrong direction entirely.
+const logWithoutRetractions = log.replace(/~~[\s\S]*?~~/g, '');
+for (const m of logWithoutRetractions.matchAll(/(?:row\s+)?#(\d+)\s+(?:is\s+)?(?:CLOSED|closed)\b/g)) {
   claimedClosed.add(Number(m[1]));
 }
 for (const id of [...claimedClosed].sort((a, b) => a - b)) {

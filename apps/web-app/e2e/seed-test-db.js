@@ -148,9 +148,15 @@ function workflowFixtures(userId, idPrefix) {
  * maintenance burden the sqlite_master enumeration exists to avoid.
  */
 async function clearAllTables(db) {
+  // `_` is a single-character WILDCARD in SQL LIKE, so the original
+  // `NOT LIKE '_prisma%'` also excluded any table matching `?prisma*`. No
+  // current model does, but a future one silently escaping the reset would
+  // resurface as a unique-constraint failure in a later create(), which is a
+  // long way from its cause. ESCAPE makes the underscore literal.
   const rows = await db.$queryRawUnsafe(
     "SELECT name FROM sqlite_master WHERE type='table' " +
-      "AND name NOT LIKE '_prisma%' AND name NOT LIKE 'sqlite_%'",
+      "AND name NOT LIKE '\\_prisma%' ESCAPE '\\' " +
+      "AND name NOT LIKE 'sqlite\\_%' ESCAPE '\\'",
   );
 
   await db.$executeRawUnsafe('PRAGMA foreign_keys = OFF');

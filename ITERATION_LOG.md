@@ -4,6 +4,24 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-30 (loop 61) — MR-035 applied, and a spec of mine that tested nothing (Mode 1, coordinator)
+
+- **Candidate Selection: `directed` — correcting my own shipped work per MR-035.** Not a new row: two of the four strikes were defects I shipped, and one of them turned out to be materially worse than the review could see from reading.
+- **`reverse-portfolio-drift: user-ack` — D-1; MR-035 shows my counter understates it** (14 logged against 18 iterations since the last extension commit) and that the increment convention is unwritten, so the number is either wrong or unauditable. Recorded; the underlying fact is unchanged — #216 is the only extension row and it is CEO-blocked.
+- **S-1 accepted — and it is MR-034's strike recurring one cycle later, in the same shape.** `global-setup.ts`'s header still read *"Creates a fresh test SQLite database / Runs Prisma migrations"*. Not creating a fresh database **is the entire content of loop 59**, and it runs `db push`, not migrations. The top of the file contradicted the change made at the bottom for a full governance cycle, because I never re-read it. Corrected, and the correction says so rather than quietly reading as though it was always right.
+- **S-3 accepted:** `TEST_DB_PATH` existed only to be unlinked and had no reader left. `noUnusedLocals` is off, so "typecheck 0" was true while the one mechanical trace pointing at S-1 sat there unflagged. Removed.
+- **Q2(c) and the latent wildcard, both closed:** `db push` now runs against a file a reused server may hold, so `SQLITE_BUSY` is a real new failure mode — loud, and strictly better than the silent one it replaced, but it was documented nowhere; it is now named at the call site. And `NOT LIKE '_prisma%'` used `_` as a **wildcard**, so it would also have excluded a future `?prisma*` table from the reset; now escaped.
+- **S-2 was not fragility. It was vacuity, and it invalidated a claim I made to the CEO.** MR-035 read the SOP a11y tests as fragile-but-working. Strengthening them as instructed made all three mode tests **fail**, and the reason is worse than the review could see: `activeTab` is React state initialised to `'workflow'`, so **the spec never opened the SOP at all**. `SOPPageShell` never mounted, the mode buttons never existed, the `if (count > 0)` guard silently skipped, and all four tests scanned the same non-SOP view. **Loop 57 reported "4/4 pass, zero critical or serious violations across all three SOP modes". That was false.**
+- **I removed the spec rather than keep it or revert it.** Reverting restores a vacuous green, which is worse than no coverage because it is believed. Keeping it red blocks the deploy gate for everyone. So it is gone, #109 is **re-opened**, and the loop-57 entry is corrected in place with a strikethrough rather than edited to look correct.
+- **What a working spec needs, recorded so the next attempt starts where this one stopped:** click `data-testid="workflow-tab-sop"`; mock the real envelope `{ workflow, artifacts: [{ artifactType: 'sop', contentJson }] }` rather than a flat object; assert the mode switcher is visible before scanning; switch modes by asserting `aria-pressed="true"` instead of sleeping. I corrected the envelope and it still did not render, so at least one requirement remains unidentified — **a seeded workflow with a real SOP artifact is probably a better route than mocking one.**
+- **What survives, and it is not nothing:** the extracted `e2e/helpers/axe.ts` is real and used — the dashboard suite passes **17/17** through it. And loop 57's two ARIA disproofs stand on their own evidence: `role="checkbox"` on a `<button>` is permitted by ARIA-in-HTML, and the `role="listitem"` occurrence the row named does not exist.
+- **My own validator caught the inconsistency** — V4 flagged that the log still asserted a closure for row 109 while the row itself was open again. Then it fired a second time on this very sentence, because my description of the problem contained the phrase it matches — so the check was taught to ignore retracted (struck-through) claims, and this line was reworded. A validator that cannot distinguish a statement from a quotation of it is a validator that punishes writing the correction down. The check I built two weeks ago found my correction before I finished making it.
+- **Validation:** dashboard a11y **17/17**; typecheck **0** across 11 packages; validator clean after the log correction.
+- **Follow-ups:** 0 created; **#109 re-opened** with the fixture requirements attached.
+- **Meta-review:** MR-035 applied in full.
+
+---
+
 ## 2026-09-30 (loop 60) — Making a measurement gap visible instead of invisible (Mode 1, coordinator)
 
 - **Candidate Selection: `top-score` among verified-open rows — #94 (13).** #108 (16) is blocked on cross-run aggregation, #168 carries an unresolved overlap flag, and the 14s are multi-iteration roadmap rows. Stated because MR-031 struck me once for asserting `top-score` without checking.
@@ -67,7 +85,7 @@ This file records each bounded improvement loop.
 - **I ran the specs rather than shipping them unrun.** The deploy gate executes these, so an unrunnable spec blocks a deploy for reasons unrelated to the change. Both suites executed locally against a real Next server and real auth.
 - **Doing that surfaced something I would not otherwise have seen: the auth setup failed twice in one session** — once retried-flaky, once a hard failure of **both** setups leaving **15 tests unrun**. **#214 was struck as fixed at loop 37**, and this is a different symptom: loop 37 guarded against a server already listening on 3098; this times out at `waitForURL('**/dashboard**')` after 60s — a login that never completes, not a port conflict. Filed as **#228** with the reproduction, rather than dismissed as local noise: these setups gate the entire authenticated project in CI.
 - **Validation:** SOP spec **4/4** locally; dashboard a11y **17/17** after the refactor; workspace typecheck **0** across 11 packages; validator clean at 221 rows.
-- **Follow-ups:** 1 created (#228); **#109 closed**.
+- **Follow-ups:** 1 created (#228); ~~**#109 closed**~~ — **RE-OPENED at loop 61. The spec this closure rested on was vacuous: it never opened the SOP tab, so every test scanned the default view and the three mode tests silently re-scanned it. The "4/4 pass across three SOP modes" reported here was false.** The two ARIA disproofs stand; the ratchet does not.
 - **Meta-review cadence:** 2 loops since MR-034.
 
 ---

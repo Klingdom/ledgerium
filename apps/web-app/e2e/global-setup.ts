@@ -1,9 +1,20 @@
 /**
  * Playwright global setup — runs ONCE before all tests.
  *
- * 1. Creates a fresh test SQLite database
- * 2. Runs Prisma migrations
- * 3. Seeds test users via external script
+ * 1. Reconciles the schema of the EXISTING test database (`prisma db push`).
+ *    The file is deliberately not deleted — see the note at step 1 below and
+ *    row #228.
+ * 2. Seeds test users via an external script, which clears every table in
+ *    place before inserting.
+ * 3. Ensures the storage-state directory exists.
+ *
+ * This header said "Creates a fresh test SQLite database / Runs Prisma
+ * migrations" until loop 61. Not creating a fresh database is the entire
+ * content of loop 59, and it runs `db push`, not migrations — the top of the
+ * file contradicted the change made at the bottom of it for a full governance
+ * cycle. Recorded rather than quietly corrected, because it is the second time
+ * in two cycles that a correcting commit left the old rule standing in the
+ * file it corrected.
  */
 
 import { execSync } from 'child_process';
@@ -11,7 +22,6 @@ import path from 'path';
 import fs from 'fs';
 
 const WEB_APP_DIR = path.resolve(__dirname, '..');
-const TEST_DB_PATH = path.join(WEB_APP_DIR, 'prisma', 'test.db');
 
 export default async function globalSetup() {
   // 1. The database file is deliberately NOT deleted (row #228, loop 59).
@@ -42,7 +52,15 @@ export default async function globalSetup() {
     DATABASE_URL: 'file:./test.db',
   };
 
-  // 2. Run Prisma db push to create schema
+  // 2. Reconcile the schema in place.
+  //
+  // New consequence of not deleting the file (MR-035 §Q2c): this now runs
+  // against a database a reused server may hold open. SQLite takes an
+  // exclusive lock for a table rebuild, so an actively-querying server can
+  // make this fail with SQLITE_BUSY. That is strictly better than what it
+  // replaced — a loud failure here, instead of a silent one sixty seconds
+  // later in the auth setup — but it is a real failure mode and is named so
+  // the next person to see it knows it is expected rather than mysterious.
   execSync('npx prisma db push --skip-generate --accept-data-loss', {
     cwd: WEB_APP_DIR,
     env,

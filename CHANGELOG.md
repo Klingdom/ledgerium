@@ -6,6 +6,20 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - Withdrawing an accessibility claim I made on Monday
+
+**Why:** on Monday I reported that a new automated check confirmed all three views of a procedure document were free of serious accessibility problems. **That was wrong.** The check never opened the procedure view at all — it looked at a different tab and reported success four times over.
+
+### Corrected
+- The faulty check has been **removed**, not quietly repaired. Leaving it would have meant a green tick that means nothing, which is worse than no check at all.
+- The task it was meant to close is **open again**, with a written record of exactly what defeated this attempt so the next one does not repeat it.
+- What does still stand: the shared piece of accessibility tooling it introduced is real and is used by the dashboard check, which genuinely passes. And the two specific accessibility complaints in the original task were checked against the standard and remain disproved.
+
+### Also fixed
+- A file describing the test-database behaviour still claimed the opposite of what it now does, a week after the change. Corrected, with a note, because this is the second time in two reviews that a fix has left the old description standing next to it.
+
+---
+
 ## [2026-09-30] - Analytics stops quietly dropping events from plan breakdowns
 
 **Why:** when the system did not yet know which plan a customer was on, it left that detail off the event entirely. Those events then disappeared from any per-plan analysis rather than showing up as unknown — so a report could look complete while silently missing an unknown share of its input.
