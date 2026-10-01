@@ -6,6 +6,25 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - Upgrade-prompt reporting corrected, and a full audit of the usage-data pipeline
+
+### Fixed
+- The quota notice appears from 80% of your limit, but "limit reached" is only recorded when something is actually blocked at 100%. Reporting both under one name made one stage of the conversion report legitimately exceed the stage before it. They are now recorded separately, with the click recorded under the same name as the view.
+
+### Audited
+After four separate measurement defects turned up in six pieces of work — each found by accident while doing something else — the whole usage-data pipeline was traced end to end. **Eleven live problems, four latent.** All are recorded with locations and measurements. The significant ones:
+
+- **Two error channels have nothing reporting into them.** An alert watching for a spike in API errors reads "fine" permanently, because no code ever reports an API error. A monitoring panel that is green because nothing reports is worse than no panel.
+- **An activation alert divides two groups that are not comparable**, so it is permanently green regardless of reality.
+- **Nothing reads the bounce measurement.** It is recorded and never consumed — which means one of the three criteria for retiring the old dashboard was never computable, independently of the two fixes made to it this week.
+- **Bounces on phones still do not arrive**, because of how two separate fixes interact. Neither is wrong alone; together they leave a gap on the most common way a phone user leaves.
+- A duration figure that is a fixed constant rather than a measurement, so the first analysis of it would return a confident and meaningless number.
+
+### Worth saying
+- The pipeline's failure modes are all *subtraction*: events not fired, buffers not drained, batches discarded. Nothing invents data. That means errors consistently make things look better than they are, which is why they went unnoticed.
+
+---
+
 ## [2026-09-30] - Coloured status badges are now readable in both light and dark mode
 
 **Why:** badges that put coloured text on a faint coloured background were close to unreadable in light mode — one of them effectively invisible.

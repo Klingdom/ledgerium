@@ -31,16 +31,28 @@ export function RecordingQuotaChip() {
 
   const state = quotaMeterState(used, max);
 
-  // Row #238. This surface has always recorded the click and never the view,
-  // so it contributed to the funnel's numerator and not its denominator.
-  // `state.cta` is the CTA actually being rendered below, so it is the honest
-  // condition for "a prompt was shown".
-  //
-  // The plan comes from the same constant as the CTA copy (row #242). Loop 70
-  // wrote 'team' here while the CTA said "Solo", which would have attributed
-  // every prompt from this surface to a plan it never names.
+  /*
+    Row #238: this surface recorded the click and never the view, so it fed
+    the funnel's numerator and not its denominator.
+
+    Row #244: the warning and at-limit prompts are reported as *different
+    locations*, because they are different events. The chip shows a CTA from
+    80% of quota, while `plan_limit_hit` only fires server-side when an action
+    is actually blocked at 100% — so lumping them together makes stage 2
+    legitimately exceed stage 1 and the funnel read over 100% for a reason
+    that is not a defect.
+
+    The at-limit case keeps the original location so historical click data
+    stays comparable.
+
+    The plan comes from the same constant as the CTA copy (row #242): loop 70
+    wrote 'team' here while the CTA said "Solo".
+  */
+  const promptLocation =
+    state.tone === 'limit' ? 'dashboard_v2_quota_chip' : 'dashboard_v2_quota_warning';
+
   useUpgradePromptViewed(
-    state.cta ? { location: 'dashboard_v2_quota_chip', plan: UNCAPPED_PLAN_ID } : null,
+    state.cta ? { location: promptLocation, plan: UNCAPPED_PLAN_ID } : null,
   );
 
   if (!state.show) return null;
@@ -63,7 +75,10 @@ export function RecordingQuotaChip() {
       {state.cta && (
         <Link
           href={state.href}
-          onClick={() => track({ event: 'upgrade_clicked', location: 'dashboard_v2_quota_chip' })}
+          // Same location as the view above (row #244). A view and a click
+          // reported under different names is the defect this row fixes,
+          // wearing different clothes.
+          onClick={() => track({ event: 'upgrade_clicked', location: promptLocation })}
           className={`text-[11px] font-medium underline underline-offset-2 whitespace-nowrap ${countClass}`}
         >
           {state.cta}

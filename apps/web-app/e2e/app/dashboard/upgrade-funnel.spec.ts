@@ -116,3 +116,47 @@ test('the prompt is recorded once, not once per render', async ({ page }) => {
     'upgrade_prompt_viewed fired more than once for a single prompt instance',
   ).toBe(1);
 });
+
+
+/**
+ * Row #244. The chip shows its CTA from 80% of quota, but `plan_limit_hit`
+ * only fires server-side when an action is actually blocked at 100%. Reporting
+ * both prompts under one location made funnel stage 2 legitimately exceed
+ * stage 1 — so the number would go back over 100% for a reason that is not a
+ * defect, while the CHANGELOG was telling the CEO that >100% meant the old
+ * undercount.
+ */
+test('the warning-tier prompt is reported separately from the at-limit one', async ({ page }) => {
+  // 4 of 5 is 80%: the warning threshold, not the limit.
+  await page.route('**/api/account', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        data: {
+          user: {
+            id: 'u1', email: 'e2e@test.local', name: null, plan: 'free',
+            subscriptionStatus: 'none', createdAt: '2026-01-01T00:00:00.000Z',
+            hasStripeCustomer: false, pendingInvoiceUrl: null,
+          },
+          features: {},
+          limits: { recordings: { used: 4, max: 5 }, seats: { max: 1 }, recorders: { max: 1 } },
+          reverseTrial: { isActive: false, hasLapsed: false, daysRemaining: 0, plan: null, endsAt: null },
+        },
+      }),
+    }),
+  );
+
+  await page.goto(V2_URL, { waitUntil: 'networkidle' });
+  await expect(page.getByText(/4 \/ 5 recordings/)).toBeVisible();
+
+  const payloads = await bufferedPayloads(page);
+  const views = payloads.filter((e) => e.event === 'upgrade_prompt_viewed');
+
+  expect(views.length, 'the warning-tier CTA rendered but recorded no prompt view').toBe(1);
+  expect(
+    views[0]!.location,
+    'a prompt shown at 80% was reported as the at-limit prompt, which is what makes ' +
+      'funnel stage 2 exceed stage 1 for a reason that is not a defect',
+  ).toBe('dashboard_v2_quota_warning');
+});

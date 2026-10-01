@@ -4,6 +4,22 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-30 (loop 78) — Closing the funnel threshold, and a pipeline audit that found eleven more (Mode 1, coordinator + MR-039)
+
+- **Controls:** Area — `web-app / analytics`. Agent — coordinator; MR-039 ran concurrently on non-overlapping files. Extension — `871e29a`, 35 loops; #216 **fifth** ask.
+- **Candidate Selection: `top-score` — #244** (12).
+- **#244 closed, half of it.** The warning-tier prompt (80%) and the at-limit prompt (100%) now report different locations, and the click reports the same location as the view — a view and a click filed under different names is this row's defect wearing different clothes. **MR-039 found the other half is also broken:** `computeFunnel` has no `location` dimension at all, so the per-location comparison that #238 and #244 both rely on **cannot actually be performed**. Filed as #248.
+- **MR-039 did the whole-pipeline audit I asked for, and found 11 live defects and 4 latent.** Four had been found in six loops by working adjacent to them; one deliberate traversal found fourteen. Its structural point is the one worth keeping: **every failure mode in this pipeline is subtraction** — unfired triggers, undrained buffers, discarded batches, dropped rows. Nothing invents events. A pipeline that can only subtract flatters every rate whose numerator is a problem, and that is bounce, errors, limits and drop-off. **The bias is structural, not four unlucky draws.**
+- **The finding I least wanted and most needed: nothing reads `dashboard_bounced`.** One reference in the codebase — its own emission. Not in any funnel, alert, retention view or analytics page. **I spent loops 71 and 73 fixing that event's delivery and its trigger.** Both were real defects and both fixes stand, but I verified the emitter, the trigger and the transport, and never asked whether the number reached anyone. #57 criterion 1 was never computable. Filed as **#247**, with that context kept in the row rather than tidied out of it.
+- **And the bounce still does not deliver on the dominant mobile exit (#249).** `pagehide` fills the buffer; the only remaining drain is visibility-hidden, which on background-then-discard fires *first*, drains nothing, and is never followed by another transition. So loops 71 and 73 do not compose, and nothing tests the composition — the drains are module-scope and the emitter is component-scope, so no test either file could carry can see it. **Fourth repeat of the same class, inside my own fix for the third.**
+- **Two error channels have no emitters at all (#246, score 16).** `api_error` and `client_error` are declared, watched by a P2 alert, and counted by the admin panel — and nothing emits either. The alert reports 0/hour and reads ok, permanently. **"No API errors" and "no instrumentation" render identically, and the rendering is the reassuring one** — worse than having no panel.
+- **Seven rows filed before fixing any of them**, per the precedent that the register should exist before the work: #246 through #252, covering dead error channels, unread metrics, the missing funnel dimension, mobile bounce delivery, three aggregation defects including an activation alert that is **permanently green because it divides two different populations**, four delivery hazards, and five emission defects including a `durationMs` that is a constant — a fabricated measurement, which is worse than a missing one.
+- **On MR-039's verdict about my own loop 73:** it is right that the three `BOUNCE_TRIGGER` assertions are tautologies against their own import, and that the e2e dispatches a synthetic event and reads the buffer, so no lifecycle runs. "Verified in a browser, which is the only place a page-lifecycle event is real" was an overstatement. The mirror gap was half closed, not closed.
+- **Validation:** web-app **3291**; funnel e2e **3/3** including the new warning-tier case; typecheck **0** across 11 packages; validator clean at 245 rows.
+- **Follow-ups:** 7 created, 1 closed. That ratio is terrible and entirely correct — the pool grew because a traversal found what adjacency could not.
+
+---
+
 ## 2026-09-30 (loop 77) — A badge is a pair, and one of them has no solution (Mode 1, coordinator)
 
 - **Controls:** Area — `web-app / a11y`. Agent — coordinator; ran alongside MR-039 on files the review is not reading. Extension — `871e29a`, 34 loops; #216 fifth ask, CEO-blocked.
