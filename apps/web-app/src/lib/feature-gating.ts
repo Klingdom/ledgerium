@@ -190,6 +190,46 @@ async function getMonthlyUploadCount(userId: string): Promise<number> {
   });
 }
 
+// ─── How plan gating is actually enforced ──────────────────────────────────
+
+/*
+  Row #235. Recorded here, in the module that is actually used, because the
+  question "how does this product gate by plan?" previously had no answer you
+  could find by reading — and had a *misleading* one you could find by
+  grepping.
+
+  There were three live mechanisms and a fourth that looked live and was not:
+
+  1. SERVER REJECTS, CLIENT EXPLAINS. The API returns 403 with
+     `code: 'plan_upgrade_required'`, `requiredPlan` and `upgradeUrl`; the
+     client maps that to an upgrade prompt at the point of intent. See
+     `api/teams/route.ts` and `(app)/teams/createTeamError.ts`. This is the
+     primary pattern and a deliberate one: the prompt appears at the moment
+     the user wanted the thing, rather than hiding the thing in advance.
+
+  2. GATED FLAGS IN THE PAYLOAD. `/api/account` and `/api/workflows` set
+     `isGated` on values the plan does not include, and the UI renders a
+     locked state rather than the value. See `canSeeHealthScores` in
+     `api/workflows/route.ts`.
+
+  3. ADMIN ALLOWLIST. `lib/admin-allowlist.ts`, for admin surfaces only. Not
+     plan gating as such, but it is the third thing a reader will find and
+     wonder about.
+
+  The fourth: `components/shared/FeatureGate.tsx` + `hooks/useFeatureGate.ts`
+  + `components/shared/UpgradeCTA.tsx` implemented a *pre-emptive hiding*
+  strategy — check the plan, hide or replace the feature before the user
+  touches it. It was rendered nowhere. Not under-used: `<FeatureGate` appeared
+  zero times in the entire source tree, so its hook and its presentation
+  component were dead behind it.
+
+  All three were deleted at loop 74 rather than wired up, because the product
+  made a different choice and made it deliberately. Leaving a complete,
+  plausible implementation of the rejected strategy in the tree is an
+  invitation to adopt it by accident, and a second answer to a question that
+  should have one. Git history has them if the choice is ever revisited.
+*/
+
 // ─── Feature Flags Response ────────────────────────────────────────────────
 
 /** Shape of the feature flags payload returned to the client via /api/account. */

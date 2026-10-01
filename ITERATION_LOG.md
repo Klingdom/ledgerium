@@ -4,6 +4,22 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-30 (loop 76) — A complete implementation of a strategy the product rejected (Mode 1, coordinator)
+
+- **Controls:** Area — `web-app / correctness`, pivoted off analytics. Agent — coordinator. Extension — `871e29a`, 33 loops; #216 fifth ask, CEO-blocked.
+- **Candidate Selection: `top-score` — #235** (11). Chosen to run alongside MR-039 because it touches no file the review is reading.
+- **The row told me to establish how gating is really enforced before deleting anything. That was the right instruction, and the answer changed what to delete.** Three mechanisms are live: the server rejects with `code: plan_upgrade_required` and the client maps it to a prompt at the point of intent; `isGated` flags in the payload so the UI renders a locked state; and an admin allowlist for admin surfaces. **The product chose attempt-then-reject deliberately** — the prompt appears when the user wanted the thing, rather than hiding the thing in advance.
+- **`FeatureGate` implemented the rejected strategy, and was dead.** Pre-emptive hiding: check the plan, hide or replace the feature before the user touches it. The tag appears **zero** times in the source tree.
+- **The dead chain was three files, not the two the row named.** `UpgradeCTA` was reachable only through `FeatureGate`, so it was dead behind dead code. Re-deriving found it; the row would not have.
+- **Deleted all three rather than wiring any of them up.** A complete, plausible implementation of a strategy the product rejected is an invitation to adopt it by accident, and a second answer to a question that should have one. Git history has them if the choice is ever revisited.
+- **The durable output is the documentation, not the deletion.** The architecture is now recorded in `lib/feature-gating.ts` — the module that *is* used — because "how does this product gate by plan?" previously had no answer you could find by reading, and a misleading one you could find by grepping. That asymmetry is the actual defect; the dead files were a symptom.
+- **One thing I checked rather than assumed:** `UpgradeCTA` emits `upgrade_prompt_viewed`, so deleting it could have removed funnel coverage. It could not — loop 70 instrumented the surfaces directly, which is why that work had to come first. **Reverse the order and this deletion silently removes the only correct emitter in the codebase.**
+- **Validation:** web-app **3278 / 3278 unchanged** (nothing imported the deleted files, which is precisely the claim); typecheck **0** across 11 packages; **production build clean**, which is the check that actually proves nothing referenced them; validator clean at 237 rows.
+- **Follow-ups:** 0 created, 1 closed (#235).
+- **Meta-review cadence:** MR-039 in progress.
+
+---
+
 ## 2026-09-30 (loop 75) — A batch that lost most of itself and reported success (Mode 1, coordinator)
 
 - **Controls:** Area — `web-app / analytics`, 1 of a fresh window after loop 74 pivoted to ux. Agent — coordinator, 3 consecutive; the next sweep-shaped loop delegates. Extension — `871e29a`, 32 loops; #216 fourth ask, CEO-blocked.

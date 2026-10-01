@@ -6,6 +6,22 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - Removed a complete, unused implementation of plan restrictions
+
+**Why:** the codebase contained two different answers to "how does this product restrict features by plan?" — one in use, one that looked equally real and was wired to nothing.
+
+### Established first
+- Plan restrictions work in three ways today: the server refuses the action and the app explains why at the moment you tried it; some values arrive marked as locked and the screen shows a locked state; and admin pages use a separate allowlist. The first is a deliberate choice — the upgrade prompt appears when you wanted the thing, rather than the thing being hidden from you in advance.
+
+### Removed
+- Three files implementing the opposite approach — hide the feature before you touch it — used nowhere. One of them existed only to serve another, so it was unreachable behind unreachable code.
+- Keeping a complete and plausible implementation of a rejected approach is how someone later adopts it by mistake. Version history keeps it if the decision is ever revisited.
+
+### Written down
+- How plan restriction actually works is now documented in the module that performs it, which is where someone will look.
+
+---
+
 ## [2026-09-30] - A batch of usage data could lose most of itself and report success
 
 **Why:** when saving a batch of events, the first failure stopped the rest from being saved — and the response still said everything had been received.
