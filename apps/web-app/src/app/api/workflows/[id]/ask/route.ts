@@ -11,6 +11,7 @@ import {
 import type { SopIntelligenceInput } from '@/components/sop-view/adapters/sopIntelligence';
 import type { SOP, ProcessMap } from '@ledgerium/process-engine';
 import { findLatestArtifact, LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * POST /api/workflows/[id]/ask — deterministic "Ask This Process" (Phase A).
@@ -64,6 +65,7 @@ function errorResponse(
   message: string,
   status: number,
 ): NextResponse {
+  reportApiError('/api/workflows/[id]/ask', status);
   return NextResponse.json(
     { data: null, error: { code, message, retryable: false }, meta: ASK_META },
     { status },

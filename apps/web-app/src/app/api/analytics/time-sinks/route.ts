@@ -9,6 +9,7 @@ import {
   type PortfolioTimeSinkReport,
 } from '@ledgerium/intelligence-engine';
 import type { TimestudyResult, BottleneckReport } from '@ledgerium/intelligence-engine';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * GET /api/analytics/time-sinks — T1 Portfolio Time-Sink Ranking
@@ -49,6 +50,7 @@ const routeMeta = (counts: { workflowCount: number; coveredWorkflowCount: number
 });
 
 function errorResponse(body: TimeSinkErrorBody, status: number): NextResponse {
+  reportApiError('/api/analytics/time-sinks', status);
   return NextResponse.json(
     {
       data: null,

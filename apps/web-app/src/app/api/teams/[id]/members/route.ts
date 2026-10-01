@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * GET /api/teams/:id/members — list team members
@@ -82,6 +83,7 @@ export async function GET(
     });
   } catch (err) {
     console.error('[teams/members/GET]', err);
+    reportApiError('/api/teams/[id]/members', 500);
     return NextResponse.json({ error: 'Failed to load members' }, { status: 500 });
   }
 }
@@ -148,6 +150,7 @@ export async function DELETE(
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('[teams/members/DELETE]', err);
+    reportApiError('/api/teams/[id]/members', 500);
     return NextResponse.json({ error: 'Failed to remove member' }, { status: 500 });
   }
 }

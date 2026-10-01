@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { canAccessAdmin } from '@/lib/admin-allowlist';
 import { computeAlerts, type AlertSeverity } from '@/lib/compute-alerts';
 import { sendAlertNotification } from '@/lib/notifications';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * GET  /api/admin/alerts
@@ -49,6 +50,7 @@ export async function GET() {
     return NextResponse.json({ alerts, summary });
   } catch (err) {
     console.error('[admin/alerts GET]', err);
+    reportApiError('/api/admin/alerts', 500);
     return NextResponse.json({ error: 'Failed to evaluate alerts' }, { status: 500 });
   }
 }
@@ -99,6 +101,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ sent: firingInScope.length, alerts });
   } catch (err) {
     console.error('[admin/alerts POST]', err);
+    reportApiError('/api/admin/alerts', 500);
     return NextResponse.json({ error: 'Failed to evaluate and notify alerts' }, { status: 500 });
   }
 }

@@ -3,6 +3,7 @@ import { statSync, statfsSync } from 'node:fs';
 import path from 'node:path';
 import { db } from '@/db';
 import { selectEmailProvider, isEmailDeliveryConfigured } from '@/lib/email';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 export const dynamic = 'force-dynamic';
 
@@ -83,6 +84,7 @@ export async function GET() {
       email: emailInfo,
     });
   } catch {
+    reportApiError('/api/health', 503);
     return NextResponse.json(
       {
         status: 'error',

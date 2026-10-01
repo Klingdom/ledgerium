@@ -33,6 +33,7 @@
 
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { track } from '@/lib/analytics';
+import { safeErrorName } from '@/lib/safe-error-name';
 
 /**
  * Closed union of the surfaces that can degrade independently. Closed on
@@ -64,21 +65,7 @@ export function describeBoundaryError(
   error: unknown,
   surface: ErrorBoundarySurface,
 ): BoundaryErrorReport {
-  let errorName = 'UnknownError';
-
-  if (error instanceof Error && typeof error.name === 'string' && error.name.trim() !== '') {
-    errorName = error.name.trim();
-  }
-
-  // A name is an identifier, not prose. Anything longer than a generous
-  // identifier, or containing whitespace, is not a constructor name — it is
-  // someone's message wearing one. Reject rather than truncate: a truncated
-  // message is still a message.
-  if (errorName.length > 40 || /\s/.test(errorName)) {
-    errorName = 'UnknownError';
-  }
-
-  return { surface, errorName };
+  return { surface, errorName: safeErrorName(error) };
 }
 
 interface ErrorBoundaryProps {

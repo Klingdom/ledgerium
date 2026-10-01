@@ -12,6 +12,7 @@ import {
 import type { ProcessOutput } from '@ledgerium/process-engine';
 import { z } from 'zod';
 import { LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * POST /api/analytics/process-diff — T2 N-Way Process Diff
@@ -71,6 +72,7 @@ function errorResponse(
   status: number,
   extra: Record<string, unknown> = {},
 ): NextResponse {
+  reportApiError('/api/analytics/process-diff', status);
   return NextResponse.json(
     {
       data: null,

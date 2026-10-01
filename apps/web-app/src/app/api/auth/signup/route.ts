@@ -9,6 +9,7 @@ import { ensureSampleVariants } from '@/lib/sample-variants';
 import { normalizeEmail } from '@/lib/email-normalize';
 import { checkAuthRateLimit, AUTH_RATE_LIMITS } from '@/lib/rate-limit/auth-buckets';
 import { getClientIp } from '@/lib/client-ip';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -114,6 +115,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ id: user.id, email: user.email }, { status: 201 });
   } catch {
+    reportApiError('/api/auth/signup', 500);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 },

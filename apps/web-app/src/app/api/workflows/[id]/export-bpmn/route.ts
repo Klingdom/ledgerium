@@ -5,6 +5,7 @@ import { checkFeatureAccess } from '@/lib/feature-gating';
 import { generateBpmnXml } from '@/lib/bpmn-export';
 import type { ProcessOutput } from '@ledgerium/process-engine';
 import { LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * GET /api/workflows/[id]/export-bpmn
@@ -105,6 +106,7 @@ export async function GET(
     });
   } catch (err) {
     console.error('BPMN export failed:', err);
+    reportApiError('/api/workflows/[id]/export-bpmn', 500);
     return NextResponse.json({ error: 'BPMN export failed' }, { status: 500 });
   }
 }

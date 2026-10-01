@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { analyzePortfolioAgentIntelligence } from '@/lib/agent-intelligence';
 import { checkFeatureAccess } from '@/lib/feature-gating';
 import { db } from '@/db';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * POST /api/agent-intelligence/portfolio
@@ -57,6 +58,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ data: result });
   } catch (err) {
     console.error('Portfolio agent intelligence analysis failed:', err);
+    reportApiError('/api/agent-intelligence/portfolio', 500);
     return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
   }
 }

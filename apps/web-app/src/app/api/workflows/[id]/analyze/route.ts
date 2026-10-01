@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { analyzeWorkflowVariants } from '@/lib/intelligence';
 import { db } from '@/db';
 import { checkFeatureAccess } from '@/lib/feature-gating';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * POST /api/workflows/[id]/analyze
@@ -58,6 +59,7 @@ export async function POST(
     return NextResponse.json({ intelligence });
   } catch (err) {
     console.error('Workflow analysis failed:', err);
+    reportApiError('/api/workflows/[id]/analyze', 500);
     return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
   }
 }

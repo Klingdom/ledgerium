@@ -22,6 +22,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { canAccessAdmin } from '@/lib/admin-allowlist';
 import { db } from '@/db';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -65,6 +66,7 @@ function errorResponse(
   generatedAt: string,
   durationMs: number,
 ): NextResponse {
+  reportApiError('/api/admin/disputes', status);
   const body: AdminDisputesApiResponse = {
     data: null,
     error: { code, message },

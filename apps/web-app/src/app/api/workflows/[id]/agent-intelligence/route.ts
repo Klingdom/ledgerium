@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { analyzeWorkflowAgentIntelligence } from '@/lib/agent-intelligence';
 import { checkFeatureAccess } from '@/lib/feature-gating';
 import { db } from '@/db';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * POST /api/workflows/[id]/agent-intelligence
@@ -50,6 +51,7 @@ export async function POST(
     return NextResponse.json({ data: result });
   } catch (err) {
     console.error('Agent intelligence analysis failed:', err);
+    reportApiError('/api/workflows/[id]/agent-intelligence', 500);
     return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
   }
 }

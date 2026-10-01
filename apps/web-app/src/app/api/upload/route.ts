@@ -9,6 +9,7 @@ import { checkRecordingLimit } from '@/lib/feature-gating';
 import { UPLOAD_DIR } from '@/lib/storage';
 import fs from 'fs';
 import path from 'path';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -270,6 +271,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error('Upload failed:', err);
     const message = err instanceof Error ? err.message : 'Unknown error';
+    reportApiError('/api/upload', 500);
     return NextResponse.json({ error: 'Internal server error', detail: message }, { status: 500 });
   }
 }

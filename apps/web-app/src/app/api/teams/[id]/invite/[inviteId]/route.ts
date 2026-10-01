@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * DELETE /api/teams/:id/invite/:inviteId — revoke an invite
@@ -57,6 +58,7 @@ export async function DELETE(
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('[teams/invite/[inviteId]/DELETE]', err);
+    reportApiError('/api/teams/[id]/invite/[inviteId]', 500);
     return NextResponse.json({ error: 'Failed to revoke invite' }, { status: 500 });
   }
 }

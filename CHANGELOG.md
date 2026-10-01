@@ -6,6 +6,21 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-01] - API and page errors are now actually reported
+
+### Fixed
+- **The API error alert could never fire.** It watched for a kind of event that no code ever sent, so it read "fine" permanently. Every error response the server sends (46 places across 33 endpoints, plus 8 shared error helpers) now reports one, and a test proves the alert stays quiet at 10 errors an hour and fires at 11.
+- **Page crashes are now counted.** The error page told users their error "has been logged for review"; until now it had only been written to their own browser console. It now reports — the kind of error only, never its message, because error messages can contain workflow titles and captured field names.
+- Server errors are counted on the server rather than in the browser, because a browser on a failing page is the least reliable place to count failures from.
+
+### Added
+- A test that fails if any new error response is added without reporting it, or reports it under the wrong endpoint name.
+
+### Known gap
+- An unexpected crash inside an endpoint that has no error handling at all (20 of 72 endpoints) is still not counted. Recorded as backlog #253.
+
+---
+
 ## [2026-09-30] - Upgrade-prompt reporting corrected, and a full audit of the usage-data pipeline
 
 ### Fixed

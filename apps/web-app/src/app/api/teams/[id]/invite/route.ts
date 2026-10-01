@@ -7,6 +7,7 @@ import { countPendingInvites } from '@/lib/workspace/seat-management';
 import { trackServer } from '@/lib/analytics-server';
 import { checkInviteRateLimit } from '@/lib/rate-limit/invite-buckets';
 import { normalizeEmail } from '@/lib/email-normalize';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * POST /api/teams/:id/invite — create an invite link for a team
@@ -247,6 +248,7 @@ export async function POST(
     });
   } catch (err) {
     console.error('[teams/invite/POST]', err);
+    reportApiError('/api/teams/[id]/invite', 500);
     return NextResponse.json({ error: 'Failed to create invite' }, { status: 500 });
   }
 }
@@ -290,6 +292,7 @@ export async function GET(
     });
   } catch (err) {
     console.error('[teams/invite/GET]', err);
+    reportApiError('/api/teams/[id]/invite', 500);
     return NextResponse.json({ error: 'Failed to load invites' }, { status: 500 });
   }
 }

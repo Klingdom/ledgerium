@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * POST /api/analytics/events — receives and persists batched analytics events.
@@ -189,6 +190,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (err) {
     console.error('[analytics/GET]', err);
+    reportApiError('/api/analytics/events', 500);
     return NextResponse.json({ error: 'Failed to load analytics' }, { status: 500 });
   }
 }

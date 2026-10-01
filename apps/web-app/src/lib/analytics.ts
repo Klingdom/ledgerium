@@ -696,8 +696,16 @@ export type AnalyticsEvent =
 
   // ── Errors ────────────────────────────────────────────────────────────────
   | { event: 'upload_failed'; error: string }
+  // Emitted server-side only, by lib/api-error-reporting.ts, for 5xx responses
+  // (row #246). `endpoint` is the route pattern, never the request path.
   | { event: 'api_error'; endpoint: string; status: number }
-  | { event: 'client_error'; message: string; component?: string };
+  // Emitted by the Next.js route (`app/error.tsx`) and root
+  // (`app/global-error.tsx`) boundaries — an error nothing nearer caught (row
+  // #246). Constructor name only, via lib/safe-error-name.ts: this variant
+  // previously declared a free-text `message`, which is the content-leak path
+  // #92 closed for `ui_error_boundary_triggered`. Narrowed before the first
+  // emitter existed, so no stored event ever carried one.
+  | { event: 'client_error'; errorName: string; boundary: 'route' | 'root' };
 
 // ─── Enriched event (what actually gets stored/sent) ─────────────────────────
 

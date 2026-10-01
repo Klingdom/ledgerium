@@ -4,6 +4,22 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 (loop 79) — An alert that was green because nothing reported (Mode 1, coordinator)
+
+- **Controls:** Area — `web-app / analytics` (loops 76-78 were correctness / a11y / analytics, so no saturation). Agent — coordinator. Extension — `871e29a`, 36 loops; #216 CEO-blocked. Meta-review cadence: loop 1 of 3 since MR-039.
+- **Candidate Selection: `top-score` — #246** (16, highest open). MR-039 §9 named #249 as its pick and #246 as runner-up "probably the cheapest correction in this document"; the formula ranks #246 six points higher, and nothing in the portfolio rules overrides it.
+- **`api_error` now has an emitter, and it is on the server on purpose.** The obvious place was the client fetch path. But MR-039's structural finding is that the client pipeline can only subtract, and an API that is failing is disproportionately being called from a page that is also failing — counting server errors from the browser would undercount exactly when the count matters. The server is also the only place that sees the extension and API-key callers.
+- **5xx only.** 4xx is validation, auth and plan gates — expected traffic. Counting it would make a threshold of ">10 per hour" measure mistyped passwords.
+- **The row underestimated the surface twice.** "The shared fetch/error paths" do not exist: there is no shared client fetch (87 call sites) and no shared server error helper. There are **46** literal 5xx responses across 33 routes, and **8** more routes build responses from a variable status inside a local `errorResponse` helper that a literal grep cannot see. The helper ones take the report unconditionally — the reporter ignores non-5xx — so a future 5xx through them is covered without anyone remembering.
+- **`client_error` was narrowed before it was wired.** Its declared shape carried a free-text `message`: the content-leak path #92 closed for the boundary event. No emitter existed, so no stored row ever carried one; it now carries the constructor name only, through the same rule `ErrorBoundary` uses, extracted to `lib/safe-error-name.ts` so the three boundaries cannot drift apart. `app/error.tsx` told users their error "has been logged for review"; it had been logged to their own console.
+- **Verified by provoking one, as the row asked:** a real `GET /api/teams` failure stores an `api_error` row, and the real `computeAlerts` over that store reads `ok` at 10 and **fires at 11**. That last assertion is the property that was false before this loop.
+- **The durable half is the guard.** `api-error-coverage.test.ts` fails on any unreported literal 5xx, any variable-status helper without a report, and any report naming another route's endpoint (a copy-pasted call would misattribute failures — a wrong number is worse than a missing one). **Mutation-checked, not assumed:** deleting one report fails it; mislabelling one fails it twice. It also found a site my own grep missed on its first run — which turned out to be a template-literal false positive, now excluded.
+- **Not covered: exceptions that escape a handler.** Next 14 turns those into 500s without running any application code, and has no `onRequestError`. **20 of 72 routes have no `catch` at all.** Filed as **#253** rather than described here and left.
+- **Validation:** web-app **3291 → 3315** (+24); typecheck **0** across 11 packages; production build clean (the two Next.js boundary files changed); validator clean at 246 rows.
+- **Follow-ups:** 1 created (#253), 1 closed (#246).
+
+---
+
 ## 2026-09-30 (loop 78) — Closing the funnel threshold, and a pipeline audit that found eleven more (Mode 1, coordinator + MR-039)
 
 - **Controls:** Area — `web-app / analytics`. Agent — coordinator; MR-039 ran concurrently on non-overlapping files. Extension — `871e29a`, 35 loops; #216 **fifth** ask.

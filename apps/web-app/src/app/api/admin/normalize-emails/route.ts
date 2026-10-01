@@ -31,6 +31,7 @@ import { auth } from '@/lib/auth';
 import { canAccessAdmin } from '@/lib/admin-allowlist';
 import { db } from '@/db';
 import { normalizeEmail } from '@/lib/email-normalize';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 const OPS_TOKEN_LABEL = 'admin-normalize-emails.v1';
 const OPS_TOKEN_WINDOW_TOLERANCE = 2;
@@ -171,6 +172,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
   } catch (err) {
     console.error('[admin/normalize-emails POST]', err);
+    reportApiError('/api/admin/normalize-emails', 500);
     return NextResponse.json(
       { data: null, error: { code: 'internal_error', message: 'Failed to normalize emails' } },
       { status: 500 },

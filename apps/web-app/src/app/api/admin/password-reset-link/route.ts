@@ -36,6 +36,7 @@ import { auth } from '@/lib/auth';
 import { canAccessAdmin } from '@/lib/admin-allowlist';
 import { db } from '@/db';
 import { normalizeEmail } from '@/lib/email-normalize';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ledgerium.ai';
 // 1 hour — matches the self-serve forgot-password window and limits the
@@ -120,6 +121,7 @@ function errorResponse(
   generatedAt: string,
   durationMs: number,
 ): NextResponse {
+  reportApiError('/api/admin/password-reset-link', status);
   const body: PasswordResetLinkApiResponse = {
     data: null,
     error: { code, message },

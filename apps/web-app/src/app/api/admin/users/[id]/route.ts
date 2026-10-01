@@ -37,6 +37,7 @@ import { canAccessAdmin } from '@/lib/admin-allowlist';
 import { db } from '@/db';
 import { toPlanType } from '@/lib/plans';
 import { normalizeStripeStatus } from '@/lib/workspace/subscription-status';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -92,6 +93,7 @@ function errorResponse(
   generatedAt: string,
   durationMs: number,
 ): NextResponse {
+  reportApiError('/api/admin/users/[id]', status);
   const body: AdminUserDetailApiResponse = {
     data: null,
     error: { code, message },

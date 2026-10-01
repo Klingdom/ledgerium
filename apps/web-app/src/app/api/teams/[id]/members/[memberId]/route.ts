@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * PATCH /api/teams/:id/members/:memberId — change a member's role
@@ -100,6 +101,7 @@ export async function PATCH(
     return NextResponse.json({ ok: true, memberId: params.memberId, role: newRole });
   } catch (err) {
     console.error('[teams/members/[memberId]/PATCH]', err);
+    reportApiError('/api/teams/[id]/members/[memberId]', 500);
     return NextResponse.json({ error: 'Failed to update member role' }, { status: 500 });
   }
 }
@@ -165,6 +167,7 @@ export async function DELETE(
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('[teams/members/[memberId]/DELETE]', err);
+    reportApiError('/api/teams/[id]/members/[memberId]', 500);
     return NextResponse.json({ error: 'Failed to remove member' }, { status: 500 });
   }
 }

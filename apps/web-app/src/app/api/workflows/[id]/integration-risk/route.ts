@@ -5,6 +5,7 @@ import { checkFeatureAccess } from '@/lib/feature-gating';
 import { transformWorkflow } from '@ledgerium/agent-intelligence';
 import type { ProcessOutput } from '@ledgerium/process-engine';
 import { LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * GET /api/workflows/[id]/integration-risk
@@ -86,6 +87,7 @@ export async function GET(
     });
   } catch (err) {
     console.error('Integration risk analysis failed:', err);
+    reportApiError('/api/workflows/[id]/integration-risk', 500);
     return NextResponse.json({ error: 'Integration risk analysis failed' }, { status: 500 });
   }
 }

@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { computeAlerts } from '@/lib/compute-alerts';
 import { sendAlertNotification } from '@/lib/notifications';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * GET /api/admin/alerts/check
@@ -31,6 +32,7 @@ export async function GET(request: NextRequest) {
   if (!cronSecret) {
     // CRON_SECRET not configured — refuse to run to avoid open access
     console.error('[admin/alerts/check] CRON_SECRET env var is not set');
+    reportApiError('/api/admin/alerts/check', 500);
     return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
   }
 
@@ -79,6 +81,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ checked: true, alertsSent: toNotify.length });
   } catch (err) {
     console.error('[admin/alerts/check GET]', err);
+    reportApiError('/api/admin/alerts/check', 500);
     return NextResponse.json({ error: 'Failed to check alerts' }, { status: 500 });
   }
 }

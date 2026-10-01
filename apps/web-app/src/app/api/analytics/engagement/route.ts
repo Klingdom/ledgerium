@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { effectivePlanFor } from '@/lib/feature-gating';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * GET /api/analytics/engagement
@@ -223,6 +224,7 @@ export async function GET() {
     return NextResponse.json({ users: scoredUsers, distribution });
   } catch (err) {
     console.error('[analytics/engagement GET]', err);
+    reportApiError('/api/analytics/engagement', 500);
     return NextResponse.json({ error: 'Failed to compute engagement scores' }, { status: 500 });
   }
 }

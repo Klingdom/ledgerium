@@ -7,6 +7,7 @@ import type { TransformationResult } from '@ledgerium/agent-intelligence';
 import type { ProcessOutput } from '@ledgerium/process-engine';
 import { z } from 'zod';
 import { LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 const compareSchema = z.object({
   workflowIds: z.array(z.string()).min(2, 'At least 2 workflow IDs are required'),
@@ -128,6 +129,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error('Cross-workflow comparison failed:', err);
+    reportApiError('/api/analytics/compare', 500);
     return NextResponse.json({ error: 'Comparison analysis failed' }, { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { ensureSampleVariants } from '@/lib/sample-variants';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * POST /api/sample-variants
@@ -18,6 +19,7 @@ export async function POST(_req: NextRequest) {
 
   const result = await ensureSampleVariants(session.user.id);
   if (!result) {
+    reportApiError('/api/sample-variants', 500);
     return NextResponse.json(
       { error: 'Failed to create sample variant set' },
       { status: 500 },

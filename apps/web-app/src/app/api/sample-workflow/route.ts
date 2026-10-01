@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { ensureSampleWorkflow } from '@/lib/sample-workflow';
 import { ensureSampleVariants } from '@/lib/sample-variants';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * POST /api/sample-workflow
@@ -20,6 +21,7 @@ export async function POST(_req: NextRequest) {
 
   const result = await ensureSampleWorkflow(session.user.id);
   if (!result) {
+    reportApiError('/api/sample-workflow', 500);
     return NextResponse.json(
       { error: 'Failed to create sample workflow' },
       { status: 500 },

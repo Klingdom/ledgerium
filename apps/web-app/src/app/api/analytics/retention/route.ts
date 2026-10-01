@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * GET /api/analytics/retention
@@ -154,6 +155,7 @@ export async function GET() {
     return NextResponse.json({ cohorts: cohortResults, averageRetention });
   } catch (err) {
     console.error('[analytics/retention GET]', err);
+    reportApiError('/api/analytics/retention', 500);
     return NextResponse.json({ error: 'Failed to compute retention data' }, { status: 500 });
   }
 }

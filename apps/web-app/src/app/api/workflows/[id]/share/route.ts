@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { trackServer } from '@/lib/analytics-server';
 import { normalizeEmail } from '@/lib/email-normalize';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * GET /api/workflows/:id/share — list who this workflow is shared with
@@ -68,6 +69,7 @@ export async function GET(
     });
   } catch (err) {
     console.error('[workflows/share/GET]', err);
+    reportApiError('/api/workflows/[id]/share', 500);
     return NextResponse.json({ error: 'Failed to load shares' }, { status: 500 });
   }
 }
@@ -163,6 +165,7 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   } catch (err) {
     console.error('[workflows/share/POST]', err);
+    reportApiError('/api/workflows/[id]/share', 500);
     return NextResponse.json({ error: 'Failed to share workflow' }, { status: 500 });
   }
 }
@@ -198,6 +201,7 @@ export async function DELETE(
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('[workflows/share/DELETE]', err);
+    reportApiError('/api/workflows/[id]/share', 500);
     return NextResponse.json({ error: 'Failed to revoke share' }, { status: 500 });
   }
 }

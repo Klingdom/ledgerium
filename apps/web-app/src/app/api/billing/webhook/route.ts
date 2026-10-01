@@ -12,6 +12,7 @@ import {
 import { softDeactivateExcessMembers } from '@/lib/workspace/seat-management';
 import { normalizeStripeStatus } from '@/lib/workspace/subscription-status';
 import type { NormalizedSubscriptionStatus } from '@/lib/workspace/subscription-status';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /** Closed union for User.subscriptionStatus (distinct from Team's 5-value vocabulary). */
 type UserSubscriptionStatus = 'active' | 'past_due' | 'canceled' | 'trialing' | 'none';
@@ -124,6 +125,7 @@ export async function POST(req: NextRequest) {
       webhookSecret = getWebhookSecret();
     } catch (err) {
       console.error('[billing] WEBHOOK_SECRET not configured — webhook rejected', err);
+      reportApiError('/api/billing/webhook', 500);
       return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
     }
     event = getStripe().webhooks.constructEvent(body, sig, webhookSecret);
@@ -162,6 +164,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true, duplicate: true });
     }
     console.error('[stripe] Failed to record webhook event for idempotency:', err);
+    reportApiError('/api/billing/webhook', 500);
     return NextResponse.json({ error: 'Webhook idempotency check failed' }, { status: 500 });
   }
 
@@ -1131,6 +1134,7 @@ export async function POST(req: NextRequest) {
     } catch (delErr) {
       console.error(`[stripe] Failed to release idempotency claim for ${event.id}:`, delErr);
     }
+    reportApiError('/api/billing/webhook', 500);
     return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 });
   }
 

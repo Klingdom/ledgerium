@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
+import { track } from '@/lib/analytics';
+import { safeErrorName } from '@/lib/safe-error-name';
 
 /**
  * Global error boundary for the web app.
@@ -16,8 +18,11 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log error for diagnostics (replace with real error tracking in production)
     console.error('[Ledgerium] Unhandled error:', error);
+    // Row #246: this page's copy says the error "has been logged for review",
+    // and until now nothing but the browser console ever saw it. Constructor
+    // name only — never the message, which can carry recorded content.
+    track({ event: 'client_error', errorName: safeErrorName(error), boundary: 'route' });
   }, [error]);
 
   return (

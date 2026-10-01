@@ -23,6 +23,7 @@ import { auth } from '@/lib/auth';
 import { isAdminUnlimited } from '@/lib/admin-allowlist';
 import { readBackupStatusFile, buildBackupStatusSummary } from '@/lib/admin-operations/backup-status';
 import type { BackupStatusApiResponse } from '@/lib/admin-operations/backup-status';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -42,6 +43,7 @@ function errorResponse(
   generatedAt: string,
   queryDurationMs: number,
 ): NextResponse {
+  reportApiError('/api/admin/backup-status', status);
   const body: BackupStatusApiResponse = {
     data: null,
     error: { code, message },

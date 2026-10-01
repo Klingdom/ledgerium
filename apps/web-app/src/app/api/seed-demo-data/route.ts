@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { runProcessEngine, buildWorkflowReportFromOutput } from '@/lib/ingestion';
 import { ensureSampleVariants } from '@/lib/sample-variants';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * POST /api/seed-demo-data
@@ -78,6 +79,7 @@ export async function POST(_req: NextRequest) {
 
       created.push(workflow.id);
     } catch (err: any) {
+      reportApiError('/api/seed-demo-data', 500);
       return NextResponse.json(
         {
           error: `Failed to create workflow "${title}"`,

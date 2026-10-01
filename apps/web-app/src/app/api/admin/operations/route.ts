@@ -39,6 +39,7 @@ import type {
   AdminOperationsApiResponse,
   TimeRangeDays,
 } from '@/lib/admin-operations/types';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -68,6 +69,7 @@ function errorResponse(
   generatedAt: string,
   queryDurationMs: number,
 ): NextResponse {
+  reportApiError('/api/admin/operations', status);
   const body: AdminOperationsApiResponse = {
     data: null,
     error: { code, message },

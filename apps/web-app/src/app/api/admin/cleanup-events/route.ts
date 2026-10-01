@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { canAccessAdmin } from '@/lib/admin-allowlist';
 import { db } from '@/db';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 const DEFAULT_RETENTION_DAYS = 90;
 const MAX_RETENTION_DAYS = 3650; // safety cap: 10 years
@@ -106,6 +107,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (err) {
     console.error('[admin/cleanup-events GET]', err);
+    reportApiError('/api/admin/cleanup-events', 500);
     return NextResponse.json({ error: 'Failed to process cleanup request' }, { status: 500 });
   }
 }

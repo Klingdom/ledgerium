@@ -14,6 +14,10 @@
  * the exact cause can be fixed in one shot. Remove this file once the recurring
  * hydration error is closed.
  */
+import { useEffect } from 'react';
+import { track } from '@/lib/analytics';
+import { safeErrorName } from '@/lib/safe-error-name';
+
 export default function GlobalError({
   error,
   reset,
@@ -27,6 +31,13 @@ export default function GlobalError({
     // eslint-disable-next-line no-console
     console.error('[ledgerium][global-error]', error);
   }
+
+  // Row #246: report once per error, constructor name only. The on-screen
+  // diagnostic below shows the message to the user who hit it; analytics is a
+  // third party and gets the name and nothing else.
+  useEffect(() => {
+    track({ event: 'client_error', errorName: safeErrorName(error), boundary: 'root' });
+  }, [error]);
 
   return (
     <html lang="en">

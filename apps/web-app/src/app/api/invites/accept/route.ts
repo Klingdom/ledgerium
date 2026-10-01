@@ -4,6 +4,7 @@ import { db } from '@/db';
 import crypto from 'crypto';
 import { trackServer } from '@/lib/analytics-server';
 import { getClientIp } from '@/lib/client-ip';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * POST /api/invites/accept — accept a workspace invite
@@ -331,6 +332,7 @@ export async function POST(req: NextRequest) {
     }
 
     console.error('[invites/accept/POST]', err);
+    reportApiError('/api/invites/accept', 500);
     return NextResponse.json({ error: 'Failed to accept invite' }, { status: 500 });
   }
 }

@@ -5,6 +5,7 @@ import { checkFeatureAccess } from '@/lib/feature-gating';
 import { transformWorkflow } from '@ledgerium/agent-intelligence';
 import type { ProcessOutput } from '@ledgerium/process-engine';
 import { findLatestArtifact, LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * GET /api/workflows/[id]/agent-composition
@@ -115,6 +116,7 @@ export async function GET(
     });
   } catch (err) {
     console.error('Agent composition failed:', err);
+    reportApiError('/api/workflows/[id]/agent-composition', 500);
     return NextResponse.json({ error: 'Agent composition failed' }, { status: 500 });
   }
 }

@@ -19,6 +19,7 @@ import { PROCESS_AUDIT_SKU } from '@/lib/service-skus';
 import { getAuditEligibility } from '@/lib/audit-eligibility';
 import type { PaidPlanType, BillingInterval } from '@/lib/stripe';
 import type Stripe from 'stripe';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /** Valid plan values for checkout (post CEO directive 2026-05-18 "Option B"). */
 const VALID_PLANS: PaidPlanType[] = ['starter', 'solo', 'team', 'growth'];
@@ -152,6 +153,7 @@ async function createOneTimeCheckoutSession(
 
   const priceId = getOneTimePriceId(sku);
   if (!priceId) {
+    reportApiError('/api/billing/checkout', 503);
     return NextResponse.json(
       { error: 'Billing not configured for this SKU', code: 'sku_not_configured', sku },
       { status: 503 },
@@ -221,6 +223,7 @@ async function createOneTimeCheckoutSession(
     return NextResponse.json({ url: checkoutSession.url });
   } catch (err) {
     console.error('Stripe one-time checkout error:', err);
+    reportApiError('/api/billing/checkout', 500);
     return NextResponse.json(
       { error: 'Failed to create checkout session', code: 'checkout_session_failed' },
       { status: 500 },
@@ -326,6 +329,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (!priceId) {
+    reportApiError('/api/billing/checkout', 503);
     return NextResponse.json(
       {
         error: 'Billing not configured for this plan',
@@ -418,6 +422,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: checkoutSession.url });
   } catch (err) {
     console.error('Stripe checkout error:', err);
+    reportApiError('/api/billing/checkout', 500);
     return NextResponse.json(
       { error: 'Failed to create checkout session', code: 'checkout_session_failed' },
       { status: 500 },

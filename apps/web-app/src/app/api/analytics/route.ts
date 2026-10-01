@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { analyzeUserPortfolio, clusterWorkflows } from '@/lib/intelligence';
 import { db } from '@/db';
 import { checkFeatureAccess } from '@/lib/feature-gating';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /** Safely parse a JSON string, returning fallback on failure instead of throwing. */
 function safeJsonParse(json: string | null | undefined, fallback: unknown = null): unknown {
@@ -94,6 +95,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error('Analytics failed:', err);
+    reportApiError('/api/analytics', 500);
     return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
   }
 }

@@ -5,6 +5,7 @@ import { db } from '@/db';
 import { trackServer } from '@/lib/analytics-server';
 import { checkBootstrapRateLimit } from '@/lib/rate-limit/bootstrap-buckets';
 import { getClientIp } from '@/lib/client-ip';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * POST /api/admin/bootstrap
@@ -164,6 +165,7 @@ export async function POST(req: NextRequest) {
     }
 
     console.error('[admin/bootstrap/POST]', err);
+    reportApiError('/api/admin/bootstrap', 500);
     return NextResponse.json(
       { error: 'Failed to promote admin' },
       { status: 500 },

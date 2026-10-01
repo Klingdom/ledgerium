@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import { checkSoloFeatureAccess } from '@/lib/feature-gating';
 import { toPlanType } from '@/lib/plans';
 import { trackServer } from '@/lib/analytics-server';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * GET /api/teams — list user's teams
@@ -57,6 +58,7 @@ export async function GET() {
     });
   } catch (err) {
     console.error('[teams/GET] Error:', err);
+    reportApiError('/api/teams', 500);
     return NextResponse.json({ error: 'Failed to load teams' }, { status: 500 });
   }
 }
@@ -132,6 +134,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ id: team.id, name: team.name, slug: team.slug });
   } catch (err) {
     console.error('[teams/POST] Error:', err);
+    reportApiError('/api/teams', 500);
     return NextResponse.json({ error: 'Failed to create team' }, { status: 500 });
   }
 }

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { getStripe, APP_URL } from '@/lib/stripe';
+import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
  * POST /api/billing/portal
@@ -32,6 +33,7 @@ export async function POST() {
     return NextResponse.json({ url: portalSession.url });
   } catch (err) {
     console.error('Stripe portal error:', err);
+    reportApiError('/api/billing/portal', 500);
     return NextResponse.json({ error: 'Failed to create portal session' }, { status: 500 });
   }
 }
