@@ -4,6 +4,21 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 (loop 80) — Two retirement criteria that nothing could compute (Mode 1, `analytics` + coordinator)
+
+- **Controls:** Area — `web-app / analytics`; **loops 78-80 are now three consecutive analytics, so loop 81 must pivot.** Agent — **`analytics`**, deliberately: coordinator had implemented loops 73-79, seven in a row, past the 4+ diversity rule, and this row is an analytics surface. Adjacent: `growth-strategist` (D-4 clause 1 fired — 8 new strings). Extension — `871e29a`, 37 loops; #216 CEO-blocked. Cadence: 2 of 3 since MR-039.
+- **Candidate Selection: `top-score` — #247** (14, highest open after #246 closed).
+- **What shipped:** a pure `computeDashboardV2RetirementMetrics` summing `chipsRenderedCount` and counting `dashboard_bounced`, wired into the admin GET and shown on the product analytics page with numerator and denominator beside every rate. Not clamped — #248 exists because a clamp hid a mismatch. Malformed chip counts are counted and shown, not dropped.
+- **The agent could not run anything** — its session had no shell — and said so plainly rather than reporting a guess. Every number below is from my own run; the agent's claimed +13 matched exactly.
+- **Two honesty defects, both corrected before close.** (1) The caveat said the mobile undercount means "the true rate is higher." But #251(3) is a bfcache double-count in the *opposite* direction; both are unmeasured, so the honest statement is that the net direction is unknown. (2) **The chip-click rate reads high whenever any view lacks a chip count:** a click cannot be joined to its view, so clicks on excluded views stay in the numerator while their chips leave the denominator. That is the flattering direction for a "≥ 10%" criterion — the exact class MR-039 named — and it is now stated on the page and in the type's contract.
+- **Brand-voice consult: 3 KEEP / 5 POLISH, all applied.** The one that mattered was accuracy, not tone: "Not enough data" implied a sample-size judgment nothing makes; the real condition is a zero denominator, and it differs per metric.
+- **Where #57 stands:** criterion 1 is now *computable* and still not *trustworthy* (#249); criterion 3 is computable, biased high if old views are in the window, and waits on a CEO number; criterion 2 is unchanged.
+- **Found while validating, checked rather than assumed:** `next build` executes `/api/admin/alerts/check`, which now reports an `api_error`. I first suspected the route was being prerendered with its 500 frozen into production; the prerender manifest has no API routes and no cached body exists, so it is not. The real consequence is smaller: a build with a database would write a spurious row on every deploy. That is a defect in loop 79's code, so it gets its own Mode 3 correction rather than riding in this commit.
+- **Validation:** web-app **3315 → 3328** (+13); typecheck **0**; production build clean; validator clean.
+- **Follow-ups:** 1 created (#254 — a bad `?days=` is a 500, and since loop 79 it counts against the alert), 1 closed (#247).
+
+---
+
 ## 2026-10-01 (loop 79) — An alert that was green because nothing reported (Mode 1, coordinator)
 
 - **Controls:** Area — `web-app / analytics` (loops 76-78 were correctness / a11y / analytics, so no saturation). Agent — coordinator. Extension — `871e29a`, 36 loops; #216 CEO-blocked. Meta-review cadence: loop 1 of 3 since MR-039.

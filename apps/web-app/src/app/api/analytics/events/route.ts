@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { reportApiError } from '@/lib/api-error-reporting';
+import { computeDashboardV2RetirementMetrics } from '@/lib/dashboard-v2-retirement-metrics';
 
 /**
  * POST /api/analytics/events — receives and persists batched analytics events.
@@ -187,6 +188,8 @@ export async function GET(req: NextRequest) {
         .sort(([, a], [, b]) => b - a)
         .slice(0, 10)
         .map(([path, count]) => ({ path, count })),
+      // Row #247: #57 retirement criteria 1 (bounce) and 3 (chip-click).
+      dashboardV2Retirement: computeDashboardV2RetirementMetrics(events),
     });
   } catch (err) {
     console.error('[analytics/GET]', err);

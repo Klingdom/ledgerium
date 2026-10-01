@@ -15,6 +15,7 @@ import {
   Trash2,
   Shield,
 } from 'lucide-react';
+import type { DashboardV2RetirementMetrics } from '@/lib/dashboard-v2-retirement-metrics';
 
 interface AnalyticsData {
   summary: {
@@ -30,6 +31,7 @@ interface AnalyticsData {
     conversion: FunnelStep[];
   };
   topPages: Array<{ path: string; count: number }>;
+  dashboardV2Retirement?: DashboardV2RetirementMetrics;
 }
 
 interface FunnelStep {
@@ -364,6 +366,10 @@ export default function ProductAnalyticsPage() {
         <MetricCard icon={Zap} label="Workflows Created" value={data.eventCounts['workflow_uploaded'] ?? 0} />
         <MetricCard icon={TrendingUp} label="Subscriptions" value={data.eventCounts['subscription_created'] ?? 0} />
       </div>
+
+      {data.dashboardV2Retirement && (
+        <RetirementPanel metrics={data.dashboardV2Retirement} />
+      )}
 
       {/* System Alerts */}
       <section className="ds-section mb-ds-8">
@@ -756,6 +762,52 @@ function MetricCard({ icon: Icon, label, value }: { icon: React.ElementType; lab
       </div>
       <p className="ds-metric-value">{value}</p>
     </div>
+  );
+}
+
+// Row #247. Rates are shown exactly as computed — never clamped, and null is an
+// explicit empty state naming which denominator is zero, never 0%.
+function formatRate(rate: number | null, emptyLabel: string): string {
+  return rate === null ? emptyLabel : `${(rate * 100).toFixed(1)}%`;
+}
+
+function plural(n: number, one: string, many: string): string {
+  return `${n} ${n === 1 ? one : many}`;
+}
+
+function RetirementPanel({ metrics }: { metrics: DashboardV2RetirementMetrics }) {
+  return (
+    <section className="ds-section mb-ds-8">
+      <h2 className="ds-section-label">Dashboard v2 Retirement Criteria</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-ds-4">
+        <div className="card px-ds-5 py-ds-4">
+          <p className="ds-metric-label">Bounce rate</p>
+          <p className="ds-metric-value">{formatRate(metrics.bounceRate, 'No views recorded')}</p>
+          <p className="text-ds-xs text-[var(--content-secondary)]">Target: under 40%</p>
+          <p className="text-ds-xs text-[var(--content-secondary)] tabular-nums">
+            {plural(metrics.bounces, 'bounce', 'bounces')} / {plural(metrics.views, 'view', 'views')}
+          </p>
+          <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-1">
+            Mobile exits are undercounted (#249). A back-button return can count twice (#251). The net
+            effect on this rate is unmeasured.
+          </p>
+        </div>
+        <div className="card px-ds-5 py-ds-4">
+          <p className="ds-metric-label">Chip-click rate</p>
+          <p className="ds-metric-value">{formatRate(metrics.chipClickRate, 'No chips shown')}</p>
+          <p className="text-ds-xs text-[var(--content-secondary)]">Threshold pending CEO decision</p>
+          <p className="text-ds-xs text-[var(--content-secondary)] tabular-nums">
+            {plural(metrics.chipClicks, 'click', 'clicks')} / {plural(metrics.chipsRendered, 'chip shown', 'chips shown')}
+          </p>
+          {metrics.viewsMissingChipCount > 0 && (
+            <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-1">
+              {plural(metrics.viewsMissingChipCount, 'view', 'views')} had no valid chip count. Their chips are
+              excluded from the denominator, but their clicks are still counted, so this rate reads high.
+            </p>
+          )}
+        </div>
+      </div>
+    </section>
   );
 }
 

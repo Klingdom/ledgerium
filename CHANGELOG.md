@@ -6,6 +6,16 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-01] - The dashboard retirement criteria can now be read
+
+### Added
+- The product analytics page now shows the two measurements that decide whether the old dashboard can be retired: how often people leave the new dashboard without doing anything, and how often they click the insight chips it shows. Each shows its counts beside the percentage, so the number can be checked rather than trusted.
+
+### Worth saying
+- Both numbers are labelled with what is known to be wrong with them. Phone exits are undercounted and a back-button return can be double-counted, and nobody yet knows which effect is bigger. The chip figure reads high when older records are in the period, because clicks are counted where the chips they came from are not.
+
+---
+
 ## [2026-10-01] - API and page errors are now actually reported
 
 ### Fixed
