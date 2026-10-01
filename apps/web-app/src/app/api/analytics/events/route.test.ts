@@ -15,6 +15,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
+import { db } from '@/db';
 
 vi.mock('@/db', () => ({
   db: {
@@ -113,5 +114,91 @@ describe('POST /api/analytics/events', () => {
     expect(calls).toHaveLength(2);
     expect((calls[0]![0] as any).data.visitorId).toBe('vid-shared');
     expect((calls[1]![0] as any).data.visitorId).toBe('vid-shared');
+  });
+});
+
+// ─── Row #243: the batch reports what it actually wrote ─────────────────────
+
+describe('POST /api/analytics/events — partial failures and honest counts', () => {
+  async function post(events: unknown[]) {
+    const { POST } = await import('./route');
+    const req = new NextRequest('http://localhost/api/analytics/events', {
+      method: 'POST',
+      body: JSON.stringify({ events }),
+      headers: { 'content-type': 'application/json' },
+    });
+    return (await POST(req)).json() as Promise<Record<string, unknown>>;
+  }
+
+  const event = (n: number) => ({ event: `e${n}`, visitorId: `v${n}` });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('one failing event costs one event, not the rest of the batch', async () => {
+    // The loop used to sit in a single try, so the first failure abandoned
+    // everything after it. A batch could lose most of itself this way.
+    const create = (db as unknown as { analyticsEvent: { create: ReturnType<typeof vi.fn> } }).analyticsEvent.create;
+    create.mockResolvedValueOnce({});
+    create.mockRejectedValueOnce(new Error('constraint'));
+    create.mockResolvedValueOnce({});
+
+    const body = await post([event(1), event(2), event(3)]);
+
+    expect(create).toHaveBeenCalledTimes(3);
+    expect(body.received, 'the two good events should still have been written').toBe(2);
+    expect(body.failed).toBe(1);
+  });
+
+  it('reports what was written, not what was built', async () => {
+    // `received` used to be records.length regardless of outcome, so a batch
+    // that wrote nothing was told it had arrived intact.
+    const create = (db as unknown as { analyticsEvent: { create: ReturnType<typeof vi.fn> } }).analyticsEvent.create;
+    create.mockRejectedValue(new Error('db down'));
+
+    const body = await post([event(1), event(2)]);
+
+    expect(body.received).toBe(0);
+    expect(body.attempted).toBe(2);
+    expect(body.failed).toBe(2);
+    expect(body.ok, 'a batch that persisted nothing is not ok').toBe(false);
+  });
+
+  it('says so when a batch is truncated', async () => {
+    const create = (db as unknown as { analyticsEvent: { create: ReturnType<typeof vi.fn> } }).analyticsEvent.create;
+    create.mockResolvedValue({});
+
+    const body = await post(Array.from({ length: 105 }, (_, i) => event(i)));
+
+    expect(body.received).toBe(100);
+    expect(body.truncated, 'five events were dropped and the caller was not told').toBe(5);
+    expect(body.ok).toBe(false);
+  });
+
+  it('a fully successful batch is ok, with no truncation and no failures', async () => {
+    const create = (db as unknown as { analyticsEvent: { create: ReturnType<typeof vi.fn> } }).analyticsEvent.create;
+    create.mockResolvedValue({});
+
+    const body = await post([event(1), event(2)]);
+
+    expect(body).toMatchObject({ ok: true, received: 2, attempted: 2, failed: 0, truncated: 0 });
+  });
+
+  it('still returns HTTP 200 when everything fails', async () => {
+    // Analytics must never surface as a broken page. An honest body and a
+    // benign status are separable, and conflating them is what produced a
+    // success report over a partial write in the first place.
+    const create = (db as unknown as { analyticsEvent: { create: ReturnType<typeof vi.fn> } }).analyticsEvent.create;
+    create.mockRejectedValue(new Error('db down'));
+
+    const { POST } = await import('./route');
+    const req = new NextRequest('http://localhost/api/analytics/events', {
+      method: 'POST',
+      body: JSON.stringify({ events: [event(1)] }),
+      headers: { 'content-type': 'application/json' },
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(200);
   });
 });

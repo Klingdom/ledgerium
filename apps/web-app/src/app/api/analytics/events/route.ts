@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     const events = body.events;
 
     if (!Array.isArray(events) || events.length === 0) {
-      return NextResponse.json({ ok: true, received: 0 });
+      return NextResponse.json({ ok: true, received: 0, attempted: 0, failed: 0, truncated: 0 });
     }
 
     let userId: string | undefined;
@@ -29,7 +29,17 @@ export async function POST(req: NextRequest) {
     // docs/meta/REVENUE_PLAN_20K/analytics_analysis.md §2): `visitorId` is
     // promoted to its own first-class indexed column instead of being left
     // inside the `properties` JSON blob (filterProperties strips it below).
-    const records = events.slice(0, 100).map((event: any) => ({
+    /*
+      Row #243. `slice(0, 100)` used to drop the remainder in silence. The cap
+      stays — an unbounded batch is a denial-of-service shape — but a batch
+      that was truncated now says so in the response rather than vanishing.
+      The client is fire-and-forget today, so nothing acts on it; the point is
+      that the information exists at all if anyone ever looks.
+    */
+    const MAX_BATCH = 100;
+    const truncated = Math.max(0, events.length - MAX_BATCH);
+
+    const records = events.slice(0, MAX_BATCH).map((event: any) => ({
       userId: userId ?? event.userId ?? null,
       visitorId: typeof event.visitorId === 'string' ? event.visitorId : null,
       eventName: event.event ?? 'unknown',
@@ -38,18 +48,53 @@ export async function POST(req: NextRequest) {
       source: event.source ?? 'client',
     }));
 
-    try {
-      for (const record of records) {
+    /*
+      Row #243. This loop used to sit inside a single `try`, so the first
+      failing row aborted every row after it — and the response still reported
+      `received: records.length`, the number of records *built*. A batch could
+      lose most of itself and be told it had arrived intact.
+
+      Two changes. Each row gets its own `try`, so one bad event costs one
+      event rather than the tail of the batch. And the response reports what
+      was actually written, so "received" means received.
+
+      The request still succeeds regardless: analytics must never surface as a
+      broken page. Honest body, benign status — those are separable, and
+      conflating them is what produced a success report over a partial write.
+    */
+    let persisted = 0;
+    const failures: unknown[] = [];
+
+    for (const record of records) {
+      try {
         await (db as any).analyticsEvent.create({ data: record });
+        persisted++;
+      } catch (err) {
+        failures.push(err);
       }
-    } catch (err) {
-      // Don't fail the request if DB write fails
-      console.error('[analytics:persist]', err);
     }
 
-    return NextResponse.json({ ok: true, received: records.length });
-  } catch {
-    return NextResponse.json({ ok: true, received: 0 });
+    if (failures.length > 0) {
+      // One line per batch rather than per row: a failing DB would otherwise
+      // turn a log into a denial-of-service against itself.
+      console.error(
+        `[analytics:persist] ${failures.length} of ${records.length} events failed to persist`,
+        failures[0],
+      );
+    }
+
+    return NextResponse.json({
+      ok: failures.length === 0 && truncated === 0,
+      received: persisted,
+      attempted: records.length,
+      failed: failures.length,
+      truncated,
+    });
+  } catch (err) {
+    // A malformed body or an unreadable request. Still a 200 — see above — but
+    // `ok: false` and a zero count, rather than `ok: true` over nothing.
+    console.error('[analytics:persist] batch rejected', err);
+    return NextResponse.json({ ok: false, received: 0, attempted: 0, failed: 0, truncated: 0 });
   }
 }
 

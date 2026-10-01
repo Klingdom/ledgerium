@@ -4,6 +4,22 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-30 (loop 75) — A batch that lost most of itself and reported success (Mode 1, coordinator)
+
+- **Controls:** Area — `web-app / analytics`, 1 of a fresh window after loop 74 pivoted to ux. Agent — coordinator, 3 consecutive; the next sweep-shaped loop delegates. Extension — `871e29a`, 32 loops; #216 fourth ask, CEO-blocked.
+- **Candidate Selection: `top-score` — #243** (12).
+- **The defect, and it was worse than the row stated.** The insert loop sat inside a single `try` with `await` inside a `for`, so the **first** failing row abandoned every row after it. The handler then returned `received: records.length` — the number of records *built*. A batch could lose most of itself and be told it had arrived intact.
+- **Each row now gets its own `try`**, so one bad event costs one event. And `received` reports what was written, alongside `attempted`, `failed` and `truncated`.
+- **The 100-row cap stays, but says so.** An unbounded batch is a denial-of-service shape, so the cap is right; silently discarding the remainder was not. MR-038 flagged truncation as latent and said so plainly rather than inflating it — that was the correct weighting, and reporting it costs one field.
+- **The distinction worth naming: an honest body and a benign status are separable.** The request still returns HTTP 200 whatever happens, because analytics must never surface as a broken page. Conflating those two things is precisely what produced a success report over a partial write — `ok: true` was doing duty for both "the request completed" and "the data landed", and only one of those was ever true.
+- **Sabotage-verified.** Restoring the single-`try` shape and the built-not-written count fails four of the five new tests.
+- **This is the fourth defect in the same pipeline in six loops** — #238 undercounted prompts, #241 dropped short sessions, #242 never emitted mobile bounces, #243 silently truncated batches. Three of the four biased a number in the flattering direction. The pipeline was never audited as a whole; each defect was found while standing next to it doing something else.
+- **Validation:** web-app **3273 → 3278** (+5); typecheck **0** across 11 packages; validator clean at 237 rows.
+- **Follow-ups:** 0 created, 1 closed (#243).
+- **Meta-review cadence:** 3 loops since MR-038 — **MR-039 is due.**
+
+---
+
 ## 2026-09-30 (loop 74) — The star nobody on a phone could see (Mode 1, coordinator)
 
 - **Controls:** Area — `web-app / ux`, **pivoted as required** after three consecutive analytics loops tripped saturation. Agent — coordinator, 2 consecutive. Extension — `871e29a`, 31 loops; #216 fourth ask, still CEO-blocked.

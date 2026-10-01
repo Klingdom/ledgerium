@@ -6,6 +6,20 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - A batch of usage data could lose most of itself and report success
+
+**Why:** when saving a batch of events, the first failure stopped the rest from being saved — and the response still said everything had been received.
+
+### Fixed
+- **One bad event now costs one event**, not everything after it in the batch.
+- **The response reports what was actually saved**, not how many were prepared. It also now reports how many failed and how many were dropped for being over the batch limit, so a truncated batch says so instead of simply vanishing.
+- The batch size limit stays — an unlimited batch is a way to overload the server — but being silent about trimming is not the same as having a limit.
+
+### A distinction worth stating
+- The request still reports success to the browser whatever happens, because usage tracking must never make a page look broken. That is separate from whether the *data* landed, and running those two meanings through a single flag is what allowed a half-written batch to be reported as complete.
+
+---
+
 ## [2026-09-30] - The "add to favourites" star was invisible on phones
 
 **Why:** the outline star shown on workflows you have not favourited was drawn in a colour barely distinguishable from the background.
