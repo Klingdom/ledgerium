@@ -4,6 +4,16 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 (loop 80, Mode 3 correction to loop 79, non-counting) — the build reported an error nobody had
+
+- **What was wrong:** `next build` executes some GET handlers while deciding whether to prerender them. `/api/admin/alerts/check` has no `CRON_SECRET` in the build environment, returns a 500, and since loop 79 reports it. A build with a database would have written one spurious `api_error` per deploy — not enough to trip the alert alone, but a fabricated row in the series loop 79 exists to make trustworthy.
+- **How it was found:** the loop 80 production build printed the event. Loop 79's own build printed nothing I read for it; I checked the exit code and the route table, not the log.
+- **Fix:** `reportApiError` returns early when `NEXT_PHASE === 'phase-production-build'`. **Verified against an actual build, not just a unit test:** build-time `api_error` lines **1 → 0**, and a test proves the same call outside the build phase still reports.
+- **Validation:** web-app **3328 → 3329**; typecheck **0**; build clean.
+- **Does not count** toward the loop cadence; MR-040 remains due after loop 81.
+
+---
+
 ## 2026-10-01 (loop 80) — Two retirement criteria that nothing could compute (Mode 1, `analytics` + coordinator)
 
 - **Controls:** Area — `web-app / analytics`; **loops 78-80 are now three consecutive analytics, so loop 81 must pivot.** Agent — **`analytics`**, deliberately: coordinator had implemented loops 73-79, seven in a row, past the 4+ diversity rule, and this row is an analytics surface. Adjacent: `growth-strategist` (D-4 clause 1 fired — 8 new strings). Extension — `871e29a`, 37 loops; #216 CEO-blocked. Cadence: 2 of 3 since MR-039.

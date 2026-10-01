@@ -53,6 +53,12 @@ export const API_ENDPOINT_PATTERN = /^\/api(\/[A-Za-z0-9_\-[\]]+)+$/;
  */
 export function reportApiError(endpoint: string, status: number): void {
   if (!Number.isInteger(status) || status < 500 || status > 599) return;
+  // `next build` executes some GET handlers while deciding whether they can be
+  // prerendered (observed at loop 80: /api/admin/alerts/check, with no
+  // CRON_SECRET in the build env, returns 500). That is not a request from
+  // anyone, and a build environment with a database would otherwise write one
+  // spurious api_error per deploy. Next sets NEXT_PHASE for the build process.
+  if (process.env.NEXT_PHASE === 'phase-production-build') return;
   try {
     trackServer('api_error', { endpoint, status });
   } catch (err) {

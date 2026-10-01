@@ -75,6 +75,19 @@ describe('reportApiError — which statuses are reported', () => {
     vi.resetModules();
   });
 
+  it('reports nothing during `next build`, where handlers run with no requester', async () => {
+    const { reportApiError } = await import('./api-error-reporting');
+    vi.stubEnv('NEXT_PHASE', 'phase-production-build');
+    reportApiError('/api/admin/alerts/check', 500);
+    vi.unstubAllEnvs();
+    await flush();
+    expect(stored).toHaveLength(0);
+    // ...and the same call outside the build phase still reports.
+    reportApiError('/api/admin/alerts/check', 500);
+    await flush();
+    expect(stored).toHaveLength(1);
+  });
+
   it('carries no message or request path — the payload is endpoint pattern and status only', async () => {
     const { reportApiError } = await import('./api-error-reporting');
     reportApiError('/api/workflows/[id]/share', 500);
