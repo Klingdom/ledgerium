@@ -67,13 +67,13 @@ export interface StateBadgeMeta {
   toneClass: string;
 }
 
-const RED_TONE = 'text-[var(--status-danger)] bg-red-500/10 border-red-500/30';
-const AMBER_TONE = 'text-[var(--status-warning)] bg-amber-500/10 border-amber-500/30';
+const RED_TONE = 'text-[var(--status-danger-on-tint)] bg-[var(--status-danger-tint)] border-red-500/30';
+const AMBER_TONE = 'text-[var(--status-warning-on-tint)] bg-[var(--status-warning-tint)] border-amber-500/30';
 // "local-only" gets its own hue, distinct from both the amber "stale"
 // warning and the neutral "unknown" disclosure — it is a specific,
 // known, actionable incompleteness, not degradation and not an unknown.
 const BLUE_TONE = 'text-blue-400 bg-blue-500/10 border-blue-500/30';
-const GREEN_TONE = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30';
+const GREEN_TONE = 'text-[var(--status-success-on-tint)] bg-[var(--status-success-tint)] border-emerald-500/30';
 const NEUTRAL_TONE =
   'text-[var(--content-secondary)] bg-[var(--surface-secondary)] border-[var(--border-default)]';
 
@@ -231,7 +231,7 @@ function ArtifactRow({
         <span>{detail}</span>
       </div>
       {derived.lastError && (
-        <p className="text-[11px] text-[var(--status-danger)]" role="alert">
+        <p className="text-[11px] text-[var(--status-danger-on-tint)]" role="alert">
           {derived.lastError}
         </p>
       )}
@@ -336,7 +336,7 @@ export function BackupStatusSection() {
               <span
                 className={
                   summary.offHostConfigured
-                    ? 'font-medium text-emerald-400'
+                    ? 'font-medium text-[var(--status-success-on-tint)]'
                     : 'font-medium text-[var(--content-secondary)]'
                 }
               >

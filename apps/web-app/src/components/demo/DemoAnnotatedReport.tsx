@@ -109,7 +109,7 @@ export default function DemoAnnotatedReport() {
             app.ledgerium.ai/workflows/approve-expense-report/report
           </div>
         </div>
-        <span className="shrink-0 rounded-full border border-amber-500/25 bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-medium text-[var(--status-warning)]">
+        <span className="shrink-0 rounded-full border border-amber-500/25 bg-[var(--status-warning-tint)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--status-warning-on-tint)]">
           Sample data
         </span>
       </div>

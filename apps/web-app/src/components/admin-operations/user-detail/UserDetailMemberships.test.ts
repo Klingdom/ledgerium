@@ -35,18 +35,18 @@ describe('formatRole', () => {
 // ── membershipStatusColorClass ─────────────────────────────────────────────────
 
 describe('membershipStatusColorClass', () => {
-  it('returns emerald class for active status', () => {
-    expect(membershipStatusColorClass('active')).toMatch(/emerald/);
+  it('returns the success tone for active status', () => {
+    expect(membershipStatusColorClass('active')).toMatch(/status-success/);
   });
 
-  it('returns amber class for invited and pending statuses', () => {
-    expect(membershipStatusColorClass('invited')).toMatch(/amber/);
-    expect(membershipStatusColorClass('pending')).toMatch(/amber/);
+  it('returns the warning tone for invited and pending statuses', () => {
+    expect(membershipStatusColorClass('invited')).toMatch(/status-warning/);
+    expect(membershipStatusColorClass('pending')).toMatch(/status-warning/);
   });
 
-  it('returns red class for removed and banned statuses', () => {
-    expect(membershipStatusColorClass('removed')).toMatch(/red/);
-    expect(membershipStatusColorClass('banned')).toMatch(/red/);
+  it('returns the danger tone for removed and banned statuses', () => {
+    expect(membershipStatusColorClass('removed')).toMatch(/status-danger/);
+    expect(membershipStatusColorClass('banned')).toMatch(/status-danger/);
   });
 
   it('returns a fallback class string for an unknown status', () => {

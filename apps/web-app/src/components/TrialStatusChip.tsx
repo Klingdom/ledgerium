@@ -35,7 +35,7 @@ export function TrialStatusChip() {
 
   const tone =
     state.tone === 'attention'
-      ? 'border-amber-500/40 bg-amber-500/10 text-amber-500 hover:bg-amber-500/15'
+      ? 'border-amber-500/40 bg-[var(--status-warning-tint)] text-[var(--status-warning-on-tint)] hover:bg-[var(--status-warning-tint)]'
       : 'border-[var(--border-default)] bg-[var(--surface-secondary)] text-[var(--content-secondary)] hover:bg-[var(--surface-elevated)]';
 
   return (

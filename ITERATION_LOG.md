@@ -4,6 +4,23 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-09-30 (loop 77) — A badge is a pair, and one of them has no solution (Mode 1, coordinator)
+
+- **Controls:** Area — `web-app / a11y`. Agent — coordinator; ran alongside MR-039 on files the review is not reading. Extension — `871e29a`, 34 loops; #216 fifth ask, CEO-blocked.
+- **Candidate Selection: `top-score` — #236** (10).
+- **The row asked which surface the badges sit on. The better answer was to remove the question.** `bg-red-500/10` composites differently on a white card than on the page, which is why two independent calculations of the same badge disagreed at loop 67 — neither was wrong, they assumed different backgrounds. **Opaque tints have one answer.**
+- **A badge needs its own foreground, and the danger case is what proves it.** In light theme `--status-danger` is 4.62:1 on plain white — it clears the floor on a surface and fails on **any** red tint, because the foreground is too close to its own hue. **There is no alpha that works.** So `--status-danger-on-tint` is red-700, not the red-600 used elsewhere. That asymmetry is not untidiness; it is the finding.
+- **Guarded as a pair, because the pair is the unit that can be right or wrong.** A per-colour check would have called the light danger badge fine — both colours pass against the page. Added an assertion that the on-tint danger foreground stays *distinct* from the on-surface one, so a later "simplification" to one token cannot silently drop those badges to ~4.1:1 while every pair test still passes.
+- **19 sites converted; 4 tints deliberately left alone** where no status foreground sat beside them. Half a pair is not something this row can judge, and converting it on the strength of the background alone would repeat the error the row exists to fix.
+- **Six test assertions matched hue words** — `/emerald/`, `/amber/`, `/red/` — against class strings, and broke the moment the colour became semantic. Rewritten to name the status. They were asserting the proxy rather than the property.
+- **Light-theme coverage extended, and it immediately found three more defects** — none of them this row's badges: `text-brand-400` on a brand tint at **1.63:1** light (row #236's shape in the brand palette), `text-brand-500` at **2.42:1** light, and `text-amber-700` at **3.77:1** in **dark** — a light-theme colour on the default theme, which is the usual defect mirrored. Filed as **#245** with the measurements; the failing scans are held in the spec file itself with the row cited, per MR-038's point that a hold recorded only in a log is indistinguishable from a test nobody wrote.
+- **Admin remains uncovered, and that is a decision rather than an omission.** `/admin/operations` 404s for anyone off the hardcoded allowlist. Adding a test account to a security boundary is not a trade worth making for coverage, so the spec exists and skips with that stated. The same badge components are exercised through the public surfaces instead.
+- **Validation:** web-app **3278 → 3291** (+13); contrast guard **42/42**; sop-template dark scan green; typecheck **0** across 11 packages; validator clean at 238 rows.
+- **Follow-ups:** 1 created (#245), 1 closed (#236).
+- **Meta-review cadence:** MR-039 in progress.
+
+---
+
 ## 2026-09-30 (loop 76) — A complete implementation of a strategy the product rejected (Mode 1, coordinator)
 
 - **Controls:** Area — `web-app / correctness`, pivoted off analytics. Agent — coordinator. Extension — `871e29a`, 33 loops; #216 fifth ask, CEO-blocked.

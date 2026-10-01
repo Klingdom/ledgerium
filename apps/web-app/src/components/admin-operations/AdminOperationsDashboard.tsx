@@ -352,7 +352,7 @@ export function AdminOperationsDashboard() {
           >
             <p
               className={`text-[13px] font-semibold ${
-                billing.canCollectRealPayments ? 'text-[var(--status-warning)]' : 'text-[var(--status-danger)]'
+                billing.canCollectRealPayments ? 'text-[var(--status-warning)]' : 'text-[var(--status-danger-on-tint)]'
               }`}
             >
               {billing.mode === 'test'
@@ -376,7 +376,7 @@ export function AdminOperationsDashboard() {
         {status === 'error' && (
           <div
             role="alert"
-            className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-[13px] text-[var(--status-danger)]"
+            className="mb-6 rounded-lg border border-red-500/30 bg-[var(--status-danger-tint)] px-4 py-3 text-[13px] text-[var(--status-danger-on-tint)]"
           >
             {errorMessage}
           </div>

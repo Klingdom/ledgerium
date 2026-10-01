@@ -23,9 +23,9 @@ export function formatRole(role: string): string {
 
 /** Map a membership status to a Tailwind color class pair. */
 export function membershipStatusColorClass(status: string): string {
-  if (status === 'active') return 'bg-emerald-500/15 text-emerald-400';
-  if (status === 'invited' || status === 'pending') return 'bg-amber-500/15 text-[var(--status-warning)]';
-  if (status === 'removed' || status === 'banned') return 'bg-red-500/15 text-[var(--status-danger)]';
+  if (status === 'active') return 'bg-[var(--status-success-tint)] text-[var(--status-success-on-tint)]';
+  if (status === 'invited' || status === 'pending') return 'bg-[var(--status-warning-tint)] text-[var(--status-warning-on-tint)]';
+  if (status === 'removed' || status === 'banned') return 'bg-[var(--status-danger-tint)] text-[var(--status-danger-on-tint)]';
   return 'bg-[var(--surface-secondary)] text-[var(--content-secondary)]';
 }
 

@@ -25,7 +25,7 @@ const STEP_BADGE = [
   'bg-brand-900/25 border-brand-700/40 text-brand-400',
   'bg-emerald-900/25 border-emerald-700/40 text-emerald-400',
   'bg-violet-900/25 border-violet-700/40 text-violet-400',
-  'bg-amber-900/25 border-amber-700/40 text-[var(--status-warning)]',
+  'bg-[var(--status-warning-tint)] border-amber-700/40 text-[var(--status-warning-on-tint)]',
 ] as const;
 
 /** The Analysis-view report sections this product produces (honest anatomy, no numbers). */
@@ -124,7 +124,7 @@ function SopReportPreview({ originalDataPoint, sectionCount }: { originalDataPoi
             <span className="h-3 w-3 rounded-full bg-red-400/80" />
             <span className="h-3 w-3 rounded-full bg-amber-400/80" />
             <span className="h-3 w-3 rounded-full bg-green-400/80" />
-            <span className="ml-auto text-[11px] font-medium text-[var(--status-warning)] rounded-full border border-amber-500/25 bg-amber-500/15 px-2.5 py-0.5">
+            <span className="ml-auto text-[11px] font-medium text-[var(--status-warning-on-tint)] rounded-full border border-amber-500/25 bg-[var(--status-warning-tint)] px-2.5 py-0.5">
               Sample output — generated from a recording
             </span>
           </div>

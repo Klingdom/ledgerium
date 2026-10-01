@@ -44,6 +44,25 @@
      Dark keeps #22C55E, so the default theme is visually unchanged. */
   --focus-ring: #22C55E;      /* 7.10:1 on --surface-primary */
 
+  /* Tinted status badges (row #236).
+     
+     Two things here are deliberate. First, these are OPAQUE rather than an
+     alpha over whatever is behind — `bg-red-500/10` composites differently on
+     a white card than on the page, and that ambiguity is what made the badges
+     unjudgeable: two independent calculations of the same badge disagreed
+     because each assumed a different surface. An opaque tint has one answer.
+     
+     Second, a tinted badge needs its OWN foreground. In light theme
+     --status-danger (#DC2626) is 4.62:1 on plain white, so any red behind it
+     falls under the floor — there is no alpha that works. The foreground is
+     too close to its own hue. So a badge is a pair, and the pair is named. */
+  --status-danger-tint: #412329;
+  --status-danger-on-tint: #F87171;   /* 5.07:1 on the tint */
+  --status-warning-tint: #59421B;
+  --status-warning-on-tint: #FBBF24;  /* 5.67:1 */
+  --status-success-tint: #1A4E34;
+  --status-success-on-tint: #4ADE80;  /* 5.52:1 */
+
   /* Borders */
   --border-default: rgba(255, 255, 255, 0.10);
   --border-subtle: rgba(255, 255, 255, 0.06);
@@ -78,6 +97,16 @@
   --status-success: #15803D;  /* 4.79:1 */
   --status-info: #1D4ED8;     /* 6.41:1 — row #229, see :root */
   --focus-ring: #15803D;      /* 4.79:1 — row #230, see :root */
+
+  /* Row #236 — light tints. Note --status-danger-on-tint is red-700, NOT the
+     red-600 used on plain surfaces: red-600 cannot clear 4.5:1 over any red
+     tint. See :root for why a badge is a pair. */
+  --status-danger-tint: #FDECEC;
+  --status-danger-on-tint: #B91C1C;   /* 5.66:1 on the tint */
+  --status-warning-tint: #FEF6E9;
+  --status-warning-on-tint: #92400E;  /* 6.61:1 */
+  --status-success-tint: #F0FBF4;
+  --status-success-on-tint: #15803D;  /* 4.73:1 */
 
   /* Borders */
   --border-default: #E2E8F0;
@@ -483,6 +512,12 @@
          so a SOP printed from dark mode would lose its confidence figures. */
       --status-info: #1D4ED8 !important;
       --focus-ring: #15803D !important;
+      --status-danger-tint: #FDECEC !important;
+      --status-danger-on-tint: #B91C1C !important;
+      --status-warning-tint: #FEF6E9 !important;
+      --status-warning-on-tint: #92400E !important;
+      --status-success-tint: #F0FBF4 !important;
+      --status-success-on-tint: #15803D !important;
       --border-default: #e2e8f0 !important;
       --border-subtle: #f1f5f9 !important;
       background: #ffffff !important;

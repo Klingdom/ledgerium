@@ -6,6 +6,23 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-09-30] - Coloured status badges are now readable in both light and dark mode
+
+**Why:** badges that put coloured text on a faint coloured background were close to unreadable in light mode — one of them effectively invisible.
+
+### Fixed
+- The background tints are now fixed colours rather than a translucent wash over whatever happens to be behind. That removes a real ambiguity: the same badge measured differently depending on whether it sat on a card or on the page, which is why two attempts to check them disagreed.
+- **Red badges needed a darker red text than red used elsewhere.** The standard red is only just readable on a plain white background, so putting *any* red tint behind it pushes it under the bar. There is no amount of tinting that works — the text and the background were simply too close in colour. A badge is a pairing, and it is now treated as one.
+- Nineteen badges updated. Four were left alone because they had no status-coloured text beside them, and judging half a pairing is how this kind of thing goes wrong in the first place.
+
+### Found by extending the checks
+- Three more contrast problems on pages that had never been checked in either mode: a brand-coloured badge at well under the required contrast in light mode, a brand-coloured heading likewise, and an amber label that fails in *dark* mode — the same mistake in reverse. All recorded with measurements; the checks covering them are held back until they are fixed, rather than shipped failing.
+
+### Not covered, deliberately
+- The admin pages return "not found" to anyone not on the admin list, and adding a test account to that list is not a trade worth making for test coverage. The same badge components are checked through the public pages instead.
+
+---
+
 ## [2026-09-30] - Removed a complete, unused implementation of plan restrictions
 
 **Why:** the codebase contained two different answers to "how does this product restrict features by plan?" — one in use, one that looked equally real and was wired to nothing.

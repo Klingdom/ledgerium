@@ -53,21 +53,21 @@ describe('formatSubscriptionStatus', () => {
 // ── statusColorClass ───────────────────────────────────────────────────────────
 
 describe('statusColorClass', () => {
-  it('returns emerald class for active and trialing', () => {
-    const emeraldPattern = /emerald/;
+  it('returns the success tone for active and trialing', () => {
+    const emeraldPattern = /status-success/;  // row #236: semantic, not hue
     expect(statusColorClass('active')).toMatch(emeraldPattern);
     expect(statusColorClass('trialing')).toMatch(emeraldPattern);
   });
 
-  it('returns amber class for past_due, unpaid, and incomplete', () => {
-    const amberPattern = /amber/;
+  it('returns the warning tone for past_due, unpaid, and incomplete', () => {
+    const amberPattern = /status-warning/;  // row #236: semantic, not hue
     expect(statusColorClass('past_due')).toMatch(amberPattern);
     expect(statusColorClass('unpaid')).toMatch(amberPattern);
     expect(statusColorClass('incomplete')).toMatch(amberPattern);
   });
 
-  it('returns red class for canceled and incomplete_expired', () => {
-    const redPattern = /red/;
+  it('returns the danger tone for canceled and incomplete_expired', () => {
+    const redPattern = /status-danger/;  // row #236: semantic, not hue
     expect(statusColorClass('canceled')).toMatch(redPattern);
     expect(statusColorClass('incomplete_expired')).toMatch(redPattern);
   });

@@ -268,7 +268,7 @@ export function UserDetailDrawer({ selectedUserId, onClose }: UserDetailDrawerPr
             <div
               role="alert"
               data-testid="drawer-error"
-              className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-[13px] text-[var(--status-danger)]"
+              className="rounded-lg border border-red-500/30 bg-[var(--status-danger-tint)] px-4 py-3 text-[13px] text-[var(--status-danger-on-tint)]"
             >
               {errorMessage}
               <button

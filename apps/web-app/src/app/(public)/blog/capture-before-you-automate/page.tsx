@@ -47,7 +47,7 @@ export default function CaptureBeforeAutomatePost() {
             Back to blog
           </Link>
 
-          <span className="inline-block text-[11px] font-semibold uppercase tracking-widest border rounded-full px-2.5 py-0.5 mb-4 bg-amber-500/10 text-[var(--status-warning)] border-amber-500/20">
+          <span className="inline-block text-[11px] font-semibold uppercase tracking-widest border rounded-full px-2.5 py-0.5 mb-4 bg-[var(--status-warning-tint)] text-[var(--status-warning-on-tint)] border-amber-500/20">
             AI &amp; Automation
           </span>
 

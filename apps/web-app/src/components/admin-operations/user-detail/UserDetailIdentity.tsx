@@ -42,13 +42,13 @@ export function formatSubscriptionStatus(status: string): string {
 /** Map a subscription status to a Tailwind color class pair. */
 export function statusColorClass(status: string): string {
   if (status === 'active' || status === 'trialing') {
-    return 'bg-emerald-500/15 text-emerald-400';
+    return 'bg-[var(--status-success-tint)] text-[var(--status-success-on-tint)]';
   }
   if (status === 'past_due' || status === 'unpaid' || status === 'incomplete') {
-    return 'bg-amber-500/15 text-[var(--status-warning)]';
+    return 'bg-[var(--status-warning-tint)] text-[var(--status-warning-on-tint)]';
   }
   if (status === 'canceled' || status === 'incomplete_expired') {
-    return 'bg-red-500/15 text-[var(--status-danger)]';
+    return 'bg-[var(--status-danger-tint)] text-[var(--status-danger-on-tint)]';
   }
   return 'bg-[var(--surface-secondary)] text-[var(--content-secondary)]';
 }

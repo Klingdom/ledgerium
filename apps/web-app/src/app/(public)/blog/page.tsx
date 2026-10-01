@@ -60,7 +60,7 @@ const POSTS = [
 const CATEGORY_STYLES: Record<string, string> = {
   'Process Intelligence': 'bg-brand-600/10 text-[var(--brand-text)] border-brand-600/20',
   'Competitive':          'bg-violet-500/10 text-violet-400 border-violet-500/20',
-  'AI & Automation':      'bg-amber-500/10 text-[var(--status-warning)] border-amber-500/20',
+  'AI & Automation':      'bg-[var(--status-warning-tint)] text-[var(--status-warning-on-tint)] border-amber-500/20',
 };
 
 function formatDate(dateStr: string): string {
