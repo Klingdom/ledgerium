@@ -4,6 +4,18 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-046 recorded (Mode 4, non-counting): the secret with a public default
+
+- **Review:** `docs/meta/MR_046_META_REVIEW.md`. Every number reproduces at `3bb26e9`. Loops 97-100 hold: the owner-removal matrix really exercises the active count; `isAdmin` decides nothing anywhere; the delivery check is sound for what it checks; every loop-100 ratio reproduces.
+- **Headline, verified by me in all three files before acting:** `compose.hostinger.yaml` gives `NEXTAUTH_SECRET` the fallback `change-me`, and the startup check rejects an empty secret and two placeholders — but not that one. If the deploy secret were ever missing, production would sign sessions with a public string, anyone could forge a session for an allowlisted email, and the admin password-reset route would then reach any account.
+- **Not live, and I checked rather than assumed:** `gh secret list` shows `NEXTAUTH_SECRET` exists, and GitHub will not store an empty secret. The value is real today. Applying MR-045's practice: the delivering line is `compose.hostinger.yaml:29`, which forwards it — so the real value arrives.
+- **My loop 99 passed it.** The delivery check treats a variable as delivered if compose lists it — so a fallback default counts as success. The check asked whether the variable is *named*, not whether its *value* can be a placeholder. Filed as **#280** (16), loop 101: no defaults for secrets, the startup check rejects every placeholder and enforces a length, and the delivery check fails on a secret with a fallback.
+- **Other findings applied:** #13's birth set to iter 001 *by position* (labelled as inferred) — MR-045 asked for this one-cell fix and I missed it; #278 corrected (four listed Stripe IDs are read but unused; three are build-time, where compose delivery is irrelevant).
+- **Not yet applied, stated:** sending `AUTHZ_AUDIT_001` back to its author to amend the re-graded findings — MR-045's practice, not yet used once. And MR-046 notes the Hostinger action's script runs on the GitHub runner (commit `9c8309b`), so the repo contains no proof the variable block reaches the VPS shell — the delivery check models the compose side only.
+- **P1-2 is now the only self-service path to admin** — signing up as an allowlisted address nobody has claimed. Your account check is the mitigation until signup verifies email.
+
+---
+
 ## 2026-10-02 (loop 100) — Fainter on hover than at rest (Mode 1, `frontend-engineer`)
 
 - **Controls:** Area — `web-app / a11y` (98 security, 99 infra). Agent — **`frontend-engineer`, a real rotation** (suite, typecheck, public scans and two mutation checks run by the agent; I re-ran suite and typecheck and recounted the residual). Extension — `871e29a`, 57 loops. **Cadence: 3 of 3 since MR-045 — MR-046 now due.**
