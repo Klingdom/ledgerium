@@ -322,7 +322,7 @@ describe('P0-I: sole-owner protection returns 409', () => {
     mockAuth.mockResolvedValue({ user: { id: 'caller-1' } });
     mockTeamMemberFindFirst
       .mockResolvedValueOnce({ teamId: 'team-1', userId: 'caller-1', role: 'owner', status: 'active' }) // caller auth
-      .mockResolvedValueOnce({ id: 'mem-1', teamId: 'team-1', userId: 'target-1', role: 'owner' }); // target
+      .mockResolvedValueOnce({ id: 'mem-1', teamId: 'team-1', userId: 'target-1', role: 'owner', status: 'active' }); // target
     mockTeamMemberCount.mockResolvedValue(1); // sole owner
     mockTeamMemberUpdate.mockResolvedValue({});
   });
@@ -350,7 +350,7 @@ describe('P0-I: sole-owner protection returns 409', () => {
     mockTeamMemberFindFirst
       .mockReset()
       .mockResolvedValueOnce({ teamId: 'team-1', userId: 'caller-1', role: 'owner', status: 'active' })
-      .mockResolvedValueOnce({ id: 'mem-1', teamId: 'team-1', userId: 'target-1', role: 'owner' });
+      .mockResolvedValueOnce({ id: 'mem-1', teamId: 'team-1', userId: 'target-1', role: 'owner', status: 'active' });
     mockTeamMemberCount.mockResolvedValue(2);
     const { PATCH } = await import('./[id]/members/[memberId]/route');
     const res = await PATCH(makePatchRequest('http://localhost/api/teams/team-1/members/mem-1', { role: 'member' }), PARAMS);

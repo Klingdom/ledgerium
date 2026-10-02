@@ -80,7 +80,7 @@ function makeDeleteRequest() {
 const PARAMS = { params: { id: 't1', memberId: 'mem-1' } };
 const OWNER_CALLER = { teamId: 't1', userId: 'caller-1', role: 'owner' };
 const TARGET_MEMBER = { id: 'mem-1', teamId: 't1', userId: 'user-2', role: 'member' };
-const TARGET_OWNER = { id: 'mem-1', teamId: 't1', userId: 'user-2', role: 'owner' };
+const TARGET_OWNER = { id: 'mem-1', teamId: 't1', userId: 'user-2', role: 'owner', status: 'active' };
 
 // ─── PATCH tests ──────────────────────────────────────────────────────────────
 

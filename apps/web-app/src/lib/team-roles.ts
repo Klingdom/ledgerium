@@ -21,6 +21,19 @@ export function isTeamRole(value: unknown): value is string {
  * viewer (as PATCH has always allowed). Callers must already have verified that the
  * actor is an active owner or admin; this function only judges the requested role.
  */
+/**
+ * Authority rule (row #274): a non-owner may not remove or change the role of an owner.
+ * Admins are peers of each other: the invite and PATCH rules already let an admin grant
+ * `admin`, so an admin may remove or change another admin. Callers must already have
+ * verified the actor is an active owner or admin.
+ */
+export function isActionOnHigherAuthority(actorRole: string, targetRole: string): boolean {
+  return targetRole === 'owner' && actorRole !== 'owner';
+}
+
+/** Response body shared by every path that refuses with `forbidden_role_elevation`. */
+export const ROLE_ELEVATION_CODE = 'forbidden_role_elevation';
+
 export function isRoleElevation(actorRole: string, requestedRole: string): boolean {
   return requestedRole === 'owner' && actorRole !== 'owner';
 }

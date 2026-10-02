@@ -209,7 +209,7 @@ describe('DELETE /api/teams/:id/members (legacy body-based)', () => {
   it('returns 409 with code sole_owner_protection when attempting to remove the sole owner (P0-I)', async () => {
     // caller findFirst returns owner, target findUnique returns owner, count=1 sole owner
     mockTeamMemberFindFirst.mockResolvedValue({ teamId: 't1', userId: 'caller-1', role: 'owner', status: 'active' });
-    mockTeamMemberFindUnique.mockResolvedValue({ teamId: 't1', userId: 'target-1', role: 'owner' });
+    mockTeamMemberFindUnique.mockResolvedValue({ teamId: 't1', userId: 'target-1', role: 'owner', status: 'active' });
     mockTeamMemberCount.mockResolvedValue(1); // only 1 owner
     const res = await DELETE(makeDeleteRequest('t1', { userId: 'target-1' }), PARAMS);
     expect(res.status).toBe(409);

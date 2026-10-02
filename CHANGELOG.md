@@ -6,6 +6,13 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Security: team admins can no longer remove owners
+
+### Security
+- A team admin could remove a team's owners — including, in some cases, the last remaining owner, leaving a team nobody could fully manage. Admins can no longer remove or change the role of an owner, and a team can no longer be left without an active owner.
+
+---
+
 ## [2026-10-01] - Security: team invitations can no longer grant more authority than the sender has
 
 ### Security

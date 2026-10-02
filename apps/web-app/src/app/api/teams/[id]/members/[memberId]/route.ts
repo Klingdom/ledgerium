@@ -4,7 +4,13 @@ import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { reportApiError } from '@/lib/api-error-reporting';
 import { z } from 'zod';
-import { TEAM_ROLES, isTeamRole, isRoleElevation } from '@/lib/team-roles';
+import {
+  TEAM_ROLES,
+  ROLE_ELEVATION_CODE,
+  isTeamRole,
+  isRoleElevation,
+  isActionOnHigherAuthority,
+} from '@/lib/team-roles';
 
 /**
  * PATCH /api/teams/:id/members/:memberId — change a member's role
@@ -81,11 +87,20 @@ async function handlePATCH(
       return NextResponse.json({ error: 'Member not found' }, { status: 404 });
     }
 
-    // Sole-owner protection: cannot demote the last owner.
+    // Row #274: a non-owner may not change an owner's role (checked on the target's CURRENT role).
+    if (isActionOnHigherAuthority(callerMembership.role, targetMembership.role)) {
+      return NextResponse.json(
+        { error: 'Only an owner can change an owner\'s role', code: ROLE_ELEVATION_CODE },
+        { status: 403 },
+      );
+    }
+
+    // Sole-owner protection: cannot demote the last ACTIVE owner (row #274: removed
+    // owners keep role='owner', so the count must filter on status).
     // P0-I: UMAP-001 AC-6 mandates HTTP 409 (conflict) not 400 for this case.
-    if (targetMembership.role === 'owner' && newRole !== 'owner') {
+    if (targetMembership.role === 'owner' && targetMembership.status === 'active' && newRole !== 'owner') {
       const ownerCount = await db.teamMember.count({
-        where: { teamId: params.id, role: 'owner' },
+        where: { teamId: params.id, role: 'owner', status: 'active' },
       });
       if (ownerCount <= 1) {
         return NextResponse.json(
@@ -140,11 +155,19 @@ async function handleDELETE(
       return NextResponse.json({ error: 'Member not found' }, { status: 404 });
     }
 
-    // Sole-owner protection: count owners; refuse if this is the last one.
+    // Row #274: a non-owner may not remove an owner.
+    if (isActionOnHigherAuthority(callerMembership.role, targetMembership.role)) {
+      return NextResponse.json(
+        { error: 'Only an owner can remove an owner', code: ROLE_ELEVATION_CODE },
+        { status: 403 },
+      );
+    }
+
+    // Sole-owner protection: count ACTIVE owners; refuse if this is the last one.
     // P0-I: UMAP-001 AC-6 mandates HTTP 409 (conflict) not 400 for this case.
-    if (targetMembership.role === 'owner') {
+    if (targetMembership.role === 'owner' && targetMembership.status === 'active') {
       const ownerCount = await db.teamMember.count({
-        where: { teamId: params.id, role: 'owner' },
+        where: { teamId: params.id, role: 'owner', status: 'active' },
       });
       if (ownerCount <= 1) {
         return NextResponse.json(

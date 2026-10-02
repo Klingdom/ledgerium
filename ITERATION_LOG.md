@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 97) — The last owner (Mode 1, `security-reviewer`)
+
+- **Controls:** Area — `security / authz` (95 security, 96 evidence). Agent — **`security-reviewer`, a real rotation** (suite, typecheck, two mutation checks run by the agent; I re-ran suite and typecheck and added the build). Ran concurrently with MR-045 on separate files. Extension — `871e29a`, 54 loops.
+- **Candidate Selection: `burn-down` — #274** (16), promoted from AUTHZ_AUDIT_001 as a P0 re-grade on my verification; MR-045 is ruling on whether that promotion was legitimate. The fix is correct whatever the grade.
+- **The defect:** removal never checked the target's role, so an admin could remove an owner; and the last-owner guard counted owner *rows* — removal only marks a row removed, so removed owners kept counting, and an admin could take a team down to no active owner. Role change had the same gap on the target's current role. Second escalation in this subsystem in three loops; the first (#272) was found by accident, this one by deliberate traversal.
+- **One rule, one place again:** `isActionOnHigherAuthority` joins loop 95's helpers in `lib/team-roles.ts`, and all three paths use it. Admins are peers — consistent with what the invite rule already lets an admin grant.
+- **Tested where the bug lived:** the matrix (5 callers × 4 targets × 3 paths) runs against a small stateful table, so the status filter that was missing is actually exercised rather than mocked past. Reverting it fails the miscount tests; dropping the target-role check fails the admin→owner cells.
+- **Residual, class-scoped:** every writer of `TeamMember.role` or `status` enumerated; the three that could reduce a superior's authority now cannot. **Left, filed:** #275 — two owners removing each other at the same instant can still race past the count.
+- **Validation (re-run by me):** web-app **3681 → 3748** (+67); typecheck 0; build 0; prerender unchanged.
+- **Follow-ups:** 1 created (#275), 1 closed (#274).
+
+---
+
 ## 2026-10-02 — AUTHZ_AUDIT_001: a deliberate traversal of access control (Mode 3-adjacent, non-counting)
 
 - **Why:** loop 95's privilege escalation was found by accident, while doing something else. MR-039 showed a deliberate traversal finds what adjacency does not. `security-reviewer`, read-only, every route: `docs/meta/AUTHZ_AUDIT_001.md`.
