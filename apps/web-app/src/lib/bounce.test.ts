@@ -74,3 +74,20 @@ describe('bounceElapsedMs', () => {
     expect(bounceElapsedMs(5_000, 1_000)).toBe(0);
   });
 });
+
+import { shouldEmitDashboardView } from './bounce';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+describe('shouldEmitDashboardView (row #250)', () => {
+  it('does not emit on the error path; emits once on success; not twice', () => {
+    expect(shouldEmitDashboardView({ isError: true, alreadyFired: false })).toBe(false);
+    expect(shouldEmitDashboardView({ isError: false, alreadyFired: false })).toBe(true);
+    expect(shouldEmitDashboardView({ isError: false, alreadyFired: true })).toBe(false);
+  });
+
+  it('the shell gates its dashboard_v2_viewed emission on this predicate (wiring lock)', () => {
+    const src = readFileSync(resolve(__dirname, '../components/dashboard-v2/DashboardV2Shell.tsx'), 'utf8');
+    expect(src).toMatch(/shouldEmitDashboardView\(\{\s*isError,/);
+  });
+});

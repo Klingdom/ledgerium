@@ -4,6 +4,18 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 112) — An alert that could not fire (Mode 1, `backend-engineer`)
+
+- **Controls:** Area — `web-app / analytics` (not saturated; security 3 of last 5 → security rows penalised). Agent — `backend-engineer` (suite ×2, typecheck and four mutations reported by the agent; I re-ran suite ×2, the new tests ×5, typecheck, and read the alert diff). Extension — `871e29a`, 69 loops. **Cadence: 3 of 3 since MR-049 — MR-050 now due.**
+- **Candidate Selection: `burn-down` — #250** (10, tied with #249, #251, #252 and #278; #285 9 after the security penalty). Tie-break: part (1) is a silent failure on the monitoring path loops 82-109 made deliverable, and the row was 34 loops old — past the 10-loop staleness cap and never triaged.
+- **What was wrong, all three still true in the current code:** (1) the activation alert divided users who viewed a SOP in 7 days *at any tenure* by users who *signed up* in 7 days — not a subset, so the ratio grew with the active base and could never fall below its 0.20 threshold: **permanently green**; (2) retention averaged cohorts too young to have reached week N as 0%; (3) `dashboard_v2_viewed` fired on failed loads, so failures counted as views and deflated every per-view rate (bounce, chip-click).
+- **What changed:** (1) new pure `lib/activation-rate.ts` — cohort = users whose first signup was 7-14 days ago; numerator = cohort members who viewed a SOP within 7 days of *their own* signup; ratio provably in [0,1]; empty cohort → `insufficient_data`. **Choice stated: the alert now lags one week** (immature signups are excluded rather than counted as failures; fresh-signup silence is covered by `no_signups_48h`). Threshold unchanged. `computeAlerts` takes an injected `nowMs`. (2) new pure `lib/retention-cohorts.ts` — a week-N cell is `null` until that week has elapsed for the cohort and nulls are excluded from averages; the one consumer already renders `null` as "—". (3) the shell skips the view on error; a successful retry still emits exactly one.
+- **Residuals, stated:** the hourly check now fetches every `sop_section_viewed` row of the last 14 days (was a grouped count) — fine at current volume, linear in traffic. The alert can now actually fire, and with a small cohort it will be noisy (one unactivated signup of one = 0%). Part (3)'s wiring test reads the shell source (no render harness for the shell), so it proves the call, not the rendered behaviour.
+- **Validation (re-run by me):** web-app **3848 → 3860** on 2 of 2 runs; the four touched test files 5 of 5; typecheck 0. Mutations by the agent: any-tenure numerator fails 3 tests; no maturity filter fails 2; error-ignoring predicate fails 1; reverting the shell wiring fails the source lock. 2 user-visible strings changed (alert messages; under the D-4 threshold). New pure modules total 195 LOC (under the D-4 clause-2 threshold).
+- **Follow-ups:** 0 created, 1 closed (#250).
+
+---
+
 ## 2026-10-02 (loop 111) — A badge that said who was admin, and was wrong (Mode 1, `frontend-engineer`)
 
 - **Controls:**

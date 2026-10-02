@@ -72,3 +72,22 @@ export function bounceElapsedMs(viewTimestampMs: number, nowMs: number): number 
   if (viewTimestampMs <= 0) return 0;
   return Math.max(0, Math.round(nowMs - viewTimestampMs));
 }
+
+/**
+ * Should `dashboard_v2_viewed` be emitted for this load outcome? — row #250.
+ *
+ * It used to fire on the error path too, so a failed load counted as a view
+ * indistinguishable from a genuine empty state, deflating every per-view rate
+ * (bounce, chip-click). A failed load is not a view. The caller must treat
+ * `alreadyFired` as the once-per-mount guard and leave it unset on error, so a
+ * successful retry still produces the single view.
+ */
+export function shouldEmitDashboardView({
+  isError,
+  alreadyFired,
+}: {
+  isError: boolean;
+  alreadyFired: boolean;
+}): boolean {
+  return !isError && !alreadyFired;
+}

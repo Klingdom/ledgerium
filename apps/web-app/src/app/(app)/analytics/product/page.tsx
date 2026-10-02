@@ -72,12 +72,12 @@ interface EngagementData {
 interface RetentionCohort {
   week: string;
   signups: number;
-  retention: number[]; // indices 0–4 = Week 0 through Week 4+
+  retention: (number | null)[]; // indices 0–4 = Week 0 through Week 4+; null = not yet measurable
 }
 
 interface RetentionData {
   cohorts: RetentionCohort[];
-  averageRetention: number[];
+  averageRetention: (number | null)[];
 }
 
 // ─── Alerts types ─────────────────────────────────────────────────────────────
@@ -173,7 +173,7 @@ const TIER_CLASSES: Record<string, string> = {
 
 // ─── Retention heat-map helpers ───────────────────────────────────────────────
 
-function retentionBg(pct: number | undefined): string {
+function retentionBg(pct: number | null | undefined): string {
   if (pct === undefined || pct === null) return 'bg-[var(--surface-secondary)]';
   if (pct >= 80) return 'bg-emerald-700 text-white';
   if (pct >= 60) return 'bg-emerald-500 text-white';

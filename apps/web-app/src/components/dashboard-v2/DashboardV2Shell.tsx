@@ -29,7 +29,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { track, setUserPlanForAnalytics } from '@/lib/analytics.js';
-import { BOUNCE_TRIGGER, shouldEmitBounce, bounceElapsedMs } from '@/lib/bounce.js';
+import { BOUNCE_TRIGGER, shouldEmitBounce, bounceElapsedMs, shouldEmitDashboardView } from '@/lib/bounce.js';
 import CommandHeader, { type TimeRange } from './CommandHeader.js';
 import InsightsStrip from './InsightsStrip.js';
 import TopBand from './band/TopBand.js';
@@ -395,11 +395,14 @@ function DashboardV2ShellInner() {
   }, [fetchWorkflows]);
 
   // PRD §4 metric #1: emit dashboard_v2_viewed once after data is available.
-  // Fires when loading completes (either success or error) and hasn't yet fired this mount.
+  // Fires when loading completes SUCCESSFULLY and hasn't yet fired this mount. Row #250:
+  // a failed load is not a view — it is skipped (the fire-once ref stays unset, so a
+  // successful retry still emits exactly one view). No new analytics event type is
+  // introduced; the failure stays observable via the /api/workflows 5xx path.
   // Uses state values directly (not derived anyFiltersActive) to avoid TDZ in closure.
   useEffect(() => {
     if (isLoading) return;
-    if (dashboardViewFiredRef.current) return;
+    if (!shouldEmitDashboardView({ isError, alreadyFired: dashboardViewFiredRef.current })) return;
     dashboardViewFiredRef.current = true;
     setDashboardViewPerfTimestampMs(performance.now());
     const filtersActive =
@@ -428,7 +431,7 @@ function DashboardV2ShellInner() {
   // Intentional: this effect is a "fire once on first data load" pattern.
   // allWorkflows.length is the trigger signal — other deps are snapshot values at emission time.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, allWorkflows.length]);
+  }, [isLoading, isError, allWorkflows.length]);
 
   // D5: fetch portfolios for the sidebar (best-effort — sidebar is supplementary)
   useEffect(() => {

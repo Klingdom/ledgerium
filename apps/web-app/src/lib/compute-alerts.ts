@@ -7,6 +7,7 @@
  */
 
 import { db } from '@/db';
+import { activationCohortBounds, computeActivationRate, type ActivationEvent } from '@/lib/activation-rate';
 
 export type AlertSeverity = 'P1' | 'P2' | 'P3';
 export type AlertStatus = 'ok' | 'firing' | 'insufficient_data';
@@ -25,16 +26,12 @@ function hoursAgo(hours: number): Date {
   return new Date(Date.now() - hours * 60 * 60 * 1000);
 }
 
-function daysAgo(days: number): Date {
-  return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-}
-
 /**
  * Evaluate all 8 alert conditions against the AnalyticsEvent table and return
  * an AlertResult for each. This function is read-only / side-effect-free.
  */
-export async function computeAlerts(): Promise<AlertResult[]> {
-  const checkedAt = new Date().toISOString();
+export async function computeAlerts(nowMs: number = Date.now()): Promise<AlertResult[]> {
+  const checkedAt = new Date(nowMs).toISOString();
   const analyticsEvent = db.analyticsEvent;
 
   // ── 1. upload_success_rate_low (P1) ─────────────────────────────────────
@@ -101,37 +98,39 @@ export async function computeAlerts(): Promise<AlertResult[]> {
   };
 
   // ── 4. activation_rate_drop (P2) ─────────────────────────────────────────
-  const cutoff7d = daysAgo(7);
-  const [signupUserGroups, sopViewUserGroups] = await Promise.all([
-    analyticsEvent.groupBy({
-      by: ['userId'],
-      where: { eventName: 'signup_completed', createdAt: { gte: cutoff7d }, userId: { not: null } },
-    }),
-    analyticsEvent.groupBy({
-      by: ['userId'],
-      where: { eventName: 'sop_section_viewed', createdAt: { gte: cutoff7d }, userId: { not: null } },
-    }),
+  // Row #250: one population — mature signup cohort (7-14d ago) and the subset
+  // of it that viewed a SOP section within 7d of signing up. See activation-rate.ts.
+  const cutoff7d = new Date(nowMs - 7 * 24 * 60 * 60 * 1000);
+  const { signupFrom, signupTo } = activationCohortBounds(nowMs);
+  const [signupRows, sopViewRows] = await Promise.all([
+    analyticsEvent.findMany({
+      where: { eventName: 'signup_completed', createdAt: { gte: signupFrom, lte: signupTo }, userId: { not: null } },
+      select: { userId: true, createdAt: true },
+    }) as Promise<ActivationEvent[]>,
+    analyticsEvent.findMany({
+      where: { eventName: 'sop_section_viewed', createdAt: { gte: signupFrom, lte: new Date(nowMs) }, userId: { not: null } },
+      select: { userId: true, createdAt: true },
+    }) as Promise<ActivationEvent[]>,
   ]);
-  const signupUsers7d = signupUserGroups.length;
-  const sopViewUsers7d = sopViewUserGroups.length;
+  const activation = computeActivationRate(signupRows, sopViewRows, nowMs);
   let activationRateAlert: AlertResult;
-  if (signupUsers7d === 0) {
+  if (activation.rate === null) {
     activationRateAlert = {
       id: 'activation_rate_drop',
       severity: 'P2',
       status: 'insufficient_data',
-      message: 'No signups in the last 7 days — cannot compute activation rate',
+      message: 'No signups 7-14 days ago — cannot compute activation rate',
       value: null,
       threshold: 0.20,
       checkedAt,
     };
   } else {
-    const activationRate = sopViewUsers7d / signupUsers7d;
+    const activationRate = activation.rate;
     activationRateAlert = {
       id: 'activation_rate_drop',
       severity: 'P2',
       status: activationRate < 0.20 ? 'firing' : 'ok',
-      message: `Activation rate is ${Math.round(activationRate * 100)}% (last 7d, ${sopViewUsers7d}/${signupUsers7d} users)`,
+      message: `Activation rate is ${Math.round(activationRate * 100)}% (signups 7-14d ago, ${activation.activated}/${activation.cohortSize} viewed a SOP within 7d)`,
       value: Math.round(activationRate * 1000) / 1000,
       threshold: 0.20,
       checkedAt,

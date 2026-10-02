@@ -6,6 +6,16 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Monitoring numbers that measure one thing each
+
+### Fixed
+- The activation alert compared two different groups of users and so could never trigger; it now measures how many people who signed up 7–14 days ago opened a SOP in their first week.
+- Retention no longer counts groups of users too new to measure as 0%.
+- A dashboard that fails to load is no longer counted as a dashboard view.
+
+---
+
+
 ## [2026-10-02] - The admin badge shows who is actually an admin
 
 ### Fixed
