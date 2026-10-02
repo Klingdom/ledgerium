@@ -295,6 +295,29 @@ function extractSystems(workflows: Array<{ toolsUsed: string | null }>): Array<{
     .sort((a, b) => b.workflowCount - a.workflowCount);
 }
 
+// ── Query-bound parsing (row #262) ───────────────────────────────────────────
+
+/** Largest magnitude accepted for an integer bound (a 32-bit Int column). */
+const MAX_INT_BOUND = 2_147_483_647;
+
+/**
+ * Optional numeric query bound. Absent or empty -> `null` (no bound, as before).
+ * Unparseable or out of range -> `NaN`, which the handler answers with a 400.
+ * Leading-number leniency (`'5abc'` -> 5) is kept: it is what `parseInt` /
+ * `parseFloat` always did here.
+ */
+function parseIntParam(raw: string | null): number | null {
+  if (!raw) return null;
+  const n = parseInt(raw, 10);
+  return Number.isFinite(n) && Math.abs(n) <= MAX_INT_BOUND ? n : NaN;
+}
+
+function parseFloatParam(raw: string | null): number | null {
+  if (!raw) return null;
+  const n = parseFloat(raw);
+  return Number.isFinite(n) ? n : NaN;
+}
+
 // ── Route handler ────────────────────────────────────────────────────────────
 
 async function handleGET(req: NextRequest) {
@@ -313,7 +336,7 @@ async function handleGET(req: NextRequest) {
   const params = req.nextUrl.searchParams;
   const search = params.get('search') ?? '';
   const sortBy = params.get('sort') ?? 'created_at';
-  const sortDir = (params.get('dir') ?? 'desc') as 'asc' | 'desc';
+  const rawDir = params.get('dir') ?? 'desc';
   const toolFilter = params.get('tool') ?? '';
   const status = params.get('status') ?? 'active';
   const tagFilter = params.get('tag') ?? '';
@@ -323,10 +346,30 @@ async function handleGET(req: NextRequest) {
   const healthFilter = params.get('health') ?? '';
   const sopReadinessFilter = params.get('sopReadiness') ?? '';
   const staleFilter = params.get('stale') ?? '';
-  const minConfidence = params.get('minConfidence') ? parseFloat(params.get('minConfidence')!) : null;
-  const maxConfidence = params.get('maxConfidence') ? parseFloat(params.get('maxConfidence')!) : null;
-  const minSteps = params.get('minSteps') ? parseInt(params.get('minSteps')!, 10) : null;
-  const maxSteps = params.get('maxSteps') ? parseInt(params.get('maxSteps')!, 10) : null;
+
+  // Row #262: these reach Prisma typed filters (`orderBy` direction, Float and
+  // Int bounds). `?dir=sideways`, `?minSteps=abc` (NaN) and out-of-range values
+  // threw inside Prisma — a client typo reported as a server failure. An absent
+  // or empty bound still means "no bound", exactly as before.
+  if (rawDir !== 'asc' && rawDir !== 'desc') {
+    return NextResponse.json({ error: "dir must be 'asc' or 'desc'" }, { status: 400 });
+  }
+  const sortDir: 'asc' | 'desc' = rawDir;
+  const minConfidence = parseFloatParam(params.get('minConfidence'));
+  const maxConfidence = parseFloatParam(params.get('maxConfidence'));
+  const minSteps = parseIntParam(params.get('minSteps'));
+  const maxSteps = parseIntParam(params.get('maxSteps'));
+  const invalidBound = (
+    [
+      ['minConfidence', minConfidence],
+      ['maxConfidence', maxConfidence],
+      ['minSteps', minSteps],
+      ['maxSteps', maxSteps],
+    ] as const
+  ).find(([, v]) => v !== null && Number.isNaN(v));
+  if (invalidBound) {
+    return NextResponse.json({ error: `${invalidBound[0]} must be a finite number` }, { status: 400 });
+  }
 
   // ── Build Prisma where clause ──────────────────────────────────────────
 

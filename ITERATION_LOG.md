@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 (loop 89) — The class, this time (Mode 1, `security-reviewer`)
+
+- **Controls:** Area — `web-app / api` (87 analytics, 88 observability). Agent — **`security-reviewer`**, per the delegation rubric (input validation + an information leak); a real rotation — it ran the suite, typecheck and mutation checks itself; I re-ran the suite and typecheck. Extension — `871e29a`, 46 loops; #216 CEO-blocked. Cadence: 2 of 3 since MR-042.
+- **Candidate Selection: `burn-down` — #262** (13), the class loop 86 claimed closed after checking one member.
+- **The brief changed, and the result is the evidence it mattered.** MR-042's lesson was that each recent residual was a property scoped to the change. This one was scoped to the class across every route, read file by file — and it found **more than the row listed in both properties**: two more numeric bounds (`?minConfidence`/`?maxConfidence`) and a crash on a text field named `file` under (a); and two more message leaks, in `sync` and `seed-demo-data`, under (b).
+- **(a) client input reaching a 5xx: 7 → 0. (b) error text in response bodies: 4 → 0.** Valid input reaches Prisma exactly as before. The upload leak was the one that mattered: an error message can carry a recorded field name or label, and the outer catch returned it verbatim.
+- **Guard:** fails on any error message or stack in a route's source, with five reasoned exemptions and a check that no exemption is stale. Mutation-checked; the 13 route tests fail against the old code. Its stated limit: a message laundered through a helper is invisible to a source scan — today no `lib/` helper builds a response from an error.
+- **Judgement calls, recorded rather than silently made:** Zod messages in a 422 about the uploader's own file stay (they describe the caller's input, not recorded content). `global-error.tsx` and four client displays show messages — in the browser of the person who hit the error, not a response; noted, not changed.
+- **Validation:** web-app **3390 → 3410** (+20); typecheck 0. **Not run:** a real multipart upload against the dev server.
+- **Follow-ups:** 0 created, 1 closed (#262). **Loop 86's claim is now true** — three loops and two reviews later.
+
+---
+
 ## 2026-10-01 (loop 88) — An error a user can quote (Mode 1, `backend-engineer`)
 
 - **Controls:** Area — `observability` (fresh). Agent — **`backend-engineer`, a real rotation** (it ran the suite, typecheck and a production build itself; I re-ran all three, plus the prerender check). Extension — `871e29a`, 45 loops; #216 CEO-blocked. Cadence: 1 of 3 since MR-042.

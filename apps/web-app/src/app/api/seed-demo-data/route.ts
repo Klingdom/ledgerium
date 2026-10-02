@@ -80,11 +80,12 @@ async function handlePOST(_req: NextRequest) {
 
       created.push(workflow.id);
     } catch (err: any) {
+      // Row #262: log the cause, never return `err.message` to the client.
+      console.error('[seed-demo-data] workflow creation failed', err);
       reportApiError('/api/seed-demo-data', 500);
       return NextResponse.json(
         {
           error: `Failed to create workflow "${title}"`,
-          detail: err?.message,
           created,
           skipped,
         },

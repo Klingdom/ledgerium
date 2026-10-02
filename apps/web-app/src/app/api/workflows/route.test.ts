@@ -18,6 +18,7 @@ import { NextRequest } from 'next/server';
 
 // ─── Module mocks ──────────────────────────────────────────────────────────────
 
+vi.mock('@/lib/api-error-reporting', () => ({ reportApiError: vi.fn() }));
 vi.mock('@/lib/auth', () => ({
   auth: vi.fn(),
 }));
@@ -1166,5 +1167,82 @@ describe('FOLLOWUP-037-01: computeHealthStatus deterministic clock (iter-043)', 
     const createdAt = new Date(BASE_NOW_MS - 30 * DAY_MS); // old enough to be 'healthy'
     expect(simulateHealthStatus(createdAt, false, 0.70, 0.9, 'ready', BASE_NOW_MS)).toBe('healthy');
     expect(simulateHealthStatus(createdAt, false, 0.701, 0.9, 'ready', BASE_NOW_MS)).toBe('high_variation');
+  });
+});
+
+// ─── Row #262: query parameters that reach typed Prisma filters ───────────────
+
+describe('GET /api/workflows — query parameter validation (row #262)', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    const { auth } = await import('@/lib/auth');
+    vi.mocked(auth).mockResolvedValue({ user: { id: 'user-1', email: 'test@test.com' } } as unknown as Awaited<ReturnType<typeof auth>>);
+    const { hasFeature } = await import('@/lib/plans');
+    vi.mocked(hasFeature).mockReturnValue(true);
+  });
+
+  async function get(params: Record<string, string>) {
+    const { GET } = await import('./route');
+    const { reportApiError } = await import('@/lib/api-error-reporting');
+    const { db } = await import('@/db');
+    const res = await GET(makeGetRequest(params));
+    return { res, reportApiError, findMany: vi.mocked(db.workflow.findMany) };
+  }
+
+  it.each([
+    ['dir=sideways', { dir: 'sideways' }],
+    ['dir= (empty)', { dir: '' }],
+    ['dir=ASC (case-sensitive)', { dir: 'ASC' }],
+    ['minSteps=abc', { minSteps: 'abc' }],
+    ['maxSteps=abc', { maxSteps: 'abc' }],
+    ['minSteps beyond Int32', { minSteps: '99999999999' }],
+    ['minConfidence=abc', { minConfidence: 'abc' }],
+    ['maxConfidence=Infinity', { maxConfidence: 'Infinity' }],
+  ])('%s -> 400, no Prisma query, no api_error', async (_label, params) => {
+    const { res, reportApiError, findMany } = await get(params);
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: string };
+    expect(typeof body.error).toBe('string');
+    // The message names the parameter, never an echo of the input value.
+    const value = Object.values(params)[0]!;
+    if (value !== '') expect(body.error).not.toContain(value);
+    expect(findMany).not.toHaveBeenCalled();
+    expect(reportApiError).not.toHaveBeenCalled();
+  });
+
+  it('valid parameters behave exactly as before: reach Prisma unchanged', async () => {
+    const { res, reportApiError, findMany } = await get({
+      dir: 'asc',
+      minSteps: '3',
+      maxSteps: '10',
+      minConfidence: '0.5',
+      maxConfidence: '0.9',
+    });
+    expect(res.status).toBe(200);
+    expect(reportApiError).not.toHaveBeenCalled();
+    const arg = findMany.mock.calls[0]![0] as {
+      where: { stepCount: unknown; confidence: unknown };
+      orderBy: unknown;
+    };
+    expect(arg.orderBy).toEqual({ createdAt: 'asc' });
+    expect(arg.where.stepCount).toEqual({ gte: 3, lte: 10 });
+    expect(arg.where.confidence).toEqual({ gte: 0.5, lte: 0.9 });
+  });
+
+  it('no parameters: default direction desc and no bounds, as before', async () => {
+    const { res, findMany } = await get({});
+    expect(res.status).toBe(200);
+    const arg = findMany.mock.calls[0]![0] as { where: Record<string, unknown>; orderBy: unknown };
+    expect(arg.orderBy).toEqual({ createdAt: 'desc' });
+    expect(arg.where).not.toHaveProperty('stepCount');
+    expect(arg.where).not.toHaveProperty('confidence');
+  });
+
+  it('an empty bound still means "no bound" (unchanged leniency)', async () => {
+    const { res, findMany } = await get({ minSteps: '', maxConfidence: '' });
+    expect(res.status).toBe(200);
+    const arg = findMany.mock.calls[0]![0] as { where: Record<string, unknown> };
+    expect(arg.where).not.toHaveProperty('stepCount');
+    expect(arg.where).not.toHaveProperty('confidence');
   });
 });

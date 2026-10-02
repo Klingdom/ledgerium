@@ -169,9 +169,11 @@ async function handlePOST(req: NextRequest) {
       error: 'processing_failed',
       uploadId,
     });
+    // Row #262: `String(err)` can quote recorded content; log it, don't return it.
+    console.error('Sync processing failed:', err);
     return NextResponse.json({
       error: 'Processing failed',
-      details: [String(err)],
+      details: ['The recording could not be processed.'],
       uploadId,
     }, { status: 422 });
   }

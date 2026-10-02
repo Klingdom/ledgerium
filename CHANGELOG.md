@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-01] - Bad requests are rejected cleanly, and errors no longer reveal internal details
+
+### Fixed
+- The workflow list and the upload endpoint answered some badly formed requests — an unknown sort order, a non-number where a number was expected, an upload that was not a file — with a server error. They now answer "bad request".
+- Three endpoints included the text of an internal error in their reply. That text can contain names taken from recorded processes, so it now stays in the server's own logs and the reply says only that something went wrong.
+
+---
+
 ## [2026-10-01] - Errors now come with a reference you can quote
 
 ### Added

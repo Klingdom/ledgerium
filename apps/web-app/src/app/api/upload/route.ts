@@ -45,12 +45,23 @@ async function handlePOST(req: NextRequest) {
   }
 
   try {
-    const formData = await req.formData();
-    const file = formData.get('file') as File | null;
+    // Row #262: a non-multipart or malformed body makes `formData()` throw.
+    // That is the caller's mistake, not a server failure — answer 400, and
+    // never echo the parser's message (it can quote the body).
+    let formData: FormData;
+    try {
+      formData = await req.formData();
+    } catch {
+      return NextResponse.json({ error: 'Request must be a multipart/form-data upload' }, { status: 400 });
+    }
+    const fileField = formData.get('file');
 
-    if (!file) {
+    // A text field named "file" is a string, not a File: `.name` would be
+    // undefined and the `.endsWith` below a TypeError (a 500 for a client input).
+    if (typeof fileField === 'string' || fileField === null) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
+    const file = fileField;
 
     if (!file.name.endsWith('.json')) {
       return NextResponse.json({ error: 'Only JSON files are supported' }, { status: 400 });
@@ -123,9 +134,13 @@ async function handlePOST(req: NextRequest) {
         },
       });
 
+      // Row #262: the engine's message can quote recorded content (it is built
+      // from the bundle's own values). Full detail goes to the server log and
+      // the upload row; the response carries a fixed sentence only.
+      console.error('Upload processing failed:', err);
       return NextResponse.json({
         error: 'Processing failed',
-        details: [String(err)],
+        details: ['The recording could not be processed. Check that the file is an unmodified Ledgerium export.'],
         uploadId,
       }, { status: 422 });
     }
@@ -271,9 +286,9 @@ async function handlePOST(req: NextRequest) {
 
   } catch (err) {
     console.error('Upload failed:', err);
-    const message = err instanceof Error ? err.message : 'Unknown error';
+    // Row #262: never return `err.message` — it can carry recorded content.
     reportApiError('/api/upload', 500);
-    return NextResponse.json({ error: 'Internal server error', detail: message }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 

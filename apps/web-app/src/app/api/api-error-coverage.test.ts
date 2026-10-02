@@ -220,3 +220,90 @@ describe('malformed-body guard (row #258)', () => {
     expect(stale).toEqual([]);
   });
 });
+
+describe('error-text-in-response guard (row #262)', () => {
+  /*
+    Property: no route returns an error's message or stack to the client.
+    Error messages in this codebase interpolate recorded user content (see
+    lib/safe-error-name.ts); `withApiRoute` returns a fixed 500 body for that
+    reason, and a hand-built `{ detail: err.message }` bypasses it. Row #262
+    found three (`/api/upload`, `/api/seed-demo-data`, and `String(err)` in
+    `/api/upload` + `/api/sync` 422 bodies) after a loop had claimed the class
+    closed. This is a source scan, so it reads each route file for the shapes
+    those leaks took; it cannot see a message laundered through a helper in
+    lib/ (none exists today: grep found no NextResponse in lib/ outside
+    feature-gating, read-json-body and with-api-route).
+  */
+  const LEAK = /\b(?:err|error|e|ex)\??\.(?:message|stack)\b|\bString\(\s*(?:err|error|e|ex)\s*\)|\.stack\b/;
+
+  // Exact, reasoned exemptions. Each is a Zod issue `.message` — a description
+  // of which field failed validation of the CALLER'S OWN request body, returned
+  // only to that caller. Not an Error thrown by the server.
+  const ALLOWED: Array<{ file: string; line: string; reason: string }> = [
+    {
+      file: 'api/analytics/extension/route.ts',
+      line: "{ data: null, error: `Invalid request: ${parsed.error.errors.map((e) => e.message).join(', ')}` },",
+      reason: 'Zod issue messages for the caller\'s own body',
+    },
+    {
+      file: 'api/dashboard/preferences/route.ts',
+      line: "error: `Invalid request: ${parsed.error.errors.map((e) => e.message).join(', ')}`,",
+      reason: 'Zod issue messages for the caller\'s own body',
+    },
+    {
+      file: 'api/workflows/[id]/route.ts',
+      line: "details: parsed.error.errors.map(e => `${e.path.join('.')}: ${e.message}`),",
+      reason: 'Zod issue messages for the caller\'s own body',
+    },
+    {
+      file: 'api/sync/route.ts',
+      line: 'validationErrors: JSON.stringify([String(err)]),',
+      reason: 'DB write to Upload.validationErrors for support; the column is never read into a response (grep, row #262)',
+    },
+    {
+      file: 'api/upload/route.ts',
+      line: 'validationErrors: JSON.stringify([String(err)]),',
+      reason: 'same as sync: a stored diagnostic, not a response body',
+    },
+  ];
+
+  function leaks(): string[] {
+    const out: string[] = [];
+    for (const r of ALL_ROUTES) {
+      r.lines.forEach((line, i) => {
+        if (!LEAK.test(line)) return;
+        const trimmed = line.trim();
+        // Comments may name the pattern (this fix's own notes do).
+        if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) return;
+        if (ALLOWED.some((a) => a.file === r.file && a.line === trimmed)) return;
+        out.push(`${r.file}:${i + 1} ${trimmed}`);
+      });
+    }
+    return out;
+  }
+
+  it('no route builds a response from an error message, stack or String(err)', () => {
+    expect(ALL_ROUTES.length).toBeGreaterThan(70); // a scan of nothing passes vacuously
+    expect(leaks()).toEqual([]);
+  });
+
+  it('every allowlist entry still matches a real line (no stale exemptions)', () => {
+    const stale = ALLOWED.filter((a) => {
+      const route = ALL_ROUTES.find((r) => r.file === a.file);
+      return !route || !route.lines.some((l) => l.trim() === a.line);
+    }).map((a) => a.file);
+    expect(stale).toEqual([]);
+  });
+
+  it('the scan pattern catches the shapes the leaks actually took', () => {
+    for (const bad of [
+      "detail: err?.message,",
+      "const message = err instanceof Error ? err.message : 'x';",
+      "details: [String(err)],",
+      "{ stack: error.stack }",
+    ]) {
+      expect(LEAK.test(bad), bad).toBe(true);
+    }
+    expect(LEAK.test("error: 'Internal server error'")).toBe(false);
+  });
+});
