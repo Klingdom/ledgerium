@@ -4,6 +4,32 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-053 recorded (Mode 4, non-counting): a proof run on the wrong version
+
+- **Review:** `docs/meta/MR_053_META_REVIEW.md`. All counts reproduce: web-app 3955 on 3 of 3 runs, root 5741 on 2 of 2, typecheck 0, validator clean at every commit in the window.
+- **Loop 120 broke the deploy gate, and I would have shipped the break.**
+  - CI installs **pnpm 9** (`deploy.yml:32`).
+  - Under pnpm 9.15.9, `pnpm test --no-passWithNoTests` fails with `Unknown option: 'passWithNoTests'` (exit 1) before any test runs.
+  - The deploy needs that gate (`deploy.yml:86`), so **the first push of `main` would have deployed nothing**.
+  - Loop 120's proofs were real, but they ran on my local pnpm 10.32.1.
+  - MR-052's line "a red first CI run is the step working" — which I relayed to the CEO — is withdrawn.
+  - `pnpm exec vitest run --no-passWithNoTests` behaves the same on pnpm 9 and 10.
+  - Filed **#301** (16): use that form, pin pnpm so local and CI match, and prove it on pnpm 9.
+  - **New practice:** a CI change is proven with the tool versions CI installs, not the local ones.
+- **The #57 fix shape (MR-052's, applied by me at loop 119) is still forgeable by one account.**
+  - The metrics count events, not users, and accept any `chipsRenderedCount`.
+  - One free account flips chip-click to ~1e-7 with one row, and three requests pull bounce to 0.10.
+  - Filed **#302** (12): aggregate per user, clamp `chipsRenderedCount` to the producer's maximum, count a bounce only against its own view.
+  - The CEO must not read #57 numbers until it ships; the deploy alone does not make them valid.
+- **Loop 121's re-arm has a cost the log omitted:** a 2-hours-on / 2-hours-off alert pages 12 times in 48 h. The D-4 review said so; my log said "as designed" without the number. One incident means one page only for one-hour flaps now. Filed **#303** (8).
+- **AUTHZ P2-3 promoted** (MR-006 Change D staleness, past the 10-loop cap): a removed team member can still list the team and its member emails, because `GET /api/teams` selects memberships by `userId` with no `status` filter (`teams/route.ts:30`). Filed **#304** (11).
+- **Emitter scan:** it misses nothing today. Three shapes would slip past it silently — `track as …`, `.track(`, and `trackActivation(variable)`; added to #302's scope. The writers × readers table has stale line numbers and omits readers that read all names; corrected in #302.
+- **The "second agent on a new trust boundary" practice adopted at MR-052 did not run at loop 119.** That is the miss behind the #57 finding. Noted; it applies to #302.
+- **Portfolio (MR-053 §8):** after #301, #302 and #304, pause the alert / analytics / CI arc (loops 109-121) for user-visible work, starting with #268. The extension cannot move until the CEO decides #216 and #271 and the Chrome Web Store submission is made.
+- **Next:** loop 122 = **#301**; loop 123 = **#302**; loop 124 = **#304**.
+
+---
+
 ## 2026-10-02 (loop 121) — A second outage is a second page (Mode 1, `backend-engineer` + `system-architect`)
 
 - **Controls:**
