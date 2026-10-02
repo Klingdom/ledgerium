@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 105) — An address nobody had claimed (Mode 1, `security-reviewer`)
+
+- **Controls:** Area — `security / authz` (103 security, 104 infra). Agent — **`security-reviewer`, a real rotation** (suite, typecheck and a mutation check run by the agent; I re-ran all three after changing its tests). Extension — `871e29a`, 62 loops. Cadence: 2 of 3 since MR-047.
+- **Candidate Selection: `burn-down` — #286** (14), AUTHZ P1-2, promoted at MR-047 through audit-intake path 1. Since loop 98 it was the only self-service route to admin.
+- **The fix is one condition, and the care is in the response.** Signup refuses an allowlisted address with the same status and body an already-registered address gets, and still does the database lookup — so neither the answer nor its timing tells an attacker the address is special.
+- **Every account-creation path was enumerated, not assumed.** NextAuth here has a single password provider and no adapter, so it never creates users; invites and password reset neither create users nor change emails; there is no email-change feature. Signup was the only door.
+- **One thing I changed in the agent's work:** its tests hardcoded the two allowlisted personal addresses. They now read them from the allowlist, through a read-only export — so no personal address is copied into test files, and the tests track the list if it changes. The mutation check, re-run on my version, fails 5.
+- **What this does not do, said plainly:** it cannot undo a squat that already happened. If both admin addresses were registered by you before anyone else could, there was never a window; that is a database fact only you can confirm. The repo has no recorded way to create an admin account other than a manual insert.
+- **Validation (re-run by me):** web-app **3787 → 3794**; typecheck 0.
+- **Follow-ups:** 0 created, 1 closed (#286).
+
+---
+
 ## 2026-10-02 (loop 104) — Two checks that disagreed (Mode 1, `devops-engineer`)
 
 - **Controls:** Area — `infra / deploy` (102 monitoring, 103 security). Agent — **`devops-engineer`, a real rotation** (the agent ran the script matrix, a diff against the old rules, the step-order proof and the suites; I re-ran the suites, the script, and checked the image path wiring). Extension — `871e29a`, 61 loops. Cadence: 1 of 3 since MR-047.

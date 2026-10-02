@@ -9,6 +9,7 @@ import { REVERSE_TRIAL_PLAN, reverseTrialEndsAt } from '@/lib/reverse-trial';
 import { ensureSampleWorkflow, ensureAdditionalSampleWorkflows } from '@/lib/sample-workflow';
 import { ensureSampleVariants } from '@/lib/sample-variants';
 import { normalizeEmail } from '@/lib/email-normalize';
+import { isAdminUnlimited } from '@/lib/admin-allowlist';
 import { checkAuthRateLimit, AUTH_RATE_LIMITS } from '@/lib/rate-limit/auth-buckets';
 import { getClientIp } from '@/lib/client-ip';
 import { reportApiError } from '@/lib/api-error-reporting';
@@ -61,7 +62,14 @@ async function handlePOST(req: NextRequest) {
     }
 
     const existing = await db.user.findUnique({ where: { email } });
-    if (existing) {
+    // Row #286 (AUTHZ_AUDIT_001 P1-2): admin and enterprise authority are
+    // granted from the session email alone, and signup does not prove
+    // ownership of the address. An allowlisted address must therefore never be
+    // registrable here — allowlisted accounts are created out of band. The
+    // refusal is deliberately the SAME status and body as the duplicate-account
+    // case, so the response does not reveal that the address is privileged.
+    // isAdminUnlimited trims + lower-cases exactly as the allowlist does.
+    if (existing || isAdminUnlimited(email)) {
       return NextResponse.json(
         { error: 'An account with this email already exists' },
         { status: 409 },

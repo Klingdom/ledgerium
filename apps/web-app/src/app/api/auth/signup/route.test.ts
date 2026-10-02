@@ -15,6 +15,11 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
+import { ADMIN_ALLOWLIST } from '@/lib/admin-allowlist';
+
+// Derived from the real allowlist, not copied: the cases follow the list.
+const ALLOWLISTED = ADMIN_ALLOWLIST[0]!;
+const CASE_VARIANTS = ADMIN_ALLOWLIST.flatMap((e) => [e.toUpperCase(), e[0]!.toUpperCase() + e.slice(1)]);
 
 // ─── Module mocks ────────────────────────────────────────────────────────────
 
@@ -291,6 +296,48 @@ describe('POST /api/auth/signup', () => {
 
       expect(res.status).toBe(400);
       expect(vi.mocked(dbLib.db.user.create)).not.toHaveBeenCalled();
+    });
+  });
+
+  // ── Row #286: allowlisted (admin) addresses cannot be self-registered ─────
+
+  describe('row #286: admin-allowlisted addresses are not registrable', () => {
+    async function existingAddressResponse() {
+      vi.mocked(dbLib.db.user.findUnique).mockResolvedValueOnce({ id: 'u1' } as never);
+      const res = await POST(makeRequest({ email: 'taken@example.com', password: 'password123' }));
+      return { status: res.status, body: await res.json() };
+    }
+
+    it('refuses an allowlisted address with a response identical to the existing-address case', async () => {
+      const baseline = await existingAddressResponse();
+      const res = await POST(makeRequest({ email: ALLOWLISTED, password: 'password123' }));
+      expect({ status: res.status, body: await res.json() }).toEqual(baseline);
+      expect(baseline.status).toBe(409);
+      expect(vi.mocked(dbLib.db.user.create)).not.toHaveBeenCalled();
+    });
+
+    it.each(CASE_VARIANTS)(
+      'refuses the case variant %j identically',
+      async (variant) => {
+        const baseline = await existingAddressResponse();
+        const res = await POST(makeRequest({ email: variant, password: 'password123' }));
+        expect({ status: res.status, body: await res.json() }).toEqual(baseline);
+        expect(vi.mocked(dbLib.db.user.create)).not.toHaveBeenCalled();
+      },
+    );
+
+    it('never creates an account for a whitespace-padded allowlisted address (schema or allowlist refuses)', async () => {
+      const res = await POST(makeRequest({ email: `  ${ALLOWLISTED}  `, password: 'password123' }));
+      expect(res.status).toBeGreaterThanOrEqual(400);
+      expect(vi.mocked(dbLib.db.user.create)).not.toHaveBeenCalled();
+    });
+
+    it('still registers an ordinary address unchanged', async () => {
+      vi.mocked(dbLib.db.user.findUnique).mockResolvedValueOnce(null);
+      vi.mocked(dbLib.db.user.create).mockResolvedValueOnce({ id: 'user_x', email: 'ordinary@example.com' } as never);
+      const res = await POST(makeRequest({ email: 'ordinary@example.com', password: 'password123' }));
+      expect(res.status).toBe(201);
+      expect(vi.mocked(dbLib.db.user.create)).toHaveBeenCalledTimes(1);
     });
   });
 });

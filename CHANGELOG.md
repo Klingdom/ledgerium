@@ -6,6 +6,13 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Security: administrator email addresses cannot be registered by others
+
+### Security
+- Administrator access is tied to a short list of email addresses. Because sign-up did not confirm that you own the address you register, someone could in principle have registered one of those addresses first. Sign-up now refuses them, with the same answer it gives for any address that is already registered, so it does not reveal which addresses are special.
+
+---
+
 ## [2026-10-02] - Email diagnostics no longer reveal mail-server details
 
 ### Security

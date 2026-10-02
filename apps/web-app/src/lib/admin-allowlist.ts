@@ -17,6 +17,12 @@ const ALLOWLIST: ReadonlySet<string> = new Set([
   'phil@mediafier.ai',
 ]);
 
+/**
+ * The allowlisted addresses, read-only. Exported so tests can derive their
+ * cases from the real list instead of copying addresses into more files.
+ */
+export const ADMIN_ALLOWLIST: readonly string[] = Object.freeze([...ALLOWLIST]);
+
 /** True if the email is on the admin-unlimited allowlist. */
 export function isAdminUnlimited(email: string | null | undefined): boolean {
   if (!email) return false;
