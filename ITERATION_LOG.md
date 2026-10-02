@@ -4,6 +4,16 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — AUTHZ_AUDIT_001 amended by its author (Mode 3-adjacent, non-counting)
+
+- **MR-045's practice applied for the first time:** a re-grade goes back to the auditor. `security-reviewer` added severity definitions (P0: exploitable today by an ordinary caller with no precondition they don't control; P1: same harm under a condition the attacker does not control, or blast radius limited to one team; P2/P3 below) and re-assessed its own findings.
+- **My intake re-grade is not upheld.** Under the auditor's definitions P1-3 (a team admin removing owners) is **P1** — its blast radius is one team. I had promoted it as P0 citing "the audit's own P0 definition", which did not exist. The fix (loop 97) stands; the grade I gave it was wrong on the merits, not only on mechanism.
+- **Two findings are now "conditional P0"**, each depending on a production fact only the CEO can check: **P1-1** (admin bootstrap — P0 if no production admin row existed; fixed at loop 98) and **P1-2** (unverified signup email vs allowlist — P0 if an allowlisted address has no exact lower-case account; **still open**, now the only self-service path to admin).
+- Status annotations: P2-4 changed by the loop-95 invite fix (owner path only); P3-7 changed by loop 101 (secret can no longer default to public). All other P2/P3 open.
+
+---
+
+
 ## 2026-10-02 (loop 101) — No public default for a secret (Mode 1, `devops-engineer`)
 
 - **Controls:** Area — `security / deploy` (99 infra, 100 a11y). Agent — **`devops-engineer`, a real rotation** (it ran `docker compose config`, the 11-case startup matrix, a mutation check and the suites; I re-ran suite, typecheck and syntax, and checked the example files it was not permitted to read). Extension — `871e29a`, 58 loops. Cadence: 1 of 3 since MR-046.
