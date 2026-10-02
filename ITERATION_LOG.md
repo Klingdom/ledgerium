@@ -4,6 +4,26 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — CEO decisions recorded (not a loop)
+
+- **CEO, verbatim:** *"I have manually pushed via my terminal. Turn off diagnostic build. Update retention policy. Let bad invites expire. Fix positioning."*
+- **Push:** `main` matches `origin/main`. The first CI run on pnpm 10 was triggered by the push.
+  - Both extension e2e jobs passed on the runner, including the real-extension harness (6 of 6). That confirms `pnpm/action-setup` reads `packageManager`, which was the open residual from loop 122.
+  - The quality gate and web e2e results are recorded when the run completes.
+- **#273 closed by decision:** bad invites are left to expire naturally after 7 days (the MR-058 recommendation). Nothing is revoked and no production count is needed. The non-destructive parts shipped at loops 136-137.
+- **Directed sequence (Mode 5, N = 3):** #283 (turn off the diagnostic build), #319 (retention policy), and #314 plus the related positioning items.
+  - **Coordinator choices made under the CEO's delegation, each stated here:**
+    - **Retention:** purge archived workflows **30 days** after deletion, configurable, with the Terms of Service and security page aligned to it. The CEO gave no period; 30 days is a common default and can be changed.
+    - **"Most Popular" badge:** **removed** until Team can be bought, the most honest of the three options.
+    - **Export footer:** drops "AI" (the brand review recommended this).
+    - **Contract claims** (SLAs, dedicated support, "never used for training"): unchanged, because code cannot verify them.
+  - **Clause 8 (companion burn-down):** ⌈3/3⌉ = 1 burn-down is required. Loop 137 (#323), the burn-down immediately before the sequence, satisfies it.
+  - **Clause 9 (hard ceiling, pool > 15):** the pool is ~118. `hard-ceiling-override: user-ack; rationale: CEO directed these three items by name on 2026-10-02.` The rule allows one override per sequence and makes a second breach a mandatory stop, and the pool will still exceed 15 at items 2 and 3. **The coordinator is asking the CEO to confirm the override covers the whole sequence**; without that confirmation the sequence stops after item 1.
+  - **Clause 6 (same-Area):** the items span security/web, security/data and web/positioning. They are not all in one Area, so no saturation acknowledgement is needed.
+  - **Clause 4:** a meta-review is mandatory before the next non-directed loop.
+
+---
+
 ## 2026-10-02 (loop 137) — Every place that asks whether an invite is live (Mode 1, `backend-engineer`)
 
 - **Controls:**
