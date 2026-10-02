@@ -64,6 +64,21 @@ describe('GET /api/analytics/events dashboardV2Retirement', () => {
     expect(body.dashboardV2Retirement.chipClickRate).toBeNull();
   });
 
+  it('adds upgradePromptByLocation and no longer clamps conversion drop-off (row #248)', async () => {
+    authMock.mockResolvedValue({ user: { id: 'a', isAdmin: true } });
+    // One user clicks with no prior view (pricing button): stage 3 > stage 2.
+    findMany.mockResolvedValue([
+      { ...row('upgrade_clicked', { location: 'upgrade_button' }), userId: 'u2' },
+      row('upgrade_prompt_viewed', { location: 'teams_create', plan: 'team' }),
+    ]);
+    const body = await (await GET(req())).json();
+    expect(body.upgradePromptByLocation.locations.map((l: { location: string }) => l.location).sort())
+      .toEqual(['teams_create', 'upgrade_button']);
+    const conv = body.funnels.conversion;
+    // views 1 user, clicks 1 user, plan_limit_hit 0: view->click is 0 dropoff; limit_hit->view is -1.
+    expect(conv[1].dropoff).toBe(-1);
+  });
+
   it('stays admin-only', async () => {
     authMock.mockResolvedValue({ user: { id: 'u', isAdmin: false } });
     const res = await GET(req());

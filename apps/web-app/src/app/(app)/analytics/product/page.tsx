@@ -16,6 +16,7 @@ import {
   Shield,
 } from 'lucide-react';
 import type { DashboardV2RetirementMetrics } from '@/lib/dashboard-v2-retirement-metrics';
+import type { UpgradePromptByLocation } from '@/lib/upgrade-prompt-by-location';
 
 interface AnalyticsData {
   summary: {
@@ -32,6 +33,7 @@ interface AnalyticsData {
   };
   topPages: Array<{ path: string; count: number }>;
   dashboardV2Retirement?: DashboardV2RetirementMetrics;
+  upgradePromptByLocation?: UpgradePromptByLocation;
 }
 
 interface FunnelStep {
@@ -491,6 +493,10 @@ export default function ProductAnalyticsPage() {
         <FunnelChart steps={data.funnels.conversion} />
       </section>
 
+      {data.upgradePromptByLocation && (
+        <UpgradePromptByLocationTable result={data.upgradePromptByLocation} />
+      )}
+
       {/* Event categories */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-ds-6 mb-ds-8">
         <EventCategory title="Activation" events={activationEvents} counts={data.eventCounts} />
@@ -833,6 +839,67 @@ function TierCard({
   );
 }
 
+function UpgradePromptByLocationTable({ result }: { result: UpgradePromptByLocation }) {
+  const missing = result.missingLocationViews + result.missingLocationClicks;
+  return (
+    <section className="ds-section mb-ds-8">
+      <h2 className="ds-section-label">Upgrade Prompts by Location</h2>
+      {result.locations.length === 0 ? (
+        <div className="card px-ds-6 py-ds-8 text-center">
+          <p className="text-ds-sm text-[var(--content-tertiary)]">No upgrade prompt views or clicks with a location in this period.</p>
+        </div>
+      ) : (
+        <div className="card px-ds-5 py-ds-4 overflow-x-auto">
+          <table className="w-full text-ds-sm">
+            <thead>
+              <tr className="text-left text-ds-xs text-[var(--content-secondary)]">
+                <th className="pb-ds-2 font-medium">Location</th>
+                <th className="pb-ds-2 font-medium text-right">Views</th>
+                <th className="pb-ds-2 font-medium text-right">Clicks</th>
+                <th className="pb-ds-2 font-medium text-right">Clicks per view</th>
+              </tr>
+            </thead>
+            <tbody>
+              {result.locations.map((l) => (
+                <tr key={l.location} className="text-[var(--content-primary)]">
+                  <td className="py-ds-1">{l.location}</td>
+                  <td className="py-ds-1 text-right tabular-nums">{l.views}</td>
+                  <td className="py-ds-1 text-right tabular-nums">{l.clicks}</td>
+                  <td className="py-ds-1 text-right tabular-nums">
+                    {l.clickRate === null ? (
+                      <span
+                        className="text-[var(--content-secondary)]"
+                        title={l.isViewlessByDesign ? undefined : 'Clicks exist but no views were logged. Cause unknown; instrumentation may be missing.'}
+                      >
+                        {l.isViewlessByDesign ? 'Not recorded by design' : 'No views recorded'}
+                      </span>
+                    ) : (
+                      <>
+                        {formatRate(l.clickRate, '')}
+                        {l.clickRate > 1 && (
+                          <span className="block text-ds-xs text-[var(--content-secondary)]">
+                            More clicks than views
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {missing > 0 && (
+        <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-1">
+          Not shown above: {plural(result.missingLocationViews, 'view', 'views')} and{' '}
+          {plural(result.missingLocationClicks, 'click', 'clicks')} had no valid location.
+        </p>
+      )}
+    </section>
+  );
+}
+
 function FunnelChart({ steps }: { steps: FunnelStep[] }) {
   if (steps.length === 0 || steps.every(s => s.count === 0)) {
     return (
@@ -860,8 +927,8 @@ function FunnelChart({ steps }: { steps: FunnelStep[] }) {
               </div>
               <div className="flex items-center gap-ds-3 text-ds-xs">
                 <span className="font-semibold text-[var(--content-primary)] tabular-nums">{step.count} users</span>
-                {i > 0 && step.rate < 100 && (
-                  <span className={`${step.rate >= 50 ? 'text-emerald-600' : step.rate >= 20 ? 'text-amber-600' : 'text-red-600'}`}>
+                {i > 0 && (
+                  <span className="text-[var(--content-secondary)] tabular-nums">
                     {step.rate}% →
                   </span>
                 )}
@@ -876,6 +943,11 @@ function FunnelChart({ steps }: { steps: FunnelStep[] }) {
             {i > 0 && step.dropoff > 0 && (
               <p className="text-[10px] text-[var(--content-tertiary)] mt-0.5">
                 ↓ {step.dropoff} dropped ({100 - step.rate}%)
+              </p>
+            )}
+            {i > 0 && step.dropoff < 0 && (
+              <p className="text-[10px] text-[var(--content-secondary)] mt-0.5">
+                ↑ {plural(-step.dropoff, 'more user', 'more users')} than the step above ({step.rate}%). Stages are not strictly nested.
               </p>
             )}
           </div>

@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { reportApiError } from '@/lib/api-error-reporting';
 import { computeDashboardV2RetirementMetrics } from '@/lib/dashboard-v2-retirement-metrics';
+import { computeUpgradePromptByLocation } from '@/lib/upgrade-prompt-by-location';
 
 /**
  * POST /api/analytics/events — receives and persists batched analytics events.
@@ -197,6 +198,8 @@ async function handleGET(req: NextRequest) {
         .map(([path, count]) => ({ path, count })),
       // Row #247: #57 retirement criteria 1 (bounce) and 3 (chip-click).
       dashboardV2Retirement: computeDashboardV2RetirementMetrics(events),
+      // Row #248: prompt -> click stages per `location` (additive key).
+      upgradePromptByLocation: computeUpgradePromptByLocation(events),
     });
   } catch (err) {
     console.error('[analytics/GET]', err);
@@ -250,7 +253,9 @@ function computeFunnel(
   return steps.map((step, i) => {
     const count = usersByStep[step]!.size;
     const prevCount = i === 0 ? count : usersByStep[steps[i - 1]!]!.size;
-    const dropoff = i === 0 ? 0 : Math.max(0, prevCount - count);
+    // Row #248: not clamped. A negative drop-off means a stage has more users
+    // than the one before it, which is the mismatch worth seeing.
+    const dropoff = i === 0 ? 0 : prevCount - count;
     const rate = prevCount > 0 ? Math.round((count / prevCount) * 100) : 0;
     return { step, count, dropoff, rate };
   });

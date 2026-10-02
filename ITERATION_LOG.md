@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 (loop 87) — A number that cannot exceed 100% because the view hides it (Mode 1, `frontend-engineer`)
+
+- **Controls:** Area — `web-app / analytics` (85 infra, 86 api). Agent — **`frontend-engineer`, a real rotation** (it ran the suite and typecheck itself; I re-ran both). Adjacent: `growth-strategist` (D-4 clause 1 — 8 strings). Extension — `871e29a`, 44 loops; #216 CEO-blocked. **Cadence: 3 of 3 since MR-041 — MR-042 now due.**
+- **Candidate Selection: `burn-down` — #248** (12, highest open).
+- **What shipped:** the upgrade funnel per `location` — the comparison two earlier rows depended on and nothing could perform. Views and clicks per surface, clicks per view, unclamped; zero views shown as a condition, not 0%; rows with no valid location counted, not dropped.
+- **Residual, as a property:** places where a computed rate or drop-off was clamped or suppressed on the analytics page and route, **2 → 0**. The page had hidden any rate ≥ 100 and the route clamped drop-off at zero — so the one reading that would reveal a mismatch rendered as two absences. A stage with more users than the one before now appears, with the reason.
+- **One claim checked and found wrong:** the agent warned that the quota chip and health gate would show "No views recorded" because it had not audited the view hook's callers. Both call `useUpgradePromptViewed`, and each reports view and click under the same location — so they pair correctly. Recorded so the warning does not resurface as a finding.
+- **Brand-voice consult: 4 KEEP, 4 POLISH, applied.** The two that mattered were about accuracy: the pricing button is *viewed* — only the logging is absent by design — so "No views by design" became **"Not recorded by design"**; and "No views recorded" gained a tooltip saying the cause is unknown. "Click rate" became **"Clicks per view"**, which stays true above 100%.
+- **Validation:** web-app **3372 → 3380** (+8); typecheck 0. **Not run:** the page in a browser — no render harness exists for web-app, the standing gap noted at the loop-80 correction.
+- **Follow-ups:** 0 created, 1 closed (#248).
+
+---
+
 ## 2026-10-01 (loop 86) — A client's mistake is not a server failure (Mode 1, `backend-engineer`)
 
 - **Controls:** Area — `web-app / api` (84 a11y, 85 infra). Agent — **`backend-engineer`, a real rotation** (it ran the suite, typecheck and both mutation checks itself; I re-ran the suite and typecheck). Extension — `871e29a`, 43 loops; #216 CEO-blocked. Cadence: 2 of 3 since MR-041.

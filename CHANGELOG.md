@@ -6,6 +6,16 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-01] - The upgrade report shows each prompt separately, and no longer hides odd numbers
+
+### Added
+- The product analytics page now breaks the upgrade prompts down by where they appear: how often each was seen, how often it was clicked, and clicks per view.
+
+### Fixed
+- The page used to hide any rate of 100% or more, and the server rounded unexpected increases down to zero, so the one reading that would show something was wrong appeared as a blank. Those numbers are now shown as they are, with the reason where it is known.
+
+---
+
 ## [2026-10-01] - A badly formed request is now answered as one
 
 ### Fixed
