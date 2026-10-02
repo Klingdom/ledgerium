@@ -4,6 +4,29 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 127) — Step detail without a mouse (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / a11y`. Two consecutive a11y loops; no saturation.
+  - **Agent:** `frontend-engineer`. This is the third consecutive loop with it (125-127), so **the next implementing agent must differ** under the agent-diversity rule.
+  - **Extension:** `871e29a`, 84 loops untouched.
+  - **Cadence:** **3 of 3 since MR-054 — MR-055 now due.**
+- **Candidate Selection: `burn-down` — #231** (10). This is cool-off recharge 2 of 3. It was queued by MR-054 as the third user-visible pick.
+- **What changed (`sop-view/SOPVisualMode.tsx`):**
+  - Each Flow View step is now a `<button>` in a roving-tabindex strip: one Tab stop, then arrows, Home and End.
+  - Each step's detail (title, system, duration) shows in one panel under the strip on hover, `:focus-visible` or tap. The panel sits outside the scroll container so it is never clipped, stays while hovered or focused, and is dismissed with Escape or an outside tap (SC 1.4.13).
+  - Each step has an `aria-label` and an `aria-describedby` that points at the panel. The `title` attributes are gone.
+  - The scrollbar now uses theme tokens. **I measured the contrast, which the agent had only estimated:** thumb on track is 5.04:1 in dark, 7.58:1 in light and 4.62:1 in print, against a requirement of 3:1.
+  - One visible string changed: the detail panel now also shows the system and duration.
+- **Done beyond the brief, and stated here:**
+  - **Dev dependencies:** `@testing-library/react@^14.3.1` and `jsdom@^24.1.3` were added to the web-app. They match the extension-app versions; until now the web-app could not render a component in a test. The lockfile changed, and I confirmed a frozen install passes.
+  - **End-to-end spec:** `e2e/app/sop/sop-a11y.spec.ts` asserted the old container tab stop and was updated. **It was not run locally; the CI e2e job runs it.**
+- **Tests:** `SOPVisualMode.test.tsx` has 8 tests covering names, the single tab stop, focus showing the detail, arrow/Home/End navigation, Escape, hover, tap and the theme tokens. All 8 fail against the old component.
+- **Validation (exit code + ANSI-stripped summary):** web-app **4102 → 4110** on 3 of 3 runs; root 5888 (`.test.tsx` runs only in the web-app config); typecheck 0; frozen install 0.
+- **Follow-ups:** 0 created, 1 closed (#231).
+
+---
+
 ## 2026-10-02 (loop 126) — Maps you can read in the dark (Mode 1, `frontend-engineer`)
 
 - **Controls:**

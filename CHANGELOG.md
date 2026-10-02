@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Flow View works with a keyboard and touch
+
+### Fixed
+- In Flow View, the details of each step can now be shown with the keyboard (arrow keys) or a tap, not only with a mouse hover, and they also show the system and duration for that step.
+
+---
+
+
 ## [2026-10-02] - Workflow maps readable in dark mode
 
 ### Fixed

@@ -98,11 +98,14 @@ test('the Flow View process strip is reachable and scrollable by keyboard', asyn
   // but had no tab stop, so off-screen steps were unreachable without a mouse.
   // axe checks for the tab stop; this checks the tab stop is the right element
   // and actually does something, which axe cannot tell you.
+  // Row #231: the tab stop is now a roving-tabindex step button inside the
+  // strip (the container itself is no longer focusable).
   const strip = page.getByRole('group', { name: /process flow/i });
-  await expect(strip).toHaveAttribute('tabindex', '0');
+  const firstStep = strip.getByRole('button', { name: /^Step 1:/ });
+  await expect(firstStep).toHaveAttribute('tabindex', '0');
 
-  await strip.focus();
-  await expect(strip).toBeFocused();
+  await firstStep.focus();
+  await expect(firstStep).toBeFocused();
 });
 
 /**

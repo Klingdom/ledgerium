@@ -13,6 +13,7 @@
  * 7. Automation Opportunities (recommendations)
  */
 
+import React, { useEffect, useId, useRef, useState } from 'react';
 import {
   Monitor, Clock, Users, Layers, AlertTriangle, Zap, ChevronRight,
   GitBranch, Target, CheckCircle2, ArrowRight, Activity, TrendingUp,
@@ -154,7 +155,56 @@ function ProcessFlowMap({
   phases: SOPViewPhase[];
   steps: SOPViewStep[];
 }) {
+  const detailId = useId();
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const dotRefs = useRef(new Map<number, HTMLButtonElement>());
+  const ordinals = dna.stepDots.map(d => d.ordinal);
+  // Roving tabindex: exactly one dot is a tab stop (SC 2.1.1 without making a
+  // 60-step strip cost 60 Tab presses); arrows/Home/End move within it.
+  const [rovingOrdinal, setRovingOrdinal] = useState<number | null>(null);
+  const [hovered, setHovered] = useState<number | null>(null);
+  const [focused, setFocused] = useState<number | null>(null);
+  const [pinned, setPinned] = useState<number | null>(null); // tap/click, no hover dependency
+  const [dismissed, setDismissed] = useState<number | null>(null); // Escape (SC 1.4.13 dismissible)
+  const candidate = hovered ?? focused ?? pinned;
+  const shown = candidate !== null && dismissed !== candidate ? candidate : null;
+
+  useEffect(() => {
+    if (candidate === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      setDismissed(candidate);
+      setPinned(null);
+    };
+    const onPointerDown = (e: PointerEvent) => {
+      if (!wrapperRef.current?.contains(e.target as Node)) setPinned(null);
+    };
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('pointerdown', onPointerDown);
+    };
+  }, [candidate]);
+
   if (dna.totalSteps === 0) return null;
+
+  const rovingTarget = rovingOrdinal !== null && ordinals.includes(rovingOrdinal) ? rovingOrdinal : ordinals[0];
+  const shownStep = shown !== null ? steps.find(s => s.ordinal === shown) : undefined;
+
+  const moveTo = (ordinal: number | undefined) => {
+    if (ordinal === undefined) return;
+    setRovingOrdinal(ordinal);
+    dotRefs.current.get(ordinal)?.focus();
+  };
+  const onDotKeyDown = (e: React.KeyboardEvent, index: number) => {
+    switch (e.key) {
+      case 'ArrowRight': case 'ArrowDown': e.preventDefault(); moveTo(ordinals[Math.min(index + 1, ordinals.length - 1)]); break;
+      case 'ArrowLeft': case 'ArrowUp': e.preventDefault(); moveTo(ordinals[Math.max(index - 1, 0)]); break;
+      case 'Home': e.preventDefault(); moveTo(ordinals[0]); break;
+      case 'End': e.preventDefault(); moveTo(ordinals[ordinals.length - 1]); break;
+    }
+  };
 
   return (
     <div className="bg-[var(--surface-elevated)] border border-[var(--border-default)] rounded-2xl overflow-hidden">
@@ -171,35 +221,21 @@ function ProcessFlowMap({
       <div className="px-5 py-4">
         {/* Flow strip: Start → [step dots grouped by phase] → End */}
         {/* Gradient fade hints for horizontal scroll on narrow screens */}
-        <div className="relative">
-        {/* Row #229. This strip scrolls horizontally, so it needs to be a tab
-            stop: without one, a keyboard-only user cannot reach the steps that
-            are off-screen at all (axe `scrollable-region-focusable`, SC 2.1.1).
-
-            role was "img". Changed to "group" on SC 1.3.1 grounds: the subtree
-            is a real element per real step, not a rasterised picture, and "img"
-            claims more than the markup supports. It makes no practical
-            difference to what assistive tech announces today — the per-dot
-            `title` text was never reachable either way, being on a
-            non-focusable div — so this is a semantic-honesty choice, not a
-            trade of detail for compliance.
-
-            The ring uses --focus-ring, the per-theme token row #230 introduced
-            after finding that the house literals measure as low as 1.40:1 on
-            the light theme's surfaces, under the 3:1 SC 1.4.11 floor, across 68
-            elements. This element was the first to use a token instead of a
-            literal; the rest followed at loop 64.
-
-            Still NOT fixed here, deliberately: the per-dot label is
-            `group-hover:` only and never fires on focus (SC 1.4.13), and the
-            hardcoded light-grey scrollbar below is invisible on the dark
-            default theme. Both are row #231 — separate outcomes. */}
+        <div className="relative" ref={wrapperRef} onMouseLeave={() => setHovered(null)}>
+        {/* Rows #229 / #231. The strip scrolls horizontally, so keyboard users
+            must be able to reach off-screen steps (SC 2.1.1): each step is a
+            button with a roving tabindex (one tab stop; arrows/Home/End move).
+            role "group" (not "img") because the subtree is real per-step
+            controls. Detail for the hovered / focused / tapped step renders in
+            the in-flow panel below, not a clipped overflow tooltip, so it is
+            persistent and hoverable, and Escape dismisses it (SC 1.4.13).
+            Ring colour is --focus-ring (row #230). Scrollbar uses theme
+            tokens: thumb --content-tertiary on track --surface-secondary. */}
         <div
-          className="flex items-center gap-0 overflow-x-auto pb-2 scroll-smooth rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+          className="flex items-center gap-0 overflow-x-auto pb-2 scroll-smooth"
           role="group"
-          tabIndex={0}
           aria-label={`Process flow: ${dna.totalSteps} steps across ${dna.systemCount} systems`}
-          style={{ scrollbarWidth: 'thin', scrollbarColor: '#e2e8f0 transparent' }}
+          style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--content-tertiary) var(--surface-secondary)' }}
         >
           {/* Start marker */}
           <div className="flex items-center gap-1 flex-shrink-0 mr-2">
@@ -231,9 +267,18 @@ function ProcessFlowMap({
                 )}
 
                 {/* Step dot */}
-                <div
-                  className="relative group cursor-default"
-                  title={step ? `Step ${dot.ordinal}: ${step.shortTitle}` : `Step ${dot.ordinal}`}
+                <button
+                  type="button"
+                  ref={el => { if (el) dotRefs.current.set(dot.ordinal, el); else dotRefs.current.delete(dot.ordinal); }}
+                  tabIndex={dot.ordinal === rovingTarget ? 0 : -1}
+                  aria-label={step ? `Step ${dot.ordinal}: ${step.shortTitle}` : `Step ${dot.ordinal}`}
+                  aria-describedby={shown === dot.ordinal ? detailId : undefined}
+                  className="relative group cursor-default p-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+                  onMouseEnter={() => { setDismissed(null); setHovered(dot.ordinal); }}
+                  onFocus={() => { setDismissed(null); setFocused(dot.ordinal); setRovingOrdinal(dot.ordinal); }}
+                  onBlur={() => setFocused(null)}
+                  onClick={() => { setDismissed(null); setPinned(p => (p === dot.ordinal ? null : dot.ordinal)); }}
+                  onKeyDown={ev => onDotKeyDown(ev, i)}
                 >
                   {dot.isDecision ? (
                     // Diamond for decisions
@@ -260,11 +305,7 @@ function ProcessFlowMap({
                     <div className="absolute -inset-1 rounded-full border border-red-300 animate-pulse" />
                   )}
 
-                  {/* Step number tooltip on hover */}
-                  <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[8px] text-[var(--content-tertiary)] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                    {dot.ordinal}
-                  </div>
-                </div>
+                </button>
               </div>
             );
           })}
@@ -276,6 +317,16 @@ function ProcessFlowMap({
               <Square className="h-2.5 w-2.5 text-white" fill="white" />
             </div>
           </div>
+        </div>
+        {/* Per-step detail: same content for pointer, keyboard focus and tap. */}
+        <div className="min-h-[1.25rem] mt-1">
+          {shownStep && (
+            <p id={detailId} role="tooltip" className="text-[10px] text-[var(--content-secondary)]">
+              <strong className="text-[var(--content-primary)]">Step {shownStep.ordinal}: {shownStep.shortTitle}</strong>
+              {shownStep.system && <> · {shownStep.system}</>}
+              {shownStep.durationLabel && <> · {shownStep.durationLabel}</>}
+            </p>
+          )}
         </div>
         {/* Scroll hint for many steps */}
         {dna.totalSteps > 12 && (
