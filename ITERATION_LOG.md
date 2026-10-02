@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 (loop 90) — An alert that fires and reaches nobody (Mode 1, `devops-engineer`)
+
+- **Controls:** Area — `infra / monitoring` (88 observability, 89 api). Agent — **`devops-engineer`, a real rotation** (suite, typecheck, `bash -n` and the stub cases run by the agent; I re-ran all of them and the YAML parse it could not). Extension — `871e29a`, 47 loops; #216 CEO-blocked. **Cadence: 3 of 3 since MR-042 — MR-043 now due.**
+- **Candidate Selection: `burn-down` — #263** (12, highest open).
+- **What shipped:** every delivery attempt reports its outcome, and `alerts/check` answers **424** when any firing P1/P2 alert reached no channel; the hourly job labels it on its own. That closes the gap MR-041 opened and loop 85 wrongly said needed the response body — a status code was enough.
+- **Why 424 and why unreported — both good calls, both the agent's.** A 4xx cannot be mistaken for a proxy's 5xx for a down app. And it is deliberately *not* reported to `api_error_spike`, which reads the same database the hourly job exists to be independent of. Reporting it there would have reintroduced, one level down, the coupling loop 82 removed.
+- **Residual scoped to the class (MR-042's rule, applied without prompting this time): ways an alert computed as firing can fail to reach a person without the job failing — 8 → 0 of those closable here.** The sweep found one I had not suspected: with `ALERT_EMAIL_TO` set and no email provider configured, the sender's console fallback reported *success*. A configured-looking channel that silently could not send.
+- **Left, and said so:** partial channel failure returns 200 with a warning, so a broken second channel goes unnoticed while the first works — filed as **#266** together with the manual alert endpoint, which still reports "sent" regardless. Not closable from here: GitHub skipping scheduled runs, and messages accepted but never read.
+- **Validation (re-run by me):** web-app **3410 → 3430** (+20); typecheck 0; script syntax ok; YAML parses; stub 200→0, 424→5, 503→4, 500→1.
+- **Follow-ups:** 1 created (#266), 1 closed (#263).
+
+---
+
 ## 2026-10-01 (loop 89) — The class, this time (Mode 1, `security-reviewer`)
 
 - **Controls:** Area — `web-app / api` (87 analytics, 88 observability). Agent — **`security-reviewer`**, per the delegation rubric (input validation + an information leak); a real rotation — it ran the suite, typecheck and mutation checks itself; I re-ran the suite and typecheck. Extension — `871e29a`, 46 loops; #216 CEO-blocked. Cadence: 2 of 3 since MR-042.

@@ -10,6 +10,11 @@
 #   4 HTTP 503: usually the SERVER has no CRON_SECRET (the app answers 503 for
 #     that). NOT proof of a config gap: a reverse proxy in front of a down app
 #     also answers 503, so the message names both causes.
+#   5 HTTP 424 (row #263): the check RAN and an alert IS firing, but it reached
+#     NO channel - none configured (SLACK_ALERTS_WEBHOOK_URL / ALERT_EMAIL_TO),
+#     or every configured one failed (revoked webhook, email provider down, or
+#     ALERT_EMAIL_TO set with no SMTP_PASSWORD / RESEND_API_KEY). The server
+#     logs say which; this script, like all of it, prints the status only.
 set -u
 
 if [ -z "${CRON_SECRET:-}" ] || [ -z "${ALERTS_CHECK_URL:-}" ]; then
@@ -40,6 +45,10 @@ echo "alerts/check HTTP status: $status"
 if [ "$status" = "503" ]; then
   echo "::error::alerts/check returned HTTP 503. Most likely CRON_SECRET is not set in the web container (the app answers 503 for that), but a proxy in front of a down app also answers 503 - check the site is up before assuming config. Alerts are NOT being checked."
   exit 4
+fi
+if [ "$status" = "424" ]; then
+  echo "::error::alerts/check returned HTTP 424: a P1/P2 alert is FIRING and could not be delivered to any channel (none configured, or Slack/email delivery failing). Check the web container logs for '[alert]' lines and the SLACK_ALERTS_WEBHOOK_URL / ALERT_EMAIL_TO / SMTP settings. Someone has NOT been told."
+  exit 5
 fi
 if [ "$status" != "200" ]; then
   echo "::error::alerts/check returned HTTP $status (expected 200)"

@@ -6,6 +6,13 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-01] - An alert that cannot be delivered is now noticed
+
+### Fixed
+- If an alert fired but could not be sent anywhere — no channel set up, a broken Slack link, or an email channel with no way to send email — it used to disappear silently. The hourly check now fails and says so, so a missing alert is itself noticed.
+
+---
+
 ## [2026-10-01] - Bad requests are rejected cleanly, and errors no longer reveal internal details
 
 ### Fixed

@@ -23,11 +23,36 @@ import { reportApiError } from '@/lib/api-error-reporting';
  * log-exposure risk that cannot be mitigated by secret rotation.
  *
  * Required env var: CRON_SECRET (unset -> 503, distinct from a 500 outage).
- * Delivery channels (optional, console-only if both unset): SLACK_ALERTS_WEBHOOK_URL,
- * ALERT_EMAIL_TO (email additionally needs the SMTP_* vars used by lib/email.ts).
+ * Delivery channels: SLACK_ALERTS_WEBHOOK_URL, ALERT_EMAIL_TO (email additionally
+ * needs SMTP_PASSWORD or RESEND_API_KEY, see lib/email.ts).
  *
- * Response:
- *   { checked: true, alertsSent: number }
+ * Status scheme (row #263) - the hourly job (.github/scripts/alerts-check.sh)
+ * labels each from the status alone, so nothing about an alert is ever printed:
+ *   200  nothing firing, or every firing P1/P2 alert reached >= 1 channel
+ *   401  wrong secret          503  CRON_SECRET not configured
+ *   500  computeAlerts threw (a real outage, e.g. DB down)
+ *   424  a firing P1/P2 alert reached NO channel: none configured, or every
+ *        configured one failed (Slack non-2xx / network, email provider failure,
+ *        ALERT_EMAIL_TO without an email provider, sender threw)
+ *
+ * Why 424 (Failed Dependency): the check itself worked; a dependency it needs to
+ * do its job (the notification channel) did not. 502/504 would collide with what
+ * a reverse proxy answers for a down app, and any 5xx must be reported by
+ * api-error-coverage guard A. 424 is emitted by neither Next nor common proxies,
+ * and is deliberately NOT reported via reportApiError: that counter is the
+ * api_error_spike signal for server faults, a misconfigured/rejected channel is
+ * not one, and the failing job is the signal here (api_error_spike also reads
+ * the DB, the dependency alerts/check exists to be independent of).
+ *
+ * Granularity is per alert: an alert delivered on at least one channel is
+ * delivered (partial channel failure -> 200 plus a console warning); if any
+ * firing alert reached no channel the response is 424, so a Slack that accepts
+ * the first message and rate-limits the second is still caught.
+ *
+ * Response bodies carry COUNTS only - never alert messages, webhook URLs or
+ * addresses.
+ *   200: { checked, alertsFiring, alertsSent (delivered), channelFailures }
+ *   424: { error, checked, alertsFiring, alertsSent, alertsUndelivered }
  */
 async function handleGET(request: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
@@ -71,7 +96,7 @@ async function handleGET(request: NextRequest) {
       (a) => a.status === 'firing' && (a.severity === 'P1' || a.severity === 'P2'),
     );
 
-    await Promise.allSettled(
+    const settled = await Promise.allSettled(
       toNotify.map((a) => {
         const notification: Parameters<typeof sendAlertNotification>[0] = {
           title: a.id.replace(/_/g, ' '),
@@ -85,9 +110,37 @@ async function handleGET(request: NextRequest) {
       }),
     );
 
-    console.log(`[admin/alerts/check] Checked ${alerts.length} alert(s), sent ${toNotify.length} notification(s)`);
+    // A rejected promise (sender threw despite its contract) is an undelivered alert.
+    const results = settled.map((r) => (r.status === 'fulfilled' ? r.value : null));
+    const alertsSent = results.filter((r) => r !== null && r.delivered > 0).length;
+    const alertsUndelivered = toNotify.length - alertsSent;
+    const channelFailures = results.reduce((n, r) => n + (r === null ? 1 : r.failed), 0);
 
-    return NextResponse.json({ checked: true, alertsSent: toNotify.length });
+    console.log(
+      `[admin/alerts/check] Checked ${alerts.length} alert(s), firing P1/P2: ${toNotify.length}, delivered: ${alertsSent}, undelivered: ${alertsUndelivered}, channel failures: ${channelFailures}`,
+    );
+
+    if (alertsUndelivered > 0) {
+      console.error(
+        `[admin/alerts/check] ${alertsUndelivered} firing alert(s) reached NO channel (none configured or all failed) - answering 424`,
+      );
+      return NextResponse.json(
+        {
+          error: 'Alert delivery failed',
+          checked: true,
+          alertsFiring: toNotify.length,
+          alertsSent,
+          alertsUndelivered,
+        },
+        { status: 424 },
+      );
+    }
+
+    if (channelFailures > 0) {
+      console.warn(`[admin/alerts/check] ${channelFailures} channel delivery failure(s); every alert still reached >= 1 channel`);
+    }
+
+    return NextResponse.json({ checked: true, alertsFiring: toNotify.length, alertsSent, channelFailures });
   } catch (err) {
     console.error('[admin/alerts/check GET]', err);
     reportApiError('/api/admin/alerts/check', 500);

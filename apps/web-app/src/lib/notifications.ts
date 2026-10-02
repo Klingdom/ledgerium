@@ -1,10 +1,11 @@
 /**
  * Push notification utility for admin alerts.
  * Supports Slack webhook and email (via existing sendEmail utility).
- * Falls back to console.log when no channels are configured.
+ * With no channel configured the alert is only logged, and the outcome says so
+ * (see AlertDeliveryResult) - callers must not treat that as delivered.
  */
 
-import { sendEmail } from '@/lib/email';
+import { isEmailDeliveryConfigured, sendEmail } from '@/lib/email';
 
 interface Alert {
   title: string;
@@ -13,59 +14,106 @@ interface Alert {
   value?: string | number | undefined;
 }
 
+/**
+ * Outcome of delivering ONE alert (row #263). Counts only - no addresses, URLs
+ * or messages - so it is safe to log and to derive a public status from.
+ *
+ *  - configured: channels this alert was attempted on. 0 = nowhere to send it.
+ *  - delivered:  channels that confirmed acceptance (Slack 2xx; email provider
+ *                reported success). A channel that is configured but cannot
+ *                actually deliver counts as configured + failed, never delivered.
+ *  - failed:     configured - delivered.
+ *
+ * `delivered === 0` means the alert reached no person-facing channel.
+ */
+export interface AlertDeliveryResult {
+  configured: number;
+  delivered: number;
+  failed: number;
+}
+
 const SEVERITY_EMOJI: Record<string, string> = {
   P1: '🔴',
   P2: '🟡',
   P3: '🔵',
 };
 
+/** A set-but-blank env var (e.g. SLACK_ALERTS_WEBHOOK_URL=" ") is NOT a channel. */
+function nonBlank(v: string | undefined): string | null {
+  return typeof v === 'string' && v.trim() !== '' ? v.trim() : null;
+}
+
 /**
- * Send alert to all configured channels.
- * Uses Promise.allSettled so a failure in one channel does not block others.
+ * Send alert to all configured channels and REPORT what happened.
+ * Never throws: a failure in one channel does not block others, and a failure
+ * is a returned outcome, not an exception. With no channel configured the alert
+ * is logged and `{ configured: 0, delivered: 0, failed: 0 }` is returned - the
+ * caller decides that is a failure, because a console line is not a delivery.
  */
-export async function sendAlertNotification(alert: Alert): Promise<void> {
-  const channels: Promise<void>[] = [];
+export async function sendAlertNotification(alert: Alert): Promise<AlertDeliveryResult> {
+  const attempts: Promise<boolean>[] = [];
 
   // Slack
-  const slackWebhook = process.env.SLACK_ALERTS_WEBHOOK_URL;
+  const slackWebhook = nonBlank(process.env.SLACK_ALERTS_WEBHOOK_URL);
   if (slackWebhook) {
-    channels.push(sendSlackAlert(slackWebhook, alert));
+    attempts.push(sendSlackAlert(slackWebhook, alert));
   }
 
   // Email
-  const alertEmail = process.env.ALERT_EMAIL_TO;
+  const alertEmail = nonBlank(process.env.ALERT_EMAIL_TO);
   if (alertEmail) {
-    channels.push(sendEmailAlert(alertEmail, alert));
+    attempts.push(sendEmailAlert(alertEmail, alert));
   }
 
-  if (channels.length === 0) {
+  if (attempts.length === 0) {
     console.log(
       `[alert] ${SEVERITY_EMOJI[alert.severity]} ${alert.severity}: ${alert.title} — ${alert.message}`,
     );
-    return;
+    return { configured: 0, delivered: 0, failed: 0 };
   }
 
-  await Promise.allSettled(channels);
+  const settled = await Promise.allSettled(attempts);
+  const delivered = settled.filter((r) => r.status === 'fulfilled' && r.value === true).length;
+  return { configured: attempts.length, delivered, failed: attempts.length - delivered };
 }
 
-async function sendSlackAlert(webhookUrl: string, alert: Alert): Promise<void> {
+const SLACK_TIMEOUT_MS = 8000;
+
+/** Slack incoming webhooks answer 200 "ok" on success; 4xx/5xx for a revoked or wrong URL. */
+async function sendSlackAlert(webhookUrl: string, alert: Alert): Promise<boolean> {
   try {
     const emoji = SEVERITY_EMOJI[alert.severity] ?? '⚪';
-    await fetch(webhookUrl, {
+    const res = await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         text: `${emoji} *${alert.severity}: ${alert.title}*\n${alert.message}${alert.value != null ? `\nValue: \`${alert.value}\`` : ''}`,
       }),
+      signal: AbortSignal.timeout(SLACK_TIMEOUT_MS),
     });
+    if (!res.ok) {
+      // Status only: the response body and the URL are never logged.
+      console.error(`[alert] Slack notification rejected: HTTP ${res.status}`);
+      return false;
+    }
+    return true;
   } catch (err) {
-    console.error('[alert] Slack notification failed:', err);
+    // Error NAME only: a fetch error message can embed the webhook URL.
+    console.error('[alert] Slack notification failed:', err instanceof Error ? err.name : 'unknown error');
+    return false;
   }
 }
 
-async function sendEmailAlert(to: string, alert: Alert): Promise<void> {
+async function sendEmailAlert(to: string, alert: Alert): Promise<boolean> {
+  // sendEmail() with no provider configured logs to the console and reports
+  // success - right for a dev signup flow, a lie for an alert. ALERT_EMAIL_TO
+  // without SMTP_PASSWORD / RESEND_API_KEY is a channel that cannot deliver.
+  if (!isEmailDeliveryConfigured()) {
+    console.error('[alert] ALERT_EMAIL_TO is set but no email provider is configured (SMTP_PASSWORD / RESEND_API_KEY)');
+    return false;
+  }
   try {
-    await sendEmail({
+    const result = await sendEmail({
       to,
       subject: `[${alert.severity}] ${alert.title} — Ledgerium AI`,
       html: `
@@ -79,7 +127,9 @@ async function sendEmailAlert(to: string, alert: Alert): Promise<void> {
         </div>
       `,
     });
+    return result.success === true;
   } catch (err) {
-    console.error('[alert] Email notification failed:', err);
+    console.error('[alert] Email notification failed:', err instanceof Error ? err.name : 'unknown error');
+    return false;
   }
 }

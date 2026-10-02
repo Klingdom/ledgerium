@@ -10,6 +10,8 @@
  *  - Both wrong Authorization header AND ?secret=correct → 401 (no fallback)
  *  - Missing Authorization header entirely → 401
  *  - Authorization header without Bearer prefix → 401
+ *  - Row #263: firing alert that reaches no channel → 424 (counts-only body,
+ *    not reported as an api error); partial channel failure → 200
  *
  * Mocking strategy:
  *  - vi.mock('@/lib/compute-alerts')   — controls alert evaluation
@@ -50,6 +52,12 @@ const mockReportApiError = reportApiError as ReturnType<typeof vi.fn>;
 
 const VALID_SECRET = 'test_cron_secret_value';
 
+// Per-alert delivery outcomes (lib/notifications AlertDeliveryResult).
+const DELIVERED = { configured: 1, delivered: 1, failed: 0 };
+const NO_CHANNEL = { configured: 0, delivered: 0, failed: 0 };
+const ALL_FAILED = { configured: 1, delivered: 0, failed: 1 };
+const PARTIAL = { configured: 2, delivered: 1, failed: 1 };
+
 const SAMPLE_ALERT = {
   id: 'error_rate_high',
   severity: 'P2' as const,
@@ -86,7 +94,7 @@ const originalCronSecret = process.env.CRON_SECRET;
 beforeEach(() => {
   vi.clearAllMocks();
   process.env.CRON_SECRET = VALID_SECRET;
-  mockSendAlertNotification.mockResolvedValue(undefined);
+  mockSendAlertNotification.mockResolvedValue(DELIVERED);
 });
 
 afterEach(() => {
@@ -209,5 +217,99 @@ describe('GET /api/admin/alerts/check — notification dispatch', () => {
 
     const body = await response.json();
     expect(body.error).toBe('Failed to check alerts');
+  });
+});
+
+describe('GET /api/admin/alerts/check — delivery failure is a distinct status (row #263)', () => {
+  const firing = (id: string, severity: 'P1' | 'P2' = 'P1') => ({
+    ...SAMPLE_ALERT,
+    id,
+    severity,
+    status: 'firing' as const,
+    message: 'SECRET-ALERT-MESSAGE',
+  });
+  const call = () => GET(makeRequest({ authHeader: `Bearer ${VALID_SECRET}` }) as any);
+
+  it('firing alert + no channel configured → 424, counts only', async () => {
+    mockComputeAlerts.mockResolvedValue([firing('db_down')]);
+    mockSendAlertNotification.mockResolvedValue(NO_CHANNEL);
+
+    const response = await call();
+    expect(response.status).toBe(424);
+    const text = JSON.stringify(await response.json());
+    expect(JSON.parse(text)).toEqual({
+      error: 'Alert delivery failed',
+      checked: true,
+      alertsFiring: 1,
+      alertsSent: 0,
+      alertsUndelivered: 1,
+    });
+    expect(text).not.toContain('SECRET-ALERT-MESSAGE');
+  });
+
+  it('firing alert + every channel failed (e.g. Slack non-ok) → 424', async () => {
+    mockComputeAlerts.mockResolvedValue([firing('db_down')]);
+    mockSendAlertNotification.mockResolvedValue(ALL_FAILED);
+    expect((await call()).status).toBe(424);
+  });
+
+  it('424 is not an api error: no reportApiError, and distinct from 500 and 503', async () => {
+    mockComputeAlerts.mockResolvedValue([firing('db_down')]);
+    mockSendAlertNotification.mockResolvedValue(NO_CHANNEL);
+    const status = (await call()).status;
+    expect([500, 503]).not.toContain(status);
+    expect(mockReportApiError).not.toHaveBeenCalled();
+  });
+
+  it('firing alert + one channel delivered → 200 (partial failure warned, not failed)', async () => {
+    mockComputeAlerts.mockResolvedValue([firing('db_down')]);
+    mockSendAlertNotification.mockResolvedValue(PARTIAL);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const response = await call();
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ checked: true, alertsFiring: 1, alertsSent: 1, channelFailures: 1 });
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it('nothing firing + no channel configured → 200 (no alert to deliver is not a failure)', async () => {
+    mockComputeAlerts.mockResolvedValue([SAMPLE_ALERT]);
+    mockSendAlertNotification.mockResolvedValue(NO_CHANNEL);
+
+    const response = await call();
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ checked: true, alertsFiring: 0, alertsSent: 0, channelFailures: 0 });
+    expect(mockSendAlertNotification).not.toHaveBeenCalled();
+  });
+
+  it('firing P3 only + no channel → 200 (P3 is never notified)', async () => {
+    mockComputeAlerts.mockResolvedValue([{ ...firing('minor'), severity: 'P3' as const }]);
+    expect((await call()).status).toBe(200);
+  });
+
+  it('two firing alerts, one delivered and one not (e.g. rate-limited) → 424 with counts', async () => {
+    mockComputeAlerts.mockResolvedValue([firing('a'), firing('b', 'P2')]);
+    mockSendAlertNotification.mockResolvedValueOnce(DELIVERED).mockResolvedValueOnce(ALL_FAILED);
+
+    const response = await call();
+    expect(response.status).toBe(424);
+    const body = await response.json();
+    expect(body.alertsSent).toBe(1);
+    expect(body.alertsUndelivered).toBe(1);
+  });
+
+  it('a sender that throws (contract violation) counts as undelivered → 424, not 500', async () => {
+    mockComputeAlerts.mockResolvedValue([firing('db_down')]);
+    mockSendAlertNotification.mockRejectedValue(new Error('boom'));
+
+    const response = await call();
+    expect(response.status).toBe(424);
+    expect(mockReportApiError).not.toHaveBeenCalled();
+  });
+
+  it('computeAlerts throwing is still 500 (not relabelled as delivery failure)', async () => {
+    mockComputeAlerts.mockRejectedValue(new Error('DB down'));
+    expect((await call()).status).toBe(500);
   });
 });

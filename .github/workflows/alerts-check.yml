@@ -15,9 +15,14 @@ name: Alerts check
 # server" message (script exit 4) instead of looking like an outage (500).
 #
 # FAILS ON: any non-200 status, a 30s timeout, any connection/DNS/TLS failure.
+# HTTP 424 (row #263, script exit 5) = a P1/P2 alert is firing and reached NO
+# delivery channel (none configured, or Slack/email failing): the alert exists
+# but nobody was told, so this job fails and GitHub tells the repo owner.
 #
-# DOES NOT COVER: a firing alert with a healthy DB returns 200 and is delivered
-# by the route's own notification path, not by this job. GitHub may delay or
+# DOES NOT COVER: delivery being CONFIRMED means the channel accepted it (Slack
+# 2xx, email provider success), not that a human read it. A firing alert
+# delivered on >= 1 channel returns 200 even if another channel failed (warning
+# in the server log only). GitHub may delay or
 # drop scheduled runs under load, and disables schedules on repos with no
 # activity for 60 days. Detection latency is up to ~1h plus GitHub delay.
 #
