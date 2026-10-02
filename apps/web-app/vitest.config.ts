@@ -8,6 +8,10 @@ export default defineConfig({
     environment: 'node',
     globals: false,
     passWithNoTests: true,
+    // #293: Prisma's native engine (loaded for real by ~13 suites via @/db) crashes
+    // (napi finalizer / heap corruption, exit 127/139) under worker_threads. Child
+    // processes isolate it; the exit code must mean only "a test failed".
+    pool: 'forks',
   },
   resolve: {
     alias: {

@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Test runs that fail only when a test fails
+
+### Fixed
+- About one in ten automated test runs crashed without any test failing, which could stop a deploy for no real reason. Tests now run in separate processes, and the crash has not recurred in 40 runs.
+
+---
+
+
 ## [2026-10-02] - Alerts tell you once, not every hour
 
 ### Changed

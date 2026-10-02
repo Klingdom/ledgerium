@@ -19,6 +19,10 @@ export default defineConfig({
     environment: 'node',
     globals: false,
     passWithNoTests: true,
+    // #293: Prisma's native engine (loaded for real by ~13 web-app suites via @/db)
+    // crashes (exit 127/139) under worker_threads. Child processes isolate it; the
+    // exit code must mean only "a test failed".
+    pool: 'forks',
     coverage: {
       provider: 'v8',
       include: [

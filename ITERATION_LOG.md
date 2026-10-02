@@ -4,6 +4,31 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 115) — A red run with no failing test (Mode 1, `qa-engineer`)
+
+- **Controls:**
+  - Area: `test-infra`, the first in the window.
+  - Agent: `qa-engineer`, two passes. The second pass extended the fix to the root config, which I had found in review — handed back per MR-050 rather than edited by me.
+  - Extension: `871e29a`, 72 loops untouched.
+  - **Cadence: 3 of 3 since MR-050, so MR-051 is now due.**
+- **Candidate Selection: `burn-down` — #293** (10, tied with #249, #251, #252 and #278). Tie-break: the selection bias puts determinism of validation first, and the crash had been reported by three reviews without ever being filed.
+- **Cause, measured:**
+  - **Rate:** before the fix, 2 of 20 full web-app runs crashed (exit 127 "memory allocation … failed", and exit 139) with no test failing.
+  - **Which suites:** a temporary probe in `db/index.ts`, since reverted, showed **13 suites load the real Prisma client** through `@/db`.
+  - **Pool:** they ran in vitest's default `worker_threads` pool, where Prisma's native library crashes.
+  - **Strength of the evidence:** the mechanism is inferred from the correlation with the pool, not proven.
+- **Fix:** `pool: 'forks'` (child processes) in **both** `apps/web-app/vitest.config.ts` and the root `vitest.config.ts`. The root config aliases `@` to the web-app and includes its `*.test.ts`; a require hook confirmed 13 engine loads there too.
+- **Why the root half matters most:** CI's deploy gate (`deploy.yml:44`) runs `pnpm test`, which is the **root** config. So this crash could fail a deploy at random. No workflow runs the web-app's own config.
+- **Validation:**
+  - Web-app: 40 of 40 clean full runs after the fix (30 by the agent, 10 by me). Against a 10% crash rate, that streak has about a 1.5% chance of being luck.
+  - Root `pnpm test`: 15 of 15 clean (5676 tests). Before the change only 3 root runs were made and none crashed, so the root soak shows no regression but does not prove a fix there.
+  - Typecheck: 0.
+  - Duration: web-app about 16 s (passing runs before were 14–25 s); root 19 s → 20–22 s.
+- **Found, not fixed — added to #53:** because CI runs only the root config, which excludes `*.test.tsx`, **the web-app's 12 component test files never gate a deploy.** #53 tracked the discovery gap since iter 021 but not this consequence.
+- **Follow-ups:** 0 created, 1 closed (#293); #53 amended.
+
+---
+
 ## 2026-10-02 (loop 114) — An alert that pages once, not every hour (Mode 1, `backend-engineer`)
 
 - **Controls:** Area — `infra / monitoring`. Agent — `backend-engineer`; it reported its own suite ×2, typecheck and five reverts. I re-ran the suite ×2, the alert tests ×5, typecheck and a shell syntax check, and read the diff. Extension — `871e29a`, 71 loops untouched. Cadence: 2 of 3 since MR-050.
