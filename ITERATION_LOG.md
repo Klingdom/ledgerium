@@ -4,6 +4,26 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 — MR-043 recorded, and what I applied from it (Mode 4, non-counting)
+
+- **Review:** `docs/meta/MR_043_META_REVIEW.md`. Every number reproduces; nothing needs reverting. Its verdict on my last window: "the class, this time" was **the class where I looked.**
+- **Corrections to my own entries (MR-043 §6.2), logged rather than rewritten:**
+  1. **Loop 89: "Loop 86's claim is now true" and class (a) "7 → 0" were false.** #261 — well-formed JSON of the wrong shape reaching a 500 — is an open member of that same class, and `?skip` on the team-members route is unbounded. I wrote a closing sentence for a class with a known open member.
+  2. **Loop 89's guard comment** said no `lib/` helper builds a response from an error. `lib/email.ts:140` does, through `admin/email-test`. Filed as #267.
+  3. **Loop 88: "never email, name or content — asserted on the logged string"** — asserted on the string arguments only; the error object itself is logged beside them.
+  4. **Loop 88: "the 500 returns the same id"** — not for a thrown ≥500 `Response`, which passes through without the header.
+  5. **Loops 89 and 90 grew #265's class from 61 to 65** and neither entry, nor the row, said so.
+  6. **Loop 90: "#263 (12, highest open)"** — highest open *follow-up*; several program rows score 14. Wording, not selection.
+  7. **The validator's "loops"** mix iteration-era and loop-era cycles; and the status-cell dating MR-042 flagged was left unfixed for a window.
+- **Applied in this commit:**
+  - **Validator:** status cells are now read for a birth only in the two forms that state one (`new (iter N`, `(born iter N`) — most status-cell iters are a closing or planned iteration, and reading them as births misdated rows such as #177. #8 and #16 still date correctly.
+  - **#10 re-scoped and re-scored 11 → 14 from the code:** nothing checks that a step's `source_event_ids` resolve to real events, that event ids are unique, or that `session_id` agrees — a step can cite evidence that does not exist. That is the evidence-linkage invariant itself, sitting in the oldest open row.
+  - **#261 re-scored 9 → 11 and `?skip` added**; **#265 re-counted to 65** with the thrown-5xx header gap; **#266 gains the SMTP timeout** (a hung email server reads as "unreachable", not 424); **#267 filed** for the helper leak and the guard's naming blind spot.
+- **For the CEO, stated plainly at MR-043's request:** with no alert channel set, the hourly job will go red on most runs once alerts fire — that is the 424 doing its job, not a malfunction.
+- **Next:** loop 91 = **#255** (impact 5; the workflow map's step labels are 1.08:1 in the default theme, skipped since loop 81); loop 92 = **#10**.
+
+---
+
 ## 2026-10-01 (loop 90) — An alert that fires and reaches nobody (Mode 1, `devops-engineer`)
 
 - **Controls:** Area — `infra / monitoring` (88 observability, 89 api). Agent — **`devops-engineer`, a real rotation** (suite, typecheck, `bash -n` and the stub cases run by the agent; I re-ran all of them and the YAML parse it could not). Extension — `871e29a`, 47 loops; #216 CEO-blocked. **Cadence: 3 of 3 since MR-042 — MR-043 now due.**

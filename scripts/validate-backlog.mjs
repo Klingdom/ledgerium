@@ -308,7 +308,13 @@ function birthLoop(r) {
   const cell = r.cells[COL.BIRTH_ITER] ?? '';
   const l = /\bL(\d+)\b/.exec(cell);
   if (l) return Number(l[1]);
-  const it = /\biter\s*0*(\d+)\b/i.exec(`${cell} ${r.status}`);
+  // Birth cell: any `iter N` there is a birth. Status cell: ONLY the two forms
+  // that state a birth — `new (iter N` and `(born iter N`. Most status-cell
+  // iters are a CLOSING or PLANNED iteration (`done (iter 087 …`, `open
+  // (ADM-002 … iter 106`), and reading those as births misdated rows
+  // (MR-042 §2.2, left unfixed until MR-043).
+  const it = /\biter\s*0*(\d+)\b/i.exec(cell)
+    ?? /(?:^\W*new\s*\(\s*|\(born\s+)iter\s*0*(\d+)/i.exec(r.status);
   return it ? Number(it[1]) - ITERATION_ERA_OFFSET : null;
 }
 
@@ -347,7 +353,9 @@ const poolLine =
   ` | median age-at-close, last ${lastTen.length}: ${median === null ? 'n/a' : `${median} loops`}` +
   ` (max ${lastTen.length ? Math.max(...lastTen) : 'n/a'}; all-time max ${maxAge ?? 'n/a'})` +
   (undatable ? ` | ${undatable} closures not datable` : '') +
-  (latestLoop ? ` | ages measured to loop ${latestLoop}, the latest closure recorded` : '');
+  (latestLoop ? ` | ages measured to loop ${latestLoop}, the latest closure recorded` : '') +
+  // MR-043 §6.2(7): the "loops" above mix iteration-era and loop-era cycles.
+  ` | iteration-era births read as loop N-${ITERATION_ERA_OFFSET}, approximate`;
 
 // ── Report ───────────────────────────────────────────────────────────────────
 const summary =
