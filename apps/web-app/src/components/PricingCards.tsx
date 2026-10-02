@@ -106,12 +106,6 @@ export function PricingCards() {
                   : 'border-[var(--border-default)] bg-[var(--surface-elevated)]'
               }`}
             >
-              {plan.highlighted && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-700 px-4 py-1 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm">
-                  Most Popular
-                </span>
-              )}
-
               <div className="mb-4">
                 <h3 className="text-lg font-bold text-[var(--content-primary)]">{plan.name}</h3>
                 <p className="text-xs text-[var(--content-primary)] mt-1 leading-relaxed">{plan.description}</p>

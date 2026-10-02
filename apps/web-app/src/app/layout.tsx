@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     title: 'Ledgerium AI',
-    description: 'Record real workflows and generate SOPs, process maps, and AI opportunity reports from how work actually happens.',
+    description: 'Record real workflows and generate SOPs, process maps, and AI-readiness reports from how work actually happens.',
     url: SITE_URL,
     siteName: 'Ledgerium AI',
     images: [{ url: '/img/demo/dashboard.png', width: 1200, height: 630 }],
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Ledgerium AI',
-    description: 'Record real workflows and generate SOPs, process maps, and AI opportunity reports from how work actually happens.',
+    description: 'Record real workflows and generate SOPs, process maps, and AI-readiness reports from how work actually happens.',
     images: ['/img/demo/dashboard.png'],
   },
   // Google Search Console domain/property verification. Set

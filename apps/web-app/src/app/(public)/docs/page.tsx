@@ -590,7 +590,7 @@ export default function DocsPage() {
                 <div className="aspect-[16/10] overflow-hidden bg-[var(--surface-primary)]">
                   <Image
                     src="/docs/screenshots/workflow-agents-tab.png"
-                    alt="AI Agent analysis tab showing automation opportunities"
+                    alt="Automation agent analysis showing automation opportunities"
                     width={640}
                     height={400}
                     className="block w-full h-full object-cover object-top"
@@ -598,7 +598,7 @@ export default function DocsPage() {
                   />
                 </div>
                 <div className="p-4">
-                  <h4 className="font-semibold text-[var(--content-primary)] mb-1">AI Agent Analysis</h4>
+                  <h4 className="font-semibold text-[var(--content-primary)] mb-1">Automation Agent Analysis</h4>
                   <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
                     Automation opportunities identified from your workflow patterns.
                   </p>
@@ -931,7 +931,7 @@ export default function DocsPage() {
                   {[
                     ['All Workflows', 'Your complete library'],
                     ['Needs Attention', 'Workflows whose health status is needs review'],
-                    ['AI-Ready', 'Workflows with an automation score of 60 or more, best first'],
+                    ['Highest AI readiness', 'Highest AI readiness: score 60 or more, best first.'],
                     ['Recently Added', 'Workflows tagged as new'],
                   ].map(([btn, desc]) => (
                     <tr key={btn}>
@@ -941,6 +941,9 @@ export default function DocsPage() {
                   ))}
                 </tbody>
               </TableWrap>
+              <P>
+                AI readiness is a rule-based score from step volume, run time and system breadth. The same recording always gets the same score. No AI model runs on your data.
+              </P>
 
               <H4>Sort options</H4>
               <P>
@@ -1017,7 +1020,7 @@ export default function DocsPage() {
                 <strong className="text-[var(--content-primary)]">Insights</strong> &middot;{' '}
                 <strong className="text-[var(--content-primary)]">Interpretation</strong> &middot;{' '}
                 <strong className="text-[var(--content-primary)]">Intelligence</strong> &middot;{' '}
-                <strong className="text-[var(--content-primary)]">AI Agents</strong> &middot;{' '}
+                <strong className="text-[var(--content-primary)]">Automation Agents</strong> &middot;{' '}
                 <strong className="text-[var(--content-primary)]">Evidence</strong>
               </P>
 
@@ -1265,25 +1268,26 @@ export default function DocsPage() {
 
               <SectionDivider />
 
-              <H3 id="agents-tab">3.7 AI Agents Tab</H3>
+              <H3 id="agents-tab">3.7 Automation Agents</H3>
               <P>
-                The AI Agents tab analyzes the workflow from an automation perspective,
-                identifying which steps are candidates for AI or robotic process automation.
+                The automation agents analysis looks at the workflow from an automation perspective,
+                identifying which steps are candidates for AI or robotic process automation. It is rule-based and
+                deterministic: no AI model runs, and the same recording always gives the same result.
               </P>
               <Screenshot
                 src="/docs/screenshots/workflow-agents-tab.png"
-                alt="AI Agents tab with an 'Analyze with Agent Intelligence' button."
+                alt="Automation agents analysis with an 'Analyze with Agent Intelligence' button."
                 caption='Click "Analyze with Agent Intelligence" to generate automation suitability scores, effort estimates, and agent composition maps.'
               />
               <P>Once analysis is complete:</P>
               <UL>
-                <li><strong className="text-[var(--content-primary)]">Agent composition</strong> — a map of which AI agent types could cover each phase (data extraction, form-fill, decision agent, etc.).</li>
+                <li><strong className="text-[var(--content-primary)]">Agent composition</strong> — a map of which agent types could cover each phase (data extraction, form-fill, decision agent, etc.).</li>
                 <li><strong className="text-[var(--content-primary)]">Automation suitability per step</strong> — each step scored 0–100 for automation potential.</li>
                 <li><strong className="text-[var(--content-primary)]">Effort and complexity estimates</strong> — development effort to automate each step.</li>
                 <li><strong className="text-[var(--content-primary)]">Success probability</strong> — estimated reliability based on execution consistency.</li>
                 <li><strong className="text-[var(--content-primary)]">Integration risk assessment</strong> — flags steps interacting with systems that may lack APIs.</li>
               </UL>
-              <Note>The AI Agents tab is available on Growth and Enterprise plans.</Note>
+              <Note>The automation agents analysis is available on Growth and Enterprise plans.</Note>
 
               <SectionDivider />
 
@@ -1491,7 +1495,7 @@ export default function DocsPage() {
               <P>Click any process family from the Intelligence page to open the detailed view.</P>
               <Screenshot
                 src="/docs/screenshots/analytics-process-detail.png"
-                alt="Process detail view showing intelligence summary, action items, AI opportunities, and workflow library for a specific process family."
+                alt="Process detail view showing intelligence summary, action items, automation opportunities, and workflow library for a specific process family."
                 caption="The Process Detail view — deep-dive into a specific process family with time study, variance analysis, and rule-based recommendations."
               />
               <P>The detail view includes:</P>
@@ -1788,7 +1792,7 @@ export default function DocsPage() {
                 </thead>
                 <tbody>
                   {[
-                    ['Free', 'Markdown exports are watermarked with a Ledgerium AI attribution footer; JSON export needs Starter or above'],
+                    ['Free', 'Markdown exports are watermarked with a Ledgerium attribution footer; JSON export needs Starter or above'],
                     ['Starter and above', 'Clean Markdown and JSON exports — no watermark'],
                     ['All plans', 'PDF is your browser print dialog on the SOP page. It is not plan-gated and carries no watermark'],
                   ].map(([plan, quality]) => (
@@ -1843,7 +1847,7 @@ export default function DocsPage() {
                     ['Automation scoring', 'No', 'No', 'Yes', 'Yes', 'Yes', 'Yes'],
                     ['Shared team library', 'No', 'No', 'No', 'Yes', 'Yes', 'Yes'],
                     ['Advanced analytics', 'No', 'No', 'No', 'No', 'Yes', 'Yes'],
-                    ['AI agent composition', 'No', 'No', 'No', 'No', 'Yes', 'Yes'],
+                    ['Automation agent composition', 'No', 'No', 'No', 'No', 'Yes', 'Yes'],
                     ['Team roles: owner and admin', 'No', 'No', 'No', 'Yes', 'Yes', 'Yes'],
                     ['SSO', 'No', 'No', 'No', 'No', 'No', 'Roadmap'],
                     ['Audit trail', 'No', 'No', 'No', 'No', 'No', 'Roadmap'],
@@ -1888,8 +1892,8 @@ export default function DocsPage() {
               </P>
               <P>
                 <strong className="text-[var(--content-primary)]">Growth ($799/mo)</strong> — For AI implementation leads.
-                Everything in Team, plus advanced analytics, cross-workflow comparison, AI
-                agent composition, BPMN export.
+                Everything in Team, plus advanced analytics, cross-workflow comparison,
+                automation agent composition, BPMN export.
               </P>
               <P>
                 <strong className="text-[var(--content-primary)]">Enterprise (custom)</strong> — For compliance-sensitive or

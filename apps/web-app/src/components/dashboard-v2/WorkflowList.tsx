@@ -674,12 +674,12 @@ export default function WorkflowList({
           >
             {/* atglance-review #14 (GROWTH_DASHBOARD_REVIEW §8): invert the sparse
                 copy — point at the IMMEDIATE reward (open the recorded workflow to
-                see its process map, cycle time, and where AI fits) FIRST, then the
+                see its process map, cycle time, and readiness for AI) FIRST, then the
                 library benefit as secondary. Honest: claims only what the detail
                 page shows (steps + timing + opportunity) and keeps the run-count
                 disclosure ("Record 2 more…"). */}
             <span>
-              Open your first workflow to see its process map, cycle time, and where AI fits. Record 2 more to compare health across your library.
+              Open your first workflow to see its process map, cycle time, and readiness for AI. Record 2 more to compare health across your library.
             </span>
             <button
               type="button"

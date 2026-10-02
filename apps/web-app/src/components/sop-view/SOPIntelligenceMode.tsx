@@ -112,7 +112,7 @@ function SmartHeader({ viewModel }: { viewModel: SOPViewModel }) {
             <div className="w-6 h-6 rounded-lg bg-[var(--surface-elevated)]/10 flex items-center justify-center">
               <Brain className="h-3.5 w-3.5 text-violet-300" aria-hidden="true" />
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-violet-300">AI Intelligence</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-violet-300">Process Intelligence</span>
           </div>
           {m.confidence !== null && (
             <div className="flex items-center gap-1.5" aria-label={`Confidence: ${Math.round(m.confidence * 100)}%`} role="status">

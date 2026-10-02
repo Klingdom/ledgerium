@@ -45,7 +45,7 @@ export const SITE_ORGANIZATION_KNOWS_ABOUT = [
   'workflow automation',
   'SOP documentation',
   'process mining',
-  'AI integration',
+  'AI readiness',
 ] as const;
 
 /**
@@ -130,7 +130,7 @@ export const SITE_ORGANIZATION_NODE = {
     height: SITE_ORGANIZATION_LOGO_HEIGHT,
   },
   description:
-    'Ledgerium AI is workflow intelligence software. It records real browser-based work and turns it into SOPs, process maps, workflow intelligence reports, and AI opportunity reports.',
+    'Ledgerium AI is workflow intelligence software. It records real browser-based work and turns it into SOPs, process maps, workflow intelligence reports, and AI-readiness reports. AI-readiness scores are rule-based and repeatable: the same recording always gets the same score.',
   knowsAbout: [...SITE_ORGANIZATION_KNOWS_ABOUT],
   sameAs: [...SITE_ORGANIZATION_SAME_AS],
   // References the Person node below by @id (not restated inline) so the

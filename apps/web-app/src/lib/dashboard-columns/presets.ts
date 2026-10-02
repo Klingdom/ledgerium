@@ -391,7 +391,7 @@ export const WORKFLOW_DASHBOARD_PRESETS: ReadonlyArray<PresetDefinition> =
     {
       id: 'ai_automation_candidates',
       label: 'AI Automation Candidates',
-      description: 'Workflows that meet AI automation criteria when eligibility scoring is available.',
+      description: 'High AI-readiness, high volume. Locked until the AI-readiness and run-volume columns are enabled.',
       iconName: 'Sparkles',
       visibleColumns: [
         'workflow_title',
@@ -417,8 +417,8 @@ export const WORKFLOW_DASHBOARD_PRESETS: ReadonlyArray<PresetDefinition> =
     // ── 9. AI Executions Running (pending-path-c-r1) ──────────────────────────
     {
       id: 'ai_executions_running',
-      label: 'AI Executions Running',
-      description: 'Workflows with AI executions in progress — requires AI execution data.',
+      label: 'Automations Running',
+      description: 'Workflows with automations in progress — requires execution data.',
       iconName: 'Cpu',
       visibleColumns: [
         'workflow_title',
@@ -443,8 +443,8 @@ export const WORKFLOW_DASHBOARD_PRESETS: ReadonlyArray<PresetDefinition> =
     // ── 10. AI Savings Leaders (pending-path-c-r1) ────────────────────────────
     {
       id: 'ai_savings_leaders',
-      label: 'AI Savings Leaders',
-      description: 'Workflows ranked by AI-estimated time savings when savings data is available.',
+      label: 'Savings Leaders',
+      description: 'Workflows ranked by estimated time savings when savings data is available.',
       iconName: 'TrendingUp',
       visibleColumns: [
         'workflow_title',

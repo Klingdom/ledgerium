@@ -407,7 +407,7 @@ function HealthTooltip({ metricsV2, onDismiss, triggerRef, id }: HealthTooltipPr
       {/* AI opportunity score — shown only for automate tag (auditable per §7.8) */}
       {opportunityTag === 'automate' && (
         <p className="mt-ds-2 pt-ds-2 border-t border-[var(--border-subtle)] text-[12px] text-[var(--content-secondary)]">
-          AI opportunity:{' '}
+          AI readiness:{' '}
           <span className="font-medium tabular-nums text-[var(--content-primary)]">
             {aiOpportunityScore}/100
           </span>

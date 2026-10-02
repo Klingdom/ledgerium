@@ -60,7 +60,7 @@ export const FIRST_RUN_STEPS: readonly TutorialStep[] = [
 /** Heading + lead, pinned for the copy-pin test (growth verbatim). */
 export const FIRST_RUN_HEADING = 'No workflows yet — here’s how Ledgerium works:';
 export const FIRST_RUN_LEAD =
-  'Every digital process you record, measured from real behavior — cycle time, variation, and where AI could help.';
+  'Every digital process you record, measured from real behavior — cycle time, variation, and readiness for AI.';
 export const FIRST_RUN_PRIMARY_CTA = 'Install the extension to start →';
 export const FIRST_RUN_SECONDARY_PREFIX = 'Already recorded elsewhere?';
 export const FIRST_RUN_SECONDARY_CTA = 'Upload a recording →';

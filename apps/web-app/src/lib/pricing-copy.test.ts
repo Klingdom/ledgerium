@@ -418,3 +418,108 @@ describe('#315: public copy does not overclaim beyond enforcement', () => {
     expect(docs).toMatch(/six tiers: Free, Starter, Solo, Team, Growth, and Enterprise/);
   });
 });
+
+/* ───────── #314: positioning, "deterministic and evidence-linked", not "AI-produced" ───────── */
+
+describe('#314: no user-facing copy claims AI authorship', () => {
+  // No model runs anywhere (see #313 tripwire above): SOPs, scores and recommendations are rules
+  // and templates. "AI" is allowed only where literally true: the brand name "Ledgerium AI",
+  // "readiness for AI", "no AI ...", and descriptions of OTHER tools.
+  const AUTHORSHIP_RE = new RegExp(
+    [
+      String.raw`AI[- ](?:powered|generated|driven|written|authored|produced|created|based)\b`,
+      String.raw`AI Insights?\b`,
+      String.raw`AI[- ]analys[ie]s\b`,
+      String.raw`AI[- ]recommendations?\b`,
+      String.raw`\b(?:generated|written|authored|produced|created|rewritten|powered|driven) (?:by|with) (?:an? )?AI\b`,
+      String.raw`\bAI tools\b`,
+    ].join('|'),
+    'gi',
+  );
+
+  interface AllowedAiCopy {
+    /** Exact matched snippet (case-insensitive) permitted in files matching `file`. */
+    text: string;
+    file: RegExp;
+    reason: string;
+  }
+  /** Each entry needs a reason; the test below fails if one stops matching anything. */
+  const ALLOWED_AI_COPY: readonly AllowedAiCopy[] = [
+    { text: 'rewritten by AI', file: new RegExp("pricing/page[.]tsx$"), reason: 'Negation: "rather than rewritten by AI" says Ledgerium does NOT use AI to write SOPs (pinned by the #313 test).' },
+    { text: 'rewritten by AI', file: new RegExp("[(]public[)]/page[.]tsx$"), reason: 'Negation: "nothing was rewritten by AI" on the home page says no AI touched the sample SOP.' },
+    { text: 'AI-generated', file: new RegExp("compare/scribe/page[.]tsx$"), reason: 'Competitor comparison: describes Scribe Optimize maps, not Ledgerium.' },
+    { text: 'AI-based', file: new RegExp("compare/scribe/page[.]tsx$"), reason: 'Competitor comparison: describes Scribe Optimize, not Ledgerium.' },
+    { text: 'AI-based', file: new RegExp("content/pages/alternatives[.]ts$"), reason: 'Competitor comparison: describes Scribe Optimize agents, not Ledgerium.' },
+  ];
+
+  const publicDir = path.resolve(SRC, '..', 'public');
+  const userFacing = [
+    ...walk(SRC).filter((f) => !/__tests__|[.]fixtures[.]/.test(f)),
+    ...readdirSync(publicDir).filter((f) => f.endsWith('.html')).map((f) => path.join(publicDir, f)),
+  ];
+  /** Source lines that are not comments (comments are not user-facing copy). */
+  const copyLines = (file: string) =>
+    readFileSync(file, 'utf8')
+      .split(/\r?\n/)
+      .filter((l) => !/^\s*(?:\/\/|\*|\/\*|\{\/\*)/.test(l));
+  const hitsIn = (file: string): string[] =>
+    copyLines(file).flatMap((l) => [...l.matchAll(AUTHORSHIP_RE)].map((m) => m[0]))
+      .filter((h) => !ALLOWED_AI_COPY.some((a) => a.file.test(file.split(path.sep).join("/")) && a.text.toLowerCase() === h.toLowerCase()));
+
+  it('scans a non-trivial file set (src + public html)', () => {
+    expect(userFacing.length).toBeGreaterThan(200);
+  });
+  it('the rule catches the claims it exists to catch', () => {
+    for (const bad of ['AI-powered insights', 'AI-generated SOPs', 'Get AI Insights', 'AI analysis', 'written by AI', 'generated with AI']) {
+      expect(bad.match(AUTHORSHIP_RE), bad).not.toBeNull();
+    }
+    for (const ok of ['Ledgerium AI', 'readiness for AI', 'AI-readiness scores', 'No AI rewriting', 'ready for AI automation']) {
+      expect(ok.match(AUTHORSHIP_RE), ok).toBeNull();
+    }
+  });
+  it('no user-facing file claims AI authorship (outside the allowlist)', () => {
+    const offenders = userFacing
+      .map((f) => ({ f: path.relative(SRC, f), hits: hitsIn(f) }))
+      .filter((o) => o.hits.length > 0);
+    expect(offenders, 'AI-authorship claim in user-facing copy; no model runs (see #313). Reword to deterministic / evidence-linked, or allowlist with a reason.').toEqual([]);
+  });
+  it('every allowlist entry has a reason and still matches something', () => {
+    for (const a of ALLOWED_AI_COPY) {
+      expect(a.reason.trim()).not.toBe('');
+      const used = userFacing.some((f) => a.file.test(f.split(path.sep).join("/")) && copyLines(f).some((l) => l.toLowerCase().includes(a.text.toLowerCase())));
+      expect(used, `stale allowlist entry: ${a.text}`).toBe(true);
+    }
+  });
+});
+
+describe('#314: no unpurchasable plan carries a popularity badge', () => {
+  const checkout = readSrc('app', 'api', 'billing', 'checkout', 'route.ts');
+  const blocked = [...(checkout.match(/BLOCKED_PLANS_AWAITING_WORKSPACE_BUILD = new Set<PaidPlanType>\(\[([^\]]*)\]/)?.[1] ?? '').matchAll(/'(\w+)'/g)].map((m) => m[1]);
+  const POPULARITY_RE = /Most Popular|Best Value|Best Seller|Recommended plan|Most Chosen/i;
+
+  it('Team is still blocked at checkout (402) — the reason the badge is gone', () => {
+    expect(blocked).toContain('team');
+  });
+  it('neither the pricing cards nor the pricing page renders a popularity badge', () => {
+    expect(readSrc('components', 'PricingCards.tsx')).not.toMatch(POPULARITY_RE);
+    expect(readSrc('app', '(public)', 'pricing', 'page.tsx')).not.toMatch(POPULARITY_RE);
+  });
+  it('no plan in PRICING_CONFIG carries a badge/popular field', () => {
+    for (const p of PRICING_CONFIG.plans) {
+      expect(Object.keys(p).filter((k) => /badge|popular/i.test(k)), p.id).toEqual([]);
+    }
+  });
+});
+
+describe('#314: the Free export watermark does not imply AI authorship', () => {
+  it('footer text attributes to Ledgerium, with the plan gate intact', () => {
+    const route = readSrc('app', 'api', 'workflows', '[id]', 'export-markdown', 'route.ts');
+    const texts = [...route.matchAll(/WATERMARK_(?:PREPEND|APPEND) =\s*'([^']*)'/g)].map((m) => m[1]!);
+    expect(texts.length).toBe(2);
+    for (const t of texts) {
+      expect(t).toMatch(/Ledgerium/);
+      expect(t).not.toMatch(/Ledgerium AI|by AI/);
+    }
+    expect(route).toMatch(/hasFeature\(plan, 'cleanExports'\)/);
+  });
+});

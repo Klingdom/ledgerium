@@ -89,7 +89,7 @@ const COMPARISON_FEATURES = [
 
   // Advanced & Enterprise
   { label: 'Advanced cross-workflow analytics', free: false, starter: false, solo: false, team: false, growth: true, enterprise: true, category: 'Advanced & Enterprise' },
-  { label: 'AI agent composition',    free: false, starter: false, solo: false, team: false, growth: true, enterprise: true },
+  { label: 'Automation agent composition',    free: false, starter: false, solo: false, team: false, growth: true, enterprise: true },
   { label: 'Integration risk assessment', free: false, starter: false, solo: false, team: false, growth: true, enterprise: true },
   { label: 'Team roles: owner and admin', free: false, starter: false, solo: false, team: true, growth: true, enterprise: true },
   { label: 'SSO',                     free: false, starter: false, solo: false, team: false, growth: false, enterprise: 'coming-soon' },
@@ -265,12 +265,7 @@ export default function PricingPage() {
                   ))}
                   {/* Team column — highlighted */}
                   <th className="px-4 py-4 text-center bg-brand-900/10 border-x border-brand-800/30">
-                    <span className="inline-flex flex-col items-center gap-1">
-                      <span className="text-xs font-bold text-white uppercase tracking-wider bg-brand-700 rounded-full px-3 py-0.5">
-                        Most Popular
-                      </span>
-                      <span className="font-semibold text-[var(--brand-text)]">Team</span>
-                    </span>
+                    <span className="font-semibold text-[var(--brand-text)]">Team</span>
                   </th>
                   {['Growth', 'Enterprise'].map((col) => (
                     <th key={col} className="px-4 py-4 font-semibold text-[var(--content-secondary)] text-center">

@@ -24,7 +24,7 @@ import {
 export const metadata: Metadata = {
   title: 'Browser Workflow Recorder & SOP Generator — Ledgerium AI',
   description:
-    'Automatic process documentation from real browser activity. Record workflows once, get structured SOPs, process maps, and AI-ready data fast. No screenshots.',
+    'Automatic process documentation from real browser activity. Record workflows once, get structured SOPs, process maps, and AI-readiness scores fast. No screenshots.',
   alternates: { canonical: '/product' },
   openGraph: {
     title: 'Browser Workflow Recorder & SOP Generator — Ledgerium AI',

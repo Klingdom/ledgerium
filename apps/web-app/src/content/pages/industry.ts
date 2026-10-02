@@ -8,7 +8,7 @@ const manufacturing: IndustryPage = {
   slug: 'manufacturing',
   metaTitle: 'Manufacturing Workflow Documentation',
   metaDescription:
-    'Document manufacturing back-office and ERP workflows by recording how they really run. Get SOPs, process maps, and AI opportunities tied to the real work.',
+    'Document manufacturing back-office and ERP workflows by recording how they really run. Get SOPs, process maps, and AI-readiness scores tied to the real work.',
   h1: 'Manufacturing workflow documentation',
   eyebrow: 'Industry',
   shortAnswer:
@@ -73,7 +73,7 @@ const manufacturing: IndustryPage = {
     },
     {
       q: 'Where can AI help in manufacturing back-office?',
-      a: 'In repetitive ERP steps like matching documents and drafting routine entries. Quality decisions and exceptions should keep a human involved.',
+      a: 'Ledgerium measures where AI could fit. It scores each recorded manufacturing back-office workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
@@ -87,7 +87,7 @@ const healthcare: IndustryPage = {
   slug: 'healthcare',
   metaTitle: 'Healthcare Workflow Documentation',
   metaDescription:
-    'Document healthcare admin and back-office workflows by recording how they really run. Get SOPs, process maps, and AI ideas, no PHI captured.',
+    'Document healthcare admin and back-office workflows by recording how they really run. Get SOPs, process maps, and AI-readiness scores, no PHI captured.',
   h1: 'Healthcare workflow documentation',
   eyebrow: 'Industry',
   shortAnswer:
@@ -152,7 +152,7 @@ const healthcare: IndustryPage = {
     },
     {
       q: 'Where can AI help in healthcare back-office?',
-      a: 'In repetitive admin steps like eligibility checks and routine billing entries. Clinical and patient-care decisions should keep a qualified human involved.',
+      a: 'Ledgerium measures where AI could fit. It scores each recorded healthcare back-office workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
@@ -166,7 +166,7 @@ const insurance: IndustryPage = {
   slug: 'insurance',
   metaTitle: 'Insurance Workflow Documentation',
   metaDescription:
-    'Document insurance claims, underwriting, and policy admin workflows by recording how they run. Get SOPs, process maps, and AI opportunities.',
+    'Document insurance claims, underwriting, and policy admin workflows by recording how they run. Get SOPs, process maps, and AI-readiness scores.',
   h1: 'Insurance workflow documentation',
   eyebrow: 'Industry',
   shortAnswer:
@@ -231,7 +231,7 @@ const insurance: IndustryPage = {
     },
     {
       q: 'Where can AI help in insurance operations?',
-      a: 'In repetitive claims and policy steps like routine entries and stall detection. Coverage and risk decisions should keep a human involved.',
+      a: 'Ledgerium measures where AI could fit. It scores each recorded insurance operations workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
@@ -245,7 +245,7 @@ const banking: IndustryPage = {
   slug: 'banking',
   metaTitle: 'Banking Workflow Documentation',
   metaDescription:
-    'Document banking and financial services workflows by recording how they really run. Get SOPs, process maps, and AI opportunities.',
+    'Document banking and financial services workflows by recording how they really run. Get SOPs, process maps, and AI-readiness scores.',
   h1: 'Banking workflow documentation',
   eyebrow: 'Industry',
   shortAnswer:
@@ -310,7 +310,7 @@ const banking: IndustryPage = {
     },
     {
       q: 'Where can AI help in banking operations?',
-      a: 'In repetitive steps like routine entries and stall detection across onboarding and processing. Credit, risk, and compliance decisions should keep a human involved.',
+      a: 'Ledgerium measures where AI could fit. It scores each recorded banking operations workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
@@ -324,7 +324,7 @@ const saas: IndustryPage = {
   slug: 'saas',
   metaTitle: 'SaaS Operations Workflow Documentation',
   metaDescription:
-    'Document SaaS onboarding, support, and RevOps workflows by recording how they really run. Get SOPs, process maps, and AI opportunities.',
+    'Document SaaS onboarding, support, and RevOps workflows by recording how they really run. Get SOPs, process maps, and AI-readiness scores.',
   h1: 'SaaS workflow documentation',
   eyebrow: 'Industry',
   shortAnswer:
@@ -389,7 +389,7 @@ const saas: IndustryPage = {
     },
     {
       q: 'Where can AI help in SaaS operations?',
-      a: 'In repetitive onboarding, support, and RevOps steps like routine responses and stall detection. Customer and revenue decisions should keep a human involved.',
+      a: 'Ledgerium measures where AI could fit. It scores each recorded SaaS operations workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
@@ -468,7 +468,7 @@ const professionalServices: IndustryPage = {
     },
     {
       q: 'Where can AI help in professional services?',
-      a: 'In repetitive onboarding, delivery, and billing steps like routine tasks and stall detection. Client judgment and scope decisions should keep a human involved.',
+      a: 'Ledgerium measures where AI could fit. It scores each recorded professional services workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
@@ -547,7 +547,7 @@ const government: IndustryPage = {
     },
     {
       q: 'Where can AI help in public sector operations?',
-      a: 'In repetitive case and records steps like routine entries and stall detection. Eligibility and policy decisions should keep a qualified human involved.',
+      a: 'Ledgerium measures where AI could fit. It scores each recorded public sector operations workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
@@ -626,7 +626,7 @@ const education: IndustryPage = {
     },
     {
       q: 'Where can AI help in education administration?',
-      a: 'In repetitive admissions and records steps like routine updates and stall detection. Admissions and academic decisions should keep a human involved.',
+      a: 'Ledgerium measures where AI could fit. It scores each recorded education administration workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],
@@ -640,7 +640,7 @@ const retail: IndustryPage = {
   slug: 'retail',
   metaTitle: 'Retail Operations Workflow Documentation',
   metaDescription:
-    'Document retail store ops, e-commerce fulfillment, and returns workflows by recording how they really run. Get SOPs, process maps, and AI opportunities.',
+    'Document retail store ops, e-commerce fulfillment, and returns workflows by recording how they really run. Get SOPs, process maps, and AI-readiness scores.',
   h1: 'Retail workflow documentation',
   eyebrow: 'Industry',
   shortAnswer:
@@ -705,7 +705,7 @@ const retail: IndustryPage = {
     },
     {
       q: 'Where can AI help in retail back-office work?',
-      a: 'In repetitive fulfillment and product-setup steps like routine entries and cutoff detection. Merchandising and pricing decisions should keep a human involved.',
+      a: 'Ledgerium measures where AI could fit. It scores each recorded retail back-office workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
     },
   ],
   jsonLd: ['Article', 'FAQPage', 'BreadcrumbList', 'WebPage', 'Organization'],

@@ -78,7 +78,7 @@ export function WorkflowPageView({ page }: { page: WorkflowPage }) {
         pageType={page.type}
         slug={page.slug}
         heading="Capture this workflow once"
-        body="Record the real process and turn it into an SOP, a process map, and an AI opportunity report, generated from how the work actually happens."
+        body="Record the real process and turn it into an SOP, a process map, and an AI-readiness report, generated from how the work actually happens."
         ctaLabel="Start free"
         location="workflow_footer"
       />

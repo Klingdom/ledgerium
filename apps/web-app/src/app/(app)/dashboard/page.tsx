@@ -253,6 +253,8 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 
 interface PresetView {
   label: string;
+  /** Hover text explaining what the preset means. */
+  title?: string;
   filters: {
     sort?: SortOption;
     health?: HealthStatus;
@@ -264,7 +266,7 @@ interface PresetView {
 const PRESET_VIEWS: PresetView[] = [
   { label: 'All Workflows', filters: {} },
   { label: 'Needs Attention', filters: { health: 'needs_review' } },
-  { label: 'AI-Ready', filters: { sort: 'optimization', minScore: 60 } },
+  { label: 'Highest AI readiness', title: 'Highest AI readiness: score 60 or more, best first', filters: { sort: 'optimization', minScore: 60 } },
   { label: 'Recently Added', filters: { sort: 'created_at', health: 'new' } },
 ];
 
@@ -691,7 +693,7 @@ function DashboardPageContent() {
 
   const displayedWorkflows = useMemo(() => {
     let result = workflows;
-    // AI-Ready preset score filter
+    // Highest AI readiness preset score filter
     if (minAiScore > 0) {
       result = result.filter((w) => (w.aiOpportunityScore ?? 0) >= minAiScore);
     }
@@ -899,7 +901,7 @@ function DashboardPageContent() {
                   <TrendingUp className="h-3 w-3 text-violet-500 flex-shrink-0" />
                   <span className="font-medium text-[var(--content-tertiary)]">Top Opportunity:</span>
                   <span className="truncate max-w-[160px]">&ldquo;{topOpportunityWorkflow.title}&rdquo;</span>
-                  <span className="text-[var(--content-tertiary)]">&mdash; AI score {topOpportunityWorkflow.aiOpportunityScore}</span>
+                  <span className="text-[var(--content-tertiary)]">&mdash; AI readiness {topOpportunityWorkflow.aiOpportunityScore}</span>
                 </Link>
               </>
             )}
@@ -924,7 +926,7 @@ function DashboardPageContent() {
               </Link>
             )}
             {stats.aiOpportunityCount > 0 && (
-              <button onClick={() => applyPreset(PRESET_VIEWS.find(v => v.label === 'AI-Ready')!)}
+              <button onClick={() => applyPreset(PRESET_VIEWS.find(v => v.label === 'Highest AI readiness')!)}
                 className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-ds-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                 {stats.aiOpportunityCount} AI candidates
@@ -1104,6 +1106,7 @@ function DashboardPageContent() {
         {PRESET_VIEWS.map((view) => (
           <button
             key={view.label}
+            title={view.title}
             onClick={() => applyPreset(view)}
             className={`whitespace-nowrap ds-tag ${activePreset === view.label ? 'ds-tag-brand' : 'ds-tag-neutral hover:bg-[var(--surface-elevated)]'} transition-colors cursor-pointer`}
           >
@@ -1591,10 +1594,10 @@ function WorkflowRow({
           {w.aiOpportunityScore >= 60 && (
             <span
               className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-50 text-violet-700"
-              title={`AI Automation Opportunity: ${w.aiOpportunityScore}/100`}
+              title={`Readiness for AI automation: ${w.aiOpportunityScore}/100`}
             >
               <Zap className="h-2.5 w-2.5" />
-              AI: {w.aiOpportunityScore}
+              AI readiness: {w.aiOpportunityScore}
             </span>
           )}
           {w.documentationCompleteness < 50 && (
@@ -1739,7 +1742,7 @@ function WorkflowRow({
           w.healthStatus === 'needs_review' && (w.confidence === null || w.confidence < 0.5) ? { text: 'Low confidence — needs more evidence or review', color: 'text-amber-600', bg: 'bg-amber-50' } :
           w.healthStatus === 'needs_review' ? { text: 'Needs review — SOP or documentation incomplete', color: 'text-amber-600', bg: 'bg-amber-50' } :
           w.isStale ? { text: `Stale — not reviewed in ${formatDateRelative(w.createdAt)}`, color: 'text-[var(--content-secondary)]', bg: 'bg-[var(--surface-secondary)]' } :
-          w.aiOpportunityScore >= 70 ? { text: `Strong AI candidate — automation potential score ${w.aiOpportunityScore}/100`, color: 'text-violet-600', bg: 'bg-violet-50' } :
+          w.aiOpportunityScore >= 70 ? { text: `Strong candidate for AI automation — readiness score ${w.aiOpportunityScore}/100`, color: 'text-violet-600', bg: 'bg-violet-50' } :
           w.complexityScore >= 70 ? { text: `High complexity (${w.complexityScore}/100) — consider simplifying`, color: 'text-amber-600', bg: 'bg-amber-50' } :
           w.cognitiveBurdenScore >= 60 ? { text: `High cognitive load (${w.cognitiveBurdenScore}/100) — operators may struggle`, color: 'text-amber-600', bg: 'bg-amber-50' } :
           w.processMaturityScore <= 30 ? { text: `Low maturity (${w.processMaturityScore}/100) — needs documentation and standardization`, color: 'text-red-600', bg: 'bg-red-50' } :
@@ -1826,10 +1829,10 @@ function WorkflowRow({
               {w.aiOpportunityScore >= 60 && (
                 <span
                   className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-50 text-violet-700"
-                  title={`AI Automation Opportunity: ${w.aiOpportunityScore}/100`}
+                  title={`Readiness for AI automation: ${w.aiOpportunityScore}/100`}
                 >
                   <Zap className="h-2.5 w-2.5" />
-                  AI: {w.aiOpportunityScore}
+                  AI readiness: {w.aiOpportunityScore}
                 </span>
               )}
               {w.documentationCompleteness < 50 && (

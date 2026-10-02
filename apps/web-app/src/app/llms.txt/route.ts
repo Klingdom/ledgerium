@@ -30,7 +30,7 @@ function handleGET(): Response {
   const lines: string[] = [
     '# Ledgerium AI',
     '',
-    '> Ledgerium AI records real browser-based workflows and turns them into SOPs, process maps, workflow intelligence reports, and AI opportunity reports. The core idea: most process documentation is written from memory, so it is outdated and incomplete. Ledgerium documents from real recorded work instead. No screenshots and no keystrokes are captured; it records structured interaction events with timing and system context.',
+    '> Ledgerium AI records real browser-based workflows and turns them into SOPs, process maps, workflow intelligence reports, and AI-readiness reports. AI-readiness scores are rule-based and repeatable: the same recording always gets the same score. Output is deterministic and evidence-linked: no AI model writes or rewrites it. The core idea: most process documentation is written from memory, so it is outdated and incomplete. Ledgerium documents from real recorded work instead. No screenshots and no keystrokes are captured; it records structured interaction events with timing and system context.',
     '',
     '## Key entry points',
     `- [Product overview](${base}/product): how recording produces SOPs, process maps, and intelligence`,

@@ -732,8 +732,8 @@ export const WORKFLOW_DASHBOARD_COLUMNS: ReadonlyArray<WorkflowDashboardColumn> 
     // "automate" alone, per WDC-002 §5.3 + CEO Signal 2.
     {
       key: 'ai_opportunity_score',
-      label: 'AI Score',
-      description: 'AI automation opportunity score (0–100).',
+      label: 'AI Readiness',
+      description: 'Readiness of the workflow for AI automation (0–100).',
       dataType: 'number',
       sortable: true,
       filterable: true,

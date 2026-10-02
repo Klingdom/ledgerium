@@ -1204,8 +1204,8 @@ function AutomationSection({
 
       {opportunities.length === 0 ? (
         <SkeletonCard
-          message="No automation analysis available. Run AI analysis to identify automation opportunities."
-          {...(onRunAgentIntelligence != null ? { onAction: onRunAgentIntelligence, actionLabel: 'Run AI Analysis' } : {})}
+          message="No automation analysis available. Run the automation analysis to identify automation opportunities."
+          {...(onRunAgentIntelligence != null ? { onAction: onRunAgentIntelligence, actionLabel: 'Run Automation Analysis' } : {})}
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

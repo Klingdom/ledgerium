@@ -1,14 +1,14 @@
 import type { DepartmentPage } from '../types';
 import { SITE_AUTHOR } from '@/lib/seo/organization';
 
-/** Department hub pages. Mid-funnel; aggregate workflows, problems, and AI opportunities. */
+/** Department hub pages. Mid-funnel; aggregate workflows, problems, and AI-readiness scores. */
 
 const finance: DepartmentPage = {
   type: 'department',
   slug: 'finance',
   metaTitle: 'Finance Workflows: Document, Standardize, Improve',
   metaDescription:
-    'Document and improve finance workflows by recording how they really run. Get SOPs, process maps, and AI opportunities for AP, close, expenses, and approvals.',
+    'Document and improve finance workflows by recording how they really run. Get SOPs, process maps, and AI-readiness scores for AP, close, expenses, and approvals.',
   h1: 'Finance workflows',
   eyebrow: 'Department',
   shortAnswer:
@@ -69,7 +69,7 @@ const finance: DepartmentPage = {
     },
     {
       q: 'Where can AI help in finance?',
-      a: 'In the repetitive, rule-based steps like matching, coding, and drafting recurring entries. Approvals and judgment calls should keep a human involved.',
+      a: 'Ledgerium measures where AI could fit. It scores each recorded finance workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep finance SOPs current?',
@@ -87,7 +87,7 @@ const hr: DepartmentPage = {
   slug: 'hr',
   metaTitle: 'HR Workflows: Document, Standardize, Improve',
   metaDescription:
-    'Document HR and people ops workflows by recording how they really run. Get SOPs, process maps, and AI opportunities for hiring and onboarding.',
+    'Document HR and people ops workflows by recording how they really run. Get SOPs, process maps, and AI-readiness scores for hiring and onboarding.',
   h1: 'HR workflows',
   eyebrow: 'Department',
   shortAnswer:
@@ -148,7 +148,7 @@ const hr: DepartmentPage = {
     },
     {
       q: 'Where can AI help in HR?',
-      a: 'In repetitive, rule-based steps like checklist drafting, case routing, and reminders. Decisions about people should keep a human involved.',
+      a: 'Ledgerium measures where AI could fit. It scores each recorded HR workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep HR SOPs current?',
@@ -166,7 +166,7 @@ const operations: DepartmentPage = {
   slug: 'operations',
   metaTitle: 'Operations Workflows: Document and Improve',
   metaDescription:
-    'Document operations workflows by recording how they really run. Get SOPs, process maps, and AI opportunities for fulfillment, orders, and handoffs.',
+    'Document operations workflows by recording how they really run. Get SOPs, process maps, and AI-readiness scores for fulfillment, orders, and handoffs.',
   h1: 'Operations workflows',
   eyebrow: 'Department',
   shortAnswer:
@@ -227,7 +227,7 @@ const operations: DepartmentPage = {
     },
     {
       q: 'Where can AI help in operations?',
-      a: 'In repetitive, rule-based steps like routing, status updates, and checklist drafting. Judgment calls on exceptions should keep a human involved.',
+      a: 'Ledgerium measures where AI could fit. It scores each recorded operations workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep operations SOPs current?',
@@ -245,7 +245,7 @@ const customerSupport: DepartmentPage = {
   slug: 'customer-support',
   metaTitle: 'Customer Support Workflows: Document and Improve',
   metaDescription:
-    'Document customer support workflows by recording how they really run. Get SOPs, process maps, and AI opportunities for tickets and escalations.',
+    'Document customer support workflows by recording how they really run. Get SOPs, process maps, and AI-readiness scores for tickets and escalations.',
   h1: 'Customer support workflows',
   eyebrow: 'Department',
   shortAnswer:
@@ -306,7 +306,7 @@ const customerSupport: DepartmentPage = {
     },
     {
       q: 'Where can AI help in support?',
-      a: 'In repetitive, rule-based steps like routing, tagging, and reply drafting. Judgment on sensitive cases should keep a human involved.',
+      a: 'Ledgerium measures where AI could fit. It scores each recorded support workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep support SOPs current?',
@@ -324,7 +324,7 @@ const salesOperations: DepartmentPage = {
   slug: 'sales-operations',
   metaTitle: 'Sales Operations Workflows: Document and Improve',
   metaDescription:
-    'Document sales operations workflows by recording how they really run. Get SOPs, process maps, and AI opportunities for leads and orders.',
+    'Document sales operations workflows by recording how they really run. Get SOPs, process maps, and AI-readiness scores for leads and orders.',
   h1: 'Sales operations workflows',
   eyebrow: 'Department',
   shortAnswer:
@@ -385,7 +385,7 @@ const salesOperations: DepartmentPage = {
     },
     {
       q: 'Where can AI help in sales ops?',
-      a: 'In repetitive, rule-based steps like lead scoring, routing, and data updates. Deal judgment should keep a human involved.',
+      a: 'Ledgerium measures where AI could fit. It scores each recorded sales ops workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep sales ops SOPs current?',
@@ -403,7 +403,7 @@ const procurement: DepartmentPage = {
   slug: 'procurement',
   metaTitle: 'Procurement Workflows: Document and Improve',
   metaDescription:
-    'Document procurement workflows by recording how they really run. Get SOPs, process maps, and AI opportunities for purchasing and vendors.',
+    'Document procurement workflows by recording how they really run. Get SOPs, process maps, and AI-readiness scores for purchasing and vendors.',
   h1: 'Procurement workflows',
   eyebrow: 'Department',
   shortAnswer:
@@ -464,7 +464,7 @@ const procurement: DepartmentPage = {
     },
     {
       q: 'Where can AI help in procurement?',
-      a: 'In repetitive, rule-based steps like matching, coding, and checklist drafting. Approvals and vendor judgment should keep a human involved.',
+      a: 'Ledgerium measures where AI could fit. It scores each recorded procurement workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep procurement SOPs current?',
@@ -482,7 +482,7 @@ const it: DepartmentPage = {
   slug: 'it',
   metaTitle: 'IT Workflows: Document, Standardize, Improve',
   metaDescription:
-    'Document IT workflows by recording how they really run. Get SOPs, process maps, and AI opportunities for access, incidents, and resets.',
+    'Document IT workflows by recording how they really run. Get SOPs, process maps, and AI-readiness scores for access, incidents, and resets.',
   h1: 'IT workflows',
   eyebrow: 'Department',
   shortAnswer:
@@ -543,7 +543,7 @@ const it: DepartmentPage = {
     },
     {
       q: 'Where can AI help in IT?',
-      a: 'In repetitive, rule-based steps like provisioning, routing, and reset handling. Security judgment should keep a human involved.',
+      a: 'Ledgerium measures where AI could fit. It scores each recorded IT workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep IT runbooks current?',
@@ -561,7 +561,7 @@ const compliance: DepartmentPage = {
   slug: 'compliance',
   metaTitle: 'Compliance Workflows: Document and Improve',
   metaDescription:
-    'Document compliance workflows by recording how they really run. Get SOPs, process maps, and AI opportunities for audits and controls.',
+    'Document compliance workflows by recording how they really run. Get SOPs, process maps, and AI-readiness scores for audits and controls.',
   h1: 'Compliance workflows',
   eyebrow: 'Department',
   shortAnswer:
@@ -622,7 +622,7 @@ const compliance: DepartmentPage = {
     },
     {
       q: 'Where can AI help in compliance?',
-      a: 'In repetitive, rule-based steps like evidence gathering, routing, and reminders. Control judgment and sign-off should keep a human involved.',
+      a: 'Ledgerium measures where AI could fit. It scores each recorded compliance workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep compliance SOPs current?',
@@ -640,7 +640,7 @@ const legal: DepartmentPage = {
   slug: 'legal',
   metaTitle: 'Legal Workflows: Document, Standardize, Improve',
   metaDescription:
-    'Document legal workflows like contract review, redlines, and approval routing by recording how they really run. Get SOPs, process maps, and AI opportunities.',
+    'Document legal workflows like contract review, redlines, and approval routing by recording how they really run. Get SOPs, process maps, and AI-readiness scores.',
   h1: 'Legal workflows',
   eyebrow: 'Department',
   shortAnswer:
@@ -701,7 +701,7 @@ const legal: DepartmentPage = {
     },
     {
       q: 'Where can AI help in legal workflows?',
-      a: 'In repetitive, rule-based steps like intake checklists, conflict-check routing, and reminders. Legal judgment and negotiation should keep a qualified human involved.',
+      a: 'Ledgerium measures where AI could fit. It scores each recorded legal workflow for AI readiness using step volume, run time and system breadth. The scoring is rule-based — no AI model runs in Ledgerium.',
     },
     {
       q: 'How do I keep legal SOPs current?',

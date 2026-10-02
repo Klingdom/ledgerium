@@ -154,7 +154,7 @@ export default function CommandHeader({
             what the engine computes (cycle time, variation, automation tag). */}
         <p className="text-[13px] font-normal leading-[1.4] text-[var(--content-secondary)] mt-ds-1 max-w-xl">
           Your recorded workflows, measured from real runs — cycle time,
-          variation, and where AI could help.
+          variation, and readiness for AI.
         </p>
         {/* atglance-review bottleneck de-dup: the top-insight line is NO LONGER
             rendered here. The same highest-severity chip (e.g. "Bottleneck: Step

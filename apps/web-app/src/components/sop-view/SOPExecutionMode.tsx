@@ -102,7 +102,7 @@ export function SOPExecutionMode({ viewModel, expandedSteps, onToggleStep }: Pro
         <VariantsSummarySection viewModel={viewModel} />
       )}
 
-      {/* 7. AI Insights */}
+      {/* 7. Insights */}
       {(viewModel.insights.length > 0 || viewModel.recommendations.length > 0) && (
         <InsightsSection insights={viewModel.insights} recommendations={viewModel.recommendations} />
       )}
@@ -703,7 +703,7 @@ function InsightsSection({
           </div>
         ))}
 
-        {/* Placeholder when no AI insights */}
+        {/* Placeholder when no insights */}
         {insights.length === 0 && recommendations.length === 0 && (
           <div className="text-center py-4">
             <Zap className="h-5 w-5 text-[var(--content-tertiary)] mx-auto mb-1.5" />

@@ -20,12 +20,12 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Ledgerium AI — Record Real Workflows, Get SOPs & Process Maps',
+  title: 'Ledgerium AI — Record Workflows, Get SOPs, Process Maps & AI-Readiness Scores',
   description:
     'Record how work actually happens in the browser. Get structured SOPs and process maps, and see which workflows are ready for AI — in minutes, not weeks.',
   alternates: { canonical: '/' },
   openGraph: {
-    title: 'Ledgerium AI — Record Real Workflows. Get SOPs, Process Maps & AI Insights.',
+    title: 'Ledgerium AI — Record Workflows, Get SOPs, Process Maps & AI-Readiness Scores',
     description:
       'Your SOP says 5 steps. Your team takes 17. Record what actually happens and get SOPs, process maps, AI-readiness scores, and training docs automatically.',
   },
@@ -45,7 +45,7 @@ const HERO_OUTCOMES = [
     alt: 'Generated standard operating procedure with evidence citations',
   },
   {
-    label: 'AI Opportunity Report',
+    label: 'AI-Readiness Report',
     src: '/img/demo/report-view.png',
     alt: 'Workflow report with AI-readiness scoring and cycle-time analysis',
   },
@@ -63,8 +63,8 @@ const VALUE_PROPS = [
   {
     icon: Sparkles,
     eyebrow: 'Find the leverage',
-    title: 'AI use-case identification',
-    desc: 'Every workflow is scored for AI readiness — based on step volume, run time, and how many systems it touches. See which workflows are candidates for automation, from your real process data, not a guess.',
+    title: 'AI-readiness scoring',
+    desc: 'Every workflow is scored for AI readiness — based on step volume, run time, and how many systems it touches. See which workflows are candidates for automation, with rule-based scores from your real process data, not a guess.',
   },
   {
     icon: GraduationCap,
@@ -358,7 +358,7 @@ export default function HomePage() {
             {[
               { icon: FileText, title: 'Standard Operating Procedures', desc: 'Step-by-step instructions with event-level detail. Prerequisites, inputs, outputs, and completion criteria — generated from what was observed.' },
               { icon: Map, title: 'Process Maps', desc: 'Visual workflow diagrams with phases, system boundaries, and transition labels. Built from observed transitions, ready to review or export.' },
-              { icon: Sparkles, title: 'AI Opportunity Scoring', desc: 'Every workflow scored for AI readiness on step volume, run time, and system breadth — the signals that show where AI could take over.' },
+              { icon: Sparkles, title: 'AI-Readiness Scoring', desc: 'Every workflow rated for readiness for AI on step volume, run time, and system breadth. Rule-based and repeatable: the same recording always gets the same score. No AI model runs on your data.' },
               { icon: GraduationCap, title: 'Skill & Training Docs', desc: 'Generated SOPs double as onboarding material. New hires follow the real steps an expert took — not an outdated guide written from memory.' },
               { icon: Library, title: 'Workflow Library', desc: 'Every workflow saved to a persistent, searchable collection with cycle-time and run history. Find any workflow by title, tool, or date.' },
               { icon: CheckCircle, title: 'Reports & Export', desc: 'Download workflow reports, SOP documents, and raw data. Share any SOP via a public link — recipients see the output and can sign up free.' },

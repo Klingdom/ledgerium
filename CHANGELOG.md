@@ -6,6 +6,16 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Positioning: evidence-linked, not AI-written
+
+### Changed
+- Product and marketing copy now describes Ledgerium accurately: SOPs and recommendations come from what was observed using fixed rules, and readiness scores measure where AI could fit; no AI model runs on your data.
+- Agent features are now called automation agents, and scores are called AI readiness scores.
+- The "Most Popular" label was removed from the Team plan while it is available by waitlist only, and exported documents no longer say "AI" in their footer.
+
+---
+
+
 ## [2026-10-02] - Deleted workflows are permanently removed after 30 days
 
 ### Added
