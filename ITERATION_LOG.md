@@ -4,6 +4,33 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 128) — A filter that matches nothing (Mode 1, `devops-engineer`)
+
+- **Controls:**
+  - **Area:** `test-infra / ci`. Saturation required a non-web-app pick, since 125-127 were all web-app.
+  - **Agent:** `devops-engineer`. This breaks the `frontend-engineer` ×3 run, as required.
+  - **Extension:** `871e29a`, 85 loops untouched. The extension's CI workflow changed; no extension code did.
+  - **Cadence:** 1 of 3 since MR-055.
+- **Candidate Selection: `burn-down` — #306** (12). This is cool-off recharge 3 of 3, so **the cool-off is re-armed**. Saturation and agent-diversity were also satisfied.
+- **What changed:** all 11 filtered pnpm steps in the three workflows (deploy, e2e-web-app, e2e-extension) gain `--fail-if-no-match`, so a renamed or misspelt package now fails CI instead of passing with nothing run.
+  - Local scripts are untouched; the only local filter use is in the PR template.
+- **Proof (exit codes, identical on pnpm 9.15.9 and 10.32.1):**
+  - Real filters exit 0.
+  - `nope` with the flag exits 1; `nope` without it exits 0, which was the hazard.
+  - Both real test gates pass on 10.32.1: root 5888 and web-app 4110.
+  - All workflow YAML parses.
+  - My own spot check matched: pnpm 9 `nope` gives rc 1, and the pnpm 10 real filter gives rc 0.
+- **Adjacent check (the MR-055 practice), reported, not changed:**
+  - `if:` cache-hit skips only a cache fill.
+  - `if: failure()/always()` only gates artifact uploads.
+  - There is no `continue-on-error` anywhere.
+  - `email-test.yml:50,57` uses `|| true` on diagnostics. That would mask a `jq` failure in a manual diagnostic workflow; it is noted, not filed (no gate depends on it).
+- **Validation:** see the proof above. No product code changed.
+- **Recording note:** the new validator gate in my recording script caught a malformed #306 row before commit. I had written a shell `||` inside a table cell. The validator's own hint ("escape as `\|`") does not work, because it splits rows on every pipe; that is filed as #312.
+- **Follow-ups:** 1 created (#312), 1 closed (#306).
+
+---
+
 ## 2026-10-02 — MR-055 recorded (Mode 4, non-counting): the defect next to the one you fixed
 
 - **Review:** `docs/meta/MR_055_META_REVIEW.md`. Nothing reverts.

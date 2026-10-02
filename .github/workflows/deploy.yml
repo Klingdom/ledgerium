@@ -33,7 +33,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma client
-        run: pnpm --filter @ledgerium/web-app exec prisma generate
+        run: pnpm --filter @ledgerium/web-app --fail-if-no-match exec prisma generate
 
       - name: Typecheck
         run: pnpm typecheck
@@ -53,7 +53,7 @@ jobs:
       # filter would be a second include list to keep in sync, and the full run
       # is ~17s, so the duplicate *.test.ts execution costs less than the hazard.
       - name: Run web-app tests (incl. component tests)
-        run: pnpm --filter @ledgerium/web-app exec vitest run --no-passWithNoTests
+        run: pnpm --filter @ledgerium/web-app --fail-if-no-match exec vitest run --no-passWithNoTests
 
       # Row #212-adjacent / MR-031 section 3.1. The backlog is edited by ad-hoc
       # scripts and has been silently corrupted three times — closed rows left
