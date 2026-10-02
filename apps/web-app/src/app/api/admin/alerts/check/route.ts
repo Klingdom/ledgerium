@@ -110,7 +110,7 @@ async function handleGET(request: NextRequest) {
     // back to "no memory": a duplicate notification, never a lost one.
     let previous: AlertStates = {};
     try {
-      previous = await loadAlertStates(nowMs);
+      previous = await loadAlertStates(nowMs, alerts.map((a) => a.id));
     } catch (err) {
       console.error('[admin/alerts/check] alert state unreadable - notifying without suppression', err);
     }
@@ -149,7 +149,7 @@ async function handleGET(request: NextRequest) {
       }),
       ...decision.resolved.map((id) => recordAlertState(id, 'resolved', nowMs)),
       ...decision.clear.map((c) => recordAlertState(c.id, 'clear', nowMs, { okRuns: c.okRuns, sinceMs: c.sinceMs })),
-      ...decision.continued.map((id) => recordAlertState(id, 'continued', nowMs)),
+      ...decision.continued.map((c) => recordAlertState(c.id, 'continued', nowMs, { firingRuns: c.firingRuns })),
     ]);
     // Row #296: a failed state write is reported, and the next run discards the
     // stale state for that alert (duplicate-shaped, never loss-shaped).

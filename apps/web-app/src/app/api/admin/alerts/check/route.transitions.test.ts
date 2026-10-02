@@ -12,8 +12,17 @@ vi.mock('@/db', () => ({
   db: {
     analyticsEvent: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      findMany: async ({ where }: any) =>
-        rows.filter((r) => r.eventName === where.eventName && r.createdAt >= where.createdAt.gte),
+      findFirst: async ({ where }: any) => {
+        const { propertiesMatch } = await import('@/lib/alerts/like-test-support');
+        return rows
+          .filter(
+            (r) =>
+              r.eventName === where.eventName &&
+              r.createdAt >= where.createdAt.gte &&
+              propertiesMatch(r.properties, where),
+          )
+          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0] ?? null;
+      },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       create: async ({ data }: any) => {
         if (failWrites.states.has(JSON.parse(data.properties).state)) throw new Error('db write failed');
@@ -188,5 +197,58 @@ describe('alerts/check notifies on transition (row #292)', () => {
     expect(mockSend).toHaveBeenCalledTimes(2);
     await run(T0 + 2 * HOUR);
     expect(mockSend).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('re-arm and per-alert state read (row #297)', () => {
+  it('a second outage 2h after recovery pages within ~2h, not at the 24h reminder', async () => {
+    mockCompute.mockResolvedValue([alert('firing')]);
+    await run(T0); // h0 page
+    mockCompute.mockResolvedValue([alert('ok')]);
+    await run(T0 + HOUR);
+    await run(T0 + 2 * HOUR);
+    mockCompute.mockResolvedValue([alert('firing')]);
+    await run(T0 + 3 * HOUR); // first firing run after the clear: still a possible blip
+    expect(mockSend).toHaveBeenCalledTimes(1);
+    await run(T0 + 4 * HOUR); // second consecutive firing run: re-arm
+    expect(mockSend).toHaveBeenCalledTimes(2);
+    for (let h = 5; h < 24; h++) await run(T0 + h * HOUR);
+    expect(mockSend).toHaveBeenCalledTimes(2);
+  });
+
+  it('hourly flapping for 48h pages exactly as before (h0 and the h24 reminder)', async () => {
+    for (let h = 0; h < 48; h++) {
+      mockCompute.mockResolvedValue([alert(h % 2 === 0 ? 'firing' : 'ok')]);
+      await run(T0 + h * HOUR);
+    }
+    expect(mockSend).toHaveBeenCalledTimes(2);
+  });
+
+  it('a fire,fire,ok flap (period 3) pages no faster than every 4h', async () => {
+    const pattern = ['firing', 'firing', 'ok'] as const;
+    for (let h = 0; h < 24; h++) {
+      mockCompute.mockResolvedValue([alert(pattern[h % 3]!)]);
+      await run(T0 + h * HOUR);
+    }
+    expect(mockSend.mock.calls.length).toBeLessThanOrEqual(6);
+  });
+
+  it('notifiedAtMs survives >1000 newer rows of other alerts (per-alert read, not a shared window)', async () => {
+    mockCompute.mockResolvedValue([alert('firing', 'a_alert'), alert('firing', 'b_alert')]);
+    await run(T0); // both paged at T0
+    for (let i = 1; i <= 1500; i++) {
+      rows.push({
+        eventName: 'alert_notified',
+        properties: JSON.stringify({ alertId: 'noise_alert', state: 'clear', okRuns: 1, sinceMs: T0 }),
+        createdAt: new Date(T0 + i * 1000),
+      });
+    }
+    // 10h later both are still inside the reminder interval: no page, 200.
+    const r = await run(T0 + 10 * HOUR);
+    expect(r.body.alertsSuppressed).toBe(2);
+    expect(mockSend).toHaveBeenCalledTimes(2);
+    // and the reminder clock still runs from T0, not a fallback
+    const r2 = await run(T0 + 24 * HOUR);
+    expect(r2.body.alertsSent).toBe(2);
   });
 });

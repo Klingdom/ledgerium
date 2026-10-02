@@ -30,6 +30,12 @@ name: Alerts check
 # run no longer means "nothing is firing". 424/207 apply to sends attempted this
 # run; a failed send is retried next hour.
 #
+# Row #297: a persistent alert-STATE write failure (the analytics_events insert
+# that records what was paged) does NOT fail this job: the route answers 200 with
+# `stateWriteFailures` in the body, which this job never prints. The job stays
+# green; the signal is hourly DUPLICATE pages (the next run discards the stale
+# state and re-sends). Duplicate over loss, by design.
+#
 # DOES NOT COVER: delivery being CONFIRMED means the channel accepted it (Slack
 # 2xx, email provider success), not that a human read it. Channels are only
 # exercised WHILE an alert is firing, so a broken channel is not detected on a

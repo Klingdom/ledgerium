@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - A second outage gets its own alert
+
+### Fixed
+- A new outage shortly after a previous one recovered was treated as the same incident and could go unannounced for most of a day; it is now announced within a few hours.
+
+---
+
+
 ## [2026-10-02] - The deploy test gate fails if no tests run
 
 ### Fixed

@@ -35,6 +35,15 @@ vi.mock('@/db', () => ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       count: async ({ where }: any) => rows.filter((r) => matches(r, where)).length,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findFirst: async ({ where }: any) => {
+        const { propertiesMatch } = await import('@/lib/alerts/like-test-support');
+        return (
+          rows
+            .filter((r) => matches(r, where) && propertiesMatch(r.properties, where))
+            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0] ?? null
+        );
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       findMany: async ({ where, take }: any) =>
         rows
           .filter((r) => matches(r, where))
@@ -168,9 +177,9 @@ describe('forged client rows cannot move alerts or alert state (row #295)', () =
     const now = Date.now();
     const props = JSON.stringify({ alertId: 'a1', state: 'firing' });
     rows.push({ eventName: 'alert_notified', source: 'client', userId: null, properties: props, createdAt: new Date(now) });
-    expect(await loadAlertStates(now)).toEqual({});
+    expect(await loadAlertStates(now, ['a1'])).toEqual({});
     rows.push({ eventName: 'alert_notified', source: 'server', userId: null, properties: props, createdAt: new Date(now) });
-    expect((await loadAlertStates(now))['a1']?.state).toBe('firing');
+    expect((await loadAlertStates(now, ['a1']))['a1']?.state).toBe('firing');
   });
 });
 

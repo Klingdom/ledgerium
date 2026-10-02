@@ -66,7 +66,7 @@ describe('decideAlertSends', () => {
     const r = d({ x: { state: 'clear', atMs: NOW - HOUR, okRuns: 1, sinceMs: NOW - HOUR, notifiedAtMs: NOW - 2 * HOUR } }, [a('firing')]);
     expect(r.sends).toEqual([]);
     expect(r.suppressed).toHaveLength(1);
-    expect(r.continued).toEqual(['x']);
+    expect(r.continued).toEqual([{ id: 'x', firingRuns: 1 }]);
   });
   it('a continued row re-fire is plain suppression (no further write); ok after continued restarts the count', () => {
     const prev: AlertStates = { x: { state: 'continued', atMs: NOW - HOUR, notifiedAtMs: NOW - 3 * HOUR } };
@@ -91,7 +91,7 @@ describe('decideAlertSends', () => {
   });
   it('legacy rows (no okRuns/sinceMs/notifiedAtMs) still behave: firing suppressed, ok -> clear', () => {
     expect(d({ x: { state: 'firing', atMs: NOW - 1 } }, [a('firing')]).suppressed).toHaveLength(1);
-    expect(d({ x: { state: 'clear', atMs: NOW - 1 } }, [a('ok')]).clear).toEqual([{ id: 'x', okRuns: 1, sinceMs: NOW - 1 }]);
+    expect(d({ x: { state: 'clear', atMs: NOW - 1, okRuns: 0, sinceMs: NOW - 1 } }, [a('ok')]).clear).toEqual([{ id: 'x', okRuns: 1, sinceMs: NOW - 1 }]);
   });
   it('ok with resolved/no state -> nothing', () => {
     expect(d({}, [a('ok')])).toEqual(NONE);
@@ -108,6 +108,36 @@ describe('decideAlertSends', () => {
   it('is deterministic', () => {
     const prev: AlertStates = { x: { state: 'firing', atMs: NOW - DAY } };
     expect(d(prev, [a('firing')])).toEqual(d(prev, [a('firing')]));
+  });
+});
+
+describe('re-arm (row #297)', () => {
+  const cont = (firingRuns: number | undefined, notified: number): AlertStates => ({
+    x: { state: 'continued', atMs: NOW - HOUR, notifiedAtMs: notified, ...(firingRuns === undefined ? {} : { firingRuns }) },
+  });
+  it('second consecutive firing run after a clear, >= 4h since the page -> new send', () => {
+    const r = d(cont(1, NOW - 4 * HOUR), [a('firing')]);
+    expect(r.sends.map((s) => s.kind)).toEqual(['new']);
+    expect(r.continued).toEqual([]);
+  });
+  it('re-arm is held back under the 4h min gap, without writing (steady)', () => {
+    const r = d(cont(1, NOW - 4 * HOUR + 1), [a('firing')]);
+    expect(r.sends).toEqual([]);
+    expect(r.suppressed).toHaveLength(1);
+    expect(r.continued).toEqual([]);
+  });
+  it('legacy continued row (no counter) never re-arms', () => {
+    expect(d(cont(undefined, NOW - 10 * HOUR), [a('firing')]).sends).toEqual([]);
+  });
+  it('first firing run after a clear is only counted', () => {
+    const r = d({ x: { state: 'clear', atMs: NOW - HOUR, okRuns: 2, sinceMs: NOW - 2 * HOUR, notifiedAtMs: NOW - 3 * HOUR } }, [a('firing')]);
+    expect(r.sends).toEqual([]);
+    expect(r.continued).toEqual([{ id: 'x', firingRuns: 1 }]);
+  });
+  it('reduce carries firingRuns; clear rows missing counters get safe defaults', () => {
+    const rw = (o: object, at: number) => ({ properties: JSON.stringify({ alertId: 'x', ...o }), createdAt: new Date(at) });
+    expect(reduceAlertStates([rw({ state: 'continued', firingRuns: 1 }, 5)])['x']).toEqual({ state: 'continued', atMs: 5, firingRuns: 1 });
+    expect(reduceAlertStates([rw({ state: 'clear' }, 5)])['x']).toEqual({ state: 'clear', atMs: 5, okRuns: 0, sinceMs: 5 });
   });
 });
 

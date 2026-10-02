@@ -4,6 +4,38 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 121) — A second outage is a second page (Mode 1, `backend-engineer` + `system-architect`)
+
+- **Controls:**
+  - **Area:** `infra / monitoring` (2 of the last 5).
+  - **Agents:** `backend-engineer` (two passes) and `system-architect` (D-4 contract review).
+  - **Review outcome:** READY WITH MINOR REVISIONS. Both must-fixes went back to the engineer. The verdict was **persisted this time**: `docs/meta/D4_REVIEW_LOOP121_ALERTS.md`. I made no product edits.
+  - **Extension:** `871e29a`, 78 loops untouched.
+  - **Cadence: 3 of 3 since MR-052 — MR-053 now due.**
+- **Candidate Selection: `burn-down` — #297** (10). It carries the merged-incident gap MR-052 found.
+- **What changed:**
+  - **(1) Re-arm.** A `continued` alert pages as new on its **2nd consecutive firing run** after a clear, if ≥4 h since the last page. A second outage 2 h after recovery is now paged at ~h4, not ~h24.
+    - Hourly flapping never reaches 2 consecutive firing runs, so 48 h still gives 2 pages.
+    - The 4 h floor matches the hysteresis path (3 ok runs + 1 fire).
+    - A legacy `continued` row without the counter never re-arms.
+  - **(2) Reads.** The latest row per alert, and its latest `firing` row, are read per alert. This replaces the shared `take: 1000`, so busy alerts can no longer scroll another's reminder clock away. Tested with >1000 unrelated rows.
+  - **(3) No separate retention.** Rows are written only on change, and the 90-day cleanup bounds them. A prune could delete a long-steady alert's only row.
+  - **(4) Module split.** `lib/alerts/state-machine.ts` (pure, with a typed `AlertState` union), `store.ts` (DB), `unconfirmed.ts` (process-local), and `lib/alert-state.ts` as a barrel.
+  - **(5) Workflow comment.** It now states that a persistent state-write failure keeps the job green.
+- **Architect must-fixes, applied:**
+  - **M1.** The firing-row query relied on `alertId` being serialized before `state`. It now uses two independent `contains` filters under `AND`. A test with `state` written first proves the reminder still fires; the single-needle version fails it.
+  - **M2.** Prisma `contains` is SQLite LIKE (`_` is a wildcard, matching is case-insensitive). A test asserts every alert id is `^[a-z0-9_]+$` and that no id's needle matches another under LIKE. The test fakes now emulate LIKE instead of a plain substring, so tests exercise real behaviour.
+- **Residuals, class-scoped (ways one incident yields the wrong number of pages):**
+  - A restart, or a second instance, between a failed write and the next run is still silent for up to ~20 h. It is documented in `unconfirmed.ts` and correct only while there is one container.
+  - f/i/f/f re-pages one sustained outage after 4 h, because a single `insufficient_data` run counts as a clear. That is a duplicate, not a loss. Recorded as a design note in the D-4 doc.
+- **Validation (exit code + ANSI-stripped summary):** web-app **3941 → 3955** on 2 of 2 runs; root **5727 → 5741**; typecheck 0. Agent reverts:
+  - re-arm count set to 999 → 3 tests fail;
+  - shared read restored → the >1000-rows test fails;
+  - single needle restored → the M1 test fails.
+- **Follow-ups:** 0 created, 1 closed (#297).
+
+---
+
 ## 2026-10-02 (loop 120) — A gate that passes on nothing (Mode 1, `devops-engineer`)
 
 - **Controls:**
