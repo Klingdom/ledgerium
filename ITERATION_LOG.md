@@ -4,6 +4,37 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-060 recorded (Mode 4, non-counting): armed by a variable
+
+- **Review:** `docs/meta/MR_060_META_REVIEW.md`. Nothing reverts.
+  - **Counts at `c91ffdd`:** root 6043 on 2 of 2 runs, web-app 4245 on 2 of 2, typecheck 0, validator clean, script tests 33/33. `check-dockerfile-workspace` and the web-app build both pass.
+  - **Not run:** a real `docker build` (no daemon here).
+- **CLAUDE.md amended: Mode 5 clause 9** (MR-059 §2, applied by silence-as-accept, verbatim as quoted in MR-060 §2).
+  - **New trigger:** the hard ceiling now halts a directed sequence only if the pool has grown since the sequence opened.
+  - **One override per directive:** an override logged at sequence open covers every item the user named in that directive.
+  - **Stated plainly: the silence window was only 48 minutes**, inside one working session. That is thin evidence of considered acceptance; the CEO can reverse it in one sentence.
+  - **Definition used:** "the pool" is the validator's `open N` at the commit that opens the sequence.
+- **The finding that changes an instruction I gave the CEO: retention is armed by setting a variable, not by a preview.**
+  - `retention-purge.yml` schedules a real run at 03:41 UTC, and `dry_run` defaults to true only for manual runs. So setting `RETENTION_PURGE_URL` arms a real purge whether or not anyone previewed it. I had said "set the URL, then preview", which is the wrong order.
+  - The preview also skips the orphan-upload sweep and caps its count at 100, so it under-reports.
+  - **SYSTEM_HEALTH now tells the CEO not to set the URL yet.** Filed **#333**: an explicit arming switch, separate from the URL, and a complete preview.
+- **The loop-143 no-app-imports guard runs nowhere in CI.** `deploy.yml` names three of the four `scripts/*.test.mjs` files. A guard added without CI wiring is the same "passes on nothing" class as #322. Filed **#332**, which makes CI run every script test file by glob.
+  - **Practice adopted:** a brief that adds a guard must wire it into CI in the same commit.
+- **Loop 141:** pressing Escape while a delete is in flight closes the prompt, but the delete still completes, so the user believes they cancelled (`WorkflowRow.tsx:648-658,870-876`). Filed **#334**.
+- **Loop 142 (added to #331):**
+  - Runs that differ only in free text (e.g. "Welcome back, Jane Doe") are scored 0.85 and marked observed, so they are read as a confident decision.
+  - That label and route text reaches more output fields than `decisionId` alone, which is a PII path.
+  - NFC vs NFD "Café" creates a false branch. That belongs to intent-inference normalization.
+- **Loop 143:** the runtime imports no `@ledgerium/*` package by name, so the runner stage is a superset, not a gap.
+- **Pool:** flat at 119.
+- **Next:**
+  - loop 144 = **#332** (14);
+  - then **#333** (13), which must land before the CEO arms retention;
+  - then #325.
+  - A third consecutive path-e pick (#331) is deferred for saturation.
+
+---
+
 ## 2026-10-02 (loop 143) — Packages do not reach into apps (Mode 1, `backend-engineer` + `devops-engineer`)
 
 - **Controls:**
