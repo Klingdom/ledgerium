@@ -27,15 +27,15 @@ const FAQ = [
   },
   {
     q: 'When can my team join my Ledgerium workspace?',
-    a: 'Multi-user invites are launching Q3 2026. Until then, Free and Starter plans are fully self-serve, and Team and Growth tiers route to a waitlist (hello@ledgerium.ai). We will email you the moment invites go live. We chose not to charge for advertised seat counts until the underlying workspace infrastructure ships — full self-serve invite flow is in active development.',
+    a: 'Free, Starter, and Solo are fully self-serve single-user plans. Team and Growth, which include the multi-user workspace and invites, are available by waitlist — email hello@ledgerium.ai. They are not sold through checkout, so you are never charged for multi-user access we cannot provision.',
   },
   {
     q: 'Can I share workflows with my team today?',
-    a: 'Yes. Every plan (including Free) supports public sharing via link. You can share SOPs and process maps with anyone — viewers do not need a Ledgerium account. Internal team workspaces with co-recording and shared libraries arrive with the Q3 2026 multi-user release.',
+    a: 'Yes. Every plan (including Free) supports public sharing via link. You can share SOPs and process maps with anyone — viewers do not need a Ledgerium account. Team workspaces and shared libraries are part of the Team and Growth plans, which are available by waitlist.',
   },
   {
     q: 'What is the intelligence layer?',
-    a: 'The intelligence layer includes bottleneck detection, friction analysis, rework pattern identification, variant path analysis, automation opportunity scoring, and process health scores. It turns raw workflow recordings into actionable process improvement insights. Available on Team plans and above.',
+    a: 'The intelligence layer includes bottleneck detection, friction analysis, rework pattern identification, variant path analysis, and automation opportunity scoring. It turns raw workflow recordings into actionable process improvement insights. Available on Solo and above. Starter includes basic process health scores only.',
   },
   {
     q: 'Can I try before I buy?',
@@ -191,10 +191,9 @@ export default function PricingPage() {
           <div className="mx-auto max-w-3xl mb-8 rounded-xl border border-amber-500/30 bg-amber-950/20 px-5 py-3 text-center">
             <p className="text-sm text-[var(--status-warning)]">
               <span className="font-semibold">Heads up:</span>{' '}
-              Multi-user invites are launching Q3 2026. Free and Starter plans are{' '}
+              Free, Starter, and Solo plans are{' '}
               <span className="font-semibold">fully self-serve today</span>.
-              Team and Growth tiers route to a waitlist until our multi-user invite
-              infrastructure ships.
+              Team and Growth, which include multi-user invites, are available by waitlist.
             </p>
           </div>
 

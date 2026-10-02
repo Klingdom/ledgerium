@@ -253,7 +253,7 @@ export function PricingCards() {
 
               {plan.id === 'team' || plan.id === 'growth' ? (
                 <p className="mt-2 mb-4 text-center text-ds-xs text-[var(--status-warning)]">
-                  Multi-user invites launching Q3 2026
+                  Team and Growth: available by waitlist
                 </p>
               ) : availability === 'unavailable' ? (
                 <p className="mt-2 mb-4 text-center text-ds-xs text-[var(--content-tertiary)]">

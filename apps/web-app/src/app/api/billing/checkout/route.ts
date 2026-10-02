@@ -310,7 +310,7 @@ async function handlePOST(req: NextRequest) {
     return NextResponse.json(
       {
         error:
-          'Multi-user invites are launching Q3 2026. Please join the waitlist at ' +
+          'Team and Growth plans are available by waitlist. Please join the waitlist at ' +
           'mailto:hello@ledgerium.ai?subject=Team Plan Waitlist or upgrade to Starter for solo use today.',
         code: 'awaiting_workspace_build',
         plan: requestedPlan,

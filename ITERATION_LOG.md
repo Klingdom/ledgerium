@@ -4,6 +4,38 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 125) — A promise with a date that has passed (Mode 1, `frontend-engineer` + `growth-strategist`)
+
+- **Controls:**
+  - **Area:** `web-app / pricing / trust` — the first user-visible loop after the 109-124 arc.
+  - **Agents:**
+    - `frontend-engineer`, two passes.
+    - `growth-strategist` as the D-4 clause-1 adjacency: 6 strings changed, against a threshold of 3. It returned 2 KEEP, 4 POLISH and 0 REWRITE. Three POLISH edits were applied.
+    - The fourth POLISH, removing "shared libraries", was overruled on evidence: `lib/plans.ts` grants `sharedLibrary: true` to Team, Growth and Enterprise. The reviewer flagged it only because I had left it out of the facts I supplied.
+  - **Extension:** `871e29a`, 82 loops untouched.
+  - **Cadence:** 1 of 3 since MR-054.
+- **Candidate Selection: `ceiling-cool-off: invoked` — #305** (12).
+  - **Rationale:** the pool exceeds 8, so clause 6 would force a burn-down pick. Cool-off has been fully re-armed since iter 029, and loops 122-124 were burn-down. MR-054 asked for the first user-visible pick to be this live trust defect on the public pricing page.
+  - **Effect:** the cool-off resource is consumed. Three new consecutive burn-downs re-arm it.
+- **The truth came from the code before any copy was written:**
+  - Free, Starter and Solo are self-serve.
+  - Team and Growth checkout is blocked with a 402, and the UI routes to a waitlist.
+  - Invites exist only on Team, Growth and Enterprise workspaces.
+  - Starter *does* have basic health scores (`plans.ts`); the intelligence layer starts at Solo. So #34's wrong half was the FAQ, not the feature line.
+- **What changed:** all six "launching Q3 2026" mentions are replaced with today's truth and no date. That is five sites plus a sixth the engineer found at FAQ :34. The FAQ now agrees with `plans.ts`, and the two checkout error strings are byte-identical.
+- **Test, `lib/pricing-copy.test.ts`:**
+  - It scans the pricing files and all of `app/(public)` for any quarter or month-year already past.
+  - It pins the Starter and Free card lists, the comparison row and the FAQ against `PLAN_FEATURES`.
+  - **Revert proof:** restoring the Q3 string fails the date test, and restoring the old FAQ fails the agreement test.
+- **Residuals, stated:**
+  - The reference date is a fixed constant (`2026-10-02`, overridable) for determinism. A future date that lapses later is caught only when that constant is moved forward. This is the trade-off against a test that would turn a deploy red on a calendar day.
+  - One pinned pattern has an unescaped `.`. That is harmless but loose.
+- **For the CEO:** no date is shown. If you want one for Team and Growth, give it to me.
+- **Validation (exit code + ANSI-stripped summary):** web-app **3968 → 4039** on 3 of 3 runs. The +71 are the per-file cases of the scan. Root is **5754 → 5825**, typecheck 0, and `Q3 2026` no longer appears in any non-test source.
+- **Follow-ups:** 0 created, 2 closed (#305, #34).
+
+---
+
 ## 2026-10-02 — MR-054 recorded (Mode 4, non-counting): the date on the pricing page
 
 - **Review:** `docs/meta/MR_054_META_REVIEW.md`. The window holds and nothing reverts.

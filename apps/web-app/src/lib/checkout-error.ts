@@ -61,7 +61,7 @@ const COPY: Record<CheckoutErrorCode, string> = {
     'meaningful result. Record more runs, then try again.',
   missing_sku: 'Could not start checkout — please try again.',
   awaiting_workspace_build:
-    'Multi-user invites are launching Q3 2026. Please join the waitlist at ' +
+    'Team and Growth plans are available by waitlist. Please join the waitlist at ' +
     'mailto:hello@ledgerium.ai?subject=Team Plan Waitlist or upgrade to Starter for solo use today.',
   plan_not_configured: "This plan isn't available for purchase yet — please check back soon.",
   sku_not_configured: "This isn't available for purchase yet — please check back soon.",

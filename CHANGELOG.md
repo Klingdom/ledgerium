@@ -6,6 +6,15 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - The pricing page says only what is true today
+
+### Fixed
+- The pricing page, plan cards and checkout message said multi-user invites would launch in Q3 2026, a date that has now passed. They now state the current situation: Free, Starter and Solo are available now, and Team and Growth are available by waitlist.
+- The pricing FAQ no longer contradicts the plan list about which plans include health scores.
+
+---
+
+
 ## [2026-10-02] - Security: removed team members lose access to the team list
 
 ### Security
