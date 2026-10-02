@@ -26,7 +26,8 @@
  * throw if they find nothing, so a restructure fails loudly instead of passing.
  */
 import { describe, it, expect } from 'vitest'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
@@ -234,6 +235,104 @@ describe('deploy.yml -> compose.hostinger.yaml env delivery (row #277)', () => {
         '          other: x',
       ].join('\n')
       expect(parseDeployWrittenVars(yml)).toEqual(['A', 'B'])
+    })
+  })
+})
+
+// ── Secrets must have no usable fallback (row #280) ──────────────────────────
+// Loop 99's check above counted `${KEY:-change-me}` as "delivered". It is, and
+// that is the problem: a public default for a signing key is a forgeable
+// session. A secret-like variable may only be `${KEY:-}` (empty: the feature
+// degrades visibly) or `${KEY:?msg}` (required: compose refuses to start).
+
+const SECRET_NAME = /SECRET|PASSWORD|PASSWD|TOKEN|WEBHOOK|(^|_)KEY(_|$)/
+const COMPOSE_FILES = readdirSync(REPO_ROOT).filter(
+  (f) => /^compose.*\.ya?ml$/.test(f) || f === 'hostinger-paste.yaml',
+)
+
+/** Secret-like keys whose `${VAR:-default}` / `${VAR-default}` default is non-empty. */
+export function findSecretFallbacks(yml: string): string[] {
+  const bad: string[] = []
+  yml.split(/\r?\n/).forEach((raw, i) => {
+    const t = raw.trim().replace(/^-\s*/, '').replace(/^["']|["']$/g, '')
+    if (t.startsWith('#')) return
+    const m = /^([A-Za-z_][A-Za-z0-9_]*)\s*[=:]\s*(.*)$/.exec(t)
+    if (!m || !SECRET_NAME.test(m[1]!)) return
+    const d = /\$\{[A-Za-z_][A-Za-z0-9_]*:?-([^}]*)\}/.exec(m[2]!)
+    if (d && d[1]!.length > 0) bad.push(`line ${i + 1}: ${m[1]}`)
+  })
+  return bad
+}
+
+/** The placeholder list + length + validation block in scripts/docker-start.sh. */
+const START_SH = readFileSync(path.join(REPO_ROOT, 'scripts/docker-start.sh'), 'utf8').replace(/\r\n/g, '\n')
+export function parsePlaceholders(sh: string): string[] {
+  const m = /^PLACEHOLDER_SECRETS="([^"]*)"/m.exec(sh)
+  if (!m) throw new Error('docker-start.sh: PLACEHOLDER_SECRETS not found')
+  return m[1]!.split(/\s+/).filter(Boolean)
+}
+
+describe('secrets have no non-empty fallback (row #280)', () => {
+  it('no compose file gives a secret-like variable a non-empty default', () => {
+    expect(COMPOSE_FILES).toContain('compose.hostinger.yaml')
+    for (const f of COMPOSE_FILES) {
+      const bad = findSecretFallbacks(readFileSync(path.join(REPO_ROOT, f), 'utf8'))
+      expect(bad, `${f}: secret with a non-empty fallback default (use \${KEY:-} or \${KEY:?msg}): ${bad.join(', ')}`).toEqual([])
+    }
+  })
+
+  it('NEXTAUTH_SECRET is required (:?) in the deployed compose file', () => {
+    const line = readFileSync(COMPOSE, 'utf8')
+      .split(/\r?\n/)
+      .find((l) => /NEXTAUTH_SECRET=/.test(l) && !l.trim().startsWith('#'))
+    expect(line).toMatch(/\$\{NEXTAUTH_SECRET:\?/)
+  })
+
+  it('docker-start.sh placeholder list covers every placeholder the repo ships', () => {
+    const list = parsePlaceholders(START_SH)
+    const dockerfile = readFileSync(path.join(REPO_ROOT, 'Dockerfile'), 'utf8')
+    const build = /^ENV NEXTAUTH_SECRET=(\S+)/m.exec(dockerfile)?.[1]
+    expect(build, 'Dockerfile build-time NEXTAUTH_SECRET').toBeTruthy()
+    for (const v of [build!, 'change-me', 'ledgerium-dev-secret-change-in-production']) {
+      expect(list.some((p) => v.toLowerCase().includes(p)), `placeholder "${v}" not rejected by docker-start.sh`).toBe(true)
+    }
+  })
+
+  describe('checker self-test (mutation cases as fixtures)', () => {
+    it('fails on the exact pre-fix line', () => {
+      expect(findSecretFallbacks('      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-me}')).toHaveLength(1)
+      expect(findSecretFallbacks('      NEXTAUTH_SECRET: "${NEXTAUTH_SECRET:-x}"')).toHaveLength(1)
+      expect(findSecretFallbacks('      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-sk_live}')).toHaveLength(1)
+    })
+    it('accepts empty defaults, required form, and non-secrets', () => {
+      expect(findSecretFallbacks('      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}')).toEqual([])
+      expect(findSecretFallbacks('      - "NEXTAUTH_SECRET=${NEXTAUTH_SECRET:?must be set}"')).toEqual([])
+      expect(findSecretFallbacks('      - SMTP_HOST=${SMTP_HOST:-smtp.hostinger.com}')).toEqual([])
+    })
+  })
+
+  const shAvailable = spawnSync('sh', ['-c', 'true']).status === 0
+  describe.skipIf(!shAvailable)('docker-start.sh NEXTAUTH_SECRET validation (executed)', () => {
+    const block = /^# BEGIN NEXTAUTH_SECRET[^\n]*\n[\s\S]*?^# END NEXTAUTH_SECRET[^\n]*$/m.exec(START_SH)?.[0]
+    const run = (secret: string | undefined) => {
+      const env: NodeJS.ProcessEnv = { NODE_ENV: 'test', PATH: process.env['PATH'] ?? '' }
+      if (secret !== undefined) env['NEXTAUTH_SECRET'] = secret
+      const r = spawnSync('sh', ['-c', block + '\necho VALID'], { env, encoding: 'utf8' })
+      return { ok: r.status === 0 && r.stdout.includes('VALID'), out: r.stdout + r.stderr }
+    }
+    const good = 'Zk3p9Qw1Lx0vB7nM2aT5yHc8RdE4uJfGgSi6oVq1AaA='
+    it('block is extractable', () => expect(block).toBeTruthy())
+    it('rejects unset, empty, and every listed placeholder', () => {
+      expect(run(undefined).ok).toBe(false)
+      expect(run('').ok).toBe(false)
+      for (const p of parsePlaceholders(START_SH)) expect(run(p).ok, p).toBe(false)
+      expect(run('Change-Me').ok).toBe(false)
+    })
+    it('rejects short secrets, accepts 32+ chars, never prints the secret', () => {
+      expect(run('abcdefghijklmnop').ok).toBe(false)
+      expect(run('a'.repeat(31)).ok).toBe(false)
+      expect(run(good).ok).toBe(true)
+      expect(run('abcdefghijklmnop').out).not.toContain('abcdefghijklmnop')
     })
   })
 })

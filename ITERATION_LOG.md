@@ -4,6 +4,20 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 101) — No public default for a secret (Mode 1, `devops-engineer`)
+
+- **Controls:** Area — `security / deploy` (99 infra, 100 a11y). Agent — **`devops-engineer`, a real rotation** (it ran `docker compose config`, the 11-case startup matrix, a mutation check and the suites; I re-ran suite, typecheck and syntax, and checked the example files it was not permitted to read). Extension — `871e29a`, 58 loops. Cadence: 1 of 3 since MR-046.
+- **Candidate Selection: `burn-down` — #280** (16, highest open), promoted by MR-046 after I verified the chain in all three files and confirmed via `gh secret list` that it is latent, not live.
+- **Fixed for the class, not the instance:** every secret in every compose file enumerated with its reader. The session secret is now *required* — compose refuses to start without it, verified with `docker compose config` both ways. The rest keep empty defaults, each justified by what its reader does when absent; none can now be a public string.
+- **The startup check now has one placeholder list** — case-insensitive substrings, including `change-me` — and a 32-character minimum; the test reads the list from the script and runs the real validation block in `sh`, so they cannot drift.
+- **The one thing the agent could not check, I did:** the two `.env.example` placeholders. One is 37 characters — long enough to pass the length rule on its own — and is caught only because it contains `your-secret`. Without the substring list, a copied example file would have started production.
+- **My loop 99 check is corrected at the same time:** it now fails any secret with a non-empty fallback, which is precisely how it had passed this one. Mutation-checked.
+- **The stated risk, unchanged:** nothing in the repo proves the deploy action delivers variables. If it does not, production has been signing with `change-me`, and the next deploy will now refuse to start. That is the intended trade, and it makes the next deploy a test — filed as **#281** (production access needed).
+- **Validation (re-run by me):** web-app **3749 → 3757** (+8); typecheck 0; `bash -n` ok.
+- **Follow-ups:** 1 created (#281), 1 closed (#280).
+
+---
+
 ## 2026-10-02 — MR-046 recorded (Mode 4, non-counting): the secret with a public default
 
 - **Review:** `docs/meta/MR_046_META_REVIEW.md`. Every number reproduces at `3bb26e9`. Loops 97-100 hold: the owner-removal matrix really exercises the active count; `isAdmin` decides nothing anywhere; the delivery check is sound for what it checks; every loop-100 ratio reproduces.

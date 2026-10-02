@@ -6,6 +6,13 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Security: the service refuses to start with a weak sign-in secret
+
+### Security
+- If the secret that protects sign-ins had ever been missing from the live configuration, the service would have fallen back to a well-known placeholder, which would have let anyone impersonate any account. The secret is set in the deployment settings, so this is not believed to have been in effect; the next deploy will confirm it. The service now refuses to start without a real, sufficiently long secret, and rejects any placeholder value.
+
+---
+
 ## [2026-10-02] - Links no longer fade when you point at them
 
 ### Fixed

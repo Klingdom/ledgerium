@@ -7,19 +7,41 @@ echo "[ledgerium] Node $(node --version) | $(date -u)"
 # ── Environment validation ────────────────────────────────────────────────────
 # Fail fast if critical env vars are missing instead of silently breaking.
 
+# BEGIN NEXTAUTH_SECRET validation (extracted verbatim by deploy-env-delivery.test.ts
+# and exercised by it -- keep the markers and the PLACEHOLDER_SECRETS line intact).
+# Known placeholder strings, space-separated, matched case-insensitively as an
+# exact value OR a substring (so "change-me-please" and "Change-Me" are caught).
+# Sources: Dockerfile build-time ENV, historical dev default, the former
+# compose.hostinger.yaml fallback, and common "fill me in" spellings.
+PLACEHOLDER_SECRETS="build-time-placeholder ledgerium-dev-secret-change-in-production change-me changeme change_me placeholder replace-me your-secret"
+# 32 chars = 256 bits of HMAC key material for NextAuth's HS256 session signing
+# (`openssl rand -base64 32` yields 44 chars).
+MIN_NEXTAUTH_SECRET_LENGTH=32
+
 if [ -z "$NEXTAUTH_SECRET" ]; then
   echo "[ledgerium] FATAL: NEXTAUTH_SECRET is not set. Generate one with: openssl rand -base64 32"
   exit 1
 fi
 
+NEXTAUTH_SECRET_LC=$(printf '%s' "$NEXTAUTH_SECRET" | tr '[:upper:]' '[:lower:]')
+for PLACEHOLDER in $PLACEHOLDER_SECRETS; do
+  case "$NEXTAUTH_SECRET_LC" in
+    *"$PLACEHOLDER"*)
+      echo "[ledgerium] FATAL: NEXTAUTH_SECRET is still set to a placeholder value. Generate a real secret."
+      exit 1
+      ;;
+  esac
+done
+
+if [ "${#NEXTAUTH_SECRET}" -lt "$MIN_NEXTAUTH_SECRET_LENGTH" ]; then
+  echo "[ledgerium] FATAL: NEXTAUTH_SECRET is shorter than $MIN_NEXTAUTH_SECRET_LENGTH characters. Generate one with: openssl rand -base64 32"
+  exit 1
+fi
+# END NEXTAUTH_SECRET validation
+
 if [ -z "$DATABASE_URL" ]; then
   echo "[ledgerium] WARNING: DATABASE_URL not set, defaulting to file:./data/ledgerium.db"
   export DATABASE_URL="file:./data/ledgerium.db"
-fi
-
-if [ "$NEXTAUTH_SECRET" = "build-time-placeholder" ] || [ "$NEXTAUTH_SECRET" = "ledgerium-dev-secret-change-in-production" ]; then
-  echo "[ledgerium] FATAL: NEXTAUTH_SECRET is still set to a placeholder value. Generate a real secret."
-  exit 1
 fi
 
 echo "[ledgerium] Environment validated"

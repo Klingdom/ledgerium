@@ -26,7 +26,10 @@ services:
       - DATA_DIR=/app/data
       - UPLOAD_DIR=/app/data/uploads
       - AUTH_TRUST_HOST=true
-      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-me}
+      # Required, no fallback (row #280): a default here would be a PUBLIC signing
+      # key. `:?` makes compose refuse to start if the deploy did not supply it
+      # (unset OR empty). Never reintroduce a `:-default` on a secret.
+      - "NEXTAUTH_SECRET=${NEXTAUTH_SECRET:?NEXTAUTH_SECRET must be set (deploy secret missing)}"
       - NEXTAUTH_URL=${NEXTAUTH_URL:-https://ledgerium.ai}
       # How many reverse proxies we trust in front of this container, counted
       # from the right of x-forwarded-for. See apps/web-app/src/lib/client-ip.ts.
