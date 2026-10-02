@@ -12,7 +12,7 @@ import { trackServer } from '@/lib/analytics-server';
 import { checkInviteRateLimit } from '@/lib/rate-limit/invite-buckets';
 import { normalizeEmail } from '@/lib/email-normalize';
 import { reportApiError } from '@/lib/api-error-reporting';
-import { isTeamRole, isRoleElevation } from '@/lib/team-roles';
+import { isTeamRole, isRoleElevation, isAcceptableInvite } from '@/lib/team-roles';
 
 /**
  * POST /api/teams/:id/invite — create an invite link for a team
@@ -313,8 +313,29 @@ async function handleGET(
       orderBy: { createdAt: 'desc' },
     });
 
+    // Row #273: omit invites acceptance would refuse (pre-#272 rows with an out-of-set role,
+    // or `owner` from an inviter who is not currently an active owner). The page renders
+    // whatever list it receives, so omission needs no UI change and nothing un-acceptable
+    // shows as pending. Inviter roles are fetched only if an owner invite exists.
+    const ownerInviterIds = Array.from(
+      new Set(invites.filter((i) => i.role === 'owner').map((i) => i.invitedBy)),
+    );
+    const activeOwnerIds = new Set<string>(
+      ownerInviterIds.length === 0
+        ? []
+        : (
+            await db.teamMember.findMany({
+              where: { teamId: params.id, userId: { in: ownerInviterIds }, status: 'active', role: 'owner' },
+              select: { userId: true },
+            })
+          ).map((m: { userId: string }) => m.userId),
+    );
+    const acceptable = invites.filter((i) =>
+      isAcceptableInvite(i, activeOwnerIds.has(i.invitedBy) ? 'owner' : null),
+    );
+
     return NextResponse.json({
-      invites: invites.map((i) => ({
+      invites: acceptable.map((i) => ({
         id: i.id,
         email: i.email,
         role: i.role,

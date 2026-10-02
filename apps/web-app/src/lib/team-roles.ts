@@ -37,3 +37,35 @@ export const ROLE_ELEVATION_CODE = 'forbidden_role_elevation';
 export function isRoleElevation(actorRole: string, requestedRole: string): boolean {
   return requestedRole === 'owner' && actorRole !== 'owner';
 }
+
+/**
+ * Why a stored invite would be refused at acceptance (row #272 defence in depth).
+ *  - `invalid_role`: stored role is outside the role set.
+ *  - `owner_not_from_owner`: stored role is `owner` but the inviter is not currently an
+ *    active owner of the team (or is no longer an active member).
+ */
+export type InviteRefusal = 'invalid_role' | 'owner_not_from_owner';
+
+/**
+ * Single predicate for "would acceptance refuse this invite on role grounds" (row #273).
+ * Used by `invites/accept` AND by every path that displays or offers an invite (pending
+ * list, unauthenticated metadata) so they cannot disagree.
+ *
+ * `inviterRole` is the inviter's CURRENT role in the invite's team if they are an active
+ * member, otherwise null/undefined. Pure; does no I/O.
+ */
+export function inviteRefusal(
+  invite: { role: unknown },
+  inviterRole: string | null | undefined,
+): InviteRefusal | null {
+  if (!isTeamRole(invite.role)) return 'invalid_role';
+  if (invite.role === 'owner' && inviterRole !== 'owner') return 'owner_not_from_owner';
+  return null;
+}
+
+export function isAcceptableInvite(
+  invite: { role: unknown },
+  inviterRole: string | null | undefined,
+): boolean {
+  return inviteRefusal(invite, inviterRole) === null;
+}

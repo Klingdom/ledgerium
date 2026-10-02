@@ -4,6 +4,29 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 136) — One rule for whether an invite is valid (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `security / authz`.
+  - **Agent:** `security-reviewer`. It reported its own runs; I re-ran the suite twice, root once, typecheck and the validator.
+  - **Extension:** `871e29a`, 93 loops untouched.
+  - **Cadence:** **3 of 3 since MR-057 — MR-058 now due.**
+- **Candidate Selection: `burn-down` — #273** (11). It is the top *follow-up*. The higher-scored rows in the open pool are older feature rows, and clause 6 (pool > 8) requires a follow-up pick.
+- **What changed (only the non-destructive parts):**
+  - **One predicate.** `inviteRefusal` / `isAcceptableInvite` in `lib/team-roles.ts` is now used by acceptance, by the pending-invite list and by the unauthenticated metadata branch, so the three can no longer disagree. Acceptance responses are byte-identical: the existing 45 + 31 accept tests pass untouched.
+  - **The pending list omits refused invites.** The teams page renders whatever it receives, so no UI change was needed.
+  - **Refused invites look expired.** For a refused invite, the metadata branch returns the same `410 "Invite has expired"` as an expired one. It never echoes a stored role outside the role set and does not say why.
+  - **Read-only count script.** `apps/web-app/scripts/count-invalid-invites.ts` uses `findMany` only and prints counts only, with no PII. Production usage is documented in its header. It was run only against the local dev DB, where every count is 0.
+  - **Schema comment.** The stale `TeamInvite.role` comment is corrected. There is no schema change or migration.
+- **Not done, and blocked on the CEO:** counting in production, and revoking any bad pending rows. Revoking is destructive, so it needs approval once the count is known. AUTHZ P2-4 (re-checking the inviter for admin and member invites) is unchanged by this loop, so the audit is untouched.
+- **Validation (exit code + ANSI-stripped summary):**
+  - web-app **4137 → 4155** on 3 of 3 runs; root **5912 → 5930**; typecheck 0; validator 0.
+  - 18 new tests in three new files.
+  - Revert proof: against the old route code, 5 of the 7 new route tests fail.
+- **Follow-ups:** 0 created, 0 closed (#273 blocked on the CEO).
+
+---
+
 ## 2026-10-02 (loop 135) — What a team actually is (Mode 1, `frontend-engineer` + `growth-strategist`)
 
 - **Controls:**

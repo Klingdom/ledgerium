@@ -7,7 +7,7 @@ import crypto from 'crypto';
 import { trackServer } from '@/lib/analytics-server';
 import { getClientIp } from '@/lib/client-ip';
 import { reportApiError } from '@/lib/api-error-reporting';
-import { isTeamRole } from '@/lib/team-roles';
+import { inviteRefusal } from '@/lib/team-roles';
 
 /** Outcome of the accept-invite transaction: a typed failure or the joined-team summary. */
 type AcceptTxResult =
@@ -200,6 +200,18 @@ async function handlePOST(req: NextRequest) {
       return NextResponse.json({ error: 'Invite has already been accepted' }, { status: 409 });
     }
 
+    // Row #273: an invite acceptance would refuse is never displayed as valid, and its
+    // stored role is never echoed. Same shape as an expired invite — no hint of why.
+    const inviterMembership = invite.role === 'owner'
+      ? await db.teamMember.findFirst({
+          where: { teamId: invite.teamId, userId: invite.invitedBy, status: 'active' },
+          select: { role: true },
+        })
+      : null;
+    if (inviteRefusal(invite, inviterMembership?.role) !== null) {
+      return NextResponse.json({ error: 'Invite has expired' }, { status: 410 });
+    }
+
     recordSuccess(ip);
     return NextResponse.json({
       requiresAuth: true,
@@ -242,14 +254,19 @@ async function handlePOST(req: NextRequest) {
         // removed inviter, or an admin-created owner invite, is refused). Refuse rather than
         // downgrade: a silent different role would be an unrequested grant. Nothing is
         // marked accepted.
-        if (!isTeamRole(invite.role)) {
-          return { error: 'This invite has an invalid role — ask for a new invite', status: 403, code: 'invalid_invite_role' };
-        }
-        if (invite.role === 'owner') {
-          const inviter = await tx.teamMember.findFirst({
-            where: { teamId: invite.teamId, userId: invite.invitedBy, status: 'active' },
-          });
-          if (!inviter || inviter.role !== 'owner') {
+        // Predicate shared with the pending-invite list and the unauthenticated metadata
+        // branch (row #273) so display and acceptance cannot disagree.
+        {
+          const inviter = invite.role === 'owner'
+            ? await tx.teamMember.findFirst({
+                where: { teamId: invite.teamId, userId: invite.invitedBy, status: 'active' },
+              })
+            : null;
+          const refusal = inviteRefusal(invite, inviter?.role);
+          if (refusal === 'invalid_role') {
+            return { error: 'This invite has an invalid role — ask for a new invite', status: 403, code: 'invalid_invite_role' };
+          }
+          if (refusal === 'owner_not_from_owner') {
             return { error: 'This invite cannot grant the owner role — ask an owner for a new invite', status: 403, code: 'forbidden_role_elevation' };
           }
         }

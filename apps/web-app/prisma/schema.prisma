@@ -650,7 +650,7 @@ model TeamInvite {
   id          String    @id @default(uuid())
   teamId      String    @map("team_id")
   email       String
-  role        String    @default("member") // member, viewer
+  role        String    @default("member") // owner, admin, member, viewer (lib/team-roles.ts); acceptance refuses anything else
   token       String    @unique  // invite acceptance token
   invitedBy   String    @map("invited_by")
   acceptedAt  DateTime? @map("accepted_at")
