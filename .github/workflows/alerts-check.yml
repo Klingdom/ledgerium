@@ -1,0 +1,52 @@
+name: Alerts check
+
+# Row #256 / MR-040 §2.3 - an alert signal INDEPENDENT of the application DB.
+#
+# WHY: `api_error_spike` reads error reports that are written to the same
+# database it monitors, so a total DB outage is invisible to it. This job
+# calls GET /api/admin/alerts/check hourly. If the DB is dead, computeAlerts
+# throws, the route returns 500 (route.test.ts "returns 500 when computeAlerts
+# throws"), this job fails, and GitHub notifies the repo owner through its own
+# channel - no dependency on the dead store.
+#
+# FAILS ON: any non-200 status, a 30s timeout, any connection/DNS/TLS failure.
+#
+# DOES NOT COVER: a firing alert with a healthy DB returns 200 and is delivered
+# by the route's own notification path, not by this job. GitHub may delay or
+# drop scheduled runs under load, and disables schedules on repos with no
+# activity for 60 days. Detection latency is up to ~1h plus GitHub delay.
+#
+# PUBLIC REPO (see ops-briefing.yml): secret from secrets.CRON_SECRET, URL from
+# vars.ALERTS_CHECK_URL. Only the HTTP status code is logged; never the body.
+#
+# UNCONFIGURED BEHAVIOUR (decision): the job FAILS with ::error:: naming what to
+# configure. Rejected: skipping via `if:` - a skipped job is grey, nobody is
+# notified, and "alerts are not being checked" would look like "alerts are fine".
+# Cost: hourly failure emails until the secret and variable are set; that noise
+# is intended pressure, since an unconfigured check is a monitoring gap.
+#
+# Setup:
+#   gh secret set CRON_SECRET
+#   gh variable set ALERTS_CHECK_URL --body https://<host>/api/admin/alerts/check
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+      - name: Call alerts/check
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          ALERTS_CHECK_URL: ${{ vars.ALERTS_CHECK_URL }}
+        run: bash .github/scripts/alerts-check.sh

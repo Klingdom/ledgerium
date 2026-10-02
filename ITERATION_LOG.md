@@ -4,6 +4,22 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 (loop 82) — The alert that nothing asked (Mode 1, `devops-engineer` + coordinator)
+
+- **Controls:** Area — `infra / monitoring` (79, 80 analytics; 81 a11y — no saturation). Agent — **`devops-engineer`, partially**: under the practice adopted at MR-040, it ran the suite (3333), typecheck, YAML parse and the unconfigured path itself, but **not the core cases** — see below — so I record this as delegated-with-coordinator-verification, not a clean rotation. Extension — `871e29a`, 39 loops; #216 CEO-blocked. Cadence: 1 of 3 since MR-040.
+- **Candidate Selection: `top-score` — #256** (13, highest open). MR-040 named #255 (11) as its pick; #256 was filed by MR-040 itself and outranks it.
+- **Looking for the fix found a larger defect.** The row asked for a signal independent of the store the alert reads. Checking who calls `/api/admin/alerts/check` — the cron endpoint that evaluates alerts and sends notifications — returned **nothing in the repository.** No workflow, no compose service, no scheduler. So unless one exists outside the repo, which I cannot see, **no alert has been evaluated on a schedule at all**: loop 79 made `api_error_spike` able to fire, and nothing ever asks it.
+- **Fix:** a scheduled GitHub workflow that calls the endpoint hourly and **fails on any non-200, timeout or unreachable host.** A failed scheduled run notifies the owner through GitHub — a channel that does not depend on the database. A dead database makes `computeAlerts` throw, the route returns 500, the job fails. That is the independent signal MR-040 asked for, and it covers the dark-site case too.
+- **Unconfigured fails loudly, on purpose.** The alternative was skipping the job until configured; a skipped job is grey and notifies no one, which renders "not being checked" as "fine". That is the exact failure this row is about. The cost is an hourly failure email until two values are set.
+- **The agent could not exercise the core behaviour, and was right not to.** `curl` is on the project's command deny-list; running the script through `bash` would have routed around that policy, and it said so instead. I verified the logic with a **stub `curl` on PATH that makes no network call** — which is within the policy's intent — and recorded argv and stdin: 200 → exit 0; 500 and 401 → exit 1; refused and timeout → exit 3; unconfigured → exit 2; **the secret appears on stdin only, never in argv.** The stub also exposed a latent defect, fixed: a secret containing `"` or `\` would have broken the quoted config line and produced a silent 401. Escaped and re-tested.
+- **Not verified, stated plainly:** real curl's handling of `--config -` on the ubuntu runner, and `actionlint` (unavailable). The first real run is the verification; it will fail loudly until configured either way.
+- **Residual:** callers of `alerts/check` under `.github` — **0 → 1** workflow.
+- **Validation:** web-app 3333 / 3333 (agent-run, unchanged — no app code touched); typecheck 0; script `bash -n` ok; YAML parses (`schedule`, `workflow_dispatch`).
+- **CEO/ops action created:** set secret `CRON_SECRET` (must match production's) and variable `ALERTS_CHECK_URL`. Until then the job fails hourly by design.
+- **Follow-ups:** 0 created, 1 closed (#256). Noted, not filed: if `CRON_SECRET` is unset on the *server*, the route returns 500 and the job reports it as an outage — correct in effect (alerts are not running) though not in label.
+
+---
+
 ## 2026-10-01 — Mode 3 correction to loop 80 (non-counting): the chip-click caveat made the error it had just fixed
 
 - **What was wrong (MR-040 §3.3-3.4):** loop 80 corrected its agent's bounce caveat for asserting a known direction, then wrote the chip-click note as if the only bias were the excluded-views one — so when nothing is excluded, the page showed no caveat and implied an unbiased rate. And "Target: under 40%" sat directly beside a bounce rate that is not decision-grade, which reads as a verdict.

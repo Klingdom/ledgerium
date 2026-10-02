@@ -6,6 +6,16 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-01] - Alerts are now checked on a schedule
+
+### Added
+- An hourly automated check of the service's alerts. Until now nothing in the system ran that check on a schedule, so alerts could only ever be seen by opening the admin page. If the check fails — including when the database itself is down — the failure is reported through GitHub, which does not depend on the database being up.
+
+### Needs setting up
+- The check needs two settings (the alert secret and the address to check). Until they are set, it reports a failure every hour on purpose, rather than quietly doing nothing.
+
+---
+
 ## [2026-10-01] - Readable colours on the public pages in light mode
 
 ### Fixed
