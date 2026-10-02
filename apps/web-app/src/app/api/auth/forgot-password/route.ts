@@ -5,6 +5,7 @@ import { db } from '@/db';
 import { sendEmail } from '@/lib/email';
 import { normalizeEmail } from '@/lib/email-normalize';
 import { checkAuthRateLimit, AUTH_RATE_LIMITS } from '@/lib/rate-limit/auth-buckets';
+import { checkForgotPasswordThrottle } from '@/lib/rate-limit/account-throttle';
 import { getClientIp } from '@/lib/client-ip';
 import { z } from 'zod';
 
@@ -44,6 +45,12 @@ async function handlePOST(req: NextRequest) {
   const successResponse = NextResponse.json({
     message: 'If an account exists with this email, a reset link has been sent.',
   });
+
+  // Per-ADDRESS limit (row #289), independent of IP. Over the limit we return
+  // the same success response without sending, so the throttle is invisible
+  // to the caller (no flooding of an address, no probing, no oracle). Counted
+  // before the lookup so existing and non-existing addresses behave alike.
+  if (!checkForgotPasswordThrottle(email, Date.now()).allowed) return successResponse;
 
   const user = await db.user.findUnique({ where: { email: normalizeEmail(email) } });
   if (!user) return successResponse;

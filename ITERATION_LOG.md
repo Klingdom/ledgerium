@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 107) — Guessing, limited by who it targets (Mode 1, `security-reviewer`)
+
+- **Controls:** Area — `security / authz` (105 security, 106 a11y; security now 2 of the last 5). Agent — **`security-reviewer`, a real rotation** (suite, typecheck and a mutation check run by the agent; I re-ran suite and typecheck and read the thresholds). Extension — `871e29a`, 64 loops. Cadence: 1 of 3 since MR-048.
+- **Candidate Selection: `burn-down` — #289** (13), promoted at MR-048 and the top score once applied.
+- **What changed:** login and password-reset requests are throttled by the *account* being targeted, not only by the requester's IP — so rotating a forged forwarding header no longer buys unlimited guesses against the two public admin addresses. Backoff, not lockout: five free failures, then a doubling delay capped at 15 minutes.
+- **Enumeration was designed out, then tested:** a throttled login looks exactly like a wrong password, and the same attempt sequence against a real and a non-existent address produces identical results.
+- **The trade-off, stated rather than buried:** the same throttle lets anyone who knows an admin address keep it in a refusal window of up to 15 minutes, indefinitely, for about four requests an hour. That is the standard price of per-account limiting and better than unlimited guessing, but it is an availability lever against your own login, so it is filed (#290) with the mitigation worth considering — telling the owner when it happens.
+- **Honest limits:** the limiter is in-process, so it resets on deploy and multiplies with instances; the production instance count is unknown. A pre-existing timing difference (non-existent accounts skip the password hash) still leaks existence — also in #290.
+- **Validation (re-run by me):** web-app **3800 → 3809**; typecheck 0.
+- **Follow-ups:** 1 created (#290), 1 closed (#289).
+
+---
+
 ## 2026-10-02 — MR-048 recorded (Mode 4, non-counting): what the summaries claimed
 
 - **Review:** `docs/meta/MR_048_META_REVIEW.md`. Loops 104-106 are correct; nothing reverts. Web-app passed 5 of 5 runs; both shell scripts are LF via `.gitattributes`, so the image will not fail on line endings.

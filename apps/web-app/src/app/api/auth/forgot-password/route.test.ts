@@ -53,6 +53,7 @@ import { db } from '@/db';
 import { sendEmail } from '@/lib/email';
 import { checkAuthRateLimit } from '@/lib/rate-limit/auth-buckets';
 import { POST } from './route';
+import { resetAccountThrottles } from '@/lib/rate-limit/account-throttle';
 
 const mockUserFindUnique = db.user.findUnique as ReturnType<typeof vi.fn>;
 const mockTokenUpdateMany = db.passwordResetToken.updateMany as ReturnType<typeof vi.fn>;
@@ -76,6 +77,7 @@ let consoleErrorSpy: any;
 
 beforeEach(() => {
   vi.clearAllMocks();
+  resetAccountThrottles();
   mockTokenUpdateMany.mockResolvedValue({ count: 0 });
   mockTokenCreate.mockResolvedValue({ id: 'token_1' });
   mockSendEmail.mockResolvedValue({ success: true });
@@ -235,5 +237,50 @@ describe('POST /api/auth/forgot-password — rate limiting', () => {
 
     expect(res.status).toBe(200);
     expect(json.message).toBe('If an account exists with this email, a reset link has been sent.');
+  });
+});
+
+describe('POST /api/auth/forgot-password — per-address throttle (#289)', () => {
+  function makeReq(email: string, ip: string): NextRequest {
+    return new NextRequest('http://localhost/api/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-forwarded-for': ip },
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  async function runSeries(email: string, exists: boolean) {
+    resetAccountThrottles();
+    mockSendEmail.mockClear();
+    mockUserFindUnique.mockResolvedValue(exists ? { email } : null);
+    const out: Array<{ status: number; body: unknown }> = [];
+    for (let i = 0; i < 6; i++) {
+      // A different IP every time: the per-IP limit (mocked allow) is irrelevant.
+      const res = await POST(makeReq(email, `198.51.100.${i}`));
+      out.push({ status: res.status, body: await res.json() });
+    }
+    return { out, sent: mockSendEmail.mock.calls.length };
+  }
+
+  it('sends at most 3 emails per address per hour across different IPs; response never changes', async () => {
+    const { out, sent } = await runSeries('user@example.com', true);
+    expect(sent).toBe(3);
+    for (const r of out) {
+      expect(r.status).toBe(200);
+      expect(r.body).toEqual(out[0]!.body);
+    }
+  });
+
+  it('existing and non-existing addresses produce identical responses throughout', async () => {
+    const real = await runSeries('user@example.com', true);
+    const ghost = await runSeries('ghost@example.com', false);
+    expect(real.out).toEqual(ghost.out);
+  });
+
+  it('case / whitespace variants share one bucket', async () => {
+    mockUserFindUnique.mockResolvedValue({ email: 'user@example.com' });
+    const variants = ['user@example.com', 'USER@example.com', ' User@Example.com ', 'user@EXAMPLE.COM', 'user@example.com'];
+    for (let i = 0; i < variants.length; i++) await POST(makeReq(variants[i]!, `192.0.2.${i}`));
+    expect(mockSendEmail).toHaveBeenCalledTimes(3);
   });
 });
