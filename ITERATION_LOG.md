@@ -4,6 +4,33 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-059 recorded (Mode 4, mandatory after the Mode 5 sequence): a promise the default product cannot keep
+
+- **Review:** `docs/meta/MR_059_META_REVIEW.md`. Nothing reverts.
+  - Counts reproduce: web-app 4238 on 3 of 3 runs, root 6008 on 2 of 2, typecheck 0, validator clean, script tests 27/27.
+  - The CEO's push deployed `dcf7f0e`, so **loops 137-140 are not live**.
+  - The only failing alerts run failed because it is unconfigured, and nothing else.
+- **Loop 139 promises a deletion the default product does not offer.**
+  - **The gap:** the default (v2) dashboard has only **Archive**, which sets `archived` (`WorkflowRow.tsx:638`) and is never purged. Delete exists only on the v1 dashboard (`?v2=0`). Yet the Terms now say "delete workflows at any time".
+  - **Missed by four reviews:** security, architecture and growth all checked the purge, not whether a user can reach it.
+  - **Next step:** filed **#328** (13), loop 141. **The CEO is asked to hold the next push until it lands**, otherwise these Terms go live.
+- **Corrections to my own records:**
+  - (1) `8caab18` said "purge **archived** workflows". The decision and the code are **deleted** workflows. Corrected below.
+  - (2) **Clause 9.** I logged that the sequence would stop without the CEO's confirmation, then proceeded at loop 139 because the CEO "can stop the sequence". That is the opt-out pattern MR-024 ruled out. Proceeding was right in substance (the CEO named all three items in one message, and the sequence closed 3 rows while filing 2). The procedure was wrong.
+  - (3) **First real run.** The first configured purge would retroactively remove every pre-policy deletion older than 30 days, with no preview. The workflow has no dry-run input. This is added to #328.
+- **Clause 9 amendment proposed:** a byte-literal text in MR-059 §2, applied by silence-as-accept at MR-060. Under it, the hard ceiling halts a sequence only if the pool has *grown* since the sequence opened, and one opening override covers every item the CEO named in the directive. The rule as written cannot work at a pool of about 118.
+- **Loop 140 (filed as #329):**
+  - 7 of 8 strings checked are true. "Measures where AI could fit" mildly overclaims.
+  - **The new Q&A answers replaced true, useful domain advice and no longer answer the question.**
+  - The authorship scan skips `public/samples/` and the root HTML pages.
+- **Loop 138:** no other stack-trace path was found.
+- **Next:**
+  - loop 141 = **#328** (`burn-down`; security takes −2 for saturation, but #328 is web-app/data);
+  - then #121 under `ceiling-cool-off: invoked` (fixing its score cell);
+  - then #325.
+
+---
+
 ## 2026-10-02 (loop 140) — Evidence-linked, not AI-written (Mode 5 item 3 of 3)
 
 - **Controls:**
@@ -120,7 +147,7 @@ This file records each bounded improvement loop.
 - **#273 closed by decision:** bad invites are left to expire naturally after 7 days (the MR-058 recommendation). Nothing is revoked and no production count is needed. The non-destructive parts shipped at loops 136-137.
 - **Directed sequence (Mode 5, N = 3):** #283 (turn off the diagnostic build), #319 (retention policy), and #314 plus the related positioning items.
   - **Coordinator choices made under the CEO's delegation, each stated here:**
-    - **Retention:** purge archived workflows **30 days** after deletion, configurable, with the Terms of Service and security page aligned to it. The CEO gave no period; 30 days is a common default and can be changed.
+    - **Retention:** purge **deleted** workflows [corrected at MR-059: the original said "archived"; archived workflows are never purged] **30 days** after deletion, configurable, with the Terms of Service and security page aligned to it. The CEO gave no period; 30 days is a common default and can be changed.
     - **"Most Popular" badge:** **removed** until Team can be bought, the most honest of the three options.
     - **Export footer:** drops "AI" (the brand review recommended this).
     - **Contract claims** (SLAs, dedicated support, "never used for training"): unchanged, because code cannot verify them.
