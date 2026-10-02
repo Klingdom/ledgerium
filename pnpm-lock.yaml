@@ -219,6 +219,8 @@ importers:
         specifier: ^1.6.0
         version: 1.6.1(@types/node@20.19.37)(jsdom@24.1.3)
 
+  packages/decision-engine: {}
+
   packages/intelligence-engine:
     dependencies:
       '@ledgerium/process-engine':

@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Decision detection engine (not yet visible)
+
+### Added
+- A new engine that compares recordings of the same workflow, finds the points where they branch, and identifies the decision made there, with outcome frequencies, supporting evidence from the recorded steps, and a confidence score. It is not yet shown in the app.
+
+---
+
+
 ## [2026-10-02] - Delete workflows from the dashboard
 
 ### Added

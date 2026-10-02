@@ -55,7 +55,7 @@ const ITERATION_LOG = process.env.VALIDATE_ITERATION_LOG_FILE ?? join(ROOT, 'ITE
  * unmoved; failing forces the one-line removal into the same commit as the fix.
  * Remove ids as rows are fixed — never add.
  */
-const MALFORMED_ROW_BASELINE = [45, 75, 102, 110, 117, 120, 121, 126, 127, 152, 154, 157, 223, 224];
+const MALFORMED_ROW_BASELINE = [45, 75, 102, 110, 117, 120, 126, 127, 152, 154, 157, 223, 224];
 
 /**
  * V4 baseline (#312). Ids ITERATION_LOG.md says were closed but the backlog

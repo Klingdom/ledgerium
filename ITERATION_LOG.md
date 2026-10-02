@@ -4,6 +4,35 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 142) — Where recorded runs branch, and why (Mode 1, `backend-engineer` + `system-architect`)
+
+- **Controls:**
+  - **Area:** `path-e / decision-detection`. This is product work, the first feature build after the hardening arc.
+  - **Agents:** `backend-engineer` (two passes) and `system-architect` (D-4 clause 2: ~585 LOC, ~250 exported).
+  - **Architect verdict:** READY WITH MINOR REVISIONS. All must-changes were applied; the verdict is persisted at `docs/meta/D4_REVIEW_LOOP142_DECISION_ENGINE.md`.
+  - **Extension:** `871e29a`, 99 loops untouched.
+  - **Cadence:** 2 of 3 since MR-059.
+- **Candidate Selection:** `ceiling-cool-off: invoked; rationale: #121 is the highest-scoring open row (14, readable only once its stray pipe was escaped); the cool-off has been re-armed since loop 128 and unused; MR-059 endorsed it.` **The cool-off is now consumed**, and three new consecutive burn-downs re-arm it.
+  - **Prerequisites:** P01-P04 (#117-#120) all shipped.
+- **What shipped — `packages/decision-engine/`, pure and deterministic.** `detectDecisions({runs})` returns typed decisions for signals 1-3 (prefix divergence, UI state, user options).
+  - **Trie:** a prefix trie over recorded steps. Runs are sorted by runId and children ordered by code unit. Branch points require ≥ 2 runs.
+  - **Decisions:** each carries a `DecisionType` reused from the P01 catalogs, outcomes with frequencies, conditions with plain-English text and **evidence traced to step and event ids**, and a confidence score.
+  - **Determinism:** shuffled input gives byte-identical output across 5 permutations. No clock, RNG, I/O or LLM.
+- **Architect must-changes, applied:**
+  - (1) **Trie key escaping bug.** It turned `|` into the literal `${c}` and never escaped `\`, so distinct steps could collide; the collision test had passed by accident. It now escapes both, and the collision tests fail on the old code.
+  - (2) **P01 contract over the row formula.** `isInferred` is true exactly when confidence < 0.55. With no real signal the score is capped at 0.54, and `rawConfidence` keeps the formula value.
+  - (3) **Root branch-point conditions now trace to source events.** A test checks that every condition has a stepId and an event id.
+  - (4) A comment fix, plus a header note: inputs must be PII-sanitized upstream, and signal 3 is dormant because `offeredOptions` has no producer yet.
+- **Row repair:** #121's three stray pipes are escaped, so it now scores 14 to the validator. It is removed from the malformed baseline, which is 13 rows now.
+- **Not wired yet,** by design. It plugs in after P02 intent inference and feeds P01 `DecisionPoint` assembly; the consuming rows are later Path E iterations.
+- **density-response: scope-guard-adjacent** for 2 follow-ups:
+  - **#330.** Move the closed unions out of `apps/web-app` into `packages/process-graph/` (PRD AC-1.1). The architect ruled this a separate logical outcome, because it changes the P01 web-app surface.
+  - **#331.** Engine refinements and a growth review of the ~10 generated question and condition templates before any UI shows them.
+- **Validation (exit code + ANSI-stripped summary):** root **6008 → 6043** on 2 of 2 runs; web-app 4245 unchanged; typecheck 0; typecheck coverage OK; validator 0; script tests 0.
+- **Follow-ups:** 2 created (#330, #331), 1 closed (#121).
+
+---
+
 ## 2026-10-02 (loop 141) — A delete the default dashboard can reach (Mode 1, `frontend-engineer` + `growth-strategist`)
 
 - **Controls:**
