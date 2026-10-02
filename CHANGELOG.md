@@ -6,6 +6,16 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Plans list only what is available today
+
+### Fixed
+- The Enterprise plan listed single sign-on, an audit trail, on-premise deployment and custom retention as included; they are now shown as on the roadmap.
+- Role-based team access (owner, admin, member, viewer) is now shown as available, because it is.
+- The comparison table now includes the Solo plan, and the trial and seat answers name the plans that can be bought today.
+
+---
+
+
 ## [2026-10-02] - Flow View works with a keyboard and touch
 
 ### Fixed

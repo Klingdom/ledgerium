@@ -1,6 +1,13 @@
 /**
- * Row #305 (+ #34): every pricing / checkout statement is true today, with no
- * lapsed date; Starter's health-score copy agrees with lib/plans.ts.
+ * Row #305 (+ #34, #310): every pricing / security statement is true today, and
+ * public copy cannot carry a forward-dated promise; Starter's health-score copy
+ * agrees with lib/plans.ts.
+ *
+ * The date rule is CLOCK-FREE. The earlier version compared copy to a fixed
+ * reference date, so it only caught dates already lapsed on the day someone last
+ * bumped the constant. A promise to ship "in Q1 2027" is wrong the moment it is
+ * written (it commits the company to a date the code does not know), so the rule
+ * rejects the promise itself, whatever the date.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -8,40 +15,51 @@ import path from 'node:path';
 import { PLAN_FEATURES } from '@/lib/plans';
 import { PRICING_CONFIG } from '@/lib/config';
 
-/**
- * Deterministic "today". A fixed constant keeps the assertion free of wall-clock
- * reads (Ledgerium determinism rule). Trade-off: it only catches dates lapsed as
- * of this value, so bump it when touching pricing copy (or set
- * COPY_DATE_REFERENCE=YYYY-MM-DD in CI to inject the build date).
- */
-const REFERENCE_DATE = process.env.COPY_DATE_REFERENCE ?? '2026-10-02';
+const MONTH =
+  '(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sept?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)';
+/** A dated point or period: "Q3 2026", "H1 2027", "October 2026", or a bare year. */
+const DATE_TOKEN = String.raw`(?:[QH][1-4]\s*(?:of\s+)?20\d{2}|${MONTH}\.?\s+(?:of\s+)?20\d{2}|\b20\d{2}\b(?!-\d))`;
+/** Verbs that promise something will exist or happen. */
+const PROMISE_VERB =
+  '(?:launch(?:ing|es)?|coming|available|ships?|shipping|arriv(?:e|es|ing)|rolling out|releas(?:e|es|ing)|goes? live|planned|expected|scheduled)';
 
-const MONTHS = ['january','february','march','april','may','june','july','august','september','october','november','december'];
-const DATE_RE =
-  /(Q([1-4])\s*(20\d{2}))|\b(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)\.?\s+(?:of\s+)?(20\d{2})\b/g;
+/** Verb, then up to 40 non-sentence characters, then a date token. */
+const PROMISE_RE = new RegExp(String.raw`\b${PROMISE_VERB}\b[^.\n]{0,40}?${DATE_TOKEN}`, 'gi');
+/** A quarter / half-year is a delivery period, never a fact: flag it wherever it stands. */
+const PERIOD_RE = /\b[QH][1-4]\s*(?:of\s+)?20\d{2}\b/gi;
 /** Retrospective phrasing ("as of July 2026") states a past fact, not a promise. */
 const RETROSPECTIVE_RE = /(as of|last updated|updated|verified)\s*$/i;
 
-/** First day AFTER the named period, as an ISO date. */
-function periodEndExclusive(m: RegExpExecArray): string {
-  if (m[1]) {
-    const q = Number(m[2]);
-    const y = Number(m[3]);
-    return q === 4 ? `${y + 1}-01-01` : `${y}-${String((q * 3) + 1).padStart(2, '0')}-01`;
-  }
-  const mi = MONTHS.findIndex((n) => n.startsWith(m[4]!.toLowerCase().slice(0, 3)));
-  const y = Number(m[5]);
-  return mi === 11 ? `${y + 1}-01-01` : `${y}-${String(mi + 2).padStart(2, '0')}-01`;
+export interface AllowedDatedCopy {
+  /** Exact matched snippet that is permitted. */
+  text: string;
+  /** Person/role accountable for keeping it true. */
+  owner: string;
+  /** Why a dated statement is acceptable here. */
+  reason: string;
 }
 
-export function findLapsedDates(text: string, referenceIso: string): string[] {
-  const hits: string[] = [];
-  for (const m of text.matchAll(DATE_RE)) {
-    const before = text.slice(Math.max(0, (m.index ?? 0) - 16), m.index ?? 0);
-    if (RETROSPECTIVE_RE.test(before)) continue;
-    if (periodEndExclusive(m as RegExpExecArray) <= referenceIso) hits.push(m[0]);
+/**
+ * Explicit exceptions. Every entry needs an owner and a reason, and the test
+ * below fails if an entry no longer matches anything (so it cannot rot).
+ * Empty on purpose: no public copy today needs one.
+ */
+export const ALLOWED_DATED_COPY: readonly AllowedDatedCopy[] = [];
+
+/** Forward-dated promises in `text`, minus allowlisted snippets. No clock is read. */
+export function findForwardDatedPromises(
+  text: string,
+  allowlist: readonly AllowedDatedCopy[] = ALLOWED_DATED_COPY,
+): string[] {
+  const hits = new Set<string>();
+  for (const re of [PROMISE_RE, PERIOD_RE]) {
+    for (const m of text.matchAll(re)) {
+      const start = m.index ?? 0;
+      if (RETROSPECTIVE_RE.test(text.slice(Math.max(0, start - 16), start))) continue;
+      hits.add(m[0]);
+    }
   }
-  return hits;
+  return [...hits].filter((h) => !allowlist.some((a) => a.text === h));
 }
 
 const SRC = path.resolve(__dirname, '..');
@@ -62,36 +80,47 @@ const SCANNED = [
   ...walk(rel('app', '(public)')),
 ];
 
-describe('findLapsedDates (injectable reference date)', () => {
-  it('flags a quarter that ended before the reference date', () => {
-    expect(findLapsedDates('launching Q3 2026', '2026-10-02')).toEqual(['Q3 2026']);
+describe('findForwardDatedPromises (clock-free)', () => {
+  it('flags the restored Q3 2026 promise strings', () => {
+    expect(findForwardDatedPromises('Multi-user invites are launching Q3 2026.')).not.toEqual([]);
+    expect(findForwardDatedPromises('arrive with the Q3 2026 multi-user release')).not.toEqual([]);
   });
-  it('does not flag the same quarter while it is still running', () => {
-    expect(findLapsedDates('launching Q3 2026', '2026-09-30')).toEqual([]);
+  it('flags a future-dated promise regardless of the date', () => {
+    expect(findForwardDatedPromises('SSO is coming in March 2031')).not.toEqual([]);
+    expect(findForwardDatedPromises('Audit trail available by 2029')).not.toEqual([]);
+    expect(findForwardDatedPromises('On-prem ships in H1 2027')).not.toEqual([]);
   });
-  it('flags a past month+year, not the current or a future one', () => {
-    expect(findLapsedDates('ships in August 2026', '2026-10-02')).toEqual(['August 2026']);
-    expect(findLapsedDates('ships October 2026', '2026-10-02')).toEqual([]);
-    expect(findLapsedDates('ships in Q1 2027', '2026-10-02')).toEqual([]);
+  it('does not flag undated promises or retrospective phrasing', () => {
+    expect(findForwardDatedPromises('SSO — coming soon')).toEqual([]);
+    expect(findForwardDatedPromises('As of July 2026, X is Y')).toEqual([]);
+    expect(findForwardDatedPromises('Annual billing saves 17%')).toEqual([]);
   });
-  it('handles Q4 / December rollover', () => {
-    expect(findLapsedDates('Q4 2026', '2027-01-01')).toEqual(['Q4 2026']);
-    expect(findLapsedDates('December 2026', '2026-12-31')).toEqual([]);
+  it('honours an allowlist entry (and only that exact snippet)', () => {
+    const allow = [{ text: 'coming in March 2031', owner: 'pm', reason: 'contractual' }];
+    expect(findForwardDatedPromises('SSO is coming in March 2031', allow)).toEqual([]);
+    expect(findForwardDatedPromises('SSO is coming in April 2031', allow)).not.toEqual([]);
   });
-  it('exempts retrospective "as of / last updated" phrasing', () => {
-    expect(findLapsedDates('As of July 2026, X is Y', '2026-10-02')).toEqual([]);
+  it('every allowlist entry has an owner and a reason', () => {
+    for (const a of ALLOWED_DATED_COPY) {
+      expect(a.owner.trim()).not.toBe('');
+      expect(a.reason.trim()).not.toBe('');
+    }
   });
 });
 
-describe('#305: no lapsed quarter / month in user-facing pricing + public copy', () => {
+describe('#305/#310: no forward-dated promise in user-facing pricing, security + public copy', () => {
   it('scans a non-trivial file set', () => {
     expect(SCANNED.length).toBeGreaterThan(10);
   });
   for (const file of SCANNED) {
-    it(`${path.relative(SRC, file).split(path.sep).join('/')} names no lapsed date`, () => {
-      expect(findLapsedDates(readFileSync(file, 'utf8'), REFERENCE_DATE)).toEqual([]);
+    it(`${path.relative(SRC, file).split(path.sep).join('/')} promises no date`, () => {
+      expect(findForwardDatedPromises(readFileSync(file, 'utf8'))).toEqual([]);
     });
   }
+  it('every allowlist entry still matches something (no stale exceptions)', () => {
+    const all = SCANNED.map((f) => readFileSync(f, 'utf8')).join('\n');
+    for (const a of ALLOWED_DATED_COPY) expect(all).toContain(a.text);
+  });
 });
 
 describe('#34: Starter health-score copy agrees with lib/plans.ts', () => {

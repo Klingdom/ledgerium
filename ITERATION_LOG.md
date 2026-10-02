@@ -4,6 +4,42 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 129) — Selling what is built (Mode 1, `frontend-engineer` + `growth-strategist`)
+
+- **Controls:**
+  - **Area:** `web-app / pricing / trust`. That is web-app 1 of the last 3 by first segment, since 128 was test-infra.
+  - **Agents:**
+    - `frontend-engineer`, two passes.
+    - `growth-strategist`, required because D-4 clause 1 fired (14 strings changed). It returned 1 REWRITE, 3 POLISH and 1 KEEP, and all were applied.
+  - **Extension:** `871e29a`, 86 loops untouched.
+  - **Cadence:** 2 of 3 since MR-055.
+- **Candidate Selection: `burn-down` — #310** (12), filed by MR-055.
+- **The truth table came first** (the MR-055 brief practice). It covered every claim on the pricing page, plan cards, comparison table and security page against the code. **It found far more than the row named:**
+  - **Enterprise advertised as present:** SSO, an audit trail and compliance exports, on-premise deployment and custom retention. The feature flags exist but nothing reads them.
+  - **Team** advertised "team branding" on shared links, which does not exist.
+  - **The trial FAQ** named Team and Growth, which cannot be bought.
+  - **The security page** claimed account-level data export and deletion; only per-workflow routes exist.
+  - **Role-based access was the reverse case.** Pricing called it "coming soon", but owner, admin, member and viewer roles *are* enforced.
+- **What changed:**
+  - **Enterprise card:** one honest "Roadmap: SSO, audit trail & compliance exports, on-premise deployment, custom retention" line replaces four repeated caveats. Its "best for" line no longer implies audit trails.
+  - **Wording:** "Role-based team access (owner, admin, member, viewer)" is used everywhere.
+  - **Comparison table:** it gains a Solo column and a separate SSO row.
+  - **Trial and seats:** both FAQs now name Starter and Solo.
+  - **Team branding:** the claim is removed.
+- **The date test is now clock-free:**
+  - `findForwardDatedPromises` fails on any promise verb followed by a date, and on any quarter or half-year anywhere in public copy.
+  - An allowlist (string + owner + reason) is empty, and a test fails on stale entries.
+  - **Revert proof:** both the old "Q3 2026" string and an inserted "coming in March 2031" fail it.
+- **Not changed — a CEO decision:** the "Most Popular" badge on Team. Three options are in SYSTEM_HEALTH.
+- **Found next to it, filed as #313:**
+  - the docs page (`docs/page.tsx` ~:1877) still lists SSO, RBAC, audit trail, on-premise and custom retention as present;
+  - pricing says "AI-generated SOPs" while security says "No AI rewriting".
+- **Not verifiable from code; left for the CEO to confirm:** "Custom SLAs", "Dedicated support", "never used for training" and "encrypted in transit".
+- **Validation (exit code + ANSI-stripped summary):** web-app **4110 → 4111** on 4 of 4 runs; root **5888 → 5889**; typecheck 0.
+- **Follow-ups:** 1 created (#313), 1 closed (#310).
+
+---
+
 ## 2026-10-02 (loop 128) — A filter that matches nothing (Mode 1, `devops-engineer`)
 
 - **Controls:**

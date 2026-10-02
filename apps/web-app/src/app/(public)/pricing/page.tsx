@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 const FAQ = [
   {
     q: 'How does Ledgerium count users?',
-    a: 'Every plan includes a set number of user seats. Free includes 1 user. Starter includes 1 user. Team includes 5 users. Growth includes 15 users. Enterprise is custom. Anyone on your team can capture workflows using the Chrome extension, view the generated SOPs and process maps, and act on the intelligence reports.',
+    a: 'Every plan includes a set number of user seats. Free includes 1 user. Starter includes 1 user. Solo includes 1 user. Team includes 5 users. Growth includes 15 users. Enterprise is custom. Anyone on your team can capture workflows using the Chrome extension, view the generated SOPs and process maps, and act on the intelligence reports.',
   },
   {
     q: 'When can my team join my Ledgerium workspace?',
@@ -39,7 +39,7 @@ const FAQ = [
   },
   {
     q: 'Can I try before I buy?',
-    a: 'Two ways. (1) The Free plan gives you 5 recordings per month with SOP and process map output — no credit card required, no time limit. Exports include a Ledgerium watermark. (2) Every paid plan (Starter, Team, Growth) includes a 14-day free trial. You enter a card up front, get full plan access immediately, and aren’t charged until day 15. Cancel any time during the trial from your account page or the Stripe Billing Portal to avoid all charges.',
+    a: 'Two ways. (1) The Free plan gives you 5 recordings per month with SOP and process map output — no credit card required, no time limit. Exports include a Ledgerium watermark. (2) Starter and Solo include a 14-day free trial when you subscribe. You enter a card up front, get full plan access immediately, and aren’t charged until day 15. Team and Growth are available by waitlist. Cancel any time during the trial from your account page or the Stripe Billing Portal to avoid all charges.',
   },
   {
     q: 'How does annual billing work?',
@@ -51,7 +51,7 @@ const FAQ = [
   },
   {
     q: 'Is my data private?',
-    a: 'Yes. Your workflow data is stored in your workspace and never shared with third parties. All processing is deterministic and auditable. Enterprise plans support custom retention policies and on-premise deployment.',
+    a: 'Yes. Your workflow data is stored in your workspace and never shared with third parties. All processing is deterministic and auditable. Custom retention policies and on-premise deployment for Enterprise are coming soon.',
   },
   {
     q: 'How is Ledgerium different from Scribe or Tango?',
@@ -68,32 +68,33 @@ const FAQ = [
 // Vocabulary refocus per CEO directive 2026-05-17: users / workflows / outputs (NOT recorders / viewers / recordings).
 const COMPARISON_FEATURES = [
   // What You Capture
-  { label: 'Price (monthly)',      free: '$0',        starter: '$49',      team: '$249',      growth: '$799',    enterprise: 'Custom', category: 'What You Capture' },
-  { label: 'User seats',           free: '1 user',    starter: '1 user',   team: '5 users',   growth: '15 users', enterprise: 'Custom' },
-  { label: 'Workflows / month',    free: '5',         starter: '15',       team: 'Unlimited', growth: 'Unlimited', enterprise: 'Custom' },
+  { label: 'Price (monthly)',      free: '$0',        starter: '$49', solo: '$89',      team: '$249',      growth: '$799',    enterprise: 'Custom', category: 'What You Capture' },
+  { label: 'User seats',           free: '1 user',    starter: '1 user', solo: '1 user',   team: '5 users',   growth: '15 users', enterprise: 'Custom' },
+  { label: 'Workflows / month',    free: '5',         starter: '15', solo: 'Unlimited',       team: 'Unlimited', growth: 'Unlimited', enterprise: 'Custom' },
 
   // What You Get
-  { label: 'AI-generated SOPs',           free: true,  starter: true,  team: true,  growth: true,  enterprise: true,  category: 'What You Get' },
-  { label: 'Visual process maps',         free: true,  starter: true,  team: true,  growth: true,  enterprise: true },
-  { label: 'Process health scores',       free: false, starter: true,  team: true,  growth: true,  enterprise: true },
-  { label: 'Full intelligence layer',     free: false, starter: false, team: true,  growth: true,  enterprise: true },
-  { label: 'Bottleneck & friction analysis', free: false, starter: false, team: true, growth: true, enterprise: true },
-  { label: 'Automation opportunity scoring', free: false, starter: false, team: true, growth: true, enterprise: true },
-  { label: 'Variation analysis across runs', free: false, starter: false, team: true, growth: true, enterprise: true },
+  { label: 'AI-generated SOPs',           free: true,  starter: true, solo: true,  team: true,  growth: true,  enterprise: true,  category: 'What You Get' },
+  { label: 'Visual process maps',         free: true,  starter: true, solo: true,  team: true,  growth: true,  enterprise: true },
+  { label: 'Process health scores',       free: false, starter: true, solo: true,  team: true,  growth: true,  enterprise: true },
+  { label: 'Full intelligence layer',     free: false, starter: false, solo: true, team: true,  growth: true,  enterprise: true },
+  { label: 'Bottleneck & friction analysis', free: false, starter: false, solo: true, team: true, growth: true, enterprise: true },
+  { label: 'Automation opportunity scoring', free: false, starter: false, solo: true, team: true, growth: true, enterprise: true },
+  { label: 'Variation analysis across runs', free: false, starter: false, solo: true, team: true, growth: true, enterprise: true },
 
   // Sharing & Collaboration
-  { label: 'Public sharing link',     free: true,  starter: true,  team: true,  growth: true,  enterprise: true,  category: 'Sharing & Collaboration' },
-  { label: 'Clean exports — PDF, Markdown, JSON', free: false, starter: true,  team: true,  growth: true,  enterprise: true },
-  { label: 'Shared team workspace',   free: false, starter: false, team: true,  growth: true,  enterprise: true },
-  { label: 'Team library & portfolios', free: false, starter: false, team: true, growth: true, enterprise: true },
+  { label: 'Public sharing link',     free: true,  starter: true, solo: true,  team: true,  growth: true,  enterprise: true,  category: 'Sharing & Collaboration' },
+  { label: 'Clean exports — PDF, Markdown, JSON', free: false, starter: true, solo: true,  team: true,  growth: true,  enterprise: true },
+  { label: 'Shared team workspace',   free: false, starter: false, solo: false, team: true,  growth: true,  enterprise: true },
+  { label: 'Team library & portfolios', free: false, starter: false, solo: false, team: true, growth: true, enterprise: true },
 
   // Advanced & Enterprise
-  { label: 'Advanced cross-workflow analytics', free: false, starter: false, team: false, growth: true, enterprise: true, category: 'Advanced & Enterprise' },
-  { label: 'AI agent composition',    free: false, starter: false, team: false, growth: true, enterprise: true },
-  { label: 'Integration risk assessment', free: false, starter: false, team: false, growth: true, enterprise: true },
-  { label: 'SSO & RBAC',              free: false, starter: false, team: false, growth: false, enterprise: 'coming-soon' },
-  { label: 'Audit trail',             free: false, starter: false, team: false, growth: false, enterprise: 'coming-soon' },
-  { label: 'On-premise deployment',   free: false, starter: false, team: false, growth: false, enterprise: 'coming-soon' },
+  { label: 'Advanced cross-workflow analytics', free: false, starter: false, solo: false, team: false, growth: true, enterprise: true, category: 'Advanced & Enterprise' },
+  { label: 'AI agent composition',    free: false, starter: false, solo: false, team: false, growth: true, enterprise: true },
+  { label: 'Integration risk assessment', free: false, starter: false, solo: false, team: false, growth: true, enterprise: true },
+  { label: 'Role-based team access (owner, admin, member, viewer)', free: false, starter: false, solo: false, team: true, growth: true, enterprise: true },
+  { label: 'SSO',                     free: false, starter: false, solo: false, team: false, growth: false, enterprise: 'coming-soon' },
+  { label: 'Audit trail',             free: false, starter: false, solo: false, team: false, growth: false, enterprise: 'coming-soon' },
+  { label: 'On-premise deployment',   free: false, starter: false, solo: false, team: false, growth: false, enterprise: 'coming-soon' },
 ] as const;
 
 type CellValue = boolean | string;
@@ -230,6 +231,7 @@ export default function PricingPage() {
             {[
               { plan: 'Free', tagline: 'Map your first workflows' },
               { plan: 'Starter', tagline: 'Document solo, share cleanly' },
+              { plan: 'Solo', tagline: 'Full intelligence, one person' },
               { plan: 'Team', tagline: 'Measure how your team works' },
               { plan: 'Growth', tagline: 'Find what to automate at scale' },
             ].map(({ plan, tagline }) => (
@@ -256,7 +258,7 @@ export default function PricingPage() {
                   <th className="text-left px-5 py-4 font-semibold text-[var(--content-secondary)] w-[220px] sticky left-0 bg-[var(--surface-elevated)] z-10">
                     Feature
                   </th>
-                  {['Free', 'Starter'].map((col) => (
+                  {['Free', 'Starter', 'Solo'].map((col) => (
                     <th key={col} className="px-4 py-4 font-semibold text-[var(--content-secondary)] text-center">
                       {col}
                     </th>
@@ -284,7 +286,7 @@ export default function PricingPage() {
                     <Fragment key={row.label}>
                       {hasCategory && (
                         <tr key={`cat-${row.label}`} className="bg-brand-900/20 border-t-2 border-brand-800/40">
-                          <td colSpan={6} className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-text)] sticky left-0 bg-brand-900/20 z-10">
+                          <td colSpan={7} className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-text)] sticky left-0 bg-brand-900/20 z-10">
                             {row.category}
                           </td>
                         </tr>
@@ -307,6 +309,9 @@ export default function PricingPage() {
                         </td>
                         <td className="px-4 py-3.5 text-center">
                           <ComparisonCell value={row.starter} />
+                        </td>
+                        <td className="px-4 py-3.5 text-center">
+                          <ComparisonCell value={row.solo} />
                         </td>
                         {/* Team column — highlighted with subtle brand tint */}
                         <td className="px-4 py-3.5 text-center bg-brand-900/10 border-x border-brand-800/30">

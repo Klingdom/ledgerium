@@ -109,7 +109,7 @@ const COMPLIANCE_CARDS = [
     details: [
       'No PII capture by default',
       'User-controlled recording',
-      'Data export / deletion',
+      'Per-workflow export and deletion',
     ],
   },
   {
@@ -126,7 +126,7 @@ const COMPLIANCE_CARDS = [
 type FeatureAvailability = 'available' | 'coming-soon';
 
 const ENTERPRISE_FEATURES: Array<{ label: string; status: FeatureAvailability }> = [
-  { label: 'Role-based access control', status: 'available' },
+  { label: 'Role-based team access (owner, admin, member, viewer)', status: 'available' },
   { label: 'SSO integration', status: 'coming-soon' },
   { label: 'Custom data retention policies', status: 'coming-soon' },
   { label: 'On-premise deployment', status: 'coming-soon' },
