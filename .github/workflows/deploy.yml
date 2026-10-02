@@ -35,17 +35,30 @@ jobs:
       # Row #317 / MR-056 section 3. Fails on pnpm < 10 (where --fail-if-no-match
       # does not fail on a renamed script) and on any TS package lacking a
       # `typecheck` script (pnpm -r typecheck would silently skip it).
-      - name: Test typecheck-coverage guard
-        run: node --test scripts/check-typecheck-coverage.test.mjs
+      # Row #332 / MR-060 section 5. Runs EVERY scripts/*.test.mjs by glob, so a
+      # new guard test cannot be silently skipped (the loop-143 no-app-imports
+      # guard was in no workflow). Count floor = 4 (current files); raise it when
+      # a guard is added, never lower it. Plain shell count is the simplest form
+      # that also fails on an empty/unexpanded glob.
+      - name: Test all script guards (scripts/*.test.mjs)
+        shell: bash
+        run: |
+          set -euo pipefail
+          MIN=4
+          shopt -s nullglob
+          files=(scripts/*.test.mjs)
+          echo "found ${#files[@]} script test files (minimum $MIN)"
+          if [ "${#files[@]}" -lt "$MIN" ]; then
+            echo "::error::expected at least $MIN scripts/*.test.mjs files, found ${#files[@]}"
+            exit 1
+          fi
+          node --test "${files[@]}"
 
       - name: Check typecheck coverage and pnpm version
         run: node scripts/check-typecheck-coverage.mjs
 
       # Production image must COPY every transitive workspace dep of apps/web-app
       # (deps + builder stages) or `pnpm install`/`next build` fails in the image build.
-      - name: Test Dockerfile workspace guard
-        run: node --test scripts/check-dockerfile-workspace.test.mjs
-
       - name: Check Dockerfile includes all web-app workspace deps
         run: node scripts/check-dockerfile-workspace.mjs
 
@@ -76,9 +89,6 @@ jobs:
       # scripts and has been silently corrupted three times — closed rows left
       # ranking as open, struck rows still reading open, and cells overwritten
       # by position. Node only, no deps, runs in well under a second.
-      - name: Test backlog validator
-        run: node --test scripts/validate-backlog.test.mjs
-
       - name: Validate backlog integrity
         run: node scripts/validate-backlog.mjs
 

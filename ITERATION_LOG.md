@@ -4,6 +4,29 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 144) — Every guard test, every time (Mode 1, `devops-engineer`)
+
+- **Controls:**
+  - **Area:** `test-infra / ci`.
+  - **Agent:** `devops-engineer`.
+  - **Extension:** `871e29a`, 101 loops untouched.
+  - **Cadence:** 1 of 3 since MR-060.
+- **Candidate Selection: `burn-down` — #332** (14), filed and endorsed by MR-060. Cool-off recharge 2 of 3.
+- **What changed:** `deploy.yml` no longer names script test files one by one.
+  - **One bash step** collects `scripts/*.test.mjs` (with `nullglob`) and fails if fewer than **4** are found. The comment says to raise that floor whenever a guard is added, never lower it. The step then runs them all with `node --test`.
+  - **The no-app-imports guard from loop 143** now runs in CI for the first time.
+  - **Unchanged:** the separate check steps (typecheck coverage, Dockerfile workspace, backlog validator).
+  - **Other workflows:** none invokes script tests.
+- **Proof (exit codes):**
+  - `node --test scripts/*.test.mjs` exits 0, with 33 of 33 passing (re-run by me: 0).
+  - The extracted step reports "found 4 … (minimum 4)" and exits 0.
+  - With a temporary failing canary test added, it exits 1.
+  - In an empty directory, it reports "found 0" with an `::error::` and exits 1.
+  - YAML parses.
+- **Follow-ups:** 0 created, 1 closed (#332).
+
+---
+
 ## 2026-10-02 — MR-060 recorded (Mode 4, non-counting): armed by a variable
 
 - **Review:** `docs/meta/MR_060_META_REVIEW.md`. Nothing reverts.
