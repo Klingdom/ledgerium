@@ -5,6 +5,8 @@ import { checkBundleEvidenceIntegrity, type EvidenceIntegrityInput } from './bun
 import { buildSampleBundle } from './sample-workflow';
 import { buildSampleVariantBundles } from './sample-variants';
 
+const CLEAN = { ok: true, unresolvedSourceRefs: 0, duplicateEventIds: 0, sessionIdMismatches: 0 } as const;
+
 function good(): EvidenceIntegrityInput {
   return {
     sessionJson: { sessionId: 's1' },
@@ -23,19 +25,19 @@ function good(): EvidenceIntegrityInput {
 
 describe('checkBundleEvidenceIntegrity (row #10)', () => {
   it('accepts a bundle whose step evidence resolves', () => {
-    expect(checkBundleEvidenceIntegrity(good())).toEqual({ ok: true });
+    expect(checkBundleEvidenceIntegrity(good())).toMatchObject(CLEAN);
   });
 
   it('accepts an empty bundle (no events, no steps)', () => {
     expect(
       checkBundleEvidenceIntegrity({ sessionJson: { sessionId: 's1' }, normalizedEvents: [], derivedSteps: [] }),
-    ).toEqual({ ok: true });
+    ).toMatchObject(CLEAN);
   });
 
   it('accepts a bundle with no manifest', () => {
     const b = good();
     delete b.manifest;
-    expect(checkBundleEvidenceIntegrity(b)).toEqual({ ok: true });
+    expect(checkBundleEvidenceIntegrity(b)).toMatchObject(CLEAN);
   });
 
   it('counts source_event_ids that resolve to no event', () => {
@@ -54,13 +56,13 @@ describe('checkBundleEvidenceIntegrity (row #10)', () => {
     });
   });
 
-  it('counts session id disagreement across events, steps and manifest', () => {
+  it('counts session id disagreement across events, steps and manifest — and ACCEPTS (MR-044)', () => {
     const b = good();
     b.normalizedEvents = [{ event_id: 'e1', session_id: 'other' }, ...b.normalizedEvents.slice(1)];
     b.derivedSteps = [b.derivedSteps[0]!, { session_id: 'other', source_event_ids: ['e3'] }];
     b.manifest = { sessionId: 'other' };
     expect(checkBundleEvidenceIntegrity(b)).toEqual({
-      ok: false, unresolvedSourceRefs: 0, duplicateEventIds: 0, sessionIdMismatches: 3,
+      ok: true, unresolvedSourceRefs: 0, duplicateEventIds: 0, sessionIdMismatches: 3,
     });
   });
 
@@ -76,7 +78,7 @@ describe('checkBundleEvidenceIntegrity (row #10)', () => {
   it('a step with no source_event_ids is not an unresolved reference', () => {
     const b = good();
     b.derivedSteps = [...b.derivedSteps, { session_id: 's1', source_event_ids: [] }];
-    expect(checkBundleEvidenceIntegrity(b)).toEqual({ ok: true });
+    expect(checkBundleEvidenceIntegrity(b)).toMatchObject(CLEAN);
   });
 
   it('truncation does not exempt: a truncated-session bundle with dangling refs is still rejected', () => {
@@ -92,7 +94,7 @@ describe('checkBundleEvidenceIntegrity (row #10)', () => {
     const b = { ...good(), sessionJson: { sessionId: 's1', persistenceTruncated: true } };
     b.normalizedEvents = b.normalizedEvents.slice(0, 1);
     b.derivedSteps = [{ session_id: 's1', source_event_ids: ['e1'] }];
-    expect(checkBundleEvidenceIntegrity(b)).toEqual({ ok: true });
+    expect(checkBundleEvidenceIntegrity(b)).toMatchObject(CLEAN);
   });
 
   it('is deterministic and does not mutate its input', () => {
@@ -119,14 +121,14 @@ describe('legitimate producers satisfy all three checks', () => {
   const repoRoot = path.resolve(__dirname, '../../../..');
 
   it('server-side sample bundle', () => {
-    expect(checkBundleEvidenceIntegrity(buildSampleBundle() as unknown as EvidenceIntegrityInput)).toEqual({ ok: true });
+    expect(checkBundleEvidenceIntegrity(buildSampleBundle() as unknown as EvidenceIntegrityInput)).toMatchObject(CLEAN);
   });
 
   it('server-side sample variant bundles (all)', () => {
     const bundles = buildSampleVariantBundles();
     expect(bundles.length).toBeGreaterThan(0);
     for (const b of bundles) {
-      expect(checkBundleEvidenceIntegrity(b as unknown as EvidenceIntegrityInput)).toEqual({ ok: true });
+      expect(checkBundleEvidenceIntegrity(b as unknown as EvidenceIntegrityInput)).toMatchObject(CLEAN);
     }
   });
 
@@ -156,7 +158,7 @@ describe('legitimate producers satisfy all three checks', () => {
       derivedSteps: bundle.derivedSteps,
       manifest: bundle.manifest,
     };
-    expect(checkBundleEvidenceIntegrity(input)).toEqual({ ok: true });
+    expect(checkBundleEvidenceIntegrity(input)).toMatchObject(CLEAN);
   });
 
   it('segmentation + normalization golden event/step pairs', () => {
@@ -174,7 +176,7 @@ describe('legitimate producers satisfy all three checks', () => {
       expect(
         checkBundleEvidenceIntegrity({ sessionJson: { sessionId: sid }, normalizedEvents: events, derivedSteps: steps }),
         ev,
-      ).toEqual({ ok: true });
+      ).toMatchObject(CLEAN);
     }
   });
 });

@@ -158,6 +158,16 @@ async function handlePOST(req: NextRequest) {
     }, { status: 422 });
   }
 
+  // MR-044: session-id disagreement is measured, not rejected — see
+  // lib/bundle-evidence-integrity.ts. Counts only; never the ids.
+  if (integrity !== null && integrity.sessionIdMismatches > 0) {
+    trackServer('bundle_session_id_mismatch', {
+      path: 'sync',
+      sessionIdMismatches: integrity.sessionIdMismatches,
+      rejectedForOtherReasons: !integrity.ok,
+    });
+  }
+
   if (integrity !== null && !integrity.ok) {
     trackServer('upload_failed', {
       userId,

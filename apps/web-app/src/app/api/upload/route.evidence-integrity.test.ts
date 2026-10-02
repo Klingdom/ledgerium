@@ -102,3 +102,33 @@ describe('POST /api/upload evidence integrity (row #10)', () => {
     expect(createdData().validationStatus).toBe('valid');
   });
 });
+
+describe('POST /api/upload — session-id disagreement is measured, not rejected (MR-044)', () => {
+  it('a bfcache-shaped recording (early events under the previous session) is accepted and counted', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { trackServer } = await import('@/lib/analytics-server');
+    vi.mocked(trackServer).mockClear();
+    // MR-044 §2: a page restored from the back/forward cache can emit focus /
+    // visibility events from a capture engine still holding the PREVIOUS
+    // session's id, before START_SESSION reaches it. Event session ids are
+    // copied from the content script, so the bundle disagrees with itself —
+    // and it is a real user's recording. The earlier fixture tests could not
+    // express this: they took the expected id from the events themselves.
+    const bundle = buildSampleBundle() as unknown as {
+      normalizedEvents: Array<{ session_id: string }>;
+    };
+    bundle.normalizedEvents[0]!.session_id = 'previous-session-from-bfcache';
+    bundle.normalizedEvents[1]!.session_id = 'previous-session-from-bfcache';
+    const res = await post(bundle);
+    const body = await res.json();
+    expect(body.error).not.toBe('Bundle evidence integrity check failed');
+    expect(createdData().validationStatus).toBe('valid');
+    expect(trackServer).toHaveBeenCalledWith('bundle_session_id_mismatch', {
+      path: 'upload',
+      sessionIdMismatches: 2,
+      rejectedForOtherReasons: false,
+    });
+    // Counts only: the foreign id is recorded content and must not be echoed.
+    expect(JSON.stringify(vi.mocked(trackServer).mock.calls)).not.toContain('previous-session-from-bfcache');
+  });
+});

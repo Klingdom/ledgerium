@@ -4,6 +4,16 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 — Mode 3 correction to loop 92 (non-counting): the check that could reject a real recording
+
+- **From MR-044 §2, and the most consequential finding of the session.** Loop 92 enforced three checks and proved two. *Steps resolve* and *ids are unique* hold for every producer — steps are built from the same array the bundle exports, and every id is a fresh UUID. **The session-id check does not:** each event's session id is copied from the content script, and the background never compares it to the active session. A page restored from the back/forward cache can still be running a capture engine from an earlier session and emit focus/visibility events under that old id before the new `START_SESSION` arrives. That bundle disagrees with itself — and is a real user's recording. **Loop 92 would have answered it 422, on every retry.**
+- **I named truncation as the risk and checked it; I did not ask which component produces each field the gate checks.** That is MR-044's recommendation and it is the right question: for any gate on extension data, name the producer of every checked field.
+- **Fix (web-app only — the extension is untouched):** session disagreement is still counted, but no longer decides acceptance; only the two proven checks reject. Each occurrence emits a counts-only `bundle_session_id_mismatch` event (path, count, whether rejected for another reason) so the real rate can be measured before anyone decides to enforce it.
+- **The test that would have caught it now exists.** The fixture tests took the expected session id *from the events themselves*, so they could not disagree. A route test now models the bfcache shape — early events under a previous session — and asserts the recording is accepted, the mismatch counted, and the foreign id not echoed. **Mutation-checked:** restoring the rejecting rule fails it.
+- **Validation:** web-app **3532 → 3533**; typecheck 0.
+
+---
+
 ## 2026-10-01 (loop 93) — 71 casts, and whether any of them was hiding something (Mode 1, `build-error-resolver`)
 
 - **Controls:** Area — `type safety` (fresh). Agent — **`build-error-resolver`, a real rotation** (typecheck, suite and production build run by the agent; I re-ran all three plus the prerender check). Extension — `871e29a`, 50 loops; #216 CEO-blocked. **Cadence: 3 of 3 since MR-043 — MR-044 now due.**

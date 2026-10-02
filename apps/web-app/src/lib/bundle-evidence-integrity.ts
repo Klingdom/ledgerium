@@ -46,9 +46,17 @@ export interface EvidenceIntegrityCounts {
   sessionIdMismatches: number;
 }
 
-export type EvidenceIntegrityResult =
-  | { ok: true }
-  | ({ ok: false } & EvidenceIntegrityCounts);
+/**
+ * `ok` decides acceptance and is false ONLY for the two checks proven to hold
+ * for every real producer (MR-044 §2): unresolved step evidence and duplicate
+ * event ids. Session-id disagreement is COUNTED but does not reject: event
+ * session ids are copied from the content script, and a page restored from
+ * the back/forward cache can emit events under the previous session before
+ * the new one starts — a real user recording, not corruption. Rejecting it
+ * would have failed that recording on every retry. The count is reported so
+ * the real rate can be measured before any decision to enforce.
+ */
+export type EvidenceIntegrityResult = { ok: boolean } & EvidenceIntegrityCounts;
 
 export function checkBundleEvidenceIntegrity(bundle: EvidenceIntegrityInput): EvidenceIntegrityResult {
   const expectedSessionId = bundle.sessionJson.sessionId;
@@ -75,8 +83,10 @@ export function checkBundleEvidenceIntegrity(bundle: EvidenceIntegrityInput): Ev
     sessionIdMismatches += 1;
   }
 
-  if (unresolvedSourceRefs === 0 && duplicateEventIds === 0 && sessionIdMismatches === 0) {
-    return { ok: true };
-  }
-  return { ok: false, unresolvedSourceRefs, duplicateEventIds, sessionIdMismatches };
+  return {
+    ok: unresolvedSourceRefs === 0 && duplicateEventIds === 0,
+    unresolvedSourceRefs,
+    duplicateEventIds,
+    sessionIdMismatches,
+  };
 }
