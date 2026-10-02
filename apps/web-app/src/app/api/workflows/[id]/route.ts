@@ -63,14 +63,19 @@ async function handleGET(
     return NextResponse.json({ error: 'Workflow not found' }, { status: 404 });
   }
 
-  // Track view — fire-and-forget for performance
-  db.workflow.update({
-    where: { id: params.id },
-    data: {
-      viewCount: { increment: 1 },
-      lastViewedAt: new Date(),
-    },
-  }).catch(() => { /* non-critical */ });
+  // Track view — fire-and-forget for performance.
+  // Row #319: never write to a deleted row. Workflow.updatedAt is the retention
+  // clock for deleted workflows (lib/workflow-retention.ts); a view bump would
+  // restart the 30 days.
+  if (workflow.status !== 'deleted') {
+    db.workflow.update({
+      where: { id: params.id },
+      data: {
+        viewCount: { increment: 1 },
+        lastViewedAt: new Date(),
+      },
+    }).catch(() => { /* non-critical */ });
+  }
 
   // Lazy template backfill — generate templates for older workflows that lack
   // them.
@@ -206,6 +211,13 @@ async function handlePATCH(
     return NextResponse.json({ error: 'Workflow not found' }, { status: 404 });
   }
 
+  // Row #319: a deleted workflow accepts only a restore (status active/archived).
+  // Any other write would bump updatedAt, the retention clock, and push the
+  // permanent removal past the stated 30 days.
+  if (workflow.status === 'deleted' && (body.status === undefined || body.status === 'deleted')) {
+    return NextResponse.json({ error: 'Workflow is deleted' }, { status: 409 });
+  }
+
   const data: Record<string, unknown> = {};
   if (body.title !== undefined) data.title = body.title;
   if (body.description !== undefined) data.description = body.description;
@@ -286,6 +298,12 @@ async function handleDELETE(
 
   if (!workflow) {
     return NextResponse.json({ error: 'Workflow not found' }, { status: 404 });
+  }
+
+  // Already deleted: idempotent, and must NOT rewrite the row (updatedAt is the
+  // retention clock, row #319).
+  if (workflow.status === 'deleted') {
+    return NextResponse.json({ ok: true });
   }
 
   // Soft delete

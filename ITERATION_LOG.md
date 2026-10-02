@@ -4,6 +4,55 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 139) — Deleted means deleted, after 30 days (Mode 5 item 2 of 3)
+
+- **Controls:**
+  - **Area:** `security / data`.
+  - **Agents:**
+    - `backend-engineer`, three passes.
+    - `security-reviewer` (verdict SHIP WITH FIXES; all four fixes applied).
+    - `system-architect` (D-4 clause 2, because the module is 321 lines; READY WITH MINOR REVISIONS, both applied; persisted at `docs/meta/D4_REVIEW_LOOP139_RETENTION.md`).
+    - `growth-strategist` (D-4 clause 1, five strings changed; final wording applied).
+  - **Extension:** `871e29a`, 96 loops untouched.
+- **Candidate Selection: `directed` — #319.** The CEO said: "Update retention policy."
+  - The coordinator chose a **30-day purge, configurable via `WORKFLOW_PURGE_AFTER_DAYS`**, because the CEO named no period.
+  - **Clause-9 conflict, stated:** the single override was consumed at loop 138. This item proceeded on the CEO's explicit instruction, and the conflict is flagged for the next meta-review to rule on. The CEO was told and can stop the sequence.
+- **Data map first.**
+  - **Cascades** remove artifacts, shares, tags, portfolios, baselines, insights and graphs.
+  - **Explicitly deleted:** the raw upload file and its `Upload` row (only when no other workflow uses it), and the `ProcessDefinition` (only when no workflow remains linked).
+  - **Not removed:** analytics events carry only an id, and the 90-day cleanup already covers them.
+- **Deletion clock.** There is no `deletedAt`, so `updatedAt` is used. It was unreliable: a GET of a deleted workflow bumped it, PATCH could edit it, and a second DELETE rewrote it. All three are now guarded in `workflows/[id]/route.ts`:
+  - GET no longer writes;
+  - PATCH on a deleted workflow returns 409 unless it restores it;
+  - DELETE is idempotent.
+  - **Census test:** `workflow-writers.census.test.ts` fails if a new writer to workflows appears, or if any write sets `updatedAt`.
+  - **No migration**, because of #12.
+- **Purge.**
+  - **Selection:** a pure eligibility rule with injected `nowMs`, re-checked inside each per-workflow transaction.
+  - **Transaction order:** the file is deleted first inside the transaction, with a real-path containment check. If the unlink fails, the transaction rolls back and the workflow is retried on the next run. A missing file counts as deleted.
+  - **Orphan sweep:** unreferenced uploads older than the cutoff are swept, so earlier failures cannot strand raw recordings.
+  - **Dry-run flag:** `?dryRun` rejects unknown values with a 400.
+  - **Audit trail:** a server-log line records SHA-256-hashed ids and the deletion clock used. It is never written to the HTTP body, which ends up in GitHub logs.
+  - **Bounds:** at most 100 per run, reported via `hasMore`. An invalid env value refuses to run.
+  - **Trigger:** `POST /api/admin/retention/purge` (`verifyCronBearer`), called by a daily `retention-purge.yml` workflow.
+- **Copy, identical in all five places:** "deleted workflows are permanently removed **after** 30 days".
+  - The places are the Terms, security, privacy, extension privacy and docs.
+  - The coordinator changed "within" to "after", because the daily job removes a workflow 30-31 days after deletion.
+  - There is no restore mention, because no restore control exists in the UI.
+  - **The Terms sentence changed** from "You can export or delete your data any time" to "You can export your data and delete workflows at any time; deleted workflows are permanently removed after 30 days."
+  - The account-deletion line ("request deletion … by contacting us") is unchanged, and no self-service account erasure is claimed.
+- **Validation (exit code + ANSI-stripped summary):**
+  - web-app **4168 → 4230** on 3 of 3 runs; root **5938 → 6000**; typecheck 0; YAML and `bash -n` pass.
+  - **Revert proofs:** disabling the sweep fails the orphan test; a scratch writer fails the census; the old copy fails the pins.
+- **To activate:** set the GitHub variable `RETENTION_PURGE_URL` (and `CRON_SECRET`, shared with alerts). Until then the daily job reports "unconfigured".
+- **density-response: scope-guard-adjacent** for 1 follow-up, **#326**. It comes from the architect's review and is out of this loop's scope:
+  - status filters on the two allowlisted writers;
+  - dry-run orphan counts;
+  - `deletedAt` once #12 is resolved.
+- **Follow-ups:** 1 created (#326), 1 closed (#319).
+
+---
+
 ## 2026-10-02 (loop 138) — The diagnostic build, turned off (Mode 5 item 1 of 3, `security-reviewer`)
 
 - **Controls:**

@@ -169,7 +169,7 @@ export default function PrivacyPage() {
                   { icon: UserCheck, text: 'You choose when to start and stop recording' },
                   { icon: EyeOff, text: 'You can discard recordings before saving' },
                   { icon: Eye, text: 'You can review all captured data' },
-                  { icon: Lock, text: 'You can manage or delete workflows within the platform' },
+                  { icon: Lock, text: 'You can manage or delete workflows; deleted workflows are permanently removed after 30 days' },
                 ].map(({ icon: Icon, text }) => (
                   <div key={text} className="flex items-start gap-2 rounded-lg bg-[var(--surface-secondary)] p-3">
                     <Icon className="h-4 w-4 text-[var(--brand-text)] mt-0.5 flex-shrink-0" />

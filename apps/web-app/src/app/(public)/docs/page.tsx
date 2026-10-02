@@ -1997,7 +1997,7 @@ export default function DocsPage() {
                     ['Pause recording', <>Click <strong className="text-[var(--content-primary)]">Pause</strong> in the side panel</>],
                     ['Stop recording', <>Click <strong className="text-[var(--content-primary)]">Stop</strong> in the side panel</>],
                     ['Discard a recording', 'Use the discard option before uploading'],
-                    ['Delete a workflow', 'Hover over the card and click the trash icon'],
+                    ['Delete a workflow', 'Hover over the card and click the trash icon. Deleted workflows are permanently removed after 30 days.'],
                     ['Revoke extension access', <>Delete the API key in Account &gt; Extension Sync</>],
                   ].map(([control, how], i) => (
                     <tr key={i}>

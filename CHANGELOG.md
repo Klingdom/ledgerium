@@ -6,6 +6,17 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Deleted workflows are permanently removed after 30 days
+
+### Added
+- Workflows you delete, together with their steps, SOPs, shares and uploaded recordings, are now permanently removed 30 days after deletion.
+
+### Changed
+- The Terms of Service, security, privacy and documentation pages describe this policy.
+
+---
+
+
 ## [2026-10-02] - Security: diagnostic build turned off
 
 ### Security

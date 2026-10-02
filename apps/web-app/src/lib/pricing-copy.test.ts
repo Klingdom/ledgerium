@@ -14,6 +14,7 @@ import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { PLAN_FEATURES } from '@/lib/plans';
 import { PRICING_CONFIG } from '@/lib/config';
+import { DEFAULT_PURGE_AFTER_DAYS } from '@/lib/workflow-retention';
 
 const MONTH =
   '(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sept?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)';
@@ -337,22 +338,44 @@ describe('#315: public copy does not overclaim beyond enforcement', () => {
   const security = readSrc('app', '(public)', 'security', 'page.tsx');
   const publicText = PUBLIC_FILES.map((f) => ({ f, text: readFileSync(f, 'utf8') }));
 
-  it('workflow delete is a soft delete that nothing purges, so no page promises deletion', () => {
+  it('#319: deletion copy states the real policy: soft delete, then a purge 30 days later', () => {
     const route = readSrc('app', 'api', 'workflows', '[id]', 'route.ts');
     expect(route).toMatch(/Soft delete[\s\S]{0,120}status: 'deleted'/);
     expect(route).not.toMatch(/workflow\.delete\(/);
-    // Scan EVERY public page. The terms page is excluded on purpose: it says "delete your data
-    // any time" and is legal text awaiting a CEO decision, tracked in #319. Do not edit it here.
-    const scanned = publicText.filter(({ f }) => !/[\\/]terms[\\/]/.test(f));
-    expect(scanned.length).toBeGreaterThan(20);
-    expect(scanned.some(({ f }) => /security[\\/]page\.tsx$/.test(f))).toBe(true);
-    for (const { f, text } of scanned) {
+    // The 30 in the copy is the code's default retention, not a second number.
+    expect(DEFAULT_PURGE_AFTER_DAYS).toBe(30);
+    expect(readSrc('app', 'api', 'admin', 'retention', 'purge', 'route.ts')).toMatch(/purgeExpiredWorkflows/);
+    // Scan EVERY public page, terms included.
+    expect(publicText.length).toBeGreaterThan(20);
+    expect(publicText.some(({ f }) => /security[\\/]page\.tsx$/.test(f))).toBe(true);
+    expect(publicText.some(({ f }) => /terms[\\/]page\.tsx$/.test(f))).toBe(true);
+    for (const { f, text } of publicText) {
       expect(text, f).not.toMatch(/export and deletion/i);
-      expect(text, f).not.toMatch(/permanently (deleted|removed|erased)|purged from our/i);
+      expect(text, f).not.toMatch(/retained, not purged/i);
+      expect(text, f).not.toMatch(/delete your data any time/i);
+      // Any "permanently removed" must carry the real window.
+      expect(text, f).not.toMatch(/permanently removed(?! after 30 days)/i);
+      expect(text, f).not.toMatch(/purged from our/i);
+      expect(text, f).not.toMatch(/within 30 days/i);
+      // "permanently deleted/erased" appears only in the terms termination clause (account closure), never about workflows.
+      if (!/[\\/]terms[\\/]/.test(f)) expect(text, f).not.toMatch(/permanently (deleted|erased)/i);
     }
+    const terms = readSrc('app', '(public)', 'terms', 'page.tsx');
+    expect(security).toMatch(/Per-workflow export; deleted workflows are permanently removed after 30 days/);
+    expect(terms).toMatch(/You can export your data and delete workflows at any time; deleted workflows are permanently removed after 30 days/);
+    expect(readSrc('app', '(public)', 'privacy', 'page.tsx')).toMatch(/deleted workflows are permanently removed after 30 days/);
+    expect(readSrc('app', '(public)', 'privacy', 'extension', 'page.tsx')).toMatch(/deleted workflows are permanently removed after 30 days/);
+    expect(readSrc('app', '(public)', 'docs', 'page.tsx')).toMatch(/Deleted workflows are permanently removed after 30 days/);
     expect(security).toMatch(/'Same input, same output'/);
     expect(security).not.toMatch(/Reproducible processing/);
-    expect(security).toMatch(/Per-workflow export and archive \(archived workflows are retained, not purged\)/);
+  });
+
+  it('#319: no account-deletion route exists, so no public page may claim self-serve account erasure', () => {
+    const account = readSrc('app', 'api', 'account', 'route.ts');
+    expect(account).not.toMatch(/export const (DELETE|POST)/);
+    for (const { f, text } of publicText) {
+      expect(text, f).not.toMatch(/delete your account (instantly|immediately)|account (is|will be) (erased|deleted) (instantly|immediately)/i);
+    }
   });
 
   it('PDF is window.print() with no plan check, so no page sells PDF as a paid/clean export', () => {

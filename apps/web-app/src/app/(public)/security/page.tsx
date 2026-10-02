@@ -109,7 +109,7 @@ const COMPLIANCE_CARDS = [
     details: [
       'No PII capture by default',
       'User-controlled recording',
-      'Per-workflow export and archive (archived workflows are retained, not purged)',
+      'Per-workflow export; deleted workflows are permanently removed after 30 days',
     ],
   },
   {

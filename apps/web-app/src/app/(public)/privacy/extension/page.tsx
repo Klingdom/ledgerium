@@ -209,7 +209,7 @@ export default function ExtensionPrivacyPage() {
               </div>
               <p className="mt-4">
                 To delete data stored in the Ledgerium AI platform, log into your account and use the workflow
-                management tools, or contact us at{' '}
+                management tools (deleted workflows are permanently removed after 30 days), or contact us at{' '}
                 <a href={`mailto:${SITE_CONFIG.supportEmail}`} className="text-[var(--brand-text)] hover:text-brand-700 underline">
                   {SITE_CONFIG.supportEmail}
                 </a>.

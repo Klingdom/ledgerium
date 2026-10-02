@@ -49,7 +49,7 @@ export default function TermsPage() {
                 'You own your workflow data and outputs',
                 'We do not sell your data',
                 'We do not train AI on your recordings',
-                'You can export or delete your data any time',
+                'You can export your data and delete workflows at any time; deleted workflows are permanently removed after 30 days',
               ].map((item) => (
                 <li key={item} className="flex items-center gap-2 text-sm text-[var(--content-primary)]">
                   <FileText className="h-3.5 w-3.5 text-[var(--brand-text)] flex-shrink-0" />

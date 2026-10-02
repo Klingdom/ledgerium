@@ -1,0 +1,43 @@
+name: Retention purge
+
+# Row #319 - deleted workflows are permanently removed 30 days after deletion
+# (WORKFLOW_PURGE_AFTER_DAYS on the server). This job calls
+# POST /api/admin/retention/purge daily. A non-200 fails the job, and GitHub
+# notifies the repo owner through its own channel. It delivers nothing else.
+#
+# Bounded per call (100 workflows); a backlog drains over successive days.
+# GitHub may delay or drop scheduled runs and disables schedules on repos with
+# no activity for 60 days, so the 30-day promise holds only while this runs.
+#
+# Unconfigured: the job FAILS (exit 2) rather than skipping, so "not purging"
+# never looks like "nothing to purge" (same decision as alerts-check.yml).
+#
+# Setup:
+#   gh secret set CRON_SECRET        (same value the web container has)
+#   gh variable set RETENTION_PURGE_URL --body https://<host>/api/admin/retention/purge
+
+on:
+  schedule:
+    - cron: '41 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: retention-purge
+  cancel-in-progress: false
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+      - name: Call retention/purge
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          RETENTION_PURGE_URL: ${{ vars.RETENTION_PURGE_URL }}
+        run: bash .github/scripts/retention-purge.sh
