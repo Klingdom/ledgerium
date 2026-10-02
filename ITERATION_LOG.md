@@ -4,6 +4,17 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-047 recorded (Mode 4, non-counting): a fix that could take the site down
+
+- **Review:** `docs/meta/MR_047_META_REVIEW.md`. Numbers reproduce. Loops 102 and 103 hold; the audit amendment holds.
+- **Headline — a risk I introduced at loop 101 and did not state.** The startup check now rejects secrets under 32 characters, but compose accepts any non-empty value. A secret that is present but short would replace the running app with one that cannot start. Nobody knows the production secret's length. I described the *missing*-secret case as "the intended trade" and never asked what happens to a *short* one — the startup check and the compose check enforce different rules, and the gap between them is an outage. **Filed #284 (15), loop 104, now:** validate in the deploy job before anything on the server is replaced.
+- **Also mine:** "not live" for the `change-me` hole was inferred from files and then written as fact in the commit, the row and the changelog. It is very likely true; it was not established. And my local `main` is several commits ahead of the last fetched `origin/main`, so the next push ships loops 99-103 together — after #284 lands, not before.
+- **Corrected in place, as MR-047 required:** the #274 row and SYSTEM_HEALTH still called P1-3 a P0 after the auditor graded it P1. Both now say so, with the original struck rather than deleted.
+- **Filed:** **#285** — with no email provider, password-reset links are logged; the SMTP deadline does not abort the send; Resend has no timeout (loop 102's "can no longer hang" was SMTP-only). **#286** — AUTHZ P1-2, promoted through audit-intake path 1 (the slot #274 and #276 opened): signup can claim an unclaimed admin address. Loop 105.
+- **Practice change MR-047 asks for, adopted:** cite audit-log timestamps instead of quoting agent output for delegation evidence — the quoting question has been open for six reviews.
+
+---
+
 ## 2026-10-02 (loop 103) — What a mail server says when it fails (Mode 1, `security-reviewer`)
 
 - **Controls:** Area — `web-app / security` (101 security/deploy, 102 monitoring). Agent — **`security-reviewer`, a real rotation** (suite, typecheck and mutation checks run by the agent; I re-ran suite and typecheck and checked the source-map finding). Extension — `871e29a`, 60 loops. **Cadence: 3 of 3 since MR-046 — MR-047 now due.**
