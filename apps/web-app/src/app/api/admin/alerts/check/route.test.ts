@@ -2,7 +2,7 @@
  * Unit tests for GET /api/admin/alerts/check (cron endpoint).
  *
  * Covers:
- *  - Missing CRON_SECRET env → 500
+ *  - Missing CRON_SECRET env → 503 (distinct from the 500 outage path)
  *  - Wrong Bearer token (value mismatch) → 401
  *  - Wrong-length Bearer token → 401
  *  - Correct Bearer token → 200
@@ -31,6 +31,11 @@ vi.mock('@/lib/notifications', () => ({
   sendAlertNotification: vi.fn(),
 }));
 
+vi.mock('@/lib/api-error-reporting', () => ({
+  reportApiError: vi.fn(),
+}));
+
+import { reportApiError } from '@/lib/api-error-reporting';
 import { computeAlerts } from '@/lib/compute-alerts';
 import { sendAlertNotification } from '@/lib/notifications';
 import { GET } from './route';
@@ -39,6 +44,7 @@ import { GET } from './route';
 
 const mockComputeAlerts = computeAlerts as ReturnType<typeof vi.fn>;
 const mockSendAlertNotification = sendAlertNotification as ReturnType<typeof vi.fn>;
+const mockReportApiError = reportApiError as ReturnType<typeof vi.fn>;
 
 // ── Test constants ─────────────────────────────────────────────────────────────
 
@@ -90,14 +96,15 @@ afterEach(() => {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('GET /api/admin/alerts/check — cron secret enforcement', () => {
-  it('returns 500 when CRON_SECRET env var is not set', async () => {
+  it('returns 503 (not 500) when CRON_SECRET env var is not set, and reports it as a 503 api error', async () => {
     delete process.env.CRON_SECRET;
 
     const response = await GET(makeRequest({ authHeader: `Bearer ${VALID_SECRET}` }) as any);
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(503);
 
     const body = await response.json();
-    expect(body.error).toBe('Server misconfiguration');
+    expect(body.error).toBe('Service not configured');
+    expect(mockReportApiError).toHaveBeenCalledWith('/api/admin/alerts/check', 503);
   });
 
   it('returns 401 when Bearer token does not match (wrong value)', async () => {

@@ -149,6 +149,9 @@ jobs:
             RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
             EMAIL_FROM=${{ vars.EMAIL_FROM || 'Ledgerium AI <hello@ledgerium.ai>' }}
             NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL || 'https://ledgerium.ai' }}
+            CRON_SECRET=${{ secrets.CRON_SECRET }}
+            SLACK_ALERTS_WEBHOOK_URL=${{ secrets.SLACK_ALERTS_WEBHOOK_URL }}
+            ALERT_EMAIL_TO=${{ vars.ALERT_EMAIL_TO }}
             DATA_DIR=/app/data
             UPLOAD_DIR=/app/data/uploads
             TRUSTED_PROXY_HOPS=${{ vars.TRUSTED_PROXY_HOPS || '0' }}

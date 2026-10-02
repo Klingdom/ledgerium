@@ -2,7 +2,14 @@
 # Calls GET $ALERTS_CHECK_URL with Bearer $CRON_SECRET. Exit 0 only on HTTP 200.
 # Prints the HTTP status code ONLY - never the body or the secret (public repo).
 # Inputs (env): CRON_SECRET, ALERTS_CHECK_URL, optional ALERTS_CHECK_MAX_TIME (default 30).
-# Exit codes: 0 ok | 1 non-200 | 2 unconfigured | 3 unreachable/timeout.
+# Exit codes:
+#   0 ok (HTTP 200)
+#   1 any other non-200 (401 wrong secret, 500 real failure e.g. DB down, ...)
+#   2 workflow side unconfigured (CRON_SECRET secret / ALERTS_CHECK_URL variable)
+#   3 unreachable / timeout / TLS failure (curl itself failed)
+#   4 HTTP 503: usually the SERVER has no CRON_SECRET (the app answers 503 for
+#     that). NOT proof of a config gap: a reverse proxy in front of a down app
+#     also answers 503, so the message names both causes.
 set -u
 
 if [ -z "${CRON_SECRET:-}" ] || [ -z "${ALERTS_CHECK_URL:-}" ]; then
@@ -30,6 +37,10 @@ if [ "$rc" -ne 0 ]; then
   exit 3
 fi
 echo "alerts/check HTTP status: $status"
+if [ "$status" = "503" ]; then
+  echo "::error::alerts/check returned HTTP 503. Most likely CRON_SECRET is not set in the web container (the app answers 503 for that), but a proxy in front of a down app also answers 503 - check the site is up before assuming config. Alerts are NOT being checked."
+  exit 4
+fi
 if [ "$status" != "200" ]; then
   echo "::error::alerts/check returned HTTP $status (expected 200)"
   exit 1

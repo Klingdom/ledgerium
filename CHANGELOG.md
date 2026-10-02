@@ -6,6 +6,17 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-01] - Alerts can now reach someone in production
+
+### Fixed
+- The hourly alert check added earlier today could never have worked in production: the live server was not being given the settings it needed, so every check would have failed, and an alert that did fire had nowhere to go. The production setup now passes those settings through.
+- When the server is missing its alert setting, the hourly check now says so as its own case instead of looking like an outage — while noting that an outage can look the same.
+
+### Needs setting up
+- To switch alerts on: the alert secret, the address to check, and at least one place to send alerts (a Slack webhook or an email address).
+
+---
+
 ## [2026-10-01] - The last faint green labels and icons are fixed
 
 ### Fixed

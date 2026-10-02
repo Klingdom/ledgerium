@@ -9,6 +9,11 @@ name: Alerts check
 # throws"), this job fails, and GitHub notifies the repo owner through its own
 # channel - no dependency on the dead store.
 #
+# SERVER SIDE: the web container must receive CRON_SECRET (same value as this
+# repo secret) via deploy.yml -> compose.hostinger.yaml. If it does not, the
+# route answers 503 and this job fails with a distinct "not configured on the
+# server" message (script exit 4) instead of looking like an outage (500).
+#
 # FAILS ON: any non-200 status, a 30s timeout, any connection/DNS/TLS failure.
 #
 # DOES NOT COVER: a firing alert with a healthy DB returns 200 and is delivered

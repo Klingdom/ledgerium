@@ -4,6 +4,20 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 (loop 85) — Making the alert reach someone (Mode 1, `devops-engineer`)
+
+- **Controls:** Area — `infra / deploy`. Agent — **`devops-engineer`, a real rotation**: it ran the suite, typecheck, YAML parses, `docker compose config` and the stub cases itself; I re-ran the suite, typecheck and stub independently. Extension — `871e29a`, 42 loops; #216 CEO-blocked. Cadence: 1 of 3 since MR-041.
+- **Candidate Selection: `burn-down` — #256** (reopened, 15). Labelled `burn-down` per MR-041 §5.2(8): with the pool above 8, clause 6 governs every pick, and I had mislabelled two loops as `top-score`.
+- **What was missing, now present:** the production deploy passes the web container `CRON_SECRET` and both alert channels. **The residual was stated as a property, as MR-041 asked** — "variables the alert path reads that the deploy does not provide" — and went **3 → 0**. Stated that way, it could not have been satisfied by matching a string.
+- **Misconfiguration is now distinguishable — mostly.** A server without `CRON_SECRET` answers 503 instead of 500, and the job reports it as its own case. I reworded the agent's message: it said a 503 *means* the secret is unset, but a reverse proxy in front of a dead app also answers 503, so that message would have confidently mislabelled a real outage as a config gap — the exact confusion this loop exists to remove. It now names both causes. The status alone cannot separate them; I did not pretend it could.
+- **The agent asked one question and was right to:** should a misconfiguration count against `api_error_spike`? Yes — it is a real server-side fault, and at one an hour it cannot trip the >10/hour alert by itself. Guard A also requires it.
+- **Deliberately not built:** surfacing "no alert channel configured" to the job. That needs the response body, and this repository's logs are public. Recorded, not hidden.
+- **Found, filed:** **#260** — three other compose files pass no alert, SMTP or Stripe variables at all. A deploy from any of them would look healthy and do nothing that matters. Pre-existing.
+- **Validation:** web-app **3348 / 3348** (a 500 test became a 503 test); typecheck 0; YAML parses; `docker compose config` valid (agent); stub 200→0, 503→4, 500→1 (both of us). **Not verifiable here:** a real deploy.
+- **Follow-ups:** 1 created (#260), 1 closed (#256).
+
+---
+
 ## 2026-10-01 — Mode 3 correction to loop 83 (non-counting): the guard that could not see the two routes that mattered
 
 - **From MR-041 §3.2-3.4.** Four things, one surface — `withApiRoute` and the guard that holds it.

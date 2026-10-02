@@ -76,6 +76,14 @@ services:
       - RESEND_API_KEY=${RESEND_API_KEY:-}
       - "EMAIL_FROM=${EMAIL_FROM:-Ledgerium AI <hello@ledgerium.ai>}"
       - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-https://ledgerium.ai}
+      # ── Alerts (row #256): GET /api/admin/alerts/check, called hourly by
+      # .github/workflows/alerts-check.yml. CRON_SECRET unset -> the route answers
+      # 503 and that job fails with "not configured on the server". Delivery
+      # channels are optional; with neither set a firing alert is a console line.
+      # Email delivery also needs SMTP_* above.
+      - CRON_SECRET=${CRON_SECRET:-}
+      - SLACK_ALERTS_WEBHOOK_URL=${SLACK_ALERTS_WEBHOOK_URL:-}
+      - ALERT_EMAIL_TO=${ALERT_EMAIL_TO:-}
     networks:
       - proxy-net
 
