@@ -587,3 +587,33 @@ describe('tokens meet their contrast floor where they are used — row #239', ()
     expect(unique, `\n${unique.join('\n')}\n`).toEqual([]);
   });
 });
+
+// ─── brand-500 as a text/icon colour is gone, and stays gone ─────────────────
+
+/*
+  Rows #245 / #257. `text-brand-500` is 2.42:1 on light surfaces — below the
+  4.5:1 text floor and the 3:1 non-text floor alike. Loop 81 fixed the uses
+  axe could see on screen and left 21 it could not (closed dropdowns, app-only
+  pages); loop 84 converted the rest to `--brand-text`, or to the
+  `--brand-tint` / `--brand-on-tint` pair where it sat on a brand tint.
+  A scanner sees rendered nodes only, so the class is held at zero here, over
+  source, where hidden states cannot hide it.
+*/
+describe('no text-brand-500 in source — rows #245 / #257', () => {
+  const ROOT = join(__dirname, '..');
+  const files = sourceFiles(ROOT).filter((f) => /\.tsx?$/.test(f));
+
+  it('scans the source tree (a guard over zero files passes vacuously)', () => {
+    expect(files.length).toBeGreaterThan(200);
+  });
+
+  it('has no text-brand-500 colour utility, in any variant', () => {
+    const hits: string[] = [];
+    for (const file of files) {
+      readFileSync(file, 'utf8').split(/\r?\n/).forEach((line, i) => {
+        if (/(^|[\s"'`:])text-brand-500\b/.test(line)) hits.push(`${file.slice(ROOT.length + 1)}:${i + 1}`);
+      });
+    }
+    expect(hits, 'text-brand-500 is 2.42:1 in light. Use var(--brand-text), or the --brand-tint/--brand-on-tint pair on a brand tint.').toEqual([]);
+  });
+});

@@ -39,7 +39,7 @@ export function WorkflowPageView({ page }: { page: WorkflowPage }) {
           <ol className="space-y-4">
             {page.steps.map((s, i) => (
               <li key={s.title} className="flex gap-4">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-brand-900/20 border border-brand-700/30 text-brand-500 text-sm font-semibold flex items-center justify-center">{i + 1}</span>
+                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--brand-tint)] border border-brand-700/30 text-[var(--brand-on-tint)] text-sm font-semibold flex items-center justify-center">{i + 1}</span>
                 <div>
                   <p className="text-sm font-semibold text-[var(--content-primary)]">{s.title}</p>
                   <p className="text-sm text-[var(--content-primary)] leading-relaxed">{s.detail}</p>

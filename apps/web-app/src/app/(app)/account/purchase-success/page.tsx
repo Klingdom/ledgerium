@@ -130,7 +130,7 @@ function PurchaseSuccessContent() {
   if (stillPending && !exhaustedRetries) {
     return (
       <div className="mx-auto max-w-lg text-center py-ds-10">
-        <Clock className="mx-auto h-8 w-8 text-brand-500 mb-ds-3 animate-pulse" />
+        <Clock className="mx-auto h-8 w-8 text-[var(--brand-text)] mb-ds-3 animate-pulse" />
         <h1 className="text-ds-xl font-bold text-[var(--content-primary)] mb-ds-2">
           Confirming your payment…
         </h1>

@@ -6,6 +6,16 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-01] - The last faint green labels and icons are fixed
+
+### Fixed
+- Twenty-one more green labels, links and icons were too faint to read in light mode, including some only visible inside menus or after signing in, which automated checks had not opened. They now meet the accessibility minimum in both themes, and so do their hover states, which were fainter still.
+
+### Added
+- A check that fails if that faint green colour is ever used for text or icons again.
+
+---
+
 ## [2026-10-01] - Every server endpoint now fails safely and visibly
 
 ### Fixed

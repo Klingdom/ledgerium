@@ -147,7 +147,7 @@ function PlanCard({
   } else if (isEnterpriseCurrent) {
     // Enterprise users see all other plans disabled
     actionButton = (
-      <span className="block w-full text-center rounded-full bg-brand-900/20 text-brand-500 text-xs font-medium px-3 py-1.5">
+      <span className="block w-full text-center rounded-full bg-[var(--brand-tint)] text-[var(--brand-on-tint)] text-xs font-medium px-3 py-1.5">
         Included in Enterprise
       </span>
     );
@@ -618,7 +618,7 @@ export default function AccountPage() {
               Annual
             </span>
             {billingInterval === 'annual' && (
-              <span className="text-[10px] font-medium text-brand-500 bg-brand-900/20 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] font-medium text-[var(--brand-on-tint)] bg-[var(--brand-tint)] px-2 py-0.5 rounded-full">
                 Save ~17%
               </span>
             )}

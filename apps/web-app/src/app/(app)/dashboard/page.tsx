@@ -2111,7 +2111,7 @@ function EmptyDashboard({
       <div className="card overflow-hidden">
         <div className="bg-gradient-to-br from-brand-900/15 via-[var(--surface-elevated)] to-[var(--surface-elevated)] px-ds-8 py-ds-10 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-900/20">
-            <Layers className="h-8 w-8 text-brand-500" />
+            <Layers className="h-8 w-8 text-[var(--brand-text)]" />
           </div>
           <h2 className="mt-ds-4 text-ds-lg font-semibold text-[var(--content-primary)]">
             Your process intelligence center is empty

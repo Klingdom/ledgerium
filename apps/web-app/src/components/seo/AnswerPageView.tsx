@@ -83,7 +83,7 @@ function RelatedTerms({ terms }: { terms: AnswerPage['relatedTerms'] }) {
               <Link
                 key={t.slug}
                 href={`/answers/${t.slug}`}
-                className="inline-flex items-center rounded-full border border-brand-700/40 bg-brand-900/10 px-4 py-1.5 text-sm text-brand-500 hover:text-brand-400 hover:border-brand-600/60 transition-colors"
+                className="inline-flex items-center rounded-full border border-brand-700/40 bg-[var(--brand-tint)] px-4 py-1.5 text-sm text-[var(--brand-on-tint)] hover:text-[var(--brand-text-hover)] hover:border-brand-600/60 transition-colors"
               >
                 {t.term}
               </Link>
@@ -112,7 +112,7 @@ function Sources({ sources }: { sources: AnswerPage['sources'] }) {
           {sources.map((s) => (
             <li key={s.label} className="text-sm text-[var(--content-secondary)] leading-relaxed">
               {s.url ? (
-                <a href={s.url} className="text-brand-500 hover:text-brand-400 underline underline-offset-2" target="_blank" rel="noopener noreferrer">
+                <a href={s.url} className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2" target="_blank" rel="noopener noreferrer">
                   {s.label}
                 </a>
               ) : (

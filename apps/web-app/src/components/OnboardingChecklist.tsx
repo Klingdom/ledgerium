@@ -64,7 +64,7 @@ export default function OnboardingChecklist({
       <div className="flex items-center justify-between px-ds-5 py-ds-4">
         <div className="flex items-center gap-ds-3">
           {allComplete ? (
-            <Sparkles className="h-4 w-4 text-brand-500 shrink-0" />
+            <Sparkles className="h-4 w-4 text-[var(--brand-text)] shrink-0" />
           ) : null}
           <span className="text-ds-sm font-semibold text-[var(--content-primary)]">
             Getting started
@@ -121,7 +121,7 @@ export default function OnboardingChecklist({
                 <div className="mt-0.5 shrink-0">
                   {completed ? (
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-500/15">
-                      <Check className="h-3 w-3 text-brand-500" aria-hidden="true" />
+                      <Check className="h-3 w-3 text-[var(--brand-text)]" aria-hidden="true" />
                     </span>
                   ) : (
                     <Circle

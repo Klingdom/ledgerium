@@ -18,7 +18,7 @@ import {
 import { FaqBlock } from './FaqBlock';
 
 function Cell({ value, accent }: { value: CompareRow['competitor']; accent: boolean }) {
-  if (value === true) return <Check className={`h-4 w-4 inline ${accent ? 'text-brand-500' : 'text-[var(--content-secondary)]'}`} />;
+  if (value === true) return <Check className={`h-4 w-4 inline ${accent ? 'text-[var(--brand-text)]' : 'text-[var(--content-secondary)]'}`} />;
   if (value === false) return <X className="h-4 w-4 inline opacity-40 text-[var(--content-tertiary)]" />;
   return <span className={`text-sm ${accent ? 'text-[var(--content-primary)]' : 'text-[var(--content-secondary)]'}`}>{value}</span>;
 }

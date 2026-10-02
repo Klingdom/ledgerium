@@ -39,7 +39,7 @@ export function AlternativesPageView({ page }: { page: AlternativesPage }) {
               <li key={o.name} className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] p-5">
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-1.5">
                   <span className="text-base font-semibold text-[var(--content-primary)]">{o.name}</span>
-                  <span className="text-xs text-brand-500 font-medium">Best for: {o.bestFor}</span>
+                  <span className="text-xs text-[var(--brand-text)] font-medium">Best for: {o.bestFor}</span>
                 </div>
                 <p className="text-sm text-[var(--content-primary)] leading-relaxed">{o.note}</p>
               </li>

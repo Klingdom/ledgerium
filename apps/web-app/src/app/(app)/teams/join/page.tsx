@@ -14,7 +14,7 @@ export default function JoinTeamPage() {
     <Suspense
       fallback={
         <div className="mx-auto max-w-md py-ds-12 text-center">
-          <Users className="mx-auto h-10 w-10 text-brand-500 animate-pulse" />
+          <Users className="mx-auto h-10 w-10 text-[var(--brand-text)] animate-pulse" />
           <p className="mt-ds-4 text-ds-sm text-[var(--content-secondary)]">Joining team...</p>
         </div>
       }
@@ -76,7 +76,7 @@ function JoinTeamContent() {
     <div className="mx-auto max-w-md py-ds-12 text-center">
       {status === 'loading' && (
         <>
-          <Users className="mx-auto h-10 w-10 text-brand-500 animate-pulse" />
+          <Users className="mx-auto h-10 w-10 text-[var(--brand-text)] animate-pulse" />
           <p className="mt-ds-4 text-ds-sm text-[var(--content-secondary)]">Joining team...</p>
         </>
       )}

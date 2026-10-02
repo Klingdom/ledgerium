@@ -365,7 +365,7 @@ function PanelLink({ leaf, onClick }: { leaf: NavLeaf; onClick: () => void }) {
     >
       {leaf.label}
       {leaf.badge && (
-        <span className="text-[10px] font-semibold uppercase tracking-wide text-brand-500 bg-brand-900/30 border border-brand-700/30 rounded px-1.5 py-0.5">
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-[var(--brand-on-tint)] bg-[var(--brand-tint)] border border-brand-700/30 rounded px-1.5 py-0.5">
           {leaf.badge}
         </span>
       )}

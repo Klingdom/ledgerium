@@ -4,6 +4,20 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 (loop 84) — The residual, counted before and after (Mode 1, coordinator)
+
+- **Controls:** Area — `web-app / a11y` (82 infra, 83 api). Agent — coordinator; 83 was a real rotation, so no streak issue. Extension — `871e29a`, 41 loops; #216 CEO-blocked. **Cadence: 3 of 3 since MR-040 — MR-041 now due.**
+- **Candidate Selection: `top-score` — #257** (12; tied with #254 and #248, both analytics). Chosen in the tie for area diversity and because it completes a class closure loop 81 left open.
+- **First loop run under MR-040's `residual:` practice, and the practice did its job:** it turned "fix the sites in this row" into "count the pattern repo-wide, then make the count zero". **`text-brand-500`: 21 → 0.**
+- **Judged by background, not by find-and-replace.** Six of the 21 sat on a brand alpha tint — the paired defect #245 already solved, so they took the tint pair rather than the on-surface token, which would have been wrong on a tint. Four were text and links. Eleven were icons; at 2.42:1 they failed even the 3:1 floor for non-text, so "it's only an icon" was not an exemption.
+- **The hover states were failing too, and nobody had listed them.** `hover:text-brand-400` on those same lines is **1.84:1** in light — worse than the resting colour. Fixed on the lines this row touched; every hover pair now measures ≥ 6.84:1.
+- **Held at zero over source, because a scanner cannot hold it.** axe measures rendered nodes, and this class survived loop 81 precisely in closed dropdowns and app-only pages. The new guard reads the source tree and fails on any `text-brand-500` in any variant. Mutation-checked: reintroducing one use fails it.
+- **Recorded, not fixed, deliberately:** 9 more `hover:text-brand-400` and 4 bare `text-brand-400` uses on lines this row did not touch. Same light-theme failure, different class. Noted in the closure rather than silently widened into.
+- **Validation:** web-app **3344 → 3346** (+2 guard tests; an earlier draft of this line said "unchanged" — that run predated the guard); typecheck 0; public badge scans 2/2.
+- **Follow-ups:** 0 created, 1 closed (#257).
+
+---
+
 ## 2026-10-01 (loop 83) — The oldest row was the fix (Mode 1, `backend-engineer`)
 
 - **Controls:** Area — `web-app / api`. Agent — **`backend-engineer`, a real rotation by the MR-040 test**: it ran the suite, typecheck, two production builds and the prerender comparison itself, and I re-ran all of them independently. Extension — `871e29a`, 40 loops; #216 CEO-blocked. Cadence: 2 of 3 since MR-040.

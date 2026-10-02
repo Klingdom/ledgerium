@@ -79,7 +79,7 @@ export function ServicesCard() {
           {/* Guided Onboarding — no data gate, just availability */}
           <div className="rounded-ds-md border border-[var(--border-default)] px-ds-4 py-ds-4">
             <div className="flex items-start gap-ds-2 mb-ds-2">
-              <Sparkles className="h-4 w-4 text-brand-500 mt-0.5 flex-shrink-0" />
+              <Sparkles className="h-4 w-4 text-[var(--brand-text)] mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-ds-sm font-semibold text-[var(--content-primary)]">
                   {onboarding.name} — ${onboarding.price}
@@ -104,7 +104,7 @@ export function ServicesCard() {
           {/* Process Audit — hard-gated on real recording counts */}
           <div className="rounded-ds-md border border-[var(--border-default)] px-ds-4 py-ds-4">
             <div className="flex items-start gap-ds-2 mb-ds-2">
-              <Check className="h-4 w-4 text-brand-500 mt-0.5 flex-shrink-0" />
+              <Check className="h-4 w-4 text-[var(--brand-text)] mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-ds-sm font-semibold text-[var(--content-primary)]">
                   {audit.name} — ${audit.price}

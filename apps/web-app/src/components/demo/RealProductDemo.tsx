@@ -154,7 +154,7 @@ export default function RealProductDemo() {
               <button
                 type="button"
                 onClick={handleBack}
-                className="inline-flex items-center gap-1.5 text-[11px] font-medium text-brand-500 hover:text-[var(--brand-text)] mb-2 transition-colors"
+                className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--brand-text)] hover:text-[var(--brand-text)] mb-2 transition-colors"
               >
                 {/* Left arrow */}
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="shrink-0" aria-hidden="true">

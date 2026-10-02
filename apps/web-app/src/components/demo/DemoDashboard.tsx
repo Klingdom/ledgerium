@@ -167,7 +167,7 @@ function WorkflowDetail({ w, onBack }: { w: DemoWorkflow; onBack: () => void }) 
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-1.5 text-[11px] font-medium text-brand-500 hover:text-brand-400 transition-colors mb-3"
+          className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] transition-colors mb-3"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Workflows

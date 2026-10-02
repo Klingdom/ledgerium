@@ -1514,7 +1514,7 @@ function ProcessStructureSection({ interpretation }: { interpretation: Interpret
         {/* Decision Points */}
         <div>
           <h3 className="text-ds-sm font-semibold text-[var(--content-primary)] mb-3 flex items-center gap-1.5">
-            <ChevronRight className="h-4 w-4 text-brand-500" />
+            <ChevronRight className="h-4 w-4 text-[var(--brand-text)]" />
             Decision Points
             {decisions.length > 0 && (
               <span className="ml-1 rounded-full bg-[var(--surface-secondary)] px-2 py-0.5 text-[10px] font-medium text-[var(--content-secondary)]">

@@ -222,7 +222,7 @@ export default function UploadPage() {
         >
           {state === 'uploading' ? (
             <>
-              <Loader2 className="h-10 w-10 text-brand-500 animate-spin" />
+              <Loader2 className="h-10 w-10 text-[var(--brand-text)] animate-spin" />
               <p className="mt-ds-3 text-ds-base font-medium text-[var(--content-primary)]">Processing workflow...</p>
               <p className="mt-ds-1 text-ds-xs text-[var(--content-tertiary)]">Validating and running deterministic pipeline</p>
             </>
