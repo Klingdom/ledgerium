@@ -23,7 +23,7 @@ import '@xyflow/react/dist/style.css';
 import { GitBranch } from 'lucide-react';
 import type { ViewVariantPath } from './adapters/viewModel';
 import { buildVariantStoryMap, type StoryEdge } from '@/lib/variantStoryMap';
-import { CATEGORY_STYLES } from './constants';
+import { CATEGORY_STYLES, categoryTextVar } from './constants';
 
 // ─── Custom node ───────────────────────────────────────────────────────────────
 
@@ -48,7 +48,7 @@ function StoryNodeComponent({ data }: { data: any }) {
       >
         <span
           className="block text-[8px] font-bold uppercase tracking-wider"
-          style={{ color: style.color }}
+          style={{ color: categoryTextVar(data.category) }}
         >
           {style.label}
         </span>
@@ -171,6 +171,9 @@ function StoryMapInner({ variants, onSelectNode }: Props) {
       </div>
 
       <ReactFlow
+        // Explicit: the fixed light node fills and #ffffff-canvas strokes below assume
+        // a light canvas in both page themes (row #268).
+        colorMode="light"
         nodes={rfNodes}
         edges={rfEdges}
         nodeTypes={nodeTypes}

@@ -20,7 +20,7 @@ import {
 import type { NormalizedViewModel, ViewNode } from './adapters/viewModel';
 import { buildVariantData } from './adapters/variantAdapter';
 import type { ViewVariantPath } from './adapters/viewModel';
-import { CATEGORY_STYLES } from './constants';
+import { CATEGORY_STYLES, categoryTextVar } from './constants';
 import { WorkflowVariantStoryMap } from './WorkflowVariantStoryMap';
 import { VariantDnaStrip } from './VariantDnaStrip';
 import { WorkflowFlowCanvas } from './WorkflowCanvas';
@@ -52,6 +52,20 @@ interface Props {
 
 // ─── Path classification ─────────────────────────────────────────────────────
 
+/**
+ * Role palette as per-theme token PAIRS (row #268). roleColor is text, bar fill
+ * and dot on a theme surface; roleBg is the pill fill behind the text. These
+ * were hard-coded light-theme hex (#d97706 text = 3.19:1 on white; #fca5a5
+ * border = 1.9:1) on a page that is dark by default.
+ */
+const ROLE_STYLES = {
+  success: { fg: 'var(--status-success-on-tint)', tint: 'var(--status-success-tint)' },
+  warning: { fg: 'var(--status-warning-on-tint)', tint: 'var(--status-warning-tint)' },
+  danger:  { fg: 'var(--status-danger-on-tint)',  tint: 'var(--status-danger-tint)' },
+  indigo:  { fg: 'var(--map-indigo-fg)',          tint: 'var(--map-indigo-tint)' },
+  blue:    { fg: 'var(--map-blue-fg)',            tint: 'var(--map-blue-tint)' },
+} as const;
+
 type PathRole = 'standard' | 'fastest' | 'longest' | 'exception' | 'variant';
 
 interface ClassifiedPath extends ViewVariantPath {
@@ -80,9 +94,9 @@ function classifyPaths(paths: ViewVariantPath[], graph: NormalizedViewModel): Cl
       evidenceRunIds: [],
       role: 'standard',
       roleLabel: 'Observed',
-      roleColor: '#059669',
-      roleBg: '#ecfdf5',
-      roleBorder: '#6ee7b7',
+      roleColor: ROLE_STYLES.success.fg,
+      roleBg: ROLE_STYLES.success.tint,
+      roleBorder: ROLE_STYLES.success.fg,
       durationLabel: formatDuration(graph.totalDurationMs) || '—',
       deltaVsStandard: '—',
       stepCountDelta: 0,
@@ -126,28 +140,28 @@ function classifyPaths(paths: ViewVariantPath[], graph: NormalizedViewModel): Cl
 
     let role: PathRole = 'variant';
     let roleLabel = `Variant`;
-    let roleColor = '#6366f1';
-    let roleBg = '#eef2ff';
-    let roleBorder = '#a5b4fc';
+    let roleColor: string = ROLE_STYLES.indigo.fg;
+    let roleBg: string = ROLE_STYLES.indigo.tint;
+    let roleBorder: string = ROLE_STYLES.indigo.fg;
 
     if (p.isStandard || p.id === standard.id) {
       role = 'standard';
       roleLabel = 'Standard Path';
-      roleColor = '#059669';
-      roleBg = '#ecfdf5';
-      roleBorder = '#6ee7b7';
+      roleColor = ROLE_STYLES.success.fg;
+      roleBg = ROLE_STYLES.success.tint;
+      roleBorder = ROLE_STYLES.success.fg;
     } else if (p.id === fastestId && p.id !== standard.id) {
       role = 'fastest';
       roleLabel = 'Fastest';
-      roleColor = '#2563eb';
-      roleBg = '#eff6ff';
-      roleBorder = '#93c5fd';
+      roleColor = ROLE_STYLES.blue.fg;
+      roleBg = ROLE_STYLES.blue.tint;
+      roleBorder = ROLE_STYLES.blue.fg;
     } else if (p.id === longestId && p.id !== standard.id) {
       role = 'longest';
       roleLabel = 'Longest';
-      roleColor = '#d97706';
-      roleBg = '#fffbeb';
-      roleBorder = '#fcd34d';
+      roleColor = ROLE_STYLES.warning.fg;
+      roleBg = ROLE_STYLES.warning.tint;
+      roleBorder = ROLE_STYLES.warning.fg;
     }
 
     // Check for exception-heavy paths (high error step ratio)
@@ -155,9 +169,9 @@ function classifyPaths(paths: ViewVariantPath[], graph: NormalizedViewModel): Cl
     if (errorCategories.length >= 2 && role === 'variant') {
       role = 'exception';
       roleLabel = 'Exception Heavy';
-      roleColor = '#dc2626';
-      roleBg = '#fef2f2';
-      roleBorder = '#fca5a5';
+      roleColor = ROLE_STYLES.danger.fg;
+      roleBg = ROLE_STYLES.danger.tint;
+      roleBorder = ROLE_STYLES.danger.fg;
     }
 
     return {
@@ -369,7 +383,7 @@ export function WorkflowVariantsMap({ graph, intelligence, workflowId, status, o
         {/* Overview header */}
         <div className="px-4 py-3 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)]">
           <div className="flex items-center gap-2 mb-2">
-            <GitBranch className="h-4 w-4 text-violet-600" />
+            <GitBranch className="h-4 w-4 text-[var(--map-violet-fg)]" />
             <h3 className="text-ds-sm font-semibold text-[var(--content-primary)]">Process Variants</h3>
           </div>
           <div className="grid grid-cols-3 gap-2">
@@ -404,7 +418,7 @@ export function WorkflowVariantsMap({ graph, intelligence, workflowId, status, o
                   onClick={() => { setSelectedPathId(standardPath?.id ?? null); setComparePathId(p.id); }}
                   className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-[10px] text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)] transition-colors text-left"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#059669' }} />
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: ROLE_STYLES.success.fg }} />
                   <span className="text-[var(--content-tertiary)]">vs</span>
                   <span className="w-1.5 h-1.5 rounded-full" style={{ background: p.roleColor }} />
                   <span className="truncate">Standard vs {p.roleLabel}</span>
@@ -468,7 +482,7 @@ function PathCard({
         isSelected
           ? 'border-[var(--border-default)] bg-[var(--surface-elevated)] shadow-sm ring-1 ring-[var(--border-default)]'
           : isComparing
-            ? 'border-indigo-200 bg-indigo-50/30'
+            ? 'border-[var(--map-indigo-fg)] bg-[var(--surface-elevated)]'
             : 'border-[var(--border-subtle)] bg-[var(--surface-elevated)] hover:border-[var(--border-default)] hover:shadow-sm'
       }`}
     >
@@ -522,7 +536,7 @@ function PathCard({
             onClick={(e) => { e.stopPropagation(); onCompare(); }}
             className={`text-[9px] font-medium px-2 py-0.5 rounded transition-colors ${
               isComparing
-                ? 'text-indigo-700 bg-indigo-100'
+                ? 'text-[var(--map-indigo-fg)] bg-[var(--map-indigo-tint)]'
                 : 'text-[var(--content-tertiary)] hover:text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
             }`}
           >
@@ -579,11 +593,11 @@ function ComparisonCard({ primary, secondary }: { primary: ClassifiedPath; secon
   const freqDiff = Math.round((secondary.frequency - primary.frequency) * 100);
 
   return (
-    <div className="bg-[var(--surface-elevated)] rounded-xl border border-indigo-200 shadow-sm overflow-hidden">
-      <div className="px-4 py-3 bg-indigo-50/50 border-b border-indigo-100">
+    <div className="bg-[var(--surface-elevated)] rounded-xl border border-[var(--map-indigo-fg)] shadow-sm overflow-hidden">
+      <div className="px-4 py-3 bg-[var(--map-indigo-tint)] border-b border-[var(--border-subtle)]">
         <div className="flex items-center gap-2">
-          <Target className="h-3.5 w-3.5 text-indigo-600" />
-          <span className="text-[10px] font-semibold text-indigo-700">Path Comparison</span>
+          <Target className="h-3.5 w-3.5 text-[var(--map-indigo-fg)]" />
+          <span className="text-[10px] font-semibold text-[var(--map-indigo-fg)]">Path Comparison</span>
         </div>
       </div>
       <div className="px-4 py-3">
@@ -605,12 +619,12 @@ function ComparisonCard({ primary, secondary }: { primary: ClassifiedPath; secon
             <div className="w-px h-8 bg-[var(--surface-secondary)]" />
             <div className="space-y-0.5 text-center">
               {stepDiff !== 0 && (
-                <p className={`text-[9px] font-medium ${stepDiff > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                <p className={`text-[9px] font-medium ${stepDiff > 0 ? 'text-[var(--status-warning)]' : 'text-[var(--status-success)]'}`}>
                   {stepDiff > 0 ? '+' : ''}{stepDiff} step{Math.abs(stepDiff) !== 1 ? 's' : ''}
                 </p>
               )}
               {freqDiff !== 0 && (
-                <p className={`text-[9px] font-medium ${freqDiff < 0 ? 'text-amber-600' : 'text-[var(--content-secondary)]'}`}>
+                <p className={`text-[9px] font-medium ${freqDiff < 0 ? 'text-[var(--status-warning)]' : 'text-[var(--content-secondary)]'}`}>
                   {freqDiff > 0 ? '+' : ''}{freqDiff}% freq
                 </p>
               )}
@@ -673,14 +687,14 @@ function StepSequenceView({
               key={`${path.id}-step-${i}`}
               onClick={() => matchNode && onSelectNode(matchNode.id)}
               className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                isDivergence ? 'bg-amber-50/30' : 'hover:bg-[var(--surface-secondary)]'
+                isDivergence ? 'bg-[var(--map-row-warn)]' : 'hover:bg-[var(--surface-secondary)]'
               }`}
             >
               {/* Ordinal + connector */}
               <div className="flex flex-col items-center w-6 flex-shrink-0">
                 <span
                   className="text-[10px] font-bold w-5 h-5 rounded flex items-center justify-center"
-                  style={{ color: style.color, background: `${style.color}12` }}
+                  style={{ color: categoryTextVar(cat), background: `${style.color}12` }}
                 >
                   {i + 1}
                 </span>
@@ -694,7 +708,7 @@ function StepSequenceView({
                 <div className="flex items-center gap-1.5">
                   <span
                     className="text-[8px] font-bold uppercase tracking-wider px-1 py-0.5 rounded"
-                    style={{ color: style.color, background: `${style.color}10` }}
+                    style={{ color: categoryTextVar(cat), background: `${style.color}10` }}
                   >
                     {style.label}
                   </span>
@@ -709,7 +723,7 @@ function StepSequenceView({
 
               {/* Divergence indicator */}
               {isDivergence && (
-                <span className="text-[8px] font-bold text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded flex-shrink-0">
+                <span className="text-[8px] font-bold text-[var(--status-warning-on-tint)] bg-[var(--status-warning-tint)] px-1.5 py-0.5 rounded flex-shrink-0">
                   DIVERGES
                 </span>
               )}
@@ -739,14 +753,15 @@ function VariantInsightsCards({
   graph: NormalizedViewModel;
   standardPath: ClassifiedPath | null;
 }) {
-  const insights: Array<{ icon: React.ElementType; label: string; detail: string; color: string }> = [];
+  const insights: Array<{ icon: React.ElementType; label: string; detail: string; color: string; tint: string }> = [];
 
   if (path.isStandard && path.frequency < 0.5) {
     insights.push({
       icon: AlertTriangle,
       label: 'Low Adherence',
       detail: `Only ${Math.round(path.frequency * 100)}% of runs follow the standard path. Consider whether the standard is still accurate.`,
-      color: '#d97706',
+      color: 'var(--status-warning-on-tint)',
+      tint: 'var(--status-warning-tint)',
     });
   }
 
@@ -755,7 +770,8 @@ function VariantInsightsCards({
       icon: TrendingUp,
       label: 'Faster Alternative',
       detail: `This path completes ${path.deltaVsStandard} compared to the standard. Consider adopting it as the new baseline.`,
-      color: '#2563eb',
+      color: 'var(--map-blue-fg)',
+      tint: 'var(--map-blue-tint)',
     });
   }
 
@@ -764,7 +780,8 @@ function VariantInsightsCards({
       icon: AlertTriangle,
       label: 'Exception-Heavy Path',
       detail: `This variant contains ${path.stepCategories.filter(c => c === 'error_handling').length} error handling steps. Investigate root causes.`,
-      color: '#dc2626',
+      color: 'var(--status-danger-on-tint)',
+      tint: 'var(--status-danger-tint)',
     });
   }
 
@@ -773,7 +790,8 @@ function VariantInsightsCards({
       icon: Layers,
       label: 'Extra Steps Detected',
       detail: `This variant has ${path.stepCountDelta} more steps than standard. These may be workarounds or unnecessary overhead.`,
-      color: '#d97706',
+      color: 'var(--status-warning-on-tint)',
+      tint: 'var(--status-warning-tint)',
     });
   }
 
@@ -782,7 +800,8 @@ function VariantInsightsCards({
       icon: Zap,
       label: 'Friction in Standard Path',
       detail: `${graph.totalFriction} friction point${graph.totalFriction !== 1 ? 's' : ''} detected in the standard path.`,
-      color: '#ea580c',
+      color: 'var(--map-orange-fg)',
+      tint: 'var(--map-orange-tint)',
     });
   }
 
@@ -796,7 +815,7 @@ function VariantInsightsCards({
         return (
           <div key={i} className="bg-[var(--surface-elevated)] rounded-xl border border-[var(--border-default)] px-4 py-3 flex items-start gap-3">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: `${insight.color}10` }}>
+              style={{ background: insight.tint }}>
               <Icon className="h-3.5 w-3.5" style={{ color: insight.color }} />
             </div>
             <div>
@@ -824,14 +843,14 @@ function VariantsStateView({
       <div className="max-w-md text-center">
         {kind === 'loading' && (
           <>
-            <div className="mx-auto mb-3 h-6 w-6 animate-spin rounded-full border-2 border-[var(--border-subtle)] border-t-violet-600" />
+            <div className="mx-auto mb-3 h-6 w-6 animate-spin rounded-full border-2 border-[var(--border-subtle)] border-t-[var(--map-violet-fg)]" />
             <p className="text-ds-sm font-medium text-[var(--content-primary)]">Analyzing runs…</p>
             <p className="mt-1 text-[11px] text-[var(--content-tertiary)]">Gathering similar recordings and comparing how they differ.</p>
           </>
         )}
         {kind === 'forbidden' && (
           <>
-            <div className="mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-violet-50"><Zap className="h-4 w-4 text-violet-600" /></div>
+            <div className="mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-[var(--map-violet-tint)]"><Zap className="h-4 w-4 text-[var(--map-violet-fg)]" /></div>
             <p className="text-ds-sm font-medium text-[var(--content-primary)]">Variant analysis is a Team feature</p>
             <p className="mt-1 text-[11px] text-[var(--content-tertiary)]">Upgrade to compare how your process varies across runs.</p>
             <a href="/pricing" className="mt-3 inline-block rounded-lg bg-violet-600 px-3 py-1.5 text-[11px] font-medium text-white hover:bg-violet-700">See plans →</a>
@@ -839,7 +858,7 @@ function VariantsStateView({
         )}
         {kind === 'unprocessed' && (
           <>
-            <div className="mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-blue-50"><Info className="h-4 w-4 text-blue-500" /></div>
+            <div className="mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-[var(--map-blue-tint)]"><Info className="h-4 w-4 text-[var(--map-blue-fg)]" /></div>
             <p className="text-ds-sm font-medium text-[var(--content-primary)]">This recording isn&apos;t analyzed yet</p>
             <p className="mt-1 text-[11px] text-[var(--content-tertiary)]">It needs to finish processing before variant analysis can run.</p>
             {onRetry && <button onClick={onRetry} className="mt-3 rounded-lg border border-[var(--border-default)] px-3 py-1.5 text-[11px] font-medium text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]">Retry</button>}
@@ -847,7 +866,7 @@ function VariantsStateView({
         )}
         {kind === 'error' && (
           <>
-            <div className="mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-red-50"><AlertTriangle className="h-4 w-4 text-red-500" /></div>
+            <div className="mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-[var(--status-danger-tint)]"><AlertTriangle className="h-4 w-4 text-[var(--status-danger-on-tint)]" /></div>
             <p className="text-ds-sm font-medium text-[var(--content-primary)]">Couldn&apos;t load variant analysis</p>
             <p className="mt-1 text-[11px] text-[var(--content-tertiary)]">Something went wrong gathering the runs. Try again.</p>
             {onRetry && <button onClick={onRetry} className="mt-3 rounded-lg border border-[var(--border-default)] px-3 py-1.5 text-[11px] font-medium text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]">Retry</button>}
@@ -879,21 +898,21 @@ function SinglePathView({
       <div className="max-w-2xl mx-auto space-y-4">
         {/* Banner — consistent multi-run (zero variation) vs a true single recording */}
         {isConsistentMultiRun ? (
-          <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 flex items-start gap-3">
-            <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+          <div className="bg-[var(--status-success-tint)] border border-[var(--border-default)] rounded-xl px-4 py-3 flex items-start gap-3">
+            <CheckCircle2 className="h-4 w-4 text-[var(--status-success-on-tint)] mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-ds-xs font-medium text-emerald-800">Consistent process — {totalRuns} runs, all the same path</p>
-              <p className="text-[10px] text-emerald-700 mt-0.5">
+              <p className="text-ds-xs font-medium text-[var(--status-success-on-tint)]">Consistent process — {totalRuns} runs, all the same path</p>
+              <p className="text-[10px] text-[var(--status-success-on-tint)] mt-0.5">
                 All {totalRuns} recordings followed the identical sequence, so there&apos;s no variation to compare yet. The standard path below is what every run did.
               </p>
             </div>
           </div>
         ) : (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-start gap-3">
-            <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+          <div className="bg-[var(--map-blue-tint)] border border-[var(--border-default)] rounded-xl px-4 py-3 flex items-start gap-3">
+            <Info className="h-4 w-4 text-[var(--map-blue-fg)] mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-ds-xs font-medium text-blue-800">Single recording — no variants to compare yet</p>
-              <p className="text-[10px] text-blue-600 mt-0.5">
+              <p className="text-ds-xs font-medium text-[var(--map-blue-fg)]">Single recording — no variants to compare yet</p>
+              <p className="text-[10px] text-[var(--map-blue-fg)] mt-0.5">
                 Record this workflow multiple times to discover how the process varies across runs. Variant analysis requires at least 2 recordings of the same process.
               </p>
             </div>
@@ -919,14 +938,14 @@ function SinglePathView({
                 >
                   <span
                     className="text-[10px] font-bold w-5 h-5 rounded flex items-center justify-center flex-shrink-0"
-                    style={{ color: style.color, background: `${style.color}12` }}
+                    style={{ color: categoryTextVar(node.category), background: `${style.color}12` }}
                   >
                     {i + 1}
                   </span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
                       <span className="text-[8px] font-bold uppercase tracking-wider px-1 py-0.5 rounded"
-                        style={{ color: style.color, background: `${style.color}10` }}>
+                        style={{ color: categoryTextVar(node.category), background: `${style.color}10` }}>
                         {style.label}
                       </span>
                       <span className="text-[10px] text-[var(--content-primary)] truncate">{node.shortLabel}</span>
@@ -986,9 +1005,10 @@ function VariantFlowCanvasWrapper({
       <div
         style={{
           padding: '6px 16px',
-          background: 'rgba(255,255,255,0.97)',
-          backdropFilter: 'blur(8px)',
-          borderBottom: '1px solid #e5e7eb',
+          // Theme surface: the legend text is --content-* / status tokens, so the
+          // strip must follow the theme (it was a hard-coded white island).
+          background: 'var(--surface-secondary)',
+          borderBottom: '1px solid var(--border-subtle)',
           display: 'flex',
           alignItems: 'center',
           gap: 16,
@@ -997,37 +1017,37 @@ function VariantFlowCanvasWrapper({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <GitBranch style={{ width: 13, height: 13, color: '#059669' }} />
-          <span style={{ fontSize: 11, color: '#374151' }}>
-            <strong style={{ color: '#111827' }}>{decisionCount}</strong> decision point{decisionCount !== 1 ? 's' : ''} ·{' '}
-            <strong style={{ color: '#111827' }}>{branchCount}</strong> branch step{branchCount !== 1 ? 's' : ''} ·{' '}
-            <strong style={{ color: '#111827' }}>{model.variants.length}</strong> path{model.variants.length !== 1 ? 's' : ''}
+          <GitBranch style={{ width: 13, height: 13, color: 'var(--status-success)' }} />
+          <span style={{ fontSize: 11, color: 'var(--content-secondary)' }}>
+            <strong style={{ color: 'var(--content-primary)' }}>{decisionCount}</strong> decision point{decisionCount !== 1 ? 's' : ''} ·{' '}
+            <strong style={{ color: 'var(--content-primary)' }}>{branchCount}</strong> branch step{branchCount !== 1 ? 's' : ''} ·{' '}
+            <strong style={{ color: 'var(--content-primary)' }}>{model.variants.length}</strong> path{model.variants.length !== 1 ? 's' : ''}
           </span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           {/* Standard path legend */}
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, color: '#4b5563' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, color: 'var(--content-secondary)' }}>
             <svg width="22" height="8">
-              <line x1="0" y1="4" x2="22" y2="4" stroke="#9ca3af" strokeWidth="2.5" />
+              <line x1="0" y1="4" x2="22" y2="4" style={{ stroke: 'var(--content-secondary)' }} strokeWidth="2.5" />
             </svg>
             Standard path
           </span>
           {/* Branch path legend */}
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, color: '#4b5563' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, color: 'var(--content-secondary)' }}>
             <svg width="22" height="8">
-              <line x1="0" y1="4" x2="22" y2="4" stroke="#d97706" strokeWidth="2" strokeDasharray="4 3" />
+              <line x1="0" y1="4" x2="22" y2="4" style={{ stroke: 'var(--status-warning)' }} strokeWidth="2" strokeDasharray="4 3" />
             </svg>
             Variant path
           </span>
           {/* Decision diamond legend */}
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, color: '#4b5563' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, color: 'var(--content-secondary)' }}>
             <span
               style={{
                 display: 'inline-block',
                 width: 10,
                 height: 10,
-                background: '#d97706',
+                background: 'var(--status-warning)',
                 borderRadius: 2,
                 transform: 'rotate(45deg)',
                 flexShrink: 0,
@@ -1036,7 +1056,7 @@ function VariantFlowCanvasWrapper({
             Branch point
           </span>
           {/* Honesty note */}
-          <span style={{ fontSize: 9, color: '#9ca3af', fontStyle: 'italic' }}>
+          <span style={{ fontSize: 9, color: 'var(--content-tertiary)', fontStyle: 'italic' }}>
             Branch points show observed splits only — no inferred conditions
           </span>
         </div>

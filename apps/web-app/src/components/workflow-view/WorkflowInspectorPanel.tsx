@@ -207,8 +207,8 @@ function NodeInspector({ data }: { data: NodeInspectorData }) {
       {sopStep && sopStep.warnings.length > 0 && (
         <InspectorSection title="Privacy Notes">
           {sopStep.warnings.map((w, i) => (
-            <div key={i} className="flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-ds-xs text-amber-800 mb-1">
-              <AlertTriangle className="h-3 w-3 mt-0.5 flex-shrink-0 text-amber-500" />
+            <div key={i} className="flex items-start gap-2 px-3 py-2 rounded-lg bg-[var(--status-warning-tint)] border border-[var(--border-default)] text-ds-xs text-[var(--status-warning-on-tint)] mb-1">
+              <AlertTriangle className="h-3 w-3 mt-0.5 flex-shrink-0 text-[var(--status-warning-on-tint)]" />
               <span>{w}</span>
             </div>
           ))}

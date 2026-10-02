@@ -66,10 +66,10 @@ Reuse the `transition: 'stroke 0.15s ease, stroke-width 0.15s ease'` CSS from `W
 
 Use a single hue ramp anchored to `#6366f1` (Ledgerium violet, matching the active toggle color).
 
-Opacity scale: `opacity = 0.20 + (transitionCount / maxTransitionCount) * 0.80`
+Opacity scale: `opacity = 0.85 + (transitionCount / maxTransitionCount) * 0.15` (floor raised from 0.20 so the faintest edge clears WCAG 1.4.11 3:1; width in §2.1 is the primary frequency channel; see row #268 / `docs/a11y/WORKFLOW_MAP_CONTRAST_268.md`)
 
 This gives:
-- Rarest visible edges: `opacity 0.20`, `stroke #6366f1` — very faint violet thread
+- Rarest visible edges: `opacity 0.85`, `stroke #6366f1` — lightest violet thread
 - Dominant edge: `opacity 1.00`, `stroke #6366f1` — full violet
 
 Do not change hue by frequency. Changing hue implies a qualitative difference (good/bad); opacity change communicates quantity. This matches how Celonis, Disco, and PM4Py render DFGs.

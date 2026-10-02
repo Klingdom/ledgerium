@@ -4,6 +4,36 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 126) — Maps you can read in the dark (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - **Area:** `web-app / a11y`.
+  - **Agent:** `frontend-engineer`, two passes. The second pass reconciled the spec after my review.
+  - **Extension:** `871e29a`, 83 loops untouched.
+  - **Cadence:** 2 of 3 since MR-054.
+- **Candidate Selection: `burn-down` — #268** (9). This is the cool-off's first post-consumption burn-down (1 of 3 toward re-arm). MR-054 queued it as the second user-visible pick.
+- **Measured before fixing:** 233 colour sites across the three workflow-map views (DFG frequency, systems, variants) and the five panels the row names. The full ledger is in `docs/a11y/WORKFLOW_MAP_CONTRAST_268.md`.
+  - **99 failed** in one or both themes, and all are fixed.
+  - **102 passed.**
+  - **32 are exempt, each with a stated reason:**
+    - shadows and skeletons;
+    - decorative hairlines;
+    - 4px dots that repeat adjacent chip text;
+    - selection-dim overlays.
+- **The biggest class:** hard-coded white strips, cards and toggles sat under theme text, which gave 1.2–2.6:1 in dark mode. They now use theme surfaces.
+  - **Named failures fixed:** `#9ca3af` text and strokes, the `#fca5a5` border, and an amber icon at ~2:1.
+  - **New tokens:** 11 per theme in `globals.css` (`--map-*`). Fixed canvas colours live in `mapColors.ts`.
+- **A design trade-off, caught in review and recorded:** the DFG edge opacity floor went from 0.20 to 0.85. The faintest edge was 1.29:1 and is now 3.47:1. Frequency is still encoded by stroke width (1.5 → 10 px), so width is now the primary channel. The file header still documented the old formula, so it, `UX_SPEC.md` §2.2 and the contrast doc were updated to match the code.
+- **Guard:** `theme-contrast.test.ts` gets 63 tests covering both themes' token pairs, the canvas pairs, and a source scan of the 8 files that allows only counted, reasoned literals. Five mutations each fail it.
+- **Not covered — filed as #309:**
+  - `WorkflowCanvas` and `WorkflowSwimlaneCanvas` still use React Flow's default light `colorMode`, so their dark `--wf-*` values never apply.
+  - `HandoffEdge`, the minimap and `SwimlaneLaneHeader` need browser measurement.
+  - No browser or axe pass was run on the dark theme.
+- **Validation (exit code + ANSI-stripped summary):** web-app **4039 → 4102** on 3 of 3 runs; root **5825 → 5888**; typecheck 0.
+- **Follow-ups:** 1 created (#309), 1 closed (#268).
+
+---
+
 ## 2026-10-02 (loop 125) — A promise with a date that has passed (Mode 1, `frontend-engineer` + `growth-strategist`)
 
 - **Controls:**

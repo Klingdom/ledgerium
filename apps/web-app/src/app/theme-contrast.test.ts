@@ -32,6 +32,11 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, sep } from 'node:path';
 import { CATEGORY_STYLES } from '../components/workflow-view/constants';
+import {
+  CANVAS_BG, EDGE_COLOR, HAPPY_COLOR, EDGE_MIN_OPACITY,
+  PERF_FAST_COLOR, PERF_MEDIUM_COLOR, PERF_SLOW_COLOR, PERF_NEUTRAL_COLOR,
+  TERMINAL_START, TERMINAL_END, TERMINAL_TEXT, BADGE, readableTextOn,
+} from '../components/workflow-view/mapColors';
 
 const CSS = readFileSync(join(__dirname, 'globals.css'), 'utf8');
 
@@ -851,5 +856,314 @@ describe('workflow-map edge strokes meet 3:1 on the white canvas — row #255', 
       expect(s, f).toContain('fill="#dc2626"');
       expect(s, f).toContain('fill="#d97706"');
     }
+  });
+});
+
+// ─── Row #268: the three workflow-map views ─────────────────────────────────
+
+/**
+ * `DfgFrequencyMap`, `WorkflowSystemsMap` and `WorkflowVariantsMap` were never
+ * measured (left open by loop 91). The failures were of three kinds, and the
+ * guards below are shaped to catch each:
+ *
+ * 1. **Hard-coded light colour on a theme-dependent background** — `#9ca3af`
+ *    text (2.54:1), `#fca5a5` border, and `--content-*` text on a hard-coded
+ *    white strip or card (1.2:1–2.6:1 in the dark default theme). Fixed by
+ *    tokens; guarded by the SOURCE SCAN below, which allows only enumerated,
+ *    reasoned, counted literals.
+ * 2. **Colour on the React Flow canvas.** The canvas is white in both themes
+ *    (`colorMode="light"`, now explicit), so those marks are fixed pairs
+ *    measured against #ffffff in `mapColors.ts`.
+ * 3. **Alpha.** Opacity encodings that drop a mark under 3:1.
+ *
+ * Floors: 4.5:1 text (SC 1.4.3), 3:1 non-text (SC 1.4.11). The map-hue tokens
+ * must clear 4.5:1 on every surface so one token serves a pill, a bare icon
+ * and a bar.
+ */
+describe('workflow-map contrast — row #268', () => {
+  const themeName = (b: 'root' | 'light') => (b === 'root' ? 'dark' : 'light');
+  const SURF = ['surface-primary', 'surface-secondary', 'surface-elevated'] as const;
+  const hex2 = (n: number) => Math.round(n).toString(16).padStart(2, '0');
+  /** `fg` drawn at opacity `a` over opaque `bg`. */
+  function over(fg: string, bg: string, a: number): string {
+    const p = (h: string, i: number) => parseInt(h.slice(1 + i * 2, 3 + i * 2), 16);
+    return '#' + [0, 1, 2].map((i) => hex2(p(fg, i) * a + p(bg, i) * (1 - a))).join('');
+  }
+
+  for (const block of ['root', 'light'] as const) {
+    const t = themeName(block);
+
+    describe(`${t} theme`, () => {
+      for (const hue of ['indigo', 'violet', 'blue', 'cyan', 'orange']) {
+        it(`--map-${hue}-fg clears 4.5:1 on its tint and on every surface`, () => {
+          const fg = token(block, `map-${hue}-fg`);
+          const tint = token(block, `map-${hue}-tint`);
+          expect(contrastRatio(fg, tint), `--map-${hue}-fg on --map-${hue}-tint`).toBeGreaterThanOrEqual(4.5);
+          for (const s of SURF) {
+            expect(contrastRatio(fg, token(block, s)), `--map-${hue}-fg on --${s}`).toBeGreaterThanOrEqual(4.5);
+          }
+        });
+      }
+
+      for (const k of ['danger', 'warning', 'success']) {
+        it(`--status-${k}-on-tint (used as bare text, icon, bar and dot) clears 4.5:1 on every surface`, () => {
+          const fg = token(block, `status-${k}-on-tint`);
+          for (const s of SURF) {
+            expect(contrastRatio(fg, token(block, s)), `--status-${k}-on-tint on --${s}`).toBeGreaterThanOrEqual(4.5);
+          }
+        });
+      }
+
+      for (const name of ['content-secondary', 'content-tertiary']) {
+        it(`--${name} text clears 4.5:1 on every surface`, () => {
+          for (const s of SURF) {
+            expect(contrastRatio(token(block, name), token(block, s)), `--${name} on --${s}`).toBeGreaterThanOrEqual(4.5);
+          }
+        });
+      }
+
+      it('divergence row wash keeps primary / secondary / tertiary text at 4.5:1', () => {
+        const bg = token(block, 'map-row-warn');
+        for (const name of ['content-primary', 'content-secondary', 'content-tertiary']) {
+          expect(contrastRatio(token(block, name), bg), `--${name} on --map-row-warn`).toBeGreaterThanOrEqual(4.5);
+        }
+      });
+
+      for (const cat of Object.keys(CATEGORY_STYLES)) {
+        it(`category ordinal/label text --wf-cat-${cat} clears 4.5:1 on its accent tint (6-7%) over card and hover surfaces`, () => {
+          const fg = token(block, `wf-cat-${cat}`);
+          const accent = CATEGORY_STYLES[cat as keyof typeof CATEGORY_STYLES].color;
+          // `${color}12` and `${color}10` are the two alpha tints the maps use.
+          for (const alpha of [0x12 / 255, 0x10 / 255]) {
+            for (const s of ['surface-elevated', 'surface-secondary'] as const) {
+              const bg = over(accent, token(block, s), alpha);
+              expect(contrastRatio(fg, bg), `${cat} text on ${accent}@${alpha.toFixed(2)} over --${s}`).toBeGreaterThanOrEqual(4.5);
+            }
+          }
+        });
+      }
+
+      it('non-text marks (selected-card border, share bars, legend swatches, accent) clear 3:1 on every surface', () => {
+        const marks = [
+          ['--map-cyan-fg', token(block, 'map-cyan-fg')],
+          ['--content-secondary', token(block, 'content-secondary')],
+          ['--status-warning', token(block, 'status-warning')],
+          ['--map-violet-fg', token(block, 'map-violet-fg')],
+          ['EDGE_COLOR legend swatch', EDGE_COLOR],
+        ] as const;
+        for (const [label, fg] of marks) {
+          for (const s of SURF) {
+            expect(contrastRatio(fg, token(block, s)), `${label} on --${s}`).toBeGreaterThanOrEqual(3);
+          }
+        }
+      });
+    });
+  }
+
+  describe('React Flow canvas (white in BOTH themes — colorMode="light" is explicit)', () => {
+    const dfg = readFileSync(join(__dirname, '..', 'components', 'workflow-view', 'DfgFrequencyMap.tsx'), 'utf8');
+
+    it('DfgCanvas sets colorMode="light" deliberately, not by library default', () => {
+      expect(dfg).toMatch(/<ReactFlow[\s\S]{0,400}colorMode="light"/);
+    });
+
+    it('edge colour is >= 3:1 on the canvas at full AND at the minimum opacity', () => {
+      expect(contrastRatio(EDGE_COLOR, CANVAS_BG)).toBeGreaterThanOrEqual(3);
+      expect(contrastRatio(over(EDGE_COLOR, CANVAS_BG, EDGE_MIN_OPACITY), CANVAS_BG)).toBeGreaterThanOrEqual(3);
+      expect(contrastRatio(HAPPY_COLOR, CANVAS_BG)).toBeGreaterThanOrEqual(3);
+    });
+
+    it('the source opacity floor is the exported constant (a stray 0.2 would reopen the 1.2:1 edge)', () => {
+      expect(dfg).toMatch(/EDGE_MIN_OPACITY \+ weight \* \(1 - EDGE_MIN_OPACITY\)/);
+    });
+
+    it('white text on the active toggle (HAPPY_COLOR) is >= 4.5:1; the old #6366f1 was not', () => {
+      expect(contrastRatio('#ffffff', HAPPY_COLOR)).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio('#ffffff', EDGE_COLOR)).toBeLessThan(4.5);
+    });
+
+    it('performance scale: every endpoint and every interpolated stop is >= 3:1, and its text >= 4.5:1', () => {
+      const lerp = (a: string, b: string, k: number) => over(b, a, k);
+      const stops = [PERF_FAST_COLOR, PERF_MEDIUM_COLOR, PERF_SLOW_COLOR, PERF_NEUTRAL_COLOR];
+      for (let i = 0; i <= 50; i++) {
+        stops.push(lerp(PERF_FAST_COLOR, PERF_MEDIUM_COLOR, i / 50), lerp(PERF_MEDIUM_COLOR, PERF_SLOW_COLOR, i / 50));
+      }
+      for (const c of stops) {
+        expect(contrastRatio(c, CANVAS_BG), `${c} fill on canvas`).toBeGreaterThanOrEqual(3);
+        expect(contrastRatio(readableTextOn(c), c), `text on ${c}`).toBeGreaterThanOrEqual(4.5);
+      }
+    });
+
+    it('terminals: glyph on fill >= 4.5:1; fill and border vs canvas >= 3:1', () => {
+      for (const t of [TERMINAL_START, TERMINAL_END]) {
+        expect(contrastRatio(TERMINAL_TEXT, t.bg)).toBeGreaterThanOrEqual(4.5);
+        expect(contrastRatio(t.bg, CANVAS_BG)).toBeGreaterThanOrEqual(3);
+        expect(contrastRatio(t.border, CANVAS_BG)).toBeGreaterThanOrEqual(3);
+      }
+    });
+
+    it('visit-count badge text >= 4.5:1 on its fill', () => {
+      expect(contrastRatio(BADGE.text, BADGE.bg)).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it('frequency node at its minimum opacity (0.7): text >= 4.5:1, border >= 3:1 (tokens resolve LIGHT here)', () => {
+      const a = 0.7;
+      const bg = over(token('light', 'surface-primary'), CANVAS_BG, a);
+      expect(contrastRatio(over(token('light', 'content-primary'), CANVAS_BG, a), bg)).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(over(token('light', 'content-tertiary'), CANVAS_BG, a), CANVAS_BG)).toBeGreaterThanOrEqual(3);
+    });
+  });
+
+  // ── Source scan ───────────────────────────────────────────────────────────
+  /**
+   * Every colour LITERAL in the three files is either gone or enumerated here
+   * with a count and a reason. A new `#9ca3af`, a new `text-amber-600`, a new
+   * `rgba(...)` fails this test; so does an allowlisted literal that goes
+   * missing (the count must stay exact, so an exemption cannot quietly grow).
+   * `var(--token)` colours are not scanned — the token tests above measure
+   * them. Comments are stripped first (the explanation of a fix quotes the old
+   * colour).
+   */
+  describe('source scan — no unmeasured colour literal in the three map views', () => {
+    const DIR = join(__dirname, '..', 'components', 'workflow-view');
+    // The three views plus the panels row #268 names (the header, insights strip,
+    // inspector, empty/error state and the variants story map embedded in the
+    // variants view).
+    const FILES = [
+      'DfgFrequencyMap.tsx', 'WorkflowSystemsMap.tsx', 'WorkflowVariantsMap.tsx',
+      'WorkflowHeader.tsx', 'WorkflowInsightsStrip.tsx', 'WorkflowInspectorPanel.tsx',
+      'WorkflowEmptyState.tsx', 'WorkflowVariantStoryMap.tsx',
+    ];
+
+    // Literal -> count + why it is acceptable. 'pair' entries are re-measured below.
+    const ALLOWED: Record<string, Record<string, { count: number; why: string }>> = {
+      'DfgFrequencyMap.tsx': {
+        '#ffffff': { count: 1, why: 'PAIR: active toggle text on HAPPY_COLOR (6.29:1, asserted above)' },
+        'rgba(79,70,229,0.35)': { count: 1, why: 'decorative selection halo; selection is carried by the 2px HAPPY_COLOR border (elementsSelectable is false, so also unreachable)' },
+        'rgba(0,0,0,0.10)': { count: 1, why: 'decorative drop shadow; carries no information' },
+        'rgba(99,102,241,0.3)': { count: 1, why: 'decorative selection halo; selection is the 2px border' },
+        'rgba(0,0,0,0.06)': { count: 1, why: 'decorative drop shadow' },
+      },
+      'WorkflowSystemsMap.tsx': {
+        'rgba(8,145,178,0.12)': { count: 1, why: 'decorative selection halo; selection is the cyan border (>= 3:1, asserted above)' },
+        'rgba(0,0,0,0.06)': { count: 1, why: 'decorative drop shadow' },
+        'rgba(0,0,0,0.04)': { count: 1, why: 'decorative drop shadow' },
+      },
+      // Fixed light tint PAIRS (asserted in 'named panels' below): every one passes
+      // in both themes because both sides are fixed. Borders are decorative: the
+      // chip is identified by its text and fill.
+      'WorkflowHeader.tsx': {
+        'text-amber-700': { count: 2, why: 'PAIR on bg-amber-50' }, 'bg-amber-50': { count: 2, why: 'PAIR' }, 'border-amber-200': { count: 2, why: 'decorative chip outline' },
+        'text-red-700': { count: 1, why: 'PAIR on bg-red-50' }, 'bg-red-50': { count: 1, why: 'PAIR' }, 'border-red-200': { count: 1, why: 'decorative chip outline' },
+        'text-emerald-700': { count: 1, why: 'PAIR on bg-emerald-50' }, 'bg-emerald-50': { count: 1, why: 'PAIR' }, 'border-emerald-200': { count: 1, why: 'decorative chip outline' },
+      },
+      'WorkflowInsightsStrip.tsx': {
+        'bg-red-50': { count: 1, why: 'PAIR with text-red-700' }, 'text-red-700': { count: 1, why: 'PAIR' }, 'border-red-200': { count: 1, why: 'decorative chip outline' }, 'bg-red-500': { count: 1, why: 'decorative 4px status dot; severity is carried by the chip text and icon' },
+        'bg-amber-50': { count: 1, why: 'PAIR with text-amber-700' }, 'text-amber-700': { count: 1, why: 'PAIR' }, 'border-amber-200': { count: 1, why: 'decorative chip outline' }, 'bg-amber-500': { count: 1, why: 'decorative 4px status dot' },
+        'bg-blue-50': { count: 1, why: 'PAIR with text-blue-700' }, 'text-blue-700': { count: 1, why: 'PAIR' }, 'border-blue-200': { count: 1, why: 'decorative chip outline' }, 'bg-blue-500': { count: 1, why: 'decorative 4px status dot' },
+      },
+      'WorkflowInspectorPanel.tsx': {
+        'text-red-700': { count: 1, why: 'PAIR on bg-red-50 (edge-type chip)' }, 'bg-red-50': { count: 1, why: 'PAIR' },
+      },
+      'WorkflowEmptyState.tsx': {
+        'bg-emerald-50/60': { count: 1, why: 'loading-skeleton placeholder shape; no information' }, 'border-emerald-100': { count: 1, why: 'loading-skeleton placeholder outline' },
+      },
+      'WorkflowVariantStoryMap.tsx': {
+        '#059669': { count: 2, why: 'backbone accent (decision border) + spine edge stroke, both on the light canvas (asserted below)' },
+        '#d97706': { count: 2, why: 'branch accent + branch edge stroke on the light canvas (asserted below)' },
+        '#ecfdf5': { count: 1, why: 'PAIR: backbone node fill under --wf-cat-* text' },
+        '#fffbeb': { count: 2, why: 'PAIR: branch node fill + edge-label fill' },
+        '#64748b': { count: 1, why: 'shortcut edge stroke on the light canvas (4.76:1)' },
+        '#92400e': { count: 1, why: 'PAIR: edge-label text on #fffbeb' },
+        'text-amber-700': { count: 1, why: 'PAIR: "diverges" on #fffbeb' },
+        'text-emerald-600': { count: 1, why: 'header icon; non-text, measured against every surface below' },
+        'accent-emerald-600': { count: 1, why: 'range-input control colour; non-text, measured against every surface below' },
+      },
+      'WorkflowVariantsMap.tsx': {
+        'bg-violet-600': { count: 5, why: 'PAIR: fixed fill under text-white (5.70:1, asserted below); 4 view-toggle buttons + 1 CTA' },
+        'text-white': { count: 5, why: 'PAIR: white on bg-violet-600' },
+        'bg-violet-700': { count: 1, why: 'PAIR: CTA hover fill under text-white (7.10:1)' },
+      },
+    };
+
+    const COLOUR_LITERAL = new RegExp(
+      [
+        String.raw`#[0-9a-fA-F]{3,8}\b`,
+        String.raw`rgba?\([^)]*\)`,
+        String.raw`\b(?:text|bg|border(?:-[trblxyse])?|ring|stroke|fill|from|via|to|divide|accent|outline|decoration|placeholder)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d{2,3}(?:/\d+)?(?![\w-])`,
+        String.raw`\b(?:text|bg|border(?:-[trblxyse])?|fill|stroke)-(?:white|black)(?![\w-])`,
+      ].join('|'),
+      'g',
+    );
+
+    const strip = (src: string) =>
+      src.replace(/\/\*[\s\S]*?\*\//g, '').split(/\r?\n/).map((l) => l.replace(/(^|\s)\/\/.*$/, '$1')).join('\n');
+
+    for (const file of FILES) {
+      it(`${file}: every colour literal is allowlisted, reasoned and counted`, () => {
+        const text = strip(readFileSync(join(DIR, file), 'utf8'));
+        const found = new Map<string, number>();
+        for (const m of text.matchAll(COLOUR_LITERAL)) found.set(m[0], (found.get(m[0]) ?? 0) + 1);
+
+        const allowed = ALLOWED[file] ?? {};
+        const problems: string[] = [];
+        for (const [lit, n] of found) {
+          const a = allowed[lit];
+          if (!a) problems.push(`${file}: unmeasured colour literal ${lit} x${n}. Use a token from globals.css, or measure it and add it here with a reason.`);
+          else if (a.count !== n) problems.push(`${file}: ${lit} allowlisted x${a.count}, found x${n}. An exemption must not grow (or shrink) silently.`);
+        }
+        for (const lit of Object.keys(allowed)) {
+          if (!found.has(lit)) problems.push(`${file}: allowlisted ${lit} no longer present — delete the entry.`);
+        }
+        expect(problems, `\n${problems.join('\n')}\n`).toEqual([]);
+      });
+    }
+
+    it('the scan is not vacuous: it sees the known allowlisted literals', () => {
+      const v = strip(readFileSync(join(DIR, 'WorkflowVariantsMap.tsx'), 'utf8'));
+      expect((v.match(COLOUR_LITERAL) ?? []).length).toBeGreaterThanOrEqual(11);
+      // The pattern must catch each form that actually failed before.
+      for (const bad of ['#9ca3af', '#fca5a5', 'text-amber-600', 'bg-red-50', 'rgba(255,255,255,0.97)', 'accent-violet-600', 'border-t-violet-600']) {
+        COLOUR_LITERAL.lastIndex = 0;
+        expect(COLOUR_LITERAL.test(`x="${bad}"`), bad).toBe(true);
+      }
+    });
+
+    it('PAIRs: white on violet-600 >= 4.5:1 and on violet-700 >= 4.5:1', () => {
+      expect(contrastRatio('#ffffff', '#7c3aed')).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio('#ffffff', '#6d28d9')).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it('named panels: fixed -700 text on its -50 fill is >= 4.5:1 (header chips, insight chips, edge-type chip)', () => {
+      const pairs: Array<[string, string, string]> = [
+        ['amber-700 on amber-50', '#b45309', '#fffbeb'],
+        ['red-700 on red-50', '#b91c1c', '#fef2f2'],
+        ['emerald-700 on emerald-50', '#047857', '#ecfdf5'],
+        ['blue-700 on blue-50', '#1d4ed8', '#eff6ff'],
+      ];
+      for (const [label, fg, bg] of pairs) expect(contrastRatio(fg, bg), label).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it('story map (light canvas in both themes): label tokens, edge strokes, node borders, label text', () => {
+      for (const cat of Object.keys(CATEGORY_STYLES)) {
+        for (const fill of ['#ecfdf5', '#fffbeb']) {
+          expect(contrastRatio(token('light', `wf-cat-${cat}`), fill), `--wf-cat-${cat} on ${fill}`).toBeGreaterThanOrEqual(4.5);
+        }
+      }
+      expect(contrastRatio('#92400e', '#fffbeb'), 'edge label text').toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio('#b45309', '#fffbeb'), '"diverges" text').toBeGreaterThanOrEqual(4.5);
+      for (const [label, hex] of [['spine', '#059669'], ['shortcut', '#64748b'], ['branch', '#d97706']] as const) {
+        expect(contrastRatio(hex, CANVAS_BG), `${label} edge on canvas`).toBeGreaterThanOrEqual(3);
+      }
+      expect(contrastRatio('#059669', '#ecfdf5'), 'backbone decision border on its fill').toBeGreaterThanOrEqual(3);
+      expect(contrastRatio('#d97706', '#fffbeb'), 'branch decision border on its fill').toBeGreaterThanOrEqual(3);
+      expect(readFileSync(join(DIR, 'WorkflowVariantStoryMap.tsx'), 'utf8')).toMatch(/<ReactFlow[\s\S]{0,300}colorMode="light"/);
+    });
+
+    it('story map header icon / slider (#059669, page-theme backed) clear 3:1 on every surface in both themes', () => {
+      for (const block of ['root', 'light'] as const) {
+        for (const s of SURF) expect(contrastRatio('#059669', token(block, s)), `#059669 on --${s} (${themeName(block)})`).toBeGreaterThanOrEqual(3);
+      }
+    });
   });
 });

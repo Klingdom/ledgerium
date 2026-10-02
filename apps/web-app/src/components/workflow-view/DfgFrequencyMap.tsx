@@ -8,7 +8,9 @@
  *
  * Visual encoding (UX_SPEC.md §2):
  *  - Edge strokeWidth = EDGE_MIN_PX + weight * (EDGE_MAX_PX - EDGE_MIN_PX)  →  [1.5, 10]
- *  - Edge opacity     = 0.20 + weight * 0.80                                 →  [0.20, 1.00]
+ *  - Edge opacity     = 0.85 + weight * 0.15 (EDGE_MIN_OPACITY=0.85)         →  [0.85, 1.00]
+ *    Floor raised from 0.20 so the faintest edge clears WCAG 1.4.11 3:1
+ *    (row #268); stroke width is the primary frequency channel.
  *
  * Layout positions (ARCHITECTURE_DFG.md §6, deterministic, via dfgToReactFlow):
  *  - strokeWidth (for adapter contract tests) = 1 + weight * 4               →  [1.0, 5.0]
@@ -46,13 +48,19 @@ import {
 import { filterDfgByCoverage, type DirectlyFollowsGraph } from '@/lib/dfgModel';
 import { track } from '@/lib/analytics';
 import { formatDuration } from '@/lib/format';
+import {
+  EDGE_COLOR, HAPPY_COLOR, EDGE_MIN_OPACITY,
+  PERF_FAST_COLOR, PERF_MEDIUM_COLOR, PERF_SLOW_COLOR, PERF_NEUTRAL_COLOR,
+  TERMINAL_START, TERMINAL_END, TERMINAL_TEXT, BADGE, readableTextOn,
+} from './mapColors';
 
 // ─── UX_SPEC visual constants ─────────────────────────────────────────────────
 
 const EDGE_MIN_PX  = 1.5;
 const EDGE_MAX_PX  = 10;
-const EDGE_COLOR   = '#6366f1'; // violet-500
-const HAPPY_COLOR  = '#4f46e5'; // indigo-700 — dominant path emphasis
+// EDGE_COLOR / HAPPY_COLOR / PERF_* / terminal + badge colours live in
+// ./mapColors (measured in theme-contrast.test.ts) — the canvas is white in both
+// page themes, so they are fixed pairs, not tokens (row #268).
 
 /** UX_SPEC.md §2.1 — strokeWidth formula for render */
 function uiStrokeWidth(weight: number): number {
@@ -63,7 +71,8 @@ function uiStrokeWidth(weight: number): number {
 
 /** UX_SPEC.md §2.2 — opacity formula for render */
 function uiOpacity(weight: number): number {
-  return 0.20 + weight * 0.80;
+  // Floor raised from 0.20 so the faintest edge still clears 3:1 (row #268).
+  return EDGE_MIN_OPACITY + weight * (1 - EDGE_MIN_OPACITY);
 }
 
 // ─── Performance overlay (QW2b) — 3-stop duration scale ───────────────────────
@@ -73,10 +82,6 @@ function uiOpacity(weight: number): number {
 // thresholds. Edge thickness is held fixed in performance mode to avoid
 // double-encoding. Items with < PERF_MIN_SAMPLES duration samples render neutral.
 
-const PERF_FAST_COLOR    = '#10b981'; // emerald-500 — fastest
-const PERF_MEDIUM_COLOR  = '#f59e0b'; // amber-500   — median
-const PERF_SLOW_COLOR    = '#ef4444'; // red-500     — slowest
-const PERF_NEUTRAL_COLOR = '#9ca3af'; // gray-400    — insufficient data
 const PERF_EDGE_PX       = 2.5;       // fixed stroke width in performance mode
 /** Minimum duration samples for a node/edge to be coloured by performance. */
 const PERF_MIN_SAMPLES   = 2;
@@ -185,9 +190,9 @@ const DfgNodeComponent = memo(function DfgNodeComponent({
   const baseStyle = useMemo<React.CSSProperties>(() => {
     if (isTerminal) {
       return {
-        background: kind === 'start' ? '#22c55e' : '#ef4444',
+        background: (kind === 'start' ? TERMINAL_START : TERMINAL_END).bg,
         border: '2px solid',
-        borderColor: kind === 'start' ? '#16a34a' : '#dc2626',
+        borderColor: (kind === 'start' ? TERMINAL_START : TERMINAL_END).border,
         borderRadius: '50%',
         width: 40,
         height: 40,
@@ -196,27 +201,31 @@ const DfgNodeComponent = memo(function DfgNodeComponent({
         justifyContent: 'center',
         fontSize: 9,
         fontWeight: 700,
-        color: '#fff',
+        color: TERMINAL_TEXT,
       };
     }
     if (perfActive) {
       return {
         background: perfColor,
-        border: selected ? '2px solid #4f46e5' : '1px solid rgba(0,0,0,0.08)',
+        // Fill vs canvas is >= 3:1 (mapColors), so the fill itself is the boundary.
+        border: selected ? `2px solid ${HAPPY_COLOR}` : '1px solid transparent',
         borderRadius: 6,
         padding: '6px 10px',
         minWidth: 120,
         maxWidth: 200,
         fontSize: 11,
         fontWeight: 500,
-        color: lowData ? '#374151' : '#ffffff',
-        boxShadow: selected ? '0 0 0 2px rgba(79,70,229,0.35)' : '0 1px 3px rgba(0,0,0,0.10)',
+        color: readableTextOn(perfColor),
+        boxShadow: selected ? '0 0 0 2px rgba(79,70,229,0.35)' : '0 1px 3px rgba(0,0,0,0.10)', // decorative elevation
         position: 'relative' as const,
       };
     }
     return {
       background: 'var(--surface-primary)',
-      border: selected ? '2px solid #6366f1' : '1px solid var(--border-subtle)',
+      // The node's boundary is a meaningful mark (SC 1.4.11): --border-subtle is
+      // ~1.1:1 on the white canvas, so the resting border is --content-tertiary
+      // (still >= 3:1 at the 0.7 minimum node opacity; --content-secondary was 2.69:1).
+      border: selected ? `2px solid ${HAPPY_COLOR}` : '1px solid var(--content-tertiary)',
       borderRadius: 6,
       padding: '6px 10px',
       minWidth: 120,
@@ -224,7 +233,7 @@ const DfgNodeComponent = memo(function DfgNodeComponent({
       fontSize: 11,
       fontWeight: 500,
       color: 'var(--content-primary)',
-      boxShadow: selected ? '0 0 0 2px rgba(99,102,241,0.3)' : '0 1px 3px rgba(0,0,0,0.06)',
+      boxShadow: selected ? '0 0 0 2px rgba(99,102,241,0.3)' : '0 1px 3px rgba(0,0,0,0.06)', // decorative elevation
       opacity: 1 - (1 - weight) * 0.3, // subtle dimming for low-frequency nodes
       position: 'relative' as const,
     };
@@ -256,11 +265,11 @@ const DfgNodeComponent = memo(function DfgNodeComponent({
               minWidth: 20,
               padding: '0 4px',
               borderRadius: 8,
-              background: '#f5f3ff', // violet-50
-              border: '1px solid #ddd6fe', // violet-200
+              background: BADGE.bg,
+              border: `1px solid ${BADGE.border}`,
               fontSize: 9,
               fontWeight: 600,
-              color: '#4c1d95', // violet-900
+              color: BADGE.text,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -334,7 +343,10 @@ const DfgEdgeComponent = memo(function DfgEdgeComponent({
         style={{
           stroke,
           strokeWidth: PERF_EDGE_PX,
-          opacity: lowData ? 0.45 : 0.9,
+          // Opacity stays 1: any alpha drops the 3.19:1 amber below the 3:1 floor.
+          // "No timing data" is signalled by a dash pattern, not by fading.
+          opacity: 1,
+          ...(lowData ? { strokeDasharray: '4 3' } : {}),
           transition: 'stroke 0.15s ease, opacity 0.15s ease',
         }}
         markerEnd="url(#dfg-arrow)"
@@ -364,9 +376,10 @@ function DfgLegendBar() {
     <div
       style={{
         padding: '5px 16px',
-        background: 'rgba(255,255,255,0.97)',
-        backdropFilter: 'blur(8px)',
-        borderBottom: '1px solid #e5e7eb',
+        // Theme surface, not a white island: --content-* text on a hard-coded
+        // white strip was 2.5:1 in dark theme.
+        background: 'var(--surface-secondary)',
+        borderBottom: '1px solid var(--border-subtle)',
         display: 'flex',
         alignItems: 'center',
         gap: 16,
@@ -396,11 +409,11 @@ function DfgLegendBar() {
             minWidth: 20,
             padding: '0 4px',
             borderRadius: 8,
-            background: '#f5f3ff',
-            border: '1px solid #ddd6fe',
+            background: BADGE.bg,
+            border: `1px solid ${BADGE.border}`,
             fontSize: 9,
             fontWeight: 600,
-            color: '#4c1d95',
+            color: BADGE.text,
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -441,7 +454,7 @@ function ModeToggleBar({ mode, onChange }: ModeToggleBarProps) {
         alignItems: 'center',
         gap: 8,
         padding: '6px 16px',
-        borderBottom: '1px solid #e5e7eb',
+        borderBottom: '1px solid var(--border-subtle)',
         flexShrink: 0,
       }}
     >
@@ -451,7 +464,7 @@ function ModeToggleBar({ mode, onChange }: ModeToggleBarProps) {
       <div
         role="group"
         aria-label="Map encoding mode"
-        style={{ display: 'inline-flex', borderRadius: 6, overflow: 'hidden', border: '1px solid #e5e7eb' }}
+        style={{ display: 'inline-flex', borderRadius: 6, overflow: 'hidden', border: '1px solid var(--border-default)' }}
       >
         {(['frequency', 'performance'] as const).map((m) => {
           const active = m === mode;
@@ -467,8 +480,11 @@ function ModeToggleBar({ mode, onChange }: ModeToggleBarProps) {
                 padding: '4px 12px',
                 cursor: 'pointer',
                 border: 'none',
-                background: active ? '#6366f1' : '#fff',
-                color: active ? '#fff' : 'var(--content-secondary)',
+                // Active: white on HAPPY_COLOR 6.29:1 (was #6366f1, 4.47:1).
+                // Inactive: a theme surface, so --content-secondary is measured
+                // against what it is actually on (was #fff: 2.56:1 in dark).
+                background: active ? HAPPY_COLOR : 'var(--surface-secondary)',
+                color: active ? '#ffffff' : 'var(--content-secondary)',
               }}
             >
               {m === 'frequency' ? 'Frequency' : 'Performance'}
@@ -505,9 +521,10 @@ function DfgPerformanceLegendBar({ scale }: { scale: PerfScale | null }) {
     <div
       style={{
         padding: '5px 16px',
-        background: 'rgba(255,255,255,0.97)',
-        backdropFilter: 'blur(8px)',
-        borderBottom: '1px solid #e5e7eb',
+        // Theme surface, not a white island: --content-* text on a hard-coded
+        // white strip was 2.5:1 in dark theme.
+        background: 'var(--surface-secondary)',
+        borderBottom: '1px solid var(--border-subtle)',
         display: 'flex',
         alignItems: 'center',
         gap: 16,
@@ -587,7 +604,7 @@ function CoverageSliderBar({ value, onChange, pathCount, totalPaths, totalRuns }
         aria-valuenow={value}
         aria-valuetext={`${value}% of runs · ${totalPaths} paths`}
         onInput={handleInput}
-        className="flex-1 h-1.5 rounded-full accent-violet-600"
+        className="flex-1 h-1.5 rounded-full accent-[var(--map-violet-fg)]"
         style={{ cursor: 'pointer' }}
       />
       <span
@@ -633,6 +650,9 @@ interface CanvasProps {
 function DfgCanvas({ nodes, edges }: CanvasProps) {
   return (
     <ReactFlow
+      // Explicit, not inherited from the library default: the node/edge colours
+      // in mapColors.ts assume a white canvas in BOTH page themes (row #268).
+      colorMode="light"
       nodes={nodes}
       edges={edges}
       nodeTypes={NODE_TYPES}
@@ -722,7 +742,10 @@ export function DfgFrequencyMap({
       return {
         ...edge,
         style: {
-          stroke: '#9ca3af',
+          // De-emphasised (not selected) — see the exemption in
+          // docs/a11y/WORKFLOW_MAP_CONTRAST_268.md; clearing the selection
+          // restores the full-contrast edge.
+          stroke: 'var(--content-secondary)',
           strokeWidth: uiStrokeWidth(w),
           opacity: 0.08,
           transition: 'stroke 0.2s ease, stroke-width 0.15s ease, opacity 0.2s ease',

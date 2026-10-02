@@ -87,6 +87,20 @@
   --wf-cat-error_handling: #F87171;        /* 5.85:1 */
   --wf-cat-annotation: #C084FC;            /* 6.12:1 */
 
+  /* Row #268 — workflow-map hue families (Variants + Systems maps). Each hue is
+     a PAIR: --map-<hue>-fg is text/icon/stroke colour, --map-<hue>-tint the
+     opaque fill behind it. fg is >= 4.5:1 on its own tint AND on every theme
+     surface, so one token serves a pill, a bare icon and a bar. Red, amber and
+     green reuse the --status-* pairs. --map-row-warn is the divergence-row
+     wash: deliberately close to the surface so --content-tertiary text on it
+     keeps >= 4.5:1 (the status tints are too strong for that). */
+  --map-indigo-fg: #A5B4FC;  --map-indigo-tint: #1E2147;
+  --map-violet-fg: #C4B5FD;  --map-violet-tint: #2A1F4D;
+  --map-blue-fg:   #93C5FD;  --map-blue-tint:   #172A4A;
+  --map-cyan-fg:   #67E8F9;  --map-cyan-tint:   #0C3441;
+  --map-orange-fg: #FDBA74;  --map-orange-tint: #4A2A12;
+  --map-row-warn:  #262218;
+
   /* Borders */
   --border-default: rgba(255, 255, 255, 0.10);
   --border-subtle: rgba(255, 255, 255, 0.06);
@@ -149,6 +163,14 @@
   --wf-cat-file_action: #B45309;           /* 5.02:1 */
   --wf-cat-error_handling: #B91C1C;        /* 6.47:1 */
   --wf-cat-annotation: #7E22CE;            /* 6.98:1 */
+
+  /* Row #268 — see :root. */
+  --map-indigo-fg: #4338CA;  --map-indigo-tint: #EEF2FF;
+  --map-violet-fg: #6D28D9;  --map-violet-tint: #F5F3FF;
+  --map-blue-fg:   #1D4ED8;  --map-blue-tint:   #EFF6FF;
+  --map-cyan-fg:   #0E7490;  --map-cyan-tint:   #ECFEFF;
+  --map-orange-fg: #C2410C;  --map-orange-tint: #FFF7ED;
+  --map-row-warn:  #FFFBEB;
 
   /* Borders */
   --border-default: #E2E8F0;

@@ -17,7 +17,7 @@ import {
 import type { NormalizedViewModel, ViewNode } from './adapters/viewModel';
 import { buildSystemData } from './adapters/systemAdapter';
 import type { ViewSystem, ViewSystemEdge } from './adapters/viewModel';
-import { CATEGORY_STYLES } from './constants';
+import { CATEGORY_STYLES, categoryTextVar } from './constants';
 import { formatDuration } from '@/lib/format';
 
 // ─── Props ───────────────────────────────────────────────────────────────────
@@ -47,14 +47,14 @@ export function WorkflowSystemsMap({ graph, onSelectNode }: Props) {
       <div className="flex-shrink-0 px-5 py-3 border-b border-[var(--border-subtle)] bg-[var(--surface-elevated)]">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <Monitor className="h-4 w-4 text-cyan-600" />
+            <Monitor className="h-4 w-4 text-[var(--map-cyan-fg)]" />
             <span className="text-ds-sm font-semibold text-[var(--content-primary)]">System Topology</span>
           </div>
           <div className="flex items-center gap-3">
-            <OverviewStat icon={Monitor} value={systemData.nodes.length} label="systems" color="#0891b2" />
-            <OverviewStat icon={ArrowRightLeft} value={systemData.totalHandoffs} label="handoffs" color="#7c3aed" />
-            <OverviewStat icon={RefreshCw} value={systemData.contextSwitchCount} label="context switches" color="#d97706" />
-            <OverviewStat icon={Clock} value={formatDuration(totalDuration) || '—'} label="total" color="#64748b" />
+            <OverviewStat icon={Monitor} value={systemData.nodes.length} label="systems" color="var(--map-cyan-fg)" />
+            <OverviewStat icon={ArrowRightLeft} value={systemData.totalHandoffs} label="handoffs" color="var(--map-violet-fg)" />
+            <OverviewStat icon={RefreshCw} value={systemData.contextSwitchCount} label="context switches" color="var(--status-warning)" />
+            <OverviewStat icon={Clock} value={formatDuration(totalDuration) || '—'} label="total" color="var(--content-secondary)" />
           </div>
         </div>
       </div>
@@ -145,22 +145,26 @@ function SystemNetworkDiagram({
                   style={{
                     minWidth: 140,
                     maxWidth: 200,
-                    borderColor: isSelected ? '#0891b2' : '#e2e8f0',
-                    background: isSelected ? '#ecfeff' : '#ffffff',
+                    // Card sits on the page theme: it was a hard-coded white fill
+                    // under --content-primary text (1.2:1 in dark). Selection is
+                    // carried by the cyan border (3:1+), not by a tint that would
+                    // put --content-tertiary text under 4.5:1 in dark.
+                    borderColor: isSelected ? 'var(--map-cyan-fg)' : 'var(--border-default)',
+                    background: 'var(--surface-elevated)',
                     boxShadow: isSelected
-                      ? '0 0 0 3px rgba(8,145,178,0.12), 0 4px 16px rgba(0,0,0,0.06)'
-                      : '0 1px 4px rgba(0,0,0,0.04)',
+                      ? '0 0 0 3px rgba(8,145,178,0.12), 0 4px 16px rgba(0,0,0,0.06)' // decorative halo
+                      : '0 1px 4px rgba(0,0,0,0.04)', // decorative elevation
                   }}
                 >
                   {/* System icon area */}
                   <div
                     className="w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center"
                     style={{
-                      background: isSelected ? 'rgba(8,145,178,0.1)' : '#f1f5f9',
-                      border: `1px solid ${isSelected ? 'rgba(8,145,178,0.2)' : '#e2e8f0'}`,
+                      background: isSelected ? 'var(--map-cyan-tint)' : 'var(--surface-secondary)',
+                      border: `1px solid ${isSelected ? 'var(--map-cyan-fg)' : 'var(--border-default)'}`,
                     }}
                   >
-                    <Monitor className="h-5 w-5" style={{ color: isSelected ? '#0891b2' : '#64748b' }} />
+                    <Monitor className="h-5 w-5" style={{ color: isSelected ? 'var(--map-cyan-fg)' : 'var(--content-secondary)' }} />
                   </div>
 
                   {/* System name */}
@@ -178,7 +182,7 @@ function SystemNetworkDiagram({
                       className="h-full rounded-full transition-all"
                       style={{
                         width: `${Math.max(5, share * 100)}%`,
-                        background: isSelected ? '#0891b2' : '#94a3b8',
+                        background: isSelected ? 'var(--map-cyan-fg)' : 'var(--content-secondary)',
                       }}
                     />
                   </div>
@@ -199,7 +203,7 @@ function SystemNetworkDiagram({
               >
                 <span className="text-[10px] font-medium text-[var(--content-primary)]">{edge.label}</span>
                 {edge.count > 1 && (
-                  <span className="text-[9px] font-bold text-violet-600 bg-violet-50 rounded-full px-1.5 py-0.5">
+                  <span className="text-[9px] font-bold text-[var(--map-violet-fg)] bg-[var(--map-violet-tint)] rounded-full px-1.5 py-0.5">
                     {edge.count}×
                   </span>
                 )}
@@ -245,7 +249,7 @@ function HandoffTimeline({
     <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border-default)] shadow-sm overflow-hidden">
       <div className="px-5 py-3 border-b border-[var(--border-subtle)]">
         <div className="flex items-center gap-2">
-          <ArrowRightLeft className="h-3.5 w-3.5 text-violet-600" />
+          <ArrowRightLeft className="h-3.5 w-3.5 text-[var(--map-violet-fg)]" />
           <span className="text-[10px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider">Handoff Timeline</span>
           <span className="text-[10px] text-[var(--content-tertiary)]">{transitions.length} transition{transitions.length !== 1 ? 's' : ''}</span>
         </div>
@@ -255,7 +259,7 @@ function HandoffTimeline({
         {transitions.map((t, i) => (
           <div key={i} className="flex items-center gap-3 px-5 py-3 hover:bg-[var(--surface-secondary)] transition-colors">
             {/* Handoff number */}
-            <span className="text-[10px] font-bold text-violet-600 bg-violet-50 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0">
+            <span className="text-[10px] font-bold text-[var(--map-violet-fg)] bg-[var(--map-violet-tint)] rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0">
               {t.handoffIndex}
             </span>
 
@@ -270,8 +274,8 @@ function HandoffTimeline({
 
             {/* Arrow */}
             <div className="flex items-center gap-1">
-              <div className="w-6 h-px bg-violet-300" />
-              <ArrowRight className="h-3 w-3 text-violet-400" />
+              <div className="w-6 h-px bg-[var(--map-violet-fg)]" />
+              <ArrowRight className="h-3 w-3 text-[var(--map-violet-fg)]" />
             </div>
 
             {/* To system */}
@@ -321,8 +325,8 @@ function FrictionAnalysis({
       label: 'High Context Switching',
       detail: `${contextSwitchCount} system switches detected. Users must mentally reset between ${systems.length} different applications.`,
       severity: 'high',
-      color: '#dc2626',
-      bg: '#fef2f2',
+      color: 'var(--status-danger-on-tint)',
+      bg: 'var(--status-danger-tint)',
     });
   } else if (contextSwitchCount >= 2) {
     signals.push({
@@ -330,8 +334,8 @@ function FrictionAnalysis({
       label: 'Moderate Context Switching',
       detail: `${contextSwitchCount} system switches between ${systems.length} applications. Consider whether some handoffs can be eliminated.`,
       severity: 'medium',
-      color: '#d97706',
-      bg: '#fffbeb',
+      color: 'var(--status-warning-on-tint)',
+      bg: 'var(--status-warning-tint)',
     });
   }
 
@@ -343,8 +347,8 @@ function FrictionAnalysis({
       label: 'Repeated System Handoffs',
       detail: `${repeatedEdges.length} transition${repeatedEdges.length !== 1 ? 's' : ''} occur more than once, suggesting back-and-forth between systems.`,
       severity: 'medium',
-      color: '#7c3aed',
-      bg: '#f5f3ff',
+      color: 'var(--map-violet-fg)',
+      bg: 'var(--map-violet-tint)',
     });
   }
 
@@ -356,8 +360,8 @@ function FrictionAnalysis({
       label: 'Fragmented Workflow',
       detail: `${totalSteps} steps spread across ${systems.length} systems. This workflow may benefit from consolidation or integration.`,
       severity: 'medium',
-      color: '#0891b2',
-      bg: '#ecfeff',
+      color: 'var(--map-cyan-fg)',
+      bg: 'var(--map-cyan-tint)',
     });
   }
 
@@ -368,8 +372,8 @@ function FrictionAnalysis({
       label: 'Integration Opportunity',
       detail: `${edges.length} cross-system transitions could potentially be automated with API integrations or workflow automation tools.`,
       severity: 'low',
-      color: '#059669',
-      bg: '#ecfdf5',
+      color: 'var(--status-success-on-tint)',
+      bg: 'var(--status-success-tint)',
     });
   }
 
@@ -455,7 +459,7 @@ function SystemDetailPanel({
           <p className="text-[9px] font-semibold text-[var(--content-tertiary)] uppercase tracking-wider mb-1">Time Distribution</p>
           <div className="h-2 bg-[var(--surface-secondary)] rounded-full overflow-hidden">
             <div
-              className="h-full rounded-full bg-cyan-500 transition-all"
+              className="h-full rounded-full bg-[var(--map-cyan-fg)] transition-all"
               style={{ width: `${Math.max(3, share * 100)}%` }}
             />
           </div>
@@ -471,18 +475,18 @@ function SystemDetailPanel({
             <div className="space-y-1">
               {inbound.map(e => (
                 <div key={`in-${e.id}`} className="flex items-center gap-2 text-[10px] px-2 py-1 rounded bg-[var(--surface-secondary)]">
-                  <ArrowRight className="h-2.5 w-2.5 text-emerald-500 rotate-180" />
+                  <ArrowRight className="h-2.5 w-2.5 text-[var(--status-success)] rotate-180" />
                   <span className="text-[var(--content-secondary)]">from</span>
                   <span className="font-medium text-[var(--content-primary)]">{e.label.split(' → ')[0]}</span>
-                  {e.count > 1 && <span className="text-violet-600 font-bold">{e.count}×</span>}
+                  {e.count > 1 && <span className="text-[var(--map-violet-fg)] font-bold">{e.count}×</span>}
                 </div>
               ))}
               {outbound.map(e => (
                 <div key={`out-${e.id}`} className="flex items-center gap-2 text-[10px] px-2 py-1 rounded bg-[var(--surface-secondary)]">
-                  <ArrowRight className="h-2.5 w-2.5 text-blue-500" />
+                  <ArrowRight className="h-2.5 w-2.5 text-[var(--status-info)]" />
                   <span className="text-[var(--content-secondary)]">to</span>
                   <span className="font-medium text-[var(--content-primary)]">{e.label.split(' → ')[1]}</span>
-                  {e.count > 1 && <span className="text-violet-600 font-bold">{e.count}×</span>}
+                  {e.count > 1 && <span className="text-[var(--map-violet-fg)] font-bold">{e.count}×</span>}
                 </div>
               ))}
             </div>
@@ -505,7 +509,7 @@ function SystemDetailPanel({
                 >
                   <span
                     className="text-[9px] font-bold w-4 h-4 rounded flex items-center justify-center flex-shrink-0"
-                    style={{ color: style.color, background: `${style.color}12` }}
+                    style={{ color: categoryTextVar(node.category), background: `${style.color}12` }}
                   >
                     {node.ordinal}
                   </span>
@@ -538,11 +542,11 @@ function SingleSystemView({
   return (
     <div className="absolute inset-0 overflow-y-auto p-5">
       <div className="max-w-2xl mx-auto space-y-4">
-        <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-start gap-3">
-          <Monitor className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+        <div className="bg-[var(--map-blue-tint)] border border-[var(--border-default)] rounded-xl px-4 py-3 flex items-start gap-3">
+          <Monitor className="h-4 w-4 text-[var(--map-blue-fg)] mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-ds-xs font-medium text-blue-800">Single-system workflow</p>
-            <p className="text-[10px] text-blue-600 mt-0.5">
+            <p className="text-ds-xs font-medium text-[var(--map-blue-fg)]">Single-system workflow</p>
+            <p className="text-[10px] text-[var(--map-blue-fg)] mt-0.5">
               This workflow operates within {system?.label ?? 'one application'}. The System Interaction Map is most useful for workflows that cross multiple tools.
             </p>
           </div>
@@ -550,8 +554,8 @@ function SingleSystemView({
 
         {system && (
           <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border-default)] shadow-sm p-5 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-cyan-50 border border-cyan-200 flex items-center justify-center mx-auto mb-3">
-              <Monitor className="h-7 w-7 text-cyan-600" />
+            <div className="w-14 h-14 rounded-2xl bg-[var(--map-cyan-tint)] border border-[var(--border-default)] flex items-center justify-center mx-auto mb-3">
+              <Monitor className="h-7 w-7 text-[var(--map-cyan-fg)]" />
             </div>
             <p className="text-ds-sm font-semibold text-[var(--content-primary)]">{system.label}</p>
             <p className="text-[10px] text-[var(--content-secondary)] mt-1">

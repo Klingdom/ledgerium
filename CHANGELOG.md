@@ -6,6 +6,17 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Workflow maps readable in dark mode
+
+### Fixed
+- Text, lines and panels in the workflow map views now meet accessibility contrast standards in both light and dark themes; several panels previously showed light text on white in dark mode.
+
+### Changed
+- In the frequency map, rarely used paths are drawn more visibly; how often a path is used is now shown mainly by line thickness.
+
+---
+
+
 ## [2026-10-02] - The pricing page says only what is true today
 
 ### Fixed
