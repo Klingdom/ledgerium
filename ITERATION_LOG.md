@@ -4,6 +4,30 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 122) — One pnpm, everywhere (Mode 1, `devops-engineer`)
+
+- **Controls:**
+  - **Area:** `test-infra / ci` (3 of the last 5, so the −2 penalty applies; #301 still scores 14, the top score).
+  - **Agent:** `devops-engineer`. I re-checked the diff scope and the Docker pin.
+  - **Extension:** `871e29a`, 79 loops untouched.
+  - **Cadence:** 1 of 3 since MR-053.
+- **Candidate Selection: `burn-down` — #301** (16). This is a defect I introduced at loop 120. Without the fix, the next push deploys nothing.
+- **What changed:**
+  - **(1) Test steps.** Both `deploy.yml` test steps now run vitest directly: `pnpm exec vitest run --no-passWithNoTests` and `pnpm --filter @ledgerium/web-app exec vitest run --no-passWithNoTests`. This avoids pnpm's own option parsing, which is what rejected the flag under pnpm 9.
+  - **(2) Single pnpm pin.** `package.json` gets `"packageManager": "pnpm@10.32.1"`, and `version: 9` is removed from every `pnpm/action-setup` (deploy, both e2e workflows). The action then uses `packageManager`.
+    - Before: local 10.32.1, Docker 10.32.1 (`Dockerfile:16,50`), CI 9.
+    - Now: one version everywhere.
+    - The lockfile is format 9.0, which both versions read. A frozen `--lockfile-only` install under 10.32.1 left it unchanged.
+- **Proof, run with the version CI will use and the one it used to use (the practice adopted at MR-053):**
+  - Under pnpm **9.15.9** and **10.32.1** alike, the real runs exit 0 (5741 root / 3955 web-app).
+  - Nonexistent filters exit 1.
+  - No `Unknown option` appears.
+  - All workflow YAML parses.
+- **Residual, stated:** that `pnpm/action-setup@v4` reads `packageManager` when `version` is omitted is its documented behaviour, but it was not verified from the action's source here. CI also has never run pnpm 10. **The first push is the confirmation.** If the pnpm setup step errors, the fix is `version: 10.32.1` in the action.
+- **Follow-ups:** 0 created, 1 closed (#301).
+
+---
+
 ## 2026-10-02 — MR-053 recorded (Mode 4, non-counting): a proof run on the wrong version
 
 - **Review:** `docs/meta/MR_053_META_REVIEW.md`. All counts reproduce: web-app 3955 on 3 of 3 runs, root 5741 on 2 of 2, typecheck 0, validator clean at every commit in the window.

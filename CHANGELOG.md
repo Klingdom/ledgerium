@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Deploy pipeline repaired
+
+### Fixed
+- A change earlier today would have stopped the deploy pipeline from running any tests, and so from deploying. It now runs correctly, and the build tools use one consistent version everywhere.
+
+---
+
+
 ## [2026-10-02] - A second outage gets its own alert
 
 ### Fixed

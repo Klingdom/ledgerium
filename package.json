@@ -1,6 +1,7 @@
 {
   "name": "ledgerium",
   "private": true,
+  "packageManager": "pnpm@10.32.1",
   "version": "0.0.1",
   "description": "Ledgerium AI — Universal Work Ledger monorepo",
   "scripts": {
