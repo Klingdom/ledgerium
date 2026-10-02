@@ -620,6 +620,44 @@ describe('no text-brand-500 in source — rows #245 / #257', () => {
 });
 
 /*
+  Row #259. The 400 shade, held at zero the same way. text-brand-400 #34D399
+  is 1.84:1 on --surface-primary in light (1.92:1 on white) and 1.82:1 on
+  brand-50 in EITHER theme (ds-tag-brand is not themed) - a hover state at
+  that ratio is fainter than the resting colour it replaces.
+  Allowlist, exact and reasoned: dark:text-brand-400 in RealProductDemo's
+  "Sample data" badge. dark: applies only under html.dark, and that badge's
+  dark background is brand-900 @30% over a dark surface (#0D1117..#1C2128),
+  which measures 7.39:1 to 8.55:1 - a dark-only pair, the light pair being
+  brand-700 on brand-100. Anything else is a failure.
+*/
+describe('no text-brand-400 in source - row #259', () => {
+  const ROOT = join(__dirname, '..');
+  const files = sourceFiles(ROOT).filter((f) => /\.tsx?$/.test(f));
+  const ALLOWED: Record<string, string> = {
+    'components/demo/RealProductDemo.tsx': 'dark:text-brand-400',
+  };
+
+  it('has no text-brand-400 colour utility, in any variant, beyond the allowlist', () => {
+    const hits: string[] = [];
+    for (const file of files) {
+      const rel = file.slice(ROOT.length + 1).replace(/\\/g, '/');
+      const allowed = ALLOWED[rel];
+      readFileSync(file, 'utf8').split(/\r?\n/).forEach((line, i) => {
+        const scrubbed = allowed ? line.split(allowed).join('') : line;
+        if (/(^|[\s"'`:])text-brand-400\b/.test(scrubbed)) hits.push(`${rel}:${i + 1}`);
+      });
+    }
+    expect(hits, 'text-brand-400 is 1.84:1 in light. Use var(--brand-text) / var(--brand-text-hover), or the --brand-tint/--brand-on-tint pair on a brand tint.').toEqual([]);
+  });
+
+  it('the allowlist entry still exists (a stale exemption is a hole)', () => {
+    for (const [rel, token] of Object.entries(ALLOWED)) {
+      expect(readFileSync(join(ROOT, rel), 'utf8')).toContain(token);
+    }
+  });
+});
+
+/*
   Row #255. The workflow-map node hardcoded light-canvas colours as inline
   styles: step label #111827 on a ~6%-alpha accent tint, 1.08:1 in the dark
   default theme (axe, /product), with the category label the raw accent

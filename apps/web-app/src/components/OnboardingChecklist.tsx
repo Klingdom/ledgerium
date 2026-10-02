@@ -153,7 +153,7 @@ export default function OnboardingChecklist({
                 {!completed && (
                   <Link
                     href={step.actionHref}
-                    className="shrink-0 text-ds-xs font-medium text-brand-400 hover:text-brand-300 transition-colors whitespace-nowrap"
+                    className="shrink-0 text-ds-xs font-medium text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] transition-colors whitespace-nowrap"
                   >
                     {step.actionLabel}
                   </Link>

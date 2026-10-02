@@ -6,6 +6,13 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Links no longer fade when you point at them
+
+### Fixed
+- Several links and labels in the app turned a very pale green when hovered — fainter than before you pointed at them. They now get clearer on hover, in both light and dark themes. A few other pale-green labels were fixed at the same time.
+
+---
+
 ## [2026-10-02] - Security: nobody can make themselves an administrator
 
 ### Security

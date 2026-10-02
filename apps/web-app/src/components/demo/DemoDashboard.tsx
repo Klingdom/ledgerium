@@ -228,7 +228,7 @@ function WorkflowDetail({ w, onBack }: { w: DemoWorkflow; onBack: () => void }) 
           <ol className="space-y-2">
             {w.steps.map((s, i) => (
               <li key={i} className="flex items-start gap-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-secondary)]/40 px-3 py-2.5">
-                <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-brand-900/20 text-[11px] font-semibold text-brand-400">
+                <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[var(--brand-tint)] text-[11px] font-semibold text-[var(--brand-on-tint)]">
                   {i + 1}
                 </span>
                 <div className="min-w-0 flex-1">
@@ -382,7 +382,7 @@ export default function DemoDashboard() {
                     className="group w-full text-left grid grid-cols-12 gap-3 items-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-secondary)]/40 px-3 py-2.5 transition-colors hover:bg-[var(--surface-secondary)] hover:border-brand-600/40"
                   >
                     <div className="col-span-12 sm:col-span-5 min-w-0">
-                      <p className="text-sm font-medium text-[var(--content-primary)] truncate group-hover:text-brand-400 transition-colors">{w.title}</p>
+                      <p className="text-sm font-medium text-[var(--content-primary)] truncate group-hover:text-[var(--brand-text-hover)] transition-colors">{w.title}</p>
                       <div className="mt-1 flex flex-wrap gap-1">
                         {systemsOf(w).map((s) => (
                           <span key={s} className="text-[10px] text-[var(--content-tertiary)] bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded px-1.5 py-0.5">

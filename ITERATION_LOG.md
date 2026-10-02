@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 100) — Fainter on hover than at rest (Mode 1, `frontend-engineer`)
+
+- **Controls:** Area — `web-app / a11y` (98 security, 99 infra). Agent — **`frontend-engineer`, a real rotation** (suite, typecheck, public scans and two mutation checks run by the agent; I re-ran suite and typecheck and recounted the residual). Extension — `871e29a`, 57 loops. **Cadence: 3 of 3 since MR-045 — MR-046 now due.**
+- **Candidate Selection: `burn-down` — #259** (11), the shade loop 84 deliberately left.
+- **Counted before editing, and the count corrected the row:** 14 uses, not 13 — a `dark:` variant had been missed. That is the fourth time in this programme a row's count was wrong in the low direction; counting first, from source, is why it was caught here rather than by the next review.
+- **What it fixed:** most uses were hover states, and **the hover was fainter than the resting colour** — a link that gets harder to read the moment you point at it. They now resolve to the hover token, measured at 7.34:1 light and 12.42:1 dark. Two sat on brand tints and took the tint pair; one count inside `ds-tag-brand` had been 1.82:1 **in both themes**, because that tag class is not themed at all.
+- **The one kept is justified by measurement, not exempted by a pattern:** a `dark:`-only badge on a dark-only surface at 7.39-8.55:1, allowlisted by file and token. The second mutation check matters more than the first: a `dark:` use added in another file still fails — the allowlist is exact, not a blanket pass for anything prefixed `dark:`.
+- **Residual: 14 → 1**, held by the loop-84 guard extended to this shade. **Filed #279:** the lighter shades as text (26 uses, never measured) and the unthemed tag class.
+- **Validation (re-run by me):** web-app **3747 → 3749**; typecheck 0; public contrast scans 4/4 (agent).
+- **Follow-ups:** 1 created (#279), 1 closed (#259).
+
+---
+
 ## 2026-10-02 (loop 99) — A setting that never arrives (Mode 1, `devops-engineer`)
 
 - **Controls:** Area — `infra / deploy` — **pivot required** (97, 98 were security/authz). Agent — **`devops-engineer`, a real rotation** (it ran the check, both mutation directions and the suites; I re-ran the suite and a mutation of my own). Extension — `871e29a`, 56 loops. Cadence: 2 of 3 since MR-045.

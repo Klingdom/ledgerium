@@ -2125,7 +2125,7 @@ function EmptyDashboard({
               href="/docs#getting-started"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-ds-xs text-[var(--content-tertiary)] hover:text-brand-400 transition-colors"
+              className="text-ds-xs text-[var(--content-tertiary)] hover:text-[var(--brand-text-hover)] transition-colors"
             >
               Not sure where to start? Read the Getting Started guide &rarr;
             </a>

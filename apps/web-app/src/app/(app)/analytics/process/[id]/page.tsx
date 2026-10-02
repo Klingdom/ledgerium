@@ -645,7 +645,7 @@ export default function ProcessGroupDetailPage() {
                     .map(([system, freq]) => (
                       <span key={system} className="ds-tag ds-tag-brand">
                         {system}
-                        <span className="ml-1 text-brand-400">{freq}x</span>
+                        <span className="ml-1 text-brand-700">{freq}x</span>
                       </span>
                     ))}
                 </div>

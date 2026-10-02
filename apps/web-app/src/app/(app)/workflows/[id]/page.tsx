@@ -443,7 +443,7 @@ export default function WorkflowDetailPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   title={`Learn about the ${label} view`}
-                  className="mb-1 ml-0.5 text-[var(--content-tertiary)] hover:text-brand-400 transition-colors"
+                  className="mb-1 ml-0.5 text-[var(--content-tertiary)] hover:text-[var(--brand-text-hover)] transition-colors"
                 >
                   <HelpCircle className="h-3.5 w-3.5" />
                 </a>

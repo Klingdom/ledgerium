@@ -254,7 +254,7 @@ export default function AnalyticsPage() {
               href="/docs#process-intelligence"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 ml-2 text-[var(--content-tertiary)] hover:text-brand-400 transition-colors"
+              className="inline-flex items-center gap-1 ml-2 text-[var(--content-tertiary)] hover:text-[var(--brand-text-hover)] transition-colors"
               title="Learn more about Process Intelligence"
             >
               <HelpCircle className="h-3.5 w-3.5" />

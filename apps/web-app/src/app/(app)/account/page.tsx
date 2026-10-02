@@ -494,7 +494,7 @@ export default function AccountPage() {
             href="/docs#pricing"
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-auto text-[var(--content-tertiary)] hover:text-brand-400 transition-colors"
+            className="ml-auto text-[var(--content-tertiary)] hover:text-[var(--brand-text-hover)] transition-colors"
             title="Compare plans"
           >
             <HelpCircle className="h-4 w-4" />

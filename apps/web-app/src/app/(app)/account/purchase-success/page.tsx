@@ -220,7 +220,7 @@ function PurchaseSuccessContent() {
             <Mail className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-[var(--content-tertiary)]" />
             <p className="text-ds-xs text-[var(--content-tertiary)]">
               Questions in the meantime? Email{' '}
-              <a href="mailto:hello@ledgerium.ai" className="underline hover:text-brand-400">
+              <a href="mailto:hello@ledgerium.ai" className="underline hover:text-[var(--brand-text-hover)]">
                 hello@ledgerium.ai
               </a>
               .

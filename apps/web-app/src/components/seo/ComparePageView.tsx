@@ -48,7 +48,7 @@ export function ComparePageView({ page }: { page: ComparePage }) {
                 <tr className="border-b border-[var(--border-default)] bg-[var(--surface-elevated)]">
                   <th className="text-left px-5 py-4 font-semibold text-[var(--content-secondary)] sticky left-0 bg-[var(--surface-elevated)] z-10">Feature</th>
                   <th className="px-5 py-4 font-semibold text-[var(--content-tertiary)] text-center w-[200px]">{page.competitor}</th>
-                  <th className="px-5 py-4 text-center w-[200px] bg-brand-900/10 border-x border-brand-800/30 font-semibold text-brand-400">Ledgerium</th>
+                  <th className="px-5 py-4 text-center w-[200px] bg-[var(--brand-tint)] border-x border-brand-800/30 font-semibold text-[var(--brand-on-tint)]">Ledgerium</th>
                 </tr>
               </thead>
               <tbody>
