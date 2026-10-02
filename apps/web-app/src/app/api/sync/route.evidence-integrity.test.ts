@@ -75,6 +75,15 @@ describe('POST /api/sync evidence integrity (row #269 (3))', () => {
 
   it('corrupt bundle (dangling evidence + duplicate id) -> 422, counts only, no ids echoed, no api_error', async () => {
     const b = fresh();
+    // Give the event we duplicate a distinctive id before asserting it is not
+    // echoed. The sample's own ids are short ('e1'), and the response also
+    // carries a random uploadId — which contained 'e1' by chance about one run
+    // in five, failing this test for no real reason (found at loop 104).
+    const oldId = b.normalizedEvents[0].event_id;
+    b.normalizedEvents[0].event_id = 'SECRET-DUP-EVENT-ID';
+    for (const step of b.derivedSteps) {
+      step.source_event_ids = step.source_event_ids.map((id: string) => (id === oldId ? 'SECRET-DUP-EVENT-ID' : id));
+    }
     b.derivedSteps[0].source_event_ids.push('SECRET-GHOST-ID');
     b.normalizedEvents.push({ ...b.normalizedEvents[0] });
     const res = await post(b);
