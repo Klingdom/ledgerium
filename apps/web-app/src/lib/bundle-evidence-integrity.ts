@@ -6,9 +6,13 @@
  * output is traceable to source evidence. A derived step that cites an event
  * id absent from the bundle's events is a claim with no evidence behind it.
  *
- * Three checks, all pure and deterministic (same bundle -> same counts):
+ * Three checks (plus the empty-evidence rule noted on check 1), all pure and deterministic (same bundle -> same counts):
  *   1. unresolvedSourceRefs — `derivedSteps[].source_event_ids` entries that
- *      do not match any `normalizedEvents[].event_id`.
+ *      do not match any `normalizedEvents[].event_id`; a step with an
+ *      EMPTY list also counts one (it cites nothing).
+ *      The process engine's own input validation (process-engine
+ *      inputValidator.ts) enforces the same two rules for every caller;
+ *      this gate runs first so routes can return counts without ids.
  *   2. duplicateEventIds    — `normalizedEvents` entries whose `event_id`
  *      repeats an earlier one (an id that names two events cannot be a
  *      reliable reference).
@@ -73,6 +77,12 @@ export function checkBundleEvidenceIntegrity(bundle: EvidenceIntegrityInput): Ev
 
   let unresolvedSourceRefs = 0;
   for (const step of bundle.derivedSteps) {
+    // A step citing nothing is unresolved evidence by another route (row #269
+    // (4)). No producer emits one: segmentation's step builders return null
+    // for an empty event group, so source_event_ids is always a non-empty map
+    // of event ids. Counted in unresolvedSourceRefs so the 422 body shape is
+    // unchanged.
+    if (step.source_event_ids.length === 0) unresolvedSourceRefs += 1;
     for (const ref of step.source_event_ids) {
       if (!seen.has(ref)) unresolvedSourceRefs += 1;
     }

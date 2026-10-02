@@ -127,6 +127,12 @@ export function validateProcessEngineInput(
 
       if (!Array.isArray(step.source_event_ids)) {
         errors.push(`derivedSteps[${i}].source_event_ids must be an array`);
+      } else if (step.source_event_ids.length === 0) {
+        // A step that cites no event is a claim with no evidence behind it.
+        // Every producer derives source_event_ids from a non-empty event group
+        // (segmentation's step builders return null for an empty group), so a
+        // legitimate step never has [].
+        errors.push(`derivedSteps[${i}].source_event_ids must not be empty (step cites no evidence)`);
       }
     }
   }

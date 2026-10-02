@@ -429,7 +429,7 @@ describe('processSession', () => {
         status: 'provisional',
         grouping_reason: 'single_action',
         confidence: 0.55,
-        source_event_ids: [],
+        source_event_ids: ['evt-4'],
         start_t_ms: NOW_MS + 10000,
       });
       const { processMap } = processSession(input);

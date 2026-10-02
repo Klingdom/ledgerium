@@ -119,6 +119,41 @@ describe('Input Validation Hardening', () => {
     expect(result.valid).toBe(false);
   });
 
+  // Row #269 (2): the engine's own validation is the single point every
+  // caller passes through (runProcessEngine -> validateProcessEngineInput ->
+  // processSession). These assert it directly, with no upload gate in front.
+  describe('evidence integrity enforced by the engine itself (row #269)', () => {
+    it('dangling evidence: validator reports it AND processSession throws', () => {
+      const input = validInput({ derivedSteps: [step({ source_event_ids: ['e1', 'ghost'] })] });
+      const result = validateProcessEngineInput(input);
+      expect(result.valid).toBe(false);
+      if (!result.valid) expect(result.errors.join(';')).toContain('references unknown event');
+      expect(() => processSession(input)).toThrow('[process-engine] Invalid input');
+    });
+
+    it('duplicate event ids: validator reports it AND processSession throws', () => {
+      const input = validInput({
+        normalizedEvents: [evt({ event_id: 'e1', t_ms: NOW }), evt({ event_id: 'e1', t_ms: NOW + 1 })],
+      });
+      const result = validateProcessEngineInput(input);
+      expect(result.valid).toBe(false);
+      if (!result.valid) expect(result.errors.join(';')).toContain('is a duplicate');
+      expect(() => processSession(input)).toThrow('[process-engine] Invalid input');
+    });
+
+    it('a step citing no events (empty source_event_ids) is rejected', () => {
+      const input = validInput({ derivedSteps: [step({ source_event_ids: [] })] });
+      const result = validateProcessEngineInput(input);
+      expect(result.valid).toBe(false);
+      if (!result.valid) expect(result.errors.join(';')).toContain('must not be empty');
+      expect(() => processSession(input)).toThrow('[process-engine] Invalid input');
+    });
+
+    it('a fully-resolved input is still valid', () => {
+      expect(validateProcessEngineInput(validInput())).toEqual({ valid: true });
+    });
+  });
+
   it('rejects all-provisional steps (no finalized)', () => {
     const input = validInput({
       derivedSteps: [step({ status: 'provisional' })],

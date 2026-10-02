@@ -75,10 +75,10 @@ describe('checkBundleEvidenceIntegrity (row #10)', () => {
     });
   });
 
-  it('a step with no source_event_ids is not an unresolved reference', () => {
+  it('a step with no source_event_ids cites no evidence and is rejected (row #269 (4))', () => {
     const b = good();
     b.derivedSteps = [...b.derivedSteps, { session_id: 's1', source_event_ids: [] }];
-    expect(checkBundleEvidenceIntegrity(b)).toMatchObject(CLEAN);
+    expect(checkBundleEvidenceIntegrity(b)).toMatchObject({ ok: false, unresolvedSourceRefs: 1 });
   });
 
   it('truncation does not exempt: a truncated-session bundle with dangling refs is still rejected', () => {

@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 96) — A step that cites nothing (Mode 1, `backend-engineer`)
+
+- **Controls:** Area — `evidence linkage` (94 api, 95 security). Agent — **`backend-engineer`, a real rotation** (web-app suite, workspace suite and typecheck run by the agent; I re-ran them and ran the real-extension harness). Extension source — untouched; extension **rebuilt and harness-tested** because it bundles the changed package. Cadence: **3 of 3 since MR-044 — MR-045 now due.** A read-only authorization audit (Mode 3-adjacent) ran concurrently on separate files.
+- **Candidate Selection: `burn-down` — #269** (12).
+- **Part (2) was a wrong premise, and the right response was tests, not code.** The row said the engine does not check evidence; it has since `bdcbee0`, and every caller passes through it. My row text was wrong. The agent verified instead of building, and added engine-level tests so the property is pinned where it lives.
+- **Part (4), answered by naming the producer (MR-044's practice):** can a legitimate step have no evidence? Both segmenters return `null` for an empty group; annotation steps cite their own event; the pre-April extension builder skipped empty flushes (checked in `ca3d0c6`); 238 steps across 63 fixture files had none. **No producer emits one, so it is now rejected** — in the gate and in the engine.
+- **The step I would not skip:** the extension bundles `process-engine` and runs `processSession` on its finalized bundle in the side panel. The invariant does not list this package, but its intent covers anything the extension executes. So I rebuilt the extension and ran the **real-extension harness: 6/6 pass**, including real capture and upload.
+- **Residual, class-scoped:** every path to the engine — seven callers, enumerated — now validates evidence; the two upload routes also gate in front. **Not done:** stored production uploads were never re-checked (part 1) — no production access.
+- **Validation:** web-app **3677 → 3681**; workspace **5472**; typecheck 0; extension build 0; real-extension harness **6/6**.
+- **Follow-ups:** 0 created, 1 closed (#269).
+
+---
+
 ## 2026-10-01 (loop 95) — An owner, by invitation (Mode 1, `security-reviewer`)
 
 - **Controls:** Area — `security / authz` (93 type safety, 94 api). Agent — **`security-reviewer`, a real rotation** (suite, typecheck and two mutation checks run by the agent; I re-ran suite and typecheck and added the build). Extension — `871e29a`, 52 loops. Cadence: 2 of 3 since MR-044.
