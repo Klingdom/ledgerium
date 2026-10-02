@@ -201,7 +201,7 @@ export function PublicNav() {
                                 <Link
                                   href={col.viewAll.href}
                                   onClick={() => fireLink(col.viewAll!, item.id, col.column, 'via_menu', 'desktop')}
-                                  className="inline-flex items-center gap-1 text-sm font-medium text-brand-500 hover:text-brand-400 mt-1"
+                                  className="inline-flex items-center gap-1 text-sm font-medium text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] mt-1"
                                 >
                                   {col.viewAll.label}
                                   <ArrowRight className="h-3.5 w-3.5" />
@@ -345,14 +345,14 @@ type NavLeafColumn =
 function navLinkClass(active: boolean): string {
   return `rounded-lg px-3 py-2 text-sm font-medium transition-colors inline-flex items-center gap-1 ${
     active
-      ? 'text-brand-400 bg-brand-900/30'
+      ? 'text-[var(--brand-on-tint)] bg-[var(--brand-tint)]'
       : 'text-[var(--content-secondary)] hover:text-[var(--content-primary)] hover:bg-[var(--surface-secondary)]'
   } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]`;
 }
 
 function mobileRowClass(active: boolean): string {
   return `rounded-lg px-3 py-2.5 text-sm font-medium flex items-center gap-2 ${
-    active ? 'text-brand-400 bg-brand-900/30' : 'text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
+    active ? 'text-[var(--brand-on-tint)] bg-[var(--brand-tint)]' : 'text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)]'
   }`;
 }
 
@@ -431,7 +431,7 @@ function MobileSection({
                     >
                       {leaf.label}
                       {leaf.badge && (
-                        <span className="text-[10px] font-semibold uppercase text-brand-500">{leaf.badge}</span>
+                        <span className="text-[10px] font-semibold uppercase text-[var(--brand-text)]">{leaf.badge}</span>
                       )}
                     </Link>
                   </li>

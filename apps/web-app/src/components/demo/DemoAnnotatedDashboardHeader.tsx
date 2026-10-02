@@ -146,7 +146,7 @@ export default function DemoAnnotatedDashboardHeader() {
     <section aria-label="Dashboard header demo" className="w-full">
       {/* Section label */}
       <div className="mb-3 flex items-center gap-2">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-600/10 px-3 py-1 text-[12px] font-medium text-brand-400">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--brand-tint)] px-3 py-1 text-[12px] font-medium text-[var(--brand-on-tint)]">
           <span aria-hidden>■</span> Container 1 — Dashboard Header
         </span>
         <span className="text-[12px] text-[var(--content-secondary)]">

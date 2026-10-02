@@ -94,7 +94,7 @@ export function SeoHero({
             {author && updatedAt && <span aria-hidden> · </span>}
             {updatedAt && <>Updated {formatUpdated(updatedAt)}</>}
             <span aria-hidden> · </span>
-            <Link href="/methodology" className="text-brand-500 hover:text-brand-400 underline underline-offset-2">
+            <Link href="/methodology" className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2">
               How we research this
             </Link>
           </p>
@@ -130,8 +130,8 @@ export function DataPointCallout({ text }: { text: string }) {
   return (
     <section className="py-8 bg-[var(--surface-primary)]">
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
-        <aside role="note" className="seo-datapoint rounded-xl border-l-4 border-brand-600 bg-brand-900/10 px-5 py-4">
-          <p className="text-xs font-semibold text-brand-500 uppercase tracking-widest mb-1.5">From Ledgerium recordings</p>
+        <aside role="note" className="seo-datapoint rounded-xl border-l-4 border-brand-600 bg-[var(--brand-tint)] px-5 py-4">
+          <p className="text-xs font-semibold text-[var(--brand-on-tint)] uppercase tracking-widest mb-1.5">From Ledgerium recordings</p>
           <p className="text-[15px] text-[var(--content-primary)] leading-relaxed">{text}</p>
         </aside>
       </div>
@@ -211,7 +211,7 @@ export function DemoNote({ location }: { location: string }) {
             href={DEMO}
             event="cta_clicked"
             properties={{ location, destination: DEMO }}
-            className="text-brand-500 hover:text-brand-400 underline underline-offset-2 font-medium"
+            className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2 font-medium"
           >
             Try the live demo
           </TrackedLink>{' '}
@@ -242,7 +242,7 @@ export function BeforeYouDecide({ pricingLocation, demoLocation }: { pricingLoca
             href={PRICING}
             event="cta_clicked"
             properties={{ location: pricingLocation, destination: PRICING }}
-            className="text-brand-500 hover:text-brand-400 underline underline-offset-2 font-medium"
+            className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2 font-medium"
           >
             See what&apos;s included on each plan
           </TrackedLink>
@@ -254,7 +254,7 @@ export function BeforeYouDecide({ pricingLocation, demoLocation }: { pricingLoca
             href={DEMO}
             event="cta_clicked"
             properties={{ location: demoLocation, destination: DEMO }}
-            className="text-brand-500 hover:text-brand-400 underline underline-offset-2 font-medium"
+            className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2 font-medium"
           >
             Try the live demo
           </TrackedLink>{' '}
@@ -463,7 +463,7 @@ export function FinalCta({
             href={INSTALL}
             event="seo_install_clicked"
             properties={{ pageType, slug, placement: 'footer_cta' }}
-            className="text-brand-500 hover:text-brand-400 underline underline-offset-2 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded-sm"
+            className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded-sm"
           >
             {installLinkLabel()}
           </TrackedLink>{' '}

@@ -143,6 +143,22 @@ describe('theme tokens meet WCAG contrast in BOTH themes', () => {
       }
     }
 
+    // Row #245: the same pair in the brand palette. `text-brand-400` on
+    // `bg-brand-600/10` was 1.63:1 in light — the brand foreground too close
+    // to its own hue, so no alpha saves it. Opaque tint, own foreground.
+    for (const block of ['root', 'light'] as const) {
+      it(`--brand-on-tint on --brand-tint, ${block === 'root' ? 'dark' : 'light'} theme`, () => {
+        const fg = token(block, 'brand-on-tint');
+        const bg = token(block, 'brand-tint');
+        const ratio = contrastRatio(fg, bg);
+        expect(
+          ratio,
+          `--brand-on-tint (${fg}) on --brand-tint (${bg}) is ${ratio.toFixed(2)}:1 in the ` +
+            (block === 'root' ? 'dark' : 'light') + ' theme, under the 4.5:1 floor.',
+        ).toBeGreaterThanOrEqual(4.5);
+      });
+    }
+
     it('the light danger foreground is NOT the same as the on-surface one', () => {
       // Guards the finding rather than just its consequence. If someone
       // "simplifies" these to one token, light-theme danger badges silently
@@ -173,7 +189,8 @@ describe('theme tokens meet WCAG contrast in BOTH themes', () => {
 
     for (const name of ['focus-ring', 'status-info', 'status-danger', 'status-warning', 'status-success', 'brand-text',
                         'status-danger-tint', 'status-danger-on-tint', 'status-warning-tint',
-                        'status-warning-on-tint', 'status-success-tint', 'status-success-on-tint']) {
+                        'status-warning-on-tint', 'status-success-tint', 'status-success-on-tint',
+                        'brand-tint', 'brand-on-tint']) {
       it(`--${name} is reset for print`, () => {
         expect(
           printBody.includes(`--${name}:`),

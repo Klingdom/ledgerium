@@ -805,9 +805,9 @@ function EvidenceLinkedBadge() {
 }
 
 const CONSISTENCY_TILE_CLASSES: Record<ConsistencyColor, { value: string; dot: string }> = {
-  green: { value: 'text-emerald-600', dot: 'bg-emerald-500' },
-  amber: { value: 'text-amber-600', dot: 'bg-amber-500' },
-  red: { value: 'text-red-600', dot: 'bg-red-500' },
+  green: { value: 'text-[var(--status-success)]', dot: 'bg-emerald-500' },
+  amber: { value: 'text-[var(--status-warning)]', dot: 'bg-amber-500' },
+  red: { value: 'text-[var(--status-danger)]', dot: 'bg-red-500' },
 };
 
 /** One scorecard tile. The consistency tile is color-coded by CV band. */
@@ -1662,12 +1662,12 @@ function LeadInsightSection({ insights, processOutput }: LeadInsightSectionProps
 
   return (
     <div id="rpt-lead" className="scroll-mt-20">
-      <div className="flex items-start gap-3 rounded-ds-lg border border-amber-200 bg-amber-50/60 px-5 py-4">
-        <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-amber-100">
-          <Zap className="h-4 w-4 text-amber-600" />
+      <div className="flex items-start gap-3 rounded-ds-lg border border-amber-200 bg-[var(--status-warning-tint)] px-5 py-4">
+        <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[var(--surface-primary)]">
+          <Zap className="h-4 w-4 text-[var(--status-warning-on-tint)]" />
         </div>
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-amber-700">Start here</p>
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--status-warning-on-tint)]">Start here</p>
           <p className="mt-1 text-ds-sm text-[var(--content-primary)]">
             <span className="font-semibold">Step {lev.longestOrdinal}</span> owns{' '}
             <span className="font-semibold">{lev.longestPct}%</span> of active process time

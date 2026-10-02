@@ -22,7 +22,7 @@ import { SopExportPanel } from './SopExportPanel';
 
 /** Token-consistent ordinal-badge palette cycled across steps (execution-SOP style). */
 const STEP_BADGE = [
-  'bg-brand-900/25 border-brand-700/40 text-brand-400',
+  'bg-[var(--brand-tint)] border-brand-700/40 text-[var(--brand-on-tint)]',
   'bg-emerald-900/25 border-emerald-700/40 text-emerald-400',
   'bg-violet-900/25 border-violet-700/40 text-violet-400',
   'bg-[var(--status-warning-tint)] border-amber-700/40 text-[var(--status-warning-on-tint)]',
@@ -45,7 +45,7 @@ const SCORECARD = [
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[11px] font-semibold text-brand-500 uppercase tracking-widest mb-2">{children}</p>
+    <p className="text-[11px] font-semibold text-[var(--brand-text)] uppercase tracking-widest mb-2">{children}</p>
   );
 }
 
@@ -110,7 +110,7 @@ function SopReportPreview({ originalDataPoint, sectionCount }: { originalDataPoi
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
         <Eyebrow>Process analysis</Eyebrow>
         <h2 className="text-xl font-bold text-[var(--content-primary)] mb-2 inline-flex items-center gap-2">
-          <BarChart3 className="h-5 w-5 text-brand-500" />
+          <BarChart3 className="h-5 w-5 text-[var(--brand-text)]" />
           The analysis that comes with it
         </h2>
         <p className="text-sm text-[var(--content-secondary)] leading-relaxed mb-6 max-w-2xl">
@@ -140,8 +140,8 @@ function SopReportPreview({ originalDataPoint, sectionCount }: { originalDataPoi
             </div>
 
             {/* The page's one real, sourced fact */}
-            <div className="seo-datapoint rounded-lg border-l-4 border-brand-600 bg-brand-900/10 px-4 py-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-brand-500 mb-1">From Ledgerium recordings</p>
+            <div className="seo-datapoint rounded-lg border-l-4 border-brand-600 bg-[var(--brand-tint)] px-4 py-3">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--brand-on-tint)] mb-1">From Ledgerium recordings</p>
               <p className="text-sm text-[var(--content-primary)] leading-relaxed">{originalDataPoint}</p>
             </div>
 
@@ -161,18 +161,18 @@ function SopReportPreview({ originalDataPoint, sectionCount }: { originalDataPoi
         </div>
 
         {/* Honest framing band */}
-        <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3">
-          <p className="text-[13px] text-[var(--content-secondary)] flex-1">
+        <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-2 rounded-xl border border-amber-500/25 bg-[var(--status-warning-tint)] px-4 py-3">
+          <p className="text-[13px] text-[var(--content-primary)] flex-1">
             Illustrative structure — record this process once and Ledgerium produces your real report.
           </p>
-          <Link href="/product" className="inline-flex items-center gap-1 text-[13px] font-semibold text-brand-400 hover:text-brand-300 whitespace-nowrap">
+          <Link href="/product" className="inline-flex items-center gap-1 text-[13px] font-semibold text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] whitespace-nowrap">
             See a live example
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
         {/* Sequenced cross-sell: report → automation intent */}
-        <Link href="/ai-opportunities" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-500 hover:text-brand-400">
+        <Link href="/ai-opportunities" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--brand-text)] hover:text-[var(--brand-text-hover)]">
           See where AI can automate steps like these
           <ArrowRight className="h-4 w-4" />
         </Link>
@@ -238,12 +238,12 @@ export function SopTemplatePageView({ page }: { page: SopTemplatePage }) {
               className="mt-6 flex items-center gap-3 rounded-xl border-l-4 border-brand-600 bg-brand-900/10 px-5 py-4 hover:bg-brand-900/20 transition-colors group"
             >
               <div className="flex-1">
-                <p className="text-[11px] font-semibold text-brand-500 uppercase tracking-wider">Paired workflow</p>
-                <p className="text-sm font-semibold text-[var(--content-primary)] group-hover:text-brand-400 transition-colors">
+                <p className="text-[11px] font-semibold text-[var(--brand-text)] uppercase tracking-wider">Paired workflow</p>
+                <p className="text-sm font-semibold text-[var(--content-primary)] group-hover:text-[var(--brand-text-hover)] transition-colors">
                   See the full workflow this SOP documents
                 </p>
               </div>
-              <ArrowRight className="h-4 w-4 text-brand-500 flex-shrink-0" />
+              <ArrowRight className="h-4 w-4 text-[var(--brand-text)] flex-shrink-0" />
             </Link>
           )}
         </div>

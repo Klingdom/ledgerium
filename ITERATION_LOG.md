@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 (loop 81) — The held scans came back, and found what the row had not listed (Mode 1, `frontend-engineer` → coordinator)
+
+- **Controls:** Area — `web-app / a11y`, **forced pivot** (loops 78-80 were three consecutive analytics). Agent — `frontend-engineer`, cut off by a rate limit mid-change; finished by coordinator (see below). Extension — `871e29a`, 38 loops; #216 CEO-blocked. **Cadence: 3 of 3 since MR-039 — MR-040 is now due.**
+- **Candidate Selection: `saturation-rule` → #245** (12), the top open row outside analytics. The higher-scoring non-analytics rows are multi-iteration program items (Path E, admin sprints), several marked stale by MR-034 — not one-loop work.
+- **The agent stopped with nothing run.** Its partial change was on-pattern but unverified, and verification found it incomplete: **3 of 4 scans failed**, one claimed ratio was wrong (dark pair 7.04 → actually **7.67**), and its CSS comments carried encoding damage. Reviewed line by line and finished rather than discarded — but nothing it claimed was accepted without measurement.
+- **The row's three defects are fixed** with the pattern #236 established: an opaque `--brand-tint` with its own `--brand-on-tint` foreground per theme, because a brand foreground too close to its own hue cannot be saved by any alpha. Guarded as a pair, mutation-checked.
+- **Returning the held scans is the part that mattered, and it found more than the row listed.** The active public-nav item — which the row said to "judge separately" — was the **identical** tint-pair defect at **1.06:1**. A warning band sat at 4.4:1. And the report tiles' consistency colours failed in light: green **3.6:1** and **amber 3.04:1**, which no scan could have shown because the fixture is green. Converted all three to the status tokens loop 67 introduced.
+- **`/product` is still held, and the reason is now one component.** Every remaining violation is inside `WorkflowTaskNode`, which hardcodes light-canvas colours inline: the step label is `#111827` on a ~6% tint, **1.08:1 in the dark default theme**. axe flagged one node because one was in the viewport; the code applies to all of them, and it is the in-app workflow map at `/workflows/[id]`. That is a different outcome from a public-badge row, so it is **#255**, and the hold in the spec now cites it. I have not measured the in-app canvas; the row says so.
+- **Validation:** sop-template scans **2/2** (light returned); web-app **3329 → 3333** (+4 guard assertions); typecheck **0**.
+- **Follow-ups:** 1 created (#255), 1 closed (#245).
+
+---
+
 ## 2026-10-01 (loop 80, Mode 3 correction to loop 79, non-counting) — the build reported an error nobody had
 
 - **What was wrong:** `next build` executes some GET handlers while deciding whether to prerender them. `/api/admin/alerts/check` has no `CRON_SECRET` in the build environment, returns a 500, and since loop 79 reports it. A build with a database would have written one spurious `api_error` per deploy — not enough to trip the alert alone, but a fabricated row in the series loop 79 exists to make trustworthy.

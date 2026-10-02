@@ -63,6 +63,13 @@
   --status-success-tint: #1A4E34;
   --status-success-on-tint: #4ADE80;  /* 5.52:1 */
 
+  /* Row #245 — the same pair, in the brand palette. `bg-brand-600/10` with
+     `text-brand-400` is 1.63:1 in light: the foreground is too close to its
+     own hue, and no alpha rescues it (see the status tints above). Opaque, so
+     the tint has one answer on any surface. */
+  --brand-tint: #0F2D27;
+  --brand-on-tint: #34D399;           /* 7.67:1 on the tint */
+
   /* Borders */
   --border-default: rgba(255, 255, 255, 0.10);
   --border-subtle: rgba(255, 255, 255, 0.06);
@@ -107,6 +114,12 @@
   --status-warning-on-tint: #92400E;  /* 6.61:1 */
   --status-success-tint: #F0FBF4;
   --status-success-on-tint: #15803D;  /* 4.73:1 */
+
+  /* Row #245 — brand tint. --brand-on-tint is brand-700 (#047857), the same
+     value as --brand-text but a separate token on purpose: the tint is its own
+     background, and the two are free to diverge (as danger's did, #236). */
+  --brand-tint: #E6F5F0;
+  --brand-on-tint: #047857;           /* 4.88:1 on the tint */
 
   /* Borders */
   --border-default: #E2E8F0;
@@ -518,6 +531,8 @@
       --status-warning-on-tint: #92400E !important;
       --status-success-tint: #F0FBF4 !important;
       --status-success-on-tint: #15803D !important;
+      --brand-tint: #E6F5F0 !important;
+      --brand-on-tint: #047857 !important;
       --border-default: #e2e8f0 !important;
       --border-subtle: #f1f5f9 !important;
       background: #ffffff !important;

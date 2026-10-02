@@ -127,7 +127,7 @@ export default function DemoAnnotatedWorkflowViews() {
     <section aria-label="Workflow views demo" className="w-full">
       {/* Section label */}
       <div className="mb-3 flex items-center gap-2">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-600/10 px-3 py-1 text-[12px] font-medium text-brand-400">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--brand-tint)] px-3 py-1 text-[12px] font-medium text-[var(--brand-on-tint)]">
           <span aria-hidden>■</span> Container 2 — Workflow Views
         </span>
         <span className="text-[12px] text-[var(--content-secondary)]">
@@ -189,7 +189,7 @@ export default function DemoAnnotatedWorkflowViews() {
             <span className="text-[11px] text-[var(--content-secondary)]">
               {DEMO_VARIANT_TOTAL_RUNS} runs · {DEMO_VARIANT_COUNT} variants
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-brand-600/10 px-2 py-0.5 text-[11px] font-medium text-brand-400">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--brand-tint)] px-2 py-0.5 text-[11px] font-medium text-[var(--brand-on-tint)]">
               Approve Expense Report
             </span>
           </div>

@@ -6,6 +6,17 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-01] - Readable colours on the public pages in light mode
+
+### Fixed
+- Several labels on the public site were nearly invisible in light mode — the highlighted menu item, demo badges, links and section labels — some as faint as 1.06 to 1 against their background. They now meet the accessibility minimum in both light and dark themes.
+- Score colours in the sample report were too faint in light mode (green and amber). They now use the same checked colours as the rest of the product.
+
+### Known gap
+- The steps in the workflow map use colours designed for a white background and are very hard to read on the default dark theme. Recorded as backlog #255; the accessibility check for the product page stays held until it is fixed.
+
+---
+
 ## [2026-10-01] - The dashboard retirement criteria can now be read
 
 ### Added

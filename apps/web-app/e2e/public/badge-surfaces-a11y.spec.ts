@@ -25,23 +25,24 @@ import { forceTheme, expectThemeApplied } from '../helpers/theme.js';
   HELD BACK, with the reason and the row, because a hold recorded only in a log
   is indistinguishable from a test nobody wrote.
 
-  Running these in full found three pre-existing contrast defects on surfaces
-  that had never been scanned in any theme — none of them #236's badges, and
-  all of them real:
+  Row #245 (filed loop 77, closed loop 81) held three contrast defects here.
+  They are fixed, and the sop-template light scan RETURNED with that fix, as
+  the row required. Returning the scans found more than the row listed, and
+  the fix covers what they found: the active public-nav item (the same
+  tint-pair defect, 1.06:1 light), a warning band at 4.4:1, and the report
+  tiles' consistency colours (green 3.6:1 and amber 3.04:1 in light — amber
+  only latent because the fixture happens to be green).
 
-    - `text-brand-400` on a `bg-brand-600/10` tint: 1.63:1 in light. This is
-      #236's defect shape exactly, in the brand palette rather than the status
-      one, and the paired-token fix #236 established applies directly.
-    - `text-brand-500` on plain surfaces: 2.42:1 in light.
-    - `text-amber-700` on plain surfaces: 3.77:1 in DARK — a light-theme colour
-      used on the default theme.
-
-  Row #245 carries all three. The combinations below are the ones that pass
-  today; the rest return with the fix, in one commit, which is the only thing
-  that makes "held back" mean something other than "quietly never written".
+  /product is STILL HELD, in both themes, for one reason only: every remaining
+  violation is inside the workflow-map node, `WorkflowTaskNode`, which
+  hardcodes light-canvas colours as inline styles — the step label is
+  `#111827` on a ~6%-alpha tint, 1.08:1 in the DARK default theme. axe flags
+  the one node in the viewport; the code applies to every node, and the
+  component is the in-app workflow map, not just this demo. That is row #255,
+  a different outcome from #245. Both /product themes return with it.
 */
 const COVERED = [
-  { name: 'sop-template', path: '/sop-templates/invoice-approval-sop-template', themes: ['dark'] },
+  { name: 'sop-template', path: '/sop-templates/invoice-approval-sop-template', themes: ['dark', 'light'] },
 ] as const;
 
 for (const pageDef of COVERED) {
@@ -64,8 +65,7 @@ for (const pageDef of COVERED) {
         .map(
           (v) =>
             `[${v.impact}] ${v.id}: ${v.description}\n  ${v.nodes
-              .slice(0, 4)
-              .map((n) => n.target.join(', '))
+              .map((n) => `${n.target.join(', ')} — ${n.any[0]?.message ?? ''}`)
               .join('\n  ')}`,
         )
         .join('\n\n');
