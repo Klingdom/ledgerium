@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 — MR-044 recorded, and what I applied from it (Mode 4, non-counting)
+
+- **Review:** `docs/meta/MR_044_META_REVIEW.md`. Every number reproduces (workspace now 5319). Its headline: **loop 92 proved one of its three checks where it claimed all three, and a real code path could make the server reject a user's whole recording.** Fixed first, in its own commit (`08ea8a1`, Mode 3): session disagreement is now measured, not enforced.
+- **Adopted as practice, MR-044's recommendation:** **for any gate on data the extension sends, name for each checked field which component produces it.** Loop 92 checked truncation — the risk I had thought of — and never asked who writes `session_id`. The answer (the content script, unverified by the background) was the defect.
+- **Applied in this commit:**
+  - **#271 filed, CEO-gated:** the extension-side fix (drop or re-stamp events whose session id is not the active session's) touches the protected capture path. It is on the Reliability Invariant's forbidden-silent-changes list, so it needs your approval and the real-extension harness. The server now measures how often it happens, which is the evidence that decision should rest on.
+  - **#12 re-scoped from the code, and CEO-gated.** Production does not use the migrations at all: it runs `prisma db push`, and on failure starts the app against the *old* schema with a log line. Making that fail loudly is right for correctness and costs availability on a bad deploy — a trade-off that is yours, so the row is marked blocked rather than selected.
+  - **#269** gains: a step with *no* evidence ids passes the gate. **#268** corrected: the variants and systems maps are not React Flow views and follow the page theme, so their quoted ratios are light-theme only; and loop 91's dark `--wf-*` tokens are never rendered inside React Flow — remove them or set `colorMode` deliberately. **#270** gains loop 93's guard blind spots (name-coupled; single-line only).
+- **Corrections to my entries (MR-044 §6):** loop 92's "established before enforcing" was true for two checks and false for the third; and its claim to have checked every producer meant every *fixture* — the fixtures could not express a bfcache restore. Loop 91's dark-theme tokens were reported as fixes; inside the canvas they are unreachable.
+- **Next:** loop 94 — not #12 (blocked on your decision). Taking **#261** (11): well-formed JSON of the wrong shape still reaches a reported 500 — the open member of the client-input class.
+
+---
+
 ## 2026-10-01 — Mode 3 correction to loop 92 (non-counting): the check that could reject a real recording
 
 - **From MR-044 §2, and the most consequential finding of the session.** Loop 92 enforced three checks and proved two. *Steps resolve* and *ids are unique* hold for every producer — steps are built from the same array the bundle exports, and every id is a fresh UUID. **The session-id check does not:** each event's session id is copied from the content script, and the background never compares it to the active session. A page restored from the back/forward cache can still be running a capture engine from an earlier session and emit focus/visibility events under that old id before the new `START_SESSION` arrives. That bundle disagrees with itself — and is a real user's recording. **Loop 92 would have answered it 422, on every retry.**
