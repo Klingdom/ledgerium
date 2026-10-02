@@ -7,6 +7,8 @@ import { notFound } from 'next/dist/client/components/not-found';
 import { DynamicServerError } from 'next/dist/client/components/hooks-server-context';
 
 vi.mock('./api-error-reporting', () => ({ reportApiError: vi.fn() }));
+const authMock = vi.hoisted(() => ({ auth: vi.fn() }));
+vi.mock('./auth', () => ({ auth: authMock.auth }));
 
 import { withApiRoute, isNextControlFlowError } from './with-api-route';
 import { reportApiError } from './api-error-reporting';
@@ -15,6 +17,8 @@ describe('withApiRoute (rows #8 / #253)', () => {
   let errSpy: MockInstance;
   beforeEach(() => {
     vi.mocked(reportApiError).mockClear();
+    authMock.auth.mockReset();
+    authMock.auth.mockResolvedValue(null);
     errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
   });
   afterEach(() => errSpy.mockRestore());
@@ -41,11 +45,117 @@ describe('withApiRoute (rows #8 / #253)', () => {
     const res = (await wrapped()) as Response;
     expect(res.status).toBe(500);
     const body = await res.json();
-    expect(body).toEqual({ error: 'Internal server error' });
+    expect(body).toEqual({ error: 'Internal server error', requestId: expect.any(String) });
     expect(JSON.stringify(body)).not.toContain('payroll');
     expect(reportApiError).toHaveBeenCalledWith('/api/x', 500);
     // Full detail stays server-side.
     expect(errSpy).toHaveBeenCalled();
+  });
+
+  describe('request id and user id on the error path (row #9)', () => {
+    const loggedContext = (): Record<string, unknown> => {
+      const call = errSpy.mock.calls[0]!;
+      const ctxArg = call.find((a) => typeof a === 'string' && a.startsWith('{')) as string;
+      return JSON.parse(ctxArg);
+    };
+    const failing = withApiRoute('/api/x/[id]', async (_req: Request) => {
+      throw new Error('boom');
+    });
+    const req = () => new Request('http://localhost/api/x/1', { method: 'post' });
+
+    it('same request id in the log line, the header and the body', async () => {
+      const res = (await failing(req())) as Response;
+      const body = await res.json();
+      const ctx = loggedContext();
+      expect(res.status).toBe(500);
+      expect(body.requestId).toMatch(/^[0-9a-f-]{36}$/);
+      expect(res.headers.get('x-request-id')).toBe(body.requestId);
+      expect(ctx.requestId).toBe(body.requestId);
+      expect(ctx.endpoint).toBe('/api/x/[id]');
+      expect(ctx.method).toBe('POST');
+      expect(Object.keys(body).sort()).toEqual(['error', 'requestId']);
+    });
+
+    it('each failure gets a distinct id', async () => {
+      const a = await ((await failing(req())) as Response).json();
+      const b = await ((await failing(req())) as Response).json();
+      expect(a.requestId).not.toBe(b.requestId);
+    });
+
+    it('logs the user id when a session exists and never the email or name', async () => {
+      authMock.auth.mockResolvedValue({ user: { id: 'user_42', email: 'pat@example.com', name: 'Pat Example' } });
+      await failing(req());
+      const ctx = loggedContext();
+      expect(ctx.userId).toBe('user_42');
+      const line = JSON.stringify(errSpy.mock.calls[0]!.filter((a) => typeof a === 'string'));
+      expect(line).not.toContain('pat@example.com');
+      expect(line).not.toContain('Pat Example');
+    });
+
+    it('no session -> userId null with a reason', async () => {
+      await failing(req());
+      const ctx = loggedContext();
+      expect(ctx.userId).toBeNull();
+      expect(ctx.userIdReason).toBe('no-session');
+    });
+
+    it('a failing user-id lookup neither changes the 500 nor swallows the report', async () => {
+      authMock.auth.mockRejectedValue(new Error('headers() outside request scope'));
+      const res = (await failing(req())) as Response;
+      expect(res.status).toBe(500);
+      expect((await res.json()).error).toBe('Internal server error');
+      expect(loggedContext().userId).toBeNull();
+      expect(loggedContext().userIdReason).toBe('lookup-failed');
+      expect(reportApiError).toHaveBeenCalledWith('/api/x/[id]', 500);
+    });
+
+    it('a lookup that never settles is abandoned, not awaited forever', async () => {
+      vi.useFakeTimers();
+      try {
+        authMock.auth.mockReturnValue(new Promise(() => {}));
+        const pending = failing(req()) as Promise<Response>;
+        await vi.advanceTimersByTimeAsync(1100);
+        const res = await pending;
+        expect(res.status).toBe(500);
+        expect(loggedContext().userIdReason).toBe('lookup-timeout');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('sync handlers stay sync: id still present, userId null with reason', () => {
+      const wrapped = withApiRoute('/api/s', () => {
+        throw new Error('sync boom');
+      });
+      const res = wrapped() as Response;
+      expect(res.status).toBe(500);
+      expect(res.headers.get('x-request-id')).toBe(loggedContext().requestId);
+      expect(loggedContext().userIdReason).toBe('sync-handler');
+    });
+
+    it('never touches the request on the success path, and survives a hostile getter on failure (build-time Proxy)', async () => {
+      const hostile = new Proxy({}, {
+        get() {
+          throw new TypeError('Cannot read private member #state');
+        },
+      });
+      const ok = withApiRoute('/api/x', (_req: unknown) => 'fine');
+      expect(ok(hostile)).toBe('fine');
+      const bad = withApiRoute('/api/x', async (_req: unknown) => {
+        throw new Error('boom');
+      });
+      const res = (await bad(hostile)) as Response;
+      expect(res.status).toBe(500);
+      expect(loggedContext().method).toBe('UNKNOWN');
+    });
+
+    it('does not consult the session for control-flow re-throws', async () => {
+      const wrapped = withApiRoute('/api/x', async () => {
+        throw new DynamicServerError('Dynamic server usage: headers');
+      });
+      await expect(wrapped()).rejects.toBeInstanceOf(DynamicServerError);
+      expect(authMock.auth).not.toHaveBeenCalled();
+    });
   });
 
   it('passes a THROWN Response through untouched and unreported (MR-041 §3.2)', async () => {

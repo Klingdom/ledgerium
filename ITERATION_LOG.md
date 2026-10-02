@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 (loop 88) — An error a user can quote (Mode 1, `backend-engineer`)
+
+- **Controls:** Area — `observability` (fresh). Agent — **`backend-engineer`, a real rotation** (it ran the suite, typecheck and a production build itself; I re-ran all three, plus the prerender check). Extension — `871e29a`, 45 loops; #216 CEO-blocked. Cadence: 1 of 3 since MR-042.
+- **Candidate Selection: `burn-down` — #9** (13 after MR-042's re-score; **oldest open non-blocked row**, pre-loop-era). Second loop in six where the oldest row turned out to sit right where the leverage was: loop 83's wrapper made this one file.
+- **What shipped:** an unexpected API error now returns a server-generated request id in a header and in the body, and logs it with endpoint, method and user id. **Never email, name or content** — asserted on the logged string, not assumed. The id is generated server-side, never read from an inbound header, so log correlation cannot be forged.
+- **The error path cannot be made worse by the thing describing it.** Looking up the user id is capped at one second and cannot throw; when it is unavailable the log says why (`no-session`, `lookup-failed`, `lookup-timeout`, `sync-handler`) rather than guessing.
+- **The agent broke the production build and caught it before reporting.** Its first version read `req.method` eagerly; during static prerender the request is a Proxy whose getters throw, so all 17 `download.md` pages failed. The fix reads the method lazily, only on the failure path, and a regression test feeds it a hostile request. This is the check MR-041 asked for in loop 83 — "do the static routes still prerender" — catching a real defect for the first time.
+- **Residual scoped to the class, as MR-042 required, and stated honestly: 62 → 61.** The class is every API error log that cannot be joined to its request. This loop fixed one line of 62. The other 61 are counted by call site and filed as **#265** with the agent's proposal (`AsyncLocalStorage` set by the wrapper + a small logger + a guard). Also named there, uncounted: error logs in shared libraries reached from routes, and 14 warnings.
+- **Validation (re-run by me):** web-app **3381 → 3390** (+9); typecheck 0; build 0; prerender `17` download pages + `llms.txt`, **0** `/api` routes; 0 unhandled errors during build.
+- **Follow-ups:** 1 created (#265), 1 closed (#9).
+
+---
+
 ## 2026-10-01 — MR-042 recorded, and what I applied from it (Mode 4, non-counting)
 
 - **Review:** `docs/meta/MR_042_META_REVIEW.md`. Numbers reproduce. Its headline: **loop 86 claimed a class closed and checked one member of it.**

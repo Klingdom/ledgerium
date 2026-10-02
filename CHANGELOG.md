@@ -6,6 +6,13 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-01] - Errors now come with a reference you can quote
+
+### Added
+- When something unexpected goes wrong on the server, the error now includes a short reference code. Quoting it to support lets the exact failure be found in the logs. The logs record which account it happened to, but never email addresses or any recorded content.
+
+---
+
 ## [2026-10-01] - The upgrade report shows each prompt separately, and no longer hides odd numbers
 
 ### Added
