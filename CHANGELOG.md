@@ -6,6 +6,17 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Security: email contents stay out of the logs
+
+### Security
+- If no email service is configured, the server used to print the full email, including any password-reset link, to its logs. Outside local development it now notes only that a message was skipped.
+
+### Fixed
+- Sending email can no longer hang indefinitely when the email service stops responding.
+
+---
+
+
 ## [2026-10-02] - Monitoring numbers that measure one thing each
 
 ### Fixed

@@ -4,6 +4,21 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 113) — A reset link in the logs (Mode 1, `security-reviewer`)
+
+- **Controls:** Area — `security / web` (by row labels security is 2 of the last 5, so no penalty; counted by the work shipped it is 3 of 5, which would give 9 — #285 was the top open score either way). Agent — `security-reviewer` (the agent ran its own suite ×2, typecheck and three reverts; I re-ran the suite ×2, the email tests ×5, typecheck, and read the diff). Extension — `871e29a`, 70 loops. Cadence: 1 of 3 since MR-050.
+- **Candidate Selection: `burn-down` — #285** (11), as picked by MR-050. Open since MR-047.
+- **What changed (`lib/email.ts`):**
+  - (1) With no email provider configured, the fallback used to print the full email body, so a password-reset email put a working reset link in the server log. It now prints the body only when `NODE_ENV === 'development'` (default-deny), and otherwise logs that a send was skipped, with the recipient domain and subject only. The Resend error path also stopped logging the provider's raw response text.
+  - (2) The Resend `fetch` now has an abort deadline, sharing the SMTP constant.
+  - (3) On the SMTP deadline the transport is closed and dropped from the cache, and the losing promise is handled so it cannot become an unhandled rejection.
+  - A timeout now returns `timedOut: true`, meaning **outcome unknown**. Alerts treat it as undelivered and retry, with the bias stated in code: a possible duplicate alert is acceptable, a lost one is not.
+- **Residual, class-scoped (ways a send can outlive its reported result):** nodemailer 9.0.3 has no per-message abort; this was verified in the package, not assumed. A slow but live SMTP server in the DATA phase can therefore still deliver after we report a timeout. This is stated in the code. One more member of the class is unbounded: the admin email diagnostic's SMTP path (`verify` + `sendMail`) has no deadline — filed as **#294**. forgot-password logs the recipient address on a failed send; that is personal data, not a credential, and is left as is.
+- **Validation (re-run by me):** web-app **3860 → 3867** on 2 of 2 runs (no native-engine crash, #293); `email.test.ts` 5 of 5; typecheck 0. Reverts run by the agent: always logging the body fails 3 tests; dropping the Resend signal fails 1; removing the SMTP close fails 1. I made no product edits this loop.
+- **Follow-ups:** 1 created (#294), 1 closed (#285).
+
+---
+
 ## 2026-10-02 — MR-050 recorded (Mode 4, non-counting): a fix for a lever can create the next lever
 
 - **Review:** `docs/meta/MR_050_META_REVIEW.md`. Nothing reverts. Re-runs: web-app 3860 on 5 of 6 runs — run 3 crashed inside Prisma's native engine ("failed to delete napi ref", exit 127) with no test failing; throttle file 10 of 10; workspace 5649; typecheck 0.

@@ -98,23 +98,57 @@ export function __resetEmailTransport(): void {
   cachedTransporter = null;
 }
 
-async function sendViaSmtp({ to, subject, html }: SendEmailParams): Promise<{ success: boolean }> {
+/**
+ * Result of a send. `timedOut: true` means the OUTCOME IS UNKNOWN, not that the
+ * mail was not sent: the deadline fired before the provider answered, and the
+ * provider may still deliver. `success` is false in that case so that callers
+ * that need delivery (alerts) treat it as undelivered and retry. Chosen bias:
+ * a possible DUPLICATE alert is acceptable, a LOST alert is not.
+ */
+export interface SendEmailResult {
+  success: boolean;
+  timedOut?: true;
+}
+
+/**
+ * Deadline abort for SMTP (row #285). Verified against nodemailer 9.0.3: there
+ * is no per-message abort API. transporter.close() on a non-pooled transport
+ * only emits 'close' (the connection is local to send()), and on a pooled one
+ * closes only IDLE connections. So the in-flight connection cannot be killed
+ * from here. What we do: close the transporter and drop it from the cache so
+ * nothing reuses it, and rely on the socket-inactivity timeout (10 s) to end a
+ * stalled connection. RESIDUAL: a slow-but-alive server in the DATA phase can
+ * still accept the message after we reported timedOut. Hence "unknown", above.
+ */
+function abortSmtpTransport(): void {
+  const t = cachedTransporter;
+  cachedTransporter = null;
+  try {
+    t?.close();
+  } catch {
+    // best effort
+  }
+}
+
+async function sendViaSmtp({ to, subject, html }: SendEmailParams): Promise<SendEmailResult> {
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let timedOut = false;
   try {
     const deadline = new Promise<never>((_, reject) => {
-      timer = setTimeout(
-        () => reject(new Error(`SMTP send exceeded ${SMTP_SEND_DEADLINE_MS}ms deadline`)),
-        SMTP_SEND_DEADLINE_MS,
-      );
+      timer = setTimeout(() => {
+        timedOut = true;
+        abortSmtpTransport();
+        reject(new Error('SMTP send exceeded ' + SMTP_SEND_DEADLINE_MS + 'ms deadline'));
+      }, SMTP_SEND_DEADLINE_MS);
     });
-    await Promise.race([
-      getSmtpTransporter().sendMail({ from: fromAddress(), to, subject, html }),
-      deadline,
-    ]);
+    const sent = Promise.resolve(getSmtpTransporter().sendMail({ from: fromAddress(), to, subject, html }));
+    // The loser of the race may reject later; never leave it unhandled.
+    sent.catch(() => {});
+    await Promise.race([sent, deadline]);
     return { success: true };
   } catch (err) {
     console.error('[email] SMTP send failed:', err);
-    return { success: false };
+    return timedOut ? { success: false, timedOut: true } : { success: false };
   } finally {
     clearTimeout(timer);
   }
@@ -122,24 +156,38 @@ async function sendViaSmtp({ to, subject, html }: SendEmailParams): Promise<{ su
 
 // ── Resend ──────────────────────────────────────────────────────────────────
 
-async function sendViaResend({ to, subject, html }: SendEmailParams): Promise<{ success: boolean }> {
+async function sendViaResend({ to, subject, html }: SendEmailParams): Promise<SendEmailResult> {
+  // AbortController + setTimeout (not AbortSignal.timeout) so the deadline is
+  // controllable under fake timers and shares SMTP_SEND_DEADLINE_MS.
+  const controller = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, SMTP_SEND_DEADLINE_MS);
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        Authorization: 'Bearer ' + process.env.RESEND_API_KEY,
       },
       body: JSON.stringify({ from: fromAddress(), to, subject, html }),
+      signal: controller.signal,
     });
     if (!res.ok) {
-      console.error('[email] Resend error:', await res.text());
+      console.error('[email] Resend error: HTTP', res.status);
       return { success: false };
     }
     return { success: true };
   } catch (err) {
-    console.error('[email] Resend send failed:', err);
-    return { success: false };
+    // Name only: a fetch error message can carry request detail.
+    console.error('[email] Resend send failed:', timedOut ? 'deadline exceeded' : err instanceof Error ? err.name : 'unknown error');
+    // Abort cancels the request client-side; the provider may already have
+    // accepted it, so a timeout is "outcome unknown" (same as SMTP).
+    return timedOut ? { success: false, timedOut: true } : { success: false };
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -264,7 +312,7 @@ export async function runEmailDiagnostic(to: string): Promise<EmailDiagnostic> {
   if (provider === 'resend') {
     const result = await sendViaResend({ to, subject, html });
     if (result.success) return { provider, attempted: true, success: true, error: null, errorCode: null, config: { from } };
-    return failure(provider, true, 'provider_send_failed', { from });
+    return failure(provider, true, result.timedOut ? 'timeout' : 'provider_send_failed', { from });
   }
 
   return failure(provider, false, 'no_provider_configured', { from });
@@ -272,18 +320,29 @@ export async function runEmailDiagnostic(to: string): Promise<EmailDiagnostic> {
 
 // ── Public API ──────────────────────────────────────────────────────────────
 
-export async function sendEmail(params: SendEmailParams): Promise<{ success: boolean }> {
+export async function sendEmail(params: SendEmailParams): Promise<SendEmailResult> {
   const provider = selectEmailProvider();
 
   if (provider === 'smtp') return sendViaSmtp(params);
   if (provider === 'resend') return sendViaResend(params);
 
-  // Console fallback (no provider configured).
-  console.log('\n══════════════════════════════════════');
-  console.log('[email] (no provider configured — logging only)');
-  console.log('[email] TO:', params.to);
-  console.log('[email] SUBJECT:', params.subject);
-  console.log('[email] BODY:', params.html);
-  console.log('══════════════════════════════════════\n');
+  // Console fallback (no provider configured). The body of a transactional
+  // email routinely carries a credential (password-reset link = working
+  // token), so it is printed ONLY in local development, where the flow is
+  // otherwise untestable. Default-deny: any other NODE_ENV (production, test,
+  // unset) logs that a send was skipped - recipient domain and subject only,
+  // never the body, a URL or a token.
+  if (process.env.NODE_ENV === 'development') {
+    console.log('\n══════════════════════════════════════');
+    console.log('[email] (no provider configured — dev logging only)');
+    console.log('[email] TO:', params.to);
+    console.log('[email] SUBJECT:', params.subject);
+    console.log('[email] BODY:', params.html);
+    console.log('══════════════════════════════════════\n');
+  } else {
+    const at = params.to.lastIndexOf('@');
+    const domain = at >= 0 ? params.to.slice(at + 1) : 'unknown';
+    console.warn('[email] send skipped: no provider configured (to domain: ' + domain + ', subject: ' + params.subject + ')');
+  }
   return { success: true };
 }

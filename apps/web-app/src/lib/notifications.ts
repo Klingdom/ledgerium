@@ -127,6 +127,9 @@ async function sendEmailAlert(to: string, alert: Alert): Promise<boolean> {
         </div>
       `,
     });
+    // result.timedOut (outcome unknown) is deliberately NOT success: an alert
+    // that may or may not have arrived is retried (possible duplicate accepted;
+    // a lost alert is not).
     return result.success === true;
   } catch (err) {
     console.error('[alert] Email notification failed:', err instanceof Error ? err.name : 'unknown error');
