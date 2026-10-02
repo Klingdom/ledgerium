@@ -292,15 +292,35 @@ const openRows = rows.filter((r) => !r.struck);
 const oldest = openRows
   .filter((r) => !BLOCKED_RE.test(r.status))
   .sort((a, b) => a.id - b.id)[0];
+/**
+ * A row's birth loop, or null if it cannot be dated. Two formats exist:
+ * `… L<N>` in the birth cell (loop-era rows), and `iter NNN` in the birth or
+ * status cell (iteration-era rows, e.g. `new (iter 001)`), read as loop N per
+ * MR-039's convention. MR-041 §2.2: skipping the second format dropped the two
+ * oldest rows ever closed, so the median read YOUNGER in the very window that
+ * closed them — a measure flattering itself by what it could not parse.
+ */
+function birthLoop(r) {
+  const cell = r.cells[COL.BIRTH_ITER] ?? '';
+  const l = /\bL(\d+)\b/.exec(cell);
+  if (l) return Number(l[1]);
+  const it = /\biter\s*0*(\d+)\b/i.exec(`${cell} ${r.status}`);
+  return it ? Number(it[1]) : null;
+}
+
 const dated = [];
 let undatable = 0;
 for (const r of rows.filter((x) => x.struck)) {
   const closed = /CLOSED\s+(?:at\s+)?loop\s+(\d+)/i.exec(r.cells.join('|'));
   if (!closed) continue;
-  const birth = /\bL(\d+)\b/.exec(r.cells[COL.BIRTH_ITER] ?? '');
-  if (!birth) { undatable++; continue; }
-  dated.push({ id: r.id, close: Number(closed[1]), age: Number(closed[1]) - Number(birth[1]) });
+  const born = birthLoop(r);
+  if (born === null) { undatable++; continue; }
+  dated.push({ id: r.id, close: Number(closed[1]), age: Number(closed[1]) - born });
 }
+// The latest loop the backlog itself records a closure in. Used only to age the
+// oldest OPEN row; stated in the output so it is not mistaken for a clock.
+const latestLoop = dated.reduce((m, d) => Math.max(m, d.close), 0);
+const maxAge = dated.length ? Math.max(...dated.map((d) => d.age)) : null;
 const lastTen = dated.sort((a, b) => b.close - a.close || b.id - a.id).slice(0, 10).map((d) => d.age).sort((a, b) => a - b);
 const median = lastTen.length === 0 ? null
   : lastTen.length % 2 ? lastTen[(lastTen.length - 1) / 2]
@@ -308,8 +328,11 @@ const median = lastTen.length === 0 ? null
 const poolLine =
   `                  open ${openRows.length}` +
   ` | oldest open non-blocked: ${oldest ? `#${oldest.id} (${/^[\s—-]*$/.test(oldest.cells[COL.BIRTH_ITER] ?? '') ? oldest.status : `birth: ${oldest.cells[COL.BIRTH_ITER].trim()}`})` : 'none'}` +
+  (oldest && birthLoop(oldest) !== null && latestLoop ? `, ~${latestLoop - birthLoop(oldest)} loops old` : '') +
   ` | median age-at-close, last ${lastTen.length}: ${median === null ? 'n/a' : `${median} loops`}` +
-  (undatable ? ` (${undatable} closures in older formats not dated)` : '');
+  ` (max ${lastTen.length ? Math.max(...lastTen) : 'n/a'}; all-time max ${maxAge ?? 'n/a'})` +
+  (undatable ? ` | ${undatable} closures not datable` : '') +
+  (latestLoop ? ` | ages measured to loop ${latestLoop}, the latest closure recorded` : '');
 
 // ── Report ───────────────────────────────────────────────────────────────────
 const summary =

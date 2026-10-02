@@ -4,6 +4,18 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 — MR-041 recorded, and what I applied from it (Mode 4, non-counting)
+
+- **Review:** `docs/meta/MR_041_META_REVIEW.md`. The three numbers reconcile. The findings are again about what my checks could not see — and the headline lands on my own loop 82.
+- **#256 REOPENED.** I closed it as "not live until the GitHub secret and variable are set". The deploy config passes neither `CRON_SECRET` nor any alert channel to the web container, so the endpoint 500s on every call regardless, and a firing alert would reach no one. The row was closed on a fix that cannot succeed in production as committed. Reopening, rather than filing a new row, keeps the record honest about whose premise was wrong. Re-scored 13 → 15 (the remaining repo work is small); it is loop 85.
+- **The validator's median was flattering itself, fixed.** It skipped rows dated `iter NNN`, which dropped #8 and #16 — the two oldest rows ever closed, ~82 loops — so the median read *younger* (4.5 → 3.5) in the window that closed them. Now both formats are dated, and the line also prints the max age and the oldest open row's age. It reads **median 4.5, max 82** (4 before #256 was reopened and left the closure set). Closing #8 and #16 had also overwritten their only birth data (`new (iter 001)` in the status cell); restored as `closed (born iter 001)`.
+- **#258's count corrected: ~20, not 35.** The `residual:` practice counted the token `await req.json()`, not the defect — many of those calls were already guarded. A residual must be a property check; this was the first time it was used on something broader than one class name, and it produced a confident wrong number.
+- **Corrections to my own entries (MR-041 §5.2), kept here rather than by rewriting them:** (1) MR-040 entry: the pool line printed **110** at its own commit, not 108 — it ran after the two new rows were filed. (2) Loop 82: "not live until two values are set" was incomplete, above. (3) Loop 83: "all 95 handlers in all 74 files … guard D fails on any unwrapped handler" — guard D scans **72** files; the two it misses are the two `force-static` routes. And "0 `/api` routes prerendered" **cannot fail** as a test of the re-throw: Next 14.2 never prerenders a ≥400 response, so a swallowing wrapper also shows 0. Likewise my "build-time `api_error` lines 0" is suppressed during build by design and also cannot fail. Both are corrected in the loop 83 Mode 3 commit that follows. (4) Loop 84: "0 created" — #259 was filed after; and the 14th `text-brand-400` (`dark:` only) was excluded without saying so. (5) **Selection labels:** loops 82 and 84 logged `top-score` with the pool at 107-109, where Follow-Up Debt Policy clause 6 makes every pick `burn-down`. Second review to flag it. From loop 85 I log `burn-down` while clause 6 stands; retiring the clause is a CEO decision, not a labelling choice.
+- **Next:** a Mode 3 correction to loop 83 (thrown `Response` pass-through, guard D over all of `app/`, a build check that can fail), then loop 85 = #256.
+- **Validation:** validator clean; no product code in this commit.
+
+---
+
 ## 2026-10-01 (loop 84) — The residual, counted before and after (Mode 1, coordinator)
 
 - **Controls:** Area — `web-app / a11y` (82 infra, 83 api). Agent — coordinator; 83 was a real rotation, so no streak issue. Extension — `871e29a`, 41 loops; #216 CEO-blocked. **Cadence: 3 of 3 since MR-040 — MR-041 now due.**
