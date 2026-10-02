@@ -88,10 +88,38 @@ describe('ingestion allowlist (row #295)', () => {
     expect(rows.map((r) => r.eventName)).toEqual(['page_viewed']);
   });
 
-  it('every client union name is accepted; server-private names are not', () => {
+  it('every allowlisted name is accepted; server-private names are not', () => {
     for (const n of ANALYTICS_EVENT_NAMES) expect(isAllowedAnalyticsEventName(n)).toBe(true);
     expect(isAllowedAnalyticsEventName('alert_notified')).toBe(false);
     expect(isAllowedAnalyticsEventName('unknown')).toBe(false);
+  });
+});
+
+describe('server-only names are not writable by a client (row #298)', () => {
+  it.each(['subscription_created', 'api_error', 'workflow_uploaded', 'payment_failed', 'plan_limit_hit', 'team_created'])(
+    'POST %s is not persisted (anonymous or signed in)',
+    async (name) => {
+      const res = await post([{ event: name, endpoint: '/x', status: 500 }]);
+      expect(res.status).toBe(200);
+      expect(await res.json()).toMatchObject({ received: 0, attempted: 0, dropped: 1 });
+      authState.session = { user: { id: 'me' } };
+      await post([{ event: name }]);
+      expect(rows).toHaveLength(0);
+    },
+  );
+
+  it('a name a browser emits is still accepted, as a client row', async () => {
+    const res = await post([{ event: 'page_viewed', path: '/a' }, { event: 'upload_failed', error: 'Network error' }]);
+    expect(await res.json()).toMatchObject({ received: 2, dropped: 0 });
+    expect(rows.map((r) => [r.eventName, r.source])).toEqual([
+      ['page_viewed', 'client'],
+      ['upload_failed', 'client'],
+    ]);
+  });
+
+  it('a mixed batch keeps only the browser-emitted names', async () => {
+    await post([{ event: 'subscription_created' }, { event: 'sop_viewed', workflowId: 'w' }, { event: 'api_error' }]);
+    expect(rows.map((r) => r.eventName)).toEqual(['sop_viewed']);
   });
 });
 
@@ -117,8 +145,10 @@ describe('forged client rows cannot move alerts or alert state (row #295)', () =
   it('forged api_error / payment_failed / upload_failed do not change computeAlerts', async () => {
     const forged = (name: string, n: number) => Array.from({ length: n }, () => ({ event: name, endpoint: '/x', status: 500 }));
     await post([...forged('api_error', 20), ...forged('payment_failed', 5), ...forged('upload_failed', 10)]);
-    // Rows were accepted (allowlisted names) but are 'client' rows.
-    expect(rows.filter((r) => r.source === 'client').length).toBeGreaterThan(0);
+    // api_error / payment_failed have no client emitter, so they are not stored at
+    // all (row #298); upload_failed is client-emitted, so those rows are stored
+    // but as 'client' rows, which the alerts do not read.
+    expect(rows.filter((r) => r.source === 'client').map((r) => r.eventName)).toEqual(Array(10).fill('upload_failed'));
     const alerts = await computeAlerts(Date.now());
     const v = (id: string) => alerts.find((a) => a.id === id)!;
     expect(v('api_error_spike')).toMatchObject({ value: 0, status: 'ok' });

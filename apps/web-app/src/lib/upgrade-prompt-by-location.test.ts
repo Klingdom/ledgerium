@@ -3,6 +3,7 @@ import { computeUpgradePromptByLocation } from './upgrade-prompt-by-location';
 
 const ev = (eventName: string, props: unknown) => ({
   eventName,
+  userId: 'u1' as string | null,
   properties: typeof props === 'string' ? props : JSON.stringify(props),
 });
 const view = (location?: unknown) => ev('upgrade_prompt_viewed', { location, plan: 'team' });
@@ -26,7 +27,7 @@ describe('computeUpgradePromptByLocation', () => {
   it('counts rows with missing, blank, non-string or unparseable location instead of dropping them', () => {
     const r = computeUpgradePromptByLocation([
       view(), view('  '), view(5), ev('upgrade_prompt_viewed', 'not json'), ev('upgrade_prompt_viewed', { plan: 'x' }),
-      click(), click(null), { eventName: 'upgrade_clicked', properties: null },
+      click(), click(null), { eventName: 'upgrade_clicked', userId: 'u1', properties: null },
       view('a'),
     ]);
     expect(r.missingLocationViews).toBe(5);
@@ -62,5 +63,16 @@ describe('computeUpgradePromptByLocation', () => {
     const a = computeUpgradePromptByLocation(rows);
     expect(computeUpgradePromptByLocation([...rows].reverse())).toEqual(a);
     expect(computeUpgradePromptByLocation(rows)).toEqual(a);
+  });
+
+  it('anonymous rows do not count in any column, including missing-location (row #298)', () => {
+    const anon = (r: ReturnType<typeof ev>) => ({ ...r, userId: null });
+    const real = [view('teams_create'), click('teams_create')];
+    const forged = [anon(view('teams_create')), anon(click('teams_create')), anon(click('upgrade_button')), anon(click()), anon(view())];
+    const r = computeUpgradePromptByLocation([...real, ...forged]);
+    expect(r).toEqual(computeUpgradePromptByLocation(real));
+    expect(r.locations).toHaveLength(1);
+    expect(r.missingLocationClicks).toBe(0);
+    expect(r.missingLocationViews).toBe(0);
   });
 });

@@ -348,6 +348,24 @@ describe('getSystemHealth', () => {
   });
 });
 
+describe('getSystemHealth error panel: which rows count (row #298)', () => {
+  it('api_error counts server rows only; client_error client rows only; upload_failed server or signed-in', async () => {
+    mockDb.$queryRaw.mockResolvedValue([{ size: BigInt(1) }]);
+    mockDb.analyticsEvent.groupBy.mockResolvedValue([]);
+
+    await getSystemHealth(FIXED_NOW_MS);
+
+    const arg = mockDb.analyticsEvent.groupBy.mock.calls[0]![0] as { where: Record<string, unknown> };
+    expect(arg.where.OR).toEqual([
+      { eventName: 'api_error', source: 'server' },
+      { eventName: 'upload_failed', OR: [{ source: 'server' }, { userId: { not: null } }] },
+      { eventName: 'client_error', source: 'client' },
+    ]);
+    // No bare name filter left that would count a forged row of any name.
+    expect(arg.where.eventName).toBeUndefined();
+  });
+});
+
 // ── getSubscriptionBreakdown — edge cases (Iter C QA) ─────────────────────────
 //
 // Edge cases verified:

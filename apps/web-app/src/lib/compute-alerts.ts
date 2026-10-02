@@ -43,6 +43,12 @@ export async function computeAlerts(nowMs: number = Date.now()): Promise<AlertRe
   const cutoff2h = hoursAgo(nowMs, 2);
   const [uploadedCount2h, failedCount2h] = await Promise.all([
     analyticsEvent.count({ where: { eventName: 'workflow_uploaded', source: 'server', createdAt: { gte: cutoff2h } } }) as Promise<number>,
+    // `upload_failed` here is the post-parse definition: a request whose body
+    // parsed and was stored and then failed validation, integrity or processing
+    // (or hit an unexpected 500), emitted by /api/upload and /api/sync with
+    // source 'server'. Unparseable/oversized/wrong-type requests, auth and
+    // plan-limit refusals are not counted, and neither is the client-observed
+    // network error (a different fact; the server never saw that request).
     analyticsEvent.count({ where: { eventName: 'upload_failed', source: 'server', createdAt: { gte: cutoff2h } } }) as Promise<number>,
   ]);
   const totalUpload2h = uploadedCount2h + failedCount2h;

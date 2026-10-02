@@ -4,6 +4,42 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 119) — Only what a browser actually says (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `security / analytics` (2 of the last 5; no penalty).
+  - **Agent:** `security-reviewer`. The brief required a writers × readers table first, per MR-052 §6.3. The agent ran its own suite ×2, root, typecheck and five reverts. I re-ran all of it and checked the emitter scan for dynamic names: `TrackedLink`'s pass-through is named and its attributes must be static, and `trackActivation` emits literals.
+  - **Extension:** `871e29a`, 76 loops untouched.
+  - **Cadence:** 1 of 3 since MR-052.
+- **Candidate Selection: `burn-down` — #298** (14), filed and endorsed by MR-052. It lands before the CEO reads #57 numbers as evidence.
+- **The table came first, and it changed the answer.** `analytics-event-names.WRITERS_READERS.md` lists every name with its client emitters, server emitters and readers, with file:line. Of 121 allowlisted names:
+  - **53** have only a client emitter;
+  - **3** are emitted on both sides (`signup_completed`, `checkout_started`, `shared_workflow_viewed`);
+  - **`upload_failed`** is client for network errors only, server otherwise;
+  - **16** are server-only, including `subscription_created`, `workflow_uploaded`, `api_error`, `payment_failed` and `team_*`;
+  - **18** have no emitter at all.
+
+  The allowlist is now the **87 names with a client emitter**. A test that scans the source for emitters proves it in both directions: removing a live client emitter fails the test.
+- **Consumers changed:**
+  - The #57 retirement metrics and the upgrade-prompt metric count only rows with a user id, which since #295 comes from the session. One stated effect: a session that expires mid-visit now slightly undercounts bounces.
+  - `eventCounts` reads server rows for the three dual-emitted names, so there is no double count.
+  - The admin error panel counts `api_error` from the server, `client_error` from the client, and `upload_failed` from the server or a signed-in client.
+  - The post-parse-only `upload_failed` definition is documented where it is read.
+- **Residuals, class-scoped (rows that something counts and an attacker can create):**
+  - Forged rows already stored, and real pre-loop-116 client `workflow_uploaded` rows, still count in the tiles. They cannot be told apart. Counts become trustworthy forward from deploy.
+  - Anonymous clients can still write the 87 browser names, which feed the event-count tiles and the admin `client_error`/`upload_failed` counts.
+  - A signed-in user can forge their own engagement, retention and funnel rows. This is inherent to browser analytics; it is stated, not fixable here.
+- **Audit status travelled:** AUTHZ_AUDIT_001 P2-5 is updated in this commit.
+- **Validation (exit code + ANSI-stripped summary):** web-app **3918 → 3941** on 2 of 2 runs; root **5704 → 5727**; typecheck 0. Reverts the agent ran:
+  - old allowlist: 12 tests fail;
+  - no userId filter: 5 fail;
+  - no source filter in the aggregate: 1 fails;
+  - old admin query: 1 fails;
+  - a dropped client name is caught by the scan.
+- **Follow-ups:** 0 created, 1 closed (#298).
+
+---
+
 ## 2026-10-02 — MR-052 recorded (Mode 4, non-counting): a list derived from a type inherits the type's meaning
 
 - **Review:** `docs/meta/MR_052_META_REVIEW.md`. Every number reproduces:

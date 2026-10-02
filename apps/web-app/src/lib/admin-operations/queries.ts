@@ -109,7 +109,26 @@ export function formatBytes(bytes: number): string {
 
 // ── Error event names ──────────────────────────────────────────────────────────
 
-const ERROR_EVENT_NAMES = ['upload_failed', 'api_error', 'client_error'] as const;
+/*
+ * Row #298: which error-class rows count, per name. The ingest endpoint is anonymous, so a
+ * name's rows are only trustworthy where the writer is constrained.
+ *
+ *  - api_error: server-emitted only (lib/api-error-reporting.ts, 5xx responses).
+ *    Counts source 'server' rows only.
+ *  - client_error: browser-emitted only (app/error.tsx, app/global-error.tsx),
+ *    possibly on public pages, so userId may legitimately be null. Counts
+ *    source 'client' rows.
+ *  - upload_failed: DEFINED AS failures after a request body parsed and was
+ *    stored (validation, evidence-integrity, processing, unexpected 500), as
+ *    emitted by /api/upload and /api/sync with source 'server'. Unparseable,
+ *    oversized or wrong-type requests, auth refusals and plan-limit refusals
+ *    are not upload attempts that failed and are not counted. The upload page
+ *    also emits a client row for a network error the server never saw; it is
+ *    counted here too but only with a session userId (the upload page is
+ *    behind auth), so an anonymous writer cannot add to it. The alerts
+ *    (lib/compute-alerts.ts) read the server rows alone.
+ */
+// The where clause in getSystemHealth encodes the per-name rules above.
 
 // ── Section query functions ────────────────────────────────────────────────────
 
@@ -417,8 +436,15 @@ export async function getSystemHealth(
     db.analyticsEvent.groupBy({
       by: ['eventName'],
       where: {
-        eventName: { in: [...ERROR_EVENT_NAMES] },
         createdAt: { gte: last24h },
+        OR: [
+          { eventName: 'api_error', source: 'server' },
+          {
+            eventName: 'upload_failed',
+            OR: [{ source: 'server' }, { userId: { not: null } }],
+          },
+          { eventName: 'client_error', source: 'client' },
+        ],
       },
       _count: { id: true },
       orderBy: { _count: { id: 'desc' } },

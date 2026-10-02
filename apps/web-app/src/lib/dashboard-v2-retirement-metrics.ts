@@ -11,10 +11,24 @@
  * clamp once concealed exactly that); it is returned as computed so a reader
  * sees the mismatch. A zero denominator yields `null`, never 0 — "no data" and
  * "none happened" are different statements.
+ *
+ * Row #298: only rows with a non-null `userId` count. The dashboard sits behind
+ * auth and `userId` is session-derived by the ingest route (#295), so every
+ * real row carries one; an anonymous row can only have been written by someone
+ * who is not using the dashboard, and the ingest endpoint is open to anyone.
+ *
+ * Effect on counts: none for rows a signed-in user produced. Anonymous rows
+ * (forged, or a real event whose request lost its session, e.g. a session that
+ * expired mid-visit) stop counting. Losing a real event this way biases bounce
+ * and chip-click counts DOWN by an amount this module cannot measure; it is
+ * the price of not letting an unauthenticated writer move a retirement
+ * criterion.
  */
 
 export interface RetirementMetricsEventRow {
   eventName: string;
+  /** Session-derived (#295); null for anonymous rows, which do not count. */
+  userId: string | null;
   properties?: string | null;
 }
 
@@ -71,6 +85,7 @@ export function computeDashboardV2RetirementMetrics(
   let viewsMissingChipCount = 0;
 
   for (const evt of events) {
+    if (evt.userId === null || evt.userId === undefined) continue;
     switch (evt.eventName) {
       case 'dashboard_v2_viewed': {
         views++;

@@ -6,7 +6,7 @@ import { db } from '@/db';
 import { reportApiError } from '@/lib/api-error-reporting';
 import { computeDashboardV2RetirementMetrics } from '@/lib/dashboard-v2-retirement-metrics';
 import { computeUpgradePromptByLocation } from '@/lib/upgrade-prompt-by-location';
-import { isAllowedAnalyticsEventName } from '@/lib/analytics-event-names';
+import { isAllowedAnalyticsEventName, countsAsServerFact } from '@/lib/analytics-event-names';
 import { checkAnalyticsIngestRateLimit } from '@/lib/rate-limit/analytics-ingest-buckets';
 import { getClientIp } from '@/lib/client-ip';
 
@@ -59,8 +59,10 @@ async function handlePOST(req: NextRequest) {
     /*
       Row #295. This endpoint is unauthenticated by design, but the server keeps
       its own state in the same table (alert state, alert inputs). So an
-      anonymous caller may write only (a) names a client actually emits — the
-      AnalyticsEvent union — (b) with source forced to 'client', and (c) with
+      anonymous caller may write only (a) names a browser actually emits (the
+      emitter-scanned list in analytics-event-names.ts, row #298; server-only
+      names such as subscription_created / api_error are NOT writable here),
+      (b) with source forced to 'client', and (c) with
       userId taken from the session, never the body. Disallowed events are
       dropped silently (the success shape is unchanged; the count is in
       `dropped`). The body's content is never logged.
@@ -161,10 +163,17 @@ async function handleGET(req: NextRequest) {
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
     // Get all events in window
-    const events = await db.analyticsEvent.findMany({
+    const rows = await db.analyticsEvent.findMany({
       where: { createdAt: { gte: since } },
       orderBy: { createdAt: 'asc' },
     });
+    // Row #298: names emitted on both sides whose reader means the server's
+    // fact (signup_completed, checkout_started, shared_workflow_viewed) count
+    // the server row only; the client row is the same fact seen from the
+    // browser, and anyone can write it. Every aggregate below reads `events`.
+    // Effect: those three names stop being double-counted in eventCounts and
+    // dailyCounts; funnels (distinct users) and totals shift by the removed rows.
+    const events = rows.filter((e) => countsAsServerFact(e.eventName, e.source));
 
     // Aggregate by event name
     const eventCounts: Record<string, number> = {};

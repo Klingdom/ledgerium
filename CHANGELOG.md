@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Security: only real browser events are accepted
+
+### Security
+- The analytics endpoint now accepts only the events a browser actually sends. Server facts such as subscriptions, uploads and errors can no longer be submitted from outside, and dashboard-adoption metrics count only signed-in users.
+
+---
+
+
 ## [2026-10-02] - One incident, one alert
 
 ### Changed

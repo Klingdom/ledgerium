@@ -83,6 +83,37 @@ describe('GET /api/analytics/events dashboardV2Retirement', () => {
     expect(conv[2].rate).toBe(100);
   });
 
+  it('an anonymous bounce or chip click does not move the #57 metrics (row #298)', async () => {
+    authMock.mockResolvedValue({ user: { id: 'a', email: 'phil@mediafier.ai' } });
+    const anon = (r: ReturnType<typeof row>) => ({ ...r, userId: null });
+    findMany.mockResolvedValue([
+      row('dashboard_v2_viewed', { chipsRenderedCount: 2 }),
+      row('dashboard_v2_viewed', { chipsRenderedCount: 2 }),
+      row('dashboard_bounced'),
+      anon(row('dashboard_bounced')),
+      anon(row('dashboard_bounced')),
+      anon(row('insight_chip_clicked')),
+    ]);
+    const body = await (await GET(req())).json();
+    expect(body.dashboardV2Retirement).toMatchObject({ views: 2, bounces: 1, bounceRate: 0.5, chipClicks: 0 });
+  });
+
+  it('counts the server row only for names emitted on both sides (row #298)', async () => {
+    authMock.mockResolvedValue({ user: { id: 'a', email: 'phil@mediafier.ai' } });
+    findMany.mockResolvedValue([
+      { ...row('signup_completed'), source: 'client', userId: null },
+      { ...row('signup_completed'), source: 'client', userId: null },
+      { ...row('signup_completed'), source: 'server' },
+      { ...row('checkout_started'), source: 'client' },
+      { ...row('checkout_started'), source: 'server' },
+      { ...row('shared_workflow_viewed'), source: 'client', userId: null },
+      { ...row('page_viewed', { path: '/a' }), source: 'client' },
+    ]);
+    const body = await (await GET(req())).json();
+    expect(body.eventCounts).toEqual({ signup_completed: 1, checkout_started: 1, page_viewed: 1 });
+    expect(body.summary.totalEvents).toBe(3);
+  });
+
   it('refuses isAdmin:true when the email is not on the allowlist (row #276)', async () => {
     authMock.mockResolvedValue({ user: { id: 'u', email: 'user@example.com', isAdmin: true } });
     const res = await GET(req());

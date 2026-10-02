@@ -20,10 +20,19 @@
  *
  * Rates are not clamped. clickRate = clicks / views and may exceed 1; it is
  * null when views is 0 ("no views" is not "0%").
+ *
+ * Row #298: only rows with a non-null `userId` count (session-derived since
+ * #295). Every prompt and every `upgrade_button` click is rendered to a
+ * signed-in user (UpgradeButton renders a plain link for signed-out visitors),
+ * so a real row always has one; the ingest endpoint is open to anyone, so an
+ * anonymous row cannot be trusted as a prompt exposure. Effect: no change for
+ * real rows; anonymous rows leave the table, including `missingLocation*`.
  */
 
 export interface UpgradePromptEventRow {
   eventName: string;
+  /** Session-derived (#295); null for anonymous rows, which do not count. */
+  userId: string | null;
   properties?: string | null;
 }
 
@@ -74,6 +83,7 @@ export function computeUpgradePromptByLocation(
   let missingLocationClicks = 0;
 
   for (const evt of events) {
+    if (evt.userId === null || evt.userId === undefined) continue;
     const isView = evt.eventName === 'upgrade_prompt_viewed';
     const isClick = evt.eventName === 'upgrade_clicked';
     if (!isView && !isClick) continue;
