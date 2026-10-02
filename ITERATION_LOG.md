@@ -4,6 +4,35 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 118) — One incident, one page (Mode 1, `backend-engineer` + `system-architect`)
+
+- **Controls:**
+  - **Area:** `infra / monitoring`.
+  - **Agents:** `backend-engineer` (two passes) and `system-architect`, invoked under the D-4 clause-2 gate because `alert-state.ts` passed 200 LOC (236). The architect gave a read-only verdict of READY WITH MINOR REVISIONS. Both revisions went back to the engineer; I made no product edits.
+  - **Extension:** `871e29a`, 75 loops untouched.
+  - **Cadence:** **3 of 3 since MR-051 — MR-052 now due.**
+- **Candidate Selection: `burn-down` — #296** (10). It was the last alert-correctness row before the CEO switches alerts on.
+- **What changed:**
+  - **Hysteresis:** an alert is recorded `resolved` only after 3 ok runs with no firing run in between. `insufficient_data` runs neither count nor reset. N=2 would still page about every 3 h on a 2-hour flap; N>3 gains nothing.
+  - **Quiet spell:** a firing alert that has been ok or `insufficient_data` for at least 6 h counts as a new incident. That is above the ~3 h hysteresis and below the 24 h reminder.
+  - **Failed state writes:** a failed write puts the alert in a process-local "unconfirmed" set that discards its stale state before the next decision, so the next run notifies. The route reports `stateWriteFailures`.
+  - **Clock moving backwards:** a negative gap now sends instead of suppressing (architect finding 2: it was a loss path).
+  - **Overlapping runs:** `alerts-check.yml` has a `concurrency` group that queues runs and never cancels one, so a run is never killed mid-send.
+  - **State machine:** documented. Old `firing`/`resolved` rows still read correctly. The architect's other must-fix: the comments said "consecutive", which the code was not; the wording now matches the code, and a test pins ok → insufficient → ok → ok → resolved.
+- **Residuals, class-scoped (ways one incident still yields the wrong number of pages):**
+  - A process restart between a failed write and the next run forgets the unconfirmed set: a possible loss.
+  - The ok count is per run, not per hour, so delayed or skipped runs stretch it.
+  - Runs that were not queued can double-send.
+  - The shared `take: 1000` read can drop the oldest `firing` rows when about 6 alerts flap for 8 days (a late or duplicate reminder, never a miss), and there is no retention on state rows. Filed with the module split (pure state machine / DB I/O / in-process set; a typed `AlertState` union) as **#297**.
+- **Validation (exit code + ANSI-stripped summary):** web-app **3904 → 3918** on 3 of 3 runs; root **5690 → 5704**; typecheck 0; YAML parses. Reverts run by the agent:
+  - N=1: 5 tests fail.
+  - Quiet threshold set to infinity: 2 fail.
+  - Without `withoutUnconfirmed`: the failed-resolve re-fire test fails.
+  - Clock fix reverted: the new clock test fails.
+- **Follow-ups:** 1 created (#297), 1 closed (#296).
+
+---
+
 ## 2026-10-02 (loop 117) — Component tests that gate nothing (Mode 1, `devops-engineer`)
 
 - **Controls:**

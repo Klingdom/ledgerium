@@ -6,6 +6,17 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - One incident, one alert
+
+### Changed
+- An alert that switches on and off repeatedly now notifies once instead of every couple of hours, and a new problem after a quiet period is announced straight away.
+
+### Fixed
+- A failed internal record or a clock correction can no longer cause an alert to be silently skipped; at worst it is sent twice.
+
+---
+
+
 ## [2026-10-02] - Every web app test now has to pass before a deploy
 
 ### Changed

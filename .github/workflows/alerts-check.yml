@@ -58,6 +58,16 @@ on:
 permissions:
   contents: read
 
+# Row #296: overlapping runs (schedule + workflow_dispatch, or a delayed hourly)
+# both read alert state before either writes it -> duplicate page. Serialize them.
+# cancel-in-progress is false on purpose: cancelling could kill a run mid-send
+# (alert delivered, state not yet recorded -> duplicate next hour) or mid-424;
+# queueing lets the later run see the earlier run's recorded state. GitHub keeps
+# at most one pending run per group (newest wins), fine for an hourly poll.
+concurrency:
+  group: alerts-check
+  cancel-in-progress: false
+
 jobs:
   check:
     runs-on: ubuntu-latest

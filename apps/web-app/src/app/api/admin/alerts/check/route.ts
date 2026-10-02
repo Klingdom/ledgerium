@@ -4,7 +4,7 @@ import { computeAlerts } from '@/lib/compute-alerts';
 import { sendAlertNotification } from '@/lib/notifications';
 import { reportApiError } from '@/lib/api-error-reporting';
 import { verifyCronBearer } from '@/lib/cron-auth';
-import { decideAlertSends, loadAlertStates, recordAlertState, type AlertStates } from '@/lib/alert-state';
+import { decideAlertSends, loadAlertStates, recordAlertState, withoutUnconfirmed, type AlertStates } from '@/lib/alert-state';
 
 /**
  * GET /api/admin/alerts/check
@@ -114,7 +114,7 @@ async function handleGET(request: NextRequest) {
     } catch (err) {
       console.error('[admin/alerts/check] alert state unreadable - notifying without suppression', err);
     }
-    const decision = decideAlertSends(previous, alerts, nowMs);
+    const decision = decideAlertSends(withoutUnconfirmed(previous), alerts, nowMs);
     const toNotify = decision.sends.map((s) => s.alert);
     // Firing P1/P2 alerts (sent now or suppressed as already-notified).
     const alertsFiring = toNotify.length + decision.suppressed.length;
@@ -142,13 +142,22 @@ async function handleGET(request: NextRequest) {
 
     // Record state ONLY for what was actually delivered (undelivered = retried
     // next run), and resolutions for alerts that went back to ok.
-    await Promise.all([
+    const writes = await Promise.all([
       ...toNotify.flatMap((a, i) => {
         const r = results[i];
         return r !== null && r !== undefined && r.delivered > 0 ? [recordAlertState(a.id, 'firing', nowMs)] : [];
       }),
       ...decision.resolved.map((id) => recordAlertState(id, 'resolved', nowMs)),
+      ...decision.clear.map((c) => recordAlertState(c.id, 'clear', nowMs, { okRuns: c.okRuns, sinceMs: c.sinceMs })),
+      ...decision.continued.map((id) => recordAlertState(id, 'continued', nowMs)),
     ]);
+    // Row #296: a failed state write is reported, and the next run discards the
+    // stale state for that alert (duplicate-shaped, never loss-shaped).
+    const stateWriteFailures = writes.filter((ok) => !ok).length;
+    const stateNote = stateWriteFailures > 0 ? { stateWriteFailures } : {};
+    if (stateWriteFailures > 0) {
+      console.error(`[admin/alerts/check] ${stateWriteFailures} alert state write(s) failed - next run will not suppress on stale state`);
+    }
 
     console.log(
       `[admin/alerts/check] Checked ${alerts.length} alert(s), firing P1/P2: ${alertsFiring}, suppressed: ${alertsSuppressed}, attempted: ${toNotify.length}, delivered: ${alertsSent}, undelivered: ${alertsUndelivered}, channel failures: ${channelFailures}`,
@@ -166,6 +175,7 @@ async function handleGET(request: NextRequest) {
           alertsSent,
           alertsSuppressed,
           alertsUndelivered,
+          ...stateNote,
         },
         { status: 424 },
       );
@@ -179,12 +189,12 @@ async function handleGET(request: NextRequest) {
         `[admin/alerts/check] ${channelFailures} channel delivery failure(s); every alert still reached >= 1 channel - answering 207`,
       );
       return NextResponse.json(
-        { checked: true, alertsFiring, alertsSent, alertsSuppressed, channelFailures },
+        { checked: true, alertsFiring, alertsSent, alertsSuppressed, channelFailures, ...stateNote },
         { status: 207 },
       );
     }
 
-    return NextResponse.json({ checked: true, alertsFiring, alertsSent, alertsSuppressed, channelFailures });
+    return NextResponse.json({ checked: true, alertsFiring, alertsSent, alertsSuppressed, channelFailures, ...stateNote });
   } catch (err) {
     console.error('[admin/alerts/check GET]', err);
     reportApiError('/api/admin/alerts/check', 500);
