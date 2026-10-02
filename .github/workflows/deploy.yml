@@ -41,6 +41,14 @@ jobs:
       - name: Check typecheck coverage and pnpm version
         run: node scripts/check-typecheck-coverage.mjs
 
+      # Production image must COPY every transitive workspace dep of apps/web-app
+      # (deps + builder stages) or `pnpm install`/`next build` fails in the image build.
+      - name: Test Dockerfile workspace guard
+        run: node --test scripts/check-dockerfile-workspace.test.mjs
+
+      - name: Check Dockerfile includes all web-app workspace deps
+        run: node scripts/check-dockerfile-workspace.mjs
+
       - name: Generate Prisma client
         run: pnpm --filter @ledgerium/web-app --fail-if-no-match exec prisma generate
 

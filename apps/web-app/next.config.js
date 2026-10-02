@@ -4,7 +4,7 @@ const nextConfig = {
   // To debug the hydration error locally use `next dev`, or build with
   // LEDGERIUM_SOURCE_MAPS=1 (default off) and keep the output private.
   productionBrowserSourceMaps: process.env.LEDGERIUM_SOURCE_MAPS === '1',
-  transpilePackages: ['@ledgerium/process-engine', '@ledgerium/intelligence-engine'],
+  transpilePackages: ['@ledgerium/process-engine', '@ledgerium/intelligence-engine', '@ledgerium/process-graph'],
   webpack: (config) => {
     // Resolve .js imports to .ts files in workspace packages (ESM → TS source)
     config.resolve.extensionAlias = {

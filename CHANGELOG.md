@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Build reliability
+
+### Fixed
+- The production image now includes every internal package the app needs, and the deploy pipeline checks this before building, so a missing package can no longer break a deploy.
+
+---
+
+
 ## [2026-10-02] - Decision detection engine (not yet visible)
 
 ### Added

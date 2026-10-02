@@ -6,8 +6,7 @@
  *
  * `DecisionType` and `ConditionType` are REUSED from the PATHE-P01 closed
  * unions (type-only import; erased at runtime, so the package has zero runtime
- * dependency on web-app). The union currently lives under apps/web-app and
- * should move to a shared package.
+ * dependency on web-app). The unions live in @ledgerium/process-graph (#330).
  *
  * Input notes: `StepInput` must be PII-sanitized upstream (labels, uiState,
  * offeredOptions are echoed into descriptions). `offeredOptions` has no
@@ -17,7 +16,7 @@
 import type {
   DecisionType,
   ConditionType,
-} from '../../../apps/web-app/src/lib/process-graph/types/closed-unions.js';
+} from '@ledgerium/process-graph';
 
 export type { DecisionType, ConditionType };
 

@@ -30,6 +30,7 @@
     "@ledgerium/agent-intelligence": "workspace:*",
     "@ledgerium/intelligence-engine": "workspace:*",
     "@ledgerium/process-engine": "workspace:*",
+    "@ledgerium/process-graph": "workspace:*",
     "@prisma/client": "^6.2.0",
     "@xyflow/react": "^12.10.1",
     "bcryptjs": "^2.4.3",

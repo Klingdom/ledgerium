@@ -26,7 +26,8 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # without package.json (api-client / capture-core / renderers /
 # schema-process / ui-components) are scaffolds — pnpm ignores them.
 # `pnpm install --frozen-lockfile` resolves the workspace graph from
-# pnpm-lock.yaml; the 10 initialized packages below must all be present.
+# pnpm-lock.yaml; every package below must be present, including all transitive
+# workspace deps of apps/web-app (guarded by scripts/check-dockerfile-workspace.mjs).
 COPY apps/web-app/package.json apps/web-app/
 COPY apps/web-app/prisma/schema.prisma apps/web-app/prisma/
 COPY apps/extension-app/package.json apps/extension-app/
@@ -38,6 +39,7 @@ COPY packages/segmentation-engine/package.json packages/segmentation-engine/
 COPY packages/policy-engine/package.json packages/policy-engine/
 COPY packages/schema-events/package.json packages/schema-events/
 COPY packages/shared-types/package.json packages/shared-types/
+COPY packages/process-graph/package.json packages/process-graph/
 
 # Install all dependencies (including dev for build step)
 RUN pnpm install --frozen-lockfile
@@ -60,6 +62,8 @@ COPY apps/web-app/ apps/web-app/
 COPY packages/process-engine/ packages/process-engine/
 COPY packages/intelligence-engine/ packages/intelligence-engine/
 COPY packages/agent-intelligence/ packages/agent-intelligence/
+COPY packages/process-graph/ packages/process-graph/
+COPY packages/schema-events/ packages/schema-events/
 
 # Generate Prisma client
 WORKDIR /app/apps/web-app
@@ -102,6 +106,8 @@ COPY --from=builder /app/apps/web-app/node_modules ./apps/web-app/node_modules
 COPY --from=builder /app/packages/process-engine ./packages/process-engine
 COPY --from=builder /app/packages/intelligence-engine ./packages/intelligence-engine
 COPY --from=builder /app/packages/agent-intelligence ./packages/agent-intelligence
+COPY --from=builder /app/packages/process-graph ./packages/process-graph
+COPY --from=builder /app/packages/schema-events ./packages/schema-events
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 

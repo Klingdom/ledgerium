@@ -4,6 +4,32 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 143) — Packages do not reach into apps (Mode 1, `backend-engineer` + `devops-engineer`)
+
+- **Controls:**
+  - **Area:** `path-e / architecture`.
+  - **Agents:** `backend-engineer` (the move) and `devops-engineer` (the Dockerfile and its guard, after my review).
+  - **Extension:** `871e29a`, 100 loops untouched.
+  - **Cadence:** **3 of 3 since MR-059 — MR-060 now due.**
+- **Candidate Selection: `burn-down` — #330** (12, tied with #325). The tie went to #330 because further Path E work builds on these types. This is the first post-consumption burn-down: cool-off recharge 1 of 3.
+- **What changed:**
+  - **The move.** The Path E closed unions moved with `git mv` (byte-identical) from `apps/web-app/src/lib/process-graph/types/closed-unions.ts` to a new `packages/process-graph/`. The old path is a one-line `export *` re-export, so the 10 web-app importers are untouched. `decision-engine` now imports `@ledgerium/process-graph`, and the web app adds the workspace dependency and `transpilePackages`.
+  - **No app imports in packages.** The guard `scripts/check-no-app-imports.test.mjs` fails if any `packages/*/src` file imports from `apps/*`; it fails against the old import.
+- **Caught in review, before commit — this would have broken the next deploy:**
+  - **The gap.** The production Dockerfile copies workspace packages from an explicit list. The web app now depended on `process-graph`, which was not on that list, so the image build would have failed on push and nothing would have deployed.
+  - **A second gap.** The new guard showed `schema-events`, a transitive dependency via `agent-intelligence`, **was already missing from the builder stage**. It had worked only by accident.
+  - **The fix.** Both packages are added to the deps, builder and runner stages.
+  - **The guard.** `scripts/check-dockerfile-workspace.mjs` (4 tests) fails whenever a transitive workspace dependency of the web app is not copied in both stages. It is wired into `deploy.yml` before build, and it exits 1 on the pre-fix Dockerfile.
+- **Validation (exit code + ANSI-stripped summary):**
+  - **Tests:** root 6043 on 2 of 2 runs; web-app 4245; script tests 33 of 33.
+  - **Typecheck:** 0. The typecheck-coverage check now counts 13 packages.
+  - **Production build:** `pnpm --filter @ledgerium/web-app build` exits 0 ("Compiled successfully"), with 0 `.map` files.
+  - **Image install, simulated:** the deps-stage file set with `pnpm install --frozen-lockfile --offline --ignore-scripts` resolves 537 packages and exits 0.
+  - **Not run:** a real Docker image build. The daemon is not running here, so **the first real image build happens in CI on push**.
+- **Follow-ups:** 0 created, 1 closed (#330).
+
+---
+
 ## 2026-10-02 (loop 142) — Where recorded runs branch, and why (Mode 1, `backend-engineer` + `system-architect`)
 
 - **Controls:**
