@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — AUTHZ_AUDIT_001: a deliberate traversal of access control (Mode 3-adjacent, non-counting)
+
+- **Why:** loop 95's privilege escalation was found by accident, while doing something else. MR-039 showed a deliberate traversal finds what adjacency does not. `security-reviewer`, read-only, every route: `docs/meta/AUTHZ_AUDIT_001.md`.
+- **Result: 72 routes; 0 P0 / 3 P1 / 5 P2 / 9 P3 as graded by the auditor.** The good news is structural and worth stating: **no IDOR and no mass assignment anywhere** — every workflow, portfolio, tag, insight, baseline and key access is scoped to the owner, and every update builds its data field by field.
+- **Verified by me before intake, not taken from the report:**
+  - **P1-3 — a team admin can remove every owner. Confirmed in code, no mitigating condition.** Removal never checks the target's role, and the last-owner guard counts owner rows without filtering for active status, while removal only marks a row removed — so removed owners keep counting. **Re-graded to P0 under the audit's own definition (exploitable escalation) and promoted live as #274.** This is coordinator judgment applied at intake on verified evidence; MR-045 is asked to ratify or reject it rather than have it pass silently.
+  - **P1-1 — first-user admin bootstrap.** Confirmed callable by any signed-in user if no admin row exists — **but the deploy defaults `DISABLE_ADMIN_BOOTSTRAP` to `true`** (`deploy.yml:173`), so it is closed in production unless that variable is overridden. Stays P1 for the two inconsistent admin definitions it exposes.
+  - **P1-2 — allowlisted admin emails without email verification** depends on production data (whether each allowlisted address already has an account). Stays P1; raised as a CEO check.
+- **Everything else stays in the audit's cold pool** per the Audit-Intake Pattern (P0-only live promotion).
+- **Pool:** +1 (#274).
+
+---
+
 ## 2026-10-02 (loop 96) — A step that cites nothing (Mode 1, `backend-engineer`)
 
 - **Controls:** Area — `evidence linkage` (94 api, 95 security). Agent — **`backend-engineer`, a real rotation** (web-app suite, workspace suite and typecheck run by the agent; I re-ran them and ran the real-extension harness). Extension source — untouched; extension **rebuilt and harness-tested** because it bundles the changed package. Cadence: **3 of 3 since MR-044 — MR-045 now due.** A read-only authorization audit (Mode 3-adjacent) ran concurrently on separate files.
