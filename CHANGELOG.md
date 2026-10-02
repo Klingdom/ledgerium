@@ -17,7 +17,7 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 ## [2026-10-02] - Security: limits on password guessing now follow the account
 
 ### Security
-- Sign-in attempts were limited per network address, which a determined attacker could get around. Repeated wrong passwords for the same account now slow down sign-in for that account, wherever the attempts come from: five tries, then a growing wait of up to 15 minutes. Password-reset emails for one address are limited the same way. Responses never reveal whether an account exists.
+- Sign-in attempts were limited per network address, which a determined attacker could get around. Repeated wrong passwords for the same account now slow down sign-in for that account, wherever the attempts come from: five tries, then a growing wait of up to 15 minutes. Password-reset emails for one address are limited the same way. The wording of a response does not reveal whether an account exists, though its timing still can; that, and a way for heavy junk traffic to switch the new limit off, are being fixed next.
 
 ---
 
