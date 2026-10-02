@@ -4,6 +4,17 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-048 recorded (Mode 4, non-counting): what the summaries claimed
+
+- **Review:** `docs/meta/MR_048_META_REVIEW.md`. Loops 104-106 are correct; nothing reverts. Web-app passed 5 of 5 runs; both shell scripts are LF via `.gitattributes`, so the image will not fail on line endings.
+- **The finding is about my summaries, not the code.** I told the CEO "the deploy is safe to run again" before the new check had ever run — and the check validates the secret *as GitHub holds it*, while the deploy action evaluates its variable block as shell, so a secret containing `$` or backticks could reach the container altered. Amended in place in SYSTEM_HEALTH. Filed **#288** with the three MR-047 recommendations I dropped: `AUTH_SECRET` is read first and unchecked; the executed test can skip silently; no test runs the start-script chain end to end.
+- **Corrections, logged:** the flaky test failed about one run in **eleven**, not five (MR-048 ran it more times than I did). I removed one unverified statistic before committing loop 106 and did not record that I had — MR-048 noticed. The light-theme tag ratio fell from 5.21 to 4.88 at loop 106 (still passes) and that went unstated. The tag has 25 product users, not 27.
+- **The squat check I gave the CEO could miss a squat.** Emails were not normalised at signup before July, so `Phil@Mediafier.AI` and `phil@mediafier.ai` can be *different* accounts — and the allowlist lower-cases both, so either is admin. The check must be case-insensitive and must return exactly one row per allowlisted address.
+- **Promoted through audit-intake path 1** (the slot #286 opened): **#289** — a per-account login throttle. The shortest remaining path to admin is now guessing the passwords of two public addresses behind an IP throttle that a forged header defeats; #225 is the proxy-side half and needs the CEO, this is the code half and does not.
+- **Next:** loop 107 = **#289** (13). MR-048 picked #285 (11) before #289 was promoted; with the promotion applied, #289 is the top score and the selection policy takes it. #285 follows.
+
+---
+
 ## 2026-10-02 (loop 106) — The last shade (Mode 1, `frontend-engineer`)
 
 - **Controls:** Area — `web-app / a11y`, chosen **by the saturation rule**: security had been the Area in 3 of the last 5 loops (101, 103, 105), which takes 2 off #285 and lets this row win. Agent — **`frontend-engineer`, a real rotation** (suite, typecheck, public scans and three mutation checks run by the agent; I re-ran suite and typecheck and recounted the residual). Extension — `871e29a`, 63 loops. **Cadence: 3 of 3 since MR-047 — MR-048 now due.**
