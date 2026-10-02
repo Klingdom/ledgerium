@@ -90,7 +90,7 @@ function JoinTeamContent() {
             Welcome to {teamName}!
           </h2>
           <p className="mt-ds-2 text-ds-sm text-[var(--content-secondary)]">
-            You've joined as a {role}. You can now access shared workflows from this team.
+            You've joined as a {role}. You can see who's on the team, and your owner or admin manages invites and roles.
           </p>
           <button
             onClick={() => router.push('/teams')}

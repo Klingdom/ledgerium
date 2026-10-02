@@ -4,6 +4,44 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 135) — What a team actually is (Mode 1, `frontend-engineer` + `growth-strategist`)
+
+- **Controls:**
+  - **Area:** `web-app / trust`. Web-app was 2 of the last 5 loops, so no penalty applies.
+  - **Agents:** `frontend-engineer` (two passes) and `growth-strategist` (D-4 review, required because 7 strings changed; it returned 4 POLISH, all applied).
+  - **Extension:** `871e29a`, 92 loops untouched.
+  - **Cadence:** 2 of 3 since MR-057.
+- **Candidate Selection: `burn-down` — #321** (12), the top score.
+- **The role-capability table came first, covering public pages and the app:**
+  - **Owner:** lists the roster, invites, revokes invites, removes members and changes roles, including granting or removing an owner (not the sole owner).
+  - **Admin:** the same, except anything touching an owner.
+  - **Member and viewer:** the roster only; viewer is identical to member.
+  - **What does not exist:** a team delete, team billing, and any team library. Nothing reads team shares.
+- **The table found four false claims the row had not named:**
+  - the docs' "Shared workflow library" section;
+  - the docs' privacy line "Team workflows are only visible to members with the appropriate role";
+  - the docs Teams card;
+  - the join page's "You can now access shared workflows from this team".
+
+  All are corrected, together with the named owner and admin rows.
+- **What changed:**
+  - **Docs owner and admin rows:** now list exactly the enforced actions.
+  - **§6.4:** begins "Roadmap:" (the library is not built).
+  - **§11.5:** "Workflows are private to your account unless you share them by link."
+  - **Teams card:** "Team roster, invites, and owner and admin roles."
+  - **Join page:** "You've joined as a {role}. You can see who's on the team, and your owner or admin manages invites and roles."
+  - **Invite picker:** shows "Viewer has the same access as Member today." when Viewer is chosen. The hint was chosen over hiding Viewer, because existing invites and the roster use it.
+- **Tests:**
+  - **Docs role pin:** checks the exact owner and admin rows, plus that no team-delete route exists.
+  - **Deletion scan:** now covers **all public pages except the terms page**. The exclusion is commented and points to #319, because the terms page is legal text left for the CEO.
+  - **New `teams/[id]/page.test.tsx`** (3 tests): no hint for Member, a hint for Viewer, and the POST still sends `viewer`.
+  - **Revert proof:** reverting the pages fails the docs pin and the hint test. Planting "export and deletion" on the support page fails the widened scan.
+- **For the CEO:** a team today is a roster with invites. A shared library and distinct viewer permissions (#316) are product work that needs a decision before the copy can promise more.
+- **Validation (exit code + ANSI-stripped summary):** web-app **4133 → 4137** on 3 of 3 runs; root **5911 → 5912**; typecheck 0; `terms/page.tsx` unchanged.
+- **Follow-ups:** 0 created, 1 closed (#321).
+
+---
+
 ## 2026-10-02 (loop 134) — Guards that cannot pass on nothing (Mode 1, `qa-engineer`)
 
 - **Controls:**

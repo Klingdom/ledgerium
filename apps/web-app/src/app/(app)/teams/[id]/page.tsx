@@ -173,6 +173,11 @@ export default function TeamDetailPage() {
               {isInviting ? 'Sending...' : 'Send Invite'}
             </button>
           </div>
+          {inviteRole === 'viewer' && (
+            <p className="text-ds-xs text-[var(--content-tertiary)] mb-ds-2">
+              Viewer has the same access as Member today.
+            </p>
+          )}
 
           {inviteUrl && (
             <div className="ds-callout ds-callout-success mt-ds-3">

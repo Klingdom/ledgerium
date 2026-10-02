@@ -610,7 +610,7 @@ export default function DocsPage() {
                 <div className="aspect-[16/10] overflow-hidden bg-[var(--surface-primary)]">
                   <Image
                     src="/docs/screenshots/teams-page.png"
-                    alt="Teams page showing shared libraries and member roles"
+                    alt="Teams page showing the member roster and roles"
                     width={640}
                     height={400}
                     className="block w-full h-full object-cover object-top"
@@ -620,7 +620,7 @@ export default function DocsPage() {
                 <div className="p-4">
                   <h4 className="font-semibold text-[var(--content-primary)] mb-1">Team Collaboration</h4>
                   <p className="text-sm text-[var(--content-secondary)] leading-relaxed">
-                    Shared workflow libraries, member management, and role-based access.
+                    Team roster, invites, and owner and admin roles.
                   </p>
                 </div>
               </div>
@@ -1598,8 +1598,8 @@ export default function DocsPage() {
                 </thead>
                 <tbody>
                   {[
-                    ['Owner', 'Full control: manage billing, delete the team, assign any role'],
-                    ['Admin', 'Manage members, invite others, manage all workflows and portfolios'],
+                    ['Owner', 'Invite and remove members, revoke invites, assign any role including Owner'],
+                    ['Admin', 'Invite and remove members, revoke invites, assign roles up to Admin (cannot grant, change or remove an Owner)'],
                     ['Member', 'Roadmap: separate Member restrictions are not yet enforced'],
                     ['Viewer', 'Roadmap: read-only restrictions are not yet enforced'],
                   ].map(([role, perms]) => (
@@ -1617,10 +1617,9 @@ export default function DocsPage() {
 
               <H3>6.4 Shared workflow library</H3>
               <P>
-                Once on a team, all Member and Admin recordings are visible in the shared team
-                library. Portfolio organization applies across the whole team. Any team member
-                with the appropriate role can view, search, filter, export workflows, assign
-                them to portfolios, and run intelligence analysis across the full team library.
+                Roadmap: today a team gives you a member roster and invites; every member can see the
+                roster. A shared team library, where teammates view and work with each
+                other&rsquo;s workflows, is on the roadmap.
               </P>
             </section>
 
@@ -1980,7 +1979,7 @@ export default function DocsPage() {
               <UL>
                 <li>Data is encrypted in transit (HTTPS/TLS).</li>
                 <li>Access is controlled by your account credentials.</li>
-                <li>Team workflows are only visible to members with the appropriate role.</li>
+                <li>Workflows are private to your account unless you share them by link.</li>
                 <li>Ledgerium AI staff do not access your data except to resolve a support issue you have explicitly raised.</li>
               </UL>
 

@@ -10,7 +10,7 @@
  * rejects the promise itself, whatever the date.
  */
 import { describe, it, expect } from 'vitest';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { PLAN_FEATURES } from '@/lib/plans';
 import { PRICING_CONFIG } from '@/lib/config';
@@ -200,6 +200,25 @@ describe('#313: docs page agrees with lib/plans.ts on Enterprise features', () =
     expect(docs).not.toMatch(/\['Member', 'Record workflows/);
     expect(docs).not.toMatch(/\['Viewer', 'Read-only access/);
   });
+  it('docs owner/admin/team claims match the team routes (#321 truth table)', () => {
+    // Enforced today (routes under app/api/teams/**, lib/team-roles.ts): owner and admin may
+    // invite, revoke invites, remove members and change roles; only an owner may grant,
+    // change or remove an owner. No team-delete route, no team billing route, no team library.
+    const teamRoutes = readSrc('app', 'api', 'teams', 'route.ts');
+    expect(teamRoutes).not.toMatch(/export const (DELETE|PATCH|PUT)/);
+    expect(existsSync(rel('app', 'api', 'teams', '[id]', 'route.ts'))).toBe(false);
+    expect(readSrc('lib', 'team-roles.ts')).toMatch(/targetRole === 'owner' && actorRole !== 'owner'/);
+    expect(docs).toMatch(/\['Owner', 'Invite and remove members, revoke invites, assign any role including Owner'\]/);
+    expect(docs).toMatch(/\['Admin', 'Invite and remove members, revoke invites, assign roles up to Admin \(cannot grant, change or remove an Owner\)'\]/);
+    expect(docs).not.toMatch(/delete the team|manage billing|manage all workflows/i);
+    // No team library exists: nothing reads team shares, so no role may be said to view one.
+    expect(docs).toMatch(/<H3>6\.4 Shared workflow library<\/H3>\s*<P>\s*Roadmap: /);
+    expect(docs).not.toMatch(/6\.4 Shared workflow library \(roadmap\)/);
+    expect(docs).not.toMatch(/appropriate role/i);
+    expect(docs).not.toMatch(/recordings are visible in the shared team/);
+    const joinPage = readSrc('app', '(app)', 'teams', 'join', 'page.tsx');
+    expect(joinPage).not.toMatch(/access shared workflows/);
+  });
   it('docs plan table has a Solo column and matches plan limits', () => {
     expect(docs).toMatch(/<TH>Solo<\/TH>/);
     expect(PLAN_FEATURES.team.maxSeats).toBe(5);
@@ -322,7 +341,15 @@ describe('#315: public copy does not overclaim beyond enforcement', () => {
     const route = readSrc('app', 'api', 'workflows', '[id]', 'route.ts');
     expect(route).toMatch(/Soft delete[\s\S]{0,120}status: 'deleted'/);
     expect(route).not.toMatch(/workflow\.delete\(/);
-    expect(security).not.toMatch(/export and deletion/i);
+    // Scan EVERY public page. The terms page is excluded on purpose: it says "delete your data
+    // any time" and is legal text awaiting a CEO decision, tracked in #319. Do not edit it here.
+    const scanned = publicText.filter(({ f }) => !/[\\/]terms[\\/]/.test(f));
+    expect(scanned.length).toBeGreaterThan(20);
+    expect(scanned.some(({ f }) => /security[\\/]page\.tsx$/.test(f))).toBe(true);
+    for (const { f, text } of scanned) {
+      expect(text, f).not.toMatch(/export and deletion/i);
+      expect(text, f).not.toMatch(/permanently (deleted|removed|erased)|purged from our/i);
+    }
     expect(security).toMatch(/'Same input, same output'/);
     expect(security).not.toMatch(/Reproducible processing/);
     expect(security).toMatch(/Per-workflow export and archive \(archived workflows are retained, not purged\)/);

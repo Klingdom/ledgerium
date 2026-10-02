@@ -6,6 +6,15 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Teams described as they work today
+
+### Fixed
+- The documentation described a shared team workflow library and role-restricted team workflows; today a team provides a member roster and invites, workflows remain private unless shared by link, and the library is on the roadmap.
+- Owner and admin descriptions now list exactly what each role can do, and the invite form notes that Viewer currently has the same access as Member.
+
+---
+
+
 ## [2026-10-02] - Public pages describe what is enforced today
 
 ### Fixed
