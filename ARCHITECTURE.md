@@ -317,7 +317,7 @@ Database: SQLite. All tables use UUID primary keys and timestamps.
 - Team roles: owner, admin, member, viewer
 - Workflow sharing: per-workflow with user or team scope, viewer or editor
   permission
-- Admin bootstrap endpoint exists (`/api/admin/bootstrap`)
+- Admin authority is the email allowlist only (`apps/web-app/src/lib/admin-allowlist.ts`, `canAccessAdmin`); `User.isAdmin` confers nothing. `/api/admin/bootstrap` is a retired stub that returns 410
 
 ---
 
@@ -354,7 +354,7 @@ All endpoints are Next.js App Router API routes under `/api/`.
 | `/api/analytics/events` | POST | Track analytics events |
 | `/api/health` | GET | Container health check |
 | `/api/sample-workflow` | POST | Generate sample workflow |
-| `/api/admin/bootstrap` | POST | Admin bootstrap |
+| `/api/admin/bootstrap` | POST | Retired; always 410 |
 | `/api/streaks` | GET | User engagement streaks |
 
 ---

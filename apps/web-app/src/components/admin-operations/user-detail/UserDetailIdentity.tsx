@@ -108,7 +108,7 @@ export function UserDetailIdentity({ user }: UserDetailIdentityProps) {
           >
             {formatSubscriptionStatus(user.subscriptionStatus)}
           </span>
-          {user.isAdmin && (
+          {user.isAllowlistedAdmin && (
             <span className="rounded-full bg-violet-500/15 px-2 py-0.5 text-[11px] font-medium text-violet-400">
               Admin
             </span>

@@ -34,7 +34,7 @@
 import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { canAccessAdmin } from '@/lib/admin-allowlist';
+import { canAccessAdmin, isAdminUnlimited } from '@/lib/admin-allowlist';
 import { db } from '@/db';
 import { toPlanType } from '@/lib/plans';
 import { normalizeStripeStatus } from '@/lib/workspace/subscription-status';
@@ -50,7 +50,8 @@ export interface AdminUserDetailData {
     plan: string;
     subscriptionStatus: string;
     stripeCustomerId: string | null;
-    isAdmin: boolean;
+    /** True IFF the user's email is on the admin allowlist (the only source of admin authority). Not User.isAdmin, which confers nothing. */
+    isAllowlistedAdmin: boolean;
     createdAt: string;
     updatedAt: string;
     /** Reserved for future schema extension. Always null until trialEndsAt is added to User. */
@@ -140,7 +141,6 @@ async function handleGET(
           plan: true,
           subscriptionStatus: true,
           stripeCustomerId: true,
-          isAdmin: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -193,7 +193,7 @@ async function handleGET(
           plan: toPlanType(user.plan ?? 'free'),
           subscriptionStatus: normalizeStripeStatus(user.subscriptionStatus ?? 'unpaid'),
           stripeCustomerId: user.stripeCustomerId,
-          isAdmin: user.isAdmin,
+          isAllowlistedAdmin: isAdminUnlimited(user.email),
           createdAt: user.createdAt.toISOString(),
           updatedAt: user.updatedAt.toISOString(),
           trialEndsAt: null,

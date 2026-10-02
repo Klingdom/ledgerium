@@ -6,6 +6,17 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - The admin badge shows who is actually an admin
+
+### Fixed
+- In the admin view of a user, the "Admin" badge was based on an old account flag that no longer grants anything, so it could label the wrong people. It now reflects the list that actually controls admin access.
+
+### Removed
+- Leftover code and documentation for the retired self-service admin setup.
+
+---
+
+
 ## [2026-10-02] - Security: the per-account sign-in limit can no longer be switched off
 
 ### Security

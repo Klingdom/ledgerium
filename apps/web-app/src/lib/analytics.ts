@@ -399,23 +399,6 @@ export type AnalyticsEvent =
       workflowId: string;
     }
 
-  // ── Admin ─────────────────────────────────────────────────────────────────
-  /**
-   * Fired when the first admin is successfully promoted via POST
-   * /api/admin/bootstrap.
-   * All fields are PII-safe: no full email, no full IP, no raw UA.
-   * @iter 091 / ADM-002 PR-2 Sub-task 4
-   */
-  | {
-      event: 'admin_bootstrap_claimed';
-      /** e.g. "mediafier.ai" — domain only, no local-part. */
-      emailDomain: string;
-      /** e.g. "192.168.x.x" — first two octets only. */
-      ipPrefix: string;
-      /** Browser family string ("Chrome", "Safari", "curl", "unknown", …). */
-      userAgentFamily: string;
-    }
-
   // ── Report engagement (R-D, 2026-06-14) ─────────────────────────────────────
   // PII-free: opaque workflowId + numeric aggregates + taxonomy labels only.
   // Never any step/workflow/section/evidence content in properties.

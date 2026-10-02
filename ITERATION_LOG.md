@@ -4,6 +4,25 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 111) — A badge that said who was admin, and was wrong (Mode 1, `frontend-engineer`)
+
+- **Controls:**
+  - Area: `infra / deploy`. This ends the security run (107, 108 and 110 were security, with 109 as the only break).
+  - Agent: `frontend-engineer`. It reported its own suite and typecheck runs; I re-ran both.
+  - Extension: `871e29a`, 68 loops untouched.
+  - Cadence: 2 of 3 since MR-049.
+- **Candidate Selection: `burn-down` — #277** (11). It was the top non-security row, and MR-049 queued it for this loop.
+- **What changed:**
+  - The admin user-detail page's "Admin" badge showed `User.isAdmin`, a column that has conferred nothing since loop 98. It could mark a non-admin as admin and miss a real one. It now shows allowlist membership, computed on the server (`isAdminUnlimited(user.email)`). The route no longer reads `isAdmin`, and the allowlist never reaches the client.
+  - The dead bootstrap rate-limit module and its 7 tests are removed, along with the unused `admin_bootstrap_claimed` event type. The 410 stub stays.
+  - `API_SPEC.md`, `ARCHITECTURE.md` and the demo-mode runbook now describe allowlist-only admin.
+  - Every remaining `isAdmin` in source is either a team-role variable or a comment or test asserting that the column confers nothing. The Prisma column stays; there is no migration.
+- **Not done, and not mine to do:** part (4) needs the CEO's intended values for `DEMO_MODE_DISABLE_TEAMS` and `NEXTAUTH_SESSION_MAXAGE`. Passing the first through as written would switch teams off in production. **The row is therefore marked blocked, not closed.** This loop earns no closure credit, which is the honest count.
+- **Validation (re-run by me):** web-app **3853 → 3848** on 2 of 2 runs (−7 deleted tests, +2 badge tests: an allowlisted user shows the badge; an `isAdmin: true` user who is not allowlisted does not). Typecheck 0. No user-visible strings changed.
+- **Follow-ups:** 0 created, 0 closed (#277 → blocked on the CEO).
+
+---
+
 ## 2026-10-02 (loop 110) — A limit other traffic cannot switch off (Mode 1, `security-reviewer`)
 
 - **Controls:** Area — `security / authz` (security in 107, 108 and now 110; the −2 saturation penalty was applied and the row still ranked first). Agent — `security-reviewer`, two passes. The second pass fixed two defects I found in review; the agent's own suite, typecheck and mutation reports are in its output. Per MR-049, I no longer label this "a real rotation" without a timestamp citation. Extension — `871e29a`, 67 loops. Cadence: 1 of 3 since MR-049.

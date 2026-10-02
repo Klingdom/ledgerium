@@ -4,16 +4,12 @@ Operational env vars for the demo period (2026-05-25 onward). Set in your deploy
 
 ---
 
-## DISABLE_ADMIN_BOOTSTRAP
+## Admin bootstrap (retired)
 
-**Purpose:** Disable the `/api/admin/bootstrap` self-promotion endpoint.
-**Values:** `true` = endpoint returns 404; unset or any other value = endpoint active.
-**Default:** unset (endpoint active).
-**When to set:** Set to `true` in the demo environment to prevent demo users from promoting themselves to admin.
-
-```
-DISABLE_ADMIN_BOOTSTRAP=true
-```
+`/api/admin/bootstrap` is retired: it always returns 410 and reads no environment variable
+(`apps/web-app/src/app/api/admin/bootstrap/route.ts`). `DISABLE_ADMIN_BOOTSTRAP` is no longer read
+by the app and needs no setting. Admin access is the email allowlist in
+`apps/web-app/src/lib/admin-allowlist.ts`, edited in code with CEO approval.
 
 ---
 

@@ -35,6 +35,7 @@ vi.mock('@/lib/auth', () => ({
 
 vi.mock('@/lib/admin-allowlist', () => ({
   canAccessAdmin: vi.fn(),
+  isAdminUnlimited: vi.fn(),
 }));
 
 vi.mock('@/db', () => ({
@@ -47,13 +48,14 @@ vi.mock('@/db', () => ({
 }));
 
 import { auth } from '@/lib/auth';
-import { canAccessAdmin } from '@/lib/admin-allowlist';
+import { canAccessAdmin, isAdminUnlimited } from '@/lib/admin-allowlist';
 import { db } from '@/db';
 import { GET } from './route';
 
 // ── Typed mock references ─────────────────────────────────────────────────────
 
 const mockAuth = auth as ReturnType<typeof vi.fn>;
+const mockIsAdminUnlimited = isAdminUnlimited as ReturnType<typeof vi.fn>;
 const mockCanAccessAdmin = canAccessAdmin as ReturnType<typeof vi.fn>;
 const mockUserFindUnique = db.user.findUnique as ReturnType<typeof vi.fn>;
 const mockUploadCount = db.upload.count as ReturnType<typeof vi.fn>;
@@ -172,6 +174,26 @@ describe('GET /api/admin/users/[id]', () => {
     expect('memberships' in body.data).toBe(true);
     expect('generatedAt' in body.meta).toBe(true);
     expect('durationMs' in body.meta).toBe(true);
+  });
+
+  it('isAllowlistedAdmin is true for an allowlisted target email, even when User.isAdmin is false', async () => {
+    setupAdminSession();
+    mockIsAdminUnlimited.mockReturnValue(true);
+    mockUserFindUnique.mockResolvedValue({ ...DB_USER, isAdmin: false });
+
+    const body = await (await GET(makeRequest(), makeParams())).json();
+    expect(body.data.user.isAllowlistedAdmin).toBe(true);
+    expect(mockIsAdminUnlimited).toHaveBeenCalledWith(DB_USER.email);
+  });
+
+  it('isAllowlistedAdmin is false for a non-allowlisted user with User.isAdmin true; the flag is not exposed', async () => {
+    setupAdminSession();
+    mockIsAdminUnlimited.mockReturnValue(false);
+    mockUserFindUnique.mockResolvedValue({ ...DB_USER, isAdmin: true });
+
+    const body = await (await GET(makeRequest(), makeParams())).json();
+    expect(body.data.user.isAllowlistedAdmin).toBe(false);
+    expect('isAdmin' in body.data.user).toBe(false);
   });
 
   it('user.trialEndsAt is always null (schema gap placeholder)', async () => {

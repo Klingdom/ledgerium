@@ -797,17 +797,12 @@ per user (returns existing if already created).
 
 **Errors:** `401`, `500`.
 
-#### POST /api/admin/bootstrap
+#### POST /api/admin/bootstrap (retired)
 
-Promote current user to admin. Only works when zero admins exist in the
-system. Permanently disabled once an admin exists.
-
-**Response 200:**
-```json
-{ "ok": true, "message": "You are now an admin. Log out and log back in for changes to take effect." }
-```
-
-**Errors:** `401`, `403` admin already exists.
+Retired. Always returns `410` with `{ "error": "Gone: admin bootstrap has been retired" }`;
+performs no auth, no DB access and no writes (`apps/web-app/src/app/api/admin/bootstrap/route.ts`).
+Admin authority comes only from the email allowlist in
+`apps/web-app/src/lib/admin-allowlist.ts` (`canAccessAdmin`); `User.isAdmin` confers nothing.
 
 ---
 
