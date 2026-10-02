@@ -4,6 +4,33 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-052 recorded (Mode 4, non-counting): a list derived from a type inherits the type's meaning
+
+- **Review:** `docs/meta/MR_052_META_REVIEW.md`. Every number reproduces:
+  - web-app 3918 on 3 of 3 runs, root 5704 on 2 of 2, typecheck 0, validator clean;
+  - loop 117's new step also passes in a clean worktree with no `.env`.
+  - Node 20 and Linux were not run. Nothing reverts.
+- **The miss started in MR-051 and I carried it through loop 116.** "Allowlist the client `AnalyticsEvent` union" assumed the union means "names a browser sends". It means "every event this codebase names".
+  - A probe accepted `subscription_created` and `api_error`, and a scan found **19 server-only names** that anyone can still write.
+  - That leaves forgeable: the Subscriptions and Workflows Created tiles, the admin error panel, and the **#57 bounce and chip-click retirement metrics** (`dashboard-v2-retirement-metrics.ts:64-98`). Alert forgery itself is fully closed.
+  - The check proving "allowlist = union" proved exactly the wrong thing.
+  - Filed **#298** (12): remove server-only names, with an emitter test; require a session on the #57 and upgrade-prompt metrics; trust `source` on server facts. **Do not read the #57 numbers as evidence until it ships.**
+- **All three loop-116 handbacks, and MR-051, missed the same question: who writes and who reads each event *name*.** It is MR-051's pattern one level down.
+  - **Adopted practice:** a brief that touches event names carries a writers × readers table.
+  - **Adopted practice:** any new allowlist or trust boundary gets a second agent asked "what does this list claim, and is it true of every member?" A LOC threshold is the wrong trigger for a trust contract.
+- **Loop 118's hysteresis has a cost no one stated.** A second outage 2 h after recovery counts as the same incident and is not paged for **~21 h**, because the reminder interval was chosen before hysteresis existed. Added to **#297** with a re-arm cap. The restart residual is now quantified at ~20 h, and it also applies to any second instance (one container today).
+- **Also filed:**
+  - **#299**: the analytics rate limiter reuses the map-with-scan pattern #291 retired (246 MB at 30k keys; quadratic prune).
+  - **#300**: the loop-117 gate passes green on zero tests (`passWithNoTests`).
+- **Process repair:**
+  - The loop-118 D-4 review existed only as a one-line summary; it is now saved as `docs/meta/D4_REVIEW_LOOP118_ALERT_STATE.md`.
+  - The narrowed `upload_failed` definition (post-parse failures only) was stated only in a code comment; it is now in #298's scope.
+- **My recording scripts now run the validator themselves and fail non-zero** — this one included. The loop-116 broken commit was a manual check read by eye. MR-052 pattern 4: make the tool fail, not the reader notice.
+- **For the CEO:** `main` is 29+ commits ahead of `origin`, so loops 116-118 exist only on this machine — the scheduled alert jobs run the old code. The first push will also run loop 117's new CI step for the first time.
+- **Next:** loop 119 = **#298** (`security-reviewer`, with the writers × readers table). Loop 120 = **#297**.
+
+---
+
 ## 2026-10-02 (loop 118) — One incident, one page (Mode 1, `backend-engineer` + `system-architect`)
 
 - **Controls:**
