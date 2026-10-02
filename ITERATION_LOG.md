@@ -4,6 +4,34 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-054 recorded (Mode 4, non-counting): the date on the pricing page
+
+- **Review:** `docs/meta/MR_054_META_REVIEW.md`. The window holds and nothing reverts.
+  - **Counts:** web-app 3968 on 3 of 3 runs, root 5754 on 2 of 2, typecheck 0. The validator was clean at every commit.
+  - **Deploy test lines:** both exit 0 under pnpm 9.15.9 and 10.32.1, and exit 1 when the test filter matches nothing.
+- **The bigger finding is outside the window.** The public pricing page, the plan cards and the checkout error all still say **"Multi-user invites are launching Q3 2026"**. That date passed two days ago. It appears in 5 places: `pricing/page.tsx:30,194`, `PricingCards.tsx:256`, `billing/checkout/route.ts:313` and `checkout-error.ts:64`.
+  - No row tracked it and no test pins it.
+  - The same page also contradicts itself on health scores (#34, open since iter 016).
+  - Filed **#305** (13) for both: the pricing page states only what is true today, with a test that no user-facing string names a lapsed date.
+- **A new CI hazard:** `pnpm --filter <missing package> …` exits 0 on both pnpm versions. A renamed package would turn the filtered CI steps green with no tests run. `--fail-if-no-match` makes it exit 1 (verified on both). Filed **#306** (12).
+- **Loop 123's page is honest only in part.**
+  - N is shown, but the "indicative below ~100 users" guidance is not on the page.
+  - The pooled counts printed under each per-user rate disagree with it: one run showed 90.0% above "9 bounces / 100 views".
+  - The trust table showed only forgeries that push away from the target.
+  - Filed **#307** (10).
+- **A Chrome Web Store / licensing item nobody tracked:** the React Flow attribution is hidden in 5 places (`proOptions.hideAttribution`). Without a Pro subscription, that is a licence question. Filed **#308** for the CEO.
+- **Corrections:**
+  - (1) My loop-124 log said invite acceptance checks for an active inviter. It does so **only for owner invites** (`invites/accept/route.ts:248`), and AUTHZ P2-4 is still open.
+  - (2) Row **#82** was already done as #196 at loop 16, so it is struck here.
+  - (3) Whether `pnpm/action-setup@v4` reads `packageManager` cannot be verified offline; the first CI run confirms it. The Dockerfile pin is now redundant but consistent.
+- **Next (MR-054 §5):**
+  - Loop 125 = **#305**. It is selected with `ceiling-cool-off: invoked`: the cool-off resource has been fully re-armed since iter 029, and loops 122-124 were `burn-down`.
+  - Loop 126 = **#268**: workflow-map contrast.
+  - Loop 127 = **#231**: Flow View step detail is hover-only.
+  - That begins the user-visible stretch.
+
+---
+
 ## 2026-10-02 (loop 124) — Removed means removed (Mode 1, `security-reviewer`)
 
 - **Controls:**
@@ -13,7 +41,7 @@ This file records each bounded improvement loop.
   - **Cadence: 3 of 3 since MR-053 — MR-054 now due.**
 - **Candidate Selection: `burn-down` — #304** (13). AUTHZ P2-3 was promoted at MR-053 after aging past the cold-pool cap.
 - **What changed:** `GET /api/teams` now selects only the caller's **active** memberships. Before, a removed, deactivated or pending member still received the team and its members' emails. It is a one-line fix.
-- **Audit of every other teams/invites route and page:** each one already authorises on the caller's active membership, or (for invite accept) on the invitee's email plus an active inviter. This route was the only defect of this shape.
+- **Audit of every other teams/invites route and page:** each one already authorises on the caller's active membership, or (for invite accept) on the invitee's email plus an active inviter. This route was the only defect of this shape. **[MR-054 correction: invite accept checks for an active inviter only for *owner* invites (`invites/accept/route.ts:248`). AUTHZ P2-4 remains open.]**
 - **Audit status travelled:** AUTHZ_AUDIT_001 P2-3 → FIXED, route-table row and summary line updated. The status was changed, not the grade. The finding's body text described the pre-fix code, so it is marked as such rather than rewritten.
 - **Validation (exit code + ANSI-stripped summary):**
   - web-app **3964 → 3968** on 2 of 2 runs, root **5750 → 5754**, typecheck 0.
