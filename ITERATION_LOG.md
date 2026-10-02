@@ -4,6 +4,16 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 — Mode 3 correction to loop 80 (non-counting): the chip-click caveat made the error it had just fixed
+
+- **What was wrong (MR-040 §3.3-3.4):** loop 80 corrected its agent's bounce caveat for asserting a known direction, then wrote the chip-click note as if the only bias were the excluded-views one — so when nothing is excluded, the page showed no caveat and implied an unbiased rate. And "Target: under 40%" sat directly beside a bounce rate that is not decision-grade, which reads as a verdict.
+- **Verified in code before writing it into the UI, not taken from the review:** `InsightsStrip.tsx` tracks `insight_chip_clicked` on every press, including the one that toggles the filter off (`aria-pressed` is not consulted); and `dashboard_v2_viewed` fires once on the error path with a valid `chipsRenderedCount: 0` and is never re-fired after `handleRetry`. Both push the rate up; lost clicks push it down. Net direction unknown.
+- **Fix:** an always-visible "Net direction unmeasured" line under the chip rate; the excluded-views note now names its mechanism as one factor, not the result; the bounce target reads "not decision-grade until #249 and #251 close". The function contract says the same, including that a zero exclusion count does not make the rate unbiased.
+- **Brand-voice consult (D-4, 3 strings): 1 KEEP, 2 POLISH — one polish rejected on accuracy.** Its suggested "Other biases act in the opposite direction" is false (two of them act in the same direction) — the same one-direction slip this correction exists to remove. Used its fallback wording instead.
+- **Validation:** web-app 3333 / 3333; typecheck 0. No test asserts copy on this page — the panel has no render test (web-app has no jsdom), which is why this class of error reached shipped UI twice in one day. Not filed as a row: a render harness for web-app is a standing gap, not this defect.
+
+---
+
 ## 2026-10-01 — MR-040 recorded, and what I applied from it (Mode 4, non-counting)
 
 - **Review:** `docs/meta/MR_040_META_REVIEW.md` (`meta-coordinator`). Window loops 79-81 + the Mode 3 correction. Every claimed number reconciled against a fresh run. The findings are about what my validation could not see.

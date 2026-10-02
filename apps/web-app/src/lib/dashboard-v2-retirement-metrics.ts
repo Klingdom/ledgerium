@@ -30,10 +30,19 @@ export interface DashboardV2RetirementMetrics {
   chipClickRate: number | null;
   /**
    * Views excluded from chipsRendered because the count was absent or invalid.
-   * When this is > 0, chipClickRate is biased UPWARD: a click cannot be joined
-   * to its view, so clicks on excluded views stay in the numerator while their
-   * chips leave the denominator. That is the flattering direction for a
-   * "≥ 10%" criterion, which is why the count is surfaced rather than dropped.
+   * When this is > 0 it pushes chipClickRate UP: a click cannot be joined to
+   * its view, so clicks on excluded views stay in the numerator while their
+   * chips leave the denominator.
+   *
+   * It is ONE of several biases, and a value of 0 does NOT make the rate
+   * unbiased (MR-040 §3.3 — loop 80 first wrote this as if it did, the same
+   * one-direction error it had just corrected for bounce). Also upward: every
+   * chip click is tracked, including the one that toggles a filter OFF, so the
+   * metric is clicks per impression and can exceed 1 on toggles alone; and a
+   * view that fires on a failed load carries a valid 0 and is never re-fired
+   * after retry, so clicks on the retried chips have no denominator. Downward:
+   * clicks are emitted later in a session than the view and are lost
+   * preferentially by the drains #249/#251 describe. Net direction: unknown.
    */
   viewsMissingChipCount: number;
 }

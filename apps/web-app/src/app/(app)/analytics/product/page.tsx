@@ -783,7 +783,7 @@ function RetirementPanel({ metrics }: { metrics: DashboardV2RetirementMetrics })
         <div className="card px-ds-5 py-ds-4">
           <p className="ds-metric-label">Bounce rate</p>
           <p className="ds-metric-value">{formatRate(metrics.bounceRate, 'No views recorded')}</p>
-          <p className="text-ds-xs text-[var(--content-secondary)]">Target: under 40%</p>
+          <p className="text-ds-xs text-[var(--content-secondary)]">Target: under 40% — not decision-grade until #249 and #251 close</p>
           <p className="text-ds-xs text-[var(--content-secondary)] tabular-nums">
             {plural(metrics.bounces, 'bounce', 'bounces')} / {plural(metrics.views, 'view', 'views')}
           </p>
@@ -796,13 +796,16 @@ function RetirementPanel({ metrics }: { metrics: DashboardV2RetirementMetrics })
           <p className="ds-metric-label">Chip-click rate</p>
           <p className="ds-metric-value">{formatRate(metrics.chipClickRate, 'No chips shown')}</p>
           <p className="text-ds-xs text-[var(--content-secondary)]">Threshold pending CEO decision</p>
+          <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-1">
+            Net direction unmeasured. Toggling a chip off and clicking after a reload error both inflate this rate; lost clicks deflate it.
+          </p>
           <p className="text-ds-xs text-[var(--content-secondary)] tabular-nums">
             {plural(metrics.chipClicks, 'click', 'clicks')} / {plural(metrics.chipsRendered, 'chip shown', 'chips shown')}
           </p>
           {metrics.viewsMissingChipCount > 0 && (
             <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-1">
               {plural(metrics.viewsMissingChipCount, 'view', 'views')} had no valid chip count. Their chips are
-              excluded from the denominator, but their clicks are still counted, so this rate reads high.
+              excluded from the denominator but their clicks are still counted, which inflates this rate. Net direction is still unmeasured.
             </p>
           )}
         </div>
