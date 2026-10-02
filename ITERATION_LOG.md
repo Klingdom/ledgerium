@@ -4,6 +4,45 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-056 recorded (Mode 4, non-counting): exists is not enforced
+
+- **Review:** `docs/meta/MR_056_META_REVIEW.md`. Nothing reverts.
+  - **Counts:** web-app 4123 on 3 of 3 runs, root 5901 on 2 of 2, typecheck 0; the validator exits 0 at every commit.
+  - **CI filters:** all 11 filtered steps behave as claimed on pnpm 9 and 10.
+  - **"No LLM anywhere":** confirmed.
+  - `main` is **45** commits ahead, not ~52 as I said.
+- **The window's miss is in my truth tables. They checked that a feature *exists*, not that it is *enforced*:**
+  - **Roles.** The site now claims four enforced roles, but only owner and admin are enforced; **a viewer can do everything a member can**. That is an authorization defect, not only a copy one. Filed **#316**.
+  - **Recorder limit.** The seat limit ("recorders") is enforced nowhere.
+  - **Deletion.** The security page lists deletion under GDPR (`security/page.tsx:112`), but delete is a soft delete that is never purged (`workflows/[id]/route.ts:291-295`).
+  - **PDF export.** It is sold as a paid, clean export, but it is `window.print()` with no plan check.
+  - **Missed siblings:**
+    - `product/page.tsx:280` says "AI-powered analysis" (false, and not in #314);
+    - the security page has an "Audit Trail" card while listing audit trail as Roadmap;
+    - an alt text still says "five tiers";
+    - 16 legacy static `*.html` files at the repo root (`pricing.html`, `security.html` …) still claim SSO and on-premise. No CNAME and no Pages workflow exist, so they are probably not served; that is a CEO check.
+  - Filed **#315**: a second pass over public claims at *enforcement* level, for everything except roles.
+- **Validator, beyond #312 (widened):**
+  - Its V4 closure check has matched nothing since #246: 0 matches across loops 100-130, against 30 log lines of the form "1 closed (#n)".
+  - Its "new offenders" list shows every offender, not just new ones.
+  - The malformed-row budget is a count, so swapping one bad row for another passes.
+- **Tripwire test (loop 130):**
+  - It does not cover extension-app, the root manifest, or raw `fetch` calls to model APIs.
+  - It matches by substring, so "coherent" would trip it.
+  - Its message does not name the claim it protects.
+  - Added to #315.
+- **CI:** `pnpm -r typecheck` silently skips any package that drops its `typecheck` script. And on pnpm 9 a renamed *script* passes even with `--fail-if-no-match` (pnpm 10 fails it), so the 10.32.1 pin is load-bearing. Filed **#317**.
+- **Corrections:**
+  - (1) **The saturation penalty was not applied at loops 129 and 130** (web-app was 4 of the last 5); both picks would still have won. The loop-130 rationale ("higher score") omitted it.
+  - (2) Handback causes are not logged. From now on each handback records which brief item was missing.
+- **Next:**
+  - loop 131 = **#316** (an authorization defect outranks copy; security, not web-app saturated);
+  - then **#312** (widened);
+  - then **#315**.
+  - #309 waits.
+
+---
+
 ## 2026-10-02 (loop 130) — Nothing here is written by AI (Mode 1, `frontend-engineer` + `growth-strategist`)
 
 - **Controls:**
