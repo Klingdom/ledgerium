@@ -4,6 +4,22 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 — MR-040 recorded, and what I applied from it (Mode 4, non-counting)
+
+- **Review:** `docs/meta/MR_040_META_REVIEW.md` (`meta-coordinator`). Window loops 79-81 + the Mode 3 correction. Every claimed number reconciled against a fresh run. The findings are about what my validation could not see.
+- **Applied in this commit:**
+  - **The three-number pool line, after four deferrals including mine.** MR-039 said "do not defer again" and loops 79-81 deferred it anyway; I did not read §7 as an instruction to me. `validate-backlog.mjs` now prints `open 108 | oldest open non-blocked: #8 (new (iter 001)) | median age-at-close, last 10: 4.5 loops`, derived from the backlog itself. It reproduces MR-040's hand measurement exactly. The delta "vs 3 loops ago" was not implemented — it needs history the script does not have; the next review compares lines. **And the review found the hand measurement three earlier reviews used was 19 rows high every time**, because it counted the historical table the validator already excluded.
+  - **`SYSTEM_HEALTH.md:442` corrected.** It still said all three #57 criteria were "evaluable with shipped instrumentation" — false since MR-038, uncorrected by loop 80, and the sentence a launch decision would quote. Left in place with the correction beside it.
+  - **Two rows filed:** **#256** — `api_error_spike` is silent for a total database outage, because the report goes to the store that failed; 39 of 46 sites are database-failure catches, `/api/health`'s report can never be stored, and **loop 79's end-to-end test fails the database selectively in exactly the way that lets the report through.** I wrote that the server side escaped the subtraction property; it moved it. **#257** — 21 `text-brand-500` text uses remain after loop 81, one in a file loop 81 edited, closed inside a dropdown during the scan.
+- **Adopted as practice from here (log rules, no CLAUDE.md edit):** (1) **a loop counts as delegated only if the delegated agent ran the validation itself**; otherwise it is logged `coordinator (drafted by <agent>)` and counts toward the coordinator streak. Re-counted honestly, loops 80 and 81 were coordinator loops — **the streak is 9**, not broken. (2) **Every validation that closes a defect class carries a `residual:` line** — a repo-wide count of the pattern before and after, not scoped to the diff. Loop 81 would have shown `text-brand-500: 21 → 21` and forced #257 at the time.
+- **Not applied here, scheduled:** loop 80's panel copy repeats the one-direction error loop 80 corrected one field over (the chip-click caveat implies an unbiased rate when nothing is excluded; toggle-offs and error-retry views push it up, lost clicks down), and it prints "Target: under 40%" beside a bounce rate that is not decision-grade. That is a copy change to shipped UI, so it goes as its own Mode 3 correction with the brand-voice consult.
+- **Not applied, deliberately:** merging #8 / #253 / #16 into one row (MR-040's runner-up). Re-scoping three rows is a selection decision for the loop that takes them; MR-040 asks for #8 within two loops, and that is noted for loop 82-83 selection.
+- **CEO decisions (MR-040 §10), unchanged and now a sixth ask for #216.** New: if the pool line is not accepted, ratio-vs-line becomes a CEO decision — it is now implemented, so that item is moot unless reversed.
+- **Validation:** validator clean, pool line reproduces MR-040 §7; no product code changed.
+- **Cadence:** counter resets; next meta-review after loop 84.
+
+---
+
 ## 2026-10-01 (loop 81) — The held scans came back, and found what the row had not listed (Mode 1, `frontend-engineer` → coordinator)
 
 - **Controls:** Area — `web-app / a11y`, **forced pivot** (loops 78-80 were three consecutive analytics). Agent — `frontend-engineer`, cut off by a rate limit mid-change; finished by coordinator (see below). Extension — `871e29a`, 38 loops; #216 CEO-blocked. **Cadence: 3 of 3 since MR-039 — MR-040 is now due.**

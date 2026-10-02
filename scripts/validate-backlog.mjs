@@ -271,6 +271,46 @@ if (malformed.length > MALFORMED_ROW_BUDGET) {
   );
 }
 
+// ── Pool line (MR-037 → MR-040; applied at MR-040 after four deferrals) ───────
+// Replaces the follow-up ratio as the reported health measure. The ratio passed
+// in every window since adoption while the pool did not move and the oldest
+// rows aged one loop per loop, and both of its terms are written by the agent
+// it grades. These three numbers are read from the backlog itself:
+//
+//   open    — unstruck rows above END_MARKER. (Three reviews measured this by
+//             hand over the whole file and were 19 rows high every time,
+//             because the historical table sits below the marker.)
+//   oldest  — the lowest-numbered unstruck row whose status is not blocked or
+//             awaiting a CEO decision. Row numbers are assigned in order, so
+//             lowest = oldest, which works for every era of birth-iter format.
+//   median  — age at close over the last 10 closures that can be dated: the
+//             closing loop from "CLOSED loop N" in the struck row, the birth
+//             loop from an "L<N>" birth cell. Rows in older formats are not
+//             guessed at; how many were skipped is printed.
+const BLOCKED_RE = /blocked|awaiting\s+CEO/i;
+const openRows = rows.filter((r) => !r.struck);
+const oldest = openRows
+  .filter((r) => !BLOCKED_RE.test(r.status))
+  .sort((a, b) => a.id - b.id)[0];
+const dated = [];
+let undatable = 0;
+for (const r of rows.filter((x) => x.struck)) {
+  const closed = /CLOSED\s+(?:at\s+)?loop\s+(\d+)/i.exec(r.cells.join('|'));
+  if (!closed) continue;
+  const birth = /\bL(\d+)\b/.exec(r.cells[COL.BIRTH_ITER] ?? '');
+  if (!birth) { undatable++; continue; }
+  dated.push({ id: r.id, close: Number(closed[1]), age: Number(closed[1]) - Number(birth[1]) });
+}
+const lastTen = dated.sort((a, b) => b.close - a.close || b.id - a.id).slice(0, 10).map((d) => d.age).sort((a, b) => a - b);
+const median = lastTen.length === 0 ? null
+  : lastTen.length % 2 ? lastTen[(lastTen.length - 1) / 2]
+  : (lastTen[lastTen.length / 2 - 1] + lastTen[lastTen.length / 2]) / 2;
+const poolLine =
+  `                  open ${openRows.length}` +
+  ` | oldest open non-blocked: ${oldest ? `#${oldest.id} (${/^[\s—-]*$/.test(oldest.cells[COL.BIRTH_ITER] ?? '') ? oldest.status : `birth: ${oldest.cells[COL.BIRTH_ITER].trim()}`})` : 'none'}` +
+  ` | median age-at-close, last ${lastTen.length}: ${median === null ? 'n/a' : `${median} loops`}` +
+  (undatable ? ` (${undatable} closures in older formats not dated)` : '');
+
 // ── Report ───────────────────────────────────────────────────────────────────
 const summary =
   `validate-backlog: ${rows.length} rows, ${struckIds.size} struck, ` +
@@ -283,7 +323,8 @@ if (violations.length > 0) {
   process.exit(1);
 }
 
-console.log(`${summary} — clean`);
+console.log(`${summary} — clean
+${poolLine}`);
 if (process.argv.includes('--ratchet') && malformed.length < MALFORMED_ROW_BUDGET) {
   console.log(
     `note: malformed rows are down to ${malformed.length}; lower MALFORMED_ROW_BUDGET to match.`,
