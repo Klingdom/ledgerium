@@ -6,6 +6,17 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Security: analytics can no longer be used to silence alerts
+
+### Security
+- The public analytics endpoint accepted any event from anyone, which could have been used to hide or fake monitoring alerts. It now accepts only the events the app sends, attributes events to the signed-in user only, and limits how fast one address can send. Alerts now rely only on records the server creates.
+
+### Fixed
+- Uploads made on the website are now included in upload monitoring, and each upload is counted once in analytics.
+
+---
+
+
 ## [2026-10-02] - Test runs that fail only when a test fails
 
 ### Fixed

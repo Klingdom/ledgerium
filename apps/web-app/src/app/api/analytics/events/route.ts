@@ -6,6 +6,9 @@ import { db } from '@/db';
 import { reportApiError } from '@/lib/api-error-reporting';
 import { computeDashboardV2RetirementMetrics } from '@/lib/dashboard-v2-retirement-metrics';
 import { computeUpgradePromptByLocation } from '@/lib/upgrade-prompt-by-location';
+import { isAllowedAnalyticsEventName } from '@/lib/analytics-event-names';
+import { checkAnalyticsIngestRateLimit } from '@/lib/rate-limit/analytics-ingest-buckets';
+import { getClientIp } from '@/lib/client-ip';
 
 /**
  * POST /api/analytics/events — receives and persists batched analytics events.
@@ -13,12 +16,21 @@ import { computeUpgradePromptByLocation } from '@/lib/upgrade-prompt-by-location
  */
 
 async function handlePOST(req: NextRequest) {
+  // Row #295: per-IP limit (spoofable until #225; see the bucket module).
+  const rl = checkAnalyticsIngestRateLimit(getClientIp(req), Date.now());
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { ok: false, received: 0, attempted: 0, failed: 0, truncated: 0, dropped: 0 },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } },
+    );
+  }
+
   try {
     const body = await req.json();
     const events = body.events;
 
     if (!Array.isArray(events) || events.length === 0) {
-      return NextResponse.json({ ok: true, received: 0, attempted: 0, failed: 0, truncated: 0 });
+      return NextResponse.json({ ok: true, received: 0, attempted: 0, failed: 0, truncated: 0, dropped: 0 });
     }
 
     let userId: string | undefined;
@@ -44,13 +56,31 @@ async function handlePOST(req: NextRequest) {
     const MAX_BATCH = 100;
     const truncated = Math.max(0, events.length - MAX_BATCH);
 
-    const records = events.slice(0, MAX_BATCH).map((event: any) => ({
-      userId: userId ?? event.userId ?? null,
+    /*
+      Row #295. This endpoint is unauthenticated by design, but the server keeps
+      its own state in the same table (alert state, alert inputs). So an
+      anonymous caller may write only (a) names a client actually emits — the
+      AnalyticsEvent union — (b) with source forced to 'client', and (c) with
+      userId taken from the session, never the body. Disallowed events are
+      dropped silently (the success shape is unchanged; the count is in
+      `dropped`). The body's content is never logged.
+    */
+    const batch = events.slice(0, MAX_BATCH);
+    const accepted = batch.filter(
+      (e: any) => e !== null && typeof e === 'object' && isAllowedAnalyticsEventName(e.event),
+    );
+    const dropped = batch.length - accepted.length;
+    if (dropped > 0) {
+      console.warn(`[analytics:persist] dropped ${dropped} event(s) with a name outside the client allowlist`);
+    }
+
+    const records = accepted.map((event: any) => ({
+      userId: userId ?? null,
       visitorId: typeof event.visitorId === 'string' ? event.visitorId : null,
-      eventName: event.event ?? 'unknown',
+      eventName: event.event as string,
       properties: JSON.stringify(filterProperties(event)),
-      url: event.url ?? null,
-      source: event.source ?? 'client',
+      url: typeof event.url === 'string' ? event.url : null,
+      source: 'client',
     }));
 
     /*
@@ -94,12 +124,13 @@ async function handlePOST(req: NextRequest) {
       attempted: records.length,
       failed: failures.length,
       truncated,
+      dropped,
     });
   } catch (err) {
     // A malformed body or an unreadable request. Still a 200 — see above — but
     // `ok: false` and a zero count, rather than `ok: true` over nothing.
     console.error('[analytics:persist] batch rejected', err);
-    return NextResponse.json({ ok: false, received: 0, attempted: 0, failed: 0, truncated: 0 });
+    return NextResponse.json({ ok: false, received: 0, attempted: 0, failed: 0, truncated: 0, dropped: 0 });
   }
 }
 

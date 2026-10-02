@@ -130,7 +130,8 @@ describe('POST /api/analytics/events — partial failures and honest counts', ()
     return (await POST(req)).json() as Promise<Record<string, unknown>>;
   }
 
-  const event = (n: number) => ({ event: `e${n}`, visitorId: `v${n}` });
+  // Row #295: names must be in the client allowlist, so use a real one.
+  const event = (n: number) => ({ event: 'page_viewed', path: `/p${n}`, visitorId: `v${n}` });
 
   beforeEach(() => {
     vi.clearAllMocks();

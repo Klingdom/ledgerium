@@ -91,7 +91,7 @@ export default function UploadPage() {
         setResult(data);
         // Update local count
         if (account) setUploadDelta((d) => d + 1);
-        track({ event: 'workflow_uploaded', stepCount: data.stepCount ?? 0, systemCount: data.toolsUsed?.length ?? 0 });
+        // `workflow_uploaded` is recorded server-side by /api/upload (one source per fact).
         trackActivation('first_workflow', { stepCount: data.stepCount ?? 0, systemCount: data.toolsUsed?.length ?? 0 });
       } else if (data.code === 'UPGRADE_REQUIRED') {
         setState('upgrade_required');
@@ -99,9 +99,10 @@ export default function UploadPage() {
       } else {
         setState('error');
         setResult(data);
-        track({ event: 'upload_failed', error: data.error ?? 'Unknown error' });
+        // Server-reported failures are recorded server-side by /api/upload.
       }
     } catch {
+      // Network error: the server never saw this request, so only the client can record it.
       setState('error');
       setResult({ error: 'Network error — please try again' });
       track({ event: 'upload_failed', error: 'Network error' });

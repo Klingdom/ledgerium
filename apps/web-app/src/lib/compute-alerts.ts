@@ -42,8 +42,8 @@ export async function computeAlerts(nowMs: number = Date.now()): Promise<AlertRe
   // ── 1. upload_success_rate_low (P1) ─────────────────────────────────────
   const cutoff2h = hoursAgo(nowMs, 2);
   const [uploadedCount2h, failedCount2h] = await Promise.all([
-    analyticsEvent.count({ where: { eventName: 'workflow_uploaded', createdAt: { gte: cutoff2h } } }) as Promise<number>,
-    analyticsEvent.count({ where: { eventName: 'upload_failed', createdAt: { gte: cutoff2h } } }) as Promise<number>,
+    analyticsEvent.count({ where: { eventName: 'workflow_uploaded', source: 'server', createdAt: { gte: cutoff2h } } }) as Promise<number>,
+    analyticsEvent.count({ where: { eventName: 'upload_failed', source: 'server', createdAt: { gte: cutoff2h } } }) as Promise<number>,
   ]);
   const totalUpload2h = uploadedCount2h + failedCount2h;
   let uploadSuccessRateAlert: AlertResult;
@@ -73,7 +73,7 @@ export async function computeAlerts(nowMs: number = Date.now()): Promise<AlertRe
   // ── 2. zero_uploads_24h (P1) ─────────────────────────────────────────────
   const cutoff24h = hoursAgo(nowMs, 24);
   const uploadedCount24h = await analyticsEvent.count({
-    where: { eventName: 'workflow_uploaded', createdAt: { gte: cutoff24h } },
+    where: { eventName: 'workflow_uploaded', source: 'server', createdAt: { gte: cutoff24h } },
   }) as number;
   const zeroUploads24hAlert: AlertResult = {
     id: 'zero_uploads_24h',
@@ -90,7 +90,7 @@ export async function computeAlerts(nowMs: number = Date.now()): Promise<AlertRe
   // ── 3. processing_failure_spike (P1) ─────────────────────────────────────
   const cutoff1h = hoursAgo(nowMs, 1);
   const failedCount1h = await analyticsEvent.count({
-    where: { eventName: 'upload_failed', createdAt: { gte: cutoff1h } },
+    where: { eventName: 'upload_failed', source: 'server', createdAt: { gte: cutoff1h } },
   }) as number;
   const processingFailureSpikeAlert: AlertResult = {
     id: 'processing_failure_spike',
@@ -109,11 +109,11 @@ export async function computeAlerts(nowMs: number = Date.now()): Promise<AlertRe
   const { signupFrom, signupTo } = activationCohortBounds(nowMs);
   const [signupRows, sopViewRows] = await Promise.all([
     analyticsEvent.findMany({
-      where: { eventName: 'signup_completed', createdAt: { gte: signupFrom, lte: signupTo }, userId: { not: null } },
+      where: { eventName: 'signup_completed', source: 'server', createdAt: { gte: signupFrom, lte: signupTo }, userId: { not: null } },
       select: { userId: true, createdAt: true },
     }) as Promise<ActivationEvent[]>,
     analyticsEvent.findMany({
-      where: { eventName: 'sop_section_viewed', createdAt: { gte: signupFrom, lte: new Date(nowMs) }, userId: { not: null } },
+      where: { eventName: 'sop_section_viewed', source: 'client', createdAt: { gte: signupFrom, lte: new Date(nowMs) }, userId: { not: null } },
       select: { userId: true, createdAt: true },
     }) as Promise<ActivationEvent[]>,
   ]);
@@ -145,7 +145,7 @@ export async function computeAlerts(nowMs: number = Date.now()): Promise<AlertRe
   // ── 5. no_signups_48h (P2) ───────────────────────────────────────────────
   const cutoff48h = hoursAgo(nowMs, 48);
   const signupCount48h = await analyticsEvent.count({
-    where: { eventName: 'signup_completed', createdAt: { gte: cutoff48h } },
+    where: { eventName: 'signup_completed', source: 'server', createdAt: { gte: cutoff48h } },
   }) as number;
   const noSignups48hAlert: AlertResult = {
     id: 'no_signups_48h',
@@ -161,7 +161,7 @@ export async function computeAlerts(nowMs: number = Date.now()): Promise<AlertRe
 
   // ── 6. payment_failure_rate (P2) ─────────────────────────────────────────
   const paymentFailedCount24h = await analyticsEvent.count({
-    where: { eventName: 'payment_failed', createdAt: { gte: cutoff24h } },
+    where: { eventName: 'payment_failed', source: 'server', createdAt: { gte: cutoff24h } },
   }) as number;
   const paymentFailureAlert: AlertResult = {
     id: 'payment_failure_rate',
@@ -175,7 +175,7 @@ export async function computeAlerts(nowMs: number = Date.now()): Promise<AlertRe
 
   // ── 7. api_error_spike (P2) ───────────────────────────────────────────────
   const apiErrorCount1h = await analyticsEvent.count({
-    where: { eventName: 'api_error', createdAt: { gte: cutoff1h } },
+    where: { eventName: 'api_error', source: 'server', createdAt: { gte: cutoff1h } },
   }) as number;
   const apiErrorSpikeAlert: AlertResult = {
     id: 'api_error_spike',
@@ -189,7 +189,7 @@ export async function computeAlerts(nowMs: number = Date.now()): Promise<AlertRe
 
   // ── 8. sop_usefulness_low (P3) ────────────────────────────────────────────
   const sopUsefulnessEvents = await analyticsEvent.findMany({
-    where: { eventName: 'sop_usefulness_response', createdAt: { gte: cutoff7d } },
+    where: { eventName: 'sop_usefulness_response', source: 'client', createdAt: { gte: cutoff7d } },
     select: { properties: true },
   }) as { properties: string | null }[];
   const totalSopUseful = sopUsefulnessEvents.length;

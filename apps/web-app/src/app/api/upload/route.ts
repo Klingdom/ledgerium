@@ -120,7 +120,13 @@ async function handlePOST(req: NextRequest) {
       },
     });
 
+    // Failure rule (matches /api/sync): once a body has parsed and been stored,
+    // validation, evidence-integrity and processing failures are `upload_failed`
+    // (server source - the upload alerts read these). Unparseable/oversized/
+    // wrong-type requests, auth and plan-limit refusals are not upload attempts
+    // that failed; an unexpected 500 is also counted (below).
     if (!validation.valid) {
+      trackServer('upload_failed', { userId, error: 'bundle_validation_failed', errorCount: validation.errors.length, via: 'web' });
       return NextResponse.json({
         error: 'Upload validation failed',
         details: validation.errors,
@@ -139,6 +145,7 @@ async function handlePOST(req: NextRequest) {
     }
 
     if (integrity !== null && !integrity.ok) {
+      trackServer('upload_failed', { userId, error: 'bundle_evidence_integrity_failed', uploadId, via: 'web' });
       // Client input fault (4xx) — deliberately not reported as api_error.
       // Counts only: ids in the bundle are recorded content and are not echoed.
       return NextResponse.json({
@@ -170,6 +177,7 @@ async function handlePOST(req: NextRequest) {
       // Row #262: the engine's message can quote recorded content (it is built
       // from the bundle's own values). Full detail goes to the server log and
       // the upload row; the response carries a fixed sentence only.
+      trackServer('upload_failed', { userId, error: 'processing_failed', uploadId, via: 'web' });
       console.error('Upload processing failed:', err);
       return NextResponse.json({
         error: 'Processing failed',
@@ -303,6 +311,19 @@ async function handlePOST(req: NextRequest) {
       uploadNumber: (user?.uploadCount ?? 0) + 1,
     });
 
+    // Same event + property shape as /api/sync (alerts count source:'server').
+    trackServer('workflow_uploaded', {
+      userId,
+      workflowId: workflow.id,
+      stepCount: processRun.stepCount,
+      phaseCount: processMap.phases.length,
+      systemCount: toolsUsed.length,
+      durationMs: processRun.durationMs ?? null,
+      confidence: confidence ?? null,
+      uploadNumber: (user?.uploadCount ?? 0) + 1,
+      via: 'web',
+    });
+
     // Auto-cluster into process definitions (fire-and-forget)
     void clusterWorkflows(userId).catch((err) => {
       console.error('Auto-clustering failed (non-blocking):', err);
@@ -320,6 +341,7 @@ async function handlePOST(req: NextRequest) {
   } catch (err) {
     console.error('Upload failed:', err);
     // Row #262: never return `err.message` — it can carry recorded content.
+    trackServer('upload_failed', { userId, error: 'internal_error', via: 'web' });
     reportApiError('/api/upload', 500);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

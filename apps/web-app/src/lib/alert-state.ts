@@ -109,6 +109,8 @@ export async function loadAlertStates(nowMs: number): Promise<AlertStates> {
   const rows = (await db.analyticsEvent.findMany({
     where: {
       eventName: ALERT_EVENT_NAME,
+      // Row #295: only rows this server wrote; never a client-ingested row.
+      source: 'server',
       createdAt: { gte: new Date(nowMs - ALERT_STATE_LOOKBACK_MS) },
     },
     select: { properties: true, createdAt: true },

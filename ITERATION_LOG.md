@@ -4,6 +4,33 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 116) — Only the server can speak for the server (Mode 1, `security-reviewer` + `backend-engineer`)
+
+- **Controls:** Area — `security / analytics` (security 1 of the last 5; no penalty). Agents — `security-reviewer` for the ingestion and alert sources, then `backend-engineer` twice for the two regressions I found in review. All three passes were handed back under MR-050, and I made no product edits. Extension — `871e29a`, 73 loops. Cadence: 1 of 3 since MR-051.
+- **Candidate Selection: `burn-down` — #295** (14), filed and endorsed by MR-051. It must land before alerts are relied on.
+- **What changed:**
+  - (1) `POST /api/analytics/events` accepts only the 121 event names in the client `AnalyticsEvent` union. They are derived from one list (`lib/analytics-event-names.ts`) with a two-way compile-time check, so deleting a name breaks `tsc`. Unknown names are dropped silently, and only a count is logged.
+  - (2) `source` is forced to `'client'` and `userId` comes from the session only. The client never sent `userId`, so nothing legitimate is lost. The only client is `deliverBufferedEvents`, which covers the beacon path too; the extension posts to a separate endpoint.
+  - (3) The endpoint is rate-limited to 120 requests per IP per minute, returning 429 with `Retry-After`. A busy tab flushes about 30 times a minute. The limit is spoofable until #225.
+  - (4) Alert state, and every alert input that has a server emitter, read only `source: 'server'`.
+- **Two regressions caught in review, each handed back:**
+  - (a) The website upload route emitted no server event. Alerts would have stopped seeing web uploads, and "zero uploads in 24 h" could fire falsely. `/api/upload` now emits server `workflow_uploaded` (`via: 'web'`) and `upload_failed`, mirroring sync.
+  - (b) That made every web upload count twice by name: the admin "Workflows Created" tile and engagement points. The upload page now emits only the failure the server cannot see, a network error. One source per fact.
+- **Residuals, class-scoped (rows an anonymous client can still create that something counts):**
+  - The two client-only alert inputs (`sop_section_viewed`, and the usefulness input) remain forgeable within the allowlist. Forging `sop_section_viewed` needs a session.
+  - The admin analytics counts, engagement and retention read event names regardless of `source`, so forged client rows still inflate them. The real fix is filtering those consumers by source.
+  - The rate limit is per IP and spoofable until #225.
+  - The new upload-page test is `.test.tsx`, so CI does not run it until #53 lands. #53 is next.
+- **Audit status travelled:** AUTHZ_AUDIT_001 P2-5 is now CHANGED, with the same residual. Status only, grade unchanged.
+- **Validation (re-run by me, exit code plus ANSI-stripped summary):** web-app **3887 → 3904** on 2 of 2 runs; root **5676 → 5690**; typecheck 0. Reverts by the agents:
+  - with the route and both source filters stashed, 7 of 10 integrity tests fail;
+  - with only the alert-side filters reverted, the 2 forged-row tests fail;
+  - with the server upload events stripped, all 4 server-event tests fail;
+  - against the old upload page, the 2 no-double-emit tests fail.
+- **Follow-ups:** 0 created, 1 closed (#295). Consumers that count by name are the #252 class; that row is amended rather than a new one filed.
+
+---
+
 ## 2026-10-02 — MR-051 recorded (Mode 4, non-counting): before storing state, ask who else can write the store
 
 - **Review:** `docs/meta/MR_051_META_REVIEW.md`.
