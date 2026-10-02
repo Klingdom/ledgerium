@@ -1,6 +1,7 @@
 import { withApiRoute } from '@/lib/with-api-route';
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { canAccessAdmin } from '@/lib/admin-allowlist';
 import { db } from '@/db';
 import { effectivePlanFor } from '@/lib/feature-gating';
 import { reportApiError } from '@/lib/api-error-reporting';
@@ -27,7 +28,7 @@ async function handleGET() {
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  if (!session.user.isAdmin) {
+  if (!canAccessAdmin(session)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

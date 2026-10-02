@@ -6,6 +6,13 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Security: nobody can make themselves an administrator
+
+### Security
+- An old setup endpoint let any signed-in user become an administrator if no administrator existed yet, and the setting meant to switch it off was not reaching the live service. The endpoint has been retired, and administrator access now depends only on a fixed list of approved accounts — no setting can reopen it.
+
+---
+
 ## [2026-10-02] - Security: team admins can no longer remove owners
 
 ### Security

@@ -34,7 +34,7 @@ describe('GET /api/analytics/events dashboardV2Retirement', () => {
   const req = () => new NextRequest('http://localhost/api/analytics/events?days=30');
 
   it('adds the key alongside the existing keys', async () => {
-    authMock.mockResolvedValue({ user: { id: 'a', isAdmin: true } });
+    authMock.mockResolvedValue({ user: { id: 'a', email: 'phil@mediafier.ai' } });
     findMany.mockResolvedValue([
       row('dashboard_v2_viewed', { chipsRenderedCount: 2 }),
       row('dashboard_v2_viewed', { chipsRenderedCount: 2 }),
@@ -57,7 +57,7 @@ describe('GET /api/analytics/events dashboardV2Retirement', () => {
   });
 
   it('returns null rates when the window has no dashboard events', async () => {
-    authMock.mockResolvedValue({ user: { id: 'a', isAdmin: true } });
+    authMock.mockResolvedValue({ user: { id: 'a', email: 'phil@mediafier.ai' } });
     findMany.mockResolvedValue([]);
     const body = await (await GET(req())).json();
     expect(body.dashboardV2Retirement.bounceRate).toBeNull();
@@ -65,7 +65,7 @@ describe('GET /api/analytics/events dashboardV2Retirement', () => {
   });
 
   it('adds upgradePromptByLocation and no longer clamps conversion drop-off (row #248)', async () => {
-    authMock.mockResolvedValue({ user: { id: 'a', isAdmin: true } });
+    authMock.mockResolvedValue({ user: { id: 'a', email: 'phil@mediafier.ai' } });
     // One user clicks with no prior view (pricing button): stage 3 > stage 2.
     findMany.mockResolvedValue([
       { ...row('upgrade_clicked', { location: 'upgrade_button' }), userId: 'u2' },
@@ -83,8 +83,15 @@ describe('GET /api/analytics/events dashboardV2Retirement', () => {
     expect(conv[2].rate).toBe(100);
   });
 
+  it('refuses isAdmin:true when the email is not on the allowlist (row #276)', async () => {
+    authMock.mockResolvedValue({ user: { id: 'u', email: 'user@example.com', isAdmin: true } });
+    const res = await GET(req());
+    expect(res.status).toBe(403);
+    expect(findMany).not.toHaveBeenCalled();
+  });
+
   it('stays admin-only', async () => {
-    authMock.mockResolvedValue({ user: { id: 'u', isAdmin: false } });
+    authMock.mockResolvedValue({ user: { id: 'u', email: 'user@example.com' } });
     const res = await GET(req());
     expect(res.status).toBe(403);
     expect(findMany).not.toHaveBeenCalled();
@@ -97,7 +104,7 @@ describe('GET /api/analytics/events ?days= validation (row #254)', () => {
   beforeEach(async () => {
     vi.resetModules();
     findMany.mockReset().mockResolvedValue([]);
-    authMock.mockReset().mockResolvedValue({ user: { id: 'a', isAdmin: true } });
+    authMock.mockReset().mockResolvedValue({ user: { id: 'a', email: 'phil@mediafier.ai' } });
     GET = (await import('./route.js')).GET;
   });
 

@@ -15,6 +15,7 @@ import {
   Trash2,
   Shield,
 } from 'lucide-react';
+import { isAdminUnlimited } from '@/lib/admin-allowlist';
 import type { DashboardV2RetirementMetrics } from '@/lib/dashboard-v2-retirement-metrics';
 import type { UpgradePromptByLocation } from '@/lib/upgrade-prompt-by-location';
 
@@ -215,7 +216,7 @@ export default function ProductAnalyticsPage() {
 
   useEffect(() => {
     if (status === 'loading') return;
-    if (!session?.user?.isAdmin) {
+    if (!isAdminUnlimited(session?.user?.email)) {
       router.replace('/dashboard');
       return;
     }
@@ -322,7 +323,7 @@ export default function ProductAnalyticsPage() {
     return <div className="text-center text-ds-sm text-[var(--content-tertiary)] py-20">Loading analytics...</div>;
   }
 
-  if (forbidden || !session?.user?.isAdmin) {
+  if (forbidden || !isAdminUnlimited(session?.user?.email)) {
     return <div className="text-center text-ds-sm text-[var(--content-tertiary)] py-20">Access denied.</div>;
   }
 

@@ -2,7 +2,7 @@
  * iter 087 / TEAM-P03.10 — P0 blockers + demo feature flags
  *
  * Covers:
- *   Demo-F1: DISABLE_ADMIN_BOOTSTRAP=true → POST /api/admin/bootstrap returns 404
+ *   Demo-F1: POST /api/admin/bootstrap retired (row #276) → 410 regardless of env
  *   Demo-F3: DEMO_MODE_DISABLE_TEAMS=true → POST /api/teams returns 404
  *   Demo-F3: DEMO_MODE_DISABLE_TEAMS=true → POST /api/teams/:id/invite returns 404
  *   P0-F:    POST /api/teams 403 includes code:'plan_upgrade_required'
@@ -120,54 +120,30 @@ function makeDeleteRequest(url: string): NextRequest {
 
 // ─── Demo-F1: admin bootstrap env flag ───────────────────────────────────────
 
-/** Minimal bootstrap request — includes the CSRF confirmation header. */
-function makeBootstrapRequest(): NextRequest {
-  return new NextRequest('http://localhost/api/admin/bootstrap', {
-    method: 'POST',
-    headers: { 'X-Admin-Bootstrap-Confirm': 'true' },
-  });
-}
-
-describe('Demo-F1: DISABLE_ADMIN_BOOTSTRAP env flag', () => {
+describe('Demo-F1: admin bootstrap (retired by row #276)', () => {
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
     mockAuth.mockResolvedValue({ user: { id: 'user-1' } });
-    // Simulate SERIALIZABLE transaction: no existing admin, then promote the user.
-    mockTransaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => {
-      mockDbAdminFindFirst.mockResolvedValue(null);
-      mockDbUserUpdate.mockResolvedValue({ id: 'user-1', email: 'admin@example.com' });
-      return callback({
-        user: {
-          findFirst: mockDbAdminFindFirst,
-          update: mockDbUserUpdate,
-        },
-      });
-    });
   });
 
-  it('returns 404 when DISABLE_ADMIN_BOOTSTRAP=true', async () => {
+  it('returns 410 and never promotes, with DISABLE_ADMIN_BOOTSTRAP unset', async () => {
+    delete process.env.DISABLE_ADMIN_BOOTSTRAP;
+    const { POST } = await import('../admin/bootstrap/route');
+    const res = await POST();
+    expect(res.status).toBe(410);
+    expect(mockDbUserUpdate).not.toHaveBeenCalled();
+  });
+
+  it('returns the same 410 when DISABLE_ADMIN_BOOTSTRAP=true', async () => {
     process.env.DISABLE_ADMIN_BOOTSTRAP = 'true';
     try {
       const { POST } = await import('../admin/bootstrap/route');
-      // Guard 1 fires before req.headers is accessed, so any request (even minimal) is fine.
-      const res = await POST(makeBootstrapRequest());
-      expect(res.status).toBe(404);
-      const body = await res.json();
-      expect(body.error).toBeDefined();
+      const res = await POST();
+      expect(res.status).toBe(410);
     } finally {
       delete process.env.DISABLE_ADMIN_BOOTSTRAP;
     }
-  });
-
-  it('proceeds normally when DISABLE_ADMIN_BOOTSTRAP is not set', async () => {
-    delete process.env.DISABLE_ADMIN_BOOTSTRAP;
-    const { POST } = await import('../admin/bootstrap/route');
-    const res = await POST(makeBootstrapRequest());
-    // No admin exists yet → should promote + return 200
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.ok).toBe(true);
   });
 });
 

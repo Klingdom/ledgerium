@@ -1,6 +1,7 @@
 import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { canAccessAdmin } from '@/lib/admin-allowlist';
 import { db } from '@/db';
 import { reportApiError } from '@/lib/api-error-reporting';
 import { computeDashboardV2RetirementMetrics } from '@/lib/dashboard-v2-retirement-metrics';
@@ -113,7 +114,7 @@ async function handleGET(req: NextRequest) {
   }
 
   // Product analytics is admin-only — regular users must not see global metrics
-  if (!session.user.isAdmin) {
+  if (!canAccessAdmin(session)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

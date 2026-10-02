@@ -47,8 +47,10 @@ function setAuth(value: unknown): void {
   (auth as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(value);
 }
 
-const ADMIN_SESSION = { user: { id: 'admin-1', isAdmin: true } };
-const NON_ADMIN_SESSION = { user: { id: 'user-1', isAdmin: false } };
+const ADMIN_SESSION = { user: { id: 'admin-1', email: 'phil@mediafier.ai' } };
+const NON_ADMIN_SESSION = { user: { id: 'user-1', email: 'user@example.com' } };
+// isAdmin in the session must confer nothing (row #276)
+const FLAGGED_NON_ALLOWLISTED_SESSION = { user: { id: 'user-2', email: 'user@example.com', isAdmin: true } };
 
 function makeUser(overrides: Record<string, unknown> = {}) {
   return {
@@ -83,6 +85,13 @@ describe('GET /api/analytics/engagement', () => {
     setAuth(NON_ADMIN_SESSION);
     const res = await GET();
     expect(res.status).toBe(403);
+  });
+
+  it('returns 403 for a session with isAdmin:true that is NOT on the allowlist (row #276)', async () => {
+    setAuth(FLAGGED_NON_ALLOWLISTED_SESSION);
+    const res = await GET();
+    expect(res.status).toBe(403);
+    expect(vi.mocked(db.user.findMany)).not.toHaveBeenCalled();
   });
 
   it('returns empty users array and zeroed distribution when no users exist', async () => {

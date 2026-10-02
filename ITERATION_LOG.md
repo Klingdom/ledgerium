@@ -4,6 +4,20 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 98) — Admin, by asking (Mode 1, `security-reviewer`)
+
+- **Controls:** Area — `security / authz` (96 evidence, 97 authz) — 2 of the last 3 in this Area; a third consecutive would force a pivot, and loop 99 will pivot. Agent — **`security-reviewer`, a real rotation** (suite, typecheck, build and two mutation checks run by the agent; I re-ran suite, typecheck and build). Extension — `871e29a`, 55 loops. Cadence: 1 of 3 since MR-045.
+- **Candidate Selection: `burn-down` — #276** (14), promoted by MR-045 as a P0 candidate after it caught my "closed in production" error. Taken immediately: an open self-service admin claim does not wait for cadence.
+- **Fixed in code, so that no environment variable can reopen it** — the failure in my intake was trusting a variable, so the fix does not use one. **The bootstrap endpoint is retired**: a stub that answers 410, reads nothing, writes nothing. Nothing called it, and since `isAdmin` no longer confers authority, a promotion would have done nothing. An allowlist-only bootstrap was considered and rejected: it would keep a live write path to the flag for no benefit.
+- **One admin definition.** The four surfaces that still gated on the flag now use the allowlist, and **the flag is removed from the session and token**, so a future gate cannot quietly lean on it.
+- **Tested under the production condition** — the kill-switch unset — which is exactly the condition my intake missed. Each surface refuses a session flagged admin but not allowlisted; restoring the old gate fails the tests.
+- **Residual, class-scoped:** authorization resting on `isAdmin` 4 → 0; writes that can set it true 1 → 0. **Filed #277** for what remains around it: a misleading admin badge in the user-detail panel, dead bootstrap code and stale docs, and — the class behind both loop 85 and MR-045's finding — **three deploy variables that never reach the app**, two of which need your decision on intended values before anyone wires them.
+- **Not answerable here, still yours:** whether any production user already holds `isAdmin = true`, and since when.
+- **Validation (re-run by me):** web-app **3748 → 3738** (the old 423-line bootstrap suite deleted; new tests added); typecheck 0; build 0; prerender unchanged.
+- **Follow-ups:** 1 created (#277), 1 closed (#276).
+
+---
+
 ## 2026-10-02 — MR-045 recorded (Mode 4, non-counting): my "closed in production" was wrong
 
 - **Review:** `docs/meta/MR_045_META_REVIEW.md`. Loops 94-96 hold. The headline is about my intake of AUTHZ_AUDIT_001.
