@@ -4,6 +4,25 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 110) — A limit other traffic cannot switch off (Mode 1, `security-reviewer`)
+
+- **Controls:** Area — `security / authz` (security in 107, 108 and now 110; the −2 saturation penalty was applied and the row still ranked first). Agent — `security-reviewer`, two passes. The second pass fixed two defects I found in review; the agent's own suite, typecheck and mutation reports are in its output. Per MR-049, I no longer label this "a real rotation" without a timestamp citation. Extension — `871e29a`, 67 loops. Cadence: 1 of 3 since MR-049.
+- **Candidate Selection: `burn-down` — #291** (16, 14 after the penalty). MR-049 filed and endorsed it as a defect in code shipped at loop 107.
+- **What changed:** the per-account throttle is now a fixed-size table indexed by a keyed hash of the address. It never evicts or grows, so other traffic can no longer reset or switch off an address's count. Login attempts are counted *before* the password check, so 50 simultaneous wrong guesses reach the check at most 5 times.
+- **Caught in review, before commit:**
+  - (1) The first pass used an unsalted hash and let any successful login clear a whole slot. Anyone could compute an address that shares an admin's slot, own it, and log into it every few guesses to reset the admin's count — unlimited guessing again. The fix keys the hash per process, and only the address holding a record can clear it (a 32-bit fingerprint).
+  - (2) The new tests took the web-app suite from 14 s to 81 s. The cause was `createHmac`, about 32 µs per call here (15× a plain hash). I replaced it with key-prefixed SHA-256. That is sound because the output is never revealed: length extension needs a known output. The suite is back to 14.4 s. This edit is mine, not the agent's.
+- **The trade-off, stated with numbers (agent's arithmetic, corrected from mine):**
+  - Fixed slots mean other traffic *can* now affect an address by over-throttling, which the old design could not.
+  - N junk addresses fill about 2²⁰·(1−e^(−N/2²⁰)) slots: ~61% at N = 1M. Every real user whose slot is filled is refused, admins included.
+  - Holding that for 15 minutes takes ~10M requests, then ~700/s upkeep. It needs the per-IP limit defeated: possible today via forged headers, closed when #225 `TRUSTED_PROXY_HOPS` is set.
+  - Recorded in #290. A minor honest-user effect is also recorded: a non-holder sharing a slot keeps counting until the holder's record clears or expires.
+- **Validation (re-run by me), including a flake I nearly committed:** after the hash swap, 4 full runs passed and the 5th failed test (b). The cause: the random per-process key puts a fixed test address in one of the 50,000 junk slots in ~5% of runs (the forgot-password test had the same exposure, unchecked). That was almost certainly the "unidentified failure" the agent reported once and called a flake. Tests now choose a probe address that does not collide. Result: throttle file **20 of 20**, full web-app **3 of 3** at 3853 (≈14-15 s, baseline 14 s), typecheck 0. My first draft of this entry claimed "5 of 5" before those runs existed — corrected before commit. Mutations by the agent: old Map logic fails (a)/(b); reserve-after-compare fails (d); no fingerprint guard fails (f). My hash swap did not touch that logic, and the suite passes after it.
+- **Audit status travelled (MR-049 pattern 4):** AUTHZ_AUDIT_001 P1-2 (loop 105, `801b5fd`), P2-2 (loops 107/110) and P3-7 (loop 108, `6fcde8b`) updated in this commit.
+- **Follow-ups:** 0 created, 1 closed (#291); #290 extended.
+
+---
+
 ## 2026-10-02 — MR-049 recorded (Mode 4, non-counting): a limit that other traffic can switch off
 
 - **Review:** `docs/meta/MR_049_META_REVIEW.md`. Every number reproduces: web-app 3846 on 3 of 3 runs, workspace 5635 on 2 of 2, typecheck 0, validator clean at 114 open. Loops 108 and 109 are correct as built; nothing reverts.

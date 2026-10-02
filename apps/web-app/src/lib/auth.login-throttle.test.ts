@@ -27,8 +27,16 @@ vi.mock('@/lib/auth-user-lookup', () => ({
 }));
 
 import './auth';
+import { compare } from 'bcryptjs';
 import {
   resetAccountThrottles,
+  reserveLoginAttempt,
+  checkForgotPasswordThrottle,
+  accountSlot,
+  recordLoginSuccess,
+  __setSlotOverrideForTests,
+  throttleTableSizes,
+  THROTTLE_TABLE_SIZE,
   LOGIN_FREE_FAILURES,
   LOGIN_MAX_DELAY_MS,
 } from '@/lib/rate-limit/account-throttle';
@@ -121,5 +129,142 @@ describe('login per-account throttle (#289)', () => {
     // the lock window exactly like the non-existing one.
     expect(real).toEqual(ghost);
     expect(real.every((r) => r === null)).toBe(true);
+  });
+});
+
+// ── Row #291: saturation, memory bound, concurrency ─────────────────────────
+describe('login per-account throttle (#291): cannot be reset, disabled or bypassed', () => {
+  const TARGET = 'admin@example.com';
+  const JUNK = 50_000;
+
+  // The slot key is random per process, so a fixed probe address collides with
+  // one of 50,000 junk slots in ~5% of runs. Collision is the documented
+  // over-throttle trade-off, not the property under test, so the probe is
+  // chosen from slots the junk set does not use (found before any writes).
+  function junkSlots(prefix: string): Set<number> {
+    const slots = new Set<number>();
+    for (let i = 0; i < JUNK; i++) slots.add(accountSlot(`${prefix}${i}@junk.example`));
+    return slots;
+  }
+  function nonColliding(base: string, slots: Set<number>): string {
+    for (let k = 0; ; k++) {
+      const addr = `${base}+${k}@example.com`;
+      if (!slots.has(accountSlot(addr))) return addr;
+    }
+  }
+  function saturate(prefix: string, now: number): void {
+    for (let i = 0; i < JUNK; i++) {
+      const addr = `${prefix}${i}@junk.example`;
+      for (let j = 0; j < 10; j++) reserveLoginAttempt(addr, now);
+    }
+  }
+  function guessOverSeconds(addr: string, seconds: number): number {
+    let evaluated = 0;
+    for (let s = 0; s < seconds; s++) {
+      if (reserveLoginAttempt(addr, T0 + s * 1000).allowed) evaluated++;
+    }
+    return evaluated;
+  }
+
+  beforeEach(() => {
+    resetAccountThrottles();
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(T0);
+    vi.mocked(compare).mockImplementation(async (pw: string) => pw === 'correct-password');
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('(a) 4 failures, then 50,000 locked junk addresses, then the 5th failure still locks the target', () => {
+    const target = nonColliding('admin', junkSlots('a'));
+    for (let i = 0; i < 4; i++) expect(reserveLoginAttempt(target, T0).allowed).toBe(true);
+    saturate('a', T0);
+    expect(reserveLoginAttempt(target, T0).allowed).toBe(true); // 5th evaluated
+    expect(reserveLoginAttempt(target, T0).allowed).toBe(false); // now locked: count survived
+  });
+
+  it('(b) after saturation with locked junk, 1,000 guesses over 1,000 s evaluate exactly as many as the unsaturated control', () => {
+    const fresh = nonColliding('fresh-target', junkSlots('b'));
+    const control = guessOverSeconds(fresh, 1000);
+    expect(control).toBeLessThan(15); // the throttle really bites (5 free + a few backoffs)
+    resetAccountThrottles();
+    saturate('b', T0);
+    expect(guessOverSeconds(fresh, 1000)).toBe(control);
+  });
+
+  it('(c) memory is strictly bounded: table size is fixed no matter how many addresses are seen', () => {
+    reserveLoginAttempt('seed@example.com', T0);
+    checkForgotPasswordThrottle('seed@example.com', T0);
+    const before = throttleTableSizes();
+    expect(before.login).toBe(THROTTLE_TABLE_SIZE);
+    expect(before.forgot).toBe(THROTTLE_TABLE_SIZE);
+    saturate('c', T0);
+    for (let i = 0; i < 20_000; i++) checkForgotPasswordThrottle(`f${i}@junk.example`, T0);
+    expect(throttleTableSizes()).toEqual(before);
+    // every slot index is inside the table
+    for (let i = 0; i < 1000; i++) {
+      const s = accountSlot(`slot${i}@x.io`);
+      expect(s).toBeGreaterThanOrEqual(0);
+      expect(s).toBeLessThan(THROTTLE_TABLE_SIZE);
+    }
+  });
+
+  it('forgot-password: 3/hour per address is not reset by 50,000+ other addresses', () => {
+    const target = nonColliding('admin', junkSlots('g'));
+    for (let i = 0; i < 2; i++) expect(checkForgotPasswordThrottle(target, T0).allowed).toBe(true);
+    for (let i = 0; i < JUNK; i++) checkForgotPasswordThrottle(`g${i}@junk.example`, T0);
+    expect(checkForgotPasswordThrottle(target, T0).allowed).toBe(true); // 3rd
+    expect(checkForgotPasswordThrottle(target, T0).allowed).toBe(false); // 4th refused
+  });
+
+  it('(d) 50 parallel wrong-password attempts: at most the free allowance (5) reach the password compare', async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    vi.mocked(compare).mockImplementation(async () => {
+      await gate; // simulate slow bcrypt
+      return false;
+    });
+    vi.mocked(compare).mockClear();
+    const burst = Array.from({ length: 50 }, (_, i) => login(TARGET, 'wrong', `172.16.0.${i}`));
+    // let every authorize run up to its first await / compare
+    await new Promise((r) => setImmediate(r));
+    expect(vi.mocked(compare).mock.calls.length).toBeLessThanOrEqual(LOGIN_FREE_FAILURES);
+    release();
+    const results = await Promise.all(burst);
+    expect(results.every((r) => r === null)).toBe(true);
+    expect(vi.mocked(compare).mock.calls.length).toBe(LOGIN_FREE_FAILURES);
+    // and the address is now locked, even for the correct password
+    expect(await login(TARGET, 'correct-password', '172.16.1.1')).toBeNull();
+  });
+
+  it('(e) success after reservations clears them; refused attempts still do not extend the lock', async () => {
+    for (let i = 0; i < 4; i++) expect(await login(TARGET, 'wrong', `10.9.0.${i}`)).toBeNull();
+    expect(await login(TARGET, 'correct-password', '10.9.1.1')).toMatchObject({ id: 'u1' });
+    // history cleared: 4 more wrong guesses do not lock, correct password works
+    for (let i = 0; i < 4; i++) expect(await login(TARGET, 'wrong', `10.9.2.${i}`)).toBeNull();
+    expect(await login(TARGET, 'correct-password', '10.9.3.1')).toMatchObject({ id: 'u1' });
+    // lock, then hammer while refused, lock still expires on schedule
+    for (let i = 0; i < LOGIN_FREE_FAILURES; i++) await login(TARGET, 'wrong', `10.9.4.${i}`);
+    for (let i = 0; i < 20; i++) expect(await login(TARGET, 'wrong', `10.9.5.${i}`)).toBeNull();
+    vi.setSystemTime(T0 + 31_000);
+    expect(await login(TARGET, 'correct-password', '10.9.6.1')).toMatchObject({ id: 'u1' });
+  });
+
+  it("(f) a successful login by a colliding address does NOT clear the target's count or lock", () => {
+    const COLLIDER = 'attacker-owned@example.com';
+    __setSlotOverrideForTests(() => 12345); // force both addresses into one slot
+    try {
+      expect(accountSlot(TARGET)).toBe(accountSlot(COLLIDER));
+      for (let i = 0; i < LOGIN_FREE_FAILURES; i++) expect(reserveLoginAttempt(TARGET, T0).allowed).toBe(true);
+      expect(reserveLoginAttempt(TARGET, T0).allowed).toBe(false); // locked
+      recordLoginSuccess(COLLIDER); // attacker logs into own account
+      expect(reserveLoginAttempt(TARGET, T0).allowed).toBe(false); // lock survives
+      // the real holder's success does clear
+      recordLoginSuccess(TARGET);
+      expect(reserveLoginAttempt(TARGET, T0 + 1).allowed).toBe(true);
+    } finally {
+      __setSlotOverrideForTests(null);
+    }
   });
 });

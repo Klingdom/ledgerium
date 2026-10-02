@@ -4,11 +4,7 @@ import { compare } from 'bcryptjs';
 import { findUserByEmailForLogin } from '@/lib/auth-user-lookup';
 import { checkAuthRateLimit, AUTH_RATE_LIMITS } from '@/lib/rate-limit/auth-buckets';
 import { getClientIp } from '@/lib/client-ip';
-import {
-  checkLoginThrottle,
-  recordLoginFailure,
-  recordLoginSuccess,
-} from '@/lib/rate-limit/account-throttle';
+import { reserveLoginAttempt, recordLoginSuccess } from '@/lib/rate-limit/account-throttle';
 
 const nextAuth = NextAuth({
   trustHost: true,
@@ -38,25 +34,21 @@ const nextAuth = NextAuth({
         const rl = checkAuthRateLimit(`login:${ip}`, Date.now(), AUTH_RATE_LIMITS.login);
         if (!rl.allowed) return null;
 
-        // Per-ACCOUNT throttle (row #289), independent of IP: X-Forwarded-For
-        // rotation defeats the per-IP limit above. Refusal is `return null`,
-        // identical to a wrong password, for existing and non-existing
-        // addresses alike (no enumeration oracle). Refused attempts are not
-        // counted as failures (no escalation past the cap).
-        const now = Date.now();
-        if (!checkLoginThrottle(rawEmail, now).allowed) return null;
+        // Per-ACCOUNT throttle (rows #289, #291), independent of IP:
+        // X-Forwarded-For rotation defeats the per-IP limit above. The
+        // attempt is RESERVED (counted as a pending failure) synchronously
+        // before the awaited bcrypt compare, so parallel requests cannot all
+        // slip through a check-then-record gap; success clears it. Refusal is
+        // `return null`, identical to a wrong password, for existing and
+        // non-existing addresses alike (no enumeration oracle). Refused
+        // attempts are not counted (no escalation past the cap).
+        if (!reserveLoginAttempt(rawEmail, Date.now()).allowed) return null;
 
         const user = await findUserByEmailForLogin(rawEmail);
-        if (!user) {
-          recordLoginFailure(rawEmail, now);
-          return null;
-        }
+        if (!user) return null;
 
         const isValid = await compare(password, user.passwordHash);
-        if (!isValid) {
-          recordLoginFailure(rawEmail, now);
-          return null;
-        }
+        if (!isValid) return null;
         recordLoginSuccess(rawEmail);
 
         return {

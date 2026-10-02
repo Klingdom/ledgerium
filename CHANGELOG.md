@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Security: the per-account sign-in limit can no longer be switched off
+
+### Security
+- The limit on wrong passwords per account, added earlier today, could be reset or disabled by flooding it with made-up addresses, and many simultaneous attempts could slip past it. It now keeps a fixed-size record that other traffic cannot clear, and counts each attempt before the password is checked.
+
+---
+
+
 ## [2026-10-02] - A daily check that alert channels still work
 
 ### Added
