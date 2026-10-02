@@ -4,6 +4,18 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-045 recorded (Mode 4, non-counting): my "closed in production" was wrong
+
+- **Review:** `docs/meta/MR_045_META_REVIEW.md`. Loops 94-96 hold. The headline is about my intake of AUTHZ_AUDIT_001.
+- **The error, stated plainly.** I verified P1-1's mitigation by reading `deploy.yml:173`, which defaults `DISABLE_ADMIN_BOOTSTRAP` to `true`, and wrote that bootstrap was "closed in production". **I did not check whether the variable reaches the running app. It does not:** `compose.hostinger.yaml` never passes it, and its own comment says unlisted variables never arrive. This is the exact failure loop 85 fixed for the alert variables — the same file, the same mechanism, two days apart — and I repeated it while writing the word "verified". I confirmed MR-045's reading myself before acting on it. Two more variables have the same problem (`DEMO_MODE_DISABLE_TEAMS`, `NEXTAUTH_SESSION_MAXAGE`).
+- **Consequence:** first-user admin bootstrap is very likely live. Any signed-in user can make themselves admin if no admin row exists yet, and four admin surfaces gate on that flag — one returns every user's email. **Promoted by MR-045 as #276 (P0 candidate) and taken immediately as loop 98, fixed in code** so that no variable can reopen it.
+- **Ruling on my #274 re-grade: mechanism rejected, row ratified.** The audit had no severity definitions, so "the audit's own P0 definition" did not exist — I attributed my definition to the auditor. Coordinator re-grading at intake is not a valid promotion path. #274 stays (and is fixed), re-anchored `MR-045-promoted`.
+- **Practices adopted:** (1) a re-grade goes back to the auditor, who amends the audit; (2) **any environment-variable mitigation must cite the line that delivers the variable to the running process**, not the line that sets it.
+- **Other findings:** loop 95's role sweep asked what role an action grants, not whom it acts on — which is why it cited the member-role route as the correct example while that route let an admin demote an owner (#274, now fixed). P1-2 is graded right; the CEO check is that both allowlisted admin emails exist as accounts exactly as stored.
+- **For the CEO, urgent:** which production users have `isAdmin = true`, and since when — that says whether anyone has used the bootstrap. And decide the intended values of the three undelivered variables before anyone wires them: passing them through as written would switch teams off in production.
+
+---
+
 ## 2026-10-02 (loop 97) — The last owner (Mode 1, `security-reviewer`)
 
 - **Controls:** Area — `security / authz` (95 security, 96 evidence). Agent — **`security-reviewer`, a real rotation** (suite, typecheck, two mutation checks run by the agent; I re-ran suite and typecheck and added the build). Ran concurrently with MR-045 on separate files. Extension — `871e29a`, 54 loops.
