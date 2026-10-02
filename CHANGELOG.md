@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Security: diagnostic build turned off
+
+### Security
+- The app no longer publishes its source maps, and the error page no longer shows technical error details; it shows a short message, a retry button and a support reference.
+
+---
+
+
 ## [2026-10-02] - Teams described as they work today
 
 ### Fixed

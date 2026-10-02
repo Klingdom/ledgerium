@@ -4,6 +4,32 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 138) — The diagnostic build, turned off (Mode 5 item 1 of 3, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `security / web`.
+  - **Agent:** `security-reviewer`.
+  - **Extension:** `871e29a`, 95 loops untouched.
+  - **Cadence:** the Mode 5 sequence increments by N=3 at its close.
+- **Candidate Selection: `directed` — #283.** The CEO's words (2026-10-02): "Turn off diagnostic build."
+  - `hard-ceiling-override: user-ack; rationale: CEO directed this item by name.` This consumes the sequence's single override.
+  - Clause 8 is satisfied by loop 137.
+  - Scope discipline: one outcome only — no public source maps and no user-visible error internals.
+- **What changed:**
+  - **Source maps.** In `next.config.js`, `productionBrowserSourceMaps` is now `process.env.LEDGERIUM_SOURCE_MAPS === '1'`, so it is **off by default**. Nothing in the deploy, Dockerfile or workflows sets that variable. No other map emitter exists: there is no `devtool` override and no Sentry.
+  - **Error page.** `global-error.tsx` is rewritten as a plain page with "Try again" (`reset()`), "Go to home", and the error digest as a support reference. It shows no error name, message or stack. `error.tsx` already rendered only safe fields, so it is unchanged.
+  - **Client error reporting** is unchanged: `track(client_error)` still sends the constructor name only. Server logging is untouched.
+  - **Hydration debugging** stays possible through `next dev`, or through a build with `LEDGERIUM_SOURCE_MAPS=1` whose output is kept private.
+- **Validation (exit code + ANSI-stripped summary):**
+  - **Build.** `pnpm --filter @ledgerium/web-app build` exits 0, with **0 `.map` files in `.next/static`**.
+  - **Tests.** web-app **4163 → 4168** on 3 of 3 runs; root 5938; typecheck 0.
+  - **Revert proof.** Restoring the stack render and forcing maps on fails 2 of the 5 new tests.
+  - **Copy.** One new user-visible string ("Go to home"), so no D-4 review is needed.
+- **Takes effect** on the next deploy.
+- **Follow-ups:** 0 created, 1 closed (#283).
+
+---
+
 ## 2026-10-02 — CEO decisions recorded (not a loop)
 
 - **CEO, verbatim:** *"I have manually pushed via my terminal. Turn off diagnostic build. Update retention policy. Let bad invites expire. Fix positioning."*

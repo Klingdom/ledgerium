@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // TEMP (hydration-debug): emit browser source maps so the production
-  // hydration error (#418/#425) resolves to a real component/file/line.
-  // Remove after the root cause is identified.
-  productionBrowserSourceMaps: true,
+  // Backlog #283 (CEO 2026-10-02): production serves NO public source maps.
+  // To debug the hydration error locally use `next dev`, or build with
+  // LEDGERIUM_SOURCE_MAPS=1 (default off) and keep the output private.
+  productionBrowserSourceMaps: process.env.LEDGERIUM_SOURCE_MAPS === '1',
   transpilePackages: ['@ledgerium/process-engine', '@ledgerium/intelligence-engine'],
   webpack: (config) => {
     // Resolve .js imports to .ts files in workspace packages (ESM → TS source)
