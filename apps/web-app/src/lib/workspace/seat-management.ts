@@ -9,6 +9,7 @@
  */
 
 import { db } from '@/db';
+import { filterLiveInvites } from './live-invites';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -142,12 +143,15 @@ export async function countActiveMembers(teamId: string): Promise<number> {
  * @param nowMs  - Current epoch milliseconds for expiry comparison (clock injection).
  */
 export async function countPendingInvites(teamId: string, nowMs: number): Promise<number> {
-  return db.teamInvite.count({
+  const pending = await db.teamInvite.findMany({
     where: {
       teamId,
       acceptedAt: null,
       revokedAt: null,
       expiresAt: { gt: new Date(nowMs) },
     },
+    select: { role: true, invitedBy: true },
   });
+  // Row #323: invites acceptance would refuse do not consume a seat.
+  return (await filterLiveInvites(teamId, pending)).length;
 }

@@ -105,3 +105,45 @@ describe('POST /api/teams/:id/invite — role matrix (#272)', () => {
     }
   });
 });
+
+describe('POST /api/teams/:id/invite — duplicate guard uses the live-invite predicate (#323)', () => {
+  const existing = (role: string, invitedBy = 'o1') => ({ id: 'old-1', role, invitedBy });
+  beforeEach(() => {
+    vi.resetAllMocks();
+    m.auth.mockResolvedValue({ user: { id: 'caller-1' } });
+    m.teamFindUnique.mockResolvedValue({ plan: 'team' });
+    m.plan.mockReturnValue({ features: { teamWorkspace: true }, maxSeats: 10 });
+    m.memberFindFirst.mockResolvedValue({ role: 'owner', status: 'active' });
+    m.memberFindMany.mockResolvedValue([]);
+    m.pending.mockResolvedValue(0);
+    m.inviteUpsert.mockResolvedValue({ id: 'inv-1' });
+    m.transaction.mockImplementation(async (fn: (tx: unknown) => Promise<void>) =>
+      fn({ teamMember: { findMany: m.memberFindMany }, teamInvite: { upsert: m.inviteUpsert } }));
+    arrange();
+  });
+
+  it('a refused (out-of-set role) pending invite does not block a re-invite', async () => {
+    m.inviteFindFirst.mockResolvedValue(existing('superadmin'));
+    expect((await POST(post({ email: 'x@example.com' }), PARAMS)).status).toBe(200);
+    expect(m.inviteUpsert).toHaveBeenCalled();
+  });
+
+  it('a refused owner invite (inviter no longer an active owner) does not block a re-invite', async () => {
+    m.inviteFindFirst.mockResolvedValue(existing('owner', 'gone'));
+    m.memberFindMany.mockResolvedValue([]);
+    expect((await POST(post({ email: 'x@example.com' }), PARAMS)).status).toBe(200);
+  });
+
+  it('an acceptable pending invite still blocks with 409', async () => {
+    m.inviteFindFirst.mockResolvedValue(existing('member'));
+    const res = await POST(post({ email: 'x@example.com' }), PARAMS);
+    expect(res.status).toBe(409);
+    expect(m.inviteUpsert).not.toHaveBeenCalled();
+  });
+
+  it('an owner invite from an active owner still blocks with 409', async () => {
+    m.inviteFindFirst.mockResolvedValue(existing('owner', 'o1'));
+    m.memberFindMany.mockResolvedValue([{ userId: 'o1' }]);
+    expect((await POST(post({ email: 'x@example.com' }), PARAMS)).status).toBe(409);
+  });
+});

@@ -4,6 +4,31 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 137) — Every place that asks whether an invite is live (Mode 1, `backend-engineer`)
+
+- **Controls:**
+  - **Area:** `security / authz`.
+  - **Agent:** `backend-engineer`.
+  - **Extension:** `871e29a`, 94 loops untouched.
+  - **Cadence:** 1 of 3 since MR-058.
+- **Candidate Selection: `burn-down` — #323** (13). This was filed and endorsed by MR-058.
+  - It also serves as the burn-down that CLAUDE.md Mode 5 clause 8 requires before the CEO-directed sequence that starts next.
+- **Inventory first** (the "all places" check MR-058 said loop 136 skipped): every read of a pending invite in `apps/web-app/src`.
+  - **Seat count** (`seat-management.ts:144`) and **duplicate-invite check** (`invite/route.ts:145`): did not apply the predicate before; now they do.
+  - **Pending list:** applied it already; now through the shared helper.
+  - **Acceptance and metadata:** unchanged.
+  - **Revoke-by-id, re-invite upsert and the count script:** not applicable.
+  - No admin or ops query, and no resend path, reads invites.
+- **What changed:** `lib/workspace/live-invites.ts` `filterLiveInvites` is now the single path every consumer uses.
+  - It loads the active-owner inviters in one query, and only when an owner invite is present.
+  - A refused invite now neither consumes a seat nor blocks a re-invite; the existing upsert overwrites it.
+  - Acceptable invites behave exactly as before.
+- **Validation (exit code + ANSI-stripped summary):** web-app **4155 → 4163** on 3 of 3 runs; root **5930 → 5938**; typecheck 0.
+  - **Revert proof:** with the old route and seat code restored, 8 tests fail. That includes the existing 409 tests, whose fixtures now carry `role` and `invitedBy`.
+- **Follow-ups:** 0 created, 1 closed (#323).
+
+---
+
 ## 2026-10-02 — MR-058 recorded (Mode 4, non-counting): the same rule in every place it applies
 
 - **Review:** `docs/meta/MR_058_META_REVIEW.md`. Nothing reverts.

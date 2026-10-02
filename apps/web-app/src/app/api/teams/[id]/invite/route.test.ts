@@ -253,6 +253,8 @@ describe('POST /api/teams/:id/invite', () => {
   it('returns 409 with inviteId when a pending invite already exists', async () => {
     mockTeamInviteFindFirst.mockResolvedValue({
       id: 'existing-inv',
+      role: 'member',
+      invitedBy: 'caller-1',
       acceptedAt: null,
       revokedAt: null,
       expiresAt: new Date(Date.now() + 86400_000),
@@ -643,6 +645,8 @@ describe('POST /api/teams/:id/invite — iter 088 copy-string polish (Sub-task 1
     // existing pending invite — trigger the duplicate-pending guard
     mockTeamInviteFindFirst.mockResolvedValue({
       id: 'inv-existing',
+      role: 'member',
+      invitedBy: 'caller-1',
       email: 'invitee@example.com',
       acceptedAt: null,
       revokedAt: null,

@@ -12,7 +12,8 @@ import { trackServer } from '@/lib/analytics-server';
 import { checkInviteRateLimit } from '@/lib/rate-limit/invite-buckets';
 import { normalizeEmail } from '@/lib/email-normalize';
 import { reportApiError } from '@/lib/api-error-reporting';
-import { isTeamRole, isRoleElevation, isAcceptableInvite } from '@/lib/team-roles';
+import { isTeamRole, isRoleElevation } from '@/lib/team-roles';
+import { filterLiveInvites } from '@/lib/workspace/live-invites';
 
 /**
  * POST /api/teams/:id/invite — create an invite link for a team
@@ -151,7 +152,13 @@ async function handlePOST(
         expiresAt: { gt: new Date(nowMs) },
       },
     });
-    if (existingPending) {
+    // Row #323: a refused invite is invisible/un-acceptable, so it must not block a re-invite
+    // (the upsert below overwrites it).
+    const isExistingLive =
+      existingPending !== null &&
+      existingPending !== undefined &&
+      (await filterLiveInvites(params.id, [existingPending])).length === 1;
+    if (existingPending && isExistingLive) {
       return NextResponse.json(
         { error: 'An invite is already pending for this email address', inviteId: existingPending.id },
         { status: 409 },
@@ -317,22 +324,7 @@ async function handleGET(
     // or `owner` from an inviter who is not currently an active owner). The page renders
     // whatever list it receives, so omission needs no UI change and nothing un-acceptable
     // shows as pending. Inviter roles are fetched only if an owner invite exists.
-    const ownerInviterIds = Array.from(
-      new Set(invites.filter((i) => i.role === 'owner').map((i) => i.invitedBy)),
-    );
-    const activeOwnerIds = new Set<string>(
-      ownerInviterIds.length === 0
-        ? []
-        : (
-            await db.teamMember.findMany({
-              where: { teamId: params.id, userId: { in: ownerInviterIds }, status: 'active', role: 'owner' },
-              select: { userId: true },
-            })
-          ).map((m: { userId: string }) => m.userId),
-    );
-    const acceptable = invites.filter((i) =>
-      isAcceptableInvite(i, activeOwnerIds.has(i.invitedBy) ? 'owner' : null),
-    );
+    const acceptable = await filterLiveInvites(params.id, invites);
 
     return NextResponse.json({
       invites: acceptable.map((i) => ({

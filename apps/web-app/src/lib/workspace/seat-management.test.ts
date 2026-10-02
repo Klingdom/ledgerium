@@ -26,12 +26,12 @@ const {
   mockTeamMemberFindMany,
   mockTeamMemberUpdateMany,
   mockTeamMemberCount,
-  mockTeamInviteCount,
+  mockTeamInviteFindMany,
 } = vi.hoisted(() => ({
   mockTeamMemberFindMany: vi.fn(),
   mockTeamMemberUpdateMany: vi.fn(),
   mockTeamMemberCount: vi.fn(),
-  mockTeamInviteCount: vi.fn(),
+  mockTeamInviteFindMany: vi.fn(),
 }));
 
 // ─── Module mocks ─────────────────────────────────────────────────────────────
@@ -44,7 +44,7 @@ vi.mock('@/db', () => ({
       count: mockTeamMemberCount,
     },
     teamInvite: {
-      count: mockTeamInviteCount,
+      findMany: mockTeamInviteFindMany,
     },
   },
 }));
@@ -159,21 +159,58 @@ describe('countActiveMembers', () => {
 
 // ─── countPendingInvites tests ────────────────────────────────────────────────
 
+const live = (role = 'member', invitedBy = 'u1') => ({ role, invitedBy });
+
 describe('countPendingInvites', () => {
+  beforeEach(() => {
+    mockTeamInviteFindMany.mockReset();
+    mockTeamMemberFindMany.mockReset();
+  });
+
   it('queries with acceptedAt=null, revokedAt=null, and future expiresAt', async () => {
-    mockTeamInviteCount.mockResolvedValue(2);
+    mockTeamInviteFindMany.mockResolvedValue([live(), live()]);
     const result = await countPendingInvites('t1', NOW_MS);
     expect(result).toBe(2);
-    const countCall = mockTeamInviteCount.mock.calls[0][0];
-    expect(countCall.where.teamId).toBe('t1');
-    expect(countCall.where.acceptedAt).toBeNull();
-    expect(countCall.where.revokedAt).toBeNull();
-    expect(countCall.where.expiresAt.gt).toEqual(new Date(NOW_MS));
+    const call = mockTeamInviteFindMany.mock.calls[0][0];
+    expect(call.where.teamId).toBe('t1');
+    expect(call.where.acceptedAt).toBeNull();
+    expect(call.where.revokedAt).toBeNull();
+    expect(call.where.expiresAt.gt).toEqual(new Date(NOW_MS));
   });
 
   it('returns 0 when no pending invites', async () => {
-    mockTeamInviteCount.mockResolvedValue(0);
-    const result = await countPendingInvites('t1', NOW_MS);
-    expect(result).toBe(0);
+    mockTeamInviteFindMany.mockResolvedValue([]);
+    expect(await countPendingInvites('t1', NOW_MS)).toBe(0);
+  });
+
+  // Row #323: refused invites do not consume a seat.
+  it('does not count an out-of-set role invite', async () => {
+    mockTeamInviteFindMany.mockResolvedValue([live('superadmin')]);
+    expect(await countPendingInvites('t1', NOW_MS)).toBe(0);
+  });
+
+  it('does not count an owner invite whose inviter is no longer an active owner', async () => {
+    mockTeamInviteFindMany.mockResolvedValue([live('owner', 'gone')]);
+    mockTeamMemberFindMany.mockResolvedValue([]);
+    expect(await countPendingInvites('t1', NOW_MS)).toBe(0);
+  });
+
+  it('counts an owner invite whose inviter is an active owner', async () => {
+    mockTeamInviteFindMany.mockResolvedValue([live('owner', 'o1')]);
+    mockTeamMemberFindMany.mockResolvedValue([{ userId: 'o1' }]);
+    expect(await countPendingInvites('t1', NOW_MS)).toBe(1);
+  });
+
+  it('counts only live invites in a mix, with a single inviter lookup', async () => {
+    mockTeamInviteFindMany.mockResolvedValue([
+      live('member'),
+      live('admin'),
+      live('superadmin'),
+      live('owner', 'o1'),
+      live('owner', 'gone'),
+    ]);
+    mockTeamMemberFindMany.mockResolvedValue([{ userId: 'o1' }]);
+    expect(await countPendingInvites('t1', NOW_MS)).toBe(3);
+    expect(mockTeamMemberFindMany).toHaveBeenCalledTimes(1);
   });
 });
