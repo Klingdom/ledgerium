@@ -48,6 +48,38 @@ describe('withApiRoute (rows #8 / #253)', () => {
     expect(errSpy).toHaveBeenCalled();
   });
 
+  it('passes a THROWN Response through untouched and unreported (MR-041 §3.2)', async () => {
+    // requireFeature() throws a 403 by design; it must stay a 403, not become
+    // a reported 500 that counts against the server-failure alert.
+    const forbidden = NextResponse.json({ error: 'upgrade required' }, { status: 403 });
+    const asyncWrapped = withApiRoute('/api/x', async () => {
+      throw forbidden;
+    });
+    expect(await asyncWrapped()).toBe(forbidden);
+    const syncWrapped = withApiRoute('/api/x', () => {
+      throw new Response(null, { status: 402 });
+    });
+    expect((syncWrapped() as Response).status).toBe(402);
+    expect(reportApiError).not.toHaveBeenCalled();
+  });
+
+  it('re-throws everything during `next build`, so a broken static route fails the build (MR-041 §3.2)', async () => {
+    vi.stubEnv('NEXT_PHASE', 'phase-production-build');
+    try {
+      const wrapped = withApiRoute('/llms.txt', () => {
+        throw new Error('broken at build');
+      });
+      expect(() => wrapped()).toThrow('broken at build');
+      const asyncWrapped = withApiRoute('/api/x', async () => {
+        throw new Error('broken at build');
+      });
+      await expect(asyncWrapped()).rejects.toThrow('broken at build');
+      expect(reportApiError).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it('also catches synchronous throws and non-Error throws', async () => {
     const sync = withApiRoute('/api/s', () => {
       throw new Error('boom');

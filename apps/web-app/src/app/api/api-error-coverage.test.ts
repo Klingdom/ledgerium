@@ -41,6 +41,12 @@ function endpointFor(file: string): string {
   return '/' + relative(APP_ROOT, join(file, '..')).split(sep).join('/');
 }
 
+const ALL_ROUTES = routeFiles(APP_ROOT).map((file) => ({
+  file: relative(APP_ROOT, file).split(sep).join('/'),
+  endpoint: endpointFor(file),
+  lines: readFileSync(file, 'utf8').split(/\r?\n/),
+}));
+
 const ROUTES = routeFiles(API_ROOT).map((file) => ({
   file: relative(API_ROOT, file).split(sep).join('/'),
   endpoint: endpointFor(file),
@@ -103,19 +109,29 @@ describe('api_error coverage guard (row #246)', () => {
     const METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
     const problems: string[] = [];
     let wrappedCount = 0;
-    for (const r of ROUTES) {
+    // MR-041 §3.3: this guard first scanned app/api only (72 of 74 files),
+    // missing exactly the two force-static routes whose wrapping changes build
+    // behaviour. It now scans every route.ts under app/.
+    for (const r of ALL_ROUTES) {
       const text = r.lines.join('\n');
       // Every way a method can be exported: function declaration, const, or a
       // destructured re-export (`export const { GET } = handlers`).
       const exported = new Set<string>();
       for (const m of text.matchAll(/^export\s+(?:async\s+)?function\s+(\w+)/gm)) exported.add(m[1]!);
       for (const m of text.matchAll(/^export\s+const\s+(\w+)\b/gm)) exported.add(m[1]!);
+      // `export { handler as GET }` too — MR-041 found this form slipped past.
+      for (const m of text.matchAll(/^export\s*\{([^}]*)\}/gm)) {
+        for (const n of m[1]!.split(',')) exported.add(n.trim().split(/\s+as\s+/).pop()!.trim());
+      }
       for (const m of text.matchAll(/^export\s+const\s*\{([^}]*)\}/gm)) {
         for (const n of m[1]!.split(',')) exported.add(n.trim().split(':')[0]!.trim());
       }
       const methods = METHODS.filter((mm) => exported.has(mm));
       if (methods.length === 0) problems.push(`${r.file}: exports no HTTP method`);
-      const escapedEndpoint = r.endpoint.replace(/[[\]]/g, '\\$&');
+      // Escape EVERY regex metacharacter: route groups like `(public)` and
+      // dotted names like `download.md` broke the bracket-only escape that
+      // was here, the moment the scan reached outside app/api.
+      const escapedEndpoint = r.endpoint.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       for (const mm of methods) {
         const wrapped = new RegExp(`^export const ${mm} = withApiRoute\\('${escapedEndpoint}',`, 'm');
         if (wrapped.test(text)) wrappedCount++;
@@ -124,7 +140,8 @@ describe('api_error coverage guard (row #246)', () => {
     }
     expect(problems).toEqual([]);
     // Vacuity floor: 95 handlers were wrapped when this guard was written.
-    expect(wrappedCount).toBeGreaterThanOrEqual(90);
+    expect(wrappedCount).toBeGreaterThanOrEqual(95);
+    expect(ALL_ROUTES.length, 'the route scan must reach outside app/api').toBeGreaterThan(ROUTES.length);
   });
 
   it('the route and root boundaries emit client_error with the constructor name only', () => {

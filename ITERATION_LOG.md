@@ -4,6 +4,17 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 — Mode 3 correction to loop 83 (non-counting): the guard that could not see the two routes that mattered
+
+- **From MR-041 §3.2-3.4.** Four things, one surface — `withApiRoute` and the guard that holds it.
+- **A thrown `Response` now passes through untouched and unreported.** `requireFeature` throws a 403 by design; its one caller catches it today, but the next route to follow its docstring would have turned an entitlement check into a reported 500 on the server-failure alert.
+- **Every throw during `next build` is re-thrown.** The two `force-static` routes (`llms.txt`, the 17 `download.md` pages) used to fail the build on a genuine error. Wrapped, that error became a 500 Next declines to prerender, so the build would pass and the route would ship broken. Re-throwing at build makes build-time behaviour identical to an unwrapped handler by construction.
+- **Guard D now scans all of `app/`, not `app/api`** — it had been blind to exactly those two routes. **Widening it immediately failed, and the failure was in the guard, not the route:** its endpoint regex escaped only `[ ]`, so the `(public)` route group's parentheses were read as regex syntax. Latent until the guard was pointed somewhere new. Now escapes every metacharacter, also reads `export { x as GET }`, and its floor is 95. **Mutation-checked** with the form and file it previously could not see: unwrapping `download.md` via `export { handleGET as GET }` fails it.
+- **My loop 83 evidence was non-discriminating, and so was the comment.** "0 `/api` routes prerendered" cannot fail as a test of the re-throw — Next 14.2 never prerenders a ≥400 response, so a swallowing wrapper also shows 0. Neither can "build-time `api_error` lines 0", which is suppressed during build regardless. The comment's "frozen 500" mechanism was also wrong for the installed Next. **This time the build check is one that can fail:** the static routes must still prerender — **17 `download.md` + `llms.txt`, confirmed** — and `[api] unhandled error` during build is **0**.
+- **Validation:** web-app **3346 → 3348** (+2: Response pass-through, build-phase re-throw); guard 17/17; typecheck 0; build 0.
+
+---
+
 ## 2026-10-01 — MR-041 recorded, and what I applied from it (Mode 4, non-counting)
 
 - **Review:** `docs/meta/MR_041_META_REVIEW.md`. The three numbers reconcile. The findings are again about what my checks could not see — and the headline lands on my own loop 82.

@@ -22,9 +22,16 @@
  * Next implements `redirect()`, `notFound()` and — critically — the
  * dynamic-server-usage signal as THROWN errors. `headers()` / `cookies()` (so
  * `auth()`, which 61 routes call) throw `DynamicServerError` during
- * `next build` when Next probes whether a GET can be prerendered. If this wrapper
- * converted that throw into a 500 response, Next would conclude the handler is
- * static and prerender a frozen 500 into production. So these are RE-THROWN.
+ * `next build` when Next probes whether a GET can be prerendered. These are
+ * RE-THROWN. Corrected at MR-041: the original comment said swallowing one
+ * would "prerender a frozen 500 into production". In Next 14.2 that is not
+ * what happens — the export step refuses to write a >=400 body
+ * (`app-route.js`), so a swallowed signal yields a route that is re-run per
+ * request and answers 500, not a frozen file. Still wrong, still re-thrown;
+ * the frozen-file version is a risk on a future Next that changes that rule.
+ * And since MR-041 every throw during `next build` is re-thrown (below), so
+ * build-time behaviour is identical to an unwrapped handler by construction;
+ * the control-flow check matters at runtime.
  *
  * Detection is by the error's `digest` / `code` property, not by importing
  * `isDynamicServerError` / `isRedirectError` / `isNotFoundError` from
@@ -58,10 +65,21 @@ export function isNextControlFlowError(error: unknown): boolean {
 }
 
 /** Response type of the wrapped handler: sync stays sync, async stays async. */
-export type WrappedResult<R> = R extends PromiseLike<infer U> ? Promise<U | NextResponse> : R | NextResponse;
+export type WrappedResult<R> = R extends PromiseLike<infer U> ? Promise<U | Response> : R | Response;
 
-function failureResponse(endpoint: string, error: unknown): NextResponse {
+function failureResponse(endpoint: string, error: unknown): Response {
+  // A thrown Response is a deliberate answer, not a failure: `requireFeature`
+  // (lib/feature-gating.ts) throws a 403 by design. Converting it to a reported
+  // 500 would turn an entitlement check into a server failure on the alert —
+  // #258's class. Pass it through untouched and unreported (MR-041 §3.2).
+  if (error instanceof Response) return error;
   if (isNextControlFlowError(error)) throw error;
+  // During `next build`, a genuine throw must fail the build, as it did before
+  // this wrapper existed. Converting it to a 500 there lets a `force-static`
+  // route (llms.txt, download.md) build "successfully" and ship broken, because
+  // Next declines to prerender a >=400 response and serves it per request
+  // instead (MR-041 §3.2).
+  if (process.env.NEXT_PHASE === 'phase-production-build') throw error;
   console.error(`[api] unhandled error in ${endpoint}:`, error);
   reportApiError(endpoint, 500);
   return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
