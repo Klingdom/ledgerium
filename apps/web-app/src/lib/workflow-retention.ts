@@ -115,6 +115,7 @@ export interface RetentionDb {
     count(args: { where: Record<string, unknown> }): Promise<number>;
   };
   upload: {
+    count(args: { where: { uploadedAt: { lte: Date }; workflows: { none: Record<string, never> } } }): Promise<number>;
     findMany(args: {
       where: { uploadedAt: { lte: Date }; workflows: { none: Record<string, never> } };
       orderBy: Array<Record<string, 'asc' | 'desc'>>;
@@ -137,8 +138,12 @@ export interface PurgeDeps {
 export interface PurgeSummary {
   dryRun: boolean;
   retentionDays: number;
-  /** Eligible in THIS batch (<= batchLimit). */
+  /** Eligible in THIS batch (<= batchLimit). In a dry run: what the next real run removes, min(total, batchLimit). */
   eligible: number;
+  /** DRY RUN ONLY (null on a real run): ALL eligible workflows, not capped by the batch limit. */
+  eligibleTotal: number | null;
+  /** DRY RUN ONLY (null on a real run): orphan uploads the sweep would consider (uncapped count). */
+  orphanCandidates: number | null;
   purged: number;
   /** Raced with a restore/touch between select and delete; left alone. */
   skipped: number;
@@ -207,6 +212,8 @@ export async function purgeExpiredWorkflows(
     dryRun,
     retentionDays: opts.retentionDays,
     eligible: 0,
+    eligibleTotal: null,
+    orphanCandidates: null,
     purged: 0,
     skipped: 0,
     failed: 0,
@@ -217,6 +224,19 @@ export async function purgeExpiredWorkflows(
     orphansRemoved: 0,
     hasMore: false,
   };
+
+  if (dryRun) {
+    // PREVIEW = exactly what a real run would do, via COUNT queries so nothing is
+    // capped at the batch limit: every eligible workflow, what the next run removes
+    // (min(total, batch)), and the orphan-sweep candidates. Same predicates as the
+    // real path (status + cutoff; upload age + no workflow). Counts only; no ids.
+    const total = await db.workflow.count({ where: { status: 'deleted', updatedAt: { lte: cutoff } } });
+    summary.eligibleTotal = total;
+    summary.eligible = Math.min(total, Math.max(0, limit));
+    summary.hasMore = total > limit;
+    summary.orphanCandidates = await db.upload.count({ where: { uploadedAt: { lte: cutoff }, workflows: { none: {} } } });
+    return summary;
+  }
 
   // The query pre-filters; selectPurgeEligible is the authority on the rule.
   const candidates = await db.workflow.findMany({
@@ -229,7 +249,6 @@ export async function purgeExpiredWorkflows(
   summary.hasMore = all.length > limit;
   const batch = all.slice(0, limit);
   summary.eligible = batch.length;
-  if (dryRun) return summary;
 
   /** Contained unlink. Throws if refused or failed (callers keep the row for retry). */
   const unlinkContained = async (rawJsonPath: string): Promise<void> => {

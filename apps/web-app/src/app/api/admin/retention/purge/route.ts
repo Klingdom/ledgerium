@@ -17,7 +17,10 @@ import { purgeExpiredWorkflows, resolvePurgeAfterDays, type RetentionDb } from '
  * timing-safe, no query-string secret (lib/cron-auth.ts). POST only: a purge is
  * a mutation and must never be a prefetchable GET.
  *
- * `?dryRun=1` (or `true`) returns the counts without deleting anything.
+ * DRY RUN BY DEFAULT: nothing is deleted unless the request carries `?mode=purge`
+ * (and not `dryRun=1`). A dry run returns counts only: `eligibleTotal` (all
+ * eligible, uncapped), `eligible` (what the next real run removes), and
+ * `orphanCandidates` (sweep candidates).
  * Bounded: at most 100 workflows per call; `hasMore: true` means the next
  * scheduled run continues.
  *
@@ -54,7 +57,16 @@ async function handlePOST(request: NextRequest) {
   if (dryNorm !== null && !['1', 'true', '0', 'false'].includes(dryNorm)) {
     return NextResponse.json({ error: 'Invalid dryRun (use 1, true, 0 or false)' }, { status: 400 });
   }
-  const dryRun = dryNorm === '1' || dryNorm === 'true';
+  // DEFENCE IN DEPTH (#333): the server DEFAULTS TO A DRY RUN. A real purge needs the
+  // caller to say `mode=purge` explicitly, so a mis-wired caller (bare POST, old
+  // script, `?dryRun=0` alone) can never delete. `dryRun=1|true` still wins over
+  // `mode=purge`. Anything but `purge`/`dryrun` is refused (a typo never deletes).
+  const modeParam = request.nextUrl.searchParams.get('mode');
+  const modeNorm = modeParam === null ? null : modeParam.toLowerCase();
+  if (modeNorm !== null && !['purge', 'dryrun'].includes(modeNorm)) {
+    return NextResponse.json({ error: 'Invalid mode (use purge or dryrun)' }, { status: 400 });
+  }
+  const dryRun = modeNorm !== 'purge' || dryNorm === '1' || dryNorm === 'true';
 
   try {
     const summary = await purgeExpiredWorkflows(
@@ -63,7 +75,7 @@ async function handlePOST(request: NextRequest) {
       { uploadDir: UPLOAD_DIR },
     );
     console.log(
-      `[admin/retention/purge] dryRun: ${summary.dryRun}, days: ${summary.retentionDays}, eligible: ${summary.eligible}, purged: ${summary.purged}, skipped: ${summary.skipped}, failed: ${summary.failed}, uploadsRemoved: ${summary.uploadsRemoved}, filesRemoved: ${summary.filesRemoved}, fileFailures: ${summary.fileFailures}, definitionsRemoved: ${summary.definitionsRemoved}, hasMore: ${summary.hasMore}`,
+      `[admin/retention/purge] dryRun: ${summary.dryRun}, days: ${summary.retentionDays}, eligible: ${summary.eligible}, eligibleTotal: ${summary.eligibleTotal}, orphanCandidates: ${summary.orphanCandidates}, purged: ${summary.purged}, skipped: ${summary.skipped}, failed: ${summary.failed}, uploadsRemoved: ${summary.uploadsRemoved}, filesRemoved: ${summary.filesRemoved}, fileFailures: ${summary.fileFailures}, definitionsRemoved: ${summary.definitionsRemoved}, hasMore: ${summary.hasMore}`,
     );
     if (summary.failed > 0 || summary.fileFailures > 0) {
       reportApiError('/api/admin/retention/purge', 500);

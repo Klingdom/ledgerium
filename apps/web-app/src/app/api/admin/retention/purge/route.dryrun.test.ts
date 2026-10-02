@@ -29,7 +29,11 @@ describe('#319 dryRun fails closed', () => {
     expect(res.status).toBe(400);
     expect(purge).not.toHaveBeenCalled();
   });
-  it.each([['', false], ['?dryRun=1', true], ['?dryRun=TRUE', true], ['?dryRun=0', false], ['?dryRun=False', false]] as const)(
+  // #333: the server defaults to a dry run; only mode=purge (without dryRun=1|true) deletes.
+  it.each([
+    ['', true], ['?dryRun=1', true], ['?dryRun=TRUE', true], ['?dryRun=0', true], ['?dryRun=False', true],
+    ['?mode=purge', false], ['?mode=PURGE&dryRun=0', false], ['?mode=purge&dryRun=1', true],
+  ] as const)(
     '%s accepted',
     async (q, dry) => {
       const res = await call(q);

@@ -63,11 +63,29 @@ describe('POST /api/admin/retention/purge', () => {
     expect(purge).not.toHaveBeenCalled();
   });
 
-  it('200 with counts only; default 30 days, not a dry run', async () => {
-    const res = await POST(req({ auth: `Bearer ${SECRET}` }));
+  it('200 with counts only; default 30 days; explicit mode=purge is a real run', async () => {
+    const res = await POST(req({ auth: `Bearer ${SECRET}`, query: '?mode=purge' }));
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual(summary);
     expect(purge.mock.calls[0]![1]).toMatchObject({ retentionDays: 30, dryRun: false });
+  });
+
+  it('#333: without an explicit mode=purge the server NEVER deletes (default dry run)', async () => {
+    for (const query of ['', '?dryRun=0', '?dryRun=false', '?mode=dryrun']) {
+      purge.mockClear();
+      expect((await POST(req({ auth: `Bearer ${SECRET}`, query }))).status).toBe(200);
+      expect(purge.mock.calls[0]![1]).toMatchObject({ dryRun: true });
+    }
+  });
+
+  it('#333: dryRun=1 beats mode=purge; a bad mode is a 400 that purges nothing', async () => {
+    await POST(req({ auth: `Bearer ${SECRET}`, query: '?mode=purge&dryRun=1' }));
+    expect(purge.mock.calls[0]![1]).toMatchObject({ dryRun: true });
+    purge.mockClear();
+    for (const query of ['?mode=purg', '?mode=', '?mode=delete']) {
+      expect((await POST(req({ auth: `Bearer ${SECRET}`, query }))).status).toBe(400);
+    }
+    expect(purge).not.toHaveBeenCalled();
   });
 
   it('?dryRun=1 passes dryRun and still answers 200', async () => {
@@ -79,7 +97,7 @@ describe('POST /api/admin/retention/purge', () => {
 
   it('uses WORKFLOW_PURGE_AFTER_DAYS when valid', async () => {
     process.env.WORKFLOW_PURGE_AFTER_DAYS = '45';
-    await POST(req({ auth: `Bearer ${SECRET}` }));
+    await POST(req({ auth: `Bearer ${SECRET}`, query: '?mode=purge' }));
     expect(purge.mock.calls[0]![1]).toMatchObject({ retentionDays: 45 });
   });
 

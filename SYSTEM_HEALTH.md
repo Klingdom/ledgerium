@@ -12,6 +12,11 @@
   - **Cold-pool triage still overdue for the remaining pools:** MR-006 Change D triage is mandatory for DV2, WDC-002, MDR, WDC and PIB (last triaged May), and PRICING-001, SOPPM-001, TEAM-001 and PATHE-001 were never triaged (~240 items). Deferred pending a CEO ruling on P-1, pool-level archive-stale.
   - **Chrome Web Store blocker B-1 (row 192): CLOSED 2026-09-16.** `docs/store-assets/chrome/promo-small-440x280.png` exists and was pixel-verified at exactly 440×280, non-blank. Root cause was an output path outside the repo, not a broken generator. **All remaining submission steps are human:** one real Chrome recording (Invariant rule 6) and the Dashboard upload. **All three promo assets now exist and are claim-verified** — the optional large (920×680) and marquee (1400×560) tiles were corrected and rendered at loop 14 (row #194 closed), so nothing in the listing promises a paid feature to a free installer.
 - **Extension gate VERIFIED in CI 2026-09-18:** the `real-extension` job ran for the first time and **passed — 6 tests, 21.3s** under `xvfb-run` (run 35353704615, job-level confirmed, log shows "Running 6 tests" then "6 passed", so it is not a vacuous pass). **My predicted environment failure did not happen**, and the runner already had xvfb ("already the newest version"), so the explicit install step is a harmless no-op that could be dropped. **The precondition for gating deploy on the E2E jobs is now met** (decided loop 25, sequenced on exactly this event). Deploy is still ungated (`deploy.yml:47` needs only `quality-gate`); wiring it requires a cross-workflow trigger, so it is scheduled as its own loop rather than slipped in.
+- **Loop 145 (#333 CLOSED): the 30-day purge now deletes nothing until you switch it on.** After you push:
+  1. Set the GitHub secret `CRON_SECRET` and the variable `RETENTION_PURGE_URL` = `https://<host>/api/admin/retention/purge`.
+  2. Run **Actions → Retention purge → Run workflow** with `dry_run` ticked, and read `eligibleTotal` (everything that would be removed), `eligible` (the next run's batch) and `orphanCandidates`.
+  3. Only then set the variable `RETENTION_PURGE_ARMED` to `true`. Delete that variable to switch it off again.
+  - Cadence: 2 of 3 since MR-060.
 - **Loop 144 (#332 CLOSED):** CI now runs every safety-check test automatically, and fails if it finds fewer than expected. The import guard added in loop 143 runs for the first time. Cadence: 1 of 3 since MR-060.
 - **MR-060 (Mode 4, after loop 143):** loops 141-143 hold, and nothing reverts.
   - **Correction to my retention instructions — don't set `RETENTION_PURGE_URL` yet.** The daily schedule runs for real, so setting that variable arms the purge even if nobody previewed it. The preview also undercounts. The next loops add a separate on/off switch and a full preview (#333). After that, the order is: set the URL, preview, then switch it on.
@@ -35,7 +40,7 @@
     1. Push.
     2. Set the GitHub variable `RETENTION_PURGE_URL` (with `CRON_SECRET`).
     3. Run **Actions → Retention purge → Run workflow** with `dry_run` ticked (the default) to see how many workflows the first real run would remove.
-    4. The daily run then purges for real.
+    4. Only then set the GitHub variable `RETENTION_PURGE_ARMED` to `true`. The daily run purges for real only while it is `true` (loop 145, #333).
   - Web-app 4238 → 4245. Cadence: 1 of 3 since MR-059.
 - **MR-059 (mandatory review after your directed sequence):** nothing reverts, but **please hold your next push until loop 141 lands.**
   - **The problem:** your new Terms say users can "delete workflows at any time". The default dashboard only offers *Archive*, which is never purged, and Delete exists only on the old dashboard (`?v2=0`). Loop 141 (#328) gives the default dashboard a real Delete and adds a preview (dry-run) option to the purge job.
@@ -55,7 +60,7 @@
 - **Loop 139 (#319 CLOSED, CEO-directed): deleted workflows are now permanently removed after 30 days.** That includes their steps, SOPs, shares and uploaded recording.
   - **Wording:** your Terms, security, privacy and docs pages now all say exactly that. Terms: "You can export your data and delete workflows at any time; deleted workflows are permanently removed after 30 days."
   - **Safeguards:** a security review and an architecture review were both applied. Each purge leaves an audit trail with no personal data.
-  - **To switch it on:** set the GitHub variable `RETENTION_PURGE_URL` to `https://<host>/api/admin/retention/purge`, using the same `CRON_SECRET` as alerts. Until then the daily job reports "not configured" and nothing is deleted.
+  - **To switch it on:** set the GitHub variable `RETENTION_PURGE_URL` to `https://<host>/api/admin/retention/purge`, using the same `CRON_SECRET` as alerts. Until then the daily job reports "not configured" and nothing is deleted. Since #333 also set `RETENTION_PURGE_ARMED=true` after a dry run; without it the job only previews.
   - **To change the period:** set `WORKFLOW_PURGE_AFTER_DAYS`.
   - Web-app 4168 → 4230.
 - **Loop 138 (#283 CLOSED, CEO-directed):** the diagnostic build is off. Production no longer publishes source maps (a test build produced zero), and the crash page shows a plain message, a retry button and a support code, never the error's internals. This takes effect on the next deploy.

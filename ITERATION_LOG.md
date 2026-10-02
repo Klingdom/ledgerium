@@ -4,6 +4,32 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 145) — Nothing is deleted until someone says so (Mode 1, `backend-engineer`)
+
+- **Controls:**
+  - **Area:** `security / data`.
+  - **Agent:** `backend-engineer`.
+  - **Extension:** `871e29a`, 102 loops untouched.
+  - **Cadence:** 2 of 3 since MR-060.
+- **Candidate Selection: `burn-down` — #333** (13). It was filed by MR-060 and must land before the CEO enables retention. Cool-off recharge 3 of 3, so **the cool-off is re-armed**.
+- **What changed:**
+  - **Server defaults to a dry run.** A real purge needs an explicit `?mode=purge`. A bare POST, `?dryRun=0` or an unknown `mode` can never delete; an unknown mode returns 400. Reverting the default fails 4 tests.
+  - **Workflow is armed only by a separate variable.** It purges for real only when `RETENTION_PURGE_ARMED` is exactly `true`; otherwise it prints "retention not armed - dry run only". The manual `dry_run` input still forces a dry run even when armed.
+  - **Full dry run.** It now uses count queries, so it is not capped by the batch. It reports `eligibleTotal` (all eligible), `eligible` (what the next real run removes, at most 100) and `orphanCandidates`. Counts only, no ids.
+  - **New tests:** `scripts/retention-purge-arming.test.mjs` (4 tests), plus route and library tests for the uncapped counts and the orphan count.
+- **Operator steps (now in the workflow header and SYSTEM_HEALTH):**
+  - 1. Set the `CRON_SECRET` secret and `RETENTION_PURGE_URL`.
+  - 2. Run the workflow manually as a dry run and read `eligibleTotal`, `eligible` and `orphanCandidates`.
+  - 3. Only then set `RETENTION_PURGE_ARMED=true`. To disarm, delete the variable.
+- **Coordinator edit, logged per MR-050:** I raised `MIN=4` to `MIN=5` in `deploy.yml`'s script-test step, because this loop added a fifth guard test.
+  - **Property secured:** a deleted guard test file is caught by the count floor.
+  - **Protected by:** the count step itself; YAML parses.
+  - **Brief gap, recorded:** the brief should have said to raise the floor when adding a test file.
+- **Validation (exit code + ANSI-stripped summary):** web-app **4245 → 4251** on 3 of 3 runs; root **6043 → 6049**; typecheck 0; script tests 0 (37); `bash -n` and YAML pass (YAML checked by me, because the agent had no parser).
+- **Follow-ups:** 0 created, 1 closed (#333).
+
+---
+
 ## 2026-10-02 (loop 144) — Every guard test, every time (Mode 1, `devops-engineer`)
 
 - **Controls:**

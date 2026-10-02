@@ -97,6 +97,11 @@ function makeFake(state: FakeState, opts: { failDefinitionDelete?: boolean } = {
   };
   const upload = {
     findUnique: vi.fn(async (args: { where: { id: string } }) => state.uploads.find((u) => u.id === args.where.id) ?? null),
+    count: vi.fn(async (args: { where: { uploadedAt: { lte: Date } } }) =>
+      state.uploads
+        .filter((u) => !state.workflows.some((w) => w.sourceUploadId === u.id))
+        .filter((u) => (u.uploadedAt ?? new Date(0)).getTime() <= args.where.uploadedAt.lte.getTime()).length,
+    ),
     findMany: vi.fn(async (args: { where: { uploadedAt: { lte: Date } }; take: number }) =>
       state.uploads
         .filter((u) => !state.workflows.some((w) => w.sourceUploadId === u.id))
@@ -174,6 +179,21 @@ describe('#319 purgeExpiredWorkflows', () => {
     expect(upload.deleteMany).not.toHaveBeenCalled();
     expect(processDefinition.deleteMany).not.toHaveBeenCalled();
     expect(unlinkFile).not.toHaveBeenCalled();
+  });
+
+  it('dry run counts ALL eligible rows (beyond the batch limit) and orphan candidates, deleting nothing', async () => {
+    const st = base();
+    for (let i = 0; i < 7; i++) st.workflows.push(row(`bulk${i}`, 'deleted', 40 * DAY));
+    st.uploads.push({ id: 'orph-1', rawJsonPath: file('o1'), uploadedAt: new Date(NOW - 60 * DAY) });
+    st.uploads.push({ id: 'orph-new', rawJsonPath: file('o2'), uploadedAt: new Date(NOW - 1 * DAY) });
+    const before = JSON.stringify(st);
+    const { db, workflow, upload } = makeFake(st);
+    const s = await purgeExpiredWorkflows(db, { nowMs: NOW, retentionDays: 30, batchLimit: 3, dryRun: true }, { uploadDir: UP, realpath });
+    expect(s).toMatchObject({ dryRun: true, eligibleTotal: 9, eligible: 3, hasMore: true, orphanCandidates: 1, purged: 0 });
+    expect(JSON.stringify(st)).toBe(before);
+    expect(workflow.deleteMany).not.toHaveBeenCalled();
+    expect(upload.deleteMany).not.toHaveBeenCalled();
+    expect(JSON.stringify(s)).not.toMatch(/bulk|orph-/);
   });
 
   it('is idempotent: a second run finds nothing', async () => {

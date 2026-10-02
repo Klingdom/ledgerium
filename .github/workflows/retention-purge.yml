@@ -9,12 +9,23 @@ name: Retention purge
 # GitHub may delay or drop scheduled runs and disables schedules on repos with
 # no activity for 60 days, so the 30-day promise holds only while this runs.
 #
-# Unconfigured: the job FAILS (exit 2) rather than skipping, so "not purging"
+# Unconfigured (no URL/secret): the job FAILS (exit 2) rather than skipping, so "not purging"
 # never looks like "nothing to purge" (same decision as alerts-check.yml).
 #
-# Setup:
-#   gh secret set CRON_SECRET        (same value the web container has)
-#   gh variable set RETENTION_PURGE_URL --body https://<host>/api/admin/retention/purge
+# NOTHING IS DELETED UNTIL YOU ARM IT. A real purge (scheduled or manual) happens
+# only when the repo variable RETENTION_PURGE_ARMED equals exactly "true"; otherwise
+# the run is a dry run and prints "retention not armed - dry run only". The server
+# also defaults to a dry run unless the request says mode=purge. A manual run with
+# dry_run ticked is a dry run even when armed.
+#
+# Setup, in this order:
+#   1. gh secret set CRON_SECRET        (same value the web container has)
+#      gh variable set RETENTION_PURGE_URL --body https://<host>/api/admin/retention/purge
+#   2. Run: Actions > Retention purge > Run workflow (dry_run ticked). Read the counts
+#      in the log: eligibleTotal (all eligible), eligible (what the next real run
+#      removes, max 100), orphanCandidates (orphan uploads to sweep).
+#   3. Only then: gh variable set RETENTION_PURGE_ARMED --body true
+#      (disarm any time: gh variable delete RETENTION_PURGE_ARMED)
 
 on:
   schedule:
@@ -22,7 +33,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry run: report counts only, delete nothing (scheduled runs are always real)'
+        description: 'Dry run: report counts only, delete nothing (a real run also needs RETENTION_PURGE_ARMED=true)'
         type: boolean
         default: true
 
@@ -45,6 +56,7 @@ jobs:
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           RETENTION_PURGE_URL: ${{ vars.RETENTION_PURGE_URL }}
-          # Manual runs follow the dry_run input (default true); schedule stays real.
+          # Real only when RETENTION_PURGE_ARMED is exactly "true"; the dry_run input still forces a dry run.
+          RETENTION_PURGE_ARMED: ${{ vars.RETENTION_PURGE_ARMED }}
           RETENTION_PURGE_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}
         run: bash .github/scripts/retention-purge.sh

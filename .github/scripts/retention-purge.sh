@@ -5,8 +5,11 @@
 # secret (public repo) - and delivers nothing else (no Slack/email).
 # Inputs (env): CRON_SECRET, RETENTION_PURGE_URL (full URL of
 #   /api/admin/retention/purge), optional RETENTION_PURGE_MAX_TIME (default 120),
-#   optional RETENTION_PURGE_DRY_RUN=1 (calls ?dryRun=1: nothing deleted; prints the
-#   counts-only response body).
+#   RETENTION_PURGE_ARMED (repo variable; only the exact value "true" arms a REAL purge,
+#   which sends ?mode=purge; anything else, or unset, is a DRY RUN: "retention not armed
+#   - dry run only"), optional RETENTION_PURGE_DRY_RUN=1 (forces a dry run even when
+#   armed). A dry run prints the counts-only response body (eligibleTotal, eligible,
+#   orphanCandidates); the server also defaults to a dry run without mode=purge.
 # Exit codes (same meaning as alerts-check.sh where they overlap):
 #   0 ok (HTTP 200)
 #   1 any other non-200 (401 wrong secret; 500 = purge failed or incomplete, or
@@ -28,9 +31,18 @@ fi
 secret_escaped=${CRON_SECRET//\\/\\\\}
 secret_escaped=${secret_escaped//\"/\\\"}
 url="$RETENTION_PURGE_URL"
-if [ "${RETENTION_PURGE_DRY_RUN:-}" = "1" ]; then
+dry=1
+if [ "${RETENTION_PURGE_ARMED:-}" = "true" ] && [ "${RETENTION_PURGE_DRY_RUN:-}" != "1" ]; then
+  dry=0
+  case "$url" in *\?*) url="${url}&mode=purge" ;; *) url="${url}?mode=purge" ;; esac
+  echo "retention/purge ARMED: real purge"
+else
   case "$url" in *\?*) url="${url}&dryRun=1" ;; *) url="${url}?dryRun=1" ;; esac
-  echo "retention/purge DRY RUN: nothing will be deleted"
+  if [ "${RETENTION_PURGE_DRY_RUN:-}" = "1" ]; then
+    echo "retention/purge DRY RUN (requested): nothing will be deleted"
+  else
+    echo "retention not armed - dry run only: nothing will be deleted (set RETENTION_PURGE_ARMED=true to arm)"
+  fi
 fi
 body_file=$(mktemp)
 status=$(printf 'header = "Authorization: Bearer %s"\n' "$secret_escaped" |
@@ -45,7 +57,7 @@ if [ "$rc" -ne 0 ]; then
 fi
 echo "retention/purge HTTP status: $status"
 # Dry run only: the route body is COUNTS ONLY (never titles/ids/paths), safe to print.
-if [ "${RETENTION_PURGE_DRY_RUN:-}" = "1" ] && [ "$status" = "200" ]; then
+if [ "$dry" = "1" ] && [ "$status" = "200" ]; then
   echo "dry-run counts: $(head -c 2000 "$body_file")"
 fi
 rm -f "$body_file"

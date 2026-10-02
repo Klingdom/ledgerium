@@ -44,7 +44,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          MIN=4
+          MIN=5
           shopt -s nullglob
           files=(scripts/*.test.mjs)
           echo "found ${#files[@]} script test files (minimum $MIN)"
