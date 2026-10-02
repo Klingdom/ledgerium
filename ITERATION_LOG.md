@@ -4,6 +4,33 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 141) — A delete the default dashboard can reach (Mode 1, `frontend-engineer` + `growth-strategist`)
+
+- **Controls:**
+  - **Area:** `web-app / data`. Security was 4 of the last 5 loops, so a security pick would have taken −2; this pick is not security.
+  - **Agents:** `frontend-engineer` (two passes) and `growth-strategist` (D-4 clause 1, 5 strings; 3 POLISH applied, 2 KEEP).
+  - **Extension:** `871e29a`, 98 loops untouched.
+  - **Cadence:** 1 of 3 since MR-059.
+- **Candidate Selection: `burn-down` — #328** (13). MR-059 filed and endorsed it. **It blocks the next push**, because the Terms promised a delete the default product did not offer.
+- **The user-flow truth table came first** (default dashboard and detail page):
+  - **Export:** detail page only.
+  - **Archive:** the v2 row menu only.
+  - **Delete:** v1 only (`?v2=0`), before this loop.
+  - **Restore:** none, anywhere.
+- **What changed:**
+  - **Delete in the v2 row menu.** It is a red **Delete** item next to Archive, and calls the existing `DELETE /api/workflows/[id]`. It has an inline confirmation: Cancel is focused first, and Escape goes through the shared dispatcher. Failures show an error. On success the row leaves the list and `workflow_deleted` fires.
+  - **Delete confirmation:** "Delete workflow? It can't be restored from the app and is permanently removed after 30 days."
+  - **Archive confirmation:** "Archive workflow? It is hidden from this list and kept, not deleted. You can't restore it from the app."
+  - The reviewer's suggested "yet" was dropped: it would promise a restore feature that is not planned.
+  - **Docs:** they now give the menu path, and state that archived workflows are not purged.
+  - **`retention-purge.yml` gains a `dry_run` input.** It defaults to true for manual runs, calls `?dryRun=1` and prints the counts only. The scheduled run stays real, so **the first purge can be previewed**.
+- **Gaps, stated:** the detail page has export but no delete or archive, and the dashboard has no export. These are noted, not filed; they are UX gaps, not false claims, because no copy promises them there.
+- **Validation (exit code + ANSI-stripped summary):** web-app **4238 → 4245** on 3 of 3 runs; root 6008; typecheck 0; `bash -n` and YAML pass. The 7 new tests all fail against the old `WorkflowRow.tsx`.
+- **Unblocks the push.**
+- **Follow-ups:** 0 created, 1 closed (#328).
+
+---
+
 ## 2026-10-02 — MR-059 recorded (Mode 4, mandatory after the Mode 5 sequence): a promise the default product cannot keep
 
 - **Review:** `docs/meta/MR_059_META_REVIEW.md`. Nothing reverts.

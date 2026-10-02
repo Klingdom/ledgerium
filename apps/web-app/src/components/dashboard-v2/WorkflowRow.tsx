@@ -43,6 +43,7 @@ import {
   ChevronDown,
   Pencil,
   Archive,
+  Trash2,
   Link,
   AlertTriangle,
   Clock,
@@ -158,6 +159,8 @@ interface WorkflowRowProps {
   onRename?: (id: string, newTitle: string) => void;
   /** Callback to notify parent when this workflow is archived (kebab archive) */
   onArchive?: (id: string) => void;
+  /** Row #328: notify parent when this workflow is deleted (soft-delete, purged after 30 days) */
+  onDelete?: (id: string) => void;
   /** PRD §4 metric #2: perf timestamp captured at dashboard_v2_viewed emission.
    * Used to compute elapsedMsSinceDashboardView on row-click navigation. */
   dashboardViewPerfTimestampMs?: number;
@@ -436,6 +439,8 @@ interface KebabMenuProps {
   onStartRename: () => void;
   /** DV2-R02b: signals parent to activate inline archive confirmation — no window.confirm */
   onStartArchiveConfirm: () => void;
+  /** Row #328: signals parent to activate inline delete confirmation */
+  onStartDeleteConfirm: () => void;
   onCopyLink: () => void;
 }
 
@@ -445,6 +450,7 @@ function KebabMenu({
   onClose,
   onStartRename,
   onStartArchiveConfirm,
+  onStartDeleteConfirm,
   onCopyLink,
 }: KebabMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
@@ -496,6 +502,18 @@ function KebabMenu({
       >
         <Archive size={12} aria-hidden="true" />
         Archive
+      </button>
+      <button
+        role="menuitem"
+        type="button"
+        className="w-full flex items-center gap-ds-2 px-ds-3 py-ds-2 text-[14px] text-red-600 hover:bg-[var(--surface-secondary)] transition-colors duration-150 focus:outline-none focus-visible:bg-[var(--surface-secondary)]"
+        onClick={() => {
+          onClose();
+          onStartDeleteConfirm();
+        }}
+      >
+        <Trash2 size={12} aria-hidden="true" />
+        Delete
       </button>
       <button
         role="menuitem"
@@ -599,6 +617,91 @@ function InlineEdit({ currentTitle, workflowId, onCommit, onCancel }: InlineEdit
   );
 }
 
+// ── Inline delete confirmation (row #328) ────────────────────────────────────
+
+interface InlineDeleteConfirmProps {
+  workflowId: string;
+  workflowTitle: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  triggerRef: React.RefObject<HTMLButtonElement | null>;
+}
+
+function InlineDeleteConfirm({
+  workflowId,
+  workflowTitle,
+  onConfirm,
+  onCancel,
+  triggerRef,
+}: InlineDeleteConfirmProps) {
+  const [isBusy, setIsBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const cancelBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Focus Cancel (the safe choice) when the destructive affordance appears
+  useEffect(() => {
+    cancelBtnRef.current?.focus();
+  }, []);
+
+  // NOTE: Escape handling is centralized in WorkflowRow via useEscapeDispatch (MDR-P08)
+
+  async function handleConfirmDelete() {
+    setIsBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/workflows/${workflowId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        setError('Delete failed — workflow not deleted.');
+        setIsBusy(false);
+        return;
+      }
+      onConfirm();
+    } catch {
+      setError('Network error. Could not delete workflow.');
+      setIsBusy(false);
+    }
+  }
+
+  return (
+    <div
+      className="px-ds-4 py-ds-2 flex flex-col gap-ds-1"
+      role="region"
+      aria-label={`Confirm delete for ${workflowTitle}`}
+    >
+      <span className="text-[12px] text-[var(--content-secondary)]">
+        Delete workflow? It can't be restored from the app and is permanently removed after 30 days.
+      </span>
+      {error && (
+        <span role="alert" className="text-[12px] text-red-600">{error}</span>
+      )}
+      <div className="flex items-center gap-ds-2">
+        <button
+          type="button"
+          disabled={isBusy}
+          aria-label={`Confirm delete for ${workflowTitle}`}
+          className="px-ds-2 py-0.5 rounded text-[12px] font-medium bg-red-600 text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-50 transition-colors duration-150"
+          onClick={() => { void handleConfirmDelete(); }}
+        >
+          {isBusy ? 'Deleting…' : 'Delete'}
+        </button>
+        <button
+          ref={cancelBtnRef}
+          type="button"
+          disabled={isBusy}
+          aria-label="Cancel — do not delete"
+          className="px-ds-2 py-0.5 rounded text-[12px] font-medium text-[var(--content-secondary)] hover:bg-[var(--surface-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:opacity-50 transition-colors duration-150"
+          onClick={() => {
+            onCancel();
+            triggerRef.current?.focus();
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Inline archive confirmation (DV2-R02b) ───────────────────────────────────
 
 interface InlineArchiveConfirmProps {
@@ -657,7 +760,7 @@ function InlineArchiveConfirm({
       aria-label={`Confirm archive for ${workflowTitle}`}
     >
       <span className="text-[12px] text-[var(--content-secondary)]">
-        Archive workflow?
+        Archive workflow? It is hidden from this list and kept, not deleted. You can't restore it from the app.
       </span>
       {error && (
         <span role="alert" className="text-[12px] text-red-600">{error}</span>
@@ -710,10 +813,12 @@ function InlineArchiveConfirm({
  */
 interface EscapeDispatchConfig {
   isConfirmingArchive: boolean;
+  isConfirmingDelete: boolean;
   isEditingName: boolean;
   showKebab: boolean;
   showTooltip: boolean;
   onArchiveCancel: () => void;
+  onDeleteCancel: () => void;
   onKebabClose: () => void;
   onTooltipDismiss: () => void;
   kebabTriggerRef: React.RefObject<HTMLButtonElement | null>;
@@ -723,23 +828,27 @@ interface EscapeDispatchConfig {
 
 function useEscapeDispatch({
   isConfirmingArchive,
+  isConfirmingDelete,
   isEditingName,
   showKebab,
   showTooltip,
   onArchiveCancel,
+  onDeleteCancel,
   onKebabClose,
   onTooltipDismiss,
   kebabTriggerRef,
   tooltipTriggerRef,
 }: EscapeDispatchConfig): void {
-  const anyOverlayActive = isConfirmingArchive || showKebab || showTooltip;
+  const anyOverlayActive = isConfirmingArchive || isConfirmingDelete || showKebab || showTooltip;
 
   // Use refs for callbacks so the effect closure never stales without
   // re-binding. The dependency array tracks the active-state booleans only.
   const onArchiveCancelRef = useRef(onArchiveCancel);
+  const onDeleteCancelRef = useRef(onDeleteCancel);
   const onKebabCloseRef = useRef(onKebabClose);
   const onTooltipDismissRef = useRef(onTooltipDismiss);
   onArchiveCancelRef.current = onArchiveCancel;
+  onDeleteCancelRef.current = onDeleteCancel;
   onKebabCloseRef.current = onKebabClose;
   onTooltipDismissRef.current = onTooltipDismiss;
 
@@ -754,6 +863,15 @@ function useEscapeDispatch({
         e.preventDefault();
         e.stopPropagation();
         onArchiveCancelRef.current();
+        kebabTriggerRef.current?.focus();
+        return;
+      }
+
+      // Priority 1b: InlineDeleteConfirm (row #328)
+      if (isConfirmingDelete) {
+        e.preventDefault();
+        e.stopPropagation();
+        onDeleteCancelRef.current();
         kebabTriggerRef.current?.focus();
         return;
       }
@@ -789,6 +907,7 @@ function useEscapeDispatch({
   }, [
     anyOverlayActive,
     isConfirmingArchive,
+    isConfirmingDelete,
     isEditingName,
     showKebab,
     showTooltip,
@@ -804,6 +923,7 @@ export default function WorkflowRow({
   timeRange,
   onRename,
   onArchive,
+  onDelete,
   dashboardViewPerfTimestampMs = 0,
   visibleColumns,
   density = 'regular',
@@ -823,6 +943,7 @@ export default function WorkflowRow({
   const [displayTitle, setDisplayTitle] = useState(workflow.title);
   const [isEditingName, setIsEditingName] = useState(false);
   const [isConfirmingArchive, setIsConfirmingArchive] = useState(false);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const kebabTriggerRef = useRef<HTMLButtonElement>(null);
   // DV2-R03: ref for the health score cell trigger (for tooltip focus-return)
   const tooltipTriggerRef = useRef<HTMLButtonElement>(null);
@@ -833,10 +954,12 @@ export default function WorkflowRow({
   // MDR-P08: centralized single Escape listener — replaces three per-component listeners
   useEscapeDispatch({
     isConfirmingArchive,
+    isConfirmingDelete,
     isEditingName,
     showKebab,
     showTooltip,
     onArchiveCancel: () => setIsConfirmingArchive(false),
+    onDeleteCancel: () => setIsConfirmingDelete(false),
     onKebabClose: () => setShowKebab(false),
     onTooltipDismiss: () => setShowTooltip(false),
     kebabTriggerRef,
@@ -951,7 +1074,7 @@ export default function WorkflowRow({
 
   function handleRowClick() {
     // Do not navigate when inline interactions are active
-    if (isEditingName || isConfirmingArchive) return;
+    if (isEditingName || isConfirmingArchive || isConfirmingDelete) return;
     // PRD §4 metric #2: time-to-first-click (p50 <8s, p95 <15s)
     const elapsed =
       dashboardViewPerfTimestampMs > 0
@@ -998,6 +1121,11 @@ export default function WorkflowRow({
   function handleArchiveConfirm() {
     setIsConfirmingArchive(false);
     onArchive?.(workflow.id);
+  }
+
+  function handleDeleteConfirm() {
+    setIsConfirmingDelete(false);
+    onDelete?.(workflow.id);
   }
 
   function handleArchiveCancel() {
@@ -1116,6 +1244,16 @@ export default function WorkflowRow({
             workflowTitle={displayTitle}
             onConfirm={handleArchiveConfirm}
             onCancel={handleArchiveCancel}
+            triggerRef={kebabTriggerRef}
+          />
+        )}
+        {/* Row #328: inline delete confirmation (30-day consequence) */}
+        {isConfirmingDelete && (
+          <InlineDeleteConfirm
+            workflowId={workflow.id}
+            workflowTitle={displayTitle}
+            onConfirm={handleDeleteConfirm}
+            onCancel={() => setIsConfirmingDelete(false)}
             triggerRef={kebabTriggerRef}
           />
         )}
@@ -1350,6 +1488,7 @@ export default function WorkflowRow({
               onClose={() => setShowKebab(false)}
               onStartRename={() => setIsEditingName(true)}
               onStartArchiveConfirm={() => setIsConfirmingArchive(true)}
+              onStartDeleteConfirm={() => setIsConfirmingDelete(true)}
               onCopyLink={handleCopyLink}
             />
           )}

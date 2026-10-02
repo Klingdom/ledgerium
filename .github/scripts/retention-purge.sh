@@ -4,7 +4,9 @@
 # (default 30) ago. This script prints the HTTP status ONLY - never the body or the
 # secret (public repo) - and delivers nothing else (no Slack/email).
 # Inputs (env): CRON_SECRET, RETENTION_PURGE_URL (full URL of
-#   /api/admin/retention/purge), optional RETENTION_PURGE_MAX_TIME (default 120).
+#   /api/admin/retention/purge), optional RETENTION_PURGE_MAX_TIME (default 120),
+#   optional RETENTION_PURGE_DRY_RUN=1 (calls ?dryRun=1: nothing deleted; prints the
+#   counts-only response body).
 # Exit codes (same meaning as alerts-check.sh where they overlap):
 #   0 ok (HTTP 200)
 #   1 any other non-200 (401 wrong secret; 500 = purge failed or incomplete, or
@@ -25,16 +27,28 @@ fi
 # and double quote escaped so the secret is sent intact (see alerts-check.sh).
 secret_escaped=${CRON_SECRET//\\/\\\\}
 secret_escaped=${secret_escaped//\"/\\\"}
+url="$RETENTION_PURGE_URL"
+if [ "${RETENTION_PURGE_DRY_RUN:-}" = "1" ]; then
+  case "$url" in *\?*) url="${url}&dryRun=1" ;; *) url="${url}?dryRun=1" ;; esac
+  echo "retention/purge DRY RUN: nothing will be deleted"
+fi
+body_file=$(mktemp)
 status=$(printf 'header = "Authorization: Bearer %s"\n' "$secret_escaped" |
   curl -sS -X POST --config - --max-time "${RETENTION_PURGE_MAX_TIME:-120}" \
-    -o /dev/null -w '%{http_code}' "$RETENTION_PURGE_URL" 2>/dev/null)
+    -o "$body_file" -w '%{http_code}' "$url" 2>/dev/null)
 rc=$?
 
 if [ "$rc" -ne 0 ]; then
+  rm -f "$body_file"
   echo "::error::retention/purge unreachable or timed out (curl exit $rc)"
   exit 3
 fi
 echo "retention/purge HTTP status: $status"
+# Dry run only: the route body is COUNTS ONLY (never titles/ids/paths), safe to print.
+if [ "${RETENTION_PURGE_DRY_RUN:-}" = "1" ] && [ "$status" = "200" ]; then
+  echo "dry-run counts: $(head -c 2000 "$body_file")"
+fi
+rm -f "$body_file"
 case "$status" in
   200) exit 0 ;;
   503)

@@ -365,7 +365,7 @@ describe('#315: public copy does not overclaim beyond enforcement', () => {
     expect(terms).toMatch(/You can export your data and delete workflows at any time; deleted workflows are permanently removed after 30 days/);
     expect(readSrc('app', '(public)', 'privacy', 'page.tsx')).toMatch(/deleted workflows are permanently removed after 30 days/);
     expect(readSrc('app', '(public)', 'privacy', 'extension', 'page.tsx')).toMatch(/deleted workflows are permanently removed after 30 days/);
-    expect(readSrc('app', '(public)', 'docs', 'page.tsx')).toMatch(/Deleted workflows are permanently removed after 30 days/);
+    expect(readSrc('app', '(public)', 'docs', 'page.tsx')).toMatch(/Deleted workflows can.{1,2}t be restored from the app and are permanently removed after 30 days/);
     expect(security).toMatch(/'Same input, same output'/);
     expect(security).not.toMatch(/Reproducible processing/);
   });

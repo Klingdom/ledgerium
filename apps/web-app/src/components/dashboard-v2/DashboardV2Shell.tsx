@@ -768,6 +768,13 @@ function DashboardV2ShellInner() {
     setAllWorkflows((prev) => prev.filter((w) => w.id !== id));
   }, []);
 
+  // Row #328: the row already called DELETE /api/workflows/[id] (soft delete);
+  // drop it from the list. Same list effect as archive.
+  const handleWorkflowDelete = useCallback((id: string) => {
+    setAllWorkflows((prev) => prev.filter((w) => w.id !== id));
+    track({ event: 'workflow_deleted', workflowId: id });
+  }, []);
+
   // ── Derived data ─────────────────────────────────────────────────────────────
 
   // MDR-P03: stable clock reference for age-based filters within this render
@@ -1373,6 +1380,7 @@ function DashboardV2ShellInner() {
             onRetry={handleRetry}
             onWorkflowRename={handleWorkflowRename}
             onWorkflowArchive={handleWorkflowArchive}
+            onWorkflowDelete={handleWorkflowDelete}
             portfolioSidebarOpen={portfolioSidebarOpen}
             onTogglePortfolioSidebar={() => setPortfolioSidebarOpen((prev) => !prev)}
             dashboardViewPerfTimestampMs={dashboardViewPerfTimestampMs}

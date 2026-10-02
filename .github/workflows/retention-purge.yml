@@ -20,6 +20,11 @@ on:
   schedule:
     - cron: '41 3 * * *'
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run: report counts only, delete nothing (scheduled runs are always real)'
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -40,4 +45,6 @@ jobs:
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           RETENTION_PURGE_URL: ${{ vars.RETENTION_PURGE_URL }}
+          # Manual runs follow the dry_run input (default true); schedule stays real.
+          RETENTION_PURGE_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}
         run: bash .github/scripts/retention-purge.sh

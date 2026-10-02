@@ -6,6 +6,17 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Delete workflows from the dashboard
+
+### Added
+- Workflows can now be deleted from the dashboard menu. The confirmation explains that a deleted workflow cannot be restored from the app and is permanently removed after 30 days.
+
+### Changed
+- The archive confirmation now explains that archiving hides a workflow and keeps it, without deleting it.
+
+---
+
+
 ## [2026-10-02] - Positioning: evidence-linked, not AI-written
 
 ### Changed

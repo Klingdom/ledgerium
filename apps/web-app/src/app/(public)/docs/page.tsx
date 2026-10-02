@@ -2001,7 +2001,7 @@ export default function DocsPage() {
                     ['Pause recording', <>Click <strong className="text-[var(--content-primary)]">Pause</strong> in the side panel</>],
                     ['Stop recording', <>Click <strong className="text-[var(--content-primary)]">Stop</strong> in the side panel</>],
                     ['Discard a recording', 'Use the discard option before uploading'],
-                    ['Delete a workflow', 'Hover over the card and click the trash icon. Deleted workflows are permanently removed after 30 days.'],
+                    ['Delete a workflow', 'Open the row menu (the three dots) on the workflow, choose Delete, and confirm. Deleted workflows can\'t be restored from the app and are permanently removed after 30 days. Archive hides a workflow and keeps it; archived workflows are not purged.'],
                     ['Revoke extension access', <>Delete the API key in Account &gt; Extension Sync</>],
                   ].map(([control, how], i) => (
                     <tr key={i}>

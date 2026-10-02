@@ -426,6 +426,7 @@ interface WorkflowListProps {
   onWorkflowRename?: (id: string, newTitle: string) => void;
   /** Called when a workflow is archived via kebab menu — removes it from the list */
   onWorkflowArchive?: (id: string) => void;
+  onWorkflowDelete?: (id: string) => void;
   /** D5: whether the portfolio sidebar is currently open */
   portfolioSidebarOpen?: boolean;
   /** D5: toggle the portfolio sidebar open/closed */
@@ -497,6 +498,7 @@ export default function WorkflowList({
   onRetry,
   onWorkflowRename,
   onWorkflowArchive,
+  onWorkflowDelete,
   portfolioSidebarOpen = false,
   onTogglePortfolioSidebar,
   dashboardViewPerfTimestampMs = 0,
@@ -948,6 +950,7 @@ export default function WorkflowList({
                   {...(visibleColumns !== undefined ? { visibleColumns } : {})}
                   {...(onWorkflowRename ? { onRename: onWorkflowRename } : {})}
                   {...(onWorkflowArchive ? { onArchive: onWorkflowArchive } : {})}
+                  {...(onWorkflowDelete ? { onDelete: onWorkflowDelete } : {})}
                 />
                 </ErrorBoundary>
               ))}
