@@ -4,6 +4,20 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-050 recorded (Mode 4, non-counting): a fix for a lever can create the next lever
+
+- **Review:** `docs/meta/MR_050_META_REVIEW.md`. Nothing reverts. Re-runs: web-app 3860 on 5 of 6 runs — run 3 crashed inside Prisma's native engine ("failed to delete napi ref", exit 127) with no test failing; throttle file 10 of 10; workspace 5649; typecheck 0.
+- **Loop 110 opened a smaller lever while closing the one review caught.** The fingerprint rule ("the slot keeps the creator; only the holder's success clears it") means an attacker who finds one address sharing an admin's slot can *create* the record first. From then on the admin's own correct logins count and never clear. In a scratch copy, a typo-then-correct-password login was refused on 8 of 10 days, against 0 of 10 without the claim. The address is findable online, because a locked slot is visible through any address that shares it. It needs the header bypass (#225), and the slot key changes on each restart. Folded into **#290 (6)**.
+- **The same structure, unquantified for the other table:** the password-reset table can be flooded the same way. At ~61.8% fill, reset requests answer "sent" without sending — a *silent* mass denial, the larger harm. Folded into **#290 (7)**. Loop 110 stated its residual for one of two tables: MR-049's pattern 2, recurring.
+- **No test checks that the slot key is used** (`account-throttle.ts:98`). Remove it and all 13 tests pass. This is the property my own hash swap secured. Folded into **#290 (8)**.
+- **The coordinator role, clarified (adopted):** a defect found in review goes back to the implementing agent. If I do edit, the log names the property the edit is load-bearing for and the test that protects it. My loop-110 hash swap was outside the role: better tested than reviewed.
+- **Four committed sentences were written from intent and are corrected here:** (1) "~10 MB login" — it is ~22 MB in total; (2) "expires after 24 h" — not for an active victim, whose own attempts keep the record alive; (3) "FIRST `signup_completed`" — it is the first *within the window*, which is equivalent in effect because the server emits once per account; (4) loop 111's "every remaining `isAdmin` asserts the column confers nothing" — `admin-allowlist.ts:40` still says bootstrap may set it. The two code comments are added to the scope of #290 and #292 respectively, and the allowlist comment is a one-line fix noted on #277.
+- **Filed:** **#292** — the activation alert pages hourly on tiny cohorts, and the alert check has no memory for *any* alert (the class). **#293** — the Prisma native-engine crash, reported across three reviews and never filed. AUTHZ_AUDIT_001's closing status line is brought in line with its finding text (P3-7 + `6fcde8b`).
+- **Activation reads low by construction:** the denominator is a server event, while the numerator is a browser event that fires after 30 s of dwell and travels the lossy client transport (#249, #251). That biases it toward firing, which makes #292 matter more.
+- **Next:** loop 113 = **#285** (11). Loop 114 = **#292**, which must land before the CEO configures alerts.
+
+---
+
 ## 2026-10-02 (loop 112) — An alert that could not fire (Mode 1, `backend-engineer`)
 
 - **Controls:** Area — `web-app / analytics` (not saturated; security 3 of last 5 → security rows penalised). Agent — `backend-engineer` (suite ×2, typecheck and four mutations reported by the agent; I re-ran suite ×2, the new tests ×5, typecheck, and read the alert diff). Extension — `871e29a`, 69 loops. **Cadence: 3 of 3 since MR-049 — MR-050 now due.**
