@@ -312,6 +312,7 @@ function birthLoop(r) {
   return it ? Number(it[1]) - ITERATION_ERA_OFFSET : null;
 }
 
+let latestClose = 0;
 const dated = [];
 let undatable = 0;
 for (const r of rows.filter((x) => x.struck)) {
@@ -324,12 +325,16 @@ for (const r of rows.filter((x) => x.struck)) {
   const closed = closures.length ? closures[closures.length - 1] : null;
   if (!closed) continue;
   const born = birthLoop(r);
+  latestClose = Math.max(latestClose, Number(closed[1]));
   if (born === null) { undatable++; continue; }
   dated.push({ id: r.id, close: Number(closed[1]), age: Number(closed[1]) - born });
 }
 // The latest loop the backlog itself records a closure in. Used only to age the
 // oldest OPEN row; stated in the output so it is not mistaken for a clock.
-const latestLoop = dated.reduce((m, d) => Math.max(m, d.close), 0);
+// From every closure, dated or not: an undatable birth says nothing about
+// when the row CLOSED (loop 88 closed #9, whose birth is unrecorded, and the
+// line read "measured to loop 87").
+const latestLoop = latestClose;
 const maxAge = dated.length ? Math.max(...dated.map((d) => d.age)) : null;
 const lastTen = dated.sort((a, b) => b.close - a.close || b.id - a.id).slice(0, 10).map((d) => d.age).sort((a, b) => a - b);
 const median = lastTen.length === 0 ? null
