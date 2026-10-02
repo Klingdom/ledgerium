@@ -57,7 +57,7 @@ async function handleGET() {
 
     // Fetch all relevant analytics events for all users in the last 30 days
     // in a single query to avoid N+1
-    const events = await (db as any).analyticsEvent.findMany({
+    const events = await db.analyticsEvent.findMany({
       where: {
         userId: { in: users.map((u) => u.id) },
         createdAt: { gte: thirtyDaysAgo },

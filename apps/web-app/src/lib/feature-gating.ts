@@ -301,7 +301,7 @@ export function buildFeatureFlags(user: User): FeatureFlagsResponse {
  * the real memoization benefit.
  */
 const fetchActiveWorkspacePlans = reactCache(async (userId: string): Promise<PlanType[]> => {
-  const memberships = await (db as any).teamMember.findMany({
+  const memberships = await db.teamMember.findMany({
     where: {
       userId,
       status: 'active',
@@ -313,7 +313,7 @@ const fetchActiveWorkspacePlans = reactCache(async (userId: string): Promise<Pla
     },
   });
 
-  return memberships.map((m: any) => toPlanType(m.team?.plan ?? 'free'));
+  return memberships.map((m) => toPlanType(m.team?.plan ?? 'free'));
 });
 
 /** Return the higher-ranking of `soloPlan` and every plan in `workspacePlans`, per PLAN_HIERARCHY. */

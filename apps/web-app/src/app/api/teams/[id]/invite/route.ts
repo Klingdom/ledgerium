@@ -3,6 +3,7 @@ import { readJsonBody } from '@/lib/read-json-body';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
+import type { Prisma, TeamInvite } from '@prisma/client';
 import crypto from 'crypto';
 import { getPlanConfig, toPlanType } from '@/lib/plans';
 import { countPendingInvites } from '@/lib/workspace/seat-management';
@@ -68,7 +69,7 @@ async function handlePOST(
   try {
     // Verify caller is an active owner or admin (P0-E: status:'active' guard — removed/deactivated
     // admins must not retain management capability for up to JWT TTL)
-    const membership = await (db as any).teamMember.findFirst({
+    const membership = await db.teamMember.findFirst({
       where: { teamId: params.id, userId: session.user.id, status: 'active' },
     });
     if (!membership || !['owner', 'admin'].includes(membership.role)) {
@@ -91,7 +92,7 @@ async function handlePOST(
     // Check if user is already a member
     const existingUser = await db.user.findUnique({ where: { email } });
     if (existingUser) {
-      const existingMember = await (db as any).teamMember.findUnique({
+      const existingMember = await db.teamMember.findUnique({
         where: { teamId_userId: { teamId: params.id, userId: existingUser.id } },
       });
       if (existingMember) {
@@ -115,7 +116,7 @@ async function handlePOST(
 
     // ── Guard 2: Duplicate-pending invite ───────────────────────────────────
     // Uses @@unique([teamId, email]) — findFirst is the safe cross-DB query.
-    const existingPending = await (db as any).teamInvite.findFirst({
+    const existingPending = await db.teamInvite.findFirst({
       where: {
         teamId: params.id,
         email,
@@ -134,7 +135,7 @@ async function handlePOST(
     // ── Guard 3: Workspace plan gate + Seat-quota ───────────────────────────
     // Gate is based on the workspace plan, not the caller's personal plan.
     // A free personal user who owns a Team-plan workspace CAN invite.
-    const team = await (db as any).team.findUnique({
+    const team = await db.team.findUnique({
       where: { id: params.id },
       select: { plan: true },
     });
@@ -163,10 +164,10 @@ async function handlePOST(
     const expiresAt = new Date(nowMs + 7 * 24 * 60 * 60 * 1000);
 
     let quotaError: NextResponse | null = null;
-    let invite: any = null;
+    let invite = null as TeamInvite | null;
 
-    await (db as any).$transaction(
-      async (tx: any) => {
+    await db.$transaction(
+      async (tx: Prisma.TransactionClient) => {
         if (maxSeats !== Number.MAX_SAFE_INTEGER) {
           // Sub-task 4 (iter 085 / TEAM-P03.7): sole-owner-overflow protection.
           // Owners are protected from soft-deactivation per iter 082
@@ -243,7 +244,8 @@ async function handlePOST(
     const inviteUrl = `${process.env.NEXTAUTH_URL ?? 'https://ledgerium.ai'}/teams/join?token=${rawToken}`;
 
     return NextResponse.json({
-      inviteId: invite.id,
+      // Non-null: the transaction either assigns `invite` or returns early via quotaError (handled above).
+      inviteId: invite!.id,
       inviteUrl,
       email,
       expiresAt,
@@ -268,14 +270,14 @@ async function handleGET(
 
   try {
     // P0-E: status:'active' guard — removed/deactivated members must not list invites.
-    const membership = await (db as any).teamMember.findFirst({
+    const membership = await db.teamMember.findFirst({
       where: { teamId: params.id, userId: session.user.id, status: 'active' },
     });
     if (!membership) {
       return NextResponse.json({ error: 'Not a member' }, { status: 403 });
     }
 
-    const invites = await (db as any).teamInvite.findMany({
+    const invites = await db.teamInvite.findMany({
       where: {
         teamId: params.id,
         acceptedAt: null,
@@ -286,7 +288,7 @@ async function handleGET(
     });
 
     return NextResponse.json({
-      invites: invites.map((i: any) => ({
+      invites: invites.map((i) => ({
         id: i.id,
         email: i.email,
         role: i.role,

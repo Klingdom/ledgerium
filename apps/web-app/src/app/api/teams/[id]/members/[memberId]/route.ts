@@ -51,7 +51,7 @@ async function handlePATCH(
 
   try {
     // Verify caller is an active owner or admin (P0-E: status:'active' guard).
-    const callerMembership = await (db as any).teamMember.findFirst({
+    const callerMembership = await db.teamMember.findFirst({
       where: { teamId: params.id, userId: session.user.id, status: 'active' },
     });
     if (!callerMembership || !['owner', 'admin'].includes(callerMembership.role)) {
@@ -70,7 +70,7 @@ async function handlePATCH(
     }
 
     // Fetch target membership by TeamMember.id (not userId).
-    const targetMembership = await (db as any).teamMember.findFirst({
+    const targetMembership = await db.teamMember.findFirst({
       where: { id: params.memberId, teamId: params.id },
     });
     if (!targetMembership) {
@@ -80,7 +80,7 @@ async function handlePATCH(
     // Sole-owner protection: cannot demote the last owner.
     // P0-I: UMAP-001 AC-6 mandates HTTP 409 (conflict) not 400 for this case.
     if (targetMembership.role === 'owner' && newRole !== 'owner') {
-      const ownerCount = await (db as any).teamMember.count({
+      const ownerCount = await db.teamMember.count({
         where: { teamId: params.id, role: 'owner' },
       });
       if (ownerCount <= 1) {
@@ -94,7 +94,7 @@ async function handlePATCH(
       }
     }
 
-    await (db as any).teamMember.update({
+    await db.teamMember.update({
       where: { id: params.memberId },
       data: { role: newRole },
     });
@@ -118,7 +118,7 @@ async function handleDELETE(
 
   try {
     // Verify caller is an active owner or admin (P0-E: status:'active' guard).
-    const callerMembership = await (db as any).teamMember.findFirst({
+    const callerMembership = await db.teamMember.findFirst({
       where: { teamId: params.id, userId: session.user.id, status: 'active' },
     });
     if (!callerMembership || !['owner', 'admin'].includes(callerMembership.role)) {
@@ -129,7 +129,7 @@ async function handleDELETE(
     }
 
     // Fetch target membership by TeamMember.id.
-    const targetMembership = await (db as any).teamMember.findFirst({
+    const targetMembership = await db.teamMember.findFirst({
       where: { id: params.memberId, teamId: params.id },
     });
     if (!targetMembership) {
@@ -139,7 +139,7 @@ async function handleDELETE(
     // Sole-owner protection: count owners; refuse if this is the last one.
     // P0-I: UMAP-001 AC-6 mandates HTTP 409 (conflict) not 400 for this case.
     if (targetMembership.role === 'owner') {
-      const ownerCount = await (db as any).teamMember.count({
+      const ownerCount = await db.teamMember.count({
         where: { teamId: params.id, role: 'owner' },
       });
       if (ownerCount <= 1) {
@@ -157,7 +157,7 @@ async function handleDELETE(
     // stays null (removal is voluntary and terminal — no grace window).
     // The TeamMember row is preserved; seat-quota queries filter on
     // status='active' so removed members do NOT count toward quota.
-    await (db as any).teamMember.update({
+    await db.teamMember.update({
       where: { id: params.memberId },
       data: {
         status: 'removed',

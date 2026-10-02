@@ -31,7 +31,7 @@ async function handleGET(
       return NextResponse.json({ error: 'Workflow not found' }, { status: 404 });
     }
 
-    const shares = await (db as any).workflowShare.findMany({
+    const shares = await db.workflowShare.findMany({
       where: { workflowId: params.id },
       include: {
         sharer: { select: { email: true, name: true } },
@@ -40,7 +40,7 @@ async function handleGET(
     });
 
     // Resolve shared-with names
-    const resolved = await Promise.all(shares.map(async (s: any) => {
+    const resolved = await Promise.all(shares.map(async (s) => {
       if (s.shareType === 'user') {
         const user = await db.user.findUnique({
           where: { id: s.sharedWith },
@@ -49,7 +49,7 @@ async function handleGET(
         return { ...s, sharedWithName: user?.name ?? user?.email ?? s.sharedWith };
       }
       if (s.shareType === 'team') {
-        const team = await (db as any).team.findUnique({
+        const team = await db.team.findUnique({
           where: { id: s.sharedWith },
           select: { name: true },
         });
@@ -59,7 +59,7 @@ async function handleGET(
     }));
 
     return NextResponse.json({
-      shares: resolved.map((s: any) => ({
+      shares: resolved.map((s) => ({
         id: s.id,
         sharedWith: s.sharedWith,
         sharedWithName: s.sharedWithName,
@@ -67,7 +67,7 @@ async function handleGET(
         permission: s.permission,
         createdAt: s.createdAt,
       })),
-      isPublic: !!(workflow as any).shareToken,
+      isPublic: !!workflow.shareToken,
     });
   } catch (err) {
     console.error('[workflows/share/GET]', err);
@@ -107,7 +107,7 @@ async function handlePOST(
         return NextResponse.json({ error: 'User not found. They must have a Ledgerium account.' }, { status: 404 });
       }
 
-      await (db as any).workflowShare.upsert({
+      await db.workflowShare.upsert({
         where: {
           workflowId_sharedWith_shareType: {
             workflowId: params.id,
@@ -133,14 +133,14 @@ async function handlePOST(
 
     if (teamId) {
       // Share with a team — verify caller is member of that team
-      const membership = await (db as any).teamMember.findUnique({
+      const membership = await db.teamMember.findUnique({
         where: { teamId_userId: { teamId, userId: session.user.id } },
       });
       if (!membership) {
         return NextResponse.json({ error: 'You are not a member of this team' }, { status: 403 });
       }
 
-      await (db as any).workflowShare.upsert({
+      await db.workflowShare.upsert({
         where: {
           workflowId_sharedWith_shareType: {
             workflowId: params.id,
@@ -198,7 +198,7 @@ async function handleDELETE(
       return NextResponse.json({ error: 'shareId is required' }, { status: 400 });
     }
 
-    await (db as any).workflowShare.deleteMany({
+    await db.workflowShare.deleteMany({
       where: { id: shareId, workflowId: params.id },
     });
 

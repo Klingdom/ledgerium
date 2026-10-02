@@ -25,7 +25,7 @@ async function handleDELETE(
 
   try {
     // Verify caller is an active owner or admin (P0-E: status:'active' guard)
-    const membership = await (db as any).teamMember.findFirst({
+    const membership = await db.teamMember.findFirst({
       where: { teamId: params.id, userId: session.user.id, status: 'active' },
     });
     if (!membership || !['owner', 'admin'].includes(membership.role)) {
@@ -36,7 +36,7 @@ async function handleDELETE(
     }
 
     // Fetch the invite — must belong to this team.
-    const invite = await (db as any).teamInvite.findFirst({
+    const invite = await db.teamInvite.findFirst({
       where: { id: params.inviteId, teamId: params.id },
     });
 
@@ -51,7 +51,7 @@ async function handleDELETE(
     }
 
     // Stamp revokedAt.
-    await (db as any).teamInvite.update({
+    await db.teamInvite.update({
       where: { id: params.inviteId },
       data: { revokedAt: new Date() },
     });

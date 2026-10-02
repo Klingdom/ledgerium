@@ -71,7 +71,7 @@ async function handlePOST(req: NextRequest) {
 
     for (const record of records) {
       try {
-        await (db as any).analyticsEvent.create({ data: record });
+        await db.analyticsEvent.create({ data: record });
         persisted++;
       } catch (err) {
         failures.push(err);
@@ -129,7 +129,7 @@ async function handleGET(req: NextRequest) {
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
     // Get all events in window
-    const events = await (db as any).analyticsEvent.findMany({
+    const events = await db.analyticsEvent.findMany({
       where: { createdAt: { gte: since } },
       orderBy: { createdAt: 'asc' },
     });

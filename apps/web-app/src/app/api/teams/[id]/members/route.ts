@@ -31,7 +31,7 @@ async function handleGET(
 
   try {
     // Verify caller is an active member (P0-E: status:'active' guard)
-    const membership = await (db as any).teamMember.findFirst({
+    const membership = await db.teamMember.findFirst({
       where: { teamId: params.id, userId: session.user.id, status: 'active' },
     });
     if (!membership) {
@@ -57,20 +57,20 @@ async function handleGET(
     // 'all' — no status filter applied.
 
     const [members, total] = await Promise.all([
-      (db as any).teamMember.findMany({
+      db.teamMember.findMany({
         where: { teamId: params.id, ...whereStatus },
         include: { user: { select: { id: true, email: true, name: true } } },
         orderBy: { joinedAt: 'asc' },
         skip,
         take,
       }),
-      (db as any).teamMember.count({
+      db.teamMember.count({
         where: { teamId: params.id, ...whereStatus },
       }),
     ]);
 
     return NextResponse.json({
-      members: members.map((m: any) => ({
+      members: members.map((m) => ({
         memberId: m.id,
         id: m.user.id,
         email: m.user.email,
@@ -107,7 +107,7 @@ async function handleDELETE(
     }
 
     // Verify caller is an active owner or admin (P0-E: status:'active' guard)
-    const callerMembership = await (db as any).teamMember.findFirst({
+    const callerMembership = await db.teamMember.findFirst({
       where: { teamId: params.id, userId: session.user.id, status: 'active' },
     });
     if (!callerMembership || !['owner', 'admin'].includes(callerMembership.role)) {
@@ -115,7 +115,7 @@ async function handleDELETE(
     }
 
     // Fetch target membership.
-    const targetMembership = await (db as any).teamMember.findUnique({
+    const targetMembership = await db.teamMember.findUnique({
       where: { teamId_userId: { teamId: params.id, userId: targetUserId } },
     });
     if (!targetMembership) {
@@ -125,7 +125,7 @@ async function handleDELETE(
     // Sole-owner protection: count owners; refuse if this is the last one.
     // P0-I: UMAP-001 AC-6 mandates HTTP 409 (conflict) not 400 for this case.
     if (targetMembership.role === 'owner') {
-      const ownerCount = await (db as any).teamMember.count({
+      const ownerCount = await db.teamMember.count({
         where: { teamId: params.id, role: 'owner' },
       });
       if (ownerCount <= 1) {
@@ -141,7 +141,7 @@ async function handleDELETE(
     // memberId-based DELETE handler at
     // /api/teams/:id/members/:memberId/route.ts. updateMany honors the
     // (teamId, userId) selector identical to the original deleteMany call.
-    await (db as any).teamMember.updateMany({
+    await db.teamMember.updateMany({
       where: { teamId: params.id, userId: targetUserId },
       data: {
         status: 'removed',

@@ -527,9 +527,7 @@ export async function getSubscriptionBreakdown(): Promise<SubscriptionBreakdownS
     }),
     // Team rows with a live Stripe subscription link — see AUTHORITATIVE
     // MODEL NOTE above for why Team, not User, is read for team/growth MRR.
-    // `(db as any)` matches the existing cast convention for the Team model
-    // used throughout webhook/route.ts and team-billing.ts.
-    (db as any).team.findMany({
+    db.team.findMany({
       where: { stripeSubscriptionId: { not: null } },
       select: { plan: true, subscriptionStatus: true, billingInterval: true },
     }) as Promise<

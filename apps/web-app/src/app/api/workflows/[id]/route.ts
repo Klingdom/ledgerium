@@ -213,8 +213,7 @@ async function handlePATCH(
   if (body.isFavorite !== undefined) data.isFavorite = body.isFavorite;
 
   // Generate share token on demand
-  // shareToken is a new schema field; cast safely
-  if (body.enableSharing === true && !(workflow as any).shareToken) {
+  if (body.enableSharing === true && !workflow.shareToken) {
     data.shareToken = crypto.randomBytes(16).toString('hex');
   }
   if (body.enableSharing === false) {
@@ -268,7 +267,7 @@ async function handlePATCH(
 
   return NextResponse.json({
     ok: true,
-    shareToken: (updated as any).shareToken ?? null,
+    shareToken: updated.shareToken ?? null,
   });
 }
 

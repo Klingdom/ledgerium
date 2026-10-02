@@ -15,12 +15,11 @@ async function handleGET(
   _req: NextRequest,
   { params }: { params: { token: string } },
 ) {
-  // shareToken is a new schema field; use raw query filter via 'where' cast
   const workflow = await db.workflow.findFirst({
     where: {
       shareToken: params.token,
       status: 'active',
-    } as any,
+    },
     // B-3: order deterministically; findLatestArtifact below re-derives this
     // anyway, but ordering here keeps the two in agreement.
     include: { artifacts: { orderBy: LATEST_ARTIFACT_ORDER_BY } },
@@ -33,7 +32,7 @@ async function handleGET(
   // Increment view count (non-critical, fire-and-forget)
   db.workflow.update({
     where: { id: workflow.id },
-    data: { viewCount: { increment: 1 } } as any,
+    data: { viewCount: { increment: 1 } },
   }).catch(() => {});
 
   // Only return SOP and report artifacts — not raw evidence or source bundle.

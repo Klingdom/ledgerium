@@ -91,12 +91,12 @@ async function handleGET(): Promise<NextResponse> {
   }
 
   try {
-    const rows = await (db as any).stripeDispute.findMany({
+    const rows = await db.stripeDispute.findMany({
       orderBy: { createdAt: 'desc' },
       take: MAX_DISPUTES,
     });
 
-    const disputes: AdminDisputeRow[] = rows.map((row: any) => ({
+    const disputes: AdminDisputeRow[] = rows.map((row) => ({
       id: row.id,
       chargeId: row.chargeId,
       userId: row.userId,

@@ -63,7 +63,7 @@ async function handleGET() {
 
     // Fetch all workflow_uploaded events for these users — no upper bound so
     // week 4+ activity beyond the window is captured
-    const uploadEvents = await (db as any).analyticsEvent.findMany({
+    const uploadEvents = await db.analyticsEvent.findMany({
       where: {
         userId: { in: userIds },
         eventName: 'workflow_uploaded',

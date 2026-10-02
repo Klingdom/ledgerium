@@ -2,10 +2,16 @@ import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
+import type { Prisma } from '@prisma/client';
 import crypto from 'crypto';
 import { trackServer } from '@/lib/analytics-server';
 import { getClientIp } from '@/lib/client-ip';
 import { reportApiError } from '@/lib/api-error-reporting';
+
+/** Outcome of the accept-invite transaction: a typed failure or the joined-team summary. */
+type AcceptTxResult =
+  | { error: string; status: number; isNotFound?: boolean }
+  | { ok: true; teamId: string; teamName: string | null; role: string };
 
 /**
  * POST /api/invites/accept — accept a workspace invite
@@ -174,7 +180,7 @@ async function handlePOST(req: NextRequest) {
 
   if (!session?.user?.id) {
     // Look up the invite by hash.
-    const invite = await (db as any).teamInvite.findFirst({
+    const invite = await db.teamInvite.findFirst({
       where: { token: tokenHash },
       include: { team: { select: { id: true, name: true } } },
     });
@@ -207,8 +213,8 @@ async function handlePOST(req: NextRequest) {
   const userId = session.user.id;
 
   try {
-    const result = await (db as any).$transaction(
-      async (tx: any) => {
+    const result = await db.$transaction(
+      async (tx: Prisma.TransactionClient): Promise<AcceptTxResult> => {
         // Re-read invite inside the transaction for serializable isolation.
         const invite = await tx.teamInvite.findFirst({
           where: { token: tokenHash },
@@ -296,7 +302,7 @@ async function handlePOST(req: NextRequest) {
     );
 
     if ('error' in result) {
-      if ((result as any).isNotFound) {
+      if (result.isNotFound) {
         recordFailure(ip, nowMs);
       } else if ('ok' in result) {
         recordSuccess(ip);

@@ -56,11 +56,11 @@ async function handleGET(req: NextRequest) {
 
     if (dryRun) {
       // Count only — no mutation
-      const deletedCount = await (db as any).analyticsEvent.count({
+      const deletedCount = await db.analyticsEvent.count({
         where: { createdAt: { lt: olderThan } },
       });
 
-      const retainedCount = await (db as any).analyticsEvent.count({
+      const retainedCount = await db.analyticsEvent.count({
         where: { createdAt: { gte: olderThan } },
       });
 
@@ -74,7 +74,7 @@ async function handleGET(req: NextRequest) {
 
     // Actual deletion
     // Count before deleting so we can return an accurate number
-    const deletedCount = await (db as any).analyticsEvent.count({
+    const deletedCount = await db.analyticsEvent.count({
       where: { createdAt: { lt: olderThan } },
     });
 
@@ -82,19 +82,19 @@ async function handleGET(req: NextRequest) {
     const BATCH_SIZE = 1000;
     let totalDeleted = 0;
     while (totalDeleted < deletedCount) {
-      const batch = await (db as any).analyticsEvent.findMany({
+      const batch = await db.analyticsEvent.findMany({
         where: { createdAt: { lt: olderThan } },
         select: { id: true },
         take: BATCH_SIZE,
       }) as { id: string }[];
       if (batch.length === 0) break;
-      await (db as any).analyticsEvent.deleteMany({
+      await db.analyticsEvent.deleteMany({
         where: { id: { in: batch.map((e: { id: string }) => e.id) } },
       });
       totalDeleted += batch.length;
     }
 
-    const retainedCount = await (db as any).analyticsEvent.count();
+    const retainedCount = await db.analyticsEvent.count();
 
     console.info(
       `[admin/cleanup-events] Deleted ${deletedCount} events older than ${olderThan.toISOString()} (requestedBy=${session?.user?.id ?? 'unknown'})`,

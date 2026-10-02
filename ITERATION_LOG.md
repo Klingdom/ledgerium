@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 (loop 93) — 71 casts, and whether any of them was hiding something (Mode 1, `build-error-resolver`)
+
+- **Controls:** Area — `type safety` (fresh). Agent — **`build-error-resolver`, a real rotation** (typecheck, suite and production build run by the agent; I re-ran all three plus the prerender check). Extension — `871e29a`, 50 loops; #216 CEO-blocked. **Cadence: 3 of 3 since MR-043 — MR-044 now due.**
+- **Candidate Selection: `burn-down` — #11** (10; **oldest open non-blocked row**, iter 001, ~190 loops by the validator). Fourth oldest-row pick in ten loops.
+- **The question that justified the loop was not style.** A cast on the database client turns off checking for every query behind it; if one hides a model or field the schema does not have, it is a runtime bug the compiler would otherwise catch. So the brief was: investigate first, classify every resulting error, and do not "fix" a real mismatch silently.
+- **The answer was no — and that is a result, not a non-event.** Client confirmed current; every cast removed; **zero real mismatches**. The casts dated from April, when those models were new and the client stale, and were copied into later routes as convention. Three type errors appeared on removal, all fallout of the casts themselves, fixed at the type level. No behaviour changed.
+- **Residual, class-scoped: untyped database calls ~82 → 0** — the 71 casts plus untyped transaction clients, db-derived `as any`, and suppressions — held by a guard with an **empty** allowlist, mutation-checked.
+- **Left, filed as #270:** `any` outside the database layer (request bodies — which overlap #261 — engine outputs, UI props), ~145 lines of untyped test mocks that could drift from the schema they stand in for, and one dead branch in invite acceptance.
+- **Validation (re-run by me):** web-app **3527 → 3532** (+5); typecheck 0; build 0; prerender 17 + `llms.txt`, 0 `/api`.
+- **Follow-ups:** 1 created (#270), 1 closed (#11).
+
+---
+
 ## 2026-10-01 (loop 92) — A step that cites evidence that does not exist (Mode 1, `backend-engineer`)
 
 - **Controls:** Area — `evidence linkage` (fresh). Agent — **`backend-engineer`, a real rotation** (web-app suite, workspace suite and typecheck run by the agent; I re-ran all three). Extension — `871e29a`, 49 loops, **read but not modified**, per the Reliability Invariant. Cadence: 2 of 3 since MR-043.

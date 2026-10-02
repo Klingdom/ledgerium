@@ -49,7 +49,7 @@ export async function softDeactivateExcessMembers(
   }
 
   // Fetch all active members for this team.
-  const activeMembers = await (db as any).teamMember.findMany({
+  const activeMembers = await db.teamMember.findMany({
     where: {
       teamId,
       status: 'active',
@@ -105,7 +105,7 @@ export async function softDeactivateExcessMembers(
   const reactivationDeadline = new Date(nowMs + THIRTY_DAYS_MS);
 
   // Perform a batched update using updateMany (single round-trip).
-  await (db as any).teamMember.updateMany({
+  await db.teamMember.updateMany({
     where: {
       id: { in: idsToDeactivate },
     },
@@ -126,7 +126,7 @@ export async function softDeactivateExcessMembers(
  * Returns only members with status='active'.
  */
 export async function countActiveMembers(teamId: string): Promise<number> {
-  return (db as any).teamMember.count({
+  return db.teamMember.count({
     where: {
       teamId,
       status: 'active',
@@ -142,7 +142,7 @@ export async function countActiveMembers(teamId: string): Promise<number> {
  * @param nowMs  - Current epoch milliseconds for expiry comparison (clock injection).
  */
 export async function countPendingInvites(teamId: string, nowMs: number): Promise<number> {
-  return (db as any).teamInvite.count({
+  return db.teamInvite.count({
     where: {
       teamId,
       acceptedAt: null,

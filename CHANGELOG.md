@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-01] - Database code is fully type-checked
+
+### Internal
+- Every database query in the web app is now checked by the compiler. Seventy-one places had switched that checking off; each was examined first to make sure none was hiding a query against data that does not exist (none was). A check now prevents it being switched off again. No visible change.
+
+---
+
+
 ## [2026-10-01] - Every recorded step must point to evidence that exists
 
 ### Added

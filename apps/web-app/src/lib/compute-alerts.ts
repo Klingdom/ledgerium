@@ -35,8 +35,7 @@ function daysAgo(days: number): Date {
  */
 export async function computeAlerts(): Promise<AlertResult[]> {
   const checkedAt = new Date().toISOString();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const analyticsEvent = (db as any).analyticsEvent;
+  const analyticsEvent = db.analyticsEvent;
 
   // ── 1. upload_success_rate_low (P1) ─────────────────────────────────────
   const cutoff2h = hoursAgo(2);
@@ -107,11 +106,11 @@ export async function computeAlerts(): Promise<AlertResult[]> {
     analyticsEvent.groupBy({
       by: ['userId'],
       where: { eventName: 'signup_completed', createdAt: { gte: cutoff7d }, userId: { not: null } },
-    }) as Promise<{ userId: string }[]>,
+    }),
     analyticsEvent.groupBy({
       by: ['userId'],
       where: { eventName: 'sop_section_viewed', createdAt: { gte: cutoff7d }, userId: { not: null } },
-    }) as Promise<{ userId: string }[]>,
+    }),
   ]);
   const signupUsers7d = signupUserGroups.length;
   const sopViewUsers7d = sopViewUserGroups.length;

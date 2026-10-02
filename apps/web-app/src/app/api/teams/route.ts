@@ -26,7 +26,7 @@ async function handleGET() {
   }
 
   try {
-    const memberships = await (db as any).teamMember.findMany({
+    const memberships = await db.teamMember.findMany({
       where: { userId: session.user.id },
       include: {
         team: {
@@ -43,13 +43,13 @@ async function handleGET() {
     });
 
     return NextResponse.json({
-      teams: memberships.map((m: any) => ({
+      teams: memberships.map((m) => ({
         id: m.team.id,
         name: m.team.name,
         slug: m.team.slug,
         role: m.role,
         memberCount: m.team._count.members,
-        members: m.team.members.map((mem: any) => ({
+        members: m.team.members.map((mem) => ({
           id: mem.user.id,
           email: mem.user.email,
           name: mem.user.name,
@@ -111,7 +111,7 @@ async function handlePOST(req: NextRequest) {
     const baseSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     const slug = `${baseSlug}-${crypto.randomBytes(3).toString('hex')}`;
 
-    const team = await (db as any).team.create({
+    const team = await db.team.create({
       data: {
         name,
         slug,

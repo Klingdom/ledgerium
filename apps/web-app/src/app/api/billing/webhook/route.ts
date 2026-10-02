@@ -203,7 +203,7 @@ async function handlePOST(req: NextRequest) {
           // WebhookEvent idempotency claim — mirrors the StripeDispute
           // upsert pattern above for the same reason (a .closed-style
           // re-delivery must not create a second row).
-          await (db as any).oneTimePurchase.upsert({
+          await db.oneTimePurchase.upsert({
             where: { id: session.id },
             create: {
               id: session.id,
@@ -308,7 +308,7 @@ async function handlePOST(req: NextRequest) {
           const existingTeam = await resolveTeamFromCustomer(customerId);
           if (!existingTeam) {
             // Look for a workspace owned by this user that has no Stripe link yet.
-            const unlinkedTeam = await (db as any).team.findFirst({
+            const unlinkedTeam = await db.team.findFirst({
               where: { createdBy: userId, stripeCustomerId: null },
             });
             if (unlinkedTeam) {
@@ -319,7 +319,7 @@ async function handlePOST(req: NextRequest) {
               // this write a brand-new trial would fall back to the Team-row DB
               // default subscriptionStatus='active', reproducing the exact same
               // trial-misclassification bug on the team path.
-              await (db as any).team.update({
+              await db.team.update({
                 where: { id: unlinkedTeam.id },
                 data: {
                   plan,
@@ -346,8 +346,8 @@ async function handlePOST(req: NextRequest) {
               });
               const baseName = userRecord?.name ?? userRecord?.email ?? userId;
               const newTeamId = `team_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-              await (db as any).$transaction([
-                (db as any).team.create({
+              await db.$transaction([
+                db.team.create({
                   data: {
                     id: newTeamId,
                     name: `${baseName}'s Workspace`,
@@ -366,7 +366,7 @@ async function handlePOST(req: NextRequest) {
                     lastSubscriptionEventAt: eventCreatedAt,
                   },
                 }),
-                (db as any).teamMember.create({
+                db.teamMember.create({
                   data: {
                     teamId: newTeamId,
                     userId,
@@ -508,7 +508,7 @@ async function handlePOST(req: NextRequest) {
             const previousPlan = team.plan as PlanType;
             const nowMs = Date.now();
 
-            await (db as any).team.update({
+            await db.team.update({
               where: { id: team.id },
               data: {
                 plan,
@@ -661,7 +661,7 @@ async function handlePOST(req: NextRequest) {
             const previousPlanDeleted = deletedTeam.plan as PlanType;
             const nowMsDeleted = Date.now();
 
-            await (db as any).team.update({
+            await db.team.update({
               where: { id: deletedTeam.id },
               data: {
                 plan: 'free',
@@ -772,12 +772,12 @@ async function handlePOST(req: NextRequest) {
         // past_due so the workspace UI can show a billing-attention banner.
         // The solo-subscriber User.update path below is preserved byte-identical
         // for non-team customers.
-        const failedTeam = await (db as any).team.findFirst({
+        const failedTeam = await db.team.findFirst({
           where: { stripeSubscriptionId: subscriptionId },
         });
 
         if (failedTeam) {
-          await (db as any).team.update({
+          await db.team.update({
             where: { id: failedTeam.id },
             data: { subscriptionStatus: 'past_due' },
           });
@@ -827,12 +827,12 @@ async function handlePOST(req: NextRequest) {
         if (!subscriptionId) break;
 
         // ── Team-first resolution (mirrors invoice.payment_failed pattern) ────
-        const succeededTeam = await (db as any).team.findFirst({
+        const succeededTeam = await db.team.findFirst({
           where: { stripeSubscriptionId: subscriptionId },
         });
 
         if (succeededTeam) {
-          await (db as any).team.update({
+          await db.team.update({
             where: { id: succeededTeam.id },
             // A successful charge resolves any outstanding SCA challenge.
             data: { subscriptionStatus: 'active', pendingInvoiceUrl: null },
@@ -912,12 +912,12 @@ async function handlePOST(req: NextRequest) {
 
         const hostedInvoiceUrl = invoice.hosted_invoice_url ?? null;
 
-        const actionTeam = await (db as any).team.findFirst({
+        const actionTeam = await db.team.findFirst({
           where: { stripeSubscriptionId: subscriptionId },
         });
 
         if (actionTeam) {
-          await (db as any).team.update({
+          await db.team.update({
             where: { id: actionTeam.id },
             data: { pendingInvoiceUrl: hostedInvoiceUrl },
           });
@@ -1004,7 +1004,7 @@ async function handlePOST(req: NextRequest) {
           }
         }
 
-        await (db as any).stripeDispute.upsert({
+        await db.stripeDispute.upsert({
           where: { id: dispute.id },
           create: {
             id: dispute.id,
@@ -1054,7 +1054,7 @@ async function handlePOST(req: NextRequest) {
         const dispute = event.data.object as Stripe.Dispute;
         const chargeId = typeof dispute.charge === 'string' ? dispute.charge : dispute.charge.id;
 
-        await (db as any).stripeDispute.upsert({
+        await db.stripeDispute.upsert({
           where: { id: dispute.id },
           create: {
             id: dispute.id,
