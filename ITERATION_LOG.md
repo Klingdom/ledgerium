@@ -4,6 +4,31 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 114) — An alert that pages once, not every hour (Mode 1, `backend-engineer`)
+
+- **Controls:** Area — `infra / monitoring`. Agent — `backend-engineer`; it reported its own suite ×2, typecheck and five reverts. I re-ran the suite ×2, the alert tests ×5, typecheck and a shell syntax check, and read the diff. Extension — `871e29a`, 71 loops untouched. Cadence: 2 of 3 since MR-050.
+- **Candidate Selection: `burn-down` — #292** (11), queued by MR-050. It must land before the CEO switches alerts on.
+- **What changed:**
+  - **Decision logic.** A pure `decideAlertSends(previous, results, nowMs)` sends when an alert *becomes* firing, then a reminder at most once per 24 h while it stays firing.
+  - **State survives restarts.** It lives in `AnalyticsEvent` rows (`alert_notified`), so no schema change was needed — #12 makes schema changes risky in production.
+  - **A send is recorded only after it reached a channel.** A failed delivery is therefore retried next hour. If reading the state fails, the job re-sends: duplicate over loss.
+  - **Resolution.** It is recorded so a re-fire notifies at once, but no "all clear" message is sent.
+  - **Minimum samples.** The activation alert needs a cohort of 10. The upload-success alert needs 5 uploads in 2 h — one failed upload used to read as 0% and page a P1. The other six alerts are counts or already had a minimum.
+  - **Determinism.** `hoursAgo` now takes the injected `nowMs`.
+- **Contract change, stated:** 200/207/424 now describe only the sends attempted *this run*. A still-firing alert that was already notified is suppressed, not failed. **A green hourly run no longer means "nothing is firing"** — it means nothing *new* needed sending. The script and workflow comments say so, and the response gains `alertsSuppressed`.
+- **Residuals, class-scoped (ways a human is not told):**
+  - **Partial delivery.** When one channel delivers and another fails, the alert is recorded as sent, so the failed channel gets no retry. The daily heartbeat (loop 109) is what exposes that channel.
+  - **Retention cleanup.** It deletes events older than 90 days. A state row lost that way re-sends: duplicate, not loss.
+  - **Raw counts.** `alert_notified` rows appear in the raw event counts of `/api/analytics/events` — a few a day, cosmetic.
+  - **Manual send.** The manual `POST /api/admin/alerts` still sends unconditionally, which is intended for a manual action.
+- **Validation (re-run by me):** web-app **3867 → 3887** on 2 of 2 runs (no #293 crash); the alert test files 72/72 on 5 of 5 runs; typecheck 0; `bash -n` on the script passes.
+  - **A false alarm of my own:** my first targeted check grepped for "failed" and matched log text ("DB connection failed") from a test that passes. I re-ran reading the summary line instead.
+  - **Agent reverts:** "always send" fails 8 tests; "no reminder" 2; "record a failed delivery" 1; "no cohort minimum" 1; "no upload minimum" 1.
+  - Strings changed: 2 (insufficient-data messages). New module `alert-state.ts`: 141 LOC.
+- **Follow-ups:** 0 created, 1 closed (#292).
+
+---
+
 ## 2026-10-02 (loop 113) — A reset link in the logs (Mode 1, `security-reviewer`)
 
 - **Controls:** Area — `security / web` (by row labels security is 2 of the last 5, so no penalty; counted by the work shipped it is 3 of 5, which would give 9 — #285 was the top open score either way). Agent — `security-reviewer` (the agent ran its own suite ×2, typecheck and three reverts; I re-ran the suite ×2, the email tests ×5, typecheck, and read the diff). Extension — `871e29a`, 70 loops. Cadence: 1 of 3 since MR-050.

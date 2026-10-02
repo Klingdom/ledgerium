@@ -22,8 +22,13 @@ export interface AlertResult {
   checkedAt: string;
 }
 
-function hoursAgo(hours: number): Date {
-  return new Date(Date.now() - hours * 60 * 60 * 1000);
+/** Below this many signups in the cohort, an activation rate is noise (3 users = 0% or 33%): no verdict. */
+export const MIN_ACTIVATION_COHORT = 10;
+/** Below this many upload attempts in 2h, a success rate is noise (1 failed upload = 0%): no verdict. */
+export const MIN_UPLOAD_SAMPLE_2H = 5;
+
+function hoursAgo(nowMs: number, hours: number): Date {
+  return new Date(nowMs - hours * 60 * 60 * 1000);
 }
 
 /**
@@ -35,19 +40,19 @@ export async function computeAlerts(nowMs: number = Date.now()): Promise<AlertRe
   const analyticsEvent = db.analyticsEvent;
 
   // ── 1. upload_success_rate_low (P1) ─────────────────────────────────────
-  const cutoff2h = hoursAgo(2);
+  const cutoff2h = hoursAgo(nowMs, 2);
   const [uploadedCount2h, failedCount2h] = await Promise.all([
     analyticsEvent.count({ where: { eventName: 'workflow_uploaded', createdAt: { gte: cutoff2h } } }) as Promise<number>,
     analyticsEvent.count({ where: { eventName: 'upload_failed', createdAt: { gte: cutoff2h } } }) as Promise<number>,
   ]);
   const totalUpload2h = uploadedCount2h + failedCount2h;
   let uploadSuccessRateAlert: AlertResult;
-  if (totalUpload2h === 0) {
+  if (totalUpload2h < MIN_UPLOAD_SAMPLE_2H) {
     uploadSuccessRateAlert = {
       id: 'upload_success_rate_low',
       severity: 'P1',
       status: 'insufficient_data',
-      message: 'No upload events in the last 2 hours — cannot compute success rate',
+      message: `Only ${totalUpload2h} upload event(s) in the last 2 hours — need at least ${MIN_UPLOAD_SAMPLE_2H} to compute success rate`,
       value: null,
       threshold: 0.95,
       checkedAt,
@@ -66,7 +71,7 @@ export async function computeAlerts(nowMs: number = Date.now()): Promise<AlertRe
   }
 
   // ── 2. zero_uploads_24h (P1) ─────────────────────────────────────────────
-  const cutoff24h = hoursAgo(24);
+  const cutoff24h = hoursAgo(nowMs, 24);
   const uploadedCount24h = await analyticsEvent.count({
     where: { eventName: 'workflow_uploaded', createdAt: { gte: cutoff24h } },
   }) as number;
@@ -83,7 +88,7 @@ export async function computeAlerts(nowMs: number = Date.now()): Promise<AlertRe
   };
 
   // ── 3. processing_failure_spike (P1) ─────────────────────────────────────
-  const cutoff1h = hoursAgo(1);
+  const cutoff1h = hoursAgo(nowMs, 1);
   const failedCount1h = await analyticsEvent.count({
     where: { eventName: 'upload_failed', createdAt: { gte: cutoff1h } },
   }) as number;
@@ -114,12 +119,12 @@ export async function computeAlerts(nowMs: number = Date.now()): Promise<AlertRe
   ]);
   const activation = computeActivationRate(signupRows, sopViewRows, nowMs);
   let activationRateAlert: AlertResult;
-  if (activation.rate === null) {
+  if (activation.rate === null || activation.cohortSize < MIN_ACTIVATION_COHORT) {
     activationRateAlert = {
       id: 'activation_rate_drop',
       severity: 'P2',
       status: 'insufficient_data',
-      message: 'No signups 7-14 days ago — cannot compute activation rate',
+      message: `Only ${activation.cohortSize} signup(s) 7-14 days ago — need at least ${MIN_ACTIVATION_COHORT} to compute activation rate`,
       value: null,
       threshold: 0.20,
       checkedAt,
@@ -138,7 +143,7 @@ export async function computeAlerts(nowMs: number = Date.now()): Promise<AlertRe
   }
 
   // ── 5. no_signups_48h (P2) ───────────────────────────────────────────────
-  const cutoff48h = hoursAgo(48);
+  const cutoff48h = hoursAgo(nowMs, 48);
   const signupCount48h = await analyticsEvent.count({
     where: { eventName: 'signup_completed', createdAt: { gte: cutoff48h } },
   }) as number;

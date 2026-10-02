@@ -22,6 +22,11 @@
 #     purpose: GitHub Actions has no warning state, and a silently decayed
 #     redundancy is the failure this exists to catch. It fires only while an
 #     alert is firing AND a channel is broken, both of which want attention.
+#   Row #292: the server now notifies on TRANSITION (becomes firing, then a daily
+#   reminder), so 200 = nothing needed sending OR every attempted send was
+#   delivered; a still-firing alert already notified is suppressed, not a failure.
+#   424/207 describe only sends attempted this run (a failed send is retried next
+#   hour). A green run no longer means "nothing is firing".
 #   Exit 0 is 200 only: 207 is a 2xx and must never be read as success.
 set -u
 

@@ -4,6 +4,7 @@ import { computeAlerts } from '@/lib/compute-alerts';
 import { sendAlertNotification } from '@/lib/notifications';
 import { reportApiError } from '@/lib/api-error-reporting';
 import { verifyCronBearer } from '@/lib/cron-auth';
+import { decideAlertSends, loadAlertStates, recordAlertState, type AlertStates } from '@/lib/alert-state';
 
 /**
  * GET /api/admin/alerts/check
@@ -61,11 +62,23 @@ import { verifyCronBearer } from '@/lib/cron-auth';
  * not reported via reportApiError (not a server fault). Precedence:
  * 500/503/401 > 424 > 207 > 200.
  *
+ * Row #292 - notify on transition, not hourly. A firing P1/P2 alert is sent when
+ * it becomes firing (first time, or after having been ok), then at most once per
+ * 24h while it stays firing (lib/alert-state.ts decideAlertSends). The statuses
+ * above now describe only the sends ATTEMPTED this run: a firing alert already
+ * notified within 24h is SUPPRESSED (counted in alertsSuppressed), is not a
+ * delivery failure, and cannot cause 424/207. 200 therefore means "nothing needed
+ * sending, or everything attempted was delivered"; it no longer means "nothing is
+ * firing" (alertsFiring says that). 424/207 mean the same as before, scoped to the
+ * attempted sends, and a failed send is not recorded, so it is retried next hour.
+ * A standing outage with working channels is announced once + daily, so the job
+ * is green while it persists; the daily heartbeat is the channel-health check.
+ *
  * Response bodies carry COUNTS only - never alert messages, webhook URLs or
  * addresses.
- *   200: { checked, alertsFiring, alertsSent (delivered), channelFailures: 0 }
- *   207: { checked, alertsFiring, alertsSent, channelFailures >= 1 }
- *   424: { error, checked, alertsFiring, alertsSent, alertsUndelivered }
+ *   200: { checked, alertsFiring, alertsSent (delivered), alertsSuppressed, channelFailures: 0 }
+ *   207: { checked, alertsFiring, alertsSent, alertsSuppressed, channelFailures >= 1 }
+ *   424: { error, checked, alertsFiring, alertsSent, alertsSuppressed, alertsUndelivered }
  */
 async function handleGET(request: NextRequest) {
   const auth = verifyCronBearer(request);
@@ -89,12 +102,23 @@ async function handleGET(request: NextRequest) {
   }
 
   try {
-    const alerts = await computeAlerts();
+    const nowMs = Date.now();
+    const alerts = await computeAlerts(nowMs);
 
-    // Only notify for P1 and P2 firing alerts
-    const toNotify = alerts.filter(
-      (a) => a.status === 'firing' && (a.severity === 'P1' || a.severity === 'P2'),
-    );
+    // Row #292: notify on transition, not every hour. State lives in
+    // AnalyticsEvent rows (lib/alert-state.ts). If the state read fails we fall
+    // back to "no memory": a duplicate notification, never a lost one.
+    let previous: AlertStates = {};
+    try {
+      previous = await loadAlertStates(nowMs);
+    } catch (err) {
+      console.error('[admin/alerts/check] alert state unreadable - notifying without suppression', err);
+    }
+    const decision = decideAlertSends(previous, alerts, nowMs);
+    const toNotify = decision.sends.map((s) => s.alert);
+    // Firing P1/P2 alerts (sent now or suppressed as already-notified).
+    const alertsFiring = toNotify.length + decision.suppressed.length;
+    const alertsSuppressed = decision.suppressed.length;
 
     const settled = await Promise.allSettled(
       toNotify.map((a) => {
@@ -116,8 +140,18 @@ async function handleGET(request: NextRequest) {
     const alertsUndelivered = toNotify.length - alertsSent;
     const channelFailures = results.reduce((n, r) => n + (r === null ? 1 : r.failed), 0);
 
+    // Record state ONLY for what was actually delivered (undelivered = retried
+    // next run), and resolutions for alerts that went back to ok.
+    await Promise.all([
+      ...toNotify.flatMap((a, i) => {
+        const r = results[i];
+        return r !== null && r !== undefined && r.delivered > 0 ? [recordAlertState(a.id, 'firing', nowMs)] : [];
+      }),
+      ...decision.resolved.map((id) => recordAlertState(id, 'resolved', nowMs)),
+    ]);
+
     console.log(
-      `[admin/alerts/check] Checked ${alerts.length} alert(s), firing P1/P2: ${toNotify.length}, delivered: ${alertsSent}, undelivered: ${alertsUndelivered}, channel failures: ${channelFailures}`,
+      `[admin/alerts/check] Checked ${alerts.length} alert(s), firing P1/P2: ${alertsFiring}, suppressed: ${alertsSuppressed}, attempted: ${toNotify.length}, delivered: ${alertsSent}, undelivered: ${alertsUndelivered}, channel failures: ${channelFailures}`,
     );
 
     if (alertsUndelivered > 0) {
@@ -128,8 +162,9 @@ async function handleGET(request: NextRequest) {
         {
           error: 'Alert delivery failed',
           checked: true,
-          alertsFiring: toNotify.length,
+          alertsFiring,
           alertsSent,
+          alertsSuppressed,
           alertsUndelivered,
         },
         { status: 424 },
@@ -144,12 +179,12 @@ async function handleGET(request: NextRequest) {
         `[admin/alerts/check] ${channelFailures} channel delivery failure(s); every alert still reached >= 1 channel - answering 207`,
       );
       return NextResponse.json(
-        { checked: true, alertsFiring: toNotify.length, alertsSent, channelFailures },
+        { checked: true, alertsFiring, alertsSent, alertsSuppressed, channelFailures },
         { status: 207 },
       );
     }
 
-    return NextResponse.json({ checked: true, alertsFiring: toNotify.length, alertsSent, channelFailures });
+    return NextResponse.json({ checked: true, alertsFiring, alertsSent, alertsSuppressed, channelFailures });
   } catch (err) {
     console.error('[admin/alerts/check GET]', err);
     reportApiError('/api/admin/alerts/check', 500);

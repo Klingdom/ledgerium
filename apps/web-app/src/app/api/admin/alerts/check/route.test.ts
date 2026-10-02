@@ -34,6 +34,13 @@ vi.mock('@/lib/notifications', () => ({
   sendAlertNotification: vi.fn(),
 }));
 
+// Row #292: state is exercised in route.transitions.test.ts; here no memory.
+vi.mock('@/lib/alert-state', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/alert-state')>()),
+  loadAlertStates: vi.fn(async () => ({})),
+  recordAlertState: vi.fn(async () => true),
+}));
+
 vi.mock('@/lib/api-error-reporting', () => ({
   reportApiError: vi.fn(),
 }));
@@ -243,6 +250,7 @@ describe('GET /api/admin/alerts/check — delivery failure is a distinct status 
       checked: true,
       alertsFiring: 1,
       alertsSent: 0,
+      alertsSuppressed: 0,
       alertsUndelivered: 1,
     });
     expect(text).not.toContain('SECRET-ALERT-MESSAGE');
@@ -270,7 +278,7 @@ describe('GET /api/admin/alerts/check — delivery failure is a distinct status 
     const response = await call();
     expect(response.status).toBe(207);
     const text = JSON.stringify(await response.json());
-    expect(JSON.parse(text)).toEqual({ checked: true, alertsFiring: 1, alertsSent: 1, channelFailures: 1 });
+    expect(JSON.parse(text)).toEqual({ checked: true, alertsFiring: 1, alertsSent: 1, alertsSuppressed: 0, channelFailures: 1 });
     expect(text).not.toContain('SECRET-ALERT-MESSAGE');
     expect(err).toHaveBeenCalled();
     expect(mockReportApiError).not.toHaveBeenCalled();
@@ -283,7 +291,7 @@ describe('GET /api/admin/alerts/check — delivery failure is a distinct status 
 
     const response = await call();
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ checked: true, alertsFiring: 2, alertsSent: 2, channelFailures: 0 });
+    expect(await response.json()).toEqual({ checked: true, alertsFiring: 2, alertsSent: 2, alertsSuppressed: 0, channelFailures: 0 });
   });
 
   it('207 is distinct from 424, 500 and 503', async () => {
@@ -308,7 +316,7 @@ describe('GET /api/admin/alerts/check — delivery failure is a distinct status 
 
     const response = await call();
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ checked: true, alertsFiring: 0, alertsSent: 0, channelFailures: 0 });
+    expect(await response.json()).toEqual({ checked: true, alertsFiring: 0, alertsSent: 0, alertsSuppressed: 0, channelFailures: 0 });
     expect(mockSendAlertNotification).not.toHaveBeenCalled();
   });
 

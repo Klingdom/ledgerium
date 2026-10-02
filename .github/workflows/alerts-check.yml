@@ -24,6 +24,12 @@ name: Alerts check
 # webhook, SMTP down or timing out). The job fails (GitHub has no warning state)
 # so the decayed redundancy is not silent; the message says someone WAS told.
 #
+# Row #292: the server notifies on TRANSITION (becomes firing, then a daily
+# reminder). 200 = nothing needed sending OR everything attempted was delivered;
+# a still-firing alert already notified is suppressed (not a failure), so a green
+# run no longer means "nothing is firing". 424/207 apply to sends attempted this
+# run; a failed send is retried next hour.
+#
 # DOES NOT COVER: delivery being CONFIRMED means the channel accepted it (Slack
 # 2xx, email provider success), not that a human read it. Channels are only
 # exercised WHILE an alert is firing, so a broken channel is not detected on a

@@ -6,6 +6,15 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Alerts tell you once, not every hour
+
+### Changed
+- An alert now notifies when it starts firing and then sends at most one reminder a day while it continues, instead of repeating every hour.
+- Alerts based on percentages wait for enough data before firing, so one failed upload or one inactive new user no longer triggers a page.
+
+---
+
+
 ## [2026-10-02] - Security: email contents stay out of the logs
 
 ### Security
