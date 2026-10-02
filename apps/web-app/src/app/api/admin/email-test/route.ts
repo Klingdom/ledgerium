@@ -2,8 +2,9 @@
  * POST /api/admin/email-test
  *
  * Admin/ops-only diagnostic: attempts a real transactional-email send and
- * returns the outcome, INCLUDING the underlying error on failure, so email
- * delivery can be debugged without server log access.
+ * returns the outcome. On failure the body carries a stable `errorCode` and
+ * fixed text, never the transport's own message (row #267): that text is built
+ * from the SMTP server's reply and the recipient address. Detail is logged.
  *
  * Auth: interactive admin session OR the time-windowed HMAC ops token
  * (x-ops-token), mirroring /api/admin/password-reset-link. 404-cloaked.

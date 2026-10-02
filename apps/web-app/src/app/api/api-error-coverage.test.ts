@@ -220,39 +220,104 @@ describe('malformed-body guard (row #258)', () => {
   });
 });
 
-describe('error-text-in-response guard (row #262)', () => {
+describe('error-text-in-response guard (rows #262, #267)', () => {
   /*
-    Property: no route returns an error's message or stack to the client.
-    Error messages in this codebase interpolate recorded user content (see
-    lib/safe-error-name.ts); `withApiRoute` returns a fixed 500 body for that
-    reason, and a hand-built `{ detail: err.message }` bypasses it. Row #262
-    found three (`/api/upload`, `/api/seed-demo-data`, and `String(err)` in
-    `/api/upload` + `/api/sync` 422 bodies) after a loop had claimed the class
-    closed. This is a source scan, so it reads each route file for the shapes
-    those leaks took; it cannot see a message laundered through a helper in
-    lib/ (none exists today: grep found no NextResponse in lib/ outside
-    feature-gating, read-json-body and with-api-route).
-  */
-  const LEAK = /\b(?:err|error|e|ex)\??\.(?:message|stack)\b|\bString\(\s*(?:err|error|e|ex)\s*\)|\.stack\b/;
+    Property: no route, and no lib/ helper whose return value can flow into a
+    response, returns an error's message or stack to the client. Error messages
+    in this codebase interpolate recorded user content (lib/safe-error-name.ts);
+    `withApiRoute` returns a fixed 500 body for that reason.
 
-  // Exact, reasoned exemptions. Each is a Zod issue `.message` — a description
-  // of which field failed validation of the CALLER'S OWN request body, returned
-  // only to that caller. Not an Error thrown by the server.
+    Row #262 scanned route files for catch variables named err|error|e|ex. Row
+    #267 found the two holes that left: a helper in lib/ that returned
+    `(err as Error).message` (lib/email.ts, spread into the admin/email-test
+    502), and any catch binding with another name. This version:
+
+      1. Collects EVERY catch binding in the file (`catch (x)`, `.catch((x) =>`,
+         `.catch(function (x)`), on top of the usual names.
+      2. Flags `.message` / `.stack` on ANYTHING (not just those names), and for
+         each collected binding: `String(x)`, `${x}`, `x.toString()`,
+         `JSON.stringify(x)`, and `error|err|detail|details|reason|cause: x`
+         (the raw error object handed back inside a result).
+      3. Scans BOTH route files and every non-test file under lib/.
+
+    Lines that are comments or console.* log calls are exempt (a log is not a
+    response). Everything else needs an exact, reasoned allowlist entry.
+
+    LIMITS (a source scan, not taint analysis): it is line-based, so a message
+    split across lines (`err\n.message`) or read through a destructure
+    (`const { message } = err`) is invisible; it does not follow a raw error
+    object passed through a variable into a response (`const out = err; return
+    json(out)`), only the `error: x` shape; and it does not scan components,
+    hooks, pages, server components, middleware or scripts. Those render in the
+    caller's own browser or never reach a response body; if one ever builds a
+    response it is a route or lib file, which are scanned. The property is held
+    for what the scan can see and by review for what it cannot.
+  */
+  // `e` is deliberately not listed: as a loop variable it is everywhere, and a real
+  // `catch (e)` / `.catch((e) =>` is collected below anyway.
+  const ALWAYS_NAMES = ['err', 'error'];
+
+  function bindingNames(lines: string[]): string[] {
+    const text = lines.join('\n');
+    const names = new Set(ALWAYS_NAMES);
+    for (const m of text.matchAll(/\bcatch\s*\(\s*([A-Za-z_$][\w$]*)/g)) names.add(m[1]!);
+    for (const m of text.matchAll(/\.catch\(\s*(?:async\s*)?(?:function\s*\w*\s*)?\(?\s*([A-Za-z_$][\w$]*)/g)) names.add(m[1]!);
+    return [...names];
+  }
+
+  function leakShapes(names: string[]): RegExp[] {
+    const alt = names.map((n) => n.replace(/\$/g, '\\$')).join('|');
+    return [
+      /\.(?:message|stack)\b/,
+      new RegExp(String.raw`\bString\(\s*(?:${alt})\s*\)`),
+      new RegExp(String.raw`\$\{\s*(?:${alt})\s*\}`),
+      new RegExp(String.raw`\b(?:${alt})\??\.toString\(\)`),
+      new RegExp(String.raw`\bJSON\.stringify\(\s*(?:${alt})\s*\)`),
+      new RegExp(String.raw`\b(?:error|err|detail|details|reason|cause)\s*:\s*(?:${alt})\s*[,}]`),
+    ];
+  }
+
+  function isExemptLine(trimmed: string): boolean {
+    return (
+      trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*') || /^console\.\w+\(/.test(trimmed)
+    );
+  }
+
+  /** Pure scan of one file's lines; returns the trimmed line + 1-based number per leak. */
+  function scanFile(lines: string[]): Array<{ n: number; line: string }> {
+    const shapes = leakShapes(bindingNames(lines));
+    const out: Array<{ n: number; line: string }> = [];
+    lines.forEach((raw, i) => {
+      const trimmed = raw.trim();
+      if (isExemptLine(trimmed)) return;
+      if (shapes.some((re) => re.test(trimmed))) out.push({ n: i + 1, line: trimmed });
+    });
+    return out;
+  }
+
+  // Exact, reasoned exemptions.
+  const ZOD = "Zod issue messages for the caller's own body";
+  const ALERT = 'an alert object built from fixed templates in compute-alerts.ts - not an Error';
   const ALLOWED: Array<{ file: string; line: string; reason: string }> = [
     {
       file: 'api/analytics/extension/route.ts',
       line: "{ data: null, error: `Invalid request: ${parsed.error.errors.map((e) => e.message).join(', ')}` },",
-      reason: 'Zod issue messages for the caller\'s own body',
+      reason: ZOD,
     },
     {
       file: 'api/dashboard/preferences/route.ts',
       line: "error: `Invalid request: ${parsed.error.errors.map((e) => e.message).join(', ')}`,",
-      reason: 'Zod issue messages for the caller\'s own body',
+      reason: ZOD,
     },
     {
       file: 'api/workflows/[id]/route.ts',
       line: "details: parsed.error.errors.map(e => `${e.path.join('.')}: ${e.message}`),",
-      reason: 'Zod issue messages for the caller\'s own body',
+      reason: ZOD,
+    },
+    {
+      file: 'lib/ingestion.ts',
+      line: "(e) => `${e.path.join('.')}: ${e.message}`,",
+      reason: `${ZOD}: validateBundle's errors reach the 422 of /api/upload and /api/sync, echoing the caller's own uploaded bundle to the caller`,
     },
     {
       file: 'api/sync/route.ts',
@@ -264,46 +329,123 @@ describe('error-text-in-response guard (row #262)', () => {
       line: 'validationErrors: JSON.stringify([String(err)]),',
       reason: 'same as sync: a stored diagnostic, not a response body',
     },
+    {
+      file: 'api/auth/signup/route.ts',
+      line: "{ error: parsed.error.errors[0]?.message ?? 'Invalid input' },",
+      reason: "signupSchema's own authored strings; its fields have no enum/literal, so Zod's default messages name a type, not the caller's value",
+    },
+    { file: 'lib/notifications.ts', line: '`[alert] ${SEVERITY_EMOJI[alert.severity]} ${alert.severity}: ${alert.title} — ${alert.message}`,', reason: ALERT },
+    {
+      file: 'lib/notifications.ts',
+      line: "text: `${emoji} *${alert.severity}: ${alert.title}*\\n${alert.message}${alert.value != null ? `\\nValue: \\`${alert.value}\\`` : ''}`,",
+      reason: ALERT,
+    },
+    {
+      file: 'lib/notifications.ts',
+      line: '<p style="color: #94a3b8; font-size: 14px; line-height: 1.6;">${alert.message}</p>',
+      reason: ALERT,
+    },
+    { file: 'api/admin/alerts/route.ts', line: 'message: a.message,', reason: ALERT },
+    { file: 'api/admin/alerts/check/route.ts', line: 'message: a.message,', reason: ALERT },
   ];
+
+  const SRC_LIB = join(__dirname, '..', '..', 'lib');
+  function libFiles(dir: string): string[] {
+    return readdirSync(dir).flatMap((name) => {
+      const p = join(dir, name);
+      if (statSync(p).isDirectory()) return name === '__tests__' ? [] : libFiles(p);
+      return /\.tsx?$/.test(name) && !/\.(?:test|spec)\.tsx?$/.test(name) ? [p] : [];
+    });
+  }
+  const LIB = libFiles(SRC_LIB).map((file) => ({
+    file: 'lib/' + relative(SRC_LIB, file).split(sep).join('/'),
+    lines: readFileSync(file, 'utf8').split(/\r?\n/),
+  }));
+  const SCANNED = [...ALL_ROUTES.map((r) => ({ file: r.file, lines: r.lines })), ...LIB];
 
   function leaks(): string[] {
     const out: string[] = [];
-    for (const r of ALL_ROUTES) {
-      r.lines.forEach((line, i) => {
-        if (!LEAK.test(line)) return;
-        const trimmed = line.trim();
-        // Comments may name the pattern (this fix's own notes do).
-        if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) return;
-        if (ALLOWED.some((a) => a.file === r.file && a.line === trimmed)) return;
-        out.push(`${r.file}:${i + 1} ${trimmed}`);
-      });
+    for (const f of SCANNED) {
+      for (const hit of scanFile(f.lines)) {
+        if (ALLOWED.some((a) => a.file === f.file && a.line === hit.line)) continue;
+        out.push(`${f.file}:${hit.n} ${hit.line}`);
+      }
     }
     return out;
   }
 
-  it('no route builds a response from an error message, stack or String(err)', () => {
+  it('no route or lib helper builds a response value from an error message, stack or String(err)', () => {
     expect(ALL_ROUTES.length).toBeGreaterThan(70); // a scan of nothing passes vacuously
+    expect(LIB.length, 'the lib scan must reach real files').toBeGreaterThan(30);
     expect(leaks()).toEqual([]);
   });
 
   it('every allowlist entry still matches a real line (no stale exemptions)', () => {
     const stale = ALLOWED.filter((a) => {
-      const route = ALL_ROUTES.find((r) => r.file === a.file);
-      return !route || !route.lines.some((l) => l.trim() === a.line);
-    }).map((a) => a.file);
+      const f = SCANNED.find((s) => s.file === a.file);
+      return !f || !f.lines.some((l) => l.trim() === a.line);
+    }).map((a) => `${a.file}: ${a.line}`);
     expect(stale).toEqual([]);
   });
 
   it('the scan pattern catches the shapes the leaks actually took', () => {
     for (const bad of [
-      "detail: err?.message,",
+      'detail: err?.message,',
       "const message = err instanceof Error ? err.message : 'x';",
-      "details: [String(err)],",
-      "{ stack: error.stack }",
+      'details: [String(err)],',
+      '{ stack: error.stack }',
+      'error: (err as Error).message,', // lib/email.ts, row #267
     ]) {
-      expect(LEAK.test(bad), bad).toBe(true);
+      expect(scanFile([bad]).length, bad).toBe(1);
     }
-    expect(LEAK.test("error: 'Internal server error'")).toBe(false);
+    expect(scanFile(["error: 'Internal server error'"])).toEqual([]);
+    expect(scanFile(["console.error('[x] failed', err.message);"])).toEqual([]);
+    expect(scanFile(['// notes may say err.message'])).toEqual([]);
+  });
+
+  it('MUTATION: a leak through a catch binding with ANY name is caught (the old guard saw only err|error|e|ex)', () => {
+    for (const src of [
+      ['try { f(); } catch (thrown) {', '  return json({ detail: String(thrown) });', '}'],
+      ['try { f(); } catch (boom) {', '  return json({ detail: `${boom}` });', '}'],
+      ['try { f(); } catch (boom) {', '  return json({ detail: boom.toString() });', '}'],
+      ['try { f(); } catch (cause) {', '  return json({ error: JSON.stringify(cause) });', '}'],
+      ['try { f(); } catch (delErr) {', '  return json({ error: delErr });', '}'],
+      ['p.catch((reason2) => json({ detail: String(reason2) }));'],
+      ['p.catch(function (oops) { return json({ detail: `${oops}` }); });'],
+      ['try { f(); } catch (anything) {', '  return json({ detail: anything.message });', '}'],
+    ]) {
+      expect(scanFile(src).length, src.join(' / ')).toBeGreaterThan(0);
+    }
+    // And the binding name does not make a clean file dirty.
+    expect(scanFile(['try { f(); } catch (thrown) {', "  return json({ error: 'x' });", '}'])).toEqual([]);
+  });
+
+  it('MUTATION: a lib helper that returns an error message is caught (row #267)', () => {
+    const helper = [
+      'export async function probe() {',
+      '  try {',
+      '    await send();',
+      '    return { ok: true, error: null };',
+      '  } catch (failure) {',
+      '    return { ok: false, error: (failure as Error).message };',
+      '  }',
+      '}',
+    ];
+    expect(scanFile(helper)).toEqual([{ n: 6, line: 'return { ok: false, error: (failure as Error).message };' }]);
+    // The raw error object handed back in a result is the other shape.
+    expect(scanFile(['  } catch (failure) {', '    return { ok: false, error: failure };']).length).toBe(1);
+    // lib/email.ts as shipped is clean.
+    const email = LIB.find((f) => f.file === 'lib/email.ts');
+    expect(email).toBeDefined();
+    expect(scanFile(email!.lines)).toEqual([]);
+    // ...and the real file with its old line put back is not.
+    const regressed = email!.lines.map((l) =>
+      l.includes('return failure(provider, true, classifyEmailError(err), config);')
+        ? 'return { provider, attempted: true, success: false, error: (err as Error).message, config };'
+        : l,
+    );
+    expect(regressed).not.toEqual(email!.lines);
+    expect(scanFile(regressed).length).toBe(1);
   });
 });
 

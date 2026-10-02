@@ -13,7 +13,8 @@
  * (e.g. forgot-password logs delivery failures) but must not break the request.
  */
 
-import nodemailer, { type Transporter } from 'nodemailer';
+import { constants as osConstants } from 'node:os';
+import nodemailer,{ type Transporter } from 'nodemailer';
 
 interface SendEmailParams {
   to: string;
@@ -144,18 +145,98 @@ async function sendViaResend({ to, subject, html }: SendEmailParams): Promise<{ 
 
 // ── Diagnostic (admin) ──────────────────────────────────────────────────────
 
+/**
+ * Stable, text-free diagnostic outcomes (row #267).
+ *
+ * The diagnostic used to return the transport error's `.message`. Producer of
+ * that text: nodemailer builds it from the SMTP server's own reply
+ * (`err.message += ': ' + response` in smtp-connection `_formatError`), the
+ * socket error (`connect ECONNREFUSED <ip>:<port>`), and, for envelope
+ * errors, the recipient address (`Invalid recipient "<to>"`). So it carries
+ * server banners, resolved IPs and caller-supplied addresses: none of it is
+ * ours to put in a response body. A code derived from `err.code` /
+ * `err.responseCode` / `err.errno` is a closed set we chose; the detail goes to
+ * the server log, where the operator who can read this response can also read
+ * logs.
+ */
+export type EmailErrorCode =
+  | 'auth_failed'
+  | 'connection_refused'
+  | 'connection_failed'
+  | 'dns_failure'
+  | 'timeout'
+  | 'tls_failure'
+  | 'recipient_rejected'
+  | 'protocol_error'
+  | 'provider_send_failed'
+  | 'no_provider_configured'
+  | 'unknown';
+
+/** Fixed operator-facing text per code. Never interpolates anything. */
+export const EMAIL_ERROR_MESSAGES: Record<EmailErrorCode, string> = {
+  auth_failed: 'SMTP authentication failed - check SMTP_USER / SMTP_PASSWORD',
+  connection_refused: 'SMTP connection refused - check SMTP_HOST / SMTP_PORT',
+  connection_failed: 'SMTP connection failed (see server logs)',
+  dns_failure: 'SMTP host name did not resolve - check SMTP_HOST',
+  timeout: 'SMTP connection or send timed out',
+  tls_failure: 'SMTP TLS negotiation failed - check SMTP_PORT / SMTP_SECURE',
+  recipient_rejected: 'SMTP server rejected the sender or recipient (see server logs)',
+  protocol_error: 'Unexpected SMTP server response (see server logs)',
+  provider_send_failed: 'Provider send failed (see server logs)',
+  no_provider_configured: 'No email provider configured',
+  unknown: 'Email send failed (see server logs)',
+};
+
+/**
+ * Map a thrown transport error to a code using ONLY its structured fields
+ * (`code`, `responseCode`, `errno`). Reads no text: nodemailer overwrites
+ * `err.code` with its own ECONNECTION/ESOCKET, leaving the OS errno intact, so
+ * "refused" is recognised by errno, not by matching the message.
+ */
+export function classifyEmailError(err: unknown): EmailErrorCode {
+  if (typeof err !== 'object' || err === null) return 'unknown';
+  const f = err as { code?: unknown; responseCode?: unknown; errno?: unknown };
+  const code = typeof f.code === 'string' ? f.code : '';
+  const responseCode = typeof f.responseCode === 'number' ? f.responseCode : 0;
+
+  if (code === 'EAUTH' || responseCode === 535 || responseCode === 534 || responseCode === 530) return 'auth_failed';
+  if (code === 'ETIMEDOUT' || code === 'ESOCKETTIMEDOUT') return 'timeout';
+  if (code === 'EDNS' || code === 'ENOTFOUND' || code === 'EAI_AGAIN') return 'dns_failure';
+  if (code === 'ETLS') return 'tls_failure';
+  if (code === 'EENVELOPE') return 'recipient_rejected';
+  if (code === 'EPROTOCOL') return 'protocol_error';
+  if (code === 'ECONNREFUSED') return 'connection_refused';
+  if (code === 'ECONNECTION' || code === 'ESOCKET') {
+    const refused = osConstants.errno.ECONNREFUSED;
+    return typeof f.errno === 'number' && Math.abs(f.errno) === refused ? 'connection_refused' : 'connection_failed';
+  }
+  return 'unknown';
+}
+
 export interface EmailDiagnostic {
   provider: EmailProvider;
   attempted: boolean;
   success: boolean;
+  /** Fixed text from EMAIL_ERROR_MESSAGES - never the transport's own message. */
   error: string | null;
+  errorCode: EmailErrorCode | null;
   config: { host?: string; port?: number; secure?: boolean; user?: string; from: string };
 }
 
+function failure(
+  provider: EmailProvider,
+  attempted: boolean,
+  code: EmailErrorCode,
+  config: EmailDiagnostic['config'],
+): EmailDiagnostic {
+  return { provider, attempted, success: false, error: EMAIL_ERROR_MESSAGES[code], errorCode: code, config };
+}
+
 /**
- * Attempt a real test send and RETURN the outcome (including the underlying
- * error message on failure) so delivery problems can be diagnosed without
- * server log access. Never throws.
+ * Attempt a real test send and RETURN the outcome so delivery problems can be
+ * diagnosed without server log access. On failure the outcome is a stable
+ * code + fixed text (see EmailErrorCode); the transport's detail is logged.
+ * Never throws.
  */
 export async function runEmailDiagnostic(to: string): Promise<EmailDiagnostic> {
   const provider = selectEmailProvider();
@@ -173,24 +254,20 @@ export async function runEmailDiagnostic(to: string): Promise<EmailDiagnostic> {
       const transporter = getSmtpTransporter();
       await transporter.verify();
       await transporter.sendMail({ from, to, subject, html });
-      return { provider, attempted: true, success: true, error: null, config };
+      return { provider, attempted: true, success: true, error: null, errorCode: null, config };
     } catch (err) {
-      return { provider, attempted: true, success: false, error: (err as Error).message, config };
+      console.error('[email] SMTP diagnostic failed:', err);
+      return failure(provider, true, classifyEmailError(err), config);
     }
   }
 
   if (provider === 'resend') {
     const result = await sendViaResend({ to, subject, html });
-    return {
-      provider,
-      attempted: true,
-      success: result.success,
-      error: result.success ? null : 'Resend send failed (see server logs)',
-      config: { from },
-    };
+    if (result.success) return { provider, attempted: true, success: true, error: null, errorCode: null, config: { from } };
+    return failure(provider, true, 'provider_send_failed', { from });
   }
 
-  return { provider, attempted: false, success: false, error: 'No email provider configured', config: { from } };
+  return failure(provider, false, 'no_provider_configured', { from });
 }
 
 // ── Public API ──────────────────────────────────────────────────────────────

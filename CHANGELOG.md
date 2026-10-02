@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Email diagnostics no longer reveal mail-server details
+
+### Security
+- The admin email test returned the mail server's raw error, which can include server details, network addresses and the recipient's address. It now returns a short, fixed reason (for example "authentication failed" or "connection timed out"), and the full detail is kept in the server's own logs.
+
+---
+
+
 ## [2026-10-02] - Alert delivery problems are no longer hidden
 
 ### Fixed

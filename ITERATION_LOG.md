@@ -4,6 +4,18 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 103) — What a mail server says when it fails (Mode 1, `security-reviewer`)
+
+- **Controls:** Area — `web-app / security` (101 security/deploy, 102 monitoring). Agent — **`security-reviewer`, a real rotation** (suite, typecheck and mutation checks run by the agent; I re-ran suite and typecheck and checked the source-map finding). Extension — `871e29a`, 60 loops. **Cadence: 3 of 3 since MR-046 — MR-047 now due.**
+- **Candidate Selection: `burn-down` — #267** (10). #273 (11) skipped on stated grounds: its main deliverable is a production count and a destructive cleanup that are the CEO's call.
+- **Producer-per-field, answered from the library rather than assumed:** nodemailer's message is assembled from the server's reply, the socket error with resolved IP and port, and — for envelope errors — the recipient address. So "it's just an SMTP error" was not true: it can carry addresses. The diagnostic now returns a code derived from structured fields only, and the route test asserts no banner, IP, recipient or password in nine failure classes.
+- **The guard is now about the property, not the names.** Loop 89's guard knew four variable names and only route files. It now reads all of `lib/` and every catch binding by any name. Widening it found one more case it had missed (a Zod message in signup — judged safe and allowlisted with the reason). Its line-based limits are written down rather than implied away.
+- **Found at the edge, filed rather than reverted: #283.** Production ships public source maps and an error page that shows stack traces — a deliberate temporary diagnostic for a hydration bug, per its own header. Removing it is right once that investigation is done; whether it is done is not recorded, so it is a question for you, not a unilateral change.
+- **Validation (re-run by me):** web-app **3767 → 3785** (+18); typecheck 0.
+- **Follow-ups:** 1 created (#283), 1 closed (#267).
+
+---
+
 ## 2026-10-02 (loop 102) — Reached someone, but not everyone (Mode 1, `backend-engineer`)
 
 - **Controls:** Area — `infra / monitoring` (100 a11y, 101 security/deploy). Agent — **`backend-engineer`, a real rotation** (suite, typecheck, `bash -n` and the stubbed script run by the agent; I re-ran suite, typecheck, YAML and the script under my own stub). Extension — `871e29a`, 59 loops. Cadence: 2 of 3 since MR-046. Ran alongside the AUTHZ audit amendment on separate files.
