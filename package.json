@@ -13,6 +13,7 @@
     "typecheck": "pnpm -r typecheck",
     "dev": "pnpm --filter extension-app dev",
     "validate:backlog": "node scripts/validate-backlog.mjs",
+    "check:typecheck-coverage": "node scripts/check-typecheck-coverage.mjs",
     "test:validate-backlog": "node --test scripts/validate-backlog.test.mjs"
   },
   "engines": {

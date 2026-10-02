@@ -32,6 +32,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Row #317 / MR-056 section 3. Fails on pnpm < 10 (where --fail-if-no-match
+      # does not fail on a renamed script) and on any TS package lacking a
+      # `typecheck` script (pnpm -r typecheck would silently skip it).
+      - name: Test typecheck-coverage guard
+        run: node --test scripts/check-typecheck-coverage.test.mjs
+
+      - name: Check typecheck coverage and pnpm version
+        run: node scripts/check-typecheck-coverage.mjs
+
       - name: Generate Prisma client
         run: pnpm --filter @ledgerium/web-app --fail-if-no-match exec prisma generate
 

@@ -4,6 +4,33 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 132) — A type-check that skips quietly (Mode 1, `devops-engineer`)
+
+- **Controls:**
+  - **Area:** `test-infra / ci`.
+  - **Agent:** `devops-engineer`.
+  - **Extension:** `871e29a`, 89 loops untouched; the e2e-extension workflow was not touched.
+  - **Cadence:** 2 of 3 since MR-056.
+- **Candidate Selection: `burn-down` — #317** (11), the top score after penalties.
+  - #316 scores 10. #315 scores 12 − 2 = 10, because web-app is 3 of the last 5.
+  - This again defers the viewer-role fix by one loop. The CEO was told, and offered the option to direct it first.
+- **What changed:**
+  - **Coverage check.** The new `scripts/check-typecheck-coverage.mjs` reads the workspace globs and fails if any package with TypeScript sources lacks a `typecheck` script. Before this, `pnpm -r typecheck` silently skipped such a package.
+  - **pnpm version check.** The same script fails if pnpm is below 10, because on pnpm 9 `--fail-if-no-match` does not fail a renamed script (MR-056).
+  - **CI wiring.** It runs after install in `deploy.yml` and `e2e-web-app.yml`, before Typecheck. Its 4 `node:test` cases run in `deploy.yml`.
+  - **Why this approach:** it stays correct as packages are added, unlike per-package filters.
+- **Proof (exit codes):**
+  - pnpm 10.32.1 gives 0 ("11 workspace packages checked").
+  - `npx pnpm@9.15.9 exec node scripts/check-typecheck-coverage.mjs` gives 1.
+  - The tests cover pass, renamed script fails, no-TypeScript package ignored, and pnpm 9 fails.
+  - My re-run matched: 0, 1, and both script test files pass.
+- **Adjacent check:** `pnpm -r typecheck` is the only recursive script in CI. Every other step is `--filter … --fail-if-no-match`.
+- **Correction (governance):** my loop-131 SYSTEM_HEALTH line said the V4 check had been dead "since loop 46". The anchor is backlog row **#246**, not a loop; fixed in this commit.
+- **Validation:** root 5901, typecheck 0, validator 0.
+- **Follow-ups:** 0 created, 1 closed (#317).
+
+---
+
 ## 2026-10-02 (loop 131) — A validator that does what it says (Mode 1, `qa-engineer`)
 
 - **Controls:**
