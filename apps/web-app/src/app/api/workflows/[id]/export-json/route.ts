@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -13,7 +14,7 @@ import { LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
  * Access: Starter+ only (cleanExports feature).
  * Free-tier users receive a 403 with upgrade details.
  */
-export async function GET(
+async function handleGET(
   _req: NextRequest,
   { params }: { params: { id: string } },
 ): Promise<NextResponse> {
@@ -77,3 +78,5 @@ export async function GET(
     },
   });
 }
+
+export const GET = withApiRoute('/api/workflows/[id]/export-json', handleGET);

@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -15,7 +16,7 @@ function safeJsonParse(json: string | null | undefined): unknown {
  * List all process definitions for the current user.
  * Requires intelligenceLayer feature (Team+).
  */
-export async function GET() {
+async function handleGET() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -88,3 +89,5 @@ export async function GET() {
     })),
   });
 }
+
+export const GET = withApiRoute('/api/process-definitions', handleGET);

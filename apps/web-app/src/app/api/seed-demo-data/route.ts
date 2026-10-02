@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -14,7 +15,7 @@ import { reportApiError } from '@/lib/api-error-reporting';
  * Returns:
  *   { created: string[], skipped: string[] }
  */
-export async function POST(_req: NextRequest) {
+async function handlePOST(_req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -581,3 +582,5 @@ function makeStep(
     },
   };
 }
+
+export const POST = withApiRoute('/api/seed-demo-data', handlePOST);

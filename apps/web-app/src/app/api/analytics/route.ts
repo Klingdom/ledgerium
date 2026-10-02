@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { analyzeUserPortfolio, clusterWorkflows } from '@/lib/intelligence';
@@ -18,7 +19,7 @@ function safeJsonParse(json: string | null | undefined, fallback: unknown = null
  * Optionally accepts { workflowIds: string[] } to analyze a subset.
  * Also triggers auto-clustering into process definitions.
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -104,7 +105,7 @@ export async function POST(req: NextRequest) {
  * GET /api/analytics
  * Get cached intelligence summary without re-running analysis.
  */
-export async function GET() {
+async function handleGET() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -154,3 +155,6 @@ export async function GET() {
     })),
   });
 }
+
+export const POST = withApiRoute('/api/analytics', handlePOST);
+export const GET = withApiRoute('/api/analytics', handleGET);

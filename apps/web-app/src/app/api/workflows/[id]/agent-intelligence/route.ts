@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { analyzeWorkflowAgentIntelligence } from '@/lib/agent-intelligence';
@@ -11,7 +12,7 @@ import { reportApiError } from '@/lib/api-error-reporting';
  * Returns the full TransformationResult.
  * Requires agentComposition feature (Growth+).
  */
-export async function POST(
+async function handlePOST(
   _req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -55,3 +56,5 @@ export async function POST(
     return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
   }
 }
+
+export const POST = withApiRoute('/api/workflows/[id]/agent-intelligence', handlePOST);

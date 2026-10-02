@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextResponse } from 'next/server';
 import { statSync, statfsSync } from 'node:fs';
 import path from 'node:path';
@@ -29,7 +30,7 @@ function sqliteFilePath(): string | null {
   return path.resolve(url.slice('file:'.length));
 }
 
-export async function GET() {
+async function handleGET() {
   const startedAt = Date.now();
   try {
     // Connectivity + read-latency probe (the only signal that gates status).
@@ -95,3 +96,5 @@ export async function GET() {
     );
   }
 }
+
+export const GET = withApiRoute('/api/health', handleGET);

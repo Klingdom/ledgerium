@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -21,7 +22,7 @@ const compareSchema = z.object({
  * Body: { workflowIds: string[] }
  * Returns: CrossWorkflowIntelligence with shared skills, patterns, and portfolio summary.
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -133,3 +134,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Comparison analysis failed' }, { status: 500 });
   }
 }
+
+export const POST = withApiRoute('/api/analytics/compare', handlePOST);

@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -8,7 +9,7 @@ import { checkFeatureAccess } from '@/lib/feature-gating';
  * Dismiss or update an insight.
  * Requires intelligenceLayer feature (Team+).
  */
-export async function PATCH(
+async function handlePATCH(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -55,3 +56,5 @@ export async function PATCH(
 
   return NextResponse.json({ ok: true });
 }
+
+export const PATCH = withApiRoute('/api/insights/[id]', handlePATCH);

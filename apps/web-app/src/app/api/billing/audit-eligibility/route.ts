@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { getAuditEligibility } from '@/lib/audit-eligibility';
@@ -20,7 +21,7 @@ import { getAuditEligibility } from '@/lib/audit-eligibility';
  * /api/process-definitions) — a Free-tier user should be able to see how
  * close they are to qualifying without needing a paid plan first.
  */
-export async function GET() {
+async function handleGET() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -30,3 +31,5 @@ export async function GET() {
 
   return NextResponse.json({ data: eligibility });
 }
+
+export const GET = withApiRoute('/api/billing/audit-eligibility', handleGET);

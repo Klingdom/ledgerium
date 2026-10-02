@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -8,7 +9,7 @@ const updateTagSchema = z.object({
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
 });
 
-export async function PATCH(
+async function handlePATCH(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -45,7 +46,7 @@ export async function PATCH(
   return NextResponse.json({ tag: updated });
 }
 
-export async function DELETE(
+async function handleDELETE(
   _req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -65,3 +66,6 @@ export async function DELETE(
 
   return NextResponse.json({ ok: true });
 }
+
+export const PATCH = withApiRoute('/api/tags/[id]', handlePATCH);
+export const DELETE = withApiRoute('/api/tags/[id]', handleDELETE);

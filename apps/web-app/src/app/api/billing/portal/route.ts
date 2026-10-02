@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -9,7 +10,7 @@ import { reportApiError } from '@/lib/api-error-reporting';
  * Creates a Stripe Billing Portal session so users can
  * manage their subscription, update payment, or cancel.
  */
-export async function POST() {
+async function handlePOST() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -37,3 +38,5 @@ export async function POST() {
     return NextResponse.json({ error: 'Failed to create portal session' }, { status: 500 });
   }
 }
+
+export const POST = withApiRoute('/api/billing/portal', handlePOST);

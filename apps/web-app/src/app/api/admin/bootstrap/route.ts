@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { auth } from '@/lib/auth';
@@ -42,7 +43,7 @@ import { reportApiError } from '@/lib/api-error-reporting';
  * @iter 087 / TEAM-P03.10 — DISABLE_ADMIN_BOOTSTRAP env guard
  * @iter 091 / ADM-002 PR-2 — CSRF + rate-limit + transactional hardening
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   // ── Guard 1: Demo-F1 disable flag ─────────────────────────────────────────
   if (process.env.DISABLE_ADMIN_BOOTSTRAP === 'true') {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -190,3 +191,5 @@ function parseUserAgentFamily(ua: string | null | undefined): string {
   if (/edg/i.test(ua)) return 'Edge';
   return 'other';
 }
+
+export const POST = withApiRoute('/api/admin/bootstrap', handlePOST);

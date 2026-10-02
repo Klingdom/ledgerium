@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -243,7 +244,7 @@ async function createOneTimeCheckoutSession(
  * Body: { type?: "subscription" | "one_time", plan?: "starter" | "team" | "growth",
  *          interval?: "monthly" | "annual", sku?: string, quantity?: number }
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized', code: 'unauthorized' }, { status: 401 });
@@ -429,3 +430,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withApiRoute('/api/billing/checkout', handlePOST);

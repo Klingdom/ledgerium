@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -15,7 +16,7 @@ import { reportApiError } from '@/lib/api-error-reporting';
  * Week 0 = same ISO week as signup (always 100% by definition).
  * Weeks 1–4+ = subsequent ISO weeks.
  */
-export async function GET() {
+async function handleGET() {
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -175,3 +176,5 @@ function getWeekMonday(date: Date): Date {
   d.setUTCDate(d.getUTCDate() + daysToMonday);
   return d;
 }
+
+export const GET = withApiRoute('/api/analytics/retention', handleGET);

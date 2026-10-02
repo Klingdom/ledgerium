@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -14,7 +15,7 @@ import { reportApiError } from '@/lib/api-error-reporting';
  *
  * Returns: BPMN 2.0 XML with Content-Disposition: attachment header.
  */
-export async function GET(
+async function handleGET(
   _req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -110,3 +111,5 @@ export async function GET(
     return NextResponse.json({ error: 'BPMN export failed' }, { status: 500 });
   }
 }
+
+export const GET = withApiRoute('/api/workflows/[id]/export-bpmn', handleGET);

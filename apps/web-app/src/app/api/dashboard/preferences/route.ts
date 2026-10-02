@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
@@ -56,7 +57,7 @@ function prefResponse(
  * Auth: required (session.user.id).
  * Errors: 401 if unauthenticated.
  */
-export async function GET(_req: NextRequest) {
+async function handleGET(_req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized', data: null, meta: {} }, { status: 401 });
@@ -103,7 +104,7 @@ export async function GET(_req: NextRequest) {
  * Auth: required (session.user.id).
  * Errors: 401 if unauthenticated, 400 if body invalid.
  */
-export async function PUT(req: NextRequest) {
+async function handlePUT(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized', data: null, meta: {} }, { status: 401 });
@@ -164,3 +165,6 @@ export async function PUT(req: NextRequest) {
 
   return prefResponse(result.preferences, result.droppedKeys, result.warnings);
 }
+
+export const GET = withApiRoute('/api/dashboard/preferences', handleGET);
+export const PUT = withApiRoute('/api/dashboard/preferences', handlePUT);

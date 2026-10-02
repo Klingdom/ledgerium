@@ -96,6 +96,37 @@ describe('api_error coverage guard (row #246)', () => {
     expect(wrong).toEqual([]);
   });
 
+  it("D. every exported HTTP method is wrapped with the file's own endpoint (rows #8 / #253)", () => {
+    // An exception that escapes a handler becomes a Next.js 500 that no
+    // application code sees. withApiRoute is what observes it, so a route that
+    // exports a bare handler reopens that hole and fails here.
+    const METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
+    const problems: string[] = [];
+    let wrappedCount = 0;
+    for (const r of ROUTES) {
+      const text = r.lines.join('\n');
+      // Every way a method can be exported: function declaration, const, or a
+      // destructured re-export (`export const { GET } = handlers`).
+      const exported = new Set<string>();
+      for (const m of text.matchAll(/^export\s+(?:async\s+)?function\s+(\w+)/gm)) exported.add(m[1]!);
+      for (const m of text.matchAll(/^export\s+const\s+(\w+)\b/gm)) exported.add(m[1]!);
+      for (const m of text.matchAll(/^export\s+const\s*\{([^}]*)\}/gm)) {
+        for (const n of m[1]!.split(',')) exported.add(n.trim().split(':')[0]!.trim());
+      }
+      const methods = METHODS.filter((mm) => exported.has(mm));
+      if (methods.length === 0) problems.push(`${r.file}: exports no HTTP method`);
+      const escapedEndpoint = r.endpoint.replace(/[[\]]/g, '\\$&');
+      for (const mm of methods) {
+        const wrapped = new RegExp(`^export const ${mm} = withApiRoute\\('${escapedEndpoint}',`, 'm');
+        if (wrapped.test(text)) wrappedCount++;
+        else problems.push(`${r.file}: ${mm} is not wrapped as withApiRoute('${r.endpoint}', …)`);
+      }
+    }
+    expect(problems).toEqual([]);
+    // Vacuity floor: 95 handlers were wrapped when this guard was written.
+    expect(wrappedCount).toBeGreaterThanOrEqual(90);
+  });
+
   it('the route and root boundaries emit client_error with the constructor name only', () => {
     for (const [file, boundary] of [['error.tsx', 'route'], ['global-error.tsx', 'root']] as const) {
       const src = readFileSync(join(APP_ROOT, file), 'utf8');

@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { canAccessAdmin } from '@/lib/admin-allowlist';
@@ -21,7 +22,7 @@ const MIN_RETENTION_DAYS = 7;    // safety floor: never delete last 7 days
  * Response:
  *   { deletedCount, dryRun, olderThan, retainedCount }
  */
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const session = await auth();
 
   if (!canAccessAdmin(session)) {
@@ -111,3 +112,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to process cleanup request' }, { status: 500 });
   }
 }
+
+export const GET = withApiRoute('/api/admin/cleanup-events', handleGET);

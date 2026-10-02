@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -20,7 +21,7 @@ import { reportApiError } from '@/lib/api-error-reporting';
  *   recency      — 10 / 5 / 2 / 0     (login_completed within 7d / 14d / 30d / none)
  *   organization — 2 pts each, max 10  (portfolio_created, tag_assigned)
  */
-export async function GET() {
+async function handleGET() {
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -228,3 +229,5 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to compute engagement scores' }, { status: 500 });
   }
 }
+
+export const GET = withApiRoute('/api/analytics/engagement', handleGET);

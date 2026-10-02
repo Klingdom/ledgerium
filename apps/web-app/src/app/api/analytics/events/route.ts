@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -9,7 +10,7 @@ import { computeDashboardV2RetirementMetrics } from '@/lib/dashboard-v2-retireme
  * GET  /api/analytics/events — retrieves aggregated event data for the dashboard.
  */
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   try {
     const body = await req.json();
     const events = body.events;
@@ -104,7 +105,7 @@ export async function POST(req: NextRequest) {
  * GET /api/analytics/events — aggregated event data for the product dashboard.
  * Query params: ?days=30 (default 30 days lookback)
  */
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -232,3 +233,6 @@ function computeFunnel(
     return { step, count, dropoff, rate };
   });
 }
+
+export const POST = withApiRoute('/api/analytics/events', handlePOST);
+export const GET = withApiRoute('/api/analytics/events', handleGET);

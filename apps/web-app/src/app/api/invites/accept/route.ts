@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -144,7 +145,7 @@ function hashInviteToken(rawToken: string): string {
   return crypto.createHash('sha256').update(rawToken).digest('hex');
 }
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   const rawToken: string | undefined = body?.token;
 
@@ -336,3 +337,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to accept invite' }, { status: 500 });
   }
 }
+
+export const POST = withApiRoute('/api/invites/accept', handlePOST);

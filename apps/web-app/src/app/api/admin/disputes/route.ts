@@ -18,6 +18,7 @@
  * @module api/admin/disputes/route
  */
 
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { canAccessAdmin } from '@/lib/admin-allowlist';
@@ -77,7 +78,7 @@ function errorResponse(
 
 // ── Route handler ──────────────────────────────────────────────────────────────
 
-export async function GET(): Promise<NextResponse> {
+async function handleGET(): Promise<NextResponse> {
   // DET-1-style single upstream clock boundary.
   const referenceNowMs = Date.now();
   const generatedAt = new Date(referenceNowMs).toISOString();
@@ -121,3 +122,5 @@ export async function GET(): Promise<NextResponse> {
     return errorResponse('internal_error', 'Failed to load disputes', 500, generatedAt, durationMs);
   }
 }
+
+export const GET = withApiRoute('/api/admin/disputes', handleGET);

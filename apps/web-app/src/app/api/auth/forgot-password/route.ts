@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes, createHash } from 'crypto';
 import { db } from '@/db';
@@ -8,7 +9,7 @@ import { getClientIp } from '@/lib/client-ip';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const { email } = await req.json().catch(() => ({ email: '' }));
 
   if (!email || typeof email !== 'string') {
@@ -94,3 +95,5 @@ export async function POST(req: NextRequest) {
 
   return successResponse;
 }
+
+export const POST = withApiRoute('/api/auth/forgot-password', handlePOST);

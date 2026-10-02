@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { canAccessAdmin } from '@/lib/admin-allowlist';
@@ -27,7 +28,7 @@ const SEVERITY_ORDER: Record<AlertSeverity, number> = { P1: 1, P2: 2, P3: 3 };
 
 // ── GET ───────────────────────────────────────────────────────────────────────
 
-export async function GET() {
+async function handleGET() {
   const session = await auth();
 
   if (!canAccessAdmin(session)) {
@@ -57,7 +58,7 @@ export async function GET() {
 
 // ── POST ──────────────────────────────────────────────────────────────────────
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const session = await auth();
 
   if (!canAccessAdmin(session)) {
@@ -105,3 +106,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to evaluate and notify alerts' }, { status: 500 });
   }
 }
+
+export const GET = withApiRoute('/api/admin/alerts', handleGET);
+export const POST = withApiRoute('/api/admin/alerts', handlePOST);

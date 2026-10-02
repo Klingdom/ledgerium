@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/db';
@@ -93,7 +94,7 @@ const extensionEventSchema = z.discriminatedUnion('event', [
 
 export type ExtensionTelemetryEvent = z.infer<typeof extensionEventSchema>;
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   // ── Rate limit (defense-in-depth; see doc comment above) ──────────────────
   const ip = getClientIp(req);
   const nowMs = Date.now();
@@ -169,3 +170,5 @@ async function recordExtensionEvent(event: ExtensionTelemetryEvent): Promise<voi
     }
   }
 }
+
+export const POST = withApiRoute('/api/analytics/extension', handlePOST);

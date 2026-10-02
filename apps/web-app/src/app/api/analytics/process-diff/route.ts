@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -120,7 +121,7 @@ function parseCompareSteps(raw: string | null | undefined): CompareStep[] | null
     }));
 }
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return errorResponse({ code: 'UNAUTHORIZED', message: 'Authentication required.' }, 401);
@@ -261,3 +262,5 @@ export async function POST(req: NextRequest) {
     return errorResponse({ code: 'PROCESS_DIFF_FAILED', message: 'Failed to compute process diff.' }, 500);
   }
 }
+
+export const POST = withApiRoute('/api/analytics/process-diff', handlePOST);

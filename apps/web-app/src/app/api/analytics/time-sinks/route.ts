@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -119,7 +120,7 @@ function deriveEvidenceRunIds(
   return [...ids];
 }
 
-export async function GET(_req: NextRequest) {
+async function handleGET(_req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return errorResponse({ code: 'UNAUTHORIZED', message: 'Authentication required.' }, 401);
@@ -195,3 +196,5 @@ export async function GET(_req: NextRequest) {
     );
   }
 }
+
+export const GET = withApiRoute('/api/analytics/time-sinks', handleGET);

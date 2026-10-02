@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextResponse } from 'next/server';
 import {
   isReverseTrialActive,
@@ -28,7 +29,7 @@ import { buildFeatureFlagsWithUsage } from '@/lib/feature-gating';
  *   }
  * }
  */
-export async function GET() {
+async function handleGET() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -92,3 +93,5 @@ export async function GET() {
     },
   });
 }
+
+export const GET = withApiRoute('/api/account', handleGET);

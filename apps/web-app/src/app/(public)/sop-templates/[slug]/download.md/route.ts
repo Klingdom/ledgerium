@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { getBySlug, getPagesByType, isReservedSlug } from '@/content/registry';
 import { renderSopExport } from '@/lib/sop-export';
 import type { SopTemplatePage } from '@/content/types';
@@ -44,7 +45,7 @@ export function generateStaticParams(): { slug: string }[] {
   return publishedSopTemplateSlugs();
 }
 
-export function GET(_req: Request, { params }: { params: { slug: string } }): Response {
+function handleGET(_req: Request, { params }: { params: { slug: string } }): Response {
   const page = getBySlug('sopTemplate', params.slug);
 
   // Defensive in-handler 404, even though dynamicParams = false should make
@@ -68,3 +69,5 @@ export function GET(_req: Request, { params }: { params: { slug: string } }): Re
     },
   });
 }
+
+export const GET = withApiRoute('/(public)/sop-templates/[slug]/download.md', handleGET);

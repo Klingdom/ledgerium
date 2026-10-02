@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -40,7 +41,7 @@ async function wouldCreateCycle(
   return false;
 }
 
-export async function GET(
+async function handleGET(
   _req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -104,7 +105,7 @@ export async function GET(
   return NextResponse.json({ portfolio: portfolioBase, workflows });
 }
 
-export async function PATCH(
+async function handlePATCH(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -213,7 +214,7 @@ export async function PATCH(
   return NextResponse.json({ portfolio: updated });
 }
 
-export async function DELETE(
+async function handleDELETE(
   _req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -255,3 +256,7 @@ export async function DELETE(
 
   return NextResponse.json({ success: true });
 }
+
+export const GET = withApiRoute('/api/portfolios/[id]', handleGET);
+export const PATCH = withApiRoute('/api/portfolios/[id]', handlePATCH);
+export const DELETE = withApiRoute('/api/portfolios/[id]', handleDELETE);

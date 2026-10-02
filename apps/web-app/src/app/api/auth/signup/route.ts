@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { hash } from 'bcryptjs';
 import { db } from '@/db';
@@ -26,7 +27,7 @@ const signupSchema = z.object({
   visitorId: z.string().min(1).max(128).optional(),
 });
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   try {
     const body = await req.json();
     const parsed = signupSchema.safeParse(body);
@@ -122,3 +123,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withApiRoute('/api/auth/signup', handlePOST);

@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -44,7 +45,7 @@ function hashInviteToken(rawToken: string): string {
   return crypto.createHash('sha256').update(rawToken).digest('hex');
 }
 
-export async function POST(
+async function handlePOST(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -253,7 +254,7 @@ export async function POST(
   }
 }
 
-export async function GET(
+async function handleGET(
   _req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -296,3 +297,6 @@ export async function GET(
     return NextResponse.json({ error: 'Failed to load invites' }, { status: 500 });
   }
 }
+
+export const POST = withApiRoute('/api/teams/[id]/invite', handlePOST);
+export const GET = withApiRoute('/api/teams/[id]/invite', handleGET);

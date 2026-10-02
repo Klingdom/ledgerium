@@ -4,6 +4,21 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 (loop 83) — The oldest row was the fix (Mode 1, `backend-engineer`)
+
+- **Controls:** Area — `web-app / api`. Agent — **`backend-engineer`, a real rotation by the MR-040 test**: it ran the suite, typecheck, two production builds and the prerender comparison itself, and I re-ran all of them independently. Extension — `871e29a`, 40 loops; #216 CEO-blocked. Cadence: 2 of 3 since MR-040.
+- **Candidate Selection: `burn-down` — #8** (9, **oldest open non-blocked, iter 001, ~80 loops**). Not the top score (#257 is 12). Chosen on MR-040 §2.4's evidence that the loop works what it filed recently and does not traverse the pool: #8 specified, at loop 47, the exact boundary loop 79 did not build. The pool line put #8 at the top of its "oldest" field the moment it existed — the first time that number has driven a selection.
+- **What shipped:** one `withApiRoute(endpoint, handler)` wrapping **all 95 exported handlers in all 74 route files**. An escaped exception is logged, reported, and answered with a non-leaking 500; success responses are untouched. That closes **#8, #253 and #16** with one mechanism — three rows, one outcome.
+- **The hazard that decided the design:** Next uses thrown errors for control flow. The dynamic-usage signal that `headers()` throws during `next build` is how Next learns a GET cannot be prerendered, and 61 routes call `auth()`. A wrapper that caught everything would have quietly turned those into **static routes serving a frozen 500 in production** — no test would fail, and the build would succeed. The wrapper re-throws by digest; its tests use Next's real `redirect()`, `notFound()` and `DynamicServerError`; and the prerender manifest is the end-to-end check: **0 `/api` routes prerendered, before and after.**
+- **The agent caught two of its own errors and reported both:** its first version made every handler async and broke the synchronous `force-static` routes (5 tests); and its first typecheck runs used `-s`, which hid a real failure — it switched to the exit code. That second one is worth keeping: a silent flag on a validation command is an instrument that can only report success.
+- **Guard D** fails on any unwrapped handler, a destructured export, or a wrapper naming another route's endpoint. Mutation-checked by the agent (bare export, wrong endpoint — both fail).
+- **Residual:** unwrapped exported handlers **95 → 0**.
+- **Validation (re-run by me):** web-app **3333 → 3344** (+11); `pnpm -r typecheck` exit 0; `next build` exit 0; prerendered `/api` routes 0; static `/api` lines 0; build-time `api_error` lines 0.
+- **Not claimed:** the `{ data, error, meta }` envelope half of #8's original text — untouched.
+- **Follow-ups:** 1 created (**#258** — 35 unguarded `req.json()` calls in 32 routes turn a client's malformed body into a server 500, which since loop 79 also inflates `api_error_spike`), 3 closed (#8, #253, #16). Pool down two.
+
+---
+
 ## 2026-10-01 (loop 82) — The alert that nothing asked (Mode 1, `devops-engineer` + coordinator)
 
 - **Controls:** Area — `infra / monitoring` (79, 80 analytics; 81 a11y — no saturation). Agent — **`devops-engineer`, partially**: under the practice adopted at MR-040, it ran the suite (3333), typecheck, YAML parse and the unconfigured path itself, but **not the core cases** — see below — so I record this as delegated-with-coordinator-verification, not a clean rotation. Extension — `871e29a`, 39 loops; #216 CEO-blocked. Cadence: 1 of 3 since MR-040.

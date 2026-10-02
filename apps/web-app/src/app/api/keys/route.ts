@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -5,7 +6,7 @@ import { generateApiKey } from '@/lib/api-keys';
 import { trackServer } from '@/lib/analytics-server';
 
 /** List user's API keys (without hashes). */
-export async function GET() {
+async function handleGET() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -21,7 +22,7 @@ export async function GET() {
 }
 
 /** Create a new API key. Returns the raw key ONCE. */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -51,7 +52,7 @@ export async function POST(req: NextRequest) {
 }
 
 /** Delete an API key. */
-export async function DELETE(req: NextRequest) {
+async function handleDELETE(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -71,3 +72,7 @@ export async function DELETE(req: NextRequest) {
 
   return NextResponse.json({ ok: true });
 }
+
+export const GET = withApiRoute('/api/keys', handleGET);
+export const POST = withApiRoute('/api/keys', handlePOST);
+export const DELETE = withApiRoute('/api/keys', handleDELETE);

@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -11,7 +12,7 @@ import { reportApiError } from '@/lib/api-error-reporting';
  * DELETE /api/workflows/:id/share — revoke a share
  */
 
-export async function GET(
+async function handleGET(
   _req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -74,7 +75,7 @@ export async function GET(
   }
 }
 
-export async function POST(
+async function handlePOST(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -170,7 +171,7 @@ export async function POST(
   }
 }
 
-export async function DELETE(
+async function handleDELETE(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -205,3 +206,7 @@ export async function DELETE(
     return NextResponse.json({ error: 'Failed to revoke share' }, { status: 500 });
   }
 }
+
+export const GET = withApiRoute('/api/workflows/[id]/share', handleGET);
+export const POST = withApiRoute('/api/workflows/[id]/share', handlePOST);
+export const DELETE = withApiRoute('/api/workflows/[id]/share', handleDELETE);

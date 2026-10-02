@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -18,7 +19,7 @@ import { reportApiError } from '@/lib/api-error-reporting';
  * @iter 082 / TEAM-P02 Part D
  */
 
-export async function GET(
+async function handleGET(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -88,7 +89,7 @@ export async function GET(
   }
 }
 
-export async function DELETE(
+async function handleDELETE(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -154,3 +155,6 @@ export async function DELETE(
     return NextResponse.json({ error: 'Failed to remove member' }, { status: 500 });
   }
 }
+
+export const GET = withApiRoute('/api/teams/[id]/members', handleGET);
+export const DELETE = withApiRoute('/api/teams/[id]/members', handleDELETE);

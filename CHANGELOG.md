@@ -6,6 +6,16 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-01] - Every server endpoint now fails safely and visibly
+
+### Fixed
+- Some server endpoints had no error handling at all, so an unexpected failure produced a generic error that nothing recorded. Every endpoint now goes through one shared safety layer: the failure is recorded, counted by the error alert, and answered with a plain "Internal server error" that never exposes internal details.
+
+### Known gap
+- Sending a badly formed request to some endpoints is still answered as a server error rather than as "bad request", and counts against the error alert. Recorded as backlog #258.
+
+---
+
 ## [2026-10-01] - Alerts are now checked on a schedule
 
 ### Added

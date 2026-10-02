@@ -31,6 +31,7 @@
  * @iter 095 / ADM-002 PR-6
  */
 
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { canAccessAdmin } from '@/lib/admin-allowlist';
@@ -104,7 +105,7 @@ function errorResponse(
 
 // ── Route handler ──────────────────────────────────────────────────────────────
 
-export async function GET(
+async function handleGET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
@@ -227,3 +228,5 @@ export async function GET(
     );
   }
 }
+
+export const GET = withApiRoute('/api/admin/users/[id]', handleGET);

@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { ensureSampleWorkflow } from '@/lib/sample-workflow';
@@ -13,7 +14,7 @@ import { reportApiError } from '@/lib/api-error-reporting';
  *  - "Approve Expense Report" recorded 8 ways — the Process Variants tab.
  * Idempotent — returns the existing PO sample if already present.
  */
-export async function POST(_req: NextRequest) {
+async function handlePOST(_req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -33,3 +34,5 @@ export async function POST(_req: NextRequest) {
 
   return NextResponse.json({ id: result.id, alreadyExists: !result.created });
 }
+
+export const POST = withApiRoute('/api/sample-workflow', handlePOST);

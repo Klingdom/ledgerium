@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { ensureSampleVariants } from '@/lib/sample-variants';
@@ -11,7 +12,7 @@ import { reportApiError } from '@/lib/api-error-reporting';
  * Process Variants tab (branch map, decision points, Variant DNA, evidence drill).
  * Idempotent — returns the existing set if already present.
  */
-export async function POST(_req: NextRequest) {
+async function handlePOST(_req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -28,3 +29,5 @@ export async function POST(_req: NextRequest) {
 
   return NextResponse.json({ id: result.id, alreadyExists: !result.created, count: result.count });
 }
+
+export const POST = withApiRoute('/api/sample-variants', handlePOST);

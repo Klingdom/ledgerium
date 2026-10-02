@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
@@ -20,7 +21,7 @@ const BodySchema = z.object({
   healthGated: z.boolean().optional(),
 });
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+async function handlePOST(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -70,3 +71,5 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     },
   });
 }
+
+export const POST = withApiRoute('/api/workflows/[id]/baseline', handlePOST);

@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { getPublishedPages, ROUTE_PREFIX, PARENT_HUB } from '@/content/registry';
 import { SITE_CONFIG } from '@/lib/config';
 import type { PageType } from '@/content/types';
@@ -22,7 +23,7 @@ const TYPE_ORDER: { type: PageType; heading: string }[] = [
   { type: 'compare', heading: 'Comparisons' },
 ];
 
-export function GET(): Response {
+function handleGET(): Response {
   const base = SITE_CONFIG.url;
   const pages = getPublishedPages();
 
@@ -76,3 +77,5 @@ export function GET(): Response {
     },
   });
 }
+
+export const GET = withApiRoute('/llms.txt', handleGET);

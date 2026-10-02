@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { analyzeWorkflowVariants } from '@/lib/intelligence';
@@ -14,7 +15,7 @@ import { reportApiError } from '@/lib/api-error-reporting';
  * workflow falls back to one bundle (runCount 1) so the honest "recorded once"
  * state still fires. Requires intelligenceLayer feature (Team+).
  */
-export async function POST(
+async function handlePOST(
   _req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -63,3 +64,5 @@ export async function POST(
     return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
   }
 }
+
+export const POST = withApiRoute('/api/workflows/[id]/analyze', handlePOST);

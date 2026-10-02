@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -17,7 +18,7 @@ import { reportApiError } from '@/lib/api-error-reporting';
  * @iter 087 / TEAM-P03.10
  */
 
-export async function GET() {
+async function handleGET() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -63,7 +64,7 @@ export async function GET() {
   }
 }
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   // Demo-F3: disable team creation during demo period without code changes.
   if (process.env.DEMO_MODE_DISABLE_TEAMS === 'true') {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -138,3 +139,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to create team' }, { status: 500 });
   }
 }
+
+export const GET = withApiRoute('/api/teams', handleGET);
+export const POST = withApiRoute('/api/teams', handlePOST);

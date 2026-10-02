@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -57,7 +58,7 @@ function buildTree(flat: FlatPortfolio[]): PortfolioNode[] {
   return roots;
 }
 
-export async function GET() {
+async function handleGET() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -89,7 +90,7 @@ export async function GET() {
   return NextResponse.json({ portfolios });
 }
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -173,3 +174,6 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ portfolio }, { status: 201 });
 }
+
+export const GET = withApiRoute('/api/portfolios', handleGET);
+export const POST = withApiRoute('/api/portfolios', handlePOST);

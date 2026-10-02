@@ -18,6 +18,7 @@
  * @module api/admin/backup-status/route
  */
 
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { isAdminUnlimited } from '@/lib/admin-allowlist';
@@ -54,7 +55,7 @@ function errorResponse(
 
 // ── Route handler ──────────────────────────────────────────────────────────────
 
-export async function GET(): Promise<NextResponse> {
+async function handleGET(): Promise<NextResponse> {
   const generatedAt = new Date().toISOString();
   const startMs = Date.now();
 
@@ -94,3 +95,5 @@ export async function GET(): Promise<NextResponse> {
     );
   }
 }
+
+export const GET = withApiRoute('/api/admin/backup-status', handleGET);

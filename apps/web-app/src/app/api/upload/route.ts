@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -11,7 +12,7 @@ import fs from 'fs';
 import path from 'path';
 import { reportApiError } from '@/lib/api-error-reporting';
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -275,3 +276,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Internal server error', detail: message }, { status: 500 });
   }
 }
+
+export const POST = withApiRoute('/api/upload', handlePOST);

@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -24,7 +25,7 @@ import { SERVICE_SKUS, isServiceSkuKey } from '@/lib/service-skus';
  * client can tell "not yet processed" apart from "wrong session / not
  * yours" and poll briefly rather than showing a false error.
  */
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -64,3 +65,5 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+export const GET = withApiRoute('/api/billing/one-time-purchase', handleGET);

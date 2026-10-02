@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -17,7 +18,7 @@ const FREE_PLAN_WATERMARK_APPEND =
  *
  * Renders a stored template artifact to Markdown and returns it as a download.
  */
-export async function GET(
+async function handleGET(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -85,3 +86,5 @@ export async function GET(
     },
   });
 }
+
+export const GET = withApiRoute('/api/workflows/[id]/export-markdown', handleGET);

@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { hashKey } from '@/lib/api-keys';
@@ -18,7 +19,7 @@ import path from 'path';
  * This is the counterpart to the extension's uploadBundle() function
  * which POSTs the bundle as application/json.
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   // ── Authenticate via API key ──────────────────────────────────────────────
   const authHeader = req.headers.get('authorization');
   if (!authHeader?.startsWith('Bearer ')) {
@@ -283,3 +284,5 @@ export async function POST(req: NextRequest) {
     toolsUsed,
   }, { status: 201 });
 }
+
+export const POST = withApiRoute('/api/sync', handlePOST);

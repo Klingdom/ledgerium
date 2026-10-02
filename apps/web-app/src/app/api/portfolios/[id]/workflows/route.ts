@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -8,7 +9,7 @@ const workflowIdsSchema = z.object({
   workflowIds: z.array(z.string().uuid()).min(1).max(100),
 });
 
-export async function POST(
+async function handlePOST(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -88,7 +89,7 @@ export async function POST(
   return NextResponse.json({ added: newIds.length }, { status: 201 });
 }
 
-export async function DELETE(
+async function handleDELETE(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -156,3 +157,6 @@ export async function DELETE(
 
   return NextResponse.json({ removed: result.count });
 }
+
+export const POST = withApiRoute('/api/portfolios/[id]/workflows', handlePOST);
+export const DELETE = withApiRoute('/api/portfolios/[id]/workflows', handleDELETE);

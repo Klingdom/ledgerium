@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
@@ -91,7 +92,7 @@ function parseArtifact<T>(
   }
 }
 
-export async function POST(
+async function handlePOST(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -222,3 +223,5 @@ function toBundleIntelligence(
     runCount: extracted.runCount,
   };
 }
+
+export const POST = withApiRoute('/api/workflows/[id]/ask', handlePOST);

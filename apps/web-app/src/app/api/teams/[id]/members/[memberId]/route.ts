@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -29,7 +30,7 @@ import { reportApiError } from '@/lib/api-error-reporting';
 // Role hierarchy: owner > admin > member > viewer (UMAP-001 §3 AC-11, iter 088 Sub-task 3)
 const VALID_ROLES = new Set(['owner', 'admin', 'member', 'viewer']);
 
-export async function PATCH(
+async function handlePATCH(
   req: NextRequest,
   { params }: { params: { id: string; memberId: string } },
 ) {
@@ -106,7 +107,7 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
+async function handleDELETE(
   _req: NextRequest,
   { params }: { params: { id: string; memberId: string } },
 ) {
@@ -171,3 +172,6 @@ export async function DELETE(
     return NextResponse.json({ error: 'Failed to remove member' }, { status: 500 });
   }
 }
+
+export const PATCH = withApiRoute('/api/teams/[id]/members/[memberId]', handlePATCH);
+export const DELETE = withApiRoute('/api/teams/[id]/members/[memberId]', handleDELETE);

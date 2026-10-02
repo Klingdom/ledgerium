@@ -29,13 +29,19 @@
  * request path: a path carries ids, and a pattern keeps the dimension bounded.
  * No error message is ever included — messages interpolate recorded content.
  *
+ * ## Escaped exceptions (row #8, loop 83)
+ *
+ * Until loop 83 an exception that escaped a handler became a Next.js 500 that
+ * no code here observed. Every exported handler is now wrapped by
+ * `withApiRoute` (lib/with-api-route.ts), whose catch reports here; guard D in
+ * `api-error-coverage.test.ts` fails on any unwrapped handler.
+ *
  * ## Not covered
  *
- * An exception that escapes a route handler entirely is turned into a 500 by
- * Next.js without passing through any code here, and Next 14 offers no
- * `onRequestError` hook to observe it. Those 500s are still invisible to the
- * alert. The coverage guard (`api-error-coverage.test.ts`) enforces every 5xx
- * this codebase sends explicitly; it cannot see the ones it does not send.
+ * Failures that prevent the report from being stored — above all a database
+ * outage, since reports are written to the database the alert reads (row #256).
+ * The scheduled `.github/workflows/alerts-check.yml` is the signal for that
+ * case, because it does not depend on the store.
  */
 
 import { trackServer } from './analytics-server';

@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { analyzePortfolioAgentIntelligence } from '@/lib/agent-intelligence';
@@ -11,7 +12,7 @@ import { reportApiError } from '@/lib/api-error-reporting';
  * Optionally accepts { workflowIds: string[] } in the body to scope analysis.
  * Requires agentComposition feature (Growth+).
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -62,3 +63,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
   }
 }
+
+export const POST = withApiRoute('/api/agent-intelligence/portfolio', handlePOST);

@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -23,7 +24,7 @@ const patchSchema = z.object({
   removeTagId: z.string().uuid().optional(),
 }).passthrough();
 
-export async function GET(
+async function handleGET(
   _req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -174,7 +175,7 @@ export async function GET(
   });
 }
 
-export async function PATCH(
+async function handlePATCH(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -270,7 +271,7 @@ export async function PATCH(
   });
 }
 
-export async function DELETE(
+async function handleDELETE(
   _req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -295,3 +296,7 @@ export async function DELETE(
 
   return NextResponse.json({ ok: true });
 }
+
+export const GET = withApiRoute('/api/workflows/[id]', handleGET);
+export const PATCH = withApiRoute('/api/workflows/[id]', handlePATCH);
+export const DELETE = withApiRoute('/api/workflows/[id]', handleDELETE);

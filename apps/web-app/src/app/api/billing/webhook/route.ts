@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { getStripe, getWebhookSecret, planFromPriceId, intervalFromStripeSubscription } from '@/lib/stripe';
 import type { PlanType } from '@/lib/plans';
@@ -107,7 +108,7 @@ function mapStripeStatusToUserSubscriptionStatus(status: string): UserSubscripti
  *   successful billing cycle) are NOT given this treatment — see the inline
  *   comments at each of those sites for the specific reasoning.
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const body = await req.text();
   const sig = req.headers.get('stripe-signature');
 
@@ -1140,3 +1141,5 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ received: true });
 }
+
+export const POST = withApiRoute('/api/billing/webhook', handlePOST);

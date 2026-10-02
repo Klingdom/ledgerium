@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { computeAlerts } from '@/lib/compute-alerts';
@@ -26,7 +27,7 @@ import { reportApiError } from '@/lib/api-error-reporting';
  * Response:
  *   { checked: true, alertsSent: number }
  */
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
 
   if (!cronSecret) {
@@ -85,3 +86,5 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to check alerts' }, { status: 500 });
   }
 }
+
+export const GET = withApiRoute('/api/admin/alerts/check', handleGET);

@@ -11,6 +11,7 @@
  * Body: { to?: string }  (defaults to the configured SMTP user / from mailbox)
  */
 
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { auth } from '@/lib/auth';
@@ -43,7 +44,7 @@ function notFound(): NextResponse {
   return NextResponse.json({ data: null, error: { code: 'not_found', message: 'Not Found' } }, { status: 404 });
 }
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+async function handlePOST(request: NextRequest): Promise<NextResponse> {
   const nowMs = Date.now();
 
   const session = await auth();
@@ -65,3 +66,5 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     { status: diagnostic.success ? 200 : 502 },
   );
 }
+
+export const POST = withApiRoute('/api/admin/email-test', handlePOST);

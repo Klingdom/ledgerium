@@ -21,6 +21,7 @@
  * @iter 071
  */
 
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { isAdminUnlimited } from '@/lib/admin-allowlist';
@@ -80,7 +81,7 @@ function errorResponse(
 
 // ── Route handler ──────────────────────────────────────────────────────────────
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
+async function handleGET(request: NextRequest): Promise<NextResponse> {
   const generatedAt = new Date().toISOString();
   const startMs = Date.now();
 
@@ -199,3 +200,5 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     );
   }
 }
+
+export const GET = withApiRoute('/api/admin/operations', handleGET);

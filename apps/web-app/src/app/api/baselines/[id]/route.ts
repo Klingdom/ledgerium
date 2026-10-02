@@ -1,9 +1,10 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
 
 /** DELETE /api/baselines/:id — remove one of the user's saved baseline snapshots. */
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+async function handleDELETE(_req: NextRequest, { params }: { params: { id: string } }) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -17,3 +18,5 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   }
   return NextResponse.json({ data: { ok: true } });
 }
+
+export const DELETE = withApiRoute('/api/baselines/[id]', handleDELETE);

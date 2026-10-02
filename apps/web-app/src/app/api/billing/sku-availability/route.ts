@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextResponse } from 'next/server';
 import { getOneTimePriceId, getPriceId } from '@/lib/stripe';
 import { GUIDED_ONBOARDING_SKU, PROCESS_AUDIT_SKU } from '@/lib/service-skus';
@@ -68,7 +69,7 @@ export const dynamic = 'force-dynamic';
  * customer clicks, rather than letting them click into a dead-end 503 from
  * /api/billing/checkout. See docs/runbooks/STRIPE_SETUP.md § Service SKUs.
  */
-export async function GET() {
+async function handleGET() {
   const plans: Record<string, { monthly: boolean; annual: boolean }> = {};
   for (const plan of PURCHASABLE_SUBSCRIPTION_PLANS) {
     plans[plan] = {
@@ -85,3 +86,5 @@ export async function GET() {
     plans,
   });
 }
+
+export const GET = withApiRoute('/api/billing/sku-availability', handleGET);

@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { canAccessAdmin } from '@/lib/admin-allowlist';
@@ -13,7 +14,7 @@ import { ensureSampleVariants } from '@/lib/sample-variants';
  * Non-admins get a fast no-op (the allowlist check stays server-side). Idempotent —
  * ensureSampleVariants returns the existing set if already present.
  */
-export async function POST(_req: NextRequest) {
+async function handlePOST(_req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -31,3 +32,5 @@ export async function POST(_req: NextRequest) {
     count: result?.count ?? 0,
   });
 }
+
+export const POST = withApiRoute('/api/admin/seed-sample-variants', handlePOST);

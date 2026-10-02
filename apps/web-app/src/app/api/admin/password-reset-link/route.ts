@@ -30,6 +30,7 @@
  * @module api/admin/password-reset-link/route
  */
 
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes, createHash, createHmac, timingSafeEqual } from 'crypto';
 import { auth } from '@/lib/auth';
@@ -132,7 +133,7 @@ function errorResponse(
 
 // ── Route handler ──────────────────────────────────────────────────────────────
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+async function handlePOST(request: NextRequest): Promise<NextResponse> {
   // Single upstream clock boundary.
   const referenceNowMs = Date.now();
   const generatedAt = new Date(referenceNowMs).toISOString();
@@ -208,3 +209,5 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 }
+
+export const POST = withApiRoute('/api/admin/password-reset-link', handlePOST);

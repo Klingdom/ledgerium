@@ -1,10 +1,11 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { createHash } from 'crypto';
 import { hash } from 'bcryptjs';
 import { db } from '@/db';
 import { normalizeEmail } from '@/lib/email-normalize';
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const { token, email, password } = body as Record<string, unknown>;
 
@@ -63,3 +64,5 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ message: 'Password updated successfully. You can now sign in.' });
 }
+
+export const POST = withApiRoute('/api/auth/reset-password', handlePOST);

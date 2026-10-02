@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { trackServer } from '@/lib/analytics-server';
@@ -10,7 +11,7 @@ import { findLatestArtifact, LATEST_ARTIFACT_ORDER_BY } from '@/lib/artifacts';
  * Returns a read-only view of a shared workflow's SOP and report.
  * Only works if the workflow has a valid shareToken.
  */
-export async function GET(
+async function handleGET(
   _req: NextRequest,
   { params }: { params: { token: string } },
 ) {
@@ -61,3 +62,5 @@ export async function GET(
     report: reportArtifact?.contentJson ? JSON.parse(reportArtifact.contentJson) : null,
   });
 }
+
+export const GET = withApiRoute('/api/share/[token]', handleGET);

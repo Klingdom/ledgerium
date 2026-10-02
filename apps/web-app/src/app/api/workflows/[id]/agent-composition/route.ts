@@ -1,3 +1,4 @@
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -17,7 +18,7 @@ import { reportApiError } from '@/lib/api-error-reporting';
  *
  * Returns: { data: { agents: AgentProfile[], workflowId: string } }
  */
-export async function GET(
+async function handleGET(
   _req: NextRequest,
   { params }: { params: { id: string } },
 ) {
@@ -120,3 +121,5 @@ export async function GET(
     return NextResponse.json({ error: 'Agent composition failed' }, { status: 500 });
   }
 }
+
+export const GET = withApiRoute('/api/workflows/[id]/agent-composition', handleGET);

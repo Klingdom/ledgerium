@@ -25,6 +25,7 @@
  * @module api/admin/normalize-emails/route
  */
 
+import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { auth } from '@/lib/auth';
@@ -121,7 +122,7 @@ function partitionUsers(users: UserIdEmail[]): { safe: SafeRow[]; collisions: Co
 
 // ── Route handler ──────────────────────────────────────────────────────────────
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+async function handlePOST(request: NextRequest): Promise<NextResponse> {
   const nowMs = Date.now();
 
   const session = await auth();
@@ -179,3 +180,5 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 }
+
+export const POST = withApiRoute('/api/admin/normalize-emails', handlePOST);
