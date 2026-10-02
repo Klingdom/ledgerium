@@ -789,10 +789,10 @@ function RetirementPanel({ metrics }: { metrics: DashboardV2RetirementMetrics })
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-ds-4">
         <div className="card px-ds-5 py-ds-4">
           <p className="ds-metric-label">Bounce rate</p>
-          <p className="ds-metric-value">{formatRate(metrics.bounceRate, 'No views recorded')}</p>
+          <p className="ds-metric-value">{formatRate(metrics.bounceRate, `Insufficient data (fewer than ${metrics.minUsers} users)`)}</p>
           <p className="text-ds-xs text-[var(--content-secondary)]">Target: under 40% — not decision-grade until #249 and #251 close</p>
           <p className="text-ds-xs text-[var(--content-secondary)] tabular-nums">
-            {plural(metrics.bounces, 'bounce', 'bounces')} / {plural(metrics.views, 'view', 'views')}
+            {plural(metrics.bounces, 'bounce', 'bounces')} / {plural(metrics.views, 'view', 'views')} · {plural(metrics.bounceUsers, 'user', 'users')}
           </p>
           <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-1">
             Mobile exits are undercounted (#249). A back-button return can count twice (#251). The net
@@ -801,13 +801,13 @@ function RetirementPanel({ metrics }: { metrics: DashboardV2RetirementMetrics })
         </div>
         <div className="card px-ds-5 py-ds-4">
           <p className="ds-metric-label">Chip-click rate</p>
-          <p className="ds-metric-value">{formatRate(metrics.chipClickRate, 'No chips shown')}</p>
+          <p className="ds-metric-value">{formatRate(metrics.chipClickRate, `Insufficient data (fewer than ${metrics.minUsers} users)`)}</p>
           <p className="text-ds-xs text-[var(--content-secondary)]">Threshold pending CEO decision</p>
           <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-1">
             Net direction unmeasured. Toggling a chip off and clicking after a reload error both inflate this rate; lost clicks deflate it.
           </p>
           <p className="text-ds-xs text-[var(--content-secondary)] tabular-nums">
-            {plural(metrics.chipClicks, 'click', 'clicks')} / {plural(metrics.chipsRendered, 'chip shown', 'chips shown')}
+            {plural(metrics.chipClicks, 'click', 'clicks')} / {plural(metrics.chipsRendered, 'chip shown', 'chips shown')} · {plural(metrics.chipUsers, 'user', 'users')}
           </p>
           {metrics.viewsMissingChipCount > 0 && (
             <p className="text-ds-xs text-[var(--content-tertiary)] mt-ds-1">

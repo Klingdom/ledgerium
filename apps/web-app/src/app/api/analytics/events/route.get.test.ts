@@ -35,23 +35,27 @@ describe('GET /api/analytics/events dashboardV2Retirement', () => {
 
   it('adds the key alongside the existing keys', async () => {
     authMock.mockResolvedValue({ user: { id: 'a', email: 'phil@mediafier.ai' } });
+    // 10 distinct users (the minimum sample), one view of 2 chips each; u0 bounces and clicks.
+    const users = Array.from({ length: 10 }, (_, i) => `u${i}`);
     findMany.mockResolvedValue([
-      row('dashboard_v2_viewed', { chipsRenderedCount: 2 }),
-      row('dashboard_v2_viewed', { chipsRenderedCount: 2 }),
-      row('dashboard_bounced'),
-      row('insight_chip_clicked'),
+      ...users.map((u) => ({ ...row('dashboard_v2_viewed', { chipsRenderedCount: 2 }), userId: u })),
+      { ...row('dashboard_bounced'), userId: 'u0' },
+      { ...row('insight_chip_clicked'), userId: 'u0' },
     ]);
     const body = await (await GET(req())).json();
-    expect(body.summary.totalEvents).toBe(4);
+    expect(body.summary.totalEvents).toBe(12);
     expect(body.eventCounts).toBeDefined();
     expect(body.funnels).toBeDefined();
     expect(body.dashboardV2Retirement).toEqual({
-      views: 2,
+      views: 10,
       bounces: 1,
-      bounceRate: 0.5,
-      chipsRendered: 4,
+      bounceRate: 0.1,
+      bounceUsers: 10,
+      chipsRendered: 20,
       chipClicks: 1,
-      chipClickRate: 0.25,
+      chipClickRate: 0.05,
+      chipUsers: 10,
+      minUsers: 10,
       viewsMissingChipCount: 0,
     });
   });
@@ -86,16 +90,16 @@ describe('GET /api/analytics/events dashboardV2Retirement', () => {
   it('an anonymous bounce or chip click does not move the #57 metrics (row #298)', async () => {
     authMock.mockResolvedValue({ user: { id: 'a', email: 'phil@mediafier.ai' } });
     const anon = (r: ReturnType<typeof row>) => ({ ...r, userId: null });
+    const users = Array.from({ length: 10 }, (_, i) => `u${i}`);
     findMany.mockResolvedValue([
-      row('dashboard_v2_viewed', { chipsRenderedCount: 2 }),
-      row('dashboard_v2_viewed', { chipsRenderedCount: 2 }),
-      row('dashboard_bounced'),
+      ...users.map((u) => ({ ...row('dashboard_v2_viewed', { chipsRenderedCount: 2 }), userId: u })),
+      { ...row('dashboard_bounced'), userId: 'u0' },
       anon(row('dashboard_bounced')),
       anon(row('dashboard_bounced')),
       anon(row('insight_chip_clicked')),
     ]);
     const body = await (await GET(req())).json();
-    expect(body.dashboardV2Retirement).toMatchObject({ views: 2, bounces: 1, bounceRate: 0.5, chipClicks: 0 });
+    expect(body.dashboardV2Retirement).toMatchObject({ views: 10, bounces: 1, bounceRate: 0.1, chipClicks: 0 });
   });
 
   it('counts the server row only for names emitted on both sides (row #298)', async () => {

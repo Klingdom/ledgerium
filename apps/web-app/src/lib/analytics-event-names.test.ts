@@ -17,6 +17,8 @@
  *  4. `<TrackedLink event="x">` — static attribute only.
  * A `track(...)` call that fits none of these fails the test rather than being
  * silently missed; the one known pass-through (TrackedLink) is named below.
+ * Also followed or failed loudly (#302): `import { track as t }` (the alias is
+ * scanned), `obj.track(...)` (always unresolved), `trackActivation(variable)`.
  *
  * Server code (app/api, lib/analytics-server.ts) is not a client emitter. The
  * extension posts to a different endpoint and is out of scope.
@@ -97,15 +99,33 @@ function functionBody(sources: Source[], name: string): string | null {
   return null;
 }
 
-function scanClientEmitters(): { names: Set<string>; unresolved: string[]; dynamicLinks: string[] } {
-  const sources = loadSources();
+function escapeRe(n: string): string {
+  return n.replace(/[$]/g, '\\$&');
+}
+
+/** Local names `track` / `trackActivation` are bound to in a file (`import { track as t }`). */
+function localNames(text: string, original: string): string[] {
+  const out = [original];
+  for (const imp of text.matchAll(/import\s*(?:type\s*)?\{([^}]*)\}/g)) {
+    for (const m of imp[1]!.matchAll(new RegExp(`\\b${original}\\s+as\\s+([A-Za-z_$][\\w$]*)`, 'g'))) out.push(m[1]!);
+  }
+  return out;
+}
+
+/**
+ * Scans `sources` (default: the real tree) for client emitters. Every shape it
+ * cannot resolve to a literal name lands in `unresolved`, which the test fails
+ * on: aliased imports are followed, `obj.track(` and `trackActivation(variable)`
+ * are reported rather than skipped (#302).
+ */
+function scanClientEmitters(sources: Source[] = loadSources()): { names: Set<string>; unresolved: string[]; dynamicLinks: string[] } {
   const names = new Set<string>();
   const unresolved: string[] = [];
   const dynamicLinks: string[] = [];
 
-  const analytics = sources.find((s) => s.rel === 'lib/analytics.ts')!;
+  const analytics = sources.find((s) => s.rel === 'lib/analytics.ts');
   const milestoneToName = new Map<string, string>();
-  for (const m of analytics.text.matchAll(/case\s+'(\w+)':\s*track\(\{\s*event:\s*'([a-z_0-9]+)'/g)) {
+  for (const m of analytics?.text.matchAll(/case\s+'(\w+)':\s*track\(\{\s*event:\s*'([a-z_0-9]+)'/g) ?? []) {
     milestoneToName.set(m[1]!, m[2]!);
   }
 
@@ -113,28 +133,45 @@ function scanClientEmitters(): { names: Set<string>; unresolved: string[]; dynam
     const isServer = s.rel.startsWith('app/api/') || s.rel === 'lib/analytics-server.ts';
     if (isServer || s.rel === 'lib/analytics.ts') continue;
 
-    for (const m of s.text.matchAll(/(?<![A-Za-z0-9_.$])track\(/g)) {
-      const arg = balancedArg(s.text, m.index! + m[0].length - 1);
-      if (arg.trim() === '') continue; // prose such as "track() calls"
-      const direct = literals(arg);
-      if (direct.length > 0) {
-        direct.forEach((n) => names.add(n));
-        continue;
-      }
-      const factory = /^\s*([A-Za-z_]\w*)\(/.exec(arg)?.[1];
-      const body = factory ? functionBody(sources, factory) : null;
-      const viaFactory = body ? literals(body) : [];
-      if (viaFactory.length > 0) {
-        viaFactory.forEach((n) => names.add(n));
-        continue;
-      }
-      if (!KNOWN_PASS_THROUGH.includes(s.rel)) unresolved.push(`${s.rel}: track(${arg.trim().slice(0, 40)}`);
+    const trackNames = localNames(s.text, 'track');
+    const activationNames = localNames(s.text, 'trackActivation');
+
+    for (const m of s.text.matchAll(/\.\s*track\s*\(/g)) {
+      unresolved.push(`${s.rel}: member call .track( at offset ${m.index} cannot be resolved`);
     }
 
-    for (const m of s.text.matchAll(/\btrackActivation\(\s*'(\w+)'/g)) {
-      const name = milestoneToName.get(m[1]!);
-      if (name) names.add(name);
-      else unresolved.push(`${s.rel}: trackActivation('${m[1]}') has no milestone mapping`);
+    for (const name of trackNames) {
+      for (const m of s.text.matchAll(new RegExp(`(?<![A-Za-z0-9_.$])${escapeRe(name)}\\(`, 'g'))) {
+        const arg = balancedArg(s.text, m.index! + m[0].length - 1);
+        if (arg.trim() === '') continue; // prose such as "track() calls"
+        const direct = literals(arg);
+        if (direct.length > 0) {
+          direct.forEach((n) => names.add(n));
+          continue;
+        }
+        const factory = /^\s*([A-Za-z_]\w*)\(/.exec(arg)?.[1];
+        const body = factory ? functionBody(sources, factory) : null;
+        const viaFactory = body ? literals(body) : [];
+        if (viaFactory.length > 0) {
+          viaFactory.forEach((n) => names.add(n));
+          continue;
+        }
+        if (!KNOWN_PASS_THROUGH.includes(s.rel)) unresolved.push(`${s.rel}: ${name}(${arg.trim().slice(0, 40)}`);
+      }
+    }
+
+    for (const name of activationNames) {
+      for (const m of s.text.matchAll(new RegExp(`(?<![A-Za-z0-9_.$])(?<!function\\s)${escapeRe(name)}\\(`, 'g'))) {
+        const arg = balancedArg(s.text, m.index! + m[0].length - 1);
+        const lit = /^\s*'(\w+)'\s*(?:,|$)/.exec(arg)?.[1];
+        if (!lit) {
+          unresolved.push(`${s.rel}: ${name}(${arg.trim().slice(0, 40)}) has a non-literal milestone`);
+          continue;
+        }
+        const mapped = milestoneToName.get(lit);
+        if (mapped) names.add(mapped);
+        else unresolved.push(`${s.rel}: ${name}('${lit}') has no milestone mapping`);
+      }
     }
 
     const tags = [...s.text.matchAll(/<TrackedLink\b[\s\S]*?>/g)];
@@ -206,5 +243,47 @@ describe('countsAsServerFact', () => {
     expect(countsAsServerFact('signup_completed', 'server')).toBe(true);
     expect(countsAsServerFact('page_viewed', 'client')).toBe(true);
     expect(countsAsServerFact('upload_failed', 'client')).toBe(true);
+  });
+});
+
+describe('emitter scan hardening (row #302)', () => {
+  const src = (rel: string, text: string): Source => ({ rel, text: stripComments(text) });
+  const analytics = src(
+    'lib/analytics.ts',
+    "export function trackActivation(m: string) { switch (m) { case 'first_x': track({ event: 'first_x_event' }); } }",
+  );
+  const scan = (text: string) => scanClientEmitters([analytics, src('components/Fake.tsx', text)]);
+
+  it('baseline: a plain literal call is resolved and nothing is unresolved', () => {
+    const r = scan("track({ event: 'a_b' }); trackActivation('first_x');");
+    expect([...r.names].sort()).toEqual(['a_b', 'first_x_event']);
+    expect(r.unresolved).toEqual([]);
+  });
+
+  it('follows `import { track as t }` and resolves t({ event })', () => {
+    const r = scan("import { track as t } from '@/lib/analytics';\nt({ event: 'aliased_one' });");
+    expect(r.names.has('aliased_one')).toBe(true);
+    expect(r.unresolved).toEqual([]);
+  });
+
+  it('reports an aliased call it cannot resolve', () => {
+    const r = scan("import { track as t } from '@/lib/analytics';\nt(build());");
+    expect(r.unresolved.length).toBe(1);
+  });
+
+  it('reports obj.track(...) instead of skipping it', () => {
+    expect(scan("analytics.track({ event: 'hidden' });").unresolved.length).toBe(1);
+  });
+
+  it('reports trackActivation(variable) and an aliased one', () => {
+    expect(scan('trackActivation(milestone);').unresolved.length).toBe(1);
+    const r = scan("import { trackActivation as ta } from '@/lib/analytics';\nta(m);");
+    expect(r.unresolved.length).toBe(1);
+  });
+
+  it('resolves an aliased trackActivation with a literal milestone', () => {
+    const r = scan("import { trackActivation as ta } from '@/lib/analytics';\nta('first_x');");
+    expect(r.names.has('first_x_event')).toBe(true);
+    expect(r.unresolved).toEqual([]);
   });
 });

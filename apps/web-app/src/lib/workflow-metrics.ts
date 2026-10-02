@@ -22,7 +22,10 @@
 // ── Thresholds (see PRD §7) ───────────────────────────────────────────────────
 
 /** Ideal duration lower bound for speed scoring (ms). */
-const SPEED_IDEAL_DURATION_MIN_MS = 30_000;           // 30 s
+/** Most insight chips the producer ever returns; also the bound on `chipsRenderedCount` (#302). */
+export const MAX_INSIGHT_CHIPS = 5;
+
+const SPEED_IDEAL_DURATION_MIN_MS= 30_000;           // 30 s
 /** Ideal duration upper bound for speed scoring (ms). */
 const SPEED_IDEAL_DURATION_MAX_MS = 30 * 60 * 1_000;  // 30 min
 /** Adjacent-band lower bound (short side): [10s, 30s). */
@@ -808,5 +811,5 @@ export function computeInsightChips(
   };
   chips.sort((a, b) => severityOrder[b.severity] - severityOrder[a.severity]);
 
-  return chips.slice(0, 5);
+  return chips.slice(0, MAX_INSIGHT_CHIPS);
 }

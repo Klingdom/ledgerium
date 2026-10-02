@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Dashboard adoption metrics count people, not clicks
+
+### Changed
+- The metrics used to decide when to retire the old dashboard now count each user once, ignore impossible values, and show how many users they are based on, or "insufficient data" when there are too few.
+
+---
+
+
 ## [2026-10-02] - Deploy pipeline repaired
 
 ### Fixed

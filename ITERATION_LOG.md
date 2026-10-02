@@ -4,6 +4,38 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 123) — One account, one vote (Mode 1, `backend-engineer` + `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `security / analytics` (2 of the last 5; no penalty).
+  - **Agents:** `backend-engineer` implemented. **`security-reviewer` reviewed the trust claim**, the MR-052 practice skipped at loop 119, and wrote `docs/meta/TRUST_REVIEW_LOOP123_57_METRICS.md`.
+  - **Extension:** `871e29a`, 80 loops untouched.
+  - **Cadence:** 2 of 3 since MR-053.
+- **Candidate Selection: `burn-down` — #302** (12), filed by MR-053. The CEO must not read #57 numbers until this lands.
+- **What changed (`dashboard-v2-retirement-metrics.ts`, definitions in its header):**
+  - **Per-user rates:**
+    - bounce rate = mean over users with a view of (paired bounces / views);
+    - chip-click rate = mean over users with chips shown of min(1, clicks / chips).
+  - **Pairing:** a bounce pairs to a distinct earlier view by the same user; orphans are dropped. The producer has no view id, so the join is user plus time.
+  - **Clamping:** `chipsRenderedCount` is clamped to `MAX_INSIGHT_CHIPS = 5`, exported from the producer instead of a literal `slice(0,5)`. Non-integers and negatives count as missing.
+  - **Minimum sample:** fewer than **10 distinct users** gives "insufficient data", not a rate.
+  - **Page:** it shows "· N users" next to each count. These are the 2 user-visible strings.
+  - **Emitter scan:** it now follows `track as x` / `trackActivation as x`, and fails on `.track(` and `trackActivation(variable)`.
+  - **WRITERS_READERS doc:** it now cites file plus symbol, not line numbers, so it cannot rot.
+- **The trust review: HOLDS WITH STATED LIMITS** (probe executed). `createdAt` is server-assigned, but an attacker controls arrival order, so pairing only removes orphans. One account weighs at most 1/N.
+  - **Sybil accounts are almost free:** there is no email verification (AUTHZ P1-2), and signup is limited to 10/hour per IP, which a forged header defeats (#225).
+  - **Measured shifts** (honest bounce 0.33, chip-click 0.11):
+    - N=200 honest users: k=10 forged accounts move bounce to 0.37 and chip-click to 0.15;
+    - N=20: k=10 move them to 0.56 and 0.41.
+  - With fewer than 10 honest users, 10 forged accounts alone produce a rate.
+  - **"A handful can't move it" holds only for N ≳ 100.**
+  - The emitter scan defines the allowlist; it is not a trust boundary.
+- **For the CEO:** read #57 numbers as **indicative below ~100 users**, and only for data collected after deploy. The real fix for Sybil accounts is signup verification (P1-2) plus `TRUSTED_PROXY_HOPS` (#225), not this module.
+- **Validation (exit code + ANSI-stripped summary):** web-app **3955 → 3964** on 2 of 2 runs; root **5741 → 5750**; typecheck 0. Reverts: against the old module, 12 of 16 new tests fail; each guard reverted alone fails 1–2 tests; the scanner reverts fail 4 and 1.
+- **Follow-ups:** 0 created, 1 closed (#302).
+
+---
+
 ## 2026-10-02 (loop 122) — One pnpm, everywhere (Mode 1, `devops-engineer`)
 
 - **Controls:**
