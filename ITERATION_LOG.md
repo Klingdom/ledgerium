@@ -4,6 +4,30 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-057 recorded (Mode 4, non-counting): a role with nothing to restrict
+
+- **Review:** `docs/meta/MR_057_META_REVIEW.md`. Nothing reverts.
+  - **Re-runs:** web-app 4133 on 3 of 3 runs; root 5911 on 2 of 2; typecheck 0. The validator is clean, and its 13 tests pass.
+  - **Coverage check:** passes on pnpm 10 with its 4 tests; pnpm 9 is refused.
+  - **V4:** it now catches a planted false closure of open row #316.
+- **Correction to MR-056 and to what I told the CEO:** "a viewer can do everything a member can" is true but harmless today. **There is no team-scoped content**, so both roles can only read the roster.
+  - **#316 is not a live authorization defect.** It needs (a) a CEO definition of what a viewer may not do, and (b) the team data layer to exist.
+  - It is re-scoped and marked blocked. Deferring it at loops 131-132 was right, and no security bonus is warranted.
+- **Loop 133 missed overclaims next to the ones it fixed** (now filed as **#321**):
+  - `docs/page.tsx:1601-1602` says owners "delete the team, manage billing" and admins "manage all workflows"; no such routes exist.
+  - `terms/page.tsx:52` says "delete your data any time". That is **legal text**, so it is a CEO/legal decision and not a copy edit.
+  - The deletion test (`pricing-copy.test.ts:321`) says "no page" but checks only the security page.
+  - In the app, the invite picker offers "Viewer" (`teams/[id]/page.tsx:170`), a role with no distinct meaning.
+- **Two of my new guards can pass while checking nothing** (filed as **#322**):
+  - The typecheck-coverage script reports OK with "0 packages checked" when it cannot parse `pnpm-workspace.yaml` (flow lists, `**` globs, explicit paths). It also ignores `.mts`, accepts `"typecheck": "echo ok"`, and is not wired into `e2e-extension.yml`, the workflow where MR-056's renamed-script case originated.
+  - V4 misses non-bold `Follow-ups:` lines and word numbers ("two closed"). MR-056's recommended canary was never added.
+- **Practices:**
+  - Loop 133's three `scope-guard-adjacent` follow-ups were applied correctly.
+  - The closed/created ratio over loops 124-133 passes (1.57 for loops only; 0.92 including meta-review filings). **But the open pool rose from 116 to 119.** The ratio passes while the pool grows, because meta-reviews keep filing rows.
+- **Next:** loop 134 = **#321**, excluding the terms-of-service line, which goes to the CEO. Then **#322**. Then **#273**.
+
+---
+
 ## 2026-10-02 (loop 133) — Claims the code actually keeps (Mode 1, `frontend-engineer` + `growth-strategist`)
 
 - **Controls:**
