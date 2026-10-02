@@ -40,8 +40,13 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      # Row #300 / MR-052 section 4. Both vitest configs set passWithNoTests: true,
+      # so a glob/filter mistake that ran zero tests exited 0 and gated nothing.
+      # --no-passWithNoTests overrides it for this CI step only (vitest 1.6.1;
+      # last flag wins over the root script's own --passWithNoTests). No
+      # hand-maintained count; local filtered runs keep working.
       - name: Run tests
-        run: pnpm test
+        run: pnpm test --no-passWithNoTests
 
       # Row #53 / MR-051. The root config above only includes *.test.ts, so the
       # web-app's *.test.tsx component tests (and scripts/**/*.test.ts) gated
@@ -50,7 +55,7 @@ jobs:
       # filter would be a second include list to keep in sync, and the full run
       # is ~17s, so the duplicate *.test.ts execution costs less than the hazard.
       - name: Run web-app tests (incl. component tests)
-        run: pnpm --filter @ledgerium/web-app test
+        run: pnpm --filter @ledgerium/web-app test --no-passWithNoTests
 
       # Row #212-adjacent / MR-031 section 3.1. The backlog is edited by ad-hoc
       # scripts and has been silently corrupted three times — closed rows left

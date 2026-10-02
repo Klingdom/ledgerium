@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - The deploy test gate fails if no tests run
+
+### Fixed
+- A misconfiguration that made the deploy pipeline run no tests would previously have passed. It now fails the deploy.
+
+---
+
+
 ## [2026-10-02] - Security: only real browser events are accepted
 
 ### Security

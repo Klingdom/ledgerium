@@ -4,6 +4,29 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 120) — A gate that passes on nothing (Mode 1, `devops-engineer`)
+
+- **Controls:**
+  - **Area:** `test-infra / ci` (2 of the last 5; no penalty).
+  - **Agent:** `devops-engineer`. The agent ran the four proof commands plus a control. I re-ran the empty-filter and real runs.
+  - **Extension:** `871e29a`, 77 loops untouched.
+  - **Cadence:** 2 of 3 since MR-052.
+- **Candidate Selection: `top-score` within `burn-down` — #300** (12), the highest open follow-up.
+  - MR-052 had suggested #297 (10) for this slot, but it said so before #300 was filed and scored.
+  - The scores decide, and the deviation is stated here.
+- **What changed:** both CI test steps in `deploy.yml` append `--no-passWithNoTests`.
+  - It overrides the configs' `passWithNoTests: true` and, because the last flag wins, the root script's own `--passWithNoTests`.
+  - No hand-maintained test count is needed. Local filtered runs are unchanged.
+  - `--passWithNoTests=false` crashed vitest 1.6.1, which is why that form was not used.
+- **Proof (exit codes):**
+  - The real root and web-app runs exit 0 with 5727 and 3941 tests.
+  - Both commands with a nonexistent filter exit 1.
+  - The control without the flag exits 0 on zero tests, which is the original defect.
+- **Residual, stated:** like loop 117's step, this has not run on a GitHub runner yet. It runs on the first push of `main`.
+- **Follow-ups:** 0 created, 1 closed (#300).
+
+---
+
 ## 2026-10-02 (loop 119) — Only what a browser actually says (Mode 1, `security-reviewer`)
 
 - **Controls:**
