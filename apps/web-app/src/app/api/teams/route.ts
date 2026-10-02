@@ -28,7 +28,9 @@ async function handleGET() {
 
   try {
     const memberships = await db.teamMember.findMany({
-      where: { userId: session.user.id },
+      // #304 / AUTHZ P2-3: a team (and its member emails) is visible only while the
+      // caller's OWN membership is active — removed/deactivated/pending must not see it.
+      where: { userId: session.user.id, status: 'active' },
       include: {
         team: {
           include: {

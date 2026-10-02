@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Security: removed team members lose access to the team list
+
+### Security
+- A person removed from a team could still see that team and the email addresses of its members in their team list. They now see only teams where their membership is active.
+
+---
+
+
 ## [2026-10-02] - Dashboard adoption metrics count people, not clicks
 
 ### Changed

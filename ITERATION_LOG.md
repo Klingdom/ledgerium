@@ -4,6 +4,25 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 124) — Removed means removed (Mode 1, `security-reviewer`)
+
+- **Controls:**
+  - **Area:** `security / authz`. Security is now 2 of the last 5 by row label (122 ci, 123 security/analytics, 124 security/authz); no penalty applies.
+  - **Agent:** `security-reviewer`. I re-ran the full suite, because the agent's last full run predated its own typecheck fix.
+  - **Extension:** `871e29a`, 81 loops untouched.
+  - **Cadence: 3 of 3 since MR-053 — MR-054 now due.**
+- **Candidate Selection: `burn-down` — #304** (13). AUTHZ P2-3 was promoted at MR-053 after aging past the cold-pool cap.
+- **What changed:** `GET /api/teams` now selects only the caller's **active** memberships. Before, a removed, deactivated or pending member still received the team and its members' emails. It is a one-line fix.
+- **Audit of every other teams/invites route and page:** each one already authorises on the caller's active membership, or (for invite accept) on the invitee's email plus an active inviter. This route was the only defect of this shape.
+- **Audit status travelled:** AUTHZ_AUDIT_001 P2-3 → FIXED, route-table row and summary line updated. The status was changed, not the grade. The finding's body text described the pre-fix code, so it is marked as such rather than rewritten.
+- **Validation (exit code + ANSI-stripped summary):**
+  - web-app **3964 → 3968** on 2 of 2 runs, root **5750 → 5754**, typecheck 0.
+  - Revert check: with the filter removed, 3 of the 4 new tests fail (removed, deactivated and pending callers); the active-member test passes, as it should.
+- **Portfolio (MR-053 §8):** the security / analytics / CI arc (loops 109-124) pauses here. Next come user-visible items, starting with #268, after MR-054.
+- **Follow-ups:** 0 created, 1 closed (#304).
+
+---
+
 ## 2026-10-02 (loop 123) — One account, one vote (Mode 1, `backend-engineer` + `security-reviewer`)
 
 - **Controls:**
