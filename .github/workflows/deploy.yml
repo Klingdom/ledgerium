@@ -43,6 +43,15 @@ jobs:
       - name: Run tests
         run: pnpm test
 
+      # Row #53 / MR-051. The root config above only includes *.test.ts, so the
+      # web-app's *.test.tsx component tests (and scripts/**/*.test.ts) gated
+      # nothing. This runs the web-app's OWN vitest config (the `@` alias,
+      # pool: forks) in full -- deliberately not narrowed to *.test.tsx: a
+      # filter would be a second include list to keep in sync, and the full run
+      # is ~17s, so the duplicate *.test.ts execution costs less than the hazard.
+      - name: Run web-app tests (incl. component tests)
+        run: pnpm --filter @ledgerium/web-app test
+
       # Row #212-adjacent / MR-031 section 3.1. The backlog is edited by ad-hoc
       # scripts and has been silently corrupted three times — closed rows left
       # ranking as open, struck rows still reading open, and cells overwritten

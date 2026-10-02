@@ -4,6 +4,24 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 117) — Component tests that gate nothing (Mode 1, `devops-engineer`)
+
+- **Controls:**
+  - **Area:** `test-infra / ci`. Test-infra was also loop 115's area, but that is 2 of the last 5, so no saturation.
+  - **Agent:** `devops-engineer`. The agent ran the gate command 3 times and parsed the YAML; I re-ran the command once and read the diff.
+  - **Extension:** `871e29a`, 74 loops untouched.
+  - **Cadence:** 2 of 3 since MR-051.
+- **Candidate Selection: `burn-down` — #53** (12, rescored at MR-051). It was born at iter 021, about 96 loops ago, and was the oldest live row on the test-infra surface.
+- **What changed:** `deploy.yml`'s `quality-gate` job gets one step after `pnpm test`: `pnpm --filter @ledgerium/web-app test`. The deploy already has `needs: quality-gate`, so the web-app's own vitest config now blocks a deploy. That covers its 13 `*.test.tsx` component files and its `scripts/**/*.test.ts`, which the root config never ran either.
+  - **Why the full run, not just `.test.tsx`:** narrowing would mean a second include list to keep in sync. The full run takes about 17 s, so running the `.test.ts` files twice is cheaper than that hazard.
+  - **The prediction was wrong:** the row expected some component suites to fail on first gating. All 219 files passed.
+- **Residual, stated:** the step has not yet run on a GitHub runner. The YAML parses, the step order is as intended, and `prisma generate` runs earlier in the job, but the first CI run is the real test. The root `vitest.config.ts` comment saying component tests run "via the package's own script" is still true but no longer the whole story; it is left as is.
+- **Incidentally confirmed:** the same job runs `Validate backlog integrity`, so my malformed loop-116 backlog commit would have failed CI. The gate I had bypassed locally exists.
+- **Validation (exit code + ANSI-stripped summary):** web-app 219 files / 3904 tests, exit 0 on 4 of 4 runs (3 by the agent, 1 by me).
+- **Follow-ups:** 0 created, 1 closed (#53).
+
+---
+
 ## 2026-10-02 (loop 116) — Only the server can speak for the server (Mode 1, `security-reviewer` + `backend-engineer`)
 
 - **Controls:** Area — `security / analytics` (security 1 of the last 5; no penalty). Agents — `security-reviewer` for the ingestion and alert sources, then `backend-engineer` twice for the two regressions I found in review. All three passes were handed back under MR-050, and I made no product edits. Extension — `871e29a`, 73 loops. Cadence: 1 of 3 since MR-051.

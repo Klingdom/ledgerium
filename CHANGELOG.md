@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Every web app test now has to pass before a deploy
+
+### Changed
+- The deploy pipeline now runs the web app's full test suite, including the dashboard component tests, which previously did not block a release.
+
+---
+
+
 ## [2026-10-02] - Security: analytics can no longer be used to silence alerts
 
 ### Security
