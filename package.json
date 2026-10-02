@@ -12,7 +12,8 @@
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "dev": "pnpm --filter extension-app dev",
-    "validate:backlog": "node scripts/validate-backlog.mjs"
+    "validate:backlog": "node scripts/validate-backlog.mjs",
+    "test:validate-backlog": "node --test scripts/validate-backlog.test.mjs"
   },
   "engines": {
     "node": ">=20.0.0",

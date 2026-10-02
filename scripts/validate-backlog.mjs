@@ -31,7 +31,7 @@
  * packages/&#42;/src and apps/&#42;/src, so a root-level test file would
  * silently never run.
  *
- * Usage:  node scripts/validate-backlog.mjs [--ratchet]
+ * Usage:  node scripts/validate-backlog.mjs
  *   exit 0 = clean, exit 1 = violations found.
  */
 
@@ -40,16 +40,38 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const BACKLOG = join(ROOT, 'IMPROVEMENT_BACKLOG.md');
-const ITERATION_LOG = join(ROOT, 'ITERATION_LOG.md');
+// Path overrides exist only so scripts/validate-backlog.test.mjs can run this
+// script against fixtures. CI and the coordinator never set them.
+const BACKLOG = process.env.VALIDATE_BACKLOG_FILE ?? join(ROOT, 'IMPROVEMENT_BACKLOG.md');
+const ITERATION_LOG = process.env.VALIDATE_ITERATION_LOG_FILE ?? join(ROOT, 'ITERATION_LOG.md');
 
 /**
- * V2 ratchet. Rows whose cell count is wrong because their prose contains an
- * unescaped `|` (typically a TypeScript union type). Pre-existing; the check
- * fails only if the count GROWS, so the debt cannot deepen while it is paid
- * down. Update this number downward as rows are fixed — never upward.
+ * V2 baseline (#312). Rows whose cell count is wrong because their prose
+ * contains an unescaped `|` (typically a TypeScript union type). Pre-existing.
+ * This is a SET OF ROW IDS, not a count: a count let one malformed row be
+ * swapped for another and still pass. A malformed row not listed here fails.
+ * A listed row that is no longer malformed ALSO fails (stale baseline) — a
+ * warning was what the old `--ratchet` note was, and the budget sat at 19
+ * unmoved; failing forces the one-line removal into the same commit as the fix.
+ * Remove ids as rows are fixed — never add.
  */
-const MALFORMED_ROW_BUDGET = 19;
+const MALFORMED_ROW_BASELINE = [45, 75, 102, 110, 117, 120, 121, 126, 127, 152, 154, 157, 223, 224];
+
+/**
+ * V4 baseline (#312). Ids ITERATION_LOG.md says were closed but the backlog
+ * does not show struck, at the time V4 was repaired. Reported-but-budgeted: a
+ * new mismatch fails, a listed id that is now struck (or gone) fails as stale.
+ * Each is a real finding for the owner to resolve, not a verdict that the log
+ * is right. Remove ids as resolved — never add.
+ */
+const V4_MISMATCH_BASELINE = [];
+
+// Test seam only: lets the test file supply its own baselines for fixtures.
+const baselineOverride = process.env.VALIDATE_BACKLOG_BASELINE_JSON
+  ? JSON.parse(process.env.VALIDATE_BACKLOG_BASELINE_JSON)
+  : null;
+const MALFORMED_BASELINE = new Set(baselineOverride?.malformed ?? MALFORMED_ROW_BASELINE);
+const V4_BASELINE = new Set(baselineOverride?.v4 ?? V4_MISMATCH_BASELINE);
 
 /**
  * V3 ratchets. The backlog spans several eras of row format: older rows record
@@ -86,7 +108,9 @@ function parseRows(fullText) {
   text.split('\n').forEach((line, i) => {
     const m = ROW_RE.exec(line);
     if (!m) return;
-    const cells = line.split('|');
+    // Split on UNESCAPED pipes only, then unescape, so the advice in the V2
+    // message ("escape a literal | as \\|") is true. (#312)
+    const cells = line.split(/(?<!\\)\|/).map((c) => c.replace(/\\\|/g, '|'));
     rows.push({
       lineNo: i + 1,
       id: Number(m[2]),
@@ -242,32 +266,58 @@ const log = readFileSync(ITERATION_LOG, 'utf8');
 const struckIds = new Set(rows.filter((r) => r.struck).map((r) => r.id));
 const knownIds = new Set(rows.map((r) => r.id));
 const claimedClosed = new Set();
-// Strikethrough is this repo's convention for a RETRACTED statement, so a
-// closure claim inside ~~...~~ is one being withdrawn, not made. Scanning the
-// raw text treated a correction as the assertion it corrects: when loop 61
-// re-opened #109 and struck the old wording, this fired on the retraction
-// itself, and the only way to silence it would have been to reword the
-// correction — the wrong direction entirely.
 const logWithoutRetractions = log.replace(/~~[\s\S]*?~~/g, '');
+// Form 1 (prose): "#102 is CLOSED", "row #102 closed".
 for (const m of logWithoutRetractions.matchAll(/(?:row\s+)?#(\d+)\s+(?:is\s+)?(?:CLOSED|closed)\b/g)) {
   claimedClosed.add(Number(m[1]));
 }
+// Form 2 (the current log format, #312): "- **Follow-ups:** 1 created (#314), 2
+// closed (#305, #34)." The ids are inside the parenthesis AFTER "N closed", and
+// count only when N > 0 ("0 closed (#277 → blocked on the CEO)" names a row
+// that did NOT close). The original regex required "#n closed", which this
+// format never produces, so V4 matched nothing from #246 until #312.
+for (const line of logWithoutRetractions.split('\n')) {
+  if (!/^\s*-\s*\*\*Follow-ups:\*\*/.test(line)) continue;
+  const m = /(\d+)\s+closed\s*\(([^)]*)\)/.exec(line);
+  if (!m || Number(m[1]) === 0) continue;
+  for (const id of m[2].matchAll(/#(\d+)/g)) claimedClosed.add(Number(id[1]));
+}
+const v4Mismatches = [];
 for (const id of [...claimedClosed].sort((a, b) => a - b)) {
   if (!knownIds.has(id)) continue; // renumbered or never existed
-  if (!struckIds.has(id)) {
+  if (!struckIds.has(id)) v4Mismatches.push(id);
+}
+for (const id of v4Mismatches) {
+  if (!V4_BASELINE.has(id)) {
     violations.push(
       `V4  #${id} is described as closed in ITERATION_LOG.md but is not struck in the backlog.`,
+    );
+  }
+}
+for (const id of V4_BASELINE) {
+  if (!v4Mismatches.includes(id)) {
+    violations.push(
+      `V4  #${id} is in V4_MISMATCH_BASELINE but no longer mismatches (now struck, unclaimed, or gone). Remove it from the baseline.`,
     );
   }
 }
 
 // ── V2 (ratchet): rows whose cell count is off ───────────────────────────────
 const malformed = rows.filter((r) => r.cells.length !== CANONICAL_CELL_COUNT);
-if (malformed.length > MALFORMED_ROW_BUDGET) {
+const newOffenders = malformed.filter((r) => !MALFORMED_BASELINE.has(r.id));
+if (newOffenders.length > 0) {
   violations.push(
-    `V2  ${malformed.length} rows have a non-canonical cell count, over the budget of ` +
-      `${MALFORMED_ROW_BUDGET}. New offenders: ${malformed.map((r) => `#${r.id}`).join(', ')}. ` +
+    `V2  ${newOffenders.length} row(s) have a non-canonical cell count and are not in the baseline. ` +
+      `New offenders: ${newOffenders.map((r) => `#${r.id}`).join(', ')}. ` +
       `Escape literal "|" in prose as "\\|".`,
+  );
+}
+const malformedIds = new Set(malformed.map((r) => r.id));
+const staleBaseline = [...MALFORMED_BASELINE].filter((id) => !malformedIds.has(id));
+if (staleBaseline.length > 0) {
+  violations.push(
+    `V2  ${staleBaseline.length} baselined row(s) are no longer malformed (or are gone): ` +
+      `${staleBaseline.map((id) => `#${id}`).join(', ')}. Remove them from MALFORMED_ROW_BASELINE.`,
   );
 }
 
@@ -360,7 +410,7 @@ const poolLine =
 // ── Report ───────────────────────────────────────────────────────────────────
 const summary =
   `validate-backlog: ${rows.length} rows, ${struckIds.size} struck, ` +
-  `${malformed.length}/${MALFORMED_ROW_BUDGET} malformed-row budget used`;
+  `${malformed.length}/${MALFORMED_BASELINE.size} baselined malformed rows`;
 
 if (violations.length > 0) {
   console.error(`${summary}\n`);
@@ -371,8 +421,3 @@ if (violations.length > 0) {
 
 console.log(`${summary} — clean
 ${poolLine}`);
-if (process.argv.includes('--ratchet') && malformed.length < MALFORMED_ROW_BUDGET) {
-  console.log(
-    `note: malformed rows are down to ${malformed.length}; lower MALFORMED_ROW_BUDGET to match.`,
-  );
-}

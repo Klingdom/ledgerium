@@ -59,6 +59,9 @@ jobs:
       # scripts and has been silently corrupted three times — closed rows left
       # ranking as open, struck rows still reading open, and cells overwritten
       # by position. Node only, no deps, runs in well under a second.
+      - name: Test backlog validator
+        run: node --test scripts/validate-backlog.test.mjs
+
       - name: Validate backlog integrity
         run: node scripts/validate-backlog.mjs
 

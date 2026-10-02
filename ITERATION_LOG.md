@@ -4,6 +4,27 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 131) — A validator that does what it says (Mode 1, `qa-engineer`)
+
+- **Controls:**
+  - **Area:** `tooling / governance`. It is not web-app, so the saturation run is broken.
+  - **Agent:** `qa-engineer`, a different agent from 129-130.
+  - **Extension:** `871e29a`, 88 loops untouched.
+  - **Cadence:** 1 of 3 since MR-056.
+- **Candidate Selection: `burn-down` — #312** (12, the top score; corrected before the loop from MR-056's first-draft "#316 first").
+- **What changed (`scripts/validate-backlog.mjs`):**
+  - **(1) Escaped pipes.** Rows now split on *unescaped* pipes and then unescape them, so the V2 message's "escape as \\|" advice is true. 13 existing rows use it, and the malformed count fell from 19 to 14.
+  - **(2) V4 closure check.** It had matched nothing since #246. It now parses the current `**Follow-ups:** … N closed (#a, #b)` form when N > 0, ignores `0 closed` and struck retractions, and still reads the old prose form. Against the real repo it parsed **109 closure claims and found zero mismatches**, so the V4 baseline is empty. The reverse direction (every struck row must be logged) is not added, because struck rows predate the log and V4's documented intent is one-directional.
+  - **(3) New offenders.** "New offenders" now lists only rows outside the baseline.
+  - **(4) Malformed-row budget.** It is now an explicit set of 14 row ids, not a count. Swapping one bad row for another fails. **A baselined row that has been fixed also fails as stale**, so the budget can only shrink; the old `--ratchet` warning had left it stuck at 19.
+- **Tests:** `scripts/validate-backlog.test.mjs` holds 13 `node:test` cases, using env-var seams for fixtures.
+  - **CI:** a new "Test backlog validator" step in `deploy.yml` runs them before "Validate backlog integrity", and the root `test:validate-backlog` script runs the same file.
+  - **Revert proof:** against the old script, 6 to 7 tests fail. The count varied between the agent's two runs, on the pipe-escape case. On the new script the result was stable: 13 of 13 passed, exit 0, on 6 of 6 runs of mine.
+- **Validation:** the validator exits 0 on the real repo (310 rows, 191 struck). Root vitest is 5901, typecheck 0.
+- **Follow-ups:** 0 created, 1 closed (#312).
+
+---
+
 ## 2026-10-02 — MR-056 recorded (Mode 4, non-counting): exists is not enforced
 
 - **Review:** `docs/meta/MR_056_META_REVIEW.md`. Nothing reverts.
