@@ -4,6 +4,39 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 134) — Guards that cannot pass on nothing (Mode 1, `qa-engineer`)
+
+- **Controls:**
+  - **Area:** `test-infra / ci`. Loop 134 was selected over #321 (web-app, which was 3 of the last 5 areas, so #321 takes −2 and drops to 10).
+  - **Agent:** `qa-engineer`.
+  - **Extension:** `871e29a`, 91 loops untouched. Only the e2e-extension *workflow* changed.
+  - **Cadence:** 1 of 3 since MR-057.
+- **Candidate Selection: `burn-down` — #322** (12), the top score after penalties.
+- **What changed:**
+  - **Typecheck-coverage script.** It now asks pnpm for the package list (`pnpm -r ls --json --depth -1`), the same resolver `pnpm -r typecheck` uses, instead of parsing the YAML. That handles flow lists, `**` globs, explicit paths and negations.
+    - It **fails on zero packages**.
+    - It counts `.mts`/`.cts` files as TypeScript.
+    - It requires the `typecheck` script to invoke `tsc`, `tsc -b` or `vue-tsc`, so `echo ok` fails.
+    - It is now wired into `e2e-extension.yml`.
+  - **Validator V4.**
+    - **Canonical follow-ups format:** bold is optional, and the count may be digits or a number word. A closure claim with no id list now fails.
+    - **Built-in canary:** if V4 cannot find the ids in three embedded fixture lines, the validator fails, so it can never silently match nothing again.
+    - **Historical line:** one line ("7 created, 1 closed", with no ids) cannot be attributed, so it is grandfathered by exact prefix.
+- **Test hook, stated:** `VALIDATE_BACKLOG_V4_SABOTAGE=1` is a test-only switch that breaks the parser to prove the canary. It is acceptable for a CI tool, and it is recorded here.
+- **Process note:** the agent's shell heredocs dropped backslashes in regexes, so it fixed them by hand. I therefore re-ran everything myself rather than trusting its report.
+- **Validation (exit codes):**
+  - coverage script 0 (11 packages);
+  - validator 0 (112 closure claims);
+  - **sabotaged validator 1**;
+  - `node --test scripts/*.test.mjs` 27 of 27;
+  - root vitest 5911;
+  - typecheck 0;
+  - YAML parses.
+  - **Revert proof:** the 6 new coverage tests all fail against the old script.
+- **Follow-ups:** 0 created, 1 closed (#322).
+
+---
+
 ## 2026-10-02 — MR-057 recorded (Mode 4, non-counting): a role with nothing to restrict
 
 - **Review:** `docs/meta/MR_057_META_REVIEW.md`. Nothing reverts.

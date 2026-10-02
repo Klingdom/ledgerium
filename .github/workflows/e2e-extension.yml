@@ -38,6 +38,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # #322: fails if pnpm < 10 (--fail-if-no-match would not catch a renamed script)
+      # or any TS package lacks a tsc-invoking typecheck script.
+      - name: Check typecheck coverage
+        run: node scripts/check-typecheck-coverage.mjs
+
       - name: Cache Playwright browsers
         id: playwright-cache
         uses: actions/cache@v4

@@ -265,23 +265,56 @@ if (mismatched.length > SCORE_MISMATCH_BUDGET) {
 const log = readFileSync(ITERATION_LOG, 'utf8');
 const struckIds = new Set(rows.filter((r) => r.struck).map((r) => r.id));
 const knownIds = new Set(rows.map((r) => r.id));
-const claimedClosed = new Set();
 const logWithoutRetractions = log.replace(/~~[\s\S]*?~~/g, '');
-// Form 1 (prose): "#102 is CLOSED", "row #102 closed".
-for (const m of logWithoutRetractions.matchAll(/(?:row\s+)?#(\d+)\s+(?:is\s+)?(?:CLOSED|closed)\b/g)) {
-  claimedClosed.add(Number(m[1]));
+// V4 parser (#322). Canonical Follow-ups line format, enforced:
+//   <list marker> [**]Follow-ups:[**] ... <N> closed (#a, #b) ...
+// marker is "-" or "*"; bold is optional (loop 133 found non-bold lines silently
+// skipped); N is digits or a number word ("two closed"). A Follow-ups line that
+// says "closed" with N > 0 but gives no "(#id ...)" list is NON-CANONICAL and is
+// reported rather than silently skipped.
+const NUMBER_WORDS = { zero: 0, no: 0, none: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12 };
+const FOLLOWUP_LINE = /^\s*[-*]\s*(?:\*\*)?Follow-ups:?(?:\*\*)?:?/i;
+const toCount = (t) => (/^\d+$/.test(t) ? Number(t) : NUMBER_WORDS[t.toLowerCase()]);
+function parseClaims(text) {
+  const claimed = new Set();
+  const nonCanonical = [];
+  if (process.env.VALIDATE_BACKLOG_V4_SABOTAGE === '1') return { claimed, nonCanonical }; // test seam: simulates a broken parser
+  // Form 1 (prose): "#102 is CLOSED", "row #102 closed".
+  for (const m of text.matchAll(/(?:row\s+)?#(\d+)(?:\*\*)?\s+(?:is\s+)?(?:CLOSED|closed)\b/g)) claimed.add(Number(m[1]));
+  // Form 2 (#312): "Follow-ups: 1 created (#314), two closed (#305, #34)." Ids sit in the
+  // parenthesis AFTER "N closed"; N = 0 names a row that did NOT close.
+  for (const line of text.split('\n')) {
+    if (!FOLLOWUP_LINE.test(line)) continue;
+    const m = /\b(\d+|zero|no|none|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\s+closed\b\s*(?:\(([^)]*)\))?/i.exec(line);
+    if (!m) continue;
+    if (toCount(m[1]) === 0) continue;
+    const ids = [...(m[2] ?? '').matchAll(/#(\d+)/g)];
+    // "#228 closed" or "**#228 closed**" on the same line is already read by Form 1.
+    if (!ids.length && !/#\d+(?:\*\*)?\s+closed\b/i.test(line)) { nonCanonical.push(line.trim().slice(0, 120)); continue; }
+    for (const id of ids) claimed.add(Number(id[1]));
+  }
+  return { claimed, nonCanonical };
 }
-// Form 2 (the current log format, #312): "- **Follow-ups:** 1 created (#314), 2
-// closed (#305, #34)." The ids are inside the parenthesis AFTER "N closed", and
-// count only when N > 0 ("0 closed (#277 → blocked on the CEO)" names a row
-// that did NOT close). The original regex required "#n closed", which this
-// format never produces, so V4 matched nothing from #246 until #312.
-for (const line of logWithoutRetractions.split('\n')) {
-  if (!/^\s*-\s*\*\*Follow-ups:\*\*/.test(line)) continue;
-  const m = /(\d+)\s+closed\s*\(([^)]*)\)/.exec(line);
-  if (!m || Number(m[1]) === 0) continue;
-  for (const id of m[2].matchAll(/#(\d+)/g)) claimedClosed.add(Number(id[1]));
+// Canary (#322, MR-056/MR-057): V4 has twice matched nothing for months unnoticed.
+// Before trusting it on the real log it must detect known fixture claims in each
+// supported spelling; otherwise the validator fails.
+{
+  const fixture = [
+    '- **Follow-ups:** 1 created (#9901), 2 closed (#9902, #9903).',
+    '- Follow-ups: one closed (#9904).',
+    '- **Follow-ups:** 0 closed (#9905 blocked).',
+  ].join('\n');
+  const got = parseClaims(fixture).claimed;
+  if (!(got.has(9902) && got.has(9903) && got.has(9904)) || got.has(9905) || got.has(9901)) {
+    violations.push('V4  canary failed: V4 matched nothing (or wrong ids) on a known fixture claim — parser broken.');
+  }
 }
+const { claimed: claimedClosed, nonCanonical: v4NonCanonical } = parseClaims(logWithoutRetractions);
+// Grandfathered (#322): one historical line claims "1 closed" with no id and cannot be
+// attributed retroactively. Matched by exact prefix; any NEW such line still fails.
+const V4_NONCANONICAL_GRANDFATHERED = ['- **Follow-ups:** 7 created, 1 closed. That ratio is terrible'];
+for (const l of v4NonCanonical.filter((x) => !V4_NONCANONICAL_GRANDFATHERED.some((g) => x.startsWith(g)))) violations.push(`V4  non-canonical Follow-ups line (says "closed" with no "(#id, ...)" list): ${l}`);
+console.log(`V4: parsed ${claimedClosed.size} closure claim(s) from ITERATION_LOG.md.`);
 const v4Mismatches = [];
 for (const id of [...claimedClosed].sort((a, b) => a - b)) {
   if (!knownIds.has(id)) continue; // renumbered or never existed

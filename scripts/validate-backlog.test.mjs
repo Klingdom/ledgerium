@@ -25,7 +25,7 @@ const SCRIPT = process.env.VALIDATE_BACKLOG_SCRIPT ?? join(HERE, 'validate-backl
 const row = (id, desc = 'a row', status = 'open', struck = false) =>
   `| ${struck ? `~~${id}~~` : id} | ${desc} | x | y | 3 | 3 | 3 | 3 | 1 | 1 | **10** | L1 | ${status} |`;
 
-function run({ backlog, log = '', baseline = { malformed: [], v4: [] } }) {
+function run({ backlog, log = '', baseline = { malformed: [], v4: [] }, extraEnv = {} }) {
   const dir = mkdtempSync(join(tmpdir(), 'vb-'));
   writeFileSync(join(dir, 'b.md'), backlog.join('\n') + '\n');
   writeFileSync(join(dir, 'l.md'), log);
@@ -36,6 +36,7 @@ function run({ backlog, log = '', baseline = { malformed: [], v4: [] } }) {
       VALIDATE_BACKLOG_FILE: join(dir, 'b.md'),
       VALIDATE_ITERATION_LOG_FILE: join(dir, 'l.md'),
       VALIDATE_BACKLOG_BASELINE_JSON: JSON.stringify(baseline),
+      ...extraEnv,
     },
   });
   return { code: r.status, out: r.stdout + r.stderr };
@@ -147,4 +148,29 @@ test('V2: the baselined malformed row alone passes', () => {
 test('the real backlog + log validate clean against the committed baselines', () => {
   const r = spawnSync(process.execPath, [SCRIPT], { encoding: 'utf8' });
   assert.equal(r.status, 0, r.stdout + r.stderr);
+});
+
+// ── #322: V4 spellings + canary ──────────────────────────────────────────────
+const NL = String.fromCharCode(10);
+test('V4 (#322): a non-bold "- Follow-ups:" line is parsed', () => {
+  const r = run({ backlog: [row(9001)], log: '- Follow-ups: 0 created, 1 closed (#9001).' + NL });
+  assert.equal(r.code, 1);
+  assert.match(r.out, /V4\s+#9001 is described as closed/);
+});
+test('V4 (#322): a number word ("two closed") is parsed', () => {
+  const r = run({ backlog: [row(9001), row(9002)], log: '- **Follow-ups:** 0 created, two closed (#9001, #9002).' + NL });
+  assert.equal(r.code, 1);
+  assert.match(r.out, /#9001/);
+  assert.match(r.out, /#9002/);
+});
+test('V4 (#322): a Follow-ups line claiming closure with no id list is non-canonical and fails', () => {
+  const r = run({ backlog: [row(9001)], log: '- **Follow-ups:** 1 created, three closed.' + NL });
+  assert.equal(r.code, 1);
+  assert.match(r.out, /non-canonical/);
+});
+test('V4 (#322): canary - a parser that matches nothing makes the validator fail', () => {
+  const r = run({ backlog: [row(9001)], extraEnv: { VALIDATE_BACKLOG_V4_SABOTAGE: '1' } });
+  assert.equal(r.code, 1);
+  assert.match(r.out, /canary failed.*parser broken/);
+  assert.equal(run({ backlog: [row(9001)] }).code, 0);
 });
