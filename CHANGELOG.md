@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-01] - Security: team invitations can no longer grant more authority than the sender has
+
+### Security
+- A team admin could make someone a team owner by sending them an invitation, even though admins are not allowed to promote anyone to owner directly. Invitations now follow the same rule as changing someone's role: only an owner can make someone an owner, and only real roles can be granted.
+- Invitations sent before this fix are checked again when they are accepted. One that would grant ownership is only honoured if the person who sent it is still an owner.
+
+---
+
 ## [2026-10-01] - Requests with the wrong kind of data are rejected cleanly
 
 ### Fixed

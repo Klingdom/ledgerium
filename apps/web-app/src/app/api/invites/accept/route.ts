@@ -7,10 +7,11 @@ import crypto from 'crypto';
 import { trackServer } from '@/lib/analytics-server';
 import { getClientIp } from '@/lib/client-ip';
 import { reportApiError } from '@/lib/api-error-reporting';
+import { isTeamRole } from '@/lib/team-roles';
 
 /** Outcome of the accept-invite transaction: a typed failure or the joined-team summary. */
 type AcceptTxResult =
-  | { error: string; status: number; isNotFound?: boolean }
+  | { error: string; status: number; isNotFound?: boolean; code?: string }
   | { ok: true; teamId: string; teamName: string | null; role: string };
 
 /**
@@ -234,6 +235,25 @@ async function handlePOST(req: NextRequest) {
           return { error: 'Invite has already been accepted', status: 409 };
         }
 
+        // Row #272 defence in depth: never grant a role outside the role set, and never grant
+        // owner on the strength of the stored role alone. Invites created before the
+        // invite-time check carry no record of the creator's authority at creation, so owner
+        // is honoured only if the inviter is STILL an active owner of this team (a demoted or
+        // removed inviter, or an admin-created owner invite, is refused). Refuse rather than
+        // downgrade: a silent different role would be an unrequested grant. Nothing is
+        // marked accepted.
+        if (!isTeamRole(invite.role)) {
+          return { error: 'This invite has an invalid role — ask for a new invite', status: 403, code: 'invalid_invite_role' };
+        }
+        if (invite.role === 'owner') {
+          const inviter = await tx.teamMember.findFirst({
+            where: { teamId: invite.teamId, userId: invite.invitedBy, status: 'active' },
+          });
+          if (!inviter || inviter.role !== 'owner') {
+            return { error: 'This invite cannot grant the owner role — ask an owner for a new invite', status: 403, code: 'forbidden_role_elevation' };
+          }
+        }
+
         // Check email matches (optional but recommended — prevents token-sharing abuse).
         const invitee = await tx.user.findUnique({
           where: { id: userId },
@@ -307,7 +327,10 @@ async function handlePOST(req: NextRequest) {
       } else if ('ok' in result) {
         recordSuccess(ip);
       }
-      return NextResponse.json({ error: result.error }, { status: result.status });
+      return NextResponse.json(
+        result.code ? { error: result.error, code: result.code } : { error: result.error },
+        { status: result.status },
+      );
     }
 
     recordSuccess(ip);

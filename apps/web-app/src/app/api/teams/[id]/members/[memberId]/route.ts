@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { reportApiError } from '@/lib/api-error-reporting';
 import { z } from 'zod';
+import { TEAM_ROLES, isTeamRole, isRoleElevation } from '@/lib/team-roles';
 
 /**
  * PATCH /api/teams/:id/members/:memberId — change a member's role
@@ -12,7 +13,7 @@ import { z } from 'zod';
  * Authorization: caller must be owner or admin.
  *
  * PATCH:
- *   - Body: { role: 'owner' | 'admin' | 'member' }
+ *   - Body: { role: 'owner' | 'admin' | 'member' | 'viewer' } — see lib/team-roles.ts
  *   - 400 if role is invalid.
  *   - 404 if memberId not found in this team.
  *   - 200 { ok: true, memberId, role } on success.
@@ -27,9 +28,6 @@ import { z } from 'zod';
  *
  * @iter 082 / TEAM-P02 Part D
  */
-
-// Role hierarchy: owner > admin > member > viewer (UMAP-001 §3 AC-11, iter 088 Sub-task 3)
-const VALID_ROLES = new Set(['owner', 'admin', 'member', 'viewer']);
 
 /** Row #261. No in-repo producer (no UI calls this route); the contract is the doc above. */
 const patchRoleSchema = z.object({ role: z.string() });
@@ -48,9 +46,9 @@ async function handlePATCH(
   const parsedBody = patchRoleSchema.safeParse(await req.json().catch(() => null));
   const newRole: string | undefined = parsedBody.success ? parsedBody.data.role : undefined;
 
-  if (!newRole || !VALID_ROLES.has(newRole)) {
+  if (!newRole || !isTeamRole(newRole)) {
     return NextResponse.json(
-      { error: `role must be one of: ${[...VALID_ROLES].join(', ')}` },
+      { error: `role must be one of: ${TEAM_ROLES.join(', ')}` },
       { status: 400 },
     );
   }
@@ -68,7 +66,7 @@ async function handlePATCH(
     }
 
     // Guard: only an owner can promote someone to owner.
-    if (newRole === 'owner' && callerMembership.role !== 'owner') {
+    if (isRoleElevation(callerMembership.role, newRole)) {
       return NextResponse.json(
         { error: 'Only an owner can promote a member to owner', code: 'forbidden_role_elevation' },
         { status: 403 },

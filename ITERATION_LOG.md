@@ -4,6 +4,21 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 (loop 95) — An owner, by invitation (Mode 1, `security-reviewer`)
+
+- **Controls:** Area — `security / authz` (93 type safety, 94 api). Agent — **`security-reviewer`, a real rotation** (suite, typecheck and two mutation checks run by the agent; I re-ran suite and typecheck and added the build). Extension — `871e29a`, 52 loops. Cadence: 2 of 3 since MR-044.
+- **Candidate Selection: `burn-down` — #272** (16, highest in the pool), filed one loop earlier. MR-040 warned against working what you just filed; I took it anyway, on stated grounds: it is privilege escalation past an explicit guard, verified in code, and leaving a known escalation open for a cadence reason would be the wrong trade.
+- **The defect:** the role-change route has always refused to let a non-owner grant `owner`. The invite route let owners and admins invite, and stored the requested role unchecked — so an admin could invite an address they controlled as `owner`, accept, and be an owner. Any inviter could also store an arbitrary role string.
+- **The fix is one rule in one place.** `lib/team-roles.ts` holds the role set and the elevation rule; both routes use it, so they cannot drift again. An admin may grant exactly what the role-change route has always let them grant.
+- **The part that closes the hole for the past, not only the future:** acceptance re-checks the stored role inside its transaction. An invalid role is refused; an `owner` invite is honoured only if the person who sent it is *still* an active owner. The agent chose refusal over silently downgrading — a downgrade grants a role nobody requested — and checking the inviter's current role cannot itself escalate.
+- **Tested as a matrix, not as examples:** 5 callers × 6 requested roles = 30 invite cases, plus 10 acceptance cases. Mutation-checked on both the invite rule and the acceptance check.
+- **Residual, class-scoped: every path that writes a team role was enumerated** — 3 could write a role outside the set or above the actor's authority; now 0. The rest (team creation, the billing webhook) assign `owner` to the creator, legitimately. `WorkflowShare.permission` was checked and is never read anywhere — inert, noted.
+- **Not knowable from here, filed as #273:** whether any such invite was ever created. A read-only count is the first step; cleaning up bad pending rows is destructive in production and needs your approval.
+- **Validation (re-run by me):** web-app **3636 → 3677** (+41); typecheck 0; build 0; prerender unchanged. One stale doc comment on the role-change route fixed by me.
+- **Follow-ups:** 1 created (#273), 1 closed (#272).
+
+---
+
 ## 2026-10-01 (loop 94) — Well-formed and wrong (Mode 1, `security-reviewer`)
 
 - **Controls:** Area — `web-app / api` (92 evidence, 93 type safety). Agent — **`security-reviewer`, a real rotation** (suite, typecheck and an old-code discrimination run by the agent; I re-ran suite and typecheck and added the production build it did not run). Extension — `871e29a`, 51 loops. Cadence: 1 of 3 since MR-044.

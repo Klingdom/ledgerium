@@ -12,6 +12,7 @@ import { trackServer } from '@/lib/analytics-server';
 import { checkInviteRateLimit } from '@/lib/rate-limit/invite-buckets';
 import { normalizeEmail } from '@/lib/email-normalize';
 import { reportApiError } from '@/lib/api-error-reporting';
+import { isTeamRole, isRoleElevation } from '@/lib/team-roles';
 
 /**
  * POST /api/teams/:id/invite — create an invite link for a team
@@ -95,6 +96,18 @@ async function handlePOST(
 
     if (!email || !email.includes('@')) {
       return NextResponse.json({ error: 'Valid email is required' }, { status: 400 });
+    }
+
+    // Row #272: role must be in the shared role set (field name only — never echo the value)
+    // and the caller may not grant above their own authority (same rule as PATCH members).
+    if (!isTeamRole(role)) {
+      return NextResponse.json({ error: 'role is invalid' }, { status: 400 });
+    }
+    if (isRoleElevation(membership.role, role)) {
+      return NextResponse.json(
+        { error: 'Only an owner can invite someone as owner', code: 'forbidden_role_elevation' },
+        { status: 403 },
+      );
     }
 
     // ── Guard 1: Self-invite ────────────────────────────────────────────────
