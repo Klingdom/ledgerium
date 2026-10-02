@@ -166,8 +166,8 @@ export default function OnboardingChecklist({
 
       {/* All-complete congratulations banner */}
       {allComplete && !isCollapsed && (
-        <div className="mx-ds-5 mb-ds-4 rounded-ds-md bg-brand-900/20 border border-brand-800/40 px-ds-4 py-ds-3 text-center">
-          <p className="text-ds-sm font-medium text-brand-300">
+        <div className="mx-ds-5 mb-ds-4 rounded-ds-md bg-[var(--surface-secondary)] border border-[var(--border-default)] px-ds-4 py-ds-3 text-center">
+          <p className="text-ds-sm font-medium text-[var(--brand-text)]">
             You&apos;re all set! Ledgerium is ready to track your processes.
           </p>
           <button

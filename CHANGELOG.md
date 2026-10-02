@@ -6,6 +6,15 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - The last pale-green text is gone, and green tags work in dark mode
+
+### Fixed
+- Many links across the public pages turned a very pale green when hovered — fainter than before you pointed at them. They now get clearer on hover. A callout on the docs page that was hard to read in light mode is fixed too.
+- The small green tags used throughout reports were a light chip even in dark mode. They now match the theme.
+
+---
+
+
 ## [2026-10-02] - Security: administrator email addresses cannot be registered by others
 
 ### Security

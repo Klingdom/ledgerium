@@ -57,7 +57,7 @@ function Screenshot({ src, alt, caption }: { src: string; alt: string; caption: 
 
 function Tip({ children }: { children: React.ReactNode }) {
   return (
-    <div className="my-4 rounded-md border-l-[3px] border-brand-400 bg-brand-900/10 px-4 py-3 text-sm text-brand-300 leading-relaxed">
+    <div className="my-4 rounded-md border-l-[3px] border-brand-400 bg-[var(--brand-tint)] px-4 py-3 text-sm text-[var(--brand-on-tint)] leading-relaxed">
       <span className="font-bold text-[var(--brand-text)]">Tip&nbsp;&nbsp;</span>
       {children}
     </div>
@@ -318,7 +318,7 @@ export default function DocsPage() {
               </p>
               <a
                 href="https://ledgerium.ai/signup"
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--brand-text)] hover:text-brand-300 transition-colors"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] transition-colors"
               >
                 ledgerium.ai/signup
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -340,7 +340,7 @@ export default function DocsPage() {
               </p>
               <a
                 href="/install"
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--brand-text)] hover:text-brand-300 transition-colors"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] transition-colors"
               >
                 Installation guide
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -362,7 +362,7 @@ export default function DocsPage() {
               </p>
               <a
                 href="#getting-started"
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--brand-text)] hover:text-brand-300 transition-colors"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] transition-colors"
               >
                 Detailed guide
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

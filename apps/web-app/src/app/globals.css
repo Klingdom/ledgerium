@@ -293,7 +293,11 @@
   }
 
   .ds-tag-brand {
-    @apply bg-brand-50 text-brand-700 border border-brand-100;
+    /* Row #279 - per-theme tokens. It was a fixed light-green pair, a light
+       chip on dark pages, and anything inside it inherited a light background. */
+    background-color: var(--brand-tint);
+    color: var(--brand-on-tint);
+    border: 1px solid color-mix(in srgb, var(--brand-on-tint) 25%, var(--brand-tint));
   }
 
   .ds-tag-neutral {

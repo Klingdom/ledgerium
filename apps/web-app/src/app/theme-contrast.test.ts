@@ -658,6 +658,70 @@ describe('no text-brand-400 in source - row #259', () => {
 });
 
 /*
+  Row #279. The lighter shades, held at zero. text-brand-300 #6EE7B7 is 1.52:1
+  on white; the 25 uses were hover states that turned fainter than the
+  var(--brand-text) they replaced (now --brand-text-hover) and three
+  tinted-callout texts on bg-brand-900/10..20, dark in intent but rendered in
+  both themes (now the --brand-tint/--brand-on-tint pair, or --brand-text on a
+  surface). 100 and 200 had no text uses. The allowlist is EMPTY on purpose: a
+  dark-only pair must be measured and added here by file and token.
+*/
+describe('no text-brand-100/200/300 in source - row #279', () => {
+  const ROOT = join(__dirname, '..');
+  const files = sourceFiles(ROOT).filter((f) => /\.tsx?$/.test(f));
+  const ALLOWED: Record<string, string> = {};
+  const LIGHT_SHADE = /(^|[\s"'`:])text-brand-(100|200|300)\b/;
+
+  it('has no text-brand-100/200/300 colour utility, in any variant, beyond the allowlist', () => {
+    const hits: string[] = [];
+    for (const file of files) {
+      const rel = file.slice(ROOT.length + 1).replace(/\\/g, '/');
+      const allowed = ALLOWED[rel];
+      readFileSync(file, 'utf8').split(/\r?\n/).forEach((line, i) => {
+        const scrubbed = allowed ? line.split(allowed).join('') : line;
+        if (LIGHT_SHADE.test(scrubbed)) hits.push(`${rel}:${i + 1}`);
+      });
+    }
+    expect(hits, 'text-brand-100/200/300 is ~1.5:1 or fainter on light surfaces. Use var(--brand-text) / var(--brand-text-hover), or the --brand-tint/--brand-on-tint pair on a brand tint.').toEqual([]);
+  });
+
+  it('the pattern catches bare, hover:, dark: and arbitrary-variant uses', () => {
+    for (const u of ['text-brand-300', 'hover:text-brand-300', 'dark:text-brand-200', '[&_a:hover]:text-brand-100']) {
+      expect(LIGHT_SHADE.test(`class="${u}"`), u).toBe(true);
+    }
+    expect(LIGHT_SHADE.test('border-brand-300 ring-brand-200 text-brand-700')).toBe(false);
+  });
+
+  it('every allowlist entry still exists (none today)', () => {
+    for (const [rel, tok] of Object.entries(ALLOWED)) {
+      expect(readFileSync(join(ROOT, rel), 'utf8')).toContain(tok);
+    }
+  });
+});
+
+/*
+  Row #279. ds-tag-brand was bg-brand-50 text-brand-700 in BOTH themes: a light
+  chip on dark pages, and anything inside it sat on a light background. It now
+  takes the brand tint pair, whose per-theme contrast is asserted above
+  (--brand-on-tint on --brand-tint), so the class must reference the tokens.
+*/
+describe('ds-tag-brand is themed - row #279', () => {
+  const start = CSS.indexOf('.ds-tag-brand {');
+  const body = CSS.slice(start, CSS.indexOf('}', start));
+
+  it('is located', () => {
+    expect(start).toBeGreaterThan(-1);
+  });
+  it('uses the per-theme brand tint pair', () => {
+    expect(body).toContain('background-color: var(--brand-tint)');
+    expect(body).toContain('color: var(--brand-on-tint)');
+  });
+  it('carries no fixed palette shade', () => {
+    expect(body).not.toMatch(/brand-(50|100|700)\b/);
+  });
+});
+
+/*
   Row #255. The workflow-map node hardcoded light-canvas colours as inline
   styles: step label #111827 on a ~6%-alpha accent tint, 1.08:1 in the dark
   default theme (axe, /product), with the category label the raw accent

@@ -166,7 +166,7 @@ export default function SopsOutdatedPost() {
 
           <p>
             You can learn more about how the capture and processing pipeline works on the{' '}
-            <Link href="/product" className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors">
+            <Link href="/product" className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2 transition-colors">
               product page
             </Link>
             .

@@ -53,7 +53,7 @@ export default function InstallPage() {
             Already installed?{' '}
             <Link
               href="/login"
-              className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors"
+              className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2 transition-colors"
             >
               Sign in to your account &rarr;
             </Link>
@@ -260,10 +260,10 @@ export default function InstallPage() {
                       <strong className="text-[var(--content-primary)]">pin icon</strong> to keep it visible.
                     </li>
                   </ul>
-                  <div className="mt-4 flex gap-3 rounded-lg border-l-4 border-brand-500 bg-brand-900/20 px-4 py-3">
+                  <div className="mt-4 flex gap-3 rounded-lg border-l-4 border-brand-500 bg-[var(--brand-tint)] px-4 py-3">
                     <CheckCircle className="h-4 w-4 text-[var(--brand-text)] mt-0.5 flex-shrink-0" />
                     <p className="text-xs text-[var(--content-primary)] leading-relaxed">
-                      <strong className="text-brand-300">Done.</strong> Click the Ledgerium AI icon in your
+                      <strong className="text-[var(--brand-on-tint)]">Done.</strong> Click the Ledgerium AI icon in your
                       toolbar to open the sidebar. Sign in or create a free account to start recording.
                     </p>
                   </div>
@@ -279,7 +279,7 @@ export default function InstallPage() {
               For a complete walkthrough with screenshots, see the Extension section in our{' '}
               <Link
                 href="/docs#getting-started"
-                className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors"
+                className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2 transition-colors"
               >
                 User Guide
               </Link>
@@ -494,7 +494,7 @@ export default function InstallPage() {
             Already installed?{' '}
             <Link
               href="/login"
-              className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors"
+              className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2 transition-colors"
             >
               Sign in to your account &rarr;
             </Link>

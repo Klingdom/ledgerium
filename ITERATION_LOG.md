@@ -4,6 +4,20 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 106) — The last shade (Mode 1, `frontend-engineer`)
+
+- **Controls:** Area — `web-app / a11y`, chosen **by the saturation rule**: security had been the Area in 3 of the last 5 loops (101, 103, 105), which takes 2 off #285 and lets this row win. Agent — **`frontend-engineer`, a real rotation** (suite, typecheck, public scans and three mutation checks run by the agent; I re-ran suite and typecheck and recounted the residual). Extension — `871e29a`, 63 loops. **Cadence: 3 of 3 since MR-047 — MR-048 now due.**
+- **Candidate Selection: `saturation-rule` → #279** (10).
+- **Counted first; the row was off by one again** (25, not 26). Row counts have repeatedly been off in this programme; counting before editing is what catches it.
+- **The same defect, a third time:** 22 of 25 were links whose hover colour was *paler* than their resting colour — 1.52:1 on white. Loops 100 and 106 together fixed ~31 of them; nobody had ever looked at a hover state on purpose.
+- **A judgement worth recording:** one onboarding card was left off the brand tint because a *sibling's* text would have failed on it. The surface is judged by everything on it, not only the element being changed.
+- **`ds-tag-brand` is themed at last** — it had been a light-green chip on dark pages, and loop 100 found a count inside it at 1.82:1 in both themes. Its 27 users were read to confirm nothing nested now fails.
+- **Residual 25 → 0; the faint-brand-text class is closed at every shade** (500, 400, 100-300), each held by a source guard. **Filed #287:** alpha tints used as *backgrounds* behind text are a different, unmeasured class.
+- **Validation (re-run by me):** web-app **3794 → 3800**; typecheck 0; public scans 4/4 (agent).
+- **Follow-ups:** 1 created (#287), 1 closed (#279).
+
+---
+
 ## 2026-10-02 (loop 105) — An address nobody had claimed (Mode 1, `security-reviewer`)
 
 - **Controls:** Area — `security / authz` (103 security, 104 infra). Agent — **`security-reviewer`, a real rotation** (suite, typecheck and a mutation check run by the agent; I re-ran all three after changing its tests). Extension — `871e29a`, 62 loops. Cadence: 2 of 3 since MR-047.

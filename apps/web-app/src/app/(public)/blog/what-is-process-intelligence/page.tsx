@@ -181,7 +181,7 @@ export default function ProcessIntelligencePost() {
             SOP, a process map, and an intelligence report generated from real work, with a
             baseline you can measure against. You can see how the capture and processing
             pipeline works on the{' '}
-            <Link href="/product" className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors">
+            <Link href="/product" className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2 transition-colors">
               product page
             </Link>
             .

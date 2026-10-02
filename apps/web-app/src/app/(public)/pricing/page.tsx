@@ -358,7 +358,7 @@ export default function PricingPage() {
           </p>
           <Link
             href="/demo"
-            className="inline-flex items-center gap-1.5 mt-3 text-sm font-semibold text-[var(--brand-text)] hover:text-brand-300 transition-colors"
+            className="inline-flex items-center gap-1.5 mt-3 text-sm font-semibold text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] transition-colors"
           >
             Explore the interactive demo
             <ArrowRight className="h-4 w-4" />

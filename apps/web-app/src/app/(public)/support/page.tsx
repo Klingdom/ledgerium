@@ -77,7 +77,7 @@ const FAQS = [
         instructions with screenshots are on the{' '}
         <Link
           href="/install"
-          className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors"
+          className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2 transition-colors"
         >
           Install page
         </Link>
@@ -92,7 +92,7 @@ const FAQS = [
         Use the{' '}
         <Link
           href="/forgot-password"
-          className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors"
+          className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2 transition-colors"
         >
           forgot password page
         </Link>{' '}
@@ -108,7 +108,7 @@ const FAQS = [
         Compare available plans on the{' '}
         <Link
           href="/pricing"
-          className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors"
+          className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2 transition-colors"
         >
           pricing page
         </Link>
@@ -130,7 +130,7 @@ const FAQS = [
         recordings, keystrokes, or typed content. See the{' '}
         <Link
           href="/security"
-          className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors"
+          className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2 transition-colors"
         >
           Security &amp; Privacy page
         </Link>{' '}
@@ -145,7 +145,7 @@ const FAQS = [
         Email us at{' '}
         <a
           href={`mailto:${SITE_CONFIG.supportEmail}`}
-          className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors"
+          className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2 transition-colors"
         >
           {SITE_CONFIG.supportEmail}
         </a>
@@ -247,7 +247,7 @@ export default function SupportPage() {
                 </p>
                 <a
                   href={`mailto:${SITE_CONFIG.supportEmail}`}
-                  className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors text-sm"
+                  className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2 transition-colors text-sm"
                 >
                   {SITE_CONFIG.supportEmail}
                 </a>
@@ -258,7 +258,7 @@ export default function SupportPage() {
                   Evaluating Ledgerium for your organization?{' '}
                   <Link
                     href="/security"
-                    className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors"
+                    className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2 transition-colors"
                   >
                     See our enterprise security overview
                   </Link>{' '}

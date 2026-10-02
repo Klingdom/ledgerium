@@ -170,11 +170,11 @@ export default function CaptureBeforeAutomatePost() {
             so the decision is grounded in observed work rather than opinion. Re-recording after
             a change measures the result against the baseline. You can read more about finding
             candidates on the{' '}
-            <Link href="/ai-opportunities/accounts-payable" className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors">
+            <Link href="/ai-opportunities/accounts-payable" className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2 transition-colors">
               AI opportunities pages
             </Link>{' '}
             or the guide on{' '}
-            <Link href="/use-cases/problems/how-to-identify-ai-automation-opportunities" className="text-[var(--brand-text)] hover:text-brand-300 underline underline-offset-2 transition-colors">
+            <Link href="/use-cases/problems/how-to-identify-ai-automation-opportunities" className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline underline-offset-2 transition-colors">
               how to identify AI automation opportunities
             </Link>
             .

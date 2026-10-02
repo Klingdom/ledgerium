@@ -142,7 +142,7 @@ export default function TermsPage() {
 
             {/* 6. Data & Privacy */}
             <PolicySection number="6" title="Data &amp; Privacy">
-              <p>Your data is governed by our <Link href="/privacy" className="text-[var(--brand-text)] hover:text-brand-300 underline">Privacy Policy</Link>, which is incorporated into these Terms by reference.</p>
+              <p>Your data is governed by our <Link href="/privacy" className="text-[var(--brand-text)] hover:text-[var(--brand-text-hover)] underline">Privacy Policy</Link>, which is incorporated into these Terms by reference.</p>
               <ul>
                 <li>We do not sell your data to third parties.</li>
                 <li>We do not use your workflow data to train AI models.</li>
@@ -274,7 +274,7 @@ function PolicySection({
       <h3 className="text-lg font-bold text-[var(--content-primary)] mb-3 flex items-baseline gap-2">
         <span className="text-[var(--brand-text)]">{number}.</span> {title}
       </h3>
-      <div className="text-sm text-[var(--content-primary)] leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_h4]:text-sm [&_h4]:font-semibold [&_h4]:text-[var(--content-primary)] [&_h4]:mt-4 [&_h4]:mb-2 [&_a]:text-[var(--brand-text)] [&_a:hover]:text-brand-300 [&_strong]:text-[var(--content-primary)]">
+      <div className="text-sm text-[var(--content-primary)] leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_h4]:text-sm [&_h4]:font-semibold [&_h4]:text-[var(--content-primary)] [&_h4]:mt-4 [&_h4]:mb-2 [&_a]:text-[var(--brand-text)] [&_a:hover]:text-[var(--brand-text-hover)] [&_strong]:text-[var(--content-primary)]">
         {children}
       </div>
     </div>
