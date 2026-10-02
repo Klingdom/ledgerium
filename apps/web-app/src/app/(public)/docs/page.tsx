@@ -929,10 +929,10 @@ export default function DocsPage() {
                 </thead>
                 <tbody>
                   {[
-                    ['All', 'Your complete library'],
-                    ['AI Health', 'Workflows with health status indicators'],
-                    ['AI SOP Status', 'SOP readiness filtering'],
-                    ['Recently Added', 'Workflows from the last 7 days'],
+                    ['All Workflows', 'Your complete library'],
+                    ['Needs Attention', 'Workflows whose health status is needs review'],
+                    ['AI-Ready', 'Workflows with an automation score of 60 or more, best first'],
+                    ['Recently Added', 'Workflows tagged as new'],
                   ].map(([btn, desc]) => (
                     <tr key={btn}>
                       <TD><strong className="text-[var(--content-primary)]">{btn}</strong></TD>
@@ -1492,7 +1492,7 @@ export default function DocsPage() {
               <Screenshot
                 src="/docs/screenshots/analytics-process-detail.png"
                 alt="Process detail view showing intelligence summary, action items, AI opportunities, and workflow library for a specific process family."
-                caption="The Process Detail view — deep-dive into a specific process family with time study, variance analysis, and AI recommendations."
+                caption="The Process Detail view — deep-dive into a specific process family with time study, variance analysis, and rule-based recommendations."
               />
               <P>The detail view includes:</P>
               <UL>
@@ -1502,7 +1502,7 @@ export default function DocsPage() {
                 <li><strong className="text-[var(--content-primary)]">SOP alignment</strong> — alignment score, undocumented steps, drift indicators.</li>
                 <li><strong className="text-[var(--content-primary)]">Standardization scorecard</strong> — readiness for standardization.</li>
                 <li><strong className="text-[var(--content-primary)]">Automation ROI candidates</strong> — steps ranked by automation potential and impact.</li>
-                <li><strong className="text-[var(--content-primary)]">AI recommendations</strong> — specific recommendations with type, impact, confidence, effort, and evidence.</li>
+                <li><strong className="text-[var(--content-primary)]">Recommendations</strong> — rule-based, specific recommendations with type, impact, confidence, effort, and evidence.</li>
               </UL>
             </section>
 
@@ -1510,7 +1510,7 @@ export default function DocsPage() {
             <section className="mb-16">
               <H2 id="recommendations">5. Recommendations Center</H2>
               <p className="mt-2 mb-6 text-[var(--content-secondary)] leading-relaxed">
-                The Recommendations page aggregates all AI-generated recommendations across your
+                The Recommendations page aggregates all rule-based recommendations across your
                 entire workflow library into one actionable view.
               </p>
               <P>
@@ -1801,7 +1801,7 @@ export default function DocsPage() {
             <section className="mb-16">
               <H2 id="pricing">10. Plans &amp; Pricing</H2>
               <p className="mt-2 mb-6 text-[var(--content-secondary)] leading-relaxed">
-                Ledgerium AI offers five plan tiers. Annual billing saves approximately 17%
+                Ledgerium AI offers six plan tiers. Annual billing saves approximately 17%
                 compared to monthly.
               </p>
 
@@ -1818,6 +1818,7 @@ export default function DocsPage() {
                     <TH>Feature</TH>
                     <TH>Free</TH>
                     <TH>Starter</TH>
+                    <TH>Solo</TH>
                     <TH>Team</TH>
                     <TH>Growth</TH>
                     <TH>Enterprise</TH>
@@ -1825,23 +1826,24 @@ export default function DocsPage() {
                 </thead>
                 <tbody>
                   {[
-                    ['Price (monthly)', '$0', '$49', '$249', '$799', 'Custom'],
-                    ['Price (annual)', '—', '$41/mo', '$207/mo', '$665/mo', 'Custom'],
-                    ['Seats', '1 user', '1 recorder', '3 recorders + 5 viewers', '10 recorders, 15 seats', 'Custom'],
-                    ['Recordings/month', '5', '15', 'Unlimited', 'Unlimited', 'Custom'],
-                    ['SOP + process map', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes'],
-                    ['Public sharing', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes'],
-                    ['Clean exports', 'No', 'Yes', 'Yes', 'Yes', 'Yes'],
-                    ['Health scores', 'No', 'Yes', 'Yes', 'Yes', 'Yes'],
-                    ['Full intelligence layer', 'No', 'No', 'Yes', 'Yes', 'Yes'],
-                    ['Bottleneck & friction analysis', 'No', 'No', 'Yes', 'Yes', 'Yes'],
-                    ['Automation scoring', 'No', 'No', 'Yes', 'Yes', 'Yes'],
-                    ['Shared team library', 'No', 'No', 'Yes', 'Yes', 'Yes'],
-                    ['Advanced analytics', 'No', 'No', 'No', 'Yes', 'Yes'],
-                    ['AI agent composition', 'No', 'No', 'No', 'Yes', 'Yes'],
-                    ['SSO & RBAC', 'No', 'No', 'No', 'No', 'Yes'],
-                    ['Audit trail', 'No', 'No', 'No', 'No', 'Yes'],
-                    ['On-premise option', 'No', 'No', 'No', 'No', 'Yes'],
+                    ['Price (monthly)', '$0', '$49', '$89', '$249', '$799', 'Custom'],
+                    ['Price (annual)', '—', '$41/mo', '$74/mo', '$207/mo', '$665/mo', 'Custom'],
+                    ['Seats', '1 user', '1 user', '1 user', '5 users (3 recorders)', '15 users (10 recorders)', 'Custom'],
+                    ['Recordings/month', '5', '15', 'Unlimited', 'Unlimited', 'Unlimited', 'Custom'],
+                    ['SOP + process map', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes'],
+                    ['Public sharing', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes'],
+                    ['Clean exports', 'No', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes'],
+                    ['Health scores', 'No', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes'],
+                    ['Full intelligence layer', 'No', 'No', 'Yes', 'Yes', 'Yes', 'Yes'],
+                    ['Bottleneck & friction analysis', 'No', 'No', 'Yes', 'Yes', 'Yes', 'Yes'],
+                    ['Automation scoring', 'No', 'No', 'Yes', 'Yes', 'Yes', 'Yes'],
+                    ['Shared team library', 'No', 'No', 'No', 'Yes', 'Yes', 'Yes'],
+                    ['Advanced analytics', 'No', 'No', 'No', 'No', 'Yes', 'Yes'],
+                    ['AI agent composition', 'No', 'No', 'No', 'No', 'Yes', 'Yes'],
+                    ['Role-based team access (owner, admin, member, viewer)', 'No', 'No', 'No', 'Yes', 'Yes', 'Yes'],
+                    ['SSO', 'No', 'No', 'No', 'No', 'No', 'Roadmap'],
+                    ['Audit trail', 'No', 'No', 'No', 'No', 'No', 'Roadmap'],
+                    ['On-premise deployment', 'No', 'No', 'No', 'No', 'No', 'Roadmap'],
                   ].map(([feature, ...vals]) => (
                     <tr key={feature}>
                       <TD><strong className="text-[var(--content-primary)]">{feature}</strong></TD>
@@ -1863,9 +1865,22 @@ export default function DocsPage() {
                 health scores.
               </P>
               <P>
+                <strong className="text-[var(--content-primary)]">Solo ($89/mo)</strong> — For one person who wants the full
+                intelligence layer: unlimited recordings, bottleneck analysis, automation
+                scoring and variant detection.
+              </P>
+              <P>
                 <strong className="text-[var(--content-primary)]">Team ($249/mo)</strong> — For process improvement teams.
                 Unlimited recordings, full intelligence layer, bottleneck analysis, automation
-                scoring, shared team workspace.
+                scoring, shared team workspace. Team and Growth are currently available by
+                waitlist; contact{' '}
+                <a
+                  href="mailto:hello@ledgerium.ai?subject=Team%20Plan%20Waitlist"
+                  className="text-[var(--brand-text)] hover:underline"
+                >
+                  hello@ledgerium.ai
+                </a>
+                .
               </P>
               <P>
                 <strong className="text-[var(--content-primary)]">Growth ($799/mo)</strong> — For AI implementation leads.
@@ -1874,8 +1889,9 @@ export default function DocsPage() {
               </P>
               <P>
                 <strong className="text-[var(--content-primary)]">Enterprise (custom)</strong> — For compliance-sensitive or
-                large-scale deployments. SSO, RBAC, audit trail, on-premise option, custom
-                retention. Contact{' '}
+                large-scale deployments. Custom seats, role-based team access (owner, admin,
+                member, viewer) and dedicated support. On the roadmap: SSO, audit trail &amp; compliance
+                exports, on-premise deployment, custom retention. Contact{' '}
                 <a
                   href="mailto:hello@ledgerium.ai?subject=Ledgerium%20Enterprise"
                   className="text-[var(--brand-text)] hover:underline"

@@ -149,3 +149,112 @@ describe('#34: Starter health-score copy agrees with lib/plans.ts', () => {
     expect(faq).toMatch(/Available on Solo and above./);
   });
 });
+
+/* ───────────────────────── #313: docs + AI-SOP wording ───────────────────────── */
+
+const readSrc = (...p: string[]) => readFileSync(rel(...p), 'utf8');
+const PUBLIC_FILES = walk(rel('app', '(public)'));
+
+describe('#313: the docs page is under the forward-dated-promise scan', () => {
+  it('docs/page.tsx is in SCANNED', () => {
+    expect(SCANNED).toContain(rel('app', '(public)', 'docs', 'page.tsx'));
+  });
+});
+
+describe('#313: docs page agrees with lib/plans.ts on Enterprise features', () => {
+  const docs = readSrc('app', '(public)', 'docs', 'page.tsx');
+  const unbuilt = [['SSO'], ['audit trail'], ['on-premise']] as const;
+
+  it('the unbuilt features exist only as plan flags (Roadmap until something enforces them)', () => {
+    for (const k of ['sso', 'auditTrail', 'complianceExports', 'customRetention'] as const) {
+      expect(PLAN_FEATURES.enterprise.features[k]).toBe(true); // flag only
+      expect(PLAN_FEATURES.growth.features[k]).toBe(false);
+    }
+  });
+  it('docs never lists SSO / audit trail / on-premise / custom retention as present', () => {
+    expect(docs).not.toMatch(/SSO, RBAC, audit trail, on-premise option, custom/);
+    expect(docs).not.toMatch(/\['SSO & RBAC'/);
+    for (const [label] of unbuilt) {
+      const rows = docs.split(/\r?\n/).filter((l) => l.trim().toLowerCase().startsWith(`['${label.toLowerCase()}`));
+      expect(rows.length).toBeGreaterThan(0);
+      for (const r of rows) expect(r).toMatch(/Roadmap/);
+    }
+    expect(docs).toMatch(/On the roadmap: SSO, audit trail &amp; compliance\s+exports, on-premise deployment, custom retention/);
+  });
+  it('docs states role-based team access with the four enforced roles', () => {
+    expect(docs).toMatch(/Role-based team access \(owner, admin, member, viewer\)/);
+  });
+  it('docs plan table has a Solo column and matches plan limits', () => {
+    expect(docs).toMatch(/<TH>Solo<\/TH>/);
+    expect(PLAN_FEATURES.team.maxSeats).toBe(5);
+    expect(PLAN_FEATURES.team.maxRecorders).toBe(3);
+    expect(docs).toMatch(/'5 users \(3 recorders\)', '15 users \(10 recorders\)'/);
+    expect(PLAN_FEATURES.growth.maxSeats).toBe(15);
+    expect(PLAN_FEATURES.growth.maxRecorders).toBe(10);
+  });
+});
+
+describe('#313: pricing, docs and security all say "Roadmap" for unbuilt Enterprise features', () => {
+  const pages = {
+    pricing: readSrc('app', '(public)', 'pricing', 'page.tsx'),
+    docs: readSrc('app', '(public)', 'docs', 'page.tsx'),
+    security: readSrc('app', '(public)', 'security', 'page.tsx'),
+  };
+  it('each page renders the Roadmap label', () => {
+    for (const src of Object.values(pages)) expect(src).toMatch(/Roadmap|on the roadmap/i);
+  });
+  it('no page renders "coming soon" as visible text', () => {
+    for (const src of Object.values(pages)) {
+      // identifiers like 'coming-soon' (hyphenated) are code, not copy
+      expect(src).not.toMatch(/coming soon/i);
+    }
+  });
+  it('security badge for SSO / custom retention / on-prem is Roadmap', () => {
+    expect(pages.security).toMatch(/status: 'roadmap'/);
+    expect(pages.security).not.toMatch(/'coming-soon'/);
+    expect(pages.security).toMatch(/>\s*Roadmap\s*</);
+  });
+});
+
+describe('#313: SOP generation is deterministic, and every public page says so', () => {
+  // Traced truth: renderSOP (packages/process-engine/src/sopTemplates.ts) and
+  // buildSOP (sopBuilder.ts) are template/rule rendering over captured events;
+  // agent-intelligence declares "deterministic and rule-based (no LLM calls)";
+  // no LLM SDK is a dependency of any package that produces SOP text.
+  const repo = path.resolve(SRC, '..', '..', '..');
+  const LLM_DEP = /anthropic|openai|@google\/generative|cohere|mistral|langchain|ai-sdk|"ai"\s*:/i;
+
+  it('no LLM SDK is a dependency of the web-app or the SOP-producing packages', () => {
+    for (const pkg of [
+      ['apps', 'web-app'],
+      ['packages', 'process-engine'],
+      ['packages', 'agent-intelligence'],
+      ['packages', 'intelligence-engine'],
+    ]) {
+      const json = readFileSync(path.join(repo, ...pkg, 'package.json'), 'utf8');
+      expect(json, pkg.join('/')).not.toMatch(LLM_DEP);
+    }
+  });
+
+  const allPublic = PUBLIC_FILES.map((f) => ({ f, text: readFileSync(f, 'utf8') }));
+  const CLAIMS_AI_WROTE_IT = /AI[- ]generated SOPs?|SOPs? (is|are|was) (written|generated|created) (by|with) AI|AI[- ]written|AI[- ]powered SOP/i;
+
+  it('no public page says SOPs are AI-generated / AI-written', () => {
+    for (const { f, text } of allPublic) {
+      expect(text.match(CLAIMS_AI_WROTE_IT), path.relative(SRC, f)).toBeNull();
+    }
+  });
+  it('pricing and security both say SOPs are not rewritten by AI (agree)', () => {
+    const pricing = readSrc('app', '(public)', 'pricing', 'page.tsx');
+    const security = readSrc('app', '(public)', 'security', 'page.tsx');
+    expect(security).toMatch(/No AI rewriting/);
+    expect(pricing).toMatch(/rather than rewritten by AI/);
+    expect(pricing).toMatch(/Evidence-linked SOPs/);
+    expect(pricing).toMatch(/An evidence-linked SOP/);
+  });
+  it('docs labels recommendations as rule-based, not AI-generated', () => {
+    const docs = readSrc('app', '(public)', 'docs', 'page.tsx');
+    expect(docs).not.toMatch(/AI-generated/i);
+    expect(docs).toMatch(/rule-based recommendations/);
+  });
+});

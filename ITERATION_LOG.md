@@ -4,6 +4,41 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 130) — Nothing here is written by AI (Mode 1, `frontend-engineer` + `growth-strategist`)
+
+- **Controls:**
+  - **Area:** `web-app / trust`. Web-app was 2 of the last 3 loops (129, 130); there is no 3-consecutive run, because 128 was test-infra.
+  - **Agents:** `frontend-engineer` ran three passes. `growth-strategist` was the required D-4 clause-1 reviewer (~20 strings changed); its verdict was mostly KEEP with 3 POLISH, all applied, plus one consistency fix I found afterwards.
+  - **Extension:** `871e29a`, 87 loops untouched.
+  - **Cadence:** **3 of 3 since MR-055 — MR-056 is now due.**
+- **Candidate Selection: `burn-down` — #313** (11).
+  - This took precedence over #309 (10), which MR-055 had planned for this slot before #313 was filed. The higher score decided it; the deviation is stated here.
+- **The trace, done before any copy changed:** **no SOP text and no recommendation is produced by a model.**
+  - SOP text is rendered from captured events by rules and templates (`process-engine` `sopBuilder.ts`, `sopTemplates.ts`).
+  - Recommendations are rule-based (`agent-intelligence`: "no LLM calls").
+  - No LLM SDK appears in any relevant package.
+  - Therefore the pricing page's "AI-generated SOPs" (3 places) and the docs' "AI-generated recommendations" were false, and the security page's "No AI rewriting" was true.
+- **The docs page was also stale:**
+  - It listed SSO, RBAC, audit trail, on-premise and custom retention as available.
+  - It had no Solo plan, said "five tiers", and gave wrong Team seat wording.
+  - It listed two dashboard presets that do not exist.
+  - It showed Team and Growth as buyable.
+  - All of this is now corrected to match `plans.ts` and loop 129's pricing wording.
+- **One term across all three pages:** "Roadmap" ("on the roadmap" in prose) replaces "coming soon", because "coming soon" implies a ship date. A test pins pricing, docs and security to the same term.
+- **Tests added to `pricing-copy.test.ts` (+12):**
+  - Docs plan facts are pinned to `plans.ts`.
+  - No public page may say "AI-generated SOP".
+  - Pricing and security must agree on the AI wording.
+  - The Roadmap term must be consistent across the three pages.
+  - **A deliberate tripwire:** no LLM SDK may appear in the relevant `package.json` files. When the planned Claude phase begins, this test forces the "No AI rewriting" claim to be revisited. It does not forbid AI.
+  - **Revert proof:** restoring the old docs and pricing files fails 6 tests.
+- **Positioning (growth-strategist, for the CEO):** "evidence-linked, generated from what was observed rather than rewritten by AI" is the strongest true framing. It turns "no model" into the moat, because competitors' output varies between runs and Ledgerium's does not.
+  - The remaining public "AI" labels are ambiguous or lean false. They are filed as **#314** for a CEO decision, not changed: the home title's "AI Insights", the "AI Agents" tab and "AI Agent Analysis", the "AI-Ready" and "AI Opportunity" wording, and "where AI can help".
+- **Validation (exit code + ANSI-stripped summary):** web-app **4111 → 4123** on 3 of 3 runs; root **5889 → 5901**; typecheck 0.
+- **Follow-ups:** 1 created (#314), 1 closed (#313).
+
+---
+
 ## 2026-10-02 (loop 129) — Selling what is built (Mode 1, `frontend-engineer` + `growth-strategist`)
 
 - **Controls:**

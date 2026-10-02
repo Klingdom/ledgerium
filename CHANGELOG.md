@@ -6,6 +6,15 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Describing SOPs accurately
+
+### Fixed
+- The pricing and documentation pages described SOPs and recommendations as AI-generated. They are produced from what was observed using fixed rules, and the pages now say so.
+- The documentation page now lists the same plans and features as the pricing page; features not yet built are marked as on the roadmap everywhere.
+
+---
+
+
 ## [2026-10-02] - Plans list only what is available today
 
 ### Fixed

@@ -123,13 +123,13 @@ const COMPLIANCE_CARDS = [
   },
 ] as const;
 
-type FeatureAvailability = 'available' | 'coming-soon';
+type FeatureAvailability = 'available' | 'roadmap';
 
 const ENTERPRISE_FEATURES: Array<{ label: string; status: FeatureAvailability }> = [
   { label: 'Role-based team access (owner, admin, member, viewer)', status: 'available' },
-  { label: 'SSO integration', status: 'coming-soon' },
-  { label: 'Custom data retention policies', status: 'coming-soon' },
-  { label: 'On-premise deployment', status: 'coming-soon' },
+  { label: 'SSO integration', status: 'roadmap' },
+  { label: 'Custom data retention policies', status: 'roadmap' },
+  { label: 'On-premise deployment', status: 'roadmap' },
   { label: 'Dedicated support', status: 'available' },
   { label: 'Custom SLAs', status: 'available' },
 ];
@@ -144,7 +144,7 @@ function AvailabilityBadge({ status }: { status: FeatureAvailability }) {
   }
   return (
     <span className="inline-flex items-center gap-1 rounded-full bg-amber-900/30 border border-amber-700/40 px-2.5 py-0.5 text-[11px] font-medium text-[var(--status-warning)]">
-      Coming soon
+      Roadmap
     </span>
   );
 }

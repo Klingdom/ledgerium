@@ -11,7 +11,7 @@ import { GUIDED_ONBOARDING_SKU } from '@/lib/service-skus';
 export const metadata: Metadata = {
   title: 'Process Intelligence Pricing — Ledgerium AI',
   description:
-    'Free plan available. One Chrome extension captures every workflow and turns it into AI-generated SOPs, process maps, and variation analysis. Plans from $49/mo.',
+    'Free plan available. One Chrome extension captures every workflow and turns it into SOPs, process maps, and variation analysis, generated from what was observed rather than rewritten by AI. Plans from $49/mo.',
   alternates: { canonical: '/pricing' },
   openGraph: {
     title: 'Record Once. Know Everything. — Process Intelligence Pricing | Ledgerium',
@@ -51,7 +51,7 @@ const FAQ = [
   },
   {
     q: 'Is my data private?',
-    a: 'Yes. Your workflow data is stored in your workspace and never shared with third parties. All processing is deterministic and auditable. Custom retention policies and on-premise deployment for Enterprise are coming soon.',
+    a: 'Yes. Your workflow data is stored in your workspace and never shared with third parties. All processing is deterministic and auditable. Custom retention policies and on-premise deployment for Enterprise are on the roadmap.',
   },
   {
     q: 'How is Ledgerium different from Scribe or Tango?',
@@ -73,7 +73,7 @@ const COMPARISON_FEATURES = [
   { label: 'Workflows / month',    free: '5',         starter: '15', solo: 'Unlimited',       team: 'Unlimited', growth: 'Unlimited', enterprise: 'Custom' },
 
   // What You Get
-  { label: 'AI-generated SOPs',           free: true,  starter: true, solo: true,  team: true,  growth: true,  enterprise: true,  category: 'What You Get' },
+  { label: 'Evidence-linked SOPs',         free: true,  starter: true, solo: true,  team: true,  growth: true,  enterprise: true,  category: 'What You Get' },
   { label: 'Visual process maps',         free: true,  starter: true, solo: true,  team: true,  growth: true,  enterprise: true },
   { label: 'Process health scores',       free: false, starter: true, solo: true,  team: true,  growth: true,  enterprise: true },
   { label: 'Full intelligence layer',     free: false, starter: false, solo: true, team: true,  growth: true,  enterprise: true },
@@ -103,7 +103,7 @@ function ComparisonCell({ value }: { value: CellValue }) {
   if (value === 'coming-soon') {
     return (
       <span className="inline-block text-[var(--status-warning)] bg-amber-900/20 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap">
-        Coming soon
+        Roadmap
       </span>
     );
   }
@@ -151,7 +151,7 @@ export default function PricingPage() {
             <li className="flex items-start gap-2">
               <Check className="h-4 w-4 text-[var(--brand-text)] mt-0.5 flex-shrink-0" aria-hidden="true" />
               <span className="text-sm text-[var(--content-primary)] leading-snug">
-                An AI-generated SOP — ready to share or train from
+                An evidence-linked SOP — ready to share or train from
               </span>
             </li>
             <li className="flex items-start gap-2">
