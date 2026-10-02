@@ -118,7 +118,13 @@ async function handleGET(req: NextRequest) {
 
   try {
     const params = req.nextUrl.searchParams;
-    const days = parseInt(params.get('days') ?? '30', 10);
+    const days = parseDaysParam(params.get('days'));
+    if (days === null) {
+      return NextResponse.json(
+        { error: `days must be an integer between 1 and ${MAX_DAYS}` },
+        { status: 400 },
+      );
+    }
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
     // Get all events in window
@@ -200,6 +206,22 @@ async function handleGET(req: NextRequest) {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/**
+ * Row #254. `parseInt('abc')` is NaN, which became an invalid Date and a Prisma
+ * throw — a client typo reported as a server failure. Accept only a plain
+ * base-10 integer in [1, MAX_DAYS]; absent means the 30-day default.
+ * 365 = one year of lookback: the query loads every event in the window with no
+ * row limit (also #254), so the bound doubles as a cap on that cost.
+ * (Not exported: Next route files may only export HTTP methods and config.)
+ */
+const MAX_DAYS = 365;
+function parseDaysParam(raw: string | null): number | null {
+  if (raw === null) return 30;
+  if (!/^\d{1,6}$/.test(raw)) return null;
+  const n = Number(raw);
+  return n >= 1 && n <= MAX_DAYS ? n : null;
+}
 
 function filterProperties(event: any): Record<string, unknown> {
   // visitorId is stripped here too — it is now stored in the first-class

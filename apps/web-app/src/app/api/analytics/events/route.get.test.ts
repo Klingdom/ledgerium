@@ -71,3 +71,37 @@ describe('GET /api/analytics/events dashboardV2Retirement', () => {
     expect(findMany).not.toHaveBeenCalled();
   });
 });
+
+describe('GET /api/analytics/events ?days= validation (row #254)', () => {
+  let GET: (req: NextRequest) => Promise<Response>;
+
+  beforeEach(async () => {
+    vi.resetModules();
+    findMany.mockReset().mockResolvedValue([]);
+    authMock.mockReset().mockResolvedValue({ user: { id: 'a', isAdmin: true } });
+    GET = (await import('./route.js')).GET;
+  });
+
+  const call = (q: string) => GET(new NextRequest(`http://localhost/api/analytics/events${q}`));
+
+  it.each(['abc', '-1', '0', '1.5', '366', '99999999999', '', '1e3', '%20'])(
+    '?days=%s is 400 and never reaches the database',
+    async (v) => {
+      const res = await call(`?days=${v}`);
+      expect(res.status).toBe(400);
+      expect(findMany).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(['1', '30', '365'])('?days=%s is accepted', async (v) => {
+    const res = await call(`?days=${v}`);
+    expect(res.status).toBe(200);
+    expect((await res.json()).summary.periodDays).toBe(Number(v));
+  });
+
+  it('absent days defaults to 30', async () => {
+    const res = await call('');
+    expect(res.status).toBe(200);
+    expect((await res.json()).summary.periodDays).toBe(30);
+  });
+});

@@ -4,6 +4,21 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 (loop 86) — A client's mistake is not a server failure (Mode 1, `backend-engineer`)
+
+- **Controls:** Area — `web-app / api` (84 a11y, 85 infra). Agent — **`backend-engineer`, a real rotation** (it ran the suite, typecheck and both mutation checks itself; I re-ran the suite and typecheck). Extension — `871e29a`, 43 loops; #216 CEO-blocked. Cadence: 2 of 3 since MR-041.
+- **Candidate Selection: `burn-down` — #258 merged with #254** (10 / 12), per MR-041 §7's ordering and its observation that they are one outcome: client input reported as server failure. Timed deliberately after loop 85 — once the alert can reach someone, every false `api_error` pages a person.
+- **Mechanism built on the previous correction.** Since MR-041, `withApiRoute` passes a thrown `Response` through untouched. So `readJsonBody` simply throws a 400 — no per-route plumbing.
+- **The trap was real, and it was where the risk was.** Six converted routes parse inside their own broad `try { … } catch { return 500 }`. That catch would have caught the thrown 400 and turned it straight back into a reported 500 — the fix would have looked applied and changed nothing. Each catch now returns a caught `Response` as-is. The agent proved it: deleting that one line from the teams route turned its malformed-body test from passing into three failures.
+- **Residual stated as a property, determined per site by reading the code: routes where a malformed body yields a 5xx, 12 → 0.** Of 35 `req.json()` sites, 13 were genuinely unguarded. **Both earlier numbers were wrong** — my loop-83 "35" counted a token; MR-041's "at most ~20" recount was also high. Only reading each enclosing block got it right. That is the strongest evidence yet for MR-041's point that a residual must be a property.
+- **`?days=`** accepts only an integer 1-365; everything else is a 400 before any query. The bound also caps the route's unbounded window load.
+- **One thing I corrected:** the helper returns `Promise<any>` with no stated reason, against CLAUDE.md. There is a real one — parity with `Request.json()`, itself `Promise<any>`, so no converted route's typing changes — now written in place. Narrowing to `unknown` needs a schema at each site, which is #261.
+- **Guard:** fails on any new bare `req.json()`/`request.json()` outside an exact, reasoned allowlist; a stale allowlist entry fails too. Mutation-checked. Its stated limit: it cannot see what a catch block returns — the trap routes are held by their own tests.
+- **Validation:** web-app **3348 → 3372** (+24); `pnpm -r typecheck` exit 0 (the agent saw one transient `ERR_PNPM_JSON_PARSE` from a malformed `package.json` **outside this repo** that `pnpm -r` picked up — cleared on re-run; noted because a recursive command reaching outside the repo is itself worth knowing).
+- **Follow-ups:** 1 created (#261 — well-formed JSON of the wrong shape can still TypeError into a 500), 2 closed (#258, #254).
+
+---
+
 ## 2026-10-01 (loop 85) — Making the alert reach someone (Mode 1, `devops-engineer`)
 
 - **Controls:** Area — `infra / deploy`. Agent — **`devops-engineer`, a real rotation**: it ran the suite, typecheck, YAML parses, `docker compose config` and the stub cases itself; I re-ran the suite, typecheck and stub independently. Extension — `871e29a`, 42 loops; #216 CEO-blocked. Cadence: 1 of 3 since MR-041.

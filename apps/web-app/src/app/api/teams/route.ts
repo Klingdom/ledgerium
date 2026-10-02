@@ -1,4 +1,5 @@
 import { withApiRoute } from '@/lib/with-api-route';
+import { readJsonBody } from '@/lib/read-json-body';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -100,7 +101,7 @@ async function handlePOST(req: NextRequest) {
   }
 
   try {
-    const body = await req.json();
+    const body = await readJsonBody(req, { object: true });
     const name = body.name?.trim();
 
     if (!name || name.length < 2) {
@@ -134,6 +135,8 @@ async function handlePOST(req: NextRequest) {
 
     return NextResponse.json({ id: team.id, name: team.name, slug: team.slug });
   } catch (err) {
+    // readJsonBody throws a 400 Response for a malformed body; do not turn it into a 500.
+    if (err instanceof Response) return err;
     console.error('[teams/POST] Error:', err);
     reportApiError('/api/teams', 500);
     return NextResponse.json({ error: 'Failed to create team' }, { status: 500 });

@@ -155,3 +155,68 @@ describe('api_error coverage guard (row #246)', () => {
     }
   });
 });
+
+describe('malformed-body guard (row #258)', () => {
+  /**
+   * A bare `req.json()` turns `{not json` into a thrown SyntaxError → a 500 that
+   * counts against `api_error_spike`: a client mistake reported as a server
+   * failure. A direct parse is allowed only when (a) it carries `.catch(`, or
+   * (b) the file is listed here with the reason its failure is NOT a 5xx.
+   * Everything else must go through `readJsonBody` (lib/read-json-body.ts).
+   *
+   * MR-041: the first count of this defect was a grep for the token and was
+   * wrong by ~2x. This test checks the property per call site, and the list is
+   * exact — a stale entry (site removed or converted) also fails, so the
+   * allowlist cannot rot into a blanket exemption. The reasons are asserted by
+   * review, not by this test: it cannot see what a catch block returns, which
+   * is why each converted route that has its own try/catch has a route test.
+   */
+  const ALLOWED: Record<string, { sites: number; reason: string }> = {
+    'api/admin/alerts/route.ts': { sites: 1, reason: 'own try; catch falls back to the default threshold' },
+    'api/admin/email-test/route.ts': { sites: 1, reason: 'own try; catch falls back to the default recipient' },
+    'api/admin/normalize-emails/route.ts': { sites: 1, reason: 'own try; catch falls back to dry-run' },
+    'api/agent-intelligence/portfolio/route.ts': { sites: 1, reason: 'own try; catch analyses all workflows' },
+    'api/admin/password-reset-link/route.ts': { sites: 1, reason: 'own try; catch returns 400 bad_request' },
+    'api/analytics/compare/route.ts': { sites: 1, reason: 'own try; catch returns 400' },
+    'api/analytics/extension/route.ts': { sites: 1, reason: 'own try; catch returns 400' },
+    'api/analytics/process-diff/route.ts': { sites: 1, reason: 'own try; catch returns 400 INVALID_JSON' },
+    'api/dashboard/preferences/route.ts': { sites: 1, reason: 'own try; catch returns 400' },
+    'api/sync/route.ts': { sites: 1, reason: 'own try; catch returns 400' },
+    'api/workflows/[id]/ask/route.ts': { sites: 1, reason: 'own try; catch returns 400 INVALID_QUESTION' },
+    'api/analytics/events/route.ts': {
+      sites: 1,
+      reason: 'fire-and-forget beacon: malformed batch answers 200 ok:false by design (#243), not a 5xx',
+    },
+  };
+
+  const BARE = /\b(?:req|request)\.json\(\)/;
+
+  function bareSites(): Map<string, number[]> {
+    const out = new Map<string, number[]>();
+    for (const r of ALL_ROUTES) {
+      r.lines.forEach((line, i) => {
+        if (!BARE.test(line)) return;
+        const next = r.lines[i + 1] ?? '';
+        if (/\.catch\(/.test(line) || /^\s*\.catch\(/.test(next)) return;
+        const key = r.file;
+        out.set(key, [...(out.get(key) ?? []), i + 1]);
+      });
+    }
+    return out;
+  }
+
+  // ALL_ROUTES paths are relative to app/, e.g. api/tags/route.ts.
+  it('no route parses a body with a bare req.json() unless allowlisted with a reason', () => {
+    const found = bareSites();
+    const unlisted = [...found].filter(([f]) => !(f in ALLOWED)).map(([f, ls]) => `${f}:${ls.join(',')}`);
+    expect(unlisted, 'use readJsonBody(req) from @/lib/read-json-body, or add `.catch(`').toEqual([]);
+  });
+
+  it('every allowlist entry still matches exactly its stated number of sites (no stale exemptions)', () => {
+    const found = bareSites();
+    const stale = Object.entries(ALLOWED)
+      .filter(([f, a]) => (found.get(f)?.length ?? 0) !== a.sites)
+      .map(([f]) => f);
+    expect(stale).toEqual([]);
+  });
+});

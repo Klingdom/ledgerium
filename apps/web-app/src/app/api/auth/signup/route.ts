@@ -1,4 +1,5 @@
 import { withApiRoute } from '@/lib/with-api-route';
+import { readJsonBody } from '@/lib/read-json-body';
 import { NextRequest, NextResponse } from 'next/server';
 import { hash } from 'bcryptjs';
 import { db } from '@/db';
@@ -29,7 +30,7 @@ const signupSchema = z.object({
 
 async function handlePOST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const parsed = signupSchema.safeParse(body);
 
     if (!parsed.success) {
@@ -115,7 +116,9 @@ async function handlePOST(req: NextRequest) {
     trackServer('signup_completed', { userId: user.id, visitorId: visitorId ?? undefined });
 
     return NextResponse.json({ id: user.id, email: user.email }, { status: 201 });
-  } catch {
+  } catch (err) {
+    // readJsonBody throws a 400 Response for a malformed body; do not turn it into a 500.
+    if (err instanceof Response) return err;
     reportApiError('/api/auth/signup', 500);
     return NextResponse.json(
       { error: 'Internal server error' },

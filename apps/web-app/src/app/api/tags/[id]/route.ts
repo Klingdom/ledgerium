@@ -1,4 +1,5 @@
 import { withApiRoute } from '@/lib/with-api-route';
+import { readJsonBody } from '@/lib/read-json-body';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -25,7 +26,7 @@ async function handlePATCH(
     return NextResponse.json({ error: 'Tag not found' }, { status: 404 });
   }
 
-  const body = await req.json();
+  const body = await readJsonBody(req);
   const parsed = updateTagSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(

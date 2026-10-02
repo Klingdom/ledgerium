@@ -1,4 +1,5 @@
 import { withApiRoute } from '@/lib/with-api-route';
+import { readJsonBody } from '@/lib/read-json-body';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -92,7 +93,7 @@ async function handlePOST(
       return NextResponse.json({ error: 'Workflow not found' }, { status: 404 });
     }
 
-    const body = await req.json();
+    const body = await readJsonBody(req, { object: true });
     const { email, teamId, permission } = body;
 
     if (!email && !teamId) {
@@ -165,6 +166,8 @@ async function handlePOST(
 
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   } catch (err) {
+    // readJsonBody throws a 400 Response for a malformed body; do not turn it into a 500.
+    if (err instanceof Response) return err;
     console.error('[workflows/share/POST]', err);
     reportApiError('/api/workflows/[id]/share', 500);
     return NextResponse.json({ error: 'Failed to share workflow' }, { status: 500 });
@@ -188,7 +191,7 @@ async function handleDELETE(
       return NextResponse.json({ error: 'Workflow not found' }, { status: 404 });
     }
 
-    const body = await req.json();
+    const body = await readJsonBody(req, { object: true });
     const shareId = body.shareId;
 
     if (!shareId) {
@@ -201,6 +204,8 @@ async function handleDELETE(
 
     return NextResponse.json({ ok: true });
   } catch (err) {
+    // readJsonBody throws a 400 Response for a malformed body; do not turn it into a 500.
+    if (err instanceof Response) return err;
     console.error('[workflows/share/DELETE]', err);
     reportApiError('/api/workflows/[id]/share', 500);
     return NextResponse.json({ error: 'Failed to revoke share' }, { status: 500 });

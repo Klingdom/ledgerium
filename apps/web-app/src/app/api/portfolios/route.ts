@@ -1,4 +1,5 @@
 import { withApiRoute } from '@/lib/with-api-route';
+import { readJsonBody } from '@/lib/read-json-body';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -115,7 +116,7 @@ async function handlePOST(req: NextRequest) {
     );
   }
 
-  const body = await req.json();
+  const body = await readJsonBody(req);
   const parsed = createPortfolioSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(

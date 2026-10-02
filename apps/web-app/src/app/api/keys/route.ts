@@ -1,4 +1,5 @@
 import { withApiRoute } from '@/lib/with-api-route';
+import { readJsonBody } from '@/lib/read-json-body';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -58,7 +59,7 @@ async function handleDELETE(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { id } = await req.json() as { id: string };
+  const { id } = (await readJsonBody(req, { object: true })) as { id: string };
 
   const key = await db.apiKey.findFirst({
     where: { id, userId: session.user.id },

@@ -6,6 +6,17 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-01] - A badly formed request is now answered as one
+
+### Fixed
+- Sending a badly formed request to thirteen endpoints used to be answered as a server error, and would have counted against the service's error alert. They now answer "bad request", which is accurate and does not raise a false alarm.
+- The analytics report's look-back period now only accepts a whole number of days from 1 to 365; anything else is rejected as a bad request instead of failing.
+
+### Known gap
+- A request that is correctly formed but has a field of the wrong type can still be answered as a server error on some endpoints. Recorded as backlog #261.
+
+---
+
 ## [2026-10-01] - Alerts can now reach someone in production
 
 ### Fixed

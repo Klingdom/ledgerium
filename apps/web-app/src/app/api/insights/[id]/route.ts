@@ -1,4 +1,5 @@
 import { withApiRoute } from '@/lib/with-api-route';
+import { readJsonBody } from '@/lib/read-json-body';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -45,7 +46,7 @@ async function handlePATCH(
     return NextResponse.json({ error: 'Insight not found' }, { status: 404 });
   }
 
-  const body = await req.json();
+  const body = await readJsonBody(req, { object: true });
   const data: Record<string, unknown> = {};
   if (typeof body.dismissed === 'boolean') data.dismissed = body.dismissed;
 

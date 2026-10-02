@@ -10,13 +10,13 @@ import { DELETE } from './route';
 import { trackServer } from '@/lib/analytics-server';
 
 describe('DELETE /api/keys malformed body (row #16)', () => {
-  it('yields the non-leaking 500 and reports api_error, rather than an unobserved crash', async () => {
+  it('answers 400 and reports NO api_error (row #258; was a reported 500 under row #16)', async () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const req = new NextRequest('http://localhost/api/keys', { method: 'DELETE', body: '{not json' });
     const res = await DELETE(req);
-    expect(res.status).toBe(500);
-    expect(await res.json()).toEqual({ error: 'Internal server error' });
-    expect(trackServer).toHaveBeenCalledWith('api_error', { endpoint: '/api/keys', status: 500 });
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: 'Invalid JSON body' });
+    expect(trackServer).not.toHaveBeenCalledWith('api_error', expect.anything());
     spy.mockRestore();
   });
 });

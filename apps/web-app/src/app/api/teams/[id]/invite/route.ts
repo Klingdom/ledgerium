@@ -1,4 +1,5 @@
 import { withApiRoute } from '@/lib/with-api-route';
+import { readJsonBody } from '@/lib/read-json-body';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/db';
@@ -74,7 +75,7 @@ async function handlePOST(
       return NextResponse.json({ error: 'Only owners and admins can invite members' }, { status: 403 });
     }
 
-    const body = await req.json();
+    const body = await readJsonBody(req, { object: true });
     const email = body.email ? normalizeEmail(body.email) : body.email;
     const role = body.role ?? 'member';
 
@@ -248,6 +249,8 @@ async function handlePOST(
       expiresAt,
     });
   } catch (err) {
+    // readJsonBody throws a 400 Response for a malformed body; do not turn it into a 500.
+    if (err instanceof Response) return err;
     console.error('[teams/invite/POST]', err);
     reportApiError('/api/teams/[id]/invite', 500);
     return NextResponse.json({ error: 'Failed to create invite' }, { status: 500 });
