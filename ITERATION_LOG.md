@@ -4,6 +4,36 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-051 recorded (Mode 4, non-counting): before storing state, ask who else can write the store
+
+- **Review:** `docs/meta/MR_051_META_REVIEW.md`.
+  - Every claim reproduces: web-app 3887 on 5 of 5 runs, root 5676 on 3 of 3, all exit 0, no crashes; typecheck 0; validator clean.
+  - Nothing reverts.
+- **The finding is mine, from loop 114: alert state was put in the one table an anonymous client writes by design.**
+  - `POST /api/analytics/events` takes the event name, `source` and `userId` straight from the request body. It has no auth, no allowlist and no rate limit.
+  - Executed against the state logic, using the route's own row mapping (not over HTTP), so anyone can:
+    - forge `alert_notified` rows: one batch every 23 h gave **0 notifications in 72 h for 8 firing alerts**, against 24 for the control;
+    - forge a `resolved` row each hour, which re-pages every hour;
+    - crowd the state read out with 1,000 junk rows.
+  - **Older and unfiled through every alert loop since #256: the alerts' inputs come from the same table, so they were forgeable too.**
+  - Filed **#295** (score 14): ingestion accepts only known client event names, forces `source`, takes the user from the session only, is rate-limited, and alerts read server rows only.
+  - My loop-114 residual list ("ways a human is not told") missed the largest member because it never asked who else writes the table.
+- **Also from loop 114:**
+  - An alert that flips every hour pages 12 times a day.
+  - A new incident after a quiet `insufficient_data` spell is not announced until the 24 h reminder.
+  - A failed `resolved` write is the one path that loses an alert.
+  - All three are filed as **#296**.
+- **Rescored #53 from 9 to 12**, because loop 115 found that the web-app's 12 component test files gate no deploy. **#294 extended:** the SMTP failure log still writes recipient addresses (nodemailer `rejected`), whereas loop 113 narrowed the Resend path only.
+- **Four sentences ran ahead of the code; corrected here:**
+  - (1) `c0924ef` states the crash cause as fact; the log rightly calls it inferred.
+  - (2) The email gate holds because Next inlines `NODE_ENV` at build time, not because of the runtime value the comment describes.
+  - (3) "Duplicate over loss" has one loss path (the failed resolve write) and one anonymous silence path (#295).
+  - (4) "Recorded only after a delivery reached a channel" is true of the server, but any client could record it too.
+- **Practice adopted (not a control change):** a test run's verdict is its exit code plus the summary line after stripping colour codes — never a substring match on the output. This window had two false results from grep: my false positive at loop 114, and the reviewer's false negative from ANSI codes.
+- **Next:** loop 116 = **#295** (`security-reviewer`, with `backend-engineer` for the alert-source split). Loop 117 = **#53**.
+
+---
+
 ## 2026-10-02 (loop 115) — A red run with no failing test (Mode 1, `qa-engineer`)
 
 - **Controls:**
