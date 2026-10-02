@@ -77,6 +77,10 @@ describe('GET /api/analytics/events dashboardV2Retirement', () => {
     const conv = body.funnels.conversion;
     // views 1 user, clicks 1 user, plan_limit_hit 0: view->click is 0 dropoff; limit_hit->view is -1.
     expect(conv[1].dropoff).toBe(-1);
+    // plan_limit_hit had nobody, so the rate into the next stage is unknown —
+    // null, not 0%, which would claim nobody progressed (MR-042 §5).
+    expect(conv[1].rate).toBeNull();
+    expect(conv[2].rate).toBe(100);
   });
 
   it('stays admin-only', async () => {

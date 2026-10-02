@@ -40,7 +40,7 @@ interface FunnelStep {
   step: string;
   count: number;
   dropoff: number;
-  rate: number;
+  rate: number | null;
 }
 
 // ─── Engagement types ─────────────────────────────────────────────────────────
@@ -929,7 +929,7 @@ function FunnelChart({ steps }: { steps: FunnelStep[] }) {
                 <span className="font-semibold text-[var(--content-primary)] tabular-nums">{step.count} users</span>
                 {i > 0 && (
                   <span className="text-[var(--content-secondary)] tabular-nums">
-                    {step.rate}% →
+                    {step.rate === null ? '— →' : `${step.rate}% →`}
                   </span>
                 )}
               </div>
@@ -942,12 +942,12 @@ function FunnelChart({ steps }: { steps: FunnelStep[] }) {
             </div>
             {i > 0 && step.dropoff > 0 && (
               <p className="text-[10px] text-[var(--content-tertiary)] mt-0.5">
-                ↓ {step.dropoff} dropped ({100 - step.rate}%)
+                ↓ {step.dropoff} dropped {step.rate === null ? '' : `(${100 - step.rate}%)`}
               </p>
             )}
             {i > 0 && step.dropoff < 0 && (
               <p className="text-[10px] text-[var(--content-secondary)] mt-0.5">
-                ↑ {plural(-step.dropoff, 'more user', 'more users')} than the step above ({step.rate}%). Stages are not strictly nested.
+                ↑ {plural(-step.dropoff, 'more user', 'more users')} than the step above {step.rate === null ? '(no users in the step above)' : `(${step.rate}%)`}. Stages are not strictly nested.
               </p>
             )}
           </div>

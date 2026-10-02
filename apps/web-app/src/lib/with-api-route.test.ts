@@ -63,6 +63,15 @@ describe('withApiRoute (rows #8 / #253)', () => {
     expect(reportApiError).not.toHaveBeenCalled();
   });
 
+  it('a THROWN 5xx Response is still reported — only <500 passes through silently (MR-042 §3.3)', async () => {
+    const unavailable = new Response(null, { status: 503 });
+    const wrapped = withApiRoute('/api/x', async () => {
+      throw unavailable;
+    });
+    expect(await wrapped()).toBe(unavailable);
+    expect(reportApiError).toHaveBeenCalledWith('/api/x', 503);
+  });
+
   it('re-throws everything during `next build`, so a broken static route fails the build (MR-041 §3.2)', async () => {
     vi.stubEnv('NEXT_PHASE', 'phase-production-build');
     try {

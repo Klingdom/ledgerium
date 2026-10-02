@@ -72,7 +72,16 @@ function failureResponse(endpoint: string, error: unknown): Response {
   // (lib/feature-gating.ts) throws a 403 by design. Converting it to a reported
   // 500 would turn an entitlement check into a server failure on the alert —
   // #258's class. Pass it through untouched and unreported (MR-041 §3.2).
-  if (error instanceof Response) return error;
+  if (error instanceof Response) {
+    // Only a client-error answer passes through unreported. A thrown 5xx
+    // Response is still a server failure, and passing it through silently
+    // would hide it from the alert — the pass-through added at MR-041 had
+    // that hole; closed at MR-042 §3.3.
+    if (error.status < 500) return error;
+    console.error(`[api] thrown ${error.status} response in ${endpoint}`);
+    reportApiError(endpoint, error.status);
+    return error;
+  }
   if (isNextControlFlowError(error)) throw error;
   // During `next build`, a genuine throw must fail the build, as it did before
   // this wrapper existed. Converting it to a 500 there lets a `force-static`

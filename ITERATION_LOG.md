@@ -4,6 +4,14 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 — Mode 3 correction (non-counting): two holes MR-042 found in my own fixes
+
+- **`withApiRoute` passed every thrown `Response` through unreported** — the pass-through I added at MR-041. Right for the 403 it was written for; wrong for a thrown 503, which would have been a server failure the alert never saw. Now only status < 500 passes through silently; a thrown 5xx is reported and still returned. Test added.
+- **The aggregate funnel rendered an empty earlier stage as 0%.** Loop 87 claimed its clamp residual went 2 → 0; this was a third suppression of the same kind, and 0% asserts "nobody progressed" when there was nobody to progress. The rate is now `null` and the page shows "—" or "(no users in the step above)". So loop 87's residual was **3 → 0**, not 2 → 0, and only now.
+- **Validation:** web-app **3380 → 3381**; typecheck 0.
+
+---
+
 ## 2026-10-01 (loop 87) — A number that cannot exceed 100% because the view hides it (Mode 1, `frontend-engineer`)
 
 - **Controls:** Area — `web-app / analytics` (85 infra, 86 api). Agent — **`frontend-engineer`, a real rotation** (it ran the suite and typecheck itself; I re-ran both). Adjacent: `growth-strategist` (D-4 clause 1 — 8 strings). Extension — `871e29a`, 44 loops; #216 CEO-blocked. **Cadence: 3 of 3 since MR-041 — MR-042 now due.**

@@ -237,7 +237,7 @@ function filterProperties(event: any): Record<string, unknown> {
 function computeFunnel(
   events: any[],
   steps: string[],
-): Array<{ step: string; count: number; dropoff: number; rate: number }> {
+): Array<{ step: string; count: number; dropoff: number; rate: number | null }> {
   // Count unique users who performed each step
   const usersByStep: Record<string, Set<string>> = {};
   for (const step of steps) {
@@ -256,7 +256,9 @@ function computeFunnel(
     // Row #248: not clamped. A negative drop-off means a stage has more users
     // than the one before it, which is the mismatch worth seeing.
     const dropoff = i === 0 ? 0 : prevCount - count;
-    const rate = prevCount > 0 ? Math.round((count / prevCount) * 100) : 0;
+    // null, not 0, when the step above is empty (MR-042 §5): 0% says "nobody
+    // progressed", which is a claim the data cannot make with no one to progress.
+    const rate = prevCount > 0 ? Math.round((count / prevCount) * 100) : null;
     return { step, count, dropoff, rate };
   });
 }
