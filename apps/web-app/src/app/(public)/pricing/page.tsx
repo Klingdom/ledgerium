@@ -39,7 +39,7 @@ const FAQ = [
   },
   {
     q: 'Can I try before I buy?',
-    a: 'Two ways. (1) The Free plan gives you 5 recordings per month with SOP and process map output — no credit card required, no time limit. Exports include a Ledgerium watermark. (2) Starter and Solo include a 14-day free trial when you subscribe. You enter a card up front, get full plan access immediately, and aren’t charged until day 15. Team and Growth are available by waitlist. Cancel any time during the trial from your account page or the Stripe Billing Portal to avoid all charges.',
+    a: 'Two ways. (1) The Free plan gives you 5 recordings per month with SOP and process map output — no credit card required, no time limit. Markdown exports include a Ledgerium watermark. (2) Starter and Solo include a 14-day free trial when you subscribe. You enter a card up front, get full plan access immediately, and aren’t charged until day 15. Team and Growth are available by waitlist. Cancel any time during the trial from your account page or the Stripe Billing Portal to avoid all charges.',
   },
   {
     q: 'How does annual billing work?',
@@ -83,7 +83,7 @@ const COMPARISON_FEATURES = [
 
   // Sharing & Collaboration
   { label: 'Public sharing link',     free: true,  starter: true, solo: true,  team: true,  growth: true,  enterprise: true,  category: 'Sharing & Collaboration' },
-  { label: 'Clean exports — PDF, Markdown, JSON', free: false, starter: true, solo: true,  team: true,  growth: true,  enterprise: true },
+  { label: 'Clean exports — Markdown, JSON', free: false, starter: true, solo: true,  team: true,  growth: true,  enterprise: true },
   { label: 'Shared team workspace',   free: false, starter: false, solo: false, team: true,  growth: true,  enterprise: true },
   { label: 'Team library & portfolios', free: false, starter: false, solo: false, team: true, growth: true, enterprise: true },
 
@@ -91,7 +91,7 @@ const COMPARISON_FEATURES = [
   { label: 'Advanced cross-workflow analytics', free: false, starter: false, solo: false, team: false, growth: true, enterprise: true, category: 'Advanced & Enterprise' },
   { label: 'AI agent composition',    free: false, starter: false, solo: false, team: false, growth: true, enterprise: true },
   { label: 'Integration risk assessment', free: false, starter: false, solo: false, team: false, growth: true, enterprise: true },
-  { label: 'Role-based team access (owner, admin, member, viewer)', free: false, starter: false, solo: false, team: true, growth: true, enterprise: true },
+  { label: 'Team roles: owner and admin', free: false, starter: false, solo: false, team: true, growth: true, enterprise: true },
   { label: 'SSO',                     free: false, starter: false, solo: false, team: false, growth: false, enterprise: 'coming-soon' },
   { label: 'Audit trail',             free: false, starter: false, solo: false, team: false, growth: false, enterprise: 'coming-soon' },
   { label: 'On-premise deployment',   free: false, starter: false, solo: false, team: false, growth: false, enterprise: 'coming-soon' },

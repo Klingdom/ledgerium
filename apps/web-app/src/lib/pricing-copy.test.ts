@@ -155,6 +155,16 @@ describe('#34: Starter health-score copy agrees with lib/plans.ts', () => {
 const readSrc = (...p: string[]) => readFileSync(rel(...p), 'utf8');
 const PUBLIC_FILES = walk(rel('app', '(public)'));
 
+/** Whole npm package names of LLM SDKs (exact or scoped), never substrings. */
+const LLM_PACKAGE_RE =
+  /^(?:@anthropic-ai\/[^/]+|@anthropic\/[^/]+|openai|@openai\/[^/]+|@google\/generative-ai|@google\/genai|@google-cloud\/vertexai|cohere-ai|@mistralai\/[^/]+|@langchain\/[^/]+|langchain|ai|@ai-sdk\/[^/]+|@aws-sdk\/client-bedrock-runtime|ollama|groq-sdk|replicate)$/;
+export const isLlmPackage = (name: string): boolean => LLM_PACKAGE_RE.test(name);
+/** Hosts a raw fetch() to a model API would name. */
+const MODEL_HOST_RE =
+  /api\.anthropic\.com|api\.openai\.com|generativelanguage\.googleapis\.com|api\.cohere\.(?:ai|com)|api\.mistral\.ai|api\.groq\.com|openrouter\.ai\/api|api\.x\.ai|bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com|aiplatform\.googleapis\.com/i;
+const PROTECTED_CLAIM =
+  'Public copy says no model writes or rewrites SOPs (security page "No AI rewriting"; pricing "rather than rewritten by AI"; docs "rule-based recommendations"). Revisit that copy before merging.';
+
 describe('#313: the docs page is under the forward-dated-promise scan', () => {
   it('docs/page.tsx is in SCANNED', () => {
     expect(SCANNED).toContain(rel('app', '(public)', 'docs', 'page.tsx'));
@@ -181,14 +191,22 @@ describe('#313: docs page agrees with lib/plans.ts on Enterprise features', () =
     }
     expect(docs).toMatch(/On the roadmap: SSO, audit trail &amp; compliance\s+exports, on-premise deployment, custom retention/);
   });
-  it('docs states role-based team access with the four enforced roles', () => {
-    expect(docs).toMatch(/Role-based team access \(owner, admin, member, viewer\)/);
+  it('docs claims only the two enforced roles as enforced (#315; enforcement fix is #316)', () => {
+    expect(docs).toMatch(/Team roles: owner and admin/);
+    expect(docs).not.toMatch(/Role-based team access \(owner, admin, member, viewer\)/);
+    expect(docs).toMatch(/Owner and Admin permissions are enforced today/);
+    expect(docs).toMatch(/\['Member', 'Roadmap:/);
+    expect(docs).toMatch(/\['Viewer', 'Roadmap:/);
+    expect(docs).not.toMatch(/\['Member', 'Record workflows/);
+    expect(docs).not.toMatch(/\['Viewer', 'Read-only access/);
   });
   it('docs plan table has a Solo column and matches plan limits', () => {
     expect(docs).toMatch(/<TH>Solo<\/TH>/);
     expect(PLAN_FEATURES.team.maxSeats).toBe(5);
     expect(PLAN_FEATURES.team.maxRecorders).toBe(3);
-    expect(docs).toMatch(/'5 users \(3 recorders\)', '15 users \(10 recorders\)'/);
+    // maxRecorders is read by no enforcement path (#315), so no page may state a recorder limit.
+    expect(docs).toMatch(/'5 users', '15 users'/);
+    expect(docs).not.toMatch(/\d+ recorders/);
     expect(PLAN_FEATURES.growth.maxSeats).toBe(15);
     expect(PLAN_FEATURES.growth.maxRecorders).toBe(10);
   });
@@ -222,17 +240,52 @@ describe('#313: SOP generation is deterministic, and every public page says so',
   // agent-intelligence declares "deterministic and rule-based (no LLM calls)";
   // no LLM SDK is a dependency of any package that produces SOP text.
   const repo = path.resolve(SRC, '..', '..', '..');
-  const LLM_DEP = /anthropic|openai|@google\/generative|cohere|mistral|langchain|ai-sdk|"ai"\s*:/i;
+  it('no LLM SDK is a dependency of the root, any app, or any package (whole package names)', () => {
+    const manifests: string[][] = [['package.json'], ['apps', 'web-app', 'package.json'], ['apps', 'extension-app', 'package.json']];
+    for (const d of readdirSync(path.join(repo, 'packages'))) manifests.push(['packages', d, 'package.json']);
+    let seen = 0;
+    for (const m of manifests) {
+      let raw: string;
+      try {
+        raw = readFileSync(path.join(repo, ...m), 'utf8');
+      } catch {
+        continue;
+      }
+      seen++;
+      const j = JSON.parse(raw) as Record<string, Record<string, string> | undefined>;
+      const names = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies'].flatMap((k) =>
+        Object.keys(j[k] ?? {}),
+      );
+      expect(
+        names.filter(isLlmPackage),
+        `${m.join('/')} depends on an LLM SDK. ${PROTECTED_CLAIM}`,
+      ).toEqual([]);
+    }
+    expect(seen).toBeGreaterThan(10);
+  });
 
-  it('no LLM SDK is a dependency of the web-app or the SOP-producing packages', () => {
-    for (const pkg of [
-      ['apps', 'web-app'],
-      ['packages', 'process-engine'],
-      ['packages', 'agent-intelligence'],
-      ['packages', 'intelligence-engine'],
-    ]) {
-      const json = readFileSync(path.join(repo, ...pkg, 'package.json'), 'utf8');
-      expect(json, pkg.join('/')).not.toMatch(LLM_DEP);
+  it('isLlmPackage matches whole names, not substrings', () => {
+    for (const n of ['@anthropic-ai/sdk', 'openai', 'cohere-ai', '@mistralai/mistralai', 'ai']) expect(isLlmPackage(n)).toBe(true);
+    for (const n of ['coherent', 'openai-compatible-docs-theme', 'react', 'mistral-wind']) expect(isLlmPackage(n)).toBe(false);
+  });
+
+  it('no non-test source references a model API host', () => {
+    const roots: string[][] = [['apps', 'web-app', 'src'], ['apps', 'extension-app', 'src']];
+    for (const d of readdirSync(path.join(repo, 'packages'))) roots.push(['packages', d, 'src']);
+    const files: string[] = [];
+    for (const r of roots) {
+      try {
+        walk(path.join(repo, ...r), files);
+      } catch {
+        /* package without src */
+      }
+    }
+    expect(files.length).toBeGreaterThan(100);
+    for (const f of files) {
+      expect(
+        readFileSync(f, 'utf8').match(MODEL_HOST_RE),
+        `${path.relative(repo, f)} references a model API host. ${PROTECTED_CLAIM}`,
+      ).toBeNull();
     }
   });
 
@@ -256,5 +309,62 @@ describe('#313: SOP generation is deterministic, and every public page says so',
     const docs = readSrc('app', '(public)', 'docs', 'page.tsx');
     expect(docs).not.toMatch(/AI-generated/i);
     expect(docs).toMatch(/rule-based recommendations/);
+  });
+});
+
+/* ───────── #315: claims pinned to the code that enforces (or does not) them ───────── */
+
+describe('#315: public copy does not overclaim beyond enforcement', () => {
+  const security = readSrc('app', '(public)', 'security', 'page.tsx');
+  const publicText = PUBLIC_FILES.map((f) => ({ f, text: readFileSync(f, 'utf8') }));
+
+  it('workflow delete is a soft delete that nothing purges, so no page promises deletion', () => {
+    const route = readSrc('app', 'api', 'workflows', '[id]', 'route.ts');
+    expect(route).toMatch(/Soft delete[\s\S]{0,120}status: 'deleted'/);
+    expect(route).not.toMatch(/workflow\.delete\(/);
+    expect(security).not.toMatch(/export and deletion/i);
+    expect(security).toMatch(/'Same input, same output'/);
+    expect(security).not.toMatch(/Reproducible processing/);
+    expect(security).toMatch(/Per-workflow export and archive \(archived workflows are retained, not purged\)/);
+  });
+
+  it('PDF is window.print() with no plan check, so no page sells PDF as a paid/clean export', () => {
+    const shell = readSrc('components', 'sop-view', 'SOPPageShell.tsx');
+    const handlePrint = shell.slice(shell.indexOf('const handlePrint'), shell.indexOf('// ── Loading'));
+    expect(handlePrint).toMatch(/window\.print\(\)/);
+    expect(handlePrint).not.toMatch(/hasFeature|requireFeature|checkFeatureAccess|cleanExports|watermark/i);
+    for (const f of [['app', '(public)', 'pricing', 'page.tsx'], ['lib', 'config.ts']]) {
+      expect(readSrc(...f), f.join('/')).not.toMatch(/Clean exports[^'\n]*PDF/);
+    }
+  });
+
+  it('the markdown and JSON export gates the copy describes exist in code', () => {
+    expect(readSrc('app', 'api', 'workflows', '[id]', 'export-markdown', 'route.ts')).toMatch(/hasFeature\(plan, 'cleanExports'\)/);
+    expect(readSrc('app', 'api', 'workflows', '[id]', 'export-json', 'route.ts')).toMatch(/requireFeature\(user, 'cleanExports'\)/);
+  });
+
+  it('no page claims four enforced roles', () => {
+    for (const { f, text } of publicText) {
+      expect(text, path.relative(SRC, f)).not.toMatch(/Role-based team access \(owner, admin, member, viewer\)/);
+    }
+    expect(readSrc('lib', 'config.ts')).not.toMatch(/Role-based team access/);
+  });
+
+  it('no public page states a recorder limit (maxRecorders is read by no enforcement path)', () => {
+    for (const { f, text } of publicText) expect(text, path.relative(SRC, f)).not.toMatch(/\d+ recorders/i);
+  });
+
+  it('no public page says AI-powered', () => {
+    for (const { f, text } of publicText) expect(text, path.relative(SRC, f)).not.toMatch(/AI[- ]powered/i);
+  });
+
+  it('security page has no "Audit Trail" card while audit trail is Roadmap', () => {
+    expect(security).not.toMatch(/title: 'Audit Trail'/);
+  });
+
+  it('docs screenshot alt says six tiers', () => {
+    const docs = readSrc('app', '(public)', 'docs', 'page.tsx');
+    expect(docs).not.toMatch(/five tiers/i);
+    expect(docs).toMatch(/six tiers: Free, Starter, Solo, Team, Growth, and Enterprise/);
   });
 });

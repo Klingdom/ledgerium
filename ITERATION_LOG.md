@@ -4,6 +4,47 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 133) — Claims the code actually keeps (Mode 1, `frontend-engineer` + `growth-strategist`)
+
+- **Controls:**
+  - **Area:** `web-app / trust`. Web-app was 2 of the last 5 loops, so no penalty.
+  - **Agents:** `frontend-engineer` (two passes) and `growth-strategist` (required D-4 clause-1 review). The review returned 4 POLISH, applied, and 1 product-name item left for the CEO.
+  - **Extension:** `871e29a`, 90 loops untouched.
+  - **Cadence:** **3 of 3 since MR-056 — MR-057 now due.**
+- **Candidate Selection: `burn-down` — #315** (12), the top score once web-app saturation had lapsed.
+  - Part (6), the 16 legacy root `*.html` files, is excluded. Deleting a possibly-served site needs the CEO's GitHub Pages answer first; split out to **#318**.
+- **The truth table was built at enforcement level** (MR-056 practice). It found seven claims the code does not keep:
+  - **GDPR "deletion".** It is a soft delete with no purge job.
+  - **PDF.** Sold as a paid clean export, but it is `window.print()`, with no gate and no watermark. Markdown and JSON are gated.
+  - **Four team roles.** Only owner and admin are enforced.
+  - **Recorder seat limits.** Never checked.
+  - **"AI-powered analysis".** False.
+  - **"Audit Trail" security card.** The feature is on the Roadmap.
+  - **"Five tiers" in the docs.** There are six.
+- **What changed:**
+  - GDPR bullet: "Per-workflow export and archive (archived workflows are retained, not purged)".
+  - The "Audit Trail" card is now "Reproducibility", ending with "Same input, same output".
+  - Product page: "rule-based analysis".
+  - Roles: "Team roles: owner and admin" everywhere. In the docs roles table, the Member and Viewer rows say "Roadmap: … not yet enforced".
+  - "Clean exports — Markdown, JSON", and the watermark copy is Markdown-only. A docs row describes PDF as the print dialog.
+  - Recorder counts removed; the alt text now says "six tiers".
+- **Tripwire, hardened (part 7):**
+  - It parses every manifest (root, web-app, extension-app, packages) and matches whole package names, so "coherent" cannot trip it.
+  - It scans source for model API hosts.
+  - Its failure names the "No AI rewriting" claim.
+  - **Residual:** a URL built at runtime would evade the host scan.
+- **Tests:** 8 new pins plus assertions inside existing tests. **Revert proof:** stashing the 5 copy files fails 9 tests.
+- **Left for the CEO:** the Markdown watermark text "Ledgerium AI attribution footer" (it is the product name).
+- **density-response: scope-guard-adjacent.** Each of the 3 follow-ups is a *behaviour* change or a CEO decision. This loop was copy-only by design, so they are split out under guardrail 7(b):
+  - **#318.** Deleting the legacy HTML is blocked on whether GitHub Pages serves it.
+  - **#319.** A purge job for soft-deleted workflows changes data handling and needs a CEO retention policy.
+  - **#320.** Whether to plan-gate or watermark PDF is a pricing decision.
+  - The unenforced recorder limit is folded into #316, the same authorization class as roles, rather than filed separately.
+- **Validation (exit code + ANSI-stripped summary):** web-app **4123 → 4133** on 3 of 3 runs; root **5901 → 5911**; typecheck 0.
+- **Follow-ups:** 3 created (#318, #319, #320), 1 closed (#315).
+
+---
+
 ## 2026-10-02 (loop 132) — A type-check that skips quietly (Mode 1, `devops-engineer`)
 
 - **Controls:**

@@ -1600,8 +1600,8 @@ export default function DocsPage() {
                   {[
                     ['Owner', 'Full control: manage billing, delete the team, assign any role'],
                     ['Admin', 'Manage members, invite others, manage all workflows and portfolios'],
-                    ['Member', 'Record workflows, upload, view and edit shared library, create portfolios'],
-                    ['Viewer', 'Read-only access to the shared library, no recording permissions'],
+                    ['Member', 'Roadmap: separate Member restrictions are not yet enforced'],
+                    ['Viewer', 'Roadmap: read-only restrictions are not yet enforced'],
                   ].map(([role, perms]) => (
                     <tr key={role}>
                       <TD><strong className="text-[var(--content-primary)]">{role}</strong></TD>
@@ -1610,6 +1610,10 @@ export default function DocsPage() {
                   ))}
                 </tbody>
               </TableWrap>
+              <P>
+                Owner and Admin permissions are enforced today. Member and Viewer are named
+                roles; separate restrictions for them are on the roadmap.
+              </P>
 
               <H3>6.4 Shared workflow library</H3>
               <P>
@@ -1785,8 +1789,9 @@ export default function DocsPage() {
                 </thead>
                 <tbody>
                   {[
-                    ['Free', 'Watermarked — includes a Ledgerium AI attribution footer'],
-                    ['Starter and above', 'Clean exports — no watermark'],
+                    ['Free', 'Markdown exports are watermarked with a Ledgerium AI attribution footer; JSON export needs Starter or above'],
+                    ['Starter and above', 'Clean Markdown and JSON exports — no watermark'],
+                    ['All plans', 'PDF is your browser print dialog on the SOP page. It is not plan-gated and carries no watermark'],
                   ].map(([plan, quality]) => (
                     <tr key={plan}>
                       <TD>{plan}</TD>
@@ -1807,7 +1812,7 @@ export default function DocsPage() {
 
               <Screenshot
                 src="/docs/screenshots/public-pricing.png"
-                alt="Pricing page showing five tiers: Free, Starter, Team, Growth, and Enterprise with monthly/annual toggle."
+                alt="Pricing page showing six tiers: Free, Starter, Solo, Team, Growth, and Enterprise with monthly/annual toggle."
                 caption="The pricing page with monthly and annual billing toggle."
               />
 
@@ -1828,11 +1833,11 @@ export default function DocsPage() {
                   {[
                     ['Price (monthly)', '$0', '$49', '$89', '$249', '$799', 'Custom'],
                     ['Price (annual)', '—', '$41/mo', '$74/mo', '$207/mo', '$665/mo', 'Custom'],
-                    ['Seats', '1 user', '1 user', '1 user', '5 users (3 recorders)', '15 users (10 recorders)', 'Custom'],
+                    ['Seats', '1 user', '1 user', '1 user', '5 users', '15 users', 'Custom'],
                     ['Recordings/month', '5', '15', 'Unlimited', 'Unlimited', 'Unlimited', 'Custom'],
                     ['SOP + process map', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes'],
                     ['Public sharing', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes'],
-                    ['Clean exports', 'No', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes'],
+                    ['Clean exports (Markdown, JSON)', 'No', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes'],
                     ['Health scores', 'No', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes'],
                     ['Full intelligence layer', 'No', 'No', 'Yes', 'Yes', 'Yes', 'Yes'],
                     ['Bottleneck & friction analysis', 'No', 'No', 'Yes', 'Yes', 'Yes', 'Yes'],
@@ -1840,7 +1845,7 @@ export default function DocsPage() {
                     ['Shared team library', 'No', 'No', 'No', 'Yes', 'Yes', 'Yes'],
                     ['Advanced analytics', 'No', 'No', 'No', 'No', 'Yes', 'Yes'],
                     ['AI agent composition', 'No', 'No', 'No', 'No', 'Yes', 'Yes'],
-                    ['Role-based team access (owner, admin, member, viewer)', 'No', 'No', 'No', 'Yes', 'Yes', 'Yes'],
+                    ['Team roles: owner and admin', 'No', 'No', 'No', 'Yes', 'Yes', 'Yes'],
                     ['SSO', 'No', 'No', 'No', 'No', 'No', 'Roadmap'],
                     ['Audit trail', 'No', 'No', 'No', 'No', 'No', 'Roadmap'],
                     ['On-premise deployment', 'No', 'No', 'No', 'No', 'No', 'Roadmap'],
@@ -1857,7 +1862,7 @@ export default function DocsPage() {
               <P>
                 <strong className="text-[var(--content-primary)]">Free</strong> — For individuals exploring the platform.
                 Record up to 5 workflows per month, generate SOPs and process maps, share via
-                public link. Exports include a watermark.
+                public link. Markdown exports include a watermark.
               </P>
               <P>
                 <strong className="text-[var(--content-primary)]">Starter ($49/mo)</strong> — For operations leads
@@ -1889,8 +1894,8 @@ export default function DocsPage() {
               </P>
               <P>
                 <strong className="text-[var(--content-primary)]">Enterprise (custom)</strong> — For compliance-sensitive or
-                large-scale deployments. Custom seats, role-based team access (owner, admin,
-                member, viewer) and dedicated support. On the roadmap: SSO, audit trail &amp; compliance
+                large-scale deployments. Custom seats, owner and admin team roles
+                and dedicated support. On the roadmap: SSO, audit trail &amp; compliance
                 exports, on-premise deployment, custom retention. Contact{' '}
                 <a
                   href="mailto:hello@ledgerium.ai?subject=Ledgerium%20Enterprise"

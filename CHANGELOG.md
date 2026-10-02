@@ -6,6 +6,16 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Public pages describe what is enforced today
+
+### Fixed
+- The security page described workflow deletion as GDPR deletion; deleted workflows are archived and retained, and the page now says so.
+- Team roles are now described as owner and admin, the two roles whose permissions are enforced; member and viewer restrictions are marked as on the roadmap.
+- PDF export is no longer described as a paid clean export, and claims of "AI-powered analysis", an audit trail card and recorder seat limits were removed.
+
+---
+
+
 ## [2026-10-02] - Describing SOPs accurately
 
 ### Fixed

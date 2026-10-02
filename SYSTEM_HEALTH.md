@@ -12,6 +12,18 @@
   - **Cold-pool triage still overdue for the remaining pools:** MR-006 Change D triage is mandatory for DV2, WDC-002, MDR, WDC and PIB (last triaged May), and PRICING-001, SOPPM-001, TEAM-001 and PATHE-001 were never triaged (~240 items). Deferred pending a CEO ruling on P-1, pool-level archive-stale.
   - **Chrome Web Store blocker B-1 (row 192): CLOSED 2026-09-16.** `docs/store-assets/chrome/promo-small-440x280.png` exists and was pixel-verified at exactly 440×280, non-blank. Root cause was an output path outside the repo, not a broken generator. **All remaining submission steps are human:** one real Chrome recording (Invariant rule 6) and the Dashboard upload. **All three promo assets now exist and are claim-verified** — the optional large (920×680) and marquee (1400×560) tiles were corrected and rendered at loop 14 (row #194 closed), so nothing in the listing promises a paid feature to a free installer.
 - **Extension gate VERIFIED in CI 2026-09-18:** the `real-extension` job ran for the first time and **passed — 6 tests, 21.3s** under `xvfb-run` (run 35353704615, job-level confirmed, log shows "Running 6 tests" then "6 passed", so it is not a vacuous pass). **My predicted environment failure did not happen**, and the runner already had xvfb ("already the newest version"), so the explicit install step is a harmless no-op that could be dropped. **The precondition for gating deploy on the E2E jobs is now met** (decided loop 25, sequenced on exactly this event). Deploy is still ungated (`deploy.yml:47` needs only `quality-gate`); wiring it requires a cross-workflow trigger, so it is scheduled as its own loop rather than slipped in.
+- **Loop 133 (#315 CLOSED):** every public claim was rechecked against what the code actually *enforces*. Seven claims went beyond that and are now worded truthfully:
+  - deletion is "archive (retained, not purged)";
+  - only owner and admin roles are enforced;
+  - PDF is the print dialog, and it is free;
+  - there is no recorder limit;
+  - "AI-powered", the "Audit Trail" card and "five tiers" are gone.
+- **Decisions for you (each blocks a fix that would make the stronger claim true again):**
+  - (1) **#319 — retention policy.** How long to keep deleted workflows before purging them for good. This is needed before you can offer real deletion.
+  - (2) **#320 — PDF export.** Gate or watermark it like Markdown, or keep it free.
+  - (3) **#318 — GitHub Pages.** Is it switched on for this repo? 16 old pages in the repo root claim SSO and on-premise.
+  - (4) **Export footer.** It says "Ledgerium AI attribution footer". Keep "AI" in it?
+- Next real fix: the viewer role (#316). **MR-057 now due (loops 131-133).**
 - **Loop 132 (#317 CLOSED):** CI now fails if any package stops being type-checked, or if it is ever run on pnpm older than 10, where one of our safety checks quietly stops working. Cadence: 2 of 3 since MR-056.
 - **Loop 131 (#312 CLOSED):** the backlog checker now does what its messages say. Its check that every closure in the log is reflected in the backlog had quietly checked nothing since row #246 (corrected at loop 132; it is a backlog row, not a loop). It now checks 109 claims and finds none wrong. Its tolerance for known-bad rows can only shrink, and it now has its own tests in CI. Cadence: 1 of 3 since MR-056.
 - **MR-056 (Mode 4, after loop 130):** loops 128-130 hold, and **"no AI model anywhere" is confirmed**. But my checks of the public pages asked whether a feature *exists*, not whether it is *enforced*. They missed several things:

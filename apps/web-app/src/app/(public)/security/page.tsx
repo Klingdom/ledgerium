@@ -109,16 +109,16 @@ const COMPLIANCE_CARDS = [
     details: [
       'No PII capture by default',
       'User-controlled recording',
-      'Per-workflow export and deletion',
+      'Per-workflow export and archive (archived workflows are retained, not purged)',
     ],
   },
   {
     icon: Server,
-    title: 'Audit Trail',
+    title: 'Reproducibility',
     details: [
       'Deterministic outputs',
       'Evidence-linked steps',
-      'Reproducible processing',
+      'Same input, same output',
     ],
   },
 ] as const;
@@ -126,7 +126,7 @@ const COMPLIANCE_CARDS = [
 type FeatureAvailability = 'available' | 'roadmap';
 
 const ENTERPRISE_FEATURES: Array<{ label: string; status: FeatureAvailability }> = [
-  { label: 'Role-based team access (owner, admin, member, viewer)', status: 'available' },
+  { label: 'Team roles: owner and admin', status: 'available' },
   { label: 'SSO integration', status: 'roadmap' },
   { label: 'Custom data retention policies', status: 'roadmap' },
   { label: 'On-premise deployment', status: 'roadmap' },

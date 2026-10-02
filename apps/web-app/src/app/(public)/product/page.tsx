@@ -277,7 +277,7 @@ export default function ProductPage() {
             </h1>
             <p className="mt-6 text-lg text-[var(--content-primary)] leading-relaxed max-w-2xl mx-auto">
               Capture real browser workflows. Get structured SOPs, interactive process maps,
-              health scores, and AI-powered analysis — deterministically.
+              health scores, and rule-based analysis — deterministically.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
               <TrackedLink
