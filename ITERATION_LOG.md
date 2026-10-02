@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 99) — A setting that never arrives (Mode 1, `devops-engineer`)
+
+- **Controls:** Area — `infra / deploy` — **pivot required** (97, 98 were security/authz). Agent — **`devops-engineer`, a real rotation** (it ran the check, both mutation directions and the suites; I re-ran the suite and a mutation of my own). Extension — `871e29a`, 56 loops. Cadence: 2 of 3 since MR-045.
+- **Candidate Selection: `burn-down` — #277, part (4) only**, scoped explicitly: the check that prevents a class that has now caused two incidents — loop 85 (alerts could never work) and MR-045 (the admin kill-switch never arrived, and I called it verified). Parts (1)-(3) are separate outcomes and stay in the row.
+- **What shipped:** a test that traces how the deploy delivers environment — the Hostinger action passes a key/value block, and the compose file forwards only what each service enumerates — and fails when any written variable is not delivered to the service that reads it, or when an allowlist entry goes stale. The three undelivered variables are allowlisted with reasons, **not wired**: two need your decision on values.
+- **Mutation-checked by both of us:** removing `CRON_SECRET` from the compose file — the loop-85 defect — fails it with a message naming the variable and the fix.
+- **The reverse direction found more than the forward one.** The app reads **14 variables no deploy file provides**: six Stripe price IDs, the PostHog keys, a trial length, and others. Some are surely intentional — Stripe is not live, and public build-time values work differently — but none has been decided. Filed as **#278**: for each, intentional (and does the app fail *visibly*?) or a gap.
+- **Not verified:** that the Hostinger action exports the block to the shell compose runs in — the compose file's own comments and loop 85's history say so; the action cannot be run here.
+- **Validation:** web-app **3738 → 3747** (+9); root suite 5536; typecheck 0.
+- **Follow-ups:** 1 created (#278), 0 closed (#277 part 4 done; row stays open).
+
+---
+
 ## 2026-10-02 (loop 98) — Admin, by asking (Mode 1, `security-reviewer`)
 
 - **Controls:** Area — `security / authz` (96 evidence, 97 authz) — 2 of the last 3 in this Area; a third consecutive would force a pivot, and loop 99 will pivot. Agent — **`security-reviewer`, a real rotation** (suite, typecheck, build and two mutation checks run by the agent; I re-ran suite, typecheck and build). Extension — `871e29a`, 55 loops. Cadence: 1 of 3 since MR-045.
