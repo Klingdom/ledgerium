@@ -36,8 +36,8 @@ This file records each bounded improvement loop.
   - (1) **The saturation penalty was not applied at loops 129 and 130** (web-app was 4 of the last 5); both picks would still have won. The loop-130 rationale ("higher score") omitted it.
   - (2) Handback causes are not logged. From now on each handback records which brief item was missing.
 - **Next:**
-  - loop 131 = **#316** (an authorization defect outranks copy; security, not web-app saturated);
-  - then **#312** (widened);
+  - loop 131 = **#312** (12, the top score under the selection policy) [corrected before loop 131: the first draft said #316 first, but #316 scores 10; it is a within-team defect on a role the owner assigns];
+  - then **#316**;
   - then **#315**.
   - #309 waits.
 
