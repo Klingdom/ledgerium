@@ -4,6 +4,42 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-058 recorded (Mode 4, non-counting): the same rule in every place it applies
+
+- **Review:** `docs/meta/MR_058_META_REVIEW.md`. Nothing reverts.
+  - **Re-runs:** every claimed count reproduced. Web-app 4155 on 3 of 3 runs, root 5930 on 2 of 2, typecheck 0. The validator exits 0; the sabotage switch makes it exit 1. Script tests pass 27/27.
+  - **Acceptance (loop 136):** traced path by path and **byte-identical** to before.
+- **Loop 136's one rule was applied in three places, not all five.**
+  - Refused invites are hidden from the list but **still count against seats** (`seat-management.ts:144-152`).
+  - They also **still trigger "already pending" on a re-invite** (`invite/route.ts:145-156`).
+  - An owner can therefore get that error for up to 7 days with nothing visible to revoke.
+  - Filed **#323**.
+- **My production instruction for the count script cannot run.**
+  - Production is SQLite inside the container, and the image ships no `scripts/` (`Dockerfile:92-106,153`).
+  - It is withdrawn in SYSTEM_HEALTH.
+- **The destructive half of #273 is moot.**
+  - Invites expire after 7 days, and re-invites pass #272's role check.
+  - So no bad invite can outlive the #272 deploy by more than 7 days.
+  - Recommendation to the CEO: accept natural expiry, and close #273 once that decision is given.
+- **Loop 135 left three "shared workflow library" claims next to the one it fixed:** `docs/page.tsx:1550-1551`, `teams/page.tsx:167`, and the pricing FAQ (`pricing/page.tsx:26`).
+  - The Viewer hint is not announced, and it is not associated with the select, which has no label.
+  - Filed **#324**.
+- **V4's canary checks embedded sample lines, not the live log.** A non-canonical line such as "0 created; closed #316" still passes silently. Filed **#325**.
+- **Portfolio:**
+  - **Pool and blockers.** The pool rose 114 → 119 since MR-054 and held flat this window. About 20 rows are blocked on the CEO.
+  - **Burn-down supply.** About 19 unblocked recent follow-ups remain, so supply is not thinning. But each loop closes one row while about one more is filed, so the pool will not shrink.
+  - **Superseded.** **#144** said SUPERSEDED but was counted open; it is struck here.
+  - **Stale feature rows.** #138, #149 and #150 are stale; #113 is largely superseded; #168 has an unresolved overlap.
+  - **#121 (Path E).** It truly scores 14, but the validator reads it as 3 because of the stray pipe MR-034 flagged and nobody fixed.
+  - **Cool-off.** It has been armed since loop 128.
+- **Plan:**
+  - loop 137 = **#323** (burn-down);
+  - loop 138 = **#324** (burn-down);
+  - loop 139 = **#121** under `ceiling-cool-off: invoked` (top-score), after repairing its row.
+- **The CEO decisions are now ranked by value unlocked.** See SYSTEM_HEALTH.
+
+---
+
 ## 2026-10-02 (loop 136) — One rule for whether an invite is valid (Mode 1, `security-reviewer`)
 
 - **Controls:**
