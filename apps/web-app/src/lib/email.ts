@@ -52,6 +52,24 @@ function fromAddress(): string {
 
 // ── SMTP (nodemailer) ───────────────────────────────────────────────────────
 
+/**
+ * SMTP time bounds (row #266). nodemailer's defaults are 2 min connection,
+ * 30 s greeting, 10 min socket - a hung mail server would outlast the hourly
+ * job's HTTP max-time (30 s) and surface as "unreachable" (exit 3) instead of an
+ * undelivered alert. Bounds are sized under that 30 s budget, alongside Slack's
+ * 8 s:
+ *  - connection 8 s: TCP + TLS handshake; generous for a healthy host, same as Slack.
+ *  - greeting   8 s: server banner after connect.
+ *  - socket    10 s: inactivity per command (AUTH, MAIL, RCPT, DATA ...).
+ *  - overall   20 s: hard deadline on the whole send. The three above are
+ *    per-phase, so a slow-but-alive server could still stack them past 30 s.
+ * A timeout is an ordinary failed send ({ success: false }) and never throws.
+ */
+export const SMTP_CONNECTION_TIMEOUT_MS = 8_000;
+export const SMTP_GREETING_TIMEOUT_MS = 8_000;
+export const SMTP_SOCKET_TIMEOUT_MS = 10_000;
+export const SMTP_SEND_DEADLINE_MS = 20_000;
+
 let cachedTransporter: Transporter | null = null;
 
 function getSmtpTransporter(): Transporter {
@@ -62,7 +80,15 @@ function getSmtpTransporter(): Transporter {
   const secure = (process.env.SMTP_SECURE ?? (port === 465 ? 'true' : 'false')) === 'true';
   const user = process.env.SMTP_USER ?? DEFAULT_SMTP_USER;
   const pass = process.env.SMTP_PASSWORD ?? '';
-  cachedTransporter = nodemailer.createTransport({ host, port, secure, auth: { user, pass } });
+  cachedTransporter = nodemailer.createTransport({
+    host,
+    port,
+    secure,
+    auth: { user, pass },
+    connectionTimeout: SMTP_CONNECTION_TIMEOUT_MS,
+    greetingTimeout: SMTP_GREETING_TIMEOUT_MS,
+    socketTimeout: SMTP_SOCKET_TIMEOUT_MS,
+  });
   return cachedTransporter;
 }
 
@@ -72,12 +98,24 @@ export function __resetEmailTransport(): void {
 }
 
 async function sendViaSmtp({ to, subject, html }: SendEmailParams): Promise<{ success: boolean }> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    await getSmtpTransporter().sendMail({ from: fromAddress(), to, subject, html });
+    const deadline = new Promise<never>((_, reject) => {
+      timer = setTimeout(
+        () => reject(new Error(`SMTP send exceeded ${SMTP_SEND_DEADLINE_MS}ms deadline`)),
+        SMTP_SEND_DEADLINE_MS,
+      );
+    });
+    await Promise.race([
+      getSmtpTransporter().sendMail({ from: fromAddress(), to, subject, html }),
+      deadline,
+    ]);
     return { success: true };
   } catch (err) {
     console.error('[email] SMTP send failed:', err);
     return { success: false };
+  } finally {
+    clearTimeout(timer);
   }
 }
 

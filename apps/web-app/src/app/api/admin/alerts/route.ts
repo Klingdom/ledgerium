@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { canAccessAdmin } from '@/lib/admin-allowlist';
 import { computeAlerts, type AlertSeverity } from '@/lib/compute-alerts';
-import { sendAlertNotification } from '@/lib/notifications';
+import { sendAlertNotification, type AlertDeliveryResult } from '@/lib/notifications';
 import { reportApiError } from '@/lib/api-error-reporting';
 
 /**
@@ -20,7 +20,14 @@ import { reportApiError } from '@/lib/api-error-reporting';
  *   Request body (optional JSON):
  *     { threshold?: 'P1' | 'P2' | 'P3' }   — default 'P2' (P1 + P2)
  *
- *   Response: { sent: number, alerts: AlertResult[] }
+ *   Response (row #266: real outcomes, not "sent" regardless):
+ *     { threshold, alertsFiring, alertsDelivered, alertsUndelivered,
+ *       channels: { configured, delivered, failed },       // summed over alerts
+ *       deliveries: [{ id, severity, configured, delivered, failed }],
+ *       alerts: AlertResult[] }
+ *   Status: 200 every firing alert reached >= 1 channel (channels.failed > 0 is
+ *   a partial failure, visible here); 424 a firing alert reached NO channel
+ *   (none configured or all failed). Nothing firing = 200 with zero counts.
  */
 
 // Severity ordering used to filter by threshold (lower number = higher priority)
@@ -83,7 +90,7 @@ async function handlePOST(request: Request) {
       (a) => a.status === 'firing' && SEVERITY_ORDER[a.severity] <= SEVERITY_ORDER[threshold],
     );
 
-    await Promise.allSettled(
+    const settled = await Promise.allSettled(
       firingInScope.map((a) => {
         const notification: Parameters<typeof sendAlertNotification>[0] = {
           title: a.id.replace(/_/g, ' '),
@@ -97,9 +104,45 @@ async function handlePOST(request: Request) {
       }),
     );
 
-    console.log(`[admin/alerts POST] Sent ${firingInScope.length} notification(s) (threshold=${threshold})`);
+    // Real outcomes (row #266). A sender that threw despite its contract is one
+    // failed channel and an undelivered alert, never "sent".
+    const deliveries = firingInScope.map((a, i) => {
+      const r = settled[i];
+      const outcome: AlertDeliveryResult =
+        r !== undefined && r.status === 'fulfilled' && r.value
+          ? r.value
+          : { configured: 1, delivered: 0, failed: 1 };
+      return { id: a.id, severity: a.severity, ...outcome };
+    });
+    const alertsDelivered = deliveries.filter((d) => d.delivered > 0).length;
+    const alertsUndelivered = deliveries.length - alertsDelivered;
+    const channels = deliveries.reduce(
+      (acc, d) => ({
+        configured: acc.configured + d.configured,
+        delivered: acc.delivered + d.delivered,
+        failed: acc.failed + d.failed,
+      }),
+      { configured: 0, delivered: 0, failed: 0 },
+    );
 
-    return NextResponse.json({ sent: firingInScope.length, alerts });
+    console.log(
+      `[admin/alerts POST] threshold=${threshold} firing: ${deliveries.length}, delivered: ${alertsDelivered}, undelivered: ${alertsUndelivered}, channel failures: ${channels.failed}`,
+    );
+
+    // 424 as in alerts/check: the evaluation ran, but a firing alert reached no
+    // channel. Partial channel failure stays 200 with channels.failed > 0.
+    return NextResponse.json(
+      {
+        threshold,
+        alertsFiring: deliveries.length,
+        alertsDelivered,
+        alertsUndelivered,
+        channels,
+        deliveries,
+        alerts,
+      },
+      { status: alertsUndelivered > 0 ? 424 : 200 },
+    );
   } catch (err) {
     console.error('[admin/alerts POST]', err);
     reportApiError('/api/admin/alerts', 500);

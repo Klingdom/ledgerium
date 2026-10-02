@@ -11,7 +11,8 @@
  *  - Missing Authorization header entirely → 401
  *  - Authorization header without Bearer prefix → 401
  *  - Row #263: firing alert that reaches no channel → 424 (counts-only body,
- *    not reported as an api error); partial channel failure → 200
+ *    not reported as an api error)
+ *  - Row #266: partial channel failure (delivered on >= 1, another failed) → 207
  *
  * Mocking strategy:
  *  - vi.mock('@/lib/compute-alerts')   — controls alert evaluation
@@ -261,16 +262,44 @@ describe('GET /api/admin/alerts/check — delivery failure is a distinct status 
     expect(mockReportApiError).not.toHaveBeenCalled();
   });
 
-  it('firing alert + one channel delivered → 200 (partial failure warned, not failed)', async () => {
+  it('firing alert + one channel delivered, another failed → 207 (row #266), counts only', async () => {
     mockComputeAlerts.mockResolvedValue([firing('db_down')]);
     mockSendAlertNotification.mockResolvedValue(PARTIAL);
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const response = await call();
+    expect(response.status).toBe(207);
+    const text = JSON.stringify(await response.json());
+    expect(JSON.parse(text)).toEqual({ checked: true, alertsFiring: 1, alertsSent: 1, channelFailures: 1 });
+    expect(text).not.toContain('SECRET-ALERT-MESSAGE');
+    expect(err).toHaveBeenCalled();
+    expect(mockReportApiError).not.toHaveBeenCalled();
+    err.mockRestore();
+  });
+
+  it('every firing alert delivered on every channel → 200 with channelFailures 0', async () => {
+    mockComputeAlerts.mockResolvedValue([firing('a'), firing('b', 'P2')]);
+    mockSendAlertNotification.mockResolvedValue({ configured: 2, delivered: 2, failed: 0 });
 
     const response = await call();
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ checked: true, alertsFiring: 1, alertsSent: 1, channelFailures: 1 });
-    expect(warn).toHaveBeenCalled();
-    warn.mockRestore();
+    expect(await response.json()).toEqual({ checked: true, alertsFiring: 2, alertsSent: 2, channelFailures: 0 });
+  });
+
+  it('207 is distinct from 424, 500 and 503', async () => {
+    mockComputeAlerts.mockResolvedValue([firing('db_down')]);
+    mockSendAlertNotification.mockResolvedValue(PARTIAL);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect([200, 424, 500, 503]).not.toContain((await call()).status);
+    vi.restoreAllMocks();
+  });
+
+  it('one alert undelivered and another partially delivered → 424 wins over 207', async () => {
+    mockComputeAlerts.mockResolvedValue([firing('a'), firing('b', 'P2')]);
+    mockSendAlertNotification.mockResolvedValueOnce(PARTIAL).mockResolvedValueOnce(ALL_FAILED);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect((await call()).status).toBe(424);
+    vi.restoreAllMocks();
   });
 
   it('nothing firing + no channel configured → 200 (no alert to deliver is not a failure)', async () => {

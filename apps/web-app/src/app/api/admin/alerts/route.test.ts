@@ -132,20 +132,81 @@ describe('POST /api/admin/alerts', () => {
     expect(body.error).toBe('Not found');
   });
 
-  it('returns 200 with sent count for an admin caller', async () => {
+  const asAdmin = () => {
     mockAuth.mockResolvedValue({ user: { email: 'philklingmbb@gmail.com', id: 'u1' } });
     mockCanAccessAdmin.mockReturnValue(true);
-    mockComputeAlerts.mockResolvedValue([
-      { ...SAMPLE_ALERT, status: 'firing', severity: 'P1' },
-    ]);
+  };
+  const firingP1 = (id = 'error_rate_high') => ({ ...SAMPLE_ALERT, id, status: 'firing', severity: 'P1' });
+
+  it('returns 200 with real delivery counts when every channel delivered (row #266)', async () => {
+    asAdmin();
+    mockComputeAlerts.mockResolvedValue([firingP1()]);
+    mockSendAlertNotification.mockResolvedValue({ configured: 2, delivered: 2, failed: 0 });
 
     const response = await POST(makePostRequest({ threshold: 'P2' }));
     expect(response.status).toBe(200);
 
     const body = await response.json();
-    expect(typeof body.sent).toBe('number');
-    expect(body.sent).toBe(1);
+    expect(body.sent).toBeUndefined();
+    expect(body).toMatchObject({
+      alertsFiring: 1,
+      alertsDelivered: 1,
+      alertsUndelivered: 0,
+      channels: { configured: 2, delivered: 2, failed: 0 },
+    });
+    expect(body.deliveries).toEqual([
+      { id: 'error_rate_high', severity: 'P1', configured: 2, delivered: 2, failed: 0 },
+    ]);
     expect(Array.isArray(body.alerts)).toBe(true);
+  });
+
+  it('partial channel failure: 200 but channels.failed is reported', async () => {
+    asAdmin();
+    mockComputeAlerts.mockResolvedValue([firingP1()]);
+    mockSendAlertNotification.mockResolvedValue({ configured: 2, delivered: 1, failed: 1 });
+
+    const response = await POST(makePostRequest());
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.alertsDelivered).toBe(1);
+    expect(body.channels).toEqual({ configured: 2, delivered: 1, failed: 1 });
+  });
+
+  it('no channel delivered: 424 and zero delivered, not "sent: N"', async () => {
+    asAdmin();
+    mockComputeAlerts.mockResolvedValue([firingP1('a'), firingP1('b')]);
+    mockSendAlertNotification
+      .mockResolvedValueOnce({ configured: 0, delivered: 0, failed: 0 })
+      .mockResolvedValueOnce({ configured: 1, delivered: 0, failed: 1 });
+
+    const response = await POST(makePostRequest());
+    expect(response.status).toBe(424);
+    const body = await response.json();
+    expect(body.alertsFiring).toBe(2);
+    expect(body.alertsDelivered).toBe(0);
+    expect(body.alertsUndelivered).toBe(2);
+    expect(body.channels).toEqual({ configured: 1, delivered: 0, failed: 1 });
+  });
+
+  it('a sender that throws counts as an undelivered alert', async () => {
+    asAdmin();
+    mockComputeAlerts.mockResolvedValue([firingP1()]);
+    mockSendAlertNotification.mockRejectedValue(new Error('boom'));
+
+    const response = await POST(makePostRequest());
+    expect(response.status).toBe(424);
+    expect((await response.json()).alertsUndelivered).toBe(1);
+  });
+
+  it('nothing firing: 200 with zero counts', async () => {
+    asAdmin();
+    mockComputeAlerts.mockResolvedValue([SAMPLE_ALERT]);
+
+    const response = await POST(makePostRequest());
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toMatchObject({ alertsFiring: 0, alertsDelivered: 0, alertsUndelivered: 0 });
+    expect(mockSendAlertNotification).not.toHaveBeenCalled();
   });
 
   it('uses default P2 threshold when body is missing', async () => {
@@ -160,8 +221,9 @@ describe('POST /api/admin/alerts', () => {
     expect(response.status).toBe(200);
 
     const body = await response.json();
-    // P3 is below default P2 threshold → sent = 0
-    expect(body.sent).toBe(0);
+    // P3 is below default P2 threshold → nothing in scope
+    expect(body.alertsFiring).toBe(0);
+    expect(mockSendAlertNotification).not.toHaveBeenCalled();
   });
 
   it('returns 500 when computeAlerts throws', async () => {

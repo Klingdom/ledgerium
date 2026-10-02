@@ -19,10 +19,15 @@ name: Alerts check
 # delivery channel (none configured, or Slack/email failing): the alert exists
 # but nobody was told, so this job fails and GitHub tells the repo owner.
 #
+# HTTP 207 (row #266, script exit 6) = PARTIAL channel failure: every firing
+# alert reached >= 1 channel but a configured channel failed (revoked Slack
+# webhook, SMTP down or timing out). The job fails (GitHub has no warning state)
+# so the decayed redundancy is not silent; the message says someone WAS told.
+#
 # DOES NOT COVER: delivery being CONFIRMED means the channel accepted it (Slack
-# 2xx, email provider success), not that a human read it. A firing alert
-# delivered on >= 1 channel returns 200 even if another channel failed (warning
-# in the server log only). GitHub may delay or
+# 2xx, email provider success), not that a human read it. Channels are only
+# exercised WHILE an alert is firing, so a broken channel is not detected on a
+# quiet hour (no heartbeat/test send exists). GitHub may delay or
 # drop scheduled runs under load, and disables schedules on repos with no
 # activity for 60 days. Detection latency is up to ~1h plus GitHub delay.
 #

@@ -6,6 +6,15 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - Alert delivery problems are no longer hidden
+
+### Fixed
+- If an alert reached one destination but another destination was broken — say email worked but Slack did not — this went unnoticed. The hourly check now fails and says so, so a broken channel is fixed before it is the only one left.
+- Sending alerts by hand from the admin area now reports what was actually delivered, instead of reporting success regardless.
+- If the mail server stops responding, sending now gives up after 20 seconds and reports the failure, instead of hanging. This also applies to password-reset emails.
+
+---
+
 ## [2026-10-02] - Security: the service refuses to start with a weak sign-in secret
 
 ### Security

@@ -15,6 +15,14 @@
 #     or every configured one failed (revoked webhook, email provider down, or
 #     ALERT_EMAIL_TO set with no SMTP_PASSWORD / RESEND_API_KEY). The server
 #     logs say which; this script, like all of it, prints the status only.
+#   6 HTTP 207 (row #266): PARTIAL channel failure. Every firing alert reached
+#     >= 1 channel (someone was told) but a configured channel failed (revoked
+#     Slack webhook beside working email, SMTP hang/timeout beside working
+#     Slack). Distinct from 5 (nobody told) and 3/1 (outage). Fails the job on
+#     purpose: GitHub Actions has no warning state, and a silently decayed
+#     redundancy is the failure this exists to catch. It fires only while an
+#     alert is firing AND a channel is broken, both of which want attention.
+#   Exit 0 is 200 only: 207 is a 2xx and must never be read as success.
 set -u
 
 if [ -z "${CRON_SECRET:-}" ] || [ -z "${ALERTS_CHECK_URL:-}" ]; then
@@ -49,6 +57,10 @@ fi
 if [ "$status" = "424" ]; then
   echo "::error::alerts/check returned HTTP 424: a P1/P2 alert is FIRING and could not be delivered to any channel (none configured, or Slack/email delivery failing). Check the web container logs for '[alert]' lines and the SLACK_ALERTS_WEBHOOK_URL / ALERT_EMAIL_TO / SMTP settings. Someone has NOT been told."
   exit 5
+fi
+if [ "$status" = "207" ]; then
+  echo "::error::alerts/check returned HTTP 207: every firing alert reached at least one channel, but a configured channel FAILED (e.g. revoked Slack webhook, SMTP down or timing out) - alert redundancy is degraded. Check the web container logs for '[alert]' lines and fix the failing channel. Someone WAS told this hour; the next failure on the remaining channel may not reach anyone."
+  exit 6
 fi
 if [ "$status" != "200" ]; then
   echo "::error::alerts/check returned HTTP $status (expected 200)"

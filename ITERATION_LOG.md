@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 102) — Reached someone, but not everyone (Mode 1, `backend-engineer`)
+
+- **Controls:** Area — `infra / monitoring` (100 a11y, 101 security/deploy). Agent — **`backend-engineer`, a real rotation** (suite, typecheck, `bash -n` and the stubbed script run by the agent; I re-ran suite, typecheck, YAML and the script under my own stub). Extension — `871e29a`, 59 loops. Cadence: 2 of 3 since MR-046. Ran alongside the AUTHZ audit amendment on separate files.
+- **Candidate Selection: `burn-down` — #266** (10).
+- **What shipped:** a broken second channel now **fails the hourly job** — HTTP 207, exit 6 — rather than a console line; the manual send reports what was actually delivered instead of a count of attempts; SMTP has real timeouts and a hard deadline so a hung mail server is a failed channel, not an "unreachable" site.
+- **The decision worth recording:** fail, not warn. GitHub Actions has no warning state, so a warning would be a log line nobody reads — which is precisely how a revoked webhook decays silently until the other channel breaks too and an alert reaches nobody. The noise is bounded: it can only fire while an alert is firing *and* a channel is broken.
+- **Residual, class-scoped:** five ways a delivery could fail invisibly → 0 of those closable here. **Honest remaining gap, filed #282:** a channel that breaks during a quiet hour is found only when an alert needs it — a heartbeat would close it.
+- **Side effect, stated:** the SMTP deadline also bounds password-reset email (20 s), which is an improvement, not a regression — it previously could hang.
+- **Validation (re-run by me):** web-app **3757 → 3767** (+10); typecheck 0; script 200→0, 207→6, 424→5, 503→4.
+- **Follow-ups:** 1 created (#282), 1 closed (#266).
+
+---
+
 ## 2026-10-02 — AUTHZ_AUDIT_001 amended by its author (Mode 3-adjacent, non-counting)
 
 - **MR-045's practice applied for the first time:** a re-grade goes back to the auditor. `security-reviewer` added severity definitions (P0: exploitable today by an ordinary caller with no precondition they don't control; P1: same harm under a condition the attacker does not control, or blast radius limited to one team; P2/P3 below) and re-assessed its own findings.
