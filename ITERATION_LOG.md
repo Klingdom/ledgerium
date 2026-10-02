@@ -28,6 +28,7 @@ This file records each bounded improvement loop.
   - with the server upload events stripped, all 4 server-event tests fail;
   - against the old upload page, the 2 no-double-emit tests fail.
 - **Follow-ups:** 0 created, 1 closed (#295). Consumers that count by name are the #252 class; that row is amended rather than a new one filed.
+- **Recording error, fixed in the next commit:** I wrote the #295 closure with line breaks inside a table cell, which split the row; the validator failed, and I committed anyway because I had piped its output through `head`, which hid its exit code. That is the same "grep is not a verdict" failure MR-051 named, this time in my own artifact check. From now on the validator is judged by its exit code.
 
 ---
 
