@@ -1,9 +1,9 @@
 import { withApiRoute } from '@/lib/with-api-route';
-import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { computeAlerts } from '@/lib/compute-alerts';
 import { sendAlertNotification } from '@/lib/notifications';
 import { reportApiError } from '@/lib/api-error-reporting';
+import { verifyCronBearer } from '@/lib/cron-auth';
 
 /**
  * GET /api/admin/alerts/check
@@ -68,9 +68,9 @@ import { reportApiError } from '@/lib/api-error-reporting';
  *   424: { error, checked, alertsFiring, alertsSent, alertsUndelivered }
  */
 async function handleGET(request: NextRequest) {
-  const cronSecret = process.env.CRON_SECRET;
+  const auth = verifyCronBearer(request);
 
-  if (!cronSecret) {
+  if (auth === 'unconfigured') {
     // CRON_SECRET not configured — refuse to run to avoid open access.
     // 503 (service not configured), NOT 500, so the scheduled job can tell a
     // missing-config deploy from a real outage (computeAlerts failing = 500).
@@ -83,21 +83,8 @@ async function handleGET(request: NextRequest) {
     return NextResponse.json({ error: 'Service not configured' }, { status: 503 });
   }
 
-  // Accept the secret ONLY via Authorization: Bearer <CRON_SECRET>
-  // Query-param delivery is intentionally not supported (log-exposure risk).
-  const authHeader = request.headers.get('authorization') ?? '';
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  const provided = match?.[1] ?? '';
-
-  // Timing-safe comparison — prevents timing oracle on secret value.
-  // Length check is safe because expectedBuf is a server-side constant.
-  const providedBuf = Buffer.from(provided, 'utf8');
-  const expectedBuf = Buffer.from(cronSecret, 'utf8');
-
-  if (
-    providedBuf.length !== expectedBuf.length ||
-    !crypto.timingSafeEqual(providedBuf, expectedBuf)
-  ) {
+  // Bearer-only, timing-safe, no query-param delivery: see lib/cron-auth.ts.
+  if (auth === 'unauthorized') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

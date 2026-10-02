@@ -1,0 +1,64 @@
+name: Alerts heartbeat
+
+# Row #282 - find a broken alert CHANNEL on a quiet day, not during an incident.
+#
+# alerts-check.yml exercises Slack/email only while an alert is firing, so a
+# revoked webhook, an expired SMTP credential or a dead mailbox is discovered
+# exactly when an incident needs it. This job POSTs daily to
+# /api/admin/alerts/heartbeat, which sends one fixed, clearly-labelled test
+# message ("Ledgerium alert channel heartbeat - no action needed") to every
+# configured channel and answers with a status; the script labels it from the
+# status alone (exit 0 ok / 5 none delivered / 6 partial / 7 none configured /
+# 4 server lacks CRON_SECRET / 3 unreachable / 2 unconfigured here / 1 other).
+# Any non-200 fails the job and GitHub notifies the repo owner by its own path.
+#
+# FREQUENCY - daily (08:23 UTC), deliberately:
+#   * Detection latency <= ~24h is the point: a channel that broke overnight is
+#     known before the working day, not at the next incident. Weekly would leave
+#     up to 7 quiet days of blindness; hourly would drown the channel.
+#   * Noise cost is one short line per channel per day (365/yr) in a channel that
+#     already expects bot posts; the text says "no action needed" and carries no
+#     alert data, so it is easy to mute/filter by the word "heartbeat". Daily
+#     (not weekdays-only) so a weekend break is not found only on Monday.
+#   * The heartbeat is also a LIVENESS signal for the email path: if the daily
+#     mail stops arriving, that is itself visible to a human.
+#
+# DOES NOT COVER: a human reading it (Slack accepted / provider reported
+# success is "delivered"); GitHub dropping or delaying scheduled runs; and
+# GitHub DISABLING scheduled workflows on a repo with no activity for 60 days -
+# a disabled heartbeat looks the same as a healthy one (both silent). Mitigation
+# is outside this file: keep repo activity, or note that the heartbeat message
+# itself not appearing in the channel is the tell. Retries are safe: the message
+# is fixed text, a duplicate is harmless.
+#
+# PUBLIC REPO: secret from secrets.CRON_SECRET, URL from vars.ALERTS_HEARTBEAT_URL
+# (falls back to deriving it from vars.ALERTS_CHECK_URL ending in /alerts/check,
+# so no new variable is required). Only the HTTP status is logged, never the body.
+# UNCONFIGURED: fails with ::error:: (same reasoning as alerts-check.yml: a
+# skipped job is grey and "channels not tested" would look like "channels fine").
+#
+# Setup (optional, if the derivation is not wanted):
+#   gh variable set ALERTS_HEARTBEAT_URL --body https://<host>/api/admin/alerts/heartbeat
+
+on:
+  schedule:
+    - cron: '23 8 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+      - name: Call alerts/heartbeat
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          ALERTS_HEARTBEAT_URL: ${{ vars.ALERTS_HEARTBEAT_URL }}
+          ALERTS_CHECK_URL: ${{ vars.ALERTS_CHECK_URL }}
+        run: bash .github/scripts/alerts-heartbeat.sh

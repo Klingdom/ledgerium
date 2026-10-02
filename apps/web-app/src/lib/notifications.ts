@@ -133,3 +133,84 @@ async function sendEmailAlert(to: string, alert: Alert): Promise<boolean> {
     return false;
   }
 }
+
+// ── Channel heartbeat (row #282) ─────────────────────────────────────────────
+
+/**
+ * The ONE message a heartbeat ever sends. Fixed text: no alert data, no
+ * timestamp, no counter - so a retried job posts an identical, harmless line
+ * and nothing about the system leaks into a channel that may be shared.
+ */
+export const HEARTBEAT_TEXT =
+  'Ledgerium alert channel heartbeat — no action needed. This is a scheduled test of the alert delivery path, not an alert.';
+export const HEARTBEAT_EMAIL_SUBJECT = '[TEST] Ledgerium alert channel heartbeat — no action needed';
+
+export type HeartbeatChannelOutcome = 'delivered' | 'failed' | 'not_configured';
+
+/** Counts and per-channel words only - never addresses, URLs or response bodies. */
+export interface HeartbeatResult {
+  configured: number;
+  delivered: number;
+  failed: number;
+  channels: { slack: HeartbeatChannelOutcome; email: HeartbeatChannelOutcome };
+}
+
+async function sendSlackHeartbeat(webhookUrl: string): Promise<boolean> {
+  try {
+    const res = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: `🟢 ${HEARTBEAT_TEXT}` }),
+      signal: AbortSignal.timeout(SLACK_TIMEOUT_MS),
+    });
+    if (!res.ok) {
+      console.error(`[heartbeat] Slack rejected: HTTP ${res.status}`);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('[heartbeat] Slack failed:', err instanceof Error ? err.name : 'unknown error');
+    return false;
+  }
+}
+
+async function sendEmailHeartbeat(to: string): Promise<boolean> {
+  if (!isEmailDeliveryConfigured()) {
+    console.error('[heartbeat] ALERT_EMAIL_TO is set but no email provider is configured (SMTP_PASSWORD / RESEND_API_KEY)');
+    return false;
+  }
+  try {
+    const result = await sendEmail({
+      to,
+      subject: HEARTBEAT_EMAIL_SUBJECT,
+      html: `<p style="font-family: -apple-system, sans-serif; font-size: 14px;">${HEARTBEAT_TEXT}</p>`,
+    });
+    return result.success === true;
+  } catch (err) {
+    console.error('[heartbeat] Email failed:', err instanceof Error ? err.name : 'unknown error');
+    return false;
+  }
+}
+
+/**
+ * Send the heartbeat to EVERY configured alert channel, with the same contract
+ * as sendAlertNotification (same env vars, same "configured but cannot deliver
+ * = failed" rule, same timeouts). Never throws.
+ */
+export async function sendChannelHeartbeat(): Promise<HeartbeatResult> {
+  const slackWebhook = nonBlank(process.env.SLACK_ALERTS_WEBHOOK_URL);
+  const alertEmail = nonBlank(process.env.ALERT_EMAIL_TO);
+
+  const [slackOk, emailOk] = await Promise.all([
+    slackWebhook ? sendSlackHeartbeat(slackWebhook) : Promise.resolve(null),
+    alertEmail ? sendEmailHeartbeat(alertEmail) : Promise.resolve(null),
+  ]);
+
+  const word = (ok: boolean | null): HeartbeatChannelOutcome =>
+    ok === null ? 'not_configured' : ok ? 'delivered' : 'failed';
+  const channels = { slack: word(slackOk), email: word(emailOk) };
+  const outcomes = Object.values(channels);
+  const delivered = outcomes.filter((o) => o === 'delivered').length;
+  const failed = outcomes.filter((o) => o === 'failed').length;
+  return { configured: delivered + failed, delivered, failed, channels };
+}

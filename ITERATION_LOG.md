@@ -4,6 +4,18 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 109) — A channel that breaks on a quiet day (Mode 1, `backend-engineer`)
+
+- **Controls:** Area — `infra / monitoring`, **pivot required** (107 and 108 were security). Agent — **`backend-engineer`, a real rotation** (suite, typecheck, script tests and YAML run by the agent; I re-ran the suite and typecheck and drove the script under my own no-network stub). Extension — `871e29a`, 66 loops. **Cadence: 3 of 3 since MR-048 — MR-049 now due.**
+- **Candidate Selection: `saturation-rule` → #282** (10), the top non-security row.
+- **What shipped:** a daily heartbeat that sends a fixed test message to every configured alert channel and fails its scheduled job if any channel is broken (207), all are broken (424), or none is set up (412). Before this, channels were exercised only when an alert fired — so the first time anyone learned a webhook was revoked was during the incident that needed it.
+- **Design choices worth keeping:** a separate POST-only endpoint, so the hourly check stays a read-only evaluation and a prefetched link cannot post to Slack; a distinct 412 so "never configured" is not confused with "configured but broken"; a message with no timestamp or data, so a retried job sends an identical, harmless duplicate. The bearer check became one shared helper instead of a second copy.
+- **The limit that no code here can fix, stated plainly:** GitHub disables scheduled workflows after 60 days without repository activity, and a disabled heartbeat is indistinguishable from a healthy one. The tell is human: the daily message stops arriving.
+- **Validation (re-run by me):** web-app **3815 → 3846** (+31); typecheck 0; script 200→0, 207→6, 424→5, 412→7, 503→4; secret never in argv.
+- **Follow-ups:** 0 created, 1 closed (#282).
+
+---
+
 ## 2026-10-02 (loop 108) — A secret the shell cannot rewrite (Mode 1, `devops-engineer`)
 
 - **Controls:** Area — `security / deploy`. Saturation: security in 3 of the last 5 loops, so security rows carried the −2 penalty; this row tied at 10 with two others and the policy's bias toward test coverage and stability broke the tie. Agent — **`devops-engineer`, a real rotation** (matrix, mutations and suites run by the agent; I re-ran the suites and the key matrix cases). Extension — `871e29a`, 65 loops. Cadence: 2 of 3 since MR-048.

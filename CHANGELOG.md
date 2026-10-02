@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-02] - A daily check that alert channels still work
+
+### Added
+- Once a day, Ledgerium now sends a short, clearly-marked test message ("heartbeat — no action needed") to each place alerts are delivered, such as Slack or email. If a channel is broken or none is set up, the daily check fails and says so. A broken alert channel is therefore found within a day, instead of during the incident it was needed for.
+
+---
+
+
 ## [2026-10-02] - Security: limits on password guessing now follow the account
 
 ### Security
