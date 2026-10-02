@@ -4,6 +4,21 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 — MR-042 recorded, and what I applied from it (Mode 4, non-counting)
+
+- **Review:** `docs/meta/MR_042_META_REVIEW.md`. Numbers reproduce. Its headline: **loop 86 claimed a class closed and checked one member of it.**
+- **Applied, product (separate Mode 3 commit `5a2fcaf`):** a thrown 5xx `Response` is reported again (my MR-041 pass-through let it through silently); an empty funnel stage reads "—", not 0%.
+- **Applied, governance (this commit):**
+  - **The validator's iteration dating was wrong, and so was MR-041's premise for it.** "iter N ≈ loop N" is false: iterations ran to 098 before loop numbering restarted at 1. Iter N is now read as loop N − 99 (approximate — the eras ran at different cadences). **The oldest closures were ~181 loops old, not 82.** The validator also now says "age not datable" for #9 instead of printing nothing — `bfc270d` claimed it printed the oldest row's age, and for #9 it did not.
+  - **#9 re-scoped and re-scored 11 → 13** (MR-041 §6, MR-042 §7): since loop 83 there is one place every escaped exception passes, so "structured logging with session context" is now one file — request id + user id on the wrapper's log line and the 500's header.
+  - **#256's Area cell** corrected to `infra / deploy`, matching the log the saturation rule reads.
+  - **Three rows filed for findings that had lived only in prose:** **#262** — client input still reaches a reported 500 outside JSON bodies, and `/api/upload` **returns the raw error message** to the client (13); **#263** — an alert can fire and fail to arrive (Slack never checks `res.ok`; no-channel is a 200) — and loop 85's reason for not surfacing it, "needs the body", was false: a status code would do (12); **#264** — the admin analytics endpoint loads every event in the window, unbounded (7).
+- **Corrections to my own entries (MR-042 §6.2), logged rather than rewritten:** (1) loop 86's residual was **15 sites in 13 files**, not 13 in 12 — the third wrong count of that defect, mine included; (2) "a client's mistake is not a server failure" in loop 86's title and changelog overclaimed — true for JSON bodies only (#262); (3) "six routes" were six handlers in five files; (4) loop 85's "needs the body" was false; (5) loop 85's CEO steps omitted the **redeploy** and the secret's character set — now in SYSTEM_HEALTH; (6) loop 87's residual was 3 → 0, not 2 → 0, and only after `5a2fcaf`.
+- **The pattern MR-042 names, which I accept:** each residual was stated as a property, but scoped to what the fix could zero. A property residual must be scoped to the *class*, not to the change.
+- **Next:** loop 88 = **#9** (oldest open non-blocked, now 13), then #262 at 89.
+
+---
+
 ## 2026-10-01 — Mode 3 correction (non-counting): two holes MR-042 found in my own fixes
 
 - **`withApiRoute` passed every thrown `Response` through unreported** — the pass-through I added at MR-041. Right for the 403 it was written for; wrong for a thrown 503, which would have been a server failure the alert never saw. Now only status < 500 passes through silently; a thrown 5xx is reported and still returned. Test added.

@@ -295,17 +295,21 @@ const oldest = openRows
 /**
  * A row's birth loop, or null if it cannot be dated. Two formats exist:
  * `… L<N>` in the birth cell (loop-era rows), and `iter NNN` in the birth or
- * status cell (iteration-era rows, e.g. `new (iter 001)`), read as loop N per
- * MR-039's convention. MR-041 §2.2: skipping the second format dropped the two
+ * status cell (iteration-era rows, e.g. `new (iter 001)`). MR-042 §2.2: MR-039's
+ * "iter N ≈ loop N" was false — iterations ran to 098 before loop numbering
+ * restarted at 1 (ITERATION_LOG.md, 2026-06-26 → 2026-09-14), so iter N is
+ * read as loop N − 99. Approximate: the two eras did not run at one cadence. MR-041 §2.2: skipping the second format dropped the two
  * oldest rows ever closed, so the median read YOUNGER in the very window that
  * closed them — a measure flattering itself by what it could not parse.
  */
+const ITERATION_ERA_OFFSET = 99;
+
 function birthLoop(r) {
   const cell = r.cells[COL.BIRTH_ITER] ?? '';
   const l = /\bL(\d+)\b/.exec(cell);
   if (l) return Number(l[1]);
   const it = /\biter\s*0*(\d+)\b/i.exec(`${cell} ${r.status}`);
-  return it ? Number(it[1]) : null;
+  return it ? Number(it[1]) - ITERATION_ERA_OFFSET : null;
 }
 
 const dated = [];
@@ -334,7 +338,7 @@ const median = lastTen.length === 0 ? null
 const poolLine =
   `                  open ${openRows.length}` +
   ` | oldest open non-blocked: ${oldest ? `#${oldest.id} (${/^[\s—-]*$/.test(oldest.cells[COL.BIRTH_ITER] ?? '') ? oldest.status : `birth: ${oldest.cells[COL.BIRTH_ITER].trim()}`})` : 'none'}` +
-  (oldest && birthLoop(oldest) !== null && latestLoop ? `, ~${latestLoop - birthLoop(oldest)} loops old` : '') +
+  (oldest ? (birthLoop(oldest) !== null && latestLoop ? `, ~${latestLoop - birthLoop(oldest)} loops old` : ', age not datable') : '') +
   ` | median age-at-close, last ${lastTen.length}: ${median === null ? 'n/a' : `${median} loops`}` +
   ` (max ${lastTen.length ? Math.max(...lastTen) : 'n/a'}; all-time max ${maxAge ?? 'n/a'})` +
   (undatable ? ` | ${undatable} closures not datable` : '') +
