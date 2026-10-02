@@ -26,7 +26,8 @@
  * throw if they find nothing, so a restructure fails loudly instead of passing.
  */
 import { describe, it, expect } from 'vitest'
-import { readFileSync, readdirSync } from 'node:fs'
+import { readFileSync, readdirSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -343,11 +344,20 @@ describe('secrets have no non-empty fallback (row #280)', () => {
     expect(v.some((l) => /^\s*(if|continue-on-error):/.test(l))).toBe(false)
   })
 
+  // The executed tests need a POSIX `sh`. They may only be skipped LOCALLY (a
+  // Windows dev box without one). In CI a missing `sh` must FAIL, not skip, or the
+  // validation could stop being exercised without anyone noticing (MR-047). The
+  // guard test below always runs, so CI cannot pass vacuously.
   const shAvailable = spawnSync('sh', ['-c', 'true']).status === 0
-  describe.skipIf(!shAvailable)('validate-secrets.sh NEXTAUTH_SECRET validation (executed)', () => {
+  const ciEnv = process.env['CI']
+  const inCi = !!ciEnv && !['0', 'false'].includes(ciEnv.toLowerCase())
+  it('a POSIX sh is available when running in CI (executed validation tests must not be skipped there)', () => {
+    if (inCi) expect(shAvailable, 'CI is set but `sh` is not runnable: the executed validate-secrets tests cannot run').toBe(true)
+  })
+  describe.skipIf(!shAvailable && !inCi)('validate-secrets.sh NEXTAUTH_SECRET validation (executed)', () => {
     const block = /^# BEGIN NEXTAUTH_SECRET[^\n]*\n[\s\S]*?^# END NEXTAUTH_SECRET[^\n]*$/m.exec(START_SH)?.[0]
-    const run = (secret: string | undefined) => {
-      const env: NodeJS.ProcessEnv = { NODE_ENV: 'test', PATH: process.env['PATH'] ?? '' }
+    const run = (secret: string | undefined, extra: Record<string, string> = {}) => {
+      const env: NodeJS.ProcessEnv = { NODE_ENV: 'test', PATH: process.env['PATH'] ?? '', ...extra }
       if (secret !== undefined) env['NEXTAUTH_SECRET'] = secret
       const r = spawnSync('sh', ['-c', block + '\necho VALID'], { env, encoding: 'utf8' })
       return { ok: r.status === 0 && r.stdout.includes('VALID'), out: r.stdout + r.stderr }
@@ -360,11 +370,81 @@ describe('secrets have no non-empty fallback (row #280)', () => {
       for (const p of parsePlaceholders(START_SH)) expect(run(p).ok, p).toBe(false)
       expect(run('Change-Me').ok).toBe(false)
     })
+    it('enforces the safe character set [A-Za-z0-9+/=_-] (row #288)', () => {
+      const base = 'Zk3p9Qw1Lx0vB7nM2aT5yHc8RdE4uJfG'
+      for (const bad of ['$', '`', '"', "'", '\\', ' ', ';', '(', ')', '&', '|', '<', '>', '!', '#', '*', '{', '}', '\n']) {
+        const r = run(base + bad + 'x')
+        expect(r.ok, JSON.stringify(bad)).toBe(false)
+        expect(r.out).toContain('characters outside')
+        expect(r.out).not.toContain(base)
+      }
+      for (const okSecret of [base + '+/=', base + '_-', 'a'.repeat(64), '0123456789abcdef'.repeat(4)]) {
+        expect(run(okSecret).ok, okSecret).toBe(true)
+      }
+    })
+    it('refuses to run when AUTH_SECRET is set, even empty (NextAuth reads it first) (row #288)', () => {
+      expect(run(good, { AUTH_SECRET: 'x' }).ok).toBe(false)
+      expect(run(good, { AUTH_SECRET: '' }).ok).toBe(false)
+      expect(run(good, { AUTH_SECRET: 'x' }).out).toContain('AUTH_SECRET is set')
+      expect(run(good).ok).toBe(true)
+    })
     it('rejects short secrets, accepts 32+ chars, never prints the secret', () => {
       expect(run('abcdefghijklmnop').ok).toBe(false)
       expect(run('a'.repeat(31)).ok).toBe(false)
       expect(run(good).ok).toBe(true)
       expect(run('abcdefghijklmnop').out).not.toContain('abcdefghijklmnop')
     })
+  })
+})
+
+// ── Start script -> shared script, end to end (row #288) ─────────────────────
+// Runs the REAL scripts/docker-start.sh with the REAL validate-secrets.sh beside
+// it (as in the image). Everything after validation is stubbed: the copy of
+// docker-start.sh is cut at the "Environment validated" line and replaced by a
+// sentinel, so no database, backup, prisma or next process is ever started.
+// Same skip policy as above: skipped only locally without sh, never in CI.
+const SH_OK = spawnSync('sh', ['-c', 'true']).status === 0
+describe.skipIf(!SH_OK && !process.env['CI'])('docker-start.sh -> validate-secrets.sh chain (executed, row #288)', () => {
+  const MARKER = 'echo "[ledgerium] Environment validated"'
+  const SENTINEL = 'POST_VALIDATION_REACHED'
+  const startSrc = readFileSync(path.join(REPO_ROOT, 'scripts/docker-start.sh'), 'utf8').replace(/\r\n/g, '\n')
+  const sharedSrc = readFileSync(path.join(REPO_ROOT, 'scripts/validate-secrets.sh'), 'utf8').replace(/\r\n/g, '\n')
+
+  const runChain = (secret: string | undefined, extra: Record<string, string> = {}) => {
+    expect(startSrc, 'docker-start.sh lost its "Environment validated" marker; update this test').toContain(MARKER)
+    const dir = mkdtempSync(path.join(tmpdir(), 'ledgerium-start-'))
+    try {
+      const cut = startSrc.slice(0, startSrc.indexOf(MARKER)) + `echo ${SENTINEL}\n`
+      writeFileSync(path.join(dir, 'docker-start.sh'), cut)
+      writeFileSync(path.join(dir, 'validate-secrets.sh'), sharedSrc)
+      const env: NodeJS.ProcessEnv = { NODE_ENV: 'test', PATH: process.env['PATH'] ?? '', ...extra }
+      if (secret !== undefined) env['NEXTAUTH_SECRET'] = secret
+      const r = spawnSync('sh', ['./docker-start.sh'], { cwd: dir, env, encoding: 'utf8' })
+      return { status: r.status, out: (r.stdout ?? '') + (r.stderr ?? '') }
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  }
+
+  it('a bad secret exits non-zero BEFORE any later step', () => {
+    for (const bad of [undefined, 'short', 'change-me-' + 'x'.repeat(30), 'a'.repeat(40) + '$HOME']) {
+      const r = runChain(bad)
+      expect(r.status, String(bad)).not.toBe(0)
+      expect(r.out).toContain('FATAL')
+      expect(r.out).not.toContain(SENTINEL)
+      expect(r.out).not.toContain('DATABASE_URL not set')
+    }
+  })
+  it('AUTH_SECRET set stops startup too', () => {
+    const r = runChain('a'.repeat(40), { AUTH_SECRET: 'x' })
+    expect(r.status).not.toBe(0)
+    expect(r.out).not.toContain(SENTINEL)
+  })
+  it('a good secret proceeds past validation and never echoes the secret', () => {
+    const good = 'Zk3p9Qw1Lx0vB7nM2aT5yHc8RdE4uJfGgSi6oVq1AaA='
+    const r = runChain(good)
+    expect(r.status).toBe(0)
+    expect(r.out).toContain(SENTINEL)
+    expect(r.out).not.toContain(good)
   })
 })

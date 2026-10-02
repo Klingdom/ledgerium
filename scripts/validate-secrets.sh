@@ -21,10 +21,38 @@ PLACEHOLDER_SECRETS="build-time-placeholder ledgerium-dev-secret-change-in-produ
 # (`openssl rand -base64 32` yields 44 chars).
 MIN_NEXTAUTH_SECRET_LENGTH=32
 
+# NextAuth (next-auth 5.0.0-beta.30, lib/env.js) resolves its secret as
+# `config.secret ?? AUTH_SECRET ?? NEXTAUTH_SECRET`; auth.ts sets no config.secret,
+# so ANY AUTH_SECRET -- even an empty string, `??` only skips null/undefined --
+# silently replaces the NEXTAUTH_SECRET validated below. Nothing in this repo
+# (compose, Dockerfile, workflows, env examples) sets it, so rather than maintain
+# a second validated secret we refuse to run when it is present at all.
+# `${VAR+x}` is non-empty iff VAR is set (including set-but-empty).
+if [ -n "${AUTH_SECRET+x}" ]; then
+  echo "[ledgerium] FATAL: AUTH_SECRET is set. NextAuth reads it before NEXTAUTH_SECRET, so it would override the validated secret. Unset it and use NEXTAUTH_SECRET only."
+  exit 1
+fi
+
 if [ -z "$NEXTAUTH_SECRET" ]; then
   echo "[ledgerium] FATAL: NEXTAUTH_SECRET is not set. Generate one with: openssl rand -base64 32"
   exit 1
 fi
+
+# Safe character set. The hostinger/deploy-on-vps action interpolates the
+# environment-variables block into a shell script (see deploy.yml WARNING), so a
+# value containing a dollar sign, backtick, quote, backslash, semicolon,
+# parenthesis or space could reach the container altered after validation.
+# Allow only base64 / base64url / hex characters: A-Z a-z 0-9 + / = _ -
+# (`openssl rand -base64 32` and `-hex 32` both fit).
+# LC_ALL=C so the ranges are ASCII, not locale collation.
+LC_ALL=C
+export LC_ALL
+case "$NEXTAUTH_SECRET" in
+  *[!A-Za-z0-9+/=_-]*)
+    echo "[ledgerium] FATAL: NEXTAUTH_SECRET contains characters outside [A-Za-z0-9+/=_-] (shell-special characters can be altered by the deploy action). Generate one with: openssl rand -base64 32"
+    exit 1
+    ;;
+esac
 
 NEXTAUTH_SECRET_LC=$(printf '%s' "$NEXTAUTH_SECRET" | tr '[:upper:]' '[:lower:]')
 for PLACEHOLDER in $PLACEHOLDER_SECRETS; do

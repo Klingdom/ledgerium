@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 108) — A secret the shell cannot rewrite (Mode 1, `devops-engineer`)
+
+- **Controls:** Area — `security / deploy`. Saturation: security in 3 of the last 5 loops, so security rows carried the −2 penalty; this row tied at 10 with two others and the policy's bias toward test coverage and stability broke the tie. Agent — **`devops-engineer`, a real rotation** (matrix, mutations and suites run by the agent; I re-ran the suites and the key matrix cases). Extension — `871e29a`, 65 loops. Cadence: 2 of 3 since MR-048.
+- **Candidate Selection: `burn-down` — #288** (12; 10 after the saturation penalty; tie-break stated above). These were the MR-047 recommendations I had dropped.
+- **What it closes:** the secret is validated before the deploy action's shell can rewrite it — only the base64/hex alphabet is accepted, so there is nothing for the shell to expand. And the override nobody had looked at: sign-in reads `AUTH_SECRET` *before* the secret every check validates, and an empty one would still win. Nothing sets it, so startup now refuses if it exists at all.
+- **Two test weaknesses fixed, each the kind these reviews keep finding:** a test that would skip silently in CI now fails loudly there; and the start chain — container script calling the shared check — had never been executed by any test. Now it is, with everything after validation stubbed so no app or database starts.
+- **Not verified, stated:** the action's shell evaluation is inferred from the repo's own comment and the failed run it cites (the action's source could not be fetched); the image's busybox shell was not run.
+- **For the CEO:** a current secret containing shell-special characters will now stop the deploy at the check — safely, before the server is touched. Regenerate with `openssl rand -hex 32` if unsure.
+- **Validation (re-run by me):** web-app **3809 → 3815**; typecheck 0; hex accepted, `$` rejected, empty `AUTH_SECRET` refused.
+- **Follow-ups:** 0 created, 1 closed (#288).
+
+---
+
 ## 2026-10-02 (loop 107) — Guessing, limited by who it targets (Mode 1, `security-reviewer`)
 
 - **Controls:** Area — `security / authz` (105 security, 106 a11y; security now 2 of the last 5). Agent — **`security-reviewer`, a real rotation** (suite, typecheck and a mutation check run by the agent; I re-ran suite and typecheck and read the thresholds). Extension — `871e29a`, 64 loops. Cadence: 1 of 3 since MR-048.
