@@ -4,6 +4,47 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 — MR-055 recorded (Mode 4, non-counting): the defect next to the one you fixed
+
+- **Review:** `docs/meta/MR_055_META_REVIEW.md`. Nothing reverts.
+  - **Counts reproduce:** web-app 4110 on 3 of 3 runs, root 5888 on 2 of 2, typecheck 0, and the validator clean at every commit.
+  - **Lockfile:** a frozen install passes on pnpm 10.32.1 and 9.15.9.
+  - **E2E:** **the loop-127 spec was run through Playwright: 9 passed.** That closes the loop-127 residual.
+- **The pattern:** each loop fixed its named defect and missed the next one on the same screen.
+  - **Loop 125 (pricing):**
+    - "Most Popular" sits on Team, which nobody can buy.
+    - The comparison table has no Solo column, although the FAQ now says "Solo and above".
+    - The pricing page says role-based access is "coming soon", while the security page says it is available.
+    - The lapsed-date test is only half a guard: a future date that later lapses passes forever, and the CI override is wired nowhere. **A better design needs no clock: ban forward-dated promises in public copy outright.**
+    - Filed **#310** (12).
+  - **Loop 126 (maps):**
+    - 7 fixes and 3 exemptions were recomputed, and all match the ledger.
+    - **One exemption's reason is false:** the insights-strip icon it relied on is never rendered, so severity is shown by colour alone.
+    - Frequency is now width-only, with no redundant channel.
+    - Performance mode is colour-only, and its greyscale separation worsened (fast vs slow 1.48 → 1.28).
+    - Added to **#309**.
+  - **Loop 127 (Flow View):**
+    - The strip should be `role="toolbar"`.
+    - The step detail is linked via `aria-describedby` only after focus, so a screen reader likely never reads it (not verified).
+    - The edited e2e spec checks programmatic focus, not keyboard scroll.
+    - The new test dependencies were added against the policy stated in `accountCache.ts:6-11`.
+    - Filed **#311** (9).
+- **All three of the design gaps I caught in review were gaps in my briefs. Adopted practice:** a user-visible brief must require, up front, a truth table against code (copy), measurement plus a spec reconciliation (visual), and a check of every adjacent claim or control on the same screen (the "next to it" check).
+- **Corrections:**
+  - (1) Loop 125's cool-off rationale said "re-armed since iter 029". The last consumption was **iter 048**, and the rule was applied correctly either way. The error originated in MR-054's text.
+  - (2) Area saturation has been read two ways: early iterations counted the top-level area (`web-app`), recent loops counted sub-areas.
+    - **Coordinator ruling until the next meta-review: compare the first segment of the Area field** (`web-app`, `security`, `infra`, `test-infra`).
+    - Under that reading loops 125-127 are web-app ×3, so **loop 128 must be non-web-app**. #306 satisfies it.
+- **For the CEO, new:**
+  - the "Most Popular" badge on an unbuyable plan (part of #310);
+  - the Starter and Solo Stripe price IDs, which the code reads but no deploy file provides (#278).
+- **Next:**
+  - loop 128 = **#306** (`devops-engineer`: non-web-app, a new agent, re-arms the cool-off, and must land before the push);
+  - loop 129 = **#310**;
+  - loop 130 = **#309** with `a11y-architect` input.
+
+---
+
 ## 2026-10-02 (loop 127) — Step detail without a mouse (Mode 1, `frontend-engineer`)
 
 - **Controls:**
@@ -68,7 +109,7 @@ This file records each bounded improvement loop.
   - **Extension:** `871e29a`, 82 loops untouched.
   - **Cadence:** 1 of 3 since MR-054.
 - **Candidate Selection: `ceiling-cool-off: invoked` — #305** (12).
-  - **Rationale:** the pool exceeds 8, so clause 6 would force a burn-down pick. Cool-off has been fully re-armed since iter 029, and loops 122-124 were burn-down. MR-054 asked for the first user-visible pick to be this live trust defect on the public pricing page.
+  - **Rationale:** the pool exceeds 8, so clause 6 would force a burn-down pick. Cool-off has been fully re-armed since its last consumption at **iter 048** [corrected at MR-055; the text originally said iter 029, copied from MR-054], and loops 122-124 were burn-down. MR-054 asked for the first user-visible pick to be this live trust defect on the public pricing page.
   - **Effect:** the cool-off resource is consumed. Three new consecutive burn-downs re-arm it.
 - **The truth came from the code before any copy was written:**
   - Free, Starter and Solo are self-serve.
