@@ -4,6 +4,19 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-02 (loop 104) — Two checks that disagreed (Mode 1, `devops-engineer`)
+
+- **Controls:** Area — `infra / deploy` (102 monitoring, 103 security). Agent — **`devops-engineer`, a real rotation** (the agent ran the script matrix, a diff against the old rules, the step-order proof and the suites; I re-ran the suites, the script, and checked the image path wiring). Extension — `871e29a`, 61 loops. Cadence: 1 of 3 since MR-047.
+- **Candidate Selection: `burn-down` — #284** (15), promoted by MR-047 and taken immediately: until it landed, the next deploy could take the site down.
+- **The root cause was two checks with different rules.** Compose accepted any non-empty secret; the startup script rejected short ones. Anything in the gap passed the first and failed the second — after the running container had already been replaced. **The fix removes the gap rather than adding a third check:** the rules live in one script, run by both the container and the deploy job, and the job runs it before the deploy step. A bad secret now fails the job while the old container keeps serving.
+- **What I checked that the agent could not:** the image was not built, so I traced the path by hand — both scripts are copied to `/app`, and the entrypoint is exec form, so the startup script finds the shared one beside it.
+- **A flaky test, found by not trusting a green report.** The agent reported all tests passing; my first run showed one failure. Four more runs isolated it to loop 96's sync test, which asserted the response does not contain `e1` — while the response carries a random upload id that sometimes does. Fixed in its own commit (`978cd29`) with a distinctive id; 0 failures in 8 runs. A test that fails one run in five teaches everyone to re-run instead of read.
+- **Not verified:** the workflow on GitHub; the image build.
+- **Validation (re-run by me):** web-app **3785 → 3787**; typecheck 0; shared script rejects empty, placeholder and 16-char, accepts 32.
+- **Follow-ups:** 0 created, 1 closed (#284).
+
+---
+
 ## 2026-10-02 — MR-047 recorded (Mode 4, non-counting): a fix that could take the site down
 
 - **Review:** `docs/meta/MR_047_META_REVIEW.md`. Numbers reproduce. Loops 102 and 103 hold; the audit amendment holds.

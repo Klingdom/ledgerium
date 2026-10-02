@@ -107,7 +107,8 @@ COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 
 # Copy startup script
 COPY scripts/docker-start.sh /app/start.sh
-RUN chmod +x /app/start.sh
+COPY scripts/validate-secrets.sh /app/validate-secrets.sh
+RUN chmod +x /app/start.sh /app/validate-secrets.sh
 
 # ── Backup/restore tooling (docs/runbooks/DATABASE_BACKUP_RESTORE.md) ────────
 # Baked into this same image (not a separate build) so the `backup` compose

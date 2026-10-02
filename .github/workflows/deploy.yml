@@ -109,6 +109,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Row #284: reject a placeholder / too-short NEXTAUTH_SECRET BEFORE the
+      # deploy step replaces anything on the server. compose.hostinger.yaml's
+      # ${NEXTAUTH_SECRET:?} only checks non-empty; without this a bad secret
+      # passes compose, the new container exits at startup (docker-start.sh runs
+      # the same script) and restarts in a loop with the old one already gone.
+      # Same script as the container start -- one set of rules. A failing step
+      # fails the job and the next step never runs (no `if:`/continue-on-error),
+      # so the running container is untouched. The secret is passed via env only;
+      # the script prints which rule failed, never the value or its length.
+      - name: Validate NEXTAUTH_SECRET
+        env:
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+        run: sh scripts/validate-secrets.sh
+
       # Off-host backup sidecar env: see docs/runbooks/DATABASE_BACKUP_RESTORE.md.
       # Those vars are consumed by the backup service in compose.hostinger.yaml,
       # not by web. Until BACKUP_S3_URI and the AWS credentials are set, the

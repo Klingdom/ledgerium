@@ -264,11 +264,15 @@ export function findSecretFallbacks(yml: string): string[] {
   return bad
 }
 
-/** The placeholder list + length + validation block in scripts/docker-start.sh. */
-const START_SH = readFileSync(path.join(REPO_ROOT, 'scripts/docker-start.sh'), 'utf8').replace(/\r\n/g, '\n')
+/**
+ * The placeholder list + length + validation block. Single source of truth is
+ * scripts/validate-secrets.sh (row #284): docker-start.sh and deploy.yml both
+ * RUN it; neither holds a copy.
+ */
+const START_SH = readFileSync(path.join(REPO_ROOT, 'scripts/validate-secrets.sh'), 'utf8').replace(/\r\n/g, '\n')
 export function parsePlaceholders(sh: string): string[] {
   const m = /^PLACEHOLDER_SECRETS="([^"]*)"/m.exec(sh)
-  if (!m) throw new Error('docker-start.sh: PLACEHOLDER_SECRETS not found')
+  if (!m) throw new Error('validate-secrets.sh: PLACEHOLDER_SECRETS not found')
   return m[1]!.split(/\s+/).filter(Boolean)
 }
 
@@ -288,13 +292,13 @@ describe('secrets have no non-empty fallback (row #280)', () => {
     expect(line).toMatch(/\$\{NEXTAUTH_SECRET:\?/)
   })
 
-  it('docker-start.sh placeholder list covers every placeholder the repo ships', () => {
+  it('validate-secrets.sh placeholder list covers every placeholder the repo ships', () => {
     const list = parsePlaceholders(START_SH)
     const dockerfile = readFileSync(path.join(REPO_ROOT, 'Dockerfile'), 'utf8')
     const build = /^ENV NEXTAUTH_SECRET=(\S+)/m.exec(dockerfile)?.[1]
     expect(build, 'Dockerfile build-time NEXTAUTH_SECRET').toBeTruthy()
     for (const v of [build!, 'change-me', 'ledgerium-dev-secret-change-in-production']) {
-      expect(list.some((p) => v.toLowerCase().includes(p)), `placeholder "${v}" not rejected by docker-start.sh`).toBe(true)
+      expect(list.some((p) => v.toLowerCase().includes(p)), `placeholder "${v}" not rejected by validate-secrets.sh`).toBe(true)
     }
   })
 
@@ -311,8 +315,36 @@ describe('secrets have no non-empty fallback (row #280)', () => {
     })
   })
 
+  it('docker-start.sh and the image use the shared script, with no inline copy of the rules', () => {
+    const start = readFileSync(path.join(REPO_ROOT, 'scripts/docker-start.sh'), 'utf8')
+    expect(start).toMatch(/^sh "\$\(dirname "\$0"\)\/validate-secrets\.sh"$/m)
+    expect(start).not.toContain('PLACEHOLDER_SECRETS')
+    const dockerfile = readFileSync(path.join(REPO_ROOT, 'Dockerfile'), 'utf8')
+    expect(dockerfile).toMatch(/^COPY scripts\/validate-secrets\.sh \/app\/validate-secrets\.sh$/m)
+  })
+
+  it('deploy.yml validates NEXTAUTH_SECRET before the deploy step (row #284)', () => {
+    const lines = readFileSync(DEPLOY_YML, 'utf8').split(/\r?\n/)
+    const deployJob = lines.findIndex((l) => /^  deploy:\s*$/.test(l))
+    expect(deployJob).toBeGreaterThan(-1)
+    const stepStarts: number[] = []
+    for (let i = deployJob; i < lines.length; i++) if (/^      - (name|uses):/.test(lines[i]!)) stepStarts.push(i)
+    const stepText = (n: number) => lines.slice(stepStarts[n]!, stepStarts[n + 1] ?? lines.length)
+    const deployIdx = stepStarts.findIndex((_, n) => stepText(n).some((l) => /uses:\s*hostinger\/deploy-on-vps/.test(l)))
+    const validateIdx = stepStarts.findIndex((_, n) => stepText(n).some((l) => /run:\s*sh scripts\/validate-secrets\.sh\s*$/.test(l)))
+    expect(deployIdx, 'deploy step').toBeGreaterThan(-1)
+    expect(validateIdx, 'validation step').toBeGreaterThan(-1)
+    expect(validateIdx).toBeLessThan(deployIdx)
+    const v = stepText(validateIdx).filter((l) => !l.trim().startsWith('#'))
+    // secret arrives via env:, never on the command line
+    expect(v.some((l) => /^\s*NEXTAUTH_SECRET:\s*\$\{\{\s*secrets\.NEXTAUTH_SECRET\s*\}\}\s*$/.test(l))).toBe(true)
+    expect(v.filter((l) => /run:/.test(l)).join('')).not.toContain('${{')
+    // default failure semantics: a failure must stop the job before the deploy step
+    expect(v.some((l) => /^\s*(if|continue-on-error):/.test(l))).toBe(false)
+  })
+
   const shAvailable = spawnSync('sh', ['-c', 'true']).status === 0
-  describe.skipIf(!shAvailable)('docker-start.sh NEXTAUTH_SECRET validation (executed)', () => {
+  describe.skipIf(!shAvailable)('validate-secrets.sh NEXTAUTH_SECRET validation (executed)', () => {
     const block = /^# BEGIN NEXTAUTH_SECRET[^\n]*\n[\s\S]*?^# END NEXTAUTH_SECRET[^\n]*$/m.exec(START_SH)?.[0]
     const run = (secret: string | undefined) => {
       const env: NodeJS.ProcessEnv = { NODE_ENV: 'test', PATH: process.env['PATH'] ?? '' }
