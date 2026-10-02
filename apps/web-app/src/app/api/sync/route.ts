@@ -2,6 +2,7 @@ import { withApiRoute } from '@/lib/with-api-route';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { hashKey } from '@/lib/api-keys';
+import { checkBundleEvidenceIntegrity } from '@/lib/bundle-evidence-integrity';
 import { validateBundle, runProcessEngine, buildWorkflowReportFromOutput, renderAllTemplates } from '@/lib/ingestion';
 import { clusterWorkflows } from '@/lib/intelligence';
 import { checkRecordingLimit } from '@/lib/feature-gating';
@@ -111,6 +112,9 @@ async function handlePOST(req: NextRequest) {
   }
 
   const validation = validateBundle(parsed);
+  // Row #10: a shape-valid bundle must also have resolvable step evidence.
+  const integrity = validation.valid ? checkBundleEvidenceIntegrity(validation.bundle) : null;
+  const integrityFailed = integrity !== null && !integrity.ok;
 
   // Save raw JSON to disk
   const uploadId = crypto.randomUUID();
@@ -130,8 +134,13 @@ async function handlePOST(req: NextRequest) {
       fileName: sessionId ? `${sessionId}.json` : `sync-${uploadId}.json`,
       fileSizeBytes: Buffer.byteLength(JSON.stringify(parsed)),
       schemaVersion: validation.valid ? (validation.bundle.manifest?.schemaVersion ?? '1.0.0') : null,
-      validationStatus: validation.valid ? 'valid' : 'invalid',
-      validationErrors: validation.valid ? null : JSON.stringify(validation.errors),
+      validationStatus: validation.valid && !integrityFailed ? 'valid' : 'invalid',
+      // Integrity failures store counts only — never ids from the bundle.
+      validationErrors: !validation.valid
+        ? JSON.stringify(validation.errors)
+        : integrity !== null && !integrity.ok
+          ? JSON.stringify({ evidenceIntegrity: { unresolvedSourceRefs: integrity.unresolvedSourceRefs, duplicateEventIds: integrity.duplicateEventIds, sessionIdMismatches: integrity.sessionIdMismatches } })
+          : null,
       rawJsonPath: rawPath,
     },
   });
@@ -146,6 +155,25 @@ async function handlePOST(req: NextRequest) {
       error: 'Bundle validation failed',
       details: validation.errors,
       uploadId,
+    }, { status: 422 });
+  }
+
+  if (integrity !== null && !integrity.ok) {
+    trackServer('upload_failed', {
+      userId,
+      error: 'bundle_evidence_integrity_failed',
+      uploadId,
+    });
+    // Client input fault (4xx) — deliberately not reported as api_error.
+    // Counts only: ids in the bundle are recorded content and are not echoed.
+    return NextResponse.json({
+      error: 'Bundle evidence integrity check failed',
+      unresolvedSourceRefs: integrity.unresolvedSourceRefs,
+      duplicateEventIds: integrity.duplicateEventIds,
+      sessionIdMismatches: integrity.sessionIdMismatches,
+      uploadId,
+      // 422, matching this route's shape-validation failures: the body parsed,
+      // its content is invalid. 400 is reserved here for unparseable input.
     }, { status: 422 });
   }
 

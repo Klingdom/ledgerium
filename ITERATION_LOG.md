@@ -4,6 +4,20 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 (loop 92) — A step that cites evidence that does not exist (Mode 1, `backend-engineer`)
+
+- **Controls:** Area — `evidence linkage` (fresh). Agent — **`backend-engineer`, a real rotation** (web-app suite, workspace suite and typecheck run by the agent; I re-ran all three). Extension — `871e29a`, 49 loops, **read but not modified**, per the Reliability Invariant. Cadence: 2 of 3 since MR-043.
+- **Candidate Selection: `burn-down` — #10** (14 after MR-043's re-score; oldest open non-blocked). Third time in eight loops the oldest row held the most important work: this one is the product's central invariant.
+- **What shipped:** upload and sync reject a bundle whose steps cite events that are not in it, whose event ids repeat, or whose session ids disagree — counts only in the response, never the ids, and not reported as a server fault.
+- **Established before enforcing, because the risk was rejecting the shipping extension.** The agent ran the three checks over every bundle it could find (10 + 12 + 1 fixtures, 16 golden event/step pairs, all sample bundles): all pass. It read the extension's builder: steps are derived from the same array that is exported, so a dangling reference is impossible — **I checked the history, and that has held since the first commit**, so no shipped build can be rejected. The truncation risk I named in the brief does not arise: a truncated session's bundle is built from what was kept, and is self-consistent.
+- **Two corrections, both caused by me or missed by the agent:** (1) My brief said 400; these routes already answer parsed-but-invalid content with 422, so the gate now matches. (2) **Changing the code exposed a weak test.** "A valid bundle passes" asserted only `status !== 400` — and the valid bundle was getting a 422 from the engine stage under the test's mocks. It passed by accident of which number the gate used. It now asserts the property: the gate did not reject.
+- **Residual: ingestion paths that silently accept unresolvable evidence, 2 → 0.** The rest of the class is filed as **#269**: uploads stored before today were never re-checked; the engine does not check, so any path around ingestion is unguarded; sync's gate has no route test.
+- **Not verified:** a real extension sync against the server (the real-extension harness does not exercise sync). Confidence rests on code and history, stated as such.
+- **Validation (re-run by me):** web-app **3486 → 3527** (+41); workspace `pnpm test` **5314**; typecheck 0.
+- **Follow-ups:** 1 created (#269), 1 closed (#10).
+
+---
+
 ## 2026-10-01 (loop 91) — The core view, readable (Mode 1, `frontend-engineer`)
 
 - **Controls:** Area — `web-app / a11y` (89 api, 90 infra). Agent — **`frontend-engineer`, a real rotation** (suite, typecheck, Playwright and a mutation check run by the agent; I re-ran the suite, typecheck and Playwright). Extension — `871e29a`, 48 loops; #216 CEO-blocked. Cadence: 1 of 3 since MR-043.

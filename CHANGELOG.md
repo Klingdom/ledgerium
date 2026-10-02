@@ -6,6 +6,16 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-01] - Every recorded step must point to evidence that exists
+
+### Added
+- When a recording is uploaded, Ledgerium now checks that every step points to captured events that are actually in the recording, and that the recording is internally consistent. A recording that fails is rejected rather than stored, so nothing shown in the product can rest on evidence that is missing. Recordings made by the Ledgerium extension always pass — this was checked against every sample and against how the extension builds recordings.
+
+### Known gap
+- Recordings uploaded before this change have not yet been re-checked. Recorded as backlog #269.
+
+---
+
 ## [2026-10-01] - The workflow map is readable
 
 ### Fixed
