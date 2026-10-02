@@ -21,6 +21,7 @@ import { Handle, Position } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import type { ViewNode } from '../adapters/viewModel';
 import { Clock, AlertTriangle, Zap, Shield } from 'lucide-react';
+import { categoryStyleFor, categoryTextVar, ORDINAL_TEXT_ON_BADGE } from '../constants';
 
 type TaskNodeData = { viewNode: ViewNode };
 type TaskFlowNode = Node<TaskNodeData, 'taskNode'>;
@@ -30,6 +31,9 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
   selected,
 }: NodeProps<TaskFlowNode>) {
   const n = data.viewNode;
+  // Row #255: opaque per-theme body + measured per-category foreground.
+  // Accent stays on the rail/border/handles; text never uses the raw accent.
+  const badgeFill = categoryStyleFor(n.category).badge;
 
   return (
     <div
@@ -40,7 +44,7 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
       style={{
         width: 260,
         minHeight: 72,
-        background: selected ? n.bgHoverColor : `${n.accentColor}0f`,
+        background: 'var(--wf-node-bg)',
         // Left-rail accent (4px) + subtle border on other sides
         border: `1px solid ${n.accentColor}20`,
         borderLeft: `4px solid ${n.accentColor}`,
@@ -48,7 +52,7 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
         borderRadius: 3,
         padding: '10px 12px 10px 14px',
         boxShadow: selected
-          ? `0 0 0 3px ${n.accentColor}25, 0 4px 16px rgba(0,0,0,0.10)`
+          ? '0 0 0 2px var(--focus-ring), 0 4px 16px rgba(0,0,0,0.10)'
           : '0 1px 4px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)',
         transition: 'all 0.15s ease',
       }}
@@ -60,7 +64,7 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
         style={{
           width: 10,
           height: 10,
-          background: '#ffffff',
+          background: 'var(--wf-node-bg)',
           border: `2px solid ${n.accentColor}`,
           top: -5,
         }}
@@ -77,8 +81,8 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
             minWidth: 20,
             height: 20,
             textAlign: 'center',
-            color: '#ffffff',
-            background: n.accentColor,
+            color: ORDINAL_TEXT_ON_BADGE,
+            background: badgeFill,
             borderRadius: 5,
             padding: '0 4px',
             flexShrink: 0,
@@ -94,7 +98,7 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
             fontWeight: 700,
             letterSpacing: '0.07em',
             textTransform: 'uppercase' as const,
-            color: n.accentColor,
+            color: categoryTextVar(n.category),
           }}
         >
           {n.categoryLabel}
@@ -106,7 +110,7 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
         {n.durationMs > 0 && (
           <span
             className="flex items-center gap-0.5 group-hover:text-[var(--content-secondary)] transition-colors"
-            style={{ fontSize: 10, color: '#6b7280' }}
+            style={{ fontSize: 10, color: 'var(--content-tertiary)' }}
           >
             <Clock style={{ width: 10, height: 10 }} />
             {n.durationLabel}
@@ -120,7 +124,7 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
           fontSize: 12,
           fontWeight: 600,
           lineHeight: 1.35,
-          color: selected ? n.textColor : '#111827',
+          color: 'var(--content-primary)',
           marginBottom: 6,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -139,9 +143,9 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
             style={{
               fontSize: 9,
               fontWeight: 500,
-              color: '#4b5563',
-              background: '#f3f4f6',
-              border: '1px solid #e5e7eb',
+              color: 'var(--content-tertiary)',
+              background: 'var(--surface-primary)',
+              border: '1px solid var(--border-default)',
               borderRadius: 4,
               padding: '1px 6px',
               maxWidth: 110,
@@ -157,22 +161,22 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
 
         {n.hasHighFriction && (
           <span aria-label="Bottleneck detected" title="Bottleneck detected" className="flex items-center">
-            <AlertTriangle className="w-3 h-3 text-red-500" />
+            <AlertTriangle className="w-3 h-3 text-[var(--status-danger)]" />
           </span>
         )}
         {n.isDecisionPoint && (
           <span aria-label={n.decisionLabel || 'Decision point'} title={n.decisionLabel || 'Decision point'} className="flex items-center">
-            <Zap className="w-3 h-3 text-amber-500" />
+            <Zap className="w-3 h-3 text-[var(--status-warning)]" />
           </span>
         )}
         {n.hasSensitiveData && (
           <span aria-label="Contains sensitive data" title="Contains sensitive data" className="flex items-center">
-            <Shield className="w-3 h-3 text-blue-500" />
+            <Shield className="w-3 h-3 text-[var(--status-info)]" />
           </span>
         )}
         {n.isLowConfidence && (
           <span
-            className="w-1.5 h-1.5 rounded-full bg-amber-400"
+            className="w-1.5 h-1.5 rounded-full bg-[var(--status-warning)]"
             aria-label="Low confidence step"
             title="Low confidence"
           />
@@ -187,7 +191,7 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
         style={{
           width: 10,
           height: 10,
-          background: '#ffffff',
+          background: 'var(--wf-node-bg)',
           border: `2px solid ${n.accentColor}`,
           bottom: -5,
         }}
@@ -201,7 +205,7 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
         style={{
           width: 10,
           height: 10,
-          background: '#ffffff',
+          background: 'var(--wf-node-bg)',
           border: `2px solid ${n.accentColor}`,
           right: -5,
         }}
@@ -215,7 +219,7 @@ export const WorkflowTaskNode = memo(function WorkflowTaskNode({
         style={{
           width: 10,
           height: 10,
-          background: '#ffffff',
+          background: 'var(--wf-node-bg)',
           border: `2px solid ${n.accentColor}`,
           left: -5,
         }}

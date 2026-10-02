@@ -44,7 +44,11 @@ export const WorkflowDecisionNode = memo(function WorkflowDecisionNode({
   // reach this component — ShapeResolver guarantees 'inferred'/null → taskNode.
   const isValidation = n.decisionProvenance === 'observed-validation';
   const borderStyle = isValidation ? 'dashed' : 'solid';
-  const borderColor = selected ? '#d97706' : '#fbbf24';
+  // Row #255: tokens, not light-canvas literals. The branch-point fill is the
+  // opaque warning tint and every text line is its tested on-tint pair; the
+  // border is --status-warning (>= 3:1 on both themes' surfaces, SC 1.4.11).
+  // Selection is a ring, not a different (unmeasured) fill.
+  const borderColor = 'var(--status-warning)';
 
   return (
     <div
@@ -60,8 +64,8 @@ export const WorkflowDecisionNode = memo(function WorkflowDecisionNode({
         style={{
           width: 10,
           height: 10,
-          background: '#ffffff',
-          border: '2px solid #d97706',
+          background: 'var(--wf-node-bg)',
+          border: '2px solid var(--status-warning)',
           top: -5,
         }}
       />
@@ -71,15 +75,15 @@ export const WorkflowDecisionNode = memo(function WorkflowDecisionNode({
         style={{
           width: 160,
           height: 160,
-          background: selected ? '#fef3c7' : '#fffbeb',
+          background: 'var(--status-warning-tint)',
           border: `2px ${borderStyle} ${borderColor}`,
           // V-P0-5 / V-P1-13: 4px = just enough to prevent aliasing, reads as sharp BPMN diamond
           // (was 16, which produced a "squircle diamond" — not authentic Visio/BPMN)
           borderRadius: 4,
           transform: 'rotate(45deg)',
           boxShadow: selected
-            ? '0 0 0 3px rgba(217,119,6,0.18), 0 4px 16px rgba(0,0,0,0.08)'
-            : '0 2px 8px rgba(217,119,6,0.12)',
+            ? '0 0 0 3px var(--focus-ring), 0 4px 16px rgba(0,0,0,0.08)'
+            : '0 2px 8px rgba(0,0,0,0.12)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -104,7 +108,7 @@ export const WorkflowDecisionNode = memo(function WorkflowDecisionNode({
               fontWeight: 700,
               letterSpacing: '0.07em',
               textTransform: 'uppercase' as const,
-              color: '#d97706',
+              color: 'var(--status-warning-on-tint)',
               marginBottom: 4,
             }}
           >
@@ -114,7 +118,7 @@ export const WorkflowDecisionNode = memo(function WorkflowDecisionNode({
             style={{
               fontSize: 11,
               fontWeight: 600,
-              color: '#92400e',
+              color: 'var(--status-warning-on-tint)',
               lineHeight: 1.3,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -131,7 +135,7 @@ export const WorkflowDecisionNode = memo(function WorkflowDecisionNode({
               display: 'block',
               fontSize: 10,
               fontWeight: 700,
-              color: '#d97706',
+              color: 'var(--status-warning-on-tint)',
             }}
           >
             {n.ordinal}
@@ -146,9 +150,9 @@ export const WorkflowDecisionNode = memo(function WorkflowDecisionNode({
             marginTop: 6,
             fontSize: 9,
             fontWeight: 600,
-            color: '#92400e',
-            background: '#fef9c3',
-            border: '1px dashed #fbbf24',
+            color: 'var(--status-warning-on-tint)',
+            background: 'var(--status-warning-tint)',
+            border: '1px dashed var(--status-warning)',
             borderRadius: 4,
             padding: '1px 6px',
             letterSpacing: '0.04em',
@@ -167,8 +171,8 @@ export const WorkflowDecisionNode = memo(function WorkflowDecisionNode({
         style={{
           width: 10,
           height: 10,
-          background: '#ffffff',
-          border: '2px solid #d97706',
+          background: 'var(--wf-node-bg)',
+          border: '2px solid var(--status-warning)',
           bottom: -5,
         }}
       />
@@ -181,8 +185,8 @@ export const WorkflowDecisionNode = memo(function WorkflowDecisionNode({
         style={{
           width: 10,
           height: 10,
-          background: '#ffffff',
-          border: '2px solid #d97706',
+          background: 'var(--wf-node-bg)',
+          border: '2px solid var(--status-warning)',
           right: -5,
         }}
       />
@@ -195,8 +199,8 @@ export const WorkflowDecisionNode = memo(function WorkflowDecisionNode({
         style={{
           width: 10,
           height: 10,
-          background: '#ffffff',
-          border: '2px solid #d97706',
+          background: 'var(--wf-node-bg)',
+          border: '2px solid var(--status-warning)',
           left: -5,
         }}
       />

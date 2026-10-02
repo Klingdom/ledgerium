@@ -70,6 +70,23 @@
   --brand-tint: #0F2D27;
   --brand-on-tint: #34D399;           /* 7.67:1 on the tint */
 
+  /* Row #255 — workflow-map node. The node body is OPAQUE and per-theme so its
+     text has one background to be measured against, regardless of what the
+     canvas behind it is (it was a ~6%-alpha accent tint over whatever sat
+     underneath: step label #111827 measured 1.08:1 in dark). The category
+     label colour is a per-category foreground measured against --wf-node-bg,
+     because a raw accent as text fails in one theme or the other. */
+  --wf-node-bg: #1C2128;
+  --wf-cat-click_then_navigate: #2DD4BF;   /* 8.69:1 */
+  --wf-cat-fill_and_submit: #60A5FA;       /* 6.37:1 */
+  --wf-cat-repeated_click_dedup: #FB923C;  /* 7.15:1 */
+  --wf-cat-single_action: #94A3B8;         /* 6.31:1 */
+  --wf-cat-data_entry: #A78BFA;            /* 5.95:1 */
+  --wf-cat-send_action: #34D399;           /* 8.42:1 */
+  --wf-cat-file_action: #FBBF24;           /* 9.69:1 */
+  --wf-cat-error_handling: #F87171;        /* 5.85:1 */
+  --wf-cat-annotation: #C084FC;            /* 6.12:1 */
+
   /* Borders */
   --border-default: rgba(255, 255, 255, 0.10);
   --border-subtle: rgba(255, 255, 255, 0.06);
@@ -120,6 +137,18 @@
      background, and the two are free to diverge (as danger's did, #236). */
   --brand-tint: #E6F5F0;
   --brand-on-tint: #047857;           /* 4.88:1 on the tint */
+
+  /* Row #255 — see :root. Light values are the 700-level shade of each hue. */
+  --wf-node-bg: #FFFFFF;
+  --wf-cat-click_then_navigate: #0F766E;   /* 5.47:1 */
+  --wf-cat-fill_and_submit: #1D4ED8;       /* 6.70:1 */
+  --wf-cat-repeated_click_dedup: #C2410C;  /* 5.18:1 */
+  --wf-cat-single_action: #475569;         /* 7.58:1 */
+  --wf-cat-data_entry: #6D28D9;            /* 7.10:1 */
+  --wf-cat-send_action: #047857;           /* 5.48:1 */
+  --wf-cat-file_action: #B45309;           /* 5.02:1 */
+  --wf-cat-error_handling: #B91C1C;        /* 6.47:1 */
+  --wf-cat-annotation: #7E22CE;            /* 6.98:1 */
 
   /* Borders */
   --border-default: #E2E8F0;

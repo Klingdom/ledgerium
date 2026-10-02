@@ -37,9 +37,9 @@ export function WorkflowLegend({ visible, onClose }: Props) {
 
         {/* Edge types */}
         <LegendSection title="Connections">
-          <LegendEdgeRow color="#cbd5e1" label="Sequence flow" dashed={false} />
-          <LegendEdgeRow color="#fca5a5" label="Exception path" dashed={true} />
-          <LegendEdgeRow color="#fbbf24" label="Decision branch" dashed={false} />
+          <LegendEdgeRow color="#64748b" label="Sequence flow" dashed={false} />
+          <LegendEdgeRow color="#dc2626" label="Exception path" dashed={true} />
+          <LegendEdgeRow color="#d97706" label="Decision branch" dashed={false} />
         </LegendSection>
       </div>
     </div>

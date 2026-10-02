@@ -33,16 +33,19 @@ import { forceTheme, expectThemeApplied } from '../helpers/theme.js';
   tiles' consistency colours (green 3.6:1 and amber 3.04:1 in light — amber
   only latent because the fixture happens to be green).
 
-  /product is STILL HELD, in both themes, for one reason only: every remaining
-  violation is inside the workflow-map node, `WorkflowTaskNode`, which
-  hardcodes light-canvas colours as inline styles — the step label is
-  `#111827` on a ~6%-alpha tint, 1.08:1 in the DARK default theme. axe flags
-  the one node in the viewport; the code applies to every node, and the
-  component is the in-app workflow map, not just this demo. That is row #255,
-  a different outcome from #245. Both /product themes return with it.
+  /product RETURNED with row #255 (loop 82), both themes. Its only remaining
+  violation was inside the workflow-map node, `WorkflowTaskNode`, which
+  hardcoded light-canvas colours as inline styles (step label `#111827` on a
+  ~6%-alpha tint, 1.08:1 in the DARK default theme). The node body is now an
+  opaque per-theme surface with token text and a measured per-category label
+  colour; the pairs are asserted in `src/app/theme-contrast.test.ts`.
+  Remaining workflow-map canvas items (edges, minimap, lane headers, legends)
+  are listed under row #255's residual, not held here: axe finds none on this
+  page in either theme.
 */
 const COVERED = [
   { name: 'sop-template', path: '/sop-templates/invoice-approval-sop-template', themes: ['dark', 'light'] },
+  { name: 'product', path: '/product', themes: ['dark', 'light'] },
 ] as const;
 
 for (const pageDef of COVERED) {

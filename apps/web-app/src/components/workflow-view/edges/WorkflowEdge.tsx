@@ -50,7 +50,7 @@ export const WorkflowEdgeComponent = memo(function WorkflowEdgeComponent({
     borderRadius: 0,
   });
 
-  const strokeColor = viewEdge?.strokeColor ?? '#9ca3af';
+  const strokeColor = viewEdge?.strokeColor ?? '#64748b';
   const strokeWidth = selected ? 3 : (viewEdge?.strokeWidth ?? 2);
 
   // V-P0-3: select the right SVG marker by edge kind.

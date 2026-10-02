@@ -18,19 +18,37 @@ export interface CategoryStyle {
   bg: string;          // Node background (light, subtle)
   bgHover: string;     // Node background on hover/select
   text: string;        // Text on white backgrounds
+  badge: string;       // Fill behind white ordinal text (>= 4.5:1 with #fff) — row #255
 }
 
 export const CATEGORY_STYLES: Record<GroupingReason, CategoryStyle> = {
-  click_then_navigate:  { label: 'Navigation',      color: '#0d9488', bg: '#f0fdfa', bgHover: '#ccfbf1', text: '#134e4a' },
-  fill_and_submit:      { label: 'Form Submit',     color: '#2563eb', bg: '#eff6ff', bgHover: '#dbeafe', text: '#1e3a8a' },
-  repeated_click_dedup: { label: 'Repeated Action', color: '#ea580c', bg: '#fff7ed', bgHover: '#ffedd5', text: '#9a3412' },
-  single_action:        { label: 'Action',          color: '#64748b', bg: '#f8fafc', bgHover: '#f1f5f9', text: '#334155' },
-  data_entry:           { label: 'Data Entry',      color: '#7c3aed', bg: '#f5f3ff', bgHover: '#ede9fe', text: '#4c1d95' },
-  send_action:          { label: 'Send / Submit',   color: '#059669', bg: '#ecfdf5', bgHover: '#d1fae5', text: '#064e3b' },
-  file_action:          { label: 'File Action',     color: '#d97706', bg: '#fffbeb', bgHover: '#fef3c7', text: '#92400e' },
-  error_handling:       { label: 'Error Handling',  color: '#dc2626', bg: '#fef2f2', bgHover: '#fee2e2', text: '#991b1b' },
-  annotation:           { label: 'Annotation',      color: '#9333ea', bg: '#faf5ff', bgHover: '#f3e8ff', text: '#581c87' },
+  click_then_navigate:  { label: 'Navigation',      color: '#0d9488', bg: '#f0fdfa', bgHover: '#ccfbf1', text: '#134e4a', badge: '#0f766e' },
+  fill_and_submit:      { label: 'Form Submit',     color: '#2563eb', bg: '#eff6ff', bgHover: '#dbeafe', text: '#1e3a8a', badge: '#2563eb' },
+  repeated_click_dedup: { label: 'Repeated Action', color: '#ea580c', bg: '#fff7ed', bgHover: '#ffedd5', text: '#9a3412', badge: '#c2410c' },
+  single_action:        { label: 'Action',          color: '#64748b', bg: '#f8fafc', bgHover: '#f1f5f9', text: '#334155', badge: '#64748b' },
+  data_entry:           { label: 'Data Entry',      color: '#7c3aed', bg: '#f5f3ff', bgHover: '#ede9fe', text: '#4c1d95', badge: '#7c3aed' },
+  send_action:          { label: 'Send / Submit',   color: '#059669', bg: '#ecfdf5', bgHover: '#d1fae5', text: '#064e3b', badge: '#047857' },
+  file_action:          { label: 'File Action',     color: '#d97706', bg: '#fffbeb', bgHover: '#fef3c7', text: '#92400e', badge: '#b45309' },
+  error_handling:       { label: 'Error Handling',  color: '#dc2626', bg: '#fef2f2', bgHover: '#fee2e2', text: '#991b1b', badge: '#dc2626' },
+  annotation:           { label: 'Annotation',      color: '#9333ea', bg: '#faf5ff', bgHover: '#f3e8ff', text: '#581c87', badge: '#9333ea' },
 };
+
+/** White ordinal text; every CategoryStyle.badge is >= 4.5:1 against it (theme-contrast.test.ts). */
+export const ORDINAL_TEXT_ON_BADGE = '#ffffff';
+
+/** Resolve a (possibly unknown) runtime category string to its style entry. */
+export function categoryStyleFor(category: string): CategoryStyle {
+  return (CATEGORY_STYLES as Record<string, CategoryStyle>)[category] ?? CATEGORY_STYLES.single_action;
+}
+
+/**
+ * CSS custom property holding the contrast-safe, per-theme text colour for a
+ * category label (row #255). Defined in globals.css for both themes.
+ */
+export function categoryTextVar(category: string): string {
+  const key = category in CATEGORY_STYLES ? category : 'single_action';
+  return `var(--wf-cat-${key})`;
+}
 
 // ─── Node type visual config ─────────────────────────────────────────────────
 
@@ -45,9 +63,9 @@ export const NODE_TYPE_STYLES = {
 // ─── Edge styles ─────────────────────────────────────────────────────────────
 
 export const EDGE_STYLES = {
-  sequence:  { stroke: '#cbd5e1', strokeWidth: 2, animated: false },
-  exception: { stroke: '#fca5a5', strokeWidth: 2, animated: false, strokeDasharray: '6 3' },
-  decision:  { stroke: '#fbbf24', strokeWidth: 2, animated: false },
+  sequence:  { stroke: '#64748b', strokeWidth: 2, animated: false },
+  exception: { stroke: '#dc2626', strokeWidth: 2, animated: false, strokeDasharray: '6 3' },
+  decision:  { stroke: '#d97706', strokeWidth: 2, animated: false },
 };
 
 // ─── Friction severity colors ────────────────────────────────────────────────

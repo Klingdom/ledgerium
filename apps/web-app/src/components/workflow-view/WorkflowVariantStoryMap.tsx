@@ -67,7 +67,7 @@ const nodeTypes: NodeTypes = { storyNode: StoryNodeComponent as any };
 
 function edgeStyle(e: StoryEdge): React.CSSProperties {
   if (e.kind === 'spine') return { stroke: '#059669', strokeWidth: 2 + e.runShare * 4 };
-  if (e.kind === 'shortcut') return { stroke: '#9ca3af', strokeWidth: 1.5, strokeDasharray: '2 3' };
+  if (e.kind === 'shortcut') return { stroke: '#64748b', strokeWidth: 1.5, strokeDasharray: '2 3' };
   return { stroke: '#d97706', strokeWidth: 1.5 + e.runShare * 3, strokeDasharray: '5 4' }; // branch / rejoin
 }
 

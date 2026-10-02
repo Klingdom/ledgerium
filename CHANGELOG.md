@@ -6,6 +6,16 @@ The format is inspired by Keep a Changelog and adapted for bounded improvement l
 
 ---
 
+## [2026-10-01] - The workflow map is readable
+
+### Fixed
+- Step names on the workflow map were close to invisible in the default dark theme. Every step, decision, start/end marker and connecting line now uses colours checked against what they sit on, in both light and dark themes. The step numbers, category labels and connector lines are all clearer as a result.
+
+### Known gap
+- Three other map views (frequency, systems and variants) have not yet been checked the same way. Recorded as backlog #268.
+
+---
+
 ## [2026-10-01] - An alert that cannot be delivered is now noticed
 
 ### Fixed

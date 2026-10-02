@@ -407,7 +407,7 @@ export function buildNormalizedViewModel(
       label: safe(raw.boundaryLabel, ''),
       boundaryReason: safe(raw.boundaryReason, ''),
       isExceptionPath: isException,
-      strokeColor: isException ? '#fca5a5' : type === 'decision' ? '#fbbf24' : '#cbd5e1',
+      strokeColor: isException ? '#dc2626' : type === 'decision' ? '#d97706' : '#64748b',
       strokeWidth: 2,
       isDashed: isException,
     };

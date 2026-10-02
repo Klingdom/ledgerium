@@ -4,6 +4,18 @@ This file records each bounded improvement loop.
 
 ---
 
+## 2026-10-01 (loop 91) — The core view, readable (Mode 1, `frontend-engineer`)
+
+- **Controls:** Area — `web-app / a11y` (89 api, 90 infra). Agent — **`frontend-engineer`, a real rotation** (suite, typecheck, Playwright and a mutation check run by the agent; I re-ran the suite, typecheck and Playwright). Extension — `871e29a`, 48 loops; #216 CEO-blocked. Cadence: 1 of 3 since MR-043.
+- **Candidate Selection: `burn-down` — #255** (11; impact 5), MR-040's and MR-043's pick, skipped since loop 81.
+- **What it fixed:** step labels on the workflow map — the product's central view — measured **1.08:1** in the default theme. Every node type and edge now uses measured per-theme tokens; an opaque node body replaces a 6%-alpha tint whose real background depended on what was behind it. The held `/product` scans came back in both themes and pass, and fail against the old node.
+- **The agent's report contained one wrong inference, and I only found it by looking.** It reported the canvas is white in both themes and concluded that dark theme would now show dark cards on white. A screenshot showed white cards in both themes; a computed-style probe explained why: **React Flow adds a `light` class to its own container**, so every token resolves to its light value inside the canvas regardless of page theme. The map is a consistent light surface — in-app too, since the class comes from the library. Reading the report alone, I would have filed a design follow-up for a problem that does not exist.
+- **Residual — the agent did what the last three reviews asked, unprompted:** it scoped the class to the whole `workflow-view/` directory, fixed nodes and edges completely, and **listed what it had not measured** rather than calling the class closed: three map views (125 colour sites) and several panels, with known failures among them. Filed as **#268**.
+- **Validation (re-run by me):** web-app **3430 → 3486** (+56, contrast pairs); typecheck 0; badge-surface scans **4/4** (`/product` dark + light returned). Not run by either of us: the authenticated `/workflows/[id]` page — shares the components, and the probe's finding comes from the library, but unscanned.
+- **Follow-ups:** 1 created (#268), 1 closed (#255).
+
+---
+
 ## 2026-10-01 — MR-043 recorded, and what I applied from it (Mode 4, non-counting)
 
 - **Review:** `docs/meta/MR_043_META_REVIEW.md`. Every number reproduces; nothing needs reverting. Its verdict on my last window: "the class, this time" was **the class where I looked.**

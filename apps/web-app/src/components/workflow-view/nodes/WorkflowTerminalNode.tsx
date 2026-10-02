@@ -32,29 +32,28 @@ export const WorkflowTerminalNode = memo(function WorkflowTerminalNode({
         style={{
           width: 160,
           height: 44,
-          background: isStart
-            ? (selected ? '#d1fae5' : '#ecfdf5')
-            : (selected ? '#e2e8f0' : '#f1f5f9'),
+          // Row #255: opaque per-theme tokens (tested pairs), no light-canvas literals.
+          background: isStart ? 'var(--status-success-tint)' : 'var(--wf-node-bg)',
           // Start: thicker border signals "entry" at a glance (Visio convention)
           // End: understated — reads as terminus
           border: isStart
-            ? `2.5px solid ${selected ? '#059669' : '#6ee7b7'}`
-            : `1.5px solid ${selected ? '#374151' : '#9ca3af'}`,
+            ? '2.5px solid var(--status-success)'
+            : '1.5px solid var(--content-tertiary)',
           // True pill: borderRadius = height/2 (ISO 5807 terminator)
           borderRadius: 22,
           boxShadow: selected
-            ? `0 0 0 2px ${isStart ? 'rgba(5,150,105,0.15)' : 'rgba(100,116,139,0.15)'}`
+            ? '0 0 0 2px var(--focus-ring)'
             : 'none',
         }}
       >
         {isStart ? (
-          <Play className="w-3.5 h-3.5 text-emerald-600" fill="currentColor" />
+          <Play className="w-3.5 h-3.5 text-[var(--status-success-on-tint)]" fill="currentColor" />
         ) : (
           <Square className="w-3 h-3 text-[var(--content-secondary)]" fill="currentColor" />
         )}
         <span
           className="text-[11px] font-semibold"
-          style={{ color: isStart ? '#065f46' : '#475569' }}
+          style={{ color: isStart ? 'var(--status-success-on-tint)' : 'var(--content-primary)' }}
         >
           {n.label}
         </span>

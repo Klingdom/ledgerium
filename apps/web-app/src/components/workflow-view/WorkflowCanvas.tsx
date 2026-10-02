@@ -137,12 +137,12 @@ function FlowCanvas({ graph, toolbar, selectedNodeId, onSelectNode, onCanvasRead
           {/* Sequence flow — slate closed triangle */}
           <marker id="arrow-seq" markerWidth="9" markerHeight="9"
                   refX="7" refY="3.5" orient="auto" markerUnits="strokeWidth">
-            <path d="M0,0 L0,7 L9,3.5 z" fill="#9ca3af" />
+            <path d="M0,0 L0,7 L9,3.5 z" fill="#64748b" />
           </marker>
           {/* Exception/error — red closed triangle */}
           <marker id="arrow-exc" markerWidth="9" markerHeight="9"
                   refX="7" refY="3.5" orient="auto" markerUnits="strokeWidth">
-            <path d="M0,0 L0,7 L9,3.5 z" fill="#fca5a5" />
+            <path d="M0,0 L0,7 L9,3.5 z" fill="#dc2626" />
           </marker>
           {/* Decision branch — amber closed triangle */}
           <marker id="arrow-dec" markerWidth="9" markerHeight="9"

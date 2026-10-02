@@ -31,6 +31,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, sep } from 'node:path';
+import { CATEGORY_STYLES } from '../components/workflow-view/constants';
 
 const CSS = readFileSync(join(__dirname, 'globals.css'), 'utf8');
 
@@ -615,5 +616,138 @@ describe('no text-brand-500 in source — rows #245 / #257', () => {
       });
     }
     expect(hits, 'text-brand-500 is 2.42:1 in light. Use var(--brand-text), or the --brand-tint/--brand-on-tint pair on a brand tint.').toEqual([]);
+  });
+});
+
+/*
+  Row #255. The workflow-map node hardcoded light-canvas colours as inline
+  styles: step label #111827 on a ~6%-alpha accent tint, 1.08:1 in the dark
+  default theme (axe, /product), with the category label the raw accent
+  (4.43:1 light). The node body is now an opaque per-theme surface, so every
+  pair below has exactly one background and is asserted AS A PAIR, in both
+  themes. The category label colour is a per-theme token measured against that
+  surface; the raw accent stays on the rail only.
+*/
+describe('workflow-map node pairs meet their floor in BOTH themes — row #255', () => {
+  const CATEGORIES = Object.keys(CATEGORY_STYLES);
+  const themeName = (b: 'root' | 'light') => (b === 'root' ? 'dark' : 'light');
+
+  for (const block of ['root', 'light'] as const) {
+    const bg = () => token(block, 'wf-node-bg');
+
+    for (const cat of CATEGORIES) {
+      it(`--wf-cat-${cat} on --wf-node-bg, ${themeName(block)} theme (>= 4.5:1)`, () => {
+        const fg = token(block, `wf-cat-${cat}`);
+        const ratio = contrastRatio(fg, bg());
+        expect(ratio, `--wf-cat-${cat} (${fg}) on --wf-node-bg (${bg()}) is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(4.5);
+      });
+    }
+
+    // step label, duration (+ its hover colour), system-chip text on the node body
+    for (const name of ['content-primary', 'content-secondary', 'content-tertiary']) {
+      it(`--${name} on --wf-node-bg, ${themeName(block)} theme (>= 4.5:1)`, () => {
+        const ratio = contrastRatio(token(block, name), bg());
+        expect(ratio, `--${name} on --wf-node-bg is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(4.5);
+      });
+    }
+
+    it(`system-chip text --content-tertiary on its --surface-primary fill, ${themeName(block)} theme (>= 4.5:1)`, () => {
+      const ratio = contrastRatio(token(block, 'content-tertiary'), token(block, 'surface-primary'));
+      expect(ratio, `chip text is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(4.5);
+    });
+
+    // meaningful icons (bottleneck / decision / sensitive / low-confidence), SC 1.4.11
+    for (const name of ['status-danger', 'status-warning', 'status-info']) {
+      it(`--${name} icon on --wf-node-bg, ${themeName(block)} theme (>= 3:1)`, () => {
+        const ratio = contrastRatio(token(block, name), bg());
+        expect(ratio, `--${name} on --wf-node-bg is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(3);
+      });
+    }
+
+    // decision diamond border / terminal borders carry the node's shape
+    it(`decision border --status-warning on its --status-warning-tint fill, ${themeName(block)} theme (>= 3:1)`, () => {
+      const ratio = contrastRatio(token(block, 'status-warning'), token(block, 'status-warning-tint'));
+      expect(ratio, `decision border is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(3);
+    });
+    it(`start-terminal border --status-success on --status-success-tint, ${themeName(block)} theme (>= 3:1)`, () => {
+      const ratio = contrastRatio(token(block, 'status-success'), token(block, 'status-success-tint'));
+      expect(ratio, `start border is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(3);
+    });
+    it(`end-terminal border --content-tertiary on --wf-node-bg, ${themeName(block)} theme (>= 3:1)`, () => {
+      const ratio = contrastRatio(token(block, 'content-tertiary'), bg());
+      expect(ratio, `end border is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(3);
+    });
+  }
+
+  // The ordinal is white text on a fill that does not change with theme.
+  for (const cat of CATEGORIES) {
+    it(`ordinal badge: white on the ${cat} badge fill (>= 4.5:1)`, () => {
+      const fill = CATEGORY_STYLES[cat as keyof typeof CATEGORY_STYLES].badge;
+      const ratio = contrastRatio('#ffffff', fill);
+      expect(ratio, `white on ${fill} is ${ratio.toFixed(2)}:1; the raw accent was 3.19-3.77 for four categories`).toBeGreaterThanOrEqual(4.5);
+    });
+  }
+
+  it('the category label is NOT the raw accent in either theme', () => {
+    // Guards the finding, not just its consequence: if a token is "simplified"
+    // back to the accent, the pair tests above would still need to be the ones
+    // to catch it; this fails first and says why.
+    for (const cat of CATEGORIES) {
+      const accent = CATEGORY_STYLES[cat as keyof typeof CATEGORY_STYLES].color.toLowerCase();
+      const lightFg = token('light', `wf-cat-${cat}`).toLowerCase();
+      expect(lightFg === accent, `${cat}: light foreground equals the raw accent ${accent}`).toBe(false);
+    }
+  });
+
+  describe('node components carry no light-canvas literals', () => {
+    const dir = join(__dirname, '..', 'components', 'workflow-view', 'nodes');
+    const files = readdirSync(dir).filter((f) => /^Workflow\w+Node\.tsx$/.test(f));
+
+    it('scans all three node components', () => {
+      expect(files.sort()).toEqual(['WorkflowDecisionNode.tsx', 'WorkflowTaskNode.tsx', 'WorkflowTerminalNode.tsx']);
+    });
+
+    for (const f of ['WorkflowDecisionNode.tsx', 'WorkflowTaskNode.tsx', 'WorkflowTerminalNode.tsx']) {
+      it(`${f} has no hex colour and no raw-accent text colour in code`, () => {
+        const code = readFileSync(join(dir, f), 'utf8')
+          .replace(/\/\*[\s\S]*?\*\//g, '')
+          .replace(/^\s*\/\/.*$/gm, '');
+        expect(code.match(/#[0-9a-fA-F]{3,8}\b/g) ?? [], 'hex literal in node code').toEqual([]);
+        expect(/\bcolor:\s*n\.(accentColor|textColor)\b/.test(code), 'text colour taken from the raw accent').toBe(false);
+      });
+    }
+  });
+});
+
+/*
+  Row #255, edges. Edge strokes are meaningful non-text (they ARE the flow), so
+  SC 1.4.11 (3:1) applies against the canvas they are drawn on. The map canvas
+  is white in both themes (`!bg-white` on the React Flow <Background>; measured
+  rgb(255,255,255) on /product dark and light), so white is the honest
+  background. The old defaults were #cbd5e1 (1.48), #fca5a5 (1.90), #fbbf24
+  (1.67), #9ca3af (2.54).
+*/
+describe('workflow-map edge strokes meet 3:1 on the white canvas — row #255', () => {
+  const src = (f: string) => readFileSync(join(__dirname, '..', 'components', 'workflow-view', f), 'utf8');
+  const strokes: Record<string, string> = {
+    sequence: '#64748b',
+    exception: '#dc2626',
+    decision: '#d97706',
+  };
+  for (const [kind, hex] of Object.entries(strokes)) {
+    it(`${kind} edge stroke ${hex} on #ffffff is >= 3:1 and is what viewModel/legend ship`, () => {
+      expect(contrastRatio(hex, '#ffffff')).toBeGreaterThanOrEqual(3);
+      expect(src('adapters/viewModel.ts').toLowerCase()).toContain(hex);
+      expect(src('WorkflowLegend.tsx').toLowerCase()).toContain(`color="${hex}"`);
+      expect(src('constants.ts').toLowerCase()).toContain(`stroke: '${hex}'`);
+    });
+  }
+  it('arrow markers match the stroke colours in both canvases', () => {
+    for (const f of ['WorkflowCanvas.tsx', 'WorkflowSwimlaneCanvas.tsx']) {
+      const s = src(f).toLowerCase();
+      expect(s, f).toContain('fill="#64748b"');
+      expect(s, f).toContain('fill="#dc2626"');
+      expect(s, f).toContain('fill="#d97706"');
+    }
   });
 });
